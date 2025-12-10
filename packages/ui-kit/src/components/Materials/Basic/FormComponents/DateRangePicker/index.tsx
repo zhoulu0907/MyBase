@@ -64,11 +64,22 @@ const XDateRangePicker = memo((props: XInputDateRangePickerConfig & { runtime?: 
         const earliestTime =
           todatTime +
           (DATE_DYNAMIC_VALUE[dateRange.earliestDynamicValue as keyof typeof DATE_DYNAMIC_VALUE] || 0) *
-            24 *
-            3600 *
-            1000;
+          24 *
+          3600 *
+          1000;
         if (currentTime < earliestTime) {
           return true;
+        }
+      }
+
+      // 变量
+      if (dateRange.earliestType === DATE_EXTREME_TYPE.VARIABLE && dateRange.earliestVariableValue) {
+        const earliestVariableValue = form.getFieldValue(dateRange.earliestDynamicValue);
+        if (earliestVariableValue) {
+          const earliestTime = new Date(earliestVariableValue).getTime()
+          if (currentTime < earliestTime) {
+            return true
+          }
         }
       }
     }
@@ -93,6 +104,17 @@ const XDateRangePicker = memo((props: XInputDateRangePickerConfig & { runtime?: 
           return true;
         }
       }
+
+      // 变量
+      if (dateRange.latestType === DATE_EXTREME_TYPE.VARIABLE && dateRange.latestVariableValue) {
+        const latestVariableValue = form.getFieldValue(dateRange.latestVariableValue)
+        if (latestVariableValue) {
+          const latestTime = new Date(latestVariableValue).getTime()
+          if (currentTime > latestTime) {
+            return true
+          }
+        }
+      }
     }
 
     return false;
@@ -109,7 +131,7 @@ const XDateRangePicker = memo((props: XInputDateRangePickerConfig & { runtime?: 
         layout={layout}
         tooltip={tooltip}
         labelCol={layout === 'horizontal' ? { span: 10 } : {}}
-        rules={[{ required: verify?.required, message:`${label.text}是必填项` }]}
+        rules={[{ required: verify?.required, message: `${label.text}是必填项` }]}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
           margin: 0,

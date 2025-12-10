@@ -1,6 +1,16 @@
-import { Form, Grid, Checkbox, Select, DatePicker, Message } from '@arco-design/web-react';
+import { Form, Grid, Checkbox, Select, DatePicker, Cascader, Message } from '@arco-design/web-react';
 import { useEffect, useState } from 'react';
-import { WEEK_OPTIONS, WEEK_OPTIONS_LABEL, DATE_EXTREME_TYPE, DATE_DYNAMIC_TYPE, getPopupContainer, CONFIG_TYPES } from '@onebase/ui-kit';
+import {
+  WEEK_OPTIONS,
+  WEEK_OPTIONS_LABEL,
+  DATE_EXTREME_TYPE,
+  DATE_DYNAMIC_TYPE,
+  getPopupContainer,
+  CONFIG_TYPES,
+  ENTITY_FIELD_TYPE,
+  useAppEntityStore
+} from '@onebase/ui-kit';
+import { type SelectOption } from '@onebase/app';
 import { registerConfigRenderer } from '../../registry';
 import styles from '../../index.module.less';
 
@@ -31,8 +41,8 @@ const DynamicDateRangeConfig: React.FC<DynamicDateRangeConfigProps> = ({ handleP
   // 最早可选日期、最晚可选日期
   const extremeOptions = [
     { label: '静态值', value: DATE_EXTREME_TYPE.STATIC },
-    { label: '动态值', value: DATE_EXTREME_TYPE.DYNAMIC }
-    // { label: '变量', value: DATE_EXTREME_TYPE.VARIABLE }
+    { label: '动态值', value: DATE_EXTREME_TYPE.DYNAMIC },
+    { label: '变量', value: DATE_EXTREME_TYPE.VARIABLE }
   ];
 
   // 动态值：下拉单选 当天/昨天/明天/7天前/7天后/30天前/30天后
@@ -45,10 +55,51 @@ const DynamicDateRangeConfig: React.FC<DynamicDateRangeConfigProps> = ({ handleP
     { label: '30天前', value: DATE_DYNAMIC_TYPE.BEFOREMONTH },
     { label: '30天后', value: DATE_DYNAMIC_TYPE.AFTERMONTH }
   ];
+  const { mainEntity, subEntities } = useAppEntityStore();
+
+  const [variableOptions, setVariableOptions] = useState<SelectOption[]>([]);
 
   useEffect(() => {
     getIndeterminate(configs[dateRangeKey]?.week);
   }, []);
+
+  // 监听当前字段的数据绑定
+  useEffect(() => {
+    if (configs.dataField?.length) {
+      // 主表字段
+      if (configs.dataField.includes(mainEntity.tableName)) {
+        const field = mainEntity.fields
+          .filter(
+            (ele: any) =>
+              ele.fieldType === ENTITY_FIELD_TYPE.DATE.VALUE || ele.fieldType === ENTITY_FIELD_TYPE.DATETIME.VALUE
+          )
+          .map((ele: any) => {
+            return {
+              label: ele.displayName,
+              value: ele.fieldName
+            };
+          });
+        setVariableOptions(field);
+      } else {
+        // 子表字段  subEntities.entities
+        const subEntity = subEntities.entities.find((ele: any) => configs.dataField.includes(ele.tableName));
+        if (subEntity) {
+          const subField = subEntity.fields
+            .filter(
+              (ele: any) =>
+                ele.fieldType === ENTITY_FIELD_TYPE.DATE.VALUE || ele.fieldType === ENTITY_FIELD_TYPE.DATETIME.VALUE
+            )
+            .map((ele: any) => {
+              return {
+                label: ele.displayName,
+                value: ele.fieldName
+              };
+            });
+          setVariableOptions(subField);
+        }
+      }
+    }
+  }, [configs.dataField]);
 
   // 获取选中状态
   const getIndeterminate = (week?: string[]) => {
@@ -169,6 +220,18 @@ const DynamicDateRangeConfig: React.FC<DynamicDateRangeConfigProps> = ({ handleP
                     }}
                   ></Select>
                 )}
+
+                {/* 变量 */}
+                {configs[dateRangeKey]['earliestType'] === DATE_EXTREME_TYPE.VARIABLE && (
+                  <Select
+                    getPopupContainer={getPopupContainer}
+                    value={configs[dateRangeKey]['earliestVariableValue']}
+                    options={variableOptions}
+                    onChange={(value) => {
+                      handlePropsChange(dateRangeKey, { ...configs[dateRangeKey], earliestVariableValue: value });
+                    }}
+                  />
+                )}
               </Grid.Col>
             </Grid.Row>
           </div>
@@ -229,6 +292,18 @@ const DynamicDateRangeConfig: React.FC<DynamicDateRangeConfigProps> = ({ handleP
                     }}
                   ></Select>
                 )}
+
+                {/* 变量 */}
+                {configs[dateRangeKey]['latestType'] === DATE_EXTREME_TYPE.VARIABLE && (
+                  <Select
+                    getPopupContainer={getPopupContainer}
+                    value={configs[dateRangeKey]['latestVariableValue']}
+                    options={variableOptions}
+                    onChange={(value) => {
+                      handlePropsChange(dateRangeKey, { ...configs[dateRangeKey], latestVariableValue: value });
+                    }}
+                  />
+                )}
               </Grid.Col>
             </Grid.Row>
           </div>
@@ -239,14 +314,6 @@ const DynamicDateRangeConfig: React.FC<DynamicDateRangeConfigProps> = ({ handleP
 };
 export default DynamicDateRangeConfig;
 
-registerConfigRenderer(
-  CONFIG_TYPES.DATE_RANGE,
-  ({ id, handlePropsChange, item, configs }) => (
-    <DynamicDateRangeConfig
-      id={id}
-      handlePropsChange={handlePropsChange}
-      item={item}
-      configs={configs}
-    />
-  )
-);
+registerConfigRenderer(CONFIG_TYPES.DATE_RANGE, ({ id, handlePropsChange, item, configs }) => (
+  <DynamicDateRangeConfig id={id} handlePropsChange={handlePropsChange} item={item} configs={configs} />
+));
