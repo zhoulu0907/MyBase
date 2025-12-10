@@ -5,8 +5,10 @@ import { IconLock, IconUser } from '@arco-design/web-react/icon';
 import {
   getHashQueryParam,
   getOrCreateDeviceInfo,
+  getPublicKey,
   SECURITY_CATEGORY_MFA,
   SliderCaptcha,
+  sm2Encrypt,
   TokenManager,
   type SliderCaptchaRef
 } from '@onebase/common';
@@ -59,7 +61,7 @@ const Right: React.FC = () => {
       accountForm.setFieldValue('account', savedAccount);
     }
 
-    // handleGetTenantSecurityConfig();
+    handleGetTenantSecurityConfig();
 
     // 如果已经登录了就自动跳转到首页
     // if (TokenManager.isTokenValid()) {
@@ -88,8 +90,8 @@ const Right: React.FC = () => {
           if (securityConfigItem.configValue.includes('email')) {
             setMfaVerifyStatus('email');
           }
-          if (securityConfigItem.configValue.includes('phone')) {
-            setMfaVerifyStatus('phone');
+          if (securityConfigItem.configValue.includes('mobile')) {
+            setMfaVerifyStatus('mobile');
           }
         }
       });
@@ -128,7 +130,9 @@ const Right: React.FC = () => {
       // 保存 captchaVerification 到 ref，以便后续使用
       savedCaptchaVerificationRef.current = captchaVerification;
 
-      if (mfaVerifyStatus === 'phone' || mfaVerifyStatus === 'email') {
+      console.log('mfaVerifyStatus: ', mfaVerifyStatus);
+
+      if (mfaVerifyStatus === 'mobile' || mfaVerifyStatus === 'email') {
         const codeToUse = mfaCode || verifyCode;
         if (!codeToUse || codeToUse === '') {
           setShowVerifyModal(true);
@@ -142,6 +146,8 @@ const Right: React.FC = () => {
       };
 
       const deviceId = await getOrCreateDeviceInfo();
+
+      values.password = await sm2Encrypt(getPublicKey(), values.password);
 
       const loginData: LoginRequest = {
         username: values.username!,
@@ -235,18 +241,6 @@ const Right: React.FC = () => {
       // 先验证表单
       await accountForm.validate();
 
-      const deviceId = await getOrCreateDeviceInfo();
-
-      if (accountForm.getFieldValue('captchaVerification')) {
-        handleAccountLogin({
-          username: accountForm.getFieldValue('username'),
-          password: accountForm.getFieldValue('password'),
-          captchaVerification: accountForm.getFieldValue('captchaVerification'),
-          deviceId: deviceId
-        });
-        return;
-      }
-
       // 显示滑块验证码
       sliderCaptchaRef.current?.showCaptcha();
     } catch (error) {
@@ -335,6 +329,7 @@ const Right: React.FC = () => {
       <VerifyModal
         verifyType={mfaVerifyStatus}
         visible={showVerifyModal}
+        userName={accountForm.getFieldValue('username')}
         onCancel={() => {
           setShowVerifyModal(false);
           setLoading(false);
