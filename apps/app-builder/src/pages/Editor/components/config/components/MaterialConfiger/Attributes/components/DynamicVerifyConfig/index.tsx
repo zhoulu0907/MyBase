@@ -161,7 +161,6 @@ const DynamicVerifyConfig: React.FC<DynamicVerifyConfigProps> = ({ handlePropsCh
               placeholder={`请输入支持文件格式，用英文逗号分隔`}
               value={configs[verifyKey]['fileFormat']}
               onChange={(value) => {
-                if (!value) return;
                 handlePropsChange(verifyKey, { ...configs[verifyKey], fileFormat: value });
               }}
             />
