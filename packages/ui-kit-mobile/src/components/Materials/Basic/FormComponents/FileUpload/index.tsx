@@ -141,7 +141,7 @@ const XFileUpload = memo((props: XFileUploadConfig & { runtime?: boolean; detail
               content: '文件数量超出限制',
               duration: 2000
             })}
-          disabled={status !== STATUS_VALUES[STATUS_OPTIONS.DEFAULT] || status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode}
+          disabled={status !== STATUS_VALUES[STATUS_OPTIONS.DEFAULT] || detailMode}
           style={{
             width: '100%'
           }}
