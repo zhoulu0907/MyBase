@@ -4,6 +4,7 @@ import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import '../index.css';
 import './index.css';
 import { type XImageConfig } from './schema';
+import { getFileUrlById } from '@onebase/platform-center';
 
 const XImage = memo((props: XImageConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const { status, fillStyle, maxHeight, runtime = true, imageConfig } = props;
@@ -14,7 +15,7 @@ const XImage = memo((props: XImageConfig & { runtime?: boolean; detailMode?: boo
       width={'100%'}
       height={300}
       preview={runtime}
-      src={imageConfig}
+      src={getFileUrlById(imageConfig)}
       style={
         {
           '--fit': fillStyle,
