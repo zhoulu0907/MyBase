@@ -68,6 +68,29 @@ const XDivider = memo((props: XDividerConfig) => {
       )
     }
 
+    if(styleType === 'style9') {
+      return (
+        <div
+          className={`decor-${styleType}`}
+          style={
+            {
+              backgroundColor: hexToRgba(color, 0.2),
+              '--before-bg': hexToRgba(color, 0.6),
+              '--after-bg': hexToRgba(color, 0.6)
+            } as React.CSSProperties
+          }
+        >
+          <div className='tabContent'>
+            <div className={'tabLeft'} style={{ backgroundColor: `${color}` }}></div>
+            <div className={'tabActive'} style={{ backgroundColor: `${color}`, color: `${titleColor}` }}>
+              {label.text}
+            </div>
+            <div className={'tabRight'} style={{ backgroundColor: `${color}`}}></div>
+          </div>
+        </div>
+      )
+    }
+
     if(styleType === 'style10') {
       return (
         <div className={`decor-${styleType}`}>

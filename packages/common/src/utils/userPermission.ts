@@ -7,6 +7,7 @@ export interface UserInfo {
   deptId: number; // 部门ID
   username: string; // 用户名
   email: string; // 邮箱
+  mobile?: string;  //手机号码
 }
 
 /**

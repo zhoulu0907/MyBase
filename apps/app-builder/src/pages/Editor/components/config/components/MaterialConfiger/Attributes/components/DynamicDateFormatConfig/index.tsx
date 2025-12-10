@@ -40,7 +40,17 @@ const DynamicDateFormatConfig: React.FC<DynamicDateFormatConfigProps> = ({
       <Select
         getPopupContainer={getPopupContainer}
         value={dateFormat}
-        onChange={(value) => handlePropsChange(dateFormatKey, value)}
+        onChange={(value) => {
+          if (configs.defaultValueConfig?.customValue) {
+            handleConfigsChange({
+              ...configs,
+              [dateFormatKey]: value,
+              defaultValueConfig: { ...configs.defaultValueConfig, customValue: '' }
+            });
+          } else {
+            handlePropsChange(dateFormatKey, value);
+          }
+        }}
         options={item.range || options}
       ></Select>
     </Form.Item>
@@ -49,5 +59,11 @@ const DynamicDateFormatConfig: React.FC<DynamicDateFormatConfigProps> = ({
 export default DynamicDateFormatConfig;
 
 registerConfigRenderer(CONFIG_TYPES.DATE_FORMAT, ({ id, handlePropsChange, handleConfigsChange, item, configs }) => (
-  <DynamicDateFormatConfig id={id} handlePropsChange={handlePropsChange} handleConfigsChange={handleConfigsChange} item={item} configs={configs} />
+  <DynamicDateFormatConfig
+    id={id}
+    handlePropsChange={handlePropsChange}
+    handleConfigsChange={handleConfigsChange}
+    item={item}
+    configs={configs}
+  />
 ));

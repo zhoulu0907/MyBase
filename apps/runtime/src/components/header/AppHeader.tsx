@@ -92,8 +92,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
         </div>
       </Menu.Item>
       <Divider style={{ margin: '4px 0' }} />
-      {tokenInfo?.adminFlag && (
-        <Menu.Item
+      <Menu.Item
           key="setting"
           onClick={() => {
             navigate(`/onebase/${tenantId}/setting`);
@@ -103,8 +102,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
             <img src={BuildingLine} />
             <span>企业管理后台</span>
           </div>
-        </Menu.Item>
-      )}
+      </Menu.Item>
       <Menu.Item key="logout" onClick={handleLogout}>
         <IconExport style={{ color: '#F53F3F' }} />
         <Typography.Text type="error">{t('header.logout')}</Typography.Text>
