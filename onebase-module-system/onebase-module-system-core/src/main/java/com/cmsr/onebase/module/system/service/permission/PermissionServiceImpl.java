@@ -310,6 +310,11 @@ public class PermissionServiceImpl implements PermissionService {
             List<MenuDO> menudoList = menuService.getAllActiveMenuListByCodes(RoleCodeEnum.devloperPermissionCodes);
             return convertSet(menudoList, MenuDO::getId);
         }
+        // 如果是系统创建的普通角, 获取普通用户菜单编号
+        if (roleService.hasAnyNormalUser(roleIds)) {
+            List<MenuDO> menudoList = menuService.getAllActiveMenuListByCodes(RoleCodeEnum.tenantDefaultPermissionCodes);
+            return convertSet(menudoList, MenuDO::getId);
+        }
 
         // 如果是非管理员的情况下，获得拥有的菜单编号
         return convertSet(roleMenuDataRepository.findListByRoleIds(roleIds), RoleMenuDO::getMenuId);

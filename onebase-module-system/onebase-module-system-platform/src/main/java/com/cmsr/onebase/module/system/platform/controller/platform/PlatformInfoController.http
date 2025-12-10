@@ -21,7 +21,7 @@ Authorization: Bearer {{token}}
 GET {{baseUrl}}/system/platform/admin/page
 Content-Type: application/json
 Authorization: Bearer {{token}}
-timestamp:1765296874000
+timestamp:1765367423000
 nonce:KSQjLklkPDFnBEj1
 sign:018e5e79e46d93bd9e10f99104e51f1c861c351db948b3125a329e6ccd1bfdee
 

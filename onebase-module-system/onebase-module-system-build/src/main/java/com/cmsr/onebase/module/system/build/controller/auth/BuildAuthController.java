@@ -19,6 +19,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.annotation.security.PermitAll;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
@@ -58,8 +59,12 @@ public class BuildAuthController {
     @PostMapping("/tenant-login")
     @PermitAll
     @Operation(summary = "空间登录（账密）")
-    public CommonResult<AuthLoginRespVO> tenantLogin(@RequestBody @Valid AuthLoginReqVO reqVO) {
-        return success(authService.login(reqVO));
+    public CommonResult<AuthLoginRespVO> tenantLogin(@RequestBody @Valid AuthLoginReqVO reqVO, HttpServletResponse response) {
+        AuthLoginRespVO respVO= authService.login(reqVO);
+        // 设置Cookie
+        response.addHeader("Set-Cookie", String.format("%s=%s; HttpOnly",
+                securityProperties.getTokenHeader(), respVO.getAccessToken()));
+        return success(respVO);
     }
 
     @PostMapping("/logout")
