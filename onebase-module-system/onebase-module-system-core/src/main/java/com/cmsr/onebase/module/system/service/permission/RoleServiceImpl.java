@@ -328,4 +328,15 @@ public class RoleServiceImpl implements RoleService {
         });
     }
 
+    public boolean hasAnyNormalUser(Collection<Long> roleIds) {
+        if (CollectionUtils.isEmpty(roleIds)) {
+            return false;
+        }
+        // 通过代理对象调用，确保 @Cacheable 生效
+        return roleIds.stream().anyMatch(id -> {
+            RoleDO role = roleService.getRoleFromCache(id);
+            return role != null && (RoleCodeEnum.isNormalUser(role.getCode()));
+        });
+    }
+
 }

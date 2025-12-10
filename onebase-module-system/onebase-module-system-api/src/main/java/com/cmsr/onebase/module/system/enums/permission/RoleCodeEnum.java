@@ -16,6 +16,7 @@ public enum RoleCodeEnum {
     TENANT_ADMIN("tenant_admin", "空间管理员"),
     CORP_ADMIN("corp_admin", "企业管理员"),
     APP_DEVELOPER("app_developer", "应用开发者"),
+    NORMAL_USER("normal_user", "普通用户"),
     ;
 
 
@@ -48,6 +49,10 @@ public enum RoleCodeEnum {
 
     public static boolean isDevloperAdmin(String code) {
         return ObjectUtils.equalsAny(code, APP_DEVELOPER.getCode());
+    }
+
+    public static boolean isNormalUser(String code) {
+        return ObjectUtils.equalsAny(code, NORMAL_USER.getCode());
     }
 
 
