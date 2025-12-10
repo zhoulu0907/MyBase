@@ -7,7 +7,11 @@ import {
   DEFAULT_VALUE_TYPES,
   DEFAULT_VALUE_TYPES_LABELS,
   PHONE_TYPE,
-  getPopupContainer
+  getPopupContainer,
+  TIME_FORMAT,
+  TIME_12_FORMAT,
+  DATE_OPTIONS,
+  DATE_VALUES
 } from '@onebase/ui-kit';
 import { FormulaEditor } from '@/components/FormulaEditor';
 import styles from '../../index.module.less';
@@ -61,6 +65,64 @@ const DynamicDefaultValueConfig: React.FC<DynamicDefaultValueConfigProps> = ({
     handleChange('formulaValue', formulaData);
   };
 
+  const renderDatePicker = () => {
+    const { YearPicker, MonthPicker } = DatePicker;
+    switch (configs.dateType) {
+      case DATE_VALUES[DATE_OPTIONS.YEAR]:
+        return (
+          <YearPicker
+            value={defaultValueConfig?.customValue}
+            format="YYYY"
+            getPopupContainer={getPopupContainer}
+            style={{ width: '100%' }}
+            onChange={(value) => handleChange('customValue', value)}
+          />
+        );
+      case DATE_VALUES[DATE_OPTIONS.MONTH]:
+        return (
+          <MonthPicker
+            value={defaultValueConfig?.customValue}
+            format="YYYY-MM"
+            getPopupContainer={getPopupContainer}
+            style={{ width: '100%' }}
+            onChange={(value) => handleChange('customValue', value)}
+          />
+        );
+      case DATE_VALUES[DATE_OPTIONS.DATE]:
+        return (
+          <DatePicker
+            value={defaultValueConfig?.customValue}
+            format="YYYY-MM-DD"
+            getPopupContainer={getPopupContainer}
+            style={{ width: '100%' }}
+            onChange={(value) => handleChange('customValue', value)}
+          />
+        );
+      case DATE_VALUES[DATE_OPTIONS.FULL]:
+        return (
+          <DatePicker
+            value={defaultValueConfig?.customValue}
+            showTime
+            format="YYYY-MM-DD HH:mm:ss"
+            getPopupContainer={getPopupContainer}
+            style={{ width: '100%' }}
+            onChange={(value) => handleChange('customValue', value)}
+          />
+        );
+      default:
+        // 默认显示日期选择器
+        return (
+          <DatePicker
+            value={defaultValueConfig?.customValue}
+            style={{ width: '100%' }}
+            format="YYYY-MM-DD"
+            getPopupContainer={getPopupContainer}
+            onChange={(value) => handleChange('customValue', value)}
+          />
+        );
+    }
+  };
+
   return (
     <>
       <Form.Item layout="vertical" label={item.name || '默认值'} className={styles.formItem}>
@@ -84,6 +146,7 @@ const DynamicDefaultValueConfig: React.FC<DynamicDefaultValueConfigProps> = ({
         <Form.Item layout="vertical" className={styles.formItem}>
           {item.valueType === 'boolean' && (
             <Select
+              value={defaultValueConfig?.customValue}
               options={[
                 { label: '开启', value: 'true' },
                 { label: '关闭', value: 'false' }
@@ -102,29 +165,29 @@ const DynamicDefaultValueConfig: React.FC<DynamicDefaultValueConfigProps> = ({
               placeholder="请输入"
             />
           )}
-          {item.valueType === 'date' && (
-            <DatePicker
-              style={{ width: '100%' }}
-              getPopupContainer={getPopupContainer}
-              format="YYYY-MM-DD"
-              onChange={(value) => handleChange('customDateValue', value)}
-            ></DatePicker>
-          )}
+          {item.valueType === 'date' && renderDatePicker()}
           {item.valueType === 'dateTime' && (
             <DatePicker
+              value={defaultValueConfig?.customValue}
               showTime
               style={{ width: '100%' }}
               getPopupContainer={getPopupContainer}
               format="YYYY-MM-DD HH:mm:ss"
-              onChange={(value) => handleChange('customDateTimeValue', value)}
+              onChange={(value) => handleChange('customValue', value)}
             ></DatePicker>
           )}
           {item.valueType === 'time' && (
             <TimePicker
+              value={defaultValueConfig?.customValue}
+              use12Hours={!configs.use24Hours}
+              format={
+                configs.use24Hours
+                  ? TIME_FORMAT[configs.dateType as keyof typeof TIME_FORMAT]
+                  : TIME_12_FORMAT[configs.dateType as keyof typeof TIME_12_FORMAT]
+              }
               style={{ width: '100%' }}
               getPopupContainer={getPopupContainer}
-              format="HH:mm:ss"
-              onChange={(value) => handleChange('customTimeValue', value)}
+              onChange={(value) => handleChange('customValue', value)}
             ></TimePicker>
           )}
 

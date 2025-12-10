@@ -28,9 +28,6 @@ const XDatePicker = memo((props: XInputDatePickerConfig & { runtime?: boolean; d
   const fieldId = dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.DATE_PICKER}_${nanoid()}`
   const fieldValue = Form.useWatch(fieldId, form);
 
-  // 确保 dateType 有默认值，避免 Form.Item 中没有元素
-  const currentDateType = dateType || DATE_VALUES[DATE_OPTIONS.DATE];
-
   // 禁用判断
   const handelDisabledDate = (current: any): boolean => {
     // 当前
@@ -118,7 +115,7 @@ const XDatePicker = memo((props: XInputDatePickerConfig & { runtime?: boolean; d
       width: '100%',
       pointerEvents: (runtime ? 'auto' : 'none') as React.CSSProperties['pointerEvents']
     };
-    switch (currentDateType) {
+    switch (dateType) {
       case DATE_VALUES[DATE_OPTIONS.YEAR]:
         return <YearPicker style={styles} disabledDate={handelDisabledDate} format='YYYY' getPopupContainer={getPopupContainer} />;
       case DATE_VALUES[DATE_OPTIONS.MONTH]:
@@ -137,7 +134,7 @@ const XDatePicker = memo((props: XInputDatePickerConfig & { runtime?: boolean; d
     if (!fieldValue) {
       return '--'
     }
-    switch (currentDateType) {
+    switch (dateType) {
       case DATE_VALUES[DATE_OPTIONS.YEAR]:
         return <>{dayjs(fieldValue).format('YYYY')}</>;
       case DATE_VALUES[DATE_OPTIONS.MONTH]:
