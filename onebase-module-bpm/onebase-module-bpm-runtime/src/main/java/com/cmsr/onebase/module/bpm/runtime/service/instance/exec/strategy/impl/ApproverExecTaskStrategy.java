@@ -494,15 +494,19 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
             List<Map<String, Object>> finalSubTableList = new ArrayList<>();
 
             // 3.1 处理新增数据（只设置有权限的字段）
+            // 前面已校验新增时 subWritableFieldNames 不为空且至少包含一个非子表本身的字段
             for (Map<String, Object> newItem : newItems) {
                 Map<String, Object> processedItem = new HashMap<>();
-                // 只设置有权限的字段（前面已校验新增时 subWritableFieldNames 不为空）
-                if (CollectionUtils.isNotEmpty(subWritableFieldNames)) {
-                    for (String fieldName : subWritableFieldNames) {
-                        Object value = newItem.get(fieldName);
-                        processedItem.put(fieldName, value);
+                // 只设置子表字段，不设置子表本身（subTableName 在 subWritableFieldNames 中表示可新增/删除权限）
+                for (String subFieldName : subTableNonSystemFields) {
+                    if (!subWritableFieldNames.contains(subFieldName)) {
+                        continue;
                     }
+
+                    Object value = newItem.get(subFieldName);
+                    processedItem.put(subFieldName, value);
                 }
+
                 finalSubTableList.add(processedItem);
             }
 
@@ -517,7 +521,7 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
                         // 只读权限，返回数据库中的原始数据
                         finalSubTableList.add(new HashMap<>(existItem));
                     } else {
-                        Map<String, Object> processedItem = processUpdateSubTableItem(updateItem, existItem, subWritableFieldNames);
+                        Map<String, Object> processedItem = processUpdateSubTableItem(updateItem, existItem, subTableNonSystemFields, subWritableFieldNames);
                         finalSubTableList.add(processedItem);
                     }
                 }
@@ -552,15 +556,23 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
      */
     private Map<String, Object> processUpdateSubTableItem(Map<String, Object> updateItem,
                                                           Map<String, Object> existItem,
+                                                          Set<String> subTableNonSystemFields,
                                                           Set<String> subWritableFieldNames) {
         Map<String, Object> mergedItem = new HashMap<>();
         // 先设置 id，确保记录能正确更新
         Object existId = existItem.get("id");
+
         if (existId != null) {
             mergedItem.put("id", existId);
         }
+
         // 只设置有权限的字段
-        for (String fieldName : subWritableFieldNames) {
+        for (String fieldName : subTableNonSystemFields) {
+            // 没有权限的字段，跳过
+            if (!subWritableFieldNames.contains(fieldName)) {
+                continue;
+            }
+
             // 使用 containsKey 区分 key 不存在和值为 null
             if (updateItem.containsKey(fieldName)) {
                 // 如果 key 存在，无论值是否为 null，都使用 updateItem 的值（包括 null）
