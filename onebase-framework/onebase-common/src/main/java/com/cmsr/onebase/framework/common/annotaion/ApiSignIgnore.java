@@ -1,4 +1,4 @@
-package com.cmsr.onebase.framework.signature.core.annotation;
+package com.cmsr.onebase.framework.common.annotaion;
 
 import java.lang.annotation.*;
 

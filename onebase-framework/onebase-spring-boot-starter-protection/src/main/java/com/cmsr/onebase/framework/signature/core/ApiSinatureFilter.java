@@ -4,7 +4,7 @@ import com.cmsr.onebase.framework.common.exception.ServiceException;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
 import com.cmsr.onebase.framework.signature.core.aop.ApiSignHelper;
-import com.cmsr.onebase.framework.signature.core.annotation.ApiSignIgnore;
+import com.cmsr.onebase.framework.common.annotaion.ApiSignIgnore;
 import jakarta.annotation.Resource;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

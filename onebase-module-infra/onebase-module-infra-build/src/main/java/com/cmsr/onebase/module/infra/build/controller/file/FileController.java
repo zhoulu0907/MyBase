@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.infra.build.controller.file;
 
 import cn.hutool.core.io.IoUtil;
+import com.cmsr.onebase.framework.common.annotaion.ApiSignIgnore;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
@@ -98,7 +99,7 @@ public class FileController {
     @Operation(summary = "获取文件内容")
     @PermitAll
     @TenantIgnore
-    // @ApiSign
+    @ApiSignIgnore
     @Parameter(name = "id", description = "文件编号", required = true)
     public void getFileContent(@PathVariable("id") Long id, HttpServletRequest request, HttpServletResponse response) throws Exception {
         fileService.getFileContent(id, request, response, null);
