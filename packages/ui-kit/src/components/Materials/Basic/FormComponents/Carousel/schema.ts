@@ -66,7 +66,7 @@ export type TXCarouselEditData = Array<
 >;
 
 interface Images {
-  image: string;
+  fileId: string;
   text?: string;
   url?: string;
 }

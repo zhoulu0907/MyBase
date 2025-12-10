@@ -22,7 +22,6 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
     dataField,
     tooltip,
     status,
-    placeholder,
     defaultValue,
     verify,
     layout,
@@ -91,7 +90,7 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
       }
     },
     selectDropdown: (value: any, option: any) => {
-      const name = (option as any)?.labelTitle ?? '';
+      const name = option?.labelTitle ?? option.children ?? '';
       const nextValue = value ? { id: value, name } : '';
       setDataState(nextValue);
       if (runtime) {
@@ -146,7 +145,6 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
     <div className="dataSelectTrigger" onClick={() => internalEvents.openPreview()}>
       <Input
         readOnly
-        placeholder={placeholder}
         value={helpers.getDisplayText(dataState)}
         suffix={
           !!helpers.getDisplayText(dataState) ? (
@@ -178,7 +176,6 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
       <div>
         <Input value={selectedId} hidden />
         <Select
-          placeholder={placeholder}
           showSearch
           allowClear
           value={selectedId}
@@ -200,8 +197,7 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
         field={fieldName}
         layout={layout}
         tooltip={tooltip}
-        labelCol={{ style: { width: labelColSpan, flex: 'unset' } }}
-        wrapperCol={{ style: { flex: 1 } }}
+        labelCol={layout === 'horizontal' ? { span: 10 } : {}}
         rules={[{ required: verify?.required, message: `${label.text}是必填项` }]}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
@@ -236,8 +232,7 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
       field={fieldName}
       layout={layout}
       tooltip={tooltip}
-      labelCol={{ style: { width: labelColSpan, flex: 'unset' } }}
-      wrapperCol={{ style: { flex: 1 } }}
+      labelCol={layout === 'horizontal' ? { span: 10 } : {}}
       rules={[{ required: verify?.required }]}
       hidden={false}
       style={{

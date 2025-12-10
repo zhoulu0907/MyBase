@@ -3,6 +3,7 @@ import { Popover, Select, Tree } from '@arco-design/web-react';
 import {
   flinkFunctionList,
   flinkFunctionTypeList,
+  getETLFlowData,
   type ELTColumn,
   type FlinkFunction,
   type FlinkFunctionListReq
@@ -13,24 +14,21 @@ import CodeMirror, { EditorView } from '@uiw/react-codemirror';
 import React, { useEffect, useState } from 'react';
 import { getSourceNodeIdsByTarget } from '../utils';
 import styles from './index.module.less';
-import { cloneDeep } from 'lodash-es';
 
 type SQLConfigProps = {
   onRegisterSave?: (fn: () => void) => void;
+  newPayload: any;
+  setNewPayload: (payload: any) => void;
 };
 
 /**
  * SQL 节点的配置主界面
  * 初始化页面，渲染 SQLNodeConfig 组件
  */
-const SQLConfig: React.FC<SQLConfigProps> = ({ onRegisterSave }) => {
+const SQLConfig: React.FC<SQLConfigProps> = ({ onRegisterSave, newPayload, setNewPayload }) => {
   useSignals();
 
   const { curDrawerTab, curNode, nodeData, setNodeData, graphData } = etlEditorSignal;
-
-  useEffect(() => {
-    console.log('curDrawerTab: ', curDrawerTab.value);
-  }, [curDrawerTab.value]);
 
   const [funcList, setFuncList] = useState<FlinkFunction[]>([]);
   const [funcTypeList, setFuncTypeList] = useState<string[]>([]);
@@ -43,9 +41,7 @@ const SQLConfig: React.FC<SQLConfigProps> = ({ onRegisterSave }) => {
     nodeData.value[curNode.value.id]?.config?.showSQLValue || ''
   );
   const [sqlVariables, setSqlVariables] = useState<Record<string, string>>({});
-
   const [currentCursorPos, setCurrentCursorPos] = useState<number | null>(null);
-  const [newPayload, setNewPayload] = useState<any>(cloneDeep(nodeData.value[curNode.value.id]));
 
   useEffect(() => {
     handleGetFlinkFunctionTypeList();
@@ -82,7 +78,6 @@ const SQLConfig: React.FC<SQLConfigProps> = ({ onRegisterSave }) => {
         }
       }
       setFieldList(tmpFieldList);
-      console.log('xxxx: ', tmpSqlVariables);
       setSqlVariables(tmpSqlVariables);
     }
   }, [nodeData, curNode]);
@@ -106,11 +101,60 @@ const SQLConfig: React.FC<SQLConfigProps> = ({ onRegisterSave }) => {
       fields: []
     };
 
-    console.log('save:  ', curNode.value.id, '-', sqlValue);
+    console.log('payload: ', payload);
     setNewPayload(payload);
   }, [showSQLValue, sqlVariables]);
 
-  const handleSaveInner = () => {
+  const handleSaveInner = async () => {
+    // Get SQL node output
+    const nodes = graphData.value.nodes?.map((node: any) => {
+      if (node.id === curNode.value.id) {
+        return {
+          description: nodeData.value[node.id].description || '',
+          meta: node.meta || {},
+          ...newPayload
+        };
+      }
+      return {
+        id: node.id,
+        title: nodeData.value[node.id].title || '',
+        description: nodeData.value[node.id].description || '',
+        type: node.type,
+        config: nodeData.value[node.id].config || {},
+        output: nodeData.value[node.id].output || {},
+        meta: node.meta || {}
+      };
+    });
+
+    // 将当前 node 的 payload 数据替换为最新生成的数据
+
+    const edges = graphData.value.edges?.map((edge: any) => {
+      return {
+        sourceNodeId: edge.sourceNodeID,
+        targetNodeId: edge.targetNodeID
+      };
+    });
+
+    const res = await getETLFlowData({
+      nodeId: curNode.value.id,
+      workflow: {
+        nodes: nodes,
+        edges: edges
+      }
+    });
+
+    const outputFields = res.map((field: any) => ({
+      fieldFqn: `${curNode.value.id}.${field.fieldName}`,
+      fieldName: field.fieldName,
+      fieldType: field.fieldType
+    }));
+
+    newPayload.output = {
+      verified: true,
+      fields: outputFields
+    };
+
+    setNewPayload(newPayload);
     setNodeData(curNode.value.id, newPayload);
   };
 

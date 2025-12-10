@@ -143,7 +143,7 @@ const Relations: React.FC<RelationsProps> = ({ entity, activeTab, reloadList }) 
         entityId: entity.id,
         pageNo: page.pageNo,
         pageSize: page.pageSize,
-        appId: curAppId
+        applicationId: curAppId
       };
       const response = await getEntityRelations(params);
       console.log('getEntityRelations', response);

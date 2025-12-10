@@ -1,16 +1,10 @@
-import { Button, Form, Message } from '@arco-design/web-react';
+import { Button, Form } from '@arco-design/web-react';
 import {
-  dataMethodData,
-  dataMethodInsert,
-  dataMethodUpdate,
   getEntityFieldsWithChildren,
   getPageSetId,
   getPageSetMetaData,
   type AppEntityField,
-  type DataMethodParam,
-  type GetPageSetIdReq,
-  type InsertMethodParams,
-  type UpdateMethodParams
+  type GetPageSetIdReq
 } from '@onebase/app';
 import { getHashQueryParam, pagesRuntimeSignal } from '@onebase/common';
 import {
@@ -34,9 +28,9 @@ interface PreviewProps {
 }
 
 const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
-  const [form] = Form.useForm();
-
   useSignals();
+
+  const [form] = Form.useForm();
 
   const {
     components: listComponents,
@@ -51,6 +45,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
   const [pageSetId, setPageSetId] = useState('');
   const [pageType, setPageType] = useState('');
   const [mainMetaData, setMainMetaData] = useState<string>('');
+  const [tableName, setTableName] = useState<string>('');
   const [mainMetaDataFields, setMainMetaDataFields] = useState<AppEntityField[]>([]);
   const [editTargetId, setEditTargetId] = useState('');
   const preview = true;
@@ -70,6 +65,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     const entityWithChildren = await getEntityFieldsWithChildren(mainMetaData);
     console.log('当前主表及所有子表数据: ', entityWithChildren);
 
+    setTableName(entityWithChildren.tableName);
     setMainMetaDataFields(entityWithChildren.parentFields);
   };
 
@@ -100,10 +96,10 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
   // 仅在 mainMetaData 或 mainMetaDataFields 变化且存在 editTargetId 时重新获取数据
   useEffect(() => {
-    if (editTargetId && mainMetaData && mainMetaDataFields) {
-      handleGetData(mainMetaData, editTargetId);
+    if (editTargetId && tableName && mainMetaDataFields) {
+      handleGetData(editTargetId);
     }
-  }, [mainMetaDataFields, mainMetaData]);
+  }, [tableName, mainMetaData]);
 
   useEffect(() => {
     if (pageSetId) {
@@ -120,45 +116,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
   const submitForm = async () => {
     const fields = form.getFieldsValue();
-    console.log('fields: ', fields);
-    console.log('mainMetaDataFields: ', mainMetaDataFields);
-    console.log('menuId: ', menuId);
-
-    const formData = {} as any;
-    Object.entries(fields).forEach(([key, value]) => {
-      const field = (mainMetaDataFields || []).find((f: AppEntityField) => f.fieldId == key);
-      if (field) {
-        formData[field.fieldId] = value;
-      }
-    });
-
-    console.log(formData);
-
     if (editTargetId) {
-      const req: UpdateMethodParams = {
-        menuId: menuId,
-        entityId: mainMetaData,
-        id: editTargetId,
-        data: formData
-      };
-      const res = await dataMethodUpdate(req);
-      console.log(res);
-      if (res) {
-        Message.success('更新成功');
-      }
       setEditTargetId('');
-    } else {
-      const req: InsertMethodParams = {
-        menuId: menuId,
-        entityId: mainMetaData,
-        data: formData
-      };
-
-      const res = await dataMethodInsert(req);
-      console.log(res);
-      if (res) {
-        Message.success('创建成功');
-      }
     }
 
     setPageType(EDITOR_TYPES.LIST_EDITOR);
@@ -179,43 +138,29 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
       console.log('edit row id: ', id);
       setEditTargetId(id);
       // 直接获取数据，避免依赖状态变化触发
-      if (mainMetaData) {
-        handleGetData(mainMetaData, id);
+      if (tableName) {
+        handleGetData(id);
       }
     }
   };
 
-  const handleGetData = async (entityId: string, id: string) => {
-    const req: DataMethodParam = {
-      menuId: menuId,
-      entityId: entityId,
-      id: id
-    };
-    const res = await dataMethodData(req);
-    console.log(res);
-
-    // 遍历 res.data，将数据回填到表单
-    if (res && res.data) {
-      const fieldIdNameMap: Record<string, string> = {};
-      (mainMetaDataFields || []).forEach((field: AppEntityField) => {
-        fieldIdNameMap[field.fieldName] = field.fieldId;
-      });
-
-      // 只处理第一个数据对象（通常为单条数据）
-      const dataItem = Array.isArray(res.data) ? res.data[0] : res.data;
-      if (dataItem && typeof dataItem === 'object') {
-        const formValues: Record<string, any> = {};
-        Object.entries(dataItem).forEach(([fieldName, value]) => {
-          const fieldID = fieldIdNameMap[fieldName];
-          if (fieldID) {
-            formValues[fieldID] = value;
-          }
-        });
-        form.setFieldsValue(formValues);
-      }
-    }
-
-    return res;
+  const handleGetData = async (id: string) => {
+    // const req: DetailMethodV2Params = {
+    //   id: id
+    // };
+    // const res = await dataMethodDetailV2(tableName, menuId, req);
+    // console.log(res);
+    // // 遍历 res, 将数据回填到表单
+    // const formValues: Record<string, any> = {};
+    // if (res) {
+    //   const dataItem = res;
+    //   if (dataItem && typeof dataItem === 'object') {
+    //     Object.entries(dataItem).forEach(([fieldName, value]) => {
+    //       formValues[fieldName] = value;
+    //     });
+    //   }
+    // }
+    // return res;
   };
 
   return (

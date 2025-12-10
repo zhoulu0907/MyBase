@@ -1,0 +1,285 @@
+.formDivider{
+   .title {
+    font-size: 14px;
+    color: #1d2129;
+    line-height: 22px;
+    margin-bottom: 3px;
+    display: inline-block;
+    font-weight: 600;
+  }
+
+  .desc {
+    font-size: 12px;
+    color: #86909c;
+    line-height: 20px;
+    margin-top: 3px;
+    display: block;
+  }
+
+/* 下方装饰条：根据截图画 8 种不同效果 */
+  .decor{
+    margin: 2px 0;
+  }
+
+  .decor-style1 {
+    display: none;
+  }
+
+  .decor-style2 {
+    border-top: 1px dashed;
+  }
+
+  .decor-style3 {
+    border-top: 1px solid;
+  }
+
+  .decor-style4 {
+    border-top: 2px solid;
+  }
+
+  .decor-style5 {
+    display: none;
+  }
+
+  .decor-style6 {
+    border-top: 1px solid;
+  }
+
+  .decor-title-style5 {
+    border-left: 4px solid;
+    line-height: 14px;
+    margin-bottom: 4px;
+    padding-left: 4px;
+    font-weight: 600;
+  }
+  
+  .decor-title-style6 {
+    border-bottom: 2px solid;
+    line-height: 22px;
+    margin-bottom: 2px;
+    font-weight: 600;
+  }
+
+  /* 样式7 */
+  /* 字段标题容器 */
+  .decor-title-style7 {
+    height: 22px;
+    border-bottom: 2px solid;
+    display: flex;
+    gap: 2px;
+
+    /* 标题标签 */
+   .label {
+      padding: 0 0 0 8px;
+      line-height: 24px;
+      font-weight: 600;
+    }
+
+    .decorator {
+      height: 24px;
+      width: 24px;
+      clip-path: polygon(0% 0%, 20% 0%, 100% 100%, 0% 100%);
+      position: relative;
+      left: -3px;
+    }
+
+    .decorator1 {
+      height: 24px;
+      width: 24px;
+      clip-path: polygon(0% 0%, 40% 0%, 100% 75%, 60% 75%);
+      position: relative;
+      left: -16px;
+    }
+
+    .decorator2 {
+      height: 24px;
+      width: 24px;
+      clip-path: polygon(0% 0%, 40% 0%, 100% 75%, 60% 75%);
+      position: relative;
+      left: -26px;
+      opacity: 0.6;
+    }
+
+    .decorator3 {
+      height: 24px;
+      width: 24px;
+      clip-path: polygon(0% 0%, 40% 0%, 100% 75%, 60% 75%);
+      position: relative;
+      left: -36px;
+      opacity: 0.3;
+    }
+  }
+
+  /* 样式8 */
+  .decor-style8 {
+    height: 24px;
+    border-radius: 12px 0 0 0;
+    .decor-title-style8 {
+      border-radius: 12px 0 12px 0;
+      line-height: 24px;
+      display: inline-block;
+      padding: 0px 10px;
+      font-weight: 600;
+    }
+  }
+
+  /* 样式9 */
+  .decor-style9 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    height: 20px;
+    padding: 0 24px;
+    border-radius: 10px 10px 0 0;
+    box-sizing: border-box;
+
+    .tabContent {
+      height: 28px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      .tabActive {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 22px;
+      font-weight: 600;
+      height: 24px;
+      padding: 0 16px;
+      margin-top: -5px;
+    }
+
+    .tabLeft {
+      height: 25px;
+      width: 16px;
+      border-radius: 0 0 0 8px;
+      margin-bottom: 6px;
+      margin-right: -1px;
+      clip-path: polygon(
+        0% 0%,        
+        100% 0%,        
+        100% 100%,
+        77% 96%,        
+        50% 82%,        
+        36% 69%,        
+        32% 64%,        
+        0% 0%
+      );
+    }
+
+    .tabRight {
+      height: 25px;
+      width: 16px;
+      border-radius: 0 0 8px 0;
+      margin-bottom: 6px;
+      margin-left: -1px;
+      clip-path: polygon(
+        0% 0%,                
+        100% 0%,                
+        77% 60%,                
+        59% 80%,                
+        49% 86%,                
+        16% 100%,         
+        0% 100% 
+      );
+    }
+    }
+  }
+
+  /* 左右撑开的留白，不做剪裁 */
+  .decor-style9::before {
+    content: '';
+    height: 4px;
+    background-color: var(--before-bg);
+    width: 6px;
+    border-radius: 4px 0 0 0;
+    position: relative;
+    top: -12px;
+    right: -2px;
+  }
+
+  .decor-style9::after {
+    content: '';
+    height: 4px;
+    background-color: var(--after-bg);
+    width: 6px;
+    border-radius: 0 4px 0 0;
+    position: relative;
+    top: -12px;
+    left: -2px;
+  }
+
+  /* 样式10 */
+  .decor-style10 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 24px;
+    overflow: hidden;
+
+    .center {
+      padding: 0px 16px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+    }
+
+    /* 左侧箭头组 */
+    .leftArrows,
+    .rightArrows {
+      display: flex;
+      height: 25px;
+    }
+
+    /* ---------------- 左侧箭头 ---------------- */
+    .leftArrow{
+      position: relative;
+      right: -2px;
+      width: 30px;
+      clip-path: polygon(100% 0%, 70% 0%, 40% 50%, 70% 100%, 100% 100%, 100% 50%);
+    }
+
+    .leftArrow1,
+    .leftArrow2 {
+      position: relative;
+      width: 30px;
+      clip-path: polygon(100% 0%, 70% 0%, 40% 50%, 70% 100%, 100% 100%, 70% 50%);
+    }
+    .leftArrow1 {
+      right: -15px;
+    }
+
+    .leftArrow2 {
+      right: -30px;
+    }
+
+    /* ---------------- 右侧箭头 ---------------- */
+    /* 右侧的箭头，形状反过来 */
+    .rightArrow{
+      position: relative;
+      left: -2px;
+      width: 30px;
+      clip-path: polygon(0% 0%, 30% 0%, 62% 50%, 30% 100%, 0% 100%, 0% 50%);
+    }
+
+    .rightArrow1,
+    .rightArrow2 {
+      position: relative;
+      width: 30px;
+      clip-path: polygon(0% 0%, 30% 0%, 62% 50%, 30% 100%, 0% 100%, 32% 50%);
+    }
+
+    .rightArrow1 {
+      left: -15px;
+    }
+
+    .rightArrow2 {
+      left: -30px;
+    }
+  }
+}

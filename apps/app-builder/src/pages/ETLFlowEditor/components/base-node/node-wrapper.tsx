@@ -8,6 +8,9 @@ import { type FlowNodeMeta } from '../../typings';
 import './node-wrapper.less';
 import { NodeWrapperStyle } from './styles';
 import { scrollToView } from './utils';
+import { clearDownStreamNodeConfig } from '../../configs/utils';
+import { useSignals } from '@preact/signals-react/runtime';
+import { etlEditorSignal } from '@onebase/common';
 
 export interface NodeWrapperProps {
   isScrollToView?: boolean;
@@ -22,6 +25,10 @@ export const NodeWrapper: React.FC<NodeWrapperProps> = (props) => {
   const { children, isScrollToView = false } = props;
   const nodeRender = useNodeRenderContext();
   const { node, selected, startDrag, ports, selectNode, nodeRef, onFocus, onBlur, deleteNode } = nodeRender;
+
+  useSignals();
+  
+  const { nodeData, graphData } = etlEditorSignal;
 
   const [isDragging, setIsDragging] = useState(false);
   const [isHover, setIsHover] = useState(false);
@@ -48,6 +55,7 @@ export const NodeWrapper: React.FC<NodeWrapperProps> = (props) => {
   const handleDeleteNode = useCallback(() => {
     // 删除节点
     console.log('删除节点', node);
+    clearDownStreamNodeConfig(node.id, graphData.value, nodeData.value);
     deleteNode();
   }, [node]);
 

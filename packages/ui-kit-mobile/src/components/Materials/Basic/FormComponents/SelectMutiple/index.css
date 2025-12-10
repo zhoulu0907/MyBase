@@ -1,0 +1,8 @@
+.selectCheckoutOBMobile {
+  .arco-checkbox {
+    display: flex;
+    padding: 0.12rem 0.24rem;
+    box-sizing: border-box;
+    justify-content: flex-end;
+  }
+}

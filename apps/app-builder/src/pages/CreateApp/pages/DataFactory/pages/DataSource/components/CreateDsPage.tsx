@@ -132,7 +132,7 @@ const CreateDataSource: React.FC<{ handlePageType: (tab: string) => void }> = ({
           url: values.url || `jdbc:mysql://${values.host}:${values.port}/${values.database}`
         },
         description: `${values.datasourceType} 数据源`,
-        appId: curAppId
+        applicationId: curAppId
       };
 
       const res = await createDatasource(createParams);

@@ -13,6 +13,7 @@ const XSwitch = memo((props: XInputSwitchConfig & { runtime?: boolean; detailMod
     tooltip,
     status,
     defaultValueConfig,
+    align,
     layout,
     fillText,
     runtime = true,
@@ -40,8 +41,8 @@ const XSwitch = memo((props: XInputSwitchConfig & { runtime?: boolean; detailMod
         field={fieldId ? fieldId : `${FORM_COMPONENT_TYPES.SWITCH}_${nanoid()}`}
         layout={layout}
         tooltip={tooltip}
+        labelCol={layout === 'horizontal' ? { span: 10 } : {}}
         triggerPropName="checked"
-        wrapperCol={{ style: { flex: 1 } }}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
           margin: 0,
@@ -56,13 +57,15 @@ const XSwitch = memo((props: XInputSwitchConfig & { runtime?: boolean; detailMod
               : (fillText?.display && fillText.uncheckedText) || '关闭'}
           </div>
         ) : (
-          <Switch
-            checkedText={fillText?.display && fillText.checkedText}
-            uncheckedText={fillText?.display && fillText.uncheckedText}
-            style={{
-              pointerEvents: runtime ? 'unset' : 'none'
-            }}
-          />
+          <div style={{ width: '100%', textAlign: align }}>
+            <Switch
+              checkedText={fillText?.display && fillText.checkedText}
+              uncheckedText={fillText?.display && fillText.uncheckedText}
+              style={{
+                pointerEvents: runtime ? 'unset' : 'none',
+              }}
+            />
+          </div>
         )}
       </Form.Item>
     </div>

@@ -1,7 +1,7 @@
-import { Avatar, Button, Form, Image, Input, Message, Modal, Select, Spin, Tabs, Upload } from '@arco-design/web-react';
-import { Cropper } from '@onebase/common';
-import { getLoginedUser, runtimeUploadFile, updateLoginedUser, updateLoginedUserPwd } from '@onebase/platform-center';
-import React, { useEffect, useRef, useState } from 'react';
+import { Button, Form, Input, Message, Select, Spin, Tabs } from '@arco-design/web-react';
+import { UploadAvatarComponent } from '@onebase/common';
+import { getLoginedUser, updateLoginedUser, updateLoginedUserPwd, uploadFile } from '@onebase/platform-center';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import styles from './index.module.less';
 
@@ -22,8 +22,6 @@ const EditPage: React.FC<IEditPageProps> = ({ avatarUrl, setAvatarUrl }) => {
   const [userInfo, setUserInfo] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  const uploadRef = useRef(null);
-
   useEffect(() => {
     fetchUserInfo();
     form.resetFields();
@@ -35,7 +33,7 @@ const EditPage: React.FC<IEditPageProps> = ({ avatarUrl, setAvatarUrl }) => {
       setLoading(true);
       const res = await getLoginedUser();
       setUserInfo(res);
-      setAvatarUrl(res.avatar);
+      setAvatarUrl(res.avatar || '');
       form.setFieldsValue({
         nickname: res.nickname,
         username: res.username,
@@ -47,24 +45,6 @@ const EditPage: React.FC<IEditPageProps> = ({ avatarUrl, setAvatarUrl }) => {
     } finally {
       setLoading(false);
     }
-  };
-
-  // 头像上传
-  const handleUpload = async (file: File, onProgress?: (percent: number, event?: ProgressEvent) => void) => {
-    const formData = new FormData();
-    formData.append('file', file);
-
-    const progressAdapter = onProgress
-      ? (progressEvent: ProgressEvent) => {
-          if (progressEvent.lengthComputable) {
-            const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-            onProgress(percent, progressEvent);
-          }
-        }
-      : undefined;
-
-    const res = await runtimeUploadFile(formData, progressAdapter);
-    return res;
   };
 
   // 表单提交
@@ -79,7 +59,7 @@ const EditPage: React.FC<IEditPageProps> = ({ avatarUrl, setAvatarUrl }) => {
       };
       await updateLoginedUser(req);
       form.resetFields();
-      nav(`/onebase/${tenantId}/setting/tenant`);
+      nav(`/onebase/${tenantId}/setting/profile`);
       Message.success('保存成功');
     } catch (error) {
       console.error('保存失败', error);
@@ -141,94 +121,13 @@ const EditPage: React.FC<IEditPageProps> = ({ avatarUrl, setAvatarUrl }) => {
             <Form form={form} layout="horizontal" onSubmit={handleSubmit}>
               <FormItem label="头像" field="avatar">
                 <div>
-                  {avatarUrl ? (
-                    <Image
-                      width={120}
-                      height={120}
-                      src={avatarUrl}
-                      alt="头像"
-                      style={{
-                        width: 120,
-                        height: 120,
-                        borderRadius: '50%',
-                        objectFit: 'cover',
-                        marginBottom: 16,
-                        display: 'block'
-                      }}
-                    />
-                  ) : (
-                    <Avatar size={96} style={{ marginBottom: '12px', backgroundColor: '#009e9e' }}>
-                      {defaultNickName}
-                    </Avatar>
-                  )}
-                  <div>
-                    <Upload
-                      ref={uploadRef}
-                      limit={1}
-                      accept="image/*"
-                      listType="picture-card"
-                      showUploadList={false}
-                      customRequest={async (option) => {
-                        const { onProgress, onError, onSuccess, file } = option;
-                        try {
-                          const uploadImgUrl = await handleUpload(file, onProgress);
-                          if (uploadImgUrl !== '') {
-                            setAvatarUrl(uploadImgUrl);
-                            onSuccess(uploadImgUrl);
-                          } else {
-                            onError({
-                              status: 'error',
-                              msg: '上传失败'
-                            });
-                          }
-                        } catch (error) {
-                          onError({
-                            status: 'error',
-                            msg: '上传失败'
-                          });
-                        }
-                      }}
-                      beforeUpload={(file) => {
-                        return new Promise((resolve) => {
-                          const modal = Modal.confirm({
-                            title: '裁剪图片',
-                            onCancel: () => {
-                              Message.info('取消上传');
-                              resolve(false);
-                              modal.close();
-                            },
-                            simple: false,
-                            content: (
-                              <Cropper
-                                file={file}
-                                onOK={(file: any) => {
-                                  resolve(file);
-                                  modal.close();
-                                }}
-                                onCancel={() => {
-                                  resolve(false);
-                                  Message.info('取消上传');
-                                  modal.close();
-                                }}
-                              />
-                            ),
-                            footer: null
-                          });
-                        });
-                      }}
-                      style={{
-                        display: 'none'
-                      }}
-                    ></Upload>
-                    <Button
-                      type="outline"
-                      onClick={() => {
-                        uploadRef.current?.getRootDOMNode()?.querySelector('input[type="file"]').click();
-                      }}
-                    >
-                      修改头像
-                    </Button>
-                  </div>
+                  <UploadAvatarComponent
+                    getUploadFile={uploadFile}
+                    avatarUrl={avatarUrl}
+                    onUpdateUrl={setAvatarUrl}
+                    defaultPlaceholder={defaultNickName}
+                    buttonName="修改头像"
+                  />
                 </div>
               </FormItem>
 
@@ -297,7 +196,7 @@ const EditPage: React.FC<IEditPageProps> = ({ avatarUrl, setAvatarUrl }) => {
                 required
                 rules={[{ required: true, message: '请输入旧密码' }]}
               >
-                <Input placeholder="请输入旧密码" />
+                <Input.Password placeholder="请输入旧密码" />
               </FormItem>
 
               <FormItem
@@ -306,7 +205,7 @@ const EditPage: React.FC<IEditPageProps> = ({ avatarUrl, setAvatarUrl }) => {
                 required
                 rules={[{ required: true, message: '请输入新密码' }]}
               >
-                <Input placeholder="请输入新密码" />
+                <Input.Password placeholder="请输入新密码" />
               </FormItem>
 
               <FormItem
@@ -328,7 +227,7 @@ const EditPage: React.FC<IEditPageProps> = ({ avatarUrl, setAvatarUrl }) => {
                   }
                 ]}
               >
-                <Input placeholder="请再次输入新密码" />
+                <Input.Password placeholder="请再次输入新密码" />
               </FormItem>
 
               <FormItem wrapperCol={{ offset: 5 }}>

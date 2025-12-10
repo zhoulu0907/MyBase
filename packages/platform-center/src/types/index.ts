@@ -1,5 +1,7 @@
 export * from './auth';
 export * from './common';
+export * from './corp';
+export * from './corpApp';
 export * from './dept';
 export * from './dict';
 export * from './infra';
@@ -7,7 +9,6 @@ export * from './platformAdmin';
 export * from './platformInfo';
 export * from './platformTenant';
 export * from './role';
+export * from './security';
 export * from './tenant';
 export * from './user';
-export * from "./corp";
-export * from "./corpApp";

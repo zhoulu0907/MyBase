@@ -25,8 +25,8 @@ export enum TriggerType {
 }
 
 export interface TriggerConfig {
-  pageId?: string;
-  entityId?: string;
+  pageUuid?: string;
+  tableName?: string;
 }
 
 export interface CreateFlowMgmtReq {
@@ -61,8 +61,8 @@ export interface UpdateFlowMgmtDefinitionReq {
 
 // 数据源类型   表单、数据节点、关联表、子表
 export enum DATA_SOURCE_TYPE {
-  FORM = 'mainEntity', // 主表
-  SUBFORM = 'subEntity', // 子表
+  MAIN_TABLE = 'mainTable', // 主表
+  SUB_TABLE = 'subTable', // 子表
   DATA_NODE = 'dataNode', // 数据节点
   ASSOCIA_FORM = 'associaForm', // 关联表
   LOOP = 'loop' // 循环体
@@ -210,6 +210,8 @@ export interface CreateScriptActionReq {
   rawScript: string; // 原始脚本内容，必需
   inputParameter?: string; // 入参，可选
   outputParameter?: string; // 出参，可选
+  inputSchema?: any; // 入参Schema，可选
+  outputSchema?: any; // 出参Schema，可选
 }
 
 export interface UpdateScriptActionReq {
@@ -220,6 +222,8 @@ export interface UpdateScriptActionReq {
   rawScript: string; // 原始脚本内容，必需
   inputParameter?: string; // 入参，可选
   outputParameter?: string; // 出参，可选
+  inputSchema?: any; // 入参Schema，可选
+  outputSchema?: any; // 出参Schema，可选
 }
 
 export interface ScriptActionItem {

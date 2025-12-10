@@ -60,6 +60,17 @@ const XDateTimePicker = memo((props: XInputDateTimePickerConfig & { runtime?: bo
           return true
         }
       }
+
+      // 变量
+      if (dateRange.earliestType === DATE_EXTREME_TYPE.VARIABLE && dateRange.earliestVariableValue) {
+        const earliestVariableValue = form.getFieldValue(dateRange.earliestDynamicValue);
+        if (earliestVariableValue) {
+          const earliestTime = new Date(earliestVariableValue).getTime()
+          if (currentTime < earliestTime) {
+            return true
+          }
+        }
+      }
     }
 
     // 最晚可选日期时间
@@ -80,6 +91,17 @@ const XDateTimePicker = memo((props: XInputDateTimePickerConfig & { runtime?: bo
           return true
         }
       }
+
+      // 变量
+      if (dateRange.latestType === DATE_EXTREME_TYPE.VARIABLE && dateRange.latestVariableValue) {
+        const latestVariableValue = form.getFieldValue(dateRange.latestVariableValue)
+        if (latestVariableValue) {
+          const latestTime = new Date(latestVariableValue).getTime()
+          if (currentTime > latestTime) {
+            return true
+          }
+        }
+      }
     }
 
     return false;
@@ -95,7 +117,7 @@ const XDateTimePicker = memo((props: XInputDateTimePickerConfig & { runtime?: bo
         field={fieldId ? fieldId : `${FORM_COMPONENT_TYPES.DATE_TIME_PICKER}_${nanoid()}`}
         layout={layout}
         tooltip={tooltip}
-        wrapperCol={{ style: { flex: 1 } }}
+        labelCol={layout === 'horizontal' ? { span: 10 } : {}}
         rules={[{ required: verify?.required, message: `${label.text}是必填项` }]}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{

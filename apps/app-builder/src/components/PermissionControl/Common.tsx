@@ -1,5 +1,5 @@
 import { userPermissionSignal } from '@/store/singals/user_permission';
-import { UserPermissionManager } from '@/utils/permission';
+import { UserPermissionManager } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect } from 'react';
 

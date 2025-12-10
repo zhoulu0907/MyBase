@@ -95,7 +95,7 @@ const EntityTable: React.FC = () => {
       tableName: data.tableName,
       description: data.description,
       datasourceId: curDataSourceId,
-      appId: curAppId
+      applicationId: curAppId
     };
 
     const res = await updateEntity(params as unknown as UpdateEntityReqVO);

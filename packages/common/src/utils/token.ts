@@ -12,7 +12,6 @@ export interface TokenInfo {
   expiresTime: number; // 令牌过期时间（时间戳，毫秒）
   tenantId?: string; // 租户id
   corpId?: string; // 企业id
-  adminFlag?: boolean; // 是否是管理员
   loginURL?: string;
 }
 
@@ -25,6 +24,7 @@ export class TokenManager {
 
   //  当前身份ID appid、tenant_id 或者两者组合
   private static readonly CUR_IDENTIFY_ID = 'cur_identify_id';
+  private static readonly CUR_APP_ID = 'cur_app_id';
 
   static addEnv(key: string): string {
     return `${getEnv()}_${this.getCurIdentifyId()}_${key}`;
@@ -36,6 +36,14 @@ export class TokenManager {
 
   static getCurIdentifyId(): string | null {
     return sessionStorage.getItem(this.CUR_IDENTIFY_ID);
+  }
+
+  static setCurAppId(appId: string): void {
+    sessionStorage.setItem(this.addEnv(this.CUR_APP_ID), appId);
+  }
+
+  static getCurAppId(): string | null {
+    return sessionStorage.getItem(this.addEnv(this.CUR_APP_ID));
   }
 
   /**

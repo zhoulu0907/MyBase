@@ -1,9 +1,9 @@
 # Docker 镜像配置
 REGISTRY ?=
 IMAGE_PREFIX ?= onebase-v3-fe
-VERSION ?= latest
+VERSION ?= v3.0.1
 SAVE_DIR ?= ./images
-PLATFORM ?= linux/amd64
+PLATFORM ?= linux/arm64
 
 # 应用名称
 ADMIN_CONSOLE_IMAGE = $(if $(REGISTRY),$(REGISTRY)/)$(IMAGE_PREFIX)/admin-console:$(VERSION)

@@ -28,9 +28,6 @@ const XDatePicker = memo((props: XInputDatePickerConfig & { runtime?: boolean; d
   const fieldId = dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.DATE_PICKER}_${nanoid()}`
   const fieldValue = Form.useWatch(fieldId, form);
 
-  // 确保 dateType 有默认值，避免 Form.Item 中没有元素
-  const currentDateType = dateType || DATE_VALUES[DATE_OPTIONS.DATE];
-
   // 禁用判断
   const handelDisabledDate = (current: any): boolean => {
     // 当前
@@ -65,6 +62,17 @@ const XDatePicker = memo((props: XInputDatePickerConfig & { runtime?: boolean; d
           return true
         }
       }
+
+      // 变量
+      if (dateRange.earliestType === DATE_EXTREME_TYPE.VARIABLE && dateRange.earliestVariableValue) {
+        const earliestVariableValue = form.getFieldValue(dateRange.earliestDynamicValue);
+        if (earliestVariableValue) {
+          const earliestTime = new Date(earliestVariableValue).getTime()
+          if (currentTime < earliestTime) {
+            return true
+          }
+        }
+      }
     }
 
     // 最晚可选日期时间
@@ -85,6 +93,17 @@ const XDatePicker = memo((props: XInputDatePickerConfig & { runtime?: boolean; d
           return true
         }
       }
+
+      // 变量
+      if (dateRange.latestType === DATE_EXTREME_TYPE.VARIABLE && dateRange.latestVariableValue) {
+        const latestVariableValue = form.getFieldValue(dateRange.latestVariableValue)
+        if (latestVariableValue) {
+          const latestTime = new Date(latestVariableValue).getTime()
+          if (currentTime > latestTime) {
+            return true
+          }
+        }
+      }
     }
 
     return false;
@@ -96,7 +115,7 @@ const XDatePicker = memo((props: XInputDatePickerConfig & { runtime?: boolean; d
       width: '100%',
       pointerEvents: (runtime ? 'auto' : 'none') as React.CSSProperties['pointerEvents']
     };
-    switch (currentDateType) {
+    switch (dateType) {
       case DATE_VALUES[DATE_OPTIONS.YEAR]:
         return <YearPicker style={styles} disabledDate={handelDisabledDate} format='YYYY' getPopupContainer={getPopupContainer} />;
       case DATE_VALUES[DATE_OPTIONS.MONTH]:
@@ -111,11 +130,11 @@ const XDatePicker = memo((props: XInputDatePickerConfig & { runtime?: boolean; d
     }
   };
 
-  const renderTime = ()=>{
-    if(!fieldValue){
+  const renderTime = () => {
+    if (!fieldValue) {
       return '--'
     }
-    switch (currentDateType) {
+    switch (dateType) {
       case DATE_VALUES[DATE_OPTIONS.YEAR]:
         return <>{dayjs(fieldValue).format('YYYY')}</>;
       case DATE_VALUES[DATE_OPTIONS.MONTH]:
@@ -140,8 +159,8 @@ const XDatePicker = memo((props: XInputDatePickerConfig & { runtime?: boolean; d
         field={fieldId ? fieldId : `${FORM_COMPONENT_TYPES.DATE_PICKER}_${nanoid()}`}
         layout={layout}
         tooltip={tooltip}
-        wrapperCol={{ style: { flex: 1 } }}
-        rules={[{ required: verify?.required, message:`${label.text}是必填项` }]}
+        labelCol={layout === 'horizontal' ? { span: 10 } : {}}
+        rules={[{ required: verify?.required, message: `${label.text}是必填项` }]}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
           margin: 0,

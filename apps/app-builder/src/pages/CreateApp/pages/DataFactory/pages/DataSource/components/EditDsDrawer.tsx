@@ -131,7 +131,7 @@ const EditDsDrawer: React.FC<EditDsDrawerProps> = ({ visible, onClose, dataSourc
         },
         // description: dataSource.description,
         // runMode: dataSource.runMode,
-        appId: curAppId
+        applicationId: curAppId
         // lockVersion: dataSource.lockVersion,
       };
 

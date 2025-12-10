@@ -33,9 +33,8 @@ export type TXFileEditData = Array<
 >;
 
 interface Files {
-  image: string;
-  text?: string;
-  url?: string;
+  name: string;
+  fileId: string;
 }
 
 export interface XFileConfig extends ICommonBaseType {

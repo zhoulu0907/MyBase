@@ -2,8 +2,9 @@ import { Carousel, Form } from '@arco-design/web-react';
 import { memo } from 'react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import '../index.css';
-import './index.css';
+import styles from './index.module.css';
 import { type XCarouselConfig } from './schema';
+import { getFileUrlById } from '@onebase/platform-center';
 
 const XCarousel = memo((props: XCarouselConfig & { runtime?: boolean }) => {
   const {
@@ -28,7 +29,7 @@ const XCarousel = memo((props: XCarouselConfig & { runtime?: boolean }) => {
         }
         layout={layout}
         tooltip={tooltip}
-        wrapperCol={{ style: { flex: 1 } }}
+        labelCol={layout === 'horizontal' ? { span: 10 } : {}}
         rules={[{ required: verify?.required, message:`${label.text}是必填项` }]}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
@@ -37,7 +38,7 @@ const XCarousel = memo((props: XCarouselConfig & { runtime?: boolean }) => {
         }}
       >
         <Carousel
-          className="carousel"
+          className={styles.carousel}
           autoPlay={
             autoplay && {
               interval: interval * 1000
@@ -48,9 +49,9 @@ const XCarousel = memo((props: XCarouselConfig & { runtime?: boolean }) => {
           }}
         >
           {carouselConfig.map((img, index) => (
-            <div className="imageWrapper" key={index} onClick={() => window.open(img.url)}>
-              <img className="image" src={img.image} style={{ objectFit: fillStyle }} />
-              <div className="text">{img.text}</div>
+            <div className={styles.imageWrapper} key={index} onClick={() => window.open(img.url)}>
+              <img className={styles.image} src={getFileUrlById(img.fileId)} style={{ objectFit: fillStyle }} />
+              <div className={styles.text}>{img.text}</div>
             </div>
           ))}
         </Carousel>

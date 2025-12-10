@@ -1,8 +1,19 @@
-import { Form, Select, Input, Button, Switch, DatePicker, TimePicker } from '@arco-design/web-react';
+import { Form, Select, Input, Button, Switch, DatePicker, TimePicker, InputNumber } from '@arco-design/web-react';
 import { useEffect, useState } from 'react';
+import { IconLaunch } from '@arco-design/web-react/icon';
 import { registerConfigRenderer } from '../../registry';
-import { CONFIG_TYPES } from '@onebase/ui-kit';
-import { DEFAULT_VALUE_TYPES, DEFAULT_VALUE_TYPES_LABELS, getPopupContainer } from '@onebase/ui-kit';
+import {
+  CONFIG_TYPES,
+  DEFAULT_VALUE_TYPES,
+  DEFAULT_VALUE_TYPES_LABELS,
+  PHONE_TYPE,
+  getPopupContainer,
+  TIME_FORMAT,
+  TIME_12_FORMAT,
+  DATE_OPTIONS,
+  DATE_VALUES
+} from '@onebase/ui-kit';
+import { FormulaEditor } from '@/components/FormulaEditor';
 import styles from '../../index.module.less';
 
 export interface DynamicDefaultValueConfigProps {
@@ -23,10 +34,19 @@ const DynamicDefaultValueConfig: React.FC<DynamicDefaultValueConfigProps> = ({
   const [defaultValueConfig, setDefaultValueConfig] = useState({
     type: '',
     customValue: undefined,
+    formulaValue: undefined
   });
+  const [errorText, setErrorText] = useState('');
+  // 公式计算弹窗
+  const [formulaVisible, setFormulaVisible] = useState<boolean>(false);
 
   useEffect(() => {
-    setDefaultValueConfig((prev) => ({ ...prev, ...configs[defaultValueConfigKey] }));
+    if (item.valueType === 'boolean') {
+      const newValue = configs[defaultValueConfigKey].customValue === true ? 'true' : 'false';
+      setDefaultValueConfig((prev) => ({ ...prev, ...configs[defaultValueConfigKey], customValue: newValue }));
+    } else {
+      setDefaultValueConfig((prev) => ({ ...prev, ...configs[defaultValueConfigKey] }));
+    }
   }, [configs[defaultValueConfigKey]]);
 
   const handleChange = (key: string, value: boolean | string) => {
@@ -34,12 +54,85 @@ const DynamicDefaultValueConfig: React.FC<DynamicDefaultValueConfigProps> = ({
     handlePropsChange(defaultValueConfigKey, newConfig);
   };
 
+  // 打开公式编辑器弹窗
+  const openFormulaEditor = () => {
+    setFormulaVisible(true);
+  };
+
+  // 公式编辑器弹窗确定
+  const handleFormulaConfirm = (formulaData: string) => {
+    setFormulaVisible(false);
+    handleChange('formulaValue', formulaData);
+  };
+
+  const renderDatePicker = () => {
+    const { YearPicker, MonthPicker } = DatePicker;
+    switch (configs.dateType) {
+      case DATE_VALUES[DATE_OPTIONS.YEAR]:
+        return (
+          <YearPicker
+            value={defaultValueConfig?.customValue}
+            format="YYYY"
+            getPopupContainer={getPopupContainer}
+            style={{ width: '100%' }}
+            onChange={(value) => handleChange('customValue', value)}
+          />
+        );
+      case DATE_VALUES[DATE_OPTIONS.MONTH]:
+        return (
+          <MonthPicker
+            value={defaultValueConfig?.customValue}
+            format="YYYY-MM"
+            getPopupContainer={getPopupContainer}
+            style={{ width: '100%' }}
+            onChange={(value) => handleChange('customValue', value)}
+          />
+        );
+      case DATE_VALUES[DATE_OPTIONS.DATE]:
+        return (
+          <DatePicker
+            value={defaultValueConfig?.customValue}
+            format="YYYY-MM-DD"
+            getPopupContainer={getPopupContainer}
+            style={{ width: '100%' }}
+            onChange={(value) => handleChange('customValue', value)}
+          />
+        );
+      case DATE_VALUES[DATE_OPTIONS.FULL]:
+        return (
+          <DatePicker
+            value={defaultValueConfig?.customValue}
+            showTime
+            format="YYYY-MM-DD HH:mm:ss"
+            getPopupContainer={getPopupContainer}
+            style={{ width: '100%' }}
+            onChange={(value) => handleChange('customValue', value)}
+          />
+        );
+      default:
+        // 默认显示日期选择器
+        return (
+          <DatePicker
+            value={defaultValueConfig?.customValue}
+            style={{ width: '100%' }}
+            format="YYYY-MM-DD"
+            getPopupContainer={getPopupContainer}
+            onChange={(value) => handleChange('customValue', value)}
+          />
+        );
+    }
+  };
+
   return (
     <>
       <Form.Item layout="vertical" label={item.name || '默认值'} className={styles.formItem}>
         <Select
           getPopupContainer={getPopupContainer}
-          onChange={(value) => handleChange('type', value)}
+          onChange={(value) => {
+            setErrorText(``);
+            const newConfig = { ...configs[defaultValueConfigKey], type: value, formulaValue: '', customValue: '' };
+            handlePropsChange(defaultValueConfigKey, newConfig);
+          }}
           value={defaultValueConfig?.type}
           options={[
             { label: DEFAULT_VALUE_TYPES_LABELS[DEFAULT_VALUE_TYPES.CUSTOM], value: DEFAULT_VALUE_TYPES.CUSTOM },
@@ -52,10 +145,18 @@ const DynamicDefaultValueConfig: React.FC<DynamicDefaultValueConfigProps> = ({
       {defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM && (
         <Form.Item layout="vertical" className={styles.formItem}>
           {item.valueType === 'boolean' && (
-            <Switch
-              checked={defaultValueConfig?.customValue}
-              onChange={(value) => handleChange('customValue', value)}
-            />
+            <Select
+              value={defaultValueConfig?.customValue}
+              options={[
+                { label: '开启', value: 'true' },
+                { label: '关闭', value: 'false' }
+              ]}
+              getPopupContainer={getPopupContainer}
+              onChange={(value) => {
+                const newValue = value === 'true' ? true : false;
+                handleChange('customValue', newValue);
+              }}
+            ></Select>
           )}
           {item.valueType === 'string' && (
             <Input
@@ -64,35 +165,95 @@ const DynamicDefaultValueConfig: React.FC<DynamicDefaultValueConfigProps> = ({
               placeholder="请输入"
             />
           )}
-          {item.valueType === 'date' && (
-            <DatePicker
-              style={{ width: '100%' }}
-              getPopupContainer={getPopupContainer}
-              format="YYYY-MM-DD"
-              onChange={(value) => handleChange('customDateValue', value)}
-            ></DatePicker>
-          )}
+          {item.valueType === 'date' && renderDatePicker()}
           {item.valueType === 'dateTime' && (
             <DatePicker
+              value={defaultValueConfig?.customValue}
               showTime
               style={{ width: '100%' }}
               getPopupContainer={getPopupContainer}
               format="YYYY-MM-DD HH:mm:ss"
-              onChange={(value) => handleChange('customDateTimeValue', value)}
+              onChange={(value) => handleChange('customValue', value)}
             ></DatePicker>
           )}
           {item.valueType === 'time' && (
             <TimePicker
+              value={defaultValueConfig?.customValue}
+              use12Hours={!configs.use24Hours}
+              format={
+                configs.use24Hours
+                  ? TIME_FORMAT[configs.dateType as keyof typeof TIME_FORMAT]
+                  : TIME_12_FORMAT[configs.dateType as keyof typeof TIME_12_FORMAT]
+              }
               style={{ width: '100%' }}
               getPopupContainer={getPopupContainer}
-              format="HH:mm:ss"
-              onChange={(value) => handleChange('customTimeValue', value)}
+              onChange={(value) => handleChange('customValue', value)}
             ></TimePicker>
           )}
+
+          {item.valueType === 'phone' && (
+            <Input
+              value={defaultValueConfig?.customValue}
+              maxLength={configs.phoneType === PHONE_TYPE.MOBILE ? 11 : 15}
+              status={errorText ? 'error' : undefined}
+              onChange={(value) => {
+                if (configs.phoneType === PHONE_TYPE.MOBILE) {
+                  if (value && !/^1[3-9]\d{9}$/.test(value)) {
+                    setErrorText(`请输入有效的11位中国大陆手机号`);
+                  } else {
+                    setErrorText(``);
+                  }
+                }
+                if (configs.phoneType === PHONE_TYPE.LANDLINE) {
+                  if (value && !/^\(?0[0-9]{2,3}\)?-?[0-9]{7,8}$/.test(value)) {
+                    setErrorText(`请输入有效的座机号`);
+                  } else {
+                    setErrorText(``);
+                  }
+                }
+                handleChange('customValue', value);
+              }}
+              placeholder="请输入"
+            />
+          )}
+          {item.valueType === 'number' && (
+            <InputNumber
+              step={configs.step}
+              min={configs.verify?.numberLimit ? configs.verify?.min : undefined}
+              max={configs.verify?.numberLimit ? configs.verify?.max : undefined}
+              precision={configs?.numberFormat.showPrecision ? configs.numberFormat.precision : 0}
+              formatter={(value) => {
+                return configs?.numberFormat.useThousandsSeparator
+                  ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+                  : value.toString();
+              }}
+              parser={(value) => value.replace(/,/g, '')}
+              suffix={configs?.numberFormat.showUnit ? configs.numberFormat.unitValue : ''}
+            />
+          )}
+
+          {errorText && <div style={{ color: '#f53f3f', fontSize: '12px' }}>{errorText}</div>}
         </Form.Item>
       )}
-      {/* TODO 公式计算 */}
-      {defaultValueConfig?.type === DEFAULT_VALUE_TYPES.FORMULA && <Button>设置公式</Button>}
+      {/* 公式计算 */}
+      {defaultValueConfig?.type === DEFAULT_VALUE_TYPES.FORMULA && (
+        <Button onClick={openFormulaEditor} long style={{ marginBottom: '20px' }}>
+          {defaultValueConfig?.formulaValue ? (
+            <>
+              <span>已设置公式</span>
+              <IconLaunch />
+            </>
+          ) : (
+            <>ƒx 编辑公式</>
+          )}
+        </Button>
+      )}
+      <FormulaEditor
+        initialFormula={defaultValueConfig?.formulaValue}
+        visible={formulaVisible}
+        onCancel={() => setFormulaVisible(false)}
+        onConfirm={handleFormulaConfirm}
+      />
     </>
   );
 };

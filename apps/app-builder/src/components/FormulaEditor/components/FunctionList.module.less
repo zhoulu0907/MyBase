@@ -1,60 +1,48 @@
 .functionList {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-
   .searchInput {
-    :global(.arco-input) {
+    :global(.pc-input) {
       border-radius: 6px;
     }
   }
   
   .listSection {
-    flex: 1;
-
+    height: 290px;
+    margin-bottom: 16px;
+    overflow-y: auto;
     .loadingFunction {
       display: flex;
       justify-content: center;
       align-items: center;
       height: 290px;
     }
-    .categoryContent {
-      height: 290px;
-      overflow: auto;
-
-      .categoryTitle {
-      font-size: 14px;
-      font-weight: bold;
-      color: #1d2129;
+    .collapseItem {
+      :global(.pc-collapse-item-content-box) {
+        padding: 0;
+      }
+    }
+    .functionInfo {
+      width: 100%;
+      .functionName {
+        font-size: 14px;
+        color: #1d2129;
+        font-weight: 500;
+        margin-bottom: 4px;
+        line-height: 24px;
       }
 
+      .functionDesc {
+        font-size: 12px;
+        color: #86909c;
+        line-height: 16px;
+      }
     }
 
     .functionItem {
-      .functionInfo {
-        width: 100%;
-        .functionName {
-          font-size: 14px;
-          color: #1d2129;
-          font-weight: 500;
-          margin-bottom: 4px;
-          line-height: 24px;
-        }
-
-        .functionDesc {
-          font-size: 12px;
-          color: #86909c;
-          line-height: 16px;
-        }
-      }
-
       &.selected {
         background-color: #e8fff2;
-        
         .functionInfo .functionName {
           color: rgb(var(--primary-6));
         }
-        // border: 1px solid #1890ff;
       }
     }
   }

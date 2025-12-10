@@ -26,15 +26,15 @@ export default function FieldModal({
   const [checkedItem, setCheckedItem] = useState([]);
 
   const invertKey = invert.map((item: any) => {
-    return item.fieldId;
+    return item.fieldName;
   });
   const useCkOptions = ckOptions
     .filter((item: any) => item.isSystemField === 0)
     .map((item: any) => {
       return {
         label: item.displayName,
-        value: item.fieldId,
-        disabled: invertKey.includes(item.fieldId)
+        value: item.fieldName,
+        disabled: invertKey.includes(item.fieldName)
       };
     });
 
@@ -58,8 +58,8 @@ export default function FieldModal({
       let resData: Array<any> = [];
       checkedItem.forEach((item: any) => {
         resData.push({
-          fieldId: item.value,
-          fieldName: item.label,
+          fieldName: item.value,
+          displayName: item.label,
           fieldPermType: isEdit ? 'write' : 'hidden'
         });
       });

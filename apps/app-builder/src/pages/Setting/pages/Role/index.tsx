@@ -1,9 +1,8 @@
 import InfoPanel from '@/components/InfoPanel';
 import { PermissionButton as Button } from '@/components/PermissionControl';
 import PlaceholderPanel from '@/components/PlaceholderPanel';
-import { TENANT_ROLE_PERMISSION as ACTIONS } from '@/constants/permission';
-import { hasPermission } from '@/utils/permission';
 import { Divider, Empty, Layout, Message, Modal, Space, Tabs } from '@arco-design/web-react';
+import { TENANT_ROLE_PERMISSION as ACTIONS, hasPermission } from '@onebase/common';
 import { RoleType } from '@onebase/platform-center';
 import { createRole, deleteRole, updateRole } from '@onebase/platform-center/src/services/role';
 import type { RoleVO } from '@onebase/platform-center/src/types/role';
@@ -20,7 +19,7 @@ const Content = Layout.Content;
 const TabPane = Tabs.TabPane;
 
 export default function RolePage() {
-  const [activeRoleId, setActiveRoleId] = useState<number | undefined>(undefined);
+  const [activeRoleId, setActiveRoleId] = useState<string | undefined>(undefined);
   const [showEmpty, setShowEmpty] = useState(false);
   const [activeRole, setActiveRole] = useState<Partial<RoleVO> | undefined>(undefined);
   const [editRole, setEditRole] = useState<Partial<RoleVO> | null>(null);
@@ -36,14 +35,14 @@ export default function RolePage() {
     }
   }, [activeRoleId]);
 
-  const handleRoleSelect = (id: number | undefined, role: Partial<RoleVO> | undefined) => {
+  const handleRoleSelect = (id: string | undefined, role: Partial<RoleVO> | undefined) => {
     setActiveRoleId(id);
     setActiveRole(role);
     setShowEmpty(false);
   };
 
   // 删除角色
-  const handleDeleteRole = async (id: number) => {
+  const handleDeleteRole = async (id: string) => {
     try {
       await deleteRole(id);
       Message.success('删除成功');
@@ -132,7 +131,12 @@ export default function RolePage() {
         <Button type="secondary" permission={ACTIONS.UPDATE} onClick={() => openRoleModal(activeRole || null)}>
           编辑
         </Button>
-        <Button type="secondary" permission={ACTIONS.DELETE} disabled={activeRole?.type === RoleType.SYSTEM} onClick={() => handleDelete(activeRole || null)}>
+        <Button
+          type="secondary"
+          permission={ACTIONS.DELETE}
+          disabled={activeRole?.type === RoleType.SYSTEM}
+          onClick={() => handleDelete(activeRole || null)}
+        >
           删除
         </Button>
       </Space>
@@ -178,7 +182,7 @@ export default function RolePage() {
 
                   <TabPane key="permission" title="关联权限">
                     <PlaceholderPanel hasPermission={hasPermission(ACTIONS.PERMISSION)}>
-                      <PermissionList selectedRoleId={activeRoleId} />
+                      <PermissionList selectedRoleId={activeRoleId} type={activeRole?.type}/>
                     </PlaceholderPanel>
                   </TabPane>
                 </Tabs>

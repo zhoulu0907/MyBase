@@ -42,7 +42,7 @@ import XWebView from './ShowComponents/WebView/schema';
 import XDivider from './ShowComponents/Divider/schema';
 import XPlaceholder from './ShowComponents/Placeholder/schema';
 
-const baseSchema = {
+export const baseSchema = {
   XInputText,
   XInputTextArea,
   XInputEmail,
@@ -88,5 +88,3 @@ const baseSchema = {
   XDivider,
   XPlaceholder
 };
-
-export default baseSchema;

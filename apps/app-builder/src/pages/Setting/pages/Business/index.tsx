@@ -18,7 +18,7 @@ import {
   deleteCorpApi,
   disabledCorpApi,
   getCorpListApi,
-  getIndustryType,
+  getDictDataListByType,
   type corpListParams
 } from '@onebase/platform-center';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -27,6 +27,8 @@ import { TopHeader } from './components/topHeader';
 import styles from './index.module.less';
 import { type corpApplicationListProps, type cropItem, type industryTypeOption } from './types/appItem';
 import { convertName } from './utils';
+import type { ColumnProps } from '@arco-design/web-react/es/Table';
+import { displayCorpLogo } from '@/utils';
 const AvatarGroup = Avatar.Group;
 
 const BusinessPage: React.FC = () => {
@@ -41,7 +43,7 @@ const BusinessPage: React.FC = () => {
           {data ? (
             <Image src={data} width={72} height={36} />
           ) : (
-            <div className={styles.corpLogo}>{record?.corpName || ''}</div>
+            <div className={styles.corpLogo}>{displayCorpLogo(record?.corpName)}</div>
           )}
         </>
       )
@@ -131,11 +133,20 @@ const BusinessPage: React.FC = () => {
       <>
         {applicationList?.length > 0 ? (
           <div style={{ display: 'flex', alignItems: 'flex-end' }}>
-            <AvatarGroup size={24}>
-              {applicationList?.map((item) => {
-                return <Avatar style={{ backgroundColor: item.iconColor }}>{item.iconName}</Avatar>;
+            <AvatarGroup
+              size={24}
+              maxCount={5}
+              maxPopoverTriggerProps={{
+                disabled: true
+              }}
+            >
+              {applicationList?.map((item, index) => {
+                return (
+                  <Avatar key={index} style={{ backgroundColor: item.iconColor }}>
+                    {item.iconName}
+                  </Avatar>
+                );
               })}
-              <Avatar>{applicationList.length}</Avatar>
             </AvatarGroup>
           </div>
         ) : (
@@ -169,7 +180,7 @@ const BusinessPage: React.FC = () => {
 
   const fetchIndustryType = async () => {
     try {
-      const res = await getIndustryType('industry_type');
+      const res = await getDictDataListByType('industry_type');
       setIndustryOptions(res);
     } catch (error) {
       Message.error('获取行业类型列表失败');
@@ -329,7 +340,7 @@ const BusinessPage: React.FC = () => {
         />
         <Table
           loading={loading}
-          columns={businessManageColumns}
+          columns={businessManageColumns as ColumnProps<cropItem>[]}
           data={displayData}
           pagination={{
             ...pagination,

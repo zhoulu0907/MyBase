@@ -14,7 +14,7 @@ interface DatasourceRecord {
   datasourceType: string;
   description: string;
   runMode: number;
-  appId: string;
+  applicationId: string;
 }
 
 const DataSourceTable = ({ handlePageType }: { handlePageType: (tab: string) => void }) => {
@@ -41,7 +41,7 @@ const DataSourceTable = ({ handlePageType }: { handlePageType: (tab: string) => 
       // datasourceType: '',
       // code: '',
       // runMode: 0,
-      appId: curAppId
+      applicationId: curAppId
     };
     const res = await getDatasourcePage(params);
 

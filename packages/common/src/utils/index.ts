@@ -6,5 +6,7 @@ export * from './http';
 export * from './httpClient';
 export * from './list';
 export * from './router';
+export * from './signature';
 export * from './token';
 export * from './tree';
+export * from './userPermission';

@@ -29,7 +29,7 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; d
     dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.USER_SELECT}_${props.id}`;
   const [advanceVisible, setAdvanceVisible] = useState(false); //高级选项popup
   const [currentSelectUser, setCurrentSelectUser] = useState<string>();
-  const [currentSelectUserID, setCurrentSelectUserID] = useState<number>();
+  const [currentSelectUserID, setCurrentSelectUserID] = useState<string>();
 
   const fieldValue = Form.useWatch(fieldName, form);
 
@@ -65,6 +65,8 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; d
     const { list, total } = await getSimpleUserPage(param);
     setPageNo(1);
     setTotal(total);
+
+    console.log('list: ', list);
     setUserData(list || []);
     setFetching(false);
   };
@@ -89,13 +91,20 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; d
     }
   };
 
-  const handleSelectChange = (value: number) => {
-    const user = userData.find((item) => item.id === value);
+  const handleSelectChange = (id: string) => {
+    console.log('value: ', id);
+    console.log('userData: ', userData);
+
+    const user = userData.find((item) => item.id === id);
+
     setCurrentSelectUser(user?.nickname);
-    setCurrentSelectUserID(value);
+    setCurrentSelectUserID(id);
+
+    console.log('fieldName: ', fieldName);
+
     form.setFieldValue(fieldName, {
-      userID: value,
-      userName: user?.nickname
+      id: id,
+      name: user?.nickname
     });
   };
 
@@ -108,19 +117,20 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; d
   };
 
   const handleOKModal = (user: any) => {
-    // form.setFieldValue(fieldName, user.value);
     setCurrentSelectUser(user.name);
     setCurrentSelectUserID(user.value);
+
     form.setFieldValue(fieldName, {
-      userID: user.value,
-      userName: user.name
+      id: user.value,
+      name: user.name
     });
+
     setAdvanceVisible(false);
   };
 
   const renderCell = () => {
     if (typeof fieldValue === 'object' && fieldValue) {
-      return fieldValue?.userName ?? '--';
+      return fieldValue?.name ?? '--';
     }
     if (currentSelectUser == null || currentSelectUser == undefined || currentSelectUser == '') {
       return '--';
@@ -139,10 +149,7 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; d
         field={fieldName}
         layout={layout}
         tooltip={tooltip}
-        labelCol={{
-          style: { width: labelColSpan, flex: 'unset' }
-        }}
-        wrapperCol={{ style: { flex: 1 } }}
+        labelCol={layout === 'horizontal' ? { span: 10 } : {}}
         rules={[{ required: verify?.required, message: `${label.text}是必填项` }]}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
@@ -170,7 +177,7 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; d
               label: (
                 <div className="optionDiv">
                   <Avatar size={34} className="optionAvatar">
-                    {option.nickname[0]}
+                    {option.nickname?.[0]}
                   </Avatar>
                   <div>
                     <div className="optionName">{option.nickname}</div>
@@ -228,6 +235,8 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; d
         runtime={runtime}
         visible={advanceVisible}
         currentSelectUserID={currentSelectUserID}
+        status={status}
+        detailMode={detailMode}
         onCancel={() => setAdvanceVisible(false)}
         onOk={(value: any) => handleOKModal(value)}
       />

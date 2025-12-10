@@ -1,20 +1,27 @@
+import { PermissionButton as Button } from '@/components/PermissionControl';
+import PlaceholderPanel from '@/components/PlaceholderPanel';
 import StatusTag, { getStatusLabel } from '@/components/StatusTag';
 import { Dropdown, Input, Menu, Message, Modal, Pagination, Select, Space, Table, Tag } from '@arco-design/web-react';
 import { IconDownload, IconMoreVertical, IconPlus, IconUpload } from '@arco-design/web-react/icon';
+import { type AuthRoleUsersPageRespVO } from '@onebase/app';
+import { CORP_USER_PERMISSION as ACTIONS, AddMembers, hasAllPermissions, hasPermission } from '@onebase/common';
 import type { PageParam, UpdateAdminOrDirectorReq, UserVO } from '@onebase/platform-center';
-import { deleteUserInCorp, getUserPageInCorp, resetUserPasswordInCorp, StatusEnum, updateUserStatusInCorp, UserType, PlatformTenantStatus, getSimpleUserInCorp, updateCorpAdminOrDirector } from '@onebase/platform-center';
+import {
+  deleteUser,
+  getSimpleUser,
+  getUserPage,
+  PlatformTenantStatus,
+  resetUserPassword,
+  StatusEnum,
+  updateCorpAdminOrDirector,
+  updateUserStatus,
+  UserType
+} from '@onebase/platform-center';
 import { debounce } from 'lodash-es';
 import { useCallback, useEffect, useState } from 'react';
 import s from '../index.module.less';
 import PasswordModal from './PasswordModal';
 import UserFormModal from './UserFormModal';
-import PlaceholderPanel from '@/components/PlaceholderPanel';
-import { PermissionButton as Button } from '@/components/PermissionControl';
-import { hasPermission, hasAllPermissions } from '@/utils/permission';
-import { CORP_USER_PERMISSION as ACTIONS } from '@/constants/permission';
-import { AddMembers } from '@onebase/common';
-import { type AuthRoleUsersPageRespVO } from '@onebase/app';
-
 
 interface DataItem {
   id: string;
@@ -24,7 +31,7 @@ interface DataItem {
 }
 
 interface UserTableProps {
-  selectedDeptId?: number;
+  selectedDeptId?: string;
   deptTree: DataItem[]; // 部门树数据
   deptLoading: boolean; // 部门数据加载状态
   onRefreshDept: () => void;
@@ -40,7 +47,7 @@ interface SelectOptions {
 const statusOptions: SelectOptions[] = [
   {
     label: '全部状态',
-    value: '',
+    value: ''
   },
   {
     label: '已启用',
@@ -49,17 +56,17 @@ const statusOptions: SelectOptions[] = [
   {
     label: '已禁用',
     value: PlatformTenantStatus.disabled
-  },
+  }
 ];
 
 export enum UserRole {
   ADMIN = 'admin',
-  DIRECTOR = 'director',
+  DIRECTOR = 'director'
 }
 
 export const RoleLabelMap: Record<UserRole, string> = {
   [UserRole.ADMIN]: '管理员',
-  [UserRole.DIRECTOR]: '主管',
+  [UserRole.DIRECTOR]: '主管'
 };
 
 export default function UserTable({
@@ -98,7 +105,7 @@ export default function UserTable({
       };
       if (selectedDeptId) params.deptId = selectedDeptId;
       if (searchValue) params.nickname = searchValue;
-      const res = await getUserPageInCorp(params);
+      const res = await getUserPage(params);
       setData(res.list || []);
       setTotal(res.total || 0);
     },
@@ -140,7 +147,6 @@ export default function UserTable({
     //   await exportUser('用户数据', params);
     //   Message.success('用户导出成功');
     // } catch (error) {
-
     // }
   };
 
@@ -170,7 +176,7 @@ export default function UserTable({
 
     try {
       setResetPasswordModalVisible(false);
-      await resetUserPasswordInCorp(resetPasswordUser.id, password);
+      await resetUserPassword(resetPasswordUser.id, password);
 
       Message.success('密码已重置');
     } catch (error) {
@@ -189,7 +195,7 @@ export default function UserTable({
       content: newStatus === StatusEnum.DISABLE ? '禁用状态下，用户无法登录系统，再次启用时用户可恢复正常使用' : '',
       okButtonProps: { status: 'danger' },
       onOk: async () => {
-        await updateUserStatusInCorp(record.id, newStatus);
+        await updateUserStatus(record.id, newStatus);
         Message.success(`${newLabel}成功`);
         getUserList();
       }
@@ -203,7 +209,7 @@ export default function UserTable({
       content: '删除用户后，用户将无法登录，用户数据将被永久删除，请谨慎操作。',
       okButtonProps: { status: 'danger' },
       onOk: async () => {
-        await deleteUserInCorp(record.id);
+        await deleteUser(record.id);
         Message.success('删除成功');
         onRefreshDept();
         getUserList();
@@ -252,7 +258,7 @@ export default function UserTable({
       {
         title: '账号',
         dataIndex: 'username',
-        width: 180,
+        width: 140,
         placeholder: '-',
         ellipsis: true
       },
@@ -272,7 +278,7 @@ export default function UserTable({
       {
         title: '操作',
         dataIndex: 'op',
-        width: 180,
+        width: 200,
         render: (_: any, record: any) => (
           <Space>
             <Button permission={ACTIONS.UPDATE} type="text" onClick={() => handleEdit(record)}>
@@ -296,7 +302,7 @@ export default function UserTable({
                 position="br"
                 trigger="click"
               >
-                <Button type='text' icon={<IconMoreVertical />}></Button>
+                <Button type="text" icon={<IconMoreVertical />}></Button>
               </Dropdown>
             ) : (
               <>
@@ -320,12 +326,12 @@ export default function UserTable({
   };
 
   /**
- * 在树形数据中根据 ID 递归查找名称
- *
- * @param {Array<Object>} dataArray - 要搜索的树形数据数组
- * @param {string} targetId - 要查找的目标 ID
- * @returns {string | null} - 找到的名称，如果未找到则返回 null
- */
+   * 在树形数据中根据 ID 递归查找名称
+   *
+   * @param {Array<Object>} dataArray - 要搜索的树形数据数组
+   * @param {string} targetId - 要查找的目标 ID
+   * @returns {string | null} - 找到的名称，如果未找到则返回 null
+   */
   const findNameById = (dataArray: DataItem[], targetId: string): string | null => {
     if (!Array.isArray(dataArray) || dataArray.length === 0) {
       return null;
@@ -344,7 +350,7 @@ export default function UserTable({
       }
     }
     return null;
-  }
+  };
 
   // 设置主管/管理员
   const handleSetAdminOrDirector = async (updateType: UserRole) => {
@@ -358,7 +364,7 @@ export default function UserTable({
     setMemberLoading(true);
     try {
       if (!selectedDeptId) return;
-      const res = await getSimpleUserInCorp(keywords);
+      const res = await getSimpleUser(keywords);
       setUsertData({ userList: res });
     } catch (error) {
       console.error('获取部门用户信息失败 error:', error);
@@ -371,7 +377,6 @@ export default function UserTable({
   const handleAddUser = async (selectedMembers: any[]) => {
     console.log('添加成员 selectedMembers:', selectedMembers);
     if (!selectedDeptId || !managerTypeModalVisible) return;
-    if (selectedMembers.length !== 1) return Message.warning(`只能设置一个${RoleLabelMap[managerTypeModalVisible]}`);
     const params: UpdateAdminOrDirectorReq = {
       deptId: `${selectedDeptId}`,
       updateType: managerTypeModalVisible,

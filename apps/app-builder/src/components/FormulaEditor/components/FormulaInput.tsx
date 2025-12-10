@@ -2,20 +2,23 @@ import { Alert } from '@arco-design/web-react';
 import { useCallback, useRef, useEffect, useState } from 'react';
 import CodeMirror from '@uiw/react-codemirror';
 import { EditorView } from '@codemirror/view';
-import type { FunctionItem } from '../utils/types';
+import type { functionGroup } from '../utils/types';
 import { placeholdersPlugin } from '../utils/placeholders';
 import styles from './FormulaInput.module.less';
 import { defaultExtenstion } from '../utils/defaultLine';
 import type { VariablesList } from '@onebase/app';
+import { lintGutter, linter, type Diagnostic } from '@codemirror/lint';
+import { validateFormula } from '../utils/formula';
 
 interface FormulaInputProps {
   value: string; // 当前公式的值
   fieldName?: string;
+  isDebugMode: boolean;
   onChange: (value: string) => void; // 公式变化时的回调函数
   onCopy: () => void; // 复制成功后的回调函数
   onDebug: () => void; // 调试按钮点击回调函数
   filteredVariables: VariablesList[]; // 过滤后的变量列表
-  filteredFunctions: FunctionItem[]; // 过滤后的函数列表
+  filteredFunctions: functionGroup[]; // 过滤后的函数列表
   onEditorReady?: (editor: { insertAtPosition: (text: string, type?: string, position?: number) => void }) => void; // 编辑器就绪回调
 }
 
@@ -26,20 +29,26 @@ interface FormulaError {
   severity: 'error' | 'warning'; // 错误严重程度
 }
 
-let isBlurred = false;
 export function FormulaInput({
   value,
   fieldName,
   onChange,
   onCopy,
   onDebug,
+  isDebugMode,
   filteredVariables,
   filteredFunctions,
   onEditorReady
 }: FormulaInputProps) {
   const editorRef = useRef<any>(null);
   const updateRef = useRef<any>(null);
-  const [errors, setErrors] = useState<FormulaError[]>([]);
+  const [errors, setErrors] = useState<Diagnostic[]>([]);
+
+  const customLinter = linter((view: EditorView) => {
+    const code = view.state.doc.toString();
+    const diagnostics = validateFormula(code);
+    return diagnostics;
+  });
 
   //插入内容到指定位置，使用[[${id}.${label}]]的格式
   /**
@@ -92,7 +101,7 @@ export function FormulaInput({
     let cursorPosition = insertFrom + insertText.length;
 
     // 如果是函数类型，确保光标位于括号中间
-    if (type === 'fn' && !isBlurred) {
+    if (type === 'fn') {
       // 在最终的插入文本中查找左括号位置
       const leftBracketPos = insertText.indexOf('(');
       if (leftBracketPos !== -1) {
@@ -100,10 +109,6 @@ export function FormulaInput({
         cursorPosition = insertFrom + leftBracketPos + 1;
       }
     }
-    if (isBlurred) {
-      // cursorPosition = state.doc.length + insertText.length;
-    }
-
     view.dispatch({
       changes: {
         from: insertFrom,
@@ -114,7 +119,6 @@ export function FormulaInput({
         anchor: cursorPosition
       }
     });
-    isBlurred = false;
     // 聚焦并插入文本
     view.focus();
   }, []);
@@ -185,6 +189,10 @@ export function FormulaInput({
    */
   useEffect(() => {
     checkFormulaSyntax(value);
+    const diagnostics = validateFormula(value);
+    if (diagnostics.length > 0) {
+      setErrors(diagnostics);
+    }
   }, [value, checkFormulaSyntax]);
 
   /**
@@ -276,16 +284,12 @@ export function FormulaInput({
     }
   }, [handlePaste]);
 
-  const blurHandlerExtension = EditorView.domEventHandlers({
-    blur: () => {
-      isBlurred = true;
-    }
-  });
-
   // 自定义扩展
   const extensions = [
-    //处理失焦的时候改变光标位置以及插入的位置
-    blurHandlerExtension,
+    lintGutter(), //左侧错误标记
+    customLinter,
+    //调试模式只读
+    isDebugMode ? EditorView.editable.of(false) : EditorView.editable.of(true),
     //设置首行-显示单行文本和两个按钮
     defaultExtenstion(handleCopy, onDebug, value, fieldName),
     EditorView.updateListener.of((update) => {

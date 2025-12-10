@@ -1,32 +1,17 @@
-import { useI18n } from '@/hooks/useI18n';
 import { useAppStore } from '@/store/store_app';
 import {
-  Avatar,
-  Button,
   Divider,
-  Dropdown,
   Form,
   Input,
-  Menu,
   Message,
   Modal,
   Pagination,
   Select,
   Space,
   Spin,
-  Tag,
-  Tooltip,
   Typography
 } from '@arco-design/web-react';
-import {
-  IconDelete,
-  IconEdit,
-  IconLeft,
-  IconMoreVertical,
-  IconPlus,
-  IconRight,
-  IconSearch
-} from '@arco-design/web-react/icon';
+import { IconLeft, IconPlus, IconRight, IconSearch } from '@arco-design/web-react/icon';
 import {
   createApplication,
   deleteApplication,
@@ -37,38 +22,24 @@ import {
   type DeleteApplicationReq,
   type PageParam
 } from '@onebase/app';
-import { getCommonPaginationList, getRuntimeURL } from '@onebase/common';
+import { getCommonPaginationList, getRuntimeURL, TENANT_APP_PERMISSION as ACTIONS } from '@onebase/common';
 import { debounce } from 'lodash-es';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import emptyApplicationSVG from '@/assets/images/applicationLogo.svg';
-import launchSVG from '@/assets/images/launch.svg';
 import CreateAppModal from '@/components/CreateApp';
 import { type Options } from '@/components/CreateApp/const';
 import CreateDataSource, { type DataSourceHandle } from '@/components/CreateDataSource';
-import DynamicIcon from '@/components/DynamicIcon';
-import { appIconMap } from '@onebase/ui-kit';
-import dayjs from 'dayjs';
-import {
-  ApplicationStatus,
-  ApplicationStatusLabel,
-  appOptions,
-  calculateMaxItems,
-  createTimeOptions,
-  defaultTheme,
-  statusOptions,
-  TagColor,
-  ThemeColorMap
-} from './const';
+import AppCard from './components/AppCard';
+import { appOptions, calculateMaxItems, createTimeOptions, statusOptions } from './const';
 import styles from './index.module.less';
+import { PermissionButton as Button } from '@/components/PermissionControl';
 
 const Option = Select.Option;
-const AvatarGroup = Avatar.Group;
 
 const AppManagement: React.FC = () => {
   const [form] = Form.useForm();
-  const { t } = useI18n();
   const navigate = useNavigate();
 
   const { tenantId } = useParams();
@@ -105,7 +76,6 @@ const AppManagement: React.FC = () => {
 
   // option dropdown
   const [optionVisibleId, setOptionVisibleId] = useState('');
-  const timerRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (!appContainerRef.current) return;
@@ -184,7 +154,7 @@ const AppManagement: React.FC = () => {
     try {
       const values = await form.validate(); // 等待校验完成并返回数据
       setCreateLoading(true);
-      const { appCode, appName, iconColor, iconName, description, tagIds, themeColor } = values;
+      const { appCode, appName, iconColor, iconName, description, tagIds, themeColor, publishModel } = values;
 
       const params: CreateApplicationReq = {
         appCode,
@@ -195,7 +165,8 @@ const AppManagement: React.FC = () => {
         iconName,
         tagIds: tagIds?.map((t: Options) => t.value),
         themeColor,
-        datasourceSaveReq: datasource
+        datasourceSaveReq: datasource,
+        publishModel: publishModel ? publishModel : 'inner'
       };
       const res = await createApplication(params);
       setCreateVisible(false);
@@ -244,11 +215,11 @@ const AppManagement: React.FC = () => {
   };
 
   const nagivateToRuntimeApp = (appId: string) => {
-    const appUrl = `${getRuntimeURL()}/#/login?appId=${appId}&tenantId=${tenantId}`;
+    const appUrl = `${getRuntimeURL()}/#/onebase/runtime/?appId=${appId}&tenantId=${tenantId}`;
 
     const newWindow = window.open('', '_blank');
     if (newWindow) {
-      newWindow.location.href = appUrl;
+      newWindow.location.href = `${getRuntimeURL()}/#/login?redirectURL=${appUrl}`;
     }
   };
 
@@ -261,58 +232,18 @@ const AppManagement: React.FC = () => {
     setOptionVisibleId(v ? id : '');
   };
 
-  const clearTimer = () => {
-    if (timerRef.current) {
-      window.clearTimeout(timerRef.current);
-      timerRef.current = null;
-    }
+  const handleEdit = (appId: string) => {
+    nagivateToDataFactory(appId);
   };
 
-  const startCloseTimer = (delay = 120) => {
-    clearTimer();
-    timerRef.current = window.setTimeout(() => {
-      setOptionVisibleId('');
-      timerRef.current = null;
-    }, delay);
+  const handleLaunch = (appId: string) => {
+    nagivateToRuntimeApp(appId);
   };
 
-  const getDevelopStatus = (developStatus?: string) => {
-    if (developStatus === ApplicationStatus.ITERATE) {
-      return ApplicationStatusLabel.ITERATE;
-    }
-    return '';
-  };
-
-  const menu = (item: any) => {
-    return (
-      <Menu style={{ marginRight: '10px' }} onPointerEnter={clearTimer} onPointerLeave={() => startCloseTimer(80)}>
-        <Menu.Item
-          key="1"
-          onClick={(e) => {
-            e.stopPropagation();
-            nagivateToRuntimeApp(item.id);
-          }}
-        >
-          <div className={styles.menuItem}>
-            <img src={launchSVG} alt="访问应用" style={{ marginRight: 4 }} />
-            访问应用
-          </div>
-        </Menu.Item>
-        <Menu.Item
-          key="2"
-          onClick={(e) => {
-            e.stopPropagation();
-            setAppName('');
-            setDeleteApp(item);
-            setDeleteVisible(true);
-          }}
-          style={{ color: 'red' }}
-        >
-          <IconDelete style={{ marginRight: 4 }} />
-          删除
-        </Menu.Item>
-      </Menu>
-    );
+  const handleDelete = (item: Application) => {
+    setAppName('');
+    setDeleteApp(item);
+    setDeleteVisible(true);
   };
 
   return (
@@ -328,6 +259,7 @@ const AppManagement: React.FC = () => {
             <Button
               type="primary"
               size="large"
+              permission={ACTIONS.CREATE}
               icon={<IconPlus fontSize={16} />}
               onClick={() => {
                 setCreateVisible(true);
@@ -397,138 +329,22 @@ const AppManagement: React.FC = () => {
                 <div className={styles.applicationEmpty}>
                   <img src={emptyApplicationSVG} alt="暂无应用" />
                   <Typography.Text type="secondary">还没有应用</Typography.Text>
-                  <Button className={styles.goCreateApplication} onClick={() => setCreateVisible(true)}>
+                  <Button className={styles.goCreateApplication} permission={ACTIONS.CREATE} onClick={() => setCreateVisible(true)}>
                     去创建
                     <IconRight style={{ marginLeft: '4px' }} />
                   </Button>
                 </div>
               )}
               {dataList?.map((item, _index) => (
-                <div className={styles.appCard} key={item.id}>
-                  <div className={styles.appCardTop}>
-                    <div className={styles.appCardHeader}>
-                      <div className={styles.appName}>
-                        <div className={styles.appIcon} style={{ backgroundColor: item.iconColor }}>
-                          <DynamicIcon
-                            IconComponent={appIconMap[item.iconName as keyof typeof appIconMap]}
-                            theme="outline"
-                            size="32"
-                            fill="#F2F3F5"
-                          />
-                        </div>
-                        <div className={styles.appCardInfo}>
-                          <div className={styles.infoHeader}>
-                            <Tooltip content={item.appName}>
-                              <div className={styles.appTitle}>{item.appName}</div>
-                            </Tooltip>
-
-                            <div className={styles.tagWrapper}>
-                              {item?.developStatus && (
-                                <Tag
-                                  color={TagColor[item.appStatus]}
-                                  style={{
-                                    fontSize: 12,
-                                    fontWeight: 400
-                                  }}
-                                >
-                                  {getDevelopStatus(item.developStatus)}
-                                </Tag>
-                              )}
-
-                              <Tag
-                                color={TagColor[item.appStatus]}
-                                style={{
-                                  fontSize: 12,
-                                  fontWeight: 400
-                                }}
-                              >
-                                {item.appStatusText}
-                              </Tag>
-                            </div>
-                          </div>
-
-                          <div className={styles.updateTime}>
-                            更新时间：{dayjs(item?.updateTime).format('YYYY-MM-DD HH:mm:ss')}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className={styles.appCardBody}>
-                      <Tooltip content={item.description}>
-                        <div className={styles.appDesc}>{item.description ?? '该应用暂无介绍。'}</div>
-                      </Tooltip>
-                      <div className={styles.appTags}>
-                        {item.tags?.map((tag: { id: string; tagName: string }) => (
-                          <Tag
-                            key={tag.id}
-                            style={{
-                              color: item.themeColor || defaultTheme,
-                              height: '22px',
-                              backgroundColor: ThemeColorMap[item.themeColor ?? defaultTheme]
-                            }}
-                          >
-                            {tag.tagName}
-                          </Tag>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                  <Divider style={{ margin: '12px 0 0' }} />
-                  <div className={styles.appCardFooter}>
-                    <div className={styles.footerLeft}>
-                      {item?.userPhotoList && item?.userPhotoList.length > 0 && (
-                        <>
-                          <AvatarGroup size={24} maxCount={4} zIndexAscend>
-                            {item?.userPhotoList?.map((item, index) => {
-                              return item.avatar ? (
-                                <Avatar key={index}>
-                                  <img src={item.avatar} alt="avatar" />
-                                </Avatar>
-                              ) : (
-                                <Avatar key={index} style={{ backgroundColor: '#009e9e' }}>
-                                  {item?.nickName?.charAt(0)}
-                                </Avatar>
-                              );
-                            })}
-                            {(item?.userPhotoList?.length > 1 && (
-                              <>
-                                <Avatar>{item?.userPhotoList?.length}</Avatar>
-                                <Typography.Text type="secondary">
-                                  {item?.createUser}等{item?.userPhotoList?.length}人开发
-                                </Typography.Text>
-                              </>
-                            )) || <Typography.Text type="secondary">{item?.createUser}</Typography.Text>}
-                          </AvatarGroup>
-                        </>
-                      )}
-                    </div>
-
-                    <div className={styles.footerRight}>
-                      <Space>
-                        <IconEdit
-                          className={styles.operationIcon}
-                          fontSize={16}
-                          onClick={() => nagivateToDataFactory(item.id)}
-                        />
-                        {/* <IconEye className={styles.operationIcon} fontSize={16} /> */}
-                        <Dropdown
-                          droplist={menu(item)}
-                          trigger="click"
-                          position="bottom"
-                          popupVisible={optionVisibleId === item.id}
-                          onVisibleChange={(v) => handleOptionVisibleChange(v, item.id)}
-                        >
-                          <IconMoreVertical
-                            className={styles.operationIcon}
-                            fontSize={16}
-                            style={{ color: '#272e3b' }}
-                          />
-                        </Dropdown>
-                      </Space>
-                    </div>
-                  </div>
-                </div>
+                <AppCard
+                  key={item.id}
+                  item={item}
+                  optionVisibleId={optionVisibleId}
+                  onOptionVisibleChange={handleOptionVisibleChange}
+                  onEdit={handleEdit}
+                  onLaunch={handleLaunch}
+                  onDelete={handleDelete}
+                />
               ))}
             </div>
           </Spin>

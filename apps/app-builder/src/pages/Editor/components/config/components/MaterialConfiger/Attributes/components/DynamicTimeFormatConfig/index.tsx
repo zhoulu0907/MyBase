@@ -45,7 +45,17 @@ const DynamicTimeFormatConfig: React.FC<DynamicTimeFormatConfigProps> = ({
         getPopupContainer={getPopupContainer}
         value={dateFormat}
         style={{ marginBottom: '8px' }}
-        onChange={(value) => handlePropsChange(dateFormatKey, value)}
+        onChange={(value) => {
+          if (configs.defaultValueConfig?.customValue) {
+            handleConfigsChange({
+              ...configs,
+              [dateFormatKey]: value,
+              defaultValueConfig: { ...configs.defaultValueConfig, customValue: '' }
+            });
+          } else {
+            handlePropsChange(dateFormatKey, value);
+          }
+        }}
         options={item.range || options}
       ></Select>
       <Checkbox checked={use24Hours} onChange={(value) => handlePropsChange(use24HoursKey, value)}>

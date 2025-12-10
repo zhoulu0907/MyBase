@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState, useContext } from 'react';
 
 import { WorkflowNodePanelService, WorkflowNodePanelUtils } from '@flowgram.ai/free-node-panel-plugin';
 import type { LineRenderProps } from '@flowgram.ai/free-lines-plugin';
@@ -18,7 +18,7 @@ import {
   usePlayground,
   type WorkflowNodeJSON
 } from '@flowgram.ai/free-layout-editor';
-
+import { SidebarContext } from '../../context';
 import './index.less';
 import { useVisible } from './use-visible';
 import { IconPlusCircle } from './button';
@@ -26,6 +26,7 @@ import { IdList } from '../../editorType';
 
 export const LineAddButton = (props: LineRenderProps) => {
   const { line, selected, hovered, color } = props;
+  const { setLineData } = useContext(SidebarContext);
   const visible = useVisible({ line, selected, hovered });
   const nodePanelService = useService<WorkflowNodePanelService>(WorkflowNodePanelService);
   const document = useService(WorkflowDocument);
@@ -33,10 +34,11 @@ export const LineAddButton = (props: LineRenderProps) => {
   const linesManager = useService(WorkflowLinesManager);
   const historyService = useService(HistoryService);
   const playground = usePlayground();
-
   const { fromPort, toPort } = line;
+  const [selectLine, setSelectLine] = useState(false);
 
   const onClick = useCallback(async () => {
+    setSelectLine(true);
     // calculate the middle point of the line - 计算线条的中点位置
     const position = {
       x: (line.position.from.x + line.position.to.x) / 2,
@@ -114,6 +116,13 @@ export const LineAddButton = (props: LineRenderProps) => {
     //    const commandService = useState(CommandService);
     //    commandService.executeCommand('DELETE', [line]);
   };
+
+  useEffect(() => {
+    if (selected && !selectLine && line.info.from.includes('branch')) {
+      setLineData(line);
+    }
+    setSelectLine(false);
+  }, [selected]);
 
   if (line.id === IdList.START_0_START_1) {
     return <></>;

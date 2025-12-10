@@ -12,7 +12,6 @@ import {
   Typography,
   Upload
 } from '@arco-design/web-react';
-import { IconEdit } from '@arco-design/web-react/icon';
 import {
   createCorpAppApi,
   getCorpAuthorizedAppListApi,
@@ -31,6 +30,7 @@ import type { AppItem, cropItem, industryTypeOption, OutletContextType, updatedP
 import { AuthorizedApp } from '../createApp/authorizedApp';
 import EditableFormItem from '../formItem';
 import styles from './index.module.less';
+import { displayCorpLogo } from '@/utils';
 
 const EnterpriseInfoPage: React.FC = () => {
   const { activeTab } = useParams();
@@ -152,7 +152,7 @@ const EnterpriseInfoPage: React.FC = () => {
       if (res) {
         await fetchCorpAuthorizedList(pageInation.current, pageInation.pageSize);
         Message.success('更新授权时间成功');
-      } 
+      }
     } catch (error) {
       Message.error('更新授权时间失败');
     } finally {
@@ -264,7 +264,7 @@ const EnterpriseInfoPage: React.FC = () => {
           value={
             isImageFailed ? (
               <Button type="dashed" style={{ width: '160px', height: '80px', backgroundColor: '#F2F3F5' }}>
-                中国移动
+                {displayCorpLogo(formData?.corpName)}
               </Button>
             ) : (
               <Image alt="头像" src={avatarUrl} onError={handleImageError} width={160} height={80} />
@@ -310,7 +310,7 @@ const EnterpriseInfoPage: React.FC = () => {
       value: (
         <EditableFormItem
           value={formData?.adminName}
-          onChange={()=> null}
+          onChange={() => null}
           isEdit={isEdited}
           component={Input}
           componentProps={{ disabled: true }}
@@ -409,17 +409,13 @@ const EnterpriseInfoPage: React.FC = () => {
             {/* 编辑按钮 */}
             {isEdited ? (
               <Space>
-                <Button icon={<IconEdit />} onClick={handleCancel}>
-                  取消
-                </Button>
-                <Button type="primary" icon={<IconEdit />} onClick={handleSubmitInfo}>
+                <Button onClick={handleCancel}>取消</Button>
+                <Button type="primary" onClick={handleSubmitInfo}>
                   保存修改
                 </Button>
               </Space>
             ) : (
-              <Button icon={<IconEdit />} onClick={toggleEdit}>
-                编辑
-              </Button>
+              <Button onClick={toggleEdit}>编辑</Button>
             )}
           </Tabs.TabPane>
           <Tabs.TabPane key="authorized" title="授权应用">

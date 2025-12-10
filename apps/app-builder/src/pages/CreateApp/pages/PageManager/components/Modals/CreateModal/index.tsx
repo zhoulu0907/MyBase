@@ -37,7 +37,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
     if (menuIcon) {
       form.setFieldValue('menuIcon', menuIcon);
     } else {
-      form.setFieldValue('menuIcon', 'FormPageLine');
+      form.setFieldValue('menuIcon', 'FormPage');
     }
   }, [menuIcon, visibleCreateForm]);
 
@@ -158,7 +158,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
                 ) : (
                   <img
                     style={{ width: 'auto', height: '18px', fill: '#333' }}
-                    src={allWebMenuIcons.find((ele) => ele.code === 'FormPageLine')?.icon}
+                    src={allWebMenuIcons.find((ele) => ele.code === 'FormPage')?.icon}
                     alt=""
                   />
                 )}
@@ -169,7 +169,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
             <TreeSelect treeData={treeData} placeholder="请选择父级页面" allowClear />
           </Form.Item>
           {visibleCreateForm === 'page' && (
-            <Form.Item label="数据资产" field="entityId" rules={[{ required: true, message: '请选择数据资产' }]}>
+            <Form.Item label="数据资产" field="entityUuid" rules={[{ required: true, message: '请选择数据资产' }]}>
               <Select options={entityListOptions} placeholder="请选择数据资产" allowClear />
             </Form.Item>
           )}

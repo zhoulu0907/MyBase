@@ -1,9 +1,8 @@
 import PlaceholderPanel from '@/components/PlaceholderPanel';
-import { CORP_INFO_PERMISSION as ACTIONS } from '@/constants/permission';
-import { hasPermission } from '@/utils/permission';
 import { Avatar, Button, Grid, Image, Space, Spin, Tag, Typography } from '@arco-design/web-react';
+import { CORP_INFO_PERMISSION as ACTIONS, hasPermission } from '@onebase/common';
 import type { PostSimpleRespVO } from '@onebase/platform-center';
-import { getLoginedUserInCorp } from '@onebase/platform-center';
+import { getDictDataByType, getLoginedUser } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import styles from './index.module.less';
@@ -25,10 +24,10 @@ const ProfilePage: React.FC = () => {
   const fetchUserInfo = async () => {
     try {
       setLoading(true);
-      const res = await getLoginedUserInCorp();
+      const res = await getLoginedUser(true);
       setUserInfo(res);
       if (res?.id) {
-        await fetchIndustryDict(res.id);
+        await getDictDataByType(res.id);
       }
     } finally {
       setLoading(false);

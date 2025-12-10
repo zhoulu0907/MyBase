@@ -1,12 +1,29 @@
 //企业管理
-import { CorpDetailResponse, corpListParams, corpStatusParams, createCorpParams, updateCorpParams } from '../types';
-import { systemService } from './clients';
+import { isRuntimeEnv } from '@onebase/common';
+import {
+  checkCorpAdminUserParams,
+  checkCorpParams,
+  CorpDetailResponse,
+  corpListParams,
+  corpStatusParams,
+  createCorpParams,
+  updateCorpParams
+} from '../types';
+import { runtimeCorpService, systemService } from './clients';
 
 // 创建企业
 export const createCorpApi = (data: createCorpParams) => systemService.post('/corp/create', data);
 
+// 验证企业基本信息
+export const checkCorpApi = (data: checkCorpParams) => systemService.post('/corp/check-corp', data);
+
+// 验证企业管理员
+export const checkCorpAdminUserApi = (data: checkCorpAdminUserParams) =>
+  systemService.post('/corp/check-corp-admin-user', data);
+
 //更新企业
-export const updateCorpApi = (data: updateCorpParams) => systemService.post('/corp/update', data);
+export const updateCorpApi = (data: updateCorpParams) =>
+  (isRuntimeEnv() ? runtimeCorpService : systemService).post('/update', data);
 
 //禁用/启用企业
 export const disabledCorpApi = (data: corpStatusParams) =>
@@ -22,7 +39,4 @@ export const getCorpListApi = (data: corpListParams) => systemService.get('/corp
 export const getCorpSimpleDetailsListApi = () => systemService.get('/corp/simple-list');
 
 //获得详情
-export const getCorpDetailByIdApi = (id: number): CorpDetailResponse => systemService.get(`/corp/get?id=${id}`);
-
-//获取行业类型
-export const getIndustryType = (type: string) => systemService.get(`dict-data/simple-list-by-type?dictType=${type}`);
+export const getCorpDetailByIdApi = (id: string): CorpDetailResponse => systemService.get(`/corp/get?id=${id}`);

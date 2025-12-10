@@ -1,9 +1,8 @@
 import { Form, Message, Upload, Progress, Modal, Grid, Card, Watermark } from '@arco-design/web-react';
 import { type UploadItem, type UploadListProps } from '@arco-design/web-react/lib/Upload';
 import { IconPlus, IconDelete, IconImage, IconEye, IconDownload, IconClose } from '@arco-design/web-react/icon';
-import { uploadFile } from '@onebase/platform-center';
+import { uploadFile, getFileUrlById } from '@onebase/platform-center';
 import { nanoid } from 'nanoid';
-import { downloadFileByUrl } from 'src/utils/downloadFile';
 import { memo, useEffect, useState } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { STATUS_OPTIONS, STATUS_VALUES, UPLOAD_VALUES, UPLOAD_OPTIONS } from '../../../constants';
@@ -52,9 +51,15 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
   useEffect(() => {
     let flag = false;
     const newFieldValue = (fieldValue || []).map((ele: any) => {
-      if (ele.url !== ele.response) {
+      if (ele.id) {
         flag = true;
-        return { ...ele, url: ele.response };
+        return {
+          uid: ele.id,
+          name: ele.name,
+          response: { fileId: ele.id },
+          url: { fileId: ele.id },
+          size: ele.size
+        };
       }
       return { ...ele };
     });
@@ -64,7 +69,7 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
   }, [fieldValue]);
 
   // 自定义文件列表展示
-  const renderUploadList = (filesList: UploadItem[], fileProps: UploadListProps) => {
+  const renderUploadList = (filesList: any[], fileProps: UploadListProps) => {
     if (listType == UPLOAD_VALUES[UPLOAD_OPTIONS.TEXT]) {
       return (
         <div className="uplaodList-text">
@@ -74,7 +79,7 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
                 gap={[20, 20]}
                 content={imageHandle?.addWatermark && imageHandle.watermarkText ? imageHandle.watermarkText : ''}
               >
-                <img className="uplaodList-text-item-img" src={file.url} alt="" />
+                <img className="uplaodList-text-item-img" src={getFileUrlById(file.response?.fileId)} alt="" />
               </Watermark>
               <div className="uplaodList-text-item-name">{file.name}</div>
               {file.percent && file.percent !== 100 ? (
@@ -102,7 +107,7 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
                               imageHandle?.addWatermark && imageHandle.watermarkText ? imageHandle.watermarkText : ''
                             }
                           >
-                            <img src={file.url} width="100%" alt="" />
+                            <img src={getFileUrlById(file.response?.fileId)} width="100%" alt="" />
                           </Watermark>
                         )
                       });
@@ -111,7 +116,7 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
                   <IconDownload
                     onClick={() => {
                       if (file.url && file.name) {
-                        downloadFileByUrl(file.url, file.name);
+                        // todo
                       }
                     }}
                   />
@@ -140,7 +145,7 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
                     gap={[20, 20]}
                     content={imageHandle?.addWatermark && imageHandle.watermarkText ? imageHandle.watermarkText : ''}
                   >
-                    <img className="uplaodList-list-item-img" src={file.url} alt="" />
+                    <img className="uplaodList-list-item-img" src={getFileUrlById(file.response?.fileId)} alt="" />
                   </Watermark>
                   <div className="uplaodList-list-item-content">
                     <div className="uplaodList-list-item-name">{file.name}</div>
@@ -179,7 +184,7 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
                     gap={[20, 20]}
                     content={imageHandle?.addWatermark && imageHandle.watermarkText ? imageHandle.watermarkText : ''}
                   >
-                    <img src={file.url} alt="" />
+                    <img src={getFileUrlById(file.response?.fileId)} alt="" />
                   </Watermark>
                 </div>
               }
@@ -220,8 +225,8 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
         field={fieldId}
         layout={layout}
         tooltip={tooltip}
-        wrapperCol={{ style: { flex: 1 } }}
-        rules={[{ required: verify?.required, message:`${label.text}是必填项` }]}
+        labelCol={layout === 'horizontal' ? { span: 10 } : {}}
+        rules={[{ required: verify?.required, message: `${label.text}是必填项` }]}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
           margin: 0,
@@ -251,10 +256,12 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
           customRequest={async (option) => {
             const { onProgress, onError, onSuccess, file } = option;
             try {
-              const uploadImgUrl = await handleUpload(file, onProgress);
+              const fileId = await handleUpload(file, onProgress);
+              const uploadImgUrl = await getFileUrlById(fileId);
+              // 文件上传文件id
               if (uploadImgUrl !== '') {
                 setImgUrl(uploadImgUrl);
-                onSuccess(uploadImgUrl);
+                onSuccess({ fileId: fileId });
               } else {
                 onError({
                   status: 'error',
@@ -279,36 +286,38 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
           drag={uploadType == UPLOAD_VALUES[UPLOAD_OPTIONS.LIST]}
           renderUploadList={renderUploadList}
         >
-          <div className="uplaodTrigger">
-            {uploadType == UPLOAD_VALUES[UPLOAD_OPTIONS.TEXT] && (
-              <div className="uplaodTriggerText">
-                <div className="uplaodTriggerText-content">
-                  <IconImage />
-                  <span className="uplaodTriggerText-tips">图片上传</span>
-                </div>
-              </div>
-            )}
-            {uploadType == UPLOAD_VALUES[UPLOAD_OPTIONS.LIST] && (
-              <div className="uplaodTriggerList">
-                <div className="uplaodTriggerList-content">
-                  <IconPlus />
-                  <div className="uplaodTriggerList-tips">点击或拖拽文件到此处上传</div>
-                  <div className="uplaodTriggerList-describe">
-                    最多可上传{verify?.maxCount && verify?.maxCount > 0 ? verify?.maxCount : 1}
-                    张图片，单张图片大小不超过{verify?.maxSize || 10}MB
+          {detailMode ? null : (
+            <div className="uplaodTrigger">
+              {uploadType == UPLOAD_VALUES[UPLOAD_OPTIONS.TEXT] && (
+                <div className="uplaodTriggerText">
+                  <div className="uplaodTriggerText-content">
+                    <IconImage />
+                    <span className="uplaodTriggerText-tips">图片上传</span>
                   </div>
                 </div>
-              </div>
-            )}
-            {uploadType == UPLOAD_VALUES[UPLOAD_OPTIONS.CARD] && (
-              <div className="uplaodTriggerPicture">
-                <div className="uplaodTriggerPicture-content">
-                  <IconImage />
-                  <div className="uplaodTriggerPicture-tips">图片上传</div>
+              )}
+              {uploadType == UPLOAD_VALUES[UPLOAD_OPTIONS.LIST] && (
+                <div className="uplaodTriggerList">
+                  <div className="uplaodTriggerList-content">
+                    <IconPlus />
+                    <div className="uplaodTriggerList-tips">点击或拖拽文件到此处上传</div>
+                    <div className="uplaodTriggerList-describe">
+                      最多可上传{verify?.maxCount && verify?.maxCount > 0 ? verify?.maxCount : 1}
+                      张图片，单张图片大小不超过{verify?.maxSize || 10}MB
+                    </div>
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
+              )}
+              {uploadType == UPLOAD_VALUES[UPLOAD_OPTIONS.CARD] && (
+                <div className="uplaodTriggerPicture">
+                  <div className="uplaodTriggerPicture-content">
+                    <IconImage />
+                    <div className="uplaodTriggerPicture-tips">图片上传</div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </Upload>
       </Form.Item>
     </div>

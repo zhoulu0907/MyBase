@@ -8,6 +8,9 @@ export default defineConfig({
     port: 4399
   },
   base: './',
+  build: {
+    minify: 'esbuild'
+  },
   plugins: [
     react({
       babel: {
@@ -27,5 +30,15 @@ export default defineConfig({
       '@workflow/images': path.join(__dirname, './src/assets/images')
     }
   },
-  assetsInclude: ['**/*.svg']
+  assetsInclude: ['**/*.svg'],
+  css: {
+    preprocessorOptions: {
+      less: {
+        javascriptEnabled: true,
+        modifyVars: {
+          prefix: 'pc'
+        }
+      }
+    }
+  }
 });

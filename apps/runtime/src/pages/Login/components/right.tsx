@@ -1,13 +1,13 @@
 import { DynamicIcon } from '@/components/DynamicIcon';
 
-import { PUBLISH_MODULE } from '@/constants/permission';
 import { appInfoSignal } from '@/store/app';
 import { Button, Checkbox, Form, Input, Message, Space, Typography } from '@arco-design/web-react';
 import { IconLock, IconMobile, IconUser } from '@arco-design/web-react/icon';
-import { runtimeGetApplication } from '@onebase/app';
+import { getApplication } from '@onebase/app';
 import {
   getHashQueryParam,
   getOrCreateDeviceInfo,
+  PUBLISH_MODULE,
   SliderCaptcha,
   TokenManager,
   type SliderCaptchaRef
@@ -116,7 +116,7 @@ const Right: React.FC = () => {
 
   const handleGetApplication = async () => {
     if (appId) {
-      const res = await runtimeGetApplication({ id: appId });
+      const res = await getApplication({ id: appId });
       if (res) {
         setCurAppInfo(res);
       }
@@ -172,13 +172,13 @@ const Right: React.FC = () => {
         };
         response = await innerLogin(innerloginData, headers);
       } else if (!appId) {
-        const innerloginData: RuntimeCorpLoginRequest = {
+        const corploginData: RuntimeCorpLoginRequest = {
           password: values.password!,
           mobile: (values as RuntimeCorpLoginRequest).mobile!,
           captchaVerification: captchaVerification,
           deviceId: deviceId
         };
-        response = await runtimeCorpLogin(innerloginData, headers);
+        response = await runtimeCorpLogin(corploginData, headers);
       } else {
         const loginData: LoginRequest = {
           username: (values as LoginRequest).username!,
@@ -192,9 +192,6 @@ const Right: React.FC = () => {
 
       if (response && response.accessToken) {
         // 使用 TokenManager 存储 token 信息
-
-        console.log('appId: ', appId);
-        console.log('tenantId: ', tenantId);
 
         if (appId && tenantId) {
           TokenManager.setCurIdentifyId(`${appId}_${tenantId}`);
@@ -214,7 +211,6 @@ const Right: React.FC = () => {
             refreshToken: response.refreshToken,
             expiresTime: response.expiresTime,
             tenantId: response.tenantId,
-            adminFlag: response.adminFlag,
             corpId: response.corpId,
             loginURL: window.location.href // 当前地址
           },

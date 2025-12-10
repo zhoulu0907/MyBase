@@ -1,0 +1,210 @@
+.loadmore-list-wrapper-OBMobile {
+  .total-data {
+    display: block;
+    line-height: 0.6rem;
+    font-size: 0.2rem;
+    text-align: center;
+    color: #86909C;
+  }
+
+  .list-search-header {
+    padding: 0.4rem 0.32rem 0.24rem;
+    display: flex;
+    align-items: center;
+    background-color: #fff;
+    width: calc(100% - 0.64rem) !important;
+
+    @media screen and (min-width: 900px) {
+      max-width: calc(450px - 0.64rem) !important;
+    }
+
+    .filter-title {
+      font-size: 0.28rem;
+      color: #86909C;
+      margin-right: 0.24rem;
+      flex: 1;
+    }
+
+    .filter-icon {
+      display: none;
+      width: 0.48rem;
+      height: 0.48rem;
+      margin-left: 0.24rem;
+    }
+
+    .arco-search-bar-container {
+      padding: 0;
+      flex: 1;
+    }
+
+    .arco-search-bar-wrap {
+      font-size: 0.28rem;
+      height: 0.72rem;
+      padding: 0 0 0 0.24rem;
+      line-height: 0.72rem;
+    }
+
+    .arco-search-bar-search-icon {
+      font-size: 0.36rem;
+    }
+  }
+
+  .list-create-btn {
+    width: 0.96rem;
+    height: 0.96rem;
+    align-items: center;
+    border-radius: 50%;
+    background: linear-gradient(326deg, #009E9E 10.69%, #24B28F 56.88%, #00B42A 103.07%);
+    /* box-shadow: 0 4px 8px 0 rgba(0, 94, 115, 0.20); */
+    position: fixed;
+    bottom: 2.4rem;
+    right: 0.24rem;
+    z-index: 99;
+
+    @media screen and (min-width: 900px) {
+      right: calc(0.24rem + 50% - 225px);
+    }
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 0.08rem;
+      height: 0.48rem;
+      background: #fff;
+    }
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 0.48rem;
+      height: 0.08rem;
+      background: #fff;
+    }
+  }
+
+  .list-body-wrapper {
+    border-radius: 0.16rem;
+    padding: 0.24rem 0.24rem 0;
+    background: #F7F8FA;
+
+    .no-data {
+      font-size: 0.28rem;
+      color: #86909C;
+      text-align: center;
+      line-height: 2.6rem;
+    }
+
+    .list-body-item-wrapper {
+      padding: 0 0.24rem 0.24rem;
+      background: #fff;
+      border-radius: 0.08rem;
+      margin-bottom: 0.24rem;
+      line-height: 0.6rem;
+      border-radius: 0.16rem;
+      border: 1px solid #fff;
+    }
+
+    .list-body-item-element {
+      display: flex;
+      line-height: 0.6rem;
+      height: 0.6rem;
+      border-radius: 0.16rem 0.16rem 0 0;
+
+      &:first-child {
+        margin: 0 -0.24rem 0.12rem;
+        padding: 0 0.24rem;
+        background: linear-gradient(90deg, #E8FFF5 0%, #FFF 80%);
+        line-height: 0.88rem;
+        height: 0.88rem;
+
+        .list-body-item-title {
+          font-size: 0.32rem;
+          font-weight: 600;
+          color: #86909C;
+          width: auto;
+        }
+
+        .list-body-item-content {
+          font-size: 0.32rem;
+          font-weight: 600;
+          line-height: 0.88rem;
+          color: #1D2129;
+          flex: 1;
+        }
+      }
+    }
+
+    .list-body-item-title {
+      font-size: 0.28rem;
+      font-weight: 500;
+      color: #86909C;
+      width: 1.6rem;
+    }
+
+    .list-body-item-content {
+      font-size: 0.28rem;
+      font-weight: 400;
+      color: #1D2129;
+      flex: 1;
+    }
+  }
+
+  .arco-load-more {
+    font-size: 0.28rem;
+  }
+
+  .list-body-item-btns {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: flex-end;
+
+    .arco-button.arco-button-size-mini {
+      width: 1.2rem;
+      height: auto;
+      text-align: center;
+      font-size: 0.28rem;
+      padding: 0;
+      margin-left: 0.24rem;
+    }
+
+    .arco-button.arco-button-size-mini .arco-button-text {
+      font-size: 0.28rem;
+      height: 0.56rem;
+      line-height: 0.56rem;
+    }
+
+    .arco-button.arco-button-type-primary {
+      background-color: rgb(var(--primary-6));
+    }
+  }
+}
+
+/* .arco-dialog-content {TODO: confirm dialog 宽度问题
+  max-width: 80%;
+
+  @media screen and (min-width: 900px) {
+    max-width: 400px;
+  }
+
+  .arco-dialog-header.ios {
+    font-size: 0.4rem;
+    padding-top: 0.4rem;
+  }
+
+  .arco-dialog-body.ios {
+    font-size: 0.32rem;
+  }
+
+  .arco-dialog-footer.ios .dialog-footer-button {
+    font-size: 0.32rem;
+    height: 0.96rem;
+  }
+} */

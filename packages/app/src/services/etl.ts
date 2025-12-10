@@ -54,6 +54,8 @@ export const disableETLFlow = (id: string) => etlService.post(`/workflow/${id}/d
 
 export const previewETLFlowData = (params: PreviewETLFlowDataReq) => etlService.post(`/workflow/preview`, params);
 
+export const getETLFlowData = (params: PreviewETLFlowDataReq) => etlService.post(`/workflow/columns`, params);
+
 export const getETLFlowScheduleInfo = (id: string) => etlService.get(`/workflow/schedule/${id}`);
 
 export const updateETLFlowScheduleInfo = (params: UpdateWorkflowScheduleInfoReq) =>

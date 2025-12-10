@@ -1,3 +1,5 @@
+import type { MenuInfo, UserInfo } from '@onebase/common';
+
 // 获取验证码请求参数
 /**
  * 登录请求参数
@@ -117,7 +119,6 @@ export interface LoginResponse {
   expiresTime: number; // 令牌过期时间（时间戳，毫秒）
   tenantId: string; // 租户id
   tenantWebsite: string; // 租户网址
-  adminFlag: boolean; // 是否是管理员
   corpId: string; // 企业id
 }
 
@@ -139,33 +140,6 @@ export interface GetPermissionInfoResponse {
   roles: string[]; // 角色标识数组
   permissions: string[]; // 权限标识数组
   menus: MenuInfo[]; // 菜单信息数组
-}
-
-export interface UserInfo {
-  id: number; // 用户ID
-  nickname: string; // 昵称
-  avatar: string; // 头像URL
-  deptId: number; // 部门ID
-  username: string; // 用户名
-  email: string; // 邮箱
-}
-
-/**
- * 菜单信息结构
- */
-export interface MenuInfo {
-  id: number;
-  parentId: number;
-  name: string;
-  path: string;
-  component: string | null;
-  componentName: string | null;
-  icon: string;
-  visible: boolean;
-  keepAlive: boolean;
-  alwaysShow: boolean;
-  permission?: string;
-  children: MenuInfo[] | null;
 }
 
 /**

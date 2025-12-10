@@ -67,7 +67,7 @@ const CreateMasterDetailModal: React.FC<{
         // 根据子表类型准备数据
         const requestData = {
           parentEntityId: values.parentEntityId,
-          appId: curAppId,
+          applicationId: curAppId,
           datasourceId: curDataSourceId
         };
 

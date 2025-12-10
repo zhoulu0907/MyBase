@@ -1,0 +1,148 @@
+.appsList {
+  padding: 0.24rem 0.32rem;
+  background-color: #fff;
+  margin: 0 0.24rem;
+  border-radius: 0.12rem;
+  margin-bottom: 0.24rem;
+
+  .label {
+    font-size: 0.32rem;
+    line-height: 0.48rem;
+    font-weight: bold;
+    color: #272e3b;
+    margin-bottom: 0.24rem;
+  }
+  .treeItem {
+    font-size: 0.32rem;
+    line-height: 1.12rem;
+    color: #1d2129;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #e0e0e0; // #F2F3F5;
+    height: 1.12rem;
+    :global {
+      .arco-ellipsis {
+        font-size: 0.32rem;
+      }
+    }
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+  .treeItemIcon {
+    height: 0.48rem;
+    width: 0.48rem;
+    margin-right: 0.16rem;
+  }
+  .treeItemGroupHeader {
+    display: flex;
+    align-items: center;
+  }
+  .treeNone {
+    font-size: 0.28rem;
+    line-height: 1.12rem;
+    color: #909399;
+    padding-left: 0.36rem;
+  }
+  .treeItemGroup {
+    // border-bottom: 1px solid #e0e0e0;// #F2F3F5;
+    :global {
+      .arco-collapse-header {
+        height: 1.12rem;
+        line-height: 1.12rem;
+        margin-left: 0;
+        padding: 0;
+        color: #1d2129;
+        font-size: 0.32rem;
+        border-bottom: 1px solid #e0e0e0; // #F2F3F5;
+        .arco-ellipsis {
+          font-size: 0.32rem;
+        }
+      }
+      .arco-collapse-icon svg,
+      .arco-collapse-icon i {
+        height: 0.24rem;
+        width: 0.24rem;
+      }
+      .arco-collapse-content-container {
+        padding: 0;
+      }
+    }
+  }
+}
+
+.gridLayout {
+  :global(.arco-grid-rows-item-text) {
+    margin-top: 0.08rem;
+  }
+  :global {
+    .arco-ellipsis {
+      font-size: 0.28rem;
+    }
+  }
+}
+
+.menuIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 0.8rem;
+  height: 0.8rem;
+  border-radius: 0.16rem;
+  background-color: rgb(var(--primary-1));
+
+  & > div {
+    display: flex;
+    align-items: center;
+  }
+}
+
+.tabs {
+  :global(.arco-tab-cell-container-wrap.vertical) {
+    height: 0.84rem;
+    margin-bottom: 0.32rem;
+  }
+
+  :global(.arco-tab-cell.vertical:not(.custom).line:not(.last)) {
+    color: #4e5969;
+    margin-right: 0.32rem;
+  }
+
+  :global(.arco-tab-cell.vertical:not(.custom).line.active) {
+    color: rgb(var(--primary-6));
+    margin-right: 0.32rem;
+  }
+
+  :global(.arco-tab-cell-underline-inner) {
+    background-color: rgb(var(--primary-6));
+  }
+
+  :global(.arco-tab-cell) {
+    color: rgb(var(--parmary-6));
+    text-align: center;
+    font-family: PingFang SC;
+    font-size: 0.32rem;
+    font-style: normal;
+    font-weight: 500;
+  }
+
+  // .arco-tab-cell {
+  //     color: #4e5969;
+  //     text-align: center;
+  //     font-size: 0.16rem;
+  //     &.vertical {
+  //       margin: 0 0.08rem !important;
+  //     }
+  //   }
+
+  .arco-tab-cell-underline {
+    border-radius: 4px;
+    height: 0.04rem;
+    width: 0.24rem;
+    background: linear-gradient(
+      301deg,
+      var(--Semantic-Success-600, #00b42a) 25.06%,
+      var(--Brand-Builder-Builder_600, rgb(var(--primary-6))) 87.47%
+    );
+  }
+}

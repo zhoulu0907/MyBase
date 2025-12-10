@@ -210,6 +210,7 @@ export async function startSavePageSet(params: SavePageSetParams, onSuccess?: Fu
 
 export interface LoadPageSetParams {
   pageSetId: string;
+  runtime?: boolean;
 }
 
 export async function startLoadPageSet(params: LoadPageSetParams) {
@@ -374,6 +375,8 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
     if (!newCurViewId) {
       newCurViewId = res.pages.find((item: PageView) => item.isDefaultEditViewMode == 1)?.id;
     }
+
+    console.log('newCurViewId: ', newCurViewId);
     if (newCurViewId) {
       setCurViewId(newCurViewId);
       setFormComponents(useEditorSignalMap.get(newCurViewId)!.components.value);

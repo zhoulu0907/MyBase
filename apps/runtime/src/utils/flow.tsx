@@ -30,6 +30,14 @@ interface TriggerFlowRes {
   };
 }
 
+/**
+ * todo 字段触发
+ * @param param
+ * pageId  获取flows
+ * formData  表单数据
+ * type  界面交互触发/表单实体触发
+ * @returns 
+ */
 const ExecuteFlows: React.FC<FlowsProps> = ({ flows, inputParams }) => {
   let curFlowIndex = 0;
   // 信息收集弹窗

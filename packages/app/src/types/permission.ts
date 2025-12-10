@@ -140,7 +140,7 @@ export interface AuthDataGroupVO {
   /**
    * 权限范围字段对应的id
    */
-  scopeFieldId?: number;
+  scopeFieldUuid?: number;
   /**
    * 业务实体字段对应的权限范围
    */
@@ -371,7 +371,7 @@ export interface AuthViewVO {
   /**
    * 实体id
    */
-  viewId?: number;
+  viewUuid?: number;
 }
 
 /**

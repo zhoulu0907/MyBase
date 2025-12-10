@@ -46,11 +46,11 @@ export interface GetPageListByAppIdReq {
 }
 
 export interface GetPageMetadataReq {
-  pageId: string;
+  pageUuid: string;
 }
 
 export interface GetComponentListByPageIdReq {
-  pageId: string;
+  pageUuid: string;
 }
 
 export interface CreatePageViewParams {

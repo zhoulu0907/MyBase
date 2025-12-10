@@ -9,7 +9,7 @@
 
 /* 菜单隐藏样式 */
 .menuTree {
-  .arco-tree-node-switcher {
+  .pc-tree-node-switcher {
     position: absolute;
     right: 0;
     top: 50%;
@@ -20,15 +20,15 @@
     height: 16px;
     margin-right: 12px;
 
-    .arco-tree-node-icon-hover:hover::before {
+    .pc-tree-node-icon-hover:hover::before {
       background-color: transparent;
     }
   }
-  .arco-tree-node-title {
+  .pc-tree-node-title {
     padding: 0;
     margin: 0;
   }
-  .arco-tree-node {
+  .pc-tree-node {
     padding: 0;
   }
 }

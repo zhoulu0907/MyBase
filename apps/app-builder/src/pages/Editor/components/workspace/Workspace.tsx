@@ -1,20 +1,26 @@
 import { getDictDataListByType, getDictDetail } from '@onebase/platform-center';
 import {
+  COLOR_MODE_TYPES,
+  DEFAULT_VALUE_TYPES,
   EDITOR_TYPES,
   FORM_COMPONENT_TYPES,
   STATUS_OPTIONS,
-  STATUS_VALUES,
-  COLOR_MODE_TYPES,
-  DEFAULT_VALUE_TYPES
+  STATUS_VALUES
 } from '@onebase/ui-kit';
 import { cloneDeep } from 'lodash-es';
 import { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import { v4 as uuidv4 } from 'uuid';
 
+import EmptyIcon from '@/assets/images/empty.svg';
+import MobileIcon from '@/assets/images/mobile_icon.svg';
+import MobileActiveIcon from '@/assets/images/mobile_icon_active.svg';
+import PCIcon from '@/assets/images/pc_icon.svg';
+import PCActiveIcon from '@/assets/images/pc_icon_active.svg';
 import {
   COMPONENT_GROUP_NAME,
   COMPONENT_MAP,
+  DEFAULT_OPTIONS_TYPE,
   EditRender,
   ENTITY_COMPONENT_TYPES,
   getComponentConfig,
@@ -24,15 +30,8 @@ import {
   usePageEditorSignal,
   WIDTH_OPTIONS,
   WIDTH_VALUES,
-  DEFAULT_OPTIONS_TYPE,
   type GridItem
 } from '@onebase/ui-kit';
-
-import EmptyIcon from '@/assets/images/empty.svg';
-import MobileIcon from '@/assets/images/mobile_icon.svg';
-import MobileActiveIcon from '@/assets/images/mobile_icon_active.svg';
-import PCIcon from '@/assets/images/pc_icon.svg';
-import PCActiveIcon from '@/assets/images/pc_icon_active.svg';
 
 import NextIcon from '@/assets/images/next_icon.svg';
 import PrevActiveIcon from '@/assets/images/prev_icon_active.svg';
@@ -40,6 +39,8 @@ import PrevActiveIcon from '@/assets/images/prev_icon_active.svg';
 import CompDeleteIcon from '@/assets/images/app_delete.svg';
 import CompCopyIcon from '@/assets/images/copy_comp_icon.svg';
 import CompShowIcon from '@/assets/images/eye_off_icon.svg';
+import { EditMode } from '@onebase/common';
+import { currentEditorSignal } from '@onebase/ui-kit/src/signals/current_editor';
 
 import { Divider, Form } from '@arco-design/web-react';
 import { ENTITY_TYPE, ENTITY_TYPE_VALUE, type AppEntityField } from '@onebase/app';
@@ -93,6 +94,13 @@ export default function EditorWorkspace() {
   } = usePageEditorSignal();
 
   const [pageMode, setPageMode] = useState<string>('pc');
+  const { editMode, setEditMode } = currentEditorSignal;
+
+  useEffect(() => {
+    if (editMode.value === EditMode.MOBILE) {
+      document.documentElement.style.fontSize = '48px';
+    }
+  }, [editMode.value]);
 
   useEffect(() => {
     if (components.length === 0) {
@@ -273,15 +281,15 @@ export default function EditorWorkspace() {
           </div>
           <Divider type="vertical" />
           <div className={styles.pageModeCtrl}>
-            {pageMode === 'pc' && (
+            {editMode.value !== EditMode.MOBILE && (
               <>
                 <img className={styles.pageModeIcon} src={PCActiveIcon} />
-                <img className={styles.pageModeIcon} src={MobileIcon} onClick={() => setPageMode('mobile')} />
+                <img className={styles.pageModeIcon} src={MobileIcon} onClick={() => setEditMode(EditMode.MOBILE)} />
               </>
             )}
-            {pageMode === 'mobile' && (
+            {editMode.value === EditMode.MOBILE && (
               <>
-                <img className={styles.pageModeIcon} src={PCIcon} onClick={() => setPageMode('pc')} />
+                <img className={styles.pageModeIcon} src={PCIcon} onClick={() => setEditMode(EditMode.PC)} />
                 <img className={styles.pageModeIcon} src={MobileActiveIcon} />
               </>
             )}
@@ -289,11 +297,7 @@ export default function EditorWorkspace() {
         </div>
       </div>
 
-      <Form
-        labelCol={{
-          style: { width: 200, flex: 'unset' }
-        }}
-      >
+      <Form labelCol={{ span: 10 }} wrapperCol={{ span: 14 }}>
         <div
           className={styles.workspaceBody}
           id="workspace-body"
@@ -398,7 +402,7 @@ export default function EditorWorkspace() {
 
                     schema.config.cpName = field.displayName;
                     schema.config.id = cpID;
-                    schema.config.dataField = [item.entityId, field.fieldId];
+                    schema.config.dataField = [item.tableName, field.fieldName];
                     schema.config.label.text = field.displayName;
                     const props = {
                       id: cpID,
@@ -520,7 +524,7 @@ export default function EditorWorkspace() {
                     subSchema.config.label.text = ele.displayName;
                     subSchema.config.label.display = false;
                     subSchema.config.status = STATUS_VALUES[STATUS_OPTIONS.DEFAULT];
-                    subSchema.config.dataField = [item.entityId, ele.fieldId];
+                    subSchema.config.dataField = [item.tableName, ele.fieldName];
                     subSchema.config.width = WIDTH_VALUES[WIDTH_OPTIONS.FULL];
                     const subProps = {
                       id: subId,
@@ -567,8 +571,9 @@ export default function EditorWorkspace() {
               const itemType = e.item.getAttribute('data-cp-type');
               const itemDisplayName = e.item.getAttribute('data-cp-displayname');
 
-              const fieldID = e.item.getAttribute('data-field-id');
-              const entityID = e.item.getAttribute('data-entity-id');
+              const tableName = e.item.getAttribute('data-table-name');
+
+              const fieldName = e.item.getAttribute('data-field-name');
               const dataLabel = e.item.getAttribute('data-label');
 
               console.log(`拖入组件 ${cpID},类型 ${itemType}, 名称 ${itemDisplayName} 组件名称 ${dataLabel}`);
@@ -587,20 +592,20 @@ export default function EditorWorkspace() {
 
               // 子表字段不允许
               if (
-                (entityID && entityID !== mainEntity.entityId) ||
+                (tableName && tableName !== mainEntity.tableName) ||
                 itemType === ENTITY_COMPONENT_TYPES.MAIN_ENTITY ||
                 itemType === ENTITY_COMPONENT_TYPES.SUB_ENTITY
               ) {
-                console.log('entity id', entityID);
+                console.log('tableName name', tableName);
               } else {
                 const schema = getComponentSchema(itemType as any);
                 schema.config.cpName = itemDisplayName;
                 schema.config.id = cpID;
 
                 // 主表 字段组件
-                if (entityID && fieldID) {
+                if (tableName && fieldName) {
                   // 获取当前字段数据源配置
-                  const currentField = mainEntity.fields?.find((ele: AppEntityField) => ele.fieldId === fieldID);
+                  const currentField = mainEntity.fields?.find((ele: AppEntityField) => ele.fieldName === fieldName);
                   if (currentField) {
                     // 数据长度 dataLength
                     // 小数位数 decimalPlaces
@@ -669,7 +674,7 @@ export default function EditorWorkspace() {
                     }
                     // 关联的字典类型ID    dictTypeId
                   }
-                  schema.config.dataField = [entityID, fieldID];
+                  schema.config.dataField = [tableName, fieldName];
                   schema.config.status = STATUS_VALUES[STATUS_OPTIONS.DEFAULT];
                 }
 

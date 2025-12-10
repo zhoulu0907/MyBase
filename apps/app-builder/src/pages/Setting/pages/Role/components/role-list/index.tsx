@@ -1,23 +1,27 @@
 import ListItem from '@/components/ListItem';
 import { PermissionButton as Button } from '@/components/PermissionControl';
 import PlaceholderPanel from '@/components/PlaceholderPanel';
-import { TENANT_ROLE_PERMISSION as ACTIONS } from '@/constants/permission';
-import { Input, Spin, Tag } from '@arco-design/web-react';
+import { Input, Spin, Tag, Tree } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
+import { TENANT_ROLE_PERMISSION as ACTIONS } from '@onebase/common';
 import type { PageParam } from '@onebase/platform-center';
 import { getRolePage, RoleType, type RoleVO } from '@onebase/platform-center';
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import s from '../../index.module.less';
+import type { TreeDataType } from '@arco-design/web-react/es/Tree/interface';
+import { renderDraggedTree } from '@/utils';
+import { listToTree } from '@/utils/tree';
 
 interface RoleListProps {
-  activeId: number | undefined;
-  onSelect: (id: number | undefined, role: Partial<RoleVO> | undefined) => void;
+  activeId: string | undefined;
+  onSelect: (id: string | undefined, role: Partial<RoleVO> | undefined) => void;
   onAdd: () => void;
 }
 
 export default forwardRef(function RoleList({ activeId, onSelect, onAdd }: RoleListProps, ref) {
   // 状态管理
   const [roleList, setRoleList] = useState<Partial<RoleVO>[]>([]);
+  const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [isScrollLoading, setIsScrollLoading] = useState(false);
@@ -25,6 +29,12 @@ export default forwardRef(function RoleList({ activeId, onSelect, onAdd }: RoleL
   const [searchValue, setSearchValue] = useState('');
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // 同步外部选中状态
+  useEffect(() => {
+    const keys = activeId ? [activeId] : [];
+    setSelectedKeys(keys);
+  }, [activeId]);
 
   // 加载角色列表
   const loadRoleList = useCallback(
@@ -68,7 +78,7 @@ export default forwardRef(function RoleList({ activeId, onSelect, onAdd }: RoleL
 
   // 刷新角色
   const refreshRoleById = useCallback(
-    (roleId: number, values: Partial<RoleVO>) => {
+    (roleId: string, values: Partial<RoleVO>) => {
       const roleIndex = roleList.findIndex((role) => role.id === roleId);
       if (roleIndex !== -1) {
         // 更新角色列表中的角色信息
@@ -132,28 +142,18 @@ export default forwardRef(function RoleList({ activeId, onSelect, onAdd }: RoleL
   };
 
   const filteredRoleList = useMemo(() => {
-    if (!searchValue) return roleList;
-    return roleList.filter((role) => role.name?.toLowerCase().includes(searchValue.toLowerCase()));
+    let newRoleList = listToTree(roleList, {}, true);
+    if (!searchValue) return newRoleList;
+    return newRoleList.filter((role) => role.name?.toLowerCase().includes(searchValue.toLowerCase()));
   }, [roleList, searchValue]);
 
-  const listTitle = `全部角色(${filteredRoleList?.length})`;
+  const handleSelect = (keys: string[]) => {
+    const selectedId = keys.length > 0 ? keys[0] : undefined;
+    const activeItem = filteredRoleList?.filter((item) => item.id === selectedId)?.[0] || null;
+    onSelect(selectedId, activeItem);
+  };
 
-  const roleListItems = useMemo(() => {
-    return filteredRoleList?.map((item) => (
-      <ListItem
-        key={item.id}
-        title={item.name || ''}
-        active={item.id === activeId}
-        onClick={() => item.id && onSelect(item.id, item)}
-      >
-        {item.type === RoleType.SYSTEM && (
-          <Tag color="cyan" style={{ marginLeft: 8 }}>
-            系统
-          </Tag>
-        )}
-      </ListItem>
-    ));
-  }, [filteredRoleList, activeId, onSelect]);
+  const listTitle = `全部角色(${filteredRoleList?.length})`;
 
   return (
     <>
@@ -188,7 +188,39 @@ export default forwardRef(function RoleList({ activeId, onSelect, onAdd }: RoleL
           }}
         >
           <>
-            {roleListItems}
+            <Tree
+              treeData={filteredRoleList}
+              selectedKeys={selectedKeys}
+              onSelect={handleSelect}
+              blockNode
+              draggable
+              onDrop={({ dragNode, dropNode, dropPosition }) => {
+                const { data: draggedTree, dragItem } = renderDraggedTree<Partial<RoleVO>>(
+                  dragNode,
+                  dropNode,
+                  dropPosition,
+                  filteredRoleList
+                );
+                setRoleList([...draggedTree]);
+                setTimeout(() => {
+                  dragItem.className = '';
+                  setRoleList([...draggedTree]);
+                }, 1000);
+              }}
+              className={s.deptTreeNode}
+              renderTitle={(node: TreeDataType) => {
+                return (
+                  <>
+                    <span>{node.name}</span>
+                    {node.type === RoleType.SYSTEM && (
+                      <Tag color="cyan" style={{ marginLeft: 24 }}>
+                        系统
+                      </Tag>
+                    )}
+                  </>
+                );
+              }}
+            />
             {isScrollLoading && (
               <div style={{ textAlign: 'center', padding: '12px' }}>
                 <Spin size={20} />

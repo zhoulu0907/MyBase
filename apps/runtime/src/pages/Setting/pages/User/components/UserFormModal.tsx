@@ -1,10 +1,9 @@
-import { emailValidator, phoneValidator } from '@/utils/validator';
-import { Button, Form, Grid, Input, Message, Modal, Switch, TreeSelect } from '@arco-design/web-react';
-import type { SimpleRoleVO, UserVO } from '@onebase/platform-center';
-import { createUserInCorp, getUserInCorp, StatusEnum, updateUserInCorp } from '@onebase/platform-center';
+import { emailValidator, filterSpace, phoneValidator } from '@/utils/validator';
+import { Button, Form, Grid, Input, Message, Modal, Select, Switch, TreeSelect } from '@arco-design/web-react';
+import { CORP_DEPT_QUERY, hasPermission } from '@onebase/common';
+import type { RoleVO, SimpleRoleVO, UserVO } from '@onebase/platform-center';
+import { createUser, getSimpleRoleList, getUser, StatusEnum, updateUser, UserType } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
-import { hasPermission } from '@/utils/permission';
-import { CORP_DEPT_QUERY } from '@/constants/permission';
 
 const Row = Grid.Row;
 const Col = Grid.Col;
@@ -36,9 +35,21 @@ export default function UserFormModal({
   const [loading, setLoading] = React.useState(false);
   const [statusCheckedValue, setStatusCheckedValue] = useState(false);
   const [hasDeptQueryPermission, setHasDeptQueryPermission] = useState(true);
+  const [roleList, setRoleList] = useState<RoleVO[]>([]);
+
+  // 获取角色列表
+  const fetchRoleList = async () => {
+    try {
+      const res = await getSimpleRoleList();
+      setRoleList(res);
+    } catch (error) {
+      console.log('error');
+    }
+  };
 
   useEffect(() => {
     if (visible) {
+      fetchRoleList();
       form.resetFields();
       if (initialValues) {
         form.setFieldsValue(initialValues);
@@ -62,7 +73,7 @@ export default function UserFormModal({
 
     // 在编辑模式下获取用户信息并设置角色ID为初始值
     if (mode === 'edit' && initialValues?.id) {
-      getUserInCorp(initialValues.id).then((user: UserVO) => {
+      getUser(initialValues.id).then((user: UserVO) => {
         form.setFieldsValue({ roleIds: user.roles?.map((item: SimpleRoleVO) => item.id) });
       });
     }
@@ -77,14 +88,19 @@ export default function UserFormModal({
 
     try {
       const values = await form.validate();
-      const params = { ...values, status: statusCheckedValue ? StatusEnum.ENABLE : StatusEnum.DISABLE };
+      const params = {
+        ...values,
+        mobile: filterSpace(values.mobile),
+        email: filterSpace(values.email),
+        status: statusCheckedValue ? StatusEnum.ENABLE : StatusEnum.DISABLE
+      };
       setLoading(true);
       if (mode === 'create') {
-        await createUserInCorp(params);
+        await createUser(params);
         Message.success('新建成功');
         onRefreshDept();
       } else {
-        await updateUserInCorp({ ...params, id: initialValues?.id });
+        await updateUser({ ...params, id: initialValues?.id });
         Message.success('编辑成功');
         onRefreshDept();
       }
@@ -94,9 +110,13 @@ export default function UserFormModal({
     }
   };
 
+  const isSystemUser = form.getFieldValue('adminType') === UserType.SYSTEM;
+
   return (
     <Modal
-      title={<div style={{ textAlign: 'left' }}>{isDetail ? '用户详情' : mode === 'create' ? '新建用户' : '编辑用户'}</div>}
+      title={
+        <div style={{ textAlign: 'left' }}>{isDetail ? '用户详情' : mode === 'create' ? '新建用户' : '编辑用户'}</div>
+      }
       visible={visible}
       onCancel={onCancel}
       onOk={handleSubmit}
@@ -107,17 +127,22 @@ export default function UserFormModal({
       footer={
         isDetail
           ? [
-            <Button key="close" onClick={onCancel}>
-              关闭
-            </Button>
-          ]
+              <Button key="close" onClick={onCancel}>
+                关闭
+              </Button>
+            ]
           : undefined
       }
     >
       <Form form={form} layout="vertical" autoComplete="off" disabled={isDetail}>
         <Row gutter={24}>
           <Col span={12}>
-            <Form.Item label="姓名" field="nickname" rules={[{ required: true, message: '请输入姓名' }]}>
+            <Form.Item
+              label="姓名"
+              field="nickname"
+              disabled={mode === 'edit' && isSystemUser}
+              rules={[{ required: true, message: '请输入姓名' }]}
+            >
               <Input placeholder="请输入" />
             </Form.Item>
           </Col>
@@ -125,6 +150,7 @@ export default function UserFormModal({
             <Form.Item
               label="手机号"
               field="mobile"
+              disabled={mode === 'edit' && isSystemUser}
               rules={[{ required: true, message: '请输入手机号' }, { validator: phoneValidator }]}
             >
               <Input placeholder="请输入" />
@@ -133,19 +159,22 @@ export default function UserFormModal({
         </Row>
         <Row gutter={24}>
           <Col span={12}>
-            <Form.Item label="账号" field="username" rules={[{ required: true, message: '请输入账号' }]}>
+            <Form.Item
+              label="账号"
+              field="username"
+              disabled={mode === 'edit' && isSystemUser}
+              rules={[{ required: true, message: '请输入账号' }]}
+            >
               <Input placeholder="请输入" autoComplete="new-password" />
             </Form.Item>
           </Col>
-          {mode === 'create' && <Col span={12}>
-            <Form.Item
-              label="密码"
-              field="password"
-              rules={[{ required: true, message: '请输入密码' }]}
-            >
-              <Input.Password placeholder="请输入" autoComplete="new-password" />
-            </Form.Item>
-          </Col>}
+          {mode === 'create' && (
+            <Col span={12}>
+              <Form.Item label="密码" field="password" rules={[{ required: true, message: '请输入密码' }]}>
+                <Input.Password placeholder="请输入" autoComplete="new-password" />
+              </Form.Item>
+            </Col>
+          )}
         </Row>
         <Row gutter={24}>
           <Col span={12}>
@@ -169,10 +198,26 @@ export default function UserFormModal({
             </Form.Item>
           </Col>
         </Row>
-        <Row gutter={24} justify="start">
+        <Row gutter={24}>
           <Col span={12}>
-            <Form.Item label="启用状态" triggerPropName="checked" layout="horizontal" labelCol={{ span: 6 }} wrapperCol={{ span: 12 }} >
+            <Form.Item label="启用状态" triggerPropName="checked" labelCol={{ span: 6 }} wrapperCol={{ span: 12 }}>
               <Switch checked={statusCheckedValue} onChange={setStatusCheckedValue} />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item label="角色" field="roleIds">
+              <Select
+                placeholder="选择角色"
+                mode="multiple"
+                allowClear
+                options={roleList.map((u) => ({
+                  label: u.name,
+                  value: u.id
+                }))}
+                filterOption={(inputValue: any, option: any) => {
+                  return option.props.children?.includes(inputValue);
+                }}
+              ></Select>
             </Form.Item>
           </Col>
         </Row>

@@ -20,7 +20,6 @@ import LeftNavBar from './components/left-nav-bar/index';
 import { getDataById, save } from '@onebase/app';
 import { useLocation } from 'react-router-dom';
 import type { WorkflowJSON } from './editorType';
-import { getAppIdByPageSetId } from '@onebase/app';
 import { useFlowEditorStor } from '@/store/index';
 import { debounce } from 'lodash-es';
 import { useRefresh } from '@flowgram.ai/fixed-layout-editor';
@@ -49,7 +48,7 @@ export const Editor = () => {
         const bpmDefJson = JSON.parse(res.bpmDefJson);
         currentJsonData = normalizeNodes(bpmDefJson);
       }
-      if (res.businessId) {
+      if (res.businessUuid) {
         setFlowData(res);
       }
       ref?.current?.document.clear();
@@ -66,6 +65,7 @@ export const Editor = () => {
     ref?.current?.document.clear();
     ref?.current?.document.fromJSON(initialData);
   };
+
   useEffect(() => {
     if (currentFlowId) {
       getFlowData(currentFlowId);
@@ -77,6 +77,12 @@ export const Editor = () => {
 
   const normalizeNodes = (obj: WorkflowJSON | undefined) => {
     obj?.edges.forEach((item) => {
+      if (item.targetNodeID.includes('branch')) {
+        item.targetPortID = 'input-top';
+      }
+      if (item.sourceNodeID.includes('branch')) {
+        item.sourcePortID = 'output-bottom';
+      }
       if (item?.type) {
         sourceNodeIDMap.set(item.sourceNodeID + item.targetNodeID, item.type);
       } else {
@@ -84,6 +90,12 @@ export const Editor = () => {
       }
     });
     const newNodes = obj?.nodes.map((node) => {
+      if (node.id.includes('branch') && node.meta) {
+        node.meta.defaultPorts = [
+          { type: 'input', portID: 'input-top', location: 'top' },
+          { type: 'output', portID: 'output-bottom', location: 'bottom' }
+        ];
+      }
       if ('name' in node) {
         return { ...node, data: { ...(node.data || {}), name: node.name } };
       } else if (node.data && 'name' in node.data) {
@@ -96,19 +108,17 @@ export const Editor = () => {
   const editorProps = useEditorProps({ nodes: [], edges: [] }, nodeRegistries);
 
   const onSave = async () => {
-    const appId = await getAppIdByPageSetId({ pageSetId });
     const data = ref?.current?.document.toJSON();
     const currentJsonData = normalizeNodes(data);
-    const { id, flowCode, flowName, version, versionAlias, versionStatus, businessId } = flowData;
+    const { id, flowCode, flowName, bpmVersion, bpmVersionAlias, bpmVersionStatus, businessUuid } = flowData;
     const params = {
       id: id || '',
       flowCode: flowCode || '',
       flowName: flowName || '',
-      version: version || '',
-      versionAlias: versionAlias || '',
-      versionStatus: versionStatus || '',
-      businessId: businessId || pageSetId,
-      appId,
+      bpmVersion: bpmVersion || '',
+      bpmVersionAlias: bpmVersionAlias || '',
+      bpmVersionStatus: bpmVersionStatus || '',
+      businessUuid: businessUuid || '',
       bpmDefJson: JSON.stringify(currentJsonData),
       globalConfig: configData
     };
@@ -128,6 +138,13 @@ export const Editor = () => {
     );
     return () => toDispose?.dispose();
   }, []);
+
+  // useEffect(() => {
+  //   const dispose = ref?.current?.document.linesManager.onAvailableLinesChange((e) => {
+  //     console.log(e, '这里监听线条的新增和删除');
+  //   });
+  //   return () => dispose?.dispose();
+  // }, []);
 
   return (
     <div className="doc-free-feature-overview">

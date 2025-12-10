@@ -352,10 +352,16 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
         return <ShowComp.XText cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case SHOW_COMPONENT_TYPES.WEB_VIEW:
         return <ShowComp.XWebView cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
-      case SHOW_COMPONENT_TYPES.DIVIDER:
-        return <ShowComp.XDivider cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case SHOW_COMPONENT_TYPES.PLACEHOLDER:
         return <ShowComp.XPlaceholder cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+      case SHOW_COMPONENT_TYPES.DIVIDER:
+        return (
+          <ShowComp.XDivider
+            cpName={cpId}
+            id={cpId}
+            {...componentConfig}
+          />
+        );  
 
       default:
         return <div>未知组件类型: {cpType}</div>;

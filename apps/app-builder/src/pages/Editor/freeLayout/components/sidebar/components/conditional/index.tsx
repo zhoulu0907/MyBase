@@ -1,10 +1,11 @@
-import { useState } from 'react';
-import Header from '../../../header';
-import BottomBtn from '../../../bottomBtn';
+import { useEffect, useState } from 'react';
 import { Table } from '@arco-design/web-react';
 import { IconDragDotVertical } from '@arco-design/web-react/icon';
+import { FlowNodeEntity, useClientContext } from '@flowgram.ai/free-layout-editor';
 import { SortableContainer, SortableElement, SortableHandle } from 'react-sortable-hoc';
-import type { BranchData, ApproveDrawerProps, TableComponents, SortEndHandler } from './indexType';
+import type { BranchData, TableComponents, SortEndHandler } from './indexType';
+import BottomBtn from '../../../bottomBtn';
+import Header from '../../../header';
 import styles from './index.module.less';
 
 const arrayMoveMutate = (array: any, from: any, to: any) => {
@@ -29,39 +30,15 @@ const columns = [
   },
   {
     title: '下游节点',
-    dataIndex: 'salary'
+    dataIndex: 'toNodeName'
   },
   {
     title: '默认分支',
-    dataIndex: 'address'
+    dataIndex: 'isDefault'
   },
   {
     title: '优先级',
-    dataIndex: 'email'
-  }
-];
-
-const initialData = [
-  {
-    key: '1',
-    name: '年休假',
-    salary: '执行人1',
-    address: '否',
-    email: '1'
-  },
-  {
-    key: '3',
-    name: '年休假',
-    salary: '执行人2',
-    address: '否',
-    email: '2'
-  },
-  {
-    key: '2',
-    name: '/',
-    salary: '执行人3',
-    address: '是',
-    email: '3'
+    dataIndex: 'priority'
   }
 ];
 
@@ -80,17 +57,15 @@ const SortableWrapper = SortableContainer((props: any) => {
 const SortableItem = SortableElement((props: any) => {
   return <tr {...props} />;
 });
-
-// { handleConfigSubmit, configData }: ApproveDrawerProps
-export default function ApproveDreawer() {
-  const [data, setData] = useState(initialData);
-  const [editValue, setEditValue] = useState('');
+export default function Conditional({ node }: { node: FlowNodeEntity }) {
+  const [data, setData] = useState<BranchData[]>([]);
+  const ctx = useClientContext();
   function onSortEnd({ oldIndex, newIndex }: SortEndHandler) {
     if (oldIndex !== newIndex) {
       const newData = arrayMove([...data], oldIndex, newIndex).filter((el: BranchData) => !!el);
       const updatedData = newData.map((item: BranchData, index: number) => ({
         ...item,
-        email: String(index + 1)
+        priority: String(index + 1)
       }));
       setData(updatedData);
     }
@@ -112,8 +87,7 @@ export default function ApproveDreawer() {
   );
   const DraggableRow = (props: { record: BranchData; index: number; [key: string]: any }) => {
     const { record, index, ...rest } = props;
-    // 如果是默认分支则返回普通行
-    if (record.address === '是') {
+    if (record.isDefault === '是') {
       return <tr {...rest} />;
     }
     return <SortableItem index={index} {...rest} />;
@@ -137,7 +111,7 @@ export default function ApproveDreawer() {
         {
           node: (record: BranchData) => (
             <td>
-              <div className="arco-table-cell">{record.address !== '是' && <DragHandle />}</div>
+              <div className="arco-table-cell">{record.isDefault !== '是' && <DragHandle />}</div>
             </td>
           ),
           width: 40
@@ -153,11 +127,46 @@ export default function ApproveDreawer() {
   };
 
   function handleSubmit() {
-    // handleConfigSubmit(data);
+    const allLines = ctx.document.linesManager
+      .getAllLines()
+      .filter((line) => line.info.from === node.id && line.lineData);
+
+    data.forEach((tableItem) => {
+      const matchingLine = allLines.find((line) => line.lineData.name === tableItem.name);
+      if (matchingLine) {
+        matchingLine.lineData = {
+          ...matchingLine.lineData,
+          priority: tableItem.priority
+        };
+      }
+    });
   }
+
+  const sortLineData = () => {
+    const allLines = ctx.document.linesManager.getAllLines();
+    const nodeOutputNodes = allLines.filter((line) => line.info.from === node.id && line.lineData);
+    const tableData = nodeOutputNodes
+      .map((line) => {
+        return {
+          name: line.lineData.name,
+          toNodeName: line?.to?.toJSON()?.data?.name,
+          isDefault: line.lineData.isDefault ? '是' : '否',
+          priority: line.lineData.priority
+        };
+      })
+      .sort((a, b) => {
+        const priorityA = Number(a.priority) || 0;
+        const priorityB = Number(b.priority) || 0;
+        return priorityA - priorityB;
+      });
+    setData(tableData);
+  };
+  useEffect(() => {
+    sortLineData();
+  }, []);
   return (
     <>
-      <Header changeName={(name) => setEditValue(name)} />
+      <Header />
       <div className={styles.conditional}>
         <div className={styles.configTitle}>
           分支优先级<span className={styles.titleTips}>可通过拖拽调整默认分支以外的分支优先级</span>
@@ -169,6 +178,7 @@ export default function ApproveDreawer() {
             columns={columns}
             data={data}
             pagination={false}
+            rowKey="name"
             rowSelection={{
               type: 'checkbox'
             }}

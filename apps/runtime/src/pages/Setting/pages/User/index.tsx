@@ -1,9 +1,8 @@
 import PlaceholderPanel from '@/components/PlaceholderPanel';
-import { CORP_USER_QUERY } from '@/constants/permission';
-import { hasPermission } from '@/utils/permission';
 import { listToTree } from '@/utils/tree';
 import { Layout } from '@arco-design/web-react';
-import { getCorpDeptList, getUserPageInCorp } from '@onebase/platform-center';
+import { CORP_USER_QUERY, hasPermission } from '@onebase/common';
+import { getCorpDeptList, getUserPage } from '@onebase/platform-center';
 import { useEffect, useState } from 'react';
 import DeptTreeCmp from './components/DeptTree';
 import UserTable from './components/UserTable';
@@ -11,7 +10,7 @@ import styles from './index.module.less';
 const { Sider, Content } = Layout;
 
 export default function UserPage() {
-  const [selectedDeptId, setSelectedDeptId] = useState<number | undefined>(undefined);
+  const [selectedDeptId, setSelectedDeptId] = useState<string | undefined>(undefined);
   const [totalUserCount, setTotalUserCount] = useState<number>(0);
   const [deptTree, setDeptTree] = useState<any[]>([]);
   const [deptLoading, setDeptLoading] = useState<boolean>(false); // 部门数据加载状态
@@ -32,7 +31,7 @@ export default function UserPage() {
   };
 
   const getUserContent = async () => {
-    const resq = await getUserPageInCorp({ pageNo: 1, pageSize: 10 });
+    const resq = await getUserPage({ pageNo: 1, pageSize: 10 });
     return resq.total;
   };
 
@@ -55,6 +54,7 @@ export default function UserPage() {
             onDeptSelect={setSelectedDeptId}
             totalUserCount={totalUserCount}
             treeData={deptTree}
+            setDeptTree = {setDeptTree}
             deptLoading={deptLoading}
           />
         </PlaceholderPanel>

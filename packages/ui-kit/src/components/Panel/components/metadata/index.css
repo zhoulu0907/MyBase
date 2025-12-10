@@ -1,0 +1,270 @@
+.rightHeader {
+  height: 40px;
+  width: 100%;
+  padding: 8px 12px;
+  box-sizing: border-box;
+  border-bottom: 0.5px solid #e8e8e8;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  .title {
+    font-size: 16px;
+    font-weight: 400;
+    color: #000000;
+    white-space: nowrap;
+  }
+
+  .right {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+
+    .search {
+      height: 100%;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-left: 12px;
+      padding-top: 4px;
+      padding-bottom: 4px;
+
+      img {
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+      }
+    }
+
+    .collapse {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+      margin-left: 18px;
+    }
+  }
+}
+
+.rightBody {
+  width: 100%;
+  height: 100%;
+
+  .entityHeader {
+    background-color: white;
+    width: 100%;
+    height: 40px;
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    padding-left: 10px;
+    box-sizing: border-box;
+    font-size: 13px;
+    font-weight: 500;
+    color: #000000;
+    white-space: nowrap;
+  }
+
+  .entityListWrapper {
+    :global(.pc-collapse-item-active) > :global(.pc-collapse-item-header) {
+      background-color: #4fae7b33 !important;
+    }
+
+    height: 35vh;
+  }
+
+  .entityList {
+    width: 100%;
+    height: 100%;
+    background-color: #ffffff;
+    border: 0;
+    box-sizing: border-box;
+
+    .entityCollapse {
+      width: 100%;
+      height: 100%;
+    }
+
+    .mainEntityHeader {
+      width: 100%;
+      min-width: 250px;
+      height: 40px;
+      box-sizing: border-box;
+      color: #4fae7b;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-start;
+      font-size: 13px;
+      font-weight: 400;
+      user-select: none;
+
+      .mainEntityHeaderIcon {
+        width: 24px;
+        height: 24px;
+        background-color: #fff7e8;
+        color: #ff7d00;
+        font-size: 12px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 2px;
+        margin-right: 5px;
+      }
+    }
+
+    .subEntityHeader {
+      width: 100%;
+      height: 40px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-start;
+      border-left: 1px solid #e5e6eb;
+      padding-left: 10px;
+      padding-top: 5px;
+      padding-bottom: 5px;
+      color: #4e5969;
+      font-size: 13px;
+      font-weight: 400;
+      user-select: none;
+
+      &:hover {
+        background-color: #f2f3f5;
+        cursor: pointer;
+      }
+
+      .subEntityHeaderIcon {
+        width: 24px;
+        height: 24px;
+        background-color: #e8f7ff;
+        color: #3491fa;
+        font-size: 12px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 2px;
+        margin-right: 5px;
+      }
+    }
+
+    .relEntityHeader {
+      width: 100%;
+      height: 40px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-start;
+      border-left: 1px solid #e5e6eb;
+      padding-left: 10px;
+      padding-top: 5px;
+      padding-bottom: 5px;
+      color: #4e5969;
+      font-size: 13px;
+      font-weight: 400;
+      user-select: none;
+
+      .relEntityHeaderIcon {
+        padding-left: 5px;
+        padding-right: 5px;
+        height: 24px;
+        background-color: #e8ffea;
+        color: #27c346;
+        font-size: 12px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 2px;
+        margin-right: 5px;
+        user-select: none;
+      }
+    }
+  }
+
+  .importEntityHeader {
+    height: 40px;
+    box-sizing: border-box;
+    margin-left: 10px;
+    width: 100%;
+    color: #4fae7b;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    font-size: 13px;
+    font-weight: 400;
+    color: #4e5969;
+    padding-left: 5px;
+    padding-right: 5px;
+    user-select: none;
+
+    .importEntityHeaderIcon {
+      height: 24px;
+      padding-left: 5px;
+      padding-right: 5px;
+      background-color: #f2f3f5;
+      color: #4e5969;
+      font-size: 12px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 2px;
+      margin-right: 5px;
+    }
+  }
+
+  .addImportEntityButton {
+    margin-left: 16px;
+    margin-top: 5px;
+    width: '108px';
+    height: '23px';
+    font-size: '12px';
+    font-weight: 400;
+  }
+
+  .fieldHeader {
+    background-color: #f2f3f5;
+    width: 100%;
+    height: 40px;
+    margin-bottom: 10px;
+    margin-top: 20px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    padding-left: 10px;
+    box-sizing: border-box;
+    font-size: 13px;
+    font-weight: 500;
+    color: #000000;
+    white-space: nowrap;
+  }
+
+  .fieldList {
+    flex: 1;
+    width: 100%;
+    height: 100%;
+    max-height: 35vh;
+    overflow-y: auto;
+  }
+
+  .fieldListContent {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 15px;
+    box-sizing: border-box;
+  }
+}

@@ -1,7 +1,9 @@
 import { Message } from '@arco-design/web-react';
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { BaseResponse, RequestConfig, RequestInterceptor, ResponseInterceptor } from '../types';
+import { isBuilderEnv, isPlatformEnv, isRuntimeEnv } from './env';
 import { getHashQueryParam } from './router';
+import { generateSignature } from './signature';
 import TokenManager from './token';
 
 /**
@@ -67,6 +69,22 @@ export class HttpClient {
           }
         }
 
+        // =========================== 签名校验开始 ===========================
+        const signature = generateSignature(config);
+        // // 将签名信息添加到请求头
+        Object.assign(config.headers, signature.headers);
+        // =========================== 签名校验结束 ===========================
+
+        let appId = getHashQueryParam('appId');
+        if (!appId) {
+          appId = TokenManager.getCurAppId();
+        }
+
+        // 如果获取到 appId 且 header 中未设置，则自动添加
+        if (appId && !config.headers['X-Application-Id']) {
+          config.headers['X-Application-Id'] = appId;
+        }
+
         // 执行自定义请求拦截器
         this.requestInterceptors.forEach((interceptor) => {
           if (interceptor.onFulfilled) {
@@ -102,19 +120,28 @@ export class HttpClient {
         const { data } = response;
         if (data && typeof data === 'object') {
           if (data.code !== 0) {
-            Message.error(data.msg || '请求失败');
+            Message.error({ id: 'http-error', content: data.msg || '请求失败' });
             if (data.code === 401) {
-              const loginURL = TokenManager.getTokenInfo()?.loginURL;
+              console.log(TokenManager.getTokenInfo());
 
-              TokenManager.clearToken();
+              const loginURL = TokenManager.getTokenInfo()?.loginURL;
+              const tenantId = TokenManager.getTokenInfo()?.tenantId;
 
               // 跳转到登录页
               if (loginURL) {
                 window.location.href = loginURL;
               } else {
                 const redirectURL = getHashQueryParam('redirectURL') || window.location.href;
-                //   window.location.href = '/#/login';
-                window.location.href = `/#/login?redirectURL=${redirectURL}`;
+                const pathURL = window.location.pathname;
+                if (isPlatformEnv()) {
+                  window.location.href = `${pathURL}#/login`;
+                } else if (isBuilderEnv()) {
+                  window.location.href = `${pathURL}#/tenant/${tenantId}/?redirectURL=${redirectURL}`;
+                } else if (isRuntimeEnv()) {
+                  window.location.href = `${pathURL}#/login?redirectURL=${redirectURL}`;
+                } else {
+                  window.location.href = `${pathURL}#/login?redirectURL=${redirectURL}`;
+                }
               }
             }
             return Promise.reject(new Error(data.msg || '请求失败'));

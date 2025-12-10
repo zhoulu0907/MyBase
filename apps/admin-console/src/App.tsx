@@ -1,3 +1,4 @@
+import { Message } from '@arco-design/web-react';
 import { NotFoundPage } from '@onebase/common';
 import { Navigate, Route, HashRouter as Router, Routes } from 'react-router-dom';
 import Home from './pages/Home';
@@ -14,6 +15,12 @@ function AppContent() {
   //   if (isChecking) {
   //     return <LoadingScreen />;
   //   }
+
+  Message.config({
+    duration: 3000,
+    maxCount: 1,
+    getContainer: () => document.body
+  });
 
   return (
     <Routes>

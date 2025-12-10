@@ -27,7 +27,7 @@ interface TestRunSidePanelProps {
 
 export const TestRunSidePanel: FC<TestRunSidePanelProps> = ({ visible, onCancel }) => {
   const runtimeService = useService(WorkflowRuntimeService);
-  const { nodeId: sidebarNodeId, setNodeId } = useContext(SidebarContext);
+  const { nodeId: sidebarNodeId, setNodeId, setLineData } = useContext(SidebarContext);
 
   const [isRunning, setRunning] = useState(false);
   const [values, setValues] = useState<Record<string, unknown>>({});
@@ -74,6 +74,7 @@ export const TestRunSidePanel: FC<TestRunSidePanelProps> = ({ visible, onCancel 
   // runtime effect
   useEffect(() => {
     setNodeId(undefined);
+    setLineData(undefined);
     const disposer = runtimeService.onResultChanged(({ result, errors }) => {
       setRunning(false);
       setResult(result);
@@ -105,11 +106,7 @@ export const TestRunSidePanel: FC<TestRunSidePanelProps> = ({ visible, onCancel 
       <div className={styles['testrun-panel-input']}>
         <div className={styles.title}>Input Form</div>
         <div>JSON Mode</div>
-        <Switch
-          checked={inputJSONMode}
-          onChange={(checked: boolean) => setInputJSONMode(checked)}
-          size="small"
-        />
+        <Switch checked={inputJSONMode} onChange={(checked: boolean) => setInputJSONMode(checked)} size="small" />
       </div>
       {inputJSONMode ? (
         <TestRunJsonInput values={values} setValues={setValues} />
@@ -132,7 +129,7 @@ export const TestRunSidePanel: FC<TestRunSidePanelProps> = ({ visible, onCancel 
       icon={isRunning ? <IconCancel /> : <IconPlay size="small" />}
       className={classnames(styles.button, {
         [styles.running]: isRunning,
-        [styles.default]: !isRunning,
+        [styles.default]: !isRunning
       })}
     >
       {isRunning ? 'Cancel' : 'Test Run'}
@@ -148,14 +145,14 @@ export const TestRunSidePanel: FC<TestRunSidePanelProps> = ({ visible, onCancel 
       onCancel={onClose}
       width={400}
       headerStyle={{
-        display: 'none',
+        display: 'none'
       }}
       bodyStyle={{
-        padding: 0,
+        padding: 0
       }}
       style={{
         background: 'none',
-        boxShadow: 'none',
+        boxShadow: 'none'
       }}
     >
       <div className={styles['testrun-panel-container']}>
@@ -170,9 +167,7 @@ export const TestRunSidePanel: FC<TestRunSidePanelProps> = ({ visible, onCancel 
             onClick={onClose}
           />
         </div>
-        <div className={styles['testrun-panel-content']}>
-          {isRunning ? renderRunning : renderForm}
-        </div>
+        <div className={styles['testrun-panel-content']}>{isRunning ? renderRunning : renderForm}</div>
         <div className={styles['testrun-panel-footer']}>{renderButton}</div>
       </div>
     </SideSheet>

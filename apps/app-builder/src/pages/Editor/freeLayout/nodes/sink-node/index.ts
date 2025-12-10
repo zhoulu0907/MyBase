@@ -34,7 +34,7 @@ export const SinkNodeBranchNodeRegistry: FlowNodeRegistry = {
   onAdd() {
     return {
       id: `sink_node_branch_${nanoid(5)}`,
-      type: WorkflowNodeType.BRANCH_IN,
+      type: WorkflowNodeType.SINK_NODE_BRANCH,
       data: {
         name: '汇聚节点'
       }

@@ -1,44 +1,46 @@
+import { Button } from '@arco-design/web-react';
 import { IconClose, IconPlusCircleFill } from '@arco-design/web-react/icon';
 import { etlEditorSignal } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
+import { cloneDeep } from 'lodash-es';
 import React, { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import { getSourceNodeIdsByTarget, setNodeDataAndResetDownstream } from '../utils';
 import styles from './index.module.less';
-import { Button } from '@arco-design/web-react';
-import { cloneDeep } from 'lodash-es';
 
 type UnionConfigProps = {
   onRegisterSave?: (fn: () => void) => void;
+  newPayload: any;
+  setNewPayload: (payload: any) => void;
 };
 
 /**
  * Union 节点的配置主界面
  * 初始化页面，渲染 UnionNodeConfig 组件
  */
-const UnionConfig: React.FC<UnionConfigProps> = ({ onRegisterSave }) => {
+const UnionConfig: React.FC<UnionConfigProps> = ({ onRegisterSave, newPayload, setNewPayload }) => {
   useSignals();
 
   const { setNodeData, curNode, nodeData, graphData } = etlEditorSignal;
 
-  const [data, setData] = useState<any[]>(cloneDeep(nodeData.value[curNode.value.id].config?.data) || []);
+  // 优先从 newPayload 恢复状态，如果没有则从 nodeData 初始化
+  const [data, setData] = useState<any[]>(
+    cloneDeep(newPayload?.config?.data || nodeData.value[curNode.value.id].config?.data) || []
+  );
 
   // 计算所有 columns 字段的去重并集
   const [colTitles, setColTitles] = useState<any[]>(
-    cloneDeep(nodeData.value[curNode.value.id].config?.colTitles) || []
+    cloneDeep(newPayload?.config?.colTitles || nodeData.value[curNode.value.id].config?.colTitles) || []
   );
   const [emptyColumn, setEmptyColumn] = useState<string[]>([]);
 
-  const [newPayload, setNewPayload] = useState<any>(cloneDeep(nodeData.value[curNode.value.id]));
+  //   const [newPayload, setNewPayload] = useState<any>(cloneDeep(nodeData.value[curNode.value.id]));
 
   useEffect(() => {
     onRegisterSave?.(handleSaveInner);
   }, [onRegisterSave]);
 
   useEffect(() => {
-    // console.log(nodeData.value);
-    // console.log(graphData.value);
-
     const tmpData = [];
     const tmpColumns = [];
 
@@ -84,15 +86,25 @@ const UnionConfig: React.FC<UnionConfigProps> = ({ onRegisterSave }) => {
       .filter((col) => col.fieldName && col.fieldName.trim() !== '')
       .map((col) => col);
 
-    //   初始化时候重置
-    if (data.length == 0 || data.length != tmpData.length) {
+    // 优先使用 newPayload 中的配置数据，这样可以保留用户在切换标签页时的修改
+    // 只有在当前 data 为空且 newPayload 有配置时，才从 newPayload 恢复
+    // 或者在没有 payload 配置且当前 data 为空或长度不匹配时才重置
+    const hasPayloadConfig = newPayload?.config?.data && newPayload.config.data.length > 0;
+    if (hasPayloadConfig && data.length === 0) {
+      // 如果 newPayload 有配置且当前 data 为空，恢复状态（用于组件重新挂载时恢复用户修改）
+      setData(cloneDeep(newPayload.config.data));
+      if (newPayload.config.colTitles && newPayload.config.colTitles.length > 0) {
+        setColTitles(cloneDeep(newPayload.config.colTitles));
+      }
+    } else if (!hasPayloadConfig && (data.length == 0 || data.length != tmpData.length)) {
+      // 只有在没有 payload 配置且当前 data 为空或长度不匹配时才重置
       setData(tmpData);
       setColTitles(newColTitles);
 
       console.log('tmpData: ', tmpData);
       console.log('newColTitles: ', newColTitles);
     }
-  }, [nodeData, graphData]);
+  }, [nodeData, graphData, newPayload]);
 
   const handleSaveInner = () => {
     setNodeDataAndResetDownstream(newPayload, curNode.value.id, graphData.value, nodeData.value);

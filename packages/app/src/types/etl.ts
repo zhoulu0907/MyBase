@@ -39,6 +39,7 @@ export interface ETLDatasourceConfig {
   host: string;
   port: number;
   database: string;
+  jdbcUrl: string;
   username: string;
   password: string;
   connectMode?: string;
@@ -107,7 +108,7 @@ export interface ETLDatasourceOption {
 
 export interface ListAppETLDatasourceParams {
   applicationId: string;
-  writable: number;
+  writable?: number;
 }
 export interface ListTableColumnsReq {
   tableUuid: string;
@@ -137,7 +138,7 @@ export interface UpdateETLFlowReq {
 
 export interface UpdateWorkflowScheduleInfoReq {
   applicationId: string;
-  workflowId: string;
+  flowUuid: string;
   flowName: string;
   scheduleStrategy: string;
   config: any;

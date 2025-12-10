@@ -7,10 +7,9 @@ import appLicationManageSVG from '@/assets/images/terminal-window-line.svg';
 import userSVG from '@/assets/images/user-group.svg';
 import roleSVG from '@/assets/images/user.svg';
 import userInfoSVG from '@/assets/images/userInfo.svg';
-import { TENANT_MENUS } from '@/constants/permission';
-import { hasMenu } from '@/utils/permission';
 import { Button, Layout, Menu } from '@arco-design/web-react';
 import { IconMenuFold, IconMenuUnfold } from '@arco-design/web-react/icon';
+import { hasMenu, TENANT_MENUS } from '@onebase/common';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import type { MenuItemType } from './menuData';
@@ -51,7 +50,7 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
           title: '应用管理',
           icon: <img src={appLicationManageSVG} />,
           path: `/onebase/${tenantId}/setting/application`,
-          permissionKey: TENANT_MENUS.INFO
+          permissionKey: TENANT_MENUS.APP
         }
       ]
     },
@@ -112,7 +111,7 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
           title: '个人中心',
           icon: <img src={userInfoSVG} />,
           path: `/onebase/${tenantId}/setting/profile`,
-          permissionKey: TENANT_MENUS.INFO
+          permissionKey: TENANT_MENUS.PROFILE
         }
       ]
     },

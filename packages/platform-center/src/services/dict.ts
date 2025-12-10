@@ -1,6 +1,7 @@
+import { isRuntimeEnv } from '@onebase/common';
 import { PageParam, PageResult } from '../types/common';
 import { BatchConfigDictDataParams, DictData, DictDataForm, DictForm, DictItem } from '../types/dict';
-import { systemService } from './clients';
+import { runtimeService, systemService } from './clients';
 
 /**
  * 创建字典
@@ -58,7 +59,6 @@ export const updateDictData = (data: DictDataForm): Promise<void> => {
   return systemService.post('/dict-data/update', data);
 };
 
-
 /**
  * 更新字典数据状态
  */
@@ -105,5 +105,5 @@ export const batchConfigDictData = (data: BatchConfigDictDataParams): Promise<vo
  * 根据dict type获得字典数据列表
  */
 export const getDictDataByType = (id: string): DictData[] => {
-  return systemService.get(`/dict-data/simple-list-by-type?id=${id}`);
+  return (isRuntimeEnv() ? runtimeService : systemService).get(`/dict-data/simple-list-by-type?id=${id}`);
 };

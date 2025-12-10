@@ -5,13 +5,12 @@ import UserProfileAvatar from '@/components/UserProfileAvatar';
 
 import { useI18n } from '@/hooks/useI18n';
 import { appInfoSignal } from '@/store/app';
-import { UserPermissionManager } from '@/utils/permission';
 import { logout } from '@/utils/session';
 import { Divider, Dropdown, Layout, Menu, Typography } from '@arco-design/web-react';
 import { IconExport } from '@arco-design/web-react/icon';
 import { getApplication, type GetApplicationReq } from '@onebase/app';
-import { TokenManager } from '@onebase/common';
-import { CodeType, runtimeGetPermissionInfo } from '@onebase/platform-center';
+import { TokenManager, UserPermissionManager } from '@onebase/common';
+import { CodeType, getPermissionInfo } from '@onebase/platform-center';
 import { appIconMap } from '@onebase/ui-kit';
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
@@ -44,12 +43,10 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
 
   useEffect(() => {
     // 正则匹配 /onebase/runtime/ 后面的两个数字（appId 和 tenantId）
-    // 例子: /onebase/runtime/123944716126027776/141778708868268032
+    // 例子: /onebase/123944716126027776/141778708868268032/runtime
     // match[1] 是 appId, match[2] 是 tenantId
-    const match = location.pathname.match(/\/onebase\/runtime\/(\d+)\/(\d+)/);
-    console.log('match: ', match);
+    const match = location.pathname.match(/\/onebase\/(\d+)\/(\d+)\/runtime/);
     if (match && match[1]) {
-      console.log('match[1]: ', match[1]);
       handleGetApplication(match[1]);
     }
   }, []);
@@ -71,9 +68,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   };
 
   const getInfo = async () => {
-    // TODO(多租户): 等马老师修复
-    const res = await runtimeGetPermissionInfo(CodeType.CORP);
-    console.log(res);
+    const res = await getPermissionInfo(CodeType.CORP);
     UserPermissionManager.setUserPermissionInfo(res);
     const mobile = res.user?.mobile;
     const formatMobile = maskMobile(mobile);
@@ -97,8 +92,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
         </div>
       </Menu.Item>
       <Divider style={{ margin: '4px 0' }} />
-      {tokenInfo?.adminFlag && (
-        <Menu.Item
+      <Menu.Item
           key="setting"
           onClick={() => {
             navigate(`/onebase/${tenantId}/setting`);
@@ -108,8 +102,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
             <img src={BuildingLine} />
             <span>企业管理后台</span>
           </div>
-        </Menu.Item>
-      )}
+      </Menu.Item>
       <Menu.Item key="logout" onClick={handleLogout}>
         <IconExport style={{ color: '#F53F3F' }} />
         <Typography.Text type="error">{t('header.logout')}</Typography.Text>

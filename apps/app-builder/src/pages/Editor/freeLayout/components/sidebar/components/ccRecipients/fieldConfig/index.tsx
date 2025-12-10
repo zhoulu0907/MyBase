@@ -7,6 +7,7 @@ import './style.less';
 export default function FieldConfig({ setCcRecipientsConfigData, fieldPermConfig, ckOptions }) {
   const [nodeSwitch, setNodeSwitch] = useState<boolean>(fieldPermConfig?.useNodeConfig || false);
   const [tbData, setTbData] = useState(fieldPermConfig?.fieldConfigs);
+
   function changeNodeSwitch(flag: boolean) {
     setNodeSwitch(flag);
   }
@@ -43,7 +44,7 @@ export default function FieldConfig({ setCcRecipientsConfigData, fieldPermConfig
 
   function handleSave(row: any) {
     const newData = [...tbData];
-    const index = newData.findIndex((item) => row.fieldId === item.fieldId);
+    const index = newData.findIndex((item) => row.fieldName === item.fieldName);
     newData.splice(index, 1, { ...newData[index], ...row });
     setTbData(newData);
   }
@@ -78,10 +79,10 @@ export default function FieldConfig({ setCcRecipientsConfigData, fieldPermConfig
   ];
 
   const setTableData = (v: any) => {
-    const tableMap = new Map<string, any>(tbData?.map((item: any) => [item.fieldId, item]));
+    const tableMap = new Map<string, any>(tbData?.map((item: any) => [item.fieldName, item]));
     const addType = v?.map((item: any) => ({
       ...item,
-      fieldPermType: tableMap.has(item.fieldId) ? tableMap.get(item.fieldId).fieldPermType : 'read'
+      fieldPermType: tableMap.has(item.fieldName) ? tableMap.get(item.fieldName).fieldPermType : 'read'
     }));
     setTbData(addType);
   };

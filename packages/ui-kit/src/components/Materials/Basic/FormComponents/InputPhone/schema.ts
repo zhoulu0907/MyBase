@@ -43,7 +43,9 @@ import type {
   TTextAreaDefaultType,
   TTextDefaultType,
   TRadioDefaultType,
-  IDefaultValueConfigType
+  IDefaultValueConfigType,
+  ITextConfigType,
+  IPhoneType
 } from '../../../types';
 
 export interface XInputPhoneSchema {
@@ -52,11 +54,13 @@ export interface XInputPhoneSchema {
 }
 
 export type TXInputPhoneEditData = Array<
+  | ITextConfigType
   | ILabelConfigType
   | IPlaceholderConfigType
   | ITooltipConfigType
   | IDataFieldConfigType
   | IDefaultValueConfigType
+  | IPhoneType
   | IBooleanConfigType
   | IVerifyConfigType
   | IStatusConfigType<TStatusSelectKeyType>
@@ -167,7 +171,12 @@ const XInputPhone: XInputPhoneSchema = {
     //  数据绑定
     ...dataFieldConfig,
     // 默认值
-    defaultValueConfig,
+    {
+      key: 'defaultValueConfig',
+      name: '默认值',
+      type: CONFIG_TYPES.DEFAULT_VALUE,
+      valueType: 'phone'
+    },
     {
       key: 'phoneType',
       name: '类型',
@@ -207,7 +216,8 @@ const XInputPhone: XInputPhoneSchema = {
     dataField: [],
     defaultValueConfig: {
       type: DEFAULT_VALUE_TYPES.CUSTOM,
-      customValue: ''
+      customValue: '',
+      formulaValue: ''
     },
     phoneType: PHONE_TYPE.MOBILE,
     verify: {

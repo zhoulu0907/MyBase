@@ -383,6 +383,7 @@ const BatchConfigModal: React.FC<BatchConfigModalProps> = ({ visible, onCancel, 
         onCancel={onCancel}
         okText="确定"
         cancelText="取消"
+        maskClosable={false}
         confirmLoading={loading || isGenerating}
         style={{ width: 800 }}
       >

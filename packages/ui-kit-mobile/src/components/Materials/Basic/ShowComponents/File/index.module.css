@@ -1,0 +1,27 @@
+.fileItemOBMobile {
+  display: flex;
+  align-items: center;
+  line-height: 0.42rem;
+  background-color: #f7f8fa;
+  padding: 0.28rem;
+  border-radius: 0.16rem;
+  cursor: pointer;
+
+  &:hover {
+    background-color: rgb(var(--primary-1));
+  }
+
+  .fileItemName {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding-right: 0.16rem;
+    box-sizing: border-box;
+    font-size: 0.28rem;
+  }
+
+  .fileItemIcon {
+    font-size: 0.28rem;
+  }
+}

@@ -6,7 +6,6 @@ import PageManagerGuide from '@/assets/images/page_manaager_guide.svg';
 import { useI18n } from '@/hooks/useI18n';
 import PreviewContainer from '@/pages/Runtime/components/preview';
 import { useAppStore } from '@/store/store_app';
-import { useBasicEditorStore } from '@/store/store_editor';
 import { addParentIdToChildren } from '@/utils/menu';
 import { Button, Dropdown, Form, Input, Layout, Menu, Message, Tree } from '@arco-design/web-react';
 import { IconDown, IconEmpty, IconPlus, IconSearch } from '@arco-design/web-react/icon';
@@ -20,6 +19,7 @@ import {
   menuSignal,
   MenuType,
   PageType,
+  RELATION_TYPE,
   RootParentPage,
   updateApplicationMenu,
   updateApplicationMenuOrder,
@@ -38,11 +38,13 @@ import {
 } from '@onebase/app';
 import { pagesRuntimeSignal } from '@onebase/common';
 import { EDITOR_TYPES } from '@onebase/ui-kit';
+import { currentEditorSignal } from '@onebase/ui-kit/src/signals/current_editor';
 import { useSignals } from '@preact/signals-react/runtime';
 import { debounce } from 'lodash-es';
 import { useCallback, useEffect, useState, type FC } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ReactSVG } from 'react-svg';
+import { RELATIONSHIP_TYPE } from '../DataFactory/utils/types';
 import CopyModal from './components/Modals/CopyModal';
 import CreateModal from './components/Modals/CreateModal';
 import RenameModal from './components/Modals/RenameModal';
@@ -118,7 +120,7 @@ const PageManagerPage: FC = () => {
   const initTreeItemWidth = 146;
   const cutTreeItemWidth = 25;
 
-  const { clearIsEditMode } = useBasicEditorStore();
+  const { clearEditMode } = currentEditorSignal;
 
   const findFirstPage: any = (nodes: ApplicationMenu[]) =>
     nodes.reduce((found, node) => {
@@ -137,7 +139,7 @@ const PageManagerPage: FC = () => {
       getMenuList();
       getEntityList();
     }
-    clearIsEditMode();
+    clearEditMode();
   }, [curAppId]);
 
   useEffect(() => {
@@ -219,10 +221,19 @@ const PageManagerPage: FC = () => {
   const getEntityList = async () => {
     const appId: string = curAppId;
     const res: MetadataEntityPair[] = await getEntityListByApp(appId);
-    const entityOptions = res.map((entity) => ({
-      label: entity.entityName,
-      value: entity.entityId
-    }));
+
+    const entityOptions = res
+      .filter(
+        (entity) =>
+          // 过滤子表
+          entity.relationType !== RELATION_TYPE.SLAVE ||
+          (entity.relationType === RELATION_TYPE.SLAVE &&
+            !entity.relationshipTypes.includes(RELATIONSHIP_TYPE.SUBTABLE_ONE_TO_MANY))
+      )
+      .map((entity) => ({
+        label: entity.entityName,
+        value: entity.entityUuid
+      }));
     setEntityListOptions(entityOptions);
   };
 
@@ -339,7 +350,7 @@ const PageManagerPage: FC = () => {
         menuName: createForm.getFieldValue('menuName'),
         menuType: MenuType.PAGE,
         menuIcon: createForm.getFieldValue('menuIcon'),
-        entityId: visibleCreateForm === 'page' ? createForm.getFieldValue('entityId') : ''
+        entityUuid: visibleCreateForm === 'page' ? createForm.getFieldValue('entityUuid') : ''
       };
 
       if (visibleCreateForm === 'page') {
@@ -379,7 +390,7 @@ const PageManagerPage: FC = () => {
           editorType = EDITOR_TYPES.FORM_EDITOR;
         }
 
-        navigate(`/onebase/${tenantId}/editor/${editorType}?pageSetId=${pageSetId}`);
+        navigate(`/onebase/${tenantId}/editor/${editorType}?pageSetId=${pageSetId}&appId=${curAppId}`);
       }
     });
   };
@@ -460,7 +471,7 @@ const PageManagerPage: FC = () => {
 
     // 把编辑页菜单数据保存起来；
     sessionStorage.setItem('EDITOR_PAGE_INFO', JSON.stringify({ id: curMenu.value?.id, name, icon }));
-    navigate(`/onebase/${tenantId}/editor/${editorType}?pageSetId=${pageSetId}`);
+    navigate(`/onebase/${tenantId}/editor/${editorType}?pageSetId=${pageSetId}&appId=${curAppId}`);
   };
 
   // 菜单搜索

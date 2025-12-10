@@ -2,11 +2,11 @@
   width: 100%;
   overflow: visible !important;
 
-  .arco-collapse-item-content {
+  .pc-collapse-item-content {
     overflow: visible !important;
   }
 
-  .arco-collapse-item-header-title {
+  .pc-collapse-item-header-title {
     width: 100%;
   }
 

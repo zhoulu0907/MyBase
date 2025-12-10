@@ -34,7 +34,7 @@ export const ParallelBranchNodeRegistry: FlowNodeRegistry = {
   onAdd() {
     return {
       id: `parallel_branch_${nanoid(5)}`,
-      type: WorkflowNodeType.BRANCH_IN,
+      type: WorkflowNodeType.PARALLEL_BRANCH,
       data: {
         name: '并行分支'
       }

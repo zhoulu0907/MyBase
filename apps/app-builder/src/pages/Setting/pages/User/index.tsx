@@ -1,17 +1,16 @@
+import PlaceholderPanel from '@/components/PlaceholderPanel';
 import { listToTree } from '@/utils/tree';
 import { Layout } from '@arco-design/web-react';
+import { hasPermission, TENANT_DEPT_QUERY, TENANT_USER_QUERY } from '@onebase/common';
 import { getDeptList, getUserPage } from '@onebase/platform-center';
 import { useEffect, useState } from 'react';
 import DeptTreeCmp from './components/DeptTree';
 import UserTable from './components/UserTable';
-import PlaceholderPanel from '@/components/PlaceholderPanel';
-import { hasPermission } from '@/utils/permission';
-import { TENANT_USER_QUERY, TENANT_DEPT_QUERY } from '@/constants/permission';
 import styles from './index.module.less';
 const { Sider, Content } = Layout;
 
 export default function UserPage() {
-  const [selectedDeptId, setSelectedDeptId] = useState<number | undefined>(undefined);
+  const [selectedDeptId, setSelectedDeptId] = useState<string | undefined>(undefined);
   const [totalUserCount, setTotalUserCount] = useState<number>(0);
   const [deptTree, setDeptTree] = useState<any[]>([]);
   const [deptLoading, setDeptLoading] = useState<boolean>(false); // 部门数据加载状态
@@ -55,6 +54,7 @@ export default function UserPage() {
             onDeptSelect={setSelectedDeptId}
             totalUserCount={totalUserCount}
             treeData={deptTree}
+            setDeptTree = {setDeptTree}
             deptLoading={deptLoading}
           />
         </PlaceholderPanel>
