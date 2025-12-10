@@ -51,7 +51,7 @@ export class HttpClient {
   private setupInterceptors(): void {
     // 请求拦截器
     this.instance.interceptors.request.use(
-      (config) => {
+      async (config) => {
         // 添加请求时间戳
         config.params = {
           ...config.params,
@@ -67,6 +67,12 @@ export class HttpClient {
             config.headers['X-Tenant-Id'] = tenantInfo?.tenantId;
           }
         }
+
+        // =========================== 签名校验开始 ===========================
+        // const signature = await generateSignature(config);
+        // // 将签名信息添加到请求头
+        // Object.assign(config.headers, signature.headers);
+        // =========================== 签名校验结束 ===========================
 
         let appId = getHashQueryParam('appId');
         if (!appId) {
