@@ -1,8 +1,14 @@
 import { Divider, Form } from '@arco-design/web-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import { useSignals } from '@preact/signals-react/runtime';
-import { getComponentWidth, COMPONENT_GROUP_NAME, type GridItem, usePageEditorSignal } from '@onebase/ui-kit';
+import {
+  getWorkbenchComponentWidth,
+  COMPONENT_GROUP_NAME,
+  EDITOR_TYPES,
+  type GridItem,
+  usePageEditorSignal
+} from '@onebase/ui-kit';
 import { useWorkbenchContainer } from '../../hooks/use-workbench-container';
 import { useWorkbenchHandlers } from '../../hooks/use-workbench-handlers';
 import { WorkbenchItem } from './components/workbench-item';
@@ -27,6 +33,12 @@ export default function WorkbenchWorkspace() {
 
   useSignals();
 
+  const rawEditorContext = usePageEditorSignal(EDITOR_TYPES.WORKBENCH_EDITOR);
+  const editorContext = rawEditorContext as ReturnType<typeof usePageEditorSignal> & {
+    workbenchComponents?: GridItem[];
+    setWorkbenchComponents?: (components: GridItem[]) => void;
+  };
+
   const {
     curComponentID,
     setCurComponentID,
@@ -35,37 +47,70 @@ export default function WorkbenchWorkspace() {
     pageComponentSchemas,
     setPageComponentSchemas,
     delPageComponentSchemas,
-    components,
     setComponents,
+    workbenchComponents,
+    setWorkbenchComponents,
     setShowDeleteButton
-  } = usePageEditorSignal();
+  } = editorContext;
+
+  const currentComponents = useMemo(() => {
+    return (workbenchComponents as GridItem[] | undefined) ?? [];
+  }, [workbenchComponents]);
+  const updateComponents = (setWorkbenchComponents ?? setComponents) as (items: GridItem[]) => void;
 
   // 处理组件列表变化
   useEffect(() => {
-    setShowEmpty(components.length === 0);
-  }, [components]);
+    setShowEmpty(currentComponents.length === 0);
+  }, [currentComponents]);
 
   // 事件处理
   const handlers = useWorkbenchHandlers({
     pageComponentSchemas,
     setPageComponentSchemas,
     delPageComponentSchemas,
-    setComponents,
+    setComponents: updateComponents,
     setCurComponentID,
     clearCurComponentID,
     setCurComponentSchema,
     setShowDeleteButton,
-    components
+    components: currentComponents
   });
+
+  // 获取或创建页面配置 schema
+  const getPageConfigSchema = () => {
+    return {
+      type: 'page',
+      config: {
+        showHeader: true,
+        showSidebar: true
+      }
+    };
+  };
 
   // 处理空白区域点击
   const handleBodyMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     const target = e.target as HTMLElement;
     if (target.id === 'workspace-content') {
-      clearCurComponentID();
+      clearCurComponentID?.();
       setShowDeleteButton(false);
+      // 设置页面配置 schema
+      const pageConfigSchema = getPageConfigSchema();
+      setCurComponentSchema(pageConfigSchema);
     }
   };
+
+  // 初始化时设置页面配置
+  useEffect(() => {
+    if (!curComponentID) {
+      setCurComponentSchema({
+        type: 'page',
+        config: {
+          showHeader: true,
+          showSidebar: true
+        }
+      });
+    }
+  }, [curComponentID, setCurComponentSchema]);
 
   return (
     <div className={styles.workbenchWorkspace}>
@@ -99,8 +144,8 @@ export default function WorkbenchWorkspace() {
         <div ref={containerRef} className={styles.workspaceBody} id="workspace-body" onMouseDown={handleBodyMouseDown}>
           <ReactSortable
             id="workspace-content"
-            list={components}
-            setList={setComponents}
+            list={currentComponents}
+            setList={updateComponents}
             filter={SORTABLE_CONFIG.filter}
             preventOnFilter={SORTABLE_CONFIG.preventOnFilter}
             sort={SORTABLE_CONFIG.sort}
@@ -110,10 +155,10 @@ export default function WorkbenchWorkspace() {
             onStart={handlers.handleDragStart}
             group={{ name: COMPONENT_GROUP_NAME }}
           >
-            {components
+            {currentComponents
               .filter((cp: GridItem) => cp.type !== 'entity')
               .map((cp: GridItem) => {
-                const currentWidth = getComponentWidth(pageComponentSchemas[cp.id], cp.type);
+                const currentWidth = getWorkbenchComponentWidth(pageComponentSchemas[cp.id], cp.type);
                 const isSelected = curComponentID === cp.id;
 
                 return (

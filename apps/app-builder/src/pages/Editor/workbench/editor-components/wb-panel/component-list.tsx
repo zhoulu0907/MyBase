@@ -49,6 +49,7 @@ export function ComponentList({ items, components, onItemsChange }: ComponentLis
           displayName={item.displayName}
           type={item.type}
           icon={item.icon || ''}
+          layout="column"
         />
       ))}
     </ReactSortable>

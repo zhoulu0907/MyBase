@@ -1,0 +1,111 @@
+.carouselList {
+  padding: 12px 0;
+
+  .listItem {
+    display: flex;
+    align-items: center;
+    padding: 8px;
+    margin-bottom: 8px;
+    border: 1px solid #e5e6eb;
+    border-radius: 4px;
+    background-color: #fff;
+
+    .dragHandle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      margin-right: 8px;
+      cursor: move;
+      color: #86909c;
+
+      &:hover {
+        color: rgb(var(--primary-6));
+      }
+    }
+
+    .itemContent {
+      flex: 1;
+      margin-right: 8px;
+      color: #1d2129;
+      font-size: 14px;
+    }
+
+    .itemActions {
+      display: flex;
+      gap: 8px;
+
+      .actionIcon {
+        cursor: pointer;
+        color: #86909c;
+        font-size: 16px;
+
+        &:hover {
+          color: rgb(var(--primary-6));
+        }
+      }
+    }
+  }
+
+  .addButton {
+    width: 100%;
+    margin-top: 8px;
+  }
+}
+
+.imageUploadContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.imagePreview {
+  width: 100%;
+  height: 200px;
+  border: 1px solid #e5e6eb;
+  border-radius: 4px;
+  overflow: hidden;
+  background: #f7f8fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .previewImage {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+}
+
+.uploadPlaceholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #86909c;
+  font-size: 12px;
+  gap: 4px;
+}
+
+.uploadActions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pasteHint {
+  color: #86909c;
+  font-size: 12px;
+  text-align: center;
+}
+
+.drawerActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e6eb;
+}
+

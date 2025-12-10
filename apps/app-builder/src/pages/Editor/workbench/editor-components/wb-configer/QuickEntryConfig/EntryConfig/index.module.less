@@ -1,0 +1,104 @@
+.entryConfig {
+  padding: 12px 0;
+
+  .entryItem {
+    display: flex;
+    align-items: center;
+    padding: 8px;
+    margin-bottom: 8px;
+    border: 1px solid #e5e6eb;
+    border-radius: 4px;
+    background-color: #fff;
+
+    .dragHandle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      margin-right: 8px;
+      cursor: move;
+      color: #86909c;
+
+      &:hover {
+        color: #165dff;
+      }
+    }
+
+    .entryContent {
+      flex: 1;
+      margin-right: 8px;
+    }
+
+    .entryActions {
+      display: flex;
+      gap: 8px;
+
+      .actionIcon {
+        cursor: pointer;
+        color: #86909c;
+        font-size: 16px;
+
+        &:hover {
+          color: #165dff;
+        }
+      }
+    }
+  }
+
+  .addEntryBtn {
+    width: 100%;
+    margin-top: 8px;
+  }
+}
+
+// 抽屉内容
+.drawerContent {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  color: #fff;
+}
+
+.drawerForm {
+  background: #fff;
+  border-radius: 16px;
+  color: #1d2129;
+
+  :global(.arco-form-item-label-col) {
+    color: #4e5969;
+    font-size: 12px;
+  }
+}
+
+.iconUploader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.iconUploaderAvatar {
+  width: 64px;
+  height: 64px;
+  background: #f2f3f5;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  img {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+.menuPicker {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+
+  :global(.arco-input) {
+    background: #f7f8fa;
+  }
+}
+
