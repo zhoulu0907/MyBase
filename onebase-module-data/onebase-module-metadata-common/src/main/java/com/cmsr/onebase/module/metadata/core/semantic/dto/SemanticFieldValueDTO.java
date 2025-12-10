@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 import java.util.Date;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -366,28 +367,27 @@ public class SemanticFieldValueDTO<T> {
             throw err("非法的 LocalDate 值", LocalDate.class);
         }
         if (rawType == LocalDateTime.class) {
-            if (value instanceof LocalDateTime) return value;
-            if (value instanceof String s) {
-                LocalDateTime dt = parseLocalDateTime(s.trim());
-                if (dt == null) throw err("LocalDateTime 解析失败", LocalDateTime.class);
-                return dt;
+            // 直接类型匹配
+            if (value instanceof LocalDateTime ldt) return ldt;
+            if (value instanceof OffsetDateTime odt) return odt.toLocalDateTime();
+            if (value instanceof java.sql.Timestamp ts) return ts.toLocalDateTime();
+            if (value instanceof Instant inst) return LocalDateTime.ofInstant(inst, ZoneId.systemDefault());
+            // java.util.Date 及子类
+            if (value instanceof Date d) {
+                if (d instanceof java.sql.Date sd) return sd.toLocalDate().atStartOfDay();
+                return LocalDateTime.ofInstant(Instant.ofEpochMilli(d.getTime()), ZoneId.systemDefault());
             }
+            // 时间戳数字
             if (value instanceof Number n) {
                 long epoch = n.longValue();
                 if (String.valueOf(epoch).length() <= 10) epoch *= 1000;
-                Instant inst = Instant.ofEpochMilli(epoch);
-                return LocalDateTime.ofInstant(inst, ZoneId.systemDefault());
+                return LocalDateTime.ofInstant(Instant.ofEpochMilli(epoch), ZoneId.systemDefault());
             }
-            if (value instanceof Date d) {
-                if (d instanceof java.sql.Timestamp ts) {
-                    return ts.toLocalDateTime();
-                }
-                if (d instanceof java.sql.Date sd) {
-                    return sd.toLocalDate().atStartOfDay();
-                }
-                return LocalDateTime.ofInstant(Instant.ofEpochMilli(d.getTime()), ZoneId.systemDefault());
-            }
-            throw err("非法的 LocalDateTime 值", LocalDateTime.class);
+            // 兜底：任何类型都转为字符串后解析
+            String strVal = String.valueOf(value).trim();
+            LocalDateTime dt = parseLocalDateTime(strVal);
+            if (dt != null) return dt;
+            throw err("LocalDateTime 解析失败, actualType=" + value.getClass().getName() + ", value=" + strVal, LocalDateTime.class);
         }
         if (rawType == Boolean.class) {
             if (value instanceof Boolean) return value;
@@ -436,16 +436,30 @@ public class SemanticFieldValueDTO<T> {
     }
 
     private LocalDateTime parseLocalDateTime(String s) {
+        if (s == null || s.isEmpty()) return null;
+        // 标准 ISO 格式
         try { return LocalDateTime.parse(s); } catch (Exception ignore) {}
-        String[] fmts = {"yyyy-MM-dd HH:mm:ss","yyyy/MM/dd HH:mm:ss","yyyyMMddHHmmss","yyyy-MM-dd'T'HH:mm:ss"};
-        for (String f : fmts) {
-            try { return LocalDateTime.parse(s, DateTimeFormatter.ofPattern(f)); } catch (Exception ignore) {}
+        // 带时区的 OffsetDateTime
+        try { return OffsetDateTime.parse(s).toLocalDateTime(); } catch (Exception ignore) {}
+        // PostgreSQL timestamptz 格式：去除尾部时区偏移（如 +08、+08:00、-05:30）
+        String normalized = s.replaceAll("[+-]\\d{2}(:\\d{2})?$", "").trim().replace('T', ' ');
+        // 灵活解析：支持可选微秒
+        try {
+            DateTimeFormatter flexible = new java.time.format.DateTimeFormatterBuilder()
+                .appendPattern("yyyy-MM-dd HH:mm:ss")
+                .optionalStart().appendFraction(java.time.temporal.ChronoField.NANO_OF_SECOND, 0, 9, true).optionalEnd()
+                .toFormatter();
+            return LocalDateTime.parse(normalized, flexible);
+        } catch (Exception ignore) {}
+        // 其他格式
+        for (String fmt : new String[]{"yyyy/MM/dd HH:mm:ss", "yyyyMMddHHmmss"}) {
+            try { return LocalDateTime.parse(s, DateTimeFormatter.ofPattern(fmt)); } catch (Exception ignore) {}
         }
+        // 时间戳
         try {
             long epoch = Long.parseLong(s);
-            if (String.valueOf(epoch).length() <= 10) epoch *= 1000;
-            Instant inst = Instant.ofEpochMilli(epoch);
-            return LocalDateTime.ofInstant(inst, ZoneId.systemDefault());
+            if (s.length() <= 10) epoch *= 1000;
+            return LocalDateTime.ofInstant(Instant.ofEpochMilli(epoch), ZoneId.systemDefault());
         } catch (Exception ignore) {}
         return null;
     }
