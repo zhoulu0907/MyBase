@@ -17,6 +17,7 @@ import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.app.api.auth.AppAuthRoleUser;
 import com.cmsr.onebase.module.infra.api.config.ConfigApi;
 import com.cmsr.onebase.module.system.convert.user.UserConvert;
+import com.cmsr.onebase.module.system.dal.database.RoleDataRepository;
 import com.cmsr.onebase.module.system.dal.database.UserPostDataRepository;
 import com.cmsr.onebase.module.system.dal.database.UserRoleDataRepository;
 import com.cmsr.onebase.module.system.dal.database.user.UserDataRepository;
@@ -49,6 +50,7 @@ import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
@@ -59,6 +61,7 @@ import org.springframework.validation.annotation.Validated;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
@@ -112,6 +115,9 @@ public class UserServiceImpl implements UserService {
 
     @Resource
     private UserDataRepository userDataRepository;
+
+    @Autowired
+    private RoleDataRepository roleDataRepository;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -339,6 +345,11 @@ public class UserServiceImpl implements UserService {
         userDataRepository.update(updateObj);
         // 2.2 更新岗位
         updateUserPost(updateReqVO, updateObj);
+
+        // 2.3 更新用户角色关联
+        if (CollUtil.isNotEmpty(updateReqVO.getRoleIds())) {
+            permissionService.assignUserRoles(updateReqVO.getId(), updateReqVO.getRoleIds());
+        }
 
         // 3. 记录操作日志上下文
         LogRecordContext.putVariable(DiffParseFunction.OLD_OBJECT, BeanUtils.toBean(oldUser, UserInsertReqVO.class));
@@ -777,6 +788,56 @@ public class UserServiceImpl implements UserService {
         return userDataRepository.findAllByStatusAndDeptIds(CommonStatusEnum.ENABLE.getStatus(), deptIds);
 
 
+    }
+
+    @Override
+    public List<UserRespVO> getConvertUserPage(PageResult<AdminUserDO> pageResult) {
+
+        // 拼接数据
+        Map<Long, DeptDO> deptMap = deptService.getDeptMap(convertList(pageResult.getList(), AdminUserDO::getDeptId));
+        // 部门赋值
+        List<UserRespVO> userRespVOList = UserConvert.INSTANCE.convertList(pageResult.getList(), deptMap);
+
+        // 获取用户 ID 列表
+        List<Long> userIds = pageResult.getList().stream()
+                .map(AdminUserDO::getId)
+                .collect(Collectors.toList());
+
+        // 获取用户角色
+        List<UserRoleDO> userRoleDOList = userRoleDataRepository.getRoleByUserIds(userIds);
+
+        // 获取角色 ID 列表
+        Set<Long> roleIds = userRoleDOList.stream()
+                .map(UserRoleDO::getRoleId)
+                .collect(Collectors.toSet());
+        // 获取角色列表
+        List<RoleDO> roleDOList = roleDataRepository.findAllByIds(roleIds);
+        Map<Long, RoleDO> roleDOMap = roleDOList.stream()
+                .collect(Collectors.toMap(RoleDO::getId, Function.identity()));
+
+        //通过用户分组
+        Map<Long, List<UserRoleDO>> userRoleMap = userRoleDOList.stream()
+                .collect(Collectors.groupingBy(UserRoleDO::getUserId));
+
+        // 封装数据
+        userRespVOList.forEach(user -> {
+            List<UserRoleDO> userRoles = userRoleMap.getOrDefault(user.getId(), Collections.emptyList());
+            List<UserRespVO.UserRoleRespVO> roleRespVOs = userRoles.stream()
+                    .map(userRole -> {
+                        RoleDO role = roleDOMap.get(userRole.getRoleId());
+                        if (null != role) {
+                            UserRespVO.UserRoleRespVO roleResp = new UserRespVO.UserRoleRespVO();
+                            roleResp.setId(role.getId());
+                            roleResp.setName(role.getName());
+                            return roleResp;
+                        }
+                        return null;
+                    })
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+            user.setRoles(roleRespVOs);
+        });
+        return userRespVOList;
     }
 
     @Override

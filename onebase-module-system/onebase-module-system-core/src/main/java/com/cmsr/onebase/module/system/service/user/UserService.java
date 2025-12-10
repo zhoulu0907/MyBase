@@ -323,4 +323,11 @@ public interface UserService {
      * @return 用户简要信息分页列表
      */
     List<AdminUserDO> getUserListByStatusAndDeptId(DeptSimpleListRespVO reqVO);
+
+    /**
+     * 转换用户数据信息
+     * @param pageResult
+     * @return
+     */
+    List<UserRespVO> getConvertUserPage(PageResult<AdminUserDO> pageResult);
 }
