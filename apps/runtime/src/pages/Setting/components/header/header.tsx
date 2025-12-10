@@ -27,9 +27,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className, avatarUrl }) => {
 
   // 登出处理
   const handleLogout = async () => {
-    // TODO(mickey): 联调后打开
-    // await systemLogout();
-
+    // await runtimeLogout();
     logout(navigate);
   };
 
@@ -46,7 +44,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className, avatarUrl }) => {
         <div className={styles.adminInformation}>
           <UserProfileAvatar adminInfo={userPermissionInfo?.user} avatarUrl={avatarUrl} />
           <Typography.Text>{userPermissionInfo?.user?.nickname || ''}</Typography.Text>
-         <span className={styles.mobileColor}>{maskMobile(userPermissionInfo?.user?.mobile || '')}</span>
+          <span className={styles.mobileColor}>{maskMobile(userPermissionInfo?.user?.mobile || '')}</span>
         </div>
       </Menu.Item>
       <Divider style={{ margin: '4px 0' }} />

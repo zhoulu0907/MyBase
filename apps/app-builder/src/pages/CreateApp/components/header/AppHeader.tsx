@@ -13,6 +13,7 @@ import { Button, Layout, Menu, Tabs, Tooltip } from '@arco-design/web-react';
 import { IconArrowLeft } from '@arco-design/web-react/icon';
 import { AppStatus, getApplication, menuSignal, type GetApplicationReq } from '@onebase/app';
 import { getRuntimeURL, TokenManager, UserPermissionManager } from '@onebase/common';
+import { systemLogout } from '@onebase/platform-center';
 import { appIconMap } from '@onebase/ui-kit';
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
@@ -77,10 +78,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
 
   // 登出处理
   const handleLogout = async () => {
-    // TODO(mickey): 联调后打开
-    // await systemLogout();
-    TokenManager.clearToken();
-    UserPermissionManager.clearUserPermissionInfo();
+    await systemLogout();
     // 跳转到登录页
     logout(navigate);
   };
