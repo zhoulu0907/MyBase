@@ -217,4 +217,12 @@ public interface DefService extends IWarmService<Definition> {
      * @return Definition
      */
     Definition getPublishByFlowCode(String flowCode);
+
+    /**
+     * 根据流程定义UUID查询流程定义（当前运行态版本）
+     *
+     * @param defUuid 流程定义UUID
+     * @return Definition
+     */
+    Definition getByDefUuid(String defUuid);
 }

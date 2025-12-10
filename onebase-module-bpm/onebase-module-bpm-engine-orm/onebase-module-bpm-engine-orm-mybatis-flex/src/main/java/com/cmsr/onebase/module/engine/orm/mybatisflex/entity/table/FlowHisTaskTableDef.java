@@ -34,7 +34,7 @@ public class FlowHisTaskTableDef extends TableDef {
      */
     public final QueryColumn TASK_ID = new QueryColumn(this, "task_id");
 
-    
+
     public final QueryColumn CREATOR = new QueryColumn(this, "creator");
 
     /**
@@ -47,7 +47,7 @@ public class FlowHisTaskTableDef extends TableDef {
      */
     public final QueryColumn MESSAGE = new QueryColumn(this, "message");
 
-    
+
     public final QueryColumn UPDATER = new QueryColumn(this, "updater");
 
     /**
@@ -131,6 +131,11 @@ public class FlowHisTaskTableDef extends TableDef {
     public final QueryColumn DEFINITION_ID = new QueryColumn(this, "definition_id");
 
     /**
+     * 流程定义UUID
+     */
+    public final QueryColumn DEFINITION_UUID = new QueryColumn(this, "definition_uuid");
+
+    /**
      * 协作方式(1审批 2转办 3委派 4会签 5票签 6加签 7减签)
      */
     public final QueryColumn COOPERATE_TYPE = new QueryColumn(this, "cooperate_type");
@@ -153,7 +158,7 @@ public class FlowHisTaskTableDef extends TableDef {
     /**
      * 默认字段，不包含逻辑删除或者 large 等字段。
      */
-    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, DEFINITION_ID, INSTANCE_ID, TASK_ID, NODE_CODE, NODE_NAME, NODE_TYPE, TARGET_NODE_CODE, TARGET_NODE_NAME, APPROVER, COOPERATE_TYPE, COLLABORATOR, SKIP_TYPE, FLOW_STATUS, FORM_CUSTOM, FORM_PATH, EXT, MESSAGE, VARIABLE, LOCK_VERSION, CREATOR, CREATE_TIME, UPDATER, UPDATE_TIME, DELETED, TENANT_ID};
+    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, DEFINITION_ID, DEFINITION_UUID, INSTANCE_ID, TASK_ID, NODE_CODE, NODE_NAME, NODE_TYPE, TARGET_NODE_CODE, TARGET_NODE_NAME, APPROVER, COOPERATE_TYPE, COLLABORATOR, SKIP_TYPE, FLOW_STATUS, FORM_CUSTOM, FORM_PATH, EXT, MESSAGE, VARIABLE, LOCK_VERSION, CREATOR, CREATE_TIME, UPDATER, UPDATE_TIME, DELETED, TENANT_ID};
 
     public FlowHisTaskTableDef() {
         super("", "bpm_flow_his_task");

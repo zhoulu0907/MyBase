@@ -105,6 +105,11 @@ public class FlowSkipTableDef extends TableDef {
     public final QueryColumn DEFINITION_ID = new QueryColumn(this, "definition_id");
 
     /**
+     * 流程定义UUID
+     */
+    public final QueryColumn DEFINITION_UUID = new QueryColumn(this, "definition_uuid");
+
+    /**
      * 下一个流程节点的编码
      */
     public final QueryColumn NEXT_NODE_CODE = new QueryColumn(this, "next_node_code");
@@ -132,7 +137,7 @@ public class FlowSkipTableDef extends TableDef {
     /**
      * 默认字段，不包含逻辑删除或者 large 等字段。
      */
-    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, DEFINITION_ID, NOW_NODE_CODE, NOW_NODE_TYPE, NEXT_NODE_CODE, NEXT_NODE_TYPE, SKIP_NAME, SKIP_TYPE, SKIP_CONDITION, COORDINATE, LOCK_VERSION, CREATOR, CREATE_TIME, UPDATER, UPDATE_TIME, DELETED, TENANT_ID, EXT, PRIORITY, APPLICATION_ID, VERSION_TAG};
+    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, DEFINITION_ID, DEFINITION_UUID, NOW_NODE_CODE, NOW_NODE_TYPE, NEXT_NODE_CODE, NEXT_NODE_TYPE, SKIP_NAME, SKIP_TYPE, SKIP_CONDITION, COORDINATE, LOCK_VERSION, CREATOR, CREATE_TIME, UPDATER, UPDATE_TIME, DELETED, TENANT_ID, EXT, PRIORITY, APPLICATION_ID, VERSION_TAG};
 
     public FlowSkipTableDef() {
         super("", "bpm_flow_skip");

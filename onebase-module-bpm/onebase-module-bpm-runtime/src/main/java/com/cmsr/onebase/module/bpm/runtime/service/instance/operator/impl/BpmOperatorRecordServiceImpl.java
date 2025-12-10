@@ -33,6 +33,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.dromara.warm.flow.core.entity.*;
 import org.dromara.warm.flow.core.enums.NodeType;
 import org.dromara.warm.flow.core.enums.SkipType;
+import org.dromara.warm.flow.core.service.DefService;
 import org.dromara.warm.flow.core.service.InsService;
 import org.dromara.warm.flow.core.service.NodeService;
 import org.dromara.warm.flow.core.service.TaskService;
@@ -70,6 +71,9 @@ public class BpmOperatorRecordServiceImpl implements BpmOperatorRecordService {
 
     @Resource(name = "bpmNodeService")
     private NodeService nodeService;
+
+    @Resource(name = "bpmDefService")
+    private DefService defService;
 
     @Resource
     private BpmFlowCcRecordRepository ccRecordRepository;

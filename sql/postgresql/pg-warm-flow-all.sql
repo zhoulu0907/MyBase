@@ -1,6 +1,7 @@
 CREATE TABLE bpm_flow_definition
 (
     id              int8         NOT NULL,
+    definition_uuid varchar(64)  NOT NULL,
     flow_code       varchar(40)  NOT NULL,
     flow_name       varchar(100) NOT NULL,
     model_value     varchar(40)  NOT NULL DEFAULT 'CLASSICS',
@@ -50,12 +51,16 @@ COMMENT ON COLUMN bpm_flow_definition.deleted IS '删除标志';
 COMMENT ON COLUMN bpm_flow_definition.tenant_id IS '租户id';
 COMMENT ON COLUMN bpm_flow_definition."application_id" IS '应用ID';
 COMMENT ON COLUMN bpm_flow_definition."version_tag" IS '版本标签';
+COMMENT ON COLUMN bpm_flow_definition."definition_uuid" IS '流程定义uuid';
+
+CREATE INDEX idx_bpm_flow_definition_uuid ON bpm_flow_definition(definition_uuid);
 
 CREATE TABLE bpm_flow_node
 (
     id              int8          NOT NULL,
     node_type       int2          NOT NULL,
     definition_id   int8          NOT NULL,
+    definition_uuid varchar(64)  NOT NULL,
     node_code       varchar(100)  NOT NULL,
     node_name       varchar(100)  NULL,
     permission_flag varchar(200)  NULL,
@@ -86,6 +91,7 @@ COMMENT ON TABLE bpm_flow_node IS '流程节点表';
 COMMENT ON COLUMN bpm_flow_node.id IS '主键id';
 COMMENT ON COLUMN bpm_flow_node.node_type IS '节点类型（0开始节点 1中间节点 2结束节点 3互斥网关 4并行网关）';
 COMMENT ON COLUMN bpm_flow_node.definition_id IS '流程定义id';
+COMMENT ON COLUMN bpm_flow_node.definition_uuid IS '流程定义uuid';
 COMMENT ON COLUMN bpm_flow_node.node_code IS '流程节点编码';
 COMMENT ON COLUMN bpm_flow_node.node_name IS '流程节点名称';
 COMMENT ON COLUMN bpm_flow_node.permission_flag IS '权限标识（权限类型:权限标识，可以多个，用@@隔开)';
@@ -110,10 +116,13 @@ COMMENT ON COLUMN bpm_flow_node.tenant_id IS '租户id';
 COMMENT ON COLUMN bpm_flow_node.application_id IS '应用ID';
 COMMENT ON COLUMN bpm_flow_node.version_tag IS '版本标签';
 
+CREATE INDEX idx_bpm_flow_node_def_uuid ON bpm_flow_node(definition_uuid);
+
 CREATE TABLE bpm_flow_skip
 (
     id             int8         NOT NULL,
     definition_id  int8         NOT NULL,
+    definition_uuid varchar(64)  NOT NULL,
     now_node_code  varchar(100) NOT NULL,
     now_node_type  int2         NULL,
     next_node_code varchar(100) NOT NULL,
@@ -139,6 +148,7 @@ COMMENT ON TABLE bpm_flow_skip IS '节点跳转关联表';
 
 COMMENT ON COLUMN bpm_flow_skip.id IS '主键id';
 COMMENT ON COLUMN bpm_flow_skip.definition_id IS '流程定义id';
+COMMENT ON COLUMN bpm_flow_skip.definition_uuid IS '流程定义uuid';
 COMMENT ON COLUMN bpm_flow_skip.now_node_code IS '当前流程节点的编码';
 COMMENT ON COLUMN bpm_flow_skip.now_node_type IS '当前节点类型（0开始节点 1中间节点 2结束节点 3互斥网关 4并行网关）';
 COMMENT ON COLUMN bpm_flow_skip.next_node_code IS '下一个流程节点的编码';
@@ -159,10 +169,13 @@ COMMENT ON COLUMN bpm_flow_skip."priority" IS '优先级';
 COMMENT ON COLUMN bpm_flow_skip.application_id IS '应用ID';
 COMMENT ON COLUMN bpm_flow_skip.version_tag IS '版本标签';
 
+CREATE INDEX idx_bpm_flow_skip_def_uuid ON bpm_flow_skip(definition_uuid);
+
 CREATE TABLE bpm_flow_instance
 (
     id              int8         NOT NULL,
     definition_id   int8         NOT NULL,
+    definition_uuid varchar(64)  NOT NULL,
     business_id     varchar(40)  NOT NULL,
     node_type       int2         NOT NULL,
     node_code       varchar(40)  NOT NULL,
@@ -187,6 +200,7 @@ COMMENT ON TABLE bpm_flow_instance IS '流程实例表';
 
 COMMENT ON COLUMN bpm_flow_instance.id IS '主键id';
 COMMENT ON COLUMN bpm_flow_instance.definition_id IS '对应flow_definition表的id';
+COMMENT ON COLUMN bpm_flow_instance.definition_uuid IS '流程定义uuid';
 COMMENT ON COLUMN bpm_flow_instance.business_id IS '业务id';
 COMMENT ON COLUMN bpm_flow_instance.node_type IS '节点类型（0开始节点 1中间节点 2结束节点 3互斥网关 4并行网关）';
 COMMENT ON COLUMN bpm_flow_instance.node_code IS '流程节点编码';
@@ -206,10 +220,13 @@ COMMENT ON COLUMN bpm_flow_instance.ext IS '扩展字段，预留给业务系统
 COMMENT ON COLUMN bpm_flow_instance.deleted IS '删除标志';
 COMMENT ON COLUMN bpm_flow_instance.tenant_id IS '租户id';
 
+CREATE INDEX idx_bpm_flow_instance_def_uuid ON bpm_flow_instance(definition_uuid);
+
 CREATE TABLE bpm_flow_task
 (
     id            int8         NOT NULL,
     definition_id int8         NOT NULL,
+    definition_uuid varchar(64)  NOT NULL,
     instance_id   int8         NOT NULL,
     node_code     varchar(100) NOT NULL,
     node_name     varchar(100) NULL,
@@ -230,6 +247,7 @@ COMMENT ON TABLE bpm_flow_task IS '待办任务表';
 
 COMMENT ON COLUMN bpm_flow_task.id IS '主键id';
 COMMENT ON COLUMN bpm_flow_task.definition_id IS '对应flow_definition表的id';
+COMMENT ON COLUMN bpm_flow_task.definition_uuid IS '流程定义uuid';
 COMMENT ON COLUMN bpm_flow_task.instance_id IS '对应flow_instance表的id';
 COMMENT ON COLUMN bpm_flow_task.node_code IS '节点编码';
 COMMENT ON COLUMN bpm_flow_task.node_name IS '节点名称';
@@ -245,10 +263,13 @@ COMMENT ON COLUMN bpm_flow_task.updater IS '更新人';
 COMMENT ON COLUMN bpm_flow_task.deleted IS '删除标志';
 COMMENT ON COLUMN bpm_flow_task.tenant_id IS '租户id';
 
+CREATE INDEX idx_bpm_flow_task_def_uuid ON bpm_flow_task(definition_uuid);
+
 CREATE TABLE bpm_flow_his_task
 (
     id               int8         NOT NULL,
     definition_id    int8         NOT NULL,
+    definition_uuid  varchar(64)  NOT NULL,
     instance_id      int8         NOT NULL,
     task_id          int8         NOT NULL,
     node_code        varchar(100) NULL,
@@ -279,6 +300,7 @@ COMMENT ON TABLE bpm_flow_his_task IS '历史任务记录表';
 
 COMMENT ON COLUMN bpm_flow_his_task.id IS '主键id';
 COMMENT ON COLUMN bpm_flow_his_task.definition_id IS '对应flow_definition表的id';
+COMMENT ON COLUMN bpm_flow_his_task.definition_uuid IS '流程定义uuid';
 COMMENT ON COLUMN bpm_flow_his_task.instance_id IS '对应flow_instance表的id';
 COMMENT ON COLUMN bpm_flow_his_task.task_id IS '对应flow_task表的id';
 COMMENT ON COLUMN bpm_flow_his_task.node_code IS '开始节点编码';
@@ -301,6 +323,8 @@ COMMENT ON COLUMN bpm_flow_his_task.create_time IS '任务开始时间';
 COMMENT ON COLUMN bpm_flow_his_task.update_time IS '审批完成时间';
 COMMENT ON COLUMN bpm_flow_his_task.deleted IS '删除标志';
 COMMENT ON COLUMN bpm_flow_his_task.tenant_id IS '租户id';
+
+CREATE INDEX idx_bpm_flow_his_task_def_uuid ON bpm_flow_his_task(definition_uuid);
 
 CREATE TABLE bpm_flow_user
 (

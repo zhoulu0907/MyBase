@@ -60,6 +60,11 @@ public class FlowDefinitionTableDef extends TableDef {
     public final QueryColumn CATEGORY = new QueryColumn(this, "category");
 
     /**
+     * 流程定义UUID
+     */
+    public final QueryColumn DEFINITION_UUID = new QueryColumn(this, "definition_uuid");
+
+    /**
      * 流程编码
      */
     public final QueryColumn FLOW_CODE = new QueryColumn(this, "flow_code");
@@ -142,7 +147,7 @@ public class FlowDefinitionTableDef extends TableDef {
     /**
      * 默认字段，不包含逻辑删除或者 large 等字段。
      */
-    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, FLOW_CODE, FLOW_NAME, MODEL_VALUE, CATEGORY, BPM_VERSION, IS_PUBLISH, FORM_CUSTOM, FORM_PATH, ACTIVITY_STATUS, LISTENER_TYPE, LISTENER_PATH, EXT, LOCK_VERSION, CREATE_TIME, UPDATER, UPDATE_TIME, DELETED, TENANT_ID, CREATOR, APPLICATION_ID, VERSION_TAG};
+    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, DEFINITION_UUID, FLOW_CODE, FLOW_NAME, MODEL_VALUE, CATEGORY, BPM_VERSION, IS_PUBLISH, FORM_CUSTOM, FORM_PATH, ACTIVITY_STATUS, LISTENER_TYPE, LISTENER_PATH, EXT, LOCK_VERSION, CREATE_TIME, UPDATER, UPDATE_TIME, DELETED, TENANT_ID, CREATOR, APPLICATION_ID, VERSION_TAG};
 
     public FlowDefinitionTableDef() {
         super("", "bpm_flow_definition");

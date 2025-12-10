@@ -77,6 +77,19 @@ public interface Task extends RootEntity {
     Task setDefinitionId(Long definitionId);
 
     /**
+     * 获取流程定义UUID（主关联）
+     * @return 流程定义UUID
+     */
+    String getDefinitionUuid();
+
+    /**
+     * 设置流程定义UUID（主关联）
+     * @param definitionUuid definitionUuid
+     * @return Task
+     */
+    Task setDefinitionUuid(String definitionUuid);
+
+    /**
      * 获取流程实例ID
      * @return 流程实例ID
      */
