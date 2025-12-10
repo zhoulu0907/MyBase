@@ -3,7 +3,6 @@ package com.cmsr.onebase.module.bpm.core.api.impl;
 import com.cmsr.onebase.framework.common.enums.VersionTagEnum;
 import com.cmsr.onebase.framework.uid.UidGenerator;
 import com.cmsr.onebase.module.bpm.api.datamanager.BpmDataManager;
-import com.cmsr.onebase.module.bpm.core.dal.database.BpmFlowAgentRepository;
 import com.cmsr.onebase.module.engine.orm.mybatisflex.entity.FlowDefinition;
 import com.cmsr.onebase.module.engine.orm.mybatisflex.entity.FlowNode;
 import com.cmsr.onebase.module.engine.orm.mybatisflex.entity.FlowSkip;
@@ -23,9 +22,6 @@ import java.util.*;
  */
 @Service
 public class BpmDataManagerImpl implements BpmDataManager {
-    @Resource
-    private BpmFlowAgentRepository agentRepository;
-
     @Resource
     private FlowDefinitionRepository flowDefinitionRepository;
 
@@ -157,9 +153,6 @@ public class BpmDataManagerImpl implements BpmDataManager {
      */
     @Override
     public void moveRuntimeToHistory(Long applicationId, Long versionTag) {
-        // 备份代理数据为历史版本
-        agentRepository.moveRuntimeToHistory(applicationId, versionTag);
-
         // 备份流程引擎数据为历史版本
         bpmEngineMoveRuntimeToHistory(applicationId, versionTag);
     }
@@ -169,9 +162,6 @@ public class BpmDataManagerImpl implements BpmDataManager {
       */
     @Override
     public void copyEditToRuntime(Long applicationId) {
-        // 编辑态数据变成运行态数据
-        agentRepository.copyEditToRuntime(applicationId);
-
         // 流程引擎编辑态数据变成运行态数据
         bpmEngineCopyEditToRuntime(applicationId);
     }
