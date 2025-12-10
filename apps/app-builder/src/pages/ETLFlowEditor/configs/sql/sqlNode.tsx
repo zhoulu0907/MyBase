@@ -1,5 +1,6 @@
 import { ETLDrawerTab, etlEditorSignal } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
+import { cloneDeep } from 'lodash-es';
 import React, { useEffect, useRef, useState } from 'react';
 import DataPreview from '../../components/dataPreview';
 import DataRemark from '../../components/dataRemark';
@@ -15,25 +16,36 @@ export const SQLNodeConfig: React.FC<SQLNodeConfigProps> = ({ onRegisterSave }) 
   const { curDrawerTab, nodeData, curNode, graphData } = etlEditorSignal;
   const saveFnRef = useRef<(() => void) | null>(null);
 
+  const [previewData, setPreviewData] = useState<PreviewData>({
+    columns: [],
+    data: []
+  });
+  const [newPayload, setNewPayload] = useState<any>(cloneDeep(nodeData.value[curNode.value.id]));
+
   const handleRegisterFromChild = (fn: () => void) => {
     saveFnRef.current = fn;
     onRegisterSave?.(fn);
   };
 
-  const [previewData, setPreviewData] = useState<PreviewData>({
-    columns: [],
-    data: []
-  });
-
   useEffect(() => {
     if (curDrawerTab.value == ETLDrawerTab.DATA_PREVIEW) {
-      handlePreviewData(graphData.value, nodeData.value, curNode.value, setPreviewData);
+      handlePreviewData(
+        graphData.value,
+        nodeData.value,
+        {
+          ...curNode.value,
+          ...newPayload
+        },
+        setPreviewData
+      );
     }
   }, [curDrawerTab.value]);
 
   return (
     <div className={styles.config}>
-      {curDrawerTab.value === ETLDrawerTab.DATA_CONFIG && <SQLConfig onRegisterSave={handleRegisterFromChild} />}
+      {curDrawerTab.value === ETLDrawerTab.DATA_CONFIG && (
+        <SQLConfig onRegisterSave={handleRegisterFromChild} newPayload={newPayload} setNewPayload={setNewPayload} />
+      )}
       {curDrawerTab.value === ETLDrawerTab.DATA_PREVIEW && (
         <DataPreview data={previewData.data} columns={previewData.columns} />
       )}

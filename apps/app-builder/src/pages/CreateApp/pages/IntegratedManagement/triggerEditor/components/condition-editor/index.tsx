@@ -96,8 +96,8 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
     }
   }, []);
 
-  const StaticValueComponent = (fieldName: string, fieldId: string, op: string) => {
-    const fieldValidationType = entityFieldValidationTypes.find((cc) => cc.fieldId == fieldId);
+  const StaticValueComponent = (fieldName: string, fieldKey: string, op: string) => {
+    const fieldValidationType = entityFieldValidationTypes.find((cc) => cc.fieldKey == fieldKey);
 
     if (
       fieldValidationType?.fieldTypeCode == ENTITY_FIELD_TYPE.TEXT.VALUE ||
@@ -310,7 +310,7 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
         NodeType.JAVASCRIPT
       ];
 
-      const fieldId = form.getFieldValue(item.field + '.fieldId');
+      const fieldId = form.getFieldValue(item.field + '.fieldKey');
       let targetField: any = {};
       for (let ele of fields) {
         targetField = ele?.children?.find((element) => element.key == fieldId);
@@ -486,7 +486,7 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
                                               {form.getFieldValue(item.field + '.operatorType') == FieldType.VALUE &&
                                                 StaticValueComponent(
                                                   item.field + '.value',
-                                                  form.getFieldValue(item.field + '.fieldId'),
+                                                  form.getFieldValue(item.field + '.fieldKey'),
                                                   form.getFieldValue(item.field + '.op')
                                                 )}
 
