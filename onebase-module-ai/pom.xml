@@ -18,4 +18,11 @@
         ai 模块下，支持ai对话，ai生成数字大屏
     </description>
 
+    <modules>
+        <module>onebase-module-ai-api</module>
+        <module>onebase-module-ai-build</module>
+        <module>onebase-module-ai-runtime</module>
+        <module>onebase-module-ai-core</module>
+    </modules>
+
 </project>
