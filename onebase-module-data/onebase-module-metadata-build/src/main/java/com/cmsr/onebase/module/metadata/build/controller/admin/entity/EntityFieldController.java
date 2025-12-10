@@ -19,6 +19,8 @@ import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.EntityF
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.EntityFieldBatchSaveRespVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.EntityFieldValidationTypesReqVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.EntityFieldValidationTypesRespVO;
+import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.FieldTypeValidationTypesReqVO;
+import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.FieldTypeValidationTypesRespVO;
 import org.modelmapper.ModelMapper;
 import com.cmsr.onebase.module.metadata.build.service.entity.MetadataEntityFieldBuildService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -136,12 +138,20 @@ public class EntityFieldController {
         EntityFieldBatchSaveRespVO resp = entityFieldService.batchSaveEntityFields(reqVO);
         return success(resp);
     }
-    //todo 这个接口需要新加一个可选入参tablename，根据tablename查到表中所有字段，然后返回所有这些字段对应的数据
+
     @PostMapping("/validation-types/query")
     @Operation(summary = "批量查询字段可选校验类型")
     public CommonResult<List<EntityFieldValidationTypesRespVO>> getFieldValidationTypes(
             @Valid @RequestBody EntityFieldValidationTypesReqVO reqVO) {
         List<EntityFieldValidationTypesRespVO> result = entityFieldService.getFieldValidationTypes(reqVO);
+        return success(result);
+    }
+
+    @PostMapping("/field-types/validation-types")
+    @Operation(summary = "根据字段类型批量查询校验类型")
+    public CommonResult<List<FieldTypeValidationTypesRespVO>> getValidationTypesByFieldTypes(
+            @Valid @RequestBody FieldTypeValidationTypesReqVO reqVO) {
+        List<FieldTypeValidationTypesRespVO> result = entityFieldService.getValidationTypesByFieldTypes(reqVO);
         return success(result);
     }
 }
