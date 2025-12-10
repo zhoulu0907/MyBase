@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.flow.context.express;
 
+import com.cmsr.onebase.module.flow.context.enums.OperatorTypeEnum;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.jexl3.JexlBuilder;
 import org.apache.commons.jexl3.JexlEngine;
@@ -41,17 +42,16 @@ public class ExpressionExecutor implements Serializable {
      */
     public boolean evaluate(OrExpression orExpression, Map<String, Object> vars) {
         String fullExpression = null;
-        JexlExpression expression = null;
         try {
             fullExpression = buildConditionExpression(orExpression);
-            expression = jexlEngine.createExpression(fullExpression);
+            JexlExpression expression = jexlEngine.createExpression(fullExpression);
             MapContext jc = new MapContext(vars);
             Object result = expression.evaluate(jc);
             return result instanceof Boolean ? (Boolean) result : Boolean.FALSE;
         } catch (Exception e) {
             String msg = "表达式执行异常, 执行表达式:" + orExpression
                     + ", 输入条件:" + vars
-                    + ", 完整表达式:" + Objects.toString(expression, "");
+                    + ", 完整表达式:" + Objects.toString(fullExpression, "");
             throw new RuntimeException(msg, e);
         }
     }
@@ -115,7 +115,7 @@ public class ExpressionExecutor implements Serializable {
      * @return 表达式字符串
      */
     private String buildExpressItemExpression(ExpressionItem expressionItem) {
-        if (expressionItem == null || expressionItem.getFieldTypeEnum() == null || expressionItem.getOp() == null) {
+        if (expressionItem == null || expressionItem.getOp() == null) {
             return "true";
         }
         String expression = buildExpression(expressionItem);
@@ -124,9 +124,10 @@ public class ExpressionExecutor implements Serializable {
 
     private String formatItemKey(String key) {
         if (key.contains(".")) {
-            String[] ss = StringUtils.split(key, ".");
-            if (!ss[1].startsWith("'") || !ss[1].endsWith("'")) {
-                return String.format("%s.'%s'", ss[0], ss[1]);
+            String key1 = StringUtils.substringBefore(key, ".");
+            String key2 = StringUtils.substringAfter(key, ".");
+            if (!key2.startsWith("'") || !key2.endsWith("'")) {
+                return String.format("%s.'%s'", key1, key2);
             }
         }
         return key;
@@ -257,6 +258,9 @@ public class ExpressionExecutor implements Serializable {
     private String formatValue(ExpressionItem expressionItem) {
         if (expressionItem.getFieldValue() == null) {
             return "null";
+        }
+        if (expressionItem.getOperatorType() == OperatorTypeEnum.VARIABLE) {
+            return formatItemKey(expressionItem.getFieldValue().toString());
         }
         if (expressionItem.getFieldValue() instanceof Collection) {
             return formatCollectionValue((Collection<?>) expressionItem.getFieldValue(), expressionItem);

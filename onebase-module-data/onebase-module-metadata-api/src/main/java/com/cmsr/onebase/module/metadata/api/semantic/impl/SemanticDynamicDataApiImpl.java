@@ -32,6 +32,8 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntit
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.core.row.Row;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -40,6 +42,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
+@Slf4j
 public class SemanticDynamicDataApiImpl implements SemanticDynamicDataApi {
 
     @Resource
@@ -181,8 +184,8 @@ public class SemanticDynamicDataApiImpl implements SemanticDynamicDataApi {
         // semanticPermissionContextLoader.loadPermissionContext(record);
         // 3) 数据完整性校验
         semanticDataIntegrityValidator.validate(record);
-        // 4) 功能权限校验
-        semanticPermissionValidator.validate(record);
+        // // 4) 功能权限校验
+        // semanticPermissionValidator.validate(record);
         // 5) 条件安全校验，避免误删全表
         SemanticConditionDTO cond = body.getSemanticConditionDTO();
         boolean noCond = cond == null
@@ -286,7 +289,7 @@ public class SemanticDynamicDataApiImpl implements SemanticDynamicDataApi {
         // semanticPermissionContextLoader.loadPermissionContext(record);
         // 3) 数据完整性与功能权限校验
         semanticDataIntegrityValidator.validate(record);
-        semanticPermissionValidator.validate(record);
+        // semanticPermissionValidator.validate(record);
         // 4) 执行更新
         semanticDataCrudService.update(record);
         // 5) 按主键读取更新后的详情

@@ -145,13 +145,14 @@ public class FlowConditionsProviderImpl implements ConditionsProvider {
 
     private Object getVariableByExpression(String exp, Map<String, Object> vars) {
         if (exp.contains(".")) {
-            String[] vv = StringUtils.split(exp, ".");
-            Object value = vars.get(vv[0]);
+            String key1 = StringUtils.substringBefore(exp, ".");
+            String key2 = StringUtils.substringAfter(exp, ".");
+            Object value = vars.get(key1);
             if (value == null) {
                 return null;
             }
             if (value instanceof Map map) {
-                return map.get(vv[1]);
+                return map.get(key2);
             }
             throw new IllegalArgumentException("变量错误: " + exp);
         } else {

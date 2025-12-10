@@ -150,7 +150,6 @@ public class SemanticDataCrudService {
         // 将 DTO 转换为可持久化的 Row；若未提供主键则由 uidGenerator 生成
         Row row = semanticValueAssembler.buildMainRow(entity, value, uidGenerator);
 
-        log.info("create record: {}", row);
         // 插入主表记录
         dynamicMetadataRepository.insert(entity.getTableName(), row);
 
@@ -356,7 +355,6 @@ public class SemanticDataCrudService {
         Object id = recordDTO.getEntityValue().getId();
         // 切换到目标数据源
         try {
-            log.info("read record: table={}, {}={}", entity.getTableName(), pkField, id);
             // 查询主表记录；若存在软删除字段则进行条件过滤
             Row row = dynamicMetadataRepository.selectMainById(entity.getTableName(), pkField, id, hasDeletedField(entity.getFields()));
             if (row == null) { return null; }
@@ -394,15 +392,12 @@ public class SemanticDataCrudService {
 
             // 引用解析与富化（如字典翻译、外键名称回填）
             semanticRefResolver.enrich(entity, resultVal);
-            log.info("read record result resultVal: {}", resultVal);
             // 设置读取结果到上下文，用于统一输出
             recordDTO.setResultValue(resultVal);
             // 转换为可序列化的 Map（适配前端 JSON 输出）
             Map<String, Object> resultData = recordDTO.getResultValue().getGlobalRawMapForJson();
-            log.info("read record result: {}", resultData);
             return resultData;
         } catch (Exception e) {
-            log.error("read record error: table={}, {}={}", entity.getTableName(), pkField, id, e);
             throw e;
         }
     }
@@ -837,7 +832,6 @@ public class SemanticDataCrudService {
                 Object cid = extractIdFromConnectorDto(dto);
                 String cidStr = cid == null ? null : String.valueOf(cid);
                 if (cidStr != null) { incomingIds.add(cidStr); }
-                log.info("子表连接器 upsert 子表记录，子表记录 ID：{}，存在IDs：{}", cidStr, existingById);
                 if (cidStr != null && existingById.containsKey(cidStr)) {
                     Row updateRow = buildConnectorUpdateRow(attrs, dto, childPk);
                     QueryWrapper uq = QueryWrapper.create().where(new QueryColumn(childPk).eq(cidStr));

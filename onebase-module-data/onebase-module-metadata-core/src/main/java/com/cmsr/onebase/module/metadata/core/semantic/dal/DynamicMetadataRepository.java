@@ -6,6 +6,7 @@ import com.mybatisflex.core.query.CPI;
 import com.mybatisflex.core.row.Db;
 import com.mybatisflex.core.row.Row;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
@@ -14,6 +15,7 @@ import com.cmsr.onebase.module.metadata.core.config.ApplicationDataSourceManager
 
 import org.springframework.stereotype.Repository;
 import com.cmsr.onebase.module.metadata.core.semantic.constants.SystemFieldConstants;
+import com.esotericsoftware.kryo.kryo5.minlog.Log;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -21,6 +23,7 @@ import java.util.List;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 
 @Repository
+@Slf4j
 public class DynamicMetadataRepository {
 
 

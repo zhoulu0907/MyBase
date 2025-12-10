@@ -54,7 +54,6 @@ public class AppDataManager {
         authFieldRepository.moveRuntimeToHistory(applicationId, versionTag);
         authDataGroupRepository.moveRuntimeToHistory(applicationId, versionTag);
         authPermissionRepository.moveRuntimeToHistory(applicationId, versionTag);
-        authRoleRepository.moveRuntimeToHistory(applicationId, versionTag);
     }
 
 
@@ -69,7 +68,6 @@ public class AppDataManager {
         authFieldRepository.copyEditToRuntime(applicationId);
         authDataGroupRepository.copyEditToRuntime(applicationId);
         authPermissionRepository.copyEditToRuntime(applicationId);
-        authRoleRepository.copyEditToRuntime(applicationId);
     }
 
     // 3、历史版本数据回滚为运行态数据

@@ -2,9 +2,7 @@ package com.cmsr.onebase.module.flow.context;
 
 import com.cmsr.onebase.module.flow.context.graph.NodeData;
 import com.google.common.base.Stopwatch;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.Data;
 
 import java.io.Serializable;
 import java.util.Collections;
@@ -19,31 +17,41 @@ import java.util.concurrent.TimeUnit;
  * @Author：huangjie
  * @Date：2025/9/5 16:12
  */
-@ToString
+@Data
 public class ExecuteContext implements Serializable {
 
-    @Setter
-    @Getter
     private String traceId;
 
-    @Setter
-    @Getter
+    /**
+     * 执行唯一标识，二次触发执行需要
+     */
+
     private String executionUuid;
 
-    @Setter
-    @Getter
+
     private Long applicationId;
 
-    @Setter
-    @Getter
+
     private Long versionTag;
 
-    @Setter
-    @Getter
+
     private Long processId;
 
-    @Setter
-    @Getter
+
+    /**
+     * 触发用户ID
+     * 界面触发：登录用户
+     * 后台触发： 流程的创建人
+     */
+    private Long triggerUserId;
+
+    /**
+     * 元数据接口调用传递过来的，也原样传递回去
+     * SystemFieldConstants
+     */
+    private Map<String, String> systemFields;
+
+
     private volatile boolean debugMode = false;
 
     //节点执行的结果
@@ -51,19 +59,16 @@ public class ExecuteContext implements Serializable {
 
     private Map<String, Object> nodeProcessCurResults = new ConcurrentHashMap<>();
 
-    @Getter
-    @Setter
+
     private volatile boolean executeEnd = false;
 
-    @Setter
-    @Getter
+
     private volatile String executionEndNodeType;
 
     /**
      * 上次执行结束节点
      */
-    @Setter
-    @Getter
+
     private volatile String executionEndNodeTag;
 
     /**
@@ -74,13 +79,15 @@ public class ExecuteContext implements Serializable {
     /**
      * 是否异常终止
      */
-    @Setter
-    @Getter
+
     private transient volatile Boolean abnormalTermination = Boolean.FALSE;
 
-    @Setter
-    @Getter
+    /**
+     * 异常终止的错误信息
+     */
+
     private transient volatile String terminationMessage;
+
 
     private transient Stopwatch stopwatch;
 

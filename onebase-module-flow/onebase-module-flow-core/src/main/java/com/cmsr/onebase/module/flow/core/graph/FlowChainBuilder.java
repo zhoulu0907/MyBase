@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.flow.core.graph;
 import com.cmsr.onebase.module.flow.context.graph.JsonGraph;
 import com.cmsr.onebase.module.flow.context.graph.JsonGraphNode;
 import com.cmsr.onebase.module.flow.context.graph.nodes.IfBlockNodeData;
+import com.cmsr.onebase.module.flow.context.graph.nodes.LoopNodeData;
 import com.cmsr.onebase.module.flow.context.graph.nodes.SwitchCaseNodeData;
 import com.cmsr.onebase.module.flow.context.graph.nodes.SwitchConditionNodeData;
 import com.yomahub.liteflow.builder.el.*;
@@ -66,8 +67,15 @@ public class FlowChainBuilder {
         throw new IllegalArgumentException("未知的节点类型: " + node.getType());
     }
 
-    private LoopELWrapper loopNodeDefine(JsonGraphNode node) {
-        return ELBus.forOpt(toDefine(node)).doOpt(blocksNodeDefine(node.getBlocks()));
+    private ELWrapper loopNodeDefine(JsonGraphNode node) {
+        LoopNodeData loopNodeData = (LoopNodeData) node.getData();
+        if (loopNodeData.isBreakMode()) {
+            return ELBus.catchException(ELBus.forOpt(toDefine(node)).doOpt(blocksNodeDefine(node.getBlocks())));
+        } else if (loopNodeData.isContinueMode()) {
+            return ELBus.forOpt(toDefine(node)).doOpt(ELBus.catchException(blocksNodeDefine(node.getBlocks())));
+        } else {
+            return ELBus.forOpt(toDefine(node)).doOpt(blocksNodeDefine(node.getBlocks()));
+        }
     }
 
     private SwitchELWrapper switchNodeDefine(JsonGraphNode node) {

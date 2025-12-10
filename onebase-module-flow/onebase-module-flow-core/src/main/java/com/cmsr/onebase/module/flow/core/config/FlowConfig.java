@@ -18,7 +18,7 @@ public class FlowConfig {
     @Bean
     public ThreadPoolTaskScheduler threadPoolTaskScheduler() {
         ThreadPoolTaskScheduler taskExecutor = new ThreadPoolTaskScheduler();
-        taskExecutor.setPoolSize(20);
+        taskExecutor.setPoolSize(10);
         return taskExecutor;
     }
 

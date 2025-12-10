@@ -35,7 +35,6 @@ public class FlowProcessManager implements ApplicationRunner, MessageListener<Ch
     private FlowCacheHandler flowCacheHandler;
 
 
-
     @Setter
     @Autowired
     private RedissonClient redissonClient;
@@ -86,7 +85,7 @@ public class FlowProcessManager implements ApplicationRunner, MessageListener<Ch
         //60秒把缓存中的数据更新做处理
         taskScheduler.scheduleWithFixedDelay(new UpdateCacheTask(), Duration.of(60, ChronoUnit.SECONDS));
         //300秒更新一次时间任务，避免任务上线失败
-        taskScheduler.scheduleAtFixedRate(new UpdateTimeJob(), Duration.of(300, ChronoUnit.SECONDS));
+        taskScheduler.scheduleWithFixedDelay(new UpdateTimeJob(), Duration.of(300, ChronoUnit.SECONDS));
     }
 
     @Override

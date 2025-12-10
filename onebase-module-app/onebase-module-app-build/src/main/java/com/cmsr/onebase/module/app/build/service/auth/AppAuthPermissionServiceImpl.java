@@ -84,7 +84,7 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
         AuthDetailFunctionPermissionVO functionPermissionVO = new AuthDetailFunctionPermissionVO();
         AppAuthPermissionDO authPermissionDO = authPermissionRepository.findByQuery(reqVO);
         if (authPermissionDO == null) {
-            authPermissionDO = AuthDefaultFactory.createAuthPermissionDO(reqVO);
+            authPermissionDO = AuthDefaultFactory.createDefaultAuthPermissionDO(reqVO);
         }
         // 页面权限
         functionPermissionVO.setIsPageAllowed(authPermissionDO.getIsPageAllowed());
@@ -113,7 +113,7 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
         //数据权限
         List<AppAuthDataGroupDO> authDataGroupDOS = authDataGroupRepository.findByQuery(reqVO);
         if (CollectionUtils.isEmpty(authDataGroupDOS)) {
-            AppAuthDataGroupDO authDataGroupDO = AuthDefaultFactory.createAuthDataGroupDO(reqVO);
+            AppAuthDataGroupDO authDataGroupDO = AuthDefaultFactory.createDefaultAuthDataGroupDO(reqVO);
             authDataGroupRepository.save(authDataGroupDO);
             authDataGroupDOS = List.of(authDataGroupDO);
         }
@@ -155,7 +155,7 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
         AuthDetailFieldPermissionVO fieldPermissionVO = new AuthDetailFieldPermissionVO();
         AppAuthPermissionDO authPermissionDO = authPermissionRepository.findByQuery(reqVO);
         if (authPermissionDO == null) {
-            authPermissionDO = AuthDefaultFactory.createAuthPermissionDO(reqVO);
+            authPermissionDO = AuthDefaultFactory.createDefaultAuthPermissionDO(reqVO);
         }
         fieldPermissionVO.setIsAllFieldsAllowed(authPermissionDO.getIsAllFieldsAllowed());
         Pair<List<AuthFieldVO>, List<AuthFieldVO>> fieldDOPair = queryAuthFields(entityUuid, reqVO);
@@ -176,7 +176,7 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
         //
         AppAuthPermissionDO authPermissionDO = authPermissionRepository.findByQuery(permissionReq);
         if (authPermissionDO == null) {
-            authPermissionDO = AuthDefaultFactory.createAuthPermissionDO(permissionReq);
+            authPermissionDO = AuthDefaultFactory.createDefaultAuthPermissionDO(permissionReq);
             authPermissionDO.setIsPageAllowed(reqVO.getIsPageAllowed());
             authPermissionRepository.save(authPermissionDO);
         } else {
@@ -199,7 +199,7 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
         //
         AppAuthPermissionDO authPermissionDO = authPermissionRepository.findByQuery(permissionReq);
         if (authPermissionDO == null) {
-            authPermissionDO = AuthDefaultFactory.createAuthPermissionDO(permissionReq);
+            authPermissionDO = AuthDefaultFactory.createDefaultAuthPermissionDO(permissionReq);
             authPermissionDO.setOperationTags(JsonUtils.toJsonString(reqVO.getOperationTags()));
             authPermissionRepository.save(authPermissionDO);
         } else {
@@ -285,7 +285,7 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
         //
         AppAuthPermissionDO authPermissionDO = authPermissionRepository.findByQuery(permissionReq);
         if (authPermissionDO == null) {
-            authPermissionDO = AuthDefaultFactory.createAuthPermissionDO(permissionReq);
+            authPermissionDO = AuthDefaultFactory.createDefaultAuthPermissionDO(permissionReq);
             authPermissionDO.setIsAllFieldsAllowed(reqVO.getIsAllFieldsAllowed());
             authPermissionRepository.save(authPermissionDO);
         } else {
@@ -338,7 +338,7 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
         //
         AppAuthPermissionDO authPermissionDO = authPermissionRepository.findByQuery(permissionReq);
         if (authPermissionDO == null) {
-            authPermissionDO = AuthDefaultFactory.createAuthPermissionDO(permissionReq);
+            authPermissionDO = AuthDefaultFactory.createDefaultAuthPermissionDO(permissionReq);
             authPermissionDO.setIsAllViewsAllowed(reqVO.getIsAllViewsAllowed());
             authPermissionRepository.save(authPermissionDO);
         } else {
