@@ -97,7 +97,6 @@ export interface BtnConfig extends BaseConfig<ButtonConfigType[]> {
 export interface FieldConfigType extends BaseConfig<FieldPermConfigType> {
   fieldPermConfig: FieldPermConfigType;
   ckOptions: any;
-  tableName: string;
 }
 export interface AdvancedConfig extends BaseConfig<AdvancedConfigType> {
   advancedConfig: AdvancedConfigType;

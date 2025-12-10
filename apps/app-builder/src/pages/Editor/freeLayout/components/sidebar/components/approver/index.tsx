@@ -50,7 +50,7 @@ export default function ApproveDreawer({ handleConfigSubmit, configData }: Appro
         }
       };
     }
-    
+
     const keys = Object.keys(initData);
     if (keys.length === 2 && keys.includes('name') && keys.includes('errorMsg')) {
       return {
@@ -79,7 +79,6 @@ export default function ApproveDreawer({ handleConfigSubmit, configData }: Appro
           ...newData.fieldPermConfig,
           ...data
         } as FieldPermConfigType;
-
       } else if (key === 'advancedConfig') {
         newData.advancedConfig = data as AdvancedConfigType;
       }
@@ -88,9 +87,41 @@ export default function ApproveDreawer({ handleConfigSubmit, configData }: Appro
   }
   const getMainMetaData = async () => {
     const mainMetaData = await getPageSetMetaData({ pageSetId: pageSetId });
-    const { parentFields, tableName } = await getEntityFieldsWithChildren(mainMetaData);
-    setTableName(tableName);
-    setCkOptions(parentFields);
+    const { parentFields, tableName, childEntities } = await getEntityFieldsWithChildren(mainMetaData);
+    const data: any = [];
+
+    parentFields.forEach((item: any) => {
+      const displayName = item.displayName || item.fieldDisplayName;
+      data.push({
+        displayName: displayName,
+        fieldDisplayName: displayName,
+        fieldName: item.fieldName,
+        tableName: tableName,
+        isSystemField: item.isSystemField
+      });
+    });
+    childEntities.forEach((item: any) => {
+      const { childTableName, childEntityName, childFields } = item;
+      data.push({
+        displayName: childEntityName,
+        fieldDisplayName: childEntityName,
+        fieldName: childTableName,
+        tableName: childTableName,
+        isSystemField: 0
+      });
+      childFields.forEach((childItem: any) => {
+        const displayName = childItem.displayName || childItem.fieldDisplayName;
+        data.push({
+          displayName: displayName,
+          fieldDisplayName: displayName,
+          fieldName: childItem.fieldName,
+          tableName: childTableName,
+          parentDisplayName: childEntityName,
+          isSystemField: childItem.isSystemField
+        });
+      });
+    });
+    setCkOptions(data);
   };
 
   useEffect(() => {
@@ -108,7 +139,6 @@ export default function ApproveDreawer({ handleConfigSubmit, configData }: Appro
             setApprovalConfigData={setApprovalConfigData}
             fieldPermConfig={fieldPermConfig || {}}
             ckOptions={ckOptions}
-            tableName={tableName}
           />
         );
       case ApproveDrawerTab.ADVANCED_SETTINGS:

@@ -18,7 +18,7 @@ const FieldTable = forwardRef(
   ({ onTableChange, title, tbData, setTableData, ckOptions, invert, columnsTable }: any, ref) => {
     // keyArr是专门给FieldModal弹窗用的，帮助弹窗反选
     const [curKeyArr, setCurKeyArr] = useState<any[]>([]);
-    const [selectRowkeyArr, setSelectRowKeyArr] = useState([]);
+    const [selectRowkeyArr, setSelectRowKeyArr] = useState<any[]>([]);
     const [fmVisible, setFmVisible] = useState(false);
     const baseColumns: TableColumnProps[] = [
       {
@@ -27,7 +27,7 @@ const FieldTable = forwardRef(
         dataIndex: 'tableName',
         render: (val: any, row: any) => {
           return (
-            <Button type="text" onClick={() => handleDelRow(row.fieldName)}>
+            <Button type="text" onClick={() => handleDelRow(row)}>
               删除
             </Button>
           );
@@ -41,18 +41,19 @@ const FieldTable = forwardRef(
     function handleAddFiled() {
       setFmVisible(true);
     }
-    function handleDelRow(fid: any) {
+    function handleDelRow(row: any) {
       let _data = [...tbData];
-      if (typeof fid === 'string') {
-        _data = _data.filter((item) => {
-          return item.fieldName !== fid;
-        });
-      } else if (Array.isArray(fid)) {
-        _data = _data.filter((item) => {
-          return fid.indexOf(item.fieldName) < 0;
-        });
-      }
+      _data = _data.filter((item) => {
+        const itemId = item.parentDisplayName ? item.parentDisplayName + item.fieldName : item.fieldName;
+        if (Array.isArray(row)) {
+          return !row.includes(itemId);
+        } else {
+          const fid = row.parentDisplayName ? row.parentDisplayName + row.fieldName : row.fieldName;
+          return itemId !== fid;
+        }
+      });
       setTableData(_data);
+      setSelectRowKeyArr([]);
     }
     function handleDelMass(fid: any) {
       handleDelRow(fid);
@@ -66,7 +67,8 @@ const FieldTable = forwardRef(
       if (Array.isArray(tbData)) {
         let cur_key_arr: any[] = [];
         tbData.forEach((item: any) => {
-          cur_key_arr.push(item.fieldName);
+          const fid = item.parentDisplayName ? item.parentDisplayName + item.fieldName : item.fieldName;
+          cur_key_arr.push(fid);
         });
         setCurKeyArr(cur_key_arr);
       }
@@ -76,6 +78,7 @@ const FieldTable = forwardRef(
     useImperativeHandle(ref, () => ({
       getTbData: () => tbData
     }));
+
     return (
       <>
         <div className="flex-btw">
@@ -90,7 +93,9 @@ const FieldTable = forwardRef(
         </div>
         <Table
           className="field-table-wrapper"
-          rowKey="fieldName"
+          rowKey={(record: any) =>
+            record.parentDisplayName ? record.parentDisplayName + record.fieldName : record.fieldName
+          }
           columns={[...(columnsTable || []), ...baseColumns]}
           data={tbData}
           pagination={false}
