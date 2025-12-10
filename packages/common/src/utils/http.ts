@@ -3,7 +3,6 @@ import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { BaseResponse, RequestConfig, RequestInterceptor, ResponseInterceptor } from '../types';
 import { isBuilderEnv, isPlatformEnv, isRuntimeEnv } from './env';
 import { getHashQueryParam } from './router';
-import { generateSignature } from './signature';
 import TokenManager from './token';
 
 /**
@@ -70,9 +69,9 @@ export class HttpClient {
         }
 
         // =========================== 签名校验开始 ===========================
-        const signature = await generateSignature(config);
-        // 将签名信息添加到请求头
-        Object.assign(config.headers, signature.headers);
+        // const signature = await generateSignature(config);
+        // // 将签名信息添加到请求头
+        // Object.assign(config.headers, signature.headers);
         // =========================== 签名校验结束 ===========================
 
         let appId = getHashQueryParam('appId');
