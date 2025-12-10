@@ -1,7 +1,10 @@
 package com.cmsr.onebase.module.system.framework.security.config;
 
+import cn.hutool.crypto.asymmetric.SM2;
+import com.cmsr.onebase.framework.common.consts.ENConstant;
 import com.cmsr.onebase.framework.security.config.AuthorizeRequestsCustomizer;
 import com.cmsr.onebase.module.system.enums.ApiConstants;
+import org.bouncycastle.crypto.engines.SM2Engine;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -12,6 +15,16 @@ import org.springframework.security.config.annotation.web.configurers.AuthorizeH
  */
 @Configuration(proxyBeanMethods = false, value = "systemSecurityConfiguration")
 public class SecurityConfiguration {
+
+    @Bean("pwdSM2")
+    public SM2 sm2() {
+        // 使用指定私钥初始化 SM2
+        String privateKey = ENConstant.EN_P_SM2KEYOLD;
+        SM2 sm2 = new SM2(privateKey, null);
+        // 使用 C1C3C2 模式解密,与前端保持一致
+        sm2.setMode(SM2Engine.Mode.C1C3C2);
+        return sm2;
+    }
 
     @Bean("systemAuthorizeRequestsCustomizer")
     public AuthorizeRequestsCustomizer authorizeRequestsCustomizer() {

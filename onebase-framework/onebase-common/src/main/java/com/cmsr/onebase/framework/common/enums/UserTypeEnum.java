@@ -21,7 +21,7 @@ public enum UserTypeEnum implements ArrayValuable<Integer> {
 
     PLATFORM(1, "平台管理员"),
     TENANT(2, "空间用户"),
-    CORP(3, "企业用户"),
+    CORP(3, "p企业用户"),
     THIRD(4, "三方用户");
 
     public static final Integer[] ARRAYS = Arrays.stream(values()).map(UserTypeEnum::getValue).toArray(Integer[]::new);

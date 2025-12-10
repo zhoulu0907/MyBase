@@ -55,35 +55,12 @@ public class BuildAuthController {
     @Resource
     private SecurityProperties securityProperties;
 
-    // @PostMapping("/admin-login")
-    // @PermitAll
-    // @Operation(summary = "使用账号密码登录")
-    // @Deprecated //todo 之后删除
-    // public CommonResult<AuthLoginRespVO> adminLogin(@RequestBody @Valid UserLoginReqVO reqVO) {
-    //     return success(authService.adminLogin(reqVO));
-    // }
-    //
-    // @PostMapping("/login")
-    // @PermitAll
-    // @Operation(summary = "使用账号密码登录")
-    // @Deprecated // todo 之后删除
-    // public CommonResult<AuthLoginRespVO> login(@RequestBody @Valid AuthLoginReqVO reqVO) {
-    //     return success(authService.login(reqVO));
-    // }
-
     @PostMapping("/tenant-login")
     @PermitAll
     @Operation(summary = "空间登录（账密）")
     public CommonResult<AuthLoginRespVO> tenantLogin(@RequestBody @Valid AuthLoginReqVO reqVO) {
         return success(authService.login(reqVO));
     }
-
-    // @PostMapping("/corp-login")
-    // @PermitAll
-    // @Operation(summary = "企业登录（手机号）")
-    // public CommonResult<AuthLoginRespVO> corpLogin(@RequestBody @Valid CorpAuthLoginReqVO reqVO) {
-    //     return success(authService.corpLogin(reqVO));
-    // }
 
     @PostMapping("/logout")
     @PermitAll
