@@ -42,6 +42,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
+import static com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticFieldTypeEnum.AUTO_CODE;
 
 /**
  * 动态数据 CRUD 服务（运行态，基于 RecordDTO）
@@ -150,7 +153,6 @@ public class SemanticDataCrudService {
         // 将 DTO 转换为可持久化的 Row；若未提供主键则由 uidGenerator 生成
         Row row = semanticValueAssembler.buildMainRow(entity, value, uidGenerator);
 
-        log.info("create record: {}", row);
         // 插入主表记录
         dynamicMetadataRepository.insert(entity.getTableName(), row);
 
@@ -356,7 +358,6 @@ public class SemanticDataCrudService {
         Object id = recordDTO.getEntityValue().getId();
         // 切换到目标数据源
         try {
-            log.info("read record: table={}, {}={}", entity.getTableName(), pkField, id);
             // 查询主表记录；若存在软删除字段则进行条件过滤
             Row row = dynamicMetadataRepository.selectMainById(entity.getTableName(), pkField, id, hasDeletedField(entity.getFields()));
             if (row == null) { return null; }
@@ -394,15 +395,12 @@ public class SemanticDataCrudService {
 
             // 引用解析与富化（如字典翻译、外键名称回填）
             semanticRefResolver.enrich(entity, resultVal);
-            log.info("read record result resultVal: {}", resultVal);
             // 设置读取结果到上下文，用于统一输出
             recordDTO.setResultValue(resultVal);
             // 转换为可序列化的 Map（适配前端 JSON 输出）
             Map<String, Object> resultData = recordDTO.getResultValue().getGlobalRawMapForJson();
-            log.info("read record result: {}", resultData);
             return resultData;
         } catch (Exception e) {
-            log.error("read record error: table={}, {}={}", entity.getTableName(), pkField, id, e);
             throw e;
         }
     }
@@ -669,14 +667,28 @@ public class SemanticDataCrudService {
      * @param value 当前值对象
      */
     private void generateAndApplyAutoNumbers(List<SemanticFieldSchemaDTO> fields, SemanticEntityValueDTO value) {
-        List<Long> fieldIds = fields.stream()
-                .filter(f -> Objects.equals(f.getFieldTypeEnum(), SemanticFieldTypeEnum.AUTO_CODE))
-                .map(SemanticFieldSchemaDTO::getId)
+        List<String> fieldIds = fields.stream()
+                .filter(f -> Objects.equals(f.getFieldTypeEnum(), AUTO_CODE))
+                .map(SemanticFieldSchemaDTO::getFieldUuid)
                 .toList();
         Map<String, String> autoNumbers = autoNumberService.generateDataNumbers(fieldIds, value.getCurrentEntityRawMap());
-        value.getFieldValueMap().forEach((key, fieldVaue) -> {
-            if (autoNumbers.containsKey(key)) { fieldVaue.setRawValue(autoNumbers.get(key)); }
-        });
+        for(String key : autoNumbers.keySet()){
+            String filedName = fields.stream().filter(semanticFieldSchemaDTO ->
+                semanticFieldSchemaDTO.getFieldUuid().equals(key)
+            ).map(SemanticFieldSchemaDTO::getFieldName).findFirst().orElse("");
+
+//            Long filedId = fields.stream().filter(semanticFieldSchemaDTO ->
+//                    semanticFieldSchemaDTO.getFieldUuid().equals(key)
+//            ).map(SemanticFieldSchemaDTO::getId).findFirst().orElse(0l);
+
+            SemanticFieldValueDTO<java.lang.Object> semanticFieldValueDTO = new SemanticFieldValueDTO<java.lang.Object>(AUTO_CODE);
+            semanticFieldValueDTO.setFieldId(null);
+            semanticFieldValueDTO.setFieldUuid(key);
+            semanticFieldValueDTO.setFieldName(filedName);
+            semanticFieldValueDTO.setRawValue(autoNumbers.get(key).toString());
+            value.getFieldValueMap().put(filedName,semanticFieldValueDTO);
+        }
+
     }
 
     /**
@@ -774,9 +786,9 @@ public class SemanticDataCrudService {
         if (connector == null || fields == null) { return; }
         List<SemanticFieldSchemaDTO> attrs = connector.getRelationAttributes();
         if (attrs == null || attrs.isEmpty()) { return; }
-        List<Long> fieldIds = attrs.stream()
-                .filter(f -> Objects.equals(f.getFieldTypeEnum(), SemanticFieldTypeEnum.AUTO_CODE))
-                .map(SemanticFieldSchemaDTO::getId)
+        List<String> fieldIds = attrs.stream()
+                .filter(f -> Objects.equals(f.getFieldTypeEnum(), AUTO_CODE))
+                .map(SemanticFieldSchemaDTO::getFieldUuid)
                 .toList();
         if (fieldIds.isEmpty()) { return; }
         Map<String, Object> raw = new HashMap<>();
@@ -837,7 +849,6 @@ public class SemanticDataCrudService {
                 Object cid = extractIdFromConnectorDto(dto);
                 String cidStr = cid == null ? null : String.valueOf(cid);
                 if (cidStr != null) { incomingIds.add(cidStr); }
-                log.info("子表连接器 upsert 子表记录，子表记录 ID：{}，存在IDs：{}", cidStr, existingById);
                 if (cidStr != null && existingById.containsKey(cidStr)) {
                     Row updateRow = buildConnectorUpdateRow(attrs, dto, childPk);
                     QueryWrapper uq = QueryWrapper.create().where(new QueryColumn(childPk).eq(cidStr));
