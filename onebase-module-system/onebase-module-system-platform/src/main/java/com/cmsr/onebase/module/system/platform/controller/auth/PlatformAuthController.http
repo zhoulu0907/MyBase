@@ -3,6 +3,30 @@
 # 请在IntelliJ IDEA中选择对应环境: local/dev/test/gateway
 # 登录成功后会自动更新token到环境变量中
 
+
+### 请求 /login 密文登录 => 成功
+POST {{baseUrl}}/system/auth/login-v2
+Content-Type: application/json
+tenant-id: {{adminTenantId}}
+tag: {{tag}}
+
+{
+  "username": "admin",
+  "password": "5219584fb796f14b38cdda92798f47ac2f5cb6e17f2124856ddabea835eac1a7eb36295b0063484608867b78ca1d5c1de8b54640160c29940821f2f6ae352d7988499a503069c7a492da4ca24596e357ab10370f21b656cd14721a0e863f2aa33c980ac321bc396e",
+  "deviceId":666
+}
+
+> {%
+    // 登录成功后自动更新token到环境变量
+    if (response.status === 200) {
+        const responseData = response.body;
+        if (responseData.code === 0 && responseData.data && responseData.data.accessToken) {
+            client.global.set("token", responseData.data.accessToken);
+            console.log("Token已更新: " + responseData.data.accessToken);
+        }
+    }
+%}
+
 ### 请求 /login 接口 => 成功
 POST {{baseUrl}}/system/auth/login
 Content-Type: application/json

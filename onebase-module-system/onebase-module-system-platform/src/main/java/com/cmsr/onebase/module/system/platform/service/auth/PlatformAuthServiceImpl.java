@@ -1,5 +1,7 @@
 package com.cmsr.onebase.module.system.platform.service.auth;
 
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.crypto.asymmetric.SM2;
 import com.anji.captcha.model.common.ResponseModel;
 import com.anji.captcha.model.vo.CaptchaVO;
 import com.anji.captcha.service.CaptchaService;
@@ -11,7 +13,6 @@ import com.cmsr.onebase.framework.common.enums.RunModeEnum;
 import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
 import com.cmsr.onebase.framework.common.util.validation.ValidationUtils;
 import com.cmsr.onebase.module.system.api.logger.dto.LoginLogCreateReqDTO;
-import com.cmsr.onebase.module.system.api.sms.SmsCodeApi;
 import com.cmsr.onebase.module.system.convert.auth.AuthConvert;
 import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2AccessTokenDO;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
@@ -20,10 +21,9 @@ import com.cmsr.onebase.module.system.enums.logger.LoginLogTypeEnum;
 import com.cmsr.onebase.module.system.enums.logger.LoginResultEnum;
 import com.cmsr.onebase.module.system.enums.oauth2.OAuth2ClientConstants;
 import com.cmsr.onebase.module.system.enums.tenant.TenantCodeEnum;
+import com.cmsr.onebase.module.system.framework.security.core.PwdEnHelper;
 import com.cmsr.onebase.module.system.service.logger.LoginLogService;
-import com.cmsr.onebase.module.system.service.member.MemberService;
 import com.cmsr.onebase.module.system.service.oauth2.OAuth2TokenService;
-import com.cmsr.onebase.module.system.service.permission.PermissionService;
 import com.cmsr.onebase.module.system.service.tenant.TenantService;
 import com.cmsr.onebase.module.system.service.user.UserService;
 import com.cmsr.onebase.module.system.vo.CaptchaVerificationReqVO;
@@ -31,14 +31,13 @@ import com.cmsr.onebase.module.system.vo.auth.AuthLoginReqVO;
 import com.cmsr.onebase.module.system.vo.auth.AuthLoginRespVO;
 import com.cmsr.onebase.module.system.vo.auth.AuthResetPasswordReqVO;
 import com.cmsr.onebase.module.system.vo.auth.UserLoginReqVO;
-import com.cmsr.onebase.module.system.vo.auth.*;
-import com.google.common.annotations.VisibleForTesting;
 import com.mzt.logapi.context.LogRecordContext;
 import com.mzt.logapi.starter.annotation.LogRecord;
 import jakarta.annotation.Resource;
 import jakarta.validation.Validator;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.bouncycastle.crypto.engines.SM2Engine;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Service;
@@ -66,13 +65,9 @@ public class PlatformAuthServiceImpl implements PlatformAuthService {
     @Resource
     private OAuth2TokenService oauth2TokenService;
     @Resource
-    private MemberService      memberService;
-    @Resource
     private Validator          validator;
     @Resource
     private CaptchaService     captchaService;
-    @Resource
-    private SmsCodeApi         smsCodeApi;
     /**
      * 验证码的开关，默认为 true
      */
@@ -89,9 +84,9 @@ public class PlatformAuthServiceImpl implements PlatformAuthService {
     @Resource
     private TenantService     tenantService;
     @Resource
-    private PermissionService permissionService;
-    @Resource
     private SecurityConfigApi securityConfigApi;
+    @Resource
+    private PwdEnHelper       pwdEnHelper;
 
     @Override
     public AdminUserDO authenticate(String username, String password) {
@@ -134,6 +129,37 @@ public class PlatformAuthServiceImpl implements PlatformAuthService {
     }
 
 
+
+    @Override
+    public AuthLoginRespVO loginV2(AuthLoginReqVO reqVO) {
+        // 解密密码（前端使用 SM2 公钥加密，这里使用私钥解密）
+        if (reqVO == null || StrUtil.isBlank(reqVO.getPassword())) {
+            throw exception(AUTH_LOGIN_BAD_CREDENTIALS, "密码为空");
+        }
+
+        // 测试用，临时解密字符串，实际使用时请从前端获取
+        String cipherText = reqVO.getPassword();
+        try {
+            // 使用指定私钥初始化 SM2（后续可从配置中心或密钥管理系统加载）
+            String privateKey = "deec05ae2b47efce4553372d172027b5fe5b6c72087bb8378efbb6c1fb2f98ae";
+            // 明确指定使用 C1C3C2 模式，与前端保持一致
+            SM2 sm2 = new SM2(privateKey, null);
+            // 使用 C1C3C2 模式解密
+            sm2.setMode(SM2Engine.Mode.C1C3C2);
+            // 将十六进制字符串转换为字节数组
+            byte[] hexBytes = cn.hutool.core.util.HexUtil.decodeHex(cipherText);
+            byte[] plainBytes = sm2.decrypt(hexBytes);
+            String plainPassword = new String(plainBytes, java.nio.charset.StandardCharsets.UTF_8);
+            reqVO.setPassword(plainPassword);
+        } catch (Exception e) {
+            log.error("SM2 密码解密失败", e);
+            // 为避免泄露加解密细节，对外统一表现为账号或密码错误
+            throw exception(AUTH_LOGIN_BAD_CREDENTIALS, "无效密码");
+        }
+
+        return login(reqVO);
+    }
+
     @Override
     @LogRecord(type = LOGIN_USER_TYPE, subType = LOGIN_USER_PLATFORM_SUB_TYPE, bizNo = "{{#user.id}}",
             success = LOGIN_USER_PLATFORM_SUCCESS)
@@ -141,9 +167,11 @@ public class PlatformAuthServiceImpl implements PlatformAuthService {
         // 校验验证码
         validateCaptcha(reqVO);
 
+        // 解密原文
+        reqVO.setPassword(pwdEnHelper.decryptHexStr(reqVO.getPassword()));
+
         // 增加日志输出，便于调试
         log.debug("platformTenantEnableCreateApp配置值: {}", platformTenantEnableCreateApp);
-
         // 确保配置值不为null，并且为false时才执行校验
         if (Boolean.FALSE.equals(platformTenantEnableCreateApp)) {
             log.info("平台租户创建应用功能已禁用，开始校验租户信息");
@@ -301,4 +329,5 @@ public class PlatformAuthServiceImpl implements PlatformAuthService {
         }
         userService.updateUserPassword(user.getId(), reqVO.getPassword());
     }
+
 }

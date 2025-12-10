@@ -1,0 +1,52 @@
+package com.cmsr.onebase.module.system.framework.security.core;
+
+import cn.hutool.core.util.HexUtil;
+import cn.hutool.crypto.asymmetric.SM2;
+import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.stereotype.Component;
+
+import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.AUTH_LOGIN_BAD_CREDENTIALS;
+
+@Component
+@Slf4j
+public class PwdEnHelper {
+
+    // see SecurityConfiguration#sm2()
+    @Resource(name = "pwdSM2")
+    private SM2 sm2;
+
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
+
+    public boolean isEecryptEnabled() {
+        // 从redis中读取配置
+        // stringRedisTemplate.opsForValue().set("system:security:pwd-encrypt-enabled", "true");
+        String enable = stringRedisTemplate.opsForValue().get("system:security:pwd-encrypt-enabled");
+        return "true".equalsIgnoreCase(enable);
+    }
+
+    public String decryptHexStr(String pwd) {
+        if (StringUtils.isBlank(pwd)) {
+            return null;
+        }
+        if (!isEecryptEnabled()) {
+            return pwd;
+        }
+        try {
+            // 测试用，临时解密字符串，实际使用时请从前端获取
+            byte[] cipherBytes = HexUtil.decodeHex(pwd);
+            // 将十六进制字符串转换为字节数组
+            byte[] plainBytes = sm2.decrypt(cipherBytes);
+            String plainPassword = new String(plainBytes, java.nio.charset.StandardCharsets.UTF_8);
+            return plainPassword;
+        } catch (Exception e) {
+            log.error("decryptHexStr SM2 密码解密失败", e);
+            // 为避免泄露加解密细节，对外统一表现为账号或密码错误
+            throw exception(AUTH_LOGIN_BAD_CREDENTIALS, "无效密码");
+        }
+    }
+}
