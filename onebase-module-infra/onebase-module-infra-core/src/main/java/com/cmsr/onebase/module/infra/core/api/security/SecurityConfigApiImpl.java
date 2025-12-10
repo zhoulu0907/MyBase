@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Set;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
@@ -66,9 +67,9 @@ public class SecurityConfigApiImpl implements SecurityConfigApi {
     private final PasswordValidator passwordValidator = new PasswordValidator();
 
     @Override
-    public List<Boolean> getTenantConfigItems(Long tenantId, String categoryCode) {
-        // securityConfigService.getTenantConfigItems(tenantId, );
-        return List.of();
+    @Operation(summary = "获取租户的脱敏字段配置")
+    public Set<String> getTenantDesensitizedFieldValues() {
+        return securityConfigService.getTenantDesensitizedFieldValues();
     }
 
     @Override

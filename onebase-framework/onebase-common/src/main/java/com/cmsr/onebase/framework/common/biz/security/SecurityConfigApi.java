@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * 密码校验API接口
@@ -25,7 +26,13 @@ import java.util.List;
 @FeignClient(name = "infra-service")
 public interface SecurityConfigApi {
 
-    List<Boolean> getTenantConfigItems(Long tenantId, String categoryCode);
+    /**
+     * 获取租户的脱敏字段配置
+     *
+     * @return 配置的值
+     */
+    @PostMapping("/get-config-value")
+    Set<String> getTenantDesensitizedFieldValues();
 
 
     /**
