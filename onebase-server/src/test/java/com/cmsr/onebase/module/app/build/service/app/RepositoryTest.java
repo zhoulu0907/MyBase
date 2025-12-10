@@ -110,14 +110,7 @@ public class RepositoryTest {
         System.out.println(page);
     }
 
-    @Test
-    public void test8() {
-        List<AppAuthDataGroupDO> appAuthDataGroupDOS = appAuthDataGroupRepository.findByAppIdAndRoleIdsAndMenuId(46699591748616192L, Set.of(104446011218624512L,
-                140498533732220928L,
-                46699591748616193L,
-                46699591748616194L), 95847916169691136L);
-        System.out.println(appAuthDataGroupDOS);
-    }
+
 
     @Test
     public void test9() {

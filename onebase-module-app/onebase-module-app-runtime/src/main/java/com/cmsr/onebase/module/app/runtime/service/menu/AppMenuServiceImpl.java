@@ -88,7 +88,7 @@ public class AppMenuServiceImpl implements AppMenuService {
         List<AppMenuDO> menuDOS = appMenuRepository.findVisibleByAppId(applicationId,
                 Set.of(MenuTypeEnum.PAGE.getValue(), MenuTypeEnum.GROUP.getValue()));
         if (!userRoleDTO.isAdminRole()) {
-            Set<String> blackMenuUuids = findBlackMenuUuids(applicationId, userRoleDTO.getRoleIds());
+            Set<String> blackMenuUuids = findBlackMenuUuids(applicationId, userRoleDTO.getRoleUuids());
             menuDOS = menuDOS.stream().filter(v -> !blackMenuUuids.contains(v.getMenuUuid())).toList();
         }
         if (CollectionUtils.isEmpty(menuDOS)) {
@@ -145,8 +145,8 @@ public class AppMenuServiceImpl implements AppMenuService {
         return children.isEmpty() ? null : children;
     }
 
-    private Set<String> findBlackMenuUuids(Long applicationId, Set<Long> roleIds) {
-        List<AppAuthPermissionDO> permissions = appAuthPermissionProvider.findPermissions(applicationId, roleIds);
+    private Set<String> findBlackMenuUuids(Long applicationId, Set<String> roleUuids) {
+        List<AppAuthPermissionDO> permissions = appAuthPermissionProvider.findPermissions(applicationId, roleUuids);
         Set<String> result = new HashSet<>();
         for (AppAuthPermissionDO permission : permissions) {
             if (NumberUtils.INTEGER_ZERO.equals(permission.getIsPageAllowed())
