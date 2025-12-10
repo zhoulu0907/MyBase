@@ -22,8 +22,8 @@ GET {{baseUrl}}/system/platform/admin/page
 Content-Type: application/json
 Authorization: Bearer {{token}}
 timestamp:1765296874000
-nonce:1765293314000
-sign:888
+nonce:KSQjLklkPDFnBEj1
+sign:018e5e79e46d93bd9e10f99104e51f1c861c351db948b3125a329e6ccd1bfdee
 
 ### 获得管理员列表分页 /admin-api/system//admin/page
 POST {{baseUrl}}/system/platform/admin/update-email
