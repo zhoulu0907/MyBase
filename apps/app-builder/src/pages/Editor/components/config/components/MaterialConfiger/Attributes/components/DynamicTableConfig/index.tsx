@@ -77,7 +77,6 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
   useEffect(() => {
     const newEntityList = [];
     if (mainEntity) {
-      console.log('mainEntity: ', mainEntity);
       newEntityList.push({
         entityId: mainEntity.entityId,
         entityUuid: mainEntity.entityUuid,
@@ -86,7 +85,6 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
       });
     }
     if (subEntities) {
-      console.log('subEntities: ', subEntities);
       newEntityList.push(
         ...subEntities.entities.map((entity: any) => ({
           entityId: entity.entityId,
