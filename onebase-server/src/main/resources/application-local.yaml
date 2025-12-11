@@ -78,4 +78,5 @@ justauth:
 
 liteflow:
   enable: true
+  version-tag: 0
   js-server-address: http://10.0.104.41:28392
