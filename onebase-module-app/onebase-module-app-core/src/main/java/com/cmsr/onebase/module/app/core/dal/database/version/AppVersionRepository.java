@@ -52,10 +52,10 @@ public class AppVersionRepository extends BaseAppRepository<AppVersionMapper, Ap
         return this.list(queryWrapper);
     }
 
-    public AppVersionDO findCurrentVersion(Long applicationId) {
+    public AppVersionDO findByApplicationIdAndVersionType(Long applicationId, int versionType) {
         QueryWrapper queryWrapper = this.query()
                 .where(APP_VERSION.APPLICATION_ID.eq(applicationId))
-                .where(APP_VERSION.ID.eq(applicationId));
+                .where(APP_VERSION.VERSION_TPYE.eq(versionType));
         return this.getOne(queryWrapper);
     }
 }

@@ -29,6 +29,11 @@ public class FlowDataManagerImpl implements FlowDataManager {
     }
 
     @Override
+    public void deleteRuntimeData(Long applicationId) {
+        flowCacheHandler.onApplicationDelete(applicationId);
+    }
+
+    @Override
     public void onlineRuntimeData(Long applicationId) {
         flowCacheHandler.onApplicationChange(applicationId);
     }
