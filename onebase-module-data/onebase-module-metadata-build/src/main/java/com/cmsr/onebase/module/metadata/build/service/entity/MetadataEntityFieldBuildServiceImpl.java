@@ -2563,9 +2563,6 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 // 新增：生成新的configUuid
                 config.setConfigUuid(UuidUtils.getUuid());
             }
-            if (existingConfig == null){
-                config.setConfigUuid(UuidUtils.getUuid());
-            }
             config.setFieldUuid(fieldUuid);
             config.setIsEnabled(autoNumber.getIsEnabled());
             // 从SEQUENCE规则项获取配置，如果没有SEQUENCE则使用默认值
