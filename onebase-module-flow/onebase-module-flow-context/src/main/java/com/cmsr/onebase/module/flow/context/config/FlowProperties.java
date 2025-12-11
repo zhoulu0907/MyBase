@@ -15,7 +15,7 @@ public class FlowProperties {
     private Long versionTag;
 
     public Long getVersionTag() {
-        if (versionTag == -1) {
+        if (versionTag < 0) {
             return ApplicationManager.getRequiredVersionTag();
         }
         return versionTag;
