@@ -4,6 +4,7 @@ import type { TableColumnProps } from '@arco-design/web-react';
 import { Button, Dropdown, Menu, Message, Space, Table, Tag } from '@arco-design/web-react';
 import { getEntityRelations, deleteRelation } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
+import { ALL_RELATIONSHIP_TYPE_MAP } from '@/pages/CreateApp/pages/DataFactory/utils/types';
 import EditRelationDrawer from '../../Drawers/EditRelationDrawer';
 import CreateRelationModal from '../../Modals/CreateRelationModal';
 import CreateMasterDetailModal from '../../Modals/CreateMasterDetailModal';
@@ -107,7 +108,7 @@ const Relations: React.FC<RelationsProps> = ({ entity, activeTab, reloadList }) 
       title: '关联类型',
       dataIndex: 'relationshipType',
       key: 'relationshipType',
-      render: (type: string) => <Tag color="purple">{type}</Tag>
+      render: (type: string) => <Tag color="purple">{ALL_RELATIONSHIP_TYPE_MAP[type]}</Tag>
     },
     {
       title: '目标资产',

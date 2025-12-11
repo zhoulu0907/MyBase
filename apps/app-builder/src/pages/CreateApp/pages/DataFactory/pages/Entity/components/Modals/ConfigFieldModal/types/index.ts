@@ -120,24 +120,16 @@ export interface AutoNumberRuleResponce {
   resetCycle?: string;
   resetOnInitialChange?: number;
   startValue?: number;
-  initialValue?:number
+  initialValue?: number;
 }
 // 创建自动编号规则
 export interface AutoNumberRule {
-  isEnabled: number;
-  numberMode: string;
-  digitWidth: number;
-  overflowContinue: number;
-  initialValue: number;
-  resetCycle: string;
-  resetOnInitialChange?: number;
-  startValue?: number;
   rules: AutoNumberRuleItem[];
 }
 
 export interface AutoNumberRuleItem {
   id?: string;
-  itemType:
+  itemType?:
     | typeof AUTO_CODE_RULE_TYPE.SEQUENCE
     | typeof AUTO_CODE_RULE_TYPE.DATE
     | typeof AUTO_CODE_RULE_TYPE.TEXT
@@ -146,20 +138,13 @@ export interface AutoNumberRuleItem {
   isEnabled?: number;
   format?: string;
   textValue?: string;
-}
-
-export interface AutoCodeRule {
-  id?: string;
-  itemType:
-    | typeof AUTO_CODE_RULE_TYPE.SEQUENCE
-    | typeof AUTO_CODE_RULE_TYPE.DATE
-    | typeof AUTO_CODE_RULE_TYPE.TEXT
-    | typeof AUTO_CODE_RULE_TYPE.FIELD_REF;
-  config: Record<string, unknown>;
-}
-
-export interface AutoCodeRules {
-  rules: AutoCodeRule[];
+  numberMode?: string;
+  digitWidth?: number;
+  overflowContinue?: number;
+  initialValue?: number;
+  resetCycle?: string;
+  resetOnInitialChange?: number;
+  startValue?: number;
 }
 
 // 资产及子表字段
