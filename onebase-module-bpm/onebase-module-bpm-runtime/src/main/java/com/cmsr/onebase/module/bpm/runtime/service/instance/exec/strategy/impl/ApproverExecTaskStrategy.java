@@ -341,16 +341,7 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
             boolean hasWritableFields = subWritableFieldNames != null
                     && subWritableFieldNames.stream().anyMatch(fieldName -> !Objects.equals(fieldName, subTableName));
 
-            // 检查是否传了子表数据（使用 containsKey 区分 key 不存在和值为 null）
-            boolean hasSubTableKey = entityData.containsKey(subTableName);
-
-            // 如果没传子表数据（key不存在），可以忽略，代表不做任何修改
-            if (!hasSubTableKey) {
-                log.debug("子表数据 key 不存在，跳过处理，subTableName: {}", subTableName);
-                continue;
-            }
-
-            // 获取要更新的子表数据（key存在，但值可能为null或[]）
+            // 获取要更新的子表数据（key不存在、值为null或空列表时，updateSubTableList都为空列表）
             Object updateSubTableDataObj = entityData.get(subTableName);
             @SuppressWarnings("unchecked")
             List<Map<String, Object>> updateSubTableList = updateSubTableDataObj instanceof List
@@ -381,19 +372,19 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
             // 删除数据（exist中有但update中没有）
             Set<String> deleteIds = new HashSet<>();
 
-            // 处理空列表或null的情况：如果传了空列表，所有exist中的id都应该在deleteIds中
+            // 处理子表未传、为null或空列表的情况：都表示删除所有数据
             if (CollectionUtils.isEmpty(updateSubTableList)) {
-                // 如果原来没有数据，不算删除，可以忽略（此时deleteIds为空）
-                if (CollectionUtils.isEmpty(existSubTableList)) {
-                    log.debug("子表原数据为空，传空列表不算删除，跳过处理，subTableName: {}", subTableName);
-                    continue;
-                }
-                // 如果原来有数据，传空列表算删除，将所有exist中的id都加入到deleteIds中
+                // 将所有exist中的id都加入到deleteIds中（表示删除）
                 for (Map<String, Object> existItem : existSubTableList) {
                     Object existId = existItem.get("id");
                     if (existId != null) {
                         deleteIds.add(convertIdToString(existId));
                     }
+                }
+                // 如果没有要删除的数据，跳过处理
+                if (deleteIds.isEmpty()) {
+                    log.debug("子表未传/为空/空列表，且原数据为空，跳过处理，subTableName: {}", subTableName);
+                    continue;
                 }
             } else {
                 // 处理 updateSubTableList，分离新增和更新
@@ -528,21 +519,9 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
             }
 
             // 第四步：将处理后的数据添加到结果中
-            // 如果整个子表都没有变化（无新增、无删除、无实际更新），可以不传子表数据
-            if (newItems.isEmpty() && deleteIds.isEmpty() && actualUpdateCount == 0) {
-                log.debug("子表无任何变化，跳过处理，subTableName: {}", subTableName);
-                continue;
-            }
-
-            if (!finalSubTableList.isEmpty()) {
-                editableEntityData.put(subTableName, finalSubTableList);
-                log.debug("处理子表完成，subTableName: {}, 新增: {}, 更新: {}, 删除: {}, 最终记录数: {}",
-                        subTableName, newItems.size(), actualUpdateCount, deleteIds.size(), finalSubTableList.size());
-            } else if (!deleteIds.isEmpty() && canAddOrDelete) {
-                // 如果只有删除操作，且可以删除，设置为空列表
-                editableEntityData.put(subTableName, Collections.emptyList());
-                log.debug("子表数据全部删除，subTableName: {}", subTableName);
-            }
+            editableEntityData.put(subTableName, finalSubTableList);
+            log.debug("处理子表完成，subTableName: {}, 新增: {}, 更新: {}, 删除: {}, 最终记录数: {}",
+                    subTableName, newItems.size(), actualUpdateCount, deleteIds.size(), finalSubTableList.size());
         }
     }
 
