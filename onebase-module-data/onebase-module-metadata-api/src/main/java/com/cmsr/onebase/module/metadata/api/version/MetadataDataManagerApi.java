@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.metadata.api.version;
 
-public interface MetadataVersionManagerApi {
+public interface MetadataDataManagerApi {
     /**
      * moveMetaDataRuntimeToHistory
      *

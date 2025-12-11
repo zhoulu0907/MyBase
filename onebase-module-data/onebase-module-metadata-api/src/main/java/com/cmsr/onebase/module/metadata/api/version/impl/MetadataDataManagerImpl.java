@@ -3,9 +3,11 @@ package com.cmsr.onebase.module.metadata.api.version.impl;
 import com.cmsr.onebase.module.metadata.core.dal.database.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.cmsr.onebase.module.metadata.api.version.MetadataVersionManagerApi;
+import com.cmsr.onebase.module.metadata.api.version.MetadataDataManagerApi;
+import org.springframework.stereotype.Service;
 
-public class MetadataVersionManagerImpl implements MetadataVersionManagerApi {
+@Service
+public class MetadataDataManagerImpl implements MetadataDataManagerApi {
 
     @Autowired
     private MetadataAppAndDatasourceRepository metadataAppAndDatasourceRepository;
