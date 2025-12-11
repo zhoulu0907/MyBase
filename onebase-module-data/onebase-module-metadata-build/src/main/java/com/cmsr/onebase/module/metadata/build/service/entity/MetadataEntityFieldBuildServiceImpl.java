@@ -422,7 +422,23 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         if (queryVO.getEntityId() != null && !queryVO.getEntityId().trim().isEmpty()) {
             entityUuid = idUuidConverter.toEntityUuid(queryVO.getEntityId().trim());
             queryWrapper.eq(MetadataEntityFieldDO::getEntityUuid, entityUuid);
+        } else if (queryVO.getTableName() != null && !queryVO.getTableName().trim().isEmpty()) {
+            // 根据tableName查询实体
+            MetadataBusinessEntityDO entity = metadataBusinessEntityRepository.getOne(
+                    metadataBusinessEntityRepository.query()
+                            .eq(MetadataBusinessEntityDO::getTableName, queryVO.getTableName().trim())
+            );
+            if (entity != null) {
+                entityUuid = entity.getEntityUuid();
+                queryWrapper.eq(MetadataEntityFieldDO::getEntityUuid, entityUuid);
+            }
         }
+
+        // 支持fieldName精确过滤
+        if (queryVO.getFieldName() != null && !queryVO.getFieldName().trim().isEmpty()) {
+            queryWrapper.eq(MetadataEntityFieldDO::getFieldName, queryVO.getFieldName().trim());
+        }
+
         if (queryVO.getKeyword() != null && !queryVO.getKeyword().trim().isEmpty()) {
             queryWrapper.like(MetadataEntityFieldDO::getFieldName, queryVO.getKeyword())
                     .or(MetadataEntityFieldDO::getDisplayName).like(queryVO.getKeyword());
@@ -2684,12 +2700,15 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         // 填充自动编号完整配置（统一规则项列表，包含SEQUENCE）
         MetadataAutoNumberConfigDO config = autoNumberConfigBuildService.getByFieldId(field.getFieldUuid());
         if (config != null) {
+            log.debug("找到字段 {} 的自动编号配置，configId: {}", field.getFieldUuid(), config.getId());
             // 基本配置
             AutoNumberConfigRespVO full = convertToAutoNumberConfigRespVO(config);
             // 构建统一规则项列表
             List<AutoNumberRuleVO> unifiedRules = buildUnifiedRuleVOList(config);
             full.setRuleItems(unifiedRules);
             vo.setAutoNumberConfig(full);
+        } else {
+            log.debug("字段 {} 没有配置自动编号", field.getFieldUuid());
         }
 
         // 填充数据选择配置（单选和多选都需要）
