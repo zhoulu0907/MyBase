@@ -10,10 +10,6 @@ export async function initInteractionRule(
   rules: InteractionRule[],
   pageComponentSchemas: any
 ) {
-  //   console.log('formValues: ', formValues);
-  //   console.log('rules: ', rules);
-  //   console.log('pageComponentSchemas: ', pageComponentSchemas);
-
   // 初始化一个map，用于后续交互规则处理
   const fieldMap: Record<string, any> = {};
   Object.entries(pageComponentSchemas).forEach(([key, value]: [string, any]) => {
@@ -23,8 +19,6 @@ export async function initInteractionRule(
       fieldMap[key.replaceAll('-', '')] = fieldValue;
     }
   });
-
-  //   console.log('fieldMap: ', fieldMap);
 
   let cpActions: Record<string, FormAction[]> = {};
 

@@ -13,11 +13,11 @@ import { findFieldPath } from '@/pages/CreateApp/pages/DataFactory/pages/Entity/
 import { Button, Cascader, Dropdown, Form, Input, Menu, Select, Tooltip } from '@arco-design/web-react';
 import { IconDelete, IconDragDotVertical, IconPen, IconPlus } from '@arco-design/web-react/icon';
 import { FilterEntityFields, type AppEntity, type AppEntityField } from '@onebase/app';
-import { getPopupContainer, useAppEntityStore, CONFIG_TYPES } from '@onebase/ui-kit';
-import { registerConfigRenderer } from '../../registry';
+import { CONFIG_TYPES, getPopupContainer, useAppEntityStore } from '@onebase/ui-kit';
 import React, { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import styles from '../../index.module.less';
+import { registerConfigRenderer } from '../../registry';
 
 export interface DynamicAutoCodeConfigProps {
   handlePropsChange: (key: string, value: any) => void;
@@ -312,7 +312,7 @@ const DynamicAutoCodeConfig: React.FC<DynamicAutoCodeConfigProps> = ({
           forceFallback={true}
           animation={150}
           onAdd={(e) => {
-            console.log('onAdd: ', e);
+            // console.log('onAdd: ', e);
           }}
           group={{
             name: 'autocode-col-item'
