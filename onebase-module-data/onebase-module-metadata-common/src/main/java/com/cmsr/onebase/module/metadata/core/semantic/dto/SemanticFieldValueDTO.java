@@ -270,6 +270,9 @@ public class SemanticFieldValueDTO<T> {
         } else if (value instanceof String s) {
             log.info("normalizeList: {}", s);
             String str = s.trim();
+            if (str.isEmpty()) {
+                return items;
+            }
             if (JsonUtils.isJson(str)) {
                 if (JsonUtils.isJsonObject(str)) {
                     Map<String, Object> obj = JsonUtils.parseObject(str, new TypeReference<Map<String, Object>>(){});
@@ -292,6 +295,10 @@ public class SemanticFieldValueDTO<T> {
 
     private Object normalizeScalar(Object value, SemanticFieldTypeEnum type) {
         if (value == null) return null;
+        if (value instanceof String s) {
+            String t = s.trim();
+            if (t.isEmpty()) return null;
+        }
         if (type.isRefType()) {
             Class<?> biz = type.getBizJavaType();
             if (biz.isInstance(value)) return value;
@@ -311,6 +318,7 @@ public class SemanticFieldValueDTO<T> {
         Class<?> rawType = type.getRawJavaType();
         if (rawType == String.class) {
             String s = value instanceof String ? ((String) value).trim() : String.valueOf(value);
+            if (s.isEmpty()) return null;
             if (type == SemanticFieldTypeEnum.EMAIL) {
                 if (!isValidEmail(s)) throw err("邮箱格式不正确", String.class);
             } else if (type == SemanticFieldTypeEnum.PHONE) {
@@ -322,44 +330,46 @@ public class SemanticFieldValueDTO<T> {
         }
         if (rawType == BigDecimal.class) {
             BigDecimal b = toBigDecimal(value);
-            if (b == null) throw err("数值类型转换失败", BigDecimal.class);
+            if (b == null) return null;
             return b;
         }
         if (rawType == Long.class) {
             BigDecimal b = toBigDecimal(value);
-            if (b == null) throw err("Long 类型转换失败", Long.class);
+            if (b == null) return null;
             return b.longValue();
         }
         if (rawType == Integer.class) {
             BigDecimal b = toBigDecimal(value);
-            if (b == null) throw err("Integer 类型转换失败", Integer.class);
+            if (b == null) return null;
             return b.intValue();
         }
         if (rawType == Double.class) {
             BigDecimal b = toBigDecimal(value);
-            if (b == null) throw err("Double 类型转换失败", Double.class);
+            if (b == null) return null;
             return b.doubleValue();
         }
         if (rawType == Float.class) {
             BigDecimal b = toBigDecimal(value);
-            if (b == null) throw err("Float 类型转换失败", Float.class);
+            if (b == null) return null;
             return b.floatValue();
         }
         if (rawType == Short.class) {
             BigDecimal b = toBigDecimal(value);
-            if (b == null) throw err("Short 类型转换失败", Short.class);
+            if (b == null) return null;
             return b.shortValue();
         }
         if (rawType == Byte.class) {
             BigDecimal b = toBigDecimal(value);
-            if (b == null) throw err("Byte 类型转换失败", Byte.class);
+            if (b == null) return null;
             return b.byteValue();
         }
         if (rawType == LocalDate.class) {
             if (value instanceof LocalDate) return value;
             if (value instanceof String s) {
-                LocalDate d = parseLocalDate(s.trim());
-                if (d == null) throw err("LocalDate 解析失败", LocalDate.class);
+                String t = s.trim();
+                if (t.isEmpty()) return null;
+                LocalDate d = parseLocalDate(t);
+                if (d == null) return null;
                 return d;
             }
             if (value instanceof Date d) {
@@ -389,15 +399,16 @@ public class SemanticFieldValueDTO<T> {
             }
             // 兜底：任何类型都转为字符串后解析
             String strVal = String.valueOf(value).trim();
+            if (strVal.isEmpty()) return null;
             LocalDateTime dt = parseLocalDateTime(strVal);
             if (dt != null) return dt;
-            throw err("LocalDateTime 解析失败, actualType=" + value.getClass().getName() + ", value=" + strVal, LocalDateTime.class);
+            return null;
         }
         if (rawType == Boolean.class) {
             if (value instanceof Boolean) return value;
             if (value instanceof String s) {
                 String t = s.trim().toLowerCase();
-                if (t.isEmpty()) return Boolean.FALSE;
+                if (t.isEmpty()) return null;
                 if ("true".equals(t) || "1".equals(t) || "yes".equals(t) || "y".equals(t) || "on".equals(t) || "t".equals(t)) return Boolean.TRUE;
                 if ("false".equals(t) || "0".equals(t) || "no".equals(t) || "n".equals(t) || "off".equals(t) || "f".equals(t)) return Boolean.FALSE;
             }

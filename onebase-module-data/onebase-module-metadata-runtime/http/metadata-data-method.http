@@ -425,3 +425,12 @@ Content-Type: image/png
 
 < test01.png
 --WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+
+### 运行态 - 实体关系（本地）查询实体及子表
+POST {{base}}/metadata/entity-relationship/entity-with-children?entityId=176207647837323264
+Accept: application/json
+Content-Type: application/json
+X-Application-Id: 176207115261378560
+X-Tenant-Id: 153935442021842944
+login-user: {"id":"155019577667616816","applicationId":"176207115261378560","tenantId":"153935442021842944"}
