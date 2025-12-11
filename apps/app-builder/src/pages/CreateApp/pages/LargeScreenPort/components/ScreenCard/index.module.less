@@ -1,8 +1,7 @@
 .appCard {
   width: 100%;
-  height: 206px;
-  border-radius: 24px;
-  padding: 16px;
+  border-radius: 16px;
+  padding: 10px 16px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -19,168 +18,44 @@
     background: linear-gradient(180deg, rgba(232, 255, 254, 0.45) 0%, rgba(255, 255, 255, 0.45) 100%), #fff;
   }
 
-  .appCardTop {
+  .appCardImg {
     flex: 1;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .appCardHeader {
-    height: 48px;
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    margin-bottom: 8px;
-
-    .appName {
-      display: flex;
-      align-items: center;
-      flex: 1 1 auto;
-      min-width: 0;
-
-      .appIcon {
-        width: 48px;
-        height: 48px;
-        margin-right: 16px;
-        border-radius: 16px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-
-        img {
-          width: 24px;
-          filter: brightness(0) invert(1);
-        }
-      }
-
-      .appCardInfo {
-        display: flex;
-        flex-direction: column;
-        flex: 1;
-
-        .infoHeader {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 8px;
-        }
-
-        .appTitle {
-          width: 100%;
-          max-width: 180px;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-          font-size: 16px;
-          font-weight: 500;
-          line-height: 24px;
-          color: #1d2129;
-
-          flex: 1 1 auto;
-          min-width: 0; /* 允许内部溢出剪裁 */
-          margin: 0;
-        }
-
-        .tagWrapper {
-          display: flex;
-          gap: 8px;
-        }
-
-        .updateTime {
-          color: #6b7785;
-          font-family: 'PingFang SC';
-          font-size: 12px;
-          font-style: normal;
-          font-weight: 400;
-          line-height: 20px;
-        }
-      }
-    }
-
-    .optionbtn {
-      height: 26px;
-      padding: 0px 4px;
-
-      /* 隐藏默认状态 */
-      opacity: 0;
-      visibility: hidden;
-      transform: translateY(-4px);
-      pointer-events: none;
-      transition:
-        opacity 0.16s ease,
-        transform 0.16s ease,
-        visibility 0.16s;
-    }
-  }
-
-  .appCardBody {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    flex-wrap: wrap;
-    align-content: flex-start;
-    justify-content: space-between;
-
-    cursor: default;
-
-    .appDesc {
-      height: 40px;
+    height: 168px;
+    border-radius: 8px;
+    overflow: hidden;
+    img {
       width: 100%;
-      display: -webkit-box;
-      -webkit-box-orient: vertical;
-      -webkit-line-clamp: 2; /* 控制显示行数 */
-      font-size: 12px;
-      font-weight: 400;
-      line-height: 20px;
-      overflow: hidden;
-      color: #272e3b;
-      text-overflow: ellipsis;
-      margin-bottom: 8px;
-    }
-
-    .appTags {
-      width: 100%;
-      height: 22px;
-      display: flex;
-      flex-direction: row;
-      flex-wrap: nowrap;
-      align-content: flex-start;
-      justify-content: flex-start;
-      column-gap: 5px;
-      overflow: hidden;
+      height: 100%;
     }
   }
 
   .appCardFooter {
-    margin-top: 13px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-
-    .footerLeft {
-      display: flex;
-      align-items: center;
-      gap: 4px;
+  }
+  .cardName {
+    font-size: 16px;
+    margin-top: 10px;
+    color: #4e5969;
+    .cardState {
+      font-size: 12px;
     }
-
-    .footerRight {
-      opacity: 0;
-    }
-
-    .operationIcon {
-      cursor: pointer;
-    }
+  }
+  .cardRemark {
+    font-size: 14px;
+    margin-top: 10px;
   }
 }
 
 /* hover */
-.appCard:hover .footerRight {
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(0);
-  pointer-events: auto;
-  transition: opacity 0.2s ease;
-}
+// .appCard:hover .footerRight {
+//   opacity: 1;
+//   visibility: visible;
+//   transform: translateY(0);
+//   pointer-events: auto;
+//   transition: opacity 0.2s ease;
+// }
 
 .menuItem {
   display: flex;

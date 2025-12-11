@@ -1,23 +1,14 @@
 import baseSettingSVG from '@/assets/images/appRelease/base_setting.svg';
 import appPermissionSVG from '@/assets/images/appRelease/app_auth.svg';
 import appReleaseSVG from '@/assets/images/appRelease/app_release.svg';
-import navigatorSettingSVG from '@/assets/images/appRelease/navigator_setting.svg';
 import { ReactSVG } from 'react-svg';
-import { type Options } from '@/components/CreateApp/const';
-import { Button, Form, Layout, Menu, Message } from '@arco-design/web-react';
+import { Form, Layout, Menu } from '@arco-design/web-react';
 import { IconMenuFold } from '@arco-design/web-react/icon';
-import {
-  getApplication,
-  updateApplication,
-  type Application,
-  type GetApplicationReq,
-  type UpdateApplicationReq
-} from '@onebase/app';
+import { type Application } from '@onebase/app';
 import { useEffect, useState, type FC } from 'react';
 import DataSet from './components/DataSet';
 import LargeScreen from './components/LargeScreen';
 import ScreenTemplate from './components/ScreenTemplate';
-import { useAppStore } from '@/store/store_app';
 import AppBreadcrumb from '@/components/Breadcrumb';
 import styles from './index.module.less';
 
@@ -29,24 +20,21 @@ interface BreadcrumbItemType {
   path?: string;
 }
 
-const AppSettingPage: FC = () => {
+const LargeScreenPort: FC = () => {
   const [form] = Form.useForm();
-  const { curAppId, curAppInfo, setCurAppInfo } = useAppStore();
   const menuData = [
     { title: '数据集', icon: baseSettingSVG, key: 'dataSet' },
     { title: '大屏', icon: appPermissionSVG, key: 'largeScreen' },
     { title: '大屏模板', icon: appReleaseSVG, key: 'screenTemplate' }
   ];
 
-  const [appData, setAppData] = useState<Application>();
-  const [navigatorData, setNavigatorData] = useState<any>();
+  // const [appData, setAppData] = useState<Application>();
   const [activeTab, setActiveTab] = useState('dataSet');
-  const [collapsed, setCollapsed] = useState<boolean>(false);
-  const [saveLoading, setSaveLoading] = useState<boolean>(false); // 保存按钮状态
   const [breadcrumbItems, setBreadcrumbItems] = useState<BreadcrumbItemType[]>([
     { key: 'screenTemplate', title: '大屏报表' },
     { key: 'dataSet', title: '数据集' }
   ]); // 菜单路径
+  const [collapsed, setCollapsed] = useState<boolean>(false);
 
   useEffect(() => {
     const currentBreadcrumb = menuData.find((ele) => ele.key === activeTab);
@@ -58,30 +46,14 @@ const AppSettingPage: FC = () => {
     }
   }, [activeTab]);
 
-  useEffect(() => {
-    if (curAppId) {
-      getApplicationData();
-      getNavigatorData();
-    }
-  }, [curAppId]);
-
-  const getApplicationData = async () => {
-    const params: GetApplicationReq = {
-      id: curAppId
-    };
-    const res = await getApplication(params);
-    setAppData(res);
-  };
-
-  // todo 接口获取数据
-  const getNavigatorData = async () => {
-    setNavigatorData({});
-  };
+  // const getApplicationData = async () => {};
 
   return (
     <Layout className={styles.appSettingPage}>
       <Layout className={styles.settingContent}>
         <Sider
+          collapsible
+          collapsed={collapsed}
           trigger={<IconMenuFold fontSize={20} style={{ width: '100%', textAlign: 'right' }} />}
           onCollapse={() => setCollapsed((prev) => !prev)}
         >
@@ -110,7 +82,7 @@ const AppSettingPage: FC = () => {
             <div className={styles.contentInner}>
               {activeTab === 'dataSet' && <DataSet />}
               {activeTab === 'largeScreen' && <LargeScreen />}
-              {activeTab === 'screenTemplate' && <ScreenTemplate form={form} data={appData!} />}
+              {activeTab === 'screenTemplate' && <ScreenTemplate />}
             </div>
           </Content>
         </div>
@@ -119,4 +91,4 @@ const AppSettingPage: FC = () => {
   );
 };
 
-export default AppSettingPage;
+export default LargeScreenPort;

@@ -5,7 +5,7 @@ import styles from './index.module.less';
 
 const Option = Select.Option;
 
-const AppPermission: FC = () => {
+const DataSet: FC = () => {
   const [status, setStatus] = useState<number | string>('');
   const statusOptions = [
     {
@@ -122,4 +122,4 @@ const AppPermission: FC = () => {
     </div>
   );
 };
-export default AppPermission;
+export default DataSet;

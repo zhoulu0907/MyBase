@@ -6,11 +6,12 @@ import styles from './index.module.less';
 interface dataList {
   id: string;
   name: string;
+  state: string;
 }
-const AppPermission: FC = () => {
+const LargeScreen: FC = () => {
   const [loading, setLoading] = useState(false);
   const [dataList, setDataList] = useState<dataList[]>();
-  const [total, setTotal] = useState(0);
+  const [total, setTotal] = useState(1);
   const [pageSize, setPageSize] = useState<number>();
   const [pageNo, setPageNo] = useState(1);
   useEffect(() => {
@@ -18,19 +19,23 @@ const AppPermission: FC = () => {
     setDataList([
       {
         id: '1',
-        name: 'screen1'
+        name: '这是一个大屏名称',
+        state: '已发布'
       },
       {
         id: '1',
-        name: 'screen1'
+        name: '这是一个大屏名称2',
+        state: '已发布'
       },
       {
         id: '1',
-        name: 'screen1'
+        name: '这是一个大屏名称4',
+        state: '已发布'
       },
       {
         id: '1',
-        name: 'screen1'
+        name: 'screen1',
+        state: '已发布'
       }
     ]);
   }, [dataList]);
@@ -71,4 +76,4 @@ const AppPermission: FC = () => {
     </div>
   );
 };
-export default AppPermission;
+export default LargeScreen;
