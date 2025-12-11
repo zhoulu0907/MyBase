@@ -11,7 +11,7 @@ window.global_config = {
     'http://s25029301301.dev.internal.virtueit.net:81/v1-snapshot/onebaseserver/admin-api/infra/file/download',
   // BASE_URL: 'http://s25029301301.sit.internal.virtueit.net:81/v1-snapshot/onebaseserver/admin-api',
   // RUNTIME_BASE_URL: 'http://s25029301301.sit.internal.virtueit.net:81/v1-snapshot/onebaseserverruntime/runtime',
-  RUNTIME_URL: 'http://localhost:9527',
+  //   RUNTIME_URL: 'http://localhost:9527',
   MOBILE_EDITOR_URL: '//localhost:4401',
 
   PUBLIC_KEY:

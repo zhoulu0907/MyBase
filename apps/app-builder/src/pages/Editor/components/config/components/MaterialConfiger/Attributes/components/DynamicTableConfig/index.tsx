@@ -42,7 +42,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
   const { mainEntity, subEntities } = useAppEntityStore();
 
   const [entityList, setEntityList] = useState<MetadataEntityPair[]>([]);
-  const [entityId, setEntityId] = useState<string>('');
+  const [entityUuid, setEntityUuid] = useState<string>('');
   const [fieldList, setFieldList] = useState<MetadataEntityField[]>([]);
 
   const columnsKey = 'columns';
@@ -62,16 +62,16 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
     }
 
     if (configs[item.key]) {
-      setEntityId(configs[item.key]);
+      setEntityUuid(configs[item.key]);
     }
   }, []);
 
   // 如果实体id变化，重新获取字段列表
   useEffect(() => {
-    if (entityId) {
+    if (entityUuid) {
       getFieldList();
     }
-  }, [entityId]);
+  }, [entityUuid]);
 
   // 获取实体列表
   useEffect(() => {
@@ -79,6 +79,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
     if (mainEntity) {
       newEntityList.push({
         entityId: mainEntity.entityId,
+        entityUuid: mainEntity.entityUuid,
         tableName: mainEntity.tableName,
         entityName: mainEntity.entityName
       });
@@ -87,11 +88,14 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
       newEntityList.push(
         ...subEntities.entities.map((entity: any) => ({
           entityId: entity.entityId,
+          entityUuid: entity.entityUuid,
           tableName: entity.tableName,
           entityName: entity.entityName
         }))
       );
     }
+
+    console.log('newEntityList: ', newEntityList);
 
     setEntityList(newEntityList);
   }, [mainEntity, subEntities]);
@@ -116,29 +120,37 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
 
   // 获取字段列表
   const getFieldList = async () => {
-    const res = await getEntityFields({ entityId });
+    const res = await getEntityFields({ entityUuid });
+
+    // TODO(mickey): 等卞老师调通后移除
     console.log('fieldList res: ', res);
+
     res.forEach((item: MetadataEntityField) => {
       if (item.fieldType && hiddenFieldTypes.includes(item.fieldType)) {
         item.disabled = true;
       }
     });
 
-    const newFieldList = res.filter((item: MetadataEntityField) => !FilterEntityFields.includes(item.fieldName));
+    const newFieldList = res
+      .filter((item: MetadataEntityField) => item.entityUuid === entityUuid)
+      .filter((item: MetadataEntityField) => !FilterEntityFields.includes(item.fieldName));
     const newFieldListNotSystemField = res.filter(
       (item: MetadataEntityField) => item.isSystemField !== 1 && !item.disabled
     );
 
+    // TODO(mickey): 等卞老师调通后移除
+    console.log('newFieldList: ', newFieldList);
+
     setFieldList(newFieldList);
 
-    if (configs.metaData === entityId) {
+    if (configs.metaData === entityUuid) {
       return;
     }
 
     const newColumns = newFieldListNotSystemField.map((item: MetadataEntityField) => ({
       // 保留已有的命名，如果没有则使用字段展示名称
       title:
-        configs[columnsKey].find((col: any) => col.dataIndex === item.fieldName && configs.metaData === entityId)
+        configs[columnsKey].find((col: any) => col.dataIndex === item.fieldName && configs.metaData === entityUuid)
           ?.title || item.displayName,
       dataIndex: item.fieldName,
       disabled: item.disabled,
@@ -159,18 +171,18 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
           onChange={(value) => {
             handleMultiPropsChange([
               { key: item.key, value: value },
-              { key: tableNameKey, value: entityList.find((item) => item.entityId === value)?.tableName || '' },
+              { key: tableNameKey, value: entityList.find((item) => item.entityUuid === value)?.tableName || '' },
               { key: searchItemsKey, value: [] },
               { key: columnsKey, value: [] }
             ]);
 
-            setEntityId(value);
+            setEntityUuid(value);
             setSearchItemsConfig([]);
             setColumnsConfig([]);
           }}
         >
           {entityList.map((item) => (
-            <Select.Option key={item.entityId} value={item.entityId}>
+            <Select.Option key={item.entityUuid} value={item.entityUuid}>
               {item.entityName}
             </Select.Option>
           ))}
@@ -184,7 +196,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
             <div className={styles.tableColumnList}>
               <ReactSortable
                 list={configs[columnsKey]}
-                setList={() => { }}
+                setList={() => {}}
                 group={{
                   name: 'table-col-item'
                 }}
