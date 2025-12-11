@@ -1,4 +1,3 @@
-import LogoSVG from '@/assets/images/app_header_logo.svg';
 import spaceShipLine from '@/assets/images/space-ship-line.svg';
 import UserProfileAvatar from '@/components/UserProfileAvatar';
 
@@ -8,10 +7,12 @@ import { logout } from '@/utils/session';
 import { Divider, Dropdown, Layout, Menu, Tabs, Typography } from '@arco-design/web-react';
 import { IconExport } from '@arco-design/web-react/icon';
 import { TokenManager, UserPermissionManager } from '@onebase/common';
-import { CodeType, getPermissionInfo, systemLogout } from '@onebase/platform-center';
+import { CodeType, getPermissionInfo, getTenantInfo, systemLogout, type TenantInfo } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import styles from './header.module.less';
+import { tenantInfoSignal } from '@/store/singals/tenant_info';
+import TenantLogo from '@/components/TenantLogo';
 
 const { Header } = Layout;
 
@@ -35,6 +36,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   const { t } = useI18n();
 
   const [adminInfo, setAdminInfo] = useState<IAdminInfo | null>(null);
+  const [tenantInfo, setTenantInfo] = useState<TenantInfo | null>(null);
   const { tenantId } = useParams();
 
   // Tab 切换
@@ -62,11 +64,16 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
 
   const getInfo = async () => {
     const res = await getPermissionInfo(CodeType.TENANT);
+    const tenantInfoRes = await getTenantInfo(tenantId || '');
     UserPermissionManager.setUserPermissionInfo(res);
     userPermissionSignal.setPermissionInfo(res);
     if (res.user) {
       setAdminInfo(res.user);
     }
+    if(tenantInfoRes) {
+      setTenantInfo(tenantInfoRes);
+    }
+    tenantInfoSignal.setTenantInfo(tenantInfoRes);
   };
 
   const maskMobile = (value?: string) => {
@@ -113,7 +120,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     <Header className={`${styles.header} ${className || ''}`}>
       <div className={styles.headerContent}>
         <div className={styles.logo}>
-          <img src={LogoSVG} alt="logo" />
+          <TenantLogo tenantInfo={tenantInfo}/>
         </div>
 
         <Tabs
