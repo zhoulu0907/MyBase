@@ -21,17 +21,25 @@ const ScreenTemplate: FC = () => {
   useEffect(() => {
     setApplicationDataList([
       {
-        id: '1',
+        id: '110',
+        name: '应用1'
+      },
+      {
+        id: '220',
         name: '应用1'
       }
     ]);
     setSystemDataList([
       {
-        id: '1',
+        id: '011',
+        name: '系统1'
+      },
+      {
+        id: '022',
         name: '系统1'
       }
     ]);
-  }, [applicationDataList, systemDataList]);
+  }, []);
   return (
     <div className={styles.datasetPage}>
       <div className={styles.dataFilter}>

@@ -2,9 +2,8 @@ import baseSettingSVG from '@/assets/images/appRelease/base_setting.svg';
 import appPermissionSVG from '@/assets/images/appRelease/app_auth.svg';
 import appReleaseSVG from '@/assets/images/appRelease/app_release.svg';
 import { ReactSVG } from 'react-svg';
-import { Form, Layout, Menu } from '@arco-design/web-react';
+import { Layout, Menu } from '@arco-design/web-react';
 import { IconMenuFold } from '@arco-design/web-react/icon';
-import { type Application } from '@onebase/app';
 import { useEffect, useState, type FC } from 'react';
 import DataSet from './components/DataSet';
 import LargeScreen from './components/LargeScreen';
@@ -21,21 +20,21 @@ interface BreadcrumbItemType {
 }
 
 const LargeScreenPort: FC = () => {
-  const [form] = Form.useForm();
   const menuData = [
     { title: '数据集', icon: baseSettingSVG, key: 'dataSet' },
     { title: '大屏', icon: appPermissionSVG, key: 'largeScreen' },
     { title: '大屏模板', icon: appReleaseSVG, key: 'screenTemplate' }
   ];
 
-  // const [appData, setAppData] = useState<Application>();
   const [activeTab, setActiveTab] = useState('dataSet');
   const [breadcrumbItems, setBreadcrumbItems] = useState<BreadcrumbItemType[]>([
     { key: 'screenTemplate', title: '大屏报表' },
     { key: 'dataSet', title: '数据集' }
   ]); // 菜单路径
   const [collapsed, setCollapsed] = useState<boolean>(false);
-
+  const handleMenuClick = (key: string) => {
+    setActiveTab(key);
+  };
   useEffect(() => {
     const currentBreadcrumb = menuData.find((ele) => ele.key === activeTab);
     if (currentBreadcrumb) {
@@ -46,18 +45,15 @@ const LargeScreenPort: FC = () => {
     }
   }, [activeTab]);
 
-  // const getApplicationData = async () => {};
-
   return (
     <Layout className={styles.appSettingPage}>
       <Layout className={styles.settingContent}>
-        <Sider
-          collapsible
-          collapsed={collapsed}
-          trigger={<IconMenuFold fontSize={20} style={{ width: '100%', textAlign: 'right' }} />}
-          onCollapse={() => setCollapsed((prev) => !prev)}
-        >
-          <Menu defaultSelectedKeys={[activeTab]} onClickMenuItem={setActiveTab}>
+        <Sider collapsed={collapsed}>
+          <Menu
+            onCollapseChange={() => setCollapsed(!collapsed)}
+            onClickMenuItem={handleMenuClick}
+            selectedKeys={[activeTab]}
+          >
             {menuData.map((item) => (
               <Menu.Item key={item.key} style={{ display: 'flex' }}>
                 <ReactSVG
@@ -76,6 +72,7 @@ const LargeScreenPort: FC = () => {
             ))}
           </Menu>
         </Sider>
+        {/* 右侧内容 */}
         <div className={styles.rightContent}>
           <AppBreadcrumb items={breadcrumbItems} />
           <Content className={styles.content}>

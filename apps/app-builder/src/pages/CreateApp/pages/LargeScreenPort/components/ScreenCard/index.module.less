@@ -33,11 +33,14 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    color: #4e5969;
+    font-family: PingFang SC;
+    line-height: 20px;
   }
   .cardName {
     font-size: 16px;
     margin-top: 10px;
-    color: #4e5969;
+    font-weight: 500;
     .cardState {
       font-size: 12px;
     }
@@ -45,21 +48,17 @@
   .cardRemark {
     font-size: 14px;
     margin-top: 10px;
+    span {
+      margin-left: 10px;
+    }
+  }
+  .footerRight {
+    display: flex;
+    align-items: center;
   }
 }
 
-/* hover */
-// .appCard:hover .footerRight {
-//   opacity: 1;
-//   visibility: visible;
-//   transform: translateY(0);
-//   pointer-events: auto;
-//   transition: opacity 0.2s ease;
-// }
-
 .menuItem {
   display: flex;
-  flex-direction: row;
   align-items: center;
-  justify-content: center;
 }
