@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.flow.core.config;
+package com.cmsr.onebase.module.flow.context.util;
 
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
