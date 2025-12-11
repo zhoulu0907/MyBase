@@ -6,9 +6,12 @@ import { logout } from '@/utils/session';
 import { Button, Divider, Dropdown, Layout, Menu, Typography } from '@arco-design/web-react';
 import { IconApps, IconExport } from '@arco-design/web-react/icon';
 import { UserPermissionManager } from '@onebase/common';
+import { systemLogout } from '@onebase/platform-center';
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import styles from './header.module.less';
+import TenantLogo from '@/components/TenantLogo';
+import { tenantInfoSignal } from '@/store/singals/tenant_info';
 
 const { Header } = Layout;
 
@@ -28,9 +31,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className, avatarUrl }) => {
 
   // 登出处理
   const handleLogout = async () => {
-    // TODO(mickey): 联调后打开
-    // await systemLogout();
-
+    await systemLogout();
     logout(navigate);
   };
 
@@ -58,11 +59,13 @@ const AppHeader: React.FC<HeaderProps> = ({ className, avatarUrl }) => {
     </Menu>
   );
 
+  const tenantInfo = tenantInfoSignal.tenantInfo.value;
+
   return (
     <Header className={`${styles.header} ${className || ''}`}>
       <div className={styles.headerContent}>
         <div className={styles.logo} onClick={() => navigate(`/onebase/${tenantId}/home/enterprise-app`)}>
-          <img src={LogoSVG} alt="logo" />
+          <TenantLogo tenantInfo={tenantInfo} />
         </div>
 
         <div className={styles.userInfo}>

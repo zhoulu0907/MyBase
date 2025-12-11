@@ -25,7 +25,7 @@ const FlowPredict = ({ businessUuid, entityParam }: any) => {
 
   const ProcessFlow = ({ data }: any) => {
     return (
-      <Steps current={current} direction="vertical" type="dot">
+      <Steps current={current} direction="vertical" type="dot" style={{paddingLeft: '2px'}}>
         {data?.map((item: any, index: number) => {
           if (index === data.length - 1) {
             return <Step key={index} disabled={true} title={renderDescript(item)} className="predictStepGray" />;

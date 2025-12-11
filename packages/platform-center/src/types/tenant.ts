@@ -16,6 +16,7 @@ export interface TenantInfo {
   tenantSecret: string;
   website: string;
   websiteH5: string;
+  logoUrl?: string;
 }
 
 export interface updateTenantParams {

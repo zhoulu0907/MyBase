@@ -130,8 +130,6 @@ const Right: React.FC = () => {
       // 保存 captchaVerification 到 ref，以便后续使用
       savedCaptchaVerificationRef.current = captchaVerification;
 
-      console.log('mfaVerifyStatus: ', mfaVerifyStatus);
-
       if (mfaVerifyStatus === 'mobile' || mfaVerifyStatus === 'email') {
         const codeToUse = mfaCode || verifyCode;
         if (!codeToUse || codeToUse === '') {

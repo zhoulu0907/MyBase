@@ -24,7 +24,7 @@ const XRadio = memo((props: XRadioConfig & { runtime?: boolean; detailMode?: boo
   // 生成唯一的字段ID
   const fieldId = dataField && dataField.length > 0
     ? dataField[dataField.length - 1]
-    : `${FORM_COMPONENT_TYPES.SWITCH}_${nanoid()}`;
+    : `${FORM_COMPONENT_TYPES.RADIO}_${nanoid()}`;
 
   const rules: ITypeRules<ValidatorType.Custom>[] = [
     {

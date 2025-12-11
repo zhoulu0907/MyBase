@@ -1,67 +1,31 @@
 import {
   AUTO_CODE_SEQUENCE_DEFAULT_CONFIG,
-  AUTO_CODE_NUMBER_MODE,
   AUTO_CODE_RULE_TYPE,
-  DIGIT_DEFAULT,
   DATE_FORMAT_DEFAULT,
-  START_VALUE_DEFAULT,
-  CONSTANTS
+  CONSTANTS,
+  AUTO_CODE_INITIAL_RULES
 } from './const';
-import type { AutoNumberRule, AutoNumberRuleItem, AutoCodeRule } from '../types';
+import type { AutoNumberRule, AutoNumberRuleItem } from '../types';
 
 /**
- * 将自动编号组件数组格式转换为 AutoNumberRule 对象格式
- * @param autoCodeRules 自动编号组件数组格式
- * @returns 转换后的 AutoNumberRule 对象格式
+ * 将自动编号组件数组中内容格式进行转换
  */
-export const convertAutoCodeCompoToAutoNumberRule = (autoCodeRules: AutoCodeRule[]): AutoNumberRule => {
+export const convertAutoCodeCompoToAutoNumberRule = (autoCodeRules: AutoNumberRuleItem[]) => {
   if (!autoCodeRules || autoCodeRules.length === 0) {
     // 返回默认配置
     return {
-      ...AUTO_CODE_SEQUENCE_DEFAULT_CONFIG,
-      rules: []
+      rules: [...AUTO_CODE_INITIAL_RULES]
     };
   }
 
-  // 找到第一个 SEQUENCE 类型的规则作为主配置
-  const sequenceRule = autoCodeRules.find((rule) => rule.itemType === AUTO_CODE_RULE_TYPE.SEQUENCE);
+  const rules = autoCodeRules.map((rule, index) => ({
+    ...rule,
+    isEnabled: CONSTANTS.ENABLED,
+    itemOrder: index + 1,
+    id: rule.id?.startsWith('rule-') ? '' : rule.id
+  }));
 
-  // 其他规则转换为 rules 数组
-  const otherRules: AutoNumberRuleItem[] = autoCodeRules
-    .filter((rule) => rule.itemType !== AUTO_CODE_RULE_TYPE.SEQUENCE)
-    .map((rule, index) => ({
-      id: rule.id?.startsWith('rule-') ? '' : rule.id,
-      itemType: rule.itemType,
-      itemOrder: index + 1,
-      isEnabled: CONSTANTS.ENABLED,
-      format:
-        (rule.config?.dateFormat as string) ||
-        (rule.config?.fixedText as string) ||
-        (rule.config?.fieldName as string) ||
-        '',
-      textValue: rule.config?.fixedText as string
-    }));
-
-  // 如果有 SEQUENCE 规则，使用其配置；否则使用默认配置
-  if (sequenceRule && sequenceRule.config) {
-    const config = sequenceRule.config;
-    return {
-      isEnabled: 1,
-      numberMode: (config.numberMode as string) || AUTO_CODE_NUMBER_MODE.FIXED_DIGITS,
-      digitWidth: (config.digitWidth as number) || DIGIT_DEFAULT,
-      overflowContinue: (config.overflowContinue as number) || CONSTANTS.ENABLED,
-      initialValue: (config.startValue as number) || START_VALUE_DEFAULT,
-      resetCycle: (config.resetCycle as string) || AUTO_CODE_SEQUENCE_DEFAULT_CONFIG.resetCycle,
-      resetOnInitialChange: (config.resetOnInitialChange as number) || CONSTANTS.ENABLED,
-      rules: otherRules
-    };
-  }
-
-  // 没有 SEQUENCE 规则时，使用默认配置
-  return {
-    ...AUTO_CODE_SEQUENCE_DEFAULT_CONFIG,
-    rules: otherRules
-  };
+  return { rules };
 };
 
 /**
@@ -94,63 +58,56 @@ export const findFieldPath = (fieldId: string, fields: unknown[]): string[] => {
 };
 
 /**
- * 将 AutoNumberRule 对象格式转换为自动编号组件数组格式
+ * 将 AutoNumberRule 对象数组格式转换为自动编号组件数组格式
  * @param autoNumberRule AutoNumberRule 对象格式
  * @param fields 字段选项数据（用于查找字段路径）
- * @returns 转换后的自动编号组件数组格式
  */
 export const convertAutoNumberRuleToAutoCodeComp = (
   autoNumberRule: AutoNumberRule,
   fields?: unknown[]
-): AutoCodeRule[] => {
-  if (!autoNumberRule) {
-    return [];
+): AutoNumberRuleItem[] => {
+  if (!autoNumberRule || autoNumberRule.rules.length === 0) {
+    return [...AUTO_CODE_INITIAL_RULES];
   }
 
-  const rules: AutoCodeRule[] = [];
-
-  // 将主配置转换为 SEQUENCE 规则
-  const sequenceRule: AutoCodeRule = {
-    id: Date.now().toString(),
-    itemType: AUTO_CODE_RULE_TYPE.SEQUENCE,
-    config: {
-      ...autoNumberRule,
-      startValue: autoNumberRule.initialValue
-    }
-  };
-  rules.push(sequenceRule);
-
-  // 将 rules 数组转换为其他类型的规则
-  autoNumberRule?.rules?.forEach((rule, index) => {
-    const autoCodeRule: AutoCodeRule = {
-      id: rule.id || `rule_${index + 1}`,
-      itemType: rule.itemType,
-      config: {}
+  return autoNumberRule.rules.map((rule, index) => {
+    const baseRule: AutoNumberRuleItem = {
+      ...rule,
+      id: rule.id || `rule-${index + 1}`,
+      itemOrder: rule.itemOrder || index + 1,
+      isEnabled: rule.isEnabled ?? CONSTANTS.ENABLED
     };
 
     switch (rule.itemType) {
       case AUTO_CODE_RULE_TYPE.DATE:
-        autoCodeRule.config = { dateFormat: rule.format || DATE_FORMAT_DEFAULT, fixedText: rule.textValue || '' };
-        break;
+        return {
+          ...baseRule,
+          format: rule.format || DATE_FORMAT_DEFAULT,
+          textValue: rule.textValue || ''
+        };
       case AUTO_CODE_RULE_TYPE.TEXT:
-        autoCodeRule.config = { fixedText: rule.format || '' };
-        break;
+        return {
+          ...baseRule,
+          textValue: rule.textValue || ''
+        };
       case AUTO_CODE_RULE_TYPE.FIELD_REF: {
         const fieldPath = fields ? findFieldPath(rule.format || '', fields) : rule.format ? [rule.format] : [];
-        autoCodeRule.config = {
-          fieldName: rule.format || '',
-          fieldPath: fieldPath
+        return {
+          ...baseRule,
+          fieldPath,
+          format: rule.format || ''
         };
-        break;
       }
+      case AUTO_CODE_RULE_TYPE.SEQUENCE:
+        return {
+          ...AUTO_CODE_SEQUENCE_DEFAULT_CONFIG,
+          ...baseRule,
+          startValue: rule.startValue || rule.initialValue
+        };
       default:
-        autoCodeRule.config = { format: '' };
+        return baseRule;
     }
-
-    rules.push(autoCodeRule);
   });
-
-  return rules;
 };
 
 const arrayMoveMutate = (array: unknown[], from: number, to: number) => {
