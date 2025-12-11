@@ -2,10 +2,16 @@
   :global(.arco-collapse-header) {
     flex-direction: row-reverse;
     justify-content: flex-end;
+    background-color: transparent !important;
 
     &::after {
       display: none;
     }
+  }
+
+   :global(.cell-content) {
+    display: block;
+    text-align: right;
   }
 
   :global(.arco-collapse-content-container) {

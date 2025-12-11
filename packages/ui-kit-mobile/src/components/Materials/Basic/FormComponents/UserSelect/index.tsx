@@ -3,12 +3,12 @@ import { memo, useEffect, useState } from 'react';
 import { nanoid } from 'nanoid';
 import { Form, Picker } from '@arco-design/mobile-react';
 import { ValidatorType, ITypeRules } from '@arco-design/mobile-utils';
-import { getSimpleUserList, UserVO } from '@onebase/platform-center';
+import { getDeptUser, UserVO } from '@onebase/platform-center';
 import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, FormSchema } from '@onebase/ui-kit';
 import '../index.css';
 
 type XUserSelectConfig = typeof FormSchema.XUserSelectSchema.config;
-const XUserSelect = memo((props: XUserSelectConfig & { runtime?: boolean; detailMode?: boolean; defaultOptionsConfig?: any; }) => {
+const XUserSelect = memo((props: XUserSelectConfig & { runtime?: boolean; detailMode?: boolean; defaultOptionsConfig?: any; form?: any; }) => {
   const {
     label,
     dataField,
@@ -17,23 +17,25 @@ const XUserSelect = memo((props: XUserSelectConfig & { runtime?: boolean; detail
     layout,
     defaultOptionsConfig,
     runtime = true,
-    detailMode
+    detailMode,
+    form
   } = props;
 
   const [userData, setUserData] = useState<UserVO[]>([]);
 
+  
   // 生成唯一的字段ID
   const fieldId = dataField && dataField.length > 0
-    ? dataField[dataField.length - 1]
-    : `${FORM_COMPONENT_TYPES.INPUT_TEXT}_${nanoid()}`;
+  ? dataField[dataField.length - 1]
+  : `${FORM_COMPONENT_TYPES.USER_SELECT}_${nanoid()}`;
 
   useEffect(() => {
-    fetchUserData();
-  }, []);
+    userData.length === 0 && fetchUserData();
+  }, [userData]);
 
   const fetchUserData = async () => {
-    const res = await getSimpleUserList();
-    setUserData(res);
+    const res = await getDeptUser();
+    setUserData(res.userList);
   };
 
   const rules: ITypeRules<ValidatorType.Custom>[] = [
@@ -67,6 +69,16 @@ const XUserSelect = memo((props: XUserSelectConfig & { runtime?: boolean; detail
           cascade={false}
           data={[userData.map(v => v.nickname)]}
           maskClosable
+          onChange={(val) => {
+            const id = val[0];
+            const target = userData.find(item => item.nickname === id);
+            if (target) {
+              form?.setFieldValue(fieldId, {
+                id: target.id,
+                name: target.nickname,
+              });
+            }
+          }}
         />
       )}
     </Form.Item>
