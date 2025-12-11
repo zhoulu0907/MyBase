@@ -2526,8 +2526,20 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         // 获取现有配置
         MetadataAutoNumberConfigDO existingConfig = autoNumberConfigBuildService.getByFieldId(fieldUuid);
 
+        // 智能判断是否启用：
+        // 1. 如果显式传入 isEnabled=1，则启用
+        // 2. 如果未传入 isEnabled（为null）但 ruleItems 不为空，也视为启用（兼容前端未显式传入isEnabled的情况）
+        boolean shouldEnable = (autoNumber.getIsEnabled() != null && CommonStatusEnum.isEnabled(autoNumber.getIsEnabled()))
+                || (autoNumber.getIsEnabled() == null && autoNumber.getRuleItems() != null && !autoNumber.getRuleItems().isEmpty());
+        
+        // 如果 isEnabled 为 null 但有规则项，自动设置为启用
+        if (autoNumber.getIsEnabled() == null && autoNumber.getRuleItems() != null && !autoNumber.getRuleItems().isEmpty()) {
+            autoNumber.setIsEnabled(CommonStatusEnum.ENABLED.getStatus());
+            log.info("自动编号配置未传入isEnabled，但有规则项，自动设为启用状态: fieldUuid={}", fieldUuid);
+        }
+
         // 使用新的枚举值：1-启用，0-禁用
-        if (autoNumber.getIsEnabled() != null && CommonStatusEnum.isEnabled(autoNumber.getIsEnabled())) {
+        if (shouldEnable) {
             // 从统一规则项列表中提取SEQUENCE配置
             AutoNumberRuleVO sequenceRule = null;
             List<AutoNumberRuleVO> otherRules = new java.util.ArrayList<>();
@@ -2544,8 +2556,12 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             // 构建配置对象（SEQUENCE配置存入Config表）
             MetadataAutoNumberConfigDO config = new MetadataAutoNumberConfigDO();
             if (existingConfig != null) {
-                // 更新：保留原有ID
+                // 更新：保留原有ID和configUuid
                 config.setId(existingConfig.getId());
+                config.setConfigUuid(existingConfig.getConfigUuid());
+            } else {
+                // 新增：生成新的configUuid
+                config.setConfigUuid(UuidUtils.getUuid());
             }
             if (existingConfig == null){
                 config.setConfigUuid(UuidUtils.getUuid());
