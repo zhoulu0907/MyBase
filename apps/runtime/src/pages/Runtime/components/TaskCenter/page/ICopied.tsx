@@ -36,7 +36,7 @@ const ICopied: FC = ({ appId }: any) => {
       ellipsis: true,
       render: (obj: any) => (
         <span className="flex-bw-center">
-          <div className="photo-img">{obj?.avatar && <img src={obj?.avatar} />}</div>
+          <div className="photo-img">{obj?.avatar ? <img src={obj?.avatar} /> : obj?.name?.charAt(0)}</div>
           {obj?.name}
         </span>
       )
