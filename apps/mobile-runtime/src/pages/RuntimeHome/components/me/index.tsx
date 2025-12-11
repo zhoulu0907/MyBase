@@ -1,12 +1,13 @@
 import AvatarSVG from '@/assets/images/avatar.svg';
 import { Cell, Popup } from '@arco-design/mobile-react';
-import { TokenManager, UserPermissionManager } from '@onebase/common';
 import React from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import account from '../../../../assets/images/account.svg';
-import file from '../../../../assets/images/file.svg';
-import lock from '../../../../assets/images/lock.svg';
-import logout from '../../../../assets/images/logout.svg';
+import { logout } from '@/utils/session';
+
+import { useNavigate } from 'react-router-dom';
+import accountSVG from '@/assets/images/account.svg';
+import fileSVG from '@/assets/images/file.svg';
+import lockSVG from '@/assets/images/lock.svg';
+import logoutSVG from '@/assets/images/logout.svg';
 import styles from './index.module.less';
 
 interface MeProps {
@@ -16,15 +17,12 @@ interface MeProps {
 
 const Me: React.FC<MeProps> = ({ nickname, username }) => {
   const navigate = useNavigate();
-  const location = useLocation();
+
   const handleLogout = () => {
-    // 清除 token
-    TokenManager.clearToken();
-    UserPermissionManager.clearUserPermissionInfo();
     // 关闭弹窗
     window.modalInstance?.close();
     // 跳转到登录页
-    navigate(`/login?redirectURL=${window.location.origin}#${location.pathname}`, { replace: true });
+    logout(navigate);
   };
 
   const toLogout = () => {
@@ -55,25 +53,25 @@ const Me: React.FC<MeProps> = ({ nickname, username }) => {
       </div>
       <Cell.Group className={styles.meCellGroup}>
         <Cell
-          icon={<img className={styles.meCellIcon} src={file} alt="protocol" />}
+          icon={<img className={styles.meCellIcon} src={fileSVG} alt="protocol" />}
           label="用户协议"
           showArrow
           onClick={() => navigate('/onebase/runtime-home/protocol')}
         />
         <Cell
-          icon={<img className={styles.meCellIcon} src={lock} alt="privacy" />}
+          icon={<img className={styles.meCellIcon} src={lockSVG} alt="privacy" />}
           label="隐私政策"
           showArrow
           onClick={() => navigate('/onebase/runtime-home/privacy')}
         />
         <Cell
-          icon={<img className={styles.meCellIcon} src={account} alt="about" />}
+          icon={<img className={styles.meCellIcon} src={accountSVG} alt="about" />}
           label="关于我们"
           showArrow
           onClick={() => navigate('/onebase/runtime-home/about')}
         />
         <Cell
-          icon={<img className={styles.meCellIcon} src={logout} alt="logout" />}
+          icon={<img className={styles.meCellIcon} src={logoutSVG} alt="logout" />}
           label="退出登录"
           showArrow
           onClick={toLogout}
