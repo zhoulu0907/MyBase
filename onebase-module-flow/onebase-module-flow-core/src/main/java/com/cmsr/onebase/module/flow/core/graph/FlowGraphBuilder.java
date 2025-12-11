@@ -6,7 +6,7 @@ import com.cmsr.onebase.module.flow.context.graph.JsonGraph;
 import com.cmsr.onebase.module.flow.context.graph.JsonGraphNode;
 import com.cmsr.onebase.module.flow.context.graph.nodes.ScriptNodeData;
 import com.cmsr.onebase.module.flow.context.provider.FlowFieldTypeProvider;
-import com.cmsr.onebase.module.flow.context.util.FlowProperties;
+import com.cmsr.onebase.module.flow.context.config.FlowProperties;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowConnectorScriptRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowConnectorScriptDO;
 import com.mybatisflex.core.tenant.TenantManager;
