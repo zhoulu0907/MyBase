@@ -1,13 +1,14 @@
 import { Form, Message, Upload, Progress, Modal, Grid, Card, Watermark } from '@arco-design/web-react';
-import { type UploadItem, type UploadListProps } from '@arco-design/web-react/lib/Upload';
+import { type UploadListProps } from '@arco-design/web-react/lib/Upload';
 import { IconPlus, IconDelete, IconImage, IconEye, IconDownload, IconClose } from '@arco-design/web-react/icon';
-import { uploadFile, getFileUrlById } from '@onebase/platform-center';
+import { attachmentUpload, attachmentDownload, menuSignal } from '@onebase/app'
 import { nanoid } from 'nanoid';
 import { memo, useEffect, useState } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { STATUS_OPTIONS, STATUS_VALUES, UPLOAD_VALUES, UPLOAD_OPTIONS } from '../../../constants';
 import './index.css';
 import type { XInputImgUploadConfig } from './schema';
+import { pagesRuntimeSignal } from '@onebase/common';
 
 const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const {
@@ -23,8 +24,12 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
     runtime = true,
     detailMode
   } = props;
+  const [tableName, fieldName] = dataField;
+  const { curMenu } = menuSignal;
+  const { entityDataId } = pagesRuntimeSignal;
 
-  const [_imgUrl, setImgUrl] = useState<string>('');
+
+  const [urlList, setUrlList] = useState<string[]>([])
 
   const handleUpload = async (file: File, onProgress?: (percent: number, event?: ProgressEvent) => void) => {
     const formData = new FormData();
@@ -39,8 +44,14 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
       }
       : undefined;
 
-    const res = await uploadFile(formData, progressAdapter);
-    return res;
+
+    if (runtime) {
+      const res = await attachmentUpload(tableName, formData, progressAdapter);
+      return res;
+    } else {
+      // TODO 编辑态上传预览
+      return ''
+    }
   };
   const { form } = Form.useFormContext();
 
@@ -66,20 +77,34 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
     if (flag) {
       form.setFieldValue(fieldId, newFieldValue);
     }
-  }, [fieldValue]);
+    if (entityDataId.value) {
+      console.log('entityDataId.value', entityDataId.value)
+      const urls = (fieldValue || []).map(async (ele: any) => {
+        const param = {
+          menuId: curMenu.value?.id,
+          id: entityDataId.value,
+          fieldName,
+          fileId: ele.id
+        }
+        const url = await attachmentDownload(tableName, param)
+        return url
+      });
+      setUrlList(urls)
+    }
+  }, [fieldValue, entityDataId.value]);
 
   // 自定义文件列表展示
   const renderUploadList = (filesList: any[], fileProps: UploadListProps) => {
     if (listType == UPLOAD_VALUES[UPLOAD_OPTIONS.TEXT]) {
       return (
         <div className="uplaodList-text">
-          {filesList.map((file) => (
+          {filesList.map((file, index) => (
             <div key={file.uid} className="uplaodList-text-item">
               <Watermark
                 gap={[20, 20]}
                 content={imageHandle?.addWatermark && imageHandle.watermarkText ? imageHandle.watermarkText : ''}
               >
-                <img className="uplaodList-text-item-img" src={getFileUrlById(file.response?.fileId)} alt="" />
+                <img className="uplaodList-text-item-img" src={urlList?.[index]} alt="" />
               </Watermark>
               <div className="uplaodList-text-item-name">{file.name}</div>
               {file.percent && file.percent !== 100 ? (
@@ -107,7 +132,7 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
                               imageHandle?.addWatermark && imageHandle.watermarkText ? imageHandle.watermarkText : ''
                             }
                           >
-                            <img src={getFileUrlById(file.response?.fileId)} width="100%" alt="" />
+                            <img src={urlList?.[index]} width="100%" alt="" />
                           </Watermark>
                         )
                       });
@@ -124,6 +149,7 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
                     onClick={() => {
                       if (fileProps.onRemove) {
                         fileProps.onRemove(file);
+                        setUrlList((prev) => prev.splice(index, 1))
                       }
                     }}
                   />}
@@ -138,14 +164,14 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
       return (
         <div className="uplaodList-list">
           <Grid.Row gutter={4}>
-            {filesList.map((file) => (
+            {filesList.map((file, index: number) => (
               <Grid.Col span={12} key={file.uid}>
                 <div className="uplaodList-list-item">
                   <Watermark
                     gap={[20, 20]}
                     content={imageHandle?.addWatermark && imageHandle.watermarkText ? imageHandle.watermarkText : ''}
                   >
-                    <img className="uplaodList-list-item-img" src={getFileUrlById(file.response?.fileId)} alt="" />
+                    <img className="uplaodList-list-item-img" src={urlList?.[index]} alt="" />
                   </Watermark>
                   <div className="uplaodList-list-item-content">
                     <div className="uplaodList-list-item-name">{file.name}</div>
@@ -158,6 +184,7 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
                     onClick={() => {
                       if (fileProps.onRemove) {
                         fileProps.onRemove(file);
+                        setUrlList((prev) => prev.splice(index, 1))
                       }
                     }}
                   />
@@ -174,7 +201,7 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
     if (listType == UPLOAD_VALUES[UPLOAD_OPTIONS.CARD]) {
       return (
         <div className="uplaodList-card">
-          {filesList.map((file) => (
+          {filesList.map((file, index) => (
             <Card
               key={file.uid}
               className="uplaodList-card-item"
@@ -184,7 +211,7 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
                     gap={[20, 20]}
                     content={imageHandle?.addWatermark && imageHandle.watermarkText ? imageHandle.watermarkText : ''}
                   >
-                    <img src={getFileUrlById(file.response?.fileId)} alt="" />
+                    <img src={urlList?.[index]} alt="" />
                   </Watermark>
                 </div>
               }
@@ -201,6 +228,7 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
                       onClick={() => {
                         if (fileProps.onRemove) {
                           fileProps.onRemove(file);
+                          setUrlList((prev) => prev.splice(index, 1))
                         }
                       }}
                     />}
@@ -257,10 +285,21 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
             const { onProgress, onError, onSuccess, file } = option;
             try {
               const fileId = await handleUpload(file, onProgress);
-              const uploadImgUrl = await getFileUrlById(fileId);
+              let uploadImgUrl = ''
+              if (entityDataId.value) {
+                const param = {
+                  menuId: curMenu.value?.id,
+                  id: entityDataId.value,
+                  fieldName,
+                  fileId: fileId
+                }
+                uploadImgUrl = await attachmentDownload(tableName, param)
+              } else {
+                uploadImgUrl = URL.createObjectURL(file);
+              }
               // 文件上传文件id
               if (uploadImgUrl !== '') {
-                setImgUrl(uploadImgUrl);
+                setUrlList((prev) => [...prev, uploadImgUrl])
                 onSuccess({ fileId: fileId });
               } else {
                 onError({
