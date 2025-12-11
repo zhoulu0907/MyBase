@@ -2,7 +2,6 @@ import { TabBar } from '@arco-design/mobile-react';
 import { IconHome, IconUser } from '@arco-design/mobile-react/esm/icon';
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-// import { TokenManager } from '@onebase/common';
 import { UserPermissionManager } from '@onebase/common';
 import { getPermissionInfo } from '@onebase/platform-center';
 import Home from './components/home';
