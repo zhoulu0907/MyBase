@@ -12,7 +12,7 @@ export default defineConfig({
       'Access-Control-Allow-Origin': '*'
     }
   },
-  base: '/',
+  base: './',
   plugins: [
     qiankun('mobile-editor', {
       useDevMode: true
