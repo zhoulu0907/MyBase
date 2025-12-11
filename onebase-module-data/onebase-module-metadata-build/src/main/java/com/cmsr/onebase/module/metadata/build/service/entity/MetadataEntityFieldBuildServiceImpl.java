@@ -422,23 +422,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         if (queryVO.getEntityId() != null && !queryVO.getEntityId().trim().isEmpty()) {
             entityUuid = idUuidConverter.toEntityUuid(queryVO.getEntityId().trim());
             queryWrapper.eq(MetadataEntityFieldDO::getEntityUuid, entityUuid);
-        } else if (queryVO.getTableName() != null && !queryVO.getTableName().trim().isEmpty()) {
-            // 根据tableName查询实体
-            MetadataBusinessEntityDO entity = metadataBusinessEntityRepository.getOne(
-                    metadataBusinessEntityRepository.query()
-                            .eq(MetadataBusinessEntityDO::getTableName, queryVO.getTableName().trim())
-            );
-            if (entity != null) {
-                entityUuid = entity.getEntityUuid();
-                queryWrapper.eq(MetadataEntityFieldDO::getEntityUuid, entityUuid);
-            }
         }
-
-        // 支持fieldName精确过滤
-        if (queryVO.getFieldName() != null && !queryVO.getFieldName().trim().isEmpty()) {
-            queryWrapper.eq(MetadataEntityFieldDO::getFieldName, queryVO.getFieldName().trim());
-        }
-
         if (queryVO.getKeyword() != null && !queryVO.getKeyword().trim().isEmpty()) {
             queryWrapper.like(MetadataEntityFieldDO::getFieldName, queryVO.getKeyword())
                     .or(MetadataEntityFieldDO::getDisplayName).like(queryVO.getKeyword());
@@ -2276,15 +2260,18 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
     public EntityFieldDetailRespVO getEntityFieldDetailWithFullConfig(String id) {
         EntityFieldDetailRespVO result = getEntityFieldDetail(id);
 
-        // 补充完整的自动编号配置信息（使用统一规则项列表）
+        // 补充完整的自动编号配置信息
         MetadataEntityFieldDO field = metadataEntityFieldRepository.getById(Long.valueOf(id));
         if (field != null) {
             MetadataAutoNumberConfigDO config = autoNumberConfigBuildService.getByFieldId(field.getFieldUuid());
             if (config != null) {
                 AutoNumberConfigRespVO autoNumberConfig = convertToAutoNumberConfigRespVO(config);
-                // 构建统一规则项列表（包含SEQUENCE）
-                List<AutoNumberRuleVO> unifiedRules = buildUnifiedRuleVOList(config);
-                autoNumberConfig.setRuleItems(unifiedRules);
+                // 获取规则项列表
+                List<MetadataAutoNumberRuleItemDO> rules = autoNumberConfigBuildService.listRules(config.getId());
+                List<AutoNumberRuleItemRespVO> ruleVOs = rules.stream()
+                        .map(this::convertToAutoNumberRuleItemRespVO)
+                        .toList();
+                autoNumberConfig.setRuleItems(ruleVOs);
                 result.setAutoNumberConfig(autoNumberConfig);
             }
         }
@@ -2514,12 +2501,10 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
 
     /**
      * 处理自动编号配置（智能更新版本）
-     * <p>
-     * 支持统一规则项列表，从中提取SEQUENCE配置到Config表，其他类型存入RuleItem表
      *
-     * @param fieldUuid   字段UUID
+     * @param fieldId     字段ID
      * @param entityField 字段实体
-     * @param autoNumber  自动编号配置（使用统一的AutoNumberRuleVO列表）
+     * @param autoNumber  自动编号配置
      */
     private void processAutoNumberConfig(String fieldUuid, MetadataEntityFieldDO entityField,
             AutoNumberConfigReqVO autoNumber) {
@@ -2528,20 +2513,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
 
         // 使用新的枚举值：1-启用，0-禁用
         if (autoNumber.getIsEnabled() != null && CommonStatusEnum.isEnabled(autoNumber.getIsEnabled())) {
-            // 从统一规则项列表中提取SEQUENCE配置
-            AutoNumberRuleVO sequenceRule = null;
-            List<AutoNumberRuleVO> otherRules = new java.util.ArrayList<>();
-            if (autoNumber.getRuleItems() != null) {
-                for (AutoNumberRuleVO rule : autoNumber.getRuleItems()) {
-                    if ("SEQUENCE".equalsIgnoreCase(rule.getItemType())) {
-                        sequenceRule = rule;
-                    } else {
-                        otherRules.add(rule);
-                    }
-                }
-            }
-
-            // 构建配置对象（SEQUENCE配置存入Config表）
+            // 构建配置对象
             MetadataAutoNumberConfigDO config = new MetadataAutoNumberConfigDO();
             if (existingConfig != null) {
                 // 更新：保留原有ID
@@ -2549,27 +2521,13 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             }
             config.setFieldUuid(fieldUuid);
             config.setIsEnabled(autoNumber.getIsEnabled());
-            // 从SEQUENCE规则项获取配置，如果没有SEQUENCE则使用默认值
-            if (sequenceRule != null) {
-                config.setNumberMode(sequenceRule.getNumberMode());
-                config.setDigitWidth(sequenceRule.getDigitWidth());
-                config.setOverflowContinue(sequenceRule.getOverflowContinue());
-                config.setInitialValue(sequenceRule.getInitialValue() != null ? sequenceRule.getInitialValue() : 1L);
-                config.setResetCycle(sequenceRule.getResetCycle());
-                config.setResetOnInitialChange(
-                        sequenceRule.getResetOnInitialChange() != null ? sequenceRule.getResetOnInitialChange() : 0);
-                // 设置SEQUENCE在列表中的排序位置
-                config.setSequenceOrder(sequenceRule.getItemOrder() != null ? sequenceRule.getItemOrder() : 999);
-            } else {
-                // 没有SEQUENCE规则项时使用默认值
-                config.setNumberMode("NATURAL");
-                config.setDigitWidth(null);
-                config.setOverflowContinue(1);
-                config.setInitialValue(1L);
-                config.setResetCycle("NEVER");
-                config.setResetOnInitialChange(0);
-                config.setSequenceOrder(999);
-            }
+            config.setNumberMode(autoNumber.getNumberMode());
+            config.setDigitWidth(autoNumber.getDigitWidth());
+            config.setOverflowContinue(autoNumber.getOverflowContinue());
+            config.setInitialValue(autoNumber.getInitialValue() != null ? autoNumber.getInitialValue() : 1L);
+            config.setResetCycle(autoNumber.getResetCycle());
+            config.setResetOnInitialChange(
+                    autoNumber.getResetOnInitialChange() != null ? autoNumber.getResetOnInitialChange() : 0);
             config.setVersionTag(entityField != null && entityField.getVersionTag() != null ? entityField.getVersionTag() : 0L);
             // 从字段实体获取applicationId
             config.setApplicationId(entityField != null ? entityField.getApplicationId() : null);
@@ -2579,8 +2537,8 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             MetadataAutoNumberConfigDO savedConfig = autoNumberConfigBuildService.getByFieldId(fieldUuid);
             String configUuid = savedConfig != null ? savedConfig.getConfigUuid() : null;
 
-            // 处理其他类型规则项（TEXT/DATE/FIELD_REF）到RuleItem表
-            if (!otherRules.isEmpty() && savedConfig != null) {
+            // 处理规则项（智能更新：根据ID进行精确匹配更新）
+            if (autoNumber.getRuleItems() != null && savedConfig != null) {
                 // 获取现有规则项，按 ID 建立映射
                 List<MetadataAutoNumberRuleItemDO> existingRules = autoNumberRuleBuildService.listByConfigId(savedConfig.getId());
                 Map<Long, MetadataAutoNumberRuleItemDO> existingRulesMap = existingRules.stream()
@@ -2592,7 +2550,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 // 用于标记已处理的规则项ID
                 Set<Long> processedRuleIds = new java.util.HashSet<>();
 
-                for (AutoNumberRuleVO ruleReq : otherRules) {
+                for (AutoNumberRuleItemReqVO ruleReq : autoNumber.getRuleItems()) {
                     // 如果提供了ID，尝试更新现有规则项
                     if (ruleReq.getId() != null) {
                         MetadataAutoNumberRuleItemDO existing = existingRulesMap.get(ruleReq.getId());
@@ -2604,11 +2562,30 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                             rule.setItemType(ruleReq.getItemType());
                             rule.setItemOrder(ruleReq.getItemOrder());
                             rule.setFormat(ruleReq.getFormat());
-                            rule.setTextValue(ruleReq.getTextValue());
+
+                            // 兼容性处理：TEXT类型的规则项支持从format字段获取文本值
+                            String textValue = ruleReq.getTextValue();
+                            if ("TEXT".equalsIgnoreCase(ruleReq.getItemType()) && textValue == null
+                                    && ruleReq.getFormat() != null) {
+                                textValue = ruleReq.getFormat();
+                            }
+                            rule.setTextValue(textValue);
+
+                            // 兼容性处理：FIELD_REF类型的规则项支持从format字段获取引用字段ID
+                            Long refFieldId = ruleReq.getRefFieldId();
+                            if ("FIELD_REF".equalsIgnoreCase(ruleReq.getItemType()) && refFieldId == null
+                                    && ruleReq.getFormat() != null) {
+                                try {
+                                    refFieldId = Long.parseLong(ruleReq.getFormat());
+                                    log.info("FIELD_REF规则项从format字段解析出引用字段ID: {}", refFieldId);
+                                } catch (NumberFormatException e) {
+                                    log.warn("FIELD_REF规则项的format字段无法解析为字段ID: {}", ruleReq.getFormat());
+                                }
+                            }
                             rule.setRefFieldUuid(ruleReq.getRefFieldUuid());
                             rule.setIsEnabled(
                                     ruleReq.getIsEnabled() != null ? ruleReq.getIsEnabled() : StatusEnumUtil.ENABLED);
-                            rule.setApplicationId(null);
+                            rule.setApplicationId(null); // RuleItem使用自己的applicationId管理
 
                             autoNumberRuleBuildService.update(rule);
                             processedRuleIds.add(ruleReq.getId());
@@ -2626,10 +2603,30 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                     rule.setItemType(ruleReq.getItemType());
                     rule.setItemOrder(ruleReq.getItemOrder());
                     rule.setFormat(ruleReq.getFormat());
-                    rule.setTextValue(ruleReq.getTextValue());
+
+                    // 兼容性处理：TEXT类型的规则项支持从format字段获取文本值
+                    String textValue = ruleReq.getTextValue();
+                    if ("TEXT".equalsIgnoreCase(ruleReq.getItemType()) && textValue == null
+                            && ruleReq.getFormat() != null) {
+                        textValue = ruleReq.getFormat();
+                    }
+                    rule.setTextValue(textValue);
+
+                    // 兼容性处理：FIELD_REF类型的规则项支持从format字段获取引用字段ID
+                    Long refFieldId = ruleReq.getRefFieldId();
+                    if ("FIELD_REF".equalsIgnoreCase(ruleReq.getItemType()) && refFieldId == null
+                            && ruleReq.getFormat() != null) {
+                        try {
+                            refFieldId = Long.parseLong(ruleReq.getFormat());
+                            log.info("FIELD_REF规则项从format字段解析出引用字段ID: {}", refFieldId);
+                        } catch (NumberFormatException e) {
+                            log.warn("FIELD_REF规则项的format字段无法解析为字段ID: {}", ruleReq.getFormat());
+                        }
+                    }
                     rule.setRefFieldUuid(ruleReq.getRefFieldUuid());
                     rule.setIsEnabled(ruleReq.getIsEnabled() != null ? ruleReq.getIsEnabled() : StatusEnumUtil.ENABLED);
-                    rule.setApplicationId(null);
+                    rule.setApplicationId(null); // RuleItem使用自己的applicationId管理
+                    rule.setConfigUuid(configUuid);
 
                     Long newRuleId = autoNumberRuleBuildService.add(rule);
                     log.info("新增自动编号规则项，id={}, configId={}, itemOrder={}",
@@ -2643,13 +2640,6 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                         log.info("删除未在请求中出现的自动编号规则项，id={}, itemOrder={}",
                                 existingRule.getId(), existingRule.getItemOrder());
                     }
-                }
-            } else if (savedConfig != null) {
-                // 如果没有其他类型规则项，删除所有现有规则项
-                List<MetadataAutoNumberRuleItemDO> existingRules = autoNumberRuleBuildService.listByConfigId(savedConfig.getId());
-                for (MetadataAutoNumberRuleItemDO existingRule : existingRules) {
-                    autoNumberRuleBuildService.deleteById(existingRule.getId());
-                    log.info("删除自动编号规则项，id={}", existingRule.getId());
                 }
             }
         } else {
@@ -2697,18 +2687,18 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             vo.setConstraints(constraintVO);
         }
 
-        // 填充自动编号完整配置（统一规则项列表，包含SEQUENCE）
+        // 填充自动编号完整配置（规则项）
         MetadataAutoNumberConfigDO config = autoNumberConfigBuildService.getByFieldId(field.getFieldUuid());
         if (config != null) {
-            log.debug("找到字段 {} 的自动编号配置，configId: {}", field.getFieldUuid(), config.getId());
-            // 基本配置
+            // 完整配置
             AutoNumberConfigRespVO full = convertToAutoNumberConfigRespVO(config);
-            // 构建统一规则项列表
-            List<AutoNumberRuleVO> unifiedRules = buildUnifiedRuleVOList(config);
-            full.setRuleItems(unifiedRules);
+            // 规则项
+            List<MetadataAutoNumberRuleItemDO> rules = autoNumberConfigBuildService.listRules(config.getId());
+            List<AutoNumberRuleItemRespVO> ruleVOs = rules.stream()
+                    .map(this::convertToAutoNumberRuleItemRespVO)
+                    .toList();
+            full.setRuleItems(ruleVOs);
             vo.setAutoNumberConfig(full);
-        } else {
-            log.debug("字段 {} 没有配置自动编号", field.getFieldUuid());
         }
 
         // 填充数据选择配置（单选和多选都需要）
@@ -2781,14 +2771,19 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
 
 
     /**
-     * 转换自动编号配置DO为响应VO（基本信息）
+     * 转换自动编号配置DO为响应VO
      */
     private AutoNumberConfigRespVO convertToAutoNumberConfigRespVO(MetadataAutoNumberConfigDO config) {
         AutoNumberConfigRespVO vo = new AutoNumberConfigRespVO();
         vo.setId(config.getId());
-        vo.setConfigUuid(config.getConfigUuid());
         vo.setFieldUuid(config.getFieldUuid());
         vo.setIsEnabled(config.getIsEnabled());
+        vo.setNumberMode(config.getNumberMode());
+        vo.setDigitWidth(config.getDigitWidth());
+        vo.setOverflowContinue(config.getOverflowContinue());
+        vo.setInitialValue(config.getInitialValue());
+        vo.setResetCycle(config.getResetCycle());
+        vo.setResetOnInitialChange(config.getResetOnInitialChange());
         vo.setVersionTag(config.getVersionTag());
         vo.setApplicationId(config.getApplicationId());
         vo.setCreateTime(config.getCreateTime());
@@ -2813,60 +2808,6 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         vo.setCreateTime(rule.getCreateTime());
         vo.setUpdateTime(rule.getUpdateTime());
         return vo;
-    }
-
-    /**
-     * 构建统一规则项VO列表
-     * <p>
-     * 将Config表中的SEQUENCE配置和RuleItem表中的其他规则项合并为统一的AutoNumberRuleVO列表，
-     * 按itemOrder排序返回
-     *
-     * @param config 自动编号配置DO
-     * @return 统一规则项VO列表
-     */
-    private List<AutoNumberRuleVO> buildUnifiedRuleVOList(MetadataAutoNumberConfigDO config) {
-        List<AutoNumberRuleVO> unifiedRules = new java.util.ArrayList<>();
-
-        // 1. 从Config构建SEQUENCE规则项
-        AutoNumberRuleVO sequenceRule = new AutoNumberRuleVO();
-        sequenceRule.setId(config.getId());
-        sequenceRule.setUuid(config.getConfigUuid());
-        sequenceRule.setItemType("SEQUENCE");
-        sequenceRule.setItemOrder(config.getSequenceOrder() != null ? config.getSequenceOrder() : 999);
-        sequenceRule.setIsEnabled(config.getIsEnabled());
-        sequenceRule.setNumberMode(config.getNumberMode());
-        sequenceRule.setDigitWidth(config.getDigitWidth());
-        sequenceRule.setOverflowContinue(config.getOverflowContinue());
-        sequenceRule.setInitialValue(config.getInitialValue());
-        sequenceRule.setResetCycle(config.getResetCycle());
-        sequenceRule.setResetOnInitialChange(config.getResetOnInitialChange());
-        sequenceRule.setCreateTime(config.getCreateTime());
-        sequenceRule.setUpdateTime(config.getUpdateTime());
-        unifiedRules.add(sequenceRule);
-
-        // 2. 从RuleItem表获取其他类型规则项
-        List<MetadataAutoNumberRuleItemDO> ruleItems = autoNumberConfigBuildService.listRules(config.getId());
-        if (ruleItems != null) {
-            for (MetadataAutoNumberRuleItemDO item : ruleItems) {
-                AutoNumberRuleVO ruleVO = new AutoNumberRuleVO();
-                ruleVO.setId(item.getId());
-                ruleVO.setUuid(item.getRuleItemUuid());
-                ruleVO.setItemType(item.getItemType());
-                ruleVO.setItemOrder(item.getItemOrder());
-                ruleVO.setIsEnabled(item.getIsEnabled());
-                ruleVO.setTextValue(item.getTextValue());
-                ruleVO.setFormat(item.getFormat());
-                ruleVO.setRefFieldUuid(item.getRefFieldUuid());
-                ruleVO.setCreateTime(item.getCreateTime());
-                ruleVO.setUpdateTime(item.getUpdateTime());
-                unifiedRules.add(ruleVO);
-            }
-        }
-
-        // 3. 按itemOrder排序
-        unifiedRules.sort(java.util.Comparator.comparingInt(r -> r.getItemOrder() != null ? r.getItemOrder() : Integer.MAX_VALUE));
-
-        return unifiedRules;
     }
 
     /**
