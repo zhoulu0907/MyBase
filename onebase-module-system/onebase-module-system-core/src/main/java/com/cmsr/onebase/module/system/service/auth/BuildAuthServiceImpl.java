@@ -508,6 +508,8 @@ public class BuildAuthServiceImpl implements BuildAuthService {
         if (user == null) {
             throw exception(USER_MOBILE_NOT_EXISTS);
         }
+        // 解密原文
+        reqVO.setPassword(pwdEnHelper.decryptHexStr(reqVO.getPassword()));
         userService.updateUserPassword(user.getId(), reqVO.getPassword());
     }
 }
