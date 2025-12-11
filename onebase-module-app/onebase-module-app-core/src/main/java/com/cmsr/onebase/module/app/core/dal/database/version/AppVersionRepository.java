@@ -37,7 +37,7 @@ public class AppVersionRepository extends BaseAppRepository<AppVersionMapper, Ap
     public PageResult<AppVersionDO> selectPage(Long applicationId, PageParam pageParam) {
         QueryWrapper queryWrapper = this.query()
                 .eq(AppVersionDO::getApplicationId, applicationId)
-                .orderBy(APP_VERSION.UPDATE_TIME, false)
+                .orderBy(APP_VERSION.VERSION_TYPE, true)
                 .orderBy(APP_VERSION.CREATE_TIME, false);
         Page<AppVersionDO> pageQuery = Page.of(pageParam.getPageNo(), pageParam.getPageSize());
         Page<AppVersionDO> pageResult = this.page(pageQuery, queryWrapper);

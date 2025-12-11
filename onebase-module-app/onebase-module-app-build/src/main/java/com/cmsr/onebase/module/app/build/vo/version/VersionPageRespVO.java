@@ -28,6 +28,12 @@ public class VersionPageRespVO {
     @Schema(description = "版本描述")
     private String versionDescription;
 
+    @Schema(description = "版本类型")
+    private Integer versionType;
+
+    @Schema(description = "版本类型中文描述")
+    private String versionTypeLabel;
+
     @Schema(description = "操作类型")
     private Integer operationType;
 

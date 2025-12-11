@@ -7,14 +7,25 @@ package com.cmsr.onebase.module.app.core.enums.version;
  */
 public enum VersionTypeEnum {
 
-    RUNTIME(1),
-    HISTORY(2),
+    RUNTIME(1, "运行版本"),
+    HISTORY(2, "历史版本"),
     ;
 
     private final int value;
+    private final String label;
 
-    VersionTypeEnum(int value) {
+    VersionTypeEnum(int value, String label) {
         this.value = value;
+        this.label = label;
+    }
+
+    public static String getLabel(Integer versionType) {
+        for (VersionTypeEnum value : VersionTypeEnum.values()) {
+            if (value.value == versionType) {
+                return value.label;
+            }
+        }
+        return "未知";
     }
 
     public int getValue() {
