@@ -25,8 +25,8 @@ import java.io.IOException;
 @Component
 public class RuntimeApplicationContextHeaderFilter extends OncePerRequestFilter {
 
-    @Value("${debug}")
-    private Boolean debug;
+    @Value("${data.isolation:true}")
+    private Boolean dataIsolation;
 
     private static final String X_APPLICATION_ID = "X-Application-Id";
 
@@ -34,10 +34,10 @@ public class RuntimeApplicationContextHeaderFilter extends OncePerRequestFilter 
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
         try {
-            if (debug) {
-                ApplicationManager.setVersionTag(0L);
-            } else {
+            if (dataIsolation) {
                 ApplicationManager.setVersionTag(VersionTagEnum.RUNTIME.getValue());
+            } else {
+                ApplicationManager.setVersionTag(0L);
             }
             RuntimeLoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
             if (loginUser != null && loginUser.getApplicationId() != null) {
