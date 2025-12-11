@@ -229,12 +229,23 @@ export default function UserTable({
     return record.adminType === UserType.SYSTEM;
   };
 
+  const renderRoleList = (record: UserRecord) => {
+    const roleNameList = record.roles?.map((item) => item.name) || [];
+    if (roleNameList.length === 1) {
+      return roleNameList[0];
+    } else if (roleNameList?.length > 1) {
+      return roleNameList.join(',');
+    } else {
+      return [];
+    }
+  };
+
   const getColumns = (handleEdit: (record: UserRecord) => void) => {
     return [
       {
         title: '姓名',
         dataIndex: 'nickname',
-        width: 180,
+        width: 140,
         ellipsis: true,
         render: (_: any, record: UserRecord) => (
           <>
@@ -253,20 +264,19 @@ export default function UserTable({
       {
         title: '账号',
         dataIndex: 'username',
-        width: 140,
+        width: 120,
         placeholder: '-',
         ellipsis: true
       },
-      // {
-      //   title: '角色',
-      //   dataIndex: 'roleIds',
-      //   width: 140,
-      //   placeholder: '-',
-      //   ellipsis: true,
-      //   render: (val: string[]) => {
-      //     <span>{val.join(",")}</span>
-      //   }
-      // },
+      {
+        title: '角色',
+        dataIndex: 'roles',
+        width: 130,
+        ellipsis: true,
+        render: (_: any, record: UserRecord) =>(
+          <span>{renderRoleList(record)}</span>
+        )
+      },
       { title: '手机号', dataIndex: 'mobile', width: 140 },
       {
         title: '邮箱',
@@ -275,17 +285,10 @@ export default function UserTable({
         placeholder: '-',
         ellipsis: true
       },
-      // {
-      //   title: '部门',
-      //   dataIndex: 'deptName',
-      //   width: 180,
-      //   placeholder: '-',
-      //   ellipsis: true
-      // },
       {
         title: '状态',
         dataIndex: 'status',
-        width: 80,
+        width: 70,
         render: (val: number) => <StatusTag status={val} />
       },
       {
