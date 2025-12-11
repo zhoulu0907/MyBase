@@ -122,24 +122,16 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
   const getFieldList = async () => {
     const res = await getEntityFields({ entityUuid });
 
-    // TODO(mickey): 等卞老师调通后移除
-    console.log('fieldList res: ', res);
-
     res.forEach((item: MetadataEntityField) => {
       if (item.fieldType && hiddenFieldTypes.includes(item.fieldType)) {
         item.disabled = true;
       }
     });
 
-    const newFieldList = res
-      .filter((item: MetadataEntityField) => item.entityUuid === entityUuid)
-      .filter((item: MetadataEntityField) => !FilterEntityFields.includes(item.fieldName));
-    const newFieldListNotSystemField = res
-      .filter((item: MetadataEntityField) => item.entityUuid === entityUuid)
-      .filter((item: MetadataEntityField) => item.isSystemField !== 1 && !item.disabled);
-
-    // TODO(mickey): 等卞老师调通后移除
-    console.log('newFieldList: ', newFieldList);
+    const newFieldList = res.filter((item: MetadataEntityField) => !FilterEntityFields.includes(item.fieldName));
+    const newFieldListNotSystemField = res.filter(
+      (item: MetadataEntityField) => item.isSystemField !== 1 && !item.disabled
+    );
 
     setFieldList(newFieldList);
 
