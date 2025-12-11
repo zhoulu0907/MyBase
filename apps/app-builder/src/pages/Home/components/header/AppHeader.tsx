@@ -8,7 +8,7 @@ import { logout } from '@/utils/session';
 import { Divider, Dropdown, Layout, Menu, Tabs, Typography } from '@arco-design/web-react';
 import { IconExport } from '@arco-design/web-react/icon';
 import { TokenManager, UserPermissionManager } from '@onebase/common';
-import { CodeType, getPermissionInfo } from '@onebase/platform-center';
+import { CodeType, getPermissionInfo, systemLogout } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import styles from './header.module.less';
@@ -77,9 +77,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
 
   // 登出处理
   const handleLogout = async () => {
-    // TODO(mickey): 联调后打开,现在后端登出接口报错
-    // await systemLogout();
-
+    await systemLogout();
     logout(navigate);
   };
 

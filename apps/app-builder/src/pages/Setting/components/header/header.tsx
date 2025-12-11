@@ -6,6 +6,7 @@ import { logout } from '@/utils/session';
 import { Button, Divider, Dropdown, Layout, Menu, Typography } from '@arco-design/web-react';
 import { IconApps, IconExport } from '@arco-design/web-react/icon';
 import { UserPermissionManager } from '@onebase/common';
+import { systemLogout } from '@onebase/platform-center';
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import styles from './header.module.less';
@@ -28,9 +29,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className, avatarUrl }) => {
 
   // 登出处理
   const handleLogout = async () => {
-    // TODO(mickey): 联调后打开
-    // await systemLogout();
-
+    await systemLogout();
     logout(navigate);
   };
 
