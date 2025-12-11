@@ -120,7 +120,7 @@ public class AppVersionServiceImpl implements AppVersionService {
 
     @Override
     public void deleteApplicationVersion(Long versionId) {
-        versionRepository.removeById(versionId);
+        //versionRepository.removeById(versionId);
     }
 
 
