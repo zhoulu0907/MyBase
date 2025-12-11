@@ -32,6 +32,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 import com.mybatisflex.core.query.QueryWrapper;
+import com.cmsr.onebase.module.metadata.core.semantic.constants.SystemFieldConstants;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.BUSINESS_ENTITY_NOT_EXISTS;
@@ -444,8 +445,8 @@ public class SemanticMergeRecordAssembler {
                 rowValue.setId(fieldRawValue);
                 MetadataEntityFieldDO fieldMeta = targetFieldMetaByName.get(fieldName);
                 rowFieldValues.put(fieldName, toFieldValue(fieldRawValue, fieldMeta, fieldName));
-            } else if ("deleted".equals(fieldName)) {
-                rowValue.setDeleted(fieldRawValue == null ? null : Boolean.valueOf(String.valueOf(fieldRawValue)));
+            } else if (SystemFieldConstants.OPTIONAL.DELETED.equals(fieldName)) {
+                rowValue.setDeleted(fieldRawValue == null ? null : ("1".equals(String.valueOf(fieldRawValue)) || Objects.equals(1, fieldRawValue)));
             } else {
                 MetadataEntityFieldDO fieldMeta = targetFieldMetaByName.get(fieldName);
                 rowFieldValues.put(fieldName, toFieldValue(fieldRawValue, fieldMeta, fieldName));

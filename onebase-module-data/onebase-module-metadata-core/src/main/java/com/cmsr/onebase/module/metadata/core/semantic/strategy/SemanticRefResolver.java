@@ -589,6 +589,7 @@ public class SemanticRefResolver {
                 SemanticFieldTypeEnum t = v.getFieldTypeEnum();
                 if (t != SemanticFieldTypeEnum.DATA_SELECTION && t != SemanticFieldTypeEnum.MULTI_DATA_SELECTION) continue;
                 String fieldUuid = v.getFieldUuid();
+                log.info("fieldUuid is {}", fieldUuid);
                 DataSelectMeta meta = fieldUuid == null ? null : metaByFieldId.get(fieldUuid);
                 if (meta == null || meta.tableName == null) continue;
                 if (v.isListType()) {

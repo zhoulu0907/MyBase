@@ -11,6 +11,7 @@ import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticOperator
 import com.mybatisflex.core.query.QueryColumn;
 import com.mybatisflex.core.query.QueryCondition;
 import com.mybatisflex.core.query.QueryWrapper;
+import com.cmsr.onebase.module.metadata.core.semantic.constants.SystemFieldConstants;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
@@ -46,7 +47,7 @@ public class SemanticQueryConditionBuilder {
         }
 
         if (hasDeletedField(fields)) {
-            QueryCondition strCond = new QueryColumn("deleted").eq("0");
+            QueryCondition strCond = new QueryColumn(SystemFieldConstants.OPTIONAL.DELETED).eq(0);
             qw.where(strCond);
         }
     }
@@ -205,7 +206,7 @@ public class SemanticQueryConditionBuilder {
 
     private boolean hasDeletedField(List<SemanticFieldSchemaDTO> fields) {
         if (fields == null) { return false; }
-        return fields.stream().anyMatch(f -> "deleted".equalsIgnoreCase(f.getFieldName()));
+        return fields.stream().anyMatch(f -> SystemFieldConstants.OPTIONAL.DELETED.equalsIgnoreCase(f.getFieldName()));
     }
 
     private SemanticFieldTypeEnum resolveFieldType(String fieldName, List<SemanticFieldSchemaDTO> fields) {

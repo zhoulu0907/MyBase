@@ -9,6 +9,7 @@ import com.mybatisflex.core.row.Row;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.stereotype.Component;
+import com.cmsr.onebase.module.metadata.core.semantic.constants.SystemFieldConstants;
 
 import java.util.HashMap;
 import java.util.List;
@@ -125,7 +126,7 @@ public class SemanticValueAssembler {
     public SemanticRowValueDTO toRowValue(Row r, List<SemanticFieldSchemaDTO> attrs, String tableName) {
         SemanticRowValueDTO rowDto = new SemanticRowValueDTO();
         rowDto.setId(r.get("id"));
-        Object del = r.get("deleted");
+        Object del = r.get(SystemFieldConstants.OPTIONAL.DELETED);
         rowDto.setDeleted(del == null ? null : ("1".equals(String.valueOf(del)) || Integer.valueOf(1).equals(del)));
         Map<String, SemanticFieldValueDTO<Object>> fv = new java.util.LinkedHashMap<>();
         
