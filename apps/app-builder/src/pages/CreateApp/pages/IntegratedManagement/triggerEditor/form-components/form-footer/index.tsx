@@ -151,7 +151,7 @@ export function FormFooter({ nodeInfo }: { nodeInfo: any }) {
           const handleSetConditionFields = (conditionFields: ConditionField[]) => {
             updateLoopOutputs(curNode.id, conditionFields);
           };
-          getEntityFieldList(originDataSource, handleSetConditionFields, () => {});
+          getEntityFieldList(curAppId, originDataSource, handleSetConditionFields, () => {});
           break;
         case NodeType.DATA_ADD:
           const mainDataSource =

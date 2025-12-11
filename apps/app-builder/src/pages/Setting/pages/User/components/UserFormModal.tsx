@@ -3,7 +3,15 @@ import { emailValidator, phoneValidator } from '@/utils/validator';
 import { Button, Form, Grid, Input, Message, Modal, Select, Space, Switch, TreeSelect } from '@arco-design/web-react';
 import { UploadAvatarComponent, hasPermission, TENANT_DEPT_QUERY } from '@onebase/common';
 import type { RoleVO, SimpleRoleVO, UserVO } from '@onebase/platform-center';
-import { createUser, getSimpleRoleList, getUser, StatusEnum, updateUser, uploadFile } from '@onebase/platform-center';
+import {
+  createUser,
+  getSimpleRoleList,
+  getUser,
+  StatusEnum,
+  updateUser,
+  uploadFile,
+  UserType
+} from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
 
 const Row = Grid.Row;
@@ -139,6 +147,8 @@ export default function UserFormModal({
     return titlePath;
   };
 
+  const isSystemUser = form.getFieldValue('adminType') === UserType.SYSTEM;
+
   return (
     <Modal
       title={
@@ -179,7 +189,12 @@ export default function UserFormModal({
             </Form.Item>
           </Col>
           <Col span={12}>
-            <Form.Item label="姓名" field="nickname" rules={[{ required: true, message: '请输入姓名' }]}>
+            <Form.Item
+              label="姓名"
+              field="nickname"
+              disabled={mode === 'edit' && isSystemUser}
+              rules={[{ required: true, message: '请输入姓名' }]}
+            >
               <Input placeholder="请输入" />
             </Form.Item>
           </Col>
@@ -187,6 +202,7 @@ export default function UserFormModal({
             <Form.Item
               label="手机号"
               field="mobile"
+              disabled={mode === 'edit' && isSystemUser}
               rules={[{ required: true, message: '请输入手机号' }, { validator: phoneValidator }]}
             >
               <Input placeholder="请输入" />
@@ -195,7 +211,12 @@ export default function UserFormModal({
         </Row>
         <Row gutter={24}>
           <Col span={12}>
-            <Form.Item label="账号" field="username" rules={[{ required: true, message: '请输入账号' }]}>
+            <Form.Item
+              label="账号"
+              field="username"
+              disabled={mode === 'edit' && isSystemUser}
+              rules={[{ required: true, message: '请输入账号' }]}
+            >
               <Input placeholder="请输入" autoComplete="new-password" />
             </Form.Item>
           </Col>

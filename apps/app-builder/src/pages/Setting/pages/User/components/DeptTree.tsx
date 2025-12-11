@@ -4,6 +4,7 @@ import { Input, Tree } from '@arco-design/web-react';
 import { type DeptTree } from '@onebase/platform-center';
 import { useEffect, useMemo, useState } from 'react';
 import s from '../index.module.less';
+import { renderDraggedTree } from '@/utils';
 
 type TreeDataType = {
   key?: string;
@@ -18,14 +19,20 @@ interface DeptTreeProps {
   totalUserCount?: number;
   treeData: DeptTree[];
   deptLoading?: boolean;
+  setDeptTree: (data: DeptTree[]) => void;
 }
 
-const DeptTreeCmp: React.FC<DeptTreeProps> = ({ selectedDeptId, onDeptSelect, totalUserCount = 0, treeData }) => {
+const DeptTreeCmp: React.FC<DeptTreeProps> = ({
+  selectedDeptId,
+  onDeptSelect,
+  setDeptTree,
+  totalUserCount = 0,
+  treeData
+}) => {
   const [search, setSearch] = useState('');
   const [selectedKeys, setSelectedKeys] = useState<string[]>(selectedDeptId ? [String(selectedDeptId)] : []);
 
-  const filteredTree = useMemo(() => treeFilter(treeData, search), [treeData, search]);
-
+  let filteredTree = useMemo(() => treeFilter(treeData, search), [treeData, search]);
   // 同步外部选中状态
   useEffect(() => {
     const keys = selectedDeptId ? [String(selectedDeptId)] : [];
@@ -59,6 +66,20 @@ const DeptTreeCmp: React.FC<DeptTreeProps> = ({ selectedDeptId, onDeptSelect, to
         selectedKeys={selectedKeys}
         onSelect={handleSelect}
         blockNode
+        draggable
+        onDrop={({ dragNode, dropNode, dropPosition }) => {
+          const { data: draggedTree, dragItem } = renderDraggedTree<DeptTree>(
+            dragNode,
+            dropNode,
+            dropPosition,
+            filteredTree
+          );
+          setDeptTree([...draggedTree]);
+          setTimeout(() => {
+            dragItem.className = '';
+            setDeptTree([...draggedTree]);
+          }, 1000);
+        }}
         className={s.deptTreeNode}
         renderTitle={(node: TreeDataType) => {
           return <span className="tableColumnUsername">{`${node.title}(${node.userCount || 0})`}</span>;

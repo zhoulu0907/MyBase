@@ -185,7 +185,9 @@ const XInputTextArea: XInputTextAreaSchema = {
       name: '文本展示行数',
       type: CONFIG_TYPES.NUMBER_INPUT,
       min: 1,
-      max: 10
+      max: 10,
+      step: 1,
+      precision: 0
     },
     // 显示状态
     statusConfig,

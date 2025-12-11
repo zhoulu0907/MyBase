@@ -7,8 +7,10 @@ import { getApplication } from '@onebase/app';
 import {
   getHashQueryParam,
   getOrCreateDeviceInfo,
+  getPublicKey,
   PUBLISH_MODULE,
   SliderCaptcha,
+  sm2Encrypt,
   TokenManager,
   type SliderCaptchaRef
 } from '@onebase/common';
@@ -152,6 +154,8 @@ const Right: React.FC = () => {
 
       const deviceId = await getOrCreateDeviceInfo();
 
+      values.password = await sm2Encrypt(getPublicKey(), values.password);
+
       if (curAppInfo.value.publishModel === PUBLISH_MODULE.SASS) {
         const sassloginData: RuntimeMobileLoginRequest = {
           password: values.password!,
@@ -211,7 +215,6 @@ const Right: React.FC = () => {
             refreshToken: response.refreshToken,
             expiresTime: response.expiresTime,
             tenantId: response.tenantId,
-            adminFlag: response.adminFlag,
             corpId: response.corpId,
             loginURL: window.location.href // 当前地址
           },

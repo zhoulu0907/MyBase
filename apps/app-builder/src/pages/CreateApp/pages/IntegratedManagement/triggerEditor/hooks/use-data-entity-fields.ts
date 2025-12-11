@@ -255,6 +255,7 @@ export const useEntityFields = () => {
         [...res.parentFields].find((field: AppEntityField) => field.fieldId == item.fieldId)?.fieldName || '';
       item.fieldKey = `${originDataSource}.${fieldName}`;
     });
+
     setValidationTypes(newValidationTypes);
   };
 

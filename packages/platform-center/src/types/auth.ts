@@ -119,7 +119,6 @@ export interface LoginResponse {
   expiresTime: number; // 令牌过期时间（时间戳，毫秒）
   tenantId: string; // 租户id
   tenantWebsite: string; // 租户网址
-  adminFlag: boolean; // 是否是管理员
   corpId: string; // 企业id
 }
 
@@ -141,6 +140,19 @@ export interface GetPermissionInfoResponse {
   roles: string[]; // 角色标识数组
   permissions: string[]; // 权限标识数组
   menus: MenuInfo[]; // 菜单信息数组
+}
+
+export interface SendVerifyCodeRequest {
+  /**
+   * 用户名
+   */
+  userName?: string;
+  /**
+   * 用户手机号
+   */
+  userMobile?: string;
+
+  sendType: string;
 }
 
 /**

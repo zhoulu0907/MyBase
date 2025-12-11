@@ -159,7 +159,7 @@ const DetailStep: FC<any> = ({ stepData }: any) => {
         {pendingUserArr.length > 0 ? 
           <>
             <div className='user-temp' style={{ display: 'flex', alignItems: 'flex-end' }}>
-              <AvatarGroup style={{flex: 1}}>
+              <AvatarGroup style={{maxWidth: '50%'}}>
                 {pendingUserArr && pendingUserArr.map((imgUrl, i) => <Avatar key={i}>
                   <img
                     alt="avatar"
@@ -190,6 +190,8 @@ const DetailStep: FC<any> = ({ stepData }: any) => {
     }
     const opperator = nodeItem?.operators?.[0];
     const userMap = displayStatusMap(opperator?.taskStatus);
+    // 发起节点post_submitted 不需要显示 审批意见
+    const hasComment = opperator?.taskStatus !== 'post_submitted'
     return <>
       <div className="flex-bw-center user-temp">
         <p className="photo-img">{opperator?.avatar && <img src={opperator.avatar} alt='' />}</p>
@@ -203,7 +205,10 @@ const DetailStep: FC<any> = ({ stepData }: any) => {
                   <span className='auto-copy-color-span'>{opperator?.colorText}</span>
                   <span className='auto-copy-color-span absolute-span'>{opperator?.autoCopyArr?.length}人</span>
                 </p> : 
-                <b className={`sp-options ${userMap?.labelColor}`}>{userMap?.label}</b>
+                <span>
+                  <b className={`sp-options ${userMap?.labelColor}`}>{userMap?.label}</b>
+                  {(opperator?.comment && hasComment) && <span className="gray-color">&nbsp;({opperator?.comment})</span>}
+                </span>
             }
             <span className="gray-color">
               {(nodeItem?.displayTime || opperator?.operatorTime)

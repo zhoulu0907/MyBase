@@ -2,7 +2,7 @@ import LogoSVG from '@/assets/images/ob_logo.svg';
 import UserProfileAvatar from '@/components//UserProfileAvatar';
 import { useI18n } from '@/hooks/useI18n';
 import { logout } from '@/utils/session';
-import { Button, Dropdown, Layout, Menu, Typography } from '@arco-design/web-react';
+import { Button, Divider, Dropdown, Layout, Menu, Typography } from '@arco-design/web-react';
 import { IconApps, IconExport } from '@arco-design/web-react/icon';
 import { UserPermissionManager } from '@onebase/common';
 import React from 'react';
@@ -27,9 +27,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className, avatarUrl }) => {
 
   // 登出处理
   const handleLogout = async () => {
-    // TODO(mickey): 联调后打开
-    // await systemLogout();
-
+    // await runtimeLogout();
     logout(navigate);
   };
 
@@ -46,10 +44,11 @@ const AppHeader: React.FC<HeaderProps> = ({ className, avatarUrl }) => {
         <div className={styles.adminInformation}>
           <UserProfileAvatar adminInfo={userPermissionInfo?.user} avatarUrl={avatarUrl} />
           <Typography.Text>{userPermissionInfo?.user?.nickname || ''}</Typography.Text>
-          <Typography.Text>{maskMobile(userPermissionInfo?.user?.mobile || '')}</Typography.Text>
+          <span className={styles.mobileColor}>{maskMobile(userPermissionInfo?.user?.mobile || '')}</span>
         </div>
       </Menu.Item>
-      <Menu.Item key="logout" onClick={handleLogout}>
+      <Divider style={{ margin: '4px 0' }} />
+      <Menu.Item key="logout" onClick={handleLogout} style={{ marginLeft: '8px' }}>
         <IconExport style={{ color: '#F53F3F' }} />
         <Typography.Text type="error">{t('header.logout')}</Typography.Text>
       </Menu.Item>

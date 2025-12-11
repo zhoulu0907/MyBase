@@ -44,7 +44,8 @@ import type {
   TTextAreaDefaultType,
   TTextDefaultType,
   TRadioDefaultType,
-  IDefaultValueConfigType
+  IDefaultValueConfigType,
+  ITextConfigType
 } from '../../../types';
 
 export interface XInputNumberSchema {
@@ -53,6 +54,7 @@ export interface XInputNumberSchema {
 }
 
 export type TXInputNumberEditData = Array<
+  | ITextConfigType
   | ILabelConfigType
   | IPlaceholderConfigType
   | ITooltipConfigType
@@ -186,7 +188,12 @@ const XInputNumber: XInputNumberSchema = {
     //  数据绑定
     ...dataFieldConfig,
     // 默认值
-    defaultValueConfig,
+    {
+      key: 'defaultValueConfig',
+      name: '默认值',
+      type: CONFIG_TYPES.DEFAULT_VALUE,
+      valueType: 'number'
+    },
     {
       key: 'numberFormat',
       name: '格式',

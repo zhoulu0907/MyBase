@@ -26,8 +26,10 @@ const fieldStyles = [
   { value: 'style4', label: '样式4' },
   { value: 'style5', label: '样式5' },
   { value: 'style6', label: '样式6' },
-  { value: 'style7', label: '样式7' }
-  //   { value: 'style8', label: '样式8' }
+  { value: 'style7', label: '样式7' },
+  { value: 'style8', label: '样式8' },
+  { value: 'style9', label: '样式9' },
+  { value: 'style10', label: '样式10' }
 ];
 
 const DynamicDividerStyleConfig = ({ handlePropsChange, item, configs }: Props) => {
@@ -37,6 +39,23 @@ const DynamicDividerStyleConfig = ({ handlePropsChange, item, configs }: Props) 
 
   const handleStyleChange = (value: string) => {
     handlePropsChange(item.key, value);
+  };
+
+  const hexToRgba = (hex: any, alpha = 1) => {
+    const cleaned = hex.replace('#', '');
+    const full =
+      cleaned.length === 3
+        ? cleaned
+            .split('')
+            .map((c: any) => c + c)
+            .join('')
+        : cleaned;
+
+    const r = parseInt(full.slice(0, 2), 16);
+    const g = parseInt(full.slice(2, 4), 16);
+    const b = parseInt(full.slice(4, 6), 16);
+
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   };
 
   const handleColorChange = (key: string, value: string | GradientColor[]) => {
@@ -58,12 +77,16 @@ const DynamicDividerStyleConfig = ({ handlePropsChange, item, configs }: Props) 
   const optionRender = (option: any, index: number) => {
     if (index < 6) {
       return (
-        <div
-          className={[4, 5].includes(index) ? styles[`decor-title-${option.value}`] : styles.title}
-          style={{ color: `${titleColor}`, borderLeftColor: `${color}`, borderBottomColor: `${color}` }}
-        >
-          字段标题
-        </div>
+        <>
+          <div
+            className={[4, 5].includes(index) ? styles[`decor-title-${option.value}`] : styles.title}
+            style={{ color: `${titleColor}`, borderLeftColor: `${color}`, borderBottomColor: `${color}` }}
+          >
+            字段标题
+          </div>
+          {/* 不同风格的装饰条 */}
+          <div className={styles[`decor-${option.value}`]} style={{ borderColor: `${color}` }} />
+        </>
       );
     } else if (index === 6) {
       return (
@@ -74,6 +97,52 @@ const DynamicDividerStyleConfig = ({ handlePropsChange, item, configs }: Props) 
           <div className={styles['decorator1']} style={{ backgroundColor: `${color}` }}></div>
           <div className={styles['decorator2']} style={{ backgroundColor: `${color}` }}></div>
           <div className={styles['decorator3']} style={{ backgroundColor: `${color}` }}></div>
+        </div>
+      );
+    } else if (index === 7) {
+      return (
+        <div className={styles[`decor-${option.value}`]} style={{ backgroundColor: hexToRgba(color, 0.2) }}>
+          <div
+            className={styles[`decor-title-${option.value}`]}
+            style={{ backgroundColor: `${color}`, color: `${titleColor}` }}
+          >
+            字段标题
+          </div>
+        </div>
+      );
+    } else if (index === 8) {
+      return (
+        <div
+          className={styles[`decor-${option.value}`]}
+          style={
+            {
+              backgroundColor: hexToRgba(color, 0.2),
+              '--before-bg': hexToRgba(color, 0.6),
+              '--after-bg': hexToRgba(color, 0.6)
+            } as React.CSSProperties
+          }
+        >
+          <div className={styles.tabActive} style={{ backgroundColor: `${color}`, color: `${titleColor}` }}>
+            字段标题
+          </div>
+        </div>
+      );
+    } else {
+      return (
+        <div className={styles[`decor-${option.value}`]}>
+          <div className={styles.leftArrows}>
+            <span className={styles.leftArrow1} style={{ backgroundColor: hexToRgba(color, 0.6) }} />
+            <span className={styles.leftArrow2} style={{ backgroundColor: hexToRgba(color, 0.2) }} />
+          </div>
+
+          <div className={styles.center} style={{ backgroundColor: `${color}`, color: `${titleColor}` }}>
+            字段标题
+          </div>
+
+          <div className={styles.rightArrows}>
+            <span className={styles.rightArrow1} style={{ backgroundColor: hexToRgba(color, 0.6) }} />
+            <span className={styles.rightArrow2} style={{ backgroundColor: hexToRgba(color, 0.2) }} />
+          </div>
         </div>
       );
     }
@@ -93,8 +162,6 @@ const DynamicDividerStyleConfig = ({ handlePropsChange, item, configs }: Props) 
               <div className={styles.dropdownWrapper}>
                 <div className={styles.previewWrapper}>
                   {optionRender(option, index)}
-                  {/* 不同风格的装饰条 */}
-                  <div className={styles[`decor-${option.value}`]} style={{ borderColor: `${color}` }} />
                   <div className={styles.desc} style={{ color: `${descriptionColor}` }}>
                     这里是字段的描述信息
                   </div>

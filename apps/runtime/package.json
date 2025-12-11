@@ -15,6 +15,8 @@
     "@arco-themes/react-cyansu-ob03": "^0.0.3",
     "@babel/plugin-proposal-class-properties": "^7.18.6",
     "@babel/plugin-proposal-decorators": "^7.28.0",
+    "@douyinfe/semi-icons": "^2.85.0",
+    "@douyinfe/semi-ui": "^2.85.0",
     "@icon-park/react": "^1.4.2",
     "@onebase/app": "workspace:*",
     "@onebase/common": "workspace:*",
@@ -44,11 +46,10 @@
     "react-sortable-hoc": "^2.0.0",
     "react-sortablejs": "^6.1.4",
     "sm-crypto": "^0.3.13",
+    "sm-crypto-v2": "^1.15.1",
     "sortablejs": "^1.15.6",
     "uuid": "^11.1.0",
-    "zustand": "^5.0.6",
-    "@douyinfe/semi-icons": "^2.85.0",
-    "@douyinfe/semi-ui": "^2.85.0"
+    "zustand": "^5.0.6"
   },
   "devDependencies": {
     "@eslint/js": "^9.30.1",

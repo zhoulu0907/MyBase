@@ -18,7 +18,7 @@ import type { TreeSelectDataType } from '@arco-design/web-react/es/TreeSelect/in
 import { IconDelete, IconLaunch } from '@arco-design/web-react/icon';
 import {
   FieldType,
-  getFieldCheckTypeApi,
+  getFieldTypeValidationTypes,
   VALIDATION_TYPE,
   type ConditionField,
   type EntityFieldValidationTypes,
@@ -142,11 +142,40 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
     const newFieldOptions = getVariableOptions(nodeId);
     setFieldOptions(newFieldOptions);
 
-    const fieldIds = getEntityFieldValidationTypes(nodeId);
+    const fieldTypeMap = new Map<string, string>();
+    newFieldOptions.forEach((item: any) => {
+      for (let ele of item.children) {
+        if (ele.fieldType) {
+          fieldTypeMap.set(ele.key, ele.fieldType);
+        }
+      }
+    });
 
-    if (fieldIds?.length) {
-      const newValidationTypes = await getFieldCheckTypeApi(fieldIds);
-      setEntityFieldValidationTypes(newValidationTypes);
+    const fieldTypes = getEntityFieldValidationTypes(nodeId);
+
+    if (fieldTypes?.length) {
+      const newValidationTypes = await getFieldTypeValidationTypes(fieldTypes);
+
+      const targetValidationTypes: EntityFieldValidationTypes[] = [];
+
+      newFieldOptions.forEach((item: any) => {
+        for (let ele of item.children) {
+          if (ele.fieldType) {
+            const found = newValidationTypes.find((cc: any) => cc.fieldTypeCode == ele.fieldType);
+            if (found) {
+              targetValidationTypes.push({
+                fieldKey: ele.key,
+                fieldId: ele.key,
+                fieldName: ele.title,
+                fieldTypeCode: ele.fieldType,
+                validationTypes: found.validationTypes
+              });
+            }
+          }
+        }
+      });
+
+      setEntityFieldValidationTypes(targetValidationTypes);
     }
   };
 
@@ -293,10 +322,11 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
   const getEntityFieldValidationTypes = (nodeId: string): string[] => {
     const nodes = getPrecedingNodes(nodeId, triggerEditorSignal.nodes.value, ALLOW_NODE_TYPES);
 
-    const fieldIds: string[] = [];
+    const fielTypes: string[] = [];
 
     nodes.forEach((node) => {
       const nodeOutput = triggerNodeOutputSignal.getTriggerNodeOutput(node.id);
+      console.log('nodeOutput: ', nodeOutput);
 
       switch (node.type) {
         case NodeType.START_FORM:
@@ -304,7 +334,7 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
 
           startFormFields &&
             startFormFields.forEach((field: any) => {
-              fieldIds.push(field.value);
+              fielTypes.push(field.fieldType);
             });
 
           break;
@@ -313,7 +343,7 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
 
           startEntityFields &&
             startEntityFields.forEach((field: any) => {
-              fieldIds.push(field.value);
+              fielTypes.push(field.fieldType);
             });
 
           break;
@@ -324,7 +354,7 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
 
           startDateFields &&
             startDateFields.forEach((field: any) => {
-              fieldIds.push(field.value);
+              fielTypes.push(field.fieldType);
             });
 
           break;
@@ -336,7 +366,7 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
           const dataAddFields = nodeOutput.conditionFields;
           dataAddFields &&
             dataAddFields.forEach((field: any) => {
-              fieldIds.push(field.value);
+              fielTypes.push(field.fieldType);
             });
 
           break;
@@ -346,7 +376,7 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
           const dataQueryFields = nodeOutput.conditionFields;
           dataQueryFields &&
             dataQueryFields.forEach((field: any) => {
-              fieldIds.push(field.value);
+              fielTypes.push(field.fieldType);
             });
 
           break;
@@ -354,7 +384,7 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
           const dataQueryMultipleFields = nodeOutput.conditionFields;
           dataQueryMultipleFields &&
             dataQueryMultipleFields.forEach((field: any) => {
-              fieldIds.push(field.value);
+              fielTypes.push(field.fieldType);
             });
 
           break;
@@ -362,7 +392,7 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
           const dataUpdateFields = nodeOutput.conditionFields;
           dataUpdateFields &&
             dataUpdateFields.forEach((field: any) => {
-              fieldIds.push(field.value);
+              fielTypes.push(field.fieldType);
             });
 
           break;
@@ -372,7 +402,7 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
           const loopFields = nodeOutput.conditionFields;
           loopFields &&
             loopFields.forEach((field: any) => {
-              fieldIds.push(field.value);
+              fielTypes.push(field.fieldType);
             });
 
           break;
@@ -380,14 +410,14 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
           const modalFields = nodeOutput.conditionFields;
           modalFields &&
             modalFields.forEach((field: any) => {
-              fieldIds.push(field.value);
+              fielTypes.push(field.fieldType);
             });
 
           break;
       }
     });
 
-    return fieldIds;
+    return fielTypes;
   };
 
   // 提取公共的字段处理逻辑
@@ -577,11 +607,11 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
                                             }}
                                           >
                                             {(() => {
-                                              const fieldId = form.getFieldValue(item.field)?.fieldKey;
+                                              const fieldKey = form.getFieldValue(item.field)?.fieldKey;
                                               let options: ValidationTypeItem[] | undefined;
-                                              if (fieldId && entityFieldValidationTypes) {
+                                              if (fieldKey && entityFieldValidationTypes) {
                                                 const found = entityFieldValidationTypes.find(
-                                                  (cc) => cc.fieldId == getSplitFieldId(fieldId)
+                                                  (cc) => cc.fieldKey == fieldKey
                                                 );
                                                 options = found?.validationTypes;
                                               }

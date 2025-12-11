@@ -9,7 +9,7 @@ import styles from '../../index.module.less';
 import UserProfileAvatar from '@/components/UserProfileAvatar';
 
 interface UserListProps {
-  selectedRoleId?: number;
+  selectedRoleId?: string;
 }
 
 type UserRecord = Pick<UserVO, 'id' | 'username' | 'nickname'> & Partial<UserVO>;
@@ -73,7 +73,7 @@ const UserList: React.FC<UserListProps> = ({ selectedRoleId = undefined }: UserL
   };
 
   // 添加用户确认
-  const handleUserSelectOk = async (selectedUserIds: number[]) => {
+  const handleUserSelectOk = async (selectedUserIds: string[]) => {
     if (!selectedRoleId) {
       Message.error('角色ID不存在');
       return;

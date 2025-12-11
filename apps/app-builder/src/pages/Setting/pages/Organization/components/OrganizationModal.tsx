@@ -2,7 +2,7 @@ import { listToTree } from '@/utils/tree';
 import { Form, Grid, Input, Modal, Select, TreeSelect } from '@arco-design/web-react';
 import { hasPermission, TENANT_USER_QUERY } from '@onebase/common';
 import type { DeptForm, UserVO } from '@onebase/platform-center';
-import { getSimpleDeptList, getSimpleUserList } from '@onebase/platform-center';
+import { getSimpleDeptList, getSimpleUser } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
 
 const { Row, Col } = Grid;
@@ -39,7 +39,7 @@ const DepartmentModal: React.FC<DepartmentModalProps> = (props) => {
       setHasUserQueryPermission(userPermission);
 
       // 获取用户列表和部门树
-      if (userPermission) {
+      if (userPermission && modalType === 'edit') {
         fetchUserList();
       }
       fetchDeptTree();
@@ -47,7 +47,8 @@ const DepartmentModal: React.FC<DepartmentModalProps> = (props) => {
   }, [visible, initialValues, form]);
 
   const fetchUserList = async () => {
-    const users = await getSimpleUserList();
+    const deptId = form.getFieldValue("id");
+    const users = await getSimpleUser(deptId,true);
     setUserList(users);
   };
 
@@ -115,46 +116,50 @@ const DepartmentModal: React.FC<DepartmentModalProps> = (props) => {
             </FormItem>
           </Col>
 
-          <Col span={12}>
-            <FormItem label="部门接口人" field="adminUserId">
-              <Select
-                placeholder={hasUserQueryPermission ? '请选择部门接口人' : '无权限'}
-                allowClear
-                showSearch
-                disabled={!hasUserQueryPermission}
-                filterOption={(input: string, option: any) =>
-                  option.props?.children?.toString().toLowerCase().indexOf(input.toLowerCase()) >= 0
-                }
-              >
-                {userList.map((user) => (
-                  <Select.Option key={user.id} value={user.id}>
-                    {user.nickname}
-                  </Select.Option>
-                ))}
-              </Select>
-            </FormItem>
-          </Col>
+          {modalType === 'edit' && (
+            <Col span={12}>
+              <FormItem label="部门接口人" field="adminUserId">
+                <Select
+                  placeholder={hasUserQueryPermission ? '请选择部门接口人' : '无权限'}
+                  allowClear
+                  showSearch
+                  disabled={!hasUserQueryPermission}
+                  filterOption={(input: string, option: any) =>
+                    option.props?.children?.toString().toLowerCase().indexOf(input.toLowerCase()) >= 0
+                  }
+                >
+                  {userList.map((user) => (
+                    <Select.Option key={user.id} value={user.id}>
+                      {user.nickname}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </FormItem>
+            </Col>
+          )}
 
-          <Col span={12}>
-            {/* todo 部门主管调整 */}
-            <FormItem label="部门主管" field="leaderUserId">
-              <Select
-                placeholder={hasUserQueryPermission ? '请选择部门主管' : '无权限'}
-                allowClear
-                showSearch
-                disabled={!hasUserQueryPermission}
-                filterOption={(input: string, option: any) =>
-                  option.props?.children?.toString().toLowerCase().indexOf(input.toLowerCase()) >= 0
-                }
-              >
-                {userList.map((user) => (
-                  <Select.Option key={user.id} value={user.id}>
-                    {user.nickname}
-                  </Select.Option>
-                ))}
-              </Select>
-            </FormItem>
-          </Col>
+          {modalType === 'edit' && (
+            <Col span={12}>
+              {/* todo 部门主管调整 */}
+              <FormItem label="部门主管" field="leaderUserId">
+                <Select
+                  placeholder={hasUserQueryPermission ? '请选择部门主管' : '无权限'}
+                  allowClear
+                  showSearch
+                  disabled={!hasUserQueryPermission}
+                  filterOption={(input: string, option: any) =>
+                    option.props?.children?.toString().toLowerCase().indexOf(input.toLowerCase()) >= 0
+                  }
+                >
+                  {userList.map((user) => (
+                    <Select.Option key={user.id} value={user.id}>
+                      {user.nickname}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </FormItem>
+            </Col>
+          )}
         </Row>
       </Form>
     </Modal>

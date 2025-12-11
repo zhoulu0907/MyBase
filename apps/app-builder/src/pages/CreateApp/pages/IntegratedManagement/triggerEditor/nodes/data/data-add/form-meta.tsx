@@ -42,6 +42,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   useEffect(() => {
     const nodes = triggerEditorSignal.nodes.value;
     const newDataNodeList = getPrecedingNodes(node.id, nodes, ALLOW_DATANODE_TYPES);
+    console.log('newDataNodeList: ', newDataNodeList);
     setDataNodeList(newDataNodeList);
   }, []);
 

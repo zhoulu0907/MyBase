@@ -19,7 +19,7 @@ const Content = Layout.Content;
 const TabPane = Tabs.TabPane;
 
 export default function RolePage() {
-  const [activeRoleId, setActiveRoleId] = useState<number | undefined>(undefined);
+  const [activeRoleId, setActiveRoleId] = useState<string | undefined>(undefined);
   const [showEmpty, setShowEmpty] = useState(false);
   const [activeRole, setActiveRole] = useState<Partial<RoleVO> | undefined>(undefined);
   const [editRole, setEditRole] = useState<Partial<RoleVO> | null>(null);
@@ -35,14 +35,14 @@ export default function RolePage() {
     }
   }, [activeRoleId]);
 
-  const handleRoleSelect = (id: number | undefined, role: Partial<RoleVO> | undefined) => {
+  const handleRoleSelect = (id: string | undefined, role: Partial<RoleVO> | undefined) => {
     setActiveRoleId(id);
     setActiveRole(role);
     setShowEmpty(false);
   };
 
   // 删除角色
-  const handleDeleteRole = async (id: number) => {
+  const handleDeleteRole = async (id: string) => {
     try {
       await deleteRole(id);
       Message.success('删除成功');

@@ -1,5 +1,5 @@
 export interface RoleVO {
-  id: number;
+  id: string;
   name: string;
   code?: string;
   sort: number;
