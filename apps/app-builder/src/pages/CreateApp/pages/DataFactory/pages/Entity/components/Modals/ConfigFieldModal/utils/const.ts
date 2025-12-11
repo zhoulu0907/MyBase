@@ -55,9 +55,7 @@ export const AUTO_CODE_INITIAL_RULES = [
   {
     id: 'rule-1',
     itemType: AUTO_CODE_RULE_TYPE.SEQUENCE,
-    config: {
-      ...AUTO_CODE_SEQUENCE_DEFAULT_CONFIG
-    }
+    ...AUTO_CODE_SEQUENCE_DEFAULT_CONFIG
   }
 ];
 

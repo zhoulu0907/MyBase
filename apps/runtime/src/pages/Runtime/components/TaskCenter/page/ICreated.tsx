@@ -56,7 +56,7 @@ const ICreated: FC = ({ appId }: any) => {
               ? userArr.map((item: any, i: number) => {
                   return (
                     <div className="flex-bw-center" key={'user' + i}>
-                      <div className="photo-img">{item?.avatar && <img src={item?.avatar} />}</div>
+                      <div className="photo-img">{item?.avatar ? <img src={item?.avatar} /> : item?.userName?.charAt(0)}</div>
                       <span className="tb-uname">{item?.userName}</span>
                     </div>
                   );
