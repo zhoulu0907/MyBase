@@ -3,7 +3,7 @@ import { IconEdit } from '@arco-design/web-react/icon';
 import { getPopupContainer, CONFIG_TYPES } from '@onebase/ui-kit';
 import styles from '../../index.module.less';
 import { registerConfigRenderer } from '../../registry';
-import { useCallback, useEffect, useState } from 'react';
+import { useState } from 'react';
 
 interface Props {
   handlePropsChange: (key: string, value: any) => void;
@@ -11,15 +11,26 @@ interface Props {
   configs: any;
 }
 
+const SECURITY_TYPES = {
+  NAME: 'name',
+  PHONE: 'phone',
+  EMAIL: 'email',
+  MONEY: 'money',
+  ID: 'id',
+  ADDRESS: 'address',
+  IP: 'ip',
+  CAR_ID: 'car_id'
+};
+
 const securityOptions = [
-  { label: '姓名', value: 'name', describe: '显示前1个字，后1个字' },
-  { label: '手机号', value: 'phone', describe: '显示前3位，后4位' },
-  { label: '邮箱', value: 'email', describe: '显示前3位字符，以及@符合和它后面的内容' },
-  { label: '金额', value: 'money', describe: '全掩盖，虚拟为5位' },
-  { label: '身份证号', value: 'id', describe: '显示后4位' },
-  { label: '住址', value: 'address', describe: '显示前4个字，后4个字' },
-  { label: 'IP地址', value: 'ip', describe: '显示第1段IP' },
-  { label: '车牌号', value: 'car_id', describe: '显示第1个字，后2位' }
+  { label: '姓名', value: SECURITY_TYPES.NAME, describe: '显示前1个字，后1个字' },
+  { label: '手机号', value: SECURITY_TYPES.PHONE, describe: '显示前3位，后4位' },
+  { label: '邮箱', value: SECURITY_TYPES.EMAIL, describe: '显示前3位字符，以及@符合和它后面的内容' },
+  { label: '金额', value: SECURITY_TYPES.MONEY, describe: '全掩盖，虚拟为5位' },
+  { label: '身份证号', value: SECURITY_TYPES.ID, describe: '显示后4位' },
+  { label: '住址', value: SECURITY_TYPES.ADDRESS, describe: '显示前4个字，后4个字' },
+  { label: 'IP地址', value: SECURITY_TYPES.IP, describe: '显示第1段IP' },
+  { label: '车牌号', value: SECURITY_TYPES.CAR_ID, describe: '显示第1个字，后2位' }
 ];
 
 const DynamicSecurityConfig = ({ handlePropsChange, item, configs }: Props) => {
@@ -34,71 +45,72 @@ const DynamicSecurityConfig = ({ handlePropsChange, item, configs }: Props) => {
   };
   const encryptionValue = () => {
     const securityType = securityForm.getFieldValue('type');
-    if (securityType && testValue) {
-      // TODO 掩码展示
-      switch (securityType) {
-        case 'name':
-          // 姓名
-          if (testValue.length < 3) {
-            return testValue.substring(0, 1) + '*';
-          }
-          const centerName = testValue.substring(1, testValue.length - 1).replace(/./g, '*');
-          return testValue.substring(0, 1) + centerName + testValue.substring(testValue.length - 1);
-        case 'phone':
-          // 手机号
-          if (testValue.length < 7) {
-            return testValue;
-          }
-          const centerPhone = testValue.substring(3, testValue.length - 4).replace(/./g, '*');
-          return testValue.substring(0, 3) + centerPhone + testValue.substring(testValue.length - 4);
-        case 'email':
-          // 邮箱
-          const lastIndex = testValue.lastIndexOf('@');
-          if (lastIndex !== -1) {
-            if (lastIndex <= 3) {
-              return testValue.substring(0, lastIndex) + '*' + testValue.substring(lastIndex);
-            }
-            const centerEmail = testValue.substring(3, lastIndex).replace(/./g, '*');
-            return testValue.substring(0, 3) + centerEmail + testValue.substring(lastIndex);
-          }
-          return testValue;
-        case 'money':
-          // 金额
-          return '*****';
-        case 'id':
-          // 身份证号
-          if (testValue.length < 4) {
-            return testValue;
-          }
-          const centeId = testValue.substring(0, testValue.length - 4).replace(/./g, '*');
-          return centeId + testValue.substring(testValue.length - 4);
-        case 'address':
-          // 住址
-          if (testValue.length < 8) {
-            return testValue;
-          }
-          const centeAddress = testValue.substring(0, testValue.length - 4).replace(/./g, '*');
-          return testValue.substring(0, 4) + centeAddress + testValue.substring(testValue.length - 4);
-        case 'ip':
-          // IP地址
-          const index = testValue.indexOf('.');
-          if (index !== -1) {
-            const centerIp = testValue.substring(index).replace(/./g, '*');
-            return testValue.substring(0, index) + centerIp;
-          }
-          return testValue;
-        case 'car_id':
-          // 车牌号
-          if (testValue.length < 4) {
-            return testValue.substring(0, 1) + '**';
-          }
-          const centerCar = testValue.substring(1, testValue.length - 2).replace(/./g, '*');
-          return testValue.substring(0, 1) + centerCar + testValue.substring(testValue.length - 2);
-        default:
-          return '';
-      }
+    if (!securityType || !testValue) {
+      return testValue;
     }
-    return testValue;
+
+    switch (securityType) {
+      case SECURITY_TYPES.NAME:
+        // 姓名
+        if (testValue.length < 3) {
+          return testValue.substring(0, 1) + '*';
+        }
+        const centerName = testValue.substring(1, testValue.length - 1).replace(/./g, '*');
+        return testValue.substring(0, 1) + centerName + testValue.substring(testValue.length - 1);
+      case SECURITY_TYPES.PHONE:
+        // 手机号
+        if (testValue.length < 7) {
+          return testValue;
+        }
+        const centerPhone = testValue.substring(3, testValue.length - 4).replace(/./g, '*');
+        return testValue.substring(0, 3) + centerPhone + testValue.substring(testValue.length - 4);
+      case SECURITY_TYPES.EMAIL:
+        // 邮箱
+        const lastIndex = testValue.lastIndexOf('@');
+        // 未找到 直接返回
+        if (lastIndex === -1) {
+          return testValue;
+        }
+        if (lastIndex <= 3) {
+          return testValue.substring(0, lastIndex) + '*' + testValue.substring(lastIndex);
+        }
+        const centerEmail = testValue.substring(3, lastIndex).replace(/./g, '*');
+        return testValue.substring(0, 3) + centerEmail + testValue.substring(lastIndex);
+      case SECURITY_TYPES.MONEY:
+        // 金额
+        return '*****';
+      case SECURITY_TYPES.ID:
+        // 身份证号
+        if (testValue.length < 4) {
+          return testValue;
+        }
+        const centeId = testValue.substring(0, testValue.length - 4).replace(/./g, '*');
+        return centeId + testValue.substring(testValue.length - 4);
+      case SECURITY_TYPES.ADDRESS:
+        // 住址
+        if (testValue.length < 8) {
+          return testValue;
+        }
+        const centeAddress = testValue.substring(0, testValue.length - 4).replace(/./g, '*');
+        return testValue.substring(0, 4) + centeAddress + testValue.substring(testValue.length - 4);
+      case SECURITY_TYPES.IP:
+        // IP地址
+        const index = testValue.indexOf('.');
+        if (index === -1) {
+          return testValue;
+        }
+        const centerIp = testValue.substring(index).replace(/./g, '*');
+        return testValue.substring(0, index) + centerIp;
+      case SECURITY_TYPES.CAR_ID:
+        // 车牌号
+        if (testValue.length < 4) {
+          return testValue.substring(0, 1) + '**';
+        }
+        const centerCar = testValue.substring(1, testValue.length - 2).replace(/./g, '*');
+        return testValue.substring(0, 1) + centerCar + testValue.substring(testValue.length - 2);
+      default:
+        return testValue;
+    }
   };
   // 弹窗 确定
   const handleConfirm = () => {
