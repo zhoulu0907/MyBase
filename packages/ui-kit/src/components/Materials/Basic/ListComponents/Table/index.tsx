@@ -259,6 +259,7 @@ const XTable = memo(
     const getFinalColumns = async () => {
       let newColumns: any[] = [];
       if (Object.keys(columns as any).length) {
+        console.log('metaData111: ', metaData);
         const mainMetaData = await getEntityFieldsWithChildren(metaData);
         newColumns = (columns || []).map((column) => {
           return {
@@ -420,6 +421,7 @@ const XTable = memo(
 
       const res = await dataMethodPageV2(tableName, curMenu.value?.id, req);
 
+      console.log('metaData222: ', metaData);
       const mainMetaData = await getEntityFieldsWithChildren(metaData);
 
       const { list, total } = res;
