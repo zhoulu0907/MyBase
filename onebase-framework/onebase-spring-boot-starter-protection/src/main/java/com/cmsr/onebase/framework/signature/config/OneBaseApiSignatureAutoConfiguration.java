@@ -5,6 +5,7 @@ import com.cmsr.onebase.framework.signature.core.ApiSinatureFilter;
 import com.cmsr.onebase.framework.signature.core.aop.ApiSignHelper;
 import com.cmsr.onebase.framework.signature.core.redis.ApiSignatureRedisDAO;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
@@ -14,6 +15,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
  * @author Zhougang
  */
 @AutoConfiguration(after = OneBaseRedisAutoConfiguration.class)
+@EnableConfigurationProperties(ApiSignatureProperties.class)
 public class OneBaseApiSignatureAutoConfiguration {
 
     @Bean
@@ -22,8 +24,8 @@ public class OneBaseApiSignatureAutoConfiguration {
     }
 
     @Bean
-    public ApiSignHelper apiSignHelper() {
-        return new ApiSignHelper();
+    public ApiSignHelper apiSignHelper(ApiSignatureProperties properties) {
+        return new ApiSignHelper(properties);
     }
 
     @Bean

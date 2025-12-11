@@ -8,6 +8,7 @@ import cn.hutool.crypto.digest.DigestUtil;
 import com.cmsr.onebase.framework.common.exception.ServiceException;
 import com.cmsr.onebase.framework.common.exception.enums.GlobalErrorCodeConstants;
 import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
+import com.cmsr.onebase.framework.signature.config.ApiSignatureProperties;
 import com.cmsr.onebase.framework.signature.core.redis.ApiSignatureRedisDAO;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,6 +29,19 @@ public class ApiSignHelper {
     @Resource
     private ApiSignatureRedisDAO signatureRedisDAO;
 
+    /**
+     * 签名请求超时时间（秒）
+     */
+    private final Integer signRequestTimeout;
+
+    /**
+     * 构造方法
+     *
+     * @param properties API签名配置属性
+     */
+    public ApiSignHelper(ApiSignatureProperties properties) {
+        this.signRequestTimeout = properties.getRequestTimeout();
+    }
 
     public boolean verifySignature(HttpServletRequest request) {
         if(!signatureRedisDAO.isApiSignEnabled()){
@@ -51,7 +65,7 @@ public class ApiSignHelper {
 
         // 3. 将 nonce 记入缓存，防止重复使用（此处将 ttl 设定为允许 timestamp 时间差的值 x 2 ）
         String nonce = request.getHeader(SIGN_HEADER_KEY_NONCE);
-        if (BooleanUtil.isFalse(signatureRedisDAO.setNonce(appKey, nonce, SIGN_REQ_TIMEOUT * 2, TimeUnit.SECONDS))) {
+        if (BooleanUtil.isFalse(signatureRedisDAO.setNonce(appKey, nonce, signRequestTimeout * 2, TimeUnit.SECONDS))) {
             String timestamp = request.getHeader(SIGN_HEADER_KEY_TIME);
             log.info("[verifySignature][appId({}) timestamp({}) nonce({}) sign({}) 存在重复请求]", appKey, timestamp, nonce, clientSignature);
             throw new ServiceException(GlobalErrorCodeConstants.REPEATED_REQUESTS.getCode(), "存在重复请求");
@@ -82,7 +96,7 @@ public class ApiSignHelper {
         if (StrUtil.isBlank(timestamp)) {
             throw new ServiceException(BAD_REQUEST.getCode(), "请求时间为空");
         }
-        long expireTime = TimeUnit.SECONDS.toMillis(SIGN_REQ_TIMEOUT);
+        long expireTime = TimeUnit.SECONDS.toMillis(signRequestTimeout);
         long requestTimestamp = Long.parseLong(timestamp);
         long timestampDisparity = Math.abs(System.currentTimeMillis() - requestTimestamp);
         if (timestampDisparity > expireTime) {
