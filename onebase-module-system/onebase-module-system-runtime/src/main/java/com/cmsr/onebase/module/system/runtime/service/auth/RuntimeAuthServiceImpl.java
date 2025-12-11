@@ -1,6 +1,5 @@
 package com.cmsr.onebase.module.system.runtime.service.auth;
 
-import cn.hutool.core.util.ObjUtil;
 import com.anji.captcha.model.common.ResponseModel;
 import com.anji.captcha.model.vo.CaptchaVO;
 import com.anji.captcha.service.CaptchaService;
@@ -413,11 +412,7 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         reqDTO.setTraceId("n/a");
         reqDTO.setUserId(userId);
         reqDTO.setUserType(userType);
-        if (ObjUtil.equal(getUserType(), userType)) {
-            reqDTO.setUsername(getUsername(userId));
-        } else {
-            reqDTO.setUsername(memberService.getMemberUserMobile(userId));
-        }
+        reqDTO.setUsername(getUsername(userId));
         reqDTO.setUserAgent(ServletUtils.getUserAgent());
         reqDTO.setUserIp(ServletUtils.getClientIP());
         reqDTO.setResult(LoginResultEnum.SUCCESS.getResult());
@@ -452,6 +447,8 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         if (user == null) {
             throw exception(USER_MOBILE_NOT_EXISTS);
         }
+        // 解密原文
+        reqVO.setPassword(pwdEnHelper.decryptHexStr(reqVO.getPassword()));
         userService.updateUserPassword(user.getId(), reqVO.getPassword());
     }
 
