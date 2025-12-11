@@ -1,12 +1,12 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { registerConfigRenderer } from '../../registry';
-import { CONFIG_TYPES, getPopupContainer } from '@onebase/ui-kit';
 import { FormulaEditor } from '@/components/FormulaEditor';
 import { Button, Form, Select, Switch } from '@arco-design/web-react';
-import { debounce } from 'lodash-es';
-import { AddMembers } from '@onebase/common';
 import { type AuthRoleUsersPageRespVO, type DeptAndUsersRespDTO } from '@onebase/app';
-import { getSimpleUserPage, getDeptUser, type GetDeptUserReq } from '@onebase/platform-center';
+import { AddMembers } from '@onebase/common';
+import { getDeptUser, getSimpleUserPage, type GetDeptUserReq } from '@onebase/platform-center';
+import { CONFIG_TYPES, getPopupContainer } from '@onebase/ui-kit';
+import { debounce } from 'lodash-es';
+import React, { useCallback, useEffect, useState } from 'react';
+import { registerConfigRenderer } from '../../registry';
 
 export interface DynamicUserDefaultConfigProps {
   handlePropsChange: (key: string, value: string | number | boolean | any[] | undefined) => void;
@@ -138,7 +138,6 @@ const DynamicUserDefaultConfig: React.FC<DynamicUserDefaultConfigProps> = ({
         keywords
       };
       const res = await getDeptUser(params);
-      console.log('获取部门用户信息 res:', res);
       setMemberData(res);
     } catch (error) {
       console.error('获取部门用户信息失败 error:', error);

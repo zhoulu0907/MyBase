@@ -1,11 +1,11 @@
 import { Button, Form, Switch } from '@arco-design/web-react';
 import { type AuthRoleUsersPageRespVO, type DeptAndUsersRespDTO } from '@onebase/app';
 import { AddMembers } from '@onebase/common';
+import { getDeptUser, type GetDeptUserReq } from '@onebase/platform-center';
+import { CONFIG_TYPES } from '@onebase/ui-kit';
 import { debounce } from 'lodash-es';
 import { useCallback, useEffect, useState } from 'react';
-import { CONFIG_TYPES } from '@onebase/ui-kit';
 import { registerConfigRenderer } from '../../registry';
-import { getDeptUser, type GetDeptUserReq } from '@onebase/platform-center';
 
 export interface DynamicSelectScopeConfigProps {
   handlePropsChange: (key: string, value: string | number | boolean | any[]) => void;
@@ -61,7 +61,6 @@ const DynamicSelectScopeConfig: React.FC<DynamicSelectScopeConfigProps> = ({
         keywords
       };
       const res = await getDeptUser(params);
-      console.log('获取部门用户信息 res:', res);
       setDeptData(res);
     } catch (error) {
       console.error('获取部门用户信息失败 error:', error);
