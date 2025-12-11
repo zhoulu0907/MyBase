@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.flow.core.handler;
 
-import com.cmsr.onebase.module.flow.context.config.FlowProperties;
+import com.cmsr.onebase.module.flow.core.config.FlowProperties;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessDateFieldRepository;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessRepository;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessTimeRepository;
@@ -67,16 +67,16 @@ public class FlowChangeClient {
                 updateDateFieldJob(flowProcessDO);
             }
         }
-        ChangeEvent changeEvent = new ChangeEvent();
-        changeEvent.setEventType(ChangeEvent.UPDATE_EVENT);
-        changeEvent.setApplicationId(applicationId);
-        changeEvent.setVersion(System.currentTimeMillis());
+        FlowChangeEvent flowChangeEvent = new FlowChangeEvent();
+        flowChangeEvent.setEventType(FlowChangeEvent.UPDATE_EVENT);
+        flowChangeEvent.setApplicationId(applicationId);
+        flowChangeEvent.setVersion(System.currentTimeMillis());
         //记录缓存
-        RMapCache<Long, ChangeEvent> mapCache = redissonClient.getMapCache(FlowUtils.REDIS_VERSION_CHANGE_CACHE_KEY, FlowUtils.KRYO5_CODEC);
-        mapCache.put(applicationId, changeEvent, FlowUtils.VERSION_TIMEOUT_MINUTES, TimeUnit.MINUTES);
+        RMapCache<Long, FlowChangeEvent> mapCache = redissonClient.getMapCache(FlowUtils.REDIS_VERSION_CHANGE_CACHE_KEY, FlowUtils.KRYO5_CODEC);
+        mapCache.put(applicationId, flowChangeEvent, FlowUtils.VERSION_TIMEOUT_MINUTES, TimeUnit.MINUTES);
         //发送消息
         RTopic topic = redissonClient.getTopic(FlowUtils.REDIS_VERSION_CHANGE_TOPIC_KEY);
-        topic.publish(changeEvent);
+        topic.publish(flowChangeEvent);
     }
 
     private void updateTimeJob(FlowProcessDO flowProcessDO) {
@@ -99,11 +99,11 @@ public class FlowChangeClient {
         RMapCache<Long, Long> mapCache = redissonClient.getMapCache(FlowUtils.REDIS_VERSION_CHANGE_CACHE_KEY);
         mapCache.put(applicationId, -1L, FlowUtils.VERSION_TIMEOUT_MINUTES, TimeUnit.MINUTES);
         RTopic topic = redissonClient.getTopic(FlowUtils.REDIS_VERSION_CHANGE_TOPIC_KEY);
-        ChangeEvent changeEvent = new ChangeEvent();
-        changeEvent.setEventType(ChangeEvent.DELETE_EVENT);
-        changeEvent.setApplicationId(applicationId);
-        changeEvent.setVersion(-1L);
-        topic.publish(changeEvent);
+        FlowChangeEvent flowChangeEvent = new FlowChangeEvent();
+        flowChangeEvent.setEventType(FlowChangeEvent.DELETE_EVENT);
+        flowChangeEvent.setApplicationId(applicationId);
+        flowChangeEvent.setVersion(-1L);
+        topic.publish(flowChangeEvent);
     }
 
 }

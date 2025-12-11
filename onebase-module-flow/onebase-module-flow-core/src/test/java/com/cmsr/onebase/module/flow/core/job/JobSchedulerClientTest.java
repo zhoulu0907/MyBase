@@ -9,7 +9,7 @@ import java.text.ParseException;
  * @Author：huangjie
  * @Date：2025/10/11 16:44
  */
-class JobClientTest {
+class JobSchedulerClientTest {
 
     @Test
     void test() throws ParseException {

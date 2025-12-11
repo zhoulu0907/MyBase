@@ -1,8 +1,7 @@
-package com.cmsr.onebase.module.flow.component.impl;
+package com.cmsr.onebase.module.flow.core.external;
 
 import com.cmsr.onebase.module.app.api.appresource.AppResourceApi;
 import com.cmsr.onebase.module.app.api.appresource.dto.PageRespDTO;
-import com.cmsr.onebase.module.flow.context.provider.FlowAppProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

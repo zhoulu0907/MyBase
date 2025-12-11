@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.flow.component.impl;
+package com.cmsr.onebase.module.flow.core.external;
 
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.module.flow.context.condition.ConditionItem;
@@ -7,9 +7,7 @@ import com.cmsr.onebase.module.flow.context.graph.JsonGraph;
 import com.cmsr.onebase.module.flow.context.graph.JsonGraphNode;
 import com.cmsr.onebase.module.flow.context.graph.NodeData;
 import com.cmsr.onebase.module.flow.context.graph.nodes.*;
-import com.cmsr.onebase.module.flow.context.provider.FlowFieldTypeProvider;
-import com.cmsr.onebase.module.flow.context.provider.FlowAppProvider;
-import com.cmsr.onebase.module.flow.context.config.FlowProperties;
+import com.cmsr.onebase.module.flow.core.config.FlowProperties;
 import com.cmsr.onebase.module.metadata.api.semantic.SemanticDynamicDataApi;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntitySchemaDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldSchemaDTO;
