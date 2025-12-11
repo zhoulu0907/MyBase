@@ -1,5 +1,6 @@
 package com.cmsr.onebase.framework.security.runtime.filter;
 
+import com.cmsr.onebase.framework.common.enums.VersionTagEnum;
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.security.dto.RuntimeLoginUser;
@@ -29,8 +30,7 @@ public class RuntimeApplicationContextHeaderFilter extends OncePerRequestFilter 
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
         try {
-            //TODO 临时设置版本号, 等发布做完后，再切换
-            ApplicationManager.setVersionTag(0L);
+            ApplicationManager.setVersionTag(VersionTagEnum.RUNTIME.getValue());
             RuntimeLoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
             if (loginUser != null && loginUser.getApplicationId() != null) {
                 ApplicationManager.setApplicationId(loginUser.getApplicationId());
