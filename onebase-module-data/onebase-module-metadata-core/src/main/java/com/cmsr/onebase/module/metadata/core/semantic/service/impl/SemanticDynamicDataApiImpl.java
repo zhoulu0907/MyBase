@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.metadata.api.semantic.impl;
+package com.cmsr.onebase.module.metadata.core.semantic.service.impl;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.metadata.api.semantic.SemanticDynamicDataApi;
@@ -188,12 +188,9 @@ public class SemanticDynamicDataApiImpl implements SemanticDynamicDataApi {
         // semanticPermissionValidator.validate(record);
         // 5) 条件安全校验，避免误删全表
         SemanticConditionDTO cond = body.getSemanticConditionDTO();
-        boolean noCond = cond == null
-                || (((cond.getFieldName() == null || cond.getFieldName().isBlank()) && cond.getFieldUuid() == null))
-                || cond.getFieldValue() == null || cond.getFieldValue().isEmpty();
-        if (noCond) { 
+        if (!SemanticConditionDTO.hasCondition(cond)) {
             throw new IllegalArgumentException("deleteDataByCondition: 为了避免删除全表数据，必须指定删除条件");
-         }
+        }
         // 6) 构建条件查询包装器（仅条件，不应用数据权限）
         List<SemanticFieldSchemaDTO> fields = record.getEntitySchema().getFields();
         QueryWrapper qw = QueryWrapper.create();
@@ -210,11 +207,11 @@ public class SemanticDynamicDataApiImpl implements SemanticDynamicDataApi {
         String tableName = body == null ? null : body.getTableName();
         if (tableName == null || tableName.isBlank()) { return List.of(); }
         SemanticConditionDTO cond = body.getSemanticConditionDTO();
-        boolean noCond = cond == null
-                || (((cond.getFieldName() == null || cond.getFieldName().isBlank()) && cond.getFieldUuid() == null))
-                || cond.getFieldValue() == null || cond.getFieldValue().isEmpty();
+        if (!SemanticConditionDTO.hasCondition(cond)) {
+            throw new IllegalArgumentException("updateDataByCondition: 为了避免更新全表数据，必须指定更新条件");
+        }
         Map<String, Object> updates = body.getUpdateProperties();
-        if (noCond || updates == null || updates.isEmpty()) { return List.of(); }
+        if (updates.isEmpty()) { return List.of(); }
 
         // 2) 构建 RecordDTO（目标请求体 + 过滤条件）
         SemanticRecordDTO record = semanticMergeRecordAssembler.assembleTargetBody(tableName, new SemanticTargetBodyVO(), null, null,

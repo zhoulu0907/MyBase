@@ -37,4 +37,27 @@ public class SemanticConditionDTO {
     @Schema(description = "主条件/子条件")
     private SemanticConditionTypeEnum conditionType;
 
+    public boolean hasCondition() {
+        if (nodeType == SemanticConditionNodeTypeEnum.GROUP) {
+            if (children == null || children.isEmpty()) { return false; }
+            for (SemanticConditionDTO c : children) { if (c != null && c.hasCondition()) { return true; } }
+            return false;
+        }
+        boolean hasField = (fieldUuid != null && !fieldUuid.trim().isEmpty()) || (fieldName != null && !fieldName.trim().isEmpty());
+        boolean hasOp = operator != null;
+        boolean hasVal = hasNonBlankValue(fieldValue);
+        return hasField && hasOp && hasVal;
+    }
+
+    public static boolean hasCondition(SemanticConditionDTO cond) { return cond != null && cond.hasCondition(); }
+
+    private boolean hasNonBlankValue(List<Object> list) {
+        if (list == null || list.isEmpty()) { return false; }
+        for (Object v : list) {
+            if (v == null) { continue; }
+            if (v instanceof String s) { if (!s.trim().isEmpty()) { return true; } }
+            else { return true; }
+        }
+        return false;
+    }
 }
