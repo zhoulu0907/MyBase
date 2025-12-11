@@ -31,7 +31,6 @@ tag: {{tag}}
 ### 请求 /login 接口 => 成功
 POST {{baseUrl}}/system/auth/app-login
 Content-Type: application/json
-#tenant-id: {{adminTenantId}}
 tenant-id: 160864959456706560
 tag: {{tag}}
 
@@ -94,3 +93,31 @@ Content-Type: application/json
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 tag: {{tag}}
+
+
+
+### 请求 /login 接口 => 成功   ##verifycode/password
+POST {{baseUrl}}/system/auth/third-login
+Content-Type: application/json
+X-Tenant-Id: 156421901678804992
+tag: {{tag}}
+
+{
+  "appId":162947915524571136,
+  "mobile": "13818118255",
+  "password": "Dm<Ei&4S:;P+aNi",
+  "deviceId":666,
+  "loginType":"verifycode",
+  "verifyCode":"888888"
+}
+
+> {%
+    // 登录成功后自动更新token到环境变量
+    if (response.status === 200) {
+        const responseData = response.body;
+        if (responseData.code === 0 && responseData.data && responseData.data.accessToken) {
+            client.global.set("token", responseData.data.accessToken);
+            console.log("Token已更新: " + responseData.data.accessToken);
+        }
+    }
+%}

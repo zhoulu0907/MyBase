@@ -1,0 +1,33 @@
+package com.cmsr.onebase.module.system.service.user;
+
+import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.module.system.vo.user.UserAppPageReqVO;
+import com.cmsr.onebase.module.system.vo.user.UserAppRelationInertReqVO;
+import com.cmsr.onebase.module.system.vo.user.UserAppVO;
+import com.cmsr.onebase.module.system.vo.user.UserApplicationRespVO;
+import jakarta.validation.Valid;
+
+import java.util.List;
+
+/**
+ * 用户应用关联 Service 接口
+ *
+ */
+public interface UserAppRelationService {
+    /**
+     * 获得用户授权应用列表-分页
+     *
+     * @param userAppPageReqVO 获取用户授权应用列表-分页请求参数
+     * @return 用户授权应用列表-分页结果
+     */
+    PageResult<UserApplicationRespVO> getUserAppRelationPage(@Valid UserAppPageReqVO userAppPageReqVO);
+
+    /**
+     * 获得用户授权应用列表-分页
+     * /
+     */
+    List<UserAppVO> getAppByUserId(Long userId);
+
+
+    void createUserAppRelation(@Valid UserAppRelationInertReqVO userAppRelationInertReqVO);
+}

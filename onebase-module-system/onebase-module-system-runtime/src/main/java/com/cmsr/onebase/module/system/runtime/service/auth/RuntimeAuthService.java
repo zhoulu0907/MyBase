@@ -69,4 +69,11 @@ public interface RuntimeAuthService {
      */
     AuthLoginRespVO corpLogin(@Valid CorpAuthLoginReqVO reqVO);
 
+    /**
+     * 账号登录
+     *
+     * @param reqVO 登录信息
+     * @return 登录结果
+     */
+    ThirdAuthLoginRespVO thirdLogin(@Valid ThirdAuthLoginReqVO reqVO);
 }

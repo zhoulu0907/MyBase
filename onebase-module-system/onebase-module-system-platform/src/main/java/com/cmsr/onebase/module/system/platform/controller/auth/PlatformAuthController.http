@@ -27,14 +27,15 @@ if (response.status === 200) {
 %}
 
 ### 请求 /admin-login 接口 => 成功
-POST {{baseUrl}}/system/auth/admin-login
+POST {{baseUrl}}/system/auth/login
 Content-Type: application/json
 tenant-id: {{adminTenantId}}
 tag: {{tag}}
 
 {
   "username": "admin",
-  "password": "admin123"
+  "password": "admin123",
+  "deviceId": "admin123"
 }
 
 > {%

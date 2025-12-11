@@ -6,9 +6,9 @@
 ### 超管登录 => 成功
 POST {{baseUrl}}/system/auth/tenant-login
 Content-Type: application/json
-X-Tenant-Id: {{adminTenantId}}
+X-Tenant-Id: 174391581036773376
 
-{"username":"admin","password":"admin123","captchaVerification":"n89lvlHjSOsQQ5kGXjNNtdnkfPnK2Y3YbPwvAEXoVyL0TqzrDumdg8MONVs+z5VaSPf4ni6QKFhhx0GcaXBF4pWVx9hsSsBZ8mysqU8u45E=",
+{"username":"pt321","password":"AdminChina2025!","captchaVerification":"n89lvlHjSOsQQ5kGXjNNtdnkfPnK2Y3YbPwvAEXoVyL0TqzrDumdg8MONVs+z5VaSPf4ni6QKFhhx0GcaXBF4pWVx9hsSsBZ8mysqU8u45E=",
  "deviceId":666}
 
 > {%

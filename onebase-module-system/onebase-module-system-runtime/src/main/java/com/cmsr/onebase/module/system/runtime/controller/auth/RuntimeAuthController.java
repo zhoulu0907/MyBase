@@ -70,6 +70,17 @@ public class RuntimeAuthController {
         return success(runtimeAuthService.corpLogin(reqVO));
     }
 
+
+
+    @PostMapping("/third-login")
+    @PermitAll
+    @Operation(summary = "企业登录（手机号）")
+    public CommonResult<ThirdAuthLoginRespVO> thirdLogin(@RequestBody @Valid ThirdAuthLoginReqVO reqVO) {
+        return success(runtimeAuthService.thirdLogin(reqVO));
+    }
+
+
+
     @PostMapping("/logout")
     @PermitAll
     @Operation(summary = "登出系统")
