@@ -3,6 +3,7 @@ import {
   getEntityFieldsWithChildren,
   getPageSetId,
   getPageSetMetaData,
+  PageType,
   type AppEntityField,
   type GetPageSetIdReq
 } from '@onebase/app';
@@ -28,9 +29,10 @@ import styles from './index.module.less';
 interface PreviewProps {
   menuId: string;
   runtime: boolean;
+  pagesetType?: number;
 }
 
-const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
+const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType }) => {
   useSignals();
 
   const [form] = Form.useForm();
@@ -72,18 +74,11 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     console.log('mainMetaData: ', mainMetaData);
     setMainMetaData(mainMetaData);
 
-    // 工作台页面不获取子表数据
-    if (mainMetaData && mainMetaData !== 'null') {
-      const entityWithChildren = await getEntityFieldsWithChildren(mainMetaData);
-      console.log('当前主表及所有子表数据: ', entityWithChildren);
+    const entityWithChildren = await getEntityFieldsWithChildren(mainMetaData);
+    console.log('当前主表及所有子表数据: ', entityWithChildren);
 
-      setTableName(entityWithChildren.tableName);
-      setMainMetaDataFields(entityWithChildren.parentFields);
-      // TODO: 根据 pagesetType 设置
-      setPageType(EDITOR_TYPES.LIST_EDITOR);
-    } else {
-      setPageType(EDITOR_TYPES.WORKBENCH_EDITOR);
-    }
+    setTableName(entityWithChildren.tableName);
+    setMainMetaDataFields(entityWithChildren.parentFields);
   };
 
   const handleGetPageSetId = useCallback(async (menuId: string) => {
@@ -123,10 +118,14 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
   useEffect(() => {
     if (pageSetId) {
       loadPageSetInfo(pageSetId);
-      getMainMetaData(pageSetId);
+
+      // 工作台页面不获取主表数据
+      if (pagesetType !== PageType.WORKBENCH) {
+        getMainMetaData(pageSetId);
+      }
     }
     // 优先切换到列表页
-    // setPageType(EDITOR_TYPES.LIST_EDITOR);
+    setPageType(pagesetType === PageType.WORKBENCH ? EDITOR_TYPES.WORKBENCH_EDITOR : EDITOR_TYPES.LIST_EDITOR);
   }, [pageSetId]);
 
   const loadPageSetInfo = async (pageSetId: string) => {

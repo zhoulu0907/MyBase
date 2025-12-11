@@ -165,7 +165,7 @@ const PageManagerPage: FC = () => {
           menuCode={menu.menuCode}
           menuName={menu.menuName}
           menuIcon={menu.menuIcon}
-          pageSetType={menu.pageSetType}
+          pagesetType={menu.pagesetType}
           isGroup={menu.menuType == MenuType.GROUP}
           maxWidth={maxWidth}
           label={menu.menuName}
@@ -693,7 +693,11 @@ const PageManagerPage: FC = () => {
                       </div>
 
                       <div className={styles.contentBody}>
-                        <PreviewContainer menuId={curMenu.value?.id} runtime={true} />
+                        <PreviewContainer
+                          menuId={curMenu.value?.id}
+                          runtime={true}
+                          pagesetType={curMenu.value?.pagesetType}
+                        />
                       </div>
                     </>
                   )}

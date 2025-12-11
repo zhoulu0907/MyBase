@@ -79,15 +79,13 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
     console.log('mainMetaDataId: ', mainMetaDataId);
     setMainMetaData(mainMetaData);
 
-    if (mainMetaDataId && mainMetaDataId !== 'null') {
-      const entityWithChildren = await getEntityFieldsWithChildren(mainMetaDataId);
-      console.log('当前主表及所有子表数据: ', entityWithChildren);
+    const entityWithChildren = await getEntityFieldsWithChildren(mainMetaDataId);
+    console.log('当前主表及所有子表数据: ', entityWithChildren);
 
-      setTableName(entityWithChildren.tableName);
+    setTableName(entityWithChildren.tableName);
 
-      setMainMetaDataFields(entityWithChildren.parentFields);
-      setSubEntities(entityWithChildren.childEntities);
-    }
+    setMainMetaDataFields(entityWithChildren.parentFields);
+    setSubEntities(entityWithChildren.childEntities);
   };
 
   useEffect(() => {
@@ -105,7 +103,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
   }, [tableName, mainMetaDataFields.value]);
 
   useEffect(() => {
-    if (pageSetId) {
+    // 工作台页面不获取主表数据
+    if (pageSetId && pageSetType !== PageType.WORKBENCH) {
       getMainMetaData(pageSetId);
     }
     setPageType(EDITOR_TYPES.LIST_EDITOR);
