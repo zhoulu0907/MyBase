@@ -126,7 +126,6 @@ const PreviewContainer = forwardRef<any, PreviewProps>((props: PreviewProps, ref
       Object.entries(pageComponentSchemas).map(([key, value]) => {
         const [bpmKey, tKey] = value?.config?.dataField || [];
         const newStatus = fieldPerm?.[bpmKey]?.[tKey];
-        console.log(fieldPerm, newStatus, bpmKey, tKey, '888888888888');
         if (value && value.config) {
           const newConfig = {
             ...value,
