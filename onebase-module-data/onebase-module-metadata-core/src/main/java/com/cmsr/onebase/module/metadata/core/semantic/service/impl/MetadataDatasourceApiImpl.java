@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.metadata.api.datasource.impl;
+package com.cmsr.onebase.module.metadata.core.semantic.service.impl;
 
 import com.cmsr.onebase.module.metadata.api.datasource.MetadataDatasourceApi;
 import com.cmsr.onebase.module.metadata.api.datasource.dto.DatasourceCreateDefaultReqDTO;

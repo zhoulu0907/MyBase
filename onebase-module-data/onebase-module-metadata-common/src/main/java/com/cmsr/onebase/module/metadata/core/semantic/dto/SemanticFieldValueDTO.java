@@ -403,12 +403,12 @@ public class SemanticFieldValueDTO<T> {
     }
 
     private boolean isValidEmail(String s) {
-        if (s == null || s.isEmpty()) return false;
+        if (s == null || s.isEmpty()) return true;
         return Pattern.compile("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$").matcher(s).matches();
     }
 
     private boolean isValidPhone(String s) {
-        if (s == null || s.isEmpty()) return false;
+        if (s == null || s.isEmpty()) return true;
         return Pattern.compile("^\\+?[0-9\\-]{5,20}$").matcher(s).matches();
     }
 
