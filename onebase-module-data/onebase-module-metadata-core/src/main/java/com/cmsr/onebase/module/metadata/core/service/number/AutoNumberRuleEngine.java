@@ -103,7 +103,7 @@ public class AutoNumberRuleEngine {
      */
     private String executeDateRule(MetadataAutoNumberRuleItemDO ruleItem) {
         LocalDateTime now = LocalDateTime.now();
-        String format = ruleItem.getFormat();
+        String format = ruleItem.getTextValue();
         
         if (StrUtil.isBlank(format)) {
             // 默认格式

@@ -2547,6 +2547,9 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 // 更新：保留原有ID
                 config.setId(existingConfig.getId());
             }
+            if (existingConfig == null){
+                config.setConfigUuid(UuidUtils.getUuid());
+            }
             config.setFieldUuid(fieldUuid);
             config.setIsEnabled(autoNumber.getIsEnabled());
             // 从SEQUENCE规则项获取配置，如果没有SEQUENCE则使用默认值
@@ -2595,22 +2598,21 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 for (AutoNumberRuleVO ruleReq : otherRules) {
                     // 如果提供了ID，尝试更新现有规则项
                     if (ruleReq.getId() != null) {
-                        MetadataAutoNumberRuleItemDO existing = existingRulesMap.get(ruleReq.getId());
-                        if (existing != null) {
+                        MetadataAutoNumberRuleItemDO existingRule = existingRulesMap.get(ruleReq.getId());
+                        if (existingRule != null) {
                             // 更新现有规则项
-                            MetadataAutoNumberRuleItemDO rule = new MetadataAutoNumberRuleItemDO();
-                            rule.setId(ruleReq.getId());
-                            rule.setConfigUuid(configUuid);
-                            rule.setItemType(ruleReq.getItemType());
-                            rule.setItemOrder(ruleReq.getItemOrder());
-                            rule.setFormat(ruleReq.getFormat());
-                            rule.setTextValue(ruleReq.getTextValue());
-                            rule.setRefFieldUuid(ruleReq.getRefFieldUuid());
-                            rule.setIsEnabled(
+                            existingRule.setId(ruleReq.getId());
+                            existingRule.setConfigUuid(configUuid);
+                            existingRule.setItemType(ruleReq.getItemType());
+                            existingRule.setItemOrder(ruleReq.getItemOrder());
+                            existingRule.setFormat(ruleReq.getFormat());
+                            existingRule.setTextValue(ruleReq.getTextValue());
+                            existingRule.setRefFieldUuid(ruleReq.getRefFieldUuid());
+                            existingRule.setIsEnabled(
                                     ruleReq.getIsEnabled() != null ? ruleReq.getIsEnabled() : StatusEnumUtil.ENABLED);
-                            rule.setApplicationId(null);
+                            existingRule.setApplicationId(null);
 
-                            autoNumberRuleBuildService.update(rule);
+                            autoNumberRuleBuildService.update(existingRule);
                             processedRuleIds.add(ruleReq.getId());
                             log.info("更新自动编号规则项，id={}, configId={}, itemOrder={}",
                                     ruleReq.getId(), configId, ruleReq.getItemOrder());
