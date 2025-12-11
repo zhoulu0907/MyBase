@@ -1,12 +1,10 @@
 package com.cmsr.onebase.framework.orm.repo;
 
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.orm.entity.BaseAppEntity;
 import com.mybatisflex.core.BaseMapper;
 import com.mybatisflex.core.paginate.Page;
-import com.mybatisflex.core.query.CPI;
-import com.mybatisflex.core.query.QueryCondition;
-import com.mybatisflex.core.query.QueryMethods;
-import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.core.query.*;
 import com.mybatisflex.core.util.CollectionUtil;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -18,12 +16,21 @@ import java.util.List;
 @Slf4j
 public class BaseAppRepository<M extends BaseMapper<T>, T extends BaseAppEntity> extends ServiceImpl<M, T> {
 
-    protected QueryWrapper injectBizFilter(QueryWrapper queryWrapper) {
-//        Long applicationId = XXX;
-//        queryWrapper.eq("application_id", applicationId);
-        log.debug("注入SQL查询条件");
-        return queryWrapper;
+    protected void injectQueryFilter(QueryWrapper queryWrapper) {
+        if (!QueryWrapperUtils.isQueryFilterable(queryWrapper)) {
+            return;
+        }
+        QueryTable queryTable = QueryWrapperUtils.getQueryTable(queryWrapper);
+        QueryColumn applicationColumn;
+        if (queryTable != null) {
+            applicationColumn = new QueryColumn(queryTable, BaseAppEntity.APPLICATION_ID);
+        } else {
+            applicationColumn = new QueryColumn(BaseAppEntity.APPLICATION_ID);
+        }
+        Long applicationId = ApplicationManager.getApplicationId();
+        queryWrapper.and(applicationColumn.eq(applicationId));
     }
+
 
     //region ===== 查询（查）操作 =====
 
@@ -35,8 +42,8 @@ public class BaseAppRepository<M extends BaseMapper<T>, T extends BaseAppEntity>
      */
     @Override
     public T getOne(QueryWrapper query) {
-        QueryWrapper queryWrapper = this.injectBizFilter(query);
-        return getMapper().selectOneByQuery(queryWrapper);
+        this.injectQueryFilter(query);
+        return getMapper().selectOneByQuery(query);
     }
 
     /**
@@ -60,8 +67,8 @@ public class BaseAppRepository<M extends BaseMapper<T>, T extends BaseAppEntity>
      */
     @Override
     public <R> R getOneAs(QueryWrapper query, Class<R> asType) {
-        QueryWrapper queryWrapper = this.injectBizFilter(query);
-        return getMapper().selectOneByQueryAs(queryWrapper, asType);
+        this.injectQueryFilter(query);
+        return getMapper().selectOneByQueryAs(query, asType);
     }
 
     /**
@@ -84,8 +91,8 @@ public class BaseAppRepository<M extends BaseMapper<T>, T extends BaseAppEntity>
      */
     @Override
     public Object getObj(QueryWrapper query) {
-        QueryWrapper queryWrapper = this.injectBizFilter(query);
-        return getMapper().selectObjectByQuery(queryWrapper);
+        this.injectQueryFilter(query);
+        return getMapper().selectObjectByQuery(query);
     }
 
     /**
@@ -97,8 +104,8 @@ public class BaseAppRepository<M extends BaseMapper<T>, T extends BaseAppEntity>
      */
     @Override
     public <R> R getObjAs(QueryWrapper query, Class<R> asType) {
-        QueryWrapper queryWrapper = this.injectBizFilter(query);
-        return getMapper().selectObjectByQueryAs(queryWrapper, asType);
+        this.injectQueryFilter(query);
+        return getMapper().selectObjectByQueryAs(query, asType);
     }
 
     /**
@@ -109,8 +116,8 @@ public class BaseAppRepository<M extends BaseMapper<T>, T extends BaseAppEntity>
      */
     @Override
     public List<Object> objList(QueryWrapper query) {
-        QueryWrapper queryWrapper = this.injectBizFilter(query);
-        return getMapper().selectObjectListByQuery(queryWrapper);
+        this.injectQueryFilter(query);
+        return getMapper().selectObjectListByQuery(query);
     }
 
     /**
@@ -122,8 +129,8 @@ public class BaseAppRepository<M extends BaseMapper<T>, T extends BaseAppEntity>
      */
     @Override
     public <R> List<R> objListAs(QueryWrapper query, Class<R> asType) {
-        QueryWrapper queryWrapper = this.injectBizFilter(query);
-        return getMapper().selectObjectListByQueryAs(queryWrapper, asType);
+        this.injectQueryFilter(query);
+        return getMapper().selectObjectListByQueryAs(query, asType);
     }
 
     /**
@@ -134,8 +141,8 @@ public class BaseAppRepository<M extends BaseMapper<T>, T extends BaseAppEntity>
      */
     @Override
     public List<T> list(QueryWrapper query) {
-        QueryWrapper queryWrapper = this.injectBizFilter(query);
-        return getMapper().selectListByQuery(queryWrapper);
+        this.injectQueryFilter(query);
+        return getMapper().selectListByQuery(query);
     }
 
     /**
@@ -147,8 +154,8 @@ public class BaseAppRepository<M extends BaseMapper<T>, T extends BaseAppEntity>
      */
     @Override
     public <R> List<R> listAs(QueryWrapper query, Class<R> asType) {
-        QueryWrapper queryWrapper = this.injectBizFilter(query);
-        return getMapper().selectListByQueryAs(queryWrapper, asType);
+        this.injectQueryFilter(query);
+        return getMapper().selectListByQueryAs(query, asType);
     }
 
     /**
@@ -159,8 +166,9 @@ public class BaseAppRepository<M extends BaseMapper<T>, T extends BaseAppEntity>
      */
     @Override
     public List<T> listByIds(Collection<? extends Serializable> ids) {
-        QueryWrapper queryWrapper = this.injectBizFilter(QueryWrapper.create().in("id", ids));
-        return getMapper().selectListByQuery(queryWrapper);
+        QueryWrapper query = QueryWrapper.create().in("id", ids);
+        this.injectQueryFilter(query);
+        return getMapper().selectListByQuery(query);
     }
     //endregion ===== 查询（查）操作 =====
 
@@ -174,8 +182,8 @@ public class BaseAppRepository<M extends BaseMapper<T>, T extends BaseAppEntity>
      */
     @Override
     public boolean exists(QueryWrapper query) {
-        QueryWrapper queryWrapper = this.injectBizFilter(query);
-        return exists(CPI.getWhereQueryCondition(queryWrapper));
+        this.injectQueryFilter(query);
+        return exists(CPI.getWhereQueryCondition(query));
     }
 
     /**
@@ -188,9 +196,10 @@ public class BaseAppRepository<M extends BaseMapper<T>, T extends BaseAppEntity>
     public boolean exists(QueryCondition condition) {
         // 根据查询条件构建 SQL 语句
         // SELECT 1 FROM table WHERE ... LIMIT 1
-        QueryWrapper queryWrapper = this.injectBizFilter(QueryMethods.selectOne().where(condition).limit(1));
+        QueryWrapper query = QueryMethods.selectOne().where(condition).limit(1);
+        this.injectQueryFilter(query);
         // 获取数据集合，空集合：[] 不存在数据，有一个元素的集合：[1] 存在数据
-        List<Object> objects = getMapper().selectObjectListByQuery(queryWrapper);
+        List<Object> objects = getMapper().selectObjectListByQuery(query);
         // 判断是否存在数据
         return CollectionUtil.isNotEmpty(objects);
     }
@@ -203,8 +212,8 @@ public class BaseAppRepository<M extends BaseMapper<T>, T extends BaseAppEntity>
      */
     @Override
     public long count(QueryWrapper query) {
-        QueryWrapper queryWrapper = this.injectBizFilter(query);
-        return getMapper().selectCountByQuery(queryWrapper);
+        this.injectQueryFilter(query);
+        return getMapper().selectCountByQuery(query);
     }
     //endregion ===== 数量查询操作 =====
 
@@ -220,8 +229,8 @@ public class BaseAppRepository<M extends BaseMapper<T>, T extends BaseAppEntity>
      */
     @Override
     public <R> Page<R> pageAs(Page<R> page, QueryWrapper query, Class<R> asType) {
-        QueryWrapper queryWrapper = this.injectBizFilter(query);
-        return getMapper().paginateAs(page, queryWrapper, asType);
+        this.injectQueryFilter(query);
+        return getMapper().paginateAs(page, query, asType);
     }
     //endregion ===== 分页查询操作 =====
 }

@@ -18,7 +18,7 @@ public class BpmTaskDetailRespVO {
 
     @Deprecated
     @Schema(description = "发起人ID")
-    private Long initiatorId;
+    private String initiatorId;
 
     @Deprecated
     @Schema(description = "发起人")
@@ -52,7 +52,7 @@ public class BpmTaskDetailRespVO {
     List<BaseNodeBtnCfgDTO> buttonConfigs;
 
     @Schema(description = "form信息")
-    private Map<String, Object> formData;
+    private FormData formData;
 
     @Schema(description = "页面视图信息")
     private PageViewDTO pageView;
@@ -64,5 +64,23 @@ public class BpmTaskDetailRespVO {
     private String agentName;
 
     @Schema(description = "代理人ID")
-    private Long agentId;
+    private String agentId;
+
+    @Data
+    public static class FormData {
+        /**
+         * 主表的表名
+         */
+        private String tableName;
+
+        /**
+         * 实体数据
+         */
+        private Map<String, Object> data;
+
+        /**
+         * 实体字段权限
+         */
+        private Map<String, Map<String, String>> fieldPermMap;
+    }
 }

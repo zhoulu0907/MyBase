@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.bpm.build.service;
 
-import com.cmsr.onebase.module.bpm.build.vo.design.BpmDesignVO;
+import com.cmsr.onebase.module.bpm.build.vo.design.BpmDesignRespVO;
+import com.cmsr.onebase.module.bpm.build.vo.design.BpmDesignSaveReqVO;
 import com.cmsr.onebase.module.bpm.build.vo.design.BpmPublishReqVO;
 
 
@@ -18,7 +19,7 @@ public interface BpmDesignService {
      * @param flowDesignVO
      * @return
      */
-    Long save(BpmDesignVO flowDesignVO);
+    Long save(BpmDesignSaveReqVO flowDesignVO);
 
     /**
      * 查询流程设计
@@ -26,15 +27,23 @@ public interface BpmDesignService {
      * @param id
      * @return
      */
-    BpmDesignVO queryById(Long id);
+    BpmDesignRespVO queryById(Long id);
 
     /**
      * 查询流程设计
      *
-     * @param businessId 业务ID
+     * @param businessId 菜单UUID
      * @return
      */
-    BpmDesignVO queryByBusinessId(Long businessId);
+    BpmDesignRespVO queryByBusinessId(Long businessId);
+
+    /**
+     * 查询流程设计
+     *
+     * @param businessUuid 菜单UUID
+     * @return
+     */
+    BpmDesignRespVO queryByBusinessUuid(String businessUuid);
 
     /**
      * 发布流程设计

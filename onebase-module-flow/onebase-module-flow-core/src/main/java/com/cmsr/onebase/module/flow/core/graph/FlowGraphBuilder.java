@@ -4,32 +4,67 @@ import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.module.flow.context.graph.InLoopDepth;
 import com.cmsr.onebase.module.flow.context.graph.JsonGraph;
 import com.cmsr.onebase.module.flow.context.graph.JsonGraphNode;
+import com.cmsr.onebase.module.flow.context.graph.nodes.ScriptNodeData;
+import com.cmsr.onebase.module.flow.context.provider.FlowFieldTypeProvider;
+import com.cmsr.onebase.module.flow.context.config.FlowProperties;
+import com.cmsr.onebase.module.flow.core.dal.database.FlowConnectorScriptRepository;
+import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowConnectorScriptDO;
+import com.mybatisflex.core.tenant.TenantManager;
+import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * @Author：huangjie
  * @Date：2025/9/28 15:12
  */
+@Component
 public class FlowGraphBuilder {
 
-    public static JsonGraph build(String json) {
+    @Setter
+    @Autowired
+    private ObjectProvider<FlowFieldTypeProvider> objectProvider;
+
+    @Setter
+    @Autowired
+    private FlowConnectorScriptRepository connectorScriptRepository;
+
+    @Setter
+    @Autowired
+    private FlowProperties flowProperties;
+
+    public JsonGraph build(Long applicationId, String json) {
         JsonGraph jsonGraph = JsonUtils.parseObject(json, JsonGraph.class);
-        addJsonGraphLoopVariable(jsonGraph);
+        addLoopContextToNodes(jsonGraph);
+        enrichNodeData(applicationId, jsonGraph);
+        FlowFieldTypeProvider flowFieldTypeProvider = objectProvider.getObject();
+        flowFieldTypeProvider.completeFieldType(applicationId, jsonGraph);
         return jsonGraph;
     }
 
-    private static void addJsonGraphLoopVariable(JsonGraph jsonGraph) {
+    private void addLoopContextToNodes(JsonGraph jsonGraph) {
         if (jsonGraph == null || jsonGraph.getNodes() == null) {
             return;
         }
         for (JsonGraphNode node : jsonGraph.getNodes()) {
-            recursiveNode(node, new InLoopDepth());
+            traverseNodeAndAddLoopContext(node, new InLoopDepth());
         }
     }
 
-    private static void recursiveNode(JsonGraphNode node, InLoopDepth loopDeepMap) {
+    private void enrichNodeData(Long applicationId, JsonGraph jsonGraph) {
+        if (jsonGraph == null || jsonGraph.getNodes() == null) {
+            return;
+        }
+        for (JsonGraphNode node : jsonGraph.getNodes()) {
+            traverseNodeAndEnrichData(applicationId, node);
+        }
+    }
+
+    private void traverseNodeAndAddLoopContext(JsonGraphNode node, InLoopDepth loopDeepMap) {
         if (StringUtils.equals(node.getType(), "loop")) {
             loopDeepMap = new InLoopDepth(loopDeepMap);
             for (String key : loopDeepMap.keySet()) {
@@ -43,7 +78,21 @@ public class FlowGraphBuilder {
         }
         if (CollectionUtils.isNotEmpty(node.getBlocks())) {
             for (JsonGraphNode childNode : node.getBlocks()) {
-                recursiveNode(childNode, loopDeepMap);
+                traverseNodeAndAddLoopContext(childNode, loopDeepMap);
+            }
+        }
+    }
+
+    private void traverseNodeAndEnrichData(Long applicationId, JsonGraphNode node) {
+        if (node.getData() instanceof ScriptNodeData scriptNodeData) {
+            FlowConnectorScriptDO connectorScriptDO = TenantManager.withoutTenantCondition(() -> connectorScriptRepository.findByApplicationAndUuid(applicationId, scriptNodeData.getActionUuid()));
+            scriptNodeData.setScript(connectorScriptDO.getRawScript());
+            scriptNodeData.setInputSchema(connectorScriptDO.getInputSchema());
+            scriptNodeData.setOutputSchema(connectorScriptDO.getOutputSchema());
+        }
+        if (CollectionUtils.isNotEmpty(node.getBlocks())) {
+            for (JsonGraphNode child : node.getBlocks()) {
+                traverseNodeAndEnrichData(applicationId, child);
             }
         }
     }

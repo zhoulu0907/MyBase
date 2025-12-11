@@ -42,11 +42,35 @@
             <artifactId>onebase-module-infra-api</artifactId>
             <version>${revision}</version>
         </dependency>
-
+        
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-flow-api</artifactId>
+            <version>${revision}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-app-api</artifactId>
+            <version>${revision}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-metadata-api</artifactId>
+            <version>${revision}</version>
+            <scope>compile</scope>
+        </dependency>
         <!-- 业务组件 -->
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-common</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-metadata-common</artifactId>
             <version>${revision}</version>
         </dependency>
 
@@ -101,6 +125,12 @@
             <artifactId>onebase-spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- MyBatis-Flex 代码生成器 -->
+        <dependency>
+            <groupId>com.mybatis-flex</groupId>
+            <artifactId>mybatis-flex-codegen</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-core</artifactId>
@@ -108,12 +138,7 @@
             <scope>compile</scope>
         </dependency>
 
-        <dependency>
-            <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-module-app-api</artifactId>
-            <version>${revision}</version>
-            <scope>compile</scope>
-        </dependency>
+        
 
 
         <!-- 工具类相关 -->

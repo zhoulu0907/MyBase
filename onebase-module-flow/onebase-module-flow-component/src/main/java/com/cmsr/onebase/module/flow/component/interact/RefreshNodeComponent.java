@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.flow.component.interact;
 
 import com.cmsr.onebase.module.flow.component.SkippableNodeComponent;
-import com.cmsr.onebase.module.flow.context.ConditionsProvider;
+import com.cmsr.onebase.module.flow.context.provider.FlowConditionsProvider;
 import com.cmsr.onebase.module.flow.context.ExecuteContext;
 import com.cmsr.onebase.module.flow.context.VariableContext;
 import com.cmsr.onebase.module.flow.context.graph.nodes.RefreshNodeData;
@@ -20,7 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class RefreshNodeComponent extends SkippableNodeComponent {
 
     @Autowired
-    private ConditionsProvider conditionsProvider;
+    private FlowConditionsProvider flowConditionsProvider;
 
     @Override
     public void process() throws Exception {

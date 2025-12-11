@@ -14,9 +14,9 @@ import lombok.Data;
 @Data
 public class EntityFieldSortItemVO {
 
-    @Schema(description = "字段ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "3001")
-    @NotNull(message = "字段ID不能为空")
-    private String fieldId;
+    @Schema(description = "字段UUID", requiredMode = Schema.RequiredMode.REQUIRED, example = "uuid-3001")
+    @NotNull(message = "字段UUID不能为空")
+    private String fieldUuid;
 
     @Schema(description = "排序顺序", requiredMode = Schema.RequiredMode.REQUIRED, example = "10")
     @NotNull(message = "排序顺序不能为空")

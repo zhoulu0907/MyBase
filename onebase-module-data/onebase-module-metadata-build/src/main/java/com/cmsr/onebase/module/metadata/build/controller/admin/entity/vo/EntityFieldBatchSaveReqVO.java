@@ -19,9 +19,8 @@ public class EntityFieldBatchSaveReqVO {
     @NotNull(message = "实体ID不能为空")
     private String entityId;
 
-    @Schema(description = "应用ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "12345")
-    @NotNull(message = "应用ID不能为空")
-    private String appId;
+    @Schema(description = "应用ID", example = "12345")
+    private String applicationId;
 
     @Schema(description = "字段变更项列表（可同时包含新增、更新、删除）", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotEmpty(message = "字段变更项列表不能为空")

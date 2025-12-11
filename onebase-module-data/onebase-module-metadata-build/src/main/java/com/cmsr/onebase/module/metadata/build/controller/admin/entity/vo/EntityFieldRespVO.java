@@ -12,8 +12,11 @@ public class EntityFieldRespVO {
     @Schema(description = "字段编号", example = "1024")
     private String id;
 
-    @Schema(description = "实体ID", example = "1")
-    private String entityId;
+    @Schema(description = "字段UUID", example = "01onal1s-0000-0000-0000-000000000003")
+    private String fieldUuid;
+
+    @Schema(description = "实体UUID", example = "01onal1s-0000-0000-0000-000000000002")
+    private String entityUuid;
 
     @Schema(description = "字段名称", example = "user_name")
     private String fieldName;
@@ -54,11 +57,11 @@ public class EntityFieldRespVO {
     @Schema(description = "校验规则配置", example = "1")
     private String validationRulesId;
 
-    @Schema(description = "运行模式", example = "0")
-    private Integer runMode;
+    @Schema(description = "版本标识", example = "0")
+    private Long versionTag;
 
-    @Schema(description = "应用ID", example = "1")
-    private String appId;
+    @Schema(description = "应用ID", example = "1001")
+    private Long applicationId;
 
     @Schema(description = "字段状态，0：开启，1：关闭", example = "0")
     private Integer status;

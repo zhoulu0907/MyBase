@@ -22,6 +22,9 @@ public class AutoNumberRuleItemRespVO {
     @Schema(description = "配置ID", example = "1")
     private Long configId;
 
+    @Schema(description = "配置UUID", example = "01onal1s-0000-0000-0000-000000000005")
+    private String configUuid;
+
     @Schema(description = "规则项类型", example = "SEQUENCE")
     private String itemType;
 
@@ -38,11 +41,14 @@ public class AutoNumberRuleItemRespVO {
     @Schema(description = "引用字段ID", example = "123")
     private Long refFieldId;
 
+    @Schema(description = "引用字段UUID", example = "01onal1s-0000-0000-0000-000000000006")
+    private String refFieldUuid;
+
     @Schema(description = "是否启用(1-启用, 0-禁用)", example = "1")
     private Integer isEnabled;
 
     @Schema(description = "应用ID", example = "1")
-    private Long appId;
+    private Long applicationId;
 
     @Schema(description = "创建时间")
     private LocalDateTime createTime;

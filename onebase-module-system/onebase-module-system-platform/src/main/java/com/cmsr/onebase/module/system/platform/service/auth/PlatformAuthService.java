@@ -22,13 +22,6 @@ public interface PlatformAuthService {
     AdminUserDO authenticate(String username, String password);
 
     /**
-     * Admin账号登录
-     *
-     * @param reqVO 登录信息
-     * @return 登录结果
-     */
-    AuthLoginRespVO adminLogin(@Valid UserLoginReqVO reqVO);
-    /**
      * 账号登录
      *
      * @param reqVO 登录信息
@@ -45,21 +38,6 @@ public interface PlatformAuthService {
     void logout(String token, Integer logType);
 
     /**
-     * 短信验证码发送
-     *
-     * @param reqVO 发送请求
-     */
-    void sendSmsCode(AuthSmsSendReqVO reqVO);
-
-    /**
-     * 短信登录
-     *
-     * @param reqVO 登录信息
-     * @return 登录结果
-     */
-    AuthLoginRespVO smsLogin(AuthSmsLoginReqVO reqVO);
-
-    /**
      * 刷新访问令牌
      *
      * @param refreshToken 刷新令牌
@@ -68,26 +46,9 @@ public interface PlatformAuthService {
     AuthLoginRespVO refreshToken(String refreshToken);
 
     /**
-     * 用户注册
-     *
-     * @param createReqVO 注册用户
-     * @return 注册结果
-     */
-    AuthLoginRespVO register(AuthRegisterReqVO createReqVO);
-
-    /**
      * 重置密码
      *
      * @param reqVO 验证码信息
      */
     void resetPassword(AuthResetPasswordReqVO reqVO);
-
-    /**
-     * 账号登录
-     *
-     * @param reqVO 登录信息
-     * @return 登录结果
-     */
-    AuthLoginRespVO corpLogin(@Valid CorpAuthLoginReqVO reqVO);
-
 }

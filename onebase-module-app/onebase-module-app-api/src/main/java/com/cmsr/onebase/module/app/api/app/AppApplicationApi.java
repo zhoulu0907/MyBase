@@ -19,9 +19,11 @@ public interface AppApplicationApi {
 
     List<ApplicationDTO> findAppApplicationByAppIds(Collection<Long> appIds);
 
-    Map<Integer,Integer> findAppApplicationAll();
+    ApplicationDTO findAppApplicationById(Long appId);
 
-    void  updateAppTimeById(Long appId);
+    Map<Long, Integer> countAppByTenantId();
+
+    void updateAppTimeById(Long appId);
 
     Map<Long, List<TagVO>> queryAppTags(List<Long> appIds);
 }

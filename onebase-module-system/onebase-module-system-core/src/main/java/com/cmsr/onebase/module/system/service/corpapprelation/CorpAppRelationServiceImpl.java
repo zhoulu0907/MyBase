@@ -11,6 +11,7 @@ import com.cmsr.onebase.module.app.api.app.dto.TagVO;
 import com.cmsr.onebase.module.system.dal.database.CorpAppRelationDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.corp.CorpDO;
 import com.cmsr.onebase.module.system.dal.dataobject.corpapprelation.CorpAppRelationDO;
+import com.cmsr.onebase.module.system.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.system.vo.corp.CorpApplicationRespVO;
 import com.cmsr.onebase.module.system.vo.corpapprelation.*;
 import jakarta.annotation.Resource;
@@ -25,15 +26,13 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.APPLICATION_AUTH_TENANT_NOT_EXISTS;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.CORP_NAME_EXISTS;
 
 /**
  * 企业应用关联表 Service 实现类
@@ -152,20 +151,25 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
         // }
         Map<Long, ApplicationDTO> applicationMap = getApplicationDoMap(pageReqVO.getAppName());
         List<Long> applicationIds = new ArrayList<>(applicationMap.keySet());
+        if(CollectionUtils.isEmpty(applicationIds)){
+            return new PageResult<CorpApplicationRespVO>();
+        }
         // 查询原始分页数据
         PageResult<CorpAppRelationDO> pageResult = corpAppRelationDataRepository.selectPage(pageReqVO, applicationIds);
 
+          Map<Long, List<TagVO>> tagMap =new HashMap<Long, List<TagVO>>();
         // 1. 获取应用ID列表
         List<Long> appIds = pageResult.getList().stream()
                 .map(CorpAppRelationDO::getApplicationId)
                 .collect(Collectors.toList());
-
-        // 获取标签列表
-        Map<Long, List<TagVO>> tagMap = appApplicationApi.queryAppTags(appIds);
-
+        if(CollectionUtils.isNotEmpty(appIds)){
+            // 获取标签列表
+            tagMap = appApplicationApi.queryAppTags(appIds);
+        }
+        final    Map<Long, List<TagVO>> finalTagMap=tagMap;
         // 转换为 VO 对象并根据 applicationName 过滤
         List<CorpApplicationRespVO> filteredList = pageResult.getList().stream()
-                .map(corpDO -> convertToRespVO(corpDO, applicationMap, tagMap))
+                .map(corpDO -> convertToRespVO(corpDO, applicationMap, finalTagMap))
                 .collect(Collectors.toList());
         // 返回过滤后的结果和总数
         return new PageResult<>(filteredList, pageResult.getTotal());
@@ -261,6 +265,20 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
                 .filter(app -> !relatedAppIds.contains(app.getId()))
                 .collect(Collectors.toList());
         return filteredList;
+    }
+
+    @Override
+    public void validCorpAppRelationStatusOrExpireTime(Long corpId, Long appId) {
+        List<CorpAppRelationDO>  corpAppRelationDOList= corpAppRelationRepository.findApplicationByCordIdAndAppId(corpId,appId);
+        // 未查出来数据，说明已过期
+        if (CollectionUtils.isEmpty(corpAppRelationDOList)){
+            throw exception(ErrorCodeConstants.AUTH_LOGIN_APP_EXPIRE);
+        }
+        // 查看状态是否禁用
+        CorpAppRelationDO corpAppRelationDO=corpAppRelationDOList.get(0);
+        if (CorpStatusEnum.DISABLE.getValue().equals(corpAppRelationDO.getStatus())){
+            throw exception(ErrorCodeConstants.AUTH_LOGIN_APP_DELETE_OR_DISABLE);
+        }
     }
 }
 

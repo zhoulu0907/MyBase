@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.flow.core.handler;
 
+import com.cmsr.onebase.module.flow.context.config.FlowProperties;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessDateFieldRepository;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessRepository;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessTimeRepository;
@@ -46,9 +47,18 @@ public class FlowChangeClient {
     @Autowired
     private FlowProcessDateFieldRepository flowProcessDateFieldRepository;
 
+    @Setter
+    @Autowired
+    private FlowProperties flowProperties;
+
     public void applicationUpdate(Long applicationId) {
         log.info("更新应用版本：{}", applicationId);
-        List<FlowProcessDO> flowProcessDOS = TenantManager.withoutTenantCondition(() -> flowProcessRepository.findByApplicationIdAndEnableStatus(applicationId, FlowEnableStatusEnum.ENABLE.getStatus()));
+        List<FlowProcessDO> flowProcessDOS = TenantManager.withoutTenantCondition(() ->
+                flowProcessRepository.findByApplicationIdAndEnableStatus(
+                        applicationId,
+                        FlowEnableStatusEnum.ENABLE.getStatus(),
+                        flowProperties.getVersionTag()
+                ));
         for (FlowProcessDO flowProcessDO : flowProcessDOS) {
             if (FlowTriggerTypeEnum.isTime(flowProcessDO.getTriggerType())) {
                 updateTimeJob(flowProcessDO);

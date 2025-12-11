@@ -49,6 +49,14 @@ public interface MetadataValidationRuleGroupBuildService {
     MetadataValidationRuleGroupDO getValidationRuleGroup(Long id);
 
     /**
+     * 根据UUID获得校验规则分组
+     *
+     * @param groupUuid 规则组UUID
+     * @return 校验规则分组
+     */
+    MetadataValidationRuleGroupDO getValidationRuleGroupByUuid(String groupUuid);
+
+    /**
      * 获得校验规则分组分页
      *
      * @param pageReqVO 分页查询
@@ -93,5 +101,11 @@ public interface MetadataValidationRuleGroupBuildService {
      * @param groupId 规则组ID
      */
     void safeDeleteGroupDirect(Long groupId);
+
+    /**
+     * 根据UUID直接物理删除规则组（调用方需保证无其他类型引用）。
+     * @param groupUuid 规则组UUID
+     */
+    void safeDeleteGroupDirect(String groupUuid);
 
 }

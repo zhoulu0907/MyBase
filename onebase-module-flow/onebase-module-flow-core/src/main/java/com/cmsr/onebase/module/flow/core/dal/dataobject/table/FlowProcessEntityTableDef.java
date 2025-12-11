@@ -8,7 +8,7 @@ import com.mybatisflex.core.table.TableDef;
  *  表定义层。
  *
  * @author HuangJie
- * @since 2025-11-25
+ * @since 2025-11-29
  */
 public class FlowProcessEntityTableDef extends TableDef {
 
@@ -32,9 +32,6 @@ public class FlowProcessEntityTableDef extends TableDef {
     public final QueryColumn UPDATER = new QueryColumn(this, "updater");
 
     
-    public final QueryColumn ENTITY_ID = new QueryColumn(this, "entity_id");
-
-    
     public final QueryColumn TENANT_ID = new QueryColumn(this, "tenant_id");
 
     
@@ -46,9 +43,6 @@ public class FlowProcessEntityTableDef extends TableDef {
     
     public final QueryColumn UPDATE_TIME = new QueryColumn(this, "update_time");
 
-    
-    public final QueryColumn LOCK_VERSION = new QueryColumn(this, "lock_version");
-
     /**
      * 所有字段。
      */
@@ -57,7 +51,7 @@ public class FlowProcessEntityTableDef extends TableDef {
     /**
      * 默认字段，不包含逻辑删除或者 large 等字段。
      */
-    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, PROCESS_ID, ENTITY_ID, LOCK_VERSION, CREATOR, CREATE_TIME, UPDATER, UPDATE_TIME, DELETED, TENANT_ID};
+    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, PROCESS_ID, CREATOR, CREATE_TIME, UPDATER, UPDATE_TIME, DELETED, TENANT_ID};
 
     public FlowProcessEntityTableDef() {
         super("", "flow_process_entity");

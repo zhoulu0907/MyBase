@@ -4,7 +4,7 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.app.build.vo.version.VersionCreateReqVO;
 import com.cmsr.onebase.module.app.build.vo.version.VersionPageReqVo;
 import com.cmsr.onebase.module.app.build.vo.version.VersionPageRespVO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.version.VersionDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppVersionDO;
 
 import java.util.List;
 import java.util.Map;
@@ -23,5 +23,4 @@ public interface AppVersionService {
 
     void deleteApplicationVersion(Long versionId);
 
-    Map<Long, VersionDO> findVersionMapByAppIds(List<Long> appIds);
-}
+ }

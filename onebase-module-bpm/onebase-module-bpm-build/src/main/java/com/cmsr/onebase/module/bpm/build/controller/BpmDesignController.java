@@ -2,9 +2,9 @@ package com.cmsr.onebase.module.bpm.build.controller;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.module.bpm.build.service.BpmDesignService;
-import com.cmsr.onebase.module.bpm.build.vo.design.BpmDesignVO;
+import com.cmsr.onebase.module.bpm.build.vo.design.BpmDesignRespVO;
+import com.cmsr.onebase.module.bpm.build.vo.design.BpmDesignSaveReqVO;
 import com.cmsr.onebase.module.bpm.build.vo.design.BpmPublishReqVO;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
@@ -30,7 +30,7 @@ public class BpmDesignController {
 
     @PostMapping("/save")
     @Operation(summary = "保存流程")
-    public CommonResult<Long> saveFlow(@Valid @RequestBody BpmDesignVO flowDesignVO) {
+    public CommonResult<Long> saveFlow(@Valid @RequestBody BpmDesignSaveReqVO flowDesignVO) {
         log.info("流程请求信息: {}", flowDesignVO);
         Long flowId = bpmDesignService.save(flowDesignVO);
         return CommonResult.success(flowId);
@@ -38,17 +38,25 @@ public class BpmDesignController {
 
     @GetMapping("/get")
     @Operation(summary = "获取流程")
-    public CommonResult<BpmDesignVO> query(@RequestParam("id") Long flowId) {
+    public CommonResult<BpmDesignRespVO> query(@RequestParam("id") Long flowId) {
         log.info("查询流程: {}", flowId);
-        BpmDesignVO flowDesignVO = bpmDesignService.queryById(flowId);
+        BpmDesignRespVO flowDesignVO = bpmDesignService.queryById(flowId);
         return CommonResult.success(flowDesignVO);
     }
 
     @GetMapping("/get-by-business-id")
     @Operation(summary = "根据业务ID查询默认流程")
-    public CommonResult<BpmDesignVO> queryByBusinessId(@RequestParam("businessId") Long businessId) {
+    public CommonResult<BpmDesignRespVO> queryByBusinessId(@RequestParam("businessId") Long businessId) {
         log.info("查询流程: {}", businessId);
-        BpmDesignVO flowDesignVO = bpmDesignService.queryByBusinessId(businessId);
+        BpmDesignRespVO flowDesignVO = bpmDesignService.queryByBusinessId(businessId);
+        return CommonResult.success(flowDesignVO);
+    }
+
+    @GetMapping("/get-by-business-uuid")
+    @Operation(summary = "根据业务UUID查询默认流程")
+    public CommonResult<BpmDesignRespVO> queryByBusinessUuid(@RequestParam("businessUuid") String businessUuid) {
+        log.info("查询流程: {}", businessUuid);
+        BpmDesignRespVO flowDesignVO = bpmDesignService.queryByBusinessUuid(businessUuid);
         return CommonResult.success(flowDesignVO);
     }
 

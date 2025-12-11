@@ -7,11 +7,15 @@ import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.anji.captcha.model.common.ResponseModel;
 import com.anji.captcha.model.vo.CaptchaVO;
 import com.anji.captcha.service.CaptchaService;
+import com.cmsr.onebase.module.system.service.user.UserService;
+import com.cmsr.onebase.module.system.vo.captcha.CaptchaReqVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.annotation.security.PermitAll;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,6 +30,8 @@ public class CaptchaController {
 
     @Resource
     private CaptchaService captchaService;
+
+
 
     @PostMapping({"/get"})
     @Operation(summary = "获得验证码")

@@ -19,7 +19,7 @@ public class DataPermissionGroup {
     /**
      * 数据权限范围字段，是 拥有着 创建者 更新者 等字段
      */
-    private Long scopeFieldId;
+    private String scopeFieldUuid;
 
     /**
      * 数据权限范围级别，与 scopeFieldId 配合，比如指定 拥有着 是 当前员工所在主部门
@@ -79,5 +79,11 @@ public class DataPermissionGroup {
     private boolean canEdit;
 
     private boolean canDelete;
+
+    //TODO 为了兼容暂时的
+    @Deprecated
+    public Long getScopeFieldId() {
+        return scopeFieldUuid == null ? null : Long.parseLong(scopeFieldUuid);
+    }
 
 }

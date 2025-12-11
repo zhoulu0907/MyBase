@@ -31,8 +31,8 @@ public class OAuth2TokenApiImpl implements OAuth2TokenCommonApi {
 
     @Override
     @TenantIgnore // 访问令牌校验时，无需传递租户编号；主要解决上传文件的场景，前端不会传递 tenant-id
-    public CommonResult<OAuth2AccessTokenCheckRespDTO> checkAccessToken(String accessToken) {
-        OAuth2AccessTokenDO accessTokenDO = oauth2TokenService.checkAccessToken(accessToken);
+    public CommonResult<OAuth2AccessTokenCheckRespDTO> checkAccessToken(String runMode, String accessToken) {
+        OAuth2AccessTokenDO accessTokenDO = oauth2TokenService.checkAccessToken(runMode, accessToken);
         return success(BeanUtils.toBean(accessTokenDO, OAuth2AccessTokenCheckRespDTO.class));
     }
 
@@ -46,6 +46,13 @@ public class OAuth2TokenApiImpl implements OAuth2TokenCommonApi {
     public CommonResult<OAuth2AccessTokenRespDTO> refreshAccessToken(String refreshToken, String clientId) {
         OAuth2AccessTokenDO accessTokenDO = oauth2TokenService.refreshAccessToken(refreshToken, clientId);
         return success(BeanUtils.toBean(accessTokenDO, OAuth2AccessTokenRespDTO.class));
+    }
+
+    @Override
+    @TenantIgnore // 访问令牌时，无需传递租户编号；主要解决上传文件的场景，前端不会传递 tenant-id
+    public CommonResult<OAuth2AccessTokenCheckRespDTO> getAccessToken(String accessToken) {
+        OAuth2AccessTokenDO accessTokenDO = oauth2TokenService.getAccessToken(accessToken);
+        return success(BeanUtils.toBean(accessTokenDO, OAuth2AccessTokenCheckRespDTO.class));
     }
 
 }

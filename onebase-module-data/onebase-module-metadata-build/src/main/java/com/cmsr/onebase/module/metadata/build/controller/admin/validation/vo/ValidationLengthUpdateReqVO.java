@@ -39,8 +39,8 @@ public class ValidationLengthUpdateReqVO {
     @Schema(description = "提示信息", example = "字符长度必须在1-100之间")
     private String promptMessage;
 
-    @Schema(description = "运行模式", example = "1")
-    private Integer runMode;
+    @Schema(description = "版本标识", example = "1")
+    private Long versionTag;
 
     @Schema(description = "校验方式", example = "POP")
     private String valMethod;

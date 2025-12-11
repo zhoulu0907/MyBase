@@ -144,7 +144,9 @@ public class TaskServiceImpl extends WarmServiceImpl<FlowTaskDao<Task>, Task> im
     public Instance taskBackByInsId(Long instanceId, FlowParams flowParams) {
         // 获取当前任务的前置任务
         HisTask lastHisTask = taskBack(flowParams, instanceId);
-        List<Node> suffixNodeList = FlowEngine.nodeService().suffixNodeList(lastHisTask.getDefinitionId()
+        // 通过 uuid 获取 definition，再用 definition.getId() 查询节点
+        Definition definition = FlowEngine.defService().getByDefUuid(lastHisTask.getDefinitionUuid());
+        List<Node> suffixNodeList = FlowEngine.nodeService().suffixNodeList(definition.getId()
             , lastHisTask.getNodeCode());
 
         List<String> suffixNodeCodes = StreamUtils.toList(suffixNodeList, Node::getNodeCode);
@@ -243,7 +245,7 @@ public class TaskServiceImpl extends WarmServiceImpl<FlowTaskDao<Task>, Task> im
         Instance instance = FlowEngine.insService().getById(instanceId);
         flowParams.variable(MapUtil.mergeAll(instance.getVariableMap(), flowParams.getVariable()));
         AssertUtil.isNull(instance, ExceptionCons.NOT_FOUNT_INSTANCE);
-        Definition definition = FlowEngine.defService().getById(instance.getDefinitionId());
+        Definition definition = FlowEngine.defService().getByDefUuid(instance.getDefinitionUuid());
         AssertUtil.isFalse(judgeActivityStatus(definition, instance), ExceptionCons.NOT_ACTIVITY);
         AssertUtil.isTrue(NodeType.isEnd(instance.getNodeType()), ExceptionCons.FLOW_FINISH);
         flowParams.variable(MapUtil.mergeAll(instance.getVariableMap(), flowParams.getVariable()));
@@ -338,7 +340,7 @@ public class TaskServiceImpl extends WarmServiceImpl<FlowTaskDao<Task>, Task> im
         checkAuth(task, flowParams);
 
         // 所有待办转历史
-        Node endNode = FlowEngine.nodeService().getEndNode(r.instance.getDefinitionId());
+        Node endNode = FlowEngine.nodeService().getEndNode(r.definition.getId());
 
         // 设置流程图元数据
         PathWayData pathWayData = new PathWayData()
@@ -377,7 +379,7 @@ public class TaskServiceImpl extends WarmServiceImpl<FlowTaskDao<Task>, Task> im
         List<Instance> instanceList = FlowEngine.insService().getByIds(instanceIds);
         Definition definition;
         for (Instance instance : instanceList) {
-            definition = FlowEngine.defService().getById(instance.getDefinitionId());
+            definition = FlowEngine.defService().getByDefUuid(instance.getDefinitionUuid());
             AssertUtil.isFalse(judgeActivityStatus(definition, instance), ExceptionCons.NOT_ACTIVITY);
         }
         return SqlHelper.retBool(getDao().deleteByInsIds(instanceIds));
@@ -497,6 +499,7 @@ public class TaskServiceImpl extends WarmServiceImpl<FlowTaskDao<Task>, Task> im
         LocalDateTime now = LocalDateTime.now();
         FlowEngine.dataFillHandler().idFill(addTask);
         addTask.setDefinitionId(instance.getDefinitionId())
+            .setDefinitionUuid(instance.getDefinitionUuid())
             .setInstanceId(instance.getId())
             .setNodeCode(node.getNodeCode())
             .setNodeName(node.getNodeName())
@@ -639,10 +642,10 @@ public class TaskServiceImpl extends WarmServiceImpl<FlowTaskDao<Task>, Task> im
         AssertUtil.isNull(task, ExceptionCons.NOT_FOUNT_TASK);
         Instance instance = FlowEngine.insService().getById(task.getInstanceId());
         AssertUtil.isNull(instance, ExceptionCons.NOT_FOUNT_INSTANCE);
-        Definition definition = FlowEngine.defService().getById(instance.getDefinitionId());
+        Definition definition = FlowEngine.defService().getByDefUuid(instance.getDefinitionUuid());
         AssertUtil.isFalse(judgeActivityStatus(definition, instance), ExceptionCons.NOT_ACTIVITY);
         AssertUtil.isTrue(NodeType.isEnd(instance.getNodeType()), ExceptionCons.FLOW_FINISH);
-        Node nowNode = FlowEngine.nodeService().getByDefIdAndNodeCode(task.getDefinitionId(), task.getNodeCode());
+        Node nowNode = FlowEngine.nodeService().getByDefIdAndNodeCode(definition.getId(), task.getNodeCode());
         AssertUtil.isNull(nowNode, ExceptionCons.LOST_CUR_NODE);
         return new R(instance, definition, nowNode, task);
     }
@@ -957,11 +960,11 @@ public class TaskServiceImpl extends WarmServiceImpl<FlowTaskDao<Task>, Task> im
         HisTask hisTask = FlowEngine.hisTaskService().getById(hisTaskId);
         AssertUtil.isNull(hisTask, ExceptionCons.NOT_FOUND_FLOW_TASK);
 
-        Definition definition = FlowEngine.defService().getById(hisTask.getDefinitionId());
+        Definition definition = FlowEngine.defService().getByDefUuid(hisTask.getDefinitionUuid());
         AssertUtil.isNull(definition, ExceptionCons.NOT_FOUNT_DEF);
 
         Node nowNode = CollUtil.getOne(FlowEngine.nodeService()
-            .getByNodeCodes(Collections.singletonList(hisTask.getNodeCode()), hisTask.getDefinitionId()));
+            .getByNodeCodes(Collections.singletonList(hisTask.getNodeCode()), definition.getId()));
         AssertUtil.isNull(nowNode, ExceptionCons.LOST_CUR_NODE);
 
         FlowDto flowDto = new FlowDto();

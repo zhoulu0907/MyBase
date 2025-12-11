@@ -1,53 +1,61 @@
 package com.cmsr.onebase.module.app.core.dal.database.version;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageParam;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.framework.data.base.BaseDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.version.VersionDO;
-import org.anyline.data.param.ConfigStore;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.Order;
+import com.cmsr.onebase.framework.orm.repo.BaseAppRepository;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppVersionDO;
+import com.cmsr.onebase.module.app.core.dal.mapper.AppVersionMapper;
+import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryWrapper;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+
+import static com.cmsr.onebase.module.app.core.dal.dataobject.table.AppVersionTableDef.APP_VERSION;
 
 /**
  * @Author：huangjie
  * @Date：2025/8/6 14:42
  */
 @Repository
-public class AppVersionRepository extends DataRepository<VersionDO> {
-
-    public AppVersionRepository() {
-        super(VersionDO.class);
-    }
+public class AppVersionRepository extends BaseAppRepository<AppVersionMapper, AppVersionDO> {
 
     public void deleteByApplicationId(Long applicationId) {
-        ConfigStore configs = new DefaultConfigStore();
-        configs.eq("application_id", applicationId);
-        deleteByConfig(configs);
+        this.updateChain()
+                .eq(AppVersionDO::getApplicationId, applicationId)
+                .remove();
     }
 
-    public List<VersionDO> findByApplicationId(Long applicationId) {
-        ConfigStore configs = new DefaultConfigStore();
-        configs.eq("application_id", applicationId);
-        configs.order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
-        return findAllByConfig(configs);
+    public List<AppVersionDO> findByApplicationId(Long applicationId) {
+        QueryWrapper queryWrapper = this.query()
+                .eq(AppVersionDO::getApplicationId, applicationId)
+                .orderBy(AppVersionDO::getUpdateTime, false)
+                .orderBy(AppVersionDO::getCreateTime, false);
+        return list(queryWrapper);
     }
 
-    public PageResult<VersionDO> selectPage(Long applicationId, PageParam pageParam) {
-        ConfigStore configs = new DefaultConfigStore();
-        if (applicationId > 0) {
-            configs.eq("application_id", applicationId);
-        }
-        return findPageWithConditions(configs, pageParam.getPageNo(), pageParam.getPageSize());
+    public PageResult<AppVersionDO> selectPage(Long applicationId, PageParam pageParam) {
+        QueryWrapper queryWrapper = this.query()
+                .eq(AppVersionDO::getApplicationId, applicationId)
+                .orderBy(APP_VERSION.VERSION_TYPE, true)
+                .orderBy(APP_VERSION.CREATE_TIME, false);
+        Page<AppVersionDO> pageQuery = Page.of(pageParam.getPageNo(), pageParam.getPageSize());
+        Page<AppVersionDO> pageResult = this.page(pageQuery, queryWrapper);
+        return new PageResult<>(pageResult.getRecords(), pageResult.getTotalRow());
     }
 
-    public List<VersionDO> findVersionList(List<Long> appIds) {
-        ConfigStore configs = new DefaultConfigStore();
-        configs.in(VersionDO.APPLICATION_ID, appIds);
-        configs.order(BaseDO.UPDATE_TIME, Order.TYPE.DESC);
-        return findAllByConfig(configs);
+    public List<AppVersionDO> findVersionList(List<Long> appIds) {
+        QueryWrapper queryWrapper = this.query()
+                .in(AppVersionDO::getApplicationId, appIds)
+                .orderBy(AppVersionDO::getUpdateTime, false)
+                .orderBy(AppVersionDO::getCreateTime, false);
+        return this.list(queryWrapper);
+    }
+
+    public AppVersionDO findByApplicationIdAndVersionType(Long applicationId, int versionType) {
+        QueryWrapper queryWrapper = this.query()
+                .where(APP_VERSION.APPLICATION_ID.eq(applicationId))
+                .where(APP_VERSION.VERSION_TYPE.eq(versionType));
+        return this.getOne(queryWrapper);
     }
 }

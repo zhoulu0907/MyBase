@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,7 +21,7 @@ import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
  */
 @Tag(name = "运行态 - 自动编号配置")
 @RestController
-@RequestMapping("/metadata-runtime/auto-number/config")
+@RequestMapping("/metadata/auto-number/config")
 @Validated
 public class AutoNumberConfigRuntimeController {
 
@@ -37,7 +36,6 @@ public class AutoNumberConfigRuntimeController {
      */
     @PostMapping("/get")
     @Operation(summary = "按字段ID获取自动编号配置与规则")
-    @PreAuthorize("@ss.hasPermission('metadata:auto-number:query')")
     public CommonResult<AutoNumberConfigWithRulesRespVO> get(@RequestParam("fieldId") Long fieldId) {
         AutoNumberConfigWithRulesRespVO result = configService.getAutoNumberConfigWithRules(fieldId);
         return success(result);
@@ -51,7 +49,6 @@ public class AutoNumberConfigRuntimeController {
      */
     @PostMapping("/upsert")
     @Operation(summary = "保存/更新自动编号配置")
-    @PreAuthorize("@ss.hasPermission('metadata:auto-number:update')")
     public CommonResult<Long> upsert(@Valid @RequestBody MetadataAutoNumberConfigDO req) {
         Long id = configService.saveAutoNumberConfig(req);
         return success(id);

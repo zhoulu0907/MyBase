@@ -1,39 +1,73 @@
 package com.cmsr.onebase.module.metadata.core.dal.dataobject.number;
 
-import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
-import jakarta.persistence.Column;
-import jakarta.persistence.Table;
-import lombok.*;
-import lombok.experimental.SuperBuilder;
+import com.cmsr.onebase.framework.orm.entity.BaseBizEntity;
+import com.cmsr.onebase.framework.orm.entity.BaseTenantEntity;
+import com.mybatisflex.annotation.Column;
+import com.mybatisflex.annotation.Table;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+import java.time.LocalDateTime;
+
 /**
  * 自动编号-周期计数状态 DO
  * 对应表：metadata_auto_number_state
+ *
+ * @author bty418
+ * @date 2025-08-18
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-@ToString(callSuper = true)
-@SuperBuilder
-@NoArgsConstructor
-@AllArgsConstructor
-@Table(name = "metadata_auto_number_state")
-public class MetadataAutoNumberStateDO extends TenantBaseDO {
+@Table(value = "metadata_auto_number_state")
+public class MetadataAutoNumberStateDO extends BaseBizEntity {
 
-    public static final String CONFIG_ID = "config_id";
-    public static final String PERIOD_KEY = "period_key";
-    public static final String CURRENT_VALUE = "current_value";
-    public static final String LAST_RESET_TIME = "last_reset_time";
-    public static final String APP_ID = "app_id";
+    /**
+     * 状态UUID
+     * <p>
+     * 用于跨应用、跨版本的唯一标识，与 application_id、version_tag 组成联合唯一约束
+     */
+    @Column(value = "state_uuid", comment = "状态UUID")
+    private String stateUuid;
 
-    @Column(name = CONFIG_ID)
-    private Long configId;
-    @Column(name = PERIOD_KEY)
+    /**
+     * 配置UUID
+     * <p>
+     * 关联 metadata_auto_number_config.config_uuid
+     */
+    @Column(value = "config_uuid", comment = "配置UUID")
+    private String configUuid;
+
+    /**
+     * 周期键
+     */
+    @Column(value = "period_key", comment = "周期键")
     private String periodKey;
-    @Column(name = CURRENT_VALUE)
+
+    /**
+     * 当前值
+     */
+    @Column(value = "current_value", comment = "当前值")
     private Long currentValue;
-    @Column(name = LAST_RESET_TIME)
-    private java.time.LocalDateTime lastResetTime;
-    @Column(name = APP_ID)
-    private Long appId;
+
+    /**
+     * 上次重置时间
+     */
+    @Column(value = "last_reset_time", comment = "上次重置时间")
+    private LocalDateTime lastResetTime;
+
+    /**
+     * 应用ID
+     */
+    @Column(value = "application_id", comment = "应用ID")
+    private Long applicationId;
+
+    /**
+     * 版本标识
+     * <p>
+     * 用于跨应用、跨版本的唯一标识，与 application_id 组成联合唯一约束
+     */
+    @Column(value = "version_tag", comment = "版本标识")
+    private Long versionTag;
 }
 
 

@@ -2,10 +2,12 @@ package com.cmsr.onebase.module.flow.context.graph.nodes;
 
 import com.cmsr.onebase.module.flow.context.condition.Conditions;
 import com.cmsr.onebase.module.flow.context.graph.NodeData;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldSchemaDTO;
 import lombok.Data;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Author：huangjie
@@ -15,13 +17,29 @@ import java.util.List;
 public class StartFormNodeData extends NodeData implements Serializable {
 
     /**
-     * 应用ID
+     * 应用ID，!!!后补充!!!
      */
     private Long applicationId;
     /**
-     * 流程ID，后补充
+     * 流程ID，!!!后补充!!!
      */
     private Long processId;
+
+    /**
+     * 页面ID，!!!后补充!!!
+     */
+    private Long pageId;
+
+    /**
+     * 表名，!!!后补充!!!
+     */
+    private String tableName;
+
+    /**
+     * 字段信息,!!!后补充!!!
+     */
+    private Map<String, SemanticFieldSchemaDTO> fieldSchemaMap;
+
 
     private String triggerRange;
 
@@ -29,12 +47,7 @@ public class StartFormNodeData extends NodeData implements Serializable {
 
     private String fieldTriggerEvents;
 
-    private Long pageId;
-
-    /**
-     * 前端组件的Id，所以是字符串
-     */
-    private String fieldId;
+    private String pageUuid;
 
     private Boolean isChildTriggerAllowed;
 

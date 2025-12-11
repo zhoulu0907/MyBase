@@ -1,14 +1,16 @@
 package com.cmsr.onebase.module.app.core.provider.auth;
 
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.module.app.api.security.bo.DataPermissionFilter;
 import com.cmsr.onebase.module.app.api.security.bo.DataPermissionGroup;
 import com.cmsr.onebase.module.app.api.security.bo.DataPermissionLevel;
 import com.cmsr.onebase.module.app.api.security.bo.DataPermissionTag;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthDataGroupRepository;
-import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthDataGroupDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthDataGroupDO;
 import com.cmsr.onebase.module.app.core.enums.auth.AuthDefaultFactory;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.mybatisflex.core.tenant.TenantManager;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -32,15 +34,17 @@ public class AppAuthDataGroupProvider {
     @Autowired
     private AppAuthDataGroupRepository appAuthDataGroupRepository;
 
-    public List<DataPermissionGroup> findDataGroups(Long applicationId, Set<Long> roleIds, Long menuId) {
-        List<AuthDataGroupDO> authDataGroupDOS = appAuthDataGroupRepository.findByAppIdAndRoleIdsAndMenuId(applicationId, roleIds, menuId);
+    public List<DataPermissionGroup> findDataGroups(Long applicationId, Set<String> roleUuids, String menuUuid) {
+        List<AppAuthDataGroupDO> authDataGroupDOS = TenantManager.withoutTenantCondition(() -> ApplicationManager.withoutApplicationCondition(() ->
+                appAuthDataGroupRepository.findByAppIdAndRoleIdsAndMenuId(applicationId, roleUuids, menuUuid)
+        ));
+        if (CollectionUtils.isEmpty(authDataGroupDOS)) {
+            authDataGroupDOS = List.of(AuthDefaultFactory.createDefaultAuthDataGroupDO());
+        }
         return authDataGroupDOS.stream().map(authDataGroupDO -> {
             DataPermissionGroup dataPermissionGroup = new DataPermissionGroup();
-            if (authDataGroupDO.getId() == null) {
-                authDataGroupDO = AuthDefaultFactory.createAuthDataGroupDO();
-            }
             dataPermissionGroup.setScopTags(toDataPermissionTags(authDataGroupDO.getScopeTags()));
-            dataPermissionGroup.setScopeFieldId(authDataGroupDO.getScopeFieldId());
+            dataPermissionGroup.setScopeFieldUuid(authDataGroupDO.getScopeFieldUuid());
             dataPermissionGroup.setScopeLevel(DataPermissionLevel.fromCode(authDataGroupDO.getScopeLevel()));
             dataPermissionGroup.setScopeValue(authDataGroupDO.getScopeValue());
             dataPermissionGroup.setFilters(toDataPermissionFilter(authDataGroupDO.getDataFilter()));

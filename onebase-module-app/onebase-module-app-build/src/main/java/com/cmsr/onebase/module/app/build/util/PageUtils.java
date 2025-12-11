@@ -1,14 +1,17 @@
 package com.cmsr.onebase.module.app.build.util;
 
 
-import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.PageDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.appresource.workbench.WorkBenchPageDO;
+import com.cmsr.onebase.framework.common.util.string.UuidUtils;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePageDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourceWorkbenchPageDO;
 
 public class PageUtils {
 
-    public static PageDO initPage(Long pageSetId, String pageName, String routerPath, String pageType, Boolean openViewMode ) {
-        PageDO pageDO = new PageDO();
-        pageDO.setPageSetId(pageSetId);
+    public static AppResourcePageDO initPage(Long applicationId, String pageSetUuid, String pageName, String routerPath, String pageType, Boolean openViewMode) {
+        AppResourcePageDO pageDO = new AppResourcePageDO();
+        pageDO.setApplicationId(applicationId);
+        pageDO.setPageUuid(UuidUtils.getUuid());
+        pageDO.setPageSetUuid(pageSetUuid);
         pageDO.setPageName(pageName);
         pageDO.setTitle(pageName);
         pageDO.setLayout("horizontal");
@@ -26,7 +29,7 @@ public class PageUtils {
             pageDO.setEditViewMode(1);
             pageDO.setIsDefaultDetailViewMode(1);
             pageDO.setIsDefaultEditViewMode(1);
-        }else{
+        } else {
             pageDO.setDetailViewMode(0);
             pageDO.setEditViewMode(0);
             pageDO.setIsDefaultDetailViewMode(0);
@@ -37,9 +40,10 @@ public class PageUtils {
     }
 
 
-    public static WorkBenchPageDO initWorkbenchPage(Long pageSetId, String pageName, String routerPath, String pageType, Boolean openViewMode ) {
-        WorkBenchPageDO pageDO = new WorkBenchPageDO();
-        pageDO.setPageSetId(pageSetId);
+    public static AppResourceWorkbenchPageDO initWorkbenchPage(String pageSetUuid, String pageName, String routerPath, String pageType, Boolean openViewMode) {
+        AppResourceWorkbenchPageDO pageDO = new AppResourceWorkbenchPageDO();
+        pageDO.setPageUuid(UuidUtils.getUuid());
+        pageDO.setPageSetUuid(pageSetUuid);
         pageDO.setPageName(pageName);
         pageDO.setTitle(pageName);
         pageDO.setLayout("horizontal");
@@ -57,7 +61,7 @@ public class PageUtils {
             pageDO.setEditViewMode(1);
             pageDO.setIsDefaultDetailViewMode(1);
             pageDO.setIsDefaultEditViewMode(1);
-        }else{
+        } else {
             pageDO.setDetailViewMode(0);
             pageDO.setEditViewMode(0);
             pageDO.setIsDefaultDetailViewMode(0);

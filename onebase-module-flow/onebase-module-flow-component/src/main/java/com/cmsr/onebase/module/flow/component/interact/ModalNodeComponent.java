@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.flow.component.interact;
 
 import com.cmsr.onebase.module.flow.component.NodeActionEnum;
 import com.cmsr.onebase.module.flow.component.SkippableNodeComponent;
-import com.cmsr.onebase.module.flow.context.ContextProvider;
+import com.cmsr.onebase.module.flow.context.provider.FlowContextProvider;
 import com.cmsr.onebase.module.flow.context.ExecuteContext;
 import com.cmsr.onebase.module.flow.context.VariableContext;
 import com.cmsr.onebase.module.flow.context.graph.nodes.ModalNodeData;
@@ -22,7 +22,7 @@ import java.util.Map;
 public class ModalNodeComponent extends SkippableNodeComponent {
 
     @Autowired
-    private ContextProvider contextProvider;
+    private FlowContextProvider flowContextProvider;
 
     @Override
     public void process() throws Exception {
@@ -37,8 +37,8 @@ public class ModalNodeComponent extends SkippableNodeComponent {
             variableContext.setOutputParams(outputParams);
             executeContext.setExecutionEndNodeType("modal");
             executeContext.setExecutionEndNodeTag(this.getTag());
-            contextProvider.storeExecuteContext(executeContext.getExecutionUuid(), executeContext);
-            contextProvider.storeVariableContext(executeContext.getExecutionUuid(), variableContext);
+            flowContextProvider.storeExecuteContext(executeContext.getExecutionUuid(), executeContext);
+            flowContextProvider.storeVariableContext(executeContext.getExecutionUuid(), variableContext);
             executeContext.addLog("弹窗节点返回暂停执行, 返回窗口信息");
             this.setIsEnd(true);
         }

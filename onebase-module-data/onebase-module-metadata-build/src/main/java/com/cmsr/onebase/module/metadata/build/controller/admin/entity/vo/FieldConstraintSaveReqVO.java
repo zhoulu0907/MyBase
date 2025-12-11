@@ -2,7 +2,6 @@ package com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 /**
@@ -10,9 +9,9 @@ import lombok.Data;
  */
 @Data
 public class FieldConstraintSaveReqVO {
-    @Schema(description = "字段ID", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull
-    private Long fieldId;
+    @Schema(description = "字段UUID", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotBlank
+    private String fieldUuid;
 
     @Schema(description = "约束类型：LENGTH_RANGE/REGEX", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank
@@ -33,12 +32,11 @@ public class FieldConstraintSaveReqVO {
     @Schema(description = "是否启用：0-是，1-否")
     private Integer isEnabled;
 
-    @Schema(description = "运行模式：0 编辑态，1 运行态")
-    private Integer runMode;
+    @Schema(description = "版本标识")
+    private Long versionTag;
 
     @Schema(description = "应用ID", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull
-    private Long appId;
+    private Long applicationId;
 }
 
 

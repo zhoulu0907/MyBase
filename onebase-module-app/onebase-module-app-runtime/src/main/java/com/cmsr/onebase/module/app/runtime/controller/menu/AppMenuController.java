@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.app.runtime.controller.menu;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.module.app.runtime.service.menu.AppMenuService;
-import com.cmsr.onebase.module.app.runtime.vo.menu.MenuListRespVO;
+import com.cmsr.onebase.module.app.core.vo.menu.MenuListRespVO;
 import com.cmsr.onebase.module.app.runtime.vo.menu.MenuPermissionVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -26,6 +26,12 @@ public class AppMenuController {
 
     @Resource
     private AppMenuService appMenuService;
+
+    @GetMapping("/bpm-list")
+    @Operation(summary = "BPM应用菜单列表")
+    public CommonResult<List<MenuListRespVO>> listBpmApplicationMenu() {
+        return success(appMenuService.listBpmApplicationMenu());
+    }
 
     @GetMapping("/list")
     @Operation(summary = "应用菜单列表")

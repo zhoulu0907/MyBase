@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.bpm.core.dto.node.base;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -26,22 +27,26 @@ public class FieldPermCfgDTO {
     /**
      * 字段配置列表
      */
+    @Valid
     private List<FieldConfigDTO> fieldConfigs;
 
     @Schema(description = "字段配置视图")
     @Data
     public static class FieldConfigDTO {
-        /**
-         * 字段ID
-         */
-        @NotNull(message = "字段ID不能为空")
-        private Long fieldId;
+        @NotBlank(message = "表名不能为空")
+        private String tableName;
 
         /**
          * 字段名
          */
         @NotBlank(message = "字段名不能为空")
         private String fieldName;
+
+        /**
+         * 字段显示名
+         */
+        @NotBlank(message = "字段显示名不能为空")
+        private String fieldDisplayName;
 
         /**
          * 字段权限类型

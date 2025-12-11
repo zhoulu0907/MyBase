@@ -1,10 +1,13 @@
 package com.cmsr.onebase.module.metadata.core.service.permission.builder;
 
+import com.cmsr.onebase.module.app.api.security.AppAuthSecurityApi;
 import com.cmsr.onebase.module.app.api.security.bo.DataPermission;
 import com.cmsr.onebase.module.app.api.security.bo.FieldPermission;
 import com.cmsr.onebase.module.app.api.security.bo.OperationPermission;
-import com.cmsr.onebase.module.metadata.core.domain.query.LoginUserCtx;
-import com.cmsr.onebase.module.metadata.core.domain.query.MetadataPermissionContext;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticLoginUserCtx;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticPermissionContext;
+
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -31,6 +34,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class PermissionContextBuilder {
 
+    @Resource
+    public AppAuthSecurityApi appAuthSecurityApi;
     /**
      * 构建权限上下文
      * 
@@ -41,7 +46,7 @@ public class PermissionContextBuilder {
      * @param entityId 实体ID
      * @return 权限上下文
      */
-    public MetadataPermissionContext buildPermissionContext(LoginUserCtx loginUserCtx, 
+    public SemanticPermissionContext buildPermissionContext(SemanticLoginUserCtx loginUserCtx, 
                                                              Long menuId, 
                                                              Long entityId) {
         if (loginUserCtx == null) {
@@ -55,7 +60,7 @@ public class PermissionContextBuilder {
         log.debug("开始构建权限上下文：userId={}, applicationId={}, menuId={}, entityId={}", 
                 userId, applicationId, menuId, entityId);
 
-        MetadataPermissionContext permissionContext = new MetadataPermissionContext();
+        SemanticPermissionContext permissionContext = new SemanticPermissionContext();
 
         // 1. 加载操作权限
         OperationPermission operationPermission = loadOperationPermission(userId, applicationId, menuId);
@@ -88,20 +93,14 @@ public class PermissionContextBuilder {
      * @return 操作权限
      */
     private OperationPermission loadOperationPermission(Long userId, Long applicationId, Long menuId) {
-        // TODO: 实际实现应该调用权限查询服务
-        // AuthPermissionReq req = new AuthPermissionReq();
-        // req.setUserId(userId);
-        // req.setApplicationId(applicationId);
-        // req.setMenuId(menuId);
-        // AuthDetailFunctionPermissionVO vo = appAuthPermissionService.getFunctionPermission(req);
-        // return convertToOperationPermission(vo);
+        // 临时实现：返回全部允许的权限（仅用于开发测试）
+        // OperationPermission permission = new OperationPermission();
+        // permission.allAllow();
+        // return permission;
 
         log.debug("加载操作权限（当前为模拟实现）：userId={}, menuId={}", userId, menuId);
+        return appAuthSecurityApi.getMenuOperationPermission(userId, applicationId, menuId);
 
-        // 临时实现：返回全部允许的权限（仅用于开发测试）
-        OperationPermission permission = new OperationPermission();
-        permission.allAllow();
-        return permission;
     }
 
     /**
@@ -118,21 +117,16 @@ public class PermissionContextBuilder {
      * @return 数据权限
      */
     private DataPermission loadDataPermission(Long userId, Long applicationId, Long menuId) {
-        // TODO: 实际实现应该调用权限查询服务
-        // AuthPermissionReq req = new AuthPermissionReq();
-        // req.setUserId(userId);
-        // req.setApplicationId(applicationId);
-        // req.setMenuId(menuId);
-        // AuthDetailDataPermissionVO vo = appAuthPermissionService.getDataPermission(req);
-        // return convertToDataPermission(vo);
-
-        log.debug("加载数据权限（当前为模拟实现）：userId={}, menuId={}", userId, menuId);
-
         // 临时实现：返回全部允许的权限（仅用于开发测试）
-        DataPermission permission = new DataPermission();
-        permission.setAllAllowed(true);
-        permission.setAllDenied(false);
-        return permission;
+        // DataPermission permission = new DataPermission();
+        // permission.setAllAllowed(true);
+        // permission.setAllDenied(false);
+        // return permission;
+    
+        log.debug("加载数据权限（当前为模拟实现）：userId={}, menuId={}", userId, menuId);
+        return appAuthSecurityApi.getMenuDataPermission(userId, applicationId, menuId);
+
+        
     }
 
     /**
@@ -150,21 +144,14 @@ public class PermissionContextBuilder {
      */
     private FieldPermission loadFieldPermission(Long userId, Long applicationId, Long menuId) {
         // TODO: 实际实现应该调用权限查询服务
-        // AuthPermissionReq req = new AuthPermissionReq();
-        // req.setUserId(userId);
-        // req.setApplicationId(applicationId);
-        // req.setMenuId(menuId);
-        // AuthDetailFieldPermissionVO vo = appAuthPermissionService.getFieldPermission(req);
-        // return convertToFieldPermission(vo);
+        // FieldPermission permission = new FieldPermission();
+        // permission.setAllAllowed(true);
+        // permission.setAllDenied(false);
+        // return permission;
 
         log.debug("加载字段权限（当前为模拟实现）：userId={}, menuId={}", userId, menuId);
 
-        // 临时实现：返回全部允许的权限（仅用于开发测试）
-        FieldPermission permission = new FieldPermission();
-        permission.setAllAllowed(true);
-        permission.setAllDenied(false);
-        return permission;
+        return appAuthSecurityApi.getMenuFieldPermission(userId, applicationId, menuId);
     }
 }
-
 

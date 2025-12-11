@@ -1,13 +1,16 @@
 package com.cmsr.onebase.framework.security.runtime.config;
 
-import com.cmsr.onebase.framework.common.biz.system.oauth2.OAuth2TokenCommonApi;
 import com.cmsr.onebase.framework.common.biz.security.SecurityConfigApi;
+import com.cmsr.onebase.framework.common.biz.system.oauth2.OAuth2TokenCommonApi;
+import com.cmsr.onebase.framework.common.biz.system.permission.PermissionCommonApi;
 import com.cmsr.onebase.framework.security.config.SecurityProperties;
 import com.cmsr.onebase.framework.security.core.context.TransmittableThreadLocalSecurityContextHolderStrategy;
 import com.cmsr.onebase.framework.security.core.handler.AccessDeniedHandlerImpl;
 import com.cmsr.onebase.framework.security.core.handler.AuthenticationEntryPointImpl;
 import com.cmsr.onebase.framework.security.runtime.filter.RemoteCallAuthenticationFilter;
 import com.cmsr.onebase.framework.security.runtime.filter.RuntimeAuthenticationFilter;
+import com.cmsr.onebase.framework.security.service.SystemPermissionService;
+import com.cmsr.onebase.framework.security.service.SystemPermissionServiceImpl;
 import com.cmsr.onebase.framework.web.core.handler.GlobalExceptionHandler;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.config.MethodInvokingFactoryBean;
@@ -39,7 +42,7 @@ public class RuntimeSecurityAutoConfiguration {
      * 认证失败处理类 Bean
      */
     @Bean
-    public AuthenticationEntryPoint runtimeAuthenticationEntryPoint() {
+    public AuthenticationEntryPoint authenticationEntryPoint() {
         return new AuthenticationEntryPointImpl();
     }
 
@@ -47,7 +50,7 @@ public class RuntimeSecurityAutoConfiguration {
      * 权限不够处理器 Bean
      */
     @Bean
-    public AccessDeniedHandler runtimeAccessDeniedHandler() {
+    public AccessDeniedHandler accessDeniedHandler() {
         return new AccessDeniedHandlerImpl();
     }
 
@@ -58,17 +61,23 @@ public class RuntimeSecurityAutoConfiguration {
      * @see <a href="http://stackabuse.com/password-encoding-with-spring-security/">Password Encoding with Spring Security</a>
      */
     @Bean
-    public PasswordEncoder runtimePasswordEncoder() {
+    public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(securityProperties.getPasswordEncoderLength());
+    }
+
+
+    @Bean("ss") // 使用 Spring Security 的缩写，方便使用
+    public SystemPermissionService securityFrameworkService(PermissionCommonApi permissionApi) {
+        return new SystemPermissionServiceImpl(permissionApi);
     }
 
     /**
      * Token 认证过滤器 Bean
      */
     @Bean
-    public RuntimeAuthenticationFilter runtimeAuthenticationTokenFilter(GlobalExceptionHandler globalExceptionHandler,
-                                                                        OAuth2TokenCommonApi oauth2TokenApi,
-                                                                        SecurityConfigApi securityConfigApi) {
+    public RuntimeAuthenticationFilter authenticationTokenFilter(GlobalExceptionHandler globalExceptionHandler,
+                                                                 OAuth2TokenCommonApi oauth2TokenApi,
+                                                                 SecurityConfigApi securityConfigApi) {
         return new RuntimeAuthenticationFilter(securityProperties, globalExceptionHandler, oauth2TokenApi, securityConfigApi);
     }
 
@@ -82,7 +91,7 @@ public class RuntimeSecurityAutoConfiguration {
      * 设置使用 {@link TransmittableThreadLocalSecurityContextHolderStrategy} 作为 Security 的上下文策略
      */
     @Bean
-    public MethodInvokingFactoryBean runtimeSecurityContextHolderMethodInvokingFactoryBean() {
+    public MethodInvokingFactoryBean securityContextHolderMethodInvokingFactoryBean() {
         MethodInvokingFactoryBean methodInvokingFactoryBean = new MethodInvokingFactoryBean();
         methodInvokingFactoryBean.setTargetClass(SecurityContextHolder.class);
         methodInvokingFactoryBean.setTargetMethod("setStrategyName");

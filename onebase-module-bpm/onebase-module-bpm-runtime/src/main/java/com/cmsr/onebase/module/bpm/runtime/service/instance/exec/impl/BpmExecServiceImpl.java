@@ -23,7 +23,7 @@ import org.dromara.warm.flow.core.entity.User;
 import org.dromara.warm.flow.core.service.InsService;
 import org.dromara.warm.flow.core.service.TaskService;
 import org.dromara.warm.flow.core.service.UserService;
-import org.dromara.warm.flow.core.service.impl.BpmConstants;
+import com.cmsr.onebase.module.bpm.core.enums.BpmConstants;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -101,9 +101,9 @@ public class BpmExecServiceImpl implements BpmExecService {
                 // 查找对应的被代理人User
                 for (User user : users) {
                     String processedBy = user.getProcessedBy();
-                    Long principalId = agentInsDO.getPrincipalId();
+                    String principalId = agentInsDO.getPrincipalId();
 
-                    if (Objects.equals(processedBy, String.valueOf(principalId))) {
+                    if (Objects.equals(processedBy, principalId)) {
                         // 说明是当前登录用户拥有被代理人权限
                         permissionUserContexts.add(new BpmPermissionUserContext(user, agentInsDO));
                         break;
@@ -118,6 +118,8 @@ public class BpmExecServiceImpl implements BpmExecService {
     @Override
     public void execTask(ExecTaskReqVO reqVO) {
         Long taskId = reqVO.getTaskId();
+
+        // todo 是否要校验是否跨应用执行
 
         BpmActionButtonEnum buttonEnum = BpmActionButtonEnum.getByCode(reqVO.getButtonType());
         if (buttonEnum == null) {
@@ -136,14 +138,14 @@ public class BpmExecServiceImpl implements BpmExecService {
         }
 
         if (instance.getBusinessId() == null) {
-            throw exception(ErrorCodeConstants.FLOW_NOT_BIND_ENTITY_ID);
+            throw exception(ErrorCodeConstants.FLOW_NOT_BIND_ENTITY);
         }
 
         Long entityDataId = Long.parseLong(instance.getBusinessId());
 
         // 忽略前端传的entityDataId，使用流程实例绑定的实体数据ID
         if (reqVO.getEntity() != null) {
-            reqVO.getEntity().setId(entityDataId);
+            reqVO.getEntity().getData().put("id", entityDataId);
         }
 
         String taskNodeCode = task.getNodeCode();
@@ -153,16 +155,16 @@ public class BpmExecServiceImpl implements BpmExecService {
             throw exception(ErrorCodeConstants.FLOW_NODE_NOT_EXISTS);
         }
 
-        // 校验实体ID
+        // 校验实体表名
         if (reqVO.getEntity() != null) {
-            Long entityId = MapUtils.getLong(instance.getVariableMap(), BpmConstants.VAR_ENTITY_ID_KEY);
+            String tableName = MapUtils.getString(instance.getVariableMap(), BpmConstants.VAR_ENTITY_TABLE_NAME_KEY);
 
-            if (entityId == null) {
-                throw exception(ErrorCodeConstants.FLOW_NOT_BIND_ENTITY_ID);
+            if (tableName == null) {
+                throw exception(ErrorCodeConstants.FLOW_NOT_BIND_ENTITY);
             }
 
-            if (!entityId.equals(reqVO.getEntity().getEntityId())) {
-                throw exception(ErrorCodeConstants.INVALID_ENTITY_ID);
+            if (!tableName.equals(reqVO.getEntity().getTableName())) {
+                throw exception(ErrorCodeConstants.INVALID_ENTITY_TABLE_NAME);
             }
         }
 

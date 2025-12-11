@@ -18,6 +18,9 @@ public class ERFieldVO {
     @Schema(description = "字段ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "1024")
     private Long fieldId;
 
+    @Schema(description = "字段UUID", example = "019b021a-c7f2-79a7-ad2e-07984e02e575")
+    private String fieldUuid;
+
     @Schema(description = "字段名称", requiredMode = Schema.RequiredMode.REQUIRED, example = "user_name")
     private String fieldName;
 

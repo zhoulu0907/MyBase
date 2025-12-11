@@ -18,11 +18,14 @@ public class BpmPreviewRespVO {
     @Schema(description = "业务ID")
     private Long businessId;
 
+    @Schema(description = "业务UUID")
+    private String businessUuid;
+
     @Schema(description = "流程名称")
     private String flowName;
 
     @Schema(description = "流程版本")
-    private String version;
+    private String bpmVersion;
 
     @Schema(description = "流程定义JSON")
     private String bpmDefJson;

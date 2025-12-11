@@ -8,7 +8,7 @@ import com.mybatisflex.core.table.TableDef;
  *  表定义层。
  *
  * @author HuangJie
- * @since 2025-11-25
+ * @since 2025-11-29
  */
 public class FlowProcessTableDef extends TableDef {
 
@@ -41,14 +41,18 @@ public class FlowProcessTableDef extends TableDef {
     public final QueryColumn UPDATE_TIME = new QueryColumn(this, "update_time");
 
     
+    public final QueryColumn VERSION_TAG = new QueryColumn(this, "version_tag");
+
+    
     public final QueryColumn LOCK_VERSION = new QueryColumn(this, "lock_version");
 
     
     public final QueryColumn PROCESS_NAME = new QueryColumn(this, "process_name");
 
-    /**
-     * 流程类型，如表达触发，定时触发，API触发等
-     */
+    
+    public final QueryColumn PROCESS_UUID = new QueryColumn(this, "process_uuid");
+
+    
     public final QueryColumn TRIGGER_TYPE = new QueryColumn(this, "trigger_type");
 
     
@@ -59,6 +63,9 @@ public class FlowProcessTableDef extends TableDef {
 
     
     public final QueryColumn PUBLISH_STATUS = new QueryColumn(this, "publish_status");
+
+    
+    public final QueryColumn TRIGGER_CONFIG = new QueryColumn(this, "trigger_config");
 
     
     public final QueryColumn PROCESS_DEFINITION = new QueryColumn(this, "process_definition");
@@ -74,7 +81,7 @@ public class FlowProcessTableDef extends TableDef {
     /**
      * 默认字段，不包含逻辑删除或者 large 等字段。
      */
-    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, APPLICATION_ID, PROCESS_NAME, PROCESS_DESCRIPTION, PROCESS_DEFINITION, ENABLE_STATUS, PUBLISH_STATUS, TRIGGER_TYPE, LOCK_VERSION, CREATOR, CREATE_TIME, UPDATER, UPDATE_TIME, DELETED, TENANT_ID};
+    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, PROCESS_UUID, PROCESS_NAME, PROCESS_DESCRIPTION, PROCESS_DEFINITION, ENABLE_STATUS, PUBLISH_STATUS, TRIGGER_TYPE, TRIGGER_CONFIG, APPLICATION_ID, VERSION_TAG, LOCK_VERSION, CREATOR, CREATE_TIME, UPDATER, UPDATE_TIME, DELETED, TENANT_ID};
 
     public FlowProcessTableDef() {
         super("", "flow_process");

@@ -9,6 +9,7 @@ import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationRang
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRangeDO;
 import com.cmsr.onebase.module.metadata.build.service.entity.MetadataEntityFieldBuildService;
+import com.cmsr.onebase.module.metadata.core.util.MetadataIdUuidConverter;
 import com.cmsr.onebase.module.metadata.core.util.StatusEnumUtil;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
@@ -27,16 +28,17 @@ public class MetadataValidationRangeBuildServiceImpl implements MetadataValidati
     @Resource private MetadataValidationRangeRepository rangeRepository; // 自身仓库
     @Resource private MetadataValidationRuleGroupBuildService ruleGroupService; // 其他服务
     @Resource private MetadataEntityFieldBuildService entityFieldService; // 其他服务
+    @Resource private MetadataIdUuidConverter idUuidConverter; // ID转UUID工具
 
     @Override
-    public MetadataValidationRangeDO getByFieldId(Long fieldId) {
+    public MetadataValidationRangeDO getByFieldId(String fieldUuid) {
         // 当前每字段至多一条，若未来支持多条，可调整为取最新或抛错
-        return rangeRepository.findByFieldId(fieldId).stream().findFirst().orElse(null);
+        return rangeRepository.findByFieldUuid(fieldUuid).stream().findFirst().orElse(null);
     }
 
     @Override
-    public ValidationRangeRespVO getByFieldIdWithRgName(Long fieldId) {
-        MetadataValidationRangeDO rangeDO = getByFieldId(fieldId);
+    public ValidationRangeRespVO getByFieldIdWithRgName(String fieldUuid) {
+        MetadataValidationRangeDO rangeDO = getByFieldId(fieldUuid);
         if (rangeDO == null) {
             return null;
         }
@@ -48,7 +50,7 @@ public class MetadataValidationRangeBuildServiceImpl implements MetadataValidati
         formatDecimalValues(respVO, rangeDO);
 
         // 获取规则组信息，包括提示语等字段
-        var ruleGroup = ruleGroupService.getValidationRuleGroup(rangeDO.getGroupId());
+        var ruleGroup = ruleGroupService.getValidationRuleGroupByUuid(rangeDO.getGroupUuid());
         if (ruleGroup != null) {
             respVO.setRgName(ruleGroup.getRgName());
             respVO.setPromptMessage(ruleGroup.getPopPrompt());
@@ -61,30 +63,31 @@ public class MetadataValidationRangeBuildServiceImpl implements MetadataValidati
     @Transactional(rollbackFor = Exception.class)
     public Long create(ValidationRangeSaveReqVO vo) {
         Assert.notNull(vo, "vo不能为空");
-        Assert.notNull(vo.getFieldId(), "字段ID不能为空");
+        // ID与UUID兼容处理：优先使用UUID，若为空则通过ID转换
+        vo.setFieldUuid(idUuidConverter.resolveFieldUuid(vo.getFieldUuid(), vo.getFieldId()));
         Assert.hasText(vo.getRgName(), "规则组名称不能为空");
 
         // 获取字段信息
-        MetadataEntityFieldDO field = entityFieldService.getEntityField(String.valueOf(vo.getFieldId()));
+        MetadataEntityFieldDO field = entityFieldService.getEntityFieldByUuid(vo.getFieldUuid());
         Assert.notNull(field, "字段不存在");
 
         // 检查同一字段是否已存在范围校验规则
-        MetadataValidationRangeDO existingRule = getByFieldId(vo.getFieldId());
+        MetadataValidationRangeDO existingRule = getByFieldId(vo.getFieldUuid());
         if (existingRule != null) {
             throw new IllegalStateException("该字段已存在范围校验规则，同一字段只能有一条范围校验规则");
         }
 
         // 处理规则组：先查找，不存在则创建；存在但已被其他字段复用则新建
-        Long groupId = null;
+        String groupUuid = null;
         var existingGroup = ruleGroupService.getByName(vo.getRgName());
         boolean needCreateGroup = false;
         if (existingGroup != null) {
-            var groupRangeList = rangeRepository.findByGroupId(existingGroup.getId());
-            boolean reused = groupRangeList.stream().anyMatch(u -> !u.getFieldId().equals(vo.getFieldId()));
+            var groupRangeList = rangeRepository.findByGroupUuid(existingGroup.getGroupUuid());
+            boolean reused = groupRangeList.stream().anyMatch(u -> !u.getFieldUuid().equals(vo.getFieldUuid()));
             if (reused) {
                 needCreateGroup = true;
             } else {
-                groupId = existingGroup.getId();
+                groupUuid = existingGroup.getGroupUuid();
             }
         } else {
             needCreateGroup = true;
@@ -100,16 +103,18 @@ public class MetadataValidationRangeBuildServiceImpl implements MetadataValidati
             groupVO.setPopPrompt(vo.getPopPrompt());
             groupVO.setPopType(vo.getPopType());
             groupVO.setValidationType("RANGE");
-            // 修复：同步entityId到规则组
-            groupVO.setEntityId(field.getEntityId());
-            groupId = ruleGroupService.createValidationRuleGroup(groupVO);
+            // 修复：同步entityUuid到规则组
+            groupVO.setEntityUuid(field.getEntityUuid());
+            Long groupId = ruleGroupService.createValidationRuleGroup(groupVO);
+            // 获取新创建的组的UUID
+            var newGroup = ruleGroupService.getValidationRuleGroup(groupId);
+            groupUuid = newGroup != null ? newGroup.getGroupUuid() : null;
         }
 
         // 转换VO为DO并设置必要字段
         MetadataValidationRangeDO data = BeanUtils.toBean(vo, MetadataValidationRangeDO.class);
-        data.setEntityId(field.getEntityId());
-        data.setAppId(field.getAppId());
-        data.setGroupId(groupId);
+        data.setEntityUuid(field.getEntityUuid());
+        data.setGroupUuid(groupUuid);
         
         // 设置默认值
         if (data.getIsEnabled() == null) {
@@ -135,24 +140,27 @@ public class MetadataValidationRangeBuildServiceImpl implements MetadataValidati
         }
 
         // 保存范围校验规则
-        rangeRepository.upsert(data);
+        rangeRepository.saveOrUpdate(data);
         return data.getId();
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void update(ValidationRangeUpdateReqVO reqVO) {
-        // 约定：reqVO.id 为 groupId
+        // 约定：reqVO.id 为 groupId(数据库主键)
         Long groupIdParam = reqVO.getId();
         Assert.notNull(groupIdParam, "规则组ID不能为空");
-        var list = rangeRepository.findByGroupId(groupIdParam);
+        // 先根据主键ID获取规则组
+        var groupDO = ruleGroupService.getValidationRuleGroup(groupIdParam);
+        Assert.notNull(groupDO, "规则组不存在(组ID=" + groupIdParam + ")");
+        // 再根据groupUuid获取范围校验记录
+        var list = rangeRepository.findByGroupUuid(groupDO.getGroupUuid());
         Assert.notEmpty(list, "当前范围校验规则不存在(组ID=" + groupIdParam + ")");
         if (list.size() > 1) { throw new IllegalStateException("数据异常：同一组存在多条范围校验规则(组ID=" + groupIdParam + ")"); }
         MetadataValidationRangeDO existingDO = list.get(0);
-        MetadataEntityFieldDO entityFieldDO = entityFieldService.getEntityField(String.valueOf(existingDO.getFieldId()));
+        MetadataEntityFieldDO entityFieldDO = entityFieldService.getEntityFieldByUuid(existingDO.getFieldUuid());
         Assert.notNull(entityFieldDO, "字段不存在");
-        Long targetGroupId = groupIdParam; // 不迁移组，但同步组配置
-        var groupDO = ruleGroupService.getValidationRuleGroup(groupIdParam);
+        String targetGroupUuid = groupDO.getGroupUuid(); // 不迁移组，但同步组配置
         if (groupDO != null) {
             boolean needGroupUpdate = false;
             ValidationRuleGroupSaveReqVO updateGroupVO = new ValidationRuleGroupSaveReqVO();
@@ -161,7 +169,7 @@ public class MetadataValidationRangeBuildServiceImpl implements MetadataValidati
             updateGroupVO.setRgDesc(groupDO.getRgDesc());
             updateGroupVO.setRgStatus(groupDO.getRgStatus());
             updateGroupVO.setValidationType(groupDO.getValidationType());
-            updateGroupVO.setEntityId(groupDO.getEntityId());
+            updateGroupVO.setEntityUuid(groupDO.getEntityUuid());
             if (reqVO.getPopPrompt() != null && !reqVO.getPopPrompt().equals(groupDO.getPopPrompt())) { updateGroupVO.setPopPrompt(reqVO.getPopPrompt()); needGroupUpdate = true; }
             if (reqVO.getValMethod() != null && !reqVO.getValMethod().equals(groupDO.getValMethod())) { updateGroupVO.setValMethod(reqVO.getValMethod()); needGroupUpdate = true; }
             if (reqVO.getPopType() != null && !reqVO.getPopType().equals(groupDO.getPopType())) { updateGroupVO.setPopType(reqVO.getPopType()); needGroupUpdate = true; }
@@ -169,31 +177,37 @@ public class MetadataValidationRangeBuildServiceImpl implements MetadataValidati
         }
         MetadataValidationRangeDO updateDO = BeanUtils.toBean(reqVO, MetadataValidationRangeDO.class);
         updateDO.setId(existingDO.getId());
-        updateDO.setFieldId(existingDO.getFieldId());
-        updateDO.setEntityId(existingDO.getEntityId());
-        updateDO.setAppId(existingDO.getAppId());
-        updateDO.setGroupId(targetGroupId);
-        rangeRepository.update(updateDO);
+        updateDO.setFieldUuid(existingDO.getFieldUuid());
+        updateDO.setEntityUuid(existingDO.getEntityUuid());
+        updateDO.setGroupUuid(targetGroupUuid);
+        rangeRepository.updateById(updateDO);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void deleteByFieldId(Long fieldId) {
+    public void deleteByFieldId(String fieldUuid) {
         // 先获取要删除的记录，以便后续删除关联的校验规则分组
-        MetadataValidationRangeDO recordToDelete = getByFieldId(fieldId);
+        MetadataValidationRangeDO recordToDelete = getByFieldId(fieldUuid);
         
         // 删除范围校验记录
-        rangeRepository.deleteByFieldId(fieldId);
+        rangeRepository.deleteByFieldUuid(fieldUuid);
         
-        // 删除关联的校验规则分组
-        if (recordToDelete != null && recordToDelete.getGroupId() != null) {
-            ruleGroupService.safeDeleteGroupDirect(recordToDelete.getGroupId());
+        // 删除关联的校验规则分组(根据groupUuid获取规则组ID后删除)
+        if (recordToDelete != null && recordToDelete.getGroupUuid() != null) {
+            var groupDO = ruleGroupService.getValidationRuleGroupByUuid(recordToDelete.getGroupUuid());
+            if (groupDO != null) {
+                ruleGroupService.safeDeleteGroupDirect(groupDO.getId());
+            }
         }
     }
 
     @Override
     public ValidationRangeRespVO getById(Long id) {
-        var list = rangeRepository.findByGroupId(id);
+        // 先根据主键ID获取规则组
+        var groupDO = ruleGroupService.getValidationRuleGroup(id);
+        if (groupDO == null) { return null; }
+        // 再根据groupUuid获取范围校验记录
+        var list = rangeRepository.findByGroupUuid(groupDO.getGroupUuid());
         if (list.isEmpty()) { return null; }
         if (list.size() > 1) { throw new IllegalStateException("数据异常：同一组存在多条范围校验规则(组ID=" + id + ")"); }
         MetadataValidationRangeDO rangeDO = list.get(0);
@@ -203,29 +217,30 @@ public class MetadataValidationRangeBuildServiceImpl implements MetadataValidati
         formatDecimalValues(respVO, rangeDO);
         
         // 获取规则组信息，包括提示语等字段
-        var ruleGroup = ruleGroupService.getValidationRuleGroup(rangeDO.getGroupId());
-        if (ruleGroup != null) {
-            respVO.setRgName(ruleGroup.getRgName());
-            respVO.setPromptMessage(ruleGroup.getPopPrompt());
-        }
+        respVO.setRgName(groupDO.getRgName());
+        respVO.setPromptMessage(groupDO.getPopPrompt());
         return respVO;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteById(Long id) {
-        var list = rangeRepository.findByGroupId(id);
+        // 先根据主键ID获取规则组
+        var groupDO = ruleGroupService.getValidationRuleGroup(id);
         
         // 删除子表记录
-        if (!list.isEmpty()) {
-            if (list.size() > 1) {
-                throw new IllegalStateException("数据异常：同一组存在多条范围校验规则(组ID=" + id + ")");
+        if (groupDO != null) {
+            var list = rangeRepository.findByGroupUuid(groupDO.getGroupUuid());
+            if (!list.isEmpty()) {
+                if (list.size() > 1) {
+                    throw new IllegalStateException("数据异常：同一组存在多条范围校验规则(组ID=" + id + ")");
+                }
+                MetadataValidationRangeDO rangeDO = list.get(0);
+                rangeRepository.removeById(rangeDO.getId());
             }
-            MetadataValidationRangeDO rangeDO = list.get(0);
-            rangeRepository.deleteById(rangeDO.getId());
         }
         
-        // 无论子表是否存在，都要删除主表作为兜底（防止脏数据）
+        // 无论子表是否存在，都要删除主表作为兖底（防止脏数据）
         ruleGroupService.safeDeleteGroupDirect(id);
     }
 

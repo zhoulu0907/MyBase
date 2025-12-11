@@ -12,9 +12,6 @@ public class FlowProcessDateFieldDO extends BaseTenantEntity {
     @Column(value = "process_id")
     private Long processId;
 
-    @Column(value = "entity_id")
-    private Long entityId;
-
     @Column(value = "job_id")
     private String jobId;
 

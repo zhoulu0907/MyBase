@@ -10,7 +10,11 @@ import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -26,8 +30,21 @@ public class MetadataEntityFieldOptionRuntimeServiceImpl implements MetadataEnti
     private MetadataEntityFieldOptionRepository optionRepository;
 
     @Override
-    public List<MetadataEntityFieldOptionDO> listByFieldId(Long fieldId) {
-        return optionRepository.findAllByFieldId(fieldId);
+    public List<MetadataEntityFieldOptionDO> listByFieldUuid(String fieldUuid) {
+        return optionRepository.findAllByFieldUuid(fieldUuid);
+    }
+
+    @Override
+    public Map<String, List<MetadataEntityFieldOptionDO>> listByFieldUuids(List<String> fieldUuids) {
+        List<MetadataEntityFieldOptionDO> all = optionRepository.findAllByFieldUuids(fieldUuids);
+        Map<String, java.util.List<MetadataEntityFieldOptionDO>> map = new HashMap<>();
+        if (all != null) {
+            for (MetadataEntityFieldOptionDO o : all) {
+                if (o == null || o.getFieldUuid() == null) continue;
+                map.computeIfAbsent(o.getFieldUuid(), k -> new ArrayList<>()).add(o);
+            }
+        }
+        return map;
     }
 
     @Override
@@ -70,8 +87,8 @@ public class MetadataEntityFieldOptionRuntimeServiceImpl implements MetadataEnti
     }
 
     @Override
-    public List<FieldOptionRespVO> getFieldOptionList(Long fieldId) {
-        List<MetadataEntityFieldOptionDO> list = listByFieldId(fieldId);
+    public List<FieldOptionRespVO> getFieldOptionList(String fieldUuid) {
+        List<MetadataEntityFieldOptionDO> list = listByFieldUuid(fieldUuid);
         return list.stream().map(this::convertToRespVO).collect(Collectors.toList());
     }
 
@@ -130,4 +147,3 @@ public class MetadataEntityFieldOptionRuntimeServiceImpl implements MetadataEnti
         return BeanUtils.toBean(req, MetadataEntityFieldOptionDO.class);
     }
 }
-

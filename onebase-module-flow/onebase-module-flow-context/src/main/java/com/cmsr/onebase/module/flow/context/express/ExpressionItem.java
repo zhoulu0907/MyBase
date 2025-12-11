@@ -1,10 +1,9 @@
 package com.cmsr.onebase.module.flow.context.express;
 
 
-import com.cmsr.onebase.module.flow.context.enums.FieldTypeEnum;
-import com.cmsr.onebase.module.flow.context.enums.JdbcTypeEnum;
 import com.cmsr.onebase.module.flow.context.enums.OpEnum;
 import com.cmsr.onebase.module.flow.context.enums.OperatorTypeEnum;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticFieldTypeEnum;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -18,25 +17,22 @@ public class ExpressionItem implements Serializable {
 
     public static ExpressionItem copy(ExpressionItem item) {
         ExpressionItem newItem = new ExpressionItem();
-        newItem.setKey(item.getKey());
+        newItem.setFieldKey(item.getFieldKey());
         newItem.setOp(item.getOp());
-        newItem.setValue(item.getValue());
+        newItem.setFieldValue(item.getFieldValue());
         newItem.setOperatorType(item.getOperatorType());
-        newItem.setFieldType(item.getFieldType());
-        newItem.setJdbcType(item.getJdbcType());
+        newItem.setFieldTypeEnum(item.getFieldTypeEnum());
         return newItem;
     }
 
-
-    private String key;
+    private String fieldKey;
 
     private OpEnum op;
 
-    private Object value;
+    private Object fieldValue;
 
     private OperatorTypeEnum operatorType;
 
-    private FieldTypeEnum fieldType;
+    private SemanticFieldTypeEnum fieldTypeEnum;
 
-    private JdbcTypeEnum jdbcType;
 }

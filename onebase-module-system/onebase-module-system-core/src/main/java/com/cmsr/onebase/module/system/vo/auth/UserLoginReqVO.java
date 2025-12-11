@@ -21,4 +21,7 @@ public class UserLoginReqVO extends CaptchaVerificationReqVO {
     @NotEmpty(message = "密码不能为空")
     private String password;
 
+    @Schema(description = "短信/邮箱验证码",  example = "10")
+    private String verifyCode;
+
 }

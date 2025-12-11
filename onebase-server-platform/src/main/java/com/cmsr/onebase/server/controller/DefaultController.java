@@ -3,6 +3,7 @@ package com.cmsr.onebase.server.controller;
 import com.cmsr.onebase.framework.common.biz.infra.logger.dto.ApiAccessLogCreateReqDTO;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
+import com.cmsr.onebase.framework.common.annotaion.ApiSignIgnore;
 import com.cmsr.onebase.module.infra.service.logger.ApiAccessLogService;
 import jakarta.annotation.Resource;
 import jakarta.annotation.security.PermitAll;
@@ -53,6 +54,7 @@ public class DefaultController {
      */
     @PostMapping("/default")
     @PermitAll
+    @ApiSignIgnore
     public CommonResult<String> defaultApi(@RequestBody @NotEmpty(message = "参数不能为空") String data, 
                                           HttpServletRequest request) {
         LocalDateTime beginTime = LocalDateTime.now();

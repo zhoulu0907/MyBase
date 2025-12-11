@@ -1,47 +1,75 @@
 package com.cmsr.onebase.module.metadata.core.dal.dataobject.validation;
 
-import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
-import jakarta.persistence.Table;
-import lombok.*;
-import lombok.experimental.SuperBuilder;
+import com.cmsr.onebase.framework.orm.entity.BaseBizEntity;
+import com.cmsr.onebase.framework.orm.entity.BaseTenantEntity;
+import com.mybatisflex.annotation.Column;
+import com.mybatisflex.annotation.Table;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * 字段校验-格式规则 DO（内置格式/自定义正则）
  * 对应表：metadata_validation_format
+ *
+ * @author bty418
+ * @date 2025-08-18
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-@ToString(callSuper = true)
-@SuperBuilder
-@NoArgsConstructor
-@AllArgsConstructor
-@Table(name = "metadata_validation_format")
-public class MetadataValidationFormatDO extends TenantBaseDO {
+@Table(value = "metadata_validation_format")
+public class MetadataValidationFormatDO extends BaseBizEntity {
 
-    public static final String GROUP_ID       = "group_id";
-    public static final String ENTITY_ID      = "entity_id";
-    public static final String FIELD_ID       = "field_id";
-    public static final String IS_ENABLED     = "is_enabled";
-    public static final String FORMAT_CODE    = "format_code";  // REGEX/EMAIL/MOBILE/...
-    public static final String REGEX_PATTERN  = "regex_pattern";
-    public static final String FLAGS          = "flags";        // i/m/s
-    public static final String PROMPT_MESSAGE = "prompt_message";
-    public static final String RUN_MODE       = "run_mode";
-    public static final String APP_ID         = "app_id";
+    /**
+     * 格式校验UUID
+     * <p>
+     * 用于跨应用、跨版本的唯一标识，与 application_id、version_tag 组成联合唯一约束
+     */
+    @Column(value = "format_uuid", comment = "格式校验UUID")
+    private String formatUuid;
 
-    public MetadataValidationFormatDO setId(Long id) {
-        super.setId(id);
-        return this;
-    }
+    /**
+     * 规则组UUID
+     * <p>
+     * 关联 metadata_validation_rule_group.group_uuid
+     */
+    @Column(value = "group_uuid", comment = "规则组UUID")
+    private String groupUuid;
 
-    private Long groupId;
-    private Long entityId;
-    private Long fieldId;
+    /**
+     * 实体UUID
+     * <p>
+     * 关联 metadata_business_entity.entity_uuid
+     */
+    @Column(value = "entity_uuid", comment = "实体UUID")
+    private String entityUuid;
+
+    /**
+     * 字段UUID
+     * <p>
+     * 关联 metadata_entity_field.field_uuid
+     */
+    @Column(value = "field_uuid", comment = "字段UUID")
+    private String fieldUuid;
+
+    @Column(value = "is_enabled", comment = "是否启用：1-启用，0-禁用")
     private Integer isEnabled;
+
+    @Column(value = "format_code", comment = "格式编码：REGEX/EMAIL/MOBILE/...")
     private String formatCode;
+
+    @Column(value = "regex_pattern", comment = "正则表达式")
     private String regexPattern;
+
+    @Column(value = "flags", comment = "正则标志：i/m/s")
     private String flags;
+
+    @Column(value = "prompt_message", comment = "提示信息")
     private String promptMessage;
-    private Integer runMode;
-    private Long appId;
+
+    @Column(value = "version_tag", comment = "版本标识")
+    private Long versionTag;
+
+    @Column(value = "application_id", comment = "应用ID")
+    private Long applicationId;
+
 }

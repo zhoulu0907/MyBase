@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.metadata.build.controller.admin.validation;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.module.metadata.core.util.MetadataIdUuidConverter;
 import com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationRuleGroupRespVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationRuleGroupSaveReqVO;
 import org.modelmapper.ModelMapper;
@@ -11,7 +12,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -35,6 +35,9 @@ import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 public class ValidationSelfDefinedController {
 
     @Resource
+    private MetadataIdUuidConverter idUuidConverter;
+
+    @Resource
     private MetadataValidationRuleGroupBuildService validationRuleGroupService;
 
     @Resource
@@ -42,39 +45,45 @@ public class ValidationSelfDefinedController {
 
     @PostMapping("/create")
     @Operation(summary = "创建自定义校验规则组")
-    @PreAuthorize("@ss.hasPermission('metadata:validation-self-defined:create')")
     public CommonResult<Long> create(@Valid @RequestBody ValidationRuleGroupSaveReqVO createReqVO) {
         createReqVO.setValidationType("SELF_DEFINED");
+        // 修复：正确处理 entityId 和 entityUuid 的转换
+        String entityUuid = idUuidConverter.resolveEntityUuid(createReqVO.getEntityUuid(), createReqVO.getEntityId());
+        createReqVO.setEntityUuid(entityUuid);
         return success(validationRuleGroupService.createValidationRuleGroup(createReqVO));
     }
 
     @PostMapping("/update")
     @Operation(summary = "更新自定义校验规则组")
-    @PreAuthorize("@ss.hasPermission('metadata:validation-self-defined:update')")
     public CommonResult<Boolean> update(@Valid @RequestBody ValidationRuleGroupSaveReqVO updateReqVO) {
         updateReqVO.setValidationType("SELF_DEFINED");
+        // 修复：正确处理 entityId 和 entityUuid 的转换
+        String entityUuid = idUuidConverter.resolveEntityUuidOptional(updateReqVO.getEntityUuid(), updateReqVO.getEntityId());
+        if (entityUuid != null) {
+            updateReqVO.setEntityUuid(entityUuid);
+        }
         validationRuleGroupService.updateValidationRuleGroup(updateReqVO);
         return success(true);
     }
 
     @PostMapping("/delete")
     @Operation(summary = "删除自定义校验规则组")
-    @Parameter(name = "id", description = "编号", required = true)
-    @PreAuthorize("@ss.hasPermission('metadata:validation-self-defined:delete')")
-    public CommonResult<Boolean> delete(@RequestParam("id") Long id) {
-        validationRuleGroupService.deleteValidationRuleGroup(id);
+    @Parameter(name = "id", description = "编号（支持ID或UUID）", required = true)
+    public CommonResult<Boolean> delete(@RequestParam("id") String id) {
+        Long resolvedId = idUuidConverter.resolveRuleGroupId(id);
+        validationRuleGroupService.deleteValidationRuleGroup(resolvedId);
         return success(true);
     }
 
     @PostMapping("/get")
     @Operation(summary = "获得自定义校验规则组详情")
-    @Parameter(name = "id", description = "编号", required = true, example = "1024")
-    @PreAuthorize("@ss.hasPermission('metadata:validation-self-defined:query')")
-    public CommonResult<ValidationRuleGroupRespVO> get(@RequestParam("id") Long id) {
-        MetadataValidationRuleGroupDO ruleGroup = validationRuleGroupService.getValidationRuleGroup(id);
+    @Parameter(name = "id", description = "编号（支持ID或UUID）", required = true, example = "1024")
+    public CommonResult<ValidationRuleGroupRespVO> get(@RequestParam("id") String id) {
+        Long resolvedId = idUuidConverter.resolveRuleGroupId(id);
+        MetadataValidationRuleGroupDO ruleGroup = validationRuleGroupService.getValidationRuleGroup(resolvedId);
         ValidationRuleGroupRespVO respVO = modelMapper.map(ruleGroup, ValidationRuleGroupRespVO.class);
         if (respVO != null) {
-            respVO.setValueRules(validationRuleGroupService.buildValueRulesStructure(id));
+            respVO.setValueRules(validationRuleGroupService.buildValueRulesStructure(resolvedId));
         }
         return success(respVO);
     }

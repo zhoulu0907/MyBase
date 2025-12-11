@@ -18,8 +18,14 @@ public class ParentChildRelationshipRespVO {
     @Schema(description = "关系ID", example = "5001")
     private Long id;
 
+    @Schema(description = "关系UUID", example = "550e8400-e29b-41d4-a716-446655440000")
+    private String relationshipUuid;
+
     @Schema(description = "主表实体ID", example = "2001")
     private Long parentEntityId;
+
+    @Schema(description = "主表实体UUID", example = "550e8400-e29b-41d4-a716-446655440001")
+    private String parentEntityUuid;
 
     @Schema(description = "主表实体名称", example = "订单信息")
     private String parentEntityName;
@@ -27,17 +33,26 @@ public class ParentChildRelationshipRespVO {
     @Schema(description = "子表实体ID", example = "2002")
     private Long childEntityId;
 
+    @Schema(description = "子表实体UUID", example = "550e8400-e29b-41d4-a716-446655440002")
+    private String childEntityUuid;
+
     @Schema(description = "子表实体名称", example = "订单明细")
     private String childEntityName;
 
     @Schema(description = "关联字段ID（主表的id字段）", example = "3001")
     private Long sourceFieldId;
 
+    @Schema(description = "关联字段UUID（主表的id字段）", example = "550e8400-e29b-41d4-a716-446655440003")
+    private String sourceFieldUuid;
+
     @Schema(description = "关联字段名称", example = "id")
     private String sourceFieldName;
 
     @Schema(description = "关联字段ID（子表的parent_id字段）", example = "3010")
     private Long targetFieldId;
+
+    @Schema(description = "关联字段UUID（子表的parent_id字段）", example = "550e8400-e29b-41d4-a716-446655440004")
+    private String targetFieldUuid;
 
     @Schema(description = "关联字段名称", example = "parent_id")
     private String targetFieldName;
@@ -49,7 +64,7 @@ public class ParentChildRelationshipRespVO {
     private String cascadeType;
 
     @Schema(description = "应用ID", example = "12345")
-    private Long appId;
+    private Long applicationId;
 
     @Schema(description = "创建时间", example = "2024-01-01 10:00:00")
     private LocalDateTime createTime;

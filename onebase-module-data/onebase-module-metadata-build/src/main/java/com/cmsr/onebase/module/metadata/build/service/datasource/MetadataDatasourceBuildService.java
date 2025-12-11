@@ -118,12 +118,12 @@ public interface MetadataDatasourceBuildService {
     DatasourceRespVO buildDatasourceRespVO(MetadataDatasourceDO datasource);
 
     /**
-     * 根据条件查询数据源列表
+     * 测试数据源连接
      *
-     * @param configStore 查询条件
-     * @return 数据源列表
+     * @param reqVO 测试连接请求
+     * @return 测试结果
      */
-    List<MetadataDatasourceDO> findAllByConfig(org.anyline.data.param.init.DefaultConfigStore configStore);
+    DatasourceTestConnectionRespVO testConnection(@Valid DatasourceTestConnectionReqVO reqVO);
 
     /**
      * 根据编码获得数据源
@@ -134,12 +134,13 @@ public interface MetadataDatasourceBuildService {
     MetadataDatasourceDO getDatasourceByCode(String code);
 
     /**
-     * 测试数据源连接
+     * 根据UUID获得数据源
      *
-     * @param reqVO 测试连接请求
-     * @return 测试结果
+     * @param datasourceUuid 数据源UUID
+     * @return 数据源
      */
-    DatasourceTestConnectionRespVO testConnection(@Valid DatasourceTestConnectionReqVO reqVO);
+    MetadataDatasourceDO getDatasourceByUuid(String datasourceUuid);
+
     /**
      * 创建默认数据源，使用配置文件中 default.datasource 配置
      *

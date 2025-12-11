@@ -3,10 +3,10 @@ package com.cmsr.onebase.module.metadata.build.service.entity.vo;
 import lombok.Data;
 
 /**
- * @ClassName EntityFieldQueryVO
- * @Description 实体字段查询VO，用于Service层参数封装
- * @Author mickey
- * @Date 2025/1/25 16:00
+ * 实体字段查询VO，用于Service层参数封装
+ *
+ * @author mickey
+ * @date 2025/1/25
  */
 @Data
 public class EntityFieldQueryVO {
@@ -15,6 +15,16 @@ public class EntityFieldQueryVO {
      * 实体ID
      */
     private String entityId;
+
+    /**
+     * 表名（与entityId二选一）
+     */
+    private String tableName;
+
+    /**
+     * 字段名（精确过滤）
+     */
+    private String fieldName;
 
     /**
      * 是否系统字段：0-是，1-不是

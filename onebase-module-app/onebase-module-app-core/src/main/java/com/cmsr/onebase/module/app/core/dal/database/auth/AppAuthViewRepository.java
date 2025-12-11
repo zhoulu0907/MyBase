@@ -1,14 +1,16 @@
 package com.cmsr.onebase.module.app.core.dal.database.auth;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
-import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthViewDO;
+import com.cmsr.onebase.framework.orm.repo.BaseBizRepository;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthViewDO;
+import com.cmsr.onebase.module.app.core.dal.mapper.AppAuthViewMapper;
 import com.cmsr.onebase.module.app.core.vo.auth.AuthPermissionReq;
-import org.anyline.data.param.ConfigStore;
-import org.anyline.data.param.init.DefaultConfigStore;
+import com.mybatisflex.core.query.QueryWrapper;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Set;
+
+import static com.cmsr.onebase.module.app.core.dal.dataobject.table.AppAuthViewTableDef.APP_AUTH_VIEW;
 
 /**
  * 应用权限实体数据访问层
@@ -17,42 +19,31 @@ import java.util.Set;
  * @date 2025-08-05
  */
 @Repository
-public class AppAuthViewRepository extends DataRepository<AuthViewDO> {
+public class AppAuthViewRepository extends BaseBizRepository<AppAuthViewMapper, AppAuthViewDO> {
 
-    public AppAuthViewRepository() {
-        super(AuthViewDO.class);
+    public List<AppAuthViewDO> findByQuery(AuthPermissionReq reqVO) {
+        QueryWrapper queryWrapper = this.query()
+                .where(APP_AUTH_VIEW.APPLICATION_ID.eq(reqVO.getApplicationId()))
+                .where(APP_AUTH_VIEW.ROLE_UUID.eq(reqVO.getRoleUuid()))
+                .where(APP_AUTH_VIEW.MENU_UUID.eq(reqVO.getMenuUuid()));
+        return this.list(queryWrapper);
     }
 
-    public List<AuthViewDO> findByQuery(AuthPermissionReq reqVO) {
-        ConfigStore configs = new DefaultConfigStore();
-        configs.eq("application_id", reqVO.getApplicationId());
-        configs.eq("role_id", reqVO.getRoleId());
-        configs.eq("menu_id", reqVO.getMenuId());
-        return this.findAllByConfig(configs);
-    }
-
-    public AuthViewDO findByQuery(AuthPermissionReq reqVO, Long viewId) {
-        ConfigStore configs = new DefaultConfigStore();
-        configs.eq("application_id", reqVO.getApplicationId());
-        configs.eq("role_id", reqVO.getRoleId());
-        configs.eq("menu_id", reqVO.getMenuId());
-        configs.eq("view_id", viewId);
-        return this.findOne(configs);
-    }
 
     public void deleteByQuery(AuthPermissionReq reqVO) {
-        ConfigStore configs = new DefaultConfigStore();
-        configs.eq("application_id", reqVO.getApplicationId());
-        configs.eq("role_id", reqVO.getRoleId());
-        configs.eq("menu_id", reqVO.getMenuId());
-        this.deleteByConfig(configs);
+        this.updateChain()
+                .where(APP_AUTH_VIEW.APPLICATION_ID.eq(reqVO.getApplicationId()))
+                .where(APP_AUTH_VIEW.ROLE_UUID.eq(reqVO.getRoleUuid()))
+                .where(APP_AUTH_VIEW.MENU_UUID.eq(reqVO.getMenuUuid()))
+                .remove();
     }
 
-    public List<AuthViewDO> findByAppIdAndRoleIdsAndMenuId(Long applicationId, Set<Long> roleIds, Long menuId) {
-        ConfigStore configs = new DefaultConfigStore();
-        configs.eq("application_id", applicationId);
-        configs.in("role_id", roleIds);
-        configs.eq("menu_id", menuId);
-        return this.findAllByConfig(configs);
+    public List<AppAuthViewDO> findByAppIdAndRoleUuidsAndMenuUuid(Long applicationId, Set<String> roleUuids, String menuUuid) {
+        QueryWrapper queryWrapper = this.query()
+                .where(APP_AUTH_VIEW.APPLICATION_ID.eq(applicationId))
+                .where(APP_AUTH_VIEW.ROLE_UUID.in(roleUuids))
+                .where(APP_AUTH_VIEW.MENU_UUID.eq(menuUuid));
+        return this.list(queryWrapper);
     }
+
 }

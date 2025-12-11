@@ -170,15 +170,21 @@ public class BpmGlobalConfigDTO {
     @Data
     public static class FieldConfigDTO {
         /**
-         * 字段ID
+         * 表名
          */
-        @NotNull(message = "字段ID不能为空")
-        private Long fieldId;
+        @NotBlank(message = "表名不能为空")
+        private String tableName;
 
         /**
          * 字段名
          */
         @NotBlank(message = "字段名不能为空")
         private String fieldName;
+
+        /**
+         * 字段名
+         */
+        @NotBlank(message = "字段显示名不能为空")
+        private String fieldDisplayName;
     }
 }

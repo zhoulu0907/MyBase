@@ -4,6 +4,7 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import cn.hutool.core.collection.CollUtil;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.module.system.vo.auth.AuthRegisterReqVO;
+import com.cmsr.onebase.module.system.vo.dept.DeptSimpleListRespVO;
 import com.cmsr.onebase.module.system.vo.user.UserProfileUpdatePasswordReqVO;
 import com.cmsr.onebase.module.system.vo.user.UserProfileUpdateReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
@@ -243,10 +244,10 @@ public interface UserService {
     /**
      * 获取所有平台管理员列表
      *
-     * @param status 状态
+     * @param userSearchReqVO
      * @return 用户们
      */
-    List<AdminUserDO> getPlatformAdminListByStatus(Integer status);
+    List<AdminUserDO> getPlatformAdminListByStatus(UserSearchReqVO userSearchReqVO);
 
 
     /**
@@ -305,4 +306,28 @@ public interface UserService {
     boolean findAdminByRoleIdAndUserId(Long roleId, Long userId);
 
     Long getUserCountByCorpId(Long id);
+    /**
+     * 验证企业用户信息
+     *
+     * @param corpAdminReqVO 分页条件
+     * @return 用户简要信息分页列表
+     */
+    void checkCorpAdminUser(AdminUserDO corpAdminReqVO);
+
+    Map<Long, Integer> getCorpExistUserCountByCorpIds(List<Long> corpIds);
+
+    /**
+     * 获取指定部门的直属用户简要信息（不分页）
+     *
+     * @param
+     * @return 用户简要信息分页列表
+     */
+    List<AdminUserDO> getUserListByStatusAndDeptId(DeptSimpleListRespVO reqVO);
+
+    /**
+     * 转换用户数据信息
+     * @param pageResult
+     * @return
+     */
+    List<UserRespVO> getConvertUserPage(PageResult<AdminUserDO> pageResult);
 }

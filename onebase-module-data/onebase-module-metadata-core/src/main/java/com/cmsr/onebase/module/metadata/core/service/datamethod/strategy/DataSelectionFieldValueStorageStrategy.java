@@ -49,6 +49,8 @@ public class DataSelectionFieldValueStorageStrategy implements FieldValueStorage
     @Resource
     private com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService businessEntityService;
     @Resource
+    private com.cmsr.onebase.module.metadata.core.service.entity.MetadataEntityFieldCoreService entityFieldService;
+    @Resource
     private UidGenerator uidGenerator;
 
     @Override
@@ -231,15 +233,15 @@ public class DataSelectionFieldValueStorageStrategy implements FieldValueStorage
         }
 
         // 获取目标实体和目标字段信息
-        MetadataBusinessEntityDO targetEntity = businessEntityService.getBusinessEntity(relationship.getTargetEntityId());
+        MetadataBusinessEntityDO targetEntity = businessEntityService.getBusinessEntityByUuid(relationship.getTargetEntityUuid());
         if (targetEntity == null) {
-            log.warn("DATA_SELECTION 字段存储时，目标实体不存在，目标实体ID：{}", relationship.getTargetEntityId());
+            log.warn("DATA_SELECTION 字段存储时，目标实体不存在，目标实体UUID：{}", relationship.getTargetEntityUuid());
             return null;
         }
 
-        MetadataEntityFieldDO targetField = entityFieldRepository.findById(Long.valueOf(relationship.getTargetFieldId()));
+        MetadataEntityFieldDO targetField = entityFieldService.getEntityFieldByUuid(relationship.getTargetFieldUuid());
         if (targetField == null) {
-            log.warn("DATA_SELECTION 字段存储时，目标字段不存在，目标字段ID：{}", relationship.getTargetFieldId());
+            log.warn("DATA_SELECTION 字段存储时，目标字段不存在，目标字段UUID：{}", relationship.getTargetFieldUuid());
             return null;
         }
 
@@ -296,15 +298,15 @@ public class DataSelectionFieldValueStorageStrategy implements FieldValueStorage
         }
 
         // 获取目标实体和目标字段信息
-        MetadataBusinessEntityDO targetEntity = businessEntityService.getBusinessEntity(relationship.getTargetEntityId());
+        MetadataBusinessEntityDO targetEntity = businessEntityService.getBusinessEntityByUuid(relationship.getTargetEntityUuid());
         if (targetEntity == null) {
-            log.warn("DATA_SELECTION 字段读取时，目标实体不存在，目标实体ID：{}", relationship.getTargetEntityId());
+            log.warn("DATA_SELECTION 字段读取时，目标实体不存在，目标实体UUID：{}", relationship.getTargetEntityUuid());
             return null;
         }
 
-        MetadataEntityFieldDO targetField = entityFieldRepository.findById(Long.valueOf(relationship.getTargetFieldId()));
+        MetadataEntityFieldDO targetField = entityFieldService.getEntityFieldByUuid(relationship.getTargetFieldUuid());
         if (targetField == null) {
-            log.warn("DATA_SELECTION 字段读取时，目标字段不存在，目标字段ID：{}", relationship.getTargetFieldId());
+            log.warn("DATA_SELECTION 字段读取时，目标字段不存在，目标字段UUID：{}", relationship.getTargetFieldUuid());
             return null;
         }
 
@@ -332,7 +334,23 @@ public class DataSelectionFieldValueStorageStrategy implements FieldValueStorage
     }
 
     /**
-     * 通过源字段ID查找关联关系
+     * 通过源字段UUID和源实体UUID查找关联关系
+     *
+     * @param sourceFieldUuid 源字段UUID
+     * @param sourceEntityUuid 源实体UUID
+     * @return 关联关系
+     */
+    private MetadataEntityRelationshipDO findRelationshipBySourceFieldUuid(String sourceFieldUuid, String sourceEntityUuid) {
+        try {
+            return entityRelationshipRepository.findBySourceFieldAndEntityUuid(sourceFieldUuid, sourceEntityUuid);
+        } catch (Exception ex) {
+            log.warn("查询关联关系失败，源字段UUID：{}，源实体UUID：{}，原因：{}", sourceFieldUuid, sourceEntityUuid, ex.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * 通过源字段ID查找关联关系（兼容方法）
      *
      * @param sourceFieldId 源字段ID
      * @param sourceEntityId 源实体ID
@@ -340,15 +358,13 @@ public class DataSelectionFieldValueStorageStrategy implements FieldValueStorage
      */
     private MetadataEntityRelationshipDO findRelationshipBySourceFieldId(Long sourceFieldId, Long sourceEntityId) {
         try {
-            DefaultConfigStore configStore = new DefaultConfigStore();
-            configStore.and(MetadataEntityRelationshipDO.SOURCE_FIELD_ID, String.valueOf(sourceFieldId));
-            configStore.and(MetadataEntityRelationshipDO.SOURCE_ENTITY_ID, sourceEntityId);
-            List<MetadataEntityRelationshipDO> relationships = entityRelationshipRepository.findAllByConfig(configStore);
-            if (CollectionUtils.isEmpty(relationships)) {
+            // 通过ID获取实体的UUID
+            MetadataEntityFieldDO field = entityFieldService.getEntityField(sourceFieldId);
+            MetadataBusinessEntityDO entity = businessEntityService.getBusinessEntity(sourceEntityId);
+            if (field == null || entity == null) {
                 return null;
             }
-            // 返回第一个匹配的关联关系
-            return relationships.get(0);
+            return entityRelationshipRepository.findBySourceFieldAndEntityUuid(field.getFieldUuid(), entity.getEntityUuid());
         } catch (Exception ex) {
             log.warn("查询关联关系失败，源字段ID：{}，源实体ID：{}，原因：{}", sourceFieldId, sourceEntityId, ex.getMessage());
             return null;

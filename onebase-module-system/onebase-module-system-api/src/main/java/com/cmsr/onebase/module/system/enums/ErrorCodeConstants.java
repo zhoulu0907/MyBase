@@ -20,6 +20,9 @@ public interface ErrorCodeConstants {
     ErrorCode AUTH_LOGIN_PLATFORM_TENANT_ERROR = new ErrorCode(1_002_000_010, "登录失败，平台租户不可登录。");
     ErrorCode AUTH_LOGIN_NO_EXISTS = new ErrorCode(1_002_000_011, "登录失败，当前账号不存在。");
 
+    ErrorCode AUTH_VERIFY_CODE_NULL = new ErrorCode(1_002_000_100, "验证码为空");
+    ErrorCode AUTH_VERIFY_CODE_ERROR = new ErrorCode(1_002_000_100, "验证码错误");
+
     // ========== 菜单模块 1-002-001-000 ==========
     ErrorCode MENU_NAME_DUPLICATE = new ErrorCode(1_002_001_000, "已经存在该名字的菜单");
     ErrorCode MENU_PARENT_NOT_EXISTS = new ErrorCode(1_002_001_001, "父菜单不存在");
@@ -52,8 +55,7 @@ public interface ErrorCodeConstants {
     ErrorCode USER_PASSWORD_NOT_ALLOW_DEL = new ErrorCode(1_002_003_012, "内置用户不允许删除，只允许修改密码");
     ErrorCode LICENSE_USER_COUNT_NOT_ENOUGH = new ErrorCode(1_002_003_013, "可分配人员数量不足，人员上限是{}, 剩余{}");
     ErrorCode LICENSE_TENANT_COUNT_NOT_ENOUGH = new ErrorCode(1_002_003_014, "租户数量已达上限");
-    ErrorCode LENANT_ALLOCATE_PERSON_COUNT_LESS_THEN_ALLOCATED = new ErrorCode(1_002_003_014,
-            "租户内已使用用户数量为({})，分配的用户数量不能低于此数量");
+    ErrorCode LENANT_ALLOCATE_PERSON_COUNT_LESS_THEN_ALLOCATED = new ErrorCode(1_002_003_014, "分配的用户数量不能低于空间内已有用户数：{}");
     ErrorCode USER_TYPE_EXCEPTION = new ErrorCode(1_002_003_015, "用户类型异常:{}");
 
     // ========== 部门模块 1-002-004-000 ==========
@@ -65,7 +67,6 @@ public interface ErrorCodeConstants {
     ErrorCode DEPT_NOT_ENABLE = new ErrorCode(1_002_004_006, "部门({})不处于开启状态，不允许选择");
     ErrorCode DEPT_PARENT_IS_CHILD = new ErrorCode(1_002_004_007, "不能设置自己的子部门为父部门");
     ErrorCode DEPT_DEL_FAILD_EXISTS_USERS = new ErrorCode(1_002_004_008, "请先移除部门内所有人员再进行删除部门操作");
-    ErrorCode DEPT_TYPE_EXCEPTION = new ErrorCode(1_002_004_009, "部门类型异常:{}");
 
     // ========== 岗位模块 1-002-005-000 ==========
     ErrorCode POST_NOT_FOUND = new ErrorCode(1_002_005_000, "当前岗位不存在");
@@ -123,6 +124,7 @@ public interface ErrorCodeConstants {
     ErrorCode TENANT_WEBSITE_DUPLICATE = new ErrorCode(1_002_015_005, "租户域名为【{}】的租户已存在");
     ErrorCode TENANT_WEBSITE_IS_NULL = new ErrorCode(1_002_015_006, "租户域名不可为空");
     ErrorCode TENANT_ONLY_GET_SELF = new ErrorCode(1_002_015_007, "只能获取自己所在的租户的信息");
+    ErrorCode TENANT_ADMIN_ISNULL = new ErrorCode(1_002_015_008, "租户管理员不可为空");
 
     // ========== 租户套餐 1-002-016-000 ==========
     ErrorCode TENANT_PACKAGE_NOT_EXISTS = new ErrorCode(1_002_016_000, "租户套餐不存在");
@@ -187,4 +189,10 @@ public interface ErrorCodeConstants {
     // ========== 企业应用关联 1-002-030-000 ==========
     ErrorCode APPLICATION_AUTH_TENANT_NOT_EXISTS = new ErrorCode(1_002_030_000, "企业应用关联表不存在");
 
+    ErrorCode AUTH_LOGIN_CORP_DELETE_OR_DISABLE = new ErrorCode(1_002_025_010, "你的的账号所属企业已被删除或禁用，暂时无法登录。");
+    ErrorCode AUTH_LOGIN_TENANT_DELETE_OR_DISABLE = new ErrorCode(1_002_025_011, "你的的账号所属空间已被删除或禁用，暂时无法登录。");
+    ErrorCode AUTH_LOGIN_APP_DELETE_OR_DISABLE = new ErrorCode(1_002_025_012, "该应用已被删除或禁用，暂时无法登录。");
+    ErrorCode CORP_USER_LIMIT_COUNT_CHECK = new ErrorCode(1_002_003_013, "空间可分配人员数量不足，人员上限是{}, 剩余{}");
+    ErrorCode CORP_USER_EXITES_LIMIT_COUNT_CHECK = new ErrorCode(1_002_003_014, "分配的用户数量不能低于企业内已有用户数：{}");
+    ErrorCode AUTH_LOGIN_APP_EXPIRE = new ErrorCode(1_002_025_015, "本企业用户无法登录，授权已过期。");
 }

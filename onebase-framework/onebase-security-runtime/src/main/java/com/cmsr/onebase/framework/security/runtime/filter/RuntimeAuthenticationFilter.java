@@ -1,17 +1,19 @@
 package com.cmsr.onebase.framework.security.runtime.filter;
 
 import cn.hutool.core.util.StrUtil;
+import com.cmsr.onebase.framework.common.biz.security.SecurityConfigApi;
 import com.cmsr.onebase.framework.common.biz.system.oauth2.OAuth2TokenCommonApi;
 import com.cmsr.onebase.framework.common.biz.system.oauth2.dto.OAuth2AccessTokenCheckRespDTO;
+import com.cmsr.onebase.framework.common.enums.RunModeEnum;
 import com.cmsr.onebase.framework.common.exception.ServiceException;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import com.cmsr.onebase.framework.common.biz.security.SecurityConfigApi;
+import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
+import com.cmsr.onebase.framework.common.security.TenantContextHolder;
+import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.framework.common.security.dto.RuntimeLoginUser;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
 import com.cmsr.onebase.framework.security.config.SecurityProperties;
-import com.cmsr.onebase.framework.common.security.dto.LoginUser;
-import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.web.core.handler.GlobalExceptionHandler;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 import jakarta.servlet.FilterChain;
@@ -54,35 +56,40 @@ public class RuntimeAuthenticationFilter extends OncePerRequestFilter {
             chain.doFilter(request, response);
             return;
         }
-        // 情况一，基于 header[login-user] 获得用户，例如说来自 Gateway 或者其它服务透传
-        RuntimeLoginUser loginUser = buildLoginUserByHeader(request);
-        // 情况二，基于 Token 获得用户
-        String token = null;
-        if (loginUser == null) {
-            token = SecurityFrameworkUtils.obtainAuthorization(request,
-                    securityProperties.getTokenHeader(), securityProperties.getTokenParameter());
-            if (StrUtil.isNotEmpty(token)) {
-                Integer userType = WebFrameworkUtils.getLoginUserType(request);
-                try {
-                    // 1.1 基于 token 构建登录用户
-                    loginUser = buildLoginUserByToken(token, userType);
-                    // 1.2 模拟 Login 功能，方便日常开发调试
-                    if (loginUser == null) {
-                        loginUser = mockLoginUser(request, token, userType);
+
+        if (isLoginOrLogoutRequest(request)) {
+            // 如果是登录、登出、注册，那么从header中获取租户信息
+            TenantContextHolder.setTenantId(WebFrameworkUtils.getTenantIdFromHeader(request));
+            // 无需获取token和登录用户信息
+        } else {
+            // 其他接口，需要获取token和登录用户信息
+            // 情况一，基于 header[login-user] 获得用户，例如说来自 Gateway 或者其它服务透传
+            RuntimeLoginUser loginUser = buildLoginUserByHeader(request);
+            // 情况二，基于 Token 获得用户
+            String token = null;
+            if (loginUser == null) {
+                token = SecurityFrameworkUtils.obtainAuthorization(request,
+                        securityProperties.getTokenHeader(), securityProperties.getTokenParameter());
+                if (StrUtil.isNotEmpty(token)) {
+                    try {
+                        // 1.1 基于 token 构建登录用户
+                        loginUser = buildLoginUserByToken(token);
+                        // 1.2 模拟 Login 功能，方便日常开发调试
+                        if (loginUser == null) {
+                            loginUser = mockLoginUser(request, token);
+                        }
+                    } catch (Throwable ex) {
+                        CommonResult<?> result = globalExceptionHandler.allExceptionHandler(request, ex);
+                        ServletUtils.writeJSON(response, result);
+                        return;
                     }
-                } catch (Throwable ex) {
-                    CommonResult<?> result = globalExceptionHandler.allExceptionHandler(request, ex);
-                    ServletUtils.writeJSON(response, result);
-                    return;
                 }
             }
-        }
-        // 设置当前用户
-        if (loginUser != null) {
-            SecurityFrameworkUtils.setLoginUser(loginUser, request);
-
-            // 会话空闲检查：排除登录和登出请求
-            if (!isLoginOrLogoutRequest(request)) {
+            // 设置当前用户
+            if (loginUser != null) {
+                SecurityFrameworkUtils.setLoginUser(loginUser, request);
+                TenantContextHolder.setTenantId(loginUser.getTenantId());
+                // 会话空闲检查：排除登录和登出请求
                 boolean checkSuc = checkAndUpdateSessionIdle(loginUser, token);
                 if (!checkSuc) {
                     log.error("[BuildAuthenticationFilter][长时间内无操作，自动登出。]");
@@ -93,26 +100,33 @@ public class RuntimeAuthenticationFilter extends OncePerRequestFilter {
             }
         }
         // 继续过滤链
-        chain.doFilter(request, response);
+        try {
+            chain.doFilter(request, response);
+        } finally {
+            // 清理租户信息
+            TenantContextHolder.clear();
+        }
     }
 
-    private RuntimeLoginUser buildLoginUserByToken(String token, Integer userType) {
+    private RuntimeLoginUser buildLoginUserByToken(String token) {
         try {
             // 校验访问令牌
-            OAuth2AccessTokenCheckRespDTO accessToken = oauth2TokenApi.checkAccessToken(token).getCheckedData();
+            OAuth2AccessTokenCheckRespDTO accessToken = oauth2TokenApi.checkAccessToken(RunModeEnum.RUNTIME.getValue(), token).getCheckedData();
             if (accessToken == null) {
                 return null;
             }
 
-            // 暂不校验类型，打印日志
-            log.info("buildLoginUserByToken userType:{}", userType);
-
             // 构建登录用户
             RuntimeLoginUser loginUser = new RuntimeLoginUser();
-            loginUser.setApplicationId(accessToken.getAppId())
-                    .setId(accessToken.getUserId()).setUserType(accessToken.getUserType())
+            loginUser.setApplicationId(accessToken.getAppId());
+            loginUser
+                    .setRunMode(accessToken.getRunMode())
+                    .setCorpId(accessToken.getCorpId())
+                    .setId(accessToken.getUserId())
+                    .setUserType(accessToken.getUserType())
                     .setInfo(accessToken.getUserInfo()) // 额外的用户信息
-                    .setTenantId(accessToken.getTenantId()).setScopes(accessToken.getScopes())
+                    .setTenantId(accessToken.getTenantId())
+                    .setScopes(accessToken.getScopes())
                     .setExpiresTime(accessToken.getExpiresTime());
             return loginUser;
         } catch (ServiceException serviceException) {
@@ -126,12 +140,11 @@ public class RuntimeAuthenticationFilter extends OncePerRequestFilter {
      * <p>
      * 注意，在线上环境下，一定要关闭该功能！！！
      *
-     * @param request  请求
-     * @param token    模拟的 token，格式为 {@link SecurityProperties#getMockSecret()} + 用户编号
-     * @param userType 用户类型
+     * @param request 请求
+     * @param token   模拟的 token，格式为 {@link SecurityProperties#getMockSecret()} + 用户编号
      * @return 模拟的 LoginUser
      */
-    private RuntimeLoginUser mockLoginUser(HttpServletRequest request, String token, Integer userType) {
+    private RuntimeLoginUser mockLoginUser(HttpServletRequest request, String token) {
         if (!securityProperties.getMockEnable()) {
             return null;
         }
@@ -142,7 +155,7 @@ public class RuntimeAuthenticationFilter extends OncePerRequestFilter {
         // 构建模拟用户
         Long userId = Long.valueOf(token.substring(securityProperties.getMockSecret().length()));
         RuntimeLoginUser loginUser = new RuntimeLoginUser();
-        loginUser.setId(userId).setUserType(userType).setTenantId(WebFrameworkUtils.getTenantIdFromHeader(request));
+        loginUser.setId(userId).setTenantId(WebFrameworkUtils.getTenantIdFromHeader(request));
         return loginUser;
     }
 

@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.app.core.dto.auth;
 
+import com.mybatisflex.annotation.Column;
 import lombok.Data;
 
 /**
@@ -13,16 +14,21 @@ public class RoleMemberDTO {
 
     public static final String MEMBER_TYPE_DEPT = "dept";
 
-    private Long Id;
+    private Long id;
 
+    @Column("member_id")
     private Long memberId;
 
+    @Column("member_name")
     private String memberName;
 
+    @Column("member_type")
     private String memberType;
 
+    @Column("is_include_child")
     private Integer isIncludeChild;
 
+    @Column("dept_name")
     private String deptName;
 
 }

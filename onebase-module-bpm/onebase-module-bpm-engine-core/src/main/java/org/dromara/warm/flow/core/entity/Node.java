@@ -79,6 +79,19 @@ public interface Node extends RootEntity {
 
     Node setDefinitionId(Long definitionId);
 
+    /**
+     * 获取流程定义UUID（备用）
+     * @return 流程定义UUID
+     */
+    String getDefinitionUuid();
+
+    /**
+     * 设置流程定义UUID（备用）
+     * @param definitionUuid definitionUuid
+     * @return Node
+     */
+    Node setDefinitionUuid(String definitionUuid);
+
     String getNodeCode();
 
     Node setNodeCode(String nodeCode);
@@ -153,6 +166,7 @@ public interface Node extends RootEntity {
             .setDelFlag(this.getDelFlag())
             .setNodeType(this.getNodeType())
             .setDefinitionId(this.getDefinitionId())
+            .setDefinitionUuid(this.getDefinitionUuid())
             .setNodeCode(this.getNodeCode())
             .setNodeName(this.getNodeName())
             .setNodeRatio(this.getNodeRatio())

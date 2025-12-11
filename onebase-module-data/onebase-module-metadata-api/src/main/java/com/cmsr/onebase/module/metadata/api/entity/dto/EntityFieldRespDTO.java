@@ -18,6 +18,9 @@ public class EntityFieldRespDTO {
     @Schema(description = "字段ID", example = "1024")
     private Long id;
 
+    @Schema(description = "字段UUID", example = "1")
+    private String fieldUuid;
+
     @Schema(description = "实体ID", example = "1")
     private Long entityId;
 
@@ -63,11 +66,11 @@ public class EntityFieldRespDTO {
     @Schema(description = "字段编码", example = "USER_NAME")
     private String fieldCode;
 
-    @Schema(description = "运行模式", example = "0")
-    private Integer runMode;
+    @Schema(description = "版本标识", example = "0")
+    private Long versionTag;
 
-    @Schema(description = "应用ID", example = "1")
-    private Long appId;
+    @Schema(description = "应用ID", example = "1001")
+    private Long applicationId;
 
     @Schema(description = "创建时间")
     private LocalDateTime createTime;

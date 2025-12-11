@@ -3,17 +3,42 @@
 # 请在IntelliJ IDEA中选择对应环境: local/dev/test/gateway
 # 登录成功后会自动更新token到环境变量中
 
+
 ### 请求 /login 接口 => 成功
-POST {{baseUrl}}/system/auth/app-login
+POST {{baseUrl}}/system/auth/corp-login
 Content-Type: application/json
-tenant-id: {{adminTenantId}}
+X-Tenant-Id: 156421901678804992
 tag: {{tag}}
 
 {
-  "username": "admin",
-  "password": "admin123",
-  "appId":1024
+  "mobile": "15800001111",
+  "password": "Dm<Ei&4S:;P+aNi",
+  "deviceId":666
 }
+
+> {%
+    // 登录成功后自动更新token到环境变量
+    if (response.status === 200) {
+        const responseData = response.body;
+        if (responseData.code === 0 && responseData.data && responseData.data.accessToken) {
+            client.global.set("token", responseData.data.accessToken);
+            console.log("Token已更新: " + responseData.data.accessToken);
+        }
+    }
+%}
+
+
+### 请求 /login 接口 => 成功
+POST {{baseUrl}}/system/auth/app-login
+Content-Type: application/json
+#tenant-id: {{adminTenantId}}
+tenant-id: 160864959456706560
+tag: {{tag}}
+
+#{"password":"AdminChina2025!","username":"admin","appId":"155296070483476480",
+#"captchaVerification":"B/IPY56Fitizbk+iaZMFreS2ac6WF9boqPZOLwDxtq82tjAZwPxJLNKBWDemjc+LACdFcc61IbKV8FbsVueG1rys88pb749urZsNI1olDlA=",
+#"deviceId":"50dddd1e2dcbb0f792b0fe3e9028890b"}
+{"password":"AdminChina2025\u0021","username":"wangshaoqing","appId":"163852177939464192","captchaVerification":"3oJFZk4xdNNjawBg8JwIwkbZv6hhC6yKrjtBq7D7tbCABbnNmu8f0T5qf/LeSpLu1dhHwA+5nS1w+uD7AK6k72E8KSX5zeXQoO1BnNR7iJ0=","deviceId":"f3b000916478e376e7253f5694a8d1e8"}
 
 > {%
     // 登录成功后自动更新token到环境变量
@@ -34,14 +59,22 @@ tenant-id: {{adminTenantId}}
 tag: {{tag}}
 
 {
-  "mobile": "13800000004",
+  "mobile": "18818260272",
   "password": "AdminChina2025!",
-  "appId":1024
+  "appId":155296070483476480,
+  "deviceId":666
 }
 
-
-
-
+> {%
+    // 登录成功后自动更新token到环境变量
+    if (response.status === 200) {
+        const responseData = response.body;
+        if (responseData.code === 0 && responseData.data && responseData.data.accessToken) {
+            client.global.set("token", responseData.data.accessToken);
+            console.log("Token已更新: " + responseData.data.accessToken);
+        }
+    }
+%}
 
 ### 请求 /reset-password 接口 => 失败
 POST {{baseUrl}}/system/auth/reset-password
@@ -54,3 +87,10 @@ tag: {{tag}}
   "userId": "544417214451814400",
   "password": "admin125"
 }
+
+### 请求 /reset-password 接口 => 失败
+GET {{baseUrl}}/system/auth/get-permission-info
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+tag: {{tag}}

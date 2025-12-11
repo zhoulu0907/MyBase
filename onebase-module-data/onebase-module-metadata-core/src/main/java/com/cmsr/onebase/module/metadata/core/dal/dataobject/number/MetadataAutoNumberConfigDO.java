@@ -1,10 +1,12 @@
 package com.cmsr.onebase.module.metadata.core.dal.dataobject.number;
 
-import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
-import jakarta.persistence.Column;
-import jakarta.persistence.Table;
-import lombok.*;
-import lombok.experimental.SuperBuilder;
+import com.cmsr.onebase.framework.orm.entity.BaseBizEntity;
+import com.cmsr.onebase.framework.orm.entity.BaseTenantEntity;
+import com.mybatisflex.annotation.Column;
+import com.mybatisflex.annotation.Table;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
 /**
  * 自动编号-字段配置 DO
  *
@@ -15,51 +17,74 @@ import lombok.experimental.SuperBuilder;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-@ToString(callSuper = true)
-@SuperBuilder
-@NoArgsConstructor
-@AllArgsConstructor
-@Table(name = "metadata_auto_number_config")
-public class MetadataAutoNumberConfigDO extends TenantBaseDO {
+@Table(value = "metadata_auto_number_config")
+public class MetadataAutoNumberConfigDO extends BaseBizEntity {
 
-    public static final String FIELD_ID = "field_id";
-    public static final String NUMBER_MODE = "number_mode";
-    public static final String DIGIT_WIDTH = "digit_width";
-    public static final String OVERFLOW_CONTINUE = "overflow_continue";
-    public static final String INITIAL_VALUE = "initial_value";
-    public static final String RESET_CYCLE = "reset_cycle";
-    public static final String RESET_ON_INITIAL_CHANGE = "reset_on_initial_change";
-    public static final String IS_ENABLED = "is_enabled";
-    public static final String RUN_MODE = "run_mode";
-    public static final String APP_ID = "app_id";
+    /**
+     * 配置UUID
+     * <p>
+     * 用于跨应用、跨版本的唯一标识，与 application_id、version_tag 组成联合唯一约束
+     */
+    @Column(value = "config_uuid", comment = "配置UUID")
+    private String configUuid;
 
-    @Column(name = FIELD_ID)
-    private Long fieldId;
-    @Column(name = NUMBER_MODE)
+    /**
+     * 字段UUID
+     * <p>
+     * 关联 metadata_entity_field.field_uuid
+     */
+    @Column(value = "field_uuid", comment = "字段UUID")
+    private String fieldUuid;
+
+    /**
+     * 编号模式
+     */
+    @Column(value = "number_mode", comment = "编号模式")
     private String numberMode;
-    @Column(name = DIGIT_WIDTH)
+
+    /**
+     * 数字宽度
+     */
+    @Column(value = "digit_width", comment = "数字宽度")
     private Short digitWidth;
-    @Column(name = OVERFLOW_CONTINUE)
+
+    /**
+     * 溢出后是否继续
+     */
+    @Column(value = "overflow_continue", comment = "溢出后是否继续")
     private Integer overflowContinue;
-    @Column(name = INITIAL_VALUE)
+
+    /**
+     * 初始值
+     */
+    @Column(value = "initial_value", comment = "初始值")
     private Long initialValue;
-    @Column(name = RESET_CYCLE)
+
+    /**
+     * 重置周期
+     */
+    @Column(value = "reset_cycle", comment = "重置周期")
     private String resetCycle;
+
     /**
      * 下一条记录以修改后的开始值编号：1-是，0-否
      */
-    @Column(name = RESET_ON_INITIAL_CHANGE)
+    @Column(value = "reset_on_initial_change", comment = "下一条记录以修改后的开始值编号：1-是，0-否")
     private Integer resetOnInitialChange;
+
     /**
      * 是否启用：1-启用，0-禁用
-     * @see CommonStatusEnum
      */
-    @Column(name = IS_ENABLED)
+    @Column(value = "is_enabled", comment = "是否启用：1-启用，0-禁用")
     private Integer isEnabled;
-    @Column(name = RUN_MODE)
-    private Integer runMode;
-    @Column(name = APP_ID)
-    private Long appId;
-}
 
+    /**
+     * SEQUENCE规则项在列表中的排序位置
+     * <p>
+     * 用于与其他RuleItem的itemOrder统一排序，默认999表示末尾
+     */
+    @Column(value = "sequence_order", comment = "SEQUENCE规则项在列表中的排序位置")
+    private Integer sequenceOrder;
+
+}
 

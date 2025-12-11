@@ -16,11 +16,11 @@ import java.util.List;
 @Tag(name = "权限管理 sdk")
 public interface MetadataPermitApi {
 
-    /**
-     * 获取权限参考操作类型列表
-     *
-     * @return 权限参考操作类型列表
-     */
-    @Operation(summary = "获取权限参考操作类型列表")
-    List<PermitRefOtftRespDTO> getPermitRefOtftList();
+    // /**
+    //  * 获取权限参考操作类型列表
+    //  *
+    //  * @return 权限参考操作类型列表
+    //  */
+    // @Operation(summary = "获取权限参考操作类型列表")
+    // List<PermitRefOtftRespDTO> getPermitRefOtftList();
 }

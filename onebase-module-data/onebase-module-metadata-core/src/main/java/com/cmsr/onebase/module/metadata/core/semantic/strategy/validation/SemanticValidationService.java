@@ -1,0 +1,12 @@
+package com.cmsr.onebase.module.metadata.core.semantic.strategy.validation;
+
+import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldSchemaDTO;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticDataMethodOpEnum;
+
+import java.util.Map;
+
+public interface SemanticValidationService {
+    void validateEntity(java.util.List<SemanticFieldSchemaDTO> fields, Map<String, Object> data, SemanticDataMethodOpEnum operationType, SemanticValidationContext context);
+    String getValidationType();
+    boolean supports(String fieldType);
+}

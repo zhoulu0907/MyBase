@@ -108,7 +108,7 @@ public class MetadataDataMethodQueryImpl extends AbstractMetadataDataMethodCoreS
         Object id = context.getId();
         MetadataBusinessEntityDO entity = validateEntityExists(entityId);
         List<MetadataEntityFieldDO> fields = getEntityFields(entityId);
-        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceId());
+        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceUuid());
         if (datasource == null) {
             throw exception(DATASOURCE_NOT_EXISTS);
         }
@@ -131,19 +131,18 @@ public class MetadataDataMethodQueryImpl extends AbstractMetadataDataMethodCoreS
 
         //查询子表数据
         Long sourceEntityId = entityId;
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and(MetadataEntityRelationshipDO.SOURCE_ENTITY_ID, sourceEntityId);
-        List<MetadataEntityRelationshipDO> relationships = entityRelationshipRepository.findAllByConfig(configStore);
+        List<MetadataEntityRelationshipDO> relationships = entityRelationshipRepository.findBySourceEntityId(sourceEntityId);
         List<String> subTableIds = new ArrayList<String>();
         List subEntities = new ArrayList();
         for(MetadataEntityRelationshipDO relationshipDO:relationships){
-            MetadataEntityFieldDO sourceFieldDO = entityFieldRepository.findById(Long.valueOf(relationshipDO.getSourceFieldId()));
+            MetadataEntityFieldDO sourceFieldDO = entityFieldRepository.getByFieldUuid(relationshipDO.getSourceFieldUuid());
 
-            MetadataBusinessEntityDO targetEntity = businessEntityService.getBusinessEntity(relationshipDO.getTargetEntityId());
-            if(targetEntity == null){
+            MetadataBusinessEntityDO targetEntity = businessEntityService.getBusinessEntity(relationshipDO.getTargetEntityUuid());
+            MetadataEntityFieldDO targetFieldDO = entityFieldRepository.getByFieldUuid(relationshipDO.getTargetFieldUuid());
+            // 如果关联的实体 或 关联的实体字段 不存在/被删除 跳过子表查询
+            if(targetEntity == null || targetFieldDO == null){
                 continue;
             }
-            MetadataEntityFieldDO targetFieldDO = entityFieldRepository.findById(Long.valueOf(relationshipDO.getTargetFieldId()));
             String tableName = targetEntity.getTableName();
             String fieldName = targetFieldDO.getFieldName();
 
@@ -223,7 +222,7 @@ public class MetadataDataMethodQueryImpl extends AbstractMetadataDataMethodCoreS
         // 移除多表查询逻辑，直接使用单表分页
         MetadataBusinessEntityDO entity = validateEntityExists(entityId);
         List<MetadataEntityFieldDO> fields = getEntityFields(entityId);
-        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceId());
+        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceUuid());
         if (datasource == null) {
             throw exception(DATASOURCE_NOT_EXISTS);
         }

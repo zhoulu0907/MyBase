@@ -1,17 +1,23 @@
 package com.cmsr.onebase.framework.security.runtime;
 
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
+import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.framework.common.security.dto.RuntimeLoginUser;
 import com.cmsr.onebase.framework.security.runtime.service.RTPermissionService;
 import com.cmsr.onebase.module.app.api.security.bo.DataPermission;
 import com.cmsr.onebase.module.app.api.security.bo.FieldPermission;
 import com.cmsr.onebase.module.app.api.security.bo.OperationPermission;
+import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.Collections;
 
 /**
+ * 为什么给数据模块要用菜单id作为条件查询？
+ * 因为一个实体可以配置多个菜单，权限的配置是以菜单来的。用户在不同的菜单可有不同的权限。
+ *
  * @Author：huangjie
  * @Date：2025/10/17 12:30
  */
@@ -21,46 +27,46 @@ public class RTSecurityContext {
         return SecurityFrameworkUtils.getLoginUser();
     }
 
-    public static Long getApplicationId() {
-        return getLoginUser().getApplicationId();
+    public static Long getRequiredUserId() {
+        LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
+        if (loginUser == null) {
+            throw new AuthenticationServiceException("用户未登录");
+        }
+        Long userId = loginUser.getId();
+        if (userId == null) {
+            throw new AuthenticationServiceException("用户未登录");
+        }
+        return userId;
     }
 
-    public static Long getUserId() {
-        return getLoginUser().getId();
-    }
-
-    public static boolean checkMenuEntity(Long menuId, Long entityId) {
-        RuntimeLoginUser RuntimeLoginUser = getLoginUser();
-        Long applicationId = RuntimeLoginUser.getApplicationId();
-        return RTPermissionService.getInstance().checkMenuEntity(applicationId, menuId, entityId);
+    public static boolean checkMenuEntity(Long menuId, String entityUuid) {
+        Long applicationId = ApplicationManager.getApplicationId();
+        return RTPermissionService.getInstance().checkMenuEntity(applicationId, menuId, entityUuid);
     }
 
     public static OperationPermission getMenuOperation(Long menuId) {
-        RuntimeLoginUser RuntimeLoginUser = getLoginUser();
-        Long userId = RuntimeLoginUser.getId();
-        Long applicationId = RuntimeLoginUser.getApplicationId();
+        Long userId = getRequiredUserId();
+        Long applicationId = ApplicationManager.getApplicationId();
         return RTPermissionService.getInstance().getMenuOperation(userId, applicationId, menuId);
     }
 
     public static DataPermission getMenuDataPermission(Long menuId) {
-        RuntimeLoginUser RuntimeLoginUser = getLoginUser();
-        Long userId = RuntimeLoginUser.getId();
-        Long applicationId = RuntimeLoginUser.getApplicationId();
+        Long userId = getRequiredUserId();
+        Long applicationId = ApplicationManager.getApplicationId();
         return RTPermissionService.getInstance().getMenuDataPermission(userId, applicationId, menuId);
     }
 
     public static FieldPermission getMenuFieldPermission(Long menuId) {
-        RuntimeLoginUser RuntimeLoginUser = getLoginUser();
-        Long userId = RuntimeLoginUser.getId();
-        Long applicationId = RuntimeLoginUser.getApplicationId();
+        Long userId = getRequiredUserId();
+        Long applicationId = ApplicationManager.getApplicationId();
         return RTPermissionService.getInstance().getMenuFieldPermission(userId, applicationId, menuId);
     }
 
     public static void mockLoginUser(Long userId, Long applicationId) {
-        RuntimeLoginUser RuntimeLoginUser = new RuntimeLoginUser();
-        RuntimeLoginUser.setId(userId);
-        RuntimeLoginUser.setApplicationId(applicationId);
-        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(RuntimeLoginUser, null, Collections.emptyList());
+        RuntimeLoginUser runtimeLoginUser = new RuntimeLoginUser();
+        runtimeLoginUser.setId(userId);
+        runtimeLoginUser.setApplicationId(applicationId);
+        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(runtimeLoginUser, null, Collections.emptyList());
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 

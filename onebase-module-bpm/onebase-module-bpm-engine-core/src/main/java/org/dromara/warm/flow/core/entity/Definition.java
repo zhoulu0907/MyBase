@@ -118,6 +118,14 @@ public interface Definition extends RootEntity {
     Definition setVersion(String version);
 
     /**
+     * 获取流程定义的版本号
+     * @return 版本号
+     */
+    String getVersionAlias();
+
+    Definition setVersionAlias(String versionAlias);
+
+    /**
      * 获取是否发布状态 (0未发布 1已发布 9已失效)
      * @return 发布状态
      */
@@ -174,15 +182,35 @@ public interface Definition extends RootEntity {
 
     Definition setListenerPath(String listenerPath);
 
+    Long getApplicationId();
+
+    Definition setApplicationId(Long applicationId);
+
+    /**
+     * 获取流程定义UUID
+     * @return 流程定义UUID
+     */
+    String getDefinitionUuid();
+
+    /**
+     * 设置流程定义UUID
+     * @param definitionUuid definitionUuid
+     * @return Definition
+     */
+    Definition setDefinitionUuid(String definitionUuid);
+
     default Definition copy() {
         return FlowEngine.newDef()
             .setTenantId(String.valueOf(this.getTenantId()))
             .setDelFlag(this.getDelFlag())
+            .setDefinitionUuid(this.getDefinitionUuid())
             .setFlowCode(this.getFlowCode())
             .setFlowName(this.getFlowName())
             .setModelValue(this.getModelValue())
             .setCategory(this.getCategory())
             .setVersion(this.getVersion())
+            .setVersionAlias(this.getVersionAlias())
+            .setApplicationId(this.getApplicationId())
             .setFormCustom(this.getFormCustom())
             .setFormPath(this.getFormPath())
             .setListenerType(this.getListenerType())

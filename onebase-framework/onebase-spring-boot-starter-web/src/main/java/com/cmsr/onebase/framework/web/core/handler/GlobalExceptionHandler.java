@@ -13,7 +13,6 @@ import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
-import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
@@ -24,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.util.Assert;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
@@ -116,8 +116,12 @@ public class GlobalExceptionHandler {
         if (ex instanceof AccessDeniedException) {
             return accessDeniedExceptionHandler(request, (AccessDeniedException) ex);
         }
+        if (ex instanceof AuthenticationException) {
+            return authenticationExceptionHandler(request, (AuthenticationException) ex);
+        }
         return defaultExceptionHandler(request, ex);
     }
+
 
     /**
      * 处理 SpringMVC 请求参数缺失
@@ -326,6 +330,12 @@ public class GlobalExceptionHandler {
         return CommonResult.error(FORBIDDEN);
     }
 
+    private CommonResult<?> authenticationExceptionHandler(HttpServletRequest request, AuthenticationException ex) {
+        log.warn("[authenticationExceptionHandler][userId({}) 访问 url({}) 发生异常]", SecurityFrameworkUtils.getLoginUserId(),
+                request.getRequestURI(), ex);
+        return CommonResult.error(UNAUTHORIZED);
+    }
+
     /**
      * 处理业务异常 ServiceException
      * <p>
@@ -465,7 +475,7 @@ public class GlobalExceptionHandler {
     private void buildExceptionLog(ApiErrorLogCreateReqDTO errorLog, HttpServletRequest request, Throwable e) {
         // 处理用户信息
         errorLog.setUserId(SecurityFrameworkUtils.getLoginUserId());
-        errorLog.setUserType(WebFrameworkUtils.getLoginUserType(request));
+        errorLog.setUserType(SecurityFrameworkUtils.getLoginUserType());
         // 设置异常字段
         errorLog.setExceptionName(e.getClass().getName());
         errorLog.setExceptionMessage(ExceptionUtils.getMessage(e));

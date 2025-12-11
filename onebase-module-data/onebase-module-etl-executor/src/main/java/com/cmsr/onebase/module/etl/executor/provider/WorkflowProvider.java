@@ -26,40 +26,39 @@ public class WorkflowProvider {
 
     private QueryProvider queryProvider;
 
-
-    public WorkflowGraph createSubWorkflowGraph(String graphJson, String nodeId) throws Exception {
+    public WorkflowGraph createSubWorkflowGraph(Long applicationId, String graphJson, String nodeId) throws Exception {
         WorkflowGraph graph = JacksonUtil.readValue(graphJson, WorkflowGraph.class);
         graph.init();
         WorkflowGraph subgraph = graph.subgraph(nodeId);
-        complementGraphInformation(subgraph);
+        complementGraphInformation(applicationId, subgraph);
         return subgraph;
     }
 
-    public WorkflowGraph createWorkflowGraph(String graphJson) throws Exception {
+    public WorkflowGraph createWorkflowGraph(Long applicationId, String graphJson) throws Exception {
         WorkflowGraph graph = JacksonUtil.fromJson(graphJson, WorkflowGraph.class);
         graph.init();
-        complementGraphInformation(graph);
+        complementGraphInformation(applicationId, graph);
         return graph;
     }
 
 
-    private void complementGraphInformation(WorkflowGraph workflowGraph) throws Exception {
+    private void complementGraphInformation(Long applicationId, WorkflowGraph workflowGraph) throws Exception {
         for (Node node : workflowGraph.getNodes()) {
             NodeConfig config = node.getConfig();
             if (config instanceof JdbcInputConfig jdbcInputConfig) {
-                complementJdbcInputInformation(jdbcInputConfig);
+                complementJdbcInputInformation(applicationId, jdbcInputConfig);
             } else if (config instanceof JdbcOutputConfig jdbcOutputConfig) {
-                complementJdbcOutputInformation(jdbcOutputConfig);
+                complementJdbcOutputInformation(applicationId, jdbcOutputConfig);
             }
         }
     }
 
-    private void complementJdbcInputInformation(JdbcInputConfig jdbcInputConfig) throws Exception {
-        Long datasourceId = jdbcInputConfig.getDatasourceId();
-        Long tableId = jdbcInputConfig.getTableId();
+    private void complementJdbcInputInformation(Long applicationId, JdbcInputConfig jdbcInputConfig) throws Exception {
+        String datasourceUuid = jdbcInputConfig.getDatasourceUuid();
+        String tableUuid = jdbcInputConfig.getTableUuid();
 
-        EtlTable etlTable = queryProvider.findTableById(tableId);
-        EtlDataSource etlDataSource = queryProvider.findConnectPropertiesById(datasourceId);
+        EtlTable etlTable = queryProvider.findTableByUuid(applicationId, tableUuid);
+        EtlDataSource etlDataSource = queryProvider.findConnectPropertiesByUuid(applicationId, datasourceUuid);
 
         JdbcConfig jdbcConfig = JacksonUtil.fromJson(etlDataSource.getConfig(), JdbcConfig.class);
         jdbcConfig.setDatabaseType(etlDataSource.getDatasourceType());
@@ -104,12 +103,12 @@ public class WorkflowProvider {
     }
 
 
-    private void complementJdbcOutputInformation(JdbcOutputConfig jdbcOutputConfig) throws Exception {
-        Long datasourceId = jdbcOutputConfig.getDatasourceId();
-        Long tableId = jdbcOutputConfig.getTableId();
+    private void complementJdbcOutputInformation(Long applicationId, JdbcOutputConfig jdbcOutputConfig) throws Exception {
+        String datasourceUuid = jdbcOutputConfig.getDatasourceUuid();
+        String tableUuid = jdbcOutputConfig.getTableUuid();
 
-        EtlDataSource etlDataSource = queryProvider.findConnectPropertiesById(datasourceId);
-        EtlTable etlTable = queryProvider.findTableById(tableId);
+        EtlDataSource etlDataSource = queryProvider.findConnectPropertiesByUuid(applicationId, datasourceUuid);
+        EtlTable etlTable = queryProvider.findTableByUuid(applicationId, tableUuid);
 
         JdbcConfig jdbcConfig = JacksonUtil.fromJson(etlDataSource.getConfig(), JdbcConfig.class);
         jdbcConfig.setDatabaseType(etlDataSource.getDatasourceType());

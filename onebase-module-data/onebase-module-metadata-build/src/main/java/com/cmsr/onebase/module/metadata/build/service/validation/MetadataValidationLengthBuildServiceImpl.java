@@ -7,9 +7,12 @@ import com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.Val
 import com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationRuleGroupSaveReqVO;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationLengthRepository;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityFieldRepository;
+import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationRuleGroupRepository;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationLengthDO;
+import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRuleGroupDO;
 import com.cmsr.onebase.module.metadata.build.service.entity.MetadataEntityFieldBuildService;
+import com.cmsr.onebase.module.metadata.core.util.MetadataIdUuidConverter;
 import com.cmsr.onebase.module.metadata.core.util.StatusEnumUtil;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -31,17 +34,19 @@ public class MetadataValidationLengthBuildServiceImpl implements MetadataValidat
 
     @Resource private MetadataValidationLengthRepository lengthRepository; // 自身仓库
     @Resource private MetadataValidationRuleGroupBuildService ruleGroupService; // 其他服务
+    @Resource private MetadataValidationRuleGroupRepository ruleGroupRepository; // 规则组仓库
     @Resource private MetadataEntityFieldBuildService entityFieldService; // 其他服务
     @Resource private MetadataEntityFieldRepository entityFieldRepository; // 字段仓库，用于同步数据
+    @Resource private MetadataIdUuidConverter idUuidConverter; // ID转UUID工具
 
     @Override
-    public MetadataValidationLengthDO getByFieldId(Long fieldId) {
-        return lengthRepository.findOneByFieldId(fieldId);
+    public MetadataValidationLengthDO getByFieldId(String fieldUuid) {
+        return lengthRepository.findOneByFieldUuid(fieldUuid);
     }
 
     @Override
-    public ValidationLengthRespVO getByFieldIdWithRgName(Long fieldId) {
-        MetadataValidationLengthDO lengthDO = lengthRepository.findOneByFieldId(fieldId);
+    public ValidationLengthRespVO getByFieldIdWithRgName(String fieldUuid) {
+        MetadataValidationLengthDO lengthDO = lengthRepository.findOneByFieldUuid(fieldUuid);
         if (lengthDO == null) {
             return null;
         }
@@ -50,10 +55,14 @@ public class MetadataValidationLengthBuildServiceImpl implements MetadataValidat
         ValidationLengthRespVO respVO = BeanUtils.toBean(lengthDO, ValidationLengthRespVO.class);
 
         // 获取规则组信息，包括提示语等字段
-        var ruleGroup = ruleGroupService.getValidationRuleGroup(lengthDO.getGroupId());
-        if (ruleGroup != null) {
-            respVO.setRgName(ruleGroup.getRgName());
-            respVO.setPromptMessage(ruleGroup.getPopPrompt());
+        if (lengthDO.getGroupUuid() != null) {
+            MetadataValidationRuleGroupDO ruleGroup = ruleGroupRepository.getOne(
+                ruleGroupRepository.query().eq(MetadataValidationRuleGroupDO::getGroupUuid, lengthDO.getGroupUuid())
+            );
+            if (ruleGroup != null) {
+                respVO.setRgName(ruleGroup.getRgName());
+                respVO.setPromptMessage(ruleGroup.getPopPrompt());
+            }
         }
 
         return respVO;
@@ -63,15 +72,16 @@ public class MetadataValidationLengthBuildServiceImpl implements MetadataValidat
     @Transactional(rollbackFor = Exception.class)
     public Long create(ValidationLengthSaveReqVO vo) {
         Assert.notNull(vo, "vo不能为空");
-        Assert.notNull(vo.getFieldId(), "字段ID不能为空");
+        // ID与UUID兼容处理：优先使用UUID，若为空则通过ID转换
+        vo.setFieldUuid(idUuidConverter.resolveFieldUuid(vo.getFieldUuid(), vo.getFieldId()));
         Assert.hasText(vo.getRgName(), "规则组名称不能为空");
 
         // 获取字段信息
-        MetadataEntityFieldDO field = entityFieldService.getEntityField(String.valueOf(vo.getFieldId()));
+        MetadataEntityFieldDO field = entityFieldService.getEntityFieldByUuid(vo.getFieldUuid());
         Assert.notNull(field, "字段不存在");
 
         // 检查同一字段是否已存在长度校验规则
-        MetadataValidationLengthDO existingRule = lengthRepository.findOneByFieldId(vo.getFieldId());
+        MetadataValidationLengthDO existingRule = lengthRepository.findOneByFieldUuid(vo.getFieldUuid());
         if (existingRule != null) {
             throw new IllegalStateException("该字段已存在长度校验规则，同一字段只能有一条长度校验规则");
         }
@@ -82,8 +92,8 @@ public class MetadataValidationLengthBuildServiceImpl implements MetadataValidat
         boolean canReuse = false;
         if (existingGroup != null) {
             // 检查该group_id下是否已存在其他字段的长度校验
-            var groupLengthList = lengthRepository.findByGroupId(existingGroup.getId());
-            if (groupLengthList.isEmpty() || (groupLengthList.size() == 1 && groupLengthList.get(0).getFieldId().equals(vo.getFieldId()))) {
+            List<MetadataValidationLengthDO> groupLengthList = lengthRepository.findByGroupUuid(existingGroup.getGroupUuid());
+            if (groupLengthList.isEmpty() || (groupLengthList.size() == 1 && groupLengthList.get(0).getFieldUuid().equals(vo.getFieldUuid()))) {
                 canReuse = true;
             }
         }
@@ -100,22 +110,23 @@ public class MetadataValidationLengthBuildServiceImpl implements MetadataValidat
             groupVO.setPopPrompt(vo.getPopPrompt());
             groupVO.setPopType(vo.getPopType());
             groupVO.setValidationType("LENGTH");
-            // 修复：同步entityId到规则组
-            groupVO.setEntityId(field.getEntityId());
+            // 修复：同步entityUuid到规则组
+            groupVO.setEntityUuid(field.getEntityUuid());
             groupId = ruleGroupService.createValidationRuleGroup(groupVO);
         }
 
         // 转换VO为DO并设置必要字段
         MetadataValidationLengthDO data = BeanUtils.toBean(vo, MetadataValidationLengthDO.class);
-        data.setEntityId(field.getEntityId());
-        data.setAppId(field.getAppId());
-        data.setGroupId(groupId);
+        data.setEntityUuid(field.getEntityUuid());
+        data.setApplicationId(field.getId()); // 使用field.getId()作为applicationId
+        MetadataValidationRuleGroupDO group = ruleGroupService.getValidationRuleGroup(groupId);
+        data.setGroupUuid(group.getGroupUuid());
         data.setPromptMessage(vo.getPopPrompt());
         // 保存长度校验规则
-        lengthRepository.upsert(data);
+        lengthRepository.saveOrUpdate(data);
         
         // 同步到MetadataEntityFieldDO：如果设置了maxLength，则同步到dataLength字段
-        syncToEntityField(vo.getFieldId(), data.getMaxLength());
+        syncToEntityField(vo.getFieldUuid(), data.getMaxLength());
         
         return data.getId();
     }
@@ -126,32 +137,35 @@ public class MetadataValidationLengthBuildServiceImpl implements MetadataValidat
             // 约定：前端传入的 reqVO.id 为 规则组 groupId
             Long groupIdAsParam = reqVO.getId();
             Assert.notNull(groupIdAsParam, "规则组ID不能为空");
+            MetadataValidationRuleGroupDO groupDO = ruleGroupService.getValidationRuleGroup(groupIdAsParam);
+            Assert.notNull(groupDO, "规则组不存在");
+            String groupUuidAsParam = groupDO.getGroupUuid();
 
-            // 根据 groupId 查询对应长度校验记录
-            List<MetadataValidationLengthDO> list = lengthRepository.findByGroupId(groupIdAsParam);
-            Assert.notEmpty(list, "当前长度校验规则不存在(组ID=" + groupIdAsParam + ")");
+            // 根据 groupUuid 查询对应长度校验记录
+            List<MetadataValidationLengthDO> list = lengthRepository.findByGroupUuid(groupUuidAsParam);
+            Assert.notEmpty(list, "当前长度校验规则不存在(组UUID=" + groupUuidAsParam + ")");
             if (list.size() > 1) {
-                throw new IllegalStateException("数据异常：同一组存在多条长度校验规则(组ID=" + groupIdAsParam + ")");
+                throw new IllegalStateException("数据异常：同一组存在多条长度校验规则(组UUID=" + groupUuidAsParam + ")");
             }
             MetadataValidationLengthDO existingDO = list.get(0);
 
             // 查询字段信息
-            MetadataEntityFieldDO entityFieldDO = entityFieldService.getEntityField(String.valueOf(existingDO.getFieldId()));
+            MetadataEntityFieldDO entityFieldDO = entityFieldService.getEntityFieldByUuid(existingDO.getFieldUuid());
             Assert.notNull(entityFieldDO, "字段不存在");
 
             // 处理规则组：根据新的 rgName 若与当前不同，且不可复用，则新建
-            Long targetGroupId;
+            String targetGroupUuid;
             var existingGroup = ruleGroupService.getByName(reqVO.getRgName());
             boolean canReuse = false;
             if (existingGroup != null) {
-                var groupLengthList = lengthRepository.findByGroupId(existingGroup.getId());
-                boolean reusedByOtherField = groupLengthList.stream().anyMatch(r -> !r.getFieldId().equals(existingDO.getFieldId()));
+                List<MetadataValidationLengthDO> groupLengthList = lengthRepository.findByGroupUuid(existingGroup.getGroupUuid());
+                boolean reusedByOtherField = groupLengthList.stream().anyMatch(r -> !r.getFieldUuid().equals(existingDO.getFieldUuid()));
                 if (!reusedByOtherField) {
                     canReuse = true;
                 }
             }
             if (existingGroup != null && canReuse) {
-                targetGroupId = existingGroup.getId();
+                targetGroupUuid = existingGroup.getGroupUuid();
                 // 如果复用已有规则组，需要根据请求更新组级别配置(popPrompt/valMethod/popType)，避免列表查询仍显示旧值
                 boolean needGroupUpdate = false;
                 ValidationRuleGroupSaveReqVO updateGroupVO = new ValidationRuleGroupSaveReqVO();
@@ -160,7 +174,7 @@ public class MetadataValidationLengthBuildServiceImpl implements MetadataValidat
                 updateGroupVO.setRgDesc(existingGroup.getRgDesc());
                 updateGroupVO.setRgStatus(existingGroup.getRgStatus());
                 updateGroupVO.setValidationType(existingGroup.getValidationType());
-                updateGroupVO.setEntityId(existingGroup.getEntityId());
+                updateGroupVO.setEntityUuid(existingGroup.getEntityUuid());
                 // 判定及赋值: 仅当传入值非空且与现有不同才更新
                 if (reqVO.getPopPrompt() != null && !reqVO.getPopPrompt().equals(existingGroup.getPopPrompt())) {
                     updateGroupVO.setPopPrompt(reqVO.getPopPrompt());
@@ -186,50 +200,60 @@ public class MetadataValidationLengthBuildServiceImpl implements MetadataValidat
                 groupVO.setPopPrompt(reqVO.getPopPrompt());
                 groupVO.setPopType(reqVO.getPopType());
                 groupVO.setValidationType("LENGTH");
-                groupVO.setEntityId(entityFieldDO.getEntityId());
-                targetGroupId = ruleGroupService.createValidationRuleGroup(groupVO);
+                groupVO.setEntityUuid(entityFieldDO.getEntityUuid());
+                Long groupId = ruleGroupService.createValidationRuleGroup(groupVO);
+                MetadataValidationRuleGroupDO newGroup = ruleGroupService.getValidationRuleGroup(groupId);
+                targetGroupUuid = newGroup.getGroupUuid();
             }
 
             // 构造更新对象
             MetadataValidationLengthDO updateDO = BeanUtils.toBean(reqVO, MetadataValidationLengthDO.class);
             updateDO.setId(existingDO.getId()); // 保留原记录主键
-            updateDO.setFieldId(existingDO.getFieldId());
-            updateDO.setEntityId(existingDO.getEntityId());
-            updateDO.setAppId(existingDO.getAppId());
-            updateDO.setGroupId(targetGroupId);
+            updateDO.setFieldUuid(existingDO.getFieldUuid());
+            updateDO.setEntityUuid(existingDO.getEntityUuid());
+            updateDO.setGroupUuid(targetGroupUuid);
             updateDO.setPromptMessage(reqVO.getPopPrompt());
 
             // 执行更新
-            lengthRepository.update(updateDO);
+            lengthRepository.updateById(updateDO);
 
             // 同步字段 dataLength
-            syncToEntityField(existingDO.getFieldId(), updateDO.getMaxLength());
+            syncToEntityField(existingDO.getFieldUuid(), updateDO.getMaxLength());
         }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void deleteByFieldId(Long fieldId) {
+    public void deleteByFieldId(String fieldUuid) {
         // 先获取要删除的记录，以便后续删除关联的校验规则分组
-        List<MetadataValidationLengthDO> recordsToDelete = lengthRepository.findByFieldId(fieldId);
+        List<MetadataValidationLengthDO> recordsToDelete = lengthRepository.findByFieldUuid(fieldUuid);
         
         // 删除长度校验记录
-        lengthRepository.deleteByFieldId(fieldId);
+        lengthRepository.deleteByFieldUuid(fieldUuid);
         
         // 删除关联的校验规则分组（如果没有其他记录引用）
         for (MetadataValidationLengthDO record : recordsToDelete) {
-            if (record.getGroupId() != null) {
-                deleteRuleGroupIfNotReferenced(record.getGroupId());
+            if (record.getGroupUuid() != null) {
+                MetadataValidationRuleGroupDO group = ruleGroupRepository.getOne(
+                    ruleGroupRepository.query().eq(MetadataValidationRuleGroupDO::getGroupUuid, record.getGroupUuid())
+                );
+                if (group != null) {
+                    deleteRuleGroupIfNotReferenced(group.getId());
+                }
             }
         }
         
         // 同步到MetadataEntityFieldDO：清空dataLength字段
-        syncToEntityField(fieldId, null);
+        syncToEntityField(fieldUuid, null);
     }
 
     @Override
     public ValidationLengthRespVO getById(Long id) {
         // 约定：传入 id 为 groupId
-        List<MetadataValidationLengthDO> list = lengthRepository.findByGroupId(id);
+        MetadataValidationRuleGroupDO group = ruleGroupService.getValidationRuleGroup(id);
+        if (group == null) {
+            return null;
+        }
+        List<MetadataValidationLengthDO> list = lengthRepository.findByGroupUuid(group.getGroupUuid());
         if (list.isEmpty()) {
             return null;
         }
@@ -240,10 +264,9 @@ public class MetadataValidationLengthBuildServiceImpl implements MetadataValidat
         ValidationLengthRespVO respVO = BeanUtils.toBean(lengthDO, ValidationLengthRespVO.class);
         
         // 获取规则组信息，包括提示语等字段
-        var ruleGroup = ruleGroupService.getValidationRuleGroup(lengthDO.getGroupId());
-        if (ruleGroup != null) {
-            respVO.setRgName(ruleGroup.getRgName());
-            respVO.setPromptMessage(ruleGroup.getPopPrompt());
+        if (group != null) {
+            respVO.setRgName(group.getRgName());
+            respVO.setPromptMessage(group.getPopPrompt());
         }
         return respVO;
     }
@@ -252,8 +275,12 @@ public class MetadataValidationLengthBuildServiceImpl implements MetadataValidat
     @Transactional(rollbackFor = Exception.class)
     public void deleteById(Long id) {
         // 约定：id 为 groupId，查找对应规则
-        List<MetadataValidationLengthDO> list = lengthRepository.findByGroupId(id);
-        Long fieldId = null;
+        MetadataValidationRuleGroupDO group = ruleGroupService.getValidationRuleGroup(id);
+        if (group == null) {
+            return;
+        }
+        List<MetadataValidationLengthDO> list = lengthRepository.findByGroupUuid(group.getGroupUuid());
+        String fieldUuid = null;
         
         // 删除子表记录
         if (!list.isEmpty()) {
@@ -261,16 +288,16 @@ public class MetadataValidationLengthBuildServiceImpl implements MetadataValidat
                 throw new IllegalStateException("数据异常：同一组存在多条长度校验规则(组ID=" + id + ")");
             }
             MetadataValidationLengthDO lengthDO = list.get(0);
-            fieldId = lengthDO.getFieldId();
-            lengthRepository.deleteById(lengthDO.getId());
+            fieldUuid = lengthDO.getFieldUuid();
+            lengthRepository.removeById(lengthDO.getId());
         }
         
         // 无论子表是否存在，都要删除主表作为兜底（防止脏数据）
         deleteRuleGroupIfNotReferenced(id);
         
         // 同步字段状态
-        if (fieldId != null) {
-            syncToEntityField(fieldId, null);
+        if (fieldUuid != null) {
+            syncToEntityField(fieldUuid, null);
         }
     }
     
@@ -278,22 +305,22 @@ public class MetadataValidationLengthBuildServiceImpl implements MetadataValidat
      * 同步长度校验到MetadataEntityFieldDO
      * 根据TODO需求：如果调用了ValidationLengthController增删改接口，也需要将信息同步到metadataEntityFieldDO中
      */
-    private void syncToEntityField(Long fieldId, Integer maxLength) {
+    private void syncToEntityField(String fieldUuid, Integer maxLength) {
         try {
             // 获取字段信息
-            MetadataEntityFieldDO field = entityFieldService.getEntityField(String.valueOf(fieldId));
+            MetadataEntityFieldDO field = entityFieldService.getEntityFieldByUuid(fieldUuid);
             if (field != null) {
                 // 创建更新对象，只更新dataLength字段
                 MetadataEntityFieldDO updateField = new MetadataEntityFieldDO();
-                updateField.setId(fieldId);
+                updateField.setId(field.getId());
                 updateField.setDataLength(maxLength); // 将maxLength同步到dataLength
                 
                 // 直接使用字段仓库进行更新
-                entityFieldRepository.update(updateField);
+                entityFieldRepository.updateById(updateField);
             }
         } catch (Exception e) {
             // 记录错误但不影响主流程
-            log.warn("同步长度校验到字段时发生异常，字段ID: {}, maxLength: {}, 错误: {}", fieldId, maxLength, e.getMessage(), e);
+            log.warn("同步长度校验到字段时发生异常，字段UUID: {}, maxLength: {}, 错误: {}", fieldUuid, maxLength, e.getMessage(), e);
         }
     }
     
@@ -302,11 +329,15 @@ public class MetadataValidationLengthBuildServiceImpl implements MetadataValidat
      */
     private void deleteRuleGroupIfNotReferenced(Long groupId) {
         try {
+            MetadataValidationRuleGroupDO group = ruleGroupService.getValidationRuleGroup(groupId);
+            if (group == null) {
+                return;
+            }
             // 检查是否还有其他校验记录引用这个分组
             boolean hasOtherReferences = false;
             
             // 检查长度校验表
-            List<MetadataValidationLengthDO> lengthRecords = lengthRepository.findByGroupId(groupId);
+            List<MetadataValidationLengthDO> lengthRecords = lengthRepository.findByGroupUuid(group.getGroupUuid());
             if (!lengthRecords.isEmpty()) {
                 hasOtherReferences = true;
             }

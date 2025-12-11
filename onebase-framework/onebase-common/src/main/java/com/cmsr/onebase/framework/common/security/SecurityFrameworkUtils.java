@@ -3,7 +3,11 @@ package com.cmsr.onebase.framework.common.security;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
+import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
+import com.cmsr.onebase.framework.common.enums.XFromSceneTypeEnum;
 import com.cmsr.onebase.framework.common.security.dto.LoginUser;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.lang.Nullable;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -12,8 +16,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.util.StringUtils;
 
-import jakarta.servlet.http.HttpServletRequest;
 import java.util.Collections;
+import java.util.Objects;
 
 /**
  * 安全服务工具类
@@ -28,13 +32,14 @@ public class SecurityFrameworkUtils {
 
     public static final String LOGIN_USER_HEADER = "login-user";
 
-    private SecurityFrameworkUtils() {}
+    private SecurityFrameworkUtils() {
+    }
 
     /**
      * 从请求中，获得认证 Token
      *
-     * @param request 请求
-     * @param headerName 认证 Token 对应的 Header 名字
+     * @param request       请求
+     * @param headerName    认证 Token 对应的 Header 名字
      * @param parameterName 认证 Token 对应的 Parameter 名字
      * @return 认证 Token
      */
@@ -42,17 +47,40 @@ public class SecurityFrameworkUtils {
                                              String headerName, String parameterName) {
         // 1. 获得 Token。优先级：Header > Parameter
         String token = request.getHeader(headerName);
+        // 2. 如果header中没有token，则尝试从请求参数中获取
         if (StrUtil.isEmpty(token)) {
             token = request.getParameter(parameterName);
         }
+        // 3. 如果仍没有token，则尝试从cookie中获取
+        if (StrUtil.isEmpty(token)) {
+            token = getTokenFromCookie(request, headerName);
+        }
+
         if (!StringUtils.hasText(token)) {
             return null;
         }
-        // 2. 去除 Token 中带的 Bearer
+        // 4. 去除 Token 中带的 Bearer
         int index = token.indexOf(AUTHORIZATION_BEARER + " ");
         return index >= 0 ? token.substring(index + 7).trim() : token;
     }
-
+    /**
+     * 从Cookie中获取token
+     *
+     * @param request HTTP请求
+     * @param tokenHeader token在cookie中的名称
+     * @return token值
+     */
+    private static String getTokenFromCookie(HttpServletRequest request, String tokenHeader) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (tokenHeader.equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
+        }
+        return null;
+    }
     /**
      * 获得当前认证信息
      *
@@ -91,6 +119,42 @@ public class SecurityFrameworkUtils {
         return loginUser != null ? loginUser.getId() : null;
     }
 
+
+    /**
+     * 获得当前用户的编号，从上下文中
+     *
+     * @return 用户编号
+     */
+    @Nullable
+    public static Integer getLoginUserType() {
+        LoginUser loginUser = getLoginUser();
+        if (loginUser != null) {
+            return loginUser.getUserType();
+        }
+        return null;
+    }
+
+    /**
+     * 获取登录用户其用户所处的场景类型：平台/空间/企业
+     *
+     * @return 场景类型
+     */
+    public static String getSceneByUserType(){
+        Integer loginUserType = getLoginUserType();
+        if (loginUserType == null) {
+            return null;
+        }
+        if(Objects.equals(UserTypeEnum.PLATFORM.getValue(), loginUserType)){
+            return XFromSceneTypeEnum.PLATFORM.getCode();
+        }else if(Objects.equals(UserTypeEnum.TENANT.getValue(), loginUserType)){
+            return XFromSceneTypeEnum.TENANT.getCode();
+        }else if(Objects.equals(UserTypeEnum.CORP.getValue(), loginUserType)){
+            return XFromSceneTypeEnum.CORP.getCode();
+        }else{
+            return null;
+        }
+    }
+
     /**
      * 获得当前用户的昵称，从上下文中
      *
@@ -117,7 +181,7 @@ public class SecurityFrameworkUtils {
      * 设置当前用户
      *
      * @param loginUser 登录用户
-     * @param request 请求
+     * @param request   请求
      */
     public static void setLoginUser(LoginUser loginUser, HttpServletRequest request) {
         // 创建 Authentication，并设置到上下文

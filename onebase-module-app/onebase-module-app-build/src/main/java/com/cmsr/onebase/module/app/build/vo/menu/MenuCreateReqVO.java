@@ -35,5 +35,5 @@ public class MenuCreateReqVO {
     private Integer pageSetType;
 
     @Schema(description = "实体编码")
-    private Long entityId;
+    private String entityUuid;
 }

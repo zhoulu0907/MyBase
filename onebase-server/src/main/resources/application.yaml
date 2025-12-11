@@ -36,21 +36,6 @@ server:
       enabled: true
       charset: UTF-8 # 必须设置 UTF-8，避免 WebFlux 流式返回（AI 场景）会乱码问题
       force: true
-
---- #################### Spring Cloud 禁用配置 ####################
-
-spring:
-  cloud:
-    nacos:
-      discovery:
-        enabled: false # 禁用 Nacos 的注册发现
-      config:
-        enabled: false # 禁用 Nacos 的配置中心
-#    openfeign:
-#      lazy-attributes-resolution: true
-#      client:
-#        refresh-enabled: false
-
 --- #################### 接口文档配置 ####################
 
 springdoc:
@@ -64,6 +49,8 @@ springdoc:
 
 # Spring Data Redis 配置
 spring:
+  redis:
+    key-prefix: obn-
   data:
     redis:
       repositories:
@@ -161,3 +148,13 @@ anyline:
   is-log-sql-param: false
   is-log-sql-when-error: true
   is-log-sql-param-when-error: true
+
+
+mybatis-flex:
+  configuration:
+    mapUnderscoreToCamelCase: true
+  print-sql: true
+pagehelper:
+  helperDialect: postgresql
+  reasonable: false
+  defaultCount: true

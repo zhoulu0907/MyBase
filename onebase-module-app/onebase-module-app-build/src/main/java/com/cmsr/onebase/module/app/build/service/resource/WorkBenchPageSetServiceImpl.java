@@ -1,0 +1,129 @@
+package com.cmsr.onebase.module.app.build.service.resource;
+
+import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
+import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.framework.common.util.string.UuidUtils;
+import com.cmsr.onebase.module.app.build.util.PageUtils;
+import com.cmsr.onebase.module.app.core.dal.database.resource.AppWorkbenchComponentRepository;
+import com.cmsr.onebase.module.app.core.dal.database.resource.AppWorkbenchPageRepository;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePagesetDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourceWorkbenchComponentDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourceWorkbenchPageDO;
+import com.cmsr.onebase.module.app.core.enums.appresource.AppResourceErrorCodeConstants;
+import com.cmsr.onebase.module.app.core.enums.appresource.PageEnum;
+import com.cmsr.onebase.module.app.core.provider.resource.WorkBenchPageSetServiceProvider;
+import com.cmsr.onebase.module.app.core.vo.resource.LoadPageSetRespVO;
+import com.cmsr.onebase.module.app.core.vo.resource.SavePageSetReqVO;
+import jakarta.annotation.Resource;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+@Service
+public class WorkBenchPageSetServiceImpl implements WorkBenchPageSetService {
+
+    @Resource
+    private AppWorkbenchPageRepository workbenchPageRepository;
+
+    @Resource
+    private AppWorkbenchComponentRepository workbenchComponentRepository;
+
+    @Resource
+    private WorkBenchPageSetServiceProvider workBenchPageSetServiceProvider;
+
+    @Override
+    public void initWorkbenchPage(AppResourcePagesetDO pageSetDO) {
+        //1. 初始化工作台页面配置（空页面配置）
+        AppResourceWorkbenchPageDO workBenchPageDO = this.buildEmptyWorkbenchPage(pageSetDO);
+        workbenchPageRepository.save(workBenchPageDO);
+    }
+
+    @Override
+    public LoadPageSetRespVO loadWorkbenchPageSet(AppResourcePagesetDO pageSetDO) {
+        return workBenchPageSetServiceProvider.loadWorkbenchPageSet(pageSetDO);
+    }
+
+    private AppResourceWorkbenchPageDO buildEmptyWorkbenchPage(AppResourcePagesetDO pageSetDO) {
+        String pageName = StringUtils.isBlank(pageSetDO.getDisplayName()) ? pageSetDO.getPageSetName() : pageSetDO.getDisplayName();
+        AppResourceWorkbenchPageDO workBenchPageDO = new AppResourceWorkbenchPageDO();
+        workBenchPageDO.setApplicationId(pageSetDO.getApplicationId());
+        workBenchPageDO.setPageUuid(UuidUtils.getUuid());
+        workBenchPageDO.setPageSetUuid(pageSetDO.getPageSetUuid());
+        workBenchPageDO.setPageName(pageName);
+        workBenchPageDO.setTitle(pageName);
+        workBenchPageDO.setPageType(PageEnum.WORKBENCH.getValue());
+        // 设置applicationId，从pageSetDO继承
+        workBenchPageDO.setApplicationId(pageSetDO.getApplicationId());
+        //补全必填字段
+        workBenchPageDO.setLayout("horizontal");
+        workBenchPageDO.setWidth("auto");
+        workBenchPageDO.setMargin("0");
+        workBenchPageDO.setBackgroundColor("#FFFFFF");
+        workBenchPageDO.setMainMetadata("{}");
+        workBenchPageDO.setRouterPath("workbench/" + UUID.randomUUID());
+        workBenchPageDO.setRouterName(pageName);
+        workBenchPageDO.setRouterMetaTitle(pageName);
+
+        return workBenchPageDO;
+    }
+
+    public void saveWorkbenchPage(SavePageSetReqVO savePageSetReqVO, AppResourcePagesetDO pageSetDO) {
+        Long applicationId = pageSetDO.getApplicationId();
+        savePageSetReqVO.getPages().forEach(page -> {
+            if (Boolean.TRUE.equals(page.getCreated())) {
+                // 插入新的视图
+                String pageCode = UUID.randomUUID().toString();
+                String pageName = page.getPageName();
+                String routerPath = pageCode + "/form";
+                String pageType = PageEnum.FORM.getValue();
+                Boolean openViewMode = false;
+
+                AppResourceWorkbenchPageDO pageDO = PageUtils.initWorkbenchPage(pageSetDO.getPageSetUuid(), pageName, routerPath, pageType,
+                        openViewMode);
+                pageDO.setId(page.getId());
+
+                workbenchPageRepository.save(pageDO);
+
+                page.setId(pageDO.getId());
+            }
+
+            AppResourceWorkbenchPageDO pageDO = workbenchPageRepository.getById(page.getId());
+            if (pageDO == null) {
+                throw ServiceExceptionUtil.exception(AppResourceErrorCodeConstants.PAGE_NOT_EXIST);
+            }
+
+            final AppResourceWorkbenchPageDO finalPageDO = pageDO;
+            finalPageDO.setPageName(page.getPageName());
+            finalPageDO.setEditViewMode(page.getEditViewMode());
+            finalPageDO.setDetailViewMode(page.getDetailViewMode());
+            finalPageDO.setIsDefaultEditViewMode(page.getIsDefaultEditViewMode());
+            finalPageDO.setIsDefaultDetailViewMode(page.getIsDefaultDetailViewMode());
+            finalPageDO.setIsLatestUpdated(page.getIsLatestUpdated());
+
+            workbenchPageRepository.updateById(finalPageDO);
+
+            // 删除已有的工作台组件（注意：工作台组件使用workbenchComponentRepository，不能使用普通的componentDataRepository）
+            workbenchComponentRepository.deleteByPageUuid(applicationId, finalPageDO.getPageUuid());
+
+            // 插入新的component
+            List<AppResourceWorkbenchComponentDO> componentDOs = new ArrayList<>();
+            for (int idx = 0; idx < page.getComponents().size(); idx++) {
+                AppResourceWorkbenchComponentDO componentDO = BeanUtils.toBean(page.getComponents().get(idx), AppResourceWorkbenchComponentDO.class);
+                componentDO.setComponentUuid(UuidUtils.getUuid());
+                componentDO.setPageUuid(finalPageDO.getPageUuid());
+                componentDO.setComponentIndex(idx);
+                componentDOs.add(componentDO);
+            }
+
+            if (!componentDOs.isEmpty()) {
+                workbenchComponentRepository.saveBatch(componentDOs);
+            }
+        });
+
+    }
+
+
+}

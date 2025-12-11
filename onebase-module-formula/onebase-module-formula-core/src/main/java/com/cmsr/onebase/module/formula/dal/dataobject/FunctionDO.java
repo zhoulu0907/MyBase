@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.formula.dal.dataobject;
 
+import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
 
 import jakarta.persistence.Column;
@@ -14,6 +15,7 @@ import lombok.Data;
  */
 @Data
 @Table(name = FunctionDO.TABLE_NAME)
+@TenantIgnore
 public class FunctionDO extends TenantBaseDO {
 
     public static final String TABLE_NAME = "formula_function";

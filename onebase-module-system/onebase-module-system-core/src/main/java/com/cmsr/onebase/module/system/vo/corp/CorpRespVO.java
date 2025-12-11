@@ -1,7 +1,8 @@
 package com.cmsr.onebase.module.system.vo.corp;
 
+import com.cmsr.onebase.framework.desensitize.annotation.EMailDesensitize;
+import com.cmsr.onebase.framework.desensitize.annotation.MobileDesensitize;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -27,8 +28,12 @@ public class CorpRespVO {
     @Schema(description = "企业编码", example = "ALIBABA")
     private String corpCode;
 
+    // 存储的数据字典Data的ID
     @Schema(description = "行业类型", example = "1")
     private Long industryType;
+
+    @Schema(description = "行业类型名称", example = "1")
+    private String industryTypeName;
 
     @Schema(description = "状态", example = "1")
     private Integer status;
@@ -46,10 +51,12 @@ public class CorpRespVO {
     private Integer appCount;
 
     @Schema(description = "联系人邮箱")
-    private String email;
+    @EMailDesensitize
+    private String adminEmail;
 
     @Schema(description = "联系人电话")
-    private String mobile;
+    @MobileDesensitize
+    private String adminMobile;
 
     @Schema(description = "管理员")
     private String adminName;
@@ -60,6 +67,4 @@ public class CorpRespVO {
     @Schema(description = "创建时间")
     private LocalDateTime createTime;
 
-    @Schema(description = "行业类型名称", example = "1")
-    private String industryTypeName;
 }

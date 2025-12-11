@@ -16,20 +16,23 @@ public class ValidationUniqueRespVO {
     @Schema(description = "主键ID", example = "1")
     private Long id;
 
+    @Schema(description = "唯一性校验UUID", example = "01onal1s-0000-0000-0000-000000000008")
+    private String uniqueUuid;
+
     @Schema(description = "规则组名称", example = "用户信息校验")
     private String rgName;
 
-    @Schema(description = "字段ID", example = "1")
-    private Long fieldId;
+    @Schema(description = "字段UUID", example = "01onal1s-0000-0000-0000-000000000003")
+    private String fieldUuid;
 
-    @Schema(description = "实体ID", example = "1")
-    private Long entityId;
+    @Schema(description = "实体UUID", example = "01onal1s-0000-0000-0000-000000000002")
+    private String entityUuid;
 
     @Schema(description = "应用ID", example = "1")
-    private String appId;
+    private String applicationId;
 
-    @Schema(description = "规则组ID", example = "1")
-    private Long groupId;
+    @Schema(description = "规则组UUID", example = "01onal1s-0000-0000-0000-000000000006")
+    private String groupUuid;
 
     @Schema(description = "是否启用", example = "1")
     private Integer isEnabled;
@@ -40,6 +43,6 @@ public class ValidationUniqueRespVO {
     @Schema(description = "提示信息", example = "该值已存在，请输入其他值")
     private String promptMessage;
 
-    @Schema(description = "运行模式", example = "1")
-    private Integer runMode;
+    @Schema(description = "版本标识", example = "1")
+    private Long versionTag;
 }

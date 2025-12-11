@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.app.build.vo.auth;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -29,7 +30,7 @@ public class AuthDataGroupVO {
     private List<String> scopeTags;
 
     @Schema(description = "权限范围字段id")
-    private Long scopeFieldId;
+    private String scopeFieldUuid;
 
     @Schema(description = "权限范围")
     private String scopeLevel;

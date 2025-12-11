@@ -15,19 +15,19 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.BooleanUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.dromara.warm.flow.core.dto.FlowParams;
 import org.dromara.warm.flow.core.entity.Instance;
 import org.dromara.warm.flow.core.entity.Node;
 import org.dromara.warm.flow.core.entity.Task;
 import org.dromara.warm.flow.core.entity.User;
+import org.dromara.warm.flow.core.enums.NodeType;
 import org.dromara.warm.flow.core.listener.GlobalListener;
 import org.dromara.warm.flow.core.listener.ListenerVariable;
 import org.dromara.warm.flow.core.service.InsService;
 import org.dromara.warm.flow.core.service.NodeService;
 import org.dromara.warm.flow.core.service.TaskService;
 import org.dromara.warm.flow.core.service.UserService;
-import org.dromara.warm.flow.core.service.impl.BpmConstants;
+import com.cmsr.onebase.module.bpm.core.enums.BpmConstants;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -62,10 +62,25 @@ public class BpmGlobalListener implements GlobalListener {
 
     @Override
     public void start(ListenerVariable listenerVariable) {
-        // 获取节点ext信息
+        Node node = listenerVariable.getNode();
 
+        // 刚发起流程，节点类型为开始节点
+        if (NodeType.isStart(node.getNodeType())) {
+            log.info("开始启动流程，节点nodeCode：{}", node.getNodeCode());
+            return;
+        }
+
+        // 获取节点ext信息
         String ext = listenerVariable.getNode().getExt();
-        log.info("开始启动流程，节点ext信息：{}", ext);
+        log.info("任务开始，节点ext信息：{}", ext);
+        BaseNodeExtDTO nodeExtDTO = BpmUtil.getNodeExtDTOByNodeCode(listenerVariable.getNode().getNodeCode(), listenerVariable.getInstance().getDefJson());
+
+        // 处理未操作的用户
+        if (Objects.equals(nodeExtDTO.getNodeType(), BpmNodeTypeEnum.APPROVER.getCode())
+                || Objects.equals(nodeExtDTO.getNodeType(), BpmNodeTypeEnum.EXECUTOR.getCode()))
+        {
+            handleUnOperatorUsersOnAssignment(listenerVariable);
+        }
     }
 
     public void assignment(ListenerVariable listenerVariable) {
@@ -108,8 +123,6 @@ public class BpmGlobalListener implements GlobalListener {
             }
         }
 
-        // 处理未操作的用户
-        handleUnOperatorUsersOnAssignment(listenerVariable);
     }
 
     public void finish(ListenerVariable listenerVariable) {
@@ -189,7 +202,7 @@ public class BpmGlobalListener implements GlobalListener {
         Map<String, Object> variable = listenerVariable.getVariable();
         Task task = listenerVariable.getTask();
 
-        Set<Long> approvalUserIds = new HashSet<>();
+        Set<String> approvalUserIds = new HashSet<>();
 
         for (User user : task.getUserList()) {
             // 只处理审批人类型的用户
@@ -197,7 +210,7 @@ public class BpmGlobalListener implements GlobalListener {
                 continue;
             }
 
-            approvalUserIds.add(Long.valueOf(user.getProcessedBy()));
+            approvalUserIds.add(user.getProcessedBy());
         }
 
         // 如果没有审批人类型的用户，则直接返回
@@ -206,11 +219,7 @@ public class BpmGlobalListener implements GlobalListener {
         }
 
         // todo：确保appId不为空
-        Long appId = MapUtils.getLong(variable, BpmConstants.VAR_APP_ID_KEY);
-
-        if (appId == null) {
-            return;
-        }
+        Long appId = listenerVariable.getDefinition().getApplicationId();
 
         List<BpmFlowAgentDO> activeAgents = agentRepository.findAllActiveAgent(appId, approvalUserIds);
 
@@ -234,7 +243,7 @@ public class BpmGlobalListener implements GlobalListener {
         }
 
         // 保存代理用户
-        agentInsRepository.insertBatch(agentInsList);
+        agentInsRepository.saveBatch(agentInsList);
     }
 
     private void handleUnOperatorUsersOnAssignment(ListenerVariable listenerVariable) {

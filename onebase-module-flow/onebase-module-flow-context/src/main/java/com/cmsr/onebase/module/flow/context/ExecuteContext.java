@@ -2,12 +2,13 @@ package com.cmsr.onebase.module.flow.context;
 
 import com.cmsr.onebase.module.flow.context.graph.NodeData;
 import com.google.common.base.Stopwatch;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.Data;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
@@ -16,62 +17,88 @@ import java.util.concurrent.TimeUnit;
  * @Author：huangjie
  * @Date：2025/9/5 16:12
  */
-@ToString
+@Data
 public class ExecuteContext implements Serializable {
 
-    @Setter
-    @Getter
     private String traceId;
 
-    @Setter
-    @Getter
+    /**
+     * 执行唯一标识，二次触发执行需要
+     */
+
     private String executionUuid;
 
 
-    @Setter
-    @Getter
+    private Long applicationId;
+
+
+    private Long versionTag;
+
+
     private Long processId;
 
-    @Setter
-    @Getter
-    private volatile boolean debugMode = false;
 
     /**
-     * 节点配置数据
+     * 触发用户ID
+     * 界面触发：登录用户
+     * 后台触发： 流程的创建人
      */
-    private volatile Map<String, NodeData> nodeDataMap = new HashMap<>();
+    private Long triggerUserId;
+
+    /**
+     * 触发用户部门ID
+     * 界面触发：登录用户
+     * 后台触发： 创建人部门
+     */
+    private Long triggerUserDeptId;
+
+    /**
+     * 元数据接口调用传递过来的，也原样传递回去
+     * SystemFieldConstants
+     */
+    private Map<String, String> systemFields;
+
+
+    private volatile boolean debugMode = false;
 
     //节点执行的结果
     private Map<String, Object> nodeProcessHisResults = new ConcurrentHashMap<>();
 
     private Map<String, Object> nodeProcessCurResults = new ConcurrentHashMap<>();
 
-    @Getter
-    @Setter
+
     private volatile boolean executeEnd = false;
 
-    @Setter
-    @Getter
+
     private volatile String executionEndNodeType;
 
     /**
      * 上次执行结束节点
      */
-    @Setter
-    @Getter
+
     private volatile String executionEndNodeTag;
 
-    @Setter
-    @Getter
-    private volatile Optional<Boolean> abnormalTermination;
+    /**
+     * 节点配置数据
+     */
+    private transient volatile Map<String, NodeData> nodeDataMap = new HashMap<>();
 
-    @Setter
-    @Getter
-    private volatile String terminationMessage;
+    /**
+     * 是否异常终止
+     */
 
-    private volatile Stopwatch stopwatch;
+    private transient volatile Boolean abnormalTermination = Boolean.FALSE;
 
-    private volatile List<String> logs;
+    /**
+     * 异常终止的错误信息
+     */
+
+    private transient volatile String terminationMessage;
+
+
+    private transient Stopwatch stopwatch;
+
+    private transient List<String> logs;
 
     public ExecuteContext() {
         this.stopwatch = Stopwatch.createStarted();

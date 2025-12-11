@@ -5,6 +5,7 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.number.MetadataAutoN
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.number.MetadataAutoNumberStateDO;
 import com.cmsr.onebase.module.metadata.core.enums.CommonStatusEnum;
 import com.cmsr.onebase.module.metadata.core.enums.BooleanStatusEnum;
+import com.cmsr.onebase.module.metadata.core.dal.database.MetadataAutoNumberConfigRepository;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataAutoNumberResetLogRepository;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataAutoNumberStateRepository;
 import jakarta.annotation.Resource;
@@ -20,11 +21,19 @@ public class AutoNumberStateBuildServiceImpl implements AutoNumberStateBuildServ
     private MetadataAutoNumberStateRepository stateRepository;
     @Resource
     private MetadataAutoNumberResetLogRepository resetLogRepository;
+    @Resource
+    private MetadataAutoNumberConfigRepository configRepository;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public long nextNumber(Long configId, java.time.LocalDateTime now) {
-        MetadataAutoNumberConfigDO cfg = configService.getByFieldId(configId);
+        // 先获取config对象以获取UUID
+        MetadataAutoNumberConfigDO configObj = configRepository.getById(configId);
+        if (configObj == null) {
+            throw new IllegalStateException("自动编号配置不存在");
+        }
+        String configUuid = configObj.getConfigUuid();
+        MetadataAutoNumberConfigDO cfg = configService.getByFieldId(configObj.getFieldUuid());
         // 使用新的枚举值：1-启用，0-禁用
         if (cfg == null || cfg.getIsEnabled() == null || !CommonStatusEnum.isEnabled(cfg.getIsEnabled())) {
             throw new IllegalStateException("自动编号未启用");
@@ -32,15 +41,15 @@ public class AutoNumberStateBuildServiceImpl implements AutoNumberStateBuildServ
         String periodKey = buildPeriodKey(cfg.getResetCycle(), now);
 
         // 简化实现：未加锁演示，实际可用版本号或数据库锁
-        MetadataAutoNumberStateDO st = stateRepository.findOneByPeriod(configId, periodKey);
+        MetadataAutoNumberStateDO st = stateRepository.findOneByPeriod(configUuid, periodKey);
         if (st == null) {
             st = new MetadataAutoNumberStateDO();
-            st.setConfigId(configId);
+            st.setConfigUuid(configUuid);
             st.setPeriodKey(periodKey);
             long start = cfg.getInitialValue() != null ? cfg.getInitialValue() : 1L;
             st.setCurrentValue(start - 1); // 初始化为初始值-1，后续+1再使用
-            st.setAppId(cfg.getAppId());
-            stateRepository.insert(st);
+            st.setApplicationId(cfg.getApplicationId());
+            stateRepository.save(st);
         }
         long next = st.getCurrentValue() + 1;
         // 溢出控制（仅当 FIXED_DIGITS 且不继续递增时回绕）
@@ -54,36 +63,42 @@ public class AutoNumberStateBuildServiceImpl implements AutoNumberStateBuildServ
         MetadataAutoNumberStateDO upd = new MetadataAutoNumberStateDO();
         upd.setId(st.getId());
         upd.setCurrentValue(next);
-        stateRepository.update(upd);
+        stateRepository.updateById(upd);
         return next;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void reset(Long configId, String periodKey, long nextValue, Long operator, String reason) {
-        MetadataAutoNumberStateDO st = stateRepository.findOneByPeriod(configId, periodKey);
+        // 先获取config对象以获取UUID
+        MetadataAutoNumberConfigDO configObj = configRepository.getById(configId);
+        if (configObj == null) {
+            throw new IllegalStateException("自动编号配置不存在");
+        }
+        String configUuid = configObj.getConfigUuid();
+        MetadataAutoNumberStateDO st = stateRepository.findOneByPeriod(configUuid, periodKey);
         Long prev = st != null ? st.getCurrentValue() : null;
         if (st == null) {
             st = new MetadataAutoNumberStateDO();
-            st.setConfigId(configId);
+            st.setConfigUuid(configUuid);
             st.setPeriodKey(periodKey);
             st.setCurrentValue(nextValue);
-            stateRepository.insert(st);
+            stateRepository.save(st);
         } else {
             MetadataAutoNumberStateDO upd = new MetadataAutoNumberStateDO();
             upd.setId(st.getId());
             upd.setCurrentValue(nextValue);
-            stateRepository.update(upd);
+            stateRepository.updateById(upd);
         }
         MetadataAutoNumberResetLogDO log = new MetadataAutoNumberResetLogDO();
-        log.setConfigId(configId);
+        log.setConfigId(configId); // ResetLogDO可能还没有改造UUID，使用configId
         log.setPeriodKey(periodKey);
         log.setPrevValue(prev);
         log.setNextValue(nextValue);
         log.setOperator(operator);
         log.setResetReason(reason);
-        log.setAppId(st != null ? st.getAppId() : null);
-        resetLogRepository.insert(log);
+        log.setApplicationId(st != null ? st.getApplicationId() : null);
+        resetLogRepository.save(log);
     }
 
     private String buildPeriodKey(String cycle, java.time.LocalDateTime now) {

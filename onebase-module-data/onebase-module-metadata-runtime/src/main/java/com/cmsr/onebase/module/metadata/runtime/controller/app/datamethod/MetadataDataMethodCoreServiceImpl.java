@@ -169,7 +169,7 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
 //        // 移除多表查询逻辑，直接使用单表分页
         MetadataBusinessEntityDO entity = validateEntityExists(entityId);
         List<MetadataEntityFieldDO> fields = getEntityFields(entityId);
-        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceId());
+        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceUuid());
         if (datasource == null) {
             throw exception(DATASOURCE_NOT_EXISTS);
         }
@@ -252,9 +252,9 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
             }
 
             // 应用数据权限过滤
-            if (permissionContext != null && loginUserCtx != null) {
+/*            if (permissionContext != null && loginUserCtx != null) {
                 permissionQueryHelper.applyQueryPermissionFilter(configs, permissionContext, loginUserCtx, fields);
-            }
+            }*/
 
             Set<String> fieldNames = fields.stream().map(MetadataEntityFieldDO::getFieldName).collect(Collectors.toSet());
             if (StringUtils.hasText(sortField) && fieldNames.contains(sortField)) {
@@ -316,9 +316,9 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
             }
 
             // 应用数据权限过滤到 count 查询
-            if (permissionContext != null && loginUserCtx != null) {
+/*            if (permissionContext != null && loginUserCtx != null) {
                 permissionQueryHelper.applyQueryPermissionFilter(countConfigs, permissionContext, loginUserCtx, fields);
-            }
+            }*/
 
             long total = temporaryService.count(quoteTableName(entity.getTableName()), countConfigs);
             DataSet dataSet = temporaryService.querys(quoteTableName(entity.getTableName()), configs);
@@ -343,7 +343,7 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
 
         MetadataBusinessEntityDO entity = validateEntityExists(entityId);
         List<MetadataEntityFieldDO> fields = getEntityFields(entityId);
-        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceId());
+        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceUuid());
         if (datasource == null) { throw exception(DATASOURCE_NOT_EXISTS); }
         AnylineService<?> temporaryService = temporaryDatasourceService.createTemporaryService(datasource);
         log.info("成功切换到数据源：{}", datasource.getCode());
@@ -595,6 +595,15 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
         loginUserCtx.setUserId(loginUser.getId());
         loginUserCtx.setApplicationId(loginUser.getApplicationId());
         return loginUserCtx;
+    }
+
+
+
+    @Override
+    protected Map<String, Object> processDataAndSetDefaults(Map<String, Object> data,
+            List<MetadataEntityFieldDO> fields) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'processDataAndSetDefaults'");
     }
 
 }

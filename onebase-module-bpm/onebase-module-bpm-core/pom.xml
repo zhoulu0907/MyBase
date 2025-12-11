@@ -28,8 +28,32 @@
         </dependency>
 
         <dependency>
+            <groupId>com.mybatis-flex</groupId>
+            <artifactId>mybatis-flex-codegen</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
             <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-module-bpm-engine-orm</artifactId>
+            <artifactId>onebase-module-app-api</artifactId>
+            <version>${revision}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-system-api</artifactId>
+            <version>${revision}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-bpm-engine-orm-mybatis-flex</artifactId>
+            <version>${revision}</version>
+        </dependency>
+
+           <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-bpm-engine-core</artifactId>
             <version>${revision}</version>
         </dependency>
 

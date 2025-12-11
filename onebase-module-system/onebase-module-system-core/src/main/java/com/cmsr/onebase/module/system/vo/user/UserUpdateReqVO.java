@@ -45,6 +45,9 @@ public class UserUpdateReqVO {
     @DiffLogField(name = "岗位", function = PostParseFunction.NAME)
     private Set<Long> postIds;
 
+    @Schema(description = "角色Ids", example = "[1,2]")
+    private Set<Long> roleIds;
+
     @Schema(description = "用户邮箱", example = "onebase@aaa.com")
     @Email(message = "邮箱格式不正确")
     @Size(max = 50, message = "邮箱长度不能超过 50 个字符")
@@ -59,9 +62,6 @@ public class UserUpdateReqVO {
     @Schema(description = "状态", example = "1")
     private Integer status;
 
-    @Schema(description = "角色Ids", example = "[1,2]")
-    private Set<Long> roleIds;
-
     @Schema(description = "用户性别，参见 SexEnum 枚举类", example = "1")
     @DiffLogField(name = "用户性别", function = SexParseFunction.NAME)
     private Integer sex;
@@ -69,14 +69,5 @@ public class UserUpdateReqVO {
     @Schema(description = "用户头像", example = "https://www.cmsr.com")
     @DiffLogField(name = "用户头像")
     private String avatar;
-
-    @Schema(description = "用户类型", example = "1")
-    @DiffLogField(name = "用户类型")
-    private Integer userType;
-
-    @Schema(description = "管理员类型", example = "2")
-    @DiffLogField(name = "管理员类型")
-    private Integer adminType;
-
 
 }

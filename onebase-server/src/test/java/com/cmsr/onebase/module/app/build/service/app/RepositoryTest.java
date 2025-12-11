@@ -1,27 +1,40 @@
 package com.cmsr.onebase.module.app.build.service.app;
 
-import com.cmsr.onebase.framework.common.pojo.PageParam;
-import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
+import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.security.TenantContextHolder;
+import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.module.app.core.dal.database.AppSqlQueryRepository;
-import com.cmsr.onebase.module.app.core.dto.auth.RoleMemberDTO;
+import com.cmsr.onebase.module.app.core.dal.database.app.AppApplicationRepository;
+import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthDataGroupRepository;
+import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthPermissionRepository;
+import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleRepository;
+import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
+import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageRepository;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthRoleDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppMenuDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePageDO;
+import com.cmsr.onebase.module.app.core.dal.mapper.AppAuthRoleMapper;
+import com.cmsr.onebase.module.app.core.enums.menu.MenuTypeEnum;
 import com.cmsr.onebase.module.app.core.impl.auth.AppAuthRoleUserImpl;
-import com.cmsr.onebase.module.etl.core.dal.database.ETLWorkflowRepository;
-import com.cmsr.onebase.module.etl.core.vo.WorkflowBriefVO;
-import com.cmsr.onebase.module.etl.core.vo.WorkflowPageReqVO;
+import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessRepository;
 import com.cmsr.onebase.server.OneBaseServerApplication;
-import com.mybatisflex.core.paginate.Page;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.mock.web.MockHttpServletRequest;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @Author：huangjie
  * @Date：2025/11/4 14:33
  */
+@Slf4j
 @Setter
 @SpringBootTest(classes = OneBaseServerApplication.class)
 public class RepositoryTest {
@@ -30,47 +43,70 @@ public class RepositoryTest {
     private AppSqlQueryRepository appSqlQueryRepository;
 
     @Autowired
+    private FlowProcessRepository flowProcessRepository;
+
+    @Autowired
     private AppAuthRoleUserImpl appAuthRoleUser;
 
     @Autowired
-    private ETLWorkflowRepository workflowRepository;
+    private AppMenuRepository appMenuRepository;
+
+    @Autowired
+    private AppAuthRoleMapper appAuthRoleMapper;
+
+    @Autowired
+    private AppAuthDataGroupRepository appAuthDataGroupRepository;
+
+    @Autowired
+    private AppApplicationServiceImpl appApplicationService;
+
+    @Autowired
+    private AppApplicationRepository appApplicationRepository;
+
+    @Autowired
+    private AppAuthPermissionRepository appAuthPermissionRepository;
+
+    @Autowired
+    private AppAuthRoleRepository appAuthRoleRepository;
+
+    @Autowired
+    private AppPageRepository appPageRepository;
+
+    @BeforeAll
+    public static void before() {
+        LoginUser loginUser = new LoginUser();
+        loginUser.setId(155019577667616800L);
+        SecurityFrameworkUtils.setLoginUser(loginUser, new MockHttpServletRequest());
+        //
+        TenantContextHolder.setTenantId(153935442021842944L);
+        ApplicationManager.setApplicationId(173020283873034240L);
+        ApplicationManager.setVersionTag(0L);
+        //
+    }
 
     @Test
-    void test() {
-        TenantContextHolder.setIgnore(true);
-        PageParam pageParam = new PageParam();
-        pageParam.setPageNo(1);
-        pageParam.setPageSize(10);
-        PageResult<RoleMemberDTO> result = appSqlQueryRepository.findRoleMembers(37775560235057154L, null, "dept", pageParam);
-        System.out.println(result);
-        System.out.println(result.getList());
-        System.out.println(result.getTotal());
+    void test1() {
+        List<AppAuthRoleDO> authRoleDOS = appAuthRoleRepository.findByUserIdAndApplicationId(155019577667616800L, 173020283873034240L);
+        log.info("authRoleDOS:{}", authRoleDOS);
     }
 
     @Test
     void test2() {
-        TenantContextHolder.setIgnore(true);
-        List<Long> ids = appSqlQueryRepository.findDeptHierarchyByUserId(85546007599284224L);
-
+        List<AppResourcePageDO> pages = appPageRepository.findPagesByMenuId(175770196824981504L);
+        log.info("pages:{}", pages);
     }
 
     @Test
     void test3() {
-        TenantContextHolder.setIgnore(true);
-        List<Long> ids = appSqlQueryRepository.findAllUserIdsByDeptIds(889796964974590L, 1);
-        System.out.println(ids);
+        List<AppMenuDO> result = appMenuRepository.findVisibleByAppId(173020283873034240L, Set.of(MenuTypeEnum.PAGE.getValue(), MenuTypeEnum.GROUP.getValue()));
+        log.info("result:{}", result);
     }
 
     @Test
     void test4() {
-        var result = workflowRepository.getById(47891273491857189L);
-        System.out.println(result);
+        List<AppMenuDO> result = appMenuRepository.findByApplicationId(173020283873034240L);
+        log.info("authRoleDOS:{}", result);
     }
 
-    @Test
-    void test5() {
-        Page page =Page.of(1, 10);
-        var result = workflowRepository.page(page);
-        System.out.println(result);
-    }
+
 }

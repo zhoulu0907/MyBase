@@ -7,7 +7,7 @@ spring:
 
   main:
     allow-circular-references: true # 允许循环依赖，因为项目是三层架构，无法避免这个情况。
-#    allow-bean-definition-overriding: false # 允许 Bean 覆盖，例如说 Feign 等会存在重复定义的服务
+  #    allow-bean-definition-overriding: false # 允许 Bean 覆盖，例如说 Feign 等会存在重复定义的服务
 
   # Servlet 配置
   servlet:
@@ -36,21 +36,6 @@ server:
       enabled: true
       charset: UTF-8 # 必须设置 UTF-8，避免 WebFlux 流式返回（AI 场景）会乱码问题
       force: true
-
---- #################### Spring Cloud 禁用配置 ####################
-
-spring:
-  cloud:
-    nacos:
-      discovery:
-        enabled: false # 禁用 Nacos 的注册发现
-      config:
-        enabled: false # 禁用 Nacos 的配置中心
-#    openfeign:
-#      lazy-attributes-resolution: true
-#      client:
-#        refresh-enabled: false
-
 --- #################### 接口文档配置 ####################
 
 springdoc:
@@ -64,6 +49,8 @@ springdoc:
 
 # Spring Data Redis 配置
 spring:
+  redis:
+    key-prefix: obn-
   data:
     redis:
       repositories:
@@ -116,6 +103,7 @@ onebase:
     ignore-urls:
       - /jmreport/* # 积木报表，无法携带租户编号
       - /runtime/flow/remote-call/*
+      - /runtime/app/application/get/**
     ignore-visit-urls:
       - /admin-api/system/user/profile/**
       - /admin-api/system/auth/**
@@ -153,3 +141,12 @@ anyline:
   is-log-sql-param: false
   is-log-sql-when-error: true
   is-log-sql-param-when-error: true
+
+mybatis-flex:
+  print-sql: true
+  configuration:
+    mapUnderscoreToCamelCase: true
+pagehelper:
+  helperDialect: postgresql
+  reasonable: false
+  defaultCount: true

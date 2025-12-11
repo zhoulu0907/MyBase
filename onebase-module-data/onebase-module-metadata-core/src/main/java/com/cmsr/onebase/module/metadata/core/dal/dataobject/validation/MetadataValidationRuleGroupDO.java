@@ -1,13 +1,12 @@
 package com.cmsr.onebase.module.metadata.core.dal.dataobject.validation;
 
-import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
+import com.cmsr.onebase.framework.orm.entity.BaseBizEntity;
+import com.cmsr.onebase.framework.orm.entity.BaseTenantEntity;
 import com.cmsr.onebase.module.metadata.core.enums.ValidationStatusEnum;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.experimental.SuperBuilder;
+import com.mybatisflex.annotation.Column;
+import com.mybatisflex.annotation.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 
 /**
  * 规则组表 DO
@@ -17,67 +16,80 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-@SuperBuilder
-@NoArgsConstructor
-@AllArgsConstructor
-@Table(name = "metadata_validation_rule_group")
-public class MetadataValidationRuleGroupDO extends TenantBaseDO {
+@Table(value = "metadata_validation_rule_group")
+public class MetadataValidationRuleGroupDO extends BaseBizEntity {
 
-    // 列名常量
-    public static final String RG_NAME     = "rg_name";
-    public static final String RG_DESC     = "rg_desc";
-    public static final String RG_STATUS   = "rg_status";
-    public static final String VAL_METHOD  = "val_method";
-    public static final String POP_PROMPT  = "pop_prompt";
-    public static final String POP_TYPE    = "pop_type";
-    public static final String VALIDATION_TYPE = "validation_type";
-    public static final String ENTITY_ID = "entity_id";
-
-    public MetadataValidationRuleGroupDO setId(Long id) {
-        super.setId(id);
-        return this;
-    }
+    /**
+     * 规则组UUID
+     * <p>
+     * 用于跨应用、跨版本的唯一标识，与 application_id、version_tag 组成联合唯一约束
+     */
+    @Column(value = "group_uuid", comment = "规则组UUID")
+    private String groupUuid;
 
     /**
      * 规则组名称，如"客户信用评级规则"
      */
+    @Column(value = "rg_name", comment = "规则组名称")
     private String rgName;
 
     /**
      * 规则组描述
      */
+    @Column(value = "rg_desc", comment = "规则组描述")
     private String rgDesc;
 
     /**
      * 状态：1-激活，0-非激活
      * @see ValidationStatusEnum
      */
+    @Column(value = "rg_status", comment = "状态：1-激活，0-非激活")
     private Integer rgStatus;
 
     /**
      * 校验方式，如：满足条件时，不允许提交表单，并弹窗提示
      */
+    @Column(value = "val_method", comment = "校验方式")
     private String valMethod;
 
     /**
      * 弹窗提示内容
      */
+    @Column(value = "pop_prompt", comment = "弹窗提示内容")
     private String popPrompt;
-
 
     /**
      * 弹窗类型，如：短提示弹窗，长提示弹窗等
      */
+    @Column(value = "pop_type", comment = "弹窗类型")
     private String popType;
 
     /**
      * 校验类型：REQUIRED / UNIQUE / LENGTH / RANGE / FORMAT / CHILD_NOT_EMPTY / SELF_DEFINED
      */
+    @Column(value = "validation_type", comment = "校验类型")
     private String validationType;
 
     /**
-     * 实体 id
-     * 
+     * 实体UUID
+     * <p>
+     * 关联 metadata_business_entity.entity_uuid
      */
-    private Long entityId;
+    @Column(value = "entity_uuid", comment = "实体UUID")
+    private String entityUuid;
+
+    /**
+     * 应用ID
+     */
+    @Column(value = "application_id", comment = "应用ID")
+    private Long applicationId;
+
+    /**
+     * 版本标识
+     * <p>
+     * 用于跨应用、跨版本的唯一标识，与 application_id 组成联合唯一约束
+     */
+    @Column(value = "version_tag", comment = "版本标识")
+    private Long versionTag;
+
 }

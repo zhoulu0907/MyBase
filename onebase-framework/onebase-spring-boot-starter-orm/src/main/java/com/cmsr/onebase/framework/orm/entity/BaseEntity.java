@@ -32,7 +32,4 @@ public class BaseEntity {
     @Column(value = "deleted", comment = "删除标识")
     private Long deleted;
 
-    @Column(value = "lock_version", comment = "乐观锁")
-    private Long lockVersion;
-
 }

@@ -1,10 +1,7 @@
 package com.cmsr.onebase.module.flow.build.vo;
 
-import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.NullNode;
 import io.swagger.v3.oas.annotations.media.Schema;
-import com.fasterxml.jackson.databind.node.TextNode;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -15,7 +12,7 @@ public class UpdateFlowConnectorScriptReqVO {
 
     @Schema(description = "脚本ID")
     @NotNull(message = "脚本ID不能为空")
-    private Long scriptId;
+    private Long id;
 
     @Schema(description = "脚本名称")
     @NotBlank(message = "脚本名称不能为空")
@@ -37,23 +34,10 @@ public class UpdateFlowConnectorScriptReqVO {
     @Schema(description = "输出参数配置")
     private JsonNode outputParameter;
 
-    public String getInputParameter() {
-        if (this.inputParameter == null || this.inputParameter instanceof NullNode) {
-            return null;
-        }
-        if (this.inputParameter instanceof TextNode) {
-            return this.inputParameter.asText();
-        }
-        return JsonUtils.toJsonString(this.inputParameter);
-    }
+    @Schema(description = "输入定义")
+    private JsonNode inputSchema;
 
-    public String getOutputParameter() {
-        if (this.outputParameter == null || this.outputParameter instanceof NullNode) {
-            return null;
-        }
-        if (this.outputParameter instanceof TextNode) {
-            return this.outputParameter.asText();
-        }
-        return JsonUtils.toJsonString(this.outputParameter);
-    }
+    @Schema(description = "输出定义")
+    private JsonNode outputSchema;
+
 }

@@ -1,12 +1,11 @@
 package com.cmsr.onebase.framework.orm.repo;
 
+import com.cmsr.onebase.framework.common.enums.VersionTagEnum;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.orm.entity.BaseBizEntity;
 import com.mybatisflex.core.BaseMapper;
 import com.mybatisflex.core.paginate.Page;
-import com.mybatisflex.core.query.CPI;
-import com.mybatisflex.core.query.QueryCondition;
-import com.mybatisflex.core.query.QueryMethods;
-import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.core.query.*;
 import com.mybatisflex.core.util.CollectionUtil;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -18,15 +17,26 @@ import java.util.List;
 @Slf4j
 public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity> extends ServiceImpl<M, T> {
 
-    protected QueryWrapper injectBizFilter(QueryWrapper queryWrapper) {
-        // TODO: add filters like applicationId, versionFlag
-//        Long applicationId = XXXXX;
-//        var versionStatus = 0,1,xxxxxxx;
-//        return queryWrapper
-//                .eq("version_flag", versionFlag);
-        log.debug("注入SQL查询条件");
-        return queryWrapper;
+    protected void injectQueryFilter(QueryWrapper queryWrapper) {
+        if (!QueryWrapperUtils.isQueryFilterable(queryWrapper)) {
+            return;
+        }
+        QueryTable queryTable = QueryWrapperUtils.getQueryTable(queryWrapper);
+        QueryColumn applicationColumn;
+        QueryColumn versionTagColumn;
+        if (queryTable != null) {
+            applicationColumn = new QueryColumn(queryTable, BaseBizEntity.APPLICATION_ID);
+            versionTagColumn = new QueryColumn(queryTable, BaseBizEntity.VERSION_TAG);
+        } else {
+            applicationColumn = new QueryColumn(BaseBizEntity.APPLICATION_ID);
+            versionTagColumn = new QueryColumn(BaseBizEntity.VERSION_TAG);
+        }
+        Long applicationId = ApplicationManager.getApplicationId();
+        Long versionTag = ApplicationManager.getVersionTag();
+        queryWrapper.and(applicationColumn.eq(applicationId).when(!ApplicationManager.isIgnoreApplicationCondition()));
+        queryWrapper.and(versionTagColumn.eq(versionTag).when(!ApplicationManager.isIgnoreVersionTagCondition()));
     }
+
 
     //region ===== 查询（查）操作 =====
 
@@ -38,8 +48,8 @@ public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity>
      */
     @Override
     public T getOne(QueryWrapper query) {
-        QueryWrapper queryWrapper = this.injectBizFilter(query);
-        return getMapper().selectOneByQuery(queryWrapper);
+        injectQueryFilter(query);
+        return getMapper().selectOneByQuery(query);
     }
 
     /**
@@ -63,8 +73,8 @@ public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity>
      */
     @Override
     public <R> R getOneAs(QueryWrapper query, Class<R> asType) {
-        QueryWrapper queryWrapper = this.injectBizFilter(query);
-        return getMapper().selectOneByQueryAs(queryWrapper, asType);
+        this.injectQueryFilter(query);
+        return getMapper().selectOneByQueryAs(query, asType);
     }
 
     /**
@@ -87,8 +97,8 @@ public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity>
      */
     @Override
     public Object getObj(QueryWrapper query) {
-        QueryWrapper queryWrapper = this.injectBizFilter(query);
-        return getMapper().selectObjectByQuery(queryWrapper);
+        this.injectQueryFilter(query);
+        return getMapper().selectObjectByQuery(query);
     }
 
     /**
@@ -100,8 +110,8 @@ public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity>
      */
     @Override
     public <R> R getObjAs(QueryWrapper query, Class<R> asType) {
-        QueryWrapper queryWrapper = this.injectBizFilter(query);
-        return getMapper().selectObjectByQueryAs(queryWrapper, asType);
+        this.injectQueryFilter(query);
+        return getMapper().selectObjectByQueryAs(query, asType);
     }
 
     /**
@@ -112,8 +122,8 @@ public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity>
      */
     @Override
     public List<Object> objList(QueryWrapper query) {
-        QueryWrapper queryWrapper = this.injectBizFilter(query);
-        return getMapper().selectObjectListByQuery(queryWrapper);
+        this.injectQueryFilter(query);
+        return getMapper().selectObjectListByQuery(query);
     }
 
     /**
@@ -125,8 +135,8 @@ public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity>
      */
     @Override
     public <R> List<R> objListAs(QueryWrapper query, Class<R> asType) {
-        QueryWrapper queryWrapper = this.injectBizFilter(query);
-        return getMapper().selectObjectListByQueryAs(queryWrapper, asType);
+        this.injectQueryFilter(query);
+        return getMapper().selectObjectListByQueryAs(query, asType);
     }
 
     /**
@@ -137,8 +147,8 @@ public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity>
      */
     @Override
     public List<T> list(QueryWrapper query) {
-        QueryWrapper queryWrapper = this.injectBizFilter(query);
-        return getMapper().selectListByQuery(queryWrapper);
+        this.injectQueryFilter(query);
+        return getMapper().selectListByQuery(query);
     }
 
     /**
@@ -150,8 +160,8 @@ public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity>
      */
     @Override
     public <R> List<R> listAs(QueryWrapper query, Class<R> asType) {
-        QueryWrapper queryWrapper = this.injectBizFilter(query);
-        return getMapper().selectListByQueryAs(queryWrapper, asType);
+        this.injectQueryFilter(query);
+        return getMapper().selectListByQueryAs(query, asType);
     }
 
     /**
@@ -162,8 +172,9 @@ public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity>
      */
     @Override
     public List<T> listByIds(Collection<? extends Serializable> ids) {
-        QueryWrapper queryWrapper = this.injectBizFilter(QueryWrapper.create().in("id", ids));
-        return getMapper().selectListByQuery(queryWrapper);
+        QueryWrapper query = QueryWrapper.create().in("id", ids);
+        this.injectQueryFilter(query);
+        return getMapper().selectListByQuery(query);
     }
     //endregion ===== 查询（查）操作 =====
 
@@ -177,8 +188,8 @@ public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity>
      */
     @Override
     public boolean exists(QueryWrapper query) {
-        QueryWrapper queryWrapper = this.injectBizFilter(query);
-        return exists(CPI.getWhereQueryCondition(queryWrapper));
+        this.injectQueryFilter(query);
+        return exists(CPI.getWhereQueryCondition(query));
     }
 
     /**
@@ -191,9 +202,10 @@ public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity>
     public boolean exists(QueryCondition condition) {
         // 根据查询条件构建 SQL 语句
         // SELECT 1 FROM table WHERE ... LIMIT 1
-        QueryWrapper queryWrapper = this.injectBizFilter(QueryMethods.selectOne().where(condition).limit(1));
+        QueryWrapper query = QueryMethods.selectOne().where(condition).limit(1);
+        this.injectQueryFilter(query);
         // 获取数据集合，空集合：[] 不存在数据，有一个元素的集合：[1] 存在数据
-        List<Object> objects = getMapper().selectObjectListByQuery(queryWrapper);
+        List<Object> objects = getMapper().selectObjectListByQuery(query);
         // 判断是否存在数据
         return CollectionUtil.isNotEmpty(objects);
     }
@@ -206,8 +218,8 @@ public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity>
      */
     @Override
     public long count(QueryWrapper query) {
-        QueryWrapper queryWrapper = this.injectBizFilter(query);
-        return getMapper().selectCountByQuery(queryWrapper);
+        this.injectQueryFilter(query);
+        return getMapper().selectCountByQuery(query);
     }
     //endregion ===== 数量查询操作 =====
 
@@ -223,8 +235,60 @@ public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity>
      */
     @Override
     public <R> Page<R> pageAs(Page<R> page, QueryWrapper query, Class<R> asType) {
-        QueryWrapper queryWrapper = this.injectBizFilter(query);
-        return getMapper().paginateAs(page, queryWrapper, asType);
+        this.injectQueryFilter(query);
+        return getMapper().paginateAs(page, query, asType);
+    }
+
+    // 1、备份运行态数据为历史版本
+    public void moveRuntimeToHistory(Long applicationId, Long versionTag) {
+        // 实现备份逻辑
+        // 执行update动作。
+        // 1、update：把versionTag为1的数据update为新值（参数`versionTag`）
+        QueryColumn applicationIdCol = new QueryColumn(BaseBizEntity.APPLICATION_ID);
+        QueryColumn versionTagCol = new QueryColumn(BaseBizEntity.VERSION_TAG);
+        this.updateChain()
+                .set(versionTagCol, versionTag)
+                .where(applicationIdCol.eq(applicationId))
+                .where(versionTagCol.eq(VersionTagEnum.RUNTIME.getValue()))
+                .update();
+    }
+
+    // 2、编辑态数据变成运行态数据
+    public void copyEditToRuntime(Long applicationId) {
+        // 实现发布逻辑
+        // 执行select 和 insert 动作。
+        // 1、select： versionTag为0的数据
+        // 2、insert：把第一步查询出来的数据插入为versionTag为1
+        QueryColumn applicationIdCol = new QueryColumn(BaseBizEntity.APPLICATION_ID);
+        QueryColumn versionTagCol = new QueryColumn(BaseBizEntity.VERSION_TAG);
+        QueryWrapper queryWrapper = QueryWrapper.create()
+                .where(applicationIdCol.eq(applicationId))
+                .where(versionTagCol.eq(VersionTagEnum.BUILD.getValue()));
+        List<T> entities = this.getMapper().selectListByQuery(queryWrapper);
+        entities.forEach(entity -> {
+            entity.setId(null);
+            entity.setVersionTag(VersionTagEnum.RUNTIME.getValue());
+        });
+        this.saveBatch(entities);
+    }
+
+    // 3、历史版本数据回滚为运行态数据
+    public void copyHistoryToRuntime(Long applicationId, Long versionTag) {
+        // 实现回滚逻辑
+        // 执行select、insert 动作。
+        // 1、select：查询versionTag为参数`versionTag`值的数据
+        // 2、insert：插入第一步查询出来的数据，versionTag为1
+        QueryColumn applicationIdCol = new QueryColumn(BaseBizEntity.APPLICATION_ID);
+        QueryColumn versionTagCol = new QueryColumn(BaseBizEntity.VERSION_TAG);
+        QueryWrapper queryWrapper = QueryWrapper.create()
+                .where(applicationIdCol.eq(applicationId))
+                .where(versionTagCol.eq(versionTag));
+        List<T> entities = this.getMapper().selectListByQuery(queryWrapper);
+        entities.forEach(entity -> {
+            entity.setId(null);
+            entity.setVersionTag(VersionTagEnum.RUNTIME.getValue());
+        });
+        this.saveBatch(entities);
     }
     //endregion ===== 分页查询操作 =====
 }

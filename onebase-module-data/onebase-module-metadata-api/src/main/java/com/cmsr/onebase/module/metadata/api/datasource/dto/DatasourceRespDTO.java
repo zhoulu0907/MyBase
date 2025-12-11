@@ -18,6 +18,9 @@ public class DatasourceRespDTO {
     @Schema(description = "数据源编号", example = "1024")
     private Long id;
 
+    @Schema(description = "数据源UUID", example = "01onal1s-0000-0000-0000-000000000001")
+    private String datasourceUuid;
+
     @Schema(description = "数据源名称", example = "用户数据库")
     private String datasourceName;
 
@@ -33,11 +36,11 @@ public class DatasourceRespDTO {
     @Schema(description = "描述", example = "用户相关数据的数据源")
     private String description;
 
-    @Schema(description = "运行模式", example = "0")
-    private Integer runMode;
+    @Schema(description = "版本标识", example = "0")
+    private Long versionTag;
 
     @Schema(description = "应用ID", example = "1")
-    private Long appId;
+    private Long applicationId;
     
     @Schema(description = "数据源来源，0：系统默认，1：自有数据源，2：外部数据源", example = "1")
     private Integer datasourceOrigin;

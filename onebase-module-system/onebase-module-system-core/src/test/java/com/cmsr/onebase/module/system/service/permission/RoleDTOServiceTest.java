@@ -3,17 +3,16 @@ package com.cmsr.onebase.module.system.service.permission;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.exception.ServiceException;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.system.dal.database.user.AdminUserDataRepository;
-import com.cmsr.onebase.module.system.vo.role.RoleInsertReqVO;
-import com.cmsr.onebase.module.system.vo.role.RolePageReqVO;
-import com.cmsr.onebase.module.system.vo.role.RoleUpdateReqVO;
-import com.cmsr.onebase.module.system.dal.database.user.AbstractUserDataRepository;
 import com.cmsr.onebase.module.system.dal.database.RoleDataRepository;
 import com.cmsr.onebase.module.system.dal.database.UserRoleDataRepository;
+import com.cmsr.onebase.module.system.dal.database.user.UserDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
 import com.cmsr.onebase.module.system.enums.permission.DataScopeEnum;
 import com.cmsr.onebase.module.system.enums.permission.RoleCodeEnum;
 import com.cmsr.onebase.module.system.enums.permission.RoleTypeEnum;
+import com.cmsr.onebase.module.system.vo.role.RoleInsertReqVO;
+import com.cmsr.onebase.module.system.vo.role.RolePageReqVO;
+import com.cmsr.onebase.module.system.vo.role.RoleUpdateReqVO;
 import jakarta.annotation.Resource;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.junit.jupiter.api.AfterEach;
@@ -67,7 +66,7 @@ public class RoleDTOServiceTest {
     private UserRoleDataRepository userRoleDataRepository;
 
     @Resource
-    private AdminUserDataRepository adminUserDataRepository;
+    private UserDataRepository userDataRepository;
 
     /**
      * 每个测试后清理数据
@@ -77,7 +76,7 @@ public class RoleDTOServiceTest {
         // 清理测试数据
         userRoleDataRepository.deleteByConfig(new DefaultConfigStore());
         roleDataRepository.deleteByConfig(new DefaultConfigStore());
-        adminUserDataRepository.deleteByConfig(new DefaultConfigStore());
+        userDataRepository.deleteByConfig(new DefaultConfigStore());
     }
 
     /**

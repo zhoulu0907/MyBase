@@ -9,7 +9,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 
-@Schema(description = "数据工厂 - ETL - 调度配置请求VO")
+@Schema(description = "数据工厂 - Etl - 调度配置请求VO")
 @Data
 public class ScheduleConfigVO {
 
@@ -17,9 +17,9 @@ public class ScheduleConfigVO {
     @NotNull
     private Long applicationId;
 
-    @Schema(description = "ETL ID")
-    @NotNull
-    private Long workflowId;
+    @Schema(description = "ETL Uuid")
+    @NotBlank
+    private String flowUuid;
 
     @Schema(description = "ETL名称")
     @NotBlank

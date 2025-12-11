@@ -1,70 +1,62 @@
 package com.cmsr.onebase.module.bpm.core.dal.dataobject;
 
-import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
-import jakarta.persistence.Column;
-import jakarta.persistence.Table;
+import com.cmsr.onebase.framework.orm.entity.BaseTenantEntity;
+import com.mybatisflex.annotation.Table;
 import lombok.Data;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 /**
- * 流程代理实例表
+ * 代理关系实例表 实体类。
  *
  * @author liyang
- * @date 2025-11-22
+ * @since 2025-11-29
  */
 @Data
-@Table(name = "bpm_flow_agent_ins")
-public class BpmFlowAgentInsDO extends TenantBaseDO {
-    public static final String PRINCIPAL_ID = "principal_id";
+@Table("bpm_flow_agent_ins")
+public class BpmFlowAgentInsDO extends BaseTenantEntity implements Serializable {
 
-    public static final String AGENT_ID = "agent_id";
-
-    public static final String AGENT_NAME = "agent_name";
-
-    public static final String PRINCIPAL_NAME = "principal_name";
-
-    public static final String TASK_ID = "task_id";
-
-    public static final String INSTANCE_ID = "instance_id";
-
-    /**
-     * 被代理人用户ID
-     */
-    @Column(name = PRINCIPAL_ID)
-    private Long principalId;
-
-    /**
-    *被代理人用户名称
-     */
-    @Column(name = PRINCIPAL_NAME)
-    private String principalName;
-
-    /**
-     * 代理人用户ID
-     */
-    @Column(name = AGENT_ID)
-    private Long agentId;
-
-    /**
-     * 代理人用户名称
-     */
-    @Column(name = AGENT_NAME)
-    private String agentName;
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     /**
      * 任务ID
      */
-    @Column(name = TASK_ID)
     private Long taskId;
 
     /**
      * 流程实例ID
      */
-    @Column(name = INSTANCE_ID)
     private Long instanceId;
 
     /**
-     * 是否执行者
+     * 被代理人ID
      */
-    @Column(name = "is_executor")
+    private String principalId;
+
+    /**
+     * 被代理人用户名称
+     */
+    private String principalName;
+
+    /**
+     * 代理人ID
+     */
+    private String agentId;
+
+    /**
+     * 代理人用户名称
+     */
+    private String agentName;
+
+    /**
+     * 是否执行人：0=未操作, 1=执行人
+     */
     private Integer isExecutor;
+
+    /**
+     * 乐观锁
+     */
+    private Long lockVersion;
 }

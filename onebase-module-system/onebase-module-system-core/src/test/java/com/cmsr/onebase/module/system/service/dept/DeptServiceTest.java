@@ -3,7 +3,7 @@ package com.cmsr.onebase.module.system.service.dept;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.exception.ServiceException;
 import com.cmsr.onebase.module.system.dal.database.dept.DeptDataRepository;
-import com.cmsr.onebase.module.system.dal.database.user.AdminUserDataRepository;
+import com.cmsr.onebase.module.system.dal.database.user.UserDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.enums.user.UserStatusEnum;
@@ -60,7 +60,7 @@ public class DeptServiceTest {
     private DeptDataRepository deptDataRepository;
 
     @Resource
-    private AdminUserDataRepository adminUserDataRepository;
+    private UserDataRepository userDataRepository;
 
     /**
      * 每个测试后清理数据
@@ -68,7 +68,7 @@ public class DeptServiceTest {
     @AfterEach
     public void tearDown() {
         // 清理测试数据
-        adminUserDataRepository.deleteByConfig(new DefaultConfigStore());
+        userDataRepository.deleteByConfig(new DefaultConfigStore());
         deptDataRepository.deleteByConfig(new DefaultConfigStore());
     }
 
@@ -213,7 +213,7 @@ public class DeptServiceTest {
         // 创建禁用状态的用户
         AdminUserDO disabledUser = createTestUser("disabled1", dept.getId());
         disabledUser.setStatus(UserStatusEnum.DISABLE.getStatus());
-        adminUserDataRepository.update(disabledUser);
+        userDataRepository.update(disabledUser);
 
         // 执行测试
         DeptListReqVO reqVO = new DeptListReqVO();
@@ -679,7 +679,7 @@ public class DeptServiceTest {
         user.setMobile("138888888" + (username.hashCode() % 90 + 10)); // 生成不同的手机号
         user.setDeptId(deptId);
         user.setTenantId(0L);
-        return adminUserDataRepository.insert(user);
+        return userDataRepository.insert(user);
     }
 }
 

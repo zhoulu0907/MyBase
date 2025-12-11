@@ -11,7 +11,7 @@ import java.io.Serializable;
 @Data
 public class SortItem implements Serializable {
 
-    private Long sortField;
+    private String sortField;
 
     private String sortType;
 

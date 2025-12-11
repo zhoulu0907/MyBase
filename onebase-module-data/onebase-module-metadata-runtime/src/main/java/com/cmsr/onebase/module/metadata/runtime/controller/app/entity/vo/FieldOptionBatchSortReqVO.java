@@ -20,6 +20,6 @@ public class FieldOptionBatchSortReqVO {
     private Long fieldId;
 
     @Schema(description = "排序项")
-    private List<SortItemDTO> items;
+    private List<SortItemVO> items;
 }
 

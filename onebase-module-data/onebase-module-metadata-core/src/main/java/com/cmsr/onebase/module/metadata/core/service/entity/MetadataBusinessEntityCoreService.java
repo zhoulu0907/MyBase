@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.metadata.core.service.entity;
 
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusinessEntityDO;
+import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.validation.Valid;
 
 import java.util.List;
@@ -45,6 +46,26 @@ public interface MetadataBusinessEntityCoreService {
     MetadataBusinessEntityDO getBusinessEntity(Long id);
 
     /**
+     * 根据UUID获得业务实体
+     *
+     * @param entityUuid 业务实体UUID
+     * @return 业务实体DO
+     */
+    MetadataBusinessEntityDO getBusinessEntityByUuid(String entityUuid);
+
+    /**
+     * 根据UUID或ID获得业务实体 - 兼容方法
+     *
+     * @param entityUuidOrId 业务实体UUID或ID字符串
+     * @return 业务实体DO
+     * @deprecated 请使用 {@link #getBusinessEntityByUuid(String)} 方法
+     */
+    @Deprecated
+    default MetadataBusinessEntityDO getBusinessEntity(String entityUuidOrId) {
+        return getBusinessEntityByUuid(entityUuidOrId);
+    }
+
+    /**
      * 获得业务实体列表
      *
      * @return 业务实体列表
@@ -59,29 +80,38 @@ public interface MetadataBusinessEntityCoreService {
      */
     MetadataBusinessEntityDO getBusinessEntityByCode(String code);
 
-    /**
-     * 根据数据源ID获得业务实体列表
+     /**
+     * 根据表名获得业务实体
      *
-     * @param datasourceId 数据源ID
+     * @param tableName 表名
+     * @return 业务实体
+     */
+    MetadataBusinessEntityDO getBusinessEntityByTableName(String tableName);
+
+
+    /**
+     * 根据数据源UUID获得业务实体列表
+     *
+     * @param datasourceUuid 数据源UUID
      * @return 业务实体列表
      */
-    List<MetadataBusinessEntityDO> getBusinessEntityListByDatasourceId(Long datasourceId);
+    List<MetadataBusinessEntityDO> getBusinessEntityListByDatasourceUuid(String datasourceUuid);
 
     /**
      * 根据条件查询业务实体列表
      *
-     * @param configStore 查询条件
+     * @param queryWrapper 查询条件
      * @return 业务实体列表
      */
-    List<MetadataBusinessEntityDO> findAllByConfig(org.anyline.data.param.init.DefaultConfigStore configStore);
+    List<MetadataBusinessEntityDO> findAllByConfig(QueryWrapper queryWrapper);
 
     /**
      * 根据条件统计业务实体数量
      *
-     * @param configStore 查询条件
+     * @param queryWrapper 查询条件
      * @return 业务实体数量
      */
-    long countByConfig(org.anyline.data.param.init.DefaultConfigStore configStore);
+    long countByConfig(QueryWrapper queryWrapper);
 
     // TODO: 以下方法需要在build模块中实现，涉及VO转换
     /*

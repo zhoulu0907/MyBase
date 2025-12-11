@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.metadata.core.service.datasource;
 
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
+import com.cmsr.onebase.framework.common.util.string.UuidUtils;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataDatasourceRepository;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataDatasourceDO;
 import jakarta.annotation.Resource;
@@ -33,6 +34,11 @@ public class MetadataDatasourceCoreServiceImpl implements MetadataDatasourceCore
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long createDatasource(@Valid MetadataDatasourceDO datasource) {
+        // 生成 UUID
+        if (datasource.getDatasourceUuid() == null || datasource.getDatasourceUuid().isEmpty()) {
+            datasource.setDatasourceUuid(UuidUtils.getUuid());
+        }
+
         // 设置创建人和时间
         Long currentUserId = SecurityFrameworkUtils.getLoginUserId();
         LocalDateTime now = LocalDateTime.now();
@@ -42,10 +48,10 @@ public class MetadataDatasourceCoreServiceImpl implements MetadataDatasourceCore
         datasource.setUpdateTime(now);
 
         // 插入数据源
-        metadataDatasourceRepository.insert(datasource);
+        metadataDatasourceRepository.save(datasource);
 
-        log.info("创建数据源成功，ID: {}，创建人: {}，创建时间: {}",
-                datasource.getId(), currentUserId, now);
+        log.info("创建数据源成功，ID: {}，UUID: {}，创建人: {}，创建时间: {}",
+                datasource.getId(), datasource.getDatasourceUuid(), currentUserId, now);
         return datasource.getId();
     }
 
@@ -53,22 +59,20 @@ public class MetadataDatasourceCoreServiceImpl implements MetadataDatasourceCore
     @Transactional(rollbackFor = Exception.class)
     public Long createDefaultDatasource(Long appId, String appUid, String datasourceType, String configJson) {
         // 构建默认数据源DO
-        MetadataDatasourceDO datasource = MetadataDatasourceDO.builder()
-                .datasourceName("默认数据源")
-                .code("default_" + System.currentTimeMillis()) // 确保编码唯一
-                .datasourceType(datasourceType)
-                .config(configJson)
-                .description("系统默认数据源")
-                .runMode(1)
-                .datasourceOrigin(0) // 系统默认
-                .appId(appId) // 设置应用ID - 修复数据插入失败问题
-                .build();
+        MetadataDatasourceDO datasource = new MetadataDatasourceDO();
+        datasource.setDatasourceName("默认数据源");
+        datasource.setCode("default_" + System.currentTimeMillis());
+        datasource.setDatasourceType(datasourceType);
+        datasource.setConfig(configJson);
+        datasource.setDescription("系统默认数据源");
+        datasource.setDatasourceOrigin(0);
+        datasource.setApplicationId(appId);
 
         // 创建数据源
         Long datasourceId = createDatasource(datasource);
 
-        // 创建关联关系
-        createAppDatasourceRelation(appId, datasourceId, datasourceType, appUid);
+        // 创建关联关系（使用数据源UUID）
+        createAppDatasourceRelation(appId, datasource.getDatasourceUuid(), datasourceType, appUid);
 
         log.info("创建默认数据源成功，数据源ID: {}，应用ID: {}", datasourceId, appId);
         return datasourceId;
@@ -83,6 +87,21 @@ public class MetadataDatasourceCoreServiceImpl implements MetadataDatasourceCore
         return datasource;
     }
 
+    /**
+     * 根据数据源ID（String）获取数据源（兼容旧代码）
+     * @deprecated 请使用 getDatasourceByUuid(String)
+     * @param id 数据源ID（可能是Long字符串或UUID）
+     * @return 数据源DO
+     */
+    @Deprecated
+    public MetadataDatasourceDO getDatasource(String id) {
+        if (id == null || id.trim().isEmpty()) {
+            throw exception(DATASOURCE_NOT_EXISTS);
+        }
+        // 尝试按UUID查询
+        return getDatasourceByUuid(id);
+    }
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateDatasource(@Valid MetadataDatasourceDO datasource) {
@@ -95,7 +114,7 @@ public class MetadataDatasourceCoreServiceImpl implements MetadataDatasourceCore
         datasource.setUpdateTime(LocalDateTime.now());
 
         // 更新数据源
-        metadataDatasourceRepository.update(datasource);
+        metadataDatasourceRepository.updateById(datasource);
 
         log.info("更新数据源成功，ID: {}，更新人: {}", datasource.getId(), currentUserId);
     }
@@ -107,7 +126,7 @@ public class MetadataDatasourceCoreServiceImpl implements MetadataDatasourceCore
         validateDatasourceExists(id);
 
         // 删除数据源
-        metadataDatasourceRepository.deleteById(id);
+        metadataDatasourceRepository.removeById(id);
 
         log.info("删除数据源成功，ID: {}", id);
     }
@@ -118,11 +137,20 @@ public class MetadataDatasourceCoreServiceImpl implements MetadataDatasourceCore
     }
 
     @Override
+    public MetadataDatasourceDO getDatasourceByUuid(String datasourceUuid) {
+        MetadataDatasourceDO datasource = metadataDatasourceRepository.getDatasourceByUuid(datasourceUuid);
+        if (datasource == null) {
+            throw exception(DATASOURCE_NOT_EXISTS);
+        }
+        return datasource;
+    }
+
+    @Override
     @Transactional(rollbackFor = Exception.class)
-    public void createAppDatasourceRelation(Long appId, Long datasourceId, String datasourceType, String appUid) {
+    public void createAppDatasourceRelation(Long appId, String datasourceUuid, String datasourceType, String appUid) {
         // 创建应用与数据源的关联关系
-        appAndDatasourceService.createRelation(appId, datasourceId, datasourceType, appUid);
-        log.info("创建应用数据源关联成功，应用ID: {}，数据源ID: {}", appId, datasourceId);
+        appAndDatasourceService.createRelation(appId, datasourceUuid, datasourceType, appUid);
+        log.info("创建应用数据源关联成功，应用ID: {}，数据源UUID: {}", appId, datasourceUuid);
     }
 
     /**

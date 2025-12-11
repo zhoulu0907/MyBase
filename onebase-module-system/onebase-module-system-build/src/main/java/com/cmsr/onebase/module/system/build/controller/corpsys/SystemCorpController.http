@@ -1,0 +1,134 @@
+
+### 企业创建（正常参数示例，可成功）
+POST {{baseUrl}}/system/corp/create
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+{
+  "corpReqVO": {
+    "corpLogo": "https://static.example.com/logo/corp-test-001.png",
+    "corpName": "测试企业Gsp125",
+    "industryType": 1,
+    "status": 0,
+    "address": "北京市海淀区中关村大街1号创新大厦9层",
+    "userLimit": 100
+  },
+  "corpAdminReqVO": {
+    "username": "corp_adminGsp125",
+    "nickname": "企业管理员",
+    "email": "corp_adminGsp125@test.com",
+    "mobile": "13800001121"
+  }
+}
+
+### result corpID： 146825072112500736
+#"user": {
+#    "username": "corp_admin1",
+#    "password": "<$KKy2XfYV1}frV",
+#    "id": "146825089292369920",
+#    "mobile": "13800001111"
+#  },
+
+
+### 请求 /login 接口 => 成功
+POST {{baseUrl}}/system/auth/corp-login
+Content-Type: application/json
+tenant-id: {{adminTenantId}}
+tag: {{tag}}
+
+{
+  "mobile": "13800001111",
+  "password": "<$KKy2XfYV1}frV",
+  "deviceId":666
+}
+
+> {%
+    // 登录成功后自动更新token到环境变量
+    if (response.status === 200) {
+        const responseData = response.body;
+        if (responseData.code === 0 && responseData.data && responseData.data.accessToken) {
+            client.global.set("token", responseData.data.accessToken);
+            console.log("Token已更新: " + responseData.data.accessToken);
+        }
+    }
+%}
+
+
+### 创建企业 /admin-api/system/corp/get?id=131231231237783552
+GET {{baseUrl}}/system/corp/get?id=131231231237783552
+Content-Type: application/json
+Authorization: Bearer {{token}}
+#tenant-id: {{adminTenantId}}
+
+### 创建企业 /admin-api/system/corp/update
+
+POST {{baseUrl}}/system/corp/update
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+{
+    "id": 153812434157633536,
+    "corpCode": "xxx",
+    "corpName": "admin220-up127",
+    "industryType": 1,
+    "address": "admin128-up",
+    "status": 1,
+    "userLimit":200
+}
+
+### 获取企业分页 /admin-api/system/tenant/page
+GET {{baseUrl}}/system/corp/page?pageNum=1&pageSize=10
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+
+### 请求 /delete 接口 => 成功
+POST {{baseUrl}}/system/corp/delete?id=153806232224792576
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+
+### 请求 /delete 接口 => 成功
+POST {{baseUrl}}/system/corp/update_status
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+{
+  "id": 1,
+  "status": 0
+}
+
+
+
+### 请求 /check-corp 接口 => 成功
+POST {{baseUrl}}/system/corp/check-corp
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+{
+   "corpLogo": "https://static.example.com/logo/corp-test-001.png",
+    "corpName": "测试企业2",
+    "industryType": 1,
+    "status": 0,
+    "corpCode": 111,
+    "address": "北京市海淀区中关村大街1号创新大厦8层",
+    "userLimit": 100
+}
+
+
+
+### 请求 /check-corp-admin-user 接口 => 成功
+POST {{baseUrl}}/system/corp/check-corp-admin-user
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+{
+    "username": "test123",
+    "nickname": "企业管理员",
+    "email": "corp_admin1@test.com",
+    "mobile": "13800001111"
+}

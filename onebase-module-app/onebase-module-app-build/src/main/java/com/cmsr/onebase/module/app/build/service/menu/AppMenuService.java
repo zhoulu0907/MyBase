@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.app.build.service.menu;
 
 import com.cmsr.onebase.module.app.build.vo.menu.*;
+import com.cmsr.onebase.module.app.core.vo.menu.MenuListRespVO;
 
 import java.util.List;
 
@@ -9,6 +10,7 @@ import java.util.List;
  * @Date：2025/7/23 13:40
  */
 public interface AppMenuService {
+
     List<MenuListRespVO> listBpmApplicationMenu(Long applicationId);
 
     void createDefaultBpmMenu(Long applicationId);

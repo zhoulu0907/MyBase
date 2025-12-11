@@ -9,7 +9,7 @@ import lombok.Data;
 @Data
 public class EtlTable {
 
-    private Long datasourceId;
+    private String datasourceUuid;
 
     private String tableName;
 

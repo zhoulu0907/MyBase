@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.metadata.core.service.datamethod.validator.impl;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationFormatDO;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationFormatRepository;
+import com.cmsr.onebase.module.metadata.core.domain.query.MetadataDataMethodSubEntityContext;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.validator.ValidationService;
 import org.springframework.stereotype.Component;
 
@@ -30,13 +31,13 @@ public class FormatValidationService implements ValidationService {
     }
 
     @Override
-    public void validate(Long entityId, Long fieldId, MetadataEntityFieldDO field, Object value, Map<String, Object> data) {
+    public void validate(String entityUuid, String fieldUuid, MetadataEntityFieldDO field, Object value, Map<String, Object> data, List<MetadataDataMethodSubEntityContext> subEntities) {
         if (value == null) {
             return; // 空值不校验格式
         }
 
         // 查询格式规则
-        List<MetadataValidationFormatDO> rules = formatRepository.findByFieldId( fieldId);
+        List<MetadataValidationFormatDO> rules = formatRepository.findByFieldUuid(fieldUuid);
 
         if (rules.isEmpty()) {
             return; // 没有格式规则，跳过校验

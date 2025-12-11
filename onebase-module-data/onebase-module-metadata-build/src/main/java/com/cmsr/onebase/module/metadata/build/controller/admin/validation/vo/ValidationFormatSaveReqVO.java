@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 /**
@@ -16,9 +15,11 @@ import lombok.Data;
 @Data
 public class ValidationFormatSaveReqVO {
 
-    @Schema(description = "字段ID", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull(message = "字段ID不能为空")
-    private Long fieldId;
+    @Schema(description = "字段UUID", example = "01onal1s-0000-0000-0000-000000000003")
+    private String fieldUuid;
+
+    @Schema(description = "字段ID（兼容旧版，与fieldUuid二选一）", example = "164329365983232003")
+    private String fieldId;
 
     @Schema(description = "是否启用(0/1)", example = "1")
     private Integer isEnabled;
@@ -37,8 +38,8 @@ public class ValidationFormatSaveReqVO {
     @Schema(description = "提示信息")
     private String promptMessage;
 
-    @Schema(description = "运行模式")
-    private Integer runMode;
+    @Schema(description = "版本标识")
+    private Long versionTag;
 
     @Schema(description = "校验方式", example = "POP")
     private String valMethod;

@@ -1,22 +1,25 @@
 package com.cmsr.onebase.module.bpm.runtime.service.impl;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
+import com.cmsr.onebase.module.app.api.appresource.AppResourceApi;
+import com.cmsr.onebase.module.app.api.appresource.dto.AppMenuRespDTO;
+import com.cmsr.onebase.module.app.api.appresource.dto.AppPagesetRespDTO;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.bpm.core.dal.database.BpmFlowInsBizExtRepository;
+import com.cmsr.onebase.module.bpm.core.dal.database.ext.BpmFlowDefinitionRepositoryExt;
 import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowInsBizExtDO;
 import com.cmsr.onebase.module.bpm.core.dto.BpmDefinitionExtDTO;
 import com.cmsr.onebase.module.bpm.core.dto.BpmGlobalConfigDTO;
 import com.cmsr.onebase.module.bpm.core.dto.PageViewGroupDTO;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeExtDTO;
-import com.cmsr.onebase.module.bpm.core.enums.BpmBusinessStatusEnum;
-import com.cmsr.onebase.module.bpm.core.enums.BpmEleRunStatusEnum;
-import com.cmsr.onebase.module.bpm.core.enums.BpmNodeApproveStatusEnum;
-import com.cmsr.onebase.module.bpm.core.enums.BpmNodeTypeEnum;
-import com.cmsr.onebase.module.bpm.core.service.BpmEngineDefExtService;
+import com.cmsr.onebase.module.bpm.core.enums.*;
+import com.cmsr.onebase.module.bpm.core.validator.BpmAppResourceValidator;
 import com.cmsr.onebase.module.bpm.core.vo.design.BpmDefJsonVO;
-import com.cmsr.onebase.module.bpm.core.vo.design.node.base.BaseEdgeVO;
+import com.cmsr.onebase.module.bpm.core.vo.design.edge.base.BaseEdgeVO;
+import com.cmsr.onebase.module.bpm.runtime.helper.BpmEntityHelper;
 import com.cmsr.onebase.module.bpm.runtime.service.BpmInstanceService;
 import com.cmsr.onebase.module.bpm.runtime.service.instance.detail.BpmDetailService;
 import com.cmsr.onebase.module.bpm.runtime.service.instance.exec.impl.BpmExecServiceImpl;
@@ -24,12 +27,9 @@ import com.cmsr.onebase.module.bpm.runtime.service.instance.operator.BpmOperator
 import com.cmsr.onebase.module.bpm.runtime.service.instance.predict.BpmPredictService;
 import com.cmsr.onebase.module.bpm.runtime.utils.PageViewUtil;
 import com.cmsr.onebase.module.bpm.runtime.vo.*;
-import com.cmsr.onebase.module.metadata.api.datamethod.DataMethodApi;
-import com.cmsr.onebase.module.metadata.api.datamethod.dto.EntityFieldDataRespDTO;
-import com.cmsr.onebase.module.metadata.api.datamethod.dto.InsertDataReqDTO;
-import com.cmsr.onebase.module.metadata.api.entity.MetadataEntityFieldApi;
-import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldQueryReqDTO;
-import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldRespDTO;
+import com.cmsr.onebase.module.metadata.api.semantic.SemanticDynamicDataApi;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntitySchemaDTO;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldSchemaDTO;
 import com.cmsr.onebase.module.system.api.user.AdminUserApi;
 import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
 import jakarta.annotation.Resource;
@@ -50,7 +50,6 @@ import org.dromara.warm.flow.core.enums.SkipType;
 import org.dromara.warm.flow.core.service.DefService;
 import org.dromara.warm.flow.core.service.InsService;
 import org.dromara.warm.flow.core.service.TaskService;
-import org.dromara.warm.flow.core.service.impl.BpmConstants;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -70,7 +69,7 @@ import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionU
 @Service
 public class BpmInstanceServiceImpl implements BpmInstanceService {
     @Resource
-    private BpmEngineDefExtService defExtService;
+    private BpmFlowDefinitionRepositoryExt defExtService;
 
     @Resource(name = "bpmDefService")
     private DefService defService;
@@ -82,16 +81,10 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
     private TaskService taskService;
 
     @Resource
-    private DataMethodApi dataMethodApi;
-
-    @Resource
     private BpmFlowInsBizExtRepository flowInsExtRepository;
 
     @Resource
     private AdminUserApi adminUserApi;
-
-    @Resource
-    protected MetadataEntityFieldApi metadataEntityFieldApi;
 
     @Resource
     private PageViewUtil pageViewUtil;
@@ -108,22 +101,33 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
     @Resource
     private BpmExecServiceImpl bpmExecService;
 
+    @Resource
+    private AppResourceApi appResourceApi;
 
-    private String buildFormSummary(EntityVO entityVO, BpmDefinitionExtDTO defExtDTO) {
+    @Resource
+    private BpmAppResourceValidator bpmAppResourceValidator;
+
+    @Resource
+    private SemanticDynamicDataApi semanticDynamicDataApi;
+
+    @Resource
+    private BpmEntityHelper bpmEntityHelper;
+
+    private String buildFormSummary(EntityVO entityVO, BpmDefinitionExtDTO defExtDTO, SemanticEntitySchemaDTO entitySchemaDTO) {
         StringBuilder sb = new StringBuilder();
         int count = 0;
-        Long entityId = entityVO.getEntityId();
+
+        Map<String, SemanticFieldSchemaDTO> mainTableFieldMap = new HashMap<>();
+
+        for (SemanticFieldSchemaDTO field : entitySchemaDTO.getFields()) {
+            mainTableFieldMap.put(field.getFieldName(), field);
+        }
 
         // 拿到所有的实体字段
-        EntityFieldQueryReqDTO queryReqDTO = new EntityFieldQueryReqDTO();
-        queryReqDTO.setEntityId(entityId);
-        List<EntityFieldRespDTO> fieldList = metadataEntityFieldApi.getEntityFieldList(queryReqDTO);
+        Map<String, Set<String>> nonSystemFields = bpmEntityHelper.getNonSystemFields(entitySchemaDTO);
 
-        Map<Long, EntityFieldRespDTO> fieldMap = new HashMap<>();
-
-        for (EntityFieldRespDTO fieldDto : fieldList) {
-            fieldMap.put(fieldDto.getId(), fieldDto);
-        }
+        // 拿主表的字段名
+        Set<String> mainTableFieldNames = nonSystemFields.get(entitySchemaDTO.getTableName());
 
         BpmGlobalConfigDTO.FormSummaryConfig formSummaryCfg = null;
 
@@ -131,20 +135,39 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
             formSummaryCfg = defExtDTO.getGlobalConfig().getFormSummaryCfg();
         }
 
-        Set<Long> formSummaryFieldIds = new HashSet<>();
+        Set<String> formSummaryFieldNames = new HashSet<>();
+
         if (formSummaryCfg != null && CollectionUtils.isNotEmpty(formSummaryCfg.getFieldConfigs())) {
             for (BpmGlobalConfigDTO.FieldConfigDTO fieldConfig : formSummaryCfg.getFieldConfigs()) {
-                formSummaryFieldIds.add(fieldConfig.getFieldId());
+                // 只取主表的字段，todo：待完善多表的情况
+                if (!Objects.equals(fieldConfig.getTableName(), entitySchemaDTO.getTableName())) {
+                    continue;
+                }
+
+                formSummaryFieldNames.add(fieldConfig.getFieldName());
             }
-        } else {
-            formSummaryFieldIds = entityVO.getData().keySet();
         }
 
-        for (Long id : formSummaryFieldIds) {
-            EntityFieldRespDTO fieldDto = fieldMap.get(id);
-            Object fieldValue = entityVO.getData().get(id);
+        if (CollectionUtils.isEmpty(formSummaryFieldNames)) {
+            entityVO.getData().keySet().forEach(fieldName -> {
+                if (mainTableFieldNames.contains(fieldName)) {
+                    formSummaryFieldNames.add(fieldName);
+                }
+            });
+        }
 
-            if (fieldDto == null || fieldValue == null) {
+        for (String name : formSummaryFieldNames) {
+            SemanticFieldSchemaDTO fieldDto = mainTableFieldMap.get(name);
+
+            if (fieldDto == null) {
+                continue;
+            }
+
+            String displayName = fieldDto.getDisplayName();
+            String fieldName = fieldDto.getFieldName();
+            Object fieldValue = entityVO.getData().get(fieldName);
+
+            if (fieldValue == null) {
                 continue;
             }
 
@@ -153,7 +176,7 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
                 break;
             }
 
-            sb.append(fieldDto.getDisplayName()).append(":").append(fieldValue).append(" ");
+            sb.append(displayName).append(":").append(fieldValue).append(" ");
 
             count++;
         }
@@ -167,22 +190,43 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
     public BpmSubmitRespVO submit(BpmSubmitReqVO reqVO) {
         BpmSubmitRespVO respVO = new BpmSubmitRespVO();
         String entityDataId = null;
+        Long applicationId = ApplicationManager.getApplicationId();
 
-        Definition def = defExtService.getByFormPathAndStatus(String.valueOf(reqVO.getBusinessId()), PublishStatus.PUBLISHED.getKey());
-        if (def == null) {
-            throw exception(ErrorCodeConstants.PUBLISHED_FLOW_NOT_EXISTS);
+        if (applicationId == null) {
+            throw exception(ErrorCodeConstants.MISSING_APPLICATION_ID);
         }
-
-        // 实体ID todo：校验，应该和businessID有关联关系
-        Long entityId = reqVO.getEntity().getEntityId();
 
         // 和更新数据公用了字段，需要手动校验
         if (MapUtils.isEmpty(reqVO.getEntity().getData())) {
             throw exception(ErrorCodeConstants.FLOW_ENTITY_DATA_NOT_EXISTS.getCode(), "实体数据内容不能为空");
         }
 
+        String businessUuid = reqVO.getBusinessUuid();
+
+        // 校验菜单
+        AppMenuRespDTO appMenuRespDTO = appResourceApi.getAppMenuByUuidAndAppId(businessUuid, applicationId);
+        bpmAppResourceValidator.validateMenu(appMenuRespDTO, applicationId);
+
+        // 校验页面集
+        AppPagesetRespDTO appPagesetRespDTO = appResourceApi.getPageSetByMenuUuidAndAppId(businessUuid, applicationId);
+        bpmAppResourceValidator.validatePageset(appPagesetRespDTO, applicationId);
+
+        String tableName = reqVO.getEntity().getTableName();
+
+        // 校验tableName
+        SemanticEntitySchemaDTO entitySchemaDTO = semanticDynamicDataApi.buildEntitySchemaByTableName(tableName);
+
+        if (!Objects.equals(entitySchemaDTO.getEntityUuid(), appMenuRespDTO.getEntityUuid())) {
+            throw exception(ErrorCodeConstants.INVALID_ENTITY_TABLE_NAME);
+        }
+
+        Definition def = defExtService.getByFormPathAndStatus(businessUuid, PublishStatus.PUBLISHED.getKey());
+        if (def == null) {
+            throw exception(ErrorCodeConstants.PUBLISHED_FLOW_NOT_EXISTS);
+        }
+
         // 详情视图页面和编辑视图页面
-        PageViewGroupDTO pageViewGroupDTO = pageViewUtil.findPageViewGroup(reqVO.getBusinessId());
+        PageViewGroupDTO pageViewGroupDTO = pageViewUtil.findPageViewGroupByPageSetUuid(appPagesetRespDTO.getPageSetUuid());
 
         if (pageViewGroupDTO == null) {
             throw exception(ErrorCodeConstants.MISSING_EDIT_OR_DETAIL_PAGE_VIEW);
@@ -197,33 +241,15 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
 
         EntityVO entityVO = reqVO.getEntity();
 
-        InsertDataReqDTO insertDataReqDTO = new InsertDataReqDTO();
-        insertDataReqDTO.setEntityId(entityId);
-        insertDataReqDTO.setData(new ArrayList<>());
-        insertDataReqDTO.getData().add(entityVO.getData());
-
         // 先插入数据，todo：这个操作跨库了，待处理回滚问题
-        List<List<EntityFieldDataRespDTO>> insertedData = dataMethodApi.insertData(insertDataReqDTO);
-
-        for (EntityFieldDataRespDTO respDTO : insertedData.get(0)) {
-            if (Objects.equals(respDTO.getFieldName(), "id")) {
-                entityDataId = String.valueOf(respDTO.getFieldValue());
-                break;
-            }
-        }
-
-        if (StringUtils.isBlank(entityDataId)) {
-            throw exception(ErrorCodeConstants.FLOW_ENTITY_DATA_ID_NOT_EXISTS);
-        }
+        entityDataId = bpmEntityHelper.insertEntityData(entityVO);
 
         BpmFlowInsBizExtDO flowInsExtDO = new BpmFlowInsBizExtDO();
         Map<String, Object> variables = new HashMap<>();
 
         // 传应用ID和实体ID
         BpmDefinitionExtDTO extDto = JsonUtils.parseObject(def.getExt(), BpmDefinitionExtDTO.class);
-        variables.put(BpmConstants.VAR_APP_ID_KEY, extDto.getAppId());
-        variables.put(BpmConstants.VAR_ENTITY_ID_KEY, entityId);
-        variables.put(BpmConstants.VAR_BINDING_VIEW_ID_KEY, reqVO.getBusinessId());
+        variables.put(BpmConstants.VAR_ENTITY_TABLE_NAME_KEY, tableName);
         variables.put(BpmConstants.VAR_PAGE_VIEW_GROUP_KEY, JsonUtils.toJsonString(pageViewGroupDTO));
 
         entityVO.getData().forEach((key, value) -> variables.put(String.valueOf(key), value));
@@ -295,7 +321,7 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         String bpmTitle = String.format("%s发起的%s", initiatorName, reqVO.getFormName());
 
         // 构建表单摘要
-        String formSummary = buildFormSummary(entityVO, extDto);
+        String formSummary = buildFormSummary(entityVO, extDto, entitySchemaDTO);
 
         if (StringUtils.isBlank(formSummary)) {
             formSummary = reqVO.getFormName();
@@ -306,7 +332,7 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         flowInsExtDO.setBindingViewId(def.getFormPath());
         flowInsExtDO.setBpmVersion("V" + def.getVersion());
         flowInsExtDO.setBpmTitle(bpmTitle);
-        flowInsExtDO.setInitiatorId(loginUserId);
+        flowInsExtDO.setInitiatorId(String.valueOf(loginUserId));
         flowInsExtDO.setInitiatorAvatar(userRespDTO.getAvatar());
         flowInsExtDO.setInitiatorName(initiatorName);
         flowInsExtDO.setInitiatorDeptId(userRespDTO.getDeptId());
@@ -314,9 +340,9 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         flowInsExtDO.setFormName(reqVO.getFormName());
         flowInsExtDO.setFormSummary(formSummary);
         flowInsExtDO.setInstanceId(instance.getId());
-        flowInsExtDO.setAppId(extDto.getAppId());
+        flowInsExtDO.setApplicationId(applicationId);
 
-        flowInsExtRepository.insert(flowInsExtDO);
+        flowInsExtRepository.save(flowInsExtDO);
 
         respVO.setInstanceId(instance.getId());
         respVO.setEntityDataId(entityDataId);
@@ -347,13 +373,18 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
     @Override
     public BpmPreviewRespVO flowPreview(BpmPreviewReqVO reqVO) {
         Long instanceId = reqVO.getInstanceId();
-        Long businessId = reqVO.getBusinessId();
+        String businessUuid = reqVO.getBusinessUuid();
+
+        Long applicationId = ApplicationManager.getApplicationId();
+        if (applicationId == null) {
+            throw exception(ErrorCodeConstants.MISSING_APPLICATION_ID);
+        }
 
         BpmPreviewRespVO respVO = new BpmPreviewRespVO();
 
         // 抛参数异常
-        if (instanceId == null && businessId == null) {
-            throw new IllegalArgumentException("业务ID和流程实例ID不能同时为空");
+        if (instanceId == null && businessUuid == null) {
+            throw new IllegalArgumentException("业务UUID和流程实例ID不能同时为空");
         }
 
         DefJson defJson;
@@ -374,8 +405,14 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
             // 解析流程定义JSON
             defJson = FlowEngine.jsonConvert.strToBean(defJsonStr, DefJson.class);
         } else {
+            // 校验菜单
+            AppMenuRespDTO appMenuRespDTO = appResourceApi.getAppMenuByUuidAndAppId(businessUuid, applicationId);
+            bpmAppResourceValidator.validateMenuAndPageset(appMenuRespDTO, applicationId);
+
+            String menuUuid = appMenuRespDTO.getMenuUuid();
+
             // 查询已发布的流程定义
-            Definition definition = defExtService.getByFormPathAndStatus(String.valueOf(businessId), PublishStatus.PUBLISHED.getKey());
+            Definition definition = defExtService.getByFormPathAndStatus(menuUuid, PublishStatus.PUBLISHED.getKey());
             if (definition == null) {
                 log.error(ErrorCodeConstants.PUBLISHED_FLOW_NOT_EXISTS.getMsg());
                 throw exception(ErrorCodeConstants.PUBLISHED_FLOW_NOT_EXISTS);
@@ -426,8 +463,6 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
                 edgeVO.setSourceNodeId(skipJson.getNowNodeCode());
                 edgeVO.setTargetNodeId(skipJson.getNextNodeCode());
                 edgeVO.setName(skipJson.getSkipName());
-                edgeVO.setType(skipJson.getSkipType());
-                edgeVO.setSkipCondition(skipJson.getSkipCondition());
 
                 // 设置状态
                 BpmEleRunStatusEnum eleRunStatus = BpmEleRunStatusEnum.chartStatusToEleRunStatus(skipJson.getStatus());
@@ -447,9 +482,9 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
             }
         }
 
-        respVO.setBusinessId(Long.valueOf(defJson.getFormPath()));
+        respVO.setBusinessUuid(defJson.getFormPath());
         respVO.setFlowName(defJson.getFlowName());
-        respVO.setVersion("V" + defJson.getVersion());
+        respVO.setBpmVersion("V" + defJson.getVersion());
         respVO.setBpmDefJson(JsonUtils.toJsonString(bpmDefJsonVO));
 
         return respVO;

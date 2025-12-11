@@ -2,27 +2,24 @@ package com.cmsr.onebase.module.system.build.controller.tenant;
 
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import com.cmsr.onebase.framework.common.pojo.PageParam;
-import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.framework.excel.core.util.ExcelUtils;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.system.convert.tenant.TenantConvert;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
 import com.cmsr.onebase.module.system.service.tenant.TenantService;
-import com.cmsr.onebase.module.system.vo.tenant.*;
+import com.cmsr.onebase.module.system.vo.tenant.TenantRespVO;
+import com.cmsr.onebase.module.system.vo.tenant.TenantSimpleRespVO;
+import com.cmsr.onebase.module.system.vo.tenant.TenantUpdateReqVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.annotation.security.PermitAll;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
 import java.util.List;
 
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
@@ -31,7 +28,6 @@ import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.
 @Tag(name = "管理后台 - 租户")
 @RestController
 @RequestMapping("/system/tenant")
-@Deprecated
 @Component("oldTenantController")
 public class TenantController {
 
@@ -71,79 +67,29 @@ public class TenantController {
         return success(TenantConvert.INSTANCE.convertToSimpleRespVO(tenant));
     }
 
-    @PostMapping("/create")
-    @Operation(summary = "创建租户")
-    @PreAuthorize("@ss.hasPermission('tenant:space:create')")
-    public CommonResult<Long> createTenant(@Valid @RequestBody TenantInsertReqVO createReqVO) {
-        return success(tenantService.createTenant(createReqVO));
-    }
-
     @PostMapping("/update")
     @Operation(summary = "更新租户")
-    @PreAuthorize("@ss.hasPermission('tenant:space:update')")
+    @PreAuthorize("@ss.hasPermission('tenant:info:update')")
     public CommonResult<Boolean> updateTenant(@Valid @RequestBody TenantUpdateReqVO updateReqVO) {
         tenantService.updateTenant(updateReqVO);
         return success(true);
     }
 
-    @PostMapping("/delete")
-    @Operation(summary = "删除租户")
-    @Parameter(name = "id", description = "编号", required = true, example = "1024")
-    @PreAuthorize("@ss.hasPermission('tenant:space:delete')")
-    public CommonResult<Boolean> deleteTenant(@RequestParam("id") Long id) {
-        tenantService.deleteTenant(id);
-        return success(true);
-    }
 
     @GetMapping("/get")
     @Operation(summary = "获得租户(安全考虑仅获取用户所属租户)")
     @Parameter(name = "id", description = "编号", required = true, example = "1024")
-    @PreAuthorize("@ss.hasPermission('tenant:space:query')")
+    @PreAuthorize("@ss.hasPermission('tenant:info:query')")
     public CommonResult<TenantRespVO> getTenant(@RequestParam("id") Long id) {
         return success(tenantService.getTenantWithAppCount(id));
     }
 
-    @GetMapping("/get-allocatable-count")
-    @Operation(summary = "获得租户可分配数量")
-    @PreAuthorize("@ss.hasPermission('tenant:tenant:query')")
-    public CommonResult<Long> getAllocatableCount() {
-        Long accountCount = tenantService.getAvailableAccountCount();
-        return success(accountCount);
-    }
-
-    @GetMapping("/get-other-exist-user-count")
-    @Operation(summary = "获得其他已有的用户数量和")
-    @PreAuthorize("@ss.hasPermission('tenant:tenant:query')")
-    public CommonResult<Long> getOtherTenantUserCount(@RequestParam(required = false) Long id) {
-        Long accountCount = tenantService.getOtherTenantUserLimitCount(id);
-        return success(accountCount);
-    }
-
-    @GetMapping("/get-tenant-exist-user-count")
-    @Operation(summary = "获得当前已有的用户数量和")
-    @PreAuthorize("@ss.hasPermission('tenant:tenant:query')")
-    public CommonResult<Long> getTenantExistUserCount(@RequestParam Long id) {
-        Long userCount = tenantService.getTenantExistUserCount(id);
-        return success(userCount);
-    }
-
-    @GetMapping("/page")
-    @Operation(summary = "获得租户分页")
-    @PreAuthorize("@ss.hasPermission('system:tenant:query')")
-    public CommonResult<PageResult<TenantRespVO>> getTenantPage(@Valid TenantPageReqVO pageVO) {
-        PageResult<TenantRespVO> pageResult = tenantService.getTenantPage(pageVO);
-        return success(BeanUtils.toBean(pageResult, TenantRespVO.class));
-    }
-
-    @GetMapping("/export-excel")
-    @Operation(summary = "导出租户 Excel")
-    @PreAuthorize("@ss.hasPermission('tenant:tenant:export')")
-    public void exportTenantExcel(@Valid TenantPageReqVO exportReqVO, HttpServletResponse response) throws IOException {
-        exportReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
-        List<TenantRespVO> list = tenantService.getTenantPage(exportReqVO).getList();
-        // 导出 Excel
-        ExcelUtils.write(response, "租户.xls", "数据", TenantRespVO.class,
-                BeanUtils.toBean(list, TenantRespVO.class));
+    @GetMapping("/get-simple-tenant-by-id")
+    @Operation(summary = "获得租户(免登录)")
+    @PermitAll
+    @TenantIgnore
+    public CommonResult<TenantSimpleRespVO> getSimpleTenantById(@RequestParam(value = "id") Long id) {
+        return success( BeanUtils.toBean(tenantService.getTenant(id), TenantSimpleRespVO.class));
     }
 
 }

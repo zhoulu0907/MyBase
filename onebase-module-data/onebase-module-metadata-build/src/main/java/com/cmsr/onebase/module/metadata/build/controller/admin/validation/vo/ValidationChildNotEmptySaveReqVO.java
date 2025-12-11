@@ -2,7 +2,6 @@ package com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 /**
@@ -14,13 +13,17 @@ import lombok.Data;
 @Data
 public class ValidationChildNotEmptySaveReqVO {
 
-    @Schema(description = "父实体ID", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull(message = "父实体ID不能为空")
-    private Long entityId;
+    @Schema(description = "父实体UUID", example = "01onal1s-0000-0000-0000-000000000002")
+    private String entityUuid;
 
-    @Schema(description = "子实体ID", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull(message = "子实体ID不能为空")
-    private Long childEntityId;
+    @Schema(description = "父实体ID（兼容旧版，与entityUuid二选一）", example = "164329365983232001")
+    private String entityId;
+
+    @Schema(description = "子实体UUID", example = "01onal1s-0000-0000-0000-000000000013")
+    private String childEntityUuid;
+
+    @Schema(description = "子实体ID（兼容旧版，与childEntityUuid二选一）", example = "164329365983232013")
+    private String childEntityId;
 
     @Schema(description = "是否启用(0/1)", example = "1")
     private Integer isEnabled;
@@ -28,8 +31,8 @@ public class ValidationChildNotEmptySaveReqVO {
     @Schema(description = "提示信息")
     private String promptMessage;
 
-    @Schema(description = "运行模式")
-    private Integer runMode;
+    @Schema(description = "版本标识")
+    private Long versionTag;
 
     @Schema(description = "校验方式", example = "POP")
     private String valMethod;

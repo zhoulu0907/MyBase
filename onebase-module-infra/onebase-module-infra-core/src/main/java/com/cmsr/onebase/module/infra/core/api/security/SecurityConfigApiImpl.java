@@ -9,6 +9,7 @@ import com.cmsr.onebase.module.infra.dal.database.SecurityRecordDataRepository;
 import com.cmsr.onebase.module.infra.dal.dataobject.security.SecurityRecordDO;
 import com.cmsr.onebase.module.infra.enums.security.SecurityRecordTypeEnum;
 import com.cmsr.onebase.module.infra.service.security.AntiBruteForceService;
+import com.cmsr.onebase.module.infra.service.security.SecurityConfigService;
 import com.cmsr.onebase.module.infra.service.security.dto.LoginFailureResult;
 import com.cmsr.onebase.module.infra.service.security.manager.PasswordPolicyManager;
 import com.cmsr.onebase.module.infra.service.security.validator.PasswordValidator;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Set;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
@@ -52,6 +54,10 @@ public class SecurityConfigApiImpl implements SecurityConfigApi {
     @Resource
     private AntiBruteForceService antiBruteForceService;
 
+
+    @Resource
+    private SecurityConfigService securityConfigService;
+
     @Resource
     private com.cmsr.onebase.module.infra.service.security.MultiDeviceSessionServiceImpl multiDeviceSessionService;
 
@@ -59,6 +65,12 @@ public class SecurityConfigApiImpl implements SecurityConfigApi {
     private com.cmsr.onebase.module.infra.service.security.SessionIdleService sessionIdleService;
 
     private final PasswordValidator passwordValidator = new PasswordValidator();
+
+    @Override
+    @Operation(summary = "获取租户的脱敏字段配置")
+    public Set<String> getTenantDesensitizedFieldValues() {
+        return securityConfigService.getTenantDesensitizedFieldValues();
+    }
 
     @Override
     @Operation(summary = "校验密码强度")
@@ -157,7 +169,7 @@ public class SecurityConfigApiImpl implements SecurityConfigApi {
         long passwordAge = ChronoUnit.DAYS.between(passwordCreateTime, now);
 
         // 判断密码是否过期
-        if (passwordAge >= expiryDays) {
+        if (passwordAge > expiryDays) {
             // 密码已过期
             int daysExpired = (int) (passwordAge - expiryDays);
             return success(PasswordExpiryCheckDTO.builder()

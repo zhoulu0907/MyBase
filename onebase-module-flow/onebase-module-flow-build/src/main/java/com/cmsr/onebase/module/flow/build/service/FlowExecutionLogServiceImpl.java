@@ -4,14 +4,17 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.flow.build.vo.ExecutionLogVO;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowExecutionLogRepository;
+import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowExecutionLogDO;
 import com.cmsr.onebase.module.flow.core.vo.PageExecutionLogReqVO;
 import lombok.Setter;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -27,16 +30,17 @@ public class FlowExecutionLogServiceImpl implements FlowExecutionLogService {
     private FlowExecutionLogRepository flowExecutionLogRepository;
 
     @Autowired
-    private FlowCommonService flowCommonService;
+    private FlowProcessRepository flowProcessRepository;
 
     @Override
     public PageResult<ExecutionLogVO> pageList(PageExecutionLogReqVO reqVO) {
         PageResult<FlowExecutionLogDO> pageResult = flowExecutionLogRepository.findPageByQuery(reqVO);
+        Map<Long, String> processName = findProcessName(pageResult.getList());
         List<ExecutionLogVO> voList = pageResult.getList().stream().map(logDO -> {
             logDO.setLogText(null);
             logDO.setErrorMessage(null);
             ExecutionLogVO logVO = BeanUtils.toBean(logDO, ExecutionLogVO.class);
-            logVO.setProcessName(flowCommonService.getProcessName(logDO.getProcessId()));
+            logVO.setProcessName(MapUtils.getString(processName, logDO.getProcessId(), ""));
             logVO.setExecutionTime(millisToSecondsDouble(logDO.getDurationTime()));
             return logVO;
         }).toList();
@@ -50,9 +54,21 @@ public class FlowExecutionLogServiceImpl implements FlowExecutionLogService {
             return null;
         }
         ExecutionLogVO logVO = BeanUtils.toBean(logDO, ExecutionLogVO.class);
-        logVO.setProcessName(flowCommonService.getProcessName(logDO.getProcessId()));
+        logVO.setProcessName(findProcessName(logDO.getProcessId()));
         logVO.setExecutionTime(millisToSecondsDouble(logDO.getDurationTime()));
         return logVO;
+    }
+
+    private Map<Long, String> findProcessName(List<FlowExecutionLogDO> flowExecutionLogDOS) {
+        if (CollectionUtils.isEmpty(flowExecutionLogDOS)) {
+            return Collections.emptyMap();
+        }
+        List<Long> processIds = flowExecutionLogDOS.stream().map(FlowExecutionLogDO::getProcessId).toList();
+        return flowProcessRepository.selectProcessNames(processIds);
+    }
+
+    private String findProcessName(Long processId) {
+        return flowProcessRepository.selectProcessName(processId);
     }
 
     @Override

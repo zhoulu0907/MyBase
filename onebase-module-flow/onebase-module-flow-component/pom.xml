@@ -22,10 +22,20 @@
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-common</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-spring-boot-starter-redis</artifactId>
+            <version>${revision}</version>
+        </dependency>
         <!-- 模块依赖 -->
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-module-flow-context</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-system-api</artifactId>
             <version>${revision}</version>
         </dependency>
         <dependency>
@@ -48,12 +58,30 @@
             <groupId>com.esotericsoftware.kryo</groupId>
             <artifactId>kryo5</artifactId>
         </dependency>
+        <!-- Unirest -->
+        <dependency>
+            <groupId>com.konghq</groupId>
+            <artifactId>unirest-java-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.konghq</groupId>
+            <artifactId>unirest-modules-jackson</artifactId>
+        </dependency>
         <!-- 测试依赖 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>

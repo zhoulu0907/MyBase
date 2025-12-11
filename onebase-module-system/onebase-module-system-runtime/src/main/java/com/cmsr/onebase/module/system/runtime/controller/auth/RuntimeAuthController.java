@@ -3,17 +3,19 @@ package com.cmsr.onebase.module.system.runtime.controller.auth;
 
 import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import com.cmsr.onebase.framework.security.config.SecurityProperties;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
+import com.cmsr.onebase.framework.security.config.SecurityProperties;
+import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.system.enums.logger.LoginLogTypeEnum;
 import com.cmsr.onebase.module.system.runtime.service.auth.RuntimeAuthService;
+import com.cmsr.onebase.module.system.service.permission.PermissionService;
 import com.cmsr.onebase.module.system.vo.auth.*;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.annotation.security.PermitAll;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
@@ -29,7 +31,7 @@ import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
  * @author matianyu
  * @date 2025-11
  */
-@Tag(name = "管理后台 - 认证")
+@Tag(name = "Runtime - 登录&认证")
 @RestController
 @RequestMapping("/system/auth")
 @Validated
@@ -42,19 +44,43 @@ public class RuntimeAuthController {
     @Resource
     private SecurityProperties securityProperties;
 
+    @Resource
+    private PermissionService permissionService;
+
     @PostMapping("/app-login")
     @PermitAll
     @Operation(summary = "内部用户登录（Inner模式，账密登录）")
-    public CommonResult<AuthLoginRespVO> appUsernameLogin(@RequestBody @Valid AppUserNameLoginReqVO reqVO) {
-        return success(runtimeAuthService.appUsernameLogin(reqVO));
+    public CommonResult<AuthLoginRespVO> appUsernameLogin(@RequestBody @Valid AppUserNameLoginReqVO reqVO, HttpServletResponse response) {
+        AuthLoginRespVO loginRespVO = runtimeAuthService.appUsernameLogin(reqVO);
+        // 设置Cookie
+        response.addHeader("Set-Cookie", String.format("%s=%s; HttpOnly",
+                securityProperties.getTokenHeader(), loginRespVO.getAccessToken()));
+        return success(loginRespVO);
     }
 
 
     @PostMapping("/app-login-mobile")
     @PermitAll
     @Operation(summary = "外部用户登录（SaaS模式，手机号登录）")
-    public CommonResult<AuthLoginRespVO> appMobileLogin(@RequestBody @Valid AppMobileLoginReqVO reqVO) {
-        return success(runtimeAuthService.appMobileLogin(reqVO));
+    public CommonResult<AuthLoginRespVO> appMobileLogin(@RequestBody @Valid AppMobileLoginReqVO reqVO, HttpServletResponse response) {
+        AuthLoginRespVO loginRespVO = runtimeAuthService.appMobileLogin(reqVO);
+        // 设置Cookie
+        response.addHeader("Set-Cookie", String.format("%s=%s; HttpOnly",
+                securityProperties.getTokenHeader(), loginRespVO.getAccessToken()));
+        return success(loginRespVO);
+    }
+
+
+
+    @PostMapping("/corp-login")
+    @PermitAll
+    @Operation(summary = "企业登录（手机号）")
+    public CommonResult<AuthLoginRespVO> corpLogin(@RequestBody @Valid CorpAuthLoginReqVO reqVO, HttpServletResponse response) {
+        AuthLoginRespVO loginRespVO = runtimeAuthService.corpLogin(reqVO);
+        // 设置Cookie
+        response.addHeader("Set-Cookie", String.format("%s=%s; HttpOnly",
+                securityProperties.getTokenHeader(), loginRespVO.getAccessToken()));
+        return success(loginRespVO);
     }
 
     @PostMapping("/logout")
@@ -69,27 +95,35 @@ public class RuntimeAuthController {
         return success(true);
     }
 
-    @PostMapping("/refresh-token")
+    @PostMapping("/send-verify-code")
     @PermitAll
-    @Operation(summary = "刷新令牌")
-    @Parameter(name = "refreshToken", description = "刷新令牌", required = true)
-    public CommonResult<AuthLoginRespVO> refreshToken(@RequestParam("refreshToken") String refreshToken) {
-        return success(runtimeAuthService.refreshToken(refreshToken));
+    @TenantIgnore
+    @Operation(summary = "发送邮箱/手机验证码")
+    public CommonResult<Boolean> sendVerifyCode(@RequestBody @Valid VerifyCodeSendReqVO reqVO) {
+        // authService.sendSmsCode(reqVO);
+        return success(true);
     }
 
+    // @PostMapping("/refresh-token")
+    // @Operation(summary = "刷新令牌")
+    // @Parameter(name = "refreshToken", description = "刷新令牌", required = true)
+    // @PermitAll
+    // public CommonResult<AuthLoginRespVO> refreshToken(@RequestParam("refreshToken") String refreshToken) {
+    //     return success(runtimeAuthService.refreshToken(refreshToken));
+    // }
 
-    @PostMapping("/register")
-    @PermitAll
-    @Operation(summary = "注册用户")
-    public CommonResult<AuthLoginRespVO> register(@RequestBody @Valid AuthRegisterReqVO registerReqVO) {
-        return success(runtimeAuthService.register(registerReqVO));
-    }
 
     @PostMapping("/reset-password")
-    @PermitAll
     @Operation(summary = "重置密码")
+    @PermitAll
     public CommonResult<Boolean> resetPassword(@RequestBody @Valid AuthResetPasswordReqVO reqVO) {
         runtimeAuthService.resetPassword(reqVO);
         return success(true);
+    }
+
+    @GetMapping("/get-permission-info")
+    @Operation(summary = "获取登录用户的权限信息")
+    public CommonResult<AuthPermissionInfoRespVO> getPermissionInfo(@RequestParam(value = "code", required = false) String code) {
+        return success(permissionService.getPermissionInfo(code));
     }
 }

@@ -118,3 +118,9 @@ LOG_FILE_IS_UNDEFINED
 /sql/postgresql/patch/2025-11-01-metadata-auto-number-reset-on-initial-change.sql
 /docs/人大金仓数据库适配方案.md
 /docs/达梦数据库适配方案.md
+/onebase-module-data/onebase-module-metadata-api/src/main/java/com/cmsr/onebase/module/metadata/api/datamethod/entity/BizDataResult.java
+/onebase-module-data/onebase-module-metadata-api/src/main/java/com/cmsr/onebase/module/metadata/api/datamethod/entity/BizData使用指南.md
+/onebase-module-data/onebase-module-metadata-api/src/main/java/com/cmsr/onebase/module/metadata/api/datamethod/entity/BizField.java
+/onebase-module-data/onebase-module-metadata-api/src/main/java/com/cmsr/onebase/module/metadata/api/datamethod/entity/BizRecord.java
+/onebase-module-data/onebase-module-metadata-api/src/main/java/com/cmsr/onebase/module/metadata/api/datamethod/entity/FieldTypeEnum.java
+/sql/metadata_field_comparison_rules.sql

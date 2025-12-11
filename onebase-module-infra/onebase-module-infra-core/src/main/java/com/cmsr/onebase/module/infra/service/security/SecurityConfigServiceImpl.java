@@ -1,5 +1,9 @@
 package com.cmsr.onebase.module.infra.service.security;
 
+import cn.hutool.core.util.StrUtil;
+import com.cmsr.onebase.framework.common.enums.SecurityCategoryCodeEnum;
+import com.cmsr.onebase.framework.common.security.TenantContextHolder;
+import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.infra.convert.security.SecurityConfigCategoryConvert;
 import com.cmsr.onebase.module.infra.dal.database.SecurityConfigCategoryDataRepository;
 import com.cmsr.onebase.module.infra.dal.database.SecurityConfigDataRepository;
@@ -7,9 +11,10 @@ import com.cmsr.onebase.module.infra.dal.database.SecurityConfigTemplateDataRepo
 import com.cmsr.onebase.module.infra.dal.dataobject.security.SecurityConfigCategoryDO;
 import com.cmsr.onebase.module.infra.dal.dataobject.security.SecurityConfigDO;
 import com.cmsr.onebase.module.infra.dal.dataobject.security.SecurityConfigTemplateDO;
-import com.cmsr.onebase.module.infra.dal.vo.security.SecurityConfigCategoryRespVO;
-import com.cmsr.onebase.module.infra.dal.vo.security.SecurityConfigItemRespVO;
-import com.cmsr.onebase.module.infra.dal.vo.security.SecurityConfigUpdateReqVO;
+import com.cmsr.onebase.module.infra.dal.vo.app.AppTenantVO;
+import com.cmsr.onebase.module.infra.dal.vo.security.*;
+import com.cmsr.onebase.module.infra.enums.ErrorCodeConstants;
+import com.cmsr.onebase.module.infra.enums.security.SecurityConfigKey;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -19,10 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
@@ -40,12 +42,12 @@ import static com.cmsr.onebase.module.infra.dal.redis.RedisKeyConstants.SECURITY
 @Validated
 public class SecurityConfigServiceImpl implements SecurityConfigService {
 
-    public static final String                   DATATYPE_STRING  = "STRING";
-    public static final String                   DATATYPE_INTEGER = "INTEGER";
-    public static final String                   DATATYPE_BOOLEAN     = "BOOLEAN";
-    public static final String                   DATATYPE_JSON_STRING  = "JSON[STRING]";
-    public static final String                   DATATYPE_JSON_INTEGER = "JSON[INTEGER]";
-    public static final String                   DATATYPE_JSON_BOOLEAN = "JSON[BOOLEAN]";
+    public static final String DATATYPE_STRING       = "STRING";
+    public static final String DATATYPE_INTEGER      = "INTEGER";
+    public static final String DATATYPE_BOOLEAN      = "BOOLEAN";
+    public static final String DATATYPE_JSON_STRING  = "JSON[STRING]";
+    public static final String DATATYPE_JSON_INTEGER = "JSON[INTEGER]";
+    public static final String DATATYPE_JSON_BOOLEAN = "JSON[BOOLEAN]";
 
     @Resource
     private SecurityConfigCategoryDataRepository categoryDataRepository;
@@ -120,6 +122,10 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
     private void updateSingleConfig(Long tenantId, SecurityConfigUpdateReqVO updateReqVO) {
         SecurityConfigDO config = securityConfigDataRepository.findByTenantIdAndKey(tenantId, updateReqVO.getConfigKey());
 
+        if (SecurityConfigKey.desensitizedField.getConfigKey().equals(updateReqVO.getConfigKey()) && StrUtil.isBlank(updateReqVO.getConfigValue())){
+            updateReqVO.setConfigValue(" ");
+        }
+
         if (config == null) {
             // 如果不存在，创建新配置
             config = SecurityConfigDO.builder()
@@ -154,6 +160,44 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
         List<SecurityConfigItemRespVO> configItems = new ArrayList<>();
         for (SecurityConfigTemplateDO template : templates) {
             SecurityConfigItemRespVO itemVO = SecurityConfigCategoryConvert.INSTANCE.convert(template);
+            if (SecurityConfigKey.desensitizedField.getConfigKey().equals(itemVO.getConfigKey())){
+                itemVO.setConfigValue(itemVO.getConfigValue().trim());
+            }
+            configItems.add(itemVO);
+        }
+
+        return configItems;
+    }
+
+
+    private List<SecurityConfigItemRespVO> findSecurityConfigItemsByTenantAndCatCodes(Long tenantId, List<String> codes) {
+        // 使用新的带兜底策略的SQL查询方法
+        // 该方法会自动处理：如果租户配置存在则使用租户配置值，否则使用模板默认值
+        List<SecurityConfigCategoryDO> categoryDOS = categoryDataRepository.findActiveByCodes(codes);
+        if (CollectionUtils.isEmpty(categoryDOS)) {
+            return new ArrayList<>();
+        }
+
+        Map<Long, String> idCodeMap = categoryDOS.stream()
+                .collect(Collectors.toMap(
+                        SecurityConfigCategoryDO::getId,    // key mapper (id)
+                        SecurityConfigCategoryDO::getCategoryCode   // value mapper (code)
+                ));
+
+        // 将categoryDOS转换为 categoryIds
+        List<Long> categoryIds = categoryDOS.stream().map(SecurityConfigCategoryDO::getId).collect(Collectors.toList());
+
+        // 查询所有具体配置项
+        List<SecurityConfigTemplateDO> templates = templateDataRepository.findByTenantIdAndCategoryIdList(tenantId, categoryIds);
+        if (CollectionUtils.isEmpty(templates)) {
+            return new ArrayList<>();
+        }
+
+        // 组装返回数据：defaultValue=模板默认值；configValue=租户有效值（租户配置或默认值）
+        List<SecurityConfigItemRespVO> configItems = new ArrayList<>();
+        for (SecurityConfigTemplateDO template : templates) {
+            SecurityConfigItemRespVO itemVO = SecurityConfigCategoryConvert.INSTANCE.convert(template);
+            itemVO.setCategoryCode(idCodeMap.get(template.getCategoryId()));
             configItems.add(itemVO);
         }
 
@@ -163,8 +207,8 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
     /**
      * 校验配置更新请求
      *
-     * @param tenantId         租户ID
-     * @param updateReqVOList  更新请求列表
+     * @param tenantId        租户ID
+     * @param updateReqVOList 更新请求列表
      */
     private void validateConfigUpdates(Long tenantId, List<SecurityConfigUpdateReqVO> updateReqVOList) {
         // 获取租户所有安全配置模板
@@ -182,13 +226,13 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
             // 1. Key匹配性校验
             SecurityConfigItemRespVO template = templateMap.get(configKey);
             if (template == null) {
-                throw exception(SECURITY_CONFIG_NOT_EXIST,configKey);
+                throw exception(SECURITY_CONFIG_NOT_EXIST, configKey);
             }
 
             // 2. 必填校验
             if ("true".equalsIgnoreCase(template.getRequired())) {
                 if (configValue == null || configValue.trim().isEmpty()) {
-                    throw exception(SECURITY_CONFIG_ITEM_REQUIRED,template.getConfigName());
+                    throw exception(SECURITY_CONFIG_ITEM_REQUIRED, template.getConfigName());
                 }
             }
 
@@ -260,10 +304,10 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
                     break;
 
                 default:
-                    throw exception(SECURITY_CONFIG_DATA_TYPE_NOT_SUPPORT,configName, dataType);
+                    throw exception(SECURITY_CONFIG_DATA_TYPE_NOT_SUPPORT, configName, dataType);
             }
         } catch (IllegalArgumentException e) {
-            throw exception(SECURITY_CONFIG_DATA_TYPE_WRONG,configName, dataType);
+            throw exception(SECURITY_CONFIG_DATA_TYPE_WRONG, configName, dataType);
         }
     }
 
@@ -280,14 +324,14 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
             long value = Long.parseLong(configValue.trim());
 
             if (minValue != null && value < minValue) {
-                throw exception(SECURITY_CONFIG_MIN_VALUE,configName, minValue);
+                throw exception(SECURITY_CONFIG_MIN_VALUE, configName, minValue);
             }
 
             if (maxValue != null && value > maxValue) {
-                throw exception(SECURITY_CONFIG_MAX_VALUE,configName, maxValue);
+                throw exception(SECURITY_CONFIG_MAX_VALUE, configName, maxValue);
             }
         } catch (NumberFormatException e) {
-            throw exception(SECURITY_CONFIG_DATA_TYPE_WRONG,configName, DATATYPE_INTEGER);
+            throw exception(SECURITY_CONFIG_DATA_TYPE_WRONG, configName, DATATYPE_INTEGER);
         }
     }
 
@@ -315,4 +359,67 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
         return null;
     }
 
+    @Override
+    @TenantIgnore
+    public List<SecurityConfigCategoryGroupRespVO> getTenantConfigItemsByCategoryCodes(SecurityConfigGetReqVO configReqVO) {
+        Long tenantId = configReqVO.getTenantId();
+
+        // 优先使用 appId 获取租户ID，覆盖 tenantId
+        Long appID = configReqVO.getAppId();
+        if (null != appID) {
+            tenantId = checkAppAndGetTenantId(appID);
+        }
+
+        List<SecurityConfigItemRespVO> configItems = findSecurityConfigItemsByTenantAndCatCodes(tenantId, configReqVO.getCategoryCode());
+        Map<String, List<SecurityConfigItemRespVO>> groupedByConfigKey = configItems.stream()
+                .collect(Collectors.groupingBy(SecurityConfigItemRespVO::getCategoryCode));
+
+        return groupedByConfigKey.entrySet().stream()
+                .map(entry -> {
+                    SecurityConfigCategoryGroupRespVO groupVO = new SecurityConfigCategoryGroupRespVO();
+                    groupVO.setCategoryCode(entry.getKey());
+                    groupVO.setSecurityConfigItemRespVO(entry.getValue());
+                    return groupVO;
+                })
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 通过appid 获取租户id
+     *
+     * @param appId
+     * @return
+     */
+    private Long checkAppAndGetTenantId(Long appId) {
+        AppTenantVO app = templateDataRepository.findAppTenantIdById(appId);
+        if (null != app) {
+            return app.getTenantId();
+        }
+        throw exception(ErrorCodeConstants.APP_DELETE_OR_DISABLE, appId);
+    }
+
+    @Override
+    public Set<String> getTenantDesensitizedFieldValues() {
+        Long tenantId = TenantContextHolder.getTenantId();
+        ArrayList<String> categoryCodeList = new ArrayList<>();
+        categoryCodeList.add(SecurityCategoryCodeEnum.DESENSITIZATION_SECURITY.getValue());
+        //查询租户下安全配置项为脱敏配置的参数
+        List<SecurityConfigCategoryGroupRespVO> tenantConfigItems = this.getTenantConfigItemsByCategoryCodes(new SecurityConfigGetReqVO().setTenantId(tenantId).setCategoryCode(categoryCodeList));
+        Set<String> configValues = new HashSet<>();
+        for (SecurityConfigCategoryGroupRespVO tenantConfigItem : tenantConfigItems) {
+            if (SecurityCategoryCodeEnum.DESENSITIZATION_SECURITY.getValue().equals(tenantConfigItem.getCategoryCode())){
+                //获取脱敏配置项中配置的需要脱敏的字段
+                List<SecurityConfigItemRespVO> securityConfigItemRespDTO = tenantConfigItem.getSecurityConfigItemRespVO();
+                securityConfigItemRespDTO.stream()
+                        .filter(configItemRespDTO -> SecurityConfigKey.desensitizedField.getConfigKey().equals(configItemRespDTO.getConfigKey()))
+                        .map(SecurityConfigItemRespVO::getConfigValue)
+                        .filter(Objects::nonNull)
+                        .forEach(configValue -> {
+                            String[] split = configValue.split(",");
+                            Collections.addAll(configValues, split);
+                        });
+            }
+        }
+        return configValues;
+    }
 }

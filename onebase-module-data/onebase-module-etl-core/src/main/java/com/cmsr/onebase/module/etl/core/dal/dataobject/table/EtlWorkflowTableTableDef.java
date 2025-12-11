@@ -3,21 +3,19 @@ package com.cmsr.onebase.module.etl.core.dal.dataobject.table;
 import com.mybatisflex.core.query.QueryColumn;
 import com.mybatisflex.core.table.TableDef;
 
-import java.io.Serial;
 
 /**
- * ETL工作流与表关联关系表 表定义层。
+ *  表定义层。
  *
- * @author HuangJie
- * @since 2025-11-22
+ * @author v1endr3
+ * @since 2025-11-26
  */
 public class EtlWorkflowTableTableDef extends TableDef {
 
-    @Serial
     private static final long serialVersionUID = 1L;
 
     /**
-     * ETL工作流与表关联关系表
+     * 
      */
     public static final EtlWorkflowTableTableDef ETL_WORKFLOW_TABLE = new EtlWorkflowTableTableDef();
 
@@ -31,13 +29,16 @@ public class EtlWorkflowTableTableDef extends TableDef {
     public final QueryColumn DELETED = new QueryColumn(this, "deleted");
 
     
-    public final QueryColumn TABLE_ID = new QueryColumn(this, "table_id");
-
-    
     public final QueryColumn UPDATER = new QueryColumn(this, "updater");
 
     
     public final QueryColumn RELATION = new QueryColumn(this, "relation");
+
+    
+    public final QueryColumn TENANT_ID = new QueryColumn(this, "tenant_id");
+
+    
+    public final QueryColumn TABLE_UUID = new QueryColumn(this, "table_uuid");
 
     
     public final QueryColumn CREATE_TIME = new QueryColumn(this, "create_time");
@@ -46,16 +47,16 @@ public class EtlWorkflowTableTableDef extends TableDef {
     public final QueryColumn UPDATE_TIME = new QueryColumn(this, "update_time");
 
     
-    public final QueryColumn WORKFLOW_ID = new QueryColumn(this, "workflow_id");
-
-    
     public final QueryColumn LOCK_VERSION = new QueryColumn(this, "lock_version");
 
     
-    public final QueryColumn DATASOURCE_ID = new QueryColumn(this, "datasource_id");
+    public final QueryColumn WORKFLOW_UUID = new QueryColumn(this, "workflow_uuid");
 
     
     public final QueryColumn APPLICATION_ID = new QueryColumn(this, "application_id");
+
+    
+    public final QueryColumn DATASOURCE_UUID = new QueryColumn(this, "datasource_uuid");
 
     /**
      * 所有字段。
@@ -65,7 +66,7 @@ public class EtlWorkflowTableTableDef extends TableDef {
     /**
      * 默认字段，不包含逻辑删除或者 large 等字段。
      */
-    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, APPLICATION_ID, WORKFLOW_ID, RELATION, TABLE_ID, DELETED, CREATOR, CREATE_TIME, UPDATER, UPDATE_TIME, LOCK_VERSION, DATASOURCE_ID};
+    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, APPLICATION_ID, WORKFLOW_UUID, DATASOURCE_UUID, TABLE_UUID, RELATION, DELETED, CREATOR, CREATE_TIME, UPDATER, UPDATE_TIME, LOCK_VERSION, TENANT_ID};
 
     public EtlWorkflowTableTableDef() {
         super("", "etl_workflow_table");

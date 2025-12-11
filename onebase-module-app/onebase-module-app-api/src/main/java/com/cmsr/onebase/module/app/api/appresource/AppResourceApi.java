@@ -1,5 +1,7 @@
 package com.cmsr.onebase.module.app.api.appresource;
 
+import com.cmsr.onebase.module.app.api.appresource.dto.AppMenuRespDTO;
+import com.cmsr.onebase.module.app.api.appresource.dto.AppPagesetRespDTO;
 import com.cmsr.onebase.module.app.api.appresource.dto.PageRespDTO;
 
 import java.util.List;
@@ -10,6 +12,10 @@ import java.util.List;
  */
 public interface AppResourceApi {
 
+    PageRespDTO findPageByPageUuid(Long applicationId, String pageUuid);
+
+    String findTableUuidByAppIdAndPageUuid(Long applicationId, String pageUuid);
+
     /**
      * 根据页面集ID查询页面
      *
@@ -17,4 +23,50 @@ public interface AppResourceApi {
      * @return 页面列表
      */
     List<PageRespDTO> findPageListByPageSetId(Long pageSetId);
+
+    /**
+     * 根据页面集UUID查询页面
+     *
+     * @param pageSetUuid   页面集UUID
+     * @param applicationId 应用ID
+     * @return 页面列表
+     */
+    List<PageRespDTO> findPageListByPageSetUuidAndAppId(String pageSetUuid, Long applicationId);
+
+    /**
+     * 根据菜单UUID查询页面集
+     *
+     * @param menuUuids     菜单UUID列表
+     * @param applicationId 应用ID
+     * @return 页面集列表
+     */
+    List<AppPagesetRespDTO> findPageSetListByMenuUuidsAndAppId(List<String> menuUuids, Long applicationId);
+
+    /**
+     * 根据菜单UUID查询页面集
+     *
+     * @param menuUuid      菜单UUID
+     * @param applicationId 应用ID
+     * @return 页面集
+     */
+    AppPagesetRespDTO getPageSetByMenuUuidAndAppId(String menuUuid, Long applicationId);
+
+    /**
+     * 根据菜单ID查询菜单
+     *
+     * @param menuId 菜单ID
+     * @return 菜单
+     */
+    AppMenuRespDTO getAppMenuById(Long menuId);
+
+    /**
+     * 根据菜单UUID查询菜单
+     *
+     * @param menuUuid      菜单UUID
+     * @param applicationId 应用ID
+     * @return 菜单
+     */
+    AppMenuRespDTO getAppMenuByUuidAndAppId(String menuUuid, Long applicationId);
+
+
 }

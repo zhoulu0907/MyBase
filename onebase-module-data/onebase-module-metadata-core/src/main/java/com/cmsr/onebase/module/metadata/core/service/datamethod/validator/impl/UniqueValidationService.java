@@ -6,6 +6,7 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusin
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationUniqueDO;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationUniqueRepository;
+import com.cmsr.onebase.module.metadata.core.domain.query.MetadataDataMethodSubEntityContext;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.validator.ValidationService;
 import com.cmsr.onebase.module.metadata.core.service.datasource.MetadataDatasourceCoreService;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService;
@@ -56,13 +57,13 @@ public class UniqueValidationService implements ValidationService {
     }
 
     @Override
-    public void validate(Long entityId, Long fieldId, MetadataEntityFieldDO field, Object value, Map<String, Object> data) {
+    public void validate(String entityUuid, String fieldUuid, MetadataEntityFieldDO field, Object value, Map<String, Object> data, List<MetadataDataMethodSubEntityContext> subEntities) {
         if (value == null) {
             return; // 空值不校验唯一性
         }
 
-        // 查询唯一性规则
-        List<MetadataValidationUniqueDO> rules = uniqueRepository.findByFieldId(fieldId);
+        // 查询唯一性规则（使用字段UUID）
+        List<MetadataValidationUniqueDO> rules = uniqueRepository.findByFieldUuid(fieldUuid);
         
         if (rules.isEmpty()) {
             return; // 没有唯一性规则，跳过校验
@@ -86,8 +87,8 @@ public class UniqueValidationService implements ValidationService {
             // 这里需要根据 rule.getUniqueScope() 来确定检查范围
             // 可能需要调用数据库查询来检查是否已存在相同的值
 
-            log.fine("执行唯一性校验：entityId=" + entityId + ", fieldId=" + fieldId + ", value=" + value);
-            boolean isExist = validateDateExistByField(entityId, field, value, data);// 查询数据库检查唯一性
+            log.fine("执行唯一性校验：entityUuid=" + entityUuid + ", fieldUuid=" + fieldUuid + ", value=" + value);
+            boolean isExist = validateDateExistByField(entityUuid, field, value, data);// 查询数据库检查唯一性
             if (isExist) {
                 throw new IllegalArgumentException("字段[" + field.getDisplayName() + "]值已存在");// 如果发现重复值，抛出异常
             }
@@ -109,9 +110,9 @@ public class UniqueValidationService implements ValidationService {
     /**
      *根据字段值在业务表中查询是否已经存在相同的值
      */
-    private boolean validateDateExistByField(Long entityId, MetadataEntityFieldDO field, Object value, Map<String, Object> data) {
-        MetadataBusinessEntityDO entity = metadataBusinessEntityCoreService.getBusinessEntity(entityId);
-        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceId());
+    private boolean validateDateExistByField(String entityUuid, MetadataEntityFieldDO field, Object value, Map<String, Object> data) {
+        MetadataBusinessEntityDO entity = metadataBusinessEntityCoreService.getBusinessEntityByUuid(entityUuid);
+        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasourceByUuid(entity.getDatasourceUuid());
         if (datasource == null) {
             throw exception(DATASOURCE_NOT_EXISTS);
         }
@@ -120,7 +121,7 @@ public class UniqueValidationService implements ValidationService {
         ConfigStore configs = new DefaultConfigStore();
         configs.and(field.getFieldName(), value);
 
-        List<MetadataEntityFieldDO> entityFields = metadataEntityFieldCoreService.getEntityFieldListByEntityId(entityId);
+        List<MetadataEntityFieldDO> entityFields = metadataEntityFieldCoreService.getEntityFieldListByEntityUuid(entityUuid);
 
         // 仅校验未被逻辑删除的数据
         boolean hasDeletedColumn = entityFields.stream()

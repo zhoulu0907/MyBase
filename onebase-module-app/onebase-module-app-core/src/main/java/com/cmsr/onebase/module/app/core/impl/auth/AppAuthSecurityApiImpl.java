@@ -3,8 +3,8 @@ package com.cmsr.onebase.module.app.core.impl.auth;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.module.app.api.security.AppAuthSecurityApi;
 import com.cmsr.onebase.module.app.api.security.bo.*;
-import com.cmsr.onebase.module.app.core.dal.dataobject.auth.AuthPermissionDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.menu.MenuDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthPermissionDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppMenuDO;
 import com.cmsr.onebase.module.app.core.dto.auth.UserRoleDTO;
 import com.cmsr.onebase.module.app.core.provider.auth.AppAuthDataGroupProvider;
 import com.cmsr.onebase.module.app.core.provider.auth.AppAuthFieldProvider;
@@ -50,14 +50,14 @@ public class AppAuthSecurityApiImpl implements AppAuthSecurityApi {
     private AppAuthFieldProvider appAuthFieldProvider;
 
     @Override
-    public boolean checkMenuEntity(Long applicationId, Long menuId, Long entityId) {
-        MenuDO menuDO = appMenuProvider.findByMenuId(menuId);
+    public boolean checkMenuEntity(Long applicationId, Long menuId, String entityUuid) {
+        AppMenuDO menuDO = appMenuProvider.findByMenuId(menuId);
         if (menuDO == null) {
             return false;
         }
         if (menuDO.getApplicationId().equals(applicationId)
                 && menuDO.getId().equals(menuId)
-                && menuDO.getEntityId().equals(entityId)) {
+                && menuDO.getEntityUuid().equals(entityUuid)) {
             return true;
         }
         return false;
@@ -86,9 +86,13 @@ public class AppAuthSecurityApiImpl implements AppAuthSecurityApi {
             operationPermission.allDeny();
             return operationPermission;
         }
-        Set<Long> roleIds = userRoleDTO.getRoleIds();
-        List<AuthPermissionDO> permissionDOs = appAuthPermissionProvider.findPermissions(applicationId, roleIds, menuId);
-        for (AuthPermissionDO permissionDO : permissionDOs) {
+        //
+        Set<String> roleUuids = userRoleDTO.getRoleUuids();
+        AppMenuDO appMenuDO = appMenuProvider.findByMenuId(menuId);
+        String menuUuid = appMenuDO.getMenuUuid();
+        //
+        List<AppAuthPermissionDO> permissionDOs = appAuthPermissionProvider.findPermissions(applicationId, roleUuids, menuUuid);
+        for (AppAuthPermissionDO permissionDO : permissionDOs) {
             if (NumberUtils.INTEGER_ONE.equals(permissionDO.getIsPageAllowed())) {
                 operationPermission.setPageAllowed(true);
             }
@@ -140,8 +144,11 @@ public class AppAuthSecurityApiImpl implements AppAuthSecurityApi {
             return dataPermission;
         }
         //
-        Set<Long> roleIds = userRoleDTO.getRoleIds();
-        List<DataPermissionGroup> dataGroups = appAuthDataGroupProvider.findDataGroups(applicationId, roleIds, menuId);
+        Set<String> roleUuids = userRoleDTO.getRoleUuids();
+        AppMenuDO appMenuDO = appMenuProvider.findByMenuId(menuId);
+        String menuUuid = appMenuDO.getMenuUuid();
+        //
+        List<DataPermissionGroup> dataGroups = appAuthDataGroupProvider.findDataGroups(applicationId, roleUuids, menuUuid);
         dataPermission.setGroups(dataGroups);
         dataPermission.setAllAllowed(false);
         dataPermission.setAllDenied(false);
@@ -181,8 +188,12 @@ public class AppAuthSecurityApiImpl implements AppAuthSecurityApi {
             fieldPermission.setAllDenied(true);
             return fieldPermission;
         }
-        Set<Long> roleIds = userRoleDTO.getRoleIds();
-        List<FieldPermissionItem> fields = appAuthFieldProvider.findFields(applicationId, roleIds, menuId);
+        //
+        Set<String> roleUuids = userRoleDTO.getRoleUuids();
+        AppMenuDO appMenuDO = appMenuProvider.findByMenuId(menuId);
+        String menuUuid = appMenuDO.getMenuUuid();
+        //
+        List<FieldPermissionItem> fields = appAuthFieldProvider.findFields(applicationId, roleUuids, menuUuid);
         fieldPermission.setAllAllowed(false);
         fieldPermission.setAllDenied(false);
         fieldPermission.setFields(fields);

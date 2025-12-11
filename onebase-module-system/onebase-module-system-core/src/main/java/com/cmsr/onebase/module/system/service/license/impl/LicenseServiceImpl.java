@@ -2,17 +2,22 @@ package com.cmsr.onebase.module.system.service.license.impl;
 
 import com.cmsr.onebase.framework.common.exception.enums.GlobalErrorCodeConstants;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
+import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.system.vo.license.LicenseExportRespVO;
-import com.cmsr.onebase.module.system.vo.license.LicensePageReqVO;
-import com.cmsr.onebase.module.system.vo.license.LicenseSaveReqVO;
 import com.cmsr.onebase.module.system.convert.license.LicenseConvert;
 import com.cmsr.onebase.module.system.dal.database.LicenseDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.license.LicenseDO;
 import com.cmsr.onebase.module.system.enums.license.LicenseStatusEnum;
 import com.cmsr.onebase.module.system.service.license.LicenseService;
+import com.cmsr.onebase.module.system.service.user.UserService;
 import com.cmsr.onebase.module.system.util.encrypt.SM4Utils;
+import com.cmsr.onebase.module.system.vo.license.LicenseExportRespVO;
+import com.cmsr.onebase.module.system.vo.license.LicensePageReqVO;
+import com.cmsr.onebase.module.system.vo.license.LicenseSaveReqVO;
+import com.mzt.logapi.context.LogRecordContext;
+import com.mzt.logapi.starter.annotation.LogRecord;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +38,7 @@ import java.util.List;
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.framework.license.core.handler.LicenseCheckHandler.LICENSE_KEY;
 import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
+import static com.cmsr.onebase.module.system.enums.LogRecordConstants.*;
 import static com.cmsr.onebase.module.system.util.encrypt.SM4Utils.sm4Encrypt;
 
 /**
@@ -71,7 +77,7 @@ public class LicenseServiceImpl implements LicenseService {
     /**
      * 创建License文件
      *
-     * @param reqVO License创建请求参数
+     * @param reqVO    License创建请求参数
      * @param response HttpServletResponse
      */
     @Override
@@ -179,56 +185,72 @@ public class LicenseServiceImpl implements LicenseService {
 
     @Override
     @Transactional
+    @LogRecord(type = SYSTEM_LICENSE_TYPE, subType = SYSTEM_LICENSE_IMPORT_SUB_TYPE, bizNo = "{{#licenseId}}",
+            success = SYSTEM_LICENSE_IMPORT_SUCCESS)
     public Long importLicense(MultipartFile file) {
 
+        // 1. 解析License文件
+        byte[] encryptedBytes = null;
         try {
             // 直接从MultipartFile获取字节数据并转换为字符串
-            byte[] encryptedBytes = file.getBytes();
-            String encryptedContent = new String(encryptedBytes, StandardCharsets.UTF_8);
-            // 解密内容
-            String decryptedContent = SM4Utils.sm4Decrypt(encryptedContent, LICENSE_SECRET_KEY);
-            log.info("License解析内容: {}", decryptedContent);
-            // 先将旧License置为失效
-            // 如果是新创建的license，将其他所有已认证的license更新为已失效状态
-            List<LicenseDO> licenses = getEnableLicenseList();
-            if (CollectionUtils.isEmpty(licenses)) {
-                log.error("error -------------> 没有启用的License！！");
-            }
-            if (licenses.size() > 1) {
-                log.error("error -------------> 存在多个启用的License！！！");
-            }
-            for (LicenseDO license : licenses) {
-                LicenseSaveReqVO updateReqVO = new LicenseSaveReqVO();
-                updateReqVO.setId(license.getId());
-                updateReqVO.setStatus(LicenseStatusEnum.DISABLE.getStatus());
-                updateLicense(updateReqVO);
-                log.info("disable license ----> {}", license.getId());
-            }
-            // 在插入新的 License
-            LicenseSaveReqVO licenseSaveReqVO = JsonUtils.parseObject(decryptedContent, LicenseSaveReqVO.class);
-            LocalDateTime expireTime = licenseSaveReqVO.getExpireTime();
-            if (expireTime.isBefore(LocalDateTime.now())) {
-                // 定义时间格式
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-                // 转换为指定格式的字符串
-                String formattedTime = expireTime.format(formatter);
-                log.error("License 过期：{}", formattedTime);
-                throw exception(GlobalErrorCodeConstants.LICENSE_IS_EXPIRED);
-            }
-            licenseSaveReqVO.setLicenseFile(encryptedContent);
-            // 创建License时，将状态设置为ENABLE
-            licenseSaveReqVO.setStatus(LicenseStatusEnum.ENABLE.getStatus());
-            Long licenseId = createLicense(licenseSaveReqVO);
-
-            // 删除License缓存，确保下次获取License时，会重新从数据库中获取
-            stringRedisTemplate.delete(LICENSE_KEY);
-
-            log.info("insert and enable new license ------> {}", licenseId);
-            return licenseId;
+            encryptedBytes = file.getBytes();
         } catch (Exception e) {
             log.error("导入License失败", e);
             throw exception(LICENSE_IMPORT_ERROR);
         }
+        String encryptedContent = new String(encryptedBytes, StandardCharsets.UTF_8);
+        // 解密内容
+        String decryptedContent = SM4Utils.sm4Decrypt(encryptedContent, LICENSE_SECRET_KEY);
+        log.info("License解析内容: {}", decryptedContent);
+        // 文件内容解析
+        LicenseSaveReqVO licenseSaveReqVO = JsonUtils.parseObject(decryptedContent, LicenseSaveReqVO.class);
+
+
+        // 2 查出所有已认证的license（在插入新License后再删除）
+        // 如果是新创建的license，将其他所有已认证的license更新为已失效状态
+        List<LicenseDO> licenses = getEnableLicenseList();
+        if (CollectionUtils.isEmpty(licenses)) {
+            log.error("error -------------> 没有启用的License！！");
+        }
+        if (licenses.size() > 1) {
+            log.error("error -------------> 存在多个启用的License！！！");
+        }
+
+        // 3 插入新的 License
+        LocalDateTime expireTime = licenseSaveReqVO.getExpireTime();
+        if (expireTime.isBefore(LocalDateTime.now())) {
+            // 定义时间格式
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            // 转换为指定格式的字符串
+            String formattedTime = expireTime.format(formatter);
+            log.error("License 过期：{}", formattedTime);
+            throw exception(GlobalErrorCodeConstants.LICENSE_IS_EXPIRED);
+        }
+        licenseSaveReqVO.setLicenseFile(encryptedContent);
+        // 创建License时，将状态设置为ENABLE
+        licenseSaveReqVO.setStatus(LicenseStatusEnum.ENABLE.getStatus());
+        Long licenseId = createLicense(licenseSaveReqVO);
+
+        // 4 删除旧的license
+        for (LicenseDO license : licenses) {
+            LicenseSaveReqVO updateReqVO = new LicenseSaveReqVO();
+            updateReqVO.setId(license.getId());
+            updateReqVO.setStatus(LicenseStatusEnum.DISABLE.getStatus());
+            updateLicense(updateReqVO);
+            log.info("disable license ----> {}", license.getId());
+        }
+
+        // 删除License缓存，确保下次获取License时，会重新从数据库中获取
+        stringRedisTemplate.delete(LICENSE_KEY);
+        log.info("insert and enable new license ------> {}", licenseId);
+
+        // 5记录操作日志上下文
+        LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
+        LogRecordContext.putVariable("licenseId", licenseId);
+        LogRecordContext.putVariable("loginUser", loginUser);
+
+        return licenseId;
+
     }
 
     @Override

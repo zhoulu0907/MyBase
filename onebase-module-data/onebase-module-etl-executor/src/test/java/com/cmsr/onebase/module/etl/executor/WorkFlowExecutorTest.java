@@ -22,7 +22,7 @@ class WorkFlowExecutorTest {
         executeRequest.setJdbcUrl("jdbc:postgresql://10.0.104.38:5432/onebase_cloud_v3");
         executeRequest.setJdbcUserName("postgres");
         executeRequest.setJdbcPassword("onebase@2025");
-        executeRequest.setWorkflowId(146454863110144000L);
+        executeRequest.setWorkflowId(161414749634166784L);
         //executeRequest.setWorkflowId(144840848755687424L);
         WorkFlowExecutor executor = new WorkFlowExecutor(executeRequest);
         executor.execute();
@@ -52,11 +52,12 @@ class WorkFlowExecutorTest {
         System.out.println(json);
         ExecuteRequest executeRequest = new ExecuteRequest();
         executeRequest.setJdbcDriverClass("org.postgresql.Driver");
+        executeRequest.setApplicationId(168331399347339264L);
         executeRequest.setJdbcUrl("jdbc:postgresql://10.0.104.38:5432/onebase_cloud_v3");
         executeRequest.setJdbcUserName("postgres");
         executeRequest.setJdbcPassword("onebase@2025");
         executeRequest.setPreviewWorkflow(json);
-        executeRequest.setPreviewNodeId("sql_502aac004e5749de9de5c03f3e0d5e8d");
+        executeRequest.setPreviewNodeId("sql_d28bd961f4a54d12a5b66db2aa78eabf");
         WorkFlowExecutor executor = new WorkFlowExecutor(executeRequest);
         List<ColumnDefine> columnDefines = executor.nodeColumns();
         System.out.println(columnDefines);

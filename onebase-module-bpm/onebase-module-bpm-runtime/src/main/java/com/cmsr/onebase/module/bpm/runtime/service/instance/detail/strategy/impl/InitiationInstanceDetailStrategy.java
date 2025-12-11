@@ -30,8 +30,8 @@ public class InitiationInstanceDetailStrategy extends AbstractInstanceDetailStra
      * @param instance 流程实例
      */
     @Override
-    protected void fillPageViewInfo(BpmTaskDetailRespVO vo, Instance instance, Long pageSetId, boolean isTodo) {
-        PageViewGroupDTO viewGroupDTO = getPageViewGroupDTO(instance, pageSetId);
+    protected void fillPageViewInfo(BpmTaskDetailRespVO vo, Instance instance, boolean isTodo) {
+        PageViewGroupDTO viewGroupDTO = getPageViewGroupDTO(instance);
 
         // 发起节点比较特殊，会返回编辑视图
         if (isTodo) {
