@@ -1,4 +1,5 @@
 import { memo } from 'react';
+import { Divider } from '@arco-design/mobile-react';
 import { ShowSchema } from '@onebase/ui-kit';
 import '../index.css';
 import './index.css'
@@ -11,10 +12,10 @@ const XDivider = memo((props: XDividerConfig) => {
     <div
       className={`formWrapperOBMobile dividerWrapperOBMobile ${align}`}
       style={{
-        margin: `${margin}px 0`,
+        margin: `${margin / 100 * 2}rem 0`,
       }}
     >
-      {content && <span>{content}</span>}
+      <Divider content={content} align={align} />
     </div>
   );
 });

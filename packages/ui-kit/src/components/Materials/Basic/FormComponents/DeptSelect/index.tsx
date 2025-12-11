@@ -109,7 +109,6 @@ const XDeptSelect = memo((props: XInputDeptSelectConfig & { runtime?: boolean; d
     const treeData = listToTree(res, {}, true);
     setDeptTree(treeData);
     getCurDeptTree(treeData);
-    console.log('deptFlatTree', deptFlatTree);
   };
 
   const filterTreeNode = (inputText: string, node: any) => {

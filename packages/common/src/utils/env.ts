@@ -24,3 +24,7 @@ export const getSignatureConfig = (): { appKey: string; appSecret: string } => {
 export const getPublicKey = (): string => {
   return (window as any).global_config?.PUBLIC_KEY;
 };
+
+export const getMobileEditorURL = (): string => {
+  return (window as any).global_config?.MOBILE_EDITOR_URL;
+};
