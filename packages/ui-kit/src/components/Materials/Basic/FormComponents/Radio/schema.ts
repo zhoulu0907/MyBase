@@ -150,8 +150,8 @@ const XRadio: XInputRadioSchema = {
     ...dataFieldConfig,
     // 选项
     radioDataConfig,
-    directionConfig,
     // 选项分布方式
+    directionConfig,
     {
       key: 'verify',
       name: '校验',

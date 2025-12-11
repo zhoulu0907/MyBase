@@ -9,6 +9,7 @@ import type { PageParam, UpdateAdminOrDirectorReq, UserVO } from '@onebase/platf
 import {
   deleteUser,
   getSimpleUser,
+  getUserListByName,
   getUserPage,
   PlatformTenantStatus,
   resetUserPassword,
@@ -74,7 +75,7 @@ export default function UserTable({
   selectedDeptId = undefined,
   deptTree,
   deptLoading,
-  onRefreshDept,
+  onRefreshDept
 }: UserTableProps) {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -376,7 +377,12 @@ export default function UserTable({
     setMemberLoading(true);
     try {
       if (!selectedDeptId) return;
-      const res = await getSimpleUser(keywords);
+      let res = null;
+      if (keywords) {
+        res = await getUserListByName(keywords);
+      } else {
+        res = await getSimpleUser(selectedDeptId, true);
+      }
       setUsertData({ userList: res });
     } catch (error) {
       console.error('获取部门用户信息失败 error:', error);

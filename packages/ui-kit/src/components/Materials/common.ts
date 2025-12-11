@@ -209,17 +209,17 @@ export const layoutConfig: ILayoutConfigType<TLayoutSelectKeyType> = {
 export type TDirectionSelectKeyType = (typeof LAYOUT_VALUES)[keyof typeof LAYOUT_VALUES];
 export const directionConfig: ILayoutConfigType<TDirectionSelectKeyType> = {
   key: 'direction',
-  name: '方向',
+  name: '选项分布方式',
   type: CONFIG_TYPES.FORM_LAYOUT,
   range: [
     {
       key: LAYOUT_OPTIONS.HORIZONTAL,
-      text: LAYOUT_OPTIONS.HORIZONTAL,
+      text: '横向排列',
       value: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL]
     },
     {
       key: LAYOUT_OPTIONS.VERTICAL,
-      text: LAYOUT_OPTIONS.VERTICAL,
+      text: '纵向排列',
       value: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL]
     }
   ]
