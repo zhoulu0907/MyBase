@@ -32,8 +32,8 @@ public class AppTagRepository extends ServiceImpl<AppTagMapper, AppTagDO> {
         return count(this.query().eq(AppTagDO::getTagName, tagName));
     }
 
-    public List<TagGroupCountVO> selectNameCounts() {
-        return this.mapper.selectNameCounts();
+    public List<TagGroupCountVO> selectNameCounts(Long tenantId) {
+        return this.mapper.selectNameCounts(tenantId);
     }
 
 }

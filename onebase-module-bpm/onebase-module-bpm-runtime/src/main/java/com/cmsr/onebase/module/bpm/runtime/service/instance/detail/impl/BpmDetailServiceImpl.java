@@ -22,7 +22,6 @@ import com.cmsr.onebase.module.engine.orm.mybatisflex.entity.FlowHisTask;
 import com.cmsr.onebase.module.metadata.api.semantic.SemanticDynamicDataApi;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntityValueDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticTargetBodyVO;
-import com.cmsr.onebase.module.metadata.core.service.datamethod.MetadataDataMethodCoreService;
 import jakarta.annotation.Resource;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -78,9 +77,6 @@ public class BpmDetailServiceImpl implements BpmDetailService {
 
     @Resource
     private BpmFlowAgentInsRepository agentInsRepository;
-
-    @Resource
-    private MetadataDataMethodCoreService metadataDataMethodCoreService;
 
     @Resource
     private InstanceDetailStrategyManager instanceDetailStrategyManager;

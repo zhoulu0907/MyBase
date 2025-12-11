@@ -1,6 +1,5 @@
 package com.cmsr.onebase.module.app.build.service.version;
 
-import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.app.build.service.AppCommonService;
@@ -10,7 +9,6 @@ import com.cmsr.onebase.module.app.build.vo.version.VersionPageRespVO;
 import com.cmsr.onebase.module.app.core.dal.database.version.AppVersionRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppApplicationDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppVersionDO;
-import com.cmsr.onebase.module.app.core.enums.AppErrorCodeConstants;
 import com.cmsr.onebase.module.app.core.enums.version.VersionTypeEnum;
 import com.cmsr.onebase.module.bpm.api.datamanager.BpmDataManager;
 import com.cmsr.onebase.module.flow.api.FlowDataManager;
@@ -22,12 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.validation.annotation.Validated;
 
-import java.util.Comparator;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * @Author：huangjie
@@ -67,6 +60,7 @@ public class AppVersionServiceImpl implements AppVersionService {
                 .map(v -> {
                     VersionPageRespVO bean = BeanUtils.toBean(v, VersionPageRespVO.class);
                     bean.setUpdaterName(userHelper.getUserNickname(v.getUpdater()));
+                    bean.setVersionTypeLabel(VersionTypeEnum.getLabel(v.getVersionType()));
                     return bean;
                 })
                 .toList();
@@ -122,7 +116,6 @@ public class AppVersionServiceImpl implements AppVersionService {
     @Override
     public void restoreApplicationVersion(Long versionId) {
         // 获取历史版本对象
-
     }
 
     @Override
@@ -130,26 +123,5 @@ public class AppVersionServiceImpl implements AppVersionService {
         versionRepository.removeById(versionId);
     }
 
-    @Override
-    public Map<Long, AppVersionDO> findVersionMapByAppIds(List<Long> appIds) {
-        List<AppVersionDO> allVersions = versionRepository.findVersionList(appIds);
-        Map<Long, AppVersionDO> latestVersionMap = allVersions.stream()
-                .sorted(Comparator.comparing(AppVersionDO::getUpdateTime).reversed())
-                .collect(Collectors.toMap(
-                        AppVersionDO::getApplicationId,
-                        Function.identity(),
-                        (existing, replacement) -> existing,
-                        LinkedHashMap::new
-                ));
-        return latestVersionMap;
-    }
-
-    private AppVersionDO validateApplicationVersionExist(Long id) {
-        AppVersionDO versionDO = versionRepository.getById(id);
-        if (versionDO == null) {
-            throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_VERSION_NOT_EXIST);
-        }
-        return versionDO;
-    }
 
 }
