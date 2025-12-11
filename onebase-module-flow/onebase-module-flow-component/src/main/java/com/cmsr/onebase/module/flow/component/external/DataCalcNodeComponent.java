@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.flow.component.data;
+package com.cmsr.onebase.module.flow.component.external;
 
 import com.cmsr.onebase.module.flow.component.SkippableNodeComponent;
 import com.cmsr.onebase.module.flow.component.utils.VariableProvider;
@@ -47,7 +47,7 @@ public class DataCalcNodeComponent extends SkippableNodeComponent {
         // 固定是字符串类型
         for (ConditionItem conditionItem : conditionItems) {
             conditionItem.setFieldTypeEnum(SemanticFieldTypeEnum.TEXT);
-            conditionItem.setOp(OpEnum.EQUALS.name());
+            //conditionItem.setOp(OpEnum.EQUALS.name());
         }
         List<ExpressionItem> expressionItems = flowConditionsProvider.formatConditionItemsForValue(conditionItems, expressionContext);
         Map<String, Object> dataMap = expressionItems.stream().collect(Collectors.toMap(ExpressionItem::getFieldKey, ExpressionItem::getFieldValue));

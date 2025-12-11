@@ -380,7 +380,7 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
 
     private List<AuthViewVO> queryAuthViews(Long menuId, AuthPermissionReq reqVO) {
         List<AppAuthViewDO> viewDOS = authViewRepository.findByQuery(reqVO);
-        List<AppResourcePageDO> pages = appMenuRepository.findPagesByMenuId(menuId);
+        List<AppResourcePageDO> pages = appPageRepository.findPagesByMenuId(menuId);
         List<Pair<AppResourcePageDO, AppAuthViewDO>> pairs =
                 AuthUtils.leftOuterJoin(pages, viewDOS, (page, view) -> page.getPageUuid().equals(view.getViewUuid()));
         return pairs.stream().map(pair -> {

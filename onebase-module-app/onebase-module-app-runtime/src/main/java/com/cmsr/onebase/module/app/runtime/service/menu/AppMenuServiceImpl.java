@@ -6,6 +6,7 @@ import com.cmsr.onebase.framework.security.runtime.RTSecurityContext;
 import com.cmsr.onebase.module.app.api.security.bo.OperationPermission;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthViewRepository;
 import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
+import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageRepository;
 import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageSetRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.*;
 import com.cmsr.onebase.module.app.core.dto.auth.UserRoleDTO;
@@ -58,6 +59,9 @@ public class AppMenuServiceImpl implements AppMenuService {
 
     @Autowired
     private AppAuthViewRepository appAuthViewRepository;
+
+    @Autowired
+    private AppPageRepository appPageRepository;
 
     @Autowired
     private RedissonClient redissonClient;
@@ -198,7 +202,7 @@ public class AppMenuServiceImpl implements AppMenuService {
     }
 
     private Set<String> findMenuAllViews(Long applicationId, Long menuId) {
-        List<AppResourcePageDO> pages = appMenuRepository.findPagesByMenuId(menuId);
+        List<AppResourcePageDO> pages = appPageRepository.findPagesByMenuId(menuId);
         return pages.stream().map(AppResourcePageDO::getPageUuid).collect(Collectors.toSet());
     }
 
