@@ -247,6 +247,7 @@ const Administrator: React.FC = () => {
   };
 
   const handleUpdate = async () => {
+    await editForm.validate();
     const newPassword = editForm.getFieldValue('password');
     const confirmPassword = editForm.getFieldValue('confirmPassword');
 
