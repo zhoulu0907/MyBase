@@ -55,7 +55,7 @@ public class AppVersionRepository extends BaseAppRepository<AppVersionMapper, Ap
     public AppVersionDO findByApplicationIdAndVersionType(Long applicationId, int versionType) {
         QueryWrapper queryWrapper = this.query()
                 .where(APP_VERSION.APPLICATION_ID.eq(applicationId))
-                .where(APP_VERSION.VERSION_TPYE.eq(versionType));
+                .where(APP_VERSION.VERSION_TYPE.eq(versionType));
         return this.getOne(queryWrapper);
     }
 }
