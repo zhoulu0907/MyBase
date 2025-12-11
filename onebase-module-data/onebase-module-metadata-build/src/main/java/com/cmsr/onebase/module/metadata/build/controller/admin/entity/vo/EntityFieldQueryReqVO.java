@@ -13,8 +13,11 @@ import lombok.Data;
 @Data
 public class EntityFieldQueryReqVO {
 
-    @Schema(description = "实体ID（与tableName二选一）", example = "1024")
+    @Schema(description = "实体ID（与tableName、entityUuid三选一）", example = "1024")
     private String entityId;
+
+    @Schema(description = "实体UUID（与tableName、entityId三选一）", example = "019b0d63-43b3-7ec8-8818-56e6be5aa0fe")
+    private String entityUuid;
 
     @Schema(description = "表名（与entityId二选一）", example = "biz_user")
     private String tableName;
