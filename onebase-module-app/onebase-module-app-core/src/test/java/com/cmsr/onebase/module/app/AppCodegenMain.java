@@ -74,6 +74,7 @@ public class AppCodegenMain {
         globalConfig.setMapperOverwriteEnable(true);
         //
         globalConfig.setMapperXmlGenerateEnable(true);
+        globalConfig.setMapperXmlOverwriteEnable(true);
         globalConfig.setMapperXmlPath(sourceDir);
         //生成代码
         Generator generator = new Generator(dataSource, globalConfig);
@@ -86,6 +87,7 @@ public class AppCodegenMain {
         globalConfig.setSourceDir(sourceDir);
         //生成表定义
         globalConfig.enableTableDef();
+        globalConfig.setTableDefOverwriteEnable(true);
         globalConfig.setTableDefPackage(basePackage + ".dataobject.table");
         //生成代码
         Generator generator = new Generator(dataSource, globalConfig);
