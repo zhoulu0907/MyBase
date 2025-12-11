@@ -14,6 +14,7 @@ import com.cmsr.onebase.module.app.core.enums.AppErrorCodeConstants;
 import com.cmsr.onebase.module.app.core.enums.version.VersionTypeEnum;
 import com.cmsr.onebase.module.bpm.api.datamanager.BpmDataManager;
 import com.cmsr.onebase.module.flow.api.FlowDataManager;
+import com.cmsr.onebase.module.metadata.api.version.MetadataVersionManagerApi;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -53,6 +54,9 @@ public class AppVersionServiceImpl implements AppVersionService {
     private FlowDataManager flowDataManager;
 
     @Autowired
+    private MetadataVersionManagerApi metadataVersionManager;
+
+    @Autowired
     private TransactionTemplate transactionTemplate;
 
     @Override
@@ -84,11 +88,13 @@ public class AppVersionServiceImpl implements AppVersionService {
                 versionRepository.updateById(currentRunVersion);
                 Long historyVersionTag = currentRunVersion.getId();
                 // 备份当前版本为历史版本
+                metadataVersionManager.moveMetaDataRuntimeToHistory(applicationId, historyVersionTag);
                 appDataManager.moveRuntimeToHistory(applicationId, historyVersionTag);
                 bpmDataManager.moveRuntimeToHistory(applicationId, historyVersionTag);
                 flowDataManager.moveRuntimeToHistory(applicationId, historyVersionTag);
             }
             // 发布上线版本
+            metadataVersionManager.copyMetaDataEditToRuntime(applicationId);
             appDataManager.copyEditToRuntime(applicationId);
             bpmDataManager.copyEditToRuntime(applicationId);
             flowDataManager.copyEditToRuntime(applicationId);
