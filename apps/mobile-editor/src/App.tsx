@@ -23,7 +23,7 @@ const App: React.FC<AppProps & { instanceId: string }> = ({ instanceId, props })
   useEffect(() => {
     if (props?.onGlobalStateChange) {
       props.onGlobalStateChange((state: any, prev: any) => {
-        console.log('子应用接收的参数', state, prev, instanceId);
+        // console.log('子应用接收的参数', state, prev, instanceId);
         if (state.drag) {
           setDragProps(state);
         } else {
