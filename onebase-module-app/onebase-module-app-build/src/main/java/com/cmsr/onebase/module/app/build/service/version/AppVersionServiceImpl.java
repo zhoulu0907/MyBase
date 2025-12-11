@@ -79,13 +79,15 @@ public class AppVersionServiceImpl implements AppVersionService {
         transactionTemplate.executeWithoutResult(transactionStatus -> {
             // 找打当前Runtime版本信息，肯定能找到，因为发布的时候会同步创建一个，把当前版本信息变成历史状态
             AppVersionDO currentRunVersion = versionRepository.findByApplicationIdAndVersionType(applicationId, VersionTypeEnum.RUNTIME.getValue());
-            currentRunVersion.setVersionTpye(VersionTypeEnum.HISTORY.getValue());
-            versionRepository.save(currentRunVersion);
-            Long historyVersionTag = currentRunVersion.getId();
-            // 备份当前版本为历史版本
-            appDataManager.moveRuntimeToHistory(applicationId, historyVersionTag);
-            bpmDataManager.moveRuntimeToHistory(applicationId, historyVersionTag);
-            flowDataManager.moveRuntimeToHistory(applicationId, historyVersionTag);
+            if (currentRunVersion != null) {
+                currentRunVersion.setVersionType(VersionTypeEnum.HISTORY.getValue());
+                versionRepository.updateById(currentRunVersion);
+                Long historyVersionTag = currentRunVersion.getId();
+                // 备份当前版本为历史版本
+                appDataManager.moveRuntimeToHistory(applicationId, historyVersionTag);
+                bpmDataManager.moveRuntimeToHistory(applicationId, historyVersionTag);
+                flowDataManager.moveRuntimeToHistory(applicationId, historyVersionTag);
+            }
             // 发布上线版本
             appDataManager.copyEditToRuntime(applicationId);
             bpmDataManager.copyEditToRuntime(applicationId);
@@ -106,7 +108,7 @@ public class AppVersionServiceImpl implements AppVersionService {
         newRunVersionDO.setVersionDescription(createReqVO.getVersionDescription());
         newRunVersionDO.setOperationType(createReqVO.getOperationType());
         newRunVersionDO.setEnvironment(createReqVO.getEnvironment());
-        newRunVersionDO.setVersionTpye(VersionTypeEnum.RUNTIME.getValue());
+        newRunVersionDO.setVersionType(VersionTypeEnum.RUNTIME.getValue());
         return newRunVersionDO;
     }
 
@@ -114,30 +116,7 @@ public class AppVersionServiceImpl implements AppVersionService {
     @Override
     public void restoreApplicationVersion(Long versionId) {
         // 获取历史版本对象
-        AppVersionDO targetVersionDO = versionRepository.getById(versionId);
-        if (targetVersionDO == null) {
-            throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_VERSION_NOT_EXIST);
-        }
-        final Long applicationId = targetVersionDO.getApplicationId();
-        final Long runtimeVersionId = applicationId;
-        if (versionId == runtimeVersionId) {
-            throw new IllegalArgumentException("当前已是最新版本");
-        }
-        // 备份当前版本为历史版本
-        AppVersionDO currentVersion = versionRepository.findCurrentVersion(applicationId);
-        if (currentVersion == null) {
-            throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_VERSION_NOT_EXIST);
-        }
-        currentVersion.setId(null);
-        versionRepository.save(currentVersion);
-        Long historyVersionTag = currentVersion.getId();
-        // 1. backup runtime
-        appDataManager.moveRuntimeToHistory(applicationId, historyVersionTag);
-//        bpmDataManager.moveRuntimeToHistory(applicationId, runtimeVersionId);
-        // 2. publish history
-        appDataManager.copyHistoryToRuntime(applicationId, versionId);
-        targetVersionDO.setId(runtimeVersionId);
-        versionRepository.updateById(targetVersionDO);
+
     }
 
     @Override
