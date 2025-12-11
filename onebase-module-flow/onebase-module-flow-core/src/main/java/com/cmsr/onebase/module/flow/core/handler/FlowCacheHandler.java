@@ -1,10 +1,9 @@
 package com.cmsr.onebase.module.flow.core.handler;
 
-import com.cmsr.onebase.framework.common.enums.VersionTagEnum;
+import com.cmsr.onebase.module.flow.context.config.FlowProperties;
 import com.cmsr.onebase.module.flow.context.graph.JsonGraph;
 import com.cmsr.onebase.module.flow.context.graph.nodes.StartDateFieldNodeData;
 import com.cmsr.onebase.module.flow.context.graph.nodes.StartTimeNodeData;
-import com.cmsr.onebase.module.flow.context.util.FlowProperties;
 import com.cmsr.onebase.module.flow.core.config.FlowRuntimeCondition;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessDateFieldRepository;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessRepository;
@@ -99,7 +98,7 @@ public class FlowCacheHandler {
                 flowProcessRepository.findByApplicationIdAndEnableStatus(
                         applicationId,
                         FlowEnableStatusEnum.ENABLE.getStatus(),
-                        VersionTagEnum.RUNTIME.getValue()
+                        flowProperties.getVersionTag()
                 ));
         Set<Long> oldProcessIds = FlowProcessCache.findProcessByApplicationId(applicationId);
         for (FlowProcessDO flowProcessDO : flowProcessDOS) {
@@ -286,7 +285,7 @@ public class FlowCacheHandler {
         List<FlowProcessDO> flowProcessDOS = TenantManager.withoutTenantCondition(() ->
                 flowProcessRepository.findAllByEnableStatusAndVersionTagAndTriggerType(
                         FlowEnableStatusEnum.ENABLE.getStatus(),
-                        VersionTagEnum.RUNTIME.getValue(),
+                        flowProperties.getVersionTag(),
                         List.of(FlowTriggerTypeEnum.TIME.getType(), FlowTriggerTypeEnum.DATE_FIELD.getType())
                 )
         );

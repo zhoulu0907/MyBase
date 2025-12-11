@@ -9,7 +9,7 @@ import com.cmsr.onebase.module.flow.context.graph.NodeData;
 import com.cmsr.onebase.module.flow.context.graph.nodes.*;
 import com.cmsr.onebase.module.flow.context.provider.FlowFieldTypeProvider;
 import com.cmsr.onebase.module.flow.context.provider.FlowAppProvider;
-import com.cmsr.onebase.module.flow.context.util.FlowProperties;
+import com.cmsr.onebase.module.flow.context.config.FlowProperties;
 import com.cmsr.onebase.module.metadata.api.semantic.SemanticDynamicDataApi;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntitySchemaDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldSchemaDTO;
