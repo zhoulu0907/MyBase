@@ -26,9 +26,11 @@ import com.cmsr.onebase.module.metadata.core.semantic.type.RefType;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
 @Schema(description = "字段值 DTO")
 @Data
+@Slf4j
 public class SemanticFieldValueDTO<T> {
     @Schema(description = "字段原始值")
     private T rawValue;
@@ -266,6 +268,7 @@ public class SemanticFieldValueDTO<T> {
         } else if (value instanceof Object[] arr) {
             for (Object o : Arrays.asList(arr)) items.add(normalizeScalar(o, type));
         } else if (value instanceof String s) {
+            log.info("normalizeList: {}", s);
             String str = s.trim();
             if (JsonUtils.isJson(str)) {
                 if (JsonUtils.isJsonObject(str)) {

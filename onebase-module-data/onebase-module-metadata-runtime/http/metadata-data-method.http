@@ -391,3 +391,37 @@ login-user: {"id":"153935442021842949","applicationId":"175757002685448192","ten
   "pageNo": 1,
   "pageSize": 10
 }
+
+### 语义详情（jkx6_student_info_01）
+POST {{base}}/metadata/vmka_main_table/detail?menuId=175768873975054336
+Accept: application/json
+Content-Type: application/json
+X-Application-Id: 175757002685448192
+X-Tenant-Id: 153935442021842944
+login-user: {"id":"153935442021842949","applicationId":"175757002685448192","tenantId":"153935442021842944"}
+
+{
+  "id": "176166570769612800"
+}
+
+### 下载指定附件
+GET {{base}}/metadata/vmka_main_table/attachment/download?menuId=175768873975054336&id=176166570769612800&fieldName=mage&fileId=172736111653617664&_t=1765442325168
+X-Application-Id: 175757002685448192
+X-Tenant-Id: 153935442021842944
+login-user: {"id":"153935442021842949","applicationId":"175757002685448192","tenantId":"153935442021842944"}
+
+
+### 上传附件（vmka_main_table，本地环境）
+POST {{base}}/metadata/vmka_main_table/attachment/upload
+Accept: application/json
+Content-Type: multipart/form-data; boundary=WebKitFormBoundary7MA4YWxkTrZu0gW
+X-Application-Id: 175757002685448192
+X-Tenant-Id: 153935442021842944
+login-user: {"id":"153935442021842949","applicationId":"175757002685448192","tenantId":"153935442021842944"}
+
+--WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="file"; filename="test.png"
+Content-Type: image/png
+
+< test01.png
+--WebKitFormBoundary7MA4YWxkTrZu0gW--
