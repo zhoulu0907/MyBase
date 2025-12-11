@@ -1,7 +1,10 @@
 import { Divider, Form } from '@arco-design/web-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import { useSignals } from '@preact/signals-react/runtime';
+import { currentEditorSignal } from '@onebase/ui-kit';
+import { loadMicroApp, initGlobalState, type MicroApp } from 'qiankun';
+import { EditMode } from '@onebase/common';
 import {
   getWorkbenchComponentWidth,
   COMPONENT_GROUP_NAME,
@@ -28,7 +31,9 @@ import PCActiveIcon from '@/assets/images/pc_icon_active.svg';
  */
 export default function WorkbenchWorkspace() {
   const [showEmpty, setShowEmpty] = useState(true);
-  const [pageMode, setPageMode] = useState<string>('pc');
+  // use global editor signal for edit mode so workbench and other editors share state
+  const { editMode, setEditMode } = currentEditorSignal;
+  const mobileEditorDragRef = useRef<MicroApp | null>(null);
   const { containerRef, containerWidth } = useWorkbenchContainer();
 
   useSignals();
@@ -62,6 +67,33 @@ export default function WorkbenchWorkspace() {
   useEffect(() => {
     setShowEmpty(currentComponents.length === 0);
   }, [currentComponents]);
+
+  // 加载移动端拖拽子应用
+  useEffect(() => {
+    if (editMode.value !== EditMode.MOBILE) {
+      return;
+    }
+
+    console.log('loading mobile-editor-drag-list (workbench)');
+
+    const qiankunActions = initGlobalState({ drag: true });
+
+    const mobileEditorDrag = loadMicroApp({
+      name: 'mobile-editor-drag-list',
+      entry: (window as any).global_config?.MOBILE_EDITOR_URL,
+      container: '#mobile-editor-drag-list',
+      props: {
+        onGlobalStateChange: qiankunActions.onGlobalStateChange,
+        setGlobalState: qiankunActions.setGlobalState,
+        offGlobalStateChange: qiankunActions.offGlobalStateChange
+      }
+    });
+    mobileEditorDragRef.current = mobileEditorDrag;
+
+    return () => {
+      mobileEditorDrag?.unmount();
+    };
+  }, [editMode.value]);
 
   // 事件处理
   const handlers = useWorkbenchHandlers({
@@ -112,7 +144,9 @@ export default function WorkbenchWorkspace() {
     }
   }, [curComponentID, setCurComponentSchema]);
 
-  return (
+  return editMode.value === EditMode.MOBILE ? (
+    <div id="mobile-editor-drag-list" className={styles.mobileeditordraglist}></div>
+  ) : (
     <div className={styles.workbenchWorkspace}>
       <div className={styles.workspaceHeader}>
         <div className={styles.workspaceHeaderLeft}></div>
@@ -124,15 +158,15 @@ export default function WorkbenchWorkspace() {
           </div>
           <Divider type="vertical" />
           <div className={styles.pageModeCtrl}>
-            {pageMode === 'pc' && (
+            {editMode.value !== EditMode.MOBILE && (
               <>
                 <img className={styles.pageModeIcon} src={PCActiveIcon} />
-                <img className={styles.pageModeIcon} src={MobileIcon} onClick={() => setPageMode('mobile')} />
+                <img className={styles.pageModeIcon} src={MobileIcon} onClick={() => setEditMode(EditMode.MOBILE)} />
               </>
             )}
-            {pageMode === 'mobile' && (
+            {editMode.value === EditMode.MOBILE && (
               <>
-                <img className={styles.pageModeIcon} src={PCIcon} onClick={() => setPageMode('pc')} />
+                <img className={styles.pageModeIcon} src={PCIcon} onClick={() => setEditMode(EditMode.PC)} />
                 <img className={styles.pageModeIcon} src={MobileActiveIcon} />
               </>
             )}
