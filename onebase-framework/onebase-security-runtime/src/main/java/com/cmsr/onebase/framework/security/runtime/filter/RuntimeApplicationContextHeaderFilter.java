@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -24,13 +25,20 @@ import java.io.IOException;
 @Component
 public class RuntimeApplicationContextHeaderFilter extends OncePerRequestFilter {
 
+    @Value("${data.isolation:true}")
+    private Boolean dataIsolation;
+
     private static final String X_APPLICATION_ID = "X-Application-Id";
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
         try {
-            ApplicationManager.setVersionTag(VersionTagEnum.RUNTIME.getValue());
+            if (dataIsolation) {
+                ApplicationManager.setVersionTag(VersionTagEnum.RUNTIME.getValue());
+            } else {
+                ApplicationManager.setVersionTag(0L);
+            }
             RuntimeLoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
             if (loginUser != null && loginUser.getApplicationId() != null) {
                 ApplicationManager.setApplicationId(loginUser.getApplicationId());
