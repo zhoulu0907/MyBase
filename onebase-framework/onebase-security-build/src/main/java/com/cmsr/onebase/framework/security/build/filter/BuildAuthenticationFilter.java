@@ -58,7 +58,8 @@ public class BuildAuthenticationFilter extends OncePerRequestFilter {
         } else {
             // 其他接口，需要获取token和登录用户信息
             // 情况一，基于 header[login-user] 获得用户，例如说来自 Gateway 或者其它服务透传
-            LoginUser loginUser = buildLoginUserByHeader(request);
+            // LoginUser loginUser = buildLoginUserByHeader(request);
+            LoginUser loginUser = null;
             // 情况二，基于 Token 获得用户
             // 注意，这里主要满足直接使用 Nginx 直接转发到 Spring Cloud 服务的场景。
             String token = null;
