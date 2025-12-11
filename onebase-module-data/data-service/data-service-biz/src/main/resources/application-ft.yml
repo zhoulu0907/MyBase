@@ -1,0 +1,49 @@
+spring:
+  datasource:
+    url: jdbc:mysql://10.0.104.38:3306/onebase_v3_ft?autoReconnect=false&useUnicode=true&characterEncoding=UTF-8&characterSetResults=UTF-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
+    username: root
+    password: onebase@2025
+    ### 连接池配置
+    druid:
+      initial-size: 5
+      max-active: 20
+      min-idle: 10
+      max-wait: 60000
+      validation-query: SELECT 1
+      test-on-borrow: true
+      test-on-return: false
+      test-while-idle: true
+      time-between-eviction-runs-millis: 60000
+      min-evictable-idle-time-millis: 300000
+  messages:
+    basename: i18n/lic,i18n/core,i18n/permissions,i18n/xpack,i18n/sync
+  flyway:
+    enabled: false
+    table: de_ft_version
+    validate-on-migrate: false
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    out-of-order: true
+
+# 功能测试环境日志配置
+logging:
+  level:
+    root: debug
+    com.cmsr: debug
+  file:
+    path: /data/onebase3.0/logs/
+
+mybatis-plus:
+  mapper-locations: classpath:mybatis/*.xml
+
+dataease:
+  path:
+    ehcache: /data/onebase3.0/cache
+    data: /data/onebase3.0/data
+    custom-drivers: /data/onebase3.0/custom-drivers/
+    driver: /data/onebase3.0/drivers
+    excel: /data/onebase3.0/data/excel/
+    report: /data/onebase3.0/data/report/
+    static-resource: /data/onebase3.0/data/static-resource/
+    font: /data/onebase3.0/data/font/
+    exportData: /data/onebase3.0/data/exportData/ 

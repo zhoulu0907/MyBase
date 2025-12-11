@@ -1,0 +1,61 @@
+package com.cmsr.share.interceptor;
+
+import com.cmsr.auth.DeLinkPermit;
+import com.cmsr.constant.AuthConstant;
+import com.cmsr.exception.DEException;
+import com.cmsr.utils.ServletUtils;
+import com.cmsr.utils.WhitelistUtils;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
+import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.servlet.HandlerInterceptor;
+
+import java.util.Arrays;
+import java.util.List;
+
+
+@Component
+public class LinkInterceptor implements HandlerInterceptor {
+
+    private final static String whiteListText = "/user/ipInfo, /apisix/check, /datasetData/enumValue, /datasetData/enumValueObj, /datasetData/getFieldTree, /dekey, /symmetricKey, /share/validate, /sysParameter/queryOnlineMap, /xpackComponent/viewPlugins";
+
+    private final static String whiteStartListText = "/dataVisualization/findDvType/";
+
+    private boolean isWhiteStart(String url) {
+        List<String> whiteStartList = Arrays.stream(StringUtils.split(whiteStartListText, ",")).map(String::trim).toList();
+        return whiteStartList.stream().anyMatch(item -> StringUtils.startsWith(url, item));
+    }
+
+    @Override
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        String linkToken = ServletUtils.getHead(AuthConstant.LINK_TOKEN_KEY);
+        if (linkToken == null) {
+            return true;
+        }
+        if (handler instanceof HandlerMethod handlerMethod) {
+            DeLinkPermit deLinkPermit = handlerMethod.getMethodAnnotation(DeLinkPermit.class);
+            if (deLinkPermit == null) {
+
+                List<String> whiteList = Arrays.stream(StringUtils.split(whiteListText, ",")).map(String::trim).toList();
+
+                String requestURI = ServletUtils.request().getRequestURI();
+                if (StringUtils.startsWith(requestURI, WhitelistUtils.getContextPath())) {
+                    requestURI = requestURI.replaceFirst(WhitelistUtils.getContextPath(), "");
+                }
+                if (StringUtils.startsWith(requestURI, AuthConstant.DE_API_PREFIX)) {
+                    requestURI = requestURI.replaceFirst(AuthConstant.DE_API_PREFIX, "");
+                }
+                boolean valid = whiteList.contains(requestURI) || isWhiteStart(requestURI) || WhitelistUtils.match(requestURI);
+                if (!valid) {
+                    DEException.throwException("分享链接Token不支持访问当前url[" + requestURI + "]");
+                }
+                return true;
+            }
+        }
+        return true;
+    }
+
+
+}

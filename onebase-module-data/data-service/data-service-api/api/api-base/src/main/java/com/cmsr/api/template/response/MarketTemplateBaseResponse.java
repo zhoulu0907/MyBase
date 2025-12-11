@@ -1,0 +1,14 @@
+package com.cmsr.api.template.response;
+
+import lombok.Data;
+
+/**
+ * @author : WangJiaHao
+ * @date : 2023/11/17 13:41
+ */
+@Data
+public class MarketTemplateBaseResponse {
+
+    private MarketTemplateInnerResult data;
+
+}
