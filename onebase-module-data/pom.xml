@@ -24,6 +24,11 @@
         <module>onebase-module-etl-core</module>
         <module>onebase-module-etl-runtime</module>
         <module>onebase-module-etl-executor</module>
+        <module>onebase-module-dataset-api</module>
+        <module>onebase-module-dataset-build</module>
+        <module>onebase-module-dataset-core</module>
+        <module>onebase-module-dataset-runtime</module>
+<!--        <module>data-service</module>-->
     </modules>
 
     <properties>

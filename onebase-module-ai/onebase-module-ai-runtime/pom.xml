@@ -5,13 +5,12 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.cmsr.onebase</groupId>
-        <artifactId>onebase-cloud</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
-        <relativePath>../../pom.xml</relativePath>
+        <artifactId>onebase-module-ai</artifactId>
+        <version>${revision}</version>
     </parent>
 
     <artifactId>onebase-module-ai-runtime</artifactId>
-
+    <packaging>jar</packaging>
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
