@@ -362,3 +362,32 @@ X-Tenant-Id: 153935442021842944
   ],
   "filters": {}
 }
+
+### 语义创建（any9_contractor，本地环境）
+POST {{base}}/metadata/any9_contractor/create?menuId=176123208779005952
+Accept: application/json
+Content-Type: application/json
+X-Application-Id: 168411371638652928
+X-Tenant-Id: 168334577623138304
+login-user: {"id":"155019577667616816","applicationId":"168411371638652928","tenantId":"168334577623138304"}
+
+{
+  "company_code": "CT-001",
+  "company": "上海中远海运重工有限公司",
+  "in_use": null
+}
+
+
+
+### 语义分页（vmka_main_table，本地环境）
+POST {{base}}/metadata/vmka_main_table/page?menuId=175768873975054336
+Accept: application/json
+Content-Type: application/json
+X-Application-Id: 175757002685448192
+X-Tenant-Id: 153935442021842944
+login-user: {"id":"153935442021842949","applicationId":"175757002685448192","tenantId":"153935442021842944"}
+
+{
+  "pageNo": 1,
+  "pageSize": 10
+}

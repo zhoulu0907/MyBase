@@ -245,7 +245,7 @@ public class SemanticFieldValueDTO<T> {
             throw new IllegalStateException("fieldTypeEnum 未设置");
         }
         Object normalized = normalizeValue(rawValue, this.fieldTypeEnum);
-        T casted = (T) normalized;
+        T casted = (T) normalized; 
         this.rawValue = casted;
     }
 
@@ -288,6 +288,7 @@ public class SemanticFieldValueDTO<T> {
     }
 
     private Object normalizeScalar(Object value, SemanticFieldTypeEnum type) {
+        if (value == null) return null;
         if (type.isRefType()) {
             Class<?> biz = type.getBizJavaType();
             if (biz.isInstance(value)) return value;
@@ -393,6 +394,7 @@ public class SemanticFieldValueDTO<T> {
             if (value instanceof Boolean) return value;
             if (value instanceof String s) {
                 String t = s.trim().toLowerCase();
+                if (t.isEmpty()) return Boolean.FALSE;
                 if ("true".equals(t) || "1".equals(t) || "yes".equals(t) || "y".equals(t) || "on".equals(t) || "t".equals(t)) return Boolean.TRUE;
                 if ("false".equals(t) || "0".equals(t) || "no".equals(t) || "n".equals(t) || "off".equals(t) || "f".equals(t)) return Boolean.FALSE;
             }
