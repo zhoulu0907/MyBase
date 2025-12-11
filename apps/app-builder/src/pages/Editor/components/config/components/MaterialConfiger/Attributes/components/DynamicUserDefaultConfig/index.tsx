@@ -3,13 +3,14 @@ import { registerConfigRenderer } from '../../registry';
 import { CONFIG_TYPES, getPopupContainer } from '@onebase/ui-kit';
 import { FormulaEditor } from '@/components/FormulaEditor';
 import { Button, Form, Select, Switch } from '@arco-design/web-react';
-import { getSimpleUserPage } from '@onebase/platform-center';
 import { debounce } from 'lodash-es';
 import { AddMembers } from '@onebase/common';
-import { getDeptUser, type AuthRoleUsersPageRespVO, type DeptAndUsersRespDTO, type GetDeptUserReq } from '@onebase/app';
+import { type AuthRoleUsersPageRespVO, type DeptAndUsersRespDTO } from '@onebase/app';
+import { getSimpleUserPage, getDeptUser, type GetDeptUserReq } from '@onebase/platform-center';
 
 export interface DynamicUserDefaultConfigProps {
-  handlePropsChange: (key: string, value: string | number | boolean | any[]) => void;
+  handlePropsChange: (key: string, value: string | number | boolean | any[] | undefined) => void;
+  handleMultiPropsChange: (updates: { key: string; value: any }[]) => void;
   item: any;
   configs: any;
   id: string;
@@ -24,12 +25,11 @@ const SELECTSCOPE = 'selectScope';
 
 const DynamicUserDefaultConfig: React.FC<DynamicUserDefaultConfigProps> = ({
   handlePropsChange,
+  handleMultiPropsChange,
   item,
   configs,
   id
 }) => {
-  //   const [defaultValueMode, setDefaultValueMode] = useState(configs[item.key]);
-  const [defaultUserValue, setDefaultUserValue] = useState<string | undefined>(configs[DEFAULTUSERVALUE]);
   const [formulaVisible, setFormulaVisible] = useState<boolean>(false);
   const [formulaData, setFormulaData] = useState<string>('');
 
@@ -50,7 +50,6 @@ const DynamicUserDefaultConfig: React.FC<DynamicUserDefaultConfigProps> = ({
   const [selectedMembers, setSelectedMembers] = useState<any[]>(configs[SELECTSCOPE] || []);
 
   useEffect(() => {
-    configs[DEFAULTUSERVALUE];
     if (selectedMembers?.length > 0) {
       formatUserScope(selectedMembers);
       setTotal(0);
@@ -116,20 +115,25 @@ const DynamicUserDefaultConfig: React.FC<DynamicUserDefaultConfigProps> = ({
   };
 
   const handleBtnSwitch = (checked: boolean) => {
-    if (checked) {
-      //   getDeptUsers({});
-    }
     setShowButton(checked);
-    handlePropsChange(ISSELECTSCOPE, checked);
+
+    if (!checked) {
+      getDeptUsers({});
+      setSelectedMembers([]);
+      handleMultiPropsChange?.([
+        { key: ISSELECTSCOPE, value: checked },
+        { key: SELECTSCOPE, value: [] }
+      ]);
+    } else {
+      handlePropsChange(ISSELECTSCOPE, checked);
+    }
   };
 
   // 获取部门用户信息
   const getDeptUsers = async ({ deptId, keywords }: { deptId?: string; keywords?: string }) => {
     setMemberLoading(true);
     try {
-      //   if (!roleInfo?.id) return;
       const params: GetDeptUserReq = {
-        roleId: '37775560235057153', //TODO
         deptId,
         keywords
       };
@@ -173,6 +177,9 @@ const DynamicUserDefaultConfig: React.FC<DynamicUserDefaultConfigProps> = ({
         email: member.email
       }));
       setUserData(selectMembers);
+
+      const defaultUser = selectMembers.find((user) => user.id === configs[DEFAULTUSERVALUE]);
+      if (!defaultUser) handlePropsChange(DEFAULTUSERVALUE, undefined);
     }
   };
 
@@ -204,6 +211,7 @@ const DynamicUserDefaultConfig: React.FC<DynamicUserDefaultConfigProps> = ({
                 : false // 远程搜索时不做本地过滤
             }
             defaultValue={configs[DEFAULTUSERVALUE]}
+            value={configs[DEFAULTUSERVALUE]}
             onSearch={debouncedSearch}
             onPopupScroll={scrollHandler}
             getPopupContainer={getPopupContainer}
@@ -275,6 +283,15 @@ const DynamicUserDefaultConfig: React.FC<DynamicUserDefaultConfigProps> = ({
 
 export default DynamicUserDefaultConfig;
 
-registerConfigRenderer(CONFIG_TYPES.USER_DEFAULT_VALUE, ({ id, handlePropsChange, item, configs }) => (
-  <DynamicUserDefaultConfig id={id} handlePropsChange={handlePropsChange} item={item} configs={configs} />
-));
+registerConfigRenderer(
+  CONFIG_TYPES.USER_DEFAULT_VALUE,
+  ({ id, handlePropsChange, handleMultiPropsChange, item, configs }) => (
+    <DynamicUserDefaultConfig
+      id={id}
+      handlePropsChange={handlePropsChange}
+      handleMultiPropsChange={handleMultiPropsChange}
+      item={item}
+      configs={configs}
+    />
+  )
+);

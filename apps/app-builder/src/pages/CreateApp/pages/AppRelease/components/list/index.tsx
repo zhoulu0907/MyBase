@@ -132,14 +132,14 @@ const VersionManagement: React.FC<VersionManagementProps> = ({
       render: (value: string) => value || '-'
     },
     {
-      title: '操作类型',
-      dataIndex: 'operationType',
-      key: 'operationType',
+      title: '版本类型',
+      dataIndex: 'versionTypeLabel',
+      key: 'versionTypeLabel',
       align: 'center',
-      width: 120,
-      render: (value: number) => {
-        return value === OperationType.PUBLISH ? '发布版本' : '保存版本';
-      }
+      width: 120
+      // render: (value: number) => {
+      //   return value === OperationType.PUBLISH ? '发布版本' : '保存版本';
+      // }
     },
     {
       title: '操作人',

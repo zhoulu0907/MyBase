@@ -87,7 +87,8 @@ const DynamicDataSourceConfig: React.FC<DynamicSelectDataSourceConfigProps> = ({
     const dataSource = dataSourceOptions.find((data) => data.entityId === value);
     const data = {
       entityId: value,
-      entityName: dataSource.entityName
+      entityName: dataSource.entityName,
+      tableName: dataSource.tableName
     };
     setSelectedDataSource(data);
     // table元数据 初始化
@@ -178,9 +179,7 @@ const DynamicDataSourceConfig: React.FC<DynamicSelectDataSourceConfigProps> = ({
 
   const handleEchoFieldChange = (fieldName: string) => {
     const option = displayFieldOptions.find((opt: any) => opt.fieldName === fieldName);
-    const displayFields = option
-      ? [{ label: option.displayName, value: option.fieldName }]
-      : [];
+    const displayFields = option ? [{ label: option.displayName, value: option.fieldName }] : [];
     handlePropsChange(ATTR_KEY.DISPLAYFIELDS, displayFields);
   };
 
@@ -287,6 +286,15 @@ const DynamicDataSourceConfig: React.FC<DynamicSelectDataSourceConfigProps> = ({
 
 export default DynamicDataSourceConfig;
 
-registerConfigRenderer(CONFIG_TYPES.SELECT_DATA_SOURCE, ({ id, handlePropsChange, handleMultiPropsChange, item, configs }) => (
-  <DynamicDataSourceConfig id={id} handlePropsChange={handlePropsChange} handleMultiPropsChange={handleMultiPropsChange} item={item} configs={configs} />
-));
+registerConfigRenderer(
+  CONFIG_TYPES.SELECT_DATA_SOURCE,
+  ({ id, handlePropsChange, handleMultiPropsChange, item, configs }) => (
+    <DynamicDataSourceConfig
+      id={id}
+      handlePropsChange={handlePropsChange}
+      handleMultiPropsChange={handleMultiPropsChange}
+      item={item}
+      configs={configs}
+    />
+  )
+);

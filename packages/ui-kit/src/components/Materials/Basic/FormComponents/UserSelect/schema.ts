@@ -108,7 +108,7 @@ export interface XInputUserSelectConfig extends ICommonBaseType {
   /**
    * 可选范围
    */
-  selectScope?: TTextDefaultType[];
+  selectScope?: any[];
 
   /**
    * 字段宽度
