@@ -91,7 +91,7 @@ const AppSettingPage: FC = () => {
       case 'appPermission':
         break;
       case 'navigatorSetting':
-        handleSaveNavigator()
+        handleSaveNavigator();
         break;
       default:
         break;
@@ -135,12 +135,12 @@ const AppSettingPage: FC = () => {
   };
 
   // 导航设置
-  const handleSaveNavigator = async ()=>{
+  const handleSaveNavigator = async () => {
     await navigatorForm.validate();
     const param = navigatorForm.getFieldsValue();
-    console.log('param',param)
+    console.log('param', param);
     // todo 接口保存
-  }
+  };
 
   return (
     <div className={styles.appSettingPage}>
