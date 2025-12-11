@@ -1,7 +1,6 @@
-import { useEffect, useState, forwardRef, useImperativeHandle, useRef } from 'react';
-import { Switch, Button, Table, type TableColumnProps, Tooltip, Radio } from '@arco-design/web-react';
-import { IconQuestionCircle, IconPlus } from '@arco-design/web-react/icon';
-import FieldModal from './FieldModal';
+import { useEffect, useState } from 'react';
+import { Switch, type TableColumnProps, Tooltip, Radio } from '@arco-design/web-react';
+import { IconQuestionCircle } from '@arco-design/web-react/icon';
 import { type FieldConfigType } from '../constant';
 import FieldTable from '../../common/filedComponent/index';
 import './style.less';
@@ -9,21 +8,12 @@ import './style.less';
  * @param editable 是否可编辑
  * @param onTableChange 表格数据变化时回调
  * @param value 表格数据
- * @param ckOptions 字段配置
  * @param invert 排除数据 为了弹窗数据去重
  */
 
-// 定义 ref 的类型接口
-interface ChildComponentRef {
-  getTbData: () => any[];
-}
-
-export default function FieldConfig({ setApprovalConfigData, fieldPermConfig, ckOptions }: FieldConfigType) {
+export default function FieldConfig({ setApprovalConfigData, fieldPermConfig }: FieldConfigType) {
   let [nodeSwitch, setNodeSwitch] = useState(fieldPermConfig.useNodeConfig);
   const [tbData, setTbData] = useState(fieldPermConfig?.fieldConfigs || []);
-  const [curKeyArr, setCurKeyArr] = useState<any[]>([]);
-  let editRef = useRef<ChildComponentRef>();
-  let hiddenRef = useRef<ChildComponentRef>();
   let writeArr: any = [];
   let hiddenArr: any = [];
   useEffect(() => {
@@ -183,11 +173,10 @@ export default function FieldConfig({ setApprovalConfigData, fieldPermConfig, ck
       {nodeSwitch && (
         <FieldTable
           onTableChange={onTableChange}
-          ckOptions={ckOptions}
           columnsTable={columnsTable}
           tbData={tbData}
           setTableData={setTableData}
-          title={'添加隐藏字段'}
+          title={'添加字段'}
         />
       )}
     </div>

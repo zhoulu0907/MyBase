@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Switch, Checkbox, Radio, type TableColumnProps } from '@arco-design/web-react';
+import { Switch, Radio, type TableColumnProps } from '@arco-design/web-react';
 import { IconQuestionCircle } from '@arco-design/web-react/icon';
 import FieldTable from '../../common/filedComponent/index';
 import './style.less';
 
-export default function FieldConfig({ setCcRecipientsConfigData, fieldPermConfig, ckOptions }: any) {
+export default function FieldConfig({ setCcRecipientsConfigData, fieldPermConfig }: any) {
   const [nodeSwitch, setNodeSwitch] = useState<boolean>(fieldPermConfig?.useNodeConfig || false);
   const [tbData, setTbData] = useState(fieldPermConfig?.fieldConfigs);
 
@@ -112,11 +112,10 @@ export default function FieldConfig({ setCcRecipientsConfigData, fieldPermConfig
       {nodeSwitch && (
         <FieldTable
           onTableChange={onTableChange}
-          ckOptions={ckOptions}
           columnsTable={columnsTable}
           tbData={tbData}
           setTableData={setTableData}
-          title={'添加隐藏字段'}
+          title={'添加字段'}
         />
       )}
     </div>

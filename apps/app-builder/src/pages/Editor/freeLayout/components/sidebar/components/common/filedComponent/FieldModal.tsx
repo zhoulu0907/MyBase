@@ -1,6 +1,6 @@
 import { Modal, Checkbox } from '@arco-design/web-react';
 import { IconClose } from '@arco-design/web-react/icon';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 
 const CheckboxGroup = Checkbox.Group;
 
@@ -17,24 +17,15 @@ export default function FieldModal({
   fmVisible,
   setFmVisible,
   curKeyArr,
-  title = '添加隐藏字段',
+  title = '添加字段',
   mergeDataToTable,
-  ckOptions = [],
-  invert = []
+  ckOptions = []
 }: any) {
   const [ckedKey, setCkedKey] = useState(curKeyArr);
   const [checkedItem, setCheckedItem] = useState([]);
-
-  // const invertKey = invert?.map((item: any) => {
-  //   return item.displayName;
-  // });
-  const useCkOptions = ckOptions?.filter((item: any) => item.isSystemField === 0);
-  // .map((item: any) => {
-  //   return {
-  //     label: item.displayName,
-  //     value: item.parentDisplayName + item.fieldName
-  //   };
-  // });
+  const useCkOptions = useMemo(() => {
+    return ckOptions?.filter((item: any) => item.isSystemField === 0);
+  }, [ckOptions]);
 
   function handleCheckChange(keyArr: Array<any>) {
     setCkedKey(keyArr);
@@ -62,9 +53,7 @@ export default function FieldModal({
 
   useEffect(() => {
     let ckedArr: any = useCkOptions.filter((item: any) => {
-      return (
-        ckedKey.indexOf(item.parentDisplayName ? item.parentDisplayName + item.fieldName : item?.fieldName) > -1
-      );
+      return ckedKey.indexOf(item.parentDisplayName ? item.parentDisplayName + item.fieldName : item?.fieldName) > -1;
     });
     setCheckedItem(ckedArr);
   }, [ckedKey]);

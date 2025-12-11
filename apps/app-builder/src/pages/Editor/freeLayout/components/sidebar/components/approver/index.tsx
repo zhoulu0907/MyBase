@@ -3,7 +3,7 @@
  */
 import { Radio } from '@arco-design/web-react';
 import styles from './index.module.less';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Header from '../../../header';
 import BottomBtn from '../../../bottomBtn';
 import ApproverConfig from './approverConfig/index';
@@ -11,7 +11,6 @@ import ApproverBtnConfig from './btnConfig/index';
 import FieldConfig from './fieldConfig/index';
 import AdvancedConfig from './advancedConfig/index';
 import { ApproveDrawerTab, defaultBtnConfigArr } from './constant';
-import { useLocation } from 'react-router-dom';
 import type {
   ApproverConfigDataType,
   ApproverConfigType,
@@ -20,16 +19,10 @@ import type {
   FieldPermConfigType,
   ApproveDrawerProps
 } from './constant';
-import { getEntityFieldsWithChildren, getPageSetMetaData } from '@onebase/app';
 
 const RadioGroup = Radio.Group;
 
 export default function ApproveDreawer({ handleConfigSubmit, configData }: ApproveDrawerProps) {
-  const location = useLocation();
-  const searchParams = new URLSearchParams(location.search);
-  const pageSetId = searchParams.get('pageSetId') || '';
-  const [ckOptions, setCkOptions] = useState([]);
-  const [tableName, setTableName] = useState('');
   const [useApprover, setApprover] = useState<string>('approver');
   const [approverConfigData, setApproverConfigData] = useState<ApproverConfigDataType>(processInitData(configData));
   function processInitData(initData: any) {
@@ -75,58 +68,14 @@ export default function ApproveDreawer({ handleConfigSubmit, configData }: Appro
       } else if (key === 'approverConfig') {
         newData.approverConfig = Object.assign({}, newData.approverConfig, data) as ApproverConfigType;
       } else if (key === 'fieldPermConfig') {
-        newData.fieldPermConfig = {
-          ...newData.fieldPermConfig,
-          ...data
-        } as FieldPermConfigType;
+        newData.fieldPermConfig = { ...data } as FieldPermConfigType;
       } else if (key === 'advancedConfig') {
         newData.advancedConfig = data as AdvancedConfigType;
       }
       return newData;
     });
   }
-  const getMainMetaData = async () => {
-    const mainMetaData = await getPageSetMetaData({ pageSetId: pageSetId });
-    const { parentFields, tableName, childEntities } = await getEntityFieldsWithChildren(mainMetaData);
-    const data: any = [];
 
-    parentFields.forEach((item: any) => {
-      const displayName = item.displayName || item.fieldDisplayName;
-      data.push({
-        displayName: displayName,
-        fieldDisplayName: displayName,
-        fieldName: item.fieldName,
-        tableName: tableName,
-        isSystemField: item.isSystemField
-      });
-    });
-    childEntities.forEach((item: any) => {
-      const { childTableName, childEntityName, childFields } = item;
-      data.push({
-        displayName: childEntityName,
-        fieldDisplayName: childEntityName,
-        fieldName: childTableName,
-        tableName: childTableName,
-        isSystemField: 0
-      });
-      childFields.forEach((childItem: any) => {
-        const displayName = childItem.displayName || childItem.fieldDisplayName;
-        data.push({
-          displayName: displayName,
-          fieldDisplayName: displayName,
-          fieldName: childItem.fieldName,
-          tableName: childTableName,
-          parentDisplayName: childEntityName,
-          isSystemField: childItem.isSystemField
-        });
-      });
-    });
-    setCkOptions(data);
-  };
-
-  useEffect(() => {
-    getMainMetaData();
-  }, []);
   const renderContent = () => {
     switch (useApprover) {
       case ApproveDrawerTab.APPROVER:
@@ -134,13 +83,7 @@ export default function ApproveDreawer({ handleConfigSubmit, configData }: Appro
       case ApproveDrawerTab.APPROVER_BTN:
         return <ApproverBtnConfig setApprovalConfigData={setApprovalConfigData} buttonConfigs={buttonConfigs || []} />;
       case ApproveDrawerTab.FIELD_PERMISSIONS:
-        return (
-          <FieldConfig
-            setApprovalConfigData={setApprovalConfigData}
-            fieldPermConfig={fieldPermConfig || {}}
-            ckOptions={ckOptions}
-          />
-        );
+        return <FieldConfig setApprovalConfigData={setApprovalConfigData} fieldPermConfig={fieldPermConfig || {}} />;
       case ApproveDrawerTab.ADVANCED_SETTINGS:
         return <AdvancedConfig setApprovalConfigData={setApprovalConfigData} advancedConfig={advancedConfig || {}} />;
       default:
