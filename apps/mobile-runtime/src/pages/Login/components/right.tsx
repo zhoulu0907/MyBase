@@ -1,7 +1,18 @@
 import { Button, Form, Input, Toast } from '@arco-design/mobile-react';
 import { useForm } from '@arco-design/mobile-react/esm/form';
-import { getHashQueryParam, TokenManager, type SliderCaptchaRef, getOrCreateDeviceInfo } from '@onebase/common';
-import { SliderCaptcha } from './Captcha';
+import { IconEyeInvisible, IconEyeVisible } from '@arco-design/mobile-react/esm/icon';
+import { ValidatorType } from '@arco-design/mobile-utils';
+import { getApplication } from '@onebase/app';
+import {
+  DynamicIcon,
+  getHashQueryParam,
+  getOrCreateDeviceInfo,
+  getPublicKey,
+  PUBLISH_MODULE,
+  sm2Encrypt,
+  TokenManager,
+  type SliderCaptchaRef
+} from '@onebase/common';
 import {
   checkCaptchaApi,
   getCaptchaApi,
@@ -15,17 +26,14 @@ import {
   type RuntimeCorpLoginRequest,
   type RuntimeMobileLoginRequest
 } from '@onebase/platform-center';
-import { getApplication } from '@onebase/app';
+import { appIconMap } from '@onebase/ui-kit';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { DynamicIcon, PUBLISH_MODULE } from '@onebase/common';
+import logoIcon from '../../../assets/images/logo-icon.svg';
 import { useI18n } from '../../../hooks/useI18n';
 import { useRememberMe } from '../../../hooks/useRememberMe';
 import styles from '../index.module.less';
-import { ValidatorType } from '@arco-design/mobile-utils';
-import logoIcon from '../../../assets/images/logo-icon.svg';
-import { IconEyeInvisible, IconEyeVisible } from '@arco-design/mobile-react/esm/icon';
-import { appIconMap } from '@onebase/ui-kit';
+import { SliderCaptcha } from './Captcha';
 
 interface APP_INFO {
   appName: string;
@@ -128,7 +136,9 @@ const Right: React.FC = () => {
   };
 
   // 账号密码登录
-  const handleRuntimeLogin = async (values: RuntimeAccountLoginRequest | RuntimeMobileLoginRequest | LoginRequest | RuntimeCorpLoginRequest) => {
+  const handleRuntimeLogin = async (
+    values: RuntimeAccountLoginRequest | RuntimeMobileLoginRequest | LoginRequest | RuntimeCorpLoginRequest
+  ) => {
     setLoading(true);
 
     try {
@@ -147,6 +157,8 @@ const Right: React.FC = () => {
       let response: LoginResponse | null = null;
 
       const deviceId = await getOrCreateDeviceInfo();
+
+      values.password = await sm2Encrypt(getPublicKey(), values.password);
 
       if (appInfo.publishModel === PUBLISH_MODULE.SASS) {
         const sassloginData: RuntimeMobileLoginRequest = {
@@ -207,7 +219,6 @@ const Right: React.FC = () => {
             refreshToken: response.refreshToken,
             expiresTime: response.expiresTime,
             tenantId: response.tenantId,
-            adminFlag: response.adminFlag,
             corpId: response.corpId,
             loginURL: window.location.href // 当前地址
           },
@@ -247,7 +258,9 @@ const Right: React.FC = () => {
   };
 
   // 表单提交处理
-  const handleSubmit = (_values: RuntimeAccountLoginRequest | RuntimeMobileLoginRequest | LoginRequest | RuntimeCorpLoginRequest) => {
+  const handleSubmit = (
+    _values: RuntimeAccountLoginRequest | RuntimeMobileLoginRequest | LoginRequest | RuntimeCorpLoginRequest
+  ) => {
     handleRuntimeLogin(_values);
   };
 
@@ -382,24 +395,13 @@ const Right: React.FC = () => {
         <h1 className={styles.title}>欢迎登录{appInfo.appName ? ` ${appInfo.appName} 应用` : 'Onebase'}</h1>
       </div>
       <div className={styles.loginFormContainer}>
-        <Form
-          form={form}
-          layout="vertical"
-          onSubmit={handleLoginClick}
-          className={styles.loginForm}
-        >
-
+        <Form form={form} layout="vertical" onSubmit={handleLoginClick} className={styles.loginForm}>
           {((appInfo.publishModel === PUBLISH_MODULE.SASS || !appId) && (
             <Form.Item label="手机号" field="mobile" rules={rules.username}>
               <Input placeholder={t('auth.mobile')} maxLength={11} />
             </Form.Item>
           )) || (
-            <Form.Item
-              field="username"
-              label="用户名"
-              initialValue=""
-              rules={rules.username}
-            >
+            <Form.Item field="username" label="用户名" initialValue="" rules={rules.username}>
               <Input placeholder={t('auth.userAccount')} clearable={false} />
             </Form.Item>
           )}
@@ -416,7 +418,7 @@ const Right: React.FC = () => {
               placeholder={t('auth.password')}
               clearable
               suffix={
-                <div className={styles.togglePassword} onClick={() => setShowPassword(prev => !prev)}>
+                <div className={styles.togglePassword} onClick={() => setShowPassword((prev) => !prev)}>
                   <EyeIcon />
                 </div>
               }
@@ -444,8 +446,7 @@ const Right: React.FC = () => {
       <div className={styles.loginFooter}>
         <div className={styles.footerText}>
           登录即表示同意
-          <span onClick={() => navigate('/onebase/runtime-home/protocol')}>《用户协议》</span>
-          和
+          <span onClick={() => navigate('/onebase/runtime-home/protocol')}>《用户协议》</span>和
           <span onClick={() => navigate('/onebase/runtime-home/privacy')}>《隐私政策》</span>
         </div>
       </div>

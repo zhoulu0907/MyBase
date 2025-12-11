@@ -10,12 +10,12 @@ import {
   type GridItem
 } from '@onebase/ui-kit';
 import classNames from 'classnames';
-import { loadMicroApp, initGlobalState, type MicroApp } from "qiankun";
+import { initGlobalState, loadMicroApp, type MicroApp } from 'qiankun';
 
+import { EditMode, getMobileEditorURL } from '@onebase/common';
+import { currentEditorSignal } from '@onebase/ui-kit/src/signals/current_editor';
 import React, { Fragment, useEffect, useRef } from 'react';
 import styles from './index.module.less';
-import { currentEditorSignal } from '@onebase/ui-kit/src/signals/current_editor';
-import { EditMode } from '@onebase/common';
 
 interface PartPreviewProps {
   visible: boolean;
@@ -36,23 +36,24 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
   const qiankunActions = initGlobalState({
     drag: false,
     components: pageType === EDITOR_TYPES.FORM_EDITOR ? formComponents.value : listComponents.value,
-    pageComponentSchemas: pageType === EDITOR_TYPES.FORM_EDITOR ? formPageComponentSchemas.value : listPageComponentSchemas.value
-  })
+    pageComponentSchemas:
+      pageType === EDITOR_TYPES.FORM_EDITOR ? formPageComponentSchemas.value : listPageComponentSchemas.value
+  });
   useEffect(() => {
-    console.log("loading mobile-editor-preview-list");
+    console.log('loading mobile-editor-preview-list');
     if (editMode.value !== EditMode.MOBILE || !visible) {
       return;
     }
 
     const mobileEditorPreview = loadMicroApp({
-      name: "mobile-editor-preview-list",
-      entry: "//localhost:4401",
-      container: "#mobile-editor-preview-list",
+      name: 'mobile-editor-preview-list',
+      entry: getMobileEditorURL(),
+      container: '#mobile-editor-preview-list',
       props: {
         onGlobalStateChange: qiankunActions.onGlobalStateChange,
         setGlobalState: qiankunActions.setGlobalState,
-        offGlobalStateChange: qiankunActions.offGlobalStateChange,
-      },
+        offGlobalStateChange: qiankunActions.offGlobalStateChange
+      }
     });
     mobileEditorPreviewRef.current = mobileEditorPreview;
 
@@ -62,31 +63,29 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
   }, [editMode.value, visible]);
 
   const getFormContent = () => {
-    return (
-      formComponents.value.map((cp: GridItem) => (
-        <Fragment key={cp.id}>
-          {formPageComponentSchemas.value[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
-            <div
-              key={cp.id}
-              className={styles.componentItem}
-              style={{
-                width: `calc(${getComponentWidth(formPageComponentSchemas.value[cp.id], cp.type)} - 8px)`,
-                margin: '4px'
-              }}
-            >
-              <PreviewRender
-                cpId={cp.id}
-                cpType={cp.type}
-                pageComponentSchema={formPageComponentSchemas.value[cp.id]}
-                runtime={true}
-                preview={true}
-              />
-            </div>
-          )}
-        </Fragment>
-      ))
-    )
-  }
+    return formComponents.value.map((cp: GridItem) => (
+      <Fragment key={cp.id}>
+        {formPageComponentSchemas.value[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+          <div
+            key={cp.id}
+            className={styles.componentItem}
+            style={{
+              width: `calc(${getComponentWidth(formPageComponentSchemas.value[cp.id], cp.type)} - 8px)`,
+              margin: '4px'
+            }}
+          >
+            <PreviewRender
+              cpId={cp.id}
+              cpType={cp.type}
+              pageComponentSchema={formPageComponentSchemas.value[cp.id]}
+              runtime={true}
+              preview={true}
+            />
+          </div>
+        )}
+      </Fragment>
+    ));
+  };
   return (
     <Drawer
       placement="bottom"
@@ -102,32 +101,32 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
       <div className={classNames(styles.previewPage, { [styles.mobilePreview]: editMode.value === EditMode.MOBILE })}>
         <div className={styles.content}>
           {pageType == EDITOR_TYPES.LIST_EDITOR &&
-            (
-              editMode.value === EditMode.MOBILE ? (
-                <div id="mobile-editor-preview-list" style={{ width: '100%' }}></div>
-              ) :
-                listComponents.value.map((cp: GridItem) => (
-                  <Fragment key={cp.id}>
-                    {listPageComponentSchemas.value[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
-                      <div
-                        key={cp.id}
-                        className={styles.componentItem}
-                        style={{
-                          width: `calc(${getComponentWidth(listPageComponentSchemas.value[cp.id], cp.type)} - 8px)`,
-                          margin: '4px'
-                        }}
-                      >
-                        <PreviewRender
-                          cpId={cp.id}
-                          cpType={cp.type}
-                          pageComponentSchema={listPageComponentSchemas.value[cp.id]}
-                          runtime={true}
-                          preview={true}
-                        />
-                      </div>
-                    )}
-                  </Fragment>
-                )))}
+            (editMode.value === EditMode.MOBILE ? (
+              <div id="mobile-editor-preview-list" style={{ width: '100%' }}></div>
+            ) : (
+              listComponents.value.map((cp: GridItem) => (
+                <Fragment key={cp.id}>
+                  {listPageComponentSchemas.value[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+                    <div
+                      key={cp.id}
+                      className={styles.componentItem}
+                      style={{
+                        width: `calc(${getComponentWidth(listPageComponentSchemas.value[cp.id], cp.type)} - 8px)`,
+                        margin: '4px'
+                      }}
+                    >
+                      <PreviewRender
+                        cpId={cp.id}
+                        cpType={cp.type}
+                        pageComponentSchema={listPageComponentSchemas.value[cp.id]}
+                        runtime={true}
+                        preview={true}
+                      />
+                    </div>
+                  )}
+                </Fragment>
+              ))
+            ))}
 
           {pageType == EDITOR_TYPES.FORM_EDITOR && (
             <div className={styles.fromContain}>

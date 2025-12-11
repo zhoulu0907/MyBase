@@ -142,6 +142,19 @@ export interface GetPermissionInfoResponse {
   menus: MenuInfo[]; // 菜单信息数组
 }
 
+export interface SendVerifyCodeRequest {
+  /**
+   * 用户名
+   */
+  userName?: string;
+  /**
+   * 用户手机号
+   */
+  userMobile?: string;
+
+  sendType: string;
+}
+
 /**
  * 登录的租户id
  */

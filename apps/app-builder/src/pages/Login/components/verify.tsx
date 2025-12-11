@@ -1,11 +1,13 @@
 import { Button, Input, Message, Modal } from '@arco-design/web-react';
 import { IconInfoCircleFill } from '@arco-design/web-react/icon';
+import { sendVerifyCodeApi, type SendVerifyCodeRequest } from '@onebase/platform-center';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import styles from '../index.module.less';
 
 export interface VerifyModalProps {
   verifyType: string;
   visible: boolean;
+  userName?: string;
   onCancel: () => void;
   onOk: (values: any) => void;
 }
@@ -17,7 +19,7 @@ const COUNTDOWN_DURATION = 60; // 倒计时时长（秒）
 /**
  * 验证弹窗组件，初始化时可执行传入的初始化方法
  */
-export const VerifyModal: React.FC<VerifyModalProps> = ({ verifyType, visible, onCancel, onOk }) => {
+export const VerifyModal: React.FC<VerifyModalProps> = ({ verifyType, visible, userName, onCancel, onOk }) => {
   const [countdown, setCountdown] = useState(0);
   const [loading, setLoading] = useState(false);
   const [loginLoading, setLoginLoading] = useState(false);
@@ -117,10 +119,16 @@ export const VerifyModal: React.FC<VerifyModalProps> = ({ verifyType, visible, o
       // const api = verifyType === 'phone' ? getPhoneVerifyCodeApi : getEmailVerifyCodeApi;
       // await api();
 
+      const sendVerifyCodeRequest: SendVerifyCodeRequest = {
+        userName: userName,
+        sendType: verifyType
+      };
+      await sendVerifyCodeApi(sendVerifyCodeRequest);
+
       // 模拟API调用
       await new Promise((resolve) => setTimeout(resolve, 500));
 
-      Message.success(verifyType === 'phone' ? '手机验证码已发送' : '邮箱验证码已发送');
+      Message.success(verifyType === 'mobile' ? '手机验证码已发送' : '邮箱验证码已发送');
       setCountdown(COUNTDOWN_DURATION);
       saveCountdown();
     } catch (error) {
@@ -180,7 +188,7 @@ export const VerifyModal: React.FC<VerifyModalProps> = ({ verifyType, visible, o
         <div className={styles.verifyModalContentText}>
           为保护你和企业业务数据安全，平台已开启每次登录验证，验证码已发送至绑定的手机号 / 邮箱，输入后即可安全登录
         </div>
-        {verifyType === 'phone' ? (
+        {verifyType === 'mobile' ? (
           <Input
             placeholder="请输入手机验证码"
             value={verifyCode}

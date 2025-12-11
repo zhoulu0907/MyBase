@@ -8,7 +8,7 @@ import {
   STATUS_VALUES
 } from '@onebase/ui-kit';
 import { cloneDeep } from 'lodash-es';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -20,6 +20,7 @@ import PCActiveIcon from '@/assets/images/pc_icon_active.svg';
 import {
   COMPONENT_GROUP_NAME,
   COMPONENT_MAP,
+  createPageEditorSignal,
   DEFAULT_OPTIONS_TYPE,
   EditRender,
   ENTITY_COMPONENT_TYPES,
@@ -27,13 +28,12 @@ import {
   getComponentSchema,
   getComponentWidth,
   useAppEntityStore,
-  usePageEditorSignal,
   useEditorSignalMap,
+  useFormEditorSignal,
+  usePageEditorSignal,
+  usePageViewEditorSignal,
   WIDTH_OPTIONS,
   WIDTH_VALUES,
-  usePageViewEditorSignal,
-  createPageEditorSignal,
-  useFormEditorSignal,
   type GridItem
 } from '@onebase/ui-kit';
 
@@ -44,11 +44,11 @@ import CompDeleteIcon from '@/assets/images/app_delete.svg';
 import CompCopyIcon from '@/assets/images/copy_comp_icon.svg';
 import CompShowIcon from '@/assets/images/eye_off_icon.svg';
 import { currentEditorSignal } from '@onebase/ui-kit/src/signals/current_editor';
-import { loadMicroApp, initGlobalState, type MicroApp } from "qiankun";
+import { initGlobalState, loadMicroApp, type MicroApp } from 'qiankun';
 
 import { Divider, Form } from '@arco-design/web-react';
 import { ENTITY_TYPE, ENTITY_TYPE_VALUE, type AppEntityField } from '@onebase/app';
-import { getHashQueryParam, EditMode } from '@onebase/common';
+import { EditMode, getHashQueryParam, getMobileEditorURL } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
 import 'react-grid-layout/css/styles.css';
 import View from '../view';
@@ -136,22 +136,22 @@ export default function EditorWorkspace() {
     setSubTableComponents,
     delSubTableComponents,
     batchDelSubTableComponents
-  })
+  });
   useEffect(() => {
     if (editMode.value !== EditMode.MOBILE) {
       return;
     }
-    console.log("loading mobile-editor-drag-list");
+    console.log('loading mobile-editor-drag-list');
 
     const mobileEditorDrag = loadMicroApp({
-      name: "mobile-editor-drag-list",
-      entry: window.global_config.MOBILE_EDITOR_URL,
-      container: "#mobile-editor-drag-list",
+      name: 'mobile-editor-drag-list',
+      entry: getMobileEditorURL(),
+      container: '#mobile-editor-drag-list',
       props: {
         onGlobalStateChange: qiankunActions.onGlobalStateChange,
         setGlobalState: qiankunActions.setGlobalState,
-        offGlobalStateChange: qiankunActions.offGlobalStateChange,
-      },
+        offGlobalStateChange: qiankunActions.offGlobalStateChange
+      }
     });
     mobileEditorDragRef.current = mobileEditorDrag;
 
@@ -327,7 +327,9 @@ export default function EditorWorkspace() {
     }
   };
 
-  return editMode.value === EditMode.MOBILE ? <div id="mobile-editor-drag-list" className={styles.mobileeditordraglist}></div> : (
+  return editMode.value === EditMode.MOBILE ? (
+    <div id="mobile-editor-drag-list" className={styles.mobileeditordraglist}></div>
+  ) : (
     <div className={styles.editorWorkspace}>
       <div className={styles.workspaceHeader}>
         <div className={styles.workspaceHeaderLeft}>{isFormEditor && pageSetId && <View pageSetId={pageSetId} />}</div>
