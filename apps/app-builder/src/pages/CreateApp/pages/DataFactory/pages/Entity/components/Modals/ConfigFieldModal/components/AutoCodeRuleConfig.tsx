@@ -4,7 +4,7 @@ import { IconDelete, IconDragDotVertical, IconPlus, IconEdit } from '@arco-desig
 import { ENTITY_FIELD_TYPE, FIELD_TYPE } from '@onebase/ui-kit';
 import { ReactSortable } from 'react-sortablejs';
 import AutoCodeNumberSettingsModal from './AutoCodeNumberSettingsModal';
-import type { AutoNumberRule, AutoCodeRule, AutoNumberRuleResponce, EntityFieldsWithChildren } from '../types';
+import type { AutoNumberRule, AutoNumberRuleResponce, EntityFieldsWithChildren, AutoNumberRuleItem } from '../types';
 import {
   convertAutoCodeCompoToAutoNumberRule,
   convertAutoNumberRuleToAutoCodeComp,
@@ -52,6 +52,8 @@ const getFieldOptions = (entitys: EntityFieldsWithChildren[]) => {
   });
 };
 
+type RuleItem = AutoNumberRuleItem & { id: string };
+
 export const AutoCodeRuleConfig: React.FC<AutoCodeRuleConfigProps> = ({
   onVisibleChange,
   onConfirm,
@@ -64,46 +66,53 @@ export const AutoCodeRuleConfig: React.FC<AutoCodeRuleConfigProps> = ({
   const [customDateFormatStatusMap, setCustomDateFormatStatusMap] = useState<Record<string, 'error' | undefined>>({});
 
   // 默认规则
-  const getInitialRules = useCallback((): AutoCodeRule[] => {
+  const getInitialRules = useCallback((): RuleItem[] => {
     if (initialConfig) {
-      return convertAutoNumberRuleToAutoCodeComp(initialConfig, fields);
+      return convertAutoNumberRuleToAutoCodeComp(initialConfig as AutoNumberRule, fields).map((rule, index) => ({
+        ...rule,
+        id: rule.id || `rule-${index + 1}`
+      }));
     }
-    return AUTO_CODE_INITIAL_RULES;
+    return (AUTO_CODE_INITIAL_RULES as AutoNumberRuleItem[]).map((rule, index) => ({
+      ...rule,
+      id: rule.id || `rule-${index + 1}`
+    }));
   }, [initialConfig, fields]);
 
-  const [rules, setRules] = useState<AutoCodeRule[]>(getInitialRules());
+  const [rules, setRules] = useState<RuleItem[]>(getInitialRules());
   const [autoCodeModalVisible, setAutoCodeModalVisible] = useState(false);
   const [editingRuleId, setEditingRuleId] = useState<string>('');
-  const getDisplayText = (config?: AutoCodeRule['config']) => {
-    const sequenceConfig = config || rules.find((rule) => rule.itemType === AUTO_CODE_RULE_TYPE.SEQUENCE)?.config;
-    if (!sequenceConfig) {
+  const getDisplayText = (config?: AutoNumberRuleItem) => {
+    const sequenceRule = config || rules.find((rule) => rule.itemType === AUTO_CODE_RULE_TYPE.SEQUENCE);
+    if (!sequenceRule) {
       return '';
     }
     const numberingMethodText =
-      sequenceConfig.numberMode === AUTO_CODE_NUMBER_MODE.NATURAL ? '自然数编号' : '指定位数编号';
+      sequenceRule.numberMode === AUTO_CODE_NUMBER_MODE.NATURAL ? '自然数编号' : '指定位数编号';
     const digitsText =
-      sequenceConfig.numberMode === AUTO_CODE_NUMBER_MODE.NATURAL ? '' : `${sequenceConfig.digitWidth}位数`;
-    const resetText = sequenceConfig.resetCycle === AUTO_CODE_RESET_CYCLE.NONE ? '不自动重置' : '自动重置';
+      sequenceRule.numberMode === AUTO_CODE_NUMBER_MODE.NATURAL ? '' : `${sequenceRule.digitWidth}位数`;
+    const resetText = sequenceRule.resetCycle === AUTO_CODE_RESET_CYCLE.NONE ? '不自动重置' : '自动重置';
     return `${numberingMethodText},${digitsText}${resetText}`;
   };
 
   const [displayText, setDisplayText] = useState(getDisplayText());
 
-  const addRule = (type: AutoCodeRule['itemType']) => {
-    let config: AutoCodeRule['config'] = {};
+  const addRule = (type: RuleItem['itemType']) => {
+    let config: Partial<RuleItem> = {};
     switch (type) {
       case AUTO_CODE_RULE_TYPE.SEQUENCE:
         config = { ...AUTO_CODE_SEQUENCE_DEFAULT_CONFIG };
         setDisplayText(getDisplayText(config));
         break;
       case AUTO_CODE_RULE_TYPE.DATE:
-        config = { dateFormat: DATE_FORMAT_DEFAULT };
+        config = { format: DATE_FORMAT_DEFAULT };
         break;
       default:
         config = {};
         break;
     }
-    setRules([...rules, { id: 'rule-' + Date.now().toString(), itemType: type, config }]);
+    const nextId = (config as RuleItem).id || `rule-${Date.now().toString()}`;
+    setRules([...rules, { ...(config as RuleItem), id: nextId, itemType: type }]);
   };
 
   const editRule = (id: string) => {
@@ -111,13 +120,15 @@ export const AutoCodeRuleConfig: React.FC<AutoCodeRuleConfigProps> = ({
     setAutoCodeModalVisible(true);
   };
 
-  const handleAutoCodeNumberSettingsConfirm = (config: AutoNumberRule) => {
-    const ruleConfig: AutoCodeRule['config'] = {
+  const handleAutoCodeNumberSettingsConfirm = (config: AutoNumberRuleResponce) => {
+    const ruleConfig: RuleItem = {
       ...config,
-      startValue: config.initialValue
+      itemType: AUTO_CODE_RULE_TYPE.SEQUENCE,
+      startValue: config.initialValue,
+      id: editingRuleId || `rule-${Date.now()}`
     };
 
-    updateRule(editingRuleId, { config: ruleConfig });
+    updateRule(editingRuleId, ruleConfig);
     setDisplayText(getDisplayText(ruleConfig));
     setEditingRuleId('');
   };
@@ -137,7 +148,7 @@ export const AutoCodeRuleConfig: React.FC<AutoCodeRuleConfigProps> = ({
     });
   };
 
-  const updateRule = (id: string, updates: Partial<AutoCodeRule>) => {
+  const updateRule = (id: string, updates: Partial<RuleItem>) => {
     setRules(rules.map((rule) => (rule.id === id ? { ...rule, ...updates } : rule)));
   };
 
@@ -172,7 +183,7 @@ export const AutoCodeRuleConfig: React.FC<AutoCodeRuleConfigProps> = ({
     }
   };
 
-  const renderRuleConfig = (rule: AutoCodeRule) => {
+  const renderRuleConfig = (rule: RuleItem) => {
     switch (rule.itemType) {
       case AUTO_CODE_RULE_TYPE.SEQUENCE: {
         return (
@@ -196,11 +207,10 @@ export const AutoCodeRuleConfig: React.FC<AutoCodeRuleConfigProps> = ({
             <span className={styles.ruleLabel}>创建时间:</span>
             <Space direction="vertical">
               <Select
-                value={(rule.config.dateFormat as string) || DATE_FORMAT_DEFAULT}
+                value={rule.format || DATE_FORMAT_DEFAULT}
                 onChange={(value) => {
-                  // 清除该规则的校验状态
                   setCustomDateFormatStatusMap((prev) => ({ ...prev, [rule.id!]: undefined }));
-                  updateRule(rule.id!, { config: { ...rule.config, dateFormat: value, fixedText: '' } });
+                  updateRule(rule.id!, { format: value, textValue: '' });
                 }}
                 className={styles.ruleInput}
               >
@@ -210,9 +220,9 @@ export const AutoCodeRuleConfig: React.FC<AutoCodeRuleConfigProps> = ({
                   </Select.Option>
                 ))}
               </Select>
-              {rule.config.dateFormat === DATE_FORMAT_VALUES.CUSTOM && (
+              {rule.format === DATE_FORMAT_VALUES.CUSTOM && (
                 <Input
-                  value={(rule.config.fixedText as string) || ''}
+                  value={(rule.textValue as string) || ''}
                   placeholder="例如：yyyyMMddHHmmss"
                   onChange={(value) => {
                     const ruleId = rule.id!;
@@ -221,7 +231,7 @@ export const AutoCodeRuleConfig: React.FC<AutoCodeRuleConfigProps> = ({
                     } else {
                       setCustomDateFormatStatusMap((prev) => ({ ...prev, [ruleId]: undefined }));
                     }
-                    updateRule(ruleId, { config: { ...rule.config, fixedText: value } });
+                    updateRule(ruleId, { textValue: value });
                   }}
                   className={styles.ruleInput}
                   status={customDateFormatStatusMap[rule.id!]}
@@ -248,7 +258,7 @@ export const AutoCodeRuleConfig: React.FC<AutoCodeRuleConfigProps> = ({
             <span className={styles.ruleLabel}>固定字符:</span>
             <Space direction="vertical">
               <Input
-                value={(rule.config.fixedText as string) || ''}
+                value={(rule.textValue as string) || ''}
                 placeholder="请输入内容"
                 maxLength={10}
                 onChange={(value) => {
@@ -258,7 +268,7 @@ export const AutoCodeRuleConfig: React.FC<AutoCodeRuleConfigProps> = ({
                   } else {
                     setFixedTextStatusMap((prev) => ({ ...prev, [ruleId]: undefined }));
                   }
-                  updateRule(ruleId, { config: { ...rule.config, fixedText: value } });
+                  updateRule(ruleId, { textValue: value });
                 }}
                 className={styles.ruleInput}
                 status={fixedTextStatusMap[rule.id!]}
@@ -286,14 +296,11 @@ export const AutoCodeRuleConfig: React.FC<AutoCodeRuleConfigProps> = ({
               placeholder="请选择字段"
               className={styles.ruleInput}
               options={getFieldOptions(fields)}
-              value={findFieldPath(rule.config.fieldName as string, fields)}
+              value={findFieldPath((rule.format as string) || '', fields)}
               onChange={(value) => {
                 updateRule(rule.id!, {
-                  config: {
-                    ...rule.config,
-                    fieldName: value[value.length - 1],
-                    fieldPath: value
-                  }
+                  format: value[value.length - 1],
+                  fieldPath: value
                 });
               }}
             />
@@ -317,9 +324,16 @@ export const AutoCodeRuleConfig: React.FC<AutoCodeRuleConfigProps> = ({
       <div className={styles.fieldTypeConfig}>
         <h4>自动编号规则</h4>
         <div className={styles.ruleConfigItems}>
-          <ReactSortable
-            list={rules as unknown as any[]}
-            setList={(newList) => setRules(newList as AutoCodeRule[])}
+          <ReactSortable<RuleItem>
+            list={rules}
+            setList={(newList) =>
+              setRules(
+                (newList as RuleItem[]).map((item, index) => ({
+                  ...item,
+                  id: item.id || `rule-${Date.now()}-${index}`
+                }))
+              )
+            }
             animation={200}
           >
             {rules.map((rule) => (
@@ -370,10 +384,14 @@ export const AutoCodeRuleConfig: React.FC<AutoCodeRuleConfigProps> = ({
         visible={autoCodeModalVisible}
         onVisibleChange={setAutoCodeModalVisible}
         onConfirm={handleAutoCodeNumberSettingsConfirm}
-        initialConfig={
-          rules.find((rule) => rule.itemType === AUTO_CODE_RULE_TYPE.SEQUENCE)
-            ?.config as unknown as AutoNumberRuleResponce
-        }
+        initialConfig={(() => {
+          const sequenceRule = rules.find((rule) => rule.itemType === AUTO_CODE_RULE_TYPE.SEQUENCE);
+          if (!sequenceRule) return undefined;
+          return {
+            ...sequenceRule,
+            initialValue: sequenceRule.initialValue ?? sequenceRule.startValue
+          } as AutoNumberRuleResponce;
+        })()}
       />
     </>
   );

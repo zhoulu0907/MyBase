@@ -23,6 +23,14 @@ interface PartPreviewProps {
   pageType: string;
 }
 
+// https://github.com/umijs/qiankun/issues/2109
+// 用props，会有闪屏、状态不同步等问题，等 qiankun 3.0发布后再调整方案
+const warn = console.warn;
+console.warn = (...args) => {
+  if (args[0]?.includes("[qiankun] globalState tools will be removed in 3.0, pls don't use it!")) return;
+  warn(...args);
+};
+
 /**
  * partPreview 组件
  * 用于预览页面组件的展示
