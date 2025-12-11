@@ -444,6 +444,9 @@ importers:
 
   apps/mobile-editor:
     dependencies:
+      '@arco-design/mobile-react':
+        specifier: ^2.38.2
+        version: 2.38.2(@types/react-dom@18.3.7(@types/react@18.3.23))(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react-transition-group@4.4.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
       '@arco-design/web-react':
         specifier: ^2.66.1
         version: 2.66.1(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -459,6 +462,9 @@ importers:
       '@onebase/common':
         specifier: workspace:*
         version: link:../../packages/common
+      '@onebase/platform-center':
+        specifier: workspace:*
+        version: link:../../packages/platform-center
       '@onebase/ui-kit':
         specifier: workspace:*
         version: link:../../packages/ui-kit
