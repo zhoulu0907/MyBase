@@ -134,9 +134,9 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
     const newFieldList = res
       .filter((item: MetadataEntityField) => item.entityUuid === entityUuid)
       .filter((item: MetadataEntityField) => !FilterEntityFields.includes(item.fieldName));
-    const newFieldListNotSystemField = res.filter(
-      (item: MetadataEntityField) => item.isSystemField !== 1 && !item.disabled
-    );
+    const newFieldListNotSystemField = res
+      .filter((item: MetadataEntityField) => item.entityUuid === entityUuid)
+      .filter((item: MetadataEntityField) => item.isSystemField !== 1 && !item.disabled);
 
     // TODO(mickey): 等卞老师调通后移除
     console.log('newFieldList: ', newFieldList);
