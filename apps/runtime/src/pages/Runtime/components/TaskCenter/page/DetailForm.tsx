@@ -75,7 +75,7 @@ const PreviewContainer = forwardRef<any, PreviewProps>((props: PreviewProps, ref
   const executionCount = useRef(0);
   const pageComponentSchemas = useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value;
   const fieldPerm = detailData?.formData?.fieldPermMap;
-
+  const prevFieldPermRef = useRef();
   useImperativeHandle(ref, () => ({
     getFormData: () => {
       const res = getFormValues();
@@ -137,6 +137,8 @@ const PreviewContainer = forwardRef<any, PreviewProps>((props: PreviewProps, ref
           };
           useEditorSignalMap.get(editPageViewId.value)!.setPageComponentSchemas(key, newConfig);
           loadFormPageComponentSchemas(useEditorSignalMap.get(editPageViewId.value)!.pageComponentSchemas.value);
+          prevFieldPermRef.current = useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value;
+
         }
       });
     }
@@ -259,15 +261,9 @@ const PreviewContainer = forwardRef<any, PreviewProps>((props: PreviewProps, ref
   }, [pageSetId]);
 
   useEffect(() => {
-    if (executionCount.current >= 10) {
-      console.log('已达到最大执行次数（10次），不再执行副作用');
-      return;
+    if (fieldPerm && pageComponentSchemas && pageComponentSchemas !== prevFieldPermRef.current) {
+      updatePageComponentSchemas();
     }
-    executionCount.current += 1;
-    console.log(`副作用第 ${executionCount.current} 次执行`);
-    console.log('这是第',executionCount,'次数')
-    updatePageComponentSchemas();
-
   }, [pageComponentSchemas, fieldPerm]);
 
   useEffect(() => {
