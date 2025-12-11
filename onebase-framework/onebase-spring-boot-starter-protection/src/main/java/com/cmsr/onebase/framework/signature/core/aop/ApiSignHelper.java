@@ -44,6 +44,11 @@ public class ApiSignHelper {
     }
 
     public boolean verifySignature(HttpServletRequest request) {
+        // 如果是本地请求，则跳过签名验证
+        if (isLocalRequest(request)) {
+            return true;
+        }
+        
         if(!signatureRedisDAO.isApiSignEnabled()){
             return true;
         }
@@ -71,6 +76,17 @@ public class ApiSignHelper {
             throw new ServiceException(GlobalErrorCodeConstants.REPEATED_REQUESTS.getCode(), "存在重复请求");
         }
         return true;
+    }
+
+    /**
+     * 判断是否为本地请求
+     * 
+     * @param request HTTP请求
+     * @return 是否为本地请求
+     */
+    private boolean isLocalRequest(HttpServletRequest request) {
+        String serverName = request.getServerName();
+        return "localhost".equalsIgnoreCase(serverName) || "127.0.0.1".equals(serverName);
     }
 
     /**
