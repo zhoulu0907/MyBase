@@ -60,6 +60,7 @@ public class AppVersionServiceImpl implements AppVersionService {
                 .map(v -> {
                     VersionPageRespVO bean = BeanUtils.toBean(v, VersionPageRespVO.class);
                     bean.setUpdaterName(userHelper.getUserNickname(v.getUpdater()));
+                    bean.setVersionTypeLabel(VersionTypeEnum.getLabel(v.getVersionType()));
                     return bean;
                 })
                 .toList();
