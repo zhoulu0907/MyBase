@@ -18,8 +18,8 @@ import styles from './index.module.css';
 type XSubTableConfig = typeof FormSchema.XSubTableSchema.config;
 
 const XSubTable = memo(
-  (props: XSubTableConfig & { runtime?: boolean; detailMode?: boolean; defaultOptionsConfig?: any; form?: any }) => {
-    const { id, label, status, verify, layout, defaultOptionsConfig, runtime = true, detailMode, form } = props;
+  (props: XSubTableConfig & { runtime?: boolean; detailMode?: boolean; defaultOptionsConfig?: any; form?: any; editLoading?: boolean }) => {
+    const { id, label, status, verify, layout, defaultOptionsConfig, runtime = true, detailMode, form, editLoading } = props;
 
     useSignals();
     const { curViewId } = usePageViewEditorSignal;
@@ -104,10 +104,11 @@ const XSubTable = memo(
                       dataField: [`${id}.${item.key}.${schema.config?.dataField?.[1] || subTable.id}`]
                     };
                     const pageSchema = { ...schema, config };
-
                     return (
                       <Cell label={config.cpName} key={subTable.id} style={{ padding: 0 }}>
                         <PreviewRender
+                          editLoading={editLoading}
+                          form={form}
                           cpId={subTable.id}
                           cpType={subTable.type}
                           detailMode={detailMode}
