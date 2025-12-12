@@ -33,8 +33,6 @@ const View: React.FC<ViewProps> = ({ pageSetId }) => {
   const [dropListVisible, setDropListVisible] = useState(false);
   const [editViewName, setEditViewName] = useState(false);
 
-  console.log('curViewId-----',curViewId.value)
-
   const { pageComponentSchemas, components, layoutSubComponents, subTableComponents } = usePageEditorSignal();
 
   const showViewType = (item: PageView | null) => {
