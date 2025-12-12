@@ -531,7 +531,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
           (!listComponents.value?.length ? (
             <div className={styles.noData}>暂无数据</div>
           ) : (
-            listComponents.value.map((cp: GridItem, index) => (
+            listComponents.value.map((cp: GridItem, index: number) => (
               <Fragment key={cp.id}>
                 {listPageComponentSchemas.value[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
                   <div

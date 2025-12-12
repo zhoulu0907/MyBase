@@ -95,9 +95,6 @@
       padding: 12px;
       border-radius: 4px;
     }
-    .workspaceContentOuterList {
-      background-color: #F7F8FA;
-    }
 
     .workspaceContent {
       background-color: #fff;
@@ -113,10 +110,7 @@
       flex-wrap: wrap;
       align-content: flex-start;
 
-      padding: 16px 0 0 0;
-      & > div {
-        width: calc(100% - 8px) !important;
-      }
+      padding-top: 18px;
 
       /* 自定义滚动条样式 */
       &::-webkit-scrollbar {
@@ -134,16 +128,14 @@
 
     // 组件样式
     .componentItem {
+      width: 100%;
       cursor: move;
       box-sizing: border-box;
       border: 1px dashed transparent;
       border-radius: 8px;
       transition: border-color 0.2s ease;
       position: relative;
-
-      // & > div {
-      //   pointer-events: none !important;
-      // }
+      margin-bottom: 4px;
 
       & .operationArea {
         pointer-events: auto !important;

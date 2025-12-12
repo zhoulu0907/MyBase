@@ -1,4 +1,8 @@
 .loadmore-list-wrapper-OBMobile {
+  height: 100%;
+  border-radius: 0.16rem;
+  background: #F7F8FA;
+
   .total-data {
     display: block;
     line-height: 0.8rem;
@@ -89,9 +93,7 @@
   }
 
   .list-body-wrapper {
-    border-radius: 0.16rem;
     padding: 0.24rem 0.24rem 0;
-    background: #F7F8FA;
 
     .no-data {
       font-size: 0.28rem;
@@ -103,7 +105,6 @@
     .list-body-item-wrapper {
       padding: 0 0.24rem 0.24rem;
       background: #fff;
-      border-radius: 0.08rem;
       margin-bottom: 0.24rem;
       line-height: 0.6rem;
       border-radius: 0.16rem;
