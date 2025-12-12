@@ -1,6 +1,6 @@
 import {
   OfflineApplicationReq,
-  type CreateApplicationVersionReq,
+  OnlineApplicationReq,
   type DeleteApplicationVersionReq,
   type PageApplicationVersionReq,
   type RestoreApplicationVersionReq
@@ -11,8 +11,8 @@ export const pageApplicationVersion = (params: PageApplicationVersionReq) => {
   return appService.get('/version/page', params);
 };
 
-export const createApplicationVersion = (params: CreateApplicationVersionReq) => {
-  return appService.post('/version/create', params);
+export const onlineApplication = (params: OnlineApplicationReq) => {
+  return appService.post('/version/online', params);
 };
 
 export const offlineApplication = (params: OfflineApplicationReq) => {
