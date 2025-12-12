@@ -75,7 +75,7 @@ const ListEditor: React.FC<FormEditorProps & { instanceId: string }> = ({ instan
   return (
     <div className={styles.formEditorPage}>
       <EditorPanel />
-      <EditorWorkspace props={props} />
+      <EditorWorkspace props={props} isListEditor={true} />
     </div>
   );
 };
