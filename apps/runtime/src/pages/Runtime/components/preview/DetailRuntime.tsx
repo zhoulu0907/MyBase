@@ -10,7 +10,7 @@ import {
   type GridItem
 } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { Fragment, useState } from 'react';
 import styles from './index.module.less';
 
 interface DetailRuntimeProps {
@@ -37,11 +37,6 @@ const DetailRuntime: React.FC<DetailRuntimeProps> = ({
   useSignals();
 
   const { detailPageViewId } = pagesRuntimeSignal;
-
-  useEffect(() => {
-    console.log('detailPageViewId: ', detailPageViewId.value);
-    console.log(useEditorSignalMap);
-  }, [useEditorSignalMap, detailPageViewId]);
 
   const [fullScreen, setFullScreen] = useState(false);
 
