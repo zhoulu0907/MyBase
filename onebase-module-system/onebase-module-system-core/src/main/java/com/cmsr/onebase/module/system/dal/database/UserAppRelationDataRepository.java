@@ -46,4 +46,11 @@ public class UserAppRelationDataRepository extends DataRepository<UserAppRelatio
         configStore.eq(UserAppRelationDO.STATUS, CorpAppReationStatusEnum.ENABLE.getValue());
         return findAllByConfig(configStore);
     }
+
+    public List<UserAppRelationDO> getUserAppRelationList(UserAppPageReqVO userAppPageReqVO) {
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        configStore.in(UserAppRelationDO.USER_ID, userAppPageReqVO.getUserIds());
+        configStore.eq(UserAppRelationDO.STATUS, CorpAppReationStatusEnum.ENABLE.getValue());
+        return findAllByConfig(configStore);
+    }
 }

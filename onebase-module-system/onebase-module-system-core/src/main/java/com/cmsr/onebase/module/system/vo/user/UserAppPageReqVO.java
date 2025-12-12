@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
+import java.util.Set;
 
 
 @Schema(description = "用户应用关联表分页")
@@ -19,12 +20,12 @@ public class UserAppPageReqVO extends PageParam {
 
     @Schema(description = "用户ID")
     @NotNull(message = "用户id不能为空")
-    private Long userId;
+    private Set<Long> userIds;
 
     @Schema(description = "状态")
     @InEnum(value = CorpAppReationStatusEnum.class, message = "状态必须是 {value}")
     private Integer status = 0;
 
-    @Schema(description = "应用名称")
-    private String appName;
+    @Schema(description = "用户名称")
+    private String userName;
 }

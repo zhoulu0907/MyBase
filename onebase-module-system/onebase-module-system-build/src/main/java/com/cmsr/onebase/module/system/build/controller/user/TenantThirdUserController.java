@@ -1,21 +1,17 @@
 package com.cmsr.onebase.module.system.build.controller.user;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.system.service.dept.DeptService;
 import com.cmsr.onebase.module.system.service.user.UserService;
-import com.cmsr.onebase.module.system.vo.user.ThirdUserAppCombinedInsertReqVO;
-import com.cmsr.onebase.module.system.vo.user.ThirdUserAppCombinedUpdateReqVO;
-import com.cmsr.onebase.module.system.vo.user.UserForgetPasswordReqVO;
+import com.cmsr.onebase.module.system.vo.user.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 
@@ -27,6 +23,14 @@ public class TenantThirdUserController {
 
     @Resource
     private UserService userService;
+
+    @GetMapping("/user-applications-page")
+    @Operation(summary = "获得用户授权应用列表-分页")
+    @PreAuthorize("@ss.hasPermission('tenant:user:query')")
+    public CommonResult<PageResult<UserApplicationRespVO>> getUserAppRelationPage(@Valid UserAppPageReqVO userAppPageReqVO) {
+        PageResult<UserApplicationRespVO> pageResult = userService.getUserAppRelationPage(userAppPageReqVO);
+        return success(pageResult);
+    }
 
 
     @PostMapping("/create")

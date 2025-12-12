@@ -48,24 +48,10 @@ public class UserAppRelationServiceImpl implements UserAppRelationService {
     @Resource
     private AppApplicationApi appApplicationApi;
 
+
     @Override
-    public PageResult<UserApplicationRespVO> getUserAppRelationPage(UserAppPageReqVO userAppPageReqVO) {
-        PageResult<UserAppRelationDO> pageResult = userAppRelationDataRepository.selectPage(userAppPageReqVO);
-        List<UserAppRelationDO> corpList = pageResult.getList();
-        if (CollectionUtils.isEmpty(corpList)) {
-            return new PageResult<>(Collections.emptyList(), pageResult.getTotal());
-        }
-        // TODO 获取用户名称
-        // TODO 获取应用名称
-        List<UserApplicationRespVO> filteredList = pageResult.getList().stream()
-                .map(userApp -> {
-                    UserApplicationRespVO userAppVO = new UserApplicationRespVO();
-                    userAppVO.setUserId(userApp.getUserId());
-                    return userAppVO;
-                })
-                .collect(Collectors.toList());
-        // 返回过滤后的结果和总数
-        return new PageResult<>(filteredList, pageResult.getTotal());
+    public List<UserAppRelationDO> getUserAppRelationList(UserAppPageReqVO userAppPageReqVO) {
+       return userAppRelationDataRepository.getUserAppRelationList(userAppPageReqVO);
     }
 
     @Override

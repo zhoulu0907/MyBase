@@ -10,7 +10,9 @@ import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
+import com.cmsr.onebase.module.system.dal.dataobject.user.UserAppRelationDO;
 import com.cmsr.onebase.module.system.enums.user.UserStatusEnum;
+import com.cmsr.onebase.module.system.vo.user.UserAppPageReqVO;
 import com.cmsr.onebase.module.system.vo.user.UserByDeptPageReqVO;
 import com.cmsr.onebase.module.system.vo.user.UserPageReqVO;
 import com.cmsr.onebase.module.system.vo.user.UserSimplePageReqVO;
@@ -379,5 +381,20 @@ public class UserDataRepository extends DataRepository<AdminUserDO> {
                 .order(AdminUserDO.ADMIN_TYPE, Order.TYPE.ASC)
                 .order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
         return findAllByConfig(configStore);
+    }
+
+    public PageResult<AdminUserDO> getUserAppRelationPage(UserAppPageReqVO userAppPageReqVO) {
+        DefaultConfigStore configStore = buildUserConfigStore();
+        // 根据关键词模糊查询
+        if (null != userAppPageReqVO.getStatus()){
+            configStore.like(AdminUserDO.STATUS, userAppPageReqVO.getStatus());
+        }
+        if (StringUtils.isNotBlank(userAppPageReqVO.getUserName())){
+            configStore.like(AdminUserDO.USERNAME, userAppPageReqVO.getUserName());
+        }
+        // 添加排序
+        configStore.order(AdminUserDO.ADMIN_TYPE, Order.TYPE.ASC).order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
+
+        return findPageWithConditions(configStore, userAppPageReqVO.getPageNo(), userAppPageReqVO.getPageSize());
     }
 }

@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.system.service.user;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.module.system.dal.dataobject.user.UserAppRelationDO;
 import com.cmsr.onebase.module.system.vo.user.UserAppPageReqVO;
 import com.cmsr.onebase.module.system.vo.user.UserAppRelationInertReqVO;
 import com.cmsr.onebase.module.system.vo.user.UserAppVO;
@@ -20,7 +21,7 @@ public interface UserAppRelationService {
      * @param userAppPageReqVO 获取用户授权应用列表-分页请求参数
      * @return 用户授权应用列表-分页结果
      */
-    PageResult<UserApplicationRespVO> getUserAppRelationPage(@Valid UserAppPageReqVO userAppPageReqVO);
+    List<UserAppRelationDO> getUserAppRelationList(UserAppPageReqVO userAppPageReqVO);
 
     /**
      * 获得用户授权应用列表-分页

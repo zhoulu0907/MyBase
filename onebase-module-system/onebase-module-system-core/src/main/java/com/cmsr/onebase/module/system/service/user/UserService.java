@@ -362,4 +362,15 @@ public interface UserService {
      * @return
      */
     Long updateUserAndUserAppRelation(ThirdUserAppCombinedUpdateReqVO reqVO);
+
+
+    /**
+     * 获得用户授权应用列表-分页
+     *
+     * @param userAppPageReqVO 获取用户授权应用列表-分页请求参数
+     * @return 用户授权应用列表-分页结果
+     */
+    PageResult<UserApplicationRespVO> getUserAppRelationPage(@Valid UserAppPageReqVO userAppPageReqVO);
+
+
 }

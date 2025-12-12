@@ -27,12 +27,4 @@ public class TenantUserAppRelationController {
     private UserAppRelationService userAppRelationService;
 
 
-     @GetMapping("/user-applications-page")
-     @Operation(summary = "获得用户授权应用列表-分页")
-     @PreAuthorize("@ss.hasPermission('user:app-auth:query')")
-     public CommonResult<PageResult<UserApplicationRespVO>> getUserAppRelationPage(@Valid UserAppPageReqVO userAppPageReqVO) {
-         PageResult<UserApplicationRespVO> pageResult = userAppRelationService.getUserAppRelationPage(userAppPageReqVO);
-         return success(pageResult);
-     }
-
 }

@@ -14,6 +14,8 @@ import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.common.util.validation.ValidationUtils;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
+import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
+import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
 import com.cmsr.onebase.module.app.api.auth.AppAuthRoleUser;
 import com.cmsr.onebase.module.infra.api.config.ConfigApi;
 import com.cmsr.onebase.module.system.convert.user.UserConvert;
@@ -27,6 +29,7 @@ import com.cmsr.onebase.module.system.dal.dataobject.dept.UserPostDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.UserRoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
+import com.cmsr.onebase.module.system.dal.dataobject.user.UserAppRelationDO;
 import com.cmsr.onebase.module.system.dal.redis.RedisKeyConstants;
 import com.cmsr.onebase.module.system.enums.dept.DefaultThirdDept;
 import com.cmsr.onebase.module.system.enums.dept.DeptTypeEnum;
@@ -43,6 +46,7 @@ import com.cmsr.onebase.module.system.service.post.PostService;
 import com.cmsr.onebase.module.system.service.tenant.TenantService;
 import com.cmsr.onebase.module.system.vo.auth.AuthRegisterReqVO;
 import com.cmsr.onebase.module.system.vo.auth.ThirdAuthLoginReqVO;
+import com.cmsr.onebase.module.system.vo.corp.CorpAppVo;
 import com.cmsr.onebase.module.system.vo.dept.DeptRespVO;
 import com.cmsr.onebase.module.system.vo.dept.DeptSaveReqVO;
 import com.cmsr.onebase.module.system.vo.dept.DeptSimpleListRespVO;
@@ -130,6 +134,10 @@ public class UserServiceImpl implements UserService {
 
     @Resource
     private UserAppRelationService userAppRelationService;
+
+
+    @Resource
+    private AppApplicationApi appApplicationApi;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -1236,5 +1244,79 @@ public class UserServiceImpl implements UserService {
         validateEmailUnique(id, email);
         return user;
     }
+
+
+
+    @Override
+    public PageResult<UserApplicationRespVO> getUserAppRelationPage(UserAppPageReqVO userAppPageReqVO) {
+        // 1. 查询用户分页数据
+        PageResult<AdminUserDO> pageResult = userDataRepository.getUserAppRelationPage(userAppPageReqVO);
+        List<AdminUserDO> userDOList = pageResult.getList();
+
+        // 2. 如果没有用户数据，直接返回空结果
+        if (org.apache.commons.collections4.CollectionUtils.isEmpty(userDOList)) {
+            return new PageResult<>(Collections.emptyList(), pageResult.getTotal());
+        }
+
+        // 3. 提取用户ID集合，用于后续查询用户应用关联关系
+        Set<Long> userIds = userDOList.stream().map(AdminUserDO::getId).collect(Collectors.toSet());
+        UserAppPageReqVO vo = new UserAppPageReqVO();
+        vo.setUserIds(userIds);
+
+        // 4. 查询用户与应用的关联关系列表
+        List<UserAppRelationDO> userAppRelationList = userAppRelationService.getUserAppRelationList(vo);
+
+        // 5. 如果没有关联关系数据，只返回用户基本信息
+        if (org.apache.commons.collections4.CollectionUtils.isEmpty(userAppRelationList)) {
+            return new PageResult<>(pageResult.getList().stream()
+                    .map(user -> {
+                        UserApplicationRespVO userApplicationRespVO = BeanUtils.toBean(user, UserApplicationRespVO.class);
+                        userApplicationRespVO.setUserId(user.getId());
+                        return userApplicationRespVO;
+                    })
+                    .collect(Collectors.toList()), pageResult.getTotal());
+        }
+
+        // 6. 按用户ID分组关联关系数据，方便后续匹配
+        Map<Long, List<UserAppRelationDO>> userAppRelationMap = userAppRelationList.stream()
+                .collect(Collectors.groupingBy(UserAppRelationDO::getUserId));
+
+        // 7. 提取所有关联的应用ID，并查询应用详细信息
+        Set<Long> appId = userAppRelationList.stream().map(UserAppRelationDO::getApplicationId).collect(Collectors.toSet());
+        List<ApplicationDTO> appList = appApplicationApi.findAppApplicationByAppIds(appId);
+        Map<Long, ApplicationDTO> appMap = appList.stream().collect(Collectors.toMap(ApplicationDTO::getId, item -> item));
+
+        // 8. 构建最终的返回结果，包含用户信息和关联的应用信息
+        return new PageResult<>(pageResult.getList().stream()
+                .map(user -> {
+                    UserApplicationRespVO userApplicationRespVO = BeanUtils.toBean(user, UserApplicationRespVO.class);
+                    userApplicationRespVO.setUserId(user.getId());
+
+                    // 9. 获取当前用户关联的应用关系列表
+                    List<UserAppRelationDO> appRelationDOList = userAppRelationMap.get(user.getId());
+                    if (!org.apache.commons.collections4.CollectionUtils.isEmpty(appRelationDOList)) {
+                        // 10. 将应用关系转换为应用详情信息
+                        userApplicationRespVO.setUserApplicationList(appRelationDOList.stream()
+                                .map(appRelationDO -> {
+                                    UserAppVO userAppVO = new UserAppVO();
+                                    ApplicationDTO appDTO = appMap.get(appRelationDO.getApplicationId());
+                                    if (null != appDTO) {
+                                        userAppVO.setAppId(appDTO.getId());
+                                        userAppVO.setAppName(appDTO.getAppName());
+                                        userAppVO.setIconName(appDTO.getIconName());
+                                        userAppVO.setIconColor(appDTO.getIconColor());
+                                    }
+                                    return userAppVO;
+                                })
+                                .collect(Collectors.toList())
+                        );
+                    }
+
+                    return userApplicationRespVO;
+                })
+                .collect(Collectors.toList()), pageResult.getTotal());
+    }
+
+
 
 }
