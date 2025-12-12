@@ -4,6 +4,6 @@ public interface EtlDataManager {
 
     void offlineAllByApplication(Long applicationId);
 
-    void removeAllByApplication(Long applicationId);
+    void deleteAllApplicationData(Long applicationId);
 
 }

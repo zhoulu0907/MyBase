@@ -244,7 +244,7 @@ public class AppApplicationServiceImpl implements AppApplicationService {
         flowDataManager.offlineRuntimeData(id);
         transactionTemplate.executeWithoutResult(transactionStatus -> {
             // TODO: 删除应用下的全部资源
-            etlDataManager.removeAllByApplication(id);
+            etlDataManager.deleteAllApplicationData(id);
             flowDataManager.deleteAllApplicationData(id);
             appDataManager.deleteAllApplicationData(id);
             versionRepository.deleteByApplicationId(id);

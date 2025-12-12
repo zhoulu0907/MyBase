@@ -59,7 +59,7 @@ public class EtlDataManagerImpl implements EtlDataManager {
     }
 
     @Override
-    public void removeAllByApplication(Long applicationId) {
+    public void deleteAllApplicationData(Long applicationId) {
         List<EtlScheduleJobDO> scheduleJobDOList = scheduleJobRepository.findAllOnlineJobByApplication(applicationId);
         if (CollectionUtils.isNotEmpty(scheduleJobDOList)) {
             List<String> workflowUuids = scheduleJobDOList.stream().map(EtlScheduleJobDO::getWorkflowUuid).toList();
