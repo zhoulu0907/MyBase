@@ -46,7 +46,7 @@ export const TopHeader: React.FC<topHeaderProps> = ({
           <div className={styles.linkContent}>
             <span>企业用户登录地址:</span>
             <div className={styles.linkText} onClick={() => navigateToRunTime(href)}>
-              www.onebase.com/enterprise
+              {href}
             </div>
             <IconCopy onClick={() => copyToClipboard(href)} style={{ fontSize: 16 }} />
           </div>
