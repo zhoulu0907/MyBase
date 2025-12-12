@@ -112,7 +112,7 @@ export default function EditorPanel({ mainEntity, subEntities, editMode } : IPro
       >
         {activeLeftTabKey === 'material' && (
           <MaterialContainer
-            editMode={editMode.value}
+            editMode={editMode?.value}
             activeTab={activeTab}
             childCollapsed={childCollapsed}
             setChildCollapsed={() => setChildCollapsed(undefined)}

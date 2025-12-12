@@ -731,11 +731,9 @@ const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({ props, isListEditor =
                   data-cp-id={cp.id}
                   className={styles.componentItem}
                   style={{
-                    width: `calc(${getComponentWidth(pageComponentSchemas[cp.id], cp.type)} - 8px)`,
                     borderColor: curComponentID === cp.id ? 'rgb(var(--primary-6))' : '',
                     borderStyle: curComponentID === cp.id ? 'solid' : 'dashed',
-                    background: curComponentID === cp.id ? 'rgb(var(--primary-1))' : '',
-                    margin: '4px'
+                    background: curComponentID === cp.id ? 'rgb(var(--primary-1))' : ''
                   }}
                   onClick={(e: React.MouseEvent<HTMLDivElement>) => {
                     e.stopPropagation();
