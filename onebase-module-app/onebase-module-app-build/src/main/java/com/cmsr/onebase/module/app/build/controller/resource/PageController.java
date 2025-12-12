@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.app.build.controller.resource;
 
+import com.cmsr.onebase.framework.common.event.AppEntityChangePublisher;
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
@@ -44,7 +45,7 @@ public class PageController {
         updatePageDTO.setPageId(updatePageNameReqVO.getId());
         updatePageDTO.setPageName(updatePageNameReqVO.getPageName());
         Boolean updated = pageService.updatePageName(updatePageDTO);
-
+        AppEntityChangePublisher.publishEvent();
         return CommonResult.success(updated);
     }
 
@@ -80,7 +81,7 @@ public class PageController {
     public CommonResult<Boolean> createPageView(@RequestBody CreatePageViewReqVO createPageViewReqVO) {
         CreatePageViewDTO createPageViewDTO = BeanUtils.toBean(createPageViewReqVO, CreatePageViewDTO.class);
         pageService.createPageView(createPageViewDTO);
-
+        AppEntityChangePublisher.publishEvent();
         return CommonResult.success(true);
     }
 

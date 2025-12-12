@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.app.build.controller.resource;
 
+import com.cmsr.onebase.framework.common.event.AppEntityChangePublisher;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.module.app.build.service.resource.PageSetService;
 import com.cmsr.onebase.module.app.core.dto.appresource.CopyPageSetDTO;
@@ -45,6 +46,7 @@ public class PageSetController {
     @Operation(summary = "创建页面集")
     public CommonResult<String> createPageSet(@RequestBody CreatePageSetDTO createPageSetDTO) {
         String pageSetCode = pageSetService.createPageSet(createPageSetDTO);
+        AppEntityChangePublisher.publishEvent();
         return CommonResult.success(pageSetCode);
     }
 
@@ -52,6 +54,7 @@ public class PageSetController {
     @Operation(summary = "复制页面集")
     public CommonResult<String> copyPageSet(@RequestBody CopyPageSetDTO copyPageSetDTO) {
         String pageSetCode = pageSetService.copyPageSet(copyPageSetDTO);
+        AppEntityChangePublisher.publishEvent();
         return CommonResult.success(pageSetCode);
     }
 
@@ -59,6 +62,7 @@ public class PageSetController {
     @Operation(summary = "删除页面集")
     public CommonResult<Boolean> deletePageSet(@RequestBody DeletePageSetReqVO deletePageSetReqVO) {
         pageSetService.deletePageSetByMenuId(deletePageSetReqVO.getMenuId());
+        AppEntityChangePublisher.publishEvent();
         return CommonResult.success(true);
     }
 
@@ -66,6 +70,7 @@ public class PageSetController {
     @Operation(summary = "保存页面集")
     public CommonResult<Boolean> savePageSet(@RequestBody SavePageSetReqVO savePageSetReqVO) {
         pageSetService.savePageSet(savePageSetReqVO);
+        AppEntityChangePublisher.publishEvent();
         return CommonResult.success(true);
     }
 
