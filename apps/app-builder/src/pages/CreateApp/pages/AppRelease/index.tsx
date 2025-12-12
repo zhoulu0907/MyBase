@@ -1,6 +1,7 @@
-import { Space } from '@arco-design/web-react';
+import { Message, Space } from '@arco-design/web-react';
 import {
   getApplication,
+  offlineApplication,
   pageApplicationVersion,
   type Application,
   type GetApplicationReq,
@@ -59,18 +60,9 @@ const AppReleasePage: React.FC = () => {
     };
 
     const appResp = await getApplication(appReq);
-    console.log('==== appResp ====', appResp);
 
     if (appResp) {
       setAppInfo(appResp);
-      //   setAppStatus(appResp.appStatus);
-      //   if (appResp.versionNumber) {
-      //     setCurrentVersion(appResp.versionNumber);
-      //   }
-
-      //   if (appResp.versionUrl) {
-      //     setVersionURL(appResp.versionUrl);
-      //   }
     }
   };
 
@@ -91,6 +83,17 @@ const AppReleasePage: React.FC = () => {
     setPublishModalVisible(true);
   };
 
+  const handleOfflineToggle = async () => {
+    const res = await offlineApplication({
+      applicationId: appId
+    });
+
+    if (res) {
+      Message.success('应用下架成功');
+      handleGetApplicationInfo();
+    }
+  };
+
   const handlePublishModalOk = async () => {
     setPublishModalVisible(false);
     handleGetApplicationVersion();
@@ -100,7 +103,13 @@ const AppReleasePage: React.FC = () => {
     <div className={styles.appReleasePage}>
       <Space direction="vertical" size={16} style={{ width: '100%' }}>
         {/* 应用状态头部 */}
-        {appInfo && <AppStatusHeader appInfo={appInfo} onReleaseToggle={handleReleaseToggle} />}
+        {appInfo && (
+          <AppStatusHeader
+            appInfo={appInfo}
+            onReleaseToggle={handleReleaseToggle}
+            onOfflineToggle={handleOfflineToggle}
+          />
+        )}
         {/* 应用访问链接 */}
         {/* {<AppAccessLink accessUrl={versionURL} />} */}
 

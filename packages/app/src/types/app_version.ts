@@ -6,7 +6,7 @@ export interface PageApplicationVersionReq {
 
 export enum OperationType {
   PUBLISH = 1, // 发布版本
-  SAVE = 2, // 保存版本
+  SAVE = 2 // 保存版本
 }
 
 export interface CreateApplicationVersionReq {
@@ -16,6 +16,10 @@ export interface CreateApplicationVersionReq {
   versionDescription: string;
   environment: string;
   operationType: number;
+}
+
+export interface OfflineApplicationReq {
+  applicationId: string;
 }
 
 export interface RestoreApplicationVersionReq {

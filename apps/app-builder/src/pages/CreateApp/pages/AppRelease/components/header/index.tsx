@@ -18,9 +18,10 @@ import styles from './index.module.less';
 interface AppStatusHeaderProps {
   appInfo: Application;
   onReleaseToggle: () => void;
+  onOfflineToggle: () => void;
 }
 
-const AppStatusHeader: React.FC<AppStatusHeaderProps> = ({ appInfo, onReleaseToggle }) => {
+const AppStatusHeader: React.FC<AppStatusHeaderProps> = ({ appInfo, onReleaseToggle, onOfflineToggle }) => {
   const tenantId = TokenManager.getTenantInfo()?.tenantId || '';
   const redirectURL = `${getRuntimeURL()}/#/onebase/runtime/?tenantId=${tenantId}&appId=${appInfo.id}`;
   const runtimeURL = `${getRuntimeURL()}/#/login?redirectURL=${redirectURL}`;
@@ -66,6 +67,9 @@ const AppStatusHeader: React.FC<AppStatusHeaderProps> = ({ appInfo, onReleaseTog
           </div>
 
           <div className={styles.right}>
+            <Button type={'default'} status={'default'} onClick={onOfflineToggle}>
+              {'应用下架'}
+            </Button>
             <Button
               type={'primary'}
               status={'default'}
