@@ -36,6 +36,8 @@ debug: false
 
 # OneBase配置项，设置当前项目所有自定义的配置
 onebase:
+  sign:
+    request-timeout: 86400 # 签名请求超时时间（秒）
   captcha:
     enable: false # 本地环境，暂时关闭图片验证码，方便登录等接口的测试；
   platform-tenant:
@@ -75,5 +77,6 @@ justauth:
     timeout: 24h # 超时时长，目前只对 Redis 缓存生效，默认 3 分钟
 
 liteflow:
-  enable: true
+  enable: false
+  version-tag: 0
   js-server-address: http://10.0.104.41:28392

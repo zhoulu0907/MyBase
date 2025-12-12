@@ -45,7 +45,7 @@ public class SemanticQueryPermissionHelper {
     /**
      * 应用数据权限与可查询字段选择到 `QueryWrapper`
      *
-     * - 数据权限：按标签聚合 creator/owner_dept 条件并 OR 合并，整体 AND 到主查询
+     * - 数据权限：按标签聚合 owner_id/owner_dept 条件并 OR 合并，整体 AND 到主查询
      * - 字段权限：根据权限裁剪选择列，减少不必要的列查询
      *
      * @param permissionContext 权限上下文
@@ -71,8 +71,8 @@ public class SemanticQueryPermissionHelper {
         }
         if (dataPermission.isAllAllowed()) { return queryWrapper; }
 
-        Set<Long> creatorIds = new HashSet<>();
-        Set<Long> deptIds = new HashSet<>();
+        Set<String> ownerIds = new HashSet<>();
+        Set<String> deptIds = new HashSet<>();
         boolean allowAllDataTag = false;
 
         List<DataPermissionGroup> groups = dataPermission.getGroups();
@@ -87,7 +87,7 @@ public class SemanticQueryPermissionHelper {
         }
 
         // 遍历数据权限组并按「标签」提取范围集合：
-        // 1) creatorIds：本人提交（OWN_SUBMIT）收集当前用户ID，生成 creator IN (...)
+        // 1) ownerIds：本人提交（OWN_SUBMIT）收集当前用户ID，生成 owner_id IN (...)
         // 2) deptIds：本部门/下级部门（DEPARTMENT_SUBMIT/SUB_DEPARTMENT_SUBMIT）收集部门ID，生成 owner_dept IN (...)
         // 3) ALL_DATA：存在该标签且无其他限定集合时不追加数据权限条件，实现全量放行
         for (DataPermissionGroup group : groups) {
@@ -97,17 +97,17 @@ public class SemanticQueryPermissionHelper {
                 switch (tag) {
                     // 全量数据：记标记位；如无其他限定集合，将不追加数据权限条件
                     case ALL_DATA -> allowAllDataTag = true;
-                    // 本人提交：收集当前登录用户ID，后续生成 creator IN (...)
-                    case OWN_SUBMIT -> { if (loginUserId != null) { creatorIds.add(loginUserId); } }
+                    // 本人提交：收集当前登录用户ID，后续生成 owner_id IN (...)
+                    case OWN_SUBMIT -> { if (loginUserId != null) { ownerIds.add(String.valueOf(loginUserId)); } }
                     // 本部门提交：收集当前用户主部门ID，后续生成 owner_dept IN (...)
-                    case DEPARTMENT_SUBMIT -> { if (userDeptId != null) { deptIds.add(userDeptId); } }
+                    case DEPARTMENT_SUBMIT -> { if (userDeptId != null) { deptIds.add(String.valueOf(userDeptId)); } }
                     // 下级部门提交：查询主部门的所有子部门并合并到 deptIds，包含主部门自身
                     case SUB_DEPARTMENT_SUBMIT -> {
                         if (userDeptId != null) {
                             List<DeptRespDTO> children = deptApi.getChildDeptList(userDeptId).getCheckedData();
                             if (children != null && !children.isEmpty()) {
-                                deptIds.addAll(children.stream().map(DeptRespDTO::getId).collect(Collectors.toSet()));
-                                deptIds.add(userDeptId);
+                                deptIds.addAll(children.stream().map(DeptRespDTO::getId).map(String::valueOf).collect(Collectors.toSet()));
+                                deptIds.add(String.valueOf(userDeptId));
                             }
                         }
                     }
@@ -118,14 +118,14 @@ public class SemanticQueryPermissionHelper {
             }
         }
 
-        // 若存在 ALL_DATA 且未收集到具体限定（既无 creatorIds 又无 deptIds），则不追加数据权限条件
+        // 若存在 ALL_DATA 且未收集到具体限定（既无 ownerIds 又无 deptIds），则不追加数据权限条件
         // 等价于全量放行，避免构造无意义的 WHERE 子句
-        if (allowAllDataTag && creatorIds.isEmpty() && deptIds.isEmpty()) { return queryWrapper; }
+        if (allowAllDataTag && ownerIds.isEmpty() && deptIds.isEmpty()) { return queryWrapper; }
 
         QueryWrapper perms = QueryWrapper.create();
         boolean added = false;
-        if (!creatorIds.isEmpty()) {
-            perms.where(new QueryColumn("creator").in(creatorIds));
+        if (!ownerIds.isEmpty()) {
+            perms.where(new QueryColumn("owner_id").in(ownerIds));
             added = true;
         }
         if (!deptIds.isEmpty()) {

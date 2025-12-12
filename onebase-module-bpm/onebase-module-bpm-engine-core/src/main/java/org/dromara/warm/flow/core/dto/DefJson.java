@@ -174,6 +174,7 @@ public class DefJson {
                 .setVersion(definition.getVersion())
                 .setVersionAlias(definition.getVersionAlias())
                 .setApplicationId(definition.getApplicationId())
+                .setDefinitionUuid(definition.getDefinitionUuid())
                 .setIsPublish(definition.getIsPublish())
                 .setCategory(definition.getCategory())
                 .setFormCustom(definition.getFormCustom())

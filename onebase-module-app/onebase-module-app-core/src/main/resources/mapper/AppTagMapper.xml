@@ -18,7 +18,7 @@
         full outer join app_tag tag on
         aat.tag_id = tag.id
         where
-        tag.id is not null and tag.tenant_id = #{tenant_id}
+        tag.id is not null and tag.tenant_id = #{tenantId}
         and
         (aat.deleted = 0
         or aat.deleted is null)

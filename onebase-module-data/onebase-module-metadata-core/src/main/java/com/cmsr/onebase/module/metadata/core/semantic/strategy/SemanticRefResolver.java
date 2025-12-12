@@ -102,8 +102,6 @@ public class SemanticRefResolver {
         // 构建数据选择上下文（关系元信息 + 主数据缓存），供 DATA_SELECTION/MULTI_DATA_SELECTION 解析
         DataSelectionContext dataSelection = buildDataSelectionContext(entity, value);
 
-        log.info("dataSelectIds: {} \n dataSelection: {}", dataSelectIds, dataSelection);
-
         // 构建文件缓存（按收集的文件ID批量查询，供 FILE/IMAGE 解析）
         Map<Long, FileListRespDTO> files = buildFileCache(fileIds);
 
@@ -466,7 +464,6 @@ public class SemanticRefResolver {
         Map<String, Set<Object>> idsByTable = collectDataSelectIdsByTable(value, metaByFieldUuid);
         Map<String, String> pkFieldByTable = buildPkFieldByTableFromMeta(metaByFieldUuid);
         Map<String, Map<Object, Row>> mainsByTable = buildMainsByTable(idsByTable, pkFieldByTable);
-        log.info("mainsByTable: {} , pkFieldByTable: {}, metaByFieldUuid: {}, idsByTable: {}", mainsByTable , pkFieldByTable, metaByFieldUuid, idsByTable);
         return new DataSelectionContext(metaByFieldUuid, mainsByTable);
     }
 
@@ -572,7 +569,6 @@ public class SemanticRefResolver {
             meta.pkField = pkField;
             meta.selectFieldName = selectFieldName;
             map.put(sourceKeyFieldUuid, meta);
-            log.info("tableName is {}, pkField is {}, selectFieldName is {}", meta.tableName, meta.pkField, meta.selectFieldName);
         }
         return map;
     }

@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.system.vo.corp;
 
 
+import com.cmsr.onebase.framework.desensitize.annotation.MobileDesensitize;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -14,6 +15,7 @@ public class CorpAdminUserRespVO {
     private Long id;
 
     @Schema(description = "企业管理员手机号")
+    @MobileDesensitize
     private String mobile;
 
     @Schema(description = "企业id")

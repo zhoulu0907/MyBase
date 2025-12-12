@@ -1,5 +1,7 @@
 package com.cmsr.onebase.module.system.vo.corp;
 
+import com.cmsr.onebase.framework.desensitize.annotation.EMailDesensitize;
+import com.cmsr.onebase.framework.desensitize.annotation.MobileDesensitize;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -49,9 +51,11 @@ public class CorpRespVO {
     private Integer appCount;
 
     @Schema(description = "联系人邮箱")
+    @EMailDesensitize
     private String adminEmail;
 
     @Schema(description = "联系人电话")
+    @MobileDesensitize
     private String adminMobile;
 
     @Schema(description = "管理员")

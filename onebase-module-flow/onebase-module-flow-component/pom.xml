@@ -22,10 +22,20 @@
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-common</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-spring-boot-starter-redis</artifactId>
+            <version>${revision}</version>
+        </dependency>
         <!-- 模块依赖 -->
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-module-flow-context</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-system-api</artifactId>
             <version>${revision}</version>
         </dependency>
         <dependency>

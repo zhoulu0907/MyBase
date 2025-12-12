@@ -10,9 +10,13 @@ import com.cmsr.onebase.module.metadata.core.service.permission.exception.Permis
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticPermissionContext;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticLoginUserCtx;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticRecordDTO;
+import com.cmsr.onebase.module.metadata.core.semantic.constants.SystemFieldConstants;
+import com.cmsr.onebase.module.metadata.core.semantic.dal.DynamicMetadataRepository;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldSchemaDTO;
 
 import org.springframework.stereotype.Component;
+
+import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
 
@@ -27,6 +31,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.LinkedHashMap;
+import com.mybatisflex.core.row.Row;
 
 /**
  * 数据权限校验器
@@ -43,6 +49,8 @@ public class SemanticDataPermissionChecker implements SemanticRuntimePermissionC
     private AdminUserApi adminUserApi;
     @Resource
     private DeptApi deptApi;
+    @Resource
+    private DynamicMetadataRepository dynamicMetadataRepository;
 
     @Override
     public String getPermissionType() { return TYPE; }
@@ -73,10 +81,16 @@ public class SemanticDataPermissionChecker implements SemanticRuntimePermissionC
         if (dataPermission.isAllAllowed()) { return; }
         List<DataPermissionGroup> groups = dataPermission.getGroups();
         SemanticDataMethodOpEnum operationType = recordDTO.getRecordContext().getOperationType();
-        SemanticLoginUserCtx loginUserContext = recordDTO.getRecordContext().getLoginUserCtx();
-        Map<String,Object> dataRow = recordDTO.getEntityValue().getCurrentEntityRawMap();
+        Map<String,Object> dataRow = recordDTO.getEntityValue() == null ? new LinkedHashMap<>() : recordDTO.getEntityValue().getCurrentEntityRawMap();
+        Object ownerIdRaw = dataRow == null ? null : dataRow.get(SystemFieldConstants.REQUIRE.OWNER_ID);
+        if ((ownerIdRaw == null) && recordDTO.getEntityValue() != null && recordDTO.getEntityValue().getId() != null) {
+            String tableName = recordDTO.getEntitySchema().getTableName();
+            String pkField = getPrimaryKeyFieldName(recordDTO.getEntitySchema().getFields());
+            Object idVal = recordDTO.getEntityValue().getId();
+            Row r = dynamicMetadataRepository.selectMainById(tableName, pkField, idVal, true);
+            dataRow = (r == null) ? new LinkedHashMap<>() : buildDataRowFromRow(r, recordDTO.getEntitySchema().getFields());
+        }
         List<SemanticFieldSchemaDTO> fields = recordDTO.getEntitySchema().getFields();
-        AdminUserRespDTO currentUser = adminUserApi.getUser(loginUserContext.getUserId()).getCheckedData();
         boolean hasPermission = false;
         for (DataPermissionGroup group : groups) {
             boolean canOperate = switch (operationType) {
@@ -86,7 +100,7 @@ public class SemanticDataPermissionChecker implements SemanticRuntimePermissionC
                 default -> false;
             };
             if (!canOperate) { continue; }
-            boolean matchesScope = checkScopeTags(group, dataRow, currentUser, fields)
+            boolean matchesScope = checkScopeTags(group, dataRow, fields)
                     && checkFilters(group, dataRow, fields);
             if (matchesScope) { hasPermission = true; break; }
         }
@@ -103,17 +117,20 @@ public class SemanticDataPermissionChecker implements SemanticRuntimePermissionC
      * 检查范围标签，只要命中任意标签即认为范围匹配
      */
     private boolean checkScopeTags(DataPermissionGroup group, Map<String,Object> dataRow,
-                                   AdminUserRespDTO currentUser, List<SemanticFieldSchemaDTO> fields) {
+                                   List<SemanticFieldSchemaDTO> fields) {
         List<DataPermissionTag> scopeTags = group.getScopTags();
+        
         if (scopeTags != null && scopeTags.contains(DataPermissionTag.ALL_DATA)) { return true; }
         if (scopeTags == null || scopeTags.isEmpty()) { return true; }
+        Long currentUserId = SecurityFrameworkUtils.getLoginUserId();
+        Long currentDeptId = SecurityFrameworkUtils.getLoginUserDeptId();
         for (DataPermissionTag tag: scopeTags) {
             switch (tag) {
                 case ALL_DATA -> { return true; }
-                case OWN_SUBMIT -> { Object creator = dataRow.get("owner"); if (creator != null && String.valueOf(creator).equals(String.valueOf(currentUser.getId()))) { return true; } }
-                case DEPARTMENT_SUBMIT -> { if (checkDepartmentMatch(dataRow, currentUser.getDeptId())) { return true; } }
-                case SUB_DEPARTMENT_SUBMIT -> { if (checkSubDepartmentMatch(dataRow, currentUser.getDeptId())) { return true; } }
-                case CUSTOM_CONDITION -> { return checkScopeLevel(group, dataRow, currentUser, fields); }
+                case OWN_SUBMIT -> { Object ownerId = dataRow.get(SystemFieldConstants.REQUIRE.OWNER_ID); if (ownerId != null && currentUserId != null && Objects.equals(toLong(ownerId), currentUserId)) { return true; } }
+                case DEPARTMENT_SUBMIT -> { if (currentDeptId != null && checkDepartmentMatch(dataRow, currentDeptId)) { return true; } }
+                case SUB_DEPARTMENT_SUBMIT -> { if (currentDeptId != null && checkSubDepartmentMatch(dataRow, currentDeptId)) { return true; } }
+                case CUSTOM_CONDITION -> { return checkScopeLevel(group, dataRow, fields); }
                 default -> {}
             }
         }
@@ -127,7 +144,7 @@ public class SemanticDataPermissionChecker implements SemanticRuntimePermissionC
         String[] deptFieldNames = {"owner_dept"};
         for (String fieldName : deptFieldNames) {
             Object deptId = dataRow.get(fieldName);
-            if (deptId != null && String.valueOf(deptId).equals(String.valueOf(userDeptId))) { return true; }
+            if (deptId != null && Objects.equals(toLong(deptId), userDeptId)) { return true; }
         }
         return false;
     }
@@ -150,41 +167,75 @@ public class SemanticDataPermissionChecker implements SemanticRuntimePermissionC
      * 检查范围级别，需结合 scopeFieldId 的字段值进行判断
      */
     private boolean checkScopeLevel(DataPermissionGroup group, Map<String,Object> dataRow,
-                                    AdminUserRespDTO currentUser, List<SemanticFieldSchemaDTO> fields) {
+                                    List<SemanticFieldSchemaDTO> fields) {
         DataPermissionLevel scopeLevel = group.getScopeLevel();
         String scopeFieldUuid = group.getScopeFieldUuid();
         String scopeValue = group.getScopeValue();
+        Long currentUserId = SecurityFrameworkUtils.getLoginUserId();
+        Long currentDeptId = SecurityFrameworkUtils.getLoginUserDeptId();
         String fieldName = null;
         if (fields != null && scopeFieldUuid != null) {
             for (SemanticFieldSchemaDTO f : fields) { if (scopeFieldUuid.equals(f.getFieldUuid())) { fieldName = f.getFieldName(); break; } }
         }
         Object fieldValue = dataRow.get(fieldName);
         return switch (scopeLevel) {
-            case SELF -> fieldValue != null && String.valueOf(fieldValue).equals(String.valueOf(currentUser.getId()));
+            case SELF -> fieldValue != null && currentUserId != null && Objects.equals(toLong(fieldValue), currentUserId);
             case SELF_AND_SUBORDINATES -> {
-                List<AdminUserRespDTO> subs = adminUserApi.getUserListBySubordinate(currentUser.getId()).getCheckedData();
+                if (currentUserId == null) { yield false; }
+                List<AdminUserRespDTO> subs = adminUserApi.getUserListBySubordinate(currentUserId).getCheckedData();
                 Set<Long> ids = subs.stream().map(AdminUserRespDTO::getId).collect(Collectors.toSet());
-                ids.add(currentUser.getId());
+                ids.add(currentUserId);
                 yield fieldValue != null && ids.contains(toLong(fieldValue));
             }
             case MAIN_DEPARTMENT -> {
-                AdminUserRespDTO target = getAdminUser(currentUser, fieldValue);
-                yield target != null && target.getDeptId() != null && target.getDeptId().equals(currentUser.getDeptId());
+                AdminUserRespDTO target = getAdminUser(currentUserId, fieldValue);
+                yield target != null && target.getDeptId() != null && currentDeptId != null && target.getDeptId().equals(currentDeptId);
             }
             case MAIN_DEPARTMENT_AND_SUBS -> {
-                AdminUserRespDTO user = getAdminUser(currentUser, fieldValue);
-                List<DeptRespDTO> childDepts = deptApi.getChildDeptList(currentUser.getDeptId()).getCheckedData();
+                AdminUserRespDTO user = getAdminUser(currentUserId, fieldValue);
+                if (currentDeptId == null) { yield false; }
+                List<DeptRespDTO> childDepts = deptApi.getChildDeptList(currentDeptId).getCheckedData();
                 Set<Long> deptIds = childDepts.stream().map(DeptRespDTO::getId).collect(Collectors.toSet());
-                deptIds.add(currentUser.getDeptId());
+                deptIds.add(currentDeptId);
                 yield user != null && user.getDeptId() != null && deptIds.contains(user.getDeptId());
             }
             case SPECIFIED_DEPARTMENT -> {
-                AdminUserRespDTO user2 = getAdminUser(currentUser, fieldValue);
+                AdminUserRespDTO user2 = getAdminUser(currentUserId, fieldValue);
                 yield user2 != null && user2.getDeptId() != null && checkSpecifiedScopeValue(scopeValue, user2.getDeptId());
             }
             case SPECIFIED_PERSON -> checkSpecifiedScopeValue(scopeValue, fieldValue);
             default -> false;
         };
+    }
+
+    private String getPrimaryKeyFieldName(List<SemanticFieldSchemaDTO> fields) {
+        if (fields == null || fields.isEmpty()) { return "id"; }
+        String idNamed = fields.stream()
+                .filter(f -> Boolean.TRUE.equals(f.getIsPrimaryKey()))
+                .map(SemanticFieldSchemaDTO::getFieldName)
+                .filter(Objects::nonNull)
+                .filter(name -> "id".equalsIgnoreCase(name))
+                .findFirst().orElse(null);
+        if (idNamed != null) { return idNamed; }
+        String firstPk = fields.stream()
+                .filter(f -> Boolean.TRUE.equals(f.getIsPrimaryKey()))
+                .map(SemanticFieldSchemaDTO::getFieldName)
+                .filter(Objects::nonNull)
+                .findFirst().orElse(null);
+        if (firstPk != null) { return firstPk; }
+        boolean hasId = fields.stream().map(SemanticFieldSchemaDTO::getFieldName)
+                .anyMatch(name -> name != null && "id".equalsIgnoreCase(name));
+        return hasId ? "id" : "id";
+    }
+
+    private Map<String, Object> buildDataRowFromRow(Row row, List<SemanticFieldSchemaDTO> fields) {
+        Map<String, Object> map = new LinkedHashMap<>();
+        if (row == null || fields == null) { return map; }
+        for (SemanticFieldSchemaDTO f : fields) {
+            String name = f.getFieldName();
+            if (name != null) { map.put(name, row.get(name)); }
+        }
+        return map;
     }
 
     /**
@@ -198,9 +249,11 @@ public class SemanticDataPermissionChecker implements SemanticRuntimePermissionC
     /**
      * 获取字段值对应的用户信息，字段值为空或等于当前用户时复用当前用户
      */
-    private AdminUserRespDTO getAdminUser(AdminUserRespDTO currentUser, Object fieldValue) {
+    private AdminUserRespDTO getAdminUser(Long currentUserId, Object fieldValue) {
         Long userId = fieldValue == null ? null : toLong(fieldValue);
-        if (userId == null || Objects.equals(userId, currentUser.getId())) { return currentUser; }
+        if (userId == null || (currentUserId != null && Objects.equals(userId, currentUserId))) {
+            return currentUserId == null ? null : adminUserApi.getUser(currentUserId).getCheckedData();
+        }
         return adminUserApi.getUser(userId).getCheckedData();
     }
 

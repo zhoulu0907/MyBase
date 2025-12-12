@@ -22,7 +22,6 @@ import com.cmsr.onebase.module.engine.orm.mybatisflex.entity.FlowHisTask;
 import com.cmsr.onebase.module.metadata.api.semantic.SemanticDynamicDataApi;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntityValueDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticTargetBodyVO;
-import com.cmsr.onebase.module.metadata.core.service.datamethod.MetadataDataMethodCoreService;
 import jakarta.annotation.Resource;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -78,9 +77,6 @@ public class BpmDetailServiceImpl implements BpmDetailService {
 
     @Resource
     private BpmFlowAgentInsRepository agentInsRepository;
-
-    @Resource
-    private MetadataDataMethodCoreService metadataDataMethodCoreService;
 
     @Resource
     private InstanceDetailStrategyManager instanceDetailStrategyManager;
@@ -216,8 +212,9 @@ public class BpmDetailServiceImpl implements BpmDetailService {
                 loadTodoTask(reqVO, context);
                 break;
             case CREATED:
-                // 我的创建来源：无需加载任务，权限已在 buildContext 中校验
-                // CREATED 来源只查看流程实例信息，不涉及任务
+                // 我的创建来源权限已在 buildContext 中校验
+                // CREATED 尝试查找待办任务，没有则只查看流程实例信息
+                loadTodoTaskFromInstance(context);
                 break;
             case CC:
                 // 抄送来源：先尝试查找待办任务，如果没有则加载抄送任务（已办任务）

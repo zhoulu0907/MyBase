@@ -5,15 +5,14 @@ import com.cmsr.onebase.module.flow.context.graph.InLoopDepth;
 import com.cmsr.onebase.module.flow.context.graph.JsonGraph;
 import com.cmsr.onebase.module.flow.context.graph.JsonGraphNode;
 import com.cmsr.onebase.module.flow.context.graph.nodes.ScriptNodeData;
-import com.cmsr.onebase.module.flow.context.provider.FieldTypeProvider;
-import com.cmsr.onebase.module.flow.core.config.FlowProperties;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowConnectorScriptRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowConnectorScriptDO;
+import com.cmsr.onebase.module.flow.core.external.FlowFieldTypeProvider;
+import com.mybatisflex.core.tenant.TenantManager;
 import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -26,22 +25,18 @@ public class FlowGraphBuilder {
 
     @Setter
     @Autowired
-    private ObjectProvider<FieldTypeProvider> objectProvider;
+    private FlowFieldTypeProvider flowFieldTypeProvider;
 
     @Setter
     @Autowired
     private FlowConnectorScriptRepository connectorScriptRepository;
 
-    @Setter
-    @Autowired
-    private FlowProperties flowProperties;
 
     public JsonGraph build(Long applicationId, String json) {
         JsonGraph jsonGraph = JsonUtils.parseObject(json, JsonGraph.class);
         addLoopContextToNodes(jsonGraph);
         enrichNodeData(applicationId, jsonGraph);
-        FieldTypeProvider fieldTypeProvider = objectProvider.getObject();
-        fieldTypeProvider.completeFieldType(applicationId, jsonGraph);
+        flowFieldTypeProvider.completeFieldType(applicationId, jsonGraph);
         return jsonGraph;
     }
 
@@ -84,7 +79,7 @@ public class FlowGraphBuilder {
 
     private void traverseNodeAndEnrichData(Long applicationId, JsonGraphNode node) {
         if (node.getData() instanceof ScriptNodeData scriptNodeData) {
-            FlowConnectorScriptDO connectorScriptDO = connectorScriptRepository.findByApplicationAndUuid(applicationId, scriptNodeData.getActionUuid());
+            FlowConnectorScriptDO connectorScriptDO = TenantManager.withoutTenantCondition(() -> connectorScriptRepository.findByApplicationAndUuid(applicationId, scriptNodeData.getActionUuid()));
             scriptNodeData.setScript(connectorScriptDO.getRawScript());
             scriptNodeData.setInputSchema(connectorScriptDO.getInputSchema());
             scriptNodeData.setOutputSchema(connectorScriptDO.getOutputSchema());

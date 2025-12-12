@@ -18,7 +18,7 @@ public class SecurityConfigGetReqVO {
     @Schema(description = "空间ID", example = "1")
     private Long tenantId;
 
-    @Schema(description = "AppID", example = "1")
+    @Schema(description = "AppID(通过App获取tenantId)", example = "1")
     private Long appId;
 
     @Schema(description = "场景编码List")

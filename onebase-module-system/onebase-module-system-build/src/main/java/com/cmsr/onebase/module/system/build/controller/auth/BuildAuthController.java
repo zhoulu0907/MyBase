@@ -19,6 +19,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.annotation.security.PermitAll;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
@@ -55,35 +56,16 @@ public class BuildAuthController {
     @Resource
     private SecurityProperties securityProperties;
 
-    // @PostMapping("/admin-login")
-    // @PermitAll
-    // @Operation(summary = "使用账号密码登录")
-    // @Deprecated //todo 之后删除
-    // public CommonResult<AuthLoginRespVO> adminLogin(@RequestBody @Valid UserLoginReqVO reqVO) {
-    //     return success(authService.adminLogin(reqVO));
-    // }
-    //
-    // @PostMapping("/login")
-    // @PermitAll
-    // @Operation(summary = "使用账号密码登录")
-    // @Deprecated // todo 之后删除
-    // public CommonResult<AuthLoginRespVO> login(@RequestBody @Valid AuthLoginReqVO reqVO) {
-    //     return success(authService.login(reqVO));
-    // }
-
     @PostMapping("/tenant-login")
     @PermitAll
     @Operation(summary = "空间登录（账密）")
-    public CommonResult<AuthLoginRespVO> tenantLogin(@RequestBody @Valid AuthLoginReqVO reqVO) {
-        return success(authService.login(reqVO));
+    public CommonResult<AuthLoginRespVO> tenantLogin(@RequestBody @Valid AuthLoginReqVO reqVO, HttpServletResponse response) {
+        AuthLoginRespVO respVO= authService.login(reqVO);
+        // 设置Cookie
+        response.addHeader("Set-Cookie", String.format("%s=%s; HttpOnly",
+                securityProperties.getTokenHeader(), respVO.getAccessToken()));
+        return success(respVO);
     }
-
-    // @PostMapping("/corp-login")
-    // @PermitAll
-    // @Operation(summary = "企业登录（手机号）")
-    // public CommonResult<AuthLoginRespVO> corpLogin(@RequestBody @Valid CorpAuthLoginReqVO reqVO) {
-    //     return success(authService.corpLogin(reqVO));
-    // }
 
     @PostMapping("/logout")
     @PermitAll

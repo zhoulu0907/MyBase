@@ -20,6 +20,7 @@ public interface PlatformAuthService {
      * @return 用户
      */
     AdminUserDO authenticate(String username, String password);
+
     /**
      * 账号登录
      *

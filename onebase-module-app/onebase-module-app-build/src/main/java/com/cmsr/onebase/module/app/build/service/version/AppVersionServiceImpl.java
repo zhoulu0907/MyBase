@@ -2,26 +2,30 @@ package com.cmsr.onebase.module.app.build.service.version;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.app.build.service.AppCommonService;
-import com.cmsr.onebase.module.app.build.vo.version.VersionCreateReqVO;
+import com.cmsr.onebase.module.app.build.vo.version.VersionOnlineReq;
 import com.cmsr.onebase.module.app.build.vo.version.VersionPageReqVo;
 import com.cmsr.onebase.module.app.build.vo.version.VersionPageRespVO;
+import com.cmsr.onebase.module.app.core.dal.database.app.AppApplicationRepository;
 import com.cmsr.onebase.module.app.core.dal.database.version.AppVersionRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppApplicationDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppVersionDO;
 import com.cmsr.onebase.module.app.core.enums.AppErrorCodeConstants;
+import com.cmsr.onebase.module.app.core.enums.app.ApplicationStatusEnum;
+import com.cmsr.onebase.module.app.core.enums.version.VersionTypeEnum;
 import com.cmsr.onebase.module.bpm.api.datamanager.BpmDataManager;
 import com.cmsr.onebase.module.flow.api.FlowDataManager;
+import com.cmsr.onebase.module.metadata.api.version.MetadataDataManagerApi;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.validation.annotation.Validated;
 
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.util.List;
 
 /**
  * @Author：huangjie
@@ -31,6 +35,9 @@ import java.util.stream.Collectors;
 @Service
 @Validated
 public class AppVersionServiceImpl implements AppVersionService {
+
+    @Autowired
+    private AppApplicationRepository applicationRepository;
 
     @Autowired
     private AppVersionRepository versionRepository;
@@ -47,6 +54,12 @@ public class AppVersionServiceImpl implements AppVersionService {
     @Autowired
     private FlowDataManager flowDataManager;
 
+    @Autowired
+    private MetadataDataManagerApi metadataVersionManager;
+
+    @Autowired
+    private TransactionTemplate transactionTemplate;
+
     @Override
     public PageResult<VersionPageRespVO> getApplicationVersionPage(VersionPageReqVo listReqVo) {
         PageResult<AppVersionDO> pageResult = versionRepository.selectPage(listReqVo.getApplicationId(), listReqVo);
@@ -55,108 +68,108 @@ public class AppVersionServiceImpl implements AppVersionService {
                 .map(v -> {
                     VersionPageRespVO bean = BeanUtils.toBean(v, VersionPageRespVO.class);
                     bean.setUpdaterName(userHelper.getUserNickname(v.getUpdater()));
+                    bean.setVersionTypeLabel(VersionTypeEnum.getLabel(v.getVersionType()));
                     return bean;
                 })
                 .toList();
         return new PageResult<>(respVOS, pageResult.getTotal());
     }
 
-    @Transactional
     @Override
-    public void createApplicationVersion(VersionCreateReqVO createReqVO) {
+    public void onlineApplication(VersionOnlineReq createReqVO) {
         AppApplicationDO applicationDO = appCommonService.validateApplicationExist(createReqVO.getApplicationId());
-        // 先备份老的相关数据
-        // 创建新版本
-        final Long applicationId = applicationDO.getId();
-        final Long runtimeVersionId = applicationId;
-        final AppVersionDO versionDO = new AppVersionDO();
-        versionDO.setId(runtimeVersionId);
-        versionDO.setApplicationId(applicationId);
-        versionDO.setVersionName(createReqVO.getVersionName());
-        versionDO.setVersionNumber(createReqVO.getVersionNumber());
-        versionDO.setVersionDescription(createReqVO.getVersionDescription());
-        versionDO.setVersionURL(UUID.randomUUID().toString().replace("-", ""));
-        versionDO.setOperationType(createReqVO.getOperationType());
-        versionDO.setEnvironment(createReqVO.getEnvironment());
-
-        this.saveVersion(applicationId, versionDO);
-        // 因为第一次不存在versionTag=1，所以可以直接向下执行，不需要多做判断
-        // 1. move runtime to history
-        appDataManager.moveRuntimeToHistory(applicationId, runtimeVersionId);
-        bpmDataManager.moveRuntimeToHistory(applicationId, runtimeVersionId);
-        flowDataManager.moveRuntimeToHistory(applicationId, runtimeVersionId);
-        // 2. copy edit to runtime
-        appDataManager.copyEditToRuntime(applicationId);
-        bpmDataManager.copyEditToRuntime(applicationId);
-        flowDataManager.copyEditToRuntime(applicationId);
-
-        // 3. online services that required
+        Long applicationId = applicationDO.getId();
+        // 删除当前运行版本数据
+        flowDataManager.offlineRuntimeData(applicationId);
+        //
+        transactionTemplate.executeWithoutResult(transactionStatus -> {
+            // 找打当前Runtime版本信息，肯定能找到，因为发布的时候会同步创建一个，把当前版本信息变成历史状态
+            AppVersionDO currentRunVersion = versionRepository.findByApplicationIdAndVersionType(applicationId, VersionTypeEnum.RUNTIME.getValue());
+            if (currentRunVersion != null) {
+                currentRunVersion.setVersionType(VersionTypeEnum.HISTORY.getValue());
+                versionRepository.updateById(currentRunVersion);
+                Long historyVersionTag = currentRunVersion.getId();
+                // 备份当前版本为历史版本
+                metadataVersionManager.moveMetaDataRuntimeToHistory(applicationId, historyVersionTag);
+                appDataManager.moveRuntimeToHistory(applicationId, historyVersionTag);
+                bpmDataManager.moveRuntimeToHistory(applicationId, historyVersionTag);
+                flowDataManager.moveRuntimeToHistory(applicationId, historyVersionTag);
+            }
+            // 发布上线版本
+            metadataVersionManager.copyMetaDataEditToRuntime(applicationId);
+            appDataManager.copyEditToRuntime(applicationId);
+            bpmDataManager.copyEditToRuntime(applicationId);
+            flowDataManager.copyEditToRuntime(applicationId);
+            // 创建新的版本信息
+            AppVersionDO newRunVersionDO = createNewVersion(createReqVO, applicationId);
+            applicationRepository.updateAppStatusByApplicationId(applicationId, ApplicationStatusEnum.PUBLISHED);
+            versionRepository.save(newRunVersionDO);
+        });
+        // online services that required
         flowDataManager.onlineRuntimeData(applicationId);
+    }
+
+    @Override
+    public void offlineApplication() {
+        Long applicationId = ApplicationManager.getRequiredApplicationId();
+        transactionTemplate.executeWithoutResult(transactionStatus -> {
+            AppVersionDO currentRunVersion = versionRepository.findByApplicationIdAndVersionType(applicationId, VersionTypeEnum.RUNTIME.getValue());
+            if (currentRunVersion != null) {
+                currentRunVersion.setVersionType(VersionTypeEnum.HISTORY.getValue());
+                versionRepository.updateById(currentRunVersion);
+                Long historyVersionTag = currentRunVersion.getId();
+                // 备份当前版本为历史版本
+                metadataVersionManager.moveMetaDataRuntimeToHistory(applicationId, historyVersionTag);
+                appDataManager.moveRuntimeToHistory(applicationId, historyVersionTag);
+                bpmDataManager.moveRuntimeToHistory(applicationId, historyVersionTag);
+                flowDataManager.moveRuntimeToHistory(applicationId, historyVersionTag);
+            }
+            applicationRepository.updateAppStatusByApplicationId(applicationId, ApplicationStatusEnum.EDITING);
+        });
+        flowDataManager.onlineRuntimeData(applicationId);
+    }
+
+    private AppVersionDO createNewVersion(VersionOnlineReq createReqVO, Long applicationId) {
+        AppVersionDO newRunVersionDO = new AppVersionDO();
+        newRunVersionDO.setApplicationId(applicationId);
+        newRunVersionDO.setVersionName(createReqVO.getVersionName());
+        newRunVersionDO.setVersionNumber(createReqVO.getVersionNumber());
+        newRunVersionDO.setVersionDescription(createReqVO.getVersionDescription());
+        newRunVersionDO.setOperationType(createReqVO.getOperationType());
+        newRunVersionDO.setEnvironment(createReqVO.getEnvironment());
+        newRunVersionDO.setVersionType(VersionTypeEnum.RUNTIME.getValue());
+        return newRunVersionDO;
     }
 
     @Transactional
     @Override
     public void restoreApplicationVersion(Long versionId) {
-        AppVersionDO targetVersionDO = versionRepository.getById(versionId);
-        if (targetVersionDO == null) {
-            throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_VERSION_NOT_EXIST);
-        }
-        final Long applicationId = targetVersionDO.getApplicationId();
-        final Long runtimeVersionId = applicationId;
-        if (versionId == runtimeVersionId) {
-            throw new IllegalArgumentException("当前已是最新版本");
-        }
-        saveVersion(applicationId, targetVersionDO);
-        // 1. backup runtime
-        appDataManager.moveRuntimeToHistory(applicationId, runtimeVersionId);
-//        bpmDataManager.moveRuntimeToHistory(applicationId, runtimeVersionId);
-        // 2. publish history
-        appDataManager.copyHistoryToRuntime(applicationId, versionId);
-    }
-
-    private void saveVersion(Long applicationId, AppVersionDO newVersion) {
-        // 0. 查询是否存在老版本
-        final AppVersionDO currentVersion = versionRepository.findCurrentVersion(applicationId);
-        // 1.
-        if (currentVersion == null) {
-            // 1.1. 不存在老版本
-            // 直接保存版本数据
-            versionRepository.save(newVersion);
-        } else {
-            // 1.2. 存在老版本
-            // 1.2.1. 将老版本另存为
-            currentVersion.setId(null);
-            versionRepository.save(currentVersion);
-            // 1.2.2. 将新版本保存
-            versionRepository.updateById(newVersion);
-        }
+        // 获取历史版本对象
     }
 
     @Override
     public void deleteApplicationVersion(Long versionId) {
-        versionRepository.removeById(versionId);
-    }
-
-    @Override
-    public Map<Long, AppVersionDO> findVersionMapByAppIds(List<Long> appIds) {
-        List<AppVersionDO> allVersions = versionRepository.findVersionList(appIds);
-        Map<Long, AppVersionDO> latestVersionMap = allVersions.stream()
-                .sorted(Comparator.comparing(AppVersionDO::getUpdateTime).reversed())
-                .collect(Collectors.toMap(
-                        AppVersionDO::getApplicationId,
-                        Function.identity(),
-                        (existing, replacement) -> existing,
-                        LinkedHashMap::new
-                ));
-        return latestVersionMap;
-    }
-
-    private AppVersionDO validateApplicationVersionExist(Long id) {
-        AppVersionDO versionDO = versionRepository.getById(id);
+        AppVersionDO versionDO = versionRepository.getById(versionId);
         if (versionDO == null) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_VERSION_NOT_EXIST);
         }
-        return versionDO;
+        if (versionDO.getVersionType() == VersionTypeEnum.BUILD.getValue()) {
+            throw new IllegalArgumentException("不允许删除当前运行的版本");
+        }
+        if (versionDO.getVersionType() == VersionTypeEnum.RUNTIME.getValue()) {
+            throw new IllegalArgumentException("不允许删除当前运行的版本");
+        }
+        Long applicationId = versionDO.getApplicationId();
+        transactionTemplate.executeWithoutResult(transactionStatus -> {
+            // 删除对应的信息
+            metadataVersionManager.deleteApplicationVersionData(applicationId, versionId);
+            bpmDataManager.removeApplicationVersion(applicationId, versionId);
+            appDataManager.deleteApplicationVersionData(applicationId, versionId);
+            flowDataManager.deleteApplicationVersionData(applicationId, versionId);
+            // 删除版本
+            versionRepository.removeById(versionId);
+        });
     }
+
 
 }

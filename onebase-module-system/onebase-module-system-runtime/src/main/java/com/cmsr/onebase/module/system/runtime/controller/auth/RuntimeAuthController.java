@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.annotation.security.PermitAll;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
@@ -49,16 +50,24 @@ public class RuntimeAuthController {
     @PostMapping("/app-login")
     @PermitAll
     @Operation(summary = "内部用户登录（Inner模式，账密登录）")
-    public CommonResult<AuthLoginRespVO> appUsernameLogin(@RequestBody @Valid AppUserNameLoginReqVO reqVO) {
-        return success(runtimeAuthService.appUsernameLogin(reqVO));
+    public CommonResult<AuthLoginRespVO> appUsernameLogin(@RequestBody @Valid AppUserNameLoginReqVO reqVO, HttpServletResponse response) {
+        AuthLoginRespVO loginRespVO = runtimeAuthService.appUsernameLogin(reqVO);
+        // 设置Cookie
+        response.addHeader("Set-Cookie", String.format("%s=%s; HttpOnly",
+                securityProperties.getTokenHeader(), loginRespVO.getAccessToken()));
+        return success(loginRespVO);
     }
 
 
     @PostMapping("/app-login-mobile")
     @PermitAll
     @Operation(summary = "外部用户登录（SaaS模式，手机号登录）")
-    public CommonResult<AuthLoginRespVO> appMobileLogin(@RequestBody @Valid AppMobileLoginReqVO reqVO) {
-        return success(runtimeAuthService.appMobileLogin(reqVO));
+    public CommonResult<AuthLoginRespVO> appMobileLogin(@RequestBody @Valid AppMobileLoginReqVO reqVO, HttpServletResponse response) {
+        AuthLoginRespVO loginRespVO = runtimeAuthService.appMobileLogin(reqVO);
+        // 设置Cookie
+        response.addHeader("Set-Cookie", String.format("%s=%s; HttpOnly",
+                securityProperties.getTokenHeader(), loginRespVO.getAccessToken()));
+        return success(loginRespVO);
     }
 
 
@@ -66,8 +75,12 @@ public class RuntimeAuthController {
     @PostMapping("/corp-login")
     @PermitAll
     @Operation(summary = "企业登录（手机号）")
-    public CommonResult<AuthLoginRespVO> corpLogin(@RequestBody @Valid CorpAuthLoginReqVO reqVO) {
-        return success(runtimeAuthService.corpLogin(reqVO));
+    public CommonResult<AuthLoginRespVO> corpLogin(@RequestBody @Valid CorpAuthLoginReqVO reqVO, HttpServletResponse response) {
+        AuthLoginRespVO loginRespVO = runtimeAuthService.corpLogin(reqVO);
+        // 设置Cookie
+        response.addHeader("Set-Cookie", String.format("%s=%s; HttpOnly",
+                securityProperties.getTokenHeader(), loginRespVO.getAccessToken()));
+        return success(loginRespVO);
     }
 
 

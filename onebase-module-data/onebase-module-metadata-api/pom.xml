@@ -24,13 +24,6 @@
             <artifactId>onebase-common</artifactId>
         </dependency>
 
-        <!-- 依赖Core模块，使用核心Service -->
-        <dependency>
-            <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-module-metadata-core</artifactId>
-            <version>${revision}</version>
-        </dependency>
-
                 <!-- 依赖Core模块，使用核心Service -->
         <dependency>
             <groupId>com.cmsr.onebase</groupId>

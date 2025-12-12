@@ -17,7 +17,11 @@ public enum ApplicationStatusEnum {
      * 已发布
      */
     PUBLISHED(1, "已发布"),
-    ;
+
+    /**
+     * 迭代中
+     */
+    ITERATING(2, "迭代中");
 
     private final Integer value;
 

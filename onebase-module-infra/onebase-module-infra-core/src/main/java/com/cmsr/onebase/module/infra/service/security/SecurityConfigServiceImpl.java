@@ -1,5 +1,8 @@
 package com.cmsr.onebase.module.infra.service.security;
 
+import cn.hutool.core.util.StrUtil;
+import com.cmsr.onebase.framework.common.enums.SecurityCategoryCodeEnum;
+import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.infra.convert.security.SecurityConfigCategoryConvert;
 import com.cmsr.onebase.module.infra.dal.database.SecurityConfigCategoryDataRepository;
@@ -11,6 +14,7 @@ import com.cmsr.onebase.module.infra.dal.dataobject.security.SecurityConfigTempl
 import com.cmsr.onebase.module.infra.dal.vo.app.AppTenantVO;
 import com.cmsr.onebase.module.infra.dal.vo.security.*;
 import com.cmsr.onebase.module.infra.enums.ErrorCodeConstants;
+import com.cmsr.onebase.module.infra.enums.security.SecurityConfigKey;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -20,10 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
@@ -121,6 +122,10 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
     private void updateSingleConfig(Long tenantId, SecurityConfigUpdateReqVO updateReqVO) {
         SecurityConfigDO config = securityConfigDataRepository.findByTenantIdAndKey(tenantId, updateReqVO.getConfigKey());
 
+        if (SecurityConfigKey.desensitizedField.getConfigKey().equals(updateReqVO.getConfigKey()) && StrUtil.isBlank(updateReqVO.getConfigValue())){
+            updateReqVO.setConfigValue(" ");
+        }
+
         if (config == null) {
             // 如果不存在，创建新配置
             config = SecurityConfigDO.builder()
@@ -155,6 +160,9 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
         List<SecurityConfigItemRespVO> configItems = new ArrayList<>();
         for (SecurityConfigTemplateDO template : templates) {
             SecurityConfigItemRespVO itemVO = SecurityConfigCategoryConvert.INSTANCE.convert(template);
+            if (SecurityConfigKey.desensitizedField.getConfigKey().equals(itemVO.getConfigKey())){
+                itemVO.setConfigValue(itemVO.getConfigValue().trim());
+            }
             configItems.add(itemVO);
         }
 
@@ -388,5 +396,30 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
             return app.getTenantId();
         }
         throw exception(ErrorCodeConstants.APP_DELETE_OR_DISABLE, appId);
+    }
+
+    @Override
+    public Set<String> getTenantDesensitizedFieldValues() {
+        Long tenantId = TenantContextHolder.getTenantId();
+        ArrayList<String> categoryCodeList = new ArrayList<>();
+        categoryCodeList.add(SecurityCategoryCodeEnum.DESENSITIZATION_SECURITY.getValue());
+        //查询租户下安全配置项为脱敏配置的参数
+        List<SecurityConfigCategoryGroupRespVO> tenantConfigItems = this.getTenantConfigItemsByCategoryCodes(new SecurityConfigGetReqVO().setTenantId(tenantId).setCategoryCode(categoryCodeList));
+        Set<String> configValues = new HashSet<>();
+        for (SecurityConfigCategoryGroupRespVO tenantConfigItem : tenantConfigItems) {
+            if (SecurityCategoryCodeEnum.DESENSITIZATION_SECURITY.getValue().equals(tenantConfigItem.getCategoryCode())){
+                //获取脱敏配置项中配置的需要脱敏的字段
+                List<SecurityConfigItemRespVO> securityConfigItemRespDTO = tenantConfigItem.getSecurityConfigItemRespVO();
+                securityConfigItemRespDTO.stream()
+                        .filter(configItemRespDTO -> SecurityConfigKey.desensitizedField.getConfigKey().equals(configItemRespDTO.getConfigKey()))
+                        .map(SecurityConfigItemRespVO::getConfigValue)
+                        .filter(Objects::nonNull)
+                        .forEach(configValue -> {
+                            String[] split = configValue.split(",");
+                            Arrays.stream(split).map(String::trim).forEach(configValues::add);
+                        });
+            }
+        }
+        return configValues;
     }
 }

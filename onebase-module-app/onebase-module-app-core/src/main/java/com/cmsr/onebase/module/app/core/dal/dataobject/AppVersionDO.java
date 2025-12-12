@@ -30,4 +30,8 @@ public class AppVersionDO extends BaseAppEntity {
 
     @Column(value = "version_url", comment = "版本URL")
     private String versionURL;
+
+    @Column(value = "version_type", comment = "版本类型")
+    private Integer versionType;
+
 }

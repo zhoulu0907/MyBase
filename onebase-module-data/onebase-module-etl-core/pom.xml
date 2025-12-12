@@ -38,6 +38,11 @@
             <artifactId>onebase-module-etl-common</artifactId>
             <version>${revision}</version>
         </dependency>
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-etl-api</artifactId>
+            <version>${revision}</version>
+        </dependency>
 
         <dependency>
             <groupId>com.cmsr.onebase</groupId>

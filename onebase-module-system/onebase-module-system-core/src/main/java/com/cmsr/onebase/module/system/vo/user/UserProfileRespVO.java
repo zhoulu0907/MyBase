@@ -1,5 +1,7 @@
 package com.cmsr.onebase.module.system.vo.user;
 
+import com.cmsr.onebase.framework.desensitize.annotation.EMailDesensitize;
+import com.cmsr.onebase.framework.desensitize.annotation.MobileDesensitize;
 import com.cmsr.onebase.module.system.vo.dept.DeptSimpleRespVO;
 import com.cmsr.onebase.module.system.vo.post.PostSimpleRespVO;
 import com.cmsr.onebase.module.system.vo.role.RoleSimpleRespVO;
@@ -23,9 +25,11 @@ public class UserProfileRespVO {
     private String nickname;
 
     @Schema(description = "用户邮箱", example = "onebase@aaa.com")
+    @EMailDesensitize
     private String email;
 
     @Schema(description = "手机号码", example = "15601691300")
+    @MobileDesensitize
     private String mobile;
 
     @Schema(description = "用户性别，参见 SexEnum 枚举类", example = "1")

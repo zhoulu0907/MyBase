@@ -1,5 +1,7 @@
 package com.cmsr.onebase.module.system.vo.dept;
 
+import com.cmsr.onebase.framework.desensitize.annotation.EMailDesensitize;
+import com.cmsr.onebase.framework.desensitize.annotation.MobileDesensitize;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -25,9 +27,11 @@ public class DeptRespVO {
     private String remark;
 
     @Schema(description = "联系电话", example = "15601691000")
+    @MobileDesensitize
     private String phone;
 
     @Schema(description = "邮箱", example = "onebase@aaa.com")
+    @EMailDesensitize
     private String email;
 
     @Schema(description = "状态,见 CommonStatusEnum 枚举", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")

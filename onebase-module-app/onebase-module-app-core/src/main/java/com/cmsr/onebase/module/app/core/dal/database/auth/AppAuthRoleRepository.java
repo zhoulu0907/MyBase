@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.app.core.dal.database.auth;
 
 import com.cmsr.onebase.framework.common.pojo.PageParam;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.orm.repo.BaseAppRepository;
 import com.cmsr.onebase.framework.orm.repo.BaseBizRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthRoleDO;
 import com.cmsr.onebase.module.app.core.dal.mapper.AppAuthRoleMapper;
@@ -30,7 +31,7 @@ import static com.cmsr.onebase.module.app.core.dal.dataobject.table.AppAuthRoleU
  * @date 2025-08-05
  */
 @Repository
-public class AppAuthRoleRepository extends BaseBizRepository<AppAuthRoleMapper, AppAuthRoleDO> {
+public class AppAuthRoleRepository extends BaseAppRepository<AppAuthRoleMapper, AppAuthRoleDO> {
 
     public List<AppAuthRoleDO> findByApplicationId(Long applicationId) {
         QueryWrapper queryWrapper = this.query()
@@ -70,7 +71,7 @@ public class AppAuthRoleRepository extends BaseBizRepository<AppAuthRoleMapper, 
                 .on(APP_AUTH_ROLE.ID.eq(APP_AUTH_ROLE_USER.ROLE_ID))
                 .where(APP_AUTH_ROLE.APPLICATION_ID.eq(applicationId)
                         .and(APP_AUTH_ROLE_USER.USER_ID.eq(userId)));
-        return list(queryWrapper);
+        return getMapper().selectListByQuery(queryWrapper);
     }
 
     public PageResult<RoleMemberDTO> findRoleMembers(Long roleId, String memberName, String memberType, PageParam pageParam) {

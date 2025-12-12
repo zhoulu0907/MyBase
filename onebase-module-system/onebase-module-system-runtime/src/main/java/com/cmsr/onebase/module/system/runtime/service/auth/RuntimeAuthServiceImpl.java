@@ -1,6 +1,5 @@
 package com.cmsr.onebase.module.system.runtime.service.auth;
 
-import cn.hutool.core.util.ObjUtil;
 import com.anji.captcha.model.common.ResponseModel;
 import com.anji.captcha.model.vo.CaptchaVO;
 import com.anji.captcha.service.CaptchaService;
@@ -31,6 +30,7 @@ import com.cmsr.onebase.module.system.enums.login.LongTypeEnum;
 import com.cmsr.onebase.module.system.enums.oauth2.OAuth2ClientConstants;
 import com.cmsr.onebase.module.system.enums.permission.RoleCodeEnum;
 import com.cmsr.onebase.module.system.enums.tenant.TenantCodeEnum;
+import com.cmsr.onebase.module.system.framework.security.core.PwdEnHelper;
 import com.cmsr.onebase.module.system.service.corp.CorpService;
 import com.cmsr.onebase.module.system.service.corpapprelation.CorpAppRelationService;
 import com.cmsr.onebase.module.system.service.logger.LoginLogService;
@@ -129,6 +129,9 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
     private CorpAppRelationService corpAppRelationService;
 
     @Resource
+    private PwdEnHelper pwdEnHelper;
+
+    @Resource
     private UserAppRelationService userAppRelationService;
 
     @Override
@@ -210,8 +213,11 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
             // 检查平台租户是否允许创建应用
             // checkPlatformAdminEnableAppCreate();
 
+            // 解密原文
+            reqVO.setPassword(pwdEnHelper.decryptHexStr(reqVO.getPassword()));
             // 使用账号密码，进行登录
             AdminUserDO user = authenticate(reqVO.getUsername(), reqVO.getPassword());
+
             authLoginRespVO.set(createAfterLoginSuccess(user.getUserType(), user.getCorpId(), reqVO.getAppId(), user.getId(), reqVO.getUsername(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_USERNAME));
 
             LogRecordContext.putVariable("user", user);
@@ -249,11 +255,13 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
             // 检查平台租户是否允许创建应用
             // checkPlatformAdminEnableAppCreate();
 
+            // 解密原文
+            reqVO.setPassword(pwdEnHelper.decryptHexStr(reqVO.getPassword()));
             // 使用手机密码，进行登录
             AdminUserDO user = mobileAuthenticate(reqVO.getMobile(), reqVO.getPassword());
 
             // 验证企业下，应用是否禁用，是否过期
-            corpAppRelationService.validCorpAppRelationStatusOrExpireTime(user.getCorpId(),reqVO.getAppId());
+            corpAppRelationService.validCorpAppRelationStatusOrExpireTime(user.getCorpId(), reqVO.getAppId());
 
             authLoginRespVO.set(createAfterLoginSuccess(user.getUserType(), user.getCorpId(), reqVO.getAppId(), user.getId(), reqVO.getMobile(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_MOBILE));
             LogRecordContext.putVariable("user", user);
@@ -266,10 +274,12 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
 
     @Override
     public AuthLoginRespVO corpLogin(CorpAuthLoginReqVO reqVO) {
-        // 校验验证码
+        // 1.校验验证码
         mobileValidateCaptcha(reqVO);
 
-        // 2. 使用账号密码，进行登录
+        // 2.1 解密原文
+        reqVO.setPassword(pwdEnHelper.decryptHexStr(reqVO.getPassword()));
+        // 2.2 使用账号密码，进行登录
         AdminUserDO user = mobileAuthenticate(reqVO.getMobile(), reqVO.getPassword());
 
         // 验证企业状态是否异常
@@ -508,11 +518,7 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         reqDTO.setTraceId("n/a");
         reqDTO.setUserId(userId);
         reqDTO.setUserType(userType);
-        if (ObjUtil.equal(getUserType(), userType)) {
-            reqDTO.setUsername(getUsername(userId));
-        } else {
-            reqDTO.setUsername(memberService.getMemberUserMobile(userId));
-        }
+        reqDTO.setUsername(getUsername(userId));
         reqDTO.setUserAgent(ServletUtils.getUserAgent());
         reqDTO.setUserIp(ServletUtils.getClientIP());
         reqDTO.setResult(LoginResultEnum.SUCCESS.getResult());
@@ -547,6 +553,8 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         if (user == null) {
             throw exception(USER_MOBILE_NOT_EXISTS);
         }
+        // 解密原文
+        reqVO.setPassword(pwdEnHelper.decryptHexStr(reqVO.getPassword()));
         userService.updateUserPassword(user.getId(), reqVO.getPassword());
     }
 

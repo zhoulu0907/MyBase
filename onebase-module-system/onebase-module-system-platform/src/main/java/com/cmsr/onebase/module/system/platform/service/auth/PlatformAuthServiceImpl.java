@@ -11,7 +11,6 @@ import com.cmsr.onebase.framework.common.enums.RunModeEnum;
 import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
 import com.cmsr.onebase.framework.common.util.validation.ValidationUtils;
 import com.cmsr.onebase.module.system.api.logger.dto.LoginLogCreateReqDTO;
-import com.cmsr.onebase.module.system.api.sms.SmsCodeApi;
 import com.cmsr.onebase.module.system.convert.auth.AuthConvert;
 import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2AccessTokenDO;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
@@ -20,10 +19,9 @@ import com.cmsr.onebase.module.system.enums.logger.LoginLogTypeEnum;
 import com.cmsr.onebase.module.system.enums.logger.LoginResultEnum;
 import com.cmsr.onebase.module.system.enums.oauth2.OAuth2ClientConstants;
 import com.cmsr.onebase.module.system.enums.tenant.TenantCodeEnum;
+import com.cmsr.onebase.module.system.framework.security.core.PwdEnHelper;
 import com.cmsr.onebase.module.system.service.logger.LoginLogService;
-import com.cmsr.onebase.module.system.service.member.MemberService;
 import com.cmsr.onebase.module.system.service.oauth2.OAuth2TokenService;
-import com.cmsr.onebase.module.system.service.permission.PermissionService;
 import com.cmsr.onebase.module.system.service.tenant.TenantService;
 import com.cmsr.onebase.module.system.service.user.UserService;
 import com.cmsr.onebase.module.system.vo.CaptchaVerificationReqVO;
@@ -31,8 +29,6 @@ import com.cmsr.onebase.module.system.vo.auth.AuthLoginReqVO;
 import com.cmsr.onebase.module.system.vo.auth.AuthLoginRespVO;
 import com.cmsr.onebase.module.system.vo.auth.AuthResetPasswordReqVO;
 import com.cmsr.onebase.module.system.vo.auth.UserLoginReqVO;
-import com.cmsr.onebase.module.system.vo.auth.*;
-import com.google.common.annotations.VisibleForTesting;
 import com.mzt.logapi.context.LogRecordContext;
 import com.mzt.logapi.starter.annotation.LogRecord;
 import jakarta.annotation.Resource;
@@ -66,13 +62,9 @@ public class PlatformAuthServiceImpl implements PlatformAuthService {
     @Resource
     private OAuth2TokenService oauth2TokenService;
     @Resource
-    private MemberService      memberService;
-    @Resource
     private Validator          validator;
     @Resource
     private CaptchaService     captchaService;
-    @Resource
-    private SmsCodeApi         smsCodeApi;
     /**
      * 验证码的开关，默认为 true
      */
@@ -89,9 +81,9 @@ public class PlatformAuthServiceImpl implements PlatformAuthService {
     @Resource
     private TenantService     tenantService;
     @Resource
-    private PermissionService permissionService;
-    @Resource
     private SecurityConfigApi securityConfigApi;
+    @Resource
+    private PwdEnHelper       pwdEnHelper;
 
     @Override
     public AdminUserDO authenticate(String username, String password) {
@@ -133,7 +125,6 @@ public class PlatformAuthServiceImpl implements PlatformAuthService {
         }
     }
 
-
     @Override
     @LogRecord(type = LOGIN_USER_TYPE, subType = LOGIN_USER_PLATFORM_SUB_TYPE, bizNo = "{{#user.id}}",
             success = LOGIN_USER_PLATFORM_SUCCESS)
@@ -141,9 +132,11 @@ public class PlatformAuthServiceImpl implements PlatformAuthService {
         // 校验验证码
         validateCaptcha(reqVO);
 
+        // 解密原文
+        reqVO.setPassword(pwdEnHelper.decryptHexStr(reqVO.getPassword()));
+
         // 增加日志输出，便于调试
         log.debug("platformTenantEnableCreateApp配置值: {}", platformTenantEnableCreateApp);
-
         // 确保配置值不为null，并且为false时才执行校验
         if (Boolean.FALSE.equals(platformTenantEnableCreateApp)) {
             log.info("平台租户创建应用功能已禁用，开始校验租户信息");
@@ -299,6 +292,9 @@ public class PlatformAuthServiceImpl implements PlatformAuthService {
         if (user == null) {
             throw exception(USER_MOBILE_NOT_EXISTS);
         }
+        // 解密原文
+        reqVO.setPassword(pwdEnHelper.decryptHexStr(reqVO.getPassword()));
         userService.updateUserPassword(user.getId(), reqVO.getPassword());
     }
+
 }

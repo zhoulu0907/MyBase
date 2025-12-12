@@ -39,7 +39,7 @@ public class SemanticRangeValidationService implements SemanticValidationService
             if (field.getFieldTypeEnum() == SemanticFieldTypeEnum.AUTO_CODE) { continue; }
             if (!supports(field.getFieldType())) { continue; }
             if (value == null) { continue; }
-            List<MetadataValidationRangeDO> rules = context.getRangeRules().getOrDefault(field.getId(), Collections.emptyList());
+            List<MetadataValidationRangeDO> rules = context.getRangeRules().getOrDefault(field.getFieldUuid(), Collections.emptyList());
             if (rules.isEmpty()) { continue; }
             boolean hasEnabledRule = rules.stream().anyMatch(rule -> rule.getIsEnabled() != null && rule.getIsEnabled() == 1);
             if (!hasEnabledRule) { continue; }

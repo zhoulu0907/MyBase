@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.flow.core.dal.database;
 
+import com.cmsr.onebase.framework.orm.repo.BaseAppRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDateFieldDO;
 import com.cmsr.onebase.module.flow.core.dal.mapper.FlowProcessDateFieldMapper;
 import com.mybatisflex.core.query.QueryWrapper;
@@ -13,7 +14,7 @@ import static com.cmsr.onebase.module.flow.core.dal.dataobject.table.FlowProcess
  * @Date：2025/8/29 14:37
  */
 @Repository
-public class FlowProcessDateFieldRepository extends ServiceImpl<FlowProcessDateFieldMapper, FlowProcessDateFieldDO> {
+public class FlowProcessDateFieldRepository extends BaseAppRepository<FlowProcessDateFieldMapper, FlowProcessDateFieldDO> {
 
 
     public FlowProcessDateFieldDO findByProcessId(Long processId) {
@@ -24,5 +25,11 @@ public class FlowProcessDateFieldRepository extends ServiceImpl<FlowProcessDateF
     public void deleteByProcessId(Long processId) {
         QueryWrapper query = this.query().where(FLOW_PROCESS_DATE_FIELD.PROCESS_ID.eq(processId));
         super.remove(query);
+    }
+
+    public void updateJobStatusByAppId(String status, Long applicationId) {
+        updateChain().set(FLOW_PROCESS_DATE_FIELD.JOB_STATUS, status)
+                .where(FLOW_PROCESS_DATE_FIELD.APPLICATION_ID.eq(applicationId))
+                .update();
     }
 }

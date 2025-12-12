@@ -37,6 +37,8 @@ debug: false
 
 # OneBase配置项，设置当前项目所有自定义的配置
 onebase:
+  sign:
+    request-timeout: 86400 # 签名请求超时时间（秒）
   captcha:
     enable: false # 本地环境，暂时关闭图片验证码，方便登录等接口的测试；
   security:
@@ -65,9 +67,9 @@ justauth:
 
 liteflow:
   enable: true
+  version-tag: 1
   print-banner: true
   js-server-address: http://10.0.104.41:28392
-  version-tag: 0
 
 metadata:
   runtime:
