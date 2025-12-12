@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.flow.core.graph;
 
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.module.flow.context.graph.JsonGraph;
 import com.cmsr.onebase.module.flow.context.graph.nodes.StartDateFieldNodeData;
 import com.cmsr.onebase.module.flow.context.graph.nodes.StartTimeNodeData;
@@ -210,7 +211,9 @@ public class FlowProcessManager {
     }
 
     private void startTimeJob(FlowProcessDO flowProcessDO) {
-        FlowProcessTimeDO flowProcessTimeDO = TenantManager.withoutTenantCondition(() -> flowProcessTimeRepository.findByProcessId(flowProcessDO.getId()));
+        FlowProcessTimeDO flowProcessTimeDO = TenantManager.withoutTenantCondition(() -> ApplicationManager.withoutApplicationCondition(() ->
+                flowProcessTimeRepository.findByProcessId(flowProcessDO.getId())
+        ));
         if (flowProcessTimeDO != null
                 && flowProcessTimeDO.getJobId() != null
                 && FlowJobStatusEnum.isDeployed(flowProcessTimeDO.getJobStatus())) {
@@ -250,7 +253,9 @@ public class FlowProcessManager {
     }
 
     private void startDateFieldJob(FlowProcessDO flowProcessDO) {
-        FlowProcessDateFieldDO flowProcessDateFieldDO = TenantManager.withoutTenantCondition(() -> flowProcessDateFieldRepository.findByProcessId(flowProcessDO.getId()));
+        FlowProcessDateFieldDO flowProcessDateFieldDO = TenantManager.withoutTenantCondition(() -> ApplicationManager.withoutApplicationCondition(() ->
+                flowProcessDateFieldRepository.findByProcessId(flowProcessDO.getId())
+        ));
         if (flowProcessDateFieldDO != null
                 && flowProcessDateFieldDO.getJobId() != null
                 && FlowJobStatusEnum.isDeployed(flowProcessDateFieldDO.getJobStatus())) {
