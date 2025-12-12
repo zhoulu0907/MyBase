@@ -74,7 +74,6 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
 
   const handleGetUrlList = async () => {
     let flag = false;
-    console.log('==== fieldValue ====', fieldValue);
 
     const newFieldValue = (fieldValue || []).map((ele: any) => {
       if (ele.id) {
@@ -90,8 +89,6 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
       return { ...ele };
     });
 
-    console.log('==== newFieldValue ====', newFieldValue);
-
     if (flag) {
       form.setFieldValue(fieldId, newFieldValue);
     }
@@ -105,8 +102,6 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
     try {
       const urls: string[] = [];
       for (const file of newFieldValue) {
-        console.log('==== file ====', file);
-
         // 判断是否为本地上传的文件（有 originFile 或已有本地 URL）
         const isLocalFile =
           file.originFile || (file.url && typeof file.url === 'string' && file.url.startsWith('blob:'));
@@ -142,15 +137,11 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
           fileId
         };
 
-        console.log('==== param ====', param);
-
         const url = await attachmentDownload(tableName, param);
         if (url) {
           urls.push(url);
         }
       }
-
-      console.log('==== urls ====', urls);
 
       // 清理旧的 blob URL，避免内存泄漏
       setUrlList((prev) => {
