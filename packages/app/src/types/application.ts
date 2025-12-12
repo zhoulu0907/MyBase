@@ -5,6 +5,10 @@ import { PUBLISH_MODULE } from '@onebase/common';
 export interface Application {
   id: string;
   /**
+   * 应用UID
+   */
+  appUid?: string;
+  /**
    * 应用名称
    */
   appName: string;
