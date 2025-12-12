@@ -69,7 +69,7 @@ const XTable = memo(
     useSignals();
     const { pageComponentSchemas: fromPageComponentSchemas, components } = useFormEditorSignal;
 
-    const { setDrawerVisible, setDrawerPageId, setDetailPageViewId } = pagesRuntimeSignal;
+    const { setDrawerVisible, setDrawerPageId, setDetailPageViewId, setEntityDataId } = pagesRuntimeSignal;
     const { runtime = true, showFromPageData, showAddBtn = true, preview } = props;
     const hasOperationPermission = true;
 
@@ -384,6 +384,7 @@ const XTable = memo(
         return;
       }
 
+      setEntityDataId('');
       showFromPageData?.(null, true);
     };
 
@@ -500,7 +501,7 @@ const XTable = memo(
       if (!runtime) {
         return;
       }
-
+      setEntityDataId(id);
       showFromPageData?.(id, toFormPage);
     };
 

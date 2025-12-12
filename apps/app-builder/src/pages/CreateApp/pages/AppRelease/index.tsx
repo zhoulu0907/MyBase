@@ -58,7 +58,6 @@ const AppReleasePage: React.FC = () => {
     };
 
     const appResp = await getApplication(appReq);
-    console.log(appResp);
 
     if (appResp) {
       setAppStatus(appResp.appStatus);
@@ -80,7 +79,7 @@ const AppReleasePage: React.FC = () => {
     };
 
     const versionResp = await pageApplicationVersion(versionReq);
-    console.log(versionResp);
+
     setVersionList(versionResp.list);
     setTotal(versionResp.total);
   };

@@ -1,14 +1,15 @@
 import { Button, Form, Switch } from '@arco-design/web-react';
 import { type AuthRoleUsersPageRespVO, type DeptAndUsersRespDTO } from '@onebase/app';
 import { AddMembers } from '@onebase/common';
+import { getDeptUser, type GetDeptUserReq } from '@onebase/platform-center';
+import { CONFIG_TYPES } from '@onebase/ui-kit';
 import { debounce } from 'lodash-es';
 import { useCallback, useEffect, useState } from 'react';
-import { CONFIG_TYPES } from '@onebase/ui-kit';
 import { registerConfigRenderer } from '../../registry';
-import { getDeptUser, type GetDeptUserReq } from '@onebase/platform-center';
 
 export interface DynamicSelectScopeConfigProps {
   handlePropsChange: (key: string, value: string | number | boolean | any[]) => void;
+  handleMultiPropsChange: (updates: { key: string; value: any }[]) => void;
   item: any;
   configs: any;
   id: string;
@@ -18,6 +19,7 @@ const FormItem = Form.Item;
 
 const DynamicSelectScopeConfig: React.FC<DynamicSelectScopeConfigProps> = ({
   handlePropsChange,
+  handleMultiPropsChange,
   item,
   configs,
   id
@@ -35,11 +37,19 @@ const DynamicSelectScopeConfig: React.FC<DynamicSelectScopeConfigProps> = ({
   }, [deptsVisible]);
 
   const handleBtnSwitch = (checked: boolean) => {
-    if (checked) {
-      getDeptUsers({});
-    }
     setShowButton(checked);
-    handlePropsChange('isSelectScope', checked);
+
+    if (!checked) {
+      getDeptUsers({});
+      setSelectedDepts([]);
+      handlePropsChange(configs[item.key], []);
+      handleMultiPropsChange?.([
+        { key: 'isSelectScope', value: checked },
+        { key: configs[item.key], value: [] }
+      ]);
+    } else {
+      handlePropsChange('isSelectScope', checked);
+    }
   };
 
   // 获取部门用户信息
@@ -51,7 +61,6 @@ const DynamicSelectScopeConfig: React.FC<DynamicSelectScopeConfigProps> = ({
         keywords
       };
       const res = await getDeptUser(params);
-      console.log('获取部门用户信息 res:', res);
       setDeptData(res);
     } catch (error) {
       console.error('获取部门用户信息失败 error:', error);
@@ -138,10 +147,11 @@ export default DynamicSelectScopeConfig;
 
 registerConfigRenderer(
   CONFIG_TYPES.DEPT_SELECT_SCOPE,
-  ({ id, handlePropsChange, item, configs }) => (
+  ({ id, handlePropsChange, handleMultiPropsChange, item, configs }) => (
     <DynamicSelectScopeConfig
       id={id}
       handlePropsChange={handlePropsChange}
+      handleMultiPropsChange={handleMultiPropsChange}
       item={item}
       configs={configs}
     />

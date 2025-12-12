@@ -124,7 +124,8 @@ const UnionConfig: React.FC<UnionConfigProps> = ({ onRegisterSave, newPayload, s
       fields: colTitles.map((col: any) => ({
         fieldFqn: `${curNode.value.id}.${col.fieldName}`,
         fieldName: col.fieldName,
-        fieldType: col.fieldType
+        fieldType: col.fieldType,
+        displayName: col.displayName
       }))
     };
     console.log(payload);

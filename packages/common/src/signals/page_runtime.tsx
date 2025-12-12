@@ -26,6 +26,11 @@ export const createPagesRuntimeSignal = () => {
   const setDetailPageViewId = (newDetailPageViewId: string) => {
     detailPageViewId.value = newDetailPageViewId;
   };
+  // 主业务实体的数据id
+  const entityDataId = signal<string>('');
+  const setEntityDataId = (newEntityDataId: string) => {
+    entityDataId.value = newEntityDataId;
+  };
 
   const mainMetaDataFields = signal<any[]>([]);
   const setMainMetaDataFields = (fields: any[]) => {
@@ -61,6 +66,9 @@ export const createPagesRuntimeSignal = () => {
 
     detailPageViewId,
     setDetailPageViewId,
+
+    entityDataId,
+    setEntityDataId,
 
     mainMetaDataFields,
     setMainMetaDataFields,

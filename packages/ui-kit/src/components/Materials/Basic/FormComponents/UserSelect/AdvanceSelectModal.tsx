@@ -3,7 +3,7 @@ import TabPane from '@arco-design/web-react/es/Tabs/tab-pane';
 import { debounce } from 'lodash-es';
 import React, { useCallback, useEffect, useState } from 'react';
 
-import { DeptMember, isRuntimeEnv } from '@onebase/common';
+import { DeptMember } from '@onebase/common';
 import { GetDeptUserReq, getSimpleUserPage, UserVO, getDeptUser } from '@onebase/platform-center';
 
 import './index.css';
