@@ -19,7 +19,6 @@ import static com.cmsr.onebase.module.app.core.dal.dataobject.table.AppMenuTable
 public class AppMenuRepository extends BaseBizRepository<AppMenuMapper, AppMenuDO> {
 
 
-
     public List<AppMenuDO> findByApplicationId(Long applicationId) {
         QueryWrapper queryWrapper = this.query()
                 .eq(AppMenuDO::getApplicationId, applicationId)
@@ -49,13 +48,6 @@ public class AppMenuRepository extends BaseBizRepository<AppMenuMapper, AppMenuD
         return this.getOne(queryWrapper);
     }
 
-//    public void deleteByApplicationId(Long applicationId) {
-//        this.updateChain()
-//                .eq(AppMenuDO::getApplicationId, applicationId)
-//                .remove();
-//    }
-
-
     public int countByApplicationId(Long applicationId) {
         QueryWrapper queryWrapper = this.query().eq(AppMenuDO::getApplicationId, applicationId);
         return (int) count(queryWrapper);
@@ -64,19 +56,18 @@ public class AppMenuRepository extends BaseBizRepository<AppMenuMapper, AppMenuD
     public List<AppMenuDO> findVisibleByAppIdAndType(Long applicationId, Set<Integer> menuTypes) {
         QueryWrapper queryWrapper = this.query()
                 .where(APP_MENU.APPLICATION_ID.eq(applicationId))
-                .where(APP_MENU.IS_VISIBLE.eq(1))
-                .where(APP_MENU.MENU_TYPE.in(menuTypes));
+                .where(APP_MENU.MENU_TYPE.in(menuTypes))
+                .where(APP_MENU.IS_VISIBLE.eq(1));
         return list(queryWrapper);
     }
 
     public List<AppMenuDO> findByApplicationIdAndType(Long applicationId, Set<Integer> menuTypes) {
         QueryWrapper queryWrapper = this.query()
-                .eq(AppMenuDO::getApplicationId, applicationId)
-                .in(AppMenuDO::getMenuType, menuTypes)
+                .where(APP_MENU.APPLICATION_ID.eq(applicationId))
+                .where(APP_MENU.MENU_TYPE.in(menuTypes))
                 .orderBy(AppMenuDO::getMenuSort, true);
         return list(queryWrapper);
     }
-
 
     public AppMenuDO findByUuidInApplication(Long applicationId, String menuUuid) {
         QueryWrapper queryWrapper = this.query()
