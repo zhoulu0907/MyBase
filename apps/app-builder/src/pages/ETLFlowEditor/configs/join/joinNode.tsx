@@ -13,11 +13,11 @@ import styles from './index.module.less';
 type Row = {
   isSelected?: boolean;
   fieldType: string;
-  // displayFieldName: string;            TODO
-  // updatedDisplayFieldName: string;     TODO
   fieldFqn: string;
   fieldName: string;
   updatedFieldName: string;
+  displayName: string;
+  updatedDisplayName: string;
   nodeId: string;
   nodeName: string;
 };
@@ -65,6 +65,8 @@ export const JoinNodeConfig: React.FC<JoinNodeConfigProps> = ({ onRegisterSave }
           fieldFqn: field.fieldFqn,
           fieldName: field.fieldName,
           updatedFieldName: field.fieldName,
+          displayName: field.displayName,
+          updatedDisplayName: field.displayName,
           nodeId: leftNodeId,
           nodeName: nodeListDetail[leftNodeId].title
         }));
@@ -73,6 +75,8 @@ export const JoinNodeConfig: React.FC<JoinNodeConfigProps> = ({ onRegisterSave }
           fieldFqn: field.fieldFqn,
           fieldName: field.fieldName,
           updatedFieldName: field.fieldName,
+          displayName: field.displayName,
+          updatedDisplayName: field.displayName,
           nodeId: rightNodeId,
           nodeName: nodeListDetail[rightNodeId].title
         }));
@@ -121,6 +125,7 @@ export const JoinNodeConfig: React.FC<JoinNodeConfigProps> = ({ onRegisterSave }
       const fields = selectedRow.map((field) => ({
         fieldFqn: curNode.value.id + `.${field.updatedFieldName}`,
         fieldName: field.updatedFieldName,
+        displayName: field.updatedDisplayName,
         fieldType: field.fieldType
       }));
       payload.output = {
@@ -194,12 +199,17 @@ export const JoinNodeConfig: React.FC<JoinNodeConfigProps> = ({ onRegisterSave }
                     width: 120,
                     render: (_: any, record: Row) => <div>{record.fieldType}</div>
                   },
-                  // TODO
-                  // {
-                  //   title: '字段名称',
-                  //   dataIndex: 'fieldName',
-                  //   render: (_: any, record: Row) => <div>{record.fieldName}</div>
-                  // },
+                  {
+                    title: '显示名称',
+                    dataIndex: 'updatedDisplayName',
+                    render: (_: any, record: Row, idx: number) => {
+                      return (
+                        <Form.Item noStyle field={`mappings.${idx}.updatedDisplayName`}>
+                          <Input size="mini" allowClear />
+                        </Form.Item>
+                      );
+                    }
+                  },
                   {
                     title: '原字段名称',
                     dataIndex: 'updatedFieldName',

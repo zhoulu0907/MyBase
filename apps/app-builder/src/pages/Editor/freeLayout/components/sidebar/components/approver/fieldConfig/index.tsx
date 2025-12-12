@@ -1,7 +1,6 @@
-import { useEffect, useState, forwardRef, useImperativeHandle, useRef } from 'react';
-import { Switch, Button, Table, type TableColumnProps, Tooltip, Radio } from '@arco-design/web-react';
-import { IconQuestionCircle, IconPlus } from '@arco-design/web-react/icon';
-import FieldModal from './FieldModal';
+import { useEffect, useState } from 'react';
+import { Switch, type TableColumnProps, Tooltip, Radio } from '@arco-design/web-react';
+import { IconQuestionCircle } from '@arco-design/web-react/icon';
 import { type FieldConfigType } from '../constant';
 import FieldTable from '../../common/filedComponent/index';
 import './style.less';
@@ -9,23 +8,30 @@ import './style.less';
  * @param editable 是否可编辑
  * @param onTableChange 表格数据变化时回调
  * @param value 表格数据
- * @param ckOptions 字段配置
  * @param invert 排除数据 为了弹窗数据去重
  */
 
-// 定义 ref 的类型接口
-interface ChildComponentRef {
-  getTbData: () => any[];
-}
-
-export default function FieldConfig({ setApprovalConfigData, fieldPermConfig, ckOptions, tableName }: FieldConfigType) {
+export default function FieldConfig({ setApprovalConfigData, fieldPermConfig }: FieldConfigType) {
   let [nodeSwitch, setNodeSwitch] = useState(fieldPermConfig.useNodeConfig);
   const [tbData, setTbData] = useState(fieldPermConfig?.fieldConfigs || []);
-  const [curKeyArr, setCurKeyArr] = useState<any[]>([]);
-  let editRef = useRef<ChildComponentRef>();
-  let hiddenRef = useRef<ChildComponentRef>();
   let writeArr: any = [];
   let hiddenArr: any = [];
+  useEffect(() => {
+    const childTableMap = new Map();
+    fieldPermConfig?.fieldConfigs?.forEach((item: any) => {
+      if (item.fieldName === item.tableName) {
+        childTableMap.set(item.tableName, item);
+      }
+    });
+    fieldPermConfig?.fieldConfigs?.forEach((item: any) => {
+      item.displayName = item.fieldDisplayName;
+      if (item.tableName !== item.fieldName && childTableMap.has(item.tableName)) {
+        item.parentDisplayName = childTableMap.get(item.tableName).displayName || item.fieldDisplayName;
+      }
+    });
+    setTbData(fieldPermConfig?.fieldConfigs || []);
+  }, [fieldPermConfig]);
+
   if (Array.isArray(fieldPermConfig.fieldConfigs)) {
     fieldPermConfig.fieldConfigs.forEach((item: any) => {
       if (item.fieldPermType === 'write') {
@@ -45,13 +51,7 @@ export default function FieldConfig({ setApprovalConfigData, fieldPermConfig, ck
   function saveData() {
     const fieldPermConfig = {
       useNodeConfig: nodeSwitch,
-      fieldConfigs: tbData.map((item: any) => {
-        item.fieldDisplayName = item.displayName || item.fieldDisplayName;
-        return {
-          ...item,
-          tableName
-        };
-      })
+      fieldConfigs: tbData
     };
     setApprovalConfigData('fieldPermConfig', fieldPermConfig);
   }
@@ -59,7 +59,22 @@ export default function FieldConfig({ setApprovalConfigData, fieldPermConfig, ck
   const columnsTable: TableColumnProps[] = [
     {
       title: '字段名称',
-      dataIndex: 'fieldName'
+      dataIndex: 'fieldName',
+      render: (val: any, row: any) => {
+        return row.parentDisplayName ? row.parentDisplayName + ' _' + row.displayName : row.displayName;
+      }
+    },
+    {
+      title: '编辑',
+      dataIndex: 'batchApproval',
+      render: (val: any, row: any) => {
+        return (
+          <Radio
+            checked={row.fieldPermType === 'write'}
+            onChange={(checked: boolean) => handleSwitchChange(row, 'writeFlag', checked)}
+          />
+        );
+      }
     },
     {
       title: '只读',
@@ -90,11 +105,19 @@ export default function FieldConfig({ setApprovalConfigData, fieldPermConfig, ck
   };
 
   const setTableData = (v: any) => {
-    const tableMap = new Map<string, any>(tbData?.map((item: any) => [item.fieldName, item]));
-    const addType = v?.map((item: any) => ({
-      ...item,
-      fieldPermType: tableMap.has(item.fieldName) ? tableMap.get(item.fieldName).fieldPermType : 'read'
-    }));
+    const tableMap = new Map<string, any>(
+      tbData?.map((item: any) => [
+        item.parentDisplayName ? item.parentDisplayName + item.fieldName : item.fieldName,
+        item
+      ])
+    );
+    const addType = v?.map((item: any) => {
+      const fid = item.parentDisplayName ? item.parentDisplayName + item.fieldName : item.fieldName;
+      return {
+        ...item,
+        fieldPermType: tableMap.has(fid) ? tableMap.get(fid).fieldPermType : 'read'
+      };
+    });
     setTbData(addType);
   };
 
@@ -104,6 +127,8 @@ export default function FieldConfig({ setApprovalConfigData, fieldPermConfig, ck
       permType = 'read';
     } else if (type === 'hideFlag') {
       permType = 'hidden';
+    } else if (type === 'writeFlag') {
+      permType = 'write';
     }
 
     if (flag) {
@@ -115,22 +140,14 @@ export default function FieldConfig({ setApprovalConfigData, fieldPermConfig, ck
 
   function handleSave(row: any) {
     const newData = [...tbData];
-    const index = newData.findIndex((item) => row.fieldName === item.fieldName);
+    const index = newData.findIndex((item: any) => {
+      const itemId = item.parentDisplayName ? item.parentDisplayName + item.fieldName : item.fieldName;
+      const fid = row.parentDisplayName ? row.parentDisplayName + row.fieldName : row.fieldName;
+      return itemId === fid;
+    });
     newData.splice(index, 1, { ...newData[index], ...row });
     setTbData(newData);
   }
-
-  useEffect(() => {
-    if (Array.isArray(tbData)) {
-      let cur_key_arr: any[] = [];
-      tbData.forEach((item: any) => {
-        cur_key_arr.push(item.fieldName);
-      });
-      setCurKeyArr(cur_key_arr);
-    }
-    onTableChange();
-  }, [tbData]);
-
   return (
     <div className="field-config">
       <div className="title-box">
@@ -156,12 +173,10 @@ export default function FieldConfig({ setApprovalConfigData, fieldPermConfig, ck
       {nodeSwitch && (
         <FieldTable
           onTableChange={onTableChange}
-          ckOptions={ckOptions}
           columnsTable={columnsTable}
           tbData={tbData}
           setTableData={setTableData}
-          title={'添加隐藏字段'}
-          curKeyArr={curKeyArr}
+          title={'添加字段'}
         />
       )}
     </div>
