@@ -32,7 +32,7 @@ const licenseDetailModal = (props: LicenseDetail) => {
                 label: t('platformInfo.certificationContent'),
                 value: (
                   <div>
-                    租户数量：{selectedLicenseInfo.tenantLimit}，用户数量：{selectedLicenseInfo.userLimit}
+                    空间数量：{selectedLicenseInfo.tenantLimit}，用户数量：{selectedLicenseInfo.userLimit}
                   </div>
                 )
               },

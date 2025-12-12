@@ -89,7 +89,7 @@ const PlatformInfo: React.FC = () => {
       dataIndex: 'certificationContent',
       key: 'certificationContent',
       render: (_text, record) =>  (<div>
-        租户数量：{record.tenantLimit}，用户数量：{record.userLimit}
+        空间数量：{record.tenantLimit}，用户数量：{record.userLimit}
       </div>)
     },
     {
