@@ -8,7 +8,7 @@ export const createPageViewEditorSignal = () => {
   const setPageViews = (initPageViews: PageView[]) => {
     pageViews.value = initPageViews.reduce(
       (acc, pv) => {
-        acc[pv.id] = pv;
+        acc[pv.pageUuid] = pv;
         return acc;
       },
       {} as { [key: string]: PageView }
@@ -16,43 +16,43 @@ export const createPageViewEditorSignal = () => {
   };
 
   const addPageView = (pageView: PageView) => {
-    pageViews.value = { ...pageViews.value, [pageView.id]: pageView };
+    pageViews.value = { ...pageViews.value, [pageView.pageUuid]: pageView };
   };
 
   const clearPageViews = () => {
     pageViews.value = {};
   };
 
-  const updatePageViewName = (id: string, name: string) => {
-    pageViews.value[id].pageName = name;
+  const updatePageViewName = (pageUuid: string, name: string) => {
+    pageViews.value[pageUuid].pageName = name;
   };
 
   const updatePageView = (pageView: PageView) => {
     if (pageView.isDefaultDetailViewMode) {
       const updatedPageViews = Object.fromEntries(
-        Object.entries(pageViews.value).map(([id, pv]) => [id, { ...pv, isDefaultDetailViewMode: 0 }])
+        Object.entries(pageViews.value).map(([pageUuid, pv]) => [pageUuid, { ...pv, isDefaultDetailViewMode: 0 }])
       );
       pageViews.value = {
         ...updatedPageViews,
-        [pageView.id]: pageView
+        [pageView.pageUuid]: pageView
       };
     }
 
     if (pageView.isDefaultEditViewMode) {
       const updatedPageViews = Object.fromEntries(
-        Object.entries(pageViews.value).map(([id, pv]) => [id, { ...pv, isDefaultEditViewMode: 0 }])
+        Object.entries(pageViews.value).map(([pageUuid, pv]) => [pageUuid, { ...pv, isDefaultEditViewMode: 0 }])
       );
       pageViews.value = {
         ...updatedPageViews,
-        [pageView.id]: pageView
+        [pageView.pageUuid]: pageView
       };
     }
 
-    pageViews.value = { ...pageViews.value, [pageView.id]: pageView };
+    pageViews.value = { ...pageViews.value, [pageView.pageUuid]: pageView };
   };
 
-  const setCurViewId = (id: string) => {
-    curViewId.value = id;
+  const setCurViewId = (pageUuid: string) => {
+    curViewId.value = pageUuid;
   };
 
   const clearCurViewId = () => {
@@ -60,15 +60,15 @@ export const createPageViewEditorSignal = () => {
   };
 
   const getDefaultEditPageViewId = () => {
-    return Object.values(pageViews.value).find((pv) => pv.isDefaultEditViewMode == 1)?.id;
+    return Object.values(pageViews.value).find((pv) => pv.isDefaultEditViewMode == 1)?.pageUuid;
   };
 
   const getDefaultDetailPageViewId = () => {
-    return Object.values(pageViews.value).find((pv) => pv.isDefaultDetailViewMode == 1)?.id;
+    return Object.values(pageViews.value).find((pv) => pv.isDefaultDetailViewMode == 1)?.pageUuid;
   };
 
-  const getPageViewType = (id: string) => {
-    const pageView = pageViews.value[id];
+  const getPageViewType = (pageUuid: string) => {
+    const pageView = pageViews.value[pageUuid];
     if (pageView.editViewMode == 1 && pageView.detailViewMode == 1) {
       return ViewType.MIX;
     } else if (pageView.editViewMode == 1) {

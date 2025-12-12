@@ -33,6 +33,8 @@ const View: React.FC<ViewProps> = ({ pageSetId }) => {
   const [dropListVisible, setDropListVisible] = useState(false);
   const [editViewName, setEditViewName] = useState(false);
 
+  console.log('curViewId-----',curViewId.value)
+
   const { pageComponentSchemas, components, layoutSubComponents, subTableComponents } = usePageEditorSignal();
 
   const showViewType = (item: PageView | null) => {
@@ -86,7 +88,8 @@ const View: React.FC<ViewProps> = ({ pageSetId }) => {
       id: newId,
       isDefaultEditViewMode: 0,
       isDefaultDetailViewMode: 0,
-      pageName: view.pageName + '-副本'
+      pageName: view.pageName + '-副本',
+      pageUuid: newId
     };
 
     const oldComponents = useEditorSignalMap.get(id)?.components.value;
@@ -243,7 +246,8 @@ const View: React.FC<ViewProps> = ({ pageSetId }) => {
               : 0,
           isDefaultEditViewMode: 0,
           isDefaultDetailViewMode: 0,
-          created: true
+          created: true,
+          pageUuid: pageId
         });
 
         useEditorSignalMap.set(pageId, createPageEditorSignal());
