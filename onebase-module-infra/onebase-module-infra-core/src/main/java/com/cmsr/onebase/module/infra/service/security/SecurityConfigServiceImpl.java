@@ -416,7 +416,7 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
                         .filter(Objects::nonNull)
                         .forEach(configValue -> {
                             String[] split = configValue.split(",");
-                            Collections.addAll(configValues, split);
+                            Arrays.stream(split).map(String::trim).forEach(configValues::add);
                         });
             }
         }
