@@ -11,32 +11,29 @@
 
     <artifactId>data-service-biz</artifactId>
 
-    <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
         <dependencies>
         <dependency>
             <groupId>commons-net</groupId>
             <artifactId>commons-net</artifactId>
+            <version>${commons-net.version}</version>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
+            <version>${guava.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.cmsr</groupId>
+            <groupId>com.cmsr.onebase</groupId>
             <artifactId>api-base</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <version>${revision}</version>
         </dependency>
         <dependency>
-            <groupId>com.cmsr</groupId>
+            <groupId>com.cmsr.onebase</groupId>
             <artifactId>api-permissions</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <version>${revision}</version>
         </dependency>
         <dependency>
-            <groupId>com.cmsr</groupId>
+            <groupId>com.cmsr.onebase</groupId>
             <artifactId>api-sync</artifactId>
             <version>1.0.0-SNAPSHOT</version>
         </dependency>
@@ -47,15 +44,18 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-dbcp2</artifactId>
+            <version>${commons-dbcp2.version}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.antlr/antlr -->
         <dependency>
             <groupId>org.antlr</groupId>
             <artifactId>antlr</artifactId>
+            <version>${antlr.version}</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -88,31 +88,7 @@
                 </exclusion>
             </exclusions>
         </dependency>
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-autoconfigure</artifactId>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-autoconfigure</artifactId>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-autoconfigure</artifactId>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-autoconfigure</artifactId>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-autoconfigure</artifactId>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-context</artifactId>
-            </dependency>
-        </dependencies>
+    </dependencies>
 
     <profiles>
 
@@ -134,10 +110,12 @@
                 <dependency>
                     <groupId>org.seleniumhq.selenium</groupId>
                     <artifactId>selenium-java</artifactId>
+                    <version>${selenium-java.version}</version>
                 </dependency>
                 <dependency>
                     <groupId>org.eclipse.angus</groupId>
                     <artifactId>angus-mail</artifactId>
+                    <version>${angus-mail.version}</version>
                     <exclusions>
                         <exclusion>
                             <groupId>org.eclipse.angus</groupId>
@@ -148,11 +126,13 @@
                 <dependency>
                     <groupId>com.itextpdf</groupId>
                     <artifactId>itext7-core</artifactId>
+                    <version>${itextpdf.version}</version>
                     <type>pom</type>
                 </dependency>
                 <dependency>
                     <groupId>com.vladsch.flexmark</groupId>
                     <artifactId>flexmark-all</artifactId>
+                    <version>${flexmark.version}</version>
                 </dependency>
             </dependencies>
 
@@ -270,8 +250,9 @@
             <dependencies>
                 <!-- 分布式版(企业版) 引入分布式组件 -->
                 <dependency>
-                    <groupId>com.cmsr</groupId>
+                    <groupId>com.cmsr.onebase</groupId>
                     <artifactId>distributed</artifactId>
+                    <version>${revision}</version>
                 </dependency>
             </dependencies>
             <build>

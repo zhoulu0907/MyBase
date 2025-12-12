@@ -58,7 +58,7 @@ public class SysParameterManage {
             List<CoreSysSetting> typeList = groupList(MAP_KEY_PREFIX + "mapType");
             mapType = "gaode";
             if (!CollectionUtils.isEmpty(typeList)) {
-                mapType = typeList.getFirst().getPval();
+                mapType = typeList.get(0).getPval();
             }
         }
         String prefix;
@@ -88,7 +88,7 @@ public class SysParameterManage {
             List<CoreSysSetting> typeList = groupList(MAP_KEY_PREFIX + "mapType");
             mapType = "gaode";
             if (!CollectionUtils.isEmpty(typeList)) {
-                mapType = typeList.getFirst().getPval();
+                mapType = typeList.get(0).getPval();
             }
         }
 

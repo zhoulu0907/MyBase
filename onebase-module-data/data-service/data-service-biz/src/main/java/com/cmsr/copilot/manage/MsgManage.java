@@ -64,7 +64,7 @@ public class MsgManage {
         wrapper.eq("user_id", userId);
         wrapper.orderByDesc("create_time");
         List<CoreCopilotMsg> perCopilotMsgs = coreCopilotMsgMapper.selectList(wrapper);
-        return ObjectUtils.isEmpty(perCopilotMsgs) ? null : transRecord(perCopilotMsgs.getFirst());
+        return ObjectUtils.isEmpty(perCopilotMsgs) ? null : transRecord(perCopilotMsgs.get(0));
     }
 
     public MsgDTO getLastSuccessMsg(Long userId, Long datasetGroupId) {
@@ -75,7 +75,7 @@ public class MsgManage {
         wrapper.eq("msg_type", "api");
         wrapper.orderByDesc("create_time");
         List<CoreCopilotMsg> perCopilotMsgs = coreCopilotMsgMapper.selectList(wrapper);
-        return ObjectUtils.isEmpty(perCopilotMsgs) ? null : transRecord(perCopilotMsgs.getFirst());
+        return ObjectUtils.isEmpty(perCopilotMsgs) ? null : transRecord(perCopilotMsgs.get(0));
     }
 
     private CoreCopilotMsg transDTO(MsgDTO dto) throws Exception {

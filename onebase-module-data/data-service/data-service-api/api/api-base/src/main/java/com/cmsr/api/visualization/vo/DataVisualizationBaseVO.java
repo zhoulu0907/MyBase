@@ -48,4 +48,19 @@ public class DataVisualizationBaseVO implements ITreeBase<DataVisualizationBaseV
     private String updateBy;
 
     private List<DataVisualizationBaseVO> children;
+
+    @Override
+    public void setChildren(List<DataVisualizationBaseVO> children) {
+        this.children = children;
+    }
+
+    @Override
+    public void setPid(Long pid) {
+        this.pid = pid;
+    }
+
+    @Override
+    public void setId(Long id) {
+        this.id = id;
+    }
 }

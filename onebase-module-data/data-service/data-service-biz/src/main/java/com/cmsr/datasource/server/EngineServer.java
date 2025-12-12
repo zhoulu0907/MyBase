@@ -91,7 +91,7 @@ public class EngineServer implements EngineApi {
         if (CollectionUtils.isEmpty(deEngines)) {
             return false;
         } else {
-            return !deEngines.getFirst().getType().equalsIgnoreCase("h2");
+            return !deEngines.get(0).getType().equalsIgnoreCase("h2");
         }
 
     }

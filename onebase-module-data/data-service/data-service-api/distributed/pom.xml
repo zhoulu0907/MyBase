@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>data-service-api</artifactId>
-        <groupId>com.cmsr</groupId>
+        <groupId>com.cmsr.onebase</groupId>
         <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -33,9 +33,9 @@
 
 
         <dependency>
-            <groupId>com.cmsr</groupId>
+            <groupId>com.cmsr.onebase</groupId>
             <artifactId>common</artifactId>
-            <version>${project.version}</version>
+            <version>${revision}</version>
         </dependency>
 
         <dependency>

@@ -7,7 +7,7 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import com.cmsr.listener.EhCacheStartListener;
 
-@SpringBootApplication(exclude = {QuartzAutoConfiguration.class})
+@SpringBootApplication(exclude = {QuartzAutoConfiguration.class, org.springdoc.webmvc.ui.SwaggerConfig.class})
 @EnableCaching
 @EnableScheduling
 public class CoreApplication {

@@ -42,7 +42,7 @@ public class ScatterHandler extends YoyChartHandler {
             Iterator<ChartViewFieldDTO> iterator = yAxisTemp.iterator();
             while (iterator.hasNext()) {
                 ChartViewFieldDTO obj = iterator.next();
-                if (obj.getId().equals(extBubble.getFirst().getId())) {
+                if (obj.getId().equals(extBubble.get(0).getId())) {
                     iterator.remove();
                     break;
                 }

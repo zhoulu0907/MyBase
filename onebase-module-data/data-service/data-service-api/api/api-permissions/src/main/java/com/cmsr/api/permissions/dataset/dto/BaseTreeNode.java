@@ -26,4 +26,19 @@ public class BaseTreeNode implements ITreeBase<BaseTreeNode> {
         this.nodeType = nodeType;
     }
 
+    @Override
+    public void setChildren(List<BaseTreeNode> children) {
+        this.children = children;
+    }
+
+    @Override
+    public void setPid(Long pid) {
+        this.pid = pid;
+    }
+
+    @Override
+    public void setId(Long id) {
+        this.id = id;
+    }
+
 }

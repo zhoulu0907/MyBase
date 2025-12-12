@@ -21,6 +21,9 @@ public class VisualizationNodeBO implements TreeBaseModel {
     private Long pid;
     private Integer extraFlag;
     private Integer extraFlag1;
-
+    @Override
+    public void setName(String name) {
+        this.name = name;
+    }
 
 }

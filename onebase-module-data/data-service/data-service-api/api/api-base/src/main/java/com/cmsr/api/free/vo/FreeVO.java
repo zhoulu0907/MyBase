@@ -29,4 +29,9 @@ public class FreeVO implements Serializable, TreeResultModel<FreeVO> {
     private int extraFlag;
 
     private List<FreeVO> children;
+
+    @Override
+    public void setChildren(List<FreeVO> children) {
+        this.children = children;
+    }
 }

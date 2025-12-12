@@ -26,4 +26,10 @@ public class DatasourceNodeBO implements TreeBaseModel<DatasourceNodeBO> {
     private Long pid;
     private Integer extraFlag;
     private String type;
+
+    @Override
+    public void setName(String name) {
+        this.name = name;
+    }
+
 }

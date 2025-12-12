@@ -36,4 +36,9 @@ public class BusiNodeVO implements TreeResultModel<BusiNodeVO>, Serializable {
     private List<BusiNodeVO> children;
     @Schema(description = "独立权重")
     private Integer ext;
+
+    @Override
+    public void setChildren(List<BusiNodeVO> children) {
+        this.children = children;
+    }
 }

@@ -161,7 +161,7 @@ public class CopilotManage {
         if (crossDs) {
             provider = ProviderFactory.getDefaultProvider();
         } else {
-            provider = ProviderFactory.getProvider(dsList.getFirst());
+            provider = ProviderFactory.getProvider(dsList.get(0));
         }
 
 //        List<DataSetRowPermissionsTreeDTO> rowPermissionsTree = new ArrayList<>();

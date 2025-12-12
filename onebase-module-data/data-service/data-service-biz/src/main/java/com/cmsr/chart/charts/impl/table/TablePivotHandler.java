@@ -193,7 +193,7 @@ public class TablePivotHandler extends GroupChartHandler {
                 var tmpData = new HashMap<String, String>();
                 for (int i = 0; i < yAxis.size(); i++) {
                     var a = yAxis.get(i);
-                    tmpData.put(a.getDataeaseName(), data.getFirst()[i]);
+                    tmpData.put(a.getDataeaseName(), data.get(0)[i]);
                 }
                 tmp.put("data", tmpData);
                 tmp.put("sql", Base64.getEncoder().encodeToString(querySql.getBytes()));
@@ -284,7 +284,7 @@ public class TablePivotHandler extends GroupChartHandler {
     private Map<String, Object> buildCustomCalcResult(List<String[]> data, List<ChartViewFieldDTO> dimAxis, List<ChartViewFieldDTO> quotaAxis) {
         var rootResult = new HashMap<String, Object>();
         if (CollectionUtils.isEmpty(dimAxis)) {
-            var rowData = data.getFirst();
+            var rowData = data.get(0);
             for (int i = 0; i < rowData.length; i++) {
                 var qAxis = quotaAxis.get(i);
                 rootResult.put(qAxis.getDataeaseName(), rowData[i]);

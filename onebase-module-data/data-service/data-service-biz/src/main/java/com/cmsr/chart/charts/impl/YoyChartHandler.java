@@ -138,7 +138,7 @@ public class YoyChartHandler extends DefaultChartHandler {
         // 不包含维度排序时，指标排序生效
         if (!data.isEmpty() && CollectionUtils.isEmpty(xAxisSortList) && CollectionUtils.isNotEmpty(yAxisSortList)) {
             // 指标排序仅第一个生效
-            ChartViewFieldDTO firstYAxis = yAxisSortList.getFirst();
+            ChartViewFieldDTO firstYAxis = yAxisSortList.get(0);
             boolean asc = firstYAxis.getSort().equalsIgnoreCase("asc");
             // 维度指标
             List<ChartViewFieldDTO> allAxisList = new ArrayList<>();

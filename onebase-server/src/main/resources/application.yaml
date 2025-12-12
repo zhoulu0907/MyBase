@@ -141,11 +141,11 @@ easy:
 
 anyline:
   is-debug: false
-  is-log-sql: false
+  is-log-sql: true
   is-log-slow-sql: false
   is-log-sql-time: false
   is-log-sql-warn: false
-  is-log-sql-param: false
+  is-log-sql-param: true
   is-log-sql-when-error: true
   is-log-sql-param-when-error: true
 

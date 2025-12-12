@@ -125,7 +125,7 @@ public class SqlparserUtils {
                         List<XpackPluginsDatasourceVO> xpackPluginsDatasourceVOS = pluginManage.queryPluginDs();
                         List<XpackPluginsDatasourceVO> list = xpackPluginsDatasourceVOS.stream().filter(ele -> StringUtils.equals(ele.getType(), value.getType())).toList();
                         if (ObjectUtils.isNotEmpty(list)) {
-                            XpackPluginsDatasourceVO first = list.getFirst();
+                            XpackPluginsDatasourceVO first = list.get(0);
                             prefix = first.getPrefix();
                             suffix = first.getSuffix();
                         } else {

@@ -79,7 +79,7 @@ public class TemplateCenterManage {
             if (baseItemInfo.getLatestRelease() != null) {
                 templateUrl = sufUrl + "/store/apps/" + templateName +
                         "/releases/download/" + baseItemInfo.getLatestRelease().getRelease().getMetadata().getName()
-                        + "/assets/" + baseItemInfo.getLatestRelease().getAssets().getFirst().getMetadata().getName();
+                        + "/assets/" + baseItemInfo.getLatestRelease().getAssets().get(0).getMetadata().getName();
             } else {
                 templateUrl = sufUrl + baseItemInfo.getApplication().getSpec().getLinks().get(0).getUrl();
             }

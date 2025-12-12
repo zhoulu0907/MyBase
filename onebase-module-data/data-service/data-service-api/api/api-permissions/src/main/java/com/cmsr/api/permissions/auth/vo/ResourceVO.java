@@ -27,4 +27,9 @@ public class ResourceVO implements TreeResultModel<ResourceVO>, Serializable {
     private boolean leaf = false;
     @Schema(description = "额外标识")
     private Integer extraFlag = 0;
+
+    @Override
+    public void setChildren(List<ResourceVO> children) {
+        this.children = children;
+    }
 }

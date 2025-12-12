@@ -16,4 +16,9 @@ public class CoreDatasourceTaskDTO extends CoreDatasourceTask {
     private String taskStatus;
     private String msg;
     private String privileges;
+
+    @Override
+    public void setTaskStatus(String taskStatus) {
+        this.taskStatus = taskStatus;
+    }
 }

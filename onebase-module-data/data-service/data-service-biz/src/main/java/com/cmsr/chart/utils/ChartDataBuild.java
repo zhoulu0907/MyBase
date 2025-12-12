@@ -1800,7 +1800,7 @@ public class ChartDataBuild {
                 return temp;
             })).collect(Collectors.toList());
             //详情只要一个
-            row.put("details", !detailValueMapList.isEmpty() ? Collections.singletonList(detailValueMapList.getFirst()) : detailValueMapList);
+            row.put("details", !detailValueMapList.isEmpty() ? Collections.singletonList(detailValueMapList.get(0)) : detailValueMapList);
         });
         // 先过滤掉所有记录数字段
         List<ChartViewFieldDTO> filterCountAxis = fields.stream()

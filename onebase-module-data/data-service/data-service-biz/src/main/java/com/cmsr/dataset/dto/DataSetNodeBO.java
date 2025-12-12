@@ -22,4 +22,9 @@ public class DataSetNodeBO implements TreeBaseModel {
     private Integer weight = 3;
     private Long pid;
     private Integer extraFlag;
+
+    @Override
+    public void setName(String name) {
+        this.name = name;
+    }
 }

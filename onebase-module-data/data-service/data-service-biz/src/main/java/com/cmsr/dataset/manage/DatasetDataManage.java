@@ -241,7 +241,7 @@ public class DatasetDataManage {
         if (crossDs) {
             provider = ProviderFactory.getDefaultProvider();
         } else {
-            provider = ProviderFactory.getProvider(dsList.getFirst());
+            provider = ProviderFactory.getProvider(dsList.get(0));
         }
 
         // build query sql
@@ -330,7 +330,7 @@ public class DatasetDataManage {
             if (crossDs) {
                 provider = ProviderFactory.getDefaultProvider();
             } else {
-                provider = ProviderFactory.getProvider(dsList.getFirst());
+                provider = ProviderFactory.getProvider(dsList.get(0));
             }
 
             // build query sql
@@ -591,7 +591,7 @@ public class DatasetDataManage {
         if (crossDs) {
             provider = ProviderFactory.getDefaultProvider();
         } else {
-            provider = ProviderFactory.getProvider(dsList.getFirst());
+            provider = ProviderFactory.getProvider(dsList.get(0));
         }
 
         String dsType = null;
@@ -709,7 +709,7 @@ public class DatasetDataManage {
             if (crossDs) {
                 provider = ProviderFactory.getDefaultProvider();
             } else {
-                provider = ProviderFactory.getProvider(dsList.getFirst());
+                provider = ProviderFactory.getProvider(dsList.get(0));
             }
 
             String dsType = null;
@@ -970,7 +970,7 @@ public class DatasetDataManage {
         if (crossDs) {
             provider = ProviderFactory.getDefaultProvider();
         } else {
-            provider = ProviderFactory.getProvider(dsList.getFirst());
+            provider = ProviderFactory.getProvider(dsList.get(0));
         }
 
         String dsType = null;
@@ -1058,7 +1058,7 @@ public class DatasetDataManage {
 
         // 根据图表计算字段，获取数据集
         List<DatasetTableFieldDTO> allFields = new ArrayList<>();
-        DatasetTableFieldDTO field = datasetTableFieldManage.selectById(ids.getFirst());
+        DatasetTableFieldDTO field = datasetTableFieldManage.selectById(ids.get(0));
         Long datasetGroupId = field.getDatasetGroupId();
         if (field.getChartId() != null) {
             allFields.addAll(datasetTableFieldManage.getChartCalcFields(field.getChartId()));
@@ -1112,7 +1112,7 @@ public class DatasetDataManage {
         if (crossDs) {
             provider = ProviderFactory.getDefaultProvider();
         } else {
-            provider = ProviderFactory.getProvider(dsList.getFirst());
+            provider = ProviderFactory.getProvider(dsList.get(0));
         }
 
         Field2SQLObj.field2sqlObj(sqlMeta, fields, allFields, crossDs, dsMap, Utils.getParams(allFields), null, pluginManage);

@@ -182,7 +182,7 @@ public class DefaultChartHandler extends AbstractChartPlugin {
     protected List<ChartSeniorAssistDTO> mergeAssistField(List<ChartSeniorAssistDTO> dynamicAssistFields, List<String[]> assistData, List<ChartSeniorAssistDTO> dynamicAssistFieldsOriginList, List<String[]> assistDataOriginList) {
         List<ChartSeniorAssistDTO> list = new ArrayList<>();
         if (ObjectUtils.isNotEmpty(assistData)) {
-            String[] strings = assistData.getFirst();
+            String[] strings = assistData.get(0);
             for (int i = 0; i < dynamicAssistFields.size(); i++) {
                 if (i < strings.length) {
                     ChartSeniorAssistDTO chartSeniorAssistDTO = dynamicAssistFields.get(i);
@@ -193,7 +193,7 @@ public class DefaultChartHandler extends AbstractChartPlugin {
         }
 
         if (ObjectUtils.isNotEmpty(assistDataOriginList)) {
-            String[] stringsOriginList = assistDataOriginList.getLast();// 取最后一项，如果有其他运算逻辑需要取明细数据可增加逻辑
+            String[] stringsOriginList = assistDataOriginList.get(assistDataOriginList.size() - 1);// 取最后一项，如果有其他运算逻辑需要取明细数据可增加逻辑
             for (int i = 0; i < dynamicAssistFieldsOriginList.size(); i++) {
                 if (i < stringsOriginList.length) {
                     ChartSeniorAssistDTO chartSeniorAssistDTO = dynamicAssistFieldsOriginList.get(i);
@@ -399,7 +399,7 @@ public class DefaultChartHandler extends AbstractChartPlugin {
                 List<XpackPluginsDatasourceVO> xpackPluginsDatasourceVOS = pluginManage.queryPluginDs();
                 List<XpackPluginsDatasourceVO> list = xpackPluginsDatasourceVOS.stream().filter(ele -> StringUtils.equals(ele.getType(), dsType)).toList();
                 if (ObjectUtils.isNotEmpty(list)) {
-                    XpackPluginsDatasourceVO first = list.getFirst();
+                    XpackPluginsDatasourceVO first = list.get(0);
                     prefix = first.getPrefix();
                     suffix = first.getSuffix();
                 } else {
@@ -439,7 +439,7 @@ public class DefaultChartHandler extends AbstractChartPlugin {
                 List<XpackPluginsDatasourceVO> xpackPluginsDatasourceVOS = pluginManage.queryPluginDs();
                 List<XpackPluginsDatasourceVO> list = xpackPluginsDatasourceVOS.stream().filter(ele -> StringUtils.equals(ele.getType(), dsType)).toList();
                 if (ObjectUtils.isNotEmpty(list)) {
-                    XpackPluginsDatasourceVO first = list.getFirst();
+                    XpackPluginsDatasourceVO first = list.get(0);
                     prefix = first.getPrefix();
                     suffix = first.getSuffix();
                 } else {
@@ -778,7 +778,7 @@ public class DefaultChartHandler extends AbstractChartPlugin {
                             // -1 year
                             try {
                                 Calendar calendar = Calendar.getInstance();
-                                calendar.setTime(new Date(Long.parseLong(filterDTO.getValue().getFirst())));
+                                calendar.setTime(new Date(Long.parseLong(filterDTO.getValue().get(0))));
                                 calendar.add(Calendar.YEAR, -1);
                                 filterDTO.getValue().set(0, String.valueOf(calendar.getTime().getTime()));
                                 flag = true;
@@ -800,7 +800,7 @@ public class DefaultChartHandler extends AbstractChartPlugin {
                                    List<ChartViewFieldDTO> drillFields,
                                    List<ChartDrillRequest> drillRequestList) {
         var fields = xAxis.stream().map(ChartViewFieldDTO::getId).collect(Collectors.toSet());
-        ChartDrillRequest head = drillRequestList.getFirst();
+        ChartDrillRequest head = drillRequestList.get(0);
         Map<Long, String> dimValMap = new HashMap<>();
         head.getDimensionList().forEach(item -> dimValMap.put(item.getId(), item.getValue()));
         Map<Long, ChartViewFieldDTO> fieldMap = xAxis.stream().collect(Collectors.toMap(ChartViewFieldDTO::getId, o -> o, ((p, n) -> p)));
