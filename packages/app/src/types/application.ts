@@ -1,6 +1,6 @@
 // 应用类型
 
-import { PUBLISH_MODULE } from "@onebase/common";
+import { PUBLISH_MODULE } from '@onebase/common';
 
 export interface Application {
   id: string;
@@ -90,10 +90,10 @@ export interface developUser {
  * 2: 已发布编辑中
  */
 export enum AppStatus {
-  DEVELOPING = 0,      // 开发中
-  PUBLISHED = 1,       // 已发布
-  EDITING_AFTER_PUBLISH = 2 // 已发布编辑中
-};
+  DEVELOPING = 0, // 开发中
+  PUBLISHED = 1, // 已发布
+  EDITING_AFTER_PUBLISH = 2 // 迭代中
+}
 
 export interface CreateApplicationReq {
   /**
@@ -135,7 +135,6 @@ export interface CreateApplicationReq {
 
   publishModel?: PUBLISH_MODULE;
 }
-
 
 /**
  * 数据源信息
@@ -190,7 +189,6 @@ export interface MapObject {
   key?: { [key: string]: any };
   [property: string]: any;
 }
-
 
 export interface UpdateApplicationReq {
   /**
@@ -257,5 +255,5 @@ export interface GetApplicationReq {
   /**
    * 应用ID
    */
-  id: string,
+  id: string;
 }
