@@ -772,7 +772,6 @@ const PageManagerPage: FC = () => {
         }}
         form={createForm}
         entityListOptions={entityListOptions}
-        // pageSetTypeOptions={pageSetTypeOptions}
         visibleCreateForm={visibleCreateScreenForm}
         initValue={{ pageType: PageType.NORMAL, menuName: '', parentId: RootParentPage.id }}
         treeData={convertMenuToTreeData(parentPageOptions, initTreeItemWidth, false, { height: '32px' })}

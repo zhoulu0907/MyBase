@@ -1,20 +1,20 @@
 import MenuComp from '@/components/MenuIcon';
 import { Button, Form, Input, Modal, Pagination, Select, TreeSelect, type FormInstance } from '@arco-design/web-react';
-import { PageType, RootParentPage } from '@onebase/app';
+import { RootParentPage } from '@onebase/app';
+import { useI18n } from '@/hooks/useI18n';
 import { webMenuIcons } from '@onebase/ui-kit';
 import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
-import screenNew from '@/assets/images/screenNew.svg';
-import screenTemplate from '@/assets/images/screenTemplate.svg';
-import screenLink from '@/assets/images/screenLink.svg';
-import screenChange from '@/assets/images/screenChange.svg';
+import screenNew from '@/assets/images/screen_new.svg';
+import screenTemplate from '@/assets/images/screen_template.svg';
+import screenLink from '@/assets/images/screen_link.svg';
+import screenChange from '@/assets/images/screen_change.svg';
 
 interface CreateModalProps {
   title: string;
   handleCreate: () => void;
   onCancel: () => void;
   form: FormInstance;
-  // pageSetTypeOptions: { label: string; value: any }[];
   visibleCreateForm: string;
   initValue: { pageType: number; menuName: string; parentId: string };
   treeData: any[];
@@ -26,13 +26,13 @@ const CreateModal: React.FC<CreateModalProps> = ({
   handleCreate,
   onCancel,
   form,
-  // pageSetTypeOptions,
   visibleCreateForm,
   initValue,
   treeData,
   entityListOptions
 }) => {
   const allWebMenuIcons = webMenuIcons.map((ele) => ele.children).reduce((acc, current) => acc.concat(current), []);
+  const { t } = useI18n();
   const InputSearch = Input.Search;
 
   const [menuIcon, setMenuIcon] = useState<string>();
@@ -88,20 +88,18 @@ const CreateModal: React.FC<CreateModalProps> = ({
     workbench: '页面',
     screen: '大屏名称'
   };
+
   const screenMethodData = [
-    // 从空白页面新建
     {
       key: 'screenNew',
       icon: screenNew,
       screenName: '从空白页面新建'
     },
-    // 从模版创建
     {
       key: 'screenTemplate',
       icon: screenTemplate,
       screenName: '从模版创建'
     },
-    // 关联已有大屏
     {
       key: 'screenLink',
       icon: screenLink,
@@ -131,6 +129,10 @@ const CreateModal: React.FC<CreateModalProps> = ({
 
   const handleChangeScreenMethod = (value: string) => {
     setScreenMethodLoading(true);
+    /**
+     * TODO 切换大屏创建方式
+     * params: screenMethod
+     */
     setScreenMethod(value);
     setTimeout(() => {
       setScreenMethodLoading(false);
@@ -138,20 +140,36 @@ const CreateModal: React.FC<CreateModalProps> = ({
   };
   const handleScreenChange = () => {
     console.log('handleScreenChange:', '换一批');
+    /**
+     * TODO 换一批
+     * params: screenMethod == screenNew + change
+     */
   };
 
   const handleSearchTemplate = (value: string) => {
     console.log('handleSearchTemplate:', value);
+    /**
+     * TODO 搜索模版
+     * params: screenMethod !== screenNew + value
+     */
   };
 
-  const handleChangeTemplateTab = (value: string) => {
+  const handleChangeTemplateTab = (value: string = '') => {
     // setScreenTemplateTabLoading(true);
+    /**
+     * TODO 切换模版tab
+     * params: screenMethod == screenTemplate + screenTemplateTab
+     */
     setScreenTemplateTab(value);
   };
 
   const handleChangePagination = (current: number) => {
     // setScreenTemplateTabLoading(true);
     console.log('handleChangePagination:', current);
+    /**
+     * TODO 改变分页
+     * params: screenMethod !== screenNew + screenPagination
+     */
     setScreenPagination((prev) => ({
       ...prev,
       current
@@ -162,7 +180,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
     <div className={styles.screenTemplateCard}>
       <div className={styles.screenTemplateCardImg}>
         <img src={item.src} alt="" />
-        <Button className={styles.screenTemplateCardBtn}>预览</Button>
+        <Button className={styles.screenTemplateCardBtn}>{t('createApp.preview')}</Button>
       </div>
       <div className={styles.screenTemplateCardTitle}>{item.title}</div>
     </div>
@@ -208,17 +226,6 @@ const CreateModal: React.FC<CreateModalProps> = ({
               transform: visibleMenuIcon ? 'translateX(-100%)' : ''
             }}
           >
-            {/* {visibleCreateForm !== 'group' && (
-            <Form.Item
-              label="页面类型"
-              field="pageSetType"
-              rules={[{ required: true, message: '请选择页面类型' }]}
-              disabled={visibleCreateForm === 'workbench'}
-            >
-              <Select options={getPageSetTypeOptions()} placeholder="请选择页面类型" allowClear />
-            </Form.Item>
-          )} */}
-
             <Form.Item
               label={nameMap[visibleCreateForm as keyof typeof nameMap]}
               field="menuName"
@@ -295,10 +302,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
                   key={item.key}
                   onClick={() => handleChangeScreenMethod(item.key)}
                 >
-                  <div className={styles.screenCreationMethodContentItemIcon}>
-                    {/* {item.icon} */}
-                    <img src={item.icon} alt="" />
-                  </div>
+                  <img src={item.icon} alt="" />
                   <div className={styles.screenCreationMethodContentItemText}>{item.screenName}</div>
                 </div>
               ))}
