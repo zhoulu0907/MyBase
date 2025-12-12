@@ -187,7 +187,7 @@ public class AppAuthSecurityApiImpl implements AppAuthSecurityApi {
 
     public List<Long> doGetVisibleMenuIds(Long userId, Long applicationId) {
         UserRoleDTO userRoleDTO = appAuthRoleProvider.findUserRoleByApplication(userId, applicationId);
-        List<AppMenuDO> menuDOS = appMenuRepository.findVisibleByAppId(applicationId,
+        List<AppMenuDO> menuDOS = appMenuRepository.findVisibleByAppIdAndType(applicationId,
                 Set.of(MenuTypeEnum.PAGE.getValue(), MenuTypeEnum.GROUP.getValue()));
         if (userRoleDTO.isAdminRole()) {
             return menuDOS.stream().map(AppMenuDO::getId).toList();

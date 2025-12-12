@@ -61,12 +61,8 @@ public class AppMenuServiceImpl implements AppMenuService {
     public List<MenuListRespVO> listBpmApplicationMenu() {
         Long applicationId = ApplicationManager.getApplicationId();
         // 获取应用下所有可见的BPM类型菜单
-        List<AppMenuDO> menuDOS = appMenuRepository.findByApplicationIdAndType(applicationId,
+        List<AppMenuDO> menuDOS = appMenuRepository.findVisibleByAppIdAndType(applicationId,
                 Set.of(MenuTypeEnum.BPM.getValue()));
-        // 额外过滤只保留可见的菜单
-        menuDOS = menuDOS.stream()
-                .filter(menu -> BooleanUtils.toBoolean(menu.getIsVisible()))
-                .toList();
         // 返回菜单
         return menuDOS.stream()
                 .map(v -> BeanUtils.toBean(v, MenuListRespVO.class))

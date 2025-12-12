@@ -18,13 +18,7 @@ import static com.cmsr.onebase.module.app.core.dal.dataobject.table.AppMenuTable
 @Repository
 public class AppMenuRepository extends BaseBizRepository<AppMenuMapper, AppMenuDO> {
 
-    public List<AppMenuDO> findByApplicationIdAndType(Long applicationId, Set<Integer> menuTypes) {
-        QueryWrapper queryWrapper = this.query()
-                .eq(AppMenuDO::getApplicationId, applicationId)
-                .in(AppMenuDO::getMenuType, menuTypes)
-                .orderBy(AppMenuDO::getMenuSort, true);
-        return list(queryWrapper);
-    }
+
 
     public List<AppMenuDO> findByApplicationId(Long applicationId) {
         QueryWrapper queryWrapper = this.query()
@@ -55,11 +49,11 @@ public class AppMenuRepository extends BaseBizRepository<AppMenuMapper, AppMenuD
         return this.getOne(queryWrapper);
     }
 
-    public void deleteByApplicationId(Long applicationId) {
-        this.updateChain()
-                .eq(AppMenuDO::getApplicationId, applicationId)
-                .remove();
-    }
+//    public void deleteByApplicationId(Long applicationId) {
+//        this.updateChain()
+//                .eq(AppMenuDO::getApplicationId, applicationId)
+//                .remove();
+//    }
 
 
     public int countByApplicationId(Long applicationId) {
@@ -67,11 +61,19 @@ public class AppMenuRepository extends BaseBizRepository<AppMenuMapper, AppMenuD
         return (int) count(queryWrapper);
     }
 
-    public List<AppMenuDO> findVisibleByAppId(Long applicationId, Set<Integer> menuTypes) {
+    public List<AppMenuDO> findVisibleByAppIdAndType(Long applicationId, Set<Integer> menuTypes) {
         QueryWrapper queryWrapper = this.query()
                 .where(APP_MENU.APPLICATION_ID.eq(applicationId))
                 .where(APP_MENU.IS_VISIBLE.eq(1))
                 .where(APP_MENU.MENU_TYPE.in(menuTypes));
+        return list(queryWrapper);
+    }
+
+    public List<AppMenuDO> findByApplicationIdAndType(Long applicationId, Set<Integer> menuTypes) {
+        QueryWrapper queryWrapper = this.query()
+                .eq(AppMenuDO::getApplicationId, applicationId)
+                .in(AppMenuDO::getMenuType, menuTypes)
+                .orderBy(AppMenuDO::getMenuSort, true);
         return list(queryWrapper);
     }
 
