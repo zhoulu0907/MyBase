@@ -34,6 +34,7 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
   const handleUpload = async (file: File, onProgress?: (percent: number, event?: ProgressEvent) => void) => {
     const formData = new FormData();
     formData.append('file', file);
+    
 
     const progressAdapter = onProgress
       ? (progressEvent: ProgressEvent) => {
