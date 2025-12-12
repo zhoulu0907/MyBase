@@ -7,7 +7,6 @@
         <groupId>com.cmsr.onebase</groupId>
         <artifactId>data-service</artifactId>
         <version>${revision}</version>
-        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>data-service-api</artifactId>
