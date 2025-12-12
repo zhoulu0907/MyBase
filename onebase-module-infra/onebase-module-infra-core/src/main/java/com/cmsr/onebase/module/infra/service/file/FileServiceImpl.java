@@ -155,8 +155,8 @@ public class FileServiceImpl implements FileService {
                 .setName(name).setPath(path).setUrl(url)
                 .setType(type).setSize(content.length)
                 .setMd5(md5)
-                .setVisitMode(visitMode))
-                .setRunMode(runMode);
+                .setVisitMode(visitMode)
+                .setRunMode(runMode));
         return fileDO.getId().toString();
     }
 

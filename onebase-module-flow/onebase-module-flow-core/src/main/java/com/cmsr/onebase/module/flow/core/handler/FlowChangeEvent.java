@@ -7,7 +7,7 @@ import lombok.Data;
  * @Date：2025/11/4 9:20
  */
 @Data
-public class ChangeEvent {
+public class FlowChangeEvent {
 
     public static final String UPDATE_EVENT = "update";
     public static final String DELETE_EVENT = "delete";

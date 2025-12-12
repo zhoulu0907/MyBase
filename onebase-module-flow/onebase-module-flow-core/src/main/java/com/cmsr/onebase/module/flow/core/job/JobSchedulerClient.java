@@ -21,7 +21,7 @@ import java.util.List;
 @Slf4j
 @Setter
 @Component
-public class JobClient {
+public class JobSchedulerClient {
 
     public static DateTimeFormatter DATETIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
@@ -36,11 +36,11 @@ public class JobClient {
 
     public String startJob(JobCreateRequest jobCreateRequest) {
         try {
-            String flowName = jobCreateRequest.getRemoteCallRequest().getApplicationId() + "-" + jobCreateRequest.getRemoteCallRequest().getProcessId();
+            String flowName = jobCreateRequest.getFlowRemoteCallRequest().getApplicationId() + "-" + jobCreateRequest.getFlowRemoteCallRequest().getProcessId();
             HttpTask httpTask = HttpTask.ofUrl(flowUrl)
                     .method(HttpTask.HttpMethod.POST)
-                    .body(JsonUtils.toJsonString(jobCreateRequest.getRemoteCallRequest()));
-            Long jobId = dolphinSchedulerClient.createSingletonHttpWorkflow(flowProjectCode, flowName, httpTask, jobCreateRequest.getRemoteCallRequest().getProcessName());
+                    .body(JsonUtils.toJsonString(jobCreateRequest.getFlowRemoteCallRequest()));
+            Long jobId = dolphinSchedulerClient.createSingletonHttpWorkflow(flowProjectCode, flowName, httpTask, jobCreateRequest.getFlowRemoteCallRequest().getProcessName());
             Schedule schedule = new Schedule();
             schedule.setStartTime(LocalDateTime.parse(jobCreateRequest.getStartTime(), DATETIME_FORMATTER));
             schedule.setEndTime(LocalDateTime.parse(jobCreateRequest.getEndTime(), DATETIME_FORMATTER));

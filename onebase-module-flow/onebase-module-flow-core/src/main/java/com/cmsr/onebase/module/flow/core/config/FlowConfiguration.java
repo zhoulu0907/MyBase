@@ -11,7 +11,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
  * @Date：2025/11/1 19:05
  */
 @Configuration
-public class FlowConfig {
+public class FlowConfiguration {
 
     //TODO 这个要全局配置
     @ConditionalOnMissingBean(TaskScheduler.class)

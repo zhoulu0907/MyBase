@@ -3,7 +3,7 @@ package com.cmsr.onebase.module.flow.runtime.controller;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.module.flow.core.flow.ExecutorResult;
 import com.cmsr.onebase.module.flow.core.flow.FlowRemoteCallExecutor;
-import com.cmsr.onebase.module.flow.core.flow.RemoteCallRequest;
+import com.cmsr.onebase.module.flow.core.flow.FlowRemoteCallRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.Setter;
@@ -30,7 +30,7 @@ public class FlowRemoteCallController {
 
     @PostMapping("/trigger")
     @Operation(summary = "远程调用触发")
-    public CommonResult<ExecutorResult> triggerForm(@RequestBody @Validated RemoteCallRequest request) {
+    public CommonResult<ExecutorResult> triggerForm(@RequestBody @Validated FlowRemoteCallRequest request) {
         ExecutorResult result = flowRemoteCallExecutor.executeFlow(request);
         return CommonResult.success(result);
     }

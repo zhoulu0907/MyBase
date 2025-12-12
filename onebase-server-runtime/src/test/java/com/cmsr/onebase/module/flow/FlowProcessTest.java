@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.flow;
 
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
-import com.cmsr.onebase.module.flow.api.FlowProcessExecApiImpl;
+import com.cmsr.onebase.module.flow.core.impl.FlowProcessExecApiImpl;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerReqDTO;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerRespDTO;
 import com.cmsr.onebase.module.flow.api.dto.TriggerEventEnum;
@@ -79,7 +79,7 @@ public class FlowProcessTest {
         reqDTO.setTraceId(UUID.randomUUID().toString());
         reqDTO.setTriggerEvent(TriggerEventEnum.BEFORE_CREATE);
         reqDTO.setApplicationId(173020283873034240L);
-        reqDTO.setTableName("xzqd_student");
+        reqDTO.setTableName("xzqd_student_info");
         reqDTO.setFlowContext(Map.of(
                 SystemFieldConstants.REQUIRE.CREATOR, "155019577667616800",
                 SystemFieldConstants.REQUIRE.UPDATER, "155019577667616800",
@@ -88,10 +88,10 @@ public class FlowProcessTest {
                 ));
 
         SemanticFieldValueDTO name = SemanticFieldValueDTO.ofType(SemanticFieldTypeEnum.TEXT);
-        name.setFieldName("name");
+        name.setFieldName("student_name");
         name.setRawValue("小");
         SemanticFieldValueDTO age = SemanticFieldValueDTO.ofType(SemanticFieldTypeEnum.NUMBER);
-        age.setFieldName("age");
+        age.setFieldName("gender");
         age.setRawValue(8);
 
         reqDTO.setFieldData(List.of(name, age));

@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.app.build.service.version;
 
+import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.app.build.service.AppCommonService;
@@ -9,6 +10,7 @@ import com.cmsr.onebase.module.app.build.vo.version.VersionPageRespVO;
 import com.cmsr.onebase.module.app.core.dal.database.version.AppVersionRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppApplicationDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppVersionDO;
+import com.cmsr.onebase.module.app.core.enums.AppErrorCodeConstants;
 import com.cmsr.onebase.module.app.core.enums.version.VersionTypeEnum;
 import com.cmsr.onebase.module.bpm.api.datamanager.BpmDataManager;
 import com.cmsr.onebase.module.flow.api.FlowDataManager;
@@ -120,7 +122,25 @@ public class AppVersionServiceImpl implements AppVersionService {
 
     @Override
     public void deleteApplicationVersion(Long versionId) {
-        versionRepository.removeById(versionId);
+        AppVersionDO versionDO = versionRepository.getById(versionId);
+        if (versionDO == null) {
+            throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_VERSION_NOT_EXIST);
+        }
+        if (versionDO.getVersionType() == 0) {
+            throw new IllegalArgumentException("不允许删除当前运行的版本");
+        }
+        if (VersionTypeEnum.RUNTIME.getValue() == versionDO.getVersionType()) {
+            throw new IllegalArgumentException("不允许删除当前运行的版本");
+        }
+        Long applicationId = versionDO.getApplicationId();
+        transactionTemplate.executeWithoutResult(transactionStatus -> {
+            // 删除对应的信息
+            // TODO: 在这里添加
+            appDataManager.removeApplicationVersion(applicationId, versionId);
+
+            // 删除版本
+            versionRepository.removeById(versionId);
+        });
     }
 
 

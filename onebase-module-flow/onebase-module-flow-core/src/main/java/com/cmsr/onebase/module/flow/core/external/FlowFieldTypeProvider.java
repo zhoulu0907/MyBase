@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.flow.context.provider;
+package com.cmsr.onebase.module.flow.core.external;
 
 import com.cmsr.onebase.module.flow.context.graph.JsonGraph;
 

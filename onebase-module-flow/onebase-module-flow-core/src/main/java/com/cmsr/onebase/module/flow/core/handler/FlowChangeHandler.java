@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.flow.core.handler;
 
 import com.cmsr.onebase.module.flow.core.config.FlowRuntimeCondition;
+import com.cmsr.onebase.module.flow.core.graph.FlowProcessManager;
 import com.cmsr.onebase.module.flow.core.utils.FlowUtils;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -26,20 +27,17 @@ import java.util.concurrent.TimeUnit;
  * @Date：2025/11/1 18:27
  */
 @Slf4j
+@Setter
 @Service
 @Conditional(FlowRuntimeCondition.class)
-public class FlowProcessManager implements ApplicationRunner, MessageListener<ChangeEvent> {
+public class FlowChangeHandler implements ApplicationRunner, MessageListener<FlowChangeEvent> {
 
-    @Setter
     @Autowired
-    private FlowCacheHandler flowCacheHandler;
+    private FlowProcessManager flowProcessManager;
 
-
-    @Setter
     @Autowired
     private RedissonClient redissonClient;
 
-    @Setter
     @Autowired
     private TaskScheduler taskScheduler;
 
@@ -51,13 +49,13 @@ public class FlowProcessManager implements ApplicationRunner, MessageListener<Ch
     private class UpdateCacheTask implements Runnable {
         @Override
         public void run() {
-            RMapCache<Long, ChangeEvent> mapCache = redissonClient.getMapCache(FlowUtils.REDIS_VERSION_CHANGE_CACHE_KEY, FlowUtils.KRYO5_CODEC);
-            mapCache.forEach((applicationId, changeEvent) -> {
+            RMapCache<Long, FlowChangeEvent> mapCache = redissonClient.getMapCache(FlowUtils.REDIS_VERSION_CHANGE_CACHE_KEY, FlowUtils.KRYO5_CODEC);
+            mapCache.forEach((applicationId, flowChangeEvent) -> {
                 try {
-                    if (ChangeEvent.UPDATE_EVENT.equals(changeEvent.getEventType())) {
-                        onApplicationUpdate(applicationId, changeEvent.getVersion());
-                    } else if (ChangeEvent.DELETE_EVENT.equals(changeEvent.getEventType())) {
-                        onApplicationDelete(applicationId, changeEvent.getVersion());
+                    if (FlowChangeEvent.UPDATE_EVENT.equals(flowChangeEvent.getEventType())) {
+                        onApplicationUpdate(applicationId, flowChangeEvent.getVersion());
+                    } else if (FlowChangeEvent.DELETE_EVENT.equals(flowChangeEvent.getEventType())) {
+                        onApplicationDelete(applicationId, flowChangeEvent.getVersion());
                     }
                 } catch (Exception e) {
                     log.error("更新版本异常：{}", e.getMessage(), e);
@@ -69,19 +67,19 @@ public class FlowProcessManager implements ApplicationRunner, MessageListener<Ch
     private class UpdateTimeJob implements Runnable {
         @Override
         public void run() {
-            flowCacheHandler.checkTimeJob();
+            flowProcessManager.checkTimeJob();
         }
     }
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        RMapCache<Long, ChangeEvent> mapCache = redissonClient.getMapCache(FlowUtils.REDIS_VERSION_CHANGE_CACHE_KEY, FlowUtils.KRYO5_CODEC);
+        RMapCache<Long, FlowChangeEvent> mapCache = redissonClient.getMapCache(FlowUtils.REDIS_VERSION_CHANGE_CACHE_KEY, FlowUtils.KRYO5_CODEC);
         mapCache.forEach((k, v) -> {
             versionCache.put(k, v.getVersion());
         });
-        flowCacheHandler.initAllProcess();
+        flowProcessManager.initAllProcess();
         RTopic topic = redissonClient.getTopic(FlowUtils.REDIS_VERSION_CHANGE_TOPIC_KEY);
-        topic.addListener(ChangeEvent.class, this);
+        topic.addListener(FlowChangeEvent.class, this);
         //60秒把缓存中的数据更新做处理
         taskScheduler.scheduleWithFixedDelay(new UpdateCacheTask(), Duration.of(60, ChronoUnit.SECONDS));
         //300秒更新一次时间任务，避免任务上线失败
@@ -89,14 +87,14 @@ public class FlowProcessManager implements ApplicationRunner, MessageListener<Ch
     }
 
     @Override
-    public void onMessage(CharSequence channel, ChangeEvent msg) {
+    public void onMessage(CharSequence channel, FlowChangeEvent msg) {
         log.info("更新自动化工作流版本：{}", msg);
         Long applicationId = msg.getApplicationId();
         Long version = msg.getVersion();
         try {
-            if (ChangeEvent.UPDATE_EVENT.equals(msg.getEventType())) {
+            if (FlowChangeEvent.UPDATE_EVENT.equals(msg.getEventType())) {
                 onApplicationUpdate(applicationId, version);
-            } else if (ChangeEvent.DELETE_EVENT.equals(msg.getEventType())) {
+            } else if (FlowChangeEvent.DELETE_EVENT.equals(msg.getEventType())) {
                 onApplicationDelete(applicationId, version);
             }
         } catch (Exception e) {
@@ -109,7 +107,7 @@ public class FlowProcessManager implements ApplicationRunner, MessageListener<Ch
             Long localVersion = versionCache.getIfPresent(applicationId);
             if (localVersion == null || localVersion < rVersion) {
                 log.info("更新应用自动化工作流：{}", applicationId);
-                flowCacheHandler.onApplicationChange(applicationId);
+                flowProcessManager.onApplicationChange(applicationId);
                 //
                 versionCache.put(applicationId, rVersion);
             }
@@ -121,7 +119,7 @@ public class FlowProcessManager implements ApplicationRunner, MessageListener<Ch
             Long localVersion = versionCache.getIfPresent(applicationId);
             if (localVersion == null || localVersion < rVersion) {
                 log.info("删除应用自动化工作流：{}", applicationId);
-                flowCacheHandler.onApplicationDelete(applicationId);
+                flowProcessManager.onApplicationDelete(applicationId);
                 //
                 versionCache.put(applicationId, rVersion);
             }

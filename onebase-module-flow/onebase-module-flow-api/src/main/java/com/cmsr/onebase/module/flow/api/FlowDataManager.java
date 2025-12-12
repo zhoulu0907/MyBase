@@ -20,4 +20,5 @@ public interface FlowDataManager {
     void deleteRuntimeData(Long applicationId);
 
     void onlineRuntimeData(Long applicationId);
+
 }
