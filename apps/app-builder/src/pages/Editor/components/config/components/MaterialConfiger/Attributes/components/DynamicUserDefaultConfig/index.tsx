@@ -1,7 +1,7 @@
 import { FormulaEditor } from '@/components/FormulaEditor';
 import { Button, Form, Select, Switch } from '@arco-design/web-react';
 import { type AuthRoleUsersPageRespVO, type DeptAndUsersRespDTO } from '@onebase/app';
-import { AddMembers } from '@onebase/common';
+import { AddMembers, TokenManager } from '@onebase/common';
 import { getDeptUser, getSimpleUserPage, type GetDeptUserReq } from '@onebase/platform-center';
 import { CONFIG_TYPES, getPopupContainer } from '@onebase/ui-kit';
 import { debounce } from 'lodash-es';
@@ -48,6 +48,7 @@ const DynamicUserDefaultConfig: React.FC<DynamicUserDefaultConfigProps> = ({
   const [memberData, setMemberData] = useState<DeptAndUsersRespDTO>();
   const [memberLoading, setMemberLoading] = useState<boolean>(false);
   const [selectedMembers, setSelectedMembers] = useState<any[]>(configs[SELECTSCOPE] || []);
+  const tokenInfo = TokenManager.getTokenInfo();
 
   useEffect(() => {
     if (selectedMembers?.length > 0) {
@@ -81,7 +82,7 @@ const DynamicUserDefaultConfig: React.FC<DynamicUserDefaultConfigProps> = ({
         pageSize: 20,
         keywords: keywords
       };
-      const { list, total } = await getSimpleUserPage(param);
+      const { list, total } = await getSimpleUserPage(param, tokenInfo?.loginMethod);
       setPageNo(pageNo + 1);
       setTotal(total);
       setUserData((prev) => [...prev, ...list]);
@@ -97,7 +98,7 @@ const DynamicUserDefaultConfig: React.FC<DynamicUserDefaultConfigProps> = ({
       pageSize: 20,
       keywords: inputValue
     };
-    const { list, total } = await getSimpleUserPage(param);
+    const { list, total } = await getSimpleUserPage(param, tokenInfo?.loginMethod);
     setPageNo(1);
     setTotal(total);
     setUserData(list || []);

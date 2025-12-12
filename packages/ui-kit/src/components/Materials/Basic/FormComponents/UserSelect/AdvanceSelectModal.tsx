@@ -3,7 +3,7 @@ import TabPane from '@arco-design/web-react/es/Tabs/tab-pane';
 import { debounce } from 'lodash-es';
 import React, { useCallback, useEffect, useState } from 'react';
 
-import { DeptMember } from '@onebase/common';
+import { DeptMember, TokenManager } from '@onebase/common';
 import { GetDeptUserReq, getSimpleUserPage, UserVO, getDeptUser } from '@onebase/platform-center';
 
 import './index.css';
@@ -50,6 +50,7 @@ const AdvanceSelectModal: React.FC<AdvanceSelectModalProps> = ({
   const [selectedMembers, setSelectedMembers] = useState<any[]>([]);
 
   const [finalSelect, setFinalSelect] = useState<any>();
+  const tokenInfo = TokenManager.getTokenInfo();
 
     useEffect(() => {
       if (runtime && status !== STATUS_VALUES[STATUS_OPTIONS.READONLY] && !detailMode) {
@@ -102,7 +103,7 @@ const AdvanceSelectModal: React.FC<AdvanceSelectModalProps> = ({
       pageSize: 20,
       keywords: inputValue
     };
-    const { list, total } = await getSimpleUserPage(param);
+    const { list, total } = await getSimpleUserPage(param, tokenInfo?.loginMethod);
     setPageNo(1);
     setTotal(total);
     setUserData(list || []);
@@ -121,7 +122,7 @@ const AdvanceSelectModal: React.FC<AdvanceSelectModalProps> = ({
         pageSize: 20,
         keywords: keywords
       };
-      const { list, total } = await getSimpleUserPage(param);
+      const { list, total } = await getSimpleUserPage(param, tokenInfo?.loginMethod);
       console.log(list, param.pageNo);
       setPageNo(pageNo + 1);
       setTotal(total);

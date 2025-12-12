@@ -216,6 +216,7 @@ const Right: React.FC = () => {
             expiresTime: response.expiresTime,
             tenantId: response.tenantId,
             corpId: response.corpId,
+            loginMethod: curAppInfo.value.publishModel === PUBLISH_MODULE.SASS || !appId ? 'mobile' : 'username',
             loginURL: window.location.href // 当前地址
           },
           rememberMe

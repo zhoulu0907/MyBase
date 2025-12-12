@@ -7,6 +7,8 @@ import appLicationManageSVG from '@/assets/images/terminal-window-line.svg';
 import userSVG from '@/assets/images/user-group.svg';
 import roleSVG from '@/assets/images/user.svg';
 import userInfoSVG from '@/assets/images/userInfo.svg';
+import plugSVG from '@/assets/images/plug.svg';
+import externalUserSVG from '@/assets/images/external_user.svg';
 import { Button, Layout, Menu } from '@arco-design/web-react';
 import { IconMenuFold, IconMenuUnfold } from '@arco-design/web-react/icon';
 import { hasMenu, TENANT_MENUS } from '@onebase/common';
@@ -119,6 +121,20 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
       key: 'extraFunction',
       title: '扩展功能',
       children: [
+        {
+          key: 'enterprise',
+          title: '插件管理',
+          icon: <img src={plugSVG} />,
+          path: `/onebase/${tenantId}/setting/plugin`,
+          permissionKey: TENANT_MENUS.CORP
+        },
+        {
+          key: 'externalUser',
+          title: '外部用户',
+          icon: <img src={externalUserSVG} />,
+          path: `/onebase/${tenantId}/setting/externalUser`,
+          permissionKey: TENANT_MENUS.CORP
+        },
         {
           key: 'enterprise',
           title: '企业管理',

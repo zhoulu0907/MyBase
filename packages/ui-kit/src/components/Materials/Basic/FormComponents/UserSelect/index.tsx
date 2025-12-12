@@ -12,7 +12,7 @@ import { getPopupContainer } from '@/utils';
 
 import '../index.css';
 import './index.css';
-import { isRuntimeEnv } from '@onebase/common';
+import { isRuntimeEnv, TokenManager } from '@onebase/common';
 
 const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const { label, dataField, tooltip, status, verify, layout,selectScope, defaultUserValue,labelColSpan = 0, runtime, detailMode } = props;
@@ -35,6 +35,7 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; d
   const runtimeRemoveRef = useRef<boolean>(false);
 
   const fieldValue = Form.useWatch(fieldName, form);
+  const tokenInfo = TokenManager.getTokenInfo();
 
   useEffect(() => {
     if (runtime && status !== STATUS_VALUES[STATUS_OPTIONS.READONLY] && !detailMode && keywords === ''
@@ -122,7 +123,7 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; d
       pageSize: 20,
       keywords: inputValue
     };
-    const { list, total } = await getSimpleUserPage(param);
+    const { list, total } = await getSimpleUserPage(param, tokenInfo?.loginMethod);
     setPageNo(1);
     setTotal(total);
 
@@ -143,7 +144,7 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; d
         pageSize: 20,
         keywords: keywords
       };
-      const { list, total } = await getSimpleUserPage(param);
+      const { list, total } = await getSimpleUserPage(param, tokenInfo?.loginMethod);
       setPageNo(pageNo + 1);
       setTotal(total);
       setUserData((prev) => [...prev, ...list]);
