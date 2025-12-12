@@ -438,6 +438,13 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             }
         }
 
+        // 安全检查：如果没有指定任何实体标识条件（entityUuid、entityId、tableName），返回空列表
+        // 防止查询出所有数据造成数据泄露
+        if (entityUuid == null) {
+            log.warn("getEntityFieldListByConditions: 未指定实体标识条件（entityUuid/entityId/tableName），返回空列表");
+            return java.util.Collections.emptyList();
+        }
+
         // 支持fieldName精确过滤
         if (queryVO.getFieldName() != null && !queryVO.getFieldName().trim().isEmpty()) {
             queryWrapper.eq(MetadataEntityFieldDO::getFieldName, queryVO.getFieldName().trim());
