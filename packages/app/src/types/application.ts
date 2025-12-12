@@ -71,6 +71,17 @@ export interface Application {
    * 发布模式
    */
   publishModel?: string;
+
+  /**
+   * 发布人
+   */
+  publisher?: string;
+
+  /**
+   * 发布时间
+   */
+  publishTime?: string;
+
   userPhotoList?: developUser[];
 }
 
