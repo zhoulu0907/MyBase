@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.infra.service.security;
 import com.cmsr.onebase.module.infra.dal.vo.security.*;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * 安全配置服务接口
@@ -60,4 +61,11 @@ public interface SecurityConfigService {
      * @return
      */
     List<SecurityConfigCategoryGroupRespVO> getTenantConfigItemsByCategoryCodes(SecurityConfigGetReqVO getReqVO);
+
+    /**
+     *  获取租户配置的需要脱敏的字段
+     * @return 配置值
+     */
+    Set<String> getTenantDesensitizedFieldValues();
+
 }

@@ -38,9 +38,25 @@ public class AppResourceImpl implements AppResourceApi {
     private AppMenuRepository appMenuRepository;
 
     @Override
-    public PageRespDTO findPageByPageId(Long pageId) {
-        AppResourcePageDO pageDO = pageRepository.getById(pageId);
-        return BeanUtils.toBean(pageDO, PageRespDTO.class);
+    public PageRespDTO findPageByPageUuid(Long applicationId, String pageUuid) {
+        return pageRepository.getByUuidInApplication(applicationId, pageUuid);
+    }
+
+    @Override
+    public String findTableUuidByAppIdAndPageUuid(Long applicationId, String pageUuid) {
+        AppResourcePageDO pageDO = pageRepository.findByAppIdAndPageUuid(applicationId, pageUuid);
+        if (pageDO == null) {
+            throw new IllegalArgumentException("页面不存在: " + pageUuid);
+        }
+        AppResourcePagesetDO pageSetDO = pageSetRepository.findByUuidInApplication(applicationId, pageDO.getPageSetUuid());
+        if (pageSetDO == null) {
+            throw new IllegalStateException("页面集不存在: " + pageDO.getPageSetUuid());
+        }
+        AppMenuDO menuDO = appMenuRepository.findByUuidInApplication(applicationId, pageSetDO.getMenuUuid());
+        if (menuDO == null) {
+            throw new IllegalStateException("菜单不存在: " + pageSetDO.getMenuUuid());
+        }
+        return menuDO.getEntityUuid();
     }
 
     @Override

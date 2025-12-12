@@ -18,6 +18,9 @@ public class EntityWithChildrenRespVO {
     @Schema(description = "实体ID", example = "1001")
     private Long entityId;
 
+    @Schema(description = "实体UUID", example = "019b0218-2cc7-7104-b390-27c7f2eb25a3")
+    private String entityUuid;
+
     @Schema(description = "实体显示名称", example = "用户信息")
     private String entityName;
 

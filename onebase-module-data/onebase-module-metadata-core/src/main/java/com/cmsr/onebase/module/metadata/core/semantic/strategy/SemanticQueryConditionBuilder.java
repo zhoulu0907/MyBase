@@ -6,16 +6,21 @@ import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticSortRuleDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticSortDirectionEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticCombinatorEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticConditionNodeTypeEnum;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticFieldTypeEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticOperatorEnum;
 import com.mybatisflex.core.query.QueryColumn;
 import com.mybatisflex.core.query.QueryCondition;
 import com.mybatisflex.core.query.QueryWrapper;
+import com.cmsr.onebase.module.metadata.core.semantic.constants.SystemFieldConstants;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Component
 public class SemanticQueryConditionBuilder {
@@ -42,7 +47,8 @@ public class SemanticQueryConditionBuilder {
         }
 
         if (hasDeletedField(fields)) {
-            qw.where(new QueryColumn("deleted").eq("0"));
+            QueryCondition strCond = new QueryColumn(SystemFieldConstants.OPTIONAL.DELETED).eq(0);
+            qw.where(strCond);
         }
     }
 
@@ -69,32 +75,87 @@ public class SemanticQueryConditionBuilder {
         boolean exists = fields != null && fields.stream().anyMatch(f -> name.equals(f.getFieldName()));
         if (!exists) { return null; }
         SemanticOperatorEnum op = cond.getOperator();
+        var type = resolveFieldType(name, fields);
         if (op == null) {
             if (val == null) { return null; }
-            return (val instanceof String) ? new QueryColumn(name).like(val) : new QueryColumn(name).eq(val);
+            Object casted = castValue(val, type);
+            if (casted instanceof String) { return new QueryColumn(name).like(casted); }
+            return new QueryColumn(name).eq(casted);
         } else if (op == SemanticOperatorEnum.EQUALS) {
-            return new QueryColumn(name).eq(val);
+            return new QueryColumn(name).eq(castValue(val, type));
         } else if (op == SemanticOperatorEnum.NOT_EQUALS) {
-            return new QueryColumn(name).ne(val);
+            return new QueryColumn(name).ne(castValue(val, type));
         } else if (op == SemanticOperatorEnum.GREATER_THAN) {
-            return new QueryColumn(name).gt(val);
+            return new QueryColumn(name).gt(castValue(val, type));
         } else if (op == SemanticOperatorEnum.GREATER_EQUALS) {
-            return new QueryColumn(name).ge(val);
+            return new QueryColumn(name).ge(castValue(val, type));
         } else if (op == SemanticOperatorEnum.LESS_THAN) {
-            return new QueryColumn(name).lt(val);
+            return new QueryColumn(name).lt(castValue(val, type));
         } else if (op == SemanticOperatorEnum.LESS_EQUALS) {
-            return new QueryColumn(name).le(val);
+            return new QueryColumn(name).le(castValue(val, type));
         } else if (op == SemanticOperatorEnum.CONTAINS) {
-            return new QueryColumn(name).like(val);
+            Object v = val == null ? null : String.valueOf(val);
+            return new QueryColumn(name).like(v);
         } else if (op == SemanticOperatorEnum.EXISTS_IN) {
-            if (values != null && !values.isEmpty()) { return new QueryColumn(name).in(values); }
+            if (values != null && !values.isEmpty()) { return new QueryColumn(name).in(castValues(values, type)); }
             return null;
         } else if (op == SemanticOperatorEnum.NOT_EXISTS_IN) {
-            if (values != null && !values.isEmpty()) { return new QueryColumn(name).notIn(values); }
+            if (values != null && !values.isEmpty()) { return new QueryColumn(name).notIn(castValues(values, type)); }
             return null;
         } else if (op == SemanticOperatorEnum.NOT_CONTAINS) {
             if (val == null) { return null; }
-            return new QueryColumn(name).notLike(val);
+            Object v = String.valueOf(val);
+            return new QueryColumn(name).notLike(v);
+        } else if (op == SemanticOperatorEnum.LATER_THAN) {
+            return new QueryColumn(name).gt(castValue(val, type));
+        } else if (op == SemanticOperatorEnum.EARLIER_THAN) {
+            return new QueryColumn(name).lt(castValue(val, type));
+        } else if (op == SemanticOperatorEnum.RANGE) {
+            if (values == null || values.isEmpty()) { return null; }
+            Object start = values.size() > 0 ? values.get(0) : null;
+            Object end = values.size() > 1 ? values.get(1) : null;
+            QueryCondition c = null;
+            Object sv = castValue(start, type);
+            Object ev = castValue(end, type);
+            if (sv != null) { c = new QueryColumn(name).ge(sv); }
+            if (ev != null) { c = (c == null) ? new QueryColumn(name).le(ev) : c.and(new QueryColumn(name).le(ev)); }
+            return c;
+        } else if (op == SemanticOperatorEnum.CONTAINS_ALL) {
+            if (values == null || values.isEmpty()) { return null; }
+            QueryCondition c = null;
+            for (Object v : values) {
+                if (v == null) { continue; }
+                QueryCondition likeCond = new QueryColumn(name).like(String.valueOf(v));
+                c = (c == null) ? likeCond : c.and(likeCond);
+            }
+            return c;
+        } else if (op == SemanticOperatorEnum.CONTAINS_ANY) {
+            if (values == null || values.isEmpty()) { return null; }
+            QueryCondition c = null;
+            for (Object v : values) {
+                if (v == null) { continue; }
+                QueryCondition likeCond = new QueryColumn(name).like(String.valueOf(v));
+                c = (c == null) ? likeCond : c.or(likeCond);
+            }
+            return c;
+        } else if (op == SemanticOperatorEnum.NOT_CONTAINS_ALL) {
+            if (values == null || values.isEmpty()) { return null; }
+            QueryCondition c = null;
+            for (Object v : values) {
+                if (v == null) { continue; }
+                QueryCondition notLikeCond = new QueryColumn(name).notLike(String.valueOf(v));
+                c = (c == null) ? notLikeCond : c.or(notLikeCond);
+            }
+            return c;
+        } else if (op == SemanticOperatorEnum.NOT_CONTAINS_ANY) {
+            if (values == null || values.isEmpty()) { return null; }
+            QueryCondition c = null;
+            for (Object v : values) {
+                if (v == null) { continue; }
+                QueryCondition notLikeCond = new QueryColumn(name).notLike(String.valueOf(v));
+                c = (c == null) ? notLikeCond : c.and(notLikeCond);
+            }
+            return c;
         } else if (op == SemanticOperatorEnum.IS_EMPTY) {
             QueryCondition c1 = new QueryColumn(name).isNull();
             QueryCondition c2 = new QueryColumn(name).eq("");
@@ -105,7 +166,9 @@ public class SemanticQueryConditionBuilder {
             return c1.and(c2);
         } else {
             if (val == null) { return null; }
-            return (val instanceof String) ? new QueryColumn(name).like(val) : new QueryColumn(name).eq(val);
+            Object casted = castValue(val, type);
+            if (casted instanceof String) { return new QueryColumn(name).like(casted); }
+            return new QueryColumn(name).eq(casted);
         }
     }
 
@@ -143,6 +206,58 @@ public class SemanticQueryConditionBuilder {
 
     private boolean hasDeletedField(List<SemanticFieldSchemaDTO> fields) {
         if (fields == null) { return false; }
-        return fields.stream().anyMatch(f -> "deleted".equalsIgnoreCase(f.getFieldName()));
+        return fields.stream().anyMatch(f -> SystemFieldConstants.OPTIONAL.DELETED.equalsIgnoreCase(f.getFieldName()));
+    }
+
+    private SemanticFieldTypeEnum resolveFieldType(String fieldName, List<SemanticFieldSchemaDTO> fields) {
+        if (fieldName == null || fields == null) { return null; }
+        Optional<SemanticFieldTypeEnum> t = fields.stream()
+                .filter(f -> f != null && fieldName.equals(f.getFieldName()))
+                .map(SemanticFieldSchemaDTO::getFieldTypeEnum)
+                .filter(Objects::nonNull)
+                .findFirst();
+        return t.orElse(null);
+    }
+
+    private Object castValue(Object v, SemanticFieldTypeEnum type) {
+        if (v == null || type == null) { return v; }
+        switch (type) {
+            case ID:
+            case USER:
+            case DEPARTMENT:
+            case DATA_SELECTION:
+                if (v instanceof Number) { return ((Number) v).longValue(); }
+                try { return Long.valueOf(String.valueOf(v).trim()); } catch (Exception e) { return null; }
+            case NUMBER:
+            case AGGREGATE:
+                if (v instanceof BigDecimal) { return v; }
+                if (v instanceof Number) { return new BigDecimal(String.valueOf(((Number) v))); }
+                try { return new BigDecimal(String.valueOf(v).trim()); } catch (Exception e) { return null; }
+            case DATE:
+                if (v instanceof LocalDate) { return v; }
+                try { return LocalDate.parse(String.valueOf(v).trim()); } catch (Exception e) { return null; }
+            case DATETIME:
+                if (v instanceof LocalDateTime) { return v; }
+                try {
+                    String s = String.valueOf(v).trim();
+                    if (s.contains(" ")) { s = s.replace(" ", "T"); }
+                    return LocalDateTime.parse(s);
+                } catch (Exception e) { return null; }
+            case BOOLEAN:
+                if (v instanceof Boolean) { return v; }
+                String s = String.valueOf(v).trim().toLowerCase();
+                if ("true".equals(s) || "1".equals(s)) { return true; }
+                if ("false".equals(s) || "0".equals(s)) { return false; }
+                return null;
+            default:
+                return String.valueOf(v);
+        }
+    }
+
+    private List<Object> castValues(List<Object> values, SemanticFieldTypeEnum type) {
+        if (values == null || values.isEmpty()) { return values; }
+        java.util.ArrayList<Object> list = new java.util.ArrayList<>(values.size());
+        for (Object v : values) { list.add(castValue(v, type)); }
+        return list;
     }
 }

@@ -25,6 +25,10 @@ public class FlowTask extends WarmFlowBaseEntity implements Task {
     @Column(value = "definition_id", comment = "对应flow_definition表的id")
     private Long definitionId;
 
+    /** 流程定义UUID（主关联） */
+    @Column(value = "definition_uuid", comment = "流程定义UUID")
+    private String definitionUuid;
+
     /** 对应flow_instance表的id */
     @Column(value = "instance_id", comment = "对应flow_instance表的id")
     private Long instanceId;
@@ -141,6 +145,11 @@ public class FlowTask extends WarmFlowBaseEntity implements Task {
             this.deleted = null;
         }
 
+        return this;
+    }
+
+    public Task setDefinitionUuid(String definitionUuid) {
+        this.definitionUuid = definitionUuid;
         return this;
     }
 }

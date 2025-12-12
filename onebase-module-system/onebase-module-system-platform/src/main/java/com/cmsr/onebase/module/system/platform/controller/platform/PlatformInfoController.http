@@ -17,6 +17,24 @@ tenant-id: 1
 GET {{baseUrl}}/system/platform/admin/get?id=
 Authorization: Bearer {{token}}
 
+### 获得管理员列表分页 /admin-api/system//admin/page
+GET {{baseUrl}}/system/platform/admin/page
+Content-Type: application/json
+Authorization: Bearer {{token}}
+timestamp:1765367423000
+nonce:KSQjLklkPDFnBEj1
+sign:018e5e79e46d93bd9e10f99104e51f1c861c351db948b3125a329e6ccd1bfdee
+
+### 获得管理员列表分页 /admin-api/system//admin/page
+POST {{baseUrl}}/system/platform/admin/update-email
+Content-Type: application/json
+Authorization: Bearer {{token}}
+timestamp:1765296874000
+nonce:1765293314000
+sign:888
+
+{"id":"167086357045215232","email":"155@ss.com"}
+
 ### 创建用户 /admin-api/system/user/platform-admin/create
 POST {{baseUrl}}/system/platform/admin/create
 Content-Type: application/json
@@ -31,6 +49,7 @@ tenant-id: 1
   "nickName": "管理员4",
   "adminType": "2"
 }
+
 ### 查询用户
 GET {{baseUrl}}/system/platform/admin/get?id=153539738093060096
 Authorization: Bearer {{token}}

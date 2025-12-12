@@ -17,5 +17,11 @@ public interface FlowDataManager {
     // 2、insert：把第一步查询出来的数据插入为versionTag为1
     void copyEditToRuntime(Long applicationId);
 
+    void offlineRuntimeData(Long applicationId);
+
     void onlineRuntimeData(Long applicationId);
+
+    void deleteAllApplicationData(Long applicationId);
+
+    void deleteApplicationVersionData(Long applicationId, Long versionId);
 }

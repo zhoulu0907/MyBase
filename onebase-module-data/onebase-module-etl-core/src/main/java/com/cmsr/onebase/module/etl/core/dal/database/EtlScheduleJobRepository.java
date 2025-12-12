@@ -7,6 +7,10 @@ import com.mybatisflex.core.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
+import static com.cmsr.onebase.module.etl.core.dal.dataobject.table.EtlScheduleJobTableDef.ETL_SCHEDULE_JOB;
+
 @Slf4j
 @Repository
 public class EtlScheduleJobRepository extends BaseAppRepository<EtlSchecheduJobMapper, EtlScheduleJobDO> {
@@ -14,21 +18,28 @@ public class EtlScheduleJobRepository extends BaseAppRepository<EtlSchecheduJobM
 
     public void deleteByWorkflow(String workflowUuid) {
         this.updateChain()
-                .eq(EtlScheduleJobDO::getWorkflowUuid, workflowUuid)
+                .where(ETL_SCHEDULE_JOB.WORKFLOW_UUID.eq(workflowUuid))
                 .remove();
     }
 
     public EtlScheduleJobDO findByApplicationAndWorkflow(Long applicationId, String workflowUuid) {
         QueryWrapper queryWrapper = query()
-                .eq(EtlScheduleJobDO::getApplicationId, applicationId)
-                .eq(EtlScheduleJobDO::getWorkflowUuid, workflowUuid);
+                .where(ETL_SCHEDULE_JOB.APPLICATION_ID.eq(applicationId))
+                .where(ETL_SCHEDULE_JOB.WORKFLOW_UUID.eq(workflowUuid));
         return getOne(queryWrapper);
     }
 
     public void removeJobId(String workflowUuid) {
-        updateChain()
-                .set(EtlScheduleJobDO::getJobId, null)
-                .where(EtlScheduleJobDO::getWorkflowUuid).eq(workflowUuid)
+        this.updateChain()
+                .set(ETL_SCHEDULE_JOB.JOB_ID, null)
+                .where(ETL_SCHEDULE_JOB.WORKFLOW_UUID.eq(workflowUuid))
                 .update();
+    }
+
+    public List<EtlScheduleJobDO> findAllOnlineJobByApplication(Long applicationId) {
+        QueryWrapper queryWrapper = this.query()
+                .where(ETL_SCHEDULE_JOB.APPLICATION_ID.eq(applicationId))
+                .where(ETL_SCHEDULE_JOB.JOB_ID.isNotNull());
+        return this.getMapper().selectListByQuery(queryWrapper);
     }
 }

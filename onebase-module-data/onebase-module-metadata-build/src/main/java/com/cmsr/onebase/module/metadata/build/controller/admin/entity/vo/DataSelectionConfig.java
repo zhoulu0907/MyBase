@@ -16,9 +16,19 @@ public class DataSelectionConfig {
     private Long relationId;
 
     /**
+     * 关联的目标实体ID（兼容前端传ID）
+     */
+    private Long targetEntityId;
+
+    /**
      * 关联的目标实体UUID
      */
     private String targetEntityUuid;
+
+    /**
+     * 关联的目标字段ID（兼容前端传ID）
+     */
+    private Long targetFieldId;
 
     /**
      * 关联的目标字段UUID

@@ -23,12 +23,18 @@ import java.util.List;
 public class FlowTask extends BaseEntity implements Task {
     public static final String INSTANCE_ID = "instance_id";
 
+    public static final String DEFINITION_UUID = "definition_uuid";
+
     public static final String NODE_CODE = "node_code";
 
 
     /** 对应flow_definition表的id */
     @Column(name = "definition_id", nullable = false)
     private Long definitionId;
+
+    /** 流程定义UUID（主关联） */
+    @Column(name = "definition_uuid", length = 64, nullable = false)
+    private String definitionUuid;
 
     /** 对应flow_instance表的id */
     @Column(name = INSTANCE_ID, nullable = false)
@@ -142,6 +148,11 @@ public class FlowTask extends BaseEntity implements Task {
             this.deleted = null;
         }
 
+        return this;
+    }
+
+    public Task setDefinitionUuid(String definitionUuid) {
+        this.definitionUuid = definitionUuid;
         return this;
     }
 }

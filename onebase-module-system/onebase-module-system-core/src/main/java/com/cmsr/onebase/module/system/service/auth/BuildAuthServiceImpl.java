@@ -25,6 +25,7 @@ import com.cmsr.onebase.module.system.enums.oauth2.OAuth2ClientConstants;
 import com.cmsr.onebase.module.system.enums.permission.RoleCodeEnum;
 import com.cmsr.onebase.module.system.enums.sms.SmsSceneEnum;
 import com.cmsr.onebase.module.system.enums.tenant.TenantCodeEnum;
+import com.cmsr.onebase.module.system.framework.security.core.PwdEnHelper;
 import com.cmsr.onebase.module.system.service.corp.CorpService;
 import com.cmsr.onebase.module.system.service.logger.LoginLogService;
 import com.cmsr.onebase.module.system.service.member.MemberService;
@@ -111,6 +112,9 @@ public class BuildAuthServiceImpl implements BuildAuthService {
 
     @Resource
     private CorpService corpService;
+
+    @Resource
+    private PwdEnHelper pwdEnHelper;
 
     @Override
     public AdminUserDO authenticate(String username, String password) {
@@ -209,9 +213,11 @@ public class BuildAuthServiceImpl implements BuildAuthService {
         // 校验短信、邮箱验证码
         validateVerfiyCode(reqVO);
 
+        // 解密原文
+        reqVO.setPassword(pwdEnHelper.decryptHexStr(reqVO.getPassword()));
+
         // 增加日志输出，便于调试
         log.debug("platformTenantEnableCreateApp配置值: {}", platformTenantEnableCreateApp);
-
         // 确保配置值不为null，并且为false时才执行校验
         if (Boolean.FALSE.equals(platformTenantEnableCreateApp)) {
             log.info("平台租户创建应用功能已禁用，开始校验租户信息");
@@ -502,6 +508,8 @@ public class BuildAuthServiceImpl implements BuildAuthService {
         if (user == null) {
             throw exception(USER_MOBILE_NOT_EXISTS);
         }
+        // 解密原文
+        reqVO.setPassword(pwdEnHelper.decryptHexStr(reqVO.getPassword()));
         userService.updateUserPassword(user.getId(), reqVO.getPassword());
     }
 }

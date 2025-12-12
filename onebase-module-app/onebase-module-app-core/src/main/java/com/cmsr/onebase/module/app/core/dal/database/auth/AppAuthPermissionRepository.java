@@ -29,11 +29,18 @@ public class AppAuthPermissionRepository extends BaseBizRepository<AppAuthPermis
         return this.getOne(queryWrapper);
     }
 
-    public List<AppAuthPermissionDO> findByAppIdAndRoleIdsAndMenuId(Long applicationId, Set<Long> roleIds, Long menuId) {
-        return mapper.findByAppIdAndRoleIdsAndMenuId(applicationId, roleIds, menuId);
+    public List<AppAuthPermissionDO> findByAppIdAndRoleIdsAndMenuId(Long applicationId, Set<String> roleUuids, String menuUuid) {
+        QueryWrapper queryWrapper = this.query()
+                .and(APP_AUTH_PERMISSION.APPLICATION_ID.eq(applicationId))
+                .and(APP_AUTH_PERMISSION.ROLE_UUID.in(roleUuids))
+                .and(APP_AUTH_PERMISSION.MENU_UUID.eq(menuUuid));
+        return list(queryWrapper);
     }
 
-    public List<AppAuthPermissionDO> findByAppIdAndRoleIds(Long applicationId, Set<Long> roleIds) {
-        return mapper.findByAppIdAndRoleIds(applicationId, roleIds);
+    public List<AppAuthPermissionDO> findByAppIdAndRoleIds(Long applicationId, Set<String> roleUuids) {
+        QueryWrapper queryWrapper = this.query()
+                .and(APP_AUTH_PERMISSION.APPLICATION_ID.eq(applicationId))
+                .and(APP_AUTH_PERMISSION.ROLE_UUID.in(roleUuids));
+        return list(queryWrapper);
     }
 }

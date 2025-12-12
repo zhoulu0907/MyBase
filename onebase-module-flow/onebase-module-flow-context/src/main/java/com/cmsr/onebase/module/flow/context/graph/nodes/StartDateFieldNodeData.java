@@ -66,6 +66,9 @@ public class StartDateFieldNodeData extends NodeData implements Serializable {
      */
     private String dailyExecTime;
 
+    /**
+     * 是否批量执行，暂时没管
+     */
     private boolean batchMode;
 
     private Integer batchSize;

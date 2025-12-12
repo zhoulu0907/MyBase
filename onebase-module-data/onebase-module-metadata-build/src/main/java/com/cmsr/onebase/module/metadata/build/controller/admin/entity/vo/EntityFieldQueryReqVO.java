@@ -3,8 +3,6 @@ package com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
-import jakarta.validation.constraints.NotNull;
-
 /**
  * 实体字段查询请求VO
  *
@@ -15,9 +13,17 @@ import jakarta.validation.constraints.NotNull;
 @Data
 public class EntityFieldQueryReqVO {
 
-    @Schema(description = "实体ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "1024")
-    @NotNull(message = "实体ID不能为空")
+    @Schema(description = "实体ID（与tableName、entityUuid三选一）", example = "1024")
     private String entityId;
+
+    @Schema(description = "实体UUID（与tableName、entityId三选一）", example = "019b0d63-43b3-7ec8-8818-56e6be5aa0fe")
+    private String entityUuid;
+
+    @Schema(description = "表名（与entityId二选一）", example = "biz_user")
+    private String tableName;
+
+    @Schema(description = "字段名（fieldName精确过滤）", example = "user_name")
+    private String fieldName;
 
     @Schema(description = "是否系统字段：0-不是，1-是", example = "1")
     private Integer isSystemField;

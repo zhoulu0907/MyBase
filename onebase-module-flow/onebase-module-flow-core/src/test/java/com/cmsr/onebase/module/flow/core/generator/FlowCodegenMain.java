@@ -25,8 +25,6 @@ public class FlowCodegenMain {
             "flow_node_type",
             "flow_process",
             "flow_process_date_field",
-            "flow_process_entity",
-            "flow_process_form",
             "flow_process_time"
     };
 
@@ -63,6 +61,7 @@ public class FlowCodegenMain {
         globalConfig.setEntityLombokNoArgsConstructorEnable(false);
         globalConfig.setEntityOverwriteEnable(true);
         globalConfig.setEntityJdkVersion(17);
+        globalConfig.setEntityOverwriteEnable(true);
 
         //生成Mapper
         globalConfig.setMapperGenerateEnable(true);
@@ -71,6 +70,7 @@ public class FlowCodegenMain {
         //
         globalConfig.setMapperXmlGenerateEnable(true);
         globalConfig.setMapperXmlPath(sourceDir);
+        globalConfig.setMapperXmlOverwriteEnable(true);
         //生成代码
         Generator generator = new Generator(dataSource, globalConfig);
         generator.generate();
@@ -83,6 +83,7 @@ public class FlowCodegenMain {
         //生成表定义
         globalConfig.enableTableDef();
         globalConfig.setTableDefPackage(basePackage + ".dataobject.table");
+        globalConfig.setTableDefOverwriteEnable(true);
         //生成代码
         Generator generator = new Generator(dataSource, globalConfig);
         generator.generate();

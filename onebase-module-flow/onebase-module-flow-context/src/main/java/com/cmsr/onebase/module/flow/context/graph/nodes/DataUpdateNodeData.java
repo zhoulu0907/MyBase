@@ -4,6 +4,7 @@ import com.cmsr.onebase.module.flow.context.condition.ConditionItem;
 import com.cmsr.onebase.module.flow.context.condition.Conditions;
 import com.cmsr.onebase.module.flow.context.graph.NodeData;
 import lombok.Data;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
 import java.util.List;
@@ -38,4 +39,13 @@ public class DataUpdateNodeData extends NodeData implements Serializable {
      */
     private List<ConditionItem> fields;
 
+    public String resolveTargetTableName() {
+        if (StringUtils.equalsIgnoreCase("mainTable", updateType)) {
+            return mainTableName;
+        } else if (StringUtils.equalsIgnoreCase("subTable", updateType)) {
+            return subTableName;
+        } else {
+            throw new IllegalArgumentException("数据更新updateType类型错误: " + updateType);
+        }
+    }
 }

@@ -8,7 +8,7 @@ import com.zaxxer.hikari.HikariDataSource;
 public class AppCodegenMain {
     //修改下面的各种参数
     private static final String DB_DRIVER = "org.postgresql.Driver";
-    private static final String DB_URL = "jdbc:postgresql://10.0.104.38:5432/onebase_flex";
+    private static final String DB_URL = "jdbc:postgresql://10.0.104.38:5432/onebase_cloud_v3";
     private static final String DB_USERNAME = "postgres";
     private static final String DB_PASSWORD = "onebase@2025";
 
@@ -74,6 +74,7 @@ public class AppCodegenMain {
         globalConfig.setMapperOverwriteEnable(true);
         //
         globalConfig.setMapperXmlGenerateEnable(true);
+        globalConfig.setMapperXmlOverwriteEnable(true);
         globalConfig.setMapperXmlPath(sourceDir);
         //生成代码
         Generator generator = new Generator(dataSource, globalConfig);
@@ -86,6 +87,7 @@ public class AppCodegenMain {
         globalConfig.setSourceDir(sourceDir);
         //生成表定义
         globalConfig.enableTableDef();
+        globalConfig.setTableDefOverwriteEnable(true);
         globalConfig.setTableDefPackage(basePackage + ".dataobject.table");
         //生成代码
         Generator generator = new Generator(dataSource, globalConfig);

@@ -1,9 +1,9 @@
 package com.cmsr.onebase.module.flow.graph;
 
-import com.cmsr.onebase.module.flow.api.FlowProcessExecApiImpl;
+import com.cmsr.onebase.module.flow.core.impl.FlowProcessExecApiImpl;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessRepository;
 import com.cmsr.onebase.module.flow.core.flow.FlowRemoteCallExecutor;
-import com.cmsr.onebase.module.flow.core.flow.RemoteCallRequest;
+import com.cmsr.onebase.module.flow.core.flow.FlowRemoteCallRequest;
 import com.cmsr.onebase.module.flow.runtime.service.FlowProcessExecService;
 import com.cmsr.onebase.server.runtime.OneBaseServerRuntimeApplication;
 import lombok.Setter;
@@ -35,7 +35,7 @@ public class FlowProcessDateTest {
     @Test
     public void testEntity1() throws IOException {
 //        115219301059362816 flowid
-        RemoteCallRequest jobMessage = new RemoteCallRequest();
+        FlowRemoteCallRequest jobMessage = new FlowRemoteCallRequest();
 //        jobMessage.setTime(LocalDateTime.now().toString());
 //        jobMessage.setTime("2025-11-05 15:35");
         jobMessage.setJobType("fld");
@@ -50,7 +50,7 @@ public class FlowProcessDateTest {
     @Test
     public void testEntity2() throws IOException {
 //        115219301059362816 flowid
-        RemoteCallRequest jobMessage = new RemoteCallRequest();
+        FlowRemoteCallRequest jobMessage = new FlowRemoteCallRequest();
         jobMessage.setJobType("fld");
         jobMessage.setProcessId(115219301059362816L);
         flowRemoteCallExecutor.executeFlow(jobMessage);

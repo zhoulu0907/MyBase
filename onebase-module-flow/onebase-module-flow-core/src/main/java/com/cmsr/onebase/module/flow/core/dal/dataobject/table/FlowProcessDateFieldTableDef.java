@@ -8,7 +8,7 @@ import com.mybatisflex.core.table.TableDef;
  *  表定义层。
  *
  * @author HuangJie
- * @since 2025-11-29
+ * @since 2025-12-12
  */
 public class FlowProcessDateFieldTableDef extends TableDef {
 
@@ -52,6 +52,9 @@ public class FlowProcessDateFieldTableDef extends TableDef {
     
     public final QueryColumn UPDATE_TIME = new QueryColumn(this, "update_time");
 
+    
+    public final QueryColumn APPLICATION_ID = new QueryColumn(this, "application_id");
+
     /**
      * 所有字段。
      */
@@ -60,7 +63,7 @@ public class FlowProcessDateFieldTableDef extends TableDef {
     /**
      * 默认字段，不包含逻辑删除或者 large 等字段。
      */
-    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, PROCESS_ID, JOB_ID, JOB_STATUS, ENTITY_ID, CREATOR, CREATE_TIME, UPDATER, UPDATE_TIME, DELETED, TENANT_ID};
+    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, PROCESS_ID, JOB_ID, JOB_STATUS, ENTITY_ID, CREATOR, CREATE_TIME, UPDATER, UPDATE_TIME, DELETED, TENANT_ID, APPLICATION_ID};
 
     public FlowProcessDateFieldTableDef() {
         super("", "flow_process_date_field");

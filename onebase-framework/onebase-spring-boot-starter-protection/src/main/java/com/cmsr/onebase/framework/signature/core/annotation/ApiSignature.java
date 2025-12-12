@@ -18,9 +18,9 @@ import java.util.concurrent.TimeUnit;
 public @interface ApiSignature {
 
     /**
-     * 同一个请求多长时间内有效 默认 60 秒
+     * 同一个请求多长时间内有效 默认 180 秒
      */
-    int timeout() default 60;
+    int timeout() default 180;
 
     /**
      * 时间单位，默认为 SECONDS 秒
@@ -39,7 +39,7 @@ public @interface ApiSignature {
     /**
      * 签名字段：appId 应用ID
      */
-    String appId() default "appId";
+    String appKey() default "appKey";
 
     /**
      * 签名字段：timestamp 时间戳

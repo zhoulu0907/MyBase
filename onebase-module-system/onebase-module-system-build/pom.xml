@@ -44,6 +44,10 @@
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-security-build</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-spring-boot-starter-protection</artifactId>
+        </dependency>
         <!-- DB 相关 -->
         <dependency>
             <groupId>com.cmsr.onebase</groupId>

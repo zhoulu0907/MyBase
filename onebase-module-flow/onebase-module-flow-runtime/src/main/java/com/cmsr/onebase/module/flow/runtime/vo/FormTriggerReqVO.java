@@ -21,10 +21,10 @@ public class FormTriggerReqVO {
     @Schema(description = "执行ID，对于交互式流程设置为后端返回的值")
     private String executionUuid;
 
-    @Schema(description = "输入参数，表单数据，用于条件过滤")
-    private Map<Long, Object> inputParams;
+    @Schema(description = "输入参数，表单数据，用于条件过滤，表单信息，用于前端提交数据的时候调用")
+    private Map<String, Object> inputParams;
 
-    @Schema(description = "输入字段，表单字段，表单数据收集")
+    @Schema(description = "输入字段，表单字段，表单数据收集，用于flow流程弹窗再次回传")
     private List<ModalNodeData.Field> inputFields;
 
 }

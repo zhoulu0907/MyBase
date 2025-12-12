@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.metadata.core.semantic.strategy.validation.impl;
 
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationUniqueDO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldSchemaDTO;
+import com.cmsr.onebase.module.metadata.core.semantic.dal.DynamicMetadataRepository;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntitySchemaDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticDataMethodOpEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticFieldTypeEnum;
@@ -10,6 +11,9 @@ import com.cmsr.onebase.module.metadata.core.semantic.strategy.validation.Semant
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.core.row.Db;
 import com.mybatisflex.core.row.Row;
+
+import jakarta.annotation.Resource;
+
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -18,6 +22,10 @@ import java.util.Optional;
 
 @Component
 public class SemanticUniqueValidationService implements SemanticValidationService {
+
+    @Resource
+    private DynamicMetadataRepository dynamicMetadataRepository;
+
     public SemanticUniqueValidationService() { }
 
 
@@ -95,7 +103,7 @@ public class SemanticUniqueValidationService implements SemanticValidationServic
         qw.select(pkName);
         for (SemanticFieldSchemaDTO f : candidates) { qw.select(f.getFieldName()); }
 
-        java.util.List<Row> rows = Db.selectListByQuery(entity.getTableName(), qw);
+        List<Row> rows = dynamicMetadataRepository.selectListByQuery(entity.getTableName(), qw);
         if (rows == null || rows.isEmpty()) { return result; }
 
         for (Row row : rows) {

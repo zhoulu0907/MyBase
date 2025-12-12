@@ -12,6 +12,20 @@ import java.io.Serializable;
 @Data
 public class LoopNodeData extends NodeData implements Serializable {
 
+    /**
+     * break  直接阻断，跳出循环
+     * continue 继续执行下一次循环
+     */
+    private String breakMode;
+
     private String dataNodeId;
+
+    public boolean isBreakMode() {
+        return "break".equalsIgnoreCase(this.breakMode);
+    }
+
+    public boolean isContinueMode() {
+        return "continue".equalsIgnoreCase(this.breakMode);
+    }
 
 }

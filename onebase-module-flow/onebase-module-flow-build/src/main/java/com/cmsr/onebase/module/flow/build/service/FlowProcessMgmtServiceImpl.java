@@ -33,17 +33,10 @@ public class FlowProcessMgmtServiceImpl implements FlowProcessMgmtService {
     private FlowProcessRepository flowProcessRepository;
 
     @Autowired
-    private FlowProcessFormRepository flowProcessFormRepository;
-
-    @Autowired
-    private FlowProcessEntityRepository flowProcessEntityRepository;
-
-    @Autowired
     private FlowProcessDateFieldRepository flowProcessDateFieldRepository;
 
     @Autowired
     private FlowProcessTimeRepository flowProcessTimeRepository;
-
 
     @Resource
     private AppApplicationApi appApplicationApi;
@@ -161,8 +154,6 @@ public class FlowProcessMgmtServiceImpl implements FlowProcessMgmtService {
         // 删除流程
         flowProcessRepository.removeById(id);
         flowProcessDateFieldRepository.deleteByProcessId(id);
-        flowProcessEntityRepository.deleteByProcessId(id);
-        flowProcessFormRepository.deleteByProcessId(id);
         flowProcessTimeRepository.deleteByProcessId(id);
     }
 

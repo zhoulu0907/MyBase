@@ -42,9 +42,22 @@
             <artifactId>onebase-module-infra-api</artifactId>
             <version>${revision}</version>
         </dependency>
+        
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-module-flow-api</artifactId>
+            <version>${revision}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-app-api</artifactId>
+            <version>${revision}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-metadata-api</artifactId>
             <version>${revision}</version>
             <scope>compile</scope>
         </dependency>
@@ -125,12 +138,7 @@
             <scope>compile</scope>
         </dependency>
 
-        <dependency>
-            <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-module-app-api</artifactId>
-            <version>${revision}</version>
-            <scope>compile</scope>
-        </dependency>
+        
 
 
         <!-- 工具类相关 -->

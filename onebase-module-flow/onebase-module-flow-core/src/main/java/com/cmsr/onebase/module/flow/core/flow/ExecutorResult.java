@@ -33,6 +33,13 @@ public class ExecutorResult {
 
     private Map<String, Object> outputParams;
 
+    public static ExecutorResult error(String message) {
+        ExecutorResult result = new ExecutorResult();
+        result.setSuccess(false);
+        result.setMessage(message);
+        return result;
+    }
+
     public static ExecutorResult error(Long processId, String message) {
         ExecutorResult result = new ExecutorResult();
         result.setProcessId(processId);

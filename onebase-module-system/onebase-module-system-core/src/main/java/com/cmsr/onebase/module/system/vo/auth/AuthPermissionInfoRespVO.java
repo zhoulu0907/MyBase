@@ -1,5 +1,7 @@
 package com.cmsr.onebase.module.system.vo.auth;
 
+import com.cmsr.onebase.framework.desensitize.annotation.EMailDesensitize;
+import com.cmsr.onebase.framework.desensitize.annotation.MobileDesensitize;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -52,9 +54,11 @@ public class AuthPermissionInfoRespVO {
         private String username;
 
         @Schema(description = "用户邮箱", example = "onebase@aaa.com")
+        @EMailDesensitize
         private String email;
 
         @Schema(description = "手机号", example = "156")
+        @MobileDesensitize
         private String mobile;
     }
 

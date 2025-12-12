@@ -11,14 +11,14 @@ import com.cmsr.onebase.module.flow.context.express.ExpressionItem;
 import com.cmsr.onebase.module.flow.context.express.OrExpression;
 import com.cmsr.onebase.module.flow.context.graph.InLoopDepth;
 import com.cmsr.onebase.module.flow.context.graph.nodes.DataUpdateNodeData;
-import com.cmsr.onebase.module.flow.context.provider.ConditionsProvider;
+import com.cmsr.onebase.module.flow.context.provider.FlowConditionsProvider;
 import com.cmsr.onebase.module.metadata.api.semantic.SemanticDynamicDataApi;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntityValueDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticTargetConditionVO;
+import com.mybatisflex.core.tenant.TenantManager;
 import com.yomahub.liteflow.annotation.LiteflowComponent;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.HashMap;
@@ -38,7 +38,7 @@ public class DataUpdateNodeComponent extends SkippableNodeComponent {
     private SemanticDynamicDataApi semanticDynamicDataApi;
 
     @Autowired
-    private ConditionsProvider conditionsProvider;
+    private FlowConditionsProvider flowConditionsProvider;
 
     @Override
     public void process() throws Exception {
@@ -51,35 +51,32 @@ public class DataUpdateNodeComponent extends SkippableNodeComponent {
         //
         SemanticTargetConditionVO reqDTO = new SemanticTargetConditionVO();
         reqDTO.setTraceId(executeContext.getTraceId());
-        if (StringUtils.equalsIgnoreCase("mainTable", nodeData.getUpdateType())) {
-            reqDTO.setTableName(nodeData.getMainTableName());
-        } else if (StringUtils.equalsIgnoreCase("subTable", nodeData.getUpdateType())) {
-            reqDTO.setTableName(nodeData.getSubTableName());
-        } else {
-            throw new IllegalArgumentException("updateType 类型错误: " + nodeData.getUpdateType());
-        }
+        reqDTO.setTableName(nodeData.resolveTargetTableName());
         //
         List<Conditions> conditions = nodeData.getFilterCondition();
-        OrExpression orExpression = conditionsProvider.formatConditionsForValue(conditions, expressionContext);
+        OrExpression orExpression = flowConditionsProvider.formatConditionsForValue(conditions, expressionContext);
         reqDTO.setSemanticConditionDTO(DataMethodApiHelper.processFilterCondition(orExpression));
         //
         List<ConditionItem> fields = nodeData.getFields();
-        reqDTO.setUpdateProperties(buildSingleReqData(fields, expressionContext));
+        reqDTO.setUpdateProperties(buildSingleReqData(fields, expressionContext, executeContext));
         //
-        List<SemanticEntityValueDTO> respDTOSS = ApplicationManager.withApplicationIdAndVersionTag(
+        List<SemanticEntityValueDTO> respDTOSS = TenantManager.withoutTenantCondition(() -> ApplicationManager.withApplicationIdAndVersionTag(
                 executeContext.getApplicationId(),
                 executeContext.getVersionTag(),
-                () -> semanticDynamicDataApi.updateDataByCondition(reqDTO));
+                () -> semanticDynamicDataApi.updateDataByCondition(reqDTO)
+        ));
         executeContext.addLog("数据更新节点更新数据量: " + respDTOSS.size());
         variableContext.putNodeVariables(this.getTag(), DataMethodApiHelper.convertToListMap(respDTOSS));
     }
 
-    private Map<String, Object> buildSingleReqData(List<ConditionItem> conditionItems, Map<String, Object> vars) {
-        List<ExpressionItem> expressionItems = conditionsProvider.formatConditionItemsForValue(conditionItems, vars);
+    private Map<String, Object> buildSingleReqData(List<ConditionItem> conditionItems, Map<String, Object> vars, ExecuteContext executeContext) {
+        List<ExpressionItem> expressionItems = flowConditionsProvider.formatConditionItemsForValue(conditionItems, vars);
         Map<String, Object> data = new HashMap<>();
         for (ExpressionItem expressionItem : expressionItems) {
             data.put(expressionItem.getFieldKey(), expressionItem.getFieldValue());
         }
+        Map<String, String> systemFields = DataMethodApiHelper.extractSystemFields(executeContext);
+        data.putAll(systemFields);
         return data;
     }
 

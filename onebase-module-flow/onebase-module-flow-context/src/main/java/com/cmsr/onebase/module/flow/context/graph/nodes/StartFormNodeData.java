@@ -2,10 +2,12 @@ package com.cmsr.onebase.module.flow.context.graph.nodes;
 
 import com.cmsr.onebase.module.flow.context.condition.Conditions;
 import com.cmsr.onebase.module.flow.context.graph.NodeData;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldSchemaDTO;
 import lombok.Data;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Author：huangjie
@@ -23,7 +25,20 @@ public class StartFormNodeData extends NodeData implements Serializable {
      */
     private Long processId;
 
+    /**
+     * 页面ID，!!!后补充!!!
+     */
+    private Long pageId;
 
+    /**
+     * 表名，!!!后补充!!!
+     */
+    private String tableName;
+
+    /**
+     * 字段信息,!!!后补充!!!
+     */
+    private Map<String, SemanticFieldSchemaDTO> fieldSchemaMap;
 
 
     private String triggerRange;

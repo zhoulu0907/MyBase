@@ -9,7 +9,6 @@ import com.mybatisflex.core.query.*;
 import com.mybatisflex.core.util.CollectionUtil;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -19,47 +18,23 @@ import java.util.List;
 public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity> extends ServiceImpl<M, T> {
 
     protected void injectQueryFilter(QueryWrapper queryWrapper) {
-        if (!canFilter(queryWrapper)) {
+        if (!QueryWrapperUtils.isQueryFilterable(queryWrapper)) {
             return;
         }
+        QueryTable queryTable = QueryWrapperUtils.getQueryTable(queryWrapper);
         QueryColumn applicationColumn;
         QueryColumn versionTagColumn;
-        List<QueryTable> queryTables = CPI.getQueryTables(queryWrapper);
-        if (CollectionUtils.isEmpty(queryTables)) {
+        if (queryTable != null) {
+            applicationColumn = new QueryColumn(queryTable, BaseBizEntity.APPLICATION_ID);
+            versionTagColumn = new QueryColumn(queryTable, BaseBizEntity.VERSION_TAG);
+        } else {
             applicationColumn = new QueryColumn(BaseBizEntity.APPLICATION_ID);
             versionTagColumn = new QueryColumn(BaseBizEntity.VERSION_TAG);
-        } else {
-            applicationColumn = new QueryColumn(queryTables.get(0), BaseBizEntity.APPLICATION_ID);
-            versionTagColumn = new QueryColumn(queryTables.get(0), BaseBizEntity.VERSION_TAG);
         }
         Long applicationId = ApplicationManager.getApplicationId();
         Long versionTag = ApplicationManager.getVersionTag();
         queryWrapper.and(applicationColumn.eq(applicationId).when(!ApplicationManager.isIgnoreApplicationCondition()));
         queryWrapper.and(versionTagColumn.eq(versionTag).when(!ApplicationManager.isIgnoreVersionTagCondition()));
-    }
-
-    private boolean canFilter(QueryWrapper queryWrapper) {
-        if (ApplicationManager.isIgnoreApplicationCondition() && ApplicationManager.isIgnoreVersionTagCondition()) {
-            return false;
-        }
-        // 不处理UNION类型
-        List<UnionWrapper> unions = CPI.getUnions(queryWrapper);
-        if (CollectionUtils.isNotEmpty(unions)) {
-
-            return false;
-        }
-        // 不处理子查询
-        List<QueryWrapper> childSelect = CPI.getChildSelect(queryWrapper);
-        if (CollectionUtils.isNotEmpty(childSelect)) {
-            return false;
-        }
-        List<QueryTable> queryTables = CPI.getQueryTables(queryWrapper);
-        if (CollectionUtils.isNotEmpty(queryTables) && queryTables.size() > 1) {
-            log.warn("查询条件包含多个表，跳过条件注入");
-            return false;
-        }
-        // 需要处理
-        return true;
     }
 
     //region ===== 查询（查）操作 =====
@@ -263,6 +238,8 @@ public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity>
         return getMapper().paginateAs(page, query, asType);
     }
 
+    //endregion ===== 分页查询操作 =====
+
     // 1、备份运行态数据为历史版本
     public void moveRuntimeToHistory(Long applicationId, Long versionTag) {
         // 实现备份逻辑
@@ -314,5 +291,17 @@ public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity>
         });
         this.saveBatch(entities);
     }
-    //endregion ===== 分页查询操作 =====
+
+    public boolean deleteAllApplicationData(Long applicationId) {
+        return this.updateChain()
+                .where(BaseBizEntity.APPLICATION_ID, applicationId)
+                .remove();
+    }
+
+    public boolean deleteApplicationVersionData(Long applicationId, Long versionId) {
+        return this.updateChain()
+                .where(BaseBizEntity.APPLICATION_ID, applicationId)
+                .and(BaseBizEntity.VERSION_TAG, versionId)
+                .remove();
+    }
 }

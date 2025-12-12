@@ -34,6 +34,15 @@ public class ApiSignatureRedisDAO {
      */
     private static final String SIGNATURE_APPID = "api_signature_app";
 
+    private static final String SIGNATURE_ENABLE = "system:security:api-sign-enable";
+
+    public boolean isApiSignEnabled() {
+        // 从redis中读取配置
+        // stringRedisTemplate.opsForValue().set(SIGNATURE_ENABLE, "true");
+        String enable = stringRedisTemplate.opsForValue().get(SIGNATURE_ENABLE);
+        return "true".equalsIgnoreCase(enable);
+    }
+
     // ========== 验签随机数 ==========
 
     public String getNonce(String appId, String nonce) {
@@ -41,7 +50,7 @@ public class ApiSignatureRedisDAO {
     }
 
     public Boolean setNonce(String appId, String nonce, int time, TimeUnit timeUnit) {
-        return stringRedisTemplate.opsForValue().setIfAbsent(formatNonceKey(appId, nonce), "", time, timeUnit);
+        return stringRedisTemplate.opsForValue().setIfAbsent(formatNonceKey(appId, nonce), "onebase", time, timeUnit);
     }
 
     private static String formatNonceKey(String appId, String nonce) {

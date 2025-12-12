@@ -20,7 +20,8 @@ public enum SecurityCategoryCodeEnum implements ArrayValuable<String> {
     PASSWORD_POLICY("PASSWORD_POLICY", "密码策略配置"),
     MFA("MFA", "多因子认证配置"),
     CAPTCHA_STRATEGY("CAPTCHA_STRATEGY", "验证码策略配置"),
-    FILE_SECURITY("FILE_SECURITY", "文件安全配置")
+    FILE_SECURITY("FILE_SECURITY", "文件安全配置"),
+    DESENSITIZATION_SECURITY("DESENSITIZATION_SECURITY", "脱敏配置")
     ;
 
     public static final String[] ARRAYS = Arrays.stream(values()).map(SecurityCategoryCodeEnum::getValue).toArray(String[]::new);

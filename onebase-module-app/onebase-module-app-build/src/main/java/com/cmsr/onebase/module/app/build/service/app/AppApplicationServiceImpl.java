@@ -9,17 +9,14 @@ import com.cmsr.onebase.framework.uid.UidGenerator;
 import com.cmsr.onebase.module.app.build.service.AppCommonService;
 import com.cmsr.onebase.module.app.build.service.auth.AppAuthRoleService;
 import com.cmsr.onebase.module.app.build.service.menu.AppMenuService;
-import com.cmsr.onebase.module.app.build.service.version.AppVersionService;
+import com.cmsr.onebase.module.app.build.service.version.AppDataManager;
 import com.cmsr.onebase.module.app.build.util.AppUtils;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationCreateReqVO;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationCreateRespVO;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationRespVO;
 import com.cmsr.onebase.module.app.build.vo.tag.TagRespVO;
-import com.cmsr.onebase.module.app.core.dal.database.AppSqlQueryRepository;
 import com.cmsr.onebase.module.app.core.dal.database.app.AppApplicationRepository;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleRepository;
-import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleUserRepository;
-import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
 import com.cmsr.onebase.module.app.core.dal.database.tag.AppApplicationTagRepository;
 import com.cmsr.onebase.module.app.core.dal.database.tag.AppTagRepository;
 import com.cmsr.onebase.module.app.core.dal.database.version.AppVersionRepository;
@@ -28,6 +25,8 @@ import com.cmsr.onebase.module.app.core.enums.AppErrorCodeConstants;
 import com.cmsr.onebase.module.app.core.enums.app.ApplicationStatusEnum;
 import com.cmsr.onebase.module.app.core.vo.app.AppUserPhotoDTO;
 import com.cmsr.onebase.module.app.core.vo.app.ApplicationPageReqVO;
+import com.cmsr.onebase.module.flow.api.FlowDataManager;
+import com.cmsr.onebase.module.etl.api.EtlDataManager;
 import com.cmsr.onebase.module.metadata.api.datasource.MetadataDatasourceApi;
 import com.cmsr.onebase.module.metadata.api.datasource.dto.DatasourceCreateDefaultReqDTO;
 import com.cmsr.onebase.module.metadata.api.datasource.dto.DatasourceSaveReqDTO;
@@ -38,6 +37,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.Collections;
@@ -68,9 +68,6 @@ public class AppApplicationServiceImpl implements AppApplicationService {
     private AppTagRepository tagRepository;
 
     @Autowired
-    private AppMenuRepository menuRepository;
-
-    @Autowired
     private AppVersionRepository versionRepository;
 
     @Autowired
@@ -83,19 +80,22 @@ public class AppApplicationServiceImpl implements AppApplicationService {
     private MetadataDatasourceApi metadataDatasourceApi;
 
     @Autowired
-    private AppAuthRoleUserRepository appAuthRoleUserRepository;
-
-    @Autowired
     private AppAuthRoleRepository appAuthRoleRepository;
 
     @Autowired
-    private AppSqlQueryRepository appSqlQueryRepository;
-
-    @Autowired
-    private AppVersionService appVersionService;
-
-    @Autowired
     private AppMenuService appMenuService;
+
+    @Autowired
+    private AppDataManager appDataManager;
+
+    @Autowired
+    private FlowDataManager flowDataManager;
+
+    @Autowired
+    private TransactionTemplate transactionTemplate;
+
+    @Autowired
+    private EtlDataManager etlDataManager;
 
     @Override
     public PageResult<ApplicationRespVO> getApplicationPage(ApplicationPageReqVO pageReqVO) {
@@ -234,16 +234,22 @@ public class AppApplicationServiceImpl implements AppApplicationService {
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public void deleteApplication(Long id, String name) {
         AppApplicationDO applicationDO = appCommonService.validateApplicationExist(id);
         if (!StringUtils.equals(name, applicationDO.getAppName())) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_NAME_ERROR);
         }
-        //TODO 删除应用下的全部资源
-        applicationRepository.removeById(id);
-        menuRepository.deleteByApplicationId(id);
-        versionRepository.deleteByApplicationId(id);
+        // TODO: 先下线所有相关任务
+        etlDataManager.offlineAllByApplication(id);
+        flowDataManager.offlineRuntimeData(id);
+        transactionTemplate.executeWithoutResult(transactionStatus -> {
+            // TODO: 删除应用下的全部资源
+            etlDataManager.deleteAllApplicationData(id);
+            flowDataManager.deleteAllApplicationData(id);
+            appDataManager.deleteAllApplicationData(id);
+            versionRepository.deleteByApplicationId(id);
+            applicationRepository.removeById(id);
+        });
     }
 
     @Override
