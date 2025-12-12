@@ -21,13 +21,14 @@ export interface MetadataEntityPair {
   entityUuid: string;
   tableName: string;
   entityName: string;
-  relationType: (typeof RELATION_TYPE)[keyof typeof RELATION_TYPE];
-  relationshipTypes: string[];
+  relationType?: (typeof RELATION_TYPE)[keyof typeof RELATION_TYPE];
+  relationshipTypes?: string[];
 }
 
 export interface MetadataEntityField {
   id: string;
   entityId: string;
+  entityUuid: string;
   fieldName: string;
   displayName: string;
   fieldType: string;
@@ -58,6 +59,7 @@ export interface AppEntities {
 
 export interface AppEntity {
   entityId: string; // 实体ID
+  entityUuid: string; // 实体UUID
   tableName: string; // 表名
   entityName: string; // 实体名称
   entityType: string; // 实体类型，如“主表”、“子表”、“独立表”、“主子表”

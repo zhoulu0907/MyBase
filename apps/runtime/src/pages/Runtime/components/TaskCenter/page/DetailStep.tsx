@@ -103,7 +103,7 @@ const DetailStep: FC<any> = ({ stepData }: any) => {
       return;
     }
     // const opperator = nodeItem?.operators?.[0];
-    const pendingUserArr:string[] = [];
+    const pendingUserArr:any[] = [];
     const viewedUserArr:string[] = [];
     const endUsersArr:any[] = [];
     const autoCopyArr: string[] = []
@@ -118,7 +118,12 @@ const DetailStep: FC<any> = ({ stepData }: any) => {
         isNotStart = item.taskStatus === 'pre_approval' || item.taskStatus === '待审批'
         isPending = item.taskStatus === 'curr_in_approval' || item.taskStatus === '审批中'
         if (isPending || isNotStart) {
-          pendingUserArr.push(item?.avatar)
+          const user = {imgUrl: '', uName: ''}
+          user.imgUrl = item?.avatar || '';
+          if (item?.operator) {
+            user.uName = item.operator?.charAt(0)
+          }
+          pendingUserArr.push(user)
         } else {
           // 不是审批中的，需要单独显示，模拟renderOneUser参数的结构
           if (item.taskStatus === 'post_auto_cc') {
@@ -160,11 +165,8 @@ const DetailStep: FC<any> = ({ stepData }: any) => {
           <>
             <div className='user-temp' style={{ display: 'flex', alignItems: 'flex-end' }}>
               <AvatarGroup style={{maxWidth: '50%'}}>
-                {pendingUserArr && pendingUserArr.map((imgUrl, i) => <Avatar key={i}>
-                  <img
-                    alt="avatar"
-                    src={imgUrl}
-                  />
+                {pendingUserArr && pendingUserArr.map((user, i) => <Avatar key={i}>
+                  {user?.imgUrl ? <img alt="avatar" src={user.imgUrl}/> : user?.uName }
                 </Avatar>)}
               </AvatarGroup>
               {viewedUserArr.length > 0 &&<span className="gray-color" style={{ marginLeft: '14px', marginBottom: '3px', width: '44%', lineHeight: '16px' }}>
@@ -194,7 +196,7 @@ const DetailStep: FC<any> = ({ stepData }: any) => {
     const hasComment = opperator?.taskStatus !== 'post_submitted'
     return <>
       <div className="flex-bw-center user-temp">
-        <p className="photo-img">{opperator?.avatar && <img src={opperator.avatar} alt='' />}</p>
+        <p className="photo-img">{opperator?.avatar ? <img src={opperator.avatar} alt='' /> : opperator?.operator?.charAt(0)}</p>
         <div style={{ flex: 1 }}>
           <p>{opperator?.operator}</p>
           <p className="flex-bw-center">

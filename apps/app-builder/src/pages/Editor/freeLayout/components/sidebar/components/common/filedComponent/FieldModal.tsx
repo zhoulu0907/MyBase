@@ -1,6 +1,6 @@
 import { Modal, Checkbox } from '@arco-design/web-react';
 import { IconClose } from '@arco-design/web-react/icon';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 
 const CheckboxGroup = Checkbox.Group;
 
@@ -17,32 +17,21 @@ export default function FieldModal({
   fmVisible,
   setFmVisible,
   curKeyArr,
-  title = '添加隐藏字段',
+  title = '添加字段',
   mergeDataToTable,
-  ckOptions = [],
-  invert = []
+  ckOptions = []
 }: any) {
   const [ckedKey, setCkedKey] = useState(curKeyArr);
   const [checkedItem, setCheckedItem] = useState([]);
-
-  const invertKey = invert?.map((item: any) => {
-    return item.displayName;
-  });
-  const useCkOptions = ckOptions
-    ?.filter((item: any) => item.isSystemField === 0)
-    .map((item: any) => {
-      return {
-        label: item.displayName,
-        value: item.fieldName,
-        disabled: invertKey.includes(item.displayName)
-      };
-    });
+  const useCkOptions = useMemo(() => {
+    return ckOptions?.filter((item: any) => item.isSystemField === 0);
+  }, [ckOptions]);
 
   function handleCheckChange(keyArr: Array<any>) {
     setCkedKey(keyArr);
   }
   function handleDelCked(item: any) {
-    let key = item?.value;
+    let key = item.parentDisplayName ? item.parentDisplayName + item?.fieldName : item?.fieldName;
     if (key) {
       let key_arr: Array<any> = [];
       key_arr = key_arr.concat(ckedKey);
@@ -55,14 +44,7 @@ export default function FieldModal({
   }
   function handleSubmit() {
     if (Array.isArray(checkedItem)) {
-      let resData: Array<any> = [];
-      checkedItem.forEach((item: any) => {
-        resData.push({
-          fieldName: item.value,
-          displayName: item.label
-        });
-      });
-      mergeDataToTable && mergeDataToTable(resData);
+      mergeDataToTable && mergeDataToTable(checkedItem);
       setFmVisible(false);
     } else {
       console.error('选择的数据结构不对');
@@ -71,7 +53,7 @@ export default function FieldModal({
 
   useEffect(() => {
     let ckedArr: any = useCkOptions.filter((item: any) => {
-      return ckedKey.indexOf(item.value) > -1;
+      return ckedKey.indexOf(item.parentDisplayName ? item.parentDisplayName + item.fieldName : item?.fieldName) > -1;
     });
     setCheckedItem(ckedArr);
   }, [ckedKey]);
@@ -93,7 +75,11 @@ export default function FieldModal({
               checked={ckedKey.length === useCkOptions.length}
               onChange={(e: boolean) => {
                 if (e) {
-                  handleCheckChange(useCkOptions?.map((item: any) => item.value));
+                  handleCheckChange(
+                    useCkOptions?.map((item: any) =>
+                      item.parentDisplayName ? item.parentDisplayName + item?.fieldName : item?.fieldName
+                    )
+                  );
                 } else {
                   handleCheckChange([]);
                 }
@@ -104,10 +90,21 @@ export default function FieldModal({
           </div>
           <CheckboxGroup
             className="check-group-outer"
-            options={useCkOptions}
+            // options={useCkOptions}
             value={ckedKey}
             onChange={handleCheckChange}
-          />
+          >
+            {useCkOptions?.map((item: any, i: number) => {
+              return (
+                <Checkbox
+                  key={i}
+                  value={item.parentDisplayName ? item.parentDisplayName + item?.fieldName : item?.fieldName}
+                >
+                  {item.parentDisplayName ? item.parentDisplayName + ' _' + item?.displayName : item?.displayName}
+                </Checkbox>
+              );
+            })}
+          </CheckboxGroup>
         </section>
         <section className="right-part">
           <div className="flex-btw">
@@ -120,7 +117,9 @@ export default function FieldModal({
             {checkedItem?.map((item: any, i: number) => {
               return (
                 <div className="flex-btw arco-checkbox li" key={i}>
-                  <span>{item?.label}</span>
+                  <span>
+                    {item.parentDisplayName ? item.parentDisplayName + ' _' + item?.displayName : item?.displayName}
+                  </span>
                   <IconClose onClick={() => handleDelCked(item)} />
                 </div>
               );

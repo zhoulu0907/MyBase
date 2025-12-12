@@ -2,13 +2,13 @@ import filterIcon from '@/assets/images/filter.svg';
 import { Button, Dialog, Dropdown, Ellipsis, LoadMore, SearchBar, Sticky, Toast } from '@arco-design/mobile-react';
 import { useForm } from '@arco-design/mobile-react/esm/form';
 import {
-  dataMethodDelete,
-  dataMethodPage,
+  dataMethodDeleteV2,
+  dataMethodPageV2,
+  DeleteMethodV2Params,
   getEntityFieldsWithChildren,
   menuSignal,
+  PageMethodV2Params,
   type AppEntityField,
-  type DeleteMethodParam,
-  type PageMethodParam
 } from '@onebase/app';
 import { pagesRuntimeSignal } from '@onebase/common';
 import { BUTTON_OPTIONS, BUTTON_VALUES, ENTITY_FIELD_TYPE, RedirectMethod, useFormEditorSignal } from '@onebase/ui-kit';
@@ -44,6 +44,7 @@ const XLoadMore = memo(
     const {
       editMode = false,
       metaData,
+      tableName,
       searchItems,
       columns,
       pageSize = 10,
@@ -104,7 +105,7 @@ const XLoadMore = memo(
               const dataFieldInfo = mainMetaData.parentFields.find(
                 (field: AppEntityField) => field.fieldId === column.id
               );
-              const result = item[dataFieldInfo.fieldName] || '';
+              const result = item[dataFieldInfo?.fieldName] || '';
               if (!result) return '';
               if (typeof result === 'object') {
                 return JSON.stringify(result);
@@ -175,26 +176,26 @@ const XLoadMore = memo(
       }
 
       setLoading(true);
-      const req: PageMethodParam = {
-        menuId: curMenu.value?.id,
-        entityId: metaData,
-        pageNo: tablePageNo,
-        pageSize: pageSize,
-        filters: queryData
-      };
 
-      if (sortByObject?.fieldName) {
-        req.sortField = sortByObject.fieldName;
-        req.sortDirection = sortByObject.sortBy === 1 ? 'asc' : 'desc';
-      }
-      const res = await dataMethodPage(req);
+      // TODO: 后续调试（同步ui-kit/Table组件）
+      // if (sortByObject?.fieldName) {
+      //   req.sortField = sortByObject.fieldName;
+      //   req.sortDirection = sortByObject.sortBy === 1 ? 'asc' : 'desc';
+      // }
+
+      const req: PageMethodV2Params = {
+        pageNo: tablePageNo,
+        pageSize: pageSize || 10
+      };
+      
+      const res = await dataMethodPageV2(tableName, curMenu.value?.id, req);
 
       const mainMetaData = await getEntityFieldsWithChildren(metaData);
 
       const { list = [], total = 0 } = res;
 
       const newTableData = (list || []).map((item: any) => {
-        const newItem = item.data;
+        const newItem = item;
         Object.entries(newItem).forEach(([key, value]) => {
           // 优化：减少重复查找，提升可读性和性能
           if (Array.isArray(mainMetaData?.parentFields)) {
@@ -216,18 +217,18 @@ const XLoadMore = memo(
             );
             if (multiSelectField && newItem[key]) {
               if (Array.isArray(newItem[key])) {
-                newItem[key] =
-                  newItem[key].length > 1 ? newItem[key].map((item: string) => item).join(', ') : newItem[key];
+                newItem[key] = newItem[key].map((item: any) => item?.id).join(', ');
               }
             }
 
-            // 人员选择单选 TODO
+            // 人员选择单选
             const userSelectField = mainMetaData.parentFields.find(
-              (field: AppEntityField) => field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.USER.VALUE
+              (field: AppEntityField) =>
+                field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.USER.VALUE
             );
             if (userSelectField && newItem[key]) {
               if (newItem[key]) {
-                newItem[key] = newItem[key].userName;
+                newItem[key] = newItem[key].name;
               }
             }
 
@@ -237,14 +238,32 @@ const XLoadMore = memo(
                 field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.DEPARTMENT.VALUE
             );
             if (departmentField && newItem[key]) {
-              newItem[key] = newItem[key].deptName || '-';
+              newItem[key] = newItem[key].name || '-';
+            }
+
+            // 开关
+            const switchField = mainMetaData.parentFields.find(
+              (field: AppEntityField) =>
+                field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.BOOLEAN.VALUE
+            );
+            if (switchField && typeof newItem[key] === 'boolean') {
+              newItem[key] = newItem[key] ? '是' : '否'
+            }
+
+            // 单选列表
+            const selectField = mainMetaData.parentFields.find(
+              (field: AppEntityField) =>
+                field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.SELECT.VALUE
+            );
+            if (selectField) {
+              newItem[key] = newItem[key].id || '-'
             }
           }
         });
 
         return {
           ...newItem,
-          key: item.data.id
+          key: item.id
         };
       });
       setLoading(false);
@@ -271,12 +290,12 @@ const XLoadMore = memo(
       if (!runtime || !showFromPageData) {
         return;
       }
-      const req: DeleteMethodParam = {
-        menuId: curMenu.value?.id,
-        entityId: metaData,
+
+      const req: DeleteMethodV2Params = {
         id: id
       };
-      const res = await dataMethodDelete(req);
+      
+      const res = await dataMethodDeleteV2(tableName, curMenu.value?.id, req);
       if (res) {
         Toast.success('删除成功');
       }

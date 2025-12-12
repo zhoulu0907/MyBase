@@ -1,21 +1,14 @@
 import { Radio } from '@arco-design/web-react';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Header from '../../../header';
 import CcRecipientsConfig from './ccRecipientsConfig/index';
 import FieldConfig from './fieldConfig/index';
 import BottomBtn from '../../../bottomBtn/index';
-import { useLocation } from 'react-router-dom';
-import { getEntityFieldsWithChildren, getPageSetMetaData } from '@onebase/app';
 import styles from './index.module.less';
 
 const RadioGroup = Radio.Group;
 
-export default function CcRecipientsDreawer({ handleConfigSubmit, configData }) {
-  const location = useLocation();
-  const searchParams = new URLSearchParams(location.search);
-  const pageSetId = searchParams.get('pageSetId') || '';
-  const [ckOptions, setCkOptions] = useState([]);
-  const [tbaleName, setTbaleName] = useState('');
+export default function CcRecipientsDreawer({ handleConfigSubmit, configData }: any) {
   const [useCcRecipients, setCcRecipients] = useState<string>('ccRecipients');
   const [editValue, setEditValue] = useState('');
 
@@ -37,24 +30,11 @@ export default function CcRecipientsDreawer({ handleConfigSubmit, configData }) 
       if (key === 'copyReceiverConfig') {
         newData.copyReceiverConfig = Object.assign({}, newData.copyReceiverConfig, data);
       } else if (key === 'fieldPermConfig') {
-        newData.fieldPermConfig = {
-          ...newData.fieldPermConfig,
-          ...data
-        };
+        newData.fieldPermConfig = { ...data };
       }
       return newData;
     });
   }
-  const getMainMetaData = async () => {
-    const mainMetaData = await getPageSetMetaData({ pageSetId: pageSetId });
-    const { parentFields, tableName } = await getEntityFieldsWithChildren(mainMetaData);
-    setTbaleName(tableName);
-    setCkOptions(parentFields);
-  };
-
-  useEffect(() => {
-    getMainMetaData();
-  }, []);
 
   const renderContent = () => {
     switch (useCcRecipients) {
@@ -66,13 +46,7 @@ export default function CcRecipientsDreawer({ handleConfigSubmit, configData }) 
           />
         );
       case 'fieldPermissions':
-        return (
-          <FieldConfig
-            ckOptions={ckOptions}
-            setCcRecipientsConfigData={setCcRecipientsConfigData}
-            fieldPermConfig={fieldPermConfig}
-          />
-        );
+        return <FieldConfig setCcRecipientsConfigData={setCcRecipientsConfigData} fieldPermConfig={fieldPermConfig} />;
 
       default:
         return <div>抄送人</div>;
@@ -85,10 +59,6 @@ export default function CcRecipientsDreawer({ handleConfigSubmit, configData }) 
     if (!users.length && !roles.length) {
       errorMsg = '节点缺少抄送人';
     }
-    ccRecipientsConfigData?.fieldPermConfig?.fieldConfigs?.forEach((item: any) => {
-      item.tableName = tbaleName;
-      item.fieldDisplayName = item.displayName || item.fieldDisplayName;
-    });
     ccRecipientsConfigData.errorMsg = errorMsg;
     handleConfigSubmit && handleConfigSubmit(ccRecipientsConfigData, editValue);
   }

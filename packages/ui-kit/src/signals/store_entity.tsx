@@ -29,6 +29,7 @@ export const useAppEntityStore = create<appEntityStore>((set) => ({
 
   mainEntity: {
     entityId: '',
+    entityUuid: '',
     entityName: '',
     tableName: '',
     entityType: '',
@@ -36,7 +37,9 @@ export const useAppEntityStore = create<appEntityStore>((set) => ({
   } as AppEntity,
   setMainEntity: (mainEntity: AppEntity) => set(() => ({ mainEntity })),
   clearMainEntity: () =>
-    set(() => ({ mainEntity: { entityId: '', entityName: '', tableName: '', entityType: '', fields: [] } })),
+    set(() => ({
+      mainEntity: { entityId: '', entityUuid: '', entityName: '', tableName: '', entityType: '', fields: [] }
+    })),
 
   subEntities: {
     entities: []
