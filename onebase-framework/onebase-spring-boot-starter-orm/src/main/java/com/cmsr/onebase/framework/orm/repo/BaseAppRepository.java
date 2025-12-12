@@ -31,6 +31,11 @@ public class BaseAppRepository<M extends BaseMapper<T>, T extends BaseAppEntity>
         queryWrapper.and(applicationColumn.eq(applicationId));
     }
 
+    public boolean removeByApplicationId(Long applicationId) {
+        return this.updateChain()
+                .where(BaseAppEntity.APPLICATION_ID, applicationId)
+                .remove();
+    }
 
     //region ===== 查询（查）操作 =====
 

@@ -37,6 +37,18 @@ public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity>
         queryWrapper.and(versionTagColumn.eq(versionTag).when(!ApplicationManager.isIgnoreVersionTagCondition()));
     }
 
+    public boolean removeByApplicationId(Long applicationId) {
+        return this.updateChain()
+                .where(BaseBizEntity.APPLICATION_ID, applicationId)
+                .remove();
+    }
+
+    public boolean removeByApplicationVersion(Long applicationId, Long versionId) {
+        return this.updateChain()
+                .where(BaseBizEntity.APPLICATION_ID, applicationId)
+                .and(BaseBizEntity.VERSION_TAG, versionId)
+                .remove();
+    }
 
     //region ===== 查询（查）操作 =====
 
