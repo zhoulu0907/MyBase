@@ -23,7 +23,7 @@
         </dependency>
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-module-flow-core</artifactId>
+            <artifactId>onebase-module-metadata-common</artifactId>
             <version>${revision}</version>
         </dependency>
         <!-- Web 相关 -->

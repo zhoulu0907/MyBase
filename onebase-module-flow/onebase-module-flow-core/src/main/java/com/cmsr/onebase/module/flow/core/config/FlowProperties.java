@@ -1,6 +1,5 @@
-package com.cmsr.onebase.module.flow.context.config;
+package com.cmsr.onebase.module.flow.core.config;
 
-import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
@@ -11,13 +10,11 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class FlowProperties {
 
-    @Value("${lite-flow.version-tag:-1}")
+    @Value("${lite-flow.version-tag:1}")
     private Long versionTag;
 
     public Long getVersionTag() {
-        if (versionTag < 0) {
-            return ApplicationManager.getRequiredVersionTag();
-        }
         return versionTag;
     }
+
 }

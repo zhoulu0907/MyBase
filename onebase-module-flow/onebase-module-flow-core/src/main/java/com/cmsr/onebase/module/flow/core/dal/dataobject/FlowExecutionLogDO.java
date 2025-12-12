@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.flow.core.dal.dataobject;
 
-import com.cmsr.onebase.framework.orm.entity.BaseEntity;
+import com.cmsr.onebase.framework.orm.entity.BaseAppEntity;
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Table;
 import lombok.Data;
@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 @Data
 @Table(value = "flow_execution_log")
-public class FlowExecutionLogDO extends BaseEntity {
+public class FlowExecutionLogDO extends BaseAppEntity {
 
     @Column(value = "trigger_user_id")
     private Long triggerUserId;
@@ -19,9 +19,6 @@ public class FlowExecutionLogDO extends BaseEntity {
 
     @Column(value = "execution_uuid")
     private String executionUuid;
-
-    @Column(value = "application_id")
-    private Long applicationId;
 
     @Column(value = "process_id")
     private Long processId;

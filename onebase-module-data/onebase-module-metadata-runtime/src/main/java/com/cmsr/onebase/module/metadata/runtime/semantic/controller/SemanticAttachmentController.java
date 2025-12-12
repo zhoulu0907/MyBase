@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.metadata.runtime.semantic.controller;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.module.infra.api.file.FileApi;
 import com.cmsr.onebase.module.infra.api.file.dto.FileCreateReqDTO;
+import com.cmsr.onebase.module.metadata.core.semantic.type.RefType;
 import org.springframework.web.multipart.MultipartFile;
 import com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticRecordDTO;
@@ -209,6 +210,7 @@ public class SemanticAttachmentController {
 
     private Long toLong(Object v) {
         if (v == null) { return null; }
+        if (v instanceof RefType r) { v = r.getId(); }
         String s = String.valueOf(v).trim();
         if (s.isEmpty()) { return null; }
         try { return Long.parseLong(s); } catch (Exception ignored) { return null; }

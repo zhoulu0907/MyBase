@@ -417,9 +417,13 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
     public List<MetadataEntityFieldDO> getEntityFieldListByConditions(EntityFieldQueryVO queryVO) {
         QueryWrapper queryWrapper = QueryWrapper.create();
 
-        // 将entityId转换为entityUuid（兼容前端传入数字ID或UUID）
+        // 优先使用 entityUuid，其次将 entityId 转换为 entityUuid（兼容前端传入数字ID或UUID）
         String entityUuid = null;
-        if (queryVO.getEntityId() != null && !queryVO.getEntityId().trim().isEmpty()) {
+        if (queryVO.getEntityUuid() != null && !queryVO.getEntityUuid().trim().isEmpty()) {
+            // 直接使用前端传递的 entityUuid
+            entityUuid = queryVO.getEntityUuid().trim();
+            queryWrapper.eq(MetadataEntityFieldDO::getEntityUuid, entityUuid);
+        } else if (queryVO.getEntityId() != null && !queryVO.getEntityId().trim().isEmpty()) {
             entityUuid = idUuidConverter.toEntityUuid(queryVO.getEntityId().trim());
             queryWrapper.eq(MetadataEntityFieldDO::getEntityUuid, entityUuid);
         } else if (queryVO.getTableName() != null && !queryVO.getTableName().trim().isEmpty()) {

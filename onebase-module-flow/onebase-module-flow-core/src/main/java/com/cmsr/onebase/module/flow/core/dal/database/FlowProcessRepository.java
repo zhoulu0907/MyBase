@@ -79,4 +79,10 @@ public class FlowProcessRepository extends BaseBizRepository<FlowProcessMapper, 
         return getMapper().selectListByQuery(query);
     }
 
+    public List<FlowProcessDO> findByApplicationId(Long applicationId) {
+        QueryWrapper query = this.query()
+                .where(FLOW_PROCESS.APPLICATION_ID.eq(applicationId));
+        return getMapper().selectListByQuery(query);
+    }
+
 }

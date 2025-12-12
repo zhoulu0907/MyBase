@@ -82,4 +82,30 @@ public class AppDataManager {
     public void historyToEdit(Long applicationId, Long versionTag) {
         // 实现回滚到编辑态逻辑，没想好！
     }
+
+    public void deleteApplicationVersionData(Long applicationId, Long versionTag) {
+        workbenchComponentRepository.deleteApplicationVersionData(applicationId, versionTag);
+        resourceComponentRepository.deleteApplicationVersionData(applicationId, versionTag);
+        workbenchPageRepository.deleteApplicationVersionData(applicationId, versionTag);
+        resourcePageRepository.deleteApplicationVersionData(applicationId, versionTag);
+        resourcePageSetRepository.deleteApplicationVersionData(applicationId, versionTag);
+        menuRepository.deleteApplicationVersionData(applicationId, versionTag);
+        authViewRepository.deleteApplicationVersionData(applicationId, versionTag);
+        authFieldRepository.deleteApplicationVersionData(applicationId, versionTag);
+        authDataGroupRepository.deleteApplicationVersionData(applicationId, versionTag);
+        authPermissionRepository.deleteApplicationVersionData(applicationId, versionTag);
+    }
+
+    public void deleteAllApplicationData(Long applicationId) {
+        workbenchComponentRepository.deleteAllApplicationData(applicationId);
+        resourceComponentRepository.deleteAllApplicationData(applicationId);
+        workbenchPageRepository.deleteAllApplicationData(applicationId);
+        resourcePageRepository.deleteAllApplicationData(applicationId);
+        resourcePageSetRepository.deleteAllApplicationData(applicationId);
+        menuRepository.deleteAllApplicationData(applicationId);
+        authViewRepository.deleteAllApplicationData(applicationId);
+        authFieldRepository.deleteAllApplicationData(applicationId);
+        authDataGroupRepository.deleteAllApplicationData(applicationId);
+        authPermissionRepository.deleteAllApplicationData(applicationId);
+    }
 }

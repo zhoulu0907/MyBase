@@ -6,7 +6,7 @@ package com.cmsr.onebase.module.app.core.enums.version;
  * @Date：2025/8/12 11:20
  */
 public enum VersionTypeEnum {
-
+    BUILD(0, "编辑版本"),
     RUNTIME(1, "运行版本"),
     HISTORY(2, "历史版本"),
     ;

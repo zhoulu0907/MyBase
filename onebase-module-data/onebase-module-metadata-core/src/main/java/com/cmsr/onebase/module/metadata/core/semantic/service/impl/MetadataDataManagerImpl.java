@@ -108,5 +108,48 @@ public class MetadataDataManagerImpl implements MetadataDataManagerApi {
         metadataValidationUniqueRepository.copyEditToRuntime(applicationId) ;
     }
 
+    @Override
+    public void deleteApplicationVersionData(Long applicationId, Long versionTag){
+        metadataAppAndDatasourceRepository.deleteApplicationVersionData(applicationId, versionTag);
+        metadataAutoNumberConfigRepository.deleteApplicationVersionData(applicationId, versionTag);
+        metadataAutoNumberRuleItemRepository.deleteApplicationVersionData(applicationId, versionTag);
+        metadataAutoNumberStateRepository.deleteApplicationVersionData(applicationId,versionTag);
+        metadataBusinessEntityRepository.deleteApplicationVersionData(applicationId,versionTag);
+        metadataDatasourceRepository.deleteApplicationVersionData(applicationId,versionTag);
+        metadataEntityFieldOptionRepository.deleteApplicationVersionData(applicationId,versionTag);
+        metadataEntityFieldRepository.deleteApplicationVersionData(applicationId,versionTag);
+        metadataEntityRelationshipRepository.deleteApplicationVersionData(applicationId,versionTag);
+        metadataValidationChildNotEmptyRepository.deleteApplicationVersionData(applicationId,versionTag);
+        metadataValidationFormatRepository.deleteApplicationVersionData(applicationId,versionTag);
+        metadataValidationLengthRepository.deleteApplicationVersionData(applicationId,versionTag);
+        metadataValidationRangeRepository.deleteApplicationVersionData(applicationId,versionTag);
+        metadataValidationRequiredRepository.deleteApplicationVersionData(applicationId,versionTag);
+        metadataValidationRuleDefinitionRepository.deleteApplicationVersionData(applicationId,versionTag);
+        metadataValidationRuleGroupRepository.deleteApplicationVersionData(applicationId,versionTag);
+        metadataValidationRuleRepository.deleteApplicationVersionData(applicationId,versionTag);
+        metadataValidationUniqueRepository.moveRuntimeToHistory(applicationId,versionTag);
+    }
+
+    @Override
+    public void deleteAllApplicationData(Long applicationId) {
+        metadataAppAndDatasourceRepository.deleteAllApplicationData(applicationId);
+        metadataAutoNumberConfigRepository.deleteAllApplicationData(applicationId);
+        metadataAutoNumberRuleItemRepository.deleteAllApplicationData(applicationId);
+        metadataAutoNumberStateRepository.deleteAllApplicationData(applicationId) ;
+        metadataBusinessEntityRepository.deleteAllApplicationData(applicationId) ;
+        metadataDatasourceRepository.deleteAllApplicationData(applicationId) ;
+        metadataEntityFieldOptionRepository.deleteAllApplicationData(applicationId) ;
+        metadataEntityFieldRepository.deleteAllApplicationData(applicationId) ;
+        metadataEntityRelationshipRepository.deleteAllApplicationData(applicationId) ;
+        metadataValidationChildNotEmptyRepository.deleteAllApplicationData(applicationId) ;
+        metadataValidationFormatRepository.deleteAllApplicationData(applicationId) ;
+        metadataValidationLengthRepository.deleteAllApplicationData(applicationId) ;
+        metadataValidationRangeRepository.deleteAllApplicationData(applicationId) ;
+        metadataValidationRequiredRepository.deleteAllApplicationData(applicationId) ;
+        metadataValidationRuleDefinitionRepository.deleteAllApplicationData(applicationId) ;
+        metadataValidationRuleGroupRepository.deleteAllApplicationData(applicationId) ;
+        metadataValidationRuleRepository.deleteAllApplicationData(applicationId) ;
+        metadataValidationUniqueRepository.deleteAllApplicationData(applicationId) ;
+    }
 
 }
