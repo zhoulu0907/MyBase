@@ -36,11 +36,11 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
 
     const progressAdapter = onProgress
       ? (progressEvent: ProgressEvent) => {
-        if (progressEvent.lengthComputable) {
-          const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-          onProgress(percent, progressEvent);
+          if (progressEvent.lengthComputable) {
+            const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            onProgress(percent, progressEvent);
+          }
         }
-      }
       : undefined;
 
     if (runtime) {
@@ -60,6 +60,17 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
   useEffect(() => {
     handleGetUrlList();
   }, [fieldValue, entityDataId.value]);
+
+  // 组件卸载时清理所有 blob URL
+  useEffect(() => {
+    return () => {
+      urlList.forEach((url) => {
+        if (url && url.startsWith('blob:')) {
+          URL.revokeObjectURL(url);
+        }
+      });
+    };
+  }, []);
 
   const handleGetUrlList = async () => {
     let flag = false;
@@ -85,18 +96,42 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
       form.setFieldValue(fieldId, newFieldValue);
     }
 
-    // 如果没有数据或没有 entityDataId，直接返回
-    if (!newFieldValue.length || !entityDataId.value || !curMenu.value?.id) {
+    // 如果没有数据，直接返回
+    if (!newFieldValue.length) {
       return;
     }
 
-    // 处理所有文件的下载
+    // 处理所有文件的 URL
     try {
       const urls: string[] = [];
       for (const file of newFieldValue) {
-        // 检查文件是否有 fileId
+        console.log('==== file ====', file);
+
+        // 判断是否为本地上传的文件（有 originFile 或已有本地 URL）
+        const isLocalFile =
+          file.originFile || (file.url && typeof file.url === 'string' && file.url.startsWith('blob:'));
+
+        if (isLocalFile) {
+          // 本地上传的文件，使用本地 URL
+          if (file.originFile) {
+            // 如果还没有创建本地 URL，则创建
+            const localUrl = URL.createObjectURL(file.originFile);
+            urls.push(localUrl);
+          } else if (file.url && typeof file.url === 'string') {
+            // 如果已经有本地 URL，直接使用
+            urls.push(file.url);
+          }
+          continue;
+        }
+
+        // 已保存的文件，需要通过 attachmentDownload 接口获取 URL
         const fileId = file.response?.fileId || file.id;
         if (!fileId) {
+          continue;
+        }
+
+        // 如果没有 entityDataId 或 curMenu，无法调用 attachmentDownload，跳过
+        if (!entityDataId.value || !curMenu.value?.id) {
           continue;
         }
 
@@ -106,16 +141,52 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
           fieldName,
           fileId
         };
+
+        console.log('==== param ====', param);
+
         const url = await attachmentDownload(tableName, param);
         if (url) {
           urls.push(url);
         }
       }
+
       console.log('==== urls ====', urls);
-      setUrlList(urls);
+
+      // 清理旧的 blob URL，避免内存泄漏
+      setUrlList((prev) => {
+        prev.forEach((url) => {
+          if (url && url.startsWith('blob:')) {
+            URL.revokeObjectURL(url);
+          }
+        });
+        return urls;
+      });
     } catch (error) {
       console.error('获取文件 URL 失败:', error);
-      setUrlList([]);
+      // 清理旧的 blob URL
+      setUrlList((prev) => {
+        prev.forEach((url) => {
+          if (url && url.startsWith('blob:')) {
+            URL.revokeObjectURL(url);
+          }
+        });
+        return [];
+      });
+    }
+  };
+
+  // 处理文件删除，清理本地 URL
+  const handleRemoveFile = (file: any, index: number, fileProps: UploadListProps) => {
+    if (fileProps.onRemove) {
+      // 如果是本地 URL（blob URL），需要清理
+      const urlToRemove = urlList[index];
+      if (urlToRemove && urlToRemove.startsWith('blob:')) {
+        URL.revokeObjectURL(urlToRemove);
+      }
+      // 从 urlList 中移除对应的 URL
+      setUrlList((prev) => prev.filter((_, i) => i !== index));
+      // 调用 Upload 组件的删除方法
+      fileProps.onRemove(file);
     }
   };
 
@@ -139,9 +210,7 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
                   <IconClose
                     className="uplaodList-text-item-process-close"
                     onClick={() => {
-                      if (fileProps.onRemove) {
-                        fileProps.onRemove(file);
-                      }
+                      handleRemoveFile(file, index, fileProps);
                     }}
                   />
                 </div>
@@ -174,10 +243,7 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
                   {!detailMode && (
                     <IconDelete
                       onClick={() => {
-                        if (fileProps.onRemove) {
-                          fileProps.onRemove(file);
-                          setUrlList((prev) => prev.splice(index, 1));
-                        }
+                        handleRemoveFile(file, index, fileProps);
                       }}
                     />
                   )}
@@ -204,16 +270,15 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
                   <div className="uplaodList-list-item-content">
                     <div className="uplaodList-list-item-name">{file.name}</div>
                     <div className="uplaodList-list-item-size">
-                      {(file?.originFile?.size || file.size) ? <span>{((file?.originFile?.size || file.size) / 1024 / 1024).toFixed(2)}MB</span> : null}
+                      {file?.originFile?.size || file.size ? (
+                        <span>{((file?.originFile?.size || file.size) / 1024 / 1024).toFixed(2)}MB</span>
+                      ) : null}
                     </div>
                   </div>
                   <IconClose
                     className="uplaodList-list-item-close"
                     onClick={() => {
-                      if (fileProps.onRemove) {
-                        fileProps.onRemove(file);
-                        setUrlList((prev) => prev.splice(index, 1));
-                      }
+                      handleRemoveFile(file, index, fileProps);
                     }}
                   />
                 </div>
@@ -249,16 +314,15 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
                 description={
                   <div className="uplaodList-card-item-footer">
                     <div className="uplaodList-card-item-size">
-                      {(file?.originFile?.size || file.size) ? <span>{((file?.originFile?.size || file.size) / 1024 / 1024).toFixed(2)}MB</span> : null}
+                      {file?.originFile?.size || file.size ? (
+                        <span>{((file?.originFile?.size || file.size) / 1024 / 1024).toFixed(2)}MB</span>
+                      ) : null}
                     </div>
                     {!detailMode && (
                       <IconDelete
                         style={{ cursor: 'pointer' }}
                         onClick={() => {
-                          if (fileProps.onRemove) {
-                            fileProps.onRemove(file);
-                            setUrlList((prev) => prev.splice(index, 1));
-                          }
+                          handleRemoveFile(file, index, fileProps);
                         }}
                       />
                     )}
@@ -314,11 +378,14 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
           customRequest={async (option) => {
             const { onProgress, onError, onSuccess, file } = option;
             try {
+              // 本地上传的文件，直接使用本地 URL 渲染
+              const uploadImgUrl = URL.createObjectURL(file);
+              setUrlList((prev) => [...prev, uploadImgUrl]);
+
+              // 上传文件获取 fileId
               const fileId = await handleUpload(file, onProgress);
-              const uploadImgUrl = fileId ? URL.createObjectURL(file) : '';
               // 文件上传文件id
-              if (uploadImgUrl !== '') {
-                setUrlList((prev) => [...prev, uploadImgUrl]);
+              if (fileId) {
                 onSuccess({ fileId: fileId });
               } else {
                 onError({
