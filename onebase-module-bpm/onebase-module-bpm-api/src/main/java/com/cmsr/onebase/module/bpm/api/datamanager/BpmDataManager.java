@@ -26,4 +26,21 @@ public interface BpmDataManager {
      *
       */
     void copyEditToRuntime(Long applicationId);
+
+    /**
+     *  删除历史版本数据
+     *  执行delete动作。
+     *  1、delete：删除varsionTag为参数`versionTag`的数据
+     *  @param applicationId
+     *  @param versionTag
+     */
+    void removeApplicationVersion(Long applicationId, Long versionTag);
+
+    /**
+     *  删除运行态数据
+     *  执行delete动作。
+     *  1、delete：删除varsionTag为1的数据
+     *  @param applicationId
+     */
+    void removeApplication(Long applicationId);
 }

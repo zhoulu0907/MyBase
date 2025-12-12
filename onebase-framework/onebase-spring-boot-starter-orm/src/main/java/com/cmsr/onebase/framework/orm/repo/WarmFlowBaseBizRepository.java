@@ -1,6 +1,7 @@
 package com.cmsr.onebase.framework.orm.repo;
 
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
+import com.cmsr.onebase.framework.orm.entity.BaseAppEntity;
 import com.cmsr.onebase.framework.orm.entity.BaseBizEntity;
 import com.cmsr.onebase.framework.orm.entity.WarmFlowBizEntity;
 import com.mybatisflex.core.BaseMapper;
@@ -240,4 +241,17 @@ public class WarmFlowBaseBizRepository<M extends BaseMapper<T>, T extends WarmFl
     }
 
     //endregion ===== 分页查询操作 =====
+
+    public boolean deleteAllApplicationData(Long applicationId) {
+        return this.updateChain()
+                .where(WarmFlowBizEntity.APPLICATION_ID, applicationId)
+                .remove();
+    }
+
+    public boolean deleteApplicationVersionData(Long applicationId, Long versionId) {
+        return this.updateChain()
+                .where(WarmFlowBizEntity.APPLICATION_ID, applicationId)
+                .and(WarmFlowBizEntity.VERSION_TAG, versionId)
+                .remove();
+    }
 }
