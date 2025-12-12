@@ -36,11 +36,11 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
 
     const progressAdapter = onProgress
       ? (progressEvent: ProgressEvent) => {
-          if (progressEvent.lengthComputable) {
-            const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-            onProgress(percent, progressEvent);
-          }
+        if (progressEvent.lengthComputable) {
+          const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          onProgress(percent, progressEvent);
         }
+      }
       : undefined;
 
     if (runtime) {
@@ -87,7 +87,6 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
 
     // 如果没有数据或没有 entityDataId，直接返回
     if (!newFieldValue.length || !entityDataId.value || !curMenu.value?.id) {
-      setUrlList([]);
       return;
     }
 
@@ -205,7 +204,7 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
                   <div className="uplaodList-list-item-content">
                     <div className="uplaodList-list-item-name">{file.name}</div>
                     <div className="uplaodList-list-item-size">
-                      {file?.originFile?.size ? <span>{(file.originFile.size / 1024 / 1024).toFixed(2)}MB</span> : null}
+                      {(file?.originFile?.size || file.size) ? <span>{((file?.originFile?.size || file.size) / 1024 / 1024).toFixed(2)}MB</span> : null}
                     </div>
                   </div>
                   <IconClose
@@ -250,7 +249,7 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
                 description={
                   <div className="uplaodList-card-item-footer">
                     <div className="uplaodList-card-item-size">
-                      {file?.originFile?.size ? <span>{(file.originFile.size / 1024 / 1024).toFixed(2)}MB</span> : null}
+                      {(file?.originFile?.size || file.size) ? <span>{((file?.originFile?.size || file.size) / 1024 / 1024).toFixed(2)}MB</span> : null}
                     </div>
                     {!detailMode && (
                       <IconDelete
@@ -316,18 +315,7 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
             const { onProgress, onError, onSuccess, file } = option;
             try {
               const fileId = await handleUpload(file, onProgress);
-              let uploadImgUrl = '';
-              if (entityDataId.value) {
-                const param = {
-                  menuId: curMenu.value?.id,
-                  id: entityDataId.value,
-                  fieldName,
-                  fileId: fileId
-                };
-                uploadImgUrl = await attachmentDownload(tableName, param);
-              } else {
-                uploadImgUrl = URL.createObjectURL(file);
-              }
+              const uploadImgUrl = fileId ? URL.createObjectURL(file) : '';
               // 文件上传文件id
               if (uploadImgUrl !== '') {
                 setUrlList((prev) => [...prev, uploadImgUrl]);
