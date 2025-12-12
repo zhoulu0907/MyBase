@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.system.vo.user;
 
+import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.enums.CorpAppReationStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.PageParam;
 import com.cmsr.onebase.framework.common.validation.InEnum;
@@ -24,4 +25,8 @@ public class UserAppPageReqVO extends PageParam {
 
     @Schema(description = "用户名称")
     private String userName;
+
+    @Schema(description = "状态")
+    @InEnum(value = CommonStatusEnum.class, message = "状态必须是 {value}")
+    private Integer status;
 }
