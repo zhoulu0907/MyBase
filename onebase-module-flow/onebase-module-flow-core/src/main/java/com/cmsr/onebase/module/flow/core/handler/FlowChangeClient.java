@@ -1,19 +1,14 @@
 package com.cmsr.onebase.module.flow.core.handler;
 
-import com.cmsr.onebase.module.flow.core.config.FlowProperties;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessDateFieldRepository;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessRepository;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessTimeRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
-import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDateFieldDO;
-import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessTimeDO;
-import com.cmsr.onebase.module.flow.core.enums.FlowEnableStatusEnum;
 import com.cmsr.onebase.module.flow.core.enums.FlowJobStatusEnum;
-import com.cmsr.onebase.module.flow.core.enums.FlowTriggerTypeEnum;
 import com.cmsr.onebase.module.flow.core.utils.FlowUtils;
-import com.mybatisflex.core.tenant.TenantManager;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.redisson.api.RMapCache;
 import org.redisson.api.RTopic;
 import org.redisson.api.RedissonClient;
@@ -47,26 +42,10 @@ public class FlowChangeClient {
     @Autowired
     private FlowProcessDateFieldRepository flowProcessDateFieldRepository;
 
-    @Setter
-    @Autowired
-    private FlowProperties flowProperties;
 
     public void applicationUpdate(Long applicationId) {
         log.info("更新应用版本：{}", applicationId);
-        List<FlowProcessDO> flowProcessDOS = TenantManager.withoutTenantCondition(() ->
-                flowProcessRepository.findByApplicationIdAndEnableStatus(
-                        applicationId,
-                        FlowEnableStatusEnum.ENABLE.getStatus(),
-                        flowProperties.getVersionTag()
-                ));
-        for (FlowProcessDO flowProcessDO : flowProcessDOS) {
-            if (FlowTriggerTypeEnum.isTime(flowProcessDO.getTriggerType())) {
-                updateTimeJob(flowProcessDO);
-            }
-            if (FlowTriggerTypeEnum.isDateField(flowProcessDO.getTriggerType())) {
-                updateDateFieldJob(flowProcessDO);
-            }
-        }
+        resetScheduleJobStatus(applicationId);
         FlowChangeEvent flowChangeEvent = new FlowChangeEvent();
         flowChangeEvent.setEventType(FlowChangeEvent.UPDATE_EVENT);
         flowChangeEvent.setApplicationId(applicationId);
@@ -79,22 +58,6 @@ public class FlowChangeClient {
         topic.publish(flowChangeEvent);
     }
 
-    private void updateTimeJob(FlowProcessDO flowProcessDO) {
-        FlowProcessTimeDO flowProcessTimeDO = TenantManager.withoutTenantCondition(() -> flowProcessTimeRepository.findByProcessId(flowProcessDO.getId()));
-        if (flowProcessTimeDO != null) {
-            flowProcessTimeDO.setJobStatus(FlowJobStatusEnum.NEED_DEPLOY.getStatus());
-            flowProcessTimeRepository.updateById(flowProcessTimeDO);
-        }
-    }
-
-    private void updateDateFieldJob(FlowProcessDO flowProcessDO) {
-        FlowProcessDateFieldDO flowProcessDateFieldDO = TenantManager.withoutTenantCondition(() -> flowProcessDateFieldRepository.findByProcessId(flowProcessDO.getId()));
-        if (flowProcessDateFieldDO != null) {
-            flowProcessDateFieldDO.setJobStatus(FlowJobStatusEnum.NEED_DEPLOY.getStatus());
-            flowProcessDateFieldRepository.updateById(flowProcessDateFieldDO);
-        }
-    }
-
     public void applicationDelete(Long applicationId) {
         RMapCache<Long, Long> mapCache = redissonClient.getMapCache(FlowUtils.REDIS_VERSION_CHANGE_CACHE_KEY);
         mapCache.put(applicationId, -1L, FlowUtils.VERSION_TIMEOUT_MINUTES, TimeUnit.MINUTES);
@@ -105,5 +68,16 @@ public class FlowChangeClient {
         flowChangeEvent.setVersion(-1L);
         topic.publish(flowChangeEvent);
     }
+
+    public void resetScheduleJobStatus(Long applicationId) {
+        List<FlowProcessDO> processDOS = flowProcessRepository.findByApplicationId(applicationId);
+        if (CollectionUtils.isEmpty(processDOS)) {
+            return;
+        }
+        List<Long> ids = processDOS.stream().map(flowProcessDO -> flowProcessDO.getId()).toList();
+        flowProcessTimeRepository.updateJobStatus(FlowJobStatusEnum.NEED_DEPLOY.getStatus(), ids);
+        flowProcessDateFieldRepository.updateJobStatus(FlowJobStatusEnum.NEED_DEPLOY.getStatus(), ids);
+    }
+
 
 }

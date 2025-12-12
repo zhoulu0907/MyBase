@@ -6,6 +6,8 @@ import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 import static com.cmsr.onebase.module.flow.core.dal.dataobject.table.FlowProcessDateFieldTableDef.FLOW_PROCESS_DATE_FIELD;
 
 /**
@@ -24,5 +26,11 @@ public class FlowProcessDateFieldRepository extends ServiceImpl<FlowProcessDateF
     public void deleteByProcessId(Long processId) {
         QueryWrapper query = this.query().where(FLOW_PROCESS_DATE_FIELD.PROCESS_ID.eq(processId));
         super.remove(query);
+    }
+
+    public void updateJobStatus(String status, List<Long> ids) {
+        updateChain().set(FLOW_PROCESS_DATE_FIELD.JOB_STATUS, status)
+                .where(FLOW_PROCESS_DATE_FIELD.ID.in(ids))
+                .update();
     }
 }

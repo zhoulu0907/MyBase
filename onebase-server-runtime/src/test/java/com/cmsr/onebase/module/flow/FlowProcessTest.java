@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.flow;
 
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
-import com.cmsr.onebase.module.flow.api.FlowProcessExecApiImpl;
+import com.cmsr.onebase.module.flow.core.impl.FlowProcessExecApiImpl;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerReqDTO;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerRespDTO;
 import com.cmsr.onebase.module.flow.api.dto.TriggerEventEnum;

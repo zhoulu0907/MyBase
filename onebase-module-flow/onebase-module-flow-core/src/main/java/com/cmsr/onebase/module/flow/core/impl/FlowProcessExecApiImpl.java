@@ -1,5 +1,6 @@
-package com.cmsr.onebase.module.flow.api;
+package com.cmsr.onebase.module.flow.core.impl;
 
+import com.cmsr.onebase.module.flow.api.FlowProcessExecApi;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerReqDTO;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerRespDTO;
 import com.cmsr.onebase.module.flow.api.dto.TriggerEventEnum;
@@ -16,6 +17,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -33,7 +35,7 @@ import java.util.Map;
 public class FlowProcessExecApiImpl implements FlowProcessExecApi {
 
     @Autowired
-    private FlowProcessExecutor flowProcessExecutor;
+    private ObjectProvider<FlowProcessExecutor> flowProcessExecutorObjectProvider;
 
     @Autowired
     private FlowConditionsProvider flowConditionsProvider;
@@ -91,8 +93,14 @@ public class FlowProcessExecApiImpl implements FlowProcessExecApi {
     }
 
     private EntityTriggerRespDTO entityTrigger(EntityTriggerReqDTO reqDTO, StartEntityNodeData nodeData) {
+        FlowProcessExecutor flowProcessExecutor = flowProcessExecutorObjectProvider.getIfAvailable();
         Map<String, Object> inputData = reqDTO.toInputData();
         EntityTriggerRespDTO respDTO = new EntityTriggerRespDTO(reqDTO.getTraceId(), nodeData.getProcessId());
+        //先判断
+        if (flowProcessExecutor == null) {
+            respDTO.setMessage("流程执行器未初始化");
+            return respDTO;
+        }
         try {
             if (!triggerEventContains(nodeData.getTriggerEvents(), reqDTO.getTriggerEvent())) {
                 respDTO.setSuccess(true);
