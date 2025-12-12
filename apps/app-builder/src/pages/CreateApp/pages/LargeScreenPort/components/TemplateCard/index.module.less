@@ -9,13 +9,13 @@
   border: 1px solid #e5e6eb;
   background-color: #fff;
   transition: all 0.1s linear;
+  background: linear-gradient(180deg, rgba(232, 255, 254, 0.45) 0%, rgba(255, 255, 255, 0.45) 100%), #fff;
 
   &:hover {
     box-sizing: border-box;
     border-color: transparent;
     outline: 2px solid rgb(var(--primary-6));
     box-shadow: 0px 0px 8px 8px rgba(0, 0, 0, 0.05);
-    background: linear-gradient(180deg, rgba(232, 255, 254, 0.45) 0%, rgba(255, 255, 255, 0.45) 100%), #fff;
   }
 
   .appCardImg {
@@ -37,7 +37,7 @@
   }
   .cardName {
     font-size: 16px;
-    margin-top: 20px;
+    margin-top: 26px;
     font-weight: 500;
     .cardState {
       width: 72px;
@@ -54,9 +54,15 @@
     font-size: 14px;
     font-weight: 400;
     color: #4e5969;
+    margin: 12px 0 2px;
   }
   .footer {
     text-align: end;
+    font-size: 12px;
+  }
+  .footerRight {
+    display: flex;
+    align-items: center;
     font-size: 12px;
   }
 }

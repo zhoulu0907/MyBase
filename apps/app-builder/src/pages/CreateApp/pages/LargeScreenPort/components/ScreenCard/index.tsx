@@ -10,12 +10,17 @@ interface dataList {
   id: string;
   name: string;
   state: string;
+  desc: string;
 }
 interface CardProps {
   item: dataList;
   onDelete: (item: dataList) => void;
+  onSaveAs: (item: dataList) => void;
+  onEditScreen: (item: dataList) => void;
+  onEdit: (item: dataList) => void;
+  onPreview: (item: dataList) => void;
 }
-const ScreenCard: FC<CardProps> = ({ item, onDelete }) => {
+const ScreenCard: FC<CardProps> = ({ item, onDelete, onSaveAs, onEditScreen, onEdit, onPreview }) => {
   const menu = (
     <Menu style={{ borderRadius: 10 }}>
       <Menu.Item
@@ -35,6 +40,7 @@ const ScreenCard: FC<CardProps> = ({ item, onDelete }) => {
         key="2"
         onClick={(e) => {
           e.stopPropagation();
+          onSaveAs(item);
         }}
       >
         <div className={styles.menuItem}>
@@ -46,7 +52,7 @@ const ScreenCard: FC<CardProps> = ({ item, onDelete }) => {
   );
 
   useEffect(() => {}, []);
-  const onEdit = () => {};
+
   return (
     <div className={styles.appCard}>
       <div className={styles.appCardImg}>
@@ -54,21 +60,44 @@ const ScreenCard: FC<CardProps> = ({ item, onDelete }) => {
       </div>
       <div className={`${styles.appCardFooter} ${styles.cardName}`}>
         <div>
-          {item.name} <IconEdit fontSize={16} onClick={() => onEdit(item.id)} />
+          {item.name}
+          <IconEdit
+            fontSize={16}
+            style={{ marginLeft: 4 }}
+            onClick={(e) => {
+              e.stopPropagation();
+              onEditScreen(item);
+            }}
+          />
         </div>
-        <div className={styles.cardState}>{item.state}</div>
+        <div className={styles.cardState}>
+          <div className={styles.cicile}></div>
+          <div>{item.state}</div>
+        </div>
       </div>
       <div className={`${styles.appCardFooter} ${styles.cardRemark}`}>
         <div>
           更新于: <span>2025-11-11</span>
         </div>
         <div>
-          <Space size={'large'}>
-            <div className={styles.footerRight}>
+          <Space size={'medium'}>
+            <div
+              className={styles.footerRight}
+              onClick={(e) => {
+                e.stopPropagation();
+                onPreview(item);
+              }}
+            >
               <img src={eye} alt="" width="15px" height="10px" />
               <span>预览</span>
             </div>
-            <div className={styles.footerRight}>
+            <div
+              className={styles.footerRight}
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit(item);
+              }}
+            >
               <img src={write} alt="" width="16px" height="16px" />
               <span>编辑</span>
             </div>

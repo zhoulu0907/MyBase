@@ -34,9 +34,6 @@ const DataSet: FC = () => {
     founder: string;
     emModifyRecord: string;
   }
-  const handleEdit = (record: DataTable) => {
-    console.log(record);
-  };
   const columns = [
     { title: '名称', dataIndex: 'name' },
     { title: '类型', dataIndex: 'type', width: 140 },
@@ -66,6 +63,9 @@ const DataSet: FC = () => {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [total, setTotal] = useState(1);
+  //编辑
+  const handleEdit = (record: DataTable) => {};
+
   useEffect(() => {}, []);
 
   return (
