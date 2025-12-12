@@ -1,6 +1,5 @@
 package com.cmsr.onebase.module.app.core.dal.database.auth;
 
-import com.cmsr.onebase.framework.orm.repo.BaseAppRepository;
 import com.cmsr.onebase.framework.orm.repo.BaseBizRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthDataGroupDO;
 import com.cmsr.onebase.module.app.core.dal.mapper.AppAuthDataGroupMapper;
@@ -39,4 +38,9 @@ public class AppAuthDataGroupRepository extends BaseBizRepository<AppAuthDataGro
         return this.list(queryWrapper);
     }
 
+    public void deleteByMenuUuid(String menuUuid) {
+        this.updateChain()
+                .where(APP_AUTH_DATA_GROUP.MENU_UUID.eq(menuUuid))
+                .remove();
+    }
 }

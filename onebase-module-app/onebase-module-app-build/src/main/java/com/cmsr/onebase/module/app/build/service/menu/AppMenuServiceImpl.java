@@ -7,9 +7,13 @@ import com.cmsr.onebase.framework.common.util.string.UuidUtils;
 import com.cmsr.onebase.module.app.build.service.AppCommonService;
 import com.cmsr.onebase.module.app.build.service.resource.PageSetService;
 import com.cmsr.onebase.module.app.build.vo.menu.*;
+import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthDataGroupRepository;
+import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthFieldRepository;
+import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthPermissionRepository;
 import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
 import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageSetRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppApplicationDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthDataGroupDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppMenuDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePagesetDO;
 import com.cmsr.onebase.module.app.core.dto.appresource.CopyPageSetDTO;
@@ -25,6 +29,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -42,17 +47,26 @@ import java.util.stream.Collectors;
 @Validated
 public class AppMenuServiceImpl implements AppMenuService {
 
-    @Resource
+    @Autowired
     private AppCommonService appCommonService;
 
-    @Resource
+    @Autowired
     private AppMenuRepository appMenuRepository;
 
-    @Resource
+    @Autowired
     private AppPageSetRepository appPageSetRepository;
 
-    @Resource
+    @Autowired
     private PageSetService pageSetService;
+
+    @Autowired
+    private AppAuthPermissionRepository authPermissionRepository;
+
+    @Autowired
+    private AppAuthFieldRepository authFieldRepository;
+
+    @Autowired
+    private AppAuthDataGroupRepository authDataGroupRepository;
 
     @Override
     public List<MenuListRespVO> listBpmApplicationMenu(Long applicationId) {
@@ -404,6 +418,9 @@ public class AppMenuServiceImpl implements AppMenuService {
         }
         // 删除页面
         pageSetService.deletePageSetByMenu(menuDO);
+        authPermissionRepository.deleteByMenuUuid(menuDO.getMenuUuid());
+        authFieldRepository.deleteByMenuUuid(menuDO.getMenuUuid());
+        authDataGroupRepository.deleteByMenuUuid(menuDO.getMenuUuid());
         // 删除菜单
         appMenuRepository.removeById(id);
     }
