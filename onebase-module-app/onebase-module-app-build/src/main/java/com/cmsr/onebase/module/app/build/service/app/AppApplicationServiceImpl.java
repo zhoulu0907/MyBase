@@ -21,6 +21,7 @@ import com.cmsr.onebase.module.app.core.dal.database.tag.AppApplicationTagReposi
 import com.cmsr.onebase.module.app.core.dal.database.tag.AppTagRepository;
 import com.cmsr.onebase.module.app.core.dal.database.version.AppVersionRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppApplicationDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppVersionDO;
 import com.cmsr.onebase.module.app.core.enums.AppErrorCodeConstants;
 import com.cmsr.onebase.module.app.core.enums.app.ApplicationStatusEnum;
 import com.cmsr.onebase.module.app.core.vo.app.AppUserPhotoDTO;
@@ -146,6 +147,14 @@ public class AppApplicationServiceImpl implements AppApplicationService {
                     vo.setTags(queryAppTags(vo.getId()));
                     vo.setCreateUser(userHelper.getUserNickname(applicationDO.getCreator()));
                     vo.setUpdateUser(userHelper.getUserNickname(applicationDO.getUpdater()));
+
+                    AppVersionDO versionDO = versionRepository.findRuntimeByApplicationId(id);
+                    if (versionDO == null) {
+                        return;
+                    }
+                    vo.setVersionNumber(versionDO.getVersionNumber());
+                    vo.setPublisher(userHelper.getUserNickname(versionDO.getCreator()));
+                    vo.setPublishTime(versionDO.getCreateTime());
                 });
         return respVO;
     }

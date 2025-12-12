@@ -1247,10 +1247,6 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
 
     @Override
     public BusinessEntityRespVO createBusinessEntityWithResponse(@Valid BusinessEntitySaveReqVO reqVO) {
-        // 修改企业主表更新时间
-        Long appId = Long.valueOf(reqVO.getApplicationId());
-        appApplicationApi.updateAppTimeById(appId);
-
         Long id = createBusinessEntity(reqVO);
         MetadataBusinessEntityDO businessEntity = getBusinessEntity(id);
         return modelMapper.map(businessEntity, BusinessEntityRespVO.class);
