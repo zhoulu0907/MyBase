@@ -2,6 +2,7 @@ import {
   baseConfig,
   baseDefault,
   dataFieldConfig,
+  dynamicUserSelectConfig,
   labelColSpanConfig,
   layoutConfig,
   statusConfig,
@@ -89,10 +90,25 @@ export interface XInputUserSelectConfig extends ICommonBaseType {
    */
   status?: TSelectDefaultType<TStatusSelectKeyType>;
 
-  /**
-   * 默认值
+   /**
+   * 默认值方式
    */
-  defaultValue?: TTextDefaultType;
+  defaultValueMode?: TTextDefaultType;
+
+  /**
+  * 人员默认值
+  */
+  defaultUserValue?: TTextDefaultType;
+
+  /**
+   * 可选范围switch
+   */
+  isSelectScope?: TBooleanDefaultType;
+
+  /**
+   * 可选范围
+   */
+  selectScope?: any[];
 
   /**
    * 字段宽度
@@ -132,12 +148,13 @@ const XUserSelect: XInputUserSelectSchema = {
       name: '标题',
       type: CONFIG_TYPES.LABEL_INPUT
     },
-    ...dataFieldConfig,
     {
       key: 'tooltip',
       name: '描述信息',
       type: CONFIG_TYPES.TOOLTIP_INPUT
     },
+    ...dataFieldConfig,
+    dynamicUserSelectConfig,
     layoutConfig,
     labelColSpanConfig,
     // {
@@ -163,7 +180,10 @@ const XUserSelect: XInputUserSelectSchema = {
     tooltip: '',
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
-    defaultValue: '',
+    defaultValueMode: 'custom',
+    defaultUserValue: undefined,
+    isSelectScope: false,
+    selectScope: [],
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
     labelColSpan: 200,
     saveWithHidden: false,

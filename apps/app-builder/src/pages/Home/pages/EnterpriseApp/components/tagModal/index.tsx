@@ -1,4 +1,4 @@
-import { Button, Input, Modal, Form, Grid, Message } from '@arco-design/web-react';
+import { Button, Input, Modal, Form, Grid, Message, Popconfirm } from '@arco-design/web-react';
 import { IconDelete, IconPlusCircle } from '@arco-design/web-react/icon';
 import { getApplicationTagGroupCount, updateApplicationTag, type ListTagReq } from '@onebase/app';
 import React, { useEffect } from 'react';
@@ -91,7 +91,16 @@ const TagModal: React.FC<TagModalProps> = ({ visible, onOk, onCancel }) => {
                           </Form.Item>
                         </Grid.Col>
                         <Grid.Col span={2}>
-                          <Button type="text" status="danger" icon={<IconDelete />} onClick={() => remove(index)} />
+                          <Popconfirm
+                            focusLock
+                            title="确认删除"
+                            content="该标签正在被应用使用，确定要删除吗?"
+                            onOk={() => {
+                              remove(index)
+                            }}
+                          >
+                            <Button type="text" status="danger" icon={<IconDelete />} />
+                          </Popconfirm>
                         </Grid.Col>
                       </Grid.Row>
                     );

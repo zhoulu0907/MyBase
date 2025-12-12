@@ -3,10 +3,32 @@
     min-height: auto; // 不用默认的 32px
     height: auto !important;
     line-height: 0 !important;
+    padding: 8px !important;
+
+    :global(.pc-select-view-selector) {
+      background-color: white;
+      border-radius: 4px 0 0 4px;
+    }
   }
 
-  :global(.pc-select-view-value) {
-    margin-top: 4px;
+  :global(.pc-select-view-value) > div:first-child > div:first-child {
+    border: none;
+    padding: 4px 10px;
+  }
+
+  :global(.pc-select-view-value) > div:first-child {
+    margin: 4px 0 0;
+  }
+
+  :global(.pc-select-option-hover) {
+    background-color: transparent;
+  }
+
+  :global(.pc-select-suffix) {
+    background-color: white;
+    margin-left: 0;
+    border-radius: 0 4px 4px 0;
+    padding-right: 10px;
   }
 }
 .dropdownWrapper {

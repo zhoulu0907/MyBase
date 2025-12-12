@@ -157,7 +157,8 @@ const DeptMember = (props: IProps) => {
                             {
                               key: item.key,
                               name: item.title,
-                              department: buildDepartmentPath() // 使用构建的完整路径
+                              department: buildDepartmentPath(),    // 使用构建的完整路径
+                              email: item.email
                             }
                           ];
                           if (onUpdateSelectedMembers) {
@@ -176,7 +177,8 @@ const DeptMember = (props: IProps) => {
                                     {
                                         key: item.key,
                                         name: item.title,
-                                        department: buildDepartmentPath()
+                                        department: buildDepartmentPath(),
+                                        email: item.email
                                     }];
                                 if (onUpdateSelectedMembers) {
                                     onUpdateSelectedMembers(newSelectedMembers);
@@ -209,7 +211,8 @@ const DeptMember = (props: IProps) => {
                               {
                                 key: item.key,
                                 name: item.title,
-                                department: buildDepartmentPath()
+                                department: buildDepartmentPath(),
+                                email: item.email
                               }
                             ];
                             if (onUpdateSelectedMembers) {
@@ -229,7 +232,8 @@ const DeptMember = (props: IProps) => {
                                     {
                                         key: item.key,
                                         name: item.title,
-                                        department: buildDepartmentPath()
+                                        department: buildDepartmentPath(),
+                                        email: item.email
                                     }];
                                 if (onUpdateSelectedMembers) {
                                     onUpdateSelectedMembers(newSelectedMembers);

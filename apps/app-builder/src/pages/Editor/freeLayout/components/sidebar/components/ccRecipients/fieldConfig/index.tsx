@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Switch, Checkbox, Radio, type TableColumnProps } from '@arco-design/web-react';
+import { Switch, Radio, type TableColumnProps } from '@arco-design/web-react';
 import { IconQuestionCircle } from '@arco-design/web-react/icon';
 import FieldTable from '../../common/filedComponent/index';
 import './style.less';
 
-export default function FieldConfig({ setCcRecipientsConfigData, fieldPermConfig, ckOptions }) {
+export default function FieldConfig({ setCcRecipientsConfigData, fieldPermConfig }: any) {
   const [nodeSwitch, setNodeSwitch] = useState<boolean>(fieldPermConfig?.useNodeConfig || false);
   const [tbData, setTbData] = useState(fieldPermConfig?.fieldConfigs);
 
@@ -44,7 +44,11 @@ export default function FieldConfig({ setCcRecipientsConfigData, fieldPermConfig
 
   function handleSave(row: any) {
     const newData = [...tbData];
-    const index = newData.findIndex((item) => row.fieldName === item.fieldName);
+    const index = newData.findIndex((item) => {
+      const itemId = item.parentDisplayName ? item.parentDisplayName + item.fieldName : item.fieldName;
+      const fid = row.parentDisplayName ? row.parentDisplayName + row.fieldName : row.fieldName;
+      return itemId === fid;
+    });
     newData.splice(index, 1, { ...newData[index], ...row });
     setTbData(newData);
   }
@@ -52,7 +56,10 @@ export default function FieldConfig({ setCcRecipientsConfigData, fieldPermConfig
   const columnsTable: TableColumnProps[] = [
     {
       title: '字段名称',
-      dataIndex: 'fieldName'
+      dataIndex: 'fieldName',
+      render: (val: any, row: any) => {
+        return row.parentDisplayName ? row.parentDisplayName + ' _' + row.displayName : row.displayName;
+      }
     },
     {
       title: '只读',
@@ -105,11 +112,10 @@ export default function FieldConfig({ setCcRecipientsConfigData, fieldPermConfig
       {nodeSwitch && (
         <FieldTable
           onTableChange={onTableChange}
-          ckOptions={ckOptions}
           columnsTable={columnsTable}
           tbData={tbData}
           setTableData={setTableData}
-          title={'添加隐藏字段'}
+          title={'添加字段'}
         />
       )}
     </div>

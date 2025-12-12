@@ -14,7 +14,7 @@ import {
   Tooltip,
   Typography
 } from '@arco-design/web-react';
-import { IconEmpty, IconMoreVertical, IconSearch } from '@arco-design/web-react/icon';
+import { IconEmpty, IconMoreVertical, IconSearch, IconSettings } from '@arco-design/web-react/icon';
 import { listApplication, type Application, type PageParam } from '@onebase/app';
 import { getCommonPaginationList, getRuntimeURL, TokenManager } from '@onebase/common';
 import { debounce } from 'lodash-es';
@@ -283,6 +283,16 @@ const EnterpriseAppPage: React.FC = () => {
                   </Option>
                 ))}
               </Select>
+              <Button
+                type="text"
+                icon={<IconSettings />}
+                style={{ color: '#21252e' }}
+                onClick={() => {
+                  setTagModalVisible(true);
+                }}
+              >
+                标签管理
+              </Button>
             </div>
           </div>
 
