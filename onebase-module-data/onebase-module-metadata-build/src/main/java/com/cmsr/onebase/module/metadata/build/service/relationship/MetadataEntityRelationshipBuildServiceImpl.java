@@ -753,7 +753,8 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
             return null;
         }
         ChildEntityInfoRespVO childInfo = BeanUtils.toBean(relationshipDO, ChildEntityInfoRespVO.class, info -> {
-                info.setChildEntityId(relationshipDO.getTargetEntityUuid());
+                info.setChildEntityId(targetEntity.getId().toString());
+                info.setChildEntityUuid(relationshipDO.getTargetEntityUuid());
                 info.setRelationshipId(String.valueOf(relationshipDO.getId()));
                 info.setRelationshipName(relationshipDO.getRelationName());
                 info.setRelationshipType(relationshipDO.getRelationshipType());
