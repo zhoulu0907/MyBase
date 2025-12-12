@@ -1,8 +1,8 @@
 import { Modal } from '@arco-design/web-react';
 import { getMethodDataById } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
-import styles from '../modal.module.less';
 import type { EntityListItem } from '../../EntityTable/types';
+import styles from '../modal.module.less';
 
 const CheckMethodModal: React.FC<{
   visible: boolean;
@@ -15,7 +15,6 @@ const CheckMethodModal: React.FC<{
   useEffect(() => {
     if (visible && methodCode) {
       getMethodDataById({ methodCode: methodCode, entityId: entity.id }).then((res) => {
-        console.log(res);
         if (res) {
           setMethodData(res);
         }

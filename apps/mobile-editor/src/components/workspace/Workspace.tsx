@@ -60,10 +60,10 @@ interface EditorWorkspaceProps {
     usePageViewEditorSignal: () => Map<string, any>;
     useFormEditorSignal: () => Map<string, any>;
   };
-  fromList?: boolean;
+  isListEditor?: boolean;
 }
 
-const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({ props, fromList = false }) => {
+const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({ props, isListEditor = false }) => {
   useSignals();
 
   const {
@@ -324,7 +324,7 @@ const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({ props, fromList = fal
             }
           }}
         >
-          <div className={fromList ? styles.workspaceContentOuterList : styles.workspaceContentOuter}>
+          <div className={isListEditor ? styles.workspaceContentOuterList : styles.workspaceContentOuter}>
           <ReactSortable
             id="workspace-content"
             list={components}

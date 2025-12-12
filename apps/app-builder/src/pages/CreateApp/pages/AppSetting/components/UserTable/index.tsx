@@ -12,25 +12,25 @@ import {
 } from '@arco-design/web-react';
 import { IconDown, IconPlus } from '@arco-design/web-react/icon';
 import {
-  getRoleMembers,
   getDeptUser,
+  getRoleMembers,
+  roleAddDept,
   roleAddUser,
   roleDeleteMember,
-  type GetDeptUserReq,
-  type Role,
-  type RoleAddUserReq,
   type AuthRoleUsersPageRespVO,
   type DeptAndUsersRespDTO,
+  type GetDeptUserReq,
   type getRoleMembersReq,
+  type Role,
+  type RoleAddDeptReq,
+  type RoleAddUserReq,
   type RoleDeleteMemberReq,
-  type UserMembers,
-  roleAddDept,
-  type RoleAddDeptReq
+  type UserMembers
 } from '@onebase/app';
+import { AddMembers } from '@onebase/common';
 import { getDeptsById, type GetDeptsByIdReq } from '@onebase/platform-center';
 import { debounce } from 'lodash-es';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { AddMembers } from '@onebase/common';
 import styles from './index.module.less';
 
 interface IProps {
@@ -140,7 +140,6 @@ const UserMembers = (props: IProps) => {
         keywords
       };
       const res = await getDeptUser(params);
-      console.log('获取部门用户信息 res:', res);
       setDeptData(res);
     } catch (error) {
       console.error('获取部门用户信息失败 error:', error);

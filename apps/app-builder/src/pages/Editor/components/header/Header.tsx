@@ -350,6 +350,7 @@ export default function EditorHeader() {
     if (entityWithChildren) {
       setMainEntity({
         entityId: entityWithChildren.entityId,
+        entityUuid: entityWithChildren.entityUuid,
         tableName: entityWithChildren.tableName,
         entityName: entityWithChildren.entityName,
         entityType: ENTITY_TYPE.MAIN,
@@ -366,6 +367,8 @@ export default function EditorHeader() {
         );
         const subEntities = entityWithChildren.childEntities.map((entity: ChildEntity, index: number) => ({
           entityId: entity.childEntityId,
+          //   TODO(mickey): 后端现在childEntityId就是uuid
+          entityUuid: entity.childEntityId,
           tableName: entity.childTableName,
           entityName: entity.childEntityName,
           entityType: ENTITY_TYPE.SUB,

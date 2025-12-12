@@ -11,6 +11,7 @@ import { lintGutter, linter, type Diagnostic } from '@codemirror/lint';
 import { validateFormula } from '../utils/formula';
 
 interface FormulaInputProps {
+  error: string;
   value: string; // 当前公式的值
   fieldName?: string;
   isDebugMode: boolean;
@@ -31,6 +32,7 @@ interface FormulaError {
 
 export function FormulaInput({
   value,
+  error,
   fieldName,
   onChange,
   onCopy,
@@ -194,6 +196,12 @@ export function FormulaInput({
       setErrors(diagnostics);
     }
   }, [value, checkFormulaSyntax]);
+
+  useEffect(() => {
+    if (error) {
+      setErrors([{ message: error, severity: 'error', from: 0, to: 0 }]);
+    }
+  }, [error]);
 
   /**
    * 监听编辑器就绪事件，将 insertAtPosition 函数传递给父组件。
