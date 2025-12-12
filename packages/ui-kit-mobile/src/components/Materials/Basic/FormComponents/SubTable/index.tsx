@@ -49,12 +49,13 @@ const XSubTable = memo(
     const handleDelete = (e: any, index: number) => {
       e.stopPropagation();
 
-      const formData = form.getFieldsValue();
+      const formData = form?.getFieldsValue();
 
-      const filtered = Object.fromEntries(Object.entries(formData).filter(([key]) => !key.includes(`.${index}.`)));
-
+      if (formData) {
+        const filtered = Object.fromEntries(Object.entries(formData).filter(([key]) => !key.includes(`.${index}.`)));
+        form?.setFieldsValue(filtered);
+      }
       setSubTableData((prev) => prev.filter((v) => v.key !== index));
-      form.setFieldsValue(filtered);
     };
 
     const rules: ITypeRules<ValidatorType.Custom>[] = [

@@ -1,13 +1,15 @@
 import type { EditorProps } from '@/common/props';
 import EditorWorkspace from '@/components/workspace/Workspace';
 import { Form as MobileForm } from '@arco-design/mobile-react';
-import type { AppEntityField } from '@onebase/app';
+import type { AppEntities, AppEntity, AppEntityField } from '@onebase/app';
 import { EditorPanel, STATUS_OPTIONS, STATUS_VALUES, type GridItem } from '@onebase/ui-kit';
 import { PreviewRender } from '@onebase/ui-kit-mobile';
 import React, { Fragment } from 'react';
 import styles from './index.module.less';
 interface FormEditorProps {
   props: EditorProps & {
+    mainEntity?: AppEntity;
+    subEntities?: AppEntities;
     useEditorSignalMap: Map<string, any>;
     batchDelPageComponentSchemas: (componentIds: Set<string>) => void;
     batchDelLayoutSubComponents: (componentIds: Set<string>) => void;
@@ -54,7 +56,7 @@ const FormEditor: React.FC<FormEditorProps & { instanceId: string }> = ({ instan
 
   return (
     <div className={styles.formEditorPage}>
-      <EditorPanel />
+      <EditorPanel mainEntity={props?.mainEntity} subEntities={props?.subEntities} editMode={props?.editMode} />
       <EditorWorkspace props={props} />
     </div>
   );
