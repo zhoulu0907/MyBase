@@ -7,10 +7,12 @@ import com.cmsr.onebase.module.app.build.service.AppCommonService;
 import com.cmsr.onebase.module.app.build.vo.version.VersionCreateReqVO;
 import com.cmsr.onebase.module.app.build.vo.version.VersionPageReqVo;
 import com.cmsr.onebase.module.app.build.vo.version.VersionPageRespVO;
+import com.cmsr.onebase.module.app.core.dal.database.app.AppApplicationRepository;
 import com.cmsr.onebase.module.app.core.dal.database.version.AppVersionRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppApplicationDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppVersionDO;
 import com.cmsr.onebase.module.app.core.enums.AppErrorCodeConstants;
+import com.cmsr.onebase.module.app.core.enums.app.ApplicationStatusEnum;
 import com.cmsr.onebase.module.app.core.enums.version.VersionTypeEnum;
 import com.cmsr.onebase.module.bpm.api.datamanager.BpmDataManager;
 import com.cmsr.onebase.module.flow.api.FlowDataManager;
@@ -32,6 +34,9 @@ import java.util.List;
 @Service
 @Validated
 public class AppVersionServiceImpl implements AppVersionService {
+
+    @Autowired
+    private AppApplicationRepository applicationRepository;
 
     @Autowired
     private AppVersionRepository versionRepository;
@@ -97,6 +102,7 @@ public class AppVersionServiceImpl implements AppVersionService {
             // 创建新的版本信息
             AppVersionDO newRunVersionDO = createNewVersion(createReqVO, applicationId);
             versionRepository.save(newRunVersionDO);
+            applicationRepository.updateAppStatusByApplicationId(applicationId, ApplicationStatusEnum.PUBLISHED);
         });
         // online services that required
         flowDataManager.onlineRuntimeData(applicationId);

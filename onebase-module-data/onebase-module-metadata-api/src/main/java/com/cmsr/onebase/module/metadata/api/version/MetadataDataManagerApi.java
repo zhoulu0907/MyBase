@@ -16,4 +16,18 @@ public interface MetadataDataManagerApi {
      */
     void copyMetaDataEditToRuntime(Long applicationId);
 
+    /**
+     * deleteApplicationVersionData
+     *
+     * @param applicationId versionTag
+     */
+    void deleteApplicationVersionData(Long applicationId, Long versionTag);
+
+    /**
+     * deleteAllApplicationData
+     *
+     * @param applicationId
+     */
+    void deleteAllApplicationData(Long applicationId);
+
 }

@@ -71,9 +71,15 @@ public class ApplicationRespVO {
     private String publishModel;
 
     @Schema(description = "头像集合")
-    private  List<AppUserPhotoDTO> userPhotoList;
+    private List<AppUserPhotoDTO> userPhotoList;
 
     @Schema(description = "开发状态")
     private String developStatus;
+
+    @Schema(description = "发布人")
+    private String publisher;
+
+    @Schema(description = "发布时间")
+    private LocalDateTime publishTime;
 
 }
