@@ -12,8 +12,12 @@ import {approvalConfigVar, displayStatusMap} from '../constant'
 const Step = Steps.Step;
 const AvatarGroup = Avatar.Group;
 
+// 审批记录 节点中，审批意见内容过长，折叠时显示的字符数量
+const strLen = 60;
+
 const DetailStep: FC<any> = ({ stepData }: any) => {
   const [current, setCurrent] = useState(0);
+  const [collapseObj, setCollapseObj] = useState<any>({})
 
   function renderDescript(nodeItem: any) {
     if (nodeItem) {
@@ -198,7 +202,14 @@ const DetailStep: FC<any> = ({ stepData }: any) => {
       <div className="flex-bw-center user-temp">
         <p className="photo-img">{opperator?.avatar ? <img src={opperator.avatar} alt='' /> : opperator?.operator?.charAt(0)}</p>
         <div style={{ flex: 1 }}>
-          <p>{opperator?.operator}</p>
+          <p className="flex-bw-center">
+            <span style={{fontSize: '14px'}}>{opperator?.operator}</span>
+            <span className="gray-color">
+              {(nodeItem?.displayTime || opperator?.operatorTime)
+                ? dayjs(nodeItem?.displayTime || opperator?.operatorTime).format('YYYY-MM-DD HH:mm:ss')
+                : '-'}
+            </span>
+          </p>
           <p className="flex-bw-center">
             {
               (opperator?.autoCopyArr?.length > 0) ? 
@@ -207,21 +218,62 @@ const DetailStep: FC<any> = ({ stepData }: any) => {
                   <span className='auto-copy-color-span'>{opperator?.colorText}</span>
                   <span className='auto-copy-color-span absolute-span'>{opperator?.autoCopyArr?.length}人</span>
                 </p> : 
-                <span>
-                  <b className={`sp-options ${userMap?.labelColor}`}>{userMap?.label}</b>
-                  {(opperator?.comment && hasComment) && <span className="gray-color">&nbsp;({opperator?.comment})</span>}
-                </span>
+                <section>
+                  <p>
+                    <b className={`sp-options ${userMap?.labelColor}`}>{userMap?.label}</b>
+                    {(opperator?.comment && hasComment) && <span className="gray-color" style={{wordBreak: 'break-all', letterSpacing: '1px'}}>&nbsp;({getComment(opperator, collapseObj)})</span>}
+                  </p>
+                  {(hasComment && opperator?.comment?.length > 60) && <p style={{textAlign: 'right'}}>
+                    <span style={{cursor: 'pointer'}} onClick={() => switchCollapse(opperator)}>{!collapseObj[opperator?.operator + opperator?.operatorTime + opperator?.taskStatus] ? '展开' : '收起'}</span>
+                  </p>}
+                </section>
             }
-            <span className="gray-color">
-              {(nodeItem?.displayTime || opperator?.operatorTime)
-                ? dayjs(nodeItem?.displayTime || opperator?.operatorTime).format('YYYY-MM-DD HH:mm:ss')
-                : '-'}
-            </span>
           </p>
         </div>
       </div>
     </>
   }
+
+  function countCharacters(str: string) {
+    let enCount = 0;
+    let zhCount = 0;
+    let subMaxIdx = 0
+    
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charAt(i);
+      if (/^[a-zA-Z0-9]$/.test(char)) {
+        enCount += 0.5;
+        subMaxIdx += 1
+      } else if (/^[\u4e00-\u9fa5]$/.test(char)) {
+        zhCount++;
+        subMaxIdx++;
+      }
+      if (Math.floor(enCount + zhCount) >= strLen) {
+        break
+      }
+    }
+    
+    return { enCount, zhCount, subMaxIdx: Math.floor(subMaxIdx) };
+  }
+  function getComment(operatorItem: any, collapseObx:any) {
+    const key = operatorItem?.operator + operatorItem?.operatorTime + operatorItem?.taskStatus
+    const count = countCharacters(operatorItem?.comment || '')
+    console.log(key, count)
+    if (!collapseObx[key] && (count.zhCount + count.enCount) >= strLen) {
+      return operatorItem.comment.substring(0, count.subMaxIdx) + '...'
+    } else {
+      return operatorItem?.comment
+    }
+  }
+  function switchCollapse(operatorItem: any) {
+    const key = operatorItem?.operator + operatorItem?.operatorTime + operatorItem?.taskStatus
+    const curFlag = collapseObj[key]
+    setCollapseObj({...collapseObj, [key]: !curFlag})
+  }
+
+  // useEffect(() => {
+  //   console.log('collapseObj ====', collapseObj)
+  // }, [collapseObj])
 
   const ProcessFlow = ({ data }: any) => {
     return (
