@@ -2,10 +2,11 @@ package com.cmsr.onebase.module.app.build.controller.version;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.app.build.vo.version.VersionCreateReqVO;
+import com.cmsr.onebase.module.app.build.service.version.AppVersionService;
+import com.cmsr.onebase.module.app.build.vo.version.VersionOnlineReq;
 import com.cmsr.onebase.module.app.build.vo.version.VersionPageReqVo;
 import com.cmsr.onebase.module.app.build.vo.version.VersionPageRespVO;
-import com.cmsr.onebase.module.app.build.service.version.AppVersionService;
+import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -32,10 +33,17 @@ public class AppVersionController {
         return CommonResult.success(appVersionService.getApplicationVersionPage(reqVo));
     }
 
-    @PostMapping("/create")
-    @Operation(summary = "创建应用版本")
-    public CommonResult<Boolean> createApplicationVersion(@RequestBody VersionCreateReqVO createReqVO) {
-        appVersionService.createApplicationVersion(createReqVO);
+    @PostMapping("/online")
+    @Operation(summary = "发布应用")
+    public CommonResult<Boolean> onlineApplicationVersion(@RequestBody VersionOnlineReq createReqVO) {
+        appVersionService.onlineApplication(createReqVO);
+        return CommonResult.success(true);
+    }
+
+    @PostMapping("/offline")
+    @Operation(summary = "下架应用")
+    public CommonResult<Boolean> offlineApplicationVersion(@RequestBody JsonNode offlineVO) {
+        appVersionService.offlineApplication();
         return CommonResult.success(true);
     }
 
