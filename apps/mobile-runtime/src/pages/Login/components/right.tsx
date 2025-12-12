@@ -353,7 +353,9 @@ const Right: React.FC = () => {
         fill="#fff"
         style={{
           padding: '0.2rem',
-          marginRight: '0.08rem',
+          borderRadius: '0.28rem',
+          marginBottom: '0.48rem',
+          verticalAlign: 'middle',
           backgroundColor: appInfo.iconColor || 'rgb(var(--primary-6))'
         }}
       />
