@@ -228,6 +228,7 @@ public class FlowProcessManager {
         if (flowProcessTimeDO == null) {
             flowProcessTimeDO = new FlowProcessTimeDO();
             flowProcessTimeDO.setProcessId(flowProcessDO.getId());
+            flowProcessTimeDO.setApplicationId(flowProcessDO.getApplicationId());
             flowProcessTimeDO.setJobId(jobId);
             flowProcessTimeDO.setJobStatus(FlowJobStatusEnum.DEPLOYED.getStatus());
             flowProcessTimeRepository.save(flowProcessTimeDO);
@@ -255,7 +256,6 @@ public class FlowProcessManager {
                 && FlowJobStatusEnum.isDeployed(flowProcessDateFieldDO.getJobStatus())) {
             return;
         }
-        JsonGraph jsonGraph = flowGraphBuilder.build(flowProcessDO.getApplicationId(), flowProcessDO.getProcessDefinition());
         StartDateFieldNodeData startDateFieldNodeData = FlowProcessCache.findStartDateFieldNodeDataByProcessId(flowProcessDO.getId());
         JobCreateRequest jobCreateRequest = consumerSettingParams(startDateFieldNodeData);
         FlowRemoteCallRequest flowRemoteCallRequest = new FlowRemoteCallRequest();
@@ -268,6 +268,7 @@ public class FlowProcessManager {
         if (flowProcessDateFieldDO == null) {
             flowProcessDateFieldDO = new FlowProcessDateFieldDO();
             flowProcessDateFieldDO.setProcessId(flowProcessDO.getId());
+            flowProcessDateFieldDO.setApplicationId(flowProcessDO.getApplicationId());
             flowProcessDateFieldDO.setJobId(jobId);
             flowProcessDateFieldDO.setJobStatus(FlowJobStatusEnum.DEPLOYED.getStatus());
             flowProcessDateFieldRepository.save(flowProcessDateFieldDO);

@@ -83,7 +83,7 @@ public class AppDataManager {
         // 实现回滚到编辑态逻辑，没想好！
     }
 
-    public void removeApplicationVersion(Long applicationId, Long versionTag) {
+    public void deleteApplicationVersionData(Long applicationId, Long versionTag) {
         workbenchComponentRepository.deleteApplicationVersionData(applicationId, versionTag);
         resourceComponentRepository.deleteApplicationVersionData(applicationId, versionTag);
         workbenchPageRepository.deleteApplicationVersionData(applicationId, versionTag);
@@ -96,7 +96,7 @@ public class AppDataManager {
         authPermissionRepository.deleteApplicationVersionData(applicationId, versionTag);
     }
 
-    public void removeApplication(Long applicationId) {
+    public void deleteAllApplicationData(Long applicationId) {
         workbenchComponentRepository.deleteAllApplicationData(applicationId);
         resourceComponentRepository.deleteAllApplicationData(applicationId);
         workbenchPageRepository.deleteAllApplicationData(applicationId);

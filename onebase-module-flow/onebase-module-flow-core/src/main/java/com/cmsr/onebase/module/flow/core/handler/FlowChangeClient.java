@@ -1,21 +1,17 @@
 package com.cmsr.onebase.module.flow.core.handler;
 
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessDateFieldRepository;
-import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessRepository;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessTimeRepository;
-import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
 import com.cmsr.onebase.module.flow.core.enums.FlowJobStatusEnum;
 import com.cmsr.onebase.module.flow.core.utils.FlowUtils;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
 import org.redisson.api.RMapCache;
 import org.redisson.api.RTopic;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -29,10 +25,6 @@ public class FlowChangeClient {
     @Setter
     @Autowired
     private RedissonClient redissonClient;
-
-    @Setter
-    @Autowired
-    private FlowProcessRepository flowProcessRepository;
 
     @Setter
     @Autowired
@@ -70,13 +62,8 @@ public class FlowChangeClient {
     }
 
     public void resetScheduleJobStatus(Long applicationId) {
-        List<FlowProcessDO> processDOS = flowProcessRepository.findByApplicationId(applicationId);
-        if (CollectionUtils.isEmpty(processDOS)) {
-            return;
-        }
-        List<Long> ids = processDOS.stream().map(flowProcessDO -> flowProcessDO.getId()).toList();
-        flowProcessTimeRepository.updateJobStatus(FlowJobStatusEnum.NEED_DEPLOY.getStatus(), ids);
-        flowProcessDateFieldRepository.updateJobStatus(FlowJobStatusEnum.NEED_DEPLOY.getStatus(), ids);
+        flowProcessTimeRepository.updateJobStatusByAppId(FlowJobStatusEnum.NEED_DEPLOY.getStatus(), applicationId);
+        flowProcessDateFieldRepository.updateJobStatusByAppId(FlowJobStatusEnum.NEED_DEPLOY.getStatus(), applicationId);
     }
 
 

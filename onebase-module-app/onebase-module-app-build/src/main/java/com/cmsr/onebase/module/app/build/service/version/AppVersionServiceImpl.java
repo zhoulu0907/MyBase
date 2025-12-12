@@ -74,7 +74,7 @@ public class AppVersionServiceImpl implements AppVersionService {
         AppApplicationDO applicationDO = appCommonService.validateApplicationExist(createReqVO.getApplicationId());
         Long applicationId = applicationDO.getId();
         // 删除当前运行版本数据
-        flowDataManager.deleteRuntimeData(applicationId);
+        flowDataManager.offlineRuntimeData(applicationId);
         //
         transactionTemplate.executeWithoutResult(transactionStatus -> {
             // 找打当前Runtime版本信息，肯定能找到，因为发布的时候会同步创建一个，把当前版本信息变成历史状态
@@ -126,18 +126,18 @@ public class AppVersionServiceImpl implements AppVersionService {
         if (versionDO == null) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_VERSION_NOT_EXIST);
         }
-        if (versionDO.getVersionType() == 0) {
+        if (versionDO.getVersionType() == VersionTypeEnum.BUILD.getValue()) {
             throw new IllegalArgumentException("不允许删除当前运行的版本");
         }
-        if (VersionTypeEnum.RUNTIME.getValue() == versionDO.getVersionType()) {
+        if (versionDO.getVersionType() == VersionTypeEnum.RUNTIME.getValue()) {
             throw new IllegalArgumentException("不允许删除当前运行的版本");
         }
         Long applicationId = versionDO.getApplicationId();
         transactionTemplate.executeWithoutResult(transactionStatus -> {
             // 删除对应的信息
             // TODO: 在这里添加
-            appDataManager.removeApplicationVersion(applicationId, versionId);
-
+            appDataManager.deleteApplicationVersionData(applicationId, versionId);
+            flowDataManager.deleteApplicationVersionData(applicationId, versionId);
             // 删除版本
             versionRepository.removeById(versionId);
         });
