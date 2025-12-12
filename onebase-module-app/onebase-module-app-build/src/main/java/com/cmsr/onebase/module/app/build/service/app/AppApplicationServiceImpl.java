@@ -26,6 +26,7 @@ import com.cmsr.onebase.module.app.core.enums.app.ApplicationStatusEnum;
 import com.cmsr.onebase.module.app.core.vo.app.AppUserPhotoDTO;
 import com.cmsr.onebase.module.app.core.vo.app.ApplicationPageReqVO;
 import com.cmsr.onebase.module.flow.api.FlowDataManager;
+import com.cmsr.onebase.module.etl.api.EtlDataManager;
 import com.cmsr.onebase.module.metadata.api.datasource.MetadataDatasourceApi;
 import com.cmsr.onebase.module.metadata.api.datasource.dto.DatasourceCreateDefaultReqDTO;
 import com.cmsr.onebase.module.metadata.api.datasource.dto.DatasourceSaveReqDTO;
@@ -92,6 +93,9 @@ public class AppApplicationServiceImpl implements AppApplicationService {
 
     @Autowired
     private TransactionTemplate transactionTemplate;
+
+    @Autowired
+    private EtlDataManager etlDataManager;
 
     @Override
     public PageResult<ApplicationRespVO> getApplicationPage(ApplicationPageReqVO pageReqVO) {
@@ -235,10 +239,14 @@ public class AppApplicationServiceImpl implements AppApplicationService {
         if (!StringUtils.equals(name, applicationDO.getAppName())) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_NAME_ERROR);
         }
+        // TODO: 先下线所有相关任务
+        etlDataManager.offlineAllByApplication(id);
         flowDataManager.offlineRuntimeData(id);
         transactionTemplate.executeWithoutResult(transactionStatus -> {
-            appDataManager.deleteAllApplicationData(id);
+            // TODO: 删除应用下的全部资源
+            etlDataManager.removeAllByApplication(id);
             flowDataManager.deleteAllApplicationData(id);
+            appDataManager.deleteAllApplicationData(id);
             versionRepository.deleteByApplicationId(id);
             applicationRepository.removeById(id);
         });
