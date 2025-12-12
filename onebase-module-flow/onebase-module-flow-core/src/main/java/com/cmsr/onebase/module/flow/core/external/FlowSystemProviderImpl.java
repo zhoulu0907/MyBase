@@ -1,6 +1,5 @@
-package com.cmsr.onebase.module.flow.component.impl;
+package com.cmsr.onebase.module.flow.core.external;
 
-import com.cmsr.onebase.module.flow.context.provider.FlowSystemProvider;
 import com.cmsr.onebase.module.system.api.user.AdminUserApi;
 import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
 import lombok.Setter;

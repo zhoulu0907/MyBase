@@ -1,7 +1,8 @@
-package com.cmsr.onebase.module.flow.api;
+package com.cmsr.onebase.module.flow.core.impl;
 
+import com.cmsr.onebase.module.flow.api.FlowDataManager;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessRepository;
-import com.cmsr.onebase.module.flow.core.handler.FlowCacheHandler;
+import com.cmsr.onebase.module.flow.core.handler.FlowChangeClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +17,7 @@ public class FlowDataManagerImpl implements FlowDataManager {
     private FlowProcessRepository flowProcessRepository;
 
     @Autowired
-    private FlowCacheHandler flowCacheHandler;
+    private FlowChangeClient flowChangeClient;
 
     @Override
     public void moveRuntimeToHistory(Long applicationId, Long versionTag) {
@@ -30,11 +31,11 @@ public class FlowDataManagerImpl implements FlowDataManager {
 
     @Override
     public void deleteRuntimeData(Long applicationId) {
-        flowCacheHandler.onApplicationDelete(applicationId);
+        flowChangeClient.applicationDelete(applicationId);
     }
 
     @Override
     public void onlineRuntimeData(Long applicationId) {
-        flowCacheHandler.onApplicationChange(applicationId);
+        flowChangeClient.applicationUpdate(applicationId);
     }
 }

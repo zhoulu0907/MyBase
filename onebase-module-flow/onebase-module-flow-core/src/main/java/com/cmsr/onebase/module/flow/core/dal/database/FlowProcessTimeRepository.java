@@ -6,6 +6,8 @@ import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 import static com.cmsr.onebase.module.flow.core.dal.dataobject.table.FlowProcessTimeTableDef.FLOW_PROCESS_TIME;
 
 /**
@@ -26,4 +28,10 @@ public class FlowProcessTimeRepository extends ServiceImpl<FlowProcessTimeMapper
         super.remove(query);
     }
 
+    public void updateJobStatus(String status, List<Long> ids) {
+        updateChain().set(FLOW_PROCESS_TIME.JOB_STATUS, status)
+                .where(FLOW_PROCESS_TIME.ID.in(ids))
+                .update();
+
+    }
 }
