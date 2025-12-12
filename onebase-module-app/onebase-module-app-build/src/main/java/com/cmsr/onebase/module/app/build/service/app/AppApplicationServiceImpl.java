@@ -9,17 +9,14 @@ import com.cmsr.onebase.framework.uid.UidGenerator;
 import com.cmsr.onebase.module.app.build.service.AppCommonService;
 import com.cmsr.onebase.module.app.build.service.auth.AppAuthRoleService;
 import com.cmsr.onebase.module.app.build.service.menu.AppMenuService;
-import com.cmsr.onebase.module.app.build.service.version.AppVersionService;
+import com.cmsr.onebase.module.app.build.service.version.AppDataManager;
 import com.cmsr.onebase.module.app.build.util.AppUtils;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationCreateReqVO;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationCreateRespVO;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationRespVO;
 import com.cmsr.onebase.module.app.build.vo.tag.TagRespVO;
-import com.cmsr.onebase.module.app.core.dal.database.AppSqlQueryRepository;
 import com.cmsr.onebase.module.app.core.dal.database.app.AppApplicationRepository;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleRepository;
-import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleUserRepository;
-import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
 import com.cmsr.onebase.module.app.core.dal.database.tag.AppApplicationTagRepository;
 import com.cmsr.onebase.module.app.core.dal.database.tag.AppTagRepository;
 import com.cmsr.onebase.module.app.core.dal.database.version.AppVersionRepository;
@@ -68,9 +65,6 @@ public class AppApplicationServiceImpl implements AppApplicationService {
     private AppTagRepository tagRepository;
 
     @Autowired
-    private AppMenuRepository menuRepository;
-
-    @Autowired
     private AppVersionRepository versionRepository;
 
     @Autowired
@@ -83,19 +77,13 @@ public class AppApplicationServiceImpl implements AppApplicationService {
     private MetadataDatasourceApi metadataDatasourceApi;
 
     @Autowired
-    private AppAuthRoleUserRepository appAuthRoleUserRepository;
-
-    @Autowired
     private AppAuthRoleRepository appAuthRoleRepository;
 
     @Autowired
-    private AppSqlQueryRepository appSqlQueryRepository;
-
-    @Autowired
-    private AppVersionService appVersionService;
-
-    @Autowired
     private AppMenuService appMenuService;
+
+    @Autowired
+    private AppDataManager appDataManager;
 
     @Override
     public PageResult<ApplicationRespVO> getApplicationPage(ApplicationPageReqVO pageReqVO) {
@@ -241,9 +229,10 @@ public class AppApplicationServiceImpl implements AppApplicationService {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_NAME_ERROR);
         }
         //TODO 删除应用下的全部资源
-        applicationRepository.removeById(id);
-        menuRepository.deleteByApplicationId(id);
+        appDataManager.removeApplication(id);
+
         versionRepository.deleteByApplicationId(id);
+        applicationRepository.removeById(id);
     }
 
     @Override
