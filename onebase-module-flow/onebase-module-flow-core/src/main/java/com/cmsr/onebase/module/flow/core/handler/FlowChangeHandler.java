@@ -74,9 +74,12 @@ public class FlowChangeHandler implements ApplicationRunner, MessageListener<Flo
     @Override
     public void run(ApplicationArguments args) throws Exception {
         RMapCache<Long, FlowChangeEvent> mapCache = redissonClient.getMapCache(FlowUtils.REDIS_VERSION_CHANGE_CACHE_KEY, FlowUtils.KRYO5_CODEC);
-        mapCache.forEach((k, v) -> {
-            versionCache.put(k, v.getVersion());
-        });
+        try {
+            mapCache.forEach((k, v) -> {
+                versionCache.put(k, v.getVersion());
+            });
+        } catch (Exception ignored) {
+        }
         flowProcessManager.initAllProcess();
         RTopic topic = redissonClient.getTopic(FlowUtils.REDIS_VERSION_CHANGE_TOPIC_KEY);
         topic.addListener(FlowChangeEvent.class, this);
