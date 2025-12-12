@@ -104,6 +104,8 @@ export default function UserFormModal({
         avatar: avatarUrl,
         mobile: filterSpace(values.mobile),
         email: filterSpace(values.email),
+        username: filterSpace(values.username),
+        nickname: filterSpace(values.nickname),
         status: statusCheckedValue ? StatusEnum.ENABLE : StatusEnum.DISABLE
       };
       setLoading(true);

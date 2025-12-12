@@ -82,7 +82,7 @@
     "certificationContent": "认证内容",
     "authStatus": "认证状态",
     "expireTime": "到期时间",
-    "tenantCount": "租户数量",
+    "tenantCount": "空间数量",
     "authRecord": "认证记录",
     "uploadAuth": "上传认证",
     "uploadSuccess": "上传成功",
