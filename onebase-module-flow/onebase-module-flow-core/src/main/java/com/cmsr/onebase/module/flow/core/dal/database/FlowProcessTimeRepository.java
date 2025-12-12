@@ -1,12 +1,10 @@
 package com.cmsr.onebase.module.flow.core.dal.database;
 
+import com.cmsr.onebase.framework.orm.repo.BaseAppRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessTimeDO;
 import com.cmsr.onebase.module.flow.core.dal.mapper.FlowProcessTimeMapper;
 import com.mybatisflex.core.query.QueryWrapper;
-import com.mybatisflex.spring.service.impl.ServiceImpl;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
 
 import static com.cmsr.onebase.module.flow.core.dal.dataobject.table.FlowProcessTimeTableDef.FLOW_PROCESS_TIME;
 
@@ -15,7 +13,7 @@ import static com.cmsr.onebase.module.flow.core.dal.dataobject.table.FlowProcess
  * @Date：2025/8/29 14:37
  */
 @Repository
-public class FlowProcessTimeRepository extends ServiceImpl<FlowProcessTimeMapper, FlowProcessTimeDO> {
+public class FlowProcessTimeRepository extends BaseAppRepository<FlowProcessTimeMapper, FlowProcessTimeDO> {
 
 
     public FlowProcessTimeDO findByProcessId(Long processId) {
@@ -28,9 +26,9 @@ public class FlowProcessTimeRepository extends ServiceImpl<FlowProcessTimeMapper
         super.remove(query);
     }
 
-    public void updateJobStatus(String status, List<Long> ids) {
+    public void updateJobStatusByAppId(String status, Long applicationId) {
         updateChain().set(FLOW_PROCESS_TIME.JOB_STATUS, status)
-                .where(FLOW_PROCESS_TIME.ID.in(ids))
+                .where(FLOW_PROCESS_TIME.APPLICATION_ID.eq(applicationId))
                 .update();
 
     }
