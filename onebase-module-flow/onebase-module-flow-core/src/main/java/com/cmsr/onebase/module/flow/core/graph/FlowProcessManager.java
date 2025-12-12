@@ -29,12 +29,12 @@ import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Conditional;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -69,7 +69,7 @@ public class FlowProcessManager {
     private JobSchedulerClient jobSchedulerClient;
 
     @Autowired
-    private Executor executor;
+    private ThreadPoolTaskScheduler executor;
 
     public void initAllProcess() {
         List<FlowProcessDO> flowProcessDOS = TenantManager.withoutTenantCondition(() ->
