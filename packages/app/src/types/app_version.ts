@@ -9,7 +9,7 @@ export enum OperationType {
   SAVE = 2 // 保存版本
 }
 
-export interface CreateApplicationVersionReq {
+export interface OnlineApplicationReq {
   applicationId: string;
   versionName: string;
   versionNumber: string;
