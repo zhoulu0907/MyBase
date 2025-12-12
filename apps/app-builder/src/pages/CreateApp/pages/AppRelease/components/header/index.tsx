@@ -60,8 +60,11 @@ const AppStatusHeader: React.FC<AppStatusHeaderProps> = ({ appInfo, onReleaseTog
                 </div>
               </div>
               <div className={styles.appId}>
-                应用ID: {appInfo.appCode || '--'} | 最后更新时间:{' '}
-                {dayjs(appInfo.updateTime).format('YYYY-MM-DD HH:mm:ss') || '--'}
+                应用ID: {appInfo.appCode || '--'}
+                <Divider type="vertical" />
+                数据资产标识: {appInfo.appUid || '--'}
+                <Divider type="vertical" />
+                最后更新时间: {dayjs(appInfo.updateTime).format('YYYY-MM-DD HH:mm:ss') || '--'}
               </div>
             </div>
           </div>
