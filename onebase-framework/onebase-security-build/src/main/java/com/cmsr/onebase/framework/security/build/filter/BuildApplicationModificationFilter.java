@@ -34,7 +34,7 @@ public class BuildApplicationModificationFilter extends OncePerRequestFilter {
         requestMatchers.add(new AntPathRequestMatcher("/app/auth-role/**", HttpMethod.POST.name()));
         requestMatchers.add(new AntPathRequestMatcher("/app/menu/**", HttpMethod.POST.name()));
         requestMatchers.add(new AntPathRequestMatcher("/app/tag/**", HttpMethod.POST.name()));
-        requestMatchers.add(new AntPathRequestMatcher("/app/version/**", HttpMethod.POST.name()));
+//        requestMatchers.add(new AntPathRequestMatcher("/app/version/**", HttpMethod.POST.name()));
         requestMatchers.add(new AntPathRequestMatcher("/etl/**", HttpMethod.POST.name()));
         requestMatchers.add(new AntPathRequestMatcher("/flow/**", HttpMethod.POST.name()));
         requestMatchers.add(new AntPathRequestMatcher("/bpm/**", HttpMethod.POST.name()));

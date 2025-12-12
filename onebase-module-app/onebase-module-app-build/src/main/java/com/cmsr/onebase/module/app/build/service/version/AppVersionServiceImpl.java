@@ -101,8 +101,8 @@ public class AppVersionServiceImpl implements AppVersionService {
             flowDataManager.copyEditToRuntime(applicationId);
             // 创建新的版本信息
             AppVersionDO newRunVersionDO = createNewVersion(createReqVO, applicationId);
-            versionRepository.save(newRunVersionDO);
             applicationRepository.updateAppStatusByApplicationId(applicationId, ApplicationStatusEnum.PUBLISHED);
+            versionRepository.save(newRunVersionDO);
         });
         // online services that required
         flowDataManager.onlineRuntimeData(applicationId);
