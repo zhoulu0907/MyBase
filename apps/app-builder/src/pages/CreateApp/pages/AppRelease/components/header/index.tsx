@@ -115,14 +115,14 @@ const AppStatusHeader: React.FC<AppStatusHeaderProps> = ({ appInfo, onReleaseTog
               <div className={styles.releaseUrlItem}>
                 Web端:
                 <div className={styles.linkText} onClick={() => navigateToRunTime(runtimeURL)}>
-                  www.onebase.com/enterprise
+                  {runtimeURL}
                 </div>
                 <IconCopy onClick={() => copyToClipboard(runtimeURL)} style={{ fontSize: 16 }} />
               </div>
               <div className={styles.releaseUrlItem}>
                 移动端:
                 <div className={styles.linkText} onClick={() => navigateToRunTime(runtimeMobileURL)}>
-                  www.onebase.com/enterprise
+                  {runtimeMobileURL}
                 </div>
                 <IconCopy onClick={() => copyToClipboard(runtimeMobileURL)} style={{ fontSize: 16 }} />
               </div>
