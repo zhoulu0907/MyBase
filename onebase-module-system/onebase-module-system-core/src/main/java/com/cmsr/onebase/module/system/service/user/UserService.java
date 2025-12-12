@@ -4,6 +4,7 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import cn.hutool.core.collection.CollUtil;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.module.system.vo.auth.AuthRegisterReqVO;
+import com.cmsr.onebase.module.system.vo.auth.ThirdAuthLoginReqVO;
 import com.cmsr.onebase.module.system.vo.dept.DeptSimpleListRespVO;
 import com.cmsr.onebase.module.system.vo.user.UserProfileUpdatePasswordReqVO;
 import com.cmsr.onebase.module.system.vo.user.UserProfileUpdateReqVO;
@@ -330,4 +331,35 @@ public interface UserService {
      * @return
      */
     List<UserRespVO> getConvertUserPage(PageResult<AdminUserDO> pageResult);
+
+    /**
+     * 忘记密码
+     * @param reqVO
+     */
+    void forgetPassword(@Valid UserForgetPasswordReqVO reqVO);
+
+    /**
+     * 创建第三方用户
+     * @param reqVO
+     * @return
+     */
+    AdminUserDO createThirdUser(ThirdAuthLoginReqVO reqVO);
+    /**
+     * 补充用户信息
+     * @param reqVO
+     * @return
+     */
+    Long supplementUser(ThirdSupplementUserReqVO reqVO);
+    /**
+     * 创建用户并关联应用
+     * @param reqVO
+     * @return
+     */
+    Long createUserAndUserAppRelation( ThirdUserAppCombinedInsertReqVO reqVO);
+    /**
+     * 更新用户并关联应用
+     * @param reqVO
+     * @return
+     */
+    Long updateUserAndUserAppRelation(ThirdUserAppCombinedUpdateReqVO reqVO);
 }

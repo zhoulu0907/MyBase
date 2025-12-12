@@ -486,4 +486,16 @@ public class DeptServiceImpl implements DeptService {
         }
     }
 
+
+    @Override
+    public DeptDO findDeptByCodeAndType(DeptSaveReqVO deptRespVO) {
+       return deptDataRepository.findDeptByCodeAndType(deptRespVO);
+    }
+
+    @Override
+    public Long createThirdDefaultDept(DeptSaveReqVO deptRespVO) {
+        DeptDO dept = BeanUtils.toBean(deptRespVO, DeptDO.class);
+       return deptDataRepository.insert(dept).getId();
+    }
+
 }

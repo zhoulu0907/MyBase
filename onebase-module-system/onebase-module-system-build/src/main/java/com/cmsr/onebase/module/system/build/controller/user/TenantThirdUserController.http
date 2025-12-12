@@ -1,0 +1,32 @@
+
+### 创建用户 /admin-api/system/user/create
+POST {{baseUrl}}/system/third/create
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+{
+  "nickname": "thirdUser",
+  "mobile": "13800000000",
+  "email": "newuser1@test.com",
+  "password": "13@ery",
+  "status": 1,
+  "applicationIdList":[162947915524571136,162947915524571137]
+}
+
+
+### 创建用户 /admin-api/system/third/update
+POST {{baseUrl}}/system/third/update
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+{
+  "userId": 177604783525003264,
+  "nickname": "thirdUser111",
+  "mobile": "13800000001",
+  "email": "newuser2@test.com",
+  "password": "13@ery",
+  "status": 1,
+  "applicationIdList":[162947915524571136,162947915524571137,162947915524571138,162947915524571138]
+}

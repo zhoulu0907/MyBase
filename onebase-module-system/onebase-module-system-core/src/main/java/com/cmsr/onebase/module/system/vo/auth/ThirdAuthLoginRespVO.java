@@ -19,5 +19,8 @@ public class ThirdAuthLoginRespVO extends AuthLoginRespVO {
     @Schema(description = "是否关联应用", example = "")
     private Boolean userAppRelationFlag;
 
+    @Schema(description = "是否关联应用", example = "")
+    private Boolean firstFlag;
+
 
 }

@@ -88,20 +88,22 @@ public class UserAppRelationServiceImpl implements UserAppRelationService {
 
     @Override
     public void createUserAppRelation(UserAppRelationInertReqVO userAppReqVO) {
-        // 插入
-        userAppReqVO.getApplicationIdList().forEach(appId -> {
-            // 先删除后插入
-            ConfigStore configs = new DefaultConfigStore();
-            configs.eq(UserAppRelationDO.USER_ID, userAppReqVO.getUserId());
-            configs.eq(CorpAppRelationDO.APPLICATION_ID, appId);
-            userAppRelationDataRepository.deleteByConfig(configs);
+        if (!CollectionUtils.isEmpty(userAppReqVO.getApplicationIdList())) {
+            // 插入
+            userAppReqVO.getApplicationIdList().forEach(appId -> {
+                // 先删除后插入
+                ConfigStore configs = new DefaultConfigStore();
+                configs.eq(UserAppRelationDO.USER_ID, userAppReqVO.getUserId());
+                configs.eq(CorpAppRelationDO.APPLICATION_ID, appId);
+                userAppRelationDataRepository.deleteByConfig(configs);
 
-            // 验证是否重复提交，先删除后插入
-            UserAppRelationDO corpAppRelationDO = new UserAppRelationDO();
-            corpAppRelationDO.setApplicationId(appId);
-            corpAppRelationDO.setStatus(CorpStatusEnum.ENABLE.getValue());
-            corpAppRelationDO.setUserId(userAppReqVO.getUserId());
-            userAppRelationDataRepository.insert(corpAppRelationDO);
-        });
+                // 验证是否重复提交，先删除后插入
+                UserAppRelationDO corpAppRelationDO = new UserAppRelationDO();
+                corpAppRelationDO.setApplicationId(appId);
+                corpAppRelationDO.setStatus(CorpStatusEnum.ENABLE.getValue());
+                corpAppRelationDO.setUserId(userAppReqVO.getUserId());
+                userAppRelationDataRepository.insert(corpAppRelationDO);
+            });
+        }
     }
 }

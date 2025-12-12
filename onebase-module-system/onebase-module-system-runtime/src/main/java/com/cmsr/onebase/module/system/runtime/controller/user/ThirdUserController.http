@@ -1,0 +1,14 @@
+ ### 请求 /login 接口 => 成功   ##verifycode/password
+POST {{baseUrl}}/third/user/supplement-user
+Content-Type: application/json
+Authorization: Bearer {{token}}
+X-Tenant-Id: 156421901678804992
+
+{
+  "userId": 176238451343360000,
+  "username": "testuser",
+  "nickname": "测试用户",
+  "email": "test@example.com",
+  "avatar": "https://example.com/avatar.jpg",
+  "password": "AdminChina2025!"
+}

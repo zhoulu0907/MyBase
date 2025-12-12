@@ -6,6 +6,7 @@ import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.enums.dept.DeptTypeEnum;
+import com.cmsr.onebase.module.system.vo.dept.DeptSaveReqVO;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Compare;
 import org.apache.commons.lang3.StringUtils;
@@ -157,4 +158,15 @@ public class DeptDataRepository extends DataRepository<DeptDO> {
         return findAllByConfig(configs);
     }
 
+    public DeptDO findDeptByCodeAndType(DeptSaveReqVO deptRespVO) {
+        DefaultConfigStore configs = new DefaultConfigStore();
+        if (StringUtils.isNotBlank(deptRespVO.getDeptType())) {
+            configs.and(DeptDO.DEPT_TYPE,deptRespVO.getDeptType());
+        }
+        if (StringUtils.isNotBlank(deptRespVO.getDeptCode())) {
+            configs.and(DeptDO.DEPT_CODE,deptRespVO.getDeptCode());
+        }
+        configs.order(DeptDO.SORT, org.anyline.entity.Order.TYPE.ASC);
+        return findOne(configs);
+    }
 }
