@@ -26,11 +26,13 @@ import com.cmsr.onebase.module.app.core.enums.AppErrorCodeConstants;
 import com.cmsr.onebase.module.app.core.enums.app.ApplicationStatusEnum;
 import com.cmsr.onebase.module.app.core.vo.app.AppUserPhotoDTO;
 import com.cmsr.onebase.module.app.core.vo.app.ApplicationPageReqVO;
+import com.cmsr.onebase.module.bpm.api.datamanager.BpmDataManager;
 import com.cmsr.onebase.module.etl.api.EtlDataManager;
 import com.cmsr.onebase.module.flow.api.FlowDataManager;
 import com.cmsr.onebase.module.metadata.api.datasource.MetadataDatasourceApi;
 import com.cmsr.onebase.module.metadata.api.datasource.dto.DatasourceCreateDefaultReqDTO;
 import com.cmsr.onebase.module.metadata.api.datasource.dto.DatasourceSaveReqDTO;
+import com.cmsr.onebase.module.metadata.api.version.MetadataDataManagerApi;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -98,6 +100,12 @@ public class AppApplicationServiceImpl implements AppApplicationService {
 
     @Autowired
     private EtlDataManager etlDataManager;
+
+    @Autowired
+    private BpmDataManager bpmDataManager;
+
+    @Autowired
+    private MetadataDataManagerApi metadataDataManagerApi;
 
     @Override
     public PageResult<ApplicationRespVO> getApplicationPage(ApplicationPageReqVO pageReqVO) {
@@ -261,7 +269,8 @@ public class AppApplicationServiceImpl implements AppApplicationService {
         etlDataManager.offlineAllByApplication(id);
         flowDataManager.offlineRuntimeData(id);
         transactionTemplate.executeWithoutResult(transactionStatus -> {
-            // TODO: 删除应用下的全部资源
+            bpmDataManager.removeApplication(id);
+            metadataDataManagerApi.deleteAllApplicationData(id);
             etlDataManager.deleteAllApplicationData(id);
             flowDataManager.deleteAllApplicationData(id);
             appDataManager.deleteAllApplicationData(id);

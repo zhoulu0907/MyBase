@@ -35,7 +35,7 @@ public class AppApplicationRepository extends ServiceImpl<AppApplicationMapper, 
     public PageResult<AppApplicationDO> selectPage(ApplicationPageReqVO pageReqVO, Long userId) {
         boolean filterByUser = pageReqVO.getOwnerTag() != null && pageReqVO.getOwnerTag().equals(OwnerTagEnum.MY.getValue()) && userId != null;
         QueryWrapper queryWrapper = this.query()
-                .where(APP_APPLICATION.APP_NAME.eq(pageReqVO.getName()).when(StringUtils.isNotBlank(pageReqVO.getName())))
+                .where(APP_APPLICATION.APP_NAME.like(pageReqVO.getName()).when(StringUtils.isNotBlank(pageReqVO.getName())))
                 .where(APP_APPLICATION.APP_STATUS.eq(pageReqVO.getStatus()).when(pageReqVO.getStatus() != null))
                 .where(APP_APPLICATION.PUBLISH_MODEL.eq(pageReqVO.getPublishModel()).when(StringUtils.isNotBlank(pageReqVO.getPublishModel())))
                 .where(APP_APPLICATION.CREATOR.eq(userId).when(filterByUser));

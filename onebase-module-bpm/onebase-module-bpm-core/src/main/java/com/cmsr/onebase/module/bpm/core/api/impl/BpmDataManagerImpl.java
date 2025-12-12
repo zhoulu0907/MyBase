@@ -165,4 +165,18 @@ public class BpmDataManagerImpl implements BpmDataManager {
         // 流程引擎编辑态数据变成运行态数据
         bpmEngineCopyEditToRuntime(applicationId);
     }
+
+    @Override
+    public void removeApplicationVersion(Long applicationId, Long versionTag) {
+        flowDefinitionRepository.deleteApplicationVersionData(applicationId, versionTag);
+        flowNodeRepository.deleteApplicationVersionData(applicationId, versionTag);
+        flowSkipRepository.deleteApplicationVersionData(applicationId, versionTag);
+    }
+
+    @Override
+    public void removeApplication(Long applicationId) {
+        flowDefinitionRepository.deleteAllApplicationData(applicationId);
+        flowNodeRepository.deleteAllApplicationData(applicationId);
+        flowSkipRepository.deleteAllApplicationData(applicationId);
+    }
 }
