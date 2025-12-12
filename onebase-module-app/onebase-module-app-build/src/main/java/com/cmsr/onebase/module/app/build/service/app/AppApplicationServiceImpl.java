@@ -41,6 +41,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.validation.annotation.Validated;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -147,7 +148,6 @@ public class AppApplicationServiceImpl implements AppApplicationService {
                     vo.setTags(queryAppTags(vo.getId()));
                     vo.setCreateUser(userHelper.getUserNickname(applicationDO.getCreator()));
                     vo.setUpdateUser(userHelper.getUserNickname(applicationDO.getUpdater()));
-
                     AppVersionDO versionDO = versionRepository.findRuntimeByApplicationId(id);
                     if (versionDO == null) {
                         return;
@@ -155,6 +155,15 @@ public class AppApplicationServiceImpl implements AppApplicationService {
                     vo.setVersionNumber(versionDO.getVersionNumber());
                     vo.setPublisher(userHelper.getUserNickname(versionDO.getCreator()));
                     vo.setPublishTime(versionDO.getCreateTime());
+                    LocalDateTime appUpdateTime = vo.getUpdateTime();
+                    LocalDateTime versionPublishTime = versionDO.getCreateTime();
+                    if (appUpdateTime.isBefore(versionPublishTime)) {
+                        vo.setAppStatus(ApplicationStatusEnum.PUBLISHED.getValue());
+                        vo.setAppStatusText(ApplicationStatusEnum.PUBLISHED.getText());
+                    } else {
+                        vo.setAppStatus(ApplicationStatusEnum.ITERATING.getValue());
+                        vo.setAppStatusText(ApplicationStatusEnum.ITERATING.getText());
+                    }
                 });
         return respVO;
     }
