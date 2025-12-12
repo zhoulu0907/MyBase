@@ -49,7 +49,23 @@ public class QueryWrapperUtils {
         }
         QueryCondition whereQueryCondition = CPI.getWhereQueryCondition(queryWrapper);
         if (whereQueryCondition != null) {
-            return whereQueryCondition.getColumn().getTable();
+            QueryColumn queryColumn = whereQueryCondition.getColumn();
+            if (queryColumn != null && queryColumn.getTable() != null) {
+                return queryColumn.getTable();
+            }
+            if (whereQueryCondition instanceof Brackets brackets) {
+                QueryCondition childCondition = brackets.getChildCondition();
+                if (childCondition != null) {
+                    if (childCondition.getColumn() != null && childCondition.getColumn().getTable() != null) {
+                        return childCondition.getColumn().getTable();
+                    }
+                    QueryCondition nextCondition = CPI.getNextCondition(childCondition);
+                    if (nextCondition != null && nextCondition.getColumn() != null && nextCondition.getColumn().getTable() != null) {
+                        return nextCondition.getColumn().getTable();
+                    }
+                }
+
+            }
         }
         return null;
     }
