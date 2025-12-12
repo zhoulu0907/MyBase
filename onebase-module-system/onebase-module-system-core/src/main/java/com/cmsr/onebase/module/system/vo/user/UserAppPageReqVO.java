@@ -19,12 +19,8 @@ import java.util.Set;
 public class UserAppPageReqVO extends PageParam {
 
     @Schema(description = "用户ID")
-    @NotNull(message = "用户id不能为空")
+   // @NotNull(message = "用户id不能为空")
     private Set<Long> userIds;
-
-    @Schema(description = "状态")
-    @InEnum(value = CorpAppReationStatusEnum.class, message = "状态必须是 {value}")
-    private Integer status = 0;
 
     @Schema(description = "用户名称")
     private String userName;

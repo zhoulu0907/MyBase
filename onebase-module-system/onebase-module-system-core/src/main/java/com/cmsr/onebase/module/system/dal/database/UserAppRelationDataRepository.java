@@ -6,6 +6,7 @@ import com.cmsr.onebase.framework.common.enums.CorpAppReationStatusEnum;
 import com.cmsr.onebase.framework.common.enums.CorpStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.system.dal.dataobject.corpapprelation.CorpAppRelationDO;
+import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.UserAppRelationDO;
 import com.cmsr.onebase.module.system.vo.corpapprelation.CorpAppPageReqVO;
 import com.cmsr.onebase.module.system.vo.corpapprelation.CorpAppRelationPageReqVO;
@@ -49,7 +50,9 @@ public class UserAppRelationDataRepository extends DataRepository<UserAppRelatio
 
     public List<UserAppRelationDO> getUserAppRelationList(UserAppPageReqVO userAppPageReqVO) {
         DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.in(UserAppRelationDO.USER_ID, userAppPageReqVO.getUserIds());
+        if (CollectionUtils.isNotEmpty(userAppPageReqVO.getUserIds())){
+            configStore.in(AdminUserDO.ID, userAppPageReqVO.getUserIds());
+        }
         configStore.eq(UserAppRelationDO.STATUS, CorpAppReationStatusEnum.ENABLE.getValue());
         return findAllByConfig(configStore);
     }

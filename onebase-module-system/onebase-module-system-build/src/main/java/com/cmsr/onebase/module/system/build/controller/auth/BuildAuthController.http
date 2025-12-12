@@ -26,18 +26,15 @@ X-Tenant-Id: 174391581036773376
 POST {{baseUrl}}/system/auth/tenant-login
 Content-Type: application/json
 #X-Tenant-Id: 153539686553452544
-X-Tenant-Id: 1
+X-Tenant-Id: 153935442021842944
 tag: {{tag}}
 
-{"username":"admin","password":"admin123","captchaVerification":"n89lvlHjSOsQQ5kGXjNNtdnkfPnK2Y3YbPwvAEXoVyL0TqzrDumdg8MONVs+z5VaSPf4ni6QKFhhx0GcaXBF4pWVx9hsSsBZ8mysqU8u45E=",
-  "deviceId":666}
-
-#{
-#  "username": "admin",
-#  "password": "AdminChina2025!",
-#  "captchaVerification": "UiXVbPBz2XVbr7pdOfIuR78qXvgiWZAg9UDiH27YsSrkyZja+6iDVorl9d2otg0yGqcH5k8a1VJopEwvzobmFdGhkjSIBFjbyaLGKYsoXbY=",
-#  "deviceId": "50dddd1e2dcbb0f792b0fe3e9028890b"
-#}
+{
+  "username": "gaoguoqing",
+  "password": "43a302eb73e0f678b1a55b323e8374451ec0015afbe7af3488c9e40de84a4b2fe40e1350f074036d1492d2a698b24ea112652483f57d9a7fbbf1f85ebfaa60a038feee4637c9bcb1ee10dfbb033b78ee20e32db41838c7a7875ccf3360590ecbbd56d2fc404dcbba054dc8d41502ab",
+  "captchaVerification": "UiXVbPBz2XVbr7pdOfIuR78qXvgiWZAg9UDiH27YsSrkyZja+6iDVorl9d2otg0yGqcH5k8a1VJopEwvzobmFdGhkjSIBFjbyaLGKYsoXbY=",
+  "deviceId": "50dddd1e2dcbb0f792b0fe3e9028890b"
+}
 
 > {%
     // 登录成功后自动更新token到环境变量

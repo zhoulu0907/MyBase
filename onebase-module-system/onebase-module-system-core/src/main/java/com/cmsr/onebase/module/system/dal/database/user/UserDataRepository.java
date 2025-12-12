@@ -384,13 +384,17 @@ public class UserDataRepository extends DataRepository<AdminUserDO> {
     }
 
     public PageResult<AdminUserDO> getUserAppRelationPage(UserAppPageReqVO userAppPageReqVO) {
-        DefaultConfigStore configStore = buildUserConfigStore();
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        configStore.and(AdminUserDO.USER_TYPE, UserTypeEnum.THIRD.getValue());
         // 根据关键词模糊查询
         if (null != userAppPageReqVO.getStatus()){
-            configStore.like(AdminUserDO.STATUS, userAppPageReqVO.getStatus());
+            configStore.eq(AdminUserDO.STATUS, userAppPageReqVO.getStatus());
         }
         if (StringUtils.isNotBlank(userAppPageReqVO.getUserName())){
             configStore.like(AdminUserDO.USERNAME, userAppPageReqVO.getUserName());
+        }
+        if (CollectionUtils.isNotEmpty(userAppPageReqVO.getUserIds())){
+            configStore.in(AdminUserDO.ID, userAppPageReqVO.getUserIds());
         }
         // 添加排序
         configStore.order(AdminUserDO.ADMIN_TYPE, Order.TYPE.ASC).order(BaseDO.CREATE_TIME, Order.TYPE.DESC);

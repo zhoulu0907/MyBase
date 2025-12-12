@@ -30,3 +30,13 @@ tenant-id: {{adminTenantId}}
   "status": 1,
   "applicationIdList":[162947915524571136,162947915524571137,162947915524571138,162947915524571138]
 }
+
+
+
+
+
+### 创建用户 /admin-api/system/third/update
+GET {{baseUrl}}/system/third/user-applications-page
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
