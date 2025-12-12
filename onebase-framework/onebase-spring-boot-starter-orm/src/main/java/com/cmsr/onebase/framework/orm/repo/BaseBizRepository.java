@@ -37,19 +37,6 @@ public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity>
         queryWrapper.and(versionTagColumn.eq(versionTag).when(!ApplicationManager.isIgnoreVersionTagCondition()));
     }
 
-    public boolean removeByApplicationId(Long applicationId) {
-        return this.updateChain()
-                .where(BaseBizEntity.APPLICATION_ID, applicationId)
-                .remove();
-    }
-
-    public boolean removeByApplicationVersion(Long applicationId, Long versionId) {
-        return this.updateChain()
-                .where(BaseBizEntity.APPLICATION_ID, applicationId)
-                .and(BaseBizEntity.VERSION_TAG, versionId)
-                .remove();
-    }
-
     //region ===== 查询（查）操作 =====
 
     /**
@@ -251,6 +238,8 @@ public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity>
         return getMapper().paginateAs(page, query, asType);
     }
 
+    //endregion ===== 分页查询操作 =====
+
     // 1、备份运行态数据为历史版本
     public void moveRuntimeToHistory(Long applicationId, Long versionTag) {
         // 实现备份逻辑
@@ -302,5 +291,17 @@ public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity>
         });
         this.saveBatch(entities);
     }
-    //endregion ===== 分页查询操作 =====
+
+    public boolean deleteAllApplicationData(Long applicationId) {
+        return this.updateChain()
+                .where(BaseBizEntity.APPLICATION_ID, applicationId)
+                .remove();
+    }
+
+    public boolean deleteApplicationVersionData(Long applicationId, Long versionId) {
+        return this.updateChain()
+                .where(BaseBizEntity.APPLICATION_ID, applicationId)
+                .and(BaseBizEntity.VERSION_TAG, versionId)
+                .remove();
+    }
 }

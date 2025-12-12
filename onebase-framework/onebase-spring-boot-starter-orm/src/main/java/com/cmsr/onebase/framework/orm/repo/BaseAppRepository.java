@@ -31,12 +31,6 @@ public class BaseAppRepository<M extends BaseMapper<T>, T extends BaseAppEntity>
         queryWrapper.and(applicationColumn.eq(applicationId));
     }
 
-    public boolean removeByApplicationId(Long applicationId) {
-        return this.updateChain()
-                .where(BaseAppEntity.APPLICATION_ID, applicationId)
-                .remove();
-    }
-
     //region ===== 查询（查）操作 =====
 
     /**
@@ -238,4 +232,10 @@ public class BaseAppRepository<M extends BaseMapper<T>, T extends BaseAppEntity>
         return getMapper().paginateAs(page, query, asType);
     }
     //endregion ===== 分页查询操作 =====
+
+    public boolean deleteAllApplicationData(Long applicationId) {
+        return this.updateChain()
+                .where(BaseAppEntity.APPLICATION_ID, applicationId)
+                .remove();
+    }
 }
