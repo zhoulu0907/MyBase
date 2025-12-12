@@ -1,14 +1,14 @@
-import { Form, Message, Upload, Progress, Modal, Grid, Card, Watermark } from '@arco-design/web-react';
+import { Card, Form, Grid, Message, Modal, Progress, Upload, Watermark } from '@arco-design/web-react';
+import { IconClose, IconDelete, IconDownload, IconEye, IconImage, IconPlus } from '@arco-design/web-react/icon';
 import { type UploadListProps } from '@arco-design/web-react/lib/Upload';
-import { IconPlus, IconDelete, IconImage, IconEye, IconDownload, IconClose } from '@arco-design/web-react/icon';
-import { attachmentUpload, attachmentDownload, menuSignal } from '@onebase/app'
+import { attachmentDownload, attachmentUpload, menuSignal } from '@onebase/app';
+import { pagesRuntimeSignal } from '@onebase/common';
 import { nanoid } from 'nanoid';
 import { memo, useEffect, useState } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
-import { STATUS_OPTIONS, STATUS_VALUES, UPLOAD_VALUES, UPLOAD_OPTIONS } from '../../../constants';
+import { STATUS_OPTIONS, STATUS_VALUES, UPLOAD_OPTIONS, UPLOAD_VALUES } from '../../../constants';
 import './index.css';
 import type { XInputImgUploadConfig } from './schema';
-import { pagesRuntimeSignal } from '@onebase/common';
 
 const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const {
@@ -28,30 +28,27 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
   const { curMenu } = menuSignal;
   const { entityDataId } = pagesRuntimeSignal;
 
-
-  const [urlList, setUrlList] = useState<string[]>([])
+  const [urlList, setUrlList] = useState<string[]>([]);
 
   const handleUpload = async (file: File, onProgress?: (percent: number, event?: ProgressEvent) => void) => {
     const formData = new FormData();
     formData.append('file', file);
-    
 
     const progressAdapter = onProgress
       ? (progressEvent: ProgressEvent) => {
-        if (progressEvent.lengthComputable) {
-          const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-          onProgress(percent, progressEvent);
+          if (progressEvent.lengthComputable) {
+            const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            onProgress(percent, progressEvent);
+          }
         }
-      }
       : undefined;
-
 
     if (runtime) {
       const res = await attachmentUpload(tableName, formData, progressAdapter);
       return res;
     } else {
       // TODO 编辑态上传预览
-      return ''
+      return '';
     }
   };
   const { form } = Form.useFormContext();
@@ -61,7 +58,13 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
   const fieldValue = Form.useWatch(fieldId, form);
 
   useEffect(() => {
+    handleGetUrlList();
+  }, [fieldValue, entityDataId.value]);
+
+  const handleGetUrlList = async () => {
     let flag = false;
+    console.log('==== fieldValue ====', fieldValue);
+
     const newFieldValue = (fieldValue || []).map((ele: any) => {
       if (ele.id) {
         flag = true;
@@ -75,24 +78,47 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
       }
       return { ...ele };
     });
+
+    console.log('==== newFieldValue ====', newFieldValue);
+
     if (flag) {
       form.setFieldValue(fieldId, newFieldValue);
     }
-    if (entityDataId.value && !urlList.length) {
-      console.log('entityDataId.value', entityDataId.value)
-      const urls = (fieldValue || []).map(async (ele: any) => {
+
+    // 如果没有数据或没有 entityDataId，直接返回
+    if (!newFieldValue.length || !entityDataId.value || !curMenu.value?.id) {
+      setUrlList([]);
+      return;
+    }
+
+    // 处理所有文件的下载
+    try {
+      const urls: string[] = [];
+      for (const file of newFieldValue) {
+        // 检查文件是否有 fileId
+        const fileId = file.response?.fileId || file.id;
+        if (!fileId) {
+          continue;
+        }
+
         const param = {
-          menuId: curMenu.value?.id,
+          menuId: curMenu.value.id,
           id: entityDataId.value,
           fieldName,
-          fileId: ele.id
+          fileId
+        };
+        const url = await attachmentDownload(tableName, param);
+        if (url) {
+          urls.push(url);
         }
-        const url = await attachmentDownload(tableName, param)
-        return url
-      });
-      setUrlList(urls)
+      }
+      console.log('==== urls ====', urls);
+      setUrlList(urls);
+    } catch (error) {
+      console.error('获取文件 URL 失败:', error);
+      setUrlList([]);
     }
-  }, [fieldValue, entityDataId.value]);
+  };
 
   // 自定义文件列表展示
   const renderUploadList = (filesList: any[], fileProps: UploadListProps) => {
@@ -146,14 +172,16 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
                       }
                     }}
                   />
-                  {!detailMode && <IconDelete
-                    onClick={() => {
-                      if (fileProps.onRemove) {
-                        fileProps.onRemove(file);
-                        setUrlList((prev) => prev.splice(index, 1))
-                      }
-                    }}
-                  />}
+                  {!detailMode && (
+                    <IconDelete
+                      onClick={() => {
+                        if (fileProps.onRemove) {
+                          fileProps.onRemove(file);
+                          setUrlList((prev) => prev.splice(index, 1));
+                        }
+                      }}
+                    />
+                  )}
                 </div>
               )}
             </div>
@@ -185,7 +213,7 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
                     onClick={() => {
                       if (fileProps.onRemove) {
                         fileProps.onRemove(file);
-                        setUrlList((prev) => prev.splice(index, 1))
+                        setUrlList((prev) => prev.splice(index, 1));
                       }
                     }}
                   />
@@ -224,15 +252,17 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
                     <div className="uplaodList-card-item-size">
                       {file?.originFile?.size ? <span>{(file.originFile.size / 1024 / 1024).toFixed(2)}MB</span> : null}
                     </div>
-                    {!detailMode && <IconDelete
-                      style={{ cursor: 'pointer' }}
-                      onClick={() => {
-                        if (fileProps.onRemove) {
-                          fileProps.onRemove(file);
-                          setUrlList((prev) => prev.splice(index, 1))
-                        }
-                      }}
-                    />}
+                    {!detailMode && (
+                      <IconDelete
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => {
+                          if (fileProps.onRemove) {
+                            fileProps.onRemove(file);
+                            setUrlList((prev) => prev.splice(index, 1));
+                          }
+                        }}
+                      />
+                    )}
                   </div>
                 }
               />
@@ -272,7 +302,7 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
                 ? undefined
                 : verify?.maxCount
           }
-          accept={verify?.fileFormat || "image/*"}
+          accept={verify?.fileFormat || 'image/*'}
           listType={'text'}
           beforeUpload={async (file) => {
             const fileSizeLimit = verify?.maxSize * 1024; // 转换为kb;
@@ -286,21 +316,21 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
             const { onProgress, onError, onSuccess, file } = option;
             try {
               const fileId = await handleUpload(file, onProgress);
-              let uploadImgUrl = ''
+              let uploadImgUrl = '';
               if (entityDataId.value) {
                 const param = {
                   menuId: curMenu.value?.id,
                   id: entityDataId.value,
                   fieldName,
                   fileId: fileId
-                }
-                uploadImgUrl = await attachmentDownload(tableName, param)
+                };
+                uploadImgUrl = await attachmentDownload(tableName, param);
               } else {
                 uploadImgUrl = URL.createObjectURL(file);
               }
               // 文件上传文件id
               if (uploadImgUrl !== '') {
-                setUrlList((prev) => [...prev, uploadImgUrl])
+                setUrlList((prev) => [...prev, uploadImgUrl]);
                 onSuccess({ fileId: fileId });
               } else {
                 onError({
