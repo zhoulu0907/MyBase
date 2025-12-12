@@ -14,8 +14,6 @@ import { v4 as uuidv4 } from 'uuid';
 
 import EmptyIcon from '@/assets/images/empty.svg';
 import MobileIcon from '@/assets/images/mobile_icon.svg';
-import MobileActiveIcon from '@/assets/images/mobile_icon_active.svg';
-import PCIcon from '@/assets/images/pc_icon.svg';
 import PCActiveIcon from '@/assets/images/pc_icon_active.svg';
 import {
   COMPONENT_GROUP_NAME,
@@ -98,11 +96,12 @@ export default function EditorWorkspace() {
   } = usePageEditorSignal();
   const { pageViews, curViewId, setCurViewId, updatePageViewName } = usePageViewEditorSignal;
 
-  const [pageMode, setPageMode] = useState<string>('pc');
   const { editMode, setEditMode } = currentEditorSignal;
   const mobileEditorDragRef = useRef<MicroApp | null>(null);
 
   const qiankunActions = initGlobalState({
+    mainEntity,
+    subEntities,
     drag: true,
     useEditorSignalMap,
     pageViews,
@@ -341,18 +340,8 @@ export default function EditorWorkspace() {
           </div>
           <Divider type="vertical" />
           <div className={styles.pageModeCtrl}>
-            {editMode.value !== EditMode.MOBILE && (
-              <>
-                <img className={styles.pageModeIcon} src={PCActiveIcon} />
-                <img className={styles.pageModeIcon} src={MobileIcon} onClick={() => setEditMode(EditMode.MOBILE)} />
-              </>
-            )}
-            {editMode.value === EditMode.MOBILE && (
-              <>
-                <img className={styles.pageModeIcon} src={PCIcon} onClick={() => setEditMode(EditMode.PC)} />
-                <img className={styles.pageModeIcon} src={MobileActiveIcon} />
-              </>
-            )}
+            <img className={styles.pageModeIcon} src={PCActiveIcon} />
+            <img className={styles.pageModeIcon} src={MobileIcon} onClick={() => setEditMode(EditMode.MOBILE)} />
           </div>
         </div>
       </div>

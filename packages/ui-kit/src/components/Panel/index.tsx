@@ -7,13 +7,20 @@ import { Tabs, Tooltip } from '@arco-design/web-react';
 import { useEffect, useState } from 'react';
 import MaterialContainer from './components/material';
 import MetadataContainer from './components/metadata';
+import { AppEntities, AppEntity } from '@onebase/app';
 import './index.css';
 
 // 定义类型
 const PANNEL_KEYS = ['material', 'metadata'] as const;
 type PannelKey = (typeof PANNEL_KEYS)[number];
 
-export default function EditorPanel() {
+interface IProps {
+  mainEntity?: AppEntity;
+  subEntities?: AppEntities;
+  editMode?: any;
+}
+
+export default function EditorPanel({ mainEntity, subEntities, editMode } : IProps) {
   const [activeTab, setActiveTab] = useState<EditorType>(EDITOR_TYPES.FORM_EDITOR);
   const [activeLeftTabKey, setActiveLeftTabKey] = useState<PannelKey>('material');
   const [childCollapsed, setChildCollapsed] = useState<PannelKey | string | undefined>('material');
@@ -105,6 +112,7 @@ export default function EditorPanel() {
       >
         {activeLeftTabKey === 'material' && (
           <MaterialContainer
+            editMode={editMode.value}
             activeTab={activeTab}
             childCollapsed={childCollapsed}
             setChildCollapsed={() => setChildCollapsed(undefined)}
@@ -115,8 +123,8 @@ export default function EditorPanel() {
             childCollapsed={childCollapsed}
             setChildCollapsed={() => setChildCollapsed(undefined)}
             // TODO: 获取主表和子表数据
-            mainEntity={{} as any}
-            subEntities={[]}
+            mainEntity={mainEntity as any}
+            subEntities={subEntities}
           />
         )}
       </div>
