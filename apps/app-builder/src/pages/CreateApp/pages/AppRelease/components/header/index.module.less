@@ -2,11 +2,195 @@
   width: 100%;
   box-sizing: border-box;
 
-  background: #fff;
-  border-radius: 8px;
-  border: 1px solid #e5e6eb;
-
+  background: #ffffff;
   padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+.appInfo {
+  width: 100%;
+  height: 60px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+
+  .left {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 16px;
+
+    .appIcon {
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      img {
+        width: 16px;
+        filter: brightness(0) invert(1);
+      }
+    }
+
+    .appNameWrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: flex-start;
+
+      .appName {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-start;
+
+        font-weight: 500;
+        font-size: 20px;
+        line-height: 28px;
+        letter-spacing: 0%;
+        vertical-align: middle;
+        gap: 8px;
+
+        .appPublishModel {
+          font-size: 12px;
+          padding: 0px 8px;
+          height: 20px;
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .saasAppPublishModel {
+          .appPublishModel();
+          color: #3491fa;
+          background: #e8f7ff;
+        }
+        .innerAppPublishModel {
+          .appPublishModel();
+          color: #009e9e;
+          background: #e8fffe;
+        }
+      }
+
+      .appId {
+        font-weight: 400;
+        font-size: 14px;
+        line-height: 22px;
+        vertical-align: middle;
+      }
+    }
+  }
+
+  .right {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    .releaseBtnIcon {
+      width: 14px;
+      height: 14px;
+      margin-right: 10px;
+    }
+  }
+}
+
+.releaseStatus {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+
+  .statusInfo {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+
+    .statusKey {
+      font-weight: 400;
+      font-size: 14px;
+      line-height: 22px;
+      letter-spacing: 0%;
+    }
+
+    .statusDescription {
+      color: #86909c;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .statusValue {
+      font-weight: 500;
+      font-size: 14px;
+      line-height: 22px;
+      letter-spacing: 0%;
+
+      // 状态标签基础样式
+      .appStatusBase {
+        font-size: 12px;
+        font-weight: 400;
+        letter-spacing: 0px;
+        line-height: 32px;
+        width: 44px;
+        height: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 4px;
+        white-space: nowrap;
+      }
+
+      .appStatusDeveloping {
+        .appStatusBase();
+        color: #3491fa;
+        background: #e8f7ff;
+      }
+
+      .appStatusPublished {
+        .appStatusBase();
+        color: #00b42a66;
+        background: #e8ffea;
+      }
+
+      .appStatusEditAfterPublished {
+        .appStatusBase();
+        color: #ff7d00;
+        background: #fff7e8;
+      }
+    }
+
+    .releaseUrlWrapper {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 24px;
+
+      .releaseUrlItem {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 4px;
+
+        .linkText {
+          margin-left: 10px;
+          color: #009e9e;
+          margin-bottom: 0;
+        }
+      }
+    }
+  }
 }
 
 .statusContent {
@@ -30,32 +214,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
-  }
-}
-
-.statusText {
-  .statusTitle {
-    margin: 0 0 8px 0;
-    color: #00b42a;
-    font-weight: 600;
-  }
-
-  .statusTitleDeveloping {
-    margin: 0 0 8px 0;
-    color: #1d2129;
-    font-weight: 600;
-  }
-
-  .statusTitleEdit {
-    margin: 0 0 8px 0;
-    color: #ff7d00;
-    font-weight: 600;
-  }
-
-  .statusDescription {
-    color: #86909c;
-    font-size: 14px;
-    line-height: 1.5;
   }
 }
 

@@ -1,0 +1,79 @@
+import EditingIcon from '@/assets/images/editing_icon.svg';
+import ReleaseBtnDownIcon from '@/assets/images/release_btn_down_icon.svg';
+import ReleaseBtnUpIcon from '@/assets/images/release_btn_up_icon.svg';
+import ReleaseIcon from '@/assets/images/release_icon.svg';
+import { Button, Card, Typography } from '@arco-design/web-react';
+import { AppStatus, type Application } from '@onebase/app';
+import React from 'react';
+import styles from './index.module.less';
+
+interface AppStatusHeaderProps {
+  appInfo: Application;
+  onReleaseToggle: () => void;
+}
+
+const AppStatusHeader: React.FC<AppStatusHeaderProps> = ({ appInfo, onReleaseToggle }) => {
+  const appStatus = appInfo.appStatus;
+
+  return (
+    <Card className={styles.appStatusHeader}>
+      <div className={styles.statusContent}>
+        <div className={styles.statusInfo}>
+          <div className={styles.statusIcon}>
+            <div className={styles.iconWrapper}>
+              {appStatus === AppStatus.DEVELOPING && <img src={EditingIcon} alt="" />}
+              {appStatus === AppStatus.PUBLISHED && <img src={ReleaseIcon} alt="" />}
+              {appStatus === AppStatus.EDITING_AFTER_PUBLISH && <img src={ReleaseIcon} alt="" />}
+            </div>
+          </div>
+          <div className={styles.statusText}>
+            {appStatus === AppStatus.PUBLISHED && (
+              <Typography.Title heading={4} className={styles.statusTitle}>
+                已发布
+              </Typography.Title>
+            )}
+            {appStatus === AppStatus.DEVELOPING && (
+              <Typography.Title heading={4} className={styles.statusTitleDeveloping}>
+                开发中
+              </Typography.Title>
+            )}
+            {appStatus === AppStatus.EDITING_AFTER_PUBLISH && (
+              <Typography.Title heading={4} className={styles.statusTitleEdit}>
+                已发布编辑中
+              </Typography.Title>
+            )}
+            <Typography.Text className={styles.statusDescription}>
+              {appStatus != AppStatus.DEVELOPING
+                ? '应用已发布,您可以将下方链接发布给企业成员进行访问'
+                : '应用仍在开发中，预览应用可查看页面，无法提交数据'}
+            </Typography.Text>
+          </div>
+        </div>
+
+        <div className={styles.statusActions}>
+          <div className={styles.versionInfo}>
+            {/* {currentVersion && (
+              <Typography.Text className={styles.versionLabel}>正式环境版本号: {currentVersion}</Typography.Text>
+            )} */}
+          </div>
+          <Button
+            type={appStatus != AppStatus.DEVELOPING ? 'outline' : 'primary'}
+            status={appStatus != AppStatus.DEVELOPING ? 'danger' : 'default'}
+            icon={
+              <img
+                className={styles.releaseBtnIcon}
+                src={appStatus != AppStatus.DEVELOPING ? ReleaseBtnDownIcon : ReleaseBtnUpIcon}
+                alt=""
+              />
+            }
+            onClick={onReleaseToggle}
+          >
+            {appStatus != AppStatus.DEVELOPING ? '应用下线' : '发布应用'}
+          </Button>
+        </div>
+      </div>
+    </Card>
+  );
+};
+
+export default AppStatusHeader;
