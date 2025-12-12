@@ -1,20 +1,21 @@
 package com.cmsr.onebase.module.app.runtime.service.menu;
 
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
+import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.framework.security.runtime.RTSecurityContext;
 import com.cmsr.onebase.module.app.api.security.bo.OperationPermission;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthViewRepository;
 import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
 import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageRepository;
 import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageSetRepository;
-import com.cmsr.onebase.module.app.core.dal.dataobject.*;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthViewDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppMenuDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePageDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePagesetDO;
 import com.cmsr.onebase.module.app.core.dto.auth.UserRoleDTO;
 import com.cmsr.onebase.module.app.core.enums.menu.MenuTypeEnum;
 import com.cmsr.onebase.module.app.core.impl.auth.AppAuthSecurityApiImpl;
-import com.cmsr.onebase.module.app.core.provider.auth.AppAuthPermissionProvider;
 import com.cmsr.onebase.module.app.core.provider.auth.AppAuthRoleProvider;
-import com.cmsr.onebase.module.app.core.utils.CacheUtils;
 import com.cmsr.onebase.module.app.core.utils.MenuUtils;
 import com.cmsr.onebase.module.app.core.vo.menu.MenuListRespVO;
 import com.cmsr.onebase.module.app.runtime.vo.menu.MenuPermissionVO;
@@ -22,10 +23,6 @@ import jakarta.annotation.Resource;
 import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
-import org.redisson.api.RBucket;
-import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
@@ -52,9 +49,6 @@ public class AppMenuServiceImpl implements AppMenuService {
     private AppAuthRoleProvider appAuthRoleProvider;
 
     @Resource
-    private AppAuthPermissionProvider appAuthPermissionProvider;
-
-    @Resource
     private AppAuthSecurityApiImpl appAuthSecurityApi;
 
     @Autowired
@@ -63,22 +57,16 @@ public class AppMenuServiceImpl implements AppMenuService {
     @Autowired
     private AppPageRepository appPageRepository;
 
-    @Autowired
-    private RedissonClient redissonClient;
-
     @Override
     public List<MenuListRespVO> listBpmApplicationMenu() {
         Long applicationId = ApplicationManager.getApplicationId();
-
         // 获取应用下所有可见的BPM类型菜单
         List<AppMenuDO> menuDOS = appMenuRepository.findByApplicationIdAndType(applicationId,
                 Set.of(MenuTypeEnum.BPM.getValue()));
-
         // 额外过滤只保留可见的菜单
         menuDOS = menuDOS.stream()
                 .filter(menu -> BooleanUtils.toBoolean(menu.getIsVisible()))
                 .toList();
-
         // 返回菜单
         return menuDOS.stream()
                 .map(v -> BeanUtils.toBean(v, MenuListRespVO.class))
@@ -87,15 +75,17 @@ public class AppMenuServiceImpl implements AppMenuService {
 
     @Override
     public List<MenuListRespVO> listApplicationMenu() {
-        Long userId = RTSecurityContext.getRequiredUserId();
+        Long userId = SecurityFrameworkUtils.getLoginUserId();
         Long applicationId = ApplicationManager.getRequiredApplicationId();
-        UserRoleDTO userRoleDTO = appAuthRoleProvider.findUserRoleByApplication(userId, applicationId);
-        List<AppMenuDO> menuDOS = appMenuRepository.findVisibleByAppId(applicationId,
-                Set.of(MenuTypeEnum.PAGE.getValue(), MenuTypeEnum.GROUP.getValue()));
-        if (!userRoleDTO.isAdminRole()) {
-            Set<String> blackMenuUuids = findBlackMenuUuids(applicationId, userRoleDTO.getRoleUuids());
-            menuDOS = menuDOS.stream().filter(v -> !blackMenuUuids.contains(v.getMenuUuid())).toList();
+        //
+        appAuthSecurityApi.cleanAuthCache(userId, applicationId);
+        appAuthSecurityApi.loadAuthCache(userId, applicationId);
+        //
+        List<Long> menuIds = appAuthSecurityApi.getVisibleMenuIds(userId, applicationId);
+        if (CollectionUtils.isEmpty(menuIds)) {
+            return Collections.emptyList();
         }
+        List<AppMenuDO> menuDOS = appMenuRepository.listByIds(menuIds);
         if (CollectionUtils.isEmpty(menuDOS)) {
             return Collections.emptyList();
         }
@@ -103,67 +93,51 @@ public class AppMenuServiceImpl implements AppMenuService {
     }
 
     private List<MenuListRespVO> convertToMenuListRespVOS(List<AppMenuDO> menuDOS) {
-        // 批量查询 pagesetType
-        Long applicationId = ApplicationManager.getApplicationId();
-        List<String> menuUuids = menuDOS.stream().map(AppMenuDO::getMenuUuid).collect(Collectors.toList());
-        Map<String, Integer> pagesetTypeMap = new HashMap<>();
-        if (CollectionUtils.isNotEmpty(menuUuids)) {
-            List<AppResourcePagesetDO> pagesets = appPageSetRepository.findByMenuUuids(applicationId, menuUuids);
-            if (CollectionUtils.isNotEmpty(pagesets)) {
-                pagesetTypeMap = pagesets.stream()
-                        .filter(p -> p.getMenuUuid() != null && p.getPageSetType() != null)
-                        .collect(Collectors.toMap(AppResourcePagesetDO::getMenuUuid, AppResourcePagesetDO::getPageSetType, (v1, v2) -> v1));
-            }
-        }
-
-        List<MenuListRespVO> menuListRespList = new ArrayList<>();
-        final Map<String, Integer> finalPagesetTypeMap = pagesetTypeMap;
+        List<MenuListRespVO> menuListRespList = BeanUtils.toBean(menuDOS, MenuListRespVO.class);
+        enrichPagesetType(menuListRespList);
         // 把第一层的菜单添加到列表中
-        LinkedList<MenuListRespVO> levelOneMenus = menuDOS.stream()
+        List<MenuListRespVO> levelOneMenus = menuListRespList.stream()
                 .filter(v -> MenuUtils.ROOT_MENU_UUID.equals(v.getParentUuid()))
-                .map(v -> {
-                    MenuListRespVO vo = BeanUtils.toBean(v, MenuListRespVO.class);
-                    vo.setPagesetType(finalPagesetTypeMap.get(v.getMenuUuid()));
-                    return vo;
-                })
-                .collect(Collectors.toCollection(LinkedList::new));
-        menuListRespList.addAll(levelOneMenus);
+                .toList();
         // 递归实现每个菜单的子菜单
         for (MenuListRespVO respVO : menuListRespList) {
-            LinkedList<MenuListRespVO> children = recursiveGetChildren(respVO.getMenuUuid(), menuDOS, finalPagesetTypeMap);
+            List<MenuListRespVO> children = recursiveGetChildren(respVO.getMenuUuid(), levelOneMenus);
             respVO.setChildren(children);
         }
         return menuListRespList;
     }
 
-    private LinkedList<MenuListRespVO> recursiveGetChildren(String parentUuid, List<AppMenuDO> menuDOS, Map<String, Integer> pagesetTypeMap) {
-        LinkedList<MenuListRespVO> children = new LinkedList<>();
-        for (AppMenuDO menuDO : menuDOS) {
-            if (Objects.equals(menuDO.getParentUuid(), parentUuid)) {
+
+    private List<MenuListRespVO> recursiveGetChildren(String parentUuid, List<MenuListRespVO> listRespVOS) {
+        List<MenuListRespVO> children = new LinkedList<>();
+        for (MenuListRespVO respVO : listRespVOS) {
+            if (Objects.equals(respVO.getParentUuid(), parentUuid)) {
                 // 只有父菜单的uuid等于当前菜单的父菜单的uuid时，才添加子菜单，继续递归
-                MenuListRespVO child = BeanUtils.toBean(menuDO, MenuListRespVO.class);
-                child.setPagesetType(pagesetTypeMap.get(menuDO.getMenuUuid()));
-                child.setChildren(recursiveGetChildren(child.getMenuUuid(), menuDOS, pagesetTypeMap));
-                children.add(child);
+                respVO.setChildren(recursiveGetChildren(respVO.getParentUuid(), listRespVOS));
+                children.add(respVO);
             }
         }
         return children.isEmpty() ? null : children;
     }
 
-    private Set<String> findBlackMenuUuids(Long applicationId, Set<String> roleUuids) {
-        List<AppAuthPermissionDO> permissions = appAuthPermissionProvider.findPermissions(applicationId, roleUuids);
-        Set<String> result = new HashSet<>();
-        for (AppAuthPermissionDO permission : permissions) {
-            if (NumberUtils.INTEGER_ZERO.equals(permission.getIsPageAllowed())
-                    && StringUtils.isNotEmpty(permission.getMenuUuid()))
-                result.add(permission.getMenuUuid());
+    private void enrichPagesetType(List<MenuListRespVO> menuListRespList) {
+        List<String> menuUuids = menuListRespList.stream().map(MenuListRespVO::getMenuUuid).collect(Collectors.toList());
+        Long applicationId = ApplicationManager.getApplicationId();
+        List<AppResourcePagesetDO> pagesets = appPageSetRepository.findByMenuUuids(applicationId, menuUuids);
+        if (CollectionUtils.isEmpty(menuUuids)) {
+            return;
         }
-        return result;
+        Map<String, Integer> pagesetTypeMap = pagesets.stream()
+                .filter(p -> p.getMenuUuid() != null && p.getPageSetType() != null)
+                .collect(Collectors.toMap(AppResourcePagesetDO::getMenuUuid, AppResourcePagesetDO::getPageSetType, (v1, v2) -> v1));
+        for (MenuListRespVO menuListRespVO : menuListRespList) {
+            menuListRespVO.setPagesetType(pagesetTypeMap.get(menuListRespVO.getMenuUuid()));
+        }
     }
 
     @Override
     public MenuPermissionVO getMenuPermission(Long menuId) {
-        Long userId = RTSecurityContext.getRequiredUserId();
+        Long userId = SecurityFrameworkUtils.getLoginUserId();
         Long applicationId = ApplicationManager.getApplicationId();
         MenuPermissionVO menuPermissionVO = new MenuPermissionVO();
         menuPermissionVO.setOperationPermission(appAuthSecurityApi.getMenuOperationPermission(userId, applicationId, menuId));
@@ -176,12 +150,6 @@ public class AppMenuServiceImpl implements AppMenuService {
      * 要缓存
      */
     public Set<String> findMenuViews(Long userId, Long applicationId, Long menuId) {
-        String redisKey = CacheUtils.keyForPagePermission(userId, applicationId, menuId);
-        RBucket<Set<String>> bucket = redissonClient.getBucket(redisKey, CacheUtils.KRYO5_CODEC);
-        if (bucket.isExists()) {
-            return bucket.get();
-        }
-
         UserRoleDTO userRoleDTO = appAuthRoleProvider.findUserRoleByApplication(userId, applicationId);
         if (userRoleDTO.isAdminRole()) {
             return findMenuAllViews(applicationId, menuId);
@@ -197,7 +165,6 @@ public class AppMenuServiceImpl implements AppMenuService {
         //
         List<AppAuthViewDO> authViewDOS = appAuthViewRepository.findByAppIdAndRoleUuidsAndMenuUuid(applicationId, roleUuids, menuUuid);
         Set<String> result = authViewDOS.stream().map(AppAuthViewDO::getViewUuid).collect(Collectors.toSet());
-        bucket.set(result, CacheUtils.CACHE_EXPIRE_TIME);
         return result;
     }
 

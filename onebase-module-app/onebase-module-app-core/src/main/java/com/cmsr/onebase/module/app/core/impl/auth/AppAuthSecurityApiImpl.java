@@ -3,9 +3,11 @@ package com.cmsr.onebase.module.app.core.impl.auth;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.module.app.api.security.AppAuthSecurityApi;
 import com.cmsr.onebase.module.app.api.security.bo.*;
+import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthPermissionDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppMenuDO;
 import com.cmsr.onebase.module.app.core.dto.auth.UserRoleDTO;
+import com.cmsr.onebase.module.app.core.enums.menu.MenuTypeEnum;
 import com.cmsr.onebase.module.app.core.provider.auth.AppAuthDataGroupProvider;
 import com.cmsr.onebase.module.app.core.provider.auth.AppAuthFieldProvider;
 import com.cmsr.onebase.module.app.core.provider.auth.AppAuthPermissionProvider;
@@ -14,12 +16,14 @@ import com.cmsr.onebase.module.app.core.provider.menu.AppMenuProvider;
 import com.cmsr.onebase.module.app.core.utils.CacheUtils;
 import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.redisson.api.RBucket;
+import org.redisson.api.RMapCache;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -33,6 +37,9 @@ public class AppAuthSecurityApiImpl implements AppAuthSecurityApi {
 
     @Autowired
     private RedissonClient redissonClient;
+
+    @Autowired
+    private AppMenuRepository appMenuRepository;
 
     @Autowired
     private AppAuthRoleProvider appAuthRoleProvider;
@@ -50,7 +57,106 @@ public class AppAuthSecurityApiImpl implements AppAuthSecurityApi {
     private AppAuthFieldProvider appAuthFieldProvider;
 
     @Override
+    public void loadAuthCache(Long userId, Long applicationId) {
+        List<Long> menuIds = getVisibleMenuIds(userId, applicationId);
+        if (CollectionUtils.isEmpty(menuIds)) {
+            return;
+        }
+        for (Long menuId : menuIds) {
+            getMenuOperationPermission(userId, applicationId, menuId);
+            getMenuDataPermission(userId, applicationId, menuId);
+            getMenuFieldPermission(userId, applicationId, menuId);
+        }
+    }
+
+    @Override
+    public void cleanAuthCache(Long userId, Long applicationId) {
+        String key = CacheUtils.keyForAuth(userId, applicationId);
+        redissonClient.getMapCache(key, CacheUtils.KRYO5_CODEC).clear();
+    }
+
+    @Override
+    public boolean isApplicationAdmin(Long userId, Long applicationId) {
+        return doIsApplicationAdmin(userId, applicationId);
+    }
+
+    @Override
+    public boolean hasApplicationPermission(Long userId, Long applicationId) {
+        String key = CacheUtils.keyForAuth(userId, applicationId);
+        RMapCache<String, Boolean> mapCache = redissonClient.getMapCache(key, CacheUtils.KRYO5_CODEC);
+        String hashKey = CacheUtils.keyForHasPerm();
+        Boolean hasPermission = mapCache.get(hashKey);
+        if (hasPermission != null) {
+            return hasPermission;
+        }
+        hasPermission = doHasApplicationPermission(userId, applicationId);
+        mapCache.put(hashKey, hasPermission, CacheUtils.CACHE_TTL, CacheUtils.CACHE_TTL_UNIT);
+        return hasPermission;
+    }
+
+    @Override
     public boolean checkMenuEntity(Long applicationId, Long menuId, String entityUuid) {
+        return doCheckMenuEntity(applicationId, menuId, entityUuid);
+    }
+
+    @Override
+    public List<Long> getVisibleMenuIds(Long userId, Long applicationId) {
+        String key = CacheUtils.keyForAuth(userId, applicationId);
+        RMapCache<String, List<Long>> mapCache = redissonClient.getMapCache(key, CacheUtils.KRYO5_CODEC);
+        String hashKey = CacheUtils.keyForVisibleMenuIds();
+        List<Long> menuIds = mapCache.get(hashKey);
+        if (menuIds != null) {
+            return menuIds;
+        }
+        menuIds = doGetVisibleMenuIds(userId, applicationId);
+        mapCache.put(hashKey, menuIds, CacheUtils.CACHE_TTL, CacheUtils.CACHE_TTL_UNIT);
+        return menuIds;
+    }
+
+    @Override
+    public OperationPermission getMenuOperationPermission(Long userId, Long applicationId, Long menuId) {
+        String key = CacheUtils.keyForAuth(userId, applicationId);
+        RMapCache<String, OperationPermission> mapCache = redissonClient.getMapCache(key, CacheUtils.KRYO5_CODEC);
+        String hashKey = CacheUtils.keyForOperation(menuId);
+        OperationPermission operationPermission = mapCache.get(hashKey);
+        if (operationPermission != null) {
+            return operationPermission;
+        }
+        operationPermission = doGetMenuOperationPermission(userId, applicationId, menuId);
+        mapCache.put(hashKey, operationPermission, CacheUtils.CACHE_TTL, CacheUtils.CACHE_TTL_UNIT);
+        return operationPermission;
+    }
+
+    @Override
+    public DataPermission getMenuDataPermission(Long userId, Long applicationId, Long menuId) {
+        String key = CacheUtils.keyForAuth(userId, applicationId);
+        RMapCache<String, DataPermission> mapCache = redissonClient.getMapCache(key, CacheUtils.KRYO5_CODEC);
+        String hashKey = CacheUtils.keyForData(menuId);
+        DataPermission dataPermission = mapCache.get(hashKey);
+        if (dataPermission != null) {
+            return dataPermission;
+        }
+        dataPermission = doGetMenuDataPermission(userId, applicationId, menuId);
+        mapCache.put(hashKey, dataPermission, CacheUtils.CACHE_TTL, CacheUtils.CACHE_TTL_UNIT);
+        return dataPermission;
+    }
+
+    @Override
+    public FieldPermission getMenuFieldPermission(Long userId, Long applicationId, Long menuId) {
+        String key = CacheUtils.keyForAuth(userId, applicationId);
+        RMapCache<String, FieldPermission> mapCache = redissonClient.getMapCache(key, CacheUtils.KRYO5_CODEC);
+        String hashKey = CacheUtils.keyForField(menuId);
+        FieldPermission fieldPermission = mapCache.get(hashKey);
+        if (fieldPermission != null) {
+            return fieldPermission;
+        }
+        fieldPermission = doGetMenuFieldPermission(userId, applicationId, menuId);
+        mapCache.put(hashKey, fieldPermission, CacheUtils.CACHE_TTL, CacheUtils.CACHE_TTL_UNIT);
+        return fieldPermission;
+    }
+
+
+    public boolean doCheckMenuEntity(Long applicationId, Long menuId, String entityUuid) {
         AppMenuDO menuDO = appMenuProvider.findByMenuId(menuId);
         if (menuDO == null) {
             return false;
@@ -63,19 +169,40 @@ public class AppAuthSecurityApiImpl implements AppAuthSecurityApi {
         return false;
     }
 
-    @Override
-    public boolean isApplicationAdmin(Long userId, Long applicationId) {
+    public Boolean doHasApplicationPermission(Long userId, Long applicationId) {
+        UserRoleDTO userRoleDTO = appAuthRoleProvider.findUserRoleByApplication(userId, applicationId);
+        if (userRoleDTO != null && userRoleDTO.isAdminRole()) {
+            return true;
+        }
+        if (userRoleDTO == null || CollectionUtils.isEmpty(userRoleDTO.getRoleIds()) || CollectionUtils.isEmpty(userRoleDTO.getRoleUuids())) {
+            return false;
+        }
+        return true;
+    }
+
+    public boolean doIsApplicationAdmin(Long userId, Long applicationId) {
         UserRoleDTO userRoleDTO = appAuthRoleProvider.findUserRoleByApplication(userId, applicationId);
         return userRoleDTO != null && userRoleDTO.isAdminRole();
     }
 
-    @Override
-    public OperationPermission getMenuOperationPermission(Long userId, Long applicationId, Long menuId) {
-        String redisKey = CacheUtils.keyForOperationPermission(userId, applicationId, menuId);
-        RBucket<OperationPermission> bucket = redissonClient.getBucket(redisKey, CacheUtils.KRYO5_CODEC);
-        if (bucket.isExists()) {
-            return bucket.get();
+    public List<Long> doGetVisibleMenuIds(Long userId, Long applicationId) {
+        UserRoleDTO userRoleDTO = appAuthRoleProvider.findUserRoleByApplication(userId, applicationId);
+        List<AppMenuDO> menuDOS = appMenuRepository.findVisibleByAppId(applicationId,
+                Set.of(MenuTypeEnum.PAGE.getValue(), MenuTypeEnum.GROUP.getValue()));
+        if (userRoleDTO.isAdminRole()) {
+            return menuDOS.stream().map(AppMenuDO::getId).toList();
         }
+        Set<String> roleUuids = userRoleDTO.getRoleUuids();
+        List<AppAuthPermissionDO> permissions = appAuthPermissionProvider.findPermissions(applicationId, roleUuids);
+        Set<String> menuUuidBlacklist = new HashSet<>();
+        for (AppAuthPermissionDO permission : permissions) {
+            if (!NumberUtils.INTEGER_ONE.equals(permission.getIsPageAllowed()) && StringUtils.isNotEmpty(permission.getMenuUuid()))
+                menuUuidBlacklist.add(permission.getMenuUuid());
+        }
+        return menuDOS.stream().filter(v -> !menuUuidBlacklist.contains(v.getMenuUuid())).map(AppMenuDO::getId).toList();
+    }
+
+    public OperationPermission doGetMenuOperationPermission(Long userId, Long applicationId, Long menuId) {
         OperationPermission operationPermission = new OperationPermission();
         UserRoleDTO userRoleDTO = appAuthRoleProvider.findUserRoleByApplication(userId, applicationId);
         if (userRoleDTO != null && userRoleDTO.isAdminRole()) {
@@ -119,18 +246,11 @@ public class AppAuthSecurityApiImpl implements AppAuthSecurityApi {
                 }
             }
         }
-        bucket.set(operationPermission, CacheUtils.CACHE_EXPIRE_TIME);
         return operationPermission;
     }
 
-    @Override
-    public DataPermission getMenuDataPermission(Long userId, Long applicationId, Long menuId) {
-        String redisKey = CacheUtils.keyForDataPermission(userId, applicationId, menuId);
-        RBucket<DataPermission> bucket = redissonClient.getBucket(redisKey, CacheUtils.KRYO5_CODEC);
-        if (bucket.isExists()) {
-            return bucket.get();
-        }
-        //
+
+    public DataPermission doGetMenuDataPermission(Long userId, Long applicationId, Long menuId) {
         DataPermission dataPermission = new DataPermission();
         UserRoleDTO userRoleDTO = appAuthRoleProvider.findUserRoleByApplication(userId, applicationId);
         if (userRoleDTO != null && userRoleDTO.isAdminRole()) {
@@ -153,18 +273,11 @@ public class AppAuthSecurityApiImpl implements AppAuthSecurityApi {
         dataPermission.setAllAllowed(false);
         dataPermission.setAllDenied(false);
         //
-        bucket.set(dataPermission, CacheUtils.CACHE_EXPIRE_TIME);
         return dataPermission;
     }
 
-    @Override
-    public FieldPermission getMenuFieldPermission(Long userId, Long applicationId, Long menuId) {
-        String redisKey = CacheUtils.keyForFieldPermission(userId, applicationId, menuId);
-        RBucket<FieldPermission> bucket = redissonClient.getBucket(redisKey, CacheUtils.KRYO5_CODEC);
-        if (bucket.isExists()) {
-            return bucket.get();
-        }
-        //
+
+    public FieldPermission doGetMenuFieldPermission(Long userId, Long applicationId, Long menuId) {
         FieldPermission fieldPermission = new FieldPermission();
         UserRoleDTO userRoleDTO = appAuthRoleProvider.findUserRoleByApplication(userId, applicationId);
         if (userRoleDTO != null && userRoleDTO.isAdminRole()) {
@@ -198,7 +311,6 @@ public class AppAuthSecurityApiImpl implements AppAuthSecurityApi {
         fieldPermission.setAllDenied(false);
         fieldPermission.setFields(fields);
         //
-        bucket.set(fieldPermission, CacheUtils.CACHE_EXPIRE_TIME);
         return fieldPermission;
     }
 
