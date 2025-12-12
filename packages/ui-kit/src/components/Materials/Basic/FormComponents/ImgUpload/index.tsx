@@ -77,7 +77,7 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
     if (flag) {
       form.setFieldValue(fieldId, newFieldValue);
     }
-    if (entityDataId.value) {
+    if (entityDataId.value && !urlList.length) {
       console.log('entityDataId.value', entityDataId.value)
       const urls = (fieldValue || []).map(async (ele: any) => {
         const param = {
