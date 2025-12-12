@@ -84,28 +84,28 @@ public class AppDataManager {
     }
 
     public void removeApplicationVersion(Long applicationId, Long versionTag) {
-        workbenchComponentRepository.removeByApplicationVersion(applicationId, versionTag);
-        resourceComponentRepository.removeByApplicationVersion(applicationId, versionTag);
-        workbenchPageRepository.removeByApplicationVersion(applicationId, versionTag);
-        resourcePageRepository.removeByApplicationVersion(applicationId, versionTag);
-        resourcePageSetRepository.removeByApplicationVersion(applicationId, versionTag);
-        menuRepository.removeByApplicationVersion(applicationId, versionTag);
-        authViewRepository.removeByApplicationVersion(applicationId, versionTag);
-        authFieldRepository.removeByApplicationVersion(applicationId, versionTag);
-        authDataGroupRepository.removeByApplicationVersion(applicationId, versionTag);
-        authPermissionRepository.removeByApplicationVersion(applicationId, versionTag);
+        workbenchComponentRepository.deleteApplicationVersionData(applicationId, versionTag);
+        resourceComponentRepository.deleteApplicationVersionData(applicationId, versionTag);
+        workbenchPageRepository.deleteApplicationVersionData(applicationId, versionTag);
+        resourcePageRepository.deleteApplicationVersionData(applicationId, versionTag);
+        resourcePageSetRepository.deleteApplicationVersionData(applicationId, versionTag);
+        menuRepository.deleteApplicationVersionData(applicationId, versionTag);
+        authViewRepository.deleteApplicationVersionData(applicationId, versionTag);
+        authFieldRepository.deleteApplicationVersionData(applicationId, versionTag);
+        authDataGroupRepository.deleteApplicationVersionData(applicationId, versionTag);
+        authPermissionRepository.deleteApplicationVersionData(applicationId, versionTag);
     }
 
     public void removeApplication(Long applicationId) {
-        workbenchComponentRepository.removeByApplicationId(applicationId);
-        resourceComponentRepository.removeByApplicationId(applicationId);
-        workbenchPageRepository.removeByApplicationId(applicationId);
-        resourcePageRepository.removeByApplicationId(applicationId);
-        resourcePageSetRepository.removeByApplicationId(applicationId);
-        menuRepository.removeByApplicationId(applicationId);
-        authViewRepository.removeByApplicationId(applicationId);
-        authFieldRepository.removeByApplicationId(applicationId);
-        authDataGroupRepository.removeByApplicationId(applicationId);
-        authPermissionRepository.removeByApplicationId(applicationId);
+        workbenchComponentRepository.deleteAllApplicationData(applicationId);
+        resourceComponentRepository.deleteAllApplicationData(applicationId);
+        workbenchPageRepository.deleteAllApplicationData(applicationId);
+        resourcePageRepository.deleteAllApplicationData(applicationId);
+        resourcePageSetRepository.deleteAllApplicationData(applicationId);
+        menuRepository.deleteAllApplicationData(applicationId);
+        authViewRepository.deleteAllApplicationData(applicationId);
+        authFieldRepository.deleteAllApplicationData(applicationId);
+        authDataGroupRepository.deleteAllApplicationData(applicationId);
+        authPermissionRepository.deleteAllApplicationData(applicationId);
     }
 }
