@@ -1,6 +1,5 @@
 package com.cmsr.onebase.plugin.context;
 
-import com.cmsr.onebase.plugin.service.CacheService;
 import com.cmsr.onebase.plugin.service.DataService;
 import com.cmsr.onebase.plugin.service.FileService;
 import com.cmsr.onebase.plugin.service.UserService;
@@ -108,7 +107,6 @@ public interface PluginContext {
      *     <li>{@link DataService} - 数据操作服务</li>
      *     <li>{@link UserService} - 用户信息服务</li>
      *     <li>{@link FileService} - 文件操作服务</li>
-     *     <li>{@link CacheService} - 缓存服务</li>
      * </ul>
      * </p>
      *
@@ -143,14 +141,5 @@ public interface PluginContext {
      */
     default FileService getFileService() {
         return getService(FileService.class);
-    }
-
-    /**
-     * 获取缓存服务（快捷方法）
-     *
-     * @return 缓存服务
-     */
-    default CacheService getCacheService() {
-        return getService(CacheService.class);
     }
 }

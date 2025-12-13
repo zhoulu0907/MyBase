@@ -37,10 +37,10 @@ public class OneBasePlugin extends Plugin {
     /**
      * 获取插件ID
      *
-     * @return 插件ID
+     * @return 插件ID，如果wrapper未设置则返回"unknown"
      */
     public String getPluginId() {
-        return getWrapper().getPluginId();
+        return getWrapper() != null ? getWrapper().getPluginId() : "unknown";
     }
 
     /**
@@ -69,7 +69,7 @@ public class OneBasePlugin extends Plugin {
      * 插件删除
      * <p>
      * 插件被卸载删除时调用。
-     * </p>x`
+     * </p>
      */
     @Override
     public void delete() {

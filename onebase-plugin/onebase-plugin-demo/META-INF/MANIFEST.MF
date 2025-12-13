@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Created-By: Maven JAR Plugin 3.4.2
+Build-Jdk-Spec: 17
+Plugin-Class: com.cmsr.onebase.plugin.demo.GeneratedPlugin
+Plugin-Description: 这是一个示例插件
+Plugin-Id: demo-plugin
+Plugin-Version: 1.0.0
+

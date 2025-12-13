@@ -2,7 +2,6 @@ package com.cmsr.onebase.plugin.demo.processor;
 
 import com.cmsr.onebase.plugin.api.DataProcessor;
 import com.cmsr.onebase.plugin.context.PluginContext;
-import org.pf4j.Extension;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -20,7 +19,6 @@ import java.util.stream.Collectors;
  * @author OneBase Team
  * @date 2025-11-29
  */
-@Extension
 public class DataMaskProcessor implements DataProcessor {
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");

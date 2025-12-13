@@ -1,30 +1,28 @@
 package com.cmsr.onebase.plugin.runtime.config;
 
 import com.cmsr.onebase.plugin.runtime.context.PluginContextFactory;
-import com.cmsr.onebase.plugin.runtime.controller.PluginController;
 import com.cmsr.onebase.plugin.runtime.executor.EventDispatcher;
 import com.cmsr.onebase.plugin.runtime.manager.OneBasePluginManager;
-import com.cmsr.onebase.plugin.runtime.service.CacheServiceImpl;
 import com.cmsr.onebase.plugin.runtime.service.DataServiceImpl;
 import com.cmsr.onebase.plugin.runtime.service.FileServiceImpl;
 import com.cmsr.onebase.plugin.runtime.service.UserServiceImpl;
-import com.cmsr.onebase.plugin.service.CacheService;
 import com.cmsr.onebase.plugin.service.DataService;
 import com.cmsr.onebase.plugin.service.FileService;
 import com.cmsr.onebase.plugin.service.UserService;
+import org.pf4j.CompoundPluginDescriptorFinder;
+import org.pf4j.DefaultPluginManager;
+import org.pf4j.ManifestPluginDescriptorFinder;
+import org.pf4j.PluginDescriptorFinder;
 import org.pf4j.PluginManager;
-import org.pf4j.spring.SpringPluginManager;
+import org.pf4j.PropertiesPluginDescriptorFinder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.core.StringRedisTemplate;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -41,7 +39,6 @@ import java.nio.file.Paths;
 @Configuration
 @ConditionalOnProperty(prefix = "onebase.plugin", name = "enabled", havingValue = "true", matchIfMissing = true)
 @EnableConfigurationProperties(PluginProperties.class)
-@ComponentScan(basePackageClasses = {PluginController.class})
 public class PluginRuntimeAutoConfiguration {
 
     private static final Logger log = LoggerFactory.getLogger(PluginRuntimeAutoConfiguration.class);
@@ -57,8 +54,21 @@ public class PluginRuntimeAutoConfiguration {
     public PluginManager pluginManager(PluginProperties properties) {
         Path pluginsPath = Paths.get(properties.getPluginsDir());
         log.info("初始化插件管理器，插件目录: {}", pluginsPath.toAbsolutePath());
+        log.info("插件目录是否存在: {}", pluginsPath.toFile().exists());
+        log.info("插件目录是否为目录: {}", pluginsPath.toFile().isDirectory());
 
-        SpringPluginManager pluginManager = new SpringPluginManager(pluginsPath);
+        // 创建自定义的 DefaultPluginManager，支持 plugin.properties
+        // 不使用 SpringPluginManager 避免 SpringExtensionFactory 的 wrapper null 问题
+        DefaultPluginManager pluginManager = new DefaultPluginManager(pluginsPath) {
+            @Override
+            protected PluginDescriptorFinder createPluginDescriptorFinder() {
+                // 组合使用 PropertiesPluginDescriptorFinder 和 ManifestPluginDescriptorFinder
+                // 优先使用 plugin.properties，其次使用 MANIFEST.MF
+                return new CompoundPluginDescriptorFinder()
+                        .add(new PropertiesPluginDescriptorFinder())
+                        .add(new ManifestPluginDescriptorFinder());
+            }
+        };
 
         if (properties.isAutoLoad()) {
             // 加载插件
@@ -133,19 +143,6 @@ public class PluginRuntimeAutoConfiguration {
     @ConditionalOnMissingBean(UserService.class)
     public UserService userService() {
         return new UserServiceImpl();
-    }
-
-    /**
-     * 配置缓存服务
-     *
-     * @param redisTemplate Redis模板（可选）
-     * @return CacheService
-     */
-    @Bean
-    @ConditionalOnMissingBean(CacheService.class)
-    @ConditionalOnBean(StringRedisTemplate.class)
-    public CacheService cacheService(StringRedisTemplate redisTemplate) {
-        return new CacheServiceImpl(redisTemplate);
     }
 
     /**

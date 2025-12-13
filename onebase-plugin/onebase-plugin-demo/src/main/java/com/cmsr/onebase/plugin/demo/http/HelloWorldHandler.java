@@ -1,7 +1,6 @@
 package com.cmsr.onebase.plugin.demo.http;
 
 import com.cmsr.onebase.plugin.api.HttpHandler;
-import org.pf4j.Extension;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -27,7 +26,6 @@ import java.util.Map;
  * @author matianyu
  * @date 2025-12-13
  */
-@Extension
 @RestController
 public class HelloWorldHandler implements HttpHandler {
 

@@ -2,7 +2,6 @@ package com.cmsr.onebase.plugin.runtime.context;
 
 import com.cmsr.onebase.plugin.context.PluginContext;
 import com.cmsr.onebase.plugin.context.PluginContextHolder;
-import com.cmsr.onebase.plugin.service.CacheService;
 import com.cmsr.onebase.plugin.service.DataService;
 import com.cmsr.onebase.plugin.service.FileService;
 import com.cmsr.onebase.plugin.service.UserService;

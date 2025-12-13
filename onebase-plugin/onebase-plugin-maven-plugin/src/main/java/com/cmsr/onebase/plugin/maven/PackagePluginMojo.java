@@ -138,16 +138,18 @@ public class PackagePluginMojo extends AbstractMojo {
      * 创建插件ZIP包
      */
     private void createPluginZip(File zipFile, File mainJar, File pluginProperties) throws IOException {
-        String baseDir = project.getArtifactId() + "/";
+        // PF4J 解压后会进入插件目录，所以ZIP内部不需要再套一层目录
+        String baseDir = "";
 
         try (ZipOutputStream zos = new ZipOutputStream(
                 new BufferedOutputStream(new FileOutputStream(zipFile)))) {
 
-            getLog().info("正在添加主JAR: " + mainJar.getName());
-            addFileToZip(zos, baseDir + mainJar.getName(), mainJar);
-
             getLog().info("正在添加 plugin.properties");
             addFileToZip(zos, baseDir + "plugin.properties", pluginProperties);
+
+            // 将主JAR添加到lib目录，确保PF4J的PluginClassLoader可以加载
+            getLog().info("正在添加主JAR到lib目录: " + mainJar.getName());
+            addFileToZip(zos, baseDir + "lib/" + mainJar.getName(), mainJar);
 
             // 添加运行时依赖
             Set<Artifact> dependencies = project.getArtifacts();
