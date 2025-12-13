@@ -178,7 +178,7 @@
         <!-- 插件运行时 -->
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-plugin-runtime</artifactId>
+            <artifactId>onebase-spring-boot-starter-plugin</artifactId>
         </dependency>
     </dependencies>
 

@@ -638,7 +638,7 @@
             </dependency>
             <dependency>
                 <groupId>com.cmsr.onebase</groupId>
-                <artifactId>onebase-plugin-runtime</artifactId>
+                <artifactId>onebase-spring-boot-starter-plugin</artifactId>
                 <version>${revision}</version>
             </dependency>
             <!-- JGraphT -->

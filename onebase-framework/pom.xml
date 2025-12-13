@@ -26,9 +26,6 @@
         <module>onebase-project-base</module>
         <module>onebase-spring-boot-starter-dolphinscheduler</module>
         <module>onebase-jose</module>
-        <module>onebase-plugin-sdk</module>
-        <module>onebase-plugin-maven-plugin</module>
-        <module>onebase-plugin-runtime</module>
         <!--        <module>onebase-spring-boot-starter-dolphinscheduler-client</module>-->
     </modules>
 

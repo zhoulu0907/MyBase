@@ -10,6 +10,7 @@
     <modules>
         <module>onebase-dependencies</module>
         <module>onebase-framework</module>
+        <module>onebase-plugin</module>
         <!-- Server 主项目 -->
         <module>onebase-server</module>
         <module>onebase-server-platform</module>
