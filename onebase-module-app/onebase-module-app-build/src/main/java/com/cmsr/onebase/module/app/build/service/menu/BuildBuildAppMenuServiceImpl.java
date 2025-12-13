@@ -114,12 +114,12 @@ public class BuildBuildAppMenuServiceImpl implements BuildAppMenuService {
         enrichPagesetType(menuListRespList);
 
         // 把第一层的菜单添加到列表中
-        List<MenuListRespVO> levelOneMenus = menuListRespList.stream()
+        LinkedList<MenuListRespVO> levelOneMenus = menuListRespList.stream()
                 .filter(v -> MenuUtils.ROOT_MENU_UUID.equals(v.getParentUuid()))
-                .toList();
+                .collect(Collectors.toCollection(LinkedList::new));
         // 递归实现每个菜单的子菜单
         for (MenuListRespVO respVO : levelOneMenus) {
-            List<MenuListRespVO> children = recursiveGetChildren(respVO.getMenuUuid(), menuListRespList);
+            LinkedList<MenuListRespVO> children = recursiveGetChildren(respVO.getMenuUuid(), menuListRespList);
             respVO.setChildren(children);
         }
         filterMenuByName(levelOneMenus, name);
@@ -127,8 +127,8 @@ public class BuildBuildAppMenuServiceImpl implements BuildAppMenuService {
     }
 
 
-    private List<MenuListRespVO> recursiveGetChildren(String parentUuid, List<MenuListRespVO> listRespVOS) {
-        List<MenuListRespVO> children = new LinkedList<>();
+    private LinkedList<MenuListRespVO> recursiveGetChildren(String parentUuid, List<MenuListRespVO> listRespVOS) {
+        LinkedList<MenuListRespVO> children = new LinkedList<>();
         for (MenuListRespVO respVO : listRespVOS) {
             if (Objects.equals(respVO.getParentUuid(), parentUuid)) {
                 // 只有父菜单的uuid等于当前菜单的父菜单的uuid时，才添加子菜单，继续递归
@@ -165,7 +165,7 @@ public class BuildBuildAppMenuServiceImpl implements BuildAppMenuService {
      * @param name
      * @return
      */
-    private void filterMenuByName(List<MenuListRespVO> menuListRespList, String name) {
+    private void filterMenuByName(LinkedList<MenuListRespVO> menuListRespList, String name) {
         // 如果没有过滤条件，直接返回原列表
         if (name == null || name.trim().isEmpty()) {
             return;
@@ -237,7 +237,7 @@ public class BuildBuildAppMenuServiceImpl implements BuildAppMenuService {
      *
      * @param menuList 菜单列表
      */
-    private void removeUnmarkedMenus(List<MenuListRespVO> menuList) {
+    private void removeUnmarkedMenus(LinkedList<MenuListRespVO> menuList) {
         // 使用迭代器安全地删除元素
         Iterator<MenuListRespVO> iterator = menuList.iterator();
         while (iterator.hasNext()) {

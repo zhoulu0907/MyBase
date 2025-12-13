@@ -265,7 +265,6 @@ public class AppApplicationServiceImpl implements AppApplicationService {
         if (!StringUtils.equals(name, applicationDO.getAppName())) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_NAME_ERROR);
         }
-        // TODO: 先下线所有相关任务
         etlDataManager.offlineAllByApplication(id);
         flowDataManager.offlineRuntimeData(id);
         transactionTemplate.executeWithoutResult(transactionStatus -> {
