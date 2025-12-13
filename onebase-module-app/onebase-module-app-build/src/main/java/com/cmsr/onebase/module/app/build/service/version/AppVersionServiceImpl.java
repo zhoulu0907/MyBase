@@ -13,7 +13,8 @@ import com.cmsr.onebase.module.app.core.dal.database.version.AppVersionRepositor
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppApplicationDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppVersionDO;
 import com.cmsr.onebase.module.app.core.enums.AppErrorCodeConstants;
-import com.cmsr.onebase.module.app.core.enums.app.ApplicationStatusEnum;
+import com.cmsr.onebase.module.app.core.enums.app.AppPublishEnum;
+import com.cmsr.onebase.module.app.core.enums.app.AppStatusEnum;
 import com.cmsr.onebase.module.app.core.enums.version.VersionTypeEnum;
 import com.cmsr.onebase.module.bpm.api.datamanager.BpmDataManager;
 import com.cmsr.onebase.module.flow.api.FlowDataManager;
@@ -79,6 +80,8 @@ public class AppVersionServiceImpl implements AppVersionService {
     public void onlineApplication(VersionOnlineReq createReqVO) {
         AppApplicationDO applicationDO = appCommonService.validateApplicationExist(createReqVO.getApplicationId());
         Long applicationId = applicationDO.getId();
+        validateVersionNameUnique(applicationId, createReqVO.getVersionName());
+
         // 删除当前运行版本数据
         flowDataManager.offlineRuntimeData(applicationId);
         //
@@ -102,11 +105,18 @@ public class AppVersionServiceImpl implements AppVersionService {
             flowDataManager.copyEditToRuntime(applicationId);
             // 创建新的版本信息
             AppVersionDO newRunVersionDO = createNewVersion(createReqVO, applicationId);
-            applicationRepository.updateAppStatusByApplicationId(applicationId, ApplicationStatusEnum.PUBLISHED);
+            applicationRepository.updateStatusByApplicationId(applicationId, AppStatusEnum.ONLINE, AppPublishEnum.ONCE_PUBLISHED);
             versionRepository.save(newRunVersionDO);
         });
         // online services that required
         flowDataManager.onlineRuntimeData(applicationId);
+    }
+
+    private void validateVersionNameUnique(Long applicationId, String versionName) {
+        long count = versionRepository.countByApplicationIdAndName(applicationId, versionName);
+        if (count > 0) {
+            throw ServiceExceptionUtil.exception(AppErrorCodeConstants.VERSION_NAME_DUPLICATE);
+        }
     }
 
     @Override
@@ -124,7 +134,7 @@ public class AppVersionServiceImpl implements AppVersionService {
                 bpmDataManager.moveRuntimeToHistory(applicationId, historyVersionTag);
                 flowDataManager.moveRuntimeToHistory(applicationId, historyVersionTag);
             }
-            applicationRepository.updateAppStatusByApplicationId(applicationId, ApplicationStatusEnum.EDITING);
+            applicationRepository.updateAppStatusByApplicationId(applicationId, AppStatusEnum.OFFLINE);
         });
         flowDataManager.onlineRuntimeData(applicationId);
     }
