@@ -739,7 +739,6 @@ export default function EditorWorkspace() {
               }
 
               if (dataLabel) {
-                console.log(schema);
                 schema.config.label.text = dataLabel;
               }
 
@@ -774,8 +773,6 @@ export default function EditorWorkspace() {
                   data-cp-type={cp.type}
                   data-cp-displayname={cp.displayName}
                   data-cp-id={cp.id}
-                  //   data-table-name={pageComponentSchemas[cp.id]?.config?.dataField?.[0] || undefined}
-                  //   data-field-name={pageComponentSchemas[cp.id]?.config?.dataField?.[1] || undefined}
                   className={styles.componentItem}
                   style={{
                     width: `calc(${getComponentWidth(pageComponentSchemas[cp.id], cp.type)} - 8px)`,
