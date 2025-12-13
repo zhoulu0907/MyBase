@@ -34,7 +34,6 @@ public interface AppErrorCodeConstants {
     ErrorCode APP_AUTH_ROLE_NOT_ALLOW_RENAME = new ErrorCode(10013, "角色不允许重命名");
     ErrorCode APP_UID_GENERATE_FAILED = new ErrorCode(10014, "应用UID生成失败");
 
-    ErrorCode NOT_LOGIN = new ErrorCode(10015, "用户未登录或登录信息已失效,请检查");
 
-    ErrorCode VERSION_NAME_DUPLICATE = new ErrorCode(10016, "版本名称重复");
+    ErrorCode VERSION_DUPLICATE = new ErrorCode(10016, "版本重复");
 }
