@@ -11,34 +11,25 @@ interface SelectMenuModalProps {
 
 const SelectMenuModal = ({ visible, onCancel, onOk }: SelectMenuModalProps) => {
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
+  const [selectedMenusCache, setSelectedMenusCache] = useState<ApplicationMenu[]>([]);
 
   const handleCancel = () => {
     setSelectedKeys([]);
+    setSelectedMenusCache([]);
     onCancel();
   };
 
   const handleOk = () => {
-    const selectedMenus = selectedKeys.map((key) => findMenuInList(menuList, key)).filter(Boolean) as ApplicationMenu[];
-    onOk(selectedMenus);
+    onOk(selectedMenusCache);
     setSelectedKeys([]);
-  };
-
-  // 递归查找菜单项
-  const findMenuInList = (menus: ApplicationMenu[], id: string): ApplicationMenu | null => {
-    for (const menu of menus) {
-      if (menu.id === id) {
-        return menu;
-      }
-      if (menu.children && menu.children.length > 0) {
-        const found = findMenuInList(menu.children, id);
-        if (found) return found;
-      }
-    }
-    return null;
+    setSelectedMenusCache([]);
   };
 
   const handleMenuChange = (value: string | string[], selectedMenus: ApplicationMenu | ApplicationMenu[]) => {
-    setSelectedKeys(Array.isArray(value) ? value : [value]);
+    const keys = Array.isArray(value) ? value : [value];
+    const menus = Array.isArray(selectedMenus) ? selectedMenus : [selectedMenus];
+    setSelectedKeys(keys);
+    setSelectedMenusCache(menus);
   };
 
   return (

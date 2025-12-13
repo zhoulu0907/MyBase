@@ -9,7 +9,7 @@ import IconEntry4 from '@/assets/workbench/quick-entry/entry4.svg';
 import IconEntry5 from '@/assets/workbench/quick-entry/entry5.svg';
 import IconEntry6 from '@/assets/workbench/quick-entry/entry6.svg';
 import arcoPalette from '@/constants/arco-palette.json';
-import ConfigDrawer from '@/pages/Editor/workbench/components/ConfigDrawer';
+import ConfigDrawer from '@/pages/Editor/workbench/components/configDrawer';
 import { useQuickEntrySection } from '../hooks/useQuickEntrySection';
 import type { QuickEntryStyleConfig } from '../types';
 import styles from './index.module.less';

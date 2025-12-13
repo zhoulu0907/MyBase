@@ -4,7 +4,7 @@ import { uploadFile } from '@onebase/platform-center';
 import { usePageViewEditorSignal } from '@onebase/ui-kit';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { ReactSortable } from 'react-sortablejs';
-import ConfigDrawer from '@/pages/Editor/workbench/components/ConfigDrawer';
+import ConfigDrawer from '@/pages/Editor/workbench/components/configDrawer';
 import type { CarouselItem, StaticCarouselListProps } from './types';
 import MenuSelector from '@/pages/Editor/workbench/components/MenuSelector';
 import styles from './StaticCarouselList.module.less';
