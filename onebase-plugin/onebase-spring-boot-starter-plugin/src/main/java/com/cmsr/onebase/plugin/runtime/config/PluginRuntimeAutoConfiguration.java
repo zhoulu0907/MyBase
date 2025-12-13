@@ -9,9 +9,7 @@ import com.cmsr.onebase.plugin.runtime.service.UserServiceImpl;
 import com.cmsr.onebase.plugin.service.DataService;
 import com.cmsr.onebase.plugin.service.FileService;
 import com.cmsr.onebase.plugin.service.UserService;
-import org.pf4j.CompoundPluginDescriptorFinder;
 import org.pf4j.DefaultPluginManager;
-import org.pf4j.ManifestPluginDescriptorFinder;
 import org.pf4j.PluginDescriptorFinder;
 import org.pf4j.PluginManager;
 import org.pf4j.PropertiesPluginDescriptorFinder;
@@ -57,16 +55,13 @@ public class PluginRuntimeAutoConfiguration {
         log.info("插件目录是否存在: {}", pluginsPath.toFile().exists());
         log.info("插件目录是否为目录: {}", pluginsPath.toFile().isDirectory());
 
-        // 创建自定义的 DefaultPluginManager，支持 plugin.properties
+        // 创建自定义的 DefaultPluginManager，使用 plugin.properties 作为插件描述符
         // 不使用 SpringPluginManager 避免 SpringExtensionFactory 的 wrapper null 问题
         DefaultPluginManager pluginManager = new DefaultPluginManager(pluginsPath) {
             @Override
             protected PluginDescriptorFinder createPluginDescriptorFinder() {
-                // 组合使用 PropertiesPluginDescriptorFinder 和 ManifestPluginDescriptorFinder
-                // 优先使用 plugin.properties，其次使用 MANIFEST.MF
-                return new CompoundPluginDescriptorFinder()
-                        .add(new PropertiesPluginDescriptorFinder())
-                        .add(new ManifestPluginDescriptorFinder());
+                // 只使用 PropertiesPluginDescriptorFinder，读取 plugin.properties
+                return new PropertiesPluginDescriptorFinder();
             }
         };
 

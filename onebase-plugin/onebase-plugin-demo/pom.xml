@@ -104,23 +104,6 @@
                 </configuration>
             </plugin>
 
-            <!-- Maven JAR插件 - 配置Manifest -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>3.4.2</version>
-                <configuration>
-                    <archive>
-                        <manifestEntries>
-                            <!-- PF4J 需要的属性 -->
-                            <Plugin-Id>demo-plugin</Plugin-Id>
-                            <Plugin-Class>com.cmsr.onebase.plugin.demo.GeneratedPlugin</Plugin-Class>
-                            <Plugin-Version>${project.version}</Plugin-Version>
-                            <Plugin-Description>这是一个示例插件</Plugin-Description>
-                        </manifestEntries>
-                    </archive>
-                </configuration>
-            </plugin>
         </plugins>
     </build>
 </project>
