@@ -69,6 +69,7 @@ export interface AppEntity {
 export interface ChildEntity {
   childEntityCode: string;
   childEntityId: string;
+  childEntityUuid: string;
   childEntityName: string;
   childFields: AppEntityField[];
   childTableName: string;
