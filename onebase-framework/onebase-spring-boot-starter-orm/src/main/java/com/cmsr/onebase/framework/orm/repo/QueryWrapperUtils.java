@@ -13,9 +13,6 @@ import java.util.List;
 public class QueryWrapperUtils {
 
     public static boolean isQueryFilterable(QueryWrapper queryWrapper) {
-        if (ApplicationManager.isIgnoreApplicationCondition() && ApplicationManager.isIgnoreVersionTagCondition()) {
-            return false;
-        }
         // 不处理UNION类型
         List<UnionWrapper> unions = CPI.getUnions(queryWrapper);
         if (CollectionUtils.isNotEmpty(unions)) {
@@ -64,7 +61,6 @@ public class QueryWrapperUtils {
                         return nextCondition.getColumn().getTable();
                     }
                 }
-
             }
         }
         return null;

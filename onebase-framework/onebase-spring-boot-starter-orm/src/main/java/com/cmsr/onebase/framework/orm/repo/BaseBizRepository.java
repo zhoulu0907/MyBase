@@ -18,6 +18,9 @@ import java.util.List;
 public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity> extends ServiceImpl<M, T> {
 
     protected void injectQueryFilter(QueryWrapper queryWrapper) {
+        if (ApplicationManager.isIgnoreApplicationCondition() && ApplicationManager.isIgnoreVersionTagCondition()) {
+            return;
+        }
         if (!QueryWrapperUtils.isQueryFilterable(queryWrapper)) {
             return;
         }
