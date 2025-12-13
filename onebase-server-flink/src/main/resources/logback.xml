@@ -29,10 +29,10 @@
                 error_code=%X{error_code:-} - log_ver=%X{log_ver:-} - %msg %n
             </pattern>
         </encoder>
-        <file>${LOG_PATH}/onebase-server-build.log</file>
+        <file>${LOG_PATH}/onebase-server-flink.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <!-- 滚动后的日志文件名 -->
-            <fileNamePattern>${LOG_ARCHIVE}/onebase-server-build-%d{yyyy-MM-dd}.%i.gz</fileNamePattern>
+            <fileNamePattern>${LOG_ARCHIVE}/onebase-server-flink-%d{yyyy-MM-dd}.%i.gz</fileNamePattern>
             <!-- 启动服务时，是否清理历史日志，一般不建议清理 -->
             <cleanHistoryOnStart>${LOGBACK_ROLLINGPOLICY_CLEAN_HISTORY_ON_START:-false}</cleanHistoryOnStart>
             <!-- 日志文件，到达多少容量，进行滚动 -->
@@ -52,16 +52,8 @@
         <appender-ref ref="FILE"/>
     </appender>
 
-    <springProfile name="local,dameng,kingbase,sit">
-        <root level="INFO">
-            <appender-ref ref="STDOUT"/>
-        </root>
-    </springProfile>
-
-    <springProfile name="prod">
-        <root level="INFO">
-            <appender-ref ref="STDOUT"/>
-            <appender-ref ref="ASYNC"/>
-        </root>
-    </springProfile>
+    <root level="INFO">
+        <appender-ref ref="STDOUT"/>
+        <!--            <appender-ref ref="ASYNC"/>-->
+    </root>
 </configuration>

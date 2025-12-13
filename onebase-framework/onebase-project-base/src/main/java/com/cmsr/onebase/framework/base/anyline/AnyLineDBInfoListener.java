@@ -1,6 +1,5 @@
 package com.cmsr.onebase.framework.base.anyline;
 
-import com.cmsr.onebase.framework.common.consts.DeleteConstant;
 import com.cmsr.onebase.framework.common.exception.DatabaseAccessErrorCodes;
 import com.cmsr.onebase.framework.common.exception.DatabaseAccessException;
 import com.cmsr.onebase.framework.common.security.TenantContextHolder;
@@ -27,6 +26,7 @@ import org.anyline.metadata.ACTION.SWITCH;
 import org.anyline.metadata.Table;
 import org.anyline.service.AnylineService;
 import org.anyline.util.ConfigTable;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -218,7 +218,7 @@ public class AnyLineDBInfoListener implements DMListener {
                 baseDO.setUpdater(userId);
             }
             // 新增数据，删除状态为未删除。解决批量插入数据是插入deleted为null的问题
-            baseDO.setDeleted(DeleteConstant.NOT_DELETED);
+            baseDO.setDeleted(NumberUtils.LONG_ZERO);
 
             // 设置乐观锁默认值
             if (Objects.isNull(baseDO.getLockVersion())) {
@@ -254,7 +254,7 @@ public class AnyLineDBInfoListener implements DMListener {
             }
 
             // 新增数据，删除状态为未删除。解决批量插入数据是插入deleted为null的问题
-            baseEntity.setDeletedByListener(DeleteConstant.NOT_DELETED);
+            baseEntity.setDeletedByListener(NumberUtils.LONG_ZERO);
 
             // 设置乐观锁默认值
             if (Objects.isNull(baseEntity.getLockVersion())) {
