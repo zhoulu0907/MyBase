@@ -2,8 +2,9 @@ import { Form, Switch } from '@arco-design/web-react';
 import { nanoid } from 'nanoid';
 import { memo, useEffect, useState } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
-import { STATUS_OPTIONS, STATUS_VALUES, DEFAULT_VALUE_TYPES } from '../../../constants';
+import { DEFAULT_VALUE_TYPES, STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import '../index.css';
+import { useFormFieldWatch } from '../useFormField';
 import type { XInputSwitchConfig } from './schema';
 
 const XSwitch = memo((props: XInputSwitchConfig & { runtime?: boolean; detailMode?: boolean }) => {
@@ -20,16 +21,23 @@ const XSwitch = memo((props: XInputSwitchConfig & { runtime?: boolean; detailMod
     detailMode
   } = props;
 
-  const { form } = Form.useFormContext();
-  const [fieldId, setFieldId] = useState('');
+  // 直接根据 dataField 计算 fieldId，确保总是使用最新的值
 
-  const fieldValue = Form.useWatch(fieldId, form);
+  const [fieldId, setFieldId] = useState('');
 
   useEffect(() => {
     if (dataField.length > 0) {
       setFieldId(dataField[dataField.length - 1]);
     }
+
+    console.log('defaultValueConfig?.customValue: ', defaultValueConfig);
   }, [dataField]);
+
+  const { form, fieldValue } = useFormFieldWatch(fieldId);
+
+  useEffect(() => {
+    console.log('fieldId: ', fieldId, 'fieldValue: ', fieldValue);
+  }, [fieldId, fieldValue]);
 
   return (
     <div className="formWrapper">
@@ -48,7 +56,7 @@ const XSwitch = memo((props: XInputSwitchConfig & { runtime?: boolean; detailMod
           margin: 0,
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
-        initialValue={defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : ''}
+        initialValue={defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : false}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
           <div>
@@ -59,10 +67,14 @@ const XSwitch = memo((props: XInputSwitchConfig & { runtime?: boolean; detailMod
         ) : (
           <div style={{ width: '100%', textAlign: align }}>
             <Switch
+              onChange={(value) => {
+                form.setFieldValue(fieldId, value);
+              }}
+              checked={fieldValue}
               checkedText={fillText?.display && fillText.checkedText}
               uncheckedText={fillText?.display && fillText.uncheckedText}
               style={{
-                pointerEvents: runtime ? 'unset' : 'none',
+                pointerEvents: runtime ? 'unset' : 'none'
               }}
             />
           </div>
@@ -71,5 +83,4 @@ const XSwitch = memo((props: XInputSwitchConfig & { runtime?: boolean; detailMod
     </div>
   );
 });
-
 export default XSwitch;

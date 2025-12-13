@@ -47,6 +47,7 @@ const PublishVersionModal: React.FC<PublishVersionModalProps> = ({ applicationId
       console.log(res);
 
       setLoading(false);
+      form.resetFields();
       onOk(values);
     } catch (error) {
       console.error('表单验证失败:', error);
