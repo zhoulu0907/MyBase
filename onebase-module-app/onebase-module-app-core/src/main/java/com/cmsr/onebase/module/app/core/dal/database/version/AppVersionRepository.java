@@ -67,10 +67,10 @@ public class AppVersionRepository extends BaseAppRepository<AppVersionMapper, Ap
         return this.getOne(queryWrapper);
     }
 
-    public long countByApplicationIdAndName(Long applicationId, String versionName) {
+    public long countByApplicationIdAndName(Long applicationId, String versionNumber, String versionName) {
         QueryWrapper queryWrapper = this.query()
                 .where(APP_VERSION.APPLICATION_ID.eq(applicationId))
-                .where(APP_VERSION.VERSION_NAME.eq(versionName));
+                .and(APP_VERSION.VERSION_NUMBER.eq(versionNumber).or(APP_VERSION.VERSION_NAME.eq(versionName)));
         return count(queryWrapper);
     }
 }

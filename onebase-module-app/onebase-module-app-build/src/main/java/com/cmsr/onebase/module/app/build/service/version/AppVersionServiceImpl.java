@@ -80,7 +80,7 @@ public class AppVersionServiceImpl implements AppVersionService {
     public void onlineApplication(VersionOnlineReq createReqVO) {
         AppApplicationDO applicationDO = appCommonService.validateApplicationExist(createReqVO.getApplicationId());
         Long applicationId = applicationDO.getId();
-        validateVersionNameUnique(applicationId, createReqVO.getVersionName());
+        validateVersionUnique(applicationId, createReqVO.getVersionNumber(), createReqVO.getVersionName());
 
         // 删除当前运行版本数据
         flowDataManager.offlineRuntimeData(applicationId);
@@ -112,10 +112,10 @@ public class AppVersionServiceImpl implements AppVersionService {
         flowDataManager.onlineRuntimeData(applicationId);
     }
 
-    private void validateVersionNameUnique(Long applicationId, String versionName) {
-        long count = versionRepository.countByApplicationIdAndName(applicationId, versionName);
+    private void validateVersionUnique(Long applicationId, String versionNumber, String versionName) {
+        long count = versionRepository.countByApplicationIdAndName(applicationId, versionNumber, versionName);
         if (count > 0) {
-            throw ServiceExceptionUtil.exception(AppErrorCodeConstants.VERSION_NAME_DUPLICATE);
+            throw ServiceExceptionUtil.exception(AppErrorCodeConstants.VERSION_DUPLICATE);
         }
     }
 
