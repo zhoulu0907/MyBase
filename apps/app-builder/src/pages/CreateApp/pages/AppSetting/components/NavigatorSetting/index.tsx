@@ -1,13 +1,19 @@
-import { Form, Radio, TreeSelect, type FormInstance } from '@arco-design/web-react';
-import { listApplicationMenu, type ListApplicationMenuReq, MenuType } from '@onebase/app';
-import { getPopupContainer } from '@onebase/ui-kit';
-import { useAppStore } from '@/store';
-import { useEffect, useState } from 'react';
+import mobileLayout1 from '@/assets/images/appRelease/mobile_layout1.svg';
+import mobileLayout2 from '@/assets/images/appRelease/mobile_layout2.svg';
 import webLayout1 from '@/assets/images/appRelease/web_layout1.svg';
 import webLayout2 from '@/assets/images/appRelease/web_layout2.svg';
 import webLayout3 from '@/assets/images/appRelease/web_layout3.svg';
-import mobileLayout1 from '@/assets/images/appRelease/mobile_layout1.svg';
-import mobileLayout2 from '@/assets/images/appRelease/mobile_layout2.svg';
+import { useAppStore } from '@/store';
+import { Form, Radio, TreeSelect, type FormInstance } from '@arco-design/web-react';
+import {
+  getAppNavigationConfig,
+  listApplicationMenu,
+  MenuType,
+  type GetAppNavigationConfigReq,
+  type ListApplicationMenuReq
+} from '@onebase/app';
+import { getPopupContainer } from '@onebase/ui-kit';
+import { useEffect, useState } from 'react';
 import styles from './index.module.less';
 
 interface IProps {
@@ -17,18 +23,34 @@ interface IProps {
 const NavigatorSetting = (props: IProps) => {
   const { curAppId } = useAppStore();
   const { form, data } = props;
-  const webHomeType = Form.useWatch('webHomeType', form);
-  const mobileHomeType = Form.useWatch('mobileHomeType', form);
+  const webDefaultMenu = Form.useWatch('webDefaultMenu', form);
+  const mobileDefaultMenu = Form.useWatch('mobileDefaultMenu', form);
 
   const [menuTree, setMenuTree] = useState<any[]>([]);
 
   useEffect(() => {
     getPages();
+    handleGetNavigationConfig();
   }, []);
 
   useEffect(() => {
     form.setFieldsValue(data);
   }, [data]);
+
+  const handleGetNavigationConfig = async () => {
+    const params: GetAppNavigationConfigReq = {
+      id: curAppId
+    };
+    const res = await getAppNavigationConfig(params);
+    form.setFieldsValue({
+      webNavLayout: res.webNavLayout,
+      mobileNavLayout: res.mobileNavLayout,
+      webHomeType: res.webDefaultMenu === 'default' ? 'default' : 'custom',
+      mobileHomeType: res.mobileDefaultMenu === 'default' ? 'default' : 'custom',
+      webDefaultMenu: res.webDefaultMenu,
+      mobileDefaultMenu: res.mobileDefaultMenu
+    });
+  };
 
   // 获取下拉页面
   const getPages = async () => {
@@ -65,13 +87,13 @@ const NavigatorSetting = (props: IProps) => {
             </Radio>
             <Radio value="custom">
               自定义首页
-              {webHomeType === 'custom' && (
-                <Form.Item field="webHomePageId" className={styles.homePage}>
+              {webDefaultMenu !== 'default' && (
+                <Form.Item field="webDefaultMenu" className={styles.homePage}>
                   <TreeSelect
                     getPopupContainer={getPopupContainer}
                     treeData={menuTree}
                     placeholder="请选择"
-                    fieldNames={{ key: 'id', title: 'menuName' }}
+                    fieldNames={{ key: 'menuUuid', title: 'menuName' }}
                   ></TreeSelect>
                 </Form.Item>
               )}
@@ -79,9 +101,9 @@ const NavigatorSetting = (props: IProps) => {
           </Radio.Group>
         </Form.Item>
 
-        <Form.Item label="导航布局" field="webLayoutType" initialValue={1}>
+        <Form.Item label="导航布局" field="webNavLayout" initialValue={1}>
           <Radio.Group>
-            <Radio value={1}>
+            <Radio value={'SIDEBAR'}>
               {({ checked }) => (
                 <>
                   <div className={styles.radioContainer} style={{ borderColor: checked ? '#009E9E' : 'transparent' }}>
@@ -91,7 +113,7 @@ const NavigatorSetting = (props: IProps) => {
                 </>
               )}
             </Radio>
-            <Radio value={2}>
+            <Radio value={'TOPBAR'}>
               {({ checked }) => (
                 <>
                   <div className={styles.radioContainer} style={{ borderColor: checked ? '#009E9E' : 'transparent' }}>
@@ -101,7 +123,7 @@ const NavigatorSetting = (props: IProps) => {
                 </>
               )}
             </Radio>
-            <Radio value={3}>
+            <Radio value={'TREE'}>
               {({ checked }) => (
                 <>
                   <div className={styles.radioContainer} style={{ borderColor: checked ? '#009E9E' : 'transparent' }}>
@@ -124,8 +146,8 @@ const NavigatorSetting = (props: IProps) => {
             </Radio>
             <Radio value="custom">
               自定义首页
-              {mobileHomeType === 'custom' && (
-                <Form.Item field="mobileHomePageId" className={styles.homePage}>
+              {mobileDefaultMenu !== 'default' && (
+                <Form.Item field="mobileDefaultMenu" className={styles.homePage}>
                   <TreeSelect
                     getPopupContainer={getPopupContainer}
                     treeData={menuTree}
@@ -138,9 +160,9 @@ const NavigatorSetting = (props: IProps) => {
           </Radio.Group>
         </Form.Item>
 
-        <Form.Item label="导航布局" field="mobileLayoutType" initialValue={1}>
+        <Form.Item label="导航布局" field="mobileNavLayout" initialValue={1}>
           <Radio.Group>
-            <Radio value={1}>
+            <Radio value={'GRID'}>
               {({ checked }) => (
                 <>
                   <div
@@ -153,7 +175,7 @@ const NavigatorSetting = (props: IProps) => {
                 </>
               )}
             </Radio>
-            <Radio value={2}>
+            <Radio value={'LIST'}>
               {({ checked }) => (
                 <>
                   <div

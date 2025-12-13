@@ -2,6 +2,8 @@
 
 import { isRuntimeEnv } from '@onebase/common';
 import {
+  GetAppNavigationConfigReq,
+  UpdateAppNavigationConfigReq,
   type CreateApplicationReq,
   type DeleteApplicationReq,
   type GetApplicationReq,
@@ -43,4 +45,12 @@ export const generateId = () => {
 // 获取应用精简信息列表-不分页
 export const getApplicationSimple = (ownerTag: number, appName: string) => {
   return appService.get(`/application/simple-list-by-name?ownerTag=${ownerTag}&appName=${appName}`);
+};
+
+export const getAppNavigationConfig = (params: GetAppNavigationConfigReq) => {
+  return appService.get('/application/get-navigation-config', params);
+};
+
+export const updateAppNavigationConfig = (params: UpdateAppNavigationConfigReq) => {
+  return (isRuntimeEnv() ? runtimeAppService : appService).post('/application/update-navigation-config', params);
 };
