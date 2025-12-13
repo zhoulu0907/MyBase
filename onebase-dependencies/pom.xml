@@ -69,7 +69,6 @@
         <liteflow.version>2.15.0.2</liteflow.version>
         <dom4j.version>2.2.0</dom4j.version>
         <jackson.version>2.18.3</jackson.version>
-        <rocketmq-client.version>5.0.8</rocketmq-client.version>
         <!-- 三方云服务相关 -->
         <commons-lang3.version>3.20.0</commons-lang3.version>
         <commons-collections4.version>4.5.0</commons-collections4.version>
@@ -113,13 +112,6 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-            <dependency>
-                <groupId>com.alibaba.cloud</groupId>
-                <artifactId>spring-cloud-alibaba-dependencies</artifactId>
-                <version>${spring.cloud.alibaba.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
 
             <!-- 业务组件 -->
             <dependency>
@@ -146,7 +138,6 @@
                 <version>${spring.boot.version}</version>
             </dependency>
 
-
             <!-- Web 相关 -->
             <dependency>
                 <groupId>com.cmsr.onebase</groupId>
@@ -154,21 +145,17 @@
                 <version>${revision}</version>
             </dependency>
 
-            <!--            <dependency>-->
-            <!--                <groupId>com.cmsr.onebase</groupId>-->
-            <!--                <artifactId>onebase-spring-boot-starter-security</artifactId>-->
-            <!--                <version>${revision}</version>-->
-            <!--            </dependency>-->
-
             <dependency>
                 <groupId>org.springdoc</groupId>
                 <artifactId>springdoc-openapi-starter-webmvc-api</artifactId>
                 <version>${springdoc.version}</version>
+                <scope>compile</scope>
             </dependency>
             <dependency>
                 <groupId>org.springdoc</groupId>
                 <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
                 <version>${springdoc.version}</version>
+                <scope>compile</scope>
             </dependency>
             <!-- DB 相关 -->
             <dependency>
@@ -188,8 +175,9 @@
                 <groupId>com.mybatis-flex</groupId>
                 <artifactId>mybatis-flex-codegen</artifactId>
                 <version>${mybatis-flex.version}</version>
+                <scope>test</scope>
             </dependency>
-            <!-- 指定版本避免与mybatis-flex冲突 -->
+            <!-- 指定版本避免pageHelper与MybatisFlex冲突 -->
             <dependency>
                 <groupId>org.mybatis</groupId>
                 <artifactId>mybatis</artifactId>
@@ -200,13 +188,11 @@
                 <artifactId>onebase-spring-boot-starter-redis</artifactId>
                 <version>${revision}</version>
             </dependency>
-
             <dependency>
                 <groupId>org.redisson</groupId>
                 <artifactId>redisson-spring-boot-starter</artifactId>
                 <version>${redisson.version}</version>
             </dependency>
-
             <dependency>
                 <groupId>org.redisson</groupId>
                 <artifactId>redisson</artifactId>
@@ -217,41 +203,38 @@
                 <artifactId>jetcache-redisson</artifactId>
                 <version>${jetcache.version}</version>
             </dependency>
+            <!-- Redission 序列化 -->
             <dependency>
                 <groupId>com.esotericsoftware.kryo</groupId>
                 <artifactId>kryo5</artifactId>
                 <version>${kryo.version}</version>
             </dependency>
+
             <dependency>
                 <groupId>com.dameng</groupId>
                 <artifactId>DmJdbcDriver18</artifactId>
                 <version>${dm8.jdbc.version}</version>
             </dependency>
-
             <dependency>
                 <groupId>org.opengauss</groupId>
                 <artifactId>opengauss-jdbc</artifactId>
                 <version>${opengauss.jdbc.version}</version>
             </dependency>
-
             <dependency>
                 <groupId>cn.com.kingbase</groupId>
                 <artifactId>kingbase8</artifactId>
                 <version>${kingbase.jdbc.version}</version>
             </dependency>
-
             <dependency>
                 <groupId>com.taosdata.jdbc</groupId>
                 <artifactId>taos-jdbcdriver</artifactId>
                 <version>${taos.version}</version>
             </dependency>
-
             <dependency>
                 <groupId>org.postgresql</groupId>
                 <artifactId>postgresql</artifactId>
                 <version>${postgresql.version}</version>
             </dependency>
-
             <dependency>
                 <groupId>com.oracle.database.jdbc</groupId>
                 <artifactId>ojdbc8</artifactId>
@@ -283,35 +266,6 @@
                     </exclusion>
                 </exclusions>
             </dependency>
-            <!-- Test 测试相关 -->
-            <dependency>
-                <groupId>com.cmsr.onebase</groupId>
-                <artifactId>onebase-spring-boot-starter-test</artifactId>
-                <version>${revision}</version>
-                <scope>test</scope>
-            </dependency>
-
-            <dependency>
-                <groupId>org.mockito</groupId>
-                <artifactId>mockito-inline</artifactId>
-                <version>${mockito-inline.version}</version> <!-- 支持 Mockito 的 final 类与 static 方法的 mock -->
-            </dependency>
-
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-test</artifactId>
-                <version>${spring.boot.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <artifactId>asm</artifactId>
-                        <groupId>org.ow2.asm</groupId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.mockito</groupId>
-                        <artifactId>mockito-core</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
 
             <dependency>
                 <groupId>com.github.fppt</groupId> <!-- 单元测试，我们采用内嵌的 Redis 数据库 -->
@@ -325,16 +279,31 @@
                 <version>${podam.version}</version>
             </dependency>
 
-            <!-- 工作流相关 -->
+            <!-- 自动化工作流相关 -->
             <dependency>
-                <groupId>org.flowable</groupId>
-                <artifactId>flowable-spring-boot-starter-process</artifactId>
-                <version>${flowable.version}</version>
+                <groupId>com.yomahub</groupId>
+                <artifactId>liteflow-core</artifactId>
+                <version>${liteflow.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.flowable</groupId>
-                <artifactId>flowable-spring-boot-starter-actuator</artifactId>
-                <version>${flowable.version}</version>
+                <groupId>com.yomahub</groupId>
+                <artifactId>liteflow-spring-boot-starter</artifactId>
+                <version>${liteflow.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.yomahub</groupId>
+                <artifactId>liteflow-el-builder</artifactId>
+                <version>${liteflow.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.yomahub</groupId>
+                <artifactId>liteflow-script-groovy</artifactId>
+                <version>${liteflow.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.yomahub</groupId>
+                <artifactId>liteflow-script-javascript</artifactId>
+                <version>${liteflow.version}</version>
             </dependency>
             <!-- 工作流相关结束 -->
 
@@ -397,46 +366,6 @@
                 <groupId>org.modelmapper</groupId>
                 <artifactId>modelmapper</artifactId>
                 <version>${modelmapper.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.konghq</groupId>
-                <artifactId>unirest-java-core</artifactId>
-                <version>${unirest.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.konghq</groupId>
-                <artifactId>unirest-modules-jackson</artifactId>
-                <version>${unirest.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.yomahub</groupId>
-                <artifactId>liteflow-core</artifactId>
-                <version>${liteflow.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.yomahub</groupId>
-                <artifactId>liteflow-spring-boot-starter</artifactId>
-                <version>${liteflow.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.yomahub</groupId>
-                <artifactId>liteflow-el-builder</artifactId>
-                <version>${liteflow.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.yomahub</groupId>
-                <artifactId>liteflow-script-groovy</artifactId>
-                <version>${liteflow.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.yomahub</groupId>
-                <artifactId>liteflow-script-javascript</artifactId>
-                <version>${liteflow.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.rocketmq</groupId>
-                <artifactId>rocketmq-client-java</artifactId>
-                <version>${rocketmq-client.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.dom4j</groupId>
@@ -603,6 +532,8 @@
                 <artifactId>anyline-data-jdbc-dm</artifactId>
                 <version>${anyline.version}</version>
             </dependency>
+
+            <!-- jakarta -->
             <dependency>
                 <groupId>jakarta.persistence</groupId>
                 <artifactId>jakarta.persistence-api</artifactId>
@@ -631,6 +562,18 @@
                 <groupId>org.graalvm.js</groupId>
                 <artifactId>js-scriptengine</artifactId>
                 <version>${graalvm.version}</version>
+            </dependency>
+
+            <!-- Unirest -->
+            <dependency>
+                <groupId>com.konghq</groupId>
+                <artifactId>unirest-java-core</artifactId>
+                <version>${unirest.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.konghq</groupId>
+                <artifactId>unirest-modules-jackson</artifactId>
+                <version>${unirest.version}</version>
             </dependency>
 
             <!-- Retrofit2 与 OkHttp 版本统一管理 -->
@@ -665,20 +608,48 @@
                 <version>${okhttp3.version}</version>
                 <scope>test</scope>
             </dependency>
-            <!-- -->
+            <!-- uuid generator -->
             <dependency>
                 <groupId>com.github.f4b6a3</groupId>
                 <artifactId>uuid-creator</artifactId>
                 <version>${uuid-creator.version}</version>
             </dependency>
 
+            <!-- Test 测试相关 -->
             <!-- 测试框架：统一 JUnit 平台与 Jupiter 版本（覆盖 Spring Boot 默认版本），解决 IDE 启动器 1.11.4 解析问题 -->
+            <dependency>
+                <groupId>com.cmsr.onebase</groupId>
+                <artifactId>onebase-spring-boot-starter-test</artifactId>
+                <version>${revision}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-test</artifactId>
+                <version>${spring.boot.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>asm</artifactId>
+                        <groupId>org.ow2.asm</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.mockito</groupId>
+                        <artifactId>mockito-core</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
             <dependency>
                 <groupId>org.junit</groupId>
                 <artifactId>junit-bom</artifactId>
                 <version>5.11.4</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-inline</artifactId>
+                <version>${mockito-inline.version}</version> <!-- 支持 Mockito 的 final 类与 static 方法的 mock -->
+                <scope>test</scope>
             </dependency>
 
         </dependencies>
