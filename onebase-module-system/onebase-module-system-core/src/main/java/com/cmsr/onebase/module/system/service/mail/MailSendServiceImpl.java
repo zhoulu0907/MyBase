@@ -1,11 +1,10 @@
 package com.cmsr.onebase.module.system.service.mail;
 
-import com.cmsr.onebase.framework.common.consts.NumberConstant;
-import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
-import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.mail.MailAccount;
 import cn.hutool.extra.mail.MailUtil;
+import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
+import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.system.dal.dataobject.mail.MailAccountDO;
 import com.cmsr.onebase.module.system.dal.dataobject.mail.MailTemplateDO;
@@ -17,6 +16,7 @@ import com.cmsr.onebase.module.system.service.user.UserService;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
@@ -37,7 +37,7 @@ import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
 public class MailSendServiceImpl implements MailSendService {
 
     @Resource
-    private UserService   userService;
+    private UserService userService;
     @Resource
     private MemberService memberService;
 
@@ -107,7 +107,7 @@ public class MailSendServiceImpl implements MailSendService {
     public void doSendMail(MailSendMessage message) {
         // 1. 创建发送账号
         MailAccountDO account = validateMailAccount(message.getAccountId());
-        MailAccount mailAccount  = buildMailAccount(account, message.getNickname());
+        MailAccount mailAccount = buildMailAccount(account, message.getNickname());
         // 2. 发送邮件
         try {
             String messageId = MailUtil.send(mailAccount, message.getMail(),
@@ -125,8 +125,8 @@ public class MailSendServiceImpl implements MailSendService {
         return new MailAccount().setFrom(from).setAuth(true)
                 .setUser(account.getUsername()).setPass(account.getPassword())
                 .setHost(account.getHost()).setPort(account.getPort())
-                .setSslEnable(account.getSslEnable()== NumberConstant.ONE?true:false)
-                .setStarttlsEnable(account.getStarttlsEnable()== NumberConstant.ONE?true:false);
+                .setSslEnable(account.getSslEnable() == NumberUtils.INTEGER_ONE ? true : false)
+                .setStarttlsEnable(account.getStarttlsEnable() == NumberUtils.INTEGER_ONE ? true : false);
     }
 
     @VisibleForTesting
@@ -162,7 +162,7 @@ public class MailSendServiceImpl implements MailSendService {
     /**
      * 校验邮件参数是否确实
      *
-     * @param template 邮箱模板
+     * @param template       邮箱模板
      * @param templateParams 参数列表
      */
     @VisibleForTesting
