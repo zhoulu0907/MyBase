@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.flow.core.graph;
 
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.module.flow.context.graph.JsonGraph;
 import com.cmsr.onebase.module.flow.context.graph.nodes.StartDateFieldNodeData;
 import com.cmsr.onebase.module.flow.context.graph.nodes.StartTimeNodeData;
@@ -29,12 +30,12 @@ import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Conditional;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -69,7 +70,7 @@ public class FlowProcessManager {
     private JobSchedulerClient jobSchedulerClient;
 
     @Autowired
-    private Executor executor;
+    private ThreadPoolTaskScheduler executor;
 
     public void initAllProcess() {
         List<FlowProcessDO> flowProcessDOS = TenantManager.withoutTenantCondition(() ->
@@ -210,7 +211,9 @@ public class FlowProcessManager {
     }
 
     private void startTimeJob(FlowProcessDO flowProcessDO) {
-        FlowProcessTimeDO flowProcessTimeDO = TenantManager.withoutTenantCondition(() -> flowProcessTimeRepository.findByProcessId(flowProcessDO.getId()));
+        FlowProcessTimeDO flowProcessTimeDO = TenantManager.withoutTenantCondition(() -> ApplicationManager.withoutApplicationCondition(() ->
+                flowProcessTimeRepository.findByProcessId(flowProcessDO.getId())
+        ));
         if (flowProcessTimeDO != null
                 && flowProcessTimeDO.getJobId() != null
                 && FlowJobStatusEnum.isDeployed(flowProcessTimeDO.getJobStatus())) {
@@ -250,7 +253,9 @@ public class FlowProcessManager {
     }
 
     private void startDateFieldJob(FlowProcessDO flowProcessDO) {
-        FlowProcessDateFieldDO flowProcessDateFieldDO = TenantManager.withoutTenantCondition(() -> flowProcessDateFieldRepository.findByProcessId(flowProcessDO.getId()));
+        FlowProcessDateFieldDO flowProcessDateFieldDO = TenantManager.withoutTenantCondition(() -> ApplicationManager.withoutApplicationCondition(() ->
+                flowProcessDateFieldRepository.findByProcessId(flowProcessDO.getId())
+        ));
         if (flowProcessDateFieldDO != null
                 && flowProcessDateFieldDO.getJobId() != null
                 && FlowJobStatusEnum.isDeployed(flowProcessDateFieldDO.getJobStatus())) {

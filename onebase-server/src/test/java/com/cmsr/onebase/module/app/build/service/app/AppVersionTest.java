@@ -5,7 +5,7 @@ import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.module.app.build.service.version.AppVersionService;
-import com.cmsr.onebase.module.app.build.vo.version.VersionCreateReqVO;
+import com.cmsr.onebase.module.app.build.vo.version.VersionOnlineReq;
 import com.cmsr.onebase.server.OneBaseServerApplication;
 import lombok.Setter;
 import org.junit.jupiter.api.Test;
@@ -34,12 +34,12 @@ public class AppVersionTest {
         ApplicationManager.setApplicationId(173020283873034240L);
         ApplicationManager.setVersionTag(0L);
         //
-        VersionCreateReqVO createReqVO = new VersionCreateReqVO();
+        VersionOnlineReq createReqVO = new VersionOnlineReq();
         createReqVO.setApplicationId(173020283873034240L);
         createReqVO.setVersionName("测试版本2");
         createReqVO.setVersionNumber("1.0.1");
         createReqVO.setVersionDescription("测试版本2");
-        appVersionService.createApplicationVersion(createReqVO);
+        appVersionService.onlineApplication(createReqVO);
 
     }
 

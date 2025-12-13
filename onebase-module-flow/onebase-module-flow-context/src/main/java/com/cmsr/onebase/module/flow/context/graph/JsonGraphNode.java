@@ -1,6 +1,5 @@
 package com.cmsr.onebase.module.flow.context.graph;
 
-import com.cmsr.onebase.module.flow.context.graph.external.weaver.e9.WeaverE9NodeData;
 import com.cmsr.onebase.module.flow.context.graph.nodes.*;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -47,9 +46,7 @@ public class JsonGraphNode implements Serializable {
             @JsonSubTypes.Type(value = StartFormNodeData.class, name = "startForm"),
             @JsonSubTypes.Type(value = StartTimeNodeData.class, name = "startTime"),
             @JsonSubTypes.Type(value = SwitchCaseNodeData.class, name = "switchCase"),
-            @JsonSubTypes.Type(value = SwitchConditionNodeData.class, name = "switchCondition"),
-            // externals
-            @JsonSubTypes.Type(value = WeaverE9NodeData.class, name = "weaverE9")
+            @JsonSubTypes.Type(value = SwitchConditionNodeData.class, name = "switchCondition")
     })
     private NodeData data;
 

@@ -9,7 +9,7 @@ import lombok.Data;
  */
 @Schema(description = "应用管理 - 版本创建 Request VO")
 @Data
-public class VersionCreateReqVO {
+public class VersionOnlineReq {
 
     @Schema(description = "应用 ID")
     private Long applicationId;

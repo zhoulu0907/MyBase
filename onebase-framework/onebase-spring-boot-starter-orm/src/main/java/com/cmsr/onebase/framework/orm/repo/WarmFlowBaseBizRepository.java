@@ -18,6 +18,9 @@ import java.util.List;
 public class WarmFlowBaseBizRepository<M extends BaseMapper<T>, T extends WarmFlowBizEntity> extends ServiceImpl<M, T> {
 
     protected void injectQueryFilter(QueryWrapper queryWrapper) {
+        if (ApplicationManager.isIgnoreApplicationCondition() && ApplicationManager.isIgnoreVersionTagCondition()) {
+            return;
+        }
         if (!QueryWrapperUtils.isQueryFilterable(queryWrapper)) {
             return;
         }
@@ -240,4 +243,17 @@ public class WarmFlowBaseBizRepository<M extends BaseMapper<T>, T extends WarmFl
     }
 
     //endregion ===== 分页查询操作 =====
+
+    public boolean deleteAllApplicationData(Long applicationId) {
+        return this.updateChain()
+                .where(WarmFlowBizEntity.APPLICATION_ID, applicationId)
+                .remove();
+    }
+
+    public boolean deleteApplicationVersionData(Long applicationId, Long versionId) {
+        return this.updateChain()
+                .where(WarmFlowBizEntity.APPLICATION_ID, applicationId)
+                .and(WarmFlowBizEntity.VERSION_TAG, versionId)
+                .remove();
+    }
 }

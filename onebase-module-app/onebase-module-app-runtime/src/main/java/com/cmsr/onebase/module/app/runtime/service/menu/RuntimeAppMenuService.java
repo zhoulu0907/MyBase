@@ -9,7 +9,8 @@ import java.util.List;
  * @Author：huangjie
  * @Date：2025/7/23 13:40
  */
-public interface AppMenuService {
+public interface RuntimeAppMenuService {
+
     List<MenuListRespVO> listBpmApplicationMenu();
 
     List<MenuListRespVO> listApplicationMenu( );

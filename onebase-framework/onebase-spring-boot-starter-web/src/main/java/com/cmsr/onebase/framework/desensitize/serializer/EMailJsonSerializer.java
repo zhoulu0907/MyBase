@@ -1,7 +1,6 @@
 package com.cmsr.onebase.framework.desensitize.serializer;
 
 import com.cmsr.onebase.framework.common.biz.security.SecurityConfigApi;
-import com.cmsr.onebase.framework.common.consts.DesensitizedFieldConstant;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
@@ -9,7 +8,7 @@ import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Set;
 
 /**
  * @Author：huangjie
@@ -34,7 +33,7 @@ public class EMailJsonSerializer extends JsonSerializer<String> {
         // 获取租户配置项
         Set<String> tenantConfigValues = securityConfigApi.getTenantDesensitizedFieldValues();
 
-        if(!tenantConfigValues.contains(DesensitizedFieldConstant.EMAIL)){
+        if (!tenantConfigValues.contains("email")) {
             gen.writeString(value);
             return;
         }

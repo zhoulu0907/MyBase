@@ -1,6 +1,5 @@
 package com.cmsr.onebase.module.infra.build.controller.config;
 
-import com.cmsr.onebase.framework.common.consts.NumberConstant;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageParam;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
@@ -11,16 +10,17 @@ import com.cmsr.onebase.module.infra.dal.vo.config.ConfigPageReqVO;
 import com.cmsr.onebase.module.infra.dal.vo.config.ConfigRespVO;
 import com.cmsr.onebase.module.infra.dal.vo.config.ConfigSaveReqVO;
 import com.cmsr.onebase.module.infra.enums.ErrorCodeConstants;
+import com.cmsr.onebase.module.infra.service.config.ConfigService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import com.cmsr.onebase.module.infra.service.config.ConfigService;
 
 import java.io.IOException;
 import java.util.List;
@@ -77,7 +77,7 @@ public class ConfigController {
         if (config == null) {
             return success(null);
         }
-        if (config.getVisible().equals(NumberConstant.ZERO)) {
+        if (config.getVisible().equals(NumberUtils.INTEGER_ZERO)) {
             throw exception(ErrorCodeConstants.CONFIG_GET_VALUE_ERROR_IF_VISIBLE);
         }
         return success(config.getValue());

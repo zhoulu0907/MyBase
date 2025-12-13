@@ -1,7 +1,6 @@
 package com.cmsr.onebase.module.system.convert.auth;
 
 import cn.hutool.core.collection.CollUtil;
-import com.cmsr.onebase.framework.common.consts.NumberConstant;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.system.api.sms.dto.code.SmsCodeSendReqDTO;
 import com.cmsr.onebase.module.system.api.sms.dto.code.SmsCodeUseReqDTO;
@@ -15,6 +14,7 @@ import com.cmsr.onebase.module.system.enums.permission.MenuTypeEnum;
 import com.cmsr.onebase.module.system.enums.permission.RoleCodeEnum;
 import com.cmsr.onebase.module.system.vo.auth.*;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
@@ -40,7 +40,7 @@ public interface AuthConvert {
         Set<String> allPermissions = new HashSet<>();
         allPermissions.addAll(RoleCodeEnum.globalDefaultPermissionCodes);
         // 权限标识信息,过滤 permission 以 expectCode 为开头的权限
-        allPermissions.addAll( convertSet(menuList, MenuDO::getPermission).stream().filter(
+        allPermissions.addAll(convertSet(menuList, MenuDO::getPermission).stream().filter(
                 permission -> StringUtils.isBlank(expectCode) || permission.startsWith(expectCode)
         ).collect(Collectors.toSet()));
 
@@ -116,6 +116,6 @@ public interface AuthConvert {
 
     @Named("integerToBoolean")
     default Boolean integerToBoolean(Integer value) {
-        return value != null && value != NumberConstant.ZERO;
+        return value != null && value != NumberUtils.INTEGER_ZERO;
     }
 }

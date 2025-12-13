@@ -17,6 +17,9 @@ import java.util.List;
 public class BaseAppRepository<M extends BaseMapper<T>, T extends BaseAppEntity> extends ServiceImpl<M, T> {
 
     protected void injectQueryFilter(QueryWrapper queryWrapper) {
+        if (ApplicationManager.isIgnoreApplicationCondition()) {
+            return;
+        }
         if (!QueryWrapperUtils.isQueryFilterable(queryWrapper)) {
             return;
         }
@@ -28,7 +31,7 @@ public class BaseAppRepository<M extends BaseMapper<T>, T extends BaseAppEntity>
             applicationColumn = new QueryColumn(BaseAppEntity.APPLICATION_ID);
         }
         Long applicationId = ApplicationManager.getApplicationId();
-        queryWrapper.and(applicationColumn.eq(applicationId));
+        queryWrapper.and(applicationColumn.eq(applicationId).when(!ApplicationManager.isIgnoreApplicationCondition()));
     }
 
     //region ===== 查询（查）操作 =====

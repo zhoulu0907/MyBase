@@ -8,7 +8,7 @@ import com.cmsr.onebase.module.app.api.security.bo.DataPermission;
 import com.cmsr.onebase.module.app.api.security.bo.FieldPermission;
 import com.cmsr.onebase.module.app.api.security.bo.OperationPermission;
 import com.cmsr.onebase.module.app.core.vo.menu.MenuListRespVO;
-import com.cmsr.onebase.module.app.runtime.service.menu.AppMenuServiceImpl;
+import com.cmsr.onebase.module.app.runtime.service.menu.RuntimeAppMenuServiceImpl;
 import com.cmsr.onebase.module.app.runtime.vo.menu.MenuPermissionVO;
 import com.cmsr.onebase.server.runtime.OneBaseServerRuntimeApplication;
 import lombok.Setter;
@@ -27,7 +27,7 @@ import java.util.List;
 public class AppAuthSecurityApiTest {
 
     @Autowired
-    private AppMenuServiceImpl appMenuServiceImpl;
+    private RuntimeAppMenuServiceImpl appMenuServiceImpl;
 
     @Autowired
     private AppAuthSecurityApi appAuthSecurityApi;

@@ -1,11 +1,15 @@
 package com.cmsr.onebase.module.app.build.service.menu;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.common.util.string.UuidUtils;
 import com.cmsr.onebase.module.app.build.service.AppCommonService;
 import com.cmsr.onebase.module.app.build.service.resource.PageSetService;
 import com.cmsr.onebase.module.app.build.vo.menu.*;
+import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthDataGroupRepository;
+import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthFieldRepository;
+import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthPermissionRepository;
 import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
 import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageSetRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppApplicationDO;
@@ -18,12 +22,12 @@ import com.cmsr.onebase.module.app.core.enums.menu.BpmMenuEnum;
 import com.cmsr.onebase.module.app.core.enums.menu.MenuTypeEnum;
 import com.cmsr.onebase.module.app.core.utils.MenuUtils;
 import com.cmsr.onebase.module.app.core.vo.menu.MenuListRespVO;
-import jakarta.annotation.Resource;
-import org.apache.commons.collections4.CollectionUtils;
 import lombok.Setter;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -39,19 +43,28 @@ import java.util.stream.Collectors;
 @Setter
 @Service
 @Validated
-public class AppMenuServiceImpl implements AppMenuService {
+public class BuildBuildAppMenuServiceImpl implements BuildAppMenuService {
 
-    @Resource
+    @Autowired
     private AppCommonService appCommonService;
 
-    @Resource
+    @Autowired
     private AppMenuRepository appMenuRepository;
 
-    @Resource
+    @Autowired
     private AppPageSetRepository appPageSetRepository;
 
-    @Resource
+    @Autowired
     private PageSetService pageSetService;
+
+    @Autowired
+    private AppAuthPermissionRepository authPermissionRepository;
+
+    @Autowired
+    private AppAuthFieldRepository authFieldRepository;
+
+    @Autowired
+    private AppAuthDataGroupRepository authDataGroupRepository;
 
     @Override
     public List<MenuListRespVO> listBpmApplicationMenu(Long applicationId) {
@@ -94,55 +107,52 @@ public class AppMenuServiceImpl implements AppMenuService {
         List<AppMenuDO> menuDOS = appMenuRepository.findByApplicationIdAndType(applicationDO.getId(),
                 Set.of(MenuTypeEnum.PAGE.getValue(), MenuTypeEnum.GROUP.getValue())
         );
-
-        // 批量查询 pagesetType
-        List<String> menuUuids = menuDOS.stream().map(AppMenuDO::getMenuUuid).collect(Collectors.toList());
-        Map<String, Integer> pagesetTypeMap = new HashMap<>();
-        if (CollectionUtils.isNotEmpty(menuUuids)) {
-            List<AppResourcePagesetDO> pagesets = appPageSetRepository.findByMenuUuids(applicationDO.getId(), menuUuids);
-            if (CollectionUtils.isNotEmpty(pagesets)) {
-                pagesetTypeMap = pagesets.stream()
-                        .filter(p -> p.getMenuUuid() != null && p.getPageSetType() != null)
-                        .collect(Collectors.toMap(AppResourcePagesetDO::getMenuUuid, AppResourcePagesetDO::getPageSetType, (v1, v2) -> v1));
-            }
+        if (CollectionUtils.isEmpty(menuDOS)) {
+            return Collections.emptyList();
         }
+        List<MenuListRespVO> menuListRespList = BeanUtils.toBean(menuDOS, MenuListRespVO.class);
+        enrichPagesetType(menuListRespList);
 
-        List<MenuListRespVO> menuListRespList = new ArrayList<>();
-        final Map<String, Integer> finalPagesetTypeMap = pagesetTypeMap;
         // 把第一层的菜单添加到列表中
-        LinkedList<MenuListRespVO> levelOneMenus = menuDOS.stream()
+        LinkedList<MenuListRespVO> levelOneMenus = menuListRespList.stream()
                 .filter(v -> MenuUtils.ROOT_MENU_UUID.equals(v.getParentUuid()))
-                .map(v -> {
-                    MenuListRespVO vo = BeanUtils.toBean(v, MenuListRespVO.class);
-                    vo.setPagesetType(finalPagesetTypeMap.get(v.getMenuUuid()));
-                    return vo;
-                })
                 .collect(Collectors.toCollection(LinkedList::new));
-        menuListRespList.addAll(levelOneMenus);
         // 递归实现每个菜单的子菜单
-        for (MenuListRespVO respVO : menuListRespList) {
-            LinkedList<MenuListRespVO> children = recursiveGetChildren(respVO.getMenuUuid(), menuDOS, finalPagesetTypeMap);
+        for (MenuListRespVO respVO : levelOneMenus) {
+            LinkedList<MenuListRespVO> children = recursiveGetChildren(respVO.getMenuUuid(), menuListRespList);
             respVO.setChildren(children);
         }
-        filterMenuByName(menuListRespList, name);
-        return menuListRespList;
+        filterMenuByName(levelOneMenus, name);
+        return levelOneMenus;
     }
 
 
-    private LinkedList<MenuListRespVO> recursiveGetChildren(String parentUuid, List<AppMenuDO> menuDOS, Map<String, Integer> pagesetTypeMap) {
+    private LinkedList<MenuListRespVO> recursiveGetChildren(String parentUuid, List<MenuListRespVO> listRespVOS) {
         LinkedList<MenuListRespVO> children = new LinkedList<>();
-        for (AppMenuDO menuDO : menuDOS) {
-            if (Objects.equals(menuDO.getParentUuid(), parentUuid)) {
+        for (MenuListRespVO respVO : listRespVOS) {
+            if (Objects.equals(respVO.getParentUuid(), parentUuid)) {
                 // 只有父菜单的uuid等于当前菜单的父菜单的uuid时，才添加子菜单，继续递归
-                MenuListRespVO child = BeanUtils.toBean(menuDO, MenuListRespVO.class);
-                child.setPagesetType(pagesetTypeMap.get(menuDO.getMenuUuid()));
-                child.setChildren(recursiveGetChildren(child.getMenuUuid(), menuDOS, pagesetTypeMap));
-                children.add(child);
+                children.add(respVO);
+                respVO.setChildren(recursiveGetChildren(respVO.getMenuUuid(), listRespVOS));
             }
         }
         return children.isEmpty() ? null : children;
     }
 
+    private void enrichPagesetType(List<MenuListRespVO> menuListRespList) {
+        List<String> menuUuids = menuListRespList.stream().map(MenuListRespVO::getMenuUuid).collect(Collectors.toList());
+        Long applicationId = ApplicationManager.getApplicationId();
+        List<AppResourcePagesetDO> pagesets = appPageSetRepository.findByMenuUuids(applicationId, menuUuids);
+        if (CollectionUtils.isEmpty(menuUuids)) {
+            return;
+        }
+        Map<String, Integer> pagesetTypeMap = pagesets.stream()
+                .filter(p -> p.getMenuUuid() != null && p.getPageSetType() != null)
+                .collect(Collectors.toMap(AppResourcePagesetDO::getMenuUuid, AppResourcePagesetDO::getPageSetType, (v1, v2) -> v1));
+        for (MenuListRespVO menuListRespVO : menuListRespList) {
+            menuListRespVO.setPagesetType(pagesetTypeMap.get(menuListRespVO.getMenuUuid()));
+        }
+    }
 
     /**
      * 根据名称过滤菜单
@@ -155,7 +165,7 @@ public class AppMenuServiceImpl implements AppMenuService {
      * @param name
      * @return
      */
-    private void filterMenuByName(List<MenuListRespVO> menuListRespList, String name) {
+    private void filterMenuByName(LinkedList<MenuListRespVO> menuListRespList, String name) {
         // 如果没有过滤条件，直接返回原列表
         if (name == null || name.trim().isEmpty()) {
             return;
@@ -189,7 +199,7 @@ public class AppMenuServiceImpl implements AppMenuService {
         }
     }
 
-    private boolean anyChildrenMatches(LinkedList<MenuListRespVO> children, String name) {
+    private boolean anyChildrenMatches(List<MenuListRespVO> children, String name) {
         if (children == null) {
             return false;
         }
@@ -227,7 +237,7 @@ public class AppMenuServiceImpl implements AppMenuService {
      *
      * @param menuList 菜单列表
      */
-    private void removeUnmarkedMenus(List<MenuListRespVO> menuList) {
+    private void removeUnmarkedMenus(LinkedList<MenuListRespVO> menuList) {
         // 使用迭代器安全地删除元素
         Iterator<MenuListRespVO> iterator = menuList.iterator();
         while (iterator.hasNext()) {
@@ -408,6 +418,9 @@ public class AppMenuServiceImpl implements AppMenuService {
         }
         // 删除页面
         pageSetService.deletePageSetByMenu(menuDO);
+        authPermissionRepository.deleteByMenuUuid(menuDO.getMenuUuid());
+        authFieldRepository.deleteByMenuUuid(menuDO.getMenuUuid());
+        authDataGroupRepository.deleteByMenuUuid(menuDO.getMenuUuid());
         // 删除菜单
         appMenuRepository.removeById(id);
     }

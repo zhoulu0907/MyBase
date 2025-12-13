@@ -212,8 +212,9 @@ public class BpmDetailServiceImpl implements BpmDetailService {
                 loadTodoTask(reqVO, context);
                 break;
             case CREATED:
-                // 我的创建来源：无需加载任务，权限已在 buildContext 中校验
-                // CREATED 来源只查看流程实例信息，不涉及任务
+                // 我的创建来源权限已在 buildContext 中校验
+                // CREATED 尝试查找待办任务，没有则只查看流程实例信息
+                loadTodoTaskFromInstance(context);
                 break;
             case CC:
                 // 抄送来源：先尝试查找待办任务，如果没有则加载抄送任务（已办任务）

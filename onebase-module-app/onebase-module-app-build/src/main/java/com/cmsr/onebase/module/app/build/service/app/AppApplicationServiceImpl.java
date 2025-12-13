@@ -8,7 +8,7 @@ import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.uid.UidGenerator;
 import com.cmsr.onebase.module.app.build.service.AppCommonService;
 import com.cmsr.onebase.module.app.build.service.auth.AppAuthRoleService;
-import com.cmsr.onebase.module.app.build.service.menu.AppMenuService;
+import com.cmsr.onebase.module.app.build.service.menu.BuildAppMenuService;
 import com.cmsr.onebase.module.app.build.service.version.AppDataManager;
 import com.cmsr.onebase.module.app.build.util.AppUtils;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationCreateReqVO;
@@ -21,15 +21,18 @@ import com.cmsr.onebase.module.app.core.dal.database.tag.AppApplicationTagReposi
 import com.cmsr.onebase.module.app.core.dal.database.tag.AppTagRepository;
 import com.cmsr.onebase.module.app.core.dal.database.version.AppVersionRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppApplicationDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppVersionDO;
 import com.cmsr.onebase.module.app.core.enums.AppErrorCodeConstants;
 import com.cmsr.onebase.module.app.core.enums.app.ApplicationStatusEnum;
 import com.cmsr.onebase.module.app.core.vo.app.AppUserPhotoDTO;
 import com.cmsr.onebase.module.app.core.vo.app.ApplicationPageReqVO;
-import com.cmsr.onebase.module.flow.api.FlowDataManager;
+import com.cmsr.onebase.module.bpm.api.datamanager.BpmDataManager;
 import com.cmsr.onebase.module.etl.api.EtlDataManager;
+import com.cmsr.onebase.module.flow.api.FlowDataManager;
 import com.cmsr.onebase.module.metadata.api.datasource.MetadataDatasourceApi;
 import com.cmsr.onebase.module.metadata.api.datasource.dto.DatasourceCreateDefaultReqDTO;
 import com.cmsr.onebase.module.metadata.api.datasource.dto.DatasourceSaveReqDTO;
+import com.cmsr.onebase.module.metadata.api.version.MetadataDataManagerApi;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -40,6 +43,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.validation.annotation.Validated;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -83,7 +87,7 @@ public class AppApplicationServiceImpl implements AppApplicationService {
     private AppAuthRoleRepository appAuthRoleRepository;
 
     @Autowired
-    private AppMenuService appMenuService;
+    private BuildAppMenuService buildAppMenuService;
 
     @Autowired
     private AppDataManager appDataManager;
@@ -96,6 +100,12 @@ public class AppApplicationServiceImpl implements AppApplicationService {
 
     @Autowired
     private EtlDataManager etlDataManager;
+
+    @Autowired
+    private BpmDataManager bpmDataManager;
+
+    @Autowired
+    private MetadataDataManagerApi metadataDataManagerApi;
 
     @Override
     public PageResult<ApplicationRespVO> getApplicationPage(ApplicationPageReqVO pageReqVO) {
@@ -146,6 +156,22 @@ public class AppApplicationServiceImpl implements AppApplicationService {
                     vo.setTags(queryAppTags(vo.getId()));
                     vo.setCreateUser(userHelper.getUserNickname(applicationDO.getCreator()));
                     vo.setUpdateUser(userHelper.getUserNickname(applicationDO.getUpdater()));
+                    AppVersionDO versionDO = versionRepository.findRuntimeByApplicationId(id);
+                    if (versionDO == null) {
+                        return;
+                    }
+                    vo.setVersionNumber(versionDO.getVersionNumber());
+                    vo.setPublisher(userHelper.getUserNickname(versionDO.getCreator()));
+                    vo.setPublishTime(versionDO.getCreateTime());
+                    LocalDateTime appUpdateTime = vo.getUpdateTime();
+                    LocalDateTime versionPublishTime = versionDO.getCreateTime();
+                    if (appUpdateTime.isBefore(versionPublishTime)) {
+                        vo.setAppStatus(ApplicationStatusEnum.PUBLISHED.getValue());
+                        vo.setAppStatusText(ApplicationStatusEnum.PUBLISHED.getText());
+                    } else {
+                        vo.setAppStatus(ApplicationStatusEnum.ITERATING.getValue());
+                        vo.setAppStatusText(ApplicationStatusEnum.ITERATING.getText());
+                    }
                 });
         return respVO;
     }
@@ -170,7 +196,7 @@ public class AppApplicationServiceImpl implements AppApplicationService {
         Long userId = SecurityFrameworkUtils.getLoginUserId();
         authRoleService.createDefaultRole(applicationDO.getId(), userId);
         createDatasource(applicationDO.getId(), applicationDO.getAppUid(), createReqVO.getDatasourceSaveReq());
-        appMenuService.createDefaultBpmMenu(applicationDO.getId());
+        buildAppMenuService.createDefaultBpmMenu(applicationDO.getId());
         return BeanUtils.toBean(applicationDO, ApplicationCreateRespVO.class);
     }
 
@@ -239,11 +265,11 @@ public class AppApplicationServiceImpl implements AppApplicationService {
         if (!StringUtils.equals(name, applicationDO.getAppName())) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_NAME_ERROR);
         }
-        // TODO: 先下线所有相关任务
         etlDataManager.offlineAllByApplication(id);
         flowDataManager.offlineRuntimeData(id);
         transactionTemplate.executeWithoutResult(transactionStatus -> {
-            // TODO: 删除应用下的全部资源
+            bpmDataManager.removeApplication(id);
+            metadataDataManagerApi.deleteAllApplicationData(id);
             etlDataManager.deleteAllApplicationData(id);
             flowDataManager.deleteAllApplicationData(id);
             appDataManager.deleteAllApplicationData(id);
