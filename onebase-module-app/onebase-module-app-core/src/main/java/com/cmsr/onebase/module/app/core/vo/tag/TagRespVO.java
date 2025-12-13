@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.app.build.vo.tag;
+package com.cmsr.onebase.module.app.core.vo.tag;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
@@ -10,6 +10,9 @@ import lombok.Data;
 @Schema(description = "应用管理 - 标签 Request VO")
 @Data
 public class TagRespVO {
+
+    @Schema(description = "应用id")
+    private Long applicationId;
 
     @Schema(description = "标签id")
     private Long id;

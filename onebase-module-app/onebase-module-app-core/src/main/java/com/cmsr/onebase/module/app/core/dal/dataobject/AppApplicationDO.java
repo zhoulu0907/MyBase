@@ -46,4 +46,33 @@ public class AppApplicationDO extends BaseTenantEntity {
     @Column(value = "publish_model", comment = "发布模式/内部模式")
     private String publishModel;
 
+    /**
+     * 发布状态，0从未发布 1发布过
+     */
+    @Column(value = "publish_status", comment = "发布状态")
+    private Integer publishStatus;
+    /**
+     * web端默认首页菜单
+     */
+    @Column(value = "web_default_menu", comment = "web端默认首页菜单")
+    private String webDefaultMenu;
+
+    /**
+     * web段导航布局
+     */
+    @Column(value = "web_nav_layout", comment = "web段导航布局")
+    private String webNavLayout;
+
+    /**
+     * 移动段首页菜单
+     */
+    @Column(value = "mobile_default_menu", comment = "移动段首页菜单")
+    private String mobileDefaultMenu;
+
+    /**
+     * 移动段当行布局
+     */
+    @Column(value = "mobile_nav_layout", comment = "移动段当行布局")
+    private String mobileNavLayout;
+
 }

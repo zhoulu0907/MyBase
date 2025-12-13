@@ -57,7 +57,8 @@ public class AppMenuRepository extends BaseBizRepository<AppMenuMapper, AppMenuD
         QueryWrapper queryWrapper = this.query()
                 .where(APP_MENU.APPLICATION_ID.eq(applicationId))
                 .where(APP_MENU.MENU_TYPE.in(menuTypes))
-                .where(APP_MENU.IS_VISIBLE.eq(1));
+                .where(APP_MENU.IS_VISIBLE.eq(1))
+                .orderBy(AppMenuDO::getMenuSort, true);
         return list(queryWrapper);
     }
 

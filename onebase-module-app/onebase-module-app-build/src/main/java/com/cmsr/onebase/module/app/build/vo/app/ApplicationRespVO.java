@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.app.build.vo.app;
 
-import com.cmsr.onebase.module.app.build.vo.tag.TagRespVO;
+import com.cmsr.onebase.module.app.core.vo.tag.TagRespVO;
 import com.cmsr.onebase.module.app.core.vo.app.AppUserPhotoDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
@@ -49,6 +49,9 @@ public class ApplicationRespVO {
     @Schema(description = "应用状态")
     private String appStatusText;
 
+    @Schema(description = "发布状态")
+    private Integer publishStatus;
+
     @Schema(description = "应用描述")
     private String description;
 
@@ -57,6 +60,12 @@ public class ApplicationRespVO {
 
     @Schema(description = "创建时间")
     private LocalDateTime createTime;
+
+    @Schema(description = "创建人")
+    private Long creator;
+
+    @Schema(description = "更新人")
+    private Long updater;
 
     @Schema(description = "创建人")
     private String createUser;
