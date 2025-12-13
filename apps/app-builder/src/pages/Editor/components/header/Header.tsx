@@ -45,6 +45,8 @@ import {
   EDITOR_TYPES,
   startLoadPageSet,
   startSavePageSet,
+  startLoadWorkbenchPageSet,
+  startSaveWorkbenchPageSet,
   useAppEntityStore,
   useFlowPageEditorSignal,
   useFormEditorSignal,
@@ -52,7 +54,8 @@ import {
   usePageEditorSignal,
   usePageViewEditorSignal,
   useWorkbenchEditorSignal,
-  type SavePageSetParams
+  type SavePageSetParams,
+  type SaveWorkbenchPageSetParams
 } from '@onebase/ui-kit';
 import { cloneDeep } from 'lodash-es';
 import { useEffect, useRef, useState } from 'react';
@@ -148,12 +151,8 @@ export default function EditorHeader() {
     clearLayoutSubComponents: clearListLayoutSubComponents
   } = useListEditorSignal;
 
-  const {
-    components: workbenchComponents,
-    pageComponentSchemas: workbenchPageComponentSchemas,
-    clearComponents: clearWorkbenchComponents,
-    clearPageComponentSchemas: clearWorkbenchPageComponentSchemas
-  } = useWorkbenchEditorSignal;
+  const { workbenchComponents, wbComponentSchemas, clearWorkbenchComponents, clearWbComponentSchemas } =
+    useWorkbenchEditorSignal;
 
   const { setMainEntity, /* setAppEntities, */ setSubEntities } = useAppEntityStore();
   const { curMenu, setCurMenu } = menuSignal;
@@ -300,7 +299,14 @@ export default function EditorHeader() {
   }, [pageSetId]);
 
   const loadPageSetInfo = async (pagesetId: string) => {
-    startLoadPageSet({ pageSetId: pagesetId });
+    // 工作台使用独立加载逻辑
+    if (activeTab === EDITOR_TYPES.WORKBENCH_EDITOR) {
+      await startLoadWorkbenchPageSet({ pageSetId: pagesetId });
+      return;
+    }
+
+    // 表单和列表使用原有加载逻辑
+    await startLoadPageSet({ pageSetId: pagesetId });
   };
 
   const handleGetAppInfo = async (pdId: string) => {
@@ -395,6 +401,20 @@ export default function EditorHeader() {
       onFlowSave();
       return;
     }
+
+    // 工作台使用独立保存逻辑
+    if (activeTab === EDITOR_TYPES.WORKBENCH_EDITOR) {
+      const saveWorkbenchParams: SaveWorkbenchPageSetParams = {
+        pageSetId: pageSetId,
+        workbenchComponents: workbenchComponents.value,
+        wbComponentSchemas: cloneDeep(wbComponentSchemas.value || {})
+      };
+
+      await startSaveWorkbenchPageSet(saveWorkbenchParams, () => setAppStatus(AppStatus.PUBLISHED));
+      return;
+    }
+
+    // 表单和列表使用原有保存逻辑
     console.log(`save appid: ${curAppId}, pageSetId: ${pageSetId}`);
     console.log('curViewId: ', curViewId.value);
 
@@ -406,9 +426,7 @@ export default function EditorHeader() {
       fromSubTableComponentsMap: cloneDeep(fromSubTableComponents.value),
       listComponents: listComponents.value,
       listPageComponentSchemas: new Map(Object.entries(cloneDeep(listPageComponentSchemas.value))),
-      listColComponentsMap: { colComponents: new Map(Object.entries(cloneDeep(listLayoutSubComponents.value))) },
-      workbenchComponents: workbenchComponents.value,
-      workbenchPageComponentSchemas: new Map(Object.entries(cloneDeep(workbenchPageComponentSchemas.value || {})))
+      listColComponentsMap: { colComponents: new Map(Object.entries(cloneDeep(listLayoutSubComponents.value))) }
     };
 
     console.log('savePageSetParams: ', savePageSetParams);
@@ -435,7 +453,7 @@ export default function EditorHeader() {
     clearWorkbenchComponents();
     clearFromPageComponentSchemas();
     clearListPageComponentSchemas();
-    clearWorkbenchPageComponentSchemas();
+    clearWbComponentSchemas();
   };
 
   const backToPageManager = async () => {

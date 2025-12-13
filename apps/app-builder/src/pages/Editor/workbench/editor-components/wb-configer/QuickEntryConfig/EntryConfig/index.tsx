@@ -1,6 +1,6 @@
 import { Button, Divider, Dropdown, Form, Input, Menu, Message, Popconfirm, Select } from '@arco-design/web-react';
 import { IconDelete, IconEdit, IconMenu, IconPlus, IconDragDotVertical } from '@arco-design/web-react/icon';
-import { usePageEditorSignal } from '@onebase/ui-kit';
+import { useWorkbenchSignal } from '@onebase/ui-kit';
 import { type ApplicationMenu } from '@onebase/app';
 import { useSignals } from '@preact/signals-react/runtime';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -29,7 +29,7 @@ const DEFAULT_GROUP_CONFIG: QuickEntryGroupConfig = {
 const EntryConfig = ({ cpID }: EntryConfigProps) => {
   useSignals();
 
-  const { curComponentSchema, setCurComponentSchema, setPageComponentSchemas } = usePageEditorSignal();
+  const { curComponentSchema, setCurComponentSchema, setWbComponentSchemas } = useWorkbenchSignal();
 
   // 使用本地 entries 描述 UI，避免直接操作 schema
   const [entries, setEntries] = useState<EntryItem[]>([]);
@@ -297,7 +297,7 @@ const EntryConfig = ({ cpID }: EntryConfigProps) => {
       }
     };
     setCurComponentSchema(newCurComponentSchema);
-    setPageComponentSchemas(cpID, newCurComponentSchema);
+    setWbComponentSchemas(cpID, newCurComponentSchema);
     setNewGroupName('');
   };
 

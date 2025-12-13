@@ -1,14 +1,8 @@
 import { Divider, Form } from '@arco-design/web-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import { useSignals } from '@preact/signals-react/runtime';
-import {
-  getWorkbenchComponentWidth,
-  COMPONENT_GROUP_NAME,
-  EDITOR_TYPES,
-  type GridItem,
-  usePageEditorSignal
-} from '@onebase/ui-kit';
+import { getWorkbenchComponentWidth, COMPONENT_GROUP_NAME, type GridItem, useWorkbenchSignal } from '@onebase/ui-kit';
 import { useWorkbenchContainer } from '../../hooks/use-workbench-container';
 import { useWorkbenchHandlers } from '../../hooks/use-workbench-handlers';
 import { WorkbenchItem } from './components/workbench-item';
@@ -30,33 +24,26 @@ export default function WorkbenchWorkspace() {
   const [showEmpty, setShowEmpty] = useState(true);
   const [pageMode, setPageMode] = useState<string>('pc');
   const { containerRef, containerWidth } = useWorkbenchContainer();
+  const isInitialized = useRef(false);
 
   useSignals();
-
-  const rawEditorContext = usePageEditorSignal(EDITOR_TYPES.WORKBENCH_EDITOR);
-  const editorContext = rawEditorContext as ReturnType<typeof usePageEditorSignal> & {
-    workbenchComponents?: GridItem[];
-    setWorkbenchComponents?: (components: GridItem[]) => void;
-  };
 
   const {
     curComponentID,
     setCurComponentID,
     clearCurComponentID,
     setCurComponentSchema,
-    pageComponentSchemas,
-    setPageComponentSchemas,
-    delPageComponentSchemas,
-    setComponents,
+    wbComponentSchemas,
+    setWbComponentSchemas,
+    delWbComponentSchemas,
     workbenchComponents,
     setWorkbenchComponents,
     setShowDeleteButton
-  } = editorContext;
+  } = useWorkbenchSignal();
 
   const currentComponents = useMemo(() => {
-    return (workbenchComponents as GridItem[] | undefined) ?? [];
+    return workbenchComponents ?? [];
   }, [workbenchComponents]);
-  const updateComponents = (setWorkbenchComponents ?? setComponents) as (items: GridItem[]) => void;
 
   // 处理组件列表变化
   useEffect(() => {
@@ -65,10 +52,10 @@ export default function WorkbenchWorkspace() {
 
   // 事件处理
   const handlers = useWorkbenchHandlers({
-    pageComponentSchemas,
-    setPageComponentSchemas,
-    delPageComponentSchemas,
-    setComponents: updateComponents,
+    wbComponentSchemas,
+    setWbComponentSchemas,
+    delWbComponentSchemas,
+    setWorkbenchComponents,
     setCurComponentID,
     clearCurComponentID,
     setCurComponentSchema,
@@ -91,17 +78,21 @@ export default function WorkbenchWorkspace() {
   const handleBodyMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     const target = e.target as HTMLElement;
     if (target.id === 'workspace-content') {
-      clearCurComponentID?.();
-      setShowDeleteButton(false);
-      // 设置页面配置 schema
-      const pageConfigSchema = getPageConfigSchema();
-      setCurComponentSchema(pageConfigSchema);
+      // 只在当前有选中组件时才清除并设置页面配置
+      if (curComponentID) {
+        clearCurComponentID?.();
+        setShowDeleteButton(false);
+        // 设置页面配置 schema
+        const pageConfigSchema = getPageConfigSchema();
+        setCurComponentSchema(pageConfigSchema);
+      }
     }
   };
 
   // 初始化时设置页面配置
   useEffect(() => {
-    if (!curComponentID) {
+    if (!isInitialized.current && !curComponentID) {
+      isInitialized.current = true;
       setCurComponentSchema({
         type: 'page',
         config: {
@@ -110,7 +101,7 @@ export default function WorkbenchWorkspace() {
         }
       });
     }
-  }, [curComponentID, setCurComponentSchema]);
+  }, []);
 
   return (
     <div className={styles.workbenchWorkspace}>
@@ -145,7 +136,7 @@ export default function WorkbenchWorkspace() {
           <ReactSortable
             id="workspace-content"
             list={currentComponents}
-            setList={updateComponents}
+            setList={setWorkbenchComponents}
             filter={SORTABLE_CONFIG.filter}
             preventOnFilter={SORTABLE_CONFIG.preventOnFilter}
             sort={SORTABLE_CONFIG.sort}
@@ -158,7 +149,7 @@ export default function WorkbenchWorkspace() {
             {currentComponents
               .filter((cp: GridItem) => cp.type !== 'entity')
               .map((cp: GridItem) => {
-                const currentWidth = getWorkbenchComponentWidth(pageComponentSchemas[cp.id], cp.type);
+                const currentWidth = getWorkbenchComponentWidth(wbComponentSchemas[cp.id], cp.type);
                 const isSelected = curComponentID === cp.id;
 
                 return (
@@ -168,7 +159,7 @@ export default function WorkbenchWorkspace() {
                     isSelected={isSelected}
                     currentWidth={currentWidth}
                     containerWidth={containerWidth}
-                    pageComponentSchema={pageComponentSchemas[cp.id]}
+                    pageComponentSchema={wbComponentSchemas[cp.id]}
                     onOperation={{
                       show: handlers.handleShowComponent,
                       copy: handlers.handleCopyComponent,

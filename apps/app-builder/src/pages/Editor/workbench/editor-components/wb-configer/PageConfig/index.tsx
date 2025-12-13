@@ -1,5 +1,5 @@
 import { Form, Switch } from '@arco-design/web-react';
-import { usePageEditorSignal } from '@onebase/ui-kit';
+import { useWorkbenchSignal } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import { useEffect, useState } from 'react';
 import styles from './index.module.less';
@@ -12,7 +12,7 @@ const FormItem = Form.Item;
 const PageConfig = () => {
   useSignals();
 
-  const { curComponentSchema, setCurComponentSchema } = usePageEditorSignal();
+  const { curComponentSchema, setCurComponentSchema } = useWorkbenchSignal();
 
   const [pageConfig, setPageConfig] = useState({
     showHeader: true,

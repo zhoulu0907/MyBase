@@ -1,6 +1,6 @@
 import {
   PreviewRender,
-  startLoadPageSet,
+  startLoadWorkbenchPageSet,
   getWorkbenchComponentWidth,
   useWorkbenchEditorSignal,
   type GridItem,
@@ -18,20 +18,19 @@ interface WorkbenchRuntimeProps {
 const WorkbenchRuntime: React.FC<WorkbenchRuntimeProps> = ({ pageSetId, runtime }) => {
   useSignals();
 
-  const { components: workbenchComponents, pageComponentSchemas: workbenchPageComponentSchemas } =
-    useWorkbenchEditorSignal;
+  const { workbenchComponents, wbComponentSchemas } = useWorkbenchEditorSignal;
 
   useEffect(() => {
     console.log('workbench runtime pageSetId: ', pageSetId);
     if (pageSetId) {
-      startLoadPageSet({ pageSetId, runtime: true });
+      startLoadWorkbenchPageSet({ pageSetId });
     }
   }, [pageSetId]);
 
   return (
     <>
       {workbenchComponents.value.map((cp: GridItem) => {
-        const schema = workbenchPageComponentSchemas.value[cp.id];
+        const schema = wbComponentSchemas.value[cp.id];
         const sanitizedSchema = {
           ...schema
         };

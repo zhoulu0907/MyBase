@@ -14,6 +14,7 @@ import {
   getWorkbenchComponentWidth,
   PreviewRender,
   startLoadPageSet,
+  startLoadWorkbenchPageSet,
   STATUS_OPTIONS,
   STATUS_VALUES,
   useEditorSignalMap,
@@ -44,12 +45,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
     clearPageComponentSchemas
   } = useListEditorSignal;
 
-  const {
-    components: workbenchComponents,
-    pageComponentSchemas: workbenchPageComponentSchemas,
-    clearComponents: clearWorkbenchComponents,
-    clearPageComponentSchemas: clearWorkbenchPageComponentSchemas
-  } = useWorkbenchEditorSignal;
+  const { workbenchComponents, wbComponentSchemas, clearWorkbenchComponents, clearWbComponentSchemas } =
+    useWorkbenchEditorSignal;
 
   const { editPageViewId } = pagesRuntimeSignal;
 
@@ -101,7 +98,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
       clearComponents();
       clearPageComponentSchemas();
       clearWorkbenchComponents();
-      clearWorkbenchPageComponentSchemas();
+      clearWbComponentSchemas();
 
       // 然后加载新的数据
       handleGetPageSetId(menuId);
@@ -129,7 +126,14 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
   }, [pageSetId]);
 
   const loadPageSetInfo = async (pageSetId: string) => {
-    startLoadPageSet({ pageSetId: pageSetId });
+    // 工作台使用独立加载逻辑
+    if (pagesetType === PageType.WORKBENCH) {
+      await startLoadWorkbenchPageSet({ pageSetId: pageSetId });
+      return;
+    }
+
+    // 表单和列表使用原有加载逻辑
+    await startLoadPageSet({ pageSetId: pageSetId });
   };
 
   const submitForm = async () => {
@@ -260,13 +264,13 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
           <Form layout="inline" form={form}>
             {workbenchComponents.value.map((cp: GridItem) => (
               <Fragment key={cp.id}>
-                {workbenchPageComponentSchemas.value[cp.id]?.config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+                {wbComponentSchemas.value[cp.id]?.config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
                   <div
                     key={cp.id}
                     className={styles.componentItem}
                     style={{
                       width: `calc(${getWorkbenchComponentWidth(
-                        workbenchPageComponentSchemas.value[cp.id],
+                        wbComponentSchemas.value[cp.id],
                         cp.type as WorkbenchComponentType
                       )} - 8px)`,
                       margin: '4px'
@@ -275,7 +279,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
                     <PreviewRender
                       cpId={cp.id}
                       cpType={cp.type}
-                      pageComponentSchema={workbenchPageComponentSchemas.value[cp.id]}
+                      pageComponentSchema={wbComponentSchemas.value[cp.id]}
                       runtime={runtime}
                       preview={preview}
                     />

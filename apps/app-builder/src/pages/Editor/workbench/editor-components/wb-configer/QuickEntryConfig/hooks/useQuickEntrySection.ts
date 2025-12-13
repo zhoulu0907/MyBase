@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { usePageEditorSignal } from '@onebase/ui-kit';
+import { useWorkbenchSignal } from '@onebase/ui-kit';
 import type { QuickEntryProps } from '../types';
 
 type SectionKey = keyof QuickEntryProps;
@@ -13,7 +13,7 @@ export function useQuickEntrySection<K extends SectionKey>(
   section: K,
   defaultValue: NonNullable<QuickEntryProps[K]>
 ) {
-  const { curComponentSchema, setCurComponentSchema, setPageComponentSchemas } = usePageEditorSignal();
+  const { curComponentSchema, setCurComponentSchema, setWbComponentSchemas } = useWorkbenchSignal();
   const [state, setState] = useState<NonNullable<QuickEntryProps[K]>>(defaultValue);
   const defaultValueRef = useRef(defaultValue);
 
@@ -63,9 +63,9 @@ export function useQuickEntrySection<K extends SectionKey>(
         }
       };
       setCurComponentSchema(nextSchema);
-      setPageComponentSchemas(cpID, nextSchema);
+      setWbComponentSchemas(cpID, nextSchema);
     },
-    [cpID, curComponentSchema, section, setCurComponentSchema, setPageComponentSchemas]
+    [cpID, curComponentSchema, section, setCurComponentSchema, setWbComponentSchemas]
   );
 
   const update = useCallback(

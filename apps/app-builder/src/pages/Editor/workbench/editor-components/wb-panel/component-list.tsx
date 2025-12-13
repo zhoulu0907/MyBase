@@ -2,7 +2,6 @@
  * 工作台组件列表组件
  */
 import MaterialCard from '@/components/MaterialCard';
-import { useI18n } from '@/hooks/useI18n';
 import { COMPONENT_GROUP_NAME } from '@onebase/ui-kit';
 import { ReactSortable } from 'react-sortablejs';
 import { v4 as uuidv4 } from 'uuid';
@@ -16,10 +15,8 @@ interface ComponentListProps {
 }
 
 export function ComponentList({ items, components, onItemsChange }: ComponentListProps) {
-  const { t } = useI18n();
-
   if (components.length === 0) {
-    return <div className={styles.emptyTip}>{t('editor.empty')}</div>;
+    return <div className={styles.emptyTip}>暂无组件</div>;
   }
 
   return (

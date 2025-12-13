@@ -40,8 +40,7 @@ console.warn = (...args) => {
 const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType }) => {
   const { components: formComponents, pageComponentSchemas: formPageComponentSchemas } = useFormEditorSignal;
   const { components: listComponents, pageComponentSchemas: listPageComponentSchemas } = useListEditorSignal;
-  const { components: workbenchComponents, pageComponentSchemas: workbenchPageComponentSchemas } =
-    useWorkbenchEditorSignal;
+  const { workbenchComponents, wbComponentSchemas } = useWorkbenchEditorSignal;
   const { editMode } = currentEditorSignal;
 
   const mobileEditorPreviewRef = useRef<MicroApp | null>(null);
@@ -165,20 +164,19 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
                 <Form layout="inline">
                   {workbenchComponents.value.map((cp: GridItem) => (
                     <Fragment key={cp.id}>
-                      {workbenchPageComponentSchemas?.value[cp.id]?.config.status !==
-                        STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+                      {wbComponentSchemas?.value[cp.id]?.config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
                         <div
                           key={cp.id}
                           className={styles.componentItem}
                           style={{
-                            width: `calc(${getWorkbenchComponentWidth(workbenchPageComponentSchemas.value[cp.id], cp.type)} - 8px)`,
+                            width: `calc(${getWorkbenchComponentWidth(wbComponentSchemas.value[cp.id], cp.type)} - 8px)`,
                             margin: '4px'
                           }}
                         >
                           <PreviewRender
                             cpId={cp.id}
                             cpType={cp.type}
-                            pageComponentSchema={workbenchPageComponentSchemas.value[cp.id]}
+                            pageComponentSchema={wbComponentSchemas.value[cp.id]}
                             runtime={true}
                             preview={true}
                           />
