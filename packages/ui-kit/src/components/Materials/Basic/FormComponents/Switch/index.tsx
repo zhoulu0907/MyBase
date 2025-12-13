@@ -29,15 +29,9 @@ const XSwitch = memo((props: XInputSwitchConfig & { runtime?: boolean; detailMod
     if (dataField.length > 0) {
       setFieldId(dataField[dataField.length - 1]);
     }
-
-    console.log('defaultValueConfig?.customValue: ', defaultValueConfig);
   }, [dataField]);
 
   const { form, fieldValue } = useFormFieldWatch(fieldId);
-
-  useEffect(() => {
-    console.log('fieldId: ', fieldId, 'fieldValue: ', fieldValue);
-  }, [fieldId, fieldValue]);
 
   return (
     <div className="formWrapper">
