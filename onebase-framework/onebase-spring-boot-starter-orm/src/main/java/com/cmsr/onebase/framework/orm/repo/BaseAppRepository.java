@@ -17,6 +17,9 @@ import java.util.List;
 public class BaseAppRepository<M extends BaseMapper<T>, T extends BaseAppEntity> extends ServiceImpl<M, T> {
 
     protected void injectQueryFilter(QueryWrapper queryWrapper) {
+        if (ApplicationManager.isIgnoreApplicationCondition()) {
+            return;
+        }
         if (!QueryWrapperUtils.isQueryFilterable(queryWrapper)) {
             return;
         }

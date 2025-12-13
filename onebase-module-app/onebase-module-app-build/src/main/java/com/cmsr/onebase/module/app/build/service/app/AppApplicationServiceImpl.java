@@ -8,7 +8,7 @@ import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.uid.UidGenerator;
 import com.cmsr.onebase.module.app.build.service.AppCommonService;
 import com.cmsr.onebase.module.app.build.service.auth.AppAuthRoleService;
-import com.cmsr.onebase.module.app.build.service.menu.AppMenuService;
+import com.cmsr.onebase.module.app.build.service.menu.BuildAppMenuService;
 import com.cmsr.onebase.module.app.build.service.version.AppDataManager;
 import com.cmsr.onebase.module.app.build.util.AppUtils;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationCreateReqVO;
@@ -87,7 +87,7 @@ public class AppApplicationServiceImpl implements AppApplicationService {
     private AppAuthRoleRepository appAuthRoleRepository;
 
     @Autowired
-    private AppMenuService appMenuService;
+    private BuildAppMenuService buildAppMenuService;
 
     @Autowired
     private AppDataManager appDataManager;
@@ -196,7 +196,7 @@ public class AppApplicationServiceImpl implements AppApplicationService {
         Long userId = SecurityFrameworkUtils.getLoginUserId();
         authRoleService.createDefaultRole(applicationDO.getId(), userId);
         createDatasource(applicationDO.getId(), applicationDO.getAppUid(), createReqVO.getDatasourceSaveReq());
-        appMenuService.createDefaultBpmMenu(applicationDO.getId());
+        buildAppMenuService.createDefaultBpmMenu(applicationDO.getId());
         return BeanUtils.toBean(applicationDO, ApplicationCreateRespVO.class);
     }
 

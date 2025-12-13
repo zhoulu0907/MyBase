@@ -1,7 +1,6 @@
 package com.cmsr.onebase.framework.orm.repo;
 
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
-import com.cmsr.onebase.framework.orm.entity.BaseAppEntity;
 import com.cmsr.onebase.framework.orm.entity.BaseBizEntity;
 import com.cmsr.onebase.framework.orm.entity.WarmFlowBizEntity;
 import com.mybatisflex.core.BaseMapper;
@@ -19,6 +18,9 @@ import java.util.List;
 public class WarmFlowBaseBizRepository<M extends BaseMapper<T>, T extends WarmFlowBizEntity> extends ServiceImpl<M, T> {
 
     protected void injectQueryFilter(QueryWrapper queryWrapper) {
+        if (ApplicationManager.isIgnoreApplicationCondition() && ApplicationManager.isIgnoreVersionTagCondition()) {
+            return;
+        }
         if (!QueryWrapperUtils.isQueryFilterable(queryWrapper)) {
             return;
         }

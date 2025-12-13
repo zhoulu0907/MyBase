@@ -43,7 +43,7 @@ import java.util.stream.Collectors;
 @Setter
 @Service
 @Validated
-public class AppMenuServiceImpl implements AppMenuService {
+public class BuildBuildAppMenuServiceImpl implements BuildAppMenuService {
 
     @Autowired
     private AppCommonService appCommonService;
@@ -118,12 +118,12 @@ public class AppMenuServiceImpl implements AppMenuService {
                 .filter(v -> MenuUtils.ROOT_MENU_UUID.equals(v.getParentUuid()))
                 .toList();
         // 递归实现每个菜单的子菜单
-        for (MenuListRespVO respVO : menuListRespList) {
-            List<MenuListRespVO> children = recursiveGetChildren(respVO.getMenuUuid(), levelOneMenus);
+        for (MenuListRespVO respVO : levelOneMenus) {
+            List<MenuListRespVO> children = recursiveGetChildren(respVO.getMenuUuid(), menuListRespList);
             respVO.setChildren(children);
         }
-        filterMenuByName(menuListRespList, name);
-        return menuListRespList;
+        filterMenuByName(levelOneMenus, name);
+        return levelOneMenus;
     }
 
 
@@ -132,8 +132,8 @@ public class AppMenuServiceImpl implements AppMenuService {
         for (MenuListRespVO respVO : listRespVOS) {
             if (Objects.equals(respVO.getParentUuid(), parentUuid)) {
                 // 只有父菜单的uuid等于当前菜单的父菜单的uuid时，才添加子菜单，继续递归
-                respVO.setChildren(recursiveGetChildren(respVO.getParentUuid(), listRespVOS));
                 children.add(respVO);
+                respVO.setChildren(recursiveGetChildren(respVO.getMenuUuid(), listRespVOS));
             }
         }
         return children.isEmpty() ? null : children;
