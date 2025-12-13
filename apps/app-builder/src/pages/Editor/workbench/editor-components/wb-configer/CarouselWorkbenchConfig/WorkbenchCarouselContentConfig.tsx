@@ -1,63 +1,12 @@
 import { Button, Form, InputNumber, Message, Radio, Select } from '@arco-design/web-react';
-import type { ReactNode } from 'react';
 import { CONFIG_TYPES } from '@onebase/ui-kit';
 import { registerConfigRenderer } from '../registry';
-import styles from '../index.module.less';
 import StaticCarouselList from './StaticCarouselList';
+import type { CarouselItem, Props, CarouselContentMeta, VerifyConfig } from './types';
+import styles from '../index.module.less';
 
 const FormItem = Form.Item;
 const Option = Select.Option;
-
-interface CarouselFieldMeta {
-  key: string;
-  label: string;
-  placeholder?: string;
-  options?: Array<{ label?: ReactNode; value: string }>;
-}
-
-interface CarouselContentMeta {
-  modeField?: {
-    key: string;
-    defaultValue?: string;
-    options?: Array<{ key: string; text: string; value: string }>;
-  };
-  dynamicFields?: CarouselFieldMeta[];
-  filterField?: {
-    key: string;
-    label: string;
-    buttonText?: string;
-  };
-  displayCountField?: {
-    key: string;
-    label: string;
-    min?: number;
-    max?: number;
-    defaultValue?: number;
-  };
-  staticFieldKey?: string;
-}
-
-interface Props {
-  id: string;
-  item: {
-    key?: string;
-    meta?: CarouselContentMeta;
-  };
-  configs: Record<string, unknown>;
-  handlePropsChange: (key: string, value: unknown) => void;
-}
-
-interface CarouselItem {
-  image?: string;
-  text?: string;
-  url?: string;
-  [key: string]: unknown;
-}
-
-interface VerifyConfig {
-  maxSize?: number;
-  maxCount?: number;
-}
 
 const WorkbenchCarouselContentConfig = ({ item, configs, handlePropsChange }: Props) => {
   const meta: CarouselContentMeta = item.meta ?? {};

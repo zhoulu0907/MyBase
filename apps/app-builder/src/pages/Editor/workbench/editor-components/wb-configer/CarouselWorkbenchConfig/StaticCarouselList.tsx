@@ -1,57 +1,56 @@
-import { Button, Form, Input, Message, Popconfirm, Radio, Select } from '@arco-design/web-react';
+import { Button, Form, Input, Message, Popconfirm, Radio } from '@arco-design/web-react';
 import { IconCloud, IconDelete, IconDragDotVertical, IconEdit, IconPlus } from '@arco-design/web-react/icon';
 import { uploadFile } from '@onebase/platform-center';
 import { usePageViewEditorSignal } from '@onebase/ui-kit';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { ReactSortable } from 'react-sortablejs';
-import ConfigDrawer from '@/pages/Editor/workbench/components/configDrawer';
+import ConfigDrawer from '@/pages/Editor/workbench/components/ConfigDrawer';
+import type { CarouselItem, StaticCarouselListProps } from './types';
+import MenuSelector from '@/pages/Editor/workbench/components/MenuSelector';
 import styles from './StaticCarouselList.module.less';
 import attributeStyles from '../attributes.module.less';
 
 const FormItem = Form.Item;
-const Option = Select.Option;
-
-interface CarouselItem {
-  title?: string;
-  image?: string;
-  linkType?: 'internal' | 'external';
-  internalPageId?: string;
-  url?: string;
-  text?: string; // 保留兼容性
-  [key: string]: unknown;
-}
-
-interface StaticCarouselListProps {
-  carouselConfig: CarouselItem[];
-  maxSizeMB?: number;
-  maxCount?: number;
-  onConfigChange: (config: CarouselItem[]) => void;
-}
 
 // 允许的文件格式列表
 const allowedFormats = ['image/jpeg', 'image/png', 'image/gif'];
 
+// 生成唯一ID
+const generateId = () => `carousel-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
 const StaticCarouselList = ({ carouselConfig, maxSizeMB = 5, onConfigChange }: StaticCarouselListProps) => {
-  const [items, setItems] = useState<CarouselItem[]>(carouselConfig || []);
-  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [items, setItems] = useState<CarouselItem[]>(() =>
+    (carouselConfig || []).map((item) => ({
+      ...item,
+      id: item.id || generateId()
+    }))
+  );
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [drawerVisible, setDrawerVisible] = useState(false);
+  const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
   const [form] = Form.useForm();
 
   useEffect(() => {
-    setItems(carouselConfig || []);
+    setItems(
+      (carouselConfig || []).map((item) => ({
+        ...item,
+        id: item.id || generateId()
+      }))
+    );
   }, [carouselConfig]);
 
   const { pageViews } = usePageViewEditorSignal;
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const getItemName = (item: CarouselItem, index: number) => {
+  const getItemName = (item?: CarouselItem) => {
+    if (!item) return '编辑轮播项';
     if (item.title) {
       return item.title;
     }
     if (item.text) {
       return item.text;
     }
-    return `图片名称${index + 1}`;
+    return '轮播项';
   };
 
   // 获取页面列表选项
@@ -68,8 +67,10 @@ const StaticCarouselList = ({ carouselConfig, maxSizeMB = 5, onConfigChange }: S
     onConfigChange(newList);
   };
 
-  const handleEdit = (index: number) => {
-    const item = items[index];
+  const handleEdit = (id: string) => {
+    const item = items.find((item) => item.id === id);
+    if (!item) return;
+
     form.setFieldsValue({
       title: item.title || item.text || '',
       image: item.image || '',
@@ -77,20 +78,31 @@ const StaticCarouselList = ({ carouselConfig, maxSizeMB = 5, onConfigChange }: S
       internalPageId: item.internalPageId || '',
       url: item.url || ''
     });
-    setEditingIndex(index);
+    setEditingId(id);
     setDrawerVisible(true);
   };
 
-  const handleDelete = (index: number) => {
-    const newItems = items.filter((_, idx) => idx !== index);
+  const handleDelete = (id: string) => {
+    const newItems = items.filter((item) => item.id !== id);
     setItems(newItems);
     onConfigChange(newItems);
     Message.success('删除成功');
   };
 
   const handleAdd = () => {
+    // 找出现有项目中"图片名称X"格式的最大序号
+    const maxIndex = items.reduce((max, item) => {
+      const match = item.title?.match(/^图片名称(\d+)$/);
+      if (match) {
+        const num = parseInt(match[1], 10);
+        return Math.max(max, num);
+      }
+      return max;
+    }, 0);
+
     const newItem: CarouselItem = {
-      title: '图片名称' + (items.length + 1),
+      id: generateId(),
+      title: '图片名称' + (maxIndex + 1),
       image: '',
       linkType: 'internal',
       internalPageId: '',
@@ -103,26 +115,23 @@ const StaticCarouselList = ({ carouselConfig, maxSizeMB = 5, onConfigChange }: S
 
   const handleDrawerClose = () => {
     setDrawerVisible(false);
-    setEditingIndex(null);
+    setEditingId(null);
     form.resetFields();
   };
 
   const [pendingValues, setPendingValues] = useState<CarouselItem | null>(null);
 
   useEffect(() => {
-    if (editingIndex === null || !pendingValues) {
+    if (editingId === null || !pendingValues) {
       return;
     }
     setItems((prevItems) => {
-      if (editingIndex < 0 || editingIndex >= prevItems.length) {
-        return prevItems;
-      }
-      const newItems = prevItems.map((item, idx) => (idx === editingIndex ? { ...item, ...pendingValues } : item));
+      const newItems = prevItems.map((item) => (item.id === editingId ? { ...item, ...pendingValues } : item));
       onConfigChange(newItems);
       return newItems;
     });
     setPendingValues(null);
-  }, [editingIndex, onConfigChange, pendingValues]);
+  }, [editingId, onConfigChange, pendingValues]);
 
   const handleFormValuesChange = useCallback((_: Record<string, unknown>, allValues: CarouselItem) => {
     setPendingValues(allValues);
@@ -231,30 +240,30 @@ const StaticCarouselList = ({ carouselConfig, maxSizeMB = 5, onConfigChange }: S
     }
   }, [drawerVisible, handlePaste]);
 
+  const handleMenuChange = (value: string | string[]) => {
+    setSelectedKeys(Array.isArray(value) ? value : [value]);
+  };
+
   return (
     <>
       <div className={styles.carouselList}>
         <ReactSortable
-          list={items.map((item, index) => ({ ...item, id: `item-${index}` }))}
+          list={items}
           setList={(newList) => {
-            const normalizedList = newList.map(({ id: _id, ...item }) => {
-              void _id;
-              return item;
-            });
-            handleSort(normalizedList);
+            handleSort(newList);
           }}
           handle=".drag-handle"
           animation={200}
         >
-          {items.map((item, index) => (
-            <div key={index} className={styles.listItem}>
+          {items.map((item) => (
+            <div key={item.id} className={styles.listItem}>
               <div className={`${styles.dragHandle} drag-handle`}>
                 <IconDragDotVertical />
               </div>
-              <div className={styles.itemContent}>{getItemName(item, index)}</div>
+              <div className={styles.itemContent}>{getItemName(item)}</div>
               <div className={styles.itemActions}>
-                <IconEdit className={styles.actionIcon} onClick={() => handleEdit(index)} />
-                <Popconfirm title="确定要删除这个轮播项吗？" onOk={() => handleDelete(index)}>
+                <IconEdit className={styles.actionIcon} onClick={() => handleEdit(item.id)} />
+                <Popconfirm title="确定要删除这个轮播项吗？" onOk={() => handleDelete(item.id)}>
                   <IconDelete className={styles.actionIcon} />
                 </Popconfirm>
               </div>
@@ -269,11 +278,7 @@ const StaticCarouselList = ({ carouselConfig, maxSizeMB = 5, onConfigChange }: S
 
       <ConfigDrawer
         visible={drawerVisible}
-        title={
-          editingIndex !== null && editingIndex < items.length
-            ? getItemName(items[editingIndex], editingIndex)
-            : '编辑轮播项'
-        }
+        title={editingId !== null ? getItemName(items.find((item) => item.id === editingId)) : '编辑轮播项'}
         onClose={handleDrawerClose}
       >
         <Form
@@ -291,16 +296,6 @@ const StaticCarouselList = ({ carouselConfig, maxSizeMB = 5, onConfigChange }: S
                 const imageUrl = form.getFieldValue('image');
                 return (
                   <div className={styles.imageUploadContainer}>
-                    <div className={styles.imagePreview}>
-                      {imageUrl ? (
-                        <img src={imageUrl} alt="预览" className={styles.previewImage} />
-                      ) : (
-                        <div className={styles.uploadPlaceholder}>
-                          <IconPlus />
-                          <div>上传图片</div>
-                        </div>
-                      )}
-                    </div>
                     <div className={styles.uploadActions}>
                       <Input
                         placeholder="支持直接粘贴上传"
@@ -313,6 +308,16 @@ const StaticCarouselList = ({ carouselConfig, maxSizeMB = 5, onConfigChange }: S
                         style={{ display: 'none' }}
                         onChange={handleFileSelect}
                       />
+                    </div>
+                    <div className={styles.imagePreview}>
+                      {imageUrl ? (
+                        <img src={imageUrl} alt="预览" className={styles.previewImage} />
+                      ) : (
+                        <div className={styles.uploadPlaceholder}>
+                          <IconPlus />
+                          <div>上传图片</div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 );
@@ -330,13 +335,14 @@ const StaticCarouselList = ({ carouselConfig, maxSizeMB = 5, onConfigChange }: S
               const linkType = form.getFieldValue('linkType');
               return linkType === 'internal' ? (
                 <FormItem label="选择页面" field="internalPageId">
-                  <Select placeholder="请选择页面" allowClear>
+                  {/* <Select placeholder="请选择页面" allowClear>
                     {getPageOptions().map((option) => (
                       <Option key={option.value} value={option.value}>
                         {option.label}
                       </Option>
                     ))}
-                  </Select>
+                  </Select> */}
+                  <MenuSelector mode="single" value={selectedKeys} onChange={handleMenuChange} />
                 </FormItem>
               ) : (
                 <FormItem label="链接地址" field="url">

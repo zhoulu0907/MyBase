@@ -6,11 +6,11 @@ import { useSignals } from '@preact/signals-react/runtime';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import IconEntry from '@/assets/workbench/quick-entry/entry1.svg';
-import ConfigDrawer from '@/pages/Editor/workbench/components/configDrawer';
+import ConfigDrawer from '@/pages/Editor/workbench/components/ConfigDrawer';
 import { useQuickEntrySection } from '../hooks/useQuickEntrySection';
 import type { EntryItem, SchemaGroup, QuickEntryGroupConfig } from '../types';
-import styles from './index.module.less';
 import SelectMenuModal from './selectMenuModal';
+import styles from './index.module.less';
 
 const FormItem = Form.Item;
 
