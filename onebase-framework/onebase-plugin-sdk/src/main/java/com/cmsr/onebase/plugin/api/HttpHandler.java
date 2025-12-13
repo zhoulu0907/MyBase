@@ -1,98 +1,62 @@
 package com.cmsr.onebase.plugin.api;
 
-import com.cmsr.onebase.plugin.context.PluginContext;
-import com.cmsr.onebase.plugin.model.HttpRequest;
-import com.cmsr.onebase.plugin.model.HttpResponse;
 import org.pf4j.ExtensionPoint;
 
 /**
- * HTTP处理器扩展点
+ * 插件HTTP扩展点标记接口
  * <p>
- * 用于提供自定义HTTP接口，扩展平台的REST API能力。
- * 插件提供的接口会被路由到：/plugin/{pluginId}/{pathPattern}
+ * 用于标记插件提供的HTTP Controller，便于平台扫描和识别。
+ * 实现此接口的类应为标准的Spring {@code @RestController}，遵循Spring MVC规范。
  * </p>
  *
+ * <h3>开发规范（强制）</h3>
+ * <ol>
+ *   <li>实现类必须添加 {@code @RestController} 注解</li>
+ *   <li>所有路由路径必须以 {@code /plugin/{pluginId}/} 开头，其中 pluginId 为插件唯一标识</li>
+ *   <li>使用标准的Spring MVC注解（如 {@code @GetMapping}、{@code @PostMapping} 等）</li>
+ *   <li>可直接使用Spring的依赖注入、参数校验等功能</li>
+ * </ol>
+ *
+ * <h3>使用示例</h3>
  * <pre>
- * 使用示例：
  * {@code
- * public class OcrApiHandler implements HttpHandler {
- *     @Override
- *     public String pathPattern() { return "/ocr/recognize"; }
+ * @RestController
+ * @RequestMapping("/plugin/demo-plugin/api")
+ * public class DemoApiController implements HttpHandler {
  *
- *     @Override
- *     public String method() { return "POST"; }
+ *     @GetMapping("/hello")
+ *     public String hello(@RequestParam(defaultValue = "World") String name) {
+ *         return "Hello, " + name + "!";
+ *     }
  *
- *     @Override
- *     public HttpResponse handle(PluginContext ctx, HttpRequest request) {
- *         String imageUrl = request.getBodyAsMap().get("imageUrl").toString();
- *         String result = doOcr(imageUrl);
- *         return HttpResponse.ok(Map.of("text", result));
+ *     @PostMapping("/data")
+ *     public Map<String, Object> processData(@RequestBody Map<String, Object> data) {
+ *         // 业务处理逻辑
+ *         return Map.of("success", true, "data", data);
  *     }
  * }
  * }
  * </pre>
  *
+ * <h3>路由访问</h3>
+ * <p>
+ * 前端统一通过宿主系统访问插件接口，例如：
+ * <ul>
+ *   <li>{@code GET http://localhost:48080/plugin/demo-plugin/api/hello?name=张三}</li>
+ *   <li>{@code POST http://localhost:48080/plugin/demo-plugin/api/data}</li>
+ * </ul>
+ * </p>
+ *
+ * <h3>本地调试</h3>
+ * <p>
+ * 插件可独立启动进行本地调试，路由保持一致即可。
+ * 开发完成后，通过 maven package 打包成插件 ZIP 包，上传至宿主系统。
+ * </p>
+ *
  * @author matianyu
- * @date 2025-11-29
+ * @date 2025-12-13
  */
 public interface HttpHandler extends ExtensionPoint {
-
-    /**
-     * 路径模式
-     * <p>
-     * 相对于插件根路径的子路径，如：/ocr/recognize
-     * 完整访问路径为：/plugin/{pluginId}/ocr/recognize
-     * </p>
-     *
-     * @return 路径模式
-     */
-    String pathPattern();
-
-    /**
-     * HTTP方法
-     *
-     * @return GET、POST、PUT、DELETE 等
-     */
-    default String method() {
-        return "POST";
-    }
-
-    /**
-     * 接口描述
-     *
-     * @return 描述信息
-     */
-    default String description() {
-        return "";
-    }
-
-    /**
-     * 是否需要认证
-     *
-     * @return true表示需要登录才能访问
-     */
-    default boolean requireAuth() {
-        return true;
-    }
-
-    /**
-     * 所需权限标识
-     * <p>
-     * 为空表示只需登录即可访问
-     * </p>
-     *
-     * @return 权限标识数组
-     */
-    default String[] permissions() {
-        return new String[0];
-    }
-
-    /**
-     * 处理HTTP请求
-     *
-     * @param ctx     插件上下文
-     * @param request HTTP请求对象
-     * @return HTTP响应对象
-     */
-    HttpResponse handle(PluginContext ctx, HttpRequest request);
+    // 纯标记接口，无需定义任何方法
+    // 插件开发者直接使用Spring MVC注解即可
 }

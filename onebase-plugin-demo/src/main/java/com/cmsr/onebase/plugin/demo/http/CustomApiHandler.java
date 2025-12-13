@@ -1,82 +1,63 @@
 package com.cmsr.onebase.plugin.demo.http;
 
 import com.cmsr.onebase.plugin.api.HttpHandler;
-import com.cmsr.onebase.plugin.context.PluginContext;
-import com.cmsr.onebase.plugin.model.HttpRequest;
-import com.cmsr.onebase.plugin.model.HttpResponse;
-import com.cmsr.onebase.plugin.service.DataService;
 import org.pf4j.Extension;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
- * 自定义HTTP接口处理器示例
+ * 自定义HTTP接口处理器示例（新模式）
  * <p>
- * 演示如何实现自定义HTTP接口扩展点，暴露插件提供的REST API
+ * 演示如何使用标准Spring Controller方式实现复杂的插件HTTP接口。
  * </p>
  *
- * @author OneBase Team
- * @date 2025-11-29
+ * @author matianyu
+ * @date 2025-12-13
  */
 @Extension
+@RestController
 public class CustomApiHandler implements HttpHandler {
 
-    @Override
-    public String pathPattern() {
-        return "/demo";
+    /**
+     * 获取插件信息
+     * <p>访问路径：GET /plugin/demo-plugin/api/info</p>
+     */
+    @GetMapping("/plugin/demo-plugin/api/info")
+    public Map<String, Object> getPluginInfo() {
+        Map<String, Object> info = new HashMap<>();
+        info.put("plugin", "demo-plugin");
+        info.put("version", "1.0.0");
+        info.put("description", "OneBase插件开发示例");
+        info.put("features", List.of("自定义函数", "数据处理器", "事件监听器", "HTTP接口"));
+        return info;
     }
 
-    @Override
-    public String method() {
-        return "GET";
-    }
-
-    @Override
-    public String description() {
-        return "示例插件API，提供插件信息、状态查询等功能";
-    }
-
-    @Override
-    public HttpResponse handle(PluginContext ctx, HttpRequest request) {
-        String action = request.getQueryParam("action");
-
-        try {
-            if (action == null || action.isEmpty()) {
-                // 返回插件信息
-                Map<String, Object> info = new HashMap<>();
-                info.put("plugin", "demo-plugin");
-                info.put("version", "1.0.0");
-                info.put("description", "OneBase插件开发示例");
-                info.put("features", List.of("自定义函数", "数据处理器", "事件监听器", "HTTP接口"));
-                return HttpResponse.ok(info);
-            }
-
-            return switch (action) {
-                case "status" -> getStatus(ctx);
-                case "stats" -> getStats();
-                default -> HttpResponse.badRequest("Unknown action: " + action);
-            };
-        } catch (Exception e) {
-            return HttpResponse.error(500, "Internal Server Error: " + e.getMessage());
-        }
-    }
-
-    private HttpResponse getStatus(PluginContext ctx) {
+    /**
+     * 获取插件状态
+     * <p>访问路径：GET /plugin/demo-plugin/api/status</p>
+     */
+    @GetMapping("/plugin/demo-plugin/api/status")
+    public Map<String, Object> getStatus() {
         Map<String, Object> status = new HashMap<>();
         status.put("status", "running");
-        status.put("tenantId", ctx.getTenantId());
-        status.put("userId", ctx.getUserId());
-        return HttpResponse.ok(status);
+        status.put("uptime", "1h 23m 45s");
+        return status;
     }
 
-    private HttpResponse getStats() {
-        // 模拟返回统计信息
-        Map<String, Object> stats = new HashMap<>();
-        stats.put("totalRequests", 1000);
-        stats.put("successRate", "99.5%");
-        stats.put("avgResponseTime", "50ms");
-        return HttpResponse.ok(stats);
+    /**
+     * 处理数据
+     * <p>访问路径：POST /plugin/demo-plugin/api/process</p>
+     */
+    @PostMapping("/plugin/demo-plugin/api/process")
+    public Map<String, Object> processData(@RequestBody Map<String, Object> data) {
+        Map<String, Object> result = new HashMap<>();
+        result.put("success", true);
+        result.put("receivedData", data);
+        result.put("processedCount", data.size());
+        return result;
     }
 }
+
