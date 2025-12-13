@@ -487,7 +487,7 @@ export default function EditorWorkspace() {
                   schema.config.id = cpID;
                   schema.config.label.text = cpName;
                   schema.config.status = STATUS_VALUES[STATUS_OPTIONS.DEFAULT];
-                  schema.config.subTable = item.id;
+                  schema.config.subTable = item.entityUuid;
 
                   const props = {
                     id: cpID,
@@ -655,6 +655,7 @@ export default function EditorWorkspace() {
                 itemType === ENTITY_COMPONENT_TYPES.MAIN_ENTITY ||
                 itemType === ENTITY_COMPONENT_TYPES.SUB_ENTITY
               ) {
+                console.log('tableName: ', tableName, '是子表');
                 return;
               }
 
@@ -783,6 +784,7 @@ export default function EditorWorkspace() {
                   }}
                   onClick={(e: React.MouseEvent<HTMLDivElement>) => {
                     e.stopPropagation();
+
                     console.log('点击组件: ', cp.id);
 
                     setCurComponentID(cp.id);
