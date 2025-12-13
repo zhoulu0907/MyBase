@@ -45,6 +45,9 @@ export default function VersionModal({
   };
   const columns = getVersionColumns(handleView, handleEditRemark, handleDelete);
   const getVersionMgmtData = async (deleteId?: string) => {
+    if (!businessUuid) {
+      return;
+    }
     const params = {
       businessUuid,
       sortType,

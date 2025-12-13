@@ -42,14 +42,16 @@ const XDeptSelect = memo((props: XInputDeptSelectConfig & { runtime?: boolean; d
   const fieldValue = Form.useWatch(fieldName, form);
 
   useEffect(() => {
-    fetchDeptList();
+    if(status !== STATUS_VALUES[STATUS_OPTIONS.READONLY] && !detailMode) {
+      fetchDeptList();
+    }
   }, []);
 
   useEffect(() => {
     if (runtime && fieldValue) {
       setCurrentSelectDept(fieldValue?.name);
       runtimeEditRef.current = true;
-    } else {
+    } else if (status !== STATUS_VALUES[STATUS_OPTIONS.READONLY] && !detailMode){
       setCurrentSelectDept('');
       form.setFieldValue(fieldName, undefined);
     }
@@ -57,15 +59,13 @@ const XDeptSelect = memo((props: XInputDeptSelectConfig & { runtime?: boolean; d
 
   useEffect(() => {
     getCurDeptTree(deptTree);
-    if (defaultDeptValue) {
-      handleChange(defaultDeptValue);
-    } else {
-      form.setFieldValue(fieldName, undefined);
+    if (status !== STATUS_VALUES[STATUS_OPTIONS.READONLY] && !detailMode) {
+      defaultDeptValue ? handleChange(defaultDeptValue) : form.setFieldValue(fieldName, undefined);
     }
   }, [selectScope]);
 
   useEffect(() => {
-    if (runtime && defaultDeptValue && !fieldValue && !runtimeEditRef.current) {
+    if(runtime && defaultDeptValue && !fieldValue && !runtimeEditRef.current && status !== STATUS_VALUES[STATUS_OPTIONS.READONLY] && !detailMode) {
       if (!deptFlatTree || deptFlatTree.length === 0) return; // 等待数据
       handleChange(defaultDeptValue);
     }
@@ -109,7 +109,6 @@ const XDeptSelect = memo((props: XInputDeptSelectConfig & { runtime?: boolean; d
     const treeData = listToTree(res, {}, true);
     setDeptTree(treeData);
     getCurDeptTree(treeData);
-    console.log('deptFlatTree', deptFlatTree);
   };
 
   const filterTreeNode = (inputText: string, node: any) => {
@@ -195,7 +194,7 @@ const XDeptSelect = memo((props: XInputDeptSelectConfig & { runtime?: boolean; d
               }
             }}
           >
-            <span>{currentSelectDept || '--'}</span>
+            <span>{fieldValue?.name ?? '--'}</span>
           </Tooltip>
         ) : (
           <TreeSelect

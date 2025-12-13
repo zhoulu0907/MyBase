@@ -49,7 +49,7 @@ const XDateTimePicker = memo((props: XDateTimePickerConfig & { runtime?: boolean
       label={label.display && label.text}
       field={fieldId}
       rules={rules}
-      initialValue={form.getFieldValue(fieldId)}
+      initialValue={form?.getFieldValue(fieldId)}
       style={{
         textAlign: 'right',
         pointerEvents: (!runtime || detailMode) ? 'none' : 'unset',

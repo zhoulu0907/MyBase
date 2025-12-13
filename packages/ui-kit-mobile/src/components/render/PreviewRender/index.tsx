@@ -35,6 +35,8 @@ interface PreviewRenderProps {
 
   form?: any;
 
+  lastOne?: boolean;
+
   editLoading?: boolean;
 }
 
@@ -53,6 +55,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
   showFromPageData,
   refresh,
   editLoading,
+  lastOne,
   form
 }) => {
 
@@ -303,7 +306,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
         return null
       //  列表组件
       case LIST_COMPONENT_TYPES.TABLE:
-        return <ListComp.XLoadMore cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} showFromPageData={showFromPageData} />;
+        return <ListComp.XLoadMore cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} manuClick={!lastOne} showFromPageData={showFromPageData} />;
       // return (
       //   <ListComp.XTable
       //     cpName={cpId}

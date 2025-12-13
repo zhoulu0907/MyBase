@@ -1,6 +1,6 @@
-import { Button, Input, Message, Select } from '@arco-design/web-react';
+import { Button, Input, Select } from '@arco-design/web-react';
 import { IconCopy, IconPlus } from '@arco-design/web-react/icon';
-import { getRuntimeURL, TokenManager } from '@onebase/common';
+import { copyToClipboard, getRuntimeURL, TokenManager } from '@onebase/common';
 import { statusOptions } from '../../constants';
 import styles from './index.module.less';
 
@@ -32,40 +32,6 @@ export const TopHeader: React.FC<topHeaderProps> = ({
   const handleChange = (statusValue: number) => {
     onchange && onchange(statusValue === 2 ? null : statusValue);
   };
-  const fallbackCopyToClipboard = (text: string) => {
-    const textArea = document.createElement('textarea');
-    textArea.value = text;
-    textArea.style.position = 'fixed';
-    textArea.style.opacity = '0';
-    textArea.style.top = '0';
-    textArea.style.left = '0';
-    document.body.appendChild(textArea);
-    textArea.select();
-    try {
-      document.execCommand('copy');
-      Message.success('复制成功!');
-    } catch (err) {
-      console.error('execCommand 失败:', err);
-      Message.error('复制失败');
-    }
-    document.body.removeChild(textArea);
-  };
-
-  const copyToClipboard = async (text: string) => {
-    try {
-      // 首先尝试使用现代 Clipboard API
-      if (navigator.clipboard && window.isSecureContext) {
-        await navigator.clipboard.writeText(text);
-        Message.success('复制成功!');
-      } else {
-        // 降级到传统方法
-        fallbackCopyToClipboard(text);
-      }
-    } catch (error) {
-      console.error('复制失败:', error);
-      Message.error('复制失败');
-    }
-  };
 
   return (
     <div className={styles.topHeader}>
@@ -80,7 +46,7 @@ export const TopHeader: React.FC<topHeaderProps> = ({
           <div className={styles.linkContent}>
             <span>企业用户登录地址:</span>
             <div className={styles.linkText} onClick={() => navigateToRunTime(href)}>
-              www.onebase.com/enterprise
+              {href}
             </div>
             <IconCopy onClick={() => copyToClipboard(href)} style={{ fontSize: 16 }} />
           </div>

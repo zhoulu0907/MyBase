@@ -165,7 +165,7 @@ const PageManagerPage: FC = () => {
           menuCode={menu.menuCode}
           menuName={menu.menuName}
           menuIcon={menu.menuIcon}
-          pageSetType={menu.pageSetType}
+          pagesetType={menu.pagesetType}
           isGroup={menu.menuType == MenuType.GROUP}
           maxWidth={maxWidth}
           label={menu.menuName}
@@ -194,7 +194,7 @@ const PageManagerPage: FC = () => {
     }));
   };
 
-  const getMenuList = async (keywords?: string) => {
+  const getMenuList = async (keywords?: string, menuId?: string) => {
     const req: ListApplicationMenuReq = {
       applicationId: curAppId,
       name: keywords
@@ -206,8 +206,11 @@ const PageManagerPage: FC = () => {
 
     const treeData = convertMenuToTreeData(res, initTreeItemWidth, true, menuStyles);
     setTreeData(treeData);
-
-    if (res && res.length > 0) {
+    if (menuId) {
+      const findCreateMenu = res.find((item: any) => item.id === menuId);
+      setCurMenu(findCreateMenu);
+      setSearchResult(false);
+    } else if (res && res.length > 0) {
       setCurMenu(findFirstPage(res));
       setSearchResult(false);
     }
@@ -371,7 +374,7 @@ const PageManagerPage: FC = () => {
         Message.success('创建成功');
       }
       setVisibleCreateForm('');
-      getMenuList();
+      getMenuList(undefined, menuResp.id);
 
       const pageSetId = await getPageSetId({
         menuId: menuResp.id
@@ -693,7 +696,11 @@ const PageManagerPage: FC = () => {
                       </div>
 
                       <div className={styles.contentBody}>
-                        <PreviewContainer menuId={curMenu.value?.id} runtime={true} />
+                        <PreviewContainer
+                          menuId={curMenu.value?.id}
+                          runtime={true}
+                          pagesetType={curMenu.value?.pagesetType}
+                        />
                       </div>
                     </>
                   )}

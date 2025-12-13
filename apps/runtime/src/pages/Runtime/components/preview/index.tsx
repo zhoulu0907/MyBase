@@ -19,7 +19,7 @@ import {
 } from '@onebase/app';
 import { fetchSubmitInstance } from '@onebase/app/src/services/app_runtime';
 import { pagesRuntimeSignal } from '@onebase/common';
-import { EDITOR_TYPES, FORM_COMPONENT_TYPES, ENTITY_FIELD_TYPE, useEditorSignalMap } from '@onebase/ui-kit';
+import { EDITOR_TYPES, ENTITY_FIELD_TYPE, FORM_COMPONENT_TYPES, useEditorSignalMap } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useState } from 'react';
 import DetailRuntime from './DetailRuntime';
@@ -76,18 +76,17 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
   // 获取主表字段和子表字段
   const getMainMetaData = async (pageSetId: string) => {
     const mainMetaDataId = await getPageSetMetaData({ pageSetId: pageSetId });
+    console.log('pageSetId: ', pageSetId);
     console.log('mainMetaDataId: ', mainMetaDataId);
     setMainMetaData(mainMetaData);
 
-    if (mainMetaDataId && mainMetaDataId !== 'null') {
-      const entityWithChildren = await getEntityFieldsWithChildren(mainMetaDataId);
-      console.log('当前主表及所有子表数据: ', entityWithChildren);
+    const entityWithChildren = await getEntityFieldsWithChildren(mainMetaDataId);
+    console.log('当前主表及所有子表数据: ', entityWithChildren);
 
-      setTableName(entityWithChildren.tableName);
+    setTableName(entityWithChildren.tableName);
 
-      setMainMetaDataFields(entityWithChildren.parentFields);
-      setSubEntities(entityWithChildren.childEntities);
-    }
+    setMainMetaDataFields(entityWithChildren.parentFields);
+    setSubEntities(entityWithChildren.childEntities);
   };
 
   useEffect(() => {
@@ -105,7 +104,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
   }, [tableName, mainMetaDataFields.value]);
 
   useEffect(() => {
-    if (pageSetId) {
+    // 工作台页面不获取主表数据
+    if (pageSetId && pageSetType !== PageType.WORKBENCH) {
       getMainMetaData(pageSetId);
     }
     setPageType(EDITOR_TYPES.LIST_EDITOR);

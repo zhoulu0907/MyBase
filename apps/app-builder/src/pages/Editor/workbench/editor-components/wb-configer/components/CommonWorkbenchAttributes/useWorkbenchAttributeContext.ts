@@ -1,9 +1,4 @@
-import {
-  EDITOR_TYPES,
-  getWorkbenchComponentSchema,
-  hasWorkbenchComponentSchema,
-  usePageEditorSignal
-} from '@onebase/ui-kit';
+import { getWorkbenchComponentSchema, hasWorkbenchComponentSchema, useWorkbenchSignal } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import { useEffect, useMemo, useState } from 'react';
 import { renderConfigItem } from '../../registry';
@@ -34,9 +29,7 @@ export interface WorkbenchAttributeContext {
 export function useWorkbenchAttributeContext(): WorkbenchAttributeContext {
   useSignals();
 
-  const { curComponentSchema, setCurComponentSchema, setPageComponentSchemas } = usePageEditorSignal(
-    EDITOR_TYPES.WORKBENCH_EDITOR
-  );
+  const { curComponentSchema, setCurComponentSchema, setWbComponentSchemas } = useWorkbenchSignal();
 
   const schema = (curComponentSchema || {}) as WorkbenchComponentSchema;
   const cpID = schema.id;
@@ -55,7 +48,7 @@ export function useWorkbenchAttributeContext(): WorkbenchAttributeContext {
       setEditData([]);
       return;
     }
-    const defaultSchema = getWorkbenchComponentSchema(componentType) as WorkbenchComponentSchema;
+    const defaultSchema = getWorkbenchComponentSchema(componentType) as unknown as WorkbenchComponentSchema;
     setEditData(defaultSchema.editData || []);
     setConfigs((curComponentSchema as WorkbenchComponentSchema)?.config || defaultSchema.config || {});
   }, [componentType, curComponentSchema]);
@@ -69,7 +62,7 @@ export function useWorkbenchAttributeContext(): WorkbenchAttributeContext {
       config: nextConfig
     };
     setCurComponentSchema(nextSchema);
-    setPageComponentSchemas(cpID, nextSchema);
+    setWbComponentSchemas(cpID, nextSchema);
     setConfigs(nextConfig);
   };
 

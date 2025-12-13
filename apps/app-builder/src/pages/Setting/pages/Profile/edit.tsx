@@ -74,7 +74,7 @@ const ProfileEditPage: React.FC<IEditPageProps> = ({ avatarUrl, setAvatarUrl }) 
       };
       await updateLoginedUserPwd(req);
       passwordForm.resetFields();
-      nav(`/onebase/${tenantId}/setting/tenant`);
+      nav(`/onebase/${tenantId}/setting/profile`);
       Message.success('保存成功');
     } catch (error) {
       console.error('保存密码失败', error);

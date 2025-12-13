@@ -10,7 +10,7 @@ export interface ApplicationMenu {
   menuSort: number;
   menuType: number;
   menuName: string;
-  pageSetType: number;
+  pagesetType: number;
   menuIcon: string;
   isVisible: number;
   children: ApplicationMenu[];

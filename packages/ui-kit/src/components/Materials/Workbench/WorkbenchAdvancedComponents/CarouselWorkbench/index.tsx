@@ -22,9 +22,9 @@ const XCarousel = memo((props: XCarouselConfig & { runtime?: boolean }) => {
 
       <Carousel
         className={styles.carousel}
-        autoPlay={{ 
+        autoPlay={runtime ? { 
           interval: interval * 1000
-        }}
+        } : false}
         style={{
           pointerEvents: runtime ? 'unset' : 'none'
         }}

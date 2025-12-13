@@ -1,7 +1,18 @@
 import { Button, Form, Input, Toast } from '@arco-design/mobile-react';
 import { useForm } from '@arco-design/mobile-react/esm/form';
-import { getHashQueryParam, TokenManager, type SliderCaptchaRef, getOrCreateDeviceInfo } from '@onebase/common';
-import { SliderCaptcha } from './Captcha';
+import { IconEyeInvisible, IconEyeVisible } from '@arco-design/mobile-react/esm/icon';
+import { ValidatorType } from '@arco-design/mobile-utils';
+import { getApplication, type Application } from '@onebase/app';
+import {
+  DynamicIcon,
+  getHashQueryParam,
+  getOrCreateDeviceInfo,
+  getPublicKey,
+  PUBLISH_MODULE,
+  sm2Encrypt,
+  TokenManager,
+  type SliderCaptchaRef
+} from '@onebase/common';
 import {
   checkCaptchaApi,
   getCaptchaApi,
@@ -15,24 +26,14 @@ import {
   type RuntimeCorpLoginRequest,
   type RuntimeMobileLoginRequest
 } from '@onebase/platform-center';
-import { getApplication } from '@onebase/app';
+import { appIconMap } from '@onebase/ui-kit';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { DynamicIcon, PUBLISH_MODULE } from '@onebase/common';
-import { useI18n } from '../../../hooks/useI18n';
-import { useRememberMe } from '../../../hooks/useRememberMe';
+import logoIcon from '@/assets/images/logo-icon.svg';
+import { useI18n } from '@/hooks/useI18n';
+import { useRememberMe } from '@/hooks/useRememberMe';
+import { SliderCaptcha } from './Captcha';
 import styles from '../index.module.less';
-import { ValidatorType } from '@arco-design/mobile-utils';
-import logoIcon from '../../../assets/images/logo-icon.svg';
-import { IconEyeInvisible, IconEyeVisible } from '@arco-design/mobile-react/esm/icon';
-import { appIconMap } from '@onebase/ui-kit';
-
-interface APP_INFO {
-  appName: string;
-  iconName: string;
-  iconColor: string;
-  publishModel: string;
-}
 
 const Right: React.FC = () => {
   const navigate = useNavigate();
@@ -40,18 +41,9 @@ const Right: React.FC = () => {
   const { t } = useI18n();
   const sliderCaptchaRef = useRef<SliderCaptchaRef>(null);
 
-  const [appInfo, setAppInfo] = useState<APP_INFO>({
-    appName: '',
-    iconName: '',
-    iconColor: '',
-    publishModel: ''
-  });
-
-  // 从路由中获取 appid 参数 TODO待优化
-  const hash = window.location.hash;
-  const match = hash.match(/\/runtime-home\/([^\/]+)\/([^/?]+)/);
-  const appId = match ? match[1] : '';
-  const tenantId = match ? match[2] : '1';
+  const [appId, setAppId] = useState('');
+  const [tenantId, setTenantId] = useState('');
+  const [appInfo, setAppInfo] = useState<Application>();
 
   // 使用记住我hook
   const { rememberMe, savedAccount, saveRememberMe } = useRememberMe();
@@ -60,6 +52,25 @@ const Right: React.FC = () => {
   // 状态管理
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    // 从 window.location.hash 中解析 redirectURL，再从 redirectURL 解析 appId 和 tenantId
+    const rawHash = window.location.hash;
+    const prefix = '#/login?redirectURL=';
+    console.log('rawHash.startsWith(prefix)', rawHash.startsWith(prefix));
+    if (rawHash.startsWith(prefix)) {
+      const redirectURL = rawHash.replace(prefix, '');
+      const aid = getHashQueryParam('appId', redirectURL) || '';
+      const tid = getHashQueryParam('tenantId', redirectURL) || '';
+      setAppId(aid);
+      setTenantId(tid);
+    } else {
+      const aid = getHashQueryParam('appId') || '';
+      const tid = getHashQueryParam('tenantId') || '';
+      setAppId(aid);
+      setTenantId(tid);
+    }
+  }, []);
+
   // 组件初始化时设置保存的账号
   useEffect(() => {
     if (savedAccount) {
@@ -67,68 +78,39 @@ const Right: React.FC = () => {
     }
 
     // 如果已经登录了就自动跳转到首
-    if (TokenManager.isTokenValid()) {
-      const redirectURL = getHashQueryParam('redirectURL');
-      if (redirectURL) {
-        window.location.href = redirectURL;
-      } else {
-        // 跳转到首页
-        navigate(`/onebase/runtime-home/${appId}/${tenantId}`);
-      }
-      return;
-    }
+    // if (TokenManager.isTokenValid()) {
+    //   const redirectURL = getHashQueryParam('redirectURL');
+    //   if (redirectURL) {
+    //     window.location.href = redirectURL;
+    //   } else {
+    //     // 跳转到首页
+    //     navigate(`/onebase/runtime-home/${appId}/${tenantId}`);
+    //   }
+    //   return;
+    // }
 
-    handleGetApplication();
+    // handleGetApplication();
   }, []);
 
+  useEffect(() => {
+    if (appId) {
+      handleGetApplication();
+    }
+  }, [appId]);
+
   const handleGetApplication = async () => {
-    const redirectURL = getHashQueryParam('redirectURL');
-    if (redirectURL) {
-      // let startIndex = redirectURL.indexOf('/runtime/');
-      // const runtimeLength = startIndex === -1 ? '/runtime-home/'.length : '/runtime/'.length;
-      // if (startIndex === -1) {
-      //   startIndex = redirectURL.indexOf('/runtime-home/');
-      // }
-      // const endRedirectURL = redirectURL.slice(startIndex + runtimeLength);
-      // const endIndex = endRedirectURL?.indexOf('?');
-      // let applicationId = redirectURL.slice(startIndex + runtimeLength, startIndex + runtimeLength + endIndex);
-      // applicationId = applicationId.split('/')[0];
-      // if (applicationId) {
-      //   const res = await getApplication({ id: applicationId });
-      //   if (res) {
-      //     setAppInfo({ appName: res.appName || '', iconName: res.iconName || '', iconColor: res.iconColor || '' });
-      //   }
-      // }
-
-      const regex = /\/runtime-home\/([^\/]+)\/([^/?]+)/;
-      const match = redirectURL.match(regex);
-      let applicationId = '';
-
-      if (match) {
-        applicationId = match[1];
-        if (applicationId) {
-          const res = await getApplication({ id: applicationId });
-          if (res) {
-            setAppInfo({
-              appName: res.appName || '',
-              iconName: res.iconName || '',
-              iconColor: res.iconColor || '',
-              publishModel: res.publishModel || ''
-            });
-          }
-        }
+    if (appId) {
+      const res = await getApplication({ id: appId });
+      if (res) {
+        setAppInfo(res);
       }
     }
-  };
-
-  // 处理记住我状态变化
-  const handleRememberMeChange = (checked: boolean) => {
-    const account = form.getFieldValue('account') || '';
-    saveRememberMe(account, checked);
   };
 
   // 账号密码登录
-  const handleRuntimeLogin = async (values: RuntimeAccountLoginRequest | RuntimeMobileLoginRequest | LoginRequest | RuntimeCorpLoginRequest) => {
+  const handleRuntimeLogin = async (
+    values: RuntimeAccountLoginRequest | RuntimeMobileLoginRequest | LoginRequest | RuntimeCorpLoginRequest
+  ) => {
     setLoading(true);
 
     try {
@@ -148,7 +130,9 @@ const Right: React.FC = () => {
 
       const deviceId = await getOrCreateDeviceInfo();
 
-      if (appInfo.publishModel === PUBLISH_MODULE.SASS) {
+      values.password = await sm2Encrypt(getPublicKey(), values.password);
+
+      if (appInfo?.publishModel === PUBLISH_MODULE.SASS) {
         const sassloginData: RuntimeMobileLoginRequest = {
           password: values.password!,
           mobile: (values as RuntimeMobileLoginRequest).mobile!,
@@ -158,7 +142,7 @@ const Right: React.FC = () => {
         };
 
         response = await sassLogin(sassloginData, headers);
-      } else if (appInfo.publishModel === PUBLISH_MODULE.INNER) {
+      } else if (appInfo?.publishModel === PUBLISH_MODULE.INNER) {
         const innerloginData: RuntimeAccountLoginRequest = {
           password: values.password!,
           username: (values as RuntimeAccountLoginRequest).username!,
@@ -207,7 +191,6 @@ const Right: React.FC = () => {
             refreshToken: response.refreshToken,
             expiresTime: response.expiresTime,
             tenantId: response.tenantId,
-            adminFlag: response.adminFlag,
             corpId: response.corpId,
             loginURL: window.location.href // 当前地址
           },
@@ -215,9 +198,9 @@ const Right: React.FC = () => {
         );
 
         // 保存记住我状态和账号信息
-        if (appInfo.publishModel === PUBLISH_MODULE.INNER) {
+        if (appInfo?.publishModel === PUBLISH_MODULE.INNER) {
           saveRememberMe((values as RuntimeAccountLoginRequest).username!, rememberMe);
-        } else if (appInfo.publishModel === PUBLISH_MODULE.SASS) {
+        } else if (appInfo?.publishModel === PUBLISH_MODULE.SASS) {
           saveRememberMe((values as RuntimeMobileLoginRequest).mobile!, rememberMe);
         } else if (!appId) {
           saveRememberMe((values as RuntimeCorpLoginRequest).mobile!, rememberMe);
@@ -228,10 +211,16 @@ const Right: React.FC = () => {
         Toast.success(t('auth.loginSuccess'));
         const redirectURL = getHashQueryParam('redirectURL');
         if (redirectURL) {
-          window.location.href = redirectURL;
+          if (!appId) {
+            //企业登录
+            navigate(`/onebase/${tenantId}/runtime-home`);
+          } else {
+            //saas模式 或者inner模式
+            navigate(`/onebase/${appId}/${tenantId}/runtime-home`);
+          }
         } else {
           // 跳转到首页
-          navigate(`/onebase/runtime-home/${appId}/${tenantId}`);
+          navigate(`/onebase/${appId}/${tenantId}/runtime-home/`);
         }
 
         return;
@@ -247,7 +236,9 @@ const Right: React.FC = () => {
   };
 
   // 表单提交处理
-  const handleSubmit = (_values: RuntimeAccountLoginRequest | RuntimeMobileLoginRequest | LoginRequest | RuntimeCorpLoginRequest) => {
+  const handleSubmit = (
+    _values: RuntimeAccountLoginRequest | RuntimeMobileLoginRequest | LoginRequest | RuntimeCorpLoginRequest
+  ) => {
     handleRuntimeLogin(_values);
   };
 
@@ -258,14 +249,14 @@ const Right: React.FC = () => {
 
     const deviceId = await getOrCreateDeviceInfo();
 
-    if (appInfo.publishModel === PUBLISH_MODULE.SASS) {
+    if (appInfo?.publishModel === PUBLISH_MODULE.SASS) {
       handleSubmit({
         mobile: values.mobile,
         password: values.password,
         captchaVerification: token,
         deviceId: deviceId
       } as RuntimeMobileLoginRequest);
-    } else if (appInfo.publishModel === PUBLISH_MODULE.INNER) {
+    } else if (appInfo?.publishModel === PUBLISH_MODULE.INNER) {
       handleSubmit({
         username: values.username,
         password: values.password,
@@ -351,7 +342,7 @@ const Right: React.FC = () => {
   };
 
   const getAppIcon = () => {
-    if (!appInfo.iconName) {
+    if (!appInfo?.iconName) {
       return <img src={logoIcon} alt="logo" className={styles.loginLogo} />;
     }
     return (
@@ -362,7 +353,9 @@ const Right: React.FC = () => {
         fill="#fff"
         style={{
           padding: '0.2rem',
-          marginRight: '0.08rem',
+          borderRadius: '0.28rem',
+          marginBottom: '0.48rem',
+          verticalAlign: 'middle',
           backgroundColor: appInfo.iconColor || 'rgb(var(--primary-6))'
         }}
       />
@@ -379,27 +372,16 @@ const Right: React.FC = () => {
     <div className={styles.loginPageRight}>
       <div className={styles.titleContainer}>
         {getAppIcon()}
-        <h1 className={styles.title}>欢迎登录{appInfo.appName ? ` ${appInfo.appName} 应用` : 'Onebase'}</h1>
+        <h1 className={styles.title}>欢迎登录{appInfo?.appName ? ` ${appInfo.appName} 应用` : 'Onebase'}</h1>
       </div>
       <div className={styles.loginFormContainer}>
-        <Form
-          form={form}
-          layout="vertical"
-          onSubmit={handleLoginClick}
-          className={styles.loginForm}
-        >
-
-          {((appInfo.publishModel === PUBLISH_MODULE.SASS || !appId) && (
-            <Form.Item label="手机号" field="mobile" rules={rules.username}>
+        <Form form={form} layout="vertical" onSubmit={handleLoginClick} className={styles.loginForm}>
+          {((appInfo?.publishModel === PUBLISH_MODULE.SASS || !appId) && (
+            <Form.Item label="手机号" field="mobile" rules={rules.mobile}>
               <Input placeholder={t('auth.mobile')} maxLength={11} />
             </Form.Item>
           )) || (
-            <Form.Item
-              field="username"
-              label="用户名"
-              initialValue=""
-              rules={rules.username}
-            >
+            <Form.Item field="username" label="用户名" initialValue="" rules={rules.username}>
               <Input placeholder={t('auth.userAccount')} clearable={false} />
             </Form.Item>
           )}
@@ -416,7 +398,7 @@ const Right: React.FC = () => {
               placeholder={t('auth.password')}
               clearable
               suffix={
-                <div className={styles.togglePassword} onClick={() => setShowPassword(prev => !prev)}>
+                <div className={styles.togglePassword} onClick={() => setShowPassword((prev) => !prev)}>
                   <EyeIcon />
                 </div>
               }
@@ -444,8 +426,7 @@ const Right: React.FC = () => {
       <div className={styles.loginFooter}>
         <div className={styles.footerText}>
           登录即表示同意
-          <span onClick={() => navigate('/onebase/runtime-home/protocol')}>《用户协议》</span>
-          和
+          <span onClick={() => navigate('/onebase/runtime-home/protocol')}>《用户协议》</span>和
           <span onClick={() => navigate('/onebase/runtime-home/privacy')}>《隐私政策》</span>
         </div>
       </div>

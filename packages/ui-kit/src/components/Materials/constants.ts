@@ -116,6 +116,8 @@ export const CONFIG_TYPES = {
   DIVIDER_TOOLTIP_INPUT: 'DividerTooltipInput',
   // 分割线样式
   DIVIDER_STYLE_TYPE: 'DividerStyleType',
+  //选择人员默认值
+  USER_DEFAULT_VALUE: 'userDefaultValue',
 } as const;
 
 // 状态选项常量
