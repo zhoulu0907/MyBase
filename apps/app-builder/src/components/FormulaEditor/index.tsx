@@ -2,15 +2,17 @@ import { getPrecedingNodes } from '@/pages/CreateApp/pages/IntegratedManagement/
 import { useAppStore } from '@/store';
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { triggerNodeOutputSignal } from '@/store/singals/trigger_node_output';
-import { Grid, Message, Modal } from '@arco-design/web-react';
+import { Grid, Message, Modal, Spin } from '@arco-design/web-react';
 import { IconLeft } from '@arco-design/web-react/icon';
 import {
+  debugFormula,
   getEntityFields,
   getEntityListByApp,
   getFormulaById,
   getFormulaFunctionSimpleList,
   type ChildVariablesField,
   type fieldListWithNodeData,
+  type formulaParams,
   type variableItem,
   type VariablesList
 } from '@onebase/app';
@@ -42,6 +44,8 @@ export function FormulaEditor({ fieldName, visible, onCancel, onConfirm, initial
   const [info, setInfo] = useState<info | null>(null);
   const [variables, setVariables] = useState<VariablesList[]>([]); //公式编辑器中的左侧变量列表展示
   const [isDebugMode, setIsDebugMode] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>('');
   const { curAppId } = useAppStore();
 
   useEffect(() => {
@@ -281,7 +285,15 @@ export function FormulaEditor({ fieldName, visible, onCancel, onConfirm, initial
       }
       return content;
     });
-    return newFormula.replace(/,(?=\s*\))/g, '').replace(/,+/g, ',');
+
+    //最后一个replace处理的场景是if(数量, >90) 去除逗号
+    return newFormula
+      .replace(/,(?=\s*\))/g, '')
+      .replace(/,+/g, ',')
+      .replace(
+        /([\u4e00-\u9fa5]+),([>=|<=|>|<<|==|!=]+)/g,
+        (_, chinesePart, logicSymbol) => `${chinesePart}${logicSymbol}`
+      );
   };
 
   /**
@@ -400,8 +412,24 @@ export function FormulaEditor({ fieldName, visible, onCancel, onConfirm, initial
   };
 
   /**点击调试 */
-  const handleClickDebug = () => {
-    setIsDebugMode(true);
+  const handleClickDebug = async () => {
+    setLoading(true);
+    const newFormula = formattedFormula();
+    const selectedVariables = getParameters(formula);
+    const newFormulaData: formulaParams = {
+      formula: newFormula,
+      parameters: selectedVariables
+    };
+    try {
+      await debugFormula(newFormulaData);
+      setIsDebugMode(true);
+    } catch (error: any) {
+      if (error.message) {
+        setError(error.message);
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   /**点击取消按钮 */
@@ -437,17 +465,20 @@ export function FormulaEditor({ fieldName, visible, onCancel, onConfirm, initial
       {/* 内容区域 */}
       <div className={styles.contentWrapper}>
         {/* 公式编辑区 */}
-        <FormulaInput
-          fieldName={fieldName}
-          value={formula}
-          isDebugMode={isDebugMode}
-          onChange={setFormula}
-          onCopy={handleCopy}
-          onDebug={handleClickDebug}
-          filteredVariables={filteredVariables}
-          filteredFunctions={filteredFunctions}
-          onEditorReady={handleEditorReady}
-        />
+        <Spin loading={loading} style={{ marginTop: '8px', display: 'block' }}>
+          <FormulaInput
+            fieldName={fieldName}
+            value={formula}
+            error={error}
+            isDebugMode={isDebugMode}
+            onChange={setFormula}
+            onCopy={handleCopy}
+            onDebug={handleClickDebug}
+            filteredVariables={filteredVariables}
+            filteredFunctions={filteredFunctions}
+            onEditorReady={handleEditorReady}
+          />
+        </Spin>
         {/* 底部面板（变量名称/函数公式/函数概要） */}
         {isDebugMode ? (
           <DebuggedFormula entityFields={entityFields} tableData={tableData} formula={formattedFormula()} />

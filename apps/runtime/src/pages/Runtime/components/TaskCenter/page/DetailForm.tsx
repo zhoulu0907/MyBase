@@ -10,10 +10,11 @@ import {
   STATUS_OPTIONS,
   STATUS_VALUES,
   useEditorSignalMap,
+  useFormEditorSignal,
   type GridItem
 } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
-import { forwardRef, Fragment, useEffect, useImperativeHandle, useState } from 'react';
+import { forwardRef, Fragment, useEffect, useImperativeHandle, useState, useRef } from 'react';
 
 interface PreviewProps {
   pageSetId: string;
@@ -67,14 +68,14 @@ const PreviewContainer = forwardRef<any, PreviewProps>((props: PreviewProps, ref
   const { pageSetId, detailData } = props;
   const [form] = Form.useForm();
   const { editPageViewId, mainMetaDataFields, setMainMetaDataFields, subEntities, setSubEntities } = pagesRuntimeSignal;
-
+  const { loadPageComponentSchemas: loadFormPageComponentSchemas } = useFormEditorSignal;
   const [pageType, setPageType] = useState('');
   const [mainMetaData, setMainMetaData] = useState<string>('');
   const [newCompents, setNewCompents] = useState<any>();
-
+  const executionCount = useRef(0);
   const pageComponentSchemas = useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value;
   const fieldPerm = detailData?.formData?.fieldPermMap;
-
+  const prevFieldPermRef = useRef();
   useImperativeHandle(ref, () => ({
     getFormData: () => {
       const res = getFormValues();
@@ -116,8 +117,29 @@ const PreviewContainer = forwardRef<any, PreviewProps>((props: PreviewProps, ref
           }
         };
       });
-      console.log(updatedData)
       setNewCompents(updatedData);
+    }
+  };
+
+  const updatePageComponentSchemas = async () => {
+    if (pageComponentSchemas && fieldPerm) {
+      Object.entries(pageComponentSchemas).map(([key, value]) => {
+        const [bpmKey, tKey] = value?.config?.dataField || [];
+        const newStatus = fieldPerm?.[bpmKey]?.[tKey];
+        if (value && value.config) {
+          const newConfig = {
+            ...value,
+            config: {
+              ...value.config,
+              status: newStatus
+            }
+          };
+          useEditorSignalMap.get(editPageViewId.value)!.setPageComponentSchemas(key, newConfig);
+          loadFormPageComponentSchemas(useEditorSignalMap.get(editPageViewId.value)!.pageComponentSchemas.value);
+          prevFieldPermRef.current = useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value;
+
+        }
+      });
     }
   };
 
@@ -236,6 +258,12 @@ const PreviewContainer = forwardRef<any, PreviewProps>((props: PreviewProps, ref
     parseData();
     getMainMetaData(pageSetId);
   }, [pageSetId]);
+
+  useEffect(() => {
+    if (fieldPerm && pageComponentSchemas && pageComponentSchemas !== prevFieldPermRef.current) {
+      updatePageComponentSchemas();
+    }
+  }, [pageComponentSchemas, fieldPerm]);
 
   useEffect(() => {
     setNewCompents(null);

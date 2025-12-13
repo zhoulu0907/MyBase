@@ -14,14 +14,14 @@ function AppContent() {
     <Routes>
       {/* 登录页面不需要认证 */}
       <Route path="/login" element={<Login />} />
-      <Route path="/:appId/:tenantId/login" element={<Login />} />
+      <Route path="/onebase/runtime/" element={<Runtime />} />
 
-      <Route path="/onebase/runtime-home/:appId/:tenantId" element={<RuntimeHome />} />
+      <Route path="/onebase/:appId/:tenantId/runtime-home/" element={<RuntimeHome />} />
       <Route path="/onebase/runtime-home/protocol" element={<RuntimeHomeProtocol />} />
       <Route path="/onebase/runtime-home/privacy" element={<RuntimeHomePrivacy />} />
       <Route path="/onebase/runtime-home/about" element={<RuntimeHomeAbout />} />
 
-      <Route path="/onebase/runtime/:appId/:tenantId" element={<Runtime />} />
+      <Route path="/onebase/:appId/:tenantId/runtime" element={<Runtime />} />
 
       {/* 默认重定向到登录页 */}
       <Route path="/" element={<Navigate to="/login" replace />} />

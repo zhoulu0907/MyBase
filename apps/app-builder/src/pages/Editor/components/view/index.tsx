@@ -86,7 +86,8 @@ const View: React.FC<ViewProps> = ({ pageSetId }) => {
       id: newId,
       isDefaultEditViewMode: 0,
       isDefaultDetailViewMode: 0,
-      pageName: view.pageName + '-副本'
+      pageName: view.pageName + '-副本',
+      pageUuid: newId
     };
 
     const oldComponents = useEditorSignalMap.get(id)?.components.value;
@@ -243,7 +244,8 @@ const View: React.FC<ViewProps> = ({ pageSetId }) => {
               : 0,
           isDefaultEditViewMode: 0,
           isDefaultDetailViewMode: 0,
-          created: true
+          created: true,
+          pageUuid: pageId
         });
 
         useEditorSignalMap.set(pageId, createPageEditorSignal());

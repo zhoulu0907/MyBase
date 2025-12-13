@@ -111,7 +111,7 @@ export const defaultBtnConfigArr:any[] = [
     defaultApprovalComment: '同意',
     approvalCommentRequired: false,
     batchApproval: false,
-    enabled: false
+    enabled: true
   },
   {
     key: '2',
@@ -120,9 +120,9 @@ export const defaultBtnConfigArr:any[] = [
     displayName: '拒绝',
     name: '拒绝',
     defaultApprovalComment: '拒绝',
-    approvalCommentRequired: false,
+    approvalCommentRequired: true,
     batchApproval: false,
-    enabled: false
+    enabled: true
   },
   {
     key: '3',
@@ -163,7 +163,7 @@ export const defaultBtnConfigArr:any[] = [
     displayName: '退回',
     name: '退回',
     defaultApprovalComment: '退回',
-    approvalCommentRequired: false,
+    approvalCommentRequired: true,
     batchApproval: false,
     enabled: false
   },
@@ -185,7 +185,7 @@ export const defaultBtnConfigArr:any[] = [
     displayName: '弃权',
     name: '弃权',
     defaultApprovalComment: '弃权',
-    approvalCommentRequired: false,
+    approvalCommentRequired: true,
     batchApproval: false,
     enabled: false
   }

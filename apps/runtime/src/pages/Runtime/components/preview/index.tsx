@@ -19,7 +19,7 @@ import {
 } from '@onebase/app';
 import { fetchSubmitInstance } from '@onebase/app/src/services/app_runtime';
 import { pagesRuntimeSignal } from '@onebase/common';
-import { EDITOR_TYPES, FORM_COMPONENT_TYPES, ENTITY_FIELD_TYPE, useEditorSignalMap } from '@onebase/ui-kit';
+import { EDITOR_TYPES, ENTITY_FIELD_TYPE, FORM_COMPONENT_TYPES, useEditorSignalMap } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useState } from 'react';
 import DetailRuntime from './DetailRuntime';
@@ -76,6 +76,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
   // 获取主表字段和子表字段
   const getMainMetaData = async (pageSetId: string) => {
     const mainMetaDataId = await getPageSetMetaData({ pageSetId: pageSetId });
+    console.log('pageSetId: ', pageSetId);
     console.log('mainMetaDataId: ', mainMetaDataId);
     setMainMetaData(mainMetaData);
 

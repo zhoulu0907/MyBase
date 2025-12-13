@@ -82,20 +82,14 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
       value: item.config?.id
     }));
 
-    console.log('cpOptions: ', cpOptions);
     setCpOptions(cpOptions);
   };
 
   useEffect(() => {
-    console.log('components: ', components.value);
-    console.log('pageComponentSchemas: ', pageComponentSchemas.value);
     visible && getComponentOptions();
   }, [visible, pageComponentSchemas]);
 
   const [form] = Form.useForm();
-
-  const interactionCondition = Form.useWatch('interactionCondition', form);
-  const formAction = Form.useWatch('formAction', form);
 
   const [rules, setRules] = useState<Rule[]>(pageViews.value[curViewId.value]?.interactionRules || []);
 
@@ -106,15 +100,14 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
       const rule = rules.find((rule) => rule.id === curRule);
       if (rule) {
         form.setFieldsValue(rule);
+      } else {
+        // 如果规则不存在，清空表单
+        form.resetFields();
       }
     }
-  }, [curRule]);
+  }, [curRule, rules]);
 
   const handleOk = () => {
-    // console.log('rules: ', rules);
-
-    // console.log('pageViews: ', pageViews.value);
-    // console.log('curViewId: ', curViewId.value);
     let curPageView = pageViews.value[curViewId.value];
     if (curPageView && curPageView.id) {
       const newPageView = {
@@ -149,7 +142,19 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
   };
 
   const handleDeleteRule = (ruleId: string) => {
-    setRules((prevRules) => prevRules.filter((rule) => rule.id !== ruleId));
+    setRules((prevRules) => {
+      const newRules = prevRules.filter((rule) => rule.id !== ruleId);
+      // 如果删除的是当前选中的规则，需要更新 curRule
+      if (curRule === ruleId) {
+        // 如果还有规则，选中第一个；否则清空
+        if (newRules.length > 0) {
+          setCurRule(newRules[0].id);
+        } else {
+          setCurRule('');
+        }
+      }
+      return newRules;
+    });
   };
 
   const handleMoveRule = (ruleId: string, direction: 'up' | 'down') => {
@@ -267,7 +272,7 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
           </div>
         </div>
         <div className={styles.right}>
-          {curRule && (
+          {curRule && rules.find((rule) => rule.id === curRule) && (
             <Form
               layout="vertical"
               form={form}

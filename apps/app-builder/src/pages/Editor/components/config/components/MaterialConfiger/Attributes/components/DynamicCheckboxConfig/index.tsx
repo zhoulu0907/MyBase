@@ -1,28 +1,33 @@
-import {
-  Button,
-  Form,
-  Input,
-  Radio,
-  Checkbox,
-  Space,
-  Grid,
-  Switch,
-  Tag,
-  ColorPicker,
-  Tooltip,
-  Select
-} from '@arco-design/web-react';
-import { IconDelete, IconDragDotVertical } from '@arco-design/web-react/icon';
-import React, { useEffect, useState } from 'react';
-import { registerConfigRenderer } from '../../registry';
-import { CONFIG_TYPES } from '@onebase/ui-kit';
-import { ReactSortable } from 'react-sortablejs';
-import styles from '../../index.module.less';
-import { COLOR_MODE_TYPES, useAppEntityStore, DEFAULT_OPTIONS_TYPE, getPopupContainer } from '@onebase/ui-kit';
-import { useSignals } from '@preact/signals-react/runtime';
-import { getDictDetail, getDictDataListByType } from '@onebase/platform-center';
 import SelectDictModal from '@/components/SelectDictModal';
 import { useAppStore } from '@/store/store_app';
+import {
+  Button,
+  Checkbox,
+  ColorPicker,
+  Form,
+  Grid,
+  Input,
+  Radio,
+  Select,
+  Space,
+  Switch,
+  Tag,
+  Tooltip
+} from '@arco-design/web-react';
+import { IconDelete, IconDragDotVertical } from '@arco-design/web-react/icon';
+import { getDictDataListByType, getDictDetail } from '@onebase/platform-center';
+import {
+  COLOR_MODE_TYPES,
+  CONFIG_TYPES,
+  DEFAULT_OPTIONS_TYPE,
+  getPopupContainer,
+  useAppEntityStore
+} from '@onebase/ui-kit';
+import { useSignals } from '@preact/signals-react/runtime';
+import React, { useEffect, useState } from 'react';
+import { ReactSortable } from 'react-sortablejs';
+import styles from '../../index.module.less';
+import { registerConfigRenderer } from '../../registry';
 
 export interface DynamicCheckboxConfigProps {
   handlePropsChange: (key: string, value: any) => void;
@@ -210,7 +215,7 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
                 forceFallback={true}
                 animation={150}
                 onAdd={(e) => {
-                  console.log('onAdd: ', e);
+                  //   console.log('onAdd: ', e);
                 }}
                 onSort={(e) => {
                   console.log(e);
