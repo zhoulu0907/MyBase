@@ -2,6 +2,8 @@ package com.cmsr.onebase.plugin.runtime.config;
 
 import com.cmsr.onebase.plugin.runtime.context.PluginContextFactory;
 import com.cmsr.onebase.plugin.runtime.executor.EventDispatcher;
+import com.cmsr.onebase.plugin.runtime.http.PluginHttpDispatcher;
+import com.cmsr.onebase.plugin.runtime.http.PluginHttpHandler;
 import com.cmsr.onebase.plugin.runtime.manager.OneBasePluginManager;
 import com.cmsr.onebase.plugin.runtime.service.DataServiceImpl;
 import com.cmsr.onebase.plugin.runtime.service.FileServiceImpl;
@@ -44,20 +46,38 @@ public class PluginRuntimeAutoConfiguration {
     /**
      * 配置PF4J PluginManager
      *
-     * @param properties 插件配置属性
+     * @param properties         插件配置属性
+     * @param applicationContext Spring应用上下文
      * @return PluginManager
      */
     @Bean
     @ConditionalOnMissingBean
-    public PluginManager pluginManager(PluginProperties properties) {
-        Path pluginsPath = Paths.get(properties.getPluginsDir());
-        log.info("初始化插件管理器，插件目录: {}", pluginsPath.toAbsolutePath());
-        log.info("插件目录是否存在: {}", pluginsPath.toFile().exists());
-        log.info("插件目录是否为目录: {}", pluginsPath.toFile().isDirectory());
+    public PluginManager pluginManager(PluginProperties properties, ApplicationContext applicationContext) {
+        String pluginsDirStr = properties.getPluginsDir();
+        
+        // 处理 file: 前缀
+        if (pluginsDirStr.startsWith("file:")) {
+            pluginsDirStr = pluginsDirStr.substring(5); // 移除 "file:" 前缀
+        }
+        
+        Path pluginsPath = Paths.get(pluginsDirStr);
+        // 规范化路径，处理 .. 和 . 等相对符号
+        Path normalizedPath = pluginsPath.normalize();
+        Path absolutePath = normalizedPath.toAbsolutePath();
+        String userDir = System.getProperty("user.dir");
+        
+        log.info("========== 插件管理器初始化信息 ==========");
+        log.info("配置的插件目录（原始值）: {}", properties.getPluginsDir());
+        log.info("当前工作目录: {}", userDir);
+        log.info("规范化后的路径: {}", normalizedPath);
+        log.info("解析后的绝对路径: {}", absolutePath);
+        log.info("插件目录是否存在: {}", absolutePath.toFile().exists());
+        log.info("插件目录是否为目录: {}", absolutePath.toFile().isDirectory());
+        log.info("========================================");
 
-        // 创建自定义的 DefaultPluginManager，使用 plugin.properties 作为插件描述符
-        // 不使用 SpringPluginManager 避免 SpringExtensionFactory 的 wrapper null 问题
-        DefaultPluginManager pluginManager = new DefaultPluginManager(pluginsPath) {
+        // 使用 DefaultPluginManager，不涉及Spring相关功能
+        // 插件扩展点通过普通的ExtensionFactory创建，不需要Spring支持
+        DefaultPluginManager pluginManager = new DefaultPluginManager(absolutePath) {
             @Override
             protected PluginDescriptorFinder createPluginDescriptorFinder() {
                 // 只使用 PropertiesPluginDescriptorFinder，读取 plugin.properties
@@ -149,5 +169,32 @@ public class PluginRuntimeAutoConfiguration {
     @ConditionalOnMissingBean(FileService.class)
     public FileService fileService() {
         return new FileServiceImpl();
+    }
+
+    /**
+     * 配置插件HTTP分发器
+     *
+     * @param oneBasePluginManager         插件管理器
+     * @param requestMappingHandlerAdapter Spring MVC 的请求处理适配器
+     * @return 分发器
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public PluginHttpDispatcher pluginHttpDispatcher(
+            OneBasePluginManager oneBasePluginManager,
+            org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter requestMappingHandlerAdapter) {
+        return new PluginHttpDispatcher(oneBasePluginManager, requestMappingHandlerAdapter);
+    }
+
+    /**
+     * 配置插件HTTP处理器（代理控制器）
+     *
+     * @param pluginHttpDispatcher 分发器
+     * @return 处理器
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public PluginHttpHandler pluginHttpHandler(PluginHttpDispatcher pluginHttpDispatcher) {
+        return new PluginHttpHandler(pluginHttpDispatcher);
     }
 }

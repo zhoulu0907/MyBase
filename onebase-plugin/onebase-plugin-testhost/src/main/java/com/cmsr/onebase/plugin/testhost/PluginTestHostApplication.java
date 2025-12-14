@@ -2,6 +2,7 @@ package com.cmsr.onebase.plugin.testhost;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
 
 /**
  * OneBase 插件系统测试宿主服务器
@@ -32,7 +33,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @author matianyu
  * @date 2025-12-13
  */
-@SpringBootApplication
+@SpringBootApplication(exclude = {RedisAutoConfiguration.class})
 public class PluginTestHostApplication {
 
     public static void main(String[] args) {

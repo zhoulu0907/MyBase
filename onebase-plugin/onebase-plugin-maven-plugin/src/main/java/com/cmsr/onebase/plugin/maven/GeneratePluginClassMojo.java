@@ -84,6 +84,7 @@ public class GeneratePluginClassMojo extends AbstractMojo {
             writer.println("package " + generatedPackage + ";");
             writer.println();
             writer.println("import com.cmsr.onebase.plugin.internal.OneBasePlugin;");
+            writer.println("import org.pf4j.PluginWrapper;");
             writer.println();
             writer.println("/**");
             writer.println(" * Auto-generated plugin class");
@@ -96,10 +97,12 @@ public class GeneratePluginClassMojo extends AbstractMojo {
             writer.println("public class GeneratedPlugin extends OneBasePlugin {");
             writer.println();
             writer.println("    /**");
-            writer.println("     * Default constructor");
+            writer.println("     * Constructor required by PF4J");
+            writer.println("     *");
+            writer.println("     * @param wrapper plugin wrapper");
             writer.println("     */");
-            writer.println("    public GeneratedPlugin() {");
-            writer.println("        super();");
+            writer.println("    public GeneratedPlugin(PluginWrapper wrapper) {");
+            writer.println("        super(wrapper);");
             writer.println("    }");
             writer.println("}");
 

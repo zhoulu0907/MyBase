@@ -17,7 +17,6 @@
         提供插件扩展点接口、平台服务接口、运行时上下文等能力
         用户开发插件时只需依赖此模块（scope=provided）
     </description>
-    <url>https://cmsr.com</url>
 
     <dependencies>
         <!-- PF4J 核心依赖（传递给插件开发者，但用户不直接使用） -->

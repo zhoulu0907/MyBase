@@ -2,6 +2,8 @@ package com.cmsr.onebase.plugin.demo.http;
 
 import com.cmsr.onebase.plugin.api.HttpHandler;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -40,6 +42,22 @@ public class HelloWorldHandler implements HttpHandler {
         result.put("timestamp", LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         result.put("plugin", "demo-plugin");
         result.put("version", "1.0.0");
+        return result;
+    }
+
+    /**
+     * 处理 JSON 数据接口（测试 @RequestBody）
+     * <p>访问路径：POST /plugin/demo-plugin/process</p>
+     * <p>请求体示例：{"name": "OneBase", "value": 100}</p>
+     */
+    @PostMapping("/plugin/demo-plugin/process")
+    public Map<String, Object> processData(@RequestBody Map<String, Object> data) {
+        Map<String, Object> result = new HashMap<>();
+        result.put("received", data);
+        result.put("size", data.size());
+        result.put("timestamp", LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+        result.put("plugin", "demo-plugin");
+        result.put("message", "数据处理成功");
         return result;
     }
 }

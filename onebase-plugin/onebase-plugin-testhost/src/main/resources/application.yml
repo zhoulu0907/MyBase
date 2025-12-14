@@ -2,18 +2,27 @@ server:
   port: 8080
   servlet:
     context-path: /
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
 
 spring:
   application:
     name: onebase-plugin-testhost
   profiles:
     active: dev
+  http:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
 
 # OneBase 插件系统配置
 onebase:
   plugin:
     enabled: true
-    plugins-dir: ${plugin.base-dir:./plugins}
+    plugins-dir: ${plugin.base-dir:D:\cmsr\10_cmsr\CodingSpace\Java\onebase-v3-be\onebase-plugin\onebase-plugin-testhost\plugins}
     auto-load: true
     auto-start: true
 

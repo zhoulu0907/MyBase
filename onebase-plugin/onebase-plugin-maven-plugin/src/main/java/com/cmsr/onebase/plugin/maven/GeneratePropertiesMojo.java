@@ -95,6 +95,15 @@ public class GeneratePropertiesMojo extends AbstractMojo {
     @Parameter(property = "generatedPackage", defaultValue = "${project.groupId}")
     private String generatedPackage;
 
+    /**
+     * 插件主类的完全限定名（如果手动创建了插件类，必须指定此参数）
+     * <p>
+     * 例如：com.cmsr.onebase.plugin.demo.DemoPlugin
+     * </p>
+     */
+    @Parameter(property = "plugin.class")
+    private String pluginClass;
+
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         getLog().info("生成插件属性文件: plugin.properties");
@@ -161,7 +170,17 @@ public class GeneratePropertiesMojo extends AbstractMojo {
         Properties props = new Properties();
         props.setProperty("plugin.id", pluginId);
         props.setProperty("plugin.version", pluginVersion);
-        props.setProperty("plugin.class", generatedPackage + ".GeneratedPlugin");
+        
+        // 关键修复：优先使用配置的 pluginClass，如果没有配置则使用自动生成的类名
+        String finalPluginClass;
+        if (pluginClass != null && !pluginClass.trim().isEmpty()) {
+            finalPluginClass = pluginClass.trim();
+            getLog().info("使用配置的插件主类: " + finalPluginClass);
+        } else {
+            finalPluginClass = generatedPackage + ".GeneratedPlugin";
+            getLog().info("使用自动生成的插件主类: " + finalPluginClass);
+        }
+        props.setProperty("plugin.class", finalPluginClass);
 
         if (pluginDescription != null && !pluginDescription.isEmpty()) {
             props.setProperty("plugin.description", pluginDescription);

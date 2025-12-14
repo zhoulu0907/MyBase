@@ -18,7 +18,7 @@ import java.util.Map;
  * @date 2025-12-13
  */
 @RestController
-@RequestMapping("/plugin")
+@RequestMapping("/api/plugin")
 public class PluginManagementController {
 
     @Resource(name = "oneBasePluginManager")

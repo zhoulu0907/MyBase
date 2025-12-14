@@ -1,6 +1,7 @@
 package com.cmsr.onebase.plugin.internal;
 
 import org.pf4j.Plugin;
+import org.pf4j.PluginWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,10 +29,12 @@ public class OneBasePlugin extends Plugin {
     private static final Logger log = LoggerFactory.getLogger(OneBasePlugin.class);
 
     /**
-     * 默认构造函数
+     * PF4J要求的构造函数
+     *
+     * @param wrapper 插件包装器
      */
-    public OneBasePlugin() {
-        super();
+    public OneBasePlugin(PluginWrapper wrapper) {
+        super(wrapper);
     }
 
     /**
