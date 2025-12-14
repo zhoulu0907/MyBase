@@ -26,12 +26,6 @@
             <artifactId>onebase-plugin-sdk</artifactId>
         </dependency>
 
-        <!-- PF4J Spring 集成 -->
-        <dependency>
-            <groupId>org.pf4j</groupId>
-            <artifactId>pf4j-spring</artifactId>
-        </dependency>
-
         <!-- Spring Boot Starter -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
