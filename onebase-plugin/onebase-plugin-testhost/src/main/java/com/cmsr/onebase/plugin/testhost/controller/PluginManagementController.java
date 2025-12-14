@@ -14,7 +14,7 @@ import java.util.Map;
  * 提供插件生命周期管理的接口。
  * </p>
  *
- * @author matianyu
+ * @author chengyuansen
  * @date 2025-12-13
  */
 @RestController

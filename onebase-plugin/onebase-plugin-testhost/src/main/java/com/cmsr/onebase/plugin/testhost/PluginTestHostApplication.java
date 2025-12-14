@@ -30,7 +30,7 @@ import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
  * 应用启动时会自动加载和启动插件。
  * </p>
  *
- * @author matianyu
+ * @author chengyuansen
  * @date 2025-12-13
  */
 @SpringBootApplication(exclude = {RedisAutoConfiguration.class})

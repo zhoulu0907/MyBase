@@ -18,8 +18,8 @@ import java.util.Set;
  * TODO: 实际使用时需要注入平台的UserService来实现真实的用户操作。
  * </p>
  *
- * @author matianyu
- * @date 2025-11-29
+ * @author chengyuansen
+ * @date 2025-12-18
  */
 @Service
 public class UserServiceImpl implements UserService {

@@ -8,8 +8,8 @@ import java.io.InputStream;
  * 提供文件上传、下载、删除等能力。
  * </p>
  *
- * @author matianyu
- * @date 2025-11-29
+ * @author chengyuansen
+ * @date 2025-12-18
  */
 public interface FileService {
 

@@ -36,8 +36,8 @@ import java.util.stream.Stream;
  * 生成 META-INF/extensions.idx 索引文件。
  * </p>
  *
- * @author matianyu
- * @date 2025-11-29
+ * @author chengyuansen
+ * @date 2025-12-18
  */
 @Mojo(
         name = "scan-extensions",

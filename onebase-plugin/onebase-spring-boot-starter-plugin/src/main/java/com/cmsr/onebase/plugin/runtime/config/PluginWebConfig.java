@@ -12,7 +12,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  * 注册插件相关的拦截器、过滤器等。
  * </p>
  *
- * @author matianyu
+ * @author chengyuansen
  * @date 2025-12-13
  */
 @Configuration

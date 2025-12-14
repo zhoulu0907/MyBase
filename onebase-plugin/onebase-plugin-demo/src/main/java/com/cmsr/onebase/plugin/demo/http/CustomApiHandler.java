@@ -13,7 +13,7 @@ import java.util.Map;
  * 演示如何使用标准Spring Controller方式实现复杂的插件HTTP接口。
  * </p>
  *
- * @author matianyu
+ * @author chengyuansen
  * @date 2025-12-13
  */
 @RestController

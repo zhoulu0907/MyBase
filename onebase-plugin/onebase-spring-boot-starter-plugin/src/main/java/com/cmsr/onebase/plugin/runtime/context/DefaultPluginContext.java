@@ -17,8 +17,8 @@ import java.util.Map;
  * 从当前线程上下文获取身份信息。
  * </p>
  *
- * @author matianyu
- * @date 2025-11-29
+ * @author chengyuansen
+ * @date 2025-12-18
  */
 public class DefaultPluginContext implements PluginContext {
 

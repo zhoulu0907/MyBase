@@ -33,8 +33,8 @@ import java.nio.file.Paths;
  * 配置PF4J的PluginManager和相关Bean。
  * </p>
  *
- * @author matianyu
- * @date 2025-11-29
+ * @author chengyuansen
+ * @date 2025-12-18
  */
 @Configuration
 @ConditionalOnProperty(prefix = "onebase.plugin", name = "enabled", havingValue = "true", matchIfMissing = true)

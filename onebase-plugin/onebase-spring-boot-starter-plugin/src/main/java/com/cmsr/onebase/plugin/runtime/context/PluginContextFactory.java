@@ -16,8 +16,8 @@ import java.util.function.Supplier;
  * 负责创建和管理插件上下文，提供上下文切换能力。
  * </p>
  *
- * @author matianyu
- * @date 2025-11-29
+ * @author chengyuansen
+ * @date 2025-12-18
  */
 @Component
 public class PluginContextFactory {

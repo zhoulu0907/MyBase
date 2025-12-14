@@ -9,8 +9,8 @@ import java.util.Map;
  * 封装HTTP响应信息，供自定义HTTP处理器返回结果。
  * </p>
  *
- * @author matianyu
- * @date 2025-11-29
+ * @author chengyuansen
+ * @date 2025-12-18
  */
 public class HttpResponse {
 

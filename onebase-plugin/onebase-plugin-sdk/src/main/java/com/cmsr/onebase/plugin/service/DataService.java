@@ -10,8 +10,8 @@ import java.util.Map;
  * 插件可以通过此服务读写低代码平台管理的业务实体数据。
  * </p>
  *
- * @author matianyu
- * @date 2025-11-29
+ * @author chengyuansen
+ * @date 2025-12-18
  */
 public interface DataService {
 

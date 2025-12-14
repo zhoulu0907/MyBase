@@ -28,7 +28,7 @@ import java.util.Map;
  * 使用 Spring MVC 的 RequestMappingHandlerAdapter 处理请求，自动支持所有 Spring MVC 特性。
  * </p>
  *
- * @author matianyu
+ * @author chengyuansen
  * @date 2025-12-13
  */
 @Component

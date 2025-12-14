@@ -13,8 +13,8 @@ import java.util.Map;
  * 包括当前租户、用户、请求信息以及平台服务代理。
  * </p>
  *
- * @author matianyu
- * @date 2025-11-29
+ * @author chengyuansen
+ * @date 2025-12-18
  */
 public interface PluginContext {
 

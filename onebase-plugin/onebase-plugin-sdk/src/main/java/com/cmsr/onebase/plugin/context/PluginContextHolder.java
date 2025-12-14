@@ -7,8 +7,8 @@ package com.cmsr.onebase.plugin.context;
  * 宿主应用会在调用插件前设置上下文，插件执行完成后清理上下文。
  * </p>
  *
- * @author matianyu
- * @date 2025-11-29
+ * @author chengyuansen
+ * @date 2025-12-18
  */
 public final class PluginContextHolder {
 

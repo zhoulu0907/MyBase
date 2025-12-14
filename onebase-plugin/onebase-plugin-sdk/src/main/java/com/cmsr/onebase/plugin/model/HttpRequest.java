@@ -10,8 +10,8 @@ import java.util.Map;
  * 封装HTTP请求信息，供自定义HTTP处理器使用。
  * </p>
  *
- * @author matianyu
- * @date 2025-11-29
+ * @author chengyuansen
+ * @date 2025-12-18
  */
 public class HttpRequest {
 

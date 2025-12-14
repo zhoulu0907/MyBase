@@ -53,7 +53,7 @@ import org.pf4j.ExtensionPoint;
  * 开发完成后，通过 maven package 打包成插件 ZIP 包，上传至宿主系统。
  * </p>
  *
- * @author matianyu
+ * @author chengyuansen
  * @date 2025-12-13
  */
 public interface HttpHandler extends ExtensionPoint {

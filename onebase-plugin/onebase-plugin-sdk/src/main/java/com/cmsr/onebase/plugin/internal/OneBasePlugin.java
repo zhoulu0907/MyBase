@@ -21,8 +21,8 @@ import org.slf4j.LoggerFactory;
  * </ol>
  * </p>
  *
- * @author matianyu
- * @date 2025-11-29
+ * @author chengyuansen
+ * @date 2025-12-18
  */
 public class OneBasePlugin extends Plugin {
 

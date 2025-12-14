@@ -6,8 +6,8 @@ package com.cmsr.onebase.plugin.model;
  * 用于定义自定义函数的参数信息。
  * </p>
  *
- * @author matianyu
- * @date 2025-11-29
+ * @author chengyuansen
+ * @date 2025-12-18
  */
 public class ParamDef {
 

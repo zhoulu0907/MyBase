@@ -24,7 +24,7 @@ import java.util.List;
  * 采用直接注册方式，将处理器对象和其映射方法直接添加到RequestMappingHandlerMapping。
  * </p>
  *
- * @author matianyu
+ * @author chengyuansen
  * @date 2025-12-13
  */
 @Component

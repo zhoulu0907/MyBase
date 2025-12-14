@@ -9,8 +9,8 @@ import java.util.Map;
  * 封装平台发出的事件信息，供事件监听器使用。
  * </p>
  *
- * @author matianyu
- * @date 2025-11-29
+ * @author chengyuansen
+ * @date 2025-12-18
  */
 public class PluginEvent {
 

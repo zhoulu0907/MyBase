@@ -22,8 +22,8 @@ import java.util.stream.Collectors;
  * 封装PF4J的PluginManager，提供插件的加载、卸载、启动、停止等生命周期管理。
  * </p>
  *
- * @author matianyu
- * @date 2025-11-29
+ * @author chengyuansen
+ * @date 2025-12-18
  */
 @Component
 public class OneBasePluginManager {

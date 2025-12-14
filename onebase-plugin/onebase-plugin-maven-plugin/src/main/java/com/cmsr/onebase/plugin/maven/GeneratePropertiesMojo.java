@@ -24,8 +24,8 @@ import java.util.Properties;
  * 自动生成 plugin.properties 文件，包含插件ID、版本、描述等元数据。
  * </p>
  *
- * @author matianyu
- * @date 2025-11-29
+ * @author chengyuansen
+ * @date 2025-12-18
  */
 @Mojo(
         name = "generate-properties",

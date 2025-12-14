@@ -15,7 +15,7 @@ import java.util.List;
  * 在应用启动完成后，自动扫描并注册插件中的HTTP处理器。
  * </p>
  *
- * @author matianyu
+ * @author chengyuansen
  * @date 2025-12-13
  */
 @Component

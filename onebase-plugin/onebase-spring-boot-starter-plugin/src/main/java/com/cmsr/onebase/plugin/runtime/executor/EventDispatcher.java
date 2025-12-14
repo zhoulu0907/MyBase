@@ -19,8 +19,8 @@ import java.util.concurrent.CompletableFuture;
  * 负责将平台事件分发给插件的事件监听器。
  * </p>
  *
- * @author matianyu
- * @date 2025-11-29
+ * @author chengyuansen
+ * @date 2025-12-18
  */
 @Component
 public class EventDispatcher {

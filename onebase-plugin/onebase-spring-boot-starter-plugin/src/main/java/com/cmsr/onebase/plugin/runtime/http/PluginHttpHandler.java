@@ -20,7 +20,7 @@ import java.util.Map;
  * 这是必要的，因为插件处理器在隔离的ClassLoader中，Spring无法直接扫描注册。
  * </p>
  *
- * @author matianyu
+ * @author chengyuansen
  * @date 2025-12-13
  */
 @RestController

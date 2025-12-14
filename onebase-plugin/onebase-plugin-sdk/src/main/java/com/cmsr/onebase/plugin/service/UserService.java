@@ -11,8 +11,8 @@ import java.util.Set;
  * 提供用户、角色、权限等信息查询能力。
  * </p>
  *
- * @author matianyu
- * @date 2025-11-29
+ * @author chengyuansen
+ * @date 2025-12-18
  */
 public interface UserService {
 
