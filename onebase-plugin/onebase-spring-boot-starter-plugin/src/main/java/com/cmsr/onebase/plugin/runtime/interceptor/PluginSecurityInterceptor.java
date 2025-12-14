@@ -40,7 +40,7 @@ public class PluginSecurityInterceptor implements HandlerInterceptor {
      */
     private static final Pattern PLUGIN_ROUTE_PATTERN = Pattern.compile("^/plugin/([^/]+)/.*$");
 
-    @Resource
+    @Resource(name = "oneBasePluginManager")
     private OneBasePluginManager pluginManager;
 
     @Override

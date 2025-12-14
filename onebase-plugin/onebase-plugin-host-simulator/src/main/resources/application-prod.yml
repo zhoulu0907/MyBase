@@ -1,0 +1,40 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
+spring:
+  application:
+    name: onebase-plugin-host-simulator-prod
+  http:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
+logging:
+  level:
+    root: INFO
+    com.cmsr.onebase.plugin: INFO
+    org.pf4j: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+
+# 插件配置（完整验证模式）
+# 此模式从 plugins 目录加载 ZIP 插件包，验证完整生命周期
+plugins:
+  # 生产模式下从此目录加载 ZIP 插件包
+  dir: ./plugins
+  enabled: true
+  # 生产模式特性
+  mode: prod
+  
+# 说明：
+# 1. 完整验证模式从 plugins 目录加载 ZIP 插件包
+# 2. 支持完整的插件生命周期管理（加载、启动、停止、卸载）
+# 3. 需要先打包插件为 ZIP 格式
+# 4. 适合集成测试和最终验证

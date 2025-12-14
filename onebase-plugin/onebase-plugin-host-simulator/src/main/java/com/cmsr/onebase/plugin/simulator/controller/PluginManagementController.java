@@ -1,4 +1,4 @@
-package com.cmsr.onebase.plugin.testhost.controller;
+package com.cmsr.onebase.plugin.simulator.controller;
 
 import com.cmsr.onebase.plugin.runtime.manager.OneBasePluginManager;
 import org.pf4j.PluginState;

@@ -1,0 +1,40 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
+spring:
+  application:
+    name: onebase-plugin-host-simulator-dev
+  http:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
+logging:
+  level:
+    root: INFO
+    com.cmsr.onebase.plugin: DEBUG
+    org.pf4j: DEBUG
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+
+# 插件配置（IDE 快速调试模式）
+# 此模式下通过 ComponentScan 自动扫描依赖中的插件，无需插件 ZIP 包
+plugins:
+  # 开发模式下插件目录可以为空或不存在
+  dir: ./target/dev-plugins
+  enabled: true
+  # 开发模式特性
+  mode: dev
+  
+# 说明：
+# 1. IDE 快速调试模式自动扫描项目依赖中的插件（如 onebase-plugin-demo）
+# 2. 无需打包插件为 ZIP，启动时间快（5-10秒）
+# 3. 支持断点调试、热重载
+# 4. 适合快速开发迭代

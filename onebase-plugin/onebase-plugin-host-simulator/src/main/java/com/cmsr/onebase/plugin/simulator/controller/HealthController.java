@@ -1,4 +1,4 @@
-package com.cmsr.onebase.plugin.testhost.controller;
+package com.cmsr.onebase.plugin.simulator.controller;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,9 +24,9 @@ public class HealthController {
     public Map<String, Object> home() {
         Map<String, Object> response = new HashMap<>();
         response.put("status", "ok");
-        response.put("app", "OneBase Plugin Test Host");
+        response.put("app", "OneBase Plugin Host Simulator");
         response.put("version", "1.0.0");
-        response.put("description", "用于测试 OneBase 插件系统的宿主服务器");
+        response.put("description", "OneBase 插件宿主模拟器 - 既能免打包快速 debug 又能全生命周期插件验证");
         response.put("apis", Map.of(
             "插件列表", "GET /plugin/list",
             "启动插件", "POST /plugin/{pluginId}/start",

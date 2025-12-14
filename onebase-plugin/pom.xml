@@ -14,7 +14,7 @@
         <module>onebase-spring-boot-starter-plugin</module>
         <module>onebase-plugin-maven-plugin</module>
         <module>onebase-plugin-demo</module>
-        <module>onebase-plugin-testhost</module>
+        <module>onebase-plugin-host-simulator</module>
     </modules>
 
     <artifactId>onebase-plugin</artifactId>

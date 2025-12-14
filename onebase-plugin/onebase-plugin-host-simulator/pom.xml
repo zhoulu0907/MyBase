@@ -9,11 +9,21 @@
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>onebase-plugin-testhost</artifactId>
+    <artifactId>onebase-plugin-host-simulator</artifactId>
+    <name>OneBase Plugin Host Simulator</name>
     <description>
-        OneBase 插件系统测试宿主服务器
-        用于测试插件的加载、卸载、启动、停止等生命周期管理
-        以及 SDK、Starter Plugin 等组件的功能
+        OneBase 插件宿主模拟器 - 既能免打包快速 debug 又能全生命周期插件验证
+        
+        【双模式支持】
+        1. IDE 快速调试模式：无需打包，直接在 IDE 中 Debug 运行（5-10秒启动）
+           - 通过 ComponentScan 自动扫描依赖中的插件
+           - 支持断点调试、热重载
+           - 适合开发迭代
+        
+        2. 完整验证模式：打包插件 ZIP，验证完整生命周期（加载、启动、停止、卸载）
+           - 从 plugins 目录加载 ZIP 插件包
+           - 完整的插件生命周期管理
+           - 适合集成测试和验证
     </description>
 
     <properties>
@@ -77,7 +87,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>3.2.0</version>
                 <configuration>
-                    <mainClass>com.cmsr.onebase.plugin.testhost.PluginTestHostApplication</mainClass>
+                    <mainClass>com.cmsr.onebase.plugin.simulator.PluginHostSimulatorApplication</mainClass>
                 </configuration>
                 <executions>
                     <execution>
