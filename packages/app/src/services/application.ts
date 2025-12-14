@@ -48,7 +48,7 @@ export const getApplicationSimple = (ownerTag: number, appName: string) => {
 };
 
 export const getAppNavigationConfig = (params: GetAppNavigationConfigReq) => {
-  return appService.get('/application/get-navigation-config', params);
+  return (isRuntimeEnv() ? runtimeAppService : appService).get('/application/get-navigation-config', params);
 };
 
 export const updateAppNavigationConfig = (params: UpdateAppNavigationConfigReq) => {
