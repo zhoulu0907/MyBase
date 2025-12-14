@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.flow.context.graph.nodes;
 import com.cmsr.onebase.module.flow.context.condition.Conditions;
 import com.cmsr.onebase.module.flow.context.condition.SortItem;
 import com.cmsr.onebase.module.flow.context.graph.NodeData;
+import com.cmsr.onebase.module.flow.context.graph.NodeType;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 
@@ -14,6 +15,7 @@ import java.util.List;
  * @Date：2025/9/30 9:07
  */
 @Data
+@NodeType("dataQuery")
 public class DataQueryNodeData extends NodeData implements Serializable {
 
     /**

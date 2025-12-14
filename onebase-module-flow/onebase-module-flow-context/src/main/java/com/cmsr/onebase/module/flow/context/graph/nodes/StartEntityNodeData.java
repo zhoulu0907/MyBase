@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.flow.context.graph.nodes;
 
 import com.cmsr.onebase.module.flow.context.condition.Conditions;
 import com.cmsr.onebase.module.flow.context.graph.NodeData;
+import com.cmsr.onebase.module.flow.context.graph.NodeType;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -12,6 +13,7 @@ import java.util.List;
  * @Date：2025/9/9 13:46
  */
 @Data
+@NodeType("startEntity")
 public class StartEntityNodeData extends NodeData implements Serializable {
 
     /**

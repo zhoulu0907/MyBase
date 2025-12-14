@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.flow.context.graph.nodes;
 
 import com.cmsr.onebase.module.flow.context.graph.NodeData;
+import com.cmsr.onebase.module.flow.context.graph.NodeType;
 import com.cmsr.onebase.module.flow.context.util.Cron;
 import lombok.Data;
 
@@ -12,6 +13,7 @@ import java.util.List;
  * @Date：2025/9/9 13:55
  */
 @Data
+@NodeType("startTime")
 public class StartTimeNodeData extends NodeData implements Serializable {
     /**
      * 不重复

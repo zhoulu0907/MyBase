@@ -49,13 +49,7 @@ public class FlowChainBuilder {
 
 
     private ELWrapper nodeDefine(JsonGraphNode node) {
-        if (StringUtils.equalsAny(node.getType(),
-                "dataAdd", "dataCalc", "dataDelete", "dataQueryMultiple", "dataQuery", "dataUpdate",
-                "modal", "refresh", "navigate", "javascript",
-                "startDateField", "startForm", "startEntity", "startTime", "startAPI", "startBPM",
-                "end", "log")) {
-            return toDefine(node);
-        } else if (StringUtils.equals(node.getType(), "ifBlock")) {
+        if (StringUtils.equals(node.getType(), "ifBlock")) {
             return ifBlockNodeDefine(node);
         } else if (StringUtils.equals(node.getType(), "ifCase")) {
             return ifCaseNodeDefine(node);
@@ -63,8 +57,9 @@ public class FlowChainBuilder {
             return loopNodeDefine(node);
         } else if (StringUtils.equals(node.getType(), "switchCondition")) {
             return switchNodeDefine(node);
+        } else {
+            return toDefine(node);
         }
-        throw new IllegalArgumentException("未知的节点类型: " + node.getType());
     }
 
     private ELWrapper loopNodeDefine(JsonGraphNode node) {

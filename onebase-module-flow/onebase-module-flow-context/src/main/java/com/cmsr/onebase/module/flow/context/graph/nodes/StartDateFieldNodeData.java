@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.flow.context.graph.nodes;
 
 import com.cmsr.onebase.module.flow.context.condition.Conditions;
 import com.cmsr.onebase.module.flow.context.graph.NodeData;
+import com.cmsr.onebase.module.flow.context.graph.NodeType;
 import com.cmsr.onebase.module.flow.context.util.Cron;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticFieldTypeEnum;
 import lombok.Data;
@@ -17,6 +18,7 @@ import java.util.List;
  * @Date：2025/9/22 9:24
  */
 @Data
+@NodeType("startDateField")
 public class StartDateFieldNodeData extends NodeData implements Serializable {
 
     public static final DateTimeFormatter TIMESTAMP_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");

@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.flow.context.graph.nodes;
 
 import com.cmsr.onebase.module.flow.context.condition.Conditions;
 import com.cmsr.onebase.module.flow.context.graph.NodeData;
+import com.cmsr.onebase.module.flow.context.graph.NodeType;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldSchemaDTO;
 import lombok.Data;
 
@@ -14,6 +15,7 @@ import java.util.Map;
  * @Date：2025/9/9 11:05
  */
 @Data
+@NodeType("startForm")
 public class StartFormNodeData extends NodeData implements Serializable {
 
     /**
