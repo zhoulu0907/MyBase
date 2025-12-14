@@ -375,8 +375,6 @@ export default function EditorHeader() {
           fields: allChildFields[index]
         }));
 
-        console.log('subEntities: ', subEntities);
-
         setSubEntities({
           entities: subEntities
         });

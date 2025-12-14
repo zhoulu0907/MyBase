@@ -272,3 +272,15 @@ export interface GetApplicationReq {
    */
   id: string;
 }
+
+export interface GetAppNavigationConfigReq {
+  id: string;
+}
+
+export interface UpdateAppNavigationConfigReq {
+  id: string;
+  webDefaultMenu: string;
+  webNavLayout: string;
+  mobileDefaultMenu: string;
+  mobileNavLayout: string;
+}
