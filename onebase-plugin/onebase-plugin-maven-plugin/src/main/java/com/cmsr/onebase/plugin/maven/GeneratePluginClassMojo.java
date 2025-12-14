@@ -45,12 +45,6 @@ public class GeneratePluginClassMojo extends AbstractMojo {
     private File outputDirectory;
 
     /**
-     * 插件ID
-     */
-    @Parameter(property = "plugin.id", defaultValue = "${project.artifactId}")
-    private String pluginId;
-
-    /**
      * 生成的Plugin类的包名
      */
     @Parameter(property = "generatedPackage", defaultValue = "${project.groupId}")
