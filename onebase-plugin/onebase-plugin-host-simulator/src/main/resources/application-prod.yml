@@ -26,12 +26,14 @@ logging:
 
 # 插件配置（完整验证模式）
 # 此模式从 plugins 目录加载 ZIP 插件包，验证完整生命周期
-plugins:
-  # 生产模式下从此目录加载 ZIP 插件包
-  dir: ./plugins
-  enabled: true
-  # 生产模式特性
-  mode: prod
+onebase:
+  plugin:
+    enabled: true
+    auto-load: true
+    auto-start: true
+    dev-mode: false
+    scan-interval: 0
+    plugins-dir: ./target/dev-plugins
   
 # 说明：
 # 1. 完整验证模式从 plugins 目录加载 ZIP 插件包

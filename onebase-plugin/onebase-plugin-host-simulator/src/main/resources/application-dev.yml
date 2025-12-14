@@ -26,12 +26,14 @@ logging:
 
 # 插件配置（IDE 快速调试模式）
 # 此模式下通过 ComponentScan 自动扫描依赖中的插件，无需插件 ZIP 包
-plugins:
-  # 开发模式下插件目录可以为空或不存在
-  dir: ./target/dev-plugins
-  enabled: true
-  # 开发模式特性
-  mode: dev
+onebase:
+  plugin:
+    enabled: true
+    auto-load: true
+    auto-start: true
+    dev-mode: true
+    scan-interval: 10000
+    plugins-dir: ./target/dev-plugins
   
 # 说明：
 # 1. IDE 快速调试模式自动扫描项目依赖中的插件（如 onebase-plugin-demo）
