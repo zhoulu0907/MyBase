@@ -1,5 +1,5 @@
 import { Button, Drawer, Form, Grid, Input, Radio, Select, Tree } from '@arco-design/web-react';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import { IconCaretDown } from '@arco-design/web-react/icon';
 import { getPopupContainer, ListComp } from '@onebase/ui-kit';
@@ -87,6 +87,15 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
   const [isFastFilter, setIsFastFilter] = useState<boolean>(false);
   const [fastFilters, setFastFilters] = useState<any[]>([]);
 
+  // 回显字段：用于排除和预览显示
+  const echoField = useMemo(() => {
+    return Array.isArray(configs?.displayFields) ? configs.displayFields[0]?.value : undefined;
+  }, [configs?.displayFields]);
+
+  const echoFieldObj = useMemo(() => {
+    return Array.isArray(configs?.displayFields) ? configs.displayFields[0] : undefined;
+  }, [configs?.displayFields]);
+
   // const sortType = 'normal';
 
   // const droplist = (
@@ -102,8 +111,8 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
   useEffect(() => {
     if (visible) {
       setDisplayFieldOptions(configs[SUB_ATTR_KEY.DATAFIELDS]);
-      const echoField = Array.isArray(configs?.displayFields) ? configs.displayFields[0]?.value : undefined;
-      const initialSelected = (configs[SUB_ATTR_KEY.SELECTDATAFIELDS] || []).filter((f: any) => f !== echoField);
+      const initialSelected = configs[SUB_ATTR_KEY.SELECTDATAFIELDS] || [];
+      //   .filter((f: any) => f !== echoField);
       setSelected(initialSelected);
       setFilterCondition(configs[SUB_ATTR_KEY.FILTERCONDITION]);
       setSortFieldValue(tableConfig[SUB_ATTR_KEY.SORTBYOBJECT]?.fieldName);
@@ -111,18 +120,18 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
       tableConfig.tableName = configs[SUB_ATTR_KEY.SELECTEDDATASOURCE].tableName;
       handlePropsChange(SUB_ATTR_KEY.DYNAMICTABLECONFIG, tableConfig);
     }
-  }, [visible]);
+  }, [visible, echoField]);
 
   useEffect(() => {
     handleOptionsChange();
   }, [displayFieldOptions, selected]);
 
   const handleOptionsChange = () => {
-    const echoField = Array.isArray(configs?.displayFields) ? configs.displayFields[0]?.value : undefined;
     const selectableOptions =
       isDropdown && echoField
-        ? (displayFieldOptions || []).filter((opt: any) => opt.fieldName !== echoField)
-        : displayFieldOptions || [];
+        ? displayFieldOptions || []
+        : // .filter((opt: any) => opt.fieldName !== echoField)
+          displayFieldOptions || [];
     const header = selectableOptions.reduce((fields: any[], option: any) => {
       if (selected.includes(option.fieldName)) {
         fields.push({
@@ -143,15 +152,23 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
   };
 
   const handleSelectedChange = (value: any) => {
-    const echoField = Array.isArray(configs?.displayFields) ? configs.displayFields[0]?.value : undefined;
-    const filtered = Array.isArray(value) && echoField ? value.filter((v) => v !== echoField) : value;
-    setSelected(filtered);
-    handlePropsChange(SUB_ATTR_KEY.SELECTDATAFIELDS, filtered);
+    // TODO(mickey): 不确定功能，先注释掉
+    // console.log('value: ', value);
+    // console.log('configs?.displayFields: ', configs?.displayFields);
+    // console.log('echoField: ', echoField);
+    // const filtered = Array.isArray(value) && echoField ? value.filter((v) => v !== echoField) : value;
+    // console.log('filtered: ', filtered);
+
+    // setSelected(filtered);
+    // handlePropsChange(SUB_ATTR_KEY.SELECTDATAFIELDS, filtered);
+
+    setSelected(value);
+    handlePropsChange(SUB_ATTR_KEY.SELECTDATAFIELDS, value);
   };
 
   const handleSelectedChangeSingle = (value: any) => {
-    const echoField = Array.isArray(configs?.displayFields) ? configs.displayFields[0]?.value : undefined;
-    const next = value && value !== echoField ? [value] : [];
+    // const next = value && value !== echoField ? [value] : [];
+    const next = value ? [value] : [];
     setSelected(next);
     handlePropsChange(SUB_ATTR_KEY.SELECTDATAFIELDS, next);
     handleOptionsChange();
@@ -261,10 +278,9 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
                 <div className={styles.previewCard}>
                   <div className={styles.cardHeader}>
                     {(() => {
-                      const echoField = Array.isArray(configs?.displayFields) ? configs.displayFields[0] : undefined;
                       const echoLabel =
-                        echoField?.label ||
-                        (displayFieldOptions || []).find((opt: any) => opt.fieldName === echoField?.value)
+                        echoFieldObj?.label ||
+                        (displayFieldOptions || []).find((opt: any) => opt.fieldName === echoFieldObj?.value)
                           ?.displayName ||
                         '标题字段';
                       return echoLabel;
@@ -272,8 +288,8 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
                   </div>
                   <div className={styles.cardSubTitle}>
                     {(() => {
-                      const echoField = Array.isArray(configs?.displayFields) ? configs.displayFields[0] : undefined;
-                      const aux = (selected || []).filter((f: any) => f !== echoField?.value);
+                      const aux = selected || [];
+                      //   .filter((f: any) => f !== echoFieldObj?.value);
                       const labels = aux
                         .map(
                           (f: any) => (displayFieldOptions || []).find((opt: any) => opt.fieldName === f)?.displayName
@@ -309,6 +325,7 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
                 />
               </FormItem>
               <FormItem label={isDropdown ? '辅助字段' : '选择数据时的显示字段'}>
+                {/* <div>{JSON.stringify(displayFieldOptions)}</div> */}
                 {isDropdown ? (
                   <Select
                     value={selected?.[0]}
@@ -317,7 +334,7 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
                     allowClear
                   >
                     {(displayFieldOptions || [])
-                      .filter((opt: any) => opt.fieldName !== configs?.displayFields?.[0]?.value)
+                      //   .filter((opt: any) => opt.fieldName !== echoField)
                       .map((option: any) => (
                         <Option key={option.fieldName} value={option.fieldName}>
                           {option.displayName}
@@ -366,11 +383,10 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
                       getPopupContainer={getPopupContainer}
                       allowClear
                     >
-                      {(isDropdown && Array.isArray(configs?.displayFields)
-                        ? (displayFieldOptions || []).filter(
-                            (opt: any) => opt.fieldName !== configs.displayFields[0]?.value
-                          )
-                        : displayFieldOptions
+                      {(isDropdown && echoField
+                        ? displayFieldOptions || []
+                        : // .filter((opt: any) => opt.fieldName !== echoField)
+                          displayFieldOptions
                       ).map((option: any) => (
                         <Option key={option.fieldName} value={option.fieldName}>
                           {option.displayName}

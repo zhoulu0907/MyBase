@@ -11,8 +11,8 @@ import { XDataSelectConfig } from './schema';
 import { dataMethodPageV2, menuSignal, PageMethodV2Params } from '@onebase/app';
 import { useFormField } from '../useFormField';
 
-import './index.css';
 import { useFormEditorSignal } from '@/index';
+import './index.css';
 // ===== 导入 end =====
 
 // ===== 组件定义 begin =====
@@ -57,6 +57,7 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
       return;
     }
     const normalize = (data: any) => {
+      console.log('data: ', data, 'typeof data: ', typeof data);
       if (!data) return '';
       if (typeof data === 'object') {
         if (typeof data.id !== 'undefined' || typeof data.name !== 'undefined') {
@@ -65,10 +66,13 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
         if (typeof data.selectID !== 'undefined' || typeof data.displayValue !== 'undefined') {
           return { id: data.selectID ?? '', name: data.displayValue ?? '' };
         }
+      } else if (typeof data === 'string') {
+        return data;
       }
       return '';
     };
-    setDataState(normalize(formFieldValue));
+    const normalizedValue = normalize(formFieldValue);
+    setDataState(normalizedValue);
   }, [formFieldValue, runtime]);
   // =====  内部状态 & 回显 end =====
 
@@ -102,15 +106,16 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
       }
     },
     fillDatabyRule: (data: any) => {
-      if(fillRuleSetting.length > 0) {
-        fillRuleSetting.forEach(item => {
+      if (fillRuleSetting.length > 0) {
+        fillRuleSetting.forEach((item) => {
           const value = data?.[item.fieldName];
           const dataField = fromPageComponentSchemas.value[item.selectComponentID].config.dataField;
-          if(dataField.length > 0) {
-            const fieldName = fromPageComponentSchemas.value[item.selectComponentID].config.dataField[dataField.length - 1];
+          if (dataField.length > 0) {
+            const fieldName =
+              fromPageComponentSchemas.value[item.selectComponentID].config.dataField[dataField.length - 1];
             form.setFieldValue(fieldName, value);
           }
-        })
+        });
       }
     }
   };
@@ -118,7 +123,14 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
 
   // ===== 方法：帮助方法 begin =====
   const helpers = {
-    getDisplayText: (v: any) => (v && typeof v === 'object' ? ((v.name && typeof v.name === 'object' ? v.name?.name : v.name) ?? '') : ''),
+    getDisplayText: (v: any) => {
+      return v && typeof v === 'object'
+        ? ((v.name && typeof v.name === 'object' ? v.name?.name : v.name) ?? '')
+        : typeof v === 'string'
+          ? v
+          : '';
+    },
+
     getSelectedId: (v: any) => (v && typeof v === 'object' ? (v.id ?? null) : null),
     isDropdownMode: () => props.selectMethod === 'dropdown'
   };

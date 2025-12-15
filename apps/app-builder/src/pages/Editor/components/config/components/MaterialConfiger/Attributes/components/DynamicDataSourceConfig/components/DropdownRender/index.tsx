@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
 import { Button, Checkbox, Input, Popover, Space } from '@arco-design/web-react';
 import { IconDragDotVertical, IconEdit } from '@arco-design/web-react/icon';
+import React, { useState } from 'react';
 
-import styles from '../../index.module.less';
-import { ReactSortable } from 'react-sortablejs';
 import { getPopupContainer } from '@onebase/ui-kit';
+import { ReactSortable } from 'react-sortablejs';
+import styles from '../../index.module.less';
 
 interface DropdownRenderProps {
   selected: Array<any>;
@@ -78,7 +78,13 @@ const DropdownRender: React.FC<DropdownRenderProps> = ({
 
   // 父节点点击
   const handleCheck = (checked: boolean, opt: any) => {
-    setSelected(checked ? [...selected, opt.fieldName] : selected.filter((v) => v !== opt.fieldName));
+    // console.log(checked, opt);
+    // console.log(selected);
+    // console.log(opt.fieldName);
+
+    const newSelected = checked ? [...selected, opt.fieldName] : selected.filter((v) => v !== opt.fieldName);
+    console.log(newSelected);
+    setSelected(newSelected);
   };
 
   // 全选点击
