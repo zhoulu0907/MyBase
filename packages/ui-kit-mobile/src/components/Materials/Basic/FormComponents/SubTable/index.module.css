@@ -4,7 +4,6 @@
     justify-content: flex-end;
     background-color: transparent !important;
     padding: 0;
-    margin-left: 0.64rem;
 
     &::after {
       transform: none !important;
@@ -18,8 +17,7 @@
   }
 
   :global(.arco-collapse-content-container) {
-    padding-top: 0;
-    padding-bottom: 0;
+    padding: 0;
   }
 
   :global(.arco-form-label-item) {
@@ -47,9 +45,12 @@
     transform: none;
   }
   :global(.arco-cell-inner .cell-label) {
-    width: 1.62rem;
-    min-width: 1.62rem;
+    width: 1.4rem;
+    min-width: 1.4rem;
     margin-right: 0.12rem;
+    white-space: normal;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   :global(.uplaodList-text) {
     width: calc(100% - 3rem);
