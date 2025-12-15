@@ -62,6 +62,7 @@ public class TenantUserController {
 
     @GetMapping("/simple-list")
     @Operation(summary = "获取用户精简信息列表", description = "只包含开启的用户，主要用于前端的下拉选项")
+    @PreAuthorize("@ss.hasPermission('tenant:user:query')")
     public CommonResult<List<UserDeptSimpleRespVO>> getSimpleUserList() {
         List<AdminUserDO> list = userService.getUserListByStatus(CommonStatusEnum.ENABLE.getStatus(), null);
         // 拼接数据
