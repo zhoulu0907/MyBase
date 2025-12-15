@@ -5,7 +5,6 @@ import com.cmsr.onebase.module.flow.component.SkippableNodeComponent;
 import com.cmsr.onebase.module.flow.context.provider.FlowContextProvider;
 import com.cmsr.onebase.module.flow.context.ExecuteContext;
 import com.cmsr.onebase.module.flow.context.VariableContext;
-import com.cmsr.onebase.module.flow.context.graph.nodes.ModalNodeData;
 import com.yomahub.liteflow.annotation.LiteflowComponent;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;

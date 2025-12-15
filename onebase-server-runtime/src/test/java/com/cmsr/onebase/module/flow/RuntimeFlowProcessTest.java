@@ -3,8 +3,8 @@ package com.cmsr.onebase.module.flow;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerReqDTO;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerRespDTO;
 import com.cmsr.onebase.module.flow.api.dto.TriggerEventEnum;
+import com.cmsr.onebase.module.flow.context.condition.SimpleField;
 import com.cmsr.onebase.module.flow.context.graph.JsonGraph;
-import com.cmsr.onebase.module.flow.context.graph.nodes.ModalNodeData;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
 import com.cmsr.onebase.module.flow.core.flow.FlowRemoteCallExecutor;
@@ -90,7 +90,7 @@ public class RuntimeFlowProcessTest {
     @Test
     public void testFormTrigger01() throws IOException {
         FormTriggerReqVO reqVO = new FormTriggerReqVO();
-        reqVO.setProcessId(181941429188165632L);
+        reqVO.setProcessId(181896898967240704L);
         reqVO.setInputParams(Map.of(
                 "student_name", "小",
                 "birthday", "2025-12-01"
@@ -103,15 +103,15 @@ public class RuntimeFlowProcessTest {
     public void testFormTrigger02() throws IOException {
         FormTriggerReqVO reqVO = new FormTriggerReqVO();
         reqVO.setProcessId(181941429188165632L);
-        reqVO.setExecutionUuid("ade06ee4-cb06-4700-af58-f4551e14439f");
+        reqVO.setExecutionUuid("f777ea05-490b-400a-a9ae-794c6563770f");
 
-        ModalNodeData.Field field1 = new ModalNodeData.Field();
+        SimpleField field1 = new SimpleField();
         field1.setId("7VGW8DgADiKOFqlxU5JGG");
         field1.setFieldName("abc");
         field1.setFieldType("TEXT");
         field1.setValue("v1");
 
-        ModalNodeData.Field field2 = new ModalNodeData.Field();
+        SimpleField field2 = new SimpleField();
         field2.setId("pMtN_4Xz63M1jw31IUGqu");
         field2.setFieldName("abc");
         field2.setFieldType("TEXT");

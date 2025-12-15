@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.flow.core.flow;
 
 import com.cmsr.onebase.module.flow.context.ExecuteContext;
+import com.cmsr.onebase.module.flow.context.ExecuteLog;
 import com.cmsr.onebase.module.flow.context.VariableContext;
 import com.cmsr.onebase.module.flow.context.graph.NodeData;
 import com.cmsr.onebase.module.flow.context.provider.FlowContextProvider;
@@ -136,24 +137,24 @@ public class FlowProcessExecutor {
         FlowExecutionLogDO executionLog = createNewExecutionLog(executorInput);
         ExecuteContext executeContext = null;
         try {
-            ExecuteContext tmpExecuteContext = new ExecuteContext();
+            ExecuteLog executeLog = new ExecuteLog();
             //初始化变量上下文
             String executionUuid = executorInput.getExecutionUuid();
-            tmpExecuteContext.addLog("恢复变量上下文");
+            executeLog.addLog("恢复变量上下文");
             VariableContext variableContext = flowContextProvider.restoreVariableContext(executionUuid);
-            tmpExecuteContext.addLog("恢复变量上下文结束");
+            executeLog.addLog("恢复变量上下文结束");
             if (variableContext == null) {
                 throw new Exception("执行上下文不存在或已过期: " + executionUuid);
             }
             //初始化执行上下文
-            tmpExecuteContext.addLog("恢复执行上下文");
+            executeLog.addLog("恢复执行上下文");
             executeContext = flowContextProvider.restoreExecuteContext(executionUuid);
-            tmpExecuteContext.addLog("恢复执行上下文结束");
-            if (tmpExecuteContext == null) {
+            executeLog.addLog("恢复执行上下文结束");
+            if (executeContext == null) {
                 throw new Exception("执行上下文不存在或已过期: " + executionUuid);
             }
             //
-            executeContext.setStopwatch(tmpExecuteContext.getStopwatch());
+            executeContext.setExecuteLog(executeLog);
             Map<String, NodeData> nodeData = FlowProcessCache.findNodeData(processId);
             executeContext.setNodeDataMap(nodeData);
 

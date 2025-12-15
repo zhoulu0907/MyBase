@@ -1,17 +1,13 @@
 package com.cmsr.onebase.module.flow.context;
 
 import com.cmsr.onebase.module.flow.context.graph.NodeData;
-import com.google.common.base.Stopwatch;
 import lombok.Data;
 
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @Author：huangjie
@@ -96,14 +92,12 @@ public class ExecuteContext implements Serializable {
     private transient volatile String terminationMessage;
 
 
-    private transient Stopwatch stopwatch;
+    private transient ExecuteLog executeLog;
 
-    private transient List<String> logs;
 
     public ExecuteContext() {
-        this.stopwatch = Stopwatch.createStarted();
-        this.logs = new CopyOnWriteArrayList<>();
-        this.logs.add(String.format("[%d] %s", stopwatch.elapsed(TimeUnit.MILLISECONDS), "流程执行开始"));
+        this.executeLog = new ExecuteLog();
+        this.executeLog.addLog("流程执行开始");
     }
 
     public void setNodeDataMap(Map<String, NodeData> nodeData) {
@@ -148,10 +142,10 @@ public class ExecuteContext implements Serializable {
     }
 
     public void addLog(String log) {
-        logs.add(String.format("[%d] %s", stopwatch.elapsed(TimeUnit.MILLISECONDS), log));
+        executeLog.addLog(log);
     }
 
     public String getLogText() {
-        return String.join("\n", logs);
+        return String.join("\n", executeLog.getLogs());
     }
 }

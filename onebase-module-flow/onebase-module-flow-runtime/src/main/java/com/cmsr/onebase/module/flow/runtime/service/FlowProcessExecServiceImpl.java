@@ -4,10 +4,10 @@ import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.flow.context.condition.ConditionsSupport;
+import com.cmsr.onebase.module.flow.context.condition.SimpleField;
 import com.cmsr.onebase.module.flow.context.enums.FieldTypeConvertor;
 import com.cmsr.onebase.module.flow.context.express.ExpressionExecutor;
 import com.cmsr.onebase.module.flow.context.express.OrExpression;
-import com.cmsr.onebase.module.flow.context.graph.nodes.ModalNodeData;
 import com.cmsr.onebase.module.flow.context.graph.nodes.start.StartFormNodeData;
 import com.cmsr.onebase.module.flow.core.flow.ExecutorInput;
 import com.cmsr.onebase.module.flow.core.flow.ExecutorResult;
@@ -67,7 +67,7 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
         try {
             if (StringUtils.isEmpty(reqVO.getExecutionUuid())) {
                 // 前端正常的触发逻辑用于表单数据 提交数据前触发
-                Map<String, Object> inputMap = convertInputParamsData(reqVO.getInputParams(), startFormNodeData.getFieldSchemaMap());
+                Map<String, Object> inputMap = convertInputParamsData(reqVO, startFormNodeData);
                 boolean isTrigger = true;
                 if (CollectionUtils.isNotEmpty(startFormNodeData.getFilterCondition())) {
                     OrExpression orExpression = ConditionsSupport.convertToOrExpresses(startFormNodeData.getFilterCondition());
@@ -114,7 +114,10 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
     }
 
 
-    private Map<String, Object> convertInputParamsData(Map<String, Object> inputParams, Map<String, SemanticFieldSchemaDTO> fieldSchemaMap) {
+    private Map<String, Object> convertInputParamsData(FormTriggerReqVO reqVO, StartFormNodeData startFormNodeData) {
+        String tableName = startFormNodeData.getTableName();
+        Map<String, Object> inputParams = reqVO.getInputParams();
+        Map<String, SemanticFieldSchemaDTO> fieldSchemaMap = startFormNodeData.getFieldSchemaMap();
         if (MapUtils.isEmpty(inputParams)) {
             return Collections.emptyMap();
         }
@@ -130,17 +133,17 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
                 fieldTypeEnum = fieldSchema.getFieldTypeEnum();
             }
             Object convertValue = FieldTypeConvertor.convert(fieldTypeEnum, value);
-            result.put(fieldName, convertValue);
+            result.put(tableName + "." + fieldName, convertValue);
         }
         return result;
     }
 
-    private Map<String, Object> convertInputFieldsData(List<ModalNodeData.Field> inputFields) {
+    private Map<String, Object> convertInputFieldsData(List<SimpleField> inputFields) {
         if (CollectionUtils.isEmpty(inputFields)) {
             return Collections.emptyMap();
         }
         Map<String, Object> result = new HashMap<>();
-        for (ModalNodeData.Field field : inputFields) {
+        for (SimpleField field : inputFields) {
             SemanticFieldTypeEnum fieldTypeEnum = SemanticFieldTypeEnum.ofCode(field.getFieldType());
             Object value = FieldTypeConvertor.convert(fieldTypeEnum, field.getValue());
             result.put(field.getId(), value);
