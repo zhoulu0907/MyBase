@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import { nanoid } from 'nanoid';
-import { Form, Radio } from '@arco-design/mobile-react';
+import { Ellipsis, Form, Radio } from '@arco-design/mobile-react';
 import { ValidatorType, ITypeRules } from '@arco-design/mobile-utils';
 import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, FormSchema } from '@onebase/ui-kit';
 import '../index.css';
@@ -41,7 +41,7 @@ const XRadio = memo((props: XRadioConfig & { runtime?: boolean; detailMode?: boo
   return (
     <Form.Item
       className="inputTextWrapperOBMobile radioWrapperOBMobile"
-      label={label.display && label.text}
+      label={label.display && <Ellipsis text={label.text} />}
       field={fieldId}
       layout={layout}
       rules={rules}

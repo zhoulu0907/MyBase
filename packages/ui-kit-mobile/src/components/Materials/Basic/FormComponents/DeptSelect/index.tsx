@@ -117,7 +117,7 @@ const XDeptSelect = memo((props: XDeptSelectConfig & { runtime?: boolean; detail
   return (
     <Form.Item
       className="inputTextWrapperOBMobile inputDeptSelectOBMobile"
-      label={label.display && label.text}
+      label={label.display && <Ellipsis text={label.text} />}
       field={fieldId}
       style={{
         borderRadius: '0.16rem',

@@ -1,5 +1,5 @@
 import { PreviewRender } from '@/components/render';
-import { Cell, Collapse, Form } from '@arco-design/mobile-react';
+import { Cell, Collapse, Ellipsis, Form } from '@arco-design/mobile-react';
 import { IconAdd, IconDelete } from '@arco-design/mobile-react/esm/icon';
 import { ITypeRules, ValidatorType } from '@arco-design/mobile-utils';
 import { pagesRuntimeSignal } from '@onebase/common';
@@ -75,7 +75,7 @@ const XSubTable = memo(
         field=""
         rules={rules}
         layout="vertical"
-        label={label.display ? label.text : undefined}
+        label={label.display ? <Ellipsis text={label.text} /> : undefined}
         style={{
           pointerEvents: !runtime || detailMode ? 'none' : 'unset',
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
@@ -105,7 +105,7 @@ const XSubTable = memo(
                     };
                     const pageSchema = { ...schema, config };
                     return (
-                      <Cell label={config.cpName} key={subTable.id} style={{ padding: 0 }}>
+                      <Cell label={<Ellipsis text={config.cpName} />} key={subTable.id} style={{ padding: 0 }}>
                         <PreviewRender
                           editLoading={editLoading}
                           form={form}

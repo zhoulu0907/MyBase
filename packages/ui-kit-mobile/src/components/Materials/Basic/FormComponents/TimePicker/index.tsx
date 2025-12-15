@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { DatePicker, Form } from '@arco-design/mobile-react';
+import { DatePicker, Ellipsis, Form } from '@arco-design/mobile-react';
 import { ValidatorType, ITypeRules } from '@arco-design/mobile-utils';
 import { STATUS_OPTIONS, STATUS_VALUES, DEFAULT_VALUE_TYPES, FormSchema } from '@onebase/ui-kit';
 import '../index.css';
@@ -36,7 +36,7 @@ const XTimePicker = memo((props: XTimePickerConfig & { runtime?: boolean; detail
       className="inputTextWrapperOBMobile"
       field=''
       rules={rules}
-      label={label.display && label.text}
+      label={label.display && <Ellipsis text={label.text} />}
       required={verify?.required}
       initialValue={defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : ''}
       style={{
