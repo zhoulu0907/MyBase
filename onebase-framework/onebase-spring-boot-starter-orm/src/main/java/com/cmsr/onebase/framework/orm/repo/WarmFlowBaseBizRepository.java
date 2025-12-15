@@ -28,11 +28,11 @@ public class WarmFlowBaseBizRepository<M extends BaseMapper<T>, T extends WarmFl
         QueryColumn applicationColumn;
         QueryColumn versionTagColumn;
         if (queryTable != null) {
-            applicationColumn = new QueryColumn(queryTable, BaseBizEntity.APPLICATION_ID);
-            versionTagColumn = new QueryColumn(queryTable, BaseBizEntity.VERSION_TAG);
+            applicationColumn = new QueryColumn(queryTable, QueryWrapperUtils.APPLICATION_ID);
+            versionTagColumn = new QueryColumn(queryTable, QueryWrapperUtils.VERSION_TAG);
         } else {
-            applicationColumn = new QueryColumn(BaseBizEntity.APPLICATION_ID);
-            versionTagColumn = new QueryColumn(BaseBizEntity.VERSION_TAG);
+            applicationColumn = new QueryColumn(QueryWrapperUtils.APPLICATION_ID);
+            versionTagColumn = new QueryColumn(QueryWrapperUtils.VERSION_TAG);
         }
         Long applicationId = ApplicationManager.getApplicationId();
         Long versionTag = ApplicationManager.getVersionTag();
@@ -245,15 +245,17 @@ public class WarmFlowBaseBizRepository<M extends BaseMapper<T>, T extends WarmFl
     //endregion ===== 分页查询操作 =====
 
     public boolean deleteAllApplicationData(Long applicationId) {
+        QueryColumn applicationColumn = new QueryColumn(QueryWrapperUtils.APPLICATION_ID);
         return this.updateChain()
-                .where(WarmFlowBizEntity.APPLICATION_ID, applicationId)
+                .where(applicationColumn.eq(applicationId))
                 .remove();
     }
 
     public boolean deleteApplicationVersionData(Long applicationId, Long versionId) {
+        QueryColumn applicationColumn = new QueryColumn(QueryWrapperUtils.APPLICATION_ID);
+        QueryColumn versionTagColumn = new QueryColumn(QueryWrapperUtils.VERSION_TAG);
         return this.updateChain()
-                .where(WarmFlowBizEntity.APPLICATION_ID, applicationId)
-                .and(WarmFlowBizEntity.VERSION_TAG, versionId)
+                .where(applicationColumn.eq(applicationId).and(versionTagColumn.eq(versionId)))
                 .remove();
     }
 }

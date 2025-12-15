@@ -28,11 +28,11 @@ public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity>
         QueryColumn applicationColumn;
         QueryColumn versionTagColumn;
         if (queryTable != null) {
-            applicationColumn = new QueryColumn(queryTable, BaseBizEntity.APPLICATION_ID);
-            versionTagColumn = new QueryColumn(queryTable, BaseBizEntity.VERSION_TAG);
+            applicationColumn = new QueryColumn(queryTable, QueryWrapperUtils.APPLICATION_ID);
+            versionTagColumn = new QueryColumn(queryTable, QueryWrapperUtils.VERSION_TAG);
         } else {
-            applicationColumn = new QueryColumn(BaseBizEntity.APPLICATION_ID);
-            versionTagColumn = new QueryColumn(BaseBizEntity.VERSION_TAG);
+            applicationColumn = new QueryColumn(QueryWrapperUtils.APPLICATION_ID);
+            versionTagColumn = new QueryColumn(QueryWrapperUtils.VERSION_TAG);
         }
         Long applicationId = ApplicationManager.getApplicationId();
         Long versionTag = ApplicationManager.getVersionTag();
@@ -248,8 +248,8 @@ public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity>
         // 实现备份逻辑
         // 执行update动作。
         // 1、update：把versionTag为1的数据update为新值（参数`versionTag`）
-        QueryColumn applicationIdCol = new QueryColumn(BaseBizEntity.APPLICATION_ID);
-        QueryColumn versionTagCol = new QueryColumn(BaseBizEntity.VERSION_TAG);
+        QueryColumn applicationIdCol = new QueryColumn(QueryWrapperUtils.APPLICATION_ID);
+        QueryColumn versionTagCol = new QueryColumn(QueryWrapperUtils.VERSION_TAG);
         this.updateChain()
                 .set(versionTagCol, versionTag)
                 .where(applicationIdCol.eq(applicationId))
@@ -263,8 +263,8 @@ public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity>
         // 执行select 和 insert 动作。
         // 1、select： versionTag为0的数据
         // 2、insert：把第一步查询出来的数据插入为versionTag为1
-        QueryColumn applicationIdCol = new QueryColumn(BaseBizEntity.APPLICATION_ID);
-        QueryColumn versionTagCol = new QueryColumn(BaseBizEntity.VERSION_TAG);
+        QueryColumn applicationIdCol = new QueryColumn(QueryWrapperUtils.APPLICATION_ID);
+        QueryColumn versionTagCol = new QueryColumn(QueryWrapperUtils.VERSION_TAG);
         QueryWrapper queryWrapper = QueryWrapper.create()
                 .where(applicationIdCol.eq(applicationId))
                 .where(versionTagCol.eq(VersionTagEnum.BUILD.getValue()));
@@ -282,8 +282,8 @@ public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity>
         // 执行select、insert 动作。
         // 1、select：查询versionTag为参数`versionTag`值的数据
         // 2、insert：插入第一步查询出来的数据，versionTag为1
-        QueryColumn applicationIdCol = new QueryColumn(BaseBizEntity.APPLICATION_ID);
-        QueryColumn versionTagCol = new QueryColumn(BaseBizEntity.VERSION_TAG);
+        QueryColumn applicationIdCol = new QueryColumn(QueryWrapperUtils.APPLICATION_ID);
+        QueryColumn versionTagCol = new QueryColumn(QueryWrapperUtils.VERSION_TAG);
         QueryWrapper queryWrapper = QueryWrapper.create()
                 .where(applicationIdCol.eq(applicationId))
                 .where(versionTagCol.eq(versionTag));
@@ -296,15 +296,17 @@ public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity>
     }
 
     public boolean deleteAllApplicationData(Long applicationId) {
+        QueryColumn applicationColumn = new QueryColumn(QueryWrapperUtils.APPLICATION_ID);
         return this.updateChain()
-                .where(BaseBizEntity.APPLICATION_ID, applicationId)
+                .where(applicationColumn.eq(applicationId))
                 .remove();
     }
 
     public boolean deleteApplicationVersionData(Long applicationId, Long versionId) {
+        QueryColumn applicationColumn = new QueryColumn(QueryWrapperUtils.APPLICATION_ID);
+        QueryColumn versionTagColumn = new QueryColumn(QueryWrapperUtils.VERSION_TAG);
         return this.updateChain()
-                .where(BaseBizEntity.APPLICATION_ID, applicationId)
-                .and(BaseBizEntity.VERSION_TAG, versionId)
+                .where(applicationColumn.eq(applicationId).and(versionTagColumn.eq(versionId)))
                 .remove();
     }
 }

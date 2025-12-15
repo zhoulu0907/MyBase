@@ -1,6 +1,5 @@
 package com.cmsr.onebase.framework.orm.repo;
 
-import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.mybatisflex.core.query.*;
 import org.apache.commons.collections4.CollectionUtils;
 
@@ -11,6 +10,10 @@ import java.util.List;
  * @Date：2025/12/11 16:51
  */
 public class QueryWrapperUtils {
+
+    public static final String APPLICATION_ID = "application_id";
+
+    public static final String VERSION_TAG = "version_tag";
 
     public static boolean isQueryFilterable(QueryWrapper queryWrapper) {
         // 不处理UNION类型

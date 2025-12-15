@@ -1,6 +1,7 @@
-package com.cmsr.onebase.module.flow.context.graph.nodes;
+package com.cmsr.onebase.module.flow.context.graph.nodes.logic;
 
 import com.cmsr.onebase.module.flow.context.graph.NodeData;
+import com.cmsr.onebase.module.flow.context.graph.NodeType;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -10,6 +11,7 @@ import java.io.Serializable;
  * @Date：2025/9/30 9:16
  */
 @Data
+@NodeType("loop")
 public class LoopNodeData extends NodeData implements Serializable {
 
     /**

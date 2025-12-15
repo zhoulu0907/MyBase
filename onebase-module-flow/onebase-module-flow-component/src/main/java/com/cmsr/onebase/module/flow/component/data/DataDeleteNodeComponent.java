@@ -8,7 +8,6 @@ import com.cmsr.onebase.module.flow.context.VariableContext;
 import com.cmsr.onebase.module.flow.context.condition.Conditions;
 import com.cmsr.onebase.module.flow.context.express.OrExpression;
 import com.cmsr.onebase.module.flow.context.graph.InLoopDepth;
-import com.cmsr.onebase.module.flow.context.graph.nodes.DataDeleteeNodeData;
 import com.cmsr.onebase.module.flow.context.provider.FlowConditionsProvider;
 import com.cmsr.onebase.module.metadata.api.semantic.SemanticDynamicDataApi;
 import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticTargetConditionVO;
@@ -42,7 +41,7 @@ public class DataDeleteNodeComponent extends SkippableNodeComponent {
         ExecuteContext executeContext = this.getContextBean(ExecuteContext.class);
         executeContext.addLog("数据删除节点开始执行");
         VariableContext variableContext = this.getContextBean(VariableContext.class);
-        DataDeleteeNodeData nodeData = (DataDeleteeNodeData) executeContext.getNodeData(this.getTag());
+        DataDeleteNodeData nodeData = (DataDeleteNodeData) executeContext.getNodeData(this.getTag());
         InLoopDepth inLoopDepth = nodeData.getInLoopDepth();
         Map<String, Object> expressionContext = VariableProvider.resolveLoopVariables(this, inLoopDepth, variableContext.getNodeVariables());
         //
