@@ -1,5 +1,7 @@
 package com.cmsr.onebase.module.system.vo.tenant;
 
+import com.cmsr.onebase.framework.desensitize.annotation.EMailDesensitize;
+import com.cmsr.onebase.framework.desensitize.annotation.MobileDesensitize;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -12,9 +14,11 @@ public class TenantAdminUserResVO {
     private String adminUserName;
 
     @Schema(description = "管理员手机", requiredMode = Schema.RequiredMode.REQUIRED, example = "adminMobile")
+    @MobileDesensitize
     private String adminMobile;
 
     @Schema(description = "管理员邮箱", example = "user@abc.com")
+    @EMailDesensitize
     private String adminEmail;
 
     @Schema(description = "管理员id", requiredMode = Schema.RequiredMode.REQUIRED, example = "adminUserId")

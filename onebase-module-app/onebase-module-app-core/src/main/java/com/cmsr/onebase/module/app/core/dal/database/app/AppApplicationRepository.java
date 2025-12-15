@@ -4,6 +4,8 @@ import com.cmsr.onebase.framework.common.enums.OwnerTagEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppApplicationDO;
 import com.cmsr.onebase.module.app.core.dal.mapper.AppApplicationMapper;
+import com.cmsr.onebase.module.app.core.enums.app.AppPublishEnum;
+import com.cmsr.onebase.module.app.core.enums.app.AppStatusEnum;
 import com.cmsr.onebase.module.app.core.vo.app.ApplicationPageReqVO;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryMethods;
@@ -13,6 +15,7 @@ import com.mybatisflex.core.tenant.TenantManager;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -33,15 +36,15 @@ public class AppApplicationRepository extends ServiceImpl<AppApplicationMapper, 
     public PageResult<AppApplicationDO> selectPage(ApplicationPageReqVO pageReqVO, Long userId) {
         boolean filterByUser = pageReqVO.getOwnerTag() != null && pageReqVO.getOwnerTag().equals(OwnerTagEnum.MY.getValue()) && userId != null;
         QueryWrapper queryWrapper = this.query()
-                .like(AppApplicationDO::getAppName, pageReqVO.getName(), StringUtils::isNotBlank)
-                .eq(AppApplicationDO::getAppStatus, pageReqVO.getStatus(), pageReqVO.getStatus() != null)
-                .eq(AppApplicationDO::getPublishModel, pageReqVO.getPublishModel(), StringUtils::isNotBlank)
-                .eq(AppApplicationDO::getCreator, userId, filterByUser);
-        if (StringUtils.equalsIgnoreCase(pageReqVO.getOrderByTime(), "create")) {
-            queryWrapper = queryWrapper.orderBy(AppApplicationDO::getCreateTime, false);
+                .where(APP_APPLICATION.APP_NAME.like(pageReqVO.getName()).when(StringUtils.isNotBlank(pageReqVO.getName())))
+                .where(APP_APPLICATION.APP_STATUS.eq(pageReqVO.getStatus()).when(pageReqVO.getStatus() != null))
+                .where(APP_APPLICATION.PUBLISH_MODEL.eq(pageReqVO.getPublishModel()).when(StringUtils.isNotBlank(pageReqVO.getPublishModel())))
+                .where(APP_APPLICATION.CREATOR.eq(userId).when(filterByUser));
+        if (Strings.CI.equals(pageReqVO.getOrderByTime(), "create")) {
+            queryWrapper = queryWrapper.orderBy(APP_APPLICATION.CREATE_TIME, false);
         }
-        if (StringUtils.equalsIgnoreCase(pageReqVO.getOrderByTime(), "update")) {
-            queryWrapper = queryWrapper.orderBy(AppApplicationDO::getUpdateTime, false);
+        if (Strings.CI.equals(pageReqVO.getOrderByTime(), "update")) {
+            queryWrapper = queryWrapper.orderBy(APP_APPLICATION.UPDATE_TIME, false);
         }
         Page<AppApplicationDO> pageQuery = Page.of(pageReqVO.getPageNo(), pageReqVO.getPageSize());
         Page<AppApplicationDO> pageResult = this.page(pageQuery, queryWrapper);
@@ -49,23 +52,26 @@ public class AppApplicationRepository extends ServiceImpl<AppApplicationMapper, 
     }
 
     public long findOneByAppCode(String appCode) {
-        QueryWrapper queryWrapper = this.query().eq(AppApplicationDO::getAppCode, appCode);
+        QueryWrapper queryWrapper = this.query()
+                .where(APP_APPLICATION.APP_CODE.eq(appCode));
         return count(queryWrapper);
     }
 
     public long findOneByUid(String uid) {
-        QueryWrapper queryWrapper = this.query().eq(AppApplicationDO::getAppUid, uid);
+        QueryWrapper queryWrapper = this.query().where(APP_APPLICATION.APP_UID.eq(uid));
         return count(queryWrapper);
     }
 
     public long findByAppCodeAndIdNot(String appCode, Long id) {
-        QueryWrapper queryWrapper = this.query().eq(AppApplicationDO::getAppCode, appCode)
-                .ne(AppApplicationDO::getId, id);
+        QueryWrapper queryWrapper = this.query()
+                .where(APP_APPLICATION.APP_CODE.eq(appCode))
+                .where(APP_APPLICATION.ID.ne(id));
         return count(queryWrapper);
     }
 
     public Long countByTenantId(Long tenantId) {
-        QueryWrapper queryWrapper = this.query().eq(AppApplicationDO::getTenantId, tenantId);
+        QueryWrapper queryWrapper = this.query()
+                .where(APP_APPLICATION.TENANT_ID.eq(tenantId));
         return this.count(queryWrapper);
     }
 
@@ -77,16 +83,18 @@ public class AppApplicationRepository extends ServiceImpl<AppApplicationMapper, 
     }
 
     public List<AppApplicationDO> getSimpleAppList(Integer status) {
-        QueryWrapper queryWrapper = this.query().eq(AppApplicationDO::getAppStatus, status)
-                .orderBy(AppApplicationDO::getCreateTime, false);
+        QueryWrapper queryWrapper = this.query()
+                .where(APP_APPLICATION.APP_STATUS.eq(status))
+                .orderBy(APP_APPLICATION.UPDATE_TIME, false)
+                .orderBy(APP_APPLICATION.CREATE_TIME, false);
         return list(queryWrapper);
     }
 
     public List<AppApplicationDO> findAppApplicationByAppName(String appName) {
         QueryWrapper queryWrapper = this.query()
-                .like(AppApplicationDO::getAppName, appName, StringUtils::isNotBlank)
-                .orderBy(AppApplicationDO::getUpdateTime, false)
-                .orderBy(AppApplicationDO::getCreateTime, false);
+                .where(APP_APPLICATION.APP_NAME.eq(appName).when(StringUtils.isNotBlank(appName)))
+                .orderBy(APP_APPLICATION.UPDATE_TIME, false)
+                .orderBy(APP_APPLICATION.CREATE_TIME, false);
         return list(queryWrapper);
     }
 
@@ -107,26 +115,41 @@ public class AppApplicationRepository extends ServiceImpl<AppApplicationMapper, 
 
     public List<AppApplicationDO> findAppApplicationByAppIds(Collection<Long> appIds) {
         QueryWrapper queryWrapper = this.query()
-                .in(AppApplicationDO::getId, appIds, CollectionUtils.isNotEmpty(appIds))
-                .orderBy(AppApplicationDO::getUpdateTime, false)
-                .orderBy(AppApplicationDO::getCreateTime, false);
+                .where(APP_APPLICATION.ID.in(appIds).when(CollectionUtils.isNotEmpty(appIds)))
+                .orderBy(APP_APPLICATION.UPDATE_TIME, false)
+                .orderBy(APP_APPLICATION.CREATE_TIME, false);
         return list(queryWrapper);
     }
 
     public List<AppApplicationDO> findMyAppApplicationByAppName(String appName, Long userId) {
         QueryWrapper queryWrapper = this.query()
-                .like(AppApplicationDO::getAppName, appName, StringUtils::isNotBlank)
-                .eq(AppApplicationDO::getCreator, userId)
-                .orderBy(AppApplicationDO::getUpdateTime, false)
-                .orderBy(AppApplicationDO::getCreateTime, false);
+                .where(APP_APPLICATION.APP_NAME.eq(appName).when(StringUtils.isNotBlank(appName)))
+                .where(APP_APPLICATION.CREATOR.eq(userId))
+                .orderBy(APP_APPLICATION.UPDATE_TIME, false)
+                .orderBy(APP_APPLICATION.CREATE_TIME, false);
         return list(queryWrapper);
     }
 
     public void updateAppTimeByApplicationId(Long appId) {
-        this.updateChain().set(AppApplicationDO::getUpdateTime, LocalDateTime.now())
-                .eq(AppApplicationDO::getId, appId)
+        this.updateChain()
+                .set(APP_APPLICATION.UPDATE_TIME, LocalDateTime.now())
+                .where(APP_APPLICATION.ID.eq(appId))
                 .update();
     }
 
+    public void updateStatusByApplicationId(Long applicationId, AppStatusEnum status, AppPublishEnum publishStatus) {
+        this.updateChain()
+                .set(APP_APPLICATION.APP_STATUS, status.getValue())
+                .set(APP_APPLICATION.PUBLISH_STATUS, publishStatus.getValue())
+                .where(APP_APPLICATION.ID.eq(applicationId))
+                .update();
+    }
+
+    public void updateAppStatusByApplicationId(Long applicationId, AppStatusEnum status) {
+        this.updateChain()
+                .set(APP_APPLICATION.APP_STATUS, status.getValue())
+                .where(APP_APPLICATION.ID.eq(applicationId))
+                .update();
+    }
 
 }

@@ -28,13 +28,16 @@ public class EntityTriggerReqDTO {
     @Schema(description = "触发事件，beforeCreate,afterCreate,beforeUpdate,afterUpdate,beforeDelete,afterDelete")
     private TriggerEventEnum triggerEvent;
 
+    @Schema(description = "流程上下文，key是上下文变量名，value是上下文变量值, 现在包含SystemFieldConstants REQUIRE中的常量")
+    private Map<String, String> flowContext;
+
     @Schema(description = "数据，字段名称和字段数据, key是字段的columnName, value是字段值")
     private List<SemanticFieldValueDTO<Object>> fieldData;
 
     public Map<String, Object> toInputData() {
         Map<String, Object> inputData = new HashMap<>();
         for (SemanticFieldValueDTO<?> fieldValueDTO : fieldData) {
-            inputData.put(fieldValueDTO.getFieldName(), fieldValueDTO.getRawValue());
+            inputData.put(tableName + "." + fieldValueDTO.getFieldName(), fieldValueDTO.getRawValue());
         }
         return inputData;
     }

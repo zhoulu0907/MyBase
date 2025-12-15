@@ -13,9 +13,6 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class BaseBizEntity extends BaseEntity {
-    public static final String APPLICATION_ID = "application_id";
-
-    public static final String VERSION_TAG = "version_tag";
 
     @Column(value = "application_id", comment = "应用ID")
     private Long applicationId;

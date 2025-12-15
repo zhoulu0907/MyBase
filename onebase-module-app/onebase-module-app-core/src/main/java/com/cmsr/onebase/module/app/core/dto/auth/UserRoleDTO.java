@@ -15,4 +15,6 @@ public class UserRoleDTO {
 
     private Set<Long> roleIds;
 
+    private Set<String> roleUuids;
+
 }

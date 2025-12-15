@@ -1,8 +1,8 @@
 package com.cmsr.onebase.module.app.api.appresource;
 
 import com.cmsr.onebase.module.app.api.appresource.dto.AppMenuRespDTO;
-import com.cmsr.onebase.module.app.api.appresource.dto.PageRespDTO;
 import com.cmsr.onebase.module.app.api.appresource.dto.AppPagesetRespDTO;
+import com.cmsr.onebase.module.app.api.appresource.dto.PageRespDTO;
 
 import java.util.List;
 
@@ -12,7 +12,9 @@ import java.util.List;
  */
 public interface AppResourceApi {
 
-    PageRespDTO findPageByPageId(Long pageId);
+    PageRespDTO findPageByPageUuid(Long applicationId, String pageUuid);
+
+    String findTableUuidByAppIdAndPageUuid(Long applicationId, String pageUuid);
 
     /**
      * 根据页面集ID查询页面
@@ -25,7 +27,7 @@ public interface AppResourceApi {
     /**
      * 根据页面集UUID查询页面
      *
-     * @param pageSetUuid    页面集UUID
+     * @param pageSetUuid   页面集UUID
      * @param applicationId 应用ID
      * @return 页面列表
      */
@@ -34,7 +36,7 @@ public interface AppResourceApi {
     /**
      * 根据菜单UUID查询页面集
      *
-     * @param menuUuids       菜单UUID列表
+     * @param menuUuids     菜单UUID列表
      * @param applicationId 应用ID
      * @return 页面集列表
      */
@@ -43,7 +45,7 @@ public interface AppResourceApi {
     /**
      * 根据菜单UUID查询页面集
      *
-     * @param menuUuid       菜单UUID
+     * @param menuUuid      菜单UUID
      * @param applicationId 应用ID
      * @return 页面集
      */
@@ -60,7 +62,7 @@ public interface AppResourceApi {
     /**
      * 根据菜单UUID查询菜单
      *
-     * @param menuUuid       菜单UUID
+     * @param menuUuid      菜单UUID
      * @param applicationId 应用ID
      * @return 菜单
      */

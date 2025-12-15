@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.system.vo.mail;
 
+import com.cmsr.onebase.framework.desensitize.annotation.EMailDesensitize;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -11,6 +12,7 @@ public class MailAccountSimpleRespVO {
     private Long id;
 
     @Schema(description = "邮箱", requiredMode = Schema.RequiredMode.REQUIRED, example = "768541388@qq.com")
+    @EMailDesensitize
     private String mail;
 
 }

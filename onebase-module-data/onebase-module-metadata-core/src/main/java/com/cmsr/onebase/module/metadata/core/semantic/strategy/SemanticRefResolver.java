@@ -102,8 +102,6 @@ public class SemanticRefResolver {
         // 构建数据选择上下文（关系元信息 + 主数据缓存），供 DATA_SELECTION/MULTI_DATA_SELECTION 解析
         DataSelectionContext dataSelection = buildDataSelectionContext(entity, value);
 
-        log.info("dataSelectIds: {} \n dataSelection: {}", dataSelectIds, dataSelection);
-
         // 构建文件缓存（按收集的文件ID批量查询，供 FILE/IMAGE 解析）
         Map<Long, FileListRespDTO> files = buildFileCache(fileIds);
 
@@ -444,6 +442,7 @@ public class SemanticRefResolver {
             List<Object> ids = new ArrayList<>(e.getValue());
             if (ids.isEmpty()) continue;
             List<Row> mains = dynamicMetadataRepository.selectMainByIds(table, pk, ids);
+            
             Map<Object, Row> rowById = new HashMap<>();
             for (Row r : mains) { rowById.put(r.get(pk), r); }
             mainsByTable.put(table, rowById);
@@ -465,7 +464,6 @@ public class SemanticRefResolver {
         Map<String, Set<Object>> idsByTable = collectDataSelectIdsByTable(value, metaByFieldUuid);
         Map<String, String> pkFieldByTable = buildPkFieldByTableFromMeta(metaByFieldUuid);
         Map<String, Map<Object, Row>> mainsByTable = buildMainsByTable(idsByTable, pkFieldByTable);
-        log.info("mainsByTable: {} , pkFieldByTable: {}, metaByFieldUuid: {}, idsByTable: {}", mainsByTable , pkFieldByTable, metaByFieldUuid, idsByTable);
         return new DataSelectionContext(metaByFieldUuid, mainsByTable);
     }
 
@@ -564,12 +562,13 @@ public class SemanticRefResolver {
             String pkField = getPrimaryKeyNameFromConnector(c);
             String selectFieldUuid = c.getSelectFieldUuid() == null ? null : c.getSelectFieldUuid();
             String selectFieldName = getFieldNameByUuidFromConnector(c, selectFieldUuid);
+            String sourceKeyFieldUuid = c.getSourceKeyFieldUuid() == null ? null : c.getSourceKeyFieldUuid();
             if (selectFieldUuid == null || pkField == null) continue;
             DataSelectMeta meta = new DataSelectMeta();
             meta.tableName = c.getTargetEntityTableName();
             meta.pkField = pkField;
             meta.selectFieldName = selectFieldName;
-            map.put(selectFieldUuid, meta);
+            map.put(sourceKeyFieldUuid, meta);
         }
         return map;
     }
@@ -590,6 +589,7 @@ public class SemanticRefResolver {
                 SemanticFieldTypeEnum t = v.getFieldTypeEnum();
                 if (t != SemanticFieldTypeEnum.DATA_SELECTION && t != SemanticFieldTypeEnum.MULTI_DATA_SELECTION) continue;
                 String fieldUuid = v.getFieldUuid();
+                log.info("fieldUuid is {}", fieldUuid);
                 DataSelectMeta meta = fieldUuid == null ? null : metaByFieldId.get(fieldUuid);
                 if (meta == null || meta.tableName == null) continue;
                 if (v.isListType()) {
@@ -614,6 +614,11 @@ public class SemanticRefResolver {
         String tableName;
         String pkField;
         String selectFieldName;
+
+        @Override
+        public String toString() {
+            return JsonUtils.toJsonPrettyString(this);
+        }
     }
 
     /**

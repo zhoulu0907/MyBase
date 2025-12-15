@@ -1,14 +1,20 @@
 package com.cmsr.onebase.module.metadata.core.semantic.strategy;
 
+import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.module.flow.api.FlowProcessExecApi;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerReqDTO;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerRespDTO;
 import com.cmsr.onebase.module.flow.api.dto.TriggerEventEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticDataMethodOpEnum;
+import com.cmsr.onebase.module.metadata.core.semantic.constants.SystemFieldConstants;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldValueDTO;
 import jakarta.annotation.Resource;
+
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
 import java.util.List;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
@@ -44,9 +50,7 @@ public class SemanticWorkflowExecutor {
                            String tableName,
                            List<SemanticFieldValueDTO<Object>> mainFieldValues,
                            List<List<SemanticFieldValueDTO<Object>>> connectorFieldValueBatches) {
-        EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
-        reqDTO.setTraceId(traceId);
-        reqDTO.setTableName(tableName);
+        EntityTriggerReqDTO reqDTO = buildReq(traceId, tableName);
         reqDTO.setFieldData(mainFieldValues);
         if (op == SemanticDataMethodOpEnum.CREATE) reqDTO.setTriggerEvent(TriggerEventEnum.BEFORE_CREATE);
         else if (op == SemanticDataMethodOpEnum.UPDATE) reqDTO.setTriggerEvent(TriggerEventEnum.BEFORE_UPDATE);
@@ -75,9 +79,7 @@ public class SemanticWorkflowExecutor {
                             String tableName,
                             List<SemanticFieldValueDTO<Object>> mainFieldValues,
                             List<List<SemanticFieldValueDTO<Object>>> connectorFieldValueBatches) {
-        EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
-        reqDTO.setTraceId(traceId);
-        reqDTO.setTableName(tableName);
+        EntityTriggerReqDTO reqDTO = buildReq(traceId, tableName);
         if (op == SemanticDataMethodOpEnum.CREATE) reqDTO.setTriggerEvent(TriggerEventEnum.AFTER_CREATE);
         else if (op == SemanticDataMethodOpEnum.UPDATE) reqDTO.setTriggerEvent(TriggerEventEnum.AFTER_UPDATE);
         else if (op == SemanticDataMethodOpEnum.DELETE) reqDTO.setTriggerEvent(TriggerEventEnum.AFTER_DELETE);
@@ -105,9 +107,7 @@ public class SemanticWorkflowExecutor {
      * @param before 是否为前置事件（true：BEFORE_*；false：AFTER_*）
      */
     private void triggerConnector(String traceId, String tableName, SemanticDataMethodOpEnum op, List<SemanticFieldValueDTO<Object>> fieldValueList, boolean before) {
-        EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
-        reqDTO.setTraceId(traceId);
-        reqDTO.setTableName(tableName);
+        EntityTriggerReqDTO reqDTO = buildReq(traceId, tableName);
         reqDTO.setFieldData(fieldValueList);
         if (before) {
             if (op == SemanticDataMethodOpEnum.CREATE) reqDTO.setTriggerEvent(TriggerEventEnum.BEFORE_CREATE);
@@ -126,5 +126,24 @@ public class SemanticWorkflowExecutor {
             if (before) { throw exception(PROCESS_ERROR_BEFORE_CREATE, respDTO.getMessage()); }
             else { throw exception(PROCESS_ERROR_AFTER_CREATE, respDTO.getMessage()); }
         }
+    }
+
+    private EntityTriggerReqDTO buildReq(String traceId, String tableName) {
+        EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
+        reqDTO.setTraceId(traceId);
+        reqDTO.setTableName(tableName);
+
+        Long userId = SecurityFrameworkUtils.getLoginUserId();
+        Long userDeptId = SecurityFrameworkUtils.getLoginUserDeptId() != null ? SecurityFrameworkUtils.getLoginUserDeptId() : 0L;
+
+        HashMap<String, String> flowContext = new HashMap<>();
+        flowContext.put(SystemFieldConstants.REQUIRE.CREATOR, ObjectUtils.isEmpty(userId) ? null : String.valueOf(userId));
+        flowContext.put(SystemFieldConstants.REQUIRE.UPDATER, ObjectUtils.isEmpty(userId) ? null : String.valueOf(userId));
+        flowContext.put(SystemFieldConstants.REQUIRE.OWNER_DEPT, ObjectUtils.isEmpty(userDeptId) ? null : String.valueOf(userDeptId));  
+        flowContext.put(SystemFieldConstants.REQUIRE.OWNER_ID, ObjectUtils.isEmpty(userId) ? null : String.valueOf(userId));
+
+        reqDTO.setFlowContext(flowContext);
+
+        return reqDTO;
     }
 }

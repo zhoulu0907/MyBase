@@ -8,7 +8,6 @@ import com.mybatisflex.core.query.*;
 import com.mybatisflex.core.util.CollectionUtil;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -18,20 +17,21 @@ import java.util.List;
 public class WarmFlowBaseBizRepository<M extends BaseMapper<T>, T extends WarmFlowBizEntity> extends ServiceImpl<M, T> {
 
     protected void injectQueryFilter(QueryWrapper queryWrapper) {
-        if (!canFilter(queryWrapper)) {
+        if (ApplicationManager.isIgnoreApplicationCondition() && ApplicationManager.isIgnoreVersionTagCondition()) {
             return;
         }
-
+        if (!QueryWrapperUtils.isQueryFilterable(queryWrapper)) {
+            return;
+        }
+        QueryTable queryTable = QueryWrapperUtils.getQueryTable(queryWrapper);
         QueryColumn applicationColumn;
         QueryColumn versionTagColumn;
-        List<QueryTable> queryTables = CPI.getQueryTables(queryWrapper);
-
-        if (CollectionUtils.isEmpty(queryTables)) {
-            applicationColumn = new QueryColumn(WarmFlowBizEntity.APPLICATION_ID);
-            versionTagColumn = new QueryColumn(WarmFlowBizEntity.VERSION_TAG);
+        if (queryTable != null) {
+            applicationColumn = new QueryColumn(queryTable, QueryWrapperUtils.APPLICATION_ID);
+            versionTagColumn = new QueryColumn(queryTable, QueryWrapperUtils.VERSION_TAG);
         } else {
-            applicationColumn = new QueryColumn(queryTables.get(0), WarmFlowBizEntity.APPLICATION_ID);
-            versionTagColumn = new QueryColumn(queryTables.get(0), WarmFlowBizEntity.VERSION_TAG);
+            applicationColumn = new QueryColumn(QueryWrapperUtils.APPLICATION_ID);
+            versionTagColumn = new QueryColumn(QueryWrapperUtils.VERSION_TAG);
         }
         Long applicationId = ApplicationManager.getApplicationId();
         Long versionTag = ApplicationManager.getVersionTag();
@@ -39,29 +39,6 @@ public class WarmFlowBaseBizRepository<M extends BaseMapper<T>, T extends WarmFl
         queryWrapper.and(versionTagColumn.eq(versionTag).when(!ApplicationManager.isIgnoreVersionTagCondition()));
     }
 
-    private boolean canFilter(QueryWrapper queryWrapper) {
-        if (ApplicationManager.isIgnoreApplicationCondition() && ApplicationManager.isIgnoreVersionTagCondition()) {
-            return false;
-        }
-        // 不处理UNION类型
-        List<UnionWrapper> unions = CPI.getUnions(queryWrapper);
-        if (CollectionUtils.isNotEmpty(unions)) {
-
-            return false;
-        }
-        // 不处理子查询
-        List<QueryWrapper> childSelect = CPI.getChildSelect(queryWrapper);
-        if (CollectionUtils.isNotEmpty(childSelect)) {
-            return false;
-        }
-        List<QueryTable> queryTables = CPI.getQueryTables(queryWrapper);
-        if (CollectionUtils.isNotEmpty(queryTables) && queryTables.size() > 1) {
-            log.warn("查询条件包含多个表，跳过条件注入");
-            return false;
-        }
-        // 需要处理
-        return true;
-    }
 
     //region ===== 查询（查）操作 =====
 
@@ -213,7 +190,6 @@ public class WarmFlowBaseBizRepository<M extends BaseMapper<T>, T extends WarmFl
      */
     @Override
     public boolean exists(QueryWrapper query) {
-        this.injectQueryFilter(query);
         return exists(CPI.getWhereQueryCondition(query));
     }
 
@@ -265,4 +241,19 @@ public class WarmFlowBaseBizRepository<M extends BaseMapper<T>, T extends WarmFl
     }
 
     //endregion ===== 分页查询操作 =====
+
+    public boolean deleteAllApplicationData(Long applicationId) {
+        QueryColumn applicationColumn = new QueryColumn(QueryWrapperUtils.APPLICATION_ID);
+        return this.updateChain()
+                .where(applicationColumn.eq(applicationId))
+                .remove();
+    }
+
+    public boolean deleteApplicationVersionData(Long applicationId, Long versionId) {
+        QueryColumn applicationColumn = new QueryColumn(QueryWrapperUtils.APPLICATION_ID);
+        QueryColumn versionTagColumn = new QueryColumn(QueryWrapperUtils.VERSION_TAG);
+        return this.updateChain()
+                .where(applicationColumn.eq(applicationId).and(versionTagColumn.eq(versionId)))
+                .remove();
+    }
 }

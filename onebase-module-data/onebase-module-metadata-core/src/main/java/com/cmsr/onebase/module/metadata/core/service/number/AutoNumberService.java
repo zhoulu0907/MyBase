@@ -92,7 +92,7 @@ public class AutoNumberService {
         return generator.preview(config, contextData);
     }
 
-    public Map<String, String> generateDataNumbers(List<Long> fieldIds, Map<String, Object> contextData) {
+    public Map<String, String> generateDataNumbers(List<String> fieldIds, Map<String, Object> contextData) {
         Map<String, String> result = new HashMap<>();
         if (fieldIds == null || fieldIds.isEmpty()) {
             return result;

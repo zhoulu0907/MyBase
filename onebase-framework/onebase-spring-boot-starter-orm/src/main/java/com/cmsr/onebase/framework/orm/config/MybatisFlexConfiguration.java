@@ -35,6 +35,9 @@ public class MybatisFlexConfiguration implements MyBatisFlexCustomizer {
     @Autowired
     private SnowflakeIdGenerator snowflakeIdGenerator;
 
+    @Autowired
+    private DefaultEntityListener defaultEntityListener;
+
     @Override
     public void customize(FlexGlobalConfig defaultConfig) {
         // 不忽略任何条件，默认行为，容易隐藏深层次的问题
@@ -45,12 +48,12 @@ public class MybatisFlexConfiguration implements MyBatisFlexCustomizer {
         defaultConfig.setDeletedValueOfLogicDelete(System.currentTimeMillis());
 
         Map<Class<?>, List<InsertListener>> insertListenerMap = new HashMap<>();
-        insertListenerMap.put(BaseEntity.class, List.of(new DefaultEntityListener()));
-        insertListenerMap.put(WarmFlowBaseEntity.class, List.of(new DefaultEntityListener()));
+        insertListenerMap.put(BaseEntity.class, List.of(defaultEntityListener));
+        insertListenerMap.put(WarmFlowBaseEntity.class, List.of(defaultEntityListener));
 
         Map<Class<?>, List<UpdateListener>> updateListenerMap = new HashMap<>();
-        updateListenerMap.put(BaseEntity.class, List.of(new DefaultEntityListener()));
-        updateListenerMap.put(WarmFlowBaseEntity.class, List.of(new DefaultEntityListener()));
+        updateListenerMap.put(BaseEntity.class, List.of(defaultEntityListener));
+        updateListenerMap.put(WarmFlowBaseEntity.class, List.of(defaultEntityListener));
 
         // base information listener
         defaultConfig.setEntityInsertListeners(insertListenerMap);

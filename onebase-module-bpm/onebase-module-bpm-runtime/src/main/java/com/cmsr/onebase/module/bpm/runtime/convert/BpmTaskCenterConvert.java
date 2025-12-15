@@ -41,6 +41,7 @@ public interface BpmTaskCenterConvert {
     @Mapping(target = "arrivalTime", source = "createTime")
     @Mapping(target = "businessUuid", source = "bindingViewId")
     @Mapping(target = "initiator", ignore = true)
+    @Mapping(target = "pageSetId", ignore = true)
     BpmFlowTodoTaskVO toTodoTaskVO(BpmTodoTaskDTO todoTaskDTO);
 
     /**
@@ -58,6 +59,7 @@ public interface BpmTaskCenterConvert {
     @Mapping(target = "taskStatus", source = "taskFlowStatus")
     @Mapping(target = "businessUuid", source = "bindingViewId")
     @Mapping(target = "initiator", ignore = true)
+    @Mapping(target = "pageSetId", ignore = true)
     BpmFlowDoneTaskVO toDoneTaskVO(BpmDoneTaskDTO doneTaskDTO);
 
     /**
@@ -75,6 +77,9 @@ public interface BpmTaskCenterConvert {
     @Mapping(target = "updateTime", source = "updateTime")
     @Mapping(target = "instanceId", source = "id")
     @Mapping(target = "businessUuid", source = "bindingViewId")
+    @Mapping(target = "currentNodeHandler", ignore = true)
+    @Mapping(target = "taskId", ignore = true)
+    @Mapping(target = "pageSetId", ignore = true)
     BpmMyCreatedVO toMyCreatedVO(BpmMyInstanceDTO myInstanceDTO);
 
     /**
@@ -92,6 +97,7 @@ public interface BpmTaskCenterConvert {
     @Mapping(target = "businessUuid", source = "bindingViewId")
     @Mapping(target = "viewed", source = "viewed", qualifiedByName = "intToBoolean")
     @Mapping(target = "initiator", ignore = true)
+    @Mapping(target = "pageSetId", ignore = true)
     BpmCcTaskPageResVO toCcTaskVO(BpmCcRecordDTO ccRecord);
 
     /**

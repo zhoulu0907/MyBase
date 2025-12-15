@@ -30,8 +30,17 @@ public class AppAuthDataGroupRepository extends BaseBizRepository<AppAuthDataGro
         return this.list(queryWrapper);
     }
 
-    public List<AppAuthDataGroupDO> findByAppIdAndRoleIdsAndMenuId(Long applicationId, Set<Long> roleIds, Long menuId) {
-        return mapper.findByAppIdAndRoleIdsAndMenuId(applicationId, roleIds, menuId);
+    public List<AppAuthDataGroupDO> findByAppIdAndRoleIdsAndMenuId(Long applicationId, Set<String> roleUuids, String menuUuid) {
+        QueryWrapper queryWrapper = this.query()
+                .where(APP_AUTH_DATA_GROUP.APPLICATION_ID.eq(applicationId))
+                .where(APP_AUTH_DATA_GROUP.ROLE_UUID.in(roleUuids))
+                .where(APP_AUTH_DATA_GROUP.MENU_UUID.eq(menuUuid));
+        return this.list(queryWrapper);
     }
 
+    public void deleteByMenuUuid(String menuUuid) {
+        this.updateChain()
+                .where(APP_AUTH_DATA_GROUP.MENU_UUID.eq(menuUuid))
+                .remove();
+    }
 }

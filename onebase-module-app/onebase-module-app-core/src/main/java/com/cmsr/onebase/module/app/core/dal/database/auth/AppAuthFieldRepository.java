@@ -37,7 +37,7 @@ public class AppAuthFieldRepository extends BaseBizRepository<AppAuthFieldMapper
                 .remove();
     }
 
-    public List<AppAuthFieldDO> findByAppIdAndRoleIdsAndMenuId(Long applicationId, List<String> roleUuids, String menuUuid) {
+    public List<AppAuthFieldDO> findByAppIdAndRoleIdsAndMenuId(Long applicationId, Set<String> roleUuids, String menuUuid) {
         QueryWrapper queryWrapper = this.query()
                 .where(APP_AUTH_FIELD.APPLICATION_ID.eq(applicationId))
                 .where(APP_AUTH_FIELD.ROLE_UUID.in(roleUuids))
@@ -45,4 +45,9 @@ public class AppAuthFieldRepository extends BaseBizRepository<AppAuthFieldMapper
         return list(queryWrapper);
     }
 
+    public void deleteByMenuUuid(String menuUuid) {
+        this.updateChain()
+                .where(APP_AUTH_FIELD.MENU_UUID.eq(menuUuid))
+                .remove();
+    }
 }

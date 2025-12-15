@@ -105,19 +105,19 @@ public class ApplicationManager {
 
     public static <T> T withoutVersionTagCondition(Supplier<T> supplier) {
         try {
-            ignoreApplicationCondition();
+            ignoreVersionTagCondition();
             return supplier.get();
         } finally {
-            restoreApplicationCondition();
+            restoreVersionTagCondition();
         }
     }
 
     public static void withoutVersionTagCondition(Runnable runnable) {
         try {
-            ignoreApplicationCondition();
+            ignoreVersionTagCondition();
             runnable.run();
         } finally {
-            restoreApplicationCondition();
+            restoreVersionTagCondition();
         }
     }
 
@@ -143,6 +143,17 @@ public class ApplicationManager {
         } finally {
             setApplicationId(previousApplicationId);
             setVersionTag(previousVersionTag);
+        }
+    }
+
+    public static <T> T withoutApplicationIdAndVersionTag(Supplier<T> supplier) {
+        try {
+            ignoreApplicationCondition();
+            ignoreVersionTagCondition();
+            return supplier.get();
+        } finally {
+            restoreApplicationCondition();
+            restoreVersionTagCondition();
         }
     }
 

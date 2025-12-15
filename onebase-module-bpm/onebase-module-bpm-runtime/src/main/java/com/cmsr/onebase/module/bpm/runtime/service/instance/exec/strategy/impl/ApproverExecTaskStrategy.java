@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.bpm.runtime.service.instance.exec.strategy.impl;
 
+import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowAgentInsDO;
 import com.cmsr.onebase.module.bpm.core.dto.node.ApproverNodeExtDTO;
@@ -12,7 +13,6 @@ import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntitySchemaDT
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntityValueDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldValueDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticFieldTypeEnum;
-import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticMergeConditionVO;
 import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticTargetBodyVO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -80,18 +80,22 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
             return writableFieldsMap;
         }
 
-        // 第一步：先取出 writable 的子表，放到 Set<String> 里
+        // 第一步：先取出 writable和hidden 的子表，放到 Set<String> 里
         Set<String> writableSubTables = new HashSet<>();
+        Set<String> hiddenSubTables = new HashSet<>();
+
         for (FieldPermCfgDTO.FieldConfigDTO fieldConfig : fieldPermConfig.getFieldConfigs()) {
             String tableName = fieldConfig.getTableName();
             String fieldName = fieldConfig.getFieldName();
             String fieldPermType = fieldConfig.getFieldPermType();
 
             // 如果子表本身是 WRITE（tableName = fieldName 且不是主表），添加到 writableSubTables
-            if (Objects.equals(fieldPermType, FieldPermTypeEnum.WRITE.getCode())
-                    && Objects.equals(tableName, fieldName)
-                    && !Objects.equals(tableName, mainTableName)) {
-                writableSubTables.add(tableName);
+            if (Objects.equals(tableName, fieldName) && !Objects.equals(tableName, mainTableName)) {
+                if (Objects.equals(fieldPermType, FieldPermTypeEnum.WRITE.name())) {
+                    writableSubTables.add(tableName);
+                } else if (Objects.equals(fieldPermType, FieldPermTypeEnum.HIDDEN.name())) {
+                    hiddenSubTables.add(tableName);
+                }
             }
         }
 
@@ -101,8 +105,8 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
             String fieldName = fieldConfig.getFieldName();
             String fieldPermType = fieldConfig.getFieldPermType();
 
-            // 如果是子表且子表本身不是可编辑权限，跳过其字段权限
-            if (!Objects.equals(tableName, mainTableName) && !writableSubTables.contains(tableName)) {
+            // 如果是子表且子表本身是隐藏权限，跳过其字段权限
+            if (!Objects.equals(tableName, mainTableName) && hiddenSubTables.contains(tableName)) {
                 continue;
             }
 
@@ -116,7 +120,7 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
         return writableFieldsMap;
     }
 
-    private Map<String, Object> buildEditableEntityData(EntityVO entityVO, ApproverNodeExtDTO extDTO) {
+    private EntityVO buildEditableEntityData(EntityVO entityVO, ApproverNodeExtDTO extDTO) {
         // 不涉及更新
         if (entityVO == null || MapUtils.isEmpty(entityVO.getData())) {
             log.debug("实体数据为空，跳过构建可编辑数据");
@@ -132,7 +136,7 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
         if (fieldPermConfig == null || !fieldPermConfig.getUseNodeConfig()) {
             log.debug("未开启节点字段权限配置，直接返回原始数据，tableName: {}", tableName);
             // todo：待完善，未开启字段权限配置，则以表单默认权限为准，此处不做校验
-            return new HashMap<>(entityData);
+            return entityVO;
         }
 
         Object idObj = entityData.get("id");
@@ -191,7 +195,12 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
                 .count();
         log.debug("构建可编辑实体数据完成，tableName: {}, entityId: {}, 主表字段数: {}, 子表数: {}",
                 tableName, entityId, mainTableFieldCount, subTableNames.size());
-        return editableEntityData;
+
+        EntityVO editableEntityVO = new EntityVO();
+        editableEntityVO.setTableName(tableName);
+        editableEntityVO.setData(editableEntityData);
+
+        return editableEntityVO;
     }
 
     /**
@@ -337,16 +346,7 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
             boolean hasWritableFields = subWritableFieldNames != null
                     && subWritableFieldNames.stream().anyMatch(fieldName -> !Objects.equals(fieldName, subTableName));
 
-            // 检查是否传了子表数据（使用 containsKey 区分 key 不存在和值为 null）
-            boolean hasSubTableKey = entityData.containsKey(subTableName);
-
-            // 如果没传子表数据（key不存在），可以忽略，代表不做任何修改
-            if (!hasSubTableKey) {
-                log.debug("子表数据 key 不存在，跳过处理，subTableName: {}", subTableName);
-                continue;
-            }
-
-            // 获取要更新的子表数据（key存在，但值可能为null或[]）
+            // 获取要更新的子表数据（key不存在、值为null或空列表时，updateSubTableList都为空列表）
             Object updateSubTableDataObj = entityData.get(subTableName);
             @SuppressWarnings("unchecked")
             List<Map<String, Object>> updateSubTableList = updateSubTableDataObj instanceof List
@@ -377,19 +377,19 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
             // 删除数据（exist中有但update中没有）
             Set<String> deleteIds = new HashSet<>();
 
-            // 处理空列表或null的情况：如果传了空列表，所有exist中的id都应该在deleteIds中
+            // 处理子表未传、为null或空列表的情况：都表示删除所有数据
             if (CollectionUtils.isEmpty(updateSubTableList)) {
-                // 如果原来没有数据，不算删除，可以忽略（此时deleteIds为空）
-                if (CollectionUtils.isEmpty(existSubTableList)) {
-                    log.debug("子表原数据为空，传空列表不算删除，跳过处理，subTableName: {}", subTableName);
-                    continue;
-                }
-                // 如果原来有数据，传空列表算删除，将所有exist中的id都加入到deleteIds中
+                // 将所有exist中的id都加入到deleteIds中（表示删除）
                 for (Map<String, Object> existItem : existSubTableList) {
                     Object existId = existItem.get("id");
                     if (existId != null) {
                         deleteIds.add(convertIdToString(existId));
                     }
+                }
+                // 如果没有要删除的数据，跳过处理
+                if (deleteIds.isEmpty()) {
+                    log.debug("子表未传/为空/空列表，且原数据为空，跳过处理，subTableName: {}", subTableName);
+                    continue;
                 }
             } else {
                 // 处理 updateSubTableList，分离新增和更新
@@ -490,15 +490,19 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
             List<Map<String, Object>> finalSubTableList = new ArrayList<>();
 
             // 3.1 处理新增数据（只设置有权限的字段）
+            // 前面已校验新增时 subWritableFieldNames 不为空且至少包含一个非子表本身的字段
             for (Map<String, Object> newItem : newItems) {
                 Map<String, Object> processedItem = new HashMap<>();
-                // 只设置有权限的字段（前面已校验新增时 subWritableFieldNames 不为空）
-                if (CollectionUtils.isNotEmpty(subWritableFieldNames)) {
-                    for (String fieldName : subWritableFieldNames) {
-                        Object value = newItem.get(fieldName);
-                        processedItem.put(fieldName, value);
+                // 只设置子表字段，不设置子表本身（subTableName 在 subWritableFieldNames 中表示可新增/删除权限）
+                for (String subFieldName : subTableNonSystemFields) {
+                    if (!subWritableFieldNames.contains(subFieldName)) {
+                        continue;
                     }
+
+                    Object value = newItem.get(subFieldName);
+                    processedItem.put(subFieldName, value);
                 }
+
                 finalSubTableList.add(processedItem);
             }
 
@@ -513,28 +517,16 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
                         // 只读权限，返回数据库中的原始数据
                         finalSubTableList.add(new HashMap<>(existItem));
                     } else {
-                        Map<String, Object> processedItem = processUpdateSubTableItem(updateItem, existItem, subWritableFieldNames);
+                        Map<String, Object> processedItem = processUpdateSubTableItem(updateItem, existItem, subTableNonSystemFields, subWritableFieldNames);
                         finalSubTableList.add(processedItem);
                     }
                 }
             }
 
             // 第四步：将处理后的数据添加到结果中
-            // 如果整个子表都没有变化（无新增、无删除、无实际更新），可以不传子表数据
-            if (newItems.isEmpty() && deleteIds.isEmpty() && actualUpdateCount == 0) {
-                log.debug("子表无任何变化，跳过处理，subTableName: {}", subTableName);
-                continue;
-            }
-
-            if (!finalSubTableList.isEmpty()) {
-                editableEntityData.put(subTableName, finalSubTableList);
-                log.debug("处理子表完成，subTableName: {}, 新增: {}, 更新: {}, 删除: {}, 最终记录数: {}",
-                        subTableName, newItems.size(), actualUpdateCount, deleteIds.size(), finalSubTableList.size());
-            } else if (!deleteIds.isEmpty() && canAddOrDelete) {
-                // 如果只有删除操作，且可以删除，设置为空列表
-                editableEntityData.put(subTableName, Collections.emptyList());
-                log.debug("子表数据全部删除，subTableName: {}", subTableName);
-            }
+            editableEntityData.put(subTableName, finalSubTableList);
+            log.debug("处理子表完成，subTableName: {}, 新增: {}, 更新: {}, 删除: {}, 最终记录数: {}",
+                    subTableName, newItems.size(), actualUpdateCount, deleteIds.size(), finalSubTableList.size());
         }
     }
 
@@ -548,15 +540,23 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
      */
     private Map<String, Object> processUpdateSubTableItem(Map<String, Object> updateItem,
                                                           Map<String, Object> existItem,
+                                                          Set<String> subTableNonSystemFields,
                                                           Set<String> subWritableFieldNames) {
         Map<String, Object> mergedItem = new HashMap<>();
         // 先设置 id，确保记录能正确更新
         Object existId = existItem.get("id");
+
         if (existId != null) {
             mergedItem.put("id", existId);
         }
+
         // 只设置有权限的字段
-        for (String fieldName : subWritableFieldNames) {
+        for (String fieldName : subTableNonSystemFields) {
+            // 没有权限的字段，跳过
+            if (!subWritableFieldNames.contains(fieldName)) {
+                continue;
+            }
+
             // 使用 containsKey 区分 key 不存在和值为 null
             if (updateItem.containsKey(fieldName)) {
                 // 如果 key 存在，无论值是否为 null，都使用 updateItem 的值（包括 null）
@@ -588,6 +588,7 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
     @Override
     public void execute(User matchedUser, BpmFlowAgentInsDO agentInsDO, Task task, ApproverNodeExtDTO extDTO, ExecTaskReqVO reqVO) {
         String buttonType = reqVO.getButtonType();
+        BpmActionButtonEnum buttonEnum = BpmActionButtonEnum.getByCode(buttonType);
 
         // 原审批人
         String approverId = matchedUser.getProcessedBy();
@@ -613,75 +614,118 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
             comment = matchButtonConfig.getDefaultApprovalComment();
         }
 
-        Map<String, Object> variables = new HashMap<>();
-
         EntityVO entityVO = reqVO.getEntity();
 
-        if (entityVO != null) {
-            entityVO.getData().forEach((key, value) -> variables.put(String.valueOf(key), value));
-        }
-
-        // 基础 FlowParams
-        FlowParams skipParams = FlowParams.build().variable(variables)
-                 .message(comment);
-
-        // 如果是代理人，需要忽略权限校验，以被代理人权限执行 todo 是否需要二次校验
-        if (agentInsDO != null) {
-            skipParams.ignore(true);
-        }
-
-        if (Objects.equals(buttonType, BpmActionButtonEnum.APPROVE.getCode())) {
-            skipParams = skipParams.skipType(SkipType.PASS.getKey())
-                .flowStatus(BpmBusinessStatusEnum.IN_APPROVAL.getCode())
-                .hisStatus(BpmNodeApproveStatusEnum.POST_APPROVED.getCode())
-                    .handler(approverId);
-
-            taskService.skip(skipParams, task);
-        } else if (Objects.equals(buttonType, BpmActionButtonEnum.REJECT.getCode())) {
-            String nodeCode = task.getNodeCode();
-            boolean hasRejectNode = false;
-
-            List<Skip> skipList = FlowEngine.skipService().getByDefIdAndNowNodeCode(task.getDefinitionId(), nodeCode);
-            for (Skip skip : skipList) {
-                if (skip.getSkipType().equals(SkipType.REJECT.getKey())) {
-                    hasRejectNode = true;
-                    break;
-                }
-            }
-
-            skipParams = skipParams.message(comment)
-                    .skipType(SkipType.REJECT.getKey())
-                    .flowStatus(BpmBusinessStatusEnum.REJECTED.getCode())
-                    .hisStatus(BpmNodeApproveStatusEnum.POST_REJECTED.getCode())
-                    .handler(approverId);
-
-            // 有拒绝节点则走拒绝路线，否则退回至发起节点
-            if (hasRejectNode) {
-                taskService.skip(skipParams, task);
-            } else {
-                Instance instance = insService.getById(task.getInstanceId());
-                NodeJson initNode = getInitiationNodeJson(instance.getDefJson());
-                skipParams.nodeCode(initNode.getNodeCode());
-                taskService.skip(skipParams, task);
-            }
-        } else {
+        if (buttonEnum == null) {
             throw exception(ErrorCodeConstants.UNSUPPORT_ACTION_BUTTON_TYPE);
         }
 
-        // 处理代理的场景，更新为代理人已执行
-        if (agentInsDO != null) {
-            agentInsDO.setIsExecutor(BooleanUtils.toInteger(true));
-            agentInsRepository.updateById(agentInsDO);
+        switch (buttonEnum) {
+            case SAVE: {
+                log.info("保存操作，不做任何流程相关的操作，taskId: {}", task.getId());
+                break;
+            }
+            default: {
+                Map<String, Object> variables = new HashMap<>();
+                if (entityVO != null && MapUtils.isNotEmpty(entityVO.getData())) {
+                    entityVO.getData().forEach((key, value) -> variables.put(String.valueOf(key), value));
+                }
+
+                // 基础 FlowParams（SAVE 不需要）
+                FlowParams baseParams = FlowParams.build()
+                        .variable(variables)
+                        .message(comment);
+
+                // 如果是代理人，需要忽略权限校验，以被代理人权限执行 todo 是否需要二次校验
+                if (agentInsDO != null) {
+                    baseParams.ignore(true);
+                }
+
+                if (buttonEnum == BpmActionButtonEnum.APPROVE) {
+                    handleApprove(task, approverId, baseParams);
+                } else if (buttonEnum == BpmActionButtonEnum.REJECT) {
+                    handleReject(task, approverId, baseParams);
+                } else if (buttonEnum == BpmActionButtonEnum.TRANSFER) {
+                    handleTransfer(task, approverId, baseParams, reqVO);
+                } else {
+                    throw exception(ErrorCodeConstants.UNSUPPORT_ACTION_BUTTON_TYPE);
+                }
+
+                // 处理代理的场景，更新为代理人已执行
+                if (agentInsDO != null) {
+                    agentInsDO.setIsExecutor(BooleanUtils.toInteger(true));
+                    agentInsRepository.updateById(agentInsDO);
+                }
+
+                break;
+            }
         }
 
-        Map<String, Object> updateEntityData = buildEditableEntityData(entityVO, extDTO);
+        EntityVO editableEntityVO = buildEditableEntityData(entityVO, extDTO);
 
-        // 更新数据
-        if (MapUtils.isNotEmpty(updateEntityData)) {
-            SemanticMergeConditionVO conditionVO = new SemanticMergeConditionVO();
-            conditionVO.setData(updateEntityData);
-            conditionVO.setTableName(entityVO.getTableName());
-            semanticDynamicDataApi.updateDataById(conditionVO);
+        bpmEntityHelper.updateEntityData(editableEntityVO);
+    }
+
+    /**
+     * 同意
+     */
+    private void handleApprove(Task task, String approverId, FlowParams baseParams) {
+        FlowParams skipParams = baseParams.skipType(SkipType.PASS.getKey())
+                .flowStatus(BpmBusinessStatusEnum.IN_APPROVAL.getCode())
+                .hisStatus(BpmNodeApproveStatusEnum.POST_APPROVED.getCode())
+                .handler(approverId);
+        taskService.skip(skipParams, task);
+    }
+
+    /**
+     * 退回/驳回
+     */
+    private void handleReject(Task task, String approverId, FlowParams baseParams) {
+        String nodeCode = task.getNodeCode();
+        boolean hasRejectNode = false;
+
+        List<Skip> skipList = FlowEngine.skipService().getByDefIdAndNowNodeCode(task.getDefinitionId(), nodeCode);
+        for (Skip skip : skipList) {
+            if (skip.getSkipType().equals(SkipType.REJECT.getKey())) {
+                hasRejectNode = true;
+                break;
+            }
         }
+
+        FlowParams skipParams = baseParams
+                .skipType(SkipType.REJECT.getKey())
+                .flowStatus(BpmBusinessStatusEnum.REJECTED.getCode())
+                .hisStatus(BpmNodeApproveStatusEnum.POST_REJECTED.getCode())
+                .handler(approverId);
+
+        // 有拒绝节点则走拒绝路线，否则退回至发起节点
+        if (hasRejectNode) {
+            taskService.skip(skipParams, task);
+        } else {
+            Instance instance = insService.getById(task.getInstanceId());
+            NodeJson initNode = getInitiationNodeJson(instance.getDefJson());
+            skipParams.nodeCode(initNode.getNodeCode());
+            taskService.skip(skipParams, task);
+        }
+    }
+
+    /**
+     * 转交
+     */
+    private void handleTransfer(Task task, String approverId, FlowParams baseParams, ExecTaskReqVO reqVO) {
+        Long loginUserId = WebFrameworkUtils.getLoginUserId();
+        String targetHandlerId = reqVO.getTargetHandlerId();
+
+        // todo：外部已经校验，此处应该不需要重复校验
+        if (Objects.equals(targetHandlerId, approverId)
+                || Objects.equals(targetHandlerId, String.valueOf(loginUserId))) {
+            throw exception(ErrorCodeConstants.CANNOT_TRANSFER_TO_SELF);
+        }
+
+        FlowParams skipParams = baseParams
+                .handler(approverId)
+                .hisStatus(BpmNodeApproveStatusEnum.POST_TRANSFERRED.getCode())
+                .addHandlers(List.of(targetHandlerId));
+        taskService.transfer(task.getId(), skipParams);
     }
 }

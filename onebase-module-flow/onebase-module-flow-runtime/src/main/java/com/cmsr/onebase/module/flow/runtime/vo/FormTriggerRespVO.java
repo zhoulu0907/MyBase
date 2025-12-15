@@ -1,6 +1,5 @@
 package com.cmsr.onebase.module.flow.runtime.vo;
 
-import com.cmsr.onebase.module.flow.core.flow.ExecutorResult;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 

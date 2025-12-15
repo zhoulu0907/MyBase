@@ -2,11 +2,13 @@ package com.cmsr.onebase.module.flow.component.logic;
 
 import com.cmsr.onebase.module.flow.context.ExecuteContext;
 import com.cmsr.onebase.module.flow.context.VariableContext;
-import com.cmsr.onebase.module.flow.context.graph.nodes.LoopNodeData;
+import com.cmsr.onebase.module.flow.context.graph.nodes.logic.LoopNodeData;
 import com.yomahub.liteflow.annotation.LiteflowComponent;
-import com.yomahub.liteflow.core.NodeForComponent;
+import com.yomahub.liteflow.core.NodeIteratorComponent;
 import lombok.Setter;
 
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -16,10 +18,10 @@ import java.util.Map;
  */
 @Setter
 @LiteflowComponent("loop")
-public class LoopNodeComponent extends NodeForComponent {
+public class LoopNodeComponent extends NodeIteratorComponent {
 
     @Override
-    public int processFor() throws Exception {
+    public Iterator<?> processIterator() throws Exception {
         ExecuteContext executeContext = this.getContextBean(ExecuteContext.class);
         executeContext.addLog("循环节点开始执行");
         VariableContext variableContext = this.getContextBean(VariableContext.class);
@@ -29,11 +31,11 @@ public class LoopNodeComponent extends NodeForComponent {
         List<Map<String, Object>> value = variableContext.getListVariableByTag(dataNodeId);
         if (value == null) {
             executeContext.addLog("循环节点数据源为空");
-            return 0;
+            return Collections.emptyIterator();
         }
         executeContext.addLog("循环节点循环数量：" + value.size());
         variableContext.putNodeVariables(this.getTag(), value);
-        return value.size();
+        return value.iterator();
     }
 
 }

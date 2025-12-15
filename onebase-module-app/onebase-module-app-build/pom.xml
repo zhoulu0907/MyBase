@@ -28,11 +28,6 @@
             <artifactId>onebase-module-system-api</artifactId>
             <version>${revision}</version>
         </dependency>
-        <!-- <dependency>
-             <groupId>com.cmsr.onebase</groupId>
-             <artifactId>onebase-module-infra-api</artifactId>
-             <version>${revision}</version>
-         </dependency>-->
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-module-metadata-api</artifactId>
@@ -41,6 +36,16 @@
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-module-bpm-api</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-etl-api</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-flow-api</artifactId>
             <version>${revision}</version>
         </dependency>
 
@@ -63,18 +68,6 @@
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-spring-boot-starter-redis</artifactId>
         </dependency>
-
-        <!-- RPC 远程调用相关 -->
-        <dependency>
-            <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-spring-boot-starter-rpc</artifactId>
-        </dependency>
-
-        <!-- 服务保障相关 TODO 开发者：暂时去掉 -->
-        <!--        <dependency>-->
-        <!--            <groupId>com.cmsr.onebase</groupId>-->
-        <!--            <artifactId>onebase-spring-boot-starter-protection</artifactId>-->
-        <!--        </dependency>-->
 
         <!-- Test 测试相关 -->
         <dependency>

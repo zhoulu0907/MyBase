@@ -1,5 +1,5 @@
 @host = localhost
-@port = 48080
+@port = 48081
 @prefix = /runtime
 
 @base = http://{{host}}:{{port}}{{prefix}}
@@ -241,3 +241,196 @@ X-Application-Id: 167176259300786176
 X-Tenant-Id: 161009562416906240
 
 {"username":"6666666"}
+
+
+### 应用数据权限测试-巫炘
+POST {{base}}/metadata/jkx6_student_info_01/page?menuId=174256719061385216&_t=1765331809182
+Accept: application/json
+Content-Type: application/json
+Accept-Language: zh-CN,zh;q=0.9
+Access-Control-Allow-Origin: *
+login-user: {"id":"155019577667616816","applicationId":"174251943057752064","tenantId":"153935442021842944"}
+X-Application-Id: 174251943057752064
+X-Tenant-Id: 153935442021842944
+
+{"pageNo":1,"pageSize":10}
+
+### 应用数据权限测试-卞天宇
+POST {{base}}/metadata/jkx6_student_info_01/page?menuId=174256719061385216&_t=1765331809182
+Accept: application/json
+Content-Type: application/json
+Accept-Language: zh-CN,zh;q=0.9
+Access-Control-Allow-Origin: *
+login-user: {"id":"155019577667616796","applicationId":"174251943057752064","tenantId":"153935442021842944"}
+X-Application-Id: 174251943057752064
+X-Tenant-Id: 153935442021842944
+
+{"pageNo":1,"pageSize":10}
+
+### 语义创建（jkx6_student_info_01）
+POST {{base}}/metadata/jkx6_student_info_01/create?menuId=174256719061385216
+Accept: application/json
+Content-Type: application/json
+Accept-Language: zh-CN,zh;q=0.9
+Access-Control-Allow-Origin: *
+login-user: {"id":"155019577667616816","applicationId":"174251943057752064","tenantId":"153935442021842944"}
+X-Application-Id: 174251943057752064
+X-Tenant-Id: 153935442021842944
+
+{
+  "name": "张三",
+  "age": 12
+}
+
+### 语义更新（jkx6_student_info_01）
+POST {{base}}/metadata/jkx6_student_info_01/update?menuId=174256719061385216
+Accept: application/json
+Content-Type: application/json
+Accept-Language: zh-CN,zh;q=0.9
+Access-Control-Allow-Origin: *
+login-user: {"id":"155019577667616816","applicationId":"174251943057752064","tenantId":"153935442021842944"}
+X-Application-Id: 174251943057752064
+X-Tenant-Id: 153935442021842944
+
+{
+  "id": "175082847438110720",
+  "name": "李四",
+  "age": 13
+}
+
+### 语义更新（jkx6_student_info_01）-卞天宇
+POST {{base}}/metadata/jkx6_student_info_01/update?menuId=174256719061385216
+Accept: application/json
+Content-Type: application/json
+Accept-Language: zh-CN,zh;q=0.9
+Access-Control-Allow-Origin: *
+login-user: {"id":"155019577667616796","applicationId":"174251943057752064","tenantId":"153935442021842944"}
+X-Application-Id: 174251943057752064
+X-Tenant-Id: 153935442021842944
+
+{
+  "id": "175082847438110720",
+  "name": "李四",
+  "age": 13
+}
+
+
+### 语义删除（jkx6_student_info_01）
+POST {{base}}/metadata/jkx6_student_info_01/delete?menuId=174256719061385216
+Accept: application/json
+Content-Type: application/json
+Accept-Language: zh-CN,zh;q=0.9
+Access-Control-Allow-Origin: *
+login-user: {"id":"155019577667616816","applicationId":"174251943057752064","tenantId":"153935442021842944"}
+X-Application-Id: 174251943057752064
+X-Tenant-Id: 153935442021842944
+
+{
+  "id": "175050618003390464"
+}
+
+### 语义详情（jkx6_student_info_01）
+POST {{base}}/metadata/jkx6_student_info_01/detail?menuId=174256719061385216
+Accept: application/json
+Content-Type: application/json
+Accept-Language: zh-CN,zh;q=0.9
+Access-Control-Allow-Origin: *
+login-user: {"id":"155019577667616816","applicationId":"174251943057752064","tenantId":"153935442021842944"}
+X-Application-Id: 174251943057752064
+X-Tenant-Id: 153935442021842944
+
+{
+  "id": "175050618003390464"
+}
+
+### 语义分页（jkx6_student_info_01）
+POST {{base}}/metadata/jkx6_student_info_01/page?menuId=174256719061385216
+Accept: application/json
+Content-Type: application/json
+Accept-Language: zh-CN,zh;q=0.9
+Access-Control-Allow-Origin: *
+login-user: {"id":"155019577667616816","applicationId":"174251943057752064","tenantId":"153935442021842944"}
+X-Application-Id: 174251943057752064
+X-Tenant-Id: 153935442021842944
+
+{
+  "data": {},
+  "pageNo": 1,
+  "pageSize": 10,
+  "sortBy": [
+    { "field": "id", "direction": "DESC" }
+  ],
+  "filters": {}
+}
+
+### 语义创建（any9_contractor，本地环境）
+POST {{base}}/metadata/any9_contractor/create?menuId=176123208779005952
+Accept: application/json
+Content-Type: application/json
+X-Application-Id: 168411371638652928
+X-Tenant-Id: 168334577623138304
+login-user: {"id":"155019577667616816","applicationId":"168411371638652928","tenantId":"168334577623138304"}
+
+{
+  "company_code": "CT-001",
+  "company": "上海中远海运重工有限公司",
+  "in_use": null
+}
+
+
+
+### 语义分页（vmka_main_table，本地环境）
+POST {{base}}/metadata/vmka_main_table/page?menuId=175768873975054336
+Accept: application/json
+Content-Type: application/json
+X-Application-Id: 175757002685448192
+X-Tenant-Id: 153935442021842944
+login-user: {"id":"153935442021842949","applicationId":"175757002685448192","tenantId":"153935442021842944"}
+
+{
+  "pageNo": 1,
+  "pageSize": 10
+}
+
+### 语义详情（jkx6_student_info_01）
+POST {{base}}/metadata/vmka_main_table/detail?menuId=175768873975054336
+Accept: application/json
+Content-Type: application/json
+X-Application-Id: 175757002685448192
+X-Tenant-Id: 153935442021842944
+login-user: {"id":"153935442021842949","applicationId":"175757002685448192","tenantId":"153935442021842944"}
+
+{
+  "id": "176166570769612800"
+}
+
+### 下载指定附件
+GET {{base}}/metadata/vmka_main_table/attachment/download?menuId=175768873975054336&id=176166570769612800&fieldName=mage&fileId=172736111653617664&_t=1765442325168
+X-Application-Id: 175757002685448192
+X-Tenant-Id: 153935442021842944
+login-user: {"id":"153935442021842949","applicationId":"175757002685448192","tenantId":"153935442021842944"}
+
+
+### 上传附件（vmka_main_table，本地环境）
+POST {{base}}/metadata/vmka_main_table/attachment/upload
+Accept: application/json
+Content-Type: multipart/form-data; boundary=WebKitFormBoundary7MA4YWxkTrZu0gW
+X-Application-Id: 175757002685448192
+X-Tenant-Id: 153935442021842944
+login-user: {"id":"153935442021842949","applicationId":"175757002685448192","tenantId":"153935442021842944"}
+
+--WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="file"; filename="test.png"
+Content-Type: image/png
+
+< test01.png
+--WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+
+### 运行态 - 实体关系（本地）查询实体及子表
+POST {{base}}/metadata/entity-relationship/entity-with-children?entityId=176207647837323264
+Accept: application/json
+Content-Type: application/json
+X-Application-Id: 176207115261378560
+X-Tenant-Id: 153935442021842944
+login-user: {"id":"155019577667616816","applicationId":"176207115261378560","tenantId":"153935442021842944"}

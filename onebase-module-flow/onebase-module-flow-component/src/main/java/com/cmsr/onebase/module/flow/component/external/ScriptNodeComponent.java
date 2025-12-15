@@ -11,7 +11,7 @@ import com.cmsr.onebase.module.flow.context.condition.ConditionItem;
 import com.cmsr.onebase.module.flow.context.express.ExpressionItem;
 import com.cmsr.onebase.module.flow.context.graph.InLoopDepth;
 import com.cmsr.onebase.module.flow.context.graph.nodes.ScriptNodeData;
-import com.cmsr.onebase.module.flow.context.provider.ConditionsProvider;
+import com.cmsr.onebase.module.flow.context.provider.FlowConditionsProvider;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticFieldTypeEnum;
 import com.yomahub.liteflow.annotation.LiteflowComponent;
 import kong.unirest.core.ContentType;
@@ -41,7 +41,7 @@ public class ScriptNodeComponent extends SkippableNodeComponent {
     private String jsServerAddress;
 
     @Autowired
-    private ConditionsProvider conditionsProvider;
+    private FlowConditionsProvider flowConditionsProvider;
 
     @Override
     public void process() throws Exception {
@@ -56,7 +56,7 @@ public class ScriptNodeComponent extends SkippableNodeComponent {
         // 2. 从空间中读取变量
         List<ConditionItem> conditionItems = nodeData.getInputParameterFields();
         settingToJdbcType(conditionItems);
-        List<ExpressionItem> expressionItems = conditionsProvider.formatConditionItemsForValue(conditionItems, expressionContext);
+        List<ExpressionItem> expressionItems = flowConditionsProvider.formatConditionItemsForValue(conditionItems, expressionContext);
 
         Map<String, Object> inputData = expressionItems.stream().collect(Collectors.toMap(ExpressionItem::getFieldKey, ExpressionItem::getFieldValue));
         // 3. 执行Http调用

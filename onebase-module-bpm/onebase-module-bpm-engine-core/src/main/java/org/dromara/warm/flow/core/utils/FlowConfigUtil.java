@@ -15,6 +15,7 @@
  */
 package org.dromara.warm.flow.core.utils;
 
+import com.cmsr.onebase.framework.common.util.string.UuidUtils;
 import org.dromara.warm.flow.core.FlowEngine;
 import org.dromara.warm.flow.core.constant.ExceptionCons;
 import org.dromara.warm.flow.core.dto.FlowCombine;
@@ -60,6 +61,10 @@ public class FlowConfigUtil {
         definition.setIsPublish(0);
         definition.setUpdateTime(LocalDateTime.now());
         FlowEngine.dataFillHandler().idFill(definition);
+        // 如果 definitionUuid 为空，则生成新的 UUID
+        if (StringUtils.isEmpty(definition.getDefinitionUuid())) {
+            definition.setDefinitionUuid(UuidUtils.getUuid());
+        }
 
         List<Node> nodeList = definition.getNodeList();
         // 每一个流程的开始节点个数
@@ -67,7 +72,7 @@ public class FlowConfigUtil {
         Set<String> nodeCodeSet = new HashSet<>();
         // 遍历一个流程中的各个节点
         for (Node node : nodeList) {
-            initNodeAndCondition(node, definition.getId(), definition.getVersion());
+            initNodeAndCondition(node, definition.getId(), definition.getDefinitionUuid(), definition.getVersion());
             startNum = checkStartAndSame(node, startNum, flowName, nodeCodeSet);
             allNodes.add(node);
             allSkips.addAll(node.getSkipList());
@@ -135,11 +140,12 @@ public class FlowConfigUtil {
     /**
      * 读取工作节点和跳转条件
      *
-     * @param node         node
-     * @param definitionId definitionId
-     * @param version      version
+     * @param node           node
+     * @param definitionId   definitionId
+     * @param definitionUuid definitionUuid
+     * @param version        version
      */
-    public static void initNodeAndCondition(Node node, Long definitionId, String version) {
+    public static void initNodeAndCondition(Node node, Long definitionId, String definitionUuid, String version) {
         String nodeName = node.getNodeName();
         String nodeCode = node.getNodeCode();
         List<Skip> skipList = node.getSkipList();
@@ -150,6 +156,7 @@ public class FlowConfigUtil {
 
         node.setVersion(version);
         node.setDefinitionId(definitionId);
+        node.setDefinitionUuid(definitionUuid);
 
         // 中间节点的集合， 跳转类型和目标节点不能重复
         Set<String> betweenSet = new HashSet<>();
@@ -166,8 +173,9 @@ public class FlowConfigUtil {
                 AssertUtil.isTrue(skipNum > 1, "[" + node.getNodeName() + "]" + ExceptionCons.MUL_START_SKIP);
             }
             AssertUtil.isEmpty(skip.getNextNodeCode(), "【" + nodeName + "】" + ExceptionCons.LOST_DEST_NODE);
-            // 流程id
+            // 流程id和uuid
             skip.setDefinitionId(definitionId);
+            skip.setDefinitionUuid(definitionUuid);
             skip.setNowNodeType(node.getNodeType());
             if (NodeType.isGateWaySerial(node.getNodeType())) {
                 String target = skip.getSkipCondition() + ":" + skip.getNextNodeCode();
