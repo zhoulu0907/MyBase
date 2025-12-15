@@ -47,7 +47,7 @@ import { ReactSVG } from 'react-svg';
 import { RELATIONSHIP_TYPE } from '../DataFactory/utils/types';
 import CopyModal from './components/Modals/CopyModal';
 import CreateModal from './components/Modals/CreateModal';
-import CreateScreenModal from './components/Modals/CreateScreenModal';
+import CreateScreenModal from '@/components/CreateScreenModal';
 import RenameModal from './components/Modals/RenameModal';
 import MyMenuItem from './components/MyMenuItem';
 import TaskCenterPage from './components/TaskCenter/TaskCenterPage';
@@ -769,13 +769,14 @@ const PageManagerPage: FC = () => {
       />
       <CreateScreenModal
         title={title}
+        type={'page'}
         handleCreate={handleCreate}
         onCancel={() => {
           setVisibleCreateScreenForm('');
         }}
         form={createForm}
-        entityListOptions={entityListOptions}
         visibleCreateForm={visibleCreateScreenForm}
+        entityListOptions={entityListOptions}
         initValue={{ pageType: PageType.NORMAL, menuName: '', parentId: RootParentPage.id }}
         treeData={convertMenuToTreeData(parentPageOptions, initTreeItemWidth, false, { height: '32px' })}
       />

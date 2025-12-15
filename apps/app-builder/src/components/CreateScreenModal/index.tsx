@@ -12,25 +12,32 @@ import screenChange from '@/assets/images/screen_change.svg';
 
 interface CreateModalProps {
   title: string;
+  type: 'page' | 'screen';
   handleCreate: () => void;
   onCancel: () => void;
-  form: FormInstance;
   visibleCreateForm: string;
-  initValue: { pageType: number; menuName: string; parentId: string };
-  treeData: any[];
-  entityListOptions: { label: string; value: any }[];
+  form: FormInstance;
+  initValue?: { pageType: number; menuName: string; parentId: string };
+  treeData?: any[];
+  entityListOptions?: { label: string; value: any }[];
 }
 
 const CreateModal: React.FC<CreateModalProps> = ({
   title,
+  type,
   handleCreate,
   onCancel,
   form,
   visibleCreateForm,
-  initValue,
-  treeData,
+  initValue = { pageType: 0, menuName: '', parentId: '' },
+  treeData = [],
   entityListOptions
 }) => {
+  // useEffect(() => {
+  //   console.log('entityListOptions:', entityListOptions);
+  //   console.log('form:', form);
+  // }, []);
+
   const allWebMenuIcons = webMenuIcons.map((ele) => ele.children).reduce((acc, current) => acc.concat(current), []);
   const { t } = useI18n();
   const InputSearch = Input.Search;
@@ -48,18 +55,22 @@ const CreateModal: React.FC<CreateModalProps> = ({
   });
   const [screenTemplateData, setScreenTemplateData] = useState<any[]>([
     {
+      id: 'template_1',
       title: '这是大屏名称',
       src: screenChange
     },
     {
+      id: 'template_2',
       title: '这是大屏名称',
       src: screenChange
     },
     {
+      id: 'template_3',
       title: '这是大屏名称',
       src: screenChange
     },
     {
+      id: 'template_4',
       title: '这是大屏名称',
       src: screenChange
     }
@@ -89,23 +100,34 @@ const CreateModal: React.FC<CreateModalProps> = ({
     screen: '大屏名称'
   };
 
-  const screenMethodData = [
-    {
-      key: 'screenNew',
-      icon: screenNew,
-      screenName: '从空白页面新建'
-    },
-    {
-      key: 'screenTemplate',
-      icon: screenTemplate,
-      screenName: '从模版创建'
-    },
-    {
-      key: 'screenLink',
-      icon: screenLink,
-      screenName: '关联已有大屏'
+  const getScreenMethodData = () => {
+    const baseData = [
+      {
+        key: 'screenNew',
+        icon: screenNew,
+        screenName: '从空白页面新建'
+      },
+      {
+        key: 'screenTemplate',
+        icon: screenTemplate,
+        screenName: '从模版创建'
+      }
+    ];
+
+    if (type === 'page') {
+      return [
+        ...baseData,
+        {
+          key: 'screenLink',
+          icon: screenLink,
+          screenName: '关联已有大屏'
+        }
+      ];
     }
-  ];
+
+    return baseData;
+  };
+  const screenMethodData = getScreenMethodData();
 
   const screenTemplateTabs = [
     {
@@ -176,11 +198,18 @@ const CreateModal: React.FC<CreateModalProps> = ({
     }));
   };
 
+  const handlePreview = (imgSrc: string) => {
+    // 新窗口打开图片预览
+    window.open(imgSrc, '_blank');
+  };
+
   const screenTemplateCard = (item: any) => (
     <div className={styles.screenTemplateCard}>
       <div className={styles.screenTemplateCardImg}>
         <img src={item.src} alt="" />
-        <Button className={styles.screenTemplateCardBtn}>{t('createApp.preview')}</Button>
+        <Button onClick={() => handlePreview(item.src)} className={styles.screenTemplateCardBtn}>
+          预览
+        </Button>
       </div>
       <div className={styles.screenTemplateCardTitle}>{item.title}</div>
     </div>
@@ -196,7 +225,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
       autoFocus={false}
       focusLock={true}
       unmountOnExit={true}
-      className={styles.createModal}
+      className={type === 'page' ? styles.createPageModal : styles.createScreenModal}
       footer={
         <div style={{ textAlign: 'right', visibility: !visibleMenuIcon ? 'visible' : 'hidden' }}>
           <Button type="default" onClick={handleCloseModal} style={{ marginRight: 12 }}>
@@ -209,83 +238,85 @@ const CreateModal: React.FC<CreateModalProps> = ({
       }
     >
       <div className={styles.createContainer}>
-        <div className={styles.infoContainer}>
-          <div className={styles.infoTitle}>
-            <span>基础信息</span>
-          </div>
-          <Form
-            className={styles.infoForm}
-            layout="vertical"
-            form={form}
-            initialValues={{
-              pageType: initValue.pageType,
-              menuName: initValue.menuName,
-              parentId: form.getFieldValue('parentId') || RootParentPage.id
-            }}
-            style={{
-              transform: visibleMenuIcon ? 'translateX(-100%)' : ''
-            }}
-          >
-            <Form.Item
-              label={nameMap[visibleCreateForm as keyof typeof nameMap]}
-              field="menuName"
-              rules={[
-                { required: true, message: `请输入${nameMap[visibleCreateForm as keyof typeof nameMap]}` },
-                { maxLength: 20, message: '页面名称不能超过20个字符' }
-              ]}
+        {type === 'page' && (
+          <div className={styles.infoContainer}>
+            <div className={styles.infoTitle}>
+              <span>基础信息</span>
+            </div>
+            <Form
+              className={styles.infoForm}
+              layout="vertical"
+              form={form}
+              initialValues={{
+                pageType: initValue.pageType || 0,
+                menuName: initValue.menuName || '',
+                parentId: form?.getFieldValue('parentId') || initValue?.parentId || RootParentPage.id
+              }}
+              style={{
+                transform: visibleMenuIcon ? 'translateX(-100%)' : ''
+              }}
             >
-              <Input
-                maxLength={20}
-                placeholder={`请输入${nameMap[visibleCreateForm as keyof typeof nameMap]}，不超过20个字符`}
-                allowClear
-                onChange={(value) => {
-                  form.setFieldValue('menuName', value);
-                }}
-              />
-            </Form.Item>
-
-            <Form.Item label={'菜单图标'} field="menuIcon" rules={[{ required: true, message: '请选择菜单图标' }]}>
-              <div style={{ display: 'flex', alignItems: 'flex-end' }}>
-                <div
-                  style={{
-                    width: 32,
-                    height: 32,
-                    marginRight: 4,
-                    borderRadius: 2,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    backgroundColor: '#F2F3F5',
-                    cursor: 'pointer'
+              <Form.Item
+                label={nameMap[visibleCreateForm as keyof typeof nameMap]}
+                field="menuName"
+                rules={[
+                  { required: true, message: `请输入${nameMap[visibleCreateForm as keyof typeof nameMap]}` },
+                  { maxLength: 20, message: '页面名称不能超过20个字符' }
+                ]}
+              >
+                <Input
+                  maxLength={20}
+                  placeholder={`请输入${nameMap[visibleCreateForm as keyof typeof nameMap]}，不超过20个字符`}
+                  allowClear
+                  onChange={(value) => {
+                    form.setFieldValue('menuName', value);
                   }}
-                  onClick={() => setVisibleMenuIcon(true)}
-                >
-                  {menuIcon ? (
-                    <img
-                      style={{ width: 'auto', height: '18px', fill: '#333' }}
-                      src={allWebMenuIcons.find((ele) => ele.code === menuIcon)?.icon}
-                      alt=""
-                    />
-                  ) : (
-                    <img
-                      style={{ width: 'auto', height: '18px', fill: '#333' }}
-                      src={allWebMenuIcons.find((ele) => ele.code === 'FormPage')?.icon}
-                      alt=""
-                    />
-                  )}
-                </div>
-              </div>
-            </Form.Item>
-            <Form.Item label="父级页面" field="parentId">
-              <TreeSelect treeData={treeData} placeholder="请选择父级页面" allowClear />
-            </Form.Item>
-            {visibleCreateForm === 'page' && (
-              <Form.Item label="数据资产" field="entityUuid" rules={[{ required: true, message: '请选择数据资产' }]}>
-                <Select options={entityListOptions} placeholder="请选择数据资产" allowClear />
+                />
               </Form.Item>
-            )}
-          </Form>
-        </div>
+
+              <Form.Item label={'菜单图标'} field="menuIcon" rules={[{ required: true, message: '请选择菜单图标' }]}>
+                <div style={{ display: 'flex', alignItems: 'flex-end' }}>
+                  <div
+                    style={{
+                      width: 32,
+                      height: 32,
+                      marginRight: 4,
+                      borderRadius: 2,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      backgroundColor: '#F2F3F5',
+                      cursor: 'pointer'
+                    }}
+                    onClick={() => setVisibleMenuIcon(true)}
+                  >
+                    {menuIcon ? (
+                      <img
+                        style={{ width: 'auto', height: '18px', fill: '#333' }}
+                        src={allWebMenuIcons.find((ele) => ele.code === menuIcon)?.icon}
+                        alt=""
+                      />
+                    ) : (
+                      <img
+                        style={{ width: 'auto', height: '18px', fill: '#333' }}
+                        src={allWebMenuIcons.find((ele) => ele.code === 'FormPage')?.icon}
+                        alt=""
+                      />
+                    )}
+                  </div>
+                </div>
+              </Form.Item>
+              <Form.Item label="父级页面" field="parentId">
+                <TreeSelect treeData={treeData || {}} placeholder="请选择父级页面" allowClear />
+              </Form.Item>
+              {visibleCreateForm === 'page' && entityListOptions && (
+                <Form.Item label="数据资产" field="entityUuid" rules={[{ required: true, message: '请选择数据资产' }]}>
+                  <Select options={entityListOptions} placeholder="请选择数据资产" allowClear />
+                </Form.Item>
+              )}
+            </Form>
+          </div>
+        )}
         <div className={styles.screenContainer}>
           <div className={styles.screenCreationMethod}>
             <div className={styles.infoTitle}>
@@ -388,7 +419,6 @@ const CreateModal: React.FC<CreateModalProps> = ({
             {screenMethod !== 'screenNew' && (
               <div className={styles.screenPagination}>
                 <Pagination
-                  // size={'small'}
                   total={screenPagination.total}
                   current={screenPagination.current}
                   pageSize={screenPagination.pageSize}
