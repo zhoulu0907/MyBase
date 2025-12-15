@@ -1,5 +1,5 @@
 import { Form, Grid, Input, Modal, Tag } from '@arco-design/web-react';
-import { createApplicationVersion, OperationType, type CreateApplicationVersionReq } from '@onebase/app';
+import { onlineApplication, OperationType, type OnlineApplicationReq } from '@onebase/app';
 import React, { useState } from 'react';
 import styles from './index.module.less';
 
@@ -35,7 +35,7 @@ const PublishVersionModal: React.FC<PublishVersionModalProps> = ({ applicationId
       const values = await form.validate();
       setLoading(true);
 
-      const req: CreateApplicationVersionReq = {
+      const req: OnlineApplicationReq = {
         applicationId: applicationId,
         versionName: values.versionName,
         versionNumber: values.versionNumber,
@@ -43,10 +43,11 @@ const PublishVersionModal: React.FC<PublishVersionModalProps> = ({ applicationId
         environment: '正式环境',
         operationType: OperationType.PUBLISH
       };
-      const res = await createApplicationVersion(req);
+      const res = await onlineApplication(req);
       console.log(res);
 
       setLoading(false);
+      form.resetFields();
       onOk(values);
     } catch (error) {
       console.error('表单验证失败:', error);

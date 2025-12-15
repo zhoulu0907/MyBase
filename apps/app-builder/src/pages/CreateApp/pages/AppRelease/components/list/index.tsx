@@ -1,11 +1,9 @@
-import { Button, Card, Pagination, Space, Table, Typography } from '@arco-design/web-react';
+import { Card, Pagination, Space, Table, Typography } from '@arco-design/web-react';
 import type { ColumnProps } from '@arco-design/web-react/es/Table';
-import { IconArrowLeft, IconArrowUp, IconSave } from '@arco-design/web-react/icon';
 import React, { useState } from 'react';
 import EditVersionModal from '../modals/EditVersionModal';
 import SaveVersionModal from '../modals/SaveVersionModal';
 
-import { OperationType } from '@onebase/app';
 import dayjs from 'dayjs';
 import type { VersionRecord } from '../..';
 import styles from './index.module.less';
@@ -124,14 +122,6 @@ const VersionManagement: React.FC<VersionManagementProps> = ({
       ellipsis: true
     },
     {
-      title: '发布环境',
-      dataIndex: 'environment',
-      key: 'environment',
-      align: 'center',
-      width: 120,
-      render: (value: string) => value || '-'
-    },
-    {
       title: '版本类型',
       dataIndex: 'versionTypeLabel',
       key: 'versionTypeLabel',
@@ -157,29 +147,29 @@ const VersionManagement: React.FC<VersionManagementProps> = ({
       render: (value: string) => {
         return value ? dayjs(value).format('YYYY-MM-DD HH:mm:ss') : '-';
       }
-    },
-    {
-      title: '操作',
-      key: 'actions',
-      align: 'center',
-      width: 200,
-      render: (_: unknown, record: VersionRecord) => (
-        <Space>
-          <Button type="text" size="small" onClick={() => handleEnableVersion(record)}>
-            启用此版本
-          </Button>
-          <Button type="text" size="small" onClick={() => handleAccessVersion(record)}>
-            访问
-          </Button>
-          <Button type="text" size="small" onClick={() => handleEditVersion(record)}>
-            编辑
-          </Button>
-          {/* <Button type="text" size="small" onClick={() => handleCompareVersion(record)}>
-            版本比对
-          </Button> */}
-        </Space>
-      )
     }
+    // {
+    //   title: '操作',
+    //   key: 'actions',
+    //   align: 'center',
+    //   width: 200,
+    //   render: (_: unknown, record: VersionRecord) => (
+    //     <Space>
+    //       <Button type="text" size="small" onClick={() => handleEnableVersion(record)}>
+    //         启用此版本
+    //       </Button>
+    //       <Button type="text" size="small" onClick={() => handleAccessVersion(record)}>
+    //         访问
+    //       </Button>
+    //       <Button type="text" size="small" onClick={() => handleEditVersion(record)}>
+    //         编辑
+    //       </Button>
+    //       {/* <Button type="text" size="small" onClick={() => handleCompareVersion(record)}>
+    //         版本比对
+    //       </Button> */}
+    //     </Space>
+    //   )
+    // }
   ];
 
   return (
@@ -189,7 +179,7 @@ const VersionManagement: React.FC<VersionManagementProps> = ({
           版本管理
         </Typography.Title>
         <Space>
-          <Button icon={<IconArrowLeft />} className={styles.actionButton}>
+          {/* <Button icon={<IconArrowLeft />} className={styles.actionButton}>
             版本回退
           </Button>
           <Button icon={<IconSave />} onClick={handleSaveVersion} className={styles.actionButton}>
@@ -197,7 +187,7 @@ const VersionManagement: React.FC<VersionManagementProps> = ({
           </Button>
           <Button type="primary" icon={<IconArrowUp />} onClick={handlePublishVersion}>
             发布版本
-          </Button>
+          </Button> */}
         </Space>
       </div>
 

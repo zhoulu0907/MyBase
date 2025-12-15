@@ -1,9 +1,9 @@
 import { menuSignal } from '@onebase/app';
+import { webMenuIcons } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import React from 'react';
-import styles from './index.module.less';
-import { webMenuIcons } from '@onebase/ui-kit';
 import { ReactSVG } from 'react-svg';
+import styles from './index.module.less';
 
 /**
  * MenuItem 组件

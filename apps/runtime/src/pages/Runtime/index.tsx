@@ -3,6 +3,7 @@ import { useI18n } from '@/hooks/useI18n';
 import { Input, Layout, Tree } from '@arco-design/web-react';
 import { IconDown, IconSearch } from '@arco-design/web-react/icon';
 import {
+  getAppNavigationConfig,
   listApplicationMenu,
   menuSignal,
   MenuType,
@@ -146,7 +147,7 @@ const Runtime: React.FC = () => {
     }
     // 处理数据
     const resPageList: any[] = res && res.length > 0 ? dealPage(res) : [];
-    console.log(resPageList);
+
     const pageList: any[] = bpmData.concat(resPageList);
 
     const treeData = convertMenuToTreeData(pageList, initTreeItemWidth);
@@ -155,10 +156,23 @@ const Runtime: React.FC = () => {
     // 如果菜单列表不为空，默认选中第一个菜单
     if (pageList && pageList.length > 0) {
       // 初始化页面没有curMenuId就处理第一个菜单为分组的情况 分组里没有页面的情况
-      const curMenuObj = curMenuId ? findMenuWithParents(pageList, [], curMenuId) : findMenuWithParents(pageList, []);
-      if (curMenuObj) {
-        setExpandedKeys(curMenuObj.parentIds);
-        setCurMenu(curMenuObj.node);
+
+      const appNavigationConfig = await getAppNavigationConfig({
+        id: appID
+      });
+
+      if (appNavigationConfig.webDefaultMenu === 'default' || appNavigationConfig.webDefaultMenu === '') {
+        const curMenuObj = curMenuId ? findMenuWithParents(pageList, [], curMenuId) : findMenuWithParents(pageList, []);
+        if (curMenuObj) {
+          setExpandedKeys(curMenuObj.parentIds);
+          setCurMenu(curMenuObj.node);
+        }
+      } else {
+        const curMenuObj = findMenuWithParents(pageList, [], appNavigationConfig.webDefaultMenu);
+        if (curMenuObj) {
+          setExpandedKeys(curMenuObj.parentIds);
+          setCurMenu(curMenuObj.node);
+        }
       }
     }
   };
@@ -170,7 +184,7 @@ const Runtime: React.FC = () => {
     targetId?: string
   ): { node: ApplicationMenu; parentIds: string[] } | null => {
     for (const n of nodes) {
-      if (targetId ? n.id === targetId : n.menuType === MenuType.PAGE) {
+      if (targetId ? n.id === targetId || n.menuUuid === targetId : n.menuType === MenuType.PAGE) {
         return { node: n, parentIds: accIds };
       }
 
