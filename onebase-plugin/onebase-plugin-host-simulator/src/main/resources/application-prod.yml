@@ -1,31 +1,5 @@
-server:
-  port: 8080
-  servlet:
-    context-path: /
-    encoding:
-      charset: UTF-8
-      enabled: true
-      force: true
-
-spring:
-  application:
-    name: onebase-plugin-host-simulator-prod
-  http:
-    encoding:
-      charset: UTF-8
-      enabled: true
-      force: true
-
-logging:
-  level:
-    root: INFO
-    com.cmsr.onebase.plugin: INFO
-    org.pf4j: ERROR
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
-
 # 插件配置（生产模式 - 使用PF4J默认策略）
-# 此模式使用PF4J默认策略，同时扫描classpath和plugins目录
+# 此模式使用PF4J默认策略，同时扫描classpath和plugins目录中的扩展点
 onebase:
   plugin:
     enabled: true
@@ -34,10 +8,4 @@ onebase:
     mode: prod                # 生产模式，使用PF4J默认策略（classpath + plugins目录）
     scan-interval: 30000      # 每 30 秒扫描插件目录，支持热加载（0 表示禁用）
     plugins-dir: ./plugins    # 插件目录，存放 ZIP/JAR 插件包
-  
-# 说明：
-# 1. mode=prod：使用PF4J默认策略，同时扫描classpath和plugins-dir
-# 2. scan-interval=30000：每 30 秒扫描插件目录，自动加载新插件、重载更新的插件
-# 3. 支持完整的插件生命周期管理（加载、启动、停止、卸载）
-# 4. 提供最大灵活性，适合生产环境
-# 5. 设置 scan-interval=0 可禁用热加载
+

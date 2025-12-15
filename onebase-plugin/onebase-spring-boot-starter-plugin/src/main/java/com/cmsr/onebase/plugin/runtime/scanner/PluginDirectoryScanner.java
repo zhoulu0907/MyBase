@@ -7,9 +7,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.File;
 import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -55,6 +59,10 @@ public class PluginDirectoryScanner implements Runnable {
      * 是否运行中
      */
     private volatile boolean running = true;
+    /**
+     * 使用ScheduledExecutorService执行定时扫描
+     */
+    private ScheduledExecutorService scheduler;
 
     public PluginDirectoryScanner(PluginManager pluginManager,
                                    OneBasePluginManager oneBasePluginManager,
@@ -71,7 +79,7 @@ public class PluginDirectoryScanner implements Runnable {
         log.info("扫描间隔: {} 毫秒", scanInterval);
         log.info("=".repeat(60));
 
-        // 初始化已知插件文件
+        // 初始化已知插件文件（使用规范化路径，避免不同Path实例导致的不匹配）
         initializeKnownPlugins();
     }
 
@@ -84,14 +92,21 @@ public class PluginDirectoryScanner implements Runnable {
             return;
         }
 
-        try (DirectoryStream<Path> stream = Files.newDirectoryStream(pluginDirectory, this::isPluginFile)) {
-            for (Path pluginFile : stream) {
-                long lastModified = Files.getLastModifiedTime(pluginFile).toMillis();
-                knownPluginFiles.put(pluginFile, lastModified);
-                log.debug("已记录插件文件: {} (最后修改时间: {})", pluginFile.getFileName(), lastModified);
+        File dir = pluginDirectory.toFile();
+        File[] files = dir.listFiles((f) -> f.isFile() && isPluginFile(f.toPath()));
+        if (files == null) {
+            log.warn("无法列出插件目录文件: {}", pluginDirectory);
+        } else {
+            for (File f : files) {
+                try {
+                    Path real = f.toPath().toAbsolutePath().normalize();
+                    long lastModified = Files.getLastModifiedTime(real).toMillis();
+                    knownPluginFiles.put(real, lastModified);
+                    log.debug("已记录插件文件: {} (最后修改时间: {})", real.getFileName(), lastModified);
+                } catch (IOException e) {
+                    log.warn("读取插件文件信息失败: {}", f, e);
+                }
             }
-        } catch (IOException e) {
-            log.error("初始化已知插件文件失败", e);
         }
 
         log.info("已初始化 {} 个已知插件文件", knownPluginFiles.size());
@@ -110,19 +125,38 @@ public class PluginDirectoryScanner implements Runnable {
 
     @Override
     public void run() {
-        log.info("插件目录扫描器已启动");
+        log.info("插件目录扫描器已启动 (scanInterval={} ms)", scanInterval);
 
+        // 使用 ScheduledExecutorService，立即执行一次，然后按照间隔执行
+        scheduler = Executors.newSingleThreadScheduledExecutor(r -> {
+            Thread t = new Thread(r, "PluginDirectoryScanner-Scheduler");
+            t.setDaemon(true);
+            return t;
+        });
+
+        scheduler.scheduleWithFixedDelay(() -> {
+            try {
+                scanPluginDirectory();
+            } catch (Exception e) {
+                log.error("定时扫描执行过程中发生异常", e);
+            }
+        }, 0, Math.max(1, scanInterval), TimeUnit.MILLISECONDS);
+
+        // 控制线程保持存活，直到 stop() 被调用
         while (running) {
             try {
-                Thread.sleep(scanInterval);
-                scanPluginDirectory();
+                Thread.sleep(1000);
             } catch (InterruptedException e) {
-                log.info("插件目录扫描器被中断");
+                log.info("插件目录扫描控制线程被中断");
                 Thread.currentThread().interrupt();
                 break;
-            } catch (Exception e) {
-                log.error("插件目录扫描过程中发生异常", e);
             }
+        }
+
+        // 停止调度器
+        if (scheduler != null && !scheduler.isShutdown()) {
+            log.info("正在关闭扫描调度器...");
+            scheduler.shutdownNow();
         }
 
         log.info("插件目录扫描器已停止");
@@ -137,18 +171,25 @@ public class PluginDirectoryScanner implements Runnable {
             return;
         }
 
-        log.debug("开始扫描插件目录: {}", pluginDirectory);
+        // （已移除）调试计数块，避免在某些 JDK/编译配置下产生受检异常处理问题。
 
         Set<Path> currentPluginFiles = new HashSet<>();
 
-        try (DirectoryStream<Path> stream = Files.newDirectoryStream(pluginDirectory, this::isPluginFile)) {
-            for (Path pluginFile : stream) {
-                currentPluginFiles.add(pluginFile);
-                handlePluginFile(pluginFile);
-            }
-        } catch (IOException e) {
-            log.error("扫描插件目录失败", e);
+        File dir = pluginDirectory.toFile();
+        File[] files = dir.listFiles((f) -> f.isFile() && isPluginFile(f.toPath()));
+        if (files == null) {
+            log.error("扫描插件目录失败（无法列出目录）: {}", pluginDirectory);
             return;
+        }
+
+        for (File f : files) {
+            try {
+                Path real = f.toPath().toAbsolutePath().normalize();
+                currentPluginFiles.add(real);
+                handlePluginFile(real);
+            } catch (Exception e) {
+                log.warn("读取插件文件信息失败: {}", f, e);
+            }
         }
 
         // 检测已删除的插件
@@ -159,8 +200,6 @@ public class PluginDirectoryScanner implements Runnable {
         for (Path deletedPlugin : deletedPlugins) {
             handleDeletedPlugin(deletedPlugin);
         }
-
-        log.debug("插件目录扫描完成，当前插件数: {}", currentPluginFiles.size());
     }
 
     /**
@@ -253,10 +292,15 @@ public class PluginDirectoryScanner implements Runnable {
      * 根据插件路径查找插件ID
      */
     private String findPluginIdByPath(Path pluginPath) {
+        String target = pluginPath.toAbsolutePath().normalize().toString();
         return pluginManager.getPlugins().stream()
                 .filter(wrapper -> {
                     Path wrapperPath = wrapper.getPluginPath();
-                    return wrapperPath != null && wrapperPath.equals(pluginPath);
+                    if (wrapperPath == null) {
+                        return false;
+                    }
+                    String w = wrapperPath.toAbsolutePath().normalize().toString();
+                    return target.equals(w);
                 })
                 .map(wrapper -> wrapper.getPluginId())
                 .findFirst()
