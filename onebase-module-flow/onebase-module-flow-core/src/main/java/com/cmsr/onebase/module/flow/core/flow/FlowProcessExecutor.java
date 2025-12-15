@@ -161,8 +161,6 @@ public class FlowProcessExecutor {
 
             variableContext.setInputFields(executorInput.getInputParams());
             variableContext.setOutputParams(Collections.emptyMap());
-            //重置执行结果
-            executeContext.resetNodeProcessResult();
             //设置日志执行UUID
             executionLog.setTraceId(executeContext.getTraceId());
             executionLog.setExecutionUuid(executeContext.getExecutionUuid());
