@@ -113,7 +113,8 @@ const XTable = memo(
       advancedButtonPermission,
       // operationButtonCollpaseNumber,
       operationButtonShowType,
-      refresh
+      refresh,
+      filterCondition
     } = props;
 
     const { curMenu } = menuSignal;
@@ -429,7 +430,8 @@ const XTable = memo(
 
       const req: PageMethodV2Params = {
         pageNo: tablePageNo,
-        pageSize: pageSize || 10
+        pageSize: pageSize || 10,
+        filters: filterCondition
       };
 
       const res = await dataMethodPageV2(tableName, curMenu.value?.id, req);

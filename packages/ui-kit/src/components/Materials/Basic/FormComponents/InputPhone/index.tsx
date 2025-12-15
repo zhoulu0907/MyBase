@@ -31,20 +31,14 @@ const XInputPhone = memo((props: XInputPhoneConfig & { runtime?: boolean; detail
   // ===== 外部 props end =====
 
   // ===== 内部状态 & 回显begin =====
-  const [fieldId, setFieldId] = useState('');
-  
-  useEffect(() => {
-    if (dataField.length > 0) {
-      setFieldId(dataField[dataField.length - 1]);
-    }
-  }, [dataField]);
+
   // =====  内部状态 & 回显 end =====
 
   // ===== 表单上下文与字段名与值读取 begin =====
   const {
     form,
     fieldValue
-  } = useFormFieldWatch(fieldId);
+  } = useFormFieldWatch(dataField);
   // ===== 表单上下文与字段名与值读取 end =====
 
   // ===== 外部事件：选择数据 begin =====
