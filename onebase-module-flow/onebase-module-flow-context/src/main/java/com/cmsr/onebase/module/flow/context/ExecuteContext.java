@@ -137,10 +137,6 @@ public class ExecuteContext implements Serializable {
         return executionEndNodeTag != null && executionEndNodeTag.equals(tag);
     }
 
-    public void restExecutionUuid() {
-        this.executionUuid = null;
-    }
-
     public void addLog(String log) {
         executeLog.addLog(log);
     }
