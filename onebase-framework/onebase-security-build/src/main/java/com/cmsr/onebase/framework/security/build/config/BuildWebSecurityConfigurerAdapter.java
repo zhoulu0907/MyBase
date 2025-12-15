@@ -2,9 +2,10 @@ package com.cmsr.onebase.framework.security.build.config;
 
 import cn.hutool.core.collection.CollUtil;
 import com.cmsr.onebase.framework.security.build.filter.BuildApplicationContextHeaderFilter;
+import com.cmsr.onebase.framework.security.build.filter.BuildApplicationModificationFilter;
+import com.cmsr.onebase.framework.security.build.filter.BuildAuthenticationFilter;
 import com.cmsr.onebase.framework.security.config.AuthorizeRequestsCustomizer;
 import com.cmsr.onebase.framework.security.config.SecurityProperties;
-import com.cmsr.onebase.framework.security.build.filter.BuildAuthenticationFilter;
 import com.cmsr.onebase.framework.web.config.WebProperties;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
@@ -55,7 +56,7 @@ import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.
 public class BuildWebSecurityConfigurerAdapter {
 
     @Resource
-    private WebProperties      webProperties;
+    private WebProperties webProperties;
     @Resource
     private SecurityProperties securityProperties;
 
@@ -63,12 +64,12 @@ public class BuildWebSecurityConfigurerAdapter {
      * 认证失败处理类 Bean
      */
     @Resource
-    private AuthenticationEntryPoint  authenticationEntryPoint;
+    private AuthenticationEntryPoint authenticationEntryPoint;
     /**
      * 权限不够处理器 Bean
      */
     @Resource
-    private AccessDeniedHandler       accessDeniedHandler;
+    private AccessDeniedHandler accessDeniedHandler;
     /**
      * Token 认证过滤器 Bean
      */
@@ -77,13 +78,17 @@ public class BuildWebSecurityConfigurerAdapter {
 
     @Autowired
     private BuildApplicationContextHeaderFilter applicationContextHeaderFilter;
+
+    @Autowired
+    private BuildApplicationModificationFilter applicationModificationFilter;
+
     /**
      * 自定义的权限映射 Bean 们
      *
      * @see #filterChain(HttpSecurity)
      */
     @Resource
-    private List<AuthorizeRequestsCustomizer>   authorizeRequestsCustomizers;
+    private List<AuthorizeRequestsCustomizer> authorizeRequestsCustomizers;
 
     @Resource
     private ApplicationContext applicationContext;
@@ -154,11 +159,13 @@ public class BuildWebSecurityConfigurerAdapter {
         // 添加 Token Filter
         httpSecurity.addFilterBefore(authenticationTokenFilter, UsernamePasswordAuthenticationFilter.class);
         httpSecurity.addFilterAfter(applicationContextHeaderFilter, BuildAuthenticationFilter.class);
+        httpSecurity.addFilterAfter(applicationModificationFilter, BuildApplicationContextHeaderFilter.class);
         return httpSecurity.build();
     }
 
     /**
      * 解析和获取免登接口
+     *
      * @return
      */
     private Multimap<HttpMethod, String> getPermitAllUrlsFromAnnotations() {

@@ -34,6 +34,8 @@ import com.cmsr.onebase.module.metadata.core.util.StatusEnumUtil;
 import com.cmsr.onebase.module.metadata.core.dal.database.TemporaryDatasourceService;
 import com.cmsr.onebase.module.metadata.core.enums.BusinessEntityTypeEnum;
 import com.cmsr.onebase.module.metadata.core.util.MetadataIdUuidConverter;
+import com.cmsr.onebase.module.metadata.core.dal.database.FieldTypeMappingRepository;
+import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.FieldTypeMappingDO;
 import com.cmsr.onebase.framework.aynline.AnylineDdlHelper;
 import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.annotation.Resource;
@@ -91,6 +93,14 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
 
     @Resource
     private AppApplicationApi appApplicationApi;
+
+    @Resource
+    private FieldTypeMappingRepository fieldTypeMappingRepository;
+
+    // 需要加长度参数的数据库类型
+    private static final Set<String> LENGTH_REQUIRED_TYPES = Set.of("VARCHAR", "CHAR", "NVARCHAR", "NCHAR");
+    // 需要加精度参数的数据库类型
+    private static final Set<String> PRECISION_REQUIRED_TYPES = Set.of("NUMERIC", "DECIMAL");
 
     // 系统字段缓存，避免频繁查询数据库
     private volatile List<MetadataSystemFieldsDO> systemFieldsCache = null;
@@ -418,32 +428,36 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
 
     /**
      * 根据字段类型获取默认数据长度
+     * <p>
+     * 从 metadata_field_type_mapping 表查询业务类型对应的默认长度
      */
     private Integer getDefaultDataLength(String fieldType) {
-        switch (fieldType.toUpperCase()) {
-            case "VARCHAR":
-                return 255;
-            case "BIGINT":
-                return 19;
-            case "INTEGER":
-                return 10;
-            case "DECIMAL":
-                return 18;
-            default:
-                return null;
+        if (fieldType == null || fieldType.trim().isEmpty()) {
+            return null;
         }
+        
+        FieldTypeMappingDO mapping = fieldTypeMappingRepository.getDefaultMappingByBusinessType(fieldType);
+        if (mapping != null && mapping.getDefaultLength() != null) {
+            return mapping.getDefaultLength();
+        }
+        return null;
     }
 
     /**
      * 根据字段类型获取默认小数位数
+     * <p>
+     * 从 metadata_field_type_mapping 表查询业务类型对应的默认小数位数
      */
     private Integer getDefaultDecimalPlaces(String fieldType) {
-        switch (fieldType.toUpperCase()) {
-            case "DECIMAL":
-                return 2;
-            default:
-                return null;
+        if (fieldType == null || fieldType.trim().isEmpty()) {
+            return null;
         }
+        
+        FieldTypeMappingDO mapping = fieldTypeMappingRepository.getDefaultMappingByBusinessType(fieldType);
+        if (mapping != null && mapping.getDefaultDecimalPlaces() != null && mapping.getDefaultDecimalPlaces() > 0) {
+            return mapping.getDefaultDecimalPlaces();
+        }
+        return null;
     }
 
     /**
@@ -696,29 +710,52 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
 
     /**
      * 字段类型映射
+     * <p>
+     * 从 metadata_field_type_mapping 表查询业务类型对应的数据库类型
+     * 支持业务类型（如 ID, USER, DATETIME, NUMBER）到数据库类型（如 BIGINT, TIMESTAMP）的转换
      */
     private String mapFieldType(String fieldType) {
-        switch (fieldType.toUpperCase()) {
-            case "BIGINT":
-                return "BIGINT";
-            case "VARCHAR":
-                return "VARCHAR(255)";
-            case "TEXT":
-            case "LONGVARCHAR":
-                // LONGVARCHAR 类型映射为 TEXT，用于存储较长的文本数据
-                // 包括：单选列表、多选列表、结构化对象、数组列表、文件、图片、地理位置、用户多选、部门多选、数据多选等
-                return "TEXT";
-            case "TIMESTAMP":
-                return "TIMESTAMP";
-            case "BOOLEAN":
-                return "BOOLEAN";
-            case "INTEGER":
-                return "INTEGER";
-            case "DECIMAL":
-                return "DECIMAL(18,2)";
-            default:
-                return "VARCHAR(255)"; // 默认类型
+        if (fieldType == null || fieldType.trim().isEmpty()) {
+            log.warn("字段类型为空，使用默认 VARCHAR(255)");
+            return "VARCHAR(255)";
         }
+        
+        // 从映射表查询业务类型对应的数据库类型
+        FieldTypeMappingDO mapping = fieldTypeMappingRepository.getDefaultMappingByBusinessType(fieldType);
+        if (mapping != null && mapping.getDatabaseField() != null) {
+            return buildDatabaseTypeString(mapping);
+        }
+        
+        // 如果映射表中没有找到，记录警告并返回默认值
+        log.warn("未找到业务类型 {} 的映射配置，使用默认 VARCHAR(255)", fieldType);
+        return "VARCHAR(255)";
+    }
+
+    /**
+     * 根据映射配置构建数据库类型字符串
+     * <p>
+     * 根据 database_field 的类型决定是否需要加长度或精度参数
+     */
+    private String buildDatabaseTypeString(FieldTypeMappingDO mapping) {
+        String dbField = mapping.getDatabaseField().toUpperCase();
+        Integer defaultLength = mapping.getDefaultLength();
+        Integer decimalPlaces = mapping.getDefaultDecimalPlaces();
+        
+        // 需要加长度参数的类型（如 VARCHAR、CHAR）
+        if (LENGTH_REQUIRED_TYPES.contains(dbField)) {
+            int length = (defaultLength != null && defaultLength > 0) ? defaultLength : 255;
+            return dbField + "(" + length + ")";
+        }
+        
+        // 需要加精度参数的类型（如 NUMERIC、DECIMAL）
+        if (PRECISION_REQUIRED_TYPES.contains(dbField)) {
+            int len = (defaultLength != null && defaultLength > 0) ? defaultLength : 18;
+            int dec = (decimalPlaces != null && decimalPlaces >= 0) ? decimalPlaces : 2;
+            return dbField + "(" + len + "," + dec + ")";
+        }
+        
+        // 其他类型直接使用 database_field 的值（如 TEXT, TIMESTAMP, BOOLEAN, DATE, int8, text[] 等）
+        return mapping.getDatabaseField();
     }
 
     @Override
@@ -1210,10 +1247,6 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
 
     @Override
     public BusinessEntityRespVO createBusinessEntityWithResponse(@Valid BusinessEntitySaveReqVO reqVO) {
-        // 修改企业主表更新时间
-        Long appId = Long.valueOf(reqVO.getApplicationId());
-        appApplicationApi.updateAppTimeById(appId);
-
         Long id = createBusinessEntity(reqVO);
         MetadataBusinessEntityDO businessEntity = getBusinessEntity(id);
         return modelMapper.map(businessEntity, BusinessEntityRespVO.class);

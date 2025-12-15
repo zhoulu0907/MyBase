@@ -1,6 +1,5 @@
 package com.cmsr.onebase.framework.common.pojo;
 
-import com.mybatisflex.core.paginate.Page;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -33,9 +32,4 @@ public class PageParam implements Serializable {
     @Min(value = 1, message = "每页条数最小值为 1")
     @Max(value = 100, message = "每页条数最大值为 100")
     private Integer pageSize = PAGE_SIZE;
-
-    public <T> com.mybatisflex.core.paginate.Page<T> toFlexPage() {
-        return Page.of(getPageNo(), getPageSize());
-    }
-
 }

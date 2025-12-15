@@ -78,5 +78,13 @@ public class MetadataAutoNumberConfigDO extends BaseBizEntity {
     @Column(value = "is_enabled", comment = "是否启用：1-启用，0-禁用")
     private Integer isEnabled;
 
+    /**
+     * SEQUENCE规则项在列表中的排序位置
+     * <p>
+     * 用于与其他RuleItem的itemOrder统一排序，默认999表示末尾
+     */
+    @Column(value = "sequence_order", comment = "SEQUENCE规则项在列表中的排序位置")
+    private Integer sequenceOrder;
+
 }
 

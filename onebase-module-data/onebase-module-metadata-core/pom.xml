@@ -42,6 +42,7 @@
             <artifactId>onebase-module-infra-api</artifactId>
             <version>${revision}</version>
         </dependency>
+
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-module-flow-api</artifactId>
@@ -52,6 +53,13 @@
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-module-app-api</artifactId>
             <version>${revision}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-metadata-api</artifactId>
+            <version>${revision}</version>
+            <scope>compile</scope>
         </dependency>
         <!-- 业务组件 -->
         <dependency>
@@ -59,7 +67,7 @@
             <artifactId>onebase-common</artifactId>
             <version>${revision}</version>
         </dependency>
-        
+
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-module-metadata-common</artifactId>
@@ -78,7 +86,7 @@
         </dependency>
 
         <!-- Web 相关 -->
-    <!-- core 为纯库模块，不需要 web/security 运行期依赖 -->
+        <!-- core 为纯库模块，不需要 web/security 运行期依赖 -->
 
         <!-- DB 相关 -->
         <dependency>
@@ -92,7 +100,7 @@
             <artifactId>HikariCP</artifactId>
         </dependency>
 
-    <!-- 数据源连接池由上层应用提供，这里不直接依赖 HikariCP -->
+        <!-- 数据源连接池由上层应用提供，这里不直接依赖 HikariCP -->
 
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
@@ -100,10 +108,10 @@
         </dependency>
 
         <!-- RPC 远程调用相关 -->
-    <!-- 不包含 RPC 运行期依赖，避免服务暴露能力下沉至 core -->
+        <!-- 不包含 RPC 运行期依赖，避免服务暴露能力下沉至 core -->
 
         <!-- Registry 注册中心相关 -->
-    <!-- 不包含注册/配置中心依赖 -->
+        <!-- 不包含注册/配置中心依赖 -->
 
         <!-- 服务保障相关 TODO 开发者：暂时去掉 -->
         <!--        <dependency>-->
@@ -131,15 +139,13 @@
         </dependency>
 
         <dependency>
-            <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-module-app-api</artifactId>
-            <version>${revision}</version>
-            <scope>compile</scope>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-inline</artifactId>
+            <scope>test</scope>
         </dependency>
 
-
         <!-- 工具类相关 -->
-    <!-- 去除与 UI/邮件/第三方登录相关的运行期依赖，统一由上层应用引入 -->
+        <!-- 去除与 UI/邮件/第三方登录相关的运行期依赖，统一由上层应用引入 -->
 
     </dependencies>
 

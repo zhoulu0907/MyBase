@@ -223,6 +223,8 @@ public class TenantServiceImpl implements TenantService {
             Long roleId = createTenantAdminRole();
             //  开发者角色 判断是否存在开发者，不存在就新增开发者角色
             createDeveloperAdminRole();
+            // 创建普通角色权限
+            createNormalUserRole();
             // 创建用户，并分配角色
             createSystemUser(roleId, createReqVO);
         });
@@ -282,6 +284,17 @@ public class TenantServiceImpl implements TenantService {
             reqVO.setName(RoleCodeEnum.APP_DEVELOPER.getName()).setCode(RoleCodeEnum.APP_DEVELOPER.getCode())
                     .setSort(0).setRemark("系统自动生成");
               roleService.createRole(reqVO, RoleTypeEnum.SYSTEM.getType());
+        }
+    }
+
+    private void createNormalUserRole() {
+        RoleDO roleDO= roleService.getRoleByCode(RoleCodeEnum.NORMAL_USER.getCode());
+        if(roleDO==null) {
+            // 创建角色
+            RoleInsertReqVO reqVO = new RoleInsertReqVO();
+            reqVO.setName(RoleCodeEnum.NORMAL_USER.getName()).setCode(RoleCodeEnum.NORMAL_USER.getCode())
+                    .setSort(0).setRemark("系统自动生成");
+            roleService.createRole(reqVO, RoleTypeEnum.SYSTEM.getType());
         }
     }
 

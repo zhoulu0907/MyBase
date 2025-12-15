@@ -5,10 +5,10 @@ import com.cmsr.onebase.module.flow.context.graph.JsonGraph;
 import com.cmsr.onebase.module.flow.context.graph.JsonGraphConstant;
 import com.cmsr.onebase.module.flow.context.graph.JsonGraphNode;
 import com.cmsr.onebase.module.flow.context.graph.NodeData;
-import com.cmsr.onebase.module.flow.context.graph.nodes.StartDateFieldNodeData;
-import com.cmsr.onebase.module.flow.context.graph.nodes.StartEntityNodeData;
-import com.cmsr.onebase.module.flow.context.graph.nodes.StartFormNodeData;
-import com.cmsr.onebase.module.flow.context.graph.nodes.StartTimeNodeData;
+import com.cmsr.onebase.module.flow.context.graph.nodes.start.StartDateFieldNodeData;
+import com.cmsr.onebase.module.flow.context.graph.nodes.start.StartEntityNodeData;
+import com.cmsr.onebase.module.flow.context.graph.nodes.start.StartFormNodeData;
+import com.cmsr.onebase.module.flow.context.graph.nodes.start.StartTimeNodeData;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
 
 import java.util.List;
@@ -122,11 +122,6 @@ public class FlowProcessCache {
         startDateFieldNodeDataCache.remove(processId);
         startEntityNodeDataCache.remove(processId);
         processCache.remove(processId);
-    }
-
-    public static Long findApplicationByProcessId(Long processId) {
-        FlowProcessDO flowProcessDO = processCache.get(processId);
-        return flowProcessDO != null ? flowProcessDO.getApplicationId() : null;
     }
 
     public static FlowProcessDO findProcessByProcessId(Long processId) {

@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.app.build.service.tag;
 
 import com.cmsr.onebase.module.app.core.vo.tag.TagGroupCountVO;
-import com.cmsr.onebase.module.app.build.vo.tag.TagRespVO;
+import com.cmsr.onebase.module.app.core.vo.tag.TagRespVO;
 
 import java.util.List;
 

@@ -2,12 +2,14 @@ package com.cmsr.onebase.module.flow.context.graph.nodes;
 
 import com.cmsr.onebase.module.flow.context.condition.ConditionItem;
 import com.cmsr.onebase.module.flow.context.graph.NodeData;
+import com.cmsr.onebase.module.flow.context.graph.NodeType;
 import lombok.Data;
 
 import java.io.Serializable;
 import java.util.List;
 
 @Data
+@NodeType("script")
 public class ScriptNodeData extends NodeData implements Serializable {
 
     /**

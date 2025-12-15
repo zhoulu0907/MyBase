@@ -8,29 +8,33 @@ import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.uid.UidGenerator;
 import com.cmsr.onebase.module.app.build.service.AppCommonService;
 import com.cmsr.onebase.module.app.build.service.auth.AppAuthRoleService;
-import com.cmsr.onebase.module.app.build.service.menu.AppMenuService;
-import com.cmsr.onebase.module.app.build.service.version.AppVersionService;
+import com.cmsr.onebase.module.app.build.service.menu.BuildAppMenuService;
+import com.cmsr.onebase.module.app.build.service.version.AppDataManager;
 import com.cmsr.onebase.module.app.build.util.AppUtils;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationCreateReqVO;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationCreateRespVO;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationRespVO;
-import com.cmsr.onebase.module.app.build.vo.tag.TagRespVO;
-import com.cmsr.onebase.module.app.core.dal.database.AppSqlQueryRepository;
 import com.cmsr.onebase.module.app.core.dal.database.app.AppApplicationRepository;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleRepository;
-import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleUserRepository;
-import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
 import com.cmsr.onebase.module.app.core.dal.database.tag.AppApplicationTagRepository;
 import com.cmsr.onebase.module.app.core.dal.database.tag.AppTagRepository;
 import com.cmsr.onebase.module.app.core.dal.database.version.AppVersionRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppApplicationDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppVersionDO;
 import com.cmsr.onebase.module.app.core.enums.AppErrorCodeConstants;
-import com.cmsr.onebase.module.app.core.enums.app.ApplicationStatusEnum;
+import com.cmsr.onebase.module.app.core.enums.app.AppPublishEnum;
+import com.cmsr.onebase.module.app.core.enums.app.AppStatusEnum;
 import com.cmsr.onebase.module.app.core.vo.app.AppUserPhotoDTO;
+import com.cmsr.onebase.module.app.core.vo.app.ApplicationNavigationConfigVO;
 import com.cmsr.onebase.module.app.core.vo.app.ApplicationPageReqVO;
+import com.cmsr.onebase.module.app.core.vo.tag.TagRespVO;
+import com.cmsr.onebase.module.bpm.api.datamanager.BpmDataManager;
+import com.cmsr.onebase.module.etl.api.EtlDataManager;
+import com.cmsr.onebase.module.flow.api.FlowDataManager;
 import com.cmsr.onebase.module.metadata.api.datasource.MetadataDatasourceApi;
 import com.cmsr.onebase.module.metadata.api.datasource.dto.DatasourceCreateDefaultReqDTO;
 import com.cmsr.onebase.module.metadata.api.datasource.dto.DatasourceSaveReqDTO;
+import com.cmsr.onebase.module.metadata.api.version.MetadataDataManagerApi;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -38,12 +42,16 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.validation.annotation.Validated;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @Author：huangjie
@@ -68,9 +76,6 @@ public class AppApplicationServiceImpl implements AppApplicationService {
     private AppTagRepository tagRepository;
 
     @Autowired
-    private AppMenuRepository menuRepository;
-
-    @Autowired
     private AppVersionRepository versionRepository;
 
     @Autowired
@@ -83,45 +88,74 @@ public class AppApplicationServiceImpl implements AppApplicationService {
     private MetadataDatasourceApi metadataDatasourceApi;
 
     @Autowired
-    private AppAuthRoleUserRepository appAuthRoleUserRepository;
-
-    @Autowired
     private AppAuthRoleRepository appAuthRoleRepository;
 
     @Autowired
-    private AppSqlQueryRepository appSqlQueryRepository;
+    private BuildAppMenuService buildAppMenuService;
 
     @Autowired
-    private AppVersionService appVersionService;
+    private AppDataManager appDataManager;
 
     @Autowired
-    private AppMenuService appMenuService;
+    private FlowDataManager flowDataManager;
+
+    @Autowired
+    private TransactionTemplate transactionTemplate;
+
+    @Autowired
+    private EtlDataManager etlDataManager;
+
+    @Autowired
+    private BpmDataManager bpmDataManager;
+
+    @Autowired
+    private MetadataDataManagerApi metadataDataManagerApi;
 
     @Override
     public PageResult<ApplicationRespVO> getApplicationPage(ApplicationPageReqVO pageReqVO) {
         Long userId = SecurityFrameworkUtils.getLoginUserId();
         PageResult<AppApplicationDO> pageResult = applicationRepository.selectPage(pageReqVO, userId);
-        AppCommonService.UserHelper userHelper = appCommonService.getUserHelper(pageResult.getList());
-
-        // 1. 获取应用ID列表
-        List<Long> appIds = pageResult.getList().stream()
-                .map(AppApplicationDO::getId)
-                .collect(Collectors.toList());
-        Map<Long, List<AppUserPhotoDTO>> userListMap = appAuthRoleRepository.findUserPhotoList(appIds);
-
-        List<ApplicationRespVO> respVOS = pageResult.getList().stream()
-                .map(v -> {
-                    ApplicationRespVO bean = BeanUtils.toBean(v, ApplicationRespVO.class);
-                    bean.setAppStatusText(ApplicationStatusEnum.getText(v.getAppStatus()));
-                    bean.setTags(queryAppTags(v.getId()));
-                    bean.setCreateUser(userHelper.getUserNickname(v.getCreator()));
-                    bean.setUpdateUser(userHelper.getUserNickname(v.getUpdater()));
-                    bean.setUserPhotoList(userListMap.get(v.getId()));
-                    return bean;
-                })
-                .toList();
+        List<ApplicationRespVO> respVOS = pageResult.getList().stream().map(v -> {
+            ApplicationRespVO bean = BeanUtils.toBean(v, ApplicationRespVO.class);
+            bean.setAppStatusText(AppStatusEnum.getText(v.getAppStatus()));
+            return bean;
+        }).toList();
+        enrichTags(respVOS);
+        enrichUser(respVOS);
+        enrichUserPhoto(respVOS);
         return new PageResult<>(respVOS, pageResult.getTotal());
     }
+
+    private void enrichTags(List<ApplicationRespVO> respVOS) {
+        List<Long> appIds = respVOS.stream().map(ApplicationRespVO::getId).collect(Collectors.toList());
+        List<TagRespVO> appTagDOS = tagRepository.selectTagVoByAppIds(appIds);
+        for (ApplicationRespVO respVO : respVOS) {
+            List<TagRespVO> tagRespVOS = appTagDOS.stream()
+                    .filter(tagDO -> tagDO.getApplicationId().equals(respVO.getId()))
+                    .toList();
+            respVO.setTags(tagRespVOS);
+        }
+    }
+
+    private void enrichUser(List<ApplicationRespVO> respVOS) {
+        Set<Long> userIds = respVOS.stream()
+                .flatMap(vo -> Stream.of(vo.getCreator(), vo.getUpdater()))
+                .collect(Collectors.toSet());
+        AppCommonService.UserHelper userHelper = appCommonService.getUserHelper(userIds);
+        for (ApplicationRespVO respVO : respVOS) {
+            respVO.setCreateUser(userHelper.getUserNickname(respVO.getCreator()));
+            respVO.setUpdateUser(userHelper.getUserNickname(respVO.getUpdater()));
+        }
+    }
+
+    private void enrichUserPhoto(List<ApplicationRespVO> respVOS) {
+        List<Long> appIds = respVOS.stream().map(ApplicationRespVO::getId).collect(Collectors.toList());
+        Map<Long, List<AppUserPhotoDTO>> userListMap = appAuthRoleRepository.findUserPhotoList(appIds);
+        for (ApplicationRespVO respVO : respVOS) {
+            respVO.setUserPhotoList(userListMap.get(respVO.getId()));
+        }
+    }
+
 
     private List<TagRespVO> queryAppTags(Long appId) {
         List<Long> tagIds = applicationTagRepository.findTagIdsByApplicationId(appId);
@@ -139,15 +173,37 @@ public class AppApplicationServiceImpl implements AppApplicationService {
         if (applicationDO == null) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_NOT_EXIST);
         }
+        ApplicationRespVO respVO = BeanUtils.toBean(applicationDO, ApplicationRespVO.class);
+        respVO.setAppStatusText(AppStatusEnum.getText(respVO.getAppStatus()));
+        respVO.setTags(queryAppTags(respVO.getId()));
+        //
         AppCommonService.UserHelper userHelper = appCommonService.getUserHelper(applicationDO);
-        ApplicationRespVO respVO = BeanUtils.toBean(applicationDO, ApplicationRespVO.class
-                , vo -> {
-                    vo.setAppStatusText(ApplicationStatusEnum.getText(vo.getAppStatus()));
-                    vo.setTags(queryAppTags(vo.getId()));
-                    vo.setCreateUser(userHelper.getUserNickname(applicationDO.getCreator()));
-                    vo.setUpdateUser(userHelper.getUserNickname(applicationDO.getUpdater()));
-                });
+        respVO.setCreateUser(userHelper.getUserNickname(applicationDO.getCreator()));
+        respVO.setUpdateUser(userHelper.getUserNickname(applicationDO.getUpdater()));
+        //
+        enrichDevelopStatus(respVO);
         return respVO;
+    }
+
+    private void enrichDevelopStatus(ApplicationRespVO vo) {
+        if (AppPublishEnum.isNotPublished(vo.getAppStatus())) {
+            vo.setDevelopStatus("开发中");
+        }
+        AppVersionDO versionDO = versionRepository.findRuntimeByApplicationId(vo.getId());
+        if (versionDO == null) {
+            return;
+        }
+        AppCommonService.UserHelper userHelper = appCommonService.getUserHelper(versionDO);
+        vo.setVersionNumber(versionDO.getVersionNumber());
+        vo.setPublisher(userHelper.getUserNickname(versionDO.getCreator()));
+        vo.setPublishTime(versionDO.getCreateTime());
+        LocalDateTime appUpdateTime = vo.getUpdateTime();
+        LocalDateTime versionPublishTime = versionDO.getCreateTime();
+        if (appUpdateTime.isBefore(versionPublishTime)) {
+            vo.setDevelopStatus("已发布");
+        } else {
+            vo.setDevelopStatus("有更新");
+        }
     }
 
     @Override
@@ -157,7 +213,8 @@ public class AppApplicationServiceImpl implements AppApplicationService {
         AppApplicationDO applicationDO = BeanUtils.toBean(createReqVO, AppApplicationDO.class);
         applicationDO.setId(null);
         applicationDO.setAppUid(findAndCreateAppUid());
-        applicationDO.setAppStatus(ApplicationStatusEnum.EDITING.getValue());
+        applicationDO.setAppStatus(AppStatusEnum.OFFLINE.getValue());
+
         if (StringUtils.isNoneBlank(createReqVO.getAppCode())) {
             applicationDO.setAppCode(createReqVO.getAppCode());
         } else {
@@ -170,7 +227,7 @@ public class AppApplicationServiceImpl implements AppApplicationService {
         Long userId = SecurityFrameworkUtils.getLoginUserId();
         authRoleService.createDefaultRole(applicationDO.getId(), userId);
         createDatasource(applicationDO.getId(), applicationDO.getAppUid(), createReqVO.getDatasourceSaveReq());
-        appMenuService.createDefaultBpmMenu(applicationDO.getId());
+        buildAppMenuService.createDefaultBpmMenu(applicationDO.getId());
         return BeanUtils.toBean(applicationDO, ApplicationCreateRespVO.class);
     }
 
@@ -224,26 +281,23 @@ public class AppApplicationServiceImpl implements AppApplicationService {
     }
 
     @Override
-    public void updateApplicationVersion(Long id, String versionNumber, String versionUrl) {
-        AppApplicationDO applicationDO = applicationRepository.getById(id);
-        if (applicationDO == null) {
-            throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_NOT_EXIST);
-        }
-        applicationDO.setVersionUrl(versionUrl);
-        applicationRepository.updateById(applicationDO);
-    }
-
-    @Override
-    @Transactional(rollbackFor = Exception.class)
     public void deleteApplication(Long id, String name) {
         AppApplicationDO applicationDO = appCommonService.validateApplicationExist(id);
         if (!StringUtils.equals(name, applicationDO.getAppName())) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_NAME_ERROR);
         }
-        //TODO 删除应用下的全部资源
-        applicationRepository.removeById(id);
-        menuRepository.deleteByApplicationId(id);
-        versionRepository.deleteByApplicationId(id);
+        etlDataManager.offlineAllByApplication(id);
+        flowDataManager.offlineRuntimeData(id);
+        transactionTemplate.executeWithoutResult(transactionStatus -> {
+            bpmDataManager.removeApplication(id);
+            metadataDataManagerApi.deleteAllApplicationData(id);
+            etlDataManager.deleteAllApplicationData(id);
+            flowDataManager.deleteAllApplicationData(id);
+            appDataManager.deleteAllApplicationData(id);
+            versionRepository.deleteByApplicationId(id);
+            applicationTagRepository.deleteByApplicationId(id);
+            applicationRepository.removeById(id);
+        });
     }
 
     @Override
@@ -294,4 +348,22 @@ public class AppApplicationServiceImpl implements AppApplicationService {
         Long currentUserId = SecurityFrameworkUtils.getLoginUserId();
         return applicationRepository.findMyAppApplicationByAppName(appName, currentUserId);
     }
+
+    @Override
+    public ApplicationNavigationConfigVO getApplicationNavigationConfig(Long id) {
+        AppApplicationDO applicationDO = appCommonService.validateApplicationExist(id);
+        ApplicationNavigationConfigVO respVO = BeanUtils.toBean(applicationDO, ApplicationNavigationConfigVO.class);
+        return respVO;
+    }
+
+    @Override
+    public void updateApplicationNavigationConfig(ApplicationNavigationConfigVO updateReqVO) {
+        AppApplicationDO applicationDO = appCommonService.validateApplicationExist(updateReqVO.getId());
+        applicationDO.setWebDefaultMenu(updateReqVO.getWebDefaultMenu());
+        applicationDO.setWebNavLayout(updateReqVO.getWebNavLayout());
+        applicationDO.setMobileDefaultMenu(updateReqVO.getMobileDefaultMenu());
+        applicationDO.setMobileNavLayout(updateReqVO.getMobileNavLayout());
+        applicationRepository.updateById(applicationDO);
+    }
+
 }

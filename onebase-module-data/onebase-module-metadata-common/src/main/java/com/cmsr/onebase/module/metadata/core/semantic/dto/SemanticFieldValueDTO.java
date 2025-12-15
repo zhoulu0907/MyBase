@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 import java.util.Date;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -25,9 +26,11 @@ import com.cmsr.onebase.module.metadata.core.semantic.type.RefType;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
 @Schema(description = "字段值 DTO")
 @Data
+@Slf4j
 public class SemanticFieldValueDTO<T> {
     @Schema(description = "字段原始值")
     private T rawValue;
@@ -52,7 +55,7 @@ public class SemanticFieldValueDTO<T> {
         return rawValue;
     }
 
-    private SemanticFieldValueDTO(SemanticFieldTypeEnum fieldTypeEnum) {
+    public SemanticFieldValueDTO(SemanticFieldTypeEnum fieldTypeEnum) {
         this.fieldTypeEnum = Objects.requireNonNull(fieldTypeEnum, "fieldTypeEnum 不能为空");
     }
 
@@ -244,7 +247,7 @@ public class SemanticFieldValueDTO<T> {
             throw new IllegalStateException("fieldTypeEnum 未设置");
         }
         Object normalized = normalizeValue(rawValue, this.fieldTypeEnum);
-        T casted = (T) normalized;
+        T casted = (T) normalized; 
         this.rawValue = casted;
     }
 
@@ -265,7 +268,11 @@ public class SemanticFieldValueDTO<T> {
         } else if (value instanceof Object[] arr) {
             for (Object o : Arrays.asList(arr)) items.add(normalizeScalar(o, type));
         } else if (value instanceof String s) {
+            log.info("normalizeList: {}", s);
             String str = s.trim();
+            if (str.isEmpty()) {
+                return items;
+            }
             if (JsonUtils.isJson(str)) {
                 if (JsonUtils.isJsonObject(str)) {
                     Map<String, Object> obj = JsonUtils.parseObject(str, new TypeReference<Map<String, Object>>(){});
@@ -287,6 +294,11 @@ public class SemanticFieldValueDTO<T> {
     }
 
     private Object normalizeScalar(Object value, SemanticFieldTypeEnum type) {
+        if (value == null) return null;
+        if (value instanceof String s) {
+            String t = s.trim();
+            if (t.isEmpty()) return null;
+        }
         if (type.isRefType()) {
             Class<?> biz = type.getBizJavaType();
             if (biz.isInstance(value)) return value;
@@ -306,6 +318,7 @@ public class SemanticFieldValueDTO<T> {
         Class<?> rawType = type.getRawJavaType();
         if (rawType == String.class) {
             String s = value instanceof String ? ((String) value).trim() : String.valueOf(value);
+            if (s.isEmpty()) return null;
             if (type == SemanticFieldTypeEnum.EMAIL) {
                 if (!isValidEmail(s)) throw err("邮箱格式不正确", String.class);
             } else if (type == SemanticFieldTypeEnum.PHONE) {
@@ -317,44 +330,46 @@ public class SemanticFieldValueDTO<T> {
         }
         if (rawType == BigDecimal.class) {
             BigDecimal b = toBigDecimal(value);
-            if (b == null) throw err("数值类型转换失败", BigDecimal.class);
+            if (b == null) return null;
             return b;
         }
         if (rawType == Long.class) {
             BigDecimal b = toBigDecimal(value);
-            if (b == null) throw err("Long 类型转换失败", Long.class);
+            if (b == null) return null;
             return b.longValue();
         }
         if (rawType == Integer.class) {
             BigDecimal b = toBigDecimal(value);
-            if (b == null) throw err("Integer 类型转换失败", Integer.class);
+            if (b == null) return null;
             return b.intValue();
         }
         if (rawType == Double.class) {
             BigDecimal b = toBigDecimal(value);
-            if (b == null) throw err("Double 类型转换失败", Double.class);
+            if (b == null) return null;
             return b.doubleValue();
         }
         if (rawType == Float.class) {
             BigDecimal b = toBigDecimal(value);
-            if (b == null) throw err("Float 类型转换失败", Float.class);
+            if (b == null) return null;
             return b.floatValue();
         }
         if (rawType == Short.class) {
             BigDecimal b = toBigDecimal(value);
-            if (b == null) throw err("Short 类型转换失败", Short.class);
+            if (b == null) return null;
             return b.shortValue();
         }
         if (rawType == Byte.class) {
             BigDecimal b = toBigDecimal(value);
-            if (b == null) throw err("Byte 类型转换失败", Byte.class);
+            if (b == null) return null;
             return b.byteValue();
         }
         if (rawType == LocalDate.class) {
             if (value instanceof LocalDate) return value;
             if (value instanceof String s) {
-                LocalDate d = parseLocalDate(s.trim());
-                if (d == null) throw err("LocalDate 解析失败", LocalDate.class);
+                String t = s.trim();
+                if (t.isEmpty()) return null;
+                LocalDate d = parseLocalDate(t);
+                if (d == null) return null;
                 return d;
             }
             if (value instanceof Date d) {
@@ -366,33 +381,34 @@ public class SemanticFieldValueDTO<T> {
             throw err("非法的 LocalDate 值", LocalDate.class);
         }
         if (rawType == LocalDateTime.class) {
-            if (value instanceof LocalDateTime) return value;
-            if (value instanceof String s) {
-                LocalDateTime dt = parseLocalDateTime(s.trim());
-                if (dt == null) throw err("LocalDateTime 解析失败", LocalDateTime.class);
-                return dt;
+            // 直接类型匹配
+            if (value instanceof LocalDateTime ldt) return ldt;
+            if (value instanceof OffsetDateTime odt) return odt.toLocalDateTime();
+            if (value instanceof java.sql.Timestamp ts) return ts.toLocalDateTime();
+            if (value instanceof Instant inst) return LocalDateTime.ofInstant(inst, ZoneId.systemDefault());
+            // java.util.Date 及子类
+            if (value instanceof Date d) {
+                if (d instanceof java.sql.Date sd) return sd.toLocalDate().atStartOfDay();
+                return LocalDateTime.ofInstant(Instant.ofEpochMilli(d.getTime()), ZoneId.systemDefault());
             }
+            // 时间戳数字
             if (value instanceof Number n) {
                 long epoch = n.longValue();
                 if (String.valueOf(epoch).length() <= 10) epoch *= 1000;
-                Instant inst = Instant.ofEpochMilli(epoch);
-                return LocalDateTime.ofInstant(inst, ZoneId.systemDefault());
+                return LocalDateTime.ofInstant(Instant.ofEpochMilli(epoch), ZoneId.systemDefault());
             }
-            if (value instanceof Date d) {
-                if (d instanceof java.sql.Timestamp ts) {
-                    return ts.toLocalDateTime();
-                }
-                if (d instanceof java.sql.Date sd) {
-                    return sd.toLocalDate().atStartOfDay();
-                }
-                return LocalDateTime.ofInstant(Instant.ofEpochMilli(d.getTime()), ZoneId.systemDefault());
-            }
-            throw err("非法的 LocalDateTime 值", LocalDateTime.class);
+            // 兜底：任何类型都转为字符串后解析
+            String strVal = String.valueOf(value).trim();
+            if (strVal.isEmpty()) return null;
+            LocalDateTime dt = parseLocalDateTime(strVal);
+            if (dt != null) return dt;
+            return null;
         }
         if (rawType == Boolean.class) {
             if (value instanceof Boolean) return value;
             if (value instanceof String s) {
                 String t = s.trim().toLowerCase();
+                if (t.isEmpty()) return null;
                 if ("true".equals(t) || "1".equals(t) || "yes".equals(t) || "y".equals(t) || "on".equals(t) || "t".equals(t)) return Boolean.TRUE;
                 if ("false".equals(t) || "0".equals(t) || "no".equals(t) || "n".equals(t) || "off".equals(t) || "f".equals(t)) return Boolean.FALSE;
             }
@@ -403,12 +419,12 @@ public class SemanticFieldValueDTO<T> {
     }
 
     private boolean isValidEmail(String s) {
-        if (s == null || s.isEmpty()) return false;
+        if (s == null || s.isEmpty()) return true;
         return Pattern.compile("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$").matcher(s).matches();
     }
 
     private boolean isValidPhone(String s) {
-        if (s == null || s.isEmpty()) return false;
+        if (s == null || s.isEmpty()) return true;
         return Pattern.compile("^\\+?[0-9\\-]{5,20}$").matcher(s).matches();
     }
 
@@ -436,16 +452,30 @@ public class SemanticFieldValueDTO<T> {
     }
 
     private LocalDateTime parseLocalDateTime(String s) {
+        if (s == null || s.isEmpty()) return null;
+        // 标准 ISO 格式
         try { return LocalDateTime.parse(s); } catch (Exception ignore) {}
-        String[] fmts = {"yyyy-MM-dd HH:mm:ss","yyyy/MM/dd HH:mm:ss","yyyyMMddHHmmss","yyyy-MM-dd'T'HH:mm:ss"};
-        for (String f : fmts) {
-            try { return LocalDateTime.parse(s, DateTimeFormatter.ofPattern(f)); } catch (Exception ignore) {}
+        // 带时区的 OffsetDateTime
+        try { return OffsetDateTime.parse(s).toLocalDateTime(); } catch (Exception ignore) {}
+        // PostgreSQL timestamptz 格式：去除尾部时区偏移（如 +08、+08:00、-05:30）
+        String normalized = s.replaceAll("[+-]\\d{2}(:\\d{2})?$", "").trim().replace('T', ' ');
+        // 灵活解析：支持可选微秒
+        try {
+            DateTimeFormatter flexible = new java.time.format.DateTimeFormatterBuilder()
+                .appendPattern("yyyy-MM-dd HH:mm:ss")
+                .optionalStart().appendFraction(java.time.temporal.ChronoField.NANO_OF_SECOND, 0, 9, true).optionalEnd()
+                .toFormatter();
+            return LocalDateTime.parse(normalized, flexible);
+        } catch (Exception ignore) {}
+        // 其他格式
+        for (String fmt : new String[]{"yyyy/MM/dd HH:mm:ss", "yyyyMMddHHmmss"}) {
+            try { return LocalDateTime.parse(s, DateTimeFormatter.ofPattern(fmt)); } catch (Exception ignore) {}
         }
+        // 时间戳
         try {
             long epoch = Long.parseLong(s);
-            if (String.valueOf(epoch).length() <= 10) epoch *= 1000;
-            Instant inst = Instant.ofEpochMilli(epoch);
-            return LocalDateTime.ofInstant(inst, ZoneId.systemDefault());
+            if (s.length() <= 10) epoch *= 1000;
+            return LocalDateTime.ofInstant(Instant.ofEpochMilli(epoch), ZoneId.systemDefault());
         } catch (Exception ignore) {}
         return null;
     }

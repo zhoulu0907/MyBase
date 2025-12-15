@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.system.vo.user;
 
+import com.cmsr.onebase.framework.desensitize.annotation.MobileDesensitize;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,6 +16,7 @@ public class UserDeptSimpleRespVO extends UserSimpleRespVO{
     private String deptName;
 
     @Schema(description = "手机号", example = "")
+    @MobileDesensitize
     private String mobile;
 
 }

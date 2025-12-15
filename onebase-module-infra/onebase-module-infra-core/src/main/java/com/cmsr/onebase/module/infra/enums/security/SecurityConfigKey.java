@@ -67,7 +67,11 @@ public enum SecurityConfigKey {
     //文件上传校验策略
     uploadFileLengthLimit("uploadFileLengthLimit", "文件上传大小限制（MB）"),
     uploadFileNameLengthLimit("uploadFileNameLengthLimit", "文件名长度限制"),
-    uploadFileCheckList("uploadFileCheckList", "上传文件检查项");
+    uploadFileCheckList("uploadFileCheckList", "上传文件检查项"),
+
+    //脱敏校验
+    desensitizedField("desensitizedField", "脱敏字段配置项");
+
 
     @Getter
     private final String configKey;

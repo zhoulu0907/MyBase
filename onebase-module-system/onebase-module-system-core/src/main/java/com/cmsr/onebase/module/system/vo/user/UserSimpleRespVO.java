@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.system.vo.user;
 
+import com.cmsr.onebase.framework.desensitize.annotation.EMailDesensitize;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -21,6 +22,7 @@ public class UserSimpleRespVO {
     private String username;
 
     @Schema(description = "用户邮箱", example = "a@b.cn")
+    @EMailDesensitize
     private String email;
 
     @Schema(description = "部门ID", example = "我是一个用户")

@@ -18,12 +18,6 @@
     </properties>
 
     <dependencies>
-        <!-- 依赖核心 -->
-        <dependency>
-            <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-module-metadata-core</artifactId>
-            <version>${revision}</version>
-        </dependency>
 
         <!-- Web & 安全 & RPC & 注册发现（沿用原 server 的能力，仅在需要时用） -->
         <dependency>
@@ -33,7 +27,10 @@
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-security-runtime</artifactId>
+            <version>${revision}</version>
+            <scope>compile</scope>
         </dependency>
+        
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-spring-boot-starter-rpc</artifactId>
@@ -57,10 +54,17 @@
         </dependency>
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-security-runtime</artifactId>
+            <artifactId>onebase-module-metadata-core</artifactId>
             <version>${revision}</version>
             <scope>compile</scope>
         </dependency>
+                <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-metadata-common</artifactId>
+            <version>${revision}</version>
+            <scope>compile</scope>
+        </dependency>
+        
         <!--        <dependency>-->
         <!--            <groupId>com.cmsr.onebase</groupId>-->
         <!--            <artifactId>onebase-module-flow-core</artifactId>-->

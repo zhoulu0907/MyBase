@@ -43,4 +43,10 @@ public class AppAuthPermissionRepository extends BaseBizRepository<AppAuthPermis
                 .and(APP_AUTH_PERMISSION.ROLE_UUID.in(roleUuids));
         return list(queryWrapper);
     }
+
+    public void deleteByMenuUuid(String menuUuid) {
+        this.updateChain()
+                .where(APP_AUTH_PERMISSION.MENU_UUID.eq(menuUuid))
+                .remove();
+    }
 }

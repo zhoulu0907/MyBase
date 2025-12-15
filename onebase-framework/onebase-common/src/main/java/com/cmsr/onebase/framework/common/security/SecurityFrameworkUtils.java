@@ -6,6 +6,7 @@ import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.common.enums.XFromSceneTypeEnum;
 import com.cmsr.onebase.framework.common.security.dto.LoginUser;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.lang.Nullable;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -46,17 +47,40 @@ public class SecurityFrameworkUtils {
                                              String headerName, String parameterName) {
         // 1. 获得 Token。优先级：Header > Parameter
         String token = request.getHeader(headerName);
+        // 2. 如果header中没有token，则尝试从请求参数中获取
         if (StrUtil.isEmpty(token)) {
             token = request.getParameter(parameterName);
         }
+        // 3. 如果仍没有token，则尝试从cookie中获取
+        if (StrUtil.isEmpty(token)) {
+            token = getTokenFromCookie(request, headerName);
+        }
+
         if (!StringUtils.hasText(token)) {
             return null;
         }
-        // 2. 去除 Token 中带的 Bearer
+        // 4. 去除 Token 中带的 Bearer
         int index = token.indexOf(AUTHORIZATION_BEARER + " ");
         return index >= 0 ? token.substring(index + 7).trim() : token;
     }
-
+    /**
+     * 从Cookie中获取token
+     *
+     * @param request HTTP请求
+     * @param tokenHeader token在cookie中的名称
+     * @return token值
+     */
+    private static String getTokenFromCookie(HttpServletRequest request, String tokenHeader) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (tokenHeader.equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
+        }
+        return null;
+    }
     /**
      * 获得当前认证信息
      *

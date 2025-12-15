@@ -8,7 +8,6 @@ import com.mybatisflex.core.query.*;
 import com.mybatisflex.core.util.CollectionUtil;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -18,41 +17,21 @@ import java.util.List;
 public class BaseAppRepository<M extends BaseMapper<T>, T extends BaseAppEntity> extends ServiceImpl<M, T> {
 
     protected void injectQueryFilter(QueryWrapper queryWrapper) {
-        if (!canFilter(queryWrapper)) {
+        if (ApplicationManager.isIgnoreApplicationCondition()) {
             return;
         }
-        List<QueryTable> queryTables = CPI.getQueryTables(queryWrapper);
+        if (!QueryWrapperUtils.isQueryFilterable(queryWrapper)) {
+            return;
+        }
+        QueryTable queryTable = QueryWrapperUtils.getQueryTable(queryWrapper);
         QueryColumn applicationColumn;
-        if (CollectionUtils.isEmpty(queryTables)) {
-            applicationColumn = new QueryColumn(BaseAppEntity.APPLICATION_ID);
+        if (queryTable != null) {
+            applicationColumn = new QueryColumn(queryTable, QueryWrapperUtils.APPLICATION_ID);
         } else {
-            applicationColumn = new QueryColumn(queryTables.get(0), BaseAppEntity.APPLICATION_ID);
+            applicationColumn = new QueryColumn(QueryWrapperUtils.APPLICATION_ID);
         }
         Long applicationId = ApplicationManager.getApplicationId();
-        queryWrapper.and(applicationColumn.eq(applicationId));
-    }
-
-    private boolean canFilter(QueryWrapper queryWrapper) {
-        if (ApplicationManager.isIgnoreApplicationCondition()) {
-            return false;
-        }
-        // 不处理UNION类型
-        List<UnionWrapper> unions = CPI.getUnions(queryWrapper);
-        if (CollectionUtils.isNotEmpty(unions)) {
-
-            return false;
-        }
-        // 不处理子查询
-        List<QueryWrapper> childSelect = CPI.getChildSelect(queryWrapper);
-        if (CollectionUtils.isNotEmpty(childSelect)) {
-            return false;
-        }
-        List<QueryTable> queryTables = CPI.getQueryTables(queryWrapper);
-        if (CollectionUtils.isNotEmpty(queryTables) && queryTables.size() > 1) {
-            return false;
-        }
-        // 需要处理
-        return true;
+        queryWrapper.and(applicationColumn.eq(applicationId).when(!ApplicationManager.isIgnoreApplicationCondition()));
     }
 
     //region ===== 查询（查）操作 =====
@@ -256,4 +235,11 @@ public class BaseAppRepository<M extends BaseMapper<T>, T extends BaseAppEntity>
         return getMapper().paginateAs(page, query, asType);
     }
     //endregion ===== 分页查询操作 =====
+
+    public boolean deleteAllApplicationData(Long applicationId) {
+        QueryColumn applicationColumn = new QueryColumn(QueryWrapperUtils.APPLICATION_ID);
+        return this.updateChain()
+                .where(applicationColumn.eq(applicationId))
+                .remove();
+    }
 }

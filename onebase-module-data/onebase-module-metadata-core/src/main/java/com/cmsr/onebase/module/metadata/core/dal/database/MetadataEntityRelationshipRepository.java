@@ -96,7 +96,7 @@ public class MetadataEntityRelationshipRepository extends BaseBizRepository<Meta
     public List<MetadataEntityRelationshipDO> getRelationshipsByEntityUuid(String entityUuid) {
         QueryWrapper queryWrapper = this.query()
                 .where(MetadataEntityRelationshipDO::getSourceEntityUuid).eq(entityUuid)
-                .or(MetadataEntityRelationshipDO::getTargetEntityUuid).eq(entityUuid)
+//                .or(MetadataEntityRelationshipDO::getTargetEntityUuid).eq(entityUuid)
                 .orderBy(MetadataEntityRelationshipDO::getCreateTime, false);
         return list(queryWrapper);
     }

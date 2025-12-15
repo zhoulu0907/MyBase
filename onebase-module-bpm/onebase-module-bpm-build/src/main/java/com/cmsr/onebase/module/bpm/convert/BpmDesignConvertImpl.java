@@ -157,6 +157,7 @@ public class BpmDesignConvertImpl implements BpmDesignConvert {
 
         // flowcode保持不变
         destDefJson.setFlowCode(definition.getFlowCode());
+        destDefJson.setDefinitionUuid(definition.getDefinitionUuid());
 
         // 节点也使用相同的version
         for (NodeJson nodeJson : destDefJson.getNodeList()) {

@@ -9,6 +9,7 @@ import com.mybatisflex.core.row.Row;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.stereotype.Component;
+import com.cmsr.onebase.module.metadata.core.semantic.constants.SystemFieldConstants;
 
 import java.util.HashMap;
 import java.util.List;
@@ -47,6 +48,7 @@ public class SemanticValueAssembler {
      */
     public Row buildMainRow(SemanticEntitySchemaDTO entity, SemanticEntityValueDTO value, UidGenerator uidGenerator) {
         Row row = new Row();
+        fillSystemFields(row, uidGenerator);
         List<SemanticFieldSchemaDTO> fields = entity.getFields();
         if (fields != null) {
             for (SemanticFieldSchemaDTO field : fields) {
@@ -56,10 +58,9 @@ public class SemanticValueAssembler {
                 if (name == null) { continue; }
                 Object storeValue = fieldValue.getStoreValue();
                 if (storeValue == null && Boolean.TRUE.equals(field.getIsPrimaryKey())) { continue; }
-                row.put(name, storeValue);
+                row.set(name, storeValue);
             }
         }
-        fillSystemFields(row, uidGenerator);
         return row;
     }
 
@@ -75,14 +76,6 @@ public class SemanticValueAssembler {
      */
     public void fillSystemFields(Row row, UidGenerator uidGenerator) {
         row.set("id", uidGenerator.getUID());
-        row.put("creator", null);
-        row.put("created_time", null);
-        row.put("updater", null);
-        row.put("updated_time", null);
-        row.put("deleted", null);
-        row.put("lock_version", null);
-        row.put("owner_id", null);
-        row.put("owner_dept", null);
     }
 
     /**
@@ -133,7 +126,7 @@ public class SemanticValueAssembler {
     public SemanticRowValueDTO toRowValue(Row r, List<SemanticFieldSchemaDTO> attrs, String tableName) {
         SemanticRowValueDTO rowDto = new SemanticRowValueDTO();
         rowDto.setId(r.get("id"));
-        Object del = r.get("deleted");
+        Object del = r.get(SystemFieldConstants.OPTIONAL.DELETED);
         rowDto.setDeleted(del == null ? null : ("1".equals(String.valueOf(del)) || Integer.valueOf(1).equals(del)));
         Map<String, SemanticFieldValueDTO<Object>> fv = new java.util.LinkedHashMap<>();
         
@@ -192,19 +185,11 @@ public class SemanticValueAssembler {
         if (data != null) {
             for (Map.Entry<String, SemanticFieldValueDTO<Object>> e : data.entrySet()) {
                 Object store = e.getValue() == null ? null : e.getValue().getStoreValue();
-                subRow.put(e.getKey(), store);
+                subRow.set(e.getKey(), store);
             }
         }
         subRow.set("id", uidGenerator.getUID());
-        subRow.put("parent_id", parentId);
-        subRow.put("deleted", null);
-        subRow.put("lock_version", null);
-        subRow.put("creator", null);
-        subRow.put("created_time", null);
-        subRow.put("updater", null);
-        subRow.put("updated_time", null);
-        subRow.put("owner_id", null);
-        subRow.put("owner_dept", null);
+        subRow.set("parent_id", parentId);
         return subRow;
     }
 
@@ -223,18 +208,10 @@ public class SemanticValueAssembler {
         if (data != null) {
             for (Map.Entry<String, SemanticFieldValueDTO<Object>> e : data.entrySet()) {
                 Object store = e.getValue() == null ? null : e.getValue().getStoreValue();
-                relRow.put(e.getKey(), store);
+                relRow.set(e.getKey(), store);
             }
         }
         relRow.set("id", uidGenerator.getUID());
-        relRow.put("deleted", null);
-        relRow.put("lock_version", null);
-        relRow.put("creator", null);
-        relRow.put("created_time", null);
-        relRow.put("updater", null);
-        relRow.put("updated_time", null);
-        relRow.put("owner_id", null);
-        relRow.put("owner_dept", null);
         return relRow;
     }
 }

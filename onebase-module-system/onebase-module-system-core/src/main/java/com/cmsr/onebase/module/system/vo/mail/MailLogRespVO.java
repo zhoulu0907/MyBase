@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.system.vo.mail;
 
+import com.cmsr.onebase.framework.desensitize.annotation.EMailDesensitize;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -20,12 +21,14 @@ public class MailLogRespVO {
     private Byte userType;
 
     @Schema(description = "接收邮箱地址", requiredMode = Schema.RequiredMode.REQUIRED, example = "76854@qq.com")
+    @EMailDesensitize
     private String toMail;
 
     @Schema(description = "邮箱账号编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "18107")
     private Long accountId;
 
     @Schema(description = "发送邮箱地址", requiredMode = Schema.RequiredMode.REQUIRED, example = "85757@qq.com")
+    @EMailDesensitize
     private String fromMail;
 
     @Schema(description = "模板编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "5678")

@@ -1,15 +1,22 @@
 package com.cmsr.onebase.module.app;
 
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
+import com.cmsr.onebase.framework.common.security.TenantContextHolder;
+import com.cmsr.onebase.framework.security.runtime.RTSecurityContext;
 import com.cmsr.onebase.module.app.api.security.AppAuthSecurityApi;
 import com.cmsr.onebase.module.app.api.security.bo.DataPermission;
 import com.cmsr.onebase.module.app.api.security.bo.FieldPermission;
 import com.cmsr.onebase.module.app.api.security.bo.OperationPermission;
+import com.cmsr.onebase.module.app.core.vo.menu.MenuListRespVO;
+import com.cmsr.onebase.module.app.runtime.service.menu.RuntimeAppMenuServiceImpl;
+import com.cmsr.onebase.module.app.runtime.vo.menu.MenuPermissionVO;
 import com.cmsr.onebase.server.runtime.OneBaseServerRuntimeApplication;
 import lombok.Setter;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+
+import java.util.List;
 
 /**
  * @Author：huangjie
@@ -20,7 +27,26 @@ import org.springframework.boot.test.context.SpringBootTest;
 public class AppAuthSecurityApiTest {
 
     @Autowired
+    private RuntimeAppMenuServiceImpl appMenuServiceImpl;
+
+    @Autowired
     private AppAuthSecurityApi appAuthSecurityApi;
+
+    @Test
+    public void testListApplicationMenu() {
+        List<MenuListRespVO> menuListRespVOS = appMenuServiceImpl.listApplicationMenu();
+        System.out.println(menuListRespVOS);
+    }
+
+    @Test
+    public void testGetMenuPermission() {
+        ApplicationManager.setApplicationId(173020283873034240L);
+        ApplicationManager.setVersionTag(0L);
+        TenantContextHolder.setTenantId(153935442021842944L);
+        RTSecurityContext.mockLoginUser(155019577667616800L, 173020283873034240L);
+        MenuPermissionVO menuListRespVO = appMenuServiceImpl.getMenuPermission(173059110377881600L);
+        System.out.println(menuListRespVO);
+    }
 
     @Test
     public void testIsApplicationAdmin() {

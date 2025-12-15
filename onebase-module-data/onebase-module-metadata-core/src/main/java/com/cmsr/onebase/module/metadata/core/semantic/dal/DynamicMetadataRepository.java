@@ -15,13 +15,19 @@ import com.cmsr.onebase.module.metadata.core.config.ApplicationDataSourceManager
 
 import org.springframework.stereotype.Repository;
 import com.cmsr.onebase.module.metadata.core.semantic.constants.SystemFieldConstants;
-import com.esotericsoftware.kryo.kryo5.minlog.Log;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 
+/**
+ * 动态元数据通用数据访问仓库。
+ *
+ * 设计要点：
+ * - 所有方法在执行前根据当前应用上下文切换业务数据源，执行结束后清理数据源上下文。
+ * - 针对主键/外键等 ID 字段，统一在非空时转换为 Long 类型参与查询，避免字符串比较导致索引失效。
+ * - 提供软删除（逻辑删除）与物理删除两类操作；查询方法可通过 filterDeleted 控制是否自动过滤逻辑删除记录。
+ */
 @Repository
 @Slf4j
 public class DynamicMetadataRepository {
@@ -30,26 +36,33 @@ public class DynamicMetadataRepository {
     @Resource
     private UidGenerator uidGenerator;
 
+    /**
+     * 插入单条记录。
+     * 会补齐系统字段（创建/更新时间、删除标记、乐观锁、所有者、部门等）。
+     * @param tableName 目标表名
+     * @param row       行数据
+     * @return 影响行数
+     */
     public int insert(String tableName, Row row) {
         ApplicationDataSourceManager.useBizDatasourceByAppId(ApplicationManager.getApplicationId());
         try {
-            String now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+            LocalDateTime now = LocalDateTime.now();
             Long userId = SecurityFrameworkUtils.getLoginUserId();
             Long userDeptId = SecurityFrameworkUtils.getLoginUserDeptId() != null ? SecurityFrameworkUtils.getLoginUserDeptId() : 0L;
 
-            if (row.containsKey(SystemFieldConstants.OPTIONAL.CREATED_TIME)) { row.set(SystemFieldConstants.OPTIONAL.CREATED_TIME, now); }
-            if (row.containsKey(SystemFieldConstants.OPTIONAL.UPDATED_TIME)) { row.set(SystemFieldConstants.OPTIONAL.UPDATED_TIME, now); }
-            if (row.containsKey(SystemFieldConstants.OPTIONAL.DELETED)) { row.set(SystemFieldConstants.OPTIONAL.DELETED, 0); }
-            if (row.containsKey(SystemFieldConstants.OPTIONAL.LOCK_VERSION)) { row.set(SystemFieldConstants.OPTIONAL.LOCK_VERSION, 0); }
+            setIfMissingOrNull(row, SystemFieldConstants.OPTIONAL.CREATED_TIME, now);
+            setIfMissingOrNull(row, SystemFieldConstants.OPTIONAL.UPDATED_TIME, now);
+            setIfMissingOrNull(row, SystemFieldConstants.OPTIONAL.DELETED, 0);
+            setIfMissingOrNull(row, SystemFieldConstants.OPTIONAL.LOCK_VERSION, 0);
 
             if (userId != null) {
-                if (row.containsKey(SystemFieldConstants.REQUIRE.OWNER_ID) && row.get(SystemFieldConstants.REQUIRE.OWNER_ID) == null) { row.set(SystemFieldConstants.REQUIRE.OWNER_ID, userId); }
-                if (row.containsKey(SystemFieldConstants.REQUIRE.CREATOR) && row.get(SystemFieldConstants.REQUIRE.CREATOR) == null) { row.set(SystemFieldConstants.REQUIRE.CREATOR, userId); }
-                if (row.containsKey(SystemFieldConstants.REQUIRE.UPDATER) && row.get(SystemFieldConstants.REQUIRE.UPDATER) == null) { row.set(SystemFieldConstants.REQUIRE.UPDATER, userId); }
+                setIfMissingOrNull(row, SystemFieldConstants.REQUIRE.OWNER_ID, userId);
+                setIfMissingOrNull(row, SystemFieldConstants.REQUIRE.CREATOR, userId);
+                setIfMissingOrNull(row, SystemFieldConstants.REQUIRE.UPDATER, userId);
             }
 
             if (userDeptId != null) {
-                if (row.containsKey(SystemFieldConstants.REQUIRE.OWNER_DEPT) && row.get(SystemFieldConstants.REQUIRE.OWNER_DEPT) == null) { row.set(SystemFieldConstants.REQUIRE.OWNER_DEPT, userDeptId); }
+                setIfMissingOrNull(row, SystemFieldConstants.REQUIRE.OWNER_DEPT, userDeptId);
             }
 
             return Db.insert(tableName, row);
@@ -58,31 +71,33 @@ public class DynamicMetadataRepository {
         }
     }
 
+    /**
+     * 批量插入记录。
+     * 为每条记录补齐系统字段，避免循环中缺失必要字段。
+     * @param tableName 目标表名
+     * @param rows      行数据列表
+     * @return 影响总行数
+     */
     public int insertBatch(String tableName, List<Row> rows) {
         if (rows == null || rows.isEmpty()) { return 0; }
         ApplicationDataSourceManager.useBizDatasourceByAppId(ApplicationManager.getApplicationId());
         try {
             int count = 0;
-            String now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+            LocalDateTime now = LocalDateTime.now();
             Long userId = SecurityFrameworkUtils.getLoginUserId();
             Long userDeptId = SecurityFrameworkUtils.getLoginUserDeptId() != null ? SecurityFrameworkUtils.getLoginUserDeptId() : 0L;
             for (Row row : rows) {
-                if (row.containsKey("created_time")) { row.set("created_time", now); }
-                if (row.containsKey("createtime")) { row.set("createtime", now); }
-                if (row.containsKey("updated_time")) { row.set("updated_time", now); }
-                if (row.containsKey("updatetime")) { row.set("updatetime", now); }
-                if (row.containsKey("deleted")) { row.set("deleted", 0); }
-                if (row.containsKey("lock_version")) { row.set("lock_version", 0); }
-                if (row.containsKey("lockversion")) { row.set("lockversion", 0); }
+                setIfMissingOrNull(row, SystemFieldConstants.OPTIONAL.CREATED_TIME, now);
+                setIfMissingOrNull(row, SystemFieldConstants.OPTIONAL.UPDATED_TIME, now);
+                setIfMissingOrNull(row, SystemFieldConstants.OPTIONAL.DELETED, 0);
+                setIfMissingOrNull(row, SystemFieldConstants.OPTIONAL.LOCK_VERSION, 0);
                 if (userId != null) {
-                    if (row.containsKey("owner_id") && row.get("owner_id") == null) { row.set("owner_id", userId); }
-                    if (row.containsKey("ownerid") && row.get("ownerid") == null) { row.set("ownerid", userId); }
-                    if (row.containsKey("creator") && row.get("creator") == null) { row.set("creator", userId); }
-                    if (row.containsKey("updater") && row.get("updater") == null) { row.set("updater", userId); }
+                    setIfMissingOrNull(row, SystemFieldConstants.REQUIRE.OWNER_ID, userId);
+                    setIfMissingOrNull(row, SystemFieldConstants.REQUIRE.CREATOR, userId);
+                    setIfMissingOrNull(row, SystemFieldConstants.REQUIRE.UPDATER, userId);
                 }
                 if (userDeptId != null) {
-                    if (row.containsKey("owner_dept") && row.get("owner_dept") == null) { row.set("owner_dept", userDeptId); }
-                    if (row.containsKey("ownerdept") && row.get("ownerdept") == null) { row.set("ownerdept", userDeptId); }
+                    setIfMissingOrNull(row, SystemFieldConstants.REQUIRE.OWNER_DEPT, userDeptId);
                 }
                 count += Db.insert(tableName, row);
             }
@@ -92,14 +107,22 @@ public class DynamicMetadataRepository {
         }
     }
 
+    /**
+     * 根据条件更新记录。
+     * 若未显式设置更新时间/更新人，则自动填充。
+     * @param tableName 表名
+     * @param row       更新内容
+     * @param qw        条件包装器
+     * @return 影响行数
+     */
     public int updateByQuery(String tableName, Row row, QueryWrapper qw) {
         ApplicationDataSourceManager.useBizDatasourceByAppId(ApplicationManager.getApplicationId());
         try {
-            String now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+            LocalDateTime now = LocalDateTime.now();
             Long userId = SecurityFrameworkUtils.getLoginUserId();
-            if (row.containsKey(SystemFieldConstants.OPTIONAL.UPDATED_TIME)) { row.set(SystemFieldConstants.OPTIONAL.UPDATED_TIME, now); }
+            if (!row.containsKey(SystemFieldConstants.OPTIONAL.UPDATED_TIME) || row.get(SystemFieldConstants.OPTIONAL.UPDATED_TIME) == null) { row.set(SystemFieldConstants.OPTIONAL.UPDATED_TIME, now); }
             if (userId != null) {
-                if (row.containsKey(SystemFieldConstants.REQUIRE.UPDATER) && row.get(SystemFieldConstants.REQUIRE.UPDATER) == null) { row.set(SystemFieldConstants.REQUIRE.UPDATER, userId); }
+                setIfMissingOrNull(row, SystemFieldConstants.REQUIRE.UPDATER, userId);
             }
             return Db.updateByQuery(tableName, row, qw);
         } finally {
@@ -107,17 +130,69 @@ public class DynamicMetadataRepository {
         }
     }
 
+    /**
+     * 当字段缺失或值为空时设置默认值。
+     * @param row  行数据
+     * @param key  字段名
+     * @param value 默认值
+     */
+    private void setIfMissingOrNull(Row row, String key, Object value) {
+        if (!row.containsKey(key) || row.get(key) == null) { row.set(key, value); }
+    }
+
+    /**
+     * ID 值规范化：非空时尝试转换为 Long 类型；
+     * 转换失败记录警告日志并原样返回，以避免破坏调用方逻辑。
+     * 空字符串或 null 返回 null。
+     * @param value 输入值
+     * @return Long 或原始值；空返回 null
+     */
+    private Object toLongIfNotEmpty(Object value) {
+        if (value == null) { return null; }
+        String s = String.valueOf(value).trim();
+        if (s.isEmpty()) { return null; }
+        try { return Long.parseLong(s); } catch (Exception e) { log.warn("Failed to parse id value to Long: {}", value); return value; }
+    }
+
+    /**
+     * 批量 ID 规范化：将列表中非空可解析的元素转换为 Long；
+     * 过滤掉无效/空元素，返回不可变空列表表示无有效 ID。
+     * @param ids 原始 ID 列表
+     * @return Long 列表或空列表
+     */
+    private List<?> toLongListIfNotEmpty(List<?> ids) {
+        if (ids == null || ids.isEmpty()) { return List.of(); }
+        List<Object> out = new java.util.ArrayList<>(ids.size());
+        for (Object id : ids) {
+            Object v = toLongIfNotEmpty(id);
+            if (v != null) { out.add(v); }
+        }
+        return out;
+    }
+
+    /**
+     * 软删除：将逻辑删除标志置为 1。
+     * @param tableName 表名
+     * @param qw        条件
+     * @return 影响行数
+     */
     public int softDeleteByQuery(String tableName, QueryWrapper qw) {
         ApplicationDataSourceManager.useBizDatasourceByAppId(ApplicationManager.getApplicationId());
         try {
             Row update = new Row();
-            update.put("deleted", 1);
+            update.put(SystemFieldConstants.OPTIONAL.DELETED, 1);
             return Db.updateByQuery(tableName, update, qw);
         } finally {
             ApplicationDataSourceManager.clear();
         }
     }
 
+    /**
+     * 物理删除：按条件直接删除记录。
+     * @param tableName 表名
+     * @param qw        条件
+     * @return 影响行数
+     */
     public int deleteByQuery(String tableName, QueryWrapper qw) {
         ApplicationDataSourceManager.useBizDatasourceByAppId(ApplicationManager.getApplicationId());
         try {
@@ -127,6 +202,12 @@ public class DynamicMetadataRepository {
         }
     }
 
+    /**
+     * 按条件查询单条记录。
+     * @param tableName 表名
+     * @param qw        条件
+     * @return 行数据；不存在时返回 null
+     */
     public Row selectOneByQuery(String tableName, QueryWrapper qw) {
         ApplicationDataSourceManager.useBizDatasourceByAppId(ApplicationManager.getApplicationId());
         try {
@@ -136,6 +217,12 @@ public class DynamicMetadataRepository {
         }
     }
 
+    /**
+     * 按条件查询多条记录。
+     * @param tableName 表名
+     * @param qw        条件
+     * @return 行数据列表
+     */
     public List<Row> selectListByQuery(String tableName, QueryWrapper qw) {
         ApplicationDataSourceManager.useBizDatasourceByAppId(ApplicationManager.getApplicationId());
         try {
@@ -145,67 +232,143 @@ public class DynamicMetadataRepository {
         }
     }
 
+    /**
+     * 根据主键 ID 查询主表记录。
+     * 非空时将 ID 规范化为 Long 参与查询；可选过滤逻辑删除。
+     * @param tableName     表名
+     * @param pkField       主键字段名
+     * @param id            主键值
+     * @param filterDeleted 是否过滤逻辑删除
+     * @return 行数据；当 ID 为空或不可解析为数值时返回 null
+     */
     public Row selectMainById(String tableName, String pkField, Object id, boolean filterDeleted) {
         ApplicationDataSourceManager.useBizDatasourceByAppId(ApplicationManager.getApplicationId());
         try {
-            QueryWrapper qw = QueryWrapper.create().where(new QueryColumn(pkField).eq(String.valueOf(id)));
-            if (filterDeleted) { qw.and(new QueryColumn("deleted").eq("0")); }
+            Object v = toLongIfNotEmpty(id);
+            if (v == null) { return null; }
+            QueryWrapper qw = QueryWrapper.create().where(new QueryColumn(pkField).eq(v));
+            if (filterDeleted) { qw.and(new QueryColumn(SystemFieldConstants.OPTIONAL.DELETED).eq(0)); }
             return Db.selectOneByQuery(tableName, qw);
         } finally {
             ApplicationDataSourceManager.clear();
         }
     }
 
+    /**
+     * 根据主键 ID 查询主表记录（默认过滤逻辑删除）。
+     * @param tableName 表名
+     * @param pkField   主键字段名
+     * @param id        主键值
+     * @return 行数据；当 ID 为空或不可解析为数值时返回 null
+     */
     public Row selectMainById(String tableName, String pkField, Object id) {
         return selectMainById(tableName, pkField, id, true);
     }
 
+    /**
+     * 根据主键 ID 列表查询主表记录。
+     * 将列表中有效 ID 统一转换为 Long 参与 IN 查询；可选过滤逻辑删除。
+     * @param tableName     表名
+     * @param pkField       主键字段名
+     * @param ids           主键列表
+     * @param filterDeleted 是否过滤逻辑删除
+     * @return 结果列表；当列表为空或无有效 ID 返回空列表
+     */
     public List<Row> selectMainByIds(String tableName, String pkField, List<?> ids, boolean filterDeleted) {
         if (ids == null || ids.isEmpty()) { return List.of(); }
         ApplicationDataSourceManager.useBizDatasourceByAppId(ApplicationManager.getApplicationId());
         try {
-            QueryWrapper qw = QueryWrapper.create().where(new QueryColumn(pkField).in(ids));
-            if (filterDeleted) { qw.and(new QueryColumn("deleted").eq("0")); }
+            List<?> v = toLongListIfNotEmpty(ids);
+            if (v.isEmpty()) { return List.of(); }
+            QueryWrapper qw = QueryWrapper.create().where(new QueryColumn(pkField).in(v));
+            if (filterDeleted) { qw.and(new QueryColumn(SystemFieldConstants.OPTIONAL.DELETED).eq(0)); }
             return Db.selectListByQuery(tableName, qw);
         } finally {
             ApplicationDataSourceManager.clear();
         }
     }
 
+    /**
+     * 根据主键 ID 列表查询主表记录（默认过滤逻辑删除）。
+     * @param tableName 表名
+     * @param pkField   主键字段名
+     * @param ids       主键列表
+     * @return 结果列表；当列表为空或无有效 ID 返回空列表
+     */
     public List<Row> selectMainByIds(String tableName, String pkField, List<?> ids) {
         return selectMainByIds(tableName, pkField, ids, true);
     }
 
+    /**
+     * 查询子表：根据父记录 ID（parent_id）查询关联行（默认过滤逻辑删除）。
+     * @param tableName 表名
+     * @param parentId  父记录 ID
+     * @return 结果列表；当 ID 为空或不可解析为数值时返回空列表
+     */
     public List<Row> selectSubtableRowsByParent(String tableName, Object parentId) {
         return selectSubtableRowsByParent(tableName, parentId, true);
     }
 
+    /**
+     * 查询子表：根据父记录 ID（parent_id）查询关联行。
+     * @param tableName     表名
+     * @param parentId      父记录 ID
+     * @param filterDeleted 是否过滤逻辑删除
+     * @return 结果列表；当 ID 为空或不可解析为数值时返回空列表
+     */
     public List<Row> selectSubtableRowsByParent(String tableName, Object parentId, boolean filterDeleted) {
         ApplicationDataSourceManager.useBizDatasourceByAppId(ApplicationManager.getApplicationId());
         try {
-            QueryWrapper qw = QueryWrapper.create().where(new QueryColumn("parent_id").eq(String.valueOf(parentId)));
-            if (filterDeleted) { qw.and(new QueryColumn("deleted").eq("0")); }
+            Object v = toLongIfNotEmpty(parentId);
+            if (v == null) { return List.of(); }
+            QueryWrapper qw = QueryWrapper.create().where(new QueryColumn("parent_id").eq(v));
+            if (filterDeleted) { qw.and(new QueryColumn(SystemFieldConstants.OPTIONAL.DELETED).eq(0)); }
             return Db.selectListByQuery(tableName, qw);
         } finally {
             ApplicationDataSourceManager.clear();
         }
     }
 
+    /**
+     * 查询关系表：根据关系键与值查询关联行（默认过滤逻辑删除）。
+     * @param tableName     表名
+     * @param relationKey   关系键字段名（如某外键列）
+     * @param relationValue 关系值
+     * @return 结果列表；当值为空或不可解析为数值时返回空列表
+     */
     public List<Row> selectRelationRowsByParent(String tableName, String relationKey, Object relationValue) {
         return selectRelationRowsByParent(tableName, relationKey, relationValue, true);
     }
 
+    /**
+     * 查询关系表：根据关系键与值查询关联行。
+     * @param tableName     表名
+     * @param relationKey   关系键字段名（如某外键列）
+     * @param relationValue 关系值
+     * @param filterDeleted 是否过滤逻辑删除
+     * @return 结果列表；当值为空或不可解析为数值时返回空列表
+     */
     public List<Row> selectRelationRowsByParent(String tableName, String relationKey, Object relationValue, boolean filterDeleted) {
         ApplicationDataSourceManager.useBizDatasourceByAppId(ApplicationManager.getApplicationId());
         try {
-            QueryWrapper qw = QueryWrapper.create().where(new QueryColumn(relationKey).eq(String.valueOf(relationValue)));
-            if (filterDeleted) { qw.and(new QueryColumn("deleted").eq("0")); }
+            Object v = toLongIfNotEmpty(relationValue);
+            if (v == null) { return List.of(); }
+            QueryWrapper qw = QueryWrapper.create().where(new QueryColumn(relationKey).eq(v));
+            if (filterDeleted) { qw.and(new QueryColumn(SystemFieldConstants.OPTIONAL.DELETED).eq(0)); }
             return Db.selectListByQuery(tableName, qw);
         } finally {
             ApplicationDataSourceManager.clear();
         }
     }
 
+    /**
+     * 分页查询：先计算总数，再按偏移量与页大小查询数据。
+     * @param tableName 表名
+     * @param qw        条件
+     * @param pageNo    页号（从 1 开始）
+     * @param pageSize  页大小
+     * @return 包含数据列表与总数的结果
+     */
     public PageResult<Row> selectPageByQuery(String tableName, QueryWrapper qw, int pageNo, int pageSize) {
         ApplicationDataSourceManager.useBizDatasourceByAppId(ApplicationManager.getApplicationId());
         try {
