@@ -6,6 +6,7 @@ import { memo, useEffect, useState } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { STATUS_OPTIONS, STATUS_VALUES, DEFAULT_VALUE_TYPES, PHONE_TYPE } from '../../../constants';
 import type { XInputPhoneConfig } from './schema';
+import { securityEncodeText } from '@/utils';
 
 import '../index.css';
 import { useFormFieldWatch } from '../useFormField';
@@ -26,13 +27,14 @@ const XInputPhone = memo((props: XInputPhoneConfig & { runtime?: boolean; detail
     align,
     layout,
     runtime = true,
-    detailMode
+    detailMode,
+    security
   } = props;
   // ===== 外部 props end =====
 
   // ===== 内部状态 & 回显begin =====
   const [fieldId, setFieldId] = useState('');
-  
+
   useEffect(() => {
     if (dataField.length > 0) {
       setFieldId(dataField[dataField.length - 1]);
@@ -64,7 +66,7 @@ const XInputPhone = memo((props: XInputPhoneConfig & { runtime?: boolean; detail
         tooltip={tooltip}
         labelCol={layout === 'horizontal' ? { span: 10 } : {}}
         rules={[
-          { required: verify?.required, message:`${label.text}是必填项` },
+          { required: verify?.required, message: `${label.text}是必填项` },
           {
             validator: (value, callback) => {
               if (phoneType === PHONE_TYPE.MOBILE) {
@@ -72,7 +74,7 @@ const XInputPhone = memo((props: XInputPhoneConfig & { runtime?: boolean; detail
                   callback(`请输入有效的11位中国大陆手机号`);
                 }
               }
-              if(phoneType === PHONE_TYPE.LANDLINE){
+              if (phoneType === PHONE_TYPE.LANDLINE) {
                 // (010)12345678  010-12345678
                 if (value && !(/^\(?0[0-9]{2,3}\)?-?[0-9]{7,8}$/).test(value)) {
                   callback(`请输入有效的座机号`);
@@ -89,7 +91,7 @@ const XInputPhone = memo((props: XInputPhoneConfig & { runtime?: boolean; detail
         initialValue={defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : ''}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
-          <div>{fieldValue || '--'}</div>
+          <div>{securityEncodeText(security, fieldValue)}</div>
         ) : (
           <Input
             prefix={phoneType === PHONE_TYPE.MOBILE ? '+86' : null}
