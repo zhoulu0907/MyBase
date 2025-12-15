@@ -112,7 +112,7 @@ public class TenantDeptController {
 
 
     @GetMapping("/get-third-depts")
-    @Operation(summary = "根据ID和类型获取其所属部门及其父部门列表")
+    @Operation(summary = "获取第三方的部门列表")
     @PreAuthorize("@ss.hasPermission('tenant:dept:query')")
     public CommonResult<List<DeptSimpleRespVO>> getThirdDept() {
         List<DeptDO> deptDOList = deptService.getThirdDept();
