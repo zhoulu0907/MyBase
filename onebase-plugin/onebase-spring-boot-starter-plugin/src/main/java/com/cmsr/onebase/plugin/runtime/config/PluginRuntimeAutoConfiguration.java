@@ -7,7 +7,6 @@ import com.cmsr.onebase.plugin.runtime.http.PluginHttpDispatcher;
 import com.cmsr.onebase.plugin.runtime.http.PluginHttpHandler;
 import com.cmsr.onebase.plugin.runtime.manager.DevModePluginManager;
 import com.cmsr.onebase.plugin.runtime.manager.OneBasePluginManager;
-import com.cmsr.onebase.plugin.runtime.scanner.PluginDirectoryScanner;
 import com.cmsr.onebase.plugin.runtime.service.DataServiceImpl;
 import com.cmsr.onebase.plugin.runtime.service.FileServiceImpl;
 import com.cmsr.onebase.plugin.runtime.service.UserServiceImpl;
@@ -48,16 +47,6 @@ import java.util.List;
 public class PluginRuntimeAutoConfiguration {
 
     private static final Logger log = LoggerFactory.getLogger(PluginRuntimeAutoConfiguration.class);
-
-    /**
-     * 插件目录扫描器线程
-     */
-    private Thread scannerThread;
-
-    /**
-     * 插件目录扫描器
-     */
-    private PluginDirectoryScanner pluginScanner;
 
     /**
      * 配置PF4J PluginManager
@@ -205,35 +194,6 @@ public class PluginRuntimeAutoConfiguration {
     public OneBasePluginManager oneBasePluginManager(PluginManager pluginManager, PluginProperties properties) {
         OneBasePluginManager oneBasePluginManager = new OneBasePluginManager(pluginManager);
         
-        // 只在非开发模式且配置了扫描间隔时，启动插件目录扫描器
-        // dev模式不支持热插拔，staging和prod模式支持
-        if (properties.getScanInterval() > 0 && !properties.isDevMode()) {
-            String pluginsDirStr = properties.getPluginsDir();
-            if (pluginsDirStr.startsWith("file:")) {
-                pluginsDirStr = pluginsDirStr.substring(5);
-            }
-            Path pluginDirectory = Paths.get(pluginsDirStr).normalize().toAbsolutePath();
-            
-            log.info("=".repeat(60));
-            log.info("启动插件目录扫描器");
-            log.info("扫描间隔: {} 毫秒", properties.getScanInterval());
-            log.info("扫描目录: {}", pluginDirectory);
-            log.info("=".repeat(60));
-            
-            pluginScanner = new PluginDirectoryScanner(
-                    pluginManager,
-                    oneBasePluginManager,
-                    pluginDirectory,
-                    properties.getScanInterval()
-            );
-            
-            scannerThread = new Thread(pluginScanner, "PluginDirectoryScanner");
-            scannerThread.setDaemon(true);
-            scannerThread.start();
-            
-            log.info("插件目录扫描器已启动");
-        }
-        
         return oneBasePluginManager;
     }
 
@@ -328,19 +288,6 @@ public class PluginRuntimeAutoConfiguration {
      */
     @PreDestroy
     public void destroy() {
-        if (pluginScanner != null && pluginScanner.isRunning()) {
-            log.info("正在停止插件目录扫描器...");
-            pluginScanner.stop();
-            
-            if (scannerThread != null && scannerThread.isAlive()) {
-                try {
-                    scannerThread.join(5000); // 等待最多5秒
-                    log.info("插件目录扫描器已停止");
-                } catch (InterruptedException e) {
-                    log.warn("等待插件目录扫描器停止时被中断", e);
-                    Thread.currentThread().interrupt();
-                }
-            }
-        }
+        // 无需处理扫描器停止，相关组件若存在应自行管理生命周期
     }
 }

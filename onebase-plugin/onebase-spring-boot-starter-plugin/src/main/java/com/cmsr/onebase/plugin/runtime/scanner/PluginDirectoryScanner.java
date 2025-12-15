@@ -11,16 +11,12 @@ import java.io.File;
 import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
  * 插件目录扫描器
  * <p>
- * 定时扫描插件目录，实现插件的热加载和热卸载。
- * 仅在生产模式（devMode=false）且scanInterval>0时启用。
+ * 扫描插件目录，实现插件的一次性扫描用于加载/重载/卸载操作。
  * </p>
  *
  * @author matianyu
@@ -51,32 +47,19 @@ public class PluginDirectoryScanner implements Runnable {
     private final Map<Path, Long> knownPluginFiles = new ConcurrentHashMap<>();
 
     /**
-     * 扫描间隔（毫秒）
+     * 插件目录扫描器现在为一次性扫描
      */
-    private final long scanInterval;
-
-    /**
-     * 是否运行中
-     */
-    private volatile boolean running = true;
-    /**
-     * 使用ScheduledExecutorService执行定时扫描
-     */
-    private ScheduledExecutorService scheduler;
 
     public PluginDirectoryScanner(PluginManager pluginManager,
                                    OneBasePluginManager oneBasePluginManager,
-                                   Path pluginDirectory,
-                                   long scanInterval) {
+                                   Path pluginDirectory) {
         this.pluginManager = pluginManager;
         this.oneBasePluginManager = oneBasePluginManager;
         this.pluginDirectory = pluginDirectory;
-        this.scanInterval = scanInterval;
 
         log.info("=".repeat(60));
-        log.info("初始化插件目录扫描器");
+        log.info("初始化插件目录扫描器（一次性扫描）");
         log.info("扫描目录: {}", pluginDirectory);
-        log.info("扫描间隔: {} 毫秒", scanInterval);
         log.info("=".repeat(60));
 
         // 初始化已知插件文件（使用规范化路径，避免不同Path实例导致的不匹配）
@@ -125,41 +108,13 @@ public class PluginDirectoryScanner implements Runnable {
 
     @Override
     public void run() {
-        log.info("插件目录扫描器已启动 (scanInterval={} ms)", scanInterval);
-
-        // 使用 ScheduledExecutorService，立即执行一次，然后按照间隔执行
-        scheduler = Executors.newSingleThreadScheduledExecutor(r -> {
-            Thread t = new Thread(r, "PluginDirectoryScanner-Scheduler");
-            t.setDaemon(true);
-            return t;
-        });
-
-        scheduler.scheduleWithFixedDelay(() -> {
-            try {
-                scanPluginDirectory();
-            } catch (Exception e) {
-                log.error("定时扫描执行过程中发生异常", e);
-            }
-        }, 0, Math.max(1, scanInterval), TimeUnit.MILLISECONDS);
-
-        // 控制线程保持存活，直到 stop() 被调用
-        while (running) {
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                log.info("插件目录扫描控制线程被中断");
-                Thread.currentThread().interrupt();
-                break;
-            }
+        log.info("插件目录扫描器启动（一次性执行扫描）");
+        try {
+            scanPluginDirectory();
+        } catch (Exception e) {
+            log.error("扫描插件目录时发生异常", e);
         }
-
-        // 停止调度器
-        if (scheduler != null && !scheduler.isShutdown()) {
-            log.info("正在关闭扫描调度器...");
-            scheduler.shutdownNow();
-        }
-
-        log.info("插件目录扫描器已停止");
+        log.info("插件目录扫描完成");
     }
 
     /**
@@ -311,14 +266,15 @@ public class PluginDirectoryScanner implements Runnable {
      * 停止扫描器
      */
     public void stop() {
-        log.info("正在停止插件目录扫描器...");
-        running = false;
+        // 不再支持周期扫描，stop 为空实现
+        log.debug("PluginDirectoryScanner.stop() 被调用（已忽略，当前为一次性扫描）");
     }
 
     /**
      * 是否正在运行
      */
     public boolean isRunning() {
-        return running;
+        // 对于一次性扫描，总是返回 false
+        return false;
     }
 }

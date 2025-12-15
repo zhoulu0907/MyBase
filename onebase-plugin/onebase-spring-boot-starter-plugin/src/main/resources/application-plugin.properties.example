@@ -14,8 +14,5 @@ onebase.plugin.auto-load=true
 # 是否自动启动已加载的插件
 onebase.plugin.auto-start=true
 
-# 是否启用开发模式（用于调试）
-onebase.plugin.dev-mode=false
-
-# 插件扫描间隔（毫秒），0表示禁用自动扫描
-onebase.plugin.scan-interval=0
+# 运行模式，可选：dev、staging、prod；默认prod
+onebase.plugin.mode=prod

@@ -47,11 +47,6 @@ public class PluginProperties {
     private String mode = "prod";
 
     /**
-     * 插件扫描间隔（毫秒），0表示禁用自动扫描
-     */
-    private long scanInterval = 0;
-
-    /**
      * 是否严格检查插件依赖
      */
     private boolean strictDependencyCheck = false;
@@ -143,14 +138,6 @@ public class PluginProperties {
      */
     public boolean isProdMode() {
         return PluginMode.PROD.getValue().equalsIgnoreCase(mode);
-    }
-
-    public long getScanInterval() {
-        return scanInterval;
-    }
-
-    public void setScanInterval(long scanInterval) {
-        this.scanInterval = scanInterval;
     }
 
     public boolean isStrictDependencyCheck() {
