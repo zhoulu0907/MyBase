@@ -161,4 +161,6 @@ public interface DeptService {
      * @return 部门编号
      */
     Long createThirdDefaultDept(DeptSaveReqVO deptRespVO);
+
+    List<DeptDO> getThirdDept();
 }

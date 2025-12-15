@@ -7,6 +7,7 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.system.dal.database.SystemGeneralConfigDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.config.SystemGeneralConfigDO;
+import com.cmsr.onebase.module.system.vo.config.SystemConfigPageReqVO;
 import com.cmsr.onebase.module.system.vo.config.SystemGeneralConfigSaveReqVO;
 import com.cmsr.onebase.module.system.vo.config.SystemGeneralConfigUpdateReqVO;
 import com.cmsr.onebase.module.system.vo.config.SystemGeneralConfigVO;
@@ -16,6 +17,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.validation.annotation.Validated;
+
+import java.util.List;
 
 
 /**
@@ -60,6 +63,11 @@ public class SystemGeneralConfigServiceImpl implements SystemGeneralConfigServic
         SystemGeneralConfigVO vo=    BeanUtils.toBean(config, SystemGeneralConfigVO.class);
         return vo;
 
+    }
+
+    @Override
+    public List<SystemGeneralConfigDO> getConfigList(SystemConfigPageReqVO pageReqVO) {
+        return systemGeneralConfigDataRepository.findConfigList(pageReqVO);
     }
 
 

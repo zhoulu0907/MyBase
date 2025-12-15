@@ -28,7 +28,7 @@ public class ThirdUserAppCombinedInsertReqVO   {
     private Integer status;
 
     @Schema(description = "应用id")
-    @NotNull(message = "企业id list不能为空")
+    @NotNull(message = "应用id列表")
     private List<Long> applicationIdList;
 
 }

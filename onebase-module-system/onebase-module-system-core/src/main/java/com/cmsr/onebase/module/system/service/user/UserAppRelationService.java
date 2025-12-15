@@ -1,11 +1,9 @@
 package com.cmsr.onebase.module.system.service.user;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.UserAppRelationDO;
-import com.cmsr.onebase.module.system.vo.user.UserAppPageReqVO;
-import com.cmsr.onebase.module.system.vo.user.UserAppRelationInertReqVO;
-import com.cmsr.onebase.module.system.vo.user.UserAppVO;
-import com.cmsr.onebase.module.system.vo.user.UserApplicationRespVO;
+import com.cmsr.onebase.module.system.vo.user.*;
 import jakarta.validation.Valid;
 
 import java.util.List;
@@ -31,4 +29,6 @@ public interface UserAppRelationService {
 
 
     void createUserAppRelation(@Valid UserAppRelationInertReqVO userAppRelationInertReqVO);
+
+    List<ApplicationDTO> getUserNoRelationAppList(UserRelationAppReqVO relationAppReqVO);
 }

@@ -2,8 +2,9 @@ package com.cmsr.onebase.module.system.build.controller.user;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.system.service.dept.DeptService;
+import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
 import com.cmsr.onebase.module.system.service.user.UserService;
+import com.cmsr.onebase.module.system.vo.corpapprelation.CorpRelationAppReqVO;
 import com.cmsr.onebase.module.system.vo.user.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -13,6 +14,8 @@ import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 
@@ -25,15 +28,6 @@ public class TenantThirdUserController {
     @Resource
     private UserService userService;
 
-    @GetMapping("/user-applications-page")
-    @Operation(summary = "获得用户授权应用列表-分页")
-    @PreAuthorize("@ss.hasPermission('tenant:user:query')")
-    public CommonResult<PageResult<UserApplicationRespVO>> getUserAppRelationPage(@Valid UserAppPageReqVO userAppPageReqVO) {
-        PageResult<UserApplicationRespVO> pageResult = userService.getUserAppRelationPage(userAppPageReqVO);
-        return success(pageResult);
-    }
-
-
     @PostMapping("/create")
     @Operation(summary = "新增用户")
     @PreAuthorize("@ss.hasPermission('tenant:user:create')")
@@ -45,18 +39,25 @@ public class TenantThirdUserController {
 
     @PostMapping("/update")
     @Operation(summary = "编辑用户")
-    @PreAuthorize("@ss.hasPermission('tenant:user:create')")
+    @PreAuthorize("@ss.hasPermission('tenant:user:update')")
     public CommonResult<Long> updateUserAndUserAppRelation(@RequestBody @Valid ThirdUserAppCombinedUpdateReqVO reqVO) {
         Long id = userService.updateUserAndUserAppRelation(reqVO);
         return success(id);
     }
 
-
-    @PostMapping("/forget-password")
-    @Operation(summary = "忘记密码")
+    @PostMapping("/update-password")
+    @Operation(summary = "重置用户密码")
     @PreAuthorize("@ss.hasPermission('tenant:user:update-password')")
-    public CommonResult<Boolean> updateUserPassword(@Valid @RequestBody UserForgetPasswordReqVO reqVO) {
-        userService.forgetPassword(reqVO);
+    public CommonResult<Boolean> updateUserPassword(@Valid @RequestBody UserUpdatePasswordReqVO reqVO) {
+        userService.updateUserPassword(reqVO.getId(), reqVO.getPassword());
+        return success(true);
+    }
+
+    @PostMapping("/update-status")
+    @Operation(summary = "修改用户状态")
+    @PreAuthorize("@ss.hasPermission('tenant:user:update')")
+    public CommonResult<Boolean> updateUserStatus(@Valid @RequestBody UserUpdateStatusReqVO reqVO) {
+        userService.updateUserStatus(reqVO.getId(), reqVO.getStatus());
         return success(true);
     }
 
@@ -69,16 +70,13 @@ public class TenantThirdUserController {
         return success(true);
     }
 
-
-
-    @PostMapping("/update-password")
-    @Operation(summary = "重置用户密码")
-    @PreAuthorize("@ss.hasPermission('tenant:user:update-password')")
-    public CommonResult<Boolean> updateUserPassword(@Valid @RequestBody UserUpdatePasswordReqVO reqVO) {
-        userService.updateUserPassword(reqVO.getId(), reqVO.getPassword());
-        return success(true);
+    @GetMapping("/user-applications-page")
+    @Operation(summary = "获得三方用户(包含授权列表)-分页")
+    @PreAuthorize("@ss.hasPermission('tenant:user:query')")
+    public CommonResult<PageResult<UserApplicationRespVO>> getUserAppRelationPage(@Valid UserAppPageReqVO userAppPageReqVO) {
+        PageResult<UserApplicationRespVO> pageResult = userService.getUserAppRelationPage(userAppPageReqVO);
+        return success(pageResult);
     }
-
 
 
 }

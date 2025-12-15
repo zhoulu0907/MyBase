@@ -5,11 +5,10 @@ Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
-  "category": "system",
-  "type": 1,
+  "category": "tenant",
   "name": "测试配置",
-  "configKey": "test.config.key",
-  "configValue": "test_value",
+  "configKey": "saas",
+  "configValue": "true",
   "status": 0,
   "remark": "测试配置项"
 }
@@ -40,4 +39,8 @@ Authorization: Bearer {{token}}
 
 ### 根据参数键名查询参数值
 GET {{baseUrl}}/system/config/get-config-by-key?key=thirdUser
+Authorization: Bearer {{token}}
+
+### 获取分页列表
+GET {{baseUrl}}/system/config/list
 Authorization: Bearer {{token}}

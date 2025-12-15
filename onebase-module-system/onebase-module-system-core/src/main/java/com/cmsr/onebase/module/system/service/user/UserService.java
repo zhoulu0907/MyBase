@@ -372,5 +372,4 @@ public interface UserService {
      */
     PageResult<UserApplicationRespVO> getUserAppRelationPage(@Valid UserAppPageReqVO userAppPageReqVO);
 
-
 }

@@ -10,6 +10,7 @@ import com.cmsr.onebase.module.system.enums.logger.LoginLogTypeEnum;
 import com.cmsr.onebase.module.system.runtime.service.auth.RuntimeAuthService;
 import com.cmsr.onebase.module.system.service.permission.PermissionService;
 import com.cmsr.onebase.module.system.vo.auth.*;
+import com.cmsr.onebase.module.system.vo.user.UserForgetPasswordReqVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
@@ -136,5 +137,14 @@ public class RuntimeAuthController {
     @Operation(summary = "获取登录用户的权限信息")
     public CommonResult<AuthPermissionInfoRespVO> getPermissionInfo(@RequestParam(value = "code", required = false) String code) {
         return success(permissionService.getPermissionInfo(code));
+    }
+
+
+    @PostMapping("/forget-password")
+    @Operation(summary = "忘记密码")
+    @PermitAll
+    public CommonResult<Boolean> updateUserPassword(@Valid @RequestBody UserForgetPasswordReqVO reqVO) {
+        runtimeAuthService.forgetPassword(reqVO);
+        return success(true);
     }
 }

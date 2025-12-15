@@ -44,6 +44,7 @@ import com.cmsr.onebase.module.system.vo.CaptchaVerificationReqVO;
 import com.cmsr.onebase.module.system.vo.auth.*;
 import com.cmsr.onebase.module.system.vo.corp.CorpRespVO;
 import com.cmsr.onebase.module.system.vo.user.UserAppVO;
+import com.cmsr.onebase.module.system.vo.user.UserForgetPasswordReqVO;
 import com.google.common.annotations.VisibleForTesting;
 import com.mybatisflex.core.tenant.TenantManager;
 import com.mzt.logapi.context.LogRecordContext;
@@ -56,6 +57,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -80,6 +82,9 @@ import static com.cmsr.onebase.module.system.enums.LogRecordConstants.*;
 @RefreshScope
 @Slf4j
 public class RuntimeAuthServiceImpl implements RuntimeAuthService {
+
+    // 三方用户设置默认密码
+    private static final String THIRD_USER_PASSWORD = "OBThird2025!";
 
     @Resource
     private UserService        userService;
@@ -133,6 +138,9 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
 
     @Resource
     private UserAppRelationService userAppRelationService;
+
+    @Resource
+    private PasswordEncoder passwordEncoder;
 
     @Override
     public AdminUserDO authenticate(String username, String password) {
@@ -328,7 +336,7 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
                 // 判断用户是否关联应用
                 thirdAuthLoginRespVO.setUserAppRelationFlag(findUserAppRelationFlag(appId,user.getId()));
             }
-            thirdAuthLoginRespVO.setFirstFlag(firstFlag);
+            thirdAuthLoginRespVO.setFistLoginFlag(firstFlag);
 
             authLoginRespVO.set(thirdAuthLoginRespVO);
 
@@ -336,6 +344,31 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
 
         });
         return authLoginRespVO.get();
+    }
+
+    /**
+     * 对密码进行加密
+     *
+     * @param password 密码
+     * @return 加密后的密码
+     */
+    private String encodePassword(String password) {
+        return passwordEncoder.encode(password);
+    }
+
+    @Override
+    public void forgetPassword(UserForgetPasswordReqVO reqVO) {
+        // 1.通过手机号，获取 用户
+        AdminUserDO user =  userService.getUserByMobile(reqVO.getMobile());
+
+        // 2. 弱密码校验
+        //  securityConfigApi.validatePassword(reqVO.getPassword());
+        // 加密密码
+        userService.forgetPassword(reqVO);
+
+        // 4. 记录操作日志上下文
+        LogRecordContext.putVariable("user", user);
+        LogRecordContext.putVariable("newPassword", THIRD_USER_PASSWORD);
     }
 
     private boolean findUserAppRelationFlag(Long appId,Long userId) {

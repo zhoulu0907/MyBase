@@ -1,9 +1,13 @@
 package com.cmsr.onebase.module.system.service.config;
+import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.system.dal.dataobject.config.SystemGeneralConfigDO;
+import com.cmsr.onebase.module.system.vo.config.SystemConfigPageReqVO;
 import com.cmsr.onebase.module.system.vo.config.SystemGeneralConfigSaveReqVO;
 import com.cmsr.onebase.module.system.vo.config.SystemGeneralConfigUpdateReqVO;
 import com.cmsr.onebase.module.system.vo.config.SystemGeneralConfigVO;
 import jakarta.validation.Valid;
+
+import java.util.List;
 
 /**
  * 参数配置 Service 接口
@@ -50,4 +54,5 @@ public interface SystemGeneralConfigService {
     SystemGeneralConfigVO getConfigByKey(String key);
 
 
+    List<SystemGeneralConfigDO> getConfigList(SystemConfigPageReqVO pageReqVO);
 }

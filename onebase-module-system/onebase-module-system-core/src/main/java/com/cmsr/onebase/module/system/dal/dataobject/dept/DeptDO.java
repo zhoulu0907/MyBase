@@ -99,6 +99,6 @@ public class DeptDO extends TenantBaseDO {
     private Long corpId;
 
     @Column(name = DEPT_CODE)
-    private String DeptCode;
+    private String deptCode;
 
 }

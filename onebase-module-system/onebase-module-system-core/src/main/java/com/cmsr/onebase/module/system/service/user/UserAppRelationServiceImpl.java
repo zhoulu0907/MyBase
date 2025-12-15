@@ -14,10 +14,7 @@ import com.cmsr.onebase.module.system.dal.dataobject.user.UserAppRelationDO;
 import com.cmsr.onebase.module.system.vo.corp.CorpAppVo;
 import com.cmsr.onebase.module.system.vo.corp.CorpApplicationRespVO;
 import com.cmsr.onebase.module.system.vo.corp.CorpRespVO;
-import com.cmsr.onebase.module.system.vo.user.UserAppPageReqVO;
-import com.cmsr.onebase.module.system.vo.user.UserAppRelationInertReqVO;
-import com.cmsr.onebase.module.system.vo.user.UserAppVO;
-import com.cmsr.onebase.module.system.vo.user.UserApplicationRespVO;
+import com.cmsr.onebase.module.system.vo.user.*;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.ConfigStore;
@@ -29,6 +26,7 @@ import org.springframework.validation.annotation.Validated;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.fasterxml.jackson.databind.type.LogicalType.Collection;
@@ -91,5 +89,29 @@ public class UserAppRelationServiceImpl implements UserAppRelationService {
                 userAppRelationDataRepository.insert(corpAppRelationDO);
             });
         }
+    }
+
+    @Override
+    public List<ApplicationDTO> getUserNoRelationAppList(UserRelationAppReqVO relationAppReqVO) {
+        List<ApplicationDTO> applicationDTOList = appApplicationApi.findAppApplicationByAppName(relationAppReqVO.getAppName());
+        if (null == relationAppReqVO.getUserId()) {
+            // 用于用户创建时拉取全部应用
+            return applicationDTOList;
+        }
+        // 获取用户已关联的数据
+        List<UserAppRelationDO> userAppRelationDOList = userAppRelationDataRepository.getUserAppRelationByUserId(relationAppReqVO.getUserId());
+        if (userAppRelationDOList.isEmpty()) {
+            return applicationDTOList;
+        }
+        // 获取已关联的应用ID集合
+        Set<Long> relatedAppIds = userAppRelationDOList.stream()
+                .map(UserAppRelationDO::getApplicationId)
+                .collect(Collectors.toSet());
+
+        // 过滤掉已关联的应用
+        List<ApplicationDTO> filteredList = applicationDTOList.stream()
+                .filter(app -> !relatedAppIds.contains(app.getId()))
+                .collect(Collectors.toList());
+        return filteredList;
     }
 }

@@ -1,11 +1,17 @@
 package com.cmsr.onebase.module.system.build.controller.config;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.system.dal.dataobject.config.SystemGeneralConfigDO;
+import com.cmsr.onebase.module.system.dal.dataobject.dept.PostDO;
 import com.cmsr.onebase.module.system.service.config.SystemGeneralConfigService;
+import com.cmsr.onebase.module.system.vo.config.SystemConfigPageReqVO;
 import com.cmsr.onebase.module.system.vo.config.SystemGeneralConfigSaveReqVO;
 import com.cmsr.onebase.module.system.vo.config.SystemGeneralConfigUpdateReqVO;
 import com.cmsr.onebase.module.system.vo.config.SystemGeneralConfigVO;
+import com.cmsr.onebase.module.system.vo.post.PostPageReqVO;
+import com.cmsr.onebase.module.system.vo.post.PostRespVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -14,6 +20,8 @@ import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 
@@ -59,13 +67,20 @@ public class SystemGeneralConfigController {
 
 
     @GetMapping(value = "/get-config-by-key")
-    @Operation(summary = "根据参数键名查询参数值", description = "不可见的配置，不允许返回给前端")
+    @Operation(summary = "根据参数键名查询", description = "不可见的配置，不允许返回给前端")
     @Parameter(name = "key", description = "参数键", required = true, example = "yunai.biz.username")
     @PreAuthorize("@ss.hasPermission('system:config:query')")
-    public CommonResult<SystemGeneralConfigVO> getConfigByKey(@RequestParam("key") String key) {
-        return success(systemGeneralConfigService.getConfigByKey(key));
+    public CommonResult<SystemGeneralConfigVO> getConfigByKey(@RequestParam("configKey") String configKey) {
+        return success(systemGeneralConfigService.getConfigByKey(configKey));
     }
 
 
+    @GetMapping("/list")
+    @Operation(summary = "获得配置项列表-分页")
+    @PreAuthorize("@ss.hasPermission('tenant:post:query')")
+    public CommonResult<List<SystemGeneralConfigVO>> getConfigList(@Validated SystemConfigPageReqVO pageReqVO) {
+         List<SystemGeneralConfigDO> pageResult = systemGeneralConfigService.getConfigList(pageReqVO);
+        return success(BeanUtils.toBean(pageResult, SystemGeneralConfigVO.class));
+    }
 
 }

@@ -13,10 +13,10 @@ import java.util.List;
 public class UserApplicationRespVO {
 
     @Schema(description = "用户id")
-    private Long userId;
+    private Long id;
 
     @Schema(description = "姓名")
-    private String nickname;
+    private String nickName;
 
     @Schema(description = "手机号")
     private String mobile;

@@ -1,10 +1,17 @@
 package com.cmsr.onebase.module.system.dal.database;
 
 import com.cmsr.onebase.framework.aynline.DataRepository;
+import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.system.dal.dataobject.config.SystemGeneralConfigDO;
+import com.cmsr.onebase.module.system.dal.dataobject.dept.PostDO;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
+import com.cmsr.onebase.module.system.vo.config.SystemConfigPageReqVO;
 import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.entity.Compare;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 @Repository
 public class SystemGeneralConfigDataRepository  extends DataRepository<SystemGeneralConfigDO> {
@@ -21,5 +28,20 @@ public class SystemGeneralConfigDataRepository  extends DataRepository<SystemGen
         configStore.eq(SystemGeneralConfigDO.CONFIG_KEY, key);
         return findOne(configStore);
 
+    }
+
+    public List<SystemGeneralConfigDO> findConfigList(SystemConfigPageReqVO reqVO) {
+        DefaultConfigStore configs = new DefaultConfigStore();
+
+        if (StringUtils.isNotBlank(reqVO.getName())) {
+            configs.and(Compare.LIKE, SystemGeneralConfigDO.NAME, reqVO.getName());
+        }
+        if (reqVO.getStatus() != null) {
+            configs.and(Compare.EQUAL, SystemGeneralConfigDO.STATUS, reqVO.getStatus());
+        }
+        // 添加排序条件，按ID降序排列
+        configs.order(SystemGeneralConfigDO.ID, org.anyline.entity.Order.TYPE.DESC);
+
+        return  findAllByConfig(configs);
     }
 }

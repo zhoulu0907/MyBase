@@ -1074,7 +1074,7 @@ public class UserServiceImpl implements UserService {
         AdminUserDO user =  userDataRepository.findByMobile(reqVO.getMobile());
 
         // 2. 弱密码校验
-      //  securityConfigApi.validatePassword(reqVO.getPassword());
+       //  securityConfigApi.validatePassword(reqVO.getPassword());
 
         // TODO 临时使用默认密码 3. 更新密码,临时使用默认密码
         AdminUserDO updateObj = new AdminUserDO();
@@ -1271,7 +1271,7 @@ public class UserServiceImpl implements UserService {
             return new PageResult<>(pageResult.getList().stream()
                     .map(user -> {
                         UserApplicationRespVO userApplicationRespVO = BeanUtils.toBean(user, UserApplicationRespVO.class);
-                        userApplicationRespVO.setUserId(user.getId());
+                        userApplicationRespVO.setId(user.getId());
                         return userApplicationRespVO;
                     })
                     .collect(Collectors.toList()), pageResult.getTotal());
@@ -1290,7 +1290,7 @@ public class UserServiceImpl implements UserService {
         return new PageResult<>(pageResult.getList().stream()
                 .map(user -> {
                     UserApplicationRespVO userApplicationRespVO = BeanUtils.toBean(user, UserApplicationRespVO.class);
-                    userApplicationRespVO.setUserId(user.getId());
+                    userApplicationRespVO.setId(user.getId());
 
                     // 9. 获取当前用户关联的应用关系列表
                     List<UserAppRelationDO> appRelationDOList = userAppRelationMap.get(user.getId());
