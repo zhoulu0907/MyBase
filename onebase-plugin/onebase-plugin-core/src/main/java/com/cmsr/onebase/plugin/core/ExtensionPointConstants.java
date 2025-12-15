@@ -13,7 +13,7 @@ import java.util.List;
  * 集中定义所有支持的扩展点接口，便于Maven插件和运行时扫描统一使用。
  * </p>
  *
- * @author matianyu
+ * @author chengyuansen
  * @date 2025-12-15
  */
 public class ExtensionPointConstants {

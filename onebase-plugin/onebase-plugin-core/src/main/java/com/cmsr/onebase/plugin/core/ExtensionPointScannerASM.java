@@ -21,7 +21,7 @@ import java.util.stream.Stream;
  * 查找所有扩展点接口的实现类，用于Maven插件构建时生成索引。
  * </p>
  *
- * @author matianyu
+ * @author chengyuansen
  * @date 2025-12-15
  */
 public class ExtensionPointScannerASM {

@@ -10,7 +10,7 @@ import org.springframework.context.annotation.ComponentScan;
  * 用于在开发IDE中直接调试demo插件，无需打包和部署到宿主
  * </p>
  *
- * @author matianyu
+ * @author chengyuansen
  * @date 2025-12-14
  */
 @SpringBootApplication

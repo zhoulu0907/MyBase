@@ -16,7 +16,7 @@ import java.util.*;
  * 查找所有扩展点接口的实现类，用于开发模式热加载。
  * </p>
  *
- * @author matianyu
+ * @author chengyuansen
  * @date 2025-12-15
  */
 public class ExtensionPointScannerSpring {

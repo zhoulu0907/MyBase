@@ -48,7 +48,7 @@ import org.springframework.context.annotation.ComponentScan;
  *     <li>application-prod.yml：生产模式配置（ZIP 插件验证）</li>
  * </ul>
  *
- * @author matianyu
+ * @author chengyuansen
  * @date 2025-12-14
  */
 @SpringBootApplication(exclude = {RedisAutoConfiguration.class})

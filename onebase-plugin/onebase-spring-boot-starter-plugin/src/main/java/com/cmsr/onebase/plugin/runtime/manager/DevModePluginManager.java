@@ -15,7 +15,7 @@ import java.util.*;
  * 适合在IDE中直接启动和调试插件代码。
  * </p>
  *
- * @author matianyu
+ * @author chengyuansen
  * @date 2025-12-15
  */
 public class DevModePluginManager extends DefaultPluginManager {

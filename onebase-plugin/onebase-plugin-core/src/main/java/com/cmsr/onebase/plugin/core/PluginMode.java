@@ -6,7 +6,7 @@ package com.cmsr.onebase.plugin.core;
  * 定义插件系统的三种运行模式，控制扩展点的加载策略。
  * </p>
  *
- * @author matianyu
+ * @author chengyuansen
  * @date 2025-12-15
  */
 public enum PluginMode {

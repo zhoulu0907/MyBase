@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
  * 扫描插件目录，实现插件的一次性扫描用于加载/重载/卸载操作。
  * </p>
  *
- * @author matianyu
+ * @author chengyuansen
  * @date 2025-12-15
  */
 public class PluginDirectoryScanner implements Runnable {
