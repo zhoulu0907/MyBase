@@ -78,11 +78,17 @@ public class RuntimeFlowProcessTest {
         SemanticFieldValueDTO name = SemanticFieldValueDTO.ofType(SemanticFieldTypeEnum.TEXT);
         name.setFieldName("student_name");
         name.setRawValue("小");
+
+        SemanticFieldValueDTO birthday = SemanticFieldValueDTO.ofType(SemanticFieldTypeEnum.DATE);
+        birthday.setFieldName("birthday");
+        birthday.setRawValue("2025-12-01");
+
         SemanticFieldValueDTO age = SemanticFieldValueDTO.ofType(SemanticFieldTypeEnum.NUMBER);
         age.setFieldName("gender");
         age.setRawValue(8);
 
-        reqDTO.setFieldData(List.of(name, age));
+
+        reqDTO.setFieldData(List.of(name, birthday, age));
         EntityTriggerRespDTO respDTO = flowProcessExecApi.entityTrigger(reqDTO);
         System.out.println(respDTO);
     }
