@@ -442,6 +442,10 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
                 onChange={(value) => {
                   setSearchItems(value);
                 }}
+                triggerProps={{
+                  autoAlignPopupWidth: false,
+                  autoAlignPopupMinWidth: true,
+                }}
                 onVisibleChange={(visible) => {
                   if (!visible) {
                     // 下拉框收起时 回显数据
