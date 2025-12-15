@@ -230,6 +230,11 @@ public class BpmExecServiceImpl implements BpmExecService {
             }
 
             execTaskStrategyManager.execute(context.getMatchedUser(), context.getAgentIns(), currentTask, extDTO, reqVO);
+
+            if (buttonEnum == BpmActionButtonEnum.SAVE) {
+                log.info("[execTask] 保存按钮只用执行一次，后续任务不执行，当前任务ID: {}", currentTask.getId());
+                break;
+            }
         }
     }
 }
