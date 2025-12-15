@@ -76,4 +76,10 @@ public class AppMenuRepository extends BaseBizRepository<AppMenuMapper, AppMenuD
                 .where(APP_MENU.MENU_UUID.eq(menuUuid));
         return this.getOne(queryWrapper);
     }
+
+    public boolean existsByEntityUuid(String entityUuid) {
+        QueryWrapper queryWrapper = this.query()
+                .where(APP_MENU.ENTITY_UUID.eq(entityUuid));
+        return this.exists(queryWrapper);
+    }
 }
