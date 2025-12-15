@@ -1,7 +1,6 @@
 package com.cmsr.onebase.framework.orm.repo;
 
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
-import com.cmsr.onebase.framework.orm.entity.BaseBizEntity;
 import com.cmsr.onebase.framework.orm.entity.WarmFlowBizEntity;
 import com.mybatisflex.core.BaseMapper;
 import com.mybatisflex.core.paginate.Page;
@@ -191,7 +190,6 @@ public class WarmFlowBaseBizRepository<M extends BaseMapper<T>, T extends WarmFl
      */
     @Override
     public boolean exists(QueryWrapper query) {
-        this.injectQueryFilter(query);
         return exists(CPI.getWhereQueryCondition(query));
     }
 
