@@ -659,6 +659,19 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
                 skipParams.nodeCode(initNode.getNodeCode());
                 taskService.skip(skipParams, task);
             }
+        } else if (Objects.equals(buttonType, BpmActionButtonEnum.TRANSFER.getCode())) {
+            // 处理转交操作，指定下一个处理人
+            String targetHandlerId = reqVO.getTargetHandlerId();
+
+            if (Objects.equals(targetHandlerId, approverId)) {
+                throw exception(ErrorCodeConstants.CANNOT_TRANSFER_TO_SELF);
+            }
+
+            skipParams.handler(approverId)
+                    .hisStatus(BpmNodeApproveStatusEnum.POST_TRANSFERRED.getCode())
+                    .addHandlers(List.of(targetHandlerId));
+
+            taskService.transfer(task.getId(), skipParams);
         } else {
             throw exception(ErrorCodeConstants.UNSUPPORT_ACTION_BUTTON_TYPE);
         }
