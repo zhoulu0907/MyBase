@@ -65,7 +65,7 @@ const XDatePicker = memo((props: XInputDatePickerConfig & { runtime?: boolean; d
 
       // 变量
       if (dateRange.earliestType === DATE_EXTREME_TYPE.VARIABLE && dateRange.earliestVariableValue) {
-        const earliestVariableValue = form.getFieldValue(dateRange.earliestDynamicValue);
+        const earliestVariableValue = form.getFieldValue(dateRange.earliestVariableValue);
         if (earliestVariableValue) {
           const earliestTime = new Date(earliestVariableValue).getTime()
           if (currentTime < earliestTime) {
