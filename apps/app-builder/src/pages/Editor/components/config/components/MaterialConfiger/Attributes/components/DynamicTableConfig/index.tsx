@@ -49,8 +49,11 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
   const searchItemsKey = 'searchItems';
   const tableNameKey = 'tableName';
 
+  const { form } = Form.useFormContext();
+
   const [columnsConfig, setColumnsConfig] = useState<any[]>(configs[columnsKey] || []);
   const [searchItemsConfig, setSearchItemsConfig] = useState<any[]>(configs[searchItemsKey] || []);
+  const [searchItems, setSearchItems] = useState<string[]>([]);
 
   const [enableAddColumn, setEnableAddColumn] = useState<boolean>(false);
   const [enableAddSearchItem, setEnableAddSearchItem] = useState<boolean>(false);
@@ -117,6 +120,11 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
 
     setEnableAddSearchItem(res);
   }, [fieldList, searchItemsConfig]);
+
+  useEffect(() => {
+    console.log('searchItemsKey', configs[searchItemsKey]);
+    setSearchItems(configs[searchItemsKey]?.map((ele: any) => ele.value));
+  }, [configs[searchItemsKey]]);
 
   // 获取字段列表
   const getFieldList = async () => {
@@ -394,16 +402,13 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
                         handlePropsChange(searchItemsKey, newList);
                       }}
                       className={styles.tableColumnItemInput}
-                      options={configs['columns']
-                        .filter(
-                          (col: any) =>
-                            // 过滤掉已在 configs[item.key] 中被选中的 dataIndex
-                            !searchItemsConfig.some((selected: any) => selected.value === col.dataIndex)
-                        )
-                        .map((item: any) => ({
+                      options={configs['columns'].map((item: any) => {
+                        return {
                           label: item.title,
-                          value: item.id
-                        }))}
+                          value: item.dataIndex,
+                          disabled: searchItemsConfig.some((selected: any) => selected.value === item.dataIndex)
+                        };
+                      })}
                     />
                     <Button
                       icon={<IconDelete />}
@@ -425,39 +430,37 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
                 ))}
               </ReactSortable>
 
-              <Dropdown
-                position={'tl'}
-                trigger="click"
-                droplist={
-                  <Menu>
-                    {fieldList
-                      .filter(
-                        (item: MetadataEntityField) =>
-                          !searchItemsConfig.some((col: any) => col.value === item.fieldName)
-                      )
-                      .map((item: MetadataEntityField) => (
-                        <Menu.Item
-                          key={item.fieldName}
-                          onClick={() => {
-                            const newList = [...searchItemsConfig, { label: item.displayName, value: item.id }];
-                            console.log('newList: ', newList);
-                            console.log('item: ', item);
-                            add({ label: item.displayName, value: item.fieldName });
-                            setSearchItemsConfig(newList);
-                            handlePropsChange(searchItemsKey, newList);
-                          }}
-                        >
-                          {item.displayName}
-                        </Menu.Item>
-                      ))}
-                  </Menu>
-                }
+              <Select
                 getPopupContainer={getPopupContainer}
+                value={searchItems}
+                mode="multiple"
+                triggerElement={
+                  <Button type={enableAddSearchItem ? 'outline' : 'secondary'} disabled={!enableAddSearchItem}>
+                    新增搜索项
+                  </Button>
+                }
+                onChange={(value) => {
+                  setSearchItems(value);
+                }}
+                onVisibleChange={(visible) => {
+                  if (!visible) {
+                    // 下拉框收起时 回显数据
+                    const newList = searchItems.map((ele: string) => {
+                      const currentField = fieldList.find((e) => e.fieldName === ele);
+                      return { label: currentField?.displayName, value: ele };
+                    });
+                    form.setFieldValue(`${id}-${searchItemsKey}`, newList);
+                    setSearchItemsConfig(newList);
+                    handlePropsChange(searchItemsKey, newList);
+                  }
+                }}
               >
-                <Button type={enableAddSearchItem ? 'outline' : 'secondary'} disabled={!enableAddSearchItem}>
-                  新增搜索项
-                </Button>
-              </Dropdown>
+                {fieldList.map((item: MetadataEntityField) => (
+                  <Select.Option key={item.fieldName} value={item.fieldName}>
+                    {item.displayName}
+                  </Select.Option>
+                ))}
+              </Select>
             </div>
           )}
         </Form.List>
