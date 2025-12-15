@@ -181,7 +181,7 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean; d
               const fileId = await handleUpload(file, onProgress);
               const uploadFileUrl = URL.createObjectURL(file);
               // 文件上传文件id
-              if (uploadFileUrl !== '') {
+              if (fileId && uploadFileUrl !== '') {
                 setFileUrl(uploadFileUrl);
                 onSuccess({ fileId: fileId });
               } else {
@@ -189,12 +189,16 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean; d
                   status: 'error',
                   msg: '上传失败'
                 });
+                const newFieldList = form.getFieldValue(fieldId)
+                form.setFieldValue(fieldId, newFieldList.filter((ele: any) => ele.status !== 'error'))
               }
             } catch (error) {
               onError({
                 status: 'error',
                 msg: '上传失败'
               });
+              const newFieldList = form.getFieldValue(fieldId)
+              form.setFieldValue(fieldId, newFieldList.filter((ele: any) => ele.status !== 'error'))
             }
           }}
           style={{

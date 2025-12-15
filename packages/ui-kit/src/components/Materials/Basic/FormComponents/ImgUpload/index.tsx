@@ -36,11 +36,11 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
 
     const progressAdapter = onProgress
       ? (progressEvent: ProgressEvent) => {
-          if (progressEvent.lengthComputable) {
-            const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-            onProgress(percent, progressEvent);
-          }
+        if (progressEvent.lengthComputable) {
+          const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          onProgress(percent, progressEvent);
         }
+      }
       : undefined;
 
     if (runtime) {
@@ -383,12 +383,16 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
                   status: 'error',
                   msg: '上传失败'
                 });
+                const newFieldList = form.getFieldValue(fieldId)
+                form.setFieldValue(fieldId, newFieldList.filter((ele: any) => ele.status !== 'error'))
               }
             } catch (error) {
               onError({
                 status: 'error',
                 msg: '上传失败'
               });
+              const newFieldList = form.getFieldValue(fieldId)
+              form.setFieldValue(fieldId, newFieldList.filter((ele: any) => ele.status !== 'error'))
             }
           }}
           showUploadList={{
