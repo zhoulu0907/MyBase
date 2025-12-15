@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.app.core.dal.database.auth;
 
+import com.cmsr.onebase.framework.common.enums.VersionTagEnum;
 import com.cmsr.onebase.framework.orm.repo.BaseBizRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthFieldDO;
 import com.cmsr.onebase.module.app.core.dal.mapper.AppAuthFieldMapper;
@@ -45,9 +46,11 @@ public class AppAuthFieldRepository extends BaseBizRepository<AppAuthFieldMapper
         return list(queryWrapper);
     }
 
-    public void deleteByMenuUuid(String menuUuid) {
+    public void deleteByMenuUuid(Long applicationId, String menuUuid) {
         this.updateChain()
                 .where(APP_AUTH_FIELD.MENU_UUID.eq(menuUuid))
+                .where(APP_AUTH_FIELD.APPLICATION_ID.eq(applicationId))
+                .where(APP_AUTH_FIELD.VERSION_TAG.eq(VersionTagEnum.BUILD.getValue()))
                 .remove();
     }
 }
