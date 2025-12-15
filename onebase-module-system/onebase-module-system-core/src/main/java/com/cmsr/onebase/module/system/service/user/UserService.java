@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.system.service.user;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import cn.hutool.core.collection.CollUtil;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
+import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.system.vo.auth.AuthRegisterReqVO;
 import com.cmsr.onebase.module.system.vo.dept.DeptSimpleListRespVO;
 import com.cmsr.onebase.module.system.vo.user.UserProfileUpdatePasswordReqVO;
@@ -11,10 +12,7 @@ import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.vo.user.*;
 import jakarta.validation.Valid;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 后台用户 Service 接口
@@ -330,4 +328,12 @@ public interface UserService {
      * @return
      */
     List<UserRespVO> getConvertUserPage(PageResult<AdminUserDO> pageResult);
+
+    /**
+     * 获取用户信息
+     * @param usernamesList
+     * @return
+     */
+    @TenantIgnore
+    List<AdminUserDO> getUserByUsernames(Set<String> usernamesList);
 }
