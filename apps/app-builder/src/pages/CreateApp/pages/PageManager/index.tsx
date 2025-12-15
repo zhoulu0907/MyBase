@@ -5,7 +5,7 @@ import EditIcon from '@/assets/images/edit_menu_icon.svg';
 import PageManagerGuide from '@/assets/images/page_manaager_guide.svg';
 import { useI18n } from '@/hooks/useI18n';
 import PreviewContainer from '@/pages/Runtime/components/preview';
-import { useAppStore } from '@/store/store_app';
+import { useAppStore } from '@/store';
 import { addParentIdToChildren } from '@/utils/menu';
 import { Button, Dropdown, Form, Input, Layout, Menu, Message, Tree } from '@arco-design/web-react';
 import { IconDown, IconEmpty, IconPlus, IconSearch } from '@arco-design/web-react/icon';
@@ -159,6 +159,7 @@ const PageManagerPage: FC = () => {
       key: menu.id,
       title: (
         <MyMenuItem
+          menuInfo={menu}
           showOption={showOption}
           menuID={menu.id}
           isVisible={menu.isVisible}
@@ -390,8 +391,10 @@ const PageManagerPage: FC = () => {
         let editorType: string = EDITOR_TYPES.FORM_EDITOR;
         if (visibleCreateForm === 'workbench') {
           editorType = EDITOR_TYPES.WORKBENCH_EDITOR;
+          setCurMenu({ ...menuResp, pagesetType: PageType.WORKBENCH });
         } else {
           editorType = EDITOR_TYPES.FORM_EDITOR;
+          setCurMenu(menuResp);
         }
 
         navigate(`/onebase/${tenantId}/editor/${editorType}?pageSetId=${pageSetId}&appId=${curAppId}`);
