@@ -47,7 +47,6 @@ const DynamicDataSourceConfig: React.FC<DynamicSelectDataSourceConfigProps> = ({
   const tableConfig = configs[ATTR_KEY.DYNAMICTABLECONFIG];
 
   const [dataSourceOptions, setDataSourceOptions] = useState<any[]>([]); // 数据源
-  const [selectedDataSource, setSelectedDataSource] = useState(configs[item.key] || null); // 选择的数据源
   const [fieldsMap, setFieldsMap] = useState<Map<string, any[]>>(new Map()); // 预构造选择的数据源
 
   const [selectDataVisible, setSelectDataVisibleVisible] = useState(false); //数据选择过程 popup
@@ -92,7 +91,7 @@ const DynamicDataSourceConfig: React.FC<DynamicSelectDataSourceConfigProps> = ({
       entityName: dataSource.entityName,
       tableName: dataSource.tableName
     };
-    setSelectedDataSource(data);
+
     // table元数据 初始化
     tableConfig.metaData = value;
     tableConfig.showOpearate = false;
@@ -198,7 +197,7 @@ const DynamicDataSourceConfig: React.FC<DynamicSelectDataSourceConfigProps> = ({
         <FormItem layout="vertical" labelAlign="left" label={'数据源'} className={styles.formItem}>
           <Select
             placeholder="请选择"
-            defaultValue={configs[item.key].entityUuid}
+            value={configs[item.key].entityUuid}
             getPopupContainer={getPopupContainer}
             onChange={(value) => {
               handleSourceChange(value);
@@ -213,7 +212,7 @@ const DynamicDataSourceConfig: React.FC<DynamicSelectDataSourceConfigProps> = ({
         </FormItem>
 
         {/* 数据选择过程（弹窗/下拉 两种模式均显示配置弹窗） */}
-        {selectedDataSource.entityUuid &&
+        {configs[item.key].entityUuid &&
           (configs?.selectMethod === 'modal' || configs?.selectMethod === 'dropdown') && (
             <div>
               <FormItem layout="vertical" labelAlign="left" label={'数据选择过程'} className={styles.formItem}>
