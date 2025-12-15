@@ -1,16 +1,16 @@
-import React, { useEffect, useState } from 'react';
 import { Button, Checkbox, Dropdown, Input, Menu, Modal, Select, Space } from '@arco-design/web-react';
+import React, { useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
-import styles from '../../index.module.less';
 import { IconDelete, IconPlus } from '@arco-design/web-react/icon';
 import {
+  COMPONENT_MAP,
   COMPONENT_TYPE_DISPLAY_NAME_MAP,
   getComponentSchema,
-  usePageEditorSignal,
-  COMPONENT_MAP,
-  getPopupContainer
+  getPopupContainer,
+  usePageEditorSignal
 } from '@onebase/ui-kit';
+import styles from '../../index.module.less';
 
 interface FillingRuleSettingsModalProps {
   visible: boolean;
@@ -58,7 +58,6 @@ const FillingRuleSettingsModal: React.FC<FillingRuleSettingsModalProps> = ({
   useEffect(() => {
     const refactFieldOptions = [...fieldOptions].reduce((newOptions, item) => {
       const cpType = COMPONENT_MAP[item.fieldType];
-      console.log(Object.entries(pageComponentSchemas));
 
       const targetComponents = Object.entries(pageComponentSchemas)
         .filter(([key, value]) => value.type === cpType)
