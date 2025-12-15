@@ -45,8 +45,6 @@ public class ThirdUserController {
     @Resource
     private UserService userService;
 
-
-
     @PostMapping("/supplement-user")
     @Operation(summary = "补充用户信息")
     @PermitAll
@@ -58,7 +56,7 @@ public class ThirdUserController {
 
     @PostMapping("/forget-password")
     @Operation(summary = "忘记密码")
-    @PreAuthorize("@ss.hasPermission('tenant:user:update-password')")
+    @PermitAll
     public CommonResult<Boolean> updateUserPassword(@Valid @RequestBody UserForgetPasswordReqVO reqVO) {
         userService.forgetPassword(reqVO);
         return success(true);
