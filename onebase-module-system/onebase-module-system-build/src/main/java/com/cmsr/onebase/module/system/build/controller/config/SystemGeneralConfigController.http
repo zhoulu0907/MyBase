@@ -1,0 +1,43 @@
+
+### 创建参数配置
+POST {{baseUrl}}/system/config/create
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "category": "system",
+  "type": 1,
+  "name": "测试配置",
+  "configKey": "test.config.key",
+  "configValue": "test_value",
+  "status": 0,
+  "remark": "测试配置项"
+}
+
+### 修改参数配置
+POST {{baseUrl}}/system/config/update
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "id": 1,
+  "category": "system",
+  "type": 1,
+  "name": "更新测试配置",
+  "configKey": "test.config.key",
+  "configValue": "updated_test_value",
+  "status": 0,
+  "remark": "更新测试配置项"
+}
+
+### 删除参数配置
+POST {{baseUrl}}/system/config/delete?id=1
+Authorization: Bearer {{token}}
+
+### 获取参数配置详情
+GET {{baseUrl}}/system/config/get?id=1
+Authorization: Bearer {{token}}
+
+### 根据参数键名查询参数值
+GET {{baseUrl}}/system/config/get-config-by-key?key=thirdUser
+Authorization: Bearer {{token}}
