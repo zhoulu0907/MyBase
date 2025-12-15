@@ -11,6 +11,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>onebase-plugin-sdk</module>
+        <module>onebase-plugin-core</module>
         <module>onebase-spring-boot-starter-plugin</module>
         <module>onebase-plugin-maven-plugin</module>
         <module>onebase-plugin-demo</module>

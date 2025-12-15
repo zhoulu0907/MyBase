@@ -40,19 +40,6 @@ public class PluginProperties {
     private boolean devMode = false;
 
     /**
-     * 开发模式下的插件类路径
-     */
-    private String devPluginClasspath;
-
-    /**
-     * 开发模式下扫描的包路径，多个包用逗号分隔
-     * <p>
-     * 默认扫描 com.cmsr.onebase.plugin 包及其子包
-     * </p>
-     */
-    private String devScanPackages = "com.cmsr.onebase.plugin";
-
-    /**
      * 插件扫描间隔（毫秒），0表示禁用自动扫描
      */
     private long scanInterval = 0;
@@ -100,22 +87,6 @@ public class PluginProperties {
 
     public void setDevMode(boolean devMode) {
         this.devMode = devMode;
-    }
-
-    public String getDevPluginClasspath() {
-        return devPluginClasspath;
-    }
-
-    public void setDevPluginClasspath(String devPluginClasspath) {
-        this.devPluginClasspath = devPluginClasspath;
-    }
-
-    public String getDevScanPackages() {
-        return devScanPackages;
-    }
-
-    public void setDevScanPackages(String devScanPackages) {
-        this.devScanPackages = devScanPackages;
     }
 
     public long getScanInterval() {

@@ -1,8 +1,7 @@
 package com.cmsr.onebase.plugin.maven;
 
-import com.cmsr.onebase.plugin.api.DataProcessor;
-import com.cmsr.onebase.plugin.api.EventListener;
-import com.cmsr.onebase.plugin.api.HttpHandler;
+import com.cmsr.onebase.plugin.core.ExtensionPointConstants;
+import com.cmsr.onebase.plugin.core.ExtensionPointScannerASM;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -12,22 +11,16 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 import org.objectweb.asm.*;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.Opcodes;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Stream;
 
 /**
  * 扩展点扫描与服务文件生成器
@@ -53,9 +46,9 @@ public class ScanExtensionsMojo extends AbstractMojo {
     private static final Set<String> EXTENSION_POINT_INTERFACES = new HashSet<>();
 
     static {
-        EXTENSION_POINT_INTERFACES.add(toInternalName(DataProcessor.class));
-        EXTENSION_POINT_INTERFACES.add(toInternalName(EventListener.class));
-        EXTENSION_POINT_INTERFACES.add(toInternalName(HttpHandler.class));
+        for (String className : ExtensionPointConstants.EXTENSION_POINT_CLASS_NAMES) {
+            EXTENSION_POINT_INTERFACES.add(toInternalName(className));
+        }
     }
 
     /**
@@ -79,12 +72,17 @@ public class ScanExtensionsMojo extends AbstractMojo {
     /**
      * 找到的扩展点实现类
      */
-    private final List<String> extensionClasses = new ArrayList<>();
+    private List<String> extensionClasses = new ArrayList<>();
     
     /**
      * HttpHandler路由校验错误列表
      */
     private final List<String> routeValidationErrors = new ArrayList<>();
+    
+    /**
+     * 扩展点扫描器
+     */
+    private ExtensionPointScannerASM scanner = new ExtensionPointScannerASM();
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
@@ -98,14 +96,16 @@ public class ScanExtensionsMojo extends AbstractMojo {
         // 从 plugin.properties 中读取 pluginId
         resolvePluginId();
 
-        // 扫描所有class文件
-        try (Stream<Path> paths = Files.walk(classesDirectory.toPath())) {
-            paths.filter(path -> path.toString().endsWith(".class"))
-                    .filter(path -> !path.toString().contains("GeneratedPlugin"))
-                    .forEach(this::scanClass);
-        } catch (IOException e) {
-            throw new MojoExecutionException("扫描类文件失败", e);
+        // 使用ExtensionPointScannerASM扫描所有扩展点
+        extensionClasses = scanner.scanExtensions(classesDirectory);
+        
+        // 输出扫描结果
+        for (String className : extensionClasses) {
+            getLog().info("  发现扩展点: " + className);
         }
+        
+        // 校验HttpHandler路由（需要额外处理）
+        validateHttpHandlerRoutes();
 
         // 生成extensions.idx
         if (!extensionClasses.isEmpty()) {
@@ -151,54 +151,48 @@ public class ScanExtensionsMojo extends AbstractMojo {
     }
 
     /**
-     * 扫描单个class文件
+     * 扫描单个class文件（已废弃，改用ExtensionPointScannerASM）
      */
-    private void scanClass(Path classPath) {
-        try (FileInputStream fis = new FileInputStream(classPath.toFile())) {
-            ClassReader reader = new ClassReader(fis);
-            ExtensionClassVisitor visitor = new ExtensionClassVisitor();
-            reader.accept(visitor, ClassReader.SKIP_CODE | ClassReader.SKIP_DEBUG | ClassReader.SKIP_FRAMES);
-
-            if (visitor.isExtension()) {
-                String className = visitor.getClassName().replace('/', '.');
-                extensionClasses.add(className);
-                getLog().info("  发现扩展点: " + className + " 实现 " + visitor.getImplementedExtensionPoint());
-                
-                // 如果是 HttpHandler，校验路由前缀
-                if ("com.cmsr.onebase.plugin.api.HttpHandler".equals(visitor.getImplementedExtensionPoint())) {
-                    validateHttpHandlerRoutes(visitor, className);
-                }
-            }
-        } catch (IOException e) {
-            getLog().warn("无法读取类文件: " + classPath, e);
-        }
+    @Deprecated
+    private void scanClass(File classFile) {
+        // 保留方法签名以兼容，实际逻辑已移至ExtensionPointScannerASM
     }
-
-    /**
-     * 生成 META-INF/extensions.idx 文件
-     */
-    private void generateExtensionsIndex() throws MojoExecutionException {
-        File metaInfDir = new File(classesDirectory, "META-INF");
-        if (!metaInfDir.exists()) {
-            metaInfDir.mkdirs();
-        }
-
-        File indexFile = new File(metaInfDir, "extensions.idx");
-        try (PrintWriter writer = new PrintWriter(new FileWriter(indexFile))) {
-            for (String className : extensionClasses) {
-                writer.println(className);
-            }
-            getLog().info("已生成: " + indexFile.getAbsolutePath());
-        } catch (IOException e) {
-            throw new MojoExecutionException("生成扩展索引文件失败", e);
-        }
-    }
-
+    
     /**
      * 校验 HttpHandler 的路由前缀
      */
-    private void validateHttpHandlerRoutes(ExtensionClassVisitor visitor, String className) {
-        List<String> mappingPaths = visitor.getRequestMappingPaths();
+    private void validateHttpHandlerRoutes() throws MojoExecutionException {
+        // 遍历所有扫描到的类，检查是否为HttpHandler
+        for (String className : extensionClasses) {
+            try {
+                // 重新读取class文件以获取路由信息
+                String classFilePath = className.replace('.', '/') + ".class";
+                File classFile = new File(classesDirectory, classFilePath);
+                
+                if (!classFile.exists()) {
+                    continue;
+                }
+                
+                try (FileInputStream fis = new FileInputStream(classFile)) {
+                    ClassReader reader = new ClassReader(fis);
+                    HttpHandlerRouteValidator validator = new HttpHandlerRouteValidator(className);
+                    reader.accept(validator, ClassReader.SKIP_CODE | ClassReader.SKIP_DEBUG);
+                    
+                    if (validator.isHttpHandler()) {
+                        validateRoutes(validator, className);
+                    }
+                }
+            } catch (IOException e) {
+                getLog().warn("无法读取类文件进行路由校验: " + className, e);
+            }
+        }
+    }
+    
+    /**
+     * 校验路由前缀
+     */
+    private void validateRoutes(HttpHandlerRouteValidator validator, String className) {
+        List<String> mappingPaths = validator.getRequestMappingPaths();
         String requiredPrefix = "/plugin/" + pluginId + "/";
         
         if (mappingPaths.isEmpty()) {
@@ -226,37 +220,52 @@ public class ScanExtensionsMojo extends AbstractMojo {
     }
 
     /**
-     * 将类转换为内部名称格式
+     * 生成 META-INF/extensions.idx 文件
      */
-    private static String toInternalName(Class<?> clazz) {
-        return clazz.getName().replace('.', '/');
+    private void generateExtensionsIndex() throws MojoExecutionException {
+        File metaInfDir = new File(classesDirectory, "META-INF");
+        if (!metaInfDir.exists()) {
+            metaInfDir.mkdirs();
+        }
+
+        File indexFile = new File(metaInfDir, "extensions.idx");
+        try (PrintWriter writer = new PrintWriter(new FileWriter(indexFile))) {
+            for (String className : extensionClasses) {
+                writer.println(className);
+            }
+            getLog().info("已生成: " + indexFile.getAbsolutePath());
+        } catch (IOException e) {
+            throw new MojoExecutionException("生成扩展索引文件失败", e);
+        }
     }
 
     /**
-     * ASM类访问器 - 检测是否实现了扩展点接口
+     * 将类名转换为内部名称格式（用于兼容）
      */
-    private class ExtensionClassVisitor extends ClassVisitor {
+    private static String toInternalName(String className) {
+        return className.replace('.', '/');
+    }
+
+    /**
+     * ASM类访问器 - 专门用于HttpHandler路由校验
+     */
+    private class HttpHandlerRouteValidator extends ClassVisitor {
         private String className;
-        private String implementedExtensionPoint;
-        private boolean isAbstract;
-        private boolean isInterface;
+        private boolean isHttpHandler = false;
         private final List<String> requestMappingPaths = new ArrayList<>();
 
-        public ExtensionClassVisitor() {
+        public HttpHandlerRouteValidator(String className) {
             super(Opcodes.ASM9);
+            this.className = className;
         }
 
         @Override
         public void visit(int version, int access, String name, String signature,
                           String superName, String[] interfaces) {
-            this.className = name;
-            this.isAbstract = (access & Opcodes.ACC_ABSTRACT) != 0;
-            this.isInterface = (access & Opcodes.ACC_INTERFACE) != 0;
-
             if (interfaces != null) {
                 for (String iface : interfaces) {
-                    if (EXTENSION_POINT_INTERFACES.contains(iface)) {
-                        this.implementedExtensionPoint = iface.replace('/', '.');
+                    if ("com/cmsr/onebase/plugin/api/HttpHandler".equals(iface)) {
+                        this.isHttpHandler = true;
                         break;
                     }
                 }
@@ -300,7 +309,7 @@ public class ScanExtensionsMojo extends AbstractMojo {
             return new MethodVisitor(Opcodes.ASM9) {
                 @Override
                 public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
-                    // 扫描方法级别的 @GetMapping、@PostMapping、@PutMapping、@DeleteMapping、@RequestMapping
+                    // 扫描方法级别的 @GetMapping、@PostMapping等
                     if ("Lorg/springframework/web/bind/annotation/GetMapping;".equals(desc)
                         || "Lorg/springframework/web/bind/annotation/PostMapping;".equals(desc)
                         || "Lorg/springframework/web/bind/annotation/PutMapping;".equals(desc)
@@ -337,16 +346,8 @@ public class ScanExtensionsMojo extends AbstractMojo {
             };
         }
 
-        public boolean isExtension() {
-            return implementedExtensionPoint != null && !isAbstract && !isInterface;
-        }
-
-        public String getClassName() {
-            return className;
-        }
-
-        public String getImplementedExtensionPoint() {
-            return implementedExtensionPoint;
+        public boolean isHttpHandler() {
+            return isHttpHandler;
         }
         
         public List<String> getRequestMappingPaths() {

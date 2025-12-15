@@ -53,6 +53,12 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- OneBase Plugin Core -->
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-plugin-core</artifactId>
+        </dependency>
+
         <!-- ASM 用于字节码分析 -->
         <dependency>
             <groupId>org.ow2.asm</groupId>

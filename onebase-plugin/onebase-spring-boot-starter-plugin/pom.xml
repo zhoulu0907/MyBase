@@ -26,6 +26,12 @@
             <artifactId>onebase-plugin-sdk</artifactId>
         </dependency>
 
+        <!-- OneBase Plugin Core -->
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-plugin-core</artifactId>
+        </dependency>
+
         <!-- Spring Boot Starter -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

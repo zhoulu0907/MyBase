@@ -77,6 +77,8 @@
         <justauth.version>1.16.7</justauth.version>
         <justauth-starter.version>1.4.0</justauth-starter.version>
         <jgrapht.version>1.5.2</jgrapht.version>
+        <!-- ASM字节码操作库 -->
+        <asm.version>9.7.1</asm.version>
         <!-- 公式引擎相关 -->
         <graalvm.version>23.0.9</graalvm.version>
         <!-- HTTP 客户端相关 -->
@@ -624,6 +626,16 @@
                 <groupId>com.cmsr.onebase</groupId>
                 <artifactId>onebase-plugin-sdk</artifactId>
                 <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.cmsr.onebase</groupId>
+                <artifactId>onebase-plugin-core</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.ow2.asm</groupId>
+                <artifactId>asm</artifactId>
+                <version>${asm.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.cmsr.onebase</groupId>

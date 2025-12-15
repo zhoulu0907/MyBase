@@ -71,11 +71,11 @@ public class PluginRuntimeAutoConfiguration {
             log.info("=".repeat(60));
             log.info("启用开发模式（devMode=true）");
             log.info("插件加载方式: 扫描classpath中的扩展点实现类");
-            log.info("扫描包路径: {}", properties.getDevScanPackages());
+            log.info("支持的扩展点: DataProcessor, EventListener, HttpHandler");
             log.info("适用场景: IDE中直接启动和调试，无需打包ZIP/JAR");
             log.info("=".repeat(60));
             
-            DevModePluginManager pluginManager = new DevModePluginManager(properties.getDevScanPackages());
+            DevModePluginManager pluginManager = new DevModePluginManager();
             
             if (properties.isAutoLoad()) {
                 pluginManager.loadPlugins();
