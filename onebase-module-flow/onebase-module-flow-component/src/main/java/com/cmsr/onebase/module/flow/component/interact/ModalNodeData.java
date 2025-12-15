@@ -1,5 +1,6 @@
-package com.cmsr.onebase.module.flow.context.graph.nodes;
+package com.cmsr.onebase.module.flow.component.interact;
 
+import com.cmsr.onebase.module.flow.context.condition.SimpleField;
 import com.cmsr.onebase.module.flow.context.graph.NodeData;
 import com.cmsr.onebase.module.flow.context.graph.NodeType;
 import lombok.Data;
@@ -37,20 +38,7 @@ public class ModalNodeData extends NodeData implements Serializable {
 
     private Integer arrange;
 
-    private List<Field> fields;
-
-    @Data
-    public static class Field implements Serializable {
-
-        private String id;
-
-        private String fieldName;
-
-        private String fieldType;
-
-        private Object value;
-
-    }
+    private List<SimpleField> fields;
 
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
