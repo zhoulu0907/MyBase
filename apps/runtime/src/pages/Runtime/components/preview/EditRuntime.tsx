@@ -62,7 +62,7 @@ const EditRuntime: React.FC<EditRuntimeProps> = ({ form, isAdd, submitLoading, o
   return (
     <Modal
       title={
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '40px' }}>
           <div>表单信息</div>
           <div className={styles.titleEditIconArea}>
             {fullScreen ? (
@@ -98,14 +98,20 @@ const EditRuntime: React.FC<EditRuntimeProps> = ({ form, isAdd, submitLoading, o
       onCancel={onCancel}
       autoFocus={false}
       focusLock={true}
-      style={{ width: fullScreen ? '98vw' : '60vw' }}
+      style={{ width: fullScreen ? '98vw' : '60vw', maxHeight: fullScreen ? '98vh' : '80vh', overflow: 'auto' }}
       alignCenter
       wrapClassName={
         fullScreen ? 'runtime-preview-formpage edit-modal edit-modal-fullscreen' : 'runtime-preview-formpage edit-modal'
       }
     >
-      <div style={{ height: '100%' }}>
-        <Form layout="inline" labelCol={{ span: 10 }} wrapperCol={{ span: 14 }} form={form} onValuesChange={handleFormValuesChange}>
+      <div style={{ maxHeight: fullScreen ? '80vh' : '60vh', overflow: 'auto' }}>
+        <Form
+          layout="inline"
+          labelCol={{ span: 10 }}
+          wrapperCol={{ span: 14 }}
+          form={form}
+          onValuesChange={handleFormValuesChange}
+        >
           {useEditorSignalMap.get(editPageViewId.value)?.components.value.map((cp: GridItem) => (
             <Fragment key={cp.id}>
               {hiddenState(cp.id) && (
@@ -130,7 +136,7 @@ const EditRuntime: React.FC<EditRuntimeProps> = ({ form, isAdd, submitLoading, o
                       useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id]
                     }
                     runtime={true}
-                    showFromPageData={() => { }}
+                    showFromPageData={() => {}}
                     cpState={cpStates[cp.id]}
                   />
                 </div>

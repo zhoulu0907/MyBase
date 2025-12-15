@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import { registerConfigRenderer } from '../../registry';
 import { ColorPicker, Form, Select } from '@arco-design/web-react';
 import type { GradientColor } from '@arco-design/web-react/es/ColorPicker/interface';
+import { useEffect, useState } from 'react';
+import { registerConfigRenderer } from '../../registry';
 
 import { CONFIG_TYPES } from '@onebase/ui-kit/src/components/Materials/constants';
 
@@ -11,6 +11,7 @@ interface Props {
   handlePropsChange: (key: string, value: any) => void;
   item: any;
   configs: any;
+  id: string;
 }
 
 const KEY = {
@@ -32,10 +33,17 @@ const fieldStyles = [
   { value: 'style10', label: '样式10' }
 ];
 
-const DynamicDividerStyleConfig = ({ handlePropsChange, item, configs }: Props) => {
+const DynamicDividerStyleConfig = ({ handlePropsChange, item, configs, id }: Props) => {
   const [color, setColor] = useState<string | GradientColor[]>(configs[KEY.COLOR]);
   const [titleColor, setTitleColor] = useState<string | GradientColor[]>(configs[KEY.TITLECOLOR]);
   const [descriptionColor, setdDscriptionColor] = useState<string | GradientColor[]>(configs[KEY.DESCRIPTIONCOLOR]);
+
+  // 当 configs 变化时，同步更新本地状态
+  useEffect(() => {
+    setColor(configs[KEY.COLOR]);
+    setTitleColor(configs[KEY.TITLECOLOR]);
+    setdDscriptionColor(configs[KEY.DESCRIPTIONCOLOR]);
+  }, [configs[KEY.COLOR], configs[KEY.TITLECOLOR], configs[KEY.DESCRIPTIONCOLOR], id]);
 
   const handleStyleChange = (value: string) => {
     handlePropsChange(item.key, value);
@@ -152,7 +160,8 @@ const DynamicDividerStyleConfig = ({ handlePropsChange, item, configs }: Props) 
     <>
       <Form.Item className={styles.formItem} label={item.name}>
         <Select
-          defaultValue={configs[item.key]}
+          key={`${id}-${item.key}-style`}
+          value={configs[item.key]}
           placeholder="请选择字段样式"
           className={styles.dividerStyle}
           getPopupContainer={() => document.body}
@@ -184,7 +193,8 @@ const DynamicDividerStyleConfig = ({ handlePropsChange, item, configs }: Props) 
         }}
       >
         <ColorPicker
-          defaultValue={color}
+          key={`${id}-${KEY.COLOR}`}
+          value={color}
           showText
           className={styles.dividerColorPicker}
           onChange={(value) => handleColorChange(KEY.COLOR, value)}
@@ -202,7 +212,8 @@ const DynamicDividerStyleConfig = ({ handlePropsChange, item, configs }: Props) 
         }}
       >
         <ColorPicker
-          defaultValue={titleColor}
+          key={`${id}-${KEY.TITLECOLOR}`}
+          value={titleColor}
           showText
           className={styles.dividerColorPicker}
           onChange={(value) => handleColorChange(KEY.TITLECOLOR, value)}
@@ -220,7 +231,8 @@ const DynamicDividerStyleConfig = ({ handlePropsChange, item, configs }: Props) 
         }}
       >
         <ColorPicker
-          defaultValue={descriptionColor}
+          key={`${id}-${KEY.DESCRIPTIONCOLOR}`}
+          value={descriptionColor}
           showText
           className={styles.dividerColorPicker}
           onChange={(value) => handleColorChange(KEY.DESCRIPTIONCOLOR, value)}
@@ -232,6 +244,6 @@ const DynamicDividerStyleConfig = ({ handlePropsChange, item, configs }: Props) 
 
 export default DynamicDividerStyleConfig;
 
-registerConfigRenderer(CONFIG_TYPES.DIVIDER_STYLE_TYPE, ({ handlePropsChange, item, configs }) => (
-  <DynamicDividerStyleConfig handlePropsChange={handlePropsChange} item={item} configs={configs} />
+registerConfigRenderer(CONFIG_TYPES.DIVIDER_STYLE_TYPE, ({ handlePropsChange, item, configs, id }) => (
+  <DynamicDividerStyleConfig handlePropsChange={handlePropsChange} item={item} configs={configs} id={id} />
 ));

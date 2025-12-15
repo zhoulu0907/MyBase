@@ -1,13 +1,19 @@
-import { Form, Radio, TreeSelect, type FormInstance } from '@arco-design/web-react';
-import { listApplicationMenu, type ListApplicationMenuReq, MenuType } from '@onebase/app';
-import { getPopupContainer } from '@onebase/ui-kit';
-import { useAppStore } from '@/store';
-import { useEffect, useState } from 'react';
+import mobileLayout1 from '@/assets/images/appRelease/mobile_layout1.svg';
+import mobileLayout2 from '@/assets/images/appRelease/mobile_layout2.svg';
 import webLayout1 from '@/assets/images/appRelease/web_layout1.svg';
 import webLayout2 from '@/assets/images/appRelease/web_layout2.svg';
 import webLayout3 from '@/assets/images/appRelease/web_layout3.svg';
-import mobileLayout1 from '@/assets/images/appRelease/mobile_layout1.svg';
-import mobileLayout2 from '@/assets/images/appRelease/mobile_layout2.svg';
+import { useAppStore } from '@/store';
+import { Form, Radio, TreeSelect, type FormInstance } from '@arco-design/web-react';
+import {
+  getAppNavigationConfig,
+  listApplicationMenu,
+  MenuType,
+  type GetAppNavigationConfigReq,
+  type ListApplicationMenuReq
+} from '@onebase/app';
+import { getPopupContainer } from '@onebase/ui-kit';
+import { useEffect, useRef, useState } from 'react';
 import styles from './index.module.less';
 
 interface IProps {
@@ -21,14 +27,53 @@ const NavigatorSetting = (props: IProps) => {
   const mobileHomeType = Form.useWatch('mobileHomeType', form);
 
   const [menuTree, setMenuTree] = useState<any[]>([]);
+  const prevWebHomeTypeRef = useRef<string>();
+  const prevMobileHomeTypeRef = useRef<string>();
 
   useEffect(() => {
     getPages();
+    handleGetNavigationConfig();
   }, []);
 
   useEffect(() => {
     form.setFieldsValue(data);
   }, [data]);
+
+  // 监听 webHomeType 变化，从 default 切换到 custom 时清空下拉菜单值
+  useEffect(() => {
+    if (prevWebHomeTypeRef.current === 'default' && webHomeType === 'custom') {
+      form.setFieldValue('webDefaultMenu', undefined);
+    }
+    prevWebHomeTypeRef.current = webHomeType;
+  }, [webHomeType, form]);
+
+  // 监听 mobileHomeType 变化，从 default 切换到 custom 时清空下拉菜单值
+  useEffect(() => {
+    if (prevMobileHomeTypeRef.current === 'default' && mobileHomeType === 'custom') {
+      form.setFieldValue('mobileDefaultMenu', undefined);
+    }
+    prevMobileHomeTypeRef.current = mobileHomeType;
+  }, [mobileHomeType, form]);
+
+  const handleGetNavigationConfig = async () => {
+    const params: GetAppNavigationConfigReq = {
+      id: curAppId
+    };
+    const res = await getAppNavigationConfig(params);
+    const webHomeTypeValue = res.webDefaultMenu === 'default' ? 'default' : 'custom';
+    const mobileHomeTypeValue = res.mobileDefaultMenu === 'default' ? 'default' : 'custom';
+    form.setFieldsValue({
+      webNavLayout: res.webNavLayout || 'SIDEBAR',
+      mobileNavLayout: res.mobileNavLayout || 'GRID',
+      webHomeType: webHomeTypeValue,
+      mobileHomeType: mobileHomeTypeValue,
+      webDefaultMenu: res.webDefaultMenu,
+      mobileDefaultMenu: res.mobileDefaultMenu
+    });
+    // 初始化 ref 值
+    prevWebHomeTypeRef.current = webHomeTypeValue;
+    prevMobileHomeTypeRef.current = mobileHomeTypeValue;
+  };
 
   // 获取下拉页面
   const getPages = async () => {
@@ -57,7 +102,7 @@ const NavigatorSetting = (props: IProps) => {
       <div className={styles.navigatorSetting}>
         <div className={styles.moduleTitle}>web端导航设置</div>
 
-        <Form.Item label="web端首页" field="webHomeType">
+        <Form.Item label="web端首页" field="webHomeType" initialValue="default">
           <Radio.Group direction="vertical">
             <Radio value="default">
               <span>默认首页</span>
@@ -66,12 +111,21 @@ const NavigatorSetting = (props: IProps) => {
             <Radio value="custom">
               自定义首页
               {webHomeType === 'custom' && (
-                <Form.Item field="webHomePageId" className={styles.homePage}>
+                <Form.Item
+                  field="webDefaultMenu"
+                  className={styles.homePage}
+                  rules={[
+                    {
+                      required: true,
+                      message: '请选择自定义首页'
+                    }
+                  ]}
+                >
                   <TreeSelect
                     getPopupContainer={getPopupContainer}
                     treeData={menuTree}
                     placeholder="请选择"
-                    fieldNames={{ key: 'id', title: 'menuName' }}
+                    fieldNames={{ key: 'menuUuid', title: 'menuName' }}
                   ></TreeSelect>
                 </Form.Item>
               )}
@@ -79,9 +133,9 @@ const NavigatorSetting = (props: IProps) => {
           </Radio.Group>
         </Form.Item>
 
-        <Form.Item label="导航布局" field="webLayoutType" initialValue={1}>
+        <Form.Item label="导航布局" field="webNavLayout" initialValue="SIDEBAR">
           <Radio.Group>
-            <Radio value={1}>
+            <Radio value={'SIDEBAR'}>
               {({ checked }) => (
                 <>
                   <div className={styles.radioContainer} style={{ borderColor: checked ? '#009E9E' : 'transparent' }}>
@@ -91,7 +145,7 @@ const NavigatorSetting = (props: IProps) => {
                 </>
               )}
             </Radio>
-            <Radio value={2}>
+            <Radio value={'TOPBAR'}>
               {({ checked }) => (
                 <>
                   <div className={styles.radioContainer} style={{ borderColor: checked ? '#009E9E' : 'transparent' }}>
@@ -101,7 +155,7 @@ const NavigatorSetting = (props: IProps) => {
                 </>
               )}
             </Radio>
-            <Radio value={3}>
+            <Radio value={'TREE'}>
               {({ checked }) => (
                 <>
                   <div className={styles.radioContainer} style={{ borderColor: checked ? '#009E9E' : 'transparent' }}>
@@ -117,7 +171,7 @@ const NavigatorSetting = (props: IProps) => {
       <div className={styles.navigatorSetting}>
         <div className={styles.moduleTitle}>移动端导航设置</div>
 
-        <Form.Item label="移动端首页" field="mobileHomeType">
+        <Form.Item label="移动端首页" field="mobileHomeType" initialValue="default">
           <Radio.Group direction="vertical">
             <Radio value="default">
               <span>默认首页</span>
@@ -125,7 +179,16 @@ const NavigatorSetting = (props: IProps) => {
             <Radio value="custom">
               自定义首页
               {mobileHomeType === 'custom' && (
-                <Form.Item field="mobileHomePageId" className={styles.homePage}>
+                <Form.Item
+                  field="mobileDefaultMenu"
+                  className={styles.homePage}
+                  rules={[
+                    {
+                      required: true,
+                      message: '请选择自定义首页'
+                    }
+                  ]}
+                >
                   <TreeSelect
                     getPopupContainer={getPopupContainer}
                     treeData={menuTree}
@@ -138,9 +201,9 @@ const NavigatorSetting = (props: IProps) => {
           </Radio.Group>
         </Form.Item>
 
-        <Form.Item label="导航布局" field="mobileLayoutType" initialValue={1}>
+        <Form.Item label="导航布局" field="mobileNavLayout" initialValue="GRID">
           <Radio.Group>
-            <Radio value={1}>
+            <Radio value={'GRID'}>
               {({ checked }) => (
                 <>
                   <div
@@ -153,7 +216,7 @@ const NavigatorSetting = (props: IProps) => {
                 </>
               )}
             </Radio>
-            <Radio value={2}>
+            <Radio value={'LIST'}>
               {({ checked }) => (
                 <>
                   <div

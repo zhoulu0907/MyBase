@@ -2,6 +2,7 @@ import { Form, Message, Upload, Progress, Button } from '@arco-design/web-react'
 import { type UploadItem, type UploadListProps } from '@arco-design/web-react/lib/Upload';
 import { IconPlus, IconDelete, IconClose, IconDownload, IconFile, IconUpload } from '@arco-design/web-react/icon';
 import { uploadFile, getFileUrlById } from '@onebase/platform-center';
+import { attachmentUpload, attachmentDownload, menuSignal } from '@onebase/app'
 import { nanoid } from 'nanoid';
 import { memo, useState, useEffect } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
@@ -9,6 +10,7 @@ import { STATUS_OPTIONS, STATUS_VALUES, UPLOAD_VALUES, UPLOAD_OPTIONS } from '..
 import { downloadFileByUrl } from 'src/utils/downloadFile';
 import '../index.css';
 import type { XInputFileUploadConfig } from './schema';
+import { pagesRuntimeSignal } from '@onebase/common';
 
 const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const {
@@ -25,6 +27,10 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean; d
     runtime = true,
     detailMode
   } = props;
+  const [tableName, fieldName] = dataField;
+  const { curMenu } = menuSignal;
+  const { entityDataId } = pagesRuntimeSignal;
+
 
   const [_fileUrl, setFileUrl] = useState<string>('');
 
@@ -41,8 +47,13 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean; d
       }
       : undefined;
 
-    const res = await uploadFile(formData, progressAdapter);
-    return res;
+    if (runtime) {
+      const res = await attachmentUpload(tableName, formData, progressAdapter);
+      return res;
+    } else {
+      // TODO 编辑态上传预览
+      return ''
+    }
   };
 
   const { form } = Form.useFormContext();
@@ -82,7 +93,7 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean; d
     }
     return (
       <div className="uplaodList-text">
-        {filesList.map((file) => (
+        {filesList.map((file, index) => (
           <div key={file.uid} className="uplaodList-text-item">
             {getFileIcon(file)}
             <div className="uplaodList-text-item-name">{file.name}</div>
@@ -101,9 +112,15 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean; d
             ) : (
               <div className="uplaodList-text-item-opera">
                 {showDownload && <IconDownload
-                  onClick={() => {
-                    const fileUrl = getFileUrlById(file.response?.fileId);
-                    window.open(fileUrl,'_blank')
+                  onClick={async () => {
+                    const param = {
+                      menuId: curMenu.value?.id,
+                      id: entityDataId.value,
+                      fieldName,
+                      fileId: file.response.fileId || file.id
+                    }
+                    const fileUrl = await attachmentDownload(tableName, param)
+                    downloadFileByUrl(fileUrl, file.name)
                   }}
                 />}
 
@@ -163,7 +180,18 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean; d
             const { onProgress, onError, onSuccess, file } = option;
             try {
               const fileId = await handleUpload(file, onProgress);
-              const uploadFileUrl = await getFileUrlById(fileId);
+              let uploadFileUrl = ''
+              if (entityDataId.value) {
+                const param = {
+                  menuId: curMenu.value?.id,
+                  id: entityDataId.value,
+                  fieldName,
+                  fileId: fileId
+                }
+                uploadFileUrl = await attachmentDownload(tableName, param)
+              } else {
+                uploadFileUrl = URL.createObjectURL(file);
+              }
               // 文件上传文件id
               if (uploadFileUrl !== '') {
                 setFileUrl(uploadFileUrl);

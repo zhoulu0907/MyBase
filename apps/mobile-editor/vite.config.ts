@@ -6,13 +6,13 @@ import qiankun from 'vite-plugin-qiankun';
 // https://vitejs.dev/config/
 export default defineConfig({
   server: {
-    port: 4400,
+    port: 4401,
     cors: true,
     headers: {
       'Access-Control-Allow-Origin': '*'
     }
   },
-  base: '/v0/mobileeditor/',
+  base: './',
   plugins: [
     qiankun('mobile-editor', {
       useDevMode: true

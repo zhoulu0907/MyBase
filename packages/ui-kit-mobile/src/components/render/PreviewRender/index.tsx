@@ -34,7 +34,17 @@ interface PreviewRenderProps {
   refresh?: number;
 
   form?: any;
+
+  lastOne?: boolean;
+
+  editLoading?: boolean;
 }
+
+const LIST_LAZY_COMPONENT: string[] = [
+  FORM_COMPONENT_TYPES.DATE_PICKER,
+  FORM_COMPONENT_TYPES.DATE_TIME_PICKER,
+  FORM_COMPONENT_TYPES.FILE_UPLOAD,
+];
 
 const PreviewRender: React.FC<PreviewRenderProps> = ({
   cpId,
@@ -44,8 +54,14 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
   detailMode,
   showFromPageData,
   refresh,
+  editLoading,
+  lastOne,
   form
 }) => {
+
+  if (LIST_LAZY_COMPONENT.includes(cpType) && editLoading) {
+    return null;
+  }
   // 获取组件配置
   const componentConfig = getComponentConfig(pageComponentSchema, cpType);
 
@@ -105,6 +121,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
             id={cpId}
             {...componentConfig}
             runtime={runtime}
+            form={form}
             detailMode={detailMode}
           />
         );
@@ -135,6 +152,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
             id={cpId}
             {...componentConfig}
             runtime={runtime}
+            form={form}
             detailMode={detailMode}
           />
         );
@@ -172,6 +190,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
             {...componentConfig}
             runtime={runtime}
             detailMode={detailMode}
+            form={form}
           />
         );
       case FORM_COMPONENT_TYPES.USER_MULTIPLE_SELECT:
@@ -182,6 +201,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
             {...componentConfig}
             runtime={runtime}
             detailMode={detailMode}
+            form={form}
             isMultiple
           />
         );
@@ -286,7 +306,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
         return null
       //  列表组件
       case LIST_COMPONENT_TYPES.TABLE:
-        return <ListComp.XLoadMore cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} showFromPageData={showFromPageData} />;
+        return <ListComp.XLoadMore cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} manuClick={!lastOne} showFromPageData={showFromPageData} />;
       // return (
       //   <ListComp.XTable
       //     cpName={cpId}

@@ -30,11 +30,10 @@ export default defineConfig({
         // 这里配置 less 选项（注意 Vite 中直接写选项，无需嵌套 lessOptions）
         javascriptEnabled: true,
         modifyVars: {
-          '@primary-color': '#009E9E',
-          // '@base-font-size': '100px',
-        },
-      },
-    },
+          '@primary-color': '#009E9E'
+        }
+      }
+    }
   },
   assetsInclude: ['**/*.svg']
 });

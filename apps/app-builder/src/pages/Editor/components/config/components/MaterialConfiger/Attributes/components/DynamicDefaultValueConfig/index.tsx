@@ -1,20 +1,20 @@
-import { Form, Select, Input, Button, Switch, DatePicker, TimePicker, InputNumber } from '@arco-design/web-react';
-import { useEffect, useState } from 'react';
+import { FormulaEditor } from '@/components/FormulaEditor';
+import { Button, DatePicker, Form, Input, InputNumber, Select, TimePicker } from '@arco-design/web-react';
 import { IconLaunch } from '@arco-design/web-react/icon';
-import { registerConfigRenderer } from '../../registry';
 import {
   CONFIG_TYPES,
+  DATE_OPTIONS,
+  DATE_VALUES,
   DEFAULT_VALUE_TYPES,
   DEFAULT_VALUE_TYPES_LABELS,
-  PHONE_TYPE,
   getPopupContainer,
-  TIME_FORMAT,
+  PHONE_TYPE,
   TIME_12_FORMAT,
-  DATE_OPTIONS,
-  DATE_VALUES
+  TIME_FORMAT
 } from '@onebase/ui-kit';
-import { FormulaEditor } from '@/components/FormulaEditor';
+import { useEffect, useState } from 'react';
 import styles from '../../index.module.less';
+import { registerConfigRenderer } from '../../registry';
 
 export interface DynamicDefaultValueConfigProps {
   handlePropsChange: (key: string, value: any) => void;

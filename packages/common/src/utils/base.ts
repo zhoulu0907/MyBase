@@ -35,3 +35,8 @@ export const getRuntimeURL = (): string => {
   const runtimeUrl = (window as any).global_config?.RUNTIME_URL;
   return runtimeUrl || 'http://localhost:9527';
 };
+
+export const getRuntimeMobileURL = (): string => {
+  const runtimeMobileUrl = (window as any).global_config?.RUNTIME_MOBILE_URL;
+  return runtimeMobileUrl || 'http://localhost:9527';
+};

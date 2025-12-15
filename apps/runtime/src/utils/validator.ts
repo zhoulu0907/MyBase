@@ -6,7 +6,7 @@ export const filterSpace = (value: string) => {
 
 export const phoneReg = /^1[3-9]\d{9}$/;
 export const phoneValidator = (value: string | undefined, callback: (error?: ReactNode) => void) => {
-  if (value && !phoneReg.test(value)) {
+  if (value && !phoneReg.test(filterSpace(value))) {
     callback('请输入正确的手机号');
   } else {
     callback();
@@ -15,7 +15,7 @@ export const phoneValidator = (value: string | undefined, callback: (error?: Rea
 
 export const emailReg = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 export const emailValidator = (value: string | undefined, callback: (error?: ReactNode) => void) => {
-  if (value && !emailReg.test(value)) {
+  if (value && !emailReg.test(filterSpace(value))) {
     callback('请输入正确的邮箱地址');
   } else {
     callback();
