@@ -41,7 +41,8 @@ public class HelloWorldHandler implements HttpHandler {
         result.put("message", "Hello, " + name + "!");
         result.put("timestamp", LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         result.put("plugin", "demo-plugin");
-        result.put("version", "1.0.0");
+        result.put("version", "1.0.0-FROM-CLASS-FILE");
+        result.put("source", "CLASSPATH_SCAN");
         return result;
     }
 

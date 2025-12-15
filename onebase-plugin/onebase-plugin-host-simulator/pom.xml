@@ -54,6 +54,14 @@
             <version>3.2.0</version>
         </dependency>
 
+        <!-- Demo 插件依赖 (开发模式需要) -->
+        <dependency>
+            <groupId>com.cmsr.onebase.plugin.demo</groupId>
+            <artifactId>onebase-plugin-demo</artifactId>
+            <version>1.0.0</version>
+            <scope>compile</scope>
+        </dependency>
+
         <!-- Lombok -->
         <dependency>
             <groupId>org.projectlombok</groupId>

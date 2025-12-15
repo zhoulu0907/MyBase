@@ -1,5 +1,6 @@
 package com.cmsr.onebase.plugin.runtime.interceptor;
 
+import com.cmsr.onebase.plugin.runtime.config.PluginProperties;
 import com.cmsr.onebase.plugin.runtime.manager.OneBasePluginManager;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
@@ -43,6 +44,9 @@ public class PluginSecurityInterceptor implements HandlerInterceptor {
     @Resource(name = "oneBasePluginManager")
     private OneBasePluginManager pluginManager;
 
+    @Resource
+    private PluginProperties pluginProperties;
+
     @Override
     public boolean preHandle(HttpServletRequest request,
                              HttpServletResponse response,
@@ -51,6 +55,13 @@ public class PluginSecurityInterceptor implements HandlerInterceptor {
 
         // 仅处理 /plugin/** 路径
         if (!uri.startsWith("/plugin/")) {
+            return true;
+        }
+
+        // 开发模式：跳过插件存在性校验，直接放行
+        // 因为开发模式下扩展点直接从classpath加载，不会创建真实的PluginWrapper
+        if (pluginProperties.isDevMode()) {
+            log.debug("开发模式：跳过插件安全校验，放行请求: {}", uri);
             return true;
         }
 

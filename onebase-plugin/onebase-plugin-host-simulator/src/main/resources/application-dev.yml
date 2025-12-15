@@ -24,19 +24,20 @@ logging:
   pattern:
     console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
 
-# 插件配置（IDE 快速调试模式）
-# 此模式下通过 ComponentScan 自动扫描依赖中的插件，无需插件 ZIP 包
+# 插件配置（开发模式 - 直接扫描 classpath）
+# 此模式下直接扫描 classpath 中的扩展点，无需打包 ZIP/JAR
 onebase:
   plugin:
     enabled: true
     auto-load: true
     auto-start: true
-    dev-mode: true
-    scan-interval: 10000
-    plugins-dir: ./target/dev-plugins
+    dev-mode: true         # 开启开发模式，扫描 classpath 而非 plugins-dir
+    scan-interval: 0       # 开发模式下禁用定时扫描（仅生产模式需要）
+    plugins-dir: ./plugins # 开发模式下该配置无效
   
 # 说明：
-# 1. IDE 快速调试模式自动扫描项目依赖中的插件（如 onebase-plugin-demo）
-# 2. 无需打包插件为 ZIP，启动时间快（5-10秒）
+# 1. dev-mode=true：直接扫描 classpath 中的扩展点（onebase-plugin-demo 等）
+# 2. 无需打包插件为 ZIP/JAR，启动时间快（5-10秒）
 # 3. 支持断点调试、热重载
 # 4. 适合快速开发迭代
+# 5. scan-interval=0：开发模式下无需定时扫描插件目录
