@@ -169,7 +169,8 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
       const resq = await getEntityById(id);
       setDataPermissionEntity({
         entityId: id,
-        entityName: resq.displayName
+        entityName: resq.displayName,
+        tableName: resq.tableName
       });
       getDataPermissionFields(resq.id);
       getDataPermissionRoles(resq.id);
@@ -275,7 +276,7 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
 
       // 添加空数组检查，避免空参数调用接口
       if (getFieldCheckTypeParams.length > 0) {
-        getFieldCheckType(getFieldCheckTypeParams);
+        getFieldCheckType(getFieldCheckTypeParams, entityFieldsResq);
       } else {
         // 如果没有字段需要获取校验类型，直接设置空数组
         setFilterFieldCheckType([]);
@@ -306,9 +307,14 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
     }
   };
   // 批量获取字段可选校验类型
-  const getFieldCheckType = async (fieldIds: string[]) => {
+  const getFieldCheckType = async (fieldIds: string[], entityFieldsResq: any[]) => {
     try {
       const fieldCheckTypeResq = await getFieldCheckTypeApi(fieldIds);
+      fieldCheckTypeResq.forEach((item: EntityFieldValidationTypes) => {
+        const fieldName =
+          entityFieldsResq.find((field: AppEntityField) => field.fieldId == item.fieldId)?.fieldName || '';
+        item.fieldKey = `${dataPermissionEntity?.tableName}.${fieldName}`;
+      });
       setFilterFieldCheckType(fieldCheckTypeResq);
     } catch (error) {
       console.error('批量获取字段可选校验类型 error:', error);

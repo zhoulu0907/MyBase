@@ -12,6 +12,7 @@ import { dataMethodPage, menuSignal, type PageMethodParam } from '@onebase/app';
 import { useFormField } from '../useFormField';
 
 import './index.css';
+import { useFormEditorSignal } from '@/index';
 // ===== 导入 end =====
 
 // ===== 组件定义 begin =====
@@ -28,8 +29,10 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
     labelColSpan = 0,
     runtime,
     displayFields,
-    detailMode
+    detailMode,
+    fillRuleSetting
   } = props;
+  const { pageComponentSchemas: fromPageComponentSchemas } = useFormEditorSignal;
   // ===== 外部 props end =====
 
   // ===== 表单上下文与字段名与值读取 begin =====
@@ -87,6 +90,7 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
       setDataState(nextValue);
       if (runtime) {
         form.setFieldValue(fieldName, nextValue);
+        internalEvents.fillDatabyRule(data);
       }
     },
     selectDropdown: (value: any, option: any) => {
@@ -96,13 +100,25 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
       if (runtime) {
         form.setFieldValue(fieldName, nextValue);
       }
+    },
+    fillDatabyRule: (data: any) => {
+      if(fillRuleSetting.length > 0) {
+        fillRuleSetting.forEach(item => {
+          const value = data?.[item.fieldName];
+          const dataField = fromPageComponentSchemas.value[item.selectComponentID].config.dataField;
+          if(dataField.length > 0) {
+            const fieldName = fromPageComponentSchemas.value[item.selectComponentID].config.dataField[dataField.length - 1];
+            form.setFieldValue(fieldName, value);
+          }
+        })
+      }
     }
   };
   // ===== 内部事件 =====
 
   // ===== 方法：帮助方法 begin =====
   const helpers = {
-    getDisplayText: (v: any) => (v && typeof v === 'object' ? (v.name ?? '') : ''),
+    getDisplayText: (v: any) => (v && typeof v === 'object' ? ((v.name && typeof v.name === 'object' ? v.name?.name : v.name) ?? '') : ''),
     getSelectedId: (v: any) => (v && typeof v === 'object' ? (v.id ?? null) : null),
     isDropdownMode: () => props.selectMethod === 'dropdown'
   };
@@ -112,7 +128,7 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
   useEffect(() => {
     const fetchOptions = async () => {
       if (!runtime) return;
-      const entityId = props?.dynamicTableConfig?.metaData || props?.selectedDataSource?.entityId;
+      const entityId = props?.dynamicTableConfig?.metaData || props?.selectedDataSource?.entityUuid;
       if (!entityId) return;
       const { curMenu } = menuSignal;
       const req: PageMethodParam = {
@@ -137,7 +153,7 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
     runtime,
     props.selectMethod,
     props?.dynamicTableConfig?.metaData,
-    props?.selectedDataSource?.entityId,
+    props?.selectedDataSource?.entityUuid,
     displayFields
   ]);
 
