@@ -57,12 +57,16 @@ public class FlowFlowFieldTypeProviderImpl implements FlowFieldTypeProvider {
             if (nodeData instanceof StartFormNodeData n) {
                 if (n.getPageId() == null) {
                     String pageUuid = n.getPageUuid();
-                    Long pageId = flowAppProvider.findPageIdByAppIdAndPageUuid(applicationId, pageUuid);
+                    Long pageId = TenantManager.withoutTenantCondition(() -> ApplicationManager.withApplicationIdAndVersionTag(applicationId, flowProperties.getVersionTag(),
+                            () -> flowAppProvider.findPageIdByAppIdAndPageUuid(applicationId, pageUuid)
+                    ));
                     n.setPageId(pageId);
                 }
                 if (n.getTableName() == null) {
                     String pageUuid = n.getPageUuid();
-                    String tableUuid = flowAppProvider.findTableUuidByAppIdAndPageUuid(applicationId, pageUuid);
+                    String tableUuid = TenantManager.withoutTenantCondition(() -> ApplicationManager.withApplicationIdAndVersionTag(applicationId, flowProperties.getVersionTag(),
+                            () -> flowAppProvider.findTableUuidByAppIdAndPageUuid(applicationId, pageUuid)
+                    ));
                     String tableName = findTableNameByUuid(applicationId, tableUuid);
                     n.setTableName(tableName);
                 }

@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.flow.core.handler;
 
-import com.cmsr.onebase.module.flow.core.config.FlowRuntimeCondition;
+import com.cmsr.onebase.module.flow.core.config.FlowEnableCondition;
 import com.cmsr.onebase.module.flow.core.graph.FlowProcessManager;
 import com.cmsr.onebase.module.flow.core.utils.FlowUtils;
 import com.google.common.cache.Cache;
@@ -29,7 +29,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Setter
 @Service
-@Conditional(FlowRuntimeCondition.class)
+@Conditional(FlowEnableCondition.class)
 public class FlowChangeHandler implements ApplicationRunner, MessageListener<FlowChangeEvent> {
 
     @Autowired

@@ -11,7 +11,7 @@ import org.springframework.core.type.AnnotatedTypeMetadata;
  * @Date：2025/9/18 14:07
  */
 @Slf4j
-public class FlowRuntimeCondition implements Condition {
+public class FlowEnableCondition implements Condition {
 
     @Override
     public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
