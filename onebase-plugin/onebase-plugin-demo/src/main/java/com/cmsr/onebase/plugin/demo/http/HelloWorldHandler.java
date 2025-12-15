@@ -38,7 +38,7 @@ public class HelloWorldHandler implements HttpHandler {
     @GetMapping("/plugin/demo-plugin/hello")
     public Map<String, Object> hello(@RequestParam(defaultValue = "World") String name) {
         Map<String, Object> result = new HashMap<>();
-        result.put("message", "Hello, " + name + "!");
+        result.put("message", "顶顶顶顶顶单打独斗, " + name + "!");
         result.put("timestamp", LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         result.put("plugin", "demo-plugin");
         result.put("version", "1.0.0-FROM-CLASS-FILE");

@@ -69,7 +69,19 @@ public class PluginHttpDispatcher {
             return;
         }
         
-        for (HttpHandler handler : httpHandlers) {
+        log.info("从PluginManager获取到 {} 个HttpHandler扩展点实例", httpHandlers.size());
+        
+        for (int i = 0; i < httpHandlers.size(); i++) {
+            HttpHandler handler = httpHandlers.get(i);
+            Class<?> handlerClass = handler.getClass();
+            ClassLoader classLoader = handlerClass.getClassLoader();
+            
+            log.info("[{}] HttpHandler实例:", i + 1);
+            log.info("    类名: {}", handlerClass.getName());
+            log.info("    哈希码: {}", System.identityHashCode(handler));
+            log.info("    ClassLoader类型: {}", classLoader.getClass().getName());
+            log.info("    ClassLoader实例: {}", classLoader);
+            
             scanHandlerMethods((Object) handler);
         }
 
@@ -131,11 +143,24 @@ public class PluginHttpDispatcher {
                     }
                     
                     String key = buildRouteKey(httpMethod, normalizedPath);
+                    MethodHandler oldHandler = routes.get(key);
+                    if (oldHandler != null) {
+                        log.warn("  ⚠ 路由冲突: {} {} 被覆盖!", httpMethod, normalizedPath);
+                        log.warn("    旧Handler: {} (哈希码: {})", 
+                                oldHandler.getHandler().getClass().getName(), 
+                                System.identityHashCode(oldHandler.getHandler()));
+                        log.warn("    新Handler: {} (哈希码: {})", 
+                                handler.getClass().getName(), 
+                                System.identityHashCode(handler));
+                    }
                     routes.put(key, new MethodHandler(handler, method));
-                    log.debug("  ✓ 注册路由: {} {} -> {}.{}", httpMethod, normalizedPath, handlerClass.getSimpleName(), method.getName());
+                    log.info("  ✓ 注册路由: {} {} -> {}.{} (Handler哈希码: {})", 
+                            httpMethod, normalizedPath, handlerClass.getSimpleName(), 
+                            method.getName(), System.identityHashCode(handler));
                 }
             }
         }
+        log.info("  Handler扫描完成: {}", handlerClass.getName());
     }
 
     /**
@@ -244,6 +269,14 @@ public class PluginHttpDispatcher {
         MethodHandler(Object controller, Method method) {
             this.controller = controller;
             this.method = method;
+        }
+
+        public Object getHandler() {
+            return controller;
+        }
+
+        public Method getMethod() {
+            return method;
         }
     }
 }

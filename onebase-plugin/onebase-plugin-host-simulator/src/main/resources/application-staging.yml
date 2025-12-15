@@ -1,0 +1,47 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
+spring:
+  application:
+    name: onebase-plugin-host-simulator-staging
+  http:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
+logging:
+  level:
+    root: INFO
+    com.cmsr.onebase.plugin: DEBUG
+    org.pf4j: ERROR
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+
+# 插件配置（预发布模式 - 全生命周期验证）
+# 此模式只加载plugins目录的ZIP/JAR插件，不扫描classpath，用于验证插件完整生命周期
+onebase:
+  plugin:
+    enabled: true
+    auto-load: true
+    auto-start: true
+    mode: staging             # 预发布模式，只加载 plugins-dir 的ZIP包，不扫描classpath
+    scan-interval: 10000      # 每 10 秒扫描插件目录，测试热加载（0 表示禁用）
+    plugins-dir: ./plugins    # 插件目录，存放 ZIP/JAR 插件包
+  
+# 说明：
+# 1. mode=staging：只从 plugins-dir 加载 ZIP/JAR 插件，严格隔离classpath
+# 2. scan-interval=10000：每 10 秒扫描（比prod更频繁），便于测试热加载
+# 3. 适用场景：
+#    - 验证插件完整生命周期（加载、启动、热插拔、卸载）
+#    - 测试ClassLoader隔离性
+#    - 验证ZIP包完整性
+#    - 模拟真实生产环境
+# 4. 需要先打包插件为 ZIP/JAR 格式
+# 5. 适合集成测试和预发布验证

@@ -20,25 +20,24 @@ logging:
   level:
     root: INFO
     com.cmsr.onebase.plugin: INFO
-    org.pf4j: INFO
+    org.pf4j: ERROR
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
 
-# 插件配置（生产模式 - 加载 ZIP/JAR 插件）
-# 此模式从 plugins 目录加载 ZIP/JAR 插件包，支持热加载
+# 插件配置（生产模式 - 使用PF4J默认策略）
+# 此模式使用PF4J默认策略，同时扫描classpath和plugins目录
 onebase:
   plugin:
     enabled: true
     auto-load: true
     auto-start: true
-    dev-mode: false           # 关闭开发模式，从 plugins-dir 加载插件
+    mode: prod                # 生产模式，使用PF4J默认策略（classpath + plugins目录）
     scan-interval: 30000      # 每 30 秒扫描插件目录，支持热加载（0 表示禁用）
     plugins-dir: ./plugins    # 插件目录，存放 ZIP/JAR 插件包
   
 # 说明：
-# 1. dev-mode=false：从 plugins-dir 目录加载 ZIP/JAR 插件包
+# 1. mode=prod：使用PF4J默认策略，同时扫描classpath和plugins-dir
 # 2. scan-interval=30000：每 30 秒扫描插件目录，自动加载新插件、重载更新的插件
 # 3. 支持完整的插件生命周期管理（加载、启动、停止、卸载）
-# 4. 需要先打包插件为 ZIP/JAR 格式
-# 5. 适合生产环境和集成测试
-# 6. 设置 scan-interval=0 可禁用热加载
+# 4. 提供最大灵活性，适合生产环境
+# 5. 设置 scan-interval=0 可禁用热加载

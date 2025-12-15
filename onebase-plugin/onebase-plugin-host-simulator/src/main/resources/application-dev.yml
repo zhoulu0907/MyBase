@@ -20,7 +20,7 @@ logging:
   level:
     root: INFO
     com.cmsr.onebase.plugin: DEBUG
-    org.pf4j: DEBUG
+    org.pf4j: ERROR
   pattern:
     console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
 
@@ -31,12 +31,12 @@ onebase:
     enabled: true
     auto-load: true
     auto-start: true
-    dev-mode: true         # 开启开发模式，扫描 classpath 而非 plugins-dir
-    scan-interval: 0       # 开发模式下禁用定时扫描（仅生产模式需要）
+    mode: dev              # 开发模式，只扫描 classpath 而非 plugins-dir
+    scan-interval: 0       # 开发模式下禁用定时扫描（仅staging/prod模式需要）
     plugins-dir: ./plugins # 开发模式下该配置无效
   
 # 说明：
-# 1. dev-mode=true：直接扫描 classpath 中的扩展点（onebase-plugin-demo 等）
+# 1. mode=dev：直接扫描 classpath 中的扩展点（onebase-plugin-demo 等）
 # 2. 无需打包插件为 ZIP/JAR，启动时间快（5-10秒）
 # 3. 支持断点调试、热重载
 # 4. 适合快速开发迭代
