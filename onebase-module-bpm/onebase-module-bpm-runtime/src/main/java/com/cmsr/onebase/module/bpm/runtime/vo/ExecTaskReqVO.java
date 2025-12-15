@@ -41,6 +41,13 @@ public class ExecTaskReqVO {
     private String comment;
 
     /**
+     * 目标处理人ID
+     *
+     * 如转交、加签等操作，指定下一个处理人
+     */
+    private String targetHandlerId;
+
+    /**
      * 实体数据
      */
     @Valid
