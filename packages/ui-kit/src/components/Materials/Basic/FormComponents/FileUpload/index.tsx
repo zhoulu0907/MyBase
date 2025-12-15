@@ -1,14 +1,13 @@
-import { Form, Message, Upload, Progress, Button } from '@arco-design/web-react';
+import { Form, Message, Upload, Progress, Button, Typography } from '@arco-design/web-react';
 import { type UploadItem, type UploadListProps } from '@arco-design/web-react/lib/Upload';
-import { IconPlus, IconDelete, IconClose, IconDownload, IconFile, IconUpload } from '@arco-design/web-react/icon';
-import { uploadFile, getFileUrlById } from '@onebase/platform-center';
+import { IconDelete, IconClose, IconDownload, IconFile, IconUpload } from '@arco-design/web-react/icon';
 import { attachmentUpload, attachmentDownload, menuSignal } from '@onebase/app'
 import { nanoid } from 'nanoid';
 import { memo, useState, useEffect } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { STATUS_OPTIONS, STATUS_VALUES, UPLOAD_VALUES, UPLOAD_OPTIONS } from '../../../constants';
 import { downloadFileByUrl } from 'src/utils/downloadFile';
-import '../index.css';
+import './index.css';
 import type { XInputFileUploadConfig } from './schema';
 import { pagesRuntimeSignal } from '@onebase/common';
 
@@ -96,7 +95,7 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean; d
         {filesList.map((file, index) => (
           <div key={file.uid} className="uplaodList-text-item">
             {getFileIcon(file)}
-            <div className="uplaodList-text-item-name">{file.name}</div>
+            <Typography.Ellipsis showTooltip className="uplaodList-text-item-name">{file.name}</Typography.Ellipsis>
             {file.percent && file.percent !== 100 ? (
               <div className="uplaodList-text-item-process">
                 <Progress color="rgb(var(--primary-7))" percent={file.percent} showText={false}></Progress>
