@@ -596,6 +596,7 @@ const XTable = memo(
                   }
                 };
               }}
+              rowClassName={()=>'tableRow'}
               border={border}
               borderCell={borderCell}
               showHeader={showHeader}
