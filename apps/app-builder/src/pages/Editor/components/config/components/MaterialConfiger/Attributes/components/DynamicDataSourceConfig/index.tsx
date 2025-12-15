@@ -74,7 +74,9 @@ const DynamicDataSourceConfig: React.FC<DynamicSelectDataSourceConfigProps> = ({
   }, []);
 
   useEffect(() => {
-    const fieldsMap = new Map<string, any[]>(dataSourceOptions.map((d: any) => [d.entityId, d.fields ?? []] as const));
+    const fieldsMap = new Map<string, any[]>(
+      dataSourceOptions.map((d: any) => [d.entityUuid, d.fields ?? []] as const)
+    );
     setFieldsMap(fieldsMap);
   }, [dataSourceOptions]);
 
@@ -84,9 +86,9 @@ const DynamicDataSourceConfig: React.FC<DynamicSelectDataSourceConfigProps> = ({
   };
 
   const handleSourceChange = (value: any) => {
-    const dataSource = dataSourceOptions.find((data) => data.entityId === value);
+    const dataSource = dataSourceOptions.find((data) => data.entityUuid === value);
     const data = {
-      entityId: value,
+      entityUuid: value,
       entityName: dataSource.entityName,
       tableName: dataSource.tableName
     };
@@ -196,14 +198,14 @@ const DynamicDataSourceConfig: React.FC<DynamicSelectDataSourceConfigProps> = ({
         <FormItem layout="vertical" labelAlign="left" label={'数据源'} className={styles.formItem}>
           <Select
             placeholder="请选择"
-            defaultValue={configs[item.key].entityId}
+            defaultValue={configs[item.key].entityUuid}
             getPopupContainer={getPopupContainer}
             onChange={(value) => {
               handleSourceChange(value);
             }}
           >
             {dataSourceOptions.map((option) => (
-              <Option key={option.entityId} value={option.entityId}>
+              <Option key={option.entityUuid} value={option.entityUuid}>
                 {option.entityName}
               </Option>
             ))}
@@ -211,26 +213,27 @@ const DynamicDataSourceConfig: React.FC<DynamicSelectDataSourceConfigProps> = ({
         </FormItem>
 
         {/* 数据选择过程（弹窗/下拉 两种模式均显示配置弹窗） */}
-        {selectedDataSource.entityId && (configs?.selectMethod === 'modal' || configs?.selectMethod === 'dropdown') && (
-          <div>
-            <FormItem layout="vertical" labelAlign="left" label={'数据选择过程'} className={styles.formItem}>
-              <Button long onClick={toSetting}>
-                {isSetted ? '已设置' : '设置'}
-              </Button>
-              <DataSelectionProcessConfig
-                visible={selectDataVisible}
-                id={id}
-                item={item}
-                configs={configs}
-                handlePropsChange={handlePropsChange}
-                handleMultiPropsChange={handleMultiPropsChange}
-                setVisible={() => setSelectDataVisibleVisible(false)}
-              />
-            </FormItem>
+        {selectedDataSource.entityUuid &&
+          (configs?.selectMethod === 'modal' || configs?.selectMethod === 'dropdown') && (
+            <div>
+              <FormItem layout="vertical" labelAlign="left" label={'数据选择过程'} className={styles.formItem}>
+                <Button long onClick={toSetting}>
+                  {isSetted ? '已设置' : '设置'}
+                </Button>
+                <DataSelectionProcessConfig
+                  visible={selectDataVisible}
+                  id={id}
+                  item={item}
+                  configs={configs}
+                  handlePropsChange={handlePropsChange}
+                  handleMultiPropsChange={handleMultiPropsChange}
+                  setVisible={() => setSelectDataVisibleVisible(false)}
+                />
+              </FormItem>
 
-            {/* 数据选择后 */}
-            <FormItem layout="vertical" labelAlign="left" label={'数据选择后'} className={styles.formItem}>
-              {/* <FormItem layout="vertical" labelAlign="left" label={'显示在表单中'} className={styles.formItem}>
+              {/* 数据选择后 */}
+              <FormItem layout="vertical" labelAlign="left" label={'数据选择后'} className={styles.formItem}>
+                {/* <FormItem layout="vertical" labelAlign="left" label={'显示在表单中'} className={styles.formItem}>
                 <Select
                   value={selected}
                   onChange={(e) => handleSelectedChange(e)}
@@ -250,35 +253,40 @@ const DynamicDataSourceConfig: React.FC<DynamicSelectDataSourceConfigProps> = ({
                   )}
                 />
               </FormItem> */}
-              <FormItem layout="vertical" labelAlign="left" label={'回显字段'} className={styles.formItem}>
-                <Select
-                  value={configs[ATTR_KEY.DISPLAYFIELDS]?.[0]?.value}
-                  onChange={(e) => handleEchoFieldChange(e)}
-                  placeholder="设置回显字段"
-                  getPopupContainer={getPopupContainer}
+                <FormItem layout="vertical" labelAlign="left" label={'回显字段'} className={styles.formItem}>
+                  <Select
+                    value={configs[ATTR_KEY.DISPLAYFIELDS]?.[0]?.value}
+                    onChange={(e) => handleEchoFieldChange(e)}
+                    placeholder="设置回显字段"
+                    getPopupContainer={getPopupContainer}
+                  >
+                    {displayFieldOptions.map((option) => (
+                      <Option key={option.fieldName} value={option.fieldName}>
+                        {option.displayName}
+                      </Option>
+                    ))}
+                  </Select>
+                </FormItem>
+                <FormItem
+                  layout="vertical"
+                  labelAlign="left"
+                  label={'填充到表单字段'}
+                  className={styles.noMarginBottom}
                 >
-                  {displayFieldOptions.map((option) => (
-                    <Option key={option.fieldName} value={option.fieldName}>
-                      {option.displayName}
-                    </Option>
-                  ))}
-                </Select>
+                  <Button long onClick={() => setRuleSettingVisible(true)}>
+                    {selectRule.length > 0 ? '已设置填充规则' : '填充规则设置'}
+                  </Button>
+                  <FillingRuleSettingsModal
+                    visible={ruleSettingVisible}
+                    fieldOptions={filteredFieldsData}
+                    selectRule={selectRule}
+                    onCancel={() => setRuleSettingVisible(false)}
+                    onOk={(values: any) => handleOKModal(values)}
+                  />
+                </FormItem>
               </FormItem>
-              <FormItem layout="vertical" labelAlign="left" label={'填充到表单字段'} className={styles.noMarginBottom}>
-                <Button long onClick={() => setRuleSettingVisible(true)}>
-                  {selectRule.length > 0 ? '已设置填充规则' : '填充规则设置'}
-                </Button>
-                <FillingRuleSettingsModal
-                  visible={ruleSettingVisible}
-                  fieldOptions={filteredFieldsData}
-                  selectRule={selectRule}
-                  onCancel={() => setRuleSettingVisible(false)}
-                  onOk={(values: any) => handleOKModal(values)}
-                />
-              </FormItem>
-            </FormItem>
-          </div>
-        )}
+            </div>
+          )}
       </div>
     </>
   );
