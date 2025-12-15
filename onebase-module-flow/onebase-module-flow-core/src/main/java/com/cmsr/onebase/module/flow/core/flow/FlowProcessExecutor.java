@@ -4,10 +4,11 @@ import com.cmsr.onebase.module.flow.context.ExecuteContext;
 import com.cmsr.onebase.module.flow.context.VariableContext;
 import com.cmsr.onebase.module.flow.context.graph.NodeData;
 import com.cmsr.onebase.module.flow.context.provider.FlowContextProvider;
-import com.cmsr.onebase.module.flow.core.config.FlowProperties;
 import com.cmsr.onebase.module.flow.core.config.FlowEnableCondition;
+import com.cmsr.onebase.module.flow.core.config.FlowProperties;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowExecutionLogRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowExecutionLogDO;
+import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
 import com.cmsr.onebase.module.flow.core.enums.ExecutionResultEnum;
 import com.cmsr.onebase.module.flow.core.graph.FlowProcessCache;
 import com.cmsr.onebase.module.flow.core.utils.FlowUtils;
@@ -107,10 +108,12 @@ public class FlowProcessExecutor {
     }
 
     private ExecuteContext createExecuteContext(ExecutorInput executorInput) {
+        FlowProcessDO flowProcessDO = FlowProcessCache.findProcessByProcessId(executorInput.getProcessId());
+        //
         ExecuteContext executeContext = new ExecuteContext();
         executeContext.setProcessId(executorInput.getProcessId());
         executeContext.setVersionTag(flowProperties.getVersionTag());
-        executeContext.setApplicationId(FlowProcessCache.findApplicationByProcessId(executorInput.getProcessId()));
+        executeContext.setApplicationId(flowProcessDO.getApplicationId());
         executeContext.setTraceId(executorInput.getTraceId());
         executeContext.setExecutionUuid(UUID.randomUUID().toString());
         executeContext.setTriggerUserId(executorInput.getTriggerUserId());
@@ -135,7 +138,7 @@ public class FlowProcessExecutor {
         try {
             ExecuteContext tmpExecuteContext = new ExecuteContext();
             //初始化变量上下文
-            String executionUuid = executeContext.getExecutionUuid();
+            String executionUuid = executorInput.getExecutionUuid();
             tmpExecuteContext.addLog("恢复变量上下文");
             VariableContext variableContext = flowContextProvider.restoreVariableContext(executionUuid);
             tmpExecuteContext.addLog("恢复变量上下文结束");
@@ -216,14 +219,15 @@ public class FlowProcessExecutor {
      * 创建新的执行日志
      */
     private FlowExecutionLogDO createNewExecutionLog(ExecutorInput executorInput) {
-        Long applicationId = FlowProcessCache.findApplicationByProcessId(executorInput.getProcessId());
+        FlowProcessDO flowProcessDO = FlowProcessCache.findProcessByProcessId(executorInput.getProcessId());
         FlowExecutionLogDO log = new FlowExecutionLogDO();
-        log.setApplicationId(applicationId);
+        log.setApplicationId(flowProcessDO.getApplicationId());
         log.setProcessId(executorInput.getProcessId());
         log.setTriggerUserId(executorInput.getTriggerUserId());
         log.setCreator(executorInput.getTriggerUserId());
         log.setUpdater(executorInput.getTriggerUserId());
         log.setStartTime(LocalDateTime.now());
+        log.setTenantId(flowProcessDO.getTenantId());
         return log;
     }
 

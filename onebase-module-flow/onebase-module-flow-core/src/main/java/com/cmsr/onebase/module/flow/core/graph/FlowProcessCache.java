@@ -124,11 +124,6 @@ public class FlowProcessCache {
         processCache.remove(processId);
     }
 
-    public static Long findApplicationByProcessId(Long processId) {
-        FlowProcessDO flowProcessDO = processCache.get(processId);
-        return flowProcessDO != null ? flowProcessDO.getApplicationId() : null;
-    }
-
     public static FlowProcessDO findProcessByProcessId(Long processId) {
         return processCache.get(processId);
     }
