@@ -46,8 +46,8 @@ spring:
   flyway:
     enabled: false
   # 禁用 MyBatis-Plus 自动配置
-  autoconfigure:
-    exclude: com.baomidou.mybatisplus.autoconfigure.MybatisPlusAutoConfiguration
+#  autoconfigure:
+#    exclude: com.baomidou.mybatisplus.autoconfigure.MybatisPlusAutoConfiguration
   mvc:   #静态文件
     static-path-pattern: /static/**
     pathmatch:

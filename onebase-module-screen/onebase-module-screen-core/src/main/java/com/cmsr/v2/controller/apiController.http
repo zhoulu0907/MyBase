@@ -1,0 +1,11 @@
+### 登录接口
+POST http://localhost:8083/api/goview/sys/login
+Content-Type: application/json
+
+{"username":"admin","password":"admin"}
+
+### 登出接口
+GET http://localhost:8080/api/goview/sys/logout
+
+### 获取OSS信息接口
+GET http://localhost:8080/api/goview/sys/getOssInfo

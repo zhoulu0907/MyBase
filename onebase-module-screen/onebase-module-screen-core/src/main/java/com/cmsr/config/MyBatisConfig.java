@@ -1,17 +1,10 @@
 package com.cmsr.config;
 
-import org.mybatis.spring.mapper.MapperScannerConfigurer;
-import org.springframework.context.annotation.Bean;
+import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@MapperScan({"com.cmsr.v2.mapper"})
 public class MyBatisConfig {
 
-    @Bean
-    public MapperScannerConfigurer mapperScannerConfigurer() {
-        MapperScannerConfigurer scannerConfigurer = new MapperScannerConfigurer();
-        scannerConfigurer.setBasePackage("com.cmsr.v2.mapper");
-        scannerConfigurer.setSqlSessionFactoryBeanName("sqlSessionFactory");
-        return scannerConfigurer;
-    }
 } 
