@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.flow.component.impl;
+package com.cmsr.onebase.module.flow.context.provider;
 
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
@@ -11,7 +11,6 @@ import com.cmsr.onebase.module.flow.context.enums.OperatorTypeEnum;
 import com.cmsr.onebase.module.flow.context.express.AndExpression;
 import com.cmsr.onebase.module.flow.context.express.ExpressionItem;
 import com.cmsr.onebase.module.flow.context.express.OrExpression;
-import com.cmsr.onebase.module.flow.context.provider.FlowConditionsProvider;
 import com.cmsr.onebase.module.formula.api.formula.FormulaEngineApi;
 import com.cmsr.onebase.module.formula.api.formula.dto.FormulaExecuteReqDTO;
 import com.cmsr.onebase.module.formula.api.formula.dto.FormulaExecuteRespDTO;
@@ -34,7 +33,7 @@ import java.util.Map;
  */
 @Setter
 @Component
-public class FlowFlowConditionsProviderImpl implements FlowConditionsProvider {
+public class FlowConditionsProviderImpl implements FlowConditionsProvider {
 
 
     @Autowired

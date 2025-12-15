@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.flow.core.dal.database;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.orm.repo.BaseAppRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowExecutionLogDO;
 import com.cmsr.onebase.module.flow.core.dal.mapper.FlowExecutionLogMapper;
 import com.cmsr.onebase.module.flow.core.vo.PageExecutionLogReqVO;
@@ -24,7 +25,7 @@ import static com.cmsr.onebase.module.flow.core.dal.dataobject.table.FlowExecuti
  * @Date：2025/8/29 14:37
  */
 @Repository
-public class FlowExecutionLogRepository extends ServiceImpl<FlowExecutionLogMapper, FlowExecutionLogDO> {
+public class FlowExecutionLogRepository extends BaseAppRepository<FlowExecutionLogMapper, FlowExecutionLogDO> {
 
 
     public FlowExecutionLogDO findByExecutionUuid(String executionUuid) {

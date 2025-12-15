@@ -7,7 +7,7 @@ import lombok.Data;
  * @Date：2025/10/15 18:16
  */
 @Data
-public class RemoteCallRequest {
+public class FlowRemoteCallRequest {
 
     public static final String JOB_TYPE_TIME = "time";
 

@@ -15,8 +15,11 @@ import lombok.Data;
 @Data
 public class ChildEntityInfoRespVO {
 
-    @Schema(description = "子表实体UUID", example = "uuid-1002")
+    @Schema(description = "子表实体ID", example = "173076084088700928")
     private String childEntityId;
+
+    @Schema(description = "子表实体UUID", example = "uuid-1002")
+    private String childEntityUuid;
 
     @Schema(description = "子表实体名称", example = "订单信息")
     private String childEntityName;

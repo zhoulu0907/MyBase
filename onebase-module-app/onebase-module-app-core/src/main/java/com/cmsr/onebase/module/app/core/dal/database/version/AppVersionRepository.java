@@ -5,6 +5,7 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.orm.repo.BaseAppRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppVersionDO;
 import com.cmsr.onebase.module.app.core.dal.mapper.AppVersionMapper;
+import com.cmsr.onebase.module.app.core.enums.version.VersionTypeEnum;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import org.springframework.stereotype.Repository;
@@ -56,6 +57,13 @@ public class AppVersionRepository extends BaseAppRepository<AppVersionMapper, Ap
         QueryWrapper queryWrapper = this.query()
                 .where(APP_VERSION.APPLICATION_ID.eq(applicationId))
                 .where(APP_VERSION.VERSION_TYPE.eq(versionType));
+        return this.getOne(queryWrapper);
+    }
+
+    public AppVersionDO findRuntimeByApplicationId(Long applicationId) {
+        QueryWrapper queryWrapper = this.query()
+                .where(APP_VERSION.APPLICATION_ID.eq(applicationId))
+                .where(APP_VERSION.VERSION_TYPE.eq(VersionTypeEnum.RUNTIME.getValue()));
         return this.getOne(queryWrapper);
     }
 }

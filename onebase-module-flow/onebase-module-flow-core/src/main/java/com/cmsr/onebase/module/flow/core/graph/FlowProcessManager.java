@@ -1,9 +1,9 @@
-package com.cmsr.onebase.module.flow.core.handler;
+package com.cmsr.onebase.module.flow.core.graph;
 
-import com.cmsr.onebase.module.flow.context.config.FlowProperties;
 import com.cmsr.onebase.module.flow.context.graph.JsonGraph;
 import com.cmsr.onebase.module.flow.context.graph.nodes.StartDateFieldNodeData;
 import com.cmsr.onebase.module.flow.context.graph.nodes.StartTimeNodeData;
+import com.cmsr.onebase.module.flow.core.config.FlowProperties;
 import com.cmsr.onebase.module.flow.core.config.FlowRuntimeCondition;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessDateFieldRepository;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessRepository;
@@ -14,12 +14,9 @@ import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessTimeDO;
 import com.cmsr.onebase.module.flow.core.enums.FlowEnableStatusEnum;
 import com.cmsr.onebase.module.flow.core.enums.FlowJobStatusEnum;
 import com.cmsr.onebase.module.flow.core.enums.FlowTriggerTypeEnum;
-import com.cmsr.onebase.module.flow.core.flow.RemoteCallRequest;
-import com.cmsr.onebase.module.flow.core.graph.FlowChainBuilder;
-import com.cmsr.onebase.module.flow.core.graph.FlowGraphBuilder;
-import com.cmsr.onebase.module.flow.core.graph.FlowProcessCache;
-import com.cmsr.onebase.module.flow.core.job.JobClient;
+import com.cmsr.onebase.module.flow.core.flow.FlowRemoteCallRequest;
 import com.cmsr.onebase.module.flow.core.job.JobCreateRequest;
+import com.cmsr.onebase.module.flow.core.job.JobSchedulerClient;
 import com.cmsr.onebase.module.flow.core.utils.FlowUtils;
 import com.mybatisflex.core.tenant.TenantManager;
 import com.yomahub.liteflow.builder.el.LiteFlowChainELBuilder;
@@ -48,16 +45,13 @@ import java.util.concurrent.TimeUnit;
 @Setter
 @Service
 @Conditional(FlowRuntimeCondition.class)
-public class FlowCacheHandler {
-
+public class FlowProcessManager {
 
     @Autowired
     private FlowProcessRepository flowProcessRepository;
 
-
     @Autowired
     private FlowProcessTimeRepository flowProcessTimeRepository;
-
 
     @Autowired
     private FlowProcessDateFieldRepository flowProcessDateFieldRepository;
@@ -72,10 +66,10 @@ public class FlowCacheHandler {
     private FlowProperties flowProperties;
 
     @Autowired
-    private JobClient jobClient;
+    private JobSchedulerClient jobSchedulerClient;
 
     @Autowired
-    private ThreadPoolTaskScheduler threadPoolTaskScheduler;
+    private ThreadPoolTaskScheduler executor;
 
     public void initAllProcess() {
         List<FlowProcessDO> flowProcessDOS = TenantManager.withoutTenantCondition(() ->
@@ -125,12 +119,25 @@ public class FlowCacheHandler {
         return "删除：" + ids;
     }
 
+    public void checkTimeJob() {
+        List<FlowProcessDO> flowProcessDOS = TenantManager.withoutTenantCondition(() ->
+                flowProcessRepository.findAllByEnableStatusAndVersionTagAndTriggerType(
+                        FlowEnableStatusEnum.ENABLE.getStatus(),
+                        flowProperties.getVersionTag(),
+                        List.of(FlowTriggerTypeEnum.TIME.getType(), FlowTriggerTypeEnum.DATE_FIELD.getType())
+                )
+        );
+        for (FlowProcessDO flowProcessDO : flowProcessDOS) {
+            startSchedulingJob(flowProcessDO);
+        }
+    }
+
     @SneakyThrows
     private void stopApplicationJob(Long applicationId) {
         RLock lock = redissonClient.getLock(FlowUtils.toRedisProcessLockKey(applicationId));
         if (lock.tryLock(120, TimeUnit.SECONDS)) {
             try {
-                jobClient.deleteJob(applicationId);
+                jobSchedulerClient.deleteJob(applicationId);
             } finally {
                 lock.unlock();
             }
@@ -154,9 +161,7 @@ public class FlowCacheHandler {
         LiteFlowChainELBuilder.createChain().setChainId(chainId).setEL(flowChain).build();
         //
         FlowProcessCache.update(processDO, jsonGraph);
-        threadPoolTaskScheduler.submit(() -> {
-            startSchedulingJob(processDO);
-        });
+        executor.execute(() -> startSchedulingJob(processDO));
     }
 
     private void onProcessDelete(Long processId) {
@@ -174,7 +179,7 @@ public class FlowCacheHandler {
         RLock lock = redissonClient.getLock(FlowUtils.toRedisProcessLockKey(processId));
         if (lock.tryLock(120, TimeUnit.SECONDS)) {
             try {
-                jobClient.deleteJob(processId);
+                jobSchedulerClient.deleteJob(processId);
             } finally {
                 lock.unlock();
             }
@@ -213,16 +218,17 @@ public class FlowCacheHandler {
         }
         StartTimeNodeData startTimeNodeData = FlowProcessCache.findStartTimeNodeDataByProcessId(flowProcessDO.getId());
         JobCreateRequest jobCreateRequest = consumerSettingParams(startTimeNodeData);
-        RemoteCallRequest remoteCallRequest = new RemoteCallRequest();
-        remoteCallRequest.setJobType(RemoteCallRequest.JOB_TYPE_TIME);
-        remoteCallRequest.setApplicationId(flowProcessDO.getApplicationId());
-        remoteCallRequest.setProcessId(flowProcessDO.getId());
-        remoteCallRequest.setProcessName(flowProcessDO.getProcessName());
-        jobCreateRequest.setRemoteCallRequest(remoteCallRequest);
-        String jobId = jobClient.startJob(jobCreateRequest);
+        FlowRemoteCallRequest flowRemoteCallRequest = new FlowRemoteCallRequest();
+        flowRemoteCallRequest.setJobType(FlowRemoteCallRequest.JOB_TYPE_TIME);
+        flowRemoteCallRequest.setApplicationId(flowProcessDO.getApplicationId());
+        flowRemoteCallRequest.setProcessId(flowProcessDO.getId());
+        flowRemoteCallRequest.setProcessName(flowProcessDO.getProcessName());
+        jobCreateRequest.setFlowRemoteCallRequest(flowRemoteCallRequest);
+        String jobId = jobSchedulerClient.startJob(jobCreateRequest);
         if (flowProcessTimeDO == null) {
             flowProcessTimeDO = new FlowProcessTimeDO();
             flowProcessTimeDO.setProcessId(flowProcessDO.getId());
+            flowProcessTimeDO.setApplicationId(flowProcessDO.getApplicationId());
             flowProcessTimeDO.setJobId(jobId);
             flowProcessTimeDO.setJobStatus(FlowJobStatusEnum.DEPLOYED.getStatus());
             flowProcessTimeRepository.save(flowProcessTimeDO);
@@ -250,19 +256,19 @@ public class FlowCacheHandler {
                 && FlowJobStatusEnum.isDeployed(flowProcessDateFieldDO.getJobStatus())) {
             return;
         }
-        JsonGraph jsonGraph = flowGraphBuilder.build(flowProcessDO.getApplicationId(), flowProcessDO.getProcessDefinition());
         StartDateFieldNodeData startDateFieldNodeData = FlowProcessCache.findStartDateFieldNodeDataByProcessId(flowProcessDO.getId());
         JobCreateRequest jobCreateRequest = consumerSettingParams(startDateFieldNodeData);
-        RemoteCallRequest remoteCallRequest = new RemoteCallRequest();
-        remoteCallRequest.setJobType(RemoteCallRequest.JOB_TYPE_FIELD);
-        remoteCallRequest.setApplicationId(flowProcessDO.getApplicationId());
-        remoteCallRequest.setProcessId(flowProcessDO.getId());
-        remoteCallRequest.setProcessName(flowProcessDO.getProcessName());
-        jobCreateRequest.setRemoteCallRequest(remoteCallRequest);
-        String jobId = jobClient.startJob(jobCreateRequest);
+        FlowRemoteCallRequest flowRemoteCallRequest = new FlowRemoteCallRequest();
+        flowRemoteCallRequest.setJobType(FlowRemoteCallRequest.JOB_TYPE_FIELD);
+        flowRemoteCallRequest.setApplicationId(flowProcessDO.getApplicationId());
+        flowRemoteCallRequest.setProcessId(flowProcessDO.getId());
+        flowRemoteCallRequest.setProcessName(flowProcessDO.getProcessName());
+        jobCreateRequest.setFlowRemoteCallRequest(flowRemoteCallRequest);
+        String jobId = jobSchedulerClient.startJob(jobCreateRequest);
         if (flowProcessDateFieldDO == null) {
             flowProcessDateFieldDO = new FlowProcessDateFieldDO();
             flowProcessDateFieldDO.setProcessId(flowProcessDO.getId());
+            flowProcessDateFieldDO.setApplicationId(flowProcessDO.getApplicationId());
             flowProcessDateFieldDO.setJobId(jobId);
             flowProcessDateFieldDO.setJobStatus(FlowJobStatusEnum.DEPLOYED.getStatus());
             flowProcessDateFieldRepository.save(flowProcessDateFieldDO);
@@ -275,22 +281,11 @@ public class FlowCacheHandler {
 
     private JobCreateRequest consumerSettingParams(StartDateFieldNodeData startDateFieldNodeData) {
         JobCreateRequest jobCreateRequest = new JobCreateRequest();
-        jobCreateRequest.setStartTime(LocalDateTime.now().format(JobClient.DATETIME_FORMATTER));
+        jobCreateRequest.setStartTime(LocalDateTime.now().format(JobSchedulerClient.DATETIME_FORMATTER));
         jobCreateRequest.setEndTime("2050-12-30 23:59:59");
         jobCreateRequest.setCrontab(startDateFieldNodeData.createCronExpression());
         return jobCreateRequest;
     }
 
-    public void checkTimeJob() {
-        List<FlowProcessDO> flowProcessDOS = TenantManager.withoutTenantCondition(() ->
-                flowProcessRepository.findAllByEnableStatusAndVersionTagAndTriggerType(
-                        FlowEnableStatusEnum.ENABLE.getStatus(),
-                        flowProperties.getVersionTag(),
-                        List.of(FlowTriggerTypeEnum.TIME.getType(), FlowTriggerTypeEnum.DATE_FIELD.getType())
-                )
-        );
-        for (FlowProcessDO flowProcessDO : flowProcessDOS) {
-            startSchedulingJob(flowProcessDO);
-        }
-    }
+
 }

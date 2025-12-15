@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.flow.core.flow;
 
 import com.cmsr.onebase.module.flow.context.graph.nodes.StartDateFieldNodeData;
 import com.cmsr.onebase.module.flow.context.graph.nodes.StartTimeNodeData;
-import com.cmsr.onebase.module.flow.context.provider.FlowSystemProvider;
+import com.cmsr.onebase.module.flow.core.external.FlowSystemProvider;
 import com.cmsr.onebase.module.flow.core.config.FlowRuntimeCondition;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
 import com.cmsr.onebase.module.flow.core.graph.FlowProcessCache;
@@ -32,13 +32,13 @@ public class FlowRemoteCallExecutor {
     @Autowired
     private FlowSystemProvider flowSystemProvider;
 
-    public ExecutorResult executeFlow(RemoteCallRequest jobMessage) {
+    public ExecutorResult executeFlow(FlowRemoteCallRequest jobMessage) {
         ExecutorResult executorResult;
         try {
             Map<String, Object> inputParams;
-            if (RemoteCallRequest.JOB_TYPE_FIELD.equals(jobMessage.getJobType())) {
+            if (FlowRemoteCallRequest.JOB_TYPE_FIELD.equals(jobMessage.getJobType())) {
                 inputParams = createDateFieldInputParams(jobMessage);
-            } else if (RemoteCallRequest.JOB_TYPE_TIME.equals(jobMessage.getJobType())) {
+            } else if (FlowRemoteCallRequest.JOB_TYPE_TIME.equals(jobMessage.getJobType())) {
                 inputParams = createTimeInputParams(jobMessage);
             } else {
                 return ExecutorResult.error("未知的流程类型:" + jobMessage.getJobType());
@@ -72,7 +72,7 @@ public class FlowRemoteCallExecutor {
         return executorInput;
     }
 
-    private Map<String, Object> createDateFieldInputParams(RemoteCallRequest message) {
+    private Map<String, Object> createDateFieldInputParams(FlowRemoteCallRequest message) {
         Long processId = message.getProcessId();
         StartDateFieldNodeData startDateFieldNodeData = FlowProcessCache.findStartDateFieldNodeDataByProcessId(processId);
         if (startDateFieldNodeData == null) {
@@ -81,7 +81,7 @@ public class FlowRemoteCallExecutor {
         return Collections.emptyMap();
     }
 
-    private Map<String, Object> createTimeInputParams(RemoteCallRequest message) {
+    private Map<String, Object> createTimeInputParams(FlowRemoteCallRequest message) {
         Long processId = message.getProcessId();
         StartTimeNodeData startTimeNodeData = FlowProcessCache.findStartTimeNodeDataByProcessId(processId);
         if (startTimeNodeData == null) {
