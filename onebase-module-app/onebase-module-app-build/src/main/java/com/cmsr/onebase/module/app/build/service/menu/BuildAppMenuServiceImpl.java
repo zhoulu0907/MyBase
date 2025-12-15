@@ -43,7 +43,7 @@ import java.util.stream.Collectors;
 @Setter
 @Service
 @Validated
-public class BuildBuildAppMenuServiceImpl implements BuildAppMenuService {
+public class BuildAppMenuServiceImpl implements BuildAppMenuService {
 
     @Autowired
     private AppCommonService appCommonService;
@@ -418,9 +418,10 @@ public class BuildBuildAppMenuServiceImpl implements BuildAppMenuService {
         }
         // 删除页面
         pageSetService.deletePageSetByMenu(menuDO);
-        authPermissionRepository.deleteByMenuUuid(menuDO.getMenuUuid());
-        authFieldRepository.deleteByMenuUuid(menuDO.getMenuUuid());
-        authDataGroupRepository.deleteByMenuUuid(menuDO.getMenuUuid());
+        Long applicationId = menuDO.getApplicationId();
+        authPermissionRepository.deleteByMenuUuid(applicationId, menuDO.getMenuUuid());
+        authFieldRepository.deleteByMenuUuid(applicationId, menuDO.getMenuUuid());
+        authDataGroupRepository.deleteByMenuUuid(applicationId, menuDO.getMenuUuid());
         // 删除菜单
         appMenuRepository.removeById(id);
     }
