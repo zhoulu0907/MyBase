@@ -1,4 +1,4 @@
-import { copyToClipboard, simplifyUrl } from '@/utils/date';
+import { simplifyUrl } from '@/utils/date';
 import { getPlatformFeDomain } from '@/utils/domain';
 import {
   Avatar,
@@ -17,7 +17,7 @@ import {
   Upload
 } from '@arco-design/web-react';
 import { IconCopy, IconUpload } from '@arco-design/web-react/icon';
-import { Cropper } from '@onebase/common';
+import { copyToClipboard, Cropper } from '@onebase/common';
 import {
   getPlatformTenantAdminInfoApi,
   getPlatformTenantAdminListApi,

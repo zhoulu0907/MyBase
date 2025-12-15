@@ -75,27 +75,27 @@ export async function startSavePageSet(params: SavePageSetParams, onSuccess?: Fu
   // 给每个页面赋值组件
   loadPagesetResp.pages.forEach((_page: PageSet, index: number) => {
     if (_page.pageType === CATEGORY_TYPE.FORM) {
-      const components = useEditorSignalMap.get(_page.id)!.components.value;
+      const components = useEditorSignalMap.get(_page.pageUuid)!.components.value;
 
       const pageComponentSchemas = new Map(
-        Object.entries(cloneDeep(useEditorSignalMap.get(_page.id)!.pageComponentSchemas.value))
+        Object.entries(cloneDeep(useEditorSignalMap.get(_page.pageUuid)!.pageComponentSchemas.value))
       );
 
       const layoutSubComponentsMap = new Map(
-        Object.entries(cloneDeep(useEditorSignalMap.get(_page.id)!.layoutSubComponents.value))
+        Object.entries(cloneDeep(useEditorSignalMap.get(_page.pageUuid)!.layoutSubComponents.value))
       );
       const subTableComponentsMap = new Map(
-        Object.entries(cloneDeep(useEditorSignalMap.get(_page.id)!.subTableComponents.value))
+        Object.entries(cloneDeep(useEditorSignalMap.get(_page.pageUuid)!.subTableComponents.value))
       );
 
       console.log(loadPagesetResp.pages[index]);
       loadPagesetResp.pages[index] = {
         ...loadPagesetResp.pages[index],
-        detailViewMode: pageViews.value[_page.id]?.detailViewMode,
-        editViewMode: pageViews.value[_page.id]?.editViewMode,
-        isDefaultDetailViewMode: pageViews.value[_page.id]?.isDefaultDetailViewMode,
-        isDefaultEditViewMode: pageViews.value[_page.id]?.isDefaultEditViewMode,
-        interactionRules: JSON.stringify(pageViews.value[_page.id]?.interactionRules)
+        detailViewMode: pageViews.value[_page.pageUuid]?.detailViewMode,
+        editViewMode: pageViews.value[_page.pageUuid]?.editViewMode,
+        isDefaultDetailViewMode: pageViews.value[_page.pageUuid]?.isDefaultDetailViewMode,
+        isDefaultEditViewMode: pageViews.value[_page.pageUuid]?.isDefaultEditViewMode,
+        interactionRules: JSON.stringify(pageViews.value[_page.pageUuid]?.interactionRules)
       };
 
       loadPagesetResp.pages[index].components = components.map((component) => {
@@ -147,9 +147,9 @@ export async function startSavePageSet(params: SavePageSetParams, onSuccess?: Fu
       loadPagesetResp.pages[index].components.push(...colComponents);
 
       //   更新视图名称
-      loadPagesetResp.pages[index].pageName = pageViews.value[_page.id]?.pageName;
+      loadPagesetResp.pages[index].pageName = pageViews.value[_page.pageUuid]?.pageName;
 
-      if (_page.id === curViewId.value) {
+      if (_page.pageUuid === curViewId.value) {
         loadPagesetResp.pages[index].isLatestUpdated = 1;
       } else {
         loadPagesetResp.pages[index].isLatestUpdated = 0;
@@ -245,7 +245,7 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
   console.log('载入页面集数据: ', pageSet);
 
   pageSet.pages.forEach((page: PageSet) => {
-    useEditorSignalMap.set(page.id, createPageEditorSignal());
+    useEditorSignalMap.set(page.pageUuid, createPageEditorSignal());
   });
 
   pageSet.pages.forEach((page: PageSet) => {
@@ -312,7 +312,7 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
             };
           }
           if (page.pageType === CATEGORY_TYPE.FORM) {
-            useEditorSignalMap.get(page.id)!.setSubTableComponents(component.parentCode, colComponents as any[]);
+            useEditorSignalMap.get(page.pageUuid)!.setSubTableComponents(component.parentCode, colComponents as any[]);
           } else if (page.pageType === CATEGORY_TYPE.LIST) {
             setListSubTableComponents(component.parentCode, colComponents as any[]);
           }
@@ -334,7 +334,7 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
             };
           }
           if (page.pageType === CATEGORY_TYPE.FORM) {
-            useEditorSignalMap.get(page.id)!.setLayoutSubComponents(component.parentCode, colComponents as any[][]);
+            useEditorSignalMap.get(page.pageUuid)!.setLayoutSubComponents(component.parentCode, colComponents as any[][]);
           } else if (page.pageType === CATEGORY_TYPE.LIST) {
             setListLayoutSubComponents(component.parentCode, colComponents as any[][]);
           }
@@ -350,10 +350,10 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
     });
 
     if (page.pageType === CATEGORY_TYPE.FORM) {
-      useEditorSignalMap.get(page.id)!.setComponents(newComponents);
+      useEditorSignalMap.get(page.pageUuid)!.setComponents(newComponents);
 
       newPageComponentSchemas.forEach((config, componentId) => {
-        useEditorSignalMap.get(page.id)!.setPageComponentSchemas(componentId, config);
+        useEditorSignalMap.get(page.pageUuid)!.setPageComponentSchemas(componentId, config);
       });
     } else if (page.pageType === CATEGORY_TYPE.LIST) {
       setListComponents(newComponents);
@@ -371,9 +371,9 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
   if (res && res.pages) {
     // 如果没有视图选中，就选中默认视图
 
-    let newCurViewId = res.pages.find((item: PageView) => item.isLatestUpdated == 1)?.id;
+    let newCurViewId = res.pages.find((item: PageView) => item.isLatestUpdated == 1)?.pageUuid;
     if (!newCurViewId) {
-      newCurViewId = res.pages.find((item: PageView) => item.isDefaultEditViewMode == 1)?.id;
+      newCurViewId = res.pages.find((item: PageView) => item.isDefaultEditViewMode == 1)?.pageUuid;
     }
 
     console.log('newCurViewId: ', newCurViewId);
@@ -396,7 +396,7 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
     console.log('载入视图: ', res.pages);
     setPageViews(res.pages);
     // 设置默认编辑视图
-    setEditPageViewId(res.pages.find((item: PageView) => item.isDefaultEditViewMode == 1)?.id);
+    setEditPageViewId(res.pages.find((item: PageView) => item.isDefaultEditViewMode == 1)?.pageUuid);
     console.log('设置默认编辑视图: ', editPageViewId.value);
   }
 }

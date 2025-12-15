@@ -4,6 +4,7 @@ import { Form, Radio } from '@arco-design/mobile-react';
 import { ValidatorType, ITypeRules } from '@arco-design/mobile-utils';
 import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, FormSchema } from '@onebase/ui-kit';
 import '../index.css';
+import './index.css';
 
 type XRadioConfig = typeof FormSchema.XRadioSchema.config;
 const RadioGroup = Radio.Group;

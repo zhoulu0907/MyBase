@@ -284,8 +284,9 @@ export default function EditorHeader() {
         getMainMetaData(pageSetId);
       }
 
+      loadPageSetInfo(pageSetId);
+
       if (!isEditMode) {
-        loadPageSetInfo(pageSetId);
         setIsEditMode(true);
       }
     }
@@ -367,8 +368,7 @@ export default function EditorHeader() {
         );
         const subEntities = entityWithChildren.childEntities.map((entity: ChildEntity, index: number) => ({
           entityId: entity.childEntityId,
-          //   TODO(mickey): 后端现在childEntityId就是uuid
-          entityUuid: entity.childEntityId,
+          entityUuid: entity.childEntityUuid,
           tableName: entity.childTableName,
           entityName: entity.childEntityName,
           entityType: ENTITY_TYPE.SUB,

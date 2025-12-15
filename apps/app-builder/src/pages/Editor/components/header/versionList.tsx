@@ -22,6 +22,9 @@ export const VersionListSelect = forwardRef(
     const getVersionMgmtData = async () => {
       const params = { businessUuid: menuUuid, sortType: 'create_time' };
       const { list } = await getVersionMgmt(params);
+      if (!list.length) {
+        setCurrnetFlowId('');
+      }
       setVersionList(list);
     };
 
@@ -51,6 +54,7 @@ export const VersionListSelect = forwardRef(
     useImperativeHandle(ref, () => ({
       getVersionMgmtData
     }));
+
     return (
       <Select
         placeholder="选择流程版本"
@@ -65,28 +69,29 @@ export const VersionListSelect = forwardRef(
         className={styles.versionSelect}
         onChange={(value) => changeCurrentFlow(value)}
       >
-        {versionList.map((item) => (
-          <Option key={item.id} value={item.id}>
-            <div className={styles.versionOption}>
-              <span className={styles.versionName}>
-                {item.bpmVersionAlias || '未命名'}
-                {item.bpmVersion}
-              </span>
-              <span
-                className={`${styles.versionStatus} ${
-                  item.bpmVersionStatus === BpmVersionStatus.DESIGNING.VALUE
-                    ? styles.designing
-                    : item.bpmVersionStatus === BpmVersionStatus.PUBLISHED.VALUE
-                      ? styles.published
-                      : styles.history
-                }`}
-              >
-                {Object.values(BpmVersionStatus).find((status) => status.VALUE === item.bpmVersionStatus)?.LABEL ||
-                  item.bpmVersionStatus}
-              </span>
-            </div>
-          </Option>
-        ))}
+        {versionList.length &&
+          versionList.map((item) => (
+            <Option key={item.id} value={item.id}>
+              <div className={styles.versionOption}>
+                <span className={styles.versionName}>
+                  {item.bpmVersionAlias || '未命名'}
+                  {item.bpmVersion}
+                </span>
+                <span
+                  className={`${styles.versionStatus} ${
+                    item.bpmVersionStatus === BpmVersionStatus.DESIGNING.VALUE
+                      ? styles.designing
+                      : item.bpmVersionStatus === BpmVersionStatus.PUBLISHED.VALUE
+                        ? styles.published
+                        : styles.history
+                  }`}
+                >
+                  {Object.values(BpmVersionStatus).find((status) => status.VALUE === item.bpmVersionStatus)?.LABEL ||
+                    item.bpmVersionStatus}
+                </span>
+              </div>
+            </Option>
+          ))}
         <Option key="manage" value={VersionStatus.MANAGE} className={styles.manageOption}>
           <IconSettings /> 流程版本管理
         </Option>
