@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.bpm.runtime.service.instance.exec.strategy.impl;
 
+import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowAgentInsDO;
 import com.cmsr.onebase.module.bpm.core.dto.node.ApproverNodeExtDTO;
@@ -12,7 +13,6 @@ import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntitySchemaDT
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntityValueDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldValueDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticFieldTypeEnum;
-import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticMergeConditionVO;
 import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticTargetBodyVO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -120,7 +120,7 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
         return writableFieldsMap;
     }
 
-    private Map<String, Object> buildEditableEntityData(EntityVO entityVO, ApproverNodeExtDTO extDTO) {
+    private EntityVO buildEditableEntityData(EntityVO entityVO, ApproverNodeExtDTO extDTO) {
         // 不涉及更新
         if (entityVO == null || MapUtils.isEmpty(entityVO.getData())) {
             log.debug("实体数据为空，跳过构建可编辑数据");
@@ -136,7 +136,7 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
         if (fieldPermConfig == null || !fieldPermConfig.getUseNodeConfig()) {
             log.debug("未开启节点字段权限配置，直接返回原始数据，tableName: {}", tableName);
             // todo：待完善，未开启字段权限配置，则以表单默认权限为准，此处不做校验
-            return new HashMap<>(entityData);
+            return entityVO;
         }
 
         Object idObj = entityData.get("id");
@@ -195,7 +195,12 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
                 .count();
         log.debug("构建可编辑实体数据完成，tableName: {}, entityId: {}, 主表字段数: {}, 子表数: {}",
                 tableName, entityId, mainTableFieldCount, subTableNames.size());
-        return editableEntityData;
+
+        EntityVO editableEntityVO = new EntityVO();
+        editableEntityVO.setTableName(tableName);
+        editableEntityVO.setData(editableEntityData);
+
+        return editableEntityVO;
     }
 
     /**
@@ -583,6 +588,7 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
     @Override
     public void execute(User matchedUser, BpmFlowAgentInsDO agentInsDO, Task task, ApproverNodeExtDTO extDTO, ExecTaskReqVO reqVO) {
         String buttonType = reqVO.getButtonType();
+        BpmActionButtonEnum buttonEnum = BpmActionButtonEnum.getByCode(buttonType);
 
         // 原审批人
         String approverId = matchedUser.getProcessedBy();
@@ -608,88 +614,118 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
             comment = matchButtonConfig.getDefaultApprovalComment();
         }
 
-        Map<String, Object> variables = new HashMap<>();
-
         EntityVO entityVO = reqVO.getEntity();
 
-        if (entityVO != null) {
-            entityVO.getData().forEach((key, value) -> variables.put(String.valueOf(key), value));
-        }
-
-        // 基础 FlowParams
-        FlowParams skipParams = FlowParams.build().variable(variables)
-                 .message(comment);
-
-        // 如果是代理人，需要忽略权限校验，以被代理人权限执行 todo 是否需要二次校验
-        if (agentInsDO != null) {
-            skipParams.ignore(true);
-        }
-
-        if (Objects.equals(buttonType, BpmActionButtonEnum.APPROVE.getCode())) {
-            skipParams = skipParams.skipType(SkipType.PASS.getKey())
-                .flowStatus(BpmBusinessStatusEnum.IN_APPROVAL.getCode())
-                .hisStatus(BpmNodeApproveStatusEnum.POST_APPROVED.getCode())
-                    .handler(approverId);
-
-            taskService.skip(skipParams, task);
-        } else if (Objects.equals(buttonType, BpmActionButtonEnum.REJECT.getCode())) {
-            String nodeCode = task.getNodeCode();
-            boolean hasRejectNode = false;
-
-            List<Skip> skipList = FlowEngine.skipService().getByDefIdAndNowNodeCode(task.getDefinitionId(), nodeCode);
-            for (Skip skip : skipList) {
-                if (skip.getSkipType().equals(SkipType.REJECT.getKey())) {
-                    hasRejectNode = true;
-                    break;
-                }
-            }
-
-            skipParams = skipParams.message(comment)
-                    .skipType(SkipType.REJECT.getKey())
-                    .flowStatus(BpmBusinessStatusEnum.REJECTED.getCode())
-                    .hisStatus(BpmNodeApproveStatusEnum.POST_REJECTED.getCode())
-                    .handler(approverId);
-
-            // 有拒绝节点则走拒绝路线，否则退回至发起节点
-            if (hasRejectNode) {
-                taskService.skip(skipParams, task);
-            } else {
-                Instance instance = insService.getById(task.getInstanceId());
-                NodeJson initNode = getInitiationNodeJson(instance.getDefJson());
-                skipParams.nodeCode(initNode.getNodeCode());
-                taskService.skip(skipParams, task);
-            }
-        } else if (Objects.equals(buttonType, BpmActionButtonEnum.TRANSFER.getCode())) {
-            // 处理转交操作，指定下一个处理人
-            String targetHandlerId = reqVO.getTargetHandlerId();
-
-            if (Objects.equals(targetHandlerId, approverId)) {
-                throw exception(ErrorCodeConstants.CANNOT_TRANSFER_TO_SELF);
-            }
-
-            skipParams.handler(approverId)
-                    .hisStatus(BpmNodeApproveStatusEnum.POST_TRANSFERRED.getCode())
-                    .addHandlers(List.of(targetHandlerId));
-
-            taskService.transfer(task.getId(), skipParams);
-        } else {
+        if (buttonEnum == null) {
             throw exception(ErrorCodeConstants.UNSUPPORT_ACTION_BUTTON_TYPE);
         }
 
-        // 处理代理的场景，更新为代理人已执行
-        if (agentInsDO != null) {
-            agentInsDO.setIsExecutor(BooleanUtils.toInteger(true));
-            agentInsRepository.updateById(agentInsDO);
+        switch (buttonEnum) {
+            case SAVE: {
+                log.info("保存操作，不做任何流程相关的操作，taskId: {}", task.getId());
+                break;
+            }
+            default: {
+                Map<String, Object> variables = new HashMap<>();
+                if (entityVO != null && MapUtils.isNotEmpty(entityVO.getData())) {
+                    entityVO.getData().forEach((key, value) -> variables.put(String.valueOf(key), value));
+                }
+
+                // 基础 FlowParams（SAVE 不需要）
+                FlowParams baseParams = FlowParams.build()
+                        .variable(variables)
+                        .message(comment);
+
+                // 如果是代理人，需要忽略权限校验，以被代理人权限执行 todo 是否需要二次校验
+                if (agentInsDO != null) {
+                    baseParams.ignore(true);
+                }
+
+                if (buttonEnum == BpmActionButtonEnum.APPROVE) {
+                    handleApprove(task, approverId, baseParams);
+                } else if (buttonEnum == BpmActionButtonEnum.REJECT) {
+                    handleReject(task, approverId, baseParams);
+                } else if (buttonEnum == BpmActionButtonEnum.TRANSFER) {
+                    handleTransfer(task, approverId, baseParams, reqVO);
+                } else {
+                    throw exception(ErrorCodeConstants.UNSUPPORT_ACTION_BUTTON_TYPE);
+                }
+
+                // 处理代理的场景，更新为代理人已执行
+                if (agentInsDO != null) {
+                    agentInsDO.setIsExecutor(BooleanUtils.toInteger(true));
+                    agentInsRepository.updateById(agentInsDO);
+                }
+
+                break;
+            }
         }
 
-        Map<String, Object> updateEntityData = buildEditableEntityData(entityVO, extDTO);
+        EntityVO editableEntityVO = buildEditableEntityData(entityVO, extDTO);
 
-        // 更新数据
-        if (MapUtils.isNotEmpty(updateEntityData)) {
-            SemanticMergeConditionVO conditionVO = new SemanticMergeConditionVO();
-            conditionVO.setData(updateEntityData);
-            conditionVO.setTableName(entityVO.getTableName());
-            semanticDynamicDataApi.updateDataById(conditionVO);
+        bpmEntityHelper.updateEntityData(editableEntityVO);
+    }
+
+    /**
+     * 同意
+     */
+    private void handleApprove(Task task, String approverId, FlowParams baseParams) {
+        FlowParams skipParams = baseParams.skipType(SkipType.PASS.getKey())
+                .flowStatus(BpmBusinessStatusEnum.IN_APPROVAL.getCode())
+                .hisStatus(BpmNodeApproveStatusEnum.POST_APPROVED.getCode())
+                .handler(approverId);
+        taskService.skip(skipParams, task);
+    }
+
+    /**
+     * 退回/驳回
+     */
+    private void handleReject(Task task, String approverId, FlowParams baseParams) {
+        String nodeCode = task.getNodeCode();
+        boolean hasRejectNode = false;
+
+        List<Skip> skipList = FlowEngine.skipService().getByDefIdAndNowNodeCode(task.getDefinitionId(), nodeCode);
+        for (Skip skip : skipList) {
+            if (skip.getSkipType().equals(SkipType.REJECT.getKey())) {
+                hasRejectNode = true;
+                break;
+            }
         }
+
+        FlowParams skipParams = baseParams
+                .skipType(SkipType.REJECT.getKey())
+                .flowStatus(BpmBusinessStatusEnum.REJECTED.getCode())
+                .hisStatus(BpmNodeApproveStatusEnum.POST_REJECTED.getCode())
+                .handler(approverId);
+
+        // 有拒绝节点则走拒绝路线，否则退回至发起节点
+        if (hasRejectNode) {
+            taskService.skip(skipParams, task);
+        } else {
+            Instance instance = insService.getById(task.getInstanceId());
+            NodeJson initNode = getInitiationNodeJson(instance.getDefJson());
+            skipParams.nodeCode(initNode.getNodeCode());
+            taskService.skip(skipParams, task);
+        }
+    }
+
+    /**
+     * 转交
+     */
+    private void handleTransfer(Task task, String approverId, FlowParams baseParams, ExecTaskReqVO reqVO) {
+        Long loginUserId = WebFrameworkUtils.getLoginUserId();
+        String targetHandlerId = reqVO.getTargetHandlerId();
+
+        // todo：外部已经校验，此处应该不需要重复校验
+        if (Objects.equals(targetHandlerId, approverId)
+                || Objects.equals(targetHandlerId, String.valueOf(loginUserId))) {
+            throw exception(ErrorCodeConstants.CANNOT_TRANSFER_TO_SELF);
+        }
+
+        FlowParams skipParams = baseParams
+                .handler(approverId)
+                .hisStatus(BpmNodeApproveStatusEnum.POST_TRANSFERRED.getCode())
+                .addHandlers(List.of(targetHandlerId));
+        taskService.transfer(task.getId(), skipParams);
     }
 }
