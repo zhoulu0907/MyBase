@@ -4,8 +4,10 @@ import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
 import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
 import com.cmsr.onebase.module.app.api.app.dto.TagVO;
-import com.cmsr.onebase.module.app.core.dal.database.AppSqlQueryRepository;
 import com.cmsr.onebase.module.app.core.dal.database.app.AppApplicationRepository;
+import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthFieldRepository;
+import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
+import com.cmsr.onebase.module.app.core.dal.database.resource.AppComponentRepository;
 import com.cmsr.onebase.module.app.core.dal.database.tag.AppApplicationTagRepository;
 import com.cmsr.onebase.module.app.core.dal.database.tag.AppTagRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppApplicationDO;
@@ -15,6 +17,7 @@ import com.mybatisflex.core.tenant.TenantManager;
 import jakarta.annotation.Resource;
 import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -28,12 +31,17 @@ import java.util.stream.Collectors;
 @Service
 public class AppApplicationApiImpl implements AppApplicationApi {
 
-    @Resource
+    @Autowired
     private AppApplicationRepository appApplicationRepository;
 
-    @Resource
-    private AppSqlQueryRepository appSqlQueryRepository;
+    @Autowired
+    private AppAuthFieldRepository authFieldRepository;
 
+    @Autowired
+    private AppMenuRepository menuRepository;
+
+    @Autowired
+    private AppComponentRepository componentRepository;
 
     @Resource
     private AppTagRepository tagRepository;
@@ -65,7 +73,7 @@ public class AppApplicationApiImpl implements AppApplicationApi {
     }
 
     @Override
-    public ApplicationDTO findAppApplicationById( Long appId) {
+    public ApplicationDTO findAppApplicationById(Long appId) {
         AppApplicationDO applicationDO = TenantManager.withoutTenantCondition(() -> appApplicationRepository.getById(appId));
         return convertToDTO(applicationDO);
     }
@@ -100,6 +108,37 @@ public class AppApplicationApiImpl implements AppApplicationApi {
         });
 
         return tagListMap;
+    }
+
+    @Override
+    public boolean existsEntityRelation(String entityUuid, String entityName) {
+        boolean refferedByMenu = menuRepository.existsByEntityUuid(entityUuid);
+        if (refferedByMenu) {
+            return true;
+        }
+        boolean refferedAsTable = componentRepository.existsEntityRefferedByTable(entityName);
+        if (refferedAsTable) {
+            return true;
+        }
+        boolean refferedAsSubTable = componentRepository.existsEntityRefferedBySubTable(entityUuid);
+        if (refferedAsSubTable) {
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean existsEntityFieldRelation(String entityUuid, String entityName, String fieldUuid, String fieldName) {
+        boolean refferedByComponent = componentRepository.existsFieldRefferedByComponent(entityName, fieldName);
+        if (refferedByComponent) {
+            return true;
+        }
+        boolean refferedByTable = componentRepository.existsFieldRefferedByTable(entityName, fieldName);
+        if (refferedByTable) {
+            return true;
+        }
+        // TODO: 需要产品确认，权限是否需要做判断
+        return false;
     }
 
     public Map<Long, List<Long>> findTagIdsByApplicationIdsGrouped(List<Long> appIds) {
