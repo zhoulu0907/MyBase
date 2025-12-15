@@ -7,8 +7,9 @@ export const useFormField = (dataField: string[], id: string, type: string) => {
   return { form, fieldName, fieldValue }
 }
 
-export const useFormFieldWatch = (fieldId: string) => {
+export const useFormFieldWatch = (dataField: string[]) => {
     const { form } = Form.useFormContext();
-    const fieldValue = Form.useWatch(fieldId, form);
+    const fieldName = dataField.length > 0 ? dataField[dataField.length - 1] : ''
+    const fieldValue = Form.useWatch(fieldName, form);
   return { form, fieldValue }
 }

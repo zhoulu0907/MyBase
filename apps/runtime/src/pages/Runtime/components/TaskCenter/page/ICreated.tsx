@@ -1,11 +1,13 @@
 import { useState, useEffect, type FC } from 'react';
-import { Table, type TableColumnProps, Button, Tag, Message, Pagination, Radio } from '@arco-design/web-react';
+import { Table, type TableColumnProps, Button, Tag, Message, Pagination, Avatar } from '@arco-design/web-react';
 import { getMyCreatePageList } from '@onebase/app/src/services/app_runtime';
 import { LISTTYPE, FLOWSTATUS_TYPE, FlowStatusMap } from '@onebase/app';
 import dayjs from 'dayjs';
 import TableSearch from './TableSearch';
 import DetailPop from './DetailPop';
 import '../style/tcPage.less';
+
+const AvatarGroup = Avatar.Group;
 
 const ICreated: FC = ({ appId }: any) => {
   const columns: TableColumnProps[] = [
@@ -52,16 +54,22 @@ const ICreated: FC = ({ appId }: any) => {
       render: (userArr: any) => {
         return (
           <div className="flex-bw-center">
-            {userArr?.length > 0
-              ? userArr.map((item: any, i: number) => {
-                  return (
-                    <div className="flex-bw-center" key={'user' + i}>
-                      <div className="photo-img">{item?.avatar ? <img src={item?.avatar} /> : item?.userName?.charAt(0)}</div>
-                      <span className="tb-uname">{item?.userName}</span>
-                    </div>
-                  );
-                })
-              : '-'}
+              {
+                userArr?.length > 0 ? <>
+                  <AvatarGroup className="color-avatar">
+                    {userArr.map((item: any, i: number) => {
+                      return <Avatar key={i}>
+                        {item?.avatar ? <img src={item?.avatar} /> : item?.userName?.charAt(0)}
+                      </Avatar>
+                    })}
+                  </AvatarGroup>
+                  <div style={{paddingLeft: '3px'}}>
+                    {userArr.map((item: any, i: number) => {
+                        return <span key={i}>{i > 0 ? `、${item?.userName}` : item?.userName}</span>
+                    })}
+                  </div>
+                </> : '-'
+              }
           </div>
         );
       },

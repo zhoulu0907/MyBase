@@ -32,20 +32,14 @@ const XInputText = memo((props: XInputTextConfig & { runtime?: boolean; detailMo
   // ===== 外部 props end =====
 
   // ===== 内部状态 & 回显begin =====
-  const [fieldId, setFieldId] = useState('');
 
-  useEffect(() => {
-    if (dataField.length > 0) {
-      setFieldId(dataField[dataField.length - 1]);
-    }
-  }, [dataField]);
   // =====  内部状态 & 回显 end =====
 
   // ===== 表单上下文与字段名与值读取 begin =====
   const {
     form,
     fieldValue
-  } = useFormFieldWatch(fieldId);
+  } = useFormFieldWatch(dataField);
   // ===== 表单上下文与字段名与值读取 end =====
 
   // ===== 外部事件：选择数据 begin =====
@@ -58,7 +52,7 @@ const XInputText = memo((props: XInputTextConfig & { runtime?: boolean; detailMo
           label.display &&
           label.text && <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>{label.text}</span>
         }
-        field={fieldId ? fieldId : `${FORM_COMPONENT_TYPES.INPUT_TEXT}_${nanoid()}`}
+        field={dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.INPUT_TEXT}_${nanoid()}`}
         layout={layout}
         tooltip={tooltip}
         labelCol={layout === 'horizontal' ? { span: 10 } : {}}

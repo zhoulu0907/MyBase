@@ -147,8 +147,9 @@ export interface XDataSelectConfig extends ICommonBaseType {
    * 选择的数据源
    */
   selectedDataSource?: {
-    entityId: TTextDefaultType;
+    entityUuid: TTextDefaultType;
     entityName: TTextDefaultType;
+    tableName: TTextDefaultType;
   };
 
   /**
@@ -230,8 +231,9 @@ const XDataSelect: XDataSelectSchema = {
       noRepeat: false
     },
     selectedDataSource: {
-      entityId: '',
-      entityName: ''
+      entityUuid: '',
+      entityName: '',
+      tableName: ''
     },
 
     // 选择数据属性 待定
@@ -253,6 +255,7 @@ const XDataSelect: XDataSelectSchema = {
         display: true
       },
       tableName: '',
+      filterCondition: {},
       stripe: true,
       border: true,
       borderCell: true,
