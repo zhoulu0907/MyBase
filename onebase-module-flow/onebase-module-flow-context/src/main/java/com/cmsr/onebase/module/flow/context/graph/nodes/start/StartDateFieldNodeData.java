@@ -1,9 +1,12 @@
-package com.cmsr.onebase.module.flow.context.graph.nodes;
+package com.cmsr.onebase.module.flow.context.graph.nodes.start;
 
 import com.cmsr.onebase.module.flow.context.condition.Conditions;
+import com.cmsr.onebase.module.flow.context.graph.FieldTypeProcessable;
+import com.cmsr.onebase.module.flow.context.graph.FieldTypeHelper;
 import com.cmsr.onebase.module.flow.context.graph.NodeData;
 import com.cmsr.onebase.module.flow.context.graph.NodeType;
 import com.cmsr.onebase.module.flow.context.util.Cron;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldSchemaDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticFieldTypeEnum;
 import lombok.Data;
 
@@ -12,6 +15,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 
 /**
  * @Author：huangjie
@@ -19,7 +25,7 @@ import java.util.List;
  */
 @Data
 @NodeType("startDateField")
-public class StartDateFieldNodeData extends NodeData implements Serializable {
+public class StartDateFieldNodeData extends NodeData implements FieldTypeProcessable, Serializable {
 
     public static final DateTimeFormatter TIMESTAMP_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
@@ -154,4 +160,17 @@ public class StartDateFieldNodeData extends NodeData implements Serializable {
         return resultTime.format(DATE_FORMATTER);
     }
 
+    @Override
+    public Set<String> getTableNames() {
+        return Set.of(tableName);
+    }
+
+    @Override
+    public void processFieldTypes(Map<String, Map<String, SemanticFieldSchemaDTO>> fieldInfoMap) {
+        SemanticFieldTypeEnum fieldTypeEnum = FieldTypeHelper.findFieldTypeEnum(getTableName(), getOffsetFieldName(), fieldInfoMap);
+        setOffsetFiledTypeEnum(fieldTypeEnum);
+        //
+        FieldTypeHelper.processConditionList( getFilterCondition(), fieldInfoMap, 2);
+
+    }
 }

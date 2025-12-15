@@ -1,13 +1,17 @@
-package com.cmsr.onebase.module.flow.context.graph.nodes;
+package com.cmsr.onebase.module.flow.component.data;
 
 import com.cmsr.onebase.module.flow.context.condition.Conditions;
+import com.cmsr.onebase.module.flow.context.graph.FieldTypeProcessable;
 import com.cmsr.onebase.module.flow.context.graph.NodeData;
 import com.cmsr.onebase.module.flow.context.graph.NodeType;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldSchemaDTO;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @Author：huangjie
@@ -15,7 +19,7 @@ import java.util.List;
  */
 @Data
 @NodeType("dataDelete")
-public class DataDeleteeNodeData extends NodeData implements Serializable {
+public class DataDeleteNodeData extends NodeData implements FieldTypeProcessable, Serializable {
 
     /**
      * mainTable
@@ -49,4 +53,13 @@ public class DataDeleteeNodeData extends NodeData implements Serializable {
         }
     }
 
+    @Override
+    public Set<String> getTableNames() {
+        return Set.of(resolveTargetTableName());
+    }
+
+    @Override
+    public void processFieldTypes(Map<String, Map<String, SemanticFieldSchemaDTO>> fieldInfoMap) {
+
+    }
 }

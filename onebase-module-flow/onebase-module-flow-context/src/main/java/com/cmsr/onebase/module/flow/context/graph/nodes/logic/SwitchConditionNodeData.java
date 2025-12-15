@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.flow.context.graph.nodes;
+package com.cmsr.onebase.module.flow.context.graph.nodes.logic;
 
 import com.cmsr.onebase.module.flow.context.condition.Conditions;
 import com.cmsr.onebase.module.flow.context.graph.NodeData;

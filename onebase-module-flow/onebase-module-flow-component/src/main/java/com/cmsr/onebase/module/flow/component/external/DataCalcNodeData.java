@@ -1,7 +1,6 @@
-package com.cmsr.onebase.module.flow.context.graph.nodes;
+package com.cmsr.onebase.module.flow.component.external;
 
 import com.cmsr.onebase.module.flow.context.condition.ConditionItem;
-import com.cmsr.onebase.module.flow.context.condition.Conditions;
 import com.cmsr.onebase.module.flow.context.graph.NodeData;
 import com.cmsr.onebase.module.flow.context.graph.NodeType;
 import lombok.Data;

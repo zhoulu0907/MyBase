@@ -2,10 +2,10 @@ package com.cmsr.onebase.module.flow.core.graph;
 
 import com.cmsr.onebase.module.flow.context.graph.JsonGraph;
 import com.cmsr.onebase.module.flow.context.graph.JsonGraphNode;
-import com.cmsr.onebase.module.flow.context.graph.nodes.IfBlockNodeData;
-import com.cmsr.onebase.module.flow.context.graph.nodes.LoopNodeData;
-import com.cmsr.onebase.module.flow.context.graph.nodes.SwitchCaseNodeData;
-import com.cmsr.onebase.module.flow.context.graph.nodes.SwitchConditionNodeData;
+import com.cmsr.onebase.module.flow.context.graph.nodes.logic.IfBlockNodeData;
+import com.cmsr.onebase.module.flow.context.graph.nodes.logic.LoopNodeData;
+import com.cmsr.onebase.module.flow.context.graph.nodes.logic.SwitchCaseNodeData;
+import com.cmsr.onebase.module.flow.context.graph.nodes.logic.SwitchConditionNodeData;
 import com.yomahub.liteflow.builder.el.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
