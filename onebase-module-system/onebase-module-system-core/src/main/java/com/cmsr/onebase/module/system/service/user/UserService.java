@@ -11,6 +11,8 @@ import com.cmsr.onebase.module.system.vo.user.UserProfileUpdateReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.vo.user.*;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -370,6 +372,12 @@ public interface UserService {
      * @param userAppPageReqVO 获取用户授权应用列表-分页请求参数
      * @return 用户授权应用列表-分页结果
      */
-    PageResult<UserApplicationRespVO> getUserAppRelationPage(@Valid UserAppPageReqVO userAppPageReqVO);
+    PageResult<UserApplicationRespVO> getUserAppRelationPage(@Valid UserAppPageSearchReqVO userAppPageReqVO);
 
+    /**
+     * 更新第三方用户密码
+     * @param id
+     * @param password
+     */
+    void updateThirdUserPassword(Long id, String password);
 }

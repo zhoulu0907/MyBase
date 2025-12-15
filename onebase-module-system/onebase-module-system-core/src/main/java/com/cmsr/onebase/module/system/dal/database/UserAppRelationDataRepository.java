@@ -30,17 +30,6 @@ public class UserAppRelationDataRepository extends DataRepository<UserAppRelatio
         super(UserAppRelationDO.class);
     }
 
-
-    public PageResult<UserAppRelationDO> selectPage(UserAppPageReqVO userAppPageReqVO) {
-        // 构建查询条件
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        // 按创建时间倒序排列
-        configStore.order(CorpAppRelationDO.CREATE_TIME, Order.TYPE.DESC);
-        // 执行分页查询
-        return findPageWithConditions(configStore, userAppPageReqVO.getPageNo(), userAppPageReqVO.getPageSize());
-
-    }
-
     public List<UserAppRelationDO> getUserAppRelationByUserId(Long userId) {
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.eq(UserAppRelationDO.USER_ID, userId);

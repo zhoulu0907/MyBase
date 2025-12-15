@@ -1069,6 +1069,23 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
+    public void updateThirdUserPassword(Long id, String password) {
+        // 1. 校验用户存在
+        AdminUserDO user = validateUserExists(id);
+
+        // 2. 弱密码校验
+        //  securityConfigApi.validatePassword(password);
+        // 3. 更新密码 ，默认密码OBThird2025!
+        AdminUserDO updateObj = new AdminUserDO();
+        updateObj.setId(id);
+        updateObj.setPassword(encodePassword(THIRD_USER_PASSWORD)); // 加密密码
+        userDataRepository.update(updateObj);
+
+        // 4. 记录操作日志上下文
+        LogRecordContext.putVariable("user", user);
+        LogRecordContext.putVariable("newPassword", updateObj.getPassword());
+    }
+    @Override
     public void forgetPassword(UserForgetPasswordReqVO reqVO) {
         // 1.通过手机号，获取 用户
         AdminUserDO user =  userDataRepository.findByMobile(reqVO.getMobile());
@@ -1248,9 +1265,9 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public PageResult<UserApplicationRespVO> getUserAppRelationPage(UserAppPageReqVO userAppPageReqVO) {
+    public PageResult<UserApplicationRespVO> getUserAppRelationPage(UserAppPageSearchReqVO userReqVO) {
         // 1. 查询用户分页数据
-        PageResult<AdminUserDO> pageResult = userDataRepository.getUserAppRelationPage(userAppPageReqVO);
+        PageResult<AdminUserDO> pageResult = userDataRepository.getUserPage(userReqVO);
         List<AdminUserDO> userDOList = pageResult.getList();
 
         // 2. 如果没有用户数据，直接返回空结果
@@ -1315,6 +1332,7 @@ public class UserServiceImpl implements UserService {
                 })
                 .collect(Collectors.toList()), pageResult.getTotal());
     }
+
 
 
 }

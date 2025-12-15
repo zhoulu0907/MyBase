@@ -76,7 +76,7 @@ public class SystemGeneralConfigController {
 
 
     @GetMapping("/list")
-    @Operation(summary = "获得配置项列表-分页")
+    @Operation(summary = "获得配置项列表-不分页")
     @PreAuthorize("@ss.hasPermission('tenant:post:query')")
     public CommonResult<List<SystemGeneralConfigVO>> getConfigList(@Validated SystemConfigPageReqVO pageReqVO) {
          List<SystemGeneralConfigDO> pageResult = systemGeneralConfigService.getConfigList(pageReqVO);

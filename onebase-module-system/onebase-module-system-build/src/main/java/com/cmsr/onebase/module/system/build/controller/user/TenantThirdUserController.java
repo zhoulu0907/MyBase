@@ -48,8 +48,8 @@ public class TenantThirdUserController {
     @PostMapping("/update-password")
     @Operation(summary = "重置用户密码")
     @PreAuthorize("@ss.hasPermission('tenant:user:update-password')")
-    public CommonResult<Boolean> updateUserPassword(@Valid @RequestBody UserUpdatePasswordReqVO reqVO) {
-        userService.updateUserPassword(reqVO.getId(), reqVO.getPassword());
+    public CommonResult<Boolean> updateUserPassword(@Valid @RequestBody ThirdUserUpdatePasswordReqVO reqVO) {
+        userService.updateThirdUserPassword(reqVO.getId(), reqVO.getPassword());
         return success(true);
     }
 
@@ -73,7 +73,7 @@ public class TenantThirdUserController {
     @GetMapping("/user-applications-page")
     @Operation(summary = "获得三方用户(包含授权列表)-分页")
     @PreAuthorize("@ss.hasPermission('tenant:user:query')")
-    public CommonResult<PageResult<UserApplicationRespVO>> getUserAppRelationPage(@Valid UserAppPageReqVO userAppPageReqVO) {
+    public CommonResult<PageResult<UserApplicationRespVO>> getUserAppRelationPage(@Valid UserAppPageSearchReqVO userAppPageReqVO) {
         PageResult<UserApplicationRespVO> pageResult = userService.getUserAppRelationPage(userAppPageReqVO);
         return success(pageResult);
     }
