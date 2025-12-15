@@ -45,16 +45,7 @@ public class ThirdUserController {
     @Resource
     private UserService userService;
 
-    @Resource
-    private DeptService deptService;
 
-    @PostMapping("/create")
-    @Operation(summary = "新增用户")
-    @PreAuthorize("@ss.hasPermission('tenant:user:create')")
-    public CommonResult<Long> createUser(@Valid @RequestBody ThirdUserInsertReqVO reqVO) {
-        Long id = userService.createUser(reqVO);
-        return success(id);
-    }
 
     @PostMapping("/supplement-user")
     @Operation(summary = "补充用户信息")
