@@ -38,6 +38,9 @@ const saveAs = (blob: Blob, filename: string) => {
 }
 
 export async function downloadFileByUrl(url: string, fileName: string) {
+    if(!url){
+        return;
+    }
     const blob = await getBlob(url);
     saveAs(blob, fileName);
 }

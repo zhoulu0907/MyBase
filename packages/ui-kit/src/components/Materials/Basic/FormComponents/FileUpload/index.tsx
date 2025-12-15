@@ -180,18 +180,7 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean; d
             const { onProgress, onError, onSuccess, file } = option;
             try {
               const fileId = await handleUpload(file, onProgress);
-              let uploadFileUrl = ''
-              if (entityDataId.value) {
-                const param = {
-                  menuId: curMenu.value?.id,
-                  id: entityDataId.value,
-                  fieldName,
-                  fileId: fileId
-                }
-                uploadFileUrl = await attachmentDownload(tableName, param)
-              } else {
-                uploadFileUrl = URL.createObjectURL(file);
-              }
+              const uploadFileUrl = URL.createObjectURL(file);
               // 文件上传文件id
               if (uploadFileUrl !== '') {
                 setFileUrl(uploadFileUrl);
