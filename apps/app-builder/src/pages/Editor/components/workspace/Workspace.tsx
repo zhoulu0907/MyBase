@@ -476,7 +476,7 @@ export default function EditorWorkspace() {
                   schema.config.id = cpID;
                   schema.config.label.text = cpName;
                   schema.config.status = STATUS_VALUES[STATUS_OPTIONS.DEFAULT];
-                  schema.config.subTable = item.id;
+                  schema.config.subTable = item.entityUuid;
 
                   const props = {
                     id: cpID,
@@ -644,104 +644,104 @@ export default function EditorWorkspace() {
                 itemType === ENTITY_COMPONENT_TYPES.MAIN_ENTITY ||
                 itemType === ENTITY_COMPONENT_TYPES.SUB_ENTITY
               ) {
-                console.log('tableName name', tableName);
-              } else {
-                const schema = getComponentSchema(itemType as any);
-                schema.config.cpName = itemDisplayName;
-                schema.config.id = cpID;
+                console.log('tableName: ', tableName, '是子表');
+                return;
+              }
 
-                // 主表 字段组件
-                if (tableName && fieldName) {
-                  // 获取当前字段数据源配置
-                  const currentField = mainEntity.fields?.find((ele: AppEntityField) => ele.fieldName === fieldName);
-                  if (currentField) {
-                    // 数据长度 dataLength
-                    // 小数位数 decimalPlaces
-                    // 默认值 defaultValue => defaultValueConfig
-                    if (schema.config.defaultValueConfig) {
-                      const defaultValueConfig = {
-                        ...schema.config.defaultValueConfig,
-                        type: DEFAULT_VALUE_TYPES.CUSTOM,
-                        customValue: currentField.defaultValue
-                      };
-                      schema.config.defaultValueConfig = defaultValueConfig;
-                    }
-                    // 字段描述 description
-                    schema.config.tooltip = currentField.description;
-                    // 是否必填：1-是，0-不是 isRequired
-                    // 是否唯一：1-是，0-不是 isUnique
-                    schema.config.verify = {
-                      ...schema.config.verify,
-                      required: currentField.isRequired,
-                      noRepeat: currentField.isUnique
+              const schema = getComponentSchema(itemType as any);
+              schema.config.cpName = itemDisplayName;
+              schema.config.id = cpID;
+
+              // 主表 字段组件
+              if (tableName && fieldName) {
+                // 获取当前字段数据源配置
+                const currentField = mainEntity.fields?.find((ele: AppEntityField) => ele.fieldName === fieldName);
+                if (currentField) {
+                  // 数据长度 dataLength
+                  // 小数位数 decimalPlaces
+                  // 默认值 defaultValue => defaultValueConfig
+                  if (schema.config.defaultValueConfig) {
+                    const defaultValueConfig = {
+                      ...schema.config.defaultValueConfig,
+                      type: DEFAULT_VALUE_TYPES.CUSTOM,
+                      customValue: currentField.defaultValue
                     };
+                    schema.config.defaultValueConfig = defaultValueConfig;
+                  }
+                  // 字段描述 description
+                  schema.config.tooltip = currentField.description;
+                  // 是否必填：1-是，0-不是 isRequired
+                  // 是否唯一：1-是，0-不是 isUnique
+                  schema.config.verify = {
+                    ...schema.config.verify,
+                    required: currentField.isRequired,
+                    noRepeat: currentField.isUnique
+                  };
 
-                    // 字段选项列表（单/多选字段专用） options
-                    if (
-                      itemType === FORM_COMPONENT_TYPES.SELECT_ONE ||
-                      itemType === FORM_COMPONENT_TYPES.SELECT_MUTIPLE
-                    ) {
-                      if (currentField.dictTypeId) {
-                        const res = await getDictDetail(currentField.dictTypeId);
-                        const dictDataList = res?.type ? await getDictDataListByType(res.type) : [];
-                        const dictOptions = dictDataList?.filter((e: any) => e.status === 1); // 只显示启用状态的字典数据
-                        if (dictOptions.length) {
-                          const newDefaultOptionsConfig = {
-                            type: DEFAULT_OPTIONS_TYPE.DICT,
-                            disabled: true,
-                            dictTypeId: currentField.dictTypeId,
-                            colorMode: true,
-                            colorModeType: COLOR_MODE_TYPES.POINT,
-                            defaultOptions: dictOptions
-                          };
-                          schema.config.defaultOptionsConfig = {
-                            ...schema.config.defaultOptionsConfig,
-                            ...newDefaultOptionsConfig
-                          };
-                        }
-                      } else if (currentField.options?.length) {
+                  // 字段选项列表（单/多选字段专用） options
+                  if (
+                    itemType === FORM_COMPONENT_TYPES.SELECT_ONE ||
+                    itemType === FORM_COMPONENT_TYPES.SELECT_MUTIPLE
+                  ) {
+                    if (currentField.dictTypeId) {
+                      const res = await getDictDetail(currentField.dictTypeId);
+                      const dictDataList = res?.type ? await getDictDataListByType(res.type) : [];
+                      const dictOptions = dictDataList?.filter((e: any) => e.status === 1); // 只显示启用状态的字典数据
+                      if (dictOptions.length) {
                         const newDefaultOptionsConfig = {
-                          defaultOptions: currentField.options.map((e) => ({
-                            label: e.optionLabel,
-                            value: e.optionValue
-                          }))
+                          type: DEFAULT_OPTIONS_TYPE.DICT,
+                          disabled: true,
+                          dictTypeId: currentField.dictTypeId,
+                          colorMode: true,
+                          colorModeType: COLOR_MODE_TYPES.POINT,
+                          defaultOptions: dictOptions
                         };
                         schema.config.defaultOptionsConfig = {
                           ...schema.config.defaultOptionsConfig,
-                          disabled: true,
                           ...newDefaultOptionsConfig
                         };
                       }
+                    } else if (currentField.options?.length) {
+                      const newDefaultOptionsConfig = {
+                        defaultOptions: currentField.options.map((e) => ({
+                          label: e.optionLabel,
+                          value: e.optionValue
+                        }))
+                      };
+                      schema.config.defaultOptionsConfig = {
+                        ...schema.config.defaultOptionsConfig,
+                        disabled: true,
+                        ...newDefaultOptionsConfig
+                      };
                     }
-                    // 字段约束配置（长度/正则） constraints
-                    schema.config.constraints = currentField.constraints;
-                    // 自动编号完整配置（含规则项） autoNumberConfig
-                    if (itemType === FORM_COMPONENT_TYPES.AUTO_CODE) {
-                      schema.config.autoCodeConfig = currentField.autoNumberConfig || schema.config.autoCodeConfig;
-                      schema.config.autoCodeDisabled = currentField?.autoNumberConfig?.id ? true : false;
-                    }
-                    // 关联的字典类型ID    dictTypeId
                   }
-                  schema.config.dataField = [tableName, fieldName];
-                  schema.config.status = STATUS_VALUES[STATUS_OPTIONS.DEFAULT];
+                  // 字段约束配置（长度/正则） constraints
+                  schema.config.constraints = currentField.constraints;
+                  // 自动编号完整配置（含规则项） autoNumberConfig
+                  if (itemType === FORM_COMPONENT_TYPES.AUTO_CODE) {
+                    schema.config.autoCodeConfig = currentField.autoNumberConfig || schema.config.autoCodeConfig;
+                    schema.config.autoCodeDisabled = currentField?.autoNumberConfig?.id ? true : false;
+                  }
+                  // 关联的字典类型ID    dictTypeId
                 }
-
-                if (dataLabel) {
-                  console.log(schema);
-                  schema.config.label.text = dataLabel;
-                }
-
-                const props = {
-                  id: cpID,
-                  type: itemType,
-                  ...schema
-                };
-
-                setPageComponentSchemas(cpID!, props);
-                setCurComponentID(cpID!);
-                setCurComponentSchema(props);
-                setShowDeleteButton(false);
+                schema.config.dataField = [tableName, fieldName];
+                schema.config.status = STATUS_VALUES[STATUS_OPTIONS.DEFAULT];
               }
+
+              if (dataLabel) {
+                schema.config.label.text = dataLabel;
+              }
+
+              const props = {
+                id: cpID,
+                type: itemType,
+                ...schema
+              };
+
+              setPageComponentSchemas(cpID!, props);
+              setCurComponentID(cpID!);
+              setCurComponentSchema(props);
+              setShowDeleteButton(false);
             }}
             group={{ name: COMPONENT_GROUP_NAME }}
             sort={true}
@@ -773,6 +773,7 @@ export default function EditorWorkspace() {
                   }}
                   onClick={(e: React.MouseEvent<HTMLDivElement>) => {
                     e.stopPropagation();
+
                     console.log('点击组件: ', cp.id);
 
                     setCurComponentID(cp.id);

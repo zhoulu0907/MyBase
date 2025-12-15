@@ -1,9 +1,16 @@
-import React, { Fragment, useState } from 'react';
 import { Button, Drawer, Form } from '@arco-design/web-react';
-import { IconFullscreen, IconFullscreenExit, IconEdit } from '@arco-design/web-react/icon';
-import { useSignals } from '@preact/signals-react/runtime';
+import { IconEdit, IconFullscreen, IconFullscreenExit } from '@arco-design/web-react/icon';
 import { pagesRuntimeSignal } from '@onebase/common';
-import { getComponentWidth, PreviewRender, STATUS_OPTIONS, STATUS_VALUES, useEditorSignalMap, type GridItem } from '@onebase/ui-kit';
+import {
+  getComponentWidth,
+  PreviewRender,
+  STATUS_OPTIONS,
+  STATUS_VALUES,
+  useEditorSignalMap,
+  type GridItem
+} from '@onebase/ui-kit';
+import { useSignals } from '@preact/signals-react/runtime';
+import React, { Fragment, useState } from 'react';
 import styles from './index.module.less';
 
 interface DetailRuntimeProps {
@@ -17,7 +24,16 @@ interface DetailRuntimeProps {
   editTargetId: string;
 }
 
-const DetailRuntime: React.FC<DetailRuntimeProps> = ({ visible, onCancel, form, detailMode, onUpdate, onCancelUpdate, showFromPageData, editTargetId }) => {
+const DetailRuntime: React.FC<DetailRuntimeProps> = ({
+  visible,
+  onCancel,
+  form,
+  detailMode,
+  onUpdate,
+  onCancelUpdate,
+  showFromPageData,
+  editTargetId
+}) => {
   useSignals();
 
   const { detailPageViewId } = pagesRuntimeSignal;
@@ -66,7 +82,9 @@ const DetailRuntime: React.FC<DetailRuntimeProps> = ({ visible, onCancel, form, 
                   <PreviewRender
                     cpId={cp.id}
                     cpType={cp.type}
-                    pageComponentSchema={useEditorSignalMap.get(detailPageViewId.value)?.pageComponentSchemas.value[cp.id]}
+                    pageComponentSchema={
+                      useEditorSignalMap.get(detailPageViewId.value)?.pageComponentSchemas.value[cp.id]
+                    }
                     runtime={true}
                     detailMode={detailMode}
                     showFromPageData={showFromPageData}
@@ -78,8 +96,12 @@ const DetailRuntime: React.FC<DetailRuntimeProps> = ({ visible, onCancel, form, 
 
           {!detailMode && (
             <div className={styles.footer}>
-              <Button type="primary" onClick={onUpdate}>更新</Button>
-              <Button type="default" onClick={onCancelUpdate}>取消</Button>
+              <Button type="primary" onClick={onUpdate}>
+                更新
+              </Button>
+              <Button type="default" onClick={onCancelUpdate}>
+                取消
+              </Button>
             </div>
           )}
         </Form>

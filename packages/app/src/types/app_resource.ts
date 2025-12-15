@@ -10,6 +10,7 @@ export interface PageSet {
   pageName: string;
   pageType: string;
   components: ComponentConfig[];
+  pageUuid: string;
 }
 
 export interface SavePageSetReq {
@@ -86,4 +87,7 @@ export interface PageView {
   isLatestUpdated?: number;
 
   interactionRules?: InteractionRule[];
+  
+  pageSetUuid?: string;
+  pageUuid: string;
 }

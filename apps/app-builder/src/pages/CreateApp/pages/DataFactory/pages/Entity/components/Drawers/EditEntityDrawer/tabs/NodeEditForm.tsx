@@ -1,10 +1,18 @@
 import { type EntityField, type EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
-import { FIELD_TYPE } from '@onebase/ui-kit';
-import { Button, Form, Input, Grid, Space, Message } from '@arco-design/web-react';
-import { IconCheck } from '@arco-design/web-react/icon';
-import React, { useEffect, useState } from 'react';
 import { createEntityRules } from '@/pages/CreateApp/pages/DataFactory/utils/rules';
+import { Button, Form, Grid, Input, Message, Space } from '@arco-design/web-react';
+import { IconCheck } from '@arco-design/web-react/icon';
 import { deleteEntity } from '@onebase/app';
+import {
+  SYSTEM_FIELD_CREATED_TIME,
+  SYSTEM_FIELD_CREATOR,
+  SYSTEM_FIELD_OWNER_DEPT,
+  SYSTEM_FIELD_OWNER_ID,
+  SYSTEM_FIELD_UPDATED_TIME,
+  SYSTEM_FIELD_UPDATER
+} from '@onebase/common';
+import { FIELD_TYPE } from '@onebase/ui-kit';
+import React, { useEffect, useState } from 'react';
 import { DeleteConfirmModal } from '../../../Modals';
 import styles from './NodeEditForm.module.less';
 
@@ -53,32 +61,35 @@ const NodeEditForm: React.FC<NodeEditFormProps> = ({ node, onCancel, onSave, suc
       description: node.description || '',
       systemFields: {
         creator: node?.fields?.find(
-          (field: EntityField) => field.isSystemField === FIELD_TYPE.SYSTEM && field.fieldName === 'creator'
+          (field: EntityField) => field.isSystemField === FIELD_TYPE.SYSTEM && field.fieldName === SYSTEM_FIELD_CREATOR
         )
           ? true
           : false,
         updater: node?.fields?.find(
-          (field: EntityField) => field.isSystemField === FIELD_TYPE.SYSTEM && field.fieldName === 'updater'
+          (field: EntityField) => field.isSystemField === FIELD_TYPE.SYSTEM && field.fieldName === SYSTEM_FIELD_UPDATER
         )
           ? true
           : false,
         created_time: node?.fields?.find(
-          (field: EntityField) => field.isSystemField === FIELD_TYPE.SYSTEM && field.fieldName === 'created_time'
+          (field: EntityField) =>
+            field.isSystemField === FIELD_TYPE.SYSTEM && field.fieldName === SYSTEM_FIELD_CREATED_TIME
         )
           ? true
           : false,
         updated_time: node?.fields?.find(
-          (field: EntityField) => field.isSystemField === FIELD_TYPE.SYSTEM && field.fieldName === 'updated_time'
+          (field: EntityField) =>
+            field.isSystemField === FIELD_TYPE.SYSTEM && field.fieldName === SYSTEM_FIELD_UPDATED_TIME
         )
           ? true
           : false,
         owner_id: node?.fields?.find(
-          (field: EntityField) => field.isSystemField === FIELD_TYPE.SYSTEM && field.fieldName === 'owner_id'
+          (field: EntityField) => field.isSystemField === FIELD_TYPE.SYSTEM && field.fieldName === SYSTEM_FIELD_OWNER_ID
         )
           ? true
           : false,
         owner_dept: node?.fields?.find(
-          (field: EntityField) => field.isSystemField === FIELD_TYPE.SYSTEM && field.fieldName === 'owner_dept'
+          (field: EntityField) =>
+            field.isSystemField === FIELD_TYPE.SYSTEM && field.fieldName === SYSTEM_FIELD_OWNER_DEPT
         )
           ? true
           : false

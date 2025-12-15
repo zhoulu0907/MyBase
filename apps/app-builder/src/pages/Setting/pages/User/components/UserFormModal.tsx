@@ -46,6 +46,8 @@ export default function UserFormModal({
   const [hasDeptQueryPermission, setHasDeptQueryPermission] = useState(true);
   const [avatarUrl, setAvatarUrl] = useState<string>();
   const [roleList, setRoleList] = useState<RoleVO[]>([]);
+  const [encryptedMobile, setEncryptedMobile] = useState<string>('');
+  const [encryptedEmail, setEncryptedEmail] = useState<string>('');
 
   // 获取角色列表
   const fetchRoleList = async () => {
@@ -84,11 +86,23 @@ export default function UserFormModal({
 
     // 在编辑模式下获取用户信息并设置角色ID为初始值
     if (mode === 'edit' && initialValues?.id) {
+      if (initialValues.mobile?.includes('*')) {
+        setEncryptedMobile(initialValues.mobile);
+      }
+      if (initialValues.mobile?.includes('*')) {
+        setEncryptedEmail(initialValues.email || '');
+      }
       getUser(initialValues.id).then((user: UserVO) => {
         form.setFieldsValue({ roleIds: user.roles?.map((item: SimpleRoleVO) => item.id) });
       });
     }
   }, [visible, mode, initialValues, form]);
+
+  const handleCancel = () => {
+    setEncryptedEmail('');
+    setEncryptedMobile('');
+    onCancel();
+  };
 
   const handleSubmit = async () => {
     if (isDetail) {
@@ -104,6 +118,8 @@ export default function UserFormModal({
         avatar: avatarUrl,
         mobile: filterSpace(values.mobile),
         email: filterSpace(values.email),
+        username: filterSpace(values.username),
+        nickname: filterSpace(values.nickname),
         status: statusCheckedValue ? StatusEnum.ENABLE : StatusEnum.DISABLE
       };
       setLoading(true);
@@ -112,7 +128,12 @@ export default function UserFormModal({
         Message.success('新建成功');
         onRefreshDept();
       } else {
-        await updateUser({ ...params, id: initialValues?.id });
+        await updateUser({
+          ...params,
+          id: initialValues?.id,
+          mobile: values.mobile?.includes('*') ? null : filterSpace(values.mobile),
+          email: values.email?.includes('*') ? null : filterSpace(values.email)
+        });
         Message.success('编辑成功');
         onRefreshDept();
       }
@@ -155,7 +176,7 @@ export default function UserFormModal({
         <div style={{ textAlign: 'left' }}>{isDetail ? '用户详情' : mode === 'create' ? '新建用户' : '编辑用户'}</div>
       }
       visible={visible}
-      onCancel={onCancel}
+      onCancel={handleCancel}
       onOk={handleSubmit}
       confirmLoading={loading}
       unmountOnExit
@@ -203,7 +224,13 @@ export default function UserFormModal({
               label="手机号"
               field="mobile"
               disabled={mode === 'edit' && isSystemUser}
-              rules={[{ required: true, message: '请输入手机号' }, { validator: phoneValidator }]}
+              onChange={(e: any) => {
+                setEncryptedMobile(e.target.value);
+              }}
+              rules={[
+                { required: true, message: '请输入手机号' },
+                { validator: encryptedMobile?.includes('*') && mode === 'edit' ? () => null : phoneValidator }
+              ]}
             >
               <Input placeholder="请输入" />
             </Form.Item>
@@ -230,7 +257,14 @@ export default function UserFormModal({
         </Row>
         <Row gutter={24}>
           <Col span={12}>
-            <Form.Item label="邮箱" field="email" rules={[{ validator: emailValidator }]}>
+            <Form.Item
+              label="邮箱"
+              field="email"
+              onChange={(e: any) => {
+                setEncryptedEmail(e.target.value);
+              }}
+              rules={[{ validator: encryptedEmail?.includes('*') && mode === 'edit' ? () => null : emailValidator }]}
+            >
               <Input placeholder="请输入" />
             </Form.Item>
           </Col>

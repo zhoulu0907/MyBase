@@ -170,7 +170,7 @@ const AdvancedTableOperationConfig: React.FC<AdvancedTableOperationConfigProps> 
       buttonName: value.buttonName,
       buttonIcon: value.buttonIcon,
       iconColor: value.iconColor,
-      redirectPageId: defaultView?.id,
+      redirectPageId: defaultView?.pageUuid,
       redirectMethod: value.redirectMethod,
       confirmText: value.confirmText,
       deletedAction: value.deletedAction
@@ -267,7 +267,7 @@ const AdvancedTableOperationConfig: React.FC<AdvancedTableOperationConfigProps> 
               if (defaultView) {
                 handleMultiPropsChange([
                   { key: item.key, value: value },
-                  { key: redirectPageId, value: defaultView.id },
+                  { key: redirectPageId, value: defaultView.pageUuid },
                   { key: redirectMethod, value: RedirectMethod.DRAWER }
                 ]);
               }
@@ -412,7 +412,7 @@ const AdvancedTableOperationConfig: React.FC<AdvancedTableOperationConfigProps> 
                 .filter((item: PageView) => item.detailViewMode === 1)
                 .map((item: PageView) => ({
                   label: item.pageName,
-                  value: item.id
+                  value: item.pageUuid
                 }))}
             />
           </Form.Item>
@@ -548,7 +548,7 @@ const AdvancedTableOperationConfig: React.FC<AdvancedTableOperationConfigProps> 
                       .filter((item: PageView) => item.detailViewMode === 1)
                       .map((item: PageView) => ({
                         label: item.pageName,
-                        value: item.id
+                        value: item.pageUuid
                       }))}
                     getPopupContainer={getPopupContainer}
                   />

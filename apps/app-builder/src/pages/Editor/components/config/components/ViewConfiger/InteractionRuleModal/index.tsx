@@ -78,43 +78,74 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
   // 获取组件下拉列表
   const getComponentOptions = () => {
     const cpOptions = Object.values(pageComponentSchemas.value).map((item: any) => ({
-      label: item.config?.label?.text || '',
+      label: item.config?.label?.text || item.config?.cpName || '',
       value: item.config?.id
     }));
 
-    console.log('cpOptions: ', cpOptions);
     setCpOptions(cpOptions);
   };
 
   useEffect(() => {
-    console.log('components: ', components.value);
-    console.log('pageComponentSchemas: ', pageComponentSchemas.value);
     visible && getComponentOptions();
   }, [visible, pageComponentSchemas]);
 
   const [form] = Form.useForm();
 
-  const interactionCondition = Form.useWatch('interactionCondition', form);
-  const formAction = Form.useWatch('formAction', form);
+  // 使用 ref 来标记是否正在初始化表单，避免触发 onValuesChange
+  const isInitializingRef = React.useRef(false);
+  // 使用 ref 存储上一次设置的 rule id，避免重复设置相同的值
+  const lastSetRuleIdRef = React.useRef<string>('');
 
-  const [rules, setRules] = useState<Rule[]>(pageViews.value[curViewId.value]?.interactionRules || []);
+  const [rules, setRules] = useState<Rule[]>([]);
+  const [curRule, setCurRule] = useState<string>('');
 
-  const [curRule, setCurRule] = useState<string>(rules.length > 0 ? rules[0].id : '');
-
+  // 当 modal 打开时，重新加载 rules
   useEffect(() => {
-    if (curRule) {
-      const rule = rules.find((rule) => rule.id === curRule);
-      if (rule) {
-        form.setFieldsValue(rule);
+    if (visible) {
+      const initialRules = pageViews.value[curViewId.value]?.interactionRules || [];
+      setRules(initialRules);
+      if (initialRules.length > 0) {
+        setCurRule(initialRules[0].id);
+        lastSetRuleIdRef.current = ''; // 重置，确保会设置表单
+      } else {
+        setCurRule('');
+        lastSetRuleIdRef.current = '';
       }
     }
-  }, [curRule]);
+  }, [visible, curViewId.value]);
+
+  useEffect(() => {
+    if (curRule && lastSetRuleIdRef.current !== curRule) {
+      const rule = rules.find((rule) => rule.id === curRule);
+      if (rule) {
+        isInitializingRef.current = true;
+        form.setFieldsValue(rule);
+        lastSetRuleIdRef.current = curRule;
+        // 使用 requestAnimationFrame 确保在下一个渲染周期重置标志
+        requestAnimationFrame(() => {
+          isInitializingRef.current = false;
+        });
+      } else {
+        // 如果规则不存在，清空表单
+        isInitializingRef.current = true;
+        form.resetFields();
+        lastSetRuleIdRef.current = '';
+        requestAnimationFrame(() => {
+          isInitializingRef.current = false;
+        });
+      }
+    } else if (!curRule && lastSetRuleIdRef.current !== '') {
+      // 如果 curRule 被清空，清空表单
+      isInitializingRef.current = true;
+      form.resetFields();
+      lastSetRuleIdRef.current = '';
+      requestAnimationFrame(() => {
+        isInitializingRef.current = false;
+      });
+    }
+  }, [curRule, form]);
 
   const handleOk = () => {
-    // console.log('rules: ', rules);
-
-    // console.log('pageViews: ', pageViews.value);
-    // console.log('curViewId: ', curViewId.value);
     let curPageView = pageViews.value[curViewId.value];
     if (curPageView && curPageView.id) {
       const newPageView = {
@@ -149,7 +180,19 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
   };
 
   const handleDeleteRule = (ruleId: string) => {
-    setRules((prevRules) => prevRules.filter((rule) => rule.id !== ruleId));
+    setRules((prevRules) => {
+      const newRules = prevRules.filter((rule) => rule.id !== ruleId);
+      // 如果删除的是当前选中的规则，需要更新 curRule
+      if (curRule === ruleId) {
+        // 如果还有规则，选中第一个；否则清空
+        if (newRules.length > 0) {
+          setCurRule(newRules[0].id);
+        } else {
+          setCurRule('');
+        }
+      }
+      return newRules;
+    });
   };
 
   const handleMoveRule = (ruleId: string, direction: 'up' | 'down') => {
@@ -267,11 +310,15 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
           </div>
         </div>
         <div className={styles.right}>
-          {curRule && (
+          {curRule && rules.find((rule) => rule.id === curRule) && (
             <Form
               layout="vertical"
               form={form}
               onValuesChange={(changeValue: any, values: any) => {
+                // 如果正在初始化表单，跳过更新 rules，避免无限循环
+                if (isInitializingRef.current) {
+                  return;
+                }
                 // 从values中获取当前rule的id
                 const curRuleId = values.id;
                 if (curRuleId) {

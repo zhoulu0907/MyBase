@@ -117,10 +117,10 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean; d
                       menuId: curMenu.value?.id,
                       id: entityDataId.value,
                       fieldName,
-                      fileId: file.id
+                      fileId: file.response.fileId || file.id
                     }
                     const fileUrl = await attachmentDownload(tableName, param)
-                    window.open(fileUrl, '_blank')
+                    downloadFileByUrl(fileUrl, file.name)
                   }}
                 />}
 
