@@ -14,6 +14,13 @@ import java.util.Map;
  * 提供插件生命周期管理的接口。
  * </p>
  *
+ * <h3>模式支持说明</h3>
+ * <ul>
+ *     <li><b>PROD模式</b>：完整支持所有接口，获取准确的插件信息（从ZIP包）</li>
+ *     <li><b>DEV模式</b>：仅支持HTTP路由调用，插件列表/详情接口获取信息不准确
+ *         （dev模式使用虚拟插件，不是真实的PF4J插件包装器）</li>
+ * </ul>
+ *
  * @author chengyuansen
  * @date 2025-12-13
  */
@@ -26,6 +33,9 @@ public class PluginManagementController {
 
     /**
      * 获取所有已加载的插件列表
+     * <p>
+     * 仅在 PROD 模式下准确。DEV 模式下信息不准确。
+     * </p>
      *
      * @return 插件信息列表
      */
@@ -106,6 +116,9 @@ public class PluginManagementController {
 
     /**
      * 获取指定插件的详细信息
+     * <p>
+     * 仅在 PROD 模式下准确。DEV 模式下信息不准确（虚拟插件不在PF4J插件包装器中）。
+     * </p>
      *
      * @param pluginId 插件ID
      * @return 插件详细信息
