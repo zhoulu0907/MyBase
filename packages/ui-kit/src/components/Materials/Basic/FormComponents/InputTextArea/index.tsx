@@ -6,6 +6,7 @@ import { memo, useEffect, useState } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { STATUS_OPTIONS, STATUS_VALUES, DEFAULT_VALUE_TYPES } from '../../../constants';
 import type { XInputTextAreaConfig } from './schema';
+import { securityEncodeText } from '@/utils';
 
 import '../index.css';
 import { useFormFieldWatch } from '../useFormField';
@@ -28,7 +29,8 @@ const XInputTextArea = memo((props: XInputTextAreaConfig & { runtime?: boolean; 
     layout,
     minRows,
     runtime = true,
-    detailMode
+    detailMode,
+    security
   } = props;
   // ===== 外部 props end =====
 
@@ -40,7 +42,7 @@ const XInputTextArea = memo((props: XInputTextAreaConfig & { runtime?: boolean; 
   const {
     form,
     fieldValue
-  } = useFormFieldWatch(dataField); 
+  } = useFormFieldWatch(dataField);
   // ===== 表单上下文与字段名与值读取 end =====
 
   // ===== 外部事件：选择数据 begin =====
@@ -60,7 +62,7 @@ const XInputTextArea = memo((props: XInputTextAreaConfig & { runtime?: boolean; 
         tooltip={tooltip}
         labelCol={layout === 'horizontal' ? { span: 10 } : {}}
         rules={[
-          { required: verify?.required, message:`${label.text}是必填项` },
+          { required: verify?.required, message: `${label.text}是必填项` },
           {
             validator: (value, callback) => {
               if (verify.lengthLimit) {
@@ -82,7 +84,7 @@ const XInputTextArea = memo((props: XInputTextAreaConfig & { runtime?: boolean; 
         initialValue={defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : ''}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
-          <div>{fieldValue || '--'}</div>
+          <div>{securityEncodeText(security, fieldValue)}</div>
         ) : (
           <TextArea
             key={`${props.id}-TextArea`}

@@ -6,6 +6,7 @@ import { memo, useEffect, useState } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { DEFAULT_VALUE_TYPES, STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import { type XInputTextConfig } from './schema';
+import { securityEncodeText } from '@/utils'
 
 import '../index.css';
 import { useFormFieldWatch } from '../useFormField';
@@ -25,7 +26,8 @@ const XInputText = memo((props: XInputTextConfig & { runtime?: boolean; detailMo
     align,
     layout,
     runtime = true,
-    detailMode
+    detailMode,
+    security
   } = props;
   // ===== 外部 props end =====
 
@@ -77,7 +79,7 @@ const XInputText = memo((props: XInputTextConfig & { runtime?: boolean; detailMo
         initialValue={defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : ''}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
-          <div>{fieldValue || '--'}</div>
+          <div>{securityEncodeText(security, fieldValue)}</div>
         ) : (
           <Input
             placeholder={placeholder}
