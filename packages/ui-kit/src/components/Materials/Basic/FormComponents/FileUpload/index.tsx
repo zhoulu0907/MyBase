@@ -174,6 +174,16 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean; d
               Message.warning('文件大小超出限制');
               return false;
             }
+
+            // 校验格式
+            if (verify?.fileFormat) {
+              const lastIndexOf = file.name.lastIndexOf('.');
+              const type = file.name.slice(lastIndexOf + 1);
+              if (verify.fileFormat.toLocaleLowerCase().indexOf(type.toLocaleLowerCase()) === -1) {
+                Message.warning(`不支持该格式，仅支持 ${verify.fileFormat}`);
+                return false;
+              }
+            }
           }}
           customRequest={async (option) => {
             const { onProgress, onError, onSuccess, file } = option;
