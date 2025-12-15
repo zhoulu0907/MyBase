@@ -31,8 +31,9 @@
   border-radius: 8px;
   transition: border-color 0.2s ease;
   position: relative;
-  min-width: 50px;
+  min-width: 200px;
 }
+/* 序号 操作 */
 .componentItem2 {
   overflow: visible;
   box-sizing: border-box;
@@ -40,7 +41,7 @@
   border-radius: 8px;
   transition: border-color 0.2s ease;
   position: relative;
-  min-width: 50px;
+  min-width: 60px;
 }
 
 /* 操作 */

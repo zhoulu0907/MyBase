@@ -322,6 +322,9 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
         dataIndex: column.id,
         key: column.id,
         fixed: undefined as any,
+        headerCellStyle: {
+          minWidth: '200px'
+        },
         bodyCellStyle: {
           padding: '4px 0'
         },
