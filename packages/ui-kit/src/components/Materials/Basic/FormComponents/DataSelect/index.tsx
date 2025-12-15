@@ -8,7 +8,7 @@ import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import PreviewDataSelectModal from './previewDataSelectModal';
 import { XDataSelectConfig } from './schema';
 
-import { dataMethodPage, menuSignal, type PageMethodParam } from '@onebase/app';
+import { dataMethodPageV2, menuSignal, PageMethodV2Params } from '@onebase/app';
 import { useFormField } from '../useFormField';
 
 import './index.css';
@@ -128,21 +128,19 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
   useEffect(() => {
     const fetchOptions = async () => {
       if (!runtime) return;
-      const entityId = props?.dynamicTableConfig?.metaData || props?.selectedDataSource?.entityUuid;
-      if (!entityId) return;
+      const tableName = props?.selectedDataSource?.tableName;
+      if (!tableName) return;
       const { curMenu } = menuSignal;
-      const req: PageMethodParam = {
-        menuId: curMenu.value?.id,
-        entityId,
+      const req: PageMethodV2Params = {
         pageNo: 1,
         pageSize: 100
       };
-      const res = await dataMethodPage(req);
+      const res = await dataMethodPageV2(tableName, curMenu.value?.id, req);
       const lastKey = (displayFields || []).length ? displayFields[displayFields.length - 1]?.value : undefined;
       const list = Array.isArray(res?.list) ? res.list : [];
       const opts = list.map((item: any) => ({
-        label: lastKey ? (item?.data?.[lastKey] ?? '') : '',
-        value: item?.id ?? item?.data?.id
+        label: lastKey ? (item?.[lastKey] ?? '') : '',
+        value: item?.id ?? item?.id
       }));
       setOptions(opts);
     };
