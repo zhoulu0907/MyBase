@@ -6,6 +6,7 @@ import com.cmsr.onebase.module.system.service.dept.DeptService;
 import com.cmsr.onebase.module.system.service.user.UserService;
 import com.cmsr.onebase.module.system.vo.user.*;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
@@ -59,7 +60,24 @@ public class TenantThirdUserController {
         return success(true);
     }
 
+    @PostMapping("/delete")
+    @Operation(summary = "删除用户")
+    @Parameter(name = "id", description = "编号", required = true, example = "1024")
+    @PreAuthorize("@ss.hasPermission('tenant:user:delete')")
+    public CommonResult<Boolean> deleteUser(@RequestParam("id") Long id) {
+        userService.deleteUser(id);
+        return success(true);
+    }
 
+
+
+    @PostMapping("/update-password")
+    @Operation(summary = "重置用户密码")
+    @PreAuthorize("@ss.hasPermission('tenant:user:update-password')")
+    public CommonResult<Boolean> updateUserPassword(@Valid @RequestBody UserUpdatePasswordReqVO reqVO) {
+        userService.updateUserPassword(reqVO.getId(), reqVO.getPassword());
+        return success(true);
+    }
 
 
 

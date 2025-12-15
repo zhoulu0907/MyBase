@@ -1189,7 +1189,7 @@ public class UserServiceImpl implements UserService {
          deptRespVO.setDeptCode(DefaultThirdDept.DEFAULT_THIRD_DEPT.getCode());
          DeptDO roleDO = deptService.findDeptByCodeAndType(deptRespVO);
 
-         if (roleDO == null) {
+         if  (null == roleDO){
              deptRespVO.setParentId(DeptDO.PARENT_ID_ROOT);
              deptRespVO.setDeptType(DeptTypeEnum.THIRD.getCode());
              deptRespVO.setStatus(CommonStatusEnum.ENABLE.getStatus());
@@ -1311,12 +1311,10 @@ public class UserServiceImpl implements UserService {
                                 .collect(Collectors.toList())
                         );
                     }
-
                     return userApplicationRespVO;
                 })
                 .collect(Collectors.toList()), pageResult.getTotal());
     }
-
 
 
 }
