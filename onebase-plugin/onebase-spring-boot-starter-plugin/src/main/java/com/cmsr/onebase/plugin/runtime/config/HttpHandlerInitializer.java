@@ -29,12 +29,9 @@ public class HttpHandlerInitializer {
             // 获取所有HTTP处理器
             List<HttpHandler> handlers = oneBasePluginManager.getHttpHandlers();
             
-            log.info("发现 {} 个HTTP处理器", handlers.size());
-            
             if (!handlers.isEmpty()) {
                 // 注册HTTP处理器
                 httpHandlerRegistry.registerHandlers(handlers);
-                log.info("HTTP处理器注册完成");
             }
         } catch (Exception e) {
             log.error("初始化HTTP处理器失败", e);

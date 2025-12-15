@@ -79,11 +79,9 @@ public class PluginRuntimeAutoConfiguration {
             
             if (properties.isAutoLoad()) {
                 pluginManager.loadPlugins();
-                log.info("开发模式：已加载classpath中的扩展点");
                 
                 if (properties.isAutoStart()) {
                     pluginManager.startPlugins();
-                    log.info("开发模式：虚拟插件已启动");
                 }
             }
             

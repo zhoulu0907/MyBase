@@ -57,7 +57,7 @@ public class HttpHandlerRegistry {
             registerHandler(handler);
         }
 
-        log.info("HTTP处理器注册完成，共注册 {} 个处理器", registeredHandlers.size());
+        log.info("HTTP处理器已注册，共 {} 个处理器", registeredHandlers.size());
     }
 
     /**
@@ -90,7 +90,7 @@ public class HttpHandlerRegistry {
 
         if (hasMapping) {
             registeredHandlers.add(handlerObject);
-            log.info("HTTP处理器注册成功: {}", handlerClass.getName());
+            log.debug("HTTP处理器注册成功: {}", handlerClass.getName());
         } else {
             log.warn("HTTP处理器 {} 中未找到任何映射方法，跳过注册", handlerClass.getName());
         }

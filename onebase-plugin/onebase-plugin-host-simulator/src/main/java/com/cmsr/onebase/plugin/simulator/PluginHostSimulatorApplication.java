@@ -59,25 +59,6 @@ import org.springframework.context.annotation.ComponentScan;
 public class PluginHostSimulatorApplication {
 
     public static void main(String[] args) {
-        SpringApplication app = new SpringApplication(PluginHostSimulatorApplication.class);
-        
-        // 检查是否指定了 profile，未指定则默认使用 dev（IDE 调试模式）
-        boolean hasProfile = false;
-        for (String arg : args) {
-            if (arg.startsWith("--spring.profiles.active=")) {
-                hasProfile = true;
-                break;
-            }
-        }
-        
-        if (!hasProfile) {
-            System.out.println("========================================");
-            System.out.println("未指定 profile，默认使用 'dev' 模式（IDE 快速调试）");
-            System.out.println("如需使用完整验证模式，请指定 --spring.profiles.active=prod");
-            System.out.println("========================================");
-            app.setAdditionalProfiles("dev");
-        }
-        
-        app.run(args);
+        SpringApplication.run(PluginHostSimulatorApplication.class, args);
     }
 }

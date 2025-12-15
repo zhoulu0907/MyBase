@@ -33,7 +33,7 @@ public class PluginHttpHandler {
 
     public PluginHttpHandler(PluginHttpDispatcher dispatcher) {
         this.dispatcher = dispatcher;
-        log.info("PluginHttpHandler已初始化，dispatcher={}",  dispatcher != null ? "OK" : "NULL");
+        log.debug("PluginHttpHandler已初始化，dispatcher={}", dispatcher != null ? "OK" : "NULL");
     }
 
     /**

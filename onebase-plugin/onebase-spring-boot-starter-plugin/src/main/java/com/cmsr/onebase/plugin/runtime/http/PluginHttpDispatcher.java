@@ -50,7 +50,7 @@ public class PluginHttpDispatcher {
                                 RequestMappingHandlerAdapter handlerAdapter) {
         this.pluginManager = pluginManager;
         this.handlerAdapter = handlerAdapter;
-        log.info("PluginHttpDispatcher已创建");
+        log.debug("PluginHttpDispatcher已创建");
     }
 
     /**
@@ -59,7 +59,8 @@ public class PluginHttpDispatcher {
      */
     @PostConstruct
     public void init() {
-        log.info("========== 初始化插件HTTP路由 ==========");
+        log.info("=" .repeat(60));
+        log.info("初始化插件HTTP路由分发器");
         
         List<HttpHandler> httpHandlers = pluginManager.getHttpHandlers();
         
@@ -67,15 +68,13 @@ public class PluginHttpDispatcher {
             log.warn("未发现任何HttpHandler扩展点，可能插件尚未启动或没有定义HttpHandler");
             return;
         }
-
-        log.info("发现 {} 个HttpHandler扩展点", httpHandlers.size());
         
         for (HttpHandler handler : httpHandlers) {
             scanHandlerMethods((Object) handler);
         }
 
-        log.info("HTTP分发器已初始化，共注册 {} 个路由", routes.size());
-        log.info("========================================");
+        log.info("HTTP路由分发器已就绪，共注册 {} 个路由", routes.size());
+        log.info("=" .repeat(60));
     }
 
     /**
@@ -133,7 +132,7 @@ public class PluginHttpDispatcher {
                     
                     String key = buildRouteKey(httpMethod, normalizedPath);
                     routes.put(key, new MethodHandler(handler, method));
-                    log.info("  ✓ 注册路由: {} {} -> {}.{}", httpMethod, normalizedPath, handlerClass.getSimpleName(), method.getName());
+                    log.debug("  ✓ 注册路由: {} {} -> {}.{}", httpMethod, normalizedPath, handlerClass.getSimpleName(), method.getName());
                 }
             }
         }

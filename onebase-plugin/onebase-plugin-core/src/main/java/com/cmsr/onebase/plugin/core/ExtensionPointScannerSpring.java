@@ -69,7 +69,7 @@ public class ExtensionPointScannerSpring {
                     @SuppressWarnings("unchecked")
                     T instance = (T) clazz.getDeclaredConstructor().newInstance();
                     extensions.add(instance);
-                    log.info("发现扩展点: {} -> {}", extensionType.getSimpleName(), className);
+                    log.debug("发现扩展点: {} -> {}", extensionType.getSimpleName(), className);
 
                 } catch (Exception e) {
                     log.warn("实例化扩展点失败 {}: {}", className, e.getMessage());

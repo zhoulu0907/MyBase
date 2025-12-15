@@ -40,12 +40,7 @@ public class DevModePluginManager extends DefaultPluginManager {
     public DevModePluginManager() {
         super(Paths.get(System.getProperty("user.dir")));
         this.scanner = new ExtensionPointScannerSpring();
-        log.info("=".repeat(60));
-        log.info("初始化开发模式插件管理器（DevModePluginManager）");
-        log.info("插件加载方式: 扫描classpath中的扩展点实现类");
-        log.info("支持的扩展点: DataProcessor, EventListener, HttpHandler");
-        log.info("适用场景: IDE中直接启动和调试，无需打包ZIP/JAR");
-        log.info("=".repeat(60));
+        log.debug("初始化开发模式插件管理器（DevModePluginManager）");
     }
 
     /**
@@ -89,11 +84,11 @@ public class DevModePluginManager extends DefaultPluginManager {
 
     @Override
     public void startPlugins() {
-        log.info("开发模式：启动虚拟插件");
+        log.debug("开发模式：启动虚拟插件");
         if (devPluginWrapper != null) {
             devPluginWrapper.setPluginState(PluginState.STARTED);
             getStartedPlugins().add(devPluginWrapper);
-            log.info("开发模式虚拟插件已启动");
+            log.debug("开发模式虚拟插件已启动");
         }
     }
 
