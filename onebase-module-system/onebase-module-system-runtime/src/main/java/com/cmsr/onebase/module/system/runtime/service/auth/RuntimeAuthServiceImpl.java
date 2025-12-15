@@ -303,6 +303,9 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
 
     @Override
     public ThirdAuthLoginRespVO thirdLogin(ThirdAuthLoginReqVO reqVO) {
+        //  解密原文
+        reqVO.setPassword(pwdEnHelper.decryptHexStr(reqVO.getPassword()));
+
         Long appId = reqVO.getAppId();
         // 校验验证码
         thirdValidateCaptcha(reqVO);
