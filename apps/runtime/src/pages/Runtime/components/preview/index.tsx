@@ -136,10 +136,9 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid })
         if (field.fieldType === ENTITY_FIELD_TYPE.IMAGE.VALUE || field.fieldType === ENTITY_FIELD_TYPE.FILE.VALUE) {
           // 图片、文件上传 数据处理 转换成后端需要的数据
           formData[field.fieldName] = (value || []).map((ele: any) => {
-            return { name: ele.name, id: ele.response?.fileId };
+            return { name: ele.name, id: ele.response?.fileId || ele.id };
           });
-        }
-        if (field.fieldType === ENTITY_FIELD_TYPE.BOOLEAN.VALUE) {
+        } else if (field.fieldType === ENTITY_FIELD_TYPE.BOOLEAN.VALUE) {
           formData[field.fieldName] = value;
         } else {
           formData[field.fieldName] = value || null;
