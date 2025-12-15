@@ -1,6 +1,5 @@
 package com.cmsr.onebase.module.flow;
 
-import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.module.flow.core.impl.FlowProcessExecApiImpl;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerReqDTO;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerRespDTO;
@@ -35,7 +34,7 @@ import java.util.UUID;
  */
 @Setter
 @SpringBootTest(classes = OneBaseServerRuntimeApplication.class)
-public class FlowProcessTest {
+public class RuntimeFlowProcessTest {
 
     @Autowired
     private FlowProcessRepository flowProcessRepository;
@@ -52,6 +51,7 @@ public class FlowProcessTest {
     @Autowired
     private FlowGraphBuilder flowGraphBuilder;
 
+
     public void testToFlowChain(Long id) throws IOException {
         FlowProcessDO flowProcessDO = flowProcessRepository.getById(id);
         String json = flowProcessDO.getProcessDefinition();
@@ -61,20 +61,10 @@ public class FlowProcessTest {
     }
 
 
-    @Test
-    public void testFormTriggerReqVO01() throws IOException {
-        ApplicationManager.ignoreApplicationCondition();
-        ApplicationManager.ignoreVersionTagCondition();
 
-        FormTriggerReqVO reqVO = new FormTriggerReqVO();
-        reqVO.setProcessId(171999834000031744L);
-        reqVO.setInputParams(Map.of());
-        FormTriggerRespVO respVO = flowProcessExecService.triggerForm(reqVO);
-        System.out.println(respVO);
-    }
 
     @Test
-    public void testEntityTriggerReqDTO01() throws IOException {
+    public void testEntityTrigger01() throws IOException {
         EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
         reqDTO.setTraceId(UUID.randomUUID().toString());
         reqDTO.setTriggerEvent(TriggerEventEnum.BEFORE_CREATE);
@@ -86,7 +76,6 @@ public class FlowProcessTest {
                 SystemFieldConstants.REQUIRE.OWNER_ID, "155019577667616800",
                 SystemFieldConstants.REQUIRE.OWNER_DEPT, "101"
                 ));
-
         SemanticFieldValueDTO name = SemanticFieldValueDTO.ofType(SemanticFieldTypeEnum.TEXT);
         name.setFieldName("student_name");
         name.setRawValue("小");
@@ -99,4 +88,15 @@ public class FlowProcessTest {
         System.out.println(respDTO);
     }
 
+    @Test
+    public void testFormTrigger01() throws IOException {
+        FormTriggerReqVO reqVO = new FormTriggerReqVO();
+        reqVO.setProcessId(181896898967240704L);
+        reqVO.setInputParams(Map.of(
+                "student_name", "小",
+                "birthday", "2025-12-01"
+        ));
+        FormTriggerRespVO formTriggerRespVO = flowProcessExecService.triggerForm(reqVO);
+        System.out.println(formTriggerRespVO);
+    }
 }

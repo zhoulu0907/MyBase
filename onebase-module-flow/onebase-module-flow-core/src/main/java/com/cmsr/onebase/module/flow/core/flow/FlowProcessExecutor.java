@@ -5,7 +5,7 @@ import com.cmsr.onebase.module.flow.context.VariableContext;
 import com.cmsr.onebase.module.flow.context.graph.NodeData;
 import com.cmsr.onebase.module.flow.context.provider.FlowContextProvider;
 import com.cmsr.onebase.module.flow.core.config.FlowProperties;
-import com.cmsr.onebase.module.flow.core.config.FlowRuntimeCondition;
+import com.cmsr.onebase.module.flow.core.config.FlowEnableCondition;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowExecutionLogRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowExecutionLogDO;
 import com.cmsr.onebase.module.flow.core.enums.ExecutionResultEnum;
@@ -38,7 +38,7 @@ import java.util.UUID;
 @Setter
 @Slf4j
 @Component
-@Conditional(FlowRuntimeCondition.class)
+@Conditional(FlowEnableCondition.class)
 public class FlowProcessExecutor {
 
     @Autowired
