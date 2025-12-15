@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
+import org.springframework.core.type.filter.AssignableTypeFilter;
 
 import java.util.HashMap;
 import java.util.List;
@@ -34,14 +35,14 @@ public class JsonGraphMapper {
             ClassPathScanningCandidateComponentProvider scanner =
                     new ClassPathScanningCandidateComponentProvider(false);
             scanner.addIncludeFilter(new AnnotationTypeFilter(NodeType.class));
-            Set<BeanDefinition> annotatedClasses = scanner.findCandidateComponents(
-                    "com.cmsr.onebase.module.flow.context.graph.nodes");
+            scanner.addIncludeFilter(new AssignableTypeFilter(NodeData.class));
+            Set<BeanDefinition> annotatedClasses = scanner.findCandidateComponents("com.cmsr.onebase.module.flow");
 
             for (BeanDefinition beanDefinition : annotatedClasses) {
                 Class<?> clazz = Class.forName(beanDefinition.getBeanClassName());
-                if (NodeData.class.isAssignableFrom(clazz) && clazz.isAnnotationPresent(NodeType.class)) {                    NodeType annotation = clazz.getAnnotation(NodeType.class);
+                if (NodeData.class.isAssignableFrom(clazz) && clazz.isAnnotationPresent(NodeType.class)) {
+                    NodeType annotation = clazz.getAnnotation(NodeType.class);
                     if (annotation != null) {
-                        @SuppressWarnings("unchecked")
                         Class<? extends NodeData> nodeDataClass = (Class<? extends NodeData>) clazz;
                         TYPE_CLASS_MAP.put(annotation.value(), nodeDataClass);
                     }
