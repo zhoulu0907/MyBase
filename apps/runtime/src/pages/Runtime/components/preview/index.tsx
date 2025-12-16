@@ -141,8 +141,11 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
           formData[field.fieldName] = (value || []).map((ele: any) => {
             return { name: ele.name, id: ele.response?.fileId };
           });
+        }
+        if (field.fieldType === ENTITY_FIELD_TYPE.BOOLEAN.VALUE) {
+          formData[field.fieldName] = value;
         } else {
-          formData[field.fieldName] = value || '';
+          formData[field.fieldName] = value || null;
         }
       }
 

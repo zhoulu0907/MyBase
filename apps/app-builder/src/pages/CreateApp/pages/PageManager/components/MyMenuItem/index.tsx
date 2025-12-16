@@ -17,9 +17,9 @@ import {
   PageType,
   RootParentPage,
   VisibleType,
-  type GetPageSetIdReq
+  type GetPageSetIdReq,
+  type ApplicationMenu
 } from '@onebase/app';
-import { pagesRuntimeSignal } from '@onebase/common';
 import { EDITOR_TYPES, webMenuIcons } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useState } from 'react';
@@ -58,6 +58,7 @@ interface MenuItemProps {
   copyForm?: FormInstance;
   createForm?: FormInstance;
   style?: React.CSSProperties;
+  menuInfo: ApplicationMenu;
 }
 
 const MyMenuItem: React.FC<MenuItemProps> = ({
@@ -67,6 +68,7 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
   menuName,
   label,
   menuIcon,
+  menuCode,
   isGroup,
   menuType,
   pagesetType,
@@ -80,7 +82,8 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
   renameForm,
   copyForm,
   createForm,
-  style
+  style,
+  menuInfo
 }) => {
   const allWebMenuIcons = webMenuIcons.map((ele) => ele.children).reduce((acc, current) => acc.concat(current), []);
   useSignals();
@@ -88,8 +91,7 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
 
   const { curAppId } = useAppStore();
 
-  const { curMenu } = menuSignal;
-  const { curPage } = pagesRuntimeSignal;
+  const { curMenu, setCurMenu } = menuSignal;
   const { tenantId } = useParams();
 
   const [popupVisible, setPopupVisible] = useState(false);
@@ -216,6 +218,8 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
       Message.error('请先创建页面集');
       return;
     }
+
+    setCurMenu(menuInfo);
 
     const editorType = pagesetType == PageType.WORKBENCH ? EDITOR_TYPES.WORKBENCH_EDITOR : EDITOR_TYPES.FORM_EDITOR;
 

@@ -23,16 +23,16 @@ const WORKBENCH_COMPONENT_DEFINITIONS: ReadonlyArray<WorkbenchComponentDefinitio
     category: 'basic',
     size: { h: 36, w: 118 }
   },
-  {
-    key: 'TODO_CENTER',
-    type: 'XTodoCenter',
-    displayName: '待办中心',
-    icon: 'todo_center_cp.svg',
-    category: 'basic',
-    size: { h: 36, w: 118 },
-    description: '待办中心组件开发中，当前为占位实现',
-    isPlaceholder: true
-  },
+  // {
+  //   key: 'TODO_CENTER',
+  //   type: 'XTodoCenter',
+  //   displayName: '待办中心',
+  //   icon: 'todo_center_cp.svg',
+  //   category: 'basic',
+  //   size: { h: 36, w: 118 },
+  //   description: '待办中心组件开发中，当前为占位实现',
+  //   isPlaceholder: true
+  // },
   {
     key: 'RICH_TEXT_WORKBENCH',
     type: 'XRichTextEditorWorkbench',

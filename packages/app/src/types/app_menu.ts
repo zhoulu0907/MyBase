@@ -12,6 +12,7 @@ export interface ApplicationMenu {
   menuName: string;
   pagesetType: number;
   menuIcon: string;
+  menuUuid: string;
   isVisible: number;
   children: ApplicationMenu[];
 }

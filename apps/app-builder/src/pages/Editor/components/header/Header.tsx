@@ -39,7 +39,7 @@ import {
   type ListApplicationMenuReq,
   type UpdateApplicationMenuNameReq
 } from '@onebase/app';
-import { getHashQueryParam, pagesRuntimeSignal } from '@onebase/common';
+import { getHashQueryParam } from '@onebase/common';
 import {
   appIconMap,
   EDITOR_TYPES,
@@ -121,7 +121,6 @@ interface VersionListSelectRef {
 export default function EditorHeader() {
   const location = useLocation();
   const selectRef = useRef<VersionListSelectRef>(null);
-  const { curPage } = pagesRuntimeSignal;
   const { t } = useI18n();
   const [renameForm] = Form.useForm();
   const { clearCurComponentID } = usePageEditorSignal();
@@ -291,8 +290,9 @@ export default function EditorHeader() {
         getMainMetaData(pageSetId);
       }
 
+      loadPageSetInfo(pageSetId);
+
       if (!isEditMode) {
-        loadPageSetInfo(pageSetId);
         setIsEditMode(true);
       }
     }
@@ -381,8 +381,7 @@ export default function EditorHeader() {
         );
         const subEntities = entityWithChildren.childEntities.map((entity: ChildEntity, index: number) => ({
           entityId: entity.childEntityId,
-          //   TODO(mickey): 后端现在childEntityId就是uuid
-          entityUuid: entity.childEntityId,
+          entityUuid: entity.childEntityUuid,
           tableName: entity.childTableName,
           entityName: entity.childEntityName,
           entityType: ENTITY_TYPE.SUB,
@@ -506,7 +505,7 @@ export default function EditorHeader() {
   };
 
   useEffect(() => {
-    const pageType = curPage?.value?.pageSetType;
+    const pageType = curMenu?.value?.pagesetType;
 
     const shouldKeepTab = (key: string) => {
       if (pageType === PageType.NORMAL) {
@@ -519,7 +518,7 @@ export default function EditorHeader() {
     };
 
     setTabData(baseTabData.filter((tab) => shouldKeepTab(tab.key)));
-  }, [curPage?.value?.pageSetType]);
+  }, [curMenu?.value?.pagesetType]);
 
   return (
     <div className={styles.editorHeader}>
