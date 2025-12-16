@@ -110,7 +110,7 @@ public class FlowProcessExecApiImpl implements FlowProcessExecApi {
             }
             if (CollectionUtils.isNotEmpty(nodeData.getFilterCondition())) {
                 OrExpression orExpression = flowConditionsProvider.formatConditionsForExpression(nodeData.getFilterCondition(), inputData);
-                boolean isMatch = expressionExecutor.evaluate(orExpression, inputData);
+                boolean isMatch = expressionExecutor.evaluateInput(orExpression, inputData);
                 if (!isMatch) {
                     respDTO.setSuccess(true);
                     respDTO.setTriggered(false);

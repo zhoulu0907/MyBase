@@ -71,7 +71,7 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
                 boolean isTrigger = true;
                 if (CollectionUtils.isNotEmpty(startFormNodeData.getFilterCondition())) {
                     OrExpression orExpression = ConditionsSupport.convertToOrExpresses(startFormNodeData.getFilterCondition());
-                    isTrigger = expressionExecutor.evaluate(orExpression, inputMap);
+                    isTrigger = expressionExecutor.evaluateInput(orExpression, inputMap);
                 }
                 if (!isTrigger) {
                     FormTriggerRespVO vo = formNotTriggerRespVO();
@@ -133,6 +133,9 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
                 fieldTypeEnum = fieldSchema.getFieldTypeEnum();
             }
             Object convertValue = FieldTypeConvertor.convert(fieldTypeEnum, value);
+            if (convertValue == null) {
+                convertValue = "";
+            }
             result.put(tableName + "." + fieldName, convertValue);
         }
         return result;

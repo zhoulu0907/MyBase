@@ -5,6 +5,8 @@ import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.Busines
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.BusinessEntityRespVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.BusinessEntitySaveReqVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.ERDiagramRespVO;
+import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.EntityWithFieldsBatchQueryReqVO;
+import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.EntityWithFieldsRespVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.SimpleEntityRespVO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusinessEntityDO;
 import jakarta.validation.Valid;
@@ -152,5 +154,13 @@ public interface MetadataBusinessEntityBuildService {
      * @param entityId 业务实体ID
      */
     void recreatePhysicalTable(Long entityId);
+
+    /**
+     * 批量查询实体及完整字段信息（包含一级子表）
+     *
+     * @param reqVO 批量查询请求VO（entityUuids和tableNames二选一）
+     * @return 实体及字段信息列表
+     */
+    List<EntityWithFieldsRespVO> getEntitiesWithFullFields(EntityWithFieldsBatchQueryReqVO reqVO);
 
 }

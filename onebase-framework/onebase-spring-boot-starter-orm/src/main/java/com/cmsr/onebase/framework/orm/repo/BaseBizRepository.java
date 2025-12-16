@@ -6,6 +6,7 @@ import com.cmsr.onebase.framework.orm.entity.BaseBizEntity;
 import com.mybatisflex.core.BaseMapper;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.*;
+import com.mybatisflex.core.update.UpdateChain;
 import com.mybatisflex.core.util.CollectionUtil;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -39,6 +40,49 @@ public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity>
         queryWrapper.and(applicationColumn.eq(applicationId).when(!ApplicationManager.isIgnoreApplicationCondition()));
         queryWrapper.and(versionTagColumn.eq(versionTag).when(!ApplicationManager.isIgnoreVersionTagCondition()));
     }
+
+    //region ===== 删除（删）操作 =====
+
+    /**
+     * <p>根据查询条件删除数据。
+     *
+     * @param query 查询条件
+     * @return {@code true} 删除成功，{@code false} 删除失败。
+     */
+    @Override
+    public boolean remove(QueryWrapper query) {
+        this.injectQueryFilter(query);
+        return super.remove(query);
+    }
+    //region ===== 更新（改）操作 =====
+
+    /**
+     * <p>根据查询条件更新数据。
+     *
+     * @param entity 实体类对象
+     * @param query  查询条件
+     * @return {@code true} 更新成功，{@code false} 更新失败。
+     * @apiNote 若实体类属性数据为 {@code null}，该属性不会新到数据库。
+     */
+    @Override
+    public boolean update(T entity, QueryWrapper query) {
+        this.injectQueryFilter(query);
+        return super.update(entity, query);
+    }
+
+    @Deprecated
+    @Override
+    public UpdateChain<T> updateChain() {
+        Long applicationId = ApplicationManager.getApplicationId();
+        Long versionTag = ApplicationManager.getVersionTag();
+        //
+        UpdateChain<T> updateChain = super.updateChain();
+        updateChain.where(QueryWrapperUtils.APPLICATION_COLUMN.eq(applicationId).when(!ApplicationManager.isIgnoreApplicationCondition())
+                .and(QueryWrapperUtils.VERSION_TAG_COLUMN.eq(versionTag).when(!ApplicationManager.isIgnoreVersionTagCondition()))
+        );
+        return updateChain;
+    }
+    //endregion ===== 更新（改）操作 =====
 
     //region ===== 查询（查）操作 =====
 
@@ -190,7 +234,6 @@ public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity>
      */
     @Override
     public boolean exists(QueryWrapper query) {
-        this.injectQueryFilter(query);
         return exists(CPI.getWhereQueryCondition(query));
     }
 
@@ -250,7 +293,7 @@ public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity>
         // 1、update：把versionTag为1的数据update为新值（参数`versionTag`）
         QueryColumn applicationIdCol = new QueryColumn(QueryWrapperUtils.APPLICATION_ID);
         QueryColumn versionTagCol = new QueryColumn(QueryWrapperUtils.VERSION_TAG);
-        this.updateChain()
+        super.updateChain()
                 .set(versionTagCol, versionTag)
                 .where(applicationIdCol.eq(applicationId))
                 .where(versionTagCol.eq(VersionTagEnum.RUNTIME.getValue()))
@@ -273,7 +316,7 @@ public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity>
             entity.setId(null);
             entity.setVersionTag(VersionTagEnum.RUNTIME.getValue());
         });
-        this.saveBatch(entities);
+        super.saveBatch(entities);
     }
 
     // 3、历史版本数据回滚为运行态数据
@@ -292,12 +335,12 @@ public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity>
             entity.setId(null);
             entity.setVersionTag(VersionTagEnum.RUNTIME.getValue());
         });
-        this.saveBatch(entities);
+        super.saveBatch(entities);
     }
 
     public boolean deleteAllApplicationData(Long applicationId) {
         QueryColumn applicationColumn = new QueryColumn(QueryWrapperUtils.APPLICATION_ID);
-        return this.updateChain()
+        return super.updateChain()
                 .where(applicationColumn.eq(applicationId))
                 .remove();
     }
@@ -305,7 +348,7 @@ public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity>
     public boolean deleteApplicationVersionData(Long applicationId, Long versionId) {
         QueryColumn applicationColumn = new QueryColumn(QueryWrapperUtils.APPLICATION_ID);
         QueryColumn versionTagColumn = new QueryColumn(QueryWrapperUtils.VERSION_TAG);
-        return this.updateChain()
+        return super.updateChain()
                 .where(applicationColumn.eq(applicationId).and(versionTagColumn.eq(versionId)))
                 .remove();
     }

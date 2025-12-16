@@ -5,6 +5,7 @@ import com.cmsr.onebase.framework.orm.entity.BaseAppEntity;
 import com.mybatisflex.core.BaseMapper;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.*;
+import com.mybatisflex.core.update.UpdateChain;
 import com.mybatisflex.core.util.CollectionUtil;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +34,48 @@ public class BaseAppRepository<M extends BaseMapper<T>, T extends BaseAppEntity>
         Long applicationId = ApplicationManager.getApplicationId();
         queryWrapper.and(applicationColumn.eq(applicationId).when(!ApplicationManager.isIgnoreApplicationCondition()));
     }
+
+
+    //region ===== 删除（删）操作 =====
+
+    /**
+     * <p>根据查询条件删除数据。
+     *
+     * @param query 查询条件
+     * @return {@code true} 删除成功，{@code false} 删除失败。
+     */
+    @Override
+    public boolean remove(QueryWrapper query) {
+        this.injectQueryFilter(query);
+        return super.remove(query);
+    }
+    //region ===== 更新（改）操作 =====
+
+    /**
+     * <p>根据查询条件更新数据。
+     *
+     * @param entity 实体类对象
+     * @param query  查询条件
+     * @return {@code true} 更新成功，{@code false} 更新失败。
+     * @apiNote 若实体类属性数据为 {@code null}，该属性不会新到数据库。
+     */
+    @Override
+    public boolean update(T entity, QueryWrapper query) {
+        this.injectQueryFilter(query);
+        return super.update(entity, query);
+    }
+
+    @Deprecated
+    @Override
+    public UpdateChain<T> updateChain() {
+        Long applicationId = ApplicationManager.getApplicationId();
+        //
+        UpdateChain<T> updateChain = super.updateChain();
+        updateChain.where(QueryWrapperUtils.APPLICATION_COLUMN.eq(applicationId).when(!ApplicationManager.isIgnoreApplicationCondition())
+        );
+        return updateChain;
+    }
+    //endregion ===== 更新（改）操作 =====
 
     //region ===== 查询（查）操作 =====
 
@@ -184,7 +227,6 @@ public class BaseAppRepository<M extends BaseMapper<T>, T extends BaseAppEntity>
      */
     @Override
     public boolean exists(QueryWrapper query) {
-        this.injectQueryFilter(query);
         return exists(CPI.getWhereQueryCondition(query));
     }
 
@@ -238,7 +280,7 @@ public class BaseAppRepository<M extends BaseMapper<T>, T extends BaseAppEntity>
 
     public boolean deleteAllApplicationData(Long applicationId) {
         QueryColumn applicationColumn = new QueryColumn(QueryWrapperUtils.APPLICATION_ID);
-        return this.updateChain()
+        return super.updateChain()
                 .where(applicationColumn.eq(applicationId))
                 .remove();
     }
