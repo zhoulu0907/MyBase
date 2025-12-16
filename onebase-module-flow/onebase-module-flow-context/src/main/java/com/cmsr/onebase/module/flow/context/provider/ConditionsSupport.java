@@ -1,5 +1,7 @@
-package com.cmsr.onebase.module.flow.context.condition;
+package com.cmsr.onebase.module.flow.context.provider;
 
+import com.cmsr.onebase.module.flow.context.condition.ConditionItem;
+import com.cmsr.onebase.module.flow.context.condition.Conditions;
 import com.cmsr.onebase.module.flow.context.enums.OpEnum;
 import com.cmsr.onebase.module.flow.context.enums.OperatorTypeEnum;
 import com.cmsr.onebase.module.flow.context.express.AndExpression;
@@ -15,7 +17,7 @@ import java.util.List;
  */
 public class ConditionsSupport {
 
-    public static OrExpression convertToOrExpresses(List<Conditions> conditions) {
+    protected static OrExpression convertToOrExpresses(List<Conditions> conditions) {
         List<AndExpression> andExpressions = new ArrayList<>();
         if (conditions != null) {
             for (Conditions condition : conditions) {
@@ -41,7 +43,7 @@ public class ConditionsSupport {
         return andExpression;
     }
 
-    public static ExpressionItem convertToExpressesItem(ConditionItem conditionItem) {
+    protected static ExpressionItem convertToExpressesItem(ConditionItem conditionItem) {
         ExpressionItem expressionItem = new ExpressionItem();
         expressionItem.setFieldKey(conditionItem.getFieldKey());
         expressionItem.setOp(OpEnum.getByName(conditionItem.getOp()));
