@@ -1,10 +1,8 @@
-import { Form, Input, Switch } from '@arco-design/web-react';
+import { Input, Switch } from '@arco-design/web-react';
 import { useSignals } from '@preact/signals-react/runtime';
 import { useQuickEntrySection } from '../hooks/useQuickEntrySection';
 import type { QuickEntryGroupConfig, QuickEntryTitleConfig } from '../types';
 import styles from './index.module.less';
-
-const FormItem = Form.Item;
 
 interface TitleConfigProps {
   cpID: string;
@@ -38,24 +36,26 @@ const TitleConfig = ({ cpID }: TitleConfigProps) => {
 
   return (
     <div className={styles.titleConfig}>
-      <Form layout="horizontal" labelAlign="left">
-        <FormItem label="标题名称" layout="vertical">
-          <Input
-            value={titleConfig.titleName}
-            onChange={(value) => handleTitleConfigChange({ titleName: value })}
-            placeholder="请输入标题名称"
-          />
-        </FormItem>
-        <FormItem label="显示标题" labelCol={{ span: 8 }} wrapperCol={{ span: 4, offset: 12 }}>
-          <Switch checked={titleConfig.showTitle} onChange={(value) => handleTitleConfigChange({ showTitle: value })} />
-        </FormItem>
-        <FormItem label="查看更多" labelCol={{ span: 8 }} wrapperCol={{ span: 4, offset: 12 }}>
-          <Switch checked={titleConfig.showMore} onChange={(value) => handleTitleConfigChange({ showMore: value })} />
-        </FormItem>
-        <FormItem label="分组" labelCol={{ span: 8 }} wrapperCol={{ span: 4, offset: 12 }}>
-          <Switch checked={titleConfig.enableGroup} onChange={handleEnableGroupChange} />
-        </FormItem>
-      </Form>
+      <div className={styles.formItem}>
+        <label>标题名称</label>
+        <Input
+          value={titleConfig.titleName}
+          onChange={(value) => handleTitleConfigChange({ titleName: value })}
+          placeholder="请输入标题名称"
+        />
+      </div>
+      <div className={styles.formItem}>
+        <label>显示标题</label>
+        <Switch checked={titleConfig.showTitle} onChange={(value) => handleTitleConfigChange({ showTitle: value })} />
+      </div>
+      <div className={styles.formItem}>
+        <label>查看更多</label>
+        <Switch checked={titleConfig.showMore} onChange={(value) => handleTitleConfigChange({ showMore: value })} />
+      </div>
+      <div className={styles.formItem}>
+        <label>分组</label>
+        <Switch checked={titleConfig.enableGroup} onChange={handleEnableGroupChange} />
+      </div>
     </div>
   );
 };
