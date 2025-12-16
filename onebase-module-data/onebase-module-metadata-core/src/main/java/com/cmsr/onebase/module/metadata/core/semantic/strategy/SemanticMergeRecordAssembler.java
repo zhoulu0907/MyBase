@@ -286,9 +286,14 @@ public class SemanticMergeRecordAssembler {
 
         Map<String, List<SemanticFieldSchemaDTO>> relationAttrsByTargetId = new HashMap<>();
         if (!targetUuids.isEmpty()) {
-            QueryWrapper fqw = new QueryWrapper();
-            fqw.in(MetadataEntityFieldDO::getEntityUuid, targetUuids);
-            List<MetadataEntityFieldDO> allTargetFields = entityFieldRepository.list(fqw);
+            // 使用 fieldCoreService 查询目标实体字段，确保正确的 version_tag 和 application_id 过滤
+            List<MetadataEntityFieldDO> allTargetFields = new ArrayList<>();
+            for (String targetUuid : targetUuids) {
+                List<MetadataEntityFieldDO> targetFields = fieldCoreService.getEntityFieldListByEntityUuid(targetUuid);
+                if (targetFields != null) {
+                    allTargetFields.addAll(targetFields);
+                }
+            }
             List<SemanticFieldSchemaDTO> allSchemas = buildFieldSchemas(allTargetFields);
             Map<String, String> fieldIdToEntityId = new HashMap<>();
             for (MetadataEntityFieldDO f : allTargetFields) {
