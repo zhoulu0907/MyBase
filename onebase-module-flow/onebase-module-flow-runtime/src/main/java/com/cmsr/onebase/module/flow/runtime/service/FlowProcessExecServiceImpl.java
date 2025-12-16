@@ -133,9 +133,6 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
                 fieldTypeEnum = fieldSchema.getFieldTypeEnum();
             }
             Object convertValue = FieldTypeConvertor.convert(fieldTypeEnum, value);
-            if (convertValue == null) {
-                convertValue = "";
-            }
             result.put(tableName + "." + fieldName, convertValue);
         }
         return result;
