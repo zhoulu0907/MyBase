@@ -2,17 +2,20 @@ package com.cmsr.onebase.module.etl.build.service;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
+import com.cmsr.onebase.module.etl.common.entity.JdbcDatasourceConfig;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.EtlDatasourceDO;
 import com.cmsr.onebase.module.etl.core.enums.EtlErrorCodeConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.metadata.type.DatabaseType;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -24,19 +27,19 @@ public class DatasourceFactory {
 
     public DataSource constructDataSource(EtlDatasourceDO datasourceDO, boolean oneshot) {
         // 1. 获取数据库类型
-        Map<String, Object> connectionProperties = JsonUtils.parseObject(datasourceDO.getConfig(), Map.class);
-        String connectMode = (String) connectionProperties.getOrDefault("connectMode", "default");
-        String jdbcConnection = (String) connectionProperties.get("jdbcUrl");
+        JdbcDatasourceConfig jdbcDatasourceConfig = JsonUtils.parseObject(datasourceDO.getConfig(), JdbcDatasourceConfig.class);
+        String connectMode = jdbcDatasourceConfig.getConnectMode();
+        String jdbcConnection = jdbcDatasourceConfig.getJdbcUrl();
         if (StringUtils.isBlank(jdbcConnection)) {
-            if (StringUtils.equalsIgnoreCase(connectMode, "default")) {
-                jdbcConnection = buildJdbcConnectionString(datasourceDO.getDatasourceType(), connectionProperties);
+            if (Strings.CI.equals(connectMode, "default")) {
+                jdbcConnection = buildJdbcConnectionString(datasourceDO.getDatasourceType(), jdbcDatasourceConfig);
             } else {
                 throw new IllegalStateException();
             }
         }
         // 2. 创建DataSource
-        String username = (String) connectionProperties.get("username");
-        String password = (String) connectionProperties.get("password");
+        String username = jdbcDatasourceConfig.getUsername();
+        String password = JsonUtils.parseTree(datasourceDO.getConfig()).get("password").asText();
         if (StringUtils.isBlank(username) || StringUtils.isBlank(password)) {
             throw ServiceExceptionUtil.exception(EtlErrorCodeConstants.DATASOURCE_PROPERTY_INSUFFICIENT);
         }
@@ -77,20 +80,25 @@ public class DatasourceFactory {
         return parseType;
     }
 
-    public static String buildJdbcConnectionString(String databaseType, Map<String, Object> connectionProperties) {
+    public static String buildJdbcConnectionString(String databaseType, JdbcDatasourceConfig jdbcDatasourceConfig) {
         DatabaseType dbType = parseDatabaseType(databaseType);
         // 直接使用Anyline提供的URL模板
         String jdbcTemplate = dbType.url();
         // 魔法处理，Anyline的PostgreSQL类数据源URL定义有错误
-        if (StringUtils.equals("org.postgresql.Driver", dbType.driver())) {
+        if (Strings.CS.equals("org.postgresql.Driver", dbType.driver())) {
             jdbcTemplate = "jdbc:postgresql://{host}:{port:5432}/{database}";
         }
 
         StringBuffer sb = new StringBuffer();
         Matcher matcher = PARAM_PATTERN.matcher(jdbcTemplate);
+        Map<String, String> properties = new HashMap<>();
+        properties.put("driver", dbType.driver());
+        properties.put("host", jdbcDatasourceConfig.getHost());
+        properties.put("port", jdbcDatasourceConfig.getPort());
+        properties.put("database", jdbcDatasourceConfig.getDatabase());
         while (matcher.find()) {
             String propertyName = matcher.group(1);
-            Object property = connectionProperties.get(propertyName);
+            Object property = properties.get(propertyName);
             if (ObjectUtils.isEmpty(property)) {
                 throw ServiceExceptionUtil.exception(EtlErrorCodeConstants.DATASOURCE_PROPERTY_INSUFFICIENT);
             }
