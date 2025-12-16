@@ -2,9 +2,7 @@ package com.cmsr.onebase.module.system.build.controller.user;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
 import com.cmsr.onebase.module.system.service.user.UserService;
-import com.cmsr.onebase.module.system.vo.corpapprelation.CorpRelationAppReqVO;
 import com.cmsr.onebase.module.system.vo.user.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -15,13 +13,11 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 
-@Tag(name = "空间外部用户服务 - 用户")
+@Tag(name = "空间外部用户服务 - 三方用户")
 @RestController
-@RequestMapping("/system/third")
+@RequestMapping("/system/third-user")
 @Validated
 public class TenantThirdUserController {
 
@@ -29,7 +25,7 @@ public class TenantThirdUserController {
     private UserService userService;
 
     @PostMapping("/create")
-    @Operation(summary = "新增用户")
+    @Operation(summary = "新增三方用户")
     @PreAuthorize("@ss.hasPermission('tenant:user:create')")
     public CommonResult<Long> createUserAndUserAppRelation(@Valid @RequestBody ThirdUserAppCombinedInsertReqVO reqVO) {
         Long id = userService.createUserAndUserAppRelation(reqVO);
@@ -38,7 +34,7 @@ public class TenantThirdUserController {
 
 
     @PostMapping("/update")
-    @Operation(summary = "编辑用户")
+    @Operation(summary = "编辑三方用户")
     @PreAuthorize("@ss.hasPermission('tenant:user:update')")
     public CommonResult<Long> updateUserAndUserAppRelation(@RequestBody @Valid ThirdUserAppCombinedUpdateReqVO reqVO) {
         Long id = userService.updateUserAndUserAppRelation(reqVO);
@@ -46,7 +42,7 @@ public class TenantThirdUserController {
     }
 
     @PostMapping("/update-password")
-    @Operation(summary = "重置用户密码")
+    @Operation(summary = "重置三方用户密码")
     @PreAuthorize("@ss.hasPermission('tenant:user:update-password')")
     public CommonResult<Boolean> updateUserPassword(@Valid @RequestBody ThirdUserUpdatePasswordReqVO reqVO) {
         userService.updateThirdUserPassword(reqVO.getId(), reqVO.getPassword());
@@ -54,7 +50,7 @@ public class TenantThirdUserController {
     }
 
     @PostMapping("/update-status")
-    @Operation(summary = "修改用户状态")
+    @Operation(summary = "修改三方用户状态")
     @PreAuthorize("@ss.hasPermission('tenant:user:update')")
     public CommonResult<Boolean> updateUserStatus(@Valid @RequestBody UserUpdateStatusReqVO reqVO) {
         userService.updateUserStatus(reqVO.getId(), reqVO.getStatus());
@@ -62,7 +58,7 @@ public class TenantThirdUserController {
     }
 
     @PostMapping("/delete")
-    @Operation(summary = "删除用户")
+    @Operation(summary = "删除三方用户")
     @Parameter(name = "id", description = "编号", required = true, example = "1024")
     @PreAuthorize("@ss.hasPermission('tenant:user:delete')")
     public CommonResult<Boolean> deleteUser(@RequestParam("id") Long id) {

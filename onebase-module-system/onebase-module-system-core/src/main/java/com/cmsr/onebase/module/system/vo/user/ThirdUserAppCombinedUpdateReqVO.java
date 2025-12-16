@@ -3,7 +3,6 @@ package com.cmsr.onebase.module.system.vo.user;
 import com.alibaba.excel.annotation.ExcelProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.util.List;
@@ -13,13 +12,13 @@ public class ThirdUserAppCombinedUpdateReqVO {
 
     @Schema(description = "用户id", example = "onebase")
     @NotBlank(message = "用户id不能为空")
-    private Long userId;
-
-    @Schema(description = "手机", example = "onebase")
-    private String mobile;
+    private Long id;
 
     @ExcelProperty("用户名称")
     private String nickName;
+
+    @Schema(description = "用户手机", example = "156")
+    private String mobile;
 
     @Schema(description = "用户邮箱", example = "a@b.cn")
     private String email;

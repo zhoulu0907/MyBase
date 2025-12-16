@@ -8,7 +8,6 @@ import com.cmsr.onebase.framework.common.biz.security.dto.LoginFailureResultDTO;
 import com.cmsr.onebase.framework.common.biz.security.dto.PasswordExpiryCheckDTO;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.enums.RunModeEnum;
-import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
@@ -61,8 +60,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
@@ -164,7 +161,6 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         // 校验账号是否存在     //验证码登录，不需要在验证密码
         return userService.getUserByMobile(mobile);
     }
-
 
 
     private void checkUserPsdAndStatus(String account, String password, AdminUserDO user, LoginLogTypeEnum logTypeEnum) {
@@ -303,9 +299,6 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
 
     @Override
     public ThirdAuthLoginRespVO thirdLogin(ThirdAuthLoginReqVO reqVO) {
-        //  解密原文
-        reqVO.setPassword(pwdEnHelper.decryptHexStr(reqVO.getPassword()));
-
         Long appId = reqVO.getAppId();
         // 校验验证码
         thirdValidateCaptcha(reqVO);
@@ -314,30 +307,32 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         AtomicReference<ThirdAuthLoginRespVO> authLoginRespVO = new AtomicReference<>();
         // 设置应用所在的租户环境
         TenantUtils.execute(tenanId, () -> {
-            AdminUserDO user= null;
-            boolean firstFlag=false;
+            AdminUserDO user = null;
+            boolean firstFlag = false;
+            //  解密原文
+            reqVO.setPassword(pwdEnHelper.decryptHexStr(reqVO.getPassword()));
             // 判断登录方式
             if (LongTypeEnum.PASSWORD.getCode().equals(reqVO.getLoginType())) {
                 // 使用手机密码，进行登录
-                  user = mobileAuthenticate(reqVO.getMobile(), reqVO.getPassword());
-            }
-            if (LongTypeEnum.VERIFYCODE.getCode().equals(reqVO.getLoginType())) {
+                user = mobileAuthenticate(reqVO.getMobile(), reqVO.getPassword());
+            } else if (LongTypeEnum.VERIFYCODE.getCode().equals(reqVO.getLoginType())) {
                 // 使用手机验证码，进行登录
                 validateVerfiyCode(reqVO);
                 user = thirdAuthenticate(reqVO.getMobile(), reqVO.getVerifyCode());
                 if (null == user) {
                     // 如果用户不存在，则注册用户
-                    user = userService.createThirdUser(reqVO);
-                    firstFlag=true;
+                    // user = userService.createThirdUser(reqVO);
+                    // firstFlag = true;
+                    throw exception(AUTH_LOGIN_NO_EXISTS);
                 }
             }
 
-            AuthLoginRespVO     vo=    createAfterLoginSuccess(user.getUserType(), user.getCorpId(), reqVO.getAppId(), user.getId(), reqVO.getMobile(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_MOBILE);
+            AuthLoginRespVO vo = createAfterLoginSuccess(user.getUserType(), user.getCorpId(), reqVO.getAppId(), user.getId(), reqVO.getMobile(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_MOBILE);
             ThirdAuthLoginRespVO thirdAuthLoginRespVO = BeanUtils.toBean(vo, ThirdAuthLoginRespVO.class);
             thirdAuthLoginRespVO.setUserAppRelationFlag(false);
-            if(!firstFlag){
+            if (!firstFlag) {
                 // 判断用户是否关联应用
-                thirdAuthLoginRespVO.setUserAppRelationFlag(findUserAppRelationFlag(appId,user.getId()));
+                thirdAuthLoginRespVO.setUserAppRelationFlag(findUserAppRelationFlag(appId, user.getId()));
             }
             thirdAuthLoginRespVO.setFistLoginFlag(firstFlag);
 
@@ -362,7 +357,7 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
     @Override
     public void forgetPassword(UserForgetPasswordReqVO reqVO) {
         // 1.通过手机号，获取 用户
-        AdminUserDO user =  userService.getUserByMobile(reqVO.getMobile());
+        AdminUserDO user = userService.getUserByMobile(reqVO.getMobile());
 
         // 2. 弱密码校验
         //  securityConfigApi.validatePassword(reqVO.getPassword());
@@ -374,15 +369,14 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         LogRecordContext.putVariable("newPassword", THIRD_USER_PASSWORD);
     }
 
-    private boolean findUserAppRelationFlag(Long appId,Long userId) {
-        List<UserAppVO>  voList= userAppRelationService.getAppByUserId(userId);
+    private boolean findUserAppRelationFlag(Long appId, Long userId) {
+        List<UserAppVO> voList = userAppRelationService.getAppByUserId(userId);
         if (!CollectionUtils.isEmpty(voList)) {
-            return  voList.stream()
-                    .anyMatch(userAppVO ->  null !=userAppVO.getAppId() && userAppVO.getAppId().equals(appId));
+            return voList.stream()
+                    .anyMatch(userAppVO -> null != userAppVO.getAppId() && userAppVO.getAppId().equals(appId));
         }
         return false;
     }
-
 
 
     private void validateVerfiyCode(ThirdAuthLoginReqVO reqVO) {
@@ -394,7 +388,7 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
 
         // 2. 如果配置了验证码
         if (StringUtils.isBlank(reqVO.getVerifyCode())) {
-            return ;
+            return;
             // throw exception(AUTH_VERIFY_CODE_NULL);
         }
 
