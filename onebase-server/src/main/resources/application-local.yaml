@@ -44,16 +44,6 @@ onebase:
     enable-create-app: true # 测试环境，暂时允许平台租户创建应用，方便登录接口测试；
   security:
     mock-enable: false
-    permit-all-urls: # 显式放行认证、注册、刷新、验证码、以及必要静态资源/健康检查，避免 @PermitAll 被覆盖导致 401
-      - /platform/system/auth/**
-      - /runtime/system/auth/**
-      - /admin-api/system/auth/**
-      - /platform/system/captcha/**
-      - /runtime/system/captcha/**
-      - /admin-api/system/captcha/**
-      - /actuator/health
-      - /swagger-ui/**
-      - /v3/api-docs/**
   access-log: # 访问日志的配置项
     enable: false
   web:

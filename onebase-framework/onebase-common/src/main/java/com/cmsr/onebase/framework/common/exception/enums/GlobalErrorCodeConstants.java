@@ -25,6 +25,7 @@ public interface GlobalErrorCodeConstants {
     ErrorCode LOCKED             = new ErrorCode(423, "请求失败，请稍后重试"); // 并发请求，不允许
     ErrorCode TOO_MANY_REQUESTS  = new ErrorCode(429, "请求过于频繁，请稍后重试");
     ErrorCode SEESION_TIMEOUT     = new ErrorCode(401, "会话超时，请重新登录");
+    ErrorCode FORBIDDEN_APP     = new ErrorCode(403, "没有该应用的操作权限");
 
     // ========== 服务端错误段 ==========
 
