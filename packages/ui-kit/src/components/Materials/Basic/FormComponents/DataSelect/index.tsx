@@ -50,7 +50,7 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
   const [uiState, setUiState] = useState<{ previewVisible: boolean }>({ previewVisible: false });
   const [dataState, setDataState] = useState<any>('');
   const [options, setOptions] = useState<any[]>([]);
-  const [optionsOrignalList, setOptionsOrignalList] = useState<any[]>([]);
+  const [dataList, setDataList] = useState<any[]>([]);
 
   useEffect(() => {
     if (!runtime) {
@@ -99,7 +99,7 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
       }
     },
     selectDropdown: (value: any, option: any) => {
-      const data = optionsOrignalList.find(option => option.id === value);
+      const data = dataList.find(item => item.id === value);
       const name = option?.labelTitle ?? option.children ?? '';
       const nextValue = value ? { id: value, name } : '';
       setDataState(nextValue);
@@ -158,7 +158,7 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
         value: item?.id ?? item?.id
       }));
       setOptions(opts);
-      setOptionsOrignalList(list);
+      setDataList(list);
     };
     if (helpers.isDropdownMode()) {
       fetchOptions();
