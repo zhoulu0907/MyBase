@@ -1,13 +1,13 @@
 import { memo } from 'react';
 import { nanoid } from 'nanoid';
-import { DatePicker, Form } from '@arco-design/mobile-react';
+import { DatePicker, Ellipsis, Form } from '@arco-design/mobile-react';
 import { ItemType } from '@arco-design/mobile-react/cjs/date-picker';
 import { ValidatorType, ITypeRules } from '@arco-design/mobile-utils';
 import { FORM_COMPONENT_TYPES, DATE_OPTIONS, DATE_VALUES, STATUS_OPTIONS, STATUS_VALUES, FormSchema } from '@onebase/ui-kit';
 type XDatePickerConfig = typeof FormSchema.XDatePickerSchema.config;
 import '../index.css';
 
-const XDatePicker = memo((props: XDatePickerConfig & { runtime?: boolean; detailMode?: boolean }) => {
+const XDatePicker = memo((props: XDatePickerConfig & { runtime?: boolean; detailMode?: boolean; form?: any; }) => {
   const {
     label,
     dataField,
@@ -17,13 +17,13 @@ const XDatePicker = memo((props: XDatePickerConfig & { runtime?: boolean; detail
     align,
     layout,
     runtime = true,
-    detailMode
+    detailMode,
+    form,
+    defaultValueConfig
   } = props;
 
   // 生成唯一的字段ID
-  const fieldId = dataField && dataField.length > 0
-    ? dataField[dataField.length - 1]
-    : `${FORM_COMPONENT_TYPES.INPUT_TEXT}_${nanoid()}`;
+  const fieldId = dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.DATE_PICKER}_${nanoid()}`
 
   const currentDateType = dateType || DATE_VALUES[DATE_OPTIONS.DATE];
 
@@ -41,10 +41,10 @@ const XDatePicker = memo((props: XDatePickerConfig & { runtime?: boolean; detail
         mode.push('year', 'month', 'date');
         break;
       case DATE_VALUES[DATE_OPTIONS.FULL]:
-        mode.push('year', 'month', 'month', 'hour', 'minute', 'second');
+        mode.push('year', 'month', 'date', 'hour', 'minute');
         break;
       default:
-        mode.push('date');
+        mode.push('year', 'month', 'date');
     };
 
     return (
@@ -83,7 +83,8 @@ const XDatePicker = memo((props: XDatePickerConfig & { runtime?: boolean; detail
       className="inputTextWrapperOBMobile"
       field={fieldId}
       rules={rules}
-      label={label.display && label.text}
+      label={label.display && <Ellipsis text={label.text} />}
+      initialValue={form?.getFieldValue(fieldId)}
       style={{
         textAlign: align,
         pointerEvents: (!runtime || detailMode) ? 'none' : 'unset',

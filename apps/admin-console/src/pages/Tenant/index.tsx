@@ -1,4 +1,4 @@
-import { copyToClipboard, formatTimestamp, simplifyUrl } from '@/utils/date';
+import { formatTimestamp, simplifyUrl } from '@/utils/date';
 import { getPlatformFeDomain } from '@/utils/domain';
 import { Button, Dropdown, Input, Menu, Message, Modal, Pagination, Select, Space, Tag } from '@arco-design/web-react';
 import {
@@ -11,6 +11,7 @@ import {
   IconRecord,
   IconSearch
 } from '@arco-design/web-react/icon';
+import { copyToClipboard } from '@onebase/common';
 import {
   deletePlatformTenantApi,
   getPlatformTenantListApi,

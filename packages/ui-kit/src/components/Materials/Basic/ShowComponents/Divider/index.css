@@ -46,6 +46,7 @@
   }
 
   .decor-title-style5 {
+    min-height: 14px;
     border-left: 4px solid;
     line-height: 14px;
     margin-bottom: 4px;

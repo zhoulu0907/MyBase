@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { Modal, Radio, InputNumber, Checkbox, Select, Form, Tooltip } from '@arco-design/web-react';
 import { IconQuestionCircle } from '@arco-design/web-react/icon';
-import type { AutoNumberRule, AutoNumberRuleResponce } from '../types';
+import type { AutoNumberRuleResponce } from '../types';
 import {
   AUTO_CODE_NUMBER_MODE,
   AUTO_CODE_RESET_CYCLE,
@@ -13,7 +13,7 @@ import styles from '../index.module.less';
 interface AutoCodeNumberSettingsModalProps {
   visible: boolean;
   onVisibleChange: (visible: boolean) => void;
-  onConfirm: (config: AutoNumberRule) => void;
+  onConfirm: (config: AutoNumberRuleResponce) => void;
   initialConfig?: AutoNumberRuleResponce;
 }
 
@@ -26,14 +26,16 @@ const AutoCodeNumberSettingsModal: React.FC<AutoCodeNumberSettingsModalProps> = 
   const [form] = Form.useForm();
   const numberMode = Form.useWatch(['numberMode'], form)?.numberMode;
 
-  const initialValues = {
-    ...AUTO_CODE_SEQUENCE_DEFAULT_CONFIG,
-    rules: []
-  };
+  const initialValues = useMemo(
+    () => ({
+      ...AUTO_CODE_SEQUENCE_DEFAULT_CONFIG
+    }),
+    []
+  );
 
   const handleConfirm = () => {
     form.validate().then((values) => {
-      onConfirm(values);
+      onConfirm(values as AutoNumberRuleResponce);
       onVisibleChange(false);
     });
   };
@@ -59,7 +61,7 @@ const AutoCodeNumberSettingsModal: React.FC<AutoCodeNumberSettingsModalProps> = 
         form.setFieldsValue(initialValues);
       }
     }
-  }, [visible, initialConfig]);
+  }, [visible, initialConfig, form, initialValues]);
 
   return (
     <Modal

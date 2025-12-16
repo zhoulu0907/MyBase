@@ -1,9 +1,9 @@
-import { Form, Uploader, Toast, Loading } from '@arco-design/mobile-react';
+import { Form, Uploader, Toast, Loading, Ellipsis } from '@arco-design/mobile-react';
 import { type UploadItem } from '@arco-design/mobile-react/lib/Upload';
 import { IconDelete, IconClose, IconDownload, IconFile } from '@arco-design/mobile-react/esm/icon';
 import { uploadFile } from '@onebase/platform-center';
 import { nanoid } from 'nanoid';
-import { memo, useState } from 'react';
+import { memo, useState, useEffect } from 'react';
 import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, FormSchema } from '@onebase/ui-kit';
 import '../index.css';
 import './index.css'
@@ -15,6 +15,8 @@ interface FileItem {
   url?: string;
   status?: "loaded" | "loading" | "error";
   file?: File;
+  name?: string;
+  id?: string;
 }
 
 const XFileUpload = memo((props: XFileUploadConfig & { runtime?: boolean; detailMode?: boolean; form?: any; }) => {
@@ -30,9 +32,15 @@ const XFileUpload = memo((props: XFileUploadConfig & { runtime?: boolean; detail
   } = props;
 
   const [filesList, setFilesList] = useState<FileItem[]>([]);
-
   const fieldId =
     dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.FILE_UPLOAD}_${nanoid()}`;
+
+  useEffect(() => {
+    const fieldValue = form?.getFieldValue(fieldId);
+    if (fieldValue && Array.isArray(fieldValue)) {
+      setFilesList(fieldValue);
+    }
+  }, [form, fieldId]);
 
   const handleUpload = async ({ file }: { file: File }) => {
     const formData = new FormData();
@@ -77,12 +85,13 @@ const XFileUpload = memo((props: XFileUploadConfig & { runtime?: boolean; detail
       }
       return <IconFile style={{ fontSize: '40px' }} />
     }
+    
     return (
       <div className="uplaodList-text">
-        {filesList.map(({ file, status, url }, index) => (
+        {filesList.map(({ file, status, url, name }, index) => (
           <div key={index} className="uplaodList-text-item">
             {getFileIcon(file as UploadItem)}
-            <div className="uplaodList-text-item-name">{file?.name}</div>
+            <div className="uplaodList-text-item-name">{file?.name || name}</div>
             {status && status !== 'loaded' ? (
               <div className="uplaodList-text-item-process">
                 <Loading type="circle" radius={7} />
@@ -116,7 +125,7 @@ const XFileUpload = memo((props: XFileUploadConfig & { runtime?: boolean; detail
       <Form.Item
         className="inputTextWrapperOBMobile fileUploadWrapperOBMobile"
         label={
-          label.display && label.text
+          label.display && <Ellipsis text={label.text} />
         }
         layout="vertical"
         field={fieldId}
@@ -141,7 +150,7 @@ const XFileUpload = memo((props: XFileUploadConfig & { runtime?: boolean; detail
               content: '文件数量超出限制',
               duration: 2000
             })}
-          disabled={status !== STATUS_VALUES[STATUS_OPTIONS.DEFAULT] || status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode}
+          disabled={status !== STATUS_VALUES[STATUS_OPTIONS.DEFAULT] || detailMode}
           style={{
             width: '100%'
           }}

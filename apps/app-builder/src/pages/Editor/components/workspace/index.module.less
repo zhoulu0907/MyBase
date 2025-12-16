@@ -4,6 +4,12 @@
 @workspace-header-height: 32px;
 @workspace-padding: 20px;
 
+.mobileeditordraglist {
+  flex: 1 1 0%;
+  width: auto;
+  height: calc(100vh - var(--editor-header-height));
+}
+
 .editorWorkspace {
   flex: 1 1 0%;
   width: auto;
@@ -172,9 +178,8 @@
       width: 490px;
       margin: 0 auto;
       .workspaceContent {
-        background-color: #F7F8FA;
+        background-color: #f7f8fa;
         box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
-        padding: 0;
         & > div {
           width: calc(100% - 8px) !important;
         }

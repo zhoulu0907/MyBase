@@ -1,7 +1,7 @@
 import { Form, Modal } from '@arco-design/web-react';
 import React, { useEffect, useState } from 'react';
 
-import { getFieldCheckTypeApi } from '@onebase/app';
+import { getFieldCheckTypeApi, type AppEntityField, type EntityFieldValidationTypes } from '@onebase/app';
 import styles from '../../index.module.less';
 import ConditionEditor from '@/pages/CreateApp/pages/IntegratedManagement/triggerEditor/components/condition-editor';
 
@@ -15,7 +15,8 @@ interface FilterDataModalProps {
 
 const PROPSNAME = {
   DISPLAYFIELDSOPTIONS: 'displayFieldsOptions',
-  FILTERCONDITION: 'filterCondition'
+  FILTERCONDITION: 'filterCondition',
+  SELECTEDDATASOURCE: 'selectedDataSource'
 };
 
 const FilterDataModal: React.FC<FilterDataModalProps> = ({ visible, item, configs, onCancel, onOk }) => {
@@ -30,11 +31,13 @@ const FilterDataModal: React.FC<FilterDataModalProps> = ({ visible, item, config
   }, [visible]);
 
   const initialData = async () => {
-    const [dataFilters, fieldIds] = (configs[PROPSNAME.DISPLAYFIELDSOPTIONS] as any[]).reduce(
+    const displayFieldsOptions = configs[PROPSNAME.DISPLAYFIELDSOPTIONS];
+    const tableName = configs[PROPSNAME.SELECTEDDATASOURCE].tableName;
+    const [dataFilters, fieldIds] = (displayFieldsOptions as any[]).reduce(
       (acc, item: any) => {
         const [dataFilters, fieldIds] = acc;
         dataFilters.push({
-          key: item.fieldId,
+          key: `${tableName}.${item.fieldName}`,
           title: item.displayName,
           fieldType: item.fieldType
         });
@@ -45,13 +48,18 @@ const FilterDataModal: React.FC<FilterDataModalProps> = ({ visible, item, config
     );
     setDataFilters([
       {
-        key: configs[item.key].entityId,
+        key: configs[item.key].entityUuid,
         title: configs[item.key].entityName,
         children: dataFilters
       }
     ]);
     if (fieldIds?.length) {
       const newValidationTypes = await getFieldCheckTypeApi(fieldIds);
+      newValidationTypes.forEach((item: EntityFieldValidationTypes) => {
+        const fieldName =
+          displayFieldsOptions.find((field: AppEntityField) => field.fieldId == item.fieldId)?.fieldName || '';
+        item.fieldKey = `${tableName}.${fieldName}`;
+      });
       setValidationTypes(newValidationTypes);
     }
     setTimeout(() => {
@@ -83,7 +91,7 @@ const FilterDataModal: React.FC<FilterDataModalProps> = ({ visible, item, config
           <Form layout="vertical" form={payloadForm}>
             {/* 添加过滤条件 */}
             <ConditionEditor
-              nodeId={configs[item.key].entityId}
+              nodeId={configs[item.key].entityUuid}
               label="添加过滤条件"
               required
               form={payloadForm}

@@ -116,14 +116,17 @@ export class HttpClient {
           }
         });
 
+        // 如果是 blob 响应类型，直接返回，不进行 JSON 格式检查
+        if (response.config.responseType === 'blob') {
+          return response;
+        }
+
         // 统一处理响应数据
         const { data } = response;
         if (data && typeof data === 'object') {
           if (data.code !== 0) {
             Message.error({ id: 'http-error', content: data.msg || '请求失败' });
             if (data.code === 401) {
-              console.log(TokenManager.getTokenInfo());
-
               const loginURL = TokenManager.getTokenInfo()?.loginURL;
               const tenantId = TokenManager.getTokenInfo()?.tenantId;
 
@@ -281,15 +284,52 @@ export class HttpClient {
 
   /**
    * 下载文件
+   * @param url 下载地址
+   * @param filename 文件名（可选）
+   * @param config 请求配置（可选）
+   * @param returnUrl 是否返回 Blob URL 而不是直接下载（默认 false）
+   * @returns 如果 returnUrl 为 true，返回 Blob URL；否则返回 void
    */
-  public async download(url: string, filename?: string, config?: AxiosRequestConfig): Promise<void> {
+  public async download(
+    url: string,
+    filename?: string,
+    config?: AxiosRequestConfig,
+    returnUrl: boolean = false
+  ): Promise<string | void> {
     const response = await this.instance.get(url, {
       ...config,
       responseType: 'blob'
     });
 
+    // 检查响应是否为错误（某些服务器可能返回 JSON 格式的错误信息）
+    if (response.data instanceof Blob && response.data.type === 'application/json' && response.data.size < 1024) {
+      // 尝试解析错误信息（克隆 Blob 以避免消耗原始数据）
+      const clonedBlob = response.data.slice();
+      const text = await clonedBlob.text();
+      try {
+        const errorData = JSON.parse(text);
+        if (errorData.code !== 0) {
+          Message.error({ id: 'http-error', content: errorData.msg || '请求失败' });
+          throw new Error(errorData.msg || '请求失败');
+        }
+      } catch (e) {
+        // 如果不是 JSON 格式或解析失败，继续处理
+        if (e instanceof Error && e.message === '请求失败') {
+          throw e;
+        }
+        // 忽略 JSON 解析错误，继续处理（可能是正常的文件内容）
+      }
+    }
+
     const blob = new Blob([response.data]);
     const downloadUrl = window.URL.createObjectURL(blob);
+
+    // 如果只需要返回 URL（用于预览），直接返回
+    if (returnUrl) {
+      return downloadUrl;
+    }
+
+    // 否则执行下载
     const link = document.createElement('a');
     link.href = downloadUrl;
     link.download = filename || 'download';

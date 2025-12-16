@@ -22,8 +22,14 @@ import {
   PageMethodV2Params,
   type AppEntityField
 } from '@onebase/app';
-import { isRuntimeEnv, pagesRuntimeSignal } from '@onebase/common';
+import {
+  isRuntimeEnv,
+  pagesRuntimeSignal,
+  SYSTEM_FIELD_CREATED_TIME,
+  SYSTEM_FIELD_UPDATED_TIME
+} from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
+import dayjs from 'dayjs';
 import PreviewRender from 'src/components/render/PreviewRender';
 import { useFormEditorSignal } from 'src/signals/page_editor';
 import { ENTITY_FIELD_TYPE } from '../../../../DataFactory/const';
@@ -45,13 +51,19 @@ type XTableSelectProps = {
 };
 
 //TODO: 优化元数据的显示内容，根据不同的类型在此显示不同的内容
-const renderCellText = (v: any) => {
+const renderCellText = (columnId: string, v: any) => {
   if (v === null || v === undefined) return '';
+
   if (typeof v === 'object') {
     if ('displayValue' in v && typeof (v as any).displayValue !== 'undefined') return (v as any).displayValue;
     if ('userName' in v && typeof (v as any).userName !== 'undefined') return (v as any).userName as any;
     return '';
   }
+
+  if (columnId === SYSTEM_FIELD_CREATED_TIME || columnId === SYSTEM_FIELD_UPDATED_TIME) {
+    return dayjs(v).format('YYYY-MM-DD HH:mm:ss');
+  }
+
   return v as any;
 };
 
@@ -69,7 +81,7 @@ const XTable = memo(
     useSignals();
     const { pageComponentSchemas: fromPageComponentSchemas, components } = useFormEditorSignal;
 
-    const { setDrawerVisible, setDrawerPageId, setDetailPageViewId } = pagesRuntimeSignal;
+    const { setDrawerVisible, setDrawerPageId, setDetailPageViewId, setEntityDataId } = pagesRuntimeSignal;
     const { runtime = true, showFromPageData, showAddBtn = true, preview } = props;
     const hasOperationPermission = true;
 
@@ -101,7 +113,8 @@ const XTable = memo(
       advancedButtonPermission,
       // operationButtonCollpaseNumber,
       operationButtonShowType,
-      refresh
+      refresh,
+      filterCondition
     } = props;
 
     const { curMenu } = menuSignal;
@@ -312,7 +325,7 @@ const XTable = memo(
                   }
                 };
                 if (!cpType) {
-                  return <span>{renderCellText(_text)}</span>;
+                  return <span>{renderCellText(columnId, _text)}</span>;
                 }
 
                 return (
@@ -325,7 +338,8 @@ const XTable = memo(
                   />
                 );
               }
-              return <span>{renderCellText(_text)}</span>;
+
+              return <span>{renderCellText(columnId, _text)}</span>;
             }
           };
         });
@@ -373,6 +387,7 @@ const XTable = memo(
         newColumns = [indexColumn, ...newColumns];
       }
 
+      console.log('newColumns: ', newColumns);
       setFinalColumns(newColumns);
     };
 
@@ -384,6 +399,7 @@ const XTable = memo(
         return;
       }
 
+      setEntityDataId('');
       showFromPageData?.(null, true);
     };
 
@@ -415,12 +431,16 @@ const XTable = memo(
 
       const req: PageMethodV2Params = {
         pageNo: tablePageNo,
-        pageSize: pageSize || 10
+        pageSize: pageSize || 10,
+        filters: filterCondition
       };
 
       const res = await dataMethodPageV2(tableName, curMenu.value?.id, req);
+      console.log('res: ', res);
 
       const mainMetaData = await getEntityFieldsWithChildren(metaData);
+
+      console.log('mainMetaData: ', mainMetaData);
 
       const { list, total } = res;
 
@@ -472,6 +492,9 @@ const XTable = memo(
           key: rowId
         };
       });
+
+      console.log('newTableData: ', newTableData);
+
       tableForm.setFieldsValue({ [id]: newTableData });
       setTableData(newTableData);
       setTableTotal(total);
@@ -500,7 +523,7 @@ const XTable = memo(
       if (!runtime) {
         return;
       }
-
+      setEntityDataId(id);
       showFromPageData?.(id, toFormPage);
     };
 
@@ -582,6 +605,7 @@ const XTable = memo(
                   }
                 };
               }}
+              rowClassName={() => 'tableRow'}
               border={border}
               borderCell={borderCell}
               showHeader={showHeader}

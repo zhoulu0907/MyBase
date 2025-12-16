@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import { nanoid } from 'nanoid';
-import { Checkbox, Form, Tag } from '@arco-design/mobile-react';
+import { Checkbox, Ellipsis, Form, Tag } from '@arco-design/mobile-react';
 import { ValidatorType, ITypeRules } from '@arco-design/mobile-utils';
 import IconSquareChecked from '@arco-design/mobile-react/esm/icon/IconSquareChecked';
 import IconSquareUnchecked from '@arco-design/mobile-react/esm/icon/IconSquareUnchecked';
@@ -33,7 +33,7 @@ const XCheckbox = memo((props: XCheckboxConfig & { runtime?: boolean; detailMode
     detailMode
   } = props;
 
-  const fieldId = dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.SELECT_MUTIPLE}_${nanoid()}`
+  const fieldId = dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.CHECKBOX}_${nanoid()}`
 
   // 根据是否为只读模式确定内容
   const renderContent = () => {
@@ -64,7 +64,7 @@ const XCheckbox = memo((props: XCheckboxConfig & { runtime?: boolean; detailMode
     <Form.Item
       className="inputTextWrapperOBMobile"
       field={fieldId}
-      label={label.display && label.text}
+      label={label.display && <Ellipsis text={label.text} />}
       rules={rules}
       initialValue={defaultOptionsConfig?.defaultOptions.filter(ele => ele.isChosen)?.map(ele => ele.value) || []}
       style={{

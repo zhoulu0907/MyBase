@@ -1,7 +1,7 @@
 import LogoSVG from '@/assets/images/ob_logo.svg';
 
 import { useI18n } from '@/hooks/useI18n';
-import { Avatar, Dropdown, Layout, Menu, Message, Typography } from '@arco-design/web-react';
+import { Avatar, Divider, Dropdown, Layout, Menu, Message, Typography } from '@arco-design/web-react';
 import { IconExport } from '@arco-design/web-react/icon';
 import { TokenManager } from '@onebase/common';
 import { getPlatformAdminInfoApi, platformLogout } from '@onebase/platform-center';
@@ -72,6 +72,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
         </div>
       </Menu.Item>
       <Menu.Item key="profile">{mobile}</Menu.Item>
+      <Divider style={{ margin: '4px 0' }} />
       <Menu.Item key="logout" onClick={handleLogout}>
         <IconExport style={{ color: '#F53F3F' }} />
         <Typography.Text type="error">{t('header.logout')}</Typography.Text>

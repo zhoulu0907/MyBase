@@ -1,4 +1,29 @@
-.inputDeptSelectOBMobile {
+.deptCell {
+  padding-right: 0;
+  .selectValue {
+    text-align: right;
+  }
+
+  :global(.cell-content) {
+    display: block;
+  }
+}
+
+.loading {
+  width: 100%;
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.inputDeptSelectPopupContainer {
+  width: 100vw;
+  height: 100vh;
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+
   .popupHeaderOBMobile {
     display: flex;
     justify-content: space-between;
@@ -96,13 +121,11 @@
           color: #1D2129;
           font-size: 0.32rem;
         }
-
       }
 
       .stepDept {
         font-size: 0.28rem;
         color: rgb(var(--primary-6));
-
       }
     }
   }

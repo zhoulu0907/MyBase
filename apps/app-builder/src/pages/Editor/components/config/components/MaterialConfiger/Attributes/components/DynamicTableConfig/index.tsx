@@ -42,15 +42,18 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
   const { mainEntity, subEntities } = useAppEntityStore();
 
   const [entityList, setEntityList] = useState<MetadataEntityPair[]>([]);
-  const [entityId, setEntityId] = useState<string>('');
+  const [entityUuid, setEntityUuid] = useState<string>('');
   const [fieldList, setFieldList] = useState<MetadataEntityField[]>([]);
 
   const columnsKey = 'columns';
   const searchItemsKey = 'searchItems';
   const tableNameKey = 'tableName';
 
+  const { form } = Form.useFormContext();
+
   const [columnsConfig, setColumnsConfig] = useState<any[]>(configs[columnsKey] || []);
   const [searchItemsConfig, setSearchItemsConfig] = useState<any[]>(configs[searchItemsKey] || []);
+  const [searchItems, setSearchItems] = useState<string[]>([]);
 
   const [enableAddColumn, setEnableAddColumn] = useState<boolean>(false);
   const [enableAddSearchItem, setEnableAddSearchItem] = useState<boolean>(false);
@@ -62,16 +65,16 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
     }
 
     if (configs[item.key]) {
-      setEntityId(configs[item.key]);
+      setEntityUuid(configs[item.key]);
     }
   }, []);
 
   // 如果实体id变化，重新获取字段列表
   useEffect(() => {
-    if (entityId) {
+    if (entityUuid) {
       getFieldList();
     }
-  }, [entityId]);
+  }, [entityUuid]);
 
   // 获取实体列表
   useEffect(() => {
@@ -79,6 +82,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
     if (mainEntity) {
       newEntityList.push({
         entityId: mainEntity.entityId,
+        entityUuid: mainEntity.entityUuid,
         tableName: mainEntity.tableName,
         entityName: mainEntity.entityName
       });
@@ -87,11 +91,14 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
       newEntityList.push(
         ...subEntities.entities.map((entity: any) => ({
           entityId: entity.entityId,
+          entityUuid: entity.entityUuid,
           tableName: entity.tableName,
           entityName: entity.entityName
         }))
       );
     }
+
+    console.log('newEntityList: ', newEntityList);
 
     setEntityList(newEntityList);
   }, [mainEntity, subEntities]);
@@ -114,10 +121,15 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
     setEnableAddSearchItem(res);
   }, [fieldList, searchItemsConfig]);
 
+  useEffect(() => {
+    console.log('searchItemsKey', configs[searchItemsKey]);
+    setSearchItems(configs[searchItemsKey]?.map((ele: any) => ele.value));
+  }, [configs[searchItemsKey]]);
+
   // 获取字段列表
   const getFieldList = async () => {
-    const res = await getEntityFields({ entityId });
-    console.log('fieldList res: ', res);
+    const res = await getEntityFields({ entityUuid });
+
     res.forEach((item: MetadataEntityField) => {
       if (item.fieldType && hiddenFieldTypes.includes(item.fieldType)) {
         item.disabled = true;
@@ -131,14 +143,14 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
 
     setFieldList(newFieldList);
 
-    if (configs.metaData === entityId) {
+    if (configs.metaData === entityUuid) {
       return;
     }
 
     const newColumns = newFieldListNotSystemField.map((item: MetadataEntityField) => ({
       // 保留已有的命名，如果没有则使用字段展示名称
       title:
-        configs[columnsKey].find((col: any) => col.dataIndex === item.fieldName && configs.metaData === entityId)
+        configs[columnsKey].find((col: any) => col.dataIndex === item.fieldName && configs.metaData === entityUuid)
           ?.title || item.displayName,
       dataIndex: item.fieldName,
       disabled: item.disabled,
@@ -159,18 +171,18 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
           onChange={(value) => {
             handleMultiPropsChange([
               { key: item.key, value: value },
-              { key: tableNameKey, value: entityList.find((item) => item.entityId === value)?.tableName || '' },
+              { key: tableNameKey, value: entityList.find((item) => item.entityUuid === value)?.tableName || '' },
               { key: searchItemsKey, value: [] },
               { key: columnsKey, value: [] }
             ]);
 
-            setEntityId(value);
+            setEntityUuid(value);
             setSearchItemsConfig([]);
             setColumnsConfig([]);
           }}
         >
           {entityList.map((item) => (
-            <Select.Option key={item.entityId} value={item.entityId}>
+            <Select.Option key={item.entityUuid} value={item.entityUuid}>
               {item.entityName}
             </Select.Option>
           ))}
@@ -390,16 +402,13 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
                         handlePropsChange(searchItemsKey, newList);
                       }}
                       className={styles.tableColumnItemInput}
-                      options={configs['columns']
-                        .filter(
-                          (col: any) =>
-                            // 过滤掉已在 configs[item.key] 中被选中的 dataIndex
-                            !searchItemsConfig.some((selected: any) => selected.value === col.dataIndex)
-                        )
-                        .map((item: any) => ({
+                      options={configs['columns'].map((item: any) => {
+                        return {
                           label: item.title,
-                          value: item.id
-                        }))}
+                          value: item.dataIndex,
+                          disabled: searchItemsConfig.some((selected: any) => selected.value === item.dataIndex)
+                        };
+                      })}
                     />
                     <Button
                       icon={<IconDelete />}
@@ -421,39 +430,41 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
                 ))}
               </ReactSortable>
 
-              <Dropdown
-                position={'tl'}
-                trigger="click"
-                droplist={
-                  <Menu>
-                    {fieldList
-                      .filter(
-                        (item: MetadataEntityField) =>
-                          !searchItemsConfig.some((col: any) => col.value === item.fieldName)
-                      )
-                      .map((item: MetadataEntityField) => (
-                        <Menu.Item
-                          key={item.fieldName}
-                          onClick={() => {
-                            const newList = [...searchItemsConfig, { label: item.displayName, value: item.id }];
-                            console.log('newList: ', newList);
-                            console.log('item: ', item);
-                            add({ label: item.displayName, value: item.fieldName });
-                            setSearchItemsConfig(newList);
-                            handlePropsChange(searchItemsKey, newList);
-                          }}
-                        >
-                          {item.displayName}
-                        </Menu.Item>
-                      ))}
-                  </Menu>
-                }
+              <Select
                 getPopupContainer={getPopupContainer}
+                value={searchItems}
+                mode="multiple"
+                triggerElement={
+                  <Button type={enableAddSearchItem ? 'outline' : 'secondary'} disabled={!enableAddSearchItem}>
+                    新增搜索项
+                  </Button>
+                }
+                onChange={(value) => {
+                  setSearchItems(value);
+                }}
+                triggerProps={{
+                  autoAlignPopupWidth: false,
+                  autoAlignPopupMinWidth: true,
+                }}
+                onVisibleChange={(visible) => {
+                  if (!visible) {
+                    // 下拉框收起时 回显数据
+                    const newList = searchItems.map((ele: string) => {
+                      const currentField = fieldList.find((e) => e.fieldName === ele);
+                      return { label: currentField?.displayName, value: ele };
+                    });
+                    form.setFieldValue(`${id}-${searchItemsKey}`, newList);
+                    setSearchItemsConfig(newList);
+                    handlePropsChange(searchItemsKey, newList);
+                  }
+                }}
               >
-                <Button type={enableAddSearchItem ? 'outline' : 'secondary'} disabled={!enableAddSearchItem}>
-                  新增搜索项
-                </Button>
-              </Dropdown>
+                {fieldList.map((item: MetadataEntityField) => (
+                  <Select.Option key={item.fieldName} value={item.fieldName}>
+                    {item.displayName}
+                  </Select.Option>
+                ))}
+              </Select>
             </div>
           )}
         </Form.List>

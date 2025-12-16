@@ -1,19 +1,17 @@
 import { useI18n } from '@/hooks/useI18n';
-import { Collapse, Grid } from '@arco-design/mobile-react';
+import { Grid } from '@arco-design/mobile-react';
 import {
   listApplicationMenu,
-  menuSignal,
   MenuType,
   TASKMENU_TYPE,
   VisibleType,
   type ApplicationMenu,
   type ListApplicationMenuReq
 } from '@onebase/app';
+import { TokenManager } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
-import { IconUser, IconHome } from '@arco-design/mobile-react/esm/icon';
 import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import RuntimeMenuItem from '../menuItem';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import ellipse from '../../../../assets/images/home/ellipse.svg';
 import curb from '../../../../assets/images/home/curb.png';
 import topcates1 from '../../../../assets/images/home/topcates-1.svg';
@@ -42,11 +40,10 @@ const Home: React.FC<{ nickname: string }> = ({ nickname }) => {
 
   const [treeData, setTreeData] = useState<TreeNode[]>([]);
 
-  const initTreeItemWidth = 155;
-
   useEffect(() => {
     if (appId) {
       getMenuList(appId);
+      TokenManager.setCurAppId(appId);
     }
   }, [appId]);
 

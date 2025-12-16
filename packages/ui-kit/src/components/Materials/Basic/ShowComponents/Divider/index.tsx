@@ -39,13 +39,11 @@ const XDivider = memo((props: XDividerConfig) => {
   };
 
   const titleRender = () => {
-    if(!label.display) return null;
-
     if(styleType === 'style7') {
       return (
         <div className={`decor-title-${styleType}`} style={{ borderBottomColor: `${color}` }}>
           <div className={'label'} style={{ backgroundColor: `${color}`,color: `${titleColor}` }}>
-              {label.text}
+              {label.display ? label.text : ''}
           </div>
           <div className={'decorator'} style={{ backgroundColor: `${color}` }}></div>
           <div className={'decorator1'} style={{ backgroundColor: `${color}` }}></div>
@@ -62,7 +60,7 @@ const XDivider = memo((props: XDividerConfig) => {
             className={`decor-title-${styleType}`}
             style={{ backgroundColor: `${color}`, color: `${titleColor}` }}
           >
-            {label.text}
+            {label.display ? label.text : ''}
           </span>
         </div>
       )
@@ -83,7 +81,7 @@ const XDivider = memo((props: XDividerConfig) => {
           <div className='tabContent'>
             <div className={'tabLeft'} style={{ backgroundColor: `${color}` }}></div>
             <div className={'tabActive'} style={{ backgroundColor: `${color}`, color: `${titleColor}` }}>
-              {label.text}
+              {label.display ? label.text : ''}
             </div>
             <div className={'tabRight'} style={{ backgroundColor: `${color}`}}></div>
           </div>
@@ -101,7 +99,7 @@ const XDivider = memo((props: XDividerConfig) => {
           </div>
 
           <div className={'center'} style={{ backgroundColor: `${color}`, color: `${titleColor}` }}>
-            {label.text}
+            {label.display ? label.text : ''}
           </div>
 
           <div className={'rightArrows'}>
@@ -119,7 +117,7 @@ const XDivider = memo((props: XDividerConfig) => {
             style={{borderLeftColor: `${color}`, 
                     borderBottomColor: `${color}`, 
                     color: `${titleColor}`}}>
-            {label.text}
+            {label.display ? label.text : ''}
         </span>
         <div className={`decor-${styleType}`} style={{borderTopColor: `${color}`}}></div>
       </>

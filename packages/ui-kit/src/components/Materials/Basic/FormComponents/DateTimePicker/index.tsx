@@ -5,7 +5,7 @@ import { memo, useEffect, useState } from 'react';
 import { STATUS_OPTIONS, STATUS_VALUES, DEFAULT_VALUE_TYPES, DATE_EXTREME_TYPE, WEEK_OPTIONS_NUMBER, DATE_DYNAMIC_VALUE } from '../../../constants';
 import '../index.css';
 import type { XInputDateTimePickerConfig } from './schema';
-import { getPopupContainer } from '@/utils';
+import { getPopupContainer, securityEncodeText } from '@/utils';
 import dayjs from 'dayjs';
 
 const XDateTimePicker = memo((props: XInputDateTimePickerConfig & { runtime?: boolean; detailMode?: boolean }) => {
@@ -19,7 +19,8 @@ const XDateTimePicker = memo((props: XInputDateTimePickerConfig & { runtime?: bo
     verify,
     layout,
     runtime = true,
-    detailMode
+    detailMode,
+    security
   } = props;
 
   const { form } = Form.useFormContext();
@@ -63,7 +64,7 @@ const XDateTimePicker = memo((props: XInputDateTimePickerConfig & { runtime?: bo
 
       // 变量
       if (dateRange.earliestType === DATE_EXTREME_TYPE.VARIABLE && dateRange.earliestVariableValue) {
-        const earliestVariableValue = form.getFieldValue(dateRange.earliestDynamicValue);
+        const earliestVariableValue = form.getFieldValue(dateRange.earliestVariableValue);
         if (earliestVariableValue) {
           const earliestTime = new Date(earliestVariableValue).getTime()
           if (currentTime < earliestTime) {
@@ -127,7 +128,7 @@ const XDateTimePicker = memo((props: XInputDateTimePickerConfig & { runtime?: bo
         initialValue={defaultValueConfig?.customValue}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
-          <div>{fieldValue || '--'}</div>
+          <div>{securityEncodeText(security, fieldValue)}</div>
         ) : (
           <DatePicker
             showTime

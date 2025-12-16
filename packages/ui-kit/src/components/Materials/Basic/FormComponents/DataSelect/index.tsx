@@ -8,9 +8,10 @@ import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import PreviewDataSelectModal from './previewDataSelectModal';
 import { XDataSelectConfig } from './schema';
 
-import { dataMethodPage, menuSignal, type PageMethodParam } from '@onebase/app';
+import { dataMethodPageV2, menuSignal, PageMethodV2Params } from '@onebase/app';
 import { useFormField } from '../useFormField';
 
+import { useFormEditorSignal } from '@/index';
 import './index.css';
 // ===== 导入 end =====
 
@@ -28,8 +29,10 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
     labelColSpan = 0,
     runtime,
     displayFields,
-    detailMode
+    detailMode,
+    fillRuleSetting
   } = props;
+  const { pageComponentSchemas: fromPageComponentSchemas } = useFormEditorSignal;
   // ===== 外部 props end =====
 
   // ===== 表单上下文与字段名与值读取 begin =====
@@ -54,6 +57,7 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
       return;
     }
     const normalize = (data: any) => {
+      console.log('data: ', data, 'typeof data: ', typeof data);
       if (!data) return '';
       if (typeof data === 'object') {
         if (typeof data.id !== 'undefined' || typeof data.name !== 'undefined') {
@@ -62,10 +66,13 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
         if (typeof data.selectID !== 'undefined' || typeof data.displayValue !== 'undefined') {
           return { id: data.selectID ?? '', name: data.displayValue ?? '' };
         }
+      } else if (typeof data === 'string') {
+        return data;
       }
       return '';
     };
-    setDataState(normalize(formFieldValue));
+    const normalizedValue = normalize(formFieldValue);
+    setDataState(normalizedValue);
   }, [formFieldValue, runtime]);
   // =====  内部状态 & 回显 end =====
 
@@ -87,6 +94,7 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
       setDataState(nextValue);
       if (runtime) {
         form.setFieldValue(fieldName, nextValue);
+        internalEvents.fillDatabyRule(data);
       }
     },
     selectDropdown: (value: any, option: any) => {
@@ -96,13 +104,33 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
       if (runtime) {
         form.setFieldValue(fieldName, nextValue);
       }
+    },
+    fillDatabyRule: (data: any) => {
+      if (fillRuleSetting.length > 0) {
+        fillRuleSetting.forEach((item) => {
+          const value = data?.[item.fieldName];
+          const dataField = fromPageComponentSchemas.value[item.selectComponentID].config.dataField;
+          if (dataField.length > 0) {
+            const fieldName =
+              fromPageComponentSchemas.value[item.selectComponentID].config.dataField[dataField.length - 1];
+            form.setFieldValue(fieldName, value);
+          }
+        });
+      }
     }
   };
   // ===== 内部事件 =====
 
   // ===== 方法：帮助方法 begin =====
   const helpers = {
-    getDisplayText: (v: any) => (v && typeof v === 'object' ? (v.name ?? '') : ''),
+    getDisplayText: (v: any) => {
+      return v && typeof v === 'object'
+        ? ((v.name && typeof v.name === 'object' ? v.name?.name : v.name) ?? '')
+        : typeof v === 'string'
+          ? v
+          : '';
+    },
+
     getSelectedId: (v: any) => (v && typeof v === 'object' ? (v.id ?? null) : null),
     isDropdownMode: () => props.selectMethod === 'dropdown'
   };
@@ -112,21 +140,19 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
   useEffect(() => {
     const fetchOptions = async () => {
       if (!runtime) return;
-      const entityId = props?.dynamicTableConfig?.metaData || props?.selectedDataSource?.entityId;
-      if (!entityId) return;
+      const tableName = props?.selectedDataSource?.tableName;
+      if (!tableName) return;
       const { curMenu } = menuSignal;
-      const req: PageMethodParam = {
-        menuId: curMenu.value?.id,
-        entityId,
+      const req: PageMethodV2Params = {
         pageNo: 1,
         pageSize: 100
       };
-      const res = await dataMethodPage(req);
+      const res = await dataMethodPageV2(tableName, curMenu.value?.id, req);
       const lastKey = (displayFields || []).length ? displayFields[displayFields.length - 1]?.value : undefined;
       const list = Array.isArray(res?.list) ? res.list : [];
       const opts = list.map((item: any) => ({
-        label: lastKey ? (item?.data?.[lastKey] ?? '') : '',
-        value: item?.id ?? item?.data?.id
+        label: lastKey ? (item?.[lastKey] ?? '') : '',
+        value: item?.id ?? item?.id
       }));
       setOptions(opts);
     };
@@ -137,7 +163,7 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
     runtime,
     props.selectMethod,
     props?.dynamicTableConfig?.metaData,
-    props?.selectedDataSource?.entityId,
+    props?.selectedDataSource?.entityUuid,
     displayFields
   ]);
 

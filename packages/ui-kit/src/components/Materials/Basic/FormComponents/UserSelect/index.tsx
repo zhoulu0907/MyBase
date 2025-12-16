@@ -1,8 +1,8 @@
 import { Avatar, Form, Input, Select } from '@arco-design/web-react';
 import { IconClose, IconSearch } from '@arco-design/web-react/icon';
-import { getSimpleUserPage, type UserVO } from '@onebase/platform-center';
+import { getSimpleUserPage } from '@onebase/platform-center';
 import { debounce } from 'lodash-es';
-import { memo, useCallback, useEffect, useState } from 'react';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import AdvanceSelectModal from './AdvanceSelectModal';
@@ -10,12 +10,25 @@ import type { XInputUserSelectConfig } from './schema';
 
 import { getPopupContainer } from '@/utils';
 
+import { isRuntimeEnv } from '@onebase/common';
 import '../index.css';
 import './index.css';
 
 const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; detailMode?: boolean }) => {
-  const { label, dataField, tooltip, status, verify, layout, labelColSpan = 0, runtime, detailMode } = props;
-  const [userData, setUserData] = useState<UserVO[]>([]);
+  const {
+    label,
+    dataField,
+    tooltip,
+    status,
+    verify,
+    layout,
+    selectScope,
+    defaultUserValue,
+    labelColSpan = 0,
+    runtime,
+    detailMode
+  } = props;
+  const [userData, setUserData] = useState<any[]>([]);
   // 分页
   const [pageNo, setPageNo] = useState<number>(1);
   const [total, setTotal] = useState<number | string>(0);
@@ -31,29 +44,100 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; d
   const [currentSelectUser, setCurrentSelectUser] = useState<string>();
   const [currentSelectUserID, setCurrentSelectUserID] = useState<string>();
 
+  const runtimeRemoveRef = useRef<boolean>(false);
+
   const fieldValue = Form.useWatch(fieldName, form);
 
   useEffect(() => {
-    if (runtime === true && keywords === '') {
+    if (
+      runtime &&
+      status !== STATUS_VALUES[STATUS_OPTIONS.READONLY] &&
+      !detailMode &&
+      keywords === '' &&
+      (!selectScope || selectScope.length === 0)
+    ) {
       getUserData('');
+    } else if (keywords === '') {
     }
   }, [keywords]);
 
   useEffect(() => {
-    if (runtime === true && fieldValue) {
-      setCurrentSelectUser(fieldValue?.userName);
+    if (selectScope && selectScope.length > 0) {
+      const selectMembers = selectScope.map((member: any) => ({
+        id: member.key,
+        // deptName: member.deptName
+        nickname: member.name,
+        email: member.email
+      }));
+      setUserData(selectMembers);
+      setTotal(0);
+      setPageNo(1);
+      setKeywords('');
     } else {
-      setCurrentSelectUser('');
+      getUserData('');
     }
-  }, [fieldValue]);
+  }, [selectScope]);
+
+  useEffect(() => {
+    if (isRuntimeEnv()) {
+      if (fieldValue) {
+        setCurrentSelectUser(fieldValue?.name);
+        form.setFieldValue(fieldName, {
+          id: fieldValue?.id,
+          name: fieldValue?.name
+        });
+      } else if (
+        defaultUserValue &&
+        !runtimeRemoveRef.current &&
+        status !== STATUS_VALUES[STATUS_OPTIONS.READONLY] &&
+        !detailMode
+      ) {
+        const defaultUser = userData.find((user) => user.id === defaultUserValue);
+        if (defaultUser) {
+          setCurrentSelectUser(defaultUser?.nickname);
+          form.setFieldValue(fieldName, {
+            id: defaultUserValue,
+            name: defaultUser?.nickname
+          });
+        }
+      }
+    }
+  }, [userData, fieldValue]);
+
+  useEffect(() => {
+    if (runtime && !isRuntimeEnv() && userData.length > 0 && defaultUserValue && !runtimeRemoveRef.current) {
+      const defaultUser = userData.find((user) => user.id === defaultUserValue);
+      if (defaultUser) {
+        setCurrentSelectUser(defaultUser?.nickname);
+        form.setFieldValue(fieldName, {
+          id: defaultUserValue,
+          name: defaultUser?.nickname
+        });
+      }
+    }
+    runtimeRemoveRef.current = false;
+  }, [defaultUserValue, runtime, userData]);
 
   // 第一页的加载
   const debouncedSearch = useCallback(
     debounce((value) => {
-      getUserData(value);
+      if (!selectScope || selectScope.length === 0) {
+        getUserData(value);
+      } else {
+        const users = selectScope
+          .filter((user) => user.name.indexOf(value) >= 0)
+          .map((member: any) => ({
+            id: member.key,
+            // deptName: member.deptName
+            nickname: member.name,
+            email: member.email
+          }));
+        setUserData(users);
+      }
     }, 500),
     []
   );
+
   const getUserData = async (inputValue: string) => {
     setFetching(true);
     setKeywords(inputValue);
@@ -66,7 +150,6 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; d
     setPageNo(1);
     setTotal(total);
 
-    console.log('list: ', list);
     setUserData(list || []);
     setFetching(false);
   };
@@ -114,6 +197,7 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; d
     setCurrentSelectUser(undefined);
     setCurrentSelectUserID(undefined);
     form.setFieldValue(fieldName, undefined);
+    runtimeRemoveRef.current = true;
   };
 
   const handleOKModal = (user: any) => {
@@ -126,17 +210,6 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; d
     });
 
     setAdvanceVisible(false);
-  };
-
-  const renderCell = () => {
-    if (typeof fieldValue === 'object' && fieldValue) {
-      return fieldValue?.name ?? '--';
-    }
-    if (currentSelectUser == null || currentSelectUser == undefined || currentSelectUser == '') {
-      return '--';
-    }
-
-    return JSON.stringify(currentSelectUser);
   };
 
   return (
@@ -158,11 +231,11 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; d
         }}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
-          <div>{renderCell()}</div>
+          <div>{fieldValue?.name ?? '--'}</div>
         ) : (
           <Select
             placeholder="请选择"
-            showSearch={false}
+            showSearch={true}
             filterOption={false}
             onSearch={debouncedSearch}
             onPopupScroll={scrollHandler}
@@ -209,23 +282,25 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; d
             )}
             renderFormat={() => {
               return (
-                <span className="renderFormat">
-                  <Avatar size={24} className="avatar">
-                    {renderCell()?.[0]}
-                  </Avatar>
-                  <span className="displayName"> {renderCell()} </span>
-                  <IconClose
-                    className="closeBtn"
-                    onMouseDown={(e) => {
-                      // 阻止 mousedown 导致 input 聚焦/下拉打开
-                      e.preventDefault();
-                      e.stopPropagation();
-                    }}
-                    onClick={(e) => {
-                      handleRemove(e);
-                    }}
-                  />
-                </span>
+                currentSelectUser && (
+                  <span className="renderFormat">
+                    <Avatar size={24} className="avatar">
+                      {currentSelectUser?.[0]}
+                    </Avatar>
+                    <span className="displayName"> {currentSelectUser} </span>
+                    <IconClose
+                      className="closeBtn"
+                      onMouseDown={(e) => {
+                        // 阻止 mousedown 导致 input 聚焦/下拉打开
+                        e.preventDefault();
+                        e.stopPropagation();
+                      }}
+                      onClick={(e) => {
+                        handleRemove(e);
+                      }}
+                    />
+                  </span>
+                )
               );
             }}
           />

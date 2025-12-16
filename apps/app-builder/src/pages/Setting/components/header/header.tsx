@@ -10,6 +10,8 @@ import { systemLogout } from '@onebase/platform-center';
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import styles from './header.module.less';
+import TenantLogo from '@/components/TenantLogo';
+import { tenantInfoSignal } from '@/store/singals/tenant_info';
 
 const { Header } = Layout;
 
@@ -50,18 +52,20 @@ const AppHeader: React.FC<HeaderProps> = ({ className, avatarUrl }) => {
         </div>
       </Menu.Item>
       <Divider style={{ margin: '4px 0' }} />
-      <Menu.Item key="logout" onClick={handleLogout} style={{ marginLeft: '8px' }}>
+      <Menu.Item key="logout" onClick={handleLogout}>
         <IconExport style={{ color: '#F53F3F' }} />
         <Typography.Text type="error">{t('header.logout')}</Typography.Text>
       </Menu.Item>
     </Menu>
   );
 
+  const tenantInfo = tenantInfoSignal.tenantInfo.value;
+
   return (
     <Header className={`${styles.header} ${className || ''}`}>
       <div className={styles.headerContent}>
         <div className={styles.logo} onClick={() => navigate(`/onebase/${tenantId}/home/enterprise-app`)}>
-          <img src={LogoSVG} alt="logo" />
+          <TenantLogo tenantInfo={tenantInfo} />
         </div>
 
         <div className={styles.userInfo}>

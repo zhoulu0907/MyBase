@@ -94,7 +94,7 @@ const SecurityPage: React.FC<SecurityPageProps> = ({}) => {
   return (
     <div className={styles.securityPage}>
       <div className={styles.sider}>
-        <Menu style={{ width: 200 }} mode="pop" onClickMenuItem={handleClickMenuItem}>
+        <Menu style={{ width: 200 }} mode="pop" onClickMenuItem={handleClickMenuItem} selectedKeys={[activeMenuItem]}>
           {categories.map((category) => (
             <MenuItem key={category.id}>{category.categoryName}</MenuItem>
           ))}
@@ -130,7 +130,7 @@ const SecurityPage: React.FC<SecurityPageProps> = ({}) => {
                           }
                         ]}
                       >
-                        <InputNumber />
+                        <InputNumber step={1} precision={0} />
                       </Form.Item>
                     )}
                     {item.widgetType === 'INPUT' && item.options == null && (

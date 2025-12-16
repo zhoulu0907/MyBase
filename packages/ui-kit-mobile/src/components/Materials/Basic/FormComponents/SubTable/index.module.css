@@ -2,10 +2,19 @@
   :global(.arco-collapse-header) {
     flex-direction: row-reverse;
     justify-content: flex-end;
+    background-color: transparent !important;
+    padding: 0;
+    margin-left: 0.64rem;
 
     &::after {
-      display: none;
+      transform: none !important;
+      /* width: calc(100% - 0.32rem); */
     }
+  }
+
+   :global(.cell-content) {
+    display: block;
+    text-align: right;
   }
 
   :global(.arco-collapse-content-container) {
@@ -23,6 +32,7 @@
 
   :global(.arco-cell-group .cell-group-body.bordered::before) {
     transform: none;
+    display: none;
   }
 
   :global(.arco-cell:not(:first-of-type).bordered::before) {
@@ -35,6 +45,20 @@
 
   :global(.arco-cell.without-group.bordered::after) {
     transform: none;
+  }
+  :global(.arco-cell-inner .cell-label) {
+    width: 1.62rem;
+    min-width: 1.62rem;
+    margin-right: 0.12rem;
+  }
+  :global(.uplaodList-text) {
+    width: calc(100% - 3rem);
+  }
+  :global(.arco-uploader-add) {
+    margin-top: 0.24rem;
+  }
+  :global(.fileUploadWrapperOBMobile) {
+    min-height: auto;
   }
 
   .collapseHeader {

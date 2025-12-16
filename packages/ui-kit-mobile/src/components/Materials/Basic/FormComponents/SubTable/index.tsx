@@ -1,5 +1,5 @@
 import { PreviewRender } from '@/components/render';
-import { Cell, Collapse, Form } from '@arco-design/mobile-react';
+import { Cell, Collapse, Ellipsis, Form } from '@arco-design/mobile-react';
 import { IconAdd, IconDelete } from '@arco-design/mobile-react/esm/icon';
 import { ITypeRules, ValidatorType } from '@arco-design/mobile-utils';
 import { pagesRuntimeSignal } from '@onebase/common';
@@ -18,8 +18,8 @@ import styles from './index.module.css';
 type XSubTableConfig = typeof FormSchema.XSubTableSchema.config;
 
 const XSubTable = memo(
-  (props: XSubTableConfig & { runtime?: boolean; detailMode?: boolean; defaultOptionsConfig?: any; form?: any }) => {
-    const { id, label, status, verify, layout, defaultOptionsConfig, runtime = true, detailMode, form } = props;
+  (props: XSubTableConfig & { runtime?: boolean; detailMode?: boolean; defaultOptionsConfig?: any; form?: any; editLoading?: boolean }) => {
+    const { id, label, status, verify, layout, defaultOptionsConfig, runtime = true, detailMode, form, editLoading } = props;
 
     useSignals();
     const { curViewId } = usePageViewEditorSignal;
@@ -49,12 +49,13 @@ const XSubTable = memo(
     const handleDelete = (e: any, index: number) => {
       e.stopPropagation();
 
-      const formData = form.getFieldsValue();
+      const formData = form?.getFieldsValue();
 
-      const filtered = Object.fromEntries(Object.entries(formData).filter(([key]) => !key.includes(`.${index}.`)));
-
+      if (formData) {
+        const filtered = Object.fromEntries(Object.entries(formData).filter(([key]) => !key.includes(`.${index}.`)));
+        form?.setFieldsValue(filtered);
+      }
       setSubTableData((prev) => prev.filter((v) => v.key !== index));
-      form.setFieldsValue(filtered);
     };
 
     const rules: ITypeRules<ValidatorType.Custom>[] = [
@@ -74,7 +75,7 @@ const XSubTable = memo(
         field=""
         rules={rules}
         layout="vertical"
-        label={label.display ? label.text : undefined}
+        label={label.display ? <Ellipsis text={label.text} /> : undefined}
         style={{
           pointerEvents: !runtime || detailMode ? 'none' : 'unset',
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
@@ -103,16 +104,17 @@ const XSubTable = memo(
                       dataField: [`${id}.${item.key}.${schema.config?.dataField?.[1] || subTable.id}`]
                     };
                     const pageSchema = { ...schema, config };
-
                     return (
-                      <Cell label={config.cpName} key={subTable.id} style={{ padding: 0 }}>
+                      <Cell label={<Ellipsis text={config.cpName} />} key={subTable.id} style={{ padding: 0 }}>
                         <PreviewRender
+                          editLoading={editLoading}
+                          form={form}
                           cpId={subTable.id}
                           cpType={subTable.type}
                           detailMode={detailMode}
                           pageComponentSchema={pageSchema}
                           runtime={true}
-                          // showFromPageData={showFromPageData}
+                        // showFromPageData={showFromPageData}
                         />
                       </Cell>
                     );
@@ -121,8 +123,11 @@ const XSubTable = memo(
               }
             />
           ))}
-          <div className={styles.onAddOBMobile} onClick={handleAdd}>
-            <IconAdd />
+          <div
+            className={styles.onAddOBMobile}
+            onClick={handleAdd}
+            style={{ pointerEvents: runtime ? 'unset' : 'none' }}>
+            <IconAdd style={{ marginRight: '0.16rem' }} />
             新增一项
           </div>
         </>

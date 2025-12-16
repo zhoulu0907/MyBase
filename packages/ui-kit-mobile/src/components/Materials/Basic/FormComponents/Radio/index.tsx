@@ -1,9 +1,10 @@
 import { memo } from 'react';
 import { nanoid } from 'nanoid';
-import { Form, Radio } from '@arco-design/mobile-react';
+import { Ellipsis, Form, Radio } from '@arco-design/mobile-react';
 import { ValidatorType, ITypeRules } from '@arco-design/mobile-utils';
 import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, FormSchema } from '@onebase/ui-kit';
 import '../index.css';
+import './index.css';
 
 type XRadioConfig = typeof FormSchema.XRadioSchema.config;
 const RadioGroup = Radio.Group;
@@ -24,7 +25,7 @@ const XRadio = memo((props: XRadioConfig & { runtime?: boolean; detailMode?: boo
   // 生成唯一的字段ID
   const fieldId = dataField && dataField.length > 0
     ? dataField[dataField.length - 1]
-    : `${FORM_COMPONENT_TYPES.SWITCH}_${nanoid()}`;
+    : `${FORM_COMPONENT_TYPES.RADIO}_${nanoid()}`;
 
   const rules: ITypeRules<ValidatorType.Custom>[] = [
     {
@@ -40,7 +41,7 @@ const XRadio = memo((props: XRadioConfig & { runtime?: boolean; detailMode?: boo
   return (
     <Form.Item
       className="inputTextWrapperOBMobile radioWrapperOBMobile"
-      label={label.display && label.text}
+      label={label.display && <Ellipsis text={label.text} />}
       field={fieldId}
       layout={layout}
       rules={rules}

@@ -1,25 +1,26 @@
-import baseSettingSVG from '@/assets/images/appRelease/base_setting.svg';
 import appPermissionSVG from '@/assets/images/appRelease/app_auth.svg';
 import appReleaseSVG from '@/assets/images/appRelease/app_release.svg';
+import baseSettingSVG from '@/assets/images/appRelease/base_setting.svg';
 import navigatorSettingSVG from '@/assets/images/appRelease/navigator_setting.svg';
-import { ReactSVG } from 'react-svg';
+import AppBreadcrumb from '@/components/Breadcrumb';
 import { type Options } from '@/components/CreateApp/const';
+import { useAppStore } from '@/store/store_app';
 import { Button, Form, Layout, Menu, Message } from '@arco-design/web-react';
 import { IconMenuFold } from '@arco-design/web-react/icon';
 import {
   getApplication,
   updateApplication,
+  updateAppNavigationConfig,
   type Application,
   type GetApplicationReq,
   type UpdateApplicationReq
 } from '@onebase/app';
 import { useEffect, useState, type FC } from 'react';
-import BasicSetting from './components/BasicSetting';
-import AppPermission from './components/AppPermission';
+import { ReactSVG } from 'react-svg';
 import AppReleasePage from '../AppRelease';
+import AppPermission from './components/AppPermission';
+import BasicSetting from './components/BasicSetting';
 import NavigatorSetting from './components/NavigatorSetting';
-import { useAppStore } from '@/store/store_app';
-import AppBreadcrumb from '@/components/Breadcrumb';
 import styles from './index.module.less';
 
 const Sider = Layout.Sider;
@@ -139,7 +140,17 @@ const AppSettingPage: FC = () => {
     await navigatorForm.validate();
     const param = navigatorForm.getFieldsValue();
     console.log('param', param);
-    // todo 接口保存
+
+    const res = await updateAppNavigationConfig({
+      id: curAppId,
+      webDefaultMenu: param.webHomeType === 'custom' ? param.webDefaultMenu : 'default',
+      webNavLayout: param.webNavLayout,
+      mobileDefaultMenu: param.mobileHomeType === 'custom' ? param.mobileDefaultMenu : 'default',
+      mobileNavLayout: param.mobileNavLayout
+    });
+    if (res) {
+      Message.success('保存成功');
+    }
   };
 
   return (
@@ -178,14 +189,13 @@ const AppSettingPage: FC = () => {
               {activeTab === 'appPermission' && <AppPermission />}
               {activeTab === 'appRelease' && <AppReleasePage />}
               {activeTab === 'navigatorSetting' && <NavigatorSetting form={navigatorForm} data={navigatorData} />}
-            </Content>
-            {(activeTab === 'baseSetting' || activeTab === 'navigatorSetting') && (
-              <Footer className={styles.footer}>
-                <Button type="primary" loading={saveLoading} onClick={handleSave}>
+
+              {(activeTab === 'baseSetting' || activeTab === 'navigatorSetting') && (
+                <Button className={styles.saveButton} type="primary" loading={saveLoading} onClick={handleSave}>
                   保存
                 </Button>
-              </Footer>
-            )}
+              )}
+            </Content>
           </div>
         </Layout>
       </Layout>

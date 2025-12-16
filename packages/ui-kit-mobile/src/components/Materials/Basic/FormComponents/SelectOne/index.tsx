@@ -1,4 +1,4 @@
-import { Form, Picker } from '@arco-design/mobile-react';
+import { Ellipsis, Form, Picker } from '@arco-design/mobile-react';
 import { nanoid } from 'nanoid';
 import { memo } from 'react';
 import { ValidatorType, ITypeRules } from '@arco-design/mobile-utils';
@@ -24,7 +24,7 @@ const XSelectOne = memo((props: XSelectOneConfig & { runtime?: boolean; detailMo
   // 生成唯一的字段ID
   const fieldId = dataField && dataField.length > 0
     ? dataField[dataField.length - 1]
-    : `${FORM_COMPONENT_TYPES.INPUT_TEXT}_${nanoid()}`;
+    : `${FORM_COMPONENT_TYPES.SELECT_ONE}_${nanoid()}`;
 
   const rules: ITypeRules<ValidatorType.Custom>[] = [
     {
@@ -40,7 +40,7 @@ const XSelectOne = memo((props: XSelectOneConfig & { runtime?: boolean; detailMo
   return (
     <Form.Item
       className="inputTextWrapperOBMobile"
-      label={label.display && label.text}
+      label={label.display && <Ellipsis text={label.text} />}
       field={fieldId}
       rules={rules}
       displayType={FormInternalComponentType.Picker}
