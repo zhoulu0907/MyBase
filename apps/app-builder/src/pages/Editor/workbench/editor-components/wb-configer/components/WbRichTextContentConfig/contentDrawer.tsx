@@ -21,15 +21,7 @@ export interface ContentDrawerProps extends BaseDrawerProps {
 const toolbarConfig: Partial<IToolbarConfig> = {};
 const allowedFormats = ['image/jpeg', 'image/png', 'image/gif'];
 const maxSizeMB = 5;
-const ContentDrawer = ({
-  visible,
-  onClose,
-  unmountOnExit = true,
-  onChange,
-  value,
-  handlePropsChange,
-  ...rest
-}: ContentDrawerProps) => {
+const ContentDrawer = ({ visible, onClose, onChange, value, handlePropsChange, ...rest }: ContentDrawerProps) => {
   const [editor, setEditor] = useState<IDomEditor | null>(null);
   const normalizedValue = value ?? '';
 
@@ -135,7 +127,6 @@ const ContentDrawer = ({
       getPopupContainer={() => document.body}
       className={styles.drawer}
       onCancel={onClose}
-      unmountOnExit={unmountOnExit}
       title="内容编辑"
       footer={null}
       height="50vh"
