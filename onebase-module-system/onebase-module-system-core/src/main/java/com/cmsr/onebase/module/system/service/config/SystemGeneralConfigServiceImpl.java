@@ -76,10 +76,10 @@ public class SystemGeneralConfigServiceImpl implements SystemGeneralConfigServic
             throw exception(ErrorCodeConstants.CONFIG_NO_EXISTS);
         }
 
-        if(CommonStatusEnum.ENABLE.getStatus().equals(status)){
+        if (CommonStatusEnum.ENABLE.getStatus().equals(status)) {
             configDO.setConfigValue(CommonStatusEnum.ENABLE.getStatus().toString());
             configDO.setStatus(CommonStatusEnum.ENABLE.getStatus());
-        }else{
+        } else {
             configDO.setConfigValue(CommonStatusEnum.DISABLE.getStatus().toString());
             configDO.setStatus(CommonStatusEnum.DISABLE.getStatus());
         }
@@ -90,20 +90,17 @@ public class SystemGeneralConfigServiceImpl implements SystemGeneralConfigServic
             SystemGeneralConfigSearchVO searchVO = getSystemGeneralConfigSearchVO(configDO);
             // 获取互斥数据 忽略租户条件,
             SystemGeneralConfigDO config = systemGeneralConfigDataRepository.getConfigByDiffCategory(searchVO);
-            if(null != config){
-                if(CommonStatusEnum.ENABLE.getStatus().equals(status)){
+            if (null != config) {
+                if (CommonStatusEnum.ENABLE.getStatus().equals(status)) {
                     config.setConfigValue(CommonStatusEnum.DISABLE.getStatus().toString());
                     config.setStatus(CommonStatusEnum.DISABLE.getStatus());
-                }else{
+                } else {
                     config.setConfigValue(CommonStatusEnum.ENABLE.getStatus().toString());
                     config.setStatus(CommonStatusEnum.ENABLE.getStatus());
                 }
                 systemGeneralConfigDataRepository.update(config);
             }
-
         }
-
-
     }
 
     @NotNull
