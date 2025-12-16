@@ -1,3 +1,5 @@
+import { SHOW_COMPONENT_TYPES } from "@onebase/ui-kit";
+
 export interface TreeNode {
   key: string; // arco-design default tree props
   title: string; // arco-design default tree props
@@ -155,4 +157,29 @@ export const splitAndFlatten = (treeData: TreeNode[]) => {
       ...rest,
       children: children ? flattenChildren(children) : [],
     }));
+};
+
+// 表单组件根据分割线组件进行分割
+export const splitByDivider = (data: any[]) => {
+  if (!data) return;
+  const result = [] as any[];
+  let buffer = [] as any[];
+
+  data.forEach((item) => {
+    if (item.type === SHOW_COMPONENT_TYPES.DIVIDER) {
+      if (buffer.length) {
+        result.push({ type: 'Normal', items: buffer });
+        buffer = [];
+      }
+      result.push({ type: SHOW_COMPONENT_TYPES.DIVIDER, item });
+    } else {
+      buffer.push(item);
+    }
+  });
+
+  if (buffer.length) {
+    result.push({ type: 'Normal', items: buffer });
+  }
+
+  return result;
 };
