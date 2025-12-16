@@ -47,6 +47,7 @@ import { ReactSVG } from 'react-svg';
 import { RELATIONSHIP_TYPE } from '../DataFactory/utils/types';
 import CopyModal from './components/Modals/CopyModal';
 import CreateModal from './components/Modals/CreateModal';
+import CreateScreenModal from '@/components/CreateScreenModal';
 import RenameModal from './components/Modals/RenameModal';
 import MyMenuItem from './components/MyMenuItem';
 import TaskCenterPage from './components/TaskCenter/TaskCenterPage';
@@ -94,6 +95,8 @@ const PageManagerPage: FC = () => {
   const [copyForm] = Form.useForm();
   // 创建弹窗
   const [visibleCreateForm, setVisibleCreateForm] = useState('');
+  // 创建大屏弹窗
+  const [visibleCreateScreenForm, setVisibleCreateScreenForm] = useState('');
   // 重命名弹窗
   const [visibleRenameForm, setVisibleRenameForm] = useState(false);
   // 复制弹窗
@@ -299,6 +302,28 @@ const PageManagerPage: FC = () => {
           {t('createApp.createGroup')}
         </div>
       </MenuItem>
+      <MenuItem
+        key="screen"
+        onClick={() => {
+          setVisibleCreateScreenForm('screen');
+          createForm.resetFields();
+          setTitle(t('createApp.createScreen'));
+        }}
+      >
+        <div className={styles.createItem}>
+          <ReactSVG
+            className={styles.customSvg}
+            src={CreateGroupIcon}
+            beforeInjection={(svg) => {
+              svg.querySelectorAll('*').forEach((el) => el.removeAttribute('fill'));
+              svg.setAttribute('fill', '#4E5969');
+              svg.setAttribute('width', '16px');
+              svg.setAttribute('height', '16px');
+            }}
+          />
+          {t('createApp.createScreen')}
+        </div>
+      </MenuItem>
     </Menu>
   );
 
@@ -345,7 +370,7 @@ const PageManagerPage: FC = () => {
   const handleCreate = async () => {
     createForm.validate(async (error) => {
       if (error !== null) return;
-      let req: CreateApplicationMenuReq = {
+      const req: CreateApplicationMenuReq = {
         applicationId: curAppId,
         parentId:
           createForm.getFieldValue('parentId') === RootParentPage.id ? '' : createForm.getFieldValue('parentId'),
@@ -739,6 +764,19 @@ const PageManagerPage: FC = () => {
         entityListOptions={entityListOptions}
         pageSetTypeOptions={pageSetTypeOptions}
         visibleCreateForm={visibleCreateForm}
+        initValue={{ pageType: PageType.NORMAL, menuName: '', parentId: RootParentPage.id }}
+        treeData={convertMenuToTreeData(parentPageOptions, initTreeItemWidth, false, { height: '32px' })}
+      />
+      <CreateScreenModal
+        title={title}
+        type={'page'}
+        handleCreate={handleCreate}
+        onCancel={() => {
+          setVisibleCreateScreenForm('');
+        }}
+        form={createForm}
+        visibleCreateForm={visibleCreateScreenForm}
+        entityListOptions={entityListOptions}
         initValue={{ pageType: PageType.NORMAL, menuName: '', parentId: RootParentPage.id }}
         treeData={convertMenuToTreeData(parentPageOptions, initTreeItemWidth, false, { height: '32px' })}
       />

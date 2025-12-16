@@ -169,9 +169,10 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
       const resq = await getEntityById(id);
       setDataPermissionEntity({
         entityId: id,
-        entityName: resq.displayName
+        entityName: resq.displayName,
+        tableName: resq.tableName
       });
-      getDataPermissionFields(resq.id);
+      getDataPermissionFields(resq.id, resq.tableName);
       getDataPermissionRoles(resq.id);
     } catch (error) {
       console.error('获取数据集详细信息 error:', error);
@@ -257,7 +258,7 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
   };
 
   // 获取数据权限数据字段
-  const getDataPermissionFields = async (entityId: string) => {
+  const getDataPermissionFields = async (entityId: string, tableName: string) => {
     try {
       const entityFieldsResq = await getEntityFields({ entityId });
       // entityFieldsResq 返回的数据 是 id 但是 appEntityField 中 是 fieldID
@@ -275,7 +276,7 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
 
       // 添加空数组检查，避免空参数调用接口
       if (getFieldCheckTypeParams.length > 0) {
-        getFieldCheckType(getFieldCheckTypeParams);
+        getFieldCheckType(getFieldCheckTypeParams, entityFieldsResq, tableName);
       } else {
         // 如果没有字段需要获取校验类型，直接设置空数组
         setFilterFieldCheckType([]);
@@ -306,9 +307,14 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
     }
   };
   // 批量获取字段可选校验类型
-  const getFieldCheckType = async (fieldIds: string[]) => {
+  const getFieldCheckType = async (fieldIds: string[], entityFieldsResq: any[], tableName: string) => {
     try {
       const fieldCheckTypeResq = await getFieldCheckTypeApi(fieldIds);
+      fieldCheckTypeResq.forEach((item: EntityFieldValidationTypes) => {
+        const fieldName =
+          entityFieldsResq.find((field: AppEntityField) => field.fieldId == item.fieldId)?.fieldName || '';
+        item.fieldKey = `${tableName}.${fieldName}`;
+      });
       setFilterFieldCheckType(fieldCheckTypeResq);
     } catch (error) {
       console.error('批量获取字段可选校验类型 error:', error);

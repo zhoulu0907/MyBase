@@ -1,7 +1,7 @@
 import { Checkbox, Form, Input } from '@arco-design/web-react';
+import { CONFIG_TYPES } from '@onebase/ui-kit';
 import styles from '../../index.module.less';
 import { registerConfigRenderer } from '../../registry';
-import { CONFIG_TYPES } from '@onebase/ui-kit';
 
 interface Props {
   handlePropsChange: (key: string, value: any) => void;
@@ -34,6 +34,7 @@ const DynamicTooltipInputConfig = ({ handlePropsChange, item, configs, isDivider
       <Input.TextArea
         placeholder={`请输入${item.name}`}
         value={!isDivider ? configs[item.key] : configs[item.key]['text']}
+        maxLength={500}
         onChange={(value) => {
           handlePropsChange(item.key, !isDivider ? value : { ...configs[item.key], text: value });
         }}

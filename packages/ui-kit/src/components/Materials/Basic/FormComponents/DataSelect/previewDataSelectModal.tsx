@@ -1,9 +1,9 @@
-import React, { useState } from 'react'
-import { Modal, Button } from '@arco-design/web-react';
+import { Button, Modal } from '@arco-design/web-react';
+import React, { useState } from 'react';
 
-import './index.css';
 import XTable from '../../ListComponents/Table';
 import { XTableConfig } from '../../ListComponents/Table/schema';
+import './index.css';
 
 interface PreviewDataSelectModalProps {
   visible: boolean;
@@ -13,7 +13,13 @@ interface PreviewDataSelectModalProps {
   defaultSelectedId?: string | number | null;
 }
 
-const PreviewDataSelectModal: React.FC<PreviewDataSelectModalProps> = ({ visible, onCancel, tableConfig, onSelect, defaultSelectedId }) => {
+const PreviewDataSelectModal: React.FC<PreviewDataSelectModalProps> = ({
+  visible,
+  onCancel,
+  tableConfig,
+  onSelect,
+  defaultSelectedId
+}) => {
   const [selectedRow, setSelectedRow] = useState<any>(null);
 
   const handleSelectData = (record: any | null, fromDoubleClick?: boolean) => {
@@ -63,7 +69,7 @@ const PreviewDataSelectModal: React.FC<PreviewDataSelectModalProps> = ({ visible
         </div>
       </div>
     </Modal>
-  )
-}
+  );
+};
 
-export default PreviewDataSelectModal
+export default PreviewDataSelectModal;

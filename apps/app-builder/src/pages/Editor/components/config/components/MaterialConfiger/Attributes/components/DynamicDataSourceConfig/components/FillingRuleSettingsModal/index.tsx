@@ -1,16 +1,16 @@
-import React, { useEffect, useState } from 'react';
 import { Button, Checkbox, Dropdown, Input, Menu, Modal, Select, Space } from '@arco-design/web-react';
+import React, { useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
-import styles from '../../index.module.less';
 import { IconDelete, IconPlus } from '@arco-design/web-react/icon';
 import {
+  COMPONENT_MAP,
   COMPONENT_TYPE_DISPLAY_NAME_MAP,
   getComponentSchema,
-  usePageEditorSignal,
-  COMPONENT_MAP,
-  getPopupContainer
+  getPopupContainer,
+  usePageEditorSignal
 } from '@onebase/ui-kit';
+import styles from '../../index.module.less';
 
 interface FillingRuleSettingsModalProps {
   visible: boolean;
@@ -58,14 +58,15 @@ const FillingRuleSettingsModal: React.FC<FillingRuleSettingsModalProps> = ({
   useEffect(() => {
     const refactFieldOptions = [...fieldOptions].reduce((newOptions, item) => {
       const cpType = COMPONENT_MAP[item.fieldType];
-      console.log(Object.entries(pageComponentSchemas))
-      
-      const targetComponents = Object.entries(pageComponentSchemas).filter(([key,value]) => value.type === cpType).map(([key,value])=>{
-        return {
-          id: value.id,
-          displayName: value.config?.label?.text,
-        }
-      });
+
+      const targetComponents = Object.entries(pageComponentSchemas)
+        .filter(([key, value]) => value.type === cpType)
+        .map(([key, value]) => {
+          return {
+            id: value.id,
+            displayName: value.config?.label?.text
+          };
+        });
       newOptions.push({
         ...item,
         targetComponents,
@@ -121,6 +122,7 @@ const FillingRuleSettingsModal: React.FC<FillingRuleSettingsModalProps> = ({
         ...newSelects,
         {
           fieldId: option.fieldId,
+          fieldName: option.fieldName,
           displayName: option.displayName,
           targetComponents: option.targetComponents,
           cpType: option.cpType,
@@ -146,6 +148,7 @@ const FillingRuleSettingsModal: React.FC<FillingRuleSettingsModalProps> = ({
       if (item.selectComponentID) {
         acc.push({
           fieldId: item.fieldId,
+          fieldName: item.fieldName,
           selectComponentID: item.selectComponentID
         });
       }
@@ -206,7 +209,8 @@ const FillingRuleSettingsModal: React.FC<FillingRuleSettingsModalProps> = ({
         });
         fillRuleSetting.push({
           fieldId: item.fieldId,
-          componentID: cpID
+          fieldName: item.fieldName,
+          selectComponentID: cpID
         });
         return [newComponents, fillRuleSetting];
       },
