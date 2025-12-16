@@ -6,6 +6,7 @@ import screen1 from '@/assets/images/screen/screen1.png';
 import eye from '@/assets/images/screen/eye.png';
 import write from '@/assets/images/screen/write.png';
 import template from '@/assets/images/screen/template.png';
+import { Point } from '@icon-park/react';
 interface dataList {
   id: string;
   name: string;
@@ -63,7 +64,7 @@ const ScreenCard: FC<CardProps> = ({ item, onDelete, onSaveAs, onEditScreen, onE
           {item.name}
           <IconEdit
             fontSize={16}
-            style={{ marginLeft: 4 }}
+            style={{ marginLeft: 4, cursor: 'pointer' }}
             onClick={(e) => {
               e.stopPropagation();
               onEditScreen(item);

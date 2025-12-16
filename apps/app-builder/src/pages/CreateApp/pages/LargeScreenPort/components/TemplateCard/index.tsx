@@ -1,6 +1,6 @@
 import { useEffect, type FC } from 'react';
-import { IconEdit } from '@arco-design/web-react/icon';
-import { Space, Button } from '@arco-design/web-react';
+import { IconEdit, IconMoreVertical, IconDelete } from '@arco-design/web-react/icon';
+import { Space, Button, Menu, Dropdown } from '@arco-design/web-react';
 import screenTemplate from '@/assets/images/screen/screenTemplate.png';
 import styles from './index.module.less';
 import eye from '@/assets/images/screen/eye.png';
@@ -19,8 +19,26 @@ interface CardProps {
   onEditTemplate: (item: dataList) => void;
   onEdit: (item: dataList) => void;
   onPreview: (item: dataList) => void;
+  onDelete: (item: dataList) => void;
 }
-const ScreenCard: FC<CardProps> = ({ item, title, onEditTemplate, onEdit, onPreview }) => {
+const ScreenCard: FC<CardProps> = ({ item, title, onEditTemplate, onEdit, onPreview, onDelete }) => {
+  const menu = (
+    <Menu style={{ borderRadius: 10 }}>
+      <Menu.Item
+        key="1"
+        onClick={(e) => {
+          e.stopPropagation();
+          onDelete(item);
+        }}
+        style={{ color: 'red' }}
+      >
+        <div className={styles.menuItem}>
+          <IconDelete style={{ marginRight: 4 }} fontSize={18} />
+          <span>删除</span>
+        </div>
+      </Menu.Item>
+    </Menu>
+  );
   useEffect(() => {}, []);
 
   return (
@@ -66,6 +84,9 @@ const ScreenCard: FC<CardProps> = ({ item, title, onEditTemplate, onEdit, onPrev
           >
             编辑
           </Button>
+          <Dropdown droplist={menu} trigger="click" position="bottom">
+            <IconMoreVertical className={styles.operationIcon} fontSize={14} style={{ color: '#272e3b' }} />
+          </Dropdown>
         </Space>
       </div>
     </div>

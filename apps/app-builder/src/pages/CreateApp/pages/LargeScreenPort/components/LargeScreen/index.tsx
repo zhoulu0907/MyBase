@@ -1,6 +1,7 @@
 import { useEffect, useState, type FC } from 'react';
 import { Button, Input, Spin, Pagination, Modal, Form } from '@arco-design/web-react';
 import { IconPlus, IconSearch } from '@arco-design/web-react/icon';
+import CreateScreenModal from '@/components/CreateScreenModal';
 import ScreenCard from '../ScreenCard';
 import styles from './index.module.less';
 const FormItem = Form.Item;
@@ -48,7 +49,13 @@ const LargeScreen: FC = () => {
     ]);
   }, []);
   const handleSearchChange = () => {};
-  const handleAdd = () => {};
+  // 创建大屏弹窗
+  const [createForm] = Form.useForm();
+  const [visibleCreateScreenForm, setVisibleCreateScreenForm] = useState('');
+  const handleAdd = () => {
+    setVisibleCreateScreenForm('screen');
+  };
+  const handleCreateOk = () => {};
   // 编辑弹框
   const [editForm] = useForm();
   const [editVisible, setEditVisible] = useState<boolean>(false);
@@ -78,8 +85,10 @@ const LargeScreen: FC = () => {
 
   // 删除弹框
   const [deleteVisible, setDeleteVisible] = useState<boolean>(false);
+  const [ModalScreenName, setModalScreenName] = useState('');
   const handleDelete = (item: dataList) => {
     console.log(item);
+    setModalScreenName(item.name);
     setDeleteVisible(true);
   };
   const handleDeleteScreenOk = () => {
@@ -176,7 +185,7 @@ const LargeScreen: FC = () => {
         <p style={{ fontSize: 16, fontWeight: 500, color: '#1D2129' }}>
           您确定要删除此大屏吗？删除后将无法恢复，请谨慎操作。
         </p>
-        <div className={styles.ModalScreenName}>大屏名称：这是一个大屏名称</div>
+        <div className={styles.ModalScreenName}>大屏名称：{ModalScreenName}</div>
       </Modal>
       {/* 另存为模板弹框 */}
       <Modal
@@ -192,6 +201,17 @@ const LargeScreen: FC = () => {
           <p>确定后将新增一个应用模板</p>
         </div>
       </Modal>
+      {/* 新建大屏 */}
+      <CreateScreenModal
+        title="新建大屏"
+        type={'screen'}
+        handleCreate={handleCreateOk}
+        onCancel={() => {
+          setVisibleCreateScreenForm('');
+        }}
+        form={createForm}
+        visibleCreateForm={visibleCreateScreenForm}
+      />
     </div>
   );
 };
