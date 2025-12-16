@@ -28,7 +28,7 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean; d
   } = props;
   const [tableName, fieldName] = dataField;
   const { curMenu } = menuSignal;
-  const { entityDataId } = pagesRuntimeSignal;
+  const { rowDataId } = pagesRuntimeSignal;
 
 
   const [_fileUrl, setFileUrl] = useState<string>('');
@@ -114,7 +114,7 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean; d
                   onClick={async () => {
                     const param = {
                       menuId: curMenu.value?.id,
-                      id: entityDataId.value,
+                      id: rowDataId.value,
                       fieldName,
                       fileId: file.response.fileId || file.id
                     }
