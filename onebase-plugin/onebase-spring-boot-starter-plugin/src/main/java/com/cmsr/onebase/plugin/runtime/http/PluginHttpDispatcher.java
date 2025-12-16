@@ -1,6 +1,7 @@
 package com.cmsr.onebase.plugin.runtime.http;
 
 import com.cmsr.onebase.plugin.api.HttpHandler;
+import com.cmsr.onebase.plugin.runtime.config.PluginProperties;
 import com.cmsr.onebase.plugin.runtime.manager.OneBasePluginManager;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
@@ -26,6 +27,7 @@ import java.util.Map;
  * <p>
  * 负责接收代理处理器转发的请求，动态查找并调用相应的插件处理器方法。
  * 使用 Spring MVC 的 RequestMappingHandlerAdapter 处理请求，自动支持所有 Spring MVC 特性。
+ * 当插件系统禁用时（enabled=false），跳过路由初始化。
  * </p>
  *
  * @author chengyuansen
@@ -38,18 +40,22 @@ public class PluginHttpDispatcher {
 
     private final OneBasePluginManager pluginManager;
     private final RequestMappingHandlerAdapter handlerAdapter;
+    private final PluginProperties pluginProperties;
     private final Map<String, MethodHandler> routes = new HashMap<>();
 
     /**
      * 构造函数
      *
-     * @param pluginManager  插件管理器
-     * @param handlerAdapter Spring MVC 的请求处理适配器（用于参数解析、类型转换等）
+     * @param pluginManager      插件管理器
+     * @param handlerAdapter     Spring MVC 的请求处理适配器（用于参数解析、类型转换等）
+     * @param pluginProperties   插件配置属性
      */
     public PluginHttpDispatcher(OneBasePluginManager pluginManager,
-                                RequestMappingHandlerAdapter handlerAdapter) {
+                                RequestMappingHandlerAdapter handlerAdapter,
+                                PluginProperties pluginProperties) {
         this.pluginManager = pluginManager;
         this.handlerAdapter = handlerAdapter;
+        this.pluginProperties = pluginProperties;
         log.debug("PluginHttpDispatcher已创建");
     }
 
@@ -59,6 +65,12 @@ public class PluginHttpDispatcher {
      */
     @PostConstruct
     public void init() {
+        // 检查插件系统是否启用
+        if (!pluginProperties.isEnabled()) {
+            log.info("插件系统已禁用，跳过HTTP路由分发器初始化");
+            return;
+        }
+        
         log.info("=" .repeat(60));
         log.info("初始化插件HTTP路由分发器");
         

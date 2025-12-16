@@ -3,8 +3,6 @@
 onebase:
   plugin:
     enabled: true
-    auto-load: true
-    auto-start: true
     mode: staging             # 预发布模式，只加载 plugins-dir 的ZIP包，不扫描classpath
     plugins-dir: ./plugins    # 插件目录，存放 ZIP/JAR 插件包
 

@@ -36,13 +36,13 @@ import java.util.List;
  * 插件运行时自动配置
  * <p>
  * 配置PF4J的PluginManager和相关Bean。
+ * 无论enabled是否为true，都会加载配置类和创建Bean，只是enabled=false时不执行主动初始化操作。
  * </p>
  *
  * @author chengyuansen
  * @date 2025-12-18
  */
 @Configuration
-@ConditionalOnProperty(prefix = "onebase.plugin", name = "enabled", havingValue = "true", matchIfMissing = true)
 @EnableConfigurationProperties(PluginProperties.class)
 public class PluginRuntimeAutoConfiguration {
 
@@ -58,6 +58,18 @@ public class PluginRuntimeAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public PluginManager pluginManager(PluginProperties properties, ApplicationContext applicationContext) {
+        // 检查插件系统是否启用
+        if (!properties.isEnabled()) {
+            log.info("插件系统已禁用（enabled=false）");
+            // 创建一个空的PluginManager，不加载任何插件
+            return new DefaultPluginManager() {
+                @Override
+                protected PluginDescriptorFinder createPluginDescriptorFinder() {
+                    return new PropertiesPluginDescriptorFinder();
+                }
+            };
+        }
+        
         PluginMode mode = properties.getPluginMode(); // 会在此处验证模式值，无效则抛异常
         
         // DEV模式：只加载classpath下的扩展点
@@ -71,13 +83,9 @@ public class PluginRuntimeAutoConfiguration {
             
             DevModePluginManager pluginManager = new DevModePluginManager();
             
-            if (properties.isAutoLoad()) {
-                pluginManager.loadPlugins();
-                
-                if (properties.isAutoStart()) {
-                    pluginManager.startPlugins();
-                }
-            }
+            // enabled=true时直接加载并启动插件
+            pluginManager.loadPlugins();
+            pluginManager.startPlugins();
             
             return pluginManager;
         }
@@ -132,15 +140,12 @@ public class PluginRuntimeAutoConfiguration {
                 }
             };
 
-            if (properties.isAutoLoad()) {
-                pluginManager.loadPlugins();
-                log.info("已加载 {} 个插件", pluginManager.getPlugins().size());
-
-                if (properties.isAutoStart()) {
-                    pluginManager.startPlugins();
-                    log.info("已启动 {} 个插件", pluginManager.getStartedPlugins().size());
-                }
-            }
+            // enabled=true时直接加载并启动插件
+            pluginManager.loadPlugins();
+            log.info("已加载 {} 个插件", pluginManager.getPlugins().size());
+            
+            pluginManager.startPlugins();
+            log.info("已启动 {} 个插件", pluginManager.getStartedPlugins().size());
 
             return pluginManager;
         }
@@ -169,15 +174,12 @@ public class PluginRuntimeAutoConfiguration {
             }
         };
 
-        if (properties.isAutoLoad()) {
-            pluginManager.loadPlugins();
-            log.info("已加载 {} 个插件", pluginManager.getPlugins().size());
-
-            if (properties.isAutoStart()) {
-                pluginManager.startPlugins();
-                log.info("已启动 {} 个插件", pluginManager.getStartedPlugins().size());
-            }
-        }
+        // enabled=true时直接加载并启动插件
+        pluginManager.loadPlugins();
+        log.info("已加载 {} 个插件", pluginManager.getPlugins().size());
+        
+        pluginManager.startPlugins();
+        log.info("已启动 {} 个插件", pluginManager.getStartedPlugins().size());
 
         return pluginManager;
     }
@@ -261,14 +263,16 @@ public class PluginRuntimeAutoConfiguration {
      *
      * @param oneBasePluginManager         插件管理器
      * @param requestMappingHandlerAdapter Spring MVC 的请求处理适配器
+     * @param properties                   插件配置属性
      * @return 分发器
      */
     @Bean
     @ConditionalOnMissingBean
     public PluginHttpDispatcher pluginHttpDispatcher(
             OneBasePluginManager oneBasePluginManager,
-            org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter requestMappingHandlerAdapter) {
-        return new PluginHttpDispatcher(oneBasePluginManager, requestMappingHandlerAdapter);
+            org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter requestMappingHandlerAdapter,
+            PluginProperties properties) {
+        return new PluginHttpDispatcher(oneBasePluginManager, requestMappingHandlerAdapter, properties);
     }
 
     /**

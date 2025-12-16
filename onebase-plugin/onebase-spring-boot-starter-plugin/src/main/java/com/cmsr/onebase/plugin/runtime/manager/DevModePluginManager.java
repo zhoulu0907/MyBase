@@ -49,9 +49,19 @@ public class DevModePluginManager extends DefaultPluginManager {
      * 零配置：无需META-INF/services，无需extensions.idx
      * IDE友好：修改Java代码后直接运行，无需Maven编译
      * </p>
+     * <p>
+     * 注意：只有在插件已启动（STARTED状态）时才返回扩展点，
+     * 这样才能正确支持auto-load和auto-start配置。
+     * </p>
      */
     @Override
     public <T> List<T> getExtensions(Class<T> type) {
+        // 检查虚拟插件是否已启动
+        if (devPluginWrapper == null || devPluginWrapper.getPluginState() != PluginState.STARTED) {
+            log.debug("开发模式：虚拟插件未启动，返回空扩展点列表");
+            return Collections.emptyList();
+        }
+        
         log.debug("开发模式：扫描classpath查找 {} 扩展点", type.getName());
         return scanner.scanExtensions(type);
     }

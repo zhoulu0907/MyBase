@@ -26,16 +26,6 @@ public class PluginProperties {
     private String pluginsDir = "plugins";
 
     /**
-     * 是否自动加载插件
-     */
-    private boolean autoLoad = true;
-
-    /**
-     * 是否启动时自动启动已加载的插件
-     */
-    private boolean autoStart = true;
-
-    /**
      * 插件运行模式
      * <ul>
      *   <li>dev: 开发模式，只加载classpath下的扩展点，支持IDE断点调试</li>
@@ -65,22 +55,6 @@ public class PluginProperties {
 
     public void setPluginsDir(String pluginsDir) {
         this.pluginsDir = pluginsDir;
-    }
-
-    public boolean isAutoLoad() {
-        return autoLoad;
-    }
-
-    public void setAutoLoad(boolean autoLoad) {
-        this.autoLoad = autoLoad;
-    }
-
-    public boolean isAutoStart() {
-        return autoStart;
-    }
-
-    public void setAutoStart(boolean autoStart) {
-        this.autoStart = autoStart;
     }
 
     public String getMode() {

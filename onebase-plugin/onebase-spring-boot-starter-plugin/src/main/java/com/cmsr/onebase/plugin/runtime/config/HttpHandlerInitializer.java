@@ -13,6 +13,7 @@ import java.util.List;
  * HTTP处理器初始化器
  * <p>
  * 在应用启动完成后，自动扫描并注册插件中的HTTP处理器。
+ * 当插件系统禁用时（enabled=false），跳过初始化。
  * </p>
  *
  * @author chengyuansen
@@ -24,7 +25,14 @@ public class HttpHandlerInitializer {
     private static final Logger log = LoggerFactory.getLogger(HttpHandlerInitializer.class);
 
     public HttpHandlerInitializer(OneBasePluginManager oneBasePluginManager,
-                                  HttpHandlerRegistry httpHandlerRegistry) {
+                                  HttpHandlerRegistry httpHandlerRegistry,
+                                  PluginProperties pluginProperties) {
+        // 检查插件系统是否启用
+        if (!pluginProperties.isEnabled()) {
+            log.info("插件系统已禁用，跳过HTTP处理器初始化");
+            return;
+        }
+        
         try {
             // 获取所有HTTP处理器
             List<HttpHandler> handlers = oneBasePluginManager.getHttpHandlers();

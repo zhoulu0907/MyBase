@@ -389,16 +389,12 @@ mvn clean package
 
 ```properties
 # 是否启用插件系统（默认：true）
+# enabled=true: 加载并启动插件
+# enabled=false: 不加载也不启动插件
 onebase.plugin.enabled=true
 
 # 插件目录（默认：plugins）
 onebase.plugin.plugins-dir=plugins
-
-# 是否自动加载插件（默认：true）
-onebase.plugin.auto-load=true
-
-# 是否自动启动插件（默认：true）
-onebase.plugin.auto-start=true
 ```
 
 ## 📚 相关文档
