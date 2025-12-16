@@ -260,20 +260,7 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
           return <Select options={options} placeholder="请选择静态值" />;
         case FORM_COMPONENT_TYPES.USER_SELECT:
           return (
-            <Select
-              placeholder="请选择人员"
-              allowClear
-              showSearch={true}
-              //   filterOption={
-              //     selectedMembers.length > 0
-              //       ? (input, option) => String(option?.props?.children ?? '').includes(input)
-              //       : false // 远程搜索时不做本地过滤
-              //   }
-              //   defaultValue={configs[DEFAULTUSERVALUE]}
-              //   value={configs[DEFAULTUSERVALUE]}
-              //   onSearch={debouncedSearch}
-              onPopupScroll={scrollHandler}
-            >
+            <Select placeholder="请选择人员" allowClear showSearch={true} onPopupScroll={scrollHandler}>
               {userOptions.map((option) => (
                 <Select.Option key={option.id} value={option.id}>
                   {option.nickname}
