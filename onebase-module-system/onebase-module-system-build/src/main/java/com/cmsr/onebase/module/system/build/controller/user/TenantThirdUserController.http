@@ -40,3 +40,25 @@ GET {{baseUrl}}/system/third/user-applications-page
 Content-Type: application/json
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
+
+
+
+### 修改用户状态 /admin-api/system/third/update-status
+POST {{baseUrl}}/system/third/update-status
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "id": 174445938142773248,
+  "status": 0
+}
+
+### 修改用户状态 /admin-api/system/third/update-password
+POST {{baseUrl}}/system/third/update-password
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "id": 174445938142773248,
+  "status": 0
+}
