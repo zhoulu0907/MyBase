@@ -190,7 +190,7 @@ const XFileUpload: XInputFileUploadSchema = {
     },
     {
       key: 'showDownload',
-      name: '列表页支持下载',
+      name: '支持下载',
       type: CONFIG_TYPES.SWITCH_INPUT
     },
     {
@@ -216,7 +216,7 @@ const XFileUpload: XInputFileUploadSchema = {
     showDownload: false,
      verify: {
       required: false,
-      maxCount: -1,
+      maxCount: 1,
       maxSize: 10,
       fileFormat: ''
     },

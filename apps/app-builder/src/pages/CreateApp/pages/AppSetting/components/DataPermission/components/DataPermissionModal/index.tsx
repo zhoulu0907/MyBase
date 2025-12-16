@@ -112,7 +112,7 @@ const DataPermissionModal = (props: IProps) => {
     // 将 appEntityFields 转换为 ConditionField 格式
     const convertedFields = appEntityFields.map((field) => ({
       title: field.displayName,
-      key: field.fieldId,
+      key: `${dataPermissionEntity?.tableName}.${field.fieldName}`,
       fieldType: field.fieldType
     }));
     setConditionFields([

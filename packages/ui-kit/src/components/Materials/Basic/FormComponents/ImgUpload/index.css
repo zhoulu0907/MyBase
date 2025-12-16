@@ -13,7 +13,6 @@
   display: inline-block;
   cursor: pointer;
   border-radius: 2px;
-  margin-bottom: 8px;
 }
 .uplaodTriggerText-content {
   display: flex;
@@ -39,7 +38,6 @@
   border-radius: 2px;
   text-align: center;
   font-size: 14px;
-  margin-bottom: 8px;
 }
 .uplaodTriggerList-tips {
   margin: 16px 0 4px;
@@ -61,7 +59,6 @@
   box-sizing: border-box;
   cursor: pointer;
   border-radius: 2px;
-  margin-bottom: 8px;
 }
 .uplaodTriggerPicture-content {
   text-align: center;
@@ -109,6 +106,8 @@
   margin-left: auto;
   text-align: right;
   color: #86909c;
+  display: flex;
+  align-items: center;
 }
 .uplaodList-text-item-opera svg {
   margin-left: 8px;

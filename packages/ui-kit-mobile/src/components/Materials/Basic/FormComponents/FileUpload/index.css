@@ -8,19 +8,29 @@
     line-height: 0.24rem;
     color: #ff4d4f;
   }
+  .arco-uploader-container {
+    display: block;
+  }
+  .arco-uploader-add {
+    width: 1.6rem;
+  }
   .uplaodList-text-item {
-    min-height: 1rem;
+     min-height: 0.8rem;
      margin-top: 0.2rem;
-     padding: 0 0.24rem;
+     padding: 0 0.12rem;
+     border-radius: 4px;
      .arco-icon {
-       font-size: 0.4rem !important;
+      font-size: 0.32rem !important;
+     }
+     .arco-icon-file {
+       width: 0.8rem;
      }
      .uplaodList-text-item-name {
         margin: 0 0.12rem;
-        font-size: 0.32rem;
+        font-size: 0.26rem;
      }
      .uplaodList-text-item-opera {
-       height: 1rem;
+       height: 0.8rem;
        display: flex;
        align-items: center;
      }

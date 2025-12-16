@@ -15,7 +15,6 @@ import {
   ENTITY_COMPONENT_TYPES,
   getComponentConfig,
   getComponentSchema,
-  useAppEntityStore,
   WIDTH_OPTIONS,
   WIDTH_VALUES,
   DEFAULT_OPTIONS_TYPE,
@@ -41,7 +40,7 @@ import CompCopyIcon from '@/assets/images/copy_comp_icon.svg';
 import CompShowIcon from '@/assets/images/eye_off_icon.svg';
 
 import type { EditorProps } from '@/common/props';
-import { type AppEntityField } from '@onebase/app';
+import { type AppEntities, type AppEntity, type AppEntityField } from '@onebase/app';
 import { ENTITY_TYPE, ENTITY_TYPE_VALUE } from '@onebase/app';
 import { EditMode, getHashQueryParam } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
@@ -51,6 +50,8 @@ import styles from './index.module.less';
 
 interface EditorWorkspaceProps {
   props: EditorProps & {
+    mainEntity?: AppEntity;
+    subEntities?: AppEntities;
     useEditorSignalMap: Map<string, any>;
     batchDelPageComponentSchemas: (componentIds: Set<string>) => void;
     batchDelLayoutSubComponents: (componentIds: Set<string>) => void;
@@ -67,6 +68,7 @@ const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({ props, isListEditor =
   useSignals();
 
   const {
+    mainEntity,
     useEditorSignalMap,
     pageViews,
     curViewId,
@@ -94,9 +96,8 @@ const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({ props, isListEditor =
     batchDelLayoutSubComponents,
     subTableComponents,
     setSubTableComponents,
-    batchDelSubTableComponents
+    batchDelSubTableComponents,
   } = props;
-  const { mainEntity } = useAppEntityStore();
 
   const [showEmpty, setShowEmpty] = useState(true);
   const [isFormEditor, setIsFormEditor] = useState(false);
@@ -309,8 +310,7 @@ const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({ props, isListEditor =
         </div>
       </div>
 
-      <MobileForm
-      >
+      <MobileForm>
         <div
           className={styles.workspaceBody}
           id="workspace-body"
@@ -731,11 +731,9 @@ const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({ props, isListEditor =
                   data-cp-id={cp.id}
                   className={styles.componentItem}
                   style={{
-                    width: `calc(${getComponentWidth(pageComponentSchemas[cp.id], cp.type)} - 8px)`,
                     borderColor: curComponentID === cp.id ? 'rgb(var(--primary-6))' : '',
                     borderStyle: curComponentID === cp.id ? 'solid' : 'dashed',
-                    background: curComponentID === cp.id ? 'rgb(var(--primary-1))' : '',
-                    margin: '4px'
+                    background: curComponentID === cp.id ? 'rgb(var(--primary-1))' : ''
                   }}
                   onClick={(e: React.MouseEvent<HTMLDivElement>) => {
                     e.stopPropagation();

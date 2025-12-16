@@ -6,6 +6,7 @@ import { memo, useEffect, useState } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { DEFAULT_VALUE_TYPES, STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import type { XInputNumberConfig } from './schema';
+import { securityEncodeText } from '@/utils';
 
 import '../index.css';
 import { useFormFieldWatch } from '../useFormField';
@@ -27,28 +28,23 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
     layout,
     runtime = true,
     detailMode,
-    numberFormat
+    numberFormat,
+    security
   } = props;
-    const { showUnit, unitValue, showPrecision, precision, showPercent, useThousandsSeparator } = numberFormat;
+  const { showUnit, unitValue, showPrecision, precision, showPercent, useThousandsSeparator } = numberFormat;
   // ===== 外部 props end =====
 
   // ===== 内部状态 & 回显begin =====
-  const [fieldId, setFieldId] = useState('');
 
-  useEffect(() => {
-    if (dataField.length > 0) {
-      setFieldId(dataField[dataField.length - 1]);
-    }
-  }, [dataField]);
   // =====  内部状态 & 回显 end =====
 
   // ===== 表单上下文与字段名与值读取 begin =====
   const {
     form,
     fieldValue
-  } = useFormFieldWatch(fieldId);
+  } = useFormFieldWatch(dataField);
   // ===== 表单上下文与字段名与值读取 end =====
-  
+
   // ===== 外部事件：选择数据 begin =====
   // ===== 外部事件：选择数据 end =====
 
@@ -92,7 +88,7 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
           label.display &&
           label.text && <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>{label.text}</span>
         }
-        field={fieldId ? fieldId : `${FORM_COMPONENT_TYPES.INPUT_NUMBER}_${nanoid()}`}
+        field={dataField.length > 0 ? dataField[dataField.length - 1]: `${FORM_COMPONENT_TYPES.INPUT_NUMBER}_${nanoid()}`}
         layout={layout}
         tooltip={tooltip}
         labelCol={layout === 'horizontal' ? { span: 10 } : {}}
@@ -110,7 +106,7 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
         initialValue={defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : ''}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
-          <div>{helpers.detailValue(fieldValue) || '--'}</div>
+          <div>{securityEncodeText(security, helpers.detailValue(fieldValue))}</div>
         ) : (
           <InputNumber
             placeholder={placeholder}
