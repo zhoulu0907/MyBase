@@ -252,7 +252,7 @@ export default function UserTable({
       {
         title: '邮箱',
         dataIndex: 'email',
-        width: 180,
+        width: 150,
         placeholder: '-',
         ellipsis: true
       },
