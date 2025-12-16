@@ -96,7 +96,7 @@ public class RuntimeFlowProcessTest {
     @Test
     public void testFormTrigger01() throws IOException {
         FormTriggerReqVO reqVO = new FormTriggerReqVO();
-        reqVO.setProcessId(181941429188165632L);
+        reqVO.setProcessId(183149380155572224L);
         reqVO.setInputParams(Map.of(
                 "student_name", "小",
                 "birthday", "2025-12-01"
@@ -108,8 +108,8 @@ public class RuntimeFlowProcessTest {
     @Test
     public void testFormTrigger02() throws IOException {
         FormTriggerReqVO reqVO = new FormTriggerReqVO();
-        reqVO.setProcessId(181941429188165632L);
-        reqVO.setExecutionUuid("13c177b5-cf2b-4d91-ac65-44455688c1db");
+        reqVO.setProcessId(183149380155572224L);
+        reqVO.setExecutionUuid("69e1b4e6-a0fe-458d-a0fe-99c5527e0191");
 
         SimpleField field1 = new SimpleField();
         field1.setId("7VGW8DgADiKOFqlxU5JGG");
@@ -133,7 +133,7 @@ public class RuntimeFlowProcessTest {
         FormTriggerReqVO reqVO = new FormTriggerReqVO();
         reqVO.setProcessId(181943095635476480L);
         reqVO.setInputParams(Map.of(
-                "phone_number", "1234567890"
+                "phone_nubmer", null
         ));
         FormTriggerRespVO formTriggerRespVO = flowProcessExecService.triggerForm(reqVO);
         System.out.println(formTriggerRespVO);

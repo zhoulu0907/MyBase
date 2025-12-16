@@ -58,7 +58,7 @@ public class SwitchConditionNodeComponent extends NodeSwitchComponent {
         for (SwitchConditionNodeData.Case aCase : nodeData.getCases()) {
             List<Conditions> conditions = aCase.getFilterCondition();
             OrExpression orExpression = flowConditionsProvider.formatConditionsForExpression(conditions, expressionContext);
-            boolean evaluated = expressionExecutor.evaluate(orExpression, expressionContext);
+            boolean evaluated = expressionExecutor.evaluateContext(orExpression, expressionContext);
             if (evaluated) {
                 return aCase.getId();
             }
