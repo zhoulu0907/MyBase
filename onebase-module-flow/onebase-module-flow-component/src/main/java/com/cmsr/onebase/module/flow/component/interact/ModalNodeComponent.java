@@ -42,8 +42,7 @@ public class ModalNodeComponent extends SkippableNodeComponent {
         }
         if (nodeResultEnum == NodeResultEnum.NEED_REEXECUTE) {
             executeContext.addLog("弹窗节点返回重置执行");
-            variableContext.putNodeVariables(this.getTag(), variableContext.getInputFields());
-            variableContext.setInputFields(Collections.emptyMap());
+            variableContext.putNodeVariables(this.getTag(), variableContext.getInputParams());
             executeContext.setNodeProcessResult(this.getTag(), NodeResultEnum.COMPLETED);
         }
     }

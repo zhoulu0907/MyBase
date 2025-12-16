@@ -280,7 +280,7 @@ public class BaseAppRepository<M extends BaseMapper<T>, T extends BaseAppEntity>
 
     public boolean deleteAllApplicationData(Long applicationId) {
         QueryColumn applicationColumn = new QueryColumn(QueryWrapperUtils.APPLICATION_ID);
-        return this.updateChain()
+        return super.updateChain()
                 .where(applicationColumn.eq(applicationId))
                 .remove();
     }

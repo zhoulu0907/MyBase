@@ -158,8 +158,9 @@ public class FlowProcessExecutor {
             executeContext.setExecuteLog(executeLog);
             Map<String, NodeData> nodeData = FlowProcessCache.findNodeData(processId);
             executeContext.setNodeDataMap(nodeData);
+            executeContext.setSystemFields(executorInput.getSystemFields());
 
-            variableContext.setInputFields(executorInput.getInputParams());
+            variableContext.setInputParams(executorInput.getInputParams());
             variableContext.setOutputParams(Collections.emptyMap());
             //设置日志执行UUID
             executionLog.setTraceId(executeContext.getTraceId());

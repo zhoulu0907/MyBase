@@ -340,7 +340,7 @@ public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity>
 
     public boolean deleteAllApplicationData(Long applicationId) {
         QueryColumn applicationColumn = new QueryColumn(QueryWrapperUtils.APPLICATION_ID);
-        return this.updateChain()
+        return super.updateChain()
                 .where(applicationColumn.eq(applicationId))
                 .remove();
     }
@@ -348,7 +348,7 @@ public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity>
     public boolean deleteApplicationVersionData(Long applicationId, Long versionId) {
         QueryColumn applicationColumn = new QueryColumn(QueryWrapperUtils.APPLICATION_ID);
         QueryColumn versionTagColumn = new QueryColumn(QueryWrapperUtils.VERSION_TAG);
-        return this.updateChain()
+        return super.updateChain()
                 .where(applicationColumn.eq(applicationId).and(versionTagColumn.eq(versionId)))
                 .remove();
     }

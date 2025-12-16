@@ -127,4 +127,15 @@ public class RuntimeFlowProcessTest {
         FormTriggerRespVO formTriggerRespVO = flowProcessExecService.triggerForm(reqVO);
         System.out.println(formTriggerRespVO);
     }
+
+    @Test
+    public void testFormTrigger03() throws IOException {
+        FormTriggerReqVO reqVO = new FormTriggerReqVO();
+        reqVO.setProcessId(181943095635476480L);
+        reqVO.setInputParams(Map.of(
+                "phone_number", "1234567890"
+        ));
+        FormTriggerRespVO formTriggerRespVO = flowProcessExecService.triggerForm(reqVO);
+        System.out.println(formTriggerRespVO);
+    }
 }
