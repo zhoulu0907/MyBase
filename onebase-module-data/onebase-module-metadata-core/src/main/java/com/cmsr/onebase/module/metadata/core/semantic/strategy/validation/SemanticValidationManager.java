@@ -104,9 +104,14 @@ public class SemanticValidationManager {
         List<SemanticFieldSchemaDTO> connectorFields = collectConnectorAttributeFields(recordDTO.getEntitySchema());
         List<SemanticFieldSchemaDTO> allFields = new ArrayList<>();
         if (mainFields != null) { allFields.addAll(mainFields); }
-        // 合并连接器“关系属性字段”，用于统一装载校验规则
+        // 合并连接器"关系属性字段"，用于统一装载校验规则
         if (connectorFields != null && !connectorFields.isEmpty()) { allFields.addAll(connectorFields); }
-
+        // 根据 fieldUuid 去重，避免重复字段导致后续 toMap 报错
+        allFields = allFields.stream()
+                .collect(Collectors.toMap(SemanticFieldSchemaDTO::getFieldUuid, f -> f, (existing, replacement) -> existing))
+                .values().stream().collect(Collectors.toList());
+        
+        
         Map<String, Object> mainData = recordDTO.getEntityValue().getCurrentEntityRawMap();
         SemanticDataMethodOpEnum operationType = recordDTO.getRecordContext().getOperationType();
         // 统一在 buildContext 中完成规则查询与上下文构建

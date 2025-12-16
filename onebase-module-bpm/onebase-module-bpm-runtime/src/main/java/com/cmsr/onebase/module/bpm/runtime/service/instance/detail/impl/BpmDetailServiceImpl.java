@@ -694,7 +694,13 @@ public class BpmDetailServiceImpl implements BpmDetailService {
             return userContext;
         }
 
-        Map<String, User> userMap = users.stream().collect(Collectors.toMap(User::getProcessedBy, user -> user));
+        Map<String, User> userMap = users.stream().collect(
+                Collectors.toMap(
+                        User::getProcessedBy,
+                        user -> user,
+                        (u1, u2) -> u1  // 保留第一个
+                )
+        );
         User matchedUser = userMap.get(loginUserId);
 
         if (matchedUser != null) {
