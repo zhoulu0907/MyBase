@@ -71,7 +71,7 @@ const XSubTable = memo(
 
     return (
       <Form.Item
-        className="inputTextWrapperOBMobile"
+        className={`inputTextWrapperOBMobile ${styles.subTableWrapperOBMobile}`}
         field=""
         rules={rules}
         layout="vertical"

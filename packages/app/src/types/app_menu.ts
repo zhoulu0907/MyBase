@@ -4,7 +4,7 @@ export interface ListApplicationMenuReq {
 }
 
 export interface ApplicationMenu {
-  id: string;
+  id?: string;
   parentId?: string;
   menuCode: string;
   menuSort: number;
@@ -12,7 +12,7 @@ export interface ApplicationMenu {
   menuName: string;
   pagesetType: number;
   menuIcon: string;
-  menuUuid: string;
+  menuUuid?: string;
   isVisible: number;
   children: ApplicationMenu[];
 }

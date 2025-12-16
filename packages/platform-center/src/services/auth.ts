@@ -59,10 +59,10 @@ export const sendVerifyCodeApi = (data: SendVerifyCodeRequest) => {
 
 // 获取验证码 /system/captcha/get
 export const getCaptchaApi = (data: Captcha) => {
-  return systemService.post('/captcha/get', data);
+  return (isRuntimeEnv() ? runtimeService : systemService).post('/captcha/get', data);
 };
 
 // 校验验证码 /system/captcha/check
 export const checkCaptchaApi = (data: CaptchaCheck) => {
-  return systemService.post('/captcha/check', data);
+  return (isRuntimeEnv() ? runtimeService : systemService).post('/captcha/check', data);
 };
