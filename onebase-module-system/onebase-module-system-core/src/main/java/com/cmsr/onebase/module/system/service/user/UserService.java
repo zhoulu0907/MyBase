@@ -335,5 +335,5 @@ public interface UserService {
      * @return
      */
     @TenantIgnore
-    List<AdminUserDO> getUserByUsernames(Set<String> usernamesList);
+    List<AdminUserDO> getPlatformUserByUsernames(Set<String> usernamesList);
 }

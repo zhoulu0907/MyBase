@@ -31,7 +31,6 @@ public class RuntimeDeptController {
 
     @GetMapping("/list")
     @Operation(summary = "获取部门列表")
-    @PreAuthorize("@ss.hasPermission('tenant:dept:query')")
     public CommonResult<List<DeptRespVO>> getDeptList(DeptListReqVO reqVO) {
         List<DeptRespVO> respList = deptService.getDeptListWithUserCount(reqVO);
         return success(respList);
