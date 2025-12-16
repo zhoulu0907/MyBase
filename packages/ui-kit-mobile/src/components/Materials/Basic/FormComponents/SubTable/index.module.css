@@ -1,3 +1,7 @@
+.subTableWrapperOBMobile {
+  display: flow-root !important;
+}
+
 .collapseOBMobile {
   :global(.arco-collapse-header) {
     flex-direction: row-reverse;

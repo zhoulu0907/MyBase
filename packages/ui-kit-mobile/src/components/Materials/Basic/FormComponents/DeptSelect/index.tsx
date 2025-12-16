@@ -112,7 +112,7 @@ const XDeptSelect = memo((props: XDeptSelectConfig & { runtime?: boolean; detail
   };
 
   const LoadingComp = () => <div className={styles.loading}><Loading type="circle" color="rgb(var(--primary-6))" /></div>
-  const selectedParseDeptName = parseDeptName(deptData?.deptList, selectedKeys);
+  const selectedParseDeptName = parseDeptName(deptData?.deptList, selectedKeys) || form?.getFieldValue(fieldId)?.name;
 
   return (
     <Form.Item
@@ -120,7 +120,6 @@ const XDeptSelect = memo((props: XDeptSelectConfig & { runtime?: boolean; detail
       label={label.display && <Ellipsis text={label.text} />}
       field={fieldId}
       style={{
-        borderRadius: '0.16rem',
         pointerEvents: runtime ? 'unset' : 'none',
         opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
       }}

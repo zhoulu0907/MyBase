@@ -47,43 +47,41 @@ const XImgUpload = memo((props: XImgUploadConfig & { runtime?: boolean; detailMo
     dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.IMG_UPLOAD}_${nanoid()}`;
 
   return (
-    <div>
-      <Form.Item
-        className="inputTextWrapperOBMobile ImgUploadWrapperOBMobile"
-        label={
-          label.display && <Ellipsis text={label.text} />
-        }
-        layout="vertical"
-        field={fieldId}
-        required={verify?.required}
-        trigger="fileList"
-        style={{
-          pointerEvents: runtime ? 'unset' : 'none',
-          opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
+    <Form.Item
+      className="inputTextWrapperOBMobile ImgUploadWrapperOBMobile"
+      label={
+        label.display && <Ellipsis text={label.text} />
+      }
+      layout="vertical"
+      field={fieldId}
+      required={verify?.required}
+      trigger="fileList"
+      style={{
+        pointerEvents: runtime ? 'unset' : 'none',
+        opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
+      }}
+    >
+      <ImagePicker
+        accept="image/*"
+        limit={verify?.maxCount === -1 ? undefined : verify?.maxCount}
+        maxSize={verify.maxSize * 1024}
+        upload={handleUpload}
+        onMaxSizeExceed={(file) => {
+          Toast.toast({
+            content: '文件大小超出限制',
+            duration: 2000
+          })
         }}
-      >
-        <ImagePicker
-          accept="image/*"
-          limit={verify?.maxCount === -1 ? undefined : verify?.maxCount}
-          maxSize={verify.maxSize * 1024}
-          upload={handleUpload}
-          onMaxSizeExceed={(file) => {
-            Toast.toast({
-              content: '文件大小超出限制',
-              duration: 2000
-            })
-          }}
-          onLimitExceed={(file) =>
-            Toast.toast({
-              content: '文件数量超出限制',
-              duration: 2000
-            })}
-          style={{
-            width: '100%'
-          }}
-        />
-      </Form.Item>
-    </div>
+        onLimitExceed={(file) =>
+          Toast.toast({
+            content: '文件数量超出限制',
+            duration: 2000
+          })}
+        style={{
+          width: '100%'
+        }}
+      />
+    </Form.Item>
   );
 });
 
