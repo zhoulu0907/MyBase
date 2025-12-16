@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.bpm.runtime.service.impl;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
@@ -11,12 +12,16 @@ import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.bpm.core.dal.database.BpmFlowInsBizExtRepository;
 import com.cmsr.onebase.module.bpm.core.dal.database.ext.BpmFlowDefinitionRepositoryExt;
 import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowInsBizExtDO;
+import com.cmsr.onebase.module.bpm.core.dal.mapper.BpmInstanceMapper;
 import com.cmsr.onebase.module.bpm.core.dto.BpmDefinitionExtDTO;
 import com.cmsr.onebase.module.bpm.core.dto.BpmGlobalConfigDTO;
+import com.cmsr.onebase.module.bpm.core.dto.BpmInstanceDTO;
 import com.cmsr.onebase.module.bpm.core.dto.PageViewGroupDTO;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeExtDTO;
 import com.cmsr.onebase.module.bpm.core.enums.*;
 import com.cmsr.onebase.module.bpm.core.validator.BpmAppResourceValidator;
+import com.cmsr.onebase.module.bpm.core.vo.BpmFormDataPageReqVO;
+import com.cmsr.onebase.module.bpm.core.vo.UserBasicInfoVO;
 import com.cmsr.onebase.module.bpm.core.vo.design.BpmDefJsonVO;
 import com.cmsr.onebase.module.bpm.core.vo.design.edge.base.BaseEdgeVO;
 import com.cmsr.onebase.module.bpm.runtime.helper.BpmEntityHelper;
@@ -28,12 +33,14 @@ import com.cmsr.onebase.module.bpm.runtime.service.instance.predict.BpmPredictSe
 import com.cmsr.onebase.module.bpm.runtime.utils.PageViewUtil;
 import com.cmsr.onebase.module.bpm.runtime.vo.*;
 import com.cmsr.onebase.module.metadata.api.semantic.SemanticDynamicDataApi;
-import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntitySchemaDTO;
-import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldSchemaDTO;
-import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldValueDTO;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.*;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticConditionNodeTypeEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticFieldTypeEnum;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticOperatorEnum;
+import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticPageConditionVO;
 import com.cmsr.onebase.module.system.api.user.AdminUserApi;
 import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
+import com.github.pagehelper.PageHelper;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -52,11 +59,13 @@ import org.dromara.warm.flow.core.enums.SkipType;
 import org.dromara.warm.flow.core.service.DefService;
 import org.dromara.warm.flow.core.service.InsService;
 import org.dromara.warm.flow.core.service.TaskService;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 
@@ -114,6 +123,9 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
 
     @Resource
     private BpmEntityHelper bpmEntityHelper;
+
+    @Resource
+    private BpmInstanceMapper  bpmInstanceMapper;
 
     private String buildFormSummary(EntityVO entityVO, BpmDefinitionExtDTO defExtDTO, SemanticEntitySchemaDTO entitySchemaDTO) {
         StringBuilder sb = new StringBuilder();
@@ -501,5 +513,195 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         respVO.setBpmDefJson(JsonUtils.toJsonString(bpmDefJsonVO));
 
         return respVO;
+    }
+   /**
+     * 获取流程表单数据
+     *
+     * @param reqVO 获取流程表单数据请求
+     * @return 流程表单数据
+     */
+    @Override
+    public PageResult<BpmFormDataPageRespVO> getFormDataPage(BpmFormDataPageReqVO reqVO) {
+        if (StringUtils.isBlank(reqVO.getBusinessUuid())){
+            throw exception(ErrorCodeConstants.REQUIRED_BUSINESS_UUID_MISSING);
+        }
+        Long loginUserId = WebFrameworkUtils.getLoginUserId();
+
+        fillAppId(reqVO);
+        validateBusinessUuid(reqVO);
+        // 处理节点编码参数
+        reqVO.setNodeCodeList(splitToList(reqVO.getNodeCode()));
+
+        // 处理流程状态参数
+        reqVO.setFlowStatusList(splitToFlowStatusList(reqVO.getFlowStatus()));
+
+        // 第一次查询：获取流程实例基础信息
+        com.github.pagehelper.Page<BpmInstanceDTO> pageResult = PageHelper
+                .startPage(reqVO.getPageNo(), reqVO.getPageSize())
+                .doSelectPage(() -> bpmInstanceMapper.getFormDataPage(reqVO, loginUserId));
+
+        // 提取所有 businessDataId 用于第二次查询
+        List<String> businessDataIdList = pageResult.getResult().stream()
+                .map(BpmInstanceDTO::getBusinessDataId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        // 第二次查询：根据 businessDataIdList 获取详细的实体数据
+        PageResult<SemanticEntityValueDTO> entityPageResult = new PageResult<>(new ArrayList<>(), 0L);
+        Map<String, BpmInstanceDTO> instanceMap;
+
+        if (!businessDataIdList.isEmpty()) {
+            entityPageResult = getEntityDataByCondition(
+                    businessDataIdList, reqVO.getTableName(), reqVO.getPageNo(), reqVO.getPageSize(), reqVO.getEntityFilters());
+
+            // 建立 businessDataId 到 BpmInstanceDTO 的映射，便于后续查找
+            instanceMap = pageResult.getResult().stream()
+                    .filter(item -> item.getBusinessDataId() != null)
+                    .collect(Collectors.toMap(BpmInstanceDTO::getBusinessDataId, item -> item));
+        } else {
+            instanceMap = new HashMap<>();
+        }
+
+        // 以第二次查询结果为主构建最终响应
+        List<BpmFormDataPageRespVO> list = entityPageResult.getList().stream().map(entityValue -> {
+            BpmFormDataPageRespVO vo = new BpmFormDataPageRespVO();
+
+            // 从映射中获取对应的流程实例数据
+            String businessDataId = String.valueOf(entityValue.getGlobalRawMap().get("id"));
+            BpmInstanceDTO instance = instanceMap.get(businessDataId);
+
+            if (instance != null) {
+                // 拼接第一次查询的流程实例数据
+                vo.setId(instance.getId());
+                vo.setProcessTitle(instance.getBpmTitle());
+                UserBasicInfoVO initiator = new UserBasicInfoVO();
+                initiator.setUserId(String.valueOf(instance.getInitiatorId()))
+                        .setName(instance.getInitiatorName())
+                        .setAvatar(instance.getInitiatorAvatar());
+                vo.setInitiator(initiator);
+                vo.setFlowStatus(instance.getFlowStatus());
+                vo.setSubmitTime(instance.getSubmitTime());
+                vo.setNodeCode(instance.getNodeCode());
+                vo.setNodeName(instance.getNodeName());
+            }
+
+            // 使用第二次查询的实体数据
+            vo.setData(entityValue.getGlobalRawMap());
+
+            return vo;
+        }).toList();
+
+        return new PageResult<>(list, entityPageResult.getTotal());
+    }
+
+   /**
+     * 获取实体数据
+     *
+     * @return 获取流程表单数据响应
+     */
+   private PageResult<SemanticEntityValueDTO> getEntityDataByCondition(List businessDataIdList, String tableName,int pageNo, int pageSize,SemanticPageConditionVO entityFilters) {
+       // 1. 创建 SemanticPageConditionVO 对象
+       SemanticPageConditionVO conditionVO = new SemanticPageConditionVO();
+       conditionVO.setTableName(tableName); // 设置表名
+
+       // 2. 构造查询条件 - 通过 entityId 集合查询
+       SemanticConditionDTO idCondition = new SemanticConditionDTO();
+       idCondition.setFieldName("id"); // 假设主键字段名为"id"
+       idCondition.setOperator(SemanticOperatorEnum.EXISTS_IN); // 使用IN操作符
+       idCondition.setFieldValue(businessDataIdList); // entityIdList
+       idCondition.setNodeType(SemanticConditionNodeTypeEnum.CONDITION);
+
+       // 3. 处理 entityFilters 中的条件，并与ID条件组合
+       if (entityFilters != null && entityFilters.getSemanticConditionDTO() != null) {
+           entityFilters.setTableName(tableName);
+           entityFilters.getSemanticConditionDTO().getChildren().add(idCondition);
+           SemanticConditionDTO combinedCondition = getSemanticConditionDTO(entityFilters, idCondition);
+           conditionVO.setSemanticConditionDTO(combinedCondition);
+
+           // 设置 entityFilters 中的排序条件
+           if (entityFilters.getSortBy() != null) {
+               conditionVO.setSortBy(entityFilters.getSortBy());
+           }
+       } else {
+           // 如果没有 entityFilters 条件，只使用ID条件
+           conditionVO.setSemanticConditionDTO(idCondition);
+       }
+
+       // 4. 设置分页参数
+       conditionVO.setPageNo(pageNo);    // 页码
+       conditionVO.setPageSize(pageSize); // 每页大小
+
+       // 5. 调用 getDataByCondition 方法
+       PageResult<SemanticEntityValueDTO> result = semanticDynamicDataApi.getDataByCondition(conditionVO);
+       return result;
+   }
+
+   /**
+   * 处理 entityFilters 中的条件，并与ID条件组合
+   *
+   * @param entityFilters entityFilters
+   * @param idCondition   ID条件
+   * @return 组合后的条件
+   */
+    @NotNull
+    private static SemanticConditionDTO getSemanticConditionDTO(SemanticPageConditionVO entityFilters, SemanticConditionDTO idCondition) {
+        SemanticConditionDTO filterConditions = entityFilters.getSemanticConditionDTO();
+
+        // 创建组合条件，将ID条件和entityFilters条件组合在一起
+        SemanticConditionDTO combinedCondition = new SemanticConditionDTO();
+        combinedCondition.setNodeType(entityFilters.getSemanticConditionDTO().getNodeType());
+        combinedCondition.setCombinator(entityFilters.getSemanticConditionDTO().getCombinator());
+        combinedCondition.setConditionType(entityFilters.getSemanticConditionDTO().getConditionType());
+        combinedCondition.setFieldName(entityFilters.getSemanticConditionDTO().getFieldName());
+        combinedCondition.setOperator(entityFilters.getSemanticConditionDTO().getOperator());
+        combinedCondition.setFieldValue(entityFilters.getSemanticConditionDTO().getFieldValue());
+        combinedCondition.setFieldUuid(entityFilters.getSemanticConditionDTO().getFieldUuid());
+        combinedCondition.setChildren(Arrays.asList(idCondition, filterConditions));
+        return combinedCondition;
+    }
+
+
+    private List<String> splitToList(String str) {
+        if (StringUtils.isBlank(str)) {
+            return Collections.emptyList();
+        }
+
+        return Arrays.stream(str.split(","))
+                .map(String::trim)
+                .filter(StringUtils::isNotBlank)
+                .collect(Collectors.toList());
+    }
+    private List<String> splitToFlowStatusList(String str) {
+        List<String> flowStatusList = splitToList(str);
+
+        if (CollectionUtils.isEmpty(flowStatusList)) {
+            return flowStatusList;
+        }
+
+        return flowStatusList.stream()
+                .filter(s -> {
+                    if (BpmBusinessStatusEnum.getByCode(s) == null) {
+                        log.warn("忽略不支持的流程状态：{}", s);
+                        return false;
+                    }
+
+                    return true;
+                })
+                .collect(Collectors.toList());
+    }
+    private void validateBusinessUuid(BpmFormDataPageReqVO queryPageVO) {
+        String businessUuid = queryPageVO.getBusinessUuid();
+        AppMenuRespDTO appMenuRespDTO = appResourceApi.getAppMenuByUuidAndAppId(businessUuid, queryPageVO.getAppId());
+        bpmAppResourceValidator.validateMenuAndPageset(appMenuRespDTO, queryPageVO.getAppId());
+    }
+
+    private void fillAppId(BpmFormDataPageReqVO queryPageVO) {
+        // todo: 后续放到全局的Repository中
+        Long appId = ApplicationManager.getApplicationId();
+
+        if (appId == null) {
+            throw exception(ErrorCodeConstants.MISSING_APPLICATION_ID);
+        }
+        queryPageVO.setAppId(appId);
     }
 }

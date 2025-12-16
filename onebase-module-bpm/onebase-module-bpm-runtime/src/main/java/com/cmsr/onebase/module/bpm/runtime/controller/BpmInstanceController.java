@@ -1,6 +1,8 @@
 package com.cmsr.onebase.module.bpm.runtime.controller;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.module.bpm.core.vo.BpmFormDataPageReqVO;
 import com.cmsr.onebase.module.bpm.runtime.service.BpmInstanceService;
 import com.cmsr.onebase.module.bpm.runtime.vo.*;
 import io.swagger.v3.oas.annotations.Operation;
@@ -82,4 +84,17 @@ public class BpmInstanceController {
         log.info("流程预览: {}", reqVO);
         return CommonResult.success(bpmExecService.flowPreview(reqVO)) ;
     }
+
+    /**
+     * 获取列表数据
+     *
+     * @param reqVO
+     */
+    @PostMapping("/form-data-page")
+    @Operation(summary = "流程预览")
+    public CommonResult<PageResult<BpmFormDataPageRespVO>> getFormDataPage(@RequestBody BpmFormDataPageReqVO   reqVO) {
+        log.info("获取列表数据: {}", reqVO);
+        return CommonResult.success(bpmExecService.getFormDataPage(reqVO)) ;
+    }
+
 }

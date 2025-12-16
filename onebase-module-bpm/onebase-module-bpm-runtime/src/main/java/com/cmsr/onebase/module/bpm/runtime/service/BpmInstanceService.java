@@ -1,5 +1,7 @@
 package com.cmsr.onebase.module.bpm.runtime.service;
 
+import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.module.bpm.core.vo.BpmFormDataPageReqVO;
 import com.cmsr.onebase.module.bpm.runtime.vo.*;
 
 import java.util.List;
@@ -55,4 +57,11 @@ public interface BpmInstanceService {
      * @return 流程图
      */
     BpmPreviewRespVO flowPreview(BpmPreviewReqVO reqVO);
+
+    /**
+     * 获取列表数据
+     *
+     * @param reqVO 获取列表数据请求VO
+     */
+    PageResult<BpmFormDataPageRespVO> getFormDataPage(BpmFormDataPageReqVO reqVO);
 }
