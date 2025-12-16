@@ -90,7 +90,7 @@ public class AppApplicationRepository extends ServiceImpl<AppApplicationMapper, 
         return list(queryWrapper);
     }
 
-    public List<AppApplicationDO> findAppApplicationByAppName(String appName,Integer status) {
+    public List<AppApplicationDO> findAppApplicationByAppName(String appName, Integer status) {
         QueryWrapper queryWrapper = this.query()
                 .where(APP_APPLICATION.APP_NAME.eq(appName).when(StringUtils.isNotBlank(appName)))
                 .where(APP_APPLICATION.APP_STATUS.eq(status).when(status != null))

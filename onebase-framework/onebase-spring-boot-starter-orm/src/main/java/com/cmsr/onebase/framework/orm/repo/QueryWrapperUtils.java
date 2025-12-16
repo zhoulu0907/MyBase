@@ -1,8 +1,15 @@
 package com.cmsr.onebase.framework.orm.repo;
 
+import com.mybatisflex.annotation.Table;
+import com.mybatisflex.core.BaseMapper;
 import com.mybatisflex.core.query.*;
+import com.mybatisflex.core.util.ClassUtil;
+import com.mybatisflex.spring.service.impl.ServiceImpl;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.List;
 
 /**
@@ -11,12 +18,59 @@ import java.util.List;
  */
 public class QueryWrapperUtils {
 
-    public static final String APPLICATION_ID = "application_id";
+    private static final String APPLICATION_ID = "application_id";
 
-    public static final String VERSION_TAG = "version_tag";
+    private static final String VERSION_TAG = "version_tag";
 
-    public static final QueryColumn APPLICATION_COLUMN = new QueryColumn(QueryWrapperUtils.APPLICATION_ID);
-    public static final  QueryColumn VERSION_TAG_COLUMN = new QueryColumn(QueryWrapperUtils.VERSION_TAG);
+    public static QueryColumn createApplicationIdColumn(ServiceImpl serviceImpl, QueryWrapper queryWrapper) {
+        QueryTable queryTable = getQueryTable(queryWrapper);
+        if (queryTable != null) {
+            return new QueryColumn(queryTable, APPLICATION_ID);
+        } else {
+            return createApplicationIdColumn(serviceImpl);
+        }
+    }
+
+    public static QueryColumn createVersionTagColumn(ServiceImpl serviceImpl, QueryWrapper queryWrapper) {
+        QueryTable queryTable = getQueryTable(queryWrapper);
+        if (queryTable != null) {
+            return new QueryColumn(queryTable, VERSION_TAG);
+        } else {
+            return createVersionTagColumn(serviceImpl);
+        }
+    }
+
+    public static QueryColumn createApplicationIdColumn(ServiceImpl serviceImpl) {
+        String tableName = getTableName(serviceImpl.getMapper());
+        if (StringUtils.isNotEmpty(tableName)) {
+            return new QueryColumn(tableName, APPLICATION_ID);
+        } else {
+            return new QueryColumn(APPLICATION_ID);
+        }
+    }
+
+    public static QueryColumn createVersionTagColumn(ServiceImpl serviceImpl) {
+        String tableName = getTableName(serviceImpl.getMapper());
+        if (StringUtils.isNotEmpty(tableName)) {
+            return new QueryColumn(tableName, VERSION_TAG);
+        } else {
+            return new QueryColumn(VERSION_TAG);
+        }
+    }
+
+    private static String getTableName(BaseMapper baseMapper) {
+        Class<?> mapperClass = ClassUtil.getUsefulClass(baseMapper.getClass());
+        Type type = mapperClass.getGenericInterfaces()[0];
+        if (type instanceof ParameterizedType) {
+            Class<?> modelClass = (Class) ((ParameterizedType) type).getActualTypeArguments()[0];
+            Table tableAnnotation = modelClass.getAnnotation(Table.class);
+            if (tableAnnotation != null) {
+                return tableAnnotation.value();
+            }
+        }
+        return null;
+    }
+
 
     public static boolean isQueryFilterable(QueryWrapper queryWrapper) {
         // 不处理UNION类型
@@ -45,7 +99,7 @@ public class QueryWrapperUtils {
         return true;
     }
 
-    public static QueryTable getQueryTable(QueryWrapper queryWrapper) {
+    private static QueryTable getQueryTable(QueryWrapper queryWrapper) {
         List<QueryTable> queryTables = CPI.getQueryTables(queryWrapper);
         if (CollectionUtils.isNotEmpty(queryTables)) {
             return queryTables.get(0);
@@ -71,5 +125,6 @@ public class QueryWrapperUtils {
         }
         return null;
     }
+
 
 }
