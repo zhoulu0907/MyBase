@@ -20,9 +20,7 @@
   font-size: 14px;
   line-height: 22px;
   color: #1d2129;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  display: inline-block;
 }
 .uplaodList-text-item-process {
   flex: 1;
@@ -36,6 +34,8 @@
   margin-left: auto;
   text-align: right;
   color: #86909c;
+  display: flex;
+  align-items: center;
 }
 .uplaodList-text-item-opera svg {
   margin-left: 8px;

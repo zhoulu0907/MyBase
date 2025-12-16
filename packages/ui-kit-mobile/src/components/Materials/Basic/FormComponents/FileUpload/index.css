@@ -15,24 +15,30 @@
     width: 1.6rem;
   }
   .uplaodList-text-item {
-     min-height: 0.8rem;
-     margin-top: 0.2rem;
-     padding: 0 0.12rem;
-     border-radius: 4px;
-     .arco-icon {
+    display: flex;
+    justify-content: space-between;
+    min-height: 0.8rem;
+    margin-top: 0.2rem;
+    padding: 0 0.12rem;
+    border-radius: 4px;
+    .arco-icon {
       font-size: 0.32rem !important;
-     }
-     .arco-icon-file {
+    }
+     /* .arco-icon-file {
        width: 0.8rem;
-     }
-     .uplaodList-text-item-name {
-        margin: 0 0.12rem;
-        font-size: 0.26rem;
-     }
-     .uplaodList-text-item-opera {
-       height: 0.8rem;
-       display: flex;
-       align-items: center;
-     }
+     } */
+    .uplaodList-text-item-name {
+      margin: 0 0.12rem;
+      font-size: 0.26rem;
+      flex: 1 1 auto;
+      width: 0;
+      text-align: left;
+    }
+    .uplaodList-text-item-opera {
+      margin-left: 0;
+      height: 0.8rem;
+      display: flex;
+      align-items: center;
+    }
   }
 }

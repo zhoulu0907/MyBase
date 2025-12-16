@@ -508,10 +508,12 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     }
 
     console.log('formValues: ', formValues);
-    form.setFieldsValue(formValues);
+    setTimeout(() => {
+      form.setFieldsValue(formValues);
+    }, 100);
     setTimeout(() => {
       setEditLoading(false);
-    }, 60);
+    }, 200);
     return res;
   };
 
