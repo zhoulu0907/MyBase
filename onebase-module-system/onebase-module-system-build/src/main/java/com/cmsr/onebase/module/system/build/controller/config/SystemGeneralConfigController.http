@@ -5,12 +5,13 @@ Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
-  "category": "tenant2",
-  "name": "测试配置2",
-  "configKey": "saas",
-  "configValue": "true",
+  "category": "corp",
+  "name": "企业变量",
+  "configKey": "simple-corp",
+  "configValue": "simple-corp",
+  "exclusiveItem": "all-corp",
   "status": 0,
-  "remark": "测试配置项2"
+  "remark": "企业变量"
 }
 
 ### 修改参数配置
@@ -19,28 +20,27 @@ Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
-  "id": 183262612675035136,
-  "category": "system",
-  "type": 1,
-  "name": "更新测试配置1155511",
-  "configKey": "test.config1155511.key",
-  "configValue": "updated_tes5555t111_value",
+  "category": "global",
+  "name": "全局变量",
+  "configKey": "all-global",
+  "configValue": "all-global",
+  "exclusiveItem": "simple-global",
   "status": 0,
-  "remark": "更新测试配置项111"
+  "remark": "全局变量"
 }
 
 ### 修改参数配置
-POST {{baseUrl}}/system/config/update-status?id=2222222&status=1
+POST {{baseUrl}}/system/config/update-status?id=183262612675035131&status=0
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
 
 ### 删除参数配置
-POST {{baseUrl}}/system/config/delete?id=1
+POST {{baseUrl}}/system/config/delete?id=444
 Authorization: Bearer {{token}}
 
 ### 获取参数配置详情
-GET {{baseUrl}}/system/config/get?id=1
+GET {{baseUrl}}/system/config/get?id=444
 Authorization: Bearer {{token}}
 
 ### 根据参数键名查询参数值
