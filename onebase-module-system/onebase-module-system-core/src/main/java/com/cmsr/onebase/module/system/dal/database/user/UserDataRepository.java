@@ -10,10 +10,9 @@ import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
+import com.cmsr.onebase.module.system.dal.dataobject.user.UserAppRelationDO;
 import com.cmsr.onebase.module.system.enums.user.UserStatusEnum;
-import com.cmsr.onebase.module.system.vo.user.UserByDeptPageReqVO;
-import com.cmsr.onebase.module.system.vo.user.UserPageReqVO;
-import com.cmsr.onebase.module.system.vo.user.UserSimplePageReqVO;
+import com.cmsr.onebase.module.system.vo.user.*;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Compare;
@@ -389,5 +388,25 @@ public class UserDataRepository extends DataRepository<AdminUserDO> {
                 .order(AdminUserDO.ADMIN_TYPE, Order.TYPE.ASC)
                 .order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
         return findAllByConfig(configStore);
+    }
+
+    public PageResult<AdminUserDO> getThirdUserPage(UserAppPageSearchReqVO userAppPageReqVO) {
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        configStore.and(AdminUserDO.USER_TYPE, UserTypeEnum.THIRD.getValue());
+        // 根据关键词查询
+        if (null != userAppPageReqVO.getDeptId()){
+            configStore.eq(AdminUserDO.DEPT_ID, userAppPageReqVO.getDeptId());
+        }
+
+        if (null != userAppPageReqVO.getStatus()){
+            configStore.eq(AdminUserDO.STATUS, userAppPageReqVO.getStatus());
+        }
+        if (StringUtils.isNotBlank(userAppPageReqVO.getUserName())){
+            configStore.like(AdminUserDO.USERNAME, userAppPageReqVO.getUserName());
+        }
+        // 添加排序
+        configStore.order(AdminUserDO.ADMIN_TYPE, Order.TYPE.ASC).order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
+
+        return findPageWithConditions(configStore, userAppPageReqVO.getPageNo(), userAppPageReqVO.getPageSize());
     }
 }
