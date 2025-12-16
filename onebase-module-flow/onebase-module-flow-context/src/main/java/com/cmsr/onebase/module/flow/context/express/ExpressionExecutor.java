@@ -16,7 +16,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 表达式助手类
@@ -67,14 +70,13 @@ public class ExpressionExecutor implements Serializable {
             MapContext jc = new MapContext(vars);
             Boolean result = (Boolean) expression.evaluate(jc);
             if (result == null) {
-                log.warn("表达式执行结果为空, 执行表达式: {}, 输入参数: {}",  fullExpression, vars);
+                log.warn("表达式执行结果为空, 执行表达式: {}, 输入参数: {}", fullExpression, vars);
                 return false;
             } else {
                 return result;
             }
         } catch (Exception e) {
-            String msg = "表达式执行异常, 执行表达式: " + Objects.toString(fullExpression, "")
-                    + ", 输入参数:" + vars;
+            String msg = "表达式执行异常, 执行表达式: " + fullExpression + ", 输入参数:" + vars;
             throw new RuntimeException(msg, e);
         }
     }
