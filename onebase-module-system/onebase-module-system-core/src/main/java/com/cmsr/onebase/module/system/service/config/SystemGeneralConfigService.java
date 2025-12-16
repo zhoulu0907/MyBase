@@ -43,19 +43,17 @@ public interface SystemGeneralConfigService {
     SystemGeneralConfigDO getConfig(Long id);
 
     /**
-     * 根据参数键，获得参数配置
+     * 获得参数配置分页
      *
-     * @param key 配置键
-     * @return 参数配置
+     * @param pageReqVO 分页参数
+     * @return 参数配置分页
      */
-    SystemGeneralConfigVO getConfigByKey(String key);
-
-
     List<SystemGeneralConfigDO> getConfigList(SystemConfigPageReqVO pageReqVO);
+
     /**
      * 更新参数配置状态
      *
-     * @param updateReqVO 更新信息
+     * @param
      */
     void updateStatus(Long id, Integer status);
 }

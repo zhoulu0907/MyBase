@@ -57,13 +57,6 @@ public class SystemGeneralConfigServiceImpl implements SystemGeneralConfigServic
     }
 
     @Override
-    public SystemGeneralConfigVO getConfigByKey(String key) {
-        SystemGeneralConfigDO config = systemGeneralConfigDataRepository.getConfigByKey(key);
-        return   BeanUtils.toBean(config, SystemGeneralConfigVO.class);
-
-    }
-
-    @Override
     public List<SystemGeneralConfigDO> getConfigList(SystemConfigPageReqVO pageReqVO) {
         return systemGeneralConfigDataRepository.findConfigList(pageReqVO);
     }

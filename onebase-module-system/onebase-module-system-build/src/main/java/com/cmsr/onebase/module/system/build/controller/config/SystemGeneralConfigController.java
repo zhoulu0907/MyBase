@@ -52,7 +52,7 @@ public class SystemGeneralConfigController {
     }
 
     @PostMapping("/delete")
-    @Operation(summary = "删除参数配置")
+    @Operation(summary = "删除配置项")
     @Parameter(name = "id", description = "编号", required = true, example = "1024")
     @PreAuthorize("@ss.hasPermission('system:config:delete')")
     public CommonResult<Boolean> deleteConfig(@RequestParam("id") Long id) {
@@ -65,15 +65,6 @@ public class SystemGeneralConfigController {
     @PreAuthorize("@ss.hasPermission('system:config:query')")
     public CommonResult<SystemGeneralConfigVO> getConfig(@RequestParam("id") Long id) {
         return success(BeanUtils.toBean(systemGeneralConfigService.getConfig(id), SystemGeneralConfigVO.class));
-    }
-
-
-    @GetMapping(value = "/get-config-by-key")
-    @Operation(summary = "根据参数键名查询", description = "不可见的配置，不允许返回给前端")
-    @Parameter(name = "key", description = "参数键", required = true, example = "yunai.biz.username")
-    @PreAuthorize("@ss.hasPermission('system:config:query')")
-    public CommonResult<SystemGeneralConfigVO> getConfigByKey(@RequestParam("configKey") String configKey) {
-        return success(systemGeneralConfigService.getConfigByKey(configKey));
     }
 
 

@@ -25,12 +25,6 @@ public class SystemGeneralConfigDataRepository  extends DataRepository<SystemGen
     }
 
 
-    public SystemGeneralConfigDO getConfigByKey(String key) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.eq(SystemGeneralConfigDO.CONFIG_KEY, key);
-        return findOne(configStore);
-
-    }
 
     public List<SystemGeneralConfigDO> findConfigList(SystemConfigPageReqVO reqVO) {
         DefaultConfigStore configs = new DefaultConfigStore();
