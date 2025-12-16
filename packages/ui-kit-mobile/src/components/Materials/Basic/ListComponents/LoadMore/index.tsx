@@ -65,7 +65,7 @@ const XLoadMore = memo(
 
     const [finalColumns, setFinalColumns] = useState<any[]>();
     // 实际查询用的参数
-    let queryData: object = {};
+    const [queryData, setQueryData] = useState<any>({ value: {} });
 
     const [tableData, setTableData] = useState<any[]>([]);
     const [tableTotal, setTableTotal] = useState<number>(0);
@@ -171,15 +171,7 @@ const XLoadMore = memo(
 
     // 查询
     const handleSearch = () => {
-      queryData = searchForm.getFieldsValue();
-      setTablePageNo(1);
-      handlePage();
-    };
-
-    // 重置
-    const handleReset = () => {
-      searchForm.resetFields();
-      queryData = {};
+      // queryData = searchForm.getFieldsValue();
       setTablePageNo(1);
       handlePage();
     };
@@ -198,7 +190,7 @@ const XLoadMore = memo(
       // }
 
       const req: PageMethodV2Params = {
-        ...queryData,
+        ...queryData.value,
         pageNo: tablePageNo,
         pageSize: pageSize || 10
       };
@@ -406,8 +398,8 @@ const XLoadMore = memo(
               searchItems={searchItems}
               runtime={runtime}
               onSearch={handleSearch}
-              onReset={handleReset}
               form={searchForm}
+              queryData={queryData}
             />
           </Form>
         </Sticky>
