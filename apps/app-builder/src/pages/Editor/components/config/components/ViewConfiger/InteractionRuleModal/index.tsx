@@ -1,6 +1,21 @@
-import { Button, Divider, Dropdown, Form, Grid, Input, Menu, Modal, Select, Switch, Tag } from '@arco-design/web-react';
+import {
+  Button,
+  Divider,
+  Dropdown,
+  Form,
+  Grid,
+  Input,
+  Menu,
+  Modal,
+  Select,
+  Switch,
+  Tag,
+  TreeSelect
+} from '@arco-design/web-react';
 import { IconDelete, IconLaunch, IconMoreVertical, IconPlus } from '@arco-design/web-react/icon';
 import { FieldType, InteractionActionType, VALIDATION_TYPE } from '@onebase/app';
+import { listToTree } from '@onebase/common';
+import { getDeptList, getSimpleUserPage } from '@onebase/platform-center';
 import { FORM_COMPONENT_TYPES, useFormEditorSignal, usePageViewEditorSignal } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useState } from 'react';
@@ -75,12 +90,28 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
 
   const [cpOptions, setCpOptions] = useState<{ label: string; value: string }[]>([]);
 
+  const [deptTree, setDeptTree] = useState<any[]>([]);
+
+  const [userOptions, setUserOptions] = useState<any[]>([]);
+  const [userPageNo, setUserPageNo] = useState<number>(1);
+  const [userTotal, setUserTotal] = useState<number | string>(0);
+  const [fetching, setFetching] = useState<boolean>(false);
+
   // 获取组件下拉列表
   const getComponentOptions = () => {
-    const cpOptions = Object.values(pageComponentSchemas.value).map((item: any) => ({
-      label: item.config?.label?.text || item.config?.cpName || '',
-      value: item.config?.id
-    }));
+    const cpOptions = Object.values(pageComponentSchemas.value)
+      // 过滤图片、文件、子表
+      .filter((item: any) => {
+        return ![
+          FORM_COMPONENT_TYPES.IMG_UPLOAD,
+          FORM_COMPONENT_TYPES.FILE_UPLOAD,
+          FORM_COMPONENT_TYPES.SUB_TABLE
+        ].includes(item?.type);
+      })
+      .map((item: any) => ({
+        label: item.config?.label?.text || item.config?.cpName || '',
+        value: item.config?.id
+      }));
 
     setCpOptions(cpOptions);
   };
@@ -111,6 +142,8 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
         setCurRule('');
         lastSetRuleIdRef.current = '';
       }
+      handleGetUsers();
+      hadleGetDept();
     }
   }, [visible, curViewId.value]);
 
@@ -225,6 +258,31 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
         case FORM_COMPONENT_TYPES.CHECKBOX:
           const options = pageComponentSchemas.value[cpId]?.config?.defaultOptionsConfig?.defaultOptions || [];
           return <Select options={options} placeholder="请选择静态值" />;
+        case FORM_COMPONENT_TYPES.USER_SELECT:
+          return (
+            <Select
+              placeholder="请选择人员"
+              allowClear
+              showSearch={true}
+              //   filterOption={
+              //     selectedMembers.length > 0
+              //       ? (input, option) => String(option?.props?.children ?? '').includes(input)
+              //       : false // 远程搜索时不做本地过滤
+              //   }
+              //   defaultValue={configs[DEFAULTUSERVALUE]}
+              //   value={configs[DEFAULTUSERVALUE]}
+              //   onSearch={debouncedSearch}
+              onPopupScroll={scrollHandler}
+            >
+              {userOptions.map((option) => (
+                <Select.Option key={option.id} value={option.id}>
+                  {option.nickname}
+                </Select.Option>
+              ))}
+            </Select>
+          );
+        case FORM_COMPONENT_TYPES.DEPT_SELECT:
+          return <TreeSelect placeholder="请选择部门" allowClear showSearch={true} treeData={deptTree} />;
 
         default:
           return <Input placeholder="请输入静态值" />;
@@ -232,6 +290,42 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
     }
 
     return <Input placeholder="请输入静态值" />;
+  };
+
+  const handleGetUsers = async () => {
+    const param = {
+      pageNo: 1,
+      pageSize: 20
+    };
+    const { list, total } = await getSimpleUserPage(param);
+    setUserOptions(list || []);
+    setUserTotal(total);
+    // console.log('res: ', res);
+  };
+
+  // 滚动加载
+  const scrollHandler = async (element: HTMLDivElement) => {
+    const { scrollTop, scrollHeight, clientHeight } = element;
+    const scrollBottom = scrollHeight - (scrollTop + clientHeight);
+
+    if (scrollBottom < 10 && !fetching && Number(userTotal) > userOptions.length) {
+      setFetching(true);
+      const param = {
+        pageNo: userPageNo + 1,
+        pageSize: 20
+      };
+      const { list, total } = await getSimpleUserPage(param);
+      setUserPageNo(userPageNo + 1);
+      setUserTotal(total);
+      setUserOptions((prev) => [...prev, ...list]);
+      setFetching(false);
+    }
+  };
+
+  const hadleGetDept = async () => {
+    const res = await getDeptList({});
+    const treeData = listToTree(res, {}, true);
+    setDeptTree(treeData);
   };
 
   return (
@@ -397,11 +491,8 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
                                                           form.setFieldValue(item.field + '.value', undefined);
                                                         }}
                                                         options={getOperatorOptions(
-                                                          components.value.find(
-                                                            (item: any) =>
-                                                              item.config?.id ===
-                                                              form.getFieldValue(item.field + '.cpId')
-                                                          )?.config?.type
+                                                          components.value,
+                                                          form.getFieldValue(item.field + '.cpId')
                                                         )}
                                                       />
                                                     </Form.Item>
@@ -453,14 +544,14 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
                                                               )}
                                                             </Form.Item>
                                                           )}
-                                                          {/* 公式 */}
+                                                          {/* 变量 */}
                                                           {form.getFieldValue(item.field + '.operatorType') ==
                                                             FieldType.VARIABLES && (
                                                             <Form.Item field={item.field + '.value'}>
                                                               <Select />
                                                             </Form.Item>
                                                           )}
-
+                                                          {/* 公式 */}
                                                           {form.getFieldValue(item.field + '.operatorType') ==
                                                             FieldType.FORMULA && (
                                                             <Form.Item field={item.field + '.value'}>
