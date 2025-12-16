@@ -842,12 +842,56 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                         physicalTableOps.add(renameOp);
                     }
 
-                    // 收集ALTER操作
-                    MetadataEntityFieldDO full = metadataEntityFieldRepository.getById(origin.getId());
-                    PhysicalTableOperation alterOp = new PhysicalTableOperation();
-                    alterOp.setOperationType("ALTER");
-                    alterOp.setFieldInfo(full);
-                    physicalTableOps.add(alterOp);
+                    // 检查是否有影响物理表结构的属性发生变化
+                    // 只有当以下属性发生变化时才需要执行 ALTER 操作：
+                    // - fieldType (字段类型)
+                    // - dataLength (数据长度)
+                    // - decimalPlaces (小数位数)
+                    // - isRequired (是否必填，影响 NOT NULL 约束)
+                    // - defaultValue (默认值)
+                    boolean needAlter = false;
+                    
+                    // 检查字段类型是否变化
+                    if (item.getFieldType() != null && !item.getFieldType().equals(origin.getFieldType())) {
+                        needAlter = true;
+                        log.debug("字段 {} 类型发生变化: {} -> {}", origin.getFieldName(), origin.getFieldType(), item.getFieldType());
+                    }
+                    
+                    // 检查数据长度是否变化
+                    if (maxLength != null && !maxLength.equals(origin.getDataLength())) {
+                        needAlter = true;
+                        log.debug("字段 {} 长度发生变化: {} -> {}", origin.getFieldName(), origin.getDataLength(), maxLength);
+                    }
+                    
+                    // 检查小数位数是否变化
+                    if (item.getDecimalPlaces() != null && !item.getDecimalPlaces().equals(origin.getDecimalPlaces())) {
+                        needAlter = true;
+                        log.debug("字段 {} 小数位数发生变化: {} -> {}", origin.getFieldName(), origin.getDecimalPlaces(), item.getDecimalPlaces());
+                    }
+                    
+                    // 检查是否必填变化
+                    if (item.getIsRequired() != null && !item.getIsRequired().equals(origin.getIsRequired())) {
+                        needAlter = true;
+                        log.debug("字段 {} 必填属性发生变化: {} -> {}", origin.getFieldName(), origin.getIsRequired(), item.getIsRequired());
+                    }
+                    
+                    // 检查默认值是否变化
+                    if (item.getDefaultValue() != null && !item.getDefaultValue().equals(origin.getDefaultValue())) {
+                        needAlter = true;
+                        log.debug("字段 {} 默认值发生变化: {} -> {}", origin.getFieldName(), origin.getDefaultValue(), item.getDefaultValue());
+                    }
+                    
+                    // 只有当需要修改物理表时才收集 ALTER 操作
+                    if (needAlter) {
+                        MetadataEntityFieldDO full = metadataEntityFieldRepository.getById(origin.getId());
+                        PhysicalTableOperation alterOp = new PhysicalTableOperation();
+                        alterOp.setOperationType("ALTER");
+                        alterOp.setFieldInfo(full);
+                        physicalTableOps.add(alterOp);
+                        log.info("字段 {} 需要修改物理表结构", origin.getFieldName());
+                    } else {
+                        log.debug("字段 {} 无物理表结构变化，跳过 ALTER 操作", origin.getFieldName());
+                    }
                 }
                 resp.getUpdatedIds().add(item.getId());
 
@@ -1997,68 +2041,18 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
 
     /**
      * 生成PostgreSQL/KingBase的USING子句，用于类型转换
-     * 使用CASE WHEN进行安全的类型转换，无效数据将被设为NULL
+     * <p>
+     * 注意：根据产品需求，不再使用 USING 子句进行数据类型转换。
+     * 如果数据不兼容目标类型，数据库将直接抛出异常，由调用方处理。
      * 
      * @param fieldType 目标字段类型
      * @param fieldName 字段名
-     * @return USING子句，如果不需要则返回null
+     * @return 始终返回null，不使用USING子句
      */
     private String generateUsingClause(String fieldType, String fieldName) {
-        if (fieldType == null) {
-            return null;
-        }
-
-        String quotedFieldName = "\"" + fieldName + "\"";
-        // 先将列转换为TEXT类型，这样可以处理从任何类型（包括已经是目标类型）的转换
-        String textFieldName = quotedFieldName + "::text";
-
-        // 需要显式类型转换的字段类型，使用CASE WHEN进行安全转换
-        switch (fieldType.toUpperCase()) {
-            case "DATETIME":
-            case "TIMESTAMP":
-                // VARCHAR/TEXT 转 TIMESTAMP：使用CASE WHEN处理无效数据
-                // 正则表达式检查是否为有效的时间戳格式
-                return "CASE WHEN " + textFieldName + " ~ '^\\\\d{4}-\\\\d{2}-\\\\d{2}' " +
-                        "THEN " + textFieldName + "::timestamp " +
-                        "ELSE NULL END";
-
-            case "DATE":
-                // VARCHAR/TEXT 转 DATE：使用CASE WHEN处理无效数据
-                return "CASE WHEN " + textFieldName + " ~ '^\\\\d{4}-\\\\d{2}-\\\\d{2}' " +
-                        "THEN " + textFieldName + "::date " +
-                        "ELSE NULL END";
-
-            case "NUMBER":
-            case "NUMERIC":
-            case "DECIMAL":
-                // VARCHAR/TEXT 转 NUMERIC：使用CASE WHEN处理无效数据
-                // 检查是否为数字格式（支持小数和负数）
-                return "CASE WHEN " + textFieldName + " ~ '^-?\\\\d+\\\\.?\\\\d*$' " +
-                        "THEN " + textFieldName + "::numeric " +
-                        "ELSE NULL END";
-
-            case "INTEGER":
-            case "INT":
-            case "BIGINT":
-                // VARCHAR/TEXT 转 INTEGER：使用CASE WHEN处理无效数据
-                // 检查是否为整数格式
-                return "CASE WHEN " + textFieldName + " ~ '^-?\\\\d+$' " +
-                        "THEN " + textFieldName + "::integer " +
-                        "ELSE NULL END";
-
-            case "BOOLEAN":
-            case "BOOL":
-                // VARCHAR/TEXT 转 BOOLEAN：使用CASE WHEN处理无效数据
-                // 支持常见的布尔值表示
-                return "CASE WHEN " + textFieldName
-                        + " IN ('true', 'false', 't', 'f', '1', '0', 'yes', 'no', 'y', 'n') " +
-                        "THEN " + textFieldName + "::boolean " +
-                        "ELSE NULL END";
-
-            default:
-                // 其他类型通常可以自动转换，不需要USING子句
-                return null;
-        }
+        // 不再使用 USING 子句进行数据转换
+        // 如果数据不兼容目标类型，数据库将直接抛出异常
+        return null;
     }
 
     /**
@@ -2089,6 +2083,10 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
 
     /**
      * 统一执行物理表操作
+     * <p>
+     * 优化策略：
+     * - DROP/RENAME/ADD 操作仍然逐个执行
+     * - ALTER 操作合并为一条 DDL 语句执行（仅针对 PostgreSQL/KingBase）
      *
      * @param datasource 数据源信息
      * @param tableName  表名
@@ -2102,32 +2100,217 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
 
         log.info("开始批量执行物理表操作，表名: {}, 操作数量: {}", tableName, operations.size());
 
+        // 分类收集操作
+        List<PhysicalTableOperation> dropOps = new java.util.ArrayList<>();
+        List<PhysicalTableOperation> renameOps = new java.util.ArrayList<>();
+        List<PhysicalTableOperation> alterOps = new java.util.ArrayList<>();
+        List<PhysicalTableOperation> addOps = new java.util.ArrayList<>();
+
         for (PhysicalTableOperation op : operations) {
+            switch (op.getOperationType()) {
+                case "DROP":
+                    dropOps.add(op);
+                    break;
+                case "RENAME":
+                    renameOps.add(op);
+                    break;
+                case "ALTER":
+                    alterOps.add(op);
+                    break;
+                case "ADD":
+                    addOps.add(op);
+                    break;
+                default:
+                    log.warn("未知的物理表操作类型: {}", op.getOperationType());
+            }
+        }
+
+        // 1. 先执行 DROP 操作
+        for (PhysicalTableOperation op : dropOps) {
             try {
-                switch (op.getOperationType()) {
-                    case "DROP":
-                        dropColumnFromTable(datasource, tableName, op.getFieldName());
-                        break;
-                    case "RENAME":
-                        renameColumnInTable(datasource, tableName, op.getOldFieldName(), op.getFieldName());
-                        break;
-                    case "ALTER":
-                        alterColumnInTable(datasource, tableName, op.getFieldInfo());
-                        break;
-                    case "ADD":
-                        addColumnToTable(datasource, tableName, op.getFieldInfo());
-                        break;
-                    default:
-                        log.warn("未知的物理表操作类型: {}", op.getOperationType());
-                }
+                dropColumnFromTable(datasource, tableName, op.getFieldName());
             } catch (Exception e) {
-                log.error("执行物理表操作失败，操作类型: {}, 字段名: {}, 错误: {}",
-                        op.getOperationType(), op.getFieldName(), e.getMessage(), e);
+                log.error("执行 DROP 操作失败，字段名: {}, 错误: {}", op.getFieldName(), e.getMessage(), e);
+                throw new RuntimeException("物理表操作失败: " + e.getMessage(), e);
+            }
+        }
+
+        // 2. 执行 RENAME 操作
+        for (PhysicalTableOperation op : renameOps) {
+            try {
+                renameColumnInTable(datasource, tableName, op.getOldFieldName(), op.getFieldName());
+            } catch (Exception e) {
+                log.error("执行 RENAME 操作失败，旧字段名: {}, 新字段名: {}, 错误: {}",
+                        op.getOldFieldName(), op.getFieldName(), e.getMessage(), e);
+                throw new RuntimeException("物理表操作失败: " + e.getMessage(), e);
+            }
+        }
+
+        // 3. 合并执行 ALTER 操作（优化性能）
+        if (!alterOps.isEmpty()) {
+            try {
+                executeBatchAlterOperations(datasource, tableName, alterOps);
+            } catch (Exception e) {
+                log.error("执行批量 ALTER 操作失败，错误: {}", e.getMessage(), e);
+                throw new RuntimeException("物理表操作失败: " + e.getMessage(), e);
+            }
+        }
+
+        // 4. 最后执行 ADD 操作
+        for (PhysicalTableOperation op : addOps) {
+            try {
+                addColumnToTable(datasource, tableName, op.getFieldInfo());
+            } catch (Exception e) {
+                log.error("执行 ADD 操作失败，字段名: {}, 错误: {}",
+                        op.getFieldInfo().getFieldName(), e.getMessage(), e);
                 throw new RuntimeException("物理表操作失败: " + e.getMessage(), e);
             }
         }
 
         log.info("批量执行物理表操作完成，表名: {}", tableName);
+    }
+
+    /**
+     * 批量执行 ALTER 操作
+     * <p>
+     * 将多个 ALTER 操作合并为一条 DDL 语句执行，减少数据库交互次数。
+     * 对于达梦数据库，仍然使用 Anyline 原生 API 逐个执行。
+     *
+     * @param datasource 数据源信息
+     * @param tableName  表名
+     * @param alterOps   ALTER 操作列表
+     */
+    private void executeBatchAlterOperations(MetadataDatasourceDO datasource, String tableName,
+            List<PhysicalTableOperation> alterOps) {
+        if (alterOps == null || alterOps.isEmpty()) {
+            return;
+        }
+
+        String datasourceType = datasource.getDatasourceType();
+        DatabaseType dbType;
+        try {
+            dbType = DatabaseType.valueOf(datasourceType);
+        } catch (IllegalArgumentException e) {
+            log.warn("未知的数据库类型: {}，使用逐个执行方式", datasourceType);
+            // 未知数据库类型，逐个执行
+            for (PhysicalTableOperation op : alterOps) {
+                alterColumnInTable(datasource, tableName, op.getFieldInfo());
+            }
+            return;
+        }
+
+        if (dbType == DatabaseType.DM) {
+            // 达梦数据库：使用 Anyline API 逐个执行（因为 MODIFY 语法不支持合并）
+            log.info("达梦数据库逐个执行 ALTER 操作，操作数量: {}", alterOps.size());
+            for (PhysicalTableOperation op : alterOps) {
+                alterColumnInTable(datasource, tableName, op.getFieldInfo());
+            }
+        } else {
+            // PostgreSQL/KingBase：合并为一条 DDL 语句执行
+            log.info("合并执行 ALTER 操作，操作数量: {}", alterOps.size());
+            executeMergedAlterDDL(datasource, tableName, alterOps, datasourceType);
+        }
+    }
+
+    /**
+     * 执行合并的 ALTER DDL 语句（适用于 PostgreSQL/KingBase）
+     * <p>
+     * PostgreSQL 支持在一条 ALTER TABLE 语句中包含多个 ALTER COLUMN 子句。
+     * 例如：
+     * <pre>
+     * ALTER TABLE "table_name"
+     *     ALTER COLUMN "col1" TYPE VARCHAR(100),
+     *     ALTER COLUMN "col2" SET NOT NULL;
+     * </pre>
+     *
+     * @param datasource     数据源信息
+     * @param tableName      表名
+     * @param alterOps       ALTER 操作列表
+     * @param datasourceType 数据库类型
+     */
+    private void executeMergedAlterDDL(MetadataDatasourceDO datasource, String tableName,
+            List<PhysicalTableOperation> alterOps, String datasourceType) {
+        try {
+            TenantUtils.executeIgnore(() -> {
+                AnylineService<?> service = temporaryDatasourceService.createTemporaryService(datasource);
+
+                // 先校验表是否存在
+                if (!AnylineDdlHelper.tableExists(service, tableName)) {
+                    throw new RuntimeException("表 " + tableName + " 不存在，请先创建表");
+                }
+
+                // 生成合并的 DDL 语句
+                StringBuilder mergedDdl = new StringBuilder();
+                StringBuilder commentDdl = new StringBuilder();
+
+                for (int i = 0; i < alterOps.size(); i++) {
+                    PhysicalTableOperation op = alterOps.get(i);
+                    MetadataEntityFieldDO field = op.getFieldInfo();
+                    String fieldName = field.getFieldName();
+
+                    // 检查列是否存在
+                    if (!AnylineDdlHelper.columnExists(service, tableName, fieldName)) {
+                        log.warn("列 {} 不存在于表 {} 中，跳过 ALTER 操作", fieldName, tableName);
+                        continue;
+                    }
+
+                    String columnType = mapFieldType(field.getFieldType(), field.getDataLength());
+
+                    // 生成该字段的 ALTER COLUMN 子句
+                    // 1. 修改字段类型
+                    if (mergedDdl.length() > 0) {
+                        mergedDdl.append(",\n    ");
+                    } else {
+                        mergedDdl.append("ALTER TABLE \"").append(tableName).append("\"\n    ");
+                    }
+                    mergedDdl.append("ALTER COLUMN \"").append(fieldName).append("\" TYPE ").append(columnType);
+
+                    // 2. 修改是否允许为空（需要单独的 ALTER COLUMN 语句）
+                    if (field.getIsRequired() != null) {
+                        mergedDdl.append(",\n    ALTER COLUMN \"").append(fieldName).append("\"");
+                        if (BooleanStatusEnum.isYes(field.getIsRequired())) {
+                            mergedDdl.append(" SET NOT NULL");
+                        } else {
+                            mergedDdl.append(" DROP NOT NULL");
+                        }
+                    }
+
+                    // 3. 修改默认值（需要单独的 ALTER COLUMN 语句）
+                    if (field.getDefaultValue() != null && !field.getDefaultValue().trim().isEmpty()) {
+                        String formattedValue = formatDefaultValue(field.getFieldType(), field.getDefaultValue());
+                        if (formattedValue != null) {
+                            mergedDdl.append(",\n    ALTER COLUMN \"").append(fieldName)
+                                    .append("\" SET DEFAULT ").append(formattedValue);
+                        }
+                    }
+
+                    // 4. 字段注释（需要单独执行）
+                    if (field.getDescription() != null && !field.getDescription().trim().isEmpty()) {
+                        commentDdl.append("COMMENT ON COLUMN \"").append(tableName).append("\".\"");
+                        commentDdl.append(fieldName).append("\" IS '").append(field.getDescription()).append("';\n");
+                    }
+                }
+
+                // 执行合并的 ALTER TABLE 语句
+                if (mergedDdl.length() > 0) {
+                    mergedDdl.append(";");
+                    String alterSql = mergedDdl.toString();
+                    log.info("执行合并的 ALTER DDL: {}", alterSql);
+                    AnylineDdlHelper.executeDDL(service, alterSql);
+                }
+
+                // 执行注释语句
+                if (commentDdl.length() > 0) {
+                    log.debug("执行字段注释 DDL: {}", commentDdl);
+                    AnylineDdlHelper.executeDDL(service, commentDdl.toString());
+                }
+
+                return null;
+            });
+        } catch (Exception e) {
+            log.error("执行合并 ALTER DDL 失败: {}", e.getMessage(), e);
+            throw new RuntimeException("修改列失败", e);
+        }
     }
 
     /**
