@@ -47,12 +47,9 @@
     transform: none;
   }
   :global(.arco-cell-inner .cell-label) {
-    width: 1.2rem;
-    min-width: 1.2rem;
+    width: 1.62rem;
+    min-width: 1.62rem;
     margin-right: 0.12rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
   }
   :global(.uplaodList-text) {
     width: calc(100% - 3rem);

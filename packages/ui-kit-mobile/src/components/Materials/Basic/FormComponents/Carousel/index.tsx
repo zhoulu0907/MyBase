@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { Carousel } from '@arco-design/mobile-react';
+import { Carousel, Ellipsis } from '@arco-design/mobile-react';
 import { STATUS_OPTIONS, STATUS_VALUES, FormSchema } from '@onebase/ui-kit';
 import { getFileUrlById } from '@onebase/platform-center';
 import styles from './index.module.css';
@@ -25,7 +25,7 @@ const XCarousel = memo((props: XCarouselConfig & { runtime?: boolean; detailMode
   return (
     <div className={`inputTextWrapperOBMobile ${styles.carouselWrapperOBMobile}`}>
       <div className={styles.label}>
-        {label.display && label.text ? label.text : ''}
+        {label.display && label.text ? <Ellipsis text={label.text} /> : ''}
       </div>
       <Carousel
         className={styles.carousel}

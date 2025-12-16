@@ -1,4 +1,4 @@
-import { Form, Uploader, Toast, Loading } from '@arco-design/mobile-react';
+import { Form, Uploader, Toast, Loading, Ellipsis } from '@arco-design/mobile-react';
 import { type UploadItem } from '@arco-design/mobile-react/lib/Upload';
 import { IconDelete, IconClose, IconDownload, IconFile } from '@arco-design/mobile-react/esm/icon';
 import { uploadFile } from '@onebase/platform-center';
@@ -125,7 +125,7 @@ const XFileUpload = memo((props: XFileUploadConfig & { runtime?: boolean; detail
       <Form.Item
         className="inputTextWrapperOBMobile fileUploadWrapperOBMobile"
         label={
-          label.display && label.text
+          label.display && <Ellipsis text={label.text} />
         }
         layout="vertical"
         field={fieldId}

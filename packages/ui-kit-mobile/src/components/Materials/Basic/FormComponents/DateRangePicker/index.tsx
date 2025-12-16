@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import { nanoid } from 'nanoid';
-import { DatePicker, Form } from '@arco-design/mobile-react';
+import { DatePicker, Ellipsis, Form } from '@arco-design/mobile-react';
 import { ValidatorType, ITypeRules } from '@arco-design/mobile-utils';
 
 import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, DEFAULT_VALUE_TYPES, FormSchema } from '@onebase/ui-kit';
@@ -66,7 +66,7 @@ const XDateRangePicker = memo((props: XDateRangePickerConfig & { runtime?: boole
   return (
     <Form.Item
       className="inputTextWrapperOBMobile"
-      label={label.display && label.text}
+      label={label.display && <Ellipsis text={label.text} />}
       field={fieldId}
       rules={rules}
       initialValue={[

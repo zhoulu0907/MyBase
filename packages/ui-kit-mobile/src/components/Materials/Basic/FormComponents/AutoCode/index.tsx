@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import { nanoid } from 'nanoid';
-import { Form, Input } from '@arco-design/mobile-react';
+import { Ellipsis, Form, Input } from '@arco-design/mobile-react';
 import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, FormSchema } from '@onebase/ui-kit';
 type XautoCodeConfig = typeof FormSchema.XAutoCodeSchema.config;
 import '../index.css';
@@ -25,7 +25,7 @@ const XautoCode = memo((props: XautoCodeConfig & { runtime?: boolean; detailMode
   return (
       <Form.Item
         className="inputTextWrapperOBMobile inputAutoWrapperOBMobile"
-        label={label.display && label.text}
+        label={label.display && <Ellipsis text={label.text} />}
         field={fieldId}
         style={{
           pointerEvents: (!runtime || detailMode) ? 'none' : 'unset',
