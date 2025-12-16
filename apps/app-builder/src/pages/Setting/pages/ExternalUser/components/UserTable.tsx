@@ -16,16 +16,19 @@ import {
 } from '@arco-design/web-react';
 import { IconMoreVertical, IconPlus } from '@arco-design/web-react/icon';
 import { TENANT_USER_PERMISSION as ACTIONS, hasAllPermissions, hasPermission } from '@onebase/common';
-import type { PageParam, UserVO } from '@onebase/platform-center';
+import type {
+  externalUserListParams,
+  updateExternalPwdParams,
+} from '@onebase/platform-center';
 import {
-  deleteUser,
+  deleteExternalUserApi,
+  getExternalUserListApi,
   getSimpleUser,
   getUserListByName,
-  getUserPage,
   PlatformTenantStatus,
   StatusEnum,
-  updateUserStatus,
-  UserType
+  updateExternalUserPwdApi,
+  updateStatusApi,
 } from '@onebase/platform-center';
 import { debounce } from 'lodash-es';
 import { useCallback, useEffect, useState } from 'react';
@@ -48,7 +51,14 @@ interface UserTableProps {
   onRefreshDept: () => void;
 }
 
-type UserRecord = Pick<UserVO, 'id' | 'nickname'> & Partial<UserVO>;
+interface externalUserRecord {
+  id: string;
+  nickname: string;
+  mobile: string;
+  applicationList: string[];
+  status: number;
+  source: string;
+}
 
 interface SelectOptions {
   label: string;
@@ -80,10 +90,10 @@ export default function UserTable({
   const [pageSize, setPageSize] = useState(10);
   const [status, setStatus] = useState<PlatformTenantStatus | ''>('');
   const [search, setSearch] = useState('');
-  const [editingUser, setEditingUser] = useState<UserRecord | undefined>();
-  const [data, setData] = useState<UserRecord[]>([]);
+  const [editingUser, setEditingUser] = useState<externalUserRecord | undefined>();
+  const [data, setData] = useState<externalUserRecord[]>([]);
   const [total, setTotal] = useState(0);
-  const [detailUser, setDetailUser] = useState<UserRecord | undefined>();
+  const [detailUser, setDetailUser] = useState<externalUserRecord | undefined>();
 
   const [userData, setUsertData] = useState<{ userList: any[] }>();
   const [memberLoading, setMemberLoading] = useState<boolean>(false);
@@ -94,14 +104,12 @@ export default function UserTable({
   // 查询用户列表
   const getUserList = useCallback(
     async (searchValue?: string) => {
-      const params: PageParam = {
+      const params: externalUserListParams = {
         pageNo: page,
-        pageSize,
-        status
+        pageSize
       };
       if (selectedDeptId) params.deptId = selectedDeptId;
-      if (searchValue) params.nickname = searchValue;
-      const res = await getUserPage(params);
+      const res = await getExternalUserListApi(params);
       setData(res.list || []);
       setTotal(res.total || 0);
     },
@@ -119,7 +127,7 @@ export default function UserTable({
     getUserList();
   }, [selectedDeptId, page, pageSize, status]);
 
-  const handleEdit = (record: UserRecord) => {
+  const handleEdit = (record: externalUserRecord) => {
     setEditingUser(record);
     setUserModalVisible(true);
   };
@@ -145,42 +153,59 @@ export default function UserTable({
   };
 
   // 重置密码
-  const handleResetPassword = (record: UserRecord) => {
+  const handleResetPassword = (record: externalUserRecord) => {
     Modal.confirm({
       title: `确定要重置用户(${record.nickname})的密码吗?`,
       content: '密码重置后，原密码失效，新密码将以短信形式发送至用户。',
       okButtonProps: { status: 'danger' },
       onOk: async () => {
-        // await updateUserStatus(record.id, newStatus);
+        const params: updateExternalPwdParams = {
+          id: record.id
+        };
+        await updateExternalUserPwdApi(params);
         Message.success('重置成功');
       }
     });
   };
 
   // 禁用用户，需确认
-  const handleStatusUpdate = (record: UserRecord) => {
-    const newStatus = record.status === StatusEnum.ENABLE ? StatusEnum.DISABLE : StatusEnum.ENABLE;
-    const newLabel = getStatusLabel(newStatus);
-    Modal.confirm({
-      title: `${newLabel}账号（${record.nickname}）？`,
-      content: newStatus === StatusEnum.DISABLE ? '禁用状态下，用户无法登录系统，再次启用时用户可恢复正常使用' : '',
-      okButtonProps: { status: 'danger' },
-      onOk: async () => {
-        await updateUserStatus(record.id, newStatus);
-        Message.success(`${newLabel}成功`);
-        getUserList();
+  const handleStatusUpdate = async (record: externalUserRecord) => {
+    if (record.status === 0) {
+      const params = { id: record.id, status: 1 };
+      try {
+        await updateStatusApi(params);
+        await getUserList();
+      } catch (error) {
+        Message.error(`启用失败`);
       }
-    });
+    } else {
+      return Modal.confirm({
+        title: `禁用企业(${record.nickname})? `,
+        content: '禁用后企业用户无法登录，再次启用时企业可恢复正常使用',
+        okButtonProps: {
+          status: 'danger'
+        },
+        onOk: async () => {
+          const params = { id: record.id, status: 0 };
+          try {
+            await updateStatusApi(params);
+            await getUserList();
+          } catch (error) {
+            Message.error(`禁用失败`);
+          }
+        }
+      });
+    }
   };
 
   // 删除
-  const handleDelete = (record: UserRecord) => {
+  const handleDelete = (record: externalUserRecord) => {
     Modal.confirm({
       title: `确认要删除账号（${record.nickname}）吗？`,
       content: '删除用户后，用户将无法登录，用户数据将被永久删除，请谨慎操作。',
       okButtonProps: { status: 'danger' },
       onOk: async () => {
-        await deleteUser(record.id);
+        await deleteExternalUserApi(record.id);
         Message.success('删除成功');
         onRefreshDept();
         getUserList();
@@ -189,13 +214,9 @@ export default function UserTable({
   };
 
   // 查看详情
-  const handleViewDetail = (record: UserRecord) => {
+  const handleViewDetail = (record: externalUserRecord) => {
     setDetailUser(record);
     setDetailModalVisible(true);
-  };
-
-  const isSystemUser = (record: UserRecord) => {
-    return record.adminType === UserType.SYSTEM;
   };
 
   const renderAuthorizedAppGroup = (applicationList: corpApplicationListProps[]) => {
@@ -226,14 +247,14 @@ export default function UserTable({
     );
   };
 
-  const getColumns = (handleEdit: (record: UserRecord) => void) => {
+  const getColumns = (handleEdit: (record: externalUserRecord) => void) => {
     return [
       {
         title: '姓名',
         dataIndex: 'nickname',
         width: 140,
         ellipsis: true,
-        render: (_: any, record: UserRecord) => (
+        render: (_: any, record: externalUserRecord) => (
           <>
             <UserProfileAvatar adminInfo={record} size={25} />
             <span className={s.tableColumnUsername} onClick={() => handleViewDetail(record)}>
@@ -299,12 +320,7 @@ export default function UserTable({
                 <Button permission={ACTIONS.UPDATE} type="text" onClick={() => handleStatusUpdate(record)}>
                   {getStatusLabel(record.status === StatusEnum.DISABLE ? StatusEnum.ENABLE : StatusEnum.DISABLE)}
                 </Button>
-                <Button
-                  permission={ACTIONS.RESET}
-                  type="text"
-                  disabled={isSystemUser(record)}
-                  onClick={() => handleDelete(record)}
-                >
+                <Button permission={ACTIONS.RESET} type="text" onClick={() => handleDelete(record)}>
                   删除
                 </Button>
               </>

@@ -2,7 +2,7 @@ import PlaceholderPanel from '@/components/PlaceholderPanel';
 import { listToTree } from '@/utils/tree';
 import { Layout } from '@arco-design/web-react';
 import { hasPermission, TENANT_DEPT_QUERY, TENANT_USER_QUERY } from '@onebase/common';
-import { getDeptList, getUserPage } from '@onebase/platform-center';
+import { getExternalDeptListApi, getExternalUserListApi, getUserPage } from '@onebase/platform-center';
 import { useEffect, useState } from 'react';
 import DeptTreeCmp from './components/DeptTree';
 import UserTable from './components/UserTable';
@@ -19,7 +19,7 @@ export default function ExternalUserPage() {
   const fetchDeptList = async () => {
     setDeptLoading(true);
     try {
-      const res = await getDeptList();
+      const res = await getExternalDeptListApi();
 
       const total = await getUserContent();
       setTotalUserCount(total);
@@ -31,7 +31,7 @@ export default function ExternalUserPage() {
   };
 
   const getUserContent = async () => {
-    const resq = await getUserPage({ pageNo: 1, pageSize: 10 });
+    const resq = await getExternalUserListApi({ pageNo: 1, pageSize: 10 });
     return resq.total;
   };
 

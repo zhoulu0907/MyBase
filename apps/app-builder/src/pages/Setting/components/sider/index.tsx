@@ -122,18 +122,18 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
       title: '扩展功能',
       children: [
         {
-          key: 'enterprise',
+          key: 'plugin',
           title: '插件管理',
           icon: <img src={plugSVG} />,
           path: `/onebase/${tenantId}/setting/plugin`,
-          permissionKey: TENANT_MENUS.CORP
+          permissionKey: TENANT_MENUS.APP
         },
         {
           key: 'externalUser',
           title: '外部用户',
           icon: <img src={externalUserSVG} />,
           path: `/onebase/${tenantId}/setting/externalUser`,
-          permissionKey: TENANT_MENUS.CORP
+          permissionKey: TENANT_MENUS.INFO
         },
         {
           key: 'enterprise',

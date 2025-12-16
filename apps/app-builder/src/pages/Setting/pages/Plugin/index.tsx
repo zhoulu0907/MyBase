@@ -1,7 +1,6 @@
-import { Card, Input, Message, Space, Switch, Tabs } from '@arco-design/web-react';
+import { Card, Input, Message, Modal, Space, Spin, Switch, Tabs } from '@arco-design/web-react';
 import { IconSettings } from '@arco-design/web-react/icon';
-import { TokenManager } from '@onebase/common';
-import { type corpAppListParams, getCorpAuthorizedAppListApiInCorp } from '@onebase/platform-center';
+import { getPluginListApi, type pluginParams } from '@onebase/platform-center';
 import { useEffect, useMemo, useState } from 'react';
 import { StatusEnumLabel, statusMapping } from './constants';
 import styles from './index.module.less';
@@ -16,38 +15,32 @@ export interface PluginItem {
 
 const PluginPage = () => {
   const [loading, setLoading] = useState<boolean>(false);
-  const [pluginData, setPluginData] = useState<PluginItem[]>([
-    { id: '1', icon: '', name: '插件管理', desc: '开启后，可创建SaaS模式应用和企业', status: 1 },
-    { id: '1', icon: '', name: 'SaaS模式', desc: '开启后，可创建SaaS模式应用和企业', status: 2 }
-  ]);
+  const [pluginData, setPluginData] = useState<PluginItem[]>([]);
   const [searchValue, setSearchValue] = useState<string>('');
   const [currentTab, setCurrentTab] = useState<string>('0');
-  const tokenInfo = TokenManager.getTokenInfo();
 
-  const fetchCorpAuthorizedList = async (pageNo = 1, pageSize = 10, status: string = '0') => {
+  const fetchPluginList = async (status: string = '0') => {
     setLoading(true);
-    const params: corpAppListParams = {
-      pageNo,
-      pageSize,
+    const params: pluginParams = {
       status: status ? Number(status) : 0,
-      corpId: tokenInfo?.corpId || ''
+      name: ''
     };
     try {
-      const res = await getCorpAuthorizedAppListApiInCorp(params);
+      const res = await getPluginListApi(params);
       if (res && Array.isArray(res.list)) {
         setPluginData(res.list);
       } else {
         console.warn('Invalid response format:', res);
       }
     } catch (error) {
-      Message.error('获取企业授权应用列表失败');
+      Message.error('获取插件管理列表失败');
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    // fetchCorpAuthorizedList();
+    fetchPluginList();
   }, []);
 
   const handleSearchChange = (searchValue: string) => {
@@ -56,13 +49,29 @@ const PluginPage = () => {
 
   const handleChangeTab = (value: string) => {
     setCurrentTab(value);
-    // fetchCorpAuthorizedList(1, 10, value);
+    fetchPluginList(value);
   };
 
   // 切换开关状态
-  const handleSwitchChange = (id: string, checked: boolean) => {
+  const handleSwitchChange = (id: string, name: string, checked: boolean) => {
     // 实际项目中这里会调用接口更新状态
     console.log(`插件 ${id} 状态切换为：${checked ? '已启用' : '未启用'}`);
+    if (checked === false) {
+      return Modal.confirm({
+        title: `关闭"${name}"插件？`,
+        content: '关闭后，外部用户将无法访问应用，再次启用时可恢复正常访问',
+        okButtonProps: {
+          status: 'danger'
+        },
+        onOk: async () => {
+          // await updateAuthAppStatusInCorp(params);
+          // await fetchCorpAuthorizedList(pageInation.current, pageInation.pageSize);
+          Message.success('关闭成功');
+        }
+      });
+    } else {
+      Message.success('当前已启用模式');
+    }
     const newPluginData = pluginData.map((item) => {
       if (item.id === id) {
         item.status = checked === true ? 1 : 2;
@@ -89,30 +98,32 @@ const PluginPage = () => {
         {statusMapping.map((plugin: any) => {
           return (
             <Tabs.TabPane key={plugin.status} title={plugin.label}>
-              <Space size={16}>
-                {filterPlugin?.map((plugin, index) => {
-                  return (
-                    <Card className={styles.card} key={index} hoverable>
-                      <Space size={48}>
-                        <Space size={16}>
-                          <IconSettings />
-                          <div className={styles.textContent}>
-                            <span className={styles.name}>{plugin.name}</span>
-                            <span className={styles.description}>{plugin.desc}</span>
-                          </div>
+              <Spin loading={loading} style={{ width: '100%' }}>
+                <Space size={16}>
+                  {filterPlugin?.map((plugin, index) => {
+                    return (
+                      <Card className={styles.card} key={index} hoverable>
+                        <Space size={48}>
+                          <Space size={16}>
+                            <IconSettings />
+                            <div className={styles.textContent}>
+                              <span className={styles.name}>{plugin.name}</span>
+                              <span className={styles.description}>{plugin.desc}</span>
+                            </div>
+                          </Space>
+                          <Space>
+                            <div>{plugin.status === 1 ? StatusEnumLabel.ENABLE : StatusEnumLabel.DISABLE}</div>
+                            <Switch
+                              checked={plugin.status === 1 ? true : false}
+                              onChange={(checked) => handleSwitchChange(plugin.id, plugin.name, checked)}
+                            />
+                          </Space>
                         </Space>
-                        <Space>
-                          <div>{plugin.status === 1 ? StatusEnumLabel.ENABLE : StatusEnumLabel.DISABLE}</div>
-                          <Switch
-                            checked={plugin.status === 1 ? true : false}
-                            onChange={(checked) => handleSwitchChange(plugin.id, checked)}
-                          />
-                        </Space>
-                      </Space>
-                    </Card>
-                  );
-                })}
-              </Space>
+                      </Card>
+                    );
+                  })}
+                </Space>
+              </Spin>
             </Tabs.TabPane>
           );
         })}

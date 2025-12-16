@@ -14,8 +14,8 @@ import {
   Typography
 } from '@arco-design/web-react';
 import { formatTimeYMDHMS } from '@onebase/common';
-import type { SimpleRoleVO, UserVO } from '@onebase/platform-center';
-import { createUser, getCorpAppSimpleListApi, getUser, StatusEnum, updateUser } from '@onebase/platform-center';
+import type { AuthAppParams, SimpleRoleVO, UserVO } from '@onebase/platform-center';
+import { createExternalUserApi, getAuthAppListApi, getUser, StatusEnum, updateExternalUserApi } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
 import styles from '../index.module.less';
 import type { authorizedAppList } from '../../Business/types/appItem';
@@ -54,7 +54,11 @@ export default function UserFormModal({
 
   const getApplicationIdResult = async () => {
     try {
-      const res: authorizedAppList[] = await getCorpAppSimpleListApi('');
+      const params:AuthAppParams = {
+        userId: '',
+        appName: ''
+      }
+      const res: authorizedAppList[] = await getAuthAppListApi(params);
       setDropdownList(res ? res : []);
     } catch (error) {
       Message.error('获取列表失败');
@@ -107,17 +111,16 @@ export default function UserFormModal({
         avatar: avatarUrl,
         mobile: filterSpace(values.mobile),
         email: filterSpace(values.email),
-        username: filterSpace(values.username),
         nickname: filterSpace(values.nickname),
         status: statusCheckedValue ? StatusEnum.ENABLE : StatusEnum.DISABLE
       };
       setLoading(true);
       if (mode === 'create') {
-        await createUser(params);
+        await createExternalUserApi(params);
         Message.success('新建成功');
         onRefreshDept();
       } else {
-        await updateUser({
+        await updateExternalUserApi({
           ...params,
           id: initialValues?.id,
           mobile: encryptedMobile ? encryptedMobile : filterSpace(values.mobile)
