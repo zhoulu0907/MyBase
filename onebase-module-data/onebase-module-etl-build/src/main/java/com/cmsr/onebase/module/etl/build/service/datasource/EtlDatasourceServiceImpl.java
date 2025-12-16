@@ -78,9 +78,11 @@ public class EtlDatasourceServiceImpl implements EtlDatasourceService {
             throw ServiceExceptionUtil.exception(EtlErrorCodeConstants.DATASOURCE_NOT_EXIST);
         }
         DatasourceRespVO datasourceRespVO = DatasourceRespVO.convertFrom(datasourceDO);
-        if (datasourceDO.getConfig() != null) {
-            datasourceRespVO.setConfig(JsonUtils.parseTree(datasourceDO.getConfig()));
-        }
+        // 前端不需要使用config中的内容
+//        if (datasourceDO.getConfig() != null) {
+//            datasourceRespVO.setConfig(JsonUtils.parseTree(datasourceDO.getConfig()));
+//        }
+        datasourceRespVO.setConfig(null);
         return datasourceRespVO;
     }
 

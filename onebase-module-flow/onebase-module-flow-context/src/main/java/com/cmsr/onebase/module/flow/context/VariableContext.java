@@ -21,9 +21,9 @@ public class VariableContext implements Serializable {
 
     private Map<String, Object> outputParams = Collections.emptyMap();
 
-    @Getter
-    @Setter
-    private Map<String, Object> inputFields = Collections.emptyMap();
+    public Map<String, Object> getInputParams() {
+        return inputParams;
+    }
 
     public void setInputParams(Map<String, Object> inputParams) {
         if (inputParams != null) {

@@ -7,12 +7,12 @@
 ### 请求 /login 接口 => 成功
 POST {{baseUrl}}/system/auth/corp-login
 Content-Type: application/json
-X-Tenant-Id: 156421901678804992
+X-Tenant-Id: 158088726951460864
 tag: {{tag}}
 
 {
-  "mobile": "15800001111",
-  "password": "Dm<Ei&4S:;P+aNi",
+  "mobile": "15890635400",
+  "password": "78090bd0ca3653088c6c82966333b9d095fd42e2e917897a2d0adb31382c468401cb651c37d8f73c12f0161c0d02d321bf9dd94b01e56e1b3e57ed3c9db7175416219eca5e70d8af70cfe3b6653da859425ecb5338bfffc64a636a12bd26a9978eea0e7909526b44f8d490b13cff",
   "deviceId":666
 }
 
@@ -89,8 +89,41 @@ tag: {{tag}}
 }
 
 ### 请求 /reset-password 接口 => 失败
-GET {{baseUrl}}/system/auth/get-permission-info
+GET {{baseUrl}}/system/auth/get-permission-info?code=corp
 Content-Type: application/json
+Authorization: Bearer 777d29f0dac54d52a48c86495acd49ea
+tenant-id: 158088726951460864
+tag: {{tag}}
+
+### 请求 /reset-password 接口 => 失败
+GET {{baseUrl}}/system/auth/logout
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
+
+
+
+### 请求 /login 接口 => 成功   ##verifycode/password
+POST {{baseUrl}}/system/auth/third-login
+Content-Type: application/json
+X-Tenant-Id: 156421901678804992
 tag: {{tag}}
+
+{
+  "appId":162947915524571136,
+  "mobile": "13818118256",
+  "password": "Dm<Ei&4S:;P+aNi",
+  "deviceId":666,
+  "loginType":"verifycode",
+  "verifyCode":"888888"
+}
+
+> {%
+    // 登录成功后自动更新token到环境变量
+    if (response.status === 200) {
+        const responseData = response.body;
+        if (responseData.code === 0 && responseData.data && responseData.data.accessToken) {
+            client.global.set("token", responseData.data.accessToken);
+            console.log("Token已更新: " + responseData.data.accessToken);
+        }
+    }
+%}

@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.app.build.service.app;
+package com.cmsr.onebase.module.app;
 
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
@@ -16,8 +16,8 @@ import com.cmsr.onebase.module.app.core.dal.dataobject.AppMenuDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePageDO;
 import com.cmsr.onebase.module.app.core.dal.mapper.AppAuthRoleMapper;
 import com.cmsr.onebase.module.app.core.enums.menu.MenuTypeEnum;
-import com.cmsr.onebase.module.app.core.impl.auth.AppAuthRoleUserImpl;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessRepository;
+import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessTimeRepository;
 import com.cmsr.onebase.server.OneBaseServerApplication;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -46,9 +46,6 @@ public class RepositoryTest {
     private FlowProcessRepository flowProcessRepository;
 
     @Autowired
-    private AppAuthRoleUserImpl appAuthRoleUser;
-
-    @Autowired
     private AppMenuRepository appMenuRepository;
 
     @Autowired
@@ -56,9 +53,6 @@ public class RepositoryTest {
 
     @Autowired
     private AppAuthDataGroupRepository appAuthDataGroupRepository;
-
-    @Autowired
-    private AppApplicationServiceImpl appApplicationService;
 
     @Autowired
     private AppApplicationRepository appApplicationRepository;
@@ -71,6 +65,9 @@ public class RepositoryTest {
 
     @Autowired
     private AppPageRepository appPageRepository;
+
+    @Autowired
+    private FlowProcessTimeRepository flowProcessTimeRepository;
 
     @BeforeAll
     public static void before() {
@@ -108,5 +105,16 @@ public class RepositoryTest {
         log.info("authRoleDOS:{}", result);
     }
 
+    @Test
+    void test5() {
+        LoginUser loginUser = new LoginUser();
+        loginUser.setId(163858465771585536L);
+        SecurityFrameworkUtils.setLoginUser(loginUser, new MockHttpServletRequest());
+        ApplicationManager.setApplicationId(162919276682641408L);
+        ApplicationManager.setVersionTag(0L);
+        TenantContextHolder.setTenantId(1L);
+        //
+        flowProcessTimeRepository.updateJobStatusByAppId("success", 1234567890L);
+    }
 
 }
