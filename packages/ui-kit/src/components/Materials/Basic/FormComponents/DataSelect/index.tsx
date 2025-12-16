@@ -12,6 +12,7 @@ import { dataMethodPageV2, menuSignal, PageMethodV2Params } from '@onebase/app';
 import { useFormField } from '../useFormField';
 
 import { useFormEditorSignal } from '@/index';
+import { isRuntimeEnv } from '@onebase/common';
 import './index.css';
 // ===== 导入 end =====
 
@@ -139,7 +140,10 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
 
   useEffect(() => {
     const fetchOptions = async () => {
-      if (!runtime) return;
+      if (!runtime || !isRuntimeEnv()) {
+        return;
+      }
+
       const tableName = props?.selectedDataSource?.tableName;
       if (!tableName) return;
       const { curMenu } = menuSignal;
@@ -147,6 +151,7 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
         pageNo: 1,
         pageSize: 100
       };
+
       const res = await dataMethodPageV2(tableName, curMenu.value?.id, req);
       const lastKey = (displayFields || []).length ? displayFields[displayFields.length - 1]?.value : undefined;
       const list = Array.isArray(res?.list) ? res.list : [];
