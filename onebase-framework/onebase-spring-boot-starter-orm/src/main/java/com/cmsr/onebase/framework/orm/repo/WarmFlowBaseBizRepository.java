@@ -24,19 +24,12 @@ public class WarmFlowBaseBizRepository<M extends BaseMapper<T>, T extends WarmFl
         if (!QueryWrapperUtils.isQueryFilterable(queryWrapper)) {
             return;
         }
-        QueryTable queryTable = QueryWrapperUtils.getQueryTable(queryWrapper);
-        QueryColumn applicationColumn;
-        QueryColumn versionTagColumn;
-        if (queryTable != null) {
-            applicationColumn = new QueryColumn(queryTable, QueryWrapperUtils.APPLICATION_ID);
-            versionTagColumn = new QueryColumn(queryTable, QueryWrapperUtils.VERSION_TAG);
-        } else {
-            applicationColumn = new QueryColumn(QueryWrapperUtils.APPLICATION_ID);
-            versionTagColumn = new QueryColumn(QueryWrapperUtils.VERSION_TAG);
-        }
         Long applicationId = ApplicationManager.getApplicationId();
         Long versionTag = ApplicationManager.getVersionTag();
-        queryWrapper.and(applicationColumn.eq(applicationId).when(!ApplicationManager.isIgnoreApplicationCondition()));
+        QueryColumn applicationIdColumn = QueryWrapperUtils.createApplicationIdColumn(this, queryWrapper);
+        QueryColumn versionTagColumn = QueryWrapperUtils.createVersionTagColumn(this, queryWrapper);
+        //
+        queryWrapper.and(applicationIdColumn.eq(applicationId).when(!ApplicationManager.isIgnoreApplicationCondition()));
         queryWrapper.and(versionTagColumn.eq(versionTag).when(!ApplicationManager.isIgnoreVersionTagCondition()));
     }
 
@@ -74,10 +67,12 @@ public class WarmFlowBaseBizRepository<M extends BaseMapper<T>, T extends WarmFl
     public UpdateChain<T> updateChain() {
         Long applicationId = ApplicationManager.getApplicationId();
         Long versionTag = ApplicationManager.getVersionTag();
+        QueryColumn applicationIdColumn = QueryWrapperUtils.createApplicationIdColumn(this);
+        QueryColumn versionTagColumn = QueryWrapperUtils.createVersionTagColumn(this);
         //
         UpdateChain<T> updateChain = super.updateChain();
-        updateChain.where(QueryWrapperUtils.APPLICATION_COLUMN.eq(applicationId).when(!ApplicationManager.isIgnoreApplicationCondition())
-                .and(QueryWrapperUtils.VERSION_TAG_COLUMN.eq(versionTag).when(!ApplicationManager.isIgnoreVersionTagCondition()))
+        updateChain.where(applicationIdColumn.eq(applicationId).when(!ApplicationManager.isIgnoreApplicationCondition())
+                .and(versionTagColumn.eq(versionTag).when(!ApplicationManager.isIgnoreVersionTagCondition()))
         );
         return updateChain;
     }
@@ -286,17 +281,19 @@ public class WarmFlowBaseBizRepository<M extends BaseMapper<T>, T extends WarmFl
     //endregion ===== 分页查询操作 =====
 
     public boolean deleteAllApplicationData(Long applicationId) {
-        QueryColumn applicationColumn = new QueryColumn(QueryWrapperUtils.APPLICATION_ID);
+        QueryColumn applicationIdColumn = QueryWrapperUtils.createApplicationIdColumn(this);
+        //
         return super.updateChain()
-                .where(applicationColumn.eq(applicationId))
+                .where(applicationIdColumn.eq(applicationId))
                 .remove();
     }
 
     public boolean deleteApplicationVersionData(Long applicationId, Long versionId) {
-        QueryColumn applicationColumn = new QueryColumn(QueryWrapperUtils.APPLICATION_ID);
-        QueryColumn versionTagColumn = new QueryColumn(QueryWrapperUtils.VERSION_TAG);
+        QueryColumn applicationIdColumn = QueryWrapperUtils.createApplicationIdColumn(this);
+        QueryColumn versionTagColumn = QueryWrapperUtils.createVersionTagColumn(this);
+        //
         return super.updateChain()
-                .where(applicationColumn.eq(applicationId).and(versionTagColumn.eq(versionId)))
+                .where(applicationIdColumn.eq(applicationId).and(versionTagColumn.eq(versionId)))
                 .remove();
     }
 }

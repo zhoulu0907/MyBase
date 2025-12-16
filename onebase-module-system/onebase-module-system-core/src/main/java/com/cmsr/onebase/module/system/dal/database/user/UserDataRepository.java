@@ -380,7 +380,7 @@ public class UserDataRepository extends DataRepository<AdminUserDO> {
         return findAllByConfig(configStore);
     }
 
-    public List<AdminUserDO> getUserByUsernames(Set<String> usernames) {
+    public List<AdminUserDO> getPlatformUserByUsernames(Set<String> usernames) {
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.eq(AdminUserDO.STATUS, UserStatusEnum.NORMAL.getStatus())
                 .in(AdminUserDO.USERNAME, usernames)

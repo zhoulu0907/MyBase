@@ -453,13 +453,19 @@ public class UserServiceImpl implements UserService {
         // 2. 弱密码校验
         securityConfigApi.validatePassword(password);
 
-        // 3. 更新密码
+        // 3. 历史密码校验
+        securityConfigApi.validatePasswordHistory(id, password);
+
+        // 4. 更新密码
         AdminUserDO updateObj = new AdminUserDO();
         updateObj.setId(id);
         updateObj.setPassword(encodePassword(password)); // 加密密码
         userDataRepository.update(updateObj);
 
-        // 4. 记录操作日志上下文
+        // 5 保存密码修改历史记录
+        securityConfigApi.savePasswordHistory(id, updateObj.getPassword());
+
+        // 6. 记录操作日志上下文
         LogRecordContext.putVariable("user", user);
         LogRecordContext.putVariable("newPassword", updateObj.getPassword());
     }
@@ -865,8 +871,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @TenantIgnore
-    public List<AdminUserDO> getUserByUsernames(Set<String> usernamesList) {
-       return  userDataRepository.getUserByUsernames(usernamesList);
+    public List<AdminUserDO> getPlatformUserByUsernames(Set<String> usernamesList) {
+       return  userDataRepository.getPlatformUserByUsernames(usernamesList);
     }
 
     @Override
