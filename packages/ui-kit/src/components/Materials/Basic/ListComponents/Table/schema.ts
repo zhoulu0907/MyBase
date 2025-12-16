@@ -195,6 +195,11 @@ export interface XTableConfig extends ICommonBaseType {
     fieldName: TTextDefaultType;
     sortBy: TNumberDefaultType;
   };
+
+  /**
+   * 数据选择过滤条件
+   */
+  filterCondition?: any
 }
 
 export interface OperationButtonConfig {
@@ -341,6 +346,7 @@ const XTable: XTableSchema = {
     pageSize: 10,
     metaData: '',
     tableName: '',
+    filterCondition:{},
     labelColSpan: 100,
     defaultValue: [],
     columns: [],

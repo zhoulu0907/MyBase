@@ -144,6 +144,22 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
   const [flows, setFlows] = useState<any[]>([]);
   const [inputParams, setInputParams] = useState<any>({});
 
+
+  const resetImageFile = (formData: any, field: { fieldType: string, fieldName: string }, value: any) => {
+    const filterByUpload = ['IMAGE', 'FILE'];
+    if (filterByUpload.includes(field.fieldType) && Array.isArray(value)) {
+      formData[field.fieldName] = value.map((item: any) => {
+        if ((item.response || item.id) && item.name) {
+          return {
+            name: item.name,
+            id: item.response || item.id,
+          };
+        }
+        return item;
+      });
+      return true
+    }
+  }
   // 提交表单
   const submitForm = async () => {
     await form.validateFields();
@@ -163,19 +179,9 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
       const field = (mainMetaDataFields.value || []).filter(f => f.isSystemField !== 1).find((f: AppEntityField) => f.fieldName == key);
       if (field) {
         console.log('field: ', field);
-        const filterByUpload = ['IMAGE', 'FILE'];
 
-        if (filterByUpload.includes(field.fieldType) && Array.isArray(value)) {
-          formData[field.fieldName] = value.map((item: any) => {
-            if ((item.response || item.id) && item.name) {
-              console.log('item=====11111====: ', item);
-              return {
-                name: item.name,
-                id: item.response || item.id,
-              };
-            }
-            return item;
-          });
+        if (resetImageFile(formData, field, value)) {
+          ; // do nothing
         } else if (field.fieldType === 'DATE') {
           formData[field.fieldName] = value ? dayjs(value).format('YYYY-MM-DD') : '';
         } else if (field.fieldType === 'DATETIME') {
@@ -228,20 +234,9 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
         }
 
         const fieldType = subEntities.value[0].childFields.find(v => v.fieldName === fieldName).fieldType;
-        const filterByUpload = ['IMAGE', 'FILE'];
+        if (resetImageFile(groups[groupIndex], { fieldType, fieldName }, value)) {
 
-        if (filterByUpload.includes(fieldType) && Array.isArray(value)) {
-          groups[groupIndex][fieldName] = value.map((item: any) => {
-            if (item.response && item.url) {
-              return {
-                ...item,
-                url: item.response
-              };
-            }
-            return item;
-          });
-        }
-        if (fieldType === ENTITY_FIELD_TYPE.DATE.VALUE) {
+        } else if (fieldType === ENTITY_FIELD_TYPE.DATE.VALUE) {
           groups[groupIndex][fieldName] = value ? dayjs(value).format('YYYY-MM-DD') : '';
         } else if (fieldType === ENTITY_FIELD_TYPE.DATETIME.VALUE) {
           groups[groupIndex][fieldName] = value ? dayjs(value).format('YYYY-MM-DD hh:mm:ss') : '';
@@ -482,6 +477,16 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
                     } else if (fieldType === ENTITY_FIELD_TYPE.DEPARTMENT.VALUE) {
                       formValues[`${key}.${idx}.${fieldName}`] = subData[idx]?.[fieldName];
+                    } else if (fieldType === ENTITY_FIELD_TYPE.IMAGE.VALUE || fieldType === ENTITY_FIELD_TYPE.FILE.VALUE) {
+                      formValues[`${key}.${idx}.${fieldName}`] = subData[idx]?.[fieldName].map((item: any) => {
+                        return {
+                          ...item,
+                          name: item.name,
+                          id: item.id,
+                          response: item.response || item.id,
+                          url: getFileUrlById(item.id)
+                        };
+                      });
                     } else {
                       formValues[`${key}.${idx}.${fieldName}`] = subData[idx]?.[fieldName];
                     }
@@ -526,7 +531,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
           (!listComponents.value?.length ? (
             <div className={styles.noData}>暂无数据</div>
           ) : (
-            listComponents.value.map((cp: GridItem, index) => (
+            listComponents.value.map((cp: GridItem, index: number) => (
               <Fragment key={cp.id}>
                 {listPageComponentSchemas.value[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
                   <div

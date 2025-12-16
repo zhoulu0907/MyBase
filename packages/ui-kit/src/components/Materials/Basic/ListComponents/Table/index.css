@@ -38,6 +38,10 @@
   }
 }
 
+.tableRow {
+  min-height: 41px;
+}
+
 .searchItems {
   display: flex;
   flex-direction: row;

@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import { nanoid } from 'nanoid';
-import { DatePicker, Form } from '@arco-design/mobile-react';
+import { DatePicker, Ellipsis, Form } from '@arco-design/mobile-react';
 import { ItemType } from '@arco-design/mobile-react/cjs/date-picker';
 import { ValidatorType, ITypeRules } from '@arco-design/mobile-utils';
 import { FORM_COMPONENT_TYPES, DATE_OPTIONS, DATE_VALUES, STATUS_OPTIONS, STATUS_VALUES, FormSchema } from '@onebase/ui-kit';
@@ -83,7 +83,7 @@ const XDatePicker = memo((props: XDatePickerConfig & { runtime?: boolean; detail
       className="inputTextWrapperOBMobile"
       field={fieldId}
       rules={rules}
-      label={label.display && label.text}
+      label={label.display && <Ellipsis text={label.text} />}
       initialValue={form?.getFieldValue(fieldId)}
       style={{
         textAlign: align,

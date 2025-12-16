@@ -31,7 +31,7 @@ const XSwitch = memo((props: XInputSwitchConfig & { runtime?: boolean; detailMod
     }
   }, [dataField]);
 
-  const { form, fieldValue } = useFormFieldWatch(fieldId);
+  const { form, fieldValue } = useFormFieldWatch(dataField);
 
   return (
     <div className="formWrapper">
