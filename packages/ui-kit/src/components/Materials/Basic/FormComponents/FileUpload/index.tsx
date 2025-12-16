@@ -112,10 +112,12 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean; d
               <div className="uplaodList-text-item-opera">
                 {showDownload && <IconDownload
                   onClick={async () => {
+                    const lastIndexOf = fieldName.lastIndexOf('.');
+                    const curFieldName = lastIndexOf === -1 ? fieldName : fieldName.slice(lastIndexOf + 1);
                     const param = {
                       menuId: curMenu.value?.id,
                       id: rowDataId.value,
-                      fieldName,
+                      fieldName: curFieldName,
                       fileId: file.response.fileId || file.id
                     }
                     const fileUrl = await attachmentDownload(tableName, param)
