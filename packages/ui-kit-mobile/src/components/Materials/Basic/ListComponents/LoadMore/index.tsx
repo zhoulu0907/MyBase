@@ -37,7 +37,7 @@ const XLoadMore = memo(
   ) => {
     useSignals();
 
-    const { pageComponentSchemas: fromPageComponentSchemas } = useFormEditorSignal;
+    const { pageComponentSchemas } = useFormEditorSignal;
     const { setDrawerVisible, setDrawerPageId, setDetailPageViewId } = pagesRuntimeSignal;
     const { runtime = true, showFromPageData, showAddBtn = true } = props;
     const hasOperationPermission = true;
@@ -128,14 +128,14 @@ const XLoadMore = memo(
               //   .includes(dataFieldInfo.fieldType)) {
               //   return result || '-';
               // }
-              const componentSchemasKeys = Object.keys(fromPageComponentSchemas.value || {});
+              const componentSchemasKeys = Object.keys(pageComponentSchemas.value || {});
               const cpId = componentSchemasKeys.find((ele) => {
-                return fromPageComponentSchemas.value[ele]?.config?.dataField?.includes(column.id);
+                return pageComponentSchemas.value[ele]?.config?.dataField?.includes(column.id);
               });
               if (!cpId) {
                 return result;
               }
-              // const currentComponentSchemas = fromPageComponentSchemas.value[cpId];
+              // const currentComponentSchemas = pageComponentSchemas.value[cpId];
               // if (['SELECT', 'MULTI_SELECT'].includes(dataFieldInfo.fieldType)) {
               //   const arrayResult = Array.isArray(result) ? result : result.split(',').map((cItem: string) => cItem.trim())
               //   const array = currentComponentSchemas.config.defaultOptionsConfig?.defaultOptions || []
@@ -264,7 +264,7 @@ const XLoadMore = memo(
             );
             if (selectField) {
               const curValue = newItem[key];
-              const curComponentSchema = Object.values(fromPageComponentSchemas.value).find(v => curValue.id.includes(v.id)) || {};
+              const curComponentSchema = Object.values(pageComponentSchemas.value).find(v => curValue.id.includes(v.id)) || {};
               const curOptions = curComponentSchema?.config?.defaultOptionsConfig?.defaultOptions;
               newItem[key] = curOptions.find(op => op.value === curValue.id)?.label || '-';
             }
