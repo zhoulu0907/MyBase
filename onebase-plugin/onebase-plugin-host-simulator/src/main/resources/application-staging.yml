@@ -6,3 +6,10 @@ onebase:
     mode: staging             # 预发布模式，只加载 plugins-dir 的ZIP包，不扫描classpath
     plugins-dir: ./plugins    # 插件目录，存放 ZIP/JAR 插件包
 
+logging:
+  level:
+    root: INFO
+    com.cmsr.onebase.plugin: DEBUG
+    org.pf4j: ERROR
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"

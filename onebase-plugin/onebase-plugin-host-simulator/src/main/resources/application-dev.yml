@@ -6,3 +6,10 @@ onebase:
     mode: dev                     # 开发模式，只扫描 classpath，不扫描plugins-dir
     plugins-dir: ./plugins        # 插件目录（开发模式下该参数无效）
 
+logging:
+  level:
+    root: INFO
+    com.cmsr.onebase.plugin: DEBUG
+    org.pf4j: ERROR
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"

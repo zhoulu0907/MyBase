@@ -1,6 +1,7 @@
 package com.cmsr.onebase.plugin.runtime.service;
 
 import com.cmsr.onebase.plugin.service.DataService;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -20,9 +21,8 @@ import java.util.Map;
  * @date 2025-12-18
  */
 @Service
+@Slf4j
 public class DataServiceImpl implements DataService {
-
-    private static final Logger log = LoggerFactory.getLogger(DataServiceImpl.class);
 
     // TODO: 注入平台的数据服务
     // @Resource

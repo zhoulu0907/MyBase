@@ -6,3 +6,10 @@ onebase:
     mode: prod                # 生产模式，使用PF4J默认策略（classpath + plugins目录）
     plugins-dir: ./plugins    # 插件目录，存放 ZIP/JAR 插件包
 
+logging:
+  level:
+    root: INFO
+    com.cmsr.onebase.plugin: INFO
+    org.pf4j: ERROR
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"

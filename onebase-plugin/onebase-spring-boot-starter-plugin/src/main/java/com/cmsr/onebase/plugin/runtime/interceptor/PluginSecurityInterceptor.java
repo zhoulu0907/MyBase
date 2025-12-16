@@ -5,10 +5,9 @@ import com.cmsr.onebase.plugin.runtime.manager.OneBasePluginManager;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.pf4j.PluginState;
 import org.pf4j.PluginWrapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
@@ -32,10 +31,8 @@ import java.util.regex.Pattern;
  * @date 2025-12-13
  */
 @Component
+@Slf4j
 public class PluginSecurityInterceptor implements HandlerInterceptor {
-
-    private static final Logger log = LoggerFactory.getLogger(PluginSecurityInterceptor.class);
-
     /**
      * 插件路由模式：/plugin/{pluginId}/...
      */
@@ -100,21 +97,6 @@ public class PluginSecurityInterceptor implements HandlerInterceptor {
 
         // 4. 记录访问日志
         log.info("插件请求: {} {} -> 插件: {}", request.getMethod(), uri, pluginId);
-
-        // TODO: 5. 权限校验（可选）
-        // if (!hasPermission(request, pluginId)) {
-        //     sendError(response, 403, "无权限访问该插件");
-        //     return false;
-        // }
-
-        // TODO: 6. 租户隔离（可选）
-        // setTenantContext(request);
-
-        // TODO: 7. 限流控制（可选）
-        // if (isRateLimited(pluginId, request)) {
-        //     sendError(response, 429, "请求过于频繁，请稍后再试");
-        //     return false;
-        // }
 
         return true;
     }
