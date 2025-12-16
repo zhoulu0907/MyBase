@@ -77,6 +77,29 @@ const DynamicDataSourceConfig: React.FC<DynamicSelectDataSourceConfigProps> = ({
       dataSourceOptions.map((d: any) => [d.entityUuid, d.fields ?? []] as const)
     );
     setFieldsMap(fieldsMap);
+
+    // SourceOptions 改变更新entity list
+    if (configs[item.key].entityUuid && dataSourceOptions.length > 0) {
+      const value = configs[item.key].entityUuid;
+      // 查找
+      const displayFieldOptions = (fieldsMap.get(value) ?? []).filter(
+        (item: any) => !hiddenFieldTypes.includes(item.fieldType)
+      );
+      setDisplayFieldOptions(displayFieldOptions);
+
+      // 去掉系统字段 和需要隐藏的字段
+      const filteredFieldsData = (fieldsMap.get(value) ?? []).filter(
+        (f: any) => !f.isSystemField && !hiddenFieldTypes.includes(f.fieldType)
+      );
+      setFilteredFieldsData(filteredFieldsData);
+
+      handleMultiPropsChange?.([
+        { key: ATTR_KEY.DISPLAYFIELDSOPTIONS, value: displayFieldOptions },
+        { key: ATTR_KEY.DATAFIELDS, value: displayFieldOptions },
+        { key: ATTR_KEY.FILLFORMFIELDOPTIONS, value: filteredFieldsData },
+        { key: ATTR_KEY.DYNAMICTABLECONFIG, value: tableConfig }
+      ]);
+    }
   }, [dataSourceOptions]);
 
   const getDataSource = async () => {
