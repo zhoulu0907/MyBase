@@ -293,7 +293,7 @@ public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity>
         super.updateChain()
                 .set(versionTagColumn, versionTag)
                 .where(applicationIdColumn.eq(applicationId))
-                .where(applicationIdColumn.eq(VersionTagEnum.RUNTIME.getValue()))
+                .where(versionTagColumn.eq(VersionTagEnum.RUNTIME.getValue()))
                 .update();
     }
 
