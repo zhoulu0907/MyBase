@@ -13,7 +13,7 @@ import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.dal.redis.RedisKeyConstants;
 import com.cmsr.onebase.module.system.enums.corp.CorpConstant;
-import com.cmsr.onebase.module.system.enums.dept.DefaultThirdDept;
+import com.cmsr.onebase.module.system.enums.dept.DeptCodeEnum;
 import com.cmsr.onebase.module.system.enums.dept.DeptTypeEnum;
 import com.cmsr.onebase.module.system.enums.dept.IdTypeEnum;
 import com.cmsr.onebase.module.system.service.permission.PermissionService;
@@ -501,7 +501,7 @@ public class DeptServiceImpl implements DeptService {
 
     @Override
     public List<DeptDO> getDefaultThirdDept() {
-        return deptDataRepository.getDefaultThirdDeptByDefaultCode(DefaultThirdDept.DEFAULT_THIRD_DEPT.getCode(), CommonStatusEnum.ENABLE.getStatus());
+        return deptDataRepository.getDefaultThirdDeptByDefaultCode(DeptCodeEnum.DEFAULT_THIRD_DEPT.getCode(), CommonStatusEnum.ENABLE.getStatus());
     }
 
 }

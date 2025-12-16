@@ -1,6 +1,5 @@
 package com.cmsr.onebase.module.system.vo.config;
 
-import jakarta.persistence.Column;
 import lombok.Data;
 
 @Data

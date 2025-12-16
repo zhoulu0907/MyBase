@@ -3,13 +3,13 @@ package com.cmsr.onebase.module.system.vo.config;
 import lombok.Data;
 
 @Data
-public class SystemGeneralConfigVO {
+public class SystemGeneralConfigRespVO {
     /**
      * 参数分类
      */
     private Long id;
     /**
-     * 参数分类
+     * 参数分类 see {@link com.cmsr.onebase.module.system.enums.config.ConfigCategoryEnum}
      */
     private String category;
     /**

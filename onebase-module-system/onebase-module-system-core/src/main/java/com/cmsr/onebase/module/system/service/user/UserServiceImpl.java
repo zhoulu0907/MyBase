@@ -23,7 +23,6 @@ import com.cmsr.onebase.module.system.dal.database.RoleDataRepository;
 import com.cmsr.onebase.module.system.dal.database.UserPostDataRepository;
 import com.cmsr.onebase.module.system.dal.database.UserRoleDataRepository;
 import com.cmsr.onebase.module.system.dal.database.user.UserDataRepository;
-import com.cmsr.onebase.module.system.dal.dataobject.corp.CorpDO;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.UserPostDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
@@ -31,7 +30,7 @@ import com.cmsr.onebase.module.system.dal.dataobject.permission.UserRoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.UserAppRelationDO;
 import com.cmsr.onebase.module.system.dal.redis.RedisKeyConstants;
-import com.cmsr.onebase.module.system.enums.dept.DefaultThirdDept;
+import com.cmsr.onebase.module.system.enums.dept.DeptCodeEnum;
 import com.cmsr.onebase.module.system.enums.dept.DeptTypeEnum;
 import com.cmsr.onebase.module.system.enums.permission.AdminTypeEnum;
 import com.cmsr.onebase.module.system.enums.permission.RoleCodeEnum;
@@ -47,8 +46,6 @@ import com.cmsr.onebase.module.system.service.post.PostService;
 import com.cmsr.onebase.module.system.service.tenant.TenantService;
 import com.cmsr.onebase.module.system.vo.auth.AuthRegisterReqVO;
 import com.cmsr.onebase.module.system.vo.auth.ThirdAuthLoginReqVO;
-import com.cmsr.onebase.module.system.vo.corp.CorpAppVo;
-import com.cmsr.onebase.module.system.vo.dept.DeptRespVO;
 import com.cmsr.onebase.module.system.vo.dept.DeptSaveReqVO;
 import com.cmsr.onebase.module.system.vo.dept.DeptSimpleListRespVO;
 import com.cmsr.onebase.module.system.vo.role.RoleInsertReqVO;
@@ -1227,8 +1224,8 @@ public class UserServiceImpl implements UserService {
     // 获取三方用户部门是否存在
      private Long createThirdDefaultDept() {
          DeptSaveReqVO deptRespVO = new DeptSaveReqVO();
-         deptRespVO.setName(DefaultThirdDept.DEFAULT_THIRD_DEPT.getName());
-         deptRespVO.setDeptCode(DefaultThirdDept.DEFAULT_THIRD_DEPT.getCode());
+         deptRespVO.setName(DeptCodeEnum.DEFAULT_THIRD_DEPT.getName());
+         deptRespVO.setDeptCode(DeptCodeEnum.DEFAULT_THIRD_DEPT.getCode());
          DeptDO deptDO = deptService.findDeptByCodeAndType(deptRespVO);
 
          if  (null == deptDO){

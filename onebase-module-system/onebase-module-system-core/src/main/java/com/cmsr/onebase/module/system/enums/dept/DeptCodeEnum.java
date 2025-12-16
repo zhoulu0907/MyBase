@@ -5,13 +5,12 @@ import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public enum DefaultThirdDept {
+public enum DeptCodeEnum {
     /**
-     *  默认三方用户部门
+     * 默认三方用户部门
      */
-    DEFAULT_THIRD_DEPT("third", "dept_third_default", "外部协作用户");
-
-    private final String value;
+    DEFAULT_THIRD_DEPT("dept_third_default", "外部协作部门"),
+    ;
 
     private final String code;
 

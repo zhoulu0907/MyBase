@@ -63,17 +63,17 @@ public class SystemGeneralConfigController {
     @GetMapping(value = "/get")
     @Operation(summary = "获得参数配置")
     @PreAuthorize("@ss.hasPermission('system:config:query')")
-    public CommonResult<SystemGeneralConfigVO> getConfig(@RequestParam("id") Long id) {
-        return success(BeanUtils.toBean(systemGeneralConfigService.getConfig(id), SystemGeneralConfigVO.class));
+    public CommonResult<SystemGeneralConfigRespVO> getConfig(@RequestParam("id") Long id) {
+        return success(BeanUtils.toBean(systemGeneralConfigService.getConfig(id), SystemGeneralConfigRespVO.class));
     }
 
 
     @GetMapping("/list")
     @Operation(summary = "获得配置项列表-不分页")
     @PreAuthorize("@ss.hasPermission('tenant:config:query')")
-    public CommonResult<List<SystemGeneralConfigVO>> getConfigList(@Valid SystemConfigPageReqVO pageReqVO) {
+    public CommonResult<List<SystemGeneralConfigRespVO>> getConfigList(@Valid SystemConfigPageReqVO pageReqVO) {
          List<SystemGeneralConfigDO> pageResult = systemGeneralConfigService.getConfigList(pageReqVO);
-        return success(BeanUtils.toBean(pageResult, SystemGeneralConfigVO.class));
+        return success(BeanUtils.toBean(pageResult, SystemGeneralConfigRespVO.class));
     }
 
 }
