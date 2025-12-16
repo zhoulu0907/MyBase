@@ -287,7 +287,7 @@ public class WarmFlowBaseBizRepository<M extends BaseMapper<T>, T extends WarmFl
 
     public boolean deleteAllApplicationData(Long applicationId) {
         QueryColumn applicationColumn = new QueryColumn(QueryWrapperUtils.APPLICATION_ID);
-        return this.updateChain()
+        return super.updateChain()
                 .where(applicationColumn.eq(applicationId))
                 .remove();
     }
@@ -295,7 +295,7 @@ public class WarmFlowBaseBizRepository<M extends BaseMapper<T>, T extends WarmFl
     public boolean deleteApplicationVersionData(Long applicationId, Long versionId) {
         QueryColumn applicationColumn = new QueryColumn(QueryWrapperUtils.APPLICATION_ID);
         QueryColumn versionTagColumn = new QueryColumn(QueryWrapperUtils.VERSION_TAG);
-        return this.updateChain()
+        return super.updateChain()
                 .where(applicationColumn.eq(applicationId).and(versionTagColumn.eq(versionId)))
                 .remove();
     }
