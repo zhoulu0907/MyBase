@@ -1156,7 +1156,7 @@ public class UserServiceImpl implements UserService {
         reqVO.setPassword(pwdEnHelper.decryptHexStr(reqVO.getPassword()));
 
         AdminUserDO user =  userDataRepository.findById(reqVO.getUserId());
-        user.setNickname(reqVO.getNickname());
+        user.setNickname(reqVO.getNickName());
         user.setEmail(reqVO.getEmail());
         user.setAvatar(reqVO.getAvatar());
         user.setPassword(encodePassword(reqVO.getPassword()));
