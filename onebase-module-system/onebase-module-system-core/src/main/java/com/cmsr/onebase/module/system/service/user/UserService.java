@@ -349,7 +349,7 @@ public interface UserService {
      * @param reqVO
      * @return
      */
-    Long supplementUser(ThirdSupplementUserReqVO reqVO);
+    ThirdSupplementUserResVO supplementUser(ThirdSupplementUserReqVO reqVO);
     /**
      * 创建用户并关联应用
      * @param reqVO

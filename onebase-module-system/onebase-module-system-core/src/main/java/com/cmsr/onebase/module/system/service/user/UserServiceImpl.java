@@ -39,6 +39,7 @@ import com.cmsr.onebase.module.system.enums.permission.RoleTypeEnum;
 import com.cmsr.onebase.module.system.enums.tenant.TenantCodeEnum;
 import com.cmsr.onebase.module.system.enums.user.CreateSourceEnum;
 import com.cmsr.onebase.module.system.enums.user.UserStatusEnum;
+import com.cmsr.onebase.module.system.framework.security.core.PwdEnHelper;
 import com.cmsr.onebase.module.system.service.dept.DeptService;
 import com.cmsr.onebase.module.system.service.permission.PermissionService;
 import com.cmsr.onebase.module.system.service.permission.RoleService;
@@ -138,6 +139,9 @@ public class UserServiceImpl implements UserService {
 
     @Resource
     private AppApplicationApi appApplicationApi;
+
+    @Resource
+    private PwdEnHelper pwdEnHelper;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -1147,13 +1151,23 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public Long supplementUser(ThirdSupplementUserReqVO reqVO) {
+    public ThirdSupplementUserResVO supplementUser(ThirdSupplementUserReqVO reqVO) {
+        // 2.1 解密原文
+        reqVO.setPassword(pwdEnHelper.decryptHexStr(reqVO.getPassword()));
+
         AdminUserDO user =  userDataRepository.findById(reqVO.getUserId());
         user.setNickname(reqVO.getNickname());
         user.setEmail(reqVO.getEmail());
         user.setAvatar(reqVO.getAvatar());
+        user.setPassword(encodePassword(reqVO.getPassword()));
         userDataRepository.update(user);
-        return user.getId();
+
+        ThirdSupplementUserResVO resVO = new ThirdSupplementUserResVO();
+        resVO.setId(user.getId());
+        resVO.setUsername(user.getUsername());
+        resVO.setNickname(user.getNickname());
+        resVO.setEmail(user.getEmail());
+        return resVO;
     }
 
     @Override

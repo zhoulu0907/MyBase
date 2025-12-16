@@ -48,9 +48,9 @@ public class ThirdUserController {
     @PostMapping("/supplement-user")
     @Operation(summary = "补充用户信息")
     @PermitAll
-    public CommonResult<Long> supplementUser(@RequestBody  @Valid ThirdSupplementUserReqVO reqVO) {
-        Long id = userService.supplementUser(reqVO);
-        return success(id);
+    public CommonResult<ThirdSupplementUserResVO> supplementUser(@RequestBody  @Valid ThirdSupplementUserReqVO reqVO) {
+        ThirdSupplementUserResVO user = userService.supplementUser(reqVO);
+        return success(user);
     }
 
 
