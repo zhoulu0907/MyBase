@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.flow.context.express;
 
 import com.cmsr.onebase.module.flow.context.enums.OperatorTypeEnum;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.jexl3.JexlBuilder;
 import org.apache.commons.jexl3.JexlEngine;
@@ -25,6 +26,7 @@ import java.util.*;
  * @Author：huangjie
  * @Date：2025/9/16 21:11
  */
+@Slf4j
 public class ExpressionExecutor implements Serializable {
 
     private JexlEngine jexlEngine;
@@ -64,11 +66,15 @@ public class ExpressionExecutor implements Serializable {
             JexlExpression expression = jexlEngine.createExpression(fullExpression);
             MapContext jc = new MapContext(vars);
             Boolean result = (Boolean) expression.evaluate(jc);
-            return result;
+            if (result == null) {
+                log.warn("表达式执行结果为空, 执行表达式: {}, 输入参数: {}",  fullExpression, vars);
+                return false;
+            } else {
+                return result;
+            }
         } catch (Exception e) {
-            String msg = "表达式执行异常, 执行表达式:" + orExpression
-                    + ", 输入条件:" + vars
-                    + ", 完整表达式:" + Objects.toString(fullExpression, "");
+            String msg = "表达式执行异常, 执行表达式: " + Objects.toString(fullExpression, "")
+                    + ", 输入参数:" + vars;
             throw new RuntimeException(msg, e);
         }
     }

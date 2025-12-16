@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -132,9 +133,10 @@ public class RuntimeFlowProcessTest {
     public void testFormTrigger03() throws IOException {
         FormTriggerReqVO reqVO = new FormTriggerReqVO();
         reqVO.setProcessId(181943095635476480L);
-        reqVO.setInputParams(Map.of(
-                "phone_nubmer", null
-        ));
+
+        Map<String, Object> inputParams = new HashMap<>();
+        inputParams.put("phone_nubmer", null);
+        reqVO.setInputParams(inputParams);
         FormTriggerRespVO formTriggerRespVO = flowProcessExecService.triggerForm(reqVO);
         System.out.println(formTriggerRespVO);
     }
