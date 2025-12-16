@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -96,7 +97,7 @@ public class RuntimeFlowProcessTest {
     @Test
     public void testFormTrigger01() throws IOException {
         FormTriggerReqVO reqVO = new FormTriggerReqVO();
-        reqVO.setProcessId(181941429188165632L);
+        reqVO.setProcessId(183149380155572224L);
         reqVO.setInputParams(Map.of(
                 "student_name", "小",
                 "birthday", "2025-12-01"
@@ -108,8 +109,8 @@ public class RuntimeFlowProcessTest {
     @Test
     public void testFormTrigger02() throws IOException {
         FormTriggerReqVO reqVO = new FormTriggerReqVO();
-        reqVO.setProcessId(181941429188165632L);
-        reqVO.setExecutionUuid("3a156a8a-73c7-407c-af19-7119bf89fa48");
+        reqVO.setProcessId(183149380155572224L);
+        reqVO.setExecutionUuid("69e1b4e6-a0fe-458d-a0fe-99c5527e0191");
 
         SimpleField field1 = new SimpleField();
         field1.setId("7VGW8DgADiKOFqlxU5JGG");
@@ -124,6 +125,17 @@ public class RuntimeFlowProcessTest {
         field2.setValue("v2");
 
         reqVO.setInputFields(List.of(field1, field2));
+        FormTriggerRespVO formTriggerRespVO = flowProcessExecService.triggerForm(reqVO);
+        System.out.println(formTriggerRespVO);
+    }
+
+    @Test
+    public void testFormTrigger03() throws IOException {
+        FormTriggerReqVO reqVO = new FormTriggerReqVO();
+        reqVO.setProcessId(181943095635476480L);
+        reqVO.setInputParams(Map.of(
+                "entity_date", "2025-12-10"
+        ));
         FormTriggerRespVO formTriggerRespVO = flowProcessExecService.triggerForm(reqVO);
         System.out.println(formTriggerRespVO);
     }

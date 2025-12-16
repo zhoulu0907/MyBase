@@ -46,7 +46,7 @@ public class IfCaseNodeComponent extends NodeBooleanComponent {
         //
         List<Conditions> conditions = nodeData.getFilterCondition();
         OrExpression orExpression = flowConditionsProvider.formatConditionsForExpression(conditions, expressionContext);
-        boolean evaluated = expressionExecutor.evaluate(orExpression, expressionContext);
+        boolean evaluated = expressionExecutor.evaluateContext(orExpression, expressionContext);
         //
         executeContext.putNodeProcessResult(this.getTag(), evaluated);
         executeContext.addLog("条件节点执行完毕，结果为: " + evaluated);
