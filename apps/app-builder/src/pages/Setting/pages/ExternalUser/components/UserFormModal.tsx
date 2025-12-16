@@ -14,7 +14,7 @@ import {
   Typography
 } from '@arco-design/web-react';
 import { formatTimeYMDHMS } from '@onebase/common';
-import type { AuthAppParams, SimpleRoleVO, UserVO } from '@onebase/platform-center';
+import type { SimpleRoleVO, UserVO } from '@onebase/platform-center';
 import { createExternalUserApi, getAuthAppListApi, getUser, StatusEnum, updateExternalUserApi } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
 import styles from '../index.module.less';
@@ -54,11 +54,7 @@ export default function UserFormModal({
 
   const getApplicationIdResult = async () => {
     try {
-      const params:AuthAppParams = {
-        userId: '',
-        appName: ''
-      }
-      const res: authorizedAppList[] = await getAuthAppListApi(params);
+      const res: authorizedAppList[] = await getAuthAppListApi();
       setDropdownList(res ? res : []);
     } catch (error) {
       Message.error('获取列表失败');

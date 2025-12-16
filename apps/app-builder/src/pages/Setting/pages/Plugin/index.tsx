@@ -1,6 +1,10 @@
 import { Card, Input, Message, Modal, Space, Spin, Switch, Tabs } from '@arco-design/web-react';
 import { IconSettings } from '@arco-design/web-react/icon';
-import { getPluginListApi, type pluginParams } from '@onebase/platform-center';
+import {
+  getPluginListApi,
+  type pluginParams,
+  updatePluginStatusApi
+} from '@onebase/platform-center';
 import { useEffect, useMemo, useState } from 'react';
 import { StatusEnumLabel, statusMapping } from './constants';
 import styles from './index.module.less';
@@ -53,7 +57,7 @@ const PluginPage = () => {
   };
 
   // 切换开关状态
-  const handleSwitchChange = (id: string, name: string, checked: boolean) => {
+  const handleSwitchChange = async (id: string, name: string, checked: boolean) => {
     // 实际项目中这里会调用接口更新状态
     console.log(`插件 ${id} 状态切换为：${checked ? '已启用' : '未启用'}`);
     if (checked === false) {
@@ -64,17 +68,18 @@ const PluginPage = () => {
           status: 'danger'
         },
         onOk: async () => {
-          // await updateAuthAppStatusInCorp(params);
-          // await fetchCorpAuthorizedList(pageInation.current, pageInation.pageSize);
+          await updatePluginStatusApi(id, 0);
+          await fetchPluginList();
           Message.success('关闭成功');
         }
       });
     } else {
+      await updatePluginStatusApi(id, 1);
       Message.success('当前已启用模式');
     }
     const newPluginData = pluginData.map((item) => {
-      if (item.id === id) {
-        item.status = checked === true ? 1 : 2;
+      if (item.id !== id) {
+        item.status = checked === true ? 0 : 1;
       }
       return item;
     });
@@ -93,7 +98,13 @@ const PluginPage = () => {
         activeTab={currentTab}
         onChange={handleChangeTab}
         type="rounded"
-        extra={<Input.Search allowClear placeholder="搜索插件" onChange={handleSearchChange} />}
+        extra={
+          <Input.Search
+            className={styles.search}
+            placeholder="搜索插件"
+            onChange={handleSearchChange}
+          />
+        }
       >
         {statusMapping.map((plugin: any) => {
           return (
