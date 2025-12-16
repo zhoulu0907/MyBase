@@ -15,6 +15,9 @@ public class QueryWrapperUtils {
 
     public static final String VERSION_TAG = "version_tag";
 
+    public static final QueryColumn APPLICATION_COLUMN = new QueryColumn(QueryWrapperUtils.APPLICATION_ID);
+    public static final  QueryColumn VERSION_TAG_COLUMN = new QueryColumn(QueryWrapperUtils.VERSION_TAG);
+
     public static boolean isQueryFilterable(QueryWrapper queryWrapper) {
         // 不处理UNION类型
         List<UnionWrapper> unions = CPI.getUnions(queryWrapper);
