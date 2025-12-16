@@ -2,6 +2,8 @@
   padding-right: 0;
   .selectValue {
     text-align: right;
+    color: #1d2129;
+    font-size: 0.32rem;
   }
 
   :global(.cell-content) {
@@ -31,8 +33,7 @@
     padding: 0.24rem;
 
     &>span {
-      color: #272E3B;
-      font-weight: 500;
+      color: #1d2129;
       font-size: 0.36rem;
     }
   }

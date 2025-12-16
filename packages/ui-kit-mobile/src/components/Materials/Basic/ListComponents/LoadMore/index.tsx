@@ -344,6 +344,7 @@ const XLoadMore = memo(
     const noEdit =
       (advancedButtonPermission === BUTTON_VALUES[BUTTON_OPTIONS.HIDDEN] && !hasOperationPermission) ||
       (advancedButtonPermission === BUTTON_VALUES[BUTTON_OPTIONS.DISABLED] && !hasOperationPermission);
+
     const getItemBtns = (item: any) => {
       if (noEdit) return;
       return (

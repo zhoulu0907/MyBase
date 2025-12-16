@@ -22,7 +22,6 @@ const XUserSelect = memo((props: XUserSelectConfig & { runtime?: boolean; detail
   } = props;
 
   const [userData, setUserData] = useState<UserVO[]>([]);
-
   
   // 生成唯一的字段ID
   const fieldId = dataField && dataField.length > 0
