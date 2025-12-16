@@ -41,8 +41,8 @@ const XDeptSelect = memo((props: XDeptSelectConfig & { runtime?: boolean; detail
   const fieldId = dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.DEPT_SELECT}_${props.id}`;
 
   useEffect(() => {
-    !deptData && getDeptUsers({});
-  }, [deptData]);
+    runtime && !deptData && getDeptUsers({});
+  }, [runtime, deptData]);
 
   useEffect(() => {
     setTimeout(() => {
@@ -117,7 +117,7 @@ const XDeptSelect = memo((props: XDeptSelectConfig & { runtime?: boolean; detail
   return (
     <Form.Item
       className="inputTextWrapperOBMobile inputDeptSelectOBMobile"
-      label={label.display && label.text}
+      label={label.display && <Ellipsis text={label.text} />}
       field={fieldId}
       style={{
         borderRadius: '0.16rem',

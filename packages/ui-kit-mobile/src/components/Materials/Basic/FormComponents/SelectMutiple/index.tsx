@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import { nanoid } from 'nanoid';
-import { Checkbox, Form } from '@arco-design/mobile-react';
+import { Checkbox, Ellipsis, Form } from '@arco-design/mobile-react';
 import IconSquareChecked from '@arco-design/mobile-react/esm/icon/IconSquareChecked';
 import IconSquareUnchecked from '@arco-design/mobile-react/esm/icon/IconSquareUnchecked';
 import IconSquareDisabled from '@arco-design/mobile-react/esm/icon/IconSquareDisabled';
@@ -55,7 +55,7 @@ const XSelectMutiple = memo((props: XSelectMutipleConfig & { runtime?: boolean; 
   return (
     <Form.Item
       className="inputTextWrapperOBMobile selectMultipleWrapper"
-      label={label.display && label.text}
+      label={label.display && <Ellipsis text={label.text} />}
       field={fieldId}
       rules={rules}
       initialValue={defaultOptionsConfig?.defaultOptions.filter(ele => ele.isChosen)?.map(ele => ele.value)}

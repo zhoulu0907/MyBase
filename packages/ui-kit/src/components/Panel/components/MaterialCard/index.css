@@ -7,9 +7,7 @@
   border: 1px solid #e5e6eb;
   background: #fff;
   display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  justify-content: center;
+  align-items: center;
 
   .text {
     color: rgb(79, 79, 79);

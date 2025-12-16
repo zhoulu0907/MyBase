@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import { nanoid } from 'nanoid';
-import { Toast, ImagePicker, Form } from '@arco-design/mobile-react';
+import { Toast, ImagePicker, Form, Ellipsis } from '@arco-design/mobile-react';
 import { uploadFile } from '@onebase/platform-center';
 import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, FormSchema } from '@onebase/ui-kit';
 import './index.css';
@@ -51,7 +51,7 @@ const XImgUpload = memo((props: XImgUploadConfig & { runtime?: boolean; detailMo
       <Form.Item
         className="inputTextWrapperOBMobile ImgUploadWrapperOBMobile"
         label={
-          label.display && label.text
+          label.display && <Ellipsis text={label.text} />
         }
         layout="vertical"
         field={fieldId}

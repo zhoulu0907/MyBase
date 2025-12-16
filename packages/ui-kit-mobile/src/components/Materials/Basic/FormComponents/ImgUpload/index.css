@@ -1,7 +1,10 @@
 .ImgUploadWrapperOBMobile {
   padding-bottom: 0.24rem;
   .arco-form-label-item {
-    margin: 0.24rem 0;
+    margin: 0.24rem 0 0;
+  }
+  .arco-form-item-control-wrapper {
+    padding-top: 0.24rem;
   }
   .uplaodTrigger {
     color: #4e5969;

@@ -103,7 +103,7 @@ const XLoadMore = memo(
             ...column,
             render: (item: any, index: number) => {
               const dataFieldInfo = mainMetaData.parentFields.find(
-                (field: AppEntityField) => field.fieldId === column.id
+                (field: AppEntityField) => field.fieldName === column.dataIndex
               );
               const result = item[dataFieldInfo?.fieldName] || '';
               if (!result) return '';

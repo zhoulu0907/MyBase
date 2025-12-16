@@ -11,12 +11,14 @@ import {
 import {
   PreviewRender
 } from '@onebase/ui-kit-mobile';
-
-import styles from './index.module.less';
 import EditorWorkspace from '../../components/workspace/Workspace';
+import type { AppEntities, AppEntity } from '@onebase/app';
+import styles from './index.module.less';
 
 interface FormEditorProps {
   props: EditorProps & {
+    mainEntity?: AppEntity;
+    subEntities?: AppEntities;
     useEditorSignalMap: Map<string, any>;
     batchDelPageComponentSchemas: (componentIds: Set<string>) => void;
     batchDelLayoutSubComponents: (componentIds: Set<string>) => void;
@@ -74,7 +76,7 @@ const ListEditor: React.FC<FormEditorProps & { instanceId: string }> = ({ instan
 
   return (
     <div className={styles.formEditorPage}>
-      <EditorPanel />
+      <EditorPanel mainEntity={props?.mainEntity} subEntities={props?.subEntities} editMode={props?.editMode} />
       <EditorWorkspace props={props} isListEditor={true} />
     </div>
   );
