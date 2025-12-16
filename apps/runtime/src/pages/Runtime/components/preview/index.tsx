@@ -115,7 +115,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid })
     setPageSetId(res);
   };
 
-  // 信息收集弹窗
+  // 收集信息弹窗
   const [flows, setFlows] = useState<any[]>([]);
   const [inputParams, setInputParams] = useState<any>({});
 
@@ -144,9 +144,10 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid })
           formData[field.fieldName] = value || null;
         }
       }
-
+      
       // 处理子表逻辑
       if (key.startsWith(FORM_COMPONENT_TYPES.SUB_TABLE)) {
+        
         const subEntityUuid = useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[key]?.config
           ?.subTable;
 
@@ -430,7 +431,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid })
         )}
       </div>
 
-      {/* 信息收集弹窗 */}
+      {/* 收集信息弹窗 */}
       <ExecuteFlows flows={flows} inputParams={inputParams}></ExecuteFlows>
       {isPredictVisible && (
         <Modal
