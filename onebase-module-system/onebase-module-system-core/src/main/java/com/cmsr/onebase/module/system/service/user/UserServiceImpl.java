@@ -841,6 +841,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @TenantIgnore
+    public List<AdminUserDO> getUserByUsernames(Set<String> usernamesList) {
+       return  userDataRepository.getUserByUsernames(usernamesList);
+    }
+
+    @Override
     public List<AdminUserDO> getPlatformAdminListByStatus(UserSearchReqVO userSearchReqVO) {
         // 获取平台管理员角色
         RoleDO platformAdminRole = roleService.getRoleIdsByCode(RoleCodeEnum.SUPER_ADMIN.getCode());

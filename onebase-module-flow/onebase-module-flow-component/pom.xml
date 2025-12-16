@@ -48,6 +48,11 @@
             <artifactId>onebase-module-formula-api</artifactId>
             <version>${revision}</version>
         </dependency>
+        <!-- Mybatis Flex -->
+        <dependency>
+            <groupId>com.mybatis-flex</groupId>
+            <artifactId>mybatis-flex-core</artifactId>
+        </dependency>
         <!-- LiteFlow流程引擎 -->
         <dependency>
             <groupId>com.yomahub</groupId>

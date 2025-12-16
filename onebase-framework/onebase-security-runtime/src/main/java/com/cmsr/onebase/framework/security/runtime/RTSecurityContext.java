@@ -21,6 +21,7 @@ import java.util.Collections;
  * @Author：huangjie
  * @Date：2025/10/17 12:30
  */
+@Deprecated(since = "1.0.0", forRemoval = true)
 public class RTSecurityContext {
 
     public static RuntimeLoginUser getLoginUser() {

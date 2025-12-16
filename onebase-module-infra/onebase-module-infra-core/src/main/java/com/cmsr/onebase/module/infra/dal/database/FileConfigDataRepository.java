@@ -1,18 +1,18 @@
 package com.cmsr.onebase.module.infra.dal.database;
 
 import com.cmsr.onebase.framework.aynline.DataRepository;
-import com.cmsr.onebase.framework.common.consts.NumberConstant;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.infra.dal.dataobject.file.FileConfigDO;
 import com.cmsr.onebase.module.infra.dal.vo.file.config.FileConfigPageReqVO;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.DataRow;
 import org.anyline.entity.Order;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.stereotype.Repository;
 
 /**
  * 文件配置数据访问层
- *
+ * <p>
  * 负责文件配置相关的数据操作，继承DataRepositoryNew，提供标准CRUD能力。
  *
  * @author matianyu
@@ -75,7 +75,7 @@ public class FileConfigDataRepository extends DataRepository<FileConfigDO> {
      * @param id 配置ID
      */
     public void updateToMaster(Long id) {
-        FileConfigDO updateObj = new FileConfigDO().setId(id).setMaster(NumberConstant.ONE);
+        FileConfigDO updateObj = new FileConfigDO().setId(id).setMaster(NumberUtils.INTEGER_ONE);
         update(updateObj);
     }
 }

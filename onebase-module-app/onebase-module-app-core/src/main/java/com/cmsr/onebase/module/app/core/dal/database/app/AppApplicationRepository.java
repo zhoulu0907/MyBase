@@ -4,7 +4,8 @@ import com.cmsr.onebase.framework.common.enums.OwnerTagEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppApplicationDO;
 import com.cmsr.onebase.module.app.core.dal.mapper.AppApplicationMapper;
-import com.cmsr.onebase.module.app.core.enums.app.ApplicationStatusEnum;
+import com.cmsr.onebase.module.app.core.enums.app.AppPublishEnum;
+import com.cmsr.onebase.module.app.core.enums.app.AppStatusEnum;
 import com.cmsr.onebase.module.app.core.vo.app.ApplicationPageReqVO;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryMethods;
@@ -35,7 +36,7 @@ public class AppApplicationRepository extends ServiceImpl<AppApplicationMapper, 
     public PageResult<AppApplicationDO> selectPage(ApplicationPageReqVO pageReqVO, Long userId) {
         boolean filterByUser = pageReqVO.getOwnerTag() != null && pageReqVO.getOwnerTag().equals(OwnerTagEnum.MY.getValue()) && userId != null;
         QueryWrapper queryWrapper = this.query()
-                .where(APP_APPLICATION.APP_NAME.eq(pageReqVO.getName()).when(StringUtils.isNotBlank(pageReqVO.getName())))
+                .where(APP_APPLICATION.APP_NAME.like(pageReqVO.getName()).when(StringUtils.isNotBlank(pageReqVO.getName())))
                 .where(APP_APPLICATION.APP_STATUS.eq(pageReqVO.getStatus()).when(pageReqVO.getStatus() != null))
                 .where(APP_APPLICATION.PUBLISH_MODEL.eq(pageReqVO.getPublishModel()).when(StringUtils.isNotBlank(pageReqVO.getPublishModel())))
                 .where(APP_APPLICATION.CREATOR.eq(userId).when(filterByUser));
@@ -136,7 +137,15 @@ public class AppApplicationRepository extends ServiceImpl<AppApplicationMapper, 
                 .update();
     }
 
-    public void updateAppStatusByApplicationId(Long applicationId, ApplicationStatusEnum status) {
+    public void updateStatusByApplicationId(Long applicationId, AppStatusEnum status, AppPublishEnum publishStatus) {
+        this.updateChain()
+                .set(APP_APPLICATION.APP_STATUS, status.getValue())
+                .set(APP_APPLICATION.PUBLISH_STATUS, publishStatus.getValue())
+                .where(APP_APPLICATION.ID.eq(applicationId))
+                .update();
+    }
+
+    public void updateAppStatusByApplicationId(Long applicationId, AppStatusEnum status) {
         this.updateChain()
                 .set(APP_APPLICATION.APP_STATUS, status.getValue())
                 .where(APP_APPLICATION.ID.eq(applicationId))

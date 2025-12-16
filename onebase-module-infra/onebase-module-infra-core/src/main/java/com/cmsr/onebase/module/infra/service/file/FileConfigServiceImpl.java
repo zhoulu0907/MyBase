@@ -1,9 +1,8 @@
 package com.cmsr.onebase.module.infra.service.file;
 
-import com.cmsr.onebase.framework.common.consts.NumberConstant;
-import com.cmsr.onebase.framework.common.pojo.PageResult;
 import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.util.IdUtil;
+import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.util.validation.ValidationUtils;
 import com.cmsr.onebase.module.infra.convert.file.FileConfigConvert;
@@ -23,6 +22,7 @@ import jakarta.validation.Validator;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -81,7 +81,7 @@ public class FileConfigServiceImpl implements FileConfigService {
         FileConfigDO fileConfig = FileConfigConvert.INSTANCE.convert(createReqVO)
                 .setConfig(createReqVO.getConfig())
                 // .setConfig(parseClientConfig(createReqVO.getStorage(), createReqVO.getConfig()))
-                .setMaster(NumberConstant.ZERO); // 默认非 master
+                .setMaster(NumberUtils.INTEGER_ZERO); // 默认非 master
         fileConfigDataRepository.insert(fileConfig);
         return fileConfig.getId();
     }
@@ -171,8 +171,8 @@ public class FileConfigServiceImpl implements FileConfigService {
 
     @Override
     public PageResult<FileConfigRespVO> getFileConfigPage(FileConfigPageReqVO pageReqVO) {
-        PageResult<FileConfigDO>  fileConfigResult = fileConfigDataRepository.findPage(pageReqVO);
-        if(CollectionUtils.isEmpty(fileConfigResult.getList())){
+        PageResult<FileConfigDO> fileConfigResult = fileConfigDataRepository.findPage(pageReqVO);
+        if (CollectionUtils.isEmpty(fileConfigResult.getList())) {
             return new PageResult<>();
         }
         // 把 PageResult<FileConfigDO> 转换为PageResult<FileConfigRespVO>

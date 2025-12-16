@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * @Author：huangjie
@@ -47,15 +48,14 @@ public class MenuListRespVO {
     @Schema(description = "页面集类型 1-普通表单 2-流程表单 3-工作台")
     private Integer pagesetType;
 
+    /**
+     * 子菜单，因为要支持数据过滤删除，所以必须用具体的集合类型
+     */
     @Schema(description = "子菜单")
     public LinkedList<MenuListRespVO> children = null;
 
     @Schema(description = "过滤标记（辅助字段，不返回给前端）", hidden = true)
     @JsonIgnore
     private boolean filter = false;
-
-
-    @Schema(description = "页面集类型 1-普通表单 2-流程表单 3-工作台")
-    private Integer pageSetType;
 
 }

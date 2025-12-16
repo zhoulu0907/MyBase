@@ -29,11 +29,16 @@ public class BuildApplicationModificationFilter extends OncePerRequestFilter {
     private ApplicationEventPublisher applicationEventPublisher;
 
     public BuildApplicationModificationFilter() {
-        requestMatchers.add(new AntPathRequestMatcher("/app/**", HttpMethod.POST.name()));
+        requestMatchers.add(new AntPathRequestMatcher("/app/application/**", HttpMethod.POST.name()));
+        requestMatchers.add(new AntPathRequestMatcher("/app/auth-permission/**", HttpMethod.POST.name()));
+        requestMatchers.add(new AntPathRequestMatcher("/app/auth-role/**", HttpMethod.POST.name()));
+        requestMatchers.add(new AntPathRequestMatcher("/app/menu/**", HttpMethod.POST.name()));
+        requestMatchers.add(new AntPathRequestMatcher("/app/tag/**", HttpMethod.POST.name()));
+//        requestMatchers.add(new AntPathRequestMatcher("/app/version/**", HttpMethod.POST.name()));
         requestMatchers.add(new AntPathRequestMatcher("/etl/**", HttpMethod.POST.name()));
-        requestMatchers.add(new AntPathRequestMatcher("/bpm/**", HttpMethod.POST.name()));
         requestMatchers.add(new AntPathRequestMatcher("/flow/**", HttpMethod.POST.name()));
-        requestMatchers.add(new AntPathRequestMatcher("/metadata/**", HttpMethod.POST.name()));
+        requestMatchers.add(new AntPathRequestMatcher("/bpm/**", HttpMethod.POST.name()));
+        // TODO: add filters
     }
 
     @Override

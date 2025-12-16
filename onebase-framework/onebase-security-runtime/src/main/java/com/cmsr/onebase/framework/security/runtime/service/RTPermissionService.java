@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 @Setter
 @Slf4j
 @Service
+@Deprecated
 public class RTPermissionService implements ApplicationContextAware {
 
     private static volatile RTPermissionService INSTANCE;

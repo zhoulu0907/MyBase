@@ -8,7 +8,7 @@ import com.cmsr.onebase.module.app.api.security.bo.DataPermission;
 import com.cmsr.onebase.module.app.api.security.bo.FieldPermission;
 import com.cmsr.onebase.module.app.api.security.bo.OperationPermission;
 import com.cmsr.onebase.module.app.core.vo.menu.MenuListRespVO;
-import com.cmsr.onebase.module.app.runtime.service.menu.AppMenuServiceImpl;
+import com.cmsr.onebase.module.app.runtime.service.menu.RuntimeAppMenuServiceImpl;
 import com.cmsr.onebase.module.app.runtime.vo.menu.MenuPermissionVO;
 import com.cmsr.onebase.server.runtime.OneBaseServerRuntimeApplication;
 import lombok.Setter;
@@ -27,7 +27,7 @@ import java.util.List;
 public class AppAuthSecurityApiTest {
 
     @Autowired
-    private AppMenuServiceImpl appMenuServiceImpl;
+    private RuntimeAppMenuServiceImpl appMenuServiceImpl;
 
     @Autowired
     private AppAuthSecurityApi appAuthSecurityApi;
@@ -47,6 +47,19 @@ public class AppAuthSecurityApiTest {
         MenuPermissionVO menuListRespVO = appMenuServiceImpl.getMenuPermission(173059110377881600L);
         System.out.println(menuListRespVO);
     }
+
+    @Test
+    public void testHasApplicationPermission() {
+        Long userId = 153935442021842949L;
+        Long applicationId = 181672186277396480L;
+        ApplicationManager.setApplicationId(applicationId);
+        //ApplicationManager.setVersionTag(0L);
+        //TenantContextHolder.setTenantId(153935442021842944L);
+        appAuthSecurityApi.cleanAuthCache(userId, applicationId);
+        boolean b = appAuthSecurityApi.hasApplicationPermission(userId, 181672186277396480L);
+        System.out.println(b);
+    }
+
 
     @Test
     public void testIsApplicationAdmin() {

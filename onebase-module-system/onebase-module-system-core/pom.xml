@@ -76,7 +76,14 @@
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-spring-boot-starter-rpc</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct-processor</artifactId>
+        </dependency>
         <!-- 服务保障相关 TODO 开发者：暂时去掉 -->
         <!--        <dependency>-->
         <!--            <groupId>com.cmsr.onebase</groupId>-->
@@ -140,7 +147,11 @@
         <!--            <groupId>org.dromara.hutool</groupId>-->
         <!--            <artifactId>hutool-extra</artifactId> &lt;!&ndash; 邮件 &ndash;&gt;-->
         <!--        </dependency>-->
-
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-inline</artifactId>
+            <scope>test</scope>
+        </dependency>
 
     </dependencies>
 

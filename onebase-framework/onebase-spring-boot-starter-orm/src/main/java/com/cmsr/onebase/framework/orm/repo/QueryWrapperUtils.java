@@ -1,6 +1,5 @@
 package com.cmsr.onebase.framework.orm.repo;
 
-import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.mybatisflex.core.query.*;
 import org.apache.commons.collections4.CollectionUtils;
 
@@ -12,10 +11,11 @@ import java.util.List;
  */
 public class QueryWrapperUtils {
 
+    public static final String APPLICATION_ID = "application_id";
+
+    public static final String VERSION_TAG = "version_tag";
+
     public static boolean isQueryFilterable(QueryWrapper queryWrapper) {
-        if (ApplicationManager.isIgnoreApplicationCondition() && ApplicationManager.isIgnoreVersionTagCondition()) {
-            return false;
-        }
         // 不处理UNION类型
         List<UnionWrapper> unions = CPI.getUnions(queryWrapper);
         if (CollectionUtils.isNotEmpty(unions)) {
@@ -49,7 +49,22 @@ public class QueryWrapperUtils {
         }
         QueryCondition whereQueryCondition = CPI.getWhereQueryCondition(queryWrapper);
         if (whereQueryCondition != null) {
-            return whereQueryCondition.getColumn().getTable();
+            QueryColumn queryColumn = whereQueryCondition.getColumn();
+            if (queryColumn != null && queryColumn.getTable() != null) {
+                return queryColumn.getTable();
+            }
+            if (whereQueryCondition instanceof Brackets brackets) {
+                QueryCondition childCondition = brackets.getChildCondition();
+                if (childCondition != null) {
+                    if (childCondition.getColumn() != null && childCondition.getColumn().getTable() != null) {
+                        return childCondition.getColumn().getTable();
+                    }
+                    QueryCondition nextCondition = CPI.getNextCondition(childCondition);
+                    if (nextCondition != null && nextCondition.getColumn() != null && nextCondition.getColumn().getTable() != null) {
+                        return nextCondition.getColumn().getTable();
+                    }
+                }
+            }
         }
         return null;
     }

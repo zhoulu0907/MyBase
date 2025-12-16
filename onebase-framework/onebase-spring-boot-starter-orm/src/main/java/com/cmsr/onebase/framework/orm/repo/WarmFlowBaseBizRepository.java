@@ -1,7 +1,6 @@
 package com.cmsr.onebase.framework.orm.repo;
 
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
-import com.cmsr.onebase.framework.orm.entity.BaseBizEntity;
 import com.cmsr.onebase.framework.orm.entity.WarmFlowBizEntity;
 import com.mybatisflex.core.BaseMapper;
 import com.mybatisflex.core.paginate.Page;
@@ -18,6 +17,9 @@ import java.util.List;
 public class WarmFlowBaseBizRepository<M extends BaseMapper<T>, T extends WarmFlowBizEntity> extends ServiceImpl<M, T> {
 
     protected void injectQueryFilter(QueryWrapper queryWrapper) {
+        if (ApplicationManager.isIgnoreApplicationCondition() && ApplicationManager.isIgnoreVersionTagCondition()) {
+            return;
+        }
         if (!QueryWrapperUtils.isQueryFilterable(queryWrapper)) {
             return;
         }
@@ -25,11 +27,11 @@ public class WarmFlowBaseBizRepository<M extends BaseMapper<T>, T extends WarmFl
         QueryColumn applicationColumn;
         QueryColumn versionTagColumn;
         if (queryTable != null) {
-            applicationColumn = new QueryColumn(queryTable, BaseBizEntity.APPLICATION_ID);
-            versionTagColumn = new QueryColumn(queryTable, BaseBizEntity.VERSION_TAG);
+            applicationColumn = new QueryColumn(queryTable, QueryWrapperUtils.APPLICATION_ID);
+            versionTagColumn = new QueryColumn(queryTable, QueryWrapperUtils.VERSION_TAG);
         } else {
-            applicationColumn = new QueryColumn(BaseBizEntity.APPLICATION_ID);
-            versionTagColumn = new QueryColumn(BaseBizEntity.VERSION_TAG);
+            applicationColumn = new QueryColumn(QueryWrapperUtils.APPLICATION_ID);
+            versionTagColumn = new QueryColumn(QueryWrapperUtils.VERSION_TAG);
         }
         Long applicationId = ApplicationManager.getApplicationId();
         Long versionTag = ApplicationManager.getVersionTag();
@@ -188,7 +190,6 @@ public class WarmFlowBaseBizRepository<M extends BaseMapper<T>, T extends WarmFl
      */
     @Override
     public boolean exists(QueryWrapper query) {
-        this.injectQueryFilter(query);
         return exists(CPI.getWhereQueryCondition(query));
     }
 
@@ -240,4 +241,19 @@ public class WarmFlowBaseBizRepository<M extends BaseMapper<T>, T extends WarmFl
     }
 
     //endregion ===== 分页查询操作 =====
+
+    public boolean deleteAllApplicationData(Long applicationId) {
+        QueryColumn applicationColumn = new QueryColumn(QueryWrapperUtils.APPLICATION_ID);
+        return this.updateChain()
+                .where(applicationColumn.eq(applicationId))
+                .remove();
+    }
+
+    public boolean deleteApplicationVersionData(Long applicationId, Long versionId) {
+        QueryColumn applicationColumn = new QueryColumn(QueryWrapperUtils.APPLICATION_ID);
+        QueryColumn versionTagColumn = new QueryColumn(QueryWrapperUtils.VERSION_TAG);
+        return this.updateChain()
+                .where(applicationColumn.eq(applicationId).and(versionTagColumn.eq(versionId)))
+                .remove();
+    }
 }

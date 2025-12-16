@@ -3,7 +3,7 @@ package com.cmsr.onebase.module.app.build.controller.tag;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.module.app.build.service.tag.AppTagService;
 import com.cmsr.onebase.module.app.build.vo.tag.CreateTagReqVO;
-import com.cmsr.onebase.module.app.build.vo.tag.TagRespVO;
+import com.cmsr.onebase.module.app.core.vo.tag.TagRespVO;
 import com.cmsr.onebase.module.app.core.vo.tag.TagGroupCountVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
