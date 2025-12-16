@@ -1164,8 +1164,8 @@ public class UserServiceImpl implements UserService {
 
         ThirdSupplementUserResVO resVO = new ThirdSupplementUserResVO();
         resVO.setId(user.getId());
-        resVO.setUsername(user.getUsername());
-        resVO.setNickname(user.getNickname());
+        resVO.setUserName(user.getUsername());
+        resVO.setNickName(user.getNickname());
         resVO.setEmail(user.getEmail());
         return resVO;
     }

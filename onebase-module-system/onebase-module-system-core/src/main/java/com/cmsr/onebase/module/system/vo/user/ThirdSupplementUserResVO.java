@@ -18,10 +18,10 @@ public class ThirdSupplementUserResVO {
 
     @Schema(description = "用户账号", example = "onebase")
 
-    private String username;
+    private String userName;
 
     @ExcelProperty("用户名称")
-    private String nickname;
+    private String nickName;
 
     @Schema(description = "用户邮箱", example = "a@b.cn")
     private String email;
