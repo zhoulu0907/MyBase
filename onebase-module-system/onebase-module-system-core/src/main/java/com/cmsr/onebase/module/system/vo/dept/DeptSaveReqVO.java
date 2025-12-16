@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.system.vo.dept;
 
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.validation.InEnum;
+import com.cmsr.onebase.module.system.enums.dept.DeptTypeEnum;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -48,5 +49,11 @@ public class DeptSaveReqVO {
 
     @Schema(description = "管理员UserID", example = "")
     private Long adminUserId;
+
+    @Schema(description = "部门类型", example = "")
+    private String deptType;
+
+    @Schema(description = "部门编码", example = "")
+    private String deptCode;
 
 }

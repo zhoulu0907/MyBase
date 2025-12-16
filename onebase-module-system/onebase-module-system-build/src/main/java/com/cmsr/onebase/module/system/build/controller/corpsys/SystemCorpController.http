@@ -34,12 +34,12 @@ tenant-id: {{adminTenantId}}
 ### 请求 /login 接口 => 成功
 POST {{baseUrl}}/system/auth/corp-login
 Content-Type: application/json
-tenant-id: {{adminTenantId}}
+tenant-id: 158088726951460864
 tag: {{tag}}
 
 {
-  "mobile": "13800001111",
-  "password": "<$KKy2XfYV1}frV",
+  "mobile": "15890615600",
+  "password": "CorpChina2025!",
   "deviceId":666
 }
 

@@ -10,6 +10,7 @@ import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticTargetBodyVO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
@@ -90,6 +91,10 @@ public class BpmEntityHelper {
      */
     public void updateEntityData(EntityVO entityVO) {
         if (entityVO == null) {
+            return;
+        }
+
+        if (MapUtils.isEmpty(entityVO.getData())) {
             return;
         }
 

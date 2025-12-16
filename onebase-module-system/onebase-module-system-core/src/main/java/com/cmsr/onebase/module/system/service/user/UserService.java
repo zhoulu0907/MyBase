@@ -3,18 +3,19 @@ package com.cmsr.onebase.module.system.service.user;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import cn.hutool.core.collection.CollUtil;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
+import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.system.vo.auth.AuthRegisterReqVO;
+import com.cmsr.onebase.module.system.vo.auth.ThirdAuthLoginReqVO;
 import com.cmsr.onebase.module.system.vo.dept.DeptSimpleListRespVO;
 import com.cmsr.onebase.module.system.vo.user.UserProfileUpdatePasswordReqVO;
 import com.cmsr.onebase.module.system.vo.user.UserProfileUpdateReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.vo.user.*;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 后台用户 Service 接口
@@ -330,4 +331,59 @@ public interface UserService {
      * @return
      */
     List<UserRespVO> getConvertUserPage(PageResult<AdminUserDO> pageResult);
+
+    /**
+     * 忘记密码
+     * @param reqVO
+     */
+    void forgetPassword(@Valid UserForgetPasswordReqVO reqVO);
+
+    /**
+     * 创建第三方用户
+     * @param reqVO
+     * @return
+     */
+    AdminUserDO createThirdUser(ThirdAuthLoginReqVO reqVO);
+    /**
+     * 补充用户信息
+     * @param reqVO
+     * @return
+     */
+    ThirdSupplementUserResVO supplementUser(ThirdSupplementUserReqVO reqVO);
+    /**
+     * 创建用户并关联应用
+     * @param reqVO
+     * @return
+     */
+    Long createUserAndUserAppRelation( ThirdUserAppCombinedInsertReqVO reqVO);
+    /**
+     * 更新用户并关联应用
+     * @param reqVO
+     * @return
+     */
+    Long updateUserAndUserAppRelation(ThirdUserAppCombinedUpdateReqVO reqVO);
+
+
+    /**
+     * 获得用户授权应用列表-分页
+     *
+     * @param userAppPageReqVO 获取用户授权应用列表-分页请求参数
+     * @return 用户授权应用列表-分页结果
+     */
+    PageResult<UserApplicationRespVO> getUserAppRelationPage(@Valid UserAppPageSearchReqVO userAppPageReqVO);
+
+    /**
+     * 更新第三方用户密码
+     * @param id
+     * @param password
+     */
+    void updateThirdUserPassword(Long id, String password);
+
+    /**
+     * 获取用户信息
+     * @param usernamesList
+     * @return
+     */
+    @TenantIgnore
+    List<AdminUserDO> getPlatformUserByUsernames(Set<String> usernamesList);
 }

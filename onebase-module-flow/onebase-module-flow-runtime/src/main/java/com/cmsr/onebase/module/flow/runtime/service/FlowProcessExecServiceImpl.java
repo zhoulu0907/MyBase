@@ -3,12 +3,12 @@ package com.cmsr.onebase.module.flow.runtime.service;
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.flow.context.condition.ConditionsSupport;
 import com.cmsr.onebase.module.flow.context.condition.SimpleField;
 import com.cmsr.onebase.module.flow.context.enums.FieldTypeConvertor;
 import com.cmsr.onebase.module.flow.context.express.ExpressionExecutor;
 import com.cmsr.onebase.module.flow.context.express.OrExpression;
 import com.cmsr.onebase.module.flow.context.graph.nodes.start.StartFormNodeData;
+import com.cmsr.onebase.module.flow.context.provider.FlowConditionsProvider;
 import com.cmsr.onebase.module.flow.core.flow.ExecutorInput;
 import com.cmsr.onebase.module.flow.core.flow.ExecutorResult;
 import com.cmsr.onebase.module.flow.core.flow.FlowProcessExecutor;
@@ -45,7 +45,11 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
     @Autowired
     private FlowProcessExecutor flowProcessExecutor;
 
+    @Autowired
+    private FlowConditionsProvider flowConditionsProvider;
+
     private ExpressionExecutor expressionExecutor = new ExpressionExecutor();
+
 
     @Override
     public List<QueryFormTriggerRespVO> queryFormTrigger(Long pageId) {
@@ -70,8 +74,8 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
                 Map<String, Object> inputMap = convertInputParamsData(reqVO, startFormNodeData);
                 boolean isTrigger = true;
                 if (CollectionUtils.isNotEmpty(startFormNodeData.getFilterCondition())) {
-                    OrExpression orExpression = ConditionsSupport.convertToOrExpresses(startFormNodeData.getFilterCondition());
-                    isTrigger = expressionExecutor.evaluate(orExpression, inputMap);
+                    OrExpression orExpression = flowConditionsProvider.formatConditionsForExpression(startFormNodeData.getFilterCondition(), inputMap);
+                    isTrigger = expressionExecutor.evaluateInput(orExpression, inputMap);
                 }
                 if (!isTrigger) {
                     FormTriggerRespVO vo = formNotTriggerRespVO();

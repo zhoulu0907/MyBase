@@ -58,21 +58,15 @@ public class ExecuteContext implements Serializable {
     private volatile boolean debugMode = false;
 
     //节点执行的结果
-    private Map<String, Object> nodeProcessHisResults = new ConcurrentHashMap<>();
 
-    private Map<String, Object> nodeProcessCurResults = new ConcurrentHashMap<>();
+
+    private Map<String, Object> nodeProcessResults = new ConcurrentHashMap<>();
 
 
     private volatile boolean executeEnd = false;
-
-
+    private volatile String executionEndNodeTag;
     private volatile String executionEndNodeType;
 
-    /**
-     * 上次执行结束节点
-     */
-
-    private volatile String executionEndNodeTag;
 
     /**
      * 节点配置数据
@@ -104,41 +98,25 @@ public class ExecuteContext implements Serializable {
         this.nodeDataMap = Collections.unmodifiableMap(nodeData);
     }
 
-    public void resetNodeProcessResult() {
-        nodeProcessHisResults.putAll(nodeProcessCurResults);
-        this.nodeProcessCurResults.clear();
-    }
 
     public void putNodeProcessResult(String tag, Object result) {
-        this.nodeProcessCurResults.put(tag, result);
+        this.nodeProcessResults.put(tag, result);
     }
 
     public boolean hasNodeProcessResult(String tag) {
-        return nodeProcessHisResults.containsKey(tag);
+        return nodeProcessResults.containsKey(tag);
     }
 
     public Object getNodeProcessResult(String tag) {
-        return nodeProcessHisResults.get(tag);
+        return nodeProcessResults.get(tag);
+    }
+
+    public void setNodeProcessResult(String tag, Object result) {
+        this.nodeProcessResults.put(tag, result);
     }
 
     public NodeData getNodeData(String nodeTag) {
         return nodeDataMap.get(nodeTag);
-    }
-
-    public void restExecutionEndNodeTag() {
-        this.executionEndNodeTag = null;
-    }
-
-    public boolean isExecutionEndNodeTagEmpty() {
-        return executionEndNodeTag == null;
-    }
-
-    public boolean isExecutionEndNodeTagEquals(String tag) {
-        return executionEndNodeTag != null && executionEndNodeTag.equals(tag);
-    }
-
-    public void restExecutionUuid() {
-        this.executionUuid = null;
     }
 
     public void addLog(String log) {

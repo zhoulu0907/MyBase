@@ -153,18 +153,15 @@ public class FlowProcessExecutor {
             if (executeContext == null) {
                 throw new Exception("执行上下文不存在或已过期: " + executionUuid);
             }
-            //
+            //执行上下文添加执行UUID
+            executeContext.setExecutionUuid(UUID.randomUUID().toString());
             executeContext.setExecuteLog(executeLog);
             Map<String, NodeData> nodeData = FlowProcessCache.findNodeData(processId);
             executeContext.setNodeDataMap(nodeData);
+            executeContext.setSystemFields(executorInput.getSystemFields());
 
-            variableContext.setInputFields(executorInput.getInputParams());
+            variableContext.setInputParams(executorInput.getInputParams());
             variableContext.setOutputParams(Collections.emptyMap());
-
-            //重置执行结果
-            executeContext.resetNodeProcessResult();
-            //执行上下文添加执行UUID
-            executeContext.setExecutionUuid(UUID.randomUUID().toString());
             //设置日志执行UUID
             executionLog.setTraceId(executeContext.getTraceId());
             executionLog.setExecutionUuid(executeContext.getExecutionUuid());

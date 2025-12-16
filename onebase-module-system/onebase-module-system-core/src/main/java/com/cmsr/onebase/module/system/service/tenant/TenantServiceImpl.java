@@ -246,17 +246,51 @@ public class TenantServiceImpl implements TenantService {
         return existTenantCount;
     }
 
+    private  Map<String,AdminUserDO> getUserMobileByUserNames(Set<String> usernamesList){
+        List<AdminUserDO> userDOList= userService.getPlatformUserByUsernames(usernamesList);
+
+        Map<String, List<AdminUserDO>> userGroupMap = userDOList.stream()
+                .collect(Collectors.groupingBy(AdminUserDO::getUsername));
+
+        return userGroupMap.entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,  // username作为key
+                        entry -> {
+                            List<AdminUserDO> userList = entry.getValue();
+                            if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(userList) ) {
+                                return userList.get(0);
+                            }
+                            return new AdminUserDO();  // 如果为空则返回空字符串
+                        }
+                ));
+
+    }
+
+
+
     private void createSystemUser(Long roleId, TenantInsertReqVO insertReqVO) {
         List<TenantAdminUserReqVO> adminUserReqVOList = insertReqVO.getTenantAdminUserReqVOList();
+
+        Set<String> usernamesList = adminUserReqVOList.stream()
+                .map(TenantAdminUserReqVO::getAdminUserName)
+                .collect(Collectors.toSet());
+
+        Map<String, AdminUserDO> usernameToFirstMobileMap = getUserMobileByUserNames(usernamesList);
+
         adminUserReqVOList.forEach(adminUserReqVO -> {
             UserInsertReqVO reqVO = new UserInsertReqVO();
             reqVO.setUsername(adminUserReqVO.getAdminUserName());
             reqVO.setNickname(adminUserReqVO.getAdminNickName());
-            reqVO.setMobile(adminUserReqVO.getAdminMobile());
-            reqVO.setEmail(adminUserReqVO.getAdminEmail());
+            if(null !=usernameToFirstMobileMap.get(adminUserReqVO.getAdminUserName())){
+                AdminUserDO platUser=usernameToFirstMobileMap.get(adminUserReqVO.getAdminUserName());
+                if (null != platUser) {
+                    reqVO.setMobile(platUser.getMobile());
+                    reqVO.setEmail(platUser.getEmail());
+                    reqVO.setPlatformUserId(platUser.getId());
+                }
+            }
             reqVO.setAdminType(AdminTypeEnum.SYSTEM.getType());
             reqVO.setPassword(TENANT_ADMIN_PASSWORD);
-            reqVO.setPlatformUserId(adminUserReqVO.getPlatformUserId());
             // 通过平台创建空间（Tenant）用户
             reqVO.setUserType(UserTypeEnum.TENANT.getValue());
             // 创建用户
@@ -407,19 +441,31 @@ public class TenantServiceImpl implements TenantService {
                 }
 
                 updateReqVO.getTenantAdminUserUpdateReqVOSList().forEach(adminUserReqVO -> {
+                    // 获取用户手机
+                    Set<String> usernamesList = updateReqVO.getTenantAdminUserUpdateReqVOSList().stream()
+                            .map(TenantAdminUserReqVO::getAdminUserName)
+                            .collect(Collectors.toSet());
+                    Map<String, AdminUserDO> usernameToFirstMobileMap = getUserMobileByUserNames(usernamesList);
+
                     // 已存在的用户
                     AdminUserDO newAdminUser = userService.getUserByUsername(adminUserReqVO.getAdminUserName());
                     // 判断前端上送的管理员是否已存在，存在则分配角色且不是老用户
                     if (newAdminUser == null) {
+
                         // 新管理员用户不存在，创建用户，并分配角色
                         UserInsertReqVO userInsertReqVO = new UserInsertReqVO();
                         userInsertReqVO.setUsername(adminUserReqVO.getAdminUserName());
                         userInsertReqVO.setNickname(adminUserReqVO.getAdminNickName());
-                        userInsertReqVO.setMobile(adminUserReqVO.getAdminMobile());
-                        userInsertReqVO.setEmail(adminUserReqVO.getAdminEmail());
+                        if(null !=usernameToFirstMobileMap.get(adminUserReqVO.getAdminUserName())){
+                            AdminUserDO platUser=usernameToFirstMobileMap.get(adminUserReqVO.getAdminUserName());
+                            if (null != platUser) {
+                                userInsertReqVO.setMobile(platUser.getMobile());
+                                userInsertReqVO.setEmail(platUser.getEmail());
+                                userInsertReqVO.setPlatformUserId(platUser.getId());
+                            }
+                        }
                         userInsertReqVO.setAdminType(AdminTypeEnum.SYSTEM.getType());
                         userInsertReqVO.setPassword(TENANT_ADMIN_PASSWORD);
-                        userInsertReqVO.setPlatformUserId(adminUserReqVO.getPlatformUserId());
                         // 新增的都是空间管理员
                         userInsertReqVO.setUserType(UserTypeEnum.TENANT.getValue());
                         // 创建用户

@@ -26,6 +26,13 @@ public class AppMenuRepository extends BaseBizRepository<AppMenuMapper, AppMenuD
         return this.list(queryWrapper);
     }
 
+    public List<AppMenuDO> listByIdsAndOrder(List<Long> menuIds) {
+        QueryWrapper queryWrapper = this.query()
+                .where(APP_MENU.ID.in(menuIds))
+                .orderBy(APP_MENU.MENU_SORT, true);
+        return this.list(queryWrapper);
+    }
+
     public List<String> findMenuUuidListByApplication(Long applicationId) {
         QueryWrapper queryWrapper = this.query()
                 .select(APP_MENU.MENU_UUID)
@@ -82,4 +89,6 @@ public class AppMenuRepository extends BaseBizRepository<AppMenuMapper, AppMenuD
                 .where(APP_MENU.ENTITY_UUID.eq(entityUuid));
         return this.exists(queryWrapper);
     }
+
+
 }
