@@ -1,16 +1,16 @@
 import { Button, Form, Select } from '@arco-design/web-react';
+import { CONFIG_TYPES } from '@onebase/ui-kit';
 import React, { useEffect, useState } from 'react';
 import { registerConfigRenderer } from '../../registry';
-import { CONFIG_TYPES } from '@onebase/ui-kit';
 
 import { useAppStore } from '@/store/store_app';
+import { useResourceStore } from '@/store/store_resource';
 import { getEntityGraph } from '@onebase/app';
+import { getPopupContainer } from '@onebase/ui-kit';
+import { hiddenFieldTypes } from '../DynamicTableConfig';
 import DataSelectionProcessConfig from './components/DataSelectionProcessConfig';
 import FillingRuleSettingsModal from './components/FillingRuleSettingsModal';
 import styles from './index.module.less';
-import { useResourceStore } from '@/store/store_resource';
-import { hiddenFieldTypes } from '../DynamicTableConfig';
-import { getPopupContainer } from '@onebase/ui-kit';
 
 const FormItem = Form.Item;
 const Option = Select.Option;
