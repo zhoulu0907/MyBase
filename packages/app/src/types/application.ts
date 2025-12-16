@@ -5,6 +5,10 @@ import { PUBLISH_MODULE } from '@onebase/common';
 export interface Application {
   id: string;
   /**
+   * 应用UID
+   */
+  appUid?: string;
+  /**
    * 应用名称
    */
   appName: string;
@@ -71,6 +75,17 @@ export interface Application {
    * 发布模式
    */
   publishModel?: string;
+
+  /**
+   * 发布人
+   */
+  publisher?: string;
+
+  /**
+   * 发布时间
+   */
+  publishTime?: string;
+
   userPhotoList?: developUser[];
 }
 
@@ -256,4 +271,16 @@ export interface GetApplicationReq {
    * 应用ID
    */
   id: string;
+}
+
+export interface GetAppNavigationConfigReq {
+  id: string;
+}
+
+export interface UpdateAppNavigationConfigReq {
+  id: string;
+  webDefaultMenu: string;
+  webNavLayout: string;
+  mobileDefaultMenu: string;
+  mobileNavLayout: string;
 }

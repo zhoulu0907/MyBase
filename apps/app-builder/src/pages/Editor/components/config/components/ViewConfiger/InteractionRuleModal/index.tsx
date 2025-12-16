@@ -78,7 +78,7 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
   // 获取组件下拉列表
   const getComponentOptions = () => {
     const cpOptions = Object.values(pageComponentSchemas.value).map((item: any) => ({
-      label: item.config?.label?.text || '',
+      label: item.config?.label?.text || item.config?.cpName || '',
       value: item.config?.id
     }));
 
@@ -91,21 +91,59 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
 
   const [form] = Form.useForm();
 
-  const [rules, setRules] = useState<Rule[]>(pageViews.value[curViewId.value]?.interactionRules || []);
+  // 使用 ref 来标记是否正在初始化表单，避免触发 onValuesChange
+  const isInitializingRef = React.useRef(false);
+  // 使用 ref 存储上一次设置的 rule id，避免重复设置相同的值
+  const lastSetRuleIdRef = React.useRef<string>('');
 
-  const [curRule, setCurRule] = useState<string>(rules.length > 0 ? rules[0].id : '');
+  const [rules, setRules] = useState<Rule[]>([]);
+  const [curRule, setCurRule] = useState<string>('');
 
+  // 当 modal 打开时，重新加载 rules
   useEffect(() => {
-    if (curRule) {
-      const rule = rules.find((rule) => rule.id === curRule);
-      if (rule) {
-        form.setFieldsValue(rule);
+    if (visible) {
+      const initialRules = pageViews.value[curViewId.value]?.interactionRules || [];
+      setRules(initialRules);
+      if (initialRules.length > 0) {
+        setCurRule(initialRules[0].id);
+        lastSetRuleIdRef.current = ''; // 重置，确保会设置表单
       } else {
-        // 如果规则不存在，清空表单
-        form.resetFields();
+        setCurRule('');
+        lastSetRuleIdRef.current = '';
       }
     }
-  }, [curRule, rules]);
+  }, [visible, curViewId.value]);
+
+  useEffect(() => {
+    if (curRule && lastSetRuleIdRef.current !== curRule) {
+      const rule = rules.find((rule) => rule.id === curRule);
+      if (rule) {
+        isInitializingRef.current = true;
+        form.setFieldsValue(rule);
+        lastSetRuleIdRef.current = curRule;
+        // 使用 requestAnimationFrame 确保在下一个渲染周期重置标志
+        requestAnimationFrame(() => {
+          isInitializingRef.current = false;
+        });
+      } else {
+        // 如果规则不存在，清空表单
+        isInitializingRef.current = true;
+        form.resetFields();
+        lastSetRuleIdRef.current = '';
+        requestAnimationFrame(() => {
+          isInitializingRef.current = false;
+        });
+      }
+    } else if (!curRule && lastSetRuleIdRef.current !== '') {
+      // 如果 curRule 被清空，清空表单
+      isInitializingRef.current = true;
+      form.resetFields();
+      lastSetRuleIdRef.current = '';
+      requestAnimationFrame(() => {
+        isInitializingRef.current = false;
+      });
+    }
+  }, [curRule, form]);
 
   const handleOk = () => {
     let curPageView = pageViews.value[curViewId.value];
@@ -277,6 +315,10 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
               layout="vertical"
               form={form}
               onValuesChange={(changeValue: any, values: any) => {
+                // 如果正在初始化表单，跳过更新 rules，避免无限循环
+                if (isInitializingRef.current) {
+                  return;
+                }
                 // 从values中获取当前rule的id
                 const curRuleId = values.id;
                 if (curRuleId) {

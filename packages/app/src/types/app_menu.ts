@@ -11,6 +11,7 @@ export interface ApplicationMenu {
   menuType: number;
   menuName: string;
   menuIcon: string;
+  menuUuid: string;
   isVisible: number;
   children: ApplicationMenu[];
 }

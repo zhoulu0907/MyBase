@@ -48,7 +48,7 @@ const FilterDataModal: React.FC<FilterDataModalProps> = ({ visible, item, config
     );
     setDataFilters([
       {
-        key: configs[item.key].entityId,
+        key: configs[item.key].entityUuid,
         title: configs[item.key].entityName,
         children: dataFilters
       }
@@ -91,7 +91,7 @@ const FilterDataModal: React.FC<FilterDataModalProps> = ({ visible, item, config
           <Form layout="vertical" form={payloadForm}>
             {/* 添加过滤条件 */}
             <ConditionEditor
-              nodeId={configs[item.key].entityId}
+              nodeId={configs[item.key].entityUuid}
               label="添加过滤条件"
               required
               form={payloadForm}

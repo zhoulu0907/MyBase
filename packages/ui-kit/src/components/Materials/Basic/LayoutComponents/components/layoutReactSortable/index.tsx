@@ -70,8 +70,9 @@ const LayoutReactSortable: React.FC<LayoutReactSortableProps> = ({
     const itemType = e.item.getAttribute('data-cp-type');
     const itemDisplayName = e.item.getAttribute('data-cp-displayname');
 
-    const tableName = e.item.getAttribute('data-table-name');
-    const fieldName = e.item.getAttribute('data-field-name');
+    // 从主视图拖进来的数据字段可以直接从signal中读取配置
+    let tableName = e.item.getAttribute('data-table-name') || pageComponentSchemas[cpID!]?.config?.dataField?.[0];
+    let fieldName = e.item.getAttribute('data-field-name') || pageComponentSchemas[cpID!]?.config?.dataField?.[1];
 
     // 子表字段不允许
     if (

@@ -1,5 +1,5 @@
 import { Button, Drawer, Form, Grid, Input, Radio, Select, Tree } from '@arco-design/web-react';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import { IconCaretDown } from '@arco-design/web-react/icon';
 import { getPopupContainer, ListComp } from '@onebase/ui-kit';
@@ -29,7 +29,8 @@ const SUB_ATTR_KEY = {
   FASTFILTER: 'fastFilter',
   DYNAMICTABLECONFIG: 'dynamicTableConfig',
   COLUMNS: 'columns',
-  SORTBYOBJECT: 'sortByObject'
+  SORTBYOBJECT: 'sortByObject',
+  SELECTEDDATASOURCE: 'selectedDataSource'
 };
 
 const sortOptions = [
@@ -67,7 +68,8 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
   item,
   configs,
   id,
-  handlePropsChange
+  handlePropsChange,
+  handleMultiPropsChange
 }) => {
   const isDropdown = configs?.selectMethod === 'dropdown';
   const tableConfig = configs[SUB_ATTR_KEY.DYNAMICTABLECONFIG];
@@ -85,6 +87,15 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
   const [isFastFilter, setIsFastFilter] = useState<boolean>(false);
   const [fastFilters, setFastFilters] = useState<any[]>([]);
 
+  // 回显字段：用于排除和预览显示
+  const echoField = useMemo(() => {
+    return Array.isArray(configs?.displayFields) ? configs.displayFields[0]?.value : undefined;
+  }, [configs?.displayFields]);
+
+  const echoFieldObj = useMemo(() => {
+    return Array.isArray(configs?.displayFields) ? configs.displayFields[0] : undefined;
+  }, [configs?.displayFields]);
+
   // const sortType = 'normal';
 
   // const droplist = (
@@ -100,24 +111,27 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
   useEffect(() => {
     if (visible) {
       setDisplayFieldOptions(configs[SUB_ATTR_KEY.DATAFIELDS]);
-      const echoField = Array.isArray(configs?.displayFields) ? configs.displayFields[0]?.value : undefined;
-      const initialSelected = (configs[SUB_ATTR_KEY.SELECTDATAFIELDS] || []).filter((f: any) => f !== echoField);
+      const initialSelected = configs[SUB_ATTR_KEY.SELECTDATAFIELDS] || [];
+      //   .filter((f: any) => f !== echoField);
       setSelected(initialSelected);
       setFilterCondition(configs[SUB_ATTR_KEY.FILTERCONDITION]);
       setSortFieldValue(tableConfig[SUB_ATTR_KEY.SORTBYOBJECT]?.fieldName);
       setSortValue(tableConfig[SUB_ATTR_KEY.SORTBYOBJECT]?.sortBy);
+      tableConfig.tableName = configs[SUB_ATTR_KEY.SELECTEDDATASOURCE].tableName;
+      handlePropsChange(SUB_ATTR_KEY.DYNAMICTABLECONFIG, tableConfig);
     }
-  }, [visible]);
+  }, [visible, echoField]);
 
   useEffect(() => {
     handleOptionsChange();
   }, [displayFieldOptions, selected]);
 
   const handleOptionsChange = () => {
-    const echoField = Array.isArray(configs?.displayFields) ? configs.displayFields[0]?.value : undefined;
-    const selectableOptions = isDropdown && echoField
-      ? (displayFieldOptions || []).filter((opt: any) => opt.fieldName !== echoField)
-      : (displayFieldOptions || []);
+    const selectableOptions =
+      isDropdown && echoField
+        ? displayFieldOptions || []
+        : // .filter((opt: any) => opt.fieldName !== echoField)
+          displayFieldOptions || [];
     const header = selectableOptions.reduce((fields: any[], option: any) => {
       if (selected.includes(option.fieldName)) {
         fields.push({
@@ -138,15 +152,23 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
   };
 
   const handleSelectedChange = (value: any) => {
-    const echoField = Array.isArray(configs?.displayFields) ? configs.displayFields[0]?.value : undefined;
-    const filtered = Array.isArray(value) && echoField ? value.filter((v) => v !== echoField) : value;
-    setSelected(filtered);
-    handlePropsChange(SUB_ATTR_KEY.SELECTDATAFIELDS, filtered);
+    // TODO(mickey): 不确定功能，先注释掉
+    // console.log('value: ', value);
+    // console.log('configs?.displayFields: ', configs?.displayFields);
+    // console.log('echoField: ', echoField);
+    // const filtered = Array.isArray(value) && echoField ? value.filter((v) => v !== echoField) : value;
+    // console.log('filtered: ', filtered);
+
+    // setSelected(filtered);
+    // handlePropsChange(SUB_ATTR_KEY.SELECTDATAFIELDS, filtered);
+
+    setSelected(value);
+    handlePropsChange(SUB_ATTR_KEY.SELECTDATAFIELDS, value);
   };
 
   const handleSelectedChangeSingle = (value: any) => {
-    const echoField = Array.isArray(configs?.displayFields) ? configs.displayFields[0]?.value : undefined;
-    const next = value && value !== echoField ? [value] : [];
+    // const next = value && value !== echoField ? [value] : [];
+    const next = value ? [value] : [];
     setSelected(next);
     handlePropsChange(SUB_ATTR_KEY.SELECTDATAFIELDS, next);
     handleOptionsChange();
@@ -174,9 +196,48 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
   };
 
   const handleOKModal = (values: any) => {
-    handlePropsChange(SUB_ATTR_KEY.FILTERCONDITION, values);
+    const newFilterCondition = getConditionChildren(values);
+    tableConfig.filterCondition = newFilterCondition;
+    handleMultiPropsChange?.([
+      { key: SUB_ATTR_KEY.FILTERCONDITION, value: values },
+      { key: SUB_ATTR_KEY.DYNAMICTABLECONFIG, value: tableConfig }
+    ]);
     setFilterCondition(values);
     setFilterDataVisible(false);
+  };
+
+  const formatConditions = (condition: any) => {
+    const newConditions = condition.conditions.map((item: any) => ({
+      nodeType: 'CONDITION',
+      fieldName: item.fieldKey.split('.')[1],
+      operator: item.op,
+      fieldValue: [item.value]
+    }));
+
+    return {
+      nodeType: 'GROUP',
+      combinator: 'AND',
+      children: newConditions
+    };
+  };
+
+  const getConditionChildren = (conditions: any[]) => {
+    if (conditions.length === 0) {
+      return {};
+    }
+    if (conditions.length === 1) {
+      return formatConditions(conditions[0]);
+    }
+    const formatChildren: any[] = [];
+    conditions.forEach((item: any) => {
+      const newConditions = formatConditions(item);
+      formatChildren.push(newConditions);
+    });
+    return {
+      nodeType: 'GROUP',
+      combinator: 'OR',
+      children: conditions.map(formatConditions)
+    };
   };
 
   // const handleSelectFastFilter = (key: any) => {
@@ -217,17 +278,22 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
                 <div className={styles.previewCard}>
                   <div className={styles.cardHeader}>
                     {(() => {
-                      const echoField = Array.isArray(configs?.displayFields) ? configs.displayFields[0] : undefined;
-                      const echoLabel = echoField?.label || (displayFieldOptions || []).find((opt: any) => opt.fieldName === echoField?.value)?.displayName || '标题字段';
+                      const echoLabel =
+                        echoFieldObj?.label ||
+                        (displayFieldOptions || []).find((opt: any) => opt.fieldName === echoFieldObj?.value)
+                          ?.displayName ||
+                        '标题字段';
                       return echoLabel;
                     })()}
                   </div>
                   <div className={styles.cardSubTitle}>
                     {(() => {
-                      const echoField = Array.isArray(configs?.displayFields) ? configs.displayFields[0] : undefined;
-                      const aux = (selected || []).filter((f: any) => f !== echoField?.value);
+                      const aux = selected || [];
+                      //   .filter((f: any) => f !== echoFieldObj?.value);
                       const labels = aux
-                        .map((f: any) => (displayFieldOptions || []).find((opt: any) => opt.fieldName === f)?.displayName)
+                        .map(
+                          (f: any) => (displayFieldOptions || []).find((opt: any) => opt.fieldName === f)?.displayName
+                        )
                         .filter(Boolean);
                       return labels.length > 0 ? labels[0] : '描述字段';
                     })()}
@@ -258,42 +324,43 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
                   }}
                 />
               </FormItem>
-                  <FormItem label={isDropdown ? '辅助字段' : '选择数据时的显示字段'}>
-                    {isDropdown ? (
-                      <Select
-                        value={selected?.[0]}
-                        onChange={(e) => handleSelectedChangeSingle(e)}
-                        placeholder="请选择"
-                        allowClear
-                      >
-                        {(displayFieldOptions || [])
-                          .filter((opt: any) => opt.fieldName !== (configs?.displayFields?.[0]?.value))
-                          .map((option: any) => (
-                            <Option key={option.fieldName} value={option.fieldName}>
-                              {option.displayName}
-                            </Option>
-                          ))}
-                      </Select>
-                    ) : (
-                      <Select
-                        value={selected}
-                        onChange={(e) => handleSelectedChange(e)}
-                        placeholder="设置显示字段"
-                        renderFormat={() => (selected.length > 0 ? `显示 ${selected.length} 个字段` : '设置显示字段')}
-                        dropdownRender={() => (
-                          <div className={styles.dropdownRender}>
-                            <DropdownRender
-                              selected={selected}
-                              setSelected={handleSelectedChange}
-                              displayFieldOptions={displayFieldOptions}
-                              handleOptionsChange={handleOptionsChange}
-                              setDisplayFieldOptions={handleDisplayFieldOptions}
-                            />
-                          </div>
-                        )}
-                      />
+              <FormItem label={isDropdown ? '辅助字段' : '选择数据时的显示字段'}>
+                {/* <div>{JSON.stringify(displayFieldOptions)}</div> */}
+                {isDropdown ? (
+                  <Select
+                    value={selected?.[0]}
+                    onChange={(e) => handleSelectedChangeSingle(e)}
+                    placeholder="请选择"
+                    allowClear
+                  >
+                    {(displayFieldOptions || [])
+                      //   .filter((opt: any) => opt.fieldName !== echoField)
+                      .map((option: any) => (
+                        <Option key={option.fieldName} value={option.fieldName}>
+                          {option.displayName}
+                        </Option>
+                      ))}
+                  </Select>
+                ) : (
+                  <Select
+                    value={selected}
+                    onChange={(e) => handleSelectedChange(e)}
+                    placeholder="设置显示字段"
+                    renderFormat={() => (selected.length > 0 ? `显示 ${selected.length} 个字段` : '设置显示字段')}
+                    dropdownRender={() => (
+                      <div className={styles.dropdownRender}>
+                        <DropdownRender
+                          selected={selected}
+                          setSelected={handleSelectedChange}
+                          displayFieldOptions={displayFieldOptions}
+                          handleOptionsChange={handleOptionsChange}
+                          setDisplayFieldOptions={handleDisplayFieldOptions}
+                        />
+                      </div>
                     )}
-                  </FormItem>
+                  />
+                )}
+              </FormItem>
               <FormItem label="数据过滤">
                 <Button type="secondary" long onClick={() => setFilterDataVisible(true)}>
                   {filterCondition.length > 0 ? '已添加过滤条件' : '添加过滤条件'}
@@ -316,9 +383,10 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
                       getPopupContainer={getPopupContainer}
                       allowClear
                     >
-                      {(isDropdown && Array.isArray(configs?.displayFields)
-                        ? (displayFieldOptions || []).filter((opt: any) => opt.fieldName !== configs.displayFields[0]?.value)
-                        : displayFieldOptions
+                      {(isDropdown && echoField
+                        ? displayFieldOptions || []
+                        : // .filter((opt: any) => opt.fieldName !== echoField)
+                          displayFieldOptions
                       ).map((option: any) => (
                         <Option key={option.fieldName} value={option.fieldName}>
                           {option.displayName}

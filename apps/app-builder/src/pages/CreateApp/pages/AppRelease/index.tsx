@@ -1,15 +1,15 @@
-import { Space } from '@arco-design/web-react';
+import { Message, Space } from '@arco-design/web-react';
 import {
-  AppStatus,
   getApplication,
+  offlineApplication,
   pageApplicationVersion,
+  type Application,
   type GetApplicationReq,
   type PageApplicationVersionReq
 } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import AppStatusHeader from './components/header';
-import AppAccessLink from './components/link';
 import VersionManagement from './components/list';
 import PublishVersionModal from './components/modals/publish';
 
@@ -30,15 +30,17 @@ const AppReleasePage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const appId = searchParams.get('appId') || '';
 
-  const [appStatus, setAppStatus] = useState<number>(AppStatus.DEVELOPING);
-  const [currentVersion, setCurrentVersion] = useState('');
-  const [versionURL, setVersionURL] = useState('');
+  const [appInfo, setAppInfo] = useState<Application>();
+
+  //   const [appStatus, setAppStatus] = useState<number>(AppStatus.DEVELOPING);
+  //   const [currentVersion, setCurrentVersion] = useState('');
+  //   const [versionURL, setVersionURL] = useState('');
 
   const [publishModalVisible, setPublishModalVisible] = useState(false);
 
   const [versionList, setVersionList] = useState<VersionRecord[]>([]);
   const [pageNo, setPageNo] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(5);
   const [total, setTotal] = useState(0);
 
   useEffect(() => {
@@ -60,14 +62,7 @@ const AppReleasePage: React.FC = () => {
     const appResp = await getApplication(appReq);
 
     if (appResp) {
-      setAppStatus(appResp.appStatus);
-      if (appResp.versionNumber) {
-        setCurrentVersion(appResp.versionNumber);
-      }
-
-      if (appResp.versionUrl) {
-        setVersionURL(appResp.versionUrl);
-      }
+      setAppInfo(appResp);
     }
   };
 
@@ -88,6 +83,17 @@ const AppReleasePage: React.FC = () => {
     setPublishModalVisible(true);
   };
 
+  const handleOfflineToggle = async () => {
+    const res = await offlineApplication({
+      applicationId: appId
+    });
+
+    if (res) {
+      Message.success('应用下架成功');
+      handleGetApplicationInfo();
+    }
+  };
+
   const handlePublishModalOk = async () => {
     setPublishModalVisible(false);
     handleGetApplicationVersion();
@@ -97,10 +103,15 @@ const AppReleasePage: React.FC = () => {
     <div className={styles.appReleasePage}>
       <Space direction="vertical" size={16} style={{ width: '100%' }}>
         {/* 应用状态头部 */}
-        <AppStatusHeader appStatus={appStatus} currentVersion={currentVersion} onReleaseToggle={handleReleaseToggle} />
-
+        {appInfo && (
+          <AppStatusHeader
+            appInfo={appInfo}
+            onReleaseToggle={handleReleaseToggle}
+            onOfflineToggle={handleOfflineToggle}
+          />
+        )}
         {/* 应用访问链接 */}
-        {<AppAccessLink accessUrl={versionURL} />}
+        {/* {<AppAccessLink accessUrl={versionURL} />} */}
 
         {/* 版本管理 */}
         <VersionManagement

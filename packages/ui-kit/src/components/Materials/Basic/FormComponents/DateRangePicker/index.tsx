@@ -15,7 +15,7 @@ import {
 } from '../../../constants';
 import '../index.css';
 import type { XInputDateRangePickerConfig } from './schema';
-import { getPopupContainer } from '@/utils';
+import { getPopupContainer, securityEncodeText } from '@/utils';
 
 const XDateRangePicker = memo((props: XInputDateRangePickerConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const {
@@ -30,7 +30,8 @@ const XDateRangePicker = memo((props: XInputDateRangePickerConfig & { runtime?: 
     endDefaultValueConfig,
     dateType,
     runtime = true,
-    detailMode
+    detailMode,
+    security
   } = props;
 
   const { form } = Form.useFormContext();
@@ -74,7 +75,7 @@ const XDateRangePicker = memo((props: XInputDateRangePickerConfig & { runtime?: 
 
       // 变量
       if (dateRange.earliestType === DATE_EXTREME_TYPE.VARIABLE && dateRange.earliestVariableValue) {
-        const earliestVariableValue = form.getFieldValue(dateRange.earliestDynamicValue);
+        const earliestVariableValue = form.getFieldValue(dateRange.earliestVariableValue);
         if (earliestVariableValue) {
           const earliestTime = new Date(earliestVariableValue).getTime()
           if (currentTime < earliestTime) {
@@ -148,7 +149,7 @@ const XDateRangePicker = memo((props: XInputDateRangePickerConfig & { runtime?: 
               typeof fieldValue === 'string' &&
               fieldValue.split(',').map((ele: any, index: number) => (
                 <span key={index} style={{ marginBottom: '0' }}>
-                  {ele}
+                  {securityEncodeText(security, ele)}
                 </span>
               ))}
           </div>
