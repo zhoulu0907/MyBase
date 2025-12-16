@@ -71,7 +71,7 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
                 boolean isTrigger = true;
                 if (CollectionUtils.isNotEmpty(startFormNodeData.getFilterCondition())) {
                     OrExpression orExpression = ConditionsSupport.convertToOrExpresses(startFormNodeData.getFilterCondition());
-                    isTrigger = expressionExecutor.evaluate(orExpression, inputMap);
+                    isTrigger = expressionExecutor.evaluateInput(orExpression, inputMap);
                 }
                 if (!isTrigger) {
                     FormTriggerRespVO vo = formNotTriggerRespVO();

@@ -7,6 +7,8 @@ import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.Busines
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.BusinessEntityRespVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.BusinessEntitySaveReqVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.ERDiagramRespVO;
+import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.EntityWithFieldsBatchQueryReqVO;
+import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.EntityWithFieldsRespVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.SimpleEntityRespVO;
 import com.cmsr.onebase.module.metadata.build.service.entity.MetadataBusinessEntityBuildService;
 import com.cmsr.onebase.module.metadata.core.util.MetadataIdUuidConverter;
@@ -111,6 +113,20 @@ public class BusinessEntityController {
     public CommonResult<List<SimpleEntityRespVO>> getSimpleEntityListByAppId(@RequestParam(value = "appId", required = false) Long appId) {
         appId = ApplicationManager.getApplicationId();
         List<SimpleEntityRespVO> result = businessEntityService.getSimpleEntityListByAppId(appId);
+        return success(result);
+    }
+
+    /**
+     * 批量查询实体及完整字段信息
+     *
+     * @param reqVO 批量查询请求VO（entityUuids和tableNames二选一，优先使用entityUuids）
+     * @return 实体及字段信息列表（包含一级子表信息）
+     */
+    @PostMapping("/list-with-fields")
+    @Operation(summary = "批量查询实体及完整字段信息", description = "根据实体UUID列表或表名列表查询实体及其完整字段信息，包含一级子表信息")
+    public CommonResult<List<EntityWithFieldsRespVO>> getEntitiesWithFullFields(
+            @Valid @RequestBody EntityWithFieldsBatchQueryReqVO reqVO) {
+        List<EntityWithFieldsRespVO> result = businessEntityService.getEntitiesWithFullFields(reqVO);
         return success(result);
     }
 
