@@ -29,6 +29,7 @@ import {
   SHOW_COMPONENT_TYPES,
   STATUS_OPTIONS,
   STATUS_VALUES,
+  useFormEditorSignal,
   type GridItem
 } from '@onebase/ui-kit';
 import { getFileUrlById } from '@onebase/platform-center';
@@ -64,6 +65,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
   const [form] = useForm();
 
+  const { pageComponentSchemas } = useFormEditorSignal;
   const { components: listComponents, pageComponentSchemas: listPageComponentSchemas } = useListEditorSignal;
 
   const {
@@ -186,16 +188,16 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
         if (resetImageFile(formData, field, value)) {
           // do nothing
-        } else if (field.fieldType === 'DATE') {
+        } else if (field.fieldType === ENTITY_FIELD_TYPE.DATE.VALUE) {
           formData[field.fieldName] = value ? dayjs(value).format('YYYY-MM-DD') : '';
-        } else if (field.fieldType === 'DATETIME') {
+        } else if (field.fieldType === ENTITY_FIELD_TYPE.DATETIME.VALUE) {
           formData[field.fieldName] = value ? dayjs(value).format('YYYY-MM-DD hh:mm:ss') : '';
-        } else if (field.fieldType === 'SELECT') {
+        } else if (field.fieldType === ENTITY_FIELD_TYPE.SELECT.VALUE) {
           formData[field.fieldName] = {
             id: value[0],
             name: value[0]
           };
-        } else if (field.fieldType === 'USER') {
+        } else if (field.fieldType === ENTITY_FIELD_TYPE.USER.VALUE) {
           if (Array.isArray(value)) {
             const userData = formDetails?.[key];
             formData[field.fieldName] = {
@@ -414,7 +416,10 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
             if (fieldType === ENTITY_FIELD_TYPE.DATE.VALUE || fieldType === ENTITY_FIELD_TYPE.DATETIME.VALUE) {
               formValues[fieldName] = dayjs(value).valueOf();
             } else if (fieldType === ENTITY_FIELD_TYPE.SELECT.VALUE) {
-              formValues[fieldName] = Object.entries(value).length > 0 ? [value.id] : value;
+              const curComponentSchema = Object.values(pageComponentSchemas.value).find(v => value.id.includes(v.id)) || {};
+              const curOptions = curComponentSchema?.config?.defaultOptionsConfig?.defaultOptions;
+              const renderValue = curOptions.find(op => op.value === value.id)?.label || '-';
+              formValues[fieldName] = [renderValue];
             } else if (fieldType === ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE) {
               formValues[fieldName] = value.map((v) => v.id) || [];
             } else if (fieldType === ENTITY_FIELD_TYPE.USER.VALUE) {
@@ -470,7 +475,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
                       formValues[`${key}.${idx}.${fieldName}`] = dayjs(subData[idx]?.[fieldName]).valueOf();
                     } else if (fieldType === ENTITY_FIELD_TYPE.SELECT.VALUE) {
                       const value = subData[idx]?.[fieldName];
-                      formValues[`${key}.${idx}.${fieldName}`] = Object.entries(value).length > 0 ? [value.id] : value;
+                      const renderValue = config.defaultOptionsConfig.defaultOptions.find(v => v.value === value.id)?.label || '-';
+                      formValues[`${key}.${idx}.${fieldName}`] = [renderValue];
                     } else if (fieldType === ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE) {
                       const value = subData[idx]?.[fieldName];
                       formValues[`${key}.${idx}.${fieldName}`] = value.map((v) => v.id) || [];

@@ -44,7 +44,6 @@ const XSelectOne = memo((props: XSelectOneConfig & { runtime?: boolean; detailMo
       field={fieldId}
       rules={rules}
       displayType={FormInternalComponentType.Picker}
-      initialValue={defaultOptionsConfig?.defaultOptions.find((ele) => ele.isChosen)?.value}
       style={{
         textAlign: align,
         pointerEvents: (!runtime || detailMode) ? 'none' : 'unset',
