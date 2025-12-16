@@ -51,13 +51,14 @@ public class FlowChangeClient {
     }
 
     public void applicationDelete(Long applicationId) {
-        RMapCache<Long, Long> mapCache = redissonClient.getMapCache(FlowUtils.REDIS_VERSION_CHANGE_CACHE_KEY);
-        mapCache.put(applicationId, -1L, FlowUtils.VERSION_TIMEOUT_MINUTES, TimeUnit.MINUTES);
-        RTopic topic = redissonClient.getTopic(FlowUtils.REDIS_VERSION_CHANGE_TOPIC_KEY);
         FlowChangeEvent flowChangeEvent = new FlowChangeEvent();
         flowChangeEvent.setEventType(FlowChangeEvent.DELETE_EVENT);
         flowChangeEvent.setApplicationId(applicationId);
         flowChangeEvent.setVersion(-1L);
+        //
+        RMapCache<Long, FlowChangeEvent> mapCache = redissonClient.getMapCache(FlowUtils.REDIS_VERSION_CHANGE_CACHE_KEY);
+        mapCache.put(applicationId, flowChangeEvent, FlowUtils.VERSION_TIMEOUT_MINUTES, TimeUnit.MINUTES);
+        RTopic topic = redissonClient.getTopic(FlowUtils.REDIS_VERSION_CHANGE_TOPIC_KEY);
         topic.publish(flowChangeEvent);
     }
 

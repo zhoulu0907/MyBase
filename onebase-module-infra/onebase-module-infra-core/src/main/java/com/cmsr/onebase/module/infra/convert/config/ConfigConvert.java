@@ -1,10 +1,10 @@
 package com.cmsr.onebase.module.infra.convert.config;
 
-import com.cmsr.onebase.framework.common.consts.NumberConstant;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.infra.dal.dataobject.config.ConfigDO;
 import com.cmsr.onebase.module.infra.dal.vo.config.ConfigRespVO;
 import com.cmsr.onebase.module.infra.dal.vo.config.ConfigSaveReqVO;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
@@ -28,18 +28,18 @@ public interface ConfigConvert {
     @Mapping(source = "key", target = "configKey")
     @Mapping(source = "visible", target = "visible", qualifiedByName = "booleanToInteger")
     ConfigDO convert(ConfigSaveReqVO bean);
-    
+
     @Named("integerToBoolean")
     default Boolean integerToBoolean(Integer value) {
-        return value != null && value != NumberConstant.ZERO;
+        return value != null && value != NumberUtils.INTEGER_ZERO;
     }
-    
+
     @Named("booleanToInteger")
     default Integer booleanToInteger(Boolean value) {
         if (value == null) {
-            return NumberConstant.ZERO;
+            return NumberUtils.INTEGER_ZERO;
         }
-        return value ? NumberConstant.ONE : NumberConstant.ZERO;
+        return value ? NumberUtils.INTEGER_ONE : NumberUtils.INTEGER_ZERO;
     }
 
 }

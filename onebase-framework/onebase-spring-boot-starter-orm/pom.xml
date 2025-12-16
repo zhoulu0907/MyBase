@@ -41,6 +41,10 @@
             </exclusions>
         </dependency>
         <dependency>
+            <groupId>jakarta.persistence</groupId>
+            <artifactId>jakarta.persistence-api</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.github.f4b6a3</groupId>
             <artifactId>uuid-creator</artifactId>
         </dependency>
@@ -101,7 +105,7 @@
         <dependency>
             <groupId>com.dameng</groupId>
             <artifactId>DmJdbcDriver18</artifactId>
-           <!-- <optional>true</optional>-->
+            <!-- <optional>true</optional>-->
         </dependency>
         <dependency>
             <groupId>cn.com.kingbase</groupId>

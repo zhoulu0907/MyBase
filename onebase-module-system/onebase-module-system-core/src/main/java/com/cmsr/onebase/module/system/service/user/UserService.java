@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.system.service.user;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import cn.hutool.core.collection.CollUtil;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
+import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.system.vo.auth.AuthRegisterReqVO;
 import com.cmsr.onebase.module.system.vo.auth.ThirdAuthLoginReqVO;
 import com.cmsr.onebase.module.system.vo.dept.DeptSimpleListRespVO;
@@ -14,10 +15,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 后台用户 Service 接口
@@ -380,4 +378,12 @@ public interface UserService {
      * @param password
      */
     void updateThirdUserPassword(Long id, String password);
+
+    /**
+     * 获取用户信息
+     * @param usernamesList
+     * @return
+     */
+    @TenantIgnore
+    List<AdminUserDO> getUserByUsernames(Set<String> usernamesList);
 }

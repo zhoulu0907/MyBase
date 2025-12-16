@@ -9,7 +9,6 @@ import java.util.function.Consumer;
  */
 public class MapUtils {
 
-
     /**
      * 从哈希表查找到 key 对应的 value，然后进一步处理
      * key 为 null 时, 不处理
@@ -29,11 +28,4 @@ public class MapUtils {
         }
         consumer.accept(value);
     }
-
-//    public static <K, V> Map<K, V> convertMap(List<KeyValue<K, V>> keyValues) {
-//        Map<K, V> map = Maps.newLinkedHashMapWithExpectedSize(keyValues.size());
-//        keyValues.forEach(keyValue -> map.put(keyValue.getKey(), keyValue.getValue()));
-//        return map;
-//    }
-
 }

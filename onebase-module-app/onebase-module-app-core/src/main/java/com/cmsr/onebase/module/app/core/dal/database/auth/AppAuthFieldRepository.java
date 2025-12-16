@@ -45,4 +45,9 @@ public class AppAuthFieldRepository extends BaseBizRepository<AppAuthFieldMapper
         return list(queryWrapper);
     }
 
+    public void deleteByMenuUuid(String menuUuid) {
+        this.updateChain()
+                .where(APP_AUTH_FIELD.MENU_UUID.eq(menuUuid))
+                .remove();
+    }
 }

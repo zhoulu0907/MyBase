@@ -380,6 +380,16 @@ public class UserDataRepository extends DataRepository<AdminUserDO> {
         return findAllByConfig(configStore);
     }
 
+    public List<AdminUserDO> getUserByUsernames(Set<String> usernames) {
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        configStore.eq(AdminUserDO.STATUS, UserStatusEnum.NORMAL.getStatus())
+                .in(AdminUserDO.USERNAME, usernames)
+                .eq(AdminUserDO.USER_TYPE, UserTypeEnum.PLATFORM.getValue())
+                .order(AdminUserDO.ADMIN_TYPE, Order.TYPE.ASC)
+                .order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
+        return findAllByConfig(configStore);
+    }
+
     public PageResult<AdminUserDO> getUserPage(UserAppPageSearchReqVO userAppPageReqVO) {
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.and(AdminUserDO.USER_TYPE, UserTypeEnum.THIRD.getValue());

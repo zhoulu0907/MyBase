@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.flow.runtime.vo;
 
-import com.cmsr.onebase.module.flow.context.graph.nodes.ModalNodeData;
+import com.cmsr.onebase.module.flow.context.condition.SimpleField;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -25,6 +25,6 @@ public class FormTriggerReqVO {
     private Map<String, Object> inputParams;
 
     @Schema(description = "输入字段，表单字段，表单数据收集，用于flow流程弹窗再次回传")
-    private List<ModalNodeData.Field> inputFields;
+    private List<SimpleField> inputFields;
 
 }

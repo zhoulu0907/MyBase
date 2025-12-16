@@ -8,7 +8,7 @@ import com.cmsr.onebase.module.flow.context.condition.Conditions;
 import com.cmsr.onebase.module.flow.context.express.ExpressionExecutor;
 import com.cmsr.onebase.module.flow.context.express.OrExpression;
 import com.cmsr.onebase.module.flow.context.graph.InLoopDepth;
-import com.cmsr.onebase.module.flow.context.graph.nodes.IfCaseNodeData;
+import com.cmsr.onebase.module.flow.context.graph.nodes.logic.IfCaseNodeData;
 import com.yomahub.liteflow.annotation.LiteflowComponent;
 import com.yomahub.liteflow.core.NodeBooleanComponent;
 import lombok.Setter;

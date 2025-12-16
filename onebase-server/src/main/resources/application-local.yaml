@@ -77,6 +77,6 @@ justauth:
     timeout: 24h # 超时时长，目前只对 Redis 缓存生效，默认 3 分钟
 
 liteflow:
-  enable: false
+  enable: true
   version-tag: 0
   js-server-address: http://10.0.104.41:28392

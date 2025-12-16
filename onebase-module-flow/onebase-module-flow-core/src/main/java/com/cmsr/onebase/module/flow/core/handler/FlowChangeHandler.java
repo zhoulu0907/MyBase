@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.flow.core.handler;
 
-import com.cmsr.onebase.module.flow.core.config.FlowRuntimeCondition;
+import com.cmsr.onebase.module.flow.core.config.FlowEnableCondition;
 import com.cmsr.onebase.module.flow.core.graph.FlowProcessManager;
 import com.cmsr.onebase.module.flow.core.utils.FlowUtils;
 import com.google.common.cache.Cache;
@@ -29,7 +29,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Setter
 @Service
-@Conditional(FlowRuntimeCondition.class)
+@Conditional(FlowEnableCondition.class)
 public class FlowChangeHandler implements ApplicationRunner, MessageListener<FlowChangeEvent> {
 
     @Autowired
@@ -73,20 +73,21 @@ public class FlowChangeHandler implements ApplicationRunner, MessageListener<Flo
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        RMapCache<Long, FlowChangeEvent> mapCache = redissonClient.getMapCache(FlowUtils.REDIS_VERSION_CHANGE_CACHE_KEY, FlowUtils.KRYO5_CODEC);
         try {
+            RMapCache<Long, FlowChangeEvent> mapCache = redissonClient.getMapCache(FlowUtils.REDIS_VERSION_CHANGE_CACHE_KEY, FlowUtils.KRYO5_CODEC);
             mapCache.forEach((k, v) -> {
                 versionCache.put(k, v.getVersion());
             });
-        } catch (Exception ignored) {
+            flowProcessManager.initAllProcess();
+            RTopic topic = redissonClient.getTopic(FlowUtils.REDIS_VERSION_CHANGE_TOPIC_KEY);
+            topic.addListener(FlowChangeEvent.class, this);
+            //60秒把缓存中的数据更新做处理
+            taskScheduler.scheduleWithFixedDelay(new UpdateCacheTask(), Duration.of(60, ChronoUnit.SECONDS));
+            //300秒更新一次时间任务，避免任务上线失败
+            taskScheduler.scheduleWithFixedDelay(new UpdateTimeJob(), Duration.of(300, ChronoUnit.SECONDS));
+        } catch (Exception e) {
+            log.error("初始化异常：{}", e.getMessage(), e);
         }
-        flowProcessManager.initAllProcess();
-        RTopic topic = redissonClient.getTopic(FlowUtils.REDIS_VERSION_CHANGE_TOPIC_KEY);
-        topic.addListener(FlowChangeEvent.class, this);
-        //60秒把缓存中的数据更新做处理
-        taskScheduler.scheduleWithFixedDelay(new UpdateCacheTask(), Duration.of(60, ChronoUnit.SECONDS));
-        //300秒更新一次时间任务，避免任务上线失败
-        taskScheduler.scheduleWithFixedDelay(new UpdateTimeJob(), Duration.of(300, ChronoUnit.SECONDS));
     }
 
     @Override
