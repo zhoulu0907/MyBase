@@ -5,7 +5,6 @@ import com.cmsr.onebase.plugin.runtime.config.PluginProperties;
 import com.cmsr.onebase.plugin.runtime.manager.OneBasePluginManager;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -32,7 +31,6 @@ import java.util.Map;
  * @author chengyuansen
  * @date 2025-12-13
  */
-@Component
 @Slf4j
 public class PluginHttpDispatcher {
 
@@ -40,6 +38,8 @@ public class PluginHttpDispatcher {
     private final RequestMappingHandlerAdapter handlerAdapter;
     private final PluginProperties pluginProperties;
     private final Map<String, MethodHandler> routes = new HashMap<>();
+    // 记录每个 pluginId 注册的路由 key 列表，便于卸载时清理
+    private final Map<String, java.util.List<String>> pluginRoutes = new java.util.HashMap<>();
 
     /**
      * 构造函数
@@ -72,27 +72,34 @@ public class PluginHttpDispatcher {
         log.info("=" .repeat(60));
         log.info("初始化插件HTTP路由分发器");
         
-        List<HttpHandler> httpHandlers = pluginManager.getHttpHandlers();
-        
-        if (httpHandlers == null || httpHandlers.isEmpty()) {
-            log.warn("未发现任何HttpHandler扩展点，可能插件尚未启动或没有定义HttpHandler");
-            return;
-        }
-        
-        log.info("从PluginManager获取到 {} 个HttpHandler扩展点实例", httpHandlers.size());
-        
-        for (int i = 0; i < httpHandlers.size(); i++) {
-            HttpHandler handler = httpHandlers.get(i);
-            Class<?> handlerClass = handler.getClass();
-            ClassLoader classLoader = handlerClass.getClassLoader();
-            
-            log.info("[{}] HttpHandler实例:", i + 1);
-            log.info("    类名: {}", handlerClass.getName());
-            log.info("    哈希码: {}", System.identityHashCode(handler));
-            log.info("    ClassLoader类型: {}", classLoader.getClass().getName());
-            log.info("    ClassLoader实例: {}", classLoader);
-            
-            scanHandlerMethods((Object) handler);
+        // 为了在卸载时能精确清理路由，我们按已启动的插件逐个查询其 HttpHandler 并记录所属 pluginId
+        try {
+            java.util.List<org.pf4j.PluginWrapper> started = pluginManager.getStartedPlugins();
+            if (started == null || started.isEmpty()) {
+                log.warn("未发现已启动的插件，可能插件尚未启动或没有定义HttpHandler");
+                return;
+            }
+
+            int idx = 1;
+            for (org.pf4j.PluginWrapper wrapper : started) {
+                String pluginId = wrapper.getPluginId();
+                List<HttpHandler> handlers = pluginManager.getHttpHandlers(pluginId);
+                if (handlers == null || handlers.isEmpty()) {
+                    log.debug("插件 {} 无 HttpHandler", pluginId);
+                    continue;
+                }
+
+                log.info("[{}] 插件 {}: 发现 {} 个 HttpHandler", idx++, pluginId, handlers.size());
+                for (HttpHandler handler : handlers) {
+                    try {
+                        registerHandlers(pluginId, java.util.List.of(handler));
+                    } catch (Exception e) {
+                        log.error("注册插件 {} 的 HttpHandler 失败: {}", pluginId, handler.getClass().getName(), e);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error("初始化时按 pluginId 注册 HttpHandler 失败", e);
         }
 
         log.info("HTTP路由分发器已就绪，共注册 {} 个路由", routes.size());
@@ -100,13 +107,88 @@ public class PluginHttpDispatcher {
     }
 
     /**
+     * 在运行时注册一组 HttpHandler（用于动态加载的插件）
+     * <p>
+     * 该方法会扫描传入的处理器并将对应的路由注册到内部路由表中，适用于插件在应用启动后被动态加载/启动的场景。
+     * </p>
+     *
+     * @param handlers 要注册的处理器列表
+     */
+    public synchronized void registerHandlers(List<HttpHandler> handlers) {
+        if (handlers == null || handlers.isEmpty()) {
+            log.debug("没有要注册的运行时 HttpHandler");
+            return;
+        }
+
+        log.info("运行时注册 {} 个 HttpHandler 扩展点实例", handlers.size());
+        for (HttpHandler handler : handlers) {
+            try {
+                // 普通运行时注册，不记录 pluginId 归属
+                scanHandlerMethods((Object) handler);
+            } catch (Exception e) {
+                log.error("注册 HttpHandler 时出错: {}", handler.getClass().getName(), e);
+            }
+        }
+
+        log.info("运行时注册完成，当前已注册路由数: {}", routes.size());
+    }
+
+    /**
+     * 为指定 pluginId 注册 handlers 并记录注册的路由键，便于后续卸载清理
+     */
+    public synchronized void registerHandlers(String pluginId, List<HttpHandler> handlers) {
+        if (handlers == null || handlers.isEmpty()) {
+            log.debug("没有要注册的运行时 HttpHandler for {}", pluginId);
+            return;
+        }
+
+        java.util.List<String> registeredKeys = pluginRoutes.computeIfAbsent(pluginId, k -> new java.util.ArrayList<>());
+        int before = routes.size();
+        for (HttpHandler handler : handlers) {
+            try {
+                // scanHandlerMethods 返回本次扫描新增的 route keys
+                java.util.List<String> newKeys = scanHandlerMethods((Object) handler);
+                if (newKeys != null && !newKeys.isEmpty()) {
+                    for (String k : newKeys) {
+                        if (!registeredKeys.contains(k)) {
+                            registeredKeys.add(k);
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                log.error("注册 HttpHandler 时出错: {}", handler.getClass().getName(), e);
+            }
+        }
+
+        log.info("为 plugin {} 注册完成，新增路由数: {} (总路由数: {})", pluginId, routes.size() - before, routes.size());
+    }
+
+    /**
+     * 注销指定 pluginId 注册的路由
+     */
+    public synchronized void unregisterHandlers(String pluginId) {
+        java.util.List<String> keys = pluginRoutes.remove(pluginId);
+        if (keys == null || keys.isEmpty()) {
+            log.debug("plugin {} 无已注册路由需要移除", pluginId);
+            return;
+        }
+
+        for (String k : keys) {
+            routes.remove(k);
+            log.info("已从路由表移除: {} -> {}", pluginId, k);
+        }
+        log.info("plugin {} 的路由已移除，当前路由总数: {}", pluginId, routes.size());
+    }
+
+    /**
      * 扫描处理器中的映射方法
      *
      * @param handler 处理器对象
      */
-    private void scanHandlerMethods(Object handler) {
+    private java.util.List<String> scanHandlerMethods(Object handler) {
         Class<?> handlerClass = handler.getClass();
         Method[] methods = handlerClass.getMethods();
+        java.util.List<String> addedKeys = new java.util.ArrayList<>();
 
         for (Method method : methods) {
             String[] paths = null;
@@ -144,7 +226,7 @@ public class PluginHttpDispatcher {
             }
 
             if (paths != null && httpMethod != null) {
-                for (String path : paths) {
+                    for (String path : paths) {
                     // 如果路径以 /plugin 开头，去掉这个前缀
                     // 因为 PluginHttpHandler 的 @RequestMapping("/plugin") 会自动处理这个前缀
                     String normalizedPath = path;
@@ -163,14 +245,19 @@ public class PluginHttpDispatcher {
                                 handler.getClass().getName(), 
                                 System.identityHashCode(handler));
                     }
+                    boolean replaced = routes.containsKey(key);
                     routes.put(key, new MethodHandler(handler, method));
+                    if (!replaced) {
+                        addedKeys.add(key);
+                    }
                     log.info("  ✓ 注册路由: {} {} -> {}.{} (Handler哈希码: {})", 
                             httpMethod, normalizedPath, handlerClass.getSimpleName(), 
                             method.getName(), System.identityHashCode(handler));
                 }
             }
         }
-        log.info("  Handler扫描完成: {}", handlerClass.getName());
+        log.info("  Handler扫描完成: {} (本次新增 {} 个路由)", handlerClass.getName(), addedKeys.size());
+        return addedKeys;
     }
 
     /**

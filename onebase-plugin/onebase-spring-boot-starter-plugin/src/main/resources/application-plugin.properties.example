@@ -8,11 +8,5 @@ onebase.plugin.enabled=true
 # 插件目录路径（相对路径或绝对路径）
 onebase.plugin.plugins-dir=plugins
 
-# 是否自动加载插件
-onebase.plugin.auto-load=true
-
-# 是否自动启动已加载的插件
-onebase.plugin.auto-start=true
-
 # 运行模式，可选：dev、staging、prod；默认prod
 onebase.plugin.mode=prod

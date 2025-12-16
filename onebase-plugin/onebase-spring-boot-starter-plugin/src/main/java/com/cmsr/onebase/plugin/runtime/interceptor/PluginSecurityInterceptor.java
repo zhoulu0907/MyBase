@@ -2,13 +2,11 @@ package com.cmsr.onebase.plugin.runtime.interceptor;
 
 import com.cmsr.onebase.plugin.runtime.config.PluginProperties;
 import com.cmsr.onebase.plugin.runtime.manager.OneBasePluginManager;
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.pf4j.PluginState;
 import org.pf4j.PluginWrapper;
-import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import java.io.IOException;
@@ -30,7 +28,6 @@ import java.util.regex.Pattern;
  * @author chengyuansen
  * @date 2025-12-13
  */
-@Component
 @Slf4j
 public class PluginSecurityInterceptor implements HandlerInterceptor {
     /**
@@ -38,11 +35,14 @@ public class PluginSecurityInterceptor implements HandlerInterceptor {
      */
     private static final Pattern PLUGIN_ROUTE_PATTERN = Pattern.compile("^/plugin/([^/]+)/.*$");
 
-    @Resource(name = "oneBasePluginManager")
-    private OneBasePluginManager pluginManager;
+    private final OneBasePluginManager pluginManager;
 
-    @Resource
-    private PluginProperties pluginProperties;
+    private final PluginProperties pluginProperties;
+
+    public PluginSecurityInterceptor(OneBasePluginManager pluginManager, PluginProperties pluginProperties) {
+        this.pluginManager = pluginManager;
+        this.pluginProperties = pluginProperties;
+    }
 
     @Override
     public boolean preHandle(HttpServletRequest request,

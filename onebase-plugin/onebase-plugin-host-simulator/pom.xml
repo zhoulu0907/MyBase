@@ -69,6 +69,22 @@
                     <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
+            <!-- Spring Boot Maven Plugin: 打包为可执行 fat JAR -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>3.2.0</version>
+                <configuration>
+                    <mainClass>com.cmsr.onebase.plugin.simulator.PluginHostSimulatorApplication</mainClass>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 

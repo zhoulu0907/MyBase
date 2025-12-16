@@ -7,12 +7,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.pf4j.PluginManager;
 import org.pf4j.PluginState;
 import org.pf4j.PluginWrapper;
-import org.springframework.stereotype.Component;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.pf4j.DefaultPluginManager;
+import org.pf4j.PluginDescriptorFinder;
+import org.pf4j.PropertiesPluginDescriptorFinder;
 
 /**
  * 插件管理器
@@ -23,15 +26,22 @@ import java.util.stream.Collectors;
  * @author chengyuansen
  * @date 2025-12-18
  */
-@Component
 @Slf4j
 public class OneBasePluginManager {
 
     private final PluginManager pluginManager;
+    private final ApplicationEventPublisher eventPublisher;
 
-    public OneBasePluginManager(PluginManager pluginManager) {
+    public OneBasePluginManager(PluginManager pluginManager, ApplicationEventPublisher eventPublisher) {
         this.pluginManager = pluginManager;
+        this.eventPublisher = eventPublisher;
     }
+
+    /**
+     * 无参构造器（兼容通过组件扫描创建bean的场景）
+     * 会创建一个最小可用的 DefaultPluginManager 和 no-op 的 ApplicationEventPublisher
+     */
+    // 注：已移除无参兼容构造器。Starter 采用 auto-configuration 提供 bean，宿主不应扫描 runtime 包。
 
     // ==================== 生命周期管理 ====================
 
@@ -46,6 +56,11 @@ public class OneBasePluginManager {
         String pluginId = pluginManager.loadPlugin(pluginPath);
         if (pluginId != null) {
             log.info("插件加载成功: {}", pluginId);
+            try {
+                org.pf4j.PluginWrapper wrapper = pluginManager.getPlugin(pluginId);
+                eventPublisher.publishEvent(new com.cmsr.onebase.plugin.runtime.event.PluginLoadedEvent(pluginId, wrapper));
+            } catch (Exception ignore) {
+            }
         } else {
             log.error("插件加载失败: {}", pluginPath);
         }
@@ -60,7 +75,14 @@ public class OneBasePluginManager {
      */
     public boolean unloadPlugin(String pluginId) {
         log.info("卸载插件: {}", pluginId);
-        return pluginManager.unloadPlugin(pluginId);
+        boolean ok = pluginManager.unloadPlugin(pluginId);
+        if (ok) {
+            try {
+                eventPublisher.publishEvent(new com.cmsr.onebase.plugin.runtime.event.PluginUnloadedEvent(pluginId));
+            } catch (Exception ignore) {
+            }
+        }
+        return ok;
     }
 
     /**
@@ -71,7 +93,15 @@ public class OneBasePluginManager {
      */
     public PluginState startPlugin(String pluginId) {
         log.info("启动插件: {}", pluginId);
-        return pluginManager.startPlugin(pluginId);
+        PluginState state = pluginManager.startPlugin(pluginId);
+        try {
+            if (state == PluginState.STARTED) {
+                org.pf4j.PluginWrapper wrapper = pluginManager.getPlugin(pluginId);
+                eventPublisher.publishEvent(new com.cmsr.onebase.plugin.runtime.event.PluginStartedEvent(pluginId, wrapper));
+            }
+        } catch (Exception ignore) {
+        }
+        return state;
     }
 
     /**
@@ -82,7 +112,12 @@ public class OneBasePluginManager {
      */
     public PluginState stopPlugin(String pluginId) {
         log.info("停止插件: {}", pluginId);
-        return pluginManager.stopPlugin(pluginId);
+        PluginState state = pluginManager.stopPlugin(pluginId);
+        try {
+            eventPublisher.publishEvent(new com.cmsr.onebase.plugin.runtime.event.PluginStoppedEvent(pluginId));
+        } catch (Exception ignore) {
+        }
+        return state;
     }
 
     /**
@@ -93,7 +128,14 @@ public class OneBasePluginManager {
      */
     public boolean deletePlugin(String pluginId) {
         log.info("删除插件: {}", pluginId);
-        return pluginManager.deletePlugin(pluginId);
+        boolean ok = pluginManager.deletePlugin(pluginId);
+        if (ok) {
+            try {
+                eventPublisher.publishEvent(new com.cmsr.onebase.plugin.runtime.event.PluginDeletedEvent(pluginId));
+            } catch (Exception ignore) {
+            }
+        }
+        return ok;
     }
 
     /**
@@ -283,8 +325,25 @@ public class OneBasePluginManager {
         pluginManager.unloadPlugin(pluginId);
 
         // 重新加载并启动
-        pluginManager.loadPlugin(pluginPath);
-        return pluginManager.startPlugin(pluginId);
+        String newId = pluginManager.loadPlugin(pluginPath);
+        PluginState state = pluginManager.startPlugin(newId);
+        if (state == PluginState.STARTED) {
+            try {
+                eventPublisher.publishEvent(new com.cmsr.onebase.plugin.runtime.event.PluginReloadedEvent(newId));
+            } catch (Exception ignore) {
+            }
+        }
+        return state;
+    }
+
+    /**
+     * 仅获取指定插件的 HttpHandler 扩展点
+     *
+     * @param pluginId 插件ID
+     * @return HttpHandler 列表
+     */
+    public java.util.List<com.cmsr.onebase.plugin.api.HttpHandler> getHttpHandlers(String pluginId) {
+        return pluginManager.getExtensions(com.cmsr.onebase.plugin.api.HttpHandler.class, pluginId);
     }
 
     /**

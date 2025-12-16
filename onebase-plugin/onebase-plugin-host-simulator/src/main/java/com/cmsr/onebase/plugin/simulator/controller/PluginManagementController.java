@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.annotation.Resource;
 import java.util.HashMap;
 import java.util.Map;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * 插件管理 REST API
@@ -30,6 +32,9 @@ public class PluginManagementController {
 
     @Resource(name = "oneBasePluginManager")
     private OneBasePluginManager pluginManager;
+    
+    @Resource
+    private com.cmsr.onebase.plugin.runtime.http.PluginHttpDispatcher pluginHttpDispatcher;
 
     /**
      * 获取所有已加载的插件列表
@@ -55,7 +60,7 @@ public class PluginManagementController {
      * @return 操作结果
      */
     @PostMapping("/{pluginId}/start")
-    public Map<String, Object> startPlugin(@PathVariable String pluginId) {
+    public Map<String, Object> startPlugin(@PathVariable("pluginId") String pluginId) {
         Map<String, Object> result = new HashMap<>();
         try {
             PluginState state = pluginManager.startPlugin(pluginId);
@@ -77,7 +82,7 @@ public class PluginManagementController {
      * @return 操作结果
      */
     @PostMapping("/{pluginId}/stop")
-    public Map<String, Object> stopPlugin(@PathVariable String pluginId) {
+    public Map<String, Object> stopPlugin(@PathVariable("pluginId") String pluginId) {
         Map<String, Object> result = new HashMap<>();
         try {
             PluginState state = pluginManager.stopPlugin(pluginId);
@@ -99,7 +104,7 @@ public class PluginManagementController {
      * @return 操作结果
      */
     @PostMapping("/{pluginId}/reload")
-    public Map<String, Object> reloadPlugin(@PathVariable String pluginId) {
+    public Map<String, Object> reloadPlugin(@PathVariable("pluginId") String pluginId) {
         Map<String, Object> result = new HashMap<>();
         try {
             PluginState state = pluginManager.reloadPlugin(pluginId);
@@ -107,6 +112,33 @@ public class PluginManagementController {
             result.put("pluginId", pluginId);
             result.put("state", state.toString());
             result.put("message", "Plugin reloaded successfully");
+        } catch (Exception e) {
+            result.put("success", false);
+            result.put("error", e.getMessage());
+        }
+        return result;
+    }
+
+    /**
+     * 从指定路径加载插件（JAR/ZIP）
+     *
+     * @param path 插件文件路径（绝对或相对）
+     * @return 操作结果，包含生成的 pluginId
+     */
+    @PostMapping("/load")
+    public Map<String, Object> loadPlugin(@RequestParam("path") String path) {
+        Map<String, Object> result = new HashMap<>();
+        try {
+            Path pluginPath = Paths.get(path);
+            String pluginId = pluginManager.loadPlugin(pluginPath);
+            if (pluginId != null) {
+                result.put("success", true);
+                result.put("pluginId", pluginId);
+                result.put("message", "Plugin loaded successfully");
+            } else {
+                result.put("success", false);
+                result.put("error", "Failed to load plugin from path: " + path);
+            }
         } catch (Exception e) {
             result.put("success", false);
             result.put("error", e.getMessage());
@@ -124,7 +156,7 @@ public class PluginManagementController {
      * @return 插件详细信息
      */
     @GetMapping("/{pluginId}/info")
-    public Map<String, Object> getPluginInfo(@PathVariable String pluginId) {
+    public Map<String, Object> getPluginInfo(@PathVariable("pluginId") String pluginId) {
         Map<String, Object> result = new HashMap<>();
         try {
             var pluginWrapper = pluginManager.getPlugin(pluginId);
@@ -179,6 +211,31 @@ public class PluginManagementController {
             pluginManager.stopAllPlugins();
             result.put("success", true);
             result.put("message", "All plugins stopped");
+        } catch (Exception e) {
+            result.put("success", false);
+            result.put("error", e.getMessage());
+        }
+        return result;
+    }
+
+    /**
+     * 卸载指定插件（根据 pluginId 卸载）
+     *
+     * @param pluginId 插件ID
+     * @return 操作结果
+     */
+    @PostMapping("/{pluginId}/unload")
+    public Map<String, Object> unloadPlugin(@PathVariable("pluginId") String pluginId) {
+        Map<String, Object> result = new HashMap<>();
+        try {
+            boolean ok = pluginManager.unloadPlugin(pluginId);
+            result.put("success", ok);
+            result.put("pluginId", pluginId);
+            if (ok) {
+                result.put("message", "Plugin unloaded successfully");
+            } else {
+                result.put("error", "Failed to unload plugin: " + pluginId);
+            }
         } catch (Exception e) {
             result.put("success", false);
             result.put("error", e.getMessage());

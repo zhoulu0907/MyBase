@@ -3,7 +3,6 @@ package com.cmsr.onebase.plugin.runtime.context;
 import com.cmsr.onebase.plugin.context.PluginContext;
 import com.cmsr.onebase.plugin.context.PluginContextHolder;
 import org.springframework.context.ApplicationContext;
-import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,7 +18,6 @@ import java.util.function.Supplier;
  * @author chengyuansen
  * @date 2025-12-18
  */
-@Component
 public class PluginContextFactory {
 
     private final ApplicationContext applicationContext;

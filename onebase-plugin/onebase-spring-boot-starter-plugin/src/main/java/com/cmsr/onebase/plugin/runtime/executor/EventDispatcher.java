@@ -7,7 +7,6 @@ import com.cmsr.onebase.plugin.runtime.context.PluginContextFactory;
 import com.cmsr.onebase.plugin.runtime.manager.OneBasePluginManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -21,7 +20,6 @@ import java.util.concurrent.CompletableFuture;
  * @author chengyuansen
  * @date 2025-12-18
  */
-@Component
 @Slf4j
 public class EventDispatcher {
 
