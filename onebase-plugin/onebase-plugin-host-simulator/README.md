@@ -105,7 +105,7 @@ Description:
 Binding to target org.springframework.boot.context.properties.bind.BindException:
 Failed to bind properties under 'onebase.plugin' to com.cmsr.onebase.plugin.runtime.config.PluginProperties
 
-Reason: 无效的插件运行模式: 'invalid-mode'。有效值: dev, staging, prod
+Reason: java.lang.IllegalArgumentException: onebase.plugin.mode 配置错误: xxx，仅支持 [dev, staging, prod]，请检查配置！
 ```
 
 ## 最佳实践

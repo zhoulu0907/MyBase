@@ -62,7 +62,17 @@ public class PluginProperties {
     }
 
     public void setMode(String mode) {
-        this.mode = mode;
+        if (mode == null) {
+            throw new IllegalArgumentException("onebase.plugin.mode 配置错误: mode 不能为空，支持值：dev, staging, prod");
+        }
+        String m = mode.trim();
+        if (!PluginMode.DEV.getValue().equalsIgnoreCase(m)
+                && !PluginMode.STAGING.getValue().equalsIgnoreCase(m)
+                && !PluginMode.PROD.getValue().equalsIgnoreCase(m)) {
+            throw new IllegalArgumentException(
+                    "onebase.plugin.mode 配置错误: " + mode + "，仅支持 [dev, staging, prod]，请检查配置！");
+        }
+        this.mode = m;
     }
 
     /**
