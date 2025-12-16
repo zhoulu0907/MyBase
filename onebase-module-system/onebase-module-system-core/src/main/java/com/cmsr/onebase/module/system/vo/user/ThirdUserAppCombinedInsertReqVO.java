@@ -21,6 +21,9 @@ public class ThirdUserAppCombinedInsertReqVO   {
     @Schema(description = "用户邮箱", example = "a@b.cn")
     private String email;
 
+    @Schema(description = "部门id", example = "a@b.cn")
+    private Long deptId;
+
     @Schema(description = "用户头像", example = "")
     private String avatar;
 

@@ -1194,8 +1194,13 @@ public class UserServiceImpl implements UserService {
         }
         // 校验手机，邮箱
         validateThirdUserForCreateOrUpdate(null, reqVO.getMobile(), reqVO.getEmail());
-        // 三方用户 默认部门，不存在就新建部门
-        Long  deptId=createThirdDefaultDept();
+
+        if (null != reqVO.getDeptId()) {
+            // 三方用户 默认部门，不存在就新建部门
+            Long deptId = createThirdDefaultDept();
+            reqVO.setDeptId(deptId);
+        }
+
 
          //创建用户
         AdminUserDO user = BeanUtils.toBean(reqVO, AdminUserDO.class);
@@ -1204,7 +1209,7 @@ public class UserServiceImpl implements UserService {
         user.setUserType(UserTypeEnum.THIRD.getValue());
         user.setStatus(UserStatusEnum.NORMAL.getStatus());
         user.setCreateSource(CreateSourceEnum.BACK.getCode());
-        user.setDeptId(deptId);
+        user.setDeptId(reqVO.getDeptId());
         user.setAdminType(AdminTypeEnum.CUSTOM.getType());
         userDataRepository.insert(user);
 
@@ -1224,15 +1229,15 @@ public class UserServiceImpl implements UserService {
          DeptSaveReqVO deptRespVO = new DeptSaveReqVO();
          deptRespVO.setName(DefaultThirdDept.DEFAULT_THIRD_DEPT.getName());
          deptRespVO.setDeptCode(DefaultThirdDept.DEFAULT_THIRD_DEPT.getCode());
-         DeptDO roleDO = deptService.findDeptByCodeAndType(deptRespVO);
+         DeptDO deptDO = deptService.findDeptByCodeAndType(deptRespVO);
 
-         if  (null == roleDO){
-             deptRespVO.setParentId(DeptDO.PARENT_ID_ROOT);
+         if  (null == deptDO){
+             deptRespVO.setParentId(deptDO.PARENT_ID_ROOT);
              deptRespVO.setDeptType(DeptTypeEnum.THIRD.getCode());
              deptRespVO.setStatus(CommonStatusEnum.ENABLE.getStatus());
              return deptService.createThirdDefaultDept(deptRespVO);
          }
-         return roleDO.getId();
+         return deptDO.getId();
      }
     @Override
     public Long updateUserAndUserAppRelation(ThirdUserAppCombinedUpdateReqVO updateReqVO) {
