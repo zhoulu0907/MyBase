@@ -91,19 +91,19 @@ onebase:
     email: xingyu4j@vip.qq.com
     license: MIT
     license-url: https://gitee.com/zhijiantianya/onebase_v3/blob/master/LICENSE
-  codegen:
-    base-package: ${onebase.info.base-package}
-    db-schemas: ${spring.datasource.dynamic.datasource.master.name}
-    front-type: 20 # 前端模版的类型，参见 CodegenFrontTypeEnum 枚举类
-    vo-type: 10 # VO 的类型，参见 CodegenVOTypeEnum 枚举类
-    delete-batch-enable: true # 是否生成批量删除接口
-    unit-test-enable: false # 是否生成单元测试
+  security:
+    mock-enable: false
+    permit-all-urls: # 显式放行认证、注册、刷新、验证码、以及必要静态资源/健康检查，避免 @PermitAll 被覆盖导致 401
+      - /runtime/system/captcha/**
+      - /runtime/infra/file/download/**
   tenant: # 多租户相关配置项
     enable: true
     ignore-urls:
       - /jmreport/* # 积木报表，无法携带租户编号
       - /runtime/flow/remote-call/*
+      - /admin-api/system/captcha/**
       - /runtime/app/application/get/**
+      - /runtime/infra/file/download/**
     ignore-visit-urls:
       - /admin-api/system/user/profile/**
       - /admin-api/system/auth/**
