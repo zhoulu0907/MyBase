@@ -17,8 +17,8 @@ interface TableSearchConfig {
   labelColSpan?: number;
   runtime: boolean;
   form?: FormInstance;
+  queryData?: any;
   onSearch?: () => void;
-  onReset?: () => void;
 }
 
 
@@ -34,12 +34,11 @@ const ghostBgColor = {
   disabled: '#FFF'
 };
 
-let formDataLocal = {}
 
 const TableSearch = memo((props: TableSearchConfig) => {
   useSignals();
 
-  const { searchItems, labelColSpan, runtime, onSearch, onReset, form } = props;
+  const { searchItems, labelColSpan, runtime, onSearch, form, queryData } = props;
   const count = searchItems?.length || 0;
   const remainder = count % 4;
   const placeholderCount = remainder === 0 ? 3 : 4 - remainder - 1;
@@ -408,27 +407,30 @@ const TableSearch = memo((props: TableSearchConfig) => {
   }
 
   const blurSearchBar = (e: any) => {
-    setFirstItemValue(e.target.value);
-    form.setFieldValue(firstItem?.config.id, e.target.value);
+    const value = e.target.value.toString();
+    setFirstItemValue(value);
+    form.setFieldValue(firstItem?.config.id, value);
+    queryData.value[firstItem?.config.id] = value;
     onSearch?.()
   }
 
   const resetLocal = () => {
-    setFirstItemValue('');
-    form.setFieldValue(firstItem?.config.id, '');
-    onReset?.()
     changeDropdown(false);
+    setFirstItemValue('');
+    form.setFieldsValue({});
+    queryData.value = {}
+    onSearch?.()
   }
 
   
   const searchLocal = () => {
-    onSearch?.()
     changeDropdown(false);
+    onSearch?.()
   }
 
   const changeDropdown = (val: boolean) => {
     if (!val) {
-      formDataLocal = form.getFieldsValue();
+      queryData.value = form.getFieldsValue();
     }
     setShowDropdown(val);
   }
@@ -438,7 +440,7 @@ const TableSearch = memo((props: TableSearchConfig) => {
     changeDropdown(val);
     if (val) {
       setTimeout(() => {
-        form.setFieldsValue(formDataLocal);
+        form.setFieldsValue(queryData.value || {});
       }, 10);
     }
   }
@@ -470,7 +472,7 @@ const TableSearch = memo((props: TableSearchConfig) => {
     >
       <div id="ob-loadmore-dropdown-scroll-search">
         {otherItems}
-        {(onSearch || onReset) && (
+        {onSearch && (
           <>
             {Array.from({ length: placeholderCount }).map((_, i) => (
               <div key={`placeholder-${i}`} className="searchItem placeholder" />
