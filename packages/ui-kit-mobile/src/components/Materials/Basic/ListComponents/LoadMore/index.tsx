@@ -257,13 +257,25 @@ const XLoadMore = memo(
               newItem[key] = newItem[key] ? '是' : '否'
             }
 
-            // 单选列表
+            // 单选列表 - 根据id返回对应label
             const selectField = mainMetaData.parentFields.find(
               (field: AppEntityField) =>
                 field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.SELECT.VALUE
             );
             if (selectField) {
-              newItem[key] = newItem[key].id || '-'
+              const curValue = newItem[key];
+              const curComponentSchema = Object.values(fromPageComponentSchemas.value).find(v => curValue.id.includes(v.id)) || {};
+              const curOptions = curComponentSchema?.config?.defaultOptionsConfig?.defaultOptions;
+              newItem[key] = curOptions.find(op => op.value === curValue.id)?.label || '-';
+            }
+
+            // 数据选择
+            const dateField = mainMetaData.parentFields.find(
+              (field: AppEntityField) =>
+                field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.DATA_SELECTION.VALUE
+            );
+            if (dateField) {
+              newItem[key] = newItem[key].name || '-'
             }
           }
         });
