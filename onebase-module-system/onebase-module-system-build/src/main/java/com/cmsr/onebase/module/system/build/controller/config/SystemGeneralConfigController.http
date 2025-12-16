@@ -5,12 +5,12 @@ Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
-  "category": "tenant",
-  "name": "测试配置",
+  "category": "tenant2",
+  "name": "测试配置2",
   "configKey": "saas",
   "configValue": "true",
   "status": 0,
-  "remark": "测试配置项"
+  "remark": "测试配置项2"
 }
 
 ### 修改参数配置
@@ -19,15 +19,21 @@ Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
-  "id": 1,
+  "id": 183262612675035136,
   "category": "system",
   "type": 1,
-  "name": "更新测试配置",
-  "configKey": "test.config.key",
-  "configValue": "updated_test_value",
+  "name": "更新测试配置1155511",
+  "configKey": "test.config1155511.key",
+  "configValue": "updated_tes5555t111_value",
   "status": 0,
-  "remark": "更新测试配置项"
+  "remark": "更新测试配置项111"
 }
+
+### 修改参数配置
+POST {{baseUrl}}/system/config/update-status?id=2222222&status=1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
 
 ### 删除参数配置
 POST {{baseUrl}}/system/config/delete?id=1

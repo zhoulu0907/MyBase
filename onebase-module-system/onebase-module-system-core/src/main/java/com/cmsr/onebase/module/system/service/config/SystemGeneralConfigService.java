@@ -1,10 +1,7 @@
 package com.cmsr.onebase.module.system.service.config;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.system.dal.dataobject.config.SystemGeneralConfigDO;
-import com.cmsr.onebase.module.system.vo.config.SystemConfigPageReqVO;
-import com.cmsr.onebase.module.system.vo.config.SystemGeneralConfigSaveReqVO;
-import com.cmsr.onebase.module.system.vo.config.SystemGeneralConfigUpdateReqVO;
-import com.cmsr.onebase.module.system.vo.config.SystemGeneralConfigVO;
+import com.cmsr.onebase.module.system.vo.config.*;
 import jakarta.validation.Valid;
 
 import java.util.List;
@@ -55,4 +52,10 @@ public interface SystemGeneralConfigService {
 
 
     List<SystemGeneralConfigDO> getConfigList(SystemConfigPageReqVO pageReqVO);
+    /**
+     * 更新参数配置状态
+     *
+     * @param updateReqVO 更新信息
+     */
+    void updateStatus(Long id, Integer status);
 }

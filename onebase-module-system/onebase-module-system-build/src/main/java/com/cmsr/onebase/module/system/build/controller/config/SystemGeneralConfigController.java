@@ -1,17 +1,10 @@
 package com.cmsr.onebase.module.system.build.controller.config;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.system.dal.dataobject.config.SystemGeneralConfigDO;
-import com.cmsr.onebase.module.system.dal.dataobject.dept.PostDO;
 import com.cmsr.onebase.module.system.service.config.SystemGeneralConfigService;
-import com.cmsr.onebase.module.system.vo.config.SystemConfigPageReqVO;
-import com.cmsr.onebase.module.system.vo.config.SystemGeneralConfigSaveReqVO;
-import com.cmsr.onebase.module.system.vo.config.SystemGeneralConfigUpdateReqVO;
-import com.cmsr.onebase.module.system.vo.config.SystemGeneralConfigVO;
-import com.cmsr.onebase.module.system.vo.post.PostPageReqVO;
-import com.cmsr.onebase.module.system.vo.post.PostRespVO;
+import com.cmsr.onebase.module.system.vo.config.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -49,6 +42,15 @@ public class SystemGeneralConfigController {
         return success(true);
     }
 
+
+    @PostMapping("/update-status")
+    @Operation(summary = "修改状态-禁用/启用")
+    @PreAuthorize("@ss.hasPermission('system:config:update')")
+    public CommonResult<Boolean> updateStatus(@RequestParam("id") Long id, @RequestParam("status") Integer status) {
+        systemGeneralConfigService.updateStatus(id,status);
+        return success(true);
+    }
+
     @PostMapping("/delete")
     @Operation(summary = "删除参数配置")
     @Parameter(name = "id", description = "编号", required = true, example = "1024")
@@ -77,8 +79,8 @@ public class SystemGeneralConfigController {
 
     @GetMapping("/list")
     @Operation(summary = "获得配置项列表-不分页")
-    @PreAuthorize("@ss.hasPermission('tenant:post:query')")
-    public CommonResult<List<SystemGeneralConfigVO>> getConfigList(@Validated SystemConfigPageReqVO pageReqVO) {
+    @PreAuthorize("@ss.hasPermission('tenant:config:query')")
+    public CommonResult<List<SystemGeneralConfigVO>> getConfigList(@Valid SystemConfigPageReqVO pageReqVO) {
          List<SystemGeneralConfigDO> pageResult = systemGeneralConfigService.getConfigList(pageReqVO);
         return success(BeanUtils.toBean(pageResult, SystemGeneralConfigVO.class));
     }

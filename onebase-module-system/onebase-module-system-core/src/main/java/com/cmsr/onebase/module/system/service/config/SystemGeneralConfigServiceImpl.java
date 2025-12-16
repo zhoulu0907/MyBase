@@ -7,10 +7,8 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.system.dal.database.SystemGeneralConfigDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.config.SystemGeneralConfigDO;
-import com.cmsr.onebase.module.system.vo.config.SystemConfigPageReqVO;
-import com.cmsr.onebase.module.system.vo.config.SystemGeneralConfigSaveReqVO;
-import com.cmsr.onebase.module.system.vo.config.SystemGeneralConfigUpdateReqVO;
-import com.cmsr.onebase.module.system.vo.config.SystemGeneralConfigVO;
+import com.cmsr.onebase.module.system.enums.ErrorCodeConstants;
+import com.cmsr.onebase.module.system.vo.config.*;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +17,9 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
+
+import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.CONFIG_NO_EXISTS;
 
 
 /**
@@ -68,6 +69,17 @@ public class SystemGeneralConfigServiceImpl implements SystemGeneralConfigServic
     @Override
     public List<SystemGeneralConfigDO> getConfigList(SystemConfigPageReqVO pageReqVO) {
         return systemGeneralConfigDataRepository.findConfigList(pageReqVO);
+    }
+
+    @Override
+    public void updateStatus(Long id,Integer status) {
+        SystemGeneralConfigDO configDO = systemGeneralConfigDataRepository.findById(id);
+        if (null == configDO) {
+            throw exception(ErrorCodeConstants.CONFIG_NO_EXISTS);
+        }
+        configDO.setStatus(status);
+        systemGeneralConfigDataRepository.update(configDO);
+
     }
 
 

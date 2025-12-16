@@ -195,4 +195,6 @@ public interface ErrorCodeConstants {
     ErrorCode CORP_USER_LIMIT_COUNT_CHECK = new ErrorCode(1_002_003_013, "空间可分配人员数量不足，人员上限是{}, 剩余{}");
     ErrorCode CORP_USER_EXITES_LIMIT_COUNT_CHECK = new ErrorCode(1_002_003_014, "分配的用户数量不能低于企业内已有用户数：{}");
     ErrorCode AUTH_LOGIN_APP_EXPIRE = new ErrorCode(1_002_025_015, "本企业用户无法登录，授权已过期。");
+
+    ErrorCode CONFIG_NO_EXISTS = new ErrorCode(1_002_026_001, "配置项不存在");
 }
