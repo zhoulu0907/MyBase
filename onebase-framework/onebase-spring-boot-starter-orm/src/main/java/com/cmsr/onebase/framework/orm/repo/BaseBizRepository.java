@@ -293,7 +293,7 @@ public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity>
         // 1、update：把versionTag为1的数据update为新值（参数`versionTag`）
         QueryColumn applicationIdCol = new QueryColumn(QueryWrapperUtils.APPLICATION_ID);
         QueryColumn versionTagCol = new QueryColumn(QueryWrapperUtils.VERSION_TAG);
-        this.updateChain()
+        super.updateChain()
                 .set(versionTagCol, versionTag)
                 .where(applicationIdCol.eq(applicationId))
                 .where(versionTagCol.eq(VersionTagEnum.RUNTIME.getValue()))
@@ -316,7 +316,7 @@ public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity>
             entity.setId(null);
             entity.setVersionTag(VersionTagEnum.RUNTIME.getValue());
         });
-        this.saveBatch(entities);
+        super.saveBatch(entities);
     }
 
     // 3、历史版本数据回滚为运行态数据
@@ -335,7 +335,7 @@ public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity>
             entity.setId(null);
             entity.setVersionTag(VersionTagEnum.RUNTIME.getValue());
         });
-        this.saveBatch(entities);
+        super.saveBatch(entities);
     }
 
     public boolean deleteAllApplicationData(Long applicationId) {
