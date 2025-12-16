@@ -190,7 +190,6 @@ public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity>
      */
     @Override
     public boolean exists(QueryWrapper query) {
-        this.injectQueryFilter(query);
         return exists(CPI.getWhereQueryCondition(query));
     }
 

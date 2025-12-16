@@ -184,7 +184,6 @@ public class BaseAppRepository<M extends BaseMapper<T>, T extends BaseAppEntity>
      */
     @Override
     public boolean exists(QueryWrapper query) {
-        this.injectQueryFilter(query);
         return exists(CPI.getWhereQueryCondition(query));
     }
 
