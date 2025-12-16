@@ -842,8 +842,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @TenantIgnore
-    public List<AdminUserDO> getUserByUsernames(Set<String> usernamesList) {
-       return  userDataRepository.getUserByUsernames(usernamesList);
+    public List<AdminUserDO> getPlatformUserByUsernames(Set<String> usernamesList) {
+       return  userDataRepository.getPlatformUserByUsernames(usernamesList);
     }
 
     @Override
