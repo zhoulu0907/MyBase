@@ -1,23 +1,38 @@
 import { Button, Divider, Dropdown, Form, Input, Menu, Message, Popconfirm, Select } from '@arco-design/web-react';
 import { IconDelete, IconEdit, IconMenu, IconPlus, IconDragDotVertical } from '@arco-design/web-react/icon';
-import { useWorkbenchSignal } from '@onebase/ui-kit';
 import { type ApplicationMenu } from '@onebase/app';
-import { useSignals } from '@preact/signals-react/runtime';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
+import type { QuickEntryPropsConfig, QuickEntryGroupConfig } from '@onebase/ui-kit';
 import IconEntry from '@/assets/workbench/quick-entry/entry1.svg';
 import ConfigDrawer from '@/pages/Editor/workbench/components/configDrawer';
-import { useQuickEntrySection } from '../hooks/useQuickEntrySection';
-import type { EntryItem, SchemaGroup, QuickEntryGroupConfig } from '../types';
 import SelectMenuModal from './selectMenuModal';
-import styles from './index.module.less';
+import styles from './EntryContentConfig.module.less';
 
-const FormItem = Form.Item;
-
-interface EntryConfigProps {
-  cpID: string;
+export interface EntryContentConfigProps {
+  value?: QuickEntryPropsConfig;
+  onChange?: (value: QuickEntryPropsConfig) => void;
 }
 
+interface EntryItem {
+  entryName: string;
+  entryIcon?: string;
+  entryType?: 'menu' | 'link';
+  menuId?: string;
+  linkAddress?: string;
+  group?: string;
+  entryId: string;
+  id?: string;
+  entryDesc?: string;
+  [key: string]: unknown;
+}
+
+interface SchemaGroup {
+  groupName: string;
+  entries?: EntryItem[];
+}
+
+const FormItem = Form.Item;
 const DEFAULT_GROUP_NAME = '默认分组';
 const generateEntryId = () => `entry-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 
@@ -26,12 +41,17 @@ const DEFAULT_GROUP_CONFIG: QuickEntryGroupConfig = {
   groups: []
 };
 
-const EntryConfig = ({ cpID }: EntryConfigProps) => {
-  useSignals();
+const EntryContentConfig = ({ onChange, value }: EntryContentConfigProps) => {
+  const normalizedValue = useMemo(() => {
+    return (
+      value || {
+        titleConfig: { showTitle: true, titleName: '快捷入口', showMore: true },
+        styleConfig: { theme: 'theme-one' },
+        groupConfig: DEFAULT_GROUP_CONFIG
+      }
+    );
+  }, [value]);
 
-  const { curComponentSchema, setCurComponentSchema, setWbComponentSchemas } = useWorkbenchSignal();
-
-  // 使用本地 entries 描述 UI，避免直接操作 schema
   const [entries, setEntries] = useState<EntryItem[]>([]);
   const [showAddMenu, setShowAddMenu] = useState(false);
   const [drawerVisible, setDrawerVisible] = useState(false);
@@ -44,18 +64,13 @@ const EntryConfig = ({ cpID }: EntryConfigProps) => {
   const currentEntryRef = useRef<EntryItem>();
   const pendingEntryRef = useRef<EntryItem | null>(null);
   const entriesInitializedRef = useRef(false);
-  // 保存最新 entries，用于与 schemaGroups 做对比，避免重复 setState
   const entriesRef = useRef<EntryItem[]>([]);
-  // schema 写回防抖相关
   const syncTimerRef = useRef<number | null>(null);
   const pendingSyncEntriesRef = useRef<EntryItem[] | null>(null);
-  const schemaGroups = curComponentSchema?.config?.props?.groupConfig?.groups as SchemaGroup[] | undefined;
+
+  const groupConfig = normalizedValue.groupConfig || DEFAULT_GROUP_CONFIG;
+  const schemaGroups = groupConfig.groups as SchemaGroup[] | undefined;
   const groupOptions = Array.isArray(schemaGroups) ? schemaGroups : [];
-  const [groupConfigSection, updateGroupConfigSection] = useQuickEntrySection(
-    cpID,
-    'groupConfig',
-    DEFAULT_GROUP_CONFIG
-  );
 
   const [form] = Form.useForm<EntryItem>();
 
@@ -64,6 +79,7 @@ const EntryConfig = ({ cpID }: EntryConfigProps) => {
     entriesRef.current = entries;
   }, [entries]);
 
+  // 更新 groupConfig 并触发 onChange
   const updateGroupConfig = useCallback(
     (newEntries: EntryItem[]) => {
       if (!entriesInitializedRef.current) {
@@ -90,13 +106,18 @@ const EntryConfig = ({ cpID }: EntryConfigProps) => {
       }));
 
       const nextGroupConfig: QuickEntryGroupConfig = {
-        ...groupConfigSection,
+        ...groupConfig,
         groups
       };
 
-      updateGroupConfigSection(nextGroupConfig, { replace: true });
+      const nextValue: QuickEntryPropsConfig = {
+        ...normalizedValue,
+        groupConfig: nextGroupConfig
+      };
+
+      onChange?.(nextValue);
     },
-    [groupConfigSection, updateGroupConfigSection]
+    [groupConfig, normalizedValue, onChange]
   );
 
   // 300ms 防抖写回 schema，避免每个字符都触发 store 更新
@@ -179,8 +200,8 @@ const EntryConfig = ({ cpID }: EntryConfigProps) => {
   }, [currentEntry]);
 
   useEffect(() => {
-    setEnableGroup(Boolean(groupConfigSection.enableGroup));
-  }, [groupConfigSection.enableGroup]);
+    setEnableGroup(Boolean(groupConfig.enableGroup));
+  }, [groupConfig.enableGroup]);
 
   // 新增入口，菜单类型需要先等待 menuId 选择
   const handleAddEntry = (type: 'menu' | 'link') => {
@@ -275,29 +296,20 @@ const EntryConfig = ({ cpID }: EntryConfigProps) => {
   };
 
   const addGroup = () => {
-    if (!curComponentSchema?.config?.props) {
-      return;
-    }
     if (newGroupName.trim() === '') {
       Message.error('请输入分组名称');
       return;
     }
     const newGroups = [...groupOptions, { groupName: newGroupName, entries: [] }];
-    const newCurComponentSchema = {
-      ...curComponentSchema,
-      config: {
-        ...curComponentSchema.config,
-        props: {
-          ...curComponentSchema.config.props,
-          groupConfig: {
-            ...(curComponentSchema.config.props.groupConfig || {}),
-            groups: newGroups
-          }
-        }
-      }
+    const nextGroupConfig: QuickEntryGroupConfig = {
+      ...groupConfig,
+      groups: newGroups
     };
-    setCurComponentSchema(newCurComponentSchema);
-    setWbComponentSchemas(cpID, newCurComponentSchema);
+    const nextValue: QuickEntryPropsConfig = {
+      ...normalizedValue,
+      groupConfig: nextGroupConfig
+    };
+    onChange?.(nextValue);
     setNewGroupName('');
   };
 
@@ -375,7 +387,7 @@ const EntryConfig = ({ cpID }: EntryConfigProps) => {
             return values.entryType === 'menu' ? (
               <FormItem label="选择菜单">
                 <div className={styles.menuPicker}>
-                  <Input readOnly value="菜单1" />
+                  <Input readOnly value={values.menuId || '请选择菜单'} />
                   <Button type="text" icon={<IconEdit />} onClick={() => setSelectMenuModalVisible(true)} />
                 </div>
               </FormItem>
@@ -404,112 +416,113 @@ const EntryConfig = ({ cpID }: EntryConfigProps) => {
   );
 
   return (
-    <div className={styles.entryConfig}>
-      <ReactSortable
-        list={entries.map((entry) => ({ ...entry, id: entry.entryId }))}
-        setList={(newList) => {
-          const normalizedList = (newList as EntryItem[]).map((entry) => {
-            const nextId = entry.entryId || entry.id || generateEntryId();
-            return {
-              ...entry,
-              entryId: nextId,
-              id: nextId
-            };
-          });
-          setEntries(normalizedList);
-          scheduleUpdateGroupConfig(normalizedList);
-        }}
-        handle=".drag-handle"
-        animation={200}
-        // onEnd={() => updateGroupConfig(entries)}
-      >
-        {entries.map((entry) => (
-          <div key={entry.entryId} className={styles.entryItem}>
-            <div className={`${styles.dragHandle} drag-handle`}>
-              <IconDragDotVertical />
+    <div className={styles.content}>
+      <div className={styles.entryConfig}>
+        <ReactSortable
+          list={entries.map((entry) => ({ ...entry, id: entry.entryId }))}
+          setList={(newList) => {
+            const normalizedList = (newList as EntryItem[]).map((entry) => {
+              const nextId = entry.entryId || entry.id || generateEntryId();
+              return {
+                ...entry,
+                entryId: nextId,
+                id: nextId
+              };
+            });
+            setEntries(normalizedList);
+            scheduleUpdateGroupConfig(normalizedList);
+          }}
+          handle=".drag-handle"
+          animation={200}
+        >
+          {entries.map((entry) => (
+            <div key={entry.entryId} className={styles.entryItem}>
+              <div className={`${styles.dragHandle} drag-handle`}>
+                <IconDragDotVertical />
+              </div>
+              <div className={styles.entryContent}>
+                <Input
+                  value={entry.entryName}
+                  onChange={(value) => handleEditEntry(entry.entryId, 'entryName', value)}
+                  placeholder="请输入入口名称"
+                />
+              </div>
+              <div className={styles.entryActions}>
+                <IconEdit className={styles.actionIcon} onClick={() => handleOpenEditDrawer(entry)} />
+                <Popconfirm title="确定要删除这个入口吗？" onOk={() => handleDeleteEntry(entry.entryId)}>
+                  <IconDelete className={styles.actionIcon} />
+                </Popconfirm>
+              </div>
             </div>
-            <div className={styles.entryContent}>
-              <Input
-                value={entry.entryName}
-                onChange={(value) => handleEditEntry(entry.entryId, 'entryName', value)}
-                placeholder="请输入入口名称"
-              />
-            </div>
-            <div className={styles.entryActions}>
-              <IconEdit className={styles.actionIcon} onClick={() => handleOpenEditDrawer(entry)} />
-              <Popconfirm title="确定要删除这个入口吗？" onOk={() => handleDeleteEntry(entry.entryId)}>
-                <IconDelete className={styles.actionIcon} />
-              </Popconfirm>
-            </div>
-          </div>
-        ))}
-      </ReactSortable>
-      <Dropdown
-        droplist={addEntry}
-        trigger="click"
-        position="bl"
-        popupVisible={showAddMenu}
-        onVisibleChange={setShowAddMenu}
-      >
-        <Button type="outline" className={styles.addEntryBtn} icon={<IconPlus />}>
-          添加入口
-        </Button>
-      </Dropdown>
+          ))}
+        </ReactSortable>
+        <Dropdown
+          droplist={addEntry}
+          trigger="click"
+          position="bl"
+          popupVisible={showAddMenu}
+          onVisibleChange={setShowAddMenu}
+        >
+          <Button type="outline" className={styles.addEntryBtn} icon={<IconPlus />}>
+            添加入口
+          </Button>
+        </Dropdown>
 
-      <ConfigDrawer
-        visible={drawerVisible}
-        title="编辑入口"
-        onClose={() => {
-          setDrawerVisible(false);
-          setCurrentEntry(undefined);
-        }}
-      >
-        {renderDrawerContent()}
-      </ConfigDrawer>
+        <ConfigDrawer
+          visible={drawerVisible}
+          title="编辑入口"
+          onClose={() => {
+            setDrawerVisible(false);
+            setCurrentEntry(undefined);
+          }}
+        >
+          {renderDrawerContent()}
+        </ConfigDrawer>
 
-      <SelectMenuModal
-        visible={selectMenuModalVisible}
-        onCancel={() => {
-          setSelectMenuModalVisible(false);
-        }}
-        onOk={(menus: ApplicationMenu[]) => {
-          setSelectMenuModalVisible(false);
-          // 如果是添加模式，将新entry添加到列表并打开编辑抽屉
-          const pendingEntry = pendingEntryRef.current;
-          if (pendingEntry) {
-            const uniqueMenus = menus.filter((menu) => menu.id);
-            if (uniqueMenus.length > 0) {
-              const createdEntries = uniqueMenus.map((menu) => {
-                const nextEntryId = generateEntryId();
-                return {
-                  ...pendingEntry,
-                  entryId: nextEntryId,
-                  id: nextEntryId,
-                  menuId: menu.id,
-                  entryName: menu.menuName || pendingEntry.entryName
-                };
-              });
-              const newEntries = [...entries, ...createdEntries];
-              setEntries(newEntries);
-              updateGroupConfig(newEntries);
+        <SelectMenuModal
+          visible={selectMenuModalVisible}
+          onCancel={() => {
+            setSelectMenuModalVisible(false);
+          }}
+          onOk={(menus: ApplicationMenu[]) => {
+            setSelectMenuModalVisible(false);
+            // 如果是添加模式，将新entry添加到列表并打开编辑抽屉
+            const pendingEntry = pendingEntryRef.current;
+            if (pendingEntry) {
+              const uniqueMenus = menus.filter((menu) => menu.id);
+              if (uniqueMenus.length > 0) {
+                const createdEntries = uniqueMenus.map((menu) => {
+                  const nextEntryId = generateEntryId();
+                  return {
+                    ...pendingEntry,
+                    entryId: nextEntryId,
+                    id: nextEntryId,
+                    menuId: menu.id,
+                    entryName: menu.menuName || pendingEntry.entryName
+                  };
+                });
+                const newEntries = [...entries, ...createdEntries];
+                setEntries(newEntries);
+                updateGroupConfig(newEntries);
+                pendingEntryRef.current = null;
+                return;
+              }
               pendingEntryRef.current = null;
-              return;
             }
-            pendingEntryRef.current = null;
-          }
 
-          // 编辑模式下，仅同步第一项选择
-          const editingEntry = currentEntryRef.current;
-          if (editingEntry) {
-            const targetMenu = menus.find((menu) => menu.id);
-            if (targetMenu?.id) {
-              handleFormValuesChange({ menuId: targetMenu.id, entryName: targetMenu.menuName });
+            // 编辑模式下，仅同步第一项选择
+            const editingEntry = currentEntryRef.current;
+            if (editingEntry) {
+              const targetMenu = menus.find((menu) => menu.id);
+              if (targetMenu?.id) {
+                handleFormValuesChange({ menuId: targetMenu.id, entryName: targetMenu.menuName });
+              }
             }
-          }
-        }}
-      />
+          }}
+        />
+      </div>
     </div>
   );
 };
 
-export default EntryConfig;
+export default EntryContentConfig;

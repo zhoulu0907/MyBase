@@ -270,8 +270,19 @@ export const getEntityGraph = (datasourceId: string) => {
   return metadataService.post('/business-entity/er-diagram?datasourceId=' + datasourceId);
 };
 
+// 根据应用ID获取实体列表
 export const getEntityListByApp = (applicationId: string) => {
   return metadataService.post(`/business-entity/list-by-app?applicationId=${applicationId}`);
+};
+
+/**
+ * 批量查询实体及完整字段信息 （entityUuids和tableNames二选一）
+ * @param entityUuids 实体UUID列表
+ * @param tableNames 表名列表
+ * @returns 
+ */
+export const getEntityListWithFields = (params: object) => {
+  return metadataService.post(`/business-entity/list-with-fields`, params);
 };
 
 /**

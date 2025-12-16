@@ -26,7 +26,7 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
   } = props;
   const [tableName, fieldName] = dataField;
   const { curMenu } = menuSignal;
-  const { entityDataId } = pagesRuntimeSignal;
+  const { rowDataId } = pagesRuntimeSignal;
 
   const [urlList, setUrlList] = useState<string[]>([]);
 
@@ -59,7 +59,7 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
 
   useEffect(() => {
     handleGetUrlList();
-  }, [fieldValue, entityDataId.value]);
+  }, [fieldValue, rowDataId.value]);
 
   // 组件卸载时清理所有 blob URL
   useEffect(() => {
@@ -125,15 +125,18 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
           continue;
         }
 
-        // 如果没有 entityDataId 或 curMenu，无法调用 attachmentDownload，跳过
-        if (!entityDataId.value || !curMenu.value?.id) {
+        // 如果没有 rowDataId 或 curMenu，无法调用 attachmentDownload，跳过
+        if (!rowDataId.value || !curMenu.value?.id) {
           continue;
         }
 
+        // 兼容子表单
+        const lastIndexOf = fieldName.lastIndexOf('.');
+        const curFieldName = lastIndexOf === -1 ? fieldName : fieldName.slice(lastIndexOf + 1);
         const param = {
           menuId: curMenu.value.id,
-          id: entityDataId.value,
-          fieldName,
+          id: rowDataId.value,
+          fieldName: curFieldName,
           fileId
         };
 

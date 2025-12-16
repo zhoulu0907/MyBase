@@ -4,7 +4,6 @@
   box-sizing: border-box;
 
   .pc-form-label-item {
-
     label {
       display: flex;
       align-items: center;
