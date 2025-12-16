@@ -45,7 +45,6 @@ public class ModalNodeComponent extends SkippableNodeComponent {
             executeContext.addLog("弹窗节点返回重置执行");
             variableContext.putNodeVariables(this.getTag(), variableContext.getInputFields());
             variableContext.setInputFields(Collections.emptyMap());
-            executeContext.restExecutionUuid();
             executeContext.restExecutionEndNodeTag();
         }
     }

@@ -49,6 +49,19 @@ public class AppAuthSecurityApiTest {
     }
 
     @Test
+    public void testHasApplicationPermission() {
+        Long userId = 153935442021842949L;
+        Long applicationId = 181672186277396480L;
+        ApplicationManager.setApplicationId(applicationId);
+        //ApplicationManager.setVersionTag(0L);
+        //TenantContextHolder.setTenantId(153935442021842944L);
+        appAuthSecurityApi.cleanAuthCache(userId, applicationId);
+        boolean b = appAuthSecurityApi.hasApplicationPermission(userId, 181672186277396480L);
+        System.out.println(b);
+    }
+
+
+    @Test
     public void testIsApplicationAdmin() {
         boolean applicationAdmin = appAuthSecurityApi.isApplicationAdmin(155019577667616800L, 173020283873034240L);
         System.out.println(applicationAdmin);
