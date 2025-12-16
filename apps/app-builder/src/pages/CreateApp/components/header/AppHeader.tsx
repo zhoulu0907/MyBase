@@ -9,8 +9,8 @@ import DynamicIcon from '@/components/DynamicIcon';
 import { useI18n } from '@/hooks/useI18n';
 import { useAppStore } from '@/store/store_app';
 import { logout } from '@/utils/session';
-import { Button, Layout, Menu, Tabs, Tooltip } from '@arco-design/web-react';
-import { IconArrowLeft } from '@arco-design/web-react/icon';
+import { Button, Layout, Menu, Modal, Tabs, Tooltip } from '@arco-design/web-react';
+import { IconArrowLeft, IconInfoCircleFill } from '@arco-design/web-react/icon';
 import { AppStatus, getApplication, menuSignal, type GetApplicationReq } from '@onebase/app';
 import { getRuntimeURL, TokenManager, UserPermissionManager } from '@onebase/common';
 import { systemLogout } from '@onebase/platform-center';
@@ -35,6 +35,9 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   const { curAppId, setCurAppId, curAppInfo, setCurAppInfo } = useAppStore();
   const { curMenu } = menuSignal;
   const { tenantId } = useParams();
+
+  const [exitModalVisible, setExitModalVisible] = useState(false);
+
   // Tab 切换
   // 根据当前路径设置 activeTab
   const getTabKeyFromPath = (pathname: string) => {
@@ -114,7 +117,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
           <div
             className={styles.menuIcon}
             onClick={() => {
-              navigate(`/onebase/${tenantId}/setting/application`);
+              setExitModalVisible(true);
             }}
           >
             {/* <img src={AppIconSVG} alt="application icon" /> */}
@@ -235,6 +238,39 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
         <Tabs.TabPane key="integrated-management" title={t('createApp.integratedManagement')} />
         <Tabs.TabPane key="app-setting" title={t('createApp.appRelease')} />
       </Tabs>
+
+      <Modal
+        title={null}
+        okText="退出"
+        cancelText="取消"
+        visible={exitModalVisible}
+        onCancel={() => {
+          setExitModalVisible(false);
+        }}
+        onOk={() => {
+          navigate(`/onebase/${tenantId}/setting/application`);
+          setExitModalVisible(false);
+        }}
+        style={{
+          width: 350
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 16,
+            fontWeight: 500,
+            height: 50,
+            paddingTop: 20
+          }}
+        >
+          <IconInfoCircleFill style={{ fontSize: 24, marginRight: 8, color: '#ff7d00' }} />
+          <span>退出应用编辑？</span>
+        </div>
+      </Modal>
     </Header>
   );
 };
