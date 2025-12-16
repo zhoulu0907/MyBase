@@ -1,15 +1,8 @@
 package com.cmsr.onebase.plugin.runtime.http;
 
 import com.cmsr.onebase.plugin.api.HttpHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
@@ -28,9 +21,8 @@ import java.util.List;
  * @date 2025-12-13
  */
 @Component
+@Slf4j
 public class HttpHandlerRegistry {
-
-    private static final Logger log = LoggerFactory.getLogger(HttpHandlerRegistry.class);
 
     private final RequestMappingHandlerMapping handlerMapping;
     private final List<Object> registeredHandlers = new ArrayList<>();

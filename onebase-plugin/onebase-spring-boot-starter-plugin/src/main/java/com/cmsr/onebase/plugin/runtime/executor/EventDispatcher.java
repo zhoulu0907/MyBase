@@ -5,8 +5,7 @@ import com.cmsr.onebase.plugin.context.PluginContext;
 import com.cmsr.onebase.plugin.model.PluginEvent;
 import com.cmsr.onebase.plugin.runtime.context.PluginContextFactory;
 import com.cmsr.onebase.plugin.runtime.manager.OneBasePluginManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
@@ -23,9 +22,8 @@ import java.util.concurrent.CompletableFuture;
  * @date 2025-12-18
  */
 @Component
+@Slf4j
 public class EventDispatcher {
-
-    private static final Logger log = LoggerFactory.getLogger(EventDispatcher.class);
 
     private final OneBasePluginManager pluginManager;
     private final PluginContextFactory contextFactory;

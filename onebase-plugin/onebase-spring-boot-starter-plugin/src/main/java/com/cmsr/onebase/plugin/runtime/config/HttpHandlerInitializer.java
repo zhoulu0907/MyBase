@@ -3,8 +3,7 @@ package com.cmsr.onebase.plugin.runtime.config;
 import com.cmsr.onebase.plugin.api.HttpHandler;
 import com.cmsr.onebase.plugin.runtime.http.HttpHandlerRegistry;
 import com.cmsr.onebase.plugin.runtime.manager.OneBasePluginManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -20,9 +19,8 @@ import java.util.List;
  * @date 2025-12-13
  */
 @Component
+@Slf4j
 public class HttpHandlerInitializer {
-
-    private static final Logger log = LoggerFactory.getLogger(HttpHandlerInitializer.class);
 
     public HttpHandlerInitializer(OneBasePluginManager oneBasePluginManager,
                                   HttpHandlerRegistry httpHandlerRegistry,

@@ -1,8 +1,7 @@
 package com.cmsr.onebase.plugin.runtime.service;
 
 import com.cmsr.onebase.plugin.service.FileService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
@@ -19,9 +18,8 @@ import java.io.InputStream;
  * @date 2025-12-18
  */
 @Service
+@Slf4j
 public class FileServiceImpl implements FileService {
-
-    private static final Logger log = LoggerFactory.getLogger(FileServiceImpl.class);
 
     // TODO: 注入平台的文件服务
     // @Resource

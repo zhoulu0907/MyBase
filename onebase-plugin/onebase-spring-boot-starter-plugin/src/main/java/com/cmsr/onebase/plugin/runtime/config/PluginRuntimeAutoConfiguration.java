@@ -13,14 +13,12 @@ import com.cmsr.onebase.plugin.runtime.service.UserServiceImpl;
 import com.cmsr.onebase.plugin.service.DataService;
 import com.cmsr.onebase.plugin.service.FileService;
 import com.cmsr.onebase.plugin.service.UserService;
+import lombok.extern.slf4j.Slf4j;
 import org.pf4j.DefaultPluginManager;
 import org.pf4j.PluginDescriptorFinder;
 import org.pf4j.PluginManager;
 import org.pf4j.PropertiesPluginDescriptorFinder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -44,9 +42,8 @@ import java.util.List;
  */
 @Configuration
 @EnableConfigurationProperties(PluginProperties.class)
+@Slf4j
 public class PluginRuntimeAutoConfiguration {
-
-    private static final Logger log = LoggerFactory.getLogger(PluginRuntimeAutoConfiguration.class);
 
     /**
      * 配置PF4J PluginManager

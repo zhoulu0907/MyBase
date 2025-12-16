@@ -1,9 +1,8 @@
 package com.cmsr.onebase.plugin.runtime.manager;
 
 import com.cmsr.onebase.plugin.core.ExtensionPointScannerSpring;
+import lombok.extern.slf4j.Slf4j;
 import org.pf4j.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.nio.file.Paths;
 import java.util.*;
@@ -18,9 +17,8 @@ import java.util.*;
  * @author chengyuansen
  * @date 2025-12-15
  */
+@Slf4j
 public class DevModePluginManager extends DefaultPluginManager {
-
-    private static final Logger log = LoggerFactory.getLogger(DevModePluginManager.class);
 
     /**
      * 虚拟插件ID，用于开发模式下的扩展点

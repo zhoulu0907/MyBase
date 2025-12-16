@@ -2,8 +2,7 @@ package com.cmsr.onebase.plugin.runtime.service;
 
 import com.cmsr.onebase.plugin.model.UserInfo;
 import com.cmsr.onebase.plugin.service.UserService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -22,9 +21,8 @@ import java.util.Set;
  * @date 2025-12-18
  */
 @Service
+@Slf4j
 public class UserServiceImpl implements UserService {
-
-    private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
 
     // TODO: 注入平台的用户服务
     // @Resource

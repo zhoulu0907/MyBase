@@ -4,8 +4,7 @@ import com.cmsr.onebase.plugin.api.HttpHandler;
 import com.cmsr.onebase.plugin.runtime.config.PluginProperties;
 import com.cmsr.onebase.plugin.runtime.manager.OneBasePluginManager;
 import jakarta.annotation.PostConstruct;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,9 +33,8 @@ import java.util.Map;
  * @date 2025-12-13
  */
 @Component
+@Slf4j
 public class PluginHttpDispatcher {
-
-    private static final Logger log = LoggerFactory.getLogger(PluginHttpDispatcher.class);
 
     private final OneBasePluginManager pluginManager;
     private final RequestMappingHandlerAdapter handlerAdapter;

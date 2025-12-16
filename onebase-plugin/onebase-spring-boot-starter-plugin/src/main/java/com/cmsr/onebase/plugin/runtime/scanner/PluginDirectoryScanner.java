@@ -1,10 +1,9 @@
 package com.cmsr.onebase.plugin.runtime.scanner;
 
 import com.cmsr.onebase.plugin.runtime.manager.OneBasePluginManager;
+import lombok.extern.slf4j.Slf4j;
 import org.pf4j.PluginManager;
 import org.pf4j.PluginState;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.File;
@@ -22,9 +21,8 @@ import java.util.stream.Collectors;
  * @author chengyuansen
  * @date 2025-12-15
  */
+@Slf4j
 public class PluginDirectoryScanner implements Runnable {
-
-    private static final Logger log = LoggerFactory.getLogger(PluginDirectoryScanner.class);
 
     /**
      * 插件管理器

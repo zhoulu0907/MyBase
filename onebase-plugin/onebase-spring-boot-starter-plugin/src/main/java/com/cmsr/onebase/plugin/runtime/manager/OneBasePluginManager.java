@@ -3,15 +3,13 @@ package com.cmsr.onebase.plugin.runtime.manager;
 import com.cmsr.onebase.plugin.api.DataProcessor;
 import com.cmsr.onebase.plugin.api.EventListener;
 import com.cmsr.onebase.plugin.api.HttpHandler;
+import lombok.extern.slf4j.Slf4j;
 import org.pf4j.PluginManager;
 import org.pf4j.PluginState;
 import org.pf4j.PluginWrapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -26,9 +24,8 @@ import java.util.stream.Collectors;
  * @date 2025-12-18
  */
 @Component
+@Slf4j
 public class OneBasePluginManager {
-
-    private static final Logger log = LoggerFactory.getLogger(OneBasePluginManager.class);
 
     private final PluginManager pluginManager;
 
