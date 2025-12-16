@@ -28,7 +28,7 @@ public class AppMenuRepository extends BaseBizRepository<AppMenuMapper, AppMenuD
 
     public List<AppMenuDO> listByIdsAndOrder(List<Long> menuIds) {
         QueryWrapper queryWrapper = this.query()
-                .where(APP_MENU.MENU_UUID.in(menuIds))
+                .where(APP_MENU.ID.in(menuIds))
                 .orderBy(APP_MENU.MENU_SORT, true);
         return this.list(queryWrapper);
     }
