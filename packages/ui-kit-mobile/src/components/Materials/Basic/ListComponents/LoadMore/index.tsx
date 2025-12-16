@@ -319,7 +319,7 @@ const XLoadMore = memo(
       if (advancedRowRedirect) {
         if (redirectMethod === RedirectMethod.DRAWER) {
           // 打开抽屉显示详情
-          setDrawerVisible(true);
+          // setDrawerVisible(true);
           redirectPageId && setDrawerPageId(redirectPageId);
 
           handleEdit(record.id, false);
