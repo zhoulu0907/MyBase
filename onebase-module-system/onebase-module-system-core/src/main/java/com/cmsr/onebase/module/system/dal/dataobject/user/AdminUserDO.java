@@ -41,7 +41,7 @@ public class AdminUserDO extends TenantBaseDO {
     public static final String ADMIN_TYPE = "admin_type";
     public static final String CORP_ID    = "corp_id";
     public static final String PLATFORM_USER_ID    = "platform_user_id";
-
+    public static final String CREATE_SOURCE    = "create_source";
 
 
     public AdminUserDO setId(Long id) {
@@ -145,6 +145,12 @@ public class AdminUserDO extends TenantBaseDO {
      */
     @Column(name = ADMIN_TYPE)
     private Integer adminType;
+
+    /**
+     * 创建来源 后台创建/自主注册
+     */
+    @Column(name = CREATE_SOURCE)
+    private String createSource;
 
     /**
      * 归属企业ID
