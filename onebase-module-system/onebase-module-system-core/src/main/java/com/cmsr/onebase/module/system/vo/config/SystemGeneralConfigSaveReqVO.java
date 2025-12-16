@@ -22,6 +22,12 @@ public class SystemGeneralConfigSaveReqVO {
      * 参数键值
      */
     private String configValue;
+
+    /**
+     * 互斥项
+     */
+    private String exclusiveItem;
+
     /**
      * 参数类型
      *

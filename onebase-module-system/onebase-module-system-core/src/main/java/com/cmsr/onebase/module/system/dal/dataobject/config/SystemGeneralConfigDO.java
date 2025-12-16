@@ -17,6 +17,9 @@ public class SystemGeneralConfigDO extends TenantBaseDO {
     public static final String CORP_ID = "corp_id";
     public static final String STATUS = "status";
     public static final String REMARK = "remark";
+    public static final String EXCLUSIVE_ITEM = "exclusive_item";
+
+
 
     /**
      * 参数分类
@@ -39,6 +42,13 @@ public class SystemGeneralConfigDO extends TenantBaseDO {
      */
     @Column(name = CONFIG_VALUE)
     private String configValue;
+
+    /**
+     * 互斥项
+     */
+    @Column(name = EXCLUSIVE_ITEM)
+    private String exclusiveItem;
+
     /**
      * 参数类型
      *

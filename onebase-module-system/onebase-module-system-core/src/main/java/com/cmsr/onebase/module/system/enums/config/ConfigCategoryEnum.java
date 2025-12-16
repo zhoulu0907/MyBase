@@ -1,10 +1,6 @@
-package com.cmsr.onebase.framework.common.enums;
+package com.cmsr.onebase.module.system.enums.config;
 
-import com.cmsr.onebase.framework.common.util.object.ObjectUtils;
 import lombok.Getter;
-
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * 角色标识枚举
