@@ -96,14 +96,14 @@ onebase:
     permit-all-urls: # 显式放行认证、注册、刷新、验证码、以及必要静态资源/健康检查，避免 @PermitAll 被覆盖导致 401
       - /runtime/system/captcha/**
       - /runtime/infra/file/download/**
+      - /runtime/app/application/get
   tenant: # 多租户相关配置项
     enable: true
     ignore-urls:
-      - /jmreport/* # 积木报表，无法携带租户编号
       - /runtime/flow/remote-call/*
-      - /admin-api/system/captcha/**
-      - /runtime/app/application/get/**
+      - /runtime/system/captcha/**
       - /runtime/infra/file/download/**
+      - /runtime/app/application/get
     ignore-visit-urls:
       - /admin-api/system/user/profile/**
       - /admin-api/system/auth/**

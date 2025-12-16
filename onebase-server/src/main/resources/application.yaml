@@ -107,17 +107,18 @@ onebase:
       - /admin-api/system/captcha/**
       - /admin-api/infra/file/download/**
       - /platform/infra/file/download/**
+      - /admin-api/app/application/get
       - /actuator/health
       - /swagger-ui/**
       - /v3/api-docs/**
   tenant: # 多租户相关配置项
     enable: true
     ignore-urls:
-      - /jmreport/* # 积木报表，无法携带租户编号
-      - /admin-api/app/application/get
+      - /platform/system/captcha/**
       - /admin-api/system/captcha/**
       - /admin-api/infra/file/download/**
       - /platform/infra/file/download/**
+      - /admin-api/app/application/get
     ignore-visit-urls:
       - /admin-api/system/user/profile/**
       - /admin-api/system/auth/**
