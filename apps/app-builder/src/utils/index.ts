@@ -1,4 +1,5 @@
 import type { NodeInstance } from '@arco-design/web-react/es/Tree/interface';
+import { UserType, type TenantInfo } from '@onebase/platform-center';
 
 export const displayCorpLogo = (logoName?: string) => {
   return logoName ? logoName.slice(0, 4) : '';
@@ -44,4 +45,17 @@ export const renderDraggedTree = <T>(
     });
   }
   return { data, dragItem };
+};
+export const TENANT_INFO_KEY = 'tenant_info';
+
+export const getTenantInfoFromSession = (): TenantInfo | null => {
+  const tenantInfo = sessionStorage.getItem(TENANT_INFO_KEY);
+  return !!tenantInfo ? JSON.parse(tenantInfo) : null;
+};
+export const setTenantInfoFromSession = (tenantInfo: TenantInfo | null) => {
+  sessionStorage.setItem(TENANT_INFO_KEY, JSON.stringify(tenantInfo));
+};
+
+export const isSystemUser = <T extends { adminType?: UserType }>(record: T) => {
+  return record.adminType === UserType.SYSTEM;
 };

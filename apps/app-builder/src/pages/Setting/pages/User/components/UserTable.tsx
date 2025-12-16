@@ -16,7 +16,6 @@ import {
   StatusEnum,
   updateAdminOrDirector,
   updateUserStatus,
-  UserType
 } from '@onebase/platform-center';
 import { debounce } from 'lodash-es';
 import { useCallback, useEffect, useState } from 'react';
@@ -24,6 +23,7 @@ import s from '../index.module.less';
 import PasswordModal from './PasswordModal';
 import UserFormModal from './UserFormModal';
 import UserProfileAvatar from '@/components/UserProfileAvatar';
+import { isSystemUser } from '@/utils';
 
 interface DataItem {
   id: string;
@@ -225,10 +225,6 @@ export default function UserTable({
     setDetailModalVisible(true);
   };
 
-  const isSystemUser = (record: UserRecord) => {
-    return record.adminType === UserType.SYSTEM;
-  };
-
   const renderRoleList = (record: UserRecord) => {
     const roleNameList = record.roles?.map((item) => item.name) || [];
     if (roleNameList.length === 1) {
@@ -281,7 +277,7 @@ export default function UserTable({
       {
         title: '邮箱',
         dataIndex: 'email',
-        width: 180,
+        width: 150,
         placeholder: '-',
         ellipsis: true
       },
