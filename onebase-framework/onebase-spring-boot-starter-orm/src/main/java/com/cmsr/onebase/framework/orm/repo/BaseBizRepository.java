@@ -6,6 +6,7 @@ import com.cmsr.onebase.framework.orm.entity.BaseBizEntity;
 import com.mybatisflex.core.BaseMapper;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.*;
+import com.mybatisflex.core.update.UpdateChain;
 import com.mybatisflex.core.util.CollectionUtil;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -67,6 +68,19 @@ public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity>
     public boolean update(T entity, QueryWrapper query) {
         this.injectQueryFilter(query);
         return super.update(entity, query);
+    }
+
+    @Deprecated
+    @Override
+    public UpdateChain<T> updateChain() {
+        Long applicationId = ApplicationManager.getApplicationId();
+        Long versionTag = ApplicationManager.getVersionTag();
+        //
+        UpdateChain<T> updateChain = super.updateChain();
+        updateChain.where(QueryWrapperUtils.APPLICATION_COLUMN.eq(applicationId).when(!ApplicationManager.isIgnoreApplicationCondition())
+                .and(QueryWrapperUtils.VERSION_TAG_COLUMN.eq(versionTag).when(!ApplicationManager.isIgnoreVersionTagCondition()))
+        );
+        return updateChain;
     }
     //endregion ===== 更新（改）操作 =====
 
