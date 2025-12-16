@@ -16,7 +16,7 @@ public class ThirdUserAppCombinedInsertReqVO   {
 
     @ExcelProperty("用户名称")
     @NotBlank(message = "用户昵称不能为空")
-    private String nickname;
+    private String nickName;
 
     @Schema(description = "用户邮箱", example = "a@b.cn")
     private String email;

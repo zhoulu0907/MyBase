@@ -162,5 +162,10 @@ public interface DeptService {
      */
     Long createThirdDefaultDept(DeptSaveReqVO deptRespVO);
 
-    List<DeptDO> getThirdDept();
+    /**
+     * 获得第三方部门列表
+     *
+     * @return 部门列表
+     */
+    List<DeptDO> getDefaultThirdDept();
 }

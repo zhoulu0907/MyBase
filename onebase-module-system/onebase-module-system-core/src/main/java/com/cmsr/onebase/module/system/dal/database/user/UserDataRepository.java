@@ -390,7 +390,7 @@ public class UserDataRepository extends DataRepository<AdminUserDO> {
         return findAllByConfig(configStore);
     }
 
-    public PageResult<AdminUserDO> getUserPage(UserAppPageSearchReqVO userAppPageReqVO) {
+    public PageResult<AdminUserDO> getThirdUserPage(UserAppPageSearchReqVO userAppPageReqVO) {
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.and(AdminUserDO.USER_TYPE, UserTypeEnum.THIRD.getValue());
         // 根据关键词查询

@@ -170,12 +170,12 @@ public class DeptDataRepository extends DataRepository<DeptDO> {
         return findOne(configs);
     }
 
-    public List<DeptDO> getThirdDept(String deptCode, Integer status) {
+    public List<DeptDO> getDefaultThirdDeptByDefaultCode(String deptCode, Integer status) {
         DefaultConfigStore configs = new DefaultConfigStore();
         if (StringUtils.isNotBlank(deptCode)) {
             configs.and(Compare.EQUAL, DeptDO.DEPT_CODE, deptCode);
         }
-        if (status != null) {
+        if (null != status) {
             configs.and(Compare.EQUAL, DeptDO.STATUS, status);
         }
         configs.order(DeptDO.SORT, org.anyline.entity.Order.TYPE.ASC);

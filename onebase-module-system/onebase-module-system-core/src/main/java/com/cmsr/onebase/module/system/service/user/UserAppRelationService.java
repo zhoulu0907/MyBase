@@ -27,8 +27,18 @@ public interface UserAppRelationService {
      */
     List<UserAppVO> getAppByUserId(Long userId);
 
+    /**
+     * 创建用户授权应用
+     *
+     * @param userAppRelationInertReqVO 创建用户授权应用请求参数
+     */
+    void createUserAppRelation(UserAppRelationInertReqVO userAppRelationInertReqVO);
 
-    void createUserAppRelation(@Valid UserAppRelationInertReqVO userAppRelationInertReqVO);
-
+    /**
+         * 获得用户未授权应用列表-分页
+         *
+         * @param relationAppReqVO 获取用户未授权应用列表-分页请求参数
+         * @return 用户未授权应用列表-分页结果
+         */
     List<ApplicationDTO> getUserNoRelationAppList(UserRelationAppReqVO relationAppReqVO);
 }

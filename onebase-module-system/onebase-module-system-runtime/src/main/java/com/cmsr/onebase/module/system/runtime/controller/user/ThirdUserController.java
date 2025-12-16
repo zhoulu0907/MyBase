@@ -62,8 +62,4 @@ public class ThirdUserController {
         return success(true);
     }
 
-
-
-
-
 }

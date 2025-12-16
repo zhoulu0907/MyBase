@@ -77,6 +77,10 @@ public interface RuntimeAuthService {
      * @return 登录结果
      */
     ThirdAuthLoginRespVO thirdLogin(@Valid ThirdAuthLoginReqVO reqVO);
-
+    /**
+     * 忘记密码
+     *
+     * @param reqVO 登录信息
+     */
     void forgetPassword(@Valid UserForgetPasswordReqVO reqVO);
 }

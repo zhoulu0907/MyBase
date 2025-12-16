@@ -1273,7 +1273,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public PageResult<UserApplicationRespVO> getUserAppRelationPage(UserAppPageSearchReqVO userReqVO) {
         // 1. 查询用户分页数据
-        PageResult<AdminUserDO> pageResult = userDataRepository.getUserPage(userReqVO);
+        PageResult<AdminUserDO> pageResult = userDataRepository.getThirdUserPage(userReqVO);
         List<AdminUserDO> userDOList = pageResult.getList();
 
         // 2. 如果没有用户数据，直接返回空结果

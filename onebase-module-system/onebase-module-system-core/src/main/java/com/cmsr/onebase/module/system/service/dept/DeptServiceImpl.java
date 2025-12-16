@@ -500,8 +500,8 @@ public class DeptServiceImpl implements DeptService {
     }
 
     @Override
-    public List<DeptDO> getThirdDept() {
-        return deptDataRepository.getThirdDept(DefaultThirdDept.DEFAULT_THIRD_DEPT.getCode(), CommonStatusEnum.ENABLE.getStatus());
+    public List<DeptDO> getDefaultThirdDept() {
+        return deptDataRepository.getDefaultThirdDeptByDefaultCode(DefaultThirdDept.DEFAULT_THIRD_DEPT.getCode(), CommonStatusEnum.ENABLE.getStatus());
     }
 
 }

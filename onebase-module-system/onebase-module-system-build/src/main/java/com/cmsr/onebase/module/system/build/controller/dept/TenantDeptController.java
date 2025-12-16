@@ -114,8 +114,8 @@ public class TenantDeptController {
     @GetMapping("/get-third-depts")
     @Operation(summary = "获取第三方的部门列表")
     @PreAuthorize("@ss.hasPermission('tenant:dept:query')")
-    public CommonResult<List<DeptSimpleRespVO>> getThirdDept() {
-        List<DeptDO> deptDOList = deptService.getThirdDept();
+    public CommonResult<List<DeptSimpleRespVO>> getDefaultThirdDept() {
+        List<DeptDO> deptDOList = deptService.getDefaultThirdDept();
         return success(BeanUtils.toBean(deptDOList, DeptSimpleRespVO.class));
     }
 

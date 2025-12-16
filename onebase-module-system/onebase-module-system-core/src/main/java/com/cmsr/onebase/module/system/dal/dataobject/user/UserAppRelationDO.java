@@ -15,18 +15,18 @@ import java.time.LocalDateTime;
  * 用户应用关联 DO
  */
 @Data
-@Entity
 @Table(name = "system_user_app_relation")
-@EqualsAndHashCode(callSuper = true)
 public class UserAppRelationDO extends TenantBaseDO {
+
     public static final Long PARENT_ID_ROOT = 0L;
     public static final String APPLICATION_ID           = "application_id";
     public static final String TENANT_ID                = "tenant_id";
     public static final String STATUS                   = "status";
     public static final String USER_ID                  = "user_id";
 
+
     /**
-     * 企业id
+     *  用户id
      */
     @Column
     private Long userId;

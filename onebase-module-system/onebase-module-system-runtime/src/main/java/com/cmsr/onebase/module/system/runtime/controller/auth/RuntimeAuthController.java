@@ -93,8 +93,6 @@ public class RuntimeAuthController {
         return success(runtimeAuthService.thirdLogin(reqVO));
     }
 
-
-
     @PostMapping("/logout")
     @PermitAll
     @Operation(summary = "登出系统")
