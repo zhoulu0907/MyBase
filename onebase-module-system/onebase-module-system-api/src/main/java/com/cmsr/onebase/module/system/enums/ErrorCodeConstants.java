@@ -56,7 +56,8 @@ public interface ErrorCodeConstants {
     ErrorCode LICENSE_USER_COUNT_NOT_ENOUGH = new ErrorCode(1_002_003_013, "可分配人员数量不足，人员上限是{}, 剩余{}");
     ErrorCode LICENSE_TENANT_COUNT_NOT_ENOUGH = new ErrorCode(1_002_003_014, "空间数量已达上限");
     ErrorCode LENANT_ALLOCATE_PERSON_COUNT_LESS_THEN_ALLOCATED = new ErrorCode(1_002_003_014, "分配的用户数量不能低于空间内已有用户数：{}");
-    ErrorCode USER_TYPE_EXCEPTION = new ErrorCode(1_002_003_015, "用户类型异常:{}");
+    ErrorCode LENANT_PERSON_COUNT_LESS_THEN_ADMIN = new ErrorCode(1_002_003_015, "管理员数量超过用户上限：{}");
+    ErrorCode USER_TYPE_EXCEPTION = new ErrorCode(1_002_003_016, "用户类型异常:{}");
 
     // ========== 部门模块 1-002-004-000 ==========
     ErrorCode DEPT_NAME_DUPLICATE = new ErrorCode(1_002_004_000, "已经存在该名字的部门");

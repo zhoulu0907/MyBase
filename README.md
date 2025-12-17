@@ -38,7 +38,7 @@ onebase-v3/
 ├── dependencies/       # 统一管理所有依赖项目
 ├── framework/          # 统一管理common公共能力和各类中间件
 ├── module-infra        # 基础设施，如文件存储、监控等。
-├── module-system       # 系统能力，如空间、租户、用户、角色、权限等。
+├── module-system       # 系统能力，如空间、空间、用户、角色、权限等。
 ├── module-data         # 数据
     ├── module-data-build    # build，编辑态服务
     ├── module-data-runtime  # runtime，运行态服务
