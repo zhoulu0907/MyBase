@@ -51,8 +51,6 @@ const ScreenCard: FC<CardProps> = ({ item, onDelete, onSaveAs, onEditScreen, onE
     </Menu>
   );
 
-  useEffect(() => {}, []);
-
   return (
     <div className={styles.appCard}>
       <div className={styles.appCardImg}>

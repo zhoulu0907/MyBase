@@ -39,7 +39,6 @@ const ScreenCard: FC<CardProps> = ({ item, title, onEditTemplate, onEdit, onPrev
       </Menu.Item>
     </Menu>
   );
-  useEffect(() => {}, []);
 
   return (
     <div className={styles.appCard}>

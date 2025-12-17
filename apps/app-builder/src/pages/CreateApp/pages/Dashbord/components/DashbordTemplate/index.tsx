@@ -109,14 +109,6 @@ const ScreenTemplate: FC = () => {
     importForm.resetFields();
     setImportVisible(true);
   };
-  // 清空表单
-  // const clearImportForm = () => {
-  //   setSelectedButton('');
-  //   importForm.setFieldValue('templateNmae', '');
-  //   importForm.setFieldValue('desc', '');
-  //   importForm.setFieldValue('type', '');
-  //   importForm.setFieldValue('screeenFile', '');
-  // };
   const handleClickButtom = (name: string) => {
     setSelectedButton(name);
     importForm.setFieldValue('type', name);
