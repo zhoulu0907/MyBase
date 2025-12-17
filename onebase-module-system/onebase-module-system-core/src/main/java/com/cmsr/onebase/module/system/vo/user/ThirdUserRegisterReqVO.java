@@ -15,9 +15,7 @@ import java.util.Set;
 
 @Schema(description = "第三方用户注册用户")
 @Data
-@EqualsAndHashCode(callSuper = true)
-@ToString(callSuper = true)
-public class ThirdUserRegisterReqVO extends PageParam {
+public class ThirdUserRegisterReqVO {
 
     @Schema(description = "手机")
     private String mobile;
@@ -28,8 +26,4 @@ public class ThirdUserRegisterReqVO extends PageParam {
     @Schema(description = "验证码",  example = "10")
     private String verifyCode;
 
-    @Schema(description = "密码/验证码",  example = "10")
-    @NotBlank(message = "登录方式不能为空")
-    @InEnum(value = LongTypeEnum.class, message = "返回值类型必须是 {value}")
-    private String loginType;
 }

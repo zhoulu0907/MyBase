@@ -13,3 +13,16 @@ X-Tenant-Id: 156421901678804992
   "avatar": "https://example.com/avatar.jpg"
 
 }
+
+
+### 请求 /login 接口 => 成功   ##verifycode/password
+POST {{baseUrl}}/system/third-user/register
+Content-Type: application/json
+Authorization: Bearer {{token}}
+X-Tenant-Id: 156421901678804992
+
+{
+  "mobile": 158945648512,
+  "appId":"1111111111",
+  "verifyCode": "testuserqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq"
+}

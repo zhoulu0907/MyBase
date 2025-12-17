@@ -1193,6 +1193,7 @@ public class UserServiceImpl implements UserService {
         AdminUserDO user = BeanUtils.toBean(reqVO, AdminUserDO.class);
         user.setPassword(encodePassword(THIRD_USER_PASSWORD));
         user.setUsername(reqVO.getMobile());
+        user.setNickname(reqVO.getNickName());
         user.setUserType(UserTypeEnum.THIRD.getValue());
         user.setStatus(UserStatusEnum.NORMAL.getStatus());
         user.setCreateSource(CreateSourceEnum.BACK.getCode());
@@ -1355,7 +1356,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Long thirdUserRegister(ThirdUserRegisterReqVO reqVO) {
-       // createThirdUser(reqVO);
-        return  null;
+        //TODO  appId ，验证码 验证逻辑
+        ThirdAuthLoginReqVO VO = BeanUtils.toBean(reqVO, ThirdAuthLoginReqVO.class);
+       return createThirdUser(VO).getId();
+
     }
 }
