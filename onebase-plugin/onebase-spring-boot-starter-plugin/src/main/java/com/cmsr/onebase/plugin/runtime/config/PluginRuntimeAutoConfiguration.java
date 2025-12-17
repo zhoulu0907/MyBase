@@ -5,6 +5,7 @@ import com.cmsr.onebase.plugin.runtime.context.PluginContextFactory;
 import com.cmsr.onebase.plugin.runtime.executor.EventDispatcher;
 import com.cmsr.onebase.plugin.runtime.http.PluginHttpDispatcher;
 import com.cmsr.onebase.plugin.runtime.http.PluginHttpHandler;
+import com.cmsr.onebase.plugin.runtime.http.PluginHttpManager;
 import com.cmsr.onebase.plugin.runtime.manager.DevModePluginManager;
 import com.cmsr.onebase.plugin.runtime.manager.OneBasePluginManager;
 import com.cmsr.onebase.plugin.runtime.service.DataServiceImpl;
@@ -27,8 +28,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import com.cmsr.onebase.plugin.runtime.interceptor.PluginSecurityInterceptor;
-import com.cmsr.onebase.plugin.runtime.http.HttpHandlerRegistry;
-import com.cmsr.onebase.plugin.runtime.config.HttpHandlerInitializer;
 import com.cmsr.onebase.plugin.runtime.listener.PluginLifecycleListener;
 
 import jakarta.annotation.PreDestroy;
@@ -341,38 +340,22 @@ public class PluginRuntimeAutoConfiguration {
     }
 
     /**
-     * HTTP处理器注册器（用于将插件中的 @RestController 注册到主应用）
-     */
-    @Bean
-    @ConditionalOnMissingBean
-    public HttpHandlerRegistry httpHandlerRegistry(
-            org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping handlerMapping) {
-        return new HttpHandlerRegistry(handlerMapping);
-    }
-
-    /**
-     * 新：HttpRoutingManager（合并 HttpHandlerRegistry + HttpHandlerInitializer）
+     * 插件HTTP管理器（统一HTTP处理模块，整合了原HttpHandlerRegistry、HttpRoutingManager、HttpHandlerInitializer）
+     * <p>
+     * 负责：
+     * 1. 启动时发现并注册插件的HttpHandler
+     * 2. 运行时注册/注销插件的HTTP处理器
+     * 3. 管理路由元数据（pluginId -> handlers/mappings）
+     * </p>
      */
     @Bean
     @ConditionalOnMissingBean
     @org.springframework.context.annotation.Lazy
-    public com.cmsr.onebase.plugin.runtime.http.HttpRoutingManager httpRoutingManager(
+    public PluginHttpManager pluginHttpManager(
             org.springframework.beans.factory.ObjectProvider<OneBasePluginManager> oneBasePluginManagerProvider,
             org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping handlerMapping,
             PluginProperties pluginProperties) {
-        return new com.cmsr.onebase.plugin.runtime.http.HttpRoutingManager(oneBasePluginManagerProvider, handlerMapping, pluginProperties);
-    }
-
-    /**
-     * 启动时的 HTTP 处理器初始化器
-     */
-    @Bean
-    @ConditionalOnMissingBean
-    public HttpHandlerInitializer httpHandlerInitializer(
-            org.springframework.beans.factory.ObjectProvider<OneBasePluginManager> oneBasePluginManagerProvider,
-            HttpHandlerRegistry httpHandlerRegistry,
-            PluginProperties pluginProperties) {
-        return new HttpHandlerInitializer(oneBasePluginManagerProvider, httpHandlerRegistry, pluginProperties);
+        return new PluginHttpManager(oneBasePluginManagerProvider, handlerMapping, pluginProperties);
     }
 
     /**
@@ -382,8 +365,8 @@ public class PluginRuntimeAutoConfiguration {
     @ConditionalOnMissingBean
     public PluginLifecycleListener pluginLifecycleListener(OneBasePluginManager oneBasePluginManager,
                                                            PluginHttpDispatcher pluginHttpDispatcher,
-                                                           com.cmsr.onebase.plugin.runtime.http.HttpRoutingManager httpRoutingManager) {
-        return new PluginLifecycleListener(oneBasePluginManager, pluginHttpDispatcher, httpRoutingManager);
+                                                           PluginHttpManager pluginHttpManager) {
+        return new PluginLifecycleListener(oneBasePluginManager, pluginHttpDispatcher, pluginHttpManager);
     }
 
 }
