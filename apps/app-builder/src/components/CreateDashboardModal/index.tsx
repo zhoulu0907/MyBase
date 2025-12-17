@@ -75,6 +75,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
       src: screenChange
     }
   ]);
+  const [selectedTemplate, setSelectedTemplate] = useState<string>('');
 
   useEffect(() => {
     if (menuIcon) {
@@ -156,6 +157,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
      * params: screenMethod
      */
     setScreenMethod(value);
+    setSelectedTemplate('');
     setTimeout(() => {
       setScreenMethodLoading(false);
     }, 3000);
@@ -206,8 +208,15 @@ const CreateModal: React.FC<CreateModalProps> = ({
     );
   };
 
+  const handleScreenTemplateCard = (id: string) => {
+    setSelectedTemplate(id);
+  };
+
   const screenTemplateCard = (item: any) => (
-    <div className={styles.screenTemplateCard}>
+    <div
+      className={`${styles.screenTemplateCard} ${selectedTemplate === item.id ? styles.screenTemplateCardSelected : ''}`}
+      onClick={() => handleScreenTemplateCard(item.id)}
+    >
       <div className={styles.screenTemplateCardImg}>
         <img src={item.src} alt="" />
         <Button onClick={() => handlePreview(item.id)} className={styles.screenTemplateCardBtn}>
