@@ -21,8 +21,6 @@ export const hiddenFieldTypes = [
   ENTITY_FIELD_TYPE.RELATION.VALUE,
   ENTITY_FIELD_TYPE.STRUCTURE.VALUE,
   ENTITY_FIELD_TYPE.ARRAY.VALUE,
-  ENTITY_FIELD_TYPE.FILE.VALUE,
-  ENTITY_FIELD_TYPE.IMAGE.VALUE,
   ENTITY_FIELD_TYPE.GEOGRAPHY.VALUE,
   ENTITY_FIELD_TYPE.PASSWORD.VALUE,
   ENTITY_FIELD_TYPE.ENCRYPTED.VALUE,
@@ -444,7 +442,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
                 }}
                 triggerProps={{
                   autoAlignPopupWidth: false,
-                  autoAlignPopupMinWidth: true,
+                  autoAlignPopupMinWidth: true
                 }}
                 onVisibleChange={(visible) => {
                   if (!visible) {

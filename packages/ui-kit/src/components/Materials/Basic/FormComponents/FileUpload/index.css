@@ -2,7 +2,7 @@
   color: #4e5969;
 }
 .uplaodList-text-item {
-  background-color: #f7f8fa;
+  background-color: transparent;
   padding: 8px 12px;
   border-radius: 2px;
   display: flex;
@@ -22,6 +22,11 @@
   color: #1d2129;
   display: inline-block;
 }
+
+.uplaodList-text-item-name-hover:hover {
+  text-decoration: underline;
+}
+
 .uplaodList-text-item-process {
   flex: 1;
   display: flex;
@@ -31,8 +36,6 @@
   margin-left: 4px;
 }
 .uplaodList-text-item-opera {
-  margin-left: auto;
-  text-align: right;
   color: #86909c;
   display: flex;
   align-items: center;

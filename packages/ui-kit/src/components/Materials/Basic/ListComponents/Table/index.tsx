@@ -335,6 +335,7 @@ const XTable = memo(
                     detailMode={true}
                     pageComponentSchema={componentConfig}
                     runtime={true}
+                    recordId={_record.id}
                   />
                 );
               }
