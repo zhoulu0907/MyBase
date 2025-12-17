@@ -26,6 +26,7 @@ import {
   updateApplicationMenuOrder,
   updateApplicationMenuVisible,
   VisibleType,
+  createScreenApi,
   type ApplicationMenu,
   type CopyApplicationMenuReq,
   type CreateApplicationMenuReq,
@@ -35,7 +36,8 @@ import {
   type MetadataEntityPair,
   type UpdateApplicationMenuNameReq,
   type UpdateApplicationMenuOrderReq,
-  type UpdateApplicationMenuVisibleReq
+  type UpdateApplicationMenuVisibleReq,
+  type createScreenApiParams
 } from '@onebase/app';
 import { pagesRuntimeSignal } from '@onebase/common';
 import { EDITOR_TYPES } from '@onebase/ui-kit';
@@ -403,7 +405,14 @@ const PageManagerPage: FC = () => {
   const triggerDelete = (menuID: string) => {
     handleDelete(menuID);
   };
-
+  const handleScreenCreate = async () => {
+    console.log('handleScreenCreate createForm:', createForm);
+    const req = createScreenApi({
+      projectName: createForm.getFieldValue('projectName'),
+      remarks: null,
+      indexImage: null
+    });
+  };
   const handleCreate = async () => {
     createForm.validate(async (error) => {
       if (error !== null) return;
@@ -806,7 +815,8 @@ const PageManagerPage: FC = () => {
       <CreateScreenModal
         title={title}
         type={'page'}
-        handleCreate={handleCreate}
+        // handleCreate={handleCreate}
+        handleCreate={handleScreenCreate}
         onCancel={() => {
           setVisibleCreateScreenForm('');
         }}
