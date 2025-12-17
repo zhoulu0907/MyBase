@@ -48,6 +48,39 @@ public class MetadataBusinessEntityRepository extends BaseBizRepository<Metadata
     }
 
     /**
+     * 根据ID获取业务实体（不受application_id和version_tag过滤条件限制）
+     * <p>
+     * 此方法直接使用Mapper查询，绕过BaseBizRepository的自动过滤条件。
+     * 主要用于ID转UUID的场景，需要跨application_id和version_tag查询实体。
+     *
+     * @param entityId 实体ID
+     * @return 业务实体对象
+     */
+    public MetadataBusinessEntityDO getBusinessEntityByIdIgnoreFilter(Long entityId) {
+        if (entityId == null) {
+            return null;
+        }
+        // 直接使用Mapper查询，绕过BaseBizRepository的过滤条件
+        return getMapper().selectOneById(entityId);
+    }
+
+    /**
+     * 根据ID获取业务实体（不受application_id和version_tag过滤条件限制）
+     * <p>
+     * 此方法直接使用Mapper查询，绕过BaseBizRepository的自动过滤条件。
+     * 主要用于ID转UUID的场景，需要跨application_id和version_tag查询实体。
+     *
+     * @param entityId 实体ID（字符串格式）
+     * @return 业务实体对象
+     */
+    public MetadataBusinessEntityDO getBusinessEntityByIdIgnoreFilter(String entityId) {
+        if (entityId == null || entityId.trim().isEmpty()) {
+            return null;
+        }
+        return getBusinessEntityByIdIgnoreFilter(Long.valueOf(entityId));
+    }
+
+    /**
      * 根据实体UUID获取业务实体
      *
      * @param entityUuid 实体UUID

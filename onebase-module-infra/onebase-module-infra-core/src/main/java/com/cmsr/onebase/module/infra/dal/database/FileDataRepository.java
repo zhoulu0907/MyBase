@@ -52,12 +52,14 @@ public class FileDataRepository extends DataRepository<FileDO> {
     /**
      * 根据MD5查找文件
      *
-     * @param md5 MD5值
+     * @param md5       MD5值
+     * @param visitMode
      * @return 文件信息
      */
-    public FileDO findByMd5(String md5) {
+    public FileDO findByMd5AndVisitMode(String md5, String visitMode) {
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.eq(FileDO.COLUMN_MD5, md5);
+        configStore.eq(FileDO.COLUMN_VISIT_MODE, visitMode);
         return findOne(configStore);
     }
 

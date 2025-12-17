@@ -41,6 +41,7 @@ public class RuntimeFileController {
 
     @PostMapping("/upload")
     @Operation(summary = "上传文件")
+    @ApiSignIgnore
     public CommonResult<String> uploadFile(@Valid AppFileUploadReqVO uploadReqVO) throws Exception {
         if (FileVisitModeEnum.PERMISSION.getValue().equals(uploadReqVO.getVisitMode())){
             return CommonResult.error(BAD_REQUEST);
