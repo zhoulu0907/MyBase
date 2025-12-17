@@ -41,7 +41,7 @@ const Home: React.FC = () => {
                   <Route path="page-manager" element={<PageManagerPage />} />
                   <Route path="integrated-management/*" element={<IntegratedManagementPage />} />
                   <Route path="data-factory" element={<DataFactoryPage />} />
-                  <Route path="screen-port" element={<LargeScreenPort />} />
+                  <Route path="dashboard" element={<LargeScreenPort />} />
                   <Route path="app-setting" element={<AppSettingPage />} />
                 </Route>
               </Routes>
