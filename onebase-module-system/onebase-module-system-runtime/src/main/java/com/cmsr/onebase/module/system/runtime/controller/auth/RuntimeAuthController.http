@@ -12,7 +12,7 @@ tag: {{tag}}
 
 {
   "mobile": "15890635400",
-  "password": "78090bd0ca3653088c6c82966333b9d095fd42e2e917897a2d0adb31382c468401cb651c37d8f73c12f0161c0d02d321bf9dd94b01e56e1b3e57ed3c9db7175416219eca5e70d8af70cfe3b6653da859425ecb5338bfffc64a636a12bd26a9978eea0e7909526b44f8d490b13cff",
+  "password": "3acdbcfde19ce8f34242052a14f2dd3b3a9075be1bd11efb69f9c375ff72f165c3e22e21856b31e95407b6beac99433388b94287780062d6fb866e587076cb53597c47bb49483918d644f30f715dc861ad37419517d523a69ec6b5993ac77a66c453195659bf0714554d0c189cdc",
   "deviceId":666
 }
 
@@ -32,13 +32,11 @@ tag: {{tag}}
 POST {{baseUrl}}/system/auth/app-login
 Content-Type: application/json
 #tenant-id: {{adminTenantId}}
-tenant-id: 160864959456706560
+tenant-id: 158088726951460864
 tag: {{tag}}
 
-#{"password":"AdminChina2025!","username":"admin","appId":"155296070483476480",
-#"captchaVerification":"B/IPY56Fitizbk+iaZMFreS2ac6WF9boqPZOLwDxtq82tjAZwPxJLNKBWDemjc+LACdFcc61IbKV8FbsVueG1rys88pb749urZsNI1olDlA=",
-#"deviceId":"50dddd1e2dcbb0f792b0fe3e9028890b"}
-{"password":"AdminChina2025\u0021","username":"wangshaoqing","appId":"163852177939464192","captchaVerification":"3oJFZk4xdNNjawBg8JwIwkbZv6hhC6yKrjtBq7D7tbCABbnNmu8f0T5qf/LeSpLu1dhHwA+5nS1w+uD7AK6k72E8KSX5zeXQoO1BnNR7iJ0=","deviceId":"f3b000916478e376e7253f5694a8d1e8"}
+{"password":"124f54e7508c286e1e488e75bc3a80d4a999fa13a2a1646d7ddce30eaaa52f2198131554b6194a52a793ec03aaf94b7e8c841636beea488831b08d8678ed3cee4f95ed83ac683d72ca51252ffecfb6bd9193d981981ff15b0c27c5d7183035ba7c7c235f48827ba27ddbb4bcec3b71","username":"gaoguoqing",
+  "appId":"166917874067439616","captchaVerification":"3oJFZk4xdNNjawBg8JwIwkbZv6hhC6yKrjtBq7D7tbCABbnNmu8f0T5qf/LeSpLu1dhHwA+5nS1w+uD7AK6k72E8KSX5zeXQoO1BnNR7iJ0=","deviceId":"f3b000916478e376e7253f5694a8d1e8"}
 
 > {%
     // 登录成功后自动更新token到环境变量
@@ -59,9 +57,9 @@ tenant-id: {{adminTenantId}}
 tag: {{tag}}
 
 {
-  "mobile": "18818260272",
-  "password": "AdminChina2025!",
-  "appId":155296070483476480,
+  "mobile": "15890635400",
+  "password": "0f16ab8010a1a7594a375370ceb14d22a4203eac42e431d8a3ccd566ceef555e2e0b2312f58e44815715d16a3e76ee506bf6552965b46c5fab4ad2e74d4450e646639a29b8823e496e16c71663f9ea19c8afa0f82e2429c1dc0b3bfd1713c638fdec434a5e33a30998f1dc071a5c",
+  "appId":166917874067439616,
   "deviceId":666
 }
 
@@ -89,10 +87,10 @@ tag: {{tag}}
 }
 
 ### 请求 /reset-password 接口 => 失败
-GET {{baseUrl}}/system/auth/get-permission-info?code=corp
+GET {{baseUrl}}/system/auth/get-permission-info
 Content-Type: application/json
-Authorization: Bearer 777d29f0dac54d52a48c86495acd49ea
-tenant-id: 158088726951460864
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
 tag: {{tag}}
 
 ### 请求 /reset-password 接口 => 失败

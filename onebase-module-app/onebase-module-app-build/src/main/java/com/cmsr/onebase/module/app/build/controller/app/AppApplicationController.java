@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.app.build.controller.app;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.app.build.service.app.AppApplicationService;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationCreateReqVO;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationCreateRespVO;
@@ -14,6 +15,7 @@ import com.cmsr.onebase.module.app.core.enums.app.AppStatusEnum;
 import com.cmsr.onebase.module.app.core.vo.app.ApplicationPageReqVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.security.PermitAll;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -47,7 +49,8 @@ public class AppApplicationController {
 
     @GetMapping("/get")
     @Operation(summary = "获得应用")
-    @PreAuthorize("@ss.hasPermission('tenant:app:query')")
+    @TenantIgnore
+    @PermitAll
     public CommonResult<ApplicationRespVO> getApplication(@RequestParam("id") Long id) {
         return CommonResult.success(appApplicationService.getApplication(id));
     }

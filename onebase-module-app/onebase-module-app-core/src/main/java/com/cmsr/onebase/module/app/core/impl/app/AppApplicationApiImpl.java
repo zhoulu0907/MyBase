@@ -13,6 +13,7 @@ import com.cmsr.onebase.module.app.core.dal.database.tag.AppTagRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppApplicationDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppApplicationTagDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppTagDO;
+import com.cmsr.onebase.module.app.core.enums.app.AppStatusEnum;
 import com.mybatisflex.core.tenant.TenantManager;
 import jakarta.annotation.Resource;
 import lombok.Setter;
@@ -58,7 +59,7 @@ public class AppApplicationApiImpl implements AppApplicationApi {
 
     @Override
     public List<ApplicationDTO> findAppApplicationByAppName(String appName) {
-        List<AppApplicationDO> applicationList = appApplicationRepository.findAppApplicationByAppName(appName);
+        List<AppApplicationDO> applicationList = appApplicationRepository.findAppApplicationByAppName(appName, AppStatusEnum.ONLINE.getValue());
         return applicationList.stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());

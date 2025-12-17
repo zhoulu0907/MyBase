@@ -16,7 +16,18 @@ public interface MetadataEntityRelationshipRuntimeService {
      * @param entityId         实体ID
      * @param relationshipType 关系类型筛选（可选）
      * @return 实体及其关联子表信息
+     * @deprecated 请使用 {@link #getEntityWithChildrenByUuid(String, String)}
      */
+    @Deprecated
     EntityWithChildrenRespVO getEntityWithChildrenById(Long entityId, String relationshipType);
+
+    /**
+     * 根据实体UUID查询实体名称及其关联的子表信息
+     *
+     * @param entityUuid       实体UUID
+     * @param relationshipType 关系类型筛选（可选）
+     * @return 实体及其关联子表信息
+     */
+    EntityWithChildrenRespVO getEntityWithChildrenByUuid(String entityUuid, String relationshipType);
 
 }

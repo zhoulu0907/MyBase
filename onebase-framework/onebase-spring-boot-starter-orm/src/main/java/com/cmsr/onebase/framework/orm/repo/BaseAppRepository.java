@@ -5,6 +5,7 @@ import com.cmsr.onebase.framework.orm.entity.BaseAppEntity;
 import com.mybatisflex.core.BaseMapper;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.*;
+import com.mybatisflex.core.update.UpdateChain;
 import com.mybatisflex.core.util.CollectionUtil;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -23,15 +24,9 @@ public class BaseAppRepository<M extends BaseMapper<T>, T extends BaseAppEntity>
         if (!QueryWrapperUtils.isQueryFilterable(queryWrapper)) {
             return;
         }
-        QueryTable queryTable = QueryWrapperUtils.getQueryTable(queryWrapper);
-        QueryColumn applicationColumn;
-        if (queryTable != null) {
-            applicationColumn = new QueryColumn(queryTable, QueryWrapperUtils.APPLICATION_ID);
-        } else {
-            applicationColumn = new QueryColumn(QueryWrapperUtils.APPLICATION_ID);
-        }
         Long applicationId = ApplicationManager.getApplicationId();
-        queryWrapper.and(applicationColumn.eq(applicationId).when(!ApplicationManager.isIgnoreApplicationCondition()));
+        QueryColumn applicationIdColumn = QueryWrapperUtils.createApplicationIdColumn(this, queryWrapper);
+        queryWrapper.and(applicationIdColumn.eq(applicationId).when(!ApplicationManager.isIgnoreApplicationCondition()));
     }
 
 
@@ -62,6 +57,18 @@ public class BaseAppRepository<M extends BaseMapper<T>, T extends BaseAppEntity>
     public boolean update(T entity, QueryWrapper query) {
         this.injectQueryFilter(query);
         return super.update(entity, query);
+    }
+
+    @Deprecated
+    @Override
+    public UpdateChain<T> updateChain() {
+        Long applicationId = ApplicationManager.getApplicationId();
+        QueryColumn applicationIdColumn = QueryWrapperUtils.createApplicationIdColumn(this);
+        //
+        UpdateChain<T> updateChain = super.updateChain();
+        updateChain.where(applicationIdColumn.eq(applicationId).when(!ApplicationManager.isIgnoreApplicationCondition())
+        );
+        return updateChain;
     }
     //endregion ===== 更新（改）操作 =====
 
@@ -267,9 +274,9 @@ public class BaseAppRepository<M extends BaseMapper<T>, T extends BaseAppEntity>
     //endregion ===== 分页查询操作 =====
 
     public boolean deleteAllApplicationData(Long applicationId) {
-        QueryColumn applicationColumn = new QueryColumn(QueryWrapperUtils.APPLICATION_ID);
-        return this.updateChain()
-                .where(applicationColumn.eq(applicationId))
+        QueryColumn applicationIdColumn = QueryWrapperUtils.createApplicationIdColumn(this);
+        return super.updateChain()
+                .where(applicationIdColumn.eq(applicationId))
                 .remove();
     }
 }

@@ -48,13 +48,13 @@ public interface ErrorCodeConstants {
     ErrorCode USER_IMPORT_LIST_IS_EMPTY = new ErrorCode(1_002_003_004, "导入用户数据不能为空！");
     ErrorCode USER_PASSWORD_FAILED = new ErrorCode(1_002_003_005, "用户密码校验失败");
     ErrorCode USER_IS_DISABLE = new ErrorCode(1_002_003_006, "名字为【{}】的用户已被禁用");
-    ErrorCode USER_COUNT_MAX = new ErrorCode(1_002_003_008, "创建用户失败，原因：超过租户最大租户配额({})！");
+    ErrorCode USER_COUNT_MAX = new ErrorCode(1_002_003_008, "创建用户失败，原因：超过空间最大空间配额({})！");
     ErrorCode USER_IMPORT_INIT_PASSWORD = new ErrorCode(1_002_003_009, "初始密码不能为空");
     ErrorCode USER_MOBILE_NOT_EXISTS = new ErrorCode(1_002_003_010, "该手机号尚未注册");
     ErrorCode USER_REGISTER_DISABLED = new ErrorCode(1_002_003_011, "注册功能已关闭");
     ErrorCode USER_PASSWORD_NOT_ALLOW_DEL = new ErrorCode(1_002_003_012, "内置用户不允许删除，只允许修改密码");
     ErrorCode LICENSE_USER_COUNT_NOT_ENOUGH = new ErrorCode(1_002_003_013, "可分配人员数量不足，人员上限是{}, 剩余{}");
-    ErrorCode LICENSE_TENANT_COUNT_NOT_ENOUGH = new ErrorCode(1_002_003_014, "租户数量已达上限");
+    ErrorCode LICENSE_TENANT_COUNT_NOT_ENOUGH = new ErrorCode(1_002_003_014, "空间数量已达上限");
     ErrorCode LENANT_ALLOCATE_PERSON_COUNT_LESS_THEN_ALLOCATED = new ErrorCode(1_002_003_014, "分配的用户数量不能低于空间内已有用户数：{}");
     ErrorCode USER_TYPE_EXCEPTION = new ErrorCode(1_002_003_015, "用户类型异常:{}");
 
@@ -115,22 +115,22 @@ public interface ErrorCodeConstants {
     ErrorCode SMS_CODE_EXCEED_SEND_MAXIMUM_QUANTITY_PER_DAY = new ErrorCode(1_002_014_004, "超过每日短信发送数量");
     ErrorCode SMS_CODE_SEND_TOO_FAST = new ErrorCode(1_002_014_005, "短信发送过于频繁");
 
-    // ========== 租户信息 1-002-015-000 ==========
-    ErrorCode TENANT_NOT_EXISTS = new ErrorCode(1_002_015_000, "租户不存在");
-    ErrorCode TENANT_DISABLE = new ErrorCode(1_002_015_001, "名字为【{}】的租户已被禁用");
-    ErrorCode TENANT_EXPIRE = new ErrorCode(1_002_015_002, "名字为【{}】的租户已过期");
-    ErrorCode TENANT_CAN_NOT_UPDATE_SYSTEM = new ErrorCode(1_002_015_003, "系统租户不能进行修改、删除等操作！");
-    ErrorCode TENANT_NAME_DUPLICATE = new ErrorCode(1_002_015_004, "名字为【{}】的租户已存在");
-    ErrorCode TENANT_WEBSITE_DUPLICATE = new ErrorCode(1_002_015_005, "租户域名为【{}】的租户已存在");
-    ErrorCode TENANT_WEBSITE_IS_NULL = new ErrorCode(1_002_015_006, "租户域名不可为空");
-    ErrorCode TENANT_ONLY_GET_SELF = new ErrorCode(1_002_015_007, "只能获取自己所在的租户的信息");
-    ErrorCode TENANT_ADMIN_ISNULL = new ErrorCode(1_002_015_008, "租户管理员不可为空");
+    // ========== 空间信息 1-002-015-000 ==========
+    ErrorCode TENANT_NOT_EXISTS = new ErrorCode(1_002_015_000, "空间不存在");
+    ErrorCode TENANT_DISABLE = new ErrorCode(1_002_015_001, "名字为【{}】的空间已被禁用");
+    ErrorCode TENANT_EXPIRE = new ErrorCode(1_002_015_002, "名字为【{}】的空间已过期");
+    ErrorCode TENANT_CAN_NOT_UPDATE_SYSTEM = new ErrorCode(1_002_015_003, "系统空间不能进行修改、删除等操作！");
+    ErrorCode TENANT_NAME_DUPLICATE = new ErrorCode(1_002_015_004, "名字为【{}】的空间已存在");
+    ErrorCode TENANT_WEBSITE_DUPLICATE = new ErrorCode(1_002_015_005, "空间域名为【{}】的空间已存在");
+    ErrorCode TENANT_WEBSITE_IS_NULL = new ErrorCode(1_002_015_006, "空间域名不可为空");
+    ErrorCode TENANT_ONLY_GET_SELF = new ErrorCode(1_002_015_007, "只能获取自己所在的空间的信息");
+    ErrorCode TENANT_ADMIN_ISNULL = new ErrorCode(1_002_015_008, "空间管理员不可为空");
 
-    // ========== 租户套餐 1-002-016-000 ==========
-    ErrorCode TENANT_PACKAGE_NOT_EXISTS = new ErrorCode(1_002_016_000, "租户套餐不存在");
-    ErrorCode TENANT_PACKAGE_USED = new ErrorCode(1_002_016_001, "租户正在使用该套餐，请给租户重新设置套餐后再尝试删除");
-    ErrorCode TENANT_PACKAGE_DISABLE = new ErrorCode(1_002_016_002, "名字为【{}】的租户套餐已被禁用");
-    ErrorCode TENANT_PACKAGE_NAME_DUPLICATE = new ErrorCode(1_002_016_003, "已经存在该名字的租户套餐");
+    // ========== 空间套餐 1-002-016-000 ==========
+    ErrorCode TENANT_PACKAGE_NOT_EXISTS = new ErrorCode(1_002_016_000, "空间套餐不存在");
+    ErrorCode TENANT_PACKAGE_USED = new ErrorCode(1_002_016_001, "空间在使用该套餐，请给空间新设置套餐后再尝试删除");
+    ErrorCode TENANT_PACKAGE_DISABLE = new ErrorCode(1_002_016_002, "名字为【{}】的空间套餐已被禁用");
+    ErrorCode TENANT_PACKAGE_NAME_DUPLICATE = new ErrorCode(1_002_016_003, "已经存在该名字的空间套餐");
 
     // ========== 外部用户 1-002-018-000 ==========
 
@@ -195,4 +195,6 @@ public interface ErrorCodeConstants {
     ErrorCode CORP_USER_LIMIT_COUNT_CHECK = new ErrorCode(1_002_003_013, "空间可分配人员数量不足，人员上限是{}, 剩余{}");
     ErrorCode CORP_USER_EXITES_LIMIT_COUNT_CHECK = new ErrorCode(1_002_003_014, "分配的用户数量不能低于企业内已有用户数：{}");
     ErrorCode AUTH_LOGIN_APP_EXPIRE = new ErrorCode(1_002_025_015, "本企业用户无法登录，授权已过期。");
+
+    ErrorCode CONFIG_NO_EXISTS = new ErrorCode(1_002_026_001, "配置项不存在");
 }
