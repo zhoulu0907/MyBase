@@ -30,6 +30,21 @@ export const hiddenFieldTypes = [
   ENTITY_FIELD_TYPE.MULTI_DATA_SELECTION.VALUE
 ];
 
+export const hiddenSearchFieldTypes = [
+  ENTITY_FIELD_TYPE.RELATION.VALUE,
+  ENTITY_FIELD_TYPE.STRUCTURE.VALUE,
+  ENTITY_FIELD_TYPE.ARRAY.VALUE,
+  ENTITY_FIELD_TYPE.GEOGRAPHY.VALUE,
+  ENTITY_FIELD_TYPE.PASSWORD.VALUE,
+  ENTITY_FIELD_TYPE.ENCRYPTED.VALUE,
+  ENTITY_FIELD_TYPE.AGGREGATE.VALUE,
+  ENTITY_FIELD_TYPE.MULTI_USER.VALUE,
+  ENTITY_FIELD_TYPE.MULTI_DEPARTMENT.VALUE,
+  ENTITY_FIELD_TYPE.MULTI_DATA_SELECTION.VALUE,
+  ENTITY_FIELD_TYPE.FILE,
+  ENTITY_FIELD_TYPE.IMAGE
+];
+
 const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
   handleMultiPropsChange,
   handlePropsChange,
@@ -457,11 +472,15 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
                   }
                 }}
               >
-                {fieldList.map((item: MetadataEntityField) => (
-                  <Select.Option key={item.fieldName} value={item.fieldName}>
-                    {item.displayName}
-                  </Select.Option>
-                ))}
+                {fieldList
+                  .filter((item: MetadataEntityField) => {
+                    return !hiddenSearchFieldTypes.includes(item.fieldType);
+                  })
+                  .map((item: MetadataEntityField) => (
+                    <Select.Option key={item.fieldName} value={item.fieldName}>
+                      {item.displayName}
+                    </Select.Option>
+                  ))}
               </Select>
             </div>
           )}

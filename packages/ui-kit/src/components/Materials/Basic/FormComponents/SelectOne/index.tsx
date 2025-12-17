@@ -17,7 +17,12 @@ const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean; det
   const fieldValue = Form.useWatch(fieldId, form);
 
   const handleSelectChange = (value: string) => {
+    console.log('value: ', value);
+
     const name = defaultOptionsConfig?.defaultOptions.find((item) => item.value === value)?.label;
+
+    console.log('name: ', name);
+    console.log('fieldId: ', fieldId);
 
     form.setFieldValue(fieldId, {
       id: value,
