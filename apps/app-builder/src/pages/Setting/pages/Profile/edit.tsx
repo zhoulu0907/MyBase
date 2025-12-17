@@ -1,5 +1,5 @@
 import { Button, Form, Input, Message, Select, Spin, Tabs } from '@arco-design/web-react';
-import { UploadAvatarComponent } from '@onebase/common';
+import { UploadAvatarComponent, UserPermissionManager } from '@onebase/common';
 import { getLoginedUser, updateLoginedUser, updateLoginedUserPwd, uploadFile } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -56,6 +56,7 @@ const ProfileEditPage: React.FC<IEditPageProps> = ({ avatarUrl, setAvatarUrl }) 
   const handleSubmit = async () => {
     try {
       const values = await form.validate();
+      const userPermissionInfo:any = UserPermissionManager.getUserPermissionInfo();
       const req = {
         nickname: values.nickname,
         mobile: values.mobile?.includes('*') ? null : filterSpace(values.mobile),
@@ -63,6 +64,11 @@ const ProfileEditPage: React.FC<IEditPageProps> = ({ avatarUrl, setAvatarUrl }) 
         avatar: avatarUrl
       };
       await updateLoginedUser(req);
+      UserPermissionManager.setUserPermissionInfo({...userPermissionInfo, user: {
+        ...userPermissionInfo.user,
+        mobile: values.mobile,
+        nickname: values.nickname,
+      }});
       form.resetFields();
       setEncryptedMobile('');
       setEncryptedEmail('');

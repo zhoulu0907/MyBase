@@ -57,7 +57,7 @@
       min-width: 1px;
       max-width: 1px;
       height: 1em;
-      margin: 0 0.25rem;
+      margin: 0 0.30rem;
       border-left: 1px solid var(--color-neutral-3);
       vertical-align: middle;
     }
@@ -86,7 +86,7 @@
       background: transparent;
     }
     .workspaceContentOuter, .workspaceContentOuterList {
-      background-color: #F7F8FA;
+      background-color: #FFF;
       box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
       min-width: 348px;
       height: calc(100% - 24px);
@@ -94,11 +94,6 @@
       flex: 1 1 auto;
       padding: 12px;
       border-radius: 4px;
-    }
-    .workspaceContentOuterList {
-      .workspaceContent {
-        background-color: #F7F8FA;
-      }
     }
 
     .workspaceContent {
@@ -115,10 +110,7 @@
       flex-wrap: wrap;
       align-content: flex-start;
 
-      padding: 16px 0 0 0;
-      & > div {
-        width: calc(100% - 8px) !important;
-      }
+      padding-top: 18px;
 
       /* 自定义滚动条样式 */
       &::-webkit-scrollbar {
@@ -136,16 +128,14 @@
 
     // 组件样式
     .componentItem {
+      width: 100%;
       cursor: move;
       box-sizing: border-box;
       border: 1px dashed transparent;
       border-radius: 8px;
       transition: border-color 0.2s ease;
       position: relative;
-
-      // & > div {
-      //   pointer-events: none !important;
-      // }
+      margin-bottom: 4px;
 
       & .operationArea {
         pointer-events: auto !important;

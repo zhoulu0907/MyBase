@@ -1,16 +1,16 @@
 import { Button, Form, Select } from '@arco-design/web-react';
+import { CONFIG_TYPES } from '@onebase/ui-kit';
 import React, { useEffect, useState } from 'react';
 import { registerConfigRenderer } from '../../registry';
-import { CONFIG_TYPES } from '@onebase/ui-kit';
 
 import { useAppStore } from '@/store/store_app';
+import { useResourceStore } from '@/store/store_resource';
 import { getEntityGraph } from '@onebase/app';
+import { getPopupContainer } from '@onebase/ui-kit';
+import { hiddenFieldTypes } from '../DynamicTableConfig';
 import DataSelectionProcessConfig from './components/DataSelectionProcessConfig';
 import FillingRuleSettingsModal from './components/FillingRuleSettingsModal';
 import styles from './index.module.less';
-import { useResourceStore } from '@/store/store_resource';
-import { hiddenFieldTypes } from '../DynamicTableConfig';
-import { getPopupContainer } from '@onebase/ui-kit';
 
 const FormItem = Form.Item;
 const Option = Select.Option;
@@ -62,7 +62,11 @@ const DynamicDataSourceConfig: React.FC<DynamicSelectDataSourceConfigProps> = ({
 
   useEffect(() => {
     curAppId && curDataSourceId && getDataSource();
-  }, [curAppId, curDataSourceId]);
+  }, [curAppId, curDataSourceId, id]);
+
+  useEffect(() => {
+    setSelectRule(configs[ATTR_KEY.FILLRULESETTING]);
+  }, [configs[ATTR_KEY.FILLRULESETTING]]);
 
   useEffect(() => {
     const displayFields = configs[ATTR_KEY.DISPLAYFIELDS];
@@ -77,6 +81,29 @@ const DynamicDataSourceConfig: React.FC<DynamicSelectDataSourceConfigProps> = ({
       dataSourceOptions.map((d: any) => [d.entityUuid, d.fields ?? []] as const)
     );
     setFieldsMap(fieldsMap);
+
+    // SourceOptions 改变更新entity list
+    if (configs[item.key].entityUuid && dataSourceOptions.length > 0) {
+      const value = configs[item.key].entityUuid;
+      // 查找
+      const displayFieldOptions = (fieldsMap.get(value) ?? []).filter(
+        (item: any) => !hiddenFieldTypes.includes(item.fieldType)
+      );
+      setDisplayFieldOptions(displayFieldOptions);
+
+      // 去掉系统字段 和需要隐藏的字段
+      const filteredFieldsData = (fieldsMap.get(value) ?? []).filter(
+        (f: any) => !f.isSystemField && !hiddenFieldTypes.includes(f.fieldType)
+      );
+      setFilteredFieldsData(filteredFieldsData);
+
+      handleMultiPropsChange?.([
+        { key: ATTR_KEY.DISPLAYFIELDSOPTIONS, value: displayFieldOptions },
+        { key: ATTR_KEY.DATAFIELDS, value: displayFieldOptions },
+        { key: ATTR_KEY.FILLFORMFIELDOPTIONS, value: filteredFieldsData },
+        { key: ATTR_KEY.DYNAMICTABLECONFIG, value: tableConfig }
+      ]);
+    }
   }, [dataSourceOptions]);
 
   const getDataSource = async () => {
@@ -147,36 +174,36 @@ const DynamicDataSourceConfig: React.FC<DynamicSelectDataSourceConfigProps> = ({
     }
   };
 
-  const handleDisplayFieldOptions = (options: any) => {
-    setDisplayFieldOptions(options);
-    const displayFields = options.reduce((fields: any[], item: any) => {
-      if (selected.includes(item.fieldName)) {
-        fields.push({
-          label: item.displayName,
-          value: item.fieldName
-        });
-      }
-      return fields;
-    }, []);
-    handleMultiPropsChange?.([
-      { key: ATTR_KEY.DISPLAYFIELDSOPTIONS, value: options },
-      { key: ATTR_KEY.DISPLAYFIELDS, value: displayFields }
-    ]);
-  };
+  // const handleDisplayFieldOptions = (options: any) => {
+  //   setDisplayFieldOptions(options);
+  //   const displayFields = options.reduce((fields: any[], item: any) => {
+  //     if (selected.includes(item.fieldName)) {
+  //       fields.push({
+  //         label: item.displayName,
+  //         value: item.fieldName
+  //       });
+  //     }
+  //     return fields;
+  //   }, []);
+  //   handleMultiPropsChange?.([
+  //     { key: ATTR_KEY.DISPLAYFIELDSOPTIONS, value: options },
+  //     { key: ATTR_KEY.DISPLAYFIELDS, value: displayFields }
+  //   ]);
+  // };
 
-  const handleSelectedChange = (value: any) => {
-    setSelected(value);
-    const displayFields = displayFieldOptions.reduce((fields: any[], option: any) => {
-      if (value.includes(option.fieldName)) {
-        fields.push({
-          label: option.displayName,
-          value: option.fieldName
-        });
-      }
-      return fields;
-    }, []);
-    handlePropsChange(ATTR_KEY.DISPLAYFIELDS, displayFields);
-  };
+  // const handleSelectedChange = (value: any) => {
+  //   setSelected(value);
+  //   const displayFields = displayFieldOptions.reduce((fields: any[], option: any) => {
+  //     if (value.includes(option.fieldName)) {
+  //       fields.push({
+  //         label: option.displayName,
+  //         value: option.fieldName
+  //       });
+  //     }
+  //     return fields;
+  //   }, []);
+  //   handlePropsChange(ATTR_KEY.DISPLAYFIELDS, displayFields);
+  // };
 
   const handleEchoFieldChange = (fieldName: string) => {
     const option = displayFieldOptions.find((opt: any) => opt.fieldName === fieldName);

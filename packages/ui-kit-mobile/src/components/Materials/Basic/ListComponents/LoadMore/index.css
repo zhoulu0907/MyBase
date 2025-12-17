@@ -1,4 +1,22 @@
+#ob-loadmore-dropdown-scroll-search {
+  font-size: 0.28rem;
+  height: 100%;
+  padding: 0.12rem 0.32rem;
+  overflow-y: auto;
+  min-height: 3rem;
+  max-height: 100%;
+  .searchItem {
+    padding: 0;
+  }
+  .searchActions {
+    margin: 0.36rem 0 0.28rem;
+  }
+}
 .loadmore-list-wrapper-OBMobile {
+  height: 100%;
+  border-radius: 0.16rem;
+  background: #F7F8FA;
+
   .total-data {
     display: block;
     line-height: 0.8rem;
@@ -8,14 +26,26 @@
   }
 
   .list-search-header {
-    padding: 0.4rem 0.32rem 0.24rem;
-    display: flex;
-    align-items: center;
+    padding: 0.4rem 0.32rem 0;
     background-color: #fff;
     width: calc(100% - 0.64rem) !important;
 
     @media screen and (min-width: 900px) {
       max-width: calc(450px - 0.64rem) !important;
+    }
+    .search-form-wrapper {
+      display: flex;
+      align-items: center;
+    }
+
+    .search-bar-form-item {
+      flex: 1;
+      .arco-form-label-item {
+        display: none;
+      }
+      .arco-form-item-control {
+        padding: 0;
+      }
     }
 
     .filter-title {
@@ -23,24 +53,25 @@
       color: #86909C;
       margin-right: 0.24rem;
       flex: 1;
+      padding-bottom: 0.24rem;
     }
 
     .filter-icon {
-      display: none;
-      width: 0.48rem;
-      height: 0.48rem;
+      width: 0.4rem;
+      height: 0.4rem;
       margin-left: 0.24rem;
+      padding-bottom: 0.24rem;
     }
 
     .arco-search-bar-container {
-      padding: 0;
+      padding: 0 0 0.24rem;
       flex: 1;
     }
 
     .arco-search-bar-wrap {
       font-size: 0.28rem;
       height: 0.72rem;
-      padding: 0 0 0 0.24rem;
+      padding: 0 0.24rem 0;
       line-height: 0.72rem;
     }
 
@@ -89,9 +120,7 @@
   }
 
   .list-body-wrapper {
-    border-radius: 0.16rem;
     padding: 0.24rem 0.24rem 0;
-    background: #F7F8FA;
 
     .no-data {
       font-size: 0.28rem;
@@ -103,7 +132,6 @@
     .list-body-item-wrapper {
       padding: 0 0.24rem 0.24rem;
       background: #fff;
-      border-radius: 0.08rem;
       margin-bottom: 0.24rem;
       line-height: 0.6rem;
       border-radius: 0.16rem;

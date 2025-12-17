@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import { nanoid } from 'nanoid';
-import { Switch, Form } from '@arco-design/mobile-react';
+import { Switch, Form, Ellipsis } from '@arco-design/mobile-react';
 import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, DEFAULT_VALUE_TYPES, FormSchema } from '@onebase/ui-kit';
 import './index.css';
 import '../index.css';
@@ -39,7 +39,7 @@ const XSwitch = memo((props: XSwitchConfig & { runtime?: boolean; detailMode?: b
     <Form.Item
       className="inputTextWrapperOBMobile switchWrapperOBMobile"
       field={fieldId}
-      label={label.display ? label.text : undefined}
+      label={label.display ? <Ellipsis text={label.text} /> : undefined}
       initialValue={defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : ''}
       style={{
         pointerEvents: (!runtime || detailMode) ? 'none' : 'unset',

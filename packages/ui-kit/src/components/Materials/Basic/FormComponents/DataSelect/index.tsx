@@ -12,6 +12,7 @@ import { dataMethodPageV2, menuSignal, PageMethodV2Params } from '@onebase/app';
 import { useFormField } from '../useFormField';
 
 import { useFormEditorSignal } from '@/index';
+import { isRuntimeEnv } from '@onebase/common';
 import './index.css';
 // ===== 导入 end =====
 
@@ -50,6 +51,7 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
   const [uiState, setUiState] = useState<{ previewVisible: boolean }>({ previewVisible: false });
   const [dataState, setDataState] = useState<any>('');
   const [options, setOptions] = useState<any[]>([]);
+  const [dataList, setDataList] = useState<any[]>([]);
 
   useEffect(() => {
     if (!runtime) {
@@ -98,11 +100,13 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
       }
     },
     selectDropdown: (value: any, option: any) => {
+      const data = dataList.find(item => item.id === value);
       const name = option?.labelTitle ?? option.children ?? '';
       const nextValue = value ? { id: value, name } : '';
       setDataState(nextValue);
       if (runtime) {
         form.setFieldValue(fieldName, nextValue);
+        internalEvents.fillDatabyRule(data);
       }
     },
     fillDatabyRule: (data: any) => {
@@ -139,7 +143,10 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
 
   useEffect(() => {
     const fetchOptions = async () => {
-      if (!runtime) return;
+      if (!runtime || !isRuntimeEnv()) {
+        return;
+      }
+
       const tableName = props?.selectedDataSource?.tableName;
       if (!tableName) return;
       const { curMenu } = menuSignal;
@@ -147,6 +154,7 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
         pageNo: 1,
         pageSize: 100
       };
+
       const res = await dataMethodPageV2(tableName, curMenu.value?.id, req);
       const lastKey = (displayFields || []).length ? displayFields[displayFields.length - 1]?.value : undefined;
       const list = Array.isArray(res?.list) ? res.list : [];
@@ -155,6 +163,7 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
         value: item?.id ?? item?.id
       }));
       setOptions(opts);
+      setDataList(list);
     };
     if (helpers.isDropdownMode()) {
       fetchOptions();

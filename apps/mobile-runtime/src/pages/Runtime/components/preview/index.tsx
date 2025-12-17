@@ -26,8 +26,10 @@ import {
   ENTITY_FIELD_TYPE,
   FORM_COMPONENT_TYPES,
   getComponentWidth,
+  SHOW_COMPONENT_TYPES,
   STATUS_OPTIONS,
   STATUS_VALUES,
+  useFormEditorSignal,
   type GridItem
 } from '@onebase/ui-kit';
 import { getFileUrlById } from '@onebase/platform-center';
@@ -38,6 +40,7 @@ import { startLoadPageSet, useEditorSignalMap, useListEditorSignal } from '@oneb
 import { PreviewRender } from '@onebase/ui-kit-mobile';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { Fragment, useEffect, useState } from 'react';
+import { splitByDivider } from '@/utils/tree';
 import styles from './index.module.less';
 
 interface PreviewProps {
@@ -62,6 +65,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
   const [form] = useForm();
 
+  const { pageComponentSchemas } = useFormEditorSignal;
   const { components: listComponents, pageComponentSchemas: listPageComponentSchemas } = useListEditorSignal;
 
   const {
@@ -84,6 +88,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
   // 当前时间戳
   const [detailMode, setDetailMode] = useState(true);
+  const [formDetails, setFormDetails] = useState<any>({}); // 表单数据
   const [refresh, setRefresh] = useState(Date.now());
 
   useEffect(() => {
@@ -144,6 +149,21 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
   const [flows, setFlows] = useState<any[]>([]);
   const [inputParams, setInputParams] = useState<any>({});
 
+  const resetImageFile = (formData: any, field: { fieldType: string; fieldName: string }, value: any) => {
+    const filterByUpload = ['IMAGE', 'FILE'];
+    if (filterByUpload.includes(field.fieldType) && Array.isArray(value)) {
+      formData[field.fieldName] = value.map((item: any) => {
+        if ((item.response || item.id) && item.name) {
+          return {
+            name: item.name,
+            id: item.response || item.id
+          };
+        }
+        return item;
+      });
+      return true;
+    }
+  };
   // 提交表单
   const submitForm = async () => {
     await form.validateFields();
@@ -160,35 +180,28 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     Object.entries(fields).forEach(([key, value]) => {
       console.log('key: ', key, '   value: ', value);
       // 处理主表逻辑
-      const field = (mainMetaDataFields.value || []).filter(f => f.isSystemField !== 1).find((f: AppEntityField) => f.fieldName == key);
+      const field = (mainMetaDataFields.value || [])
+        .filter((f) => f.isSystemField !== 1)
+        .find((f: AppEntityField) => f.fieldName == key);
       if (field) {
         console.log('field: ', field);
-        const filterByUpload = ['IMAGE', 'FILE'];
 
-        if (filterByUpload.includes(field.fieldType) && Array.isArray(value)) {
-          formData[field.fieldName] = value.map((item: any) => {
-            if ((item.response || item.id) && item.name) {
-              console.log('item=====11111====: ', item);
-              return {
-                name: item.name,
-                id: item.response || item.id,
-              };
-            }
-            return item;
-          });
-        } else if (field.fieldType === 'DATE') {
+        if (resetImageFile(formData, field, value)) {
+          // do nothing
+        } else if (field.fieldType === ENTITY_FIELD_TYPE.DATE.VALUE) {
           formData[field.fieldName] = value ? dayjs(value).format('YYYY-MM-DD') : '';
-        } else if (field.fieldType === 'DATETIME') {
+        } else if (field.fieldType === ENTITY_FIELD_TYPE.DATETIME.VALUE) {
           formData[field.fieldName] = value ? dayjs(value).format('YYYY-MM-DD hh:mm:ss') : '';
-        } else if (field.fieldType === 'SELECT') {
+        } else if (field.fieldType === ENTITY_FIELD_TYPE.SELECT.VALUE) {
           formData[field.fieldName] = {
             id: value[0],
             name: value[0]
           };
-        } else if (field.fieldType === 'USER') {
+        } else if (field.fieldType === ENTITY_FIELD_TYPE.USER.VALUE) {
           if (Array.isArray(value)) {
+            const userData = formDetails?.[key];
             formData[field.fieldName] = {
-              id: value[0],
+              id: userData?.id,
               name: value[0]
             };
           } else {
@@ -227,21 +240,9 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
           groups[groupIndex] = {};
         }
 
-        const fieldType = subEntities.value[0].childFields.find(v => v.fieldName === fieldName).fieldType;
-        const filterByUpload = ['IMAGE', 'FILE'];
-
-        if (filterByUpload.includes(fieldType) && Array.isArray(value)) {
-          groups[groupIndex][fieldName] = value.map((item: any) => {
-            if (item.response && item.url) {
-              return {
-                ...item,
-                url: item.response
-              };
-            }
-            return item;
-          });
-        }
-        if (fieldType === ENTITY_FIELD_TYPE.DATE.VALUE) {
+        const fieldType = subEntities.value[0].childFields.find((v) => v.fieldName === fieldName).fieldType;
+        if (resetImageFile(groups[groupIndex], { fieldType, fieldName }, value)) {
+        } else if (fieldType === ENTITY_FIELD_TYPE.DATE.VALUE) {
           groups[groupIndex][fieldName] = value ? dayjs(value).format('YYYY-MM-DD') : '';
         } else if (fieldType === ENTITY_FIELD_TYPE.DATETIME.VALUE) {
           groups[groupIndex][fieldName] = value ? dayjs(value).format('YYYY-MM-DD hh:mm:ss') : '';
@@ -252,8 +253,9 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
           };
         } else if (fieldType === ENTITY_FIELD_TYPE.USER.VALUE) {
           if (Array.isArray(value)) {
+            const userData = formDetails?.[key];
             groups[groupIndex][fieldName] = {
-              id: value[0],
+              id: userData?.id,
               name: value[0]
             };
           } else {
@@ -400,6 +402,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     const formValues: Record<string, any> = {};
 
     if (res) {
+      setFormDetails(res);
       const dataItem = res;
       const fieldIdNameMap: Record<string, string> = {};
       (mainMetaDataFields.value || []).forEach((field: AppEntityField) => {
@@ -413,9 +416,12 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
             if (fieldType === ENTITY_FIELD_TYPE.DATE.VALUE || fieldType === ENTITY_FIELD_TYPE.DATETIME.VALUE) {
               formValues[fieldName] = dayjs(value).valueOf();
             } else if (fieldType === ENTITY_FIELD_TYPE.SELECT.VALUE) {
-              formValues[fieldName] = Object.entries(value).length > 0 ? [value.id] : value;
+              const curComponentSchema = Object.values(pageComponentSchemas.value).find(v => value.id.includes(v.id)) || {};
+              const curOptions = curComponentSchema?.config?.defaultOptionsConfig?.defaultOptions;
+              const renderValue = curOptions.find(op => op.value === value.id)?.label || '-';
+              formValues[fieldName] = [renderValue];
             } else if (fieldType === ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE) {
-              formValues[fieldName] = value.map(v => v.id) || [];
+              formValues[fieldName] = value.map((v) => v.id) || [];
             } else if (fieldType === ENTITY_FIELD_TYPE.USER.VALUE) {
               formValues[fieldName] = Object.entries(value).length > 0 ? [value.name] : value;
             } else if (fieldType === ENTITY_FIELD_TYPE.DEPARTMENT.VALUE) {
@@ -462,26 +468,37 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
                 for (let ele in componentSchemas) {
                   const config = componentSchemas[ele]?.config;
                   const fieldName = config?.dataField?.[1];
-                  const fieldType = subEntity.childFields.find(v => v.fieldName === fieldName)?.fieldType;
+                  const fieldType = subEntity.childFields.find((v) => v.fieldName === fieldName)?.fieldType;
 
                   if (keys.includes(fieldName)) {
                     if (fieldType === ENTITY_FIELD_TYPE.DATE.VALUE || fieldType === ENTITY_FIELD_TYPE.DATETIME.VALUE) {
                       formValues[`${key}.${idx}.${fieldName}`] = dayjs(subData[idx]?.[fieldName]).valueOf();
-
                     } else if (fieldType === ENTITY_FIELD_TYPE.SELECT.VALUE) {
                       const value = subData[idx]?.[fieldName];
-                      formValues[`${key}.${idx}.${fieldName}`] = Object.entries(value).length > 0 ? [value.id] : value;
-
+                      const renderValue = config.defaultOptionsConfig.defaultOptions.find(v => v.value === value.id)?.label || '-';
+                      formValues[`${key}.${idx}.${fieldName}`] = [renderValue];
                     } else if (fieldType === ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE) {
                       const value = subData[idx]?.[fieldName];
-                      formValues[`${key}.${idx}.${fieldName}`] = value.map(v => v.id) || [];
-
+                      formValues[`${key}.${idx}.${fieldName}`] = value.map((v) => v.id) || [];
                     } else if (fieldType === ENTITY_FIELD_TYPE.USER.VALUE) {
                       const value = subData[idx]?.[fieldName];
-                      formValues[`${key}.${idx}.${fieldName}`] = Object.entries(value).length > 0 ? [value.name] : value;
-
+                      formValues[`${key}.${idx}.${fieldName}`] =
+                        Object.entries(value).length > 0 ? [value.name] : value;
                     } else if (fieldType === ENTITY_FIELD_TYPE.DEPARTMENT.VALUE) {
                       formValues[`${key}.${idx}.${fieldName}`] = subData[idx]?.[fieldName];
+                    } else if (
+                      fieldType === ENTITY_FIELD_TYPE.IMAGE.VALUE ||
+                      fieldType === ENTITY_FIELD_TYPE.FILE.VALUE
+                    ) {
+                      formValues[`${key}.${idx}.${fieldName}`] = subData[idx]?.[fieldName].map((item: any) => {
+                        return {
+                          ...item,
+                          name: item.name,
+                          id: item.id,
+                          response: item.response || item.id,
+                          url: getFileUrlById(item.id)
+                        };
+                      });
                     } else {
                       formValues[`${key}.${idx}.${fieldName}`] = subData[idx]?.[fieldName];
                     }
@@ -497,10 +514,12 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     }
 
     console.log('formValues: ', formValues);
-    form.setFieldsValue(formValues);
+    setTimeout(() => {
+      form.setFieldsValue(formValues);
+    }, 100);
     setTimeout(() => {
       setEditLoading(false);
-    }, 60);
+    }, 200);
     return res;
   };
 
@@ -510,6 +529,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
   const curFormPage =
     curPage.value?.pages?.find((ele: any) => ele.pageType === CATEGORY_TYPE.LIST)?.pageName || '标题_列表';
+
   return (
     <div className={styles.previewPage}>
       {/* <Sticky topOffset={0} className={styles.previewTitle}>
@@ -526,7 +546,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
           (!listComponents.value?.length ? (
             <div className={styles.noData}>暂无数据</div>
           ) : (
-            listComponents.value.map((cp: GridItem, index) => (
+            listComponents.value.map((cp: GridItem, index: number) => (
               <Fragment key={cp.id}>
                 {listPageComponentSchemas.value[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
                   <div
@@ -553,28 +573,53 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
         {pageType == EDITOR_TYPES.FORM_EDITOR && (
           <Form layout="inline" form={form} className={styles.formWrapper}>
-            {useEditorSignalMap.get(editPageViewId.value)?.components.value.map((cp: GridItem) => (
-              <Fragment key={cp.id}>
-                {useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id].config.status !==
-                  STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
-                    <div key={cp.id} className={styles.componentItem} style={{ width: '100%' }}>
-                      <PreviewRender
-                        cpId={cp.id}
-                        cpType={cp.type}
-                        pageComponentSchema={
-                          useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id]
-                        }
-                        editLoading={editLoading}
-                        form={form}
-                        runtime={true}
-                        showFromPageData={() => {
-                          setPageType(EDITOR_TYPES.FORM_EDITOR);
-                        }}
-                      />
-                    </div>
-                  )}
-              </Fragment>
-            ))}
+            {splitByDivider(useEditorSignalMap.get(editPageViewId.value)?.components.value).map((block, index) => {
+              if (block.type === SHOW_COMPONENT_TYPES.DIVIDER) {
+                return (
+                  <Fragment key={index}>
+                    <PreviewRender
+                      cpId={block.item.id}
+                      cpType={block.item.type}
+                      pageComponentSchema={
+                        useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[block.item.id]
+                      }
+                      editLoading={editLoading}
+                      form={form}
+                      runtime={true}
+                      showFromPageData={() => {
+                        setPageType(EDITOR_TYPES.FORM_EDITOR);
+                      }}
+                    />
+                  </Fragment>
+                );
+              }
+              return (
+                <div className={styles.formComp} key={index}>
+                  {block.items.map(cp => (
+                    <Fragment key={cp.id}>
+                      {useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id].config.status !==
+                        STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+                        <div key={cp.id} className={styles.componentItem}>
+                          <PreviewRender
+                            cpId={cp.id}
+                            cpType={cp.type}
+                            pageComponentSchema={
+                              useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id]
+                            }
+                            editLoading={editLoading}
+                            form={form}
+                            runtime={true}
+                            showFromPageData={() => {
+                              setPageType(EDITOR_TYPES.FORM_EDITOR);
+                            }}
+                          />
+                        </div>
+                      )}
+                    </Fragment>
+                  ))}
+                </div>
+              );
+            })}
 
             <div className={styles.footer}>
               <Button
@@ -623,28 +668,28 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
                 <Fragment key={cp.id}>
                   {useEditorSignalMap.get(detailPageViewId.value)?.pageComponentSchemas.value[cp.id].config.status !==
                     STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
-                      <div
-                        key={cp.id}
-                        className={styles.componentItem}
-                        style={{
-                          width: getComponentWidth(
-                            useEditorSignalMap.get(detailPageViewId.value)?.pageComponentSchemas.value[cp.id],
-                            cp.type
-                          )
-                        }}
-                      >
-                        <PreviewRender
-                          cpId={cp.id}
-                          cpType={cp.type}
-                          pageComponentSchema={
-                            useEditorSignalMap.get(detailPageViewId.value)?.pageComponentSchemas.value[cp.id]
-                          }
-                          runtime={true}
-                          detailMode={detailMode}
-                          showFromPageData={() => { }}
-                        />
-                      </div>
-                    )}
+                    <div
+                      key={cp.id}
+                      className={styles.componentItem}
+                      style={{
+                        width: getComponentWidth(
+                          useEditorSignalMap.get(detailPageViewId.value)?.pageComponentSchemas.value[cp.id],
+                          cp.type
+                        )
+                      }}
+                    >
+                      <PreviewRender
+                        cpId={cp.id}
+                        cpType={cp.type}
+                        pageComponentSchema={
+                          useEditorSignalMap.get(detailPageViewId.value)?.pageComponentSchemas.value[cp.id]
+                        }
+                        runtime={true}
+                        detailMode={detailMode}
+                        showFromPageData={() => {}}
+                      />
+                    </div>
+                  )}
                 </Fragment>
               ))}
 

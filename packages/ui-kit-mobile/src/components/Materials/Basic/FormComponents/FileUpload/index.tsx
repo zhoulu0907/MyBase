@@ -1,4 +1,4 @@
-import { Form, Uploader, Toast, Loading } from '@arco-design/mobile-react';
+import { Form, Uploader, Toast, Loading, Ellipsis } from '@arco-design/mobile-react';
 import { type UploadItem } from '@arco-design/mobile-react/lib/Upload';
 import { IconDelete, IconClose, IconDownload, IconFile } from '@arco-design/mobile-react/esm/icon';
 import { uploadFile } from '@onebase/platform-center';
@@ -121,45 +121,43 @@ const XFileUpload = memo((props: XFileUploadConfig & { runtime?: boolean; detail
   };
 
   return (
-    <div>
-      <Form.Item
-        className="inputTextWrapperOBMobile fileUploadWrapperOBMobile"
-        label={
-          label.display && label.text
-        }
-        layout="vertical"
-        field={fieldId}
-        required={verify?.required}
-        trigger="fileList"
+    <Form.Item
+      className="inputTextWrapperOBMobile fileUploadWrapperOBMobile"
+      label={
+        label.display && <Ellipsis text={label.text} />
+      }
+      layout="vertical"
+      field={fieldId}
+      required={verify?.required}
+      trigger="fileList"
+      style={{
+        pointerEvents: runtime ? 'unset' : 'none',
+        opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
+      }}
+    >
+      <Uploader
+        accept={verify?.fileFormat}
+        files={filesList}
+        limit={verify?.maxCount === -1 ? undefined : verify?.maxCount}
+        onMaxSizeExceed={(file) =>
+          Toast.toast({
+            content: '文件大小超出限制',
+            duration: 2000
+          })}
+        onLimitExceed={(file) =>
+          Toast.toast({
+            content: '文件数量超出限制',
+            duration: 2000
+          })}
+        disabled={status !== STATUS_VALUES[STATUS_OPTIONS.DEFAULT] || detailMode}
         style={{
-          pointerEvents: runtime ? 'unset' : 'none',
-          opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
+          width: '100%'
         }}
-      >
-        <Uploader
-          accept={verify?.fileFormat}
-          files={filesList}
-          limit={verify?.maxCount === -1 ? undefined : verify?.maxCount}
-          onMaxSizeExceed={(file) =>
-            Toast.toast({
-              content: '文件大小超出限制',
-              duration: 2000
-            })}
-          onLimitExceed={(file) =>
-            Toast.toast({
-              content: '文件数量超出限制',
-              duration: 2000
-            })}
-          disabled={status !== STATUS_VALUES[STATUS_OPTIONS.DEFAULT] || detailMode}
-          style={{
-            width: '100%'
-          }}
-          renderFileList={renderUploadList}
-          onChange={handleChange}
-          upload={handleUpload}
-        />
-      </Form.Item>
-    </div>
+        renderFileList={renderUploadList}
+        onChange={handleChange}
+        upload={handleUpload}
+      />
+    </Form.Item>
   );
 });
 

@@ -111,7 +111,9 @@ export const OPERATOR_OPTIONS_COMMON = [
   ...OPERATOR_OPTIONS_NULL
 ];
 
-export const getOperatorOptions = (cpType: string): { label: string; value: string }[] => {
+export const getOperatorOptions = (components: any[], cpId: string): { label: string; value: string }[] => {
+  const cpType = components.find((item: any) => item?.id == cpId)?.type;
+
   switch (cpType) {
     case FORM_COMPONENT_TYPES.INPUT_TEXT:
     case FORM_COMPONENT_TYPES.INPUT_TEXTAREA:

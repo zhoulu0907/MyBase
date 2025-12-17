@@ -15,6 +15,11 @@ interface ChildMethodParams {
   };
   entityData: any;
 }
+
+const enum Type {
+  Transfer = '转交'
+}
+
 const FormItem = Form.Item;
 
 const maxImgSizeMB = 20;
@@ -99,26 +104,28 @@ const DetailOKConfirm: FC = forwardRef((props: any, ref: any) => {
   return (
     <section className="detail-confirm-page">
       <Form form={form} layout="vertical">
-        <FormItem
-          label="转交对象"
-          field="targetHandlerId"
-          rules={[{ required: true, message: '请选择转交对象' }]}
-          wrapperCol={{ style: { width: '100%' } }}
-        >
-          <Select
-            placeholder="选择转交对象"
-            filterOption={(inputValue, option) =>
-              option.props.children?.toLowerCase().indexOf(inputValue?.toLowerCase()) >= 0
-            }
-            allowClear
+        {props.itemData?.buttonName === Type.Transfer && (
+          <FormItem
+            label="转交对象"
+            field="targetHandlerId"
+            rules={[{ required: true, message: '请选择转交对象' }]}
+            wrapperCol={{ style: { width: '100%' } }}
           >
-            {userOptions?.map((option: any) => (
-              <Option key={option?.userId} value={option?.userId}>
-                {option.name}
-              </Option>
-            ))}
-          </Select>
-        </FormItem>
+            <Select
+              placeholder="选择转交对象"
+              filterOption={(inputValue, option) =>
+                option.props.children?.toLowerCase().indexOf(inputValue?.toLowerCase()) >= 0
+              }
+              allowClear
+            >
+              {userOptions?.map((option: any) => (
+                <Option key={option?.userId} value={option?.userId}>
+                  {option.name}
+                </Option>
+              ))}
+            </Select>
+          </FormItem>
+        )}
         <div className="form-item-title">审批意见</div>
         <FormItem field="name" rules={[{ required: isRequired, message: '请输入审批意见' }]}>
           <Input.TextArea maxLength={500} showWordLimit placeholder="请输入审批意见" wrapperStyle={{ width: '100%' }} />

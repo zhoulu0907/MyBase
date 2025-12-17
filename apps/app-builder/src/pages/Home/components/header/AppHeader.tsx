@@ -7,12 +7,12 @@ import { logout } from '@/utils/session';
 import { Divider, Dropdown, Layout, Menu, Tabs, Typography } from '@arco-design/web-react';
 import { IconExport } from '@arco-design/web-react/icon';
 import { TokenManager, UserPermissionManager } from '@onebase/common';
-import { CodeType, getPermissionInfo, getTenantInfo, systemLogout, type TenantInfo } from '@onebase/platform-center';
+import { CodeType, getPermissionInfo, getTenantInfo, systemLogout } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import styles from './header.module.less';
-import { tenantInfoSignal } from '@/store/singals/tenant_info';
 import TenantLogo from '@/components/TenantLogo';
+import { getTenantInfoFromSession, setTenantInfoFromSession } from '@/utils';
 
 const { Header } = Layout;
 
@@ -69,7 +69,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     if (res.user) {
       setAdminInfo(res.user);
     }
-    tenantInfoSignal.setTenantInfo(tenantInfoRes);
+    setTenantInfoFromSession(tenantInfoRes);
   };
 
   const maskMobile = (value?: string) => {
@@ -84,8 +84,8 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     logout(navigate);
   };
 
-  const tenantInfo = tenantInfoSignal.tenantInfo.value;
-  
+ const tenantInfo = getTenantInfoFromSession();
+
   const tenantAdminMenu = (
     <Menu style={{ marginRight: '10px' }}>
       <Menu.Item key="info" style={{ height: '90px' }}>
@@ -118,7 +118,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     <Header className={`${styles.header} ${className || ''}`}>
       <div className={styles.headerContent}>
         <div className={styles.logo}>
-          <TenantLogo tenantInfo={tenantInfo}/>
+          <TenantLogo tenantInfo={tenantInfo} />
         </div>
 
         <Tabs
