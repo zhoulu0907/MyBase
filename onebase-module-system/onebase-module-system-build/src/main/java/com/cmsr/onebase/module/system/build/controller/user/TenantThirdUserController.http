@@ -7,8 +7,8 @@ tenant-id: {{adminTenantId}}
 
 {
   "nickName": "thirdUser",
-  "mobile": "13800000000",
-  "email": "newuser1@test.com",
+  "mobile": "13800000001",
+  "email": "newusewr1@test.com",
   "password": "13@ery",
   "status": 1,
   "applicationIdList":[162947915524571136,162947915524571137]
@@ -16,15 +16,14 @@ tenant-id: {{adminTenantId}}
 
 
 ### 创建用户 /admin-api/system/third/update
-POST {{baseUrl}}/system/third/update
+POST {{baseUrl}}/system/third-user/update
 Content-Type: application/json
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
 {
-  "userId": 177604783525003264,
-  "nickname": "thirdUser111",
-  "mobile": "13800000001",
+  "id": 185181999209512960,
+  "nickName": "thirdUser111",
   "email": "newuser2@test.com",
   "password": "13@ery",
   "status": 1,

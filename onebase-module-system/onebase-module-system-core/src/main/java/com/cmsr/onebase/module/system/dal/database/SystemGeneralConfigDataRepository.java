@@ -6,6 +6,7 @@ import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.system.dal.dataobject.config.SystemGeneralConfigDO;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.PostDO;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
+import com.cmsr.onebase.module.system.enums.config.ConfigCategoryEnum;
 import com.cmsr.onebase.module.system.vo.config.SystemConfigPageReqVO;
 import com.cmsr.onebase.module.system.vo.config.SystemGeneralConfigSearchVO;
 import org.anyline.data.param.init.DefaultConfigStore;
@@ -57,5 +58,14 @@ public class SystemGeneralConfigDataRepository  extends DataRepository<SystemGen
             configs.and(Compare.EQUAL, SystemGeneralConfigDO.CORP_ID, searchVO.getCorpId());
         }
         return findOne(configs);
+    }
+
+    @TenantIgnore
+    public List<SystemGeneralConfigDO> findGlobaConfigList() {
+        DefaultConfigStore configs = new DefaultConfigStore();
+        configs.and(Compare.EQUAL, SystemGeneralConfigDO.CATEGORY, ConfigCategoryEnum.GLOBAL.getCode());
+        // 添加排序条件，按ID降序排列
+        configs.order(SystemGeneralConfigDO.ID, org.anyline.entity.Order.TYPE.DESC);
+        return  findAllByConfig(configs);
     }
 }
