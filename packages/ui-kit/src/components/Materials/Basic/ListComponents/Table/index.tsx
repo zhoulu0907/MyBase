@@ -407,9 +407,6 @@ const XTable = memo(
 
     // 查询
     const handleSearch = () => {
-      //   queryData = form.getFieldsValue();
-      //   console.log('queryData: ', queryData);
-
       setTablePageNo(1);
       handlePage();
     };
@@ -428,7 +425,6 @@ const XTable = memo(
       }
 
       queryData = form.getFieldsValue();
-      console.log('queryData: ', queryData);
 
       // TODO(mickey): 后续调试
       // if (sortByObject?.fieldName) {
@@ -438,7 +434,6 @@ const XTable = memo(
 
       const conditions: any[] = [];
       Object.entries(queryData).forEach(([key, value]) => {
-        console.log('queryData key: ', key, 'value: ', value);
         if (value !== undefined && value !== null && value !== '') {
           conditions.push({
             nodeType: 'CONDITION',
