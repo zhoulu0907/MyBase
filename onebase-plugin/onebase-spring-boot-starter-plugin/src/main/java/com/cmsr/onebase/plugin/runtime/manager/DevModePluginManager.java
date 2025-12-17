@@ -64,6 +64,30 @@ public class DevModePluginManager extends DefaultPluginManager {
         return scanner.scanExtensions(type);
     }
 
+    /**
+     * 开发模式下获取特定插件的扩展点
+     * <p>
+     * 对于开发模式虚拟插件，委托给getExtensions(Class)方法；
+     * 对于其他插件ID，返回空列表。
+     * </p>
+     */
+    @Override
+    public <T> List<T> getExtensions(Class<T> type, String pluginId) {
+        log.debug("开发模式：getExtensions({}, {}) 被调用", type.getSimpleName(), pluginId);
+        log.debug("  虚拟插件ID: {}, 请求插件ID: {}", DEV_PLUGIN_ID, pluginId);
+        log.debug("  虚拟插件状态: {}", devPluginWrapper != null ? devPluginWrapper.getPluginState() : "NULL");
+        
+        if (DEV_PLUGIN_ID.equals(pluginId)) {
+            log.debug("开发模式：匹配虚拟插件 {}，委托给 getExtensions(Class)", pluginId);
+            List<T> result = getExtensions(type);
+            log.debug("开发模式：为虚拟插件 {} 获取到 {} 个 {} 扩展点", pluginId, result.size(), type.getSimpleName());
+            return result;
+        }
+        
+        log.debug("开发模式：插件 {} 不是虚拟插件，返回空列表", pluginId);
+        return Collections.emptyList();
+    }
+
     @Override
     public void loadPlugins() {
         log.info("开发模式：跳过ZIP/JAR插件加载，使用当前classpath");

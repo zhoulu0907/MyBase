@@ -41,6 +41,26 @@ public class PluginProperties {
      */
     private boolean strictDependencyCheck = false;
 
+    /**
+     * 是否自动加载插件
+     * <p>
+     * true: 应用启动时自动加载plugins目录下的所有插件
+     * false: 不自动加载，需要通过管理接口手动加载
+     * </p>
+     * 默认值: true
+     */
+    private boolean autoLoad = true;
+
+    /**
+     * 是否自动启动插件
+     * <p>
+     * true: 插件加载后自动启动
+     * false: 插件加载后保持已加载状态，需要手动启动
+     * </p>
+     * 默认值: true
+     */
+    private boolean autoStart = true;
+
     public boolean isEnabled() {
         return enabled;
     }
@@ -130,5 +150,21 @@ public class PluginProperties {
 
     public void setStrictDependencyCheck(boolean strictDependencyCheck) {
         this.strictDependencyCheck = strictDependencyCheck;
+    }
+
+    public boolean isAutoLoad() {
+        return autoLoad;
+    }
+
+    public void setAutoLoad(boolean autoLoad) {
+        this.autoLoad = autoLoad;
+    }
+
+    public boolean isAutoStart() {
+        return autoStart;
+    }
+
+    public void setAutoStart(boolean autoStart) {
+        this.autoStart = autoStart;
     }
 }

@@ -1,6 +1,6 @@
 spring:
   profiles:
-    default: staging
+    default: dev
   http:
     encoding:
       charset: UTF-8

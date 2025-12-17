@@ -10,3 +10,9 @@ onebase.plugin.plugins-dir=plugins
 
 # 运行模式，可选：dev、staging、prod；默认prod
 onebase.plugin.mode=prod
+
+# 是否自动加载插件（应用启动时加载plugins目录下的所有插件）；默认true
+onebase.plugin.auto-load=true
+
+# 是否自动启动插件（插件加载后自动启动）；默认true
+onebase.plugin.auto-start=true

@@ -5,6 +5,8 @@ onebase:
     enabled: true
     mode: dev                     # 开发模式，只扫描 classpath，不扫描plugins-dir
     plugins-dir: ./plugins        # 插件目录（开发模式下该参数无效）
+    auto-load: true               # 自动加载插件
+    auto-start: true              # 自动启动插件
 
 logging:
   level:

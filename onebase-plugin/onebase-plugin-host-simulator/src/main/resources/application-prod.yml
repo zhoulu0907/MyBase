@@ -5,6 +5,8 @@ onebase:
     enabled: true
     mode: prod                # 生产模式，使用PF4J默认策略（classpath + plugins目录）
     plugins-dir: ./plugins    # 插件目录，存放 ZIP/JAR 插件包
+    auto-load: true           # 自动加载插件
+    auto-start: true          # 自动启动插件
 
 logging:
   level:

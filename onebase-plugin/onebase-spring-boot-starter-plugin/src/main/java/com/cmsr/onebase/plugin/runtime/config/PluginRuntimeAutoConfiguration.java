@@ -13,6 +13,7 @@ import com.cmsr.onebase.plugin.runtime.service.UserServiceImpl;
 import com.cmsr.onebase.plugin.service.DataService;
 import com.cmsr.onebase.plugin.service.FileService;
 import com.cmsr.onebase.plugin.service.UserService;
+import lombok.extern.slf4j.Slf4j;
 import org.pf4j.DefaultPluginManager;
 import org.pf4j.PluginDescriptorFinder;
 import org.pf4j.PluginManager;
@@ -46,11 +47,10 @@ import java.util.List;
  * @author chengyuansen
  * @date 2025-12-18
  */
+@Slf4j
 @Configuration
 @EnableConfigurationProperties(PluginProperties.class)
 public class PluginRuntimeAutoConfiguration {
-
-    private static final Logger log = LoggerFactory.getLogger(PluginRuntimeAutoConfiguration.class);
 
     private final PluginProperties properties;
 
@@ -96,9 +96,21 @@ public class PluginRuntimeAutoConfiguration {
             
             DevModePluginManager pluginManager = new DevModePluginManager();
             
-            // enabled=true时直接加载并启动插件
-            pluginManager.loadPlugins();
-            pluginManager.startPlugins();
+            // 根据autoLoad配置决定是否自动加载
+            if (properties.isAutoLoad()) {
+                pluginManager.loadPlugins();
+                log.info("已自动加载开发模式插件");
+            } else {
+                log.info("跳过自动加载插件（autoLoad=false）");
+            }
+            
+            // 根据autoStart配置决定是否自动启动
+            if (properties.isAutoStart() && properties.isAutoLoad()) {
+                pluginManager.startPlugins();
+                log.info("已自动启动开发模式插件");
+            } else {
+                log.info("跳过自动启动插件（autoStart={} 或 autoLoad={}）", properties.isAutoStart(), properties.isAutoLoad());
+            }
             
             return pluginManager;
         }
@@ -153,12 +165,21 @@ public class PluginRuntimeAutoConfiguration {
                 }
             };
 
-            // enabled=true时直接加载并启动插件
-            pluginManager.loadPlugins();
-            log.info("已加载 {} 个插件", pluginManager.getPlugins().size());
+            // 根据autoLoad配置决定是否自动加载
+            if (properties.isAutoLoad()) {
+                pluginManager.loadPlugins();
+                log.info("已自动加载 {} 个插件", pluginManager.getPlugins().size());
+            } else {
+                log.info("跳过自动加载插件（autoLoad=false）");
+            }
             
-            pluginManager.startPlugins();
-            log.info("已启动 {} 个插件", pluginManager.getStartedPlugins().size());
+            // 根据autoStart配置决定是否自动启动
+            if (properties.isAutoStart() && properties.isAutoLoad()) {
+                pluginManager.startPlugins();
+                log.info("已自动启动 {} 个插件", pluginManager.getStartedPlugins().size());
+            } else {
+                log.info("跳过自动启动插件（autoStart={} 或 autoLoad={}）", properties.isAutoStart(), properties.isAutoLoad());
+            }
 
             return pluginManager;
         }
@@ -187,12 +208,21 @@ public class PluginRuntimeAutoConfiguration {
             }
         };
 
-        // enabled=true时直接加载并启动插件
-        pluginManager.loadPlugins();
-        log.info("已加载 {} 个插件", pluginManager.getPlugins().size());
+        // 根据autoLoad配置决定是否自动加载
+        if (properties.isAutoLoad()) {
+            pluginManager.loadPlugins();
+            log.info("已自动加载 {} 个插件", pluginManager.getPlugins().size());
+        } else {
+            log.info("跳过自动加载插件（autoLoad=false）");
+        }
         
-        pluginManager.startPlugins();
-        log.info("已启动 {} 个插件", pluginManager.getStartedPlugins().size());
+        // 根据autoStart配置决定是否自动启动
+        if (properties.isAutoStart() && properties.isAutoLoad()) {
+            pluginManager.startPlugins();
+            log.info("已自动启动 {} 个插件", pluginManager.getStartedPlugins().size());
+        } else {
+            log.info("跳过自动启动插件（autoStart={} 或 autoLoad={}）", properties.isAutoStart(), properties.isAutoLoad());
+        }
 
         return pluginManager;
     }

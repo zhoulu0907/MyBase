@@ -68,6 +68,80 @@ public class OneBasePluginManager {
     }
 
     /**
+     * 带回滚机制的插件加载
+     * <p>
+     * 在加载失败时自动回滚（卸载已部分加载的插件），并发布失败事件。
+     * 支持完整的生命周期事件通知（加载前、加载后、加载失败）。
+     * </p>
+     *
+     * @param pluginPath 插件文件路径（JAR或ZIP）
+     * @param operator   操作者（用户ID或"system"）
+     * @return 插件ID，失败时返回null
+     */
+    public String loadPluginWithRollback(Path pluginPath, String operator) {
+        String pluginId = null;
+        
+        try {
+            // 发布加载前事件
+            eventPublisher.publishEvent(
+                new com.cmsr.onebase.plugin.runtime.event.PluginBeforeLoadEvent(pluginPath, operator)
+            );
+            
+            // 执行加载
+            log.info("加载插件（带回滚）: {}, 操作者: {}", pluginPath, operator);
+            pluginId = pluginManager.loadPlugin(pluginPath);
+            
+            if (pluginId == null) {
+                throw new RuntimeException("插件加载返回null，可能是插件文件格式错误或依赖冲突");
+            }
+            
+            log.info("插件加载成功: {}", pluginId);
+            
+            // 发布加载后事件
+            org.pf4j.PluginWrapper wrapper = pluginManager.getPlugin(pluginId);
+            eventPublisher.publishEvent(
+                new com.cmsr.onebase.plugin.runtime.event.PluginLoadedEvent(pluginId, wrapper)
+            );
+            
+            return pluginId;
+            
+        } catch (Exception e) {
+            log.error("插件加载失败，开始回滚: {}", pluginPath, e);
+            
+            // 回滚操作：卸载已部分加载的插件
+            if (pluginId != null) {
+                try {
+                    boolean unloaded = pluginManager.unloadPlugin(pluginId);
+                    if (unloaded) {
+                        log.info("插件回滚成功，已卸载: {}", pluginId);
+                    } else {
+                        log.warn("插件回滚失败，无法卸载: {}", pluginId);
+                    }
+                } catch (Exception rollbackEx) {
+                    log.error("插件回滚过程中发生异常: {}", pluginId, rollbackEx);
+                }
+            }
+            
+            // 发布加载失败事件
+            eventPublisher.publishEvent(
+                new com.cmsr.onebase.plugin.runtime.event.PluginLoadFailedEvent(pluginPath, pluginId, e, operator)
+            );
+            
+            return null;
+        }
+    }
+
+    /**
+     * 带回滚机制的插件加载（使用默认操作者"system"）
+     *
+     * @param pluginPath 插件文件路径（JAR或ZIP）
+     * @return 插件ID，失败时返回null
+     */
+    public String loadPluginWithRollback(Path pluginPath) {
+        return loadPluginWithRollback(pluginPath, "system");
+    }
+
+    /**
      * 卸载插件
      *
      * @param pluginId 插件ID
@@ -105,6 +179,67 @@ public class OneBasePluginManager {
     }
 
     /**
+     * 带回滚机制的插件启动
+     * <p>
+     * 在启动失败时发布失败事件，支持完整的生命周期事件通知（启动前、启动后、启动失败）。
+     * </p>
+     *
+     * @param pluginId 插件ID
+     * @param operator 操作者（用户ID或"system"）
+     * @return 插件状态
+     */
+    public PluginState startPluginWithRollback(String pluginId, String operator) {
+        org.pf4j.PluginWrapper wrapper = pluginManager.getPlugin(pluginId);
+        if (wrapper == null) {
+            throw new IllegalArgumentException("插件不存在: " + pluginId);
+        }
+        
+        try {
+            // 发布启动前事件
+            eventPublisher.publishEvent(
+                new com.cmsr.onebase.plugin.runtime.event.PluginBeforeStartEvent(pluginId, wrapper, operator)
+            );
+            
+            // 执行启动
+            log.info("启动插件（带回滚）: {}, 操作者: {}", pluginId, operator);
+            PluginState state = pluginManager.startPlugin(pluginId);
+            
+            if (state == PluginState.STARTED) {
+                log.info("插件启动成功: {}", pluginId);
+                
+                // 发布启动后事件
+                eventPublisher.publishEvent(
+                    new com.cmsr.onebase.plugin.runtime.event.PluginStartedEvent(pluginId, wrapper)
+                );
+            } else {
+                throw new RuntimeException("插件启动失败，状态: " + state);
+            }
+            
+            return state;
+            
+        } catch (Exception e) {
+            log.error("插件启动失败: {}", pluginId, e);
+            
+            // 发布启动失败事件
+            eventPublisher.publishEvent(
+                new com.cmsr.onebase.plugin.runtime.event.PluginStartFailedEvent(pluginId, wrapper, e, operator)
+            );
+            
+            return wrapper.getPluginState();
+        }
+    }
+
+    /**
+     * 带回滚机制的插件启动（使用默认操作者"system"）
+     *
+     * @param pluginId 插件ID
+     * @return 插件状态
+     */
+    public PluginState startPluginWithRollback(String pluginId) {
+        return startPluginWithRollback(pluginId, "system");
+    }
+
+    /**
      * 停止插件
      *
      * @param pluginId 插件ID
@@ -118,6 +253,112 @@ public class OneBasePluginManager {
         } catch (Exception ignore) {
         }
         return state;
+    }
+
+    /**
+     * 带事件通知的插件停止
+     * <p>
+     * 支持完整的生命周期事件通知（停止前、停止后）。
+     * </p>
+     *
+     * @param pluginId 插件ID
+     * @param operator 操作者（用户ID或"system"）
+     * @return 插件状态
+     */
+    public PluginState stopPluginWithEvent(String pluginId, String operator) {
+        org.pf4j.PluginWrapper wrapper = pluginManager.getPlugin(pluginId);
+        if (wrapper == null) {
+            throw new IllegalArgumentException("插件不存在: " + pluginId);
+        }
+        
+        try {
+            // 发布停止前事件
+            eventPublisher.publishEvent(
+                new com.cmsr.onebase.plugin.runtime.event.PluginBeforeStopEvent(pluginId, wrapper, operator)
+            );
+            
+            // 执行停止
+            log.info("停止插件（带事件）: {}, 操作者: {}", pluginId, operator);
+            PluginState state = pluginManager.stopPlugin(pluginId);
+            
+            log.info("插件停止完成: {}, 状态: {}", pluginId, state);
+            
+            // 发布停止后事件
+            eventPublisher.publishEvent(
+                new com.cmsr.onebase.plugin.runtime.event.PluginStoppedEvent(pluginId)
+            );
+            
+            return state;
+            
+        } catch (Exception e) {
+            log.error("插件停止失败: {}", pluginId, e);
+            throw e;
+        }
+    }
+
+    /**
+     * 带事件通知的插件停止（使用默认操作者"system"）
+     *
+     * @param pluginId 插件ID
+     * @return 插件状态
+     */
+    public PluginState stopPluginWithEvent(String pluginId) {
+        return stopPluginWithEvent(pluginId, "system");
+    }
+
+    /**
+     * 带事件通知的插件卸载
+     * <p>
+     * 支持完整的生命周期事件通知（卸载前、卸载后）。
+     * </p>
+     *
+     * @param pluginId 插件ID
+     * @param operator 操作者（用户ID或"system"）
+     * @return 是否成功
+     */
+    public boolean unloadPluginWithEvent(String pluginId, String operator) {
+        org.pf4j.PluginWrapper wrapper = pluginManager.getPlugin(pluginId);
+        if (wrapper == null) {
+            throw new IllegalArgumentException("插件不存在: " + pluginId);
+        }
+        
+        try {
+            // 发布卸载前事件
+            eventPublisher.publishEvent(
+                new com.cmsr.onebase.plugin.runtime.event.PluginBeforeUnloadEvent(pluginId, wrapper, operator)
+            );
+            
+            // 执行卸载
+            log.info("卸载插件（带事件）: {}, 操作者: {}", pluginId, operator);
+            boolean ok = pluginManager.unloadPlugin(pluginId);
+            
+            if (ok) {
+                log.info("插件卸载成功: {}", pluginId);
+                
+                // 发布卸载后事件
+                eventPublisher.publishEvent(
+                    new com.cmsr.onebase.plugin.runtime.event.PluginUnloadedEvent(pluginId)
+                );
+            } else {
+                log.warn("插件卸载失败: {}", pluginId);
+            }
+            
+            return ok;
+            
+        } catch (Exception e) {
+            log.error("插件卸载异常: {}", pluginId, e);
+            throw e;
+        }
+    }
+
+    /**
+     * 带事件通知的插件卸载（使用默认操作者"system"）
+     *
+     * @param pluginId 插件ID
+     * @return 是否成功
+     */
+    public boolean unloadPluginWithEvent(String pluginId) {
+        return unloadPluginWithEvent(pluginId, "system");
     }
 
     /**

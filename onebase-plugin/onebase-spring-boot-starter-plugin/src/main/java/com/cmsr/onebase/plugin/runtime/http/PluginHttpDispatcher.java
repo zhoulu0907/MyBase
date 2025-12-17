@@ -3,8 +3,9 @@ package com.cmsr.onebase.plugin.runtime.http;
 import com.cmsr.onebase.plugin.api.HttpHandler;
 import com.cmsr.onebase.plugin.runtime.config.PluginProperties;
 import com.cmsr.onebase.plugin.runtime.manager.OneBasePluginManager;
-import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -59,9 +60,9 @@ public class PluginHttpDispatcher {
 
     /**
      * 初始化路由映射
-     * 在所有Bean注入完成后执行，手动从pluginManager获取HttpHandler扩展点
+     * 监听ApplicationReadyEvent事件，在应用完全启动后执行，确保所有插件都已加载和启动
      */
-    @PostConstruct
+    @EventListener(ApplicationReadyEvent.class)
     public void init() {
         // 检查插件系统是否启用
         if (!pluginProperties.isEnabled()) {

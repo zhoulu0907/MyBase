@@ -26,6 +26,6 @@ public class PluginWebConfig implements WebMvcConfigurer {
         // 注册插件安全拦截器，拦截所有 /plugin/** 路由
         registry.addInterceptor(pluginSecurityInterceptor)
                 .addPathPatterns("/plugin/**")
-                .order(1); // 优先级设置为最高
+                .order(50);
     }
 }
