@@ -12,8 +12,8 @@ import {approvalConfigVar, displayStatusMap} from '../constant'
 const Step = Steps.Step;
 const AvatarGroup = Avatar.Group;
 
-// 审批记录 节点中，审批意见内容过长，折叠时显示的字符数量
-const strLen = 60;
+let commentOpratorObx:any = {}
+let commentDomTimer:any = null;
 
 const DetailStep: FC<any> = ({ stepData }: any) => {
   const [current, setCurrent] = useState(0);
@@ -197,7 +197,15 @@ const DetailStep: FC<any> = ({ stepData }: any) => {
     const opperator = nodeItem?.operators?.[0];
     const userMap = displayStatusMap(opperator?.taskStatus);
     // 发起节点post_submitted 不需要显示 审批意见
-    const hasComment = opperator?.taskStatus !== 'post_submitted'
+    let hasComment = opperator?.taskStatus !== 'post_submitted'
+    let comment_key = opperator?.operator + opperator?.operatorTime + opperator?.taskStatus
+    if (opperator?.comment?.length && hasComment) {
+      hasComment = true
+      commentOpratorObx[comment_key] = opperator
+      console.log('commentOpratorObx =====', commentOpratorObx)
+    } else {
+      hasComment = false
+    }
     return <>
       <div className="flex-bw-center user-temp">
         <p className="photo-img">{opperator?.avatar ? <img src={opperator.avatar} alt='' /> : opperator?.operator?.charAt(0)}</p>
@@ -210,7 +218,7 @@ const DetailStep: FC<any> = ({ stepData }: any) => {
                 : '-'}
             </span>
           </p>
-          <p className="flex-bw-center">
+          <p className="flex-bw-center get-width-temp">
             {
               (opperator?.autoCopyArr?.length > 0) ? 
                 <p style={{position: 'relative'}}>
@@ -221,10 +229,10 @@ const DetailStep: FC<any> = ({ stepData }: any) => {
                 <section>
                   <p>
                     <b className={`sp-options ${userMap?.labelColor}`}>{userMap?.label}</b>
-                    {(opperator?.comment && hasComment) && <span className="gray-color" style={{wordBreak: 'break-all', letterSpacing: '1px'}}>&nbsp;({getComment(opperator, collapseObj)})</span>}
+                    {hasComment && <span className={`gray-color many-node-comment ${collapseObj?.[comment_key]?.moreLineClass} ${collapseObj?.[comment_key]?.isOpen?'open':''}`} data-comment={comment_key}>({opperator.comment})</span>}
                   </p>
-                  {(hasComment && opperator?.comment?.length > 60) && <p style={{textAlign: 'right'}}>
-                    <span style={{cursor: 'pointer'}} onClick={() => switchCollapse(opperator)}>{!collapseObj[opperator?.operator + opperator?.operatorTime + opperator?.taskStatus] ? '展开' : '收起'}</span>
+                  {(hasComment && collapseObj?.[comment_key]?.hasMoreBtn) && <p style={{textAlign: 'right'}}>
+                    <span style={{cursor: 'pointer'}} onClick={() => switchCollapse(opperator)}>{!collapseObj?.[comment_key]?.isOpen ? '展开' : '收起'}</span>
                   </p>}
                 </section>
             }
@@ -234,41 +242,15 @@ const DetailStep: FC<any> = ({ stepData }: any) => {
     </>
   }
 
-  function countCharacters(str: string) {
-    let enCount = 0;
-    let zhCount = 0;
-    let subMaxIdx = 0
-    
-    for (let i = 0; i < str.length; i++) {
-      const char = str.charAt(i);
-      if (/^[a-zA-Z0-9]$/.test(char)) {
-        enCount += 0.5;
-        subMaxIdx += 1
-      } else if (/^[\u4e00-\u9fa5]$/.test(char)) {
-        zhCount++;
-        subMaxIdx++;
-      }
-      if (Math.floor(enCount + zhCount) >= strLen) {
-        break
-      }
-    }
-    
-    return { enCount, zhCount, subMaxIdx: Math.floor(subMaxIdx) };
-  }
-  function getComment(operatorItem: any, collapseObx:any) {
-    const key = operatorItem?.operator + operatorItem?.operatorTime + operatorItem?.taskStatus
-    const count = countCharacters(operatorItem?.comment || '')
-    console.log(key, count)
-    if (!collapseObx[key] && (count.zhCount + count.enCount) >= strLen) {
-      return operatorItem.comment.substring(0, count.subMaxIdx) + '...'
-    } else {
-      return operatorItem?.comment
-    }
-  }
   function switchCollapse(operatorItem: any) {
     const key = operatorItem?.operator + operatorItem?.operatorTime + operatorItem?.taskStatus
-    const curFlag = collapseObj[key]
-    setCollapseObj({...collapseObj, [key]: !curFlag})
+    const tempObx = JSON.parse(JSON.stringify(collapseObj))
+    const curColObx = tempObx[key]
+    console.log('cur Collapse Obx ===', curColObx)
+    if (curColObx) {
+      curColObx['isOpen'] = !curColObx['isOpen']
+    }
+    setCollapseObj(tempObx)
   }
 
   // useEffect(() => {
@@ -299,14 +281,64 @@ const DetailStep: FC<any> = ({ stepData }: any) => {
     );
   };
 
+  function clearDomTimer() {
+    if (commentDomTimer) {
+      clearTimeout(commentDomTimer)
+      commentDomTimer = null
+    }
+  }
+  function afterDomRender() {
+    // 计算dom
+    clearDomTimer()
+    commentDomTimer = window.setTimeout(() => {
+      clearDomTimer()
+      let $commentDomArr = document.querySelectorAll('.many-node-comment[data-comment]')
+      if ($commentDomArr?.length > 0) {
+        let displayHeight = 0;
+        let realHeight = 0;
+        let collapseObx = JSON.parse(JSON.stringify(collapseObj))
+        let domKey;
+        let tempDomWidth = 0;
+        let displayWidth = 0;
+        $commentDomArr.forEach($dom => {
+          displayHeight = $dom?.clientHeight || 0;
+          realHeight = $dom?.scrollHeight || 0;
+          console.log('height ===', displayHeight, realHeight)
+          if (displayHeight > 0 && realHeight > 0) {
+            tempDomWidth = document.querySelector('.get-width-temp')?.clientWidth || 0;
+            displayWidth = $dom.clientWidth || 0;
+            domKey = $dom.getAttribute('data-comment')
+            console.log('dom key ====', domKey, 'width ===', displayWidth, tempDomWidth)
+            if (domKey) {
+              let curColObx = collapseObx[domKey] || {isOpen: false, hasMoreBtn: false, moreLineClass: 'one-line'};
+              if (realHeight > (displayHeight + 10)) {
+                curColObx.hasMoreBtn = true
+              }
+              if (displayWidth >= tempDomWidth) {
+                curColObx.moreLineClass = 'more-line'
+              }
+              collapseObx[domKey] = curColObx;
+              setCollapseObj(collapseObx)
+            }
+          }
+        })
+      }
+    }, 100)
+  }
+
   useEffect(() => {
     if (Array.isArray(stepData)) {
+      commentOpratorObx = {}
       for(let k = 0; k < stepData.length; k++) {
         if (stepData[k]?.isCurrent) {
           setCurrent(k + 1)
           break;
         }
       }
+      let tt = setTimeout(() => {
+        clearTimeout(tt)
+        afterDomRender()
+      }, 100);
     }
   }, [stepData]);
 

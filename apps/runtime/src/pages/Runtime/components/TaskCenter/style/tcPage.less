@@ -230,6 +230,31 @@
         .pc-steps-item-description .flex-bw-center.user-temp {
             align-items: flex-start;
         }
+        .many-node-comment {
+            display: inline-block;
+            word-break: break-all;
+            letter-spacing: 1px;
+            overflow: hidden;
+            max-height: 60px;
+            text-indent: 0.5em;
+            position: relative;
+            top: 3px;
+            opacity: 0;
+        }
+        .many-node-comment.more-line {
+            text-indent: 3.3em;
+            height: 60px;
+            max-height: 100vh;
+            margin-top: -21px;
+            top: 0;
+            opacity: 1;
+        }
+        .many-node-comment.open {
+            height: auto;
+        }
+        .many-node-comment.one-line {
+            opacity: 1;
+        }
     }
     .header-row {
         background: #fff; padding: 0 16px 16px;
