@@ -19,8 +19,6 @@ import styles from './index.module.less';
 function useMergedWorkbenchData(props: EditorWorkspaceProps['props']) {
   const workbenchSignal = useWorkbenchSignal();
 
-  console.log('--2--props: ', props);
-
   const currentComponents = useMemo(() => {
     return props.workbenchComponents ?? workbenchSignal.workbenchComponents ?? [];
   }, [props.workbenchComponents, workbenchSignal.workbenchComponents]) as GridItem[];
