@@ -31,6 +31,6 @@ public class UserApplicationRespVO {
     private Integer status;
 
     @Schema(description = "授权应用")
-    private List<CorpAppVo> userApplicationList;
+    private List<UserAppVO> userApplicationList;
 
 }

@@ -57,15 +57,15 @@ public class ExecuteContext implements Serializable {
 
     private volatile boolean debugMode = false;
 
-    //节点执行的结果
-
-
+    /**
+     * 节点执行的结果
+     */
     private Map<String, Object> nodeProcessResults = new ConcurrentHashMap<>();
 
-
+    /**
+     * 是否执行结束
+     */
     private volatile boolean executeEnd = false;
-    private volatile String executionEndNodeTag;
-    private volatile String executionEndNodeType;
 
 
     /**
@@ -76,7 +76,6 @@ public class ExecuteContext implements Serializable {
     /**
      * 是否异常终止
      */
-
     private transient volatile Boolean abnormalTermination = Boolean.FALSE;
 
     /**
