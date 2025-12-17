@@ -8,10 +8,12 @@ import {
   getComponentConfig,
   ALIGN_OPTIONS,
   ALIGN_VALUES,
+  WORKBENCH_COMPONENT_TYPES,
 } from '@onebase/ui-kit';
 import { ListComp } from '@/components/Materials/Basic/ListComponents';
 import { FormComp } from '@/components/Materials/Basic/FormComponents';
 import { ShowComp } from '@/components/Materials/Basic/ShowComponents';
+import { WorkbenchComp } from '@/components/Materials/Workbench';
 
 /**
  * 组件渲染的通用属性
@@ -345,6 +347,14 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
         return <ShowComp.XDivider cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case SHOW_COMPONENT_TYPES.PLACEHOLDER:
         return <ShowComp.XPlaceholder cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+
+      //  工作台组件
+      case WORKBENCH_COMPONENT_TYPES.QUICK_ENTRY:
+        return <WorkbenchComp.XQuickEntry cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+      case WORKBENCH_COMPONENT_TYPES.RICH_TEXT_WORKBENCH:
+        return <WorkbenchComp.XRichTextEditorWorkbench cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+      case WORKBENCH_COMPONENT_TYPES.CAROUSEL_WORKBENCH:
+        return <WorkbenchComp.XCarouselWorkbench cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
 
       default:
         return <div>未知组件类型: {cpType}</div>;
