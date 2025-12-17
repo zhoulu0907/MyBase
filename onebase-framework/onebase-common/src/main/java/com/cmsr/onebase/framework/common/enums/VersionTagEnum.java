@@ -6,16 +6,19 @@ package com.cmsr.onebase.framework.common.enums;
  */
 public enum VersionTagEnum {
 
-    BUILD(0, "编辑态"),
+    BUILD(0L, "编辑态"),
 
-    RUNTIME(1, "运行态");
+    RUNTIME(1L, "运行态");
 
-    private Integer value;
+    private Long value;
     private String description;
 
-    VersionTagEnum(Integer value, String description) {
+    VersionTagEnum(Long value, String description) {
         this.value = value;
         this.description = description;
     }
 
+    public Long getValue() {
+        return value;
+    }
 }

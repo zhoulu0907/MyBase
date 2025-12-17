@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.flow.runtime.controller;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import com.cmsr.onebase.module.flow.core.handler.FlowCacheHandler;
+import com.cmsr.onebase.module.flow.core.handler.FlowChangeClient;
 import com.cmsr.onebase.module.flow.runtime.service.FlowProcessExecService;
 import com.cmsr.onebase.module.flow.runtime.vo.FormTriggerReqVO;
 import com.cmsr.onebase.module.flow.runtime.vo.FormTriggerRespVO;
@@ -29,11 +29,12 @@ public class FlowProcessExecController {
     private FlowProcessExecService flowProcessExecService;
 
     @Autowired
-    private FlowCacheHandler flowCacheHandler;
+    private FlowChangeClient flowChangeClient;
 
     @GetMapping("/form/query")
     @Operation(summary = "查询页面触发列表")
-    public CommonResult<List<QueryFormTriggerRespVO>> queryFormTrigger(@RequestParam("pageId") Long pageId) {
+    public CommonResult<List<QueryFormTriggerRespVO>> queryFormTrigger(
+            @RequestParam("pageId") Long pageId) {
         List<QueryFormTriggerRespVO> result = flowProcessExecService.queryFormTrigger(pageId);
         return CommonResult.success(result);
     }
@@ -47,16 +48,16 @@ public class FlowProcessExecController {
 
     @PostMapping("/flow-handler/update")
     @Operation(summary = "更新流程")
-    public CommonResult<String> updateProcess(@RequestParam("applicationId") Long applicationId) {
-        String result = flowCacheHandler.onApplicationChange(applicationId);
-        return CommonResult.success(result);
+    public CommonResult<Boolean> updateProcess(@RequestParam("applicationId") Long applicationId) {
+        flowChangeClient.applicationUpdate(applicationId);
+        return CommonResult.success(Boolean.TRUE);
     }
 
     @PostMapping("/flow-handler/delete")
     @Operation(summary = "删除流程")
-    public CommonResult<String> deleteProcess(@RequestParam("applicationId") Long applicationId) {
-        String result = flowCacheHandler.onApplicationDelete(applicationId);
-        return CommonResult.success(result);
+    public CommonResult<Boolean> deleteProcess(@RequestParam("applicationId") Long applicationId) {
+        flowChangeClient.applicationDelete(applicationId);
+        return CommonResult.success(Boolean.TRUE);
     }
 
 

@@ -11,6 +11,9 @@ import lombok.EqualsAndHashCode;
 @Table(value = "flow_connector_script")
 public class FlowConnectorScriptDO extends BaseAppEntity {
 
+    @Column(value = "script_uuid")
+    private String scriptUuid;
+
     @Column(value = "connector_uuid")
     private String connectorUuid;
 
@@ -31,5 +34,11 @@ public class FlowConnectorScriptDO extends BaseAppEntity {
 
     @Column(value = "output_parameter")
     private String outputParameter;
+
+    @Column(value = "input_schema")
+    private String inputSchema;
+
+    @Column(value = "output_schema")
+    private String outputSchema;
 
 }

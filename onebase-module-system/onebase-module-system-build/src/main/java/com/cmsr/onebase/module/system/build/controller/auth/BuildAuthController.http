@@ -3,15 +3,38 @@
 # 请在IntelliJ IDEA中选择对应环境: local/dev/test/gateway
 # 登录成功后会自动更新token到环境变量中
 
+### 超管登录 => 成功
+POST {{baseUrl}}/system/auth/tenant-login
+Content-Type: application/json
+X-Tenant-Id: 174391581036773376
+
+{"username":"pt321","password":"AdminChina2025!","captchaVerification":"n89lvlHjSOsQQ5kGXjNNtdnkfPnK2Y3YbPwvAEXoVyL0TqzrDumdg8MONVs+z5VaSPf4ni6QKFhhx0GcaXBF4pWVx9hsSsBZ8mysqU8u45E=",
+ "deviceId":666}
+
+> {%
+    // 登录成功后自动更新token到环境变量
+    if (response.status === 200) {
+        const responseData = response.body;
+        if (responseData.code === 0 && responseData.data && responseData.data.accessToken) {
+            client.global.set("token", responseData.data.accessToken);
+            console.log("Token已更新: " + responseData.data.accessToken);
+        }
+    }
+%}
+
 ### 请求 /login 接口 => 成功
 POST {{baseUrl}}/system/auth/tenant-login
 Content-Type: application/json
-X-Tenant-Id: 153539686553452544
+#X-Tenant-Id: 153539686553452544
+X-Tenant-Id: 153935442021842944
 tag: {{tag}}
 
-{"username":"user001","password":"AdminChina2025!",
-  "captchaVerification":"n89lvlHjSOsQQ5kGXjNNtdnkfPnK2Y3YbPwvAEXoVyL0TqzrDumdg8MONVs+z5VaSPf4ni6QKFhhx0GcaXBF4pWVx9hsSsBZ8mysqU8u45E=",
-  "deviceId":666}
+{
+  "username": "gaoguoqing",
+  "password": "43a302eb73e0f678b1a55b323e8374451ec0015afbe7af3488c9e40de84a4b2fe40e1350f074036d1492d2a698b24ea112652483f57d9a7fbbf1f85ebfaa60a038feee4637c9bcb1ee10dfbb033b78ee20e32db41838c7a7875ccf3360590ecbbd56d2fc404dcbba054dc8d41502ab",
+  "captchaVerification": "UiXVbPBz2XVbr7pdOfIuR78qXvgiWZAg9UDiH27YsSrkyZja+6iDVorl9d2otg0yGqcH5k8a1VJopEwvzobmFdGhkjSIBFjbyaLGKYsoXbY=",
+  "deviceId": "50dddd1e2dcbb0f792b0fe3e9028890b"
+}
 
 > {%
     // 登录成功后自动更新token到环境变量
@@ -28,6 +51,9 @@ tag: {{tag}}
 GET {{baseUrl}}/system/auth/get-permission-info
 Authorization: Bearer {{token}}
 X-Tenant-Id: {{adminTenantId}}
+timestamp:1765293651000
+nonce:1765293314000
+sign:888
 
 ### 请求 /get-permission-info 接口+code => 成功
 GET {{baseUrl}}/system/auth/get-permission-info?code=tenant

@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.metadata.build.controller.admin.validation;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.module.metadata.core.util.MetadataIdUuidConverter;
 import com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationChildNotEmptyRespVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationChildNotEmptySaveReqVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationChildNotEmptyUpdateReqVO;
@@ -10,7 +11,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,54 +22,53 @@ import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 @Validated
 public class ValidationChildNotEmptyController {
 
+    @Resource
+    private MetadataIdUuidConverter idUuidConverter;
+
     @Resource private MetadataValidationChildNotEmptyBuildService childNotEmptyService;
 
     @PostMapping("/get-by-field")
-    @Operation(summary = "根据字段ID获取子表非空校验")
-    @Parameter(name = "id", description = "字段ID", required = true)
-    @PreAuthorize("@ss.hasPermission('metadata:validation-child-not-empty:query')")
-    public CommonResult<ValidationChildNotEmptyRespVO> getByField(@RequestParam("id") Long id) {
-        return success(childNotEmptyService.getByFieldIdWithRgName(id));
+    @Operation(summary = "根据字段UUID获取子表非空校验")
+    @Parameter(name = "id", description = "字段UUID", required = true)
+    public CommonResult<ValidationChildNotEmptyRespVO> getByField(@RequestParam("id") String fieldUuid) {
+        return success(childNotEmptyService.getByFieldIdWithRgName(fieldUuid));
     }
 
     @GetMapping("/get")
     @Operation(summary = "根据主键ID获取子表非空校验")
-    @Parameter(name = "id", description = "校验规则ID", required = true)
-    @PreAuthorize("@ss.hasPermission('metadata:validation-child-not-empty:query')")
-    public CommonResult<ValidationChildNotEmptyRespVO> get(@RequestParam("id") Long id) {
-        return success(childNotEmptyService.getById(id));
+    @Parameter(name = "id", description = "校验规则ID（支持ID或UUID）", required = true)
+    public CommonResult<ValidationChildNotEmptyRespVO> get(@RequestParam("id") String id) {
+        Long resolvedId = idUuidConverter.resolveRuleGroupId(id);
+        return success(childNotEmptyService.getById(resolvedId));
     }
 
     @PostMapping("/create")
     @Operation(summary = "创建子表非空校验")
-    @PreAuthorize("@ss.hasPermission('metadata:validation-child-not-empty:create')")
     public CommonResult<Long> create(@Valid @RequestBody ValidationChildNotEmptySaveReqVO vo) {
         return success(childNotEmptyService.create(vo));
     }
 
     @PostMapping("/update")
     @Operation(summary = "更新子表非空校验")
-    @PreAuthorize("@ss.hasPermission('metadata:validation-child-not-empty:update')")
     public CommonResult<Boolean> update(@Valid @RequestBody ValidationChildNotEmptyUpdateReqVO vo) {
         childNotEmptyService.update(vo);
         return success(true);
     }
 
     @PostMapping("/delete-by-field")
-    @Operation(summary = "按字段删除子表非空校验")
-    @Parameter(name = "id", description = "字段ID", required = true)
-    @PreAuthorize("@ss.hasPermission('metadata:validation-child-not-empty:delete')")
-    public CommonResult<Boolean> deleteByField(@RequestParam("id") Long id) {
-        childNotEmptyService.deleteByFieldId(id);
+    @Operation(summary = "按字段UUID删除子表非空校验")
+    @Parameter(name = "id", description = "字段UUID", required = true)
+    public CommonResult<Boolean> deleteByField(@RequestParam("id") String fieldUuid) {
+        childNotEmptyService.deleteByFieldId(fieldUuid);
         return success(true);
     }
 
     @PostMapping("/delete")
     @Operation(summary = "根据主键ID删除子表非空校验")
-    @Parameter(name = "id", description = "校验规则ID", required = true)
-    @PreAuthorize("@ss.hasPermission('metadata:validation-child-not-empty:delete')")
-    public CommonResult<Boolean> delete(@RequestParam("id") Long id) {
-        childNotEmptyService.deleteById(id);
+    @Parameter(name = "id", description = "校验规则ID（支持ID或UUID）", required = true)
+    public CommonResult<Boolean> delete(@RequestParam("id") String id) {
+        Long resolvedId = idUuidConverter.resolveRuleGroupId(id);
+        childNotEmptyService.deleteById(resolvedId);
         return success(true);
     }
 }

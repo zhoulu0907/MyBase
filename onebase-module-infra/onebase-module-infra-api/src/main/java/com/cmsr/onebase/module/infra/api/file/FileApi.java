@@ -6,7 +6,9 @@ import com.cmsr.onebase.module.infra.api.file.dto.FileCreateReqDTO;
 import com.cmsr.onebase.module.infra.api.file.dto.FileListRespDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
@@ -69,6 +71,6 @@ public interface FileApi {
     @GetMapping(PREFIX + "/download/{id}")
     @Operation(summary = "获取文件内容")
     @Parameter(name = "id", description = "文件编号", required = true)
-    void getFileContent(@PathVariable("id") Long id, HttpServletResponse response) throws Exception;
+    void getFileContent(@PathVariable("id") Long id, HttpServletRequest request, HttpServletResponse response) throws Exception;
 
 }

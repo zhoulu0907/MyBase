@@ -9,6 +9,9 @@ package com.cmsr.onebase.module.bpm.core.enums;
 public interface BpmConstants {
     String SYS_USER_ID = "-1";
 
+    /**  BPM的页面集类型：流程设计 */
+    Integer PAGESET_TYPE_BPM = 2;
+
     /**  节点审批人列表最多100个用户 */
     Integer MAX_NODE_APPROVER_USERS = 100;
 
@@ -26,6 +29,9 @@ public interface BpmConstants {
 
     /**  flow variable 中entityId的key */
     String VAR_ENTITY_ID_KEY = "entityId";
+
+    /**  flow variable 中entityId的key */
+    String VAR_ENTITY_TABLE_NAME_KEY = "entityTableName";
 
     /**  flow variable 中editPageView的key */
     String VAR_EDIT_PAGE_VIEW_KEY = "editPageView";

@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.bpm.runtime.service.instance.exec.impl;
 
+import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.bpm.core.dal.database.BpmFlowAgentInsRepository;
@@ -12,11 +13,14 @@ import com.cmsr.onebase.module.bpm.runtime.service.instance.exec.BpmExecService;
 import com.cmsr.onebase.module.bpm.runtime.service.context.BpmPermissionUserContext;
 import com.cmsr.onebase.module.bpm.runtime.service.instance.exec.strategy.ExecTaskStrategyManager;
 import com.cmsr.onebase.module.bpm.runtime.vo.ExecTaskReqVO;
+import com.cmsr.onebase.module.system.api.user.AdminUserApi;
+import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.dromara.warm.flow.core.entity.Instance;
 import org.dromara.warm.flow.core.entity.Task;
 import org.dromara.warm.flow.core.entity.User;
@@ -51,6 +55,9 @@ public class BpmExecServiceImpl implements BpmExecService {
     private UserService userService;
 
     @Resource
+    private AdminUserApi adminUserApi;
+
+    @Resource
     private BpmFlowAgentInsRepository agentInsRepository;
 
     @Resource
@@ -72,22 +79,20 @@ public class BpmExecServiceImpl implements BpmExecService {
 
         Long loginUserId = WebFrameworkUtils.getLoginUserId();
 
-        // 查找当前用户直接拥有的权限
-        User directMatchedUser = null;
+        // 查找当前用户直接拥有的权限（可能存在多个同一用户的记录，逐一添加）
+        List<User> directMatchedUsers = new ArrayList<>();
         for (User user : users) {
             if (user.getProcessedBy().equals(String.valueOf(loginUserId))) {
-                // 说明是当前登录用户拥有权限
-                directMatchedUser = user;
-                break;
+                directMatchedUsers.add(user);
             }
         }
 
         // 查找所有代理人记录（一个代理人可能代理多个被代理人）
         List<BpmFlowAgentInsDO> agentInsList = agentInsRepository.findAllByTaskIdAndAgentId(taskId, String.valueOf(loginUserId));
 
-        // 1. 如果当前用户直接拥有权限，添加一次执行
-        if (directMatchedUser != null) {
-            permissionUserContexts.add(new BpmPermissionUserContext(directMatchedUser, null));
+        // 1. 当前用户直接拥有的所有权限记录，逐条添加执行上下文
+        if (CollectionUtils.isNotEmpty(directMatchedUsers)) {
+            directMatchedUsers.forEach(user -> permissionUserContexts.add(new BpmPermissionUserContext(user, null)));
         }
 
         // 2. 如果是代理人，为每个被代理人添加一次执行
@@ -118,10 +123,28 @@ public class BpmExecServiceImpl implements BpmExecService {
     @Override
     public void execTask(ExecTaskReqVO reqVO) {
         Long taskId = reqVO.getTaskId();
+        Long loginUserId = WebFrameworkUtils.getLoginUserId();
+
+        // todo 是否要校验是否跨应用执行
 
         BpmActionButtonEnum buttonEnum = BpmActionButtonEnum.getByCode(reqVO.getButtonType());
         if (buttonEnum == null) {
             throw exception(ErrorCodeConstants.UNSUPPORT_ACTION_BUTTON_TYPE);
+        }
+
+        // 参数校验
+        if (buttonEnum.equals(BpmActionButtonEnum.TRANSFER)) {
+            if (StringUtils.isBlank(reqVO.getTargetHandlerId())) {
+                throw new IllegalArgumentException("目标处理人ID不能为空");
+            }
+
+            CommonResult<AdminUserRespDTO> targetUserResult = adminUserApi.getUser(Long.valueOf(reqVO.getTargetHandlerId()));
+            if (targetUserResult == null || !targetUserResult.isSuccess() || targetUserResult.getData() == null) {
+                throw exception(ErrorCodeConstants.TARGET_HANDLER_USER_NOT_EXISTS);
+            }
+        } else {
+            // 其它场景置空目标处理人ID
+            reqVO.setTargetHandlerId(null);
         }
 
         // 第一次查询task，用于权限检查
@@ -136,14 +159,14 @@ public class BpmExecServiceImpl implements BpmExecService {
         }
 
         if (instance.getBusinessId() == null) {
-            throw exception(ErrorCodeConstants.FLOW_NOT_BIND_ENTITY_ID);
+            throw exception(ErrorCodeConstants.FLOW_NOT_BIND_ENTITY);
         }
 
         Long entityDataId = Long.parseLong(instance.getBusinessId());
 
         // 忽略前端传的entityDataId，使用流程实例绑定的实体数据ID
         if (reqVO.getEntity() != null) {
-            reqVO.getEntity().setId(entityDataId);
+            reqVO.getEntity().getData().put("id", entityDataId);
         }
 
         String taskNodeCode = task.getNodeCode();
@@ -153,16 +176,16 @@ public class BpmExecServiceImpl implements BpmExecService {
             throw exception(ErrorCodeConstants.FLOW_NODE_NOT_EXISTS);
         }
 
-        // 校验实体ID
+        // 校验实体表名
         if (reqVO.getEntity() != null) {
-            Long entityId = MapUtils.getLong(instance.getVariableMap(), BpmConstants.VAR_ENTITY_ID_KEY);
+            String tableName = MapUtils.getString(instance.getVariableMap(), BpmConstants.VAR_ENTITY_TABLE_NAME_KEY);
 
-            if (entityId == null) {
-                throw exception(ErrorCodeConstants.FLOW_NOT_BIND_ENTITY_ID);
+            if (tableName == null) {
+                throw exception(ErrorCodeConstants.FLOW_NOT_BIND_ENTITY);
             }
 
-            if (!entityId.equals(reqVO.getEntity().getEntityId())) {
-                throw exception(ErrorCodeConstants.INVALID_ENTITY_ID);
+            if (!tableName.equals(reqVO.getEntity().getTableName())) {
+                throw exception(ErrorCodeConstants.INVALID_ENTITY_TABLE_NAME);
             }
         }
 
@@ -172,6 +195,16 @@ public class BpmExecServiceImpl implements BpmExecService {
         // 如果没有任何匹配的任务的执行权限，返回权限不足错误
         if (permissionUserContexts.isEmpty()) {
             throw exception(ErrorCodeConstants.FLOW_PERMISSION_DENY);
+        }
+
+        // 当转交、或者加签时，目标处理人ID不应该为当前用户ID，或者被代理人ID
+        if (StringUtils.isNotBlank(reqVO.getTargetHandlerId())) {
+            for (BpmPermissionUserContext context : permissionUserContexts) {
+                if (Objects.equals(context.getMatchedUser().getProcessedBy(), reqVO.getTargetHandlerId())
+                        || Objects.equals(String.valueOf(loginUserId), reqVO.getTargetHandlerId())) {
+                    throw exception(ErrorCodeConstants.CANNOT_TRANSFER_TO_SELF);
+                }
+            }
         }
 
         // 循环执行所有匹配的任务（当前用户直接权限 + 所有代理人权限）
@@ -197,6 +230,11 @@ public class BpmExecServiceImpl implements BpmExecService {
             }
 
             execTaskStrategyManager.execute(context.getMatchedUser(), context.getAgentIns(), currentTask, extDTO, reqVO);
+
+            if (buttonEnum == BpmActionButtonEnum.SAVE) {
+                log.info("[execTask] 保存按钮只用执行一次，后续任务不执行，当前任务ID: {}", currentTask.getId());
+                break;
+            }
         }
     }
 }

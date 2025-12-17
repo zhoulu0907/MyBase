@@ -16,6 +16,8 @@ import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.EntityF
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.EntityFieldBatchSaveRespVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.EntityFieldValidationTypesReqVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.EntityFieldValidationTypesRespVO;
+import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.FieldTypeValidationTypesReqVO;
+import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.FieldTypeValidationTypesRespVO;
 import com.cmsr.onebase.module.metadata.build.service.entity.vo.EntityFieldQueryVO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import jakarta.validation.Valid;
@@ -102,6 +104,14 @@ public interface MetadataEntityFieldBuildService {
      * @return 实体字段
      */
     MetadataEntityFieldDO getEntityField(String id);
+
+    /**
+     * 获得实体字段（根据UUID）
+     *
+     * @param fieldUuid 字段UUID
+     * @return 实体字段
+     */
+    MetadataEntityFieldDO getEntityFieldByUuid(String fieldUuid);
 
     /**
      * 创建实体字段（内部使用）
@@ -223,5 +233,19 @@ public interface MetadataEntityFieldBuildService {
      * @return 每个字段可选校验类型列表
      */
     List<EntityFieldValidationTypesRespVO> getFieldValidationTypes(@Valid EntityFieldValidationTypesReqVO reqVO);
+
+    /**
+     * 根据字段类型编码批量查询校验类型
+     *
+     * 实现逻辑：
+     * 1. 根据 field_type_code 查询 metadata_component_field_type 获取字段类型ID和名称
+     * 2. 根据字段类型ID关联 metadata_permit_ref_otft 获取校验类型ID
+     * 3. 关联 metadata_validation_type 获取校验类型编码/名称/描述/排序
+     * 4. 按 field_type_code 分组返回
+     *
+     * @param reqVO 字段类型编码列表请求
+     * @return 每个字段类型对应的校验类型列表
+     */
+    List<FieldTypeValidationTypesRespVO> getValidationTypesByFieldTypes(@Valid FieldTypeValidationTypesReqVO reqVO);
 
 }

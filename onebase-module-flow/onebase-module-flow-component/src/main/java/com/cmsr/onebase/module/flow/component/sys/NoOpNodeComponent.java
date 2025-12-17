@@ -12,9 +12,11 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @LiteflowComponent("noop")
 public class NoOpNodeComponent extends SkippableNodeComponent {
+
     @Override
     public void process() throws Exception {
         ExecuteContext executeContext = this.getContextBean(ExecuteContext.class);
-        executeContext.addLog("NoOp节点开始执行");    }
+        executeContext.addLog("NoOp节点开始执行");
+    }
 
 }

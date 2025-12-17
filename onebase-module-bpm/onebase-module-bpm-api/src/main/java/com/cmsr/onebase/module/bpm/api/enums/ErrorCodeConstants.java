@@ -75,9 +75,9 @@ public interface ErrorCodeConstants {
 
     ErrorCode FLOW_TASK_NOT_EXISTS = new ErrorCode(1_009_002_013, "流程任务不存在或已被处理");
 
-    ErrorCode FLOW_NOT_BIND_ENTITY_ID = new ErrorCode(1_009_002_014, "流程未绑定实体ID");
+    ErrorCode FLOW_NOT_BIND_ENTITY = new ErrorCode(1_009_002_014, "流程未绑定实体");
 
-    ErrorCode INVALID_ENTITY_ID = new ErrorCode(1_009_002_015, "无效的实体ID");
+    ErrorCode INVALID_ENTITY_TABLE_NAME = new ErrorCode(1_009_002_015, "无效的实体表名");
 
     ErrorCode APPROVER_NODE_REQUIRED_ENABLED_BTN = new ErrorCode(1_009_002_016, "审批节点至少开启一个按钮");
 
@@ -118,6 +118,28 @@ public interface ErrorCodeConstants {
     ErrorCode AGENT_UPDATE_INVALID_STATUS = new ErrorCode(1_009_002_034, "只允许更新待生效或代理中的记录");
 
     ErrorCode AGENT_END_TIME_BEFORE_NOW = new ErrorCode(1_009_002_035, "代理失效时间必须大于当前时间");
+
+    ErrorCode MENU_NOT_EXISTS = new ErrorCode(1_009_002_036, "菜单不存在");
+
+    ErrorCode MENU_NOT_BIND_PAGESET = new ErrorCode(1_009_002_037, "菜单未绑定页面集");
+
+    ErrorCode APPLICATION_ID_MISMATCH = new ErrorCode(1_009_002_038, "应用ID与请求应用ID不一致");
+
+    ErrorCode UNSUPPORT_PAGESET_TYPE = new ErrorCode(1_009_002_039, "不支持的页面集类型");
+
+    ErrorCode MISSING_APPLICATION_ID = new ErrorCode(1_009_002_039, "缺少应用ID");
+
+    ErrorCode SUB_TABLE_NO_EDIT_PERMISSION_FIELDS = new ErrorCode(1_009_002_040, "子表没有编辑字段权限");
+
+    ErrorCode SUB_TABLE_NO_EDIT_PERMISSION = new ErrorCode(1_009_002_040, "子表没有编辑权限，无法新增或删除数据");
+
+    ErrorCode SUB_TABLE_DATA_ID_NOT_EXISTS = new ErrorCode(1_009_002_041, "子表数据ID不存在");
+
+    ErrorCode MAIN_TABLE_FIELD_NO_EDIT_PERMISSION = new ErrorCode(1_009_002_042, "主表字段没有编辑权限");
+
+    ErrorCode CANNOT_TRANSFER_TO_SELF = new ErrorCode(1_009_002_043, "不能将流程转交给自己或被代理人");
+
+    ErrorCode TARGET_HANDLER_USER_NOT_EXISTS = new ErrorCode(1_009_002_044, "目标处理人不存在");
 
     // ============= 系统相关错误 =============
 

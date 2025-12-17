@@ -103,7 +103,7 @@ public class AutoNumberRuleEngine {
      */
     private String executeDateRule(MetadataAutoNumberRuleItemDO ruleItem) {
         LocalDateTime now = LocalDateTime.now();
-        String format = ruleItem.getFormat();
+        String format = ruleItem.getTextValue();
         
         if (StrUtil.isBlank(format)) {
             // 默认格式
@@ -213,8 +213,8 @@ public class AutoNumberRuleEngine {
      * @return 字段值的字符串表示
      */
     private String executeFieldRefRule(MetadataAutoNumberRuleItemDO ruleItem, Map<String, Object> contextData) {
-        if (ruleItem.getRefFieldId() == null) {
-            throw new ServiceException(GlobalErrorCodeConstants.BAD_REQUEST.getCode(), "字段引用规则必须指定引用字段ID");
+        if (ruleItem.getRefFieldUuid() == null || ruleItem.getRefFieldUuid().isEmpty()) {
+            throw new ServiceException(GlobalErrorCodeConstants.BAD_REQUEST.getCode(), "字段引用规则必须指定引用字段UUID");
         }
         
         if (contextData == null || contextData.isEmpty()) {
@@ -223,13 +223,13 @@ public class AutoNumberRuleEngine {
         }
         
         // 从上下文数据中获取字段值
-        // 这里需要根据实际的字段ID到字段名的映射逻辑来实现
-        // 暂时使用字段ID作为key
-        String fieldKey = "field_" + ruleItem.getRefFieldId();
+        // 这里需要根据实际的字段UUID到字段名的映射逻辑来实现
+        // 暂时使用字段UUID作为key
+        String fieldKey = "field_" + ruleItem.getRefFieldUuid();
         Object fieldValue = contextData.get(fieldKey);
         
         if (fieldValue == null) {
-            log.warn("Field value not found in context data for field: {}", ruleItem.getRefFieldId());
+            log.warn("Field value not found in context data for field: {}", ruleItem.getRefFieldUuid());
             return "";
         }
         

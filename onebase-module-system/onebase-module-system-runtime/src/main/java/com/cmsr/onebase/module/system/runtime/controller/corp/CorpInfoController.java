@@ -29,31 +29,6 @@ public class CorpInfoController {
     @Resource
     private CorpService corpService;
 
-
-    // @GetMapping("/page")
-    // @Operation(summary = "获得企业列表-分页")
-    // @PreAuthorize("@ss.hasPermission('corp:app-auth:query')")
-    // public CommonResult<PageResult<CorpRespVO>> getCorpPage(@Valid CorpPageReqVO pageReqVO) {
-    //     PageResult<CorpRespVO> pageResult = corpService.getCorpAppsPage(pageReqVO);
-    //     return success(pageResult);
-    // }
-
-    // @GetMapping(value = {"/simple-list"})
-    // @Operation(summary = "获取企业精简信息列表-不分页", description = "只包含被开启的企业，主要用于前端的下拉选项")
-    // @PreAuthorize("@ss.hasPermission('corp:app-auth:query')")
-    // public CommonResult<List<CorpSimpleRespVO>> getSimpleCorpList() {
-    //     List<CorpDO> list = corpService.getSimpleCorpList(CommonStatusEnum.ENABLE.getStatus());
-    //     return success(BeanUtils.toBean(list, CorpSimpleRespVO.class));
-    // }
-
-    // @PostMapping("/update-status")
-    // @Operation(summary = "企业启用/禁用")
-    // @PreAuthorize("@ss.hasPermission('corp:info:update')")
-    // public CommonResult<Boolean> updateStatus(@RequestParam("id") Long id, @RequestParam("status") Long status) {
-    //     corpService.updateStatus(id, status);
-    //     return success(true);
-    // }
-
     @GetMapping("/get")
     @Operation(summary = "获得企业详情")
     @PreAuthorize("@ss.hasPermission('corp:info:query')")
@@ -64,7 +39,7 @@ public class CorpInfoController {
 
     @PostMapping("/update")
     @Operation(summary = "更新企业")
-    @PreAuthorize("@ss.hasPermission('tenant:info:update')")
+    @PreAuthorize("@ss.hasPermission('corp:info:update')")
     public CommonResult<Boolean> updateCorp(@RequestBody @Valid CorpUpdateReqVO reqVO) {
         corpService.updateCorp(reqVO);
         return success(true);

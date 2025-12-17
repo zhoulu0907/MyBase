@@ -1,14 +1,15 @@
 package com.cmsr.onebase.framework.orm.config;
 
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
-import com.cmsr.onebase.framework.orm.entity.BaseBizEntity;
-import com.cmsr.onebase.framework.orm.entity.BaseEntity;
-import com.cmsr.onebase.framework.orm.entity.WarmFlowBaseEntity;
+import com.cmsr.onebase.framework.orm.entity.*;
 import com.mybatisflex.annotation.InsertListener;
 import com.mybatisflex.annotation.UpdateListener;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
+@Component
 public class DefaultEntityListener implements InsertListener, UpdateListener {
 
     @Override
@@ -29,10 +30,32 @@ public class DefaultEntityListener implements InsertListener, UpdateListener {
             wfBaseEntity.setUpdateTimeByListener(now);
         }
 
+        if (o instanceof BaseAppEntity appEntity) {
+            Long applicationId = ApplicationManager.getApplicationId();
+            if (appEntity.getApplicationId() == null && applicationId != null) {
+                appEntity.setApplicationId(applicationId);
+            }
+        }
+
         if (o instanceof BaseBizEntity bizEntity) {
-            // TODO: set version properties for biz entity if absent
-            if (bizEntity.getVersionTag() == null) {
-//            bizEntity.setVersionId();
+            Long versionTag = ApplicationManager.getVersionTag();
+            if (bizEntity.getVersionTag() == null && versionTag != null) {
+                bizEntity.setVersionTag(versionTag);
+            }
+            Long applicationId = ApplicationManager.getApplicationId();
+            if (bizEntity.getApplicationId() == null && applicationId != null) {
+                bizEntity.setApplicationId(applicationId);
+            }
+        }
+
+        if (o instanceof WarmFlowBizEntity wfBizEntity) {
+            Long versionTag = ApplicationManager.getVersionTag();
+            if (wfBizEntity.getVersionTag() == null && versionTag != null) {
+                wfBizEntity.setVersionTagByListener(versionTag);
+            }
+            Long applicationId = ApplicationManager.getApplicationId();
+            if (wfBizEntity.getApplicationId() == null && applicationId != null) {
+                wfBizEntity.setApplicationIdByListener(applicationId);
             }
         }
     }
@@ -43,11 +66,10 @@ public class DefaultEntityListener implements InsertListener, UpdateListener {
             baseEntity.setUpdater(SecurityFrameworkUtils.getLoginUserId());
             baseEntity.setUpdateTime(LocalDateTime.now());
         }
-        if (o instanceof BaseBizEntity bizEntity) {
-            // TODO: set version properties for biz entity if absent
-            if (bizEntity.getVersionTag() == null) {
-//            bizEntity.setVersionId();
-            }
+
+        if (o instanceof WarmFlowBaseEntity wfBaseEntity) {
+            wfBaseEntity.setUpdater(SecurityFrameworkUtils.getLoginUserId());
+            wfBaseEntity.setUpdateTimeByListener(LocalDateTime.now());
         }
     }
 }

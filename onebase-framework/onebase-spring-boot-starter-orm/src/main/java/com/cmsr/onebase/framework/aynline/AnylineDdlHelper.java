@@ -76,6 +76,15 @@ public class AnylineDdlHelper {
             return true;
         }
 
+        // 尝试去除引号后匹配
+        String unquotedName = columnName.replace("\"", "").replace("'", "");
+        if (!unquotedName.equals(columnName)) {
+            column = table.getColumn(unquotedName);
+            if (column != null) {
+                return true;
+            }
+        }
+
         column = table.getColumn(columnName.toLowerCase());
         if (column != null) {
             return true;
@@ -84,7 +93,13 @@ public class AnylineDdlHelper {
         LinkedHashMap<String, Column> columns = table.getColumns();
         if (columns != null) {
             for (Column col : columns.values()) {
-                if (col.getName().equalsIgnoreCase(columnName)) {
+                String colName = col.getName();
+                if (colName.equalsIgnoreCase(columnName)) {
+                    return true;
+                }
+                // 尝试去除引号后忽略大小写匹配
+                String unquotedColName = colName.replace("\"", "").replace("'", "");
+                if (unquotedColName.equalsIgnoreCase(unquotedName)) {
                     return true;
                 }
             }
@@ -289,10 +304,22 @@ public class AnylineDdlHelper {
                                           String alterColumnDDL) {
         clearMetadataCache();
         log.info("执行自定义 ALTER COLUMN DDL 修改表 {} 的列 {}", tableName, columnName);
-        log.debug("DDL 内容: {}", alterColumnDDL);
+        executeDDL(service, alterColumnDDL);
+        clearMetadataCache();
+        log.info("成功修改表 {} 的列 {}", tableName, columnName);
+    }
+
+    /**
+     * 执行自定义 DDL 语句
+     *
+     * @param service AnylineService 实例
+     * @param ddl     DDL 语句（支持多条语句，以 ;\n 分隔）
+     */
+    public static void executeDDL(AnylineService<?> service, String ddl) {
+        log.debug("DDL 内容: {}", ddl);
 
         // 拆分多条语句分别执行
-        String[] sqlStatements = alterColumnDDL.split(";\n");
+        String[] sqlStatements = ddl.split(";\n");
         for (String sql : sqlStatements) {
             String trimmedSql = sql.trim();
             if (!trimmedSql.isEmpty()) {
@@ -304,9 +331,6 @@ public class AnylineDdlHelper {
                 service.execute(trimmedSql);
             }
         }
-
-        clearMetadataCache();
-        log.info("成功修改表 {} 的列 {}", tableName, columnName);
     }
 
     /**

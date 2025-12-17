@@ -14,11 +14,11 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
 {
-  "name": "test002",
-  "tenantCode": "tenant_002",
+  "name": "测试创建普通角色",
+  "tenantCode": "normal_user",
   "status": 1,
   "accountCount": 100,
-  "website": "test002.onebase.com",
+  "website": "test002.onebase1.com",
   "publishModel": "saas",
   "tenantAdminUserReqVOList": [
     {

@@ -16,6 +16,7 @@ import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationChil
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityFieldRepository;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRuleDefinitionDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRuleGroupDO;
+import com.cmsr.onebase.module.metadata.core.util.MetadataIdUuidConverter;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -71,6 +72,9 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
 
     @Resource
     private MetadataValidationChildNotEmptyBuildService childNotEmptyService;
+
+    @Resource
+    private MetadataIdUuidConverter idUuidConverter;
 
     // 注入各种校验Repository用于查询
     @Resource
@@ -168,27 +172,52 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void safeDeleteGroupDirect(String groupUuid) {
+        if (groupUuid == null || groupUuid.isBlank()) { return; }
+        MetadataValidationRuleGroupDO group = validationRuleGroupRepository.getByGroupUuid(groupUuid);
+        if (group == null) { return; }
+        validationRuleDefinitionService.deleteByGroupId(group.getId());
+        validationRuleGroupRepository.removeById(group.getId());
+    }
+
+    @Override
     public MetadataValidationRuleGroupDO getValidationRuleGroup(Long id) {
         return validationRuleGroupRepository.getById(id);
     }
 
     @Override
+    public MetadataValidationRuleGroupDO getValidationRuleGroupByUuid(String groupUuid) {
+        return validationRuleGroupRepository.getByGroupUuid(groupUuid);
+    }
+
+    @Override
     public PageResult<MetadataValidationRuleGroupDO> getValidationRuleGroupPage(ValidationRuleGroupPageReqVO pageReqVO) {
+        // 优先使用entityUuid，若为空则使用entityId（转换为UUID）
+        String entityUuid = pageReqVO.getEntityUuid();
+        if (entityUuid == null && pageReqVO.getEntityId() != null) {
+            entityUuid = idUuidConverter.toEntityUuid(pageReqVO.getEntityId());
+        }
         return validationRuleGroupRepository.selectPage(
                 pageReqVO.getPageNo(),
                 pageReqVO.getPageSize(),
                 pageReqVO.getRgName(),
-                pageReqVO.getEntityId()
+                entityUuid
         );
     }
 
     @Override
     public PageResult<ValidationRuleGroupSimpleRespVO> getValidationRuleGroupPageSimple(ValidationRuleGroupPageReqVO pageReqVO) {
+        // 优先使用entityUuid，若为空则使用entityId（转换为UUID）
+        String entityUuid = pageReqVO.getEntityUuid();
+        if (entityUuid == null && pageReqVO.getEntityId() != null) {
+            entityUuid = idUuidConverter.toEntityUuid(pageReqVO.getEntityId());
+        }
         PageResult<MetadataValidationRuleGroupDO> page = validationRuleGroupRepository.selectPage(
                 pageReqVO.getPageNo(),
                 pageReqVO.getPageSize(),
                 pageReqVO.getRgName(),
-                pageReqVO.getEntityId()
+                entityUuid
         );
         List<ValidationRuleGroupSimpleRespVO> list = new ArrayList<>();
         for (MetadataValidationRuleGroupDO groupDO : page.getList()) {
@@ -231,10 +260,10 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
             group.setRgName(rgName);
             group.setRgDesc("字段" + fieldId + "的规则组");
             group.setRgStatus(StatusEnumUtil.ACTIVE);
-            // 同步entityId
+            // 同步entityUuid
             var fieldDO = entityFieldRepository.getById(fieldId);
             if (fieldDO != null) {
-                group.setEntityId(fieldDO.getEntityId());
+                group.setEntityUuid(fieldDO.getEntityUuid());
             }
             // 设置校验类型和提示信息（如果提供）
             if (validationType != null) {
@@ -305,7 +334,7 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
 
         // 创建主OR规则节点
         MetadataValidationRuleDefinitionDO mainOrRule = new MetadataValidationRuleDefinitionDO();
-        mainOrRule.setGroupId(groupId);
+        mainOrRule.setGroupUuid(String.valueOf(groupId));
         mainOrRule.setLogicType("LOGIC");
         mainOrRule.setLogicOperator("OR");
         mainOrRule.setStatus(StatusEnumUtil.ACTIVE);
@@ -322,8 +351,8 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
                 // 只有一个条件，直接添加到主OR节点下
                 ValidationRuleDefinitionVO singleRule = andGroup.get(0);
                 MetadataValidationRuleDefinitionDO ruleDO = modelMapper.map(singleRule, MetadataValidationRuleDefinitionDO.class);
-                ruleDO.setGroupId(groupId);
-                ruleDO.setParentRuleId(mainOrRuleId);
+                ruleDO.setGroupUuid(String.valueOf(groupId));
+                ruleDO.setParentRuleUuid(String.valueOf(mainOrRuleId));
                 ruleDO.setLogicType("CONDITION");
                 if (ruleDO.getStatus() == null) {
                     ruleDO.setStatus(StatusEnumUtil.ACTIVE);
@@ -332,8 +361,8 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
             } else {
                 // 多个条件，创建AND分组节点
                 MetadataValidationRuleDefinitionDO andGroupRule = new MetadataValidationRuleDefinitionDO();
-                andGroupRule.setGroupId(groupId);
-                andGroupRule.setParentRuleId(mainOrRuleId);
+                andGroupRule.setGroupUuid(String.valueOf(groupId));
+                andGroupRule.setParentRuleUuid(String.valueOf(mainOrRuleId));
                 andGroupRule.setLogicType("LOGIC");
                 andGroupRule.setLogicOperator("AND");
                 andGroupRule.setStatus(StatusEnumUtil.ACTIVE);
@@ -343,8 +372,8 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
                 // 添加AND分组内的所有条件
                 for (ValidationRuleDefinitionVO conditionRule : andGroup) {
                     MetadataValidationRuleDefinitionDO ruleDO = modelMapper.map(conditionRule, MetadataValidationRuleDefinitionDO.class);
-                    ruleDO.setGroupId(groupId);
-                    ruleDO.setParentRuleId(andGroupRuleId);
+                    ruleDO.setGroupUuid(String.valueOf(groupId));
+                    ruleDO.setParentRuleUuid(String.valueOf(andGroupRuleId));
                     ruleDO.setLogicType("CONDITION");
                     if (ruleDO.getStatus() == null) {
                         ruleDO.setStatus(StatusEnumUtil.ACTIVE);
@@ -475,8 +504,8 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
                     log.info("查询到必填校验字段数量：{}", requiredFields != null ? requiredFields.size() : 0);
                     if (requiredFields != null) {
                         for (var field : requiredFields) {
-                            log.info("处理字段ID：{}", field.getFieldId());
-                            String fieldName = getFieldNameById(field.getFieldId());
+                            log.info("处理字段UUID：{}", field.getFieldUuid());
+                            String fieldName = getFieldNameByUuid(field.getFieldUuid());
                             log.info("获取到字段名称：{}", fieldName);
                             if (fieldName != null) {
                                 fieldNames.add(fieldName);
@@ -491,8 +520,8 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
                     log.info("查询到长度校验字段数量：{}", lengthFields != null ? lengthFields.size() : 0);
                     if (lengthFields != null) {
                         for (var field : lengthFields) {
-                            log.info("处理长度校验字段ID：{}", field.getFieldId());
-                            String fieldName = getFieldNameById(field.getFieldId());
+                            log.info("处理长度校验字段UUID：{}", field.getFieldUuid());
+                            String fieldName = getFieldNameByUuid(field.getFieldUuid());
                             log.info("获取到长度校验字段名称：{}", fieldName);
                             if (fieldName != null) {
                                 fieldNames.add(fieldName);
@@ -507,8 +536,8 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
                     log.info("查询到唯一性校验字段数量：{}", uniqueFields != null ? uniqueFields.size() : 0);
                     if (uniqueFields != null) {
                         for (var field : uniqueFields) {
-                            log.info("处理唯一性校验字段ID：{}", field.getFieldId());
-                            String fieldName = getFieldNameById(field.getFieldId());
+                            log.info("处理唯一性校验字段UUID：{}", field.getFieldUuid());
+                            String fieldName = getFieldNameByUuid(field.getFieldUuid());
                             log.info("获取到唯一性校验字段名称：{}", fieldName);
                             if (fieldName != null) {
                                 fieldNames.add(fieldName);
@@ -523,8 +552,8 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
                     log.info("查询到范围校验字段数量：{}", rangeFields != null ? rangeFields.size() : 0);
                     if (rangeFields != null) {
                         for (var field : rangeFields) {
-                            log.info("处理范围校验字段ID：{}", field.getFieldId());
-                            String fieldName = getFieldNameById(field.getFieldId());
+                            log.info("处理范围校验字段UUID：{}", field.getFieldUuid());
+                            String fieldName = getFieldNameByUuid(field.getFieldUuid());
                             log.info("获取到范围校验字段名称：{}", fieldName);
                             if (fieldName != null) {
                                 fieldNames.add(fieldName);
@@ -539,8 +568,8 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
                     log.info("查询到格式校验字段数量：{}", formatFields != null ? formatFields.size() : 0);
                     if (formatFields != null) {
                         for (var field : formatFields) {
-                            log.info("处理格式校验字段ID：{}", field.getFieldId());
-                            String fieldName = getFieldNameById(field.getFieldId());
+                            log.info("处理格式校验字段UUID：{}", field.getFieldUuid());
+                            String fieldName = getFieldNameByUuid(field.getFieldUuid());
                             log.info("获取到格式校验字段名称：{}", fieldName);
                             if (fieldName != null) {
                                 fieldNames.add(fieldName);
@@ -555,8 +584,8 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
                     log.info("查询到子表非空校验字段数量：{}", childNotEmptyFields != null ? childNotEmptyFields.size() : 0);
                     if (childNotEmptyFields != null) {
                         for (var field : childNotEmptyFields) {
-                            log.info("处理子表非空校验字段ID：{}", field.getFieldId());
-                            String fieldName = getFieldNameById(field.getFieldId());
+                            log.info("处理子表非空校验字段UUID：{}", field.getFieldUuid());
+                            String fieldName = getFieldNameByUuid(field.getFieldUuid());
                             log.info("获取到子表非空校验字段名称：{}", fieldName);
                             if (fieldName != null) {
                                 fieldNames.add(fieldName);
@@ -578,18 +607,30 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
 
     /**
      * 根据字段ID获取字段显示名称
+     * @deprecated 请使用 getFieldNameByUuid(String)
      */
+    @Deprecated
     private String getFieldNameById(Long fieldId) {
         if (fieldId == null) {
+            return null;
+        }
+        return getFieldNameByUuid(String.valueOf(fieldId));
+    }
+
+    /**
+     * 根据字段UUID获取字段显示名称
+     */
+    private String getFieldNameByUuid(String fieldUuid) {
+        if (fieldUuid == null) {
             return null;
         }
 
         try {
             // 使用 entityFieldRepository 查询字段信息，返回displayName而不是fieldName
-            var fieldDO = entityFieldRepository.getById(fieldId);
+            var fieldDO = entityFieldRepository.getByUuid(fieldUuid);
             return fieldDO != null ? fieldDO.getDisplayName() : null;
         } catch (Exception e) {
-            log.error("根据字段ID获取字段显示名称失败，fieldId: {}", fieldId, e);
+            log.error("根据字段UUID获取字段显示名称失败，fieldUuid: {}", fieldUuid, e);
             return null;
         }
     }

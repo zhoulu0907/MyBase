@@ -18,7 +18,6 @@
         <module>onebase-security-platform</module>
         <module>onebase-security-build</module>
         <module>onebase-security-runtime</module>
-<!--        <module>onebase-spring-boot-starter-security</module>-->
         <module>onebase-spring-boot-starter-protection</module>
         <module>onebase-spring-boot-starter-rpc</module>
         <module>onebase-spring-boot-starter-excel</module>
@@ -27,7 +26,6 @@
         <module>onebase-project-base</module>
         <module>onebase-spring-boot-starter-dolphinscheduler</module>
         <module>onebase-jose</module>
-        <!--        <module>onebase-spring-boot-starter-dolphinscheduler-client</module>-->
     </modules>
 
     <artifactId>onebase-framework</artifactId>

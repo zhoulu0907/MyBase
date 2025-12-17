@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.metadata.core.dal.dataobject.number;
 
+import com.cmsr.onebase.framework.orm.entity.BaseBizEntity;
 import com.cmsr.onebase.framework.orm.entity.BaseTenantEntity;
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Table;
@@ -17,13 +18,23 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Table(value = "metadata_auto_number_config")
-public class MetadataAutoNumberConfigDO extends BaseTenantEntity {
+public class MetadataAutoNumberConfigDO extends BaseBizEntity {
 
     /**
-     * 字段ID
+     * 配置UUID
+     * <p>
+     * 用于跨应用、跨版本的唯一标识，与 application_id、version_tag 组成联合唯一约束
      */
-    @Column(value = "field_id", comment = "字段ID")
-    private Long fieldId;
+    @Column(value = "config_uuid", comment = "配置UUID")
+    private String configUuid;
+
+    /**
+     * 字段UUID
+     * <p>
+     * 关联 metadata_entity_field.field_uuid
+     */
+    @Column(value = "field_uuid", comment = "字段UUID")
+    private String fieldUuid;
 
     /**
      * 编号模式
@@ -68,16 +79,12 @@ public class MetadataAutoNumberConfigDO extends BaseTenantEntity {
     private Integer isEnabled;
 
     /**
-     * 版本标识
+     * SEQUENCE规则项在列表中的排序位置
+     * <p>
+     * 用于与其他RuleItem的itemOrder统一排序，默认999表示末尾
      */
-    @Column(value = "version_tag", comment = "版本标识")
-    private Long versionTag;
+    @Column(value = "sequence_order", comment = "SEQUENCE规则项在列表中的排序位置")
+    private Integer sequenceOrder;
 
-    /**
-     * 应用ID
-     */
-    @Column(value = "application_id", comment = "应用ID")
-    private Long applicationId;
 }
-
 

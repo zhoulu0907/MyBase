@@ -4,9 +4,8 @@ import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.common.util.string.UuidUtils;
 import com.cmsr.onebase.module.app.build.util.PageUtils;
-import com.cmsr.onebase.module.app.core.dal.database.app.AppApplicationRepository;
-import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
-import com.cmsr.onebase.module.app.core.dal.database.resource.*;
+import com.cmsr.onebase.module.app.core.dal.database.resource.AppWorkbenchComponentRepository;
+import com.cmsr.onebase.module.app.core.dal.database.resource.AppWorkbenchPageRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePagesetDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourceWorkbenchComponentDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourceWorkbenchPageDO;
@@ -26,36 +25,11 @@ import java.util.UUID;
 @Service
 public class WorkBenchPageSetServiceImpl implements WorkBenchPageSetService {
 
-
-    @Resource
-    private AppWorkbenchPageRepository appWorkbenchPageRepository;
-
-    @Resource
-
-    private AppWorkbenchComponentRepository appWorkbenchComponentRepository;
-
-    @Resource
-    private WorkBenchPageSetService workBenchPageSetService;
-
-    @Resource
-    private AppPageSetRepository pageSetDataRepository;
-
-    @Resource
-    private AppPageRepository pageDataRepository;
-
     @Resource
     private AppWorkbenchPageRepository workbenchPageRepository;
 
     @Resource
-    private AppComponentRepository componentDataRepository;
-    @Resource
     private AppWorkbenchComponentRepository workbenchComponentRepository;
-
-    @Resource
-    private AppMenuRepository appMenuRepository;
-
-    @Resource
-    private AppApplicationRepository appApplicationRepository;
 
     @Resource
     private WorkBenchPageSetServiceProvider workBenchPageSetServiceProvider;
@@ -64,7 +38,7 @@ public class WorkBenchPageSetServiceImpl implements WorkBenchPageSetService {
     public void initWorkbenchPage(AppResourcePagesetDO pageSetDO) {
         //1. 初始化工作台页面配置（空页面配置）
         AppResourceWorkbenchPageDO workBenchPageDO = this.buildEmptyWorkbenchPage(pageSetDO);
-        appWorkbenchPageRepository.save(workBenchPageDO);
+        workbenchPageRepository.save(workBenchPageDO);
     }
 
     @Override
@@ -75,11 +49,14 @@ public class WorkBenchPageSetServiceImpl implements WorkBenchPageSetService {
     private AppResourceWorkbenchPageDO buildEmptyWorkbenchPage(AppResourcePagesetDO pageSetDO) {
         String pageName = StringUtils.isBlank(pageSetDO.getDisplayName()) ? pageSetDO.getPageSetName() : pageSetDO.getDisplayName();
         AppResourceWorkbenchPageDO workBenchPageDO = new AppResourceWorkbenchPageDO();
+        workBenchPageDO.setApplicationId(pageSetDO.getApplicationId());
         workBenchPageDO.setPageUuid(UuidUtils.getUuid());
         workBenchPageDO.setPageSetUuid(pageSetDO.getPageSetUuid());
         workBenchPageDO.setPageName(pageName);
         workBenchPageDO.setTitle(pageName);
         workBenchPageDO.setPageType(PageEnum.WORKBENCH.getValue());
+        // 设置applicationId，从pageSetDO继承
+        workBenchPageDO.setApplicationId(pageSetDO.getApplicationId());
         //补全必填字段
         workBenchPageDO.setLayout("horizontal");
         workBenchPageDO.setWidth("auto");
@@ -128,13 +105,14 @@ public class WorkBenchPageSetServiceImpl implements WorkBenchPageSetService {
 
             workbenchPageRepository.updateById(finalPageDO);
 
-            // 删除已有的component
-            componentDataRepository.deleteComponentByPageUuid(applicationId, finalPageDO.getPageUuid());
+            // 删除已有的工作台组件（注意：工作台组件使用workbenchComponentRepository，不能使用普通的componentDataRepository）
+            workbenchComponentRepository.deleteByPageUuid(applicationId, finalPageDO.getPageUuid());
 
             // 插入新的component
             List<AppResourceWorkbenchComponentDO> componentDOs = new ArrayList<>();
             for (int idx = 0; idx < page.getComponents().size(); idx++) {
                 AppResourceWorkbenchComponentDO componentDO = BeanUtils.toBean(page.getComponents().get(idx), AppResourceWorkbenchComponentDO.class);
+                componentDO.setComponentUuid(UuidUtils.getUuid());
                 componentDO.setPageUuid(finalPageDO.getPageUuid());
                 componentDO.setComponentIndex(idx);
                 componentDOs.add(componentDO);

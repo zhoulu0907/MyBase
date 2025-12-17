@@ -1,10 +1,9 @@
 package com.cmsr.onebase.module.flow.component.interact;
 
 import com.cmsr.onebase.module.flow.component.SkippableNodeComponent;
-import com.cmsr.onebase.module.flow.context.ConditionsProvider;
+import com.cmsr.onebase.module.flow.context.provider.FlowConditionsProvider;
 import com.cmsr.onebase.module.flow.context.ExecuteContext;
 import com.cmsr.onebase.module.flow.context.VariableContext;
-import com.cmsr.onebase.module.flow.context.graph.nodes.NavigateNodeData;
 import com.yomahub.liteflow.annotation.LiteflowComponent;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class NavigateNodeComponent extends SkippableNodeComponent {
 
     @Autowired
-    private ConditionsProvider conditionsProvider;
+    private FlowConditionsProvider flowConditionsProvider;
 
     @Override
     public void process() throws Exception {

@@ -29,4 +29,14 @@ public class FlowConnectorScriptRepository extends BaseAppRepository<FlowConnect
         return new PageResult<>(pageData.getRecords(), pageData.getTotalRow());
     }
 
+    public FlowConnectorScriptDO findById(Long id) {
+        return this.getMapper().selectOneById(id);
+    }
+
+    public FlowConnectorScriptDO findByApplicationAndUuid(Long applicationId, String actionUuid) {
+        QueryWrapper query = this.query().select(FLOW_CONNECTOR_SCRIPT.ALL_COLUMNS)
+                .where(FLOW_CONNECTOR_SCRIPT.APPLICATION_ID.eq(applicationId))
+                .where(FLOW_CONNECTOR_SCRIPT.SCRIPT_UUID.eq(actionUuid));
+        return getMapper().selectOneByQuery(query);
+    }
 }

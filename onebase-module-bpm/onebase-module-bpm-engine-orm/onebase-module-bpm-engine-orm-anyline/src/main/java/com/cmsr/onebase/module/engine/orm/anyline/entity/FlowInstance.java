@@ -21,9 +21,15 @@ import java.time.LocalDateTime;
 public class FlowInstance extends BaseEntity implements Instance {
     public static final String DEFINITION_ID = "definition_id";
 
+    public static final String DEFINITION_UUID = "definition_uuid";
+
     /** 对应flow_definition表的id */
     @Column(name = DEFINITION_ID, nullable = false)
     private Long definitionId;
+
+    /** 流程定义UUID（主关联） */
+    @Column(name = "definition_uuid", length = 64, nullable = false)
+    private String definitionUuid;
 
     /** 业务id */
     @Column(name = "business_id", length = 40, nullable = false)
@@ -140,6 +146,11 @@ public class FlowInstance extends BaseEntity implements Instance {
             this.deleted = null;
         }
 
+        return this;
+    }
+
+    public Instance setDefinitionUuid(String definitionUuid) {
+        this.definitionUuid = definitionUuid;
         return this;
     }
 }

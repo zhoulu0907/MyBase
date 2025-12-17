@@ -100,6 +100,11 @@ public class FlowTaskTableDef extends TableDef {
     public final QueryColumn DEFINITION_ID = new QueryColumn(this, "definition_id");
 
     /**
+     * 流程定义UUID
+     */
+    public final QueryColumn DEFINITION_UUID = new QueryColumn(this, "definition_uuid");
+
+    /**
      * 所有字段。
      */
     public final QueryColumn ALL_COLUMNS = new QueryColumn(this, "*");
@@ -107,7 +112,7 @@ public class FlowTaskTableDef extends TableDef {
     /**
      * 默认字段，不包含逻辑删除或者 large 等字段。
      */
-    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, DEFINITION_ID, INSTANCE_ID, NODE_CODE, NODE_NAME, NODE_TYPE, FLOW_STATUS, FORM_CUSTOM, FORM_PATH, LOCK_VERSION, CREATOR, CREATE_TIME, UPDATER, UPDATE_TIME, DELETED, TENANT_ID};
+    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, DEFINITION_ID, DEFINITION_UUID, INSTANCE_ID, NODE_CODE, NODE_NAME, NODE_TYPE, FLOW_STATUS, FORM_CUSTOM, FORM_PATH, LOCK_VERSION, CREATOR, CREATE_TIME, UPDATER, UPDATE_TIME, DELETED, TENANT_ID};
 
     public FlowTaskTableDef() {
         super("", "bpm_flow_task");

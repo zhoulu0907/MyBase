@@ -1,0 +1,13 @@
+
+
+
+### 请求 infra/security-config/check-scenarios-captcha 接口 => 成功
+### 请求 /check-scenarios-captcha 接口 => 成功
+POST {{baseUrl}}/infra/security-config/check-scenarios-captcha
+Content-Type: application/json
+
+{
+  "tenantId": 158088726951460864,
+  "scenariosCode": "login"
+}
+

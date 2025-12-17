@@ -1,11 +1,14 @@
 package com.cmsr.onebase.module.metadata.core.service.entity.impl;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.util.string.UuidUtils;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityFieldRepository;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataComponentFieldTypeRepository;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataComponentFieldTypeDO;
+import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataEntityFieldCoreService;
+import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.annotation.Resource;
@@ -32,9 +35,17 @@ public class MetadataEntityFieldCoreServiceImpl implements MetadataEntityFieldCo
     @Resource
     private MetadataComponentFieldTypeRepository metadataComponentFieldTypeRepository;
 
+    @Resource
+    private MetadataBusinessEntityCoreService metadataBusinessEntityCoreService;
+
     @Override
     public Long createEntityField(@Valid MetadataEntityFieldDO entityField) {
+        // 生成 UUID
+        if (entityField.getFieldUuid() == null || entityField.getFieldUuid().isEmpty()) {
+            entityField.setFieldUuid(UuidUtils.getUuid());
+        }
         metadataEntityFieldRepository.save(entityField);
+        log.info("创建实体字段成功，ID: {}，UUID: {}", entityField.getId(), entityField.getFieldUuid());
         return entityField.getId();
     }
 
@@ -54,9 +65,41 @@ public class MetadataEntityFieldCoreServiceImpl implements MetadataEntityFieldCo
     }
 
     @Override
-    public List<MetadataEntityFieldDO> getEntityFieldListByEntityId(Long entityId) {
+    public MetadataEntityFieldDO getEntityFieldByUuid(String fieldUuid) {
+        if (fieldUuid == null || fieldUuid.trim().isEmpty()) {
+            return null;
+        }
         QueryWrapper queryWrapper = metadataEntityFieldRepository.query()
-                .eq(MetadataEntityFieldDO::getEntityId, entityId)
+                .eq(MetadataEntityFieldDO::getFieldUuid, fieldUuid.trim());
+        return metadataEntityFieldRepository.getOne(queryWrapper);
+    }
+
+    @Override
+    public List<MetadataEntityFieldDO> getEntityFieldListByEntityId(Long entityId) {
+        // 通过 entityId 获取实体的 entityUuid，然后使用 entityUuid 进行查询
+        if (entityId == null) {
+            log.warn("getEntityFieldListByEntityId: entityId 为 null，返回空列表");
+            return Collections.emptyList();
+        }
+        
+        // 通过 entityId 获取业务实体，从中提取 entityUuid
+        MetadataBusinessEntityDO entity = metadataBusinessEntityCoreService.getBusinessEntity(entityId);
+        if (entity == null || entity.getEntityUuid() == null) {
+            log.warn("getEntityFieldListByEntityId: 无法找到实体或实体UUID为空，entityId={}，返回空列表", entityId);
+            return Collections.emptyList();
+        }
+        
+        // 使用 entityUuid 进行查询
+        return getEntityFieldListByEntityUuid(entity.getEntityUuid());
+    }
+
+    @Override
+    public List<MetadataEntityFieldDO> getEntityFieldListByEntityUuid(String entityUuid) {
+        if (entityUuid == null || entityUuid.isEmpty()) {
+            return Collections.emptyList();
+        }
+        QueryWrapper queryWrapper = metadataEntityFieldRepository.query()
+                .eq(MetadataEntityFieldDO::getEntityUuid, entityUuid)
                 .orderBy(MetadataEntityFieldDO::getSortOrder, true)
                 .orderBy(MetadataEntityFieldDO::getCreateTime, false);
         return metadataEntityFieldRepository.list(queryWrapper);
@@ -80,11 +123,22 @@ public class MetadataEntityFieldCoreServiceImpl implements MetadataEntityFieldCo
 
     @Override
     public PageResult<MetadataEntityFieldDO> getEntityFieldPage(int pageNum, int pageSize, Long entityId) {
-        QueryWrapper queryWrapper = metadataEntityFieldRepository.query();
-        if (entityId != null) {
-            queryWrapper.eq(MetadataEntityFieldDO::getEntityId, entityId);
+        // 通过 entityId 获取实体的 entityUuid，然后使用 entityUuid 进行查询
+        if (entityId == null) {
+            log.warn("getEntityFieldPage: entityId 为 null，返回空页");
+            return new PageResult<>(Collections.emptyList(), 0L);
         }
-        queryWrapper.orderBy(MetadataEntityFieldDO::getSortOrder, true)
+        
+        // 通过 entityId 获取业务实体，从中提取 entityUuid
+        MetadataBusinessEntityDO entity = metadataBusinessEntityCoreService.getBusinessEntity(entityId);
+        if (entity == null || entity.getEntityUuid() == null) {
+            log.warn("getEntityFieldPage: 无法找到实体或实体UUID为空，entityId={}，返回空页", entityId);
+            return new PageResult<>(Collections.emptyList(), 0L);
+        }
+        
+        QueryWrapper queryWrapper = metadataEntityFieldRepository.query()
+                .eq(MetadataEntityFieldDO::getEntityUuid, entity.getEntityUuid())
+                .orderBy(MetadataEntityFieldDO::getSortOrder, true)
                 .orderBy(MetadataEntityFieldDO::getCreateTime, false);
         Page<MetadataEntityFieldDO> page = metadataEntityFieldRepository.page(Page.of(pageNum, pageSize), queryWrapper);
         return new PageResult<>(page.getRecords(), page.getTotalRow());
@@ -92,9 +146,39 @@ public class MetadataEntityFieldCoreServiceImpl implements MetadataEntityFieldCo
 
     @Override
     public MetadataEntityFieldDO getEntityFieldByCode(String fieldCode, Long entityId) {
+        // 通过 entityId 获取实体的 entityUuid，然后使用 entityUuid 进行查询
+        if (fieldCode == null || fieldCode.trim().isEmpty()) {
+            return null;
+        }
+        if (entityId == null) {
+            log.warn("getEntityFieldByCode: entityId 为 null，无法确定实体范围");
+            return null;
+        }
+        
+        // 通过 entityId 获取业务实体，从中提取 entityUuid
+        MetadataBusinessEntityDO entity = metadataBusinessEntityCoreService.getBusinessEntity(entityId);
+        if (entity == null || entity.getEntityUuid() == null) {
+            log.warn("getEntityFieldByCode: 无法找到实体或实体UUID为空，entityId={}", entityId);
+            return null;
+        }
+        
         QueryWrapper queryWrapper = metadataEntityFieldRepository.query()
                 .eq(MetadataEntityFieldDO::getFieldCode, fieldCode)
-                .eq(MetadataEntityFieldDO::getEntityId, entityId);
+                .eq(MetadataEntityFieldDO::getEntityUuid, entity.getEntityUuid());
+        return metadataEntityFieldRepository.getOne(queryWrapper);
+    }
+
+    /**
+     * 根据字段编码和实体UUID获取字段
+     *
+     * @param fieldCode 字段编码
+     * @param entityUuid 实体UUID
+     * @return 实体字段
+     */
+    public MetadataEntityFieldDO getEntityFieldByCodeAndEntityUuid(String fieldCode, String entityUuid) {
+        QueryWrapper queryWrapper = metadataEntityFieldRepository.query()
+                .eq(MetadataEntityFieldDO::getFieldCode, fieldCode)
+                .eq(MetadataEntityFieldDO::getEntityUuid, entityUuid);
         return metadataEntityFieldRepository.getOne(queryWrapper);
     }
 
@@ -105,6 +189,10 @@ public class MetadataEntityFieldCoreServiceImpl implements MetadataEntityFieldCo
         }
 
         for (MetadataEntityFieldDO field : entityFields) {
+            // 生成 UUID
+            if (field.getFieldUuid() == null || field.getFieldUuid().isEmpty()) {
+                field.setFieldUuid(UuidUtils.getUuid());
+            }
             metadataEntityFieldRepository.save(field);
         }
         return entityFields.size();

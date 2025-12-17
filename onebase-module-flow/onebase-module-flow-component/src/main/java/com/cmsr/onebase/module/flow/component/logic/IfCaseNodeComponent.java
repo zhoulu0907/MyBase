@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.flow.component.logic;
 
-import com.cmsr.onebase.module.flow.context.ConditionsProvider;
+import com.cmsr.onebase.module.flow.context.provider.FlowConditionsProvider;
 import com.cmsr.onebase.module.flow.component.utils.VariableProvider;
 import com.cmsr.onebase.module.flow.context.ExecuteContext;
 import com.cmsr.onebase.module.flow.context.VariableContext;
@@ -8,7 +8,7 @@ import com.cmsr.onebase.module.flow.context.condition.Conditions;
 import com.cmsr.onebase.module.flow.context.express.ExpressionExecutor;
 import com.cmsr.onebase.module.flow.context.express.OrExpression;
 import com.cmsr.onebase.module.flow.context.graph.InLoopDepth;
-import com.cmsr.onebase.module.flow.context.graph.nodes.IfCaseNodeData;
+import com.cmsr.onebase.module.flow.context.graph.nodes.logic.IfCaseNodeData;
 import com.yomahub.liteflow.annotation.LiteflowComponent;
 import com.yomahub.liteflow.core.NodeBooleanComponent;
 import lombok.Setter;
@@ -26,7 +26,7 @@ import java.util.Map;
 public class IfCaseNodeComponent extends NodeBooleanComponent {
 
     @Autowired
-    private ConditionsProvider conditionsProvider;
+    private FlowConditionsProvider flowConditionsProvider;
 
     private ExpressionExecutor expressionExecutor = new ExpressionExecutor();
 
@@ -45,8 +45,8 @@ public class IfCaseNodeComponent extends NodeBooleanComponent {
         }
         //
         List<Conditions> conditions = nodeData.getFilterCondition();
-        OrExpression orExpression = conditionsProvider.formatConditionsForExpression(conditions, expressionContext);
-        boolean evaluated = expressionExecutor.evaluate(orExpression, expressionContext);
+        OrExpression orExpression = flowConditionsProvider.formatConditionsForExpression(conditions, expressionContext);
+        boolean evaluated = expressionExecutor.evaluateContext(orExpression, expressionContext);
         //
         executeContext.putNodeProcessResult(this.getTag(), evaluated);
         executeContext.addLog("条件节点执行完毕，结果为: " + evaluated);

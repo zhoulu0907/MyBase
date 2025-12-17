@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.metadata.core.dal.dataobject.validation;
 
+import com.cmsr.onebase.framework.orm.entity.BaseBizEntity;
 import com.cmsr.onebase.framework.orm.entity.BaseTenantEntity;
 import com.cmsr.onebase.module.metadata.core.enums.ValidationStatusEnum;
 import com.mybatisflex.annotation.Column;
@@ -16,7 +17,15 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Table(value = "metadata_validation_rule_group")
-public class MetadataValidationRuleGroupDO extends BaseTenantEntity {
+public class MetadataValidationRuleGroupDO extends BaseBizEntity {
+
+    /**
+     * 规则组UUID
+     * <p>
+     * 用于跨应用、跨版本的唯一标识，与 application_id、version_tag 组成联合唯一约束
+     */
+    @Column(value = "group_uuid", comment = "规则组UUID")
+    private String groupUuid;
 
     /**
      * 规则组名称，如"客户信用评级规则"
@@ -62,8 +71,25 @@ public class MetadataValidationRuleGroupDO extends BaseTenantEntity {
     private String validationType;
 
     /**
-     * 实体 id
+     * 实体UUID
+     * <p>
+     * 关联 metadata_business_entity.entity_uuid
      */
-    @Column(value = "entity_id", comment = "实体ID")
-    private Long entityId;
+    @Column(value = "entity_uuid", comment = "实体UUID")
+    private String entityUuid;
+
+    /**
+     * 应用ID
+     */
+    @Column(value = "application_id", comment = "应用ID")
+    private Long applicationId;
+
+    /**
+     * 版本标识
+     * <p>
+     * 用于跨应用、跨版本的唯一标识，与 application_id 组成联合唯一约束
+     */
+    @Column(value = "version_tag", comment = "版本标识")
+    private Long versionTag;
+
 }

@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.metadata.core.dal.database;
 
+import com.cmsr.onebase.framework.orm.repo.BaseBizRepository;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.field.MetadataEntityFieldOptionDO;
 import com.cmsr.onebase.module.metadata.core.dal.mapper.MetadataEntityFieldOptionMapper;
 import com.mybatisflex.core.query.QueryWrapper;
@@ -7,6 +8,7 @@ import com.mybatisflex.spring.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -17,19 +19,41 @@ import java.util.List;
  */
 @Repository
 @Slf4j
-public class MetadataEntityFieldOptionRepository extends ServiceImpl<MetadataEntityFieldOptionMapper, MetadataEntityFieldOptionDO> {
+public class MetadataEntityFieldOptionRepository extends BaseBizRepository<MetadataEntityFieldOptionMapper, MetadataEntityFieldOptionDO> {
 
-    public List<MetadataEntityFieldOptionDO> findAllByFieldId(Long fieldId) {
+    /**
+     * 根据字段UUID获取字段选项列表
+     *
+     * @param fieldUuid 字段UUID
+     * @return 字段选项列表
+     */
+    public List<MetadataEntityFieldOptionDO> findAllByFieldUuid(String fieldUuid) {
         QueryWrapper queryWrapper = this.query()
-                .eq(MetadataEntityFieldOptionDO::getFieldId, fieldId)
+                .eq(MetadataEntityFieldOptionDO::getFieldUuid, fieldUuid)
                 .orderBy(MetadataEntityFieldOptionDO::getOptionOrder, true)
                 .orderBy(MetadataEntityFieldOptionDO::getCreateTime, true);
         return list(queryWrapper);
     }
 
-    public void deleteByFieldId(Long fieldId) {
+    public List<MetadataEntityFieldOptionDO> findAllByFieldUuids(Collection<String> fieldUuids) {
+        if (fieldUuids == null || fieldUuids.isEmpty()) {
+            return java.util.Collections.emptyList();
+        }
         QueryWrapper queryWrapper = this.query()
-                .eq(MetadataEntityFieldOptionDO::getFieldId, fieldId);
+                .in(MetadataEntityFieldOptionDO::getFieldUuid, fieldUuids)
+                .orderBy(MetadataEntityFieldOptionDO::getCreateTime, true);
+        return list(queryWrapper);
+    }
+
+
+    /**
+     * 根据字段UUID删除字段选项
+     *
+     * @param fieldUuid 字段UUID
+     */
+    public void deleteByFieldUuid(String fieldUuid) {
+        QueryWrapper queryWrapper = this.query()
+                .eq(MetadataEntityFieldOptionDO::getFieldUuid, fieldUuid);
         remove(queryWrapper);
     }
 
@@ -62,6 +86,28 @@ public class MetadataEntityFieldOptionRepository extends ServiceImpl<MetadataEnt
     public boolean deleteById(Long id) {
         return removeById(id);
     }
-}
 
+    // ==================== 向后兼容方法 ====================
+
+    /**
+     * 根据字段ID获取字段选项列表（兼容旧代码）
+     * @deprecated 请使用 findAllByFieldUuid(String)
+     * @param fieldId 字段ID
+     * @return 字段选项列表
+     */
+    @Deprecated
+    public List<MetadataEntityFieldOptionDO> findAllByFieldId(Long fieldId) {
+        return findAllByFieldUuid(fieldId != null ? String.valueOf(fieldId) : null);
+    }
+
+    /**
+     * 根据字段ID删除字段选项（兼容旧代码）
+     * @deprecated 请使用 deleteByFieldUuid(String)
+     * @param fieldId 字段ID
+     */
+    @Deprecated
+    public void deleteByFieldId(Long fieldId) {
+        deleteByFieldUuid(fieldId != null ? String.valueOf(fieldId) : null);
+    }
+}
 

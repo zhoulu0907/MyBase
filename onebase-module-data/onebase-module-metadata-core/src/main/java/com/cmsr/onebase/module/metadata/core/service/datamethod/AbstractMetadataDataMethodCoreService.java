@@ -21,6 +21,8 @@ import com.cmsr.onebase.module.metadata.core.service.datasource.MetadataDatasour
 import com.cmsr.onebase.module.metadata.core.dal.database.TemporaryDatasourceService;
 import com.cmsr.onebase.module.metadata.core.service.number.AutoNumberService;
 import com.cmsr.onebase.module.metadata.core.enums.BooleanStatusEnum;
+import com.cmsr.onebase.module.metadata.core.service.permission.PermissionManager;
+import com.cmsr.onebase.module.metadata.core.service.permission.PermissionQueryHelper;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.entity.DataRow;
@@ -72,9 +74,9 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
     @Resource
     protected ValidationManager validationManager;
     @Resource
-    protected com.cmsr.onebase.module.metadata.core.service.permission.PermissionManager permissionManager;
+    protected PermissionManager permissionManager;
     @Resource
-    protected com.cmsr.onebase.module.metadata.core.service.permission.PermissionQueryHelper permissionQueryHelper;
+    protected PermissionQueryHelper permissionQueryHelper;
     @Resource
     protected FieldValueStorageStrategyFactory fieldValueStorageStrategyFactory;
 
@@ -99,10 +101,38 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
     }
 
     /**
+     * 校验实体存在 - 通过UUID
+     *
+     * @param entityUuid 实体UUID
+     * @return 业务实体DO
+     */
+    protected MetadataBusinessEntityDO validateEntityExists(String entityUuid) {
+        MetadataBusinessEntityDO entity = metadataBusinessEntityCoreService.getBusinessEntityByUuid(entityUuid);
+        if (entity == null) {
+            throw exception(BUSINESS_ENTITY_NOT_EXISTS);
+        }
+        return entity;
+    }
+
+    /**
      * 获取实体字段
      */
     protected List<MetadataEntityFieldDO> getEntityFields(Long entityId) {
         List<MetadataEntityFieldDO> fields = metadataEntityFieldService.getEntityFieldListByEntityId(entityId);
+        if (fields == null || fields.isEmpty()) {
+            throw exception(ENTITY_FIELD_NOT_EXISTS);
+        }
+        return fields;
+    }
+
+    /**
+     * 获取实体字段 - 通过UUID
+     *
+     * @param entityUuid 实体UUID
+     * @return 实体字段列表
+     */
+    protected List<MetadataEntityFieldDO> getEntityFields(String entityUuid) {
+        List<MetadataEntityFieldDO> fields = metadataEntityFieldService.getEntityFieldListByEntityUuid(entityUuid);
         if (fields == null || fields.isEmpty()) {
             throw exception(ENTITY_FIELD_NOT_EXISTS);
         }
@@ -310,7 +340,7 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
         for (MetadataEntityFieldDO field : fields) {
             try {
                 // 检查字段是否配置了自动编号
-                if (autoNumberService.hasAutoNumber(field.getId())) {
+                if (autoNumberService.hasAutoNumber(field.getFieldUuid())) {
                     String fieldName = field.getFieldName();
 
                     // 如果用户没有提供值，则生成自动编号
@@ -321,15 +351,15 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
                         // 准备上下文数据，将当前的processedData作为上下文传递
                         Map<String, Object> contextData = new HashMap<>(processedData);
 
-                        // 为字段引用规则准备数据，使用字段ID作为key
+                        // 为字段引用规则准备数据，使用字段UUID作为key
                         for (MetadataEntityFieldDO f : fields) {
                             if (f.getFieldName() != null && processedData.containsKey(f.getFieldName())) {
-                                contextData.put("field_" + f.getId(), processedData.get(f.getFieldName()));
+                                contextData.put("field_" + f.getFieldUuid(), processedData.get(f.getFieldName()));
                             }
                         }
 
                         // 生成自动编号
-                        String autoNumber = autoNumberService.generateNumber(field.getId(), contextData);
+                        String autoNumber = autoNumberService.generateNumber(field.getFieldUuid(), contextData);
                         processedData.put(fieldName, autoNumber);
 
                         log.info("为字段 " + fieldName + " 生成自动编号: " + autoNumber);
@@ -401,7 +431,6 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
 
             //5. 处理数据并设置默认值
             Map<String, Object> processedData = processDataAndSetDefaults(requestContext.getData(), fields);
-
             context.setProcessedData(processedData);
 
             // 6. 功能权限校验
@@ -483,10 +512,7 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
         return convertedData;
     }
 
-    protected Map<String, Object> processDataAndSetDefaults(Map<String, Object> data, List<MetadataEntityFieldDO> fields) {
-
-        return null;
-    }
+    protected abstract Map<String, Object> processDataAndSetDefaults(Map<String, Object> data, List<MetadataEntityFieldDO> fields);
 
     // ========== 抽象方法 ==========
 
@@ -515,7 +541,7 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
         processContext.setId(requestContext.getId());
         processContext.setSubEntities(requestContext.getSubEntities());
         // 5. 获取临时数据源服务
-        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entityDO.getDatasourceId());
+        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasourceByUuid(entityDO.getDatasourceUuid());
         if (datasource == null) {
             throw exception(DATASOURCE_NOT_EXISTS);
         }
@@ -535,8 +561,8 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
      * 2. 功能权限校验
      */
     protected void validatePermission(ProcessContext context) {
-        log.info("开始执行权限校验：entityId={}, operationType={}", 
-                context.getEntityId(), 
+        log.info("开始执行权限校验：entityId={}, operationType={}",
+                context.getEntityId(),
                 context.getOperationType());
 
         // 使用权限管理器执行完整的权限校验流程
@@ -550,6 +576,7 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
      */
     protected void validateData(ProcessContext context) {
         Long entityId = context.getEntityId();
+        String entityUuid = context.getEntity().getEntityUuid();
         Map<String, Object> data = context.getData();
         List<MetadataEntityFieldDO> fields = context.getFields();
         Object id = context.getId();
@@ -575,7 +602,7 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
 
         // 使用校验管理器执行所有字段的校验
         List<MetadataDataMethodSubEntityContext> subEntities = context.getSubEntities();
-        validationManager.validateEntity(entityId, fields, dataForValidation, subEntities, operationType);
+        validationManager.validateEntity(entityUuid, fields, dataForValidation, subEntities, operationType);
 
         log.info("数据校验完成：entityId={}", entityId);
     }
@@ -780,14 +807,14 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
 
     /**
      * 应用查询权限过滤
-     * 
+     *
      * 在查询前调用，向 ConfigStore 添加数据权限过滤条件
      * 供子类在 queryData、getData 等查询方法中使用
      *
      * @param configStore Anyline 查询配置
      * @param context 处理上下文
      */
-    public void applyQueryPermissionFilter(org.anyline.data.param.ConfigStore configStore,
+/*    public void applyQueryPermissionFilter(org.anyline.data.param.ConfigStore configStore,
                                                ProcessContext context) {
         if (context.getMetadataPermissionContext() == null) {
             log.debug("权限上下文为空，跳过查询权限过滤");
@@ -800,11 +827,11 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
                 context.getLoginUserCtx(),
                 context.getFields()
         );
-    }
+    }*/
 
     /**
      * 过滤查询结果中的字段
-     * 
+     *
      * 在查询后调用，移除用户无权读取的字段
      * 供子类在 getData 等单条查询方法中使用
      *
@@ -827,7 +854,7 @@ public abstract class AbstractMetadataDataMethodCoreService implements MetadataD
 
     /**
      * 批量过滤查询结果列表中的字段
-     * 
+     *
      * 在查询后调用，移除用户无权读取的字段
      * 供子类在 queryData 等列表查询方法中使用
      *

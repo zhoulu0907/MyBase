@@ -1,11 +1,11 @@
 package com.cmsr.onebase.module.bpm.core.dal.database;
 
+import com.cmsr.onebase.framework.orm.repo.BaseAppRepository;
 import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowAgentDO;
 import com.cmsr.onebase.module.bpm.core.dal.mapper.BpmFlowAgentMapper;
 import com.cmsr.onebase.module.bpm.core.enums.BpmAgentStatus;
 import com.mybatisflex.core.query.QueryCondition;
 import com.mybatisflex.core.query.QueryWrapper;
-import com.mybatisflex.spring.service.impl.ServiceImpl;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -22,34 +22,34 @@ import static com.cmsr.onebase.module.bpm.core.dal.dataobject.table.BpmFlowAgent
  * @date 2025-11-10
  */
 @Repository
-public class BpmFlowAgentRepository extends ServiceImpl<BpmFlowAgentMapper, BpmFlowAgentDO> {
+public class BpmFlowAgentRepository extends BaseAppRepository<BpmFlowAgentMapper, BpmFlowAgentDO> {
     public QueryCondition buildConditionByAgentStatus(BpmAgentStatus agentStatus) {
-        QueryCondition condition = QueryCondition.createEmpty();
+        QueryCondition condition = null;
         LocalDateTime now = LocalDateTime.now();
 
         switch (agentStatus) {
             case INACTIVE:
                 // 待生效：当前时间 < 代理生效时间
                 // 同时需要确保未被撤销
-                condition.and(BPM_FLOW_AGENT.START_TIME.gt(now));
-                condition.and(BPM_FLOW_AGENT.REVOKED_TIME.isNull());
+                condition = BPM_FLOW_AGENT.START_TIME.gt(now)
+                        .and(BPM_FLOW_AGENT.REVOKED_TIME.isNull());
                 break;
             case ACTIVE:
                 // 代理中：当前时间 >= 代理生效时间 且 当前时间 <= 代理失效时间
                 // 同时需要确保未被撤销
-                condition.and(BPM_FLOW_AGENT.START_TIME.le(now));
-                condition.and(BPM_FLOW_AGENT.END_TIME.ge(now));
-                condition.and(BPM_FLOW_AGENT.REVOKED_TIME.isNull());
+                condition = BPM_FLOW_AGENT.START_TIME.le(now)
+                        .and(BPM_FLOW_AGENT.END_TIME.ge(now))
+                        .and(BPM_FLOW_AGENT.REVOKED_TIME.isNull());
                 break;
             case EXPIRED:
                 // 已失效：当前时间 > 代理失效时间
                 // 同时需要确保未被撤销
-                condition.and(BPM_FLOW_AGENT.END_TIME.lt(now));
-                condition.and(BPM_FLOW_AGENT.REVOKED_TIME.isNull());
+                condition = BPM_FLOW_AGENT.END_TIME.lt(now)
+                        .and(BPM_FLOW_AGENT.REVOKED_TIME.isNull());
                 break;
             case REVOKED:
                 // 已撤销：撤销时间不为空
-                condition.and(BPM_FLOW_AGENT.REVOKED_TIME.isNotNull());
+                condition = BPM_FLOW_AGENT.REVOKED_TIME.isNotNull();
                 break;
             default:
                 break;
@@ -114,12 +114,17 @@ public class BpmFlowAgentRepository extends ServiceImpl<BpmFlowAgentMapper, BpmF
         QueryCondition statusConfig = QueryCondition.createEmpty();
 
         // 待生效的记录
-        statusConfig.or(buildConditionByAgentStatus(BpmAgentStatus.INACTIVE));
+        QueryCondition inactiveCondition = buildConditionByAgentStatus(BpmAgentStatus.INACTIVE);
 
         // 已生效的记录
-        statusConfig.or(buildConditionByAgentStatus(BpmAgentStatus.ACTIVE));
+        QueryCondition activeCondition = buildConditionByAgentStatus(BpmAgentStatus.ACTIVE);
 
-        queryWrapper.and(statusConfig);
+        statusConfig.or(inactiveCondition);
+        statusConfig.or(activeCondition);
+
+        // 关键：用一个新的 QueryCondition 包裹 OR 条件，确保括号正确
+        QueryCondition wrappedStatusCondition = QueryCondition.createEmpty().and(statusConfig);
+        queryWrapper.and(wrappedStatusCondition);
 
         return list(queryWrapper);
     }

@@ -60,12 +60,6 @@ Content-Type: application/json
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
-### 获得租户可分配数量 /admin-api/system/tenant/get-other-exist-user-count?id=545560397835538432
-GET {{baseUrl}}/system/tenant/get-other-exist-user-count?id=545560397835538432
-Content-Type: application/json
-Authorization: Bearer {{token}}
-tenant-id: {{adminTenantId}}
-
 ### 根据网站获取租户 /admin-api/system/tenant/get-by-website
 GET {{baseUrl}}/system/tenant/get-by-website?website=tenant_20250811184245
 Content-Type: application/json
@@ -74,12 +68,6 @@ tenant-id: {{adminTenantId}}
 
 ### 获得租户详情 /admin-api/system/tenant/get
 GET {{baseUrl}}/system/tenant/get?id=141778811947483136
-Content-Type: application/json
-Authorization: Bearer {{token}}
-tenant-id: {{adminTenantId}}
-
-### 删除租户 /admin-api/system/tenant/delete
-POST {{baseUrl}}/system/tenant/delete?id=153771975565377536
 Content-Type: application/json
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}

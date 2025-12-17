@@ -16,6 +16,7 @@ public enum RoleCodeEnum {
     TENANT_ADMIN("tenant_admin", "空间管理员"),
     CORP_ADMIN("corp_admin", "企业管理员"),
     APP_DEVELOPER("app_developer", "应用开发者"),
+    NORMAL_USER("normal_user", "普通用户"),
     ;
 
 
@@ -50,6 +51,10 @@ public enum RoleCodeEnum {
         return ObjectUtils.equalsAny(code, APP_DEVELOPER.getCode());
     }
 
+    public static boolean isNormalUser(String code) {
+        return ObjectUtils.equalsAny(code, NORMAL_USER.getCode());
+    }
+
 
     /**
      * 应用开发者权限编码列表(建议未来迁移到数据库配置)
@@ -60,9 +65,9 @@ public enum RoleCodeEnum {
         add("tenant:app"); // 应用管理
         add("tenant:app:create"); // 应用新增
         add("tenant:app:delete"); // 应用删除
-        add("tenant:app:enable");  // 应用禁用
         add("tenant:app:query");  //应用查看
-        add("tenant:app:update"); // 应用修改system/user/
+        add("tenant:app:update"); // 应用修改
+        add("tenant:app:publish"); // 应用发布
 
         add("tenant:profile"); // 个人中心
         add("tenant:profile:query");  // 个人中心查看
@@ -123,17 +128,19 @@ public enum RoleCodeEnum {
         add("tenant:info"); // 空间信息
         add("tenant:info:query"); // 空间信息查看
 
+        add("tenant:dict:query"); // 数据字典查看
+
     }};
 
     /**
      * 企业全部用户的默认权限(建议未来迁移到数据库配置)
      */
     public static final Set<String> corpDefaultPermissionCodes = new HashSet<>() {{
-        add("tenant"); // 一级
-        add("tenant:app"); // 应用管理
-        add("tenant:app:query");  //应用查看
 
         add("corp"); // 一级
+
+        add("corp:app-auth"); // 二级 应用授权
+        add("corp:app-auth:query"); // 三级 应用授权查看
 
         add("corp:user"); // 二级 用户
         add("corp:user:query"); // 三级 用户查看

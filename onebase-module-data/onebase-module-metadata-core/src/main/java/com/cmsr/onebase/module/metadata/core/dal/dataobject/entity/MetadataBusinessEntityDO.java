@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.metadata.core.dal.dataobject.entity;
 
+import com.cmsr.onebase.framework.orm.entity.BaseBizEntity;
 import com.cmsr.onebase.framework.orm.entity.BaseTenantEntity;
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Table;
@@ -15,7 +16,15 @@ import lombok.EqualsAndHashCode;
 @Table(value = "metadata_business_entity")
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class MetadataBusinessEntityDO extends BaseTenantEntity {
+public class MetadataBusinessEntityDO extends BaseBizEntity {
+
+    /**
+     * 实体UUID
+     * <p>
+     * 用于跨应用、跨版本的唯一标识，与 application_id、version_tag 组成联合唯一约束
+     */
+    @Column(value = "entity_uuid", comment = "实体UUID")
+    private String entityUuid;
 
     /**
      * 实体名称
@@ -42,10 +51,12 @@ public class MetadataBusinessEntityDO extends BaseTenantEntity {
     private String description;
 
     /**
-     * 数据源ID
+     * 数据源UUID
+     * <p>
+     * 关联 metadata_datasource.datasource_uuid
      */
-    @Column(value = "datasource_id", comment = "数据源ID")
-    private Long datasourceId;
+    @Column(value = "datasource_uuid", comment = "数据源UUID")
+    private String datasourceUuid;
 
     /**
      * 对应数据表名

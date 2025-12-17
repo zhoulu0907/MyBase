@@ -16,6 +16,9 @@ public class PageSetRespDTO {
     @Schema(description = "页面集ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "1024")
     private Long id;
 
+    @Schema(description = "菜单UUID", requiredMode = Schema.RequiredMode.REQUIRED, example = "1024")
+    private String menuUuid;
+
     @Schema(description = "页面集名称", requiredMode = Schema.RequiredMode.REQUIRED, example = "首页页面集")
     private String pageSetName;
 

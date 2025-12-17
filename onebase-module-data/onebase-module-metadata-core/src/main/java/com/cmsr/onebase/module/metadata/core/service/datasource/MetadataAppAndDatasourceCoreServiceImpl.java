@@ -29,41 +29,41 @@ public class MetadataAppAndDatasourceCoreServiceImpl implements MetadataAppAndDa
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Long createRelation(Long applicationId, Long datasourceId, String datasourceType, String appUid) {
-        log.info("创建应用{}与数据源{}的关联关系", applicationId, datasourceId);
-        return appAndDatasourceRepository.createRelation(applicationId, datasourceId, datasourceType, appUid);
+    public Long createRelation(Long applicationId, String datasourceUuid, String datasourceType, String appUid) {
+        log.info("创建应用{}与数据源{}的关联关系", applicationId, datasourceUuid);
+        return appAndDatasourceRepository.createRelation(applicationId, datasourceUuid, datasourceType, appUid);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean deleteRelation(Long applicationId, Long datasourceId) {
-        log.info("删除应用{}与数据源{}的关联关系", applicationId, datasourceId);
-        return appAndDatasourceRepository.deleteRelation(applicationId, datasourceId);
+    public boolean deleteRelation(Long applicationId, String datasourceUuid) {
+        log.info("删除应用{}与数据源{}的关联关系", applicationId, datasourceUuid);
+        return appAndDatasourceRepository.deleteRelation(applicationId, datasourceUuid);
     }
 
     @Override
     public List<MetadataDatasourceDO> getDatasourcesByApplicationId(Long applicationId) {
         log.debug("查询应用{}关联的数据源", applicationId);
 
-        // 获取关联的数据源ID列表
-        List<Long> datasourceIds = appAndDatasourceRepository.getDatasourceIdsByApplicationId(applicationId);
+        // 获取关联的数据源UUID列表
+        List<String> datasourceUuids = appAndDatasourceRepository.getDatasourceUuidsByApplicationId(applicationId);
 
-        if (datasourceIds.isEmpty()) {
+        if (datasourceUuids.isEmpty()) {
             log.debug("应用{}未关联任何数据源", applicationId);
             return new ArrayList<>();
         }
 
-        // 根据数据源ID列表查询数据源详情
+        // 根据数据源UUID列表查询数据源详情
         List<MetadataDatasourceDO> datasources = new ArrayList<>();
-        for (Long datasourceId : datasourceIds) {
+        for (String datasourceUuid : datasourceUuids) {
             try {
-                MetadataDatasourceDO datasource = datasourceCoreService.getDatasource(datasourceId);
+                MetadataDatasourceDO datasource = datasourceCoreService.getDatasourceByUuid(datasourceUuid);
                 if (datasource != null) {
                     datasources.add(datasource);
                 }
             } catch (Exception e) {
                 // 如果数据源不存在或查询失败,记录日志并跳过
-                log.warn("查询数据源失败,数据源ID: {},错误: {}", datasourceId, e.getMessage());
+                log.warn("查询数据源失败,数据源UUID: {},错误: {}", datasourceUuid, e.getMessage());
             }
         }
 
@@ -72,14 +72,14 @@ public class MetadataAppAndDatasourceCoreServiceImpl implements MetadataAppAndDa
     }
 
     @Override
-    public List<Long> getApplicationIdsByDatasourceId(Long datasourceId) {
-        log.debug("查询数据源{}关联的应用", datasourceId);
-        return appAndDatasourceRepository.getApplicationIdsByDatasourceId(datasourceId);
+    public List<Long> getApplicationIdsByDatasourceUuid(String datasourceUuid) {
+        log.debug("查询数据源{}关联的应用", datasourceUuid);
+        return appAndDatasourceRepository.getApplicationIdsByDatasourceUuid(datasourceUuid);
     }
 
     @Override
-    public boolean isRelationExists(Long applicationId, Long datasourceId) {
-        return appAndDatasourceRepository.isRelationExists(applicationId, datasourceId);
+    public boolean isRelationExists(Long applicationId, String datasourceUuid) {
+        return appAndDatasourceRepository.isRelationExists(applicationId, datasourceUuid);
     }
 
     @Override
@@ -91,27 +91,27 @@ public class MetadataAppAndDatasourceCoreServiceImpl implements MetadataAppAndDa
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public long deleteRelationsByDatasourceId(Long datasourceId) {
-        log.info("删除数据源{}的所有关联关系", datasourceId);
-        return appAndDatasourceRepository.deleteRelationsByDatasourceId(datasourceId);
+    public long deleteRelationsByDatasourceUuid(String datasourceUuid) {
+        log.info("删除数据源{}的所有关联关系", datasourceUuid);
+        return appAndDatasourceRepository.deleteRelationsByDatasourceUuid(datasourceUuid);
     }
 
     @Override
     public List<MetadataDatasourceDO> getDatasourcesByAppUid(String appUid) {
         log.debug("查询应用UID{}关联的数据源", appUid);
 
-        // 获取关联的数据源ID列表
-        List<Long> datasourceIds = appAndDatasourceRepository.getDatasourceIdsByAppUid(appUid);
+        // 获取关联的数据源UUID列表
+        List<String> datasourceUuids = appAndDatasourceRepository.getDatasourceUuidsByAppUid(appUid);
 
-        if (datasourceIds.isEmpty()) {
+        if (datasourceUuids.isEmpty()) {
             log.debug("应用UID{}未关联任何数据源", appUid);
             return new ArrayList<>();
         }
 
-        // 根据数据源ID列表查询数据源详情
+        // 根据数据源UUID列表查询数据源详情
         List<MetadataDatasourceDO> datasources = new ArrayList<>();
-        for (Long datasourceId : datasourceIds) {
-            MetadataDatasourceDO datasource = datasourceCoreService.getDatasource(datasourceId);
+        for (String datasourceUuid : datasourceUuids) {
+            MetadataDatasourceDO datasource = datasourceCoreService.getDatasourceByUuid(datasourceUuid);
             if (datasource != null) {
                 datasources.add(datasource);
             }
@@ -128,20 +128,20 @@ public class MetadataAppAndDatasourceCoreServiceImpl implements MetadataAppAndDa
     }
 
     @Override
-    public String getAppUidByAppIdAndDatasourceId(Long applicationId, Long datasourceId) {
-        return appAndDatasourceRepository.getAppUidByAppIdAndDatasourceId(applicationId, datasourceId);
+    public String getAppUidByAppIdAndDatasourceUuid(Long applicationId, String datasourceUuid) {
+        return appAndDatasourceRepository.getAppUidByAppIdAndDatasourceUuid(applicationId, datasourceUuid);
     }
 
     @Override
-    public MetadataAppAndDatasourceDO getRelation(Long applicationId, Long datasourceId) {
-        log.debug("查询应用{}与数据源{}的关联关系", applicationId, datasourceId);
-        return appAndDatasourceRepository.getRelation(applicationId, datasourceId);
+    public MetadataAppAndDatasourceDO getRelation(Long applicationId, String datasourceUuid) {
+        log.debug("查询应用{}与数据源{}的关联关系", applicationId, datasourceUuid);
+        return appAndDatasourceRepository.getRelation(applicationId, datasourceUuid);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean updateRelationAppUid(Long applicationId, Long datasourceId, String newAppUid) {
-        log.info("更新应用{}与数据源{}关联关系的appUid为{}", applicationId, datasourceId, newAppUid);
-        return appAndDatasourceRepository.updateRelationAppUid(applicationId, datasourceId, newAppUid);
+    public boolean updateRelationAppUid(Long applicationId, String datasourceUuid, String newAppUid) {
+        log.info("更新应用{}与数据源{}关联关系的appUid为{}", applicationId, datasourceUuid, newAppUid);
+        return appAndDatasourceRepository.updateRelationAppUid(applicationId, datasourceUuid, newAppUid);
     }
 }

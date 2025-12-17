@@ -2,14 +2,17 @@ package com.cmsr.onebase.module.flow.component.external;
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.module.flow.component.SkippableNodeComponent;
+import com.cmsr.onebase.module.flow.component.utils.PropertyDefine;
+import com.cmsr.onebase.module.flow.component.utils.SchemaParser;
 import com.cmsr.onebase.module.flow.component.utils.VariableProvider;
-import com.cmsr.onebase.module.flow.context.ConditionsProvider;
 import com.cmsr.onebase.module.flow.context.ExecuteContext;
 import com.cmsr.onebase.module.flow.context.VariableContext;
 import com.cmsr.onebase.module.flow.context.condition.ConditionItem;
 import com.cmsr.onebase.module.flow.context.express.ExpressionItem;
 import com.cmsr.onebase.module.flow.context.graph.InLoopDepth;
 import com.cmsr.onebase.module.flow.context.graph.nodes.ScriptNodeData;
+import com.cmsr.onebase.module.flow.context.provider.FlowConditionsProvider;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticFieldTypeEnum;
 import com.yomahub.liteflow.annotation.LiteflowComponent;
 import kong.unirest.core.ContentType;
 import kong.unirest.core.HttpResponse;
@@ -31,13 +34,14 @@ import java.util.stream.Collectors;
 @Setter
 @LiteflowComponent("javascript")
 public class ScriptNodeComponent extends SkippableNodeComponent {
+
     private static final String INVOKE_SUFFIX_URI = "/api/exec";
 
     @Value("${liteflow.js-server-address}")
     private String jsServerAddress;
 
     @Autowired
-    private ConditionsProvider conditionsProvider;
+    private FlowConditionsProvider flowConditionsProvider;
 
     @Override
     public void process() throws Exception {
@@ -51,14 +55,16 @@ public class ScriptNodeComponent extends SkippableNodeComponent {
 
         // 2. 从空间中读取变量
         List<ConditionItem> conditionItems = nodeData.getInputParameterFields();
-        List<ExpressionItem> expressionItems = conditionsProvider.formatConditionItemsForValue(conditionItems, expressionContext);
+        settingToJdbcType(conditionItems);
+        List<ExpressionItem> expressionItems = flowConditionsProvider.formatConditionItemsForValue(conditionItems, expressionContext);
 
-        Map<String, Object> inputData = expressionItems.stream().collect(Collectors.toMap(ExpressionItem::getKey, ExpressionItem::getValue));
+        Map<String, Object> inputData = expressionItems.stream().collect(Collectors.toMap(ExpressionItem::getFieldKey, ExpressionItem::getFieldValue));
         // 3. 执行Http调用
         JsRequest jsRequest = new JsRequest();
         jsRequest.setScript(nodeData.getScript());
-        jsRequest.setInputJson(JsonUtils.toJsonString(inputData));
-        jsRequest.setOutputJson(nodeData.getOutputParameter());
+        List<PropertyDefine> inputDef = JsonUtils.parseArray(nodeData.getInputSchema(), PropertyDefine.class);
+        Map<String, Object> parsedInputParams = SchemaParser.parseBySchemaDef(inputData, inputDef);
+        jsRequest.setInputJson(JsonUtils.toJsonString(parsedInputParams));
 
         String invokeUrl = jsServerAddress + INVOKE_SUFFIX_URI;
         HttpResponse<JsonNode> nodeHttpResponse = Unirest.post(invokeUrl)
@@ -68,9 +74,12 @@ public class ScriptNodeComponent extends SkippableNodeComponent {
                 .asJson();
 
         if (nodeHttpResponse.isSuccess()) {
-            System.out.println("node服务器调用成功");
             JSONObject result = nodeHttpResponse.getBody().getObject().getJSONObject("data");
-            variableContext.putNodeVariables(this.getTag(), result.toMap());
+            List<PropertyDefine> outputDef = JsonUtils.parseArray(nodeData.getOutputSchema(), PropertyDefine.class);
+            Map<String, Object> resultMap = result.toMap();
+            Map<String, Object> parsedResult = SchemaParser.parseBySchemaDef(resultMap, outputDef);
+            executeContext.addLog("脚本节点执行成功，输出: " + JsonUtils.toJsonString(parsedResult));
+            variableContext.putNodeVariables(this.getTag(), parsedResult);
         } else {
             int httpStatus = nodeHttpResponse.getStatus();
             String errMsg = nodeHttpResponse.getBody().getObject().getString("msg");
@@ -79,14 +88,18 @@ public class ScriptNodeComponent extends SkippableNodeComponent {
         }
     }
 
-    @Data
-    protected static class JsRequest {
-
-        private String inputJson;
-
-        private String script;
-
-        private String outputJson;
-
+    private void settingToJdbcType(List<ConditionItem> conditionItems) {
+        for (ConditionItem conditionItem : conditionItems) {
+            conditionItem.setFieldTypeEnum(SemanticFieldTypeEnum.TEXT);
+        }
     }
+
+
+    @Data
+    public static class JsRequest {
+        private String inputJson;
+        private String script;
+    }
+
+
 }

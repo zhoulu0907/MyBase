@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 
 /**
  * 自动编号核心服务
@@ -37,16 +38,16 @@ public class AutoNumberService {
     /**
      * 为指定字段生成自动编号
      *
-     * @param fieldId     字段ID
+     * @param fieldUuid   字段UUID
      * @param contextData 上下文数据（用于规则计算）
      * @return 生成的编号
      */
-    public String generateNumber(Long fieldId, Map<String, Object> contextData) {
+    public String generateNumber(String fieldUuid, Map<String, Object> contextData) {
         // 1. 查询字段的自动编号配置
-        MetadataAutoNumberConfigDO config = configRepository.findByFieldId(fieldId);
+        MetadataAutoNumberConfigDO config = configRepository.findByFieldUuid(fieldUuid);
         if (config == null) {
             throw new ServiceException(GlobalErrorCodeConstants.BAD_REQUEST.getCode(), 
-                    "字段未配置自动编号: " + fieldId);
+                    "字段未配置自动编号: " + fieldUuid);
         }
 
         // 2. 生成编号
@@ -56,55 +57,68 @@ public class AutoNumberService {
     /**
      * 批量生成自动编号
      *
-     * @param fieldIds        字段ID列表
+     * @param fieldUuids      字段UUID列表
      * @param contextDataList 上下文数据列表
      * @return 生成的编号列表
      */
-    public List<String> batchGenerateNumbers(List<Long> fieldIds, List<Map<String, Object>> contextDataList) {
-        if (fieldIds.size() != contextDataList.size()) {
+    public List<String> batchGenerateNumbers(List<String> fieldUuids, List<Map<String, Object>> contextDataList) {
+        if (fieldUuids.size() != contextDataList.size()) {
             throw new ServiceException(GlobalErrorCodeConstants.BAD_REQUEST.getCode(), 
-                    "字段ID数量与上下文数据数量不匹配");
+                    "字段UUID数量与上下文数据数量不匹配");
         }
 
-        return fieldIds.stream()
-                .mapToInt(i -> fieldIds.indexOf(i))
-                .mapToObj(i -> generateNumber(fieldIds.get(i), contextDataList.get(i)))
+        return fieldUuids.stream()
+                .mapToInt(i -> fieldUuids.indexOf(i))
+                .mapToObj(i -> generateNumber(fieldUuids.get(i), contextDataList.get(i)))
                 .toList();
     }
 
     /**
      * 预览编号格式（不消费序号）
      *
-     * @param fieldId     字段ID
+     * @param fieldUuid   字段UUID
      * @param contextData 上下文数据
      * @return 预览结果
      */
-    public String previewNumber(Long fieldId, Map<String, Object> contextData) {
+    public String previewNumber(String fieldUuid, Map<String, Object> contextData) {
         // 1. 查询字段的自动编号配置
-        MetadataAutoNumberConfigDO config = configRepository.findByFieldId(fieldId);
+        MetadataAutoNumberConfigDO config = configRepository.findByFieldUuid(fieldUuid);
         if (config == null) {
             throw new ServiceException(GlobalErrorCodeConstants.BAD_REQUEST.getCode(), 
-                    "字段未配置自动编号: " + fieldId);
+                    "字段未配置自动编号: " + fieldUuid);
         }
 
         // 2. 预览编号
         return generator.preview(config, contextData);
     }
 
+    public Map<String, String> generateDataNumbers(List<String> fieldIds, Map<String, Object> contextData) {
+        Map<String, String> result = new HashMap<>();
+        if (fieldIds == null || fieldIds.isEmpty()) {
+            return result;
+        }
+        List<MetadataAutoNumberConfigDO> configs = configRepository.listEnabledByFieldIds(fieldIds);
+        for (MetadataAutoNumberConfigDO config : configs) {
+            String number = generator.generate(config, contextData);
+            result.put(config.getFieldUuid(), number);
+        }
+        return result;
+    }
+
     /**
      * 手动重置编号序号
      *
-     * @param fieldId     字段ID
+     * @param fieldUuid   字段UUID
      * @param nextValue   下一个编号值
      * @param resetReason 重置原因
      * @param operator    操作者ID
      */
-    public void resetSequence(Long fieldId, Long nextValue, String resetReason, Long operator) {
+    public void resetSequence(String fieldUuid, Long nextValue, String resetReason, Long operator) {
         // 1. 查询字段的自动编号配置
-        MetadataAutoNumberConfigDO config = configRepository.findByFieldId(fieldId);
+        MetadataAutoNumberConfigDO config = configRepository.findByFieldUuid(fieldUuid);
         if (config == null) {
             throw new ServiceException(GlobalErrorCodeConstants.BAD_REQUEST.getCode(), 
-                    "字段未配置自动编号: " + fieldId);
+                    "字段未配置自动编号: " + fieldUuid);
         }
 
         // 2. 验证下一个编号值
@@ -117,28 +131,28 @@ public class AutoNumberService {
         String periodKey = ruleEngine.generatePeriodKey(config.getResetCycle(), 
                 java.time.LocalDateTime.now());
 
-        // 4. 重置序号
-        stateManager.resetSequence(config.getId(), periodKey, resetReason, operator);
+        // 4. 重置序号（使用configUuid）
+        stateManager.resetSequence(config.getConfigUuid(), periodKey, resetReason, operator);
     }
 
     /**
      * 检查字段是否配置了自动编号
      *
-     * @param fieldId 字段ID
+     * @param fieldUuid 字段UUID
      * @return 是否配置了自动编号
      */
-    public boolean hasAutoNumber(Long fieldId) {
-        MetadataAutoNumberConfigDO config = configRepository.findByFieldId(fieldId);
+    public boolean hasAutoNumber(String fieldUuid) {
+        MetadataAutoNumberConfigDO config = configRepository.findByFieldUuid(fieldUuid);
         return config != null && config.getIsEnabled() != null && config.getIsEnabled() == 1;
     }
 
     /**
      * 获取字段的自动编号配置
      *
-     * @param fieldId 字段ID
+     * @param fieldUuid 字段UUID
      * @return 自动编号配置
      */
-    public MetadataAutoNumberConfigDO getAutoNumberConfig(Long fieldId) {
-        return configRepository.findByFieldId(fieldId);
+    public MetadataAutoNumberConfigDO getAutoNumberConfig(String fieldUuid) {
+        return configRepository.findByFieldUuid(fieldUuid);
     }
 }

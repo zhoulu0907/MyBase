@@ -57,7 +57,7 @@ public class TenantSecurityWebFilter extends ApiRequestFilter {
         // 1. 登陆的用户，校验是否有权限访问该租户，避免越权问题。
         LoginUser user = SecurityFrameworkUtils.getLoginUser();
         if (user != null) {
-            // 如果获取不到租户编号，则尝试使用登陆用户的租户编号
+            // 如果获取不到租户编号，则使用登陆用户的租户编号
             if (tenantId == null) {
                 tenantId = user.getTenantId();
                 TenantContextHolder.setTenantId(tenantId);
@@ -82,6 +82,7 @@ public class TenantSecurityWebFilter extends ApiRequestFilter {
                 return;
             }
             // 3. 校验租户是合法，例如说被禁用、到期
+            
             try {
                 tenantFrameworkService.validTenant(tenantId);
             } catch (Throwable ex) {

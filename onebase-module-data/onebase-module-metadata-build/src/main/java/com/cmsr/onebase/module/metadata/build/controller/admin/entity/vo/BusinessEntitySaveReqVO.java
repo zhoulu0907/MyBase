@@ -13,6 +13,9 @@ public class BusinessEntitySaveReqVO {
     @Schema(description = "实体编号", example = "1024")
     private String id;
 
+    @Schema(description = "实体UUID（更新时可用于定位记录）", example = "01onal1s-0000-0000-0000-000000000002")
+    private String entityUuid;
+
     @Schema(description = "实体名称", requiredMode = Schema.RequiredMode.REQUIRED, example = "用户实体")
     @NotBlank(message = "实体名称不能为空")
     @Size(max = 64, message = "实体名称长度不能超过64个字符")
@@ -29,7 +32,10 @@ public class BusinessEntitySaveReqVO {
     @Size(max = 512, message = "实体描述长度不能超过512个字符")
     private String description;
 
-    @Schema(description = "数据源ID", example = "1")
+    @Schema(description = "数据源UUID", example = "01onal1s-0000-0000-0000-000000000001")
+    private String datasourceUuid;
+
+    @Schema(description = "数据源ID（兼容旧版，与datasourceUuid二选一）", example = "164329365983232001")
     private String datasourceId;
 
     @Schema(description = "对应数据表名", requiredMode = Schema.RequiredMode.REQUIRED, example = "sys_user")

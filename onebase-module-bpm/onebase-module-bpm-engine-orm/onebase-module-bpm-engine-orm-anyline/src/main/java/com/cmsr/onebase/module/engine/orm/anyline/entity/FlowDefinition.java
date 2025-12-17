@@ -25,10 +25,16 @@ import java.util.List;
 public class FlowDefinition extends BaseEntity implements Definition {
     public static final String FLOW_CODE = "flow_code";
 
+    public static final String DEFINITION_UUID = "definition_uuid";
+
     public static final String IS_PUBLISH = "is_publish";
 
     public static final String FORM_PATH = "form_path";
 
+
+    /** 流程定义UUID */
+    @Column(name = "definition_uuid", length = 64, nullable = false)
+    private String definitionUuid;
 
     /** 流程编码 */
     @Column(name = FLOW_CODE, length = 40, nullable = false)
@@ -161,6 +167,11 @@ public class FlowDefinition extends BaseEntity implements Definition {
             this.deleted = null;
         }
 
+        return this;
+    }
+
+    public Definition setDefinitionUuid(String definitionUuid) {
+        this.definitionUuid = definitionUuid;
         return this;
     }
 }

@@ -5,6 +5,7 @@ import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.security.config.SecurityProperties;
+import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.system.enums.logger.LoginLogTypeEnum;
 import com.cmsr.onebase.module.system.service.auth.BuildAuthService;
 import com.cmsr.onebase.module.system.service.permission.MenuService;
@@ -18,6 +19,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.annotation.security.PermitAll;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
@@ -33,7 +35,7 @@ import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
  *  @author matianyu
  *  @date 2025-11
  */
-@Tag(name = "管理后台 - 认证")
+@Tag(name = "管理后台 - 登录&认证")
 @RestController
 @RequestMapping("/system/auth")
 @Validated
@@ -54,34 +56,15 @@ public class BuildAuthController {
     @Resource
     private SecurityProperties securityProperties;
 
-    @PostMapping("/admin-login")
-    @PermitAll
-    @Operation(summary = "使用账号密码登录")
-    @Deprecated //todo 之后删除
-    public CommonResult<AuthLoginRespVO> adminLogin(@RequestBody @Valid UserLoginReqVO reqVO) {
-        return success(authService.adminLogin(reqVO));
-    }
-
-    @PostMapping("/login")
-    @PermitAll
-    @Operation(summary = "使用账号密码登录")
-    @Deprecated // todo 之后删除
-    public CommonResult<AuthLoginRespVO> login(@RequestBody @Valid AuthLoginReqVO reqVO) {
-        return success(authService.login(reqVO));
-    }
-
     @PostMapping("/tenant-login")
     @PermitAll
     @Operation(summary = "空间登录（账密）")
-    public CommonResult<AuthLoginRespVO> tenantLogin(@RequestBody @Valid AuthLoginReqVO reqVO) {
-        return success(authService.login(reqVO));
-    }
-
-    @PostMapping("/corp-login")
-    @PermitAll
-    @Operation(summary = "企业登录（手机号）")
-    public CommonResult<AuthLoginRespVO> corpLogin(@RequestBody @Valid CorpAuthLoginReqVO reqVO) {
-        return success(authService.corpLogin(reqVO));
+    public CommonResult<AuthLoginRespVO> tenantLogin(@RequestBody @Valid AuthLoginReqVO reqVO, HttpServletResponse response) {
+        AuthLoginRespVO respVO= authService.login(reqVO);
+        // 设置Cookie
+        response.addHeader("Set-Cookie", String.format("%s=%s; HttpOnly",
+                securityProperties.getTokenHeader(), respVO.getAccessToken()));
+        return success(respVO);
     }
 
     @PostMapping("/logout")
@@ -117,22 +100,23 @@ public class BuildAuthController {
         return success(authService.register(registerReqVO));
     }
 
-    // ========== 短信登录相关(暂不支持) ==========
-
-    @PostMapping("/sms-login")
+    // ========== 验证码 ==========
+    @PostMapping("/send-verify-code")
     @PermitAll
-    @Operation(summary = "使用短信验证码登录")
-    public CommonResult<AuthLoginRespVO> smsLogin(@RequestBody @Valid AuthSmsLoginReqVO reqVO) {
-        return success(authService.smsLogin(reqVO));
-    }
-
-    @PostMapping("/send-sms-code")
-    @PermitAll
-    @Operation(summary = "发送手机验证码")
-    public CommonResult<Boolean> sendLoginSmsCode(@RequestBody @Valid AuthSmsSendReqVO reqVO) {
-        authService.sendSmsCode(reqVO);
+    @TenantIgnore
+    @Operation(summary = "发送邮箱/手机验证码")
+    public CommonResult<Boolean> sendVerifyCode(@RequestBody @Valid VerifyCodeSendReqVO reqVO) {
+        // authService.sendSmsCode(reqVO);
         return success(true);
     }
+
+    // ========== 短信登录相关(暂不支持) ==========
+    // @PostMapping("/sms-login")
+    // @PermitAll
+    // @Operation(summary = "使用短信验证码登录")
+    // public CommonResult<AuthLoginRespVO> smsLogin(@RequestBody @Valid AuthSmsLoginReqVO reqVO) {
+    //     return success(authService.smsLogin(reqVO));
+    // }
 
     @PostMapping("/reset-password")
     @PermitAll

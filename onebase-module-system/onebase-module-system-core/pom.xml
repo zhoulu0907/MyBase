@@ -56,10 +56,10 @@
         </dependency>
 
         <!-- Web 相关 -->
-<!--        <dependency>-->
-<!--            <groupId>com.cmsr.onebase</groupId>-->
-<!--            <artifactId>onebase-spring-boot-starter-security</artifactId>-->
-<!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>com.cmsr.onebase</groupId>-->
+        <!--            <artifactId>onebase-spring-boot-starter-security</artifactId>-->
+        <!--        </dependency>-->
         <!-- DB 相关 -->
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
@@ -76,23 +76,19 @@
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-spring-boot-starter-rpc</artifactId>
         </dependency>
-
-        <!-- Registry 注册中心相关 -->
         <dependency>
-            <groupId>com.alibaba.cloud</groupId>
-            <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct</artifactId>
         </dependency>
-
-        <!-- Config 配置中心相关 -->
         <dependency>
-            <groupId>com.alibaba.cloud</groupId>
-            <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct-processor</artifactId>
         </dependency>
         <!-- 服务保障相关 TODO 开发者：暂时去掉 -->
-<!--        <dependency>-->
-<!--            <groupId>com.cmsr.onebase</groupId>-->
-<!--            <artifactId>onebase-spring-boot-starter-protection</artifactId>-->
-<!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>com.cmsr.onebase</groupId>-->
+        <!--            <artifactId>onebase-spring-boot-starter-protection</artifactId>-->
+        <!--        </dependency>-->
 
         <!-- Test 测试相关 -->
         <dependency>
@@ -114,11 +110,11 @@
             <artifactId>onebase-spring-boot-starter-excel</artifactId>
         </dependency>
 
-<!--        &lt;!&ndash; BouncyCastle 加密库 &ndash;&gt;-->
-<!--        <dependency>-->
-<!--            <groupId>org.bouncycastle</groupId>-->
-<!--            <artifactId>bcprov-jdk15on</artifactId>-->
-<!--        </dependency>-->
+        <!--        &lt;!&ndash; BouncyCastle 加密库 &ndash;&gt;-->
+        <!--        <dependency>-->
+        <!--            <groupId>org.bouncycastle</groupId>-->
+        <!--            <artifactId>bcprov-jdk15on</artifactId>-->
+        <!--        </dependency>-->
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -143,28 +139,19 @@
         </dependency>
 
         <dependency>
-            <groupId>com.github.binarywang</groupId>
-            <artifactId>wx-java-mp-spring-boot-starter</artifactId> <!-- 微信登录（公众号） -->
-        </dependency>
-        <dependency>
-            <groupId>com.github.binarywang</groupId>
-            <artifactId>wx-java-miniapp-spring-boot-starter</artifactId>  <!-- 微信登录（小程序） -->
-        </dependency>
-
-        <dependency>
             <groupId>com.anji-plus</groupId>
             <artifactId>captcha-spring-boot-starter</artifactId> <!-- 验证码，一般用于登录使用 -->
         </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-text</artifactId>
-        </dependency>
 
         <!--        <dependency>-->
-<!--            <groupId>org.dromara.hutool</groupId>-->
-<!--            <artifactId>hutool-extra</artifactId> &lt;!&ndash; 邮件 &ndash;&gt;-->
-<!--        </dependency>-->
-
+        <!--            <groupId>org.dromara.hutool</groupId>-->
+        <!--            <artifactId>hutool-extra</artifactId> &lt;!&ndash; 邮件 &ndash;&gt;-->
+        <!--        </dependency>-->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-inline</artifactId>
+            <scope>test</scope>
+        </dependency>
 
     </dependencies>
 

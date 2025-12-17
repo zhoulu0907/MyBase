@@ -11,6 +11,7 @@ public interface LogRecordConstants {
     // ======================= SYSTEM_USER 用户 =======================
 
     String SYSTEM_USER_TYPE = "SYSTEM 用户";
+    String SYSTEM_USER_TYPE_THRID = "三方用户";
     String SYSTEM_USER_CREATE_SUB_TYPE = "创建用户";
     String SYSTEM_USER_CREATE_SUCCESS = LOGIN_USER + "创建了用户【{{#user.nickname}}】";
     String SYSTEM_USER_UPDATE_SUB_TYPE = "更新用户";

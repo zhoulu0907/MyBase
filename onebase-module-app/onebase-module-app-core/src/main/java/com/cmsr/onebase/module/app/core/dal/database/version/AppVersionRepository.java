@@ -5,11 +5,14 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.orm.repo.BaseAppRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppVersionDO;
 import com.cmsr.onebase.module.app.core.dal.mapper.AppVersionMapper;
+import com.cmsr.onebase.module.app.core.enums.version.VersionTypeEnum;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+
+import static com.cmsr.onebase.module.app.core.dal.dataobject.table.AppVersionTableDef.APP_VERSION;
 
 /**
  * @Author：huangjie
@@ -34,7 +37,9 @@ public class AppVersionRepository extends BaseAppRepository<AppVersionMapper, Ap
 
     public PageResult<AppVersionDO> selectPage(Long applicationId, PageParam pageParam) {
         QueryWrapper queryWrapper = this.query()
-                .eq(AppVersionDO::getApplicationId, applicationId);
+                .eq(AppVersionDO::getApplicationId, applicationId)
+                .orderBy(APP_VERSION.VERSION_TYPE, true)
+                .orderBy(APP_VERSION.CREATE_TIME, false);
         Page<AppVersionDO> pageQuery = Page.of(pageParam.getPageNo(), pageParam.getPageSize());
         Page<AppVersionDO> pageResult = this.page(pageQuery, queryWrapper);
         return new PageResult<>(pageResult.getRecords(), pageResult.getTotalRow());
@@ -46,5 +51,26 @@ public class AppVersionRepository extends BaseAppRepository<AppVersionMapper, Ap
                 .orderBy(AppVersionDO::getUpdateTime, false)
                 .orderBy(AppVersionDO::getCreateTime, false);
         return this.list(queryWrapper);
+    }
+
+    public AppVersionDO findByApplicationIdAndVersionType(Long applicationId, int versionType) {
+        QueryWrapper queryWrapper = this.query()
+                .where(APP_VERSION.APPLICATION_ID.eq(applicationId))
+                .where(APP_VERSION.VERSION_TYPE.eq(versionType));
+        return this.getOne(queryWrapper);
+    }
+
+    public AppVersionDO findRuntimeByApplicationId(Long applicationId) {
+        QueryWrapper queryWrapper = this.query()
+                .where(APP_VERSION.APPLICATION_ID.eq(applicationId))
+                .where(APP_VERSION.VERSION_TYPE.eq(VersionTypeEnum.RUNTIME.getValue()));
+        return this.getOne(queryWrapper);
+    }
+
+    public long countByApplicationIdAndName(Long applicationId, String versionNumber, String versionName) {
+        QueryWrapper queryWrapper = this.query()
+                .where(APP_VERSION.APPLICATION_ID.eq(applicationId))
+                .and(APP_VERSION.VERSION_NUMBER.eq(versionNumber).or(APP_VERSION.VERSION_NAME.eq(versionName)));
+        return count(queryWrapper);
     }
 }

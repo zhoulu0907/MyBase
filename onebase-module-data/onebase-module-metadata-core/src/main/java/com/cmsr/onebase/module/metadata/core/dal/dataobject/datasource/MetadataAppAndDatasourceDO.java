@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource;
 
+import com.cmsr.onebase.framework.orm.entity.BaseBizEntity;
 import com.cmsr.onebase.framework.orm.entity.BaseTenantEntity;
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Table;
@@ -15,19 +16,16 @@ import lombok.EqualsAndHashCode;
 @Table(value = "metadata_app_and_datasource")
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class MetadataAppAndDatasourceDO extends BaseTenantEntity {
+public class MetadataAppAndDatasourceDO extends BaseBizEntity {
+
 
     /**
-     * 应用ID
+     * 数据源UUID
+     * <p>
+     * 关联 metadata_datasource.datasource_uuid
      */
-    @Column(value = "application_id", comment = "应用ID")
-    private Long applicationId;
-
-    /**
-     * 数据源ID
-     */
-    @Column(value = "datasource_id", comment = "数据源ID")
-    private Long datasourceId;
+    @Column(value = "datasource_uuid", comment = "数据源UUID")
+    private String datasourceUuid;
 
     /**
      * 数据源类型(POSTGRESQL,MYSQL,KINGBASE,TDENGINE,CLICKHOUSE等)
@@ -40,6 +38,7 @@ public class MetadataAppAndDatasourceDO extends BaseTenantEntity {
      */
     @Column(value = "app_uid", comment = "应用UID")
     private String appUid;
+
 
 }
 

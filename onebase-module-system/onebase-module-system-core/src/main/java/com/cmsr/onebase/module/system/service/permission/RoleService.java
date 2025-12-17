@@ -150,6 +150,18 @@ public interface RoleService {
     RoleDO getRoleIdsByCodeAndTenantId(String code, Long id);
 
     RoleDO getRoleByCode(String code);
-
+    /**
+     * 判断角色编号数组中，是否有开发人员
+     *
+     * @param roleIds 角色编号数组
+     * @return 角色编号数组中，是否有开发人员
+     */
     boolean hasAnyDevloperAdmin(Collection<Long> roleIds);
+    /**
+     * 判断角色编号数组中，是否有普通用户
+     *
+     * @param roleIds 角色编号数组
+     * @return 是否有普通用户
+     */
+    boolean hasAnyNormalUser(Collection<Long> roleIds);
 }

@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.metadata.core.dal.dataobject.validation;
 
+import com.cmsr.onebase.framework.orm.entity.BaseBizEntity;
 import com.cmsr.onebase.framework.orm.entity.BaseTenantEntity;
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Table;
@@ -16,19 +17,47 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Table(value = "metadata_validation_child_not_empty")
-public class MetadataValidationChildNotEmptyDO extends BaseTenantEntity {
+public class MetadataValidationChildNotEmptyDO extends BaseBizEntity {
 
-    @Column(value = "group_id", comment = "规则组ID")
-    private Long groupId;
+    /**
+     * 子表非空校验UUID
+     * <p>
+     * 用于跨应用、跨版本的唯一标识，与 application_id、version_tag 组成联合唯一约束
+     */
+    @Column(value = "child_not_empty_uuid", comment = "子表非空校验UUID")
+    private String childNotEmptyUuid;
 
-    @Column(value = "entity_id", comment = "实体ID")
-    private Long entityId;
+    /**
+     * 规则组UUID
+     * <p>
+     * 关联 metadata_validation_rule_group.group_uuid
+     */
+    @Column(value = "group_uuid", comment = "规则组UUID")
+    private String groupUuid;
 
-    @Column(value = "field_id", comment = "字段ID")
-    private Long fieldId;
+    /**
+     * 实体UUID
+     * <p>
+     * 关联 metadata_business_entity.entity_uuid
+     */
+    @Column(value = "entity_uuid", comment = "实体UUID")
+    private String entityUuid;
 
-    @Column(value = "child_entity_id", comment = "子实体ID")
-    private Long childEntityId;
+    /**
+     * 字段UUID
+     * <p>
+     * 关联 metadata_entity_field.field_uuid
+     */
+    @Column(value = "field_uuid", comment = "字段UUID")
+    private String fieldUuid;
+
+    /**
+     * 子实体UUID
+     * <p>
+     * 关联 metadata_business_entity.entity_uuid
+     */
+    @Column(value = "child_entity_uuid", comment = "子实体UUID")
+    private String childEntityUuid;
 
     @Column(value = "is_enabled", comment = "是否启用：1-启用，0-禁用")
     private Integer isEnabled;
@@ -44,4 +73,5 @@ public class MetadataValidationChildNotEmptyDO extends BaseTenantEntity {
 
     @Column(value = "application_id", comment = "应用ID")
     private Long applicationId;
+
 }

@@ -23,6 +23,8 @@ mvn clean install
 cd onebase-server
 mvn spring-boot:run
 
+
+
 ## 数据库设置
 
 自增ID设置从最大值开始(以部门system_dept为例)：

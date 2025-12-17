@@ -9,9 +9,10 @@ import java.util.List;
 @Data
 public class FunctionGroupRespVo {
 
-    @Schema(description = "函数类型", requiredMode = Schema.RequiredMode.REQUIRED, example = "BUILT_IN")
+    @Schema(description = "函数类型",  example = "COMMON")
     private String type;
 
+    @Schema(description = "函数列表", example = "[]")
     private List<FunctionRespVO> functions;
 
 }

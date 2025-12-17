@@ -1,18 +1,18 @@
 package com.cmsr.onebase.module.flow.core.graph;
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
-import com.cmsr.onebase.module.flow.context.FieldTypeProvider;
 import com.cmsr.onebase.module.flow.context.graph.InLoopDepth;
 import com.cmsr.onebase.module.flow.context.graph.JsonGraph;
 import com.cmsr.onebase.module.flow.context.graph.JsonGraphNode;
 import com.cmsr.onebase.module.flow.context.graph.nodes.ScriptNodeData;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowConnectorScriptRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowConnectorScriptDO;
+import com.cmsr.onebase.module.flow.core.external.FlowFieldTypeProvider;
+import com.mybatisflex.core.tenant.TenantManager;
 import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -25,39 +25,40 @@ public class FlowGraphBuilder {
 
     @Setter
     @Autowired
-    private ObjectProvider<FieldTypeProvider> objectProvider;
+    private FlowFieldTypeProvider flowFieldTypeProvider;
 
+    @Setter
     @Autowired
     private FlowConnectorScriptRepository connectorScriptRepository;
 
-    public JsonGraph build(String json) {
+
+    public JsonGraph build(Long applicationId, String json) {
         JsonGraph jsonGraph = JsonUtils.parseObject(json, JsonGraph.class);
-        addJsonGraphLoopVariable(jsonGraph);
-        complementJsonGraphNodeData(jsonGraph);
-        FieldTypeProvider fieldTypeProvider = objectProvider.getObject();
-        fieldTypeProvider.completeFieldType(jsonGraph);
+        addLoopContextToNodes(jsonGraph);
+        enrichNodeData(applicationId, jsonGraph);
+        flowFieldTypeProvider.completeFieldType(applicationId, jsonGraph);
         return jsonGraph;
     }
 
-    private void addJsonGraphLoopVariable(JsonGraph jsonGraph) {
+    private void addLoopContextToNodes(JsonGraph jsonGraph) {
         if (jsonGraph == null || jsonGraph.getNodes() == null) {
             return;
         }
         for (JsonGraphNode node : jsonGraph.getNodes()) {
-            recursiveNode(node, new InLoopDepth());
+            traverseNodeAndAddLoopContext(node, new InLoopDepth());
         }
     }
 
-    private void complementJsonGraphNodeData(JsonGraph jsonGraph) {
+    private void enrichNodeData(Long applicationId, JsonGraph jsonGraph) {
         if (jsonGraph == null || jsonGraph.getNodes() == null) {
             return;
         }
         for (JsonGraphNode node : jsonGraph.getNodes()) {
-            recursivelyComplementNode(node);
+            traverseNodeAndEnrichData(applicationId, node);
         }
     }
 
-    private void recursiveNode(JsonGraphNode node, InLoopDepth loopDeepMap) {
+    private void traverseNodeAndAddLoopContext(JsonGraphNode node, InLoopDepth loopDeepMap) {
         if (StringUtils.equals(node.getType(), "loop")) {
             loopDeepMap = new InLoopDepth(loopDeepMap);
             for (String key : loopDeepMap.keySet()) {
@@ -71,19 +72,21 @@ public class FlowGraphBuilder {
         }
         if (CollectionUtils.isNotEmpty(node.getBlocks())) {
             for (JsonGraphNode childNode : node.getBlocks()) {
-                recursiveNode(childNode, loopDeepMap);
+                traverseNodeAndAddLoopContext(childNode, loopDeepMap);
             }
         }
     }
 
-    private void recursivelyComplementNode(JsonGraphNode node) {
+    private void traverseNodeAndEnrichData(Long applicationId, JsonGraphNode node) {
         if (node.getData() instanceof ScriptNodeData scriptNodeData) {
-            FlowConnectorScriptDO connectorScriptDO = connectorScriptRepository.getById(scriptNodeData.getActionId());
+            FlowConnectorScriptDO connectorScriptDO = TenantManager.withoutTenantCondition(() -> connectorScriptRepository.findByApplicationAndUuid(applicationId, scriptNodeData.getActionUuid()));
             scriptNodeData.setScript(connectorScriptDO.getRawScript());
+            scriptNodeData.setInputSchema(connectorScriptDO.getInputSchema());
+            scriptNodeData.setOutputSchema(connectorScriptDO.getOutputSchema());
         }
         if (CollectionUtils.isNotEmpty(node.getBlocks())) {
             for (JsonGraphNode child : node.getBlocks()) {
-                recursivelyComplementNode(child);
+                traverseNodeAndEnrichData(applicationId, child);
             }
         }
     }

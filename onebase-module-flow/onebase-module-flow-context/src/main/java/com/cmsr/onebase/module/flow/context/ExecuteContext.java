@@ -1,130 +1,129 @@
 package com.cmsr.onebase.module.flow.context;
 
 import com.cmsr.onebase.module.flow.context.graph.NodeData;
-import com.google.common.base.Stopwatch;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.Data;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @Author：huangjie
  * @Date：2025/9/5 16:12
  */
-@ToString
+@Data
 public class ExecuteContext implements Serializable {
 
-    @Setter
-    @Getter
     private String traceId;
 
-    @Setter
-    @Getter
+    /**
+     * 执行唯一标识，二次触发执行需要
+     */
+
     private String executionUuid;
 
 
-    @Setter
-    @Getter
+    private Long applicationId;
+
+
+    private Long versionTag;
+
+
     private Long processId;
 
-    @Setter
-    @Getter
+
+    /**
+     * 触发用户ID
+     * 界面触发：登录用户
+     * 后台触发： 流程的创建人
+     */
+    private Long triggerUserId;
+
+    /**
+     * 触发用户部门ID
+     * 界面触发：登录用户
+     * 后台触发： 创建人部门
+     */
+    private Long triggerUserDeptId;
+
+    /**
+     * 元数据接口调用传递过来的，也原样传递回去
+     * SystemFieldConstants
+     */
+    private Map<String, String> systemFields;
+
+
     private volatile boolean debugMode = false;
+
+    //节点执行的结果
+
+
+    private Map<String, Object> nodeProcessResults = new ConcurrentHashMap<>();
+
+
+    private volatile boolean executeEnd = false;
+    private volatile String executionEndNodeTag;
+    private volatile String executionEndNodeType;
+
 
     /**
      * 节点配置数据
      */
-    private volatile Map<String, NodeData> nodeDataMap = new HashMap<>();
-
-    //节点执行的结果
-    private Map<String, Object> nodeProcessHisResults = new ConcurrentHashMap<>();
-
-    private Map<String, Object> nodeProcessCurResults = new ConcurrentHashMap<>();
-
-    @Getter
-    @Setter
-    private volatile boolean executeEnd = false;
-
-    @Setter
-    @Getter
-    private volatile String executionEndNodeType;
+    private transient volatile Map<String, NodeData> nodeDataMap = new HashMap<>();
 
     /**
-     * 上次执行结束节点
+     * 是否异常终止
      */
-    @Setter
-    @Getter
-    private volatile String executionEndNodeTag;
 
-    @Setter
-    @Getter
-    private volatile Optional<Boolean> abnormalTermination;
+    private transient volatile Boolean abnormalTermination = Boolean.FALSE;
 
-    @Setter
-    @Getter
-    private volatile String terminationMessage;
+    /**
+     * 异常终止的错误信息
+     */
 
-    private volatile Stopwatch stopwatch;
+    private transient volatile String terminationMessage;
 
-    private volatile List<String> logs;
+
+    private transient ExecuteLog executeLog;
+
 
     public ExecuteContext() {
-        this.stopwatch = Stopwatch.createStarted();
-        this.logs = new CopyOnWriteArrayList<>();
-        this.logs.add(String.format("[%d] %s", stopwatch.elapsed(TimeUnit.MILLISECONDS), "流程执行开始"));
+        this.executeLog = new ExecuteLog();
+        this.executeLog.addLog("流程执行开始");
     }
 
     public void setNodeDataMap(Map<String, NodeData> nodeData) {
         this.nodeDataMap = Collections.unmodifiableMap(nodeData);
     }
 
-    public void resetNodeProcessResult() {
-        nodeProcessHisResults.putAll(nodeProcessCurResults);
-        this.nodeProcessCurResults.clear();
-    }
 
     public void putNodeProcessResult(String tag, Object result) {
-        this.nodeProcessCurResults.put(tag, result);
+        this.nodeProcessResults.put(tag, result);
     }
 
     public boolean hasNodeProcessResult(String tag) {
-        return nodeProcessHisResults.containsKey(tag);
+        return nodeProcessResults.containsKey(tag);
     }
 
     public Object getNodeProcessResult(String tag) {
-        return nodeProcessHisResults.get(tag);
+        return nodeProcessResults.get(tag);
+    }
+
+    public void setNodeProcessResult(String tag, Object result) {
+        this.nodeProcessResults.put(tag, result);
     }
 
     public NodeData getNodeData(String nodeTag) {
         return nodeDataMap.get(nodeTag);
     }
 
-    public void restExecutionEndNodeTag() {
-        this.executionEndNodeTag = null;
-    }
-
-    public boolean isExecutionEndNodeTagEmpty() {
-        return executionEndNodeTag == null;
-    }
-
-    public boolean isExecutionEndNodeTagEquals(String tag) {
-        return executionEndNodeTag != null && executionEndNodeTag.equals(tag);
-    }
-
-    public void restExecutionUuid() {
-        this.executionUuid = null;
-    }
-
     public void addLog(String log) {
-        logs.add(String.format("[%d] %s", stopwatch.elapsed(TimeUnit.MILLISECONDS), log));
+        executeLog.addLog(log);
     }
 
     public String getLogText() {
-        return String.join("\n", logs);
+        return String.join("\n", executeLog.getLogs());
     }
 }

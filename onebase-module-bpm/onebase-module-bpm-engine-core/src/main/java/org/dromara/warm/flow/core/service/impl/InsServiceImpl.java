@@ -82,6 +82,10 @@ public class InsServiceImpl extends WarmServiceImpl<FlowInstanceDao<Instance>, I
         // 设置流程实例对象
         Instance instance = setStartInstance(nextNodes.get(0), businessId, flowParams);
 
+        // 设置审批表单路径和是否自定义
+        instance.setFormPath(flowCombine.getDefinition().getFormPath());
+        instance.setFormCustom(flowCombine.getDefinition().getFormCustom());
+
         // 设置历史任务
         HisTask hisTask = setHisTask(nextNodes, flowParams, startNode, instance.getId());
 
@@ -138,6 +142,7 @@ public class InsServiceImpl extends WarmServiceImpl<FlowInstanceDao<Instance>, I
         Task startTask = FlowEngine.newTask()
             .setInstanceId(instanceId)
             .setDefinitionId(startNode.getDefinitionId())
+            .setDefinitionUuid(startNode.getDefinitionUuid())
             .setNodeCode(startNode.getNodeCode())
             .setNodeName(startNode.getNodeName())
             .setNodeType(startNode.getNodeType());
@@ -179,6 +184,7 @@ public class InsServiceImpl extends WarmServiceImpl<FlowInstanceDao<Instance>, I
         FlowEngine.dataFillHandler().idFill(instance);
         // 关联业务id,其实后面可以不用到业务id,传业务id目前来看只是为了批量创建流程的时候能创建出有区别化的流程,也是为了后期需要用到businessId。
         instance.setDefinitionId(firstBetweenNode.getDefinitionId())
+            .setDefinitionUuid(firstBetweenNode.getDefinitionUuid())
             .setBusinessId(businessId)
             .setNodeType(firstBetweenNode.getNodeType())
             .setNodeCode(firstBetweenNode.getNodeCode())

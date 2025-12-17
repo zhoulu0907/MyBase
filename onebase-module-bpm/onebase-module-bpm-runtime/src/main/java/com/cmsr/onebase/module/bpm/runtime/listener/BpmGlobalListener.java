@@ -6,27 +6,25 @@ import com.cmsr.onebase.module.bpm.core.dal.database.BpmFlowAgentRepository;
 import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowAgentDO;
 import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowAgentInsDO;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeExtDTO;
-import com.cmsr.onebase.module.bpm.core.enums.BpmBusinessStatusEnum;
-import com.cmsr.onebase.module.bpm.core.enums.BpmNodeTypeEnum;
-import com.cmsr.onebase.module.bpm.core.enums.BpmUserTypeEnum;
+import com.cmsr.onebase.module.bpm.core.enums.*;
 import com.cmsr.onebase.module.bpm.core.utils.BpmUtil;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.dromara.warm.flow.core.dto.FlowParams;
 import org.dromara.warm.flow.core.entity.Instance;
 import org.dromara.warm.flow.core.entity.Node;
 import org.dromara.warm.flow.core.entity.Task;
 import org.dromara.warm.flow.core.entity.User;
+import org.dromara.warm.flow.core.enums.CooperateType;
+import org.dromara.warm.flow.core.enums.NodeType;
 import org.dromara.warm.flow.core.listener.GlobalListener;
 import org.dromara.warm.flow.core.listener.ListenerVariable;
 import org.dromara.warm.flow.core.service.InsService;
 import org.dromara.warm.flow.core.service.NodeService;
 import org.dromara.warm.flow.core.service.TaskService;
 import org.dromara.warm.flow.core.service.UserService;
-import com.cmsr.onebase.module.bpm.core.enums.BpmConstants;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -59,19 +57,49 @@ public class BpmGlobalListener implements GlobalListener {
     @Resource
     private BpmFlowAgentInsRepository agentInsRepository;
 
+    /**
+     * 判断是否为审批类操作（含会签/票签），非转交/委派/加签/减签
+     *
+     * @param flowParams 流程参数
+     * @return 是否为审批类
+     */
+    private boolean isApprovalLikeType(FlowParams flowParams) {
+        if (flowParams == null) {
+            return false;
+        }
+
+        Integer cooperateType = flowParams.getCooperateType();
+
+        if (cooperateType == null
+                || Objects.equals(CooperateType.APPROVAL.getKey(), cooperateType)
+                || Objects.equals(CooperateType.COUNTERSIGN.getKey(), cooperateType)
+                || Objects.equals(CooperateType.VOTE.getKey(), cooperateType)) {
+            return true;
+        }
+
+        return false;
+    }
+
     @Override
     public void start(ListenerVariable listenerVariable) {
-        // 获取节点ext信息
+        Node node = listenerVariable.getNode();
 
+        // 刚发起流程，节点类型为开始节点
+        if (NodeType.isStart(node.getNodeType())) {
+            log.info("开始启动流程，节点nodeCode：{}", node.getNodeCode());
+            return;
+        }
+
+        // 获取节点ext信息
         String ext = listenerVariable.getNode().getExt();
-        log.info("开始启动流程，节点ext信息：{}", ext);
+        log.info("任务开始，节点ext信息：{}", ext);
         BaseNodeExtDTO nodeExtDTO = BpmUtil.getNodeExtDTOByNodeCode(listenerVariable.getNode().getNodeCode(), listenerVariable.getInstance().getDefJson());
 
         // 处理未操作的用户
         if (Objects.equals(nodeExtDTO.getNodeType(), BpmNodeTypeEnum.APPROVER.getCode())
                 || Objects.equals(nodeExtDTO.getNodeType(), BpmNodeTypeEnum.EXECUTOR.getCode()))
         {
-            handleUnOperatorUsersOnAssignment(listenerVariable);
+            handleUnOperatorUsersOnStart(listenerVariable);
         }
     }
 
@@ -80,11 +108,15 @@ public class BpmGlobalListener implements GlobalListener {
         String ext = listenerVariable.getNode().getExt();
         List<Task> nextTasks = listenerVariable.getNextTasks();
         Instance instance = listenerVariable.getInstance();
-        Task currTask = listenerVariable.getTask();
-        FlowParams flowParams = listenerVariable.getFlowParams();
         Map<String, Object> flowVariable = listenerVariable.getVariable();
 
         log.info("开始分派任务，节点ext信息：{}", ext);
+
+        // 防御性检查：flowVariable 可能为空
+        if (flowVariable == null) {
+            log.warn("flowVariable 为空，跳过分派任务处理");
+            return;
+        }
 
         for (Task nextTask : nextTasks) {
             BaseNodeExtDTO nodeExtDTO = BpmUtil.getNodeExtDTOByNodeCode(nextTask.getNodeCode(), listenerVariable.getInstance().getDefJson());
@@ -125,6 +157,12 @@ public class BpmGlobalListener implements GlobalListener {
         String ext = currNode.getExt();
         log.info("完成任务，节点ext信息：{}", ext);
 
+        // 防御性检查：flowVariable 可能为空
+        if (flowVariable == null) {
+            log.warn("flowVariable 为空，跳过完成任务处理");
+            return;
+        }
+
         // 判断下，如果是最后一个节点就直接结束
         Instance instance = listenerVariable.getInstance();
 
@@ -149,9 +187,7 @@ public class BpmGlobalListener implements GlobalListener {
         // 抄送给未处理的用户
         if (Objects.equals(nodeExtDTO.getNodeType(), BpmNodeTypeEnum.APPROVER.getCode())
                 || Objects.equals(nodeExtDTO.getNodeType(), BpmNodeTypeEnum.EXECUTOR.getCode())) {
-            Task currTask = listenerVariable.getTask();
-
-            ccNodeListener.handleCcUsers(currTask, flowVariable);
+            handleUnOperatorUsersOnFinish(listenerVariable);
         }
     }
 
@@ -161,12 +197,17 @@ public class BpmGlobalListener implements GlobalListener {
      * @param listenerVariable 监听器变量
      */
     public void create(ListenerVariable listenerVariable) {
-
         // 获取节点ext信息
         String ext = listenerVariable.getNode().getExt();
         Task currTask = listenerVariable.getTask();
 
         log.info("开始创建任务，节点ext信息：{}", ext);
+
+        // 防御性检查：currTask 可能为空
+        if (currTask == null) {
+            log.warn("currTask 为空，跳过创建任务处理");
+            return;
+        }
 
         BaseNodeExtDTO nodeExtDTO = BpmUtil.getNodeExtDTOByNodeCode(currTask.getNodeCode(), listenerVariable.getInstance().getDefJson());
 
@@ -191,8 +232,13 @@ public class BpmGlobalListener implements GlobalListener {
      * 处理代理人的业务逻辑
      */
     private void handleAgentOnCreate(ListenerVariable listenerVariable) {
-        Map<String, Object> variable = listenerVariable.getVariable();
         Task task = listenerVariable.getTask();
+
+        // 防御性检查：task 可能为空
+        if (task == null) {
+            log.warn("task 为空，跳过处理代理人逻辑");
+            return;
+        }
 
         Set<String> approvalUserIds = new HashSet<>();
 
@@ -211,7 +257,7 @@ public class BpmGlobalListener implements GlobalListener {
         }
 
         // todo：确保appId不为空
-        Long appId = listenerVariable.getDefinition().getId();
+        Long appId = listenerVariable.getDefinition().getApplicationId();
 
         List<BpmFlowAgentDO> activeAgents = agentRepository.findAllActiveAgent(appId, approvalUserIds);
 
@@ -238,13 +284,31 @@ public class BpmGlobalListener implements GlobalListener {
         agentInsRepository.saveBatch(agentInsList);
     }
 
-    private void handleUnOperatorUsersOnAssignment(ListenerVariable listenerVariable) {
+    private void handleUnOperatorUsersOnStart(ListenerVariable listenerVariable) {
         Task currTask = listenerVariable.getTask();
         FlowParams flowParams = listenerVariable.getFlowParams();
         Map<String, Object> flowVariable = listenerVariable.getVariable();
 
         // 不一定有待办
         if (currTask == null) {
+            log.warn("当前待办任务为空，跳过处理未操作用户");
+            return;
+        }
+
+        // flowParams 空值检查
+        if (flowParams == null) {
+            log.warn("flowParams 为空，跳过处理未操作用户，taskId: {}", currTask.getId());
+            return;
+        }
+
+        // 防御性检查：flowVariable 可能为空
+        if (flowVariable == null) {
+            log.warn("flowVariable 为空，跳过处理未操作用户，taskId: {}", currTask.getId());
+            return;
+        }
+
+        if (!isApprovalLikeType(flowParams)) {
+            log.debug("操作非审批类（转交/委派/加签/减签），跳过处理未操作用户，taskId: {}", currTask.getId());
             return;
         }
 
@@ -253,7 +317,6 @@ public class BpmGlobalListener implements GlobalListener {
 
         if (CollectionUtils.isNotEmpty(unOperatorUsers)) {
             String currHandler = flowParams.getHandler();
-            String agentId = MapUtils.getString(flowVariable, "agentId");
 
             Set<String> ccPermissionList = unOperatorUsers.stream()
                 .filter(item -> {
@@ -277,6 +340,23 @@ public class BpmGlobalListener implements GlobalListener {
                 flowVariable.put(BpmConstants.VAR_CC_USERS_KEY + "_" + currTask.getNodeCode(),
                         JsonUtils.toJsonString(ccPermissionList));
             }
+        }
+    }
+
+    private void handleUnOperatorUsersOnFinish(ListenerVariable listenerVariable) {
+        Task currTask = listenerVariable.getTask();
+        FlowParams flowParams = listenerVariable.getFlowParams();
+        Map<String, Object> flowVariable = listenerVariable.getVariable();
+
+        if (currTask == null) {
+            log.warn("currTask 为空，跳过处理未操作用户");
+            return;
+        }
+
+        if (!isApprovalLikeType(listenerVariable.getFlowParams())) {
+            log.info("操作非审批类（转交/委派/加签/减签），跳过处理未操作用户，taskId: {}", currTask.getId());
+        } else {
+            ccNodeListener.handleCcUsers(currTask, flowVariable);
         }
     }
 }

@@ -1,5 +1,7 @@
 package com.cmsr.onebase.module.app.build.controller.resource;
 
+import com.cmsr.onebase.framework.common.event.AppEntityChangePublisher;
+import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.app.build.service.resource.PageService;
@@ -43,7 +45,7 @@ public class PageController {
         updatePageDTO.setPageId(updatePageNameReqVO.getId());
         updatePageDTO.setPageName(updatePageNameReqVO.getPageName());
         Boolean updated = pageService.updatePageName(updatePageDTO);
-
+        AppEntityChangePublisher.publishEvent();
         return CommonResult.success(updated);
     }
 
@@ -60,7 +62,14 @@ public class PageController {
     @PostMapping("/metadata")
     @Operation(summary = "根据page_id获取页面绑定的元数据id")
     public CommonResult<GetMetadataByPageIdRespVO> getMetadataByPageId(@RequestBody GetMetadataByPageIdReqVO getMetadataByPageIdReqVO) {
-        String metadata = pageService.getMetadataByPageId(getMetadataByPageIdReqVO.getPageId());
+        String metadata;
+        if (getMetadataByPageIdReqVO.getPageId() != null) {
+            metadata = pageService.getMetadataByPageId(getMetadataByPageIdReqVO.getPageId());
+        } else if (getMetadataByPageIdReqVO.getPageUuid() != null) {
+            metadata = pageService.getMetadataByPageUuid(getMetadataByPageIdReqVO.getPageUuid());
+        } else {
+            throw ServiceExceptionUtil.invalidParamException("page_id或page_uuid不能同时为空");
+        }
 
         GetMetadataByPageIdRespVO getMetadataByPageIdRespVO = new GetMetadataByPageIdRespVO();
         getMetadataByPageIdRespVO.setMetadata(metadata);
@@ -72,7 +81,7 @@ public class PageController {
     public CommonResult<Boolean> createPageView(@RequestBody CreatePageViewReqVO createPageViewReqVO) {
         CreatePageViewDTO createPageViewDTO = BeanUtils.toBean(createPageViewReqVO, CreatePageViewDTO.class);
         pageService.createPageView(createPageViewDTO);
-
+        AppEntityChangePublisher.publishEvent();
         return CommonResult.success(true);
     }
 

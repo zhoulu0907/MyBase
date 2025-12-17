@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.system.vo.sms;
 
+import com.cmsr.onebase.framework.desensitize.annotation.MobileDesensitize;
 import com.cmsr.onebase.framework.excel.core.annotations.DictFormat;
 import com.cmsr.onebase.framework.excel.core.convert.DictConvert;
 import com.cmsr.onebase.framework.excel.core.convert.JsonConvert;
@@ -56,6 +57,7 @@ public class SmsLogRespVO {
 
     @Schema(description = "手机号", requiredMode = Schema.RequiredMode.REQUIRED, example = "15601691300")
     @ExcelProperty("手机号")
+    @MobileDesensitize
     private String mobile;
 
     @Schema(description = "用户编号", example = "10")

@@ -16,20 +16,20 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataV
 public interface MetadataValidationLengthBuildService {
 
     /**
-     * 按字段ID查询长度校验配置
+     * 按字段UUID查询长度校验配置
      *
-     * @param fieldId 字段ID
+     * @param fieldUuid 字段UUID
      * @return 长度校验DO，可能为null
      */
-    MetadataValidationLengthDO getByFieldId(Long fieldId);
+    MetadataValidationLengthDO getByFieldId(String fieldUuid);
 
     /**
-     * 按字段ID查询长度校验配置（包含规则组名称）
+     * 按字段UUID查询长度校验配置（包含规则组名称）
      *
-     * @param fieldId 字段ID
+     * @param fieldUuid 字段UUID
      * @return 长度校验VO，可能为null
      */
-    ValidationLengthRespVO getByFieldIdWithRgName(Long fieldId);
+    ValidationLengthRespVO getByFieldIdWithRgName(String fieldUuid);
 
     /**
      * 新增长度校验配置
@@ -47,11 +47,11 @@ public interface MetadataValidationLengthBuildService {
     void update(ValidationLengthUpdateReqVO vo);
 
     /**
-     * 按字段ID删除长度校验配置
+     * 按字段UUID删除长度校验配置
      *
-     * @param fieldId 字段ID
+     * @param fieldUuid 字段UUID
      */
-    void deleteByFieldId(Long fieldId);
+    void deleteByFieldId(String fieldUuid);
 
     /**
      * 按主键ID查询长度校验配置（包含规则组名称）

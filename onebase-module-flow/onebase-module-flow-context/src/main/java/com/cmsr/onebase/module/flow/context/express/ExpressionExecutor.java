@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.flow.context.express;
 
-import com.cmsr.onebase.module.flow.context.enums.JdbcTypeEnum;
+import com.cmsr.onebase.module.flow.context.enums.OperatorTypeEnum;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.jexl3.JexlBuilder;
 import org.apache.commons.jexl3.JexlEngine;
@@ -10,11 +11,15 @@ import org.apache.commons.jexl3.introspection.JexlPermissions;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 表达式助手类
@@ -24,15 +29,31 @@ import java.util.*;
  * @Author：huangjie
  * @Date：2025/9/16 21:11
  */
+@Slf4j
 public class ExpressionExecutor implements Serializable {
-
-    public static final String VAR_PREFIX = "var_";
 
     private JexlEngine jexlEngine;
 
     public ExpressionExecutor() {
         JexlPermissions permissions = JexlPermissions.UNRESTRICTED;
-        this.jexlEngine = new JexlBuilder().permissions(permissions).arithmetic(new ExtJexlArithmetic(true)).silent(false).create();
+        this.jexlEngine = new JexlBuilder().permissions(permissions).arithmetic(new ExtJexlArithmetic(false)).silent(false).create();
+    }
+
+    public boolean evaluateInput(OrExpression orExpression, Map<String, Object> vars) {
+        return evaluate(orExpression, vars);
+    }
+
+    public boolean evaluateContext(OrExpression orExpression, Map<String, Object> vars) {
+        formatFieldKeyForContext(orExpression);
+        return evaluate(orExpression, vars);
+    }
+
+    private void formatFieldKeyForContext(OrExpression orExpression) {
+        for (AndExpression andExpression : orExpression.getAndExpressions()) {
+            for (ExpressionItem expressionItem : andExpression.getExpressionItems()) {
+                expressionItem.setFieldKey(formatItemKey(expressionItem.getFieldKey()));
+            }
+        }
     }
 
     /**
@@ -41,39 +62,25 @@ public class ExpressionExecutor implements Serializable {
      * 根据Condition类的注释：条件项之间是OR关系
      * 根据ConditionItem类的注释：规则项之间是AND关系
      */
-    public boolean evaluate(OrExpression orExpression, Map<String, Object> vars) {
+    private boolean evaluate(OrExpression orExpression, Map<String, Object> vars) {
         String fullExpression = null;
-        JexlExpression expression = null;
-        Map<String, Object> expressionContext = null;
         try {
             fullExpression = buildConditionExpression(orExpression);
-            expression = jexlEngine.createExpression(fullExpression);
-            expressionContext = formatMapContextKey(vars);
-            MapContext jc = new MapContext(expressionContext);
-            Object result = expression.evaluate(jc);
-            return result instanceof Boolean ? (Boolean) result : Boolean.FALSE;
+            JexlExpression expression = jexlEngine.createExpression(fullExpression);
+            MapContext jc = new MapContext(vars);
+            Boolean result = (Boolean) expression.evaluate(jc);
+            if (result == null) {
+                log.warn("表达式执行结果为空, 执行表达式: {}, 输入参数: {}", fullExpression, vars);
+                return false;
+            } else {
+                return result;
+            }
         } catch (Exception e) {
-            String msg = "表达式执行异常, 执行表达式:" + orExpression
-                    + ", 输入条件:" + vars
-                    + ", 完整表达式:" + Objects.toString(expression, "")
-                    + ", 上下文参数:" + Objects.toString(expressionContext, "");
+            String msg = "表达式执行异常, 执行表达式: " + fullExpression + ", 输入参数:" + vars;
             throw new RuntimeException(msg, e);
         }
     }
 
-    private Map<String, Object> formatMapContextKey(Map<String, Object> context) {
-        Map<String, Object> newContext = new HashMap<>();
-        for (Map.Entry<String, Object> entry : context.entrySet()) {
-            String key = entry.getKey();
-            Object value = entry.getValue();
-            if (StringUtils.isNumeric(key)) {
-                newContext.put(VAR_PREFIX + key, value);
-            } else {
-                newContext.put(key, value);
-            }
-        }
-        return newContext;
-    }
 
     /**
      * 构建完整的条件表达式
@@ -133,7 +140,7 @@ public class ExpressionExecutor implements Serializable {
      * @return 表达式字符串
      */
     private String buildExpressItemExpression(ExpressionItem expressionItem) {
-        if (expressionItem == null || expressionItem.getKey() == null || expressionItem.getOp() == null) {
+        if (expressionItem == null || expressionItem.getOp() == null) {
             return "true";
         }
         String expression = buildExpression(expressionItem);
@@ -141,13 +148,11 @@ public class ExpressionExecutor implements Serializable {
     }
 
     private String formatItemKey(String key) {
-        if (StringUtils.isNumeric(key)) {
-            return VAR_PREFIX + key;
-        }
         if (key.contains(".")) {
-            String[] ss = StringUtils.split(key, ".");
-            if (!ss[1].startsWith("'") || !ss[1].endsWith("'")) {
-                return String.format("%s.'%s'", ss[0], ss[1]);
+            String key1 = StringUtils.substringBefore(key, ".");
+            String key2 = StringUtils.substringAfter(key, ".");
+            if (!key2.startsWith("[") || !key2.endsWith("]")) {
+                return String.format("%s['%s']", key1, key2);
             }
         }
         return key;
@@ -161,57 +166,57 @@ public class ExpressionExecutor implements Serializable {
      */
     public String buildExpression(ExpressionItem expressionItem) {
         expressionItem = ExpressionItem.copy(expressionItem);
-        expressionItem.setKey(formatItemKey(expressionItem.getKey()));
+        expressionItem.setFieldKey(expressionItem.getFieldKey());
         switch (expressionItem.getOp()) {
             case EQUALS:
-                return String.format("%s == %s", expressionItem.getKey(), formatValue(expressionItem));
+                return String.format("%s == %s", expressionItem.getFieldKey(), formatValue(expressionItem));
 
             case NOT_EQUALS:
-                return String.format("%s != %s", expressionItem.getKey(), formatValue(expressionItem));
+                return String.format("%s != %s", expressionItem.getFieldKey(), formatValue(expressionItem));
 
             case CONTAINS:
-                return String.format("%s.contains(%s)", expressionItem.getKey(), formatValue(expressionItem));
+                return String.format("%s.contains(%s)", expressionItem.getFieldKey(), formatValue(expressionItem));
 
             case NOT_CONTAINS:
-                return String.format("!(%s.contains(%s))", expressionItem.getKey(), formatValue(expressionItem));
+                return String.format("!(%s.contains(%s))", expressionItem.getFieldKey(), formatValue(expressionItem));
 
             case EXISTS_IN:
-                return String.format("%s.contains(%s)", formatValue(expressionItem), expressionItem.getKey());
+                return String.format("%s.contains(%s)", formatValue(expressionItem), expressionItem.getFieldKey());
 
             case NOT_EXISTS_IN:
-                return String.format("!(%s.contains(%s))", formatValue(expressionItem), expressionItem.getKey());
+                return String.format("!(%s.contains(%s))", formatValue(expressionItem), expressionItem.getFieldKey());
 
             case GREATER_THAN:
-                return String.format("%s > %s", expressionItem.getKey(), formatValue(expressionItem));
+                return String.format("%s > %s", expressionItem.getFieldKey(), formatValue(expressionItem));
 
             case GREATER_EQUALS:
-                return String.format("%s >= %s", expressionItem.getKey(), formatValue(expressionItem));
+                return String.format("%s >= %s", expressionItem.getFieldKey(), formatValue(expressionItem));
 
             case LESS_THAN:
-                return String.format("%s < %s", expressionItem.getKey(), formatValue(expressionItem));
+                return String.format("%s < %s", expressionItem.getFieldKey(), formatValue(expressionItem));
 
             case LESS_EQUALS:
-                return String.format("%s <= %s", expressionItem.getKey(), formatValue(expressionItem));
+                return String.format("%s <= %s", expressionItem.getFieldKey(), formatValue(expressionItem));
 
             case LATER_THAN:
-                return String.format("%s > %s", expressionItem.getKey(), formatDateValue(expressionItem));
+                return String.format("%s > %s", expressionItem.getFieldKey(), formatDateValue(expressionItem));
 
             case EARLIER_THAN:
-                return String.format("%s < %s", expressionItem.getKey(), formatDateValue(expressionItem));
+                return String.format("%s < %s", expressionItem.getFieldKey(), formatDateValue(expressionItem));
 
             case RANGE:
-                if (expressionItem.getValue() instanceof List list) {
+                if (expressionItem.getFieldValue() instanceof List list) {
                     return String.format("(%s >= %s && %s <= %s)",
-                            expressionItem.getKey(), formatValue(list.get(0), expressionItem),
-                            expressionItem.getKey(), formatValue(list.get(1), expressionItem));
+                            expressionItem.getFieldKey(), formatValue(list.get(0), expressionItem),
+                            expressionItem.getFieldKey(), formatValue(list.get(1), expressionItem));
                 }
                 throw new IllegalArgumentException("RANGE操作需要两个值");
 
             case IS_EMPTY:
-                return String.format("(%s == null || %s.isEmpty())", expressionItem.getKey(), expressionItem.getKey());
+                return String.format("(%s == null || %s.isEmpty())", expressionItem.getFieldKey(), expressionItem.getFieldKey());
 
             case IS_NOT_EMPTY:
-                return String.format("(%s != null && !%s.isEmpty())", expressionItem.getKey(), expressionItem.getKey());
+                return String.format("(%s != null && !%s.isEmpty())", expressionItem.getFieldKey(), expressionItem.getFieldKey());
 
             case CONTAINS_ALL:
                 return buildContainsAllExpression(expressionItem);
@@ -235,13 +240,13 @@ public class ExpressionExecutor implements Serializable {
      * 构建包含全部的表达式
      */
     private String buildContainsAllExpression(ExpressionItem expressionItem) {
-        List listValue = (List) expressionItem.getValue();
+        List listValue = (List) expressionItem.getFieldValue();
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < listValue.size(); i++) {
             if (i > 0) {
                 sb.append(" && ");
             }
-            sb.append(String.format("%s contains %s", expressionItem.getKey(), formatValue(listValue.get(i), expressionItem)));
+            sb.append(String.format("%s contains %s", expressionItem.getFieldKey(), formatValue(listValue.get(i), expressionItem)));
         }
         return sb.toString();
     }
@@ -250,25 +255,24 @@ public class ExpressionExecutor implements Serializable {
      * 构建包含任一的表达式
      */
     private String buildContainsAnyExpression(ExpressionItem expressionItem) {
-        List listValue = (List) expressionItem.getValue();
+        List listValue = (List) expressionItem.getFieldValue();
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < listValue.size(); i++) {
             if (i > 0) {
                 sb.append(" || ");
             }
-            sb.append(String.format("%s contains %s", expressionItem.getKey(), formatValue(listValue.get(i), expressionItem)));
+            sb.append(String.format("%s contains %s", expressionItem.getFieldKey(), formatValue(listValue.get(i), expressionItem)));
         }
         return sb.toString();
     }
 
     private String formatValue(Object value, ExpressionItem expressionItem) {
         ExpressionItem newExpressionItem = new ExpressionItem();
-        newExpressionItem.setKey(expressionItem.getKey());
+        newExpressionItem.setFieldKey(expressionItem.getFieldKey());
         newExpressionItem.setOp(expressionItem.getOp());
-        newExpressionItem.setValue(value);
-        newExpressionItem.setJdbcType(expressionItem.getJdbcType());
+        newExpressionItem.setFieldValue(value);
         newExpressionItem.setOperatorType(expressionItem.getOperatorType());
-        newExpressionItem.setFieldType(expressionItem.getFieldType());
+        newExpressionItem.setFieldTypeEnum(expressionItem.getFieldTypeEnum());
         return formatValue(newExpressionItem);
 
     }
@@ -277,46 +281,46 @@ public class ExpressionExecutor implements Serializable {
      * 格式化值为表达式字符串
      */
     private String formatValue(ExpressionItem expressionItem) {
-        if (expressionItem.getValue() == null) {
+        if (expressionItem.getFieldValue() == null) {
             return "null";
         }
-        if (expressionItem.getValue() instanceof Collection) {
-            return formatCollectionValue((Collection<?>) expressionItem.getValue(), expressionItem);
+        if (expressionItem.getOperatorType() == OperatorTypeEnum.VARIABLE) {
+            return formatItemKey(expressionItem.getFieldValue().toString());
         }
-        if (expressionItem.getJdbcType() == JdbcTypeEnum.VARCHAR
-                || expressionItem.getJdbcType() == JdbcTypeEnum.LONGVARCHAR) {
-            return "'" + expressionItem.getValue().toString().replace("'", "\\'") + "'";
+        if (expressionItem.getFieldValue() instanceof Collection) {
+            return formatCollectionValue((Collection<?>) expressionItem.getFieldValue(), expressionItem);
         }
-        if (expressionItem.getJdbcType() == JdbcTypeEnum.BOOLEAN
-                || expressionItem.getJdbcType() == JdbcTypeEnum.BIGINT
-                || expressionItem.getJdbcType() == JdbcTypeEnum.NUMERIC
-                || expressionItem.getJdbcType() == JdbcTypeEnum.DECIMAL) {
-            return expressionItem.getValue().toString();
+        if (expressionItem.getFieldTypeEnum().getRawJavaType() == String.class) {
+            return "'" + expressionItem.getFieldValue().toString().replace("'", "\\'") + "'";
         }
-        if (expressionItem.getJdbcType() == JdbcTypeEnum.TIMESTAMP
-                || expressionItem.getJdbcType() == JdbcTypeEnum.DATE) {
+        if (expressionItem.getFieldTypeEnum().getRawJavaType() == BigDecimal.class
+                || expressionItem.getFieldTypeEnum().getRawJavaType() == Long.class) {
+            return expressionItem.getFieldValue().toString();
+        }
+        if (expressionItem.getFieldTypeEnum().getRawJavaType() == LocalDate.class
+                || expressionItem.getFieldTypeEnum().getRawJavaType() == LocalDateTime.class) {
             return formatDateValue(expressionItem);
         }
-        return "'" + expressionItem.getValue() + "'";
+        return "'" + expressionItem.getFieldValue() + "'";
     }
 
     /**
      * 格式化日期值
      */
     private String formatDateValue(ExpressionItem expressionItem) {
-        if (expressionItem.getValue() instanceof LocalDate) {
-            LocalDate date = (LocalDate) expressionItem.getValue();
+        if (expressionItem.getFieldValue() instanceof LocalDate) {
+            LocalDate date = (LocalDate) expressionItem.getFieldValue();
             return date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         }
-        if (expressionItem.getValue() instanceof LocalDateTime) {
-            LocalDateTime dateTime = (LocalDateTime) expressionItem.getValue();
+        if (expressionItem.getFieldValue() instanceof LocalDateTime) {
+            LocalDateTime dateTime = (LocalDateTime) expressionItem.getFieldValue();
             return dateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         }
-        if (expressionItem.getValue() instanceof LocalTime) {
-            LocalTime time = (LocalTime) expressionItem.getValue();
+        if (expressionItem.getFieldValue() instanceof LocalTime) {
+            LocalTime time = (LocalTime) expressionItem.getFieldValue();
             return time.format(DateTimeFormatter.ofPattern("HH:mm:ss"));
         }
-        return "'" + expressionItem.getValue().toString() + "'";
+        return "'" + expressionItem.getFieldValue().toString() + "'";
     }
 
     /**

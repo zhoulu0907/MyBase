@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.metadata.build.service.entity;
 
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.util.string.UuidUtils;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.IdUtil;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
@@ -9,6 +10,11 @@ import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.BusinessEntityPageReqVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.BusinessEntityRespVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.BusinessEntitySaveReqVO;
+import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.ChildEntityWithFieldsRespVO;
+import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.EntityFieldQueryReqVO;
+import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.EntityFieldRespVO;
+import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.EntityWithFieldsBatchQueryReqVO;
+import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.EntityWithFieldsRespVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.ERDiagramRespVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.EREntityVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.ERFieldVO;
@@ -24,6 +30,8 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.field.MetadataEntity
 import com.cmsr.onebase.module.metadata.build.service.field.MetadataEntityFieldOptionBuildService;
 import com.cmsr.onebase.module.metadata.core.enums.BooleanStatusEnum;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataBusinessEntityRepository;
+import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityFieldRepository;
+import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityRelationshipRepository;
 import com.cmsr.onebase.module.metadata.build.service.datasource.MetadataDatasourceBuildService;
 import com.cmsr.onebase.module.metadata.core.service.datasource.MetadataAppAndDatasourceCoreService;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataSystemFieldsCoreService;
@@ -31,6 +39,9 @@ import com.cmsr.onebase.module.metadata.build.service.relationship.MetadataEntit
 import com.cmsr.onebase.module.metadata.core.util.StatusEnumUtil;
 import com.cmsr.onebase.module.metadata.core.dal.database.TemporaryDatasourceService;
 import com.cmsr.onebase.module.metadata.core.enums.BusinessEntityTypeEnum;
+import com.cmsr.onebase.module.metadata.core.util.MetadataIdUuidConverter;
+import com.cmsr.onebase.module.metadata.core.dal.database.FieldTypeMappingRepository;
+import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.FieldTypeMappingDO;
 import com.cmsr.onebase.framework.aynline.AnylineDdlHelper;
 import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.annotation.Resource;
@@ -44,7 +55,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -64,6 +78,10 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
     @Resource
     private MetadataBusinessEntityRepository metadataBusinessEntityRepository;
     @Resource
+    private MetadataEntityRelationshipRepository metadataEntityRelationshipRepository;
+    @Resource
+    private MetadataEntityFieldRepository metadataEntityFieldRepository;
+    @Resource
     private MetadataDatasourceBuildService metadataDatasourceBuildService;
     @Resource
     private MetadataSystemFieldsCoreService metadataSystemFieldsCoreService;
@@ -79,7 +97,18 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
     private MetadataEntityFieldOptionBuildService fieldOptionService;
 
     @Resource
+    private MetadataIdUuidConverter idUuidConverter;
+
+    @Resource
     private AppApplicationApi appApplicationApi;
+
+    @Resource
+    private FieldTypeMappingRepository fieldTypeMappingRepository;
+
+    // 需要加长度参数的数据库类型
+    private static final Set<String> LENGTH_REQUIRED_TYPES = Set.of("VARCHAR", "CHAR", "NVARCHAR", "NCHAR");
+    // 需要加精度参数的数据库类型
+    private static final Set<String> PRECISION_REQUIRED_TYPES = Set.of("NUMERIC", "DECIMAL");
 
     // 系统字段缓存，避免频繁查询数据库
     private volatile List<MetadataSystemFieldsDO> systemFieldsCache = null;
@@ -109,6 +138,17 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
     @Transactional(rollbackFor = Exception.class)
 
     public Long createBusinessEntity(@Valid BusinessEntitySaveReqVO createReqVO) {
+        // ID转UUID兼容处理：支持前端传入datasourceId或datasourceUuid
+        String resolvedDatasourceUuid = idUuidConverter.resolveDatasourceUuidOptional(
+                createReqVO.getDatasourceUuid(), createReqVO.getDatasourceId());
+        createReqVO.setDatasourceUuid(resolvedDatasourceUuid);
+
+        // 如果entityType为空，默认设置为自建表类型(1)
+        if (createReqVO.getEntityType() == null) {
+            createReqVO.setEntityType(BusinessEntityTypeEnum.SELF_BUILT.getCode());
+            log.info("实体类型未指定，默认设置为自建表类型(1)");
+        }
+
         // 预先获取系统字段信息，避免在事务中查询
         List<MetadataSystemFieldsDO> systemFields = null;
         if (BusinessEntityTypeEnum.needCreatePhysicalTable(createReqVO.getEntityType())) {
@@ -127,7 +167,12 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
         // 插入业务实体
         MetadataBusinessEntityDO businessEntity = BeanUtils.toBean(createReqVO, MetadataBusinessEntityDO.class);
         businessEntity.setApplicationId(appId);
-        businessEntity.setDatasourceId(safeParseLong(createReqVO.getDatasourceId()));
+        
+        // 设置datasourceUuid
+        String datasourceUuid = createReqVO.getDatasourceUuid();
+        if (datasourceUuid != null && !datasourceUuid.isEmpty()) {
+            businessEntity.setDatasourceUuid(datasourceUuid);
+        }
 
         // 处理code字段：如果为空或空字符串，则生成UUID
         if (CharSequenceUtil.isEmpty(createReqVO.getCode())) {
@@ -137,9 +182,9 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
         // 根据实体类型处理表名，并加上 appUid 前缀（如有）
         handleTableNameByEntityType(businessEntity, createReqVO);
         String appUid = null;
-        if (appId != null && businessEntity.getDatasourceId() != null) {
-            appUid = metadataAppAndDatasourceCoreService.getAppUidByAppIdAndDatasourceId(
-                    appId, businessEntity.getDatasourceId()
+        if (appId != null && businessEntity.getDatasourceUuid() != null) {
+            appUid = metadataAppAndDatasourceCoreService.getAppUidByAppIdAndDatasourceUuid(
+                    appId, businessEntity.getDatasourceUuid()
             );
         }
         if (appUid != null && !appUid.isBlank()) {
@@ -160,12 +205,17 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
             createPhysicalTableForEntitySync(businessEntity, createReqVO, systemFields);
         }
 
+        // 生成实体UUID（如果为空）
+        if (businessEntity.getEntityUuid() == null || businessEntity.getEntityUuid().isEmpty()) {
+            businessEntity.setEntityUuid(UuidUtils.getUuid());
+        }
+
         // 插入业务实体到数据库，如果前面创建物理表失败，这里不会执行
         metadataBusinessEntityRepository.save(businessEntity);
 
         // 如果需要创建物理表，保存系统字段信息到 metadata_entity_field 表
         if (BusinessEntityTypeEnum.needCreatePhysicalTable(createReqVO.getEntityType()) && systemFields != null && appId != null) {
-            saveEntityFields(businessEntity.getId(), systemFields, appId);
+            saveEntityFields(businessEntity.getEntityUuid(), systemFields, appId);
         }
 
         if (!BusinessEntityTypeEnum.needCreatePhysicalTable(createReqVO.getEntityType())) {
@@ -259,14 +309,14 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
                                                  BusinessEntitySaveReqVO createReqVO,
                                                  List<MetadataSystemFieldsDO> systemFields) {
         try {
-            // 1. 通过数据源 id 获取对应的数据源信息
-            Long datasourceId = safeParseLong(createReqVO.getDatasourceId());
-            if (datasourceId == null) {
-                throw new RuntimeException("数据源ID为空，无法创建物理表");
+            // 1. 通过数据源UUID获取对应的数据源信息
+            String datasourceUuid = createReqVO.getDatasourceUuid();
+            if (datasourceUuid == null || datasourceUuid.isEmpty()) {
+                throw new RuntimeException("数据源UUID为空，无法创建物理表");
             }
-            MetadataDatasourceDO datasource = metadataDatasourceBuildService.getDatasource(datasourceId);
+            MetadataDatasourceDO datasource = metadataDatasourceBuildService.getDatasourceByUuid(datasourceUuid);
             if (datasource == null) {
-                throw new RuntimeException("未找到数据源ID为 " + datasourceId + " 的数据源配置");
+                throw new RuntimeException("未找到数据源UUID为 " + datasourceUuid + " 的数据源配置");
             }
 
             // 2. 生成 DDL 并在数据源内建物理表
@@ -341,11 +391,11 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
     /**
      * 保存实体字段信息到 metadata_entity_field 表
      *
-     * @param entityId 业务实体ID
+     * @param entityUuid 业务实体UUID
      * @param systemFields 系统字段列表
      * @param appId 应用ID
      */
-    private void saveEntityFields(Long entityId, List<MetadataSystemFieldsDO> systemFields, Long appId) {
+    private void saveEntityFields(String entityUuid, List<MetadataSystemFieldsDO> systemFields, Long appId) {
         int sortOrder = 1;
         for (MetadataSystemFieldsDO systemField : systemFields) {
             // 特殊处理 parent_id：不是主键、不是必填、不是唯一
@@ -355,7 +405,7 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
             int isUnique = isParentId ? StatusEnumUtil.NO : BooleanStatusEnum.toStatusValue(systemField.getIsSnowflakeId());
             
             MetadataEntityFieldDO entityField = new MetadataEntityFieldDO();
-            entityField.setEntityId(entityId);
+            entityField.setEntityUuid(entityUuid);
             entityField.setFieldName(systemField.getFieldName());
             // 优先使用系统字段的显示名称，为空则回退为字段名
             entityField.setDisplayName(CharSequenceUtil.isNotEmpty(systemField.getDisplayName())
@@ -375,7 +425,7 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
             entityField.setValidationRules(null); // 系统字段暂不设置校验规则
             entityField.setVersionTag(0L); // 默认编辑态
             entityField.setApplicationId(appId);
-            entityField.setStatus(0); // 默认开启
+            entityField.setStatus(1); // 默认启用：1-启用，0-禁用
             entityField.setFieldCode(generateFieldCode(systemField.getFieldName())); // 生成字段编码
 
             metadataEntityFieldBuildService.createEntityFieldInternal(entityField);
@@ -386,32 +436,36 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
 
     /**
      * 根据字段类型获取默认数据长度
+     * <p>
+     * 从 metadata_field_type_mapping 表查询业务类型对应的默认长度
      */
     private Integer getDefaultDataLength(String fieldType) {
-        switch (fieldType.toUpperCase()) {
-            case "VARCHAR":
-                return 255;
-            case "BIGINT":
-                return 19;
-            case "INTEGER":
-                return 10;
-            case "DECIMAL":
-                return 18;
-            default:
-                return null;
+        if (fieldType == null || fieldType.trim().isEmpty()) {
+            return null;
         }
+        
+        FieldTypeMappingDO mapping = fieldTypeMappingRepository.getDefaultMappingByBusinessType(fieldType);
+        if (mapping != null && mapping.getDefaultLength() != null) {
+            return mapping.getDefaultLength();
+        }
+        return null;
     }
 
     /**
      * 根据字段类型获取默认小数位数
+     * <p>
+     * 从 metadata_field_type_mapping 表查询业务类型对应的默认小数位数
      */
     private Integer getDefaultDecimalPlaces(String fieldType) {
-        switch (fieldType.toUpperCase()) {
-            case "DECIMAL":
-                return 2;
-            default:
-                return null;
+        if (fieldType == null || fieldType.trim().isEmpty()) {
+            return null;
         }
+        
+        FieldTypeMappingDO mapping = fieldTypeMappingRepository.getDefaultMappingByBusinessType(fieldType);
+        if (mapping != null && mapping.getDefaultDecimalPlaces() != null && mapping.getDefaultDecimalPlaces() > 0) {
+            return mapping.getDefaultDecimalPlaces();
+        }
+        return null;
     }
 
     /**
@@ -664,38 +718,66 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
 
     /**
      * 字段类型映射
+     * <p>
+     * 从 metadata_field_type_mapping 表查询业务类型对应的数据库类型
+     * 支持业务类型（如 ID, USER, DATETIME, NUMBER）到数据库类型（如 BIGINT, TIMESTAMP）的转换
      */
     private String mapFieldType(String fieldType) {
-        switch (fieldType.toUpperCase()) {
-            case "BIGINT":
-                return "BIGINT";
-            case "VARCHAR":
-                return "VARCHAR(255)";
-            case "TEXT":
-            case "LONGVARCHAR":
-                // LONGVARCHAR 类型映射为 TEXT，用于存储较长的文本数据
-                // 包括：单选列表、多选列表、结构化对象、数组列表、文件、图片、地理位置、用户多选、部门多选、数据多选等
-                return "TEXT";
-            case "TIMESTAMP":
-                return "TIMESTAMP";
-            case "BOOLEAN":
-                return "BOOLEAN";
-            case "INTEGER":
-                return "INTEGER";
-            case "DECIMAL":
-                return "DECIMAL(18,2)";
-            default:
-                return "VARCHAR(255)"; // 默认类型
+        if (fieldType == null || fieldType.trim().isEmpty()) {
+            log.warn("字段类型为空，使用默认 VARCHAR(255)");
+            return "VARCHAR(255)";
         }
+        
+        // 从映射表查询业务类型对应的数据库类型
+        FieldTypeMappingDO mapping = fieldTypeMappingRepository.getDefaultMappingByBusinessType(fieldType);
+        if (mapping != null && mapping.getDatabaseField() != null) {
+            return buildDatabaseTypeString(mapping);
+        }
+        
+        // 如果映射表中没有找到，记录警告并返回默认值
+        log.warn("未找到业务类型 {} 的映射配置，使用默认 VARCHAR(255)", fieldType);
+        return "VARCHAR(255)";
+    }
+
+    /**
+     * 根据映射配置构建数据库类型字符串
+     * <p>
+     * 根据 database_field 的类型决定是否需要加长度或精度参数
+     */
+    private String buildDatabaseTypeString(FieldTypeMappingDO mapping) {
+        String dbField = mapping.getDatabaseField().toUpperCase();
+        Integer defaultLength = mapping.getDefaultLength();
+        Integer decimalPlaces = mapping.getDefaultDecimalPlaces();
+        
+        // 需要加长度参数的类型（如 VARCHAR、CHAR）
+        if (LENGTH_REQUIRED_TYPES.contains(dbField)) {
+            int length = (defaultLength != null && defaultLength > 0) ? defaultLength : 255;
+            return dbField + "(" + length + ")";
+        }
+        
+        // 需要加精度参数的类型（如 NUMERIC、DECIMAL）
+        if (PRECISION_REQUIRED_TYPES.contains(dbField)) {
+            int len = (defaultLength != null && defaultLength > 0) ? defaultLength : 18;
+            int dec = (decimalPlaces != null && decimalPlaces >= 0) ? decimalPlaces : 2;
+            return dbField + "(" + len + "," + dec + ")";
+        }
+        
+        // 其他类型直接使用 database_field 的值（如 TEXT, TIMESTAMP, BOOLEAN, DATE, int8, text[] 等）
+        return mapping.getDatabaseField();
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateBusinessEntity(@Valid BusinessEntitySaveReqVO updateReqVO) {
+        // ID转UUID兼容处理：支持前端传入datasourceId或datasourceUuid
+        String resolvedDatasourceUuid = idUuidConverter.resolveDatasourceUuidOptional(
+                updateReqVO.getDatasourceUuid(), updateReqVO.getDatasourceId());
+        updateReqVO.setDatasourceUuid(resolvedDatasourceUuid);
+
         // 安全转换 ID 和 appId
         Long id = safeParseLong(updateReqVO.getId());
         Long appId = safeParseLong(updateReqVO.getApplicationId());
-        Long datasourceId = safeParseLong(updateReqVO.getDatasourceId());
+        String datasourceUuid = updateReqVO.getDatasourceUuid();
         
         // 校验存在
         if (id != null) {
@@ -714,7 +796,7 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
         MetadataBusinessEntityDO updateObj = BeanUtils.toBean(updateReqVO, MetadataBusinessEntityDO.class);
         updateObj.setId(id);
         updateObj.setApplicationId(appId);
-        updateObj.setDatasourceId(datasourceId);
+        updateObj.setDatasourceUuid(datasourceUuid);
 
         // 处理code字段：如果为空或空字符串，则生成UUID
         if (CharSequenceUtil.isEmpty(updateReqVO.getCode())) {
@@ -732,17 +814,23 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
     public void deleteBusinessEntity(Long id) {
         // 校验存在
         validateBusinessEntityExists(id);
+        
+        // 先获取实体信息以获取UUID
+        MetadataBusinessEntityDO entity = metadataBusinessEntityRepository.getBusinessEntityById(id);
+        String entityUuid = entity != null ? entity.getEntityUuid() : null;
 
         // 删除业务实体
         metadataBusinessEntityRepository.removeById(id);
 
         // 删除实体关联关系
-        QueryWrapper relationshipQueryWrapper = QueryWrapper.create()
-                .eq(MetadataEntityRelationshipDO::getSourceEntityId, id)
-                .or(MetadataEntityRelationshipDO::getTargetEntityId).eq(id);
-        List<MetadataEntityRelationshipDO> relationshipDOs = metadataEntityRelationshipBuildService.findAllByConfig(relationshipQueryWrapper);
-        for(MetadataEntityRelationshipDO relationshipDO : relationshipDOs){
-            metadataEntityRelationshipBuildService.deleteEntityRelationship(relationshipDO.getId());
+        if (entityUuid != null) {
+            QueryWrapper relationshipQueryWrapper = QueryWrapper.create()
+                    .eq(MetadataEntityRelationshipDO::getSourceEntityUuid, entityUuid)
+                    .or(MetadataEntityRelationshipDO::getTargetEntityUuid).eq(entityUuid);
+            List<MetadataEntityRelationshipDO> relationshipDOs = metadataEntityRelationshipBuildService.findAllByConfig(relationshipQueryWrapper);
+            for(MetadataEntityRelationshipDO relationshipDO : relationshipDOs){
+                metadataEntityRelationshipBuildService.deleteEntityRelationship(relationshipDO.getId());
+            }
         }
     }
 
@@ -764,6 +852,11 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
     }
 
     @Override
+    public MetadataBusinessEntityDO getBusinessEntityByUuid(String entityUuid) {
+        return metadataBusinessEntityRepository.getByEntityUuid(entityUuid);
+    }
+
+    @Override
     public PageResult<MetadataBusinessEntityDO> getBusinessEntityPage(BusinessEntityPageReqVO pageReqVO) {
         QueryWrapper queryWrapper = QueryWrapper.create();
 
@@ -781,7 +874,7 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
             queryWrapper.eq(MetadataBusinessEntityDO::getEntityType, pageReqVO.getEntityType());
         }
         if (pageReqVO.getDatasourceId() != null) {
-            queryWrapper.eq(MetadataBusinessEntityDO::getDatasourceId, pageReqVO.getDatasourceId());
+            queryWrapper.eq(MetadataBusinessEntityDO::getDatasourceUuid, pageReqVO.getDatasourceId());
         }
         if (pageReqVO.getVersionTag() != null) {
             queryWrapper.eq(MetadataBusinessEntityDO::getVersionTag, pageReqVO.getVersionTag());
@@ -816,24 +909,24 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
     }
 
     @Override
-    public List<MetadataBusinessEntityDO> getBusinessEntityListByDatasourceId(Long datasourceId) {
-        return metadataBusinessEntityRepository.getBusinessEntityListByDatasourceId(datasourceId);
+    public List<MetadataBusinessEntityDO> getBusinessEntityListByDatasourceUuid(String datasourceUuid) {
+        return metadataBusinessEntityRepository.getBusinessEntityListByDatasourceUuid(datasourceUuid);
     }
 
     @Override
-    public ERDiagramRespVO getERDiagramByDatasourceId(Long datasourceId) {
+    public ERDiagramRespVO getERDiagramByDatasourceUuid(String datasourceUuid) {
         // 1. 获取数据源信息
-        MetadataDatasourceDO datasource = metadataDatasourceBuildService.getDatasource(datasourceId);
+        MetadataDatasourceDO datasource = metadataDatasourceBuildService.getDatasourceByUuid(datasourceUuid);
         if (datasource == null) {
-            throw new IllegalArgumentException("数据源不存在，ID: " + datasourceId);
+            throw new IllegalArgumentException("数据源不存在，UUID: " + datasourceUuid);
         }
 
         // 2. 获取该数据源下的所有业务实体
-        List<MetadataBusinessEntityDO> entities = getBusinessEntityListByDatasourceId(datasourceId);
+        List<MetadataBusinessEntityDO> entities = getBusinessEntityListByDatasourceUuid(datasourceUuid);
 
         // 3. 构建ER图响应对象
         ERDiagramRespVO result = new ERDiagramRespVO();
-        result.setDatasourceId(datasourceId);
+        result.setDatasourceId(datasourceUuid);
         result.setDatasourceName(datasource.getDatasourceName());
 
         // 4. 转换实体信息，包括字段信息
@@ -877,6 +970,7 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
     private EREntityVO convertToEREntity(MetadataBusinessEntityDO entity) {
         return BeanUtils.toBean(entity, EREntityVO.class, erEntity -> {
             erEntity.setEntityId(entity.getId().toString());
+            erEntity.setEntityUuid(entity.getEntityUuid());
             erEntity.setEntityName(entity.getDisplayName());
             erEntity.setTableName(entity.getTableName());
             erEntity.setDescription(entity.getDescription());
@@ -907,6 +1001,8 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
             ERFieldVO erField = BeanUtils.toBean(field, ERFieldVO.class, result -> {
                 // 手动设置 fieldId，因为数据库实体中是 id，而 VO 中是 fieldId
                 result.setFieldId(field.getId());
+                // 设置 fieldUuid
+                result.setFieldUuid(field.getFieldUuid());
             });
             
             // 填充选项信息（单选、多选字段）
@@ -918,12 +1014,12 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
                 "MULTI_USER".equalsIgnoreCase(field.getFieldType()) ||
                 "MULTI_DEPARTMENT".equalsIgnoreCase(field.getFieldType()) ||
                 "MULTI_DATA_SELECTION".equalsIgnoreCase(field.getFieldType())) {
-                List<MetadataEntityFieldOptionDO> options = fieldOptionService.listByFieldId(field.getId());
+                List<MetadataEntityFieldOptionDO> options = fieldOptionService.listByFieldId(field.getFieldUuid());
                 if (options != null && !options.isEmpty()) {
                     List<FieldOptionRespVO> optionVOs = options.stream().map(o -> {
                         FieldOptionRespVO item = new FieldOptionRespVO();
                         item.setId(o.getId() != null ? String.valueOf(o.getId()) : null);
-                        item.setFieldId(o.getFieldId());
+                        item.setFieldUuid(o.getFieldUuid());
                         item.setOptionLabel(o.getOptionLabel());
                         item.setOptionValue(o.getOptionValue());
                         item.setOptionOrder(o.getOptionOrder());
@@ -956,13 +1052,13 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
         }
 
         // 获取该数据源下的所有实体关系
-        List<Long> entityIds = entities.stream()
-                .map(MetadataBusinessEntityDO::getId)
+        List<String> entityUuids = entities.stream()
+                .map(MetadataBusinessEntityDO::getEntityUuid)
                 .toList();
 
         QueryWrapper relationshipQueryWrapper = QueryWrapper.create()
-                .in(MetadataEntityRelationshipDO::getSourceEntityId, entityIds)
-                .or(MetadataEntityRelationshipDO::getTargetEntityId).in(entityIds)
+                .in(MetadataEntityRelationshipDO::getSourceEntityUuid, entityUuids)
+                .or(MetadataEntityRelationshipDO::getTargetEntityUuid).in(entityUuids)
                 .orderBy(MetadataEntityRelationshipDO::getCreateTime, false);
 
         List<MetadataEntityRelationshipDO> relationshipDOs = metadataEntityRelationshipBuildService.findAllByConfig(
@@ -1000,6 +1096,26 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
     }
 
     /**
+     * 根据字段UUID获取字段名称
+     *
+     * @param fieldUuid 字段UUID
+     * @return 字段名称
+     */
+    private String getFieldNameByUuid(String fieldUuid) {
+        if (fieldUuid == null || fieldUuid.isEmpty()) {
+            return null;
+        }
+
+        try {
+            MetadataEntityFieldDO field = metadataEntityFieldBuildService.getEntityFieldByUuid(fieldUuid);
+            return field != null ? field.getFieldName() : null;
+        } catch (Exception e) {
+            log.warn("获取字段名称失败，字段UUID: {}, 错误: {}", fieldUuid, e.getMessage());
+            return null;
+        }
+    }
+
+    /**
      * 将实体关系DO转换为ER关系VO
      *
      * @param relationshipDO 实体关系DO
@@ -1008,14 +1124,14 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
      */
     private ERRelationshipVO convertToERRelationship(MetadataEntityRelationshipDO relationshipDO,
                                                     List<MetadataBusinessEntityDO> entities) {
-        // 查找源实体和目标实体
+        // 查找源实体和目标实体（使用UUID匹配）
         MetadataBusinessEntityDO sourceEntity = entities.stream()
-                .filter(entity -> entity.getId().equals(relationshipDO.getSourceEntityId()))
+                .filter(entity -> entity.getEntityUuid().equals(relationshipDO.getSourceEntityUuid()))
                 .findFirst()
                 .orElse(null);
 
         MetadataBusinessEntityDO targetEntity = entities.stream()
-                .filter(entity -> entity.getId().equals(relationshipDO.getTargetEntityId()))
+                .filter(entity -> entity.getEntityUuid().equals(relationshipDO.getTargetEntityUuid()))
                 .findFirst()
                 .orElse(null);
 
@@ -1025,14 +1141,24 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
 
         ERRelationshipVO relationship = BeanUtils.toBean(relationshipDO, ERRelationshipVO.class, rel -> {
             rel.setRelationshipId(relationshipDO.getId().toString());
-            rel.setSourceEntityId(relationshipDO.getSourceEntityId().toString());
+            // 源实体：同时设置ID和UUID
+            rel.setSourceEntityId(sourceEntity.getId().toString());
+            rel.setSourceEntityUuid(relationshipDO.getSourceEntityUuid());
             rel.setSourceEntityName(sourceEntity.getDisplayName());
-            rel.setSourceFieldId(String.valueOf(relationshipDO.getSourceFieldId()));
-            rel.setSourceFieldName(getFieldNameById(relationshipDO.getSourceFieldId()));
-            rel.setTargetEntityId(relationshipDO.getTargetEntityId().toString());
+            // 源字段：同时设置ID和UUID
+            rel.setSourceFieldUuid(relationshipDO.getSourceFieldUuid());
+            Long sourceFieldId = idUuidConverter.resolveFieldId(relationshipDO.getSourceFieldUuid());
+            rel.setSourceFieldId(sourceFieldId != null ? sourceFieldId.toString() : null);
+            rel.setSourceFieldName(getFieldNameByUuid(relationshipDO.getSourceFieldUuid()));
+            // 目标实体：同时设置ID和UUID
+            rel.setTargetEntityId(targetEntity.getId().toString());
+            rel.setTargetEntityUuid(relationshipDO.getTargetEntityUuid());
             rel.setTargetEntityName(targetEntity.getDisplayName());
-            rel.setTargetFieldId(String.valueOf(relationshipDO.getTargetFieldId()));
-            rel.setTargetFieldName(getFieldNameById(relationshipDO.getTargetFieldId()));
+            // 目标字段：同时设置ID和UUID
+            rel.setTargetFieldUuid(relationshipDO.getTargetFieldUuid());
+            Long targetFieldId = idUuidConverter.resolveFieldId(relationshipDO.getTargetFieldUuid());
+            rel.setTargetFieldId(targetFieldId != null ? targetFieldId.toString() : null);
+            rel.setTargetFieldName(getFieldNameByUuid(relationshipDO.getTargetFieldUuid()));
         });
 
         return relationship;
@@ -1057,6 +1183,56 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
                 .map(this::convertToSimpleEntity)
                 .toList();
 
+        // 3. 查询应用下的所有关系，判断主子表类型
+        List<MetadataEntityRelationshipDO> relationships = metadataEntityRelationshipRepository.findByApplicationId(appId);
+        
+        // 提取所有作为源实体的UUID集合
+        Set<String> sourceEntityUuids = relationships.stream()
+                .map(MetadataEntityRelationshipDO::getSourceEntityUuid)
+                .collect(Collectors.toSet());
+        
+        // 提取所有作为目标实体的UUID集合
+        Set<String> targetEntityUuids = relationships.stream()
+                .map(MetadataEntityRelationshipDO::getTargetEntityUuid)
+                .collect(Collectors.toSet());
+
+        // 构建实体UUID到关系类型的映射
+        Map<String, Set<String>> entityRelationshipTypesMap = new HashMap<>();
+        for (MetadataEntityRelationshipDO rel : relationships) {
+            String type = rel.getRelationshipType();
+            if (type != null) {
+                // 作为源实体
+                if (rel.getSourceEntityUuid() != null) {
+                    entityRelationshipTypesMap.computeIfAbsent(rel.getSourceEntityUuid(), k -> new HashSet<>()).add(type);
+                }
+                // 作为目标实体
+                if (rel.getTargetEntityUuid() != null) {
+                    entityRelationshipTypesMap.computeIfAbsent(rel.getTargetEntityUuid(), k -> new HashSet<>()).add(type);
+                }
+            }
+        }
+
+        // 遍历实体列表，设置关系类型
+        for (SimpleEntityRespVO entity : result) {
+            String uuid = entity.getEntityUuid();
+            boolean isSource = sourceEntityUuids.contains(uuid);
+            boolean isTarget = targetEntityUuids.contains(uuid);
+
+            if (isSource && !isTarget) {
+                // 只在source出现且未在target出现 -> 主表
+                entity.setRelationType("MASTER");
+            } else if (isTarget) {
+                // 只要在target出现 -> 子表
+                entity.setRelationType("SLAVE");
+            } else {
+                // 都没有 -> 无关系
+                entity.setRelationType("NONE");
+            }
+            
+            // 设置关联关系类型列表
+            entity.setRelationshipTypes(entityRelationshipTypesMap.getOrDefault(uuid, new HashSet<>()));
+        }
+
         log.info("查询应用实体列表完成，应用ID: {}, 实体数量: {}", appId, result.size());
         return result;
     }
@@ -1070,6 +1246,7 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
     private SimpleEntityRespVO convertToSimpleEntity(MetadataBusinessEntityDO entityDO) {
         return BeanUtils.toBean(entityDO, SimpleEntityRespVO.class, simpleEntity -> {
             simpleEntity.setEntityId(entityDO.getId());
+            simpleEntity.setEntityUuid(entityDO.getEntityUuid());
             simpleEntity.setEntityName(entityDO.getDisplayName());
             // 设置实际表名
             simpleEntity.setTableName(entityDO.getTableName());
@@ -1078,10 +1255,6 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
 
     @Override
     public BusinessEntityRespVO createBusinessEntityWithResponse(@Valid BusinessEntitySaveReqVO reqVO) {
-        // 修改企业主表更新时间
-        Long appId = Long.valueOf(reqVO.getApplicationId());
-        appApplicationApi.updateAppTimeById(appId);
-
         Long id = createBusinessEntity(reqVO);
         MetadataBusinessEntityDO businessEntity = getBusinessEntity(id);
         return modelMapper.map(businessEntity, BusinessEntityRespVO.class);
@@ -1105,9 +1278,9 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
     }
 
     @Override
-    public List<BusinessEntityRespVO> getBusinessEntityListByDatasourceIdWithRelationType(Long datasourceId) {
+    public List<BusinessEntityRespVO> getBusinessEntityListByDatasourceUuidWithRelationType(String datasourceUuid) {
         // 1. 获取业务实体列表
-        List<MetadataBusinessEntityDO> list = getBusinessEntityListByDatasourceId(datasourceId);
+        List<MetadataBusinessEntityDO> list = getBusinessEntityListByDatasourceUuid(datasourceUuid);
 
         // 2. 转换为 VO
         List<BusinessEntityRespVO> result = list.stream()
@@ -1118,7 +1291,7 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
         // relationType 用于标识实体在关系中的角色：PARENT(主表/父表) 或 CHILD(子表)
         if (!result.isEmpty()) {
             // 复用 ER 图服务获取关系信息，保持逻辑一致性
-            ERDiagramRespVO erDiagram = getERDiagramByDatasourceId(datasourceId);
+            ERDiagramRespVO erDiagram = getERDiagramByDatasourceUuid(datasourceUuid);
             List<ERRelationshipVO> relationships = erDiagram.getRelationships();
 
             // 收集所有作为源实体(主表)和目标实体(子表)的ID
@@ -1168,9 +1341,9 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
             }
 
             // 3. 获取数据源信息
-            MetadataDatasourceDO datasource = metadataDatasourceBuildService.getDatasource(entity.getDatasourceId());
+            MetadataDatasourceDO datasource = metadataDatasourceBuildService.getDatasourceByUuid(entity.getDatasourceUuid());
             if (datasource == null) {
-                throw new RuntimeException("未找到数据源ID为 " + entity.getDatasourceId() + " 的数据源配置");
+                throw new RuntimeException("未找到数据源UUID为 " + entity.getDatasourceUuid() + " 的数据源配置");
             }
 
             // 4. 获取系统字段信息
@@ -1180,7 +1353,7 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
             createPhysicalTable(datasource, entity.getTableName(), systemFields);
 
             // 6. 保存实体字段信息到 metadata_entity_field 表（如果还没有保存的话）
-            saveEntityFields(entityId, systemFields, entity.getApplicationId());
+            saveEntityFields(entity.getEntityUuid(), systemFields, entity.getApplicationId());
 
             log.info("成功重新创建业务实体 {} 的物理表: {}", entity.getDisplayName(), entity.getTableName());
         } catch (Exception e) {
@@ -1223,6 +1396,132 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
             log.debug("从配置获取数据库名称失败: {}", e.getMessage());
             return "unknown";
         }
+    }
+
+    @Override
+    public List<EntityWithFieldsRespVO> getEntitiesWithFullFields(EntityWithFieldsBatchQueryReqVO reqVO) {
+        log.info("开始批量查询实体及完整字段信息, entityUuids: {}, tableNames: {}", 
+                reqVO.getEntityUuids(), reqVO.getTableNames());
+
+        // 1. 参数校验：entityUuids和tableNames至少传一个
+        List<String> entityUuids = reqVO.getEntityUuids();
+        List<String> tableNames = reqVO.getTableNames();
+        
+        if ((entityUuids == null || entityUuids.isEmpty()) && (tableNames == null || tableNames.isEmpty())) {
+            log.warn("entityUuids和tableNames都为空，返回空列表");
+            return List.of();
+        }
+
+        // 2. 查询实体列表
+        List<MetadataBusinessEntityDO> entities;
+        if (entityUuids != null && !entityUuids.isEmpty()) {
+            // 优先使用entityUuids查询
+            QueryWrapper queryWrapper = metadataBusinessEntityRepository.query()
+                    .in(MetadataBusinessEntityDO::getEntityUuid, entityUuids);
+            entities = metadataBusinessEntityRepository.list(queryWrapper);
+        } else {
+            // 使用tableNames查询
+            QueryWrapper queryWrapper = metadataBusinessEntityRepository.query()
+                    .in(MetadataBusinessEntityDO::getTableName, tableNames);
+            entities = metadataBusinessEntityRepository.list(queryWrapper);
+        }
+
+        if (entities.isEmpty()) {
+            log.info("未找到匹配的实体");
+            return List.of();
+        }
+
+        // 3. 转换为响应VO
+        List<EntityWithFieldsRespVO> result = new ArrayList<>();
+        for (MetadataBusinessEntityDO entity : entities) {
+            EntityWithFieldsRespVO respVO = convertToEntityWithFieldsRespVO(entity);
+            result.add(respVO);
+        }
+
+        log.info("批量查询实体及字段信息完成，共查询到 {} 个实体", result.size());
+        return result;
+    }
+
+    /**
+     * 将实体DO转换为带完整字段信息的响应VO
+     *
+     * @param entity 实体DO
+     * @return 实体及字段信息响应VO
+     */
+    private EntityWithFieldsRespVO convertToEntityWithFieldsRespVO(MetadataBusinessEntityDO entity) {
+        EntityWithFieldsRespVO respVO = new EntityWithFieldsRespVO();
+        respVO.setEntityId(entity.getId());
+        respVO.setEntityUuid(entity.getEntityUuid());
+        respVO.setEntityName(entity.getDisplayName());
+        respVO.setEntityCode(entity.getCode());
+        respVO.setTableName(entity.getTableName());
+
+        // 1. 查询实体的完整字段信息
+        EntityFieldQueryReqVO fieldQueryReqVO = new EntityFieldQueryReqVO();
+        fieldQueryReqVO.setEntityUuid(entity.getEntityUuid());
+        List<EntityFieldRespVO> fields = metadataEntityFieldBuildService.getEntityFieldListWithRelated(fieldQueryReqVO);
+        respVO.setFields(fields);
+
+        // 2. 查询以该实体为源实体的所有关系（即该实体作为父表的关系）
+        QueryWrapper relationshipQueryWrapper = metadataEntityRelationshipRepository.query()
+                .eq(MetadataEntityRelationshipDO::getSourceEntityUuid, entity.getEntityUuid())
+                .orderBy(MetadataEntityRelationshipDO::getCreateTime, false);
+        List<MetadataEntityRelationshipDO> relationships = metadataEntityRelationshipRepository.list(relationshipQueryWrapper);
+
+        // 3. 转换为子表信息列表
+        List<ChildEntityWithFieldsRespVO> childEntities = new ArrayList<>();
+        for (MetadataEntityRelationshipDO relationship : relationships) {
+            ChildEntityWithFieldsRespVO childVO = convertToChildEntityWithFieldsRespVO(relationship);
+            if (childVO != null) {
+                childEntities.add(childVO);
+            }
+        }
+        respVO.setChildEntities(childEntities);
+
+        return respVO;
+    }
+
+    /**
+     * 将关系DO转换为子表实体及字段信息VO
+     *
+     * @param relationship 关系DO
+     * @return 子表实体及字段信息VO
+     */
+    private ChildEntityWithFieldsRespVO convertToChildEntityWithFieldsRespVO(MetadataEntityRelationshipDO relationship) {
+        // 获取子表实体信息
+        MetadataBusinessEntityDO childEntity = metadataBusinessEntityRepository.getByEntityUuid(relationship.getTargetEntityUuid());
+        if (childEntity == null) {
+            log.warn("子表实体不存在，关系ID: {}, 目标实体UUID: {}", 
+                    relationship.getId(), relationship.getTargetEntityUuid());
+            return null;
+        }
+
+        ChildEntityWithFieldsRespVO childVO = new ChildEntityWithFieldsRespVO();
+        childVO.setChildEntityId(childEntity.getId());
+        childVO.setChildEntityUuid(childEntity.getEntityUuid());
+        childVO.setChildEntityName(childEntity.getDisplayName());
+        childVO.setChildEntityCode(childEntity.getCode());
+        childVO.setChildTableName(childEntity.getTableName());
+
+        // 设置关系信息
+        childVO.setRelationshipId(relationship.getId());
+        childVO.setRelationshipUuid(relationship.getRelationshipUuid());
+        childVO.setRelationshipName(relationship.getRelationName());
+        childVO.setRelationshipType(relationship.getRelationshipType());
+        
+        // 通过字段UUID查询字段名称
+        String sourceFieldName = getFieldNameByUuid(relationship.getSourceFieldUuid());
+        String targetFieldName = getFieldNameByUuid(relationship.getTargetFieldUuid());
+        childVO.setSourceFieldName(sourceFieldName);
+        childVO.setTargetFieldName(targetFieldName);
+
+        // 查询子表的完整字段信息
+        EntityFieldQueryReqVO childFieldQueryReqVO = new EntityFieldQueryReqVO();
+        childFieldQueryReqVO.setEntityUuid(childEntity.getEntityUuid());
+        List<EntityFieldRespVO> childFields = metadataEntityFieldBuildService.getEntityFieldListWithRelated(childFieldQueryReqVO);
+        childVO.setChildFields(childFields);
+
+        return childVO;
     }
 
 }

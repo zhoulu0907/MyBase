@@ -5,6 +5,8 @@ import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.Busines
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.BusinessEntityRespVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.BusinessEntitySaveReqVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.ERDiagramRespVO;
+import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.EntityWithFieldsBatchQueryReqVO;
+import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.EntityWithFieldsRespVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.SimpleEntityRespVO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusinessEntityDO;
 import jakarta.validation.Valid;
@@ -50,6 +52,14 @@ public interface MetadataBusinessEntityBuildService {
     MetadataBusinessEntityDO getBusinessEntity(Long id);
 
     /**
+     * 根据实体UUID获得业务实体
+     *
+     * @param entityUuid 实体UUID
+     * @return 业务实体
+     */
+    MetadataBusinessEntityDO getBusinessEntityByUuid(String entityUuid);
+
+    /**
      * 获得业务实体分页
      *
      * @param pageReqVO 分页查询
@@ -73,20 +83,20 @@ public interface MetadataBusinessEntityBuildService {
     MetadataBusinessEntityDO getBusinessEntityByCode(String code);
 
     /**
-     * 根据数据源ID获得业务实体列表
+     * 根据数据源UUID获得业务实体列表
      *
-     * @param datasourceId 数据源ID
+     * @param datasourceUuid 数据源UUID
      * @return 业务实体列表
      */
-    List<MetadataBusinessEntityDO> getBusinessEntityListByDatasourceId(Long datasourceId);
+    List<MetadataBusinessEntityDO> getBusinessEntityListByDatasourceUuid(String datasourceUuid);
 
     /**
-     * 根据数据源ID获取ER图数据
+     * 根据数据源UUID获取ER图数据
      *
-     * @param datasourceId 数据源ID
+     * @param datasourceUuid 数据源UUID
      * @return ER图数据
      */
-    ERDiagramRespVO getERDiagramByDatasourceId(Long datasourceId);
+    ERDiagramRespVO getERDiagramByDatasourceUuid(String datasourceUuid);
 
     /**
      * 根据应用ID获取实体列表（仅包含ID和名称）
@@ -130,12 +140,12 @@ public interface MetadataBusinessEntityBuildService {
     PageResult<BusinessEntityRespVO> getBusinessEntityPageWithResponse(BusinessEntityPageReqVO pageReqVO);
 
     /**
-     * 根据数据源ID获得业务实体列表（带关系类型）
+     * 根据数据源UUID获得业务实体列表（带关系类型）
      *
-     * @param datasourceId 数据源ID
+     * @param datasourceUuid 数据源UUID
      * @return 业务实体响应VO列表
      */
-    List<BusinessEntityRespVO> getBusinessEntityListByDatasourceIdWithRelationType(Long datasourceId);
+    List<BusinessEntityRespVO> getBusinessEntityListByDatasourceUuidWithRelationType(String datasourceUuid);
 
     /**
      * 重新创建业务实体的物理表
@@ -144,5 +154,13 @@ public interface MetadataBusinessEntityBuildService {
      * @param entityId 业务实体ID
      */
     void recreatePhysicalTable(Long entityId);
+
+    /**
+     * 批量查询实体及完整字段信息（包含一级子表）
+     *
+     * @param reqVO 批量查询请求VO（entityUuids和tableNames二选一）
+     * @return 实体及字段信息列表
+     */
+    List<EntityWithFieldsRespVO> getEntitiesWithFullFields(EntityWithFieldsBatchQueryReqVO reqVO);
 
 }

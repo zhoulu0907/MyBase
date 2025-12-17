@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.bpm.runtime.service;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.bpm.runtime.vo.*;
+import com.cmsr.onebase.module.bpm.runtime.vo.agent.*;
 
 /**
  * 流程代理接口

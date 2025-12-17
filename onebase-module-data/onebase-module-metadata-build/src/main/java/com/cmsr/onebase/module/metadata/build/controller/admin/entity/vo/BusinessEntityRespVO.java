@@ -10,6 +10,9 @@ public class BusinessEntityRespVO {
     @Schema(description = "实体编号", example = "1024")
     private String id;
 
+    @Schema(description = "实体UUID", example = "01onal1s-0000-0000-0000-000000000002")
+    private String entityUuid;
+
     @Schema(description = "实体名称", example = "用户实体")
     private String displayName;
 
@@ -22,8 +25,8 @@ public class BusinessEntityRespVO {
     @Schema(description = "实体描述", example = "用户相关的业务实体")
     private String description;
 
-    @Schema(description = "数据源ID", example = "1")
-    private String datasourceId;
+    @Schema(description = "数据源UUID", example = "01onal1s-0000-0000-0000-000000000001")
+    private String datasourceUuid;
 
     @Schema(description = "对应数据表名", example = "sys_user")
     private String tableName;

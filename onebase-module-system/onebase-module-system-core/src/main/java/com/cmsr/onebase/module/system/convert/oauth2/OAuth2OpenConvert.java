@@ -1,19 +1,19 @@
 package com.cmsr.onebase.module.system.convert.oauth2;
 
-import com.cmsr.onebase.framework.common.consts.NumberConstant;
+import cn.hutool.core.date.LocalDateTimeUtil;
 import com.cmsr.onebase.framework.common.core.KeyValue;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
-import cn.hutool.core.date.LocalDateTimeUtil;
+import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
-import com.cmsr.onebase.module.system.vo.oauth.OAuth2OpenAccessTokenRespVO;
-import com.cmsr.onebase.module.system.vo.oauth.OAuth2OpenAuthorizeInfoRespVO;
-import com.cmsr.onebase.module.system.vo.oauth.OAuth2OpenCheckTokenRespVO;
 import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2AccessTokenDO;
 import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2ApproveDO;
 import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2ClientDO;
 import com.cmsr.onebase.module.system.util.oauth2.OAuth2Utils;
+import com.cmsr.onebase.module.system.vo.oauth.OAuth2OpenAccessTokenRespVO;
+import com.cmsr.onebase.module.system.vo.oauth.OAuth2OpenAuthorizeInfoRespVO;
+import com.cmsr.onebase.module.system.vo.oauth.OAuth2OpenCheckTokenRespVO;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
@@ -47,7 +47,7 @@ public interface OAuth2OpenConvert {
         Map<String, OAuth2ApproveDO> approveMap = CollectionUtils.convertMap(approves, OAuth2ApproveDO::getScope);
         client.getScopes().forEach(scope -> {
             OAuth2ApproveDO approve = approveMap.get(scope);
-            scopes.add(new KeyValue<>(scope, approve != null && approve.getApproved() == NumberConstant.ONE?true:false));
+            scopes.add(new KeyValue<>(scope, approve != null && approve.getApproved() == NumberUtils.INTEGER_ONE ? true : false));
         });
         // 拼接返回
         return new OAuth2OpenAuthorizeInfoRespVO(

@@ -24,10 +24,10 @@
             <artifactId>onebase-common</artifactId>
         </dependency>
 
-        <!-- 依赖Core模块，使用核心Service -->
+                <!-- 依赖Core模块，使用核心Service -->
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-module-metadata-core</artifactId>
+            <artifactId>onebase-module-metadata-common</artifactId>
             <version>${revision}</version>
         </dependency>
 

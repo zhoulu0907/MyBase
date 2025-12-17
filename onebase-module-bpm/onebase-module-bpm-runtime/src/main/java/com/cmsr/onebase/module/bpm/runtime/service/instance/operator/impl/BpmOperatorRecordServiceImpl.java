@@ -33,6 +33,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.dromara.warm.flow.core.entity.*;
 import org.dromara.warm.flow.core.enums.NodeType;
 import org.dromara.warm.flow.core.enums.SkipType;
+import org.dromara.warm.flow.core.service.DefService;
 import org.dromara.warm.flow.core.service.InsService;
 import org.dromara.warm.flow.core.service.NodeService;
 import org.dromara.warm.flow.core.service.TaskService;
@@ -70,6 +71,9 @@ public class BpmOperatorRecordServiceImpl implements BpmOperatorRecordService {
 
     @Resource(name = "bpmNodeService")
     private NodeService nodeService;
+
+    @Resource(name = "bpmDefService")
+    private DefService defService;
 
     @Resource
     private BpmFlowCcRecordRepository ccRecordRepository;
@@ -127,7 +131,7 @@ public class BpmOperatorRecordServiceImpl implements BpmOperatorRecordService {
 
     private List<HisTask> findAllHisTaskByInsId(Long instanceId) {
         QueryWrapper queryWrapper = QueryWrapper.create();
-        queryWrapper.eq(FlowTask::getInstanceId, instanceId);
+        queryWrapper.eq(FlowHisTask::getInstanceId, instanceId);
         queryWrapper.orderBy(FlowHisTask::getNodeType, true);
         queryWrapper.orderBy(FlowHisTask::getCreateTime, true);
 
@@ -143,8 +147,8 @@ public class BpmOperatorRecordServiceImpl implements BpmOperatorRecordService {
     private List<Task> findAllTaskByInsId(Long instanceId) {
         QueryWrapper queryWrapper = QueryWrapper.create();
         queryWrapper.eq(FlowTask::getInstanceId, instanceId);
-        queryWrapper.orderBy(FlowHisTask::getNodeType, true);
-        queryWrapper.orderBy(FlowHisTask::getCreateTime, true);
+        queryWrapper.orderBy(FlowTask::getNodeType, true);
+        queryWrapper.orderBy(FlowTask::getCreateTime, true);
 
         List<FlowTask> flowTasks = taskRepository.list(queryWrapper);
 

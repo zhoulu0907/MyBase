@@ -2,7 +2,6 @@ package com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
@@ -22,8 +21,13 @@ public class EntityFieldSaveReqVO {
     @Schema(description = "字段ID", example = "3001")
     private String id;
 
-    @Schema(description = "实体ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "2001")
-    @NotNull(message = "实体ID不能为空")
+    @Schema(description = "字段UUID（更新时可用于定位记录）", example = "01onal1s-0000-0000-0000-000000000003")
+    private String fieldUuid;
+
+    @Schema(description = "实体UUID", example = "01onal1s-0000-0000-0000-000000000002")
+    private String entityUuid;
+
+    @Schema(description = "实体ID（兼容旧版，与entityUuid二选一）", example = "164329365983232001")
     private String entityId;
 
     @Schema(description = "字段名", requiredMode = Schema.RequiredMode.REQUIRED, example = "username")

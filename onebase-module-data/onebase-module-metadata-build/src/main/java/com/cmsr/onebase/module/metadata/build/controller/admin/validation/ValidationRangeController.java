@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.metadata.build.controller.admin.validation;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.module.metadata.core.util.MetadataIdUuidConverter;
 import com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationRangeRespVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationRangeSaveReqVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationRangeUpdateReqVO;
@@ -10,7 +11,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,54 +22,53 @@ import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 @Validated
 public class ValidationRangeController {
 
+    @Resource
+    private MetadataIdUuidConverter idUuidConverter;
+
     @Resource private MetadataValidationRangeBuildService rangeService;
 
     @PostMapping("/get-by-field")
-    @Operation(summary = "根据字段ID获取范围校验")
-    @Parameter(name = "id", description = "字段ID", required = true)
-    @PreAuthorize("@ss.hasPermission('metadata:validation-range:query')")
-    public CommonResult<ValidationRangeRespVO> getByField(@RequestParam("id") Long id) {
-        return success(rangeService.getByFieldIdWithRgName(id));
+    @Operation(summary = "根据字段UUID获取范围校验")
+    @Parameter(name = "id", description = "字段UUID", required = true)
+    public CommonResult<ValidationRangeRespVO> getByField(@RequestParam("id") String fieldUuid) {
+        return success(rangeService.getByFieldIdWithRgName(fieldUuid));
     }
 
     @PostMapping("/create")
     @Operation(summary = "创建范围校验")
-    @PreAuthorize("@ss.hasPermission('metadata:validation-range:create')")
     public CommonResult<Long> create(@Valid @RequestBody ValidationRangeSaveReqVO vo) {
         return success(rangeService.create(vo));
     }
 
     @PostMapping("/update")
     @Operation(summary = "更新范围校验")
-    @PreAuthorize("@ss.hasPermission('metadata:validation-range:update')")
     public CommonResult<Boolean> update(@Valid @RequestBody ValidationRangeUpdateReqVO vo) {
         rangeService.update(vo);
         return success(true);
     }
 
     @PostMapping("/delete-by-field")
-    @Operation(summary = "按字段删除范围校验")
-    @Parameter(name = "id", description = "字段ID", required = true)
-    @PreAuthorize("@ss.hasPermission('metadata:validation-range:delete')")
-    public CommonResult<Boolean> deleteByField(@RequestParam("id") Long id) {
-        rangeService.deleteByFieldId(id);
+    @Operation(summary = "按字段UUID删除范围校验")
+    @Parameter(name = "id", description = "字段UUID", required = true)
+    public CommonResult<Boolean> deleteByField(@RequestParam("id") String fieldUuid) {
+        rangeService.deleteByFieldId(fieldUuid);
         return success(true);
     }
 
     @GetMapping("/get")
     @Operation(summary = "根据主键ID获取范围校验")
-    @Parameter(name = "id", description = "范围校验规则主键ID", required = true)
-    @PreAuthorize("@ss.hasPermission('metadata:validation-range:query')")
-    public CommonResult<ValidationRangeRespVO> get(@RequestParam("id") Long id) {
-        return success(rangeService.getById(id));
+    @Parameter(name = "id", description = "范围校验规则主键ID（支持ID或UUID）", required = true)
+    public CommonResult<ValidationRangeRespVO> get(@RequestParam("id") String id) {
+        Long resolvedId = idUuidConverter.resolveRuleGroupId(id);
+        return success(rangeService.getById(resolvedId));
     }
 
     @PostMapping("/delete")
     @Operation(summary = "按主键ID删除范围校验")
-    @Parameter(name = "id", description = "范围校验规则主键ID", required = true)
-    @PreAuthorize("@ss.hasPermission('metadata:validation-range:delete')")
-    public CommonResult<Boolean> delete(@RequestParam("id") Long id) {
-        rangeService.deleteById(id);
+    @Parameter(name = "id", description = "范围校验规则主键ID（支持ID或UUID）", required = true)
+    public CommonResult<Boolean> delete(@RequestParam("id") String id) {
+        Long resolvedId = idUuidConverter.resolveRuleGroupId(id);
+        rangeService.deleteById(resolvedId);
         return success(true);
     }
 }

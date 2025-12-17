@@ -15,11 +15,11 @@ public interface PageSetService {
 
     String createPageSet(CreatePageSetDTO createPageSetDTO);
 
+    void deletePageSetByMenu(AppMenuDO menuDO);
+
     void deletePageSetByMenuId(Long menuId);
 
     String copyPageSet(CopyPageSetDTO copyPageSetDTO);
-
-    String copyPageSet(CopyPageSetDTO copyPageSetDTO, AppMenuDO appMenuDO);
 
     Boolean savePageSet(SavePageSetReqVO savePageSetReqVO);
 

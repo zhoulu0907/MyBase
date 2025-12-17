@@ -4604,143 +4604,7 @@ function _typeof(o) {
     }
   }
 
-  function RMBCAP(number) {
-    if (arguments.length !== 1) {
-      return value;
-    }
-    
-    number = parseNumber(number);
-    if (number instanceof Error) {
-      return number;
-    }
-    
-    // 检查输入是否包含非法字符
-    if (isNaN(number) || !isFinite(number)) {
-      return "输入包含非法字符!";
-    }
-    
-    // 检查金额是否超过限制 (小于1万亿)
-    if (Math.abs(number) >= 1000000000000) {
-      return "数额太大，转换金额上限小于1万亿!";
-    }
-    
-    // 检查是否为负数
-    var isNegative = number < 0;
-    number = Math.abs(number);
-    
-    // 分离整数和小数部分
-    var integerPart = Math.floor(number);
-    var decimalPart = Math.round((number - integerPart) * 100);
-    
-    // 数字对应的大写
-    var digits = ["零", "壹", "贰", "叁", "肆", "伍", "陆", "柒", "捌", "玖"];
-    var units = ["", "拾", "佰", "仟"];
-    var bigUnits = ["", "万", "亿"];
-    
-    // 转换整数部分
-    function convertInteger(num) {
-      if (num === 0) return "";
-      
-      var str = "";
-      var zero = false;
-      var unitIndex = 0;
-      var bigUnitIndex = 0;
-      
-      while (num > 0) {
-        var digit = num % 10;
-        
-        if (digit === 0) {
-          zero = true;
-        } else {
-          if (zero) {
-            str = digits[0] + str;
-            zero = false;
-          }
-          
-          if (unitIndex === 0 && bigUnitIndex > 0) {
-            str = bigUnits[bigUnitIndex] + str;
-          }
-          
-          str = digits[digit] + units[unitIndex] + str;
-        }
-        
-        unitIndex++;
-        if (unitIndex === 4) {
-          unitIndex = 0;
-          bigUnitIndex++;
-        }
-        
-        num = Math.floor(num / 10);
-      }
-      
-      // 处理万、亿单位
-      if (bigUnitIndex > 0 && str.indexOf(bigUnits[bigUnitIndex]) === -1) {
-        str = bigUnits[bigUnitIndex] + str;
-      }
-      
-      return str;
-    }
-    
-    // 转换小数部分
-    function convertDecimal(decimal) {
-      if (decimal === 0) return "";
-      
-      var str = "";
-      var jiao = Math.floor(decimal / 10);
-      var fen = decimal % 10;
-      
-      if (jiao > 0) {
-        str += digits[jiao] + "角";
-      }
-      
-      if (fen > 0) {
-        str += digits[fen] + "分";
-      }
-      
-      return str;
-    }
-    
-    try {
-      var result = "人民币";
-      
-      if (isNegative) {
-        result += "负";
-      }
-      
-      var integerStr = convertInteger(integerPart);
-      var decimalStr = convertDecimal(decimalPart);
-      
-      // 特殊情况：0
-      if (integerPart === 0 && decimalPart === 0) {
-        return "人民币零元整";
-      }
-      
-      // 整数部分处理
-      if (integerPart > 0) {
-        result += integerStr + "元";
-      }
-      
-      // 小数部分处理
-      if (decimalPart === 0) {
-        // 没有小数部分
-        if (integerPart > 0) {
-          result += "整";
-        }
-      } else {
-        // 有小数部分
-        result += decimalStr;
-      }
-      
-      // 特殊处理：只有小数部分的情况
-      if (integerPart === 0 && decimalPart > 0) {
-        result = "人民币" + decimalStr;
-      }
-      
-      return result;
-    } catch (e) {
-      return value;
-    }
-  }
+
 
   function UUID() {
     if (arguments.length !== 0) {
@@ -5134,6 +4998,136 @@ function _typeof(o) {
     }
     return new Array(number_times + 1).join(text);
   }
+  function RMBCAP(number) {
+    // 参数检查
+    if (arguments.length !== 1) {
+      return value;
+    }
+
+    // 解析数字
+    number = parseNumber(number);
+    if (number instanceof Error) {
+      return value;
+    }
+
+    // 检查是否为非法字符（NaN 或 Infinity）
+    if (isNaN(number) || !isFinite(number)) {
+      return value;
+    }
+
+    // 检查是否为负数
+    if (number < 0) {
+      return "输入包含非法字符!"; // 输入包含非法字符!
+    }
+
+    // 检查金额是否过大（限制小于1万亿）
+    if (number >= 1000000000000) {
+      return "数额太大，转换金额上限小于1万亿!"; // 数额太大，转换金额上限小于1万亿!
+    }
+
+    try {
+      // 定义中文数字
+      var cnNums = ["零", "壹", "贰", "叁", "肆", "伍", "陆", "柒", "捌", "玖"];
+      
+      // 定义中文单位
+      var cnIntRadice = ["", "拾", "佰", "仟"];
+      var cnIntUnits = ["", "万", "亿", "兆"];
+      var cnDecUnits = ["角", "分"];
+
+      // 转换为字符串并分离整数和小数部分
+      var numberStr = number.toString();
+      var parts = numberStr.split(".");
+      var integerPart = parts[0];
+      var decimalPart = parts[1] || "";
+
+      // 处理整数部分
+      if (integerPart.length > 12) {
+        return "数额太大，转换金额上限小于1万亿!"; // 超过限制
+      }
+
+      var integerStr = "";
+      if (integerPart === "0") {
+        integerStr = "";
+      } else {
+        var zeroCount = 0;
+        var IntLen = integerPart.length;
+        
+        for (var i = 0; i < IntLen; i++) {
+          var n = parseInt(integerPart[i]);
+          var p = IntLen - i - 1;
+          var q = Math.floor(p / 4);
+          var r = p % 4;
+          
+          if (n === 0) {
+            zeroCount++;
+          } else {
+            if (zeroCount > 0) {
+              integerStr += cnNums[0];
+              zeroCount = 0;
+            }
+            integerStr += cnNums[n];
+          }
+          
+          if (p != 0) { // 不是最后一位时才添加单位
+            if (r !== 0) {
+              // 添加单位（拾、佰、仟）
+              integerStr += cnIntRadice[r];
+            } else if (q > 0) {
+              // 添加单位（万、亿）
+              integerStr += cnIntUnits[q];
+            }
+          }
+        }
+      }
+
+      // 处理小数部分
+      var decimalStr = "";
+      if (decimalPart !== "") {
+        // 处理角（第一位小数）
+        if (decimalPart.length >= 1) {
+          var jiao = parseInt(decimalPart[0]);
+          decimalStr += cnNums[jiao] + cnDecUnits[0];
+        }
+        
+        // 处理分（第二位小数）
+        if (decimalPart.length >= 2) {
+          var fen = parseInt(decimalPart[1]);
+          decimalStr += cnNums[fen] + cnDecUnits[1];
+        }
+      }
+
+      // 组合结果
+      var result = "";
+      if (integerPart === "0" && decimalPart === "") {
+        result = "零元整";
+      } else if (integerPart === "0") {
+        // 整数位为0时，不显示"零元"，只显示小数部分
+        result = decimalStr;
+      } else if (decimalPart === "") {
+        result = integerStr + "元整";
+      } else {
+        result = integerStr + "元" + decimalStr;
+      }
+
+      // 处理特殊情况
+      if (result.startsWith("壹拾")) {
+        result = result.substring(1);
+      }
+
+      // 替换连续的零
+      result = result.replace(/零+/g, "零");
+      
+      // 删除末尾的零（但保留"零元"的情况）
+      if (result !== "零元整" && result.endsWith("零")) {
+        result = result.substring(0, result.length - 1);
+      }
+
+      return result;
+    } catch (e) {
+      return value;
+    }
+  }
+
   function RIGHT(text, num_chars) {
     var someError = anyError(text, num_chars);
     if (someError) {
@@ -5191,9 +5185,50 @@ function _typeof(o) {
     if (value$1 === undefined || value$1 instanceof Error || format_text instanceof Error) {
       return na;
     }
+    
+    // 处理日期格式
     if (value$1 instanceof Date) {
-      return value$1.toISOString().slice(0, 10);
+      return formatDate(value$1, format_text);
     }
+    
+    // 如果第一个参数是日期字符串，尝试解析为日期
+    if (typeof value$1 === "string") {
+      var parsedDate = parseDateString(value$1);
+      if (parsedDate) {
+        return formatDate(parsedDate, format_text);
+      }
+    }
+    
+    // 如果值是一个数字，并且格式是日期格式，尝试将其作为日期序列处理
+    if (typeof value$1 === "number" && 
+        (format_text === "YYYY/MM/DD" || format_text === "MM/DD HH:MM" || 
+         format_text === "DDDD" || format_text === "DDD")) {
+      try {
+        // 首先尝试作为毫秒时间戳处理（如1771315200000）
+        if (value$1 > 10000000000) { // 大于这个数的很可能是毫秒时间戳
+          return formatTimestamp(value$1, format_text);
+        }
+        
+        // 假设这是一个Excel日期序列号
+        var dateFromSerial = serialToDate(value$1);
+        if (dateFromSerial && !isNaN(dateFromSerial.getTime())) {
+          return formatDate(dateFromSerial, format_text);
+        }
+      } catch (e) {
+        // 如果转换失败，继续执行原始逻辑
+      }
+    }
+    
+    // 特殊处理：如果值是类似2025-11-19这样的数学表达式结果，尝试作为日期解析
+    if (typeof value$1 === "number" && format_text === "DDDD") {
+      // 检查是否可能是年份（1900-2100之间）
+      if (value$1 >= 1900 && value$1 <= 2100) {
+        // 创建一个该年份的1月1日日期对象
+        var yearDate = new Date(value$1, 0, 1);
+        return formatDate(yearDate, format_text);
+      }
+    }
+    
     if (format_text === undefined || format_text === null) {
       return "";
     }
@@ -5222,6 +5257,83 @@ function _typeof(o) {
       value$1 = value$1 + "%";
     }
     return value$1;
+  }
+  
+  // 日期格式化辅助函数
+  function formatDate(date, format) {
+    if (!format || typeof format !== "string") {
+      return date.toISOString().slice(0, 10);
+    }
+    
+    var year = date.getFullYear();
+    var month = date.getMonth() + 1;
+    var day = date.getDate();
+    var hours = date.getHours();
+    var minutes = date.getMinutes();
+    var seconds = date.getSeconds();
+    
+    var weekdays = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
+    var shortWeekdays = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
+    var weekday = date.getDay();
+    
+    // 处理各种日期格式
+    if (format === "YYYY/MM/DD") {
+      return year + "/" + padZero(month) + "/" + padZero(day);
+    } else if (format === "MM/DD HH:MM") {
+      return padZero(month) + "/" + padZero(day) + " " + padZero(hours) + ":" + padZero(minutes);
+    } else if (format === "DDDD") {
+      return weekdays[weekday];
+    } else if (format === "DDD") {
+      return shortWeekdays[weekday];
+    } else if (format === "0.0%") {
+      // 这不是日期格式，而是百分比格式
+      return FIXED(date, 1, false) + "%";
+    }
+    
+    // 默认格式
+    return year + "-" + padZero(month) + "-" + padZero(day);
+  }
+  
+  // 补零函数
+  function padZero(num) {
+    return num < 10 ? "0" + num : num.toString();
+  }
+  
+  // 格式化时间戳
+  function formatTimestamp(timestamp, format) {
+    // 如果输入是数字，假设它是毫秒时间戳
+    var date = new Date(timestamp);
+    
+    // 检查日期是否有效
+    if (isNaN(date.getTime())) {
+      return "Invalid Date";
+    }
+    
+    return formatDate(date, format);
+  }
+  
+  // 解析日期字符串
+  function parseDateString(str) {
+    // 尝试解析常见的日期格式
+    var date = new Date(str);
+    if (!isNaN(date.getTime())) {
+      return date;
+    }
+    
+    // 尝试解析YYYY-MM-DD格式
+    var match = str.match(/^\d{4}-\d{2}-\d{2}$/);
+    if (match) {
+      var parts = str.split('-');
+      var year = parseInt(parts[0], 10);
+      var month = parseInt(parts[1], 10) - 1; // 月份从0开始
+      var day = parseInt(parts[2], 10);
+      date = new Date(year, month, day);
+      if (!isNaN(date.getTime())) {
+        return date;
+      }
+    }
+    
+    return null;
   }
   function TEXTJOIN(delimiter, ignore_empty) {
     for (var _len = arguments.length, args = new Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
@@ -8209,6 +8321,8 @@ function _typeof(o) {
     return 360 * (end_date.getFullYear() - start_date.getFullYear()) + 30 * (em - sm) + (ed - sd);
   }
   function EDATE(start_date, months) {
+    // 保存原始输入以确定输出格式
+    var original_input = start_date;
     start_date = parseDate(start_date);
     if (start_date instanceof Error) {
       return start_date;
@@ -8230,7 +8344,24 @@ function _typeof(o) {
       storedDay = Math.min(storedDay, daysInTargetMonth);
     }
     start_date.setDate(storedDay);
-    return returnSerial ? dateToSerial(start_date) : start_date;
+    
+    // 如果需要返回序列号，则返回序列号
+    if (returnSerial) {
+      return dateToSerial(start_date);
+    }
+    
+    // 否则根据输入格式返回格式化的日期字符串
+    if (typeof original_input === "string") {
+      // 如果原始输入是日期字符串，尝试解析其格式
+      if (original_input.match(/^\d{4}-\d{2}-\d{2}$/)) {
+        return formatDate(start_date, "YYYY-MM-DD");
+      } else if (original_input.match(/^\d{4}\/\d{2}\/\d{2}$/)) {
+        return formatDate(start_date, "YYYY/MM/DD");
+      }
+    }
+    
+    // 默认返回日期对象
+    return start_date;
   }
   function EOMONTH(start_date, months) {
     start_date = parseDate(start_date);
@@ -8340,7 +8471,24 @@ function _typeof(o) {
     return total;
   };
   function NOW() {
-    return returnSerial ? dateToSerial(new Date) : new Date;
+    var now = new Date();
+    if (returnSerial) {
+      return dateToSerial(now);
+    } else {
+      // 格式化为 "YYYY/MM/DD HH:MM" 格式
+      var year = now.getFullYear();
+      var month = (now.getMonth() + 1);
+      var day = now.getDate();
+      var hours = now.getHours();
+      var minutes = now.getMinutes();
+      
+      // 补零函数
+      function padZero(num) {
+        return num < 10 ? '0' + num : num;
+      }
+      
+      return year + '/' + padZero(month) + '/' + padZero(day) + ' ' + padZero(hours) + ':' + padZero(minutes);
+    }
   }
   function SECOND(serial_number) {
     serial_number = parseDate(serial_number);
@@ -8370,7 +8518,15 @@ function _typeof(o) {
   }
   function TODAY() {
     var today = startOfDay(new Date);
-    return returnSerial ? dateToSerial(today) : today;
+    if (returnSerial) {
+      return dateToSerial(today);
+    } else {
+      // 返回格式为 YYYY/MM/DD 的日期字符串
+      var year = today.getFullYear();
+      var month = today.getMonth() + 1;
+      var day = today.getDate();
+      return year + "/" + padZero(month) + "/" + padZero(day);
+    }
   }
   function WEEKDAY(serial_number, return_type) {
     serial_number = parseDate(serial_number);

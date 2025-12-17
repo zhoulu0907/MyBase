@@ -35,13 +35,6 @@ public class AppPageSetRepository extends BaseBizRepository<AppResourcePagesetMa
         return getOne(queryWrapper);
     }
 
-//    public String findPageSetUuidByMenuUuid(String menuUuid) {
-//        QueryWrapper queryWrapper = this.query()
-//                .select(APP_RESOURCE_PAGESET.PAGESET_UUID)
-//                .where(APP_RESOURCE_PAGESET.MENU_UUID.eq(menuUuid));
-//        return this.getObjAs(queryWrapper, String.class);
-//    }
-
     public List<AppResourcePagesetDO> findByMenuUuids(Long applicationId, List<String> menuUuids) {
         QueryWrapper queryWrapper = this.query()
                 .where(APP_RESOURCE_PAGESET.APPLICATION_ID.eq(applicationId))
@@ -49,13 +42,8 @@ public class AppPageSetRepository extends BaseBizRepository<AppResourcePagesetMa
         return list(queryWrapper);
     }
 
-//    public void deletePageSetByMenuUuid(String menuUuid) {
-//        QueryWrapper queryWrapper = this.query()
-//                .where(APP_RESOURCE_PAGESET.MENU_UUID.eq(menuUuid));
-//        remove(queryWrapper);
-//    }
 
-    public List<AppResourcePagesetDO> findByMenuUuidAndType(Long applicationId,List<String> menuUuids, Integer pageSetType) {
+    public List<AppResourcePagesetDO> findByMenuUuidAndType(Long applicationId, List<String> menuUuids, Integer pageSetType) {
         QueryWrapper queryWrapper = this.query()
                 .where(APP_RESOURCE_PAGESET.APPLICATION_ID.eq(applicationId))
                 .where(APP_RESOURCE_PAGESET.MENU_UUID.in(menuUuids))
@@ -69,5 +57,12 @@ public class AppPageSetRepository extends BaseBizRepository<AppResourcePagesetMa
                 .where(APP_RESOURCE_PAGESET.APPLICATION_ID.eq(applicationId))
                 .where(APP_RESOURCE_PAGESET.PAGESET_UUID.eq(pageSetUuid));
         return this.getObjAs(queryWrapper, String.class);
+    }
+
+    public AppResourcePagesetDO findByUuidInApplication(Long applicationId, String pageSetUuid) {
+        QueryWrapper queryWrapper = this.query()
+                .where(APP_RESOURCE_PAGESET.APPLICATION_ID.eq(applicationId))
+                .where(APP_RESOURCE_PAGESET.PAGESET_UUID.eq(pageSetUuid));
+        return this.getOne(queryWrapper);
     }
 }

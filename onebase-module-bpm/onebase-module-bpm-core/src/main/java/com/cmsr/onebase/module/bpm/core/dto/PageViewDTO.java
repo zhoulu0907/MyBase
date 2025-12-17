@@ -16,6 +16,11 @@ public class PageViewDTO {
     private Long viewId;
 
     /**
+     * 视图UUID
+     */
+    private String viewUuid;
+
+    /**
      * 视图名称
      */
     private String viewName;

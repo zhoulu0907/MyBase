@@ -64,6 +64,8 @@ springdoc:
 
 # Spring Data Redis 配置
 spring:
+  redis:
+    key-prefix: obn-
   data:
     redis:
       repositories:
@@ -161,3 +163,12 @@ anyline:
   is-log-sql-param: true
   is-log-sql-when-error: true
   is-log-sql-param-when-error: true
+
+mybatis-flex:
+  print-sql: true
+  configuration:
+    mapUnderscoreToCamelCase: true
+pagehelper:
+  helperDialect: postgresql
+  reasonable: false
+  defaultCount: true

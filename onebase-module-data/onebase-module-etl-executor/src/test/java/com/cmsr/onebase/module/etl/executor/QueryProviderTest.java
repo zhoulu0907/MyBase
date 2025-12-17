@@ -44,7 +44,7 @@ public class QueryProviderTest {
         WorkflowProvider workflowProvider = new WorkflowProvider();
         workflowProvider.setQueryProvider(queryProvider);
         EtlWorkflow etlWorkflow = queryProvider.findWorkflowConfig(131538080882786304L);
-        WorkflowGraph workflowGraph = workflowProvider.createWorkflowGraph(etlWorkflow.getConfig());
+        WorkflowGraph workflowGraph = workflowProvider.createWorkflowGraph(1L, etlWorkflow.getConfig());
         System.out.println(JacksonUtil.OBJECT_MAPPER.writeValueAsString(workflowGraph));
     }
 }

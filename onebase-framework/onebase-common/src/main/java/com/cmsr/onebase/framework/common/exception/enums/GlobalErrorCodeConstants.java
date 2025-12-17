@@ -25,6 +25,7 @@ public interface GlobalErrorCodeConstants {
     ErrorCode LOCKED             = new ErrorCode(423, "请求失败，请稍后重试"); // 并发请求，不允许
     ErrorCode TOO_MANY_REQUESTS  = new ErrorCode(429, "请求过于频繁，请稍后重试");
     ErrorCode SEESION_TIMEOUT     = new ErrorCode(401, "会话超时，请重新登录");
+    ErrorCode FORBIDDEN_APP     = new ErrorCode(403, "没有该应用的操作权限");
 
     // ========== 服务端错误段 ==========
 
@@ -41,7 +42,6 @@ public interface GlobalErrorCodeConstants {
 
     // ========== 自定义错误段 ==========
     ErrorCode REPEATED_REQUESTS = new ErrorCode(900, "重复请求，请稍后重试"); // 重复请求
-    ErrorCode DEMO_DENY         = new ErrorCode(901, "演示模式，禁止写操作");
 
     ErrorCode UNKNOWN = new ErrorCode(999, "未知错误");
 

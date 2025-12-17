@@ -17,21 +17,21 @@ public interface MetadataAppAndDatasourceCoreService {
      * 创建应用与数据源的关联关系
      *
      * @param applicationId 应用ID
-     * @param datasourceId 数据源ID
+     * @param datasourceUuid 数据源UUID
      * @param datasourceType 数据源类型
      * @param appUid 应用UID
      * @return 关联关系ID
      */
-    Long createRelation(Long applicationId, Long datasourceId, String datasourceType, String appUid);
+    Long createRelation(Long applicationId, String datasourceUuid, String datasourceType, String appUid);
 
     /**
      * 删除应用与数据源的关联关系
      *
      * @param applicationId 应用ID
-     * @param datasourceId 数据源ID
+     * @param datasourceUuid 数据源UUID
      * @return 是否删除成功
      */
-    boolean deleteRelation(Long applicationId, Long datasourceId);
+    boolean deleteRelation(Long applicationId, String datasourceUuid);
 
     /**
      * 根据应用ID获取关联的数据源列表
@@ -42,21 +42,21 @@ public interface MetadataAppAndDatasourceCoreService {
     List<MetadataDatasourceDO> getDatasourcesByApplicationId(Long applicationId);
 
     /**
-     * 根据数据源ID获取关联的应用ID列表
+     * 根据数据源UUID获取关联的应用ID列表
      *
-     * @param datasourceId 数据源ID
+     * @param datasourceUuid 数据源UUID
      * @return 应用ID列表
      */
-    List<Long> getApplicationIdsByDatasourceId(Long datasourceId);
+    List<Long> getApplicationIdsByDatasourceUuid(String datasourceUuid);
 
     /**
      * 检查应用和数据源是否已关联
      *
      * @param applicationId 应用ID
-     * @param datasourceId 数据源ID
+     * @param datasourceUuid 数据源UUID
      * @return 是否已关联
      */
-    boolean isRelationExists(Long applicationId, Long datasourceId);
+    boolean isRelationExists(Long applicationId, String datasourceUuid);
 
     /**
      * 根据应用ID删除所有关联关系
@@ -67,12 +67,12 @@ public interface MetadataAppAndDatasourceCoreService {
     long deleteRelationsByApplicationId(Long applicationId);
 
     /**
-     * 根据数据源ID删除所有关联关系
+     * 根据数据源UUID删除所有关联关系
      *
-     * @param datasourceId 数据源ID
+     * @param datasourceUuid 数据源UUID
      * @return 删除的关联关系数量
      */
-    long deleteRelationsByDatasourceId(Long datasourceId);
+    long deleteRelationsByDatasourceUuid(String datasourceUuid);
 
     /**
      * 根据应用UID获取关联的数据源列表
@@ -91,30 +91,30 @@ public interface MetadataAppAndDatasourceCoreService {
     List<MetadataAppAndDatasourceDO> getRelationsByDatasourceType(String datasourceType);
 
     /**
-     * 根据应用ID与数据源ID获取应用UID
+     * 根据应用ID与数据源UUID获取应用UID
      *
      * @param applicationId 应用ID
-     * @param datasourceId 数据源ID
+     * @param datasourceUuid 数据源UUID
      * @return appUid，未找到时返回 null
      */
-    String getAppUidByAppIdAndDatasourceId(Long applicationId, Long datasourceId);
+    String getAppUidByAppIdAndDatasourceUuid(Long applicationId, String datasourceUuid);
 
     /**
-     * 根据应用ID与数据源ID获取关联关系对象
+     * 根据应用ID与数据源UUID获取关联关系对象
      *
      * @param applicationId 应用ID
-     * @param datasourceId 数据源ID
+     * @param datasourceUuid 数据源UUID
      * @return 关联关系对象，未找到时返回 null
      */
-    MetadataAppAndDatasourceDO getRelation(Long applicationId, Long datasourceId);
+    MetadataAppAndDatasourceDO getRelation(Long applicationId, String datasourceUuid);
 
     /**
      * 更新应用与数据源关联关系中的appUid
      *
      * @param applicationId 应用ID
-     * @param datasourceId 数据源ID
+     * @param datasourceUuid 数据源UUID
      * @param newAppUid 新的应用UID
      * @return 是否更新成功
      */
-    boolean updateRelationAppUid(Long applicationId, Long datasourceId, String newAppUid);
+    boolean updateRelationAppUid(Long applicationId, String datasourceUuid, String newAppUid);
 }

@@ -19,6 +19,16 @@ tenant-id: {{adminTenantId}}
   "sex": 1
 }
 
+### 修改密码 /admin-api/system/user/update-password
+POST {{baseUrl}}/system/user/update-password
+Content-Type: application/json
+Authorization: Bearer 91ab1c728fd24eccb29dacec93b41974
+
+{
+  "id": "183591864871092224",
+  "password": "Admin159!"
+}
+
 ### 删除用户 /admin-api/system/user/delete
 POST {{baseUrl}}/system/user/delete?id=153536353659224064
 Authorization: Bearer {{token}}
@@ -31,18 +41,17 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
 {
-  "id": 153536353659224064,
+  "id": 161198197381922816,
   "username": "newUserGsp11",
   "nickname": "New Test Gsp11",
-  "deptId": 100,
   "postIds": [],
   "email": "updated@test11.com",
-  "mobile": "13900000002",
+  "mobile": "13900010002",
   "status": 1,
-  "roleIds": [1, 2],
+  "roleIds": [172865922746908672,158088726951460867],
   "sex": 1,
   "avatar": "https://www.cmsr.com/avatar.jpg",
-  "userType": 1,
+  "userType": 2,
   "adminType": 1
 }
 
@@ -68,4 +77,9 @@ Authorization: Bearer {{token}}
 
 ### 获得指定部门的用户简要分页列表（带关键词搜索，不包含下级部门）
 GET {{baseUrl}}/system/user/get-user-page-by-dept?deptId=1&isRecurseSub=false&keywords=admin
+Authorization: Bearer {{token}}
+
+
+### 获得指定部门的用户简要分页列表（仅直属部门）
+GET {{baseUrl}}/system/user/page
 Authorization: Bearer {{token}}

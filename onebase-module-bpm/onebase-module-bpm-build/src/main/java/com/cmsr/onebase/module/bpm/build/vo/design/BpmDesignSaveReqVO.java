@@ -26,6 +26,9 @@ public class BpmDesignSaveReqVO {
     @Schema(description = "主键id")
     private Long id;
 
+    /**
+     * 应用ID，前端不需要传，通过token获取
+     */
     @Schema(description = "应用ID")
     private Long appId;
 
@@ -42,9 +45,15 @@ public class BpmDesignSaveReqVO {
      * 业务UUID，用于关联业务系统的业务数据
      *
      */
-    @NotBlank(message = "业务不能为空")
-    @Schema(description = "业务ID，当前菜单UUID")
-    private String businessId;
+    @Schema(description = "业务ID，当前菜单ID")
+    private Long businessId;
+
+    /**
+     * 业务UUID，用于关联业务系统的业务数据
+     *
+     */
+    @Schema(description = "业务UUID，当前菜单UUID")
+    private String businessUuid;
 
     /**
      * 流程定义JSON

@@ -14,13 +14,10 @@ public enum NodeActionEnum {
      * 跳过节点执行
      */
     DO_SKIP,
-    /**
-     * 节点执行，但后续节点不执行，结束流程
-     */
-    DO_PROCESS_AND_DO_END,
+//    /**
+//     * 节点执行，但后续节点不执行，结束流程
+//     */
+//    DO_PROCESS_AND_DO_END,
 
-    /**
-     * 做重置操作，并跳转到下一个节点继续执行
-     */
-    DO_RESET
+
 }

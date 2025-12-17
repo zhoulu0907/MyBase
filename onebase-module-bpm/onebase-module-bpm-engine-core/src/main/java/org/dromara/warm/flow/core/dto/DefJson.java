@@ -153,6 +153,11 @@ public class DefJson {
      */
     private Long applicationId;
 
+    /**
+     * 定义UUID
+     */
+    private String definitionUuid;
+
 
     public String getModelValue() {
         if (StringUtils.isEmpty(modelValue)) {
@@ -169,6 +174,7 @@ public class DefJson {
                 .setVersion(definition.getVersion())
                 .setVersionAlias(definition.getVersionAlias())
                 .setApplicationId(definition.getApplicationId())
+                .setDefinitionUuid(definition.getDefinitionUuid())
                 .setIsPublish(definition.getIsPublish())
                 .setCategory(definition.getCategory())
                 .setFormCustom(definition.getFormCustom())
@@ -234,6 +240,7 @@ public class DefJson {
                 .setVersion(defJson.getVersion())
                 .setVersionAlias(defJson.getVersionAlias())
                 .setApplicationId(defJson.getApplicationId())
+                .setDefinitionUuid(defJson.getDefinitionUuid())
                 .setCategory(defJson.getCategory())
                 .setFormCustom(defJson.getFormCustom())
                 .setFormPath(defJson.getFormPath())

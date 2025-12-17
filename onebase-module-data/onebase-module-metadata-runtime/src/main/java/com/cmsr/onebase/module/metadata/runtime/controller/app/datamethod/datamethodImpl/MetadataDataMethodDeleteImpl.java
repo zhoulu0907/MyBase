@@ -2,10 +2,9 @@ package com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.datam
 
 import cn.hutool.core.util.ObjectUtil;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
-import com.cmsr.onebase.module.flow.api.FlowProcessExecApiImpl;
+import com.cmsr.onebase.module.flow.api.FlowProcessExecApi;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerReqDTO;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerRespDTO;
-import com.cmsr.onebase.module.flow.api.dto.TriggerEventEnum;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityFieldRepository;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityRelationshipRepository;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataDatasourceDO;
@@ -53,7 +52,7 @@ public class MetadataDataMethodDeleteImpl extends AbstractMetadataDataMethodCore
     private MetadataEntityFieldRepository entityFieldRepository;
 
     @Autowired
-    private FlowProcessExecApiImpl flowProcessExecApi;
+    private FlowProcessExecApi flowProcessExecApi;
 
     @Resource
     MetadataDataMethodSubEntityCrudImpl metadataDataMethodSubEntityCrudImpl;
@@ -61,13 +60,14 @@ public class MetadataDataMethodDeleteImpl extends AbstractMetadataDataMethodCore
     @Override
     protected void validateData(ProcessContext context) {
         Object id = context.getId();
-        if(id == null){
+        if (id == null) {
             throw invalidParamException("主键字段[{}]为必传字段");
         }
     }
 
     /**
      * 根据id校验待更新的数据记录是否存在
+     *
      * @param context
      */
     protected void checkDataExistence(ProcessContext context) {
@@ -75,7 +75,7 @@ public class MetadataDataMethodDeleteImpl extends AbstractMetadataDataMethodCore
         List<MetadataEntityFieldDO> fields = context.getFields();
 
         // 获取临时数据源服务
-        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceId());
+        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceUuid());
         if (datasource == null) {
             throw exception(DATASOURCE_NOT_EXISTS);
         }
@@ -92,6 +92,7 @@ public class MetadataDataMethodDeleteImpl extends AbstractMetadataDataMethodCore
 
     /**
      * 针对删除后的数据进行存储
+     *
      * @param context
      */
     protected void storeData(ProcessContext context) {
@@ -101,7 +102,7 @@ public class MetadataDataMethodDeleteImpl extends AbstractMetadataDataMethodCore
         Long entityId = context.getEntityId();
         List<MetadataEntityFieldDO> fields = context.getFields();
         // 获取临时数据源服务
-        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceId());
+        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceUuid());
         if (datasource == null) {
             throw exception(DATASOURCE_NOT_EXISTS);
         }
@@ -124,13 +125,13 @@ public class MetadataDataMethodDeleteImpl extends AbstractMetadataDataMethodCore
             Object id = context.getId();
             configStore.and(primaryKeyField, id);
 
-            DataRow sourceDataRow = temporaryService.query(quoteTableName(entity.getTableName()),configStore);
-            Map sourceData = convertDataRowToMap(sourceDataRow,fields);
+            DataRow sourceDataRow = temporaryService.query(quoteTableName(entity.getTableName()), configStore);
+            Map sourceData = convertDataRowToMap(sourceDataRow, fields);
             context.setProcessedData(sourceData);//保存源业务实体数据 在级联删除的时候使用（根据关联字段查询原始值）
 
             // AnyLine开启事务
             TransactionState transactionState = temporaryService.start();
-            try{
+            try {
                 long deleteCount;
                 if (hasDeletedField) {
                     // 软删除：更新deleted字段为删除时间戳
@@ -151,18 +152,18 @@ public class MetadataDataMethodDeleteImpl extends AbstractMetadataDataMethodCore
                     log.info("物理删除数据成功，实体ID: {}, 表名: {}, 删除记录数: {}", entityId, entity.getTableName(), deleteCount);
                 }
                 boolean ok = deleteCount > 0;
-                if(ok){
-                        super.storeData(context);// 子表处理创建嵌套内部事务
-                        log.info("子表处理完成，准备提交事务");
-                        // 子表处理完成 提交事务
-                        temporaryService.commit(transactionState);
+                if (ok) {
+                    super.storeData(context);// 子表处理创建嵌套内部事务
+                    log.info("子表处理完成，准备提交事务");
+                    // 子表处理完成 提交事务
+                    temporaryService.commit(transactionState);
                 }
                 return ok;
-            }catch (Exception e){
-                log.info("数据删除出现异常，准备回滚事务：{}",e.getMessage());
+            } catch (Exception e) {
+                log.info("数据删除出现异常，准备回滚事务：{}", e.getMessage());
                 // 数据删除出现异常 回滚事务
                 temporaryService.rollback(transactionState);
-                throw exception(DB_OPERATION_ERROR_DELETE,e.getMessage());
+                throw exception(DB_OPERATION_ERROR_DELETE, e.getMessage());
             }
         });
     }
@@ -176,57 +177,58 @@ public class MetadataDataMethodDeleteImpl extends AbstractMetadataDataMethodCore
     /**
      * 级联删除逻辑
      */
-    protected void processCascadeDelete(ProcessContext context){
+    protected void processCascadeDelete(ProcessContext context) {
         MetadataBusinessEntityDO entity = context.getEntity();
-        log.info("开始对被删除表进行级联删除操作,表名：{}",entity.getTableName());
+        log.info("开始对被删除表进行级联删除操作,表名：{}", entity.getTableName());
         Long entityId = context.getEntityId();
-        List<MetadataEntityRelationshipDO> relationshipDOs  = getRelationShipByEntityId(entityId,"SOURCE");
-        if(!relationshipDOs.isEmpty()){
-            doCascadeIfSourceEntityDeleted(context,relationshipDOs);
-        }else{
-            log.info("没有找到被删除表作为源表对应的关联表，处理被删除表作为目标表的级联删除逻辑。实体ID: {}，表名：{}",entityId,entity.getTableName());
-            List<MetadataEntityRelationshipDO> relationships  = getRelationShipByEntityId(entityId,"TARGET");
-            if(relationships.isEmpty()){
+        List<MetadataEntityRelationshipDO> relationshipDOs = getRelationShipByEntityId(entityId, "SOURCE");
+        if (!relationshipDOs.isEmpty()) {
+            doCascadeIfSourceEntityDeleted(context, relationshipDOs);
+        } else {
+            log.info("没有找到被删除表作为源表对应的关联表，处理被删除表作为目标表的级联删除逻辑。实体ID: {}，表名：{}", entityId, entity.getTableName());
+            List<MetadataEntityRelationshipDO> relationships = getRelationShipByEntityId(entityId, "TARGET");
+            if (relationships.isEmpty()) {
                 return;
             }
-            doCascadeIfTargetEntityDeleted(context,relationships);
+            doCascadeIfTargetEntityDeleted(context, relationships);
         }
     }
 
     /**
      * 当被删除的表在级联配置关系中是源表,删除关联表的数据
+     *
      * @param context relationshipDOs
      */
-    private void doCascadeIfSourceEntityDeleted(ProcessContext context,List<MetadataEntityRelationshipDO> relationshipDOs){
+    private void doCascadeIfSourceEntityDeleted(ProcessContext context, List<MetadataEntityRelationshipDO> relationshipDOs) {
         MetadataBusinessEntityDO entity = context.getEntity();
         Long entityId = context.getEntityId();
         List<MetadataEntityFieldDO> fields = context.getFields();
-        for(MetadataEntityRelationshipDO relationshipDO: relationshipDOs) {
-            if("DELETE".equals(relationshipDO.getCascadeType())){
+        for (MetadataEntityRelationshipDO relationshipDO : relationshipDOs) {
+            if ("DELETE".equals(relationshipDO.getCascadeType())) {
                 continue;
             }
             String relType = relationshipDO.getRelationshipType();
             // 使用枚举的辅助方法判断关系类型语义
             if (RelationshipTypeEnum.isManyToOneType(relType)) {
-                log.info("被删除表和关联表是多对一关系，无需对一方删除: 源实体ID: {}, 关联实体ID： {}", relationshipDO.getSourceEntityId(), relationshipDO.getTargetEntityId());
+                log.info("被删除表和关联表是多对一关系，无需对一方删除: 源实体UUID: {}, 关联实体UUID： {}", relationshipDO.getSourceEntityUuid(), relationshipDO.getTargetEntityUuid());
                 return;
             } else if (RelationshipTypeEnum.isOneToOneType(relType) || RelationshipTypeEnum.isOneToManyType(relType) || RelationshipTypeEnum.isManyToManyType(relType)) {
-                MetadataBusinessEntityDO sourceEntity = businessEntityService.getBusinessEntity(relationshipDO.getSourceEntityId());
+                MetadataBusinessEntityDO sourceEntity = businessEntityService.getBusinessEntity(relationshipDO.getSourceEntityUuid());
                 if (sourceEntity.getEntityType() == 3) {
                     log.info("被删除表类型是多对多的中间表，表名：{}，无需对其他关联表删除", sourceEntity.getTableName());
                     return;
                 }
-                MetadataEntityFieldDO sourceFieldDO = entityFieldRepository.findById(Long.valueOf(relationshipDO.getSourceFieldId()));
+                MetadataEntityFieldDO sourceFieldDO = entityFieldRepository.getByFieldUuid(relationshipDO.getSourceFieldUuid());
                 if ("parent_id".equals(sourceFieldDO.getFieldName())) {
                     log.info("被删除表是子表，表名：{}，无需对主表删除", sourceEntity.getTableName());
                     return;
                 }
 
-                // 子表实体id
-                Long subEntityId = relationshipDO.getTargetEntityId();
+                // 子表实体uuid
+                String subEntityId = relationshipDO.getTargetEntityUuid();
 
                 // 构建查询子表关联条件
-                MetadataEntityFieldDO targetEntityFieldDO = entityFieldRepository.findById(Long.valueOf(relationshipDO.getTargetFieldId()));
+                MetadataEntityFieldDO targetEntityFieldDO = entityFieldRepository.getByFieldUuid(relationshipDO.getTargetFieldUuid());
                 String targetField = targetEntityFieldDO.getFieldName();
                 Map deletedData = context.getProcessedData();
                 Object value = deletedData.get(sourceFieldDO.getFieldName());
@@ -235,19 +237,19 @@ public class MetadataDataMethodDeleteImpl extends AbstractMetadataDataMethodCore
                 AnylineService<?> temporaryService = context.getTemporaryService();
                 DefaultConfigStore deleteConfig = new DefaultConfigStore();
                 deleteConfig.and(targetField, value);
-                deleteConfig.and("deleted",0);
-                MetadataBusinessEntityDO targetEntity = businessEntityService.getBusinessEntity(relationshipDO.getTargetEntityId());
+                deleteConfig.and("deleted", 0);
+                MetadataBusinessEntityDO targetEntity = businessEntityService.getBusinessEntity(relationshipDO.getTargetEntityUuid());
                 DataSet dateSet = temporaryService.querys(quoteTableName(targetEntity.getTableName()), deleteConfig);
 
                 // 待删除数据行的id集合
                 List toDeleteList = dateSet.stream().map(map -> map.get("id")).collect(Collectors.toList());
 
-                if(ObjectUtil.isEmpty(toDeleteList)){
+                if (ObjectUtil.isEmpty(toDeleteList)) {
                     return;
                 }
 
                 // 执行删除操作
-                for(Object id: toDeleteList){
+                for (Object id : toDeleteList) {
                     ProcessedSubEntityVo processedSubEntityVo = new ProcessedSubEntityVo();
                     processedSubEntityVo.setTraceId(context.getTraceId());
                     processedSubEntityVo.setSubEntityId(subEntityId);
@@ -262,38 +264,39 @@ public class MetadataDataMethodDeleteImpl extends AbstractMetadataDataMethodCore
 
     /**
      * 当被删除的表在级联配置关系中是目标表,删除关联表的数据
+     *
      * @param context relationshipDOs
      */
-    private void doCascadeIfTargetEntityDeleted(ProcessContext context,List<MetadataEntityRelationshipDO> relationshipDOs){
+    private void doCascadeIfTargetEntityDeleted(ProcessContext context, List<MetadataEntityRelationshipDO> relationshipDOs) {
         MetadataBusinessEntityDO entity = context.getEntity();
         Long entityId = context.getEntityId();
         List<MetadataEntityFieldDO> fields = context.getFields();
-        for(MetadataEntityRelationshipDO relationshipDO: relationshipDOs) {
-            if("DELETE".equals(relationshipDO.getCascadeType())){
+        for (MetadataEntityRelationshipDO relationshipDO : relationshipDOs) {
+            if ("DELETE".equals(relationshipDO.getCascadeType())) {
                 continue;
             }
             String relType = relationshipDO.getRelationshipType();
             // 使用枚举的辅助方法判断关系类型语义
             if (RelationshipTypeEnum.isOneToManyType(relType)) {
-                log.info("关联表和被删除表是一对多关系，无需对一方删除: 源实体ID: {}, 关联实体ID： {}", relationshipDO.getSourceEntityId(), relationshipDO.getTargetEntityId());
+                log.info("关联表和被删除表是一对多关系，无需对一方删除: 源实体UUID: {}, 关联实体UUID： {}", relationshipDO.getSourceEntityUuid(), relationshipDO.getTargetEntityUuid());
                 return;
             } else if (RelationshipTypeEnum.isOneToOneType(relType) || RelationshipTypeEnum.isManyToOneType(relType) || RelationshipTypeEnum.isManyToManyType(relType)) {
-                MetadataBusinessEntityDO targetEntity = businessEntityService.getBusinessEntity(relationshipDO.getTargetEntityId());
+                MetadataBusinessEntityDO targetEntity = businessEntityService.getBusinessEntity(relationshipDO.getTargetEntityUuid());
                 if (targetEntity.getEntityType() == 3) {
                     log.info("被删除表类型是多对多的中间表，表名：{}，无需对其他关联表删除", targetEntity.getTableName());
                     return;
                 }
-                MetadataEntityFieldDO targetFieldDO = entityFieldRepository.findById(Long.valueOf(relationshipDO.getTargetFieldId()));
+                MetadataEntityFieldDO targetFieldDO = entityFieldRepository.getByFieldUuid(relationshipDO.getTargetFieldUuid());
                 if ("parent_id".equals(targetFieldDO.getFieldName())) {
                     log.info("被删除表是子表，表名：{}，无需对主表删除", targetEntity.getTableName());
                     return;
                 }
 
-                // 子表实体id
-                Long subEntityId = relationshipDO.getSourceEntityId();
+                // 子表实体uuid
+                String subEntityId = relationshipDO.getSourceEntityUuid();
 
                 // 构建查询子表关联条件
-                MetadataEntityFieldDO sourceEntityFieldDO = entityFieldRepository.findById(Long.valueOf(relationshipDO.getSourceFieldId()));
+                MetadataEntityFieldDO sourceEntityFieldDO = entityFieldRepository.getByFieldUuid(relationshipDO.getSourceFieldUuid());
                 String sourceField = sourceEntityFieldDO.getFieldName();
                 Map deletedData = context.getProcessedData();
                 Object value = deletedData.get(targetFieldDO.getFieldName());
@@ -302,19 +305,19 @@ public class MetadataDataMethodDeleteImpl extends AbstractMetadataDataMethodCore
                 AnylineService<?> temporaryService = context.getTemporaryService();
                 DefaultConfigStore deleteConfig = new DefaultConfigStore();
                 deleteConfig.and(sourceField, value);
-                deleteConfig.and("deleted",0);
-                MetadataBusinessEntityDO sourceEntity = businessEntityService.getBusinessEntity(relationshipDO.getSourceEntityId());
+                deleteConfig.and("deleted", 0);
+                MetadataBusinessEntityDO sourceEntity = businessEntityService.getBusinessEntity(relationshipDO.getSourceEntityUuid());
                 DataSet dateSet = temporaryService.querys(quoteTableName(sourceEntity.getTableName()), deleteConfig);
 
                 // 待删除数据行的id集合
                 List toDeleteList = dateSet.stream().map(map -> map.get("id")).collect(Collectors.toList());
 
-                if(ObjectUtil.isEmpty(toDeleteList)){
+                if (ObjectUtil.isEmpty(toDeleteList)) {
                     return;
                 }
 
                 // 执行删除操作
-                for(Object id: toDeleteList){
+                for (Object id : toDeleteList) {
                     ProcessedSubEntityVo processedSubEntityVo = new ProcessedSubEntityVo();
                     processedSubEntityVo.setTraceId(context.getTraceId());
                     processedSubEntityVo.setSubEntityId(subEntityId);
@@ -346,6 +349,7 @@ public class MetadataDataMethodDeleteImpl extends AbstractMetadataDataMethodCore
 
     /**
      * 结果进行格式化
+     *
      * @param context
      * @return
      */
@@ -366,7 +370,7 @@ public class MetadataDataMethodDeleteImpl extends AbstractMetadataDataMethodCore
                 log.warn("无法获取主键值，跳过查询删除后的数据，实体ID: {}, 表名: {}", entityId, entity.getTableName());
                 // 返回插入的数据
                 return buildDataResponse(entity, processedData, fields);
-            }else {
+            } else {
                 processedData.put("id", primaryKeyValue);
                 return buildDataResponse(entity, processedData, fields);
             }
@@ -385,37 +389,37 @@ public class MetadataDataMethodDeleteImpl extends AbstractMetadataDataMethodCore
         DefaultConfigStore configStore = new DefaultConfigStore();
         Object id = context.getId();
         configStore.and(primaryKeyField, id);
-        configStore.and("deleted",0);
+        configStore.and("deleted", 0);
 
-        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceId());
+        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceUuid());
         if (datasource == null) {
             throw exception(DATASOURCE_NOT_EXISTS);
         }
         AnylineService<?> temporaryService = temporaryDatasourceService.createTemporaryService(datasource);
         log.info("成功切换到数据源：{}", datasource.getCode());
-        DataRow dataRow = temporaryService.query(quoteTableName(entity.getTableName()),configStore);
+        DataRow dataRow = temporaryService.query(quoteTableName(entity.getTableName()), configStore);
 
         // 将要删除的数据行保存下来，以便在后置删除触发方法中使用（物理删除之后数据库可能不存在该数据行）
         context.setProcessedData(dataRow == null ? new HashMap<>() : dataRow.map());
 
         Long entityId = context.getEntityId();
-        Map<String, Object> data = convertNameToId(entityId,dataRow == null ? new HashMap<>() : dataRow.map());
+        Map<String, Object> data = convertNameToId(entityId, dataRow == null ? new HashMap<>() : dataRow.map());
 
         EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
         reqDTO.setTraceId(UUID.randomUUID().toString());
-        reqDTO.setEntityId(entityId);
-        reqDTO.setTriggerEvent(TriggerEventEnum.BEFORE_DELETE);
-        reqDTO.setFieldData(data);
+        // reqDTO.setEntityId(entityId);
+        // reqDTO.setTriggerEvent(TriggerEventEnum.BEFORE_DELETE);
+        // reqDTO.setFieldData(data);
         EntityTriggerRespDTO respDTO = flowProcessExecApi.entityTrigger(reqDTO);
-        if(!respDTO.isTriggered()){
-            log.info("BEFORE_DELETE 数据删除前置工作流未触发，实体Id：{} ，参数：{}，原因：{}", entityId,data,respDTO.getMessage());
+        if (!respDTO.isTriggered()) {
+            log.info("BEFORE_DELETE 数据删除前置工作流未触发，实体Id：{} ，参数：{}，原因：{}", entityId, data, respDTO.getMessage());
             return;
         }
-        if(respDTO.isSuccess()){
-            log.info("BEFORE_DELETE 数据删除触发前置工作流成功，实体Id：{} ，参数：{}", entityId,data);
-        }else{
-            log.error("BEFORE_DELETE 数据删除触发前置工作流失败，实体Id：{} ，参数：{} ，返回信息：{}", entityId,data,respDTO.getMessage());
-            throw  exception(PROCESS_ERROR_BEFORE_DELETE,respDTO.getMessage());
+        if (respDTO.isSuccess()) {
+            log.info("BEFORE_DELETE 数据删除触发前置工作流成功，实体Id：{} ，参数：{}", entityId, data);
+        } else {
+            log.error("BEFORE_DELETE 数据删除触发前置工作流失败，实体Id：{} ，参数：{} ，返回信息：{}", entityId, data, respDTO.getMessage());
+            throw exception(PROCESS_ERROR_BEFORE_DELETE, respDTO.getMessage());
         }
     }
 
@@ -425,24 +429,31 @@ public class MetadataDataMethodDeleteImpl extends AbstractMetadataDataMethodCore
         Map deletedData = context.getProcessedData();
 
         Long entityId = context.getEntityId();
-        Map<String, Object> data = convertNameToId(entityId,deletedData == null ? new HashMap<>() : deletedData);
+        Map<String, Object> data = convertNameToId(entityId, deletedData == null ? new HashMap<>() : deletedData);
 
         EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
         reqDTO.setTraceId(UUID.randomUUID().toString());
-        reqDTO.setEntityId(entityId);
-        reqDTO.setTriggerEvent(TriggerEventEnum.AFTER_DELETE);
-        reqDTO.setFieldData(data);
+        // reqDTO.setEntityId(entityId);
+        // reqDTO.setTriggerEvent(TriggerEventEnum.AFTER_DELETE);
+        // reqDTO.setFieldData(data);
         EntityTriggerRespDTO respDTO = flowProcessExecApi.entityTrigger(reqDTO);
-        if(!respDTO.isTriggered()){
-            log.info("AFTER_DELETE 数据删除后置工作流未触发，实体Id：{} ，参数：{}，原因：{}", entityId,data,respDTO.getMessage());
+        if (!respDTO.isTriggered()) {
+            log.info("AFTER_DELETE 数据删除后置工作流未触发，实体Id：{} ，参数：{}，原因：{}", entityId, data, respDTO.getMessage());
             return;
         }
-        if(respDTO.isSuccess()){
-            log.info("AFTER_DELETE 数据删除触发后置工作流成功，实体Id：{} ，参数：{}", entityId,data);
-        }else{
-            log.error("AFTER_DELETE 数据删除触发后置工作流失败，实体Id：{} ，参数：{}，返回信息：{}", entityId,data,respDTO.getMessage());
-            throw  exception(PROCESS_ERROR_AFTER_DELETE,respDTO.getMessage());
+        if (respDTO.isSuccess()) {
+            log.info("AFTER_DELETE 数据删除触发后置工作流成功，实体Id：{} ，参数：{}", entityId, data);
+        } else {
+            log.error("AFTER_DELETE 数据删除触发后置工作流失败，实体Id：{} ，参数：{}，返回信息：{}", entityId, data, respDTO.getMessage());
+            throw exception(PROCESS_ERROR_AFTER_DELETE, respDTO.getMessage());
         }
+    }
+
+    @Override
+    protected Map<String, Object> processDataAndSetDefaults(Map<String, Object> data,
+                                                            List<MetadataEntityFieldDO> fields) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'processDataAndSetDefaults'");
     }
 
 }

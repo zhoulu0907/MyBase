@@ -103,6 +103,17 @@ public interface MetadataEntityRelationshipBuildService {
     EntityWithChildrenRespVO getEntityWithChildrenById(Long entityId, String relationshipType);
 
     /**
+     * 根据实体ID查询实体名称及其关联的子表信息
+     *
+     * @param entityId 实体ID
+     * @param relationshipType 关系类型筛选（ONE_TO_ONE-一对一, ONE_TO_MANY-一对多），为null时查询所有类型
+     * @param fieldType 字段类型（可选）
+     * @param operator 操作符（可选）
+     * @return 实体及其关联子表信息
+     */
+    EntityWithChildrenRespVO getEntityWithChildrenById(Long entityId, String relationshipType, String fieldType, String operator);
+
+    /**
      * 根据应用ID查询所有实体及字段信息
      * 首先根据appId查询datasourceId，如果有多个datasource，默认用第一个
      * 然后再查询相关的实体表和实体字段表
@@ -121,11 +132,11 @@ public interface MetadataEntityRelationshipBuildService {
     List<MetadataEntityRelationshipDO> findAllByConfig(com.mybatisflex.core.query.QueryWrapper queryWrapper);
 
     /**
-     * 根据字段id删除关联关系 包括字段作为 源字段和目标字段 两种情况
-     * @param fieldId
+     * 根据字段UUID删除关联关系 包括字段作为 源字段和目标字段 两种情况
+     * @param fieldUuid
      * @return
      */
-    void deleteRelationShipByFieldId(Long fieldId);
+    void deleteRelationShipByFieldId(String fieldUuid);
 
     /**
      * 根据源实体ID和目标实体ID查找关系
@@ -133,8 +144,19 @@ public interface MetadataEntityRelationshipBuildService {
      * @param sourceEntityId 源实体ID
      * @param targetEntityId 目标实体ID
      * @return 实体关系列表
+     * @deprecated 请使用 {@link #findBySourceEntityUuidAndTargetEntityUuid(String, String)} 代替
      */
+    @Deprecated
     List<MetadataEntityRelationshipDO> findBySourceEntityIdAndTargetEntityId(Long sourceEntityId, Long targetEntityId);
+
+    /**
+     * 根据源实体UUID和目标实体UUID查找关系
+     *
+     * @param sourceEntityUuid 源实体UUID
+     * @param targetEntityUuid 目标实体UUID
+     * @return 实体关系列表
+     */
+    List<MetadataEntityRelationshipDO> findBySourceEntityUuidAndTargetEntityUuid(String sourceEntityUuid, String targetEntityUuid);
 
     /**
      * 根据ID查询实体关系

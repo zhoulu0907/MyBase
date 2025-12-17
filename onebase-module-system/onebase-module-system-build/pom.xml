@@ -44,6 +44,10 @@
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-security-build</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-spring-boot-starter-protection</artifactId>
+        </dependency>
         <!-- DB 相关 -->
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
@@ -100,15 +104,6 @@
                     <artifactId>hutool-core</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency>
-
-        <dependency>
-            <groupId>com.github.binarywang</groupId>
-            <artifactId>wx-java-mp-spring-boot-starter</artifactId> <!-- 微信登录（公众号） -->
-        </dependency>
-        <dependency>
-            <groupId>com.github.binarywang</groupId>
-            <artifactId>wx-java-miniapp-spring-boot-starter</artifactId>  <!-- 微信登录（小程序） -->
         </dependency>
 
         <dependency>

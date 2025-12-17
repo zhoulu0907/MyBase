@@ -25,6 +25,7 @@ import com.cmsr.onebase.module.system.enums.oauth2.OAuth2ClientConstants;
 import com.cmsr.onebase.module.system.enums.permission.RoleCodeEnum;
 import com.cmsr.onebase.module.system.enums.sms.SmsSceneEnum;
 import com.cmsr.onebase.module.system.enums.tenant.TenantCodeEnum;
+import com.cmsr.onebase.module.system.framework.security.core.PwdEnHelper;
 import com.cmsr.onebase.module.system.service.corp.CorpService;
 import com.cmsr.onebase.module.system.service.logger.LoginLogService;
 import com.cmsr.onebase.module.system.service.member.MemberService;
@@ -43,6 +44,7 @@ import jakarta.annotation.Resource;
 import jakarta.validation.Validator;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -111,6 +113,9 @@ public class BuildAuthServiceImpl implements BuildAuthService {
     @Resource
     private CorpService corpService;
 
+    @Resource
+    private PwdEnHelper pwdEnHelper;
+
     @Override
     public AdminUserDO authenticate(String username, String password) {
         final LoginLogTypeEnum logTypeEnum = LoginLogTypeEnum.LOGIN_USERNAME;
@@ -120,6 +125,7 @@ public class BuildAuthServiceImpl implements BuildAuthService {
 
         return user;
     }
+
     public AdminUserDO mobileAuthenticate(String mobile, String password) {
         final LoginLogTypeEnum logTypeEnum = LoginLogTypeEnum.LOGIN_USERNAME;
         // 校验账号是否存在
@@ -204,9 +210,14 @@ public class BuildAuthServiceImpl implements BuildAuthService {
         // 校验验证码
         validateCaptcha(reqVO);
 
+        // 校验短信、邮箱验证码
+        validateVerfiyCode(reqVO);
+
+        // 解密原文
+        reqVO.setPassword(pwdEnHelper.decryptHexStr(reqVO.getPassword()));
+
         // 增加日志输出，便于调试
         log.debug("platformTenantEnableCreateApp配置值: {}", platformTenantEnableCreateApp);
-
         // 确保配置值不为null，并且为false时才执行校验
         if (Boolean.FALSE.equals(platformTenantEnableCreateApp)) {
             log.info("平台租户创建应用功能已禁用，开始校验租户信息");
@@ -229,9 +240,27 @@ public class BuildAuthServiceImpl implements BuildAuthService {
 
         AuthLoginRespVO authLoginRespVO = createTokenAfterLoginSuccess(user.getUserType(), user.getId(), reqVO.getUsername(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_USERNAME);
         // 设置是否管理员
-        authLoginRespVO.setAdminFlag(findAdminFlag(RoleCodeEnum.TENANT_ADMIN.getCode(),user.getId()));
+        authLoginRespVO.setAdminFlag(findAdminFlag(RoleCodeEnum.TENANT_ADMIN.getCode(), user.getId()));
         LogRecordContext.putVariable("user", user);
         return authLoginRespVO;
+    }
+
+    private void validateVerfiyCode(AuthLoginReqVO reqVO) {
+        // 1. 获取安全配置项
+        boolean verifyCodeEnable = true; // todo 暂时直接校验
+        if (!verifyCodeEnable) {
+            return;
+        }
+
+        // 2. 如果配置了验证码
+        if (StringUtils.isBlank(reqVO.getVerifyCode())) {
+            return ;
+            // throw exception(AUTH_VERIFY_CODE_NULL);
+        }
+
+        if (!"888888".equalsIgnoreCase(reqVO.getVerifyCode())) { // todo 后续动态读取真实验证码
+            throw exception(AUTH_VERIFY_CODE_ERROR);
+        }
     }
 
     @Override
@@ -479,6 +508,8 @@ public class BuildAuthServiceImpl implements BuildAuthService {
         if (user == null) {
             throw exception(USER_MOBILE_NOT_EXISTS);
         }
+        // 解密原文
+        reqVO.setPassword(pwdEnHelper.decryptHexStr(reqVO.getPassword()));
         userService.updateUserPassword(user.getId(), reqVO.getPassword());
     }
 }

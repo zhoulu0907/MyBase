@@ -32,10 +32,18 @@ public interface BpmDesignService {
     /**
      * 查询流程设计
      *
-     * @param menuUuid 菜单UUID
+     * @param businessId 菜单UUID
      * @return
      */
-    BpmDesignRespVO queryByMenuUuid(String menuUuid);
+    BpmDesignRespVO queryByBusinessId(Long businessId);
+
+    /**
+     * 查询流程设计
+     *
+     * @param businessUuid 菜单UUID
+     * @return
+     */
+    BpmDesignRespVO queryByBusinessUuid(String businessUuid);
 
     /**
      * 发布流程设计

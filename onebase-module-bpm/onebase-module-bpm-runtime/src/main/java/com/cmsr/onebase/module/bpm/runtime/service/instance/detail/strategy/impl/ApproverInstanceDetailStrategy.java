@@ -24,10 +24,10 @@ public class ApproverInstanceDetailStrategy extends AbstractInstanceDetailStrate
     }
 
     @Override
-    protected void fillFieldPermConfig(BpmTaskDetailRespVO vo, ApproverNodeExtDTO extDTO, Long entityId, boolean isTodo) {
+    protected void fillFieldPermConfig(BpmTaskDetailRespVO vo, ApproverNodeExtDTO extDTO, String tableName, boolean isTodo) {
         FieldPermCfgDTO fieldPermConfig = extDTO.getFieldPermConfig();
 
-        fillFieldPermFromConfig(vo, fieldPermConfig, entityId, isTodo);
+        fillFieldPermFromConfig(vo, fieldPermConfig, tableName, isTodo);
     }
 
     @Override

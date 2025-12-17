@@ -1,14 +1,13 @@
 package com.cmsr.onebase.module.system.service.corp;
 
-import com.alibaba.nacos.common.utils.CollectionUtils;
 import com.cmsr.onebase.framework.common.biz.system.dict.DictDataCommonApi;
 import com.cmsr.onebase.framework.common.biz.system.dict.dto.DictDataRespDTO;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
+import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
@@ -34,8 +33,8 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.DataRow;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -45,7 +44,6 @@ import org.springframework.validation.annotation.Validated;
 
 import java.util.*;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
@@ -142,7 +140,7 @@ public class CorpServiceImpl implements CorpService {
                 .sum();
     }
 
-    private void validCorpUserCountLimit(Integer userCount,Long corpId) {
+    private void validCorpUserMaxCountLimit(Integer userCount, Long corpId) {
         if (userCount != null && userCount > CorpConstant.USER_LIMIT) {
             throw exception(CORP_USER_LIMIT_COUNT, userCount);
         }
@@ -188,12 +186,12 @@ public class CorpServiceImpl implements CorpService {
         if (checkCorp == null) {
             throw exception(CORP_NO_EXISTS, reqVO.getCorpName());
         }
-
-        // todo 检查1：不能小于企业已有开启状态的用户实际数量
-
-        // 检查2：不能大于空间下可用的用户数量
-        validCorpUserCountLimit(reqVO.getUserLimit(), reqVO.getId());
-
+        if (null != reqVO.getUserLimit()) {
+            //  检查1：用户数下限，不能小于企业已有开启状态的用户实际数量
+            validCorpUserMinCountLimit(reqVO.getUserLimit(), reqVO.getId());
+            // 检查2：用户数上限，不能大于空间下可用的用户数量
+            validCorpUserMaxCountLimit(reqVO.getUserLimit(), reqVO.getId());
+        }
         CorpDO corpDO = BeanUtils.toBean(reqVO, CorpDO.class);
         corpDataRepository.update(corpDO);
 
@@ -202,6 +200,16 @@ public class CorpServiceImpl implements CorpService {
 
         LogRecordContext.putVariable("loginUser", loginUser);
         LogRecordContext.putVariable("corp", corpDO);
+    }
+
+    private void validCorpUserMinCountLimit(Integer userLimit, Long corpId) {
+        // 获取已存在的空间用户数
+        Map<Long, Integer> existUserCountMap = userService.getCorpExistUserCountByCorpIds(List.of(corpId));
+        Integer existUserCountInt = existUserCountMap.get(corpId);
+        int existUserCount = existUserCountInt != null ? existUserCountInt : 0;
+        if (userLimit < existUserCount) {
+            throw exception(CORP_USER_EXITES_LIMIT_COUNT_CHECK, existUserCount);
+        }
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -436,13 +444,13 @@ public class CorpServiceImpl implements CorpService {
         return corpDataRepository.getSimpleCorpList(staus);
     }
 
-    public void validCreateCorp(CorpReqVO corpReqVO){
+    public void validCreateCorp(CorpReqVO corpReqVO) {
         // 用于校验企业名称是否已存在
         validCorpNameDuplicate(corpReqVO.getCorpName());
         // 用于校验企业ID是否已存在
         validCorpIdDuplicate(corpReqVO.getCorpCode());
         // 用于校验企业用户数量是否超过限制（如大于500）
-        validCorpUserCountLimit(corpReqVO.getUserLimit(),null);
+        validCorpUserMaxCountLimit(corpReqVO.getUserLimit(), null);
     }
 
 

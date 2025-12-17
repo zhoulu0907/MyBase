@@ -4,6 +4,7 @@ import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.framework.common.util.string.UuidUtils;
 import com.cmsr.onebase.module.flow.build.vo.ConnectorScriptVO;
 import com.cmsr.onebase.module.flow.build.vo.CreateFlowConnectorScriptReqVO;
 import com.cmsr.onebase.module.flow.build.vo.UpdateFlowConnectorScriptReqVO;
@@ -19,6 +20,7 @@ import com.fasterxml.jackson.databind.node.TextNode;
 import com.google.common.base.Preconditions;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -60,7 +62,12 @@ public class FlowConnectorScriptServiceImpl implements FlowConnectorScriptServic
         if (scriptDO == null) {
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_SCRIPT_NOT_EXISTS);
         }
-        return BeanUtils.toBean(scriptDO, ConnectorScriptVO.class);
+        ConnectorScriptVO scriptVO = BeanUtils.toBean(scriptDO, ConnectorScriptVO.class);
+        scriptVO.setInputParameter(string2JsonNode(scriptDO.getInputParameter()));
+        scriptVO.setOutputParameter(string2JsonNode(scriptDO.getOutputParameter()));
+        scriptVO.setInputSchema(string2JsonNode(scriptDO.getInputSchema()));
+        scriptVO.setOutputSchema(string2JsonNode(scriptDO.getOutputSchema()));
+        return scriptVO;
     }
 
     @Override
@@ -71,10 +78,13 @@ public class FlowConnectorScriptServiceImpl implements FlowConnectorScriptServic
         if (connectorDO == null) {
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS);
         }
+        connectorScriptDO.setScriptUuid(UuidUtils.getUuid());
         connectorScriptDO.setConnectorUuid(connectorDO.getConnectorUuid());
         connectorScriptDO.setApplicationId(connectorDO.getApplicationId());
         connectorScriptDO.setInputParameter(jsonNodeToString(createVO.getInputParameter()));
         connectorScriptDO.setOutputParameter(jsonNodeToString(createVO.getOutputParameter()));
+        connectorScriptDO.setInputSchema(jsonNodeToString(createVO.getInputSchema()));
+        connectorScriptDO.setOutputSchema(jsonNodeToString(createVO.getOutputSchema()));
 
         connectorScriptRepository.save(connectorScriptDO);
         return connectorScriptDO.getId();
@@ -93,6 +103,8 @@ public class FlowConnectorScriptServiceImpl implements FlowConnectorScriptServic
         oldDO.setRawScript(updateVO.getRawScript());
         oldDO.setInputParameter(jsonNodeToString(updateVO.getInputParameter()));
         oldDO.setOutputParameter(jsonNodeToString(updateVO.getOutputParameter()));
+        oldDO.setInputSchema(jsonNodeToString(updateVO.getInputSchema()));
+        oldDO.setOutputSchema(jsonNodeToString(updateVO.getOutputSchema()));
 
         connectorScriptRepository.updateById(oldDO);
     }
@@ -103,7 +115,7 @@ public class FlowConnectorScriptServiceImpl implements FlowConnectorScriptServic
     }
 
 
-    public String jsonNodeToString(JsonNode jsonNode) {
+    private String jsonNodeToString(JsonNode jsonNode) {
         if (jsonNode == null || jsonNode instanceof NullNode) {
             return null;
         }
@@ -113,5 +125,10 @@ public class FlowConnectorScriptServiceImpl implements FlowConnectorScriptServic
         return JsonUtils.toJsonString(jsonNode);
     }
 
-
+    private JsonNode string2JsonNode(String json) {
+        if (json == null || StringUtils.isBlank(json)) {
+            return null;
+        }
+        return JsonUtils.parseTree(json);
+    }
 }

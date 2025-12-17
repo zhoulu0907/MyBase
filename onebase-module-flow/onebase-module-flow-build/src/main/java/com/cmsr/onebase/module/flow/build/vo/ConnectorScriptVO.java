@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.flow.build.vo;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -11,6 +12,9 @@ public class ConnectorScriptVO {
 
     @Schema(description = "脚本ID")
     private Long id;
+
+    @Schema(description = "脚本UUID")
+    private String scriptUuid;
 
     @Schema(description = "连接器UUID")
     private String connectorUuid;
@@ -28,10 +32,16 @@ public class ConnectorScriptVO {
     private String rawScript;
 
     @Schema(description = "输入参数")
-    private String inputParameter;
+    private JsonNode inputParameter;
 
     @Schema(description = "输出参数")
-    private String outputParameter;
+    private JsonNode outputParameter;
+
+    @Schema(description = "输入定义")
+    private JsonNode inputSchema;
+
+    @Schema(description = "输出定义")
+    private JsonNode outputSchema;
 
     @Schema(description = "应用ID")
     private Long applicationId;

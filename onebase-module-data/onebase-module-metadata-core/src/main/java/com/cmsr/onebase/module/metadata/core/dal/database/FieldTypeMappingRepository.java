@@ -72,4 +72,48 @@ public class FieldTypeMappingRepository extends ServiceImpl<FieldTypeMappingMapp
                 .orderBy(FieldTypeMappingDO::getCreateTime, false);
         return list(queryWrapper);
     }
+
+    /**
+     * 根据业务字段类型获取默认的数据库字段映射
+     * <p>
+     * 查询 is_default=1 的默认映射，如果没有则返回该类型的第一条记录
+     *
+     * @param businessFieldType 业务字段类型（如 ID, USER, DATETIME, NUMBER 等）
+     * @param databaseType      数据库类型（如 PostgreSQL）
+     * @return 默认的字段类型映射对象，如果未找到则返回 null
+     */
+    public FieldTypeMappingDO getDefaultMappingByBusinessType(String businessFieldType, String databaseType) {
+        if (businessFieldType == null || businessFieldType.trim().isEmpty()) {
+            return null;
+        }
+        
+        // 优先查询 is_default=1 的默认映射
+        QueryWrapper queryWrapper = this.query()
+                .eq(FieldTypeMappingDO::getBusinessFieldType, businessFieldType.toUpperCase())
+                .eq(FieldTypeMappingDO::getDatabaseType, databaseType)
+                .eq(FieldTypeMappingDO::getIsDefault, 1);
+        FieldTypeMappingDO defaultMapping = getOne(queryWrapper);
+        
+        if (defaultMapping != null) {
+            return defaultMapping;
+        }
+        
+        // 如果没有默认映射，返回该类型的第一条记录
+        QueryWrapper fallbackWrapper = this.query()
+                .eq(FieldTypeMappingDO::getBusinessFieldType, businessFieldType.toUpperCase())
+                .eq(FieldTypeMappingDO::getDatabaseType, databaseType)
+                .orderBy(FieldTypeMappingDO::getId, true)
+                .limit(1);
+        return getOne(fallbackWrapper);
+    }
+
+    /**
+     * 根据业务字段类型获取默认的数据库字段映射（不指定数据库类型，默认使用 PostgreSQL）
+     *
+     * @param businessFieldType 业务字段类型
+     * @return 默认的字段类型映射对象
+     */
+    public FieldTypeMappingDO getDefaultMappingByBusinessType(String businessFieldType) {
+        return getDefaultMappingByBusinessType(businessFieldType, "PostgreSQL");
+    }
 }

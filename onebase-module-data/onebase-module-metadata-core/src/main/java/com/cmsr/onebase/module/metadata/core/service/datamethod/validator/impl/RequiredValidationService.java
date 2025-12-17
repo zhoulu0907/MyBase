@@ -28,9 +28,9 @@ public class RequiredValidationService implements ValidationService {
     }
 
     @Override
-    public void validate(Long entityId, Long fieldId, MetadataEntityFieldDO field, Object value, Map<String, Object> data, List<MetadataDataMethodSubEntityContext> subEntities) {
+    public void validate(String entityUuid, String fieldUuid, MetadataEntityFieldDO field, Object value, Map<String, Object> data, List<MetadataDataMethodSubEntityContext> subEntities) {
         // 查询必填规则
-        List<MetadataValidationRequiredDO> rules = requiredRepository.findByFieldId(fieldId);
+        List<MetadataValidationRequiredDO> rules = requiredRepository.findByFieldUuid(fieldUuid);
         
         if (rules.isEmpty()) {
             return; // 没有必填规则，跳过校验

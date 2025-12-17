@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.metadata.core.dal.dataobject.number;
 
+import com.cmsr.onebase.framework.orm.entity.BaseBizEntity;
 import com.cmsr.onebase.framework.orm.entity.BaseTenantEntity;
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Table;
@@ -16,13 +17,23 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Table(value = "metadata_auto_number_rule_item")
-public class MetadataAutoNumberRuleItemDO extends BaseTenantEntity {
+public class MetadataAutoNumberRuleItemDO extends BaseBizEntity {
 
     /**
-     * 配置ID
+     * 规则项UUID
+     * <p>
+     * 用于跨应用、跨版本的唯一标识，与 application_id、version_tag 组成联合唯一约束
      */
-    @Column(value = "config_id", comment = "配置ID")
-    private Long configId;
+    @Column(value = "rule_item_uuid", comment = "规则项UUID")
+    private String ruleItemUuid;
+
+    /**
+     * 配置UUID
+     * <p>
+     * 关联 metadata_auto_number_config.config_uuid
+     */
+    @Column(value = "config_uuid", comment = "配置UUID")
+    private String configUuid;
 
     /**
      * 项类型
@@ -49,10 +60,12 @@ public class MetadataAutoNumberRuleItemDO extends BaseTenantEntity {
     private String textValue;
 
     /**
-     * 引用字段ID
+     * 引用字段UUID
+     * <p>
+     * 关联 metadata_entity_field.field_uuid
      */
-    @Column(value = "ref_field_id", comment = "引用字段ID")
-    private Long refFieldId;
+    @Column(value = "ref_field_uuid", comment = "引用字段UUID")
+    private String refFieldUuid;
 
     /**
      * 是否启用：1-启用，0-禁用
@@ -65,6 +78,14 @@ public class MetadataAutoNumberRuleItemDO extends BaseTenantEntity {
      */
     @Column(value = "application_id", comment = "应用ID")
     private Long applicationId;
-}
 
+    /**
+     * 版本标识
+     * <p>
+     * 用于跨应用、跨版本的唯一标识，与 application_id 组成联合唯一约束
+     */
+    @Column(value = "version_tag", comment = "版本标识")
+    private Long versionTag;
+
+}
 

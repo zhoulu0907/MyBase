@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.metadata.core.dal.dataobject.entity;
 
+import com.cmsr.onebase.framework.orm.entity.BaseBizEntity;
 import com.cmsr.onebase.framework.orm.entity.BaseTenantEntity;
 import com.cmsr.onebase.module.metadata.core.enums.BooleanStatusEnum;
 import com.cmsr.onebase.module.metadata.core.enums.CommonStatusEnum;
@@ -17,13 +18,23 @@ import lombok.EqualsAndHashCode;
 @Table(value = "metadata_entity_field")
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class MetadataEntityFieldDO extends BaseTenantEntity {
+public class MetadataEntityFieldDO extends BaseBizEntity {
 
     /**
-     * 实体ID
+     * 字段UUID
+     * <p>
+     * 用于跨应用、跨版本的唯一标识，与 application_id、version_tag 组成联合唯一约束
      */
-    @Column(value = "entity_id", comment = "实体ID")
-    private Long entityId;
+    @Column(value = "field_uuid", comment = "字段UUID")
+    private String fieldUuid;
+
+    /**
+     * 实体UUID
+     * <p>
+     * 关联 metadata_business_entity.entity_uuid
+     */
+    @Column(value = "entity_uuid", comment = "实体UUID")
+    private String entityUuid;
 
     /**
      * 字段名称

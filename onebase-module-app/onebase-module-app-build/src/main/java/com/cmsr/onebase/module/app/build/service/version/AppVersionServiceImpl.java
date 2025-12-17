@@ -2,32 +2,31 @@ package com.cmsr.onebase.module.app.build.service.version;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.framework.common.util.json.JsonUtils;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.framework.orm.entity.BaseEntity;
-import com.cmsr.onebase.framework.uid.UidGenerator;
 import com.cmsr.onebase.module.app.build.service.AppCommonService;
-import com.cmsr.onebase.module.app.build.vo.version.VersionCreateReqVO;
+import com.cmsr.onebase.module.app.build.vo.version.VersionOnlineReq;
 import com.cmsr.onebase.module.app.build.vo.version.VersionPageReqVo;
 import com.cmsr.onebase.module.app.build.vo.version.VersionPageRespVO;
 import com.cmsr.onebase.module.app.core.dal.database.app.AppApplicationRepository;
-import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
-import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageRepository;
-import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageSetRepository;
 import com.cmsr.onebase.module.app.core.dal.database.version.AppVersionRepository;
-import com.cmsr.onebase.module.app.core.dal.database.version.AppVersionResourceRepository;
-import com.cmsr.onebase.module.app.core.dal.dataobject.*;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppApplicationDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppVersionDO;
 import com.cmsr.onebase.module.app.core.enums.AppErrorCodeConstants;
-import com.cmsr.onebase.module.app.core.enums.version.ResTypeEnum;
-import jakarta.annotation.Resource;
+import com.cmsr.onebase.module.app.core.enums.app.AppPublishEnum;
+import com.cmsr.onebase.module.app.core.enums.app.AppStatusEnum;
+import com.cmsr.onebase.module.app.core.enums.version.VersionTypeEnum;
+import com.cmsr.onebase.module.bpm.api.datamanager.BpmDataManager;
+import com.cmsr.onebase.module.flow.api.FlowDataManager;
+import com.cmsr.onebase.module.metadata.api.version.MetadataDataManagerApi;
 import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.validation.annotation.Validated;
 
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.util.List;
 
 /**
  * @Author：huangjie
@@ -38,32 +37,29 @@ import java.util.stream.Collectors;
 @Validated
 public class AppVersionServiceImpl implements AppVersionService {
 
-    @Resource
-    private AppVersionRepository versionRepository;
-
-    @Resource
-    private AppVersionResourceRepository versionResourceRepository;
-
-    @Resource
+    @Autowired
     private AppApplicationRepository applicationRepository;
 
-    @Resource
-    private AppMenuRepository menuRepository;
+    @Autowired
+    private AppVersionRepository versionRepository;
 
-    @Resource
+    @Autowired
     private AppCommonService appCommonService;
 
-    @Resource
-    private AppPageSetRepository pageSetRepository;
+    @Autowired
+    private AppDataManager appDataManager;
 
-//    @Resource
-//    private AppPageSetPageRepository pageSetPageRepository;
+    @Autowired
+    private BpmDataManager bpmDataManager;
 
-    @Resource
-    private AppPageRepository pageRepository;
+    @Autowired
+    private FlowDataManager flowDataManager;
 
-    @Resource
-    private UidGenerator uidGenerator;
+    @Autowired
+    private MetadataDataManagerApi metadataVersionManager;
+
+    @Autowired
+    private TransactionTemplate transactionTemplate;
 
     @Override
     public PageResult<VersionPageRespVO> getApplicationVersionPage(VersionPageReqVo listReqVo) {
@@ -73,149 +69,117 @@ public class AppVersionServiceImpl implements AppVersionService {
                 .map(v -> {
                     VersionPageRespVO bean = BeanUtils.toBean(v, VersionPageRespVO.class);
                     bean.setUpdaterName(userHelper.getUserNickname(v.getUpdater()));
+                    bean.setVersionTypeLabel(VersionTypeEnum.getLabel(v.getVersionType()));
                     return bean;
                 })
                 .toList();
         return new PageResult<>(respVOS, pageResult.getTotal());
     }
 
-    @Transactional
     @Override
-    public void createApplicationVersion(VersionCreateReqVO createReqVO) {
+    public void onlineApplication(VersionOnlineReq createReqVO) {
         AppApplicationDO applicationDO = appCommonService.validateApplicationExist(createReqVO.getApplicationId());
-        // 先备份老的相关数据
-        // 创建新版本
-        final AppVersionDO versionDO = new AppVersionDO();
-        versionDO.setApplicationId(applicationDO.getId());
-        versionDO.setVersionName(createReqVO.getVersionName());
-        versionDO.setVersionNumber(createReqVO.getVersionNumber());
-        versionDO.setVersionDescription(createReqVO.getVersionDescription());
-        versionDO.setVersionURL(UUID.randomUUID().toString().replace("-", ""));
-        versionDO.setOperationType(createReqVO.getOperationType());
-        versionDO.setEnvironment(createReqVO.getEnvironment());
-        versionRepository.save(versionDO);
         Long applicationId = applicationDO.getId();
-        Long versionId = versionDO.getId();
-        // 备份 Menu
-        List<Long> menuIds = backupMenu(applicationId, versionId);
-        // 备份 pageset
-        List<Long> pageSetCodes = backupPageSet(applicationId, versionId, menuIds);
-        // 备份 PageSet Page
-        List<Long> pageCodes = backupPageSetPage(applicationId, versionId, pageSetCodes);
-        // 备份 page
-        backupPage(applicationId, versionId, pageCodes);
-        // 备份 page ref router
+        validateVersionUnique(applicationId, createReqVO.getVersionNumber(), createReqVO.getVersionName());
+
+        // 删除当前运行版本数据
+        flowDataManager.offlineRuntimeData(applicationId);
+        //
+        transactionTemplate.executeWithoutResult(transactionStatus -> {
+            // 找打当前Runtime版本信息，肯定能找到，因为发布的时候会同步创建一个，把当前版本信息变成历史状态
+            AppVersionDO currentRunVersion = versionRepository.findByApplicationIdAndVersionType(applicationId, VersionTypeEnum.RUNTIME.getValue());
+            if (currentRunVersion != null) {
+                currentRunVersion.setVersionType(VersionTypeEnum.HISTORY.getValue());
+                versionRepository.updateById(currentRunVersion);
+                Long historyVersionTag = currentRunVersion.getId();
+                // 备份当前版本为历史版本
+                metadataVersionManager.moveMetaDataRuntimeToHistory(applicationId, historyVersionTag);
+                appDataManager.moveRuntimeToHistory(applicationId, historyVersionTag);
+                bpmDataManager.moveRuntimeToHistory(applicationId, historyVersionTag);
+                flowDataManager.moveRuntimeToHistory(applicationId, historyVersionTag);
+            }
+            // 发布上线版本
+            metadataVersionManager.copyMetaDataEditToRuntime(applicationId);
+            appDataManager.copyEditToRuntime(applicationId);
+            bpmDataManager.copyEditToRuntime(applicationId);
+            flowDataManager.copyEditToRuntime(applicationId);
+            // 创建新的版本信息
+            AppVersionDO newRunVersionDO = createNewVersion(createReqVO, applicationId);
+            applicationRepository.updateStatusByApplicationId(applicationId, AppStatusEnum.ONLINE, AppPublishEnum.ONCE_PUBLISHED);
+            versionRepository.save(newRunVersionDO);
+        });
+        // online services that required
+        flowDataManager.onlineRuntimeData(applicationId);
     }
 
-    private List<Long> backupMenu(Long applicationId, Long versionId) {
-        List<AppMenuDO> menuDOS = menuRepository.findByApplicationId(applicationId);
-        AppVersionResourceDO versionResourceDO = new AppVersionResourceDO();
-        versionResourceDO.setApplicationId(applicationId);
-        versionResourceDO.setVersionId(versionId);
-        versionResourceDO.setResType(ResTypeEnum.MENU.getValue());
-        versionResourceDO.setResData(JsonUtils.toJsonString(menuDOS));
-        versionResourceRepository.save(versionResourceDO);
-        return menuDOS.stream().map(BaseEntity::getId).toList();
+    private void validateVersionUnique(Long applicationId, String versionNumber, String versionName) {
+        long count = versionRepository.countByApplicationIdAndName(applicationId, versionNumber, versionName);
+        if (count > 0) {
+            throw ServiceExceptionUtil.exception(AppErrorCodeConstants.VERSION_DUPLICATE);
+        }
     }
 
-    private List<Long> backupPageSet(Long applicationId, Long versionId, List<Long> menuIds) {
-//        List<AppResourcePagesetDO> pageSetDOS = pageSetRepository.findByMenuIds(menuIds);
-//        AppVersionResourceDO versionResourceDO = new AppVersionResourceDO();
-//        versionResourceDO.setApplicationId(applicationId);
-//        versionResourceDO.setVersionId(versionId);
-//        versionResourceDO.setResType(ResTypeEnum.PAGE_SET.getValue());
-//        versionResourceDO.setResData(JsonUtils.toJsonString(pageSetDOS));
-//        versionResourceRepository.save(versionResourceDO);
-//        return pageSetDOS.stream().map(BaseEntity::getId).toList();
-        return null;
+    @Override
+    public void offlineApplication() {
+        Long applicationId = ApplicationManager.getRequiredApplicationId();
+        transactionTemplate.executeWithoutResult(transactionStatus -> {
+            AppVersionDO currentRunVersion = versionRepository.findByApplicationIdAndVersionType(applicationId, VersionTypeEnum.RUNTIME.getValue());
+            if (currentRunVersion != null) {
+                currentRunVersion.setVersionType(VersionTypeEnum.HISTORY.getValue());
+                versionRepository.updateById(currentRunVersion);
+                Long historyVersionTag = currentRunVersion.getId();
+                // 备份当前版本为历史版本
+                metadataVersionManager.moveMetaDataRuntimeToHistory(applicationId, historyVersionTag);
+                appDataManager.moveRuntimeToHistory(applicationId, historyVersionTag);
+                bpmDataManager.moveRuntimeToHistory(applicationId, historyVersionTag);
+                flowDataManager.moveRuntimeToHistory(applicationId, historyVersionTag);
+            }
+            applicationRepository.updateAppStatusByApplicationId(applicationId, AppStatusEnum.OFFLINE);
+        });
+        flowDataManager.onlineRuntimeData(applicationId);
     }
 
-    private List<Long> backupPageSetPage(Long applicationId, Long versionId, List<Long> pageSetIds) {
-        return null;
-        //            List<AppResourcePagesetPageDO> pageSetPageDOs = pageSetPageRepository.findByPageSetIds(pageSetIds);
-//            AppVersionResourceDO versionResourceDO = new AppVersionResourceDO();
-//            versionResourceDO.setApplicationId(applicationId);
-//            versionResourceDO.setVersionId(versionId);
-//            versionResourceDO.setResType(ResTypeEnum.PAGE_SET_PAGE.getValue());
-//            versionResourceDO.setResData(JsonUtils.toJsonString(pageSetPageDOs));
-//            versionResourceRepository.save(versionResourceDO);
-//            return pageSetPageDOs.stream().map(BaseEntity::getId).toList();
-    }
-
-    private List<Long> backupPage(Long applicationId, Long versionId, List<Long> pageIds) {
-        List<AppResourcePageDO> pageDOs = pageRepository.listByIds(pageIds);
-        AppVersionResourceDO versionResourceDO = new AppVersionResourceDO();
-        versionResourceDO.setApplicationId(applicationId);
-        versionResourceDO.setVersionId(versionId);
-        versionResourceDO.setResType(ResTypeEnum.PAGE.name());
-        versionResourceDO.setResData(JsonUtils.toJsonString(pageDOs));
-        versionResourceRepository.save(versionResourceDO);
-        return pageDOs.stream().map(BaseEntity::getId).toList();
+    private AppVersionDO createNewVersion(VersionOnlineReq createReqVO, Long applicationId) {
+        AppVersionDO newRunVersionDO = new AppVersionDO();
+        newRunVersionDO.setApplicationId(applicationId);
+        newRunVersionDO.setVersionName(createReqVO.getVersionName());
+        newRunVersionDO.setVersionNumber(createReqVO.getVersionNumber());
+        newRunVersionDO.setVersionDescription(createReqVO.getVersionDescription());
+        newRunVersionDO.setOperationType(createReqVO.getOperationType());
+        newRunVersionDO.setEnvironment(createReqVO.getEnvironment());
+        newRunVersionDO.setVersionType(VersionTypeEnum.RUNTIME.getValue());
+        return newRunVersionDO;
     }
 
     @Transactional
     @Override
     public void restoreApplicationVersion(Long versionId) {
-//        AppVersionDO applicationVersionDO = validateApplicationVersionExist(versionId);
-//        Long applicationId = applicationVersionDO.getApplicationId();
-//        // 更新到主表
-//        AppApplicationDO applicationDO = applicationRepository.getById(applicationId);
-//        applicationDO.setVersionNumber(applicationVersionDO.getVersionNumber());
-//        applicationRepository.updateById(applicationDO);
-//        // 恢复菜单
-//        restoreMenu(applicationDO.getId(), versionId);
-    }
-
-    private void restoreMenu(Long applicationId, Long versionId) {
-        // 删除相关数据
-        menuRepository.deleteByApplicationId(applicationId);
-        // 恢复菜单
-        AppVersionResourceDO resourceDOS = versionResourceRepository
-                .findByApplicationIdAndVersionIdAndResType(applicationId, versionId, ResTypeEnum.MENU.getValue());
-        List<AppMenuDO> menuDOS = JsonUtils.parseArray(resourceDOS.getResData(), AppMenuDO.class);
-        prepareForBackup(menuDOS);
-        menuRepository.saveBatch(menuDOS);
-    }
-
-    private void prepareForBackup(List<? extends BaseEntity> list) {
-        list.forEach(v -> {
-            // TODO clean方法待完善
-            v.setId(null);
-            v.setUpdater(null);
-            v.setUpdateTime(null);
-            v.setCreator(null);
-            v.setCreateTime(null);
-            v.setDeleted(null);
-            //v.setLockVersion(null);
-        });
+        // 获取历史版本对象
     }
 
     @Override
     public void deleteApplicationVersion(Long versionId) {
-        versionRepository.removeById(versionId);
-        versionResourceRepository.deleteByVersionId(versionId);
-    }
-
-    @Override
-    public Map<Long, AppVersionDO> findVersionMapByAppIds(List<Long> appIds) {
-        List<AppVersionDO> allVersions = versionRepository.findVersionList(appIds);
-        Map<Long, AppVersionDO> latestVersionMap = allVersions.stream()
-                .sorted(Comparator.comparing(AppVersionDO::getUpdateTime).reversed())
-                .collect(Collectors.toMap(
-                        AppVersionDO::getApplicationId,
-                        Function.identity(),
-                        (existing, replacement) -> existing,
-                        LinkedHashMap::new
-                ));
-        return latestVersionMap;
-    }
-
-    private AppVersionDO validateApplicationVersionExist(Long id) {
-        AppVersionDO versionDO = versionRepository.getById(id);
+        AppVersionDO versionDO = versionRepository.getById(versionId);
         if (versionDO == null) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_VERSION_NOT_EXIST);
         }
-        return versionDO;
+        if (versionDO.getVersionType() == VersionTypeEnum.BUILD.getValue()) {
+            throw new IllegalArgumentException("不允许删除当前运行的版本");
+        }
+        if (versionDO.getVersionType() == VersionTypeEnum.RUNTIME.getValue()) {
+            throw new IllegalArgumentException("不允许删除当前运行的版本");
+        }
+        Long applicationId = versionDO.getApplicationId();
+        transactionTemplate.executeWithoutResult(transactionStatus -> {
+            // 删除对应的信息
+            metadataVersionManager.deleteApplicationVersionData(applicationId, versionId);
+            bpmDataManager.removeApplicationVersion(applicationId, versionId);
+            appDataManager.deleteApplicationVersionData(applicationId, versionId);
+            flowDataManager.deleteApplicationVersionData(applicationId, versionId);
+            // 删除版本
+            versionRepository.removeById(versionId);
+        });
     }
+
 
 }

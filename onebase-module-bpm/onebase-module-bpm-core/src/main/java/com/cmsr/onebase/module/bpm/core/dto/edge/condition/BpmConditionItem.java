@@ -20,8 +20,8 @@ public class BpmConditionItem {
     @NotBlank(message = "业务字段类型不能为空")
     private String fieldScope;
 
-    @NotBlank(message = "业务字段ID不能为空")
-    private String fieldId;
+    @NotBlank(message = "业务字段UUID不能为空")
+    private String fieldUuid;
 
     @NotBlank(message = "业务字段操作符不能为空")
     private String op;

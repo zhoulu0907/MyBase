@@ -25,6 +25,8 @@ import java.util.List;
 public class FlowNode extends BaseEntity implements Node {
     public static final String DEFINITION_ID = "definition_id";
 
+    public static final String DEFINITION_UUID = "definition_uuid";
+
     public static final String NODE_CODE = "node_code";
 
     /** 节点类型（0开始 1中间 2结束 3互斥网关 4并行网关） */
@@ -34,6 +36,10 @@ public class FlowNode extends BaseEntity implements Node {
     /** 流程定义ID */
     @Column(name = DEFINITION_ID, nullable = false)
     private Long definitionId;
+
+    /** 流程定义UUID（备用） */
+    @Column(name = "definition_uuid", length = 64, nullable = false)
+    private String definitionUuid;
 
     /** 节点编码 */
     @Column(name = NODE_CODE, length = 100, nullable = false)
@@ -161,6 +167,11 @@ public class FlowNode extends BaseEntity implements Node {
             this.deleted = null;
         }
 
+        return this;
+    }
+
+    public Node setDefinitionUuid(String definitionUuid) {
+        this.definitionUuid = definitionUuid;
         return this;
     }
 }

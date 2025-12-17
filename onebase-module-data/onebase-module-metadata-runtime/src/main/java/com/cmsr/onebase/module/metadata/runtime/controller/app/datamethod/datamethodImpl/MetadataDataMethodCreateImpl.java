@@ -1,13 +1,11 @@
 package com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.datamethodImpl;
 
-import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
+import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
-import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
-import com.cmsr.onebase.module.flow.api.FlowProcessExecApiImpl;
+import com.cmsr.onebase.module.flow.api.FlowProcessExecApi;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerReqDTO;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerRespDTO;
-import com.cmsr.onebase.module.flow.api.dto.TriggerEventEnum;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityFieldRepository;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityRelationshipRepository;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataDatasourceDO;
@@ -47,7 +45,7 @@ import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.*;
 public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCoreService {
 
     @Autowired
-    private FlowProcessExecApiImpl flowProcessExecApi;
+    private FlowProcessExecApi flowProcessExecApi;
 
     @Resource
     private MetadataEntityRelationshipRepository entityRelationshipRepository;
@@ -73,7 +71,7 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
             }
 
             // 跳过自动编号字段，自动编号字段不进行必填等任何校验
-            if (autoNumberService.hasAutoNumber(field.getId())) {
+            if (autoNumberService.hasAutoNumber(field.getFieldUuid())) {
                 log.debug("字段[{}]是自动编号字段，跳过校验", field.getFieldName());
                 continue;
             }
@@ -143,14 +141,14 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
                     case "owner_id":
                     case "ownerid":
                         // 设置为当前登录用户ID
-                        Long currentUserId = WebFrameworkUtils.getLoginUserId();
+                        Long currentUserId = SecurityFrameworkUtils.getLoginUserId();
                         if (currentUserId != null) {
                             processedData.put(fieldName, currentUserId);
                         } else {
                             log.warn("无法获取当前用户ID，owner_id字段将使用默认值");
                             if (StringUtils.hasText(field.getDefaultValue())) {
                                 processedData.put(fieldName, field.getDefaultValue());
-                            }else{
+                            } else {
                                 processedData.put(fieldName, "1");
                             }
                         }
@@ -169,7 +167,7 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
                         break;
                     case "creator":
                         // 设置为当前登录用户ID
-                        Long creatorUserId = WebFrameworkUtils.getLoginUserId();
+                        Long creatorUserId = SecurityFrameworkUtils.getLoginUserId();
                         if (creatorUserId != null) {
                             processedData.put(fieldName, creatorUserId);
                         } else {
@@ -179,7 +177,7 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
                         break;
                     case "updater":
                         // 设置为当前登录用户ID
-                        Long updaterUserId = WebFrameworkUtils.getLoginUserId();
+                        Long updaterUserId = SecurityFrameworkUtils.getLoginUserId();
                         if (updaterUserId != null) {
                             processedData.put(fieldName, updaterUserId);
                         } else {
@@ -213,7 +211,7 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
      * 处理复杂类型字段的JSON序列化
      * 对于数组和对象类型的字段值，需要序列化为JSON字符串存储到数据库
      *
-     * @param fields 字段列表
+     * @param fields        字段列表
      * @param processedData 待处理的数据
      */
     private void processComplexTypeFields(List<MetadataEntityFieldDO> fields, Map<String, Object> processedData) {
@@ -258,7 +256,7 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
     /**
      * 判断字段类型是否需要JSON序列化
      *
-     * @param fieldType 字段类型
+     * @param fieldType  字段类型
      * @param fieldValue 字段值
      * @return 是否需要序列化
      */
@@ -271,18 +269,18 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
 
         // 字段类型包含以下关键字的需要JSON序列化
         boolean isComplexType = upperFieldType.contains("SELECT") ||       // 选择类型（包括SELECT、MULTI_SELECT、DATA_SELECTION等）
-                                upperFieldType.contains("MULTI") ||        // 多选类型（包括MULTI_USER、MULTI_DEPARTMENT等）
-                                upperFieldType.contains("ADDRESS") ||       // 地址类型
-                                upperFieldType.contains("FILE") ||          // 文件附件
-                                upperFieldType.contains("ATTACHMENT") ||    // 附件
-                                upperFieldType.contains("IMAGE") ||         // 图片
-                                upperFieldType.contains("USER") ||          // 人员选择（包括USER、MULTI_USER）
-                                upperFieldType.contains("DEPARTMENT") ||    // 部门选择（包括DEPARTMENT、MULTI_DEPARTMENT）
-                                upperFieldType.contains("DATA") ||          // 数据选择（包括DATA_SELECTION、MULTI_DATA_SELECTION）
-                                upperFieldType.contains("GEOGRAPHY") ||     // 地理位置
-                                upperFieldType.contains("GEO") ||           // 地理位置（简写）
-                                upperFieldType.equals("JSONB") ||           // JSONB类型
-                                upperFieldType.equals("JSON");              // JSON类型
+                upperFieldType.contains("MULTI") ||        // 多选类型（包括MULTI_USER、MULTI_DEPARTMENT等）
+                upperFieldType.contains("ADDRESS") ||       // 地址类型
+                upperFieldType.contains("FILE") ||          // 文件附件
+                upperFieldType.contains("ATTACHMENT") ||    // 附件
+                upperFieldType.contains("IMAGE") ||         // 图片
+                upperFieldType.contains("USER") ||          // 人员选择（包括USER、MULTI_USER）
+                upperFieldType.contains("DEPARTMENT") ||    // 部门选择（包括DEPARTMENT、MULTI_DEPARTMENT）
+                upperFieldType.contains("DATA") ||          // 数据选择（包括DATA_SELECTION、MULTI_DATA_SELECTION）
+                upperFieldType.contains("GEOGRAPHY") ||     // 地理位置
+                upperFieldType.contains("GEO") ||           // 地理位置（简写）
+                upperFieldType.equals("JSONB") ||           // JSONB类型
+                upperFieldType.equals("JSON");              // JSON类型
 
         // 同时判断值是否为复杂对象（List或Map）
         boolean isComplexValue = fieldValue instanceof List || fieldValue instanceof Map;
@@ -300,7 +298,7 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
         List<MetadataEntityFieldDO> fields = context.getFields();
 
         // 获取临时数据源服务
-        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceId());
+        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceUuid());
         if (datasource == null) {
             throw exception(DATASOURCE_NOT_EXISTS);
         }
@@ -363,11 +361,11 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
                 log.info("子表处理完成，准备提交事务");
                 // 子表处理完成 提交事务
                 temporaryService.commit(transactionState);
-            }catch (Exception e){
-                log.info("数据插入出现异常，准备回滚事务：{}",e.getMessage());
+            } catch (Exception e) {
+                log.info("数据插入出现异常，准备回滚事务：{}", e.getMessage());
                 // 数据插入出现异常 回滚事务
                 temporaryService.rollback(transactionState);
-                throw exception(DB_OPERATION_ERROR_CREATE,e.getMessage());
+                throw exception(DB_OPERATION_ERROR_CREATE, e.getMessage());
             }
 
             // 查询插入后的完整数据
@@ -398,46 +396,46 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
 
         //查询子表和主表的关联字段 构建关联条件后插入数据库
         List<MetadataDataMethodSubEntityContext> subEntityVos = context.getSubEntities();
-        for(MetadataDataMethodSubEntityContext subEntityContext: subEntityVos){
-            Long subEntityId  = subEntityContext.getEntityId();
-            if(ObjectUtils.isEmpty(subEntityId)){
-                throw exception(DB_SUBENTITY_OPERATION_ERROR,"subEntityId 参数不能为空");
+        for (MetadataDataMethodSubEntityContext subEntityContext : subEntityVos) {
+            String subEntityUuid = subEntityContext.getEntityUuid();
+            if (ObjectUtils.isEmpty(subEntityUuid)) {
+                throw exception(DB_SUBENTITY_OPERATION_ERROR, "subEntityUuid 参数不能为空");
             }
             List<Map<Long, Object>> subData = subEntityContext.getSubData();
 
-            String parentRelFieldId = String.valueOf(relationshipDOS.stream().filter(relationshipDO ->
-                            (subEntityId).equals(relationshipDO.getTargetEntityId())).
-                    map(MetadataEntityRelationshipDO::getSourceFieldId).findFirst().orElse(null));
-            MetadataEntityFieldDO parentEntityFieldDO = entityFieldRepository.findById(Long.valueOf(parentRelFieldId));
+            String parentRelFieldUuid = relationshipDOS.stream().filter(relationshipDO ->
+                            (subEntityUuid).equals(relationshipDO.getTargetEntityUuid())).
+                    map(MetadataEntityRelationshipDO::getSourceFieldUuid).findFirst().orElse(null);
+            MetadataEntityFieldDO parentEntityFieldDO = entityFieldRepository.getByFieldUuid(parentRelFieldUuid);
             String parentFiledName = parentEntityFieldDO.getFieldName();// 主表关联字段名称
             Object parentValue = parentData.get(parentFiledName);
 
-            String subRelFieldId = String.valueOf(relationshipDOS.stream().filter(relationshipDO ->
-                            (subEntityId).equals(relationshipDO.getTargetEntityId())).
-                    map(MetadataEntityRelationshipDO::getTargetFieldId).findFirst().orElse(null));
-            MetadataEntityFieldDO subEntityFieldDO = entityFieldRepository.findById(Long.valueOf(subRelFieldId));
+            String subRelFieldUuid = relationshipDOS.stream().filter(relationshipDO ->
+                            (subEntityUuid).equals(relationshipDO.getTargetEntityUuid())).
+                    map(MetadataEntityRelationshipDO::getTargetFieldUuid).findFirst().orElse(null);
+            MetadataEntityFieldDO subEntityFieldDO = entityFieldRepository.getByFieldUuid(subRelFieldUuid);
             String subRelFieldName = subEntityFieldDO.getFieldName();// 子表关联字段名称
 
-            List<MetadataEntityFieldDO> subEntityFields = getEntityFields(subEntityId);
-            MetadataBusinessEntityDO subEntity = validateEntityExists(subEntityId);
+            List<MetadataEntityFieldDO> subEntityFields = getEntityFields(subEntityUuid);
+            MetadataBusinessEntityDO subEntity = validateEntityExists(subEntityUuid);
 
             // 逐条插入子表数据
-            for(Map<Long,Object> row: subData){
+            for (Map<Long, Object> row : subData) {
                 // key类型：Long 转 String
                 Map covertedRow = row.entrySet().stream().collect(Collectors.toMap(
                         entry ->
-                        entry.getKey().toString(),
+                                entry.getKey().toString(),
                         Map.Entry::getValue));
 
                 // id：value 转 name：value
-                Map<String,Object> nameValueParis = convertFieldIdToFieldName(covertedRow,subEntityFields);
+                Map<String, Object> nameValueParis = convertFieldIdToFieldName(covertedRow, subEntityFields);
 
                 // 执行插入
-                nameValueParis.put(subRelFieldName,parentValue);// 加入关联信息字段
+                nameValueParis.put(subRelFieldName, parentValue);// 加入关联信息字段
 
                 ProcessedSubEntityVo processedSubEntityVo = new ProcessedSubEntityVo();
                 processedSubEntityVo.setTraceId(context.getTraceId());
-                processedSubEntityVo.setSubEntityId(subEntityId);
+                processedSubEntityVo.setSubEntityId(subEntityUuid);
                 processedSubEntityVo.setSubData(nameValueParis);
 
                 Map<String, Object> resultData = metadataDataMethodSubEntityCrudImpl.doInsert(processedSubEntityVo);
@@ -453,22 +451,22 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
         Map processedData = context.getProcessedData();
 
         Long entityId = context.getEntityId();
-        Map fieldData = convertNameToId(entityId,processedData == null ? new HashMap<>() : processedData);
+        Map fieldData = convertNameToId(entityId, processedData == null ? new HashMap<>() : processedData);
         EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
         reqDTO.setTraceId(UUID.randomUUID().toString());
-        reqDTO.setEntityId(entityId);
-        reqDTO.setTriggerEvent(TriggerEventEnum.BEFORE_CREATE);
-        reqDTO.setFieldData(fieldData);
+        // reqDTO.setEntityId(entityId);
+        // reqDTO.setTriggerEvent(TriggerEventEnum.BEFORE_CREATE);
+        // reqDTO.setFieldData(fieldData);
         EntityTriggerRespDTO respDTO = flowProcessExecApi.entityTrigger(reqDTO);
-        if(!respDTO.isTriggered()){
-            log.info("BEFORE_CREATE 数据创建前置工作流未触发，实体Id：{} ，参数：{}，原因：{}", entityId,processedData,respDTO.getMessage());
+        if (!respDTO.isTriggered()) {
+            log.info("BEFORE_CREATE 数据创建前置工作流未触发，实体Id：{} ，参数：{}，原因：{}", entityId, processedData, respDTO.getMessage());
             return;
         }
-        if(respDTO.isSuccess()){
-            log.info("BEFORE_CREATE 数据创建触发前置工作流成功，实体Id：{} ，参数：{}", entityId,processedData);
-        }else{
-            log.info("BEFORE_CREATE 数据创建触发前置工作流失败，实体Id：{} ，参数：{} ，返回信息：{}", entityId,processedData,respDTO.getMessage());
-            throw  exception(PROCESS_ERROR_BEFORE_CREATE,respDTO.getMessage());
+        if (respDTO.isSuccess()) {
+            log.info("BEFORE_CREATE 数据创建触发前置工作流成功，实体Id：{} ，参数：{}", entityId, processedData);
+        } else {
+            log.info("BEFORE_CREATE 数据创建触发前置工作流失败，实体Id：{} ，参数：{} ，返回信息：{}", entityId, processedData, respDTO.getMessage());
+            throw exception(PROCESS_ERROR_BEFORE_CREATE, respDTO.getMessage());
         }
     }
 
@@ -478,25 +476,24 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
         Map processedData = context.getProcessedData();
 
         Long entityId = context.getEntityId();
-        Map fieldData = convertNameToId(entityId,processedData == null ? new HashMap<>() : processedData);
+        Map fieldData = convertNameToId(entityId, processedData == null ? new HashMap<>() : processedData);
         EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
         reqDTO.setTraceId(UUID.randomUUID().toString());
-        reqDTO.setEntityId(entityId);
-        reqDTO.setTriggerEvent(TriggerEventEnum.AFTER_CREATE);
-        reqDTO.setFieldData(fieldData);
+        // reqDTO.setEntityId(entityId);
+        // reqDTO.setTriggerEvent(TriggerEventEnum.AFTER_CREATE);
+        // reqDTO.setFieldData(fieldData);
         EntityTriggerRespDTO respDTO = flowProcessExecApi.entityTrigger(reqDTO);
-        if(!respDTO.isTriggered()){
-            log.info("AFTER_CREATE 数据创建后置工作流未触发，实体Id：{} ，参数：{}，原因：{}", entityId,processedData,respDTO.getMessage());
+        if (!respDTO.isTriggered()) {
+            log.info("AFTER_CREATE 数据创建后置工作流未触发，实体Id：{} ，参数：{}，原因：{}", entityId, processedData, respDTO.getMessage());
             return;
         }
-        if(respDTO.isSuccess()){
-            log.info("AFTER_CREATE 数据创建触发后置工作流成功，实体Id：{} ，参数：{}", entityId,processedData);
-        }else{
-            log.error("AFTER_CREATE 数据创建触发后置工作流失败，实体Id：{} ，参数：{}，返回信息：{}", entityId,processedData,respDTO.getMessage());
-            throw  exception(PROCESS_ERROR_AFTER_CREATE,respDTO.getMessage());
+        if (respDTO.isSuccess()) {
+            log.info("AFTER_CREATE 数据创建触发后置工作流成功，实体Id：{} ，参数：{}", entityId, processedData);
+        } else {
+            log.error("AFTER_CREATE 数据创建触发后置工作流失败，实体Id：{} ，参数：{}，返回信息：{}", entityId, processedData, respDTO.getMessage());
+            throw exception(PROCESS_ERROR_AFTER_CREATE, respDTO.getMessage());
         }
     }
-
 
 
 }
