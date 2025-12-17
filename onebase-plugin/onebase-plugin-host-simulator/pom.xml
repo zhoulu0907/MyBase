@@ -58,6 +58,20 @@
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-common</artifactId>
+            <exclusions>
+                <!-- 排除Spring Security，我们自己配置 -->
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-security</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!-- Spring Security（简化配置） -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+            <version>3.2.0</version>
         </dependency>
 
         <!-- Swagger/OpenAPI -->
