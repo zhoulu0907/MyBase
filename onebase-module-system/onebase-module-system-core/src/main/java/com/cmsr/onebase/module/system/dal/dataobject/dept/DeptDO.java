@@ -29,6 +29,7 @@ public class DeptDO extends TenantBaseDO {
     public static final String ADMIN_USER_ID  = "admin_user_id";
     public static final String CORP_ID        = "corp_id";
     public static final String DEPT_TYPE      = "dept_type";
+    public static final String DEPT_CODE      = "dept_code";
 
     /**
      * 部门名称
@@ -96,5 +97,8 @@ public class DeptDO extends TenantBaseDO {
      */
     @Column(name = CORP_ID)
     private Long corpId;
+
+    @Column(name = DEPT_CODE)
+    private String deptCode;
 
 }
