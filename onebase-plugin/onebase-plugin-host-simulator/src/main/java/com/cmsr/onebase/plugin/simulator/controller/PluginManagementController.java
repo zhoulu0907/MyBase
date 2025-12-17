@@ -104,9 +104,17 @@ public class PluginManagementController {
     @Operation(summary = "获取指定插件的详细信息")
     @Parameter(name = "pluginId", description = "插件ID", required = true, example = "demo-plugin")
     public CommonResult<PluginRespVO> getPluginInfo(@PathVariable("pluginId") String pluginId) {
-        PluginWrapper wrapper = pluginManager.getPlugin(pluginId)
-            .orElseThrow(() -> new IllegalArgumentException("Plugin not found: " + pluginId));
-        return success(PluginConvert.INSTANCE.convert(wrapper));
+        // 尝试从getPlugin获取PluginWrapper
+        return pluginManager.getPlugin(pluginId)
+            .map(wrapper -> success(PluginConvert.INSTANCE.convert(wrapper)))
+            // 如果getPlugin返回empty（如DEV模式），尝试从getLoadedPlugins获取PluginInfo
+            .orElseGet(() -> {
+                return pluginManager.getLoadedPlugins().stream()
+                    .filter(info -> info.getPluginId().equals(pluginId))
+                    .findFirst()
+                    .map(info -> success(PluginConvert.INSTANCE.convert(info)))
+                    .orElseThrow(() -> new IllegalArgumentException("Plugin not found: " + pluginId));
+            });
     }
 
     @PostMapping("/start-all")
