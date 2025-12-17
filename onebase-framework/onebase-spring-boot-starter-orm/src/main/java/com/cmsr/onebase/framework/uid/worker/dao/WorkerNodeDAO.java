@@ -60,8 +60,7 @@ public class WorkerNodeDAO {
                             databaseType = "mysql";
                         } else if (driverClassName.contains("postgresql")) {
                             databaseType = "postgresql";
-                        }
-                        {
+                        } else {
                             databaseType = OTHER;
                         }
                     } catch (Exception e) {
