@@ -202,7 +202,6 @@ const DetailStep: FC<any> = ({ stepData }: any) => {
     if (opperator?.comment?.length && hasComment) {
       hasComment = true
       commentOpratorObx[comment_key] = opperator
-      console.log('commentOpratorObx =====', commentOpratorObx)
     } else {
       hasComment = false
     }
@@ -246,16 +245,11 @@ const DetailStep: FC<any> = ({ stepData }: any) => {
     const key = operatorItem?.operator + operatorItem?.operatorTime + operatorItem?.taskStatus
     const tempObx = JSON.parse(JSON.stringify(collapseObj))
     const curColObx = tempObx[key]
-    console.log('cur Collapse Obx ===', curColObx)
     if (curColObx) {
       curColObx['isOpen'] = !curColObx['isOpen']
     }
     setCollapseObj(tempObx)
   }
-
-  // useEffect(() => {
-  //   console.log('collapseObj ====', collapseObj)
-  // }, [collapseObj])
 
   const ProcessFlow = ({ data }: any) => {
     return (
@@ -303,12 +297,10 @@ const DetailStep: FC<any> = ({ stepData }: any) => {
         $commentDomArr.forEach($dom => {
           displayHeight = $dom?.clientHeight || 0;
           realHeight = $dom?.scrollHeight || 0;
-          console.log('height ===', displayHeight, realHeight)
           if (displayHeight > 0 && realHeight > 0) {
             tempDomWidth = document.querySelector('.get-width-temp')?.clientWidth || 0;
             displayWidth = $dom.clientWidth || 0;
             domKey = $dom.getAttribute('data-comment')
-            console.log('dom key ====', domKey, 'width ===', displayWidth, tempDomWidth)
             if (domKey) {
               let curColObx = collapseObx[domKey] || {isOpen: false, hasMoreBtn: false, moreLineClass: 'one-line'};
               if (realHeight > (displayHeight + 10)) {
