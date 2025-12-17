@@ -432,9 +432,16 @@ const XTable = memo(
       //   req.sortDirection = sortByObject.sortBy === 1 ? 'asc' : 'desc';
       // }
 
+      // TODO(mickey): 考虑模糊查询和范围查询
       const conditions: any[] = [];
       Object.entries(queryData).forEach(([key, value]) => {
-        if (value !== undefined && value !== null && value !== '') {
+        if (typeof value === 'object') {
+          if (value.id == undefined || value.id == null || value.id == '') {
+            return;
+          }
+        }
+
+        if (value != undefined && value != null && value !== '') {
           conditions.push({
             nodeType: 'CONDITION',
             fieldName: key,
