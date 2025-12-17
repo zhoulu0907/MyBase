@@ -149,6 +149,9 @@ const DynamicSelectMutipleConfig: React.FC<DynamicSelectMutipleConfigProps> = ({
         setSelectDisabled(true);
       }
     }
+    if(configs[selectMutipleKey].dictTypeId){
+      setSelectDisabled(true);
+    }
   };
 
   const handleSelectDictOk = async (dict?: any) => {
@@ -160,7 +163,7 @@ const DynamicSelectMutipleConfig: React.FC<DynamicSelectMutipleConfigProps> = ({
         defaultOptions: dictOptions,
         dictTypeId: dict.id
       });
-      setSelectDisabled(false);
+      setSelectDisabled(true);
     }
     setSelectDictModalVisible(false);
   };
@@ -181,7 +184,7 @@ const DynamicSelectMutipleConfig: React.FC<DynamicSelectMutipleConfigProps> = ({
               if (value === DEFAULT_OPTIONS_TYPE.CUSTOM) {
                 setSelectDisabled(false);
               }
-              handlePropsChange(selectMutipleKey, { ...configs[selectMutipleKey], type: value });
+              handlePropsChange(selectMutipleKey, { ...configs[selectMutipleKey], type: value, defaultOptions: [] });
             }}
             options={[
               { label: '自定义', value: DEFAULT_OPTIONS_TYPE.CUSTOM },
@@ -189,10 +192,9 @@ const DynamicSelectMutipleConfig: React.FC<DynamicSelectMutipleConfigProps> = ({
             ]}
           ></Select>
         </Form.Item>
-        {configs[selectMutipleKey].type === DEFAULT_OPTIONS_TYPE.DICT &&
-          configs[selectMutipleKey].defaultOptions.length === 0 && (
+        {configs[selectMutipleKey].type === DEFAULT_OPTIONS_TYPE.DICT && (
             <Form.Item>
-              <Button long onClick={() => setSelectDictModalVisible(true)}>
+              <Button long disabled={configs[selectMutipleKey].disabled} onClick={() => setSelectDictModalVisible(true)}>
                 请选择数据字典
               </Button>
             </Form.Item>
@@ -264,7 +266,7 @@ const DynamicSelectMutipleConfig: React.FC<DynamicSelectMutipleConfigProps> = ({
                         />
                         <Input
                           size="small"
-                          disabled={selectDisabled}
+                          disabled={configs[selectMutipleKey].disabled || selectDisabled}
                           value={configs[selectMutipleKey].defaultOptions[idx].label}
                           onChange={(e) => {
                             const newList = [...configs[selectMutipleKey].defaultOptions];
@@ -278,22 +280,7 @@ const DynamicSelectMutipleConfig: React.FC<DynamicSelectMutipleConfigProps> = ({
                           className={styles.tableColumnItemInput}
                           placeholder={'新选项'}
                         />
-                        {configs[selectMutipleKey]['colorMode'] && (
-                          <ColorPicker
-                            size="mini"
-                            disabled={selectDisabled}
-                            value={configs[selectMutipleKey].defaultOptions[idx].colorType || 'rgb(var(--primary-7))'}
-                            onChange={(e) => {
-                              const newList = [...configs[selectMutipleKey].defaultOptions];
-                              newList[idx] = {
-                                ...newList[idx],
-                                colorType: e
-                              };
-                              const newConfig = { ...configs[selectMutipleKey], defaultOptions: newList };
-                              handlePropsChange(selectMutipleKey, newConfig);
-                            }}
-                          ></ColorPicker>
-                        )}
+                       
                         {!configs[selectMutipleKey].disabled && !selectDisabled && (
                           <Button
                             icon={<IconDelete />}
@@ -348,48 +335,6 @@ const DynamicSelectMutipleConfig: React.FC<DynamicSelectMutipleConfigProps> = ({
             </div>
           )}
         </Form.List>
-
-        <Grid.Row gutter={8} style={{ marginTop: '4px' }}>
-          <Grid.Col span={6} style={{ color: 'var(--color-text-2)' }}>
-            彩色模式
-          </Grid.Col>
-          <Grid.Col span={4}>
-            <Switch
-              disabled={configs[selectMutipleKey].disabled || selectDisabled}
-              size="small"
-              checked={configs[selectMutipleKey].colorMode}
-              onChange={(value) => {
-                handlePropsChange(selectMutipleKey, { ...configs[selectMutipleKey], colorMode: value });
-              }}
-            />
-          </Grid.Col>
-          <Grid.Col span={14}>
-            <Radio.Group
-              disabled={configs[selectMutipleKey].disabled || selectDisabled}
-              value={configs[selectMutipleKey].colorModeType}
-              onChange={(value) => {
-                handlePropsChange(selectMutipleKey, { ...configs[selectMutipleKey], colorModeType: value });
-              }}
-            >
-              <Radio value={COLOR_MODE_TYPES.TAG} style={{ marginRight: '8px' }}>
-                <Tag color="rgb(var(--primary-7))">选项</Tag>
-              </Radio>
-              <Radio value={COLOR_MODE_TYPES.POINT} style={{ marginRight: '0' }}>
-                <span
-                  style={{
-                    width: '8px',
-                    height: '8px',
-                    borderRadius: '50%',
-                    background: 'rgb(var(--primary-7))',
-                    display: 'inline-block',
-                    marginRight: '8px'
-                  }}
-                ></span>
-                <span>选项</span>
-              </Radio>
-            </Radio.Group>
-          </Grid.Col>
-        </Grid.Row>
       </Form.Item>
       <SelectDictModal
         appId={curAppId}

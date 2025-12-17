@@ -190,6 +190,7 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({
       return {};
     }
     let newConfig: any = {
+      disabled: false,
       defaultOptions: []
     };
     if (field.dictTypeId) {
@@ -207,6 +208,8 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({
     } else if (field.options?.length) {
       newConfig.type = DEFAULT_OPTIONS_TYPE.CUSTOM;
       newConfig.disabled = true;
+      newConfig.colorMode = false;
+      newConfig.colorModeType = COLOR_MODE_TYPES.POINT;
       newConfig.defaultOptions = field.options?.map((e: any) => ({
         label: e.optionLabel,
         value: e.optionValue
