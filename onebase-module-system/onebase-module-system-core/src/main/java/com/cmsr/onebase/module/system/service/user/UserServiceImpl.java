@@ -1353,5 +1353,9 @@ public class UserServiceImpl implements UserService {
                 .collect(Collectors.toList()), pageResult.getTotal());
     }
 
-
+    @Override
+    public Long thirdUserRegister(ThirdUserRegisterReqVO reqVO) {
+       // createThirdUser(reqVO);
+        return  null;
+    }
 }

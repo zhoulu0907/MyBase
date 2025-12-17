@@ -386,4 +386,11 @@ public interface UserService {
      */
     @TenantIgnore
     List<AdminUserDO> getPlatformUserByUsernames(Set<String> usernamesList);
+
+    /**
+     * 第三方用户注册
+     * @param reqVO
+     * @return
+     */
+    Long thirdUserRegister(@Valid ThirdUserRegisterReqVO reqVO);
 }

@@ -308,7 +308,6 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         // 设置应用所在的租户环境
         TenantUtils.execute(tenanId, () -> {
             AdminUserDO user = null;
-            boolean firstFlag = false;
             //  解密原文
             reqVO.setPassword(pwdEnHelper.decryptHexStr(reqVO.getPassword()));
             // 判断登录方式
@@ -320,22 +319,14 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
                 validateVerfiyCode(reqVO);
                 user = thirdAuthenticate(reqVO.getMobile(), reqVO.getVerifyCode());
                 if (null == user) {
-                    // 如果用户不存在，则注册用户
-                    // user = userService.createThirdUser(reqVO);
-                    // firstFlag = true;
                     throw exception(AUTH_LOGIN_NO_EXISTS);
                 }
             }
 
             AuthLoginRespVO vo = createAfterLoginSuccess(user.getUserType(), user.getCorpId(), reqVO.getAppId(), user.getId(), reqVO.getMobile(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_MOBILE);
             ThirdAuthLoginRespVO thirdAuthLoginRespVO = BeanUtils.toBean(vo, ThirdAuthLoginRespVO.class);
-            thirdAuthLoginRespVO.setUserAppRelationFlag(false);
-            if (!firstFlag) {
-                // 判断用户是否关联应用
-                thirdAuthLoginRespVO.setUserAppRelationFlag(findUserAppRelationFlag(appId, user.getId()));
-            }
-            thirdAuthLoginRespVO.setFistLoginFlag(firstFlag);
-
+            // 判断用户是否关联应用
+            thirdAuthLoginRespVO.setUserAppRelationFlag(findUserAppRelationFlag(appId, user.getId()));
             authLoginRespVO.set(thirdAuthLoginRespVO);
 
             LogRecordContext.putVariable("user", user);
