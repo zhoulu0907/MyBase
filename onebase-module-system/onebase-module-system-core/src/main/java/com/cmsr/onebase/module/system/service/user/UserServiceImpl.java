@@ -1280,6 +1280,7 @@ public class UserServiceImpl implements UserService {
                     .map(user -> {
                         UserApplicationRespVO userApplicationRespVO = BeanUtils.toBean(user, UserApplicationRespVO.class);
                         userApplicationRespVO.setId(user.getId());
+                        userApplicationRespVO.setNickName(user.getNickname());
                         return userApplicationRespVO;
                     })
                     .collect(Collectors.toList()), pageResult.getTotal());
@@ -1299,6 +1300,7 @@ public class UserServiceImpl implements UserService {
                 .map(user -> {
                     UserApplicationRespVO userApplicationRespVO = BeanUtils.toBean(user, UserApplicationRespVO.class);
                     userApplicationRespVO.setId(user.getId());
+                    userApplicationRespVO.setNickName(user.getNickname());
 
                     // 9. 获取当前用户关联的应用关系列表
                     List<UserAppRelationDO> appRelationDOList = userAppRelationMap.get(user.getId());
