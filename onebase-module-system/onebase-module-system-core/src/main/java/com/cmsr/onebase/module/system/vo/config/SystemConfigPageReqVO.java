@@ -12,6 +12,6 @@ public class SystemConfigPageReqVO {
     @Schema(description = "数据源名称，模糊匹配", example = "名称")
     private String name;
     @Schema(description = "状态", example = "")
-    @InEnum( value = CommonStatusEnum.class)
-    private Long status;
+    @InEnum(value = CommonStatusEnum.class, message = "状态必须是 {value}")
+    private Integer status;
 }
