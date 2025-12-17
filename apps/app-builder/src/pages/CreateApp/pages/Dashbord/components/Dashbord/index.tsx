@@ -2,7 +2,7 @@ import { useEffect, useState, type FC } from 'react';
 import { Button, Input, Spin, Pagination, Modal, Form } from '@arco-design/web-react';
 import { IconPlus, IconSearch } from '@arco-design/web-react/icon';
 import CreateScreenModal from '@/components/CreateScreenModal';
-import ScreenCard from '../ScreenCard';
+import ScreenCard from '../DashbordCard';
 import styles from './index.module.less';
 const FormItem = Form.Item;
 const { useForm } = Form;

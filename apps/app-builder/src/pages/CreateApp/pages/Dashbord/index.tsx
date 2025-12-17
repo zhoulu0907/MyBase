@@ -5,8 +5,8 @@ import { ReactSVG } from 'react-svg';
 import { Layout, Menu } from '@arco-design/web-react';
 import { useEffect, useState, type FC } from 'react';
 import DataSet from './components/DataSet';
-import LargeScreen from './components/LargeScreen';
-import ScreenTemplate from './components/ScreenTemplate';
+import LargeScreen from './components/Dashbord';
+import ScreenTemplate from './components/DashbordTemplate';
 import AppBreadcrumb from '@/components/Breadcrumb';
 import styles from './index.module.less';
 
@@ -18,7 +18,7 @@ interface BreadcrumbItemType {
   path?: string;
 }
 
-const LargeScreenPort: FC = () => {
+const Dashboard: FC = () => {
   const menuData = [
     { title: '数据集', icon: baseSettingSVG, key: 'dataSet' },
     { title: '大屏', icon: appPermissionSVG, key: 'largeScreen' },
@@ -87,4 +87,4 @@ const LargeScreenPort: FC = () => {
   );
 };
 
-export default LargeScreenPort;
+export default Dashboard;

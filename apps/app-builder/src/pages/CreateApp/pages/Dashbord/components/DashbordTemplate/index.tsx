@@ -106,17 +106,17 @@ const ScreenTemplate: FC = () => {
   const [importVisible, setImportVisible] = useState<boolean>(false);
   const [importForm] = useForm();
   const handleImportTemplate = () => {
-    clearImportForm();
+    importForm.resetFields();
     setImportVisible(true);
   };
   // 清空表单
-  const clearImportForm = () => {
-    setSelectedButton('');
-    importForm.setFieldValue('templateNmae', '');
-    importForm.setFieldValue('desc', '');
-    importForm.setFieldValue('type', '');
-    importForm.setFieldValue('screeenFile', '');
-  };
+  // const clearImportForm = () => {
+  //   setSelectedButton('');
+  //   importForm.setFieldValue('templateNmae', '');
+  //   importForm.setFieldValue('desc', '');
+  //   importForm.setFieldValue('type', '');
+  //   importForm.setFieldValue('screeenFile', '');
+  // };
   const handleClickButtom = (name: string) => {
     setSelectedButton(name);
     importForm.setFieldValue('type', name);
@@ -189,6 +189,7 @@ const ScreenTemplate: FC = () => {
                     onEditTemplate={handleEditName}
                     onEdit={handleEditTemplate}
                     onPreview={handlePreview}
+                    onDelete={handleDelete}
                   />
                 ))}
               </div>
@@ -253,7 +254,7 @@ const ScreenTemplate: FC = () => {
         onOk={handleImportOk}
         onCancel={() => {
           setImportVisible(false);
-          clearImportForm();
+          importForm.resetFields();
         }}
         autoFocus={false}
         focusLock={true}

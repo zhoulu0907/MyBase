@@ -74,8 +74,6 @@ const DataSet: FC = () => {
     console.log(record);
   };
 
-  useEffect(() => {}, []);
-
   return (
     <div className={styles.datasetPage}>
       <div className={styles.datasetTitle}>数据集</div>
