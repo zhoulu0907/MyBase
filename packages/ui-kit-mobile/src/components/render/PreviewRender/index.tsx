@@ -44,6 +44,7 @@ const LIST_LAZY_COMPONENT: string[] = [
   FORM_COMPONENT_TYPES.DATE_PICKER,
   FORM_COMPONENT_TYPES.DATE_TIME_PICKER,
   FORM_COMPONENT_TYPES.FILE_UPLOAD,
+  FORM_COMPONENT_TYPES.SELECT_MUTIPLE,
   // FORM_COMPONENT_TYPES.SUB_TABLE,
 ];
 
@@ -181,6 +182,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
             {...componentConfig}
             runtime={runtime}
             detailMode={detailMode}
+            form={form}
           />
         );
       case FORM_COMPONENT_TYPES.USER_SELECT:
