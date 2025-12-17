@@ -1,14 +1,30 @@
 package com.cmsr.onebase.plugin.simulator.controller;
 
+import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.plugin.runtime.manager.OneBasePluginManager;
-import org.pf4j.PluginState;
-import org.springframework.web.bind.annotation.*;
-
+import com.cmsr.onebase.plugin.simulator.controller.plugin.vo.*;
+import com.cmsr.onebase.plugin.simulator.convert.PluginConvert;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
-import java.util.HashMap;
-import java.util.Map;
+import org.pf4j.PluginState;
+import org.pf4j.PluginWrapper;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 
 /**
  * 插件管理 REST API
@@ -19,227 +35,158 @@ import java.nio.file.Paths;
  * <h3>模式支持说明</h3>
  * <ul>
  *     <li><b>PROD模式</b>：完整支持所有接口，获取准确的插件信息（从ZIP包）</li>
+ *     <li><b>STAGING模式</b>：支持ZIP包加载，完整生命周期管理</li>
  *     <li><b>DEV模式</b>：仅支持HTTP路由调用，插件列表/详情接口获取信息不准确
  *         （dev模式使用虚拟插件，不是真实的PF4J插件包装器）</li>
  * </ul>
  *
  * @author chengyuansen
+ * @author matianyu
  * @date 2025-12-13
  */
+@Tag(name = "插件管理")
 @RestController
 @RequestMapping("/api/plugin")
 public class PluginManagementController {
 
     @Resource(name = "oneBasePluginManager")
     private OneBasePluginManager pluginManager;
-    
-    @Resource
-    private com.cmsr.onebase.plugin.runtime.http.PluginHttpDispatcher pluginHttpDispatcher;
 
-    /**
-     * 获取所有已加载的插件列表
-     * <p>
-     * 仅在 PROD 模式下准确。DEV 模式下信息不准确。
-     * </p>
-     *
-     * @return 插件信息列表
-     */
     @GetMapping("/list")
-    public Map<String, Object> listPlugins() {
-        Map<String, Object> result = new HashMap<>();
-        result.put("success", true);
-        result.put("plugins", pluginManager.getLoadedPlugins());
-        result.put("count", pluginManager.getLoadedPlugins().size());
-        return result;
+    @Operation(summary = "获取所有已加载的插件列表")
+    public CommonResult<List<PluginRespVO>> listPlugins() {
+        List<OneBasePluginManager.PluginInfo> plugins = pluginManager.getLoadedPlugins();
+        return success(PluginConvert.INSTANCE.convertList(plugins));
     }
 
-    /**
-     * 启动指定插件
-     *
-     * @param pluginId 插件ID
-     * @return 操作结果
-     */
     @PostMapping("/{pluginId}/start")
-    public Map<String, Object> startPlugin(@PathVariable("pluginId") String pluginId) {
-        Map<String, Object> result = new HashMap<>();
-        try {
-            PluginState state = pluginManager.startPlugin(pluginId);
-            result.put("success", true);
-            result.put("pluginId", pluginId);
-            result.put("state", state.toString());
-            result.put("message", "Plugin started successfully");
-        } catch (Exception e) {
-            result.put("success", false);
-            result.put("error", e.getMessage());
-        }
-        return result;
+    @Operation(summary = "启动指定插件")
+    @Parameter(name = "pluginId", description = "插件ID", required = true, example = "demo-plugin")
+    public CommonResult<PluginOperationResultItemVO> startPlugin(@PathVariable("pluginId") String pluginId) {
+        PluginState state = pluginManager.startPlugin(pluginId);
+        return success(PluginOperationResultItemVO.success(pluginId, state.toString()));
     }
 
-    /**
-     * 停止指定插件
-     *
-     * @param pluginId 插件ID
-     * @return 操作结果
-     */
     @PostMapping("/{pluginId}/stop")
-    public Map<String, Object> stopPlugin(@PathVariable("pluginId") String pluginId) {
-        Map<String, Object> result = new HashMap<>();
-        try {
-            PluginState state = pluginManager.stopPlugin(pluginId);
-            result.put("success", true);
-            result.put("pluginId", pluginId);
-            result.put("state", state.toString());
-            result.put("message", "Plugin stopped successfully");
-        } catch (Exception e) {
-            result.put("success", false);
-            result.put("error", e.getMessage());
-        }
-        return result;
+    @Operation(summary = "停止指定插件")
+    @Parameter(name = "pluginId", description = "插件ID", required = true, example = "demo-plugin")
+    public CommonResult<PluginOperationResultItemVO> stopPlugin(@PathVariable("pluginId") String pluginId) {
+        PluginState state = pluginManager.stopPlugin(pluginId);
+        return success(PluginOperationResultItemVO.success(pluginId, state.toString()));
     }
 
-    /**
-     * 重新加载指定插件
-     *
-     * @param pluginId 插件ID
-     * @return 操作结果
-     */
     @PostMapping("/{pluginId}/reload")
-    public Map<String, Object> reloadPlugin(@PathVariable("pluginId") String pluginId) {
-        Map<String, Object> result = new HashMap<>();
-        try {
-            PluginState state = pluginManager.reloadPlugin(pluginId);
-            result.put("success", true);
-            result.put("pluginId", pluginId);
-            result.put("state", state.toString());
-            result.put("message", "Plugin reloaded successfully");
-        } catch (Exception e) {
-            result.put("success", false);
-            result.put("error", e.getMessage());
-        }
-        return result;
+    @Operation(summary = "重新加载指定插件")
+    @Parameter(name = "pluginId", description = "插件ID", required = true, example = "demo-plugin")
+    public CommonResult<PluginOperationResultItemVO> reloadPlugin(@PathVariable("pluginId") String pluginId) {
+        PluginState state = pluginManager.reloadPlugin(pluginId);
+        return success(PluginOperationResultItemVO.success(pluginId, state.toString()));
     }
 
-    /**
-     * 从指定路径加载插件（JAR/ZIP）
-     *
-     * @param path 插件文件路径（绝对或相对）
-     * @return 操作结果，包含生成的 pluginId
-     */
     @PostMapping("/load")
-    public Map<String, Object> loadPlugin(@RequestParam("path") String path) {
-        Map<String, Object> result = new HashMap<>();
-        try {
-            Path pluginPath = Paths.get(path);
-            String pluginId = pluginManager.loadPlugin(pluginPath);
-            if (pluginId != null) {
-                result.put("success", true);
-                result.put("pluginId", pluginId);
-                result.put("message", "Plugin loaded successfully");
-            } else {
-                result.put("success", false);
-                result.put("error", "Failed to load plugin from path: " + path);
-            }
-        } catch (Exception e) {
-            result.put("success", false);
-            result.put("error", e.getMessage());
-        }
-        return result;
+    @Operation(summary = "从指定路径加载插件")
+    @Parameter(name = "path", description = "插件文件路径（绝对或相对）", required = true, example = "/plugins/demo-plugin.zip")
+    public CommonResult<PluginLoadRespVO> loadPlugin(@RequestParam("path") String path) {
+        Path pluginPath = Paths.get(path);
+        String pluginId = pluginManager.loadPlugin(pluginPath);
+        
+        PluginLoadRespVO respVO = new PluginLoadRespVO();
+        respVO.setPluginId(pluginId);
+        respVO.setPluginPath(path);
+        respVO.setState(pluginManager.getPlugin(pluginId)
+            .map(w -> w.getPluginState().toString())
+            .orElse("UNKNOWN"));
+        
+        return success(respVO);
     }
 
-    /**
-     * 获取指定插件的详细信息
-     * <p>
-     * 仅在 PROD 模式下准确。DEV 模式下信息不准确（虚拟插件不在PF4J插件包装器中）。
-     * </p>
-     *
-     * @param pluginId 插件ID
-     * @return 插件详细信息
-     */
     @GetMapping("/{pluginId}/info")
-    public Map<String, Object> getPluginInfo(@PathVariable("pluginId") String pluginId) {
-        Map<String, Object> result = new HashMap<>();
-        try {
-            var pluginWrapper = pluginManager.getPlugin(pluginId);
-            if (pluginWrapper.isPresent()) {
-                var wrapper = pluginWrapper.get();
-                result.put("success", true);
-                result.put("pluginId", wrapper.getPluginId());
-                result.put("description", wrapper.getDescriptor().getPluginDescription());
-                result.put("version", wrapper.getDescriptor().getVersion());
-                result.put("provider", wrapper.getDescriptor().getProvider());
-                result.put("state", wrapper.getPluginState().toString());
-            } else {
-                result.put("success", false);
-                result.put("error", "Plugin not found: " + pluginId);
-            }
-        } catch (Exception e) {
-            result.put("success", false);
-            result.put("error", e.getMessage());
-        }
-        return result;
+    @Operation(summary = "获取指定插件的详细信息")
+    @Parameter(name = "pluginId", description = "插件ID", required = true, example = "demo-plugin")
+    public CommonResult<PluginRespVO> getPluginInfo(@PathVariable("pluginId") String pluginId) {
+        PluginWrapper wrapper = pluginManager.getPlugin(pluginId)
+            .orElseThrow(() -> new IllegalArgumentException("Plugin not found: " + pluginId));
+        return success(PluginConvert.INSTANCE.convert(wrapper));
     }
 
-    /**
-     * 启动所有插件
-     *
-     * @return 操作结果
-     */
     @PostMapping("/start-all")
-    public Map<String, Object> startAllPlugins() {
-        Map<String, Object> result = new HashMap<>();
-        try {
-            pluginManager.startAllPlugins();
-            result.put("success", true);
-            result.put("message", "All plugins started");
-            result.put("count", pluginManager.getStartedPlugins().size());
-        } catch (Exception e) {
-            result.put("success", false);
-            result.put("error", e.getMessage());
-        }
-        return result;
-    }
-
-    /**
-     * 停止所有插件
-     *
-     * @return 操作结果
-     */
-    @PostMapping("/stop-all")
-    public Map<String, Object> stopAllPlugins() {
-        Map<String, Object> result = new HashMap<>();
-        try {
-            pluginManager.stopAllPlugins();
-            result.put("success", true);
-            result.put("message", "All plugins stopped");
-        } catch (Exception e) {
-            result.put("success", false);
-            result.put("error", e.getMessage());
-        }
-        return result;
-    }
-
-    /**
-     * 卸载指定插件（根据 pluginId 卸载）
-     *
-     * @param pluginId 插件ID
-     * @return 操作结果
-     */
-    @PostMapping("/{pluginId}/unload")
-    public Map<String, Object> unloadPlugin(@PathVariable("pluginId") String pluginId) {
-        Map<String, Object> result = new HashMap<>();
-        try {
-            boolean ok = pluginManager.unloadPlugin(pluginId);
-            result.put("success", ok);
-            result.put("pluginId", pluginId);
-            if (ok) {
-                result.put("message", "Plugin unloaded successfully");
-            } else {
-                result.put("error", "Failed to unload plugin: " + pluginId);
+    @Operation(summary = "启动所有插件")
+    public CommonResult<PluginBatchOperationRespVO> startAllPlugins() {
+        List<OneBasePluginManager.PluginInfo> plugins = pluginManager.getLoadedPlugins();
+        List<PluginOperationResultItemVO> items = new ArrayList<>();
+        
+        for (OneBasePluginManager.PluginInfo plugin : plugins) {
+            try {
+                PluginState state = pluginManager.startPlugin(plugin.getPluginId());
+                items.add(PluginOperationResultItemVO.success(plugin.getPluginId(), state.toString()));
+            } catch (Exception e) {
+                items.add(PluginOperationResultItemVO.error(plugin.getPluginId(), e.getMessage()));
             }
-        } catch (Exception e) {
-            result.put("success", false);
-            result.put("error", e.getMessage());
         }
-        return result;
+        
+        return success(new PluginBatchOperationRespVO(items));
     }
+
+    @PostMapping("/stop-all")
+    @Operation(summary = "停止所有插件")
+    public CommonResult<PluginBatchOperationRespVO> stopAllPlugins() {
+        List<PluginWrapper> plugins = pluginManager.getStartedPlugins();
+        List<PluginOperationResultItemVO> items = new ArrayList<>();
+        
+        for (PluginWrapper plugin : plugins) {
+            try {
+                PluginState state = pluginManager.stopPlugin(plugin.getPluginId());
+                items.add(PluginOperationResultItemVO.success(plugin.getPluginId(), state.toString()));
+            } catch (Exception e) {
+                items.add(PluginOperationResultItemVO.error(plugin.getPluginId(), e.getMessage()));
+            }
+        }
+        
+        return success(new PluginBatchOperationRespVO(items));
+    }
+
+    @PostMapping("/{pluginId}/unload")
+    @Operation(summary = "卸载指定插件")
+    @Parameter(name = "pluginId", description = "插件ID", required = true, example = "demo-plugin")
+    public CommonResult<PluginOperationResultItemVO> unloadPlugin(@PathVariable("pluginId") String pluginId) {
+        boolean ok = pluginManager.unloadPlugin(pluginId);
+        if (ok) {
+            return success(PluginOperationResultItemVO.success(pluginId, "UNLOADED"));
+        } else {
+            return CommonResult.error(500, "Failed to unload plugin: " + pluginId);
+        }
+    }
+
+    @PostMapping("/upload")
+    @Operation(summary = "上传并加载插件ZIP/JAR包")
+    public CommonResult<PluginLoadRespVO> uploadPlugin(@RequestParam("file") MultipartFile file) throws IOException {
+        if (file.isEmpty()) {
+            return CommonResult.error(400, "上传文件不能为空");
+        }
+        
+        String originalFilename = file.getOriginalFilename();
+        if (originalFilename == null || (!originalFilename.endsWith(".zip") && !originalFilename.endsWith(".jar"))) {
+            return CommonResult.error(400, "仅支持上传ZIP或JAR文件");
+        }
+        
+        Path pluginsDir = Paths.get("plugins");
+        if (!Files.exists(pluginsDir)) {
+            Files.createDirectories(pluginsDir);
+        }
+        
+        Path targetPath = pluginsDir.resolve(originalFilename);
+        Files.copy(file.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
+        
+        String pluginId = pluginManager.loadPlugin(targetPath);
+        
+        PluginLoadRespVO respVO = new PluginLoadRespVO();
+        respVO.setPluginId(pluginId);
+        respVO.setPluginPath(targetPath.toString());
+        respVO.setState(pluginManager.getPlugin(pluginId)
+            .map(w -> w.getPluginState().toString())
+            .orElse("UNKNOWN"));
+        
+        return success(respVO);
+    }
+
 }
