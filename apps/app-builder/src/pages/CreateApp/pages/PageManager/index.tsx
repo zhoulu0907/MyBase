@@ -405,13 +405,14 @@ const PageManagerPage: FC = () => {
   const triggerDelete = (menuID: string) => {
     handleDelete(menuID);
   };
-  const handleScreenCreate = async () => {
-    console.log('handleScreenCreate createForm:', createForm);
-    const req = createScreenApi({
-      projectName: createForm.getFieldValue('projectName'),
-      remarks: null,
-      indexImage: null
-    });
+  const handleScreenCreate = async (id?: string, screenMethod?: string) => {
+    console.log('handleScreenCreate id:', id);
+    console.log('handleScreenCreate screenMethod:', screenMethod);
+    // const req = await createScreenApi({
+    //   projectName: createForm.getFieldValue('menuName') || '新大屏',
+    //   remarks: null,
+    //   indexImage: null
+    // });
   };
   const handleCreate = async () => {
     createForm.validate(async (error) => {
