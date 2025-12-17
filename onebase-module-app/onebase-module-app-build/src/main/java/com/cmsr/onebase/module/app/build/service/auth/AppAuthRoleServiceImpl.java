@@ -210,7 +210,6 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
         if (AuthRoleTypeEnum.isSystemRoleType(authRoleDO.getRoleType())) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_AUTH_ROLE_NOT_ALLOW_DELETE);
         }
-        List<Long> userIds = appAuthRoleUserRepository.findByRoleId(roleId).stream().map(v -> v.getUserId()).toList();
         appAuthRoleUserRepository.deleteByRoleId(roleId);
         appAuthRoleDeptRepository.deleteByRoleId(roleId);
         appAuthRoleRepository.removeById(roleId);
