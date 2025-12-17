@@ -7,7 +7,7 @@ import { WorkbenchAdvancedComp } from './WorkbenchAdvancedComponents';
 
 // 组件导出
 export const WorkbenchComp = { ...WorkbenchBasicComp, ...WorkbenchAdvancedComp };
-export { WORKBENCH_CONFIG_TYPES, QUICK_ENTRY_THEME_OPTIONS, QUICK_ENTRY_THEME_VALUES } from './core/constants';
+export { WORKBENCH_CONFIG_TYPES, QUICK_ENTRY_THEME_OPTIONS, QUICK_ENTRY_THEME_VALUES, WORKBENCH_STATUS_OPTIONS, WORKBENCH_STATUS_VALUES } from './core/constants';
 
 // 类型常量导出
 export {
