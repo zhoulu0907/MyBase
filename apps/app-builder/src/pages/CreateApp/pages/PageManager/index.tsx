@@ -3,7 +3,7 @@ import CreatePageIcon from '@/assets/images/addpage.svg';
 import CreateWorkbenchIcon from '@/assets/images/addworkbench.svg';
 import EditIcon from '@/assets/images/edit_menu_icon.svg';
 import PageManagerGuide from '@/assets/images/page_manaager_guide.svg';
-import CreateScreenModal from '@/components/CreateScreenModal';
+import CreateScreenModal from '@/components/CreateDashboardModal';
 import { useI18n } from '@/hooks/useI18n';
 import PreviewContainer from '@/pages/Runtime/components/preview';
 import { useAppStore } from '@/store/store_app';
