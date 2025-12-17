@@ -6,14 +6,14 @@ import {
   updatePluginStatusApi
 } from '@onebase/platform-center';
 import { useEffect, useMemo, useState } from 'react';
-import { StatusEnumLabel, statusMapping } from './constants';
+import { StatusEnumLabel, statusMapping, StatusValue } from './constants';
 import styles from './index.module.less';
 
 export interface PluginItem {
   id: string;
   icon: string;
   name: string;
-  desc: string;
+  remark: string;
   status: number;
 }
 
@@ -21,18 +21,30 @@ const PluginPage = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [pluginData, setPluginData] = useState<PluginItem[]>([]);
   const [searchValue, setSearchValue] = useState<string>('');
-  const [currentTab, setCurrentTab] = useState<string>('0');
+  const [currentTab, setCurrentTab] = useState<string>(StatusValue.ALL);
 
-  const fetchPluginList = async (status: string = '0') => {
+  const renderStatus = (status: any) => {
+    let value = null;
+    if(status === StatusValue.ALL) {
+      value = null;
+    }else if(status === StatusValue.DISABLE) {
+      value = 0
+    }else if(status === StatusValue.ENABLE) {
+      value = 1
+    }
+    return value;
+  }
+
+  const fetchPluginList = async (status: string = '') => {
     setLoading(true);
     const params: pluginParams = {
-      status: status ? Number(status) : 0,
+      status: renderStatus(status),
       name: ''
     };
     try {
       const res = await getPluginListApi(params);
-      if (res && Array.isArray(res.list)) {
-        setPluginData(res.list);
+      if (res && Array.isArray(res)) {
+        setPluginData(res);
       } else {
         console.warn('Invalid response format:', res);
       }
@@ -58,8 +70,6 @@ const PluginPage = () => {
 
   // 切换开关状态
   const handleSwitchChange = async (id: string, name: string, checked: boolean) => {
-    // 实际项目中这里会调用接口更新状态
-    console.log(`插件 ${id} 状态切换为：${checked ? '已启用' : '未启用'}`);
     if (checked === false) {
       return Modal.confirm({
         title: `关闭"${name}"插件？`,
@@ -75,6 +85,7 @@ const PluginPage = () => {
       });
     } else {
       await updatePluginStatusApi(id, 1);
+      await fetchPluginList();
       Message.success('当前已启用模式');
     }
     const newPluginData = pluginData.map((item) => {
@@ -106,9 +117,9 @@ const PluginPage = () => {
           />
         }
       >
-        {statusMapping.map((plugin: any) => {
+        {statusMapping.map((data: any) => {
           return (
-            <Tabs.TabPane key={plugin.status} title={plugin.label}>
+            <Tabs.TabPane key={data.value} title={data.label}>
               <Spin loading={loading} style={{ width: '100%' }}>
                 <Space size={16}>
                   {filterPlugin?.map((plugin, index) => {
@@ -119,7 +130,7 @@ const PluginPage = () => {
                             <IconSettings />
                             <div className={styles.textContent}>
                               <span className={styles.name}>{plugin.name}</span>
-                              <span className={styles.description}>{plugin.desc}</span>
+                              <span className={styles.description}>{plugin.remark}</span>
                             </div>
                           </Space>
                           <Space>

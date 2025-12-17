@@ -1,27 +1,28 @@
 
 import { externalUserListParams, createExternalUserParams, updateExternalPwdParams, updateExternalUserParams, updateStatusParams, pluginParams } from "../types";
 import { systemService } from "./clients";
+import { userService } from "./clients/factory";
 
 //新增用户
-export const createExternalUserApi = (data: createExternalUserParams) => systemService.post('/third/create', data);
+export const createExternalUserApi = (data: createExternalUserParams) => systemService.post('/third-user/create', data);
 
 //编辑用户
-export const updateExternalUserApi = (data: updateExternalUserParams) => systemService.post('/third/update', data);
+export const updateExternalUserApi = (data: updateExternalUserParams) => systemService.post('/third-user/update', data);
 
 //删除用户
-export const deleteExternalUserApi = (id: string) => systemService.post(`/third/delete?id=${id}`);
+export const deleteExternalUserApi = (id: string) => systemService.post(`/third-user/delete?id=${id}`);
 
 //获取用户列表-分页
-export const getExternalUserListApi = (data: externalUserListParams) => systemService.get('/third/user-applications-page', data);
+export const getExternalUserListApi = (data: externalUserListParams) => systemService.get('/third-user/user-applications-page', data);
 
 //重置用户密码
-export const updateExternalUserPwdApi = (data: updateExternalPwdParams) => systemService.post('/third/update', data);
+export const updateExternalUserPwdApi = (data: updateExternalPwdParams) => systemService.post('/third-user/update-password', data);
 
-//获取授权应用
-export const getAuthAppListApi = (userId?: string,appName?: string) => systemService.post(`/third/update?userId=${userId}&appName=${appName}`);
+//获取外部用户授权应用
+export const getAuthAppListApi = (userId?: string,appName?: string) => userService.post(`/user-app-relation/user-no-relation-app-list?userId=${userId ? userId : ""}&appName=${appName ? appName : ""}`);
 
 //修改用户状态
-export const updateStatusApi = (data: updateStatusParams) => systemService.post('/third/update-status', data);
+export const updateStatusApi = (data: updateStatusParams) => systemService.post('/third-user/update-status', data);
 
 //获取第三方的部门列表
 export const getExternalDeptListApi = () => systemService.get('/dept/get-third-depts');

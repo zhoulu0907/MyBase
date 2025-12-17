@@ -2,7 +2,7 @@ import PlaceholderPanel from '@/components/PlaceholderPanel';
 import { listToTree } from '@/utils/tree';
 import { Layout } from '@arco-design/web-react';
 import { hasPermission, TENANT_DEPT_QUERY, TENANT_USER_QUERY } from '@onebase/common';
-import { getExternalDeptListApi, getExternalUserListApi, getUserPage } from '@onebase/platform-center';
+import { getExternalDeptListApi, getExternalUserListApi } from '@onebase/platform-center';
 import { useEffect, useState } from 'react';
 import DeptTreeCmp from './components/DeptTree';
 import UserTable from './components/UserTable';

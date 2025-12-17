@@ -107,7 +107,7 @@ export default function UserFormModal({
         avatar: avatarUrl,
         mobile: filterSpace(values.mobile),
         email: filterSpace(values.email),
-        nickname: filterSpace(values.nickname),
+        nickName: filterSpace(values.nickName),
         status: statusCheckedValue ? StatusEnum.ENABLE : StatusEnum.DISABLE
       };
       setLoading(true);
@@ -157,7 +157,7 @@ export default function UserFormModal({
       <Form form={form} layout="vertical" autoComplete="off" disabled={isDetail}>
         <Row gutter={24}>
           <Col span={12}>
-            <Form.Item label="姓名" field="nickname" rules={[{ required: true, message: '请输入姓名' }]}>
+            <Form.Item label="姓名" field="nickName" rules={[{ required: true, message: '请输入姓名' }]}>
               <Input placeholder="请输入" />
             </Form.Item>
           </Col>

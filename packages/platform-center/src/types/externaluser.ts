@@ -98,5 +98,5 @@ export interface updateStatusParams {
 
 export interface pluginParams {
     name?: string;
-    status?: number;
+    status?: number | null;
 }

@@ -1,7 +1,6 @@
 export interface statusProps {
   label: string;
   value: string;
-  status: number;
 }
 
 export enum StatusEnumLabel {
@@ -17,14 +16,13 @@ export enum StatusValue {
 }
 
 export enum StatusEnum {
-  ALL = 0,
+  ALL = 2,
   ENABLE = 1,
-  DISABLE = 2,
-  EXPIRED = 3
+  DISABLE = 0,
 }
 
 export const statusMapping: statusProps[] = [
-  { label: StatusEnumLabel.ALL, value: StatusValue.ALL, status: StatusEnum.ALL },
-  { label: StatusEnumLabel.ENABLE, value: StatusValue.ENABLE, status: StatusEnum.ENABLE },
-  { label: StatusEnumLabel.DISABLE, value: StatusValue.DISABLE, status: StatusEnum.DISABLE }
+  { label: StatusEnumLabel.ALL, value: StatusValue.ALL},
+  { label: StatusEnumLabel.ENABLE, value: StatusValue.ENABLE},
+  { label: StatusEnumLabel.DISABLE, value: StatusValue.DISABLE}
 ];

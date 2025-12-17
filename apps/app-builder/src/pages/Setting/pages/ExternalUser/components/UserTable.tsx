@@ -15,70 +15,23 @@ import {
   Tag
 } from '@arco-design/web-react';
 import { IconMoreVertical, IconPlus } from '@arco-design/web-react/icon';
-import { TENANT_USER_PERMISSION as ACTIONS, hasAllPermissions, hasPermission } from '@onebase/common';
-import type {
-  externalUserListParams,
-  updateExternalPwdParams,
-} from '@onebase/platform-center';
+import { TENANT_THIRD_PERMISSION as ACTIONS, hasAllPermissions, hasPermission } from '@onebase/common';
+import type { externalUserListParams, updateExternalPwdParams } from '@onebase/platform-center';
 import {
   deleteExternalUserApi,
   getExternalUserListApi,
-  getSimpleUser,
-  getUserListByName,
   PlatformTenantStatus,
   StatusEnum,
   updateExternalUserPwdApi,
-  updateStatusApi,
+  updateStatusApi
 } from '@onebase/platform-center';
 import { debounce } from 'lodash-es';
 import { useCallback, useEffect, useState } from 'react';
 import s from '../index.module.less';
 import UserFormModal from './UserFormModal';
 import UserProfileAvatar from '@/components/UserProfileAvatar';
-import type { corpApplicationListProps } from '../../Business/types/appItem';
-
-interface DataItem {
-  id: string;
-  name: string;
-  children?: DataItem[];
-  [key: string]: any;
-}
-
-interface UserTableProps {
-  selectedDeptId?: string;
-  deptTree: DataItem[]; // 部门树数据
-  deptLoading: boolean; // 部门数据加载状态
-  onRefreshDept: () => void;
-}
-
-interface externalUserRecord {
-  id: string;
-  nickname: string;
-  mobile: string;
-  applicationList: string[];
-  status: number;
-  source: string;
-}
-
-interface SelectOptions {
-  label: string;
-  value: string | number;
-}
-
-const statusOptions: SelectOptions[] = [
-  {
-    label: '全部状态',
-    value: ''
-  },
-  {
-    label: '已启用',
-    value: PlatformTenantStatus.enabled
-  },
-  {
-    label: '已禁用',
-    value: PlatformTenantStatus.disabled
-  }
-];
+import { CreateSource, CreateSourceValue, statusOptions } from '../constant';
+import type { CreateSourceKey, DataItem, externalUserRecord, userApplicationList, UserTableProps } from '../type';
 
 export default function UserTable({
   selectedDeptId = undefined,
@@ -94,10 +47,6 @@ export default function UserTable({
   const [data, setData] = useState<externalUserRecord[]>([]);
   const [total, setTotal] = useState(0);
   const [detailUser, setDetailUser] = useState<externalUserRecord | undefined>();
-
-  const [userData, setUsertData] = useState<{ userList: any[] }>();
-  const [memberLoading, setMemberLoading] = useState<boolean>(false);
-
   const [userModalVisible, setUserModalVisible] = useState(false);
   const [detailModalVisible, setDetailModalVisible] = useState(false);
 
@@ -155,7 +104,7 @@ export default function UserTable({
   // 重置密码
   const handleResetPassword = (record: externalUserRecord) => {
     Modal.confirm({
-      title: `确定要重置用户(${record.nickname})的密码吗?`,
+      title: `确定要重置用户(${record.nickName})的密码吗?`,
       content: '密码重置后，原密码失效，新密码将以短信形式发送至用户。',
       okButtonProps: { status: 'danger' },
       onOk: async () => {
@@ -180,7 +129,7 @@ export default function UserTable({
       }
     } else {
       return Modal.confirm({
-        title: `禁用企业(${record.nickname})? `,
+        title: `禁用企业(${record.nickName})? `,
         content: '禁用后企业用户无法登录，再次启用时企业可恢复正常使用',
         okButtonProps: {
           status: 'danger'
@@ -201,7 +150,7 @@ export default function UserTable({
   // 删除
   const handleDelete = (record: externalUserRecord) => {
     Modal.confirm({
-      title: `确认要删除账号（${record.nickname}）吗？`,
+      title: `确认要删除账号（${record.nickName}）吗？`,
       content: '删除用户后，用户将无法登录，用户数据将被永久删除，请谨慎操作。',
       okButtonProps: { status: 'danger' },
       onOk: async () => {
@@ -219,7 +168,7 @@ export default function UserTable({
     setDetailModalVisible(true);
   };
 
-  const renderAuthorizedAppGroup = (applicationList: corpApplicationListProps[]) => {
+  const renderAuthorizedAppGroup = (applicationList: userApplicationList[]) => {
     return (
       <>
         {applicationList?.length > 0 ? (
@@ -251,14 +200,14 @@ export default function UserTable({
     return [
       {
         title: '姓名',
-        dataIndex: 'nickname',
+        dataIndex: 'nickName',
         width: 140,
         ellipsis: true,
         render: (_: any, record: externalUserRecord) => (
           <>
             <UserProfileAvatar adminInfo={record} size={25} />
             <span className={s.tableColumnUsername} onClick={() => handleViewDetail(record)}>
-              {record.nickname}
+              {record.nickName}
             </span>
           </>
         )
@@ -267,16 +216,16 @@ export default function UserTable({
       {
         title: '授权应用',
         width: 140,
-        dataIndex: 'corpApplicationList',
-        render: (apps: corpApplicationListProps[]) => <div>{renderAuthorizedAppGroup(apps)}</div>
+        dataIndex: 'userApplicationList',
+        render: (apps: userApplicationList[]) => <div>{renderAuthorizedAppGroup(apps)}</div>
       },
       {
         title: '来源',
-        width: 140,
-        dataIndex: 'source',
-        render: (source: string) => (
-          <Tag color="cyan" size="small">
-            {source}
+        width: 100,
+        dataIndex: 'createSource',
+        render: (source: CreateSourceKey) => (
+          <Tag color={source === CreateSourceValue.BACK ? "cyan" : 'blue'} size="small">
+            {CreateSource[source]}
           </Tag>
         )
       },
@@ -295,10 +244,10 @@ export default function UserTable({
             <Button permission={ACTIONS.UPDATE} type="text" onClick={() => handleEdit(record)}>
               编辑
             </Button>
-            <Button permission={ACTIONS.RESET} type="text" onClick={() => handleResetPassword(record)}>
+            <Button permission={ACTIONS.RESETPWD} type="text" onClick={() => handleResetPassword(record)}>
               重置密码
             </Button>
-            {hasAllPermissions([ACTIONS.DELETE, ACTIONS.STATUS]) ? (
+            {hasAllPermissions([ACTIONS.ENABLE, ACTIONS.DELETE]) ? (
               <Dropdown
                 droplist={
                   <Menu>
@@ -320,7 +269,7 @@ export default function UserTable({
                 <Button permission={ACTIONS.UPDATE} type="text" onClick={() => handleStatusUpdate(record)}>
                   {getStatusLabel(record.status === StatusEnum.DISABLE ? StatusEnum.ENABLE : StatusEnum.DISABLE)}
                 </Button>
-                <Button permission={ACTIONS.RESET} type="text" onClick={() => handleDelete(record)}>
+                <Button permission={ACTIONS.DELETE} type="text" onClick={() => handleDelete(record)}>
                   删除
                 </Button>
               </>
@@ -357,36 +306,6 @@ export default function UserTable({
     }
     return null;
   };
-
-  // 获取部门用户信息
-  const getSimpleUsers = async ({ keywords = '' }: { keywords?: string }) => {
-    setMemberLoading(true);
-    try {
-      if (!selectedDeptId) return;
-      let res = null;
-      if (keywords) {
-        res = await getUserListByName(keywords);
-      } else {
-        res = await getSimpleUser(selectedDeptId, true);
-      }
-      setUsertData({ userList: res });
-    } catch (error) {
-      console.error('获取部门用户信息失败 error:', error);
-    } finally {
-      setMemberLoading(false);
-    }
-  };
-
-  const debouncedUpdate = useCallback(
-    debounce((value) => {
-      getSimpleUsers({ keywords: value });
-    }, 500),
-    [selectedDeptId]
-  );
-
-  useEffect(() => {
-    return () => debouncedUpdate.cancel();
-  }, [debouncedUpdate]);
 
   return (
     <div>
