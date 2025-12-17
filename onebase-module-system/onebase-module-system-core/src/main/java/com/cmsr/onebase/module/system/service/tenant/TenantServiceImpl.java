@@ -247,7 +247,7 @@ public class TenantServiceImpl implements TenantService {
     }
 
     private  Map<String,AdminUserDO> getUserMobileByUserNames(Set<String> usernamesList){
-        List<AdminUserDO> userDOList= userService.getUserByUsernames(usernamesList);
+        List<AdminUserDO> userDOList= userService.getPlatformUserByUsernames(usernamesList);
 
         Map<String, List<AdminUserDO>> userGroupMap = userDOList.stream()
                 .collect(Collectors.groupingBy(AdminUserDO::getUsername));
@@ -257,9 +257,8 @@ public class TenantServiceImpl implements TenantService {
                         Map.Entry::getKey,  // username作为key
                         entry -> {
                             List<AdminUserDO> userList = entry.getValue();
-                            if (!org.apache.commons.collections4.CollectionUtils.isEmpty(userList)  && userList.get(0) != null) {
-                                AdminUserDO firstUser = userList.get(0);
-                                return firstUser;
+                            if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(userList) ) {
+                                return userList.get(0);
                             }
                             return new AdminUserDO();  // 如果为空则返回空字符串
                         }

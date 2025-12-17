@@ -44,6 +44,7 @@ public class RuntimeApplicationContextHeaderFilter extends OncePerRequestFilter 
 
     private RequestMatcher systemRequestMatcher = new AntPathRequestMatcher("/runtime/system/**");
     private RequestMatcher corpRequestMatcher   = new AntPathRequestMatcher("/runtime/corp/**");
+    private RequestMatcher appGetRequestMatcher = new AntPathRequestMatcher("/runtime/app/application/get");
 
     /**
      * 企业接口和系统接口不做App校验
@@ -52,7 +53,7 @@ public class RuntimeApplicationContextHeaderFilter extends OncePerRequestFilter 
      * @return
      */
     private boolean doFilter(HttpServletRequest request) {
-        return systemRequestMatcher.matches(request) || corpRequestMatcher.matches(request);
+        return systemRequestMatcher.matches(request) || corpRequestMatcher.matches(request) || appGetRequestMatcher.matches(request);
     }
 
     @Override
@@ -81,8 +82,8 @@ public class RuntimeApplicationContextHeaderFilter extends OncePerRequestFilter 
                 String applicationIdHeader = request.getHeader(X_APPLICATION_ID);
                 applicationId = NumberUtils.toLong(applicationIdHeader, -1L);
             }
-            if(applicationId <= 0){
-                CommonResult<?> result = CommonResult.error(FORBIDDEN_APP.getCode(),"应用ID为空");
+            if (applicationId <= 0) {
+                CommonResult<?> result = CommonResult.error(FORBIDDEN_APP.getCode(), "应用ID为空");
                 ServletUtils.writeJSON(response, result);
                 return;
             }

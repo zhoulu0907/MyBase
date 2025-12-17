@@ -13,6 +13,7 @@ import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.dal.redis.RedisKeyConstants;
 import com.cmsr.onebase.module.system.enums.corp.CorpConstant;
+import com.cmsr.onebase.module.system.enums.dept.DeptCodeEnum;
 import com.cmsr.onebase.module.system.enums.dept.DeptTypeEnum;
 import com.cmsr.onebase.module.system.enums.dept.IdTypeEnum;
 import com.cmsr.onebase.module.system.service.permission.PermissionService;
@@ -484,6 +485,23 @@ public class DeptServiceImpl implements DeptService {
             row.put(DeptDO.LEADER_USER_ID, reqVO.getUserId());
             deptDataRepository.updateByConfig(row, new DefaultConfigStore().eq(DeptDO.ID, reqVO.getDeptId()));
         }
+    }
+
+
+    @Override
+    public DeptDO findDeptByCodeAndType(DeptSaveReqVO deptRespVO) {
+       return deptDataRepository.findDeptByCodeAndType(deptRespVO);
+    }
+
+    @Override
+    public Long createThirdDefaultDept(DeptSaveReqVO deptRespVO) {
+        DeptDO dept = BeanUtils.toBean(deptRespVO, DeptDO.class);
+       return deptDataRepository.insert(dept).getId();
+    }
+
+    @Override
+    public List<DeptDO> getDefaultThirdDept() {
+        return deptDataRepository.getDefaultThirdDeptByDefaultCode(DeptCodeEnum.DEFAULT_THIRD_DEPT.getCode(), CommonStatusEnum.ENABLE.getStatus());
     }
 
 }

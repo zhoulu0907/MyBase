@@ -38,7 +38,7 @@ import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.
 @RestController
 @RequestMapping("/system/user")
 @Validated
-public class TenantUserController {
+public class RuntimeUserController {
 
     @Resource
     private UserService userService;
@@ -49,7 +49,6 @@ public class TenantUserController {
 
     @GetMapping("/simple-page")
     @Operation(summary = "获得简要用户分页列表(启用状态)", description = "只包含开启的用户，主要用于前端的下拉选项")
-    @PreAuthorize("@ss.hasPermission('tenant:user:query')")
     public CommonResult<PageResult<UserSimpleRespVO>> getUserSimplePage(@Valid UserSimplePageReqVO pageReqVO) {
         // 获得用户分页列表
         PageResult<AdminUserDO> pageResult = userService.getSimpleEnableUserPage(pageReqVO);
@@ -62,7 +61,6 @@ public class TenantUserController {
 
     @GetMapping("/simple-list")
     @Operation(summary = "获取用户精简信息列表", description = "只包含开启的用户，主要用于前端的下拉选项")
-    @PreAuthorize("@ss.hasPermission('tenant:user:query')")
     public CommonResult<List<UserDeptSimpleRespVO>> getSimpleUserList() {
         List<AdminUserDO> list = userService.getUserListByStatus(CommonStatusEnum.ENABLE.getStatus(), null);
         // 拼接数据
