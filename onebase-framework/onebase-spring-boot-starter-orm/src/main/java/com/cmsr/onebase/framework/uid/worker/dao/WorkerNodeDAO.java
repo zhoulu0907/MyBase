@@ -16,6 +16,7 @@
 package com.cmsr.onebase.framework.uid.worker.dao;
 
 import com.cmsr.onebase.framework.uid.worker.entity.WorkerNodeEntity;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -32,6 +33,8 @@ import java.util.Map;
  * @author yutianbao
  */
 public class WorkerNodeDAO {
+
+    public static final String OTHER = "other";
 
     private final JdbcTemplate jdbcTemplate;
     private final DataSource dataSource;
@@ -53,21 +56,16 @@ public class WorkerNodeDAO {
                 if (databaseType == null) {
                     try {
                         String driverClassName = dataSource.getConnection().getMetaData().getDriverName().toLowerCase();
-                        if (driverClassName.contains("dm") || driverClassName.contains("dameng")) {
-                            databaseType = "dameng";
-                        } else if (driverClassName.contains("mysql")) {
+                        if (driverClassName.contains("mysql")) {
                             databaseType = "mysql";
                         } else if (driverClassName.contains("postgresql")) {
                             databaseType = "postgresql";
-                        } else if (driverClassName.contains("oracle")) {
-                            databaseType = "oracle";
-                        } else if (driverClassName.contains("kingbase") || driverClassName.contains("人大金仓")) {
-                            databaseType = "kingbase";
-                        } else {
-                            databaseType = "unknown";
+                        }
+                        {
+                            databaseType = OTHER;
                         }
                     } catch (Exception e) {
-                        databaseType = "postgresql";
+                        databaseType = OTHER;
                     }
                 }
             }
@@ -82,51 +80,47 @@ public class WorkerNodeDAO {
      */
     public void addWorkerNode(WorkerNodeEntity workerNodeEntity) {
         String dbType = getDatabaseType();
-        // 达梦数据库：需要手动生成ID（表中id列不是自增的）
-        if ("dameng".equals(dbType)) {
-            // 先查询当前最大ID
-            Long maxId = jdbcTemplate.queryForObject(
-                    """
-                            SELECT COALESCE(MAX("id"), 0) FROM "system_uid_worker_node""",
-                    Long.class
-            );
-            Long newId = (maxId != null ? maxId : 0L) + 1;
-            // 插入时显式指定ID和所有必需字段
-            String sql = """
-                    INSERT INTO "system_uid_worker_node"
-                    ("id", "worker_host", "worker_port", "node_type", "launch_date", "creator",
-                    "create_time", "updater", "update_time", "deleted")
-                    VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, 0, CURRENT_TIMESTAMP, 0, CURRENT_TIMESTAMP, 0)""";
-
-            jdbcTemplate.update(sql, newId,
-                    workerNodeEntity.getWorkerHost(),
-                    workerNodeEntity.getWorkerPort(),
-                    workerNodeEntity.getNodeType());
-
-            workerNodeEntity.setId(newId);
-            return;
-        }
-
-        // 其他数据库的处理逻辑
-        String sql;
-        if ("kingbase".equals(dbType)) {
-            // 人大金仓：显式使用序列生成ID
-            sql = """
-                    INSERT INTO "system_uid_worker_node" ("id", "worker_host", "worker_port", "node_type")
-                    VALUES (nextval('seq_system_uid_worker_node'), ?, ?, ?)""";
-        } else if ("oracle".equals(dbType)) {
-            // Oracle：显式使用序列生成ID
-            sql = """
-                    INSERT INTO "system_uid_worker_node" ("id", "worker_host", "worker_port", "node_type")
-                    VALUES (seq_system_uid_worker_node.NEXTVAL, ?, ?, ?)""";
+        if (OTHER.equals(dbType)) {
+            otherTypeDb(workerNodeEntity);
         } else {
-            // MySQL、PostgreSQL等：依赖自增主键
-            sql = """
-                    INSERT INTO "system_uid_worker_node" ("worker_host", "worker_port", "node_type")
-                    VALUES (?, ?, ?)""";
+            mysqlTypeDb(workerNodeEntity);
         }
+    }
 
-        // 使用KeyHolder获取自动生成的ID
+    private void otherTypeDb(WorkerNodeEntity workerNodeEntity) {
+        for (int i = 0; i < 10; i++) {
+            try {
+                Long maxId = jdbcTemplate.queryForObject(
+                        """
+                                SELECT MAX("id") FROM "system_uid_worker_node"
+                                """,
+                        Long.class
+                );
+                Long newId = (maxId != null ? maxId : 0L) + 1;
+                String sql = """
+                        INSERT INTO "system_uid_worker_node"
+                        ("id", "worker_host", "worker_port", "node_type", "launch_date", "creator",
+                        "create_time", "updater", "update_time", "deleted")
+                        VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, 0, CURRENT_TIMESTAMP, 0, CURRENT_TIMESTAMP, 0)""";
+                jdbcTemplate.update(sql, newId,
+                        workerNodeEntity.getWorkerHost(),
+                        workerNodeEntity.getWorkerPort(),
+                        workerNodeEntity.getNodeType());
+
+                workerNodeEntity.setId(newId);
+                return;
+            } catch (DuplicateKeyException e) {
+                // 忽略重复
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to add worker node, database type: " + databaseType, e);
+            }
+        }
+    }
+
+    private void mysqlTypeDb(WorkerNodeEntity workerNodeEntity) {
+        String sql = """
+                INSERT INTO "system_uid_worker_node" ("worker_host", "worker_port", "node_type")
+                VALUES (?, ?, ?)""";
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
