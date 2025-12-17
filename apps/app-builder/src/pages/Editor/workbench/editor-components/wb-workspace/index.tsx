@@ -1,16 +1,11 @@
 import { Divider, Form } from '@arco-design/web-react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import { useSignals } from '@preact/signals-react/runtime';
-import {
-  currentEditorSignal,
-  getWorkbenchComponentWidth,
-  COMPONENT_GROUP_NAME,
-  type GridItem,
-  useWorkbenchSignal
-} from '@onebase/ui-kit';
+import { getWorkbenchComponentWidth, COMPONENT_GROUP_NAME, type GridItem, useWorkbenchSignal } from '@onebase/ui-kit';
+import { currentEditorSignal } from '@onebase/ui-kit/src/signals/current_editor';
 import { loadMicroApp, initGlobalState, type MicroApp } from 'qiankun';
-import { EditMode } from '@onebase/common';
+import { EditMode, getMobileEditorURL } from '@onebase/common';
 import { useWorkbenchContainer } from '../../hooks/use-workbench-container';
 import { useWorkbenchHandlers } from '../../hooks/use-workbench-handlers';
 import { WorkbenchItem } from './components/workbench-item';
@@ -21,8 +16,6 @@ import styles from './index.module.less';
 import NextIcon from '@/assets/images/next_icon.svg';
 import PrevActiveIcon from '@/assets/images/prev_icon_active.svg';
 import MobileIcon from '@/assets/images/mobile_icon.svg';
-import MobileActiveIcon from '@/assets/images/mobile_icon_active.svg';
-import PCIcon from '@/assets/images/pc_icon.svg';
 import PCActiveIcon from '@/assets/images/pc_icon_active.svg';
 
 /**
@@ -30,7 +23,6 @@ import PCActiveIcon from '@/assets/images/pc_icon_active.svg';
  */
 export default function WorkbenchWorkspace() {
   const [showEmpty, setShowEmpty] = useState(true);
-  // use global editor signal for edit mode so workbench and other editors share state
   const { editMode, setEditMode } = currentEditorSignal;
   const mobileEditorDragRef = useRef<MicroApp | null>(null);
   const { containerRef, containerWidth } = useWorkbenchContainer();
@@ -48,32 +40,48 @@ export default function WorkbenchWorkspace() {
     delWbComponentSchemas,
     workbenchComponents,
     setWorkbenchComponents,
+    delWorkbenchComponents,
+    showDeleteButton,
     setShowDeleteButton
   } = useWorkbenchSignal();
 
-  const currentComponents = useMemo(() => {
-    return workbenchComponents ?? [];
-  }, [workbenchComponents]);
+  const updateComponents = setWorkbenchComponents as (items: GridItem[]) => void;
+
+  // 初始化 qiankun 全局状态，明确列出需要传递的属性
+  const qiankunActions = initGlobalState({
+    drag: true,
+    editMode,
+    setEditMode,
+    curComponentID,
+    setCurComponentID,
+    clearCurComponentID,
+    setCurComponentSchema,
+    wbComponentSchemas,
+    setWbComponentSchemas,
+    delWbComponentSchemas,
+    workbenchComponents,
+    setWorkbenchComponents,
+    delWorkbenchComponents,
+    showDeleteButton,
+    setShowDeleteButton
+  });
 
   // 处理组件列表变化
   useEffect(() => {
-    setShowEmpty(currentComponents.length === 0);
-  }, [currentComponents]);
+    setShowEmpty(workbenchComponents?.length === 0);
+  }, [workbenchComponents]);
 
   // 加载移动端拖拽子应用
   useEffect(() => {
     if (editMode.value !== EditMode.MOBILE) {
       return;
     }
-
-    console.log('loading mobile-editor-drag-list (workbench)');
-
-    const qiankunActions = initGlobalState({ drag: true });
+    console.log('loading mobile-wb-editor-drag-list');
 
     const mobileEditorDrag = loadMicroApp({
-      name: 'mobile-editor-drag-list',
-      entry: (window as any).global_config?.MOBILE_EDITOR_URL,
-      container: '#mobile-editor-drag-list',
+      name: 'mobile-wb-editor-drag-list',
+      entry: getMobileEditorURL(),
+      container: '#mobile-wb-editor-drag-list',
       props: {
         onGlobalStateChange: qiankunActions.onGlobalStateChange,
         setGlobalState: qiankunActions.setGlobalState,
@@ -97,7 +105,7 @@ export default function WorkbenchWorkspace() {
     clearCurComponentID,
     setCurComponentSchema,
     setShowDeleteButton,
-    components: currentComponents
+    workbenchComponents
   });
 
   // 获取或创建页面配置 schema
@@ -141,7 +149,7 @@ export default function WorkbenchWorkspace() {
   }, []);
 
   return editMode.value === EditMode.MOBILE ? (
-    <div id="mobile-editor-drag-list" className={styles.mobileeditordraglist}></div>
+    <div id="mobile-wb-editor-drag-list" className={styles.mobileeditordraglist}></div>
   ) : (
     <div className={styles.workbenchWorkspace}>
       <div className={styles.workspaceHeader}>
@@ -154,18 +162,8 @@ export default function WorkbenchWorkspace() {
           </div>
           <Divider type="vertical" />
           <div className={styles.pageModeCtrl}>
-            {editMode.value !== EditMode.MOBILE && (
-              <>
-                <img className={styles.pageModeIcon} src={PCActiveIcon} />
-                <img className={styles.pageModeIcon} src={MobileIcon} onClick={() => setEditMode(EditMode.MOBILE)} />
-              </>
-            )}
-            {editMode.value === EditMode.MOBILE && (
-              <>
-                <img className={styles.pageModeIcon} src={PCIcon} onClick={() => setEditMode(EditMode.PC)} />
-                <img className={styles.pageModeIcon} src={MobileActiveIcon} />
-              </>
-            )}
+            <img className={styles.pageModeIcon} src={PCActiveIcon} />
+            <img className={styles.pageModeIcon} src={MobileIcon} onClick={() => setEditMode(EditMode.MOBILE)} />
           </div>
         </div>
       </div>
@@ -174,8 +172,8 @@ export default function WorkbenchWorkspace() {
         <div ref={containerRef} className={styles.workspaceBody} id="workspace-body" onMouseDown={handleBodyMouseDown}>
           <ReactSortable
             id="workspace-content"
-            list={currentComponents}
-            setList={setWorkbenchComponents}
+            list={workbenchComponents}
+            setList={updateComponents}
             filter={SORTABLE_CONFIG.filter}
             preventOnFilter={SORTABLE_CONFIG.preventOnFilter}
             sort={SORTABLE_CONFIG.sort}
@@ -185,8 +183,8 @@ export default function WorkbenchWorkspace() {
             onStart={handlers.handleDragStart}
             group={{ name: COMPONENT_GROUP_NAME }}
           >
-            {currentComponents
-              .filter((cp: GridItem) => cp.type !== 'entity')
+            {workbenchComponents
+              ?.filter((cp: GridItem) => cp.type !== 'entity')
               .map((cp: GridItem) => {
                 const currentWidth = getWorkbenchComponentWidth(wbComponentSchemas[cp.id], cp.type);
                 const isSelected = curComponentID === cp.id;
