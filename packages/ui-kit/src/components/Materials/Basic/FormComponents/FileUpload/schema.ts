@@ -5,6 +5,13 @@ import {
   layoutConfig,
   statusConfig,
   widthConfig,
+  buttonNameConfig,
+  uploadButtonTypeConfig,
+  uploadMethodConfig,
+  showDownloadConfig,
+  labelConfig,
+  tooltipConfig,
+  verifyConfig,
   type ICommonBaseType,
   type TLayoutSelectKeyType,
   type TStatusSelectKeyType,
@@ -13,20 +20,19 @@ import {
   type TWidthSelectKeyType
 } from '../../../common';
 import {
-  CONFIG_TYPES,
   LAYOUT_OPTIONS,
   LAYOUT_VALUES,
   STATUS_OPTIONS,
   STATUS_VALUES,
   UPLOAD_OPTIONS,
   UPLOAD_VALUES,
-  UPLOAD_TYPE_OPTIONS,
   WIDTH_OPTIONS,
   WIDTH_VALUES,
   UPLOAD_BUTTON_TYPES
 } from '../../../constants';
 import type {
   IBooleanConfigType,
+  ICommonConfigType,
   IDataFieldConfigType,
   ILabelConfigType,
   ILayoutConfigType,
@@ -63,6 +69,7 @@ export type TXInputFileUploadEditData = Array<
   | IStatusConfigType<TStatusSelectKeyType>
   | ILayoutConfigType<TLayoutSelectKeyType>
   | IWidthConfigType<TWidthSelectKeyType>
+  | ICommonConfigType
 >;
 
 export interface XInputFileUploadConfig extends ICommonBaseType {
@@ -133,71 +140,14 @@ export interface XInputFileUploadConfig extends ICommonBaseType {
 const XFileUpload: XInputFileUploadSchema = {
   editData: [
     ...baseConfig,
-    {
-      key: 'label',
-      name: '标题',
-      type: CONFIG_TYPES.LABEL_INPUT
-    },
-    {
-      key: 'tooltip',
-      name: '描述信息',
-      type: CONFIG_TYPES.TOOLTIP_INPUT
-    },
+    labelConfig,
+    tooltipConfig,
     ...dataFieldConfig,
-    {
-      key: 'uploadType',
-      name: '上传方式',
-      type: CONFIG_TYPES.STATUS_RADIO,
-      range: [
-        {
-          key: UPLOAD_OPTIONS.TEXT,
-          text: UPLOAD_TYPE_OPTIONS.TEXT,
-          value: UPLOAD_VALUES[UPLOAD_OPTIONS.TEXT]
-        },
-        {
-          key: UPLOAD_OPTIONS.LIST,
-          text: UPLOAD_TYPE_OPTIONS.LIST,
-          value: UPLOAD_VALUES[UPLOAD_OPTIONS.LIST]
-        },
-      ]
-    },
-    {
-      key: 'buttonName',
-      name: '按钮名称',
-      type: CONFIG_TYPES.TEXT_INPUT
-    },
-    {
-      key: 'buttonType',
-      name: '按钮类型',
-      type: CONFIG_TYPES.STATUS_RADIO,
-      range: [
-        {
-          key: UPLOAD_BUTTON_TYPES.PRIMARY,
-          text: '主要按钮',
-          value: UPLOAD_BUTTON_TYPES.PRIMARY
-        },
-        {
-          key: UPLOAD_BUTTON_TYPES.SECONDARY,
-          text: '次要按钮',
-          value: UPLOAD_BUTTON_TYPES.SECONDARY
-        },
-        {
-          key: UPLOAD_BUTTON_TYPES.OUTLINE,
-          text: '线框按钮',
-          value: UPLOAD_BUTTON_TYPES.OUTLINE
-        }
-      ]
-    },
-    {
-      key: 'showDownload',
-      name: '列表页支持下载',
-      type: CONFIG_TYPES.SWITCH_INPUT
-    },
-    {
-      key: 'verify',
-      name: '校验',
-      type: CONFIG_TYPES.VERIFY
-    },
+    uploadMethodConfig,
+    buttonNameConfig,
+    uploadButtonTypeConfig,
+    showDownloadConfig,
+    verifyConfig,
     statusConfig,
     layoutConfig,
     widthConfig

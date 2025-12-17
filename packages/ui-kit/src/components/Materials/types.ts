@@ -23,7 +23,7 @@ export interface ICommonConfigType {
 }
 
 // 文本输入框配置
-export interface ITextConfigType {
+export interface ITextConfigType extends ICommonConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.TEXT_INPUT;
@@ -31,7 +31,7 @@ export interface ITextConfigType {
 }
 
 // 数字输入框配置
-export interface INumberConfigType {
+export interface INumberConfigType extends ICommonConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.NUMBER_INPUT;
@@ -40,14 +40,14 @@ export interface INumberConfigType {
 }
 
 // 文本区域输入框配置
-export interface ITextAreaConfigType {
+export interface ITextAreaConfigType extends ICommonConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.TEXT_AREA_INPUT;
 }
 
 // 下拉框配置
-export interface ISelectConfigType<KeyType> {
+export interface ISelectConfigType<KeyType> extends ICommonConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.SELECT_INPUT;
@@ -58,38 +58,38 @@ export interface ISelectConfigType<KeyType> {
   }>;
 }
 
-export interface IDynamicSelectConfigType {
+export interface IDynamicSelectConfigType extends ICommonConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.DYNAMIC_SELECT_INPUT;
 }
 
-export interface IDataFieldConfigType {
+export interface IDataFieldConfigType extends ICommonConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.FIELD_DATA;
 }
 
-export interface IRelatedFormDataConfigType {
+export interface IRelatedFormDataConfigType extends ICommonConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.RELATED_FORM_DATA;
 }
 
-export interface ITableDataConfigType {
+export interface ITableDataConfigType extends ICommonConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.TABLE_DATA;
   advanced?: boolean;
 }
 
-export interface IRadioDataConfigType {
+export interface IRadioDataConfigType extends ICommonConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.RADIO_DATA;
 }
 
-export interface ICheckboxDataConfigType {
+export interface ICheckboxDataConfigType extends ICommonConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.CHECKBOX_DATA;
@@ -102,7 +102,7 @@ export interface ICheckboxDataConfigType {
 //   type: typeof CONFIG_TYPES.SEARCH_ITEM_LIST;
 // }
 
-export interface IBooleanConfigType {
+export interface IBooleanConfigType extends ICommonConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.SWITCH_INPUT;
@@ -114,7 +114,7 @@ export interface IBooleanConfigType {
  * */
 
 // Label配置
-export interface ILabelConfigType {
+export interface ILabelConfigType extends ICommonConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.LABEL_INPUT;
@@ -122,7 +122,7 @@ export interface ILabelConfigType {
 }
 
 // 占位符配置
-export interface IPlaceholderConfigType {
+export interface IPlaceholderConfigType extends ICommonConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.PLACEHOLDER_INPUT;
@@ -130,7 +130,7 @@ export interface IPlaceholderConfigType {
 }
 
 // 提示配置
-export interface ITooltipConfigType {
+export interface ITooltipConfigType extends ICommonConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.TOOLTIP_INPUT;
@@ -138,7 +138,7 @@ export interface ITooltipConfigType {
 }
 
 // 状态配置
-export interface IStatusConfigType<KeyType> {
+export interface IStatusConfigType<KeyType> extends ICommonConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.STATUS_RADIO;
@@ -150,26 +150,26 @@ export interface IStatusConfigType<KeyType> {
 }
 
 // 数据选择方式配置（下拉框/弹窗）
-export interface IDataSelectModeConfigType {
+export interface IDataSelectModeConfigType extends ICommonConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.DATA_SELECT_MODE;
   range: Array<any>;
 }
 
-export interface IImageConfigType {
+export interface IImageConfigType extends ICommonConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.IMAGE;
 }
-export interface IFileConfigType {
+export interface IFileConfigType extends ICommonConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.FILE;
 }
 
 // 宽度配置
-export interface IWidthConfigType<KeyType> {
+export interface IWidthConfigType<KeyType> extends ICommonConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.WIDTH_RADIO;
@@ -181,14 +181,14 @@ export interface IWidthConfigType<KeyType> {
 }
 
 // 是否必填配置
-export interface IRequiredCheckboxConfigType {
+export interface IRequiredCheckboxConfigType extends ICommonConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.REQUIRED_CHECKBOX;
 }
 
 // 布局列数配置
-export interface IColumnCountConfigType<KeyType> {
+export interface IColumnCountConfigType<KeyType> extends ICommonConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.COLUMN_COUNT_RADIO;
@@ -207,7 +207,7 @@ export interface IColumnCountConfigType<KeyType> {
 // }
 
 // 状态配置
-export interface ITablePagePositionConfigType<KeyType> {
+export interface ITablePagePositionConfigType<KeyType> extends ICommonConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.TABLE_PAGE_POSITION_RADIO;
@@ -219,35 +219,35 @@ export interface ITablePagePositionConfigType<KeyType> {
 }
 
 // 表格分页
-export interface ITablePageSizeConfigType {
+export interface ITablePageSizeConfigType extends ICommonConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.TABLE_PAGE_SIZE;
 }
 
 // 文件上传大小限制
-export interface IUploadSizeConfigType {
+export interface IUploadSizeConfigType extends ICommonConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.UPLOAD_SIZE;
 }
 
 // 文件上传数量限制
-export interface IUploadLimitConfigType {
+export interface IUploadLimitConfigType extends ICommonConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.UPLOAD_LIMIT;
 }
 
 // 图片压缩率
-export interface IUploadCompressConfigType {
+export interface IUploadCompressConfigType extends ICommonConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.UPLOAD_COMPRESS;
 }
 
 // 日期格式
-export interface IDateTypeConfigType<KeyType> {
+export interface IDateTypeConfigType<KeyType> extends ICommonConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.DATE_TYPE;
@@ -259,7 +259,7 @@ export interface IDateTypeConfigType<KeyType> {
 }
 
 // 表单布局方式
-export interface ILayoutConfigType<KeyType> {
+export interface ILayoutConfigType<KeyType> extends ICommonConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.FORM_LAYOUT;
@@ -271,7 +271,7 @@ export interface ILayoutConfigType<KeyType> {
 }
 
 // 文本对齐方式
-export interface IAlignConfigType<KeyType> {
+export interface IAlignConfigType<KeyType> extends ICommonConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.TEXT_ALIGN;
@@ -283,7 +283,7 @@ export interface IAlignConfigType<KeyType> {
 }
 
 // 颜色配置
-export interface IColorConfigType {
+export interface IColorConfigType extends ICommonConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.COLOR;
@@ -291,34 +291,34 @@ export interface IColorConfigType {
 }
 
 // 日期
-export interface IDateConfigType {
+export interface IDateConfigType extends ICommonConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.DATE_INPUT;
 }
 
 // 轮播图配置
-export interface ICarouselConfigType {
+export interface ICarouselConfigType extends ICommonConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.CAROUSEL;
 }
 
 // 安全配置
-export interface ISecurityConfigType {
+export interface ISecurityConfigType extends ICommonConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.SECURITY;
 }
 
 // 校验配置
-export interface IVerifyConfigType {
+export interface IVerifyConfigType extends ICommonConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.VERIFY;
 }
 
-export interface INumberFormatConfigType {
+export interface INumberFormatConfigType extends ICommonConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.NUMBER_FORMAT;
@@ -332,13 +332,13 @@ export interface INumberFormatConfigType {
 //   placeholder?: string;
 // }
 
-export interface ISelectOptionsConfigType {
+export interface ISelectOptionsConfigType extends ICommonConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.SELECT_OPTIONS_INPUT;
   placeholder?: string;
 }
-export interface IMutipleSelectOptionsConfigType {
+export interface IMutipleSelectOptionsConfigType extends ICommonConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.MUTIPLE_SELECT_OPTIONS_INPUT;
@@ -346,28 +346,28 @@ export interface IMutipleSelectOptionsConfigType {
 }
 
 // 数据选择 数据源
-export interface ISelectDataSourceConfigType {
+export interface ISelectDataSourceConfigType extends ICommonConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.SELECT_DATA_SOURCE;
 }
 
 // 子表子组件配置
-export interface ISubTableConfigType {
+export interface ISubTableConfigType extends ICommonConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.SUB_TABLE;
 }
 
 // 页签组件配置
-export interface ITabsConfigType {
+export interface ITabsConfigType extends ICommonConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.TABS;
 }
 
 // 页签组件类型
-export interface ITabsTypeConfigType<KeyType> {
+export interface ITabsTypeConfigType<KeyType> extends ICommonConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.TABS_TYPE;
@@ -379,7 +379,7 @@ export interface ITabsTypeConfigType<KeyType> {
 }
 
 // 页签组件位置
-export interface ITabsPositionConfigType<KeyType> {
+export interface ITabsPositionConfigType<KeyType> extends ICommonConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.TABS_POSITION;
@@ -391,7 +391,7 @@ export interface ITabsPositionConfigType<KeyType> {
 }
 
 // 折叠配置
-export interface ICollapsedConfigType<KeyType> {
+export interface ICollapsedConfigType<KeyType> extends ICommonConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.COLLAPSED;
@@ -401,13 +401,13 @@ export interface ICollapsedConfigType<KeyType> {
     value: KeyType;
   }>;
 }
-export interface ICollapsedStyleConfig {
+export interface ICollapsedStyleConfig extends ICommonConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.COLLAPSED_STYLE;
 }
 
-export interface ITableOperationConfigType {
+export interface ITableOperationConfigType extends ICommonConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.TABLE_OPERATION;
@@ -415,7 +415,7 @@ export interface ITableOperationConfigType {
 }
 
 // 按钮权限配置
-export interface ITableButtonConfigType<KeyType> {
+export interface ITableButtonConfigType<KeyType> extends ICommonConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.TABLE_BUTTON;
@@ -428,20 +428,20 @@ export interface ITableButtonConfigType<KeyType> {
 }
 
 // 自动编号规则配置
-export interface IAutoCodeConfigType {
+export interface IAutoCodeConfigType extends ICommonConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.AUTO_CODE_RULES;
 }
 
-export interface IImageHandleConfigType {
+export interface IImageHandleConfigType extends ICommonConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.IMAGE_HANDLE;
 }
 
 // 日期格式
-export interface IDateFormatConfigType {
+export interface IDateFormatConfigType<KeyType> extends ICommonConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.DATE_FORMAT;
@@ -452,14 +452,14 @@ export interface IDateFormatConfigType {
 }
 
 // 日期可选范围
-export interface IDateRangeConfigType {
+export interface IDateRangeConfigType extends ICommonConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.DATE_RANGE;
 }
 
 // 时间格式
-export interface ITimeFormatConfigType {
+export interface ITimeFormatConfigType<KeyType> extends ICommonConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.TIME_FORMAT;
@@ -469,7 +469,7 @@ export interface ITimeFormatConfigType {
   }>;
 }
 // 时间可选范围
-export interface ITimeRangeConfigType {
+export interface ITimeRangeConfigType extends ICommonConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.TIME_RANGE;
@@ -477,21 +477,21 @@ export interface ITimeRangeConfigType {
 
 
 // 填充文本 switch
-export interface ISwitchFillTextConfigType {
+export interface ISwitchFillTextConfigType extends ICommonConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.SWITCH_FILL_TEXT;
 }
 
 // 默认值
-export interface IDefaultValueConfigType {
+export interface IDefaultValueConfigType extends ICommonConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.DEFAULT_VALUE;
   valueType?: string;
 }
 // 电话类型
-export interface IPhoneType {
+export interface IPhoneType extends ICommonConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.PHONE_TYPE;
@@ -502,14 +502,14 @@ export interface IPhoneType {
 }
 
 // 分割线字段描述
-export interface IDividerTooltipConfigType {
+export interface IDividerTooltipConfigType extends ICommonConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.DIVIDER_TOOLTIP_INPUT;
 }
 
 // 分割线样式
-export interface IDividerStyleTypeConfigType {
+export interface IDividerStyleTypeConfigType extends ICommonConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.DIVIDER_STYLE_TYPE;

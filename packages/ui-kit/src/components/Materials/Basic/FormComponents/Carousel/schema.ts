@@ -6,6 +6,11 @@ import {
   layoutConfig,
   statusConfig,
   widthConfig,
+  labelConfig,
+  tooltipConfig,
+  autoplayConfig,
+  carouselIntervalConfig,
+  verifyConfig,
   type ICommonBaseType,
   type TAlignSelectKeyType,
   type TFillSelectKeyType,
@@ -27,6 +32,7 @@ import {
 import type {
   IBooleanConfigType,
   ICarouselConfigType,
+  ICommonConfigType,
   ILabelConfigType,
   ILayoutConfigType,
   INumberConfigType,
@@ -63,6 +69,7 @@ export type TXCarouselEditData = Array<
   | ITextAreaConfigType
   | ILabelConfigType
   | ITooltipConfigType
+  | ICommonConfigType
 >;
 
 interface Images {
@@ -136,33 +143,13 @@ export interface XCarouselConfig extends ICommonBaseType {
 const XCarousel: XCarouselSchema = {
   editData: [
     ...baseConfig,
-    {
-      key: 'label',
-      name: '标题',
-      type: CONFIG_TYPES.LABEL_INPUT
-    },
-    {
-      key: 'tooltip',
-      name: '描述信息',
-      type: CONFIG_TYPES.TOOLTIP_INPUT
-    },
+    labelConfig,
+    tooltipConfig,
     carouselConfig,
-    {
-      key: 'autoplay',
-      name: '自动轮播',
-      type: CONFIG_TYPES.SWITCH_INPUT
-    },
-    {
-      key: 'interval',
-      name: '轮播间隔',
-      type: CONFIG_TYPES.NUMBER_INPUT
-    },
+    autoplayConfig,
+    carouselIntervalConfig,
     fillConfig,
-    {
-      key: 'verify',
-      name: '校验',
-      type: CONFIG_TYPES.VERIFY
-    },
+    verifyConfig,
     statusConfig,
     layoutConfig,
     widthConfig

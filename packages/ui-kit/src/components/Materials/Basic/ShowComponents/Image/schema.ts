@@ -16,6 +16,7 @@ import type {
   IStatusConfigType,
   ITextConfigType,
   IWidthConfigType,
+  ICommonConfigType,
   TNumberDefaultType,
   TRadioDefaultType,
   TSelectDefaultType,
@@ -29,7 +30,7 @@ export interface XImageSchema {
 
 export type TXImageEditData = Array<
   ITextConfigType | IWidthConfigType<TWidthSelectKeyType> | IStatusConfigType<TStatusSelectKeyType> | IBooleanConfigType |
-  IStatusConfigType<TFillSelectKeyType> | IImageConfigType
+  IStatusConfigType<TFillSelectKeyType> | IImageConfigType | ICommonConfigType
 >;
 
 interface Images {

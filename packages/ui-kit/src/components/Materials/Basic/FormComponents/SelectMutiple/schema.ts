@@ -6,12 +6,15 @@ import {
   layoutConfig,
   statusConfig,
   widthConfig,
+  mutipleSelectOptionsConfig,
+  labelConfig,
+  tooltipConfig,
+  verifyConfig,
   type ICommonBaseType,
   type TLayoutSelectKeyType,
   type TStatusSelectKeyType,
   type TAlignSelectKeyType,
-  type TWidthSelectKeyType,
-  mutipleSelectOptionsConfig
+  type TWidthSelectKeyType
 } from '../../../common';
 import {
   ALIGN_VALUES,
@@ -35,6 +38,7 @@ import type {
   ITooltipConfigType,
   IVerifyConfigType,
   IWidthConfigType,
+  ICommonConfigType,
   TBooleanDefaultType,
   TSelectDefaultType,
   TTextAreaDefaultType,
@@ -60,6 +64,8 @@ export type TXInputSelectMutipleEditData = Array<
   | IAlignConfigType<TAlignSelectKeyType>
   | ILayoutConfigType<TLayoutSelectKeyType>
   | IWidthConfigType<TWidthSelectKeyType>
+  | any
+  | ICommonConfigType
 >;
 
 export interface XInputSelectMutipleConfig extends ICommonBaseType {
@@ -128,26 +134,14 @@ export interface XInputSelectMutipleConfig extends ICommonBaseType {
 const XSelectMutiple: XInputSelectMutipleSchema = {
   editData: [
     ...baseConfig,
-    {
-      key: 'label',
-      name: '标题',
-      type: CONFIG_TYPES.LABEL_INPUT
-    },
-    {
-      key: 'tooltip',
-      name: '字段描述',
-      type: CONFIG_TYPES.TOOLTIP_INPUT
-    },
+    labelConfig,
+    tooltipConfig,
     //  数据绑定
     ...dataFieldConfig,
     // 选项
     mutipleSelectOptionsConfig,
     // 选项分布方式
-    {
-      key: 'verify',
-      name: '校验',
-      type: CONFIG_TYPES.VERIFY
-    },
+    verifyConfig,
     // 显示状态
     statusConfig,
     // 对齐方式

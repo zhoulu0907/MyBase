@@ -13,6 +13,7 @@ import type {
   IBooleanConfigType,
   ITextConfigType,
   IWidthConfigType,
+  ICommonConfigType,
   TSelectDefaultType,
   IColorConfigType
 } from '../../../types';
@@ -23,7 +24,7 @@ export interface XPlaceholderSchema {
 }
 
 export type TPlaceholderEditData = Array<
-  ITextConfigType | IWidthConfigType<TWidthSelectKeyType> | IBooleanConfigType | IColorConfigType
+  ITextConfigType | IWidthConfigType<TWidthSelectKeyType> | IBooleanConfigType | IColorConfigType | ICommonConfigType
 >;
 
 export interface XPlaceholderConfig extends ICommonBaseType {

@@ -462,8 +462,137 @@ export const COLOR_MODE_TYPES = {
   POINT: 'point'
 }
 
-// 
+// 默认选项类型
 export const DEFAULT_OPTIONS_TYPE = {
   CUSTOM: 'CUSTOM',
   DICT: 'DICT'
 } as const;
+// ---------------------------------------------
+// 通用：值集合构造器（减少 OPTIONS/VALUES 重复）
+// ---------------------------------------------
+export function createOptionSet<const T extends Record<string, string>>(values: T) {
+  type Value = T[keyof T];
+  const list = Object.values(values) as Value[];
+  const api = {
+    values,
+    list,
+    is(v: string): v is Value { return list.includes(v as Value); }
+  } as T & { values: T; list: Value[]; is(v: string): v is Value };
+  for (const k in values) {
+    (api as any)[k] = values[k];
+  }
+  return api;
+}
+
+// ---------------------------------------------
+// 表单布局与对齐
+// ---------------------------------------------
+export const FormLayout = createOptionSet({
+  HORIZONTAL: 'horizontal',
+  VERTICAL: 'vertical'
+});
+export type FormLayoutValue = (typeof FormLayout.list)[number];
+
+export const TextAlign = createOptionSet({
+  LEFT: 'left',
+  CENTER: 'center',
+  RIGHT: 'right'
+});
+export type TextAlignValue = (typeof TextAlign.list)[number];
+
+// ---------------------------------------------
+// 状态与宽度
+// ---------------------------------------------
+export const FieldStatus = createOptionSet({
+  DEFAULT: 'default',
+  READONLY: 'readonly',
+  HIDDEN: 'hidden'
+});
+export type FieldStatusValue = (typeof FieldStatus.list)[number];
+
+export const FieldWidth = createOptionSet({
+  QUARTER: '25%',
+  THIRD: '33.33%',
+  HALF: '50%',
+  TWO_THIRDS: '66.66%',
+  THREE_QUARTERS: '75%',
+  FULL: '100%'
+});
+export type FieldWidthValue = (typeof FieldWidth.list)[number];
+
+// ---------------------------------------------
+// 分页位置
+// ---------------------------------------------
+export const PaginationPosition = createOptionSet({
+  BR: 'br',
+  BL: 'bl',
+  TR: 'tr',
+  TL: 'tl',
+  TOP_CENTER: 'topCenter',
+  BOTTOM_CENTER: 'bottomCenter'
+});
+export type PaginationPositionValue = (typeof PaginationPosition.list)[number];
+
+// ---------------------------------------------
+// 上传：展示、触发、按钮类型
+// ---------------------------------------------
+export const UploadDisplay = createOptionSet({
+  TEXT: 'text',
+  LIST: 'picture-list',
+  CARD: 'picture-card'
+});
+export const UploadTrigger = createOptionSet({
+  CLICK: 'click',
+  DRAG: 'drag'
+});
+export const UploadButtonType = createOptionSet({
+  PRIMARY: 'primary',
+  SECONDARY: 'secondary',
+  DASHED: 'dashed',
+  OUTLINE: 'outline',
+  TEXT: 'text'
+});
+
+// ---------------------------------------------
+// 日期与时间
+// ---------------------------------------------
+export const DateValue = createOptionSet({
+  YEAR: 'year',
+  MONTH: 'month',
+  DATE: 'date',
+  FULL: 'full'
+});
+export const TimeValue = createOptionSet({
+  HOUR: 'hour',
+  MINUTE: 'minute',
+  SECOND: 'second'
+});
+export const DATE_FORMAT_COMPACT: Record<(typeof DateValue.list)[number], string> = {
+  year: 'YYYY',
+  month: 'YYYY-MM',
+  date: 'YYYY-MM-DD',
+  full: 'YYYY-MM-DD HH:mm:ss'
+};
+export const TIME_FORMAT_COMPACT: Record<(typeof TimeValue.list)[number], string> = {
+  hour: 'HH',
+  minute: 'HH:mm',
+  second: 'HH:mm:ss'
+};
+
+// ---------------------------------------------
+// 页签
+// ---------------------------------------------
+export const TabsType = createOptionSet({
+  LINE: 'line',
+  CARD: 'card',
+  CARD_GUTTER: 'card-gutter',
+  TEXT: 'text',
+  ROUNDED: 'rounded',
+  CAPSULE: 'capsule'
+});
+export const TabsPosition = createOptionSet({
+  TOP: 'top',
+  BOTTOM: 'bottom',
+  LEFT: 'left',
+  RIGHT: 'right'
+});

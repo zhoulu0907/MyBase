@@ -3,10 +3,16 @@ import {
   baseConfig,
   baseDefault,
   dataFieldConfig,
-  defaultValueConfig,
+  defaultPhoneValueConfig,
   layoutConfig,
   statusConfig,
   widthConfig,
+  labelConfig,
+  placeholderConfig,
+  tooltipConfig,
+  verifyConfig,
+  securityConfig,
+  phoneTypeConfig,
   type ICommonBaseType,
   type TAlignSelectKeyType,
   type TLayoutSelectKeyType,
@@ -38,6 +44,7 @@ import type {
   ITooltipConfigType,
   IVerifyConfigType,
   IWidthConfigType,
+  ICommonConfigType,
   TBooleanDefaultType,
   TSelectDefaultType,
   TTextAreaDefaultType,
@@ -68,6 +75,7 @@ export type TXInputPhoneEditData = Array<
   | ILayoutConfigType<TLayoutSelectKeyType>
   | ISecurityConfigType
   | IWidthConfigType<TWidthSelectKeyType>
+  | ICommonConfigType
 >;
 
 export interface XInputPhoneConfig extends ICommonBaseType {
@@ -153,55 +161,22 @@ export interface XInputPhoneConfig extends ICommonBaseType {
 const XInputPhone: XInputPhoneSchema = {
   editData: [
     ...baseConfig,
-    {
-      key: 'label',
-      name: '标题',
-      type: CONFIG_TYPES.LABEL_INPUT
-    },
-    {
-      key: 'placeholder',
-      name: '占位提示',
-      type: CONFIG_TYPES.PLACEHOLDER_INPUT
-    },
-    {
-      key: 'tooltip',
-      name: '字段描述',
-      type: CONFIG_TYPES.TOOLTIP_INPUT
-    },
+    labelConfig,
+    placeholderConfig,
+    tooltipConfig,
     //  数据绑定
     ...dataFieldConfig,
     // 默认值
-    {
-      key: 'defaultValueConfig',
-      name: '默认值',
-      type: CONFIG_TYPES.DEFAULT_VALUE,
-      valueType: 'phone'
-    },
-    {
-      key: 'phoneType',
-      name: '类型',
-      type: CONFIG_TYPES.PHONE_TYPE,
-      range: [
-        { label: '手机', value: PHONE_TYPE.MOBILE },
-        { label: '座机', value: PHONE_TYPE.LANDLINE },
-      ]
-    },
-    {
-      key: 'verify',
-      name: '校验',
-      type: CONFIG_TYPES.VERIFY
-    },
+    defaultPhoneValueConfig,
+    phoneTypeConfig,
+    verifyConfig,
     // 显示状态
     statusConfig,
     // 对齐方式
     alignConfig,
     // 布局方式
     layoutConfig,
-    {
-      key: 'security',
-      name: '安全',
-      type: CONFIG_TYPES.SECURITY
-    },
+    securityConfig,
     // 字段宽度
     widthConfig
   ],

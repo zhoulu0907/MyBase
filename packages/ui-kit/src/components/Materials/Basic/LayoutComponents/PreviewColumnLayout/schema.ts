@@ -1,13 +1,13 @@
-import { baseConfig, baseDefault, widthConfig, type ICommonBaseType } from 'src/components/Materials/common';
+import { baseConfig, baseDefault, widthConfig, columnCountConfig, type ICommonBaseType } from 'src/components/Materials/common';
 import {
     COLUMN_COUNT_OPTIONS,
     COLUMN_COUNT_VALUES,
-    CONFIG_TYPES,
     WIDTH_OPTIONS,
     WIDTH_VALUES
 } from 'src/components/Materials/constants';
 import type {
     IColumnCountConfigType,
+    ICommonConfigType,
     ILabelConfigType,
     ISelectConfigType,
     ITextConfigType,
@@ -25,6 +25,7 @@ export type TColumnLayoutEditData = Array<
   | IWidthConfigType<TColumnLayouTWidthSelectKeyType>
   | ILabelConfigType
   | ISelectConfigType<TColumnLayouTWidthSelectKeyType | TColumnCountSelectKeyType>
+  | ICommonConfigType
 >;
 
 export interface XColumnLayoutConfig extends ICommonBaseType {
@@ -48,33 +49,7 @@ export interface XColumnLayoutSchema {
 const XColumnLayout: XColumnLayoutSchema = {
   editData: [
     ...baseConfig,
-    {
-      key: 'colCount',
-      name: '列数',
-      type: CONFIG_TYPES.COLUMN_COUNT_RADIO,
-      range: [
-        {
-          key: String(COLUMN_COUNT_OPTIONS.ONE),
-          text: String(COLUMN_COUNT_OPTIONS.ONE),
-          value: COLUMN_COUNT_VALUES[COLUMN_COUNT_OPTIONS.ONE]
-        },
-        {
-          key: String(COLUMN_COUNT_OPTIONS.TWO),
-          text: String(COLUMN_COUNT_OPTIONS.TWO),
-          value: COLUMN_COUNT_VALUES[COLUMN_COUNT_OPTIONS.TWO]
-        },
-        {
-          key: String(COLUMN_COUNT_OPTIONS.THREE),
-          text: String(COLUMN_COUNT_OPTIONS.THREE),
-          value: COLUMN_COUNT_VALUES[COLUMN_COUNT_OPTIONS.THREE]
-        },
-        {
-          key: String(COLUMN_COUNT_OPTIONS.FOUR),
-          text: String(COLUMN_COUNT_OPTIONS.FOUR),
-          value: COLUMN_COUNT_VALUES[COLUMN_COUNT_OPTIONS.FOUR]
-        }
-      ]
-    },
+    columnCountConfig,
     widthConfig
   ],
   config: {

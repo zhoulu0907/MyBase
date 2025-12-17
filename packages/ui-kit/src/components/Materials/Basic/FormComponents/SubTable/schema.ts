@@ -5,6 +5,9 @@ import {
   statusConfig,
   subTableConfig,
   widthConfig,
+  labelConfig,
+  tooltipConfig,
+  verifyConfig,
   type ICommonBaseType,
   type TLayoutSelectKeyType,
   type TStatusSelectKeyType,
@@ -30,6 +33,7 @@ import type {
   ITooltipConfigType,
   IVerifyConfigType,
   IWidthConfigType,
+  ICommonConfigType,
   TBooleanDefaultType,
   TSelectDefaultType,
   TTextAreaDefaultType,
@@ -51,6 +55,7 @@ export type TColumnLayoutEditData = Array<
   | ITooltipConfigType
   | INumberConfigType
   | ISubTableConfigType
+  | ICommonConfigType
 >;
 
 export interface XSubTableConfig extends ICommonBaseType {
@@ -114,21 +119,9 @@ export interface XSubTableSchema {
 const XSubTable: XSubTableSchema = {
   editData: [
     ...baseConfig,
-    {
-      key: 'label',
-      name: '标题',
-      type: CONFIG_TYPES.LABEL_INPUT
-    },
-    {
-      key: 'tooltip',
-      name: '描述信息',
-      type: CONFIG_TYPES.TOOLTIP_INPUT
-    },
-    {
-      key: 'verify',
-      name: '校验',
-      type: CONFIG_TYPES.VERIFY
-    },
+    labelConfig,
+    tooltipConfig,
+    verifyConfig,
     subTableConfig,
     layoutConfig,
     widthConfig

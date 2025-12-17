@@ -8,6 +8,9 @@ import {
   radioDataConfig,
   statusConfig,
   widthConfig,
+  labelConfig,
+  tooltipConfig,
+  verifyConfig,
   type ICommonBaseType,
   type TLayoutSelectKeyType,
   type TStatusSelectKeyType,
@@ -38,6 +41,7 @@ import type {
   ITooltipConfigType,
   IVerifyConfigType,
   IWidthConfigType,
+  ICommonConfigType,
   TBooleanDefaultType,
   TSelectDefaultType,
   TTextAreaDefaultType,
@@ -61,6 +65,7 @@ export type TXInputRadioEditData = Array<
   | IAlignConfigType<TAlignSelectKeyType>
   | ILayoutConfigType<TLayoutSelectKeyType>
   | IWidthConfigType<TWidthSelectKeyType>
+  | ICommonConfigType
 >;
 
 export interface XInputRadioConfig extends ICommonBaseType {
@@ -136,27 +141,15 @@ export interface XInputRadioConfig extends ICommonBaseType {
 const XRadio: XInputRadioSchema = {
   editData: [
     ...baseConfig,
-    {
-      key: 'label',
-      name: '标题',
-      type: CONFIG_TYPES.LABEL_INPUT
-    },
-    {
-      key: 'tooltip',
-      name: '字段描述',
-      type: CONFIG_TYPES.TOOLTIP_INPUT
-    },
+    labelConfig,
+    tooltipConfig,
     //  数据绑定
     ...dataFieldConfig,
     // 选项
     radioDataConfig,
     // 选项分布方式
     directionConfig,
-    {
-      key: 'verify',
-      name: '校验',
-      type: CONFIG_TYPES.VERIFY
-    },
+    verifyConfig,
     // 显示状态
     statusConfig,
     // 对齐方式

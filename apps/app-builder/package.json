@@ -45,6 +45,7 @@
     "@onebase/common": "workspace:*",
     "@onebase/platform-center": "workspace:*",
     "@onebase/ui-kit": "workspace:*",
+    "@ob/plugin": "workspace:*",
     "@preact/signals-react": "^3.2.1",
     "@prettier/plugin-oxc": "^0.0.4",
     "@qiankunjs/react": "0.0.1-rc.14",

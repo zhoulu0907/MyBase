@@ -4,15 +4,18 @@ import {
   dataFieldConfig,
   layoutConfig,
   selectDataResourceConfig,
+  dataSelectModeConfig,
   statusConfig,
   widthConfig,
+  labelConfig,
+  tooltipConfig,
+  verifyConfig,
   type ICommonBaseType,
   type TLayoutSelectKeyType,
   type TStatusSelectKeyType,
   type TWidthSelectKeyType
 } from '../../../common';
 import {
-  CONFIG_TYPES,
   LAYOUT_OPTIONS,
   LAYOUT_VALUES,
   PAGINATION_POSITION_OPTIONS,
@@ -38,6 +41,7 @@ import type {
   ITooltipConfigType,
   IVerifyConfigType,
   IWidthConfigType,
+  ICommonConfigType,
   TBooleanDefaultType,
   TNumberDefaultType,
   TSelectDefaultType,
@@ -67,6 +71,7 @@ export type TXDataSelectEditData = Array<
   | IVerifyConfigType
   | ISelectDataSourceConfigType
   | IDataSelectModeConfigType
+  | ICommonConfigType
 >;
 
 export type TSelectMethodKeyType = 'dropdown' | 'modal';
@@ -179,32 +184,12 @@ export interface XDataSelectConfig extends ICommonBaseType {
 const XDataSelect: XDataSelectSchema = {
   editData: [
     ...baseConfig,
-    {
-      key: 'label',
-      name: '标题',
-      type: CONFIG_TYPES.LABEL_INPUT
-    },
-    {
-      key: 'tooltip',
-      name: '描述信息',
-      type: CONFIG_TYPES.TOOLTIP_INPUT
-    },
+    labelConfig,
+    tooltipConfig,
     ...dataFieldConfig,
-    {
-      key: 'selectMethod',
-      name: '数据选择方式',
-      type: CONFIG_TYPES.DATA_SELECT_MODE,
-      range: [
-        { key: 'dropdown', text: '下拉框', value: 'dropdown', default: true },
-        { key: 'modal', text: '弹窗', value: 'modal' }
-      ]
-    },
+    dataSelectModeConfig,
     selectDataResourceConfig,
-    {
-      key: 'verify',
-      name: '校验',
-      type: CONFIG_TYPES.VERIFY
-    },
+    verifyConfig,
     statusConfig,
     layoutConfig,
     widthConfig

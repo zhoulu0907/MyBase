@@ -7,6 +7,13 @@ import {
   layoutConfig,
   statusConfig,
   widthConfig,
+  labelConfig,
+  textDefaultValueConfig,
+  placeholderConfig,
+  tooltipConfig,
+  maxLengthConfig,
+  colorConfig,
+  bgColorConfig,
   type ICommonBaseType,
   type TAlignSelectKeyType,
   type TLayoutSelectKeyType,
@@ -38,6 +45,7 @@ import type {
   ITextConfigType,
   ITooltipConfigType,
   IWidthConfigType,
+  ICommonConfigType,
   TBooleanDefaultType,
   TNumberDefaultType,
   TRadioDefaultType,
@@ -70,6 +78,7 @@ export type TXStaticTextEditData = Array<
   | IAlignConfigType<TAlignSelectKeyType>
   | IColorConfigType
   | IDataFieldConfigType
+  | ICommonConfigType
 >;
 
 export interface XStaticTextConfig extends ICommonBaseType {
@@ -155,49 +164,21 @@ export interface XStaticTextConfig extends ICommonBaseType {
 const XStaticText: XStaticTextSchema = {
   editData: [
     ...baseConfig,
-    {
-      key: 'label',
-      name: '标题',
-      type: CONFIG_TYPES.LABEL_INPUT
-    },
+    labelConfig,
     ...dataFieldConfig,
-    {
-      key: 'defaultValue',
-      name: '默认值',
-      type: CONFIG_TYPES.TEXT_INPUT
-    },
-    {
-      key: 'placeholder',
-      name: '占位符',
-      type: CONFIG_TYPES.PLACEHOLDER_INPUT
-    },
-    {
-      key: 'tooltip',
-      name: '描述信息',
-      type: CONFIG_TYPES.TOOLTIP_INPUT
-    },
+    textDefaultValueConfig,
+    placeholderConfig,
+    tooltipConfig,
     layoutConfig,
     labelColSpanConfig,
-    {
-      key: 'maxLength',
-      name: '文本最大长度',
-      type: CONFIG_TYPES.NUMBER_INPUT
-    },
+    maxLengthConfig,
     // {
     //   key: 'saveWithHidden',
     //   name: '隐藏时提交数据',
     //   type: CONFIG_TYPES.SWITCH_INPUT
     // },
-    {
-      key: 'color',
-      name: '文本颜色',
-      type: CONFIG_TYPES.COLOR
-    },
-    {
-      key: 'bgColor',
-      name: '背景颜色',
-      type: CONFIG_TYPES.COLOR
-    },
+    colorConfig,
+    bgColorConfig,
     statusConfig,
     alignConfig,
     widthConfig

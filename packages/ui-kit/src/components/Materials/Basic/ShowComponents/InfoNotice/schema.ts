@@ -3,12 +3,12 @@ import {
     baseDefault,
     statusConfig,
     widthConfig,
+    contentConfig,
     type ICommonBaseType,
     type TStatusSelectKeyType,
     type TWidthSelectKeyType
 } from '../../../common';
 import {
-    CONFIG_TYPES,
     STATUS_OPTIONS,
     STATUS_VALUES,
     WIDTH_OPTIONS,
@@ -19,6 +19,7 @@ import type {
     IStatusConfigType,
     ITextConfigType,
     IWidthConfigType,
+    ICommonConfigType,
     TRadioDefaultType,
     TSelectDefaultType,
     TTextDefaultType
@@ -30,7 +31,7 @@ export interface XInfoNoticeSchema {
 }
 
 export type TXInfoNoticeEditData = Array<
-  ITextConfigType | IWidthConfigType<TWidthSelectKeyType> | IStatusConfigType<TStatusSelectKeyType> | IBooleanConfigType
+  ITextConfigType | IWidthConfigType<TWidthSelectKeyType> | IStatusConfigType<TStatusSelectKeyType> | IBooleanConfigType | ICommonConfigType
 >;
 
 export interface XInfoNoticeConfig extends ICommonBaseType {
@@ -54,11 +55,7 @@ export interface XInfoNoticeConfig extends ICommonBaseType {
 const XInfoNotice: XInfoNoticeSchema = {
   editData: [
     ...baseConfig,
-    {
-      key: 'content',
-      name: '文本内容',
-      type: CONFIG_TYPES.TEXT_INPUT
-    },
+    contentConfig,
     widthConfig,
     statusConfig
     // TODO(mickey): 补充颜色 背景色配置

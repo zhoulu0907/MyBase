@@ -3,10 +3,17 @@ import {
   baseConfig,
   baseDefault,
   dataFieldConfig,
-  defaultValueConfig,
+  defaultNumberValueConfig,
   layoutConfig,
   statusConfig,
   widthConfig,
+  labelConfig,
+  placeholderConfig,
+  tooltipConfig,
+  verifyConfig,
+  securityConfig,
+  numberFormatConfig,
+  stepConfig,
   type ICommonBaseType,
   type TAlignSelectKeyType,
   type TLayoutSelectKeyType,
@@ -38,6 +45,7 @@ import type {
   ITooltipConfigType,
   IVerifyConfigType,
   IWidthConfigType,
+  ICommonConfigType,
   TBooleanDefaultType,
   TNumberDefaultType,
   TSelectDefaultType,
@@ -68,6 +76,7 @@ export type TXInputNumberEditData = Array<
   | ILayoutConfigType<TLayoutSelectKeyType>
   | ISecurityConfigType
   | IWidthConfigType<TWidthSelectKeyType>
+  | ICommonConfigType
 >;
 
 export interface XInputNumberConfig extends ICommonBaseType {
@@ -170,56 +179,23 @@ export interface XInputNumberConfig extends ICommonBaseType {
 const XInputNumber: XInputNumberSchema = {
   editData: [
     ...baseConfig,
-    {
-      key: 'label',
-      name: '标题',
-      type: CONFIG_TYPES.LABEL_INPUT
-    },
-    {
-      key: 'placeholder',
-      name: '占位提示',
-      type: CONFIG_TYPES.PLACEHOLDER_INPUT
-    },
-    {
-      key: 'tooltip',
-      name: '字段描述',
-      type: CONFIG_TYPES.TOOLTIP_INPUT
-    },
+    labelConfig,
+    placeholderConfig,
+    tooltipConfig,
     //  数据绑定
     ...dataFieldConfig,
     // 默认值
-    {
-      key: 'defaultValueConfig',
-      name: '默认值',
-      type: CONFIG_TYPES.DEFAULT_VALUE,
-      valueType: 'number'
-    },
-    {
-      key: 'numberFormat',
-      name: '格式',
-      type: CONFIG_TYPES.NUMBER_FORMAT
-    },
-    {
-      key: 'step',
-      name: '数字步长',
-      type: CONFIG_TYPES.NUMBER_INPUT
-    },
-    {
-      key: 'verify',
-      name: '校验',
-      type: CONFIG_TYPES.VERIFY
-    },
+    defaultNumberValueConfig,
+    numberFormatConfig,
+    stepConfig,
+    verifyConfig,
     // 显示状态
     statusConfig,
     // 对齐方式
     alignConfig,
     // 布局方式
     layoutConfig,
-    {
-      key: 'security',
-      name: '安全',
-      type: CONFIG_TYPES.SECURITY
-    },
+    securityConfig,
     // 字段宽度
     widthConfig
   ],

@@ -8,6 +8,9 @@ import {
   statusConfig,
   widthConfig,
   imageHandleConfig,
+  labelConfig,
+  tooltipConfig,
+  verifyConfig,
   type ICommonBaseType,
   type TLayoutSelectKeyType,
   type TStatusSelectKeyType,
@@ -34,6 +37,7 @@ import type {
   IVerifyConfigType,
   IWidthConfigType,
   IImageHandleConfigType,
+  ICommonConfigType,
   TBooleanDefaultType,
   TNumberDefaultType,
   TSelectDefaultType,
@@ -56,6 +60,7 @@ export type TXInputImgUploadEditData = Array<
   | IStatusConfigType<TStatusSelectKeyType>
   | ILayoutConfigType<TLayoutSelectKeyType>
   | IWidthConfigType<TWidthSelectKeyType>
+  | ICommonConfigType
 >;
 
 interface IMAGE_HANDLE {
@@ -130,25 +135,13 @@ export interface XInputImgUploadConfig extends ICommonBaseType {
 const XImgUpload: XInputImgUploadSchema = {
   editData: [
     ...baseConfig,
-    {
-      key: 'label',
-      name: '标题',
-      type: CONFIG_TYPES.LABEL_INPUT
-    },
-    {
-      key: 'tooltip',
-      name: '描述信息',
-      type: CONFIG_TYPES.TOOLTIP_INPUT
-    },
+    labelConfig,
+    tooltipConfig,
     ...dataFieldConfig,
     uploadTypeConfig,
     listTypeConfig,
     imageHandleConfig,
-    {
-      key: 'verify',
-      name: '校验',
-      type: CONFIG_TYPES.VERIFY
-    },
+    verifyConfig,
     statusConfig,
     layoutConfig,
     widthConfig

@@ -7,6 +7,9 @@ import {
   selectOptionsConfig,
   statusConfig,
   widthConfig,
+  labelConfig,
+  tooltipConfig,
+  verifyConfig,
   type ICommonBaseType,
   type TLayoutSelectKeyType,
   type TStatusSelectKeyType,
@@ -35,6 +38,7 @@ import type {
   ITooltipConfigType,
   IVerifyConfigType,
   IWidthConfigType,
+  ICommonConfigType,
   TBooleanDefaultType,
   TSelectDefaultType,
   TTextAreaDefaultType,
@@ -59,6 +63,8 @@ export type TXInputSelectOneEditData = Array<
   | IAlignConfigType<TAlignSelectKeyType>
   | ILayoutConfigType<TLayoutSelectKeyType>
   | IWidthConfigType<TWidthSelectKeyType>
+  | any
+  | ICommonConfigType
 >;
 
 export interface XInputSelectOneConfig extends ICommonBaseType {
@@ -126,26 +132,14 @@ export interface XInputSelectOneConfig extends ICommonBaseType {
 const XSelectOne: XInputSelectOneSchema = {
   editData: [
     ...baseConfig,
-    {
-      key: 'label',
-      name: '标题',
-      type: CONFIG_TYPES.LABEL_INPUT
-    },
-    {
-      key: 'tooltip',
-      name: '字段描述',
-      type: CONFIG_TYPES.TOOLTIP_INPUT
-    },
+    labelConfig,
+    tooltipConfig,
     //  数据绑定
     ...dataFieldConfig,
     // 选项
     selectOptionsConfig,
     // 选项分布方式
-    {
-      key: 'verify',
-      name: '校验',
-      type: CONFIG_TYPES.VERIFY
-    },
+    verifyConfig,
     // 显示状态
     statusConfig,
     // 对齐方式

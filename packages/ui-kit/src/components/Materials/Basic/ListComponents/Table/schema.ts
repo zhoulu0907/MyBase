@@ -7,6 +7,18 @@ import {
   tableMetaDataConfig,
   tableOperationConfig,
   widthConfig,
+  labelConfig,
+  tablePagePositionConfig,
+  tablePageSizeConfig,
+  tableBorderConfig,
+  tableBorderCellConfig,
+  tableShowHeaderConfig,
+  tableHoverConfig,
+  tableStripeConfig,
+  tableShowTotalConfig,
+  tableShowOperateConfig,
+  tableFixedOperateConfig,
+  rowRedirectConfig,
   type ICommonBaseType,
   type TButtonSelectKeyType,
   type TPagePositionSelectKeyType,
@@ -16,7 +28,6 @@ import {
 import {
   BUTTON_OPTIONS,
   BUTTON_VALUES,
-  CONFIG_TYPES,
   PAGINATION_POSITION_OPTIONS,
   PAGINATION_POSITION_VALUES,
   RedirectMethod,
@@ -28,6 +39,7 @@ import {
 } from '../../../constants';
 import type {
   IBooleanConfigType,
+  ICommonConfigType,
   ILabelConfigType,
   INumberConfigType,
   IStatusConfigType,
@@ -62,6 +74,7 @@ export type TXTableEditData = Array<
   | INumberConfigType
   | ITableButtonConfigType<TButtonSelectKeyType>
   | ITableOperationConfigType
+  | ICommonConfigType
 >;
 
 export interface XTableConfig extends ICommonBaseType {
@@ -209,101 +222,24 @@ export interface OperationButtonConfig {
   display: boolean;
 }
 
-const pagePositionConfig: ITablePagePositionConfigType<TPagePositionSelectKeyType> = {
-  key: 'pagePosition',
-  name: '分页位置',
-  type: CONFIG_TYPES.TABLE_PAGE_POSITION_RADIO,
-  range: [
-    {
-      key: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.TL],
-      text: PAGINATION_POSITION_OPTIONS.TL,
-      value: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.TL]
-    },
-    {
-      key: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.TOP_CENTER],
-      text: PAGINATION_POSITION_OPTIONS.TOP_CENTER,
-      value: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.TOP_CENTER]
-    },
-    {
-      key: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.TR],
-      text: PAGINATION_POSITION_OPTIONS.TR,
-      value: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.TR]
-    },
-    {
-      key: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.BL],
-      text: PAGINATION_POSITION_OPTIONS.BL,
-      value: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.BL]
-    },
-    {
-      key: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.BOTTOM_CENTER],
-      text: PAGINATION_POSITION_OPTIONS.BOTTOM_CENTER,
-      value: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.BOTTOM_CENTER]
-    },
-    {
-      key: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.BR],
-      text: PAGINATION_POSITION_OPTIONS.BR,
-      value: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.BR]
-    }
-  ]
-};
 
 const XTable: XTableSchema = {
   editData: [
     ...baseConfig,
-    {
-      key: 'label',
-      name: '标题',
-      type: CONFIG_TYPES.LABEL_INPUT
-    },
+    labelConfig,
     tableMetaDataConfig,
     // keyDataConfig,
     labelColSpanConfig,
-    pagePositionConfig,
-    {
-      key: 'pageSize',
-      name: '分页数量',
-      type: CONFIG_TYPES.TABLE_PAGE_SIZE
-    },
-    {
-      key: 'border',
-      name: '显示边框',
-      type: CONFIG_TYPES.SWITCH_INPUT
-    },
-    {
-      key: 'borderCell',
-      name: '显示单元格',
-      type: CONFIG_TYPES.SWITCH_INPUT
-    },
-    {
-      key: 'showHeader',
-      name: '显示表头',
-      type: CONFIG_TYPES.SWITCH_INPUT
-    },
-    {
-      key: 'hover',
-      name: '鼠标悬浮效果',
-      type: CONFIG_TYPES.SWITCH_INPUT
-    },
-    {
-      key: 'stripe',
-      name: '开启斑马纹',
-      type: CONFIG_TYPES.SWITCH_INPUT
-    },
-    {
-      key: 'showTotal',
-      name: '显示表格总数',
-      type: CONFIG_TYPES.SWITCH_INPUT
-    },
-    {
-      key: 'showOpearate',
-      name: '开启操作项',
-      type: CONFIG_TYPES.SWITCH_INPUT
-    },
-    {
-      key: 'fixedOpearate',
-      name: '固定操作项',
-      type: CONFIG_TYPES.SWITCH_INPUT
-    },
+    tablePagePositionConfig,
+    tablePageSizeConfig,
+    tableBorderConfig,
+    tableBorderCellConfig,
+    tableShowHeaderConfig,
+    tableHoverConfig,
+    tableStripeConfig,
+    tableShowTotalConfig,
+    tableShowOperateConfig,
+    tableFixedOperateConfig,
     // {
     //   key: 'saveWithHidden',
     //   name: '隐藏时提交数据',
@@ -311,12 +247,7 @@ const XTable: XTableSchema = {
     // },
     widthConfig,
     statusConfig,
-    {
-      key: 'advancedRowRedirect',
-      name: '行点击跳转',
-      type: CONFIG_TYPES.TABLE_DATA,
-      advanced: true
-    },
+    rowRedirectConfig,
     tableOperationConfig,
     tableButtonPermissionConfig
   ],

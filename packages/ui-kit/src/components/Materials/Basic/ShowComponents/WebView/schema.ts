@@ -3,12 +3,13 @@ import {
     baseDefault,
     statusConfig,
     widthConfig,
+    titleTextConfig,
+    webViewUrlConfig,
     type ICommonBaseType,
     type TStatusSelectKeyType,
     type TWidthSelectKeyType
 } from '../../../common';
 import {
-    CONFIG_TYPES,
     STATUS_OPTIONS,
     STATUS_VALUES,
     WIDTH_OPTIONS,
@@ -59,16 +60,8 @@ export interface XWebViewConfig extends ICommonBaseType {
 const XWebView: XWebViewSchema = {
   editData: [
     ...baseConfig,
-    {
-      key: 'title',
-      name: '标题',
-      type: CONFIG_TYPES.TEXT_INPUT
-    },
-    {
-      key: 'webViewUrl',
-      name: '网页链接',
-      type: CONFIG_TYPES.TEXT_INPUT
-    },
+    titleTextConfig,
+    webViewUrlConfig,
     widthConfig,
     statusConfig
     // TODO(mickey): 补充颜色 背景色配置

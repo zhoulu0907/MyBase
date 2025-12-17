@@ -5,9 +5,15 @@ import {
   layoutConfig,
   statusConfig,
   widthConfig,
-  defaultValueConfig,
   alignConfig,
   timeRangeConfig,
+  labelConfig,
+  placeholderConfig,
+  tooltipConfig,
+  defaultTimeValueConfig,
+  timeFormatConfig,
+  verifyConfig,
+  securityConfig,
   type ICommonBaseType,
   type TTimeTypeSelectKeyType,
   type TLayoutSelectKeyType,
@@ -42,6 +48,7 @@ import type {
   ITooltipConfigType,
   IVerifyConfigType,
   IWidthConfigType,
+  ICommonConfigType,
   TBooleanDefaultType,
   TNumberDefaultType,
   TSelectDefaultType,
@@ -69,7 +76,8 @@ export type TXInputTimePickerEditData = Array<
   | IBooleanConfigType
   | ILayoutConfigType<TLayoutSelectKeyType>
   | IVerifyConfigType
-  | ITimeFormatConfigType
+  | ITimeFormatConfigType<TTimeTypeSelectKeyType>
+  | ICommonConfigType
 >;
 
 export interface XInputTimePickerConfig extends ICommonBaseType {
@@ -163,57 +171,23 @@ export interface XInputTimePickerConfig extends ICommonBaseType {
 const XTimePicker: XInputTimePickerSchema = {
   editData: [
     ...baseConfig,
-    {
-      key: 'label',
-      name: '标题',
-      type: CONFIG_TYPES.LABEL_INPUT
-    },
-    {
-      key: 'placeholder',
-      name: '占位提示',
-      type: CONFIG_TYPES.PLACEHOLDER_INPUT
-    },
-    {
-      key: 'tooltip',
-      name: '字段描述',
-      type: CONFIG_TYPES.TOOLTIP_INPUT
-    },
+    labelConfig,
+    placeholderConfig,
+    tooltipConfig,
     //  数据绑定
     ...dataFieldConfig,
     // 默认值
-    {
-      key: 'defaultValueConfig',
-      name: '默认值',
-      type: CONFIG_TYPES.DEFAULT_VALUE,
-      valueType: 'time'
-    },
-    {
-      key: 'timeFormat',
-      name: '时间格式',
-      type: CONFIG_TYPES.TIME_FORMAT,
-      range: [
-        { label: '时', value: TIME_VALUES[TIME_OPTIONS.HOUR] },
-        { label: '时:分', value: TIME_VALUES[TIME_OPTIONS.MINUTE] },
-        { label: '时:分:秒', value: TIME_VALUES[TIME_OPTIONS.SECOND] }
-      ]
-    },
+    defaultTimeValueConfig,
+    timeFormatConfig,
     timeRangeConfig,
-    {
-      key: 'verify',
-      name: '校验',
-      type: CONFIG_TYPES.VERIFY
-    },
+    verifyConfig,
     // 显示状态
     statusConfig,
     // 对齐方式
     alignConfig,
     // 布局方式
     layoutConfig,
-    {
-      key: 'security',
-      name: '安全',
-      type: CONFIG_TYPES.SECURITY
-    },
+    securityConfig,
     // 字段宽度
     widthConfig
   ],

@@ -7,6 +7,9 @@ import {
   layoutConfig,
   statusConfig,
   widthConfig,
+  labelConfig,
+  tooltipConfig,
+  verifyConfig,
   type ICommonBaseType,
   type TLayoutSelectKeyType,
   type TStatusSelectKeyType,
@@ -35,6 +38,7 @@ import type {
   ITooltipConfigType,
   IVerifyConfigType,
   IWidthConfigType,
+  ICommonConfigType,
   TBooleanDefaultType,
   TNumberDefaultType,
   TSelectDefaultType,
@@ -61,6 +65,7 @@ export type TXInputUserSelectEditData = Array<
   | ILayoutConfigType<TLayoutSelectKeyType>
   | IDataFieldConfigType
   | IVerifyConfigType
+  | ICommonConfigType
 >;
 
 export interface XInputUserSelectConfig extends ICommonBaseType {
@@ -143,16 +148,8 @@ export interface XInputUserSelectConfig extends ICommonBaseType {
 const XUserSelect: XInputUserSelectSchema = {
   editData: [
     ...baseConfig,
-    {
-      key: 'label',
-      name: '标题',
-      type: CONFIG_TYPES.LABEL_INPUT
-    },
-    {
-      key: 'tooltip',
-      name: '描述信息',
-      type: CONFIG_TYPES.TOOLTIP_INPUT
-    },
+    labelConfig,
+    tooltipConfig,
     ...dataFieldConfig,
     dynamicUserSelectConfig,
     layoutConfig,
@@ -162,11 +159,7 @@ const XUserSelect: XInputUserSelectSchema = {
     //   name: '隐藏时提交数据',
     //   type: CONFIG_TYPES.SWITCH_INPUT
     // },
-    {
-      key: 'verify',
-      name: '校验',
-      type: CONFIG_TYPES.VERIFY
-    },
+    verifyConfig,
     statusConfig,
     widthConfig
   ],

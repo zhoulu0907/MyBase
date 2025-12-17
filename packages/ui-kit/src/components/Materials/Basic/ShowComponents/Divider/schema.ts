@@ -1,11 +1,13 @@
 import {
   baseDefault,
   widthConfig,
+  labelConfig,
+  dividerTooltipConfig,
+  dividerStyleTypeConfig,
   type ICommonBaseType,
   type TWidthSelectKeyType
 } from '../../../common';
 import {
-  CONFIG_TYPES,
   WIDTH_OPTIONS,
   WIDTH_VALUES
 } from '../../../constants';
@@ -16,7 +18,8 @@ import type {
   TTextDefaultType,
   TRadioDefaultType,
   IDividerTooltipConfigType,
-  IDividerStyleTypeConfigType
+  IDividerStyleTypeConfigType,
+  ICommonConfigType
 } from '../../../types';
 
 export interface XDividerSchema {
@@ -29,6 +32,7 @@ export type TXDividerEditData = Array<
   | IDividerTooltipConfigType
   | IDividerStyleTypeConfigType
   | IWidthConfigType<TWidthSelectKeyType>
+  | ICommonConfigType
 >;
 
 export interface XDividerConfig extends ICommonBaseType {
@@ -78,22 +82,9 @@ export interface XDividerConfig extends ICommonBaseType {
 
 const XDivider: XDividerSchema = {
   editData: [
-    {
-      key: 'label',
-      name: '标题',
-      type: CONFIG_TYPES.LABEL_INPUT
-    },
-    {
-      key: 'tooltip',
-      name: '字段描述',
-      type: CONFIG_TYPES.DIVIDER_TOOLTIP_INPUT
-    },
-    {
-      key: 'styleType',
-      name: '样式',
-      type: CONFIG_TYPES.DIVIDER_STYLE_TYPE
-    },
-    // 字段宽度
+    labelConfig,
+    dividerTooltipConfig,
+    dividerStyleTypeConfig,
     widthConfig,
   ],
   config: {

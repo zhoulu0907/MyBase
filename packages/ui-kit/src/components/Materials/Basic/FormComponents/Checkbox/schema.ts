@@ -8,6 +8,9 @@ import {
   alignConfig,
   statusConfig,
   widthConfig,
+  labelConfig,
+  tooltipConfig,
+  verifyConfig,
   type ICommonBaseType,
   type TLayoutSelectKeyType,
   type TStatusSelectKeyType,
@@ -43,6 +46,7 @@ import type {
   TTextDefaultType,
   IAlignConfigType,
   TRadioDefaultType,
+  ICommonConfigType,
 } from '../../../types';
 
 export interface XInputCheckboxSchema {
@@ -61,6 +65,7 @@ export type TXInputCheckboxEditData = Array<
   | IAlignConfigType<TAlignSelectKeyType>
   | ILayoutConfigType<TLayoutSelectKeyType>
   | IWidthConfigType<TWidthSelectKeyType>
+  | ICommonConfigType
 >;
 
 export interface XInputCheckboxConfig extends ICommonBaseType {
@@ -136,27 +141,15 @@ export interface XInputCheckboxConfig extends ICommonBaseType {
 const XCheckbox: XInputCheckboxSchema = {
   editData: [
     ...baseConfig,
-    {
-      key: 'label',
-      name: '标题',
-      type: CONFIG_TYPES.LABEL_INPUT
-    },
-    {
-      key: 'tooltip',
-      name: '字段描述',
-      type: CONFIG_TYPES.TOOLTIP_INPUT
-    },
+    labelConfig,
+    tooltipConfig,
     //  数据绑定
     ...dataFieldConfig,
     // 选项
     checkboxDataConfig,
     // 选项分布方式
     directionConfig,
-    {
-      key: 'verify',
-      name: '校验',
-      type: CONFIG_TYPES.VERIFY
-    },
+    verifyConfig,
     // 显示状态
     statusConfig,
     // 对齐方式

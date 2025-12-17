@@ -2,12 +2,14 @@ import {
   baseConfig,
   baseDefault,
   dataFieldConfig,
-  defaultValueConfig,
   layoutConfig,
   statusConfig,
   widthConfig,
   alignConfig,
   switchFillTextConfig,
+  labelConfig,
+  tooltipConfig,
+  defaultBooleanValueConfig,
   type ICommonBaseType,
   type TLayoutSelectKeyType,
   type TStatusSelectKeyType,
@@ -42,6 +44,7 @@ import type {
   ITooltipConfigType,
   IVerifyConfigType,
   IWidthConfigType,
+  ICommonConfigType,
   TBooleanDefaultType,
   TNumberDefaultType,
   TSelectDefaultType,
@@ -67,6 +70,7 @@ export type TXInputSwitchEditData = Array<
   | IAlignConfigType<TAlignSelectKeyType>
   | ILayoutConfigType<TLayoutSelectKeyType>
   | IWidthConfigType<TWidthSelectKeyType>
+  | ICommonConfigType
 >;
 
 export interface XInputSwitchConfig extends ICommonBaseType {
@@ -129,25 +133,12 @@ export interface XInputSwitchConfig extends ICommonBaseType {
 const XSwitch: XInputSwitchSchema = {
   editData: [
     ...baseConfig,
-    {
-      key: 'label',
-      name: '标题',
-      type: CONFIG_TYPES.LABEL_INPUT
-    },
-    {
-      key: 'tooltip',
-      name: '字段描述',
-      type: CONFIG_TYPES.TOOLTIP_INPUT
-    },
+    labelConfig,
+    tooltipConfig,
     //  数据绑定
     ...dataFieldConfig,
     // 默认值
-    {
-      key: 'defaultValueConfig',
-      name: '默认值',
-      type: CONFIG_TYPES.DEFAULT_VALUE,
-      valueType: 'boolean'
-    },
+    defaultBooleanValueConfig,
     switchFillTextConfig,
     // 显示状态
     statusConfig,
