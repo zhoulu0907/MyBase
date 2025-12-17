@@ -3,6 +3,7 @@ import { Route, Routes } from 'react-router-dom';
 import type { EditorProps } from './common/props';
 import { FormEditor } from './pages/FormEditor';
 import { ListEditor } from './pages/ListEditor';
+import { WorkbenchEditor } from './pages/WorkbenchEditor';
 
 interface AppProps {
   props: {
@@ -54,6 +55,10 @@ const App: React.FC<AppProps & { instanceId: string }> = ({ instanceId, props })
         <Route
           path="/onebase/:tenantId/editor/list_editor"
           element={<ListEditor instanceId={instanceId} props={propsData} />}
+        />
+        <Route 
+          path="/onebase/:tenantId/editor/workbench_editor" 
+          element={<WorkbenchEditor instanceId={instanceId} props={propsData} />} 
         />
       </Routes>
     </>
