@@ -3,7 +3,6 @@ import appPermissionSVG from '@/assets/images/appRelease/app_auth.svg';
 import appReleaseSVG from '@/assets/images/appRelease/app_release.svg';
 import { ReactSVG } from 'react-svg';
 import { Layout, Menu } from '@arco-design/web-react';
-import { IconMenuFold } from '@arco-design/web-react/icon';
 import { useEffect, useState, type FC } from 'react';
 import DataSet from './components/DataSet';
 import LargeScreen from './components/LargeScreen';
