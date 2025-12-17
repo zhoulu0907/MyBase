@@ -3629,4 +3629,9 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         return result;
     }
 
+    @Override
+    public List<MetadataEntityFieldDO> getByFieldUuids(java.util.Collection<String> fieldUuids) {
+        return metadataEntityFieldRepository.getByFieldUuids(fieldUuids);
+    }
+
 }
