@@ -416,8 +416,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
             if (fieldType === ENTITY_FIELD_TYPE.DATE.VALUE || fieldType === ENTITY_FIELD_TYPE.DATETIME.VALUE) {
               formValues[fieldName] = dayjs(value).valueOf();
             } else if (fieldType === ENTITY_FIELD_TYPE.SELECT.VALUE) {
-              const curComponentSchema = Object.values(pageComponentSchemas.value).find(v => value.id.includes(v.id)) || {};
-              const curOptions = curComponentSchema?.config?.defaultOptionsConfig?.defaultOptions;
+              const curComponentSchema = Object.values(pageComponentSchemas.value).find(v => value?.id?.includes(v.id)) || {};
+              const curOptions = curComponentSchema?.config?.defaultOptionsConfig?.defaultOptions || [];
               const renderValue = curOptions.find(op => op.value === value.id)?.label || '-';
               formValues[fieldName] = [renderValue];
             } else if (fieldType === ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE) {
