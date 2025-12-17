@@ -198,16 +198,22 @@ const CreateModal: React.FC<CreateModalProps> = ({
     }));
   };
 
-  const handlePreview = (imgSrc: string) => {
-    // 新窗口打开图片预览
-    window.open(imgSrc, '_blank');
+  const handlePreview = (screenProjectId: string) => {
+    console.log('${window.location.origin}:', `${window.location.origin}`);
+    console.log('${window.location.pathname}:', `${window.location.pathname}`);
+    console.log('screenProjectId:', screenProjectId);
+    // 在新窗口打开预览页面，使用 hash 路由
+    // window.open(
+    //   `${window.location.origin}${window.location.pathname}#/onebase/screen/preview/${screenProjectId}`,
+    //   '_blank'
+    // );
   };
 
   const screenTemplateCard = (item: any) => (
     <div className={styles.screenTemplateCard}>
       <div className={styles.screenTemplateCardImg}>
         <img src={item.src} alt="" />
-        <Button onClick={() => handlePreview(item.src)} className={styles.screenTemplateCardBtn}>
+        <Button onClick={() => handlePreview(item.id)} className={styles.screenTemplateCardBtn}>
           预览
         </Button>
       </div>
