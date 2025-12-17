@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.flow.build.service;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.flow.build.vo.ExecutionLogVO;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowExecutionLogRepository;
@@ -17,6 +18,8 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @Author：huangjie
@@ -63,8 +66,8 @@ public class FlowExecutionLogServiceImpl implements FlowExecutionLogService {
         if (CollectionUtils.isEmpty(flowExecutionLogDOS)) {
             return Collections.emptyMap();
         }
-        List<Long> processIds = flowExecutionLogDOS.stream().map(FlowExecutionLogDO::getProcessId).toList();
-        return flowProcessRepository.selectProcessNames(processIds);
+        Set<Long> processIds = flowExecutionLogDOS.stream().map(FlowExecutionLogDO::getProcessId).collect(Collectors.toSet());
+        return ApplicationManager.withoutApplicationIdAndVersionTag(() -> flowProcessRepository.selectProcessNames(processIds));
     }
 
     private String findProcessName(Long processId) {
