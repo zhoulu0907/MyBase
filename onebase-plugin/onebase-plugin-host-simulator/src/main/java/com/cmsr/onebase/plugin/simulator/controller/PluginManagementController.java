@@ -138,10 +138,11 @@ public class PluginManagementController {
     @PostMapping("/stop-all")
     @Operation(summary = "停止所有插件")
     public CommonResult<PluginBatchOperationRespVO> stopAllPlugins() {
-        List<PluginWrapper> plugins = pluginManager.getStartedPlugins();
+        // 使用getLoadedPlugins获取所有插件，然后尝试停止每一个
+        List<OneBasePluginManager.PluginInfo> plugins = pluginManager.getLoadedPlugins();
         List<PluginOperationResultItemVO> items = new ArrayList<>();
         
-        for (PluginWrapper plugin : plugins) {
+        for (OneBasePluginManager.PluginInfo plugin : plugins) {
             try {
                 PluginState state = pluginManager.stopPlugin(plugin.getPluginId());
                 items.add(PluginOperationResultItemVO.success(plugin.getPluginId(), state.toString()));

@@ -41,9 +41,80 @@ public class HelloWorldHandler implements HttpHandler {
         result.put("message", "顶顶顶顶顶单打独斗, " + name + "!");
         result.put("timestamp", LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         result.put("plugin", "demo-plugin");
-        result.put("version", "1.0.0-FROM-CLASS-FILE");
-        result.put("source", "CLASSPATH_SCAN");
+        
+        // 动态检测加载方式
+        String loadSource = detectLoadSource();
+        result.put("loadSource", loadSource);
+        result.put("version", getVersionBySource(loadSource));
+        
         return result;
+    }
+    
+    /**
+     * 检测插件加载来源
+     * 通过检查类加载器和资源路径来判断
+     * <p>
+     * 关键区分点：
+     * <ul>
+     *   <li>PluginClassLoader：PF4J动态加载的ZIP包插件</li>
+     *   <li>BOOT-INF/lib/*.jar：Spring Boot打包的classpath依赖</li>
+     *   <li>外部ZIP/JAR且非BOOT-INF：真正的ZIP包插件</li>
+     *   <li>其他：纯classpath加载（DEV模式IDE直接运行）</li>
+     * </ul>
+     * </p>
+     */
+    private String detectLoadSource() {
+        try {
+            ClassLoader classLoader = this.getClass().getClassLoader();
+            String className = classLoader.getClass().getName();
+            System.out.println("[HelloWorldHandler] 检测加载来源 - ClassLoader类型: " + className);
+            
+            // PF4J的PluginClassLoader表示从ZIP/JAR加载
+            if (className.contains("PluginClassLoader")) {
+                System.out.println("[HelloWorldHandler] 检测结果: ZIP_PACKAGE (PluginClassLoader)");
+                return "ZIP_PACKAGE";
+            }
+            
+            // 检查资源路径
+            String resourcePath = this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath();
+            System.out.println("[HelloWorldHandler] 检测加载来源 - 资源路径: " + resourcePath);
+            
+            // 如果在BOOT-INF中，说明是Spring Boot打包的依赖，属于classpath方式
+            if (resourcePath.contains("BOOT-INF")) {
+                System.out.println("[HelloWorldHandler] 检测结果: CLASSPATH_DIRECT (BOOT-INF依赖)");
+                return "CLASSPATH_DIRECT";
+            }
+            
+            // 如果在Maven本地仓库(.m2/repository)或target/classes，也属于classpath方式
+            if (resourcePath.contains(".m2/repository") || resourcePath.contains("target/classes") || resourcePath.contains("target\\classes")) {
+                System.out.println("[HelloWorldHandler] 检测结果: CLASSPATH_DIRECT (Maven依赖或编译输出)");
+                return "CLASSPATH_DIRECT";
+            }
+            
+            // 如果包含.zip/.jar且不在上述目录，则是真正的ZIP包加载
+            if (resourcePath.contains(".zip") || resourcePath.contains(".jar")) {
+                System.out.println("[HelloWorldHandler] 检测结果: ZIP_PACKAGE (外部JAR/ZIP)");
+                return "ZIP_PACKAGE";
+            }
+            
+            // 默认是从classpath加载（DEV模式）
+            System.out.println("[HelloWorldHandler] 检测结果: CLASSPATH_DIRECT (默认classpath)");
+            return "CLASSPATH_DIRECT";
+        } catch (Exception e) {
+            System.err.println("[HelloWorldHandler] 检测加载来源失败: " + e.getMessage());
+            e.printStackTrace();
+            return "CLASSPATH_DIRECT";
+        }
+    }
+    
+    /**
+     * 根据加载来源返回不同的版本标识
+     */
+    private String getVersionBySource(String source) {
+        if ("ZIP_PACKAGE".equals(source)) {
+            return "1.0.0-FROM-ZIP";
+        }
+        return "1.0.0-FROM-CLASSPATH";
     }
 
     /**
