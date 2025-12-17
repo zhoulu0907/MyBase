@@ -147,7 +147,7 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; d
       pageSize: 20,
       keywords: inputValue
     };
-    const { list, total } = await getSimpleUserPage(param, tokenInfo?.loginMethod);
+    const { list, total } = await getSimpleUserPage(param);
     setPageNo(1);
     setTotal(total);
 
@@ -167,7 +167,7 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; d
         pageSize: 20,
         keywords: keywords
       };
-      const { list, total } = await getSimpleUserPage(param, tokenInfo?.loginMethod);
+      const { list, total } = await getSimpleUserPage(param);
       setPageNo(pageNo + 1);
       setTotal(total);
       setUserData((prev) => [...prev, ...list]);

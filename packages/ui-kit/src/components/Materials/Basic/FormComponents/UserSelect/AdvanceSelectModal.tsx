@@ -103,7 +103,7 @@ const AdvanceSelectModal: React.FC<AdvanceSelectModalProps> = ({
       pageSize: 20,
       keywords: inputValue
     };
-    const { list, total } = await getSimpleUserPage(param, tokenInfo?.loginMethod);
+    const { list, total } = await getSimpleUserPage(param);
     setPageNo(1);
     setTotal(total);
     setUserData(list || []);
@@ -122,7 +122,7 @@ const AdvanceSelectModal: React.FC<AdvanceSelectModalProps> = ({
         pageSize: 20,
         keywords: keywords
       };
-      const { list, total } = await getSimpleUserPage(param, tokenInfo?.loginMethod);
+      const { list, total } = await getSimpleUserPage(param);
       console.log(list, param.pageNo);
       setPageNo(pageNo + 1);
       setTotal(total);
