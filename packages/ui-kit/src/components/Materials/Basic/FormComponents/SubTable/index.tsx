@@ -208,7 +208,22 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
         schema.config.autoCodeConfig = currentField.autoNumberConfig || schema.config.autoCodeConfig;
         schema.config.autoCodeDisabled = currentField?.autoNumberConfig?.id ? true : false;
       }
-      // 关联的字典类型ID    dictTypeId
+      // 数据选择
+      if (itemType === FORM_COMPONENT_TYPES.DATA_SELECT) {
+        // 数据源
+        schema.config.selectedDataSource = {
+          ...schema.config.selectedDataSource,
+          entityUuid: currentField.dataSelectionConfig?.targetEntityUuid
+        };
+        // 回显字段  name
+        schema.config.displayFields = currentField.dataSelectionConfig?.targetFieldName
+          ? [
+            {
+              value: currentField.dataSelectionConfig?.targetFieldName
+            }
+          ]
+          : [];
+      }
     }
 
     schema.config.cpName = itemDisplayName;

@@ -178,7 +178,22 @@ const LayoutReactSortable: React.FC<LayoutReactSortableProps> = ({
             schema.config.autoCodeConfig = field.autoNumberConfig || schema.config.autoCodeConfig;
             schema.config.autoCodeDisabled = field?.autoNumberConfig?.id ? true : false;
           }
-          // 关联的字典类型ID    dictTypeId
+          // 数据选择
+          if (cpType === FORM_COMPONENT_TYPES.DATA_SELECT) {
+            // 数据源
+            schema.config.selectedDataSource = {
+              ...schema.config.selectedDataSource,
+              entityUuid: field.dataSelectionConfig?.targetEntityUuid
+            };
+            // 回显字段  name
+            schema.config.displayFields = field.dataSelectionConfig?.targetFieldName
+              ? [
+                {
+                  value: field.dataSelectionConfig?.targetFieldName
+                }
+              ]
+              : [];
+          }
 
           schema.config.cpName = field.displayName;
           schema.config.id = cpID;
@@ -294,7 +309,22 @@ const LayoutReactSortable: React.FC<LayoutReactSortableProps> = ({
             subSchema.config.autoCodeConfig = ele.autoNumberConfig || subSchema.config.autoCodeConfig;
             subSchema.config.autoCodeDisabled = ele?.autoNumberConfig?.id ? true : false;
           }
-          // 关联的字典类型ID    dictTypeId
+          // 数据选择
+          if (subType === FORM_COMPONENT_TYPES.DATA_SELECT) {
+            // 数据源
+            subSchema.config.selectedDataSource = {
+              ...subSchema.config.selectedDataSource,
+              entityUuid: ele.dataSelectionConfig?.targetEntityUuid
+            };
+            // 回显字段  name
+            subSchema.config.displayFields = ele.dataSelectionConfig?.targetFieldName
+              ? [
+                {
+                  value: ele.dataSelectionConfig?.targetFieldName
+                }
+              ]
+              : [];
+          }
 
           subSchema.config.cpName = ele.displayName;
           subSchema.config.id = subId;
