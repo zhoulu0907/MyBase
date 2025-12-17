@@ -8,7 +8,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 @Data
-public class SystemConfigPageReqVO {
+public class SystemConfigReqVO {
     @Schema(description = "数据源名称，模糊匹配", example = "名称")
     private String name;
     @Schema(description = "状态", example = "")

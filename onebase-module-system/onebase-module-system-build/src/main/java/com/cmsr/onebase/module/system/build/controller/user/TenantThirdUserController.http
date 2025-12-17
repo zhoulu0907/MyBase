@@ -6,9 +6,9 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
 {
-  "nickName": "thirdUser",
-  "mobile": "13800000001",
-  "email": "newusewr1@test.com",
+  "nickName": "thirdUser11311",
+  "mobile": "13800303041",
+  "email": "newuse13r1@test.com",
   "password": "13@ery",
   "status": 1,
   "applicationIdList":[162947915524571136,162947915524571137]

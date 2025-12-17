@@ -8,6 +8,7 @@ import com.cmsr.onebase.module.system.dal.database.SystemGeneralConfigDataReposi
 import com.cmsr.onebase.module.system.dal.dataobject.config.SystemGeneralConfigDO;
 import com.cmsr.onebase.module.system.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.system.enums.config.ConfigCategoryEnum;
+import com.cmsr.onebase.module.system.enums.config.GlobalCategoryConfigEnum;
 import com.cmsr.onebase.module.system.vo.config.*;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +19,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.validation.annotation.Validated;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
@@ -59,16 +62,16 @@ public class SystemGeneralConfigServiceImpl implements SystemGeneralConfigServic
     }
 
     @Override
-    public List<SystemGeneralConfigDO> getConfigList(SystemConfigPageReqVO pageReqVO) {
-        List<SystemGeneralConfigDO> configList = systemGeneralConfigDataRepository.findConfigList(pageReqVO);
+    public List<SystemGeneralConfigDO> getTenantConfigList(SystemConfigReqVO configReqVO) {
+        List<SystemGeneralConfigDO> configList = systemGeneralConfigDataRepository.findTenantConfigList(configReqVO.getName(),configReqVO.getStatus());
         if(CollectionUtils.isNotEmpty(configList)){
             return configList;
         }
 
-        if (StringUtils.isBlank(pageReqVO.getName())  &&  null ==pageReqVO.getStatus()) {
-            List<SystemGeneralConfigDO>  globalConfigList =  systemGeneralConfigDataRepository.findGlobaConfigList();
+        if (StringUtils.isBlank(configReqVO.getName())  &&  null ==configReqVO.getStatus()) {
+            List<SystemGeneralConfigDO> globalConfigList = systemGeneralConfigDataRepository.findGlobaConfigListByKeys(Arrays.asList(GlobalCategoryConfigEnum.ARRAYS));
             if (CollectionUtils.isEmpty(globalConfigList)) {
-                return globalConfigList;
+                return new ArrayList<>();
             }
             globalConfigList.forEach(configDO -> {
                 configDO.setId(null);
@@ -78,7 +81,7 @@ public class SystemGeneralConfigServiceImpl implements SystemGeneralConfigServic
             });
 
         }
-        return systemGeneralConfigDataRepository.findConfigList(pageReqVO);
+        return systemGeneralConfigDataRepository.findTenantConfigList(configReqVO.getName(),configReqVO.getStatus());
 
 
     }

@@ -1,19 +1,17 @@
 package com.cmsr.onebase.module.system.dal.database;
 
 import com.cmsr.onebase.framework.aynline.DataRepository;
-import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.system.dal.dataobject.config.SystemGeneralConfigDO;
-import com.cmsr.onebase.module.system.dal.dataobject.dept.PostDO;
-import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
 import com.cmsr.onebase.module.system.enums.config.ConfigCategoryEnum;
-import com.cmsr.onebase.module.system.vo.config.SystemConfigPageReqVO;
 import com.cmsr.onebase.module.system.vo.config.SystemGeneralConfigSearchVO;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Compare;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Repository
@@ -27,19 +25,19 @@ public class SystemGeneralConfigDataRepository  extends DataRepository<SystemGen
 
 
 
-    public List<SystemGeneralConfigDO> findConfigList(SystemConfigPageReqVO reqVO) {
+    public List<SystemGeneralConfigDO> findTenantConfigList(String name,Integer status) {
         DefaultConfigStore configs = new DefaultConfigStore();
 
-        if (StringUtils.isNotBlank(reqVO.getName())) {
-            configs.and(Compare.LIKE, SystemGeneralConfigDO.NAME, reqVO.getName());
+        if (StringUtils.isNotBlank(name)) {
+            configs.and(Compare.LIKE, SystemGeneralConfigDO.NAME, name);
         }
-        if (reqVO.getStatus() != null) {
-            configs.and(Compare.EQUAL, SystemGeneralConfigDO.STATUS, reqVO.getStatus());
+        if (null != status) {
+            configs.and(Compare.EQUAL, SystemGeneralConfigDO.STATUS, status);
         }
         // 添加排序条件，按ID降序排列
         configs.order(SystemGeneralConfigDO.ID, org.anyline.entity.Order.TYPE.DESC);
 
-        return  findAllByConfig(configs);
+        return findAllByConfig(configs);
     }
 
     @TenantIgnore
@@ -61,11 +59,14 @@ public class SystemGeneralConfigDataRepository  extends DataRepository<SystemGen
     }
 
     @TenantIgnore
-    public List<SystemGeneralConfigDO> findGlobaConfigList() {
+    public List<SystemGeneralConfigDO> findGlobaConfigListByKeys(List<String> configKeys) {
         DefaultConfigStore configs = new DefaultConfigStore();
         configs.and(Compare.EQUAL, SystemGeneralConfigDO.CATEGORY, ConfigCategoryEnum.GLOBAL.getCode());
+        if(CollectionUtils.isNotEmpty(configKeys)){
+            configs.and(Compare.IN, SystemGeneralConfigDO.CONFIG_KEY, configKeys);
+        }
         // 添加排序条件，按ID降序排列
         configs.order(SystemGeneralConfigDO.ID, org.anyline.entity.Order.TYPE.DESC);
-        return  findAllByConfig(configs);
+        return findAllByConfig(configs);
     }
 }

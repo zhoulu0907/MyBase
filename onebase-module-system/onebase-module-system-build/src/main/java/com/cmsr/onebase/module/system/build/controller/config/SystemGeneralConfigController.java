@@ -71,8 +71,8 @@ public class SystemGeneralConfigController {
     @GetMapping("/list")
     @Operation(summary = "获得配置项列表-不分页")
     @PreAuthorize("@ss.hasPermission('tenant:config:query')")
-    public CommonResult<List<SystemGeneralConfigRespVO>> getConfigList(@Valid SystemConfigPageReqVO pageReqVO) {
-         List<SystemGeneralConfigDO> pageResult = systemGeneralConfigService.getConfigList(pageReqVO);
+    public CommonResult<List<SystemGeneralConfigRespVO>> getTenantConfigList(@Valid SystemConfigReqVO configReqVO) {
+         List<SystemGeneralConfigDO> pageResult = systemGeneralConfigService.getTenantConfigList(configReqVO);
         return success(BeanUtils.toBean(pageResult, SystemGeneralConfigRespVO.class));
     }
 
