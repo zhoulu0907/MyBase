@@ -45,7 +45,7 @@ Authorization: Bearer {{token}}
 }
 
 ### 修改用户状态
-POST {{baseUrl}}/corp/user/update-status
+POST {{baseUrl}}/system/user/update-status
 Content-Type: application/json
 Authorization: Bearer {{token}}
 

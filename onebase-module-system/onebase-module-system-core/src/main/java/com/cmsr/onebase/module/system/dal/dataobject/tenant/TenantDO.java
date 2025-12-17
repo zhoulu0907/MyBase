@@ -11,7 +11,7 @@ import lombok.experimental.SuperBuilder;
 import java.time.LocalDateTime;
 
 /**
- * 租户 DO
+ * 空间 DO
  *
  */
 @Data
@@ -53,7 +53,7 @@ public class TenantDO extends BaseDO {
     public static final Long PACKAGE_ID_SYSTEM = 0L;
 
     /**
-     * 租户名，唯一
+     * 空间名，唯一
      */
     @Column(name = NAME)
     private String name;
@@ -64,7 +64,7 @@ public class TenantDO extends BaseDO {
     @Column(name = ADMIN_USER_ID)
     private Long adminUserId;
     /**
-     * 租户状态
+     * 空间状态
      * 枚举 {@link CommonStatusEnum}
      */
     @Column(name = STATUS)
