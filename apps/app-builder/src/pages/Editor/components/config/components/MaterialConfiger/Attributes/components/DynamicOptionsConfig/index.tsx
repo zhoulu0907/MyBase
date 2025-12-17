@@ -123,6 +123,9 @@ const DynamicSelectConfig: React.FC<DynamicSelectConfigProps> = ({ handlePropsCh
         setSelectDisabled(true);
       }
     }
+    if(configs[selectKey].dictTypeId){
+      setSelectDisabled(true);
+    }
   };
 
   const handleSelectDictOk = async (dict?: any) => {
@@ -134,7 +137,7 @@ const DynamicSelectConfig: React.FC<DynamicSelectConfigProps> = ({ handlePropsCh
         defaultOptions: dictOptions,
         dictTypeId: dict.id
       });
-      setSelectDisabled(false);
+      setSelectDisabled(true);
     }
     setSelectDictModalVisible(false);
   };
@@ -163,9 +166,9 @@ const DynamicSelectConfig: React.FC<DynamicSelectConfigProps> = ({ handlePropsCh
             ]}
           ></Select>
         </Form.Item>
-        {configs[selectKey].type === DEFAULT_OPTIONS_TYPE.DICT && configs[selectKey].defaultOptions.length === 0 && (
+        {configs[selectKey].type === DEFAULT_OPTIONS_TYPE.DICT && (
           <Form.Item>
-            <Button long onClick={() => setSelectDictModalVisible(true)}>
+            <Button long disabled={configs[selectKey].disabled} onClick={() => setSelectDictModalVisible(true)}>
               请选择数据字典
             </Button>
           </Form.Item>
