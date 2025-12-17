@@ -1101,37 +1101,7 @@ public class UserServiceImpl implements UserService {
         LogRecordContext.putVariable("newPassword", updateObj.getPassword());
     }
 
-    @Override
-    public AdminUserDO createThirdUser(ThirdAuthLoginReqVO reqVO) {
 
-        // 如果是启用状态，校验当前租户下的用户数量有没有超过最大限额
-        if (Objects.equals(CommonStatusEnum.ENABLE.getStatus(), CommonStatusEnum.ENABLE.getStatus())) {
-            // 1.1 校验账户配合
-            tenantService.handleTenantInfo(tenant -> {
-                // 如果用户的租户不是平台租户，则校验租户用户最大限额
-                if (!tenant.getTenantCode().equals(TenantCodeEnum.PLATFORM_TENANT.getCode())) {
-                    long count = userDataRepository.countByConfig(new DefaultConfigStore().eq(AdminUserDO.STATUS,
-                            UserStatusEnum.NORMAL.getStatus()));
-                    log.info(" count user four tenant, count={}", count);
-                    if (count >= tenant.getAccountCount()) {
-                        throw exception(USER_COUNT_MAX, tenant.getAccountCount());
-                    }
-                }
-            });
-        }
-
-        AdminUserDO user = new AdminUserDO();
-        user.setPassword(encodePassword(THIRD_USER_PASSWORD)); // 加密密码
-        // 管理员类型：内置/自定义
-        user.setAdminType(AdminTypeEnum.CUSTOM.getType());
-        user.setMobile(reqVO.getMobile());
-        user.setUserType(UserTypeEnum.THIRD.getValue());
-        user.setStatus(UserStatusEnum.NORMAL.getStatus());
-        user.setUsername(reqVO.getMobile());
-        user.setNickname(" ");
-        userDataRepository.insert(user);
-        return user;
-    }
 
 
     @Override
@@ -1356,9 +1326,31 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Long thirdUserRegister(ThirdUserRegisterReqVO reqVO) {
-        //TODO  appId ，验证码 验证逻辑
-        ThirdAuthLoginReqVO VO = BeanUtils.toBean(reqVO, ThirdAuthLoginReqVO.class);
-       return createThirdUser(VO).getId();
+        //TODO  手机号验证，  appId ，验证码 验证逻辑
+        // 如果是启用状态，校验当前租户下的用户数量有没有超过最大限额
+        // 1.1 校验账户配合
+        tenantService.handleTenantInfo(tenant -> {
+            // 如果用户的租户不是平台租户，则校验租户用户最大限额
+            if (!tenant.getTenantCode().equals(TenantCodeEnum.PLATFORM_TENANT.getCode())) {
+                long count = userDataRepository.countByConfig(new DefaultConfigStore().eq(AdminUserDO.STATUS,
+                        UserStatusEnum.NORMAL.getStatus()));
+                log.info(" count user four tenant, count={}", count);
+                if (count >= tenant.getAccountCount()) {
+                    throw exception(USER_COUNT_MAX, tenant.getAccountCount());
+                }
+            }
+        });
 
+        AdminUserDO user = new AdminUserDO();
+        user.setPassword(encodePassword(THIRD_USER_PASSWORD)); // 加密密码
+        // 管理员类型：内置/自定义
+        user.setAdminType(AdminTypeEnum.CUSTOM.getType());
+        user.setMobile(reqVO.getMobile());
+        user.setUserType(UserTypeEnum.THIRD.getValue());
+        user.setStatus(UserStatusEnum.NORMAL.getStatus());
+        user.setUsername(reqVO.getMobile());
+        user.setCreateSource(CreateSourceEnum.SELF.getCode());
+        userDataRepository.insert(user);
+        return user.getId();
     }
 }

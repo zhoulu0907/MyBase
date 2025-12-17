@@ -22,7 +22,7 @@ Authorization: Bearer {{token}}
 X-Tenant-Id: 156421901678804992
 
 {
-  "mobile": 158945648512,
+  "mobile": 158945648592,
   "appId":"1111111111",
   "verifyCode": "testuserqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq"
 }

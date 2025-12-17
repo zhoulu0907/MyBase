@@ -338,12 +338,7 @@ public interface UserService {
      */
     void forgetPassword(@Valid UserForgetPasswordReqVO reqVO);
 
-    /**
-     * 创建第三方用户
-     * @param reqVO
-     * @return
-     */
-    AdminUserDO createThirdUser(ThirdAuthLoginReqVO reqVO);
+
     /**
      * 补充用户信息
      * @param reqVO
