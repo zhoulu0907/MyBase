@@ -1,8 +1,5 @@
 import AutoCodeNumberSettingsModal from '@/pages/CreateApp/pages/DataFactory/pages/Entity/components/Modals/ConfigFieldModal/components/AutoCodeNumberSettingsModal';
-import type {
-  AutoNumberRule,
-  AutoNumberRuleResponce
-} from '@/pages/CreateApp/pages/DataFactory/pages/Entity/components/Modals/ConfigFieldModal/types';
+import type { AutoNumberRuleResponce } from '@/pages/CreateApp/pages/DataFactory/pages/Entity/components/Modals/ConfigFieldModal/types';
 import {
   AUTO_CODE_NUMBER_MODE,
   AUTO_CODE_RESET_CYCLE,
@@ -49,14 +46,9 @@ const DynamicAutoCodeConfig: React.FC<DynamicAutoCodeConfigProps> = ({
 
   const [entityTree, setEntityTree] = useState<any[]>([]);
   const [editRuleVisible, setEditRuleVisible] = useState(false);
-  const [rules, setRules] = useState<any[]>([]);
   const [customDateFormatStatusMap, setCustomDateFormatStatusMap] = useState<Record<string, 'error' | undefined>>({});
 
-  const getDisplayText = (config: any) => {
-    if (!config) {
-      return '';
-    }
-    const sequenceConfig = config || rules.find((rule) => rule.itemType === AUTO_CODE_RULE_TYPE.SEQUENCE)?.config;
+  const getDisplayText = (sequenceConfig: any) => {
     if (!sequenceConfig) {
       return '';
     }
@@ -67,18 +59,15 @@ const DynamicAutoCodeConfig: React.FC<DynamicAutoCodeConfigProps> = ({
     const resetText = sequenceConfig.resetCycle === AUTO_CODE_RESET_CYCLE.NONE ? '不自动重置' : '自动重置';
     return `${numberingMethodText},${digitsText ? digitsText + ',' : ''}${resetText}`;
   };
-  const [displayText, setDisplayText] = useState(getDisplayText(configs[autoCodeKey]));
+  const [displayText, setDisplayText] = useState('');
 
   useEffect(() => {
-    const keys = Object.keys(configs[autoCodeKey] || {});
-    if (keys?.length) {
-      const newRules = configs[autoCodeKey].rules || [];
-      const newConfig = { ...configs[autoCodeKey], itemType: AUTO_CODE_RULE_TYPE.SEQUENCE };
+    if (configs[autoCodeKey]?.rules?.length) {
+      const newConfig = configs[autoCodeKey]?.rules.find((ele: any) => ele.itemType === AUTO_CODE_RULE_TYPE.SEQUENCE);
       setDisplayText(getDisplayText(newConfig));
-      setRules([newConfig, ...newRules]);
     } else {
       // 默认值
-      const newConfig = {
+      const sequenceConfig = {
         numberMode: AUTO_CODE_NUMBER_MODE.FIXED_DIGITS,
         digitWidth: DIGIT_DEFAULT,
         continueIncrement: true,
@@ -87,8 +76,8 @@ const DynamicAutoCodeConfig: React.FC<DynamicAutoCodeConfigProps> = ({
         resetCycle: AUTO_CODE_RESET_CYCLE.NONE,
         itemType: AUTO_CODE_RULE_TYPE.SEQUENCE
       };
-      setDisplayText(getDisplayText(newConfig));
-      setRules([newConfig]);
+      setDisplayText(getDisplayText(sequenceConfig));
+      handlePropsChange(autoCodeKey, { ...configs[autoCodeKey], rules: [sequenceConfig] });
     }
   }, [configs[autoCodeKey]]);
 
@@ -135,7 +124,7 @@ const DynamicAutoCodeConfig: React.FC<DynamicAutoCodeConfigProps> = ({
     const mainEntityTree = mainEntity.fields
       .filter((field: AppEntityField) => !FilterEntityFields.includes(field.fieldName))
       .map((field: AppEntityField) => ({
-        value: field.fieldId,
+        value: field.id,
         label: field.displayName
       }));
 
@@ -145,7 +134,7 @@ const DynamicAutoCodeConfig: React.FC<DynamicAutoCodeConfigProps> = ({
       children: entity.fields
         .filter((field: AppEntityField) => !FilterEntityFields.includes(field.fieldName))
         .map((field: AppEntityField) => ({
-          value: field.fieldId,
+          value: field.id,
           label: field.displayName
         }))
     }));
@@ -165,7 +154,7 @@ const DynamicAutoCodeConfig: React.FC<DynamicAutoCodeConfigProps> = ({
       itemType: type,
       format: ''
     };
-    setRules([...rules, newRule]);
+    handlePropsChange(autoCodeKey, { ...configs[autoCodeKey], rules: [...configs[autoCodeKey].rules, newRule] });
   };
   // 自动编号编辑
   const openEditRuleModal = () => {
@@ -176,30 +165,18 @@ const DynamicAutoCodeConfig: React.FC<DynamicAutoCodeConfigProps> = ({
   };
   // 自动编号 删除
   const removeRule = (index: number) => {
-    const newConfig = rules.filter((ele: any) => ele.itemType === AUTO_CODE_RULE_TYPE.SEQUENCE)?.[0] || {
-      ...configs[autoCodeKey]
-    };
-    const newRules = rules
-      .filter((_ele: any, i: number) => i !== index)
-      .filter((ele: any) => ele.itemType !== AUTO_CODE_RULE_TYPE.SEQUENCE);
-
-    handlePropsChange(autoCodeKey, { ...newConfig, rules: newRules });
+    const newRules = configs[autoCodeKey].rules.filter((_ele: any, i: number) => i !== index);
+    handlePropsChange(autoCodeKey, { ...configs[autoCodeKey], rules: newRules });
   };
-  const updateRule = (index: number, value: any) => {
-    const newConfig = rules.filter((ele: any) => ele.itemType === AUTO_CODE_RULE_TYPE.SEQUENCE)?.[0] || {
-      ...configs[autoCodeKey]
-    };
-    const newRules = rules
-      .map((ele: any, i: number) => {
-        // 先赋值 后过滤
-        if (i === index) {
-          return { ...ele, format: value };
-        }
-        return ele;
-      })
-      .filter((ele: any) => ele.itemType !== AUTO_CODE_RULE_TYPE.SEQUENCE);
-
-    handlePropsChange(autoCodeKey, { ...newConfig, rules: newRules });
+  const updateRule = (index: number, key: string, value: any) => {
+    const newRules = configs[autoCodeKey].rules.map((ele: any, i: number) => {
+      // 赋值
+      if (i === index) {
+        return { ...ele, [key]: value };
+      }
+      return ele;
+    });
+    handlePropsChange(autoCodeKey, { ...configs[autoCodeKey], rules: newRules });
   };
 
   // 渲染每一项规则
@@ -230,7 +207,7 @@ const DynamicAutoCodeConfig: React.FC<DynamicAutoCodeConfigProps> = ({
                 disabled={configs[autoCodeDisabledKey]}
                 value={rule.format}
                 style={{ marginBottom: '4px' }}
-                onChange={(value) => updateRule(index, value)}
+                onChange={(value) => updateRule(index, 'format', value)}
                 options={dataOptions}
                 getPopupContainer={getPopupContainer}
               ></Select>
@@ -246,7 +223,7 @@ const DynamicAutoCodeConfig: React.FC<DynamicAutoCodeConfigProps> = ({
                     } else {
                       setCustomDateFormatStatusMap((prev) => ({ ...prev, [ruleId]: undefined }));
                     }
-                    updateRule(ruleId, { config: { ...rule.config, textValue: value } });
+                    updateRule(ruleId, 'textValue', value);
                   }}
                   className={styles.ruleInput}
                   status={customDateFormatStatusMap[rule.id!]}
@@ -266,9 +243,9 @@ const DynamicAutoCodeConfig: React.FC<DynamicAutoCodeConfigProps> = ({
             <span className={styles.autoCodeItemLable}>固定字符:</span>
             <Input
               disabled={configs[autoCodeDisabledKey]}
-              value={rule.format}
+              value={rule.textValue}
               placeholder="请输入内容"
-              onChange={(value) => updateRule(index, value)}
+              onChange={(value) => updateRule(index, 'textValue', value)}
               className={styles.ruleInput}
             />
           </>
@@ -286,26 +263,32 @@ const DynamicAutoCodeConfig: React.FC<DynamicAutoCodeConfigProps> = ({
               options={entityTree}
               animation
               value={findFieldPath(rule.format, entityTree)}
-              onChange={(value) => updateRule(index, value?.[1] || '')}
+              onChange={(value) => updateRule(index, 'format', value?.[1] || '')}
               getPopupContainer={getPopupContainer}
             />
           </>
         );
+      default:
+        return null;
     }
   };
 
-  const handleAutoCodeConfigConfirm = (config: AutoNumberRule) => {
+  const handleAutoCodeConfigConfirm = (config: AutoNumberRuleResponce) => {
     setDisplayText(getDisplayText(config));
-    const newConfig = { ...config };
-    const newRules = rules.filter((ele: any) => ele.itemType !== AUTO_CODE_RULE_TYPE.SEQUENCE);
-    handlePropsChange(autoCodeKey, { ...newConfig, rules: newRules });
+    const newRules = configs[autoCodeKey].rules.map((ele: any) => {
+      if (ele.itemType === AUTO_CODE_RULE_TYPE.SEQUENCE) {
+        return { ...ele, ...config };
+      }
+      return { ...ele };
+    });
+    handlePropsChange(autoCodeKey, { ...configs[autoCodeKey], rules: newRules });
   };
 
   return (
     <>
       <Form.Item layout="vertical" label={'编号规则配置'} className={styles.formItem}>
         <ReactSortable
-          list={rules}
+          list={configs[autoCodeKey]?.rules}
           setList={() => {}}
           sort={!configs[autoCodeDisabledKey]}
           handle=".autocode-item-handle"
@@ -318,7 +301,7 @@ const DynamicAutoCodeConfig: React.FC<DynamicAutoCodeConfigProps> = ({
             name: 'autocode-col-item'
           }}
           onSort={(e) => {
-            const newList = [...rules];
+            const newList = [...configs[autoCodeKey]?.rules];
             // 根据 onSort 事件中的 oldIndex 和 newIndex 交换数组元素
             const { oldIndex, newIndex } = e;
             console.log(oldIndex, newIndex);
@@ -329,16 +312,11 @@ const DynamicAutoCodeConfig: React.FC<DynamicAutoCodeConfigProps> = ({
               const [movedItem] = movedList.splice(oldIndex, 1);
               // 插入到新位置
               movedList.splice(newIndex, 0, movedItem);
-              // 更新属性
-              const newConfig = movedList.filter((ele: any) => ele.itemType === AUTO_CODE_RULE_TYPE.SEQUENCE)?.[0] || {
-                ...configs[autoCodeKey]
-              };
-              const newRules = movedList.filter((ele: any) => ele.itemType !== AUTO_CODE_RULE_TYPE.SEQUENCE);
-              handlePropsChange(autoCodeKey, { ...newConfig, rules: newRules });
+              handlePropsChange(autoCodeKey, { ...configs[autoCodeKey], rules: movedList });
             }
           }}
         >
-          {rules.map((rule: any, index: number) => (
+          {configs[autoCodeKey]?.rules.map((rule: any, index: number) => (
             <Tooltip key={index} content="如需修改请前往数据建模" disabled={!configs[autoCodeDisabledKey]}>
               <div className={styles.autoCodeItem}>
                 {!configs[autoCodeDisabledKey] && (
@@ -358,7 +336,7 @@ const DynamicAutoCodeConfig: React.FC<DynamicAutoCodeConfigProps> = ({
                     status="danger"
                     icon={<IconDelete />}
                     onClick={() => removeRule(index)}
-                    disabled={rules.length <= 1 || rule.itemType === AUTO_CODE_RULE_TYPE.SEQUENCE}
+                    disabled={configs[autoCodeKey]?.rules.length <= 1 || rule.itemType === AUTO_CODE_RULE_TYPE.SEQUENCE}
                     className={styles.ruleActionBtn}
                   />
                 )}
@@ -375,7 +353,10 @@ const DynamicAutoCodeConfig: React.FC<DynamicAutoCodeConfigProps> = ({
                 <Menu.Item
                   key={AUTO_CODE_RULE_TYPE.DATE}
                   onClick={() => addRule(AUTO_CODE_RULE_TYPE.DATE)}
-                  disabled={rules.filter((rule) => rule.itemType === AUTO_CODE_RULE_TYPE.DATE)?.length >= 1}
+                  disabled={
+                    configs[autoCodeKey]?.rules.filter((rule: any) => rule.itemType === AUTO_CODE_RULE_TYPE.DATE)
+                      ?.length >= 1
+                  }
                 >
                   创建时间
                 </Menu.Item>
@@ -400,7 +381,9 @@ const DynamicAutoCodeConfig: React.FC<DynamicAutoCodeConfigProps> = ({
         onVisibleChange={setEditRuleVisible}
         onConfirm={handleAutoCodeConfigConfirm}
         initialConfig={
-          rules.find((rule) => rule.itemType === AUTO_CODE_RULE_TYPE.SEQUENCE) as unknown as AutoNumberRuleResponce
+          configs[autoCodeKey]?.rules.find(
+            (rule: any) => rule.itemType === AUTO_CODE_RULE_TYPE.SEQUENCE
+          ) as unknown as AutoNumberRuleResponce
         }
       />
     </>

@@ -138,7 +138,9 @@ const XautoCode: XautoCodeSchema = {
     placeholder: '自动生成无需填写',
     tooltip: '',
     dataField: [],
-    autoCodeConfig: {},
+    autoCodeConfig: {
+      rules: []
+    },
     autoCodeDisabled: false,
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
