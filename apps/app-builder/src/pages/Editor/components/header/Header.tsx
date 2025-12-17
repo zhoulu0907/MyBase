@@ -27,7 +27,7 @@ import {
   getAppIdByPageSetId,
   getApplication,
   getDatasourceList,
-  getEntityFieldsWithChildren,
+  getEntityListWithFields,
   getPageSetMetaData,
   listApplicationMenu,
   menuSignal,
@@ -351,18 +351,12 @@ export default function EditorHeader() {
   // 获取主表对应的主实体信息
   const getMainMetaData = async (pageSetId: string) => {
     const mainMetaData = await getPageSetMetaData({ pageSetId: pageSetId });
-    console.log('mainMetaData: ', mainMetaData);
 
-    const entityWithChildren = await getEntityFieldsWithChildren(mainMetaData);
-
+    const entityListWithFields = await getEntityListWithFields({ entityUuids: [mainMetaData] });
+    const [entityWithChildren] = entityListWithFields;
     console.log('entityWithChildren: ', entityWithChildren);
 
     // 主表数据
-
-    const parentFields = entityWithChildren.parentFields;
-
-    console.log('parentFields: ', parentFields);
-
     if (entityWithChildren) {
       setMainEntity({
         entityId: entityWithChildren.entityId,
@@ -370,8 +364,7 @@ export default function EditorHeader() {
         tableName: entityWithChildren.tableName,
         entityName: entityWithChildren.entityName,
         entityType: ENTITY_TYPE.MAIN,
-
-        fields: parentFields
+        fields: entityWithChildren.fields
       });
 
       if (entityWithChildren.childEntities && entityWithChildren.childEntities.length > 0) {

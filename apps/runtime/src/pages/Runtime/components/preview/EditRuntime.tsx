@@ -98,13 +98,13 @@ const EditRuntime: React.FC<EditRuntimeProps> = ({ form, isAdd, submitLoading, o
       onCancel={onCancel}
       autoFocus={false}
       focusLock={true}
-      style={{ width: fullScreen ? '98vw' : '60vw', maxHeight: fullScreen ? '98vh' : '80vh', overflow: 'auto' }}
+      style={{ width: fullScreen ? '100vw' : '60vw', maxHeight: fullScreen ? '100vh' : '80vh', overflow: 'auto' }}
       alignCenter
       wrapClassName={
         fullScreen ? 'runtime-preview-formpage edit-modal edit-modal-fullscreen' : 'runtime-preview-formpage edit-modal'
       }
     >
-      <div style={{ maxHeight: fullScreen ? '80vh' : '60vh', overflow: 'auto' }}>
+      <div style={{ maxHeight: fullScreen ? '80vh' : '55vh', overflow: 'auto' }}>
         <Form
           layout="inline"
           labelCol={{ span: 10 }}
