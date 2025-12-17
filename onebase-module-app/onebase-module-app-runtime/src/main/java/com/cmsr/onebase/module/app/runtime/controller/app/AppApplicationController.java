@@ -30,6 +30,8 @@ public class AppApplicationController {
 
     @GetMapping("/get")
     @Operation(summary = "获得应用")
+    @TenantIgnore
+    @PermitAll
     public CommonResult<ApplicationRespVO> getApplication(@RequestParam("id") Long id) {
         return CommonResult.success(appApplicationService.getApplication(id));
     }
