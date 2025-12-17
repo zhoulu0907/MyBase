@@ -1152,7 +1152,7 @@ public class UserServiceImpl implements UserService {
         // 校验手机，邮箱
         validateThirdUserForCreateOrUpdate(null, reqVO.getMobile(), reqVO.getEmail());
 
-        if (null != reqVO.getDeptId()) {
+        if (null == reqVO.getDeptId()) {
             // 三方用户 默认部门，不存在就新建部门
             Long deptId = createThirdDefaultDept();
             reqVO.setDeptId(deptId);
@@ -1187,12 +1187,13 @@ public class UserServiceImpl implements UserService {
     // 获取三方用户部门是否存在
     private Long createThirdDefaultDept() {
         DeptSaveReqVO deptRespVO = new DeptSaveReqVO();
-        deptRespVO.setName(DeptCodeEnum.DEFAULT_THIRD_DEPT.getName());
+
         deptRespVO.setDeptType(DeptTypeEnum.THIRD.getCode());
         deptRespVO.setDeptCode(DeptCodeEnum.DEFAULT_THIRD_DEPT.getCode());
         DeptDO deptDO = deptService.findDeptByCodeAndType(deptRespVO);
 
         if (null == deptDO) {
+            deptRespVO.setName(DeptCodeEnum.DEFAULT_THIRD_DEPT.getName());
             deptRespVO.setParentId(DeptDO.PARENT_ID_ROOT);
             deptRespVO.setStatus(CommonStatusEnum.ENABLE.getStatus());
             return deptService.createThirdDefaultDept(deptRespVO);
