@@ -48,5 +48,5 @@ GET {{baseUrl}}/system/config/get-config-by-key?key=thirdUser
 Authorization: Bearer {{token}}
 
 ### 获取分页列表
-GET {{baseUrl}}/system/config/list
+GET {{baseUrl}}/system/config/list?status=0
 Authorization: Bearer {{token}}
