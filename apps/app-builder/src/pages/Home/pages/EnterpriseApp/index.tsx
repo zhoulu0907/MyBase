@@ -218,7 +218,7 @@ const EnterpriseAppPage: React.FC = () => {
     <div className={styles.myAppPage}>
       <div className={styles.myAppPageHeader}>
         <PermissionButton
-          permission={ACTIONS.CREATE}
+          permission={ACTIONS.QUERY}
           type="outline"
           size="large"
           icon={<img src={arrowRightUp} alt="create application" />}
