@@ -7,7 +7,6 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import UserSelectModal from './UserSelectModal';
 import styles from '../../index.module.less';
 import UserProfileAvatar from '@/components/UserProfileAvatar';
-import { isSystemUser } from '@/utils';
 
 interface UserListProps {
   selectedRoleId?: string;
@@ -152,7 +151,7 @@ const UserList: React.FC<UserListProps> = ({ selectedRoleId = undefined }: UserL
         dataIndex: 'op',
         width: 180,
         render: (_: any, record: any) => (
-          <Button type="text" onClick={() => handleRemove(record)} disabled={isSystemUser(record)}>
+          <Button type="text" onClick={() => handleRemove(record)}>
             移除
           </Button>
         )

@@ -120,6 +120,7 @@ export interface LoginResponse {
   tenantId: string; // 租户id
   tenantWebsite: string; // 租户网址
   corpId: string; // 企业id
+  loginSource: string //来源
 }
 
 export interface TenantLoginResponse {
