@@ -1,7 +1,7 @@
-import { useEffect, useState, type FC } from 'react';
-import { Button, Input, Spin, Pagination, Modal, Form } from '@arco-design/web-react';
+import CreateDashboardModal from '@/components/CreateDashboardModal';
+import { Button, Form, Input, Modal, Pagination, Spin } from '@arco-design/web-react';
 import { IconPlus, IconSearch } from '@arco-design/web-react/icon';
-import CreateScreenModal from '@/components/CreateScreenModal';
+import { useEffect, useState, type FC } from 'react';
 import ScreenCard from '../DashbordCard';
 import styles from './index.module.less';
 const FormItem = Form.Item;
@@ -202,7 +202,7 @@ const LargeScreen: FC = () => {
         </div>
       </Modal>
       {/* 新建大屏 */}
-      <CreateScreenModal
+      <CreateDashboardModal
         title="新建大屏"
         type={'screen'}
         handleCreate={handleCreateOk}
