@@ -7,6 +7,7 @@ import { EditorPage } from './pages/Editor';
 import { ETLFlowEditorPage } from './pages/ETLFlowEditor';
 import Home from './pages/Home';
 import Login from './pages/Login';
+import PreviewPage from './pages/ScreenPage/PreviewPage';
 import SettingPage from './pages/Setting';
 
 function AppContent() {
@@ -63,6 +64,8 @@ function AppContent() {
 
       <Route path="/onebase/:tenantId/editor/*" element={<EditorPage />} />
       <Route path="/onebase/:tenantId/etl_editor/*" element={<ETLFlowEditorPage />} />
+
+      <Route path="/onebase/screen/preview/:screenProjectId" element={<PreviewPage />} />
 
       {/* 默认重定向到登录页 */}
       <Route path="/" element={<Navigate to="/login" replace />} />
