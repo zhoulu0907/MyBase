@@ -299,6 +299,7 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         authLoginRespVO.setAdminFlag(findCorpAdminFlag(RoleCodeEnum.CORP_ADMIN.getCode(), user.getId()));
         // 回显当前登录用户的企业id
         authLoginRespVO.setCorpId(user.getCorpId());
+        authLoginRespVO.setLoginSource(LoginSourceEnum.CORPLOGIN.getCode());
         return authLoginRespVO;
     }
 
