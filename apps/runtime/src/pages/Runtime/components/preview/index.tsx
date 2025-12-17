@@ -421,10 +421,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid })
     submitForm(true);
   };
 
-  const toEditMode = () => {
-    setDetailMode(false);
-  };
-
   return (
     <div className={`${styles.previewPage} runtime-preview-formpage`}>
       <div className={styles.content}>
