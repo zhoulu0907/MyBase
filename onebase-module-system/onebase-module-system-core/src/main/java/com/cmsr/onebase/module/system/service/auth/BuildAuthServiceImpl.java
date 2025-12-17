@@ -413,7 +413,6 @@ public class BuildAuthServiceImpl implements BuildAuthService {
 
         // 创建会话空闲检测Key
         securityConfigApi.createSessionIdleKey(userId, deviceId);
-
         return respVO;
     }
 
