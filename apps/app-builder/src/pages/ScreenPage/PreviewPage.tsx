@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-
+import styles from './index.module.less';
 const PreviewPage: React.FC = () => {
   const { screenProjectId } = useParams<{ screenProjectId: string }>();
   const [imgSrc, setImgSrc] = useState<string | null>(null);
@@ -46,25 +46,11 @@ const PreviewPage: React.FC = () => {
   }
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        width: '100vw',
-        height: '100vh',
-        backgroundColor: 'black'
-      }}
-    >
-      <img
-        src={imgSrc}
-        style={{
-          maxWidth: '100%',
-          maxHeight: '100%',
-          objectFit: 'contain'
-        }}
-      />
-    </div>
+    <>
+      <div className={styles.previewPage}>
+        <img className={styles.previewImg} src={imgSrc} />
+      </div>
+    </>
   );
 };
 

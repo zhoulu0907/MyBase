@@ -199,14 +199,11 @@ const CreateModal: React.FC<CreateModalProps> = ({
   };
 
   const handlePreview = (screenProjectId: string) => {
-    console.log('${window.location.origin}:', `${window.location.origin}`);
-    console.log('${window.location.pathname}:', `${window.location.pathname}`);
-    console.log('screenProjectId:', screenProjectId);
     // 在新窗口打开预览页面，使用 hash 路由
-    // window.open(
-    //   `${window.location.origin}${window.location.pathname}#/onebase/screen/preview/${screenProjectId}`,
-    //   '_blank'
-    // );
+    window.open(
+      `${window.location.origin}${window.location.pathname}#/onebase/screen/preview/${screenProjectId}`,
+      '_blank'
+    );
   };
 
   const screenTemplateCard = (item: any) => (
