@@ -205,14 +205,12 @@ public class FileServiceImpl implements FileService {
 
         // 3. 获取文件扩展名(这里不通过文件名获取真实扩展名，有些场景文件名并不准确，比如用户手动修改文件名后缀、图片裁切JPG转为PNG等)
         String extension = FileTypeUtils.getExtension(type);
-        // if (StrUtil.isNotEmpty(name)) {
-        //     extension = FileNameUtil.extName(name).toLowerCase();
-        // } else {
-        //     extension = FileTypeUtils.getExtension(type);
-        // }
 
         if (StrUtil.isEmpty(extension)) {
             throw exception(FILE_EXTENSION_UNIDENTIFIABLE);
+        }else{
+            // 去除扩展名前的点号
+            extension = extension.replaceAll("\\.", "");
         }
         Map<String, FileTypeInfo> configuredFileCheckList = getConfiguredFileCheckList(configMap);
         // 4. 校验文件后缀
