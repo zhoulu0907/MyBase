@@ -25,6 +25,7 @@ import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.enums.logger.LoginLogTypeEnum;
 import com.cmsr.onebase.module.system.enums.logger.LoginResultEnum;
+import com.cmsr.onebase.module.system.enums.login.LoginSourceEnum;
 import com.cmsr.onebase.module.system.enums.login.LongTypeEnum;
 import com.cmsr.onebase.module.system.enums.oauth2.OAuth2ClientConstants;
 import com.cmsr.onebase.module.system.enums.permission.RoleCodeEnum;
@@ -227,7 +228,9 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
             LogRecordContext.putVariable("user", user);
         });
 
-        return authLoginRespVO.get();
+        AuthLoginRespVO authLogVO = authLoginRespVO.get();
+        authLogVO.setLoginSource(LoginSourceEnum.APPLOGIN.getCode());
+        return authLogVO;
 
     }
 
@@ -271,7 +274,9 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
             LogRecordContext.putVariable("user", user);
         });
 
-        return authLoginRespVO.get();
+        AuthLoginRespVO authLogVO = authLoginRespVO.get();
+        authLogVO.setLoginSource(LoginSourceEnum.APPLOGINMOBILE.getCode());
+        return authLogVO;
 
     }
 
@@ -446,7 +451,6 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
 
         // 创建会话空闲检测Key
         securityConfigApi.createSessionIdleKey(userId, deviceId);
-
         return respVO;
     }
 
