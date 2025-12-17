@@ -9,12 +9,12 @@ import java.util.Arrays;
  * 角色标识枚举
  */
 @Getter
-public enum GlobalCategoryConfigEnum implements ArrayValuable<String> {
+public enum SystemConfigKeyEnum implements ArrayValuable<String> {
 
-    THIRD("third", "外部用户"),
-    SAAS("saas", "Saas");
+    THIRDUSERCONFIG("thirdUserConfig ", "外部用户管理配置项"),
+    SAASMODECONFIG("saasModeConfig", "SaaS模式配置项");
 
-    GlobalCategoryConfigEnum(String code, String name) {
+    SystemConfigKeyEnum(String code, String name) {
         this.code = code;
         this.name = name;
     }
@@ -28,7 +28,7 @@ public enum GlobalCategoryConfigEnum implements ArrayValuable<String> {
      */
     private final String name;
 
-    public static final String[] ARRAYS = Arrays.stream(values()).map(GlobalCategoryConfigEnum::getCode).toArray(String[]::new);
+    public static final String[] ARRAYS = Arrays.stream(values()).map(SystemConfigKeyEnum::getCode).toArray(String[]::new);
 
 
     @Override

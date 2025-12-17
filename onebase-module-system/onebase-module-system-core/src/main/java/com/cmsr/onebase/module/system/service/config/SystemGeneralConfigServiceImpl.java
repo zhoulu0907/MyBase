@@ -8,7 +8,7 @@ import com.cmsr.onebase.module.system.dal.database.SystemGeneralConfigDataReposi
 import com.cmsr.onebase.module.system.dal.dataobject.config.SystemGeneralConfigDO;
 import com.cmsr.onebase.module.system.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.system.enums.config.ConfigCategoryEnum;
-import com.cmsr.onebase.module.system.enums.config.GlobalCategoryConfigEnum;
+import com.cmsr.onebase.module.system.enums.config.SystemConfigKeyEnum;
 import com.cmsr.onebase.module.system.vo.config.*;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -69,7 +69,7 @@ public class SystemGeneralConfigServiceImpl implements SystemGeneralConfigServic
         }
 
         if (StringUtils.isBlank(configReqVO.getName())  &&  null ==configReqVO.getStatus()) {
-            List<SystemGeneralConfigDO> globalConfigList = systemGeneralConfigDataRepository.findGlobaConfigListByKeys(Arrays.asList(GlobalCategoryConfigEnum.ARRAYS));
+            List<SystemGeneralConfigDO> globalConfigList = systemGeneralConfigDataRepository.findGlobaConfigListByKeys(Arrays.asList(SystemConfigKeyEnum.ARRAYS));
             if (CollectionUtils.isEmpty(globalConfigList)) {
                 return new ArrayList<>();
             }
