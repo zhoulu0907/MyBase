@@ -212,7 +212,7 @@ export default forwardRef(function RoleList({ activeId, onSelect, onAdd }: RoleL
                 return (
                   <>
                     <span>{node.name}</span>
-                    {node.type === RoleType.SYSTEM && node.code !== 'normal_user' && (
+                    {node.type === RoleType.SYSTEM && (
                       <Tag color="cyan" style={{ marginLeft: 24 }}>
                         系统
                       </Tag>
