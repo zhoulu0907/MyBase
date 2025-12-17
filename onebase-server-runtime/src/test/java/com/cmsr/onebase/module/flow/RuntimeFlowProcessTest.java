@@ -133,9 +133,9 @@ public class RuntimeFlowProcessTest {
     public void testFormTrigger03() throws IOException {
         FormTriggerReqVO reqVO = new FormTriggerReqVO();
         reqVO.setProcessId(181943095635476480L);
-        reqVO.setInputParams(Map.of(
-                "entity_date", "2025-12-10"
-        ));
+        Map<String, Object> inputParams = new HashMap<>();
+        inputParams.put("entity_date", null);
+        reqVO.setInputParams(inputParams);
         FormTriggerRespVO formTriggerRespVO = flowProcessExecService.triggerForm(reqVO);
         System.out.println(formTriggerRespVO);
     }
