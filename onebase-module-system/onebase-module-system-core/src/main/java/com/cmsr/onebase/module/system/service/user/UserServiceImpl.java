@@ -1304,35 +1304,35 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserApplicationRespVO getThirdUserAndRelationApp(Long id) {
 
-        // 获取用户基本信息
+        // 1.获取用户基本信息
         AdminUserDO user = getUser(id);
         if (user == null) {
             return null;
         }
         UserApplicationRespVO userApplicationRespVO =    BeanUtils.toBean(user, UserApplicationRespVO.class);
         userApplicationRespVO.setNickName(user.getNickname());
-        // 1. 获取用户关联的应用关系列表
+        // 2. 获取用户关联的应用关系列表
         Set<Long> userIds = new HashSet<>();
         userIds.add(user.getId());
         UserAppPageReqVO vo = new UserAppPageReqVO();
         vo.setUserIds(userIds);
 
-        // 4. 查询用户与应用的关联关系列表
+        // 3. 查询用户与应用的关联关系列表
         List<UserAppRelationDO> userAppRelationList = userAppRelationService.getUserAppRelationList(vo);
         if (org.apache.commons.collections4.CollectionUtils.isEmpty(userAppRelationList)) {
             return userApplicationRespVO;
         }
-        // 7. 提取所有关联的应用ID，并查询应用详细信息
+        // 4. 提取所有关联的应用ID，并查询应用详细信息
         Set<Long> appId = userAppRelationList.stream().map(UserAppRelationDO::getApplicationId).collect(Collectors.toSet());
         List<ApplicationDTO> appList = appApplicationApi.findAppApplicationByAppIds(appId);
 
-        Map<Long, ApplicationDTO> appMap = appList.stream().collect(Collectors.toMap(ApplicationDTO::getId, item -> item));
-
         Map<Long, List<UserAppRelationDO>> userAppRelationMap = userAppRelationList.stream()
                 .collect(Collectors.groupingBy(UserAppRelationDO::getUserId));
-
+        //5. 获取当前用户关联的应用关系列表
         List<UserAppRelationDO> appRelationDOList = userAppRelationMap.get(user.getId());
+        Map<Long, ApplicationDTO> appMap = appList.stream().collect(Collectors.toMap(ApplicationDTO::getId, item -> item));
 
+        //6. 将应用关系转换为应用详情信息
         userApplicationRespVO.setUserApplicationList(appRelationDOList.stream()
                         .map(appRelationDO -> {
                             UserAppVO userAppVO = new UserAppVO();
