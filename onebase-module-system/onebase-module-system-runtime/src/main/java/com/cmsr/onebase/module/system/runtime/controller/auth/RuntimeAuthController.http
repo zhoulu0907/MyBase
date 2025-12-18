@@ -125,3 +125,16 @@ tag: {{tag}}
         }
     }
 %}
+
+
+### 请求 /忘记密码 接口 => 失败
+POST {{baseUrl}}/system/auth/forget-password
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+tag: {{tag}}
+
+{
+  "mobile": "15890615800",
+  "verifyCode": "111111"
+}

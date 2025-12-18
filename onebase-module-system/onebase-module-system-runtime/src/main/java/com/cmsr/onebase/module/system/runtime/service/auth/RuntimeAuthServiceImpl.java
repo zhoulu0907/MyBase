@@ -82,7 +82,7 @@ import static com.cmsr.onebase.module.system.enums.LogRecordConstants.*;
 public class RuntimeAuthServiceImpl implements RuntimeAuthService {
 
     // 三方用户设置默认密码
-    private static final String THIRD_USER_PASSWORD = "OBThird2025!";
+    private static final String THIRD_USER_PASSWORD = "ThirdChina2025!";
 
     @Resource
     private UserService        userService;
@@ -352,18 +352,23 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
     }
 
     @Override
-    public void forgetPassword(UserForgetPasswordReqVO reqVO) {
-        // 1.通过手机号，获取 用户
+    public void thirdUserForgetPassword(UserForgetPasswordReqVO reqVO) {
+
+        // 1.校验验证码
+        ThirdAuthLoginReqVO thirdAuthLoginReqVO=new ThirdAuthLoginReqVO();
+        thirdAuthLoginReqVO.setMobile(reqVO.getMobile());
+        thirdAuthLoginReqVO.setVerifyCode(reqVO.getVerifyCode());
+        validateVerfiyCode(thirdAuthLoginReqVO);
+
+        // 2.通过手机号，获取 用户
         AdminUserDO user = userService.getUserByMobile(reqVO.getMobile());
+        if (null == user) {
+            throw exception(USER_NOT_EXISTS);
+        }
+        // 3.加密密码
+        userService.thirdUserForgetPassword(user.getId(), THIRD_USER_PASSWORD);
 
-        // 2. 弱密码校验
-        //  securityConfigApi.validatePassword(reqVO.getPassword());
-        // 加密密码
-        userService.forgetPassword(reqVO);
 
-        // 4. 记录操作日志上下文
-        LogRecordContext.putVariable("user", user);
-        LogRecordContext.putVariable("newPassword", THIRD_USER_PASSWORD);
     }
 
     private boolean findUserAppRelationFlag(Long appId, Long userId) {

@@ -11,8 +11,8 @@ import java.util.Arrays;
 @Getter
 public enum SystemConfigKeyEnum implements ArrayValuable<String> {
 
-    THIRDUSERCONFIG("thirdUserConfig ", "外部用户管理配置项"),
-    SAASMODECONFIG("saasModeConfig", "SaaS模式配置项");
+    ThirdUserConfig("thirdUserConfig ", "外部用户管理配置项"),
+    SaasModeConfig("saasModeConfig", "SaaS模式配置项");
 
     SystemConfigKeyEnum(String code, String name) {
         this.code = code;

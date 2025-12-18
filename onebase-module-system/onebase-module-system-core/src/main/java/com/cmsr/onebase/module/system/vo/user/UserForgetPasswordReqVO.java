@@ -13,10 +13,6 @@ public class UserForgetPasswordReqVO {
     @NotNull(message = "手机号不能为空")
     private String mobile;
 
-    @Schema(description = "密码", requiredMode = Schema.RequiredMode.REQUIRED, example = "123456")
-    //@NotEmpty(message = "密码不能为空")
-    private String password;
-
     @Schema(description = "验证码",  example = "10")
     @NotEmpty(message = "验证码不能为空")
     private String verifyCode;

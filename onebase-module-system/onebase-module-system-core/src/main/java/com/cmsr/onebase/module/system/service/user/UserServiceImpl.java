@@ -415,17 +415,27 @@ public class UserServiceImpl implements UserService {
     public void updateUserPassword(Long id, UserProfileUpdatePasswordReqVO reqVO) {
         // 校验旧密码密码
         validateOldPassword(id, reqVO.getOldPassword());
-        // 弱密码校验
-        securityConfigApi.validatePassword(reqVO.getNewPassword());
+        // 调用更新密码逻辑
+        AdminUserDO user =  commonUpdatePassword(id, reqVO.getNewPassword());
+    }
+
+    // 密码更新逻辑
+    public AdminUserDO commonUpdatePassword(Long id, String newPassword){
+
+        //校验密码强度
+        securityConfigApi.validatePassword(newPassword);
         // 历史密码校验
-        securityConfigApi.validatePasswordHistory(id, reqVO.getNewPassword());
+        securityConfigApi.validatePasswordHistory(id, newPassword);
         // 执行更新
         AdminUserDO updateObj = new AdminUserDO().setId(id);
-        updateObj.setPassword(encodePassword(reqVO.getNewPassword())); // 加密密码
+        updateObj.setPassword(encodePassword(newPassword)); // 加密密码
         userDataRepository.update(updateObj);
         // 保存密码历史
         securityConfigApi.savePasswordHistory(id, updateObj.getPassword());
+        return updateObj;
     }
+
+
 
     @Override
     @LogRecord(type = SYSTEM_USER_TYPE, subType = SYSTEM_USER_UPDATE_PASSWORD_SUB_TYPE, bizNo = "{{#id}}",
@@ -434,24 +444,13 @@ public class UserServiceImpl implements UserService {
         // 1. 校验用户存在
         AdminUserDO user = validateUserExists(id);
 
-        // 2. 弱密码校验
-        securityConfigApi.validatePassword(password);
+        //2. 第三方密码，目前取默认值，若以后用户可以自定义，使用入参 password
+        AdminUserDO updateObj =    commonUpdatePassword(user.getId(), password);
 
-        // 3. 历史密码校验
-        securityConfigApi.validatePasswordHistory(id, password);
-
-        // 4. 更新密码
-        AdminUserDO updateObj = new AdminUserDO();
-        updateObj.setId(id);
-        updateObj.setPassword(encodePassword(password)); // 加密密码
-        userDataRepository.update(updateObj);
-
-        // 5 保存密码修改历史记录
-        securityConfigApi.savePasswordHistory(id, updateObj.getPassword());
-
-        // 6. 记录操作日志上下文
+        // 3. 记录操作日志上下文
         LogRecordContext.putVariable("user", user);
         LogRecordContext.putVariable("newPassword", updateObj.getPassword());
+
     }
 
     @Override
@@ -1064,71 +1063,14 @@ public class UserServiceImpl implements UserService {
     }
 
 
-    @Override
-    public void updateThirdUserPassword(Long id, String password) {
-        // 1. 校验用户存在
-        AdminUserDO user = validateUserExists(id);
 
-        // 2. 弱密码校验
-        //  securityConfigApi.validatePassword(password);
-        // 3. 更新密码 ，默认密码OBThird2025!
-        AdminUserDO updateObj = new AdminUserDO();
-        updateObj.setId(id);
-        updateObj.setPassword(encodePassword(THIRD_USER_PASSWORD)); // 加密密码
-        userDataRepository.update(updateObj);
-
-        // 4. 记录操作日志上下文
-        LogRecordContext.putVariable("user", user);
-        LogRecordContext.putVariable("newPassword", updateObj.getPassword());
-    }
-
-    @Override
-    public void forgetPassword(UserForgetPasswordReqVO reqVO) {
-        // 1.通过手机号，获取 用户
-        AdminUserDO user = userDataRepository.findByMobile(reqVO.getMobile());
-
-        // 2. 弱密码校验
-        //  securityConfigApi.validatePassword(reqVO.getPassword());
-
-        // TODO 临时使用默认密码 3. 更新密码,临时使用默认密码
-        AdminUserDO updateObj = new AdminUserDO();
-        updateObj.setId(user.getId());
-        updateObj.setPassword(encodePassword(THIRD_USER_PASSWORD)); // 加密密码
-        userDataRepository.update(updateObj);
-
-        // 4. 记录操作日志上下文
-        LogRecordContext.putVariable("user", user);
-        LogRecordContext.putVariable("newPassword", updateObj.getPassword());
-    }
-
-
-
-
-    @Override
-    public ThirdSupplementUserResVO supplementUser(ThirdSupplementUserReqVO reqVO) {
-        // 2.1 解密原文
-        reqVO.setPassword(pwdEnHelper.decryptHexStr(reqVO.getPassword()));
-
-        AdminUserDO user = userDataRepository.findById(reqVO.getUserId());
-        user.setNickname(reqVO.getNickName());
-        user.setEmail(reqVO.getEmail());
-        user.setAvatar(reqVO.getAvatar());
-        user.setPassword(encodePassword(reqVO.getPassword()));
-        userDataRepository.update(user);
-
-        ThirdSupplementUserResVO resVO = new ThirdSupplementUserResVO();
-        resVO.setId(user.getId());
-        resVO.setUserName(user.getUsername());
-        resVO.setNickName(user.getNickname());
-        resVO.setEmail(user.getEmail());
-        return resVO;
-    }
+    // ---------------------------------第三方用户方法分割线-----------------------------------------------
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     @LogRecord(type = SYSTEM_USER_TYPE_THRID, subType = SYSTEM_USER_CREATE_SUB_TYPE, bizNo = "{{#user.id}}",
             success = SYSTEM_USER_CREATE_SUCCESS)
-    public Long createUserAndUserAppRelation(ThirdUserAppCombinedInsertReqVO reqVO) {
+    public Long thirdUserCreateUserAndUserAppRelation(ThirdUserAppCombinedInsertReqVO reqVO) {
         // 验证用户数据，确保用户不存在
         // 如果为空，默认为开启状态
         if (null == reqVO.getStatus()) {
@@ -1184,6 +1126,24 @@ public class UserServiceImpl implements UserService {
     }
 
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    @LogRecord(type = SYSTEM_USER_TYPE_THRID, subType = SYSTEM_USER_UPDATE_SUB_TYPE, bizNo = "{{#updateReqVO.id}}",
+            success = SYSTEM_USER_UPDATE_SUCCESS)
+    public Long thirdUserUpdateUserAndUserAppRelation(ThirdUserAppCombinedUpdateReqVO updateReqVO) {
+        AdminUserDO oldUser = validateThirdUserForCreateOrUpdate(updateReqVO.getId(), null, updateReqVO.getEmail());
+        checkTenantUserCountLimit(updateReqVO.getStatus(), oldUser);
+        // 2.1 更新用户
+        AdminUserDO updateObj = BeanUtils.toBean(updateReqVO, AdminUserDO.class);
+        userDataRepository.update(updateObj);
+        // 创建关联关系
+        setUserAppRelation(updateReqVO.getId(), updateReqVO.getApplicationIdList());
+        // 3. 记录操作日志上下文
+        LogRecordContext.putVariable(DiffParseFunction.OLD_OBJECT, BeanUtils.toBean(oldUser, UserInsertReqVO.class));
+        LogRecordContext.putVariable("user", oldUser);
+        return updateReqVO.getId();
+    }
+
     // 获取三方用户部门是否存在
     private Long createThirdDefaultDept() {
         DeptSaveReqVO deptRespVO = new DeptSaveReqVO();
@@ -1201,22 +1161,14 @@ public class UserServiceImpl implements UserService {
         return deptDO.getId();
     }
 
+
     @Override
-    @Transactional(rollbackFor = Exception.class)
-    @LogRecord(type = SYSTEM_USER_TYPE_THRID, subType = SYSTEM_USER_UPDATE_SUB_TYPE, bizNo = "{{#updateReqVO.id}}",
-            success = SYSTEM_USER_UPDATE_SUCCESS)
-    public Long updateUserAndUserAppRelation(ThirdUserAppCombinedUpdateReqVO updateReqVO) {
-        AdminUserDO oldUser = validateThirdUserForCreateOrUpdate(updateReqVO.getId(), updateReqVO.getMobile(), updateReqVO.getEmail());
-        checkTenantUserCountLimit(updateReqVO.getStatus(), oldUser);
-        // 2.1 更新用户
-        AdminUserDO updateObj = BeanUtils.toBean(updateReqVO, AdminUserDO.class);
-        userDataRepository.update(updateObj);
-        // 创建关联关系
-        setUserAppRelation(updateReqVO.getId(), updateReqVO.getApplicationIdList());
-        // 3. 记录操作日志上下文
-        LogRecordContext.putVariable(DiffParseFunction.OLD_OBJECT, BeanUtils.toBean(oldUser, UserInsertReqVO.class));
-        LogRecordContext.putVariable("user", oldUser);
-        return updateReqVO.getId();
+    public void thirdUserUpdatePassword(Long id, String password) {
+        // 1. 校验用户存在
+        AdminUserDO user = validateUserExists(id);
+
+        //2. 第三方密码，目前取默认值，若以后用户可以自定义，使用入参 password
+        commonUpdatePassword(user.getId(), THIRD_USER_PASSWORD);
     }
 
     private void checkTenantUserCountLimit(Integer status, AdminUserDO oldUser) {
@@ -1356,4 +1308,84 @@ public class UserServiceImpl implements UserService {
         userDataRepository.insert(user);
         return user.getId();
     }
+
+    @Override
+    public UserApplicationRespVO getThirdUserAndRelationApp(Long id) {
+
+        // 获取用户基本信息
+        AdminUserDO user = getUser(id);
+        if (user == null) {
+            return null;
+        }
+        UserApplicationRespVO userApplicationRespVO =    BeanUtils.toBean(user, UserApplicationRespVO.class);
+        userApplicationRespVO.setNickName(user.getNickname());
+        // 1. 获取用户关联的应用关系列表
+        Set<Long> userIds = new HashSet<>();
+        userIds.add(user.getId());
+        UserAppPageReqVO vo = new UserAppPageReqVO();
+        vo.setUserIds(userIds);
+
+        // 4. 查询用户与应用的关联关系列表
+        List<UserAppRelationDO> userAppRelationList = userAppRelationService.getUserAppRelationList(vo);
+        if (org.apache.commons.collections4.CollectionUtils.isEmpty(userAppRelationList)) {
+            return userApplicationRespVO;
+        }
+        // 7. 提取所有关联的应用ID，并查询应用详细信息
+        Set<Long> appId = userAppRelationList.stream().map(UserAppRelationDO::getApplicationId).collect(Collectors.toSet());
+        List<ApplicationDTO> appList = appApplicationApi.findAppApplicationByAppIds(appId);
+
+        Map<Long, ApplicationDTO> appMap = appList.stream().collect(Collectors.toMap(ApplicationDTO::getId, item -> item));
+
+        Map<Long, List<UserAppRelationDO>> userAppRelationMap = userAppRelationList.stream()
+                .collect(Collectors.groupingBy(UserAppRelationDO::getUserId));
+
+        List<UserAppRelationDO> appRelationDOList = userAppRelationMap.get(user.getId());
+
+        userApplicationRespVO.setUserApplicationList(appRelationDOList.stream()
+                        .map(appRelationDO -> {
+                            UserAppVO userAppVO = new UserAppVO();
+                            ApplicationDTO appDTO = appMap.get(appRelationDO.getApplicationId());
+                            if (null != appDTO) {
+                                userAppVO.setAppId(appDTO.getId());
+                                userAppVO.setAppName(appDTO.getAppName());
+                                userAppVO.setIconName(appDTO.getIconName());
+                                userAppVO.setIconColor(appDTO.getIconColor());
+                            }
+                            return userAppVO;
+                        })
+                        .collect(Collectors.toList()));
+        // 转换为响应对象
+        return  userApplicationRespVO;
+    }
+
+
+
+
+    @Override
+    public ThirdSupplementUserResVO thirdUserSupplementUser(ThirdSupplementUserReqVO reqVO) {
+        // 2.1 解密原文
+        reqVO.setPassword(pwdEnHelper.decryptHexStr(reqVO.getPassword()));
+
+        AdminUserDO user = userDataRepository.findById(reqVO.getUserId());
+        user.setNickname(reqVO.getNickName());
+        user.setEmail(reqVO.getEmail());
+        user.setAvatar(reqVO.getAvatar());
+        user.setPassword(encodePassword(reqVO.getPassword()));
+        userDataRepository.update(user);
+
+        ThirdSupplementUserResVO resVO = new ThirdSupplementUserResVO();
+        resVO.setId(user.getId());
+        resVO.setUserName(user.getUsername());
+        resVO.setNickName(user.getNickname());
+        resVO.setEmail(user.getEmail());
+        return resVO;
+    }
+
+
+    @Override
+    public void thirdUserForgetPassword(Long id,String password) {
+        commonUpdatePassword(id, password);
+    }
+
+
 }
