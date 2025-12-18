@@ -53,6 +53,22 @@ public class JobSchedulerClient {
         }
     }
 
+    private String createFlowName(Long applicationId, Long processId) {
+        return applicationId + "-" + processId;
+    }
+
+    public void deleteJob(Long applicationId, Long processId) {
+        try {
+            String flowName = createFlowName(applicationId, processId);
+            List<Long> jobIds = dolphinSchedulerClient.queryWorkflowCodeListByName(flowProjectCode, flowName);
+            for (Long jobId : jobIds) {
+                dolphinSchedulerClient.purgeWorkflow(flowProjectCode, jobId);
+            }
+        } catch (Exception e) {
+            log.error("删除工作流失败: {}", applicationId, e);
+            throw new RuntimeException("删除工作流失败: " + applicationId, e);
+        }
+    }
 
     public void deleteJob(Long applicationId) {
         try {
