@@ -573,6 +573,10 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         conditionVO.setSortBy(reqVO.getSortBy());
 
         if (reqVO.getFilters() != null) {
+            if (reqVO.getFilters().getChildren() == null) {
+                reqVO.getFilters().setChildren(new ArrayList<>());
+            }
+
             reqVO.getFilters().getChildren().add(idCondition);
             conditionVO.setSemanticConditionDTO(reqVO.getFilters());
         } else {
