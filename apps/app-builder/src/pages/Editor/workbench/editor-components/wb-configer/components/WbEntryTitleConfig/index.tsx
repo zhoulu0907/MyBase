@@ -15,59 +15,68 @@ interface Props {
   configs: Record<string, unknown>;
 }
 
-const DEFAULT_TITLE_CONFIG: QuickEntryTitleConfig = {
-  showTitle: true,
-  titleName: '快捷入口',
-  showMore: true,
-  enableGroup: false
-};
-
-const DEFAULT_GROUP_CONFIG: QuickEntryGroupConfig = {
-  enableGroup: false,
-  groups: []
-};
-
 const WbEntryTitleConfig = ({ handlePropsChange, item, configs }: Props) => {
   const currentTitleConfig = useMemo(() => {
-    const value = configs?.[item.key] as QuickEntryTitleConfig | undefined;
-    return value || DEFAULT_TITLE_CONFIG;
+    return (configs?.[item.key] as QuickEntryTitleConfig | undefined) || undefined;
   }, [configs, item.key]);
 
   const currentGroupConfig = useMemo(() => {
-    const value = configs?.['groupConfig'] as QuickEntryGroupConfig | undefined;
-    return value || DEFAULT_GROUP_CONFIG;
+    return (configs?.['groupConfig'] as QuickEntryGroupConfig | undefined) || undefined;
   }, [configs]);
 
   const handleTitleConfigChange = useCallback(
     (patch: Partial<QuickEntryTitleConfig>) => {
+
+      const latestTitleConfig = configs?.[item.key] as QuickEntryTitleConfig | undefined;
       const nextValue = {
-        ...currentTitleConfig,
+        ...(latestTitleConfig || {}),
         ...patch
       };
       handlePropsChange(item.key, nextValue);
     },
-    [currentTitleConfig, handlePropsChange, item.key]
+    [configs, handlePropsChange, item.key]
   );
 
   const handleEnableGroupChange = useCallback(
     (value: boolean) => {
+
+      const latestTitleConfig = configs?.[item.key] as QuickEntryTitleConfig | undefined;
+      const latestGroupConfig = configs?.['groupConfig'] as QuickEntryGroupConfig | undefined;
+
       // 同时更新titleConfig和groupConfig的enableGroup
-      handleTitleConfigChange({ enableGroup: value });
-      const nextGroupConfig = {
-        ...currentGroupConfig,
+      const nextTitleConfig = {
+        ...(latestTitleConfig || {}),
         enableGroup: value
       };
-      handlePropsChange('groupConfig', nextGroupConfig);
+      handlePropsChange(item.key, nextTitleConfig);
+
+      if (latestGroupConfig) {
+        const nextGroupConfig = {
+          ...latestGroupConfig,
+          enableGroup: value
+        };
+        handlePropsChange('groupConfig', nextGroupConfig);
+      } else {
+        handlePropsChange('groupConfig', {
+          enableGroup: value,
+          groups: []
+        });
+      }
     },
-    [currentGroupConfig, handleTitleConfigChange, handlePropsChange]
+    [configs, handlePropsChange, item.key]
   );
+
+  // 如果配置不存在，不渲染
+  if (!currentTitleConfig) {
+    return null;
+  }
 
   return (
     <div className={styles.entryTitleConfig}>
       <div className={styles.formItem}>
         <label>标题名称</label>
         <Input
-          value={currentTitleConfig.titleName}
+          value={currentTitleConfig.titleName || ''}
           onChange={(value) => handleTitleConfigChange({ titleName: value })}
           placeholder="请输入标题名称"
         />
@@ -75,20 +84,23 @@ const WbEntryTitleConfig = ({ handlePropsChange, item, configs }: Props) => {
       <div className={styles.formItem}>
         <label>显示标题</label>
         <Switch
-          checked={currentTitleConfig.showTitle}
+          checked={currentTitleConfig.showTitle ?? true}
           onChange={(value) => handleTitleConfigChange({ showTitle: value })}
         />
       </div>
       <div className={styles.formItem}>
         <label>查看更多</label>
         <Switch
-          checked={currentTitleConfig.showMore}
+          checked={currentTitleConfig.showMore ?? true}
           onChange={(value) => handleTitleConfigChange({ showMore: value })}
         />
       </div>
       <div className={styles.formItem}>
         <label>分组</label>
-        <Switch checked={currentTitleConfig.enableGroup || false} onChange={handleEnableGroupChange} />
+        <Switch
+          checked={currentGroupConfig?.enableGroup ?? currentTitleConfig?.enableGroup ?? false}
+          onChange={handleEnableGroupChange}
+        />
       </div>
     </div>
   );

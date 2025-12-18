@@ -24,7 +24,6 @@ const WorkbenchConfiger = () => {
   const componentType = useMemo(() => curComponentSchema?.type, [curComponentSchema?.type]);
   const isPageConfig = useMemo(() => componentType === 'page' || !curComponentID, [componentType, curComponentID]);
 
-  console.log('curComponentSchema', curComponentSchema);
   const configComponent = useMemo(() => {
     if (isPageConfig) {
       return <PageConfig />;

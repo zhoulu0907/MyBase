@@ -1,7 +1,7 @@
 import { Button, Divider, Dropdown, Form, Input, Menu, Message, Popconfirm, Select } from '@arco-design/web-react';
 import { IconDelete, IconEdit, IconMenu, IconPlus, IconDragDotVertical } from '@arco-design/web-react/icon';
 import { type ApplicationMenu } from '@onebase/app';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import type { QuickEntryGroupConfig, QuickEntryGroupItemConfig } from '@onebase/ui-kit';
 import IconEntry from '@/assets/workbench/quick-entry/entry1.svg';
@@ -34,272 +34,263 @@ interface SchemaGroup {
 
 const FormItem = Form.Item;
 const DEFAULT_GROUP_NAME = '默认分组';
+
 const generateEntryId = () => `entry-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 
-const DEFAULT_GROUP_CONFIG: QuickEntryGroupConfig = {
-  enableGroup: false,
-  groups: []
-};
-
 const EntryContentConfig = ({ onChange, value }: EntryContentConfigProps) => {
-  const normalizedValue = useMemo(() => {
-    return value || DEFAULT_GROUP_CONFIG;
-  }, [value]);
-
-  const [entries, setEntries] = useState<EntryItem[]>([]);
-  const [showAddMenu, setShowAddMenu] = useState(false);
-  const [drawerVisible, setDrawerVisible] = useState(false);
-  const [selectMenuModalVisible, setSelectMenuModalVisible] = useState(false);
-  const [entryType, setEntryType] = useState<string>('');
-  const [newGroupName, setNewGroupName] = useState<string>('');
-  const [currentEntry, setCurrentEntry] = useState<EntryItem>();
-  const [enableGroup, setEnableGroup] = useState<boolean>(false);
-  const initializingFormRef = useRef(false);
-  const currentEntryRef = useRef<EntryItem>();
-  const pendingEntryRef = useRef<EntryItem | null>(null);
-  const entriesInitializedRef = useRef(false);
-  const entriesRef = useRef<EntryItem[]>([]);
-  const syncTimerRef = useRef<number | null>(null);
-  const pendingSyncEntriesRef = useRef<EntryItem[] | null>(null);
-
-  const groupConfig = normalizedValue || DEFAULT_GROUP_CONFIG;
-  const schemaGroups = groupConfig.groups as SchemaGroup[] | undefined;
-  const groupOptions = Array.isArray(schemaGroups) ? schemaGroups : [];
+  const [state, setState] = useState({
+    entries: [] as EntryItem[],
+    showAddMenu: false,
+    drawerVisible: false,
+    selectMenuModalVisible: false,
+    entryType: '',
+    newGroupName: '',
+    currentEntry: undefined as EntryItem | undefined,
+    enableGroup: false,
+    pendingEntry: null as EntryItem | null,
+    formInitialized: false
+  });
 
   const [form] = Form.useForm<EntryItem>();
 
-  // 将最新 entries 存入 ref，供 effect 做浅比较使用
-  useEffect(() => {
-    entriesRef.current = entries;
-  }, [entries]);
+  const normalizedValue = useMemo(() => value || { enableGroup: false, groups: [] }, [value]);
+  const schemaGroups = useMemo(() => normalizedValue.groups || [], [normalizedValue]);
 
-  // 更新 groupConfig 并触发 onChange
-  const updateGroupConfig = useCallback(
-    (newEntries: EntryItem[]) => {
-      if (!entriesInitializedRef.current) {
-        return;
+  // 转换函数
+  const entriesToGroups = useCallback((entries: EntryItem[]): QuickEntryGroupItemConfig[] => {
+    const groupsMap = new Map<string, EntryItem[]>();
+    entries.forEach((entry) => {
+      const groupName = entry.group || DEFAULT_GROUP_NAME;
+      if (!groupsMap.has(groupName)) {
+        groupsMap.set(groupName, []);
       }
-      const groupsMap = new Map<string, EntryItem[]>();
-      newEntries.forEach((entry) => {
-        const groupName = entry.group || DEFAULT_GROUP_NAME;
-        if (!groupsMap.has(groupName)) {
-          groupsMap.set(groupName, []);
-        }
-        groupsMap.get(groupName)!.push({ ...entry });
-      });
+      groupsMap.get(groupName)!.push(entry);
+    });
 
-      // 每次同步时重建 groups，避免引用残留导致的样式回退
-      const groups = Array.from(groupsMap.entries()).map(([groupName, entryList]) => ({
-        groupName,
-        entries: entryList.map((entryItem) => {
-          const rest = { ...entryItem };
-          delete rest.group;
-          delete rest.id;
-          return rest;
-        })
-      }));
+    return Array.from(groupsMap.entries()).map(([groupName, entryList]) => ({
+      groupName,
+      entries: entryList.map((entry) => {
+        const { group, id, ...rest } = entry;
+        return rest;
+      })
+    }));
+  }, []);
 
-      const nextGroupConfig: QuickEntryGroupConfig = {
-        ...groupConfig,
-        groups
-      };
-
-      onChange?.(nextGroupConfig);
-    },
-    [groupConfig, normalizedValue, onChange]
-  );
-
-  // 300ms 防抖写回 schema，避免每个字符都触发 store 更新
-  const scheduleUpdateGroupConfig = useCallback(
-    (newEntries: EntryItem[]) => {
-      entriesInitializedRef.current = true;
-      pendingSyncEntriesRef.current = newEntries;
-      if (syncTimerRef.current) {
-        window.clearTimeout(syncTimerRef.current);
-      }
-      syncTimerRef.current = window.setTimeout(() => {
-        if (pendingSyncEntriesRef.current) {
-          updateGroupConfig(pendingSyncEntriesRef.current);
-        }
-      }, 300);
-    },
-    [updateGroupConfig]
-  );
-
-  // 卸载时清理定时器
-  useEffect(
-    () => () => {
-      if (syncTimerRef.current) {
-        window.clearTimeout(syncTimerRef.current);
-      }
-    },
-    []
-  );
-
-  useEffect(() => {
-    if (!Array.isArray(schemaGroups)) {
-      setEntries([]);
-      return;
-    }
-
-    let needsIdSync = false;
-    const nextEntries: EntryItem[] = [];
-    // 扁平化 schema 中的分组数据，并补齐缺失的 entryId
-    schemaGroups.forEach((group) => {
+  // 扁平化 schemaGroups 为 entries
+  const flattenSchemaGroups = useCallback((groups: SchemaGroup[]): EntryItem[] => {
+    return groups.flatMap((group) => {
       const groupName = group?.groupName || DEFAULT_GROUP_NAME;
-      (group?.entries || []).forEach((entry: EntryItem) => {
-        const normalizedId = entry?.entryId || entry?.id || generateEntryId();
-        if (!entry?.entryId) {
-          needsIdSync = true;
-        }
-        nextEntries.push({
+      return (group?.entries || []).map((entry) => {
+        const entryId = entry?.entryId || entry?.id || generateEntryId();
+        return {
           ...entry,
-          group: entry?.group || groupName,
-          entryId: normalizedId,
-          id: normalizedId
-        });
+          group: groupName,
+          entryId,
+          id: entryId
+        };
       });
     });
+  }, []);
 
-    // 如果扁平化结果与当前 entries 完全一致，就不再触发本地更新，避免循环
-    const prev = entriesRef.current;
-    const isSame =
-      prev.length === nextEntries.length &&
-      prev.every(
-        (item, index) =>
-          item.entryId === nextEntries[index].entryId &&
-          (item.group || DEFAULT_GROUP_NAME) === (nextEntries[index].group || DEFAULT_GROUP_NAME)
-      );
-    if (isSame) {
-      return;
-    }
-
-    setEntries(nextEntries);
-    entriesInitializedRef.current = true;
-
-    if (needsIdSync && nextEntries.length > 0) {
-      updateGroupConfig(nextEntries);
-    }
-    // 这里只关注 schemaGroups 变化，updateGroupConfig 通过闭包获取最新引用
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [schemaGroups]);
-
+  // 同步entries
   useEffect(() => {
-    currentEntryRef.current = currentEntry;
-  }, [currentEntry]);
+    if (!value) return;
 
-  useEffect(() => {
-    setEnableGroup(Boolean(groupConfig.enableGroup));
-  }, [groupConfig.enableGroup]);
+    const initialEntries = flattenSchemaGroups(schemaGroups);
+    const initialEnableGroup = Boolean(value.enableGroup);
 
-  // 新增入口，菜单类型需要先等待 menuId 选择
-  const handleAddEntry = (type: 'menu' | 'link') => {
-    setEntryType(type);
+    setState((prev) => ({
+      ...prev,
+      entries: initialEntries,
+      enableGroup: initialEnableGroup
+    }));
+  }, [value, schemaGroups, flattenSchemaGroups]);
 
-    if (type === 'link') {
-      pendingEntryRef.current = null;
-      const newEntry: EntryItem = {
-        entryId: generateEntryId(),
-        entryName: '新增链接' + (entries.length + 1),
-        entryType: type,
-        group: enableGroup ? entries[0]?.group || DEFAULT_GROUP_NAME : DEFAULT_GROUP_NAME
-      };
-      newEntry.id = newEntry.entryId;
-      const newEntries = [...entries, newEntry];
-      setEntries(newEntries);
-      scheduleUpdateGroupConfig(newEntries);
-      setShowAddMenu(false);
-    } else {
-      const pendingEntry: EntryItem = {
-        entryId: generateEntryId(),
-        entryName: '新增菜单' + (entries.length + 1),
-        entryType: type,
-        group: enableGroup ? entries[0]?.group || DEFAULT_GROUP_NAME : DEFAULT_GROUP_NAME,
-        id: ''
-      };
-      pendingEntry.id = pendingEntry.entryId;
-      pendingEntryRef.current = pendingEntry;
-      setShowAddMenu(false);
-      setSelectMenuModalVisible(true);
-    }
-  };
+  const handleFormValuesChange = useCallback(
+    (changedValues: Partial<EntryItem>) => {
+      if (state.formInitialized) return;
+      if (!state.currentEntry?.entryId) return;
 
-  const handleDeleteEntry = (entryId: string) => {
-    const newEntries = entries.filter((entry) => entry.entryId !== entryId);
-    setEntries(newEntries);
-    scheduleUpdateGroupConfig(newEntries);
-  };
+      const updatedEntry = {
+        ...state.currentEntry,
+        ...changedValues
+      } as EntryItem;
+      updatedEntry.id = updatedEntry.entryId;
 
-  const handleOpenEditDrawer = (item: EntryItem) => {
-    pendingEntryRef.current = null;
-    const normalizedItem = { ...item, id: item.entryId };
-    setEntryType(item.entryType || '');
-    setCurrentEntry(normalizedItem);
-    currentEntryRef.current = normalizedItem;
-    initializingFormRef.current = true;
-    form.setFieldsValue(normalizedItem);
-    initializingFormRef.current = false;
-    setDrawerVisible(true);
-  };
+      const newEntries = state.entries.map((entry) => (entry.entryId === updatedEntry.entryId ? updatedEntry : entry));
 
-  // 拖拽列表内编辑时，保持指定 entry 独立更新
-  const handleEditEntry = (entryId: string, field: string, value: string) => {
-    setEntries((prev) => {
-      const newEntries = prev.map((entry) => {
-        if (entry.entryId === entryId) {
-          const nextEntry = { ...entry, [field]: value };
-          nextEntry.id = nextEntry.entryId;
-          return nextEntry;
+      setState((prev) => ({ ...prev, currentEntry: updatedEntry }));
+      onChange?.({ ...normalizedValue, groups: entriesToGroups(newEntries) });
+    },
+    [state.currentEntry, state.entries, state.formInitialized, normalizedValue, onChange, entriesToGroups]
+  );
+
+  const handleEditEntry = useCallback(
+    (entryId: string, field: string, value: string) => {
+      setState((prev) => {
+        // 检查是否真的需要更新
+        const existingEntry = prev.entries.find((e) => e.entryId === entryId);
+        if (existingEntry && existingEntry[field as keyof EntryItem] === value) {
+          return prev;
         }
-        return entry;
+
+        const newEntries = prev.entries.map((entry) => {
+          if (entry.entryId === entryId) {
+            return { ...entry, [field]: value, id: entry.entryId };
+          }
+          return entry;
+        });
+
+        // 更新父组件，但不更新本地状态（由useEffect处理同步）
+        onChange?.({ ...normalizedValue, groups: entriesToGroups(newEntries) });
+
+        return { ...prev, entries: newEntries };
       });
-      scheduleUpdateGroupConfig(newEntries);
-      return newEntries;
-    });
-  };
+    },
+    [normalizedValue, onChange, entriesToGroups]
+  );
 
-  // 处理表单值变化，实时同步到workspace组件
-  // 抽屉编辑采用 form.onValuesChange，排除初始化阶段
-  const handleFormValuesChange = (changedValues: Partial<EntryItem>) => {
-    if (initializingFormRef.current) {
-      return;
-    }
-    const editingEntry = currentEntryRef.current;
-    if (!editingEntry?.entryId) {
-      return;
-    }
+  const handleAddEntry = useCallback(
+    (type: 'menu' | 'link') => {
+      if (type === 'link') {
+        const newEntry: EntryItem = {
+          entryId: generateEntryId(),
+          entryName: `新增链接${state.entries.length + 1}`,
+          entryType: type,
+          group: state.enableGroup ? state.entries[0]?.group || DEFAULT_GROUP_NAME : DEFAULT_GROUP_NAME
+        };
 
-    const updatedEntry = {
-      ...editingEntry,
-      ...changedValues
-    } as EntryItem;
-    updatedEntry.id = updatedEntry.entryId;
+        const newEntries = [...state.entries, { ...newEntry, id: newEntry.entryId }];
+        setState((prev) => ({ ...prev, showAddMenu: false }));
+        onChange?.({ ...normalizedValue, groups: entriesToGroups(newEntries) });
+      } else {
+        const pendingEntry: EntryItem = {
+          entryId: generateEntryId(),
+          entryName: `新增菜单${state.entries.length + 1}`,
+          entryType: type,
+          group: state.enableGroup ? state.entries[0]?.group || DEFAULT_GROUP_NAME : DEFAULT_GROUP_NAME,
+          id: ''
+        };
 
-    setCurrentEntry(updatedEntry);
-    currentEntryRef.current = updatedEntry;
-    setEntries((prev) => {
-      const newEntries = prev.map((entry) => (entry.entryId === updatedEntry.entryId ? updatedEntry : entry));
-      scheduleUpdateGroupConfig(newEntries);
-      return newEntries;
-    });
-  };
+        setState({
+          ...state,
+          showAddMenu: false,
+          selectMenuModalVisible: true,
+          pendingEntry: { ...pendingEntry, id: pendingEntry.entryId }
+        });
+      }
+    },
+    [state, normalizedValue, onChange, entriesToGroups]
+  );
 
-  const addGroup = () => {
-    if (newGroupName.trim() === '') {
+  const handleDeleteEntry = useCallback(
+    (entryId: string) => {
+      const newEntries = state.entries.filter((entry) => entry.entryId !== entryId);
+      onChange?.({ ...normalizedValue, groups: entriesToGroups(newEntries) });
+      setState((prev) => ({ ...prev, entries: newEntries }));
+    },
+    [state.entries, normalizedValue, onChange, entriesToGroups]
+  );
+
+  const handleOpenEditDrawer = useCallback(
+    (item: EntryItem) => {
+      const normalizedItem = { ...item, id: item.entryId };
+
+      form.setFieldsValue(normalizedItem);
+      setState({
+        ...state,
+        drawerVisible: true,
+        currentEntry: normalizedItem,
+        entryType: item.entryType || '',
+        formInitialized: true
+      });
+
+      // 在下一个渲染周期后重置formInitialized
+      setTimeout(() => {
+        setState((prev) => ({ ...prev, formInitialized: false }));
+      }, 0);
+    },
+    [state, form]
+  );
+
+  const addGroup = useCallback(() => {
+    if (state.newGroupName.trim() === '') {
       Message.error('请输入分组名称');
       return;
     }
-    const newGroups: QuickEntryGroupItemConfig[] = [
-      ...groupOptions.map((g) => ({ groupName: g.groupName, entries: g.entries || [] })),
-      { groupName: newGroupName, entries: [] }
-    ];
-    const nextGroupConfig: QuickEntryGroupConfig = {
-      ...groupConfig,
-      groups: newGroups
-    };
-    onChange?.(nextGroupConfig);
-    setNewGroupName('');
-  };
+
+    const existingGroups = schemaGroups.map((g) => ({
+      groupName: g.groupName,
+      entries: g.entries || []
+    }));
+
+    const newGroups = [...existingGroups, { groupName: state.newGroupName, entries: [] }];
+
+    onChange?.({ ...normalizedValue, groups: newGroups });
+    setState((prev) => ({ ...prev, newGroupName: '' }));
+  }, [state.newGroupName, schemaGroups, normalizedValue, onChange]);
+
+  const handleSelectMenuOk = useCallback(
+    (menus: ApplicationMenu[]) => {
+      setState((prev) => {
+        // 添加模式
+        if (prev.pendingEntry) {
+          const uniqueMenus = menus.filter((menu) => menu.id);
+          if (uniqueMenus.length > 0) {
+            const createdEntries = uniqueMenus.map((menu) => {
+              const nextEntryId = generateEntryId();
+              return {
+                ...prev.pendingEntry!,
+                entryId: nextEntryId,
+                id: nextEntryId,
+                menuId: menu.id,
+                entryName: menu.menuName || prev.pendingEntry!.entryName
+              };
+            });
+
+            const newEntries = [...prev.entries, ...createdEntries];
+            onChange?.({ ...normalizedValue, groups: entriesToGroups(newEntries) });
+
+            return {
+              ...prev,
+              selectMenuModalVisible: false,
+              pendingEntry: null,
+              entries: newEntries
+            };
+          }
+          return { ...prev, selectMenuModalVisible: false, pendingEntry: null };
+        }
+
+        // 编辑模式
+        if (prev.currentEntry) {
+          const targetMenu = menus.find((menu) => menu.id);
+          if (targetMenu?.id) {
+            const updatedEntry = {
+              ...prev.currentEntry,
+              menuId: targetMenu.id,
+              entryName: targetMenu.menuName
+            };
+
+            const newEntries = prev.entries.map((entry) =>
+              entry.entryId === updatedEntry.entryId ? updatedEntry : entry
+            );
+
+            onChange?.({ ...normalizedValue, groups: entriesToGroups(newEntries) });
+
+            return {
+              ...prev,
+              selectMenuModalVisible: false,
+              currentEntry: updatedEntry,
+              entries: newEntries
+            };
+          }
+        }
+
+        return { ...prev, selectMenuModalVisible: false };
+      });
+    },
+    [normalizedValue, onChange, entriesToGroups]
+  );
 
   const renderDrawerContent = () => (
     <div className={styles.drawerContent}>
@@ -317,14 +308,13 @@ const EntryContentConfig = ({ onChange, value }: EntryContentConfigProps) => {
           labelCol={{ span: 8 }}
           wrapperCol={{ span: 6, offset: 10 }}
         >
-          <div>{entryType === 'menu' ? '应用菜单' : '外部链接'}</div>
+          <div>{state.entryType === 'menu' ? '应用菜单' : '外部链接'}</div>
         </FormItem>
         <FormItem label="入口图标" field="entryIcon">
           <div className={styles.iconUploader}>
             <div className={styles.iconUploaderAvatar}>
               <img src={IconEntry} alt="entry icon" />
             </div>
-            {/* <Button type="secondary">重新上传</Button> */}
           </div>
         </FormItem>
         <FormItem label="入口名称" field="entryName">
@@ -333,7 +323,7 @@ const EntryContentConfig = ({ onChange, value }: EntryContentConfigProps) => {
         <FormItem label="辅助描述" field="entryDesc">
           <Input.TextArea placeholder="请输入" autoSize={{ minRows: 2, maxRows: 3 }} />
         </FormItem>
-        {enableGroup && (
+        {state.enableGroup && (
           <FormItem label="分组" field="group">
             <Select
               placeholder="请选择"
@@ -351,8 +341,8 @@ const EntryContentConfig = ({ onChange, value }: EntryContentConfigProps) => {
                     <Input
                       size="small"
                       style={{ marginRight: 18 }}
-                      value={newGroupName}
-                      onChange={(value) => setNewGroupName(value)}
+                      value={state.newGroupName}
+                      onChange={(value) => setState((prev) => ({ ...prev, newGroupName: value }))}
                     />
                     <Button style={{ fontSize: 14, padding: '0 6px' }} type="text" size="mini" onClick={addGroup}>
                       <IconPlus />
@@ -362,7 +352,7 @@ const EntryContentConfig = ({ onChange, value }: EntryContentConfigProps) => {
                 </div>
               )}
             >
-              {groupOptions.map((group) => (
+              {schemaGroups.map((group) => (
                 <Select.Option key={group.groupName} value={group.groupName}>
                   {group.groupName}
                 </Select.Option>
@@ -376,7 +366,11 @@ const EntryContentConfig = ({ onChange, value }: EntryContentConfigProps) => {
               <FormItem label="选择菜单">
                 <div className={styles.menuPicker}>
                   <Input readOnly value={values.menuId || '请选择菜单'} />
-                  <Button type="text" icon={<IconEdit />} onClick={() => setSelectMenuModalVisible(true)} />
+                  <Button
+                    type="text"
+                    icon={<IconEdit />}
+                    onClick={() => setState((prev) => ({ ...prev, selectMenuModalVisible: true }))}
+                  />
                 </div>
               </FormItem>
             ) : (
@@ -403,27 +397,45 @@ const EntryContentConfig = ({ onChange, value }: EntryContentConfigProps) => {
     </Menu>
   );
 
+  const handleSortListChange = useCallback(
+    (newList: EntryItem[]) => {
+      const normalizedList = newList.map((entry) => {
+        const nextId = entry.entryId || entry.id || generateEntryId();
+        return {
+          ...entry,
+          entryId: nextId,
+          id: nextId
+        };
+      });
+
+      // 检查是否真的需要更新
+      const entriesChanged = normalizedList.some(
+        (newEntry, index) =>
+          state.entries[index]?.entryId !== newEntry.entryId || state.entries[index]?.group !== newEntry.group
+      );
+
+      if (entriesChanged) {
+        onChange?.({ ...normalizedValue, groups: entriesToGroups(normalizedList) });
+        setState((prev) => ({ ...prev, entries: normalizedList }));
+      }
+    },
+    [state.entries, normalizedValue, onChange, entriesToGroups]
+  );
+
+  if (!value) {
+    return null;
+  }
+
   return (
     <div className={styles.content}>
       <div className={styles.entryConfig}>
         <ReactSortable
-          list={entries.map((entry) => ({ ...entry, id: entry.entryId }))}
-          setList={(newList) => {
-            const normalizedList = (newList as EntryItem[]).map((entry) => {
-              const nextId = entry.entryId || entry.id || generateEntryId();
-              return {
-                ...entry,
-                entryId: nextId,
-                id: nextId
-              };
-            });
-            setEntries(normalizedList);
-            scheduleUpdateGroupConfig(normalizedList);
-          }}
+          list={state.entries.map((entry) => ({ ...entry, id: entry.entryId }))}
+          setList={handleSortListChange}
           handle=".drag-handle"
           animation={200}
         >
-          {entries.map((entry) => (
+          {state.entries.map((entry) => (
             <div key={entry.entryId} className={styles.entryItem}>
               <div className={`${styles.dragHandle} drag-handle`}>
                 <IconDragDotVertical />
@@ -448,8 +460,8 @@ const EntryContentConfig = ({ onChange, value }: EntryContentConfigProps) => {
           droplist={addEntry}
           trigger="click"
           position="bl"
-          popupVisible={showAddMenu}
-          onVisibleChange={setShowAddMenu}
+          popupVisible={state.showAddMenu}
+          onVisibleChange={(visible) => setState((prev) => ({ ...prev, showAddMenu: visible }))}
         >
           <Button type="outline" className={styles.addEntryBtn} icon={<IconPlus />}>
             添加入口
@@ -457,56 +469,17 @@ const EntryContentConfig = ({ onChange, value }: EntryContentConfigProps) => {
         </Dropdown>
 
         <ConfigDrawer
-          visible={drawerVisible}
+          visible={state.drawerVisible}
           title="编辑入口"
-          onClose={() => {
-            setDrawerVisible(false);
-            setCurrentEntry(undefined);
-          }}
+          onClose={() => setState((prev) => ({ ...prev, drawerVisible: false, currentEntry: undefined }))}
         >
           {renderDrawerContent()}
         </ConfigDrawer>
 
         <SelectMenuModal
-          visible={selectMenuModalVisible}
-          onCancel={() => {
-            setSelectMenuModalVisible(false);
-          }}
-          onOk={(menus: ApplicationMenu[]) => {
-            setSelectMenuModalVisible(false);
-            // 如果是添加模式，将新entry添加到列表并打开编辑抽屉
-            const pendingEntry = pendingEntryRef.current;
-            if (pendingEntry) {
-              const uniqueMenus = menus.filter((menu) => menu.id);
-              if (uniqueMenus.length > 0) {
-                const createdEntries = uniqueMenus.map((menu) => {
-                  const nextEntryId = generateEntryId();
-                  return {
-                    ...pendingEntry,
-                    entryId: nextEntryId,
-                    id: nextEntryId,
-                    menuId: menu.id,
-                    entryName: menu.menuName || pendingEntry.entryName
-                  };
-                });
-                const newEntries = [...entries, ...createdEntries];
-                setEntries(newEntries);
-                updateGroupConfig(newEntries);
-                pendingEntryRef.current = null;
-                return;
-              }
-              pendingEntryRef.current = null;
-            }
-
-            // 编辑模式下，仅同步第一项选择
-            const editingEntry = currentEntryRef.current;
-            if (editingEntry) {
-              const targetMenu = menus.find((menu) => menu.id);
-              if (targetMenu?.id) {
-                handleFormValuesChange({ menuId: targetMenu.id, entryName: targetMenu.menuName });
-              }
-            }
-          }}
+          visible={state.selectMenuModalVisible}
+          onCancel={() => setState((prev) => ({ ...prev, selectMenuModalVisible: false }))}
+          onOk={handleSelectMenuOk}
         />
       </div>
     </div>

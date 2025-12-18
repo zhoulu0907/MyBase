@@ -29,9 +29,9 @@ const defaultGroupConfig: QuickEntryGroupConfig = {
 };
 
 const XQuickEntry = memo((props: XQuickEntryConfig & { runtime?: boolean; detailMode?: boolean }) => {
-  const { id, status, width, entryTitleConfig, styleConfig, groupConfig, runtime } = props;
+  const { id, status, width, titleConfig, styleConfig, groupConfig, runtime } = props;
 
-  const finalTitleConfig = entryTitleConfig || defaultTitleConfig;
+  const finalTitleConfig = titleConfig || defaultTitleConfig;
   const finalStyleConfig = styleConfig || defaultStyleConfig;
   const finalGroupConfig = groupConfig || defaultGroupConfig;
 
