@@ -211,9 +211,9 @@ export default forwardRef(function RoleList({ activeId, onSelect, onAdd }: RoleL
               renderTitle={(node: TreeDataType) => {
                 return (
                   <>
-                    <span>{node.name}</span>
-                    {node.type === RoleType.SYSTEM && node.code !== 'normal_user' && (
-                      <Tag color="cyan" style={{ marginLeft: 24 }}>
+                    <span style={{minWidth:'120px', display:'inline-block'}}>{node.name}</span>
+                    {node.type === RoleType.SYSTEM && (
+                      <Tag color="cyan">
                         系统
                       </Tag>
                     )}

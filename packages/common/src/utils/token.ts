@@ -13,7 +13,7 @@ export interface TokenInfo {
   tenantId?: string; // 租户id
   corpId?: string; // 企业id
   loginURL?: string;
-  loginMethod?: "mobile" | "username";
+  loginSource: string;
 }
 
 export class TokenManager {

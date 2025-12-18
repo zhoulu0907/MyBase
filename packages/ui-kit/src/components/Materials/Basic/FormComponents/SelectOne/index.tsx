@@ -66,7 +66,9 @@ const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean; det
             }}
             renderFormat={(option) => {
               if (typeof fieldValue === 'object' && fieldValue) {
-                return defaultOptionsConfig?.defaultOptions?.find((op) => op.value === fieldValue?.id)?.label ?? '--';
+                return (
+                  defaultOptionsConfig?.defaultOptions?.find((op) => op.value === fieldValue?.id)?.label ?? undefined
+                );
               }
               return <span>{option?.children}</span>;
             }}

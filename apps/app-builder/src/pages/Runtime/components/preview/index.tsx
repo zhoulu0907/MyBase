@@ -209,9 +209,11 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
             </Fragment>
           ))
         ) : (
-          <div className={styles.noData}>
-            <img src={EditorEmpty} alt="暂无数据" />
-          </div>
+          pageType === EDITOR_TYPES.LIST_EDITOR && (
+            <div className={styles.noData}>
+              <img src={EditorEmpty} alt="暂无数据" />
+            </div>
+          )
         )}
 
         {pageType == EDITOR_TYPES.FORM_EDITOR && (

@@ -62,8 +62,7 @@ const MaterialContainer: React.FC<MaterialContainerProps> = ({ activeTab, editMo
     return [
       // { key: CATEGORY_TYPE.NAVIGATE, items: baseNavigateItems },
       {
-        key: CATEGORY_TYPE.LAYOUT,
-        items: editMode === EditMode.MOBILE ? baseLayoutItems.filter(item => item.type === LAYOUT_COMPONENT_TYPES.COLLAPSE_LAYOUT) : baseLayoutItems
+        key: CATEGORY_TYPE.LAYOUT, items: baseLayoutItems
       },
       {
         key: CATEGORY_TYPE.FORM,

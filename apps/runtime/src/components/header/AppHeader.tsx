@@ -5,16 +5,17 @@ import UserProfileAvatar from '@/components/UserProfileAvatar';
 
 import { useI18n } from '@/hooks/useI18n';
 import { appInfoSignal } from '@/store/app';
-import { logout } from '@/utils/session';
+import { getTenantInfoFromSession, logout, setTenantInfoFromSession } from '@/utils/session';
 import { Divider, Dropdown, Layout, Menu, Typography } from '@arco-design/web-react';
 import { IconExport } from '@arco-design/web-react/icon';
 import { getApplication, type GetApplicationReq } from '@onebase/app';
 import { TokenManager, UserPermissionManager } from '@onebase/common';
-import { CodeType, getPermissionInfo } from '@onebase/platform-center';
+import { CodeType, getCorpDetailByIdApiInCorp, getPermissionInfo } from '@onebase/platform-center';
 import { appIconMap } from '@onebase/ui-kit';
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import styles from './header.module.less';
+import TenantLogo from '../TenantLogo';
 
 const { Header } = Layout;
 
@@ -69,11 +70,13 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
 
   const getInfo = async () => {
     const res = await getPermissionInfo(CodeType.CORP);
+    const tenantInfoRes = await getCorpDetailByIdApiInCorp(tokenInfo?.corpId || '');
     UserPermissionManager.setUserPermissionInfo(res);
     const mobile = res.user?.mobile;
     const formatMobile = maskMobile(mobile);
     setMobile(formatMobile);
     setUserInfo(res.user);
+    setTenantInfoFromSession(tenantInfoRes);
   };
 
   // 登出处理
@@ -85,7 +88,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   // 用户菜单
   const userMenu = (
     <Menu style={{ marginRight: '10px' }}>
-      <Menu.Item key="info" style={{ height: '90px' }}>
+      <Menu.Item key="info" style={{ height: 'auto' }}>
         <div className={styles.adminInformation}>
           <UserProfileAvatar adminInfo={userInfo} />
           <Typography.Text>{userInfo?.nickname}</Typography.Text>
@@ -93,17 +96,19 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
         </div>
       </Menu.Item>
       <Divider style={{ margin: '4px 0' }} />
-      <Menu.Item
-        key="setting"
-        onClick={() => {
-          navigate(`/onebase/${tenantId}/setting`);
-        }}
-      >
-        <div className={styles.headerContent}>
-          <img src={BuildingLine} />
-          <span>企业管理后台</span>
-        </div>
-      </Menu.Item>
+      {(tokenInfo?.loginSource === 'app-login-mobile' || tokenInfo?.loginSource === 'corp-login') && (
+        <Menu.Item
+          key="setting"
+          onClick={() => {
+            navigate(`/onebase/${tenantId}/setting`);
+          }}
+        >
+          <div className={styles.headerContent}>
+            <img src={BuildingLine} />
+            <span>企业管理后台</span>
+          </div>
+        </Menu.Item>
+      )}
       <Menu.Item key="logout" onClick={handleLogout}>
         <IconExport style={{ color: '#F53F3F' }} />
         <Typography.Text type="error">{t('header.logout')}</Typography.Text>
@@ -111,22 +116,14 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     </Menu>
   );
 
+  const tenantInfo = getTenantInfoFromSession();
+
   return (
     <Header className={`${styles.header} ${className || ''}`}>
       <div className={styles.headerContent}>
-        {(curAppInfo.value.iconName && (
-          <div className={styles.appInfo}>
-            <div className={styles.myAppIcon} style={{ backgroundColor: curAppInfo.value.iconColor }}>
-              <DynamicIcon
-                IconComponent={appIconMap[curAppInfo.value.iconName as keyof typeof appIconMap]}
-                theme="outline"
-                size="14"
-                fill="#F2F3F5"
-              />
-            </div>
-            <div className={styles.appName}>{curAppInfo.value.appName}</div>
-          </div>
-        )) || <img src={LogoAvatarSVG} />}
+       <div className={styles.logo}>
+          <TenantLogo tenantInfo={tenantInfo} />
+        </div>
 
         <div className={styles.userInfo}>
           {userInfo?.nickname ? '你好，' + userInfo?.nickname : '未登录'}
