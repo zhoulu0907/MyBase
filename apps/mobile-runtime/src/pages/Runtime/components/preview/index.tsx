@@ -30,6 +30,7 @@ import {
   STATUS_OPTIONS,
   STATUS_VALUES,
   useFormEditorSignal,
+  usePageEditorSignal,
   type GridItem
 } from '@onebase/ui-kit';
 import { getFileUrlById } from '@onebase/platform-center';
@@ -65,7 +66,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
   const [form] = useForm();
 
-  const { pageComponentSchemas } = useFormEditorSignal;
+  const pageEditorSignal = usePageEditorSignal();
   const { components: listComponents, pageComponentSchemas: listPageComponentSchemas } = useListEditorSignal;
 
   const {
@@ -396,7 +397,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
       id: id
     };
     const res = await dataMethodDetailV2(tableName, menuId, req);
-    // console.log('xxx=====', res);
 
     // 遍历 res.data，将数据回填到表单
     const formValues: Record<string, any> = {};
@@ -416,10 +416,11 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
             if (fieldType === ENTITY_FIELD_TYPE.DATE.VALUE || fieldType === ENTITY_FIELD_TYPE.DATETIME.VALUE) {
               formValues[fieldName] = dayjs(value).valueOf();
             } else if (fieldType === ENTITY_FIELD_TYPE.SELECT.VALUE) {
-              const curComponentSchema = Object.values(pageComponentSchemas.value).find(v => value?.id?.includes(v.id)) || {};
-              const curOptions = curComponentSchema?.config?.defaultOptionsConfig?.defaultOptions || [];
-              const renderValue = curOptions.find(op => op.value === value.id)?.label || '-';
-              formValues[fieldName] = [renderValue];
+              // const curComponentSchema = Object.values(pageComponentSchemas.value).find(v => value.id?.includes(v.id)) || {};
+              // const curOptions = curComponentSchema?.config?.defaultOptionsConfig?.defaultOptions || [];
+              // const renderValue = curOptions.find(op => op.value === value.id)?.label || '-';
+              // formValues[fieldName] = [renderValue];
+              formValues[fieldName] = [value.id];
             } else if (fieldType === ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE) {
               formValues[fieldName] = value.map((v) => v.id) || [];
             } else if (fieldType === ENTITY_FIELD_TYPE.USER.VALUE) {
@@ -475,8 +476,9 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
                       formValues[`${key}.${idx}.${fieldName}`] = dayjs(subData[idx]?.[fieldName]).valueOf();
                     } else if (fieldType === ENTITY_FIELD_TYPE.SELECT.VALUE) {
                       const value = subData[idx]?.[fieldName];
-                      const renderValue = config.defaultOptionsConfig.defaultOptions.find(v => v.value === value.id)?.label || '-';
-                      formValues[`${key}.${idx}.${fieldName}`] = [renderValue];
+                      // const renderValue = config.defaultOptionsConfig.defaultOptions.find(v => v.value === value.id)?.label || '-';
+                      // formValues[`${key}.${idx}.${fieldName}`] = [renderValue];
+                      formValues[`${key}.${idx}.${fieldName}`] = [value.id];
                     } else if (fieldType === ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE) {
                       const value = subData[idx]?.[fieldName];
                       formValues[`${key}.${idx}.${fieldName}`] = value.map((v) => v.id) || [];
@@ -521,10 +523,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
       setEditLoading(false);
     }, 200);
     return res;
-  };
-
-  const toEditMode = () => {
-    setDetailMode(false);
   };
 
   const curFormPage =
@@ -612,6 +610,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
                             showFromPageData={() => {
                               setPageType(EDITOR_TYPES.FORM_EDITOR);
                             }}
+                            useStoreSignals={pageEditorSignal}
                           />
                         </div>
                       )}

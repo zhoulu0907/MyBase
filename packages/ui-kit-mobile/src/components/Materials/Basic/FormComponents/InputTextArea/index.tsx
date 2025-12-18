@@ -8,8 +8,9 @@ type XInputTextAreaConfig = typeof FormSchema.XInputTextAreaSchema.config;
 import './index.css';
 import '../index.css';
 
-const XInputTextArea = memo((props: XInputTextAreaConfig & { runtime?: boolean; detailMode?: boolean }) => {
+const XInputTextArea = memo((props: XInputTextAreaConfig & { runtime?: boolean; detailMode?: boolean; form?: any; }) => {
   const {
+    form,
     label,
     dataField,
     placeholder,
@@ -86,14 +87,14 @@ const XInputTextArea = memo((props: XInputTextAreaConfig & { runtime?: boolean; 
     >
       {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
         // 只读模式，渲染文本内容
-        <div style={{
+        <div className="readonlyText" style={{
           textAlign: align,
-          padding: '8px',
+          paddingTop: '0.16rem',
           whiteSpace: 'pre-wrap',
           wordBreak: 'break-word',
           minHeight: `${minRows * 24 + 16}px`
         }}>
-          --
+          {form?.getFieldValue(fieldId)}
         </div>
       ) : (
         renderContent()
