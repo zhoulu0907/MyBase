@@ -353,6 +353,7 @@ public class SemanticMergeRecordAssembler {
         Map<String, SemanticFieldSchemaDTO> byUuid = new HashMap<>();
         for (MetadataEntityFieldDO f : fields) {
             SemanticFieldSchemaDTO s = new SemanticFieldSchemaDTO();
+            s.setId(f.getId());
             s.setFieldUuid(f.getFieldUuid());
             s.setFieldCode(f.getFieldCode());
             s.setFieldName(f.getFieldName());
@@ -387,6 +388,7 @@ public class SemanticMergeRecordAssembler {
                     if (s == null) { continue; }
                     if (s.getFieldOptions() == null) { s.setFieldOptions(new ArrayList<>()); }
                     com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldOptionDTO dto = new com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldOptionDTO();
+                    dto.setId(opt.getId());
                     dto.setOptionUuid(opt.getOptionUuid());
                     dto.setFieldUuid(opt.getFieldUuid());
                     dto.setOptionLabel(opt.getOptionLabel());
