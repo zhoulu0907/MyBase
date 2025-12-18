@@ -48,10 +48,10 @@ export const getFieldOptionsConfig = async (dataField: string[], mainEntity: App
 export const getFieldAutoCodeConfig = async (dataField: string[], mainEntity: AppEntity, subEntities: AppEntities) => {
     const currentField = getFieldConfig(dataField, mainEntity, subEntities)
     if (!currentField) {
-        return {};
+        return [];
     }
     if (currentField.autoNumberConfig?.rules?.length) {
-        return { ...currentField.autoNumberConfig, rules: currentField.autoNumberConfig?.rules };
+        return [...currentField.autoNumberConfig?.rules];
     }
     return [];
 }

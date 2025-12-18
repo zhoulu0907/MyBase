@@ -169,11 +169,6 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
 
       // 字段约束配置（长度/正则） constraints
       schema.config.constraints = currentField.constraints;
-      // 自动编号完整配置（含规则项） autoNumberConfig
-      if (itemType === FORM_COMPONENT_TYPES.AUTO_CODE) {
-        schema.config.autoCodeConfig = currentField.autoNumberConfig || schema.config.autoCodeConfig;
-        schema.config.autoCodeDisabled = currentField?.autoNumberConfig?.id ? true : false;
-      }
       // 数据选择
       if (itemType === FORM_COMPONENT_TYPES.DATA_SELECT) {
         // 数据源

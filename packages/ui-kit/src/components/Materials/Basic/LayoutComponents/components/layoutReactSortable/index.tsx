@@ -173,11 +173,6 @@ const LayoutReactSortable: React.FC<LayoutReactSortableProps> = ({
           }
           // 字段约束配置（长度/正则） constraints
           schema.config.constraints = field.constraints;
-          // 自动编号完整配置（含规则项） autoNumberConfig
-          if (cpType === FORM_COMPONENT_TYPES.AUTO_CODE) {
-            schema.config.autoCodeConfig = field.autoNumberConfig || schema.config.autoCodeConfig;
-            schema.config.autoCodeDisabled = field?.autoNumberConfig?.id ? true : false;
-          }
           // 数据选择
           if (cpType === FORM_COMPONENT_TYPES.DATA_SELECT) {
             // 数据源
@@ -270,11 +265,6 @@ const LayoutReactSortable: React.FC<LayoutReactSortableProps> = ({
 
           // 字段约束配置（长度/正则） constraints
           subSchema.config.constraints = ele.constraints;
-          // 自动编号完整配置（含规则项） autoNumberConfig
-          if (subType === FORM_COMPONENT_TYPES.AUTO_CODE) {
-            subSchema.config.autoCodeConfig = ele.autoNumberConfig || subSchema.config.autoCodeConfig;
-            subSchema.config.autoCodeDisabled = ele?.autoNumberConfig?.id ? true : false;
-          }
           // 数据选择
           if (subType === FORM_COMPONENT_TYPES.DATA_SELECT) {
             // 数据源
