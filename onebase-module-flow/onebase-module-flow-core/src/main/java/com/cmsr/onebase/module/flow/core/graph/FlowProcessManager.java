@@ -177,6 +177,8 @@ public class FlowProcessManager {
         FlowProcessCache.deleteByProcessId(processId);
         //
         stopSchedulingJob(applicationId, processId);
+        flowProcessTimeRepository.deleteByProcessId(processId);
+        flowProcessDateFieldRepository.deleteByProcessId(processId);
     }
 
     @SneakyThrows

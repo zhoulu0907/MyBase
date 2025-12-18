@@ -109,9 +109,9 @@ public class FlowProcessCache {
     }
 
     public static Set<Long> findProcessByApplicationId(Long applicationId) {
-        return processCache.entrySet().stream()
-                .filter(entry -> entry.getValue().equals(applicationId))
-                .map(Map.Entry::getKey)
+        return processCache.values().stream()
+                .filter(processDO -> processDO.getApplicationId().equals(applicationId))
+                .map(processDO -> processDO.getId())
                 .collect(Collectors.toSet());
     }
 

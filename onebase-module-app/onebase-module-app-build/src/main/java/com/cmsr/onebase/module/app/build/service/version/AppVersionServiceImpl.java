@@ -81,9 +81,6 @@ public class AppVersionServiceImpl implements AppVersionService {
         AppApplicationDO applicationDO = appCommonService.validateApplicationExist(createReqVO.getApplicationId());
         Long applicationId = applicationDO.getId();
         validateVersionUnique(applicationId, createReqVO.getVersionNumber(), createReqVO.getVersionName());
-
-        // 删除当前运行版本数据
-        flowDataManager.offlineRuntimeData(applicationId);
         //
         transactionTemplate.executeWithoutResult(transactionStatus -> {
             // 找打当前Runtime版本信息，肯定能找到，因为发布的时候会同步创建一个，把当前版本信息变成历史状态
@@ -109,7 +106,7 @@ public class AppVersionServiceImpl implements AppVersionService {
             versionRepository.save(newRunVersionDO);
         });
         // online services that required
-        flowDataManager.onlineRuntimeData(applicationId);
+        flowDataManager.updateRuntimeData(applicationId);
     }
 
     private void validateVersionUnique(Long applicationId, String versionNumber, String versionName) {
@@ -136,7 +133,7 @@ public class AppVersionServiceImpl implements AppVersionService {
             }
             applicationRepository.updateAppStatusByApplicationId(applicationId, AppStatusEnum.OFFLINE);
         });
-        flowDataManager.onlineRuntimeData(applicationId);
+        flowDataManager.deleteRuntimeData(applicationId);
     }
 
     private AppVersionDO createNewVersion(VersionOnlineReq createReqVO, Long applicationId) {
