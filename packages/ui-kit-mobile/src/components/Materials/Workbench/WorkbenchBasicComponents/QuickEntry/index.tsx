@@ -139,15 +139,20 @@ const XQuickEntry = memo((props: XQuickEntryConfig & { runtime?: boolean; detail
     let globalIndex = 0;
 
     if (enableGroup && groups.length > 0) {
+      const tabs = groups.map((group) => ({
+        title: group.groupName || '',
+        key: group.groupName || ''
+      }));
+      
       return (
-        <Tabs defaultActiveTab={groups[0]?.groupName || `group-0`}>
+        <Tabs defaultActiveTab={0} tabs={tabs}>
           {groups.map((group, groupIndex) => (
-            <div className="quick-entry-items" key={group.groupName || `group-${groupIndex}`} title={group.groupName}>
-                {group.entries?.map((item) => {
-                  const currentIndex = globalIndex++;
-                  return renderEntryItem(item, currentIndex);
-                })}
-              </div>
+            <div className="quick-entry-items" key={group.groupName || `group-${groupIndex}`}>
+              {group.entries?.map((item) => {
+                const currentIndex = globalIndex++;
+                return renderEntryItem(item, currentIndex);
+              })}
+            </div>
           ))}
         </Tabs>
       );
