@@ -2,7 +2,7 @@ import { listToTree } from '@/utils/tree';
 import { Button, Message, Modal, Table } from '@arco-design/web-react';
 import { PERMISSION_TYPES } from '@onebase/common';
 import type { Permission } from '@onebase/platform-center';
-import { configureRolePermissions, getConfiguredPermissions, removeRolePermission } from '@onebase/platform-center';
+import { configureRolePermissions, getConfiguredPermissions, removeRolePermission, UserType } from '@onebase/platform-center';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import PermissionConfigModal from './PermissionModal';
 
@@ -120,7 +120,7 @@ const PermissionList: React.FC<PermissionListProps> = ({ selectedRoleId, type })
         dataIndex: 'op',
         width: 120,
         render: (_: any, record: Permission) => (
-          <Button type="text" size="small" onClick={() => handleRemove(record.id, permissions)}>
+          <Button type="text" size="small" disabled ={type === UserType.SYSTEM} onClick={() => handleRemove(record.id, permissions)}>
             移除
           </Button>
         )

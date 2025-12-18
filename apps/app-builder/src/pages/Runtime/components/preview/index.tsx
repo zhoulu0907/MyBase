@@ -234,11 +234,13 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
               )}
             </Fragment>
           ))
-        ) : pageType === EDITOR_TYPES.LIST_EDITOR && listComponents.value.length === 0 ? (
-          <div className={styles.noData}>
-            <img src={EditorEmpty} alt="暂无数据" />
-          </div>
-        ) : null}
+        ) : (
+          pageType === EDITOR_TYPES.LIST_EDITOR && (
+            <div className={styles.noData}>
+              <img src={EditorEmpty} alt="暂无数据" />
+            </div>
+          )
+        )}
 
         {pageType == EDITOR_TYPES.FORM_EDITOR && (
           <Form layout="inline" form={form}>
