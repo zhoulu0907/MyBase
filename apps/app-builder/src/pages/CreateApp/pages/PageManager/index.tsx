@@ -7,6 +7,7 @@ import CreateScreenModal from '@/components/CreateDashboardModal';
 import { useI18n } from '@/hooks/useI18n';
 import PreviewContainer from '@/pages/Runtime/components/preview';
 import { useAppStore } from '@/store/store_app';
+import { setMainMetaData } from '@/utils/entity';
 import { addParentIdToChildren } from '@/utils/menu';
 import { Button, Dropdown, Form, Input, Layout, Menu, Message, Tree } from '@arco-design/web-react';
 import { IconDown, IconEmpty, IconPlus, IconSearch } from '@arco-design/web-react/icon';
@@ -26,7 +27,6 @@ import {
   updateApplicationMenuOrder,
   updateApplicationMenuVisible,
   VisibleType,
-  createScreenApi,
   type ApplicationMenu,
   type CopyApplicationMenuReq,
   type CreateApplicationMenuReq,
@@ -36,8 +36,7 @@ import {
   type MetadataEntityPair,
   type UpdateApplicationMenuNameReq,
   type UpdateApplicationMenuOrderReq,
-  type UpdateApplicationMenuVisibleReq,
-  type createScreenApiParams
+  type UpdateApplicationMenuVisibleReq
 } from '@onebase/app';
 import { pagesRuntimeSignal } from '@onebase/common';
 import { EDITOR_TYPES } from '@onebase/ui-kit';
@@ -177,6 +176,21 @@ const PageManagerPage: FC = () => {
     if (searchResult) return;
     setShowGuide(treeData?.length === 0);
   }, [treeData, searchResult]);
+
+  useEffect(() => {
+    const loadMainMetaData = async () => {
+      console.log('loadMainMetaData curMenu.value: ', curMenu.value);
+      const req: GetPageSetIdReq = {
+        menuId: curMenu.value?.id
+      };
+      const pageSetId = await getPageSetId(req);
+      setMainMetaData(pageSetId);
+    };
+
+    if (curMenu.value?.id && curMenu.value?.menuType === MenuType.PAGE) {
+      loadMainMetaData();
+    }
+  }, [curMenu.value?.id]);
 
   // 将接口返回的菜单数据（res）转换为 Tree 组件可用的 treeData 格式
   // TODO(mickey): showOption重构

@@ -28,6 +28,7 @@ import React, { useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import styles from './index.module.less';
 import { getOperatorOptions } from './ruleMap';
+import { FormulaEditor } from '@/components/FormulaEditor';
 
 const Row = Grid.Row;
 const Col = Grid.Col;
@@ -103,6 +104,11 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
   const [userPageNo, setUserPageNo] = useState<number>(1);
   const [userTotal, setUserTotal] = useState<number | string>(0);
   const [fetching, setFetching] = useState<boolean>(false);
+
+  // 公式
+  const [formulaVisible, setFormulaVisible] = useState<boolean>(false);
+  const [formulaFieldKey, setFormulaFieldKey] = useState<string>('');
+  const [formulaData, setFormulaData] = useState<string>('');
 
   // 获取组件下拉列表
   const getComponentOptions = () => {
@@ -341,6 +347,20 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
     setDeptTree(treeData);
   };
 
+  // 公式
+  const openFormulaEditor = (fieldKey: string) => {
+    setFormulaVisible(true);
+    setFormulaData(form.getFieldValue(fieldKey)?.formulaData);
+    setFormulaFieldKey(fieldKey);
+  };
+
+  const handleFormulaConfirm = (formulaData: string, formattedFormula: string, params: any) => {
+    setFormulaVisible(false);
+    form.setFieldValue(formulaFieldKey, { formulaData: formulaData, formula: formattedFormula, parameters: params });
+    setFormulaData('');
+    setFormulaFieldKey('');
+  };
+
   return (
     <Modal
       style={{ width: 1200, height: 800 }}
@@ -569,7 +589,7 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
                                                             FieldType.FORMULA && (
                                                             <Form.Item field={item.field + '.value'}>
                                                               <Button
-                                                                //   onClick={() => openFormulaEditor(item.field + '.value')}
+                                                                onClick={() => openFormulaEditor(item.field + '.value')}
                                                                 long
                                                               >
                                                                 {form.getFieldValue(item.field + '.value')
@@ -746,10 +766,7 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
 
                                             {form.getFieldValue(item.field + '.operatorType') == FieldType.FORMULA && (
                                               <Form.Item field={item.field + '.value'}>
-                                                <Button
-                                                  //   onClick={() => openFormulaEditor(item.field + '.value')}
-                                                  long
-                                                >
+                                                <Button onClick={() => openFormulaEditor(item.field + '.value')} long>
                                                   {form.getFieldValue(item.field + '.value')
                                                     ? '已设置公式'
                                                     : 'ƒx 编辑公式'}
@@ -797,6 +814,13 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
           )}
         </div>
       </div>
+
+      <FormulaEditor
+        initialFormula={formulaData}
+        visible={formulaVisible}
+        onCancel={() => setFormulaVisible(false)}
+        onConfirm={handleFormulaConfirm}
+      />
     </Modal>
   );
 };
