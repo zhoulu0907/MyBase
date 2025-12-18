@@ -30,6 +30,7 @@ import {
   STATUS_OPTIONS,
   STATUS_VALUES,
   useFormEditorSignal,
+  usePageEditorSignal,
   type GridItem
 } from '@onebase/ui-kit';
 import { getFileUrlById } from '@onebase/platform-center';
@@ -65,7 +66,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
   const [form] = useForm();
 
-  const { pageComponentSchemas } = useFormEditorSignal;
+  const pageEditorSignal = usePageEditorSignal();
   const { components: listComponents, pageComponentSchemas: listPageComponentSchemas } = useListEditorSignal;
 
   const {
@@ -609,6 +610,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
                             showFromPageData={() => {
                               setPageType(EDITOR_TYPES.FORM_EDITOR);
                             }}
+                            useStoreSignals={pageEditorSignal}
                           />
                         </div>
                       )}
