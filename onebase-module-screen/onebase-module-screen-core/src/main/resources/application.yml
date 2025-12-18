@@ -23,7 +23,7 @@ server:
 spring:
   # 环境 dev|ft|prod
   profiles:
-    active: dev
+    active: local
   # 允许 Bean 定义覆盖
   main:
     allow-bean-definition-overriding: true
@@ -64,7 +64,6 @@ spring:
 
 #mybatis
 mybatis-plus:
-  mapper-locations: classpath:/mapper/*Mapper.xml
   #实体扫描，多个package用逗号或者分号分隔
   typeAliasesPackage: com.cmsr.v2.model
   global-config:

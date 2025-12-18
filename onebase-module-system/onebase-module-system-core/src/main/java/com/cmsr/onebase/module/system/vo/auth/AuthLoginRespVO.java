@@ -40,6 +40,9 @@ public class AuthLoginRespVO {
     @Schema(description = "是否管理员", example = "")
     private Boolean adminFlag;
 
+    @Schema(description = "登录来源", example = "")
+    private String loginSource;
+
     @Schema(description = "密码有效期检查信息")
     private PasswordExpiryCheckDTO passwordExpiryInfo;
 }

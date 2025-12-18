@@ -1,0 +1,70 @@
+## Goview Project APIs
+
+#@baseUrl = http://localhost:48080/admin-api
+#@projectId = test_project_id
+
+### 1. 分页查询项目列表
+GET http://localhost:48080/api/goview/project/list?page=1&limit=10
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+
+### 2. 创建新项目
+POST {{baseUrl}}/api/goview/project/create
+Content-Type: application/json
+
+{
+  "id": "{{$uuid}}",
+  "projectName": "测试项目",
+  "state": -1,
+  "indexImage": "",
+  "remarks": "测试项目备注",
+  "createTime": "{(new Date())).toISOString()}"
+}
+
+### 3. 删除项目
+DELETE {{baseUrl}}/api/goview/project/delete?ids={{projectId}}
+
+### 4. 修改项目
+POST {{baseUrl}}/api/goview/project/edit
+Content-Type: application/json
+
+{
+  "id": "{{projectId}}",
+  "projectName": "修改后的项目名称",
+  "state": 1,
+  "indexImage": "image_url",
+  "remarks": "修改后的备注"
+}
+
+### 5. 项目重命名
+POST {{baseUrl}}/api/goview/project/rename
+Content-Type: application/json
+
+{
+  "id": "{{projectId}}",
+  "projectName": "重命名后的项目"
+}
+
+### 6. 发布/取消项目状态
+PUT {{baseUrl}}/api/goview/project/publish
+Content-Type: application/json
+
+{
+  "id": "{{projectId}}",
+  "state": 1
+}
+
+### 7. 获取项目存储数据
+GET {{baseUrl}}/api/goview/project/getScreenDSLData?projectId={{projectId}}
+
+### 8. 保存项目数据
+POST {{baseUrl}}/api/goview/project/save/data
+Content-Type: application/json
+
+{
+  "id": "{{$uuid}}",
+  "projectId": "{{projectId}}",
+  "content": "{\"data\": \"示例内容\"}",
+  "remark": "保存的数据备注"
+}

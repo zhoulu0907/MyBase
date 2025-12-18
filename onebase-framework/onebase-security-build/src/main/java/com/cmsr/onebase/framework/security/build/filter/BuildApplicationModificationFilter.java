@@ -44,24 +44,26 @@ public class BuildApplicationModificationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         boolean appEntityPosted = false;
-
-        for (RequestMatcher requestMatcher : requestMatchers) {
-            if (requestMatcher.matches(request)) {
-                appEntityPosted = true;
-                break;
+        try {
+            for (RequestMatcher requestMatcher : requestMatchers) {
+                if (requestMatcher.matches(request)) {
+                    appEntityPosted = true;
+                    break;
+                }
             }
+
+            Long applicationId = ApplicationManager.getApplicationId();
+
+            if (appEntityPosted && applicationId != null) {
+                applicationEventPublisher.publishEvent(
+                        AppEntityChangeEvent.builder()
+                                .applicationId(applicationId)
+                                .build()
+                );
+            }
+        } catch (Exception e) {
+            log.warn("应用修改拦截失败", e);
         }
-
-        Long applicationId = ApplicationManager.getApplicationId();
-
-        if (appEntityPosted && applicationId != null) {
-            applicationEventPublisher.publishEvent(
-                    AppEntityChangeEvent.builder()
-                            .applicationId(applicationId)
-                            .build()
-            );
-        }
-
         filterChain.doFilter(request, response);
     }
 }

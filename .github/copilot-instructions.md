@@ -10,7 +10,7 @@
    ├── onebase-dependencies/       # 统一管理所有依赖项目
    ├── onebase-framework/          # 统一管理common公共能力和各类中间件
    ├── onebase-module-infra        # 基础设施，如文件存储、监控等。
-   ├── onebase-module-system       # 系统能力，如空间、租户、用户、角色、权限等。
+   ├── onebase-module-system       # 系统能力，如空间、空间、用户、角色、权限等。
    ├── onebase-module-data         # 数据模块
    ├── onebase-module-app          # 应用模块
    ├── onebase-module-flow         # 流程模块

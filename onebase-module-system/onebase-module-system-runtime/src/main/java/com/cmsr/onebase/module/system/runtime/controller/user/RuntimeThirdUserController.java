@@ -4,6 +4,7 @@ import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.module.system.service.user.UserService;
 import com.cmsr.onebase.module.system.vo.user.ThirdSupplementUserReqVO;
 import com.cmsr.onebase.module.system.vo.user.ThirdSupplementUserResVO;
+import com.cmsr.onebase.module.system.vo.user.ThirdUserRegisterReqVO;
 import com.cmsr.onebase.module.system.vo.user.UserForgetPasswordReqVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -26,6 +27,15 @@ public class RuntimeThirdUserController {
 
     @Resource
     private UserService userService;
+
+
+    @PostMapping("/register")
+    @Operation(summary = "第三方注册用户")
+    @PermitAll
+    public CommonResult<Long> register(@RequestBody  @Valid ThirdUserRegisterReqVO reqVO) {
+        Long userId = userService.thirdUserRegister(reqVO);
+        return success(userId);
+    }
 
     @PostMapping("/supplement-user")
     @Operation(summary = "补充用户信息")

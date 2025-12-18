@@ -43,6 +43,7 @@ public class MetadataEntityRelationshipRuntimeServiceImpl implements MetadataEnt
     private MetadataIdUuidConverter idUuidConverter;
 
     @Override
+    @Deprecated
     public EntityWithChildrenRespVO getEntityWithChildrenById(Long entityId, String relationshipType) {
         // 1. 获取实体基本信息
         MetadataBusinessEntityDO entity = businessEntityService.getBusinessEntity(entityId);
@@ -57,20 +58,30 @@ public class MetadataEntityRelationshipRuntimeServiceImpl implements MetadataEnt
             log.info("实体entityUuid为空，通过ID转换获取，entityId: {}, entityUuid: {}", entityId, entityUuid);
         }
 
-        // 3. 创建响应VO
-        final String finalEntityUuidForResult = entityUuid;
+        // 委托给UUID方法处理
+        return getEntityWithChildrenByUuid(entityUuid, relationshipType);
+    }
+
+    @Override
+    public EntityWithChildrenRespVO getEntityWithChildrenByUuid(String entityUuid, String relationshipType) {
+        // 1. 根据UUID获取实体基本信息
+        MetadataBusinessEntityDO entity = businessEntityService.getBusinessEntityByUuid(entityUuid);
+        if (entity == null) {
+            throw new IllegalArgumentException("实体不存在，实体UUID: " + entityUuid);
+        }
+
+        // 2. 创建响应VO
         EntityWithChildrenRespVO result = BeanUtils.toBean(entity, EntityWithChildrenRespVO.class, res -> {
             res.setEntityId(entity.getId());
-            res.setEntityUuid(finalEntityUuidForResult);
+            res.setEntityUuid(entityUuid);
             res.setEntityName(entity.getDisplayName());
             res.setEntityCode(entity.getCode());
             res.setTableName(entity.getTableName());
         });
 
-        // 4. 查询以该实体为源实体的所有关系（即该实体作为父表的关系）
-        final String finalEntityUuid = entityUuid;
+        // 3. 查询以该实体为源实体的所有关系（即该实体作为父表的关系）
         QueryWrapper queryWrapper = entityRelationshipRepository.query()
-                .eq(MetadataEntityRelationshipDO::getSourceEntityUuid, finalEntityUuid);
+                .eq(MetadataEntityRelationshipDO::getSourceEntityUuid, entityUuid);
         
         // 增加关系类型筛选条件
         if (StringUtils.hasText(relationshipType)) {
@@ -80,11 +91,11 @@ public class MetadataEntityRelationshipRuntimeServiceImpl implements MetadataEnt
 
         List<MetadataEntityRelationshipDO> relationships = entityRelationshipRepository.list(queryWrapper);
 
-        // 5. 填充父表字段信息（使用转换后的entityUuid）
-        List<EntityFieldInfoRespVO> parentFields = getEntityFields(finalEntityUuid);
+        // 4. 填充父表字段信息（使用entityUuid）
+        List<EntityFieldInfoRespVO> parentFields = getEntityFields(entityUuid);
         result.setParentFields(parentFields);
 
-        // 6. 转换为子表信息列表
+        // 5. 转换为子表信息列表
         List<ChildEntityInfoRespVO> childEntities = relationships.stream()
                 .map(this::convertToChildEntityInfo)
                 .filter(Objects::nonNull)
@@ -92,8 +103,8 @@ public class MetadataEntityRelationshipRuntimeServiceImpl implements MetadataEnt
 
         result.setChildEntities(childEntities);
 
-        log.info("查询实体及其关联子表成功，实体ID: {}, entityUuid: {}, 关系类型筛选: {}, 关联子表数量: {}, 父表字段数量: {}",
-                entityId, finalEntityUuid, relationshipType, childEntities.size(), parentFields.size());
+        log.info("查询实体及其关联子表成功，实体UUID: {}, 关系类型筛选: {}, 关联子表数量: {}, 父表字段数量: {}",
+                entityUuid, relationshipType, childEntities.size(), parentFields.size());
         return result;
     }
 

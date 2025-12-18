@@ -16,10 +16,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 表达式助手类
@@ -76,7 +73,7 @@ public class ExpressionExecutor implements Serializable {
                 return result;
             }
         } catch (Exception e) {
-            String msg = "表达式执行异常, 执行表达式: " + fullExpression + ", 输入参数:" + vars;
+            String msg = "表达式执行异常, 执行表达式: " + Objects.toString(fullExpression, orExpression.toString()) + ", 输入参数:" + vars;
             throw new RuntimeException(msg, e);
         }
     }

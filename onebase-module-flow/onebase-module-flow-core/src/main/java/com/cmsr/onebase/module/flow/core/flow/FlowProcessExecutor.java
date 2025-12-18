@@ -257,8 +257,6 @@ public class FlowProcessExecutor {
         result.setCause(response.getCause());
         result.setExecutionEnd(executeContext.isExecuteEnd());
         result.setExecutionUuid(executeContext.getExecutionUuid());
-        result.setExecutionEndNodeType(executeContext.getExecutionEndNodeType());
-        result.setExecutionEndNodeTag(executeContext.getExecutionEndNodeTag());
         result.setOutputParams(variableContext.getOutputParams());
         if (Boolean.TRUE.equals(executeContext.getAbnormalTermination())) {
             result.setSuccess(false);

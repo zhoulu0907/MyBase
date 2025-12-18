@@ -60,7 +60,11 @@
             <artifactId>onebase-module-infra-platform</artifactId>
             <version>${revision}</version>
         </dependency>
-
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-screen-core</artifactId>
+            <version>${revision}</version>
+        </dependency>
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-module-infra-core</artifactId>

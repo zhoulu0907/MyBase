@@ -76,7 +76,7 @@ public class SystemGeneralConfigServiceImpl implements SystemGeneralConfigServic
             configDO.setConfigValue(CommonStatusEnum.DISABLE.getStatus().toString());
             configDO.setStatus(CommonStatusEnum.DISABLE.getStatus());
         }
-        systemGeneralConfigDataRepository.update(configDO);
+
 
         // 如果配置有互斥数据，需要更新互斥数据为修改状态的反值
         if (StringUtils.isNotBlank(configDO.getExclusiveItem())) {
@@ -84,6 +84,10 @@ public class SystemGeneralConfigServiceImpl implements SystemGeneralConfigServic
             // 获取互斥数据 忽略租户条件,
             SystemGeneralConfigDO config = systemGeneralConfigDataRepository.getConfigByDiffCategory(searchVO);
             if (null != config) {
+                // 判断互斥数据是否已启用
+                if(CommonStatusEnum.ENABLE.getStatus().equals(config.getStatus())){
+                    throw exception(ErrorCodeConstants.CONFIG_ALREADY_ENABLE,config.getName(),configDO.getName());
+                }
                 if (CommonStatusEnum.ENABLE.getStatus().equals(status)) {
                     config.setConfigValue(CommonStatusEnum.DISABLE.getStatus().toString());
                     config.setStatus(CommonStatusEnum.DISABLE.getStatus());
@@ -94,6 +98,7 @@ public class SystemGeneralConfigServiceImpl implements SystemGeneralConfigServic
                 systemGeneralConfigDataRepository.update(config);
             }
         }
+        systemGeneralConfigDataRepository.update(configDO);
     }
 
     @NotNull

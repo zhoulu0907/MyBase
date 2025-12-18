@@ -21,6 +21,7 @@ import io.swagger.annotations.ApiOperation;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -41,6 +42,7 @@ import java.util.Map.Entry;
 @Api(value = "文件上传")
 @RestController
 @RequestMapping("/api/file")
+@Component("fileControllerV2")
 @Slf4j
 public class FileController extends BaseController {
 

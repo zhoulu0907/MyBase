@@ -22,6 +22,7 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.annotations.ApiOperation;
+import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.ModelMap;
@@ -57,6 +58,7 @@ public class GoviewProjectController  extends BaseController {
 
 	@ApiOperation(value = "分页跳转", notes = "分页跳转")
 	@GetMapping("/list")
+	@PermitAll
 	@ResponseBody
 	public ResultTable list(Tablepar tablepar){
 		Page<GoviewProject> page= new Page<GoviewProject>(tablepar.getPage(), tablepar.getLimit());

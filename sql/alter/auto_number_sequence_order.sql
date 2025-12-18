@@ -10,3 +10,9 @@ ALTER TABLE "public"."metadata_auto_number_config"
 
 -- 添加字段注释
 COMMENT ON COLUMN "public"."metadata_auto_number_config"."sequence_order" IS 'SEQUENCE规则项在列表中的排序位置';
+
+
+ALTER TABLE public.flow_node_type ADD config_type varchar(4) NULL;
+COMMENT ON COLUMN public.flow_node_type.config_type IS '节点配置方式：code(代码)、form(动态表单)';
+ALTER TABLE public.flow_node_type ADD form_config text NULL;
+COMMENT ON COLUMN public.flow_node_type.form_config IS '动态表单配置json';
