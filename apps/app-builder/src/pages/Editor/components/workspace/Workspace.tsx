@@ -106,9 +106,6 @@ export default function EditorWorkspace() {
     curViewId: curViewId.value,
     setCurViewId,
     updatePageViewName,
-    // usePageViewEditorSignal,
-    // createPageEditorSignal
-    // useFormEditorSignal,
     editMode: editMode.value,
     setEditMode,
     curComponentID,
