@@ -466,8 +466,8 @@ public class CorpServiceImpl implements CorpService {
     }
 
     @Override
-    public List<CorpDO> getAllEnableCorp() {
-        return corpDataRepository.getAllEnableCorp();
+    public List<CorpDO> getAllCorpList() {
+        return corpDataRepository.getAllCorpList();
     }
 
 }

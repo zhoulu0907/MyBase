@@ -96,4 +96,8 @@ CorpDataRepository extends DataRepository<CorpDO> {
     }
 
 
+    public List<CorpDO> getAllCorpList() {
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        return findAllByConfig(configStore);
+    }
 }

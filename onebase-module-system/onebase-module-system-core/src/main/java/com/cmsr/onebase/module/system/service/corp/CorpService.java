@@ -83,5 +83,5 @@ public interface CorpService {
      * 获取所有企业
      *
      */
-    List<CorpDO> getAllEnableCorp();
+    List<CorpDO> getAllCorpList();
 }

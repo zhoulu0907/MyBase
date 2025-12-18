@@ -100,7 +100,7 @@ public class SystemGeneralConfigServiceImpl implements SystemGeneralConfigServic
 
     private void checkSaasExitsCorpOrApp(){
         // 如果是Saas模式,并且当前租户已存在企业，则不允许禁用
-       List<CorpDO> corpList = corpService.getAllEnableCorp();
+       List<CorpDO> corpList = corpService.getAllCorpList();
        if(CollectionUtils.isNotEmpty(corpList)){
            throw exception(ErrorCodeConstants.CONFIG_SAAS_CORP_EXISTS);
        }
@@ -110,7 +110,7 @@ public class SystemGeneralConfigServiceImpl implements SystemGeneralConfigServic
         boolean hasSaasApp = appList.stream()
                 .anyMatch(app -> CommonPublishModelEnum.SaaSModel.getValue().equalsIgnoreCase(app.getPublishModel()));
         if(hasSaasApp){
-            throw exception(ErrorCodeConstants.CONFIG_SAAS_CORP_EXISTS);
+            throw exception(ErrorCodeConstants.CONFIG_SAAS_APP_EXISTS);
         }
     }
 
