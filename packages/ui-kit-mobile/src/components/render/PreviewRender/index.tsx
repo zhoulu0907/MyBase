@@ -38,6 +38,8 @@ interface PreviewRenderProps {
   lastOne?: boolean;
 
   editLoading?: boolean;
+  /** signal传递 */
+  useStoreSignals?: any;
 }
 
 const LIST_LAZY_COMPONENT: string[] = [
@@ -58,7 +60,8 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
   refresh,
   editLoading,
   lastOne,
-  form
+  form,
+  useStoreSignals
 }) => {
 
   if (LIST_LAZY_COMPONENT.includes(cpType) && editLoading) {
@@ -74,7 +77,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
     switch (cpType) {
       case FORM_COMPONENT_TYPES.INPUT_TEXT:
         return (
-          <FormComp.XInputText cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} detailMode={detailMode} />
+          <FormComp.XInputText cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} detailMode={detailMode} form={form} />
         );
       case FORM_COMPONENT_TYPES.INPUT_TEXTAREA:
         return (
@@ -84,6 +87,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
             {...componentConfig}
             runtime={runtime}
             detailMode={detailMode}
+            form={form}
           />
         );
       case FORM_COMPONENT_TYPES.INPUT_EMAIL:
@@ -94,6 +98,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
             {...componentConfig}
             runtime={runtime}
             detailMode={detailMode}
+            form={form}
           />
         );
       case FORM_COMPONENT_TYPES.INPUT_PHONE:
@@ -104,6 +109,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
             {...componentConfig}
             runtime={runtime}
             detailMode={detailMode}
+            form={form}
           />
         );
       case FORM_COMPONENT_TYPES.INPUT_NUMBER:
@@ -114,6 +120,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
             {...componentConfig}
             runtime={runtime}
             detailMode={detailMode}
+            form={form}
           />
         );
       case FORM_COMPONENT_TYPES.DATE_PICKER:
@@ -135,6 +142,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
             {...componentConfig}
             runtime={runtime}
             detailMode={detailMode}
+            form={form}
           />
         );
       case FORM_COMPONENT_TYPES.TIME_PICKER:
@@ -145,6 +153,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
             {...componentConfig}
             runtime={runtime}
             detailMode={detailMode}
+            form={form}
           />
         );
       case FORM_COMPONENT_TYPES.DATE_TIME_PICKER:
@@ -160,19 +169,19 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
         );
       case FORM_COMPONENT_TYPES.SWITCH:
         return (
-          <FormComp.XSwitch cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} detailMode={detailMode} />
+          <FormComp.XSwitch cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} detailMode={detailMode} form={form} />
         );
       case FORM_COMPONENT_TYPES.RADIO:
         return (
-          <FormComp.XRadio cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} detailMode={detailMode} />
+          <FormComp.XRadio cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} detailMode={detailMode} form={form} />
         );
       case FORM_COMPONENT_TYPES.CHECKBOX:
         return (
-          <FormComp.XCheckbox cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} detailMode={detailMode} />
+          <FormComp.XCheckbox cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} detailMode={detailMode} form={form} />
         );
       case FORM_COMPONENT_TYPES.SELECT_ONE:
         return (
-          <FormComp.XSelectOne cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} detailMode={detailMode} />
+          <FormComp.XSelectOne cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} detailMode={detailMode} form={form} />
         );
       case FORM_COMPONENT_TYPES.SELECT_MUTIPLE:
         return (
@@ -248,7 +257,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
         );
       case FORM_COMPONENT_TYPES.AUTO_CODE:
         return (
-          <FormComp.XAutoCode cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} detailMode={detailMode} />
+          <FormComp.XAutoCode cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} detailMode={detailMode} form={form} />
         );
       case FORM_COMPONENT_TYPES.RELATED_FORM:
       // return (
@@ -286,7 +295,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
         );
       case FORM_COMPONENT_TYPES.SUB_TABLE:
         return (
-          <FormComp.XSubTable cpName={cpId} id={cpId} {...componentConfig} editLoading={editLoading} runtime={runtime} detailMode={detailMode} form={form} />
+          <FormComp.XSubTable cpName={cpId} id={cpId} {...componentConfig} editLoading={editLoading} runtime={runtime} detailMode={detailMode} form={form} useStoreSignals={useStoreSignals} />
         );
       case FORM_COMPONENT_TYPES.DATA_SELECT:
       // return (

@@ -2,7 +2,29 @@
   display: flow-root !important;
 }
 
+.subTableContent {
+  width: 100%;
+  min-height: 3rem;
+  box-sizing: border-box;
+  overflow-x: auto;
+  overflow-y: visible;
+  padding-top: 0.42rem;
+}
+
+.componentItem {
+  overflow: visible;
+  flex: 1 0 auto;
+  cursor: move;
+  box-sizing: border-box;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  transition: border-color 0.2s ease;
+  position: relative;
+  min-width: 200px;
+}
+
 .collapseOBMobile {
+  border: 0;
   :global(.arco-collapse-header) {
     flex-direction: row-reverse;
     justify-content: flex-end;
@@ -22,6 +44,11 @@
 
   :global(.arco-collapse-content-container) {
     padding: 0;
+  }
+
+  :global(.cell-group-body bordered),
+  :global(.arco-cell-group .cell-group-body) {
+    background-color: transparent;
   }
 
   :global(.arco-form-label-item) {

@@ -37,6 +37,8 @@ const XDateRangePicker = memo((props: XDateRangePickerConfig & { runtime?: boole
         mode="date"
         title={label.text}
         maskClosable
+        minTs={new Date(1900, 0, 1).getTime()}
+        maxTs={new Date(2099, 11, 31).getTime()}
         formatter={(value, type) => {
           const map = {
             year: '年',
@@ -80,9 +82,7 @@ const XDateRangePicker = memo((props: XDateRangePickerConfig & { runtime?: boole
       }}
     >
       {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
-        <div>
-          --
-        </div>
+        <div className="readonlyText">--</div>
       ) : (
         renderContent()
       )}

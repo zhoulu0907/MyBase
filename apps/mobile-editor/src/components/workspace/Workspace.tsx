@@ -758,6 +758,7 @@ const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({ props, isListEditor =
                     cpType={cp.type}
                     runtime={false}
                     pageComponentSchema={pageComponentSchemas[cp.id]}
+                    useStoreSignals={props}
                   />
 
                   {curComponentID === cp.id && showDeleteButton && (

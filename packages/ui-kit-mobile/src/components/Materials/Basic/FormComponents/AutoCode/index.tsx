@@ -5,8 +5,9 @@ import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, FormSchema } from 
 type XautoCodeConfig = typeof FormSchema.XAutoCodeSchema.config;
 import '../index.css';
 
-const XautoCode = memo((props: XautoCodeConfig & { runtime?: boolean; detailMode?: boolean }) => {
+const XautoCode = memo((props: XautoCodeConfig & { runtime?: boolean; detailMode?: boolean; form?: any; }) => {
   const {
+    form,
     label,
     dataField,
     placeholder,
@@ -33,8 +34,7 @@ const XautoCode = memo((props: XautoCodeConfig & { runtime?: boolean; detailMode
         }}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
-          <div>--</div>
-        ) : (
+        <div className="readonlyText">{form?.getFieldValue(fieldId)}</div>        ) : (
           <Input
             readOnly={true}
             placeholder={placeholder}

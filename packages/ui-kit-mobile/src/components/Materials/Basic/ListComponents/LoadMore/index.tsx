@@ -254,7 +254,7 @@ const XLoadMore = memo(
                 field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.BOOLEAN.VALUE
             );
             if (switchField && typeof newItem[key] === 'boolean') {
-              newItem[key] = newItem[key] ? '是' : '否'
+              newItem[key] = newItem[key] ? '是' : '否';
             }
 
             // 单选列表 - 根据id返回对应label
@@ -275,7 +275,16 @@ const XLoadMore = memo(
                 field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.DATA_SELECTION.VALUE
             );
             if (dateField) {
-              newItem[key] = newItem[key].name || '-'
+              newItem[key] = newItem[key].name || '-';
+            }
+
+            // 数据选择
+            const fileField = mainMetaData.parentFields.find(
+              (field: AppEntityField) =>
+                field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.FILE.VALUE
+            );
+            if (fileField) {
+              newItem[key] = newItem[key]?.[0]?.name || '-';
             }
           }
         });
