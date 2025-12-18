@@ -1,17 +1,23 @@
 package com.cmsr.onebase.module.system.service.config;
 
+import com.cmsr.onebase.framework.common.enums.CommonPublishModelEnum;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
+import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
+import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
 import com.cmsr.onebase.module.system.dal.database.SystemGeneralConfigDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.config.SystemGeneralConfigDO;
+import com.cmsr.onebase.module.system.dal.dataobject.corp.CorpDO;
 import com.cmsr.onebase.module.system.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.system.enums.config.ConfigCategoryEnum;
 import com.cmsr.onebase.module.system.enums.config.SystemConfigKeyEnum;
+import com.cmsr.onebase.module.system.service.corp.CorpService;
 import com.cmsr.onebase.module.system.vo.config.*;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.anyline.web.tag.If;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -36,6 +42,12 @@ public class SystemGeneralConfigServiceImpl implements SystemGeneralConfigServic
 
     @Resource
     private SystemGeneralConfigDataRepository systemGeneralConfigDataRepository;
+    @Resource
+    private CorpService corpService;
+
+    @Resource
+    private AppApplicationApi appApplicationApi;
+
     @Override
     public Long createConfig(SystemGeneralConfigSaveReqVO createReqVO) {
         // 使用正确的Bean转换方法
@@ -86,8 +98,24 @@ public class SystemGeneralConfigServiceImpl implements SystemGeneralConfigServic
 
     }
 
+    private void checkSaasExitsCorpOrApp(){
+        // 如果是Saas模式,并且当前租户已存在企业，则不允许禁用
+       List<CorpDO> corpList = corpService.getAllEnableCorp();
+       if(CollectionUtils.isNotEmpty(corpList)){
+           throw exception(ErrorCodeConstants.CONFIG_SAAS_CORP_EXISTS);
+       }
+        // 如果是Saas模式,并且 当前租户已存在SAAS应用，存在则不可禁用
+        List<ApplicationDTO> appList =  appApplicationApi.findAppApplicationByAppName("");
+       // appList 是否模式字段是否有saas应用
+        boolean hasSaasApp = appList.stream()
+                .anyMatch(app -> CommonPublishModelEnum.SaaSModel.getValue().equalsIgnoreCase(app.getPublishModel()));
+        if(hasSaasApp){
+            throw exception(ErrorCodeConstants.CONFIG_SAAS_CORP_EXISTS);
+        }
+    }
+
+
     @Override
-    @TenantIgnore
     public void updateStatus(Long id,Integer status) {
         SystemGeneralConfigDO configDO = systemGeneralConfigDataRepository.findById(id);
         if (null == configDO) {
@@ -98,6 +126,11 @@ public class SystemGeneralConfigServiceImpl implements SystemGeneralConfigServic
             configDO.setConfigValue(CommonStatusEnum.ENABLE.getStatus().toString());
             configDO.setStatus(CommonStatusEnum.ENABLE.getStatus());
         } else {
+            //判断配置项是否为saas配置项
+            if(SystemConfigKeyEnum.SaasModeConfig.getCode().equals(configDO.getConfigKey())){
+                checkSaasExitsCorpOrApp();
+            }
+
             configDO.setConfigValue(CommonStatusEnum.DISABLE.getStatus().toString());
             configDO.setStatus(CommonStatusEnum.DISABLE.getStatus());
         }

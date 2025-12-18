@@ -30,7 +30,7 @@ Authorization: Bearer {{token}}
 }
 
 ### 修改参数配置
-POST {{baseUrl}}/system/config/update-status?id=185306742241329153&status=1
+POST {{baseUrl}}/system/config/update-status?id=185306742241329152&status=0
 Content-Type: application/json
 Authorization: Bearer {{token}}
 

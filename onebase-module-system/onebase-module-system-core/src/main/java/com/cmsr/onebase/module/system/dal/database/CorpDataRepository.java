@@ -94,4 +94,6 @@ CorpDataRepository extends DataRepository<CorpDO> {
         configStore.eq(CorpDO.STATUS, CommonStatusEnum.ENABLE.getStatus());
         return findAllByConfig(configStore);
     }
+
+
 }
