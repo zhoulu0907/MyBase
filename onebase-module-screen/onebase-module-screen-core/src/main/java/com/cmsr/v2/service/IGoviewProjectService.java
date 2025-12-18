@@ -1,7 +1,7 @@
 package com.cmsr.v2.service;
 
 import com.cmsr.v2.model.GoviewProject;
-import com.baomidou.mybatisplus.extension.service.IService;
+import com.mybatisflex.core.service.IService;
 
 /**
  * <p>

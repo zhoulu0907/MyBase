@@ -1,7 +1,7 @@
 package com.cmsr.v2.mapper;
 
 import com.cmsr.v2.model.SysFile;
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.mybatisflex.core.BaseMapper;
 
 /**
  * <p>

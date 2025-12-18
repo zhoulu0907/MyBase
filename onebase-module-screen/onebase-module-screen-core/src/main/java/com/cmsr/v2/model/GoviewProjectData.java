@@ -1,6 +1,9 @@
 package com.cmsr.v2.model;
 
-import com.baomidou.mybatisplus.annotation.*;
+import com.mybatisflex.annotation.Column;
+import com.mybatisflex.annotation.Id;
+import com.mybatisflex.annotation.KeyType;
+import com.mybatisflex.annotation.Table;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -13,17 +16,17 @@ import java.io.Serializable;
  * @author fc
  * @since 2023-04-30
  */
-@TableName("t_goview_project_data")
+@Table("t_goview_project_data")
 @Data
 public class GoviewProjectData implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    @TableId(type = IdType.ASSIGN_ID)
+    @Id(keyType = KeyType.Generator, value = "uuid")
     private String id;
 
     private String projectId;
 
-    @TableField(fill = FieldFill.INSERT)
+    @Column(onInsertValue = "now()")
     private String createTime;
 
     private String createUserId;

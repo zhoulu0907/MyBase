@@ -13,9 +13,8 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IORuntimeException;
 import cn.hutool.core.util.StrUtil;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryWrapper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import jakarta.servlet.http.HttpServletResponse;
@@ -308,8 +307,7 @@ public class FileController extends BaseController {
 	@GetMapping("/list")
 	public Object list(long current, long size){
 		Page<SysFile> page= new Page<SysFile>(current, size);
-		IPage<SysFile> sysFile=iSysFileService.page(page, new LambdaQueryWrapper<SysFile>());
-		return sysFile;
+        return iSysFileService.page(page, new QueryWrapper());
 	}
 
 

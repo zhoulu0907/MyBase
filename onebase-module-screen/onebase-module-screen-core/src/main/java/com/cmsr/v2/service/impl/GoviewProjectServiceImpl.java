@@ -1,9 +1,9 @@
 package com.cmsr.v2.service.impl;
 
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.cmsr.v2.mapper.GoviewProjectMapper;
 import com.cmsr.v2.model.GoviewProject;
 import com.cmsr.v2.service.IGoviewProjectService;
+import com.mybatisflex.spring.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 
 /**

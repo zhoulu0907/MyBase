@@ -9,7 +9,7 @@ import com.cmsr.v2.util.SaTokenUtil;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.mybatisflex.core.query.QueryWrapper;
 import io.swagger.annotations.ApiOperation;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
@@ -45,7 +45,7 @@ public class ApiController  extends BaseController {
 			} else {
 				if (StrUtil.isNotBlank(user.getUsername()) && StrUtil.isNotBlank(user.getPassword())) {
 					// 直接查询用户
-					LambdaQueryWrapper<SysUser> queryWrapper = new LambdaQueryWrapper<>();
+                    QueryWrapper queryWrapper = new QueryWrapper();
 					queryWrapper.eq(SysUser::getUsername, user.getUsername());
 
 					try {

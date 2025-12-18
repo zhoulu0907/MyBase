@@ -10,12 +10,13 @@ tenant-id: {{adminTenantId}}
 
 
 ### 2. 创建新项目
-POST {{baseUrl}}/api/goview/project/create
+POST http://localhost:48080/api/goview/project/create
 Content-Type: application/json
+Authorization: Bearer {{token}}
 
 {
   "id": "{{$uuid}}",
-  "projectName": "测试项目",
+  "projectName": "测试项目test",
   "state": -1,
   "indexImage": "",
   "remarks": "测试项目备注",

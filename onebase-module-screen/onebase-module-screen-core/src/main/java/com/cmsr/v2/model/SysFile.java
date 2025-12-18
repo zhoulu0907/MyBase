@@ -1,6 +1,9 @@
 package com.cmsr.v2.model;
 
-import com.baomidou.mybatisplus.annotation.*;
+import com.mybatisflex.annotation.Column;
+import com.mybatisflex.annotation.Id;
+import com.mybatisflex.annotation.KeyType;
+import com.mybatisflex.annotation.Table;
 
 import java.io.Serializable;
 
@@ -12,12 +15,12 @@ import java.io.Serializable;
  * @author fc
  * @since 2022-12-22
  */
-@TableName("t_sys_file")
+@Table("t_sys_file")
 public class SysFile implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @TableId(value = "id", type = IdType.INPUT)
+    @Id(keyType = KeyType.Generator, value = "uuid")
     private String id;
 
     private String fileName;
@@ -44,7 +47,7 @@ public class SysFile implements Serializable {
 
 
 
-    @TableField(fill = FieldFill.INSERT)
+    @Column(onInsertValue = "now()")
     private String createTime;
 
     public String getId() {

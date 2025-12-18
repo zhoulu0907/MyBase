@@ -17,10 +17,8 @@ import com.cmsr.v2.util.ConvertUtil;
 import com.cmsr.v2.util.SnowflakeIdWorker;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateUtil;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryWrapper;
 import io.swagger.annotations.ApiOperation;
 import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.BeanUtils;
@@ -62,11 +60,11 @@ public class GoviewProjectController  extends BaseController {
 	@ResponseBody
 	public ResultTable list(Tablepar tablepar){
 		Page<GoviewProject> page= new Page<GoviewProject>(tablepar.getPage(), tablepar.getLimit());
-		IPage<GoviewProject> iPages=iGoviewProjectService.page(page, new LambdaQueryWrapper<GoviewProject>());
-		ResultTable resultTable=new ResultTable();
+        Page<GoviewProject> iPages = iGoviewProjectService.page(page, new QueryWrapper());
+        ResultTable resultTable=new ResultTable();
 		resultTable.setData(iPages.getRecords());
 		resultTable.setCode(200);
-		resultTable.setCount(iPages.getTotal());
+		resultTable.setCount(iPages.getTotalPage());
 		resultTable.setMsg("获取成功");
 		return resultTable;
 	}
@@ -81,6 +79,7 @@ public class GoviewProjectController  extends BaseController {
 	@ApiOperation(value = "新增", notes = "新增")
 	@PostMapping("/create")
 	@ResponseBody
+    @PermitAll
 	public AjaxResult add(@RequestBody GoviewProject goviewProject){
 		goviewProject.setCreateTime(DateUtil.now());
 		goviewProject.setState(-1);
@@ -132,10 +131,7 @@ public class GoviewProjectController  extends BaseController {
     public AjaxResult rename(@RequestBody GoviewProject goviewProject)
     {
 
-		LambdaUpdateWrapper<GoviewProject> updateWrapper=new LambdaUpdateWrapper<GoviewProject>();
-		updateWrapper.eq(GoviewProject::getId, goviewProject.getId());
-		updateWrapper.set(GoviewProject::getProjectName, goviewProject.getProjectName());
-		Boolean b=iGoviewProjectService.update(updateWrapper);
+		Boolean b=iGoviewProjectService.updateById(goviewProject);
 		if(b){
         	return success();
         }
@@ -149,10 +145,7 @@ public class GoviewProjectController  extends BaseController {
     public AjaxResult updateVisible(@RequestBody GoviewProject goviewProject){
     	if(goviewProject.getState()==-1||goviewProject.getState()==1) {
 
-    		LambdaUpdateWrapper<GoviewProject> updateWrapper=new LambdaUpdateWrapper<GoviewProject>();
-    		updateWrapper.eq(GoviewProject::getId, goviewProject.getId());
-    		updateWrapper.set(GoviewProject::getState, goviewProject.getState());
-    		Boolean b=iGoviewProjectService.update(updateWrapper);
+    		Boolean b=iGoviewProjectService.updateById(goviewProject);
     		if(b){
             	return success();
             }
@@ -188,7 +181,7 @@ public class GoviewProjectController  extends BaseController {
 		if(goviewProject==null) {
 			return error("没有该项目ID");
 		}
-		GoviewProjectData goviewProjectData= iGoviewProjectDataService.getOne(new LambdaQueryWrapper<GoviewProjectData>().eq(GoviewProjectData::getProjectId, goviewProject.getId()));
+		GoviewProjectData goviewProjectData= iGoviewProjectDataService.getOne(new QueryWrapper().eq(GoviewProjectData::getProjectId, goviewProject.getId()));
 		if(goviewProjectData!=null) {
 			 data.setId(goviewProjectData.getId());
 			 iGoviewProjectDataService.updateById(data);

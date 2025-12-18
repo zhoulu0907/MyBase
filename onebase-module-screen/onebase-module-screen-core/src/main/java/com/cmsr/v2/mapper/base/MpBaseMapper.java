@@ -1,6 +1,7 @@
 package com.cmsr.v2.mapper.base;
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+
+import com.mybatisflex.core.BaseMapper;
 
 /**
  * MyBatis-Plus Mapper 基类
