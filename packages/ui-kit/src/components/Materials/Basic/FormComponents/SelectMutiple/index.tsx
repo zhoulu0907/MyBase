@@ -36,18 +36,8 @@ const XSelectMutiple = memo((props: XInputSelectMutipleConfig & { runtime?: bool
   }, [dataField])
 
   const getOptions = async () => {
-    const [tableName, fieldName] = dataField;
-    const index = fieldName?.indexOf('.');
-    const lastIndex = fieldName?.lastIndexOf('.');
-    if (index !== -1) {
-      const subTableName = fieldName.slice(0, index);
-      const subFieldName = lastIndex === -1 ? fieldName : fieldName.slice(lastIndex + 1);
-      const newOptions = await getFieldOptionsConfig([subTableName, subFieldName], mainEntity, subEntities);
-      setOptions(newOptions)
-    } else {
-      const newOptions = await getFieldOptionsConfig(dataField, mainEntity, subEntities);
-      setOptions(newOptions)
-    }
+    const newOptions = await getFieldOptionsConfig(dataField, mainEntity, subEntities);
+    setOptions(newOptions)
   }
 
   return (
