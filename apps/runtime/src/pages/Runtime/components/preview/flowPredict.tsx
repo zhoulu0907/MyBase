@@ -12,8 +12,7 @@ const FlowPredict = ({ businessUuid, entityParam }: any) => {
 
   function renderDescript(value: any) {
     const nameArr:Array<any> = []
-    // [{img: '', text: ''}, ...]
-    const imgArr:Array<any> = []
+    const imgArr:Array<{img: any, text:string}> = []
     value?.handlers?.forEach((handler:any) => {
       nameArr.push(handler?.handlerName)
       imgArr.push({img: handler?.avatar, text: handler?.handlerName?.charAt(0) || ''})
