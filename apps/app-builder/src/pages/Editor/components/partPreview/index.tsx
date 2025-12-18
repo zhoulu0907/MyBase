@@ -108,6 +108,7 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
       onCancel={() => {
         setVisible(false);
       }}
+      unmountOnExit
       bodyStyle={{ background: '#F2F3F5', padding: '0' }}
     >
       <div className={classNames(styles.previewPage, { [styles.mobilePreview]: editMode.value === EditMode.MOBILE })}>
