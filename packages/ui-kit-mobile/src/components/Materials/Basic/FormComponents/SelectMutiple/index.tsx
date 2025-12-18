@@ -1,7 +1,6 @@
 import { memo, useState } from 'react';
 import { nanoid } from 'nanoid';
 import { Checkbox, Ellipsis, Form, PopupSwiper, Cell, Button } from '@arco-design/mobile-react';
-import IconArrowBack from '@arco-design/mobile-react/esm/icon/IconArrowBack';
 import IconSquareChecked from '@arco-design/mobile-react/esm/icon/IconSquareChecked';
 import IconSquareUnchecked from '@arco-design/mobile-react/esm/icon/IconSquareUnchecked';
 import IconSquareDisabled from '@arco-design/mobile-react/esm/icon/IconSquareDisabled';
@@ -95,7 +94,7 @@ const XSelectMutiple = memo((props: XSelectMutipleConfig & { runtime?: boolean; 
       }}
     >
       {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
-        <div>--</div>
+        <div className="readonlyText">{getSelectedLabels()}</div>
       ) : (
         <Cell
           className="selectMultipleCellOBMobile"
