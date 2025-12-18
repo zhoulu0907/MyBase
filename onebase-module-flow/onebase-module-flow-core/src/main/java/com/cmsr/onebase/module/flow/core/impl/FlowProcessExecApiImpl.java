@@ -44,6 +44,23 @@ public class FlowProcessExecApiImpl implements FlowProcessExecApi {
 
     @Override
     public EntityTriggerRespDTO entityTrigger(EntityTriggerReqDTO reqDTO) {
+        log.info("entityTrigger req: {}", reqDTO);
+        try {
+            EntityTriggerRespDTO respDTO = doEntityTrigger(reqDTO);
+            log.info("entityTrigger resp: {}", respDTO);
+            return respDTO;
+        } catch (Exception e) {
+            log.error("entityTrigger error: {}", reqDTO, e);
+            EntityTriggerRespDTO respDTO = new EntityTriggerRespDTO(reqDTO.getTraceId());
+            respDTO.setSuccess(false);
+            respDTO.setTriggered(false);
+            respDTO.setMessage("执行异常");
+            respDTO.setCause(e);
+            return respDTO;
+        }
+    }
+
+    private EntityTriggerRespDTO doEntityTrigger(EntityTriggerReqDTO reqDTO) {
         if (reqDTO.getApplicationId() == null) {
             EntityTriggerRespDTO respDTO = new EntityTriggerRespDTO(reqDTO.getTraceId());
             respDTO.setSuccess(false);

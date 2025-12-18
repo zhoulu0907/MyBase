@@ -62,44 +62,52 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
 
     @Override
     public FormTriggerRespVO triggerForm(FormTriggerReqVO reqVO) {
-        StartFormNodeData startFormNodeData = FlowProcessCache.findStartFormNodeDataByProcessId(reqVO.getProcessId());
-        if (startFormNodeData == null) {
-            FormTriggerRespVO vo = formNotTriggerRespVO();
-            vo.setMessage("流程不存在");
-            return vo;
-        }
+        log.info("表单触发: {}", reqVO);
         try {
-            if (StringUtils.isEmpty(reqVO.getExecutionUuid())) {
-                // 前端正常的触发逻辑用于表单数据 提交数据前触发
-                Map<String, Object> inputMap = convertInputParamsData(reqVO, startFormNodeData);
-                boolean isTrigger = true;
-                if (CollectionUtils.isNotEmpty(startFormNodeData.getFilterCondition())) {
-                    OrExpression orExpression = flowConditionsProvider.formatConditionsForExpression(startFormNodeData.getFilterCondition(), inputMap);
-                    isTrigger = expressionExecutor.evaluateInput(orExpression, inputMap);
-                }
-                if (!isTrigger) {
-                    FormTriggerRespVO vo = formNotTriggerRespVO();
-                    vo.setMessage("表单不满足触发条件");
-                    return vo;
-                } else {
-                    ExecutorInput executorInput = buildExecutorInput(reqVO.getProcessId(), inputMap);
-                    ExecutorResult executorResult = flowProcessExecutor.startExecution(executorInput);
-                    return formTriggerRespVO(executorResult);
-                }
-            } else {
-                // 前端二次触发，用于表单信息收集等节点流程的继续执行
-                Map<String, Object> inputMap = convertInputFieldsData(reqVO.getInputFields());
-                ExecutorInput executorInput = buildExecutorInput(reqVO.getProcessId(), inputMap);
-                executorInput.setExecutionUuid(reqVO.getExecutionUuid());
-                ExecutorResult executorResult = flowProcessExecutor.resumeExecution(executorInput);
-                return formTriggerRespVO(executorResult);
-            }
+            FormTriggerRespVO respVO = doTriggerForm(reqVO);
+            log.info("表单触发结果: {}", respVO);
+            return respVO;
         } catch (Exception e) {
             log.error("表单触发异常: {}", reqVO, e);
             FormTriggerRespVO vo = formNotTriggerRespVO();
             vo.setMessage("表单触发异常");
             vo.setCause(ExceptionUtils.getMessage(e));
             return vo;
+        }
+    }
+
+    private FormTriggerRespVO doTriggerForm(FormTriggerReqVO reqVO) {
+        StartFormNodeData startFormNodeData = FlowProcessCache.findStartFormNodeDataByProcessId(reqVO.getProcessId());
+        if (startFormNodeData == null) {
+            FormTriggerRespVO vo = formNotTriggerRespVO();
+            vo.setMessage("流程不存在");
+            return vo;
+        }
+
+        if (StringUtils.isEmpty(reqVO.getExecutionUuid())) {
+            // 前端正常的触发逻辑用于表单数据 提交数据前触发
+            Map<String, Object> inputMap = convertInputParamsData(reqVO, startFormNodeData);
+            boolean isTrigger = true;
+            if (CollectionUtils.isNotEmpty(startFormNodeData.getFilterCondition())) {
+                OrExpression orExpression = flowConditionsProvider.formatConditionsForExpression(startFormNodeData.getFilterCondition(), inputMap);
+                isTrigger = expressionExecutor.evaluateInput(orExpression, inputMap);
+            }
+            if (!isTrigger) {
+                FormTriggerRespVO vo = formNotTriggerRespVO();
+                vo.setMessage("表单不满足触发条件");
+                return vo;
+            } else {
+                ExecutorInput executorInput = buildExecutorInput(reqVO.getProcessId(), inputMap);
+                ExecutorResult executorResult = flowProcessExecutor.startExecution(executorInput);
+                return formTriggerRespVO(executorResult);
+            }
+        } else {
+            // 前端二次触发，用于表单信息收集等节点流程的继续执行
+            Map<String, Object> inputMap = convertInputFieldsData(reqVO.getInputFields());
+            ExecutorInput executorInput = buildExecutorInput(reqVO.getProcessId(), inputMap);
+            executorInput.setExecutionUuid(reqVO.getExecutionUuid());
+            ExecutorResult executorResult = flowProcessExecutor.resumeExecution(executorInput);
+            return formTriggerRespVO(executorResult);
         }
     }
 
