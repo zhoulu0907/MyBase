@@ -38,7 +38,6 @@ export interface QuickEntryOtherConfig {
 
 export interface QuickEntryProps {
   styleConfig?: QuickEntryStyleConfig;
-  titleConfig?: QuickEntryTitleConfig;
+  entryTitleConfig?: QuickEntryTitleConfig;
   groupConfig?: QuickEntryGroupConfig;
-  otherConfig?: QuickEntryOtherConfig;
 }

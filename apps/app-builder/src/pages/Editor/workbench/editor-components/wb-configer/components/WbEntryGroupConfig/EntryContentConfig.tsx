@@ -3,15 +3,15 @@ import { IconDelete, IconEdit, IconMenu, IconPlus, IconDragDotVertical } from '@
 import { type ApplicationMenu } from '@onebase/app';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
-import type { QuickEntryPropsConfig, QuickEntryGroupConfig } from '@onebase/ui-kit';
+import type { QuickEntryGroupConfig, QuickEntryGroupItemConfig } from '@onebase/ui-kit';
 import IconEntry from '@/assets/workbench/quick-entry/entry1.svg';
 import ConfigDrawer from '@/pages/Editor/workbench/components/configDrawer';
 import SelectMenuModal from './selectMenuModal';
 import styles from './EntryContentConfig.module.less';
 
 export interface EntryContentConfigProps {
-  value?: QuickEntryPropsConfig;
-  onChange?: (value: QuickEntryPropsConfig) => void;
+  value?: QuickEntryGroupConfig;
+  onChange?: (value: QuickEntryGroupConfig) => void;
 }
 
 interface EntryItem {
@@ -43,13 +43,7 @@ const DEFAULT_GROUP_CONFIG: QuickEntryGroupConfig = {
 
 const EntryContentConfig = ({ onChange, value }: EntryContentConfigProps) => {
   const normalizedValue = useMemo(() => {
-    return (
-      value || {
-        titleConfig: { showTitle: true, titleName: '快捷入口', showMore: true },
-        styleConfig: { theme: 'theme-one' },
-        groupConfig: DEFAULT_GROUP_CONFIG
-      }
-    );
+    return value || DEFAULT_GROUP_CONFIG;
   }, [value]);
 
   const [entries, setEntries] = useState<EntryItem[]>([]);
@@ -68,7 +62,7 @@ const EntryContentConfig = ({ onChange, value }: EntryContentConfigProps) => {
   const syncTimerRef = useRef<number | null>(null);
   const pendingSyncEntriesRef = useRef<EntryItem[] | null>(null);
 
-  const groupConfig = normalizedValue.groupConfig || DEFAULT_GROUP_CONFIG;
+  const groupConfig = normalizedValue || DEFAULT_GROUP_CONFIG;
   const schemaGroups = groupConfig.groups as SchemaGroup[] | undefined;
   const groupOptions = Array.isArray(schemaGroups) ? schemaGroups : [];
 
@@ -110,12 +104,7 @@ const EntryContentConfig = ({ onChange, value }: EntryContentConfigProps) => {
         groups
       };
 
-      const nextValue: QuickEntryPropsConfig = {
-        ...normalizedValue,
-        groupConfig: nextGroupConfig
-      };
-
-      onChange?.(nextValue);
+      onChange?.(nextGroupConfig);
     },
     [groupConfig, normalizedValue, onChange]
   );
@@ -300,16 +289,15 @@ const EntryContentConfig = ({ onChange, value }: EntryContentConfigProps) => {
       Message.error('请输入分组名称');
       return;
     }
-    const newGroups = [...groupOptions, { groupName: newGroupName, entries: [] }];
+    const newGroups: QuickEntryGroupItemConfig[] = [
+      ...groupOptions.map((g) => ({ groupName: g.groupName, entries: g.entries || [] })),
+      { groupName: newGroupName, entries: [] }
+    ];
     const nextGroupConfig: QuickEntryGroupConfig = {
       ...groupConfig,
       groups: newGroups
     };
-    const nextValue: QuickEntryPropsConfig = {
-      ...normalizedValue,
-      groupConfig: nextGroupConfig
-    };
-    onChange?.(nextValue);
+    onChange?.(nextGroupConfig);
     setNewGroupName('');
   };
 

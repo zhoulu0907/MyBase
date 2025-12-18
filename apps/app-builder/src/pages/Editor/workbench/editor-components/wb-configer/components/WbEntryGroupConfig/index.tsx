@@ -1,22 +1,22 @@
 import { useCallback, useMemo } from 'react';
 import { registerConfigRenderer } from '../../registry';
-import { WORKBENCH_CONFIG_TYPES, type IQuickEntryConfigType, type QuickEntryPropsConfig } from '@onebase/ui-kit';
+import { WORKBENCH_CONFIG_TYPES, type IEntryGroupConfigType, type QuickEntryGroupConfig } from '@onebase/ui-kit';
 import EntryContent from './EntryContentConfig';
 
 interface Props {
   handlePropsChange: (key: string, value: unknown) => void;
-  item: IQuickEntryConfigType;
+  item: IEntryGroupConfigType;
   configs: Record<string, unknown>;
 }
 
-const EntryContentConfig = ({ handlePropsChange, item, configs }: Props) => {
+const WbEntryGroupConfig = ({ handlePropsChange, item, configs }: Props) => {
   const currentValue = useMemo(() => {
-    const nextValue = configs?.[item.key] as QuickEntryPropsConfig | undefined;
+    const nextValue = configs?.[item.key] as QuickEntryGroupConfig | undefined;
     return nextValue;
   }, [configs, item.key]);
 
   const handleEntryChange = useCallback(
-    (value: QuickEntryPropsConfig) => {
+    (value: QuickEntryGroupConfig) => {
       handlePropsChange(item.key, value);
     },
     [handlePropsChange, item.key]
@@ -29,8 +29,8 @@ const EntryContentConfig = ({ handlePropsChange, item, configs }: Props) => {
   );
 };
 
-export default EntryContentConfig;
+export default WbEntryGroupConfig;
 
-registerConfigRenderer(WORKBENCH_CONFIG_TYPES.QUICK_ENTRY, ({ handlePropsChange, item, configs }) => (
-  <EntryContentConfig handlePropsChange={handlePropsChange} item={item} configs={configs} />
+registerConfigRenderer(WORKBENCH_CONFIG_TYPES.WB_ENTRY_GROUP, ({ handlePropsChange, item, configs }) => (
+  <WbEntryGroupConfig handlePropsChange={handlePropsChange} item={item} configs={configs} />
 ));

@@ -33,13 +33,13 @@ const RichTextEditorWorkbenchConfig = () => {
             header: '样式设置',
             name: SECTION_KEYS.STYLE,
             contentStyle: PanelContentStyle,
-            content: findItem(editData, 'WbColor')
+            content: findItem(editData, 'Wb_Color')
           },
           {
             header: '内容编辑',
             name: SECTION_KEYS.CONTENT,
             contentStyle: PanelContentStyle,
-            content: findItem(editData, 'WbRichTextContent')
+            content: findItem(editData, 'Wb_RichTextContent')
           }
         ].filter((item) => item.content !== null);
 

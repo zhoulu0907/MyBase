@@ -35,4 +35,14 @@ export type { WorkbenchComponentSchema } from './schema/schema';
 export { workbenchTemplate, WORKBENCH_COMPONENT_TYPE_DISPLAY_NAME_MAP } from './template/template';
 
 // 类型导出
-export { IDataConfigConfigType } from './core/types';
+export type {
+  IDataConfigConfigType,
+  IEntryStyleConfigType,
+  IEntryTitleConfigType,
+  IEntryGroupConfigType,
+  QuickEntryTitleConfig,
+  QuickEntryStyleConfig,
+  QuickEntryGroupConfig,
+  QuickEntryGroupItemConfig,
+  QuickEntryEntryConfig
+} from './core/types';

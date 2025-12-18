@@ -9,7 +9,7 @@ interface Props {
   configs: Record<string, unknown>;
 }
 
-const DataConfig = ({ handlePropsChange, item, configs }: Props) => {
+const WbDataConfig = ({ handlePropsChange, item, configs }: Props) => {
   // 获取 dataConfig 对象，如果不存在则初始化为空对象
   const dataConfig = (configs[item.key] as Record<string, boolean>) || {};
 
@@ -52,8 +52,8 @@ const DataConfig = ({ handlePropsChange, item, configs }: Props) => {
   );
 };
 
-export default DataConfig;
+export default WbDataConfig;
 
-registerConfigRenderer(WORKBENCH_CONFIG_TYPES.DATA_CONFIG, ({ handlePropsChange, item, configs }) => (
-  <DataConfig handlePropsChange={handlePropsChange} item={item} configs={configs} />
+registerConfigRenderer(WORKBENCH_CONFIG_TYPES.WB_DATA_CONFIG, ({ handlePropsChange, item, configs }) => (
+  <WbDataConfig handlePropsChange={handlePropsChange} item={item} configs={configs} />
 ));

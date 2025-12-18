@@ -1,5 +1,5 @@
 import { Button, Form, InputNumber, Message, Radio, Select } from '@arco-design/web-react';
-import { CONFIG_TYPES } from '@onebase/ui-kit';
+import { WORKBENCH_CONFIG_TYPES } from '@onebase/ui-kit';
 import { registerConfigRenderer } from '../registry';
 import StaticCarouselList from './StaticCarouselList';
 import type { CarouselItem, Props, CarouselContentMeta, VerifyConfig } from './types';
@@ -8,7 +8,7 @@ import styles from '../index.module.less';
 const FormItem = Form.Item;
 const Option = Select.Option;
 
-const WorkbenchCarouselContentConfig = ({ item, configs, handlePropsChange }: Props) => {
+const WbCarouselContentConfig = ({ item, configs, handlePropsChange }: Props) => {
   const meta: CarouselContentMeta = item.meta ?? {};
   const modeField = meta.modeField ?? { key: 'dataSourceMode', options: [] };
   const dynamicFields = meta.dynamicFields ?? [];
@@ -117,8 +117,8 @@ const WorkbenchCarouselContentConfig = ({ item, configs, handlePropsChange }: Pr
   );
 };
 
-registerConfigRenderer(CONFIG_TYPES.CAROUSEL_CONTENT, ({ id, item, configs, handlePropsChange }) => (
-  <WorkbenchCarouselContentConfig id={id} item={item} configs={configs} handlePropsChange={handlePropsChange} />
+registerConfigRenderer(WORKBENCH_CONFIG_TYPES.WB_CAROUSEL_CONTENT, ({ id, item, configs, handlePropsChange }) => (
+  <WbCarouselContentConfig id={id} item={item} configs={configs} handlePropsChange={handlePropsChange} />
 ));
 
-export default WorkbenchCarouselContentConfig;
+export default WbCarouselContentConfig;
