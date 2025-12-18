@@ -19,10 +19,10 @@ X-Tenant-Id: 156421901678804992
 POST {{baseUrl}}/system/third-user/register
 Content-Type: application/json
 Authorization: Bearer {{token}}
-X-Tenant-Id: 156421901678804992
+X-Tenant-Id: 174391581036773376
 
 {
-  "mobile": 15890615800,
-  "appId":"1111111111",
+  "mobile": 15890615820,
+  "appId":"177228595925417984",
   "verifyCode": "888888"
 }

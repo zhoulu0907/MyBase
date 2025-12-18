@@ -51,6 +51,7 @@ import com.cmsr.onebase.module.system.vo.dept.DeptSimpleListRespVO;
 import com.cmsr.onebase.module.system.vo.role.RoleInsertReqVO;
 import com.cmsr.onebase.module.system.vo.user.*;
 import com.google.common.annotations.VisibleForTesting;
+import com.mybatisflex.core.tenant.TenantManager;
 import com.mzt.logapi.context.LogRecordContext;
 import com.mzt.logapi.service.impl.DiffParseFunction;
 import com.mzt.logapi.starter.annotation.LogRecord;
@@ -1268,15 +1269,25 @@ public class UserServiceImpl implements UserService {
                 .collect(Collectors.toList()), pageResult.getTotal());
     }
 
+    private void checkAppAndGetTenantId(Long appId) {
+        ApplicationDTO applicationDTO = TenantManager.withoutTenantCondition(() -> appApplicationApi.findAppApplicationById(appId));
+        if (applicationDTO == null) {
+            throw exception(AUTH_LOGIN_APP_DELETE_OR_DISABLE);
+        }
+    }
+
+
     @Override
     public Long thirdUserRegister(ThirdUserRegisterReqVO reqVO) {
+        //TODO  验证码 验证逻辑
 
-
-        //TODO  手机号验证，  appId ，验证码 验证逻辑
-        // 如果是启用状态，校验当前租户下的用户数量有没有超过最大限额
         // 1.1 校验账户配合
         validateTenantUserCountMaxLimit();
-
+        // 1.2 校验手机号唯一
+        validateMobileUnique(null, reqVO.getMobile());
+        // 1.3 验证app存在
+        checkAppAndGetTenantId(reqVO.getAppId());
+        // 1.4 新增用户
         AdminUserDO user = new AdminUserDO();
         user.setPassword(encodePassword(THIRD_USER_PASSWORD)); // 加密密码
         // 管理员类型：内置/自定义
