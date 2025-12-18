@@ -16,3 +16,4 @@ export * from './role';
 export * from './tag';
 export * from './trigger_flow';
 export * from './upload';
+export * from './app_dashboard';
