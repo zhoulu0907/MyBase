@@ -167,40 +167,6 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
         noRepeat: currentField.isUnique
       };
 
-      // 字段选项列表（单/多选字段专用） options
-      if (itemType === FORM_COMPONENT_TYPES.SELECT_ONE || itemType === FORM_COMPONENT_TYPES.SELECT_MUTIPLE) {
-        if (currentField.dictTypeId) {
-          const res = await getDictDetail(currentField.dictTypeId);
-          const dictDataList = res?.type ? await getDictDataListByType(res.type) : [];
-          const dictOptions = dictDataList?.filter((e: any) => e.status === 1); // 只显示启用状态的字典数据
-          if (dictOptions.length) {
-            const newDefaultOptionsConfig = {
-              type: DEFAULT_OPTIONS_TYPE.DICT,
-              disabled: true,
-              dictTypeId: currentField.dictTypeId,
-              colorMode: true,
-              colorModeType: COLOR_MODE_TYPES.POINT,
-              defaultOptions: dictOptions
-            };
-            schema.config.defaultOptionsConfig = {
-              ...schema.config.defaultOptionsConfig,
-              ...newDefaultOptionsConfig
-            };
-          }
-        } else if (currentField.options?.length) {
-          const newDefaultOptionsConfig = {
-            defaultOptions: currentField.options.map((e: any) => ({
-              label: e.optionLabel,
-              value: e.optionValue
-            }))
-          };
-          schema.config.defaultOptionsConfig = {
-            ...schema.config.defaultOptionsConfig,
-            disabled: true,
-            ...newDefaultOptionsConfig
-          };
-        }
-      }
       // 字段约束配置（长度/正则） constraints
       schema.config.constraints = currentField.constraints;
       // 自动编号完整配置（含规则项） autoNumberConfig

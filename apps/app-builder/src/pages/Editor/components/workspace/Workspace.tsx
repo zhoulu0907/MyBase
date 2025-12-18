@@ -404,42 +404,7 @@ export default function EditorWorkspace() {
                       required: field.isRequired,
                       noRepeat: field.isUnique
                     };
-
-                    // 字段选项列表（单/多选字段专用） options COMPONENT_MAP
-                    if (cpType === FORM_COMPONENT_TYPES.SELECT_ONE || cpType === FORM_COMPONENT_TYPES.SELECT_MUTIPLE) {
-                      // 判断是否引用字典数据
-                      if (field.dictTypeId) {
-                        const res = await getDictDetail(field.dictTypeId);
-                        const dictDataList = res?.type ? await getDictDataListByType(res.type) : [];
-                        const dictOptions = dictDataList?.filter((e: any) => e.status === 1); // 只显示启用状态的字典数据
-                        if (dictOptions.length) {
-                          const newDefaultOptionsConfig = {
-                            type: DEFAULT_OPTIONS_TYPE.DICT,
-                            disabled: true,
-                            dictTypeId: field.dictTypeId,
-                            colorMode: true,
-                            colorModeType: COLOR_MODE_TYPES.POINT,
-                            defaultOptions: dictOptions
-                          };
-                          schema.config.defaultOptionsConfig = {
-                            ...schema.config.defaultOptionsConfig,
-                            ...newDefaultOptionsConfig
-                          };
-                        }
-                      } else if (field.options?.length) {
-                        const newDefaultOptionsConfig = {
-                          defaultOptions: field.options.map((e: any) => ({
-                            label: e.optionLabel,
-                            value: e.optionValue
-                          }))
-                        };
-                        schema.config.defaultOptionsConfig = {
-                          ...schema.config.defaultOptionsConfig,
-                          disabled: true,
-                          ...newDefaultOptionsConfig
-                        };
-                      }
-                    }
+                   
                     // 字段约束配置（长度/正则） constraints
                     schema.config.constraints = field.constraints;
                     // 自动编号完整配置（含规则项） autoNumberConfig
@@ -536,44 +501,7 @@ export default function EditorWorkspace() {
                       required: ele.isRequired,
                       noRepeat: ele.isUnique
                     };
-
-                    // 字段选项列表（单/多选字段专用） options
-                    if (
-                      subType === FORM_COMPONENT_TYPES.SELECT_ONE ||
-                      subType === FORM_COMPONENT_TYPES.SELECT_MUTIPLE
-                    ) {
-                      if (ele.dictTypeId) {
-                        const res = await getDictDetail(ele.dictTypeId);
-                        const dictDataList = res?.type ? await getDictDataListByType(res.type) : [];
-                        const dictOptions = dictDataList?.filter((e: any) => e.status === 1); // 只显示启用状态的字典数据
-                        if (dictOptions.length) {
-                          const newDefaultOptionsConfig = {
-                            type: DEFAULT_OPTIONS_TYPE.DICT,
-                            disabled: true,
-                            dictTypeId: ele.dictTypeId,
-                            colorMode: true,
-                            colorModeType: COLOR_MODE_TYPES.POINT,
-                            defaultOptions: dictOptions
-                          };
-                          subSchema.config.defaultOptionsConfig = {
-                            ...subSchema.config.defaultOptionsConfig,
-                            ...newDefaultOptionsConfig
-                          };
-                        }
-                      } else if (ele.options?.length) {
-                        const newDefaultOptionsConfig = {
-                          defaultOptions: ele.options.map((e: any) => ({
-                            label: e.optionLabel,
-                            value: e.optionValue
-                          }))
-                        };
-                        subSchema.config.defaultOptionsConfig = {
-                          ...subSchema.config.defaultOptionsConfig,
-                          disabled: true,
-                          ...newDefaultOptionsConfig
-                        };
-                      }
-                    }
+                   
                     // 字段约束配置（长度/正则） constraints
                     subSchema.config.constraints = ele.constraints;
                     // 自动编号完整配置（含规则项） autoNumberConfig
@@ -708,43 +636,6 @@ export default function EditorWorkspace() {
                     noRepeat: currentField.isUnique
                   };
 
-                  // 字段选项列表（单/多选字段专用） options
-                  if (
-                    itemType === FORM_COMPONENT_TYPES.SELECT_ONE ||
-                    itemType === FORM_COMPONENT_TYPES.SELECT_MUTIPLE
-                  ) {
-                    if (currentField.dictTypeId) {
-                      const res = await getDictDetail(currentField.dictTypeId);
-                      const dictDataList = res?.type ? await getDictDataListByType(res.type) : [];
-                      const dictOptions = dictDataList?.filter((e: any) => e.status === 1); // 只显示启用状态的字典数据
-                      if (dictOptions.length) {
-                        const newDefaultOptionsConfig = {
-                          type: DEFAULT_OPTIONS_TYPE.DICT,
-                          disabled: true,
-                          dictTypeId: currentField.dictTypeId,
-                          colorMode: true,
-                          colorModeType: COLOR_MODE_TYPES.POINT,
-                          defaultOptions: dictOptions
-                        };
-                        schema.config.defaultOptionsConfig = {
-                          ...schema.config.defaultOptionsConfig,
-                          ...newDefaultOptionsConfig
-                        };
-                      }
-                    } else if (currentField.options?.length) {
-                      const newDefaultOptionsConfig = {
-                        defaultOptions: currentField.options.map((e) => ({
-                          label: e.optionLabel,
-                          value: e.optionValue
-                        }))
-                      };
-                      schema.config.defaultOptionsConfig = {
-                        ...schema.config.defaultOptionsConfig,
-                        disabled: true,
-                        ...newDefaultOptionsConfig
-                      };
-                    }
-                  }
                   // 字段约束配置（长度/正则） constraints
                   schema.config.constraints = currentField.constraints;
                   // 自动编号完整配置（含规则项） autoNumberConfig

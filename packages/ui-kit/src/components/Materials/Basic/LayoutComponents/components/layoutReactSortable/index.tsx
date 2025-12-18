@@ -268,40 +268,6 @@ const LayoutReactSortable: React.FC<LayoutReactSortableProps> = ({
             noRepeat: ele.isUnique
           };
 
-          // 字段选项列表（单/多选字段专用） options
-          if (subType === FORM_COMPONENT_TYPES.SELECT_ONE || subType === FORM_COMPONENT_TYPES.SELECT_MUTIPLE) {
-            if (ele.dictTypeId) {
-              const res = await getDictDetail(ele.dictTypeId);
-              const dictDataList = res?.type ? await getDictDataListByType(res.type) : [];
-              const dictOptions = dictDataList?.filter((e: any) => e.status === 1); // 只显示启用状态的字典数据
-              if (dictOptions.length) {
-                const newDefaultOptionsConfig = {
-                  type: DEFAULT_OPTIONS_TYPE.CUSTOM,
-                  disabled: true,
-                  dictTypeId: ele.dictTypeId,
-                  colorMode: true,
-                  colorModeType: COLOR_MODE_TYPES.POINT,
-                  defaultOptions: dictOptions
-                };
-                subSchema.config.defaultOptionsConfig = {
-                  ...subSchema.config.defaultOptionsConfig,
-                  ...newDefaultOptionsConfig
-                };
-              }
-            } else if (ele.options?.length) {
-              const newDefaultOptionsConfig = {
-                defaultOptions: ele.options.map((e: any) => ({
-                  label: e.optionLabel,
-                  value: e.optionValue
-                }))
-              };
-              subSchema.config.defaultOptionsConfig = {
-                ...subSchema.config.defaultOptionsConfig,
-                disabled: true,
-                ...newDefaultOptionsConfig
-              };
-            }
-          }
           // 字段约束配置（长度/正则） constraints
           subSchema.config.constraints = ele.constraints;
           // 自动编号完整配置（含规则项） autoNumberConfig
