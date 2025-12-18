@@ -55,6 +55,7 @@ const DynamicVerifyConfig: React.FC<DynamicVerifyConfigProps> = ({ handlePropsCh
                   value={configs[verifyKey]['minLength']}
                   placeholder="字数下限"
                   min={0}
+                  max={configs[verifyKey]['maxLength'] || undefined}
                   onChange={(value) => {
                     if (value > configs[verifyKey]['maxLength']) return;
                     handlePropsChange(verifyKey, { ...configs[verifyKey], minLength: value });
@@ -68,7 +69,7 @@ const DynamicVerifyConfig: React.FC<DynamicVerifyConfigProps> = ({ handlePropsCh
                 <InputNumber
                   size="mini"
                   placeholder="字数上限"
-                  min={0}
+                  min={configs[verifyKey]['minLength'] || 0}
                   value={configs[verifyKey]['maxLength']}
                   onChange={(value) => {
                     if (value < configs[verifyKey]['minLength']) return;
@@ -96,6 +97,7 @@ const DynamicVerifyConfig: React.FC<DynamicVerifyConfigProps> = ({ handlePropsCh
                   size="mini"
                   placeholder="最小值"
                   min={0}
+                  max={configs[verifyKey]['max']}
                   value={configs[verifyKey]['min']}
                   onChange={(value) => {
                     if (value > configs[verifyKey]['max']) return;
@@ -110,7 +112,7 @@ const DynamicVerifyConfig: React.FC<DynamicVerifyConfigProps> = ({ handlePropsCh
                 <InputNumber
                   size="mini"
                   placeholder="最大值"
-                  min={0}
+                  min={configs[verifyKey]['min'] || 0}
                   value={configs[verifyKey]['max']}
                   onChange={(value) => {
                     if (value < configs[verifyKey]['max']) return;
