@@ -1,6 +1,7 @@
 import { Tabs } from '@arco-design/web-react';
 import { IconRight } from '@arco-design/web-react/icon';
 import type { CSSProperties } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { nanoid } from 'nanoid';
 import { memo } from 'react';
 import { WORKBENCH_STATUS_OPTIONS, WORKBENCH_STATUS_VALUES, QUICK_ENTRY_THEME_OPTIONS, QUICK_ENTRY_THEME_VALUES } from '../../core/constants';
@@ -30,7 +31,7 @@ const defaultGroupConfig: QuickEntryGroupConfig = {
 
 const XQuickEntry = memo((props: XQuickEntryConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const { id, status, width, titleConfig, styleConfig, groupConfig, runtime } = props;
-
+  const navigate = useNavigate();
   const finalTitleConfig = titleConfig || defaultTitleConfig;
   const finalStyleConfig = styleConfig || defaultStyleConfig;
   const finalGroupConfig = groupConfig || defaultGroupConfig;
@@ -68,13 +69,14 @@ const XQuickEntry = memo((props: XQuickEntryConfig & { runtime?: boolean; detail
                 window.open(item.linkAddress);
               } else {
                 console.log('Navigate to:', item.linkAddress);
+                navigate(item.linkAddress);
               }
               return;
             }
 
             if (item.menuId) {
               // TODO: 集成与应用菜单的跳转能力
-              console.log('Navigate to menu:', item.menuId);
+              console.log('Navigate to menu:', item);
             }
           }}
           style={{
@@ -108,13 +110,14 @@ const XQuickEntry = memo((props: XQuickEntryConfig & { runtime?: boolean; detail
               window.open(item.linkAddress);
             } else {
               console.log('Navigate to:', item.linkAddress);
+              navigate(item.linkAddress);
             }
             return;
           }
 
           if (item.menuId) {
             // TODO: 集成与应用菜单的跳转能力
-            console.log('Navigate to menu:', item.menuId);
+            console.log('Navigate to menu:', item);
           }
         }}
         style={{

@@ -1,6 +1,6 @@
 import { Button, Form, Input, Message, Popconfirm, Radio } from '@arco-design/web-react';
 import { IconCloud, IconDelete, IconDragDotVertical, IconEdit, IconPlus } from '@arco-design/web-react/icon';
-import { uploadFile } from '@onebase/platform-center';
+import { uploadFile, getFileUrlById } from '@onebase/platform-center';
 import { usePageViewEditorSignal } from '@onebase/ui-kit';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { ReactSortable } from 'react-sortablejs';
@@ -170,9 +170,9 @@ const StaticCarouselList = ({ carouselConfig, maxSizeMB = 5, onConfigChange }: S
             }
 
             try {
-              const uploadImgUrl = await handleUpload(file);
-              if (uploadImgUrl !== '') {
-                form.setFieldValue('image', uploadImgUrl);
+              const uploadImgId = await handleUpload(file);
+              if (uploadImgId !== '') {
+                form.setFieldValue('image', uploadImgId);
                 setPendingValues(form.getFieldsValue());
                 Message.success('图片上传成功');
               } else {
@@ -205,9 +205,9 @@ const StaticCarouselList = ({ carouselConfig, maxSizeMB = 5, onConfigChange }: S
     }
 
     try {
-      const uploadImgUrl = await handleUpload(file);
-      if (uploadImgUrl !== '') {
-        form.setFieldValue('image', uploadImgUrl);
+      const uploadImgId = await handleUpload(file);
+      if (uploadImgId !== '') {
+        form.setFieldValue('image', uploadImgId);
         setPendingValues(form.getFieldsValue());
         Message.success('图片上传成功');
       } else {
@@ -304,7 +304,11 @@ const StaticCarouselList = ({ carouselConfig, maxSizeMB = 5, onConfigChange }: S
                     </div>
                     <div className={styles.imagePreview}>
                       {imageUrl ? (
-                        <img src={imageUrl} alt="预览" className={styles.previewImage} />
+                        <img
+                          src={imageUrl.indexOf('data:') < 0 ? getFileUrlById(imageUrl) : imageUrl}
+                          alt="预览"
+                          className={styles.previewImage}
+                        />
                       ) : (
                         <div className={styles.uploadPlaceholder}>
                           <IconPlus />
