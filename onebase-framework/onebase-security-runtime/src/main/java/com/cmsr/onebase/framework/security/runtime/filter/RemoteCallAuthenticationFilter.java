@@ -29,7 +29,7 @@ public class RemoteCallAuthenticationFilter extends OncePerRequestFilter {
 
     public static final String X_EXEC_TOKEN = "X-Exec-Token";
 
-    private RequestMatcher flowRemoteCallRequestMatcher = new AntPathRequestMatcher("/runtime/flow/remote-call/**", "POST");
+    public static final RequestMatcher flowRemoteCallRequestMatcher = new AntPathRequestMatcher("/runtime/flow/remote-call/**", "POST");
 
     private boolean doFilter(HttpServletRequest request) {
         return flowRemoteCallRequestMatcher.matches(request);
