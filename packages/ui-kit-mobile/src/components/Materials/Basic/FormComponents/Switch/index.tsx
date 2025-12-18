@@ -7,8 +7,9 @@ import '../index.css';
 
 type XSwitchConfig = typeof FormSchema.XSwitchSchema.config;
 
-const XSwitch = memo((props: XSwitchConfig & { runtime?: boolean; detailMode?: boolean }) => {
+const XSwitch = memo((props: XSwitchConfig & { runtime?: boolean; detailMode?: boolean; form?: any; }) => {
   const {
+    form,
     label,
     dataField,
     status,
@@ -48,9 +49,7 @@ const XSwitch = memo((props: XSwitchConfig & { runtime?: boolean; detailMode?: b
     >
       {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
         // 只读模式，渲染文本内容
-        <div>
-          {/* {defaultValue ? '开启' : '关闭'} */}
-        </div>
+        <div className="readonlyText">{form?.getFieldValue(fieldId) ? '开启' : '关闭'}</div>
       ) : (
         renderContent()
       )}
