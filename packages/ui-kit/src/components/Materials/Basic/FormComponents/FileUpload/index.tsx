@@ -3,7 +3,7 @@ import { Button, Form, Message, Progress, Typography, Upload } from '@arco-desig
 import { IconClose, IconDelete, IconDownload, IconUpload } from '@arco-design/web-react/icon';
 import { type UploadItem, type UploadListProps } from '@arco-design/web-react/lib/Upload';
 import { attachmentDownload, attachmentUpload, menuSignal } from '@onebase/app';
-import { pagesRuntimeSignal } from '@onebase/common';
+import { isRuntimeEnv, pagesRuntimeSignal } from '@onebase/common';
 import { nanoid } from 'nanoid';
 import { memo, useEffect, useState } from 'react';
 import { downloadFileByUrl } from 'src/utils/downloadFile';
@@ -239,7 +239,7 @@ const XFileUpload = memo(
               width: '100%',
               pointerEvents: runtime ? 'unset' : 'none'
             }}
-            disabled={status !== STATUS_VALUES[STATUS_OPTIONS.DEFAULT] || detailMode}
+            disabled={status !== STATUS_VALUES[STATUS_OPTIONS.DEFAULT] || detailMode || !isRuntimeEnv()}
             showUploadList={{
               removeIcon: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? null : <IconDelete />
             }}
