@@ -329,8 +329,6 @@ export default function EditorHeader() {
       console.warn('getAppResources - 未获取到数据源列表');
     }
   };
-
-  // 获取主表对应的主实体信息
   //   const getMainMetaData = async (pageSetId: string) => {
   //     const mainMetaData = await getPageSetMetaData({ pageSetId: pageSetId });
 
@@ -377,8 +375,7 @@ export default function EditorHeader() {
       onFlowSave();
       return;
     }
-    console.log(`save appid: ${curAppId}, pageSetId: ${pageSetId}`);
-    console.log('curViewId: ', curViewId.value);
+    console.log(`save appid: ${curAppId}, pageSetId: ${pageSetId} curViewId: ${curViewId.value}`);
 
     const savePageSetParams: SavePageSetParams = {
       pageSetId: pageSetId,

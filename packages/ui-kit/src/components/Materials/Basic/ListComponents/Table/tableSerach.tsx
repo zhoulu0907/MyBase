@@ -2,7 +2,7 @@ import { useAppEntityStore } from '@/signals';
 import { Button, Form } from '@arco-design/web-react';
 import { IconSearch, IconSync } from '@arco-design/web-react/icon';
 import { useSignals } from '@preact/signals-react/runtime';
-import { memo, useEffect } from 'react';
+import { memo } from 'react';
 import { COMPONENT_MAP, FORM_COMPONENT_TYPES, FormComp, getComponentSchema } from 'src/components/Materials';
 import { useFormEditorSignal } from 'src/signals/page_editor';
 import { v4 as uuidv4 } from 'uuid';
@@ -29,16 +29,8 @@ const TableSearch = memo((props: TableSearchConfig) => {
 
   const { mainEntity } = useAppEntityStore();
 
-  useEffect(() => {
-    console.log('mainEntityxxx:   ', mainEntity);
-  }, [mainEntity]);
-
   const renderSearchItem = (item: any) => {
-    // console.log('item', item);
-    // console.log('mainEntity', mainEntity);
     const fieldType = mainEntity.fields.find((field) => field.fieldName === item.value)?.fieldType;
-
-    // console.log('fieldType', fieldType);
 
     if (!fieldType) {
       return;
@@ -47,7 +39,7 @@ const TableSearch = memo((props: TableSearchConfig) => {
     const dataField = [mainEntity.tableName, item.value];
 
     const cpType = COMPONENT_MAP[fieldType as any];
-    console.log('cpType', cpType);
+
     let componentConfig: any = {};
     const detailMode = false;
 
