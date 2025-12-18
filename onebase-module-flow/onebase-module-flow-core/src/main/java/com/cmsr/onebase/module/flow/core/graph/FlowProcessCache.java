@@ -10,6 +10,9 @@ import com.cmsr.onebase.module.flow.context.graph.nodes.start.StartEntityNodeDat
 import com.cmsr.onebase.module.flow.context.graph.nodes.start.StartFormNodeData;
 import com.cmsr.onebase.module.flow.context.graph.nodes.start.StartTimeNodeData;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
+import com.cmsr.onebase.module.flow.core.utils.FlowUtils;
+import com.yomahub.liteflow.meta.LiteflowMetaOperator;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.Map;
@@ -21,6 +24,7 @@ import java.util.stream.Collectors;
  * @Author：huangjie
  * @Date：2025/9/4 18:16
  */
+@Slf4j
 public class FlowProcessCache {
 
     private static volatile FlowProcessCache instance;
@@ -52,9 +56,14 @@ public class FlowProcessCache {
 
     private ConcurrentHashMap<Long, StartDateFieldNodeData> startDateFieldNodeDataCache = new ConcurrentHashMap<>();
 
+
+
     public void update(FlowProcessDO processDO, JsonGraph jsonGraph) {
+        //
         Long processId = processDO.getId();
         Long applicationId = processDO.getApplicationId();
+        //
+        updateChain(processId, jsonGraph);
         //
         Map<String, NodeData> flowNodeData = jsonGraph.getNodeData();
         flowNodeDataCache.put(processId, flowNodeData);
@@ -133,6 +142,9 @@ public class FlowProcessCache {
     }
 
     public void deleteByProcessId(Long processId) {
+        //
+        removeChain(processId);
+        //
         flowNodeDataCache.remove(processId);
         startTimeNodeDataCache.remove(processId);
         startFormNodeDataCache.remove(processId);
@@ -149,4 +161,15 @@ public class FlowProcessCache {
         return processCache.values().stream().toList();
     }
 
+    private void updateChain(Long processId, JsonGraph jsonGraph) {
+        String flowChain = FlowChainBuilder.toFlowChain(jsonGraph);
+        log.debug("flowChain:{}", flowChain);
+        String chainId = FlowUtils.toFlowChainId(processId);
+        LiteflowMetaOperator.reloadOneChain(chainId, flowChain);
+    }
+
+    private void removeChain(Long processId) {
+        String chainId = FlowUtils.toFlowChainId(processId);
+        LiteflowMetaOperator.removeChain(chainId);
+    }
 }

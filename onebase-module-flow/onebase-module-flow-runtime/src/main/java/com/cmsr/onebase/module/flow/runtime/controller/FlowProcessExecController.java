@@ -65,7 +65,7 @@ public class FlowProcessExecController {
     }
 
     @GetMapping("/flow-handler/get")
-    @Operation(summary = "删除流程")
+    @Operation(summary = "查询流程")
     public CommonResult<List<FlowProcessDO>> getProcess() {
         List<FlowProcessDO> allProcess = flowProcessCache.getAllProcess();
         return CommonResult.success(allProcess);

@@ -11,8 +11,9 @@ import org.redisson.api.RMapCache;
 import org.redisson.api.RTopic;
 import org.redisson.api.RedissonClient;
 import org.redisson.api.listener.MessageListener;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -27,7 +28,7 @@ import java.util.concurrent.TimeUnit;
 @Setter
 @Service
 @Conditional(FlowEnableCondition.class)
-public class FlowChangeHandler implements InitializingBean, MessageListener<FlowChangeEvent> {
+public class FlowChangeHandler implements ApplicationRunner, MessageListener<FlowChangeEvent> {
 
     @Autowired
     private FlowProcessManager flowProcessManager;
@@ -39,8 +40,17 @@ public class FlowChangeHandler implements InitializingBean, MessageListener<Flow
     private Cache<Long, Long> versionCache = CacheBuilder.newBuilder()
             .expireAfterWrite(FlowUtils.VERSION_TIMEOUT_MINUTES * 2, TimeUnit.MINUTES).build();
 
+
+    private volatile boolean inited = false;
+
+    /**
+     * 注意！！千万不要修改为 InitializingBean，一定要用ApplicationRunner，必须等Spring扫描完LiteFlow的组件后，才能加载组件！！
+     *
+     * @param args
+     * @throws Exception
+     */
     @Override
-    public void afterPropertiesSet() {
+    public void run(ApplicationArguments args) throws Exception {
         try {
             RMapCache<Long, FlowChangeEvent> mapCache = redissonClient.getMapCache(FlowUtils.REDIS_VERSION_CHANGE_CACHE_KEY, FlowUtils.KRYO5_CODEC);
             mapCache.forEach((k, v) -> {
@@ -49,6 +59,7 @@ public class FlowChangeHandler implements InitializingBean, MessageListener<Flow
             flowProcessManager.initAllProcess();
             RTopic topic = redissonClient.getTopic(FlowUtils.REDIS_VERSION_CHANGE_TOPIC_KEY);
             topic.addListener(FlowChangeEvent.class, this);
+            inited = true;
         } catch (Exception e) {
             log.error("初始化异常：{}", e.getMessage(), e);
         }
@@ -97,6 +108,9 @@ public class FlowChangeHandler implements InitializingBean, MessageListener<Flow
 
     @Scheduled(initialDelay = 60 * 1000, fixedDelay = 60 * 1000)
     private void updateCacheTask() {
+        if (!inited) {
+            return;
+        }
         RMapCache<Long, FlowChangeEvent> mapCache = redissonClient.getMapCache(FlowUtils.REDIS_VERSION_CHANGE_CACHE_KEY, FlowUtils.KRYO5_CODEC);
         mapCache.forEach((applicationId, flowChangeEvent) -> {
             try {
@@ -113,6 +127,9 @@ public class FlowChangeHandler implements InitializingBean, MessageListener<Flow
 
     @Scheduled(initialDelay = 120 * 1000, fixedDelay = 300 * 1000)
     private void updateTimeJob() {
+        if (!inited) {
+            return;
+        }
         flowProcessManager.checkTimeJob();
     }
 
