@@ -17,23 +17,20 @@ import { useBasicEditorStore } from '@/store';
 import { useFlowEditorStor } from '@/store/index';
 import { useAppStore } from '@/store/store_app';
 import { useResourceStore } from '@/store/store_resource';
+import { setMainMetaData } from '@/utils/entity';
 import { Breadcrumb, Button, Form, Message, Modal, Tabs } from '@arco-design/web-react';
 import { IconArrowLeft, IconInfoCircleFill } from '@arco-design/web-react/icon';
 import {
   AppStatus,
-  ENTITY_TYPE,
   fetchPublish,
   getAppIdByPageSetId,
   getApplication,
   getDatasourceList,
-  getEntityListWithFields,
-  getPageSetMetaData,
   listApplicationMenu,
   menuSignal,
   PageType,
   save,
   updateApplicationMenu,
-  type ChildEntity,
   type GetApplicationReq,
   type ListApplicationMenuReq,
   type UpdateApplicationMenuNameReq
@@ -44,7 +41,6 @@ import {
   EDITOR_TYPES,
   startLoadPageSet,
   startSavePageSet,
-  useAppEntityStore,
   useFlowPageEditorSignal,
   useFormEditorSignal,
   useListEditorSignal,
@@ -148,7 +144,7 @@ export default function EditorHeader() {
     clearLayoutSubComponents: clearListLayoutSubComponents
   } = useListEditorSignal;
 
-  const { setMainEntity, /* setAppEntities, */ setSubEntities } = useAppEntityStore();
+  //   const { setMainEntity, /* setAppEntities, */ setSubEntities } = useAppEntityStore();
   const { curMenu, setCurMenu } = menuSignal;
   const { curAppId, setCurAppId } = useAppStore();
 
@@ -282,7 +278,7 @@ export default function EditorHeader() {
       handleGetAppInfo(pageSetId);
       // 工作台设计页不获取主表数据
       if (activeTab !== EDITOR_TYPES.WORKBENCH_EDITOR) {
-        getMainMetaData(pageSetId);
+        setMainMetaData(pageSetId);
       }
 
       loadPageSetInfo(pageSetId);
@@ -335,46 +331,46 @@ export default function EditorHeader() {
   };
 
   // 获取主表对应的主实体信息
-  const getMainMetaData = async (pageSetId: string) => {
-    const mainMetaData = await getPageSetMetaData({ pageSetId: pageSetId });
+  //   const getMainMetaData = async (pageSetId: string) => {
+  //     const mainMetaData = await getPageSetMetaData({ pageSetId: pageSetId });
 
-    const entityListWithFields = await getEntityListWithFields({ entityUuids: [mainMetaData] });
-    const [entityWithChildren] = entityListWithFields;
-    console.log('entityWithChildren: ', entityWithChildren);
+  //     const entityListWithFields = await getEntityListWithFields({ entityUuids: [mainMetaData] });
+  //     const [entityWithChildren] = entityListWithFields;
+  //     console.log('entityWithChildren: ', entityWithChildren);
 
-    // 主表数据
-    if (entityWithChildren) {
-      setMainEntity({
-        entityId: entityWithChildren.entityId,
-        entityUuid: entityWithChildren.entityUuid,
-        tableName: entityWithChildren.tableName,
-        entityName: entityWithChildren.entityName,
-        entityType: ENTITY_TYPE.MAIN,
-        fields: entityWithChildren.fields
-      });
+  //     // 主表数据
+  //     if (entityWithChildren) {
+  //       setMainEntity({
+  //         entityId: entityWithChildren.entityId,
+  //         entityUuid: entityWithChildren.entityUuid,
+  //         tableName: entityWithChildren.tableName,
+  //         entityName: entityWithChildren.entityName,
+  //         entityType: ENTITY_TYPE.MAIN,
+  //         fields: entityWithChildren.fields
+  //       });
 
-      if (entityWithChildren.childEntities && entityWithChildren.childEntities.length > 0) {
-        // 返回新Promise对象，当所有输入Promise成功时返回结果数组（顺序与输入一致）
-        const allChildFields = await Promise.all(
-          entityWithChildren.childEntities.map(async (entity: ChildEntity) => {
-            return entity.childFields;
-          })
-        );
-        const subEntities = entityWithChildren.childEntities.map((entity: ChildEntity, index: number) => ({
-          entityId: entity.childEntityId,
-          entityUuid: entity.childEntityUuid,
-          tableName: entity.childTableName,
-          entityName: entity.childEntityName,
-          entityType: ENTITY_TYPE.SUB,
-          fields: allChildFields[index]
-        }));
+  //       if (entityWithChildren.childEntities && entityWithChildren.childEntities.length > 0) {
+  //         // 返回新Promise对象，当所有输入Promise成功时返回结果数组（顺序与输入一致）
+  //         const allChildFields = await Promise.all(
+  //           entityWithChildren.childEntities.map(async (entity: ChildEntity) => {
+  //             return entity.childFields;
+  //           })
+  //         );
+  //         const subEntities = entityWithChildren.childEntities.map((entity: ChildEntity, index: number) => ({
+  //           entityId: entity.childEntityId,
+  //           entityUuid: entity.childEntityUuid,
+  //           tableName: entity.childTableName,
+  //           entityName: entity.childEntityName,
+  //           entityType: ENTITY_TYPE.SUB,
+  //           fields: allChildFields[index]
+  //         }));
 
-        setSubEntities({
-          entities: subEntities
-        });
-      }
-    }
-  };
+  //         setSubEntities({
+  //           entities: subEntities
+  //         });
+  //       }
+  //     }
+  //   };
 
   const handleSavePageSet = async (exit?: boolean) => {
     if (activeTab === EDITOR_TYPES.FLOW_EDITOR) {
