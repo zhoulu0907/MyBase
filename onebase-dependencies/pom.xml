@@ -86,7 +86,7 @@
         <okhttp3.version>4.12.0</okhttp3.version>
         <uuid-creator.version>6.1.1</uuid-creator.version>
         <!-- 插件框架相关 -->
-        <pf4j.version>3.10.0</pf4j.version>
+        <pf4j.version>3.14.0</pf4j.version>
     </properties>
 
     <dependencyManagement>
