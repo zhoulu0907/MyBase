@@ -6,7 +6,7 @@ import { memo } from 'react';
 import { COMPONENT_MAP, FORM_COMPONENT_TYPES, FormComp, getComponentSchema } from 'src/components/Materials';
 import { useFormEditorSignal } from 'src/signals/page_editor';
 import { v4 as uuidv4 } from 'uuid';
-import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
+import { DEFAULT_VALUE_TYPES, STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import './index.css';
 
 interface TableSearchConfig {
@@ -60,6 +60,7 @@ const TableSearch = memo((props: TableSearchConfig) => {
         labelColSpan,
         dataField,
         defaultValue: undefined,
+        defaultValueConfig: { type: DEFAULT_VALUE_TYPES.CUSTOM, customValue: null },
         status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
         verify: { required: false },
         tooltip: '',
@@ -82,6 +83,7 @@ const TableSearch = memo((props: TableSearchConfig) => {
         labelColSpan,
         dataField,
         defaultValue: undefined,
+        defaultValueConfig: { type: DEFAULT_VALUE_TYPES.CUSTOM, customValue: null },
         status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
         verify: { required: false },
         tooltip: '',
