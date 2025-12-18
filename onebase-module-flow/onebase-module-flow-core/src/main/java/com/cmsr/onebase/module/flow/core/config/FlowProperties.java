@@ -10,11 +10,11 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class FlowProperties {
 
-    @Value("${lite-flow.version-tag:1}")
-    private Long versionTag;
+    @Value("${lite-flow.version-tag:runtime}")
+    private String versionTag;
 
     public Long getVersionTag() {
-        return versionTag;
+        return versionTag.equals("build") ? 0L : 1L;
     }
 
 }

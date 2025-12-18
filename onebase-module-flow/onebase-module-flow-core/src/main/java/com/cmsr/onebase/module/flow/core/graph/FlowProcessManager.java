@@ -20,8 +20,6 @@ import com.cmsr.onebase.module.flow.core.job.JobCreateRequest;
 import com.cmsr.onebase.module.flow.core.job.JobSchedulerClient;
 import com.cmsr.onebase.module.flow.core.utils.FlowUtils;
 import com.mybatisflex.core.tenant.TenantManager;
-import com.yomahub.liteflow.builder.el.LiteFlowChainELBuilder;
-import com.yomahub.liteflow.flow.FlowBus;
 import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -118,8 +116,6 @@ public class FlowProcessManager {
     public void onApplicationDelete(Long applicationId) {
         Set<Long> ids = flowProcessCache.findProcessByApplicationId(applicationId);
         ids.forEach(id -> {
-            String chainId = FlowUtils.toFlowChainId(id);
-            FlowBus.removeChain(chainId);
             flowProcessCache.deleteByProcessId(id);
         });
         stopApplicationJob(applicationId);
@@ -186,11 +182,6 @@ public class FlowProcessManager {
             log.error("流程定义错误：{}", processDO);
             return;
         }
-        String flowChain = FlowChainBuilder.toFlowChain(jsonGraph);
-        log.debug("flowChain:{}", flowChain);
-        String chainId = FlowUtils.toFlowChainId(processDO.getId());
-        LiteFlowChainELBuilder.createChain().setChainId(chainId).setEL(flowChain).build();
-        //
         flowProcessCache.update(processDO, jsonGraph);
         if (sync) {
             startSchedulingJob(processDO);
@@ -201,8 +192,6 @@ public class FlowProcessManager {
 
     private void onProcessDelete(Long applicationId, Long processId) {
         log.info("处理流程删除：{}-{}", applicationId, processId);
-        String chainId = FlowUtils.toFlowChainId(processId);
-        FlowBus.removeChain(chainId);
         //
         flowProcessCache.deleteByProcessId(processId);
         //
