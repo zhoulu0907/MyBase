@@ -204,12 +204,14 @@ const PageManagerPage: FC = () => {
       key: menu.id,
       title: (
         <MyMenuItem
+          menuInfo={menu}
           showOption={showOption}
           menuID={menu.id || ''}
           isVisible={menu.isVisible}
           menuCode={menu.menuCode}
           menuName={menu.menuName}
           menuIcon={menu.menuIcon}
+          pagesetType={menu.pagesetType}
           isGroup={menu.menuType == MenuType.GROUP}
           maxWidth={maxWidth}
           label={menu.menuName}
@@ -475,8 +477,10 @@ const PageManagerPage: FC = () => {
         let editorType: string = EDITOR_TYPES.FORM_EDITOR;
         if (visibleCreateForm === 'workbench') {
           editorType = EDITOR_TYPES.WORKBENCH_EDITOR;
+          setCurMenu({ ...menuResp, pagesetType: PageType.WORKBENCH });
         } else {
           editorType = EDITOR_TYPES.FORM_EDITOR;
+          setCurMenu(menuResp);
         }
 
         navigate(`/onebase/${tenantId}/editor/${editorType}?pageSetId=${pageSetId}&appId=${curAppId}`);
@@ -780,7 +784,11 @@ const PageManagerPage: FC = () => {
                       </div>
 
                       <div className={styles.contentBody}>
-                        <PreviewContainer menuId={curMenu.value?.id} runtime={true} />
+                        <PreviewContainer
+                          menuId={curMenu.value?.id}
+                          runtime={true}
+                          pagesetType={curMenu.value?.pagesetType}
+                        />
                       </div>
                     </>
                   )}
