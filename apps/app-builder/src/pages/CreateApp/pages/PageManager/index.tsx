@@ -179,16 +179,15 @@ const PageManagerPage: FC = () => {
 
   useEffect(() => {
     const loadMainMetaData = async () => {
-      if (curMenu.value?.id) {
-        const req: GetPageSetIdReq = {
-          menuId: curMenu.value?.id
-        };
-        const pageSetId = await getPageSetId(req);
-        setMainMetaData(pageSetId);
-      }
+      console.log('loadMainMetaData curMenu.value: ', curMenu.value);
+      const req: GetPageSetIdReq = {
+        menuId: curMenu.value?.id
+      };
+      const pageSetId = await getPageSetId(req);
+      setMainMetaData(pageSetId);
     };
 
-    if (curMenu.value?.id) {
+    if (curMenu.value?.id && curMenu.value?.menuType === MenuType.PAGE) {
       loadMainMetaData();
     }
   }, [curMenu.value?.id]);
