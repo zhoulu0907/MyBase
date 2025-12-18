@@ -287,7 +287,7 @@ public class AppApplicationServiceImpl implements AppApplicationService {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_NAME_ERROR);
         }
         etlDataManager.offlineAllByApplication(id);
-        flowDataManager.offlineRuntimeData(id);
+        flowDataManager.deleteRuntimeData(id);
         transactionTemplate.executeWithoutResult(transactionStatus -> {
             bpmDataManager.removeApplication(id);
             metadataDataManagerApi.deleteAllApplicationData(id);
