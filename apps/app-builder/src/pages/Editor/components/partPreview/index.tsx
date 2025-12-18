@@ -45,8 +45,6 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
   const mobileEditorPreviewRef = useRef<MicroApp | null>(null);
   const qiankunActionsRef = useRef<ReturnType<typeof initGlobalState> | null>(null);
 
-  //   const pageEditorSignal = usePageEditorSignal();
-
   // 使用 useMemo 安全地序列化数据，移除循环引用
   const safeData = useMemo(() => {
     try {
