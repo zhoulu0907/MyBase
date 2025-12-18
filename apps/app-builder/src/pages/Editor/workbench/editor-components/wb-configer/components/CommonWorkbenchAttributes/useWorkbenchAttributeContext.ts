@@ -29,10 +29,11 @@ export interface WorkbenchAttributeContext {
 export function useWorkbenchAttributeContext(): WorkbenchAttributeContext {
   useSignals();
 
-  const { curComponentSchema, setCurComponentSchema, setWbComponentSchemas } = useWorkbenchSignal();
+  const { curComponentID, curComponentSchema, setCurComponentSchema, setWbComponentSchemas, wbComponentSchemas } =
+    useWorkbenchSignal();
 
   const schema = (curComponentSchema || {}) as WorkbenchComponentSchema;
-  const cpID = schema.id;
+  const cpID = schema.id || curComponentID;
   const componentType = schema.type;
 
   const [editData, setEditData] = useState<WorkbenchEditItem[]>([]);
@@ -44,14 +45,27 @@ export function useWorkbenchAttributeContext(): WorkbenchAttributeContext {
   );
 
   useEffect(() => {
-    if (!componentType || !hasWorkbenchComponentSchema(componentType)) {
+    if (!cpID) {
+      return;
+    }
+
+    // 优先从 wbComponentSchemas 中获取组件配置，确保使用正确的组件配置
+    // 如果 wbComponentSchemas 中没有，再使用 curComponentSchema（作为回退）
+    const componentSchema = wbComponentSchemas[cpID] || curComponentSchema;
+    const type = componentSchema?.type || componentType;
+
+    if (!type || !hasWorkbenchComponentSchema(type)) {
       setEditData([]);
       return;
     }
-    const defaultSchema = getWorkbenchComponentSchema(componentType) as unknown as WorkbenchComponentSchema;
+
+    const defaultSchema = getWorkbenchComponentSchema(type) as unknown as WorkbenchComponentSchema;
     setEditData(defaultSchema.editData || []);
-    setConfigs((curComponentSchema as WorkbenchComponentSchema)?.config || defaultSchema.config || {});
-  }, [componentType, curComponentSchema]);
+
+    // 使用当前组件的配置，确保切换组件时显示正确的配置
+    const newConfigs = componentSchema?.config || {};
+    setConfigs({ ...newConfigs });
+  }, [cpID, curComponentID, wbComponentSchemas[cpID]?.config, curComponentSchema?.config]);
 
   const persistConfig = (nextConfig: WorkbenchConfig) => {
     if (!cpID) {

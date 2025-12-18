@@ -1,6 +1,6 @@
 import { Form, Input, Tooltip } from '@arco-design/web-react';
 import { IconCopy } from '@arco-design/web-react/icon';
-import attributeStyles from '../../attributes.module.less';
+import attributeStyles from './attributes.module.less';
 
 const FormItem = Form.Item;
 

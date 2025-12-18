@@ -62,7 +62,7 @@ const XInformationList: XInformationListSchema = {
   {
     key: 'dataConfig',
     name: '数据内容配置',
-    type: WORKBENCH_CONFIG_TYPES.DATA_CONFIG,
+    type: WORKBENCH_CONFIG_TYPES.WB_DATA_CONFIG,
     range: DATA_CONFIG_RANGE
   }],
   config: {

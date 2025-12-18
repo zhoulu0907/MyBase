@@ -1,4 +1,5 @@
-import { Button, Form } from '@arco-design/web-react';
+import EditorEmpty from '@/assets/images/edit_empty.svg';
+import { Button, Form, Spin } from '@arco-design/web-react';
 import {
   getEntityFieldsWithChildren,
   getPageSetId,
@@ -57,6 +58,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
   const [tableName, setTableName] = useState<string>('');
   const [mainMetaDataFields, setMainMetaDataFields] = useState<AppEntityField[]>([]);
   const [editTargetId, setEditTargetId] = useState('');
+  const [loading, setLoading] = useState(false);
   const preview = true;
 
   useEffect(() => {
@@ -100,6 +102,9 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
       clearWorkbenchComponents();
       clearWbComponentSchemas();
 
+      // 设置加载状态
+      setLoading(true);
+
       // 然后加载新的数据
       handleGetPageSetId(menuId);
     }
@@ -114,11 +119,24 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
 
   useEffect(() => {
     if (pageSetId) {
-      loadPageSetInfo(pageSetId);
+      const loadData = async () => {
+        try {
+          await Promise.all([loadPageSetInfo(pageSetId), getMainMetaData(pageSetId)]);
+        } finally {
+          // 数据加载完成后，延迟一小段时间确保组件已更新
+          setTimeout(() => {
+            setLoading(false);
+          }, 100);
+        }
+      };
 
       // 工作台页面不获取主表数据
-      if (pagesetType !== PageType.WORKBENCH) {
-        getMainMetaData(pageSetId);
+      if (pagesetType === PageType.WORKBENCH) {
+        loadPageSetInfo(pageSetId).finally(() => {
+          setLoading(false);
+        });
+      } else {
+        loadData();
       }
     }
     // 优先切换到列表页
@@ -188,7 +206,11 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
   return (
     <div className={styles.previewPage}>
       <div className={styles.content}>
-        {pageType === EDITOR_TYPES.LIST_EDITOR &&
+        {loading ? (
+          <div className={styles.loading}>
+            <Spin size={40} tip="加载中..." />
+          </div>
+        ) : pageType === EDITOR_TYPES.LIST_EDITOR && listComponents.value.length > 0 ? (
           listComponents.value.map((cp: GridItem) => (
             <Fragment key={cp.id}>
               {listPageComponentSchemas.value[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
@@ -211,7 +233,14 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
                 </div>
               )}
             </Fragment>
-          ))}
+          ))
+        ) : (
+          pageType === EDITOR_TYPES.LIST_EDITOR && (
+            <div className={styles.noData}>
+              <img src={EditorEmpty} alt="暂无数据" />
+            </div>
+          )
+        )}
 
         {pageType == EDITOR_TYPES.FORM_EDITOR && (
           <Form layout="inline" form={form}>

@@ -49,12 +49,12 @@ export interface XRichTextConfig extends ICommonBaseWorkbenchType {
   /**
    * 背景颜色
    */
-  WbColor: TWbColorDefaultType;
+  Wb_Color: TWbColorDefaultType;
 
   /**
    * 富文本内容
    */
-  WbRichTextContent: string;
+  Wb_RichTextContent: string;
 
   /**
    * 默认值
@@ -82,12 +82,12 @@ const XRichText: XRichTextSchema = {
       type: WORKBENCH_CONFIG_TYPES.LABEL_INPUT
     },
     {
-      key: 'WbColor',
+      key: 'Wb_Color',
       name: '背景颜色',
       type: WORKBENCH_CONFIG_TYPES.WB_COLOR
     },
     {
-      key: 'WbRichTextContent',
+      key: 'Wb_RichTextContent',
       name: '富文本内容',
       type: WORKBENCH_CONFIG_TYPES.WB_RICH_TEXT_CONTENT
     },
@@ -107,8 +107,8 @@ const XRichText: XRichTextSchema = {
       type: DEFAULT_VALUE_TYPES.CUSTOM,
       customValue: ''
     },
-    WbColor: '#ffffff',
-    WbRichTextContent: '',
+    Wb_Color: '#ffffff',
+    Wb_RichTextContent: '',
     status: WORKBENCH_STATUS_VALUES[WORKBENCH_STATUS_OPTIONS.DEFAULT]
   }
 };

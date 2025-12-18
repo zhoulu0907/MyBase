@@ -126,7 +126,7 @@ const DEFAULT_CAROUSEL_CONTENT: Images[] = [
 const carouselContentConfig: ICarouselContentConfigType = {
   key: 'carouselContent',
   name: '轮播内容',
-  type: WORKBENCH_CONFIG_TYPES.CAROUSEL_CONTENT,
+  type: WORKBENCH_CONFIG_TYPES.WB_CAROUSEL_CONTENT,
   meta: {
     modeField: {
       key: 'dataSourceMode',

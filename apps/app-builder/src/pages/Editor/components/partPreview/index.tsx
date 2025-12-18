@@ -44,6 +44,8 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
   const { editMode } = currentEditorSignal;
   const mobileEditorPreviewRef = useRef<MicroApp | null>(null);
 
+  //   const pageEditorSignal = usePageEditorSignal();
+
   const qiankunActions = initGlobalState({
     drag: false,
     components: pageType === EDITOR_TYPES.FORM_EDITOR ? formComponents.value : listComponents.value,

@@ -3,10 +3,11 @@ import CreatePageIcon from '@/assets/images/addpage.svg';
 import CreateWorkbenchIcon from '@/assets/images/addworkbench.svg';
 import EditIcon from '@/assets/images/edit_menu_icon.svg';
 import PageManagerGuide from '@/assets/images/page_manaager_guide.svg';
-import CreateScreenModal from '@/components/CreateScreenModal';
+import CreateScreenModal from '@/components/CreateDashboardModal';
 import { useI18n } from '@/hooks/useI18n';
 import PreviewContainer from '@/pages/Runtime/components/preview';
-import { useAppStore } from '@/store';
+import { useAppStore } from '@/store/store_app';
+import { setMainMetaData } from '@/utils/entity';
 import { addParentIdToChildren } from '@/utils/menu';
 import { Button, Dropdown, Form, Input, Layout, Menu, Message, Tree } from '@arco-design/web-react';
 import { IconDown, IconEmpty, IconPlus, IconSearch } from '@arco-design/web-react/icon';
@@ -175,6 +176,21 @@ const PageManagerPage: FC = () => {
     if (searchResult) return;
     setShowGuide(treeData?.length === 0);
   }, [treeData, searchResult]);
+
+  useEffect(() => {
+    const loadMainMetaData = async () => {
+      console.log('loadMainMetaData curMenu.value: ', curMenu.value);
+      const req: GetPageSetIdReq = {
+        menuId: curMenu.value?.id
+      };
+      const pageSetId = await getPageSetId(req);
+      setMainMetaData(pageSetId);
+    };
+
+    if (curMenu.value?.id && curMenu.value?.menuType === MenuType.PAGE) {
+      loadMainMetaData();
+    }
+  }, [curMenu.value?.id]);
 
   // 将接口返回的菜单数据（res）转换为 Tree 组件可用的 treeData 格式
   // TODO(mickey): showOption重构
@@ -405,7 +421,15 @@ const PageManagerPage: FC = () => {
   const triggerDelete = (menuID: string) => {
     handleDelete(menuID);
   };
-
+  const handleScreenCreate = async (id?: string, screenMethod?: string) => {
+    console.log('handleScreenCreate id:', id);
+    console.log('handleScreenCreate screenMethod:', screenMethod);
+    // const req = await createScreenApi({
+    //   projectName: createForm.getFieldValue('menuName') || '新大屏',
+    //   remarks: null,
+    //   indexImage: null
+    // });
+  };
   const handleCreate = async () => {
     createForm.validate(async (error) => {
       if (error !== null) return;
@@ -814,7 +838,8 @@ const PageManagerPage: FC = () => {
       <CreateScreenModal
         title={title}
         type={'page'}
-        handleCreate={handleCreate}
+        // handleCreate={handleCreate}
+        handleCreate={handleScreenCreate}
         onCancel={() => {
           setVisibleCreateScreenForm('');
         }}

@@ -7,6 +7,12 @@
   border-bottom: 0.5px solid #e5e6eb !important;
   align-items: center !important;
 
+  .readonlyText {
+    font-size: 0.32rem;
+    color: #1d2129;
+    text-align: right;
+  }
+
   .arco-input-wrap,
   .arco-form-label-item {
     height: 100%;
@@ -25,7 +31,7 @@
   }
 
   .arco-form-item-control {
-    display: unset;
+    /* display: unset; */
     padding: 0;
     justify-content: flex-end;
   }

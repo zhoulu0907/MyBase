@@ -43,12 +43,16 @@ export const WORKBENCH_CONFIG_TYPES = {
   STATUS_RADIO: CONFIG_TYPES.STATUS_RADIO,
   WIDTH_RADIO: CONFIG_TYPES.WIDTH_RADIO,
   FORM_LAYOUT: CONFIG_TYPES.FORM_LAYOUT,
-  // 工作台专属配置类型
-  QUICK_ENTRY: 'QuickEntry' as const,
-  CAROUSEL_CONTENT: 'CarouselContent' as const,
-  WB_COLOR: 'WbColor' as const,
-  WB_RICH_TEXT_CONTENT: 'WbRichTextContent' as const,
-  DATA_CONFIG: 'DataConfig' as const,
+  // 工作台专属配置类型（以WB_开头）
+  // 快捷入口
+  WB_ENTRY_GROUP: 'Wb_EntryGroup' as const,
+  WB_ENTRY_STYLE: 'Wb_EntryStyle' as const,
+  WB_ENTRY_TITLE: 'Wb_EntryTitle' as const,
+  // 轮播图
+  WB_CAROUSEL_CONTENT: 'Wb_CarouselContent' as const,
+  WB_COLOR: 'Wb_Color' as const,
+  WB_RICH_TEXT_CONTENT: 'Wb_RichTextContent' as const,
+  WB_DATA_CONFIG: 'Wb_DataConfig' as const,
 } as const;
 
 /**

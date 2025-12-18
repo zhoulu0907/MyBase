@@ -42,6 +42,9 @@ interface PreviewRenderProps {
 
   // 自定义视图规则
   cpState?: any;
+
+  // 表格数据id
+  recordId?: string;
 }
 
 const PreviewRender: React.FC<PreviewRenderProps> = ({
@@ -54,7 +57,8 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
   showFromPageData,
   refresh,
   pageType,
-  cpState
+  cpState,
+  recordId
 }) => {
   // 获取组件配置，使用深拷贝确保每次都是新对象
   const [componentConfig, setComponentConfig] = useState(() =>
@@ -245,6 +249,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
             {...componentConfig}
             runtime={runtime}
             detailMode={detailMode}
+            recordId={recordId}
           />
         );
       case FORM_COMPONENT_TYPES.IMG_UPLOAD:
@@ -313,11 +318,35 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
 
       //  布局组件
       case LAYOUT_COMPONENT_TYPES.COLUMN_LAYOUT:
-        return <LayoutComp.XPreviewColumnLayout {...componentConfig} cpName={cpId} id={cpId} pageType={pageType} detailMode={detailMode} />;
+        return (
+          <LayoutComp.XPreviewColumnLayout
+            {...componentConfig}
+            cpName={cpId}
+            id={cpId}
+            pageType={pageType}
+            detailMode={detailMode}
+          />
+        );
       case LAYOUT_COMPONENT_TYPES.TABS_LAYOUT:
-        return <LayoutComp.XPreviewTabsLayout {...componentConfig} cpName={cpId} id={cpId} pageType={pageType} detailMode={detailMode} />;
+        return (
+          <LayoutComp.XPreviewTabsLayout
+            {...componentConfig}
+            cpName={cpId}
+            id={cpId}
+            pageType={pageType}
+            detailMode={detailMode}
+          />
+        );
       case LAYOUT_COMPONENT_TYPES.COLLAPSE_LAYOUT:
-        return <LayoutComp.XPreviewCollapseLayout {...componentConfig} cpName={cpId} id={cpId} pageType={pageType} detailMode={detailMode} />;
+        return (
+          <LayoutComp.XPreviewCollapseLayout
+            {...componentConfig}
+            cpName={cpId}
+            id={cpId}
+            pageType={pageType}
+            detailMode={detailMode}
+          />
+        );
 
       //  列表组件
       case LIST_COMPONENT_TYPES.TABLE:
@@ -357,13 +386,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
       case SHOW_COMPONENT_TYPES.PLACEHOLDER:
         return <ShowComp.XPlaceholder cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case SHOW_COMPONENT_TYPES.DIVIDER:
-        return (
-          <ShowComp.XDivider
-            cpName={cpId}
-            id={cpId}
-            {...componentConfig}
-          />
-        );  
+        return <ShowComp.XDivider cpName={cpId} id={cpId} {...componentConfig} />;
 
       // 工作台组件
       case WORKBENCH_COMPONENT_TYPES.QUICK_ENTRY:

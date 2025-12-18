@@ -1,8 +1,8 @@
-import { useEffect, useState, forwardRef, useImperativeHandle, useRef } from 'react';
-import { Switch, Button, Table, type TableColumnProps } from '@arco-design/web-react';
-import { IconQuestionCircle, IconPlus } from '@arco-design/web-react/icon';
-import { useLocation } from 'react-router-dom';
+import { Button, Table, type TableColumnProps } from '@arco-design/web-react';
+import { IconPlus } from '@arco-design/web-react/icon';
 import { getEntityFieldsWithChildren, getPageSetMetaData } from '@onebase/app';
+import { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import FieldModal from './FieldModal';
 import './style.less';
 

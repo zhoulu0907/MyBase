@@ -62,6 +62,7 @@ export interface QuickEntryTitleConfig {
   showTitle: boolean;
   titleName: string;
   showMore: boolean;
+  enableGroup?: boolean;
 }
 
 /**
@@ -100,29 +101,39 @@ export interface QuickEntryGroupConfig {
   groups: QuickEntryGroupItemConfig[];
 }
 
-/**
- * 快捷入口属性配置
- */
-export interface QuickEntryPropsConfig {
-  titleConfig: QuickEntryTitleConfig;
-  styleConfig: QuickEntryStyleConfig;
-  groupConfig: QuickEntryGroupConfig;
-}
 
 /**
  * 快捷入口-配置类型
  */
-export interface IQuickEntryConfigType {
+export interface IEntryGroupConfigType {
   key: string;
   name: string;
-  type: typeof WORKBENCH_CONFIG_TYPES.QUICK_ENTRY;
+  type: typeof WORKBENCH_CONFIG_TYPES.WB_ENTRY_GROUP;
+}
+
+/**
+ * 快捷入口-样式配置类型
+ */
+export interface IEntryStyleConfigType {
+  key: string;
+  name: string;
+  type: typeof WORKBENCH_CONFIG_TYPES.WB_ENTRY_STYLE;
+}
+
+/**
+ * 快捷入口-标题配置类型
+ */
+export interface IEntryTitleConfigType {
+  key: string;
+  name: string;
+  type: typeof WORKBENCH_CONFIG_TYPES.WB_ENTRY_TITLE;
 }
 
 // 轮播-内容配置
 export interface ICarouselContentConfigType {
   key: string;
   name: string;
-  type: typeof WORKBENCH_CONFIG_TYPES.CAROUSEL_CONTENT;
+  type: typeof WORKBENCH_CONFIG_TYPES.WB_CAROUSEL_CONTENT;
   meta?: Record<string, any>;
 }
 
@@ -131,6 +142,6 @@ import type { IBooleanConfigType } from '../../types';
 export interface IDataConfigConfigType {
   key: string;
   name: string;
-  type: typeof WORKBENCH_CONFIG_TYPES.DATA_CONFIG;
+  type: typeof WORKBENCH_CONFIG_TYPES.WB_DATA_CONFIG;
   range: IBooleanConfigType[];
 }

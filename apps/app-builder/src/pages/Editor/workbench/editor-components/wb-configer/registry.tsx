@@ -31,5 +31,5 @@ export function renderConfigItem(ctx: RenderContext) {
   return renderer ? renderer(ctx) : null;
 }
 
+// 自动加载所有配置组件文件，执行文件末尾的 registerConfigRenderer 调用
 const modules = import.meta.glob('./components/**/index.tsx', { eager: true });
-

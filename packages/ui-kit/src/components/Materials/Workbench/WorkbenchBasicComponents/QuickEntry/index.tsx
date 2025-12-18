@@ -4,7 +4,7 @@ import type { CSSProperties } from 'react';
 import { nanoid } from 'nanoid';
 import { memo } from 'react';
 import { WORKBENCH_STATUS_OPTIONS, WORKBENCH_STATUS_VALUES, QUICK_ENTRY_THEME_OPTIONS, QUICK_ENTRY_THEME_VALUES } from '../../core/constants';
-import type { QuickEntryPropsConfig } from '../../core/types';
+import type { QuickEntryTitleConfig, QuickEntryStyleConfig, QuickEntryGroupConfig } from '../../core/types';
 import { type XQuickEntryConfig } from './schema';
 import { getDefaultIcon } from './getDefaultIcon';
 import './index.css';
@@ -12,19 +12,31 @@ import './index.css';
 // 主题三使用的颜色数组（对应 arcoPalette.primary 的颜色，添加 20% 透明度）
 const THEME_THREE_COLORS = ['#24b28f20', '#eb693a20', '#1979ff20', '#7e5aea20', '#009e9e20', '#ebbc0020'];
 
-const defaultQuickEntryProps: QuickEntryPropsConfig = {
-  titleConfig: { showTitle: true, titleName: '快捷入口', showMore: true },
-  styleConfig: { theme: QUICK_ENTRY_THEME_VALUES[QUICK_ENTRY_THEME_OPTIONS.THEME_1] },
-  groupConfig: { enableGroup: false, groups: [] }
+const defaultTitleConfig: QuickEntryTitleConfig = {
+  showTitle: true,
+  titleName: '快捷入口',
+  showMore: true,
+  enableGroup: false
+};
+
+const defaultStyleConfig: QuickEntryStyleConfig = {
+  theme: QUICK_ENTRY_THEME_VALUES[QUICK_ENTRY_THEME_OPTIONS.THEME_1]
+};
+
+const defaultGroupConfig: QuickEntryGroupConfig = {
+  enableGroup: false,
+  groups: []
 };
 
 const XQuickEntry = memo((props: XQuickEntryConfig & { runtime?: boolean; detailMode?: boolean }) => {
-  const { id, status, width, props: quickEntryProps, runtime } = props;
+  const { id, status, width, titleConfig, styleConfig, groupConfig, runtime } = props;
 
-  const { titleConfig, styleConfig, groupConfig } = quickEntryProps || defaultQuickEntryProps;
+  const finalTitleConfig = titleConfig || defaultTitleConfig;
+  const finalStyleConfig = styleConfig || defaultStyleConfig;
+  const finalGroupConfig = groupConfig || defaultGroupConfig;
 
-  const groups = groupConfig?.groups ?? [];
-  const enableGroup = Boolean(groupConfig?.enableGroup);
+  const groups = finalGroupConfig?.groups ?? [];
+  const enableGroup = Boolean(finalGroupConfig?.enableGroup);
 
   const renderEntryItem = (
     item: {
@@ -38,7 +50,7 @@ const XQuickEntry = memo((props: XQuickEntryConfig & { runtime?: boolean; detail
     },
     index: number
   ) => {
-    const theme = styleConfig?.theme || QUICK_ENTRY_THEME_VALUES[QUICK_ENTRY_THEME_OPTIONS.THEME_1];
+    const theme = finalStyleConfig?.theme || QUICK_ENTRY_THEME_VALUES[QUICK_ENTRY_THEME_OPTIONS.THEME_1];
     const isThemeOne = theme === QUICK_ENTRY_THEME_VALUES[QUICK_ENTRY_THEME_OPTIONS.THEME_1];
     const isThemeTwo = theme === QUICK_ENTRY_THEME_VALUES[QUICK_ENTRY_THEME_OPTIONS.THEME_2];
     const isThemeThree = theme === QUICK_ENTRY_THEME_VALUES[QUICK_ENTRY_THEME_OPTIONS.THEME_3];
@@ -164,7 +176,7 @@ const XQuickEntry = memo((props: XQuickEntryConfig & { runtime?: boolean; detail
       .join('');
   };
 
-  const themeClass = normalizeThemeClass(styleConfig?.theme);
+  const themeClass = normalizeThemeClass(finalStyleConfig?.theme);
   const statusValueHidden = WORKBENCH_STATUS_VALUES[WORKBENCH_STATUS_OPTIONS.HIDDEN];
   const isHidden = status === statusValueHidden;
   const containerStyle: CSSProperties = {
@@ -178,12 +190,12 @@ const XQuickEntry = memo((props: XQuickEntryConfig & { runtime?: boolean; detail
 
   return (
     <div className={`quick-entry ${themeClass ? `quick-entry-theme-${themeClass}` : ''}`} style={containerStyle}>
-      {(titleConfig?.showTitle || titleConfig?.showMore) && (
+      {(finalTitleConfig?.showTitle || finalTitleConfig?.showMore) && (
         <div className="quick-entry-header">
-          {titleConfig?.showTitle && (
-            <span className="quick-entry-header-title">{titleConfig?.titleName || '快捷入口'}</span>
+          {finalTitleConfig?.showTitle && (
+            <span className="quick-entry-header-title">{finalTitleConfig?.titleName || '快捷入口'}</span>
           )}
-          {titleConfig?.showMore && <span className="quick-entry-more">更多 <IconRight /></span>}
+          {finalTitleConfig?.showMore && <span className="quick-entry-more">更多 <IconRight /></span>}
         </div>
       )}
       {renderContent()}

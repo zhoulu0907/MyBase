@@ -2,11 +2,13 @@ import { ICON_Map_By_Type } from '@/components/MaterialCard/icons';
 import { useWorkbenchSignal } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import pageIcon from '@/assets/workbench/page_icon.svg';
-import PageConfig from './PageConfig';
-import QuickEntryConfig from './QuickEntryConfig';
-import TodoCenterConfig from './TodoCenterConfig';
-import RichTextEditorWorkbenchConfig from './RichTextEditorWorkbenchConfig';
-import CarouselWorkbenchConfig from './CarouselWorkbenchConfig';
+import {
+  PageConfig,
+  QuickEntryConfig,
+  TodoCenterConfig,
+  RichTextEditorWorkbenchConfig,
+  CarouselWorkbenchConfig
+} from './ConfigsByComp';
 import styles from './index.module.less';
 import { useMemo } from 'react';
 

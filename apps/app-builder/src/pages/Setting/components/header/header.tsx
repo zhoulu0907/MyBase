@@ -43,7 +43,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className, avatarUrl }) => {
   // 用户菜单
   const userMenu = (
     <Menu style={{ marginRight: '10px' }}>
-      <Menu.Item key="info" style={{ height: '90px' }}>
+      <Menu.Item key="info" style={{ height: 'auto' }}>
         <div className={styles.adminInformation}>
           <UserProfileAvatar adminInfo={userPermissionInfo?.user} avatarUrl={avatarUrl} />
           <Typography.Text>{userPermissionInfo?.user?.nickname || ''}</Typography.Text>
