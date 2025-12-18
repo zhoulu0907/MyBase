@@ -4,7 +4,7 @@ import com.cmsr.onebase.framework.orm.repo.BaseAppRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDateFieldDO;
 import com.cmsr.onebase.module.flow.core.dal.mapper.FlowProcessDateFieldMapper;
 import com.mybatisflex.core.query.QueryWrapper;
-import com.mybatisflex.spring.service.impl.ServiceImpl;
+import com.mybatisflex.core.util.UpdateEntity;
 import org.springframework.stereotype.Repository;
 
 import static com.cmsr.onebase.module.flow.core.dal.dataobject.table.FlowProcessDateFieldTableDef.FLOW_PROCESS_DATE_FIELD;
@@ -16,20 +16,21 @@ import static com.cmsr.onebase.module.flow.core.dal.dataobject.table.FlowProcess
 @Repository
 public class FlowProcessDateFieldRepository extends BaseAppRepository<FlowProcessDateFieldMapper, FlowProcessDateFieldDO> {
 
-
     public FlowProcessDateFieldDO findByProcessId(Long processId) {
         QueryWrapper query = this.query().where(FLOW_PROCESS_DATE_FIELD.PROCESS_ID.eq(processId));
-        return getOne(query);
+        return getMapper().selectOneByQuery(query);
     }
 
     public void deleteByProcessId(Long processId) {
         QueryWrapper query = this.query().where(FLOW_PROCESS_DATE_FIELD.PROCESS_ID.eq(processId));
-        super.remove(query);
+        super.getMapper().deleteByQuery(query);
     }
 
     public void updateJobStatusByAppId(String status, Long applicationId) {
-        updateChain().set(FLOW_PROCESS_DATE_FIELD.JOB_STATUS, status)
-                .where(FLOW_PROCESS_DATE_FIELD.APPLICATION_ID.eq(applicationId))
-                .update();
+        FlowProcessDateFieldDO flowProcessDateFieldDO = UpdateEntity.of(FlowProcessDateFieldDO.class);
+        flowProcessDateFieldDO.setJobStatus(status);
+        QueryWrapper query = this.query().where(FLOW_PROCESS_DATE_FIELD.APPLICATION_ID.eq(applicationId));
+        super.getMapper().updateByQuery(flowProcessDateFieldDO, query);
     }
+
 }
