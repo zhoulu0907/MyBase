@@ -2,6 +2,7 @@ import { Carousel } from '@arco-design/mobile-react';
 import { memo } from 'react';
 import { STATUS_OPTIONS, STATUS_VALUES, workbenchSchema } from '@onebase/ui-kit';
 import styles from './index.module.css';
+import { getFileUrlById } from '@onebase/platform-center';
 
 type XCarouselConfig = typeof workbenchSchema.XCarouselWorkbench.config;
 
@@ -33,7 +34,7 @@ const XCarousel = memo((props: XCarouselConfig & { runtime?: boolean }) => {
       >
         {carouselConfig.map((img, index) => (
           <div className={styles.imageWrapper} key={index} onClick={() => window.open(img.url)}>
-            <img className={styles.image} src={img.image} />
+            <img className={styles.image} src={img.image.indexOf('data:') < 0 ? getFileUrlById(img.image) : img.image} />
             {/* <div className={styles.text}>{img.text}</div> */}
           </div>
         ))}

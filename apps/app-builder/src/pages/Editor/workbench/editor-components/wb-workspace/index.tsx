@@ -50,7 +50,7 @@ export default function WorkbenchWorkspace() {
   // 初始化 qiankun 全局状态，明确列出需要传递的属性
   const qiankunActions = initGlobalState({
     drag: true,
-    editMode,
+    editMode: editMode.value,
     setEditMode,
     curComponentID,
     setCurComponentID,

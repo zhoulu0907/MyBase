@@ -10,16 +10,16 @@ const XRichText = memo((props: XRichTextConfig & { runtime?: boolean; detailMode
     id,
     label,
     runtime = true,
-    WbRichTextContent = '',
-    WbColor = '#FFFFFF',
+    Wb_RichTextContent = '',
+    Wb_Color = '#FFFFFF',
     status
   } = props;
 
-  const displayValue = WbRichTextContent || '';
+  const displayValue = Wb_RichTextContent || '';
 
   const containerStyle: React.CSSProperties = {
     width: '100%',
-    backgroundColor: WbColor,
+    backgroundColor: Wb_Color,
     padding: '10px',
     borderRadius: '4px',
     boxSizing: 'border-box' as const,
