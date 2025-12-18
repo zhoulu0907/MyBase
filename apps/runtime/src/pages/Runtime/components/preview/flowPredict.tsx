@@ -1,7 +1,8 @@
 import { useEffect, useState, type FC } from 'react';
 import { Steps, Avatar } from '@arco-design/web-react';
 import { fetchFlowPredict } from '@onebase/app/src/services/app_runtime';
-import styles from './index.module.less';
+// import styles from './index.module.less';
+import './flow.less'
 
 const Step = Steps.Step;
 
@@ -10,14 +11,25 @@ const FlowPredict = ({ businessUuid, entityParam }: any) => {
   const [stepData, setStepData] = useState();
 
   function renderDescript(value: any) {
+    const nameArr:Array<any> = []
+    // [{img: '', text: ''}, ...]
+    const imgArr:Array<any> = []
+    value?.handlers?.forEach((handler:any) => {
+      nameArr.push(handler?.handlerName)
+      imgArr.push({img: handler?.avatar, text: handler?.handlerName?.charAt(0) || ''})
+    })
     return (
-      <div className={styles.predictBox}>
-        <div className={styles.predictImg}>{value?.avatar && <img src={value?.avatar} />}</div>
-        <div className={styles.predictText}>
-          <div className={styles.predictName}>
-            {value?.handlers?.map((handler: any) => handler?.handlerName).join('、') || '暂无处理人'}
+      <div className='predictBox'>
+        <Avatar.Group>
+          {imgArr.map((item:any) => {
+            return item?.img ? <Avatar><img src={item.img} alt='' /></Avatar> : <Avatar>{item?.text}</Avatar>
+          })}
+        </Avatar.Group>
+        <div className='predictText'>
+          <div className='predictName'>
+            {nameArr.join('、') || '暂无处理人'}
           </div>
-          <div className={styles.predictDesc}>{value?.nodeName}</div>
+          <div className='predictDesc'>{value?.nodeName}</div>
         </div>
       </div>
     );
@@ -50,8 +62,8 @@ const FlowPredict = ({ businessUuid, entityParam }: any) => {
 
   return (
     <div>
-      <div className={styles.predictTitle}>提交流程</div>
-      <div className={styles.predictContent} style={{ maxHeight: '65vh', overflowY: 'auto' }}>
+      <div className='predictTitle'>提交流程</div>
+      <div className='predictContent' style={{ maxHeight: '65vh', overflowY: 'auto' }}>
         <ProcessFlow data={stepData} />
       </div>
     </div>
