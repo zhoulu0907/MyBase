@@ -43,7 +43,7 @@ public class RuntimeApplicationContextHeaderFilter extends OncePerRequestFilter 
     private static final String X_APPLICATION_ID = "X-Application-Id";
 
     private RequestMatcher systemRequestMatcher = new AntPathRequestMatcher("/runtime/system/**");
-    private RequestMatcher corpRequestMatcher   = new AntPathRequestMatcher("/runtime/corp/**");
+    private RequestMatcher corpRequestMatcher = new AntPathRequestMatcher("/runtime/corp/**");
     private RequestMatcher appGetRequestMatcher = new AntPathRequestMatcher("/runtime/app/application/get");
 
     /**
@@ -53,7 +53,10 @@ public class RuntimeApplicationContextHeaderFilter extends OncePerRequestFilter 
      * @return
      */
     private boolean doFilter(HttpServletRequest request) {
-        return systemRequestMatcher.matches(request) || corpRequestMatcher.matches(request) || appGetRequestMatcher.matches(request);
+        return systemRequestMatcher.matches(request)
+                || corpRequestMatcher.matches(request)
+                || appGetRequestMatcher.matches(request)
+                || RemoteCallAuthenticationFilter.flowRemoteCallRequestMatcher.matches(request);
     }
 
     @Override
