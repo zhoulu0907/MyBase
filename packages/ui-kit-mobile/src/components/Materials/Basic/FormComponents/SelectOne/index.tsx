@@ -55,6 +55,7 @@ const XSelectOne = memo((props: XSelectOneConfig & { runtime?: boolean; detailMo
         <div className="readonlyText">{form?.getFieldValue(fieldId)}</div>
       ) : (
         <Picker
+          title={label?.text || ''}
           cascade={false}
           renderLinkedContainer={(a, b = []) => {
             let result: any = ''

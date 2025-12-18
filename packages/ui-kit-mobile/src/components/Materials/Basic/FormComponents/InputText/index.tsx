@@ -78,7 +78,7 @@ const XInputText = memo((props: XInputTextConfig & { runtime?: boolean; detailMo
     >
       {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
         // 只读模式，渲染文本内容 TODO 主表不展示
-        <div className="readonlyText">{form?.getFieldValue(fieldId)}</div>
+        <div className="readonlyText">{form?.getFieldValue(fieldId) || (defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : '')}</div>
       ) : (
         renderContent()
       )}
