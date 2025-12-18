@@ -436,7 +436,7 @@ const XTable = memo(
       const conditions: any[] = [];
       Object.entries(queryData).forEach(([key, value]) => {
         if (typeof value === 'object') {
-          if (value.id == undefined || value.id == null || value.id == '') {
+          if (value?.id == undefined || value?.id == null || value?.id == '') {
             return;
           }
         }
