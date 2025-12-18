@@ -1,5 +1,4 @@
 import { Card, Input, Message, Modal, Space, Spin, Switch, Tabs } from '@arco-design/web-react';
-import { IconSettings } from '@arco-design/web-react/icon';
 import {
   getPluginListApi,
   type pluginParams,
@@ -8,6 +7,7 @@ import {
 import { useEffect, useMemo, useState } from 'react';
 import { StatusEnumLabel, statusMapping, StatusValue } from './constants';
 import styles from './index.module.less';
+import externalUserSVG from '@/assets/images/external_user.svg';
 
 export interface PluginItem {
   id: string;
@@ -88,13 +88,6 @@ const PluginPage = () => {
       await fetchPluginList();
       Message.success('当前已启用模式');
     }
-    const newPluginData = pluginData.map((item) => {
-      if (item.id !== id) {
-        item.status = checked === true ? 0 : 1;
-      }
-      return item;
-    });
-    setPluginData(newPluginData);
   };
 
   const filterPlugin = useMemo(() => {
@@ -127,7 +120,9 @@ const PluginPage = () => {
                       <Card className={styles.card} key={index} hoverable>
                         <Space size={48}>
                           <Space size={16}>
-                            <IconSettings />
+                            <div className={styles.icon} style={{backgroundColor: '#009E9E' }}>
+                              <img src={externalUserSVG} style={{width:'32px', height:'32px', filter: 'brightness(0) invert(1)'}}/>
+                            </div>
                             <div className={styles.textContent}>
                               <span className={styles.name}>{plugin.name}</span>
                               <span className={styles.description}>{plugin.remark}</span>

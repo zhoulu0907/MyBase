@@ -29,7 +29,6 @@ import { debounce } from 'lodash-es';
 import { useCallback, useEffect, useState } from 'react';
 import s from '../index.module.less';
 import UserFormModal from './UserFormModal';
-import UserProfileAvatar from '@/components/UserProfileAvatar';
 import { CreateSource, CreateSourceValue, statusOptions } from '../constant';
 import type { CreateSourceKey, DataItem, externalUserRecord, userApplicationList, UserTableProps } from '../type';
 
@@ -205,7 +204,6 @@ export default function UserTable({
         ellipsis: true,
         render: (_: any, record: externalUserRecord) => (
           <>
-            <UserProfileAvatar adminInfo={record} size={25} />
             <span className={s.tableColumnUsername} onClick={() => handleViewDetail(record)}>
               {record.nickName}
             </span>
