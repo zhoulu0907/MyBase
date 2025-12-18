@@ -70,13 +70,15 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
 
   const getInfo = async () => {
     const res = await getPermissionInfo(CodeType.CORP);
-    const tenantInfoRes = await getCorpDetailByIdApiInCorp(tokenInfo?.corpId || '');
+    if (tokenInfo?.corpId) {
+      const tenantInfoRes = await getCorpDetailByIdApiInCorp(tokenInfo?.corpId);
+      setTenantInfoFromSession(tenantInfoRes);
+    }
     UserPermissionManager.setUserPermissionInfo(res);
     const mobile = res.user?.mobile;
     const formatMobile = maskMobile(mobile);
     setMobile(formatMobile);
     setUserInfo(res.user);
-    setTenantInfoFromSession(tenantInfoRes);
   };
 
   // 登出处理
@@ -121,7 +123,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   return (
     <Header className={`${styles.header} ${className || ''}`}>
       <div className={styles.headerContent}>
-       <div className={styles.logo}>
+        <div className={styles.logo}>
           <TenantLogo tenantInfo={tenantInfo} />
         </div>
 
