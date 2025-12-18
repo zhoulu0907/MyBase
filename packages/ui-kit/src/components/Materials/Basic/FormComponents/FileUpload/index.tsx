@@ -1,5 +1,6 @@
+import DownloadLink from '@/assets/images/download_link.svg';
 import { Button, Form, Message, Progress, Typography, Upload } from '@arco-design/web-react';
-import { IconClose, IconDelete, IconDownload, IconFile, IconUpload } from '@arco-design/web-react/icon';
+import { IconClose, IconDelete, IconDownload, IconUpload } from '@arco-design/web-react/icon';
 import { type UploadItem, type UploadListProps } from '@arco-design/web-react/lib/Upload';
 import { attachmentDownload, attachmentUpload, menuSignal } from '@onebase/app';
 import { pagesRuntimeSignal } from '@onebase/common';
@@ -89,8 +90,10 @@ const XFileUpload = memo(
           const index = file.name.lastIndexOf('.');
           const type = file.name.slice(index + 1);
         }
-        return <IconFile style={{ fontSize: '40px' }} />;
+
+        return <img src={DownloadLink} alt="download_link" />;
       };
+
       return (
         <div className="uplaodList-text">
           {filesList.map((file, index) => (
