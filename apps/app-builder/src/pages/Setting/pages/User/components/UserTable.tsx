@@ -16,7 +16,6 @@ import {
   StatusEnum,
   updateAdminOrDirector,
   updateUserStatus,
-  UserType
 } from '@onebase/platform-center';
 import { debounce } from 'lodash-es';
 import { useCallback, useEffect, useState } from 'react';
@@ -24,6 +23,7 @@ import s from '../index.module.less';
 import PasswordModal from './PasswordModal';
 import UserFormModal from './UserFormModal';
 import UserProfileAvatar from '@/components/UserProfileAvatar';
+import { isSystemUser } from '@/utils';
 
 interface DataItem {
   id: string;
@@ -96,7 +96,7 @@ export default function UserTable({
   const [resetPasswordModalVisible, setResetPasswordModalVisible] = useState(false);
   const [importModalVisible, setImportModalVisible] = useState(false); // 导入
   const [managerTypeModalVisible, setManagerTypeModalVisible] = useState<UserRole | null>(null); // 设置主管 or 管理员
-
+  const [isMultiple, setIsMultiple] = useState<boolean>(false);
   // 查询用户列表
   const getUserList = useCallback(
     async (searchValue?: string) => {
@@ -225,10 +225,6 @@ export default function UserTable({
     setDetailModalVisible(true);
   };
 
-  const isSystemUser = (record: UserRecord) => {
-    return record.adminType === UserType.SYSTEM;
-  };
-
   const renderRoleList = (record: UserRecord) => {
     const roleNameList = record.roles?.map((item) => item.name) || [];
     if (roleNameList.length === 1) {
@@ -245,7 +241,7 @@ export default function UserTable({
       {
         title: '姓名',
         dataIndex: 'nickname',
-        width: 140,
+        width: 160,
         ellipsis: true,
         render: (_: any, record: UserRecord) => (
           <>
@@ -277,11 +273,11 @@ export default function UserTable({
           <span>{renderRoleList(record)}</span>
         )
       },
-      { title: '手机号', dataIndex: 'mobile', width: 140 },
+      { title: '手机号', dataIndex: 'mobile', width: 120 },
       {
         title: '邮箱',
         dataIndex: 'email',
-        width: 180,
+        width: 150,
         placeholder: '-',
         ellipsis: true
       },
@@ -373,6 +369,11 @@ export default function UserTable({
     if (!selectedDeptId) return Message.warning('请先选择部门');
     await getSimpleUsers({});
     setManagerTypeModalVisible(updateType);
+    if(updateType === UserRole.ADMIN) {
+      setIsMultiple(true);
+    }else {
+      setIsMultiple(false);
+    }
   };
 
   // 获取部门用户信息
@@ -529,6 +530,7 @@ export default function UserTable({
         visible={!!managerTypeModalVisible}
         data={userData}
         loading={memberLoading}
+        isMultiple={isMultiple}
         selectedMembers={selectedMembers || []}
         onSearch={debouncedUpdate}
         onConfirm={handleAddUser}

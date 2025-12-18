@@ -3,9 +3,11 @@ import CreatePageIcon from '@/assets/images/addpage.svg';
 import CreateWorkbenchIcon from '@/assets/images/addworkbench.svg';
 import EditIcon from '@/assets/images/edit_menu_icon.svg';
 import PageManagerGuide from '@/assets/images/page_manaager_guide.svg';
+import CreateScreenModal from '@/components/CreateDashboardModal';
 import { useI18n } from '@/hooks/useI18n';
 import PreviewContainer from '@/pages/Runtime/components/preview';
 import { useAppStore } from '@/store/store_app';
+import { setMainMetaData } from '@/utils/entity';
 import { addParentIdToChildren } from '@/utils/menu';
 import { Button, Dropdown, Form, Input, Layout, Menu, Message, Tree } from '@arco-design/web-react';
 import { IconDown, IconEmpty, IconPlus, IconSearch } from '@arco-design/web-react/icon';
@@ -42,12 +44,11 @@ import { currentEditorSignal } from '@onebase/ui-kit/src/signals/current_editor'
 import { useSignals } from '@preact/signals-react/runtime';
 import { debounce } from 'lodash-es';
 import { useCallback, useEffect, useState, type FC } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { ReactSVG } from 'react-svg';
 import { RELATIONSHIP_TYPE } from '../DataFactory/utils/types';
 import CopyModal from './components/Modals/CopyModal';
 import CreateModal from './components/Modals/CreateModal';
-import CreateScreenModal from '@/components/CreateScreenModal';
 import RenameModal from './components/Modals/RenameModal';
 import MyMenuItem from './components/MyMenuItem';
 import TaskCenterPage from './components/TaskCenter/TaskCenterPage';
@@ -85,6 +86,7 @@ const PageManagerPage: FC = () => {
 
   const { t } = useI18n();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const { tenantId } = useParams();
 
@@ -129,9 +131,31 @@ const PageManagerPage: FC = () => {
     nodes.reduce((found, node) => {
       if (found) return found;
       if (Number(node.menuType) === MenuType.PAGE) return node;
-      setExpandedKeys((prev) => [...prev, node.id]);
+      if (node.id) {
+        setExpandedKeys((prev) => [...prev, node.id!]);
+      }
       return node.children ? findFirstPage(node.children) : undefined;
     }, undefined);
+
+  // 查找菜单及其所有父节点ID
+  const findMenuWithParents = (
+    nodes: ApplicationMenu[],
+    targetId: string,
+    parentIds: string[] = []
+  ): { node: ApplicationMenu; parentIds: string[] } | null => {
+    for (const node of nodes) {
+      if (node.id === targetId) {
+        return { node, parentIds };
+      }
+      if (node.children && node.children.length > 0 && node.id) {
+        const result = findMenuWithParents(node.children, targetId, [...parentIds, node.id]);
+        if (result) {
+          return result;
+        }
+      }
+    }
+    return null;
+  };
 
   useEffect(() => {
     setCurMenu({} as ApplicationMenu);
@@ -139,16 +163,34 @@ const PageManagerPage: FC = () => {
 
   useEffect(() => {
     if (curAppId !== '') {
-      getMenuList();
+      // 从URL参数中读取菜单ID
+      const menuIdFromUrl = searchParams.get('menuId');
+      getMenuList(undefined, menuIdFromUrl || undefined);
       getEntityList();
     }
     clearEditMode();
-  }, [curAppId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [curAppId, searchParams.get('menuId')]);
 
   useEffect(() => {
     if (searchResult) return;
     setShowGuide(treeData?.length === 0);
   }, [treeData, searchResult]);
+
+  useEffect(() => {
+    const loadMainMetaData = async () => {
+      console.log('loadMainMetaData curMenu.value: ', curMenu.value);
+      const req: GetPageSetIdReq = {
+        menuId: curMenu.value?.id
+      };
+      const pageSetId = await getPageSetId(req);
+      setMainMetaData(pageSetId);
+    };
+
+    if (curMenu.value?.id && curMenu.value?.menuType === MenuType.PAGE) {
+      loadMainMetaData();
+    }
+  }, [curMenu.value?.id]);
 
   // 将接口返回的菜单数据（res）转换为 Tree 组件可用的 treeData 格式
   // TODO(mickey): showOption重构
@@ -163,7 +205,7 @@ const PageManagerPage: FC = () => {
       title: (
         <MyMenuItem
           showOption={showOption}
-          menuID={menu.id}
+          menuID={menu.id || ''}
           isVisible={menu.isVisible}
           menuCode={menu.menuCode}
           menuName={menu.menuName}
@@ -209,9 +251,20 @@ const PageManagerPage: FC = () => {
     const treeData = convertMenuToTreeData(res, initTreeItemWidth, true, menuStyles);
     setTreeData(treeData);
     if (menuId) {
-      const findCreateMenu = res.find((item: any) => item.id === menuId);
-      setCurMenu(findCreateMenu);
-      setSearchResult(false);
+      // 查找菜单及其所有父节点
+      const menuWithParents = findMenuWithParents(res, menuId);
+      if (menuWithParents) {
+        setCurMenu(menuWithParents.node);
+        // 展开所有父节点，以便菜单可见
+        setExpandedKeys(menuWithParents.parentIds);
+        setSearchResult(false);
+      } else {
+        // 如果找不到菜单，回退到默认行为
+        if (res && res.length > 0) {
+          setCurMenu(findFirstPage(res));
+          setSearchResult(false);
+        }
+      }
     } else if (res && res.length > 0) {
       setCurMenu(findFirstPage(res));
       setSearchResult(false);
@@ -234,7 +287,7 @@ const PageManagerPage: FC = () => {
           // 过滤子表
           entity.relationType !== RELATION_TYPE.SLAVE ||
           (entity.relationType === RELATION_TYPE.SLAVE &&
-            !entity.relationshipTypes.includes(RELATIONSHIP_TYPE.SUBTABLE_ONE_TO_MANY))
+            !entity.relationshipTypes?.includes(RELATIONSHIP_TYPE.SUBTABLE_ONE_TO_MANY))
       )
       .map((entity) => ({
         label: entity.entityName,
@@ -366,7 +419,15 @@ const PageManagerPage: FC = () => {
   const triggerDelete = (menuID: string) => {
     handleDelete(menuID);
   };
-
+  const handleScreenCreate = async (id?: string, screenMethod?: string) => {
+    console.log('handleScreenCreate id:', id);
+    console.log('handleScreenCreate screenMethod:', screenMethod);
+    // const req = await createScreenApi({
+    //   projectName: createForm.getFieldValue('menuName') || '新大屏',
+    //   remarks: null,
+    //   indexImage: null
+    // });
+  };
   const handleCreate = async () => {
     createForm.validate(async (error) => {
       if (error !== null) return;
@@ -637,7 +698,6 @@ const PageManagerPage: FC = () => {
             styles_tree={styles.tree}
             curAppId={curAppId}
             triggerHide={triggerHide}
-            findFirstPage={findFirstPage}
             setSearchResult={setSearchResult}
             searchResult={searchResult}
             setShowGuide={setShowGuide}
@@ -770,7 +830,8 @@ const PageManagerPage: FC = () => {
       <CreateScreenModal
         title={title}
         type={'page'}
-        handleCreate={handleCreate}
+        // handleCreate={handleCreate}
+        handleCreate={handleScreenCreate}
         onCancel={() => {
           setVisibleCreateScreenForm('');
         }}

@@ -1,0 +1,76 @@
+.appCard {
+  width: 100%;
+  border-radius: 16px;
+  padding: 10px 16px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border: 1px solid #e5e6eb;
+  background-color: #fff;
+  transition: all 0.1s linear;
+  background: linear-gradient(180deg, rgba(232, 255, 254, 0.45) 0%, rgba(255, 255, 255, 0.45) 100%), #fff;
+
+  &:hover {
+    box-sizing: border-box;
+    border-color: transparent;
+    outline: 2px solid rgb(var(--primary-6));
+    box-shadow: 0px 0px 8px 8px rgba(0, 0, 0, 0.05);
+  }
+
+  .appCardImg {
+    flex: 1;
+    text-align: center;
+    img {
+      width: 282px;
+      height: 165px;
+    }
+  }
+
+  .appCardFooter {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: #4e5969;
+    font-family: PingFang SC;
+    line-height: 20px;
+  }
+  .cardName {
+    font-size: 16px;
+    margin-top: 26px;
+    font-weight: 500;
+    .cardState {
+      width: 72px;
+      height: 24px;
+      font-weight: 300;
+      background-color: #e8f3ff;
+      font-size: 14px;
+      color: #165dff;
+      text-align: center;
+      line-height: 24px;
+    }
+  }
+  .dec {
+    font-size: 14px;
+    font-weight: 400;
+    color: #4e5969;
+    margin: 12px 0 2px;
+  }
+  .footer {
+    text-align: end;
+    font-size: 12px;
+  }
+  .footerRight {
+    display: flex;
+    align-items: center;
+    font-size: 12px;
+    cursor: pointer;
+  }
+}
+.menuItem {
+  display: flex;
+  align-items: center;
+}
+.operationIcon {
+  cursor: pointer;
+}

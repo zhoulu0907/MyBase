@@ -1,7 +1,7 @@
 import { getPopupContainer } from '@/utils';
 import { Form, Select } from '@arco-design/web-react';
 import { nanoid } from 'nanoid';
-import { memo, useEffect, useState } from 'react';
+import { memo } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import '../index.css';
@@ -11,16 +11,16 @@ const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean; det
   const { label, dataField, tooltip, status, verify, layout, defaultOptionsConfig, runtime = true, detailMode } = props;
 
   const { form } = Form.useFormContext();
-  const fieldId = dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.CHECKBOX}_${nanoid()}`
+  const fieldId =
+    dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.CHECKBOX}_${nanoid()}`;
 
   const fieldValue = Form.useWatch(fieldId, form);
-
 
   const handleSelectChange = (value: string) => {
     const name = defaultOptionsConfig?.defaultOptions.find((item) => item.value === value)?.label;
 
     form.setFieldValue(fieldId, {
-      id:value,
+      id: value,
       name
     });
   };
@@ -46,7 +46,9 @@ const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean; det
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
           <div>
-            {(fieldValue?.id && defaultOptionsConfig?.defaultOptions?.find((op) => op.value === fieldValue.id)?.label) || '--'}
+            {(fieldValue?.id &&
+              defaultOptionsConfig?.defaultOptions?.find((op) => op.value === fieldValue.id)?.label) ||
+              '--'}
           </div>
         ) : (
           <Select
@@ -64,9 +66,11 @@ const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean; det
             }}
             renderFormat={(option) => {
               if (typeof fieldValue === 'object' && fieldValue) {
-                return defaultOptionsConfig?.defaultOptions?.find((op) => op.value === fieldValue?.id)?.label ?? '--';
+                return (
+                  defaultOptionsConfig?.defaultOptions?.find((op) => op.value === fieldValue?.id)?.label ?? undefined
+                );
               }
-              return <span>{option?.children}</span>
+              return <span>{option?.children}</span>;
             }}
           />
         )}

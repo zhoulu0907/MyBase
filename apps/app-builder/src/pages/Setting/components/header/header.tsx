@@ -1,4 +1,3 @@
-import LogoSVG from '@/assets/images/ob_logo.svg';
 import UserProfileAvatar from '@/components/UserProfileAvatar';
 
 import { useI18n } from '@/hooks/useI18n';
@@ -11,7 +10,7 @@ import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import styles from './header.module.less';
 import TenantLogo from '@/components/TenantLogo';
-import { tenantInfoSignal } from '@/store/singals/tenant_info';
+import { getTenantInfoFromSession } from '@/utils';
 
 const { Header } = Layout;
 
@@ -44,7 +43,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className, avatarUrl }) => {
   // 用户菜单
   const userMenu = (
     <Menu style={{ marginRight: '10px' }}>
-      <Menu.Item key="info" style={{ height: '90px' }}>
+      <Menu.Item key="info" style={{ height: 'auto' }}>
         <div className={styles.adminInformation}>
           <UserProfileAvatar adminInfo={userPermissionInfo?.user} avatarUrl={avatarUrl} />
           <Typography.Text>{userPermissionInfo?.user?.nickname || ''}</Typography.Text>
@@ -59,7 +58,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className, avatarUrl }) => {
     </Menu>
   );
 
-  const tenantInfo = tenantInfoSignal.tenantInfo.value;
+  const tenantInfo = getTenantInfoFromSession();
 
   return (
     <Header className={`${styles.header} ${className || ''}`}>

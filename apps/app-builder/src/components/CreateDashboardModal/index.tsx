@@ -13,7 +13,7 @@ import screenChange from '@/assets/images/screen_change.svg';
 interface CreateModalProps {
   title: string;
   type: 'page' | 'screen';
-  handleCreate: () => void;
+  handleCreate: (selectedTemplateId?: string, screenMethod?: string) => void;
   onCancel: () => void;
   visibleCreateForm: string;
   form: FormInstance;
@@ -50,7 +50,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
   const [screenTemplateTabLoading, setScreenTemplateTabLoading] = useState<boolean>(false);
   const [screenPagination, setScreenPagination] = useState<{ current: number; pageSize: number; total: number }>({
     current: 1,
-    pageSize: 8,
+    pageSize: screenMethod === 'screenNew' ? 4 : 8,
     total: 160
   });
   const [screenTemplateData, setScreenTemplateData] = useState<any[]>([
@@ -75,6 +75,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
       src: screenChange
     }
   ]);
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
 
   useEffect(() => {
     if (menuIcon) {
@@ -91,6 +92,10 @@ const CreateModal: React.FC<CreateModalProps> = ({
       current: 1
     }));
     setScreenTemplateTab('allTemplate');
+
+    if (screenMethod !== 'screenNew' && screenTemplateData.length > 0 && !selectedTemplateId) {
+      setSelectedTemplateId(screenTemplateData[0].id);
+    }
   }, [screenMethod]);
 
   const nameMap = {
@@ -156,16 +161,21 @@ const CreateModal: React.FC<CreateModalProps> = ({
      * params: screenMethod
      */
     setScreenMethod(value);
+    setSelectedTemplateId('');
     setTimeout(() => {
       setScreenMethodLoading(false);
     }, 3000);
   };
   const handleScreenChange = () => {
-    console.log('handleScreenChange:', '换一批');
+    // console.log('换一批 handleScreenChange:', screenPagination);
     /**
      * TODO 换一批
      * params: screenMethod == screenNew + change
      */
+    setScreenPagination((prev) => ({
+      ...prev,
+      current: prev.current + 1 > 3 ? 1 : prev.current + 1
+    }));
   };
 
   const handleSearchTemplate = (value: string) => {
@@ -198,16 +208,26 @@ const CreateModal: React.FC<CreateModalProps> = ({
     }));
   };
 
-  const handlePreview = (imgSrc: string) => {
-    // 新窗口打开图片预览
-    window.open(imgSrc, '_blank');
+  const handlePreview = (screenProjectId: string) => {
+    // 在新窗口打开预览页面，使用 hash 路由
+    window.open(
+      `${window.location.origin}${window.location.pathname}#/onebase/screen/preview/${screenProjectId}`,
+      '_blank'
+    );
+  };
+
+  const handleScreenTemplateCard = (id: string) => {
+    setSelectedTemplateId(id);
   };
 
   const screenTemplateCard = (item: any) => (
-    <div className={styles.screenTemplateCard}>
+    <div
+      className={`${styles.screenTemplateCard} ${selectedTemplateId === item.id ? styles.screenTemplateCardSelected : ''}`}
+      onClick={() => handleScreenTemplateCard(item.id)}
+    >
       <div className={styles.screenTemplateCardImg}>
         <img src={item.src} alt="" />
-        <Button onClick={() => handlePreview(item.src)} className={styles.screenTemplateCardBtn}>
+        <Button onClick={() => handlePreview(item.id)} className={styles.screenTemplateCardBtn}>
           预览
         </Button>
       </div>
@@ -219,7 +239,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
     <Modal
       title={title}
       visible={visibleCreateForm !== ''}
-      onOk={handleCreate}
+      onOk={() => handleCreate(selectedTemplateId, screenMethod)}
       onCancel={handleCloseModal}
       closable={!visibleMenuIcon}
       autoFocus={false}
@@ -231,7 +251,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
           <Button type="default" onClick={handleCloseModal} style={{ marginRight: 12 }}>
             取消
           </Button>
-          <Button type="primary" onClick={handleCreate}>
+          <Button type="primary" onClick={() => handleCreate(selectedTemplateId, screenMethod)}>
             创建
           </Button>
         </div>

@@ -1,13 +1,13 @@
-import LogoSVG from '@/assets/images/ob_logo.svg';
 import UserProfileAvatar from '@/components//UserProfileAvatar';
 import { useI18n } from '@/hooks/useI18n';
-import { logout } from '@/utils/session';
+import { getTenantInfoFromSession, logout } from '@/utils/session';
 import { Button, Divider, Dropdown, Layout, Menu, Typography } from '@arco-design/web-react';
 import { IconApps, IconExport } from '@arco-design/web-react/icon';
 import { UserPermissionManager } from '@onebase/common';
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import styles from './header.module.less';
+import TenantLogo from '@/components/TenantLogo';
 
 const { Header } = Layout;
 
@@ -37,10 +37,12 @@ const AppHeader: React.FC<HeaderProps> = ({ className, avatarUrl }) => {
     return formatMobile;
   };
 
+  const tenantInfo = getTenantInfoFromSession();
+
   // 用户菜单
   const userMenu = (
     <Menu style={{ marginRight: '10px' }}>
-      <Menu.Item key="info" style={{ height: '90px' }}>
+      <Menu.Item key="info" style={{ height: 'auto' }}>
         <div className={styles.adminInformation}>
           <UserProfileAvatar adminInfo={userPermissionInfo?.user} avatarUrl={avatarUrl} />
           <Typography.Text>{userPermissionInfo?.user?.nickname || ''}</Typography.Text>
@@ -58,8 +60,8 @@ const AppHeader: React.FC<HeaderProps> = ({ className, avatarUrl }) => {
   return (
     <Header className={`${styles.header} ${className || ''}`}>
       <div className={styles.headerContent}>
-        <div className={styles.logo} onClick={() => navigate('/onebase/runtime/my-app')}>
-          <img src={LogoSVG} alt="logo" />
+        <div className={styles.logo} onClick={() => navigate(`/onebase/${tenantId}/runtime/my-app`)}>
+          <TenantLogo tenantInfo={tenantInfo} />
         </div>
 
         <div className={styles.userInfo}>

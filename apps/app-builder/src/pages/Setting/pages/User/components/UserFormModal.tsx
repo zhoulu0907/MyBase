@@ -68,12 +68,17 @@ export default function UserFormModal({
         setAvatarUrl(initialValues.avatar);
         setStatusCheckedValue(initialValues.status === StatusEnum.ENABLE ? true : false);
       } else {
+        // 创建时用户角色默认为普通用户
+        const defaultRoleId = roleList.find((data) => data.code === 'normal_user')?.id || '';
+        if (defaultRoleId) {
+          form.setFieldValue('roleIds', [defaultRoleId]);
+        }
         // 创建时用户状态默认为开启
         form.setFieldValue('status', StatusEnum.ENABLE);
         setStatusCheckedValue(true);
       }
     }
-  }, [visible, initialValues, form]);
+  }, [visible, initialValues, form, JSON.stringify(roleList)]);
 
   useEffect(() => {
     if (!visible) {
@@ -294,7 +299,7 @@ export default function UserFormModal({
             </Form.Item>
           </Col>
           <Col span={12}>
-            <Form.Item label="角色" field="roleIds">
+            <Form.Item label="角色" field="roleIds" rules={[{ required: true, message: '请选择角色' }]}>
               <Select
                 placeholder="选择角色"
                 mode="multiple"

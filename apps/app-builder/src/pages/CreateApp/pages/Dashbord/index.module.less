@@ -1,0 +1,52 @@
+@header-height: 64px;
+.appSettingPage {
+  height: calc(100vh - 64px);
+  width: 100vw;
+  background: rgba(247, 248, 250, 1);
+  .settingContent {
+    height: calc(100vh - @header-height);
+    width: 100%;
+    background: rgba(247, 248, 250, 1);
+    display: flex;
+    flex-direction: row;
+  }
+
+  .menuIcon {
+    display: flex;
+    align-items: center;
+    margin-right: 16px;
+    & > div {
+      display: flex;
+      align-items: center;
+    }
+  }
+
+  .rightContent {
+    flex: 1;
+    background-color: #f7f8fa;
+  }
+
+  .content {
+    margin: 16px;
+    border-radius: 6px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - @header-height - 80px);
+  }
+  .contentInner {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background-color: #fff;
+
+    /* 隐藏滚动条但保持滚动功能 */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+
+    &::-webkit-scrollbar {
+      display: none; /* Chrome, Safari and Opera */
+    }
+  }
+}
