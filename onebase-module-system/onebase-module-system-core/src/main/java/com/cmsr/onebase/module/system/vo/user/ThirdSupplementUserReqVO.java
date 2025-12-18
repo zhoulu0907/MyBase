@@ -17,9 +17,6 @@ public class ThirdSupplementUserReqVO {
     @Schema(description = "用户编号", example = "1024")
     private Long userId;
 
-    @Schema(description = "用户账号", example = "onebase")
-    private String userName;
-
     @ExcelProperty("用户名称")
     @NotBlank(message = "用户昵称不能为空")
     private String nickName;

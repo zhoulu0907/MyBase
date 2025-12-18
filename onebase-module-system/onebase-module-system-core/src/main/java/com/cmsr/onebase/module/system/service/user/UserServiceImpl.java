@@ -153,17 +153,7 @@ public class UserServiceImpl implements UserService {
         // 如果是启用状态，校验当前租户下的用户数量有没有超过最大限额
         if (Objects.equals(CommonStatusEnum.ENABLE.getStatus(), createReqVO.getStatus())) {
             // 1.1 校验账户配合
-            tenantService.handleTenantInfo(tenant -> {
-                // 如果用户的租户不是平台租户，则校验租户用户最大限额
-                if (!tenant.getTenantCode().equals(TenantCodeEnum.PLATFORM_TENANT.getCode())) {
-                    long count = userDataRepository.countByConfig(new DefaultConfigStore().eq(AdminUserDO.STATUS,
-                            UserStatusEnum.NORMAL.getStatus()));
-                    log.info(" count user four tenant, count={}", count);
-                    if (count >= tenant.getAccountCount()) {
-                        throw exception(USER_COUNT_MAX, tenant.getAccountCount());
-                    }
-                }
-            });
+            validateTenantUserCountMaxLimit();
         }
         // 1.2 校验正确性
         validateUserForCreateOrUpdate(null, createReqVO.getUsername(),
@@ -444,7 +434,7 @@ public class UserServiceImpl implements UserService {
         // 1. 校验用户存在
         AdminUserDO user = validateUserExists(id);
 
-        //2. 第三方密码，目前取默认值，若以后用户可以自定义，使用入参 password
+        //2. 使用用户入参密码
         AdminUserDO updateObj =    commonUpdatePassword(user.getId(), password);
 
         // 3. 记录操作日志上下文
@@ -453,8 +443,27 @@ public class UserServiceImpl implements UserService {
 
     }
 
+    public void validateTenantUserCountMaxLimit(){
+        tenantService.handleTenantInfo(tenant -> {
+            // 如果用户的租户不是平台租户，则校验租户用户最大限额
+            if (!tenant.getTenantCode().equals(TenantCodeEnum.PLATFORM_TENANT.getCode())) {
+                long count = userDataRepository.countByConfig(new DefaultConfigStore().eq(AdminUserDO.STATUS,
+                        UserStatusEnum.NORMAL.getStatus()));
+                log.info(" count user four tenant, count={}", count);
+                if (count >= tenant.getAccountCount()) {
+                    throw exception(USER_COUNT_MAX, tenant.getAccountCount());
+                }
+            }
+        });
+    }
+
     @Override
     public void updateUserStatus(Long id, Integer status) {
+        if(CommonStatusEnum.ENABLE.getStatus().equals(status) ){
+            validateTenantUserCountMaxLimit();
+        }
+
+
         // 校验用户存在
         validateUserExists(id);
         // 更新状态
@@ -1079,17 +1088,7 @@ public class UserServiceImpl implements UserService {
         // 如果是启用状态，校验当前租户下的用户数量有没有超过最大限额
         if (Objects.equals(CommonStatusEnum.ENABLE.getStatus(), reqVO.getStatus())) {
             // 1.1 校验账户配合
-            tenantService.handleTenantInfo(tenant -> {
-                // 如果用户的租户不是平台租户，则校验租户用户最大限额
-                if (!tenant.getTenantCode().equals(TenantCodeEnum.PLATFORM_TENANT.getCode())) {
-                    long count = userDataRepository.countByConfig(new DefaultConfigStore().eq(AdminUserDO.STATUS,
-                            UserStatusEnum.NORMAL.getStatus()));
-                    log.info(" count user four tenant, count={}", count);
-                    if (count >= tenant.getAccountCount()) {
-                        throw exception(USER_COUNT_MAX, tenant.getAccountCount());
-                    }
-                }
-            });
+            validateTenantUserCountMaxLimit();
         }
         // 校验手机，邮箱
         validateThirdUserForCreateOrUpdate(null, reqVO.getMobile(), reqVO.getEmail());
@@ -1173,19 +1172,9 @@ public class UserServiceImpl implements UserService {
 
     private void checkTenantUserCountLimit(Integer status, AdminUserDO oldUser) {
         if (status != null) {
-            if (!status.equals(oldUser.getStatus()) && status == CommonStatusEnum.ENABLE.getStatus()) {
+            if (!status.equals(oldUser.getStatus()) &&  CommonStatusEnum.ENABLE.getStatus().equals(status)) {
                 // 1.1 校验账户配合
-                tenantService.handleTenantInfo(tenant -> {
-                    // 如果用户的租户不是平台租户，则校验租户用户最大限额
-                    if (!tenant.getTenantCode().equals(TenantCodeEnum.PLATFORM_TENANT.getCode())) {
-                        long count = userDataRepository.countByConfig(new DefaultConfigStore().eq(AdminUserDO.STATUS,
-                                UserStatusEnum.NORMAL.getStatus()));
-                        log.info(" count user four tenant, count={}", count);
-                        if (count >= tenant.getAccountCount()) {
-                            throw exception(USER_COUNT_MAX, tenant.getAccountCount());
-                        }
-                    }
-                });
+                validateTenantUserCountMaxLimit();
             }
         }
     }
@@ -1281,20 +1270,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Long thirdUserRegister(ThirdUserRegisterReqVO reqVO) {
+
+
         //TODO  手机号验证，  appId ，验证码 验证逻辑
         // 如果是启用状态，校验当前租户下的用户数量有没有超过最大限额
         // 1.1 校验账户配合
-        tenantService.handleTenantInfo(tenant -> {
-            // 如果用户的租户不是平台租户，则校验租户用户最大限额
-            if (!tenant.getTenantCode().equals(TenantCodeEnum.PLATFORM_TENANT.getCode())) {
-                long count = userDataRepository.countByConfig(new DefaultConfigStore().eq(AdminUserDO.STATUS,
-                        UserStatusEnum.NORMAL.getStatus()));
-                log.info(" count user four tenant, count={}", count);
-                if (count >= tenant.getAccountCount()) {
-                    throw exception(USER_COUNT_MAX, tenant.getAccountCount());
-                }
-            }
-        });
+        validateTenantUserCountMaxLimit();
 
         AdminUserDO user = new AdminUserDO();
         user.setPassword(encodePassword(THIRD_USER_PASSWORD)); // 加密密码
@@ -1363,16 +1344,19 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ThirdSupplementUserResVO thirdUserSupplementUser(ThirdSupplementUserReqVO reqVO) {
-        // 2.1 解密原文
+        // 1. 校验用户和邮箱
+        validateThirdUserForCreateOrUpdate(reqVO.getUserId(), null, reqVO.getEmail());
+        // 2. 弱密码校验
+        securityConfigApi.validatePassword(reqVO.getPassword());
+        // 3. 解密原文
         reqVO.setPassword(pwdEnHelper.decryptHexStr(reqVO.getPassword()));
-
+        // 4. 更新用户信息
         AdminUserDO user = userDataRepository.findById(reqVO.getUserId());
         user.setNickname(reqVO.getNickName());
         user.setEmail(reqVO.getEmail());
-        user.setAvatar(reqVO.getAvatar());
         user.setPassword(encodePassword(reqVO.getPassword()));
         userDataRepository.update(user);
-
+        // 5. 转换成返回结果
         ThirdSupplementUserResVO resVO = new ThirdSupplementUserResVO();
         resVO.setId(user.getId());
         resVO.setUserName(user.getUsername());
@@ -1384,6 +1368,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void thirdUserForgetPassword(Long id,String password) {
+        //  被调用前，已经做过用户判断，  调用通用改密码的方法
         commonUpdatePassword(id, password);
     }
 
