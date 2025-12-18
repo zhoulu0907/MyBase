@@ -2,9 +2,12 @@ import { Checkbox, Form, Space, Tag } from '@arco-design/web-react';
 import { nanoid } from 'nanoid';
 import { memo, useEffect, useState } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
-import { STATUS_OPTIONS, STATUS_VALUES, COLOR_MODE_TYPES } from '../../../constants';
+import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import '../index.css';
 import type { XInputCheckboxConfig } from './schema';
+import { getFieldOptionsConfig } from '@/utils';
+import { useAppEntityStore } from '@/signals';
+import type { DictData } from '@onebase/platform-center';
 
 const CheckboxGroup = Checkbox.Group;
 
@@ -14,19 +17,40 @@ const XCheckbox = memo((props: XInputCheckboxConfig & { runtime?: boolean; detai
     dataField,
     tooltip,
     status,
-    defaultOptionsConfig,
     verify,
     layout,
     direction,
     runtime = true,
     detailMode
   } = props;
+  const { mainEntity, subEntities } = useAppEntityStore();
 
   const { form } = Form.useFormContext();
-
   const fieldId = dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.CHECKBOX}_${nanoid()}`
-
   const fieldValue = Form.useWatch(fieldId, form);
+
+  const [options, setOptions] = useState<DictData[]>([]);
+
+  useEffect(() => {
+    if (dataField?.length) {
+      getOptions()
+    }
+  }, [dataField])
+
+  const getOptions = async () => {
+    const [tableName, fieldName] = dataField;
+    const index = fieldName?.indexOf('.');
+    const lastIndex = fieldName?.lastIndexOf('.');
+    if (index !== -1) {
+      const subTableName = fieldName.slice(0, index);
+      const subFieldName = lastIndex === -1 ? fieldName : fieldName.slice(lastIndex + 1);
+      const newOptions = await getFieldOptionsConfig([subTableName, subFieldName], mainEntity, subEntities);
+      setOptions(newOptions)
+    } else {
+      const newOptions = await getFieldOptionsConfig(dataField, mainEntity, subEntities);
+      setOptions(newOptions)
+    }
+  }
 
   return (
     <div className="formWrapper">
@@ -39,18 +63,17 @@ const XCheckbox = memo((props: XInputCheckboxConfig & { runtime?: boolean; detai
         layout={layout}
         tooltip={tooltip}
         labelCol={layout === 'horizontal' ? { span: 10 } : {}}
-        rules={[{ required: verify?.required, message:`${label.text}是必填项` }]}
+        rules={[{ required: verify?.required, message: `${label.text}是必填项` }]}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
           margin: 0,
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
-        initialValue={defaultOptionsConfig?.defaultOptions.filter(ele => ele.isChosen)?.map(ele => ele.value)}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
-          <Space wrap>
-            {fieldValue && defaultOptionsConfig?.defaultOptions && typeof fieldValue === 'string' && fieldValue.split(',').map((ele: any, index: number) => <Tag key={index}>
-              {defaultOptionsConfig?.defaultOptions.find((e: any) => e.value === ele)?.label}
+          <Space wrap size={[4, 4]}>
+            {fieldValue && fieldValue.map((ele: any, index: number) => <Tag key={index} style={{ marginBottom: '0' }}>
+              {options.find((e) => e.id === ele.id)?.label}
             </Tag>)}
           </Space>
         ) : (
@@ -61,24 +84,19 @@ const XCheckbox = memo((props: XInputCheckboxConfig & { runtime?: boolean; detai
               pointerEvents: runtime ? 'unset' : 'none'
             }}
           >
-            {defaultOptionsConfig?.defaultOptions.map((ele, index: number) => (
+            {options.map((ele, index: number) => (
               <Checkbox key={index} value={ele.value}>
-                {defaultOptionsConfig.colorMode ? <>
-                  {defaultOptionsConfig.colorModeType === COLOR_MODE_TYPES.TAG ?
-                    <Tag color={ele.colorType || "rgb(var(--primary-7))"}>{ele.label}</Tag> : <>
-                      <span
-                        style={{
-                          width: '8px',
-                          height: '8px',
-                          borderRadius: '50%',
-                          background: ele.colorType || "rgb(var(--primary-7))",
-                          display: 'inline-block',
-                          marginRight: '8px'
-                        }}
-                      ></span>
-                      <span>{ele.label}</span>
-                    </>}
-                </> : <>{ele.label}</>}
+                {ele.colorType && <span
+                  style={{
+                    width: '8px',
+                    height: '8px',
+                    borderRadius: '50%',
+                    background: ele.colorType,
+                    display: 'inline-block',
+                    marginRight: '8px'
+                  }}
+                ></span>}
+                <span>{ele.label}</span>
               </Checkbox>
             ))}
           </CheckboxGroup>

@@ -77,16 +77,6 @@ export interface XInputSelectMutipleConfig extends ICommonBaseType {
   dataField: TTextDefaultType[];
 
   /**
-   * 选项
-   */
-  defaultOptionsConfig?: {
-    type: string;
-    disabled?: boolean;
-    dictTypeId?: string;
-    defaultOptions: { label: string; value: any; [property: string]: any }[];
-  };
-
-  /**
    * required：是否必填，未填写时提交报错
    */
   verify: {
@@ -150,31 +140,6 @@ const XSelectMutiple: XInputSelectMutipleSchema = {
     },
     tooltip: '',
     dataField: [],
-    defaultOptionsConfig: {
-      type: DEFAULT_OPTIONS_TYPE.CUSTOM,
-      disabled: false,
-      dictTypeId: '',
-      defaultOptions: [
-        {
-          label: '选项一',
-          colorType: '',
-          isChosen: false,
-          value: '选项一'
-        },
-        {
-          label: '选项二',
-          colorType: '',
-          isChosen: false,
-          value: '选项二'
-        },
-        {
-          label: '选项三',
-          colorType: '',
-          isChosen: false,
-          value: '选项三'
-        }
-      ]
-    },
     verify: {
       required: false,
       maxChecked: 3

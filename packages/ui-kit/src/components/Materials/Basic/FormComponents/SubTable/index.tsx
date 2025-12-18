@@ -310,7 +310,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
         render: (_text: string, _record: any, index: number) => {
           const newConfig = {
             ...pageComponentSchemas[column.id].config,
-            dataField: [mainEntity.tableName, `${id}.${index}.${fieldName}`]
+            dataField: [mainEntity.tableName, `${subTableName}.${index}.${fieldName}`]
           };
           const finalConfig = applySubTableCellOverrides(newConfig, column.type);
           const pageSchema = { ...pageComponentSchemas[column.id], config: finalConfig };
