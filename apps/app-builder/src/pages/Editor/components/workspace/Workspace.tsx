@@ -8,7 +8,7 @@ import {
   STATUS_VALUES
 } from '@onebase/ui-kit';
 import { cloneDeep } from 'lodash-es';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -98,46 +98,122 @@ export default function EditorWorkspace() {
 
   const { editMode, setEditMode } = currentEditorSignal;
   const mobileEditorDragRef = useRef<MicroApp | null>(null);
+  const qiankunActionsRef = useRef<ReturnType<typeof initGlobalState> | null>(null);
 
-  const qiankunActions = initGlobalState({
-    mainEntity,
-    subEntities,
-    drag: true,
-    useEditorSignalMap,
-    pageViews,
-    curViewId,
-    setCurViewId,
-    updatePageViewName,
-    usePageViewEditorSignal,
-    createPageEditorSignal,
-    useFormEditorSignal,
-    editMode,
-    setEditMode,
-    curComponentID,
-    setCurComponentID,
-    clearCurComponentID,
-    setCurComponentSchema,
-    pageComponentSchemas,
-    setPageComponentSchemas,
-    delPageComponentSchemas,
-    components,
-    addComponents,
-    setComponents,
-    delComponents,
-    showDeleteButton,
-    setShowDeleteButton,
-    layoutSubComponents,
-    setLayoutSubComponents,
-    delLayoutSubComponents,
-    batchDelPageComponentSchemas,
-    batchDelLayoutSubComponents,
-    subTableComponents,
-    setSubTableComponents,
-    delSubTableComponents,
-    batchDelSubTableComponents
-  });
+  // 使用 useMemo 安全地序列化可能包含循环引用的数据对象
+  const safeData = useMemo(() => {
+    try {
+      // 安全地序列化可能包含循环引用的数据对象
+      const safePageComponentSchemas = JSON.parse(JSON.stringify(pageComponentSchemas));
+      const safeComponents = JSON.parse(JSON.stringify(components));
+      const safeLayoutSubComponents = JSON.parse(JSON.stringify(layoutSubComponents));
+      const safeSubTableComponents = JSON.parse(JSON.stringify(subTableComponents));
+      const safePageViews = JSON.parse(JSON.stringify(pageViews));
+      const safeMainEntity = mainEntity ? JSON.parse(JSON.stringify(mainEntity)) : null;
+      const safeSubEntities = subEntities ? JSON.parse(JSON.stringify(subEntities)) : null;
+
+      return {
+        pageComponentSchemas: safePageComponentSchemas,
+        components: safeComponents,
+        layoutSubComponents: safeLayoutSubComponents,
+        subTableComponents: safeSubTableComponents,
+        pageViews: safePageViews,
+        mainEntity: safeMainEntity,
+        subEntities: safeSubEntities
+      };
+    } catch (error) {
+      console.error('Failed to serialize data for qiankun:', error);
+      // 如果序列化失败，返回空数据
+      return {
+        pageComponentSchemas: {},
+        components: [],
+        layoutSubComponents: {},
+        subTableComponents: {},
+        pageViews: {},
+        mainEntity: null,
+        subEntities: null
+      };
+    }
+  }, [pageComponentSchemas, components, layoutSubComponents, subTableComponents, pageViews, mainEntity, subEntities]);
+
+  // 初始化 qiankun globalState，只执行一次
+  // 初始化时只传递函数和简单的值，数据对象使用空值
   useEffect(() => {
-    if (editMode.value !== EditMode.MOBILE) {
+    if (!qiankunActionsRef.current) {
+      try {
+        qiankunActionsRef.current = initGlobalState({
+          mainEntity: null,
+          subEntities: null,
+          drag: true,
+          useEditorSignalMap,
+          pageViews: {},
+          curViewId,
+          setCurViewId,
+          updatePageViewName,
+          usePageViewEditorSignal,
+          createPageEditorSignal,
+          useFormEditorSignal,
+          editMode,
+          setEditMode,
+          curComponentID,
+          setCurComponentID,
+          clearCurComponentID,
+          setCurComponentSchema,
+          pageComponentSchemas: {},
+          setPageComponentSchemas,
+          delPageComponentSchemas,
+          components: [],
+          addComponents,
+          setComponents,
+          delComponents,
+          showDeleteButton,
+          setShowDeleteButton,
+          layoutSubComponents: {},
+          setLayoutSubComponents,
+          delLayoutSubComponents,
+          batchDelPageComponentSchemas,
+          batchDelLayoutSubComponents,
+          subTableComponents: {},
+          setSubTableComponents,
+          delSubTableComponents,
+          batchDelSubTableComponents
+        });
+      } catch (error) {
+        console.error('Failed to initialize qiankun global state:', error);
+      }
+    }
+  }, []);
+
+  // 当数据变化时，使用 setGlobalState 更新状态
+  useEffect(() => {
+    if (!qiankunActionsRef.current) {
+      return;
+    }
+
+    try {
+      // 只更新数据部分，使用已经序列化的安全数据
+      qiankunActionsRef.current.setGlobalState({
+        mainEntity: safeData.mainEntity,
+        subEntities: safeData.subEntities,
+        pageViews: safeData.pageViews,
+        pageComponentSchemas: safeData.pageComponentSchemas,
+        components: safeData.components,
+        layoutSubComponents: safeData.layoutSubComponents,
+        subTableComponents: safeData.subTableComponents
+      });
+    } catch (error) {
+      console.error('Failed to update qiankun global state:', error);
+    }
+  }, [safeData]);
+
+  // 使用 ref 来访问 qiankunActions，避免在依赖项中引用
+  const qiankunActions = qiankunActionsRef.current || {
+    onGlobalStateChange: () => {},
+    setGlobalState: () => {},
+    offGlobalStateChange: () => {}
+  };
+  useEffect(() => {
+    if (editMode.value !== EditMode.MOBILE || !qiankunActionsRef.current) {
       return;
     }
     console.log('loading mobile-editor-drag-list');
@@ -147,9 +223,9 @@ export default function EditorWorkspace() {
       entry: getMobileEditorURL(),
       container: '#mobile-editor-drag-list',
       props: {
-        onGlobalStateChange: qiankunActions.onGlobalStateChange,
-        setGlobalState: qiankunActions.setGlobalState,
-        offGlobalStateChange: qiankunActions.offGlobalStateChange
+        onGlobalStateChange: qiankunActionsRef.current.onGlobalStateChange,
+        setGlobalState: qiankunActionsRef.current.setGlobalState,
+        offGlobalStateChange: qiankunActionsRef.current.offGlobalStateChange
       }
     });
     mobileEditorDragRef.current = mobileEditorDrag;
