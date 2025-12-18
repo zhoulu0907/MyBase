@@ -1,8 +1,8 @@
 import { Collapse } from '@arco-design/web-react';
 import { useState } from 'react';
-import { WorkbenchAttributes, PanelContentStyle } from '../components/CommonWorkbenchAttributes';
-import { findItem } from '../../../utils/edit-data';
-import styles from './index.module.less';
+import { WorkbenchAttributes, PanelContentStyle } from '../../components/CommonWorkbenchAttributes';
+import { findItem } from '../../../../utils/edit-data';
+import styles from '../../index.module.less';
 
 const CollapseItem = Collapse.Item;
 
@@ -12,7 +12,6 @@ const QuickEntryConfig = () => {
   return (
     <WorkbenchAttributes
       renderPanels={({ editData, renderEditItem }) => {
-
         // 找到入口配置项（key 为 'groupConfig'）
         const entryConfigItem = findItem(editData, 'groupConfig');
 

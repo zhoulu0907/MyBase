@@ -1,9 +1,9 @@
 import { Button, Form, InputNumber, Message, Radio, Select } from '@arco-design/web-react';
 import { WORKBENCH_CONFIG_TYPES } from '@onebase/ui-kit';
-import { registerConfigRenderer } from '../registry';
+import { registerConfigRenderer } from '../../registry';
 import StaticCarouselList from './StaticCarouselList';
 import type { CarouselItem, Props, CarouselContentMeta, VerifyConfig } from './types';
-import styles from '../index.module.less';
+import styles from '../../index.module.less';
 
 const FormItem = Form.Item;
 const Option = Select.Option;

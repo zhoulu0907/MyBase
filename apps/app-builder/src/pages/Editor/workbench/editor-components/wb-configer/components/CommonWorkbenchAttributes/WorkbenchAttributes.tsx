@@ -1,6 +1,6 @@
 import { Form } from '@arco-design/web-react';
 import type { ReactNode, FC } from 'react';
-import attributeStyles from '../../attributes.module.less';
+import attributeStyles from './attributes.module.less';
 import ComponentIdFormItem from './ComponentIdFormItem';
 import { useWorkbenchAttributeContext } from './useWorkbenchAttributeContext';
 

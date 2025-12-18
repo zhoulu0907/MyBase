@@ -5,9 +5,9 @@ import {
   WorkbenchAttributes,
   UseWorkbenchAttributeContext,
   PanelContentStyle
-} from '../components/CommonWorkbenchAttributes';
-import { findItem } from '../../../utils/edit-data';
-import styles from '../index.module.less';
+} from '../../components/CommonWorkbenchAttributes';
+import { findItem } from '../../../../utils/edit-data';
+import styles from '../../index.module.less';
 
 const CollapseItem = Collapse.Item;
 

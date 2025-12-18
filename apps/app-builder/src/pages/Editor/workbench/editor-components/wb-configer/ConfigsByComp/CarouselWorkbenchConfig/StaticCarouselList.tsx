@@ -8,7 +8,7 @@ import ConfigDrawer from '@/pages/Editor/workbench/components/configDrawer';
 import type { CarouselItem, StaticCarouselListProps } from './types';
 import MenuSelector from '@/pages/Editor/workbench/components/MenuSelector';
 import styles from './StaticCarouselList.module.less';
-import attributeStyles from '../attributes.module.less';
+import attributeStyles from '../../components/CommonWorkbenchAttributes/attributes.module.less';
 
 const FormItem = Form.Item;
 

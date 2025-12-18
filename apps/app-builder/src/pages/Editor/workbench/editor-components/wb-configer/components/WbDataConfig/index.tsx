@@ -1,8 +1,7 @@
 import { Form, Switch } from '@arco-design/web-react';
-import styles from '../../attributes.module.less';
 import { registerConfigRenderer } from '../../registry';
 import { WORKBENCH_CONFIG_TYPES, type IDataConfigConfigType, type IBooleanConfigType } from '@onebase/ui-kit';
-
+import styles from '../CommonWorkbenchAttributes/attributes.module.less';
 interface Props {
   handlePropsChange: (key: string, value: unknown) => void;
   item: IDataConfigConfigType;

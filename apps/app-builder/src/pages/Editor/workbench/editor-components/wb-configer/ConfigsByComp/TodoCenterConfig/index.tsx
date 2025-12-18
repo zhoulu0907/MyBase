@@ -1,8 +1,8 @@
 import { Collapse } from '@arco-design/web-react';
-import { useState, useMemo } from 'react';
-import { WorkbenchAttributes, PanelContentStyle } from '../components/CommonWorkbenchAttributes';
-import { findItem } from '../../../utils/edit-data';
-import styles from '../index.module.less';
+import { useState } from 'react';
+import { WorkbenchAttributes, PanelContentStyle } from '../../components/CommonWorkbenchAttributes';
+import { findItem } from '../../../../utils/edit-data';
+import styles from '../../index.module.less';
 
 /**
  * 待办中心配置
