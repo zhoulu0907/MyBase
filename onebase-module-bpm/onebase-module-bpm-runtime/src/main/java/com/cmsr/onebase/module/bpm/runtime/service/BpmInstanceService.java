@@ -5,6 +5,7 @@ import com.cmsr.onebase.module.bpm.core.vo.BpmFormDataPageReqVO;
 import com.cmsr.onebase.module.bpm.runtime.vo.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 流程执行服务接口
@@ -63,5 +64,5 @@ public interface BpmInstanceService {
      *
      * @param reqVO 获取列表数据请求VO
      */
-    PageResult<BpmFormDataPageRespVO> getFormDataPage(BpmFormDataPageReqVO reqVO);
+    PageResult<Map<String, Object>> formDataPage(BpmFormDataPageReqVO reqVO);
 }

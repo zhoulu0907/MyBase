@@ -15,13 +15,11 @@ import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowInsBizExtDO;
 import com.cmsr.onebase.module.bpm.core.dal.mapper.BpmInstanceMapper;
 import com.cmsr.onebase.module.bpm.core.dto.BpmDefinitionExtDTO;
 import com.cmsr.onebase.module.bpm.core.dto.BpmGlobalConfigDTO;
-import com.cmsr.onebase.module.bpm.core.dto.BpmInstanceDTO;
 import com.cmsr.onebase.module.bpm.core.dto.PageViewGroupDTO;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeExtDTO;
 import com.cmsr.onebase.module.bpm.core.enums.*;
 import com.cmsr.onebase.module.bpm.core.validator.BpmAppResourceValidator;
 import com.cmsr.onebase.module.bpm.core.vo.BpmFormDataPageReqVO;
-import com.cmsr.onebase.module.bpm.core.vo.UserBasicInfoVO;
 import com.cmsr.onebase.module.bpm.core.vo.design.BpmDefJsonVO;
 import com.cmsr.onebase.module.bpm.core.vo.design.edge.base.BaseEdgeVO;
 import com.cmsr.onebase.module.bpm.runtime.helper.BpmEntityHelper;
@@ -32,15 +30,18 @@ import com.cmsr.onebase.module.bpm.runtime.service.instance.operator.BpmOperator
 import com.cmsr.onebase.module.bpm.runtime.service.instance.predict.BpmPredictService;
 import com.cmsr.onebase.module.bpm.runtime.utils.PageViewUtil;
 import com.cmsr.onebase.module.bpm.runtime.vo.*;
+import com.cmsr.onebase.module.engine.orm.mybatisflex.entity.FlowInstance;
+import com.cmsr.onebase.module.engine.orm.mybatisflex.repository.FlowInstanceRepository;
 import com.cmsr.onebase.module.metadata.api.semantic.SemanticDynamicDataApi;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.*;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticConditionNodeTypeEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticFieldTypeEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticOperatorEnum;
+import com.cmsr.onebase.module.metadata.core.semantic.type.BpmSystemFieldEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticPageConditionVO;
 import com.cmsr.onebase.module.system.api.user.AdminUserApi;
 import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
-import com.github.pagehelper.PageHelper;
+import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -90,6 +91,9 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
 
     @Resource(name = "bpmTaskService")
     private TaskService taskService;
+
+    @Resource
+    private FlowInstanceRepository flowInstanceRepository;
 
     @Resource
     private BpmFlowInsBizExtRepository flowInsExtRepository;
@@ -521,77 +525,259 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
      * @return 流程表单数据
      */
     @Override
-    public PageResult<BpmFormDataPageRespVO> getFormDataPage(BpmFormDataPageReqVO reqVO) {
-        if (StringUtils.isBlank(reqVO.getBusinessUuid())){
-            throw exception(ErrorCodeConstants.REQUIRED_BUSINESS_UUID_MISSING);
-        }
+    public PageResult<Map<String, Object>> formDataPage(BpmFormDataPageReqVO reqVO) {
         Long loginUserId = WebFrameworkUtils.getLoginUserId();
+        PageResult<Map<String, Object>> response = PageResult.empty();
 
-        fillAppId(reqVO);
-        validateBusinessUuid(reqVO);
-        // 处理节点编码参数
-        reqVO.setNodeCodeList(splitToList(reqVO.getNodeCode()));
+        // menuId转menuUuid
+        AppMenuRespDTO appMenuRespDTO = appResourceApi.getAppMenuById(reqVO.getMenuId());
+        bpmAppResourceValidator.validateMenu(appMenuRespDTO, appMenuRespDTO.getApplicationId());
 
-        // 处理流程状态参数
-        reqVO.setFlowStatusList(splitToFlowStatusList(reqVO.getFlowStatus()));
+        String menuUuid = appMenuRespDTO.getMenuUuid();
 
-        // 第一次查询：获取流程实例基础信息
-        com.github.pagehelper.Page<BpmInstanceDTO> pageResult = PageHelper
-                .startPage(reqVO.getPageNo(), reqVO.getPageSize())
-                .doSelectPage(() -> bpmInstanceMapper.getFormDataPage(reqVO, loginUserId));
+        // todo 增加流程本身的条件筛选，数据量如果太大，可能会导致性能问题，待优化，先限制2000条
+        QueryWrapper instanceQuery = QueryWrapper.create();
+        instanceQuery.eq(FlowInstance::getFormPath, menuUuid);
+        instanceQuery.limit(2000);
+        instanceQuery.orderBy(FlowInstance::getCreateTime, false);
 
-        // 提取所有 businessDataId 用于第二次查询
-        List<String> businessDataIdList = pageResult.getResult().stream()
-                .map(BpmInstanceDTO::getBusinessDataId)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+        List<FlowInstance> instances = flowInstanceRepository.list(instanceQuery);
+        Map<Long, Long> entityDataIdInstanceIdMap = new HashMap<>();
 
-        // 第二次查询：根据 businessDataIdList 获取详细的实体数据
-        PageResult<SemanticEntityValueDTO> entityPageResult = new PageResult<>(new ArrayList<>(), 0L);
-        Map<String, BpmInstanceDTO> instanceMap;
-
-        if (!businessDataIdList.isEmpty()) {
-            entityPageResult = getEntityDataByCondition(
-                    businessDataIdList, reqVO.getTableName(), reqVO.getPageNo(), reqVO.getPageSize(), reqVO.getEntityFilters());
-
-            // 建立 businessDataId 到 BpmInstanceDTO 的映射，便于后续查找
-            instanceMap = pageResult.getResult().stream()
-                    .filter(item -> item.getBusinessDataId() != null)
-                    .collect(Collectors.toMap(BpmInstanceDTO::getBusinessDataId, item -> item));
-        } else {
-            instanceMap = new HashMap<>();
+        if (CollectionUtils.isEmpty(instances)) {
+            return response;
         }
 
-        // 以第二次查询结果为主构建最终响应
-        List<BpmFormDataPageRespVO> list = entityPageResult.getList().stream().map(entityValue -> {
-            BpmFormDataPageRespVO vo = new BpmFormDataPageRespVO();
+        Set<Long> entityDataIds = new HashSet<>();
 
-            // 从映射中获取对应的流程实例数据
-            String businessDataId = String.valueOf(entityValue.getGlobalRawMap().get("id"));
-            BpmInstanceDTO instance = instanceMap.get(businessDataId);
+        for (Instance instance : instances) {
+            Long entityDataId = Long.valueOf(instance.getBusinessId());
+            entityDataIds.add(entityDataId);
+            entityDataIdInstanceIdMap.put(entityDataId, instance.getId());
+        }
 
-            if (instance != null) {
-                // 拼接第一次查询的流程实例数据
-                vo.setId(instance.getId());
-                vo.setProcessTitle(instance.getBpmTitle());
-                UserBasicInfoVO initiator = new UserBasicInfoVO();
-                initiator.setUserId(String.valueOf(instance.getInitiatorId()))
-                        .setName(instance.getInitiatorName())
-                        .setAvatar(instance.getInitiatorAvatar());
-                vo.setInitiator(initiator);
-                vo.setFlowStatus(instance.getFlowStatus());
-                vo.setSubmitTime(instance.getSubmitTime());
-                vo.setNodeCode(instance.getNodeCode());
-                vo.setNodeName(instance.getNodeName());
+        // 去查询实体的数据
+        // 1. 创建 SemanticPageConditionVO 对象
+        SemanticPageConditionVO conditionVO = new SemanticPageConditionVO();
+        conditionVO.setTableName(reqVO.getTableName());
+        conditionVO.setPageNo(reqVO.getPageNo());
+        conditionVO.setPageSize(reqVO.getPageSize());
+
+        // 2. 构造查询条件 - 通过 entityId 集合查询
+        SemanticConditionDTO idCondition = new SemanticConditionDTO();
+        idCondition.setFieldName("id");
+        idCondition.setOperator(SemanticOperatorEnum.EXISTS_IN);
+        idCondition.setFieldValue(Arrays.asList(entityDataIds.toArray()));
+        idCondition.setNodeType(SemanticConditionNodeTypeEnum.CONDITION);
+
+        conditionVO.setSortBy(reqVO.getSortBy());
+
+        if (reqVO.getFilters() != null) {
+            reqVO.getFilters().getChildren().add(idCondition);
+            conditionVO.setSemanticConditionDTO(reqVO.getFilters());
+        } else {
+            conditionVO.setSemanticConditionDTO(idCondition);
+        }
+
+        // 3. 调用 getDataByCondition 方法， todo 增加menuId的权限限制
+        PageResult<SemanticEntityValueDTO> entityPageResult = semanticDynamicDataApi.getDataByCondition(conditionVO);
+        Set<Long> instanceIds = new HashSet<>();
+
+        response.setTotal(entityPageResult.getTotal());
+
+        if (CollectionUtils.isEmpty(entityPageResult.getList())) {
+            return response;
+        }
+
+        for (SemanticEntityValueDTO entityValueDTO : entityPageResult.getList()) {
+             Long instanceId = entityDataIdInstanceIdMap.get(entityValueDTO.getId());
+
+             if (instanceId == null) {
+                 log.warn("未匹配到对应的实例ID");
+                 continue;
+             }
+
+            instanceIds.add(instanceId);
+        }
+
+        // 查询流程数据，todo 使用关联查询
+
+        List<FlowInstance> instanceResults =  flowInstanceRepository.listByIds(instanceIds);
+
+        QueryWrapper instanceExtResultQuery = QueryWrapper.create();
+        instanceExtResultQuery.in(BpmFlowInsBizExtDO::getInstanceId, instanceIds);
+        List<BpmFlowInsBizExtDO> instanceExtResults = flowInsExtRepository.list(instanceExtResultQuery);
+
+        Map<Long, FlowInstance> instanceResultMap = new HashMap<>();
+        Map<Long, BpmFlowInsBizExtDO> instanceExtResultMap = new HashMap<>();
+        Set<Long> userIds = new HashSet<>();
+
+        for (FlowInstance instanceResult : instanceResults) {
+            Long instanceId = instanceResult.getId();
+            Long entityDataId = Long.valueOf(instanceResult.getBusinessId());
+
+            instanceResultMap.put(entityDataId, instanceResult);
+
+            for (BpmFlowInsBizExtDO instanceExtResult : instanceExtResults) {
+                Long extInstanceId = instanceExtResult.getInstanceId();
+                if (Objects.equals(extInstanceId, instanceId)) {
+                    instanceExtResultMap.put(entityDataId, instanceExtResult);
+
+                    if (instanceExtResult.getInitiatorId() != null) {
+                        userIds.add(Long.valueOf(instanceExtResult.getInitiatorId()));
+                    }
+
+                    break;
+                }
+            }
+        }
+
+        // 查出所有的用户信息
+        Map<Long, AdminUserRespDTO> userMap = new HashMap<>();
+        if (CollectionUtils.isNotEmpty(userIds)) {
+            CommonResult<List<AdminUserRespDTO>> userResult = adminUserApi.getUserList(userIds);
+
+            if (userResult.isSuccess() && CollectionUtils.isNotEmpty(userResult.getData())) {
+                userMap = userResult.getData().stream().collect(Collectors.toMap(AdminUserRespDTO::getId, v -> v));
+            }
+        }
+
+        for (SemanticEntityValueDTO entityValueDTO : entityPageResult.getList()) {
+            Long entityValueId = (Long) entityValueDTO.getId();
+
+            FlowInstance matchedInstance = instanceResultMap.get(entityValueId);
+            BpmFlowInsBizExtDO matchedInstanceExt = instanceExtResultMap.get(entityValueId);
+
+            if (matchedInstance == null && matchedInstanceExt == null) {
+                log.warn("无匹配的流程实例信息 entityDataId = {}", entityValueId);
+                continue;
             }
 
-            // 使用第二次查询的实体数据
-            vo.setData(entityValue.getGlobalRawMap());
+            //  填充BPM相关的值
+            for (BpmSystemFieldEnum bpmFieldEnum : BpmSystemFieldEnum.values()) {
+                SemanticFieldTypeEnum fieldType = SemanticFieldTypeEnum.ofCode(bpmFieldEnum.getFieldTypeCode());
 
-            return vo;
-        }).toList();
+                if (fieldType == null) {
+                    log.warn("实体字段类型为空");
+                    continue;
+                }
 
-        return new PageResult<>(list, entityPageResult.getTotal());
+                SemanticFieldValueDTO<Object> semanticFieldValue = SemanticFieldValueDTO.ofType(fieldType);
+                semanticFieldValue.setFieldName(bpmFieldEnum.getFieldName());
+                Object rawValue = null;
+
+                if (matchedInstanceExt != null) {
+                    if (bpmFieldEnum == BpmSystemFieldEnum.BPM_TITLE) {
+                        rawValue = matchedInstanceExt.getBpmTitle();
+                    } else if (bpmFieldEnum == BpmSystemFieldEnum.BPM_INITIATOR_ID) {
+                        if (matchedInstanceExt.getInitiatorId() != null) {
+                            Map<String, Object> mapValue = new HashMap<>();
+                            mapValue.put("id", matchedInstanceExt.getInitiatorId());
+
+                            AdminUserRespDTO matchedUser = userMap.get(Long.valueOf(matchedInstanceExt.getInitiatorId()));
+
+                            if (matchedUser != null) {
+                                mapValue.put("name", matchedUser.getNickname());
+                            }
+
+                            rawValue = mapValue;
+                        }
+                    } else if (bpmFieldEnum == BpmSystemFieldEnum.BPM_SUBMIT_TIME) {
+                        rawValue = matchedInstanceExt.getSubmitTime();
+                    }
+                }
+
+                if (matchedInstance != null) {
+                    if (bpmFieldEnum == BpmSystemFieldEnum.BPM_CURRENT_NODE) {
+                        Map<String, Object> mapValue = new HashMap<>();
+                        mapValue.put("id", matchedInstance.getNodeCode());
+                        mapValue.put("name", matchedInstance.getNodeName());
+
+                        rawValue = mapValue;
+                    } else if (bpmFieldEnum == BpmSystemFieldEnum.BPM_STATUS) {
+                        Map<String, Object> mapValue = new HashMap<>();
+                        mapValue.put("id", matchedInstance.getFlowStatus());
+
+                        BpmBusinessStatusEnum bpmStatusEnum = BpmBusinessStatusEnum.getByCode(matchedInstance.getFlowStatus());
+
+                        if (bpmStatusEnum != null) {
+                            mapValue.put("name", bpmStatusEnum.getDesc());
+                        }
+
+                        rawValue = mapValue;
+                    } else if (bpmFieldEnum == BpmSystemFieldEnum.BPM_INSTANCE_ID) {
+                        rawValue = matchedInstance.getId();
+                    }
+                }
+
+                semanticFieldValue.setRawValue(rawValue);
+
+                entityValueDTO.getFieldValueMap().put(bpmFieldEnum.getFieldName(), semanticFieldValue);
+            }
+
+            response.getList().add(entityValueDTO.getGlobalRawMap());
+        }
+
+        return response;
+
+
+//        // 第一次查询：获取流程实例基础信息
+//        com.github.pagehelper.Page<BpmInstanceDTO> pageResult = PageHelper
+//                .startPage(reqVO.getPageNo(), reqVO.getPageSize())
+//                .doSelectPage(() -> bpmInstanceMapper.getFormDataPage(reqVO, loginUserId));
+//
+//        // 提取所有 businessDataId 用于第二次查询
+//        List<String> businessDataIdList = pageResult.getResult().stream()
+//                .map(BpmInstanceDTO::getBusinessDataId)
+//                .filter(Objects::nonNull)
+//                .collect(Collectors.toList());
+//
+//        // 第二次查询：根据 businessDataIdList 获取详细的实体数据
+//        PageResult<SemanticEntityValueDTO> entityPageResult = new PageResult<>(new ArrayList<>(), 0L);
+//        Map<String, BpmInstanceDTO> instanceMap;
+
+//        if (!businessDataIdList.isEmpty()) {
+//            entityPageResult = getEntityDataByCondition(
+//                    businessDataIdList, reqVO.getTableName(), reqVO.getPageNo(), reqVO.getPageSize(), reqVO.getEntityFilters());
+//
+//            // 建立 businessDataId 到 BpmInstanceDTO 的映射，便于后续查找
+//            instanceMap = pageResult.getResult().stream()
+//                    .filter(item -> item.getBusinessDataId() != null)
+//                    .collect(Collectors.toMap(BpmInstanceDTO::getBusinessDataId, item -> item));
+//        } else {
+//            instanceMap = new HashMap<>();
+//        }
+
+        // 以第二次查询结果为主构建最终响应
+//        List<BpmFormDataPageRespVO> list = entityPageResult.getList().stream().map(entityValue -> {
+//            BpmFormDataPageRespVO vo = new BpmFormDataPageRespVO();
+//
+//            // 从映射中获取对应的流程实例数据
+//            String businessDataId = String.valueOf(entityValue.getGlobalRawMap().get("id"));
+//            BpmInstanceDTO instance = instanceMap.get(businessDataId);
+//
+//            if (instance != null) {
+//                // 拼接第一次查询的流程实例数据
+//                vo.setId(instance.getId());
+//                vo.setProcessTitle(instance.getBpmTitle());
+//                UserBasicInfoVO initiator = new UserBasicInfoVO();
+//                initiator.setUserId(String.valueOf(instance.getInitiatorId()))
+//                        .setName(instance.getInitiatorName())
+//                        .setAvatar(instance.getInitiatorAvatar());
+//                vo.setInitiator(initiator);
+//                vo.setFlowStatus(instance.getFlowStatus());
+//                vo.setSubmitTime(instance.getSubmitTime());
+//                vo.setNodeCode(instance.getNodeCode());
+//                vo.setNodeName(instance.getNodeName());
+//            }
+//
+//            // 使用第二次查询的实体数据
+//            vo.setData(entityValue.getGlobalRawMap());
+//
+//            return vo;
+//        }).toList();
+
+        // return new PageResult<>(list, entityPageResult.getTotal());
     }
 
    /**
@@ -689,19 +875,19 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
                 })
                 .collect(Collectors.toList());
     }
-    private void validateBusinessUuid(BpmFormDataPageReqVO queryPageVO) {
-        String businessUuid = queryPageVO.getBusinessUuid();
-        AppMenuRespDTO appMenuRespDTO = appResourceApi.getAppMenuByUuidAndAppId(businessUuid, queryPageVO.getAppId());
-        bpmAppResourceValidator.validateMenuAndPageset(appMenuRespDTO, queryPageVO.getAppId());
-    }
-
-    private void fillAppId(BpmFormDataPageReqVO queryPageVO) {
-        // todo: 后续放到全局的Repository中
-        Long appId = ApplicationManager.getApplicationId();
-
-        if (appId == null) {
-            throw exception(ErrorCodeConstants.MISSING_APPLICATION_ID);
-        }
-        queryPageVO.setAppId(appId);
-    }
+//    private void validateBusinessUuid(BpmFormDataPageReqVO queryPageVO) {
+//        String businessUuid = queryPageVO.getBusinessUuid();
+//        AppMenuRespDTO appMenuRespDTO = appResourceApi.getAppMenuByUuidAndAppId(businessUuid, queryPageVO.getAppId());
+//        bpmAppResourceValidator.validateMenuAndPageset(appMenuRespDTO, queryPageVO.getAppId());
+//    }
+//
+//    private void fillAppId(BpmFormDataPageReqVO queryPageVO) {
+//        // todo: 后续放到全局的Repository中
+//        Long appId = ApplicationManager.getApplicationId();
+//
+//        if (appId == null) {
+//            throw exception(ErrorCodeConstants.MISSING_APPLICATION_ID);
+//        }
+//        queryPageVO.setAppId(appId);
+//    }
 }
