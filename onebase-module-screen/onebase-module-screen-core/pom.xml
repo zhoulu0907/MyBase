@@ -76,37 +76,6 @@
             <version>${hutool.version}</version>
         </dependency>
 
-
-<!--        <dependency>-->
-<!--            <groupId>org.mybatis.spring.boot</groupId>-->
-<!--            <artifactId>mybatis-spring-boot-starter</artifactId>-->
-<!--            <version>3.0.3</version>-->
-<!--            <exclusions>-->
-<!--                <exclusion>-->
-<!--                    <groupId>org.mybatis</groupId>-->
-<!--                    <artifactId>mybatis</artifactId>-->
-<!--                </exclusion>-->
-<!--            </exclusions>-->
-<!--        </dependency>-->
-
-<!--        <dependency>-->
-<!--            <groupId>org.mybatis</groupId>-->
-<!--            <artifactId>mybatis</artifactId>-->
-<!--            <version>${mybatis.version}</version>-->
-<!--        </dependency>-->
-
-<!--        <dependency>-->
-<!--            <groupId>com.baomidou</groupId>-->
-<!--            <artifactId>mybatis-plus</artifactId>-->
-<!--            <version>3.5.7</version>-->
-<!--        </dependency>-->
-
-<!--        <dependency>-->
-<!--            <groupId>com.baomidou</groupId>-->
-<!--            <artifactId>mybatis-plus-spring-boot3-starter</artifactId>-->
-<!--            <version>3.5.7</version>-->
-<!--        </dependency>-->
-
         <dependency>
             <groupId>com.mybatis-flex</groupId>
             <artifactId>mybatis-flex-codegen</artifactId>
@@ -123,12 +92,6 @@
             <artifactId>onebase-spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-
-<!--        <dependency>-->
-<!--            <groupId>com.baomidou</groupId>-->
-<!--            <artifactId>mybatis-plus-generator</artifactId>-->
-<!--        </dependency>-->
-
 
         <!--SQLite-->
         <dependency>

@@ -1,0 +1,16 @@
+@baseUrl = http://localhost:48080/admin-api
+@projectId = test_project_id
+
+### 登录接口
+POST {{baseUrl}}/api/goview/sys/login
+Authorization: Bearer {{token}}
+Content-Type: application/json
+tenant-id: {{adminTenantId}}
+
+{"username":"admin","password":"admin"}
+
+### 登出接口
+GET http://localhost:8080/api/goview/sys/logout
+
+### 获取OSS信息接口
+GET http://localhost:8080/api/goview/sys/getOssInfo
