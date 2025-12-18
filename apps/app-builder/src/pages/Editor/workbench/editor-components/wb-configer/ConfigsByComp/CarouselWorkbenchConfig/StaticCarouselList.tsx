@@ -7,6 +7,7 @@ import { ReactSortable } from 'react-sortablejs';
 import ConfigDrawer from '@/pages/Editor/workbench/components/configDrawer';
 import type { CarouselItem, StaticCarouselListProps } from './types';
 import MenuSelector from '@/pages/Editor/workbench/components/MenuSelector';
+import { getNextIndex } from '@/pages/Editor/workbench/utils/edit-data';
 import styles from './StaticCarouselList.module.less';
 import attributeStyles from '../../components/CommonWorkbenchAttributes/attributes.module.less';
 
@@ -90,19 +91,11 @@ const StaticCarouselList = ({ carouselConfig, maxSizeMB = 5, onConfigChange }: S
   };
 
   const handleAdd = () => {
-    // 找出现有项目中"图片名称X"格式的最大序号
-    const maxIndex = items.reduce((max, item) => {
-      const match = item.title?.match(/^图片名称(\d+)$/);
-      if (match) {
-        const num = parseInt(match[1], 10);
-        return Math.max(max, num);
-      }
-      return max;
-    }, 0);
+    const nextIndex = getNextIndex(items, 'title', '图片名称');
 
     const newItem: CarouselItem = {
       id: generateId(),
-      title: '图片名称' + (maxIndex + 1),
+      title: `图片名称${nextIndex}`,
       image: '',
       linkType: 'internal',
       internalPageId: '',

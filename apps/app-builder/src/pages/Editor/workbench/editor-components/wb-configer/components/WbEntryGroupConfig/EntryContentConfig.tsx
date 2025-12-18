@@ -7,6 +7,7 @@ import type { QuickEntryGroupConfig, QuickEntryGroupItemConfig } from '@onebase/
 import IconEntry from '@/assets/workbench/quick-entry/entry1.svg';
 import ConfigDrawer from '@/pages/Editor/workbench/components/configDrawer';
 import SelectMenuModal from './selectMenuModal';
+import { getNextIndex } from '@/pages/Editor/workbench/utils/edit-data';
 import styles from './EntryContentConfig.module.less';
 
 export interface EntryContentConfigProps {
@@ -153,9 +154,10 @@ const EntryContentConfig = ({ onChange, value }: EntryContentConfigProps) => {
   const handleAddEntry = useCallback(
     (type: 'menu' | 'link') => {
       if (type === 'link') {
+        const nextIndex = getNextIndex(state.entries, 'entryName', '新增链接');
         const newEntry: EntryItem = {
           entryId: generateEntryId(),
-          entryName: `新增链接${state.entries.length + 1}`,
+          entryName: `新增链接${nextIndex}`,
           entryType: type,
           group: state.enableGroup ? state.entries[0]?.group || DEFAULT_GROUP_NAME : DEFAULT_GROUP_NAME
         };
@@ -164,9 +166,10 @@ const EntryContentConfig = ({ onChange, value }: EntryContentConfigProps) => {
         setState((prev) => ({ ...prev, showAddMenu: false }));
         onChange?.({ ...normalizedValue, groups: entriesToGroups(newEntries) });
       } else {
+        const nextIndex = getNextIndex(state.entries, 'entryName', '新增菜单');
         const pendingEntry: EntryItem = {
           entryId: generateEntryId(),
-          entryName: `新增菜单${state.entries.length + 1}`,
+          entryName: `新增菜单${nextIndex}`,
           entryType: type,
           group: state.enableGroup ? state.entries[0]?.group || DEFAULT_GROUP_NAME : DEFAULT_GROUP_NAME,
           id: ''
