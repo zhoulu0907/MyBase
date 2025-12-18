@@ -33,6 +33,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -73,7 +74,6 @@ public class FlowProcessManager {
 
     private FlowProcessCache flowProcessCache = FlowProcessCache.getInstance();
 
-
     public void initAllProcess() {
         List<FlowProcessDO> flowProcessDOS = TenantManager.withoutTenantCondition(() ->
                 flowProcessRepository.findAllByEnableStatusAndVersionTag(
@@ -88,6 +88,14 @@ public class FlowProcessManager {
                 log.error("初始化flowProcessDO异常：{}", flowProcessDO, e);
             }
         }
+        executor.execute(() -> {
+            Map<Long, List<FlowProcessDO>> applicationProcessMap = flowProcessDOS.stream().collect(Collectors.groupingBy(FlowProcessDO::getApplicationId));
+            for (Map.Entry<Long, List<FlowProcessDO>> entry : applicationProcessMap.entrySet()) {
+                Long applicationId = entry.getKey();
+                List<FlowProcessDO> dos = entry.getValue();
+                cleanApplicationJob(applicationId, dos);
+            }
+        });
     }
 
     public void onApplicationChange(Long applicationId, boolean sync) {
@@ -149,25 +157,13 @@ public class FlowProcessManager {
 
     private void cleanApplicationJob(Long applicationId, List<FlowProcessDO> flowProcessDOS) {
         Set<Long> newIds = flowProcessDOS.stream().map(FlowProcessDO::getId).collect(Collectors.toSet());
-        Set<Long> oldIds = jobSchedulerClient.queryJob(applicationId);
+        Set<Long> oldIds = jobSchedulerClient.queryProcessIds(applicationId);
         oldIds.removeAll(newIds);
         for (Long oldId : oldIds) {
             log.info("删除遗留的job: {}-{}", applicationId, oldId);
             jobSchedulerClient.deleteJob(applicationId, oldId);
             flowProcessTimeRepository.deleteByProcessId(oldId);
             flowProcessDateFieldRepository.deleteByProcessId(oldId);
-        }
-        List<FlowProcessTimeDO> timeDOS = flowProcessTimeRepository.findByAppIdAndProcessIdsNotIn(applicationId, newIds);
-        for (FlowProcessTimeDO timeDO : timeDOS) {
-            log.info("删除多余的Time job: {}-{}", applicationId, timeDO.getProcessId());
-            jobSchedulerClient.deleteJob(applicationId, timeDO.getProcessId());
-            flowProcessTimeRepository.removeById(timeDO.getId());
-        }
-        List<FlowProcessDateFieldDO> dateFieldDOS = flowProcessDateFieldRepository.findByAppIdAndProcessIdsNotIn(applicationId, newIds);
-        for (FlowProcessDateFieldDO dateFieldDO : dateFieldDOS) {
-            log.info("删除多余的DateField job: {}-{}", applicationId, dateFieldDO.getProcessId());
-            jobSchedulerClient.deleteJob(applicationId, dateFieldDO.getProcessId());
-            flowProcessDateFieldRepository.removeById(dateFieldDO.getId());
         }
     }
 
