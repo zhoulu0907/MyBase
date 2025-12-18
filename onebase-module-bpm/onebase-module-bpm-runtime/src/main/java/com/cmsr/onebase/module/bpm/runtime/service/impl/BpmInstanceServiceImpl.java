@@ -30,6 +30,8 @@ import com.cmsr.onebase.module.bpm.runtime.vo.*;
 import com.cmsr.onebase.module.metadata.api.semantic.SemanticDynamicDataApi;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntitySchemaDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldSchemaDTO;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldValueDTO;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticFieldTypeEnum;
 import com.cmsr.onebase.module.system.api.user.AdminUserApi;
 import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
 import jakarta.annotation.Resource;
@@ -174,6 +176,17 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
             // 超过3个字段，只取前3个
             if (count >= 3) {
                 break;
+            }
+
+            // 处理复杂组件类型，转换为SemanticFieldValueDTO获取实际存储值
+            SemanticFieldTypeEnum fieldType = bpmEntityHelper.findFieldType(entitySchemaDTO, entitySchemaDTO.getTableName(), fieldName);
+            if (fieldType != null) {
+                SemanticFieldValueDTO<Object> semanticFieldValue = SemanticFieldValueDTO.ofType(fieldType);
+                semanticFieldValue.setRawValue(fieldValue);
+                Object storeValue = semanticFieldValue.getStoreValue();
+                if (storeValue != null) {
+                    fieldValue = storeValue;
+                }
             }
 
             sb.append(displayName).append(":").append(fieldValue).append(" ");
