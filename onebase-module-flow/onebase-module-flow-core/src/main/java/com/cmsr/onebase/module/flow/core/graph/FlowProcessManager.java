@@ -4,8 +4,8 @@ import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.module.flow.context.graph.JsonGraph;
 import com.cmsr.onebase.module.flow.context.graph.nodes.start.StartDateFieldNodeData;
 import com.cmsr.onebase.module.flow.context.graph.nodes.start.StartTimeNodeData;
-import com.cmsr.onebase.module.flow.core.config.FlowProperties;
 import com.cmsr.onebase.module.flow.core.config.FlowEnableCondition;
+import com.cmsr.onebase.module.flow.core.config.FlowProperties;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessDateFieldRepository;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessRepository;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessTimeRepository;
@@ -217,8 +217,10 @@ public class FlowProcessManager {
         if (flowProcessTimeDO != null
                 && flowProcessTimeDO.getJobId() != null
                 && FlowJobStatusEnum.isDeployed(flowProcessTimeDO.getJobStatus())) {
+            log.info("流程Time任务已存在：{}", flowProcessTimeDO);
             return;
         }
+        log.info("启动流程Time任务：{}", flowProcessDO);
         StartTimeNodeData startTimeNodeData = FlowProcessCache.findStartTimeNodeDataByProcessId(flowProcessDO.getId());
         JobCreateRequest jobCreateRequest = consumerSettingParams(startTimeNodeData);
         FlowRemoteCallRequest flowRemoteCallRequest = new FlowRemoteCallRequest();
@@ -228,6 +230,7 @@ public class FlowProcessManager {
         flowRemoteCallRequest.setProcessName(flowProcessDO.getProcessName());
         jobCreateRequest.setFlowRemoteCallRequest(flowRemoteCallRequest);
         String jobId = jobSchedulerClient.startJob(jobCreateRequest);
+        log.info("启动流程Time任务成功：{}", flowProcessDO.getId());
         if (flowProcessTimeDO == null) {
             flowProcessTimeDO = new FlowProcessTimeDO();
             flowProcessTimeDO.setProcessId(flowProcessDO.getId());
@@ -240,7 +243,6 @@ public class FlowProcessManager {
             flowProcessTimeDO.setJobStatus(FlowJobStatusEnum.DEPLOYED.getStatus());
             flowProcessTimeRepository.updateById(flowProcessTimeDO);
         }
-        log.info("启动flowProcess流程成功：{}", flowProcessDO.getId());
     }
 
 
@@ -259,8 +261,10 @@ public class FlowProcessManager {
         if (flowProcessDateFieldDO != null
                 && flowProcessDateFieldDO.getJobId() != null
                 && FlowJobStatusEnum.isDeployed(flowProcessDateFieldDO.getJobStatus())) {
+            log.info("流程DateField任务已存在：{}", flowProcessDateFieldDO);
             return;
         }
+        log.info("启动流程DateField任务：{}", flowProcessDO);
         StartDateFieldNodeData startDateFieldNodeData = FlowProcessCache.findStartDateFieldNodeDataByProcessId(flowProcessDO.getId());
         JobCreateRequest jobCreateRequest = consumerSettingParams(startDateFieldNodeData);
         FlowRemoteCallRequest flowRemoteCallRequest = new FlowRemoteCallRequest();
@@ -270,6 +274,7 @@ public class FlowProcessManager {
         flowRemoteCallRequest.setProcessName(flowProcessDO.getProcessName());
         jobCreateRequest.setFlowRemoteCallRequest(flowRemoteCallRequest);
         String jobId = jobSchedulerClient.startJob(jobCreateRequest);
+        log.info("启动流程DateField任务成功：{}", flowProcessDO.getId());
         if (flowProcessDateFieldDO == null) {
             flowProcessDateFieldDO = new FlowProcessDateFieldDO();
             flowProcessDateFieldDO.setProcessId(flowProcessDO.getId());
