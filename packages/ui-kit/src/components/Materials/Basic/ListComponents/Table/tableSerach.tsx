@@ -39,6 +39,7 @@ const TableSearch = memo((props: TableSearchConfig) => {
     const dataField = [mainEntity.tableName, item.value];
 
     const cpType = COMPONENT_MAP[fieldType as any];
+
     let componentConfig: any = {};
     const detailMode = false;
 
@@ -51,6 +52,10 @@ const TableSearch = memo((props: TableSearchConfig) => {
 
       componentConfig = {
         ...defaultSchema.config,
+        label: {
+          display: true,
+          text: item.label
+        },
         layout: 'vertical',
         labelColSpan,
         dataField,
