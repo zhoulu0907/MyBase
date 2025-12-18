@@ -127,6 +127,25 @@ public class DolphinSchedulerClient {
         return result.stream().map(WorkflowDefinitionResp::getCode).toList();
     }
 
+    public List<String> queryWorkflowNameListByName(Long projectCode, String flowName) {
+        List<WorkflowDefinitionResp> result = new ArrayList<>();
+        Result<PageInfo<WorkflowDefinitionResp>> pageResp =
+                execute(dsClientStub.queryWorkflowPage(projectCode, flowName, 1, 1000));
+        if (pageResp.getFailed()) {
+            throw DolphinschedulerException.of("根据查询条件【{}】查询工作流异常, {}", flowName, pageResp.getMsg());
+        }
+        int totalPage = pageResp.getData().getTotalPage();
+        result.addAll(pageResp.getData().getTotalList());
+        for (int i = 2; i <= totalPage; i++) {
+            pageResp = execute(dsClientStub.queryWorkflowPage(projectCode, flowName, i, 1000));
+            if (pageResp.getFailed()) {
+                throw DolphinschedulerException.of("根据查询条件【{}】查询工作流异常, {}", flowName, pageResp.getMsg());
+            }
+            result.addAll(pageResp.getData().getTotalList());
+        }
+        return result.stream().map(WorkflowDefinitionResp::getName).toList();
+    }
+
     /**
      * 创建工作流
      */

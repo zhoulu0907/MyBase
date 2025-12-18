@@ -37,6 +37,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * @Author：huangjie
@@ -72,6 +73,9 @@ public class FlowProcessManager {
     @Autowired
     private ThreadPoolTaskScheduler executor;
 
+    private FlowProcessCache flowProcessCache = FlowProcessCache.getInstance();
+
+
     public void initAllProcess() {
         List<FlowProcessDO> flowProcessDOS = TenantManager.withoutTenantCondition(() ->
                 flowProcessRepository.findAllByEnableStatusAndVersionTag(
@@ -95,7 +99,7 @@ public class FlowProcessManager {
                         FlowEnableStatusEnum.ENABLE.getStatus(),
                         flowProperties.getVersionTag()
                 ));
-        Set<Long> oldProcessIds = FlowProcessCache.findProcessByApplicationId(applicationId);
+        Set<Long> oldProcessIds = flowProcessCache.findProcessByApplicationId(applicationId);
         for (FlowProcessDO flowProcessDO : flowProcessDOS) {
             oldProcessIds.remove(flowProcessDO.getId());
         }
@@ -105,16 +109,18 @@ public class FlowProcessManager {
         for (FlowProcessDO flowProcessDO : flowProcessDOS) {
             onProcessUpdate(flowProcessDO, sync);
         }
+        cleanApplicationJob(applicationId, flowProcessDOS);
         log.info("处理应用更新: {}, 删除：{} ，添加：{}", applicationId, oldProcessIds, flowProcessDOS.stream().map(FlowProcessDO::getId).toList());
     }
 
+
     @SneakyThrows
     public void onApplicationDelete(Long applicationId) {
-        Set<Long> ids = FlowProcessCache.findProcessByApplicationId(applicationId);
+        Set<Long> ids = flowProcessCache.findProcessByApplicationId(applicationId);
         ids.forEach(id -> {
             String chainId = FlowUtils.toFlowChainId(id);
             FlowBus.removeChain(chainId);
-            FlowProcessCache.deleteByProcessId(id);
+            flowProcessCache.deleteByProcessId(id);
         });
         stopApplicationJob(applicationId);
         log.info("处理应用删除：{}, 删除: {}", applicationId, ids);
@@ -145,6 +151,30 @@ public class FlowProcessManager {
         }
     }
 
+    private void cleanApplicationJob(Long applicationId, List<FlowProcessDO> flowProcessDOS) {
+        Set<Long> newIds = flowProcessDOS.stream().map(FlowProcessDO::getId).collect(Collectors.toSet());
+        Set<Long> oldIds = jobSchedulerClient.queryJob(applicationId);
+        oldIds.removeAll(newIds);
+        for (Long oldId : oldIds) {
+            log.info("删除遗留的job: {}-{}", applicationId, oldId);
+            jobSchedulerClient.deleteJob(applicationId, oldId);
+            flowProcessTimeRepository.deleteByProcessId(oldId);
+            flowProcessDateFieldRepository.deleteByProcessId(oldId);
+        }
+        List<FlowProcessTimeDO> timeDOS = flowProcessTimeRepository.findByAppIdAndProcessIdsNotIn(applicationId, newIds);
+        for (FlowProcessTimeDO timeDO : timeDOS) {
+            log.info("删除多余的Time job: {}-{}", applicationId, timeDO.getProcessId());
+            jobSchedulerClient.deleteJob(applicationId, timeDO.getProcessId());
+            flowProcessTimeRepository.removeById(timeDO.getId());
+        }
+        List<FlowProcessDateFieldDO> dateFieldDOS = flowProcessDateFieldRepository.findByAppIdAndProcessIdsNotIn(applicationId, newIds);
+        for (FlowProcessDateFieldDO dateFieldDO : dateFieldDOS) {
+            log.info("删除多余的DateField job: {}-{}", applicationId, dateFieldDO.getProcessId());
+            jobSchedulerClient.deleteJob(applicationId, dateFieldDO.getProcessId());
+            flowProcessDateFieldRepository.removeById(dateFieldDO.getId());
+        }
+    }
+
     private void onProcessUpdate(FlowProcessDO processDO, boolean sync) {
         log.info("处理流程更新：{}-{}", processDO.getApplicationId(), processDO.getId());
         if (StringUtils.isBlank(processDO.getProcessDefinition())) {
@@ -161,7 +191,7 @@ public class FlowProcessManager {
         String chainId = FlowUtils.toFlowChainId(processDO.getId());
         LiteFlowChainELBuilder.createChain().setChainId(chainId).setEL(flowChain).build();
         //
-        FlowProcessCache.update(processDO, jsonGraph);
+        flowProcessCache.update(processDO, jsonGraph);
         if (sync) {
             startSchedulingJob(processDO);
         } else {
@@ -174,7 +204,7 @@ public class FlowProcessManager {
         String chainId = FlowUtils.toFlowChainId(processId);
         FlowBus.removeChain(chainId);
         //
-        FlowProcessCache.deleteByProcessId(processId);
+        flowProcessCache.deleteByProcessId(processId);
         //
         stopSchedulingJob(applicationId, processId);
         flowProcessTimeRepository.deleteByProcessId(processId);
@@ -186,6 +216,7 @@ public class FlowProcessManager {
         RLock lock = redissonClient.getLock(FlowUtils.toRedisProcessLockKey(processId));
         if (lock.tryLock(120, TimeUnit.SECONDS)) {
             try {
+                log.info("流程流程任务：{}-{}", applicationId, processId);
                 jobSchedulerClient.deleteJob(applicationId, processId);
             } finally {
                 lock.unlock();
@@ -226,8 +257,7 @@ public class FlowProcessManager {
             log.info("流程Time任务已存在：{}-{}", flowProcessTimeDO.getApplicationId(), flowProcessTimeDO.getProcessId());
             return;
         }
-        log.info("启动流程Time任务：{}-{}", flowProcessTimeDO.getApplicationId(), flowProcessTimeDO.getProcessId());
-        StartTimeNodeData startTimeNodeData = FlowProcessCache.findStartTimeNodeDataByProcessId(flowProcessDO.getId());
+        StartTimeNodeData startTimeNodeData = flowProcessCache.findStartTimeNodeDataByProcessId(flowProcessDO.getId());
         JobCreateRequest jobCreateRequest = consumerSettingParams(startTimeNodeData);
         FlowRemoteCallRequest flowRemoteCallRequest = new FlowRemoteCallRequest();
         flowRemoteCallRequest.setJobType(FlowRemoteCallRequest.JOB_TYPE_TIME);
@@ -236,7 +266,7 @@ public class FlowProcessManager {
         flowRemoteCallRequest.setProcessName(flowProcessDO.getProcessName());
         jobCreateRequest.setFlowRemoteCallRequest(flowRemoteCallRequest);
         String jobId = jobSchedulerClient.startJob(jobCreateRequest);
-        log.info("启动流程Time任务成功：{}-{}", flowProcessTimeDO.getApplicationId(), flowProcessTimeDO.getProcessId());
+        log.info("启动流程Time任务成功：{}-{}", flowProcessDO.getApplicationId(), flowProcessDO.getId());
         if (flowProcessTimeDO == null) {
             flowProcessTimeDO = new FlowProcessTimeDO();
             flowProcessTimeDO.setProcessId(flowProcessDO.getId());
@@ -270,8 +300,7 @@ public class FlowProcessManager {
             log.info("流程DateField任务已存在：{}-{}", flowProcessDateFieldDO.getApplicationId(), flowProcessDateFieldDO.getProcessId());
             return;
         }
-        log.info("启动流程DateField任务：{}-{}", flowProcessDateFieldDO.getApplicationId(), flowProcessDateFieldDO.getProcessId());
-        StartDateFieldNodeData startDateFieldNodeData = FlowProcessCache.findStartDateFieldNodeDataByProcessId(flowProcessDO.getId());
+        StartDateFieldNodeData startDateFieldNodeData = flowProcessCache.findStartDateFieldNodeDataByProcessId(flowProcessDO.getId());
         JobCreateRequest jobCreateRequest = consumerSettingParams(startDateFieldNodeData);
         FlowRemoteCallRequest flowRemoteCallRequest = new FlowRemoteCallRequest();
         flowRemoteCallRequest.setJobType(FlowRemoteCallRequest.JOB_TYPE_FIELD);
@@ -280,7 +309,7 @@ public class FlowProcessManager {
         flowRemoteCallRequest.setProcessName(flowProcessDO.getProcessName());
         jobCreateRequest.setFlowRemoteCallRequest(flowRemoteCallRequest);
         String jobId = jobSchedulerClient.startJob(jobCreateRequest);
-        log.info("启动流程DateField任务成功：{}-{}", flowProcessDateFieldDO.getApplicationId(), flowProcessDateFieldDO.getProcessId());
+        log.info("启动流程DateField任务成功：{}-{}", flowProcessDO.getApplicationId(), flowProcessDO.getId());
         if (flowProcessDateFieldDO == null) {
             flowProcessDateFieldDO = new FlowProcessDateFieldDO();
             flowProcessDateFieldDO.setProcessId(flowProcessDO.getId());

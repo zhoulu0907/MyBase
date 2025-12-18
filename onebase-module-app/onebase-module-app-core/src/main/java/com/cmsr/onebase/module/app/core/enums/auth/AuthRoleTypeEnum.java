@@ -21,7 +21,7 @@ public enum AuthRoleTypeEnum {
     /**
      * 用户自定义角色
      */
-    CUSTOM_ROLE(3, null, "自定义角色"),
+    CUSTOM_ROLE(3, "ROLE_CUSTOM", "自定义角色"),
 
     /**
      * 外部用户

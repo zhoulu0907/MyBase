@@ -42,6 +42,8 @@ public class FlowProcessExecApiImpl implements FlowProcessExecApi {
 
     private ExpressionExecutor expressionExecutor = new ExpressionExecutor();
 
+    private FlowProcessCache flowProcessCache = FlowProcessCache.getInstance();
+
     @Override
     public EntityTriggerRespDTO entityTrigger(EntityTriggerReqDTO reqDTO) {
         log.info("entityTrigger req: {}", reqDTO);
@@ -76,7 +78,7 @@ public class FlowProcessExecApiImpl implements FlowProcessExecApi {
             return respDTO;
         }
 
-        List<StartEntityNodeData> entityNodeDataList = FlowProcessCache.findStartEntityNodeDataByEntityName(reqDTO.getApplicationId(), reqDTO.getTableName());
+        List<StartEntityNodeData> entityNodeDataList = flowProcessCache.findStartEntityNodeDataByEntityName(reqDTO.getApplicationId(), reqDTO.getTableName());
         if (CollectionUtils.isEmpty(entityNodeDataList)) {
             EntityTriggerRespDTO respDTO = new EntityTriggerRespDTO(reqDTO.getTraceId());
             respDTO.setSuccess(true);

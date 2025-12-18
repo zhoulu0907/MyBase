@@ -7,6 +7,9 @@ import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.core.util.UpdateEntity;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+import java.util.Set;
+
 import static com.cmsr.onebase.module.flow.core.dal.dataobject.table.FlowProcessDateFieldTableDef.FLOW_PROCESS_DATE_FIELD;
 
 /**
@@ -31,6 +34,13 @@ public class FlowProcessDateFieldRepository extends BaseAppRepository<FlowProces
         flowProcessDateFieldDO.setJobStatus(status);
         QueryWrapper query = this.query().where(FLOW_PROCESS_DATE_FIELD.APPLICATION_ID.eq(applicationId));
         super.getMapper().updateByQuery(flowProcessDateFieldDO, query);
+    }
+
+    public List<FlowProcessDateFieldDO> findByAppIdAndProcessIdsNotIn(Long applicationId, Set<Long> processIds) {
+        QueryWrapper query = this.query()
+                .where(FLOW_PROCESS_DATE_FIELD.APPLICATION_ID.eq(applicationId))
+                .and(FLOW_PROCESS_DATE_FIELD.PROCESS_ID.notIn(processIds));
+        return getMapper().selectListByQuery(query);
     }
 
 }

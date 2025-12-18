@@ -50,11 +50,12 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
 
     private ExpressionExecutor expressionExecutor = new ExpressionExecutor();
 
+    private FlowProcessCache flowProcessCache = FlowProcessCache.getInstance();
 
     @Override
     public List<QueryFormTriggerRespVO> queryFormTrigger(Long pageId) {
         Long applicationId = ApplicationManager.getApplicationId();
-        List<StartFormNodeData> startFormNodeDataList = FlowProcessCache.findStartFormNodeDataByPageId(applicationId, pageId);
+        List<StartFormNodeData> startFormNodeDataList = flowProcessCache.findStartFormNodeDataByPageId(applicationId, pageId);
         return startFormNodeDataList.stream()
                 .map(startFormNodeData -> BeanUtils.toBean(startFormNodeData, QueryFormTriggerRespVO.class))
                 .toList();
@@ -77,7 +78,7 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
     }
 
     private FormTriggerRespVO doTriggerForm(FormTriggerReqVO reqVO) {
-        StartFormNodeData startFormNodeData = FlowProcessCache.findStartFormNodeDataByProcessId(reqVO.getProcessId());
+        StartFormNodeData startFormNodeData = flowProcessCache.findStartFormNodeDataByProcessId(reqVO.getProcessId());
         if (startFormNodeData == null) {
             FormTriggerRespVO vo = formNotTriggerRespVO();
             vo.setMessage("流程不存在");

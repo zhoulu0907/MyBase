@@ -6,6 +6,8 @@ import com.cmsr.onebase.framework.ds.model.schedule.sub.Schedule;
 import com.cmsr.onebase.framework.ds.model.task.def.HttpTask;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -13,6 +15,8 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @Author：huangjie
@@ -57,6 +61,14 @@ public class JobSchedulerClient {
         return applicationId + "-" + processId;
     }
 
+    private Long extractProcessId(String flowName) {
+        String[] split = StringUtils.split(flowName, "-");
+        if (split == null || split.length != 2) {
+            return null;
+        }
+        return NumberUtils.toLong(split[1]);
+    }
+
     public void deleteJob(Long applicationId, Long processId) {
         try {
             String flowName = createFlowName(applicationId, processId);
@@ -80,6 +92,17 @@ public class JobSchedulerClient {
         } catch (Exception e) {
             log.error("删除工作流失败: {}", applicationId, e);
             throw new RuntimeException("删除工作流失败: " + applicationId, e);
+        }
+    }
+
+    public Set<Long> queryJob(Long applicationId) {
+        try {
+            String flowName = String.valueOf(applicationId);
+            List<String> flowNames = dolphinSchedulerClient.queryWorkflowNameListByName(flowProjectCode, flowName);
+            return flowNames.stream().map(n -> extractProcessId(n)).collect(Collectors.toSet());
+        } catch (Exception e) {
+            log.error("查询工作流失败: {}", applicationId, e);
+            throw new RuntimeException("查询工作流失败: " + applicationId, e);
         }
     }
 
