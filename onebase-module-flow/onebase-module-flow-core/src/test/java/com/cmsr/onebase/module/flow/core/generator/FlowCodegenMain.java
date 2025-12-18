@@ -54,12 +54,10 @@ public class FlowCodegenMain {
         globalConfig.setEntityPackage(basePackage + ".dataobject");
         globalConfig.setEntityClassSuffix("DO");
         globalConfig.setEntitySuperClass(BaseBizEntity.class);
-        globalConfig.setEntityWithBaseClassEnable(true);
         globalConfig.setEntityGenerateEnable(true);
         globalConfig.setEntityWithLombok(true);
         globalConfig.setEntityLombokAllArgsConstructorEnable(false);
         globalConfig.setEntityLombokNoArgsConstructorEnable(false);
-        globalConfig.setEntityOverwriteEnable(true);
         globalConfig.setEntityJdkVersion(17);
         globalConfig.setEntityOverwriteEnable(true);
 

@@ -37,8 +37,8 @@ public class BpmDataManagerImpl implements BpmDataManager {
     private void bpmEngineMoveRuntimeToHistory(Long applicationId, Long versionTag) {
         QueryWrapper queryWrapper = new QueryWrapper();
         queryWrapper.eq(FlowDefinition::getApplicationId, applicationId);
-        queryWrapper.eq(FlowDefinition::getVersionTag, versionTag);
-        List<FlowDefinition> flowDefinitionList = flowDefinitionRepository.list(queryWrapper);
+        queryWrapper.eq(FlowDefinition::getVersionTag, VersionTagEnum.RUNTIME.getValue());
+        List<FlowDefinition> flowDefinitionList = flowDefinitionRepository.getMapper().selectListByQuery(queryWrapper);
 
         if (CollectionUtils.isEmpty(flowDefinitionList)) {
             return;
@@ -54,7 +54,7 @@ public class BpmDataManagerImpl implements BpmDataManager {
         FlowDefinition updateFlowDefinition = new FlowDefinition();
         updateFlowDefinition.setVersionTag(versionTag);
 
-        flowDefinitionRepository.update(updateFlowDefinition, queryWrapper);
+        flowDefinitionRepository.getMapper().updateByQuery(updateFlowDefinition, queryWrapper);
 
         // 更新节点
         QueryWrapper nodeQueryWrapper = new QueryWrapper();
@@ -63,7 +63,7 @@ public class BpmDataManagerImpl implements BpmDataManager {
         FlowNode updateFlowNode = new FlowNode();
         updateFlowNode.setVersionTag(versionTag);
 
-        flowNodeRepository.update(updateFlowNode, nodeQueryWrapper);
+        flowNodeRepository.getMapper().updateByQuery(updateFlowNode, nodeQueryWrapper);
 
         // 更新跳转数据
         QueryWrapper skipQueryWrapper = new QueryWrapper();
@@ -72,7 +72,7 @@ public class BpmDataManagerImpl implements BpmDataManager {
         FlowSkip updateFlowSkip = new FlowSkip();
         updateFlowSkip.setVersionTag(versionTag);
 
-        flowSkipRepository.update(updateFlowSkip, skipQueryWrapper);
+        flowSkipRepository.getMapper().updateByQuery(updateFlowSkip, skipQueryWrapper);
     }
 
     /**
@@ -85,7 +85,7 @@ public class BpmDataManagerImpl implements BpmDataManager {
         QueryWrapper defQueryWrapper = new QueryWrapper();
         defQueryWrapper.eq(FlowDefinition::getApplicationId, applicationId);
         defQueryWrapper.eq(FlowDefinition::getVersionTag, VersionTagEnum.BUILD.getValue());
-        List<FlowDefinition> flowDefinitionList = flowDefinitionRepository.list(defQueryWrapper);
+        List<FlowDefinition> flowDefinitionList = flowDefinitionRepository.getMapper().selectListByQuery(defQueryWrapper);
 
         if (CollectionUtils.isEmpty(flowDefinitionList)) {
             return;
@@ -104,11 +104,11 @@ public class BpmDataManagerImpl implements BpmDataManager {
         // 第二步：根据 def 查出 node 和 skip 数据
         QueryWrapper nodeQueryWrapper = new QueryWrapper();
         nodeQueryWrapper.in(FlowNode::getDefinitionId, oldDefIds);
-        List<FlowNode> flowNodeList = flowNodeRepository.list(nodeQueryWrapper);
+        List<FlowNode> flowNodeList = flowNodeRepository.getMapper().selectListByQuery(nodeQueryWrapper);
 
         QueryWrapper skipQueryWrapper = new QueryWrapper();
         skipQueryWrapper.in(FlowSkip::getDefinitionId, oldDefIds);
-        List<FlowSkip> flowSkipList = flowSkipRepository.list(skipQueryWrapper);
+        List<FlowSkip> flowSkipList = flowSkipRepository.getMapper().selectListByQuery(skipQueryWrapper);
 
         // 第三步：更新 ID 和 versionTag，然后保存
         // 更新 def
@@ -136,15 +136,15 @@ public class BpmDataManagerImpl implements BpmDataManager {
 
         // 第四步：批量保存
         if (CollectionUtils.isNotEmpty(flowDefinitionList)) {
-            flowDefinitionRepository.saveBatch(flowDefinitionList);
+            flowDefinitionRepository.getMapper().insertBatch(flowDefinitionList);
         }
 
         if (CollectionUtils.isNotEmpty(flowNodeList)) {
-            flowNodeRepository.saveBatch(flowNodeList);
+            flowNodeRepository.getMapper().insertBatch(flowNodeList);
         }
 
         if (CollectionUtils.isNotEmpty(flowSkipList)) {
-            flowSkipRepository.saveBatch(flowSkipList);
+            flowSkipRepository.getMapper().insertBatch(flowSkipList);
         }
     }
 
