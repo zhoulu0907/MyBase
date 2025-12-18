@@ -77,7 +77,7 @@ public class TenantThirdUserController {
 
 
     @GetMapping("/get")
-    @Operation(summary = "获得三方用户详（包含授权app）")
+    @Operation(summary = "获得三方用户详情(包含授权app)")
     @PreAuthorize("@ss.hasPermission('tenant:third:query')")
     public CommonResult<UserApplicationRespVO> getThirdUserAndRelationApp(@RequestParam("id") Long id) {
         UserApplicationRespVO userDetail = userService.getThirdUserAndRelationApp(id);
