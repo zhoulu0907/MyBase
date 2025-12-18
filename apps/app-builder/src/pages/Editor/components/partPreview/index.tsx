@@ -131,6 +131,7 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
                         cpType={cp.type}
                         pageComponentSchema={listPageComponentSchemas.value[cp.id]}
                         runtime={true}
+                        pageType={pageType}
                         preview={true}
                       />
                     </div>
