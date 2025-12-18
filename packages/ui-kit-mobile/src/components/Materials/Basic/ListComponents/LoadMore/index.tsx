@@ -264,9 +264,9 @@ const XLoadMore = memo(
             );
             if (selectField) {
               const curValue = newItem[key];
-              const curComponentSchema = Object.values(pageComponentSchemas.value).find(v => curValue.id.includes(v.id)) || {};
-              const curOptions = curComponentSchema?.config?.defaultOptionsConfig?.defaultOptions;
-              newItem[key] = curOptions.find(op => op.value === curValue.id)?.label || '-';
+              const curComponentSchema = Object.values(pageComponentSchemas.value).find(v => v.config.dataField?.includes(selectField.fieldName)) || {};
+              const curOptions = curComponentSchema?.config?.defaultOptionsConfig?.defaultOptions || [];
+              newItem[key] = curOptions.find(op => op.value === curValue.id)?.label || '';
             }
 
             // 数据选择
