@@ -4,7 +4,7 @@ onebase:
   plugin:
     enabled: true
     mode: staging             # 预发布模式，只加载 plugins-dir 的ZIP包，不扫描classpath
-    plugins-dir: ./plugins    # 插件目录，存放 ZIP/JAR 插件包
+    plugins-dir: D:/cmsr/10_cmsr/CodingSpace/plugins-root    # 插件目录，存放 ZIP/JAR 插件包
     auto-load: true           # 自动加载插件
     auto-start: true          # 自动启动插件
 

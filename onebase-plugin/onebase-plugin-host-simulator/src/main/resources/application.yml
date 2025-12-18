@@ -2,7 +2,7 @@ spring:
   application:
     name: onebase-plugin-simulator
   profiles:
-    default: staging
+    default: dev
   http:
     encoding:
       charset: UTF-8
