@@ -17,4 +17,11 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+    <dependencies>
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-screen-core</artifactId>
+        </dependency>
+    </dependencies>
+
 </project>
