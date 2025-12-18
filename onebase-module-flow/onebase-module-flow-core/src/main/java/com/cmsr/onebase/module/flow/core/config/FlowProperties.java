@@ -1,5 +1,7 @@
 package com.cmsr.onebase.module.flow.core.config;
 
+import com.cmsr.onebase.framework.common.enums.VersionTagEnum;
+import org.apache.commons.lang3.Strings;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
@@ -14,7 +16,7 @@ public class FlowProperties {
     private String versionTag;
 
     public Long getVersionTag() {
-        return versionTag.equals("build") ? 0L : 1L;
+        return Strings.CS.equals(versionTag, "build") ? VersionTagEnum.BUILD.getValue() : VersionTagEnum.RUNTIME.getValue();
     }
 
 }
