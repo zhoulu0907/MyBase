@@ -18,7 +18,6 @@ import PCActiveIcon from '@/assets/images/pc_icon_active.svg';
 import {
   COMPONENT_GROUP_NAME,
   COMPONENT_MAP,
-  createPageEditorSignal,
   DEFAULT_OPTIONS_TYPE,
   EditRender,
   ENTITY_COMPONENT_TYPES,
@@ -27,7 +26,6 @@ import {
   getComponentWidth,
   useAppEntityStore,
   useEditorSignalMap,
-  useFormEditorSignal,
   usePageEditorSignal,
   usePageViewEditorSignal,
   WIDTH_OPTIONS,
@@ -104,14 +102,14 @@ export default function EditorWorkspace() {
     subEntities,
     drag: true,
     useEditorSignalMap,
-    pageViews,
-    curViewId,
+    pageViews: pageViews.value,
+    curViewId: curViewId.value,
     setCurViewId,
     updatePageViewName,
-    usePageViewEditorSignal,
-    createPageEditorSignal,
-    useFormEditorSignal,
-    editMode,
+    // usePageViewEditorSignal,
+    // createPageEditorSignal
+    // useFormEditorSignal,
+    editMode: editMode.value,
     setEditMode,
     curComponentID,
     setCurComponentID,
@@ -136,6 +134,7 @@ export default function EditorWorkspace() {
     delSubTableComponents,
     batchDelSubTableComponents
   });
+
   useEffect(() => {
     if (editMode.value !== EditMode.MOBILE) {
       return;
