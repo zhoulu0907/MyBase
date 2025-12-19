@@ -1,5 +1,8 @@
-import { Button, Input, Pagination, Spin } from '@arco-design/web-react';
+import CreateExternalModal from '@/components/CreateExternalModal';
+import { useAppStore } from '@/store';
+import { Button, Input, Message, Pagination, Spin } from '@arco-design/web-react';
 import { IconPlus } from '@douyinfe/semi-icons';
+import { deleteETLDatasource, getETLDatasource, pageETLDatasource, type PageDatasourceItem } from '@onebase/app';
 import { debounce } from 'lodash-es';
 import React, { useCallback, useEffect, useState } from 'react';
 import DataSourceCard from './card';
@@ -10,12 +13,16 @@ import styles from './index.module.less';
 const DataSourceManagementPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [searchDatasourceName, setSearchDatasourceName] = useState('');
+  const [createExternalModalVisible, setCreateExternalModalVisible] = useState(false);
+  const [editInitialData, setEditInitialData] = useState<any>(null);
 
-  const [datasourceList, setDatasourceList] = useState<any[]>([]);
+  const [datasourceList, setDatasourceList] = useState<PageDatasourceItem[]>([]);
 
   const [pageSize, setPageSize] = useState<number>(8);
   const [pageNo, setPageNo] = useState(1);
   const [total, setTotal] = useState(0);
+
+  const { curAppId } = useAppStore();
 
   const debouncedSearch = useCallback(
     debounce(() => {
@@ -30,24 +37,46 @@ const DataSourceManagementPage: React.FC = () => {
 
   const handleGetDatasourceList = async () => {
     setLoading(true);
-    // const res = await pageETLFlow({
-    //   applicationId: curAppId,
-    //   pageNo,
-    //   pageSize
-    // });
-    // setDatasourceList(res.list);
-    // setTotal(res.total);
+    const res = await pageETLDatasource({
+      applicationId: curAppId,
+      pageNo,
+      pageSize
+    });
+
+    setDatasourceList(res.list);
+    setTotal(res.total);
     setLoading(false);
   };
 
-  const handleCreateDatasource = () => {};
-
-  const handleEditDatasource = (datasourceId: string) => {
-    console.log('handleEditDatasource', datasourceId);
+  const handleCreateDatasource = () => {
+    setEditInitialData(null);
+    setCreateExternalModalVisible(true);
   };
 
-  const handleDeleteDatasource = (datasourceId: string) => {
-    console.log('handleDeleteDatasource', datasourceId);
+  const handleCreateExternalModalClose = () => {
+    setCreateExternalModalVisible(false);
+    setEditInitialData(null);
+  };
+
+  const handleEditDatasource = async (datasourceId: string) => {
+    const res = await getETLDatasource(datasourceId);
+    setEditInitialData(res);
+    setCreateExternalModalVisible(true);
+  };
+
+  const handleDeleteDatasource = async (datasourceId: string) => {
+    const res = await deleteETLDatasource(datasourceId);
+    if (res) {
+      Message.success('删除成功');
+      handleGetDatasourceList();
+    }
+  };
+
+  const handleCreateExternalModalCreate = (datasourceUuid: string) => {
+    setCreateExternalModalVisible(false);
+    setEditInitialData(null);
+    // 刷新列表
+    handleGetDatasourceList();
   };
 
   return (
@@ -103,6 +132,13 @@ const DataSourceManagementPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      <CreateExternalModal
+        visible={createExternalModalVisible}
+        onClose={handleCreateExternalModalClose}
+        onCreate={handleCreateExternalModalCreate}
+        initialData={editInitialData}
+      />
     </div>
   );
 };
