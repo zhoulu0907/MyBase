@@ -184,5 +184,13 @@
       "#272e3b",
       "#1d2129"
     ]
+  },
+  "primary": {
+    "green": "#24B28F",
+    "orange": "#FF7D00",
+    "blue": "#1979FF",
+    "purple": "#7E5AEA",
+    "cyan": "#009E9E",
+    "yellow": "#EBBC00"
   }
 }

@@ -27,14 +27,16 @@ import EditRuntime from './EditRuntime';
 import FlowPredict from './flowPredict';
 import styles from './index.module.less';
 import ListRuntime from './ListRuntime';
+import WorkbenchRuntime from './WorkbenchRuntime';
 
 interface PreviewProps {
   menuId: string;
   runtime: boolean;
   menuUuid: string;
+  pageSetType: PageType;
 }
 
-const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid }) => {
+const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, pageSetType }) => {
   useSignals();
 
   const [form] = Form.useForm();
@@ -102,7 +104,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid })
   }, [tableName, mainMetaDataFields.value]);
 
   useEffect(() => {
-    if (pageSetId) {
+    // 工作台页面不获取主表数据
+    if (pageSetId && pageSetType !== PageType.WORKBENCH) {
       getMainMetaData(pageSetId);
     }
     setPageType(EDITOR_TYPES.LIST_EDITOR);
@@ -422,7 +425,11 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid })
   return (
     <div className={`${styles.previewPage} runtime-preview-formpage`}>
       <div className={styles.content}>
-        <ListRuntime pageSetId={pageSetId} runtime={runtime} showFromPageData={showFromPageData} refresh={refresh} />
+        {pageSetType === PageType.WORKBENCH ? (
+          <WorkbenchRuntime pageSetId={pageSetId} runtime={runtime} />
+        ) : (
+          <ListRuntime pageSetId={pageSetId} runtime={runtime} showFromPageData={showFromPageData} refresh={refresh} />
+        )}
 
         <DetailRuntime
           visible={drawerVisible.value}

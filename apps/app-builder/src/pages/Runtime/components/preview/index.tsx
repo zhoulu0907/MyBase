@@ -4,6 +4,7 @@ import {
   getEntityFieldsWithChildren,
   getPageSetId,
   getPageSetMetaData,
+  PageType,
   type AppEntityField,
   type GetPageSetIdReq
 } from '@onebase/app';
@@ -11,13 +12,17 @@ import { getHashQueryParam, pagesRuntimeSignal } from '@onebase/common';
 import {
   EDITOR_TYPES,
   getComponentWidth,
+  getWorkbenchComponentWidth,
   PreviewRender,
   startLoadPageSet,
+  startLoadWorkbenchPageSet,
   STATUS_OPTIONS,
   STATUS_VALUES,
   useEditorSignalMap,
   useListEditorSignal,
-  type GridItem
+  useWorkbenchEditorSignal,
+  type GridItem,
+  type WorkbenchComponentType
 } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { Fragment, useCallback, useEffect, useState } from 'react';
@@ -26,9 +31,10 @@ import styles from './index.module.less';
 interface PreviewProps {
   menuId: string;
   runtime: boolean;
+  pagesetType?: number;
 }
 
-const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
+const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType }) => {
   useSignals();
 
   const [form] = Form.useForm();
@@ -39,6 +45,9 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     clearComponents,
     clearPageComponentSchemas
   } = useListEditorSignal;
+
+  const { workbenchComponents, wbComponentSchemas, clearWorkbenchComponents, clearWbComponentSchemas } =
+    useWorkbenchEditorSignal;
 
   const { editPageViewId } = pagesRuntimeSignal;
 
@@ -90,6 +99,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
       // 清空全局 signals 中的组件和 schemas
       clearComponents();
       clearPageComponentSchemas();
+      clearWorkbenchComponents();
+      clearWbComponentSchemas();
 
       // 设置加载状态
       setLoading(true);
@@ -118,13 +129,28 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
           }, 100);
         }
       };
-      loadData();
+
+      // 工作台页面不获取主表数据
+      if (pagesetType === PageType.WORKBENCH) {
+        loadPageSetInfo(pageSetId).finally(() => {
+          setLoading(false);
+        });
+      } else {
+        loadData();
+      }
     }
     // 优先切换到列表页
-    setPageType(EDITOR_TYPES.LIST_EDITOR);
+    setPageType(pagesetType === PageType.WORKBENCH ? EDITOR_TYPES.WORKBENCH_EDITOR : EDITOR_TYPES.LIST_EDITOR);
   }, [pageSetId]);
 
   const loadPageSetInfo = async (pageSetId: string) => {
+    // 工作台使用独立加载逻辑
+    if (pagesetType === PageType.WORKBENCH) {
+      await startLoadWorkbenchPageSet({ pageSetId: pageSetId });
+      return;
+    }
+
+    // 表单和列表使用原有加载逻辑
     await startLoadPageSet({ pageSetId: pageSetId });
   };
 
@@ -260,6 +286,36 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
                 取消
               </Button>
             </div>
+          </Form>
+        )}
+
+        {pageType == EDITOR_TYPES.WORKBENCH_EDITOR && (
+          <Form layout="inline" form={form}>
+            {workbenchComponents.value.map((cp: GridItem) => (
+              <Fragment key={cp.id}>
+                {wbComponentSchemas.value[cp.id]?.config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+                  <div
+                    key={cp.id}
+                    className={styles.componentItem}
+                    style={{
+                      width: `calc(${getWorkbenchComponentWidth(
+                        wbComponentSchemas.value[cp.id],
+                        cp.type as WorkbenchComponentType
+                      )} - 8px)`,
+                      margin: '4px'
+                    }}
+                  >
+                    <PreviewRender
+                      cpId={cp.id}
+                      cpType={cp.type}
+                      pageComponentSchema={wbComponentSchemas.value[cp.id]}
+                      runtime={runtime}
+                      preview={preview}
+                    />
+                  </div>
+                )}
+              </Fragment>
+            ))}
           </Form>
         )}
       </div>
