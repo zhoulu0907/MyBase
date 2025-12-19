@@ -37,7 +37,7 @@ import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionU
 @Validated
 @Slf4j
 @EnableTransactionManagement
-public class SystemGeneralConfigServiceImpl implements SystemGeneralConfigService {
+public class SystemConfigServiceImpl implements SystemConfigService {
 
     @Resource
     private SystemGeneralConfigDataRepository systemGeneralConfigDataRepository;

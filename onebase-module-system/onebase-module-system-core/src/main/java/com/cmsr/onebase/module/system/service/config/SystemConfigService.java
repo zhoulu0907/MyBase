@@ -1,17 +1,15 @@
 package com.cmsr.onebase.module.system.service.config;
-import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.system.dal.dataobject.config.SystemGeneralConfigDO;
 import com.cmsr.onebase.module.system.vo.config.*;
 import jakarta.validation.Valid;
 
 import java.util.List;
-import java.util.Set;
 
 /**
  * 参数配置 Service 接口
  *
  */
-public interface SystemGeneralConfigService {
+public interface SystemConfigService {
 
     /**
      * 创建参数配置
