@@ -94,8 +94,11 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
     public AuthDetailDataPermissionVO getDataPermission(AuthPermissionReq reqVO) {
         appCommonService.validateApplicationExist(reqVO.getApplicationId());
         AppAuthRoleDO appAuthRoleDO = appCommonService.validateRoleExist(reqVO.getRoleId());
-        AppMenuDO appMenuDO = appCommonService.validateMenuExist(reqVO.getMenuId());
         reqVO.setRoleUuid(appAuthRoleDO.getRoleUuid());
+        reqVO.setRoleCode(appAuthRoleDO.getRoleCode());
+        reqVO.setRoleType(appAuthRoleDO.getRoleType());
+        //
+        AppMenuDO appMenuDO = appCommonService.validateMenuExist(reqVO.getMenuId());
         reqVO.setMenuUuid(appMenuDO.getMenuUuid());
         //
         AuthDetailDataPermissionVO dataPermissionVO = new AuthDetailDataPermissionVO();

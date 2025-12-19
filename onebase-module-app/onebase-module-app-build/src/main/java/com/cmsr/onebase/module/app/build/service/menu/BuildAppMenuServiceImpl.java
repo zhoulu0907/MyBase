@@ -297,7 +297,7 @@ public class BuildAppMenuServiceImpl implements BuildAppMenuService {
     }
 
     private String validateParentMenuId(Long parentId) {
-        if (parentId == null) {
+        if (parentId == null || parentId <= 0) {
             return MenuUtils.ROOT_MENU_UUID;
         }
         AppMenuDO parentMenu = appCommonService.validateMenuExist(parentId);
