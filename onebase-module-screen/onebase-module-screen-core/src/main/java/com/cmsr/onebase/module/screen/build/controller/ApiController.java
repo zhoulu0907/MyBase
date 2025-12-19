@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/goview/sys")
+@RequestMapping("/sys")
 public class ApiController  extends BaseController {
 	private static final Logger logger = LoggerFactory.getLogger(ApiController.class);
 
