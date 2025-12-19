@@ -130,7 +130,9 @@ const XSubTable: XSubTableSchema = {
       type: CONFIG_TYPES.VERIFY
     },
     subTableConfig,
-    layoutConfig,
+    // 显示状态
+    statusConfig,
+    // layoutConfig,
     widthConfig
   ],
   config: {
