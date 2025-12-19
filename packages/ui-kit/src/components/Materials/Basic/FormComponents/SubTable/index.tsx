@@ -459,7 +459,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
         ) : (
           <div style={{ width: '100%', display: 'flex' }}>
             {subTableConfig?.showIndex && (
-              <div className="componentItem2" style={{ width: '62px', paddingTop: '18px' }}>
+              <div className="subComponentItem2" style={{ width: '62px', paddingTop: '18px' }}>
                 <div className="simulate-header-item">序号</div>
               </div>
             )}
@@ -517,7 +517,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                     data-cp-type={cp.type}
                     data-cp-displayname={cp.displayName}
                     data-cp-id={cp.id}
-                    className="componentItem"
+                    className="subComponentItem"
                     style={{
                       borderColor: curComponentID === cp.id ? '#4FAE7B' : 'transparent'
                     }}
@@ -586,7 +586,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                 ))}
             </ReactSortable>
             {subTableConfig?.showOperate && (
-              <div className="componentItem2" style={{ width: '64px', paddingTop: '18px' }}>
+              <div className="subComponentItem2" style={{ width: '64px', paddingTop: '18px' }}>
                 <div className="simulate-header-item">操作</div>
               </div>
             )}

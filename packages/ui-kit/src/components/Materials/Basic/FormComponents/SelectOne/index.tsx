@@ -50,9 +50,7 @@ const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean; det
         }}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
-          <div>
-            {(fieldValue?.id && options.find((op) => op.id === fieldValue.id)?.label) || '--'}
-          </div>
+          <div>{fieldValue?.name || options.find((op) => op.id === fieldValue?.id || op.id === fieldValue)?.label || '--'}</div>
         ) : (
           <Select
             placeholder="请选择"

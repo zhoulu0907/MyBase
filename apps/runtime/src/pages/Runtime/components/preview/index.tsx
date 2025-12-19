@@ -141,7 +141,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
           formData[field.fieldName] = (value || []).map((ele: any) => {
             return { name: ele.name, id: ele.response?.fileId || ele.id };
           });
-        }else {
+        } else {
           formData[field.fieldName] = value;
         }
       }
@@ -323,7 +323,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
 
       //   主表渲染逻辑
       if (dataItem && typeof dataItem === 'object') {
-        Object.entries(dataItem).forEach(([fieldName, value]) => {
+        Object.entries(dataItem).forEach(([fieldName, value]: [string, any]) => {
           const componentSchemaList = Object.keys(componentSchemas);
           const currentKey = componentSchemaList.find((key) =>
             componentSchemas?.[key]?.config?.dataField?.includes(fieldName)
@@ -334,7 +334,23 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
               currentSchema?.type === FORM_COMPONENT_TYPES.FILE_UPLOAD) &&
             Array.isArray(value)
           ) {
+            // 处理文件、图片
             formValues[fieldName] = (value || []).map((ele: any) => ({ ...ele, uid: ele.id }));
+          } else if (
+            (currentSchema?.type === FORM_COMPONENT_TYPES.RADIO ||
+              currentSchema?.type === FORM_COMPONENT_TYPES.SELECT_ONE) &&
+            typeof value === 'object' &&
+            value !== null
+          ) {
+            // 处理单选框、下拉列表
+            formValues[fieldName] = value?.id;
+          } else if (
+            (currentSchema?.type === FORM_COMPONENT_TYPES.CHECKBOX ||
+              currentSchema?.type === FORM_COMPONENT_TYPES.SELECT_MUTIPLE) &&
+            Array.isArray(value)
+          ) {
+            // 处理复选框、下拉多选列表
+            formValues[fieldName] = (value || []).map((ele: any) => ele.id);
           } else {
             formValues[fieldName] = value;
           }
@@ -376,6 +392,23 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
                         ...ele,
                         uid: ele.id
                       }));
+                    } else if (
+                      (componentSchemas[ele]?.type === FORM_COMPONENT_TYPES.RADIO ||
+                        componentSchemas[ele]?.type === FORM_COMPONENT_TYPES.SELECT_ONE) &&
+                      typeof subData[idx]?.[fieldId] === 'object' &&
+                      subData[idx]?.[fieldId] !== null
+                    ) {
+                      // 处理单选框、下拉列表
+                      formValues[`${key}.${idx}.${fieldId}`] = subData[idx]?.[fieldId]?.id;
+                    } else if (
+                      (componentSchemas[ele]?.type === FORM_COMPONENT_TYPES.CHECKBOX ||
+                        componentSchemas[ele]?.type === FORM_COMPONENT_TYPES.SELECT_MUTIPLE) &&
+                      Array.isArray(subData[idx]?.[fieldId])
+                    ) {
+                      // 处理复选框、下拉多选列表
+                      formValues[`${key}.${idx}.${fieldId}`] = (subData[idx]?.[fieldId] || []).map(
+                        (ele: any) => ele.id
+                      );
                     } else {
                       formValues[`${key}.${idx}.${fieldId}`] = subData[idx]?.[fieldId];
                     }
