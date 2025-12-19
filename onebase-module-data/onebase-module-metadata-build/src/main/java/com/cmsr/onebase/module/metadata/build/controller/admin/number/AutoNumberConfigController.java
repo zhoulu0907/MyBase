@@ -1,6 +1,8 @@
 package com.cmsr.onebase.module.metadata.build.controller.admin.number;
 
+import com.cmsr.onebase.framework.common.event.AppEntityChangeEvent;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.AutoNumberConfigReqVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.AutoNumberConfigRespVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.number.vo.AutoNumberConfigWithRulesRespVO;
@@ -10,6 +12,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,6 +33,9 @@ public class AutoNumberConfigController {
     @Resource
     private AutoNumberConfigBuildService configService;
 
+    @Resource
+    ApplicationEventPublisher applicationEventPublisher;
+
     @PostMapping("/get")
     @Operation(summary = "按字段UUID获取自动编号配置与规则（旧接口）")
     public CommonResult<AutoNumberConfigWithRulesRespVO> get(@RequestParam("fieldId") String fieldUuid) {
@@ -41,6 +47,11 @@ public class AutoNumberConfigController {
     @Operation(summary = "保存/更新自动编号配置（旧接口）")
     public CommonResult<Long> upsert(@Valid @RequestBody MetadataAutoNumberConfigDO req) {
         Long id = configService.saveAutoNumberConfig(req);
+        applicationEventPublisher.publishEvent(
+                AppEntityChangeEvent.builder()
+                        .applicationId(ApplicationManager.getApplicationId())
+                        .build()
+        );
         return success(id);
     }
 
@@ -56,6 +67,11 @@ public class AutoNumberConfigController {
     public CommonResult<Long> saveUnified(@RequestParam("fieldUuid") String fieldUuid,
                                           @Valid @RequestBody AutoNumberConfigReqVO reqVO) {
         Long id = configService.saveConfigWithUnifiedRules(fieldUuid, reqVO);
+        applicationEventPublisher.publishEvent(
+                AppEntityChangeEvent.builder()
+                        .applicationId(ApplicationManager.getApplicationId())
+                        .build()
+        );
         return success(id);
     }
 }
