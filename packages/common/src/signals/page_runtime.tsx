@@ -51,6 +51,14 @@ export const createPagesRuntimeSignal = () => {
     subEntities.value = entities;
   };
 
+  const flows = signal<any[]>([]);
+  const setFlows = (newFlows: any[]) => {
+    flows.value = newFlows;
+  };
+  const resetFlows = () => {
+    flows.value = [];
+  };
+
   return {
     curPage,
     setCurPage,
@@ -78,7 +86,11 @@ export const createPagesRuntimeSignal = () => {
     resetSubTableDataLength,
 
     subEntities,
-    setSubEntities
+    setSubEntities,
+
+    flows,
+    setFlows,
+    resetFlows
   };
 };
 
