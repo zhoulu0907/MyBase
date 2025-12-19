@@ -4,20 +4,18 @@ import com.cmsr.onebase.framework.common.enums.CommonPublishModelEnum;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
 import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
 import com.cmsr.onebase.module.system.dal.database.SystemGeneralConfigDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.config.SystemGeneralConfigDO;
 import com.cmsr.onebase.module.system.dal.dataobject.corp.CorpDO;
 import com.cmsr.onebase.module.system.enums.ErrorCodeConstants;
-import com.cmsr.onebase.module.system.enums.config.ConfigCategoryEnum;
+import com.cmsr.onebase.module.system.enums.config.ConfigTypeEnum;
 import com.cmsr.onebase.module.system.enums.config.SystemConfigKeyEnum;
 import com.cmsr.onebase.module.system.service.corp.CorpService;
 import com.cmsr.onebase.module.system.vo.config.*;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.web.tag.If;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -88,7 +86,7 @@ public class SystemGeneralConfigServiceImpl implements SystemGeneralConfigServic
             globalConfigList.forEach(configDO -> {
                 configDO.setId(null);
                 configDO.setTenantId(TenantContextHolder.getTenantId());
-                configDO.setCategory(ConfigCategoryEnum.TENANT.getCode());
+                configDO.setConfigType(ConfigTypeEnum.TENANT.getCode());
                 systemGeneralConfigDataRepository.insert(configDO);
             });
 
@@ -161,16 +159,16 @@ public class SystemGeneralConfigServiceImpl implements SystemGeneralConfigServic
 
     @NotNull
     private static SystemGeneralConfigSearchVO getSystemGeneralConfigSearchVO(SystemGeneralConfigDO configDO) {
-        String category= configDO.getCategory();
+        String category= configDO.getConfigType();
 
         SystemGeneralConfigSearchVO searchVO = new SystemGeneralConfigSearchVO();
         searchVO.setCategory(category);
         searchVO.setConfigKey(configDO.getExclusiveItem());
 
-        if(ConfigCategoryEnum.TENANT.getCode().equals( category)){
+        if(ConfigTypeEnum.TENANT.getCode().equals( category)){
             searchVO.setTenantId(configDO.getTenantId());
         }
-        if(ConfigCategoryEnum.CORP.getCode().equals( category)){
+        if(ConfigTypeEnum.CORP.getCode().equals( category)){
             searchVO.setCorpId(configDO.getCorpId());
             searchVO.setTenantId(configDO.getTenantId());
         }

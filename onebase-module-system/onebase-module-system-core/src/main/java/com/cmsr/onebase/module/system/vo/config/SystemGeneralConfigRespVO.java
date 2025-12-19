@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.system.vo.config;
 
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.validation.InEnum;
-import com.cmsr.onebase.module.system.enums.config.ConfigCategoryEnum;
+import com.cmsr.onebase.module.system.enums.config.ConfigTypeEnum;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -12,13 +12,13 @@ public class SystemGeneralConfigRespVO {
      * 参数分类
      */
     @Schema(description = "参数分类", example = "")
-    private Long id;
+    private Long   id;
     /**
-     * 参数分类 see {@link com.cmsr.onebase.module.system.enums.config.ConfigCategoryEnum}
+     * 参数分类 see {@link ConfigTypeEnum}
      */
     @Schema(description = "参数分类", example = "")
-    @InEnum(value = ConfigCategoryEnum.class, message = "参数类型必须是 {value}")
-    private String category;
+    @InEnum(value = ConfigTypeEnum.class, message = "参数类型必须是 {value}")
+    private String configType;
     /**
      * 参数名称
      */
@@ -35,7 +35,6 @@ public class SystemGeneralConfigRespVO {
      */
     @Schema(description = "配置项值", example = "")
     private String configValue;
-
 
     /**
      * 互斥项

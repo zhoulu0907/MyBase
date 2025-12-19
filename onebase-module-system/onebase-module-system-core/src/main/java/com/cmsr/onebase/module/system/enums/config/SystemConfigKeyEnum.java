@@ -12,17 +12,25 @@ import java.util.Arrays;
 public enum SystemConfigKeyEnum implements ArrayValuable<String> {
 
     ThirdUserConfig("thirdUserConfig ", "外部用户管理配置项"),
-    SaasModeConfig("saasModeConfig", "SaaS模式配置项");
+    SaasModeConfig("saasModeConfig", "SaaS模式配置项"),
+    appThirdUserEnable("appThirdUserEnable", "应用三方用户登录-开关"),
+    appThirdUserRegisterShow("appThirdUserRegisterShow", "应用三方用户登录-注册入口显隐"),
+    appThirdUserForgetPwdShow("appThirdUserForgetPwdShow", "应用三方用户登录-忘记密码显隐"),
+    ;
 
     SystemConfigKeyEnum(String code, String name) {
         this.code = code;
         this.name = name;
     }
 
+    //  默认值：应用三方用户登录-开关
+    public static final boolean appThirdUserEnable_DefaultValue = true;
+
     /**
      * 角色编码
      */
     private final String code;
+
     /**
      * 名字
      */
