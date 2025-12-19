@@ -34,6 +34,8 @@ import dayjs from 'dayjs';
 import PreviewRender from 'src/components/render/PreviewRender';
 import { useFormEditorSignal } from 'src/signals/page_editor';
 import { ENTITY_FIELD_TYPE } from '../../../../DataFactory/const';
+import { COMPONENT_MAP } from '../../../componentsMap';
+import { getComponentSchema } from '../../../schema';
 import './index.css';
 import type { XTableConfig } from './schema';
 import TableSearch from './tableSerach';
@@ -339,6 +341,39 @@ const XTable = memo(
                     recordId={_record.id}
                   />
                 );
+              }
+
+              // 系统字段 表单配置里没有就根据字段类型获取默认配置
+              if (mainMetaData?.parentFields?.length) {
+                const dataFieldInfo = mainMetaData.parentFields.find(
+                  (field: AppEntityField) => field.fieldName === columnId
+                );
+                const cpType = dataFieldInfo?.fieldType ? COMPONENT_MAP[dataFieldInfo.fieldType] : null;
+                if (cpType) {
+                  const basicConfig = getComponentSchema(cpType as any);
+                  const componentConfig = {
+                    ...basicConfig,
+                    config: {
+                      ...basicConfig.config,
+                      dataField: [mainMetaData.tableName, `${mainMetaData.tableName}.${index}.${dataFieldInfo.fieldName}`],
+                      label: {
+                        display: false,
+                        text: ''
+                      },
+                      verify: { required: false },
+                      tooltip: ''
+                    }
+                  };
+                  return (
+                    <PreviewRender
+                      cpId={columnId}
+                      cpType={cpType}
+                      detailMode={true}
+                      pageComponentSchema={componentConfig}
+                      runtime={true}
+                    />
+                  );
+                }
               }
 
               return <span>{renderCellText(columnId, _text)}</span>;
