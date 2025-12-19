@@ -305,7 +305,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
           minWidth: '200px'
         },
         bodyCellStyle: {
-          padding: '4px 0'
+          padding: '4px'
         },
         render: (_text: string, _record: any, index: number) => {
           const newConfig = {
