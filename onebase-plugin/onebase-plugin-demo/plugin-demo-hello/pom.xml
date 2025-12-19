@@ -8,7 +8,6 @@
         <groupId>com.cmsr.onebase</groupId>
         <artifactId>onebase-plugin-demo</artifactId>
         <version>${revision}</version>
-        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>plugin-demo-hello</artifactId>
