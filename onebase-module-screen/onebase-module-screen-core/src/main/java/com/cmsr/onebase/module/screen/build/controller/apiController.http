@@ -1,8 +1,10 @@
-@baseUrl = http://localhost:48080/admin-api
-@projectId = test_project_id
+## 环境配置说明
+# 使用全局环境配置文件 http-client.env.json
+# 请在IntelliJ IDEA中选择对应环境: local/dev/test/gateway
+# 确保先在AuthController.http中登录获取token
 
 ### 登录接口
-POST {{baseUrl}}/api/goview/sys/login
+POST {{baseUrl}}/sys/login
 Authorization: Bearer {{token}}
 Content-Type: application/json
 tenant-id: {{adminTenantId}}
