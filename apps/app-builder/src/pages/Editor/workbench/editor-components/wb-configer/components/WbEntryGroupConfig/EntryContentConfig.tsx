@@ -19,7 +19,7 @@ interface EntryItem {
   entryName: string;
   entryIcon?: string;
   entryType?: 'menu' | 'link';
-  menuId?: string;
+  menuUuid?: string;
   linkAddress?: string;
   group?: string;
   entryId: string;
@@ -246,7 +246,7 @@ const EntryContentConfig = ({ onChange, value }: EntryContentConfigProps) => {
                 ...prev.pendingEntry!,
                 entryId: nextEntryId,
                 id: nextEntryId,
-                menuId: menu.id,
+                menuUuid: menu.menuUuid,
                 entryName: menu.menuName || prev.pendingEntry!.entryName
               };
             });
@@ -270,7 +270,7 @@ const EntryContentConfig = ({ onChange, value }: EntryContentConfigProps) => {
           if (targetMenu?.id) {
             const updatedEntry = {
               ...prev.currentEntry,
-              menuId: targetMenu.id,
+              menuUuid: targetMenu.id,
               entryName: targetMenu.menuName
             };
 
@@ -368,7 +368,7 @@ const EntryContentConfig = ({ onChange, value }: EntryContentConfigProps) => {
             return values.entryType === 'menu' ? (
               <FormItem label="选择菜单">
                 <div className={styles.menuPicker}>
-                  <Input readOnly value={values.menuId || '请选择菜单'} />
+                  <Input readOnly value={values.menuUuid || '请选择菜单'} />
                   <Button
                     type="text"
                     icon={<IconEdit />}
