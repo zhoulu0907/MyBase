@@ -229,8 +229,14 @@ const EditModal: React.FC<EditModalProps> = ({ initData, visible, onOk, onCancel
                         { required: true, message: '请选择触发时间' },
                         {
                           validator: (value, callback) => {
-                            console.log(isValidCron(value, { seconds: true }));
-                            if (!isValidCron(value, { seconds: true })) {
+                            if (
+                              !isValidCron(value, {
+                                seconds: true,
+                                allowBlankDay: true,
+                                alias: true,
+                                allowSevenAsSunday: true
+                              })
+                            ) {
                               return callback('请输入正确的cron表达式');
                             }
                           }
