@@ -61,6 +61,7 @@ const AppReleasePage: React.FC = () => {
 
     const appResp = await getApplication(appReq);
 
+    console.log('app resp: ', appResp);
     if (appResp) {
       setAppInfo(appResp);
     }
@@ -127,6 +128,7 @@ const AppReleasePage: React.FC = () => {
 
       <PublishVersionModal
         applicationId={appId}
+        appName={appInfo?.appName}
         visible={publishModalVisible}
         onCancel={() => setPublishModalVisible(false)}
         onOk={handlePublishModalOk}

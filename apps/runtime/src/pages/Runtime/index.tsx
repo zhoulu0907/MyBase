@@ -3,21 +3,21 @@ import { useI18n } from '@/hooks/useI18n';
 import { Input, Layout, Tree } from '@arco-design/web-react';
 import { IconDown, IconSearch } from '@arco-design/web-react/icon';
 import {
+  ENTITY_TYPE,
   getAppNavigationConfig,
+  getEntityListWithFields,
   listApplicationMenu,
   menuSignal,
   MenuType,
   runtimeListApplicationBPMMenu,
   VisibleType,
-  getEntityListWithFields,
-  ENTITY_TYPE,
-  type ChildEntity,
   type ApplicationMenu,
+  type ChildEntity,
   type ListApplicationMenuReq
 } from '@onebase/app';
 import { TokenManager, UserPermissionManager } from '@onebase/common';
-import { useAppEntityStore } from '@onebase/ui-kit';
 import { getPermissionInfo } from '@onebase/platform-center';
+import { useAppEntityStore } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
@@ -128,6 +128,8 @@ const Runtime: React.FC = () => {
       return;
     }
     const entityListWithFields = await getEntityListWithFields({ entityUuids: [entityUuid] });
+    // console.log('entityListWithFields: ', entityListWithFields);
+
     const [entityWithChildren] = entityListWithFields;
     if (entityWithChildren) {
       setMainEntity({
@@ -258,13 +260,13 @@ const Runtime: React.FC = () => {
       key: menu.menuCode,
       title: (
         <RuntimeMenuItem
-          menuID={menu.id}
+          menuID={menu.id || ''}
           menuIcon={menu.menuType === MenuType.BPM ? menu.menuCode : menu.menuIcon}
           maxWidth={maxWidth}
           label={menu.menuName}
           onClick={() => {
             if (menu.menuType == MenuType.PAGE || menu.menuType == MenuType.BPM) {
-              handleCurMenuUrl(menu.id);
+              handleCurMenuUrl(menu.id || '');
               setCurMenu(menu);
             }
           }}
