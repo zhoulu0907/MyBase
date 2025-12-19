@@ -150,7 +150,8 @@ const LayoutReactSortable: React.FC<LayoutReactSortableProps> = ({
           schema.config.verify = {
             ...schema.config.verify,
             required: field.isRequired,
-            noRepeat: field.isUnique
+            noRepeat: 
+              typeof schema.config?.verify?.noRepeat === 'boolean' ? field.isUnique === 1 : undefined
           };
 
           // 字段约束配置（长度/正则） constraints
@@ -242,7 +243,7 @@ const LayoutReactSortable: React.FC<LayoutReactSortableProps> = ({
           subSchema.config.verify = {
             ...subSchema.config.verify,
             required: ele.isRequired,
-            noRepeat: ele.isUnique
+            noRepeat: typeof subSchema.config?.verify?.noRepeat === 'boolean' ? ele.isUnique === 1 : undefined
           };
 
           // 字段约束配置（长度/正则） constraints

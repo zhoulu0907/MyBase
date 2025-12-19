@@ -39,7 +39,7 @@ export interface MetadataEntityField {
   isSystemField: number;
   isPrimaryKey: boolean;
   isRequired: boolean;
-  isUnique: boolean;
+  isUnique: number;
   allowNull: boolean;
   sortOrder: number;
   validationRulesId?: string;
