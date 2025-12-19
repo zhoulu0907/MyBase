@@ -47,7 +47,7 @@ public class PageServiceProvider {
         return BeanUtils.toBean(pageDO, PageRespDTO.class);
     }
 
-    public List<PageDTO> getFormPageListByAppId(Long applicationId) {
+    public List<PageDTO> getPageListByAppId(Long applicationId) {
         List<String> menuUuidList = menuRepository.findMenuUuidListByApplication(applicationId);
         if (CollectionUtils.isEmpty(menuUuidList)) {
             return Collections.emptyList();
@@ -56,7 +56,7 @@ public class PageServiceProvider {
         if (CollectionUtils.isEmpty(pageSetUuidList)) {
             return Collections.emptyList();
         }
-        List<AppResourcePageDO> pageDOList = pageRepository.findAllFormPageByPageSetUuids(applicationId, pageSetUuidList);
+        List<AppResourcePageDO> pageDOList = pageRepository.findAllPageByPageSetUuids(applicationId, pageSetUuidList);
         List<PageDTO> pageDTOList = BeanUtils.toBean(pageDOList, PageDTO.class);
         return pageDTOList;
     }
