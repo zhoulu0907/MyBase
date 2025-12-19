@@ -235,9 +235,20 @@ const XLoadMore = memo(
           // 优化：减少重复查找，提升可读性和性能
           if (Array.isArray(mainMetaData?.parentFields)) {
             const dataField = mainMetaData.parentFields.find(
-              (field: AppEntityField) => field.fieldName === key && (field.fieldType === ENTITY_FIELD_TYPE.DATE.VALUE || field.fieldType === ENTITY_FIELD_TYPE.DATETIME.VALUE)
+              (field: AppEntityField) => field.fieldName === key && (field.fieldType === ENTITY_FIELD_TYPE.DATE.VALUE)
             );
             if (dataField && newItem[key]) {
+              // 仅当字段类型为日期且有值时格式化
+              const dateValue = new Date(newItem[key]);
+              if (!isNaN(dateValue.getTime())) {
+                newItem[key] = dayjs(dateValue).format('YYYY-MM-DD');
+              }
+            }
+
+            const datatimeField = mainMetaData.parentFields.find(
+              (field: AppEntityField) => field.fieldName === key && (field.fieldType === ENTITY_FIELD_TYPE.DATETIME.VALUE)
+            );
+            if (datatimeField && newItem[key]) {
               // 仅当字段类型为日期且有值时格式化
               const dateValue = new Date(newItem[key]);
               if (!isNaN(dateValue.getTime())) {
