@@ -36,7 +36,7 @@ public class TenantThirdUserController {
     @PostMapping("/update")
     @Operation(summary = "编辑三方用户")
     @PreAuthorize("@ss.hasPermission('tenant:user:update')")
-    public CommonResult<Long> updateUserAndUserAppRelation(@RequestBody @Valid ThirdUserAppCombinedUpdateReqVO reqVO) {
+    public CommonResult<Long> updateUserAndUserAppRelation(@Valid  @RequestBody ThirdUserAppCombinedUpdateReqVO reqVO) {
         Long id = userService.updateUserAndUserAppRelation(reqVO);
         return success(id);
     }

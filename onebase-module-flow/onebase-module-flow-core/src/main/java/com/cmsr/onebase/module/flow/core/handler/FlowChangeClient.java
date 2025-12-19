@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.flow.core.handler;
 
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessDateFieldRepository;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessTimeRepository;
 import com.cmsr.onebase.module.flow.core.enums.FlowJobStatusEnum;
@@ -63,8 +64,11 @@ public class FlowChangeClient {
     }
 
     public void resetScheduleJobStatus(Long applicationId) {
-        flowProcessTimeRepository.updateJobStatusByAppId(FlowJobStatusEnum.NEED_DEPLOY.getStatus(), applicationId);
-        flowProcessDateFieldRepository.updateJobStatusByAppId(FlowJobStatusEnum.NEED_DEPLOY.getStatus(), applicationId);
+        ApplicationManager.withoutApplicationCondition(() -> {
+                    flowProcessTimeRepository.updateJobStatusByAppId(FlowJobStatusEnum.INIT.getStatus(), applicationId);
+                    flowProcessDateFieldRepository.updateJobStatusByAppId(FlowJobStatusEnum.INIT.getStatus(), applicationId);
+                }
+        );
     }
 
 

@@ -1,21 +1,26 @@
 package com.cmsr.onebase.module.system.service.config;
 
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
+import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.system.dal.database.SystemGeneralConfigDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.config.SystemGeneralConfigDO;
 import com.cmsr.onebase.module.system.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.system.enums.config.ConfigCategoryEnum;
+import com.cmsr.onebase.module.system.enums.config.SystemConfigKeyEnum;
 import com.cmsr.onebase.module.system.vo.config.*;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.validation.annotation.Validated;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
@@ -57,8 +62,28 @@ public class SystemGeneralConfigServiceImpl implements SystemGeneralConfigServic
     }
 
     @Override
-    public List<SystemGeneralConfigDO> getConfigList(SystemConfigPageReqVO pageReqVO) {
-        return systemGeneralConfigDataRepository.findConfigList(pageReqVO);
+    public List<SystemGeneralConfigDO> getTenantConfigList(SystemConfigReqVO configReqVO) {
+        List<SystemGeneralConfigDO> configList = systemGeneralConfigDataRepository.findTenantConfigList(configReqVO.getName(),configReqVO.getStatus());
+        if(CollectionUtils.isNotEmpty(configList)){
+            return configList;
+        }
+
+        if (StringUtils.isBlank(configReqVO.getName())  &&  null ==configReqVO.getStatus()) {
+            List<SystemGeneralConfigDO> globalConfigList = systemGeneralConfigDataRepository.findGlobaConfigListByKeys(Arrays.asList(SystemConfigKeyEnum.ARRAYS));
+            if (CollectionUtils.isEmpty(globalConfigList)) {
+                return new ArrayList<>();
+            }
+            globalConfigList.forEach(configDO -> {
+                configDO.setId(null);
+                configDO.setTenantId(TenantContextHolder.getTenantId());
+                configDO.setCategory(ConfigCategoryEnum.TENANT.getCode());
+                systemGeneralConfigDataRepository.insert(configDO);
+            });
+
+        }
+        return systemGeneralConfigDataRepository.findTenantConfigList(configReqVO.getName(),configReqVO.getStatus());
+
+
     }
 
     @Override
@@ -79,7 +104,7 @@ public class SystemGeneralConfigServiceImpl implements SystemGeneralConfigServic
 
 
         // 如果配置有互斥数据，需要更新互斥数据为修改状态的反值
-        if (StringUtils.isNotBlank(configDO.getExclusiveItem())) {
+        if (StringUtils.isNotBlank(configDO.getExclusiveItem())  &&  CommonStatusEnum.ENABLE.getStatus().equals(status)) {
             SystemGeneralConfigSearchVO searchVO = getSystemGeneralConfigSearchVO(configDO);
             // 获取互斥数据 忽略租户条件,
             SystemGeneralConfigDO config = systemGeneralConfigDataRepository.getConfigByDiffCategory(searchVO);

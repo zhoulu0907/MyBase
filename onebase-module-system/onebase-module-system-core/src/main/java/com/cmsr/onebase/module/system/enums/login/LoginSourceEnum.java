@@ -16,7 +16,13 @@ public enum LoginSourceEnum implements ArrayValuable<String> {
     /**
      * 手机登录
      */
-    APPLOGINMOBILE("app-login-mobile", "手机登录");
+    APPLOGINMOBILE("app-login-mobile", "手机登录"),
+
+    /**
+     * 公司登录
+     */
+    CORPLOGIN("corp-login", "企业手机登录");
+
 
     public static final String[] ARRAYS = Arrays.stream(values()).map(LoginSourceEnum::getCode).toArray(String[]::new);
 

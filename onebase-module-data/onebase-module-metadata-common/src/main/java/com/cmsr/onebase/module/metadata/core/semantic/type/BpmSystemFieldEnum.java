@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.metadata.core.enums;
+package com.cmsr.onebase.module.metadata.core.semantic.type;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -38,6 +38,11 @@ public enum BpmSystemFieldEnum {
      * 当前节点
      */
     BPM_CURRENT_NODE(104L, "bpm_current_node", "当前节点", "SELECT"),
+
+    /**
+     * 当前流程实例ID
+     */
+    BPM_INSTANCE_ID(105L, "bpm_instance_id", "流程实例ID", "ID"),
     ;
 
     /**
