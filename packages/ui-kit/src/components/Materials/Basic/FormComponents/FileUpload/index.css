@@ -1,6 +1,9 @@
 .uplaodTrigger {
   color: #4e5969;
 }
+.uplaodList-text {
+  width: 100%;
+}
 .uplaodList-text-item {
   background-color: transparent;
   padding: 8px 12px;
@@ -22,6 +25,8 @@
   line-height: 22px;
   color: #1d2129;
   display: inline-block;
+  flex: 1;
+  max-width: calc(100% - 56px);
 }
 
 .uplaodList-text-item-name-hover:hover {
