@@ -53,7 +53,8 @@ import org.springframework.context.annotation.ComponentScan;
  */
 @SpringBootApplication(exclude = {RedisAutoConfiguration.class})
 @ComponentScan(basePackages = {
-    "com.cmsr.onebase.plugin.simulator"   // 仅扫描模拟器自身的组件，避免扫描 starter runtime 包
+    "com.cmsr.onebase.plugin.simulator",  // 模拟器自身的组件
+    "com.cmsr.onebase.plugin.demo"        // 插件demo包，用于开发模式下扫描插件组件
 })
 public class PluginHostSimulatorApplication {
 

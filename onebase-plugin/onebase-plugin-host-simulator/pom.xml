@@ -93,10 +93,17 @@
             <version>1.0.0-SNAPSHOT</version>
         </dependency>
 
-        <!-- Demo 插件依赖 (开发模式需要) -->
+        <!-- Hello Demo 插件依赖 (开发模式需要) -->
         <dependency>
             <groupId>com.cmsr.onebase.plugin.demo</groupId>
-            <artifactId>onebase-plugin-demo</artifactId>
+            <artifactId>plugin-demo-hello</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
+        <!-- Test Demo 插件依赖 (开发模式需要) -->
+        <dependency>
+            <groupId>com.cmsr.onebase.plugin.demo</groupId>
+            <artifactId>plugin-demo-test</artifactId>
             <version>1.0.0</version>
         </dependency>
 
