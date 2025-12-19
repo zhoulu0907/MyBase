@@ -3,7 +3,7 @@ package com.cmsr.onebase.module.system.dal.database;
 import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.system.dal.dataobject.config.SystemGeneralConfigDO;
-import com.cmsr.onebase.module.system.enums.config.ConfigCategoryEnum;
+import com.cmsr.onebase.module.system.enums.config.ConfigTypeEnum;
 import com.cmsr.onebase.module.system.vo.config.SystemGeneralConfigSearchVO;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Compare;
@@ -11,7 +11,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
-import java.util.Arrays;
 import java.util.List;
 
 @Repository
@@ -44,7 +43,7 @@ public class SystemGeneralConfigDataRepository  extends DataRepository<SystemGen
     public SystemGeneralConfigDO getConfigByDiffCategory(SystemGeneralConfigSearchVO searchVO) {
         DefaultConfigStore configs = new DefaultConfigStore();
         if (StringUtils.isNotBlank(searchVO.getCategory())) {
-            configs.and(Compare.EQUAL, SystemGeneralConfigDO.CATEGORY, searchVO.getCategory());
+            configs.and(Compare.EQUAL, SystemGeneralConfigDO.CONFIG_TYPE, searchVO.getCategory());
         }
         if (StringUtils.isNotBlank(searchVO.getConfigKey())) {
             configs.and(Compare.EQUAL, SystemGeneralConfigDO.CONFIG_KEY, searchVO.getConfigKey());
@@ -61,7 +60,7 @@ public class SystemGeneralConfigDataRepository  extends DataRepository<SystemGen
     @TenantIgnore
     public List<SystemGeneralConfigDO> findGlobaConfigListByKeys(List<String> configKeys) {
         DefaultConfigStore configs = new DefaultConfigStore();
-        configs.and(Compare.EQUAL, SystemGeneralConfigDO.CATEGORY, ConfigCategoryEnum.GLOBAL.getCode());
+        configs.and(Compare.EQUAL, SystemGeneralConfigDO.CONFIG_TYPE, ConfigTypeEnum.GLOBAL.getCode());
         if(CollectionUtils.isNotEmpty(configKeys)){
             configs.and(Compare.IN, SystemGeneralConfigDO.CONFIG_KEY, configKeys);
         }

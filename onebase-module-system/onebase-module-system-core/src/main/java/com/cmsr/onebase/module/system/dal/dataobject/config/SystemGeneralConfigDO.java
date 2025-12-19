@@ -6,12 +6,11 @@ import jakarta.persistence.Table;
 import lombok.Data;
 
 @Data
-@Table(name = "system_general_config")
+@Table(name = "system_config")
 public class SystemGeneralConfigDO extends TenantBaseDO {
 
-
-    public static final String CATEGORY = "category";
-    public static final String NAME = "name";
+    public static final String CONFIG_TYPE = "config_type";
+    public static final String NAME        = "name";
     public static final String CONFIG_KEY = "config_key";
     public static final String CONFIG_VALUE = "config_value";
     public static final String CORP_ID = "corp_id";
@@ -24,8 +23,8 @@ public class SystemGeneralConfigDO extends TenantBaseDO {
     /**
      * 参数分类
      */
-    @Column(name = CATEGORY)
-    private String category;
+    @Column(name = CONFIG_TYPE)
+    private String configType;
     /**
      * 参数名称
      */

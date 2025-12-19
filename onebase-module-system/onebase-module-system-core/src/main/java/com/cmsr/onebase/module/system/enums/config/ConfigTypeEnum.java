@@ -9,7 +9,7 @@ import java.util.Arrays;
  * 角色标识枚举
  */
 @Getter
-public enum ConfigCategoryEnum  implements ArrayValuable<String> {
+public enum ConfigTypeEnum implements ArrayValuable<String> {
 
     TENANT("tenant", "空间"),
     CORP("corp", "企业"),
@@ -17,7 +17,7 @@ public enum ConfigCategoryEnum  implements ArrayValuable<String> {
     GLOBAL("global", "全局"),
     ;
 
-    ConfigCategoryEnum(String code, String name) {
+    ConfigTypeEnum(String code, String name) {
         this.code = code;
         this.name = name;
     }
@@ -31,7 +31,7 @@ public enum ConfigCategoryEnum  implements ArrayValuable<String> {
      */
     private final String name;
 
-    public static final String[] ARRAYS = Arrays.stream(values()).map(ConfigCategoryEnum::getCode).toArray(String[]::new);
+    public static final String[] ARRAYS = Arrays.stream(values()).map(ConfigTypeEnum::getCode).toArray(String[]::new);
 
 
     @Override
