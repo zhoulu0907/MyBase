@@ -23,7 +23,6 @@ import {
   STATUS_VALUES,
   usePageEditorSignal
 } from '@onebase/ui-kit';
-import { useAppEntityStore } from '@onebase/ui-kit/src/signals/store_entity';
 import { ENTITY_TYPE_VALUE } from '@onebase/app';
 import { EditRender, PreviewRender } from '@/components/render';
 import CompDeleteIcon from '@/assets/images/app_delete.svg';
@@ -37,7 +36,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
   useSignals();
 
   const { id, label, tooltip, status, subTableConfig, verify, runtime = true, detailMode, pageType, form, editLoading, useStoreSignals, editPreview } = props;
-  const { mainEntity, subEntities } = useAppEntityStore();
+  const { mainEntity, subEntities } = useStoreSignals;
 
   const {
     curComponentID,
@@ -324,13 +323,13 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                     {subTableComponents &&
                       subTableComponents[id] &&
                       subTableComponents[id].map((subTable: any) => {
-                        const schema = pageComponentSchemas[subTable.id];
-
-                        const config = {
-                          ...schema.config,
-                          dataField: [`${id}.${item.key}.${schema.config?.dataField?.[1] || subTable.id}`]
+                        const config = pageComponentSchemas[subTable.id].config;
+                        const [_subTableName, fieldName] = config.dataField;
+                        const newConfig = {
+                          ...config,
+                          dataField: [mainEntity.tableName, `${id}.${index}.${fieldName}`]
                         };
-                        const pageSchema = { ...schema, config };
+                        const pageSchema = { ...pageComponentSchemas[subTable.id], config: newConfig };
                         return (
                           <Cell label={<Ellipsis text={config.cpName} />} key={subTable.id} style={{ padding: 0 }}>
                             <PreviewRender

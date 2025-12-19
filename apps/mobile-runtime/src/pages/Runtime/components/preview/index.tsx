@@ -13,6 +13,8 @@ import {
   PageType,
   queryFlowExecForm,
   TRIGGER_EVENTS,
+  type AppEntities,
+  type AppEntity,
   type AppEntityField,
   type DetailMethodV2Params,
   type GetPageSetIdReq,
@@ -29,7 +31,6 @@ import {
   SHOW_COMPONENT_TYPES,
   STATUS_OPTIONS,
   STATUS_VALUES,
-  useFormEditorSignal,
   usePageEditorSignal,
   type GridItem
 } from '@onebase/ui-kit';
@@ -47,6 +48,8 @@ import styles from './index.module.less';
 interface PreviewProps {
   menuId: string;
   runtime: boolean;
+  mainEntity: AppEntity;
+  subEntities: AppEntities;
 }
 
 const colorConfig = {
@@ -61,7 +64,7 @@ const ghostBgColor = {
   disabled: '#FFF'
 };
 
-const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
+const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, mainEntity, subEntities: subEntitiesValues }) => {
   useSignals();
 
   const [form] = useForm();
@@ -613,7 +616,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
                             showFromPageData={() => {
                               setPageType(EDITOR_TYPES.FORM_EDITOR);
                             }}
-                            useStoreSignals={pageEditorSignal}
+                            useStoreSignals={{ ...pageEditorSignal, mainEntity, subEntities: subEntitiesValues }}
                           />
                         </div>
                       )}

@@ -125,13 +125,16 @@ const AppsList: React.FC<{ treeData: TreeNode[] }> = ({ treeData }) => {
     const sp = new URLSearchParams(location.search);
     sp.set('curMenu', String(item.id));
     setCurMenu({
+      ...item,
       id: item.id || '',
+      menuUuid: item.menuUuid,
       menuCode: item.key,
       menuSort: item.menuSort,
       menuType: item.menuType,
       menuName: item.title,
       menuIcon: item.icon || '',
       isVisible: item.isVisible || 0,
+      pagesetType: item.entityUuid,
       children: []
     });
     // sp.delete('curTab');

@@ -1,7 +1,9 @@
-import { useI18n } from '@/hooks/useI18n';
+// import { useI18n } from '@/hooks/useI18n';
 import { Grid } from '@arco-design/mobile-react';
 import {
+  getAppNavigationConfig,
   listApplicationMenu,
+  menuSignal,
   MenuType,
   TASKMENU_TYPE,
   VisibleType,
@@ -11,7 +13,7 @@ import {
 import { TokenManager } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import ellipse from '../../../../assets/images/home/ellipse.svg';
 import curb from '../../../../assets/images/home/curb.png';
 import topcates1 from '../../../../assets/images/home/topcates-1.svg';
@@ -35,6 +37,10 @@ const Home: React.FC<{ nickname: string }> = ({ nickname }) => {
   useSignals();
   const navigate = useNavigate();
   const location = useLocation();
+
+  const [search] = useSearchParams();
+  const curMenuId = search.get('curMenu');
+  const { setCurMenu } = menuSignal;
 
   const { appId } = useParams<{ appId?: string }>();
 
@@ -73,6 +79,47 @@ const Home: React.FC<{ nickname: string }> = ({ nickname }) => {
     const pageList = resPageList; //getMenuArr().concat(resPageList);
     const treeData = convertMenuToTreeData(pageList);
     setTreeData(treeData);
+    // 如果菜单列表不为空，默认选中第一个菜单
+    if (pageList && pageList.length > 0) {
+      // 初始化页面没有curMenuId就处理第一个菜单为分组的情况 分组里没有页面的情况
+
+      const appNavigationConfig = await getAppNavigationConfig({
+        id: appID
+      });
+
+      if (appNavigationConfig.webDefaultMenu === 'default' || appNavigationConfig.webDefaultMenu === '') {
+        const curMenuObj = curMenuId ? findMenuWithParents(pageList, [], curMenuId) : findMenuWithParents(pageList, []);
+        if (curMenuObj) {
+          setCurMenu(curMenuObj.node);
+          sessionStorage.setItem('ENTITY_UUID', curMenuObj.node.entityUuid);
+        }
+      } else {
+        const curMenuObj = findMenuWithParents(pageList, [], appNavigationConfig.webDefaultMenu);
+        if (curMenuObj) {
+          setCurMenu(curMenuObj.node);
+          sessionStorage.setItem('ENTITY_UUID', curMenuObj.node.entityUuid);
+        }
+      }
+    }
+  };
+
+  //返回当前 menu 对象和链路上所有父节点 code
+  const findMenuWithParents = (
+    nodes: ApplicationMenu[],
+    accIds: string[],
+    targetId?: string
+  ): { node: ApplicationMenu; parentIds: string[] } | null => {
+    for (const n of nodes) {
+      if (targetId ? n.id === targetId || n.menuUuid === targetId : n.menuType === MenuType.PAGE) {
+        return { node: n, parentIds: accIds };
+      }
+
+      if (n.children && n.children.length) {
+        const res = findMenuWithParents(n.children, accIds.concat(n.menuCode), targetId);
+        if (res) return res;
+      }
+    }
+    return null;
   };
 
   const convertMenuToTreeData = (menus: ApplicationMenu[]): any[] => {
@@ -82,6 +129,7 @@ const Home: React.FC<{ nickname: string }> = ({ nickname }) => {
       icon: menu.menuIcon,
       title: menu.menuName,
       isVisible: menu.isVisible,
+      entityUuid: menu.entityUuid,
       isPage: menu.menuType === MenuType.PAGE,
       // title1: (
       //   <RuntimeMenuItem
