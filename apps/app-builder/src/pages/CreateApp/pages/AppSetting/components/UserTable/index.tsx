@@ -155,7 +155,7 @@ const UserMembers = (props: IProps) => {
         res = await getDeptUser(params);
       } else {
         // 外部用户List TODO
-        // res = await getDeptUser(params);
+        res = await getDeptUser(params, RoleType.OUTERUSER);
       }
 
       setDeptData(res);
