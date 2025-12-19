@@ -309,7 +309,7 @@ const XTable = memo(
                   );
 
                   if (dataFieldInfo && _record[dataFieldInfo.fieldName]) {
-                    dataField = [mainMetaData.tableName, `${id}.${index}.${dataFieldInfo.fieldName}`];
+                    dataField = [mainMetaData.tableName, `${mainMetaData.tableName}.${index}.${dataFieldInfo.fieldName}`];
                   }
                 }
 
@@ -320,7 +320,7 @@ const XTable = memo(
                     dataField:
                       dataField?.length > 0
                         ? dataField
-                        : [mainMetaData.tableName, `${id}.${index}.${column.dataIndex}`],
+                        : [mainMetaData.tableName, `${mainMetaData.tableName}.${index}.${column.dataIndex}`],
                     label: {
                       display: false,
                       text: ''
@@ -493,18 +493,6 @@ const XTable = memo(
               }
             }
 
-            // 多选字段回显 逗号分割
-            const multiSelectField = mainMetaData.parentFields.find(
-              (field: AppEntityField) =>
-                field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE
-            );
-            if (multiSelectField && newItem[key]) {
-              if (Array.isArray(newItem[key])) {
-                newItem[key] =
-                  newItem[key].length > 1 ? newItem[key].map((item: string) => item).join(', ') : newItem[key];
-              }
-            }
-
             // // 部门选择单选 TODO
             // const deptSelectField = mainMetaData.parentFields.find(
             //   (field: AppEntityField) =>
@@ -528,7 +516,7 @@ const XTable = memo(
 
       console.log('newTableData: ', newTableData);
 
-      tableForm.setFieldsValue({ [id]: newTableData });
+      tableForm.setFieldsValue({ [mainMetaData.tableName]: newTableData });
       setTableData(newTableData);
       setTableTotal(total);
     };

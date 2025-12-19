@@ -15,8 +15,14 @@ import {
 import { IconDelete, IconLaunch, IconMoreVertical, IconPlus } from '@arco-design/web-react/icon';
 import { FieldType, InteractionActionType, VALIDATION_TYPE } from '@onebase/app';
 import { listToTree } from '@onebase/common';
-import { getDeptList, getSimpleUserPage } from '@onebase/platform-center';
-import { FORM_COMPONENT_TYPES, useFormEditorSignal, usePageViewEditorSignal } from '@onebase/ui-kit';
+import { getDeptList, getSimpleUserPage, type DictData } from '@onebase/platform-center';
+import {
+  getFieldOptionsConfig,
+  FORM_COMPONENT_TYPES,
+  useFormEditorSignal,
+  usePageViewEditorSignal,
+  useAppEntityStore
+} from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
@@ -86,6 +92,7 @@ interface Rule {
 
 const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, onCancel, onOk }) => {
   useSignals();
+  const { mainEntity, subEntities } = useAppEntityStore();
   const { components, pageComponentSchemas } = useFormEditorSignal;
   const { curViewId, pageViews, updatePageView } = usePageViewEditorSignal;
 
@@ -254,7 +261,7 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
     });
   };
 
-  const renderValueFormItem: any = (cpId: string) => {
+  const renderValueFormItem: any = async (cpId: string) => {
     const component = components.value.find((item: any) => item?.id === cpId);
     if (component?.type) {
       switch (component?.type) {
@@ -262,8 +269,27 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
         case FORM_COMPONENT_TYPES.SELECT_MUTIPLE:
         case FORM_COMPONENT_TYPES.RADIO:
         case FORM_COMPONENT_TYPES.CHECKBOX:
-          const options = pageComponentSchemas.value[cpId]?.config?.defaultOptionsConfig?.defaultOptions || [];
-          return <Select options={options} placeholder="请选择静态值" />;
+          const dataField = pageComponentSchemas.value[cpId]?.config.dataField;
+          const [tableName, fieldName] = dataField;
+          let options: DictData[] = [];
+          const index = fieldName?.indexOf('.');
+          const lastIndex = fieldName?.lastIndexOf('.');
+          if (index !== -1) {
+            const subTableName = fieldName.slice(0, index);
+            const subFieldName = lastIndex === -1 ? fieldName : fieldName.slice(lastIndex + 1);
+            options = await getFieldOptionsConfig([subTableName, subFieldName], mainEntity, subEntities);
+          } else {
+            options = await getFieldOptionsConfig(dataField, mainEntity, subEntities);
+          }
+          return (
+            <Select options={options} placeholder="请选择静态值">
+              {options.map((ele, index: number) => (
+                <Select.Option key={index} value={ele.id}>
+                  {ele.label}
+                </Select.Option>
+              ))}
+            </Select>
+          );
         case FORM_COMPONENT_TYPES.USER_SELECT:
           return (
             <Select placeholder="请选择人员" allowClear showSearch={true} onPopupScroll={scrollHandler}>
