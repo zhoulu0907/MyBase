@@ -141,30 +141,33 @@ public class FlowProcessManager {
         for (FlowProcessDO flowProcessDO : flowProcessDOS) {
             startSchedulingJob(flowProcessDO);
         }
+        Map<Long, List<FlowProcessDO>> applicationProcessMap = flowProcessDOS.stream().collect(Collectors.groupingBy(FlowProcessDO::getApplicationId));
+        for (Map.Entry<Long, List<FlowProcessDO>> entry : applicationProcessMap.entrySet()) {
+            Long applicationId = entry.getKey();
+            List<FlowProcessDO> dos = entry.getValue();
+            cleanApplicationJob(applicationId, dos);
+        }
     }
 
     @SneakyThrows
     private void stopApplicationJob(Long applicationId) {
-        RLock lock = redissonClient.getLock(FlowUtils.toRedisProcessLockKey(applicationId));
-        if (lock.tryLock(120, TimeUnit.SECONDS)) {
-            try {
-                jobSchedulerClient.deleteJob(applicationId);
-            } finally {
-                lock.unlock();
-            }
-        }
+        lockExecute(applicationId, () -> {
+            jobSchedulerClient.deleteJob(applicationId);
+        });
     }
 
     private void cleanApplicationJob(Long applicationId, List<FlowProcessDO> flowProcessDOS) {
-        Set<Long> newIds = flowProcessDOS.stream().map(FlowProcessDO::getId).collect(Collectors.toSet());
-        Set<Long> oldIds = jobSchedulerClient.queryProcessIds(applicationId);
-        oldIds.removeAll(newIds);
-        for (Long oldId : oldIds) {
-            log.info("删除遗留的job: {}-{}", applicationId, oldId);
-            jobSchedulerClient.deleteJob(applicationId, oldId);
-            flowProcessTimeRepository.deleteByProcessId(oldId);
-            flowProcessDateFieldRepository.deleteByProcessId(oldId);
-        }
+        lockExecute(applicationId, () -> {
+            Set<Long> newIds = flowProcessDOS.stream().map(FlowProcessDO::getId).collect(Collectors.toSet());
+            Set<Long> oldIds = jobSchedulerClient.queryProcessIds(applicationId);
+            oldIds.removeAll(newIds);
+            for (Long oldId : oldIds) {
+                log.info("删除遗留的job: {}-{}", applicationId, oldId);
+                jobSchedulerClient.deleteJob(applicationId, oldId);
+                flowProcessTimeRepository.deleteByProcessId(oldId);
+                flowProcessDateFieldRepository.deleteByProcessId(oldId);
+            }
+        });
     }
 
     private void onProcessUpdate(FlowProcessDO processDO, boolean sync) {
@@ -198,38 +201,21 @@ public class FlowProcessManager {
 
     @SneakyThrows
     private void stopSchedulingJob(Long applicationId, Long processId) {
-        RLock lock = redissonClient.getLock(FlowUtils.toRedisProcessLockKey(processId));
-        if (lock.tryLock(120, TimeUnit.SECONDS)) {
-            try {
-                log.info("流程流程任务：{}-{}", applicationId, processId);
-                jobSchedulerClient.deleteJob(applicationId, processId);
-            } finally {
-                lock.unlock();
-            }
-        }
+        lockExecute(applicationId, () -> {
+            log.info("流程流程任务：{}-{}", applicationId, processId);
+            jobSchedulerClient.deleteJob(applicationId, processId);
+        });
     }
 
     @SneakyThrows
     private void startSchedulingJob(FlowProcessDO flowProcessDO) {
-        if (FlowTriggerTypeEnum.isTime(flowProcessDO.getTriggerType())) {
-            RLock lock = redissonClient.getLock(FlowUtils.toRedisProcessLockKey(flowProcessDO.getId()));
-            if (lock.tryLock(60, TimeUnit.SECONDS)) {
-                try {
-                    startTimeJob(flowProcessDO);
-                } finally {
-                    lock.unlock();
-                }
+        lockExecute(flowProcessDO.getApplicationId(), () -> {
+            if (FlowTriggerTypeEnum.isTime(flowProcessDO.getTriggerType())) {
+                startTimeJob(flowProcessDO);
+            } else if (FlowTriggerTypeEnum.isDateField(flowProcessDO.getTriggerType())) {
+                startDateFieldJob(flowProcessDO);
             }
-        } else if (FlowTriggerTypeEnum.isDateField(flowProcessDO.getTriggerType())) {
-            RLock lock = redissonClient.getLock(FlowUtils.toRedisProcessLockKey(flowProcessDO.getId()));
-            if (lock.tryLock(60, TimeUnit.SECONDS)) {
-                try {
-                    startDateFieldJob(flowProcessDO);
-                } finally {
-                    lock.unlock();
-                }
-            }
-        }
+        });
     }
 
     private void startTimeJob(FlowProcessDO flowProcessDO) {
@@ -317,5 +303,17 @@ public class FlowProcessManager {
         return jobCreateRequest;
     }
 
+    private void lockExecute(Long applicationId, Runnable runnable) {
+        RLock lock = redissonClient.getLock(FlowUtils.toRedisFlowLockKey(applicationId));
+        try {
+            if (lock.tryLock(120, TimeUnit.SECONDS)) {
+                runnable.run();
+            }
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        } finally {
+            lock.unlock();
+        }
+    }
 
 }
