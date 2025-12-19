@@ -254,7 +254,7 @@ public class SemanticDynamicDataApiImpl implements SemanticDynamicDataApi {
                 mergeBody.set(e.getKey(), e.getValue());
             }
         }
-        SemanticRecordDTO record = semanticMergeRecordAssembler.assembleMergeBody(tableName, mergeBody, null, null,
+        SemanticRecordDTO record = semanticMergeRecordAssembler.assembleMergeBody(tableName, mergeBody, null, body.getTraceId(),
                 SemanticMethodCodeEnum.CREATE, SemanticDataMethodOpEnum.CREATE);
         // 2) 考虑后台调用，暂不初始化权限上下文初始化
         // semanticPermissionContextLoader.loadPermissionContext(record);
