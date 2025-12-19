@@ -4,7 +4,7 @@
 # 确保先在AuthController.http中登录获取token
 
 ### 登录接口
-POST {{baseUrl}}/sys/login
+POST {{baseUrl}}/dashboard/sys/login
 Authorization: Bearer {{token}}
 Content-Type: application/json
 tenant-id: {{adminTenantId}}
@@ -12,7 +12,7 @@ tenant-id: {{adminTenantId}}
 {"username":"admin","password":"admin"}
 
 ### 登出接口
-GET http://localhost:8080/api/goview/sys/logout
+GET {{baseUrl}}/dashboard/sys/logout
 
 ### 获取OSS信息接口
-GET http://localhost:8080/api/goview/sys/getOssInfo
+GET {{baseUrl}}/dashboard/sys/getOssInfo

@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class SysFileServiceImpl extends ServiceImpl<SysFileMapper, SysFile> implements ISysFileService {
+
 	@Autowired
 	private SysFileMapper sysFileMapper;
 

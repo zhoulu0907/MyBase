@@ -17,6 +17,7 @@ import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import jakarta.annotation.security.PermitAll;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,8 +41,8 @@ import java.util.Map.Entry;
  */
 @Api(value = "文件上传")
 @RestController
-@RequestMapping("/api/file")
-@Component("fileControllerV2")
+@RequestMapping("/dashboard/file")
+@Component("dashboardFileController")
 @Slf4j
 public class FileController extends BaseController {
 
@@ -57,7 +58,8 @@ public class FileController extends BaseController {
 	 * @return
 	 */
 	@ApiOperation(value = "删除", notes = "删除")
-	@DeleteMapping("/remove")
+	@PostMapping("/remove")
+	@PermitAll
 	public AjaxResult remove(String ids){
 		Boolean b=iSysFileService.removeByIds(StrUtil.split(ids, ',',-1));
 		if(b){
@@ -69,7 +71,8 @@ public class FileController extends BaseController {
 
 
 	@ApiOperation(value = "修改", notes = "修改")
-	@PutMapping("/update")
+	@PostMapping("/update")
+	@PermitAll
 	public AjaxResult update(String id,@RequestBody MultipartFile object) throws IllegalStateException, IOException{
 		SysFile sysFile=iSysFileService.getById(id);
 		if(sysFile!=null){
@@ -84,11 +87,11 @@ public class FileController extends BaseController {
 	/**
 	 * 上传文件
 	 * @param object 文件流对象
-	 * @param bucketName 桶名
 	 * @return
 	 * @throws Exception
 	 */
 	@PostMapping("/upload")
+	@PermitAll
 	public AjaxResult upload(@RequestBody MultipartFile object) throws IOException{
 		String fileName = object.getOriginalFilename();
 		//默认文件格式
@@ -131,10 +134,10 @@ public class FileController extends BaseController {
 
 	/**
 	 * Base64字符串转成图片
-	 * @param str
 	 * @throws IOException
 	 */
 	@PostMapping("/uploadbase64")
+	@PermitAll
 	public synchronized AjaxResult uploadbase64(String base64str) throws IOException{
 		if(StrUtil.isNotBlank(base64str)){
 			String suffixName=v2Config.getDefaultFormat();
@@ -174,10 +177,10 @@ public class FileController extends BaseController {
 	 * 定制方法
 	 * 根据关键字与相对路径获取文件内容
 	 * @param key 访问关键字
-	 * @param rpf 相对路径+文件名字
 	 * @return
 	 */
 	@PostMapping("/getFileText")
+	@PermitAll
 	public AjaxResult getFileText(String key,String relativePath){
 		String absolutePath= v2Config.getXnljmap().get(key).replace("file:", "");
 		String fileurl=absolutePath+relativePath;
@@ -197,11 +200,11 @@ public class FileController extends BaseController {
 	 * 定制方法
 	 * 根据关键字与相对路径获取文件内容
 	 * @param key 访问关键字
-	 * @param rpf 相对路径+文件名字
 	 * @return
 	 * @throws IOException
 	 */
 	@PostMapping("/getFileText302")
+	@PermitAll
 	public void getFileText302(String key,String relativePath,HttpServletResponse response) throws IOException{
 		String str=v2Config.getHttpurl()+key+"/"+relativePath;
 		response.sendRedirect(str);
@@ -214,11 +217,11 @@ public class FileController extends BaseController {
 	/**
 	 * 覆盖上传文件 key与指定路径
 	 * @param object 文件流对象
-	 * @param bucketName 桶名
 	 * @return
 	 * @throws Exception
 	 */
 	@PostMapping("/coverupload")
+	@PermitAll
 	public AjaxResult coverupload(@RequestBody MultipartFile object,String key,String relativePath) throws IOException{
 
 		String fileName = object.getOriginalFilename();
@@ -267,6 +270,7 @@ public class FileController extends BaseController {
 	 * @return
 	 */
 	@GetMapping("/getFileid/{id}")
+	@PermitAll
 	public AjaxResult getFileid(@PathVariable("id") String id){
 		SysFile sysFile=iSysFileService.getById(id);
 		if(sysFile!=null){
@@ -285,6 +289,7 @@ public class FileController extends BaseController {
 	 * @throws IOException
 	 */
 	@GetMapping("/getFileid/302/{id}")
+	@PermitAll
 	public void getFileid302(@PathVariable("id") String id,HttpServletResponse response) throws IOException{
 		SysFile sysFile=iSysFileService.getById(id);
 		if(sysFile!=null){
@@ -305,6 +310,7 @@ public class FileController extends BaseController {
 	 * @return
 	 */
 	@GetMapping("/list")
+	@PermitAll
 	public Object list(long current, long size){
 		Page<SysFile> page= new Page<SysFile>(current, size);
         return iSysFileService.page(page, new QueryWrapper());

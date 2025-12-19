@@ -56,8 +56,8 @@ public class GoviewProjectController  extends BaseController {
 
 	@ApiOperation(value = "分页跳转", notes = "分页跳转")
 	@GetMapping("/list")
-	@PermitAll
 	@ResponseBody
+	@PermitAll
 	public ResultTable list(Tablepar tablepar){
 		Page<GoviewProject> page= new Page<GoviewProject>(tablepar.getPage(), tablepar.getLimit());
         Page<GoviewProject> iPages = iGoviewProjectService.page(page, new QueryWrapper());
@@ -100,8 +100,9 @@ public class GoviewProjectController  extends BaseController {
 	 */
 	//@Log(title = "项目表删除", action = "111")
 	@ApiOperation(value = "删除", notes = "删除")
-	@DeleteMapping("/delete")
+	@PostMapping("/delete")
 	@ResponseBody
+	@PermitAll
 	public AjaxResult remove(String ids){
 		List<String> lista= ConvertUtil.toListStrArray(ids);
 		Boolean b=iGoviewProjectService.removeByIds(lista);
@@ -115,6 +116,7 @@ public class GoviewProjectController  extends BaseController {
 	@ApiOperation(value = "修改保存", notes = "修改保存")
     @PostMapping("/edit")
     @ResponseBody
+	@PermitAll
     public AjaxResult editSave(@RequestBody GoviewProject goviewProject)
     {
 		Boolean b= iGoviewProjectService.updateById(goviewProject);
@@ -128,6 +130,7 @@ public class GoviewProjectController  extends BaseController {
 	@ApiOperation(value = "项目重命名", notes = "项目重命名")
     @PostMapping("/rename")
     @ResponseBody
+	@PermitAll
     public AjaxResult rename(@RequestBody GoviewProject goviewProject)
     {
 
@@ -140,8 +143,9 @@ public class GoviewProjectController  extends BaseController {
 
 
 	//发布/取消项目状态
-    @PutMapping("/publish")
+    @PostMapping("/publish")
 	@ResponseBody
+	@PermitAll
     public AjaxResult updateVisible(@RequestBody GoviewProject goviewProject){
     	if(goviewProject.getState()==-1||goviewProject.getState()==1) {
 
@@ -157,6 +161,7 @@ public class GoviewProjectController  extends BaseController {
     @ApiOperation(value = "获取项目存储数据", notes = "获取项目存储数据")
 	@GetMapping("/getScreenDSLData")
 	@ResponseBody
+	@PermitAll
     public AjaxResult getScreenDSLData(String projectId, ModelMap map)
     {
 		GoviewProject goviewProject= iGoviewProjectService.getById(projectId);
@@ -175,6 +180,7 @@ public class GoviewProjectController  extends BaseController {
 	@ApiOperation(value = "保存项目数据", notes = "保存项目数据")
 	@PostMapping("/save/data")
 	@ResponseBody
+	@PermitAll
 	public AjaxResult saveData(GoviewProjectData data) {
 
 		GoviewProject goviewProject= iGoviewProjectService.getById(data.getProjectId());
@@ -199,6 +205,7 @@ public class GoviewProjectController  extends BaseController {
 	 * @throws Exception
 	 */
 	@PostMapping("/upload")
+	@PermitAll
 	public AjaxResult upload(@RequestBody MultipartFile object) throws IOException{
 		String fileName = object.getOriginalFilename();
 		//默认文件格式

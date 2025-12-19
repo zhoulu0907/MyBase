@@ -58,8 +58,9 @@ Content-Type: application/json
 }
 
 ### 7. 获取项目存储数据
-GET {{baseUrl}}/dashboard/getScreenDSLData?projectId={{projectId}}
-
+GET {{baseUrl}}/dashboard/getScreenDSLData?projectId=1914977381945298946
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
 ### 8. 保存项目数据
 POST {{baseUrl}}/dashboard/save/data
 Content-Type: application/json

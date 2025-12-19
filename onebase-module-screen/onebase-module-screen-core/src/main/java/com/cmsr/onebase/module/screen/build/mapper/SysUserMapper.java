@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.screen.build.mapper;
 
 import com.cmsr.onebase.module.screen.build.model.SysUser;
 import com.mybatisflex.core.BaseMapper;
+import org.apache.ibatis.annotations.Mapper;
 
 /**
  * <p>
@@ -11,6 +12,7 @@ import com.mybatisflex.core.BaseMapper;
  * @author fc
  * @since 2023-04-30
  */
+@Mapper
 public interface SysUserMapper extends BaseMapper<SysUser> {
 
 }
