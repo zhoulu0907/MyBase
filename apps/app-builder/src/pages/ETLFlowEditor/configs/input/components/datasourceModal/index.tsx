@@ -1,6 +1,7 @@
 import DatabaseIcon from '@/assets/images/etl/database.svg';
 import TableIcon from '@/assets/images/etl/table.svg';
 import TableIconActive from '@/assets/images/etl/table_active.svg';
+import CreateExternalModal from '@/components/CreateExternalModal';
 import { Button, Input, Modal, Popover, Tabs } from '@arco-design/web-react';
 import { IconPlus, IconSwap } from '@arco-design/web-react/icon';
 import {
@@ -14,7 +15,6 @@ import {
 import { etlEditorSignal, getHashQueryParam } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useState } from 'react';
-import CreateExternalModal from '../createExternalModal';
 import styles from './index.module.less';
 
 const TabPane = Tabs.TabPane;

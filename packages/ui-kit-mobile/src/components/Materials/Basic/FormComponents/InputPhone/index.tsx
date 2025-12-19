@@ -8,8 +8,9 @@ type XInputPhoneConfig = typeof FormSchema.XInputPhoneSchema.config;
 
 import '../index.css';
 
-const XInputPhone = memo((props: XInputPhoneConfig & { runtime?: boolean; detailMode?: boolean }) => {
+const XInputPhone = memo((props: XInputPhoneConfig & { runtime?: boolean; detailMode?: boolean; form?: any; }) => {
   const {
+    form,
     label,
     dataField,
     placeholder,
@@ -82,12 +83,7 @@ const XInputPhone = memo((props: XInputPhoneConfig & { runtime?: boolean; detail
     >
       {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
         // 只读模式，渲染文本内容
-        <div style={{
-          textAlign: align,
-          padding: '8px'
-        }}>
-          --
-        </div>
+        <div className="readonlyText">{form?.getFieldValue(fieldId)}</div>
       ) : (
         renderContent()
       )}

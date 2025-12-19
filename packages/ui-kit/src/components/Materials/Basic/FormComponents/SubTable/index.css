@@ -22,7 +22,7 @@
   flex: 1;
 }
 
-.componentItem {
+.subComponentItem {
   overflow: visible;
   flex: 1 0 auto;
   cursor: move;
@@ -34,7 +34,7 @@
   min-width: 200px;
 }
 /* 序号 操作 */
-.componentItem2 {
+.subComponentItem2 {
   overflow: visible;
   box-sizing: border-box;
   border: 1px solid transparent;

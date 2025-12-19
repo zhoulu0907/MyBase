@@ -12,6 +12,7 @@ interface IProps {
   data: IData;
   loading: boolean;
   visible: boolean;
+  isMultiple: boolean;
   selectedMembers: any[];
   isFromPermission?: boolean;
   selectMemberCanEmpty?: boolean;
@@ -31,6 +32,7 @@ const AddMembers = (props: IProps) => {
     data,
     loading,
     selectedMembers,
+    isMultiple,
     isFromPermission = false,
     selectMemberCanEmpty = false,
     onExpand,
@@ -94,6 +96,7 @@ const AddMembers = (props: IProps) => {
         title={title}
         data={data}
         loading={loading}
+        isMultiple={isMultiple}
         selectedMembers={selectedMembers}
         resetFlag={resetFlag}
         onExpand={onExpand}

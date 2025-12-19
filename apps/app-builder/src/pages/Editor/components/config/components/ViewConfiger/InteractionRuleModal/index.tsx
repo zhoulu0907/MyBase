@@ -15,13 +15,20 @@ import {
 import { IconDelete, IconLaunch, IconMoreVertical, IconPlus } from '@arco-design/web-react/icon';
 import { FieldType, InteractionActionType, VALIDATION_TYPE } from '@onebase/app';
 import { listToTree } from '@onebase/common';
-import { getDeptList, getSimpleUserPage } from '@onebase/platform-center';
-import { FORM_COMPONENT_TYPES, useFormEditorSignal, usePageViewEditorSignal } from '@onebase/ui-kit';
+import { getDeptList, getSimpleUserPage, type DictData } from '@onebase/platform-center';
+import {
+  getFieldOptionsConfig,
+  FORM_COMPONENT_TYPES,
+  useFormEditorSignal,
+  usePageViewEditorSignal,
+  useAppEntityStore
+} from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import styles from './index.module.less';
 import { getOperatorOptions } from './ruleMap';
+import { FormulaEditor } from '@/components/FormulaEditor';
 
 const Row = Grid.Row;
 const Col = Grid.Col;
@@ -85,6 +92,7 @@ interface Rule {
 
 const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, onCancel, onOk }) => {
   useSignals();
+  const { mainEntity, subEntities } = useAppEntityStore();
   const { components, pageComponentSchemas } = useFormEditorSignal;
   const { curViewId, pageViews, updatePageView } = usePageViewEditorSignal;
 
@@ -96,6 +104,11 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
   const [userPageNo, setUserPageNo] = useState<number>(1);
   const [userTotal, setUserTotal] = useState<number | string>(0);
   const [fetching, setFetching] = useState<boolean>(false);
+
+  // 公式
+  const [formulaVisible, setFormulaVisible] = useState<boolean>(false);
+  const [formulaFieldKey, setFormulaFieldKey] = useState<string>('');
+  const [formulaData, setFormulaData] = useState<string>('');
 
   // 获取组件下拉列表
   const getComponentOptions = () => {
@@ -248,7 +261,7 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
     });
   };
 
-  const renderValueFormItem: any = (cpId: string) => {
+  const renderValueFormItem: any = async (cpId: string) => {
     const component = components.value.find((item: any) => item?.id === cpId);
     if (component?.type) {
       switch (component?.type) {
@@ -256,8 +269,27 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
         case FORM_COMPONENT_TYPES.SELECT_MUTIPLE:
         case FORM_COMPONENT_TYPES.RADIO:
         case FORM_COMPONENT_TYPES.CHECKBOX:
-          const options = pageComponentSchemas.value[cpId]?.config?.defaultOptionsConfig?.defaultOptions || [];
-          return <Select options={options} placeholder="请选择静态值" />;
+          const dataField = pageComponentSchemas.value[cpId]?.config.dataField;
+          const [tableName, fieldName] = dataField;
+          let options: DictData[] = [];
+          const index = fieldName?.indexOf('.');
+          const lastIndex = fieldName?.lastIndexOf('.');
+          if (index !== -1) {
+            const subTableName = fieldName.slice(0, index);
+            const subFieldName = lastIndex === -1 ? fieldName : fieldName.slice(lastIndex + 1);
+            options = await getFieldOptionsConfig([subTableName, subFieldName], mainEntity, subEntities);
+          } else {
+            options = await getFieldOptionsConfig(dataField, mainEntity, subEntities);
+          }
+          return (
+            <Select options={options} placeholder="请选择静态值">
+              {options.map((ele, index: number) => (
+                <Select.Option key={index} value={ele.id}>
+                  {ele.label}
+                </Select.Option>
+              ))}
+            </Select>
+          );
         case FORM_COMPONENT_TYPES.USER_SELECT:
           return (
             <Select placeholder="请选择人员" allowClear showSearch={true} onPopupScroll={scrollHandler}>
@@ -313,6 +345,20 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
     const res = await getDeptList({});
     const treeData = listToTree(res, {}, true);
     setDeptTree(treeData);
+  };
+
+  // 公式
+  const openFormulaEditor = (fieldKey: string) => {
+    setFormulaVisible(true);
+    setFormulaData(form.getFieldValue(fieldKey)?.formulaData);
+    setFormulaFieldKey(fieldKey);
+  };
+
+  const handleFormulaConfirm = (formulaData: string, formattedFormula: string, params: any) => {
+    setFormulaVisible(false);
+    form.setFieldValue(formulaFieldKey, { formulaData: formulaData, formula: formattedFormula, parameters: params });
+    setFormulaData('');
+    setFormulaFieldKey('');
   };
 
   return (
@@ -543,7 +589,7 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
                                                             FieldType.FORMULA && (
                                                             <Form.Item field={item.field + '.value'}>
                                                               <Button
-                                                                //   onClick={() => openFormulaEditor(item.field + '.value')}
+                                                                onClick={() => openFormulaEditor(item.field + '.value')}
                                                                 long
                                                               >
                                                                 {form.getFieldValue(item.field + '.value')
@@ -720,10 +766,7 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
 
                                             {form.getFieldValue(item.field + '.operatorType') == FieldType.FORMULA && (
                                               <Form.Item field={item.field + '.value'}>
-                                                <Button
-                                                  //   onClick={() => openFormulaEditor(item.field + '.value')}
-                                                  long
-                                                >
+                                                <Button onClick={() => openFormulaEditor(item.field + '.value')} long>
                                                   {form.getFieldValue(item.field + '.value')
                                                     ? '已设置公式'
                                                     : 'ƒx 编辑公式'}
@@ -771,6 +814,13 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
           )}
         </div>
       </div>
+
+      <FormulaEditor
+        initialFormula={formulaData}
+        visible={formulaVisible}
+        onCancel={() => setFormulaVisible(false)}
+        onConfirm={handleFormulaConfirm}
+      />
     </Modal>
   );
 };

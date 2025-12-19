@@ -282,7 +282,7 @@ export const getEntityListByApp = (applicationId: string) => {
  * @returns 
  */
 export const getEntityListWithFields = (params: object) => {
-  return metadataService.post(`/business-entity/list-with-fields`, params);
+  return (isRuntimeEnv() ? runtimeMetadataService : metadataService).post(`/business-entity/list-with-fields`, params);
 };
 
 /**

@@ -1,0 +1,18 @@
+<svg width="800" height="320" viewBox="0 0 800 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="slide2Gradient" x1="0" y1="320" x2="800" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#BE4BDB"/>
+      <stop offset="1" stop-color="#FF8787"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="320" rx="24" fill="url(#slide2Gradient)"/>
+  <rect x="520" y="40" width="220" height="140" rx="20" stroke="rgba(255,255,255,0.4)" stroke-width="2" fill="rgba(255,255,255,0.08)"/>
+  <rect x="60" y="210" width="160" height="80" rx="16" stroke="rgba(255,255,255,0.3)" stroke-width="2" fill="rgba(255,255,255,0.06)"/>
+  <text x="64" y="124" fill="#FFFFFF" font-size="38" font-weight="600" font-family="Montserrat, Arial, sans-serif">
+    Launch New Campaigns
+  </text>
+  <text x="64" y="176" fill="#F8F9FA" font-size="20" font-family="Montserrat, Arial, sans-serif">
+    Keep your team aligned with visual updates.
+  </text>
+</svg>
+

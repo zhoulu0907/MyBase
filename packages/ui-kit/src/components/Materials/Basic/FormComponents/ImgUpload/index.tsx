@@ -2,7 +2,7 @@ import { Card, Form, Grid, Message, Modal, Progress, Upload, Watermark } from '@
 import { IconClose, IconDelete, IconDownload, IconEye, IconImage, IconPlus } from '@arco-design/web-react/icon';
 import { type UploadListProps } from '@arco-design/web-react/lib/Upload';
 import { attachmentDownload, attachmentUpload, menuSignal } from '@onebase/app';
-import { pagesRuntimeSignal } from '@onebase/common';
+import { isRuntimeEnv, pagesRuntimeSignal } from '@onebase/common';
 import { nanoid } from 'nanoid';
 import { memo, useEffect, useState } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
@@ -36,11 +36,11 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
 
     const progressAdapter = onProgress
       ? (progressEvent: ProgressEvent) => {
-        if (progressEvent.lengthComputable) {
-          const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-          onProgress(percent, progressEvent);
+          if (progressEvent.lengthComputable) {
+            const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            onProgress(percent, progressEvent);
+          }
         }
-      }
       : undefined;
 
     if (runtime) {
@@ -188,28 +188,28 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
   const renderUploadList = (filesList: any[], fileProps: UploadListProps) => {
     if (listType == UPLOAD_VALUES[UPLOAD_OPTIONS.TEXT]) {
       return (
-        <div className="uplaodList-text">
+        <div className="uplaodImgList-text">
           {filesList.map((file, index) => (
-            <div key={file.uid} className="uplaodList-text-item">
+            <div key={file.uid} className="uplaodImgList-text-item">
               <Watermark
                 gap={[20, 20]}
                 content={imageHandle?.addWatermark && imageHandle.watermarkText ? imageHandle.watermarkText : ''}
               >
-                <img className="uplaodList-text-item-img" src={urlList?.[index]} alt="" />
+                <img className="uplaodImgList-text-item-img" src={urlList?.[index]} alt="" />
               </Watermark>
-              <div className="uplaodList-text-item-name">{file.name}</div>
+              <div className="uplaodImgList-text-item-name">{file.name}</div>
               {file.percent && file.percent !== 100 ? (
-                <div className="uplaodList-text-item-process">
+                <div className="uplaodImgList-text-item-process">
                   <Progress color="rgb(var(--primary-7))" percent={file.percent} showText={false}></Progress>
                   <IconClose
-                    className="uplaodList-text-item-process-close"
+                    className="uplaodImgList-text-item-process-close"
                     onClick={() => {
                       handleRemoveFile(file, index, fileProps);
                     }}
                   />
                 </div>
               ) : (
-                <div className="uplaodList-text-item-opera">
+                <div className="uplaodImgList-text-item-opera">
                   <IconEye
                     onClick={() => {
                       Modal.info({
@@ -250,27 +250,27 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
     }
     if (listType == UPLOAD_VALUES[UPLOAD_OPTIONS.LIST]) {
       return (
-        <div className="uplaodList-list">
+        <div className="uplaodImgList-list">
           <Grid.Row gutter={4}>
             {filesList.map((file, index: number) => (
               <Grid.Col span={12} key={file.uid}>
-                <div className="uplaodList-list-item">
+                <div className="uplaodImgList-list-item">
                   <Watermark
                     gap={[20, 20]}
                     content={imageHandle?.addWatermark && imageHandle.watermarkText ? imageHandle.watermarkText : ''}
                   >
-                    <img className="uplaodList-list-item-img" src={urlList?.[index]} alt="" />
+                    <img className="uplaodImgList-list-item-img" src={urlList?.[index]} alt="" />
                   </Watermark>
-                  <div className="uplaodList-list-item-content">
-                    <div className="uplaodList-list-item-name">{file.name}</div>
-                    <div className="uplaodList-list-item-size">
+                  <div className="uplaodImgList-list-item-content">
+                    <div className="uplaodImgList-list-item-name">{file.name}</div>
+                    <div className="uplaodImgList-list-item-size">
                       {file?.originFile?.size || file.size ? (
                         <span>{((file?.originFile?.size || file.size) / 1024 / 1024).toFixed(2)}MB</span>
                       ) : null}
                     </div>
                   </div>
                   <IconClose
-                    className="uplaodList-list-item-close"
+                    className="uplaodImgList-list-item-close"
                     onClick={() => {
                       handleRemoveFile(file, index, fileProps);
                     }}
@@ -287,13 +287,13 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
     }
     if (listType == UPLOAD_VALUES[UPLOAD_OPTIONS.CARD]) {
       return (
-        <div className="uplaodList-card">
+        <div className="uplaodImgList-card">
           {filesList.map((file, index) => (
             <Card
               key={file.uid}
-              className="uplaodList-card-item"
+              className="uplaodImgList-card-item"
               cover={
-                <div className="uplaodList-card-item-img">
+                <div className="uplaodImgList-card-item-img">
                   <Watermark
                     gap={[20, 20]}
                     content={imageHandle?.addWatermark && imageHandle.watermarkText ? imageHandle.watermarkText : ''}
@@ -304,10 +304,10 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
               }
             >
               <Card.Meta
-                title={<div className="uplaodList-card-item-name">{file.name}</div>}
+                title={<div className="uplaodImgList-card-item-name">{file.name}</div>}
                 description={
-                  <div className="uplaodList-card-item-footer">
-                    <div className="uplaodList-card-item-size">
+                  <div className="uplaodImgList-card-item-footer">
+                    <div className="uplaodImgList-card-item-size">
                       {file?.originFile?.size || file.size ? (
                         <span>{((file?.originFile?.size || file.size) / 1024 / 1024).toFixed(2)}MB</span>
                       ) : null}
@@ -397,16 +397,22 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
                   status: 'error',
                   msg: '上传失败'
                 });
-                const newFieldList = form.getFieldValue(fieldId)
-                form.setFieldValue(fieldId, newFieldList.filter((ele: any) => ele.status !== 'error'))
+                const newFieldList = form.getFieldValue(fieldId);
+                form.setFieldValue(
+                  fieldId,
+                  newFieldList.filter((ele: any) => ele.status !== 'error')
+                );
               }
             } catch (error) {
               onError({
                 status: 'error',
                 msg: '上传失败'
               });
-              const newFieldList = form.getFieldValue(fieldId)
-              form.setFieldValue(fieldId, newFieldList.filter((ele: any) => ele.status !== 'error'))
+              const newFieldList = form.getFieldValue(fieldId);
+              form.setFieldValue(
+                fieldId,
+                newFieldList.filter((ele: any) => ele.status !== 'error')
+              );
             }
           }}
           showUploadList={{
@@ -416,7 +422,7 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean; det
             width: '100%',
             pointerEvents: runtime ? 'unset' : 'none'
           }}
-          disabled={status !== STATUS_VALUES[STATUS_OPTIONS.DEFAULT] || detailMode}
+          disabled={status !== STATUS_VALUES[STATUS_OPTIONS.DEFAULT] || detailMode || !isRuntimeEnv()}
           drag={uploadType == UPLOAD_VALUES[UPLOAD_OPTIONS.LIST]}
           renderUploadList={renderUploadList}
         >

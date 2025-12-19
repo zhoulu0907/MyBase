@@ -85,18 +85,6 @@ export interface XInputCheckboxConfig extends ICommonBaseType {
   dataField: TTextDefaultType[];
 
   /**
-   * 选项
-   */
-  defaultOptionsConfig?: {
-    type: string;
-    dictTypeId?: string;
-    disabled?: boolean;
-    defaultOptions: { label: string; value: any;[property: string]: any }[];
-    colorMode?: boolean;
-    colorModeType?: string;
-  }
-
-  /**
    * 单选框方向：水平（默认）、垂直
    * 可选值: 'vertical' | 'horizontal'
    */
@@ -174,33 +162,6 @@ const XCheckbox: XInputCheckboxSchema = {
     },
     tooltip: '',
     dataField: [],
-    defaultOptionsConfig: {
-      type: DEFAULT_OPTIONS_TYPE.CUSTOM,
-      disabled: false,
-      dictTypeId: '',
-      colorMode: false,
-      colorModeType: COLOR_MODE_TYPES.TAG,
-      defaultOptions: [
-        {
-          label: '选项一',
-          colorType: '',
-          isChosen: false,
-          value: '选项一'
-        },
-        {
-          label: '选项二',
-          colorType: '',
-          isChosen: false,
-          value: '选项二'
-        },
-        {
-          label: '选项三',
-          colorType: '',
-          isChosen: false,
-          value: '选项三'
-        }
-      ],
-    },
     direction: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
     verify: {
       required: false,

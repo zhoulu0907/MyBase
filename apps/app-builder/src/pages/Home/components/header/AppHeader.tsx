@@ -88,7 +88,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
 
   const tenantAdminMenu = (
     <Menu style={{ marginRight: '10px' }}>
-      <Menu.Item key="info" style={{ height: '90px' }}>
+      <Menu.Item key="info" style={{ height: 'auto' }}>
         <div className={styles.adminInformation}>
           <UserProfileAvatar adminInfo={adminInfo} />
           <Typography.Text>{adminInfo?.nickname}</Typography.Text>

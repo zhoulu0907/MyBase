@@ -14,6 +14,7 @@ import DynamicIcon from '@/components/DynamicIcon';
 import { iconMap } from '@/utils/const';
 import { IconPlus, IconRefresh } from '@arco-design/web-react/icon';
 import {
+  CATEGORY_TYPE,
   dataMethodDeleteV2,
   dataMethodPageV2,
   DeleteMethodV2Params,
@@ -21,6 +22,9 @@ import {
   menuSignal,
   PageMethodV2Params,
   getFormDataPage,
+  queryFlowExecForm,
+  TRIGGER_EVENTS,
+  VALIDATION_TYPE,
   type AppEntityField
 } from '@onebase/app';
 import {
@@ -80,9 +84,11 @@ const XTable = memo(
     }
   ) => {
     useSignals();
+
     const { pageComponentSchemas: fromPageComponentSchemas, components } = useFormEditorSignal;
 
-    const { setDrawerVisible, setDrawerPageId, setDetailPageViewId, setRowDataId, setBpmInstanceId } = pagesRuntimeSignal;
+    const { curPage, setDrawerVisible, setDrawerPageId, setDetailPageViewId, setRowDataId, setFlows,setBpmInstanceId } =
+      pagesRuntimeSignal;
     const { runtime = true, showFromPageData, showAddBtn = true, preview } = props;
     const hasOperationPermission = true;
 
@@ -304,7 +310,7 @@ const XTable = memo(
                   );
 
                   if (dataFieldInfo && _record[dataFieldInfo.fieldName]) {
-                    dataField = [mainMetaData.tableName, `${id}.${index}.${dataFieldInfo.fieldName}`];
+                    dataField = [mainMetaData.tableName, `${mainMetaData.tableName}.${index}.${dataFieldInfo.fieldName}`];
                   }
                 }
 
@@ -315,7 +321,7 @@ const XTable = memo(
                     dataField:
                       dataField?.length > 0
                         ? dataField
-                        : [mainMetaData.tableName, `${id}.${index}.${column.dataIndex}`],
+                        : [mainMetaData.tableName, `${mainMetaData.tableName}.${index}.${column.dataIndex}`],
                     label: {
                       display: false,
                       text: ''
@@ -336,6 +342,7 @@ const XTable = memo(
                     detailMode={true}
                     pageComponentSchema={componentConfig}
                     runtime={true}
+                    recordId={_record.id}
                   />
                 );
               }
@@ -406,7 +413,6 @@ const XTable = memo(
 
     // 查询
     const handleSearch = () => {
-      queryData = form.getFieldsValue();
       setTablePageNo(1);
       handlePage();
     };
@@ -424,16 +430,43 @@ const XTable = memo(
         return;
       }
 
+      queryData = form.getFieldsValue();
+
       // TODO(mickey): 后续调试
       // if (sortByObject?.fieldName) {
       //   req.sortField = sortByObject.fieldName;
       //   req.sortDirection = sortByObject.sortBy === 1 ? 'asc' : 'desc';
       // }
-      
+
+      // TODO(mickey): 考虑模糊查询和范围查询
+      const conditions: any[] = [];
+      Object.entries(queryData).forEach(([key, value]) => {
+        if (typeof value === 'object') {
+          if (value?.id == undefined || value?.id == null || value?.id == '') {
+            return;
+          }
+        }
+
+        if (value != undefined && value != null && value !== '') {
+          conditions.push({
+            nodeType: 'CONDITION',
+            fieldName: key,
+            operator: VALIDATION_TYPE.EQUALS,
+            fieldValue: typeof value === 'object' ? [value.id] : [value]
+          });
+        }
+      });
+
+      const filters = {
+        nodeType: 'GROUP',
+        combinator: 'AND',
+        children: conditions
+      };
+
       const req: PageMethodV2Params = {
         pageNo: tablePageNo,
         pageSize: pageSize || 10,
-        filters: filterCondition
+        filters: filters
       };
       let res:any
       if (advancedRowRedirect&&redirectMethod === RedirectMethod.DRAWER) {
@@ -470,18 +503,6 @@ const XTable = memo(
               }
             }
 
-            // 多选字段回显 逗号分割
-            const multiSelectField = mainMetaData.parentFields.find(
-              (field: AppEntityField) =>
-                field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE
-            );
-            if (multiSelectField && newItem[key]) {
-              if (Array.isArray(newItem[key])) {
-                newItem[key] =
-                  newItem[key].length > 1 ? newItem[key].map((item: string) => item).join(', ') : newItem[key];
-              }
-            }
-
             // // 部门选择单选 TODO
             // const deptSelectField = mainMetaData.parentFields.find(
             //   (field: AppEntityField) =>
@@ -505,7 +526,7 @@ const XTable = memo(
 
       console.log('newTableData: ', newTableData);
 
-      tableForm.setFieldsValue({ [id]: newTableData });
+      tableForm.setFieldsValue({ [mainMetaData.tableName]: newTableData });
       setTableData(newTableData);
       setTableTotal(total);
     };
@@ -514,6 +535,18 @@ const XTable = memo(
       if (!runtime) {
         return;
       }
+      const curFormPage = curPage.value?.pages?.find((ele: any) => ele.pageType === CATEGORY_TYPE.LIST);
+      console.log('curFormPage: ', curFormPage);
+      const pageId = curFormPage?.id;
+
+      const flowRes = pageId ? await queryFlowExecForm(pageId) : [];
+      console.log('flowRes: ', flowRes);
+
+      const deleteFlows = (flowRes || []).filter(
+        (ele: any) => ele.recordTriggerEvents && ele.recordTriggerEvents.includes(TRIGGER_EVENTS.DELETE)
+      );
+      setFlows(deleteFlows);
+
       console.log('删除数据 id: ', id);
 
       const req: DeleteMethodV2Params = {

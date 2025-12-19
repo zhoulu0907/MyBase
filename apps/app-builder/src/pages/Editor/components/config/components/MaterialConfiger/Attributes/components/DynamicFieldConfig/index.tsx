@@ -33,8 +33,6 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({
   configs
 }) => {
   useSignals();
-  const autoCodeKey = 'autoCodeConfig';
-  const autoCodeDisabledKey = 'autoCodeDisabled';
   const { curComponentSchema, components, pageComponentSchemas, setPageComponentSchemas } = usePageEditorSignal();
   const { subTableComponents } = useFormEditorSignal;
   const { mainEntity, subEntities } = useAppEntityStore();
@@ -123,16 +121,13 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({
     }
   };
 
-  const handleDefaultOptions = async (value: (string | string[])[]) => {
-    const type = components.find((ele: any) => ele.id === configs.id)?.type;
-
+  const handleDefaultConfig = async (value: (string | string[])[]) => {
     const isMainEntity = value?.includes(mainEntity.tableName);
     const currentMainField = mainEntity.fields?.find((ele: AppEntityField) => value.includes(ele.fieldName));
     const isSubEntity = subEntities.entities?.find((ele: any) => value?.includes(ele.tableName));
     const currentSubField = isSubEntity?.fields.find((ele: AppEntityField) => value.includes(ele.fieldName));
 
     if (isMainEntity && currentMainField) {
-      const newConfig = await getDefaultOptions(currentMainField, type);
       // 主表
       const newConfigs = {
         ...configs,
@@ -145,15 +140,9 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({
         },
         constraints: currentMainField.constraints,
         [item.key]: value,
-        // 自动编号
-        [autoCodeKey]: type === FORM_COMPONENT_TYPES.AUTO_CODE ? { ...currentMainField.autoNumberConfig } : undefined,
-        [autoCodeDisabledKey]:
-          type === FORM_COMPONENT_TYPES.AUTO_CODE ? (currentMainField?.autoNumberConfig?.id ? true : false) : undefined,
-        defaultOptionsConfig: { ...configs.defaultOptionsConfig, ...newConfig }
       };
       handleConfigsChange(newConfigs);
     } else if (isSubEntity && currentSubField) {
-      const newConfig = await getDefaultOptions(currentSubField, type);
       // 子表
       const newConfigs = {
         ...configs,
@@ -166,53 +155,12 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({
         },
         constraints: currentSubField.constraints,
         [item.key]: value,
-        // 自动编号
-        [autoCodeKey]: type === FORM_COMPONENT_TYPES.AUTO_CODE ? { ...currentSubField.autoNumberConfig } : undefined,
-        [autoCodeDisabledKey]:
-          type === FORM_COMPONENT_TYPES.AUTO_CODE ? (currentSubField?.autoNumberConfig?.id ? true : false) : undefined,
-        //  字段选项列表（单/多选）
-        defaultOptionsConfig: { ...configs.defaultOptionsConfig, ...newConfig }
       };
       handleConfigsChange(newConfigs);
     } else {
       // 未找到字段对应配置
       handlePropsChange(item.key, value);
     }
-  };
-
-  const getDefaultOptions = async (field: any, type: string) => {
-    if (
-      type !== FORM_COMPONENT_TYPES.SELECT_ONE &&
-      type !== FORM_COMPONENT_TYPES.SELECT_MUTIPLE &&
-      type !== FORM_COMPONENT_TYPES.RADIO &&
-      type !== FORM_COMPONENT_TYPES.CHECKBOX
-    ) {
-      return {};
-    }
-    let newConfig: any = {
-      defaultOptions: []
-    };
-    if (field.dictTypeId) {
-      const res = await getDictDetail(field.dictTypeId);
-      const dictDataList = res?.type ? await getDictDataListByType(res.type) : [];
-      const dictOptions = dictDataList?.filter((e: any) => e.status === 1); // 只显示启用状态的字典数据
-      if (dictOptions.length) {
-        newConfig.type = DEFAULT_OPTIONS_TYPE.DICT;
-        newConfig.disabled = true;
-        newConfig.dictTypeId = field.dictTypeId;
-        newConfig.colorMode = true;
-        newConfig.colorModeType = COLOR_MODE_TYPES.POINT;
-        newConfig.defaultOptions = dictOptions;
-      }
-    } else if (field.options?.length) {
-      newConfig.type = DEFAULT_OPTIONS_TYPE.CUSTOM;
-      newConfig.disabled = true;
-      newConfig.defaultOptions = field.options?.map((e: any) => ({
-        label: e.optionLabel,
-        value: e.optionValue
-      }));
-    }
-    return newConfig;
   };
 
   return (
@@ -234,7 +182,7 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({
         }
         onChange={(value) => {
           handleDataFieldChange(value);
-          handleDefaultOptions(value);
+          handleDefaultConfig(value);
         }}
       />
     </FormItem>

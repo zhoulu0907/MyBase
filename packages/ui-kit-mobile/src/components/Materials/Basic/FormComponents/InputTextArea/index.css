@@ -38,7 +38,7 @@
 
     &:hover,
     &:focus {
-      border: none;
+      border-color: transparent;
       background-color: transparent !important;
     }
   }

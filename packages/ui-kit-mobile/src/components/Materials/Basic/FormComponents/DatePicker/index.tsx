@@ -1,5 +1,6 @@
 import { memo } from 'react';
 import { nanoid } from 'nanoid';
+import dayjs from 'dayjs';
 import { DatePicker, Ellipsis, Form } from '@arco-design/mobile-react';
 import { ItemType } from '@arco-design/mobile-react/cjs/date-picker';
 import { ValidatorType, ITypeRules } from '@arco-design/mobile-utils';
@@ -52,6 +53,8 @@ const XDatePicker = memo((props: XDatePickerConfig & { runtime?: boolean; detail
         title={label.text}
         typeArr={mode}
         maskClosable
+        minTs={new Date(1900, 0, 1).getTime()}
+        maxTs={new Date(2099, 11, 31).getTime()}
         formatter={(value, type) => {
           const map = {
             year: '年',
@@ -92,7 +95,7 @@ const XDatePicker = memo((props: XDatePickerConfig & { runtime?: boolean; detail
       }}
     >
       {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
-        <div>--</div>
+        <div className="readonlyText">{dayjs(form?.getFieldValue(fieldId)).format('YYYY-MM-DD')}</div>
       ) : (
         renderDatePicker()
       )}

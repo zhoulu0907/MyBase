@@ -9,7 +9,7 @@ import {
   MenuType,
   runtimeListApplicationBPMMenu,
   VisibleType,
-  getEntityFieldsWithChildren,
+  getEntityListWithFields,
   ENTITY_TYPE,
   type ChildEntity,
   type ApplicationMenu,
@@ -118,15 +118,17 @@ const Runtime: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    getMainMetaData();
+    if (curMenu.value?.entityUuid) {
+      getMainMetaData(curMenu.value.entityUuid);
+    }
   }, [curMenu.value]);
 
-  const getMainMetaData = async () => {
-    if (!curMenu.value?.entityUuid) {
+  const getMainMetaData = async (entityUuid: string) => {
+    if (!entityUuid) {
       return;
     }
-
-    const entityWithChildren = await getEntityFieldsWithChildren(curMenu.value.entityUuid);
+    const entityListWithFields = await getEntityListWithFields({ entityUuids: [entityUuid] });
+    const [entityWithChildren] = entityListWithFields;
     if (entityWithChildren) {
       setMainEntity({
         entityId: entityWithChildren.entityId,
@@ -134,7 +136,7 @@ const Runtime: React.FC = () => {
         tableName: entityWithChildren.tableName,
         entityName: entityWithChildren.entityName,
         entityType: ENTITY_TYPE.MAIN,
-        fields: entityWithChildren.parentFields
+        fields: entityWithChildren.fields
       });
       if (entityWithChildren.childEntities && entityWithChildren.childEntities.length > 0) {
         // 返回新Promise对象，当所有输入Promise成功时返回结果数组（顺序与输入一致）
@@ -312,7 +314,12 @@ const Runtime: React.FC = () => {
             <TaskCenterPage curMenuCode={curMenu.value.menuCode} />
           ) : (
             <div className={styles.contentBody}>
-              <PreviewContainer menuId={curMenu.value?.id || ''} runtime={true} menuUuid={curMenu.value?.menuUuid} />
+              <PreviewContainer
+                menuId={curMenu.value?.id || ''}
+                runtime={true}
+                menuUuid={curMenu.value?.menuUuid}
+                pageSetType={curMenu.value?.pagesetType}
+              />
             </div>
           )}
         </Content>

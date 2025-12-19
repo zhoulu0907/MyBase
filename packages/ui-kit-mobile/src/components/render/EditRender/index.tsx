@@ -29,17 +29,20 @@ interface ComponentRenderProps {
   /** 组件预览状态 */
   runtime: boolean;
   form?: any;
+  /** signal传递 */
+  useStoreSignals?: any;
 }
 
 /**
  * ComponentRender 组件
  * 用于渲染传入的组件，支持适配各类组件
  */
-const ComponentEditRender: React.FC<ComponentRenderProps> = ({ cpId, cpType, pageComponentSchema, runtime, form }) => {
+const ComponentEditRender: React.FC<ComponentRenderProps> = ({ cpId, cpType, pageComponentSchema, runtime, form, useStoreSignals }) => {
   // 获取组件配置
 
   const componentConfig = getComponentConfig(pageComponentSchema, cpType);
   componentConfig.align = ALIGN_VALUES[ALIGN_OPTIONS.RIGHT];
+  componentConfig.width = '100%';
 
   // 渲染对应的组件
   const renderComponent = () => {
@@ -89,7 +92,7 @@ const ComponentEditRender: React.FC<ComponentRenderProps> = ({ cpId, cpType, pag
       case FORM_COMPONENT_TYPES.USER_MULTIPLE_SELECT:
         return <FormComp.XUserSelect cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} form={form} isMultiple />;
       case FORM_COMPONENT_TYPES.SUB_TABLE:
-        return <FormComp.XSubTable cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+        return <FormComp.XSubTable cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} useStoreSignals={useStoreSignals} />;
 
       //  展示组件
       case SHOW_COMPONENT_TYPES.INFO_NOTICE:

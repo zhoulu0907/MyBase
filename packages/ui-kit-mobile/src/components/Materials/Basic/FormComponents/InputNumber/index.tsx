@@ -7,8 +7,9 @@ import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, DEFAULT_VALUE_TYPE
 type XInputNumberConfig = typeof FormSchema.XInputNumberSchema.config;
 import '../index.css';
 
-const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; detailMode?: boolean }) => {
+const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; detailMode?: boolean; form?: any; }) => {
   const {
+    form,
     label,
     placeholder,
     dataField,
@@ -104,12 +105,7 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
     >
       {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
         // 只读模式，渲染格式化的文本内容
-        <div style={{
-          textAlign: align,
-          padding: '8px'
-        }}>
-          --
-        </div>
+        <div className="readonlyText">{form?.getFieldValue(fieldId)}</div>
       ) : (
         renderContent()
       )}
