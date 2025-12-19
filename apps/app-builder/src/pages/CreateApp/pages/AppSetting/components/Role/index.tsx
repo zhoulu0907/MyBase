@@ -10,6 +10,7 @@ import {
   RoleType,
   listApplicationMenu,
   MenuType,
+  PageType,
   type Role,
   type ApplicationMenu,
   type ListApplicationMenuReq,
@@ -41,6 +42,7 @@ const RoleInfo = (props: IProps) => {
 
   const [activeTab, setActiveTab] = useState('1'); // tabs
   const [activeMenuId, setActiveMenuId] = useState(''); // 选中菜单id
+  const [activeMenuPageType, setActiveMenuPageType] = useState<number>(); // 选中菜单的Page Type
   const [managerType, setManagerType] = useState<ManagerType>('permission'); // 权限管理 or 成员管理
   const [menuList, setMuneList] = useState<ApplicationMenu[]>(); //菜单数据
   const [menuLoading, setMuneLoading] = useState<boolean>(false);
@@ -66,7 +68,10 @@ const RoleInfo = (props: IProps) => {
     console.log('获取菜单 res:', res);
     setMuneList(res);
     setMuneLoading(false);
-    handleSelectMenu(findFirstPage(res).id);
+
+    const firstPage = findFirstPage(res);
+    handleSelectMenu(firstPage.id);
+    setActiveMenuPageType(firstPage.pagesetType);
   };
 
   /* 选择菜单获取权限数据 */
@@ -94,7 +99,7 @@ const RoleInfo = (props: IProps) => {
       const hasChildren = menu.children && menu.children.length > 0;
       if (!hasChildren) {
         return (
-          <MenuItem key={menu.id} style={{ display: 'flex', alignItems: 'center' }}>
+          <MenuItem key={menu.id} style={{ display: 'flex', alignItems: 'center' }} onClick={() => handleClick(menu)}>
             <DynamicIcon
               IconComponent={menuIconList.find((icon) => icon.code === menu.menuIcon)?.icon}
               theme="outline"
@@ -112,6 +117,10 @@ const RoleInfo = (props: IProps) => {
         </SubMenu>
       );
     });
+  };
+
+  const handleClick = (menu: any) => {
+    setActiveMenuPageType(menu.pagesetType);
   };
 
   const debouncedSearch = useCallback(
@@ -166,14 +175,28 @@ const RoleInfo = (props: IProps) => {
                 <div className={styles.right}>
                   <Tabs defaultActiveTab="1" destroyOnHide activeTab={activeTab} onChange={setActiveTab}>
                     <TabPane key="1" title="功能权限">
-                      <FuncPermission appId={curAppId} menuId={activeMenuId} roleId={roleInfo.id} />
+                      <FuncPermission
+                        appId={curAppId}
+                        menuId={activeMenuId}
+                        roleId={roleInfo.id}
+                        activeMenuPageType={activeMenuPageType}
+                      />
                     </TabPane>
-                    <TabPane key="2" title="数据权限">
-                      <DataPermission appId={curAppId} menuId={activeMenuId} roleId={roleInfo.id} />
-                    </TabPane>
-                    <TabPane key="3" title="字段权限">
-                      <FieldPermission appId={curAppId} menuId={activeMenuId} roleId={roleInfo.id} />
-                    </TabPane>
+                    {activeMenuPageType !== PageType.WORKBENCH && (
+                      <TabPane key="2" title="数据权限">
+                        <DataPermission
+                          appId={curAppId}
+                          menuId={activeMenuId}
+                          roleId={roleInfo.id}
+                          roleType={roleInfo.roleType}
+                        />
+                      </TabPane>
+                    )}
+                    {activeMenuPageType !== PageType.WORKBENCH && (
+                      <TabPane key="3" title="字段权限">
+                        <FieldPermission appId={curAppId} menuId={activeMenuId} roleId={roleInfo.id} />
+                      </TabPane>
+                    )}
                   </Tabs>
                 </div>
               )}

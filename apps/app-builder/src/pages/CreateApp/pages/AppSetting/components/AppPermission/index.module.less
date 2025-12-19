@@ -2,17 +2,38 @@
   width: 100%;
   height: 100%;
   border-radius: 8px 8px 0 0;
-  padding: 22px 22px 16px;
   box-sizing: border-box;
-  background-color: #fff;
   display: flex;
 
   .left {
-    width: 210px;
-    padding-right: 21px;
-    border-right: 1px solid #e5e6eb;
+    background-color: #fff;
+    border-radius: 4px;
+    padding: 16px;
+    width: 248px;
+
+    .roleTabs {
+      :global(.pc-tabs-header-title) {
+        margin-left: 0px;
+      }
+      :global(.pc-tabs-header-title:first-of-type) {
+        margin-left: 0px;
+      }
+      :global(.pc-tabs-header) {
+        border-bottom: 1px solid #e5e6eb;
+      }
+
+      .roleLabel {
+        font-weight: 500;
+        line-height: 22px;
+      }
+    }
 
     .menu {
+      margin-top: 16px;
+
+      :global(.pc-menu-inner) {
+        padding: 0;
+      }
       .user {
         margin-bottom: 12px;
         padding-bottom: 24px;
@@ -50,7 +71,7 @@
       .editIcon {
         margin-left: 4px;
         margin-right: 0;
-        transition: 'opacity 0.2s'
+        transition: 'opacity 0.2s';
       }
 
       label {
@@ -72,23 +93,27 @@
       }
     }
 
-    .addRoleBox
-     {
+    .userHeader {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .addRoleBox {
       padding: 0 8px;
-      height: 32px;
       color: rgb(var(--primary-6));
       cursor: pointer;
-      display: flex;
-      align-items: center;
     }
     .addRole {
       color: rgb(var(--primary-6));
-      margin: 0 16px 0 12px;
+      margin-right: 4px;
     }
   }
 
   .right {
     flex: 1;
-    margin-left: 21px;
+    margin-left: 16px;
+    background-color: #fff;
+    border-radius: 4px;
+    padding: 16px;
   }
 }

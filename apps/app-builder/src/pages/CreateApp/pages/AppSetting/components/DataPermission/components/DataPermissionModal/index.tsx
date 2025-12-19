@@ -4,6 +4,7 @@ import type { TreeSelectDataType } from '@arco-design/web-react/es/TreeSelect/in
 import { IconEdit } from '@arco-design/web-react/icon';
 import {
   getDeptUser,
+  RoleType,
   type AppEntityField,
   type AuthDataFilterVO,
   type AuthDataGroupVO,
@@ -23,6 +24,7 @@ const CheckboxGroup = Checkbox.Group;
 
 interface IProps {
   roleId: string;
+  roleType: number;
   initialFormValues: AuthDataGroupVO;
   modalVisible: boolean;
   status: 'create' | 'edit';
@@ -39,10 +41,10 @@ interface IProps {
 const ALLDATA = 'allData';
 const CUSTOMCONDITION = 'customCondition';
 const PERMISSIONSCOPE_DICT = [
-  { value: 'allData', label: '全部数据' },
-  { value: 'ownSubmit', label: '本人提交' },
-  { value: 'departmentSubmit', label: '本部门提交' },
-  { value: 'subDepartmentSubmit', label: '下级部门提交' }
+  { value: 'allData', label: '全部数据', type: 'base' },
+  { value: 'ownSubmit', label: '本人提交', type: 'base' },
+  { value: 'departmentSubmit', label: '本部门提交', type: 'special' },
+  { value: 'subDepartmentSubmit', label: '下级部门提交', type: 'special' }
 ];
 const OperationOptions = [
   { value: 'edit', label: '可编辑', disabled: false },
@@ -60,6 +62,7 @@ const dataPermissionScope: ScopeTypeOption[] = [
 const DataPermissionModal = (props: IProps) => {
   const {
     roleId,
+    roleType,
     initialFormValues,
     modalVisible,
     status,
@@ -395,128 +398,105 @@ const DataPermissionModal = (props: IProps) => {
           <FormItem label="权限范围" field="scopeTags" rules={[{ required: true, message: '至少设置一个权限范围' }]}>
             <div className={styles.dataPermissionScope}>
               <FormItem field="scopeTags" noStyle>
-                <CheckboxGroup options={PERMISSIONSCOPE_DICT} onChange={(values) => changeScopePermission(values)} />
+                <CheckboxGroup onChange={(values: any) => changeScopePermission(values)}>
+                  {PERMISSIONSCOPE_DICT.filter((opt) => (roleType === RoleType.OUTERUSER ? opt.type === 'base' : true)) // 根据条件过滤
+                    .map((opt) => (
+                      <Checkbox key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </Checkbox>
+                    ))}
+                </CheckboxGroup>
               </FormItem>
-              <div className={styles.scopeRow}>
-                <FormItem field="customCondition" noStyle>
-                  <Checkbox checked={customChecked} onChange={(checked: boolean) => handleCustomChecked(checked)}>
-                    自定义条件
-                  </Checkbox>
-                </FormItem>
-                {customChecked && (
-                  <div className={styles.selfRow}>
-                    <FormItem field="scopeFieldUuid" className={styles.scopeRoles}>
-                      <Select
-                        placeholder="请选择"
-                        onChange={(value) => {
-                          console.log('选择拥有者 value:', value);
-                        }}
-                      >
-                        {dataPermissionPerson
-                          .filter((option) => option.PersonId)
-                          .map((option) => (
-                            <Option key={option.PersonId} value={option.PersonId || ''}>
-                              {option.displayName}
+              {roleType !== RoleType.OUTERUSER && (
+                <div className={styles.scopeRow}>
+                  <FormItem field="customCondition" noStyle>
+                    <Checkbox checked={customChecked} onChange={(checked: boolean) => handleCustomChecked(checked)}>
+                      自定义条件
+                    </Checkbox>
+                  </FormItem>
+                  {customChecked && (
+                    <div className={styles.selfRow}>
+                      <FormItem field="scopeFieldUuid" className={styles.scopeRoles}>
+                        <Select
+                          placeholder="请选择"
+                          onChange={(value) => {
+                            console.log('选择拥有者 value:', value);
+                          }}
+                        >
+                          {dataPermissionPerson
+                            .filter((option) => option.PersonId)
+                            .map((option) => (
+                              <Option key={option.PersonId} value={option.PersonId || ''}>
+                                {option.displayName}
+                              </Option>
+                            ))}
+                        </Select>
+                      </FormItem>
+                      是
+                      <FormItem field="scopeLevel" className={styles.scopePerson}>
+                        <Select
+                          placeholder="请选择"
+                          onChange={(value) => {
+                            setScopeType(value);
+                            setSelectedMembers([]);
+                            // 同时更新scopeValue字段
+                            form.setFieldValue('scopeValue', value);
+                          }}
+                        >
+                          {dataPermissionScope.map((option) => (
+                            <Option key={option.value} value={option.value} title={option.label}>
+                              {option.label}
                             </Option>
                           ))}
-                      </Select>
-                    </FormItem>
-                    是
-                    <FormItem field="scopeLevel" className={styles.scopePerson}>
-                      <Select
-                        placeholder="请选择"
-                        onChange={(value) => {
-                          setScopeType(value);
-                          setSelectedMembers([]);
-                          // 同时更新scopeValue字段
-                          form.setFieldValue('scopeValue', value);
-                        }}
-                      >
-                        {dataPermissionScope.map((option) => (
-                          <Option key={option.value} value={option.value} title={option.label}>
-                            {option.label}
-                          </Option>
-                        ))}
-                      </Select>
-                    </FormItem>
-                    {(scopeType === 'specifiedPerson' || scopeType === 'specifiedDepartment') && (
-                      <div className={styles.scopeAssign}>
-                        <FormItem field="scopeValue" noStyle style={{ pointerEvents: 'none' }}>
-                          {(scopeType === 'specifiedPerson' || scopeType === 'specifiedDepartment') &&
-                          selectedMembers &&
-                          selectedMembers.length > 0 ? (
-                            <div className={styles.assignIdTag}>
-                              <div className={styles.tagContainer}>
-                                {selectedMembers.slice(0, 2).map((member) => (
-                                  <Tag
-                                    title={member.name}
-                                    className={styles.tag}
-                                    key={member.key}
-                                    closable
-                                    onClose={(e) => {
-                                      e.preventDefault();
-                                      handleTagClose(member.key);
-                                    }}
-                                  >
-                                    <span>{member.name}</span>
-                                  </Tag>
-                                ))}
-                                {selectedMembers.length - 2 > 0 && (
-                                  <Popover
-                                    trigger="hover"
-                                    content={selectedMembers.slice(2).map((member) => (
-                                      <div>{member.name}</div>
-                                    ))}
-                                  >
-                                    <Tag>+{selectedMembers.length - 2}</Tag>
-                                  </Popover>
-                                )}
+                        </Select>
+                      </FormItem>
+                      {(scopeType === 'specifiedPerson' || scopeType === 'specifiedDepartment') && (
+                        <div className={styles.scopeAssign}>
+                          <FormItem field="scopeValue" noStyle style={{ pointerEvents: 'none' }}>
+                            {(scopeType === 'specifiedPerson' || scopeType === 'specifiedDepartment') &&
+                            selectedMembers &&
+                            selectedMembers.length > 0 ? (
+                              <div className={styles.assignIdTag}>
+                                <div className={styles.tagContainer}>
+                                  {selectedMembers.slice(0, 2).map((member) => (
+                                    <Tag
+                                      title={member.name}
+                                      className={styles.tag}
+                                      key={member.key}
+                                      closable
+                                      onClose={(e) => {
+                                        e.preventDefault();
+                                        handleTagClose(member.key);
+                                      }}
+                                    >
+                                      <span>{member.name}</span>
+                                    </Tag>
+                                  ))}
+                                  {selectedMembers.length - 2 > 0 && (
+                                    <Popover
+                                      trigger="hover"
+                                      content={selectedMembers.slice(2).map((member) => (
+                                        <div>{member.name}</div>
+                                      ))}
+                                    >
+                                      <Tag>+{selectedMembers.length - 2}</Tag>
+                                    </Popover>
+                                  )}
+                                </div>
+                                <IconEdit className={styles.tagBtn} onClick={() => specifiedModalVisible()}></IconEdit>
                               </div>
-                              <IconEdit className={styles.tagBtn} onClick={() => specifiedModalVisible()}></IconEdit>
-                            </div>
-                          ) : (
-                            <Button type="outline" style={{ width: '100%' }} onClick={() => specifiedModalVisible()}>
-                              {scopeType === 'specifiedPerson' ? '添加人员' : '添加部门'}
-                            </Button>
-                          )}
-                        </FormItem>
-                      </div>
-                    )}
-                    {/* {(scopeType === 'specifiedPerson' || scopeType === 'specifiedDepartment') && (
-                      <div className={styles.scopeAssign}>
-                        <FormItem field="scopeValue" noStyle>
-                          {(scopeType === 'specifiedPerson' || scopeType === 'specifiedDepartment') &&
-                          selectedMembers &&
-                          selectedMembers.length > 0 ? (
-                            <div className={styles.assignIdTag}>
-                              <div className={styles.tagContainer}>
-                                {selectedMembers.map((member) => (
-                                  <Tag
-                                    className={styles.tag}
-                                    key={member.key}
-                                    closable
-                                    onClose={(e) => {
-                                      e.preventDefault();
-                                      handleTagClose(member.key);
-                                    }}
-                                  >
-                                    <span>{member.name}</span>
-                                  </Tag>
-                                ))}
-                              </div>
-                              <IconEdit className={styles.tagBtn} onClick={() => specifiedModalVisible()}></IconEdit>
-                            </div>
-                          ) : (
-                            <Button type="primary" style={{ width: '100%' }} onClick={() => specifiedModalVisible()}>
-                              {scopeType === 'specifiedPerson' ? '添加人员' : '添加部门'}
-                            </Button>
-                          )}
-                        </FormItem>
-                      </div>
-                    )} */}
-                  </div>
-                )}
-              </div>
+                            ) : (
+                              <Button type="outline" style={{ width: '100%' }} onClick={() => specifiedModalVisible()}>
+                                {scopeType === 'specifiedPerson' ? '添加人员' : '添加部门'}
+                              </Button>
+                            )}
+                          </FormItem>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </FormItem>
           {/* 数据过滤 */}

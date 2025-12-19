@@ -22,12 +22,12 @@ interface HeaderProps {
 
 export interface IAdminInfo {
   avatar: string;
-  deptId: string;
-  email: string;
-  id: string;
+  deptId?: string;
+  email?: string;
+  id?: string;
   nickname: string;
-  username: string;
-  mobile: string;
+  username?: string;
+  mobile?: string;
 }
 
 const AppHeader: React.FC<HeaderProps> = ({ className }) => {

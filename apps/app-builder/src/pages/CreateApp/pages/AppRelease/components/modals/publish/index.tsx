@@ -1,4 +1,4 @@
-import { Form, Grid, Input, Modal, Tag } from '@arco-design/web-react';
+import { Form, Grid, Input, Message, Modal, Tag } from '@arco-design/web-react';
 import { onlineApplication, OperationType, type OnlineApplicationReq } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
@@ -70,11 +70,13 @@ const PublishVersionModal: React.FC<PublishVersionModalProps> = ({
       const res = await onlineApplication(req);
       console.log(res);
 
+      Message.success('应用发布成功');
       setLoading(false);
       form.resetFields();
       onOk(values);
     } catch (error) {
       console.error('表单验证失败:', error);
+      Message.error('应用发布失败');
       setLoading(false);
     }
   };
