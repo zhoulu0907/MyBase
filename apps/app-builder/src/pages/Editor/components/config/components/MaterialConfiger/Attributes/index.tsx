@@ -5,6 +5,7 @@ import { useSignals } from '@preact/signals-react/runtime';
 import { useEffect, useState } from 'react';
 import styles from './index.module.less';
 import { renderConfigItem } from './registry';
+import { resolveEditData } from './mapping';
 
 const FormItem = Form.Item;
 
@@ -18,8 +19,14 @@ interface ConfigsProps {
 
 const Attributes = ({ cpID }: ConfigsProps) => {
   useSignals();
-  const { curComponentID, curComponentSchema, setCurComponentSchema, setPageComponentSchemas, subTableComponents } =
-    usePageEditorSignal();
+  const {
+    curComponentID,
+    curComponentSchema,
+    setCurComponentSchema,
+    setPageComponentSchemas,
+    subTableComponents,
+    pageComponentSchemas
+  } = usePageEditorSignal();
 
   const [editData, setEditData] = useState<any>([]);
   const [configs, setConfigs] = useState<any>({});
@@ -52,11 +59,19 @@ const Attributes = ({ cpID }: ConfigsProps) => {
     if (!cpID) {
       return;
     }
+    // 优先从 pageComponentSchemas 中获取组件配置，确保使用正确的组件配置
+    // 如果 pageComponentSchemas 中没有，再使用 curComponentSchema（作为回退）
+    const componentSchema = pageComponentSchemas[cpID] || curComponentSchema;
     const type = resolveType();
-    const defaultSchema = type ? getComponentSchema(type as any) : { editData: curComponentSchema.editData || [] };
-    setEditData(defaultSchema.editData);
-    setConfigs(curComponentSchema.config);
-  }, [cpID, curComponentSchema]);
+    const defaultSchema = type ? getComponentSchema(type as any) : { editData: componentSchema?.editData || [] };
+    const rawEditData = defaultSchema.editData || [];
+    setEditData(resolveEditData(rawEditData));
+    // 使用当前组件的配置，确保切换组件时显示正确的配置
+    // 创建新的对象引用，确保 React 能检测到变化
+    const newConfigs = componentSchema?.config || {};
+    setConfigs({ ...newConfigs });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cpID, curComponentID, pageComponentSchemas[cpID]?.config, curComponentSchema?.config]);
 
   useEffect(() => {
     const keys = Object.keys(subTableComponents) || [];

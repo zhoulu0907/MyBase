@@ -310,8 +310,11 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
       tableColumns.push(indexColumn);
     }
     for (let [colIdx, column] of (subTableComponents[id] || []).entries()) {
-      const displayName = pageComponentSchemas[column.id].config.label.text || column.displayName;
-      const required = pageComponentSchemas[column.id].config?.verify?.required;
+      const config = pageComponentSchemas[column.id].config
+      const displayName = config.label.text || column.displayName;
+      const required = config?.verify?.required;
+      const [subTableName, fieldName] = config.dataField;
+
       const tableColumn = {
         title: (
           <>
@@ -319,18 +322,21 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
             {displayName}
           </>
         ),
-        dataIndex: column.id,
-        key: column.id,
+        dataIndex: fieldName,
+        key: fieldName,
         fixed: undefined as any,
+        headerCellStyle: {
+          minWidth: '200px'
+        },
         bodyCellStyle: {
           padding: '4px 0'
         },
         render: (_text: string, _record: any, index: number) => {
-          const config = {
+          const newConfig = {
             ...pageComponentSchemas[column.id].config,
-            dataField: [`${id}.${index}.${pageComponentSchemas[column.id].config?.dataField?.[1] || column.id}`]
+            dataField: [mainEntity.tableName, `${id}.${index}.${fieldName}`]
           };
-          const finalConfig = applySubTableCellOverrides(config, column.type);
+          const finalConfig = applySubTableCellOverrides(newConfig, column.type);
           const pageSchema = { ...pageComponentSchemas[column.id], config: finalConfig };
           const editDisabled = (_record.key || _record.key === '0') && !subTableConfig?.editRow;
 

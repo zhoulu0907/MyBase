@@ -1,10 +1,12 @@
-import { Form, Input, Message, Upload } from '@arco-design/web-react';
+import { Form, Input, Message, Upload, Select } from '@arco-design/web-react';
 import { IconAttachment, IconFileImage } from '@arco-design/web-react/icon';
 import { fetchExecTask } from '@onebase/app/src/services/app_runtime';
 import { uploadFile } from '@onebase/platform-center';
-import { forwardRef, useImperativeHandle, useState, type FC } from 'react';
-
+import { forwardRef, useEffect, useImperativeHandle, useState, type FC } from 'react';
+import { getUserPage, type PageParam } from '@onebase/platform-center';
 import '../style/detailOkConfirm.less';
+
+const Option = Select.Option;
 
 interface ChildMethodParams {
   value: {
@@ -13,12 +15,18 @@ interface ChildMethodParams {
   };
   entityData: any;
 }
+
+const enum Type {
+  Transfer = '转交'
+}
+
 const FormItem = Form.Item;
 
 const maxImgSizeMB = 20;
 const maxFileSizeMB = 50;
 
 const DetailOKConfirm: FC = forwardRef((props: any, ref: any) => {
+  const [userOptions, setUserOptions] = useState<any[]>([]);
   const { onSetPopupVisible, onBack, taskId, instanceId, isRequired } = props;
   const [form] = Form.useForm();
   const [imgUpList, setImgUpList] = useState<any>();
@@ -34,12 +42,14 @@ const DetailOKConfirm: FC = forwardRef((props: any, ref: any) => {
     try {
       await form.validate();
       const nameValue = form.getFieldValue('name');
+      const targetHandlerId = form.getFieldValue('targetHandlerId');
       const req = {
         buttonType,
         taskId,
         instanceId,
         comment: nameValue,
-        entity: entityData
+        entity: entityData,
+        targetHandlerId
       };
       await fetchExecTask(req);
       onSetPopupVisible(false);
@@ -65,9 +75,57 @@ const DetailOKConfirm: FC = forwardRef((props: any, ref: any) => {
     return res;
   };
 
+  const initUserData = () => {
+    const params: PageParam = {
+      pageNo: 1,
+      pageSize: 100
+    };
+    getUserPage(params)
+      .then((res: any) => {
+        if (Array.isArray(res?.list)) {
+          const selectArr: any[] = [];
+          res.list?.forEach((item: any) => {
+            selectArr.push({
+              userId: item.id,
+              name: item.nickname
+            });
+          });
+          setUserOptions(selectArr);
+        }
+      })
+      .catch((err: any) => {
+        console.info('Api getUserPage Error:', err);
+      });
+  };
+  useEffect(() => {
+    initUserData();
+  }, []);
+
   return (
     <section className="detail-confirm-page">
       <Form form={form} layout="vertical">
+        {props.itemData?.buttonName === Type.Transfer && (
+          <FormItem
+            label="转交对象"
+            field="targetHandlerId"
+            rules={[{ required: true, message: '请选择转交对象' }]}
+            wrapperCol={{ style: { width: '100%' } }}
+          >
+            <Select
+              placeholder="选择转交对象"
+              filterOption={(inputValue, option) =>
+                option.props.children?.toLowerCase().indexOf(inputValue?.toLowerCase()) >= 0
+              }
+              allowClear
+            >
+              {userOptions?.map((option: any) => (
+                <Option key={option?.userId} value={option?.userId}>
+                  {option.name}
+                </Option>
+              ))}
+            </Select>
+          </FormItem>
+        )}
         <div className="form-item-title">审批意见</div>
         <FormItem field="name" rules={[{ required: isRequired, message: '请输入审批意见' }]}>
           <Input.TextArea maxLength={500} showWordLimit placeholder="请输入审批意见" wrapperStyle={{ width: '100%' }} />

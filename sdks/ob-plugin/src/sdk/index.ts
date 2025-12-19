@@ -20,3 +20,5 @@ export function createHostSDK(context: Context, overrides?: { ui?: UIAPI }): Hos
 }
 
 export * from './types';
+export * from './constants';
+export * from './utils';

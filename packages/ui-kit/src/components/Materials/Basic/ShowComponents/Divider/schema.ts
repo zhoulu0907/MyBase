@@ -12,13 +12,13 @@ import {
   WIDTH_VALUES
 } from '../../../constants';
 import type {
+  IDividerStyleTypeConfigType,
+  IDividerTooltipConfigType,
   ILabelConfigType,
   IWidthConfigType,
   TBooleanDefaultType,
-  TTextDefaultType,
   TRadioDefaultType,
-  IDividerTooltipConfigType,
-  IDividerStyleTypeConfigType,
+  TTextDefaultType,
   ICommonConfigType
 } from '../../../types';
 
@@ -61,12 +61,12 @@ export interface XDividerConfig extends ICommonBaseType {
 
   /**
    * 配色
-  */
+   */
   color: TTextDefaultType;
 
   /**
    * 标题颜色
-  */
+   */
   titleColor: TTextDefaultType;
 
   /**
@@ -101,7 +101,7 @@ const XDivider: XDividerSchema = {
     color: '#C9CDD4',
     titleColor: '#1D2129',
     descriptionColor: '#86909C',
-    width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
+    width: WIDTH_VALUES[WIDTH_OPTIONS.FULL]
   }
 };
 

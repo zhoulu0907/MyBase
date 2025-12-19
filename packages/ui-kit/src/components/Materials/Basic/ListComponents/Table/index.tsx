@@ -81,7 +81,7 @@ const XTable = memo(
     useSignals();
     const { pageComponentSchemas: fromPageComponentSchemas, components } = useFormEditorSignal;
 
-    const { setDrawerVisible, setDrawerPageId, setDetailPageViewId, setEntityDataId } = pagesRuntimeSignal;
+    const { setDrawerVisible, setDrawerPageId, setDetailPageViewId, setRowDataId } = pagesRuntimeSignal;
     const { runtime = true, showFromPageData, showAddBtn = true, preview } = props;
     const hasOperationPermission = true;
 
@@ -113,7 +113,8 @@ const XTable = memo(
       advancedButtonPermission,
       // operationButtonCollpaseNumber,
       operationButtonShowType,
-      refresh
+      refresh,
+      filterCondition
     } = props;
 
     const { curMenu } = menuSignal;
@@ -334,6 +335,7 @@ const XTable = memo(
                     detailMode={true}
                     pageComponentSchema={componentConfig}
                     runtime={true}
+                    recordId={_record.id}
                   />
                 );
               }
@@ -386,6 +388,7 @@ const XTable = memo(
         newColumns = [indexColumn, ...newColumns];
       }
 
+      console.log('newColumns: ', newColumns);
       setFinalColumns(newColumns);
     };
 
@@ -397,7 +400,7 @@ const XTable = memo(
         return;
       }
 
-      setEntityDataId('');
+      setRowDataId('');
       showFromPageData?.(null, true);
     };
 
@@ -429,12 +432,16 @@ const XTable = memo(
 
       const req: PageMethodV2Params = {
         pageNo: tablePageNo,
-        pageSize: pageSize || 10
+        pageSize: pageSize || 10,
+        filters: filterCondition
       };
 
       const res = await dataMethodPageV2(tableName, curMenu.value?.id, req);
+      console.log('res: ', res);
 
       const mainMetaData = await getEntityFieldsWithChildren(metaData);
+
+      console.log('mainMetaData: ', mainMetaData);
 
       const { list, total } = res;
 
@@ -486,6 +493,9 @@ const XTable = memo(
           key: rowId
         };
       });
+
+      console.log('newTableData: ', newTableData);
+
       tableForm.setFieldsValue({ [id]: newTableData });
       setTableData(newTableData);
       setTableTotal(total);
@@ -514,7 +524,7 @@ const XTable = memo(
       if (!runtime) {
         return;
       }
-      setEntityDataId(id);
+      setRowDataId(id);
       showFromPageData?.(id, toFormPage);
     };
 
@@ -596,6 +606,7 @@ const XTable = memo(
                   }
                 };
               }}
+              rowClassName={() => 'tableRow'}
               border={border}
               borderCell={borderCell}
               showHeader={showHeader}

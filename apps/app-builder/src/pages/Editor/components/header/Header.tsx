@@ -7,9 +7,8 @@ import activeListDesignSVG from '@/assets/images/list_design_active_icon.svg';
 import defaultListDesignSVG from '@/assets/images/list_design_default_icon.svg';
 import activePageSettingSVG from '@/assets/images/page_setting_active_icon.svg';
 import defaultPageSettingSVG from '@/assets/images/page_setting_default_icon.svg';
-import activeWorkbenchDesignSVG from '@/assets/images/workbench_design_active_icon.svg';
-// import defaultWorkbenchDesignSVG from '@/assets/images/workbench_design_default_icon.svg';
 import previewSVG from '@/assets/images/preview_icon.svg';
+import activeWorkbenchDesignSVG from '@/assets/images/workbench_design_active_icon.svg';
 import DynamicIcon from '@/components/DynamicIcon';
 import { useI18n } from '@/hooks/useI18n';
 import RenameModal from '@/pages/CreateApp/pages/PageManager/components/Modals/RenameModal';
@@ -18,8 +17,8 @@ import { useBasicEditorStore } from '@/store';
 import { useFlowEditorStor } from '@/store/index';
 import { useAppStore } from '@/store/store_app';
 import { useResourceStore } from '@/store/store_resource';
-import { Breadcrumb, Button, Form, Message, Tabs } from '@arco-design/web-react';
-import { IconArrowLeft } from '@arco-design/web-react/icon';
+import { Breadcrumb, Button, Form, Message, Modal, Tabs } from '@arco-design/web-react';
+import { IconArrowLeft, IconInfoCircleFill } from '@arco-design/web-react/icon';
 import {
   AppStatus,
   ENTITY_TYPE,
@@ -27,7 +26,7 @@ import {
   getAppIdByPageSetId,
   getApplication,
   getDatasourceList,
-  getEntityFieldsWithChildren,
+  getEntityListWithFields,
   getPageSetMetaData,
   listApplicationMenu,
   menuSignal,
@@ -124,6 +123,8 @@ export default function EditorHeader() {
   const { curViewId } = usePageViewEditorSignal;
   const { flowId, setFlowId } = useFlowPageEditorSignal;
   const { isEditMode, setIsEditMode } = useBasicEditorStore();
+
+  const [exitModalVisible, setExitModalVisible] = useState(false);
 
   const { tenantId } = useParams();
 
@@ -284,8 +285,9 @@ export default function EditorHeader() {
         getMainMetaData(pageSetId);
       }
 
+      loadPageSetInfo(pageSetId);
+
       if (!isEditMode) {
-        loadPageSetInfo(pageSetId);
         setIsEditMode(true);
       }
     }
@@ -335,18 +337,12 @@ export default function EditorHeader() {
   // 获取主表对应的主实体信息
   const getMainMetaData = async (pageSetId: string) => {
     const mainMetaData = await getPageSetMetaData({ pageSetId: pageSetId });
-    console.log('mainMetaData: ', mainMetaData);
 
-    const entityWithChildren = await getEntityFieldsWithChildren(mainMetaData);
-
+    const entityListWithFields = await getEntityListWithFields({ entityUuids: [mainMetaData] });
+    const [entityWithChildren] = entityListWithFields;
     console.log('entityWithChildren: ', entityWithChildren);
 
     // 主表数据
-
-    const parentFields = entityWithChildren.parentFields;
-
-    console.log('parentFields: ', parentFields);
-
     if (entityWithChildren) {
       setMainEntity({
         entityId: entityWithChildren.entityId,
@@ -354,8 +350,7 @@ export default function EditorHeader() {
         tableName: entityWithChildren.tableName,
         entityName: entityWithChildren.entityName,
         entityType: ENTITY_TYPE.MAIN,
-
-        fields: parentFields
+        fields: entityWithChildren.fields
       });
 
       if (entityWithChildren.childEntities && entityWithChildren.childEntities.length > 0) {
@@ -367,8 +362,7 @@ export default function EditorHeader() {
         );
         const subEntities = entityWithChildren.childEntities.map((entity: ChildEntity, index: number) => ({
           entityId: entity.childEntityId,
-          //   TODO(mickey): 后端现在childEntityId就是uuid
-          entityUuid: entity.childEntityId,
+          entityUuid: entity.childEntityUuid,
           tableName: entity.childTableName,
           entityName: entity.childEntityName,
           entityType: ENTITY_TYPE.SUB,
@@ -382,7 +376,7 @@ export default function EditorHeader() {
     }
   };
 
-  const handleSavePageSet = async () => {
+  const handleSavePageSet = async (exit?: boolean) => {
     if (activeTab === EDITOR_TYPES.FLOW_EDITOR) {
       onFlowSave();
       return;
@@ -404,6 +398,9 @@ export default function EditorHeader() {
     console.log('savePageSetParams: ', savePageSetParams);
 
     startSavePageSet(savePageSetParams, () => setAppStatus(AppStatus.PUBLISHED));
+    if (exit) {
+      backToPageManager();
+    }
   };
   const handleExecTask = async () => {
     try {
@@ -435,7 +432,17 @@ export default function EditorHeader() {
 
     clearAllData();
 
-    navigate(`/onebase/${tenantId}/home/create-app/page-manager?appId=${appId}`);
+    // 如果当前有选中的菜单，将菜单ID作为URL参数传递，以便返回时恢复选中状态
+    const menuId = curMenu.value?.id;
+    const menuIdParam = menuId ? `&menuId=${menuId}` : '';
+    navigate(`/onebase/${tenantId}/home/create-app/page-manager?appId=${appId}${menuIdParam}`);
+  };
+  const handleExit = () => {
+    if (appStatus === AppStatus.DEVELOPING) {
+      setExitModalVisible(true);
+    } else {
+      backToPageManager();
+    }
   };
 
   const toPreview = () => {
@@ -495,7 +502,7 @@ export default function EditorHeader() {
     <div className={styles.editorHeader}>
       {/* 左侧 */}
       <div className={styles.left}>
-        <Button shape="square" type="default" size="small" onClick={backToPageManager} icon={<IconArrowLeft />} />
+        <Button shape="square" type="default" size="small" onClick={handleExit} icon={<IconArrowLeft />} />
 
         <div className={styles.myAppIcon} style={{ backgroundColor: iconColor }}>
           <DynamicIcon
@@ -648,6 +655,80 @@ export default function EditorHeader() {
         getVersonList={getVersonList}
         businessUuid={flowData?.businessUuid}
       />
+
+      <Modal
+        title={null}
+        okText="退出"
+        cancelText="取消"
+        visible={exitModalVisible}
+        onCancel={() => {
+          setExitModalVisible(false);
+        }}
+        onOk={() => {
+          setExitModalVisible(false);
+        }}
+        style={{
+          width: 350
+        }}
+        footer={
+          <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div>
+              <Button
+                type="default"
+                status="danger"
+                onClick={() => {
+                  backToPageManager();
+                }}
+              >
+                不保存
+              </Button>
+            </div>
+
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 10
+              }}
+            >
+              <Button
+                type="default"
+                onClick={() => {
+                  setExitModalVisible(false);
+                }}
+              >
+                取消
+              </Button>
+              <Button
+                type="primary"
+                onClick={() => {
+                  handleSavePageSet(true);
+                }}
+              >
+                保存并离开
+              </Button>
+            </div>
+          </div>
+        }
+      >
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 16,
+            fontWeight: 500,
+            height: 50,
+            paddingTop: 20
+          }}
+        >
+          <IconInfoCircleFill style={{ fontSize: 24, marginRight: 8, color: '#ff7d00' }} />
+          <span>即将离开当前页面，是否保存更改</span>
+        </div>
+      </Modal>
     </div>
   );
 }

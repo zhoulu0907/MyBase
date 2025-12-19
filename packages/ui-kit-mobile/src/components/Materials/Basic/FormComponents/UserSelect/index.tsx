@@ -1,7 +1,7 @@
 
 import { memo, useEffect, useState } from 'react';
 import { nanoid } from 'nanoid';
-import { Form, Picker } from '@arco-design/mobile-react';
+import { Ellipsis, Form, Picker } from '@arco-design/mobile-react';
 import { ValidatorType, ITypeRules } from '@arco-design/mobile-utils';
 import { getDeptUser, UserVO } from '@onebase/platform-center';
 import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, FormSchema } from '@onebase/ui-kit';
@@ -22,7 +22,6 @@ const XUserSelect = memo((props: XUserSelectConfig & { runtime?: boolean; detail
   } = props;
 
   const [userData, setUserData] = useState<UserVO[]>([]);
-
   
   // 生成唯一的字段ID
   const fieldId = dataField && dataField.length > 0
@@ -52,7 +51,7 @@ const XUserSelect = memo((props: XUserSelectConfig & { runtime?: boolean; detail
   return (
     <Form.Item
       className="inputTextWrapperOBMobile"
-      label={label.display && label.text}
+      label={label.display && <Ellipsis text={label.text} />}
       field={fieldId}
       rules={rules}
       style={{

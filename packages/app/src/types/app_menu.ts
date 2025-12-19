@@ -4,13 +4,14 @@ export interface ListApplicationMenuReq {
 }
 
 export interface ApplicationMenu {
-  id: string;
+  id?: string;
   parentId?: string;
   menuCode: string;
   menuSort: number;
   menuType: number;
   menuName: string;
   menuIcon: string;
+  menuUuid?: string;
   isVisible: number;
   children: ApplicationMenu[];
 }

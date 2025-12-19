@@ -187,7 +187,7 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({ childCollapsed, s
                           displayName: ENTITY_TYPE_VALUE.MAIN
                         }
                       ]}
-                      setList={() => { }}
+                      setList={() => {}}
                       group={{
                         name: COMPONENT_GROUP_NAME,
                         pull: 'clone',
@@ -230,7 +230,7 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({ childCollapsed, s
                         displayName: ENTITY_TYPE_VALUE.SUB
                       }))
                     ]}
-                    setList={() => { }}
+                    setList={() => {}}
                     group={{
                       name: COMPONENT_GROUP_NAME,
                       pull: 'clone',
@@ -247,7 +247,7 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({ childCollapsed, s
                         key={subEntity.entityId}
                         onClick={() => setActiveEntityID(subEntity.entityId)}
                         data-cp-type={ENTITY_COMPONENT_TYPES.SUB_ENTITY}
-                        data-entity-id={subEntity.entityId}
+                        data-entity-id={subEntity.entityUuid}
                         data-table-name={subEntity.tableName}
                       >
                         <div className={styles.subEntityHeaderIcon}>子</div>
@@ -299,7 +299,7 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({ childCollapsed, s
                   <div className={styles.fieldList}>
                     <ReactSortable
                       list={field.data || []}
-                      setList={() => { }}
+                      setList={() => {}}
                       group={{
                         name: COMPONENT_GROUP_NAME,
                         pull: 'clone',

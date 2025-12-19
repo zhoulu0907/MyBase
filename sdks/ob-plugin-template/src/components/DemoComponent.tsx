@@ -9,7 +9,7 @@ interface Props {
   sdk: ExtendedSDK
 }
 
-const DemoComponent = ({ message, onUpdate, sdk }: Props) => {
+const PluginDemoComponent = ({ message, onUpdate, sdk }: Props) => {
   const [value, setValue] = useState(message)
   return (
     <Space>
@@ -25,4 +25,4 @@ const DemoComponent = ({ message, onUpdate, sdk }: Props) => {
   )
 }
 
-export default DemoComponent
+export default PluginDemoComponent

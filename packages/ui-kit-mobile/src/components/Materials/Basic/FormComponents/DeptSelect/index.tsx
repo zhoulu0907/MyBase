@@ -41,8 +41,8 @@ const XDeptSelect = memo((props: XDeptSelectConfig & { runtime?: boolean; detail
   const fieldId = dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.DEPT_SELECT}_${props.id}`;
 
   useEffect(() => {
-    !deptData && getDeptUsers({});
-  }, [deptData]);
+    runtime && !deptData && getDeptUsers({});
+  }, [runtime, deptData]);
 
   useEffect(() => {
     setTimeout(() => {
@@ -112,15 +112,14 @@ const XDeptSelect = memo((props: XDeptSelectConfig & { runtime?: boolean; detail
   };
 
   const LoadingComp = () => <div className={styles.loading}><Loading type="circle" color="rgb(var(--primary-6))" /></div>
-  const selectedParseDeptName = parseDeptName(deptData?.deptList, selectedKeys);
+  const selectedParseDeptName = parseDeptName(deptData?.deptList, selectedKeys) || form?.getFieldValue(fieldId)?.name;
 
   return (
     <Form.Item
       className="inputTextWrapperOBMobile inputDeptSelectOBMobile"
-      label={label.display && label.text}
+      label={label.display && <Ellipsis text={label.text} />}
       field={fieldId}
       style={{
-        borderRadius: '0.16rem',
         pointerEvents: runtime ? 'unset' : 'none',
         opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
       }}

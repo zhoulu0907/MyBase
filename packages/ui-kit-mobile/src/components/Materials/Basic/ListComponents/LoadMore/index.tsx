@@ -1,5 +1,5 @@
 import filterIcon from '@/assets/images/filter.svg';
-import { Button, Dialog, Dropdown, Ellipsis, LoadMore, SearchBar, Sticky, Toast } from '@arco-design/mobile-react';
+import { Button, Dialog, Dropdown, Ellipsis, LoadMore, SearchBar, Sticky, Toast, Form } from '@arco-design/mobile-react';
 import { useForm } from '@arco-design/mobile-react/esm/form';
 import {
   dataMethodDeleteV2,
@@ -14,6 +14,7 @@ import { pagesRuntimeSignal } from '@onebase/common';
 import { BUTTON_OPTIONS, BUTTON_VALUES, ENTITY_FIELD_TYPE, RedirectMethod, useFormEditorSignal } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import { memo, useEffect, useState } from 'react';
+import TableSearch from './tableSerach';
 import './index.css';
 import type { XLoadMoreConfig } from './schema';
 
@@ -36,7 +37,7 @@ const XLoadMore = memo(
   ) => {
     useSignals();
 
-    const { pageComponentSchemas: fromPageComponentSchemas } = useFormEditorSignal;
+    const { pageComponentSchemas } = useFormEditorSignal;
     const { setDrawerVisible, setDrawerPageId, setDetailPageViewId } = pagesRuntimeSignal;
     const { runtime = true, showFromPageData, showAddBtn = true } = props;
     const hasOperationPermission = true;
@@ -64,13 +65,16 @@ const XLoadMore = memo(
 
     const [finalColumns, setFinalColumns] = useState<any[]>();
     // 实际查询用的参数
-    let queryData: object = {};
+    const [queryData, setQueryData] = useState<any>({ value: {} });
 
     const [tableData, setTableData] = useState<any[]>([]);
     const [tableTotal, setTableTotal] = useState<number>(0);
     const [tablePageNo, setTablePageNo] = useState<number>(1);
     const [loading, setLoading] = useState<boolean>(false);
     const [showDropdown, setShowDropdown] = useState(false);
+    const [ localMainMetaData, setLocalMainMetaData] = useState<AppEntityField[]>();
+
+    const [searchForm] = useForm();
 
     const onReachBottom = (cb: Function) => {
       if (!tableData.length) return;
@@ -94,19 +98,29 @@ const XLoadMore = memo(
       }
     }, [finalColumns, tablePageNo, metaData, sortByObject]);
 
+    const getMainMetaData = async () => {
+      if (localMainMetaData) {
+        return localMainMetaData;
+      }
+
+      const result =  await getEntityFieldsWithChildren(metaData);
+      setLocalMainMetaData(result);
+      return result;
+    }
+
     const getFinalColumns = async () => {
       let newColumns: any[] = [];
       if (Object.keys(columns as any).length) {
-        const mainMetaData = await getEntityFieldsWithChildren(metaData);
+        const mainMetaData = await getMainMetaData();
         newColumns = (columns || []).map((column) => {
           return {
             ...column,
             render: (item: any, index: number) => {
               const dataFieldInfo = mainMetaData.parentFields.find(
-                (field: AppEntityField) => field.fieldId === column.id
+                (field: AppEntityField) => field.fieldName === column.dataIndex
               );
               const result = item[dataFieldInfo?.fieldName] || '';
-              if (!result) return '';
+              if (!result) return '-';
               if (typeof result === 'object') {
                 return JSON.stringify(result);
               }
@@ -114,14 +128,14 @@ const XLoadMore = memo(
               //   .includes(dataFieldInfo.fieldType)) {
               //   return result || '-';
               // }
-              const componentSchemasKeys = Object.keys(fromPageComponentSchemas.value || {});
+              const componentSchemasKeys = Object.keys(pageComponentSchemas.value || {});
               const cpId = componentSchemasKeys.find((ele) => {
-                return fromPageComponentSchemas.value[ele]?.config?.dataField?.includes(column.id);
+                return pageComponentSchemas.value[ele]?.config?.dataField?.includes(column.id);
               });
               if (!cpId) {
                 return result;
               }
-              // const currentComponentSchemas = fromPageComponentSchemas.value[cpId];
+              // const currentComponentSchemas = pageComponentSchemas.value[cpId];
               // if (['SELECT', 'MULTI_SELECT'].includes(dataFieldInfo.fieldType)) {
               //   const arrayResult = Array.isArray(result) ? result : result.split(',').map((cItem: string) => cItem.trim())
               //   const array = currentComponentSchemas.config.defaultOptionsConfig?.defaultOptions || []
@@ -157,15 +171,7 @@ const XLoadMore = memo(
 
     // 查询
     const handleSearch = () => {
-      queryData = form.getFieldsValue();
-      setTablePageNo(1);
-      handlePage();
-    };
-
-    // 重置
-    const handleReset = () => {
-      form.resetFields();
-      queryData = {};
+      // queryData = searchForm.getFieldsValue();
       setTablePageNo(1);
       handlePage();
     };
@@ -184,13 +190,14 @@ const XLoadMore = memo(
       // }
 
       const req: PageMethodV2Params = {
+        ...queryData.value,
         pageNo: tablePageNo,
         pageSize: pageSize || 10
       };
       
       const res = await dataMethodPageV2(tableName, curMenu.value?.id, req);
 
-      const mainMetaData = await getEntityFieldsWithChildren(metaData);
+      const mainMetaData = await getMainMetaData();
 
       const { list = [], total = 0 } = res;
 
@@ -250,13 +257,25 @@ const XLoadMore = memo(
               newItem[key] = newItem[key] ? '是' : '否'
             }
 
-            // 单选列表
+            // 单选列表 - 根据id返回对应label
             const selectField = mainMetaData.parentFields.find(
               (field: AppEntityField) =>
                 field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.SELECT.VALUE
             );
             if (selectField) {
-              newItem[key] = newItem[key].id || '-'
+              const curValue = newItem[key];
+              const curComponentSchema = Object.values(pageComponentSchemas.value).find(v => curValue.id.includes(v.id)) || {};
+              const curOptions = curComponentSchema?.config?.defaultOptionsConfig?.defaultOptions;
+              newItem[key] = curOptions.find(op => op.value === curValue.id)?.label || '-';
+            }
+
+            // 数据选择
+            const dateField = mainMetaData.parentFields.find(
+              (field: AppEntityField) =>
+                field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.DATA_SELECTION.VALUE
+            );
+            if (dateField) {
+              newItem[key] = newItem[key].name || '-'
             }
           }
         });
@@ -319,7 +338,7 @@ const XLoadMore = memo(
       if (advancedRowRedirect) {
         if (redirectMethod === RedirectMethod.DRAWER) {
           // 打开抽屉显示详情
-          setDrawerVisible(true);
+          // setDrawerVisible(true);
           redirectPageId && setDrawerPageId(redirectPageId);
 
           handleEdit(record.id, false);
@@ -337,6 +356,7 @@ const XLoadMore = memo(
     const noEdit =
       (advancedButtonPermission === BUTTON_VALUES[BUTTON_OPTIONS.HIDDEN] && !hasOperationPermission) ||
       (advancedButtonPermission === BUTTON_VALUES[BUTTON_OPTIONS.DISABLED] && !hasOperationPermission);
+
     const getItemBtns = (item: any) => {
       if (noEdit) return;
       return (
@@ -355,86 +375,6 @@ const XLoadMore = memo(
             编辑
           </Button>
         </div>
-      );
-    };
-
-    const [value, setValue] = useState([]);
-
-    const filterDropdown = () => {
-      return (
-        <Dropdown showDropdown={showDropdown} onCancel={() => setShowDropdown(false)}>
-          <div style={{ padding: '0.32rem' }}>
-            <div className="demo-dropdown-option-desc">Group 1</div>
-            <Dropdown.Options
-              useColumn={3}
-              multiple={true}
-              selectedValue={value[0] || []}
-              onOptionClick={() => {
-                console.info('click 1');
-              }}
-              onOptionChange={(val, item) => {
-                console.info('change 1', val, item);
-                setValue((oldValue) => {
-                  oldValue[0] = val;
-                  return [...oldValue];
-                });
-              }}
-              options={[
-                {
-                  label: 'Option 1',
-                  value: 0,
-                  disabled: false
-                },
-                {
-                  label: 'Option 2',
-                  value: 1
-                },
-                {
-                  label: 'Option 3',
-                  value: 2,
-                  disabled: true
-                },
-                {
-                  label: 'Option 4',
-                  value: 3
-                }
-              ]}
-            ></Dropdown.Options>
-            <div className="demo-dropdown-option-desc">Group 2</div>
-            <Dropdown.Options
-              useColumn={3}
-              multiple={true}
-              selectedValue={value[1] || []}
-              onOptionClick={() => {
-                console.info('click 2');
-              }}
-              onOptionChange={(val, item) => {
-                console.info('change 2', val, item);
-                setValue((oldValue) => {
-                  oldValue[1] = val;
-                  return [...oldValue];
-                });
-              }}
-              options={[
-                {
-                  label: 'Option 5',
-                  value: 0,
-                  disabled: false
-                },
-                {
-                  label: 'Option 6',
-                  value: 1
-                }
-              ]}
-            ></Dropdown.Options>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Button type="ghost" style={{ marginRight: '0.16rem', flex: 1 }}>
-                重置
-              </Button>
-              <Button style={{ flex: 1 }}>确定</Button>
-            </div>
-          </div>
-        </Dropdown>
       );
     };
 
@@ -460,19 +400,28 @@ const XLoadMore = memo(
       );
     };
 
+    const getTopSearch = () => {
+      if (!searchItems?.length) {
+        return null;
+      }
+      return (
+        <Sticky topOffset={0.88 * window.ROOT_FONT_SIZE} className="list-search-header">
+          <Form form={searchForm} className="search-form-wrapper">
+            <TableSearch
+              searchItems={searchItems}
+              runtime={runtime}
+              onSearch={handleSearch}
+              form={searchForm}
+              queryData={queryData}
+            />
+          </Form>
+        </Sticky>
+      );
+    }
+
     return (
       <div className="loadmore-list-wrapper-OBMobile">
-        {searchItems?.length ? (
-          <Sticky topOffset={0.88 * window.ROOT_FONT_SIZE} className="list-search-header">
-            {searchItems?.length ? (
-              <SearchBar actionButton={null} placeholder={`请输入${searchItems[0].label}`} />
-            ) : (
-              <div className="filter-title">筛选过滤</div>
-            )}
-            <img className="filter-icon" src={filterIcon} alt="" onClick={() => setShowDropdown(true)} />
-            {filterDropdown()}
-          </Sticky>
-        ) : null}
+        { getTopSearch() }
         {showAddBtn && <div className="list-create-btn" onClick={handleCreate}></div>}
         <div className="list-body-wrapper">
           {(editMode ? [{}] : tableData).map((item, index) => (

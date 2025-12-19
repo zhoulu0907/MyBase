@@ -1,16 +1,16 @@
 import { Button, Form, Select } from '@arco-design/web-react';
+import { CONFIG_TYPES } from '@onebase/ui-kit';
 import React, { useEffect, useState } from 'react';
 import { registerConfigRenderer } from '../../registry';
-import { CONFIG_TYPES } from '@onebase/ui-kit';
 
 import { useAppStore } from '@/store/store_app';
+import { useResourceStore } from '@/store/store_resource';
 import { getEntityGraph } from '@onebase/app';
+import { getPopupContainer } from '@onebase/ui-kit';
+import { hiddenFieldTypes } from '../DynamicTableConfig';
 import DataSelectionProcessConfig from './components/DataSelectionProcessConfig';
 import FillingRuleSettingsModal from './components/FillingRuleSettingsModal';
 import styles from './index.module.less';
-import { useResourceStore } from '@/store/store_resource';
-import { hiddenFieldTypes } from '../DynamicTableConfig';
-import { getPopupContainer } from '@onebase/ui-kit';
 
 const FormItem = Form.Item;
 const Option = Select.Option;
@@ -47,7 +47,6 @@ const DynamicDataSourceConfig: React.FC<DynamicSelectDataSourceConfigProps> = ({
   const tableConfig = configs[ATTR_KEY.DYNAMICTABLECONFIG];
 
   const [dataSourceOptions, setDataSourceOptions] = useState<any[]>([]); // 数据源
-  const [selectedDataSource, setSelectedDataSource] = useState(configs[item.key] || null); // 选择的数据源
   const [fieldsMap, setFieldsMap] = useState<Map<string, any[]>>(new Map()); // 预构造选择的数据源
 
   const [selectDataVisible, setSelectDataVisibleVisible] = useState(false); //数据选择过程 popup
@@ -63,7 +62,11 @@ const DynamicDataSourceConfig: React.FC<DynamicSelectDataSourceConfigProps> = ({
 
   useEffect(() => {
     curAppId && curDataSourceId && getDataSource();
-  }, [curAppId, curDataSourceId]);
+  }, [curAppId, curDataSourceId, id]);
+
+  useEffect(() => {
+    setSelectRule(configs[ATTR_KEY.FILLRULESETTING]);
+  }, [configs[ATTR_KEY.FILLRULESETTING]]);
 
   useEffect(() => {
     const displayFields = configs[ATTR_KEY.DISPLAYFIELDS];
@@ -74,8 +77,33 @@ const DynamicDataSourceConfig: React.FC<DynamicSelectDataSourceConfigProps> = ({
   }, []);
 
   useEffect(() => {
-    const fieldsMap = new Map<string, any[]>(dataSourceOptions.map((d: any) => [d.entityId, d.fields ?? []] as const));
+    const fieldsMap = new Map<string, any[]>(
+      dataSourceOptions.map((d: any) => [d.entityUuid, d.fields ?? []] as const)
+    );
     setFieldsMap(fieldsMap);
+
+    // SourceOptions 改变更新entity list
+    if (configs[item.key].entityUuid && dataSourceOptions.length > 0) {
+      const value = configs[item.key].entityUuid;
+      // 查找
+      const displayFieldOptions = (fieldsMap.get(value) ?? []).filter(
+        (item: any) => !hiddenFieldTypes.includes(item.fieldType)
+      );
+      setDisplayFieldOptions(displayFieldOptions);
+
+      // 去掉系统字段 和需要隐藏的字段
+      const filteredFieldsData = (fieldsMap.get(value) ?? []).filter(
+        (f: any) => !f.isSystemField && !hiddenFieldTypes.includes(f.fieldType)
+      );
+      setFilteredFieldsData(filteredFieldsData);
+
+      handleMultiPropsChange?.([
+        { key: ATTR_KEY.DISPLAYFIELDSOPTIONS, value: displayFieldOptions },
+        { key: ATTR_KEY.DATAFIELDS, value: displayFieldOptions },
+        { key: ATTR_KEY.FILLFORMFIELDOPTIONS, value: filteredFieldsData },
+        { key: ATTR_KEY.DYNAMICTABLECONFIG, value: tableConfig }
+      ]);
+    }
   }, [dataSourceOptions]);
 
   const getDataSource = async () => {
@@ -84,13 +112,13 @@ const DynamicDataSourceConfig: React.FC<DynamicSelectDataSourceConfigProps> = ({
   };
 
   const handleSourceChange = (value: any) => {
-    const dataSource = dataSourceOptions.find((data) => data.entityId === value);
+    const dataSource = dataSourceOptions.find((data) => data.entityUuid === value);
     const data = {
-      entityId: value,
+      entityUuid: value,
       entityName: dataSource.entityName,
       tableName: dataSource.tableName
     };
-    setSelectedDataSource(data);
+
     // table元数据 初始化
     tableConfig.metaData = value;
     tableConfig.showOpearate = false;
@@ -146,36 +174,36 @@ const DynamicDataSourceConfig: React.FC<DynamicSelectDataSourceConfigProps> = ({
     }
   };
 
-  const handleDisplayFieldOptions = (options: any) => {
-    setDisplayFieldOptions(options);
-    const displayFields = options.reduce((fields: any[], item: any) => {
-      if (selected.includes(item.fieldName)) {
-        fields.push({
-          label: item.displayName,
-          value: item.fieldName
-        });
-      }
-      return fields;
-    }, []);
-    handleMultiPropsChange?.([
-      { key: ATTR_KEY.DISPLAYFIELDSOPTIONS, value: options },
-      { key: ATTR_KEY.DISPLAYFIELDS, value: displayFields }
-    ]);
-  };
+  // const handleDisplayFieldOptions = (options: any) => {
+  //   setDisplayFieldOptions(options);
+  //   const displayFields = options.reduce((fields: any[], item: any) => {
+  //     if (selected.includes(item.fieldName)) {
+  //       fields.push({
+  //         label: item.displayName,
+  //         value: item.fieldName
+  //       });
+  //     }
+  //     return fields;
+  //   }, []);
+  //   handleMultiPropsChange?.([
+  //     { key: ATTR_KEY.DISPLAYFIELDSOPTIONS, value: options },
+  //     { key: ATTR_KEY.DISPLAYFIELDS, value: displayFields }
+  //   ]);
+  // };
 
-  const handleSelectedChange = (value: any) => {
-    setSelected(value);
-    const displayFields = displayFieldOptions.reduce((fields: any[], option: any) => {
-      if (value.includes(option.fieldName)) {
-        fields.push({
-          label: option.displayName,
-          value: option.fieldName
-        });
-      }
-      return fields;
-    }, []);
-    handlePropsChange(ATTR_KEY.DISPLAYFIELDS, displayFields);
-  };
+  // const handleSelectedChange = (value: any) => {
+  //   setSelected(value);
+  //   const displayFields = displayFieldOptions.reduce((fields: any[], option: any) => {
+  //     if (value.includes(option.fieldName)) {
+  //       fields.push({
+  //         label: option.displayName,
+  //         value: option.fieldName
+  //       });
+  //     }
+  //     return fields;
+  //   }, []);
+  //   handlePropsChange(ATTR_KEY.DISPLAYFIELDS, displayFields);
+  // };
 
   const handleEchoFieldChange = (fieldName: string) => {
     const option = displayFieldOptions.find((opt: any) => opt.fieldName === fieldName);
@@ -196,14 +224,14 @@ const DynamicDataSourceConfig: React.FC<DynamicSelectDataSourceConfigProps> = ({
         <FormItem layout="vertical" labelAlign="left" label={'数据源'} className={styles.formItem}>
           <Select
             placeholder="请选择"
-            defaultValue={configs[item.key].entityId}
+            value={configs[item.key].entityUuid}
             getPopupContainer={getPopupContainer}
             onChange={(value) => {
               handleSourceChange(value);
             }}
           >
             {dataSourceOptions.map((option) => (
-              <Option key={option.entityId} value={option.entityId}>
+              <Option key={option.entityUuid} value={option.entityUuid}>
                 {option.entityName}
               </Option>
             ))}
@@ -211,26 +239,27 @@ const DynamicDataSourceConfig: React.FC<DynamicSelectDataSourceConfigProps> = ({
         </FormItem>
 
         {/* 数据选择过程（弹窗/下拉 两种模式均显示配置弹窗） */}
-        {selectedDataSource.entityId && (configs?.selectMethod === 'modal' || configs?.selectMethod === 'dropdown') && (
-          <div>
-            <FormItem layout="vertical" labelAlign="left" label={'数据选择过程'} className={styles.formItem}>
-              <Button long onClick={toSetting}>
-                {isSetted ? '已设置' : '设置'}
-              </Button>
-              <DataSelectionProcessConfig
-                visible={selectDataVisible}
-                id={id}
-                item={item}
-                configs={configs}
-                handlePropsChange={handlePropsChange}
-                handleMultiPropsChange={handleMultiPropsChange}
-                setVisible={() => setSelectDataVisibleVisible(false)}
-              />
-            </FormItem>
+        {configs[item.key].entityUuid &&
+          (configs?.selectMethod === 'modal' || configs?.selectMethod === 'dropdown') && (
+            <div>
+              <FormItem layout="vertical" labelAlign="left" label={'数据选择过程'} className={styles.formItem}>
+                <Button long onClick={toSetting}>
+                  {isSetted ? '已设置' : '设置'}
+                </Button>
+                <DataSelectionProcessConfig
+                  visible={selectDataVisible}
+                  id={id}
+                  item={item}
+                  configs={configs}
+                  handlePropsChange={handlePropsChange}
+                  handleMultiPropsChange={handleMultiPropsChange}
+                  setVisible={() => setSelectDataVisibleVisible(false)}
+                />
+              </FormItem>
 
-            {/* 数据选择后 */}
-            <FormItem layout="vertical" labelAlign="left" label={'数据选择后'} className={styles.formItem}>
-              {/* <FormItem layout="vertical" labelAlign="left" label={'显示在表单中'} className={styles.formItem}>
+              {/* 数据选择后 */}
+              <FormItem layout="vertical" labelAlign="left" label={'数据选择后'} className={styles.formItem}>
+                {/* <FormItem layout="vertical" labelAlign="left" label={'显示在表单中'} className={styles.formItem}>
                 <Select
                   value={selected}
                   onChange={(e) => handleSelectedChange(e)}
@@ -250,35 +279,40 @@ const DynamicDataSourceConfig: React.FC<DynamicSelectDataSourceConfigProps> = ({
                   )}
                 />
               </FormItem> */}
-              <FormItem layout="vertical" labelAlign="left" label={'回显字段'} className={styles.formItem}>
-                <Select
-                  value={configs[ATTR_KEY.DISPLAYFIELDS]?.[0]?.value}
-                  onChange={(e) => handleEchoFieldChange(e)}
-                  placeholder="设置回显字段"
-                  getPopupContainer={getPopupContainer}
+                <FormItem layout="vertical" labelAlign="left" label={'回显字段'} className={styles.formItem}>
+                  <Select
+                    value={configs[ATTR_KEY.DISPLAYFIELDS]?.[0]?.value}
+                    onChange={(e) => handleEchoFieldChange(e)}
+                    placeholder="设置回显字段"
+                    getPopupContainer={getPopupContainer}
+                  >
+                    {displayFieldOptions.map((option) => (
+                      <Option key={option.fieldName} value={option.fieldName}>
+                        {option.displayName}
+                      </Option>
+                    ))}
+                  </Select>
+                </FormItem>
+                <FormItem
+                  layout="vertical"
+                  labelAlign="left"
+                  label={'填充到表单字段'}
+                  className={styles.noMarginBottom}
                 >
-                  {displayFieldOptions.map((option) => (
-                    <Option key={option.fieldName} value={option.fieldName}>
-                      {option.displayName}
-                    </Option>
-                  ))}
-                </Select>
+                  <Button long onClick={() => setRuleSettingVisible(true)}>
+                    {selectRule.length > 0 ? '已设置填充规则' : '填充规则设置'}
+                  </Button>
+                  <FillingRuleSettingsModal
+                    visible={ruleSettingVisible}
+                    fieldOptions={filteredFieldsData}
+                    selectRule={selectRule}
+                    onCancel={() => setRuleSettingVisible(false)}
+                    onOk={(values: any) => handleOKModal(values)}
+                  />
+                </FormItem>
               </FormItem>
-              <FormItem layout="vertical" labelAlign="left" label={'填充到表单字段'} className={styles.noMarginBottom}>
-                <Button long onClick={() => setRuleSettingVisible(true)}>
-                  {selectRule.length > 0 ? '已设置填充规则' : '填充规则设置'}
-                </Button>
-                <FillingRuleSettingsModal
-                  visible={ruleSettingVisible}
-                  fieldOptions={filteredFieldsData}
-                  selectRule={selectRule}
-                  onCancel={() => setRuleSettingVisible(false)}
-                  onOk={(values: any) => handleOKModal(values)}
-                />
-              </FormItem>
-            </FormItem>
-          </div>
-        )}
+            </div>
+          )}
       </div>
     </>
   );

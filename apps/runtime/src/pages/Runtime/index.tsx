@@ -3,15 +3,20 @@ import { useI18n } from '@/hooks/useI18n';
 import { Input, Layout, Tree } from '@arco-design/web-react';
 import { IconDown, IconSearch } from '@arco-design/web-react/icon';
 import {
+  getAppNavigationConfig,
   listApplicationMenu,
   menuSignal,
   MenuType,
   runtimeListApplicationBPMMenu,
   VisibleType,
+  getEntityFieldsWithChildren,
+  ENTITY_TYPE,
+  type ChildEntity,
   type ApplicationMenu,
   type ListApplicationMenuReq
 } from '@onebase/app';
 import { TokenManager, UserPermissionManager } from '@onebase/common';
+import { useAppEntityStore } from '@onebase/ui-kit';
 import { getPermissionInfo } from '@onebase/platform-center';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useState } from 'react';
@@ -43,6 +48,7 @@ interface TreeNode {
 
 const Runtime: React.FC = () => {
   useSignals();
+  const { setMainEntity, setSubEntities } = useAppEntityStore();
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -111,6 +117,48 @@ const Runtime: React.FC = () => {
     getUserInfo();
   }, []);
 
+  useEffect(() => {
+    getMainMetaData();
+  }, [curMenu.value]);
+
+  const getMainMetaData = async () => {
+    if (!curMenu.value?.entityUuid) {
+      return;
+    }
+
+    const entityWithChildren = await getEntityFieldsWithChildren(curMenu.value.entityUuid);
+    if (entityWithChildren) {
+      setMainEntity({
+        entityId: entityWithChildren.entityId,
+        entityUuid: entityWithChildren.entityUuid,
+        tableName: entityWithChildren.tableName,
+        entityName: entityWithChildren.entityName,
+        entityType: ENTITY_TYPE.MAIN,
+        fields: entityWithChildren.parentFields
+      });
+      if (entityWithChildren.childEntities && entityWithChildren.childEntities.length > 0) {
+        // 返回新Promise对象，当所有输入Promise成功时返回结果数组（顺序与输入一致）
+        const allChildFields = await Promise.all(
+          entityWithChildren.childEntities.map(async (entity: ChildEntity) => {
+            return entity.childFields;
+          })
+        );
+        const subEntities = entityWithChildren.childEntities.map((entity: ChildEntity, index: number) => ({
+          entityId: entity.childEntityId,
+          entityUuid: entity.childEntityUuid,
+          tableName: entity.childTableName,
+          entityName: entity.childEntityName,
+          entityType: ENTITY_TYPE.SUB,
+          fields: allChildFields[index]
+        }));
+
+        setSubEntities({
+          entities: subEntities
+        });
+      }
+    }
+  };
+
   const getUserInfo = async () => {
     const res = await getPermissionInfo();
     UserPermissionManager.setUserPermissionInfo(res);
@@ -146,7 +194,7 @@ const Runtime: React.FC = () => {
     }
     // 处理数据
     const resPageList: any[] = res && res.length > 0 ? dealPage(res) : [];
-    console.log(resPageList);
+
     const pageList: any[] = bpmData.concat(resPageList);
 
     const treeData = convertMenuToTreeData(pageList, initTreeItemWidth);
@@ -155,10 +203,23 @@ const Runtime: React.FC = () => {
     // 如果菜单列表不为空，默认选中第一个菜单
     if (pageList && pageList.length > 0) {
       // 初始化页面没有curMenuId就处理第一个菜单为分组的情况 分组里没有页面的情况
-      const curMenuObj = curMenuId ? findMenuWithParents(pageList, [], curMenuId) : findMenuWithParents(pageList, []);
-      if (curMenuObj) {
-        setExpandedKeys(curMenuObj.parentIds);
-        setCurMenu(curMenuObj.node);
+
+      const appNavigationConfig = await getAppNavigationConfig({
+        id: appID
+      });
+
+      if (appNavigationConfig.webDefaultMenu === 'default' || appNavigationConfig.webDefaultMenu === '') {
+        const curMenuObj = curMenuId ? findMenuWithParents(pageList, [], curMenuId) : findMenuWithParents(pageList, []);
+        if (curMenuObj) {
+          setExpandedKeys(curMenuObj.parentIds);
+          setCurMenu(curMenuObj.node);
+        }
+      } else {
+        const curMenuObj = findMenuWithParents(pageList, [], appNavigationConfig.webDefaultMenu);
+        if (curMenuObj) {
+          setExpandedKeys(curMenuObj.parentIds);
+          setCurMenu(curMenuObj.node);
+        }
       }
     }
   };
@@ -170,7 +231,7 @@ const Runtime: React.FC = () => {
     targetId?: string
   ): { node: ApplicationMenu; parentIds: string[] } | null => {
     for (const n of nodes) {
-      if (targetId ? n.id === targetId : n.menuType === MenuType.PAGE) {
+      if (targetId ? n.id === targetId || n.menuUuid === targetId : n.menuType === MenuType.PAGE) {
         return { node: n, parentIds: accIds };
       }
 

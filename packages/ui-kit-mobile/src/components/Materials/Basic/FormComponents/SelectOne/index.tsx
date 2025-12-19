@@ -1,4 +1,4 @@
-import { Form, Picker } from '@arco-design/mobile-react';
+import { Ellipsis, Form, Picker } from '@arco-design/mobile-react';
 import { nanoid } from 'nanoid';
 import { memo } from 'react';
 import { ValidatorType, ITypeRules } from '@arco-design/mobile-utils';
@@ -40,11 +40,10 @@ const XSelectOne = memo((props: XSelectOneConfig & { runtime?: boolean; detailMo
   return (
     <Form.Item
       className="inputTextWrapperOBMobile"
-      label={label.display && label.text}
+      label={label.display && <Ellipsis text={label.text} />}
       field={fieldId}
       rules={rules}
       displayType={FormInternalComponentType.Picker}
-      initialValue={defaultOptionsConfig?.defaultOptions.find((ele) => ele.isChosen)?.value}
       style={{
         textAlign: align,
         pointerEvents: (!runtime || detailMode) ? 'none' : 'unset',

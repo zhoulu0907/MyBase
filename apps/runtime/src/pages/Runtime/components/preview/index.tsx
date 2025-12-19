@@ -115,7 +115,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid })
     setPageSetId(res);
   };
 
-  // 信息收集弹窗
+  // 收集信息弹窗
   const [flows, setFlows] = useState<any[]>([]);
   const [inputParams, setInputParams] = useState<any>({});
 
@@ -136,10 +136,9 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid })
         if (field.fieldType === ENTITY_FIELD_TYPE.IMAGE.VALUE || field.fieldType === ENTITY_FIELD_TYPE.FILE.VALUE) {
           // 图片、文件上传 数据处理 转换成后端需要的数据
           formData[field.fieldName] = (value || []).map((ele: any) => {
-            return { name: ele.name, id: ele.response?.fileId };
+            return { name: ele.name, id: ele.response?.fileId || ele.id };
           });
-        }
-        if (field.fieldType === ENTITY_FIELD_TYPE.BOOLEAN.VALUE) {
+        } else if (field.fieldType === ENTITY_FIELD_TYPE.BOOLEAN.VALUE) {
           formData[field.fieldName] = value;
         } else {
           formData[field.fieldName] = value || null;
@@ -319,20 +318,31 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid })
     if (res) {
       const dataItem = res;
 
+      const componentSchemas = useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value;
+
       //   主表渲染逻辑
       if (dataItem && typeof dataItem === 'object') {
         Object.entries(dataItem).forEach(([fieldName, value]) => {
-          formValues[fieldName] = value;
+          const componentSchemaList = Object.keys(componentSchemas);
+          const currentKey = componentSchemaList.find((key) =>
+            componentSchemas?.[key]?.config?.dataField?.includes(fieldName)
+          );
+          const currentSchema = componentSchemas?.[currentKey];
+          if (
+            (currentSchema?.type === FORM_COMPONENT_TYPES.IMG_UPLOAD ||
+              currentSchema?.type === FORM_COMPONENT_TYPES.FILE_UPLOAD) &&
+            Array.isArray(value)
+          ) {
+            formValues[fieldName] = (value || []).map((ele: any) => ({ ...ele, uid: ele.id }));
+          } else {
+            formValues[fieldName] = value;
+          }
         });
       }
 
       //   子表渲染逻辑
-
-      const componentSchemas = useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value;
-
       for (const subEntity of subEntities.value) {
         // 判断 res 对象内的 key 是否等于 subEntity.childTableName
-
         if (
           dataItem &&
           subEntity.childTableName &&
@@ -343,6 +353,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid })
           const subData = dataItem[subEntity.childTableName];
 
           Object.entries(componentSchemas).forEach(([key, schema]: [string, any]) => {
+            // pagesRuntimeSignal
             if (
               key.startsWith(FORM_COMPONENT_TYPES.SUB_TABLE) &&
               schema?.config?.subTable == subEntity.childEntityUuid
@@ -355,7 +366,18 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid })
                   const config = componentSchemas[ele]?.config;
                   const fieldId = config?.dataField?.[1];
                   if (keys.includes(fieldId)) {
-                    formValues[`${key}.${idx}.${fieldId}`] = subData[idx]?.[fieldId];
+                    if (
+                      (componentSchemas[ele]?.type === FORM_COMPONENT_TYPES.IMG_UPLOAD ||
+                        componentSchemas[ele]?.type === FORM_COMPONENT_TYPES.FILE_UPLOAD) &&
+                      Array.isArray(subData[idx]?.[fieldId])
+                    ) {
+                      formValues[`${key}.${idx}.${fieldId}`] = (subData[idx]?.[fieldId] || []).map((ele: any) => ({
+                        ...ele,
+                        uid: ele.id
+                      }));
+                    } else {
+                      formValues[`${key}.${idx}.${fieldId}`] = subData[idx]?.[fieldId];
+                    }
                   }
                 }
                 // 补充id
@@ -399,10 +421,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid })
     submitForm(true);
   };
 
-  const toEditMode = () => {
-    setDetailMode(false);
-  };
-
   return (
     <div className={`${styles.previewPage} runtime-preview-formpage`}>
       <div className={styles.content}>
@@ -431,7 +449,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid })
         )}
       </div>
 
-      {/* 信息收集弹窗 */}
+      {/* 收集信息弹窗 */}
       <ExecuteFlows flows={flows} inputParams={inputParams}></ExecuteFlows>
       {isPredictVisible && (
         <Modal

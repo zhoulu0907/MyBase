@@ -1,8 +1,8 @@
-import { Card, Button, Space, Typography } from '@arco-design/web-react'
+import { Card, Button, Space, Typography, Form } from '@arco-design/web-react'
 import type { HostSDK } from '@ob/plugin/sdk'
 type ExtendedSDK = HostSDK & { ui: any; context: any }
-import DemoComponent from '../components/DemoComponent'
-import InputText from '../components/InputText'
+import PluginDemoComponent from '../components/DemoComponent'
+import PluginInputText from '../components/InputText'
 
 const { Title, Text } = Typography
 
@@ -18,7 +18,7 @@ export const HomePage = ({ sdk }: { sdk: ExtendedSDK }) => {
       <Text>这是一个完全隔离的插件，不依赖主工程代码</Text>
       <Card style={{ margin: '20px 0' }}>
         <Title heading={4}>插件组件示例</Title>
-        <DemoComponent
+        <PluginDemoComponent
           message="测试消息"
           onUpdate={(msg) => sdk.ui.notify('info', `组件更新：${msg}`)}
           sdk={sdk}
@@ -26,19 +26,21 @@ export const HomePage = ({ sdk }: { sdk: ExtendedSDK }) => {
       </Card>
       <Card style={{ margin: '20px 0' }}>
         <Title heading={4}>XInputText（物料对齐）</Title>
-        <InputText
-          label={{ text: '单行文本', display: true }}
-          placeholder="请输入文本"
-          tooltip=""
-          dataField={[]}
-          defaultValueConfig={{ type: 'CUSTOM', customValue: '', formulaValue: '' }}
-          verify={{ required: false, lengthLimit: true, minLength: 0, maxLength: 20 }}
-          status="default"
-          align="left"
-          layout="vertical"
-          runtime
-          detailMode={false}
-        />
+        <Form>
+          <PluginInputText
+            label={{ text: '单行文本', display: true }}
+            placeholder="请输入文本"
+            tooltip=""
+            dataField={[]}
+            defaultValueConfig={{ type: 'CUSTOM', customValue: '', formulaValue: '' }}
+            verify={{ required: false, lengthLimit: true, minLength: 0, maxLength: 20 }}
+            status="default"
+            align="left"
+            layout="vertical"
+            runtime
+            detailMode={false}
+          />
+        </Form>
       </Card>
       <Space>
         <Button onClick={handleCallSDK}>调用平台SDK</Button>

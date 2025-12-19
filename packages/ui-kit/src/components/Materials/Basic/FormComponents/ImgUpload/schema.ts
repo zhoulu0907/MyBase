@@ -163,7 +163,7 @@ const XImgUpload: XInputImgUploadSchema = {
     },
     verify: {
       required: false,
-      maxCount: -1,
+      maxCount: 1,
       maxSize: 10,
       fileFormat: ''
     },

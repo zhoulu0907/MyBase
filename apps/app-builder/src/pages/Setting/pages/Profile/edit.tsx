@@ -1,9 +1,11 @@
 import { Button, Form, Input, Message, Select, Spin, Tabs } from '@arco-design/web-react';
-import { UploadAvatarComponent } from '@onebase/common';
+import { UploadAvatarComponent, UserPermissionManager } from '@onebase/common';
 import { getLoginedUser, updateLoginedUser, updateLoginedUserPwd, uploadFile } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import styles from './index.module.less';
+import { emailValidator, phoneValidator } from '@/utils/validator';
+import { filterSpace } from '@/utils';
 
 const TabPane = Tabs.TabPane;
 const { Item: FormItem } = Form;
@@ -20,6 +22,8 @@ const ProfileEditPage: React.FC<IEditPageProps> = ({ avatarUrl, setAvatarUrl }) 
   const [passwordForm] = Form.useForm();
   const [userInfo, setUserInfo] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [encryptedMobile, setEncryptedMobile] = useState<string>('');
+  const [encryptedEmail, setEncryptedEmail] = useState<string>('');
 
   useEffect(() => {
     fetchUserInfo();
@@ -32,7 +36,9 @@ const ProfileEditPage: React.FC<IEditPageProps> = ({ avatarUrl, setAvatarUrl }) 
       setLoading(true);
       const res = await getLoginedUser();
       setUserInfo(res);
-      setAvatarUrl(res.avatar || "");
+      setAvatarUrl(res.avatar || '');
+      setEncryptedMobile(res.mobile || '');
+      setEncryptedEmail(res.email || '');
       form.setFieldsValue({
         nickname: res.nickname,
         username: res.username,
@@ -50,14 +56,22 @@ const ProfileEditPage: React.FC<IEditPageProps> = ({ avatarUrl, setAvatarUrl }) 
   const handleSubmit = async () => {
     try {
       const values = await form.validate();
+      const userPermissionInfo:any = UserPermissionManager.getUserPermissionInfo();
       const req = {
         nickname: values.nickname,
-        mobile: values.mobile,
-        email: values.email,
+        mobile: values.mobile?.includes('*') ? null : filterSpace(values.mobile),
+        email: values.email?.includes('*') ? null : filterSpace(values.email),
         avatar: avatarUrl
       };
       await updateLoginedUser(req);
+      UserPermissionManager.setUserPermissionInfo({...userPermissionInfo, user: {
+        ...userPermissionInfo.user,
+        mobile: values.mobile,
+        nickname: values.nickname,
+      }});
       form.resetFields();
+      setEncryptedMobile('');
+      setEncryptedEmail('');
       nav(`/onebase/${tenantId}/setting/profile`);
       Message.success('保存成功');
     } catch (error) {
@@ -144,8 +158,11 @@ const ProfileEditPage: React.FC<IEditPageProps> = ({ avatarUrl, setAvatarUrl }) 
                 required
                 rules={[
                   { required: true, message: '请输入手机号' },
-                  { match: /^1[3-9]\d{9}$/, message: '手机号格式错误' }
+                  { validator: encryptedMobile?.includes('*') ? () => null : phoneValidator }
                 ]}
+                onChange={(e: any) => {
+                  setEncryptedMobile(e.target.value);
+                }}
               >
                 <Input placeholder="请输入手机号" />
               </FormItem>
@@ -156,8 +173,11 @@ const ProfileEditPage: React.FC<IEditPageProps> = ({ avatarUrl, setAvatarUrl }) 
                 required
                 rules={[
                   { required: true, message: '请输入邮箱' },
-                  { type: 'email', message: '邮箱格式错误' }
+                  { validator: encryptedEmail?.includes('*') ? () => null : emailValidator }
                 ]}
+                onChange={(e: any) => {
+                  setEncryptedEmail(e.target.value);
+                }}
               >
                 <Input placeholder="请输入邮箱" />
               </FormItem>

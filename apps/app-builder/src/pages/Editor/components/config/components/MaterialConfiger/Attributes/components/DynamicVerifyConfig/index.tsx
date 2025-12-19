@@ -1,6 +1,5 @@
-import { Form, Checkbox, Input, InputNumber, Grid } from '@arco-design/web-react';
-import { useEffect, useState } from 'react';
-import { DEFAULT_VALUE_TYPES, DEFAULT_VALUE_TYPES_LABELS, CONFIG_TYPES } from '@onebase/ui-kit';
+import { Checkbox, Form, Grid, Input, InputNumber } from '@arco-design/web-react';
+import { CONFIG_TYPES } from '@onebase/ui-kit';
 import styles from '../../index.module.less';
 import { registerConfigRenderer } from '../../registry';
 
@@ -95,9 +94,9 @@ const DynamicVerifyConfig: React.FC<DynamicVerifyConfigProps> = ({ handlePropsCh
               <Grid.Col span={7}>
                 <InputNumber
                   size="mini"
-                  value={configs[verifyKey]['min']}
                   placeholder="最小值"
                   min={0}
+                  value={configs[verifyKey]['min']}
                   onChange={(value) => {
                     if (value > configs[verifyKey]['max']) return;
                     handlePropsChange(verifyKey, { ...configs[verifyKey], min: value });
@@ -114,14 +113,14 @@ const DynamicVerifyConfig: React.FC<DynamicVerifyConfigProps> = ({ handlePropsCh
                   min={0}
                   value={configs[verifyKey]['max']}
                   onChange={(value) => {
-                    if (value < configs[verifyKey]['min']) return;
+                    if (value < configs[verifyKey]['max']) return;
                     handlePropsChange(verifyKey, { ...configs[verifyKey], max: value });
                   }}
                 />
               </Grid.Col>
             </Grid.Row>
           )}
-         
+
           {typeof configs[verifyKey]['maxChecked'] === 'number' && (
             <InputNumber
               value={configs[verifyKey]['maxChecked']}
@@ -136,7 +135,7 @@ const DynamicVerifyConfig: React.FC<DynamicVerifyConfigProps> = ({ handlePropsCh
           {typeof configs[verifyKey]['maxCount'] === 'number' && (
             <InputNumber
               value={configs[verifyKey]['maxCount']}
-              min={-1}
+              min={1}
               prefix="上传数量限制"
               onChange={(value) => {
                 if (typeof value !== 'number') return;
@@ -172,14 +171,6 @@ const DynamicVerifyConfig: React.FC<DynamicVerifyConfigProps> = ({ handlePropsCh
 };
 export default DynamicVerifyConfig;
 
-registerConfigRenderer(
-  CONFIG_TYPES.VERIFY,
-  ({ id, handlePropsChange, item, configs }) => (
-    <DynamicVerifyConfig
-      id={id}
-      handlePropsChange={handlePropsChange}
-      item={item}
-      configs={configs}
-    />
-  )
-);
+registerConfigRenderer(CONFIG_TYPES.VERIFY, ({ id, handlePropsChange, item, configs }) => (
+  <DynamicVerifyConfig id={id} handlePropsChange={handlePropsChange} item={item} configs={configs} />
+));

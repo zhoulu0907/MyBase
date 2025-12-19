@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import { nanoid } from 'nanoid';
-import { DatePicker, Form } from '@arco-design/mobile-react';
+import { DatePicker, Ellipsis, Form } from '@arco-design/mobile-react';
 import { ValidatorType, ITypeRules } from '@arco-design/mobile-utils';
 
 import {
@@ -46,7 +46,7 @@ const XDateTimePicker = memo((props: XDateTimePickerConfig & { runtime?: boolean
   return (
     <Form.Item
       className="inputTextWrapperOBMobile"
-      label={label.display && label.text}
+      label={label.display && <Ellipsis text={label.text} />}
       field={fieldId}
       rules={rules}
       initialValue={form?.getFieldValue(fieldId)}

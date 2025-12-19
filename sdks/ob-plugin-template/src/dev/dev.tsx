@@ -4,7 +4,9 @@ import * as ReactRouterDOM from 'react-router-dom'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { Layout, Menu, Button } from '@arco-design/web-react'
 import * as Arco from '@arco-design/web-react'
+import '@arco-design/web-react/dist/css/arco.css'
 import plugin from '../index'
+import { HomePage } from '../pages/HomePage'
 import type { HostSDK } from '@ob/plugin/sdk'
 import { PluginManager } from '@ob/plugin/host'
 
@@ -70,11 +72,14 @@ const DevApp: React.FC = () => {
   const managerRef = React.useRef<PluginManager | null>(null)
 
   React.useEffect(() => {
-    // 将插件挂到 window，供 PluginManager 读取
+    const isDev = (import.meta as any)?.env?.DEV
+    if (isDev) {
+      setLoaded(plugin as any)
+      return
+    }
     ;(window as any)['ob-plugin-template'] = plugin
     const pm = new PluginManager({ terminal: 'PC' })
     managerRef.current = pm
-
     pm.registerPlugin({
       name: 'ob-plugin-template',
       version: '0.0.0',
@@ -82,17 +87,9 @@ const DevApp: React.FC = () => {
       routePrefix: '/ob-plugin-template',
       resources: { js: '/ob-plugin-template.umd.js', css: '/ob-plugin-template.css' }
     })
-
     pm.loadPlugin('ob-plugin-template')
-      .then((p) => {
-        console.log('Plugin loaded from UMD:', p)
-        setLoaded(p)
-      })
-      .catch((e) => {
-        console.error('Failed to load UMD plugin:', e)
-        setLoaded(plugin as any)
-      })
-
+      .then((p) => { setLoaded(p) })
+      .catch(() => { setLoaded(plugin as any) })
     return () => { pm.unloadPlugin('ob-plugin-template') }
   }, [])
 
@@ -114,8 +111,8 @@ const DevApp: React.FC = () => {
         </div>
         {loaded ? (
           <Routes>
-            <Route path="/" element={loaded.pages.home.component({ sdk: mockSDK })} />
-            <Route path="/about" element={loaded.pages.about.component({ sdk: mockSDK })} />
+            <Route path="/" element={<HomePage sdk={mockSDK as any} />} />
+            <Route path="/about" element={loaded.pages.about.component({ sdk: mockSDK }) as any} />
           </Routes>
         ) : null}
       </Layout.Content>

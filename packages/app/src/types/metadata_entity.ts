@@ -51,6 +51,7 @@ export interface MetadataEntityField {
   options?: any[];
   constraints?: any;
   autoNumberConfig?: any;
+  dataSelectionConfig?: any;
 }
 
 export interface AppEntities {
@@ -69,6 +70,7 @@ export interface AppEntity {
 export interface ChildEntity {
   childEntityCode: string;
   childEntityId: string;
+  childEntityUuid: string;
   childEntityName: string;
   childFields: AppEntityField[];
   childTableName: string;

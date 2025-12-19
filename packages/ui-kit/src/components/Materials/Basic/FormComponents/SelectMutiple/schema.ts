@@ -2,7 +2,6 @@ import {
   baseConfig,
   baseDefault,
   dataFieldConfig,
-  alignConfig,
   layoutConfig,
   statusConfig,
   widthConfig,
@@ -13,20 +12,17 @@ import {
   type ICommonBaseType,
   type TLayoutSelectKeyType,
   type TStatusSelectKeyType,
-  type TAlignSelectKeyType,
   type TWidthSelectKeyType
 } from '../../../common';
 import {
-  ALIGN_VALUES,
-  ALIGN_OPTIONS,
   CONFIG_TYPES,
+  DEFAULT_OPTIONS_TYPE,
   LAYOUT_OPTIONS,
   LAYOUT_VALUES,
   STATUS_OPTIONS,
   STATUS_VALUES,
   WIDTH_OPTIONS,
-  WIDTH_VALUES,
-  DEFAULT_OPTIONS_TYPE
+  WIDTH_VALUES
 } from '../../../constants';
 import type {
   IDataFieldConfigType,
@@ -40,11 +36,9 @@ import type {
   IWidthConfigType,
   ICommonConfigType,
   TBooleanDefaultType,
-  TSelectDefaultType,
-  TTextAreaDefaultType,
   TNumberDefaultType,
   TRadioDefaultType,
-  IAlignConfigType,
+  TTextAreaDefaultType,
   TTextDefaultType
 } from '../../../types';
 
@@ -61,7 +55,6 @@ export type TXInputSelectMutipleEditData = Array<
   | IMutipleSelectOptionsConfigType
   | IVerifyConfigType
   | IStatusConfigType<TStatusSelectKeyType>
-  | IAlignConfigType<TAlignSelectKeyType>
   | ILayoutConfigType<TLayoutSelectKeyType>
   | IWidthConfigType<TWidthSelectKeyType>
   | any
@@ -94,14 +87,14 @@ export interface XInputSelectMutipleConfig extends ICommonBaseType {
    */
   defaultOptionsConfig?: {
     type: string;
-    disabled?: boolean,
+    disabled?: boolean;
     dictTypeId?: string;
-    defaultOptions: { label: string; value: any;[property: string]: any }[];
-  }
+    defaultOptions: { label: string; value: any; [property: string]: any }[];
+  };
 
   /**
-  * required：是否必填，未填写时提交报错
-  */
+   * required：是否必填，未填写时提交报错
+   */
   verify: {
     required: TBooleanDefaultType;
     maxChecked: TNumberDefaultType;
@@ -112,12 +105,6 @@ export interface XInputSelectMutipleConfig extends ICommonBaseType {
    * 可选值: 'default' | 'hidden' | 'readonly'
    */
   status?: TRadioDefaultType<TStatusSelectKeyType>;
-
-  /**
-   * 内容对齐方式：左、中、右
-   * 可选值: 'left' | 'center' | 'right'
-   */
-  align?: TSelectDefaultType<TAlignSelectKeyType>;
 
   /**
    * 表单的布局：水平、垂直（默认）
@@ -144,8 +131,6 @@ const XSelectMutiple: XInputSelectMutipleSchema = {
     verifyConfig,
     // 显示状态
     statusConfig,
-    // 对齐方式
-    alignConfig,
     // 布局方式
     layoutConfig,
     // 字段宽度
@@ -182,17 +167,16 @@ const XSelectMutiple: XInputSelectMutipleSchema = {
           isChosen: false,
           value: '选项三'
         }
-      ],
+      ]
     },
     verify: {
       required: false,
       maxChecked: 3
     },
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
-    align: ALIGN_VALUES[ALIGN_OPTIONS.LEFT],
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
-    width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
-  },
+    width: WIDTH_VALUES[WIDTH_OPTIONS.HALF]
+  }
 };
 
 export default XSelectMutiple;

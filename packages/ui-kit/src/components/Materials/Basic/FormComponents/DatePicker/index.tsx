@@ -4,7 +4,7 @@ import { memo, useEffect, useState } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { DATE_OPTIONS, DATE_VALUES, STATUS_OPTIONS, STATUS_VALUES, WEEK_OPTIONS_NUMBER, DATE_EXTREME_TYPE, DATE_DYNAMIC_VALUE } from '../../../constants';
 import type { XInputDatePickerConfig } from './schema';
-import { getPopupContainer } from '@/utils';
+import { getPopupContainer, securityEncodeText } from '@/utils';
 import dayjs from 'dayjs';
 import '../index.css';
 
@@ -21,7 +21,8 @@ const XDatePicker = memo((props: XInputDatePickerConfig & { runtime?: boolean; d
     dateRange,
     layout,
     runtime = true,
-    detailMode
+    detailMode,
+    security
   } = props;
 
   const { form } = Form.useFormContext();
@@ -65,7 +66,7 @@ const XDatePicker = memo((props: XInputDatePickerConfig & { runtime?: boolean; d
 
       // 变量
       if (dateRange.earliestType === DATE_EXTREME_TYPE.VARIABLE && dateRange.earliestVariableValue) {
-        const earliestVariableValue = form.getFieldValue(dateRange.earliestDynamicValue);
+        const earliestVariableValue = form.getFieldValue(dateRange.earliestVariableValue);
         if (earliestVariableValue) {
           const earliestTime = new Date(earliestVariableValue).getTime()
           if (currentTime < earliestTime) {
@@ -134,15 +135,16 @@ const XDatePicker = memo((props: XInputDatePickerConfig & { runtime?: boolean; d
     if (!fieldValue) {
       return '--'
     }
+
     switch (dateType) {
       case DATE_VALUES[DATE_OPTIONS.YEAR]:
-        return <>{dayjs(fieldValue).format('YYYY')}</>;
+        return <>{securityEncodeText(security, dayjs(fieldValue).format('YYYY'))}</>;
       case DATE_VALUES[DATE_OPTIONS.MONTH]:
-        return <>{dayjs(fieldValue).format('YYYY-MM')}</>;
+        return <>{securityEncodeText(security, dayjs(fieldValue).format('YYYY-MM'))}</>;
       case DATE_VALUES[DATE_OPTIONS.DATE]:
-        return <>{dayjs(fieldValue).format('YYYY-MM-DD')}</>;
+        return <>{securityEncodeText(security, dayjs(fieldValue).format('YYYY-MM-DD'))}</>;
       case DATE_VALUES[DATE_OPTIONS.FULL]:
-        return <>{dayjs(fieldValue).format('YYYY-MM-DD HH:mm:ss')}</>;
+        return <>{securityEncodeText(security, dayjs(fieldValue).format('YYYY-MM-DD HH:mm:ss'))}</>;
       default:
         // 默认显示日期选择器
         return <DatePicker style={{ width: '100%' }} format='YYYY-MM-DD' />;

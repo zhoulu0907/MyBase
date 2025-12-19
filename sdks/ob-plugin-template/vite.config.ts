@@ -6,6 +6,7 @@ export default defineConfig(({ mode }) => ({
   plugins: [react()],
   resolve: {
     alias: { '@': path.resolve(__dirname, './src') },
+    dedupe: ['react', 'react-dom']
   },
   define: {
     'process.env.NODE_ENV': '"production"',

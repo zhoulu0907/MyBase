@@ -30,6 +30,9 @@ interface PreviewRenderProps {
 
   // 自定义视图规则
   cpState?: any;
+
+  // 表格数据id
+  recordId?: string;
 }
 
 const PreviewRender: React.FC<PreviewRenderProps> = ({
@@ -42,7 +45,8 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
   showFromPageData,
   refresh,
   pageType,
-  cpState
+  cpState,
+  recordId
 }) => {
   // 获取组件配置，使用深拷贝确保每次都是新对象
   const [componentConfig, setComponentConfig] = useState(() =>

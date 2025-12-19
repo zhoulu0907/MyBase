@@ -56,20 +56,30 @@
 }
 
 .formWrapper {
-  margin: 0.24rem;
-  width: calc(100% - 0.48rem);
-  background-color: #fff;
-  border-radius: 8px;
+  width: 100%;
   margin-bottom: 1.2rem;
 }
+
+.formComp {
+  margin: 0.24rem;
+  background-color: #fff;
+  border-radius: 8px;
+
+  .componentItem:last-of-type > div {
+    border-bottom: none !important;
+  }
+}
+
 // 组件样式
 .componentItem {
   // padding: 6px;
+  width: 100%;
   box-sizing: border-box;
   // border: 1px dashed transparent;
   border-radius: 8px;
   transition: border-color 0.2s ease;
   position: relative;
+
   .formWrapper {
     padding: 0.06rem;
   }

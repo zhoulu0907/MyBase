@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import { nanoid } from 'nanoid';
-import { Input, Form } from '@arco-design/mobile-react';
+import { Input, Form, Ellipsis } from '@arco-design/mobile-react';
 import { ValidatorType, ITypeRules } from '@arco-design/mobile-utils';
 
 import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, DEFAULT_VALUE_TYPES, FormSchema } from '@onebase/ui-kit';
@@ -95,7 +95,7 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
       className="inputTextWrapperOBMobile"
       field={fieldId}
       rules={rules}
-      label={label.display ? label.text : undefined}
+      label={label.display ? <Ellipsis text={label.text} /> : undefined}
       initialValue={defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : ''}
       style={{
         pointerEvents: (!runtime || detailMode) ? 'none' : 'unset',
