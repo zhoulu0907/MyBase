@@ -54,13 +54,13 @@ const MenuSelector = ({
   }, [value]);
 
   // 递归查找菜单项
-  const findMenuById = (menus: ApplicationMenu[], id: string): ApplicationMenu | null => {
+  const findMenuById = (menus: ApplicationMenu[], menuUuid: string): ApplicationMenu | null => {
     for (const menu of menus) {
-      if (menu.id === id) {
+      if (menu.menuUuid === menuUuid) {
         return menu;
       }
       if (menu.children && menu.children.length > 0) {
-        const found = findMenuById(menu.children, id);
+        const found = findMenuById(menu.children, menuUuid);
         if (found) return found;
       }
     }
@@ -103,7 +103,7 @@ const MenuSelector = ({
   useEffect(() => {
     listApplicationMenu({ applicationId: curAppId }).then((res) => {
       const treeData = listToTree(res, {
-        key: 'id',
+        key: 'menuUuid',
         children: 'children',
         label: 'menuName'
       });
@@ -146,7 +146,7 @@ const MenuSelector = ({
             return treeNode.menuName?.toLowerCase().includes(inputValue.toLowerCase()) || false;
           }}
           fieldNames={{
-            key: 'id',
+            key: 'menuUuid',
             title: 'menuName',
             children: 'children'
           }}

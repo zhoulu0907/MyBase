@@ -2,7 +2,7 @@ import { useState, useCallback, useMemo, useEffect } from 'react';
 import { Drawer, Message } from '@arco-design/web-react';
 import type { DrawerProps } from '@arco-design/web-react';
 import { Editor, Toolbar } from '@wangeditor/editor-for-react';
-import { uploadFile } from '@onebase/platform-center';
+import { uploadFile, getFileUrlById } from '@onebase/platform-center';
 import { type IDomEditor, type IEditorConfig, type IToolbarConfig } from '@wangeditor/editor';
 import styles from './contentDrawer.module.less';
 
@@ -53,10 +53,11 @@ const ContentDrawer = ({ visible, onClose, onChange, value, handlePropsChange, .
         maxNumberOfFiles: 1,
         async customUpload(file: File, insertFn: InsertFnType) {
           try {
-            const uploadImgUrl = await handleUpload(file);
+            const uploadImgId = await handleUpload(file);
+            const uploadImgUrl = getFileUrlById(uploadImgId);
             console.log('uploadImgUrl', uploadImgUrl, file);
             if (uploadImgUrl !== '') {
-              handlePropsChange('WbRichTextContentConfig', uploadImgUrl);
+              handlePropsChange('WbRichTextContentConfig', uploadImgId);
               // 最后插入图片
               insertFn(uploadImgUrl, file?.name, uploadImgUrl);
             } else {
