@@ -222,6 +222,7 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
         deptAndUsersReqDTO.setDeptId(reqVO.getDeptId());
         deptAndUsersReqDTO.setKeywords(reqVO.getKeywords());
         deptAndUsersReqDTO.setExcludeUserIds(userIds);
+        deptAndUsersReqDTO.setUserType(reqVO.getUserType());
         return deptApi.getDeptAndUsers(deptAndUsersReqDTO).getData();
     }
 

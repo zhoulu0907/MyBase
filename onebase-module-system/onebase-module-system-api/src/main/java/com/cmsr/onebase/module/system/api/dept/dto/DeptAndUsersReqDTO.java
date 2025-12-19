@@ -26,4 +26,7 @@ public class DeptAndUsersReqDTO {
 
     @Schema(description = "排除的roleIDs", example = "100")
     private Collection<Long> excludeRoleIds;
+
+    @Schema(description = "用户类型", example = "onebase")
+    private  Integer userType;
 }

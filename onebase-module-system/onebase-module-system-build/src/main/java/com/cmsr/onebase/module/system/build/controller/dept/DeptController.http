@@ -50,7 +50,7 @@ Content-Type: application/json
 
 
 ### 请求 /get-dept-users 接口 => 成功
-GET {{baseUrl}}/system/dept/get-dept-users?userType=4
+GET {{baseUrl}}/system/dept/get-dept-users
 Authorization: Bearer {{token}}
 tenant-id: 168334577623138304
 
