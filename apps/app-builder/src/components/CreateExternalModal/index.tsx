@@ -4,7 +4,7 @@ import mysqlIcon from '@/assets/images/etl/mysql.png';
 import oracleIcon from '@/assets/images/etl/oracle.png';
 import postgresqlIcon from '@/assets/images/etl/postgresql.png';
 import { Button, Checkbox, Form, Grid, Input, Message, Modal, Radio, Select, Steps } from '@arco-design/web-react';
-import { createETLDataSource } from '@onebase/app';
+import { createETLDataSource, updateETLDatasource } from '@onebase/app';
 import { pingETLDataSource } from '@onebase/app/src/services';
 import { getHashQueryParam } from '@onebase/common';
 import React, { useEffect, useState } from 'react';
@@ -14,6 +14,23 @@ const Row = Grid.Row;
 const Col = Grid.Col;
 const Step = Steps.Step;
 
+interface InitialData {
+  id?: string;
+  datasourceName: string;
+  datasourceType: string;
+  config: {
+    host?: string;
+    port?: number;
+    database?: string;
+    jdbcUrl?: string;
+    username: string;
+    password: string;
+    connectMode?: string;
+  };
+  declaration?: string;
+  readonly?: number;
+}
+
 interface CreateExternalModalProps {
   // 控制弹窗是否显示
   visible: boolean;
@@ -21,9 +38,11 @@ interface CreateExternalModalProps {
   onClose: () => void;
   // 新建外部数据源后的回调
   onCreate: (datasourceUuid: string) => void;
+  // 编辑时的初始数据
+  initialData?: InitialData;
 }
 
-const CreateExternalModal: React.FC<CreateExternalModalProps> = ({ visible, onClose, onCreate }) => {
+const CreateExternalModal: React.FC<CreateExternalModalProps> = ({ visible, onClose, onCreate, initialData }) => {
   const [form] = Form.useForm();
 
   const [loading, setLoading] = useState(false);
@@ -38,22 +57,50 @@ const CreateExternalModal: React.FC<CreateExternalModalProps> = ({ visible, onCl
 
   const connectMode = Form.useWatch('connectMode', form);
 
-  useEffect(() => {
-    if (visible) {
-      setSelectedDataSourceType('');
-      handleGetSupportedDataSource();
-    }
-    setCurrentStep(1);
-  }, [visible]);
+  const isEditMode = !!initialData;
 
   useEffect(() => {
-    if (currentStep == 1) {
+    if (visible) {
+      handleGetSupportedDataSource();
+      if (initialData) {
+        // 编辑模式：直接跳到第二步，设置数据源类型和表单数据
+        setSelectedDataSourceType(initialData.datasourceType);
+        setCurrentStep(2);
+        // 回显表单数据
+        const connectModeValue = initialData.config.connectMode || 'default';
+        form.setFieldsValue({
+          datasourceName: initialData.datasourceName,
+          datasourceType: initialData.datasourceType,
+          connectMode: connectModeValue,
+          host: initialData.config.host || '',
+          port: initialData.config.port ? initialData.config.port.toString() : '',
+          database: initialData.config.database || '',
+          jdbcUrl: initialData.config.jdbcUrl || '',
+          username: initialData.config.username || '',
+          password: initialData.config.password || '',
+          declaration: initialData.declaration || '',
+          readonly: initialData.readonly === 1
+        });
+        // 编辑模式下默认通过连接测试（因为数据已存在）
+        setTestConnectionSuccess(true);
+      } else {
+        // 新建模式：重置状态
+        setSelectedDataSourceType('');
+        setCurrentStep(1);
+        form.resetFields();
+        setTestConnectionSuccess(false);
+      }
+    }
+  }, [visible, initialData]);
+
+  useEffect(() => {
+    if (currentStep == 1 && !isEditMode) {
       form.resetFields();
     }
-    if (currentStep == 2 && selectedDataSourceType != '') {
+    if (currentStep == 2 && selectedDataSourceType != '' && !isEditMode) {
       form.setFieldValue('datasourceType', selectedDataSourceType);
     }
-  }, [selectedDataSourceType, currentStep]);
+  }, [selectedDataSourceType, currentStep, isEditMode]);
 
   const showIcon = (datasourceType: string) => {
     if (datasourceType === 'PostgreSQL') {
@@ -94,25 +141,48 @@ const CreateExternalModal: React.FC<CreateExternalModalProps> = ({ visible, onCl
 
       form.validate().then(async (values) => {
         console.log('values', values);
-        const res = await createETLDataSource({
-          datasourceName: values.datasourceName,
-          datasourceType: values.datasourceType,
-          applicationId: curAppId!,
-          config: {
-            host: values.host,
-            port: parseInt(values.port),
-            jdbcUrl: values.jdbcUrl,
-            database: values.database,
-            username: values.username,
-            password: values.password,
-            connectMode: values.connectMode
-          },
-          declaration: values.declaration,
-          readonly: values.readonly ? 1 : 0,
-          withCollect: 1
-        });
-
-        onCreate(res);
+        if (isEditMode && initialData) {
+          // 编辑模式：使用更新接口
+          const res = await updateETLDatasource({
+            id: initialData.id!,
+            datasourceName: values.datasourceName,
+            datasourceType: values.datasourceType,
+            applicationId: curAppId!,
+            config: {
+              host: values.host,
+              port: values.port ? parseInt(values.port) : 0,
+              jdbcUrl: values.jdbcUrl,
+              database: values.database,
+              username: values.username,
+              password: values.password,
+              connectMode: values.connectMode
+            },
+            declaration: values.declaration,
+            readonly: values.readonly ? 1 : 0,
+            withCollect: 1
+          });
+          onCreate(res);
+        } else {
+          // 新建模式：使用创建接口
+          const res = await createETLDataSource({
+            datasourceName: values.datasourceName,
+            datasourceType: values.datasourceType,
+            applicationId: curAppId!,
+            config: {
+              host: values.host,
+              port: values.port ? parseInt(values.port) : 0,
+              jdbcUrl: values.jdbcUrl,
+              database: values.database,
+              username: values.username,
+              password: values.password,
+              connectMode: values.connectMode
+            },
+            declaration: values.declaration,
+            readonly: values.readonly ? 1 : 0,
+            withCollect: 1
+          });
+          onCreate(res);
+        }
 
         onClose();
       });
@@ -148,6 +218,7 @@ const CreateExternalModal: React.FC<CreateExternalModalProps> = ({ visible, onCl
   const handleTestConnection = async () => {
     form.validate().then(async (values) => {
       const res = await pingETLDataSource({
+        id: initialData?.id,
         datasourceType: values.datasourceType,
         config: {
           host: values.host,
@@ -173,7 +244,7 @@ const CreateExternalModal: React.FC<CreateExternalModalProps> = ({ visible, onCl
   return (
     <Modal
       visible={visible}
-      title="新建外部数据源"
+      title={isEditMode ? '编辑外部数据源' : '新建外部数据源'}
       onOk={handleOk}
       onCancel={handleCancel}
       confirmLoading={loading}
@@ -189,8 +260,8 @@ const CreateExternalModal: React.FC<CreateExternalModalProps> = ({ visible, onCl
             )}
           </div>
           <div className={styles.createExternalModalFooterButtons}>
-            <Button type="default" onClick={currentStep == 2 ? () => setCurrentStep(1) : handleCancel}>
-              {currentStep == 2 ? '上一步' : '取消'}
+            <Button type="default" onClick={currentStep == 2 && !isEditMode ? () => setCurrentStep(1) : handleCancel}>
+              {currentStep == 2 && !isEditMode ? '上一步' : '取消'}
             </Button>
             <Button
               type="primary"
@@ -212,7 +283,7 @@ const CreateExternalModal: React.FC<CreateExternalModalProps> = ({ visible, onCl
             <Step title="配置连接" />
           </Steps>
         </div>
-        {currentStep == 1 && (
+        {currentStep == 1 && !isEditMode && (
           <div className={styles.createExternalModalContent}>
             <Input.Search placeholder="搜索数据源" />
             {supportedDatasourceList.map((item: any) => {

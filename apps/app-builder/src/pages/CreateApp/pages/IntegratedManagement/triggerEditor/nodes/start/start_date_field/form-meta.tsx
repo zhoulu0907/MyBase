@@ -19,7 +19,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const [payloadForm] = Form.useForm();
   const tableName = Form.useWatch('tableName', payloadForm);
   const batchMode = Form.useWatch('batchMode', payloadForm);
-  const offsetFiledName = Form.useWatch('offsetFiledName', payloadForm);
+  const offsetFieldName = Form.useWatch('offsetFieldName', payloadForm);
 
   useEffect(() => {
     if (tableName && entityList.length > 0) {
@@ -34,7 +34,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     }
   }, [tableName, entityList]);
 
-  const offsetFiledNameChange = () => {
+  const offsetFieldNameChange = () => {
     payloadForm.clearFields(['offsetUnit']);
   };
 
@@ -68,11 +68,11 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
               <Grid.Col span={12}>
                 <Form.Item
                   label="基准日期字段"
-                  field="offsetFiledName"
+                  field="offsetFieldName"
                   rules={[{ required: true, message: '请选择基准日期字段' }]}
                 >
                   <Select
-                    onChange={offsetFiledNameChange}
+                    onChange={offsetFieldNameChange}
                     options={conditionFields[0]?.children
                       ?.filter(
                         (item) =>
@@ -109,7 +109,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                 <Form.Item field="offsetUnit">
                   <Select
                     options={
-                      conditionFields[0]?.children?.find((item) => item.key === offsetFiledName)?.fieldType ==
+                      conditionFields[0]?.children?.find((item) => item.key === offsetFieldName)?.fieldType ==
                       ENTITY_FIELD_TYPE.DATETIME.VALUE
                         ? [
                             { label: '小时', value: 'hour' },
