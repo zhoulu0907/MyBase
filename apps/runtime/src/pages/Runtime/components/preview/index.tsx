@@ -1,5 +1,6 @@
 import ExecuteFlows from '@/utils/flow';
 import { Form, Message, Modal } from '@arco-design/web-react';
+import DetailPop from '../TaskCenter/page/DetailPop';
 import {
   CATEGORY_TYPE,
   dataMethodCreateV2,
@@ -11,6 +12,7 @@ import {
   PageType,
   queryFlowExecForm,
   TRIGGER_EVENTS,
+  LISTTYPE,
   type AppEntityField,
   type DetailMethodV2Params,
   type GetPageSetIdReq,
@@ -58,6 +60,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
     setMainMetaDataFields,
     subEntities,
     setSubEntities,
+    bpmInstanceId,
     flows,
     setFlows,
     resetFlows
@@ -484,25 +487,48 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
     submitForm(true);
   };
 
+  const onBack = () => {
+    setPredictVisible(false);
+    setTimeout(() => setRefresh(Date.now()), 150);
+  };
+
   return (
     <div className={`${styles.previewPage} runtime-preview-formpage`}>
       <div className={styles.content}>
         {pageSetType === PageType.WORKBENCH ? (
           <WorkbenchRuntime pageSetId={pageSetId} runtime={runtime} />
         ) : (
-          <ListRuntime pageSetId={pageSetId} runtime={runtime} showFromPageData={showFromPageData} refresh={refresh} />
+          <ListRuntime
+            pageSetType={pageSetType}
+            pageSetId={pageSetId}
+            runtime={runtime}
+            showFromPageData={showFromPageData}
+            refresh={refresh}
+          />
         )}
 
-        <DetailRuntime
-          visible={drawerVisible.value}
-          onCancel={() => setDrawerVisible(false)}
-          form={form}
-          detailMode={detailMode}
-          onUpdate={() => submitForm()}
-          onCancelUpdate={cancelSubmitForm}
-          showFromPageData={showFromPageData}
-          editTargetId={editTargetId}
-        />
+        {pageSetType === PageType.NORMAL && (
+          <DetailRuntime
+            visible={drawerVisible.value}
+            onCancel={() => setDrawerVisible(false)}
+            form={form}
+            detailMode={detailMode}
+            onUpdate={() => submitForm()}
+            onCancelUpdate={cancelSubmitForm}
+            showFromPageData={showFromPageData}
+            editTargetId={editTargetId}
+          />
+        )}
+
+        {pageSetType === PageType.BPM && drawerVisible.value && bpmInstanceId.value && (
+          <DetailPop
+            detailPopVisible={drawerVisible.value}
+            setPopVisible={setDrawerVisible}
+            onBack={onBack}
+            rowData={{ instanceId: bpmInstanceId.value, pageSetId }}
+            listType={LISTTYPE.LIST}
+          />
+        )}
 
         {pageType == EDITOR_TYPES.FORM_EDITOR && (
           <EditRuntime
