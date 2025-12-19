@@ -131,7 +131,7 @@ const XFileUpload = memo(
                           menuId: curMenu.value?.id,
                           id: recordId || rowDataId.value,
                           fieldName: curFieldName,
-                          fileId: file.response.fileId || file.id
+                          fileId: file.response.fileId || file.uid
                         };
                         const fileUrl = await attachmentDownload(tableName, param);
                         downloadFileByUrl(fileUrl, file.name);

@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import { nanoid } from 'nanoid';
-import { Checkbox, Ellipsis, Form, Tag } from '@arco-design/mobile-react';
+import { Checkbox, Ellipsis, Form } from '@arco-design/mobile-react';
 import { ValidatorType, ITypeRules } from '@arco-design/mobile-utils';
 import IconSquareChecked from '@arco-design/mobile-react/esm/icon/IconSquareChecked';
 import IconSquareUnchecked from '@arco-design/mobile-react/esm/icon/IconSquareUnchecked';
@@ -19,8 +19,9 @@ const squareIcon = {
   activeDisabled: <IconSquareChecked />,
 }
 
-const XCheckbox = memo((props: XCheckboxConfig & { runtime?: boolean; detailMode?: boolean; defaultOptionsConfig?: any; }) => {
+const XCheckbox = memo((props: XCheckboxConfig & { runtime?: boolean; detailMode?: boolean; defaultOptionsConfig?: any; form?: any; }) => {
   const {
+    form,
     label,
     align,
     dataField,
@@ -66,7 +67,6 @@ const XCheckbox = memo((props: XCheckboxConfig & { runtime?: boolean; detailMode
       field={fieldId}
       label={label.display && <Ellipsis text={label.text} />}
       rules={rules}
-      initialValue={defaultOptionsConfig?.defaultOptions.filter(ele => ele.isChosen)?.map(ele => ele.value) || []}
       style={{
         textAlign: align || 'right',
         pointerEvents: (!runtime || detailMode) ? 'none' : 'unset',
@@ -75,11 +75,7 @@ const XCheckbox = memo((props: XCheckboxConfig & { runtime?: boolean; detailMode
     >
       {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
         // 只读模式，渲染文本内容
-        <div>
-          {defaultOptionsConfig?.defaultOptions.map((ele: any, index: number) => ele.isChosen && <Tag key={index}>
-            {ele.label}
-          </Tag>)}
-        </div>
+        <div className="readonlyText">{form?.getFieldValue(fieldId)}</div>
       ) : (
         renderContent()
       )}
