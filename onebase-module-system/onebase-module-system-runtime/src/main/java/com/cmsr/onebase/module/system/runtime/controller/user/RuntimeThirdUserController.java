@@ -41,7 +41,6 @@ public class RuntimeThirdUserController {
     @PostMapping("/supplement-user")
     @Operation(summary = "第三方用户补充用户信息")
     @PermitAll
-    @TenantIgnore
     public CommonResult<ThirdSupplementUserResVO> thirdUserSupplementUser(@RequestBody  @Valid ThirdSupplementUserReqVO reqVO) {
         ThirdSupplementUserResVO user = userService.thirdUserSupplementUser(reqVO);
         return success(user);

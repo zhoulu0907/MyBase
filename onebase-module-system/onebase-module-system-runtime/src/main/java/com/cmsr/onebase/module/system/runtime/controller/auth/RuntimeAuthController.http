@@ -36,7 +36,9 @@ tenant-id: 158088726951460864
 tag: {{tag}}
 
 {"password":"124f54e7508c286e1e488e75bc3a80d4a999fa13a2a1646d7ddce30eaaa52f2198131554b6194a52a793ec03aaf94b7e8c841636beea488831b08d8678ed3cee4f95ed83ac683d72ca51252ffecfb6bd9193d981981ff15b0c27c5d7183035ba7c7c235f48827ba27ddbb4bcec3b71","username":"gaoguoqing",
-  "appId":"166917874067439616","captchaVerification":"3oJFZk4xdNNjawBg8JwIwkbZv6hhC6yKrjtBq7D7tbCABbnNmu8f0T5qf/LeSpLu1dhHwA+5nS1w+uD7AK6k72E8KSX5zeXQoO1BnNR7iJ0=","deviceId":"f3b000916478e376e7253f5694a8d1e8"}
+  "appId":"166917874067439616",
+  "captchaVerification":"3oJFZk4xdNNjawBg8JwIwkbZv6hhC6yKrjtBq7D7tbCABbnNmu8f0T5qf/LeSpLu1dhHwA+5nS1w+uD7AK6k72E8KSX5zeXQoO1BnNR7iJ0=",
+  "deviceId":"f3b000916478e376e7253f5694a8d1e8"}
 
 > {%
     // 登录成功后自动更新token到环境变量
@@ -108,8 +110,7 @@ tag: {{tag}}
 
 {
   "appId":162947915524571136,
-  "mobile": "13818118256",
-  "password": "Dm<Ei&4S:;P+aNi",
+  "mobile": "15890615200",
   "deviceId":666,
   "loginType":"verifycode",
   "verifyCode":"888888"
@@ -136,5 +137,6 @@ tag: {{tag}}
 
 {
   "mobile": "15890615800",
+  "password": "0f16ab8010a1a7594a375370ceb14d22a4203eac42e431d8a3ccd566ceef555e2e0b2312f58e44815715d16a3e76ee506bf6552965b46c5fab4ad2e74d4450e646639a29b8823e496e16c71663f9ea19c8afa0f82e2429c1dc0b3bfd1713c638fdec434a5e33a30998f1dc071a5c",
   "verifyCode": "111111"
 }

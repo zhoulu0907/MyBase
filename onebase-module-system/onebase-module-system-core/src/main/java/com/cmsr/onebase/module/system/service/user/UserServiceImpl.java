@@ -1355,18 +1355,28 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ThirdSupplementUserResVO thirdUserSupplementUser(ThirdSupplementUserReqVO reqVO) {
-        // 1. 校验用户和邮箱
-        validateThirdUserForCreateOrUpdate(reqVO.getUserId(), null, reqVO.getEmail());
-        // 2. 弱密码校验
-        securityConfigApi.validatePassword(reqVO.getPassword());
-        // 3. 解密原文
+        // 1. 校验手机和邮箱
+        validateThirdUserForCreateOrUpdate(null, reqVO.getMobile(), reqVO.getEmail());
+        // 2: 验证空间用户数
+        validateTenantUserCountMaxLimit();
+        // 3 验证app存在
+        checkAppAndGetTenantId(reqVO.getAppId());
+        // 4. 解密原文
         reqVO.setPassword(pwdEnHelper.decryptHexStr(reqVO.getPassword()));
-        // 4. 更新用户信息
-        AdminUserDO user = userDataRepository.findById(reqVO.getUserId());
-        user.setNickname(reqVO.getNickName());
-        user.setEmail(reqVO.getEmail());
+        // 5. 弱密码校验
+        securityConfigApi.validatePassword(reqVO.getPassword());
+        // 6. 注册用户信息
+        AdminUserDO user =  new AdminUserDO();
+        // 管理员类型：内置/自定义
+        user.setAdminType(AdminTypeEnum.CUSTOM.getType());
+        user.setMobile(reqVO.getMobile());
+        user.setUserType(UserTypeEnum.THIRD.getValue());
+        user.setStatus(UserStatusEnum.NORMAL.getStatus());
+        user.setUsername(reqVO.getNickName());
         user.setPassword(encodePassword(reqVO.getPassword()));
-        userDataRepository.update(user);
+        user.setCreateSource(CreateSourceEnum.SELF.getCode());
+        userDataRepository.insert(user);
+
         // 5. 转换成返回结果
         ThirdSupplementUserResVO resVO = new ThirdSupplementUserResVO();
         resVO.setId(user.getId());
