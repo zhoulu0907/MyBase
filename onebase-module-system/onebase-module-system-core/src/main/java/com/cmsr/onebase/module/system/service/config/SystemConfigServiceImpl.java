@@ -42,7 +42,7 @@ public class SystemConfigServiceImpl implements SystemConfigService {
     @Resource
     private SystemGeneralConfigDataRepository systemGeneralConfigDataRepository;
     @Resource
-    private CorpService corpService;
+    private CorpService                       corpService;
 
     @Resource
     private AppApplicationApi appApplicationApi;
@@ -56,47 +56,38 @@ public class SystemConfigServiceImpl implements SystemConfigService {
         return configDO.getId();
     }
 
-    public SystemGeneralConfigDO get(SystemGeneralConfigDO configDO,String key){
+    public SystemGeneralConfigDO get(SystemGeneralConfigDO configDO, String key) {
 
         return configDO;
     }
-
 
 
     @Override
     public void updateConfig(SystemGeneralConfigUpdateReqVO updateReqVO) {
         SystemGeneralConfigDO systemGeneralConfigDO = BeanUtils.toBean(updateReqVO, SystemGeneralConfigDO.class);
         // 判断数据库是否存在三个配置项
-        if (SystemConfigKeyEnum.appThirdUserEnable.getCode().equals(updateReqVO.getConfigKey()) ||
-                SystemConfigKeyEnum.appThirdUserForgetPwdShow.getCode().equals(updateReqVO.getConfigKey()) ||
-                SystemConfigKeyEnum.appThirdUserRegisterShow.getCode().equals(updateReqVO.getConfigKey())) {
+        if (SystemConfigKeyEnum.appThirdUserEnable.getKey().equals(updateReqVO.getConfigKey()) ||
+                SystemConfigKeyEnum.appThirdUserForgetPwdShow.getKey().equals(updateReqVO.getConfigKey()) ||
+                SystemConfigKeyEnum.appThirdUserRegisterShow.getKey().equals(updateReqVO.getConfigKey())) {
 
             // 先判断 key，appid 对于的数是否存在，
             SystemGeneralConfigDO configDO = systemGeneralConfigDataRepository.findOneByConfigKeyAndAppId(updateReqVO.getConfigKey(), updateReqVO.getAppId());
             if (null == configDO) {
                 SystemGeneralConfigDO insertConfigDO = new SystemGeneralConfigDO();
                 insertConfigDO.setId(null);
-                insertConfigDO.setConfigType(ConfigTypeEnum.APP.getCode());
-                insertConfigDO.setConfigValue(updateReqVO.getConfigValue());
                 insertConfigDO.setAppId(updateReqVO.getAppId());
                 insertConfigDO.setStatus(CommonStatusEnum.ENABLE.getStatus());
+                insertConfigDO.setConfigType(ConfigTypeEnum.APP.getCode());
                 insertConfigDO.setConfigKey(updateReqVO.getConfigKey());
-                if (SystemConfigKeyEnum.appThirdUserEnable.getCode().equals(updateReqVO.getConfigKey())) {
-                    insertConfigDO.setName(SystemConfigKeyEnum.appThirdUserEnable.getName());
-                }
-                if (SystemConfigKeyEnum.appThirdUserForgetPwdShow.getCode().equals(updateReqVO.getConfigKey())) {
-                    insertConfigDO.setName(SystemConfigKeyEnum.appThirdUserForgetPwdShow.getName());
-                }
-                if (SystemConfigKeyEnum.appThirdUserRegisterShow.getCode().equals(updateReqVO.getConfigKey())) {
-                    insertConfigDO.setName(SystemConfigKeyEnum.appThirdUserRegisterShow.getName());
-                }
+                insertConfigDO.setConfigValue(updateReqVO.getConfigValue());
+                insertConfigDO.setName(SystemConfigKeyEnum.getByKey(updateReqVO.getConfigKey()).getName());
                 systemGeneralConfigDataRepository.insert(insertConfigDO);
             } else {
                 configDO.setConfigValue(updateReqVO.getConfigValue());
                 systemGeneralConfigDataRepository.update(configDO);
 
             }
-        }else{
+        } else {
             systemGeneralConfigDataRepository.update(systemGeneralConfigDO);
         }
 
@@ -114,12 +105,12 @@ public class SystemConfigServiceImpl implements SystemConfigService {
 
     @Override
     public List<SystemGeneralConfigDO> getTenantConfigList(SystemConfigReqVO configReqVO) {
-        List<SystemGeneralConfigDO> configList = systemGeneralConfigDataRepository.findTenantConfigList(configReqVO.getName(),configReqVO.getStatus(),configReqVO.getConfigType());
-        if(CollectionUtils.isNotEmpty(configList)){
+        List<SystemGeneralConfigDO> configList = systemGeneralConfigDataRepository.findTenantConfigList(configReqVO.getName(), configReqVO.getStatus(), configReqVO.getConfigType());
+        if (CollectionUtils.isNotEmpty(configList)) {
             return configList;
         }
 
-        if (StringUtils.isBlank(configReqVO.getName())  &&  null ==configReqVO.getStatus()) {
+        if (StringUtils.isBlank(configReqVO.getName()) && null == configReqVO.getStatus()) {
             List<SystemGeneralConfigDO> globalConfigList = systemGeneralConfigDataRepository.findGlobaConfigListByKeys(Arrays.asList(SystemConfigKeyEnum.ARRAYS));
             if (CollectionUtils.isEmpty(globalConfigList)) {
                 return new ArrayList<>();
@@ -134,30 +125,30 @@ public class SystemConfigServiceImpl implements SystemConfigService {
             });
 
         }
-        return systemGeneralConfigDataRepository.findTenantConfigList(configReqVO.getName(),configReqVO.getStatus(),configReqVO.getConfigType());
+        return systemGeneralConfigDataRepository.findTenantConfigList(configReqVO.getName(), configReqVO.getStatus(), configReqVO.getConfigType());
 
 
     }
 
-    private void checkSaasExitsCorpOrApp(){
+    private void checkSaasExitsCorpOrApp() {
         // 如果是Saas模式,并且当前租户已存在企业，则不允许禁用
-       List<CorpDO> corpList = corpService.getAllCorpList();
-       if(CollectionUtils.isNotEmpty(corpList)){
-           throw exception(ErrorCodeConstants.CONFIG_SAAS_CORP_EXISTS);
-       }
+        List<CorpDO> corpList = corpService.getAllCorpList();
+        if (CollectionUtils.isNotEmpty(corpList)) {
+            throw exception(ErrorCodeConstants.CONFIG_SAAS_CORP_EXISTS);
+        }
         // 如果是Saas模式,并且 当前租户已存在SAAS应用，存在则不可禁用
-        List<ApplicationDTO> appList =  appApplicationApi.findAppApplicationByAppName("");
-       // appList 是否模式字段是否有saas应用
+        List<ApplicationDTO> appList = appApplicationApi.findAppApplicationByAppName("");
+        // appList 是否模式字段是否有saas应用
         boolean hasSaasApp = appList.stream()
                 .anyMatch(app -> CommonPublishModelEnum.SaaSModel.getValue().equalsIgnoreCase(app.getPublishModel()));
-        if(hasSaasApp){
+        if (hasSaasApp) {
             throw exception(ErrorCodeConstants.CONFIG_SAAS_APP_EXISTS);
         }
     }
 
 
     @Override
-    public void updateStatus(Long id,Integer status) {
+    public void updateStatus(Long id, Integer status) {
         SystemGeneralConfigDO configDO = systemGeneralConfigDataRepository.findById(id);
         if (null == configDO) {
             throw exception(ErrorCodeConstants.CONFIG_NO_EXISTS);
@@ -167,8 +158,8 @@ public class SystemConfigServiceImpl implements SystemConfigService {
             configDO.setConfigValue(CommonStatusEnum.ENABLE.getStatus().toString());
             configDO.setStatus(CommonStatusEnum.ENABLE.getStatus());
         } else {
-            //判断配置项是否为saas配置项
-            if(SystemConfigKeyEnum.SaasModeConfig.getCode().equals(configDO.getConfigKey())){
+            // 判断配置项是否为saas配置项
+            if (SystemConfigKeyEnum.SaasModeConfig.getKey().equals(configDO.getConfigKey())) {
                 checkSaasExitsCorpOrApp();
             }
 
@@ -178,14 +169,14 @@ public class SystemConfigServiceImpl implements SystemConfigService {
 
 
         // 如果配置有互斥数据，需要更新互斥数据为修改状态的反值
-        if (StringUtils.isNotBlank(configDO.getExclusiveItem())  &&  CommonStatusEnum.ENABLE.getStatus().equals(status)) {
+        if (StringUtils.isNotBlank(configDO.getExclusiveItem()) && CommonStatusEnum.ENABLE.getStatus().equals(status)) {
             SystemGeneralConfigSearchVO searchVO = getSystemGeneralConfigSearchVO(configDO);
             // 获取互斥数据 忽略租户条件,
             SystemGeneralConfigDO config = systemGeneralConfigDataRepository.getConfigByDiffCategory(searchVO);
             if (null != config) {
                 // 判断互斥数据是否已启用
-                if(CommonStatusEnum.ENABLE.getStatus().equals(config.getStatus())){
-                    throw exception(ErrorCodeConstants.CONFIG_ALREADY_ENABLE,config.getName(),configDO.getName());
+                if (CommonStatusEnum.ENABLE.getStatus().equals(config.getStatus())) {
+                    throw exception(ErrorCodeConstants.CONFIG_ALREADY_ENABLE, config.getName(), configDO.getName());
                 }
                 if (CommonStatusEnum.ENABLE.getStatus().equals(status)) {
                     config.setConfigValue(CommonStatusEnum.DISABLE.getStatus().toString());
@@ -203,16 +194,16 @@ public class SystemConfigServiceImpl implements SystemConfigService {
 
     @NotNull
     private static SystemGeneralConfigSearchVO getSystemGeneralConfigSearchVO(SystemGeneralConfigDO configDO) {
-        String category= configDO.getConfigType();
+        String category = configDO.getConfigType();
 
         SystemGeneralConfigSearchVO searchVO = new SystemGeneralConfigSearchVO();
         searchVO.setCategory(category);
         searchVO.setConfigKey(configDO.getExclusiveItem());
 
-        if(ConfigTypeEnum.TENANT.getCode().equals( category)){
+        if (ConfigTypeEnum.TENANT.getCode().equals(category)) {
             searchVO.setTenantId(configDO.getTenantId());
         }
-        if(ConfigTypeEnum.CORP.getCode().equals( category)){
+        if (ConfigTypeEnum.CORP.getCode().equals(category)) {
             searchVO.setCorpId(configDO.getCorpId());
             searchVO.setTenantId(configDO.getTenantId());
         }
@@ -225,18 +216,18 @@ public class SystemConfigServiceImpl implements SystemConfigService {
         Long appId = searchVO.getAppId();
         String category = searchVO.getConfigType();
 
-        if(CollectionUtils.isEmpty(configKeys)){
+        if (CollectionUtils.isEmpty(configKeys)) {
             return new ArrayList<>();
         }
-        List<SystemGeneralConfigDO> configDOList = systemGeneralConfigDataRepository.findConfigListByKeysAndAppId(configKeys,appId, category);
-        if(CollectionUtils.isNotEmpty(configDOList)){
+        List<SystemGeneralConfigDO> configDOList = systemGeneralConfigDataRepository.findConfigListByKeysAndAppId(configKeys, appId, category);
+        if (CollectionUtils.isNotEmpty(configDOList)) {
             return configDOList;
         }
 
         configKeys.forEach(configKey -> {
-            if (SystemConfigKeyEnum.appThirdUserEnable.getCode().equals(configKey) ||
-                    SystemConfigKeyEnum.appThirdUserForgetPwdShow.getCode().equals(configKey) ||
-                    SystemConfigKeyEnum.appThirdUserRegisterShow.getCode().equals(configKey)) {
+            if (SystemConfigKeyEnum.appThirdUserEnable.getKey().equals(configKey) ||
+                    SystemConfigKeyEnum.appThirdUserForgetPwdShow.getKey().equals(configKey) ||
+                    SystemConfigKeyEnum.appThirdUserRegisterShow.getKey().equals(configKey)) {
                 SystemGeneralConfigDO configDO = systemGeneralConfigDataRepository.findOneByConfigKeyAndAppId(configKey, appId);
                 if (null == configDO) {
                     SystemGeneralConfigDO insertConfigDO = new SystemGeneralConfigDO();
@@ -245,15 +236,15 @@ public class SystemConfigServiceImpl implements SystemConfigService {
                     insertConfigDO.setAppId(appId);
                     insertConfigDO.setStatus(CommonStatusEnum.ENABLE.getStatus());
                     insertConfigDO.setConfigKey(configKey);
-                    if (SystemConfigKeyEnum.appThirdUserEnable.getCode().equals(configKey)) {
+                    if (SystemConfigKeyEnum.appThirdUserEnable.getKey().equals(configKey)) {
                         insertConfigDO.setName(SystemConfigKeyEnum.appThirdUserEnable.getName());
                         insertConfigDO.setConfigValue(SystemConfigKeyEnum.appThirdUserEnable_DefaultValue);
                     }
-                    if (SystemConfigKeyEnum.appThirdUserForgetPwdShow.getCode().equals(configKey)) {
+                    if (SystemConfigKeyEnum.appThirdUserForgetPwdShow.getKey().equals(configKey)) {
                         insertConfigDO.setName(SystemConfigKeyEnum.appThirdUserForgetPwdShow.getName());
                         insertConfigDO.setConfigValue(SystemConfigKeyEnum.appThirdUserForgetPwdShow_DefaultValue);
                     }
-                    if (SystemConfigKeyEnum.appThirdUserRegisterShow.getCode().equals(configKey)) {
+                    if (SystemConfigKeyEnum.appThirdUserRegisterShow.getKey().equals(configKey)) {
                         insertConfigDO.setName(SystemConfigKeyEnum.appThirdUserRegisterShow.getName());
                         insertConfigDO.setConfigValue(SystemConfigKeyEnum.appThirdUserRegisterShow_DefaultValue);
                     }
@@ -262,7 +253,7 @@ public class SystemConfigServiceImpl implements SystemConfigService {
             }
         });
 
-        return   systemGeneralConfigDataRepository.findConfigListByKeysAndAppId(configKeys,appId,category);
+        return systemGeneralConfigDataRepository.findConfigListByKeysAndAppId(configKeys, appId, category);
 
     }
 

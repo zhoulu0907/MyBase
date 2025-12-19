@@ -18,8 +18,8 @@ public enum SystemConfigKeyEnum implements ArrayValuable<String> {
     appThirdUserForgetPwdShow("appThirdUserForgetPwdShow", "应用三方用户登录-忘记密码显隐"),
     ;
 
-    SystemConfigKeyEnum(String code, String name) {
-        this.code = code;
+    SystemConfigKeyEnum(String key, String name) {
+        this.key = key;
         this.name = name;
     }
 
@@ -33,18 +33,27 @@ public enum SystemConfigKeyEnum implements ArrayValuable<String> {
     /**
      * 角色编码
      */
-    private final String code;
+    private final String key;
 
     /**
      * 名字
      */
     private final String name;
 
-    public static final String[] ARRAYS = Arrays.stream(values()).map(SystemConfigKeyEnum::getCode).toArray(String[]::new);
+    public static final String[] ARRAYS = Arrays.stream(values()).map(SystemConfigKeyEnum::getKey).toArray(String[]::new);
 
 
     @Override
     public String[] array() {
         return ARRAYS;
+    }
+
+    public static SystemConfigKeyEnum getByKey(String key) {
+        for (SystemConfigKeyEnum configKeyEnum : SystemConfigKeyEnum.values()) {
+            if (configKeyEnum.getKey().equals(key)) {
+                return configKeyEnum;
+            }
+        }
+        return null;
     }
 }
