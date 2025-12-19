@@ -52,7 +52,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
     setMainMetaDataFields,
     subEntities,
     setSubEntities,
-    bpmInstanceId
+    bpmInstanceId,
     flows,
     setFlows,
     resetFlows
