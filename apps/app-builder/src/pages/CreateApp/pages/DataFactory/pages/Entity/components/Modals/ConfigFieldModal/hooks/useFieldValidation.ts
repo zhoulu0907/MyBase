@@ -78,6 +78,14 @@ export const useFieldValidation = (): FieldValidation => {
     setErrors(newErrors);
   }, []);
 
+  // 清除单个字段错误
+  const clearFieldError = useCallback((fieldKey: string) => {
+    setErrors((prev) => {
+      const { [fieldKey]: _, ...rest } = prev;
+      return rest;
+    });
+  }, []);
+
   return useMemo(
     () => ({
       validateField,
@@ -85,8 +93,9 @@ export const useFieldValidation = (): FieldValidation => {
       clearErrors,
       setFieldError,
       setAllErrors,
+      clearFieldError,
       errors
     }),
-    [validateField, validateAllFields, clearErrors, setFieldError, setAllErrors, errors]
+    [validateField, validateAllFields, clearErrors, setFieldError, setAllErrors, clearFieldError, errors]
   );
 };
