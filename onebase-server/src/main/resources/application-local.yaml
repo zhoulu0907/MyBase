@@ -43,7 +43,7 @@ onebase:
   platform-tenant:
     enable-create-app: true # 测试环境，暂时允许平台租户创建应用，方便登录接口测试；
   security:
-    mock-enable: false
+    mock-enable: true
   access-log: # 访问日志的配置项
     enable: false
   web:
