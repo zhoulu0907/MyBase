@@ -8,6 +8,7 @@ import {
   STATUS_VALUES,
   useFormEditorSignal,
   useListEditorSignal,
+  usePageEditorSignal,
   useWorkbenchEditorSignal,
   type GridItem
 } from '@onebase/ui-kit';
@@ -45,11 +46,34 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
 
   const mobileEditorPreviewRef = useRef<MicroApp | null>(null);
 
+  const {
+    curComponentID,
+    setCurComponentID,
+    clearCurComponentID,
+    setCurComponentSchema,
+    setPageComponentSchemas,
+    delPageComponentSchemas,
+    showDeleteButton,
+    setShowDeleteButton,
+    subTableComponents,
+    setSubTableComponents,
+  } = usePageEditorSignal();
+
   const qiankunActions = initGlobalState({
     drag: false,
     components: pageType === EDITOR_TYPES.FORM_EDITOR ? formComponents.value : listComponents.value,
     pageComponentSchemas:
-      pageType === EDITOR_TYPES.FORM_EDITOR ? formPageComponentSchemas.value : listPageComponentSchemas.value
+      pageType === EDITOR_TYPES.FORM_EDITOR ? formPageComponentSchemas.value : listPageComponentSchemas.value,
+    curComponentID,
+    setCurComponentID,
+    clearCurComponentID,
+    setCurComponentSchema,
+    setPageComponentSchemas,
+    delPageComponentSchemas,
+    showDeleteButton,
+    setShowDeleteButton,
+    subTableComponents,
+    setSubTableComponents
   });
   useEffect(() => {
     console.log('loading mobile-editor-preview-list');
