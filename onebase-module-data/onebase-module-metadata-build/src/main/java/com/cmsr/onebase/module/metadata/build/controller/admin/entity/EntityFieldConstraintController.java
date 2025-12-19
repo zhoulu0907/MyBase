@@ -1,6 +1,8 @@
 package com.cmsr.onebase.module.metadata.build.controller.admin.entity;
 
+import com.cmsr.onebase.framework.common.event.AppEntityChangeEvent;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.FieldConstraintRespVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.FieldConstraintSaveReqVO;
 import com.cmsr.onebase.module.metadata.build.service.field.MetadataEntityFieldConstraintBuildService;
@@ -8,6 +10,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,6 +31,9 @@ public class EntityFieldConstraintController {
     @Resource
     private MetadataEntityFieldConstraintBuildService constraintService;
 
+    @Resource
+    ApplicationEventPublisher applicationEventPublisher;
+
     @PostMapping("/get")
     @Operation(summary = "按字段UUID获取约束配置")
     public CommonResult<FieldConstraintRespVO> get(@RequestParam("fieldId") String fieldUuid) {
@@ -39,6 +45,11 @@ public class EntityFieldConstraintController {
     @Operation(summary = "保存/更新约束配置")
     public CommonResult<Boolean> upsert(@Valid @RequestBody FieldConstraintSaveReqVO req) {
         constraintService.saveFieldConstraintConfig(req);
+        applicationEventPublisher.publishEvent(
+                AppEntityChangeEvent.builder()
+                        .applicationId(ApplicationManager.getApplicationId())
+                        .build()
+        );
         return success(true);
     }
 
@@ -47,6 +58,11 @@ public class EntityFieldConstraintController {
     public CommonResult<Boolean> delete(@RequestParam("fieldId") String fieldUuid,
                                         @RequestParam("constraintType") String type) {
         constraintService.delete(fieldUuid, type);
+        applicationEventPublisher.publishEvent(
+                AppEntityChangeEvent.builder()
+                        .applicationId(ApplicationManager.getApplicationId())
+                        .build()
+        );
         return success(true);
     }
 }
