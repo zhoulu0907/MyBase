@@ -10,7 +10,9 @@ import org.pf4j.PluginWrapper;
 import org.springframework.context.ApplicationEventPublisher;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.pf4j.DefaultPluginManager;
@@ -535,13 +537,35 @@ public class OneBasePluginManager {
      * @return 插件信息列表
      */
     public List<PluginInfo> getLoadedPlugins() {
-        return pluginManager.getPlugins().stream()
-                .map(wrapper -> new PluginInfo(
-                        wrapper.getPluginId(),
-                        wrapper.getDescriptor().getPluginDescription(),
-                        wrapper.getDescriptor().getVersion(),
-                        wrapper.getPluginState().name()
-                ))
+        log.debug("开始获取已加载的插件列表");
+        List<org.pf4j.PluginWrapper> plugins = pluginManager.getPlugins();
+        log.debug("获取到的插件列表大小: {}", plugins != null ? plugins.size() : "null");
+        
+        if (plugins == null) {
+            log.warn("插件管理器返回了null插件列表");
+            return new ArrayList<>();
+        }
+        
+        return plugins.stream()
+                .filter(Objects::nonNull)
+                .map(wrapper -> {
+                    log.debug("处理插件包装器: {}", wrapper.getPluginId());
+                    if (wrapper.getDescriptor() == null) {
+                        log.warn("插件 {} 的描述符为null", wrapper.getPluginId());
+                        return new PluginInfo(
+                                wrapper.getPluginId(),
+                                "Unknown",
+                                "Unknown",
+                                wrapper.getPluginState().name()
+                        );
+                    }
+                    return new PluginInfo(
+                            wrapper.getPluginId(),
+                            wrapper.getDescriptor().getPluginDescription(),
+                            wrapper.getDescriptor().getVersion(),
+                            wrapper.getPluginState().name()
+                    );
+                })
                 .collect(Collectors.toList());
     }
 
