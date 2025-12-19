@@ -8,6 +8,8 @@ import lombok.Data;
 @Schema(description = "数据工厂 - 数据源 - 测试连接请求VO")
 @Data
 public class TestConnectionVO {
+    @Schema(description = "数据源ID", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private Long id;
 
     @Schema(description = "数据源类型信息", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "数据源类型不能为空")
