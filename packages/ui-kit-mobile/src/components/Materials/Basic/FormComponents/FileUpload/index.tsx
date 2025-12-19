@@ -1,11 +1,12 @@
 import { Form, Uploader, Toast, Loading, Ellipsis } from '@arco-design/mobile-react';
 import { type UploadItem } from '@arco-design/mobile-react/lib/Upload';
-import { IconDelete, IconClose, IconDownload, IconFile } from '@arco-design/mobile-react/esm/icon';
+import { IconDelete, IconClose, IconDownload } from '@arco-design/mobile-react/esm/icon';
 import { uploadFile } from '@onebase/platform-center';
 import { nanoid } from 'nanoid';
 import { memo, useState, useEffect } from 'react';
 import { attachmentDownload, menuSignal } from '@onebase/app';
 import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, FormSchema, downloadFileByUrl } from '@onebase/ui-kit';
+import DownloadLink from '@/assets/images/download_link.svg';
 import '../index.css';
 import './index.css'
 
@@ -90,7 +91,7 @@ const XFileUpload = memo((props: XFileUploadConfig & { runtime?: boolean; detail
         const index = file.name.lastIndexOf('.');
         const type = file.name.slice(index + 1)
       }
-      return <IconFile style={{ fontSize: '40px' }} />
+      return <img src={DownloadLink} alt="download_link" />;
     }
     
     return (
@@ -110,6 +111,7 @@ const XFileUpload = memo((props: XFileUploadConfig & { runtime?: boolean; detail
             ) : (
               <div className="uplaodList-text-item-opera">
                 {showDownload && <IconDownload
+                  style={{ color: 'rgb(var(--primary-6))' }}
                   onClick={async (e) => {
                     e.stopPropagation();
 
