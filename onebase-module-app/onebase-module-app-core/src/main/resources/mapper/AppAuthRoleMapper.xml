@@ -11,7 +11,10 @@
         aaru.update_time,
         -1 AS is_include_child,
         d.name AS dept_name,
+        u.username as account,
         u.nickname AS member_name,
+        u.avatar as avatar,
+        u.create_source,
         'user' AS member_type
         from
         app_auth_role_user aaru
@@ -31,7 +34,10 @@
         aard.update_time,
         aard.is_include_child,
         d.name as dept_name,
+        d.name as account,
         d.name as member_name,
+        '' as avatar,
+        '' as create_source,
         'dept' as member_type
         from
         app_auth_role_dept aard
@@ -52,7 +58,10 @@
         aaru.update_time,
         -1 AS is_include_child,
         d.name AS dept_name,
+        u.username as account,
         u.nickname AS member_name,
+        u.avatar as avatar,
+        u.create_source,
         'user' AS member_type
         from
         app_auth_role_user aaru
@@ -71,7 +80,10 @@
         aard.update_time,
         aard.is_include_child,
         d.name as dept_name,
+        d.name as account,
         d.name as member_name,
+        '' as avatar,
+        '' as create_source,
         'dept' as member_type
         from
         app_auth_role_dept aard
