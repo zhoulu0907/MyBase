@@ -88,7 +88,7 @@ const XTable = memo(
 
     const { pageComponentSchemas: fromPageComponentSchemas, components } = useFormEditorSignal;
 
-    const { curPage, setDrawerVisible, setDrawerPageId, setDetailPageViewId, setRowDataId, setFlows,setBpmInstanceId } =
+    const { curPage, setDrawerVisible, setDrawerPageId, setDetailPageViewId, setRowDataId, setFlows, setBpmInstanceId } =
       pagesRuntimeSignal;
     const { runtime = true, showFromPageData, showAddBtn = true, preview } = props;
     const hasOperationPermission = true;

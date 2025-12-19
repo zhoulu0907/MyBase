@@ -12,6 +12,7 @@ import {
   PageType,
   queryFlowExecForm,
   TRIGGER_EVENTS,
+  LISTTYPE,
   type AppEntityField,
   type DetailMethodV2Params,
   type GetPageSetIdReq,
@@ -494,7 +495,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
             setPopVisible={setDrawerVisible}
             onBack={onBack}
             rowData={{ instanceId: bpmInstanceId.value, pageSetId }}
-            listType={'list'}
+            listType={LISTTYPE.LIST}
           />
         )}
 

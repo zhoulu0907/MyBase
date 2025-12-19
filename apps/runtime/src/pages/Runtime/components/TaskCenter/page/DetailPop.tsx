@@ -208,7 +208,7 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
       listType === LISTTYPE.IDONE ||
       listType === LISTTYPE.ICREATED ||
       listType === LISTTYPE.ICOPIED||
-       listType === LISTTYPE.LIST
+      listType === LISTTYPE.LIST
     ) {
       fetchStepData();
       fetchDetailData();
