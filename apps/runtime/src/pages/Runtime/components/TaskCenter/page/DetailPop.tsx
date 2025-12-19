@@ -9,9 +9,7 @@ import DetailOKConfirm from './DetailOKConfirm';
 import { getFormDetail, getOperatorRecord, fetchExecTask } from '@onebase/app/src/services/app_runtime';
 import PreviewContainer from './DetailForm';
 import FlowView from '../../../../../../../app-builder/src/pages/Editor/components/flowView';
-import {
-  type FetchExecTaskReq
-} from '@onebase/app';
+import { type FetchExecTaskReq } from '@onebase/app';
 const Row = Grid.Row;
 const Col = Grid.Col;
 
@@ -19,7 +17,8 @@ enum PageTypeMap {
   willdo = 'todo',
   idone = 'done',
   icreated = 'created',
-  icopied = 'cc'
+  icopied = 'cc',
+  list = 'list'
 }
 
 interface PageProps {
@@ -208,7 +207,8 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
       listType === LISTTYPE.WILLDO ||
       listType === LISTTYPE.IDONE ||
       listType === LISTTYPE.ICREATED ||
-      listType === LISTTYPE.ICOPIED
+      listType === LISTTYPE.ICOPIED||
+       listType === LISTTYPE.LIST
     ) {
       fetchStepData();
       fetchDetailData();
@@ -246,7 +246,11 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
               <p className="gray-color">发起人</p>
               <div className="photo-box">
                 <p className="photo-img">
-                  {detailData?.initiator?.avatar ? <img src={detailData?.initiator?.avatar} alt="" /> : detailData?.initiatorName?.charAt(0)}
+                  {detailData?.initiator?.avatar ? (
+                    <img src={detailData?.initiator?.avatar} alt="" />
+                  ) : (
+                    detailData?.initiatorName?.charAt(0)
+                  )}
                 </p>
                 {detailData?.initiatorName}
               </div>

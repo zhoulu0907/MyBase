@@ -1,5 +1,6 @@
 import ExecuteFlows from '@/utils/flow';
 import { Form, Message, Modal } from '@arco-design/web-react';
+import DetailPop from '../TaskCenter/page/DetailPop';
 import {
   CATEGORY_TYPE,
   dataMethodCreateV2,
@@ -48,7 +49,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid })
     mainMetaDataFields,
     setMainMetaDataFields,
     subEntities,
-    setSubEntities
+    setSubEntities,
+    bpmInstanceId
   } = pagesRuntimeSignal;
 
   const [pageSetId, setPageSetId] = useState('');
@@ -426,7 +428,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid })
       <div className={styles.content}>
         <ListRuntime pageSetId={pageSetId} runtime={runtime} showFromPageData={showFromPageData} refresh={refresh} />
 
-        <DetailRuntime
+        {/* <DetailRuntime
           visible={drawerVisible.value}
           onCancel={() => setDrawerVisible(false)}
           form={form}
@@ -435,7 +437,17 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid })
           onCancelUpdate={cancelSubmitForm}
           showFromPageData={showFromPageData}
           editTargetId={editTargetId}
-        />
+        /> */}
+
+        {drawerVisible.value && bpmInstanceId.value && (
+          <DetailPop
+            detailPopVisible={drawerVisible.value}
+            setPopVisible={setDrawerVisible}
+            onBack={() => setDrawerVisible(false)}
+            rowData={{ instanceId: bpmInstanceId.value, pageSetId }}
+            listType={'list'}
+          />
+        )}
 
         {pageType == EDITOR_TYPES.FORM_EDITOR && (
           <EditRuntime

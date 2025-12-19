@@ -20,6 +20,7 @@ import {
   getEntityFieldsWithChildren,
   menuSignal,
   PageMethodV2Params,
+  getFormDataPage,
   type AppEntityField
 } from '@onebase/app';
 import {
@@ -81,7 +82,7 @@ const XTable = memo(
     useSignals();
     const { pageComponentSchemas: fromPageComponentSchemas, components } = useFormEditorSignal;
 
-    const { setDrawerVisible, setDrawerPageId, setDetailPageViewId, setRowDataId } = pagesRuntimeSignal;
+    const { setDrawerVisible, setDrawerPageId, setDetailPageViewId, setRowDataId, setBpmInstanceId } = pagesRuntimeSignal;
     const { runtime = true, showFromPageData, showAddBtn = true, preview } = props;
     const hasOperationPermission = true;
 
@@ -428,14 +429,23 @@ const XTable = memo(
       //   req.sortField = sortByObject.fieldName;
       //   req.sortDirection = sortByObject.sortBy === 1 ? 'asc' : 'desc';
       // }
-
+      
       const req: PageMethodV2Params = {
         pageNo: tablePageNo,
         pageSize: pageSize || 10,
         filters: filterCondition
       };
-
-      const res = await dataMethodPageV2(tableName, curMenu.value?.id, req);
+      let res:any
+      if (advancedRowRedirect&&redirectMethod === RedirectMethod.DRAWER) {
+        const params={
+	        menuId: curMenu.value?.id,
+	        tableName,
+          ...req
+        }
+       res = await getFormDataPage(params)
+      } else {
+        res = await dataMethodPageV2(tableName, curMenu.value?.id, req);
+      }
       console.log('res: ', res);
 
       const mainMetaData = await getEntityFieldsWithChildren(metaData);
@@ -538,6 +548,8 @@ const XTable = memo(
           // 打开抽屉显示详情
           setDrawerVisible(true);
           redirectPageId && setDrawerPageId(redirectPageId);
+
+          record.bpm_instance_id && setBpmInstanceId(record.bpm_instance_id);
 
           handleEdit(record.id, false);
           if (runtime) {

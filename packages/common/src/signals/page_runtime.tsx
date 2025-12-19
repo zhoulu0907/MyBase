@@ -17,7 +17,10 @@ export const createPagesRuntimeSignal = () => {
   const setDrawerPageId = (newDrawerPageId: string) => {
     drawerPageId.value = newDrawerPageId;
   };
-
+  const bpmInstanceId = signal<string>('');
+  const setBpmInstanceId = (newBpmInstanceId: string) => {
+    bpmInstanceId.value = newBpmInstanceId;
+  };
   const editPageViewId = signal<string>('');
   const setEditPageViewId = (newEditPageViewId: string) => {
     editPageViewId.value = newEditPageViewId;
@@ -60,6 +63,9 @@ export const createPagesRuntimeSignal = () => {
 
     drawerPageId,
     setDrawerPageId,
+
+    bpmInstanceId,
+    setBpmInstanceId,
 
     editPageViewId,
     setEditPageViewId,
