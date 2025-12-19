@@ -38,5 +38,8 @@ export const RELATIONSHIP_TYPE_LABEL_MAP: Partial<Record<RelationshipType, strin
   DEFINE_ONE_TO_ONE: '1:1',
   DEFINE_ONE_TO_MANY: '1:N',
   DEFINE_MANY_TO_ONE: 'N:1',
-  DEFINE_MANY_TO_MANY: 'M:N'
+  DEFINE_MANY_TO_MANY: 'M:N',
+  SUBTABLE_ONE_TO_MANY: '主子',
+  DATA_SELECT: '数据选择',
+  DATA_SELECT_MULTI: '数据选择多选'
 };

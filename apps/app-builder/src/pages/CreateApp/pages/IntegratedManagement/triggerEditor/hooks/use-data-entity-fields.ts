@@ -1,4 +1,4 @@
-import { RELATIONSHIP_TYPE } from '@/pages/CreateApp/pages/DataFactory/utils/types';
+import { RELATIONSHIP_TYPE } from '@/pages/CreateApp/pages/DataFactory/utils/relation';
 import { useAppStore } from '@/store/store_app';
 import type { TreeSelectDataType } from '@arco-design/web-react/es/TreeSelect/interface';
 import {

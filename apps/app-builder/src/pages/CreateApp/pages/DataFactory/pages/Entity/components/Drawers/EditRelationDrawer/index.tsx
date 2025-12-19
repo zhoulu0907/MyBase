@@ -3,7 +3,7 @@ import { useResourceStore } from '@/store/store_resource';
 import { Button, Drawer, Form, Message, Select, Space, Spin } from '@arco-design/web-react';
 import { deleteRelation, getEntityFields, getEntityList, updateRelation } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
-import { ALL_RELATIONSHIP_OPTIONS } from '@/pages/CreateApp/pages/DataFactory/utils/types';
+import { ALL_RELATIONSHIP_OPTIONS } from '@/pages/CreateApp/pages/DataFactory/utils/relation';
 import { DeleteConfirmModal } from '../../Modals';
 import styles from './index.module.less';
 interface EntityOption {
