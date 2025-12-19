@@ -80,7 +80,6 @@ public interface RuntimeAuthService {
     /**
      * 忘记密码
      *
-     * @param reqVO 登录信息
      */
-    void forgetPassword(@Valid UserForgetPasswordReqVO reqVO);
+    void thirdUserForgetPassword(@Valid UserForgetPasswordReqVO reqVO);
 }

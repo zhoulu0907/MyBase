@@ -19,9 +19,6 @@ public class ThirdUserAppCombinedUpdateReqVO {
     @ExcelProperty("用户名称")
     private String nickName;
 
-    @Schema(description = "用户手机", example = "156")
-    private String mobile;
-
     @Schema(description = "用户邮箱", example = "a@b.cn")
     private String email;
 

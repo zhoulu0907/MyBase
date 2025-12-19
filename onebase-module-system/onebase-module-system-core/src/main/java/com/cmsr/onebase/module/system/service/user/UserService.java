@@ -336,7 +336,7 @@ public interface UserService {
      * 忘记密码
      * @param reqVO
      */
-    void forgetPassword(@Valid UserForgetPasswordReqVO reqVO);
+    void thirdUserForgetPassword(Long id, String password);
 
 
     /**
@@ -344,19 +344,19 @@ public interface UserService {
      * @param reqVO
      * @return
      */
-    ThirdSupplementUserResVO supplementUser(ThirdSupplementUserReqVO reqVO);
+    ThirdSupplementUserResVO thirdUserSupplementUser(ThirdSupplementUserReqVO reqVO);
     /**
      * 创建用户并关联应用
      * @param reqVO
      * @return
      */
-    Long createUserAndUserAppRelation( ThirdUserAppCombinedInsertReqVO reqVO);
+    Long thirdUserCreateUserAndUserAppRelation( ThirdUserAppCombinedInsertReqVO reqVO);
     /**
      * 更新用户并关联应用
      * @param reqVO
      * @return
      */
-    Long updateUserAndUserAppRelation(ThirdUserAppCombinedUpdateReqVO reqVO);
+    Long thirdUserUpdateUserAndUserAppRelation(ThirdUserAppCombinedUpdateReqVO reqVO);
 
 
     /**
@@ -372,7 +372,7 @@ public interface UserService {
      * @param id
      * @param password
      */
-    void updateThirdUserPassword(Long id, String password);
+    void thirdUserUpdatePassword(Long id, String password);
 
     /**
      * 获取用户信息
@@ -388,4 +388,11 @@ public interface UserService {
      * @return
      */
     Long thirdUserRegister(@Valid ThirdUserRegisterReqVO reqVO);
+
+    /**
+     * 获取第三方用户授权应用信息
+     * @param id
+     * @return
+     */
+    UserApplicationRespVO getThirdUserAndRelationApp(Long id);
 }

@@ -1,5 +1,4 @@
 package com.cmsr.onebase.module.system.service.config;
-import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.system.dal.dataobject.config.SystemGeneralConfigDO;
 import com.cmsr.onebase.module.system.vo.config.*;
 import jakarta.validation.Valid;
@@ -10,7 +9,7 @@ import java.util.List;
  * 参数配置 Service 接口
  *
  */
-public interface SystemGeneralConfigService {
+public interface SystemConfigService {
 
     /**
      * 创建参数配置
@@ -56,4 +55,10 @@ public interface SystemGeneralConfigService {
      * @param
      */
     void updateStatus(Long id, Integer status);
+    /**
+     * 根据参数键，获得参数配置
+     *
+     * @return 参数配置
+     */
+    List<SystemGeneralConfigDO> getTenantConfigListByKeysAndAppId(SystemConfigSearchReqVO  vo);
 }

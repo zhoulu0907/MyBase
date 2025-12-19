@@ -1,17 +1,15 @@
  ### 请求 /login 接口 => 成功   ##verifycode/password
-POST {{baseUrl}}/third/user/supplement-user
+POST {{baseUrl}}/system/third-user/supplement-user
 Content-Type: application/json
 Authorization: Bearer {{token}}
 X-Tenant-Id: 156421901678804992
 
 {
-  "userId": 111,
+  "appId":"177228595925417984",
   "password":"2f09c45d45fc7086f83e9757711fe6207915416f656d4494b5f29d2ba7268ba86d9e0001b712781a5feba3ed691e6276893f7ece3e890a37972f29de0a0775743b939a02977aea43240f730054c1f1c8aa79622071a0417f58f3590fef952255fc031ed882487818f2ae3fab86ef68",
-  "username": "testuser",
-  "nickname": "测试用户",
-  "email": "test@example.com",
-  "avatar": "https://example.com/avatar.jpg"
-
+  "nickName": "nickName1219",
+  "mobile": "15890615200",
+  "email": "122292@11.com"
 }
 
 
@@ -19,10 +17,10 @@ X-Tenant-Id: 156421901678804992
 POST {{baseUrl}}/system/third-user/register
 Content-Type: application/json
 Authorization: Bearer {{token}}
-X-Tenant-Id: 156421901678804992
+X-Tenant-Id: 174391581036773376
 
 {
-  "mobile": 158945648592,
-  "appId":"1111111111",
-  "verifyCode": "testuserqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq"
+  "mobile": 15890615820,
+  "appId":"177228595925417984",
+  "verifyCode": "888888"
 }

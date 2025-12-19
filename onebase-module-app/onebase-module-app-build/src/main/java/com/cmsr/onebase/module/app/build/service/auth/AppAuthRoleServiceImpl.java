@@ -7,7 +7,6 @@ import com.cmsr.onebase.framework.common.util.string.UuidUtils;
 import com.cmsr.onebase.module.app.build.service.AppCommonService;
 import com.cmsr.onebase.module.app.build.util.AuthUtils;
 import com.cmsr.onebase.module.app.build.vo.auth.*;
-import com.cmsr.onebase.module.app.core.dal.database.AppSqlQueryRepository;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleDeptRepository;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleRepository;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleUserRepository;
@@ -52,9 +51,6 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
 
     @Autowired
     private DeptApi deptApi;
-
-    @Autowired
-    private AppSqlQueryRepository appSqlQueryRepository;
 
     @Override
     public List<AuthRoleListRespVO> getRoleList(Long applicationId) {
@@ -163,7 +159,7 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
     @Override
     public void renameRole(Long roleId, String name) {
         AppAuthRoleDO authRoleDO = appCommonService.validateRoleExist(roleId);
-        if (AuthRoleTypeEnum.isSystemRoleType(authRoleDO.getRoleType())) {
+        if (AuthRoleTypeEnum.isDefaultRoleType(authRoleDO.getRoleType())) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_AUTH_ROLE_NOT_ALLOW_RENAME);
         }
         checkRoleNameExists(authRoleDO.getApplicationId(), name, roleId);
@@ -207,7 +203,7 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
     @Transactional(rollbackFor = Exception.class)
     public void deleteRole(Long roleId) {
         AppAuthRoleDO authRoleDO = appCommonService.validateRoleExist(roleId);
-        if (AuthRoleTypeEnum.isSystemRoleType(authRoleDO.getRoleType())) {
+        if (AuthRoleTypeEnum.isDefaultRoleType(authRoleDO.getRoleType())) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_AUTH_ROLE_NOT_ALLOW_DELETE);
         }
         appAuthRoleUserRepository.deleteByRoleId(roleId);

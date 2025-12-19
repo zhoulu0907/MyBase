@@ -150,7 +150,7 @@ public class UserDataRepository extends DataRepository<AdminUserDO> {
      * @return 用户列表
      */
     public List<AdminUserDO> findAllNoDept() {
-        DefaultConfigStore configStore = new DefaultConfigStore();
+        DefaultConfigStore configStore =  buildUserConfigStore();
         configStore.isNull(AdminUserDO.DEPT_ID);
         return findAllByConfig(configStore);
     }
