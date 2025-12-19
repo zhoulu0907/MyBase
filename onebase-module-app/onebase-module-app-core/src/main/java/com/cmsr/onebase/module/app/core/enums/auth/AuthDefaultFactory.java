@@ -76,6 +76,7 @@ public class AuthDefaultFactory {
 
     //数据组权限 authDataGroupDOS
     public static AppAuthDataGroupDO createDefaultAuthDataGroupDO(AuthPermissionReq req) {
+
         AppAuthDataGroupDO adg = new AppAuthDataGroupDO();
         adg.setGroupName("默认权限");
         adg.setApplicationId(req.getApplicationId());

@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -97,10 +98,10 @@ public class RuntimeFlowProcessTest {
     @Test
     public void testFormTrigger01() throws IOException {
         FormTriggerReqVO reqVO = new FormTriggerReqVO();
-        reqVO.setProcessId(183149380155572224L);
+        reqVO.setProcessId(187687270821101647L);
         Map<String, Object> inputParams = new HashMap<>();
         inputParams.put("student_name", "小");
-        inputParams.put("birthday", null);
+        inputParams.put("birthday", "2025-10-10");
 
         reqVO.setInputParams(inputParams);
         FormTriggerRespVO formTriggerRespVO = flowProcessExecService.triggerForm(reqVO);
