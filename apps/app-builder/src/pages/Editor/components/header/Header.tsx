@@ -7,8 +7,9 @@ import activeListDesignSVG from '@/assets/images/list_design_active_icon.svg';
 import defaultListDesignSVG from '@/assets/images/list_design_default_icon.svg';
 import activePageSettingSVG from '@/assets/images/page_setting_active_icon.svg';
 import defaultPageSettingSVG from '@/assets/images/page_setting_default_icon.svg';
-import previewSVG from '@/assets/images/preview_icon.svg';
 import activeWorkbenchDesignSVG from '@/assets/images/workbench_design_active_icon.svg';
+import defaultWorkbenchDesignSVG from '@/assets/images/workbench_design_default_icon.svg';
+import previewSVG from '@/assets/images/preview_icon.svg';
 import DynamicIcon from '@/components/DynamicIcon';
 import { useI18n } from '@/hooks/useI18n';
 import RenameModal from '@/pages/CreateApp/pages/PageManager/components/Modals/RenameModal';
@@ -35,18 +36,23 @@ import {
   type ListApplicationMenuReq,
   type UpdateApplicationMenuNameReq
 } from '@onebase/app';
-import { getHashQueryParam, pagesRuntimeSignal } from '@onebase/common';
+import { getHashQueryParam } from '@onebase/common';
 import {
   appIconMap,
   EDITOR_TYPES,
   startLoadPageSet,
   startSavePageSet,
+  startLoadWorkbenchPageSet,
+  startSaveWorkbenchPageSet,
+  useAppEntityStore,
   useFlowPageEditorSignal,
   useFormEditorSignal,
   useListEditorSignal,
   usePageEditorSignal,
   usePageViewEditorSignal,
-  type SavePageSetParams
+  useWorkbenchEditorSignal,
+  type SavePageSetParams,
+  type SaveWorkbenchPageSetParams
 } from '@onebase/ui-kit';
 import { cloneDeep } from 'lodash-es';
 import { useEffect, useRef, useState } from 'react';
@@ -86,7 +92,7 @@ const baseTabData = [
     key: EDITOR_TYPES.WORKBENCH_EDITOR,
     title: '工作台设计',
     alt: 'workbench Setting',
-    defaultIcon: defaultPageSettingSVG, // TODO: 待UI补充后替换
+    defaultIcon: defaultWorkbenchDesignSVG,
     activeIcon: activeWorkbenchDesignSVG
   },
   {
@@ -112,7 +118,6 @@ interface VersionListSelectRef {
 export default function EditorHeader() {
   const location = useLocation();
   const selectRef = useRef<VersionListSelectRef>(null);
-  const { curPage } = pagesRuntimeSignal;
   const { t } = useI18n();
   const [renameForm] = Form.useForm();
   const { clearCurComponentID } = usePageEditorSignal();
@@ -144,7 +149,10 @@ export default function EditorHeader() {
     clearLayoutSubComponents: clearListLayoutSubComponents
   } = useListEditorSignal;
 
-  //   const { setMainEntity, /* setAppEntities, */ setSubEntities } = useAppEntityStore();
+  const { workbenchComponents, wbComponentSchemas, clearWorkbenchComponents, clearWbComponentSchemas } =
+    useWorkbenchEditorSignal;
+
+  // const { setMainEntity, /* setAppEntities, */ setSubEntities } = useAppEntityStore();
   const { curMenu, setCurMenu } = menuSignal;
   const { curAppId, setCurAppId } = useAppStore();
 
@@ -290,7 +298,14 @@ export default function EditorHeader() {
   }, [pageSetId]);
 
   const loadPageSetInfo = async (pagesetId: string) => {
-    startLoadPageSet({ pageSetId: pagesetId });
+    // 工作台使用独立加载逻辑
+    if (activeTab === EDITOR_TYPES.WORKBENCH_EDITOR) {
+      await startLoadWorkbenchPageSet({ pageSetId: pagesetId });
+      return;
+    }
+
+    // 表单和列表使用原有加载逻辑
+    await startLoadPageSet({ pageSetId: pagesetId });
   };
 
   const handleGetAppInfo = async (pdId: string) => {
@@ -375,6 +390,20 @@ export default function EditorHeader() {
       onFlowSave();
       return;
     }
+
+    // 工作台使用独立保存逻辑
+    if (activeTab === EDITOR_TYPES.WORKBENCH_EDITOR) {
+      const saveWorkbenchParams: SaveWorkbenchPageSetParams = {
+        pageSetId: pageSetId,
+        workbenchComponents: workbenchComponents.value,
+        wbComponentSchemas: cloneDeep(wbComponentSchemas.value || {})
+      };
+
+      await startSaveWorkbenchPageSet(saveWorkbenchParams, () => setAppStatus(AppStatus.PUBLISHED));
+      return;
+    }
+
+    // 表单和列表使用原有保存逻辑
     console.log(`save appid: ${curAppId}, pageSetId: ${pageSetId} curViewId: ${curViewId.value}`);
 
     const savePageSetParams: SavePageSetParams = {
@@ -412,8 +441,10 @@ export default function EditorHeader() {
     clearListLayoutSubComponents();
     clearFormComponents();
     clearListComponents();
+    clearWorkbenchComponents();
     clearFromPageComponentSchemas();
     clearListPageComponentSchemas();
+    clearWbComponentSchemas();
   };
 
   const backToPageManager = async () => {
@@ -476,7 +507,7 @@ export default function EditorHeader() {
   };
 
   useEffect(() => {
-    const pageType = curPage?.value?.pageSetType;
+    const pageType = curMenu?.value?.pagesetType;
 
     const shouldKeepTab = (key: string) => {
       if (pageType === PageType.NORMAL) {
@@ -489,7 +520,7 @@ export default function EditorHeader() {
     };
 
     setTabData(baseTabData.filter((tab) => shouldKeepTab(tab.key)));
-  }, [curPage?.value?.pageSetType]);
+  }, [curMenu?.value?.pagesetType]);
 
   return (
     <div className={styles.editorHeader}>
