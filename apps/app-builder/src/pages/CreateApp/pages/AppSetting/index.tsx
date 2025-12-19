@@ -2,6 +2,7 @@ import appPermissionSVG from '@/assets/images/appRelease/app_auth.svg';
 import appReleaseSVG from '@/assets/images/appRelease/app_release.svg';
 import baseSettingSVG from '@/assets/images/appRelease/base_setting.svg';
 import navigatorSettingSVG from '@/assets/images/appRelease/navigator_setting.svg';
+import loginPermissionSVG from '@/assets/images/appRelease/app_release.svg';
 import AppBreadcrumb from '@/components/Breadcrumb';
 import { type Options } from '@/components/CreateApp/const';
 import { useAppStore } from '@/store/store_app';
@@ -39,6 +40,7 @@ const AppSettingPage: FC = () => {
   const { curAppId, curAppInfo, setCurAppInfo } = useAppStore();
   const menuData = [
     { title: '基础设置', icon: baseSettingSVG, key: 'baseSetting' },
+    { title: '登录设置', icon: loginPermissionSVG, key: 'loginPermission' },
     { title: '应用权限', icon: appPermissionSVG, key: 'appPermission' },
     { title: '应用发布', icon: appReleaseSVG, key: 'appRelease' },
     { title: '导航设置', icon: navigatorSettingSVG, key: 'navigatorSetting' }

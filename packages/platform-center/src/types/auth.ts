@@ -87,6 +87,39 @@ export interface RuntimeCorpLoginRequest {
   deviceId: string;
 }
 
+export interface RuntimeThirdLoginRequest {
+    /**
+     * 应用ID
+     */
+    appId: string;
+    /**
+     * ========== 图片验证码相关 ==========
+     * 验证码，验证码开启时，需要传递
+     */
+    captchaVerification?: string;
+    /**
+     * ========== 设备标识相关 ==========
+     * 设备ID，用于多设备管理和限制
+     */
+    deviceId: string;
+    /**
+     * 密码/验证码
+     */
+    loginType: string;
+    /**
+     * 手机号
+     */
+    mobile: string;
+    /**
+     * 密码
+     */
+    password?: string;
+    /**
+     * 验证码
+     */
+    verifyCode?: string;
+}
+
 export interface RuntimeMobileLoginRequest {
   /**
    * 应用id
@@ -131,6 +164,18 @@ export interface TenantLoginResponse {
   tenantId: string; // 租户id
   tenantWebsite: string; // 租户网址
   corpId: string; // 企业id
+}
+
+export interface ThirdUserLoginResponse {
+  userId: string; // 用户ID
+  accessToken: string; // 访问令牌
+  refreshToken: string; // 刷新令牌
+  expiresTime: number; // 令牌过期时间（时间戳，毫秒）
+  tenantId: string; // 租户id
+  tenantWebsite: string; // 租户网址
+  corpId?: string; // 企业id
+  loginSource: string //来源
+  userUnRegistFlag: boolean;
 }
 
 /**

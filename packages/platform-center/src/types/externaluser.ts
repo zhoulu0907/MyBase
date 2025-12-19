@@ -100,3 +100,58 @@ export interface pluginParams {
     name?: string;
     status?: number | null;
 }
+
+export interface updatePasswordParams {
+    /**
+     * 手机号
+     */
+    mobile: string;
+    /**
+     * 密码
+     */
+    password?: string;
+    /**
+     * 验证码
+     */
+    verifyCode: string;
+}
+
+export interface registerExternalUserParams {
+    /**
+     * 用户名称
+     */
+    appId?: number;
+    /**
+     * 手机
+     */
+    mobile?: string;
+    /**
+     * 验证码
+     */
+    verifyCode?: string;
+}
+
+export interface supplementUserInfoParams {
+    appId: string;
+    /**
+     * 用户头像
+     */
+    avatar?: string;
+    /**
+     * 用户邮箱
+     */
+    email?: string;
+    nickName: string;
+    /**
+     * 密码
+     */
+    password: string;
+    /**
+     * 手机号
+     */
+    mobile: string;
+    /**
+     * 用户账号
+     */
+    userName?: string;
+}

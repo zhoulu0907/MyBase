@@ -7,3 +7,4 @@ export { AddMembers, DeptMember } from './members';
 export { FooterButton, UploadAvatarComponent, UploadCommonComponent, UploadImageComponent } from './Upload';
 
 export { copyToClipboard } from './CopyToClipboard';
+export { VerifyInput } from './VerifyCode';

@@ -69,8 +69,8 @@ export const getSimpleUserList = (runtime?: boolean): Promise<UserVO[]> => {
 };
 
 // 分页获取用户精简信息列表
-export const getSimpleUserPage = (params: PageParam, loginMethod?: "mobile" | "username"): Promise<PageResult<UserVO>> => {
-  return (loginMethod=== "mobile" ? runtimeCorpService : runtimeService).get('/user/simple-page', params);
+export const getSimpleUserPage = (params: PageParam): Promise<PageResult<UserVO>> => {
+  return (isRuntimeEnv() ? runtimeCorpService : runtimeService).get('/user/simple-page', params);
 };
 
 // 获得登录用户信息

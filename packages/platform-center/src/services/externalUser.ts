@@ -1,5 +1,5 @@
 
-import { externalUserListParams, createExternalUserParams, updateExternalPwdParams, updateExternalUserParams, updateStatusParams, pluginParams } from "../types";
+import { externalUserListParams, createExternalUserParams, updateExternalPwdParams, updateExternalUserParams, updateStatusParams, pluginParams, updatePasswordParams, registerExternalUserParams, supplementUserInfoParams } from "../types";
 import { systemService } from "./clients";
 import { userService } from "./clients/factory";
 
@@ -32,3 +32,12 @@ export const getPluginListApi = (data: pluginParams) => systemService.get('/conf
 
 //修改状态-关闭/开启
 export const updatePluginStatusApi = (id: string, status: number) => systemService.post(`/config/update-status?id=${id}&status=${status}`);
+
+//忘记密码- 外部用户
+export const updatePasswordApi = (data: updatePasswordParams) => systemService.post('/third-user/forget-password', data);
+
+//注册外部用户
+export const registerExternalUserApi = (data: registerExternalUserParams) => systemService.post('/third-user/register', data);
+
+//补充外部用户信息
+export const supplementUserInfoApi = (data: supplementUserInfoParams) => systemService.post('/third-user/supplement-user', data);
