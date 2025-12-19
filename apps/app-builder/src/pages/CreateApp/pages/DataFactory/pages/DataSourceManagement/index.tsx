@@ -42,7 +42,7 @@ const DataSourceManagementPage: React.FC = () => {
       pageNo,
       pageSize
     });
-    console.log('res:', res.list);
+
     setDatasourceList(res.list);
     setTotal(res.total);
     setLoading(false);
