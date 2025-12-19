@@ -10,8 +10,11 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -199,7 +202,7 @@ public class GeneratePropertiesMojo extends AbstractMojo {
         }
 
         File propertiesFile = new File(outputDirectory, "plugin.properties");
-        try (FileWriter writer = new FileWriter(propertiesFile)) {
+        try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(propertiesFile), StandardCharsets.UTF_8)) {
             props.store(writer, "OneBase Plugin Properties - Auto Generated");
             getLog().info("已生成: " + propertiesFile.getAbsolutePath());
         } catch (IOException e) {
