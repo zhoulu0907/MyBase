@@ -33,5 +33,8 @@ public class GoviewProjectData implements Serializable {
 
     private String content;
 
+    private Long tenantId;
+
+    private Long appId;
 
 }

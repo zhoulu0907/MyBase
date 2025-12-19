@@ -16,16 +16,22 @@ tenant-id: {{adminTenantId}}
 
 {
   "id": "{{$uuid}}",
-  "projectName": "测试项目Gsp",
+  "projectName": "测试项目Gsp1",
   "state": -1,
   "indexImage": "",
   "remarks": "",
-  "createTime": "new Date().getTime()"
+  "createTime": "new Date().getTime()",
+  "appId": 184716905786900480,
+  "tenantId": {{adminTenantId}}
+
 }
 
 ### 3. 删除项目
-DELETE {{baseUrl}}/dashboard/delete?ids={{projectId}}
-/delete?ids={{projectId}}
+POST {{baseUrl}}/dashboard/delete?ids=83348edd-f0cc-42a2-bab9-f29d257f1448
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
 
 ### 4. 修改项目
 POST {{baseUrl}}/dashboard/edit

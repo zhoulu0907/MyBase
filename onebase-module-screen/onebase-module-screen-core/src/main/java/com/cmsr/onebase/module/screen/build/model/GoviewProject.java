@@ -40,4 +40,8 @@ public class GoviewProject implements Serializable {
 
     private String remarks;
 
+    private Long tenantId;
+
+    private Long appId;
+
 }

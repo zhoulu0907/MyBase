@@ -4,10 +4,12 @@ import cn.hutool.core.date.DateUtil;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
 
 import java.io.Serializable;
 import java.util.Date;
 
+@Data
 public class GoviewProjectVo implements Serializable {
     private static final long serialVersionUID = 1L;
 
@@ -36,80 +38,15 @@ public class GoviewProjectVo implements Serializable {
 	@ApiModelProperty(value = "项目介绍")
 	private String remarks;
 
+	@ApiModelProperty(value = "应用ID")
+	private Long appId;
+
+	@ApiModelProperty(value = "租户ID")
+	private Long tenantId;
+
+	@ApiModelProperty(value = "大屏内容")
 	private String content;
 
-
-	@JsonProperty("id")
-	public String getId() {
-		return id;
-	}
-
-	public void setId(String id) {
-		this.id =  id;
-	}
-	@JsonProperty("projectName")
-	public String getProjectName() {
-		return projectName;
-	}
-
-	public void setProjectName(String projectName) {
-		this.projectName =  projectName;
-	}
-	@JsonProperty("state")
-	public Integer getState() {
-		return state;
-	}
-
-	public void setState(Integer state) {
-		this.state =  state;
-	}
-	@JsonProperty("createTime")
-	public Date getCreateTime() {
-		return createTime;
-	}
-
-	public void setCreateTime(Date createTime) {
-		this.createTime =  createTime;
-	}
-	@JsonProperty("createUserId")
-	public String getCreateUserId() {
-		return createUserId;
-	}
-
-	public void setCreateUserId(String createUserId) {
-		this.createUserId =  createUserId;
-	}
-	@JsonProperty("isDelete")
-	public Integer getIsDelete() {
-		return isDelete;
-	}
-
-	public void setIsDelete(Integer isDelete) {
-		this.isDelete =  isDelete;
-	}
-	@JsonProperty("indexImage")
-	public String getIndexImage() {
-		return indexImage;
-	}
-
-	public void setIndexImage(String indexImage) {
-		this.indexImage =  indexImage;
-	}
-	@JsonProperty("remarks")
-	public String getRemarks() {
-		return remarks;
-	}
-
-	public void setRemarks(String remarks) {
-		this.remarks =  remarks;
-	}
-	public String getContent() {
-		return content;
-	}
-
-	public void setContent(String content) {
-		this.content = content;
-	}
 
 	public String dateToStringConvert(Date date) {
 		if(date!=null) {
