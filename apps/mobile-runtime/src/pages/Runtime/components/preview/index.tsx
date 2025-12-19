@@ -420,7 +420,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
               // const curOptions = curComponentSchema?.config?.defaultOptionsConfig?.defaultOptions || [];
               // const renderValue = curOptions.find(op => op.value === value.id)?.label || '-';
               // formValues[fieldName] = [renderValue];
-              formValues[fieldName] = [value.id];
+              formValues[fieldName] = value.id ? [value.id] : [];
             } else if (fieldType === ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE) {
               formValues[fieldName] = value.map((v) => v.id) || [];
             } else if (fieldType === ENTITY_FIELD_TYPE.USER.VALUE) {
