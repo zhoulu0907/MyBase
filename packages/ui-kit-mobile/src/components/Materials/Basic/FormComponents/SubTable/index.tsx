@@ -51,11 +51,8 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
     setShowDeleteButton,
     subTableComponents,
     setSubTableComponents
-  } = useStoreSignals || usePageEditorSignal(pageType || EDITOR_TYPES.FORM_EDITOR);
+  } = runtime ? usePageEditorSignal(pageType || EDITOR_TYPES.FORM_EDITOR) : useStoreSignals;
   const { subTableDataLength } = pagesRuntimeSignal;
-
-  // console.log('yyyyy------', useStoreSignals, { pageComponentSchemas, subTableComponents, mainEntity, subEntities});
-
   const [subTableData, setSubTableData] = useState<any[]>([]);
 
   useEffect(() => {
