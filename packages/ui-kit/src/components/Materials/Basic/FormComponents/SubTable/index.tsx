@@ -164,7 +164,8 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
       schema.config.verify = {
         ...schema.config.verify,
         required: currentField.isRequired,
-        noRepeat: currentField.isUnique
+        noRepeat:
+          typeof schema.config?.verify?.noRepeat === 'boolean' ? currentField.isUnique === 1 : undefined
       };
 
       // 字段约束配置（长度/正则） constraints
@@ -305,7 +306,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
           minWidth: '200px'
         },
         bodyCellStyle: {
-          padding: '4px 0'
+          padding: '4px'
         },
         render: (_text: string, _record: any, index: number) => {
           const newConfig = {

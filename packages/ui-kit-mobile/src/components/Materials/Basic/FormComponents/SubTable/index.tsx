@@ -212,7 +212,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
       schema.config.verify = {
         ...schema.config.verify,
         required: currentField.isRequired,
-        noRepeat: currentField.isUnique
+        noRepeat: typeof schema.config?.verify?.noRepeat === 'boolean' ? ele.currentField === 1 : undefined
       };
 
       // 字段选项列表（单/多选字段专用） options

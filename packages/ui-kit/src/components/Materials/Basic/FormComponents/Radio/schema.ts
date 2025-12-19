@@ -148,7 +148,7 @@ const XRadio: XInputRadioSchema = {
     // 显示状态
     statusConfig,
     // 对齐方式
-    alignConfig,
+    // alignConfig,
     // 布局方式
     layoutConfig,
     // 字段宽度
