@@ -5,9 +5,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.cmsr.onebase.plugin.demo</groupId>
+        <groupId>com.cmsr.onebase</groupId>
         <artifactId>onebase-plugin-demo</artifactId>
-        <version>1.0.0</version>
+        <version>${revision}</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>plugin-demo-test</artifactId>

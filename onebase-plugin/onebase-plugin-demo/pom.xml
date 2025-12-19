@@ -4,9 +4,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.cmsr.onebase.plugin.demo</groupId>
+    <parent>
+        <groupId>com.cmsr.onebase</groupId>
+        <artifactId>onebase-plugin</artifactId>
+        <version>${revision}</version>
+    </parent>
+
     <artifactId>onebase-plugin-demo</artifactId>
-    <version>1.0.0</version>
     <packaging>pom</packaging>
 
     <name>${project.artifactId}</name>
@@ -74,6 +78,33 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
                     <version>3.4.1</version>
+                </plugin>
+                
+                <!-- 统一 revision 版本 -->
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>flatten-maven-plugin</artifactId>
+                    <version>1.6.0</version>
+                    <configuration>
+                        <flattenMode>oss</flattenMode>
+                        <updatePomFile>true</updatePomFile>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>flatten</goal>
+                            </goals>
+                            <id>flatten</id>
+                            <phase>process-resources</phase>
+                        </execution>
+                        <execution>
+                            <goals>
+                                <goal>clean</goal>
+                            </goals>
+                            <id>flatten.clean</id>
+                            <phase>clean</phase>
+                        </execution>
+                    </executions>
                 </plugin>
             </plugins>
         </pluginManagement>
