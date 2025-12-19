@@ -63,7 +63,7 @@ const EditRuntime: React.FC<EditRuntimeProps> = ({ form, isAdd, submitLoading, o
     <Modal
       title={
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '40px' }}>
-          <div>表单信息</div>
+          <div>{isAdd ? '添加数据' : '编辑数据'}</div>
           <div className={styles.titleEditIconArea}>
             {fullScreen ? (
               <IconFullscreenExit className={styles.fullscreenIcon} onClick={() => setFullScreen(false)} />

@@ -8,8 +8,9 @@ import '../index.css';
 
 type XSelectOneConfig = typeof FormSchema.XSelectOneSchema.config;
 
-const XSelectOne = memo((props: XSelectOneConfig & { runtime?: boolean; detailMode?: boolean; defaultOptionsConfig?: any; }) => {
+const XSelectOne = memo((props: XSelectOneConfig & { runtime?: boolean; detailMode?: boolean; defaultOptionsConfig?: any; form?: any; }) => {
   const {
+    form,
     label,
     dataField,
     status,
@@ -51,7 +52,7 @@ const XSelectOne = memo((props: XSelectOneConfig & { runtime?: boolean; detailMo
       }}
     >
       {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
-        <div>--</div>
+        <div className="readonlyText">{form?.getFieldValue(fieldId)}</div>
       ) : (
         <Picker
           cascade={false}

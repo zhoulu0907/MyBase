@@ -62,7 +62,7 @@ const XUserSelect = memo((props: XUserSelectConfig & { runtime?: boolean; detail
       }}
     >
       {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
-        <div>{readonlyValue}</div>
+        <div className="readonlyText">{readonlyValue}</div>
       ) : (
         <Picker
           cascade={false}

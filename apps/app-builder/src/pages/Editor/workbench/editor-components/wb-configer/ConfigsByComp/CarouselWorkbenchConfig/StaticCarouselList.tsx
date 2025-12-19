@@ -1,12 +1,13 @@
 import { Button, Form, Input, Message, Popconfirm, Radio } from '@arco-design/web-react';
 import { IconCloud, IconDelete, IconDragDotVertical, IconEdit, IconPlus } from '@arco-design/web-react/icon';
-import { uploadFile } from '@onebase/platform-center';
+import { uploadFile, getFileUrlById } from '@onebase/platform-center';
 import { usePageViewEditorSignal } from '@onebase/ui-kit';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import ConfigDrawer from '@/pages/Editor/workbench/components/configDrawer';
 import type { CarouselItem, StaticCarouselListProps } from './types';
 import MenuSelector from '@/pages/Editor/workbench/components/MenuSelector';
+import { getNextIndex } from '@/pages/Editor/workbench/utils/edit-data';
 import styles from './StaticCarouselList.module.less';
 import attributeStyles from '../../components/CommonWorkbenchAttributes/attributes.module.less';
 
@@ -90,19 +91,11 @@ const StaticCarouselList = ({ carouselConfig, maxSizeMB = 5, onConfigChange }: S
   };
 
   const handleAdd = () => {
-    // 找出现有项目中"图片名称X"格式的最大序号
-    const maxIndex = items.reduce((max, item) => {
-      const match = item.title?.match(/^图片名称(\d+)$/);
-      if (match) {
-        const num = parseInt(match[1], 10);
-        return Math.max(max, num);
-      }
-      return max;
-    }, 0);
+    const nextIndex = getNextIndex(items, 'title', '图片名称');
 
     const newItem: CarouselItem = {
       id: generateId(),
-      title: '图片名称' + (maxIndex + 1),
+      title: `图片名称${nextIndex}`,
       image: '',
       linkType: 'internal',
       internalPageId: '',
@@ -177,9 +170,9 @@ const StaticCarouselList = ({ carouselConfig, maxSizeMB = 5, onConfigChange }: S
             }
 
             try {
-              const uploadImgUrl = await handleUpload(file);
-              if (uploadImgUrl !== '') {
-                form.setFieldValue('image', uploadImgUrl);
+              const uploadImgId = await handleUpload(file);
+              if (uploadImgId !== '') {
+                form.setFieldValue('image', uploadImgId);
                 setPendingValues(form.getFieldsValue());
                 Message.success('图片上传成功');
               } else {
@@ -212,9 +205,9 @@ const StaticCarouselList = ({ carouselConfig, maxSizeMB = 5, onConfigChange }: S
     }
 
     try {
-      const uploadImgUrl = await handleUpload(file);
-      if (uploadImgUrl !== '') {
-        form.setFieldValue('image', uploadImgUrl);
+      const uploadImgId = await handleUpload(file);
+      if (uploadImgId !== '') {
+        form.setFieldValue('image', uploadImgId);
         setPendingValues(form.getFieldsValue());
         Message.success('图片上传成功');
       } else {
@@ -311,7 +304,11 @@ const StaticCarouselList = ({ carouselConfig, maxSizeMB = 5, onConfigChange }: S
                     </div>
                     <div className={styles.imagePreview}>
                       {imageUrl ? (
-                        <img src={imageUrl} alt="预览" className={styles.previewImage} />
+                        <img
+                          src={imageUrl.indexOf('data:') < 0 ? getFileUrlById(imageUrl) : imageUrl}
+                          alt="预览"
+                          className={styles.previewImage}
+                        />
                       ) : (
                         <div className={styles.uploadPlaceholder}>
                           <IconPlus />

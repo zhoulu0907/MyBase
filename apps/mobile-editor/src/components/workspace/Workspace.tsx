@@ -17,6 +17,8 @@ import {
   STATUS_VALUES,
   WIDTH_OPTIONS,
   WIDTH_VALUES,
+  usePageViewEditorSignal,
+  useFormEditorSignal,
   type GridItem
 } from '@onebase/ui-kit';
 import { EditRender } from '@onebase/ui-kit-mobile';
@@ -54,8 +56,6 @@ interface EditorWorkspaceProps {
     subTableComponents: Record<string, AppEntityField[]>;
     setSubTableComponents: (subTableComponentId: string, componentIds: AppEntityField[]) => void;
     batchDelSubTableComponents: (componentIds: Set<string>) => void;
-    usePageViewEditorSignal: () => Map<string, any>;
-    useFormEditorSignal: () => Map<string, any>;
   };
   isListEditor?: boolean;
 }
@@ -70,8 +70,6 @@ const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({ props, isListEditor =
     curViewId,
     setCurViewId,
     updatePageViewName,
-    usePageViewEditorSignal,
-    useFormEditorSignal,
     setEditMode,
     curComponentID,
     setCurComponentID,
@@ -759,7 +757,7 @@ const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({ props, isListEditor =
                       cpType={cp.type}
                       runtime={false}
                       pageComponentSchema={pageComponentSchemas[cp.id]}
-                      // useStoreSignals={props}
+                      useStoreSignals={props}
                     />
 
                     {curComponentID === cp.id && showDeleteButton && (

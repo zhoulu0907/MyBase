@@ -128,7 +128,7 @@ const XDateTimePicker = memo((props: XInputDateTimePickerConfig & { runtime?: bo
         initialValue={defaultValueConfig?.customValue}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
-          <div>{securityEncodeText(security, fieldValue)}</div>
+          <div>{securityEncodeText(security, dayjs(fieldValue).format('YYYY-MM-DD HH:mm:ss'))}</div>
         ) : (
           <DatePicker
             showTime
