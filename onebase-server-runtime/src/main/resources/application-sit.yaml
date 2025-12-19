@@ -1,5 +1,5 @@
 server:
-  port: 48080
+  port: 48081
 
 --- #################### 数据库相关配置 ####################
 spring:
@@ -43,20 +43,20 @@ debug: false
 onebase:
   captcha:
     enable: false # 本地环境，暂时关闭图片验证码，方便登录等接口的测试；
+  security:
+    mock-enable: false
   access-log: # 访问日志的配置项
     enable: false
   web:
     return-exception-stack-trace: true # 本地开发：接口错误时返回堆栈，便于调试
   scheduler:
     address: http://10.0.104.50:12345/dolphinscheduler
-    token: 06bd06605a9bc7b9621590acb7cc80ec
-    env: 158049897452288
-    flow-project: 158049907843840
+    token: 33bbafeb4bc3c965327df753d5eaa684
+    env: 158315396070176
+    flow-project: 158315307028256
     flow-url: http://10.0.104.41:49224/runtime/flow/remote-call/trigger
-    etl-project: 158049912856320
+    etl-project: 158315300537120
     tenant: root
-  flink:
-    address: http://localhost:58080
 
 justauth:
   enabled: true
@@ -87,11 +87,8 @@ liteflow:
   version-tag: 1
   print-banner: true
   js-server-address: http://10.0.104.41:28392
-rocketmq:
-  endpoints: 10.0.104.50:8081
+
 
 metadata:
   runtime:
-    enable-auth-check: false
-
-
+    enable-auth-check: true
