@@ -1,12 +1,15 @@
 package com.cmsr.onebase.module.system.enums.config;
 
+import com.cmsr.onebase.framework.common.core.ArrayValuable;
 import lombok.Getter;
+
+import java.util.Arrays;
 
 /**
  * 角色标识枚举
  */
 @Getter
-public enum ConfigCategoryEnum {
+public enum ConfigCategoryEnum  implements ArrayValuable<String> {
 
     TENANT("tenant", "空间"),
     CORP("corp", "企业"),
@@ -27,7 +30,11 @@ public enum ConfigCategoryEnum {
      */
     private final String name;
 
+    public static final String[] ARRAYS = Arrays.stream(values()).map(ConfigCategoryEnum::getCode).toArray(String[]::new);
 
 
-
+    @Override
+    public String[] array() {
+        return ARRAYS;
+    }
 }

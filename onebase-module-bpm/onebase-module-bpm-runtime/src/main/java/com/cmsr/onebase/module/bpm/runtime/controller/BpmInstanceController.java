@@ -1,6 +1,8 @@
 package com.cmsr.onebase.module.bpm.runtime.controller;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.module.bpm.core.vo.BpmFormDataPageReqVO;
 import com.cmsr.onebase.module.bpm.runtime.service.BpmInstanceService;
 import com.cmsr.onebase.module.bpm.runtime.vo.*;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,6 +14,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -28,20 +31,20 @@ import java.util.List;
 public class BpmInstanceController {
 
     @Resource
-    private BpmInstanceService bpmExecService;
+    private BpmInstanceService bpmInstanceService;
 
     @PostMapping("/submit")
     @Operation(summary = "流程发起")
     public CommonResult<BpmSubmitRespVO> exec(@RequestBody @Valid BpmSubmitReqVO reqVO) {
         log.info("执行流程实例的操作按钮: {}", reqVO);
-        BpmSubmitRespVO respVO = bpmExecService.submit(reqVO);
+        BpmSubmitRespVO respVO = bpmInstanceService.submit(reqVO);
         return CommonResult.success(respVO);
     }
 
     @PostMapping("/exec-task")
     public CommonResult<Boolean> exec(@RequestBody @Valid ExecTaskReqVO reqVO) {
         log.info("执行流程实例的操作按钮: {}", reqVO);
-        bpmExecService.execTask(reqVO);
+        bpmInstanceService.execTask(reqVO);
         return CommonResult.success(true);
     }
 
@@ -49,14 +52,14 @@ public class BpmInstanceController {
     @Operation(summary = "获取流程实例的操作记录")
     public CommonResult<List<BpmOperatorRecordRespVO.OperatorRecord>> getOperatorRecord(@RequestParam("instanceId") Long instanceId) {
         log.info("获取流程实例的操作记录: {}", instanceId);
-        List<BpmOperatorRecordRespVO.OperatorRecord> records = bpmExecService.getOperatorRecord(instanceId);
+        List<BpmOperatorRecordRespVO.OperatorRecord> records = bpmInstanceService.getOperatorRecord(instanceId);
         return CommonResult.success(records);
     }
 
     @GetMapping("/get-form-detail")
     public CommonResult<BpmTaskDetailRespVO> getFormDetail(@Valid BpmTaskDetailReqVO reqVO) {
         log.info("获取流程详情: {}", reqVO);
-        return CommonResult.success(bpmExecService.getFormDetail(reqVO));
+        return CommonResult.success(bpmInstanceService.getFormDetail(reqVO));
     }
 
     /**
@@ -68,7 +71,7 @@ public class BpmInstanceController {
     @Operation(summary = "流程预测")
     public CommonResult<List<BpmPredictRespVO.NodeInfo>> flowPredict(@RequestBody @Valid BpmPredictReqVO reqVO) {
         log.info("流程预测: {}", reqVO);
-        return CommonResult.success(bpmExecService.flowPredict(reqVO)) ;
+        return CommonResult.success(bpmInstanceService.flowPredict(reqVO)) ;
     }
 
     /**
@@ -80,6 +83,19 @@ public class BpmInstanceController {
     @Operation(summary = "流程预览")
     public CommonResult<BpmPreviewRespVO> flowPreview(@Valid BpmPreviewReqVO reqVO) {
         log.info("流程预览: {}", reqVO);
-        return CommonResult.success(bpmExecService.flowPreview(reqVO)) ;
+        return CommonResult.success(bpmInstanceService.flowPreview(reqVO)) ;
     }
+
+    /**
+     * 获取列表数据
+     *
+     * @param reqVO
+     */
+    @PostMapping("/form-data-page")
+    @Operation(summary = "流程实体数据分页")
+    public CommonResult<PageResult<Map<String, Object>>> formDataPage(@RequestBody BpmFormDataPageReqVO   reqVO) {
+        log.info("获取列表数据: {}", reqVO);
+        return CommonResult.success(bpmInstanceService.formDataPage(reqVO)) ;
+    }
+
 }

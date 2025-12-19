@@ -278,7 +278,7 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
             authPermissionRepository.updateById(authPermissionDO);
         }
         if (authPermissionDO != null && reqVO.getIsAllFieldsAllowed() == 1) {
-            authFieldRepository.deleteByQuery(permissionReq);
+            authFieldRepository.deleteByQueryRequest(permissionReq);
         }
         if (authPermissionDO != null && reqVO.getIsAllFieldsAllowed() == 0 && CollectionUtils.isNotEmpty(reqVO.getAuthFields())) {
             for (AuthFieldVO authField : reqVO.getAuthFields()) {
@@ -381,7 +381,7 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
 
     private Pair<List<AuthFieldVO>, List<AuthFieldVO>> queryAuthFields(String entityUuid, AuthPermissionReq reqVO) {
         List<SemanticFieldSchemaDTO> entityFieldRespDTOS = getEntityFieldRespDTOS(entityUuid);
-        List<AppAuthFieldDO> authFieldDOS = authFieldRepository.findByQuery(reqVO);
+        List<AppAuthFieldDO> authFieldDOS = authFieldRepository.findByQueryRequest(reqVO);
         List<Pair<SemanticFieldSchemaDTO, AppAuthFieldDO>> pairs = AuthUtils.leftOuterJoin(entityFieldRespDTOS, authFieldDOS,
                 (entityFieldRespDTO, authFieldDO) -> Objects.equals(entityFieldRespDTO.getFieldUuid(), authFieldDO.getFieldUuid()));
         List<AuthFieldVO> fieldVOS = pairs.stream().map(pair -> {

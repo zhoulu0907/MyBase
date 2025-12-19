@@ -47,12 +47,12 @@ public class FlowDataManagerImpl implements FlowDataManager {
     }
 
     @Override
-    public void offlineRuntimeData(Long applicationId) {
+    public void deleteRuntimeData(Long applicationId) {
         flowChangeClient.applicationDelete(applicationId);
     }
 
     @Override
-    public void onlineRuntimeData(Long applicationId) {
+    public void updateRuntimeData(Long applicationId) {
         flowChangeClient.applicationUpdate(applicationId);
     }
 

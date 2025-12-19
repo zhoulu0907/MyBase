@@ -65,7 +65,7 @@ justauth:
 
 liteflow:
   enable: true
-  version-tag: 0
+  version-tag: 1
   print-banner: true
   js-server-address: http://10.0.104.41:28392
 

@@ -49,14 +49,14 @@ public class PageController {
         return CommonResult.success(updated);
     }
 
-    @PostMapping("/form/app_id")
+    @PostMapping("/app_id")
     @Operation(summary = "根据app_id获取表单页面")
-    public CommonResult<GetFormPageListByAppIdRespVO> getFormPageListByAppId(@RequestBody GetFormPageListByAppIdReqVO getFormPageListByAppIdReqVO) {
-        List<PageDTO> pageDtoList = pageService.getFormPageListByAppId(getFormPageListByAppIdReqVO.getAppId());
+    public CommonResult<GetPageListByAppIdRespVO> getPageListByAppId(@RequestBody GetPageListByAppIdReqVO getPageListByAppIdReqVO) {
+        List<PageDTO> pageDtoList = pageService.getPageListByAppId(getPageListByAppIdReqVO.getAppId());
 
-        GetFormPageListByAppIdRespVO getFormPageListByAppIdRespVO = new GetFormPageListByAppIdRespVO();
-        getFormPageListByAppIdRespVO.setPages(pageDtoList);
-        return CommonResult.success(getFormPageListByAppIdRespVO);
+        GetPageListByAppIdRespVO getPageListByAppIdRespVO = new GetPageListByAppIdRespVO();
+        getPageListByAppIdRespVO.setPages(pageDtoList);
+        return CommonResult.success(getPageListByAppIdRespVO);
     }
 
     @PostMapping("/metadata")

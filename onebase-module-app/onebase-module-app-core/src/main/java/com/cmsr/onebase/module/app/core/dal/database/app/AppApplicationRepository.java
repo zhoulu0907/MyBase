@@ -12,6 +12,7 @@ import com.mybatisflex.core.query.QueryMethods;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.core.row.Row;
 import com.mybatisflex.core.tenant.TenantManager;
+import com.mybatisflex.core.util.UpdateEntity;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -132,10 +133,11 @@ public class AppApplicationRepository extends ServiceImpl<AppApplicationMapper, 
     }
 
     public void updateAppTimeByApplicationId(Long appId) {
-        this.updateChain()
-                .set(APP_APPLICATION.UPDATE_TIME, LocalDateTime.now())
-                .where(APP_APPLICATION.ID.eq(appId))
-                .update();
+        QueryWrapper queryWrapper = this.query()
+                .where(APP_APPLICATION.ID.eq(appId));
+        AppApplicationDO appApplicationDO = UpdateEntity.of(AppApplicationDO.class);
+        appApplicationDO.setUpdateTime(LocalDateTime.now());
+        this.getMapper().updateByQuery(appApplicationDO, queryWrapper);
     }
 
     public void updateStatusByApplicationId(Long applicationId, AppStatusEnum status, AppPublishEnum publishStatus) {

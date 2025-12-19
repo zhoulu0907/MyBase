@@ -8,6 +8,7 @@ import com.mybatisflex.spring.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -189,6 +190,21 @@ public class MetadataEntityFieldRepository extends BaseBizRepository<MetadataEnt
                 .eq(MetadataEntityFieldDO::getApplicationId, appId)
                 .orderBy(MetadataEntityFieldDO::getSortOrder, true)
                 .orderBy(MetadataEntityFieldDO::getCreateTime, false);
+        return list(queryWrapper);
+    }
+
+    /**
+     * 根据字段UUID列表批量查询实体字段
+     *
+     * @param fieldUuids 字段UUID列表
+     * @return 实体字段列表
+     */
+    public List<MetadataEntityFieldDO> getByFieldUuids(Collection<String> fieldUuids) {
+        if (fieldUuids == null || fieldUuids.isEmpty()) {
+            return java.util.Collections.emptyList();
+        }
+        QueryWrapper queryWrapper = this.query()
+                .in(MetadataEntityFieldDO::getFieldUuid, fieldUuids);
         return list(queryWrapper);
     }
 }

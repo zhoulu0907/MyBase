@@ -2,9 +2,9 @@ package com.cmsr.onebase.module.flow.core.flow;
 
 import com.cmsr.onebase.module.flow.context.graph.nodes.start.StartDateFieldNodeData;
 import com.cmsr.onebase.module.flow.context.graph.nodes.start.StartTimeNodeData;
-import com.cmsr.onebase.module.flow.core.external.FlowSystemProvider;
 import com.cmsr.onebase.module.flow.core.config.FlowEnableCondition;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
+import com.cmsr.onebase.module.flow.core.external.FlowSystemProvider;
 import com.cmsr.onebase.module.flow.core.graph.FlowProcessCache;
 import com.cmsr.onebase.module.flow.core.utils.FlowUtils;
 import lombok.Setter;
@@ -32,6 +32,9 @@ public class FlowRemoteCallExecutor {
     @Autowired
     private FlowSystemProvider flowSystemProvider;
 
+    private FlowProcessCache flowProcessCache = FlowProcessCache.getInstance();
+
+
     public ExecutorResult executeFlow(FlowRemoteCallRequest jobMessage) {
         ExecutorResult executorResult;
         try {
@@ -45,7 +48,7 @@ public class FlowRemoteCallExecutor {
 
             }
             log.info("处理流程消息: {}", jobMessage);
-            FlowProcessDO flowProcessDO = FlowProcessCache.findProcessByProcessId(jobMessage.getProcessId());
+            FlowProcessDO flowProcessDO = flowProcessCache.findProcessByProcessId(jobMessage.getProcessId());
             if (flowProcessDO == null) {
                 return ExecutorResult.error("流程不存在:" + jobMessage.getProcessId());
             }
@@ -74,7 +77,7 @@ public class FlowRemoteCallExecutor {
 
     private Map<String, Object> createDateFieldInputParams(FlowRemoteCallRequest message) {
         Long processId = message.getProcessId();
-        StartDateFieldNodeData startDateFieldNodeData = FlowProcessCache.findStartDateFieldNodeDataByProcessId(processId);
+        StartDateFieldNodeData startDateFieldNodeData = flowProcessCache.findStartDateFieldNodeDataByProcessId(processId);
         if (startDateFieldNodeData == null) {
             throw new RuntimeException("实体时间字段触发流程未找到:" + processId);
         }
@@ -83,7 +86,7 @@ public class FlowRemoteCallExecutor {
 
     private Map<String, Object> createTimeInputParams(FlowRemoteCallRequest message) {
         Long processId = message.getProcessId();
-        StartTimeNodeData startTimeNodeData = FlowProcessCache.findStartTimeNodeDataByProcessId(processId);
+        StartTimeNodeData startTimeNodeData = flowProcessCache.findStartTimeNodeDataByProcessId(processId);
         if (startTimeNodeData == null) {
             throw new RuntimeException("定时任务流程未找到:" + processId);
         }

@@ -48,7 +48,7 @@ public interface SystemGeneralConfigService {
      * @param pageReqVO 分页参数
      * @return 参数配置分页
      */
-    List<SystemGeneralConfigDO> getConfigList(SystemConfigPageReqVO pageReqVO);
+    List<SystemGeneralConfigDO> getTenantConfigList(SystemConfigReqVO pageReqVO);
 
     /**
      * 更新参数配置状态

@@ -1101,37 +1101,7 @@ public class UserServiceImpl implements UserService {
         LogRecordContext.putVariable("newPassword", updateObj.getPassword());
     }
 
-    @Override
-    public AdminUserDO createThirdUser(ThirdAuthLoginReqVO reqVO) {
 
-        // 如果是启用状态，校验当前租户下的用户数量有没有超过最大限额
-        if (Objects.equals(CommonStatusEnum.ENABLE.getStatus(), CommonStatusEnum.ENABLE.getStatus())) {
-            // 1.1 校验账户配合
-            tenantService.handleTenantInfo(tenant -> {
-                // 如果用户的租户不是平台租户，则校验租户用户最大限额
-                if (!tenant.getTenantCode().equals(TenantCodeEnum.PLATFORM_TENANT.getCode())) {
-                    long count = userDataRepository.countByConfig(new DefaultConfigStore().eq(AdminUserDO.STATUS,
-                            UserStatusEnum.NORMAL.getStatus()));
-                    log.info(" count user four tenant, count={}", count);
-                    if (count >= tenant.getAccountCount()) {
-                        throw exception(USER_COUNT_MAX, tenant.getAccountCount());
-                    }
-                }
-            });
-        }
-
-        AdminUserDO user = new AdminUserDO();
-        user.setPassword(encodePassword(THIRD_USER_PASSWORD)); // 加密密码
-        // 管理员类型：内置/自定义
-        user.setAdminType(AdminTypeEnum.CUSTOM.getType());
-        user.setMobile(reqVO.getMobile());
-        user.setUserType(UserTypeEnum.THIRD.getValue());
-        user.setStatus(UserStatusEnum.NORMAL.getStatus());
-        user.setUsername(reqVO.getMobile());
-        user.setNickname(" ");
-        userDataRepository.insert(user);
-        return user;
-    }
 
 
     @Override
@@ -1182,7 +1152,7 @@ public class UserServiceImpl implements UserService {
         // 校验手机，邮箱
         validateThirdUserForCreateOrUpdate(null, reqVO.getMobile(), reqVO.getEmail());
 
-        if (null != reqVO.getDeptId()) {
+        if (null == reqVO.getDeptId()) {
             // 三方用户 默认部门，不存在就新建部门
             Long deptId = createThirdDefaultDept();
             reqVO.setDeptId(deptId);
@@ -1193,6 +1163,7 @@ public class UserServiceImpl implements UserService {
         AdminUserDO user = BeanUtils.toBean(reqVO, AdminUserDO.class);
         user.setPassword(encodePassword(THIRD_USER_PASSWORD));
         user.setUsername(reqVO.getMobile());
+        user.setNickname(reqVO.getNickName());
         user.setUserType(UserTypeEnum.THIRD.getValue());
         user.setStatus(UserStatusEnum.NORMAL.getStatus());
         user.setCreateSource(CreateSourceEnum.BACK.getCode());
@@ -1216,12 +1187,13 @@ public class UserServiceImpl implements UserService {
     // 获取三方用户部门是否存在
     private Long createThirdDefaultDept() {
         DeptSaveReqVO deptRespVO = new DeptSaveReqVO();
-        deptRespVO.setName(DeptCodeEnum.DEFAULT_THIRD_DEPT.getName());
+
         deptRespVO.setDeptType(DeptTypeEnum.THIRD.getCode());
         deptRespVO.setDeptCode(DeptCodeEnum.DEFAULT_THIRD_DEPT.getCode());
         DeptDO deptDO = deptService.findDeptByCodeAndType(deptRespVO);
 
         if (null == deptDO) {
+            deptRespVO.setName(DeptCodeEnum.DEFAULT_THIRD_DEPT.getName());
             deptRespVO.setParentId(DeptDO.PARENT_ID_ROOT);
             deptRespVO.setStatus(CommonStatusEnum.ENABLE.getStatus());
             return deptService.createThirdDefaultDept(deptRespVO);
@@ -1309,6 +1281,7 @@ public class UserServiceImpl implements UserService {
                     .map(user -> {
                         UserApplicationRespVO userApplicationRespVO = BeanUtils.toBean(user, UserApplicationRespVO.class);
                         userApplicationRespVO.setId(user.getId());
+                        userApplicationRespVO.setNickName(user.getNickname());
                         return userApplicationRespVO;
                     })
                     .collect(Collectors.toList()), pageResult.getTotal());
@@ -1328,6 +1301,7 @@ public class UserServiceImpl implements UserService {
                 .map(user -> {
                     UserApplicationRespVO userApplicationRespVO = BeanUtils.toBean(user, UserApplicationRespVO.class);
                     userApplicationRespVO.setId(user.getId());
+                    userApplicationRespVO.setNickName(user.getNickname());
 
                     // 9. 获取当前用户关联的应用关系列表
                     List<UserAppRelationDO> appRelationDOList = userAppRelationMap.get(user.getId());
@@ -1353,5 +1327,33 @@ public class UserServiceImpl implements UserService {
                 .collect(Collectors.toList()), pageResult.getTotal());
     }
 
+    @Override
+    public Long thirdUserRegister(ThirdUserRegisterReqVO reqVO) {
+        //TODO  手机号验证，  appId ，验证码 验证逻辑
+        // 如果是启用状态，校验当前租户下的用户数量有没有超过最大限额
+        // 1.1 校验账户配合
+        tenantService.handleTenantInfo(tenant -> {
+            // 如果用户的租户不是平台租户，则校验租户用户最大限额
+            if (!tenant.getTenantCode().equals(TenantCodeEnum.PLATFORM_TENANT.getCode())) {
+                long count = userDataRepository.countByConfig(new DefaultConfigStore().eq(AdminUserDO.STATUS,
+                        UserStatusEnum.NORMAL.getStatus()));
+                log.info(" count user four tenant, count={}", count);
+                if (count >= tenant.getAccountCount()) {
+                    throw exception(USER_COUNT_MAX, tenant.getAccountCount());
+                }
+            }
+        });
 
+        AdminUserDO user = new AdminUserDO();
+        user.setPassword(encodePassword(THIRD_USER_PASSWORD)); // 加密密码
+        // 管理员类型：内置/自定义
+        user.setAdminType(AdminTypeEnum.CUSTOM.getType());
+        user.setMobile(reqVO.getMobile());
+        user.setUserType(UserTypeEnum.THIRD.getValue());
+        user.setStatus(UserStatusEnum.NORMAL.getStatus());
+        user.setUsername(reqVO.getMobile());
+        user.setCreateSource(CreateSourceEnum.SELF.getCode());
+        userDataRepository.insert(user);
+        return user.getId();
+    }
 }
