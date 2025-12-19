@@ -14,7 +14,7 @@
     <version>${revision}</version>
     <packaging>jar</packaging>
 
-    <name>OneBase Plugin Core</name>
+    <name>${project.artifactId}</name>
     <description>插件核心模块，提供扩展点扫描的公共能力</description>
 
     <dependencies>

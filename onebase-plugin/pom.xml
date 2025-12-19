@@ -19,6 +19,7 @@
     </modules>
 
     <artifactId>onebase-plugin</artifactId>
+    <name>${project.artifactId}</name>
     <description>
         OneBase插件体系
         基于PF4J框架实现的插件化架构，支持动态加载、热插拔、隔离运行等特性。

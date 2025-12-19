@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>onebase-plugin-host-simulator</artifactId>
-    <name>OneBase Plugin Host Simulator</name>
+    <name>${project.artifactId}</name>
     <description>
         OneBase 插件宿主模拟器 - 既能免打包快速 debug 又能全生命周期插件验证
         

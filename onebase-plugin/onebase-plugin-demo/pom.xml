@@ -7,9 +7,9 @@
     <groupId>com.cmsr.onebase.plugin.demo</groupId>
     <artifactId>onebase-plugin-demo</artifactId>
     <version>1.0.0</version>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
 
-    <name>onebase-plugin-demo</name>
+    <name>${project.artifactId}</name>
     <description>OneBase低代码平台插件开发示例</description>
 
     <properties>
@@ -18,106 +18,64 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
-    <dependencies>
-        <!-- OneBase 插件 SDK -->
-        <dependency>
-            <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-plugin-sdk</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
+    <modules>
+        <!-- 子模块列表 -->
+        <module>plugin-demo-hello</module>
+        <module>plugin-demo-test</module>
+    </modules>
 
-        <!-- Spring Web - 用于 @RestController 等注解 -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-            <version>3.2.0</version>
-            <scope>provided</scope>
-        </dependency>
-    </dependencies>
+    <!-- 管理子模块的依赖版本 -->
+    <dependencyManagement>
+        <dependencies>
+            <!-- OneBase 插件 SDK -->
+            <dependency>
+                <groupId>com.cmsr.onebase</groupId>
+                <artifactId>onebase-plugin-sdk</artifactId>
+                <version>1.0.0-SNAPSHOT</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <!-- Spring Web - 用于 @RestController 等注解 -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-web</artifactId>
+                <version>3.2.0</version>
+                <scope>provided</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <build>
-        <plugins>
-            <!-- OneBase插件Maven插件 - 提供自动生成和打包能力 -->
-            <plugin>
-                <groupId>com.cmsr.onebase</groupId>
-                <artifactId>onebase-plugin-maven-plugin</artifactId>
-                <version>1.0.0-SNAPSHOT</version>
-                <executions>
-                    <!-- 1. 自动生成插件主类 GeneratedPlugin - 包名通过 generatedPackage 参数指定 -->
-                    <execution>
-                        <id>generate-plugin-class</id>
-                        <goals>
-                            <goal>generate-plugin-class</goal>
-                        </goals>
-                        <configuration>
-                            <generatedPackage>com.cmsr.onebase.plugin.demo</generatedPackage>
-                        </configuration>
-                    </execution>
+        <pluginManagement>
+            <plugins>
+                <!-- OneBase插件Maven插件 - 提供自动生成和打包能力 -->
+                <plugin>
+                    <groupId>com.cmsr.onebase</groupId>
+                    <artifactId>onebase-plugin-maven-plugin</artifactId>
+                    <version>1.0.0-SNAPSHOT</version>
+                </plugin>
 
-                    <!-- 2. 自动生成插件配置文件 plugin.properties -->
-                    <execution>
-                        <id>generate-properties</id>
-                        <goals>
-                            <goal>generate-properties</goal>
-                        </goals>
-                        <configuration>
-                            <!-- 插件唯一标识 -->
-                            <pluginId>demo-plugin</pluginId>
-                            <!-- 插件版本，通常引用项目版本 -->
-                            <pluginVersion>${project.version}</pluginVersion>
-                            <!-- 插件描述 -->
-                            <pluginDescription>OneBase演示插件，展示HttpHandler等扩展点的使用</pluginDescription>
-                            <!-- 插件提供者 -->
-                            <pluginProvider>OneBase Team</pluginProvider>
-                        </configuration>
-                    </execution>
+                <!-- Maven Compiler插件 -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.14.0</version>
+                    <configuration>
+                        <source>17</source>
+                        <target>17</target>
+                        <encoding>UTF-8</encoding>
+                        <!-- 必须设置为true。保留方法参数名，支持@RequestParam等注解无需显式指定name -->
+                        <parameters>true</parameters>
+                    </configuration>
+                </plugin>
 
-                    <!-- 3. 自动扫描扩展点，生成META-INF/extensions.idx索引文件 (无需额外配置) -->
-                    <execution>
-                        <id>scan-extensions</id>
-                        <goals>
-                            <goal>scan-extensions</goal>
-                        </goals>
-                    </execution>
-
-                    <!-- 4. 自动打包成 ZIP (无需额外配置) -->
-                    <execution>
-                        <id>package-plugin</id>
-                        <goals>
-                            <goal>package-plugin</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <!-- Maven Compiler插件 -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.14.0</version>
-                <configuration>
-                    <source>17</source>
-                    <target>17</target>
-                    <encoding>UTF-8</encoding>
-                    <!-- 必须设置为true。保留方法参数名，支持@RequestParam等注解无需显式指定name -->
-                    <parameters>true</parameters>
-                </configuration>
-            </plugin>
-
-            <!-- Maven JAR插件 - 禁止生成插件相关的MANIFEST属性 -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>3.4.1</version>
-                <configuration>
-                    <archive>
-                        <!-- 不添加任何PF4J插件属性到MANIFEST.MF -->
-                        <addMavenDescriptor>false</addMavenDescriptor>
-                    </archive>
-                </configuration>
-            </plugin>
-
-        </plugins>
+                <!-- Maven JAR插件 - 禁止生成插件相关的MANIFEST属性 -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>3.4.1</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
     </build>
 </project>
