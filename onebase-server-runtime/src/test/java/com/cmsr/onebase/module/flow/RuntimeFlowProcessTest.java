@@ -8,6 +8,7 @@ import com.cmsr.onebase.module.flow.context.graph.JsonGraph;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
 import com.cmsr.onebase.module.flow.core.flow.FlowRemoteCallExecutor;
+import com.cmsr.onebase.module.flow.core.flow.FlowRemoteCallRequest;
 import com.cmsr.onebase.module.flow.core.graph.FlowChainBuilder;
 import com.cmsr.onebase.module.flow.core.graph.FlowGraphBuilder;
 import com.cmsr.onebase.module.flow.core.impl.FlowProcessExecApiImpl;
@@ -141,4 +142,15 @@ public class RuntimeFlowProcessTest {
         FormTriggerRespVO formTriggerRespVO = flowProcessExecService.triggerForm(reqVO);
         System.out.println(formTriggerRespVO);
     }
+
+    @Test
+    public void testFlowRemoteCallExecutor(){
+        FlowRemoteCallRequest callRequest = new FlowRemoteCallRequest();
+        callRequest.setApplicationId(184716905786900480L);
+        callRequest.setProcessId(187695809216086066L);
+        callRequest.setProcessName("流程测试");
+        callRequest.setJobType(FlowRemoteCallRequest.JOB_TYPE_FIELD);
+        flowRemoteCallExecutor.executeFlow(callRequest);
+    }
+
 }

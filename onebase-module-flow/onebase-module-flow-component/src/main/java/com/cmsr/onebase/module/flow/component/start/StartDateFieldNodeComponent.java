@@ -105,7 +105,7 @@ public class StartDateFieldNodeComponent extends NodeComponent {
             filterCondition.setOperator(SemanticOperatorEnum.EQUALS);
             return filterCondition;
         } else {
-            throw new IllegalArgumentException("参数offsetFiledType错误: " + filedTypeEnum);
+            throw new IllegalArgumentException("参数offsetFiledType错误: " + nodeData.getOffsetFieldName() + ":" + filedTypeEnum);
         }
     }
 
