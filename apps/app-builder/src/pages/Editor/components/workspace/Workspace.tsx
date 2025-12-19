@@ -96,46 +96,46 @@ export default function EditorWorkspace() {
 
   const { editMode, setEditMode } = currentEditorSignal;
   const mobileEditorDragRef = useRef<MicroApp | null>(null);
-
+  const qiankunActions = initGlobalState({
+    mainEntity,
+    subEntities,
+    drag: true,
+    useEditorSignalMap,
+    pageViews: pageViews.value,
+    curViewId: curViewId.value,
+    setCurViewId,
+    updatePageViewName,
+    editMode: editMode.value,
+    setEditMode,
+    curComponentID,
+    setCurComponentID,
+    clearCurComponentID,
+    setCurComponentSchema,
+    pageComponentSchemas,
+    setPageComponentSchemas,
+    delPageComponentSchemas,
+    components,
+    addComponents,
+    setComponents,
+    delComponents,
+    showDeleteButton,
+    setShowDeleteButton,
+    layoutSubComponents,
+    setLayoutSubComponents,
+    delLayoutSubComponents,
+    batchDelPageComponentSchemas,
+    batchDelLayoutSubComponents,
+    subTableComponents,
+    setSubTableComponents,
+    delSubTableComponents,
+    batchDelSubTableComponents
+  });
   useEffect(() => {
     if (editMode.value !== EditMode.MOBILE) {
       return;
     }
     console.log('loading mobile-editor-drag-list');
-    const qiankunActions = initGlobalState({
-      mainEntity,
-      subEntities,
-      drag: true,
-      useEditorSignalMap,
-      pageViews: pageViews.value,
-      curViewId: curViewId.value,
-      setCurViewId,
-      updatePageViewName,
-      editMode: editMode.value,
-      setEditMode,
-      curComponentID,
-      setCurComponentID,
-      clearCurComponentID,
-      setCurComponentSchema,
-      pageComponentSchemas,
-      setPageComponentSchemas,
-      delPageComponentSchemas,
-      components,
-      addComponents,
-      setComponents,
-      delComponents,
-      showDeleteButton,
-      setShowDeleteButton,
-      layoutSubComponents,
-      setLayoutSubComponents,
-      delLayoutSubComponents,
-      batchDelPageComponentSchemas,
-      batchDelLayoutSubComponents,
-      subTableComponents,
-      setSubTableComponents,
-      delSubTableComponents,
-      batchDelSubTableComponents
-    });
+    
     const mobileEditorDrag = loadMicroApp({
       name: 'mobile-editor-drag-list',
       entry: getMobileEditorURL(),

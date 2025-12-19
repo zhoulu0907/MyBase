@@ -29,14 +29,14 @@ import { EditRender, PreviewRender } from '@/components/render';
 import CompDeleteIcon from '@/assets/images/app_delete.svg';
 import CompCopyIcon from '@/assets/images/copy_comp_icon.svg';
 import CompShowIcon from '@/assets/images/eye_off_icon.svg';
-import styles from './index.module.css';
+import './index.css';
 
 type XSubTableConfig = typeof FormSchema.XSubTableSchema.config;
 
-const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: boolean; defaultOptionsConfig?: any; form?: any; editLoading?: boolean; useStoreSignals?: any; }) => {
+const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: boolean; defaultOptionsConfig?: any; form?: any; editLoading?: boolean; useStoreSignals?: any; editPreview?: boolean; }) => {
   useSignals();
 
-  const { id, label, tooltip, status, subTableConfig, verify, runtime = true, detailMode, pageType, form, editLoading, useStoreSignals } = props;
+  const { id, label, tooltip, status, subTableConfig, verify, runtime = true, detailMode, pageType, form, editLoading, useStoreSignals, editPreview } = props;
   const { mainEntity, subEntities } = useAppEntityStore();
 
   const {
@@ -51,7 +51,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
     setShowDeleteButton,
     subTableComponents,
     setSubTableComponents
-  } = runtime ? usePageEditorSignal(pageType || EDITOR_TYPES.FORM_EDITOR) : useStoreSignals;
+  } = runtime && !editPreview ? usePageEditorSignal(pageType || EDITOR_TYPES.FORM_EDITOR) : useStoreSignals;
   const { subTableDataLength } = pagesRuntimeSignal;
   const [subTableData, setSubTableData] = useState<any[]>([]);
 
@@ -295,7 +295,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
 
   return (
     <Form.Item
-      className={`inputTextWrapperOBMobile ${styles.subTableWrapperOBMobile}`}
+      className={`inputTextWrapperOBMobile subTableWrapperOBMobile`}
       field=""
       rules={rules}
       layout="vertical"
@@ -309,10 +309,10 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
           <>
             {subTableData.map((item, index) => (
               <Collapse
-                className={styles.collapseOBMobile}
+                className="collapseSubtableOBMobile"
                 key={item.key}
                 header={
-                  <div className={styles.collapseHeader}>
+                  <div className="collapseHeaderSubtableObMobile">
                     #{index + 1}
                     <IconDelete onClick={(e) => handleDelete(e, item.key)} />
                   </div>
@@ -351,7 +351,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
               />
             ))}
             {!detailMode && <div
-              className={styles.onAddOBMobile}
+              className="onAddSubtableOBMobile"
               onClick={handleAdd}
               style={{ pointerEvents: runtime ? 'unset' : 'none' }}>
               <IconAdd style={{ marginRight: '0.16rem' }} />
@@ -361,9 +361,9 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
         ) : (
           <div style={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
             <Collapse
-              className={styles.collapseOBMobile}
+              className="collapseSubtableOBMobile"
               header={
-                <div className={styles.collapseHeader}>
+                <div className="collapseHeaderSubtableObMobile">
                   #1<IconDelete />
                 </div>
               }
@@ -406,7 +406,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                     animation={150}
                     fallbackOnBody={true}
                     swapThreshold={0.65}
-                    className={styles.subTableContent}
+                    className="subTableContentOBMobile"
                     onStart={onSubStart}
                   >
                     {subTableComponents &&
@@ -424,7 +424,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                             data-cp-displayname={cp.displayName}
                             data-cp-id={cp.id}
                             data-id={cp.id}
-                            className={styles.componentItem}
+                            className="componentItemSubtableOBMobile"
                             style={{
                               borderColor: curComponentID === cp.id ? 'rgb(var(--primary-6))' : 'transparent'
                             }}
@@ -493,7 +493,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
               }
             />
             {!detailMode && <div
-              className={styles.onAddOBMobile}
+              className="onAddSubtableOBMobile"
               onClick={handleAdd}
               style={{ pointerEvents: runtime ? 'unset' : 'none' }}>
               <IconAdd style={{ marginRight: '0.16rem' }} />

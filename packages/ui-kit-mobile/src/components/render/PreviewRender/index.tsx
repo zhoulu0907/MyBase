@@ -26,6 +26,9 @@ interface PreviewRenderProps {
 
   runtime: boolean;
 
+  /** 编辑预览模式 */
+  editPreview?: boolean;
+
   // 详情视图
   detailMode?: boolean;
 
@@ -55,6 +58,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
   cpType,
   pageComponentSchema,
   runtime,
+  editPreview,
   detailMode,
   showFromPageData,
   refresh,
@@ -295,7 +299,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
         );
       case FORM_COMPONENT_TYPES.SUB_TABLE:
         return (
-          <FormComp.XSubTable cpName={cpId} id={cpId} {...componentConfig} editLoading={editLoading} runtime={runtime} detailMode={detailMode} form={form} useStoreSignals={useStoreSignals} />
+          <FormComp.XSubTable cpName={cpId} id={cpId} {...componentConfig} editLoading={editLoading} runtime={runtime} detailMode={detailMode} form={form} useStoreSignals={useStoreSignals} editPreview={editPreview} />
         );
       case FORM_COMPONENT_TYPES.DATA_SELECT:
       // return (

@@ -1,17 +1,25 @@
 .subTableWrapperOBMobile {
   display: flow-root !important;
+  > .arco-form-item-control-wrapper > .arco-form-item-control {
+    display: block;
+  }
+  .arco-form-item {
+    border: none !important;
+  }
+  .arco-cell:before {
+    transform: none !important;
+  }
 }
 
-.subTableContent {
+.subTableContentOBMobile {
   width: 100%;
-  min-height: 3rem;
+  min-height: 1rem;
   box-sizing: border-box;
   overflow-x: auto;
   overflow-y: visible;
-  padding-top: 0.42rem;
 }
 
-.componentItem {
+.componentItemSubtableOBMobile {
   overflow: visible;
   flex: 1 0 auto;
   cursor: move;
@@ -23,13 +31,14 @@
   min-width: 200px;
 }
 
-.collapseOBMobile {
+.collapseSubtableOBMobile {
   border: 0;
-  :global(.arco-collapse-header) {
+  .arco-collapse-header {
     flex-direction: row-reverse;
     justify-content: flex-end;
     background-color: transparent !important;
     padding: 0;
+    background-color: red;
 
     &::after {
       transform: none !important;
@@ -37,45 +46,45 @@
     }
   }
 
-   :global(.cell-content) {
+  .cell-content {
     display: block;
     text-align: right;
   }
 
-  :global(.arco-collapse-content-container) {
+  .arco-collapse-content-container {
     padding: 0;
   }
 
-  :global(.cell-group-body bordered),
-  :global(.arco-cell-group .cell-group-body) {
+  .cell-group-body bordered,
+  .arco-cell-group .cell-group-body {
     background-color: transparent;
   }
 
-  :global(.arco-form-label-item) {
+  .arco-form-label-item {
     display: none;
   }
 
-  :global(.inputTextWrapperOBMobile) {
+  .inputTextWrapperOBMobile {
     border: none !important;
   }
 
-  :global(.arco-cell-group .cell-group-body.bordered::before) {
+  .arco-cell-group .cell-group-body.bordered::before {
     transform: none;
     display: none;
   }
 
-  :global(.arco-cell:not(:first-of-type).bordered::before) {
+  .arco-cell:not(:first-of-type).bordered::before {
     transform: none;
   }
 
-  :global(.arco-cell-group .cell-group-body.bordered::after) {
+  .arco-cell-group .cell-group-body.bordered::after {
     transform: none;
   }
 
-  :global(.arco-cell.without-group.bordered::after) {
+  .arco-cell.without-group.bordered::after {
     transform: none;
   }
-  :global(.arco-cell-inner .cell-label) {
+  .arco-cell-inner .cell-label {
     width: 1.4rem;
     min-width: 1.4rem;
     margin-right: 0.12rem;
@@ -86,24 +95,42 @@
   /* :global(.uplaodList-text) {
     width: calc(100% - 3rem);
   } */
-  :global(.arco-uploader-add) {
+  .arco-uploader-add {
     margin-top: 0.24rem;
   }
-  :global(.fileUploadWrapperOBMobile) {
+  .fileUploadWrapperOBMobile {
     min-height: auto;
   }
 
-  .collapseHeader {
+  .collapseHeaderSubtableObMobile {
     width: 100%;
     display: flex;
     align-items: center;
     justify-content: space-between;
     margin-left: 0.16rem;
   }
-
+  .arco-cell::before {
+    content: '';
+    width: 100%;
+    height: 1px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 1;
+    border-top-style: solid;
+    border-top-width: 1px;
+    border-top-color: #e5e6eb;
+    box-sizing: border-box;
+    transform-origin: left top;
+    pointer-events: none;
+    border-radius: 0;
+  }
+  .componentItemSubtableOBMobile:first-child .arco-cell::before {
+    display: none;
+  }
 }
 
-.onAddOBMobile {
+.onAddSubtableOBMobile {
   text-align: center;
   color: rgb(var(--primary-6));
   font-family: "PingFang SC";
