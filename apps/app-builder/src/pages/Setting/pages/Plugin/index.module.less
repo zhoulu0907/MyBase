@@ -1,0 +1,37 @@
+.pluginPage {
+  padding: 20px;
+
+  .search {
+    width: 200px;
+    :global(.pc-input-group > .pc-input-inner-wrapper) {
+      border-radius: 24px;
+    }
+  }
+  .card {
+    border: 2px solid #009e9e;
+    border-radius: 16px;
+
+    .icon {
+      padding: 12px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+    }
+
+    .textContent {
+      display: flex;
+      flex-direction: column;
+
+      .name {
+        font-size: 16px;
+        font-weight: 500;
+        color: #272e3b;
+      }
+      .description {
+        color: #86909c;
+        max-width: 200px;
+        word-wrap: break-word;
+      }
+    }
+  }
+}

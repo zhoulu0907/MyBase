@@ -1,0 +1,46 @@
+.loginWrapper {
+  background-color: #ffffff;
+  padding: 16px 24px;
+
+  .headerContent {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .linkContent {
+      display: flex;
+      align-items: center;
+      margin-bottom: 24px;
+      .linkText {
+        margin-left: 10px;
+        color: #009e9e;
+        margin-bottom: 0;
+        cursor: pointer;
+        max-width: 200px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+    }
+  }
+
+  .bodyContent {
+    display: flex;
+    .previewImage {
+      flex: 1;
+    }
+    .rightContent {
+      margin-left: 14px;
+      width: 250px;
+      .rightUploadText {
+        &:last-child {
+          color: #86909c;
+        }
+      }
+      .rightText {
+        margin-top: 16px;
+        display: block;
+      }
+    }
+  }
+}

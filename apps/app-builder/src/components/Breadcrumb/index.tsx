@@ -79,6 +79,8 @@ const AppBreadcrumb: React.FC<BreadcrumbProps> = ({ className, items }) => {
             path: '/onebase'
           });
           break;
+        case 'plugin':
+        case 'externalUser':
         case 'enterprise':
           result.push({
             key: 'onebase',
@@ -134,6 +136,12 @@ const AppBreadcrumb: React.FC<BreadcrumbProps> = ({ className, items }) => {
           break;
         case 'edit':
           title = t('sider.edit');
+          break;
+        case 'plugin':
+          title = t('sider.plugin');
+          break;
+        case 'externalUser':
+          title = t('sider.externalUser');
           break;
         default:
           title = decodeURIComponent(segment);

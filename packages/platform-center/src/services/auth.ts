@@ -6,6 +6,7 @@ import {
   RuntimeAccountLoginRequest,
   RuntimeCorpLoginRequest,
   RuntimeMobileLoginRequest,
+  RuntimeThirdLoginRequest,
   SendVerifyCodeRequest,
   TenantLoginRequest
 } from '../types';
@@ -38,6 +39,11 @@ export const sassLogin = (req: RuntimeMobileLoginRequest, headers: Headers) => {
 export const runtimeCorpLogin = (req: RuntimeCorpLoginRequest, headers: Headers) => {
   return runtimeService.post('/auth/corp-login', req, { headers });
 };
+
+export const runtimeThirdLogin = (req: RuntimeThirdLoginRequest, headers: Headers)  => {
+  return runtimeService.post('/auth/third-login', req, { headers });
+};
+
 
 // TODO(mickey): 重构合并
 
