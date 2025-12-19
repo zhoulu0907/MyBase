@@ -13,6 +13,7 @@ public enum ConfigCategoryEnum  implements ArrayValuable<String> {
 
     TENANT("tenant", "空间"),
     CORP("corp", "企业"),
+    APP("app", "应用"),
     GLOBAL("global", "全局"),
     ;
 

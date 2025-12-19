@@ -19,10 +19,13 @@ public enum SystemConfigKeyEnum implements ArrayValuable<String> {
         this.name = name;
     }
 
+    public static final boolean THIRD_USER_CONFIG_DEFAULT_VALUE = true;
+
     /**
      * 角色编码
      */
     private final String code;
+
     /**
      * 名字
      */
