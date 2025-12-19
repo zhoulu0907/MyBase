@@ -18,10 +18,8 @@ public class SecurityConfiguration {
 
     @Bean("pwdSM2")
     public SM2 sm2() {
-        // 使用指定私钥初始化 SM2
-        String privateKey = ENConstant.EN_P_SM2KEY;
-        String publicKey = ENConstant.EN_P_SM2KEY_PUBLIC;
-        SM2 sm2 = new SM2(privateKey, publicKey);
+        // 使用指定私钥初始化 SM2ENConstant.EN_P_SM2KEY
+        SM2 sm2 = new SM2(ENConstant.EN_P_SM2KEY, ENConstant.EN_P_SM2KEY_PUBLIC);
         // 使用 C1C3C2 模式解密,与前端保持一致
         sm2.setMode(SM2Engine.Mode.C1C3C2);
         return sm2;
