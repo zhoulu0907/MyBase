@@ -12,7 +12,7 @@ public interface PageService {
 
     Boolean updatePageName(UpdatePageNameDTO updatePageNameVO);
 
-    List<PageDTO> getFormPageListByAppId(Long appId);
+    List<PageDTO> getPageListByAppId(Long appId);
 
     String getMetadataByPageId(Long pageId);
 

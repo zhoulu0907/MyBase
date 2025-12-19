@@ -38,14 +38,13 @@ public class AppPageRepository extends BaseBizRepository<AppResourcePageMapper, 
         return list(queryWrapper);
     }
 
-    public List<AppResourcePageDO> findAllFormPageByPageSetUuids(Long applicationId, List<String> pageSetUuidList) {
+    public List<AppResourcePageDO> findAllPageByPageSetUuids(Long applicationId, List<String> pageSetUuidList) {
         if (CollectionUtils.isEmpty(pageSetUuidList)) {
             return Collections.emptyList();
         }
         QueryWrapper queryWrapper = this.query()
                 .where(APP_RESOURCE_PAGE.APPLICATION_ID.eq(applicationId))
-                .where(APP_RESOURCE_PAGE.PAGESET_UUID.in(pageSetUuidList))
-                .and(APP_RESOURCE_PAGE.PAGE_TYPE.eq(PageEnum.FORM.getValue()));
+                .where(APP_RESOURCE_PAGE.PAGESET_UUID.in(pageSetUuidList));
         return list(queryWrapper);
     }
 
