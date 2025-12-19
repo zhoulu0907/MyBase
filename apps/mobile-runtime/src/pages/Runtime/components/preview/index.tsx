@@ -427,8 +427,11 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
               formValues[fieldName] = Object.entries(value).length > 0 ? [value.name] : value;
             } else if (fieldType === ENTITY_FIELD_TYPE.DEPARTMENT.VALUE) {
               formValues[fieldName] = value;
-            } else if (fieldType === ENTITY_FIELD_TYPE.IMAGE.VALUE || fieldType === ENTITY_FIELD_TYPE.FILE.VALUE) {
-              formValues[fieldName] = value.map((item: any) => {
+            } else if (
+              (fieldType === ENTITY_FIELD_TYPE.IMAGE.VALUE || fieldType === ENTITY_FIELD_TYPE.FILE.VALUE) &&
+              Array.isArray(value)
+            ) {
+              formValues[fieldName] = (value || []).map((item: any) => {
                 return {
                   ...item,
                   name: item.name,
@@ -489,10 +492,10 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
                     } else if (fieldType === ENTITY_FIELD_TYPE.DEPARTMENT.VALUE) {
                       formValues[`${key}.${idx}.${fieldName}`] = subData[idx]?.[fieldName];
                     } else if (
-                      fieldType === ENTITY_FIELD_TYPE.IMAGE.VALUE ||
-                      fieldType === ENTITY_FIELD_TYPE.FILE.VALUE
+                      (fieldType === ENTITY_FIELD_TYPE.IMAGE.VALUE || fieldType === ENTITY_FIELD_TYPE.FILE.VALUE) &&
+                      Array.isArray(subData[idx]?.[fieldName])
                     ) {
-                      formValues[`${key}.${idx}.${fieldName}`] = subData[idx]?.[fieldName].map((item: any) => {
+                      formValues[`${key}.${idx}.${fieldName}`] = (subData[idx]?.[fieldName] || []).map((item: any) => {
                         return {
                           ...item,
                           name: item.name,
