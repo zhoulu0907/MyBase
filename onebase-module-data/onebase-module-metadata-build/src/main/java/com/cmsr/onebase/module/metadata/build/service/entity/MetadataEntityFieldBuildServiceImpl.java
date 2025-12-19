@@ -2803,6 +2803,19 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 Set<Long> processedRuleIds = new java.util.HashSet<>();
 
                 for (AutoNumberRuleVO ruleReq : otherRules) {
+                    // FIELD_REF类型特殊处理：确保refFieldUuid有值
+                    if ("FIELD_REF".equalsIgnoreCase(ruleReq.getItemType())) {
+                        String resolvedRefFieldUuid = resolveFieldRefUuid(ruleReq);
+                        if (resolvedRefFieldUuid == null || resolvedRefFieldUuid.trim().isEmpty()) {
+                            log.error("FIELD_REF类型规则项缺少引用字段UUID，跳过保存。itemOrder={}, format={}, refFieldUuid={}",
+                                    ruleReq.getItemOrder(), ruleReq.getFormat(), ruleReq.getRefFieldUuid());
+                            throw new IllegalArgumentException("FIELD_REF类型规则项必须指定引用字段UUID");
+                        }
+                        ruleReq.setRefFieldUuid(resolvedRefFieldUuid);
+                        // 清空format，因为FIELD_REF类型不需要format字段
+                        ruleReq.setFormat(null);
+                    }
+
                     // 如果提供了ID，尝试更新现有规则项
                     if (ruleReq.getId() != null) {
                         MetadataAutoNumberRuleItemDO existingRule = existingRulesMap.get(ruleReq.getId());
@@ -2868,6 +2881,40 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 log.info("删除字段 {} 的自动编号配置", fieldUuid);
             }
         }
+    }
+
+    /**
+     * 解析FIELD_REF类型规则项的引用字段UUID
+     * <p>
+     * 兼容处理逻辑：
+     * 1. 如果 refFieldUuid 不为空，直接返回
+     * 2. 如果 refFieldUuid 为空但 format 有值，尝试将 format 作为字段标识符（可能是ID或UUID）转换为UUID
+     * 3. 否则返回 null
+     *
+     * @param ruleReq 规则项请求VO
+     * @return 解析后的字段UUID，如果无法解析则返回null
+     */
+    private String resolveFieldRefUuid(AutoNumberRuleVO ruleReq) {
+        // 1. 优先使用 refFieldUuid
+        if (ruleReq.getRefFieldUuid() != null && !ruleReq.getRefFieldUuid().trim().isEmpty()) {
+            return ruleReq.getRefFieldUuid();
+        }
+
+        // 2. 尝试从 format 字段获取并转换（兼容前端将字段ID放在format的情况）
+        if (ruleReq.getFormat() != null && !ruleReq.getFormat().trim().isEmpty()) {
+            try {
+                String resolvedUuid = idUuidConverter.toFieldUuid(ruleReq.getFormat());
+                log.info("FIELD_REF规则项兼容处理：从 format={} 转换得到 refFieldUuid={}",
+                        ruleReq.getFormat(), resolvedUuid);
+                return resolvedUuid;
+            } catch (Exception e) {
+                log.warn("FIELD_REF规则项转换失败：无法将 format={} 转换为字段UUID，错误: {}",
+                        ruleReq.getFormat(), e.getMessage());
+            }
+        }
+
+        // 3. 无法解析
+        return null;
     }
 
     /**
