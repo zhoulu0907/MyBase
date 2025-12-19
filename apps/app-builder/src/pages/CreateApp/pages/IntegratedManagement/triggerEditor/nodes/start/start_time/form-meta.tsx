@@ -1,4 +1,5 @@
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
+import { DEFAULT_CRON_VALIDATOR_OPTIONS } from '@/utils/cron';
 import { DatePicker, Form, Grid, Input, Select, Tabs, TimePicker } from '@arco-design/web-react';
 import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
 import { isValidCron } from 'cron-validator';
@@ -184,14 +185,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                       { required: true, message: '请选择触发时间' },
                       {
                         validator: (value, callback) => {
-                          if (
-                            !isValidCron(value, {
-                              seconds: true,
-                              allowBlankDay: true,
-                              alias: true,
-                              allowSevenAsSunday: true
-                            })
-                          ) {
+                          if (!isValidCron(value, DEFAULT_CRON_VALIDATOR_OPTIONS)) {
                             return callback('请输入正确的cron表达式');
                           }
                         }

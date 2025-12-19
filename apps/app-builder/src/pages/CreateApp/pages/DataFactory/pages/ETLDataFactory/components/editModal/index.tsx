@@ -1,3 +1,4 @@
+import { DEFAULT_CRON_VALIDATOR_OPTIONS } from '@/utils/cron';
 import { DatePicker, Form, Grid, Input, Modal, Radio, Select, Switch, TimePicker } from '@arco-design/web-react';
 import { ETL_FLOW_STATUS, ETL_SCHEDULE_STRATEGY, type UpdateWorkflowScheduleInfoReq } from '@onebase/app';
 import { isValidCron } from 'cron-validator';
@@ -229,14 +230,7 @@ const EditModal: React.FC<EditModalProps> = ({ initData, visible, onOk, onCancel
                         { required: true, message: '请选择触发时间' },
                         {
                           validator: (value, callback) => {
-                            if (
-                              !isValidCron(value, {
-                                seconds: true,
-                                allowBlankDay: true,
-                                alias: true,
-                                allowSevenAsSunday: true
-                              })
-                            ) {
+                            if (!isValidCron(value, DEFAULT_CRON_VALIDATOR_OPTIONS)) {
                               return callback('请输入正确的cron表达式');
                             }
                           }
