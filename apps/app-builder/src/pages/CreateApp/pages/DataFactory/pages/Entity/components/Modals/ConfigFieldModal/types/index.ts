@@ -146,6 +146,7 @@ export interface AutoNumberRuleItem {
   resetCycle?: string;
   resetOnInitialChange?: number;
   startValue?: number;
+  refFieldUuid?: string;
 }
 
 // 资产及子表字段
