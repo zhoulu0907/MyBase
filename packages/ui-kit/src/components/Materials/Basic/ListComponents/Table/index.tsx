@@ -25,6 +25,7 @@ import {
   queryFlowExecForm,
   TRIGGER_EVENTS,
   VALIDATION_TYPE,
+  PageType,
   type AppEntityField
 } from '@onebase/app';
 import {
@@ -429,7 +430,7 @@ const XTable = memo(
       if (!runtime || !metaData || !isRuntimeEnv()) {
         return;
       }
-
+      
       queryData = form.getFieldsValue();
 
       // TODO(mickey): 后续调试
@@ -469,7 +470,7 @@ const XTable = memo(
         filters: filters
       };
       let res:any
-      if (advancedRowRedirect&&redirectMethod === RedirectMethod.DRAWER) {
+      if (props?.pageSetType === PageType.BPM) {
         const params={
 	        menuId: curMenu.value?.id,
 	        tableName,
