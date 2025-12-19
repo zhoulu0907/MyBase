@@ -376,6 +376,7 @@ public class DeptServiceImpl implements DeptService {
         Integer userType = reqVO.getUserType();
         DeptAndUsersRespVO respVO = new DeptAndUsersRespVO();
 
+
         // 判断是否有搜索关键词
         boolean hasKeywords = StrUtil.isNotBlank(reqVO.getKeywords());
         boolean hasDeptId = reqVO.getDeptId() != null && reqVO.getDeptId() > 0;

@@ -54,6 +54,10 @@ GET {{baseUrl}}/system/dept/get-dept-users
 Authorization: Bearer {{token}}
 tenant-id: 168334577623138304
 
+### 请求 /get-dept-users 接口 => 成功
+GET {{baseUrl}}/app/auth-role/list-dept-users?userType=4&roleId=187881437703897090
+Authorization: Bearer {{token}}
+tenant-id: 168334577623138304
 
 
 
