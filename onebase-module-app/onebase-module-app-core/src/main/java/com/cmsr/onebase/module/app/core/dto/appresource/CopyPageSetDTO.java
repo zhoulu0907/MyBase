@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.app.core.dto.appresource;
 
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppMenuDO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -16,4 +17,6 @@ public class CopyPageSetDTO {
     @NotNull(message = "复制后的新菜单编码不能为空")
     private Long newMenuId;
 
+    private AppMenuDO menuDO;
+    private AppMenuDO newMenuDO;
 }

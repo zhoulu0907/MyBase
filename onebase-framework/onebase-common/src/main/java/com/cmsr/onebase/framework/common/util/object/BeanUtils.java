@@ -21,7 +21,8 @@ public class BeanUtils {
                 .setMatchingStrategy(MatchingStrategies.STRICT)
                 .setAmbiguityIgnored(true)
                 .setSkipNullEnabled(true)
-                .setFieldAccessLevel(Configuration.AccessLevel.PRIVATE);
+                .setFieldAccessLevel(Configuration.AccessLevel.PRIVATE)
+                .setDeepCopyEnabled(true);
     }
 
     public static <T> T toBean(Object source, Class<T> targetClass) {

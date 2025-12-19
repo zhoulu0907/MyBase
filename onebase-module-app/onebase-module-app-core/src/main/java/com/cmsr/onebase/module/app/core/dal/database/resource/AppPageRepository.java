@@ -81,6 +81,13 @@ public class AppPageRepository extends BaseBizRepository<AppResourcePageMapper, 
         return this.objListAs(queryWrapper, Long.class);
     }
 
+    public List<AppResourcePageDO> findByAppIdAndPageSetUuid(Long applicationId, String pageSetUuid) {
+        QueryWrapper queryWrapper = this.query()
+                .where(APP_RESOURCE_PAGE.APPLICATION_ID.eq(applicationId))
+                .where(APP_RESOURCE_PAGE.PAGESET_UUID.eq(pageSetUuid));
+        return this.list(queryWrapper);
+    }
+
 
     public AppResourcePageDO findByAppIdAndPageUuid(Long applicationId, String pageUuid) {
         QueryWrapper queryWrapper = this.query()
