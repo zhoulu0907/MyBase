@@ -1,0 +1,5 @@
+### 获得企业授权应用列表-分页
+GET {{baseUrl}}/app/application/get?id=1
+Authorization: Bearer {{token}}
+
+

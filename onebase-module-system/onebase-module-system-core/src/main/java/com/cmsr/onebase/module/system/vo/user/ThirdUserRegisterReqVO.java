@@ -20,7 +20,7 @@ public class ThirdUserRegisterReqVO {
     @Schema(description = "手机")
     private String mobile;
 
-    @Schema(description = "用户名称")
+    @Schema(description = "应用ID")
     private Long appId;
 
     @Schema(description = "验证码",  example = "10")
