@@ -206,6 +206,7 @@ export interface ValidationTypeItem {
 
 export interface EntityFieldOption {
   id: string;
+  optionUuid: string;
   fieldId: string;
   optionValue: string;
   optionLabel: string;

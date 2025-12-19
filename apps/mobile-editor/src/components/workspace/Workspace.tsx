@@ -393,6 +393,7 @@ const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({ props, isListEditor =
                             };
                           }
                         } else if (field.options?.length) {
+                          // TODO defaultOptions不需要了 直接从接口读取
                           const newDefaultOptionsConfig = {
                             defaultOptions: field.options.map((e: any) => ({
                               label: e.optionLabel,

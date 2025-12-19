@@ -47,7 +47,7 @@ export const getFieldOptionsConfig = async (dataField: string[], mainEntity: App
         return dictOptions || [];
     } else if (currentField.options?.length) {
         const newOptions = currentField.options.map((ele: EntityFieldOption) => ({
-            id: ele.id,
+            id: ele.optionUuid || ele.id,
             sort: 0,
             label: ele.optionLabel,
             value: ele.optionValue,

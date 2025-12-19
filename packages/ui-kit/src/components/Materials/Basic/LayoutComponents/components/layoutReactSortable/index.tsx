@@ -153,24 +153,6 @@ const LayoutReactSortable: React.FC<LayoutReactSortableProps> = ({
             noRepeat: field.isUnique
           };
 
-          // 字段选项列表（单/多选字段专用） options COMPONENT_MAP
-          if (cpType === FORM_COMPONENT_TYPES.SELECT_ONE || cpType === FORM_COMPONENT_TYPES.SELECT_MUTIPLE) {
-            // 判断是否引用字典数据
-            if (field.dictTypeId) {
-              const res = await getDictDetail(field.dictTypeId);
-              const dictDataList = res?.type ? await getDictDataListByType(res.type) : [];
-              const dictOptions = dictDataList?.filter((e: any) => e.status === 1); // 只显示启用状态的字典数据
-              if (dictOptions.length) {
-                schema.config.defaultOptions = dictOptions;
-              }
-            } else if (field.options?.length) {
-              schema.config.defaultOptions = field.options.map((e: any) => ({
-                chosen: field.defaultValue && e.optionValue === field.defaultValue,
-                label: e.optionLabel,
-                value: e.optionValue
-              }));
-            }
-          }
           // 字段约束配置（长度/正则） constraints
           schema.config.constraints = field.constraints;
           // 数据选择
