@@ -14,11 +14,10 @@ public class SystemGeneralConfigDO extends TenantBaseDO {
     public static final String CONFIG_KEY = "config_key";
     public static final String CONFIG_VALUE = "config_value";
     public static final String CORP_ID = "corp_id";
+    public static final String APP_ID = "app_id";
     public static final String STATUS = "status";
     public static final String REMARK = "remark";
     public static final String EXCLUSIVE_ITEM = "exclusive_item";
-
-
 
     /**
      * 参数分类
@@ -40,7 +39,7 @@ public class SystemGeneralConfigDO extends TenantBaseDO {
      * 参数键值
      */
     @Column(name = CONFIG_VALUE)
-    private String configValue;
+    private Object configValue;
 
     /**
      * 互斥项
@@ -61,6 +60,12 @@ public class SystemGeneralConfigDO extends TenantBaseDO {
      */
     @Column(name = CORP_ID)
     private Long corpId;
+
+    /**
+     * appId
+     */
+    @Column(name = APP_ID)
+    private Long appId;
 
     /**
      * 备注

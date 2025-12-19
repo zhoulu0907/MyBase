@@ -25,6 +25,10 @@ public enum SystemConfigKeyEnum implements ArrayValuable<String> {
 
     //  默认值：应用三方用户登录-开关
     public static final boolean appThirdUserEnable_DefaultValue = true;
+    // 应用三方用户登录-注册入口显隐
+    public static final boolean appThirdUserRegisterShow_DefaultValue = true;
+    // 应用三方用户登录-忘记密码显隐
+    public static final boolean appThirdUserForgetPwdShow_DefaultValue = true;
 
     /**
      * 角色编码

@@ -20,13 +20,10 @@ Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
-  "category": "global",
-  "name": "全局变量",
-  "configKey": "all-global",
-  "configValue": "all-global",
-  "exclusiveItem": "simple-global",
-  "status": 0,
-  "remark": "全局变量"
+  "category": "app",
+  "configKey": "appThirdUserRegisterShow",
+  "configValue": "false",
+  "appId": "5454545454"
 }
 
 ### 修改参数配置
@@ -48,5 +45,9 @@ GET {{baseUrl}}/system/config/get-config-by-key?key=thirdUser
 Authorization: Bearer {{token}}
 
 ### 获取分页列表
-GET {{baseUrl}}/system/config/list
+GET {{baseUrl}}/system/config/list?configType=tenant
+Authorization: Bearer {{token}}
+
+### 获取分页列表
+GET {{baseUrl}}/system/config/list-by-keys?configType=app&appId=5454545454&configKeys=appThirdUserEnable,appThirdUserRegisterShow,appThirdUserForgetPwdShow
 Authorization: Bearer {{token}}

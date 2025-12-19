@@ -12,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Set;
 
 @Repository
 public class SystemGeneralConfigDataRepository  extends DataRepository<SystemGeneralConfigDO> {
@@ -24,7 +25,7 @@ public class SystemGeneralConfigDataRepository  extends DataRepository<SystemGen
 
 
 
-    public List<SystemGeneralConfigDO> findTenantConfigList(String name,Integer status) {
+    public List<SystemGeneralConfigDO> findTenantConfigList(String name,Integer status,String configType) {
         DefaultConfigStore configs = new DefaultConfigStore();
 
         if (StringUtils.isNotBlank(name)) {
@@ -33,6 +34,10 @@ public class SystemGeneralConfigDataRepository  extends DataRepository<SystemGen
         if (null != status) {
             configs.and(Compare.EQUAL, SystemGeneralConfigDO.STATUS, status);
         }
+        if (null != configType) {
+            configs.and(Compare.EQUAL, SystemGeneralConfigDO.CONFIG_TYPE, configType);
+        }
+
         // 添加排序条件，按ID降序排列
         configs.order(SystemGeneralConfigDO.ID, org.anyline.entity.Order.TYPE.DESC);
 
@@ -64,6 +69,25 @@ public class SystemGeneralConfigDataRepository  extends DataRepository<SystemGen
         if(CollectionUtils.isNotEmpty(configKeys)){
             configs.and(Compare.IN, SystemGeneralConfigDO.CONFIG_KEY, configKeys);
         }
+        // 添加排序条件，按ID降序排列
+        configs.order(SystemGeneralConfigDO.ID, org.anyline.entity.Order.TYPE.DESC);
+        return findAllByConfig(configs);
+    }
+
+    public SystemGeneralConfigDO findOneByConfigKeyAndAppId(String configKey, Long appId) {
+        DefaultConfigStore configs = new DefaultConfigStore();
+            configs.and(Compare.EQUAL, SystemGeneralConfigDO.CONFIG_KEY, configKey);
+            configs.and(Compare.EQUAL, SystemGeneralConfigDO.APP_ID, appId);
+        return findOne(configs);
+    }
+
+    public List<SystemGeneralConfigDO> findConfigListByKeysAndAppId(Set<String> configKeys, Long appId, String configType) {
+        DefaultConfigStore configs = new DefaultConfigStore();
+        if(CollectionUtils.isNotEmpty(configKeys)){
+            configs.and(Compare.IN, SystemGeneralConfigDO.CONFIG_KEY, configKeys);
+        }
+        configs.and(Compare.EQUAL, SystemGeneralConfigDO.APP_ID, appId);
+        configs.and(Compare.EQUAL, SystemGeneralConfigDO.CONFIG_TYPE, configType);
         // 添加排序条件，按ID降序排列
         configs.order(SystemGeneralConfigDO.ID, org.anyline.entity.Order.TYPE.DESC);
         return findAllByConfig(configs);

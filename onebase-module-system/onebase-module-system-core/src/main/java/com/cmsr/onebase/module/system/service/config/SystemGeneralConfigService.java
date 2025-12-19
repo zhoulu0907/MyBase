@@ -5,6 +5,7 @@ import com.cmsr.onebase.module.system.vo.config.*;
 import jakarta.validation.Valid;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * 参数配置 Service 接口
@@ -56,4 +57,10 @@ public interface SystemGeneralConfigService {
      * @param
      */
     void updateStatus(Long id, Integer status);
+    /**
+     * 根据参数键，获得参数配置
+     *
+     * @return 参数配置
+     */
+    List<SystemGeneralConfigDO> getTenantConfigListByKeysAndAppId(SystemConfigSearchReqVO  vo);
 }

@@ -26,6 +26,7 @@ import org.springframework.validation.annotation.Validated;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 
@@ -55,10 +56,50 @@ public class SystemGeneralConfigServiceImpl implements SystemGeneralConfigServic
         return configDO.getId();
     }
 
+    public SystemGeneralConfigDO get(SystemGeneralConfigDO configDO,String key){
+
+        return configDO;
+    }
+
+
+
     @Override
     public void updateConfig(SystemGeneralConfigUpdateReqVO updateReqVO) {
         SystemGeneralConfigDO systemGeneralConfigDO = BeanUtils.toBean(updateReqVO, SystemGeneralConfigDO.class);
-        systemGeneralConfigDataRepository.update(systemGeneralConfigDO);
+        // 判断数据库是否存在三个配置项
+        if (SystemConfigKeyEnum.appThirdUserEnable.getCode().equals(updateReqVO.getConfigKey()) ||
+                SystemConfigKeyEnum.appThirdUserForgetPwdShow.getCode().equals(updateReqVO.getConfigKey()) ||
+                SystemConfigKeyEnum.appThirdUserRegisterShow.getCode().equals(updateReqVO.getConfigKey())) {
+
+            // 先判断 key，appid 对于的数是否存在，
+            SystemGeneralConfigDO configDO = systemGeneralConfigDataRepository.findOneByConfigKeyAndAppId(updateReqVO.getConfigKey(), updateReqVO.getAppId());
+            if (null == configDO) {
+                SystemGeneralConfigDO insertConfigDO = new SystemGeneralConfigDO();
+                insertConfigDO.setId(null);
+                insertConfigDO.setConfigType(ConfigTypeEnum.APP.getCode());
+                insertConfigDO.setConfigValue(updateReqVO.getConfigValue());
+                insertConfigDO.setAppId(updateReqVO.getAppId());
+                insertConfigDO.setStatus(CommonStatusEnum.ENABLE.getStatus());
+                insertConfigDO.setConfigKey(updateReqVO.getConfigKey());
+                if (SystemConfigKeyEnum.appThirdUserEnable.getCode().equals(updateReqVO.getConfigKey())) {
+                    insertConfigDO.setName(SystemConfigKeyEnum.appThirdUserEnable.getName());
+                }
+                if (SystemConfigKeyEnum.appThirdUserForgetPwdShow.getCode().equals(updateReqVO.getConfigKey())) {
+                    insertConfigDO.setName(SystemConfigKeyEnum.appThirdUserForgetPwdShow.getName());
+                }
+                if (SystemConfigKeyEnum.appThirdUserRegisterShow.getCode().equals(updateReqVO.getConfigKey())) {
+                    insertConfigDO.setName(SystemConfigKeyEnum.appThirdUserRegisterShow.getName());
+                }
+                systemGeneralConfigDataRepository.insert(insertConfigDO);
+            } else {
+                configDO.setConfigValue(updateReqVO.getConfigValue());
+                systemGeneralConfigDataRepository.update(configDO);
+
+            }
+        }else{
+            systemGeneralConfigDataRepository.update(systemGeneralConfigDO);
+        }
+
     }
 
     @Override
@@ -73,7 +114,7 @@ public class SystemGeneralConfigServiceImpl implements SystemGeneralConfigServic
 
     @Override
     public List<SystemGeneralConfigDO> getTenantConfigList(SystemConfigReqVO configReqVO) {
-        List<SystemGeneralConfigDO> configList = systemGeneralConfigDataRepository.findTenantConfigList(configReqVO.getName(),configReqVO.getStatus());
+        List<SystemGeneralConfigDO> configList = systemGeneralConfigDataRepository.findTenantConfigList(configReqVO.getName(),configReqVO.getStatus(),configReqVO.getConfigType());
         if(CollectionUtils.isNotEmpty(configList)){
             return configList;
         }
@@ -84,14 +125,16 @@ public class SystemGeneralConfigServiceImpl implements SystemGeneralConfigServic
                 return new ArrayList<>();
             }
             globalConfigList.forEach(configDO -> {
-                configDO.setId(null);
-                configDO.setTenantId(TenantContextHolder.getTenantId());
-                configDO.setConfigType(ConfigTypeEnum.TENANT.getCode());
-                systemGeneralConfigDataRepository.insert(configDO);
+                if (ConfigTypeEnum.GLOBAL.getCode().equals(configDO.getConfigType())) {
+                    configDO.setId(null);
+                    configDO.setTenantId(TenantContextHolder.getTenantId());
+                    configDO.setConfigType(ConfigTypeEnum.TENANT.getCode());
+                    systemGeneralConfigDataRepository.insert(configDO);
+                }
             });
 
         }
-        return systemGeneralConfigDataRepository.findTenantConfigList(configReqVO.getName(),configReqVO.getStatus());
+        return systemGeneralConfigDataRepository.findTenantConfigList(configReqVO.getName(),configReqVO.getStatus(),configReqVO.getConfigType());
 
 
     }
@@ -157,6 +200,7 @@ public class SystemGeneralConfigServiceImpl implements SystemGeneralConfigServic
         systemGeneralConfigDataRepository.update(configDO);
     }
 
+
     @NotNull
     private static SystemGeneralConfigSearchVO getSystemGeneralConfigSearchVO(SystemGeneralConfigDO configDO) {
         String category= configDO.getConfigType();
@@ -175,5 +219,51 @@ public class SystemGeneralConfigServiceImpl implements SystemGeneralConfigServic
         return searchVO;
     }
 
+    @Override
+    public List<SystemGeneralConfigDO> getTenantConfigListByKeysAndAppId(SystemConfigSearchReqVO searchVO) {
+        Set<String> configKeys = searchVO.getConfigKeys();
+        Long appId = searchVO.getAppId();
+        String category = searchVO.getConfigType();
+
+        if(CollectionUtils.isEmpty(configKeys)){
+            return new ArrayList<>();
+        }
+        List<SystemGeneralConfigDO> configDOList = systemGeneralConfigDataRepository.findConfigListByKeysAndAppId(configKeys,appId, category);
+        if(CollectionUtils.isNotEmpty(configDOList)){
+            return configDOList;
+        }
+
+        configKeys.forEach(configKey -> {
+            if (SystemConfigKeyEnum.appThirdUserEnable.getCode().equals(configKey) ||
+                    SystemConfigKeyEnum.appThirdUserForgetPwdShow.getCode().equals(configKey) ||
+                    SystemConfigKeyEnum.appThirdUserRegisterShow.getCode().equals(configKey)) {
+                SystemGeneralConfigDO configDO = systemGeneralConfigDataRepository.findOneByConfigKeyAndAppId(configKey, appId);
+                if (null == configDO) {
+                    SystemGeneralConfigDO insertConfigDO = new SystemGeneralConfigDO();
+                    insertConfigDO.setId(null);
+                    insertConfigDO.setConfigType(ConfigTypeEnum.APP.getCode());
+                    insertConfigDO.setAppId(appId);
+                    insertConfigDO.setStatus(CommonStatusEnum.ENABLE.getStatus());
+                    insertConfigDO.setConfigKey(configKey);
+                    if (SystemConfigKeyEnum.appThirdUserEnable.getCode().equals(configKey)) {
+                        insertConfigDO.setName(SystemConfigKeyEnum.appThirdUserEnable.getName());
+                        insertConfigDO.setConfigValue(SystemConfigKeyEnum.appThirdUserEnable_DefaultValue);
+                    }
+                    if (SystemConfigKeyEnum.appThirdUserForgetPwdShow.getCode().equals(configKey)) {
+                        insertConfigDO.setName(SystemConfigKeyEnum.appThirdUserForgetPwdShow.getName());
+                        insertConfigDO.setConfigValue(SystemConfigKeyEnum.appThirdUserForgetPwdShow_DefaultValue);
+                    }
+                    if (SystemConfigKeyEnum.appThirdUserRegisterShow.getCode().equals(configKey)) {
+                        insertConfigDO.setName(SystemConfigKeyEnum.appThirdUserRegisterShow.getName());
+                        insertConfigDO.setConfigValue(SystemConfigKeyEnum.appThirdUserRegisterShow_DefaultValue);
+                    }
+                    systemGeneralConfigDataRepository.insert(insertConfigDO);
+                }
+            }
+        });
+
+        return   systemGeneralConfigDataRepository.findConfigListByKeysAndAppId(configKeys,appId,category);
+
+    }
 
 }
