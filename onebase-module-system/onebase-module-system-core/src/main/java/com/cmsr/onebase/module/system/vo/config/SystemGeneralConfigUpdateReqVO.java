@@ -10,6 +10,16 @@ public class SystemGeneralConfigUpdateReqVO {
      */
     @Schema(description = "id", example = "")
     private Long id;
+
+    /**
+     * appId
+     */
+    @Schema(description = "appId", example = "")
+    private Long appId;
+
+    @Schema(description = "key", example = "")
+    private String configKey;
+
     /**
      * 参数名称
      */

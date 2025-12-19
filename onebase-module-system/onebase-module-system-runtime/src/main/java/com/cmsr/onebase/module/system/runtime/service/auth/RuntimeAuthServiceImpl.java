@@ -81,9 +81,6 @@ import static com.cmsr.onebase.module.system.enums.LogRecordConstants.*;
 @Slf4j
 public class RuntimeAuthServiceImpl implements RuntimeAuthService {
 
-    // 三方用户设置默认密码
-    private static final String THIRD_USER_PASSWORD = "OBThird2025!";
-
     @Resource
     private UserService        userService;
     @Resource
@@ -305,38 +302,44 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
 
     @Override
     public ThirdAuthLoginRespVO thirdLogin(ThirdAuthLoginReqVO reqVO) {
-        Long appId = reqVO.getAppId();
+
         // 校验验证码
         thirdValidateCaptcha(reqVO);
         // 验证应用是否存在
-        Long tenanId = checkAppAndGetTenantId(appId);
+        Long appId = reqVO.getAppId();
+        Long tenantId = checkAppAndGetTenantId(appId);
+
         AtomicReference<ThirdAuthLoginRespVO> authLoginRespVO = new AtomicReference<>();
         // 设置应用所在的租户环境
-        TenantUtils.execute(tenanId, () -> {
+        TenantUtils.execute(tenantId, () -> {
             AdminUserDO user = null;
-            //  解密原文
-            reqVO.setPassword(pwdEnHelper.decryptHexStr(reqVO.getPassword()));
             // 判断登录方式
             if (LongTypeEnum.PASSWORD.getCode().equals(reqVO.getLoginType())) {
+                //  解密原文
+                reqVO.setPassword(pwdEnHelper.decryptHexStr(reqVO.getPassword()));
                 // 使用手机密码，进行登录
                 user = mobileAuthenticate(reqVO.getMobile(), reqVO.getPassword());
+
             } else if (LongTypeEnum.VERIFYCODE.getCode().equals(reqVO.getLoginType())) {
                 // 使用手机验证码，进行登录
                 validateVerfiyCode(reqVO);
                 user = thirdAuthenticate(reqVO.getMobile(), reqVO.getVerifyCode());
                 if (null == user) {
-                    throw exception(AUTH_LOGIN_NO_EXISTS);
+                    //如果未注册，直接返回，首次注册为true
+                    ThirdAuthLoginRespVO thirdAuthLoginRespVO = new ThirdAuthLoginRespVO();
+                    thirdAuthLoginRespVO.setUserUnRegistFlag(true);
+                    authLoginRespVO.set(thirdAuthLoginRespVO);
                 }
             }
-
-            AuthLoginRespVO vo = createAfterLoginSuccess(user.getUserType(), user.getCorpId(), reqVO.getAppId(), user.getId(), reqVO.getMobile(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_MOBILE);
-            ThirdAuthLoginRespVO thirdAuthLoginRespVO = BeanUtils.toBean(vo, ThirdAuthLoginRespVO.class);
-            // 判断用户是否关联应用
-            thirdAuthLoginRespVO.setUserAppRelationFlag(findUserAppRelationFlag(appId, user.getId()));
-            authLoginRespVO.set(thirdAuthLoginRespVO);
-
-            LogRecordContext.putVariable("user", user);
-
+            if (null != user) {
+                AuthLoginRespVO vo = createAfterLoginSuccess(user.getUserType(), user.getCorpId(), reqVO.getAppId(), user.getId(), reqVO.getMobile(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_MOBILE);
+                ThirdAuthLoginRespVO thirdAuthLoginRespVO = BeanUtils.toBean(vo, ThirdAuthLoginRespVO.class);
+                // 判断用户是否关联应用
+                thirdAuthLoginRespVO.setUserAppRelationFlag(findUserAppRelationFlag(appId, user.getId()));
+                thirdAuthLoginRespVO.setUserUnRegistFlag(false);
+                authLoginRespVO.set(thirdAuthLoginRespVO);
+                LogRecordContext.putVariable("user", user);
+            }
         });
         return authLoginRespVO.get();
     }
@@ -352,27 +355,34 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
     }
 
     @Override
-    public void forgetPassword(UserForgetPasswordReqVO reqVO) {
-        // 1.通过手机号，获取 用户
+    public void thirdUserForgetPassword(UserForgetPasswordReqVO reqVO) {
+
+        // 1.校验验证码
+        ThirdAuthLoginReqVO thirdAuthLoginReqVO=new ThirdAuthLoginReqVO();
+        thirdAuthLoginReqVO.setMobile(reqVO.getMobile());
+        thirdAuthLoginReqVO.setVerifyCode(reqVO.getVerifyCode());
+        thirdAuthLoginReqVO.setPassword(reqVO.getPassword());
+        //调用通用的验证码校验
+        validateVerfiyCode(thirdAuthLoginReqVO);
+
+        // 2.通过手机号，获取 用户
         AdminUserDO user = userService.getUserByMobile(reqVO.getMobile());
+        if (null == user) {
+            throw exception(USER_NOT_EXISTS);
+        }
+        // 3.加密密码
+        userService.thirdUserForgetPassword(user.getId(), thirdAuthLoginReqVO.getPassword());
 
-        // 2. 弱密码校验
-        //  securityConfigApi.validatePassword(reqVO.getPassword());
-        // 加密密码
-        userService.forgetPassword(reqVO);
 
-        // 4. 记录操作日志上下文
-        LogRecordContext.putVariable("user", user);
-        LogRecordContext.putVariable("newPassword", THIRD_USER_PASSWORD);
     }
 
     private boolean findUserAppRelationFlag(Long appId, Long userId) {
         List<UserAppVO> voList = userAppRelationService.getAppByUserId(userId);
         if (!CollectionUtils.isEmpty(voList)) {
-            return voList.stream()
+            return !voList.stream()
                     .anyMatch(userAppVO -> null != userAppVO.getAppId() && userAppVO.getAppId().equals(appId));
         }
-        return false;
+        return true;
     }
 
 

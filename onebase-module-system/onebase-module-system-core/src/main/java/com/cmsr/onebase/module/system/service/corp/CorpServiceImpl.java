@@ -465,4 +465,9 @@ public class CorpServiceImpl implements CorpService {
         userService.checkCorpAdminUser(user);
     }
 
+    @Override
+    public List<CorpDO> getAllCorpList() {
+        return corpDataRepository.getAllCorpList();
+    }
+
 }
