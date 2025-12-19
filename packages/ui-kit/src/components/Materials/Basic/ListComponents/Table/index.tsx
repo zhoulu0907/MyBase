@@ -1,4 +1,4 @@
-import { Button, Checkbox, Form, Message, Popconfirm, Space, Table, Tooltip } from '@arco-design/web-react';
+import { Button, Checkbox, Form, Popconfirm, Space, Table, Tooltip } from '@arco-design/web-react';
 import { memo, useEffect, useState } from 'react';
 import {
   BUTTON_OPTIONS,
@@ -17,7 +17,6 @@ import {
   CATEGORY_TYPE,
   dataMethodDeleteV2,
   dataMethodPageV2,
-  DeleteMethodV2Params,
   getEntityFieldsWithChildren,
   menuSignal,
   PageMethodV2Params,
@@ -549,19 +548,19 @@ const XTable = memo(
       );
       setFlows(deleteFlows);
 
-      console.log('删除数据 id: ', id);
+      //   console.log('删除数据 id: ', id);
 
-      const req: DeleteMethodV2Params = {
-        id: id
-      };
+      //   const req: DeleteMethodV2Params = {
+      //     id: id
+      //   };
 
-      const res = await dataMethodDeleteV2(tableName, curMenu.value?.id, req);
+      //   const res = await dataMethodDeleteV2(tableName, curMenu.value?.id, req);
 
-      if (res) {
-        Message.success('删除成功');
-      }
+      //   if (res) {
+      //     Message.success('删除成功');
+      //   }
 
-      handlePage();
+      //   handlePage();
     };
 
     const handleEdit = (id: string, toFormPage: boolean) => {
