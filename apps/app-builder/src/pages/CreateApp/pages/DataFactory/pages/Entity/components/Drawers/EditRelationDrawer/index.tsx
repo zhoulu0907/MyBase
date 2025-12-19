@@ -3,7 +3,10 @@ import { useResourceStore } from '@/store/store_resource';
 import { Button, Drawer, Form, Message, Select, Space, Spin } from '@arco-design/web-react';
 import { deleteRelation, getEntityFields, getEntityList, updateRelation } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
-import { ALL_RELATIONSHIP_OPTIONS } from '@/pages/CreateApp/pages/DataFactory/utils/relation';
+import {
+  DEFINE_RELATIONSHIP_TYPE_LIST,
+  ALL_RELATIONSHIP_TYPE_MAP
+} from '@/pages/CreateApp/pages/DataFactory/utils/relation';
 import { DeleteConfirmModal } from '../../Modals';
 import styles from './index.module.less';
 interface EntityOption {
@@ -233,8 +236,26 @@ const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVis
             field="relationshipType"
             required
             rules={[{ required: true, message: '请选择关联关系' }]}
+            shouldUpdate={(prev, next) => prev.relationshipType !== next.relationshipType}
           >
-            <Select placeholder="请选择关联关系" options={ALL_RELATIONSHIP_OPTIONS} allowClear />
+            {(values) => {
+              // 如果返回值不在DEFINE_RELATIONSHIP_OPTIONS中，则标记为 disabled
+              const currentValue = values?.relationshipType;
+              const options = DEFINE_RELATIONSHIP_TYPE_LIST.map((type) => ({
+                label: ALL_RELATIONSHIP_TYPE_MAP[type as keyof typeof ALL_RELATIONSHIP_TYPE_MAP],
+                value: type,
+                disabled: false
+              }));
+
+              if (currentValue && !DEFINE_RELATIONSHIP_TYPE_LIST.includes(currentValue)) {
+                const currentLabel = ALL_RELATIONSHIP_TYPE_MAP[currentValue as keyof typeof ALL_RELATIONSHIP_TYPE_MAP];
+                if (currentLabel) {
+                  options.unshift({ label: currentLabel, value: currentValue, disabled: true });
+                }
+              }
+
+              return <Select placeholder="请选择关联关系" options={options} allowClear />;
+            }}
           </Form.Item>
 
           {/* 关联表 */}
