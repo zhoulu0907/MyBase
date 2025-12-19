@@ -1,7 +1,13 @@
 spring:
   application:
     name: onebase-v3
-
+  task:
+    execution:
+      pool:
+        core-size: 10
+        max-size: 30
+        queue-capacity: 100
+        keep-alive: 30s
   profiles:
     active: sit
 
