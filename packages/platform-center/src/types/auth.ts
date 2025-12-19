@@ -176,6 +176,7 @@ export interface ThirdUserLoginResponse {
   corpId?: string; // 企业id
   loginSource: string //来源
   userUnRegistFlag: boolean;
+  userAppRelationFlag?: boolean; //是否关联应用
 }
 
 /**

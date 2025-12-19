@@ -56,6 +56,7 @@ const Right: React.FC = () => {
   const [tenantId, setTenantId] = useState('');
   const [visibleRegister, setVisibleRegister] = useState<boolean>(false);
   const [visbileUpdatePwd, setVisibleUpdatePwd] = useState<boolean>(false);
+  const [isRelatedApp, setIsRelatedApp] = useState<boolean>(false);
 
   useEffect(() => {
     // 从 window.location.hash 中解析 redirectURL，再从 redirectURL 解析 appId 和 tenantId
@@ -174,22 +175,20 @@ const Right: React.FC = () => {
 
         Message.success(t('auth.loginSuccess'));
         const redirectURL = getHashQueryParam('redirectURL');
-        if(response.userUnRegistFlag) {
-          setVisibleRegister(true);
-        }else {
-          if (redirectURL) {
-            navigate(`/onebase/${appId}/${tenantId}/runtime`);
-          } else {
-            // 跳转到首页
-            navigate(`/onebase/runtime/?appId=${appId}`);
-          }
+        if (redirectURL) {
+          navigate(`/onebase/${appId}/${tenantId}/runtime`);
+        } else {
+          // 跳转到首页
+          navigate(`/onebase/runtime/?appId=${appId}`);
         }
         return;
       } else {
-        Message.error(t('auth.loginFailed'));
+        if(response?.userUnRegistFlag) {
+          setVisibleRegister(true);
+        }
+        setIsRelatedApp(response?.userAppRelationFlag || false);
       }
     } catch (error: any) {
-        setVisibleRegister(true) //todo 需要删除
       console.error('登录失败:', error);
     } finally {
       setLoading(false);
@@ -352,6 +351,8 @@ const Right: React.FC = () => {
       {visibleRegister && (
         <RegisterForm
           appId={appId}
+          isRelatedApp = {isRelatedApp}
+          tenantId={tenantId}
           onGoBack={() => {
             setVisibleRegister(false);
           }}

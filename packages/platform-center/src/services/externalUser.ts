@@ -1,7 +1,7 @@
 
-import { externalUserListParams, createExternalUserParams, updateExternalPwdParams, updateExternalUserParams, updateStatusParams, pluginParams, updatePasswordParams, registerExternalUserParams, supplementUserInfoParams } from "../types";
+import { externalUserListParams, createExternalUserParams, updateExternalPwdParams, updateExternalUserParams, updateStatusParams, pluginParams, updatePasswordParams, registerExternalUserParams, supplementUserInfoParams, loginConfigParams, Headers, updateLoginConfigParams } from "../types";
 import { systemService } from "./clients";
-import { userService } from "./clients/factory";
+import { runtimeService, userService } from "./clients/factory";
 
 //新增用户
 export const createExternalUserApi = (data: createExternalUserParams) => systemService.post('/third-user/create', data);
@@ -34,10 +34,13 @@ export const getPluginListApi = (data: pluginParams) => systemService.get('/conf
 export const updatePluginStatusApi = (id: string, status: number) => systemService.post(`/config/update-status?id=${id}&status=${status}`);
 
 //忘记密码- 外部用户
-export const updatePasswordApi = (data: updatePasswordParams) => systemService.post('/third-user/forget-password', data);
-
-//注册外部用户
-export const registerExternalUserApi = (data: registerExternalUserParams) => systemService.post('/third-user/register', data);
+export const updatePasswordApi = (data: updatePasswordParams, headers: Headers) => runtimeService.post('/third-user/forget-password', data, { headers });
 
 //补充外部用户信息
-export const supplementUserInfoApi = (data: supplementUserInfoParams) => systemService.post('/third-user/supplement-user', data);
+export const supplementUserInfoApi = (data: supplementUserInfoParams, headers: Headers) => runtimeService.post('/third-user/supplement-user', data, { headers });
+
+//配置参数 -应用发布登录页
+export const loginConfigListByKeyApi = (data: loginConfigParams) => systemService.get(`/config/list-by-keys?configType=app&appId=${data.appId}&configKeys=${data.configKeys}`);
+
+//修改参数配置-应用发布登录页
+export const updateLoginConfigApi = (data: updateLoginConfigParams) => systemService.post('/config/update', data);

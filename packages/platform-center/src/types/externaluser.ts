@@ -155,3 +155,91 @@ export interface supplementUserInfoParams {
      */
     userName?: string;
 }
+
+export interface loginConfigParams {
+    /**
+     * AppId称不能为空
+     */
+    appId: string;
+    /**
+     * 批量查询keys
+     */
+    configKeys: string[];
+}
+
+export interface loginPermissionRes {
+    /**
+     * 参数键名
+     * 配置项
+     */
+    configKey?: string;
+    /**
+     * 参数分类 see{@link ConfigTypeEnum}
+     * 参数分类
+     */
+    configType?: string;
+    /**
+     * 参数键值
+     * 配置项值
+     */
+    configValue?: string;
+    /**
+     * 归属企业ID
+     * 企业id
+     */
+    corpId?: string;
+    /**
+     * 互斥项
+     */
+    exclusiveItem?: string;
+    /**
+     * 参数分类
+     */
+    id?: string;
+    /**
+     * 参数名称
+     * 名称
+     */
+    name?: string;
+    /**
+     * 备注
+     */
+    remark?: string;
+    /**
+     * 参数类型
+     *
+     * 枚举
+     * 状态
+     */
+    status?: number;
+}
+
+/**
+ * SystemGeneralConfigUpdateReqVO
+ */
+export interface updateLoginConfigParams {
+    /**
+     * appId
+     */
+    appId?: string;
+    /**
+     * key
+     */
+    configKey?: string;
+    /**
+     * 参数键值
+     */
+    configValue?: string;
+    /**
+     * 参数分类
+     */
+    id?: string;
+    /**
+     * 参数名称
+     */
+    name?: string;
+    /**
+     * 备注
+     */
+    remark?: string;
+}

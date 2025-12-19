@@ -1,10 +1,12 @@
 import { Form, Input, Button, Typography, Link } from '@arco-design/web-react';
 import styles from './register.module.less';
+import type { registerInfo } from './type';
 
 interface IConfirmInfoProps {
-    onGoBack: () => void;
+  initialValues: registerInfo | null;
+  onGoBack: () => void;
 }
-const ConfirmInfoForm:React.FC<IConfirmInfoProps> = ({onGoBack}) => {
+const ConfirmInfoForm:React.FC<IConfirmInfoProps> = ({initialValues, onGoBack}) => {
   const [form] = Form.useForm();
 
   return (
@@ -17,9 +19,12 @@ const ConfirmInfoForm:React.FC<IConfirmInfoProps> = ({onGoBack}) => {
       <Typography.Text type='secondary'>检测到您的预留信息，确认身份即可登录</Typography.Text>
 
       {/* 表单区域 */}
-      <Form layout="vertical" style={{marginTop:'40px'}}>
+      <Form layout="vertical" style={{marginTop:'40px'}} form={form} initialValues={{
+        nickName: initialValues?.userName,
+        email: initialValues?.email
+      }}>
         {/* 姓名输入框 */}
-        <Form.Item label="姓名" field="nickname" required rules={[{ required: true, message: '请输入姓名' }]}>
+        <Form.Item label="姓名" field="nickName" required rules={[{ required: true, message: '请输入姓名' }]}>
           <Input placeholder="请输入姓名" />
         </Form.Item>
 

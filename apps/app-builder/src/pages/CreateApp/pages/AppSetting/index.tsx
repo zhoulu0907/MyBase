@@ -23,10 +23,10 @@ import AppPermission from './components/AppPermission';
 import BasicSetting from './components/BasicSetting';
 import NavigatorSetting from './components/NavigatorSetting';
 import styles from './index.module.less';
+import LoginPermission from './components/LoginPermission';
 
 const Sider = Layout.Sider;
 const Content = Layout.Content;
-const Footer = Layout.Footer;
 
 interface BreadcrumbItemType {
   key: string;
@@ -191,7 +191,7 @@ const AppSettingPage: FC = () => {
               {activeTab === 'appPermission' && <AppPermission />}
               {activeTab === 'appRelease' && <AppReleasePage />}
               {activeTab === 'navigatorSetting' && <NavigatorSetting form={navigatorForm} data={navigatorData} />}
-
+              {activeTab === 'loginPermission' && <LoginPermission appId={curAppId} /> }
               {(activeTab === 'baseSetting' || activeTab === 'navigatorSetting') && (
                 <Button className={styles.saveButton} type="primary" loading={saveLoading} onClick={handleSave}>
                   保存

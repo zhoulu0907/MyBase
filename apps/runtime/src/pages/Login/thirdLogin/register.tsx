@@ -4,37 +4,50 @@ import { useState } from 'react';
 import ConfirmInfoForm from './confirmInfo';
 import { IconMobile } from '@arco-design/web-react/icon';
 import { emailValidator, filterSpace, phoneValidator } from '@/utils/validator';
-import { getPublicKey, sm2Encrypt } from '@onebase/common';
+import { getHashQueryParam, getPublicKey, sm2Encrypt } from '@onebase/common';
 import { supplementUserInfoApi, type supplementUserInfoParams } from '@onebase/platform-center';
-
-interface IRegisterProps {
-  appId: string;
-  onGoBack: () => void;
-}
+import type { IRegisterProps, registerInfo } from './type';
+import { useNavigate } from 'react-router-dom';
 
 // 补充用户信息页面
-const RegisterForm: React.FC<IRegisterProps> = ({ appId, onGoBack }) => {
+const RegisterForm: React.FC<IRegisterProps> = ({ appId, isRelatedApp, tenantId, onGoBack }) => {
   const [registerForm] = Form.useForm();
+  const navigate = useNavigate();
   const [visible, setVisible] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
-  const [registerInfo, setRegisterInfo] = useState(null);
+  const [registerInfo, setRegisterInfo] = useState<registerInfo | null>(null);
 
   const handleSubmitUserInfo = async() => {
     try {
       setLoading(true);
       // 先验证表单
       const values = await registerForm.validate();
-      values.password = await sm2Encrypt(getPublicKey(), values.password || '');
+      const headers = {
+        'X-Tenant-Id': tenantId
+      };
+      values.password = await sm2Encrypt(getPublicKey(), values?.password || '');
       const registerParams: supplementUserInfoParams = {
         appId: appId,
-        mobile: filterSpace(values.mobile),
-        password: values.password,
-        nickName: filterSpace(values.nickName),
-        email: filterSpace(values.email)
+        mobile: filterSpace(values?.mobile),
+        email: filterSpace(values?.email),
+        password: values?.password,
+        nickName: filterSpace(values?.nickName),
       };
-      const response = await supplementUserInfoApi(registerParams);
-      setRegisterInfo(response);
-      console.log("response", response);
+      const response = await supplementUserInfoApi(registerParams, headers);
+      if(response && response.id) {
+        setRegisterInfo(response);
+        if(isRelatedApp) {
+          setVisible(true);
+        }else {
+          const redirectURL = getHashQueryParam('redirectURL');
+          if (redirectURL) {
+            navigate(`/onebase/${appId}/${tenantId}/runtime`);
+          } else {
+            // 跳转到首页
+            navigate(`/onebase/runtime/?appId=${appId}`);
+          }
+        }
+      }
     }catch(error) {
       console.log("error");
     }finally {
@@ -46,6 +59,7 @@ const RegisterForm: React.FC<IRegisterProps> = ({ appId, onGoBack }) => {
     <>
       {visible ? (
         <ConfirmInfoForm
+          initialValues = {registerInfo}
           onGoBack={() => {
             setVisible(false);
           }}
