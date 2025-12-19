@@ -1,0 +1,18 @@
+<svg width="800" height="320" viewBox="0 0 800 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="slide1Gradient" x1="0" y1="0" x2="800" y2="320" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#4C6EF5"/>
+      <stop offset="1" stop-color="#69DB7C"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="320" rx="24" fill="url(#slide1Gradient)"/>
+  <circle cx="120" cy="80" r="60" fill="rgba(255,255,255,0.12)"/>
+  <circle cx="680" cy="60" r="80" fill="rgba(255,255,255,0.08)"/>
+  <text x="64" y="140" fill="#FFFFFF" font-size="40" font-weight="600" font-family="Montserrat, Arial, sans-serif">
+    Welcome to Workbench
+  </text>
+  <text x="64" y="200" fill="#F8F9FA" font-size="20" font-family="Montserrat, Arial, sans-serif">
+    Showcase announcements or marketing highlights here.
+  </text>
+</svg>
+

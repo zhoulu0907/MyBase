@@ -1,7 +1,5 @@
 import React from 'react';
-import WorkbenchConfiger from '../../workbench/editor-components/wb-configer';
-import WorkbenchPanel from '../../workbench/editor-components/wb-panel';
-import WorkbenchWorkspace from '../../workbench/editor-components/wb-workspace';
+import { WorkbenchConfiger, WorkbenchPanel, WorkbenchWorkspace } from '../../workbench';
 
 import styles from './index.module.less';
 
