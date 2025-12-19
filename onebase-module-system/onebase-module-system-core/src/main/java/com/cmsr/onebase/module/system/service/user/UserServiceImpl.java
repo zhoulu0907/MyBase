@@ -1372,7 +1372,9 @@ public class UserServiceImpl implements UserService {
         user.setMobile(reqVO.getMobile());
         user.setUserType(UserTypeEnum.THIRD.getValue());
         user.setStatus(UserStatusEnum.NORMAL.getStatus());
-        user.setUsername(reqVO.getNickName());
+        user.setUsername(reqVO.getMobile());// 用户名取手机号
+        user.setNickname(reqVO.getNickName());
+        user.setEmail(reqVO.getEmail());
         user.setPassword(encodePassword(reqVO.getPassword()));
         user.setCreateSource(CreateSourceEnum.SELF.getCode());
         userDataRepository.insert(user);
