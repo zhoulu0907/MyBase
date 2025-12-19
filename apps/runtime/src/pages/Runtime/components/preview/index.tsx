@@ -50,7 +50,10 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
     mainMetaDataFields,
     setMainMetaDataFields,
     subEntities,
-    setSubEntities
+    setSubEntities,
+    flows,
+    setFlows,
+    resetFlows
   } = pagesRuntimeSignal;
 
   const [pageSetId, setPageSetId] = useState('');
@@ -93,6 +96,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
     if (menuId) {
       handleGetPageSetId(menuId);
       setEditTargetId('');
+      resetFlows();
     }
   }, [menuId]);
 
@@ -112,14 +116,12 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
   }, [pageSetId]);
 
   const handleGetPageSetId = async (menuId: string) => {
-    // TODO(mickey多租户): 待runtime接口提供后打开
     const req: GetPageSetIdReq = { menuId: menuId };
     const res = await getPageSetId(req);
     setPageSetId(res);
   };
 
   // 收集信息弹窗
-  const [flows, setFlows] = useState<any[]>([]);
   const [inputParams, setInputParams] = useState<any>({});
 
   const [entityParam, setEntityParam] = useState<any>();
@@ -457,7 +459,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
       </div>
 
       {/* 收集信息弹窗 */}
-      <ExecuteFlows flows={flows} inputParams={inputParams}></ExecuteFlows>
+      <ExecuteFlows flows={flows.value} inputParams={inputParams}></ExecuteFlows>
       {isPredictVisible && (
         <Modal
           title=""

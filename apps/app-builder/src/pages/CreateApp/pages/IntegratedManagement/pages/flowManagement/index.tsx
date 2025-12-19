@@ -15,6 +15,7 @@ import {
 } from '@arco-design/web-react';
 import { IconApps, IconDown, IconList, IconPlus } from '@arco-design/web-react/icon';
 import {
+  CATEGORY_TYPE,
   createFlowMgmt,
   deleteFlowMgmt,
   getEntityListByApp,
@@ -102,7 +103,9 @@ const FlowManagementPage: React.FC = () => {
   const handleGetPageList = async () => {
     const res = await getPageListByAppId({ appId: curAppId });
     console.log('pageList: ', res);
-    setPageList(res.pages);
+    setPageList(
+      res.pages.filter((ele: any) => ele.pageType == CATEGORY_TYPE.LIST || ele.pageType == CATEGORY_TYPE.FORM)
+    );
   };
 
   const handleCreateFlow = async () => {

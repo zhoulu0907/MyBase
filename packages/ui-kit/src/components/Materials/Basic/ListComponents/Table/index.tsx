@@ -1,4 +1,4 @@
-import { Button, Checkbox, Form, Message, Popconfirm, Space, Table, Tooltip } from '@arco-design/web-react';
+import { Button, Checkbox, Form, Popconfirm, Space, Table, Tooltip } from '@arco-design/web-react';
 import { memo, useEffect, useState } from 'react';
 import {
   BUTTON_OPTIONS,
@@ -14,12 +14,13 @@ import DynamicIcon from '@/components/DynamicIcon';
 import { iconMap } from '@/utils/const';
 import { IconPlus, IconRefresh } from '@arco-design/web-react/icon';
 import {
-  dataMethodDeleteV2,
+  CATEGORY_TYPE,
   dataMethodPageV2,
-  DeleteMethodV2Params,
   getEntityFieldsWithChildren,
   menuSignal,
   PageMethodV2Params,
+  queryFlowExecForm,
+  TRIGGER_EVENTS,
   VALIDATION_TYPE,
   type AppEntityField
 } from '@onebase/app';
@@ -80,9 +81,11 @@ const XTable = memo(
     }
   ) => {
     useSignals();
+
     const { pageComponentSchemas: fromPageComponentSchemas, components } = useFormEditorSignal;
 
-    const { setDrawerVisible, setDrawerPageId, setDetailPageViewId, setRowDataId } = pagesRuntimeSignal;
+    const { curPage, setDrawerVisible, setDrawerPageId, setDetailPageViewId, setRowDataId, setFlows } =
+      pagesRuntimeSignal;
     const { runtime = true, showFromPageData, showAddBtn = true, preview } = props;
     const hasOperationPermission = true;
 
@@ -532,19 +535,31 @@ const XTable = memo(
       if (!runtime) {
         return;
       }
-      console.log('删除数据 id: ', id);
+      const curFormPage = curPage.value?.pages?.find((ele: any) => ele.pageType === CATEGORY_TYPE.LIST);
+      console.log('curFormPage: ', curFormPage);
+      const pageId = curFormPage?.id;
 
-      const req: DeleteMethodV2Params = {
-        id: id
-      };
+      const flowRes = pageId ? await queryFlowExecForm(pageId) : [];
+      console.log('flowRes: ', flowRes);
 
-      const res = await dataMethodDeleteV2(tableName, curMenu.value?.id, req);
+      const deleteFlows = (flowRes || []).filter(
+        (ele: any) => ele.recordTriggerEvents && ele.recordTriggerEvents.includes(TRIGGER_EVENTS.DELETE)
+      );
+      setFlows(deleteFlows);
 
-      if (res) {
-        Message.success('删除成功');
-      }
+      //   console.log('删除数据 id: ', id);
 
-      handlePage();
+      //   const req: DeleteMethodV2Params = {
+      //     id: id
+      //   };
+
+      //   const res = await dataMethodDeleteV2(tableName, curMenu.value?.id, req);
+
+      //   if (res) {
+      //     Message.success('删除成功');
+      //   }
+
+      //   handlePage();
     };
 
     const handleEdit = (id: string, toFormPage: boolean) => {
