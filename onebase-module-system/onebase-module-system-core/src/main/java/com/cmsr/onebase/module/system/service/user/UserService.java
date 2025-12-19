@@ -167,9 +167,9 @@ public interface UserService {
      * @param deptIds 部门数组
      * @return 用户数组
      */
-    List<AdminUserDO> getUserListByDeptIds(Collection<Long> deptIds);
+    List<AdminUserDO> getUserListByDeptIds(Collection<Long> deptIds, Integer userType);
 
-    List<AdminUserDO> getUserListNoDept();
+    List<AdminUserDO> getUserListNoDept(Integer userType);
 
     /**
      * 获得指定岗位的用户数组
@@ -223,7 +223,7 @@ public interface UserService {
      * @param nickname 昵称
      * @return 用户列表
      */
-    List<AdminUserDO> getUserListByNickname(String nickname);
+    List<AdminUserDO> getUserListByNickname(String nickname,Integer  userType);
 
     /**
      * 批量导入用户

@@ -12,6 +12,12 @@ public class UserAppRelationInertReqVO {
     @NotNull(message = "用户Id不能为空")
     private Long userId;
 
+    @Schema(description = "姓名")
+    private String nickName;
+
+    @Schema(description = "邮箱")
+    private String email;
+
     @Schema(description = "应用id")
     @NotNull(message = "企业id list不能为空")
     private List<Long> applicationIdList;

@@ -20,7 +20,6 @@ Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
-  "category": "app",
   "configKey": "appThirdUserRegisterShow",
   "configValue": "false",
   "appId": "5454545454"
