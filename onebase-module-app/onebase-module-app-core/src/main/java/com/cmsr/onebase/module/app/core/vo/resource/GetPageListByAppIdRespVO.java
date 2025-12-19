@@ -7,13 +7,13 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * @ClassName GetFormPageListByAppIdRespVO
+ * @ClassName GetPageListByAppIdRespVO
  * @Description TODO
  * @Author mickey
  * @Date 2025/9/1 18:54
  */
 @Data
-public class GetFormPageListByAppIdRespVO {
+public class GetPageListByAppIdRespVO {
     @Schema(description = "pages")
     private List<PageDTO> pages;
 }

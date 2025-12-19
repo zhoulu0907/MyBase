@@ -223,10 +223,11 @@ public class SemanticQueryConditionBuilder {
         if (v == null || type == null) { return v; }
         switch (type) {
             case ID:
+                    return Long.valueOf(String.valueOf(v).trim());
             case USER:
             case DEPARTMENT:
             case DATA_SELECTION:
-                // 使用 String 类型以兼容数据库中 text 类型的 ID 字段
+                // 使用 String 类型以兼容数据库中 text 类型的引用字段
                 return String.valueOf(v).trim();
             case NUMBER:
             case AGGREGATE:

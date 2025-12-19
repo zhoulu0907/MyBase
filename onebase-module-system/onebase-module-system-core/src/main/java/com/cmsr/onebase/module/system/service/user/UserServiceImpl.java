@@ -51,6 +51,7 @@ import com.cmsr.onebase.module.system.vo.dept.DeptSimpleListRespVO;
 import com.cmsr.onebase.module.system.vo.role.RoleInsertReqVO;
 import com.cmsr.onebase.module.system.vo.user.*;
 import com.google.common.annotations.VisibleForTesting;
+import com.mybatisflex.core.tenant.TenantManager;
 import com.mzt.logapi.context.LogRecordContext;
 import com.mzt.logapi.service.impl.DiffParseFunction;
 import com.mzt.logapi.starter.annotation.LogRecord;
@@ -153,17 +154,7 @@ public class UserServiceImpl implements UserService {
         // 如果是启用状态，校验当前租户下的用户数量有没有超过最大限额
         if (Objects.equals(CommonStatusEnum.ENABLE.getStatus(), createReqVO.getStatus())) {
             // 1.1 校验账户配合
-            tenantService.handleTenantInfo(tenant -> {
-                // 如果用户的租户不是平台租户，则校验租户用户最大限额
-                if (!tenant.getTenantCode().equals(TenantCodeEnum.PLATFORM_TENANT.getCode())) {
-                    long count = userDataRepository.countByConfig(new DefaultConfigStore().eq(AdminUserDO.STATUS,
-                            UserStatusEnum.NORMAL.getStatus()));
-                    log.info(" count user four tenant, count={}", count);
-                    if (count >= tenant.getAccountCount()) {
-                        throw exception(USER_COUNT_MAX, tenant.getAccountCount());
-                    }
-                }
-            });
+            validateTenantUserCountMaxLimit();
         }
         // 1.2 校验正确性
         validateUserForCreateOrUpdate(null, createReqVO.getUsername(),
@@ -415,17 +406,27 @@ public class UserServiceImpl implements UserService {
     public void updateUserPassword(Long id, UserProfileUpdatePasswordReqVO reqVO) {
         // 校验旧密码密码
         validateOldPassword(id, reqVO.getOldPassword());
-        // 弱密码校验
-        securityConfigApi.validatePassword(reqVO.getNewPassword());
+        // 调用更新密码逻辑
+        AdminUserDO user =  commonUpdatePassword(id, reqVO.getNewPassword());
+    }
+
+    // 密码更新逻辑
+    public AdminUserDO commonUpdatePassword(Long id, String newPassword){
+
+        //校验密码强度
+        securityConfigApi.validatePassword(newPassword);
         // 历史密码校验
-        securityConfigApi.validatePasswordHistory(id, reqVO.getNewPassword());
+        securityConfigApi.validatePasswordHistory(id, newPassword);
         // 执行更新
         AdminUserDO updateObj = new AdminUserDO().setId(id);
-        updateObj.setPassword(encodePassword(reqVO.getNewPassword())); // 加密密码
+        updateObj.setPassword(encodePassword(newPassword)); // 加密密码
         userDataRepository.update(updateObj);
         // 保存密码历史
         securityConfigApi.savePasswordHistory(id, updateObj.getPassword());
+        return updateObj;
     }
+
+
 
     @Override
     @LogRecord(type = SYSTEM_USER_TYPE, subType = SYSTEM_USER_UPDATE_PASSWORD_SUB_TYPE, bizNo = "{{#id}}",
@@ -434,28 +435,36 @@ public class UserServiceImpl implements UserService {
         // 1. 校验用户存在
         AdminUserDO user = validateUserExists(id);
 
-        // 2. 弱密码校验
-        securityConfigApi.validatePassword(password);
+        //2. 使用用户入参密码
+        AdminUserDO updateObj =    commonUpdatePassword(user.getId(), password);
 
-        // 3. 历史密码校验
-        securityConfigApi.validatePasswordHistory(id, password);
-
-        // 4. 更新密码
-        AdminUserDO updateObj = new AdminUserDO();
-        updateObj.setId(id);
-        updateObj.setPassword(encodePassword(password)); // 加密密码
-        userDataRepository.update(updateObj);
-
-        // 5 保存密码修改历史记录
-        securityConfigApi.savePasswordHistory(id, updateObj.getPassword());
-
-        // 6. 记录操作日志上下文
+        // 3. 记录操作日志上下文
         LogRecordContext.putVariable("user", user);
         LogRecordContext.putVariable("newPassword", updateObj.getPassword());
+
+    }
+
+    public void validateTenantUserCountMaxLimit(){
+        tenantService.handleTenantInfo(tenant -> {
+            // 如果用户的租户不是平台租户，则校验租户用户最大限额
+            if (!tenant.getTenantCode().equals(TenantCodeEnum.PLATFORM_TENANT.getCode())) {
+                long count = userDataRepository.countByConfig(new DefaultConfigStore().eq(AdminUserDO.STATUS,
+                        UserStatusEnum.NORMAL.getStatus()));
+                log.info(" count user four tenant, count={}", count);
+                if (count >= tenant.getAccountCount()) {
+                    throw exception(USER_COUNT_MAX, tenant.getAccountCount());
+                }
+            }
+        });
     }
 
     @Override
     public void updateUserStatus(Long id, Integer status) {
+        if(CommonStatusEnum.ENABLE.getStatus().equals(status) ){
+            validateTenantUserCountMaxLimit();
+        }
+
+
         // 校验用户存在
         validateUserExists(id);
         // 更新状态
@@ -1064,71 +1073,14 @@ public class UserServiceImpl implements UserService {
     }
 
 
-    @Override
-    public void updateThirdUserPassword(Long id, String password) {
-        // 1. 校验用户存在
-        AdminUserDO user = validateUserExists(id);
 
-        // 2. 弱密码校验
-        //  securityConfigApi.validatePassword(password);
-        // 3. 更新密码 ，默认密码OBThird2025!
-        AdminUserDO updateObj = new AdminUserDO();
-        updateObj.setId(id);
-        updateObj.setPassword(encodePassword(THIRD_USER_PASSWORD)); // 加密密码
-        userDataRepository.update(updateObj);
-
-        // 4. 记录操作日志上下文
-        LogRecordContext.putVariable("user", user);
-        LogRecordContext.putVariable("newPassword", updateObj.getPassword());
-    }
-
-    @Override
-    public void forgetPassword(UserForgetPasswordReqVO reqVO) {
-        // 1.通过手机号，获取 用户
-        AdminUserDO user = userDataRepository.findByMobile(reqVO.getMobile());
-
-        // 2. 弱密码校验
-        //  securityConfigApi.validatePassword(reqVO.getPassword());
-
-        // TODO 临时使用默认密码 3. 更新密码,临时使用默认密码
-        AdminUserDO updateObj = new AdminUserDO();
-        updateObj.setId(user.getId());
-        updateObj.setPassword(encodePassword(THIRD_USER_PASSWORD)); // 加密密码
-        userDataRepository.update(updateObj);
-
-        // 4. 记录操作日志上下文
-        LogRecordContext.putVariable("user", user);
-        LogRecordContext.putVariable("newPassword", updateObj.getPassword());
-    }
-
-
-
-
-    @Override
-    public ThirdSupplementUserResVO supplementUser(ThirdSupplementUserReqVO reqVO) {
-        // 2.1 解密原文
-        reqVO.setPassword(pwdEnHelper.decryptHexStr(reqVO.getPassword()));
-
-        AdminUserDO user = userDataRepository.findById(reqVO.getUserId());
-        user.setNickname(reqVO.getNickName());
-        user.setEmail(reqVO.getEmail());
-        user.setAvatar(reqVO.getAvatar());
-        user.setPassword(encodePassword(reqVO.getPassword()));
-        userDataRepository.update(user);
-
-        ThirdSupplementUserResVO resVO = new ThirdSupplementUserResVO();
-        resVO.setId(user.getId());
-        resVO.setUserName(user.getUsername());
-        resVO.setNickName(user.getNickname());
-        resVO.setEmail(user.getEmail());
-        return resVO;
-    }
+    // ---------------------------------第三方用户方法分割线-----------------------------------------------
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     @LogRecord(type = SYSTEM_USER_TYPE_THRID, subType = SYSTEM_USER_CREATE_SUB_TYPE, bizNo = "{{#user.id}}",
             success = SYSTEM_USER_CREATE_SUCCESS)
-    public Long createUserAndUserAppRelation(ThirdUserAppCombinedInsertReqVO reqVO) {
+    public Long thirdUserCreateUserAndUserAppRelation(ThirdUserAppCombinedInsertReqVO reqVO) {
         // 验证用户数据，确保用户不存在
         // 如果为空，默认为开启状态
         if (null == reqVO.getStatus()) {
@@ -1137,22 +1089,12 @@ public class UserServiceImpl implements UserService {
         // 如果是启用状态，校验当前租户下的用户数量有没有超过最大限额
         if (Objects.equals(CommonStatusEnum.ENABLE.getStatus(), reqVO.getStatus())) {
             // 1.1 校验账户配合
-            tenantService.handleTenantInfo(tenant -> {
-                // 如果用户的租户不是平台租户，则校验租户用户最大限额
-                if (!tenant.getTenantCode().equals(TenantCodeEnum.PLATFORM_TENANT.getCode())) {
-                    long count = userDataRepository.countByConfig(new DefaultConfigStore().eq(AdminUserDO.STATUS,
-                            UserStatusEnum.NORMAL.getStatus()));
-                    log.info(" count user four tenant, count={}", count);
-                    if (count >= tenant.getAccountCount()) {
-                        throw exception(USER_COUNT_MAX, tenant.getAccountCount());
-                    }
-                }
-            });
+            validateTenantUserCountMaxLimit();
         }
         // 校验手机，邮箱
         validateThirdUserForCreateOrUpdate(null, reqVO.getMobile(), reqVO.getEmail());
 
-        if (null != reqVO.getDeptId()) {
+        if (null == reqVO.getDeptId()) {
             // 三方用户 默认部门，不存在就新建部门
             Long deptId = createThirdDefaultDept();
             reqVO.setDeptId(deptId);
@@ -1184,28 +1126,12 @@ public class UserServiceImpl implements UserService {
     }
 
 
-    // 获取三方用户部门是否存在
-    private Long createThirdDefaultDept() {
-        DeptSaveReqVO deptRespVO = new DeptSaveReqVO();
-        deptRespVO.setName(DeptCodeEnum.DEFAULT_THIRD_DEPT.getName());
-        deptRespVO.setDeptType(DeptTypeEnum.THIRD.getCode());
-        deptRespVO.setDeptCode(DeptCodeEnum.DEFAULT_THIRD_DEPT.getCode());
-        DeptDO deptDO = deptService.findDeptByCodeAndType(deptRespVO);
-
-        if (null == deptDO) {
-            deptRespVO.setParentId(DeptDO.PARENT_ID_ROOT);
-            deptRespVO.setStatus(CommonStatusEnum.ENABLE.getStatus());
-            return deptService.createThirdDefaultDept(deptRespVO);
-        }
-        return deptDO.getId();
-    }
-
     @Override
     @Transactional(rollbackFor = Exception.class)
     @LogRecord(type = SYSTEM_USER_TYPE_THRID, subType = SYSTEM_USER_UPDATE_SUB_TYPE, bizNo = "{{#updateReqVO.id}}",
             success = SYSTEM_USER_UPDATE_SUCCESS)
-    public Long updateUserAndUserAppRelation(ThirdUserAppCombinedUpdateReqVO updateReqVO) {
-        AdminUserDO oldUser = validateThirdUserForCreateOrUpdate(updateReqVO.getId(), updateReqVO.getMobile(), updateReqVO.getEmail());
+    public Long thirdUserUpdateUserAndUserAppRelation(ThirdUserAppCombinedUpdateReqVO updateReqVO) {
+        AdminUserDO oldUser = validateThirdUserForCreateOrUpdate(updateReqVO.getId(), null, updateReqVO.getEmail());
         checkTenantUserCountLimit(updateReqVO.getStatus(), oldUser);
         // 2.1 更新用户
         AdminUserDO updateObj = BeanUtils.toBean(updateReqVO, AdminUserDO.class);
@@ -1218,21 +1144,38 @@ public class UserServiceImpl implements UserService {
         return updateReqVO.getId();
     }
 
+    // 获取三方用户部门是否存在
+    private Long createThirdDefaultDept() {
+        DeptSaveReqVO deptRespVO = new DeptSaveReqVO();
+
+        deptRespVO.setDeptType(DeptTypeEnum.THIRD.getCode());
+        deptRespVO.setDeptCode(DeptCodeEnum.DEFAULT_THIRD_DEPT.getCode());
+        DeptDO deptDO = deptService.findDeptByCodeAndType(deptRespVO);
+
+        if (null == deptDO) {
+            deptRespVO.setName(DeptCodeEnum.DEFAULT_THIRD_DEPT.getName());
+            deptRespVO.setParentId(DeptDO.PARENT_ID_ROOT);
+            deptRespVO.setStatus(CommonStatusEnum.ENABLE.getStatus());
+            return deptService.createThirdDefaultDept(deptRespVO);
+        }
+        return deptDO.getId();
+    }
+
+
+    @Override
+    public void thirdUserUpdatePassword(Long id, String password) {
+        // 1. 校验用户存在
+        AdminUserDO user = validateUserExists(id);
+
+        //2. 第三方密码，目前取默认值，若以后用户可以自定义，使用入参 password
+        commonUpdatePassword(user.getId(), THIRD_USER_PASSWORD);
+    }
+
     private void checkTenantUserCountLimit(Integer status, AdminUserDO oldUser) {
         if (status != null) {
-            if (!status.equals(oldUser.getStatus()) && status == CommonStatusEnum.ENABLE.getStatus()) {
+            if (!status.equals(oldUser.getStatus()) &&  CommonStatusEnum.ENABLE.getStatus().equals(status)) {
                 // 1.1 校验账户配合
-                tenantService.handleTenantInfo(tenant -> {
-                    // 如果用户的租户不是平台租户，则校验租户用户最大限额
-                    if (!tenant.getTenantCode().equals(TenantCodeEnum.PLATFORM_TENANT.getCode())) {
-                        long count = userDataRepository.countByConfig(new DefaultConfigStore().eq(AdminUserDO.STATUS,
-                                UserStatusEnum.NORMAL.getStatus()));
-                        log.info(" count user four tenant, count={}", count);
-                        if (count >= tenant.getAccountCount()) {
-                            throw exception(USER_COUNT_MAX, tenant.getAccountCount());
-                        }
-                    }
-                });
+                validateTenantUserCountMaxLimit();
             }
         }
     }
@@ -1326,23 +1269,25 @@ public class UserServiceImpl implements UserService {
                 .collect(Collectors.toList()), pageResult.getTotal());
     }
 
+    private void checkAppAndGetTenantId(Long appId) {
+        ApplicationDTO applicationDTO = TenantManager.withoutTenantCondition(() -> appApplicationApi.findAppApplicationById(appId));
+        if (applicationDTO == null) {
+            throw exception(AUTH_LOGIN_APP_DELETE_OR_DISABLE);
+        }
+    }
+
+
     @Override
     public Long thirdUserRegister(ThirdUserRegisterReqVO reqVO) {
-        //TODO  手机号验证，  appId ，验证码 验证逻辑
-        // 如果是启用状态，校验当前租户下的用户数量有没有超过最大限额
-        // 1.1 校验账户配合
-        tenantService.handleTenantInfo(tenant -> {
-            // 如果用户的租户不是平台租户，则校验租户用户最大限额
-            if (!tenant.getTenantCode().equals(TenantCodeEnum.PLATFORM_TENANT.getCode())) {
-                long count = userDataRepository.countByConfig(new DefaultConfigStore().eq(AdminUserDO.STATUS,
-                        UserStatusEnum.NORMAL.getStatus()));
-                log.info(" count user four tenant, count={}", count);
-                if (count >= tenant.getAccountCount()) {
-                    throw exception(USER_COUNT_MAX, tenant.getAccountCount());
-                }
-            }
-        });
+        //TODO  验证码 验证逻辑
 
+        // 1.1 校验账户配合
+        validateTenantUserCountMaxLimit();
+        // 1.2 校验手机号唯一
+        validateMobileUnique(null, reqVO.getMobile());
+        // 1.3 验证app存在
+        checkAppAndGetTenantId(reqVO.getAppId());
+        // 1.4 新增用户
         AdminUserDO user = new AdminUserDO();
         user.setPassword(encodePassword(THIRD_USER_PASSWORD)); // 加密密码
         // 管理员类型：内置/自定义
@@ -1355,4 +1300,98 @@ public class UserServiceImpl implements UserService {
         userDataRepository.insert(user);
         return user.getId();
     }
+
+    @Override
+    public UserApplicationRespVO getThirdUserAndRelationApp(Long id) {
+
+        // 1.获取用户基本信息
+        AdminUserDO user = getUser(id);
+        if (user == null) {
+            return null;
+        }
+        UserApplicationRespVO userApplicationRespVO =    BeanUtils.toBean(user, UserApplicationRespVO.class);
+        userApplicationRespVO.setNickName(user.getNickname());
+        // 2. 获取用户关联的应用关系列表
+        Set<Long> userIds = new HashSet<>();
+        userIds.add(user.getId());
+        UserAppPageReqVO vo = new UserAppPageReqVO();
+        vo.setUserIds(userIds);
+
+        // 3. 查询用户与应用的关联关系列表
+        List<UserAppRelationDO> userAppRelationList = userAppRelationService.getUserAppRelationList(vo);
+        if (org.apache.commons.collections4.CollectionUtils.isEmpty(userAppRelationList)) {
+            return userApplicationRespVO;
+        }
+        // 4. 提取所有关联的应用ID，并查询应用详细信息
+        Set<Long> appId = userAppRelationList.stream().map(UserAppRelationDO::getApplicationId).collect(Collectors.toSet());
+        List<ApplicationDTO> appList = appApplicationApi.findAppApplicationByAppIds(appId);
+
+        Map<Long, List<UserAppRelationDO>> userAppRelationMap = userAppRelationList.stream()
+                .collect(Collectors.groupingBy(UserAppRelationDO::getUserId));
+        //5. 获取当前用户关联的应用关系列表
+        List<UserAppRelationDO> appRelationDOList = userAppRelationMap.get(user.getId());
+        Map<Long, ApplicationDTO> appMap = appList.stream().collect(Collectors.toMap(ApplicationDTO::getId, item -> item));
+
+        //6. 将应用关系转换为应用详情信息
+        userApplicationRespVO.setUserApplicationList(appRelationDOList.stream()
+                        .map(appRelationDO -> {
+                            UserAppVO userAppVO = new UserAppVO();
+                            ApplicationDTO appDTO = appMap.get(appRelationDO.getApplicationId());
+                            if (null != appDTO) {
+                                userAppVO.setAppId(appDTO.getId());
+                                userAppVO.setAppName(appDTO.getAppName());
+                                userAppVO.setIconName(appDTO.getIconName());
+                                userAppVO.setIconColor(appDTO.getIconColor());
+                            }
+                            return userAppVO;
+                        })
+                        .collect(Collectors.toList()));
+        // 转换为响应对象
+        return  userApplicationRespVO;
+    }
+
+
+
+
+    @Override
+    public ThirdSupplementUserResVO thirdUserSupplementUser(ThirdSupplementUserReqVO reqVO) {
+        // 1. 校验手机和邮箱
+        validateThirdUserForCreateOrUpdate(null, reqVO.getMobile(), reqVO.getEmail());
+        // 2: 验证空间用户数
+        validateTenantUserCountMaxLimit();
+        // 3 验证app存在
+        checkAppAndGetTenantId(reqVO.getAppId());
+        // 4. 解密原文
+        reqVO.setPassword(pwdEnHelper.decryptHexStr(reqVO.getPassword()));
+        // 5. 弱密码校验
+        securityConfigApi.validatePassword(reqVO.getPassword());
+        // 6. 注册用户信息
+        AdminUserDO user =  new AdminUserDO();
+        // 管理员类型：内置/自定义
+        user.setAdminType(AdminTypeEnum.CUSTOM.getType());
+        user.setMobile(reqVO.getMobile());
+        user.setUserType(UserTypeEnum.THIRD.getValue());
+        user.setStatus(UserStatusEnum.NORMAL.getStatus());
+        user.setUsername(reqVO.getNickName());
+        user.setPassword(encodePassword(reqVO.getPassword()));
+        user.setCreateSource(CreateSourceEnum.SELF.getCode());
+        userDataRepository.insert(user);
+
+        // 5. 转换成返回结果
+        ThirdSupplementUserResVO resVO = new ThirdSupplementUserResVO();
+        resVO.setId(user.getId());
+        resVO.setUserName(user.getUsername());
+        resVO.setNickName(user.getNickname());
+        resVO.setEmail(user.getEmail());
+        return resVO;
+    }
+
+
+    @Override
+    public void thirdUserForgetPassword(Long id,String password) {
+        //  被调用前，已经做过用户判断，  调用通用改密码的方法
+        commonUpdatePassword(id, password);
+    }
+
+
 }

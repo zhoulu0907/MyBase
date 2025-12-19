@@ -18,7 +18,6 @@ import com.cmsr.onebase.module.etl.core.dal.dataobject.EtlDatasourceDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.EtlTableDO;
 import com.cmsr.onebase.module.etl.core.enums.EtlErrorCodeConstants;
 import com.cmsr.onebase.module.etl.core.enums.MetadataType;
-import com.github.f4b6a3.uuid.UuidCreator;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.datasource.DataSourceHolder;
@@ -59,7 +58,13 @@ public class DataInspectServiceImpl implements DataInspectService {
 
     @Override
     public boolean testConnection(TestConnectionVO pingVO) {
-        EtlDatasourceDO datasourceDO = BeanUtils.toBean(pingVO, EtlDatasourceDO.class);
+        Long datasourceId = pingVO.getId();
+        EtlDatasourceDO datasourceDO;
+        if (datasourceId == null) {
+            datasourceDO = BeanUtils.toBean(pingVO, EtlDatasourceDO.class);
+        } else {
+            datasourceDO = datasourceRepository.getById(datasourceId);
+        }
         DataSource datasource = dataSourceFactory.constructDataSource(datasourceDO, true);
         String runnerKey = "ping-" + UuidUtils.getUuid();
 

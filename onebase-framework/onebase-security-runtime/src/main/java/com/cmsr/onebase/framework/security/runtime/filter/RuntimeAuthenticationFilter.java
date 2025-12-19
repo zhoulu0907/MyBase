@@ -94,7 +94,7 @@ public class RuntimeAuthenticationFilter extends OncePerRequestFilter implements
             } else {
                 // 其他接口，需要获取token和登录用户信息
                 // 情况一，基于 header[login-user] 获得用户，例如说来自 Gateway 或者其它服务透传
-                RuntimeLoginUser loginUser = buildLoginUserByHeader(request);
+                RuntimeLoginUser loginUser = null;
                 // 情况二，基于 Token 获得用户
                 String token = null;
                 if (loginUser == null) {

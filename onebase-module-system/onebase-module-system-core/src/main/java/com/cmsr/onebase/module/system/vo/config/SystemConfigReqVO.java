@@ -8,10 +8,13 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 @Data
-public class SystemConfigPageReqVO {
+public class SystemConfigReqVO {
     @Schema(description = "数据源名称，模糊匹配", example = "名称")
     private String name;
     @Schema(description = "状态", example = "")
     @InEnum(value = CommonStatusEnum.class, message = "状态必须是 {value}")
     private Integer status;
+
+    @Schema(description = "分类", example = "分类")
+    private String configType;
 }

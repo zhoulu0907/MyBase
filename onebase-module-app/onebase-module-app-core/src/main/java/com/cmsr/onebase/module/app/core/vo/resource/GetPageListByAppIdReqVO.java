@@ -5,14 +5,13 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 /**
- * @ClassName GetFormPageListByAppIdReqVO
+ * @ClassName GetPageListByAppIdReqVO
  * @Description TODO
  * @Author mickey
  * @Date 2025/9/1 18:54
  */
 @Data
-public class GetFormPageListByAppIdReqVO {
-    // TODO: replace with applicationManager?
+public class GetPageListByAppIdReqVO {
     @Schema(description = "appId", requiredMode = Schema.RequiredMode.REQUIRED, example = "xxx")
     @NotNull(message = "应用id不能为空")
     private Long appId;

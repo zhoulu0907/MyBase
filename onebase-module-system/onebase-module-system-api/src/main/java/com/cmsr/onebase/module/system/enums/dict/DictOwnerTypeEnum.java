@@ -16,6 +16,10 @@ import java.util.Arrays;
 @Getter
 @AllArgsConstructor
 public enum DictOwnerTypeEnum implements ArrayValuable<String> {
+    /**
+     * 全局字典
+     */
+    GLOBAL("global", "全局字典"),
 
     /**
      * 应用自定义字典
