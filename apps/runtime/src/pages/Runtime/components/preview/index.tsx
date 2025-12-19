@@ -146,13 +146,12 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
         }
       }
 
-      // 处理子表逻辑
-      if (key.startsWith(FORM_COMPONENT_TYPES.SUB_TABLE)) {
-        const subEntityUuid = useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[key]?.config
-          ?.subTable;
+      // 判断是子表
+      const subEntity = subEntities.value.find((ele: any) => ele.childTableName == key);
 
-        const subEntity = subEntities.value.find((ele: any) => ele.childEntityUuid == subEntityUuid);
-        const subTableName = subEntity?.childTableName;
+      // 处理子表逻辑
+      if (subEntity) {
+        const subTableName = subEntity.childTableName;
 
         //   过滤空行
         const subTableRows = [] as any;
@@ -320,6 +319,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
       const dataItem = res;
 
       const componentSchemas = useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value;
+      const subTableComponents = useEditorSignalMap.get(editPageViewId.value)?.subTableComponents.value;
 
       //   主表渲染逻辑
       if (dataItem && typeof dataItem === 'object') {
@@ -365,57 +365,53 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
           subEntity.childTableName &&
           Object.prototype.hasOwnProperty.call(dataItem, subEntity.childTableName)
         ) {
-          console.log(`找到子表 ${subEntity.childTableName} 数据:`, dataItem[subEntity.childTableName]);
-
+          // 子表数据
           const subData = dataItem[subEntity.childTableName];
 
           Object.entries(componentSchemas).forEach(([key, schema]: [string, any]) => {
-            // pagesRuntimeSignal
-            if (
-              key.startsWith(FORM_COMPONENT_TYPES.SUB_TABLE) &&
-              schema?.config?.subTable == subEntity.childEntityUuid
-            ) {
+            // 找到子表
+            if (schema?.config?.subTable == subEntity.childEntityUuid) {
               pagesRuntimeSignal.setSubTableDataLength(key, (subData || []).length);
 
+              // 当前子表单的所有组件id
+              const componentIds = subTableComponents[key]?.map((ele: any) => ele.id);
               for (let idx = 0; idx < (subData || []).length; idx++) {
-                const keys = Object.keys((subData || [])[idx]);
-                for (let ele in componentSchemas) {
-                  const config = componentSchemas[ele]?.config;
-                  const fieldId = config?.dataField?.[1];
-                  if (keys.includes(fieldId)) {
-                    if (
-                      (componentSchemas[ele]?.type === FORM_COMPONENT_TYPES.IMG_UPLOAD ||
-                        componentSchemas[ele]?.type === FORM_COMPONENT_TYPES.FILE_UPLOAD) &&
-                      Array.isArray(subData[idx]?.[fieldId])
-                    ) {
-                      formValues[`${key}.${idx}.${fieldId}`] = (subData[idx]?.[fieldId] || []).map((ele: any) => ({
-                        ...ele,
-                        uid: ele.id
-                      }));
-                    } else if (
-                      (componentSchemas[ele]?.type === FORM_COMPONENT_TYPES.RADIO ||
-                        componentSchemas[ele]?.type === FORM_COMPONENT_TYPES.SELECT_ONE) &&
-                      typeof subData[idx]?.[fieldId] === 'object' &&
-                      subData[idx]?.[fieldId] !== null
-                    ) {
-                      // 处理单选框、下拉列表
-                      formValues[`${key}.${idx}.${fieldId}`] = subData[idx]?.[fieldId]?.id;
-                    } else if (
-                      (componentSchemas[ele]?.type === FORM_COMPONENT_TYPES.CHECKBOX ||
-                        componentSchemas[ele]?.type === FORM_COMPONENT_TYPES.SELECT_MUTIPLE) &&
-                      Array.isArray(subData[idx]?.[fieldId])
-                    ) {
-                      // 处理复选框、下拉多选列表
-                      formValues[`${key}.${idx}.${fieldId}`] = (subData[idx]?.[fieldId] || []).map(
-                        (ele: any) => ele.id
-                      );
-                    } else {
-                      formValues[`${key}.${idx}.${fieldId}`] = subData[idx]?.[fieldId];
-                    }
+                for (let componentId of componentIds) {
+                  const fieldName = componentSchemas[componentId]?.config?.dataField?.[1];
+                  if (
+                    (componentSchemas[componentId]?.type === FORM_COMPONENT_TYPES.IMG_UPLOAD ||
+                      componentSchemas[componentId]?.type === FORM_COMPONENT_TYPES.FILE_UPLOAD) &&
+                    Array.isArray(subData[idx]?.[fieldName])
+                  ) {
+                    formValues[`${subEntity.childTableName}.${idx}.${fieldName}`] = (
+                      subData[idx]?.[fieldName] || []
+                    ).map((e: any) => ({
+                      ...e,
+                      uid: e.id
+                    }));
+                  } else if (
+                    (componentSchemas[componentId]?.type === FORM_COMPONENT_TYPES.RADIO ||
+                      componentSchemas[componentId]?.type === FORM_COMPONENT_TYPES.SELECT_ONE) &&
+                    typeof subData[idx]?.[fieldName] === 'object' &&
+                    subData[idx]?.[fieldName] !== null
+                  ) {
+                    // 处理单选框、下拉列表
+                    formValues[`${subEntity.childTableName}.${idx}.${fieldName}`] = subData[idx]?.[fieldName]?.id;
+                  } else if (
+                    (componentSchemas[componentId]?.type === FORM_COMPONENT_TYPES.CHECKBOX ||
+                      componentSchemas[componentId]?.type === FORM_COMPONENT_TYPES.SELECT_MUTIPLE) &&
+                    Array.isArray(subData[idx]?.[fieldName])
+                  ) {
+                    // 处理复选框、下拉多选列表
+                    formValues[`${subEntity.childTableName}.${idx}.${fieldName}`] = (
+                      subData[idx]?.[fieldName] || []
+                    ).map((ele: any) => ele.id);
+                  } else {
+                    formValues[`${subEntity.childTableName}.${idx}.${fieldName}`] = subData[idx]?.[fieldName];
                   }
                 }
                 // 补充id
-                formValues[`${key}.${idx}.id`] = subData[idx]?.id;
+                formValues[`${subEntity.childTableName}.${idx}.id`] = subData[idx]?.id;
               }
             }
           });
