@@ -1,5 +1,5 @@
+import UserProfileAvatar from '@/components/UserProfileAvatar';
 import {
-  Avatar,
   Button,
   Dropdown,
   Input,
@@ -35,7 +35,6 @@ import { getDeptsById, type GetDeptsByIdReq } from '@onebase/platform-center';
 import { debounce } from 'lodash-es';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import styles from './index.module.less';
-import UserProfileAvatar from '@/components/UserProfileAvatar';
 
 interface IProps {
   roleInfo: Role | undefined;
@@ -88,8 +87,9 @@ const UserMembers = (props: IProps) => {
 
   const dropList = (
     <Menu
-      onClickMenuItem={(key) => {
+      onClickMenuItem={async (key) => {
         setAddSelect(key);
+        await handleMembersVisible();
       }}
     >
       <Menu.Item key={ADDTYPE.USER}>
