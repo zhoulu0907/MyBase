@@ -14,7 +14,6 @@ import com.cmsr.onebase.module.app.build.service.version.AppDataManager;
 import com.cmsr.onebase.module.app.build.util.AppUtils;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationCreateReqVO;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationCreateRespVO;
-import com.cmsr.onebase.module.app.build.vo.app.ApplicationRespVO;
 import com.cmsr.onebase.module.app.core.dal.database.app.AppApplicationRepository;
 import com.cmsr.onebase.module.app.core.dal.database.app.AppNavigationRepository;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleRepository;
@@ -30,6 +29,7 @@ import com.cmsr.onebase.module.app.core.enums.app.AppStatusEnum;
 import com.cmsr.onebase.module.app.core.vo.app.AppUserPhotoDTO;
 import com.cmsr.onebase.module.app.core.vo.app.ApplicationNavigationConfigVO;
 import com.cmsr.onebase.module.app.core.vo.app.ApplicationPageReqVO;
+import com.cmsr.onebase.module.app.core.vo.app.ApplicationRespVO;
 import com.cmsr.onebase.module.app.core.vo.tag.TagRespVO;
 import com.cmsr.onebase.module.bpm.api.datamanager.BpmDataManager;
 import com.cmsr.onebase.module.etl.api.EtlDataManager;
@@ -64,7 +64,7 @@ import java.util.stream.Stream;
 @Service
 @Validated
 @Slf4j
-public class AppApplicationServiceImpl implements AppApplicationService {
+public class BuildAppApplicationServiceImpl implements AppApplicationService {
 
     @Autowired
     private UidGenerator uidGenerator;
@@ -179,7 +179,12 @@ public class AppApplicationServiceImpl implements AppApplicationService {
         if (applicationDO == null) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_NOT_EXIST);
         }
-        ApplicationRespVO respVO = BeanUtils.toBean(applicationDO, ApplicationRespVO.class);
+        ApplicationRespVO respVO = new ApplicationRespVO();
+        AppNavigationDO appNavigationDO = appNavigationRepository.findByApplicationId(id);
+        if (appNavigationDO != null) {
+            BeanUtils.copyProperties(appNavigationDO, respVO);
+        }
+        BeanUtils.copyProperties(applicationDO, respVO);
         respVO.setAppStatusText(AppStatusEnum.getText(respVO.getAppStatus()));
         respVO.setTags(queryAppTags(respVO.getId()));
         //
@@ -278,7 +283,7 @@ public class AppApplicationServiceImpl implements AppApplicationService {
     }
 
     private void saveApplicationNavigation(Long applicationId, ApplicationCreateReqVO createReqVO) {
-        AppNavigationDO appNavigationDO = appNavigationRepository.findByApplicationId(applicationId, VersionTagEnum.BUILD.getValue());
+        AppNavigationDO appNavigationDO = appNavigationRepository.findByApplicationId(applicationId);
         if (appNavigationDO == null) {
             appNavigationDO = new AppNavigationDO();
         }
@@ -386,21 +391,26 @@ public class AppApplicationServiceImpl implements AppApplicationService {
     @Override
     public ApplicationNavigationConfigVO getApplicationNavigationConfig(Long id) {
         appCommonService.validateApplicationExist(id);
-        AppNavigationDO appNavigationDO = appNavigationRepository.findByApplicationId(id, VersionTagEnum.BUILD.getValue());
-        ApplicationNavigationConfigVO respVO = BeanUtils.toBean(appNavigationDO, ApplicationNavigationConfigVO.class);
-        return respVO;
+        AppNavigationDO appNavigationDO = appNavigationRepository.findByApplicationId(id);
+        if (appNavigationDO == null) {
+            appNavigationDO = new AppNavigationDO();
+        }
+        return BeanUtils.toBean(appNavigationDO, ApplicationNavigationConfigVO.class);
     }
 
     @Override
     public void updateApplicationNavigationConfig(ApplicationNavigationConfigVO updateReqVO) {
         appCommonService.validateApplicationExist(updateReqVO.getId());
-        AppNavigationDO appNavigationDO = appNavigationRepository.findByApplicationId(updateReqVO.getId(), VersionTagEnum.BUILD.getValue());
+        AppNavigationDO appNavigationDO = appNavigationRepository.findByApplicationId(updateReqVO.getId());
+        if (appNavigationDO == null) {
+            appNavigationDO = new AppNavigationDO();
+        }
         // 设置数据
         appNavigationDO.setWebDefaultMenu(updateReqVO.getWebDefaultMenu());
         appNavigationDO.setWebNavLayout(updateReqVO.getWebNavLayout());
         appNavigationDO.setMobileDefaultMenu(updateReqVO.getMobileDefaultMenu());
         appNavigationDO.setMobileNavLayout(updateReqVO.getMobileNavLayout());
-        appNavigationRepository.save(appNavigationDO);
+        appNavigationRepository.saveOrUpdate(appNavigationDO);
     }
 
 }

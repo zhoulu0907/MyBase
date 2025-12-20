@@ -14,10 +14,9 @@ import static com.cmsr.onebase.module.app.core.dal.dataobject.table.AppNavigatio
  */
 @Repository
 public class AppNavigationRepository extends BaseBizRepository<AppNavigationMapper, AppNavigationDO> {
-    public AppNavigationDO findByApplicationId(Long id, Long versionTag) {
+    public AppNavigationDO findByApplicationId(Long id) {
         QueryWrapper queryWrapper = this.query()
-                .where(APP_NAVIGATION.APPLICATION_ID.eq(id))
-                .where(APP_NAVIGATION.VERSION_TAG.eq(versionTag));
+                .where(APP_NAVIGATION.APPLICATION_ID.eq(id));
         return this.getOne(queryWrapper);
     }
 }

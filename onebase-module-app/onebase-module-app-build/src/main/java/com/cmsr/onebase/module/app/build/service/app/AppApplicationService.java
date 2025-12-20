@@ -3,10 +3,10 @@ package com.cmsr.onebase.module.app.build.service.app;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationCreateReqVO;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationCreateRespVO;
-import com.cmsr.onebase.module.app.build.vo.app.ApplicationRespVO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppApplicationDO;
 import com.cmsr.onebase.module.app.core.vo.app.ApplicationNavigationConfigVO;
 import com.cmsr.onebase.module.app.core.vo.app.ApplicationPageReqVO;
+import com.cmsr.onebase.module.app.core.vo.app.ApplicationRespVO;
 
 import java.util.List;
 
