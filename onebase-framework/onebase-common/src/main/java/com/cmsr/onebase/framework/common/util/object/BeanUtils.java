@@ -63,13 +63,13 @@ public class BeanUtils {
         return CollectionUtils.convertList(source, s -> toBean(s, targetType));
     }
 
-    public static <S, T> List<T> toBean(List<S> source, Class<T> targetType, Consumer<T> peek) {
-        List<T> list = toBean(source, targetType);
-        if (list != null) {
-            list.forEach(peek);
-        }
-        return list;
-    }
+//    public static <S, T> List<T> toBean(List<S> source, Class<T> targetType, Consumer<T> peek) {
+//        List<T> list = toBean(source, targetType);
+//        if (list != null) {
+//            list.forEach(peek);
+//        }
+//        return list;
+//    }
 
     public static <S, T> PageResult<T> toBean(PageResult<S> source, Class<T> targetType) {
         return toBean(source, targetType, null);

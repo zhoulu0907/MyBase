@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.app.core.enums.appresource;
+package com.cmsr.onebase.module.app.core.enums.resource;
 
 
 public enum WorkbenchComponentEnum {

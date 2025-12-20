@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.app.core.dto.appresource;
+package com.cmsr.onebase.module.app.core.dto.resource;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;

@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.app.build.service.app;
 
 import com.cmsr.onebase.framework.common.enums.CommonPublishModelEnum;
+import com.cmsr.onebase.framework.common.enums.VersionTagEnum;
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
@@ -15,11 +16,13 @@ import com.cmsr.onebase.module.app.build.vo.app.ApplicationCreateReqVO;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationCreateRespVO;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationRespVO;
 import com.cmsr.onebase.module.app.core.dal.database.app.AppApplicationRepository;
+import com.cmsr.onebase.module.app.core.dal.database.app.AppNavigationRepository;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleRepository;
 import com.cmsr.onebase.module.app.core.dal.database.tag.AppApplicationTagRepository;
 import com.cmsr.onebase.module.app.core.dal.database.tag.AppTagRepository;
 import com.cmsr.onebase.module.app.core.dal.database.version.AppVersionRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppApplicationDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppNavigationDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppVersionDO;
 import com.cmsr.onebase.module.app.core.enums.AppErrorCodeConstants;
 import com.cmsr.onebase.module.app.core.enums.app.AppPublishEnum;
@@ -110,6 +113,9 @@ public class AppApplicationServiceImpl implements AppApplicationService {
 
     @Autowired
     private MetadataDataManagerApi metadataDataManagerApi;
+
+    @Autowired
+    private AppNavigationRepository appNavigationRepository;
 
     @Override
     public PageResult<ApplicationRespVO> getApplicationPage(ApplicationPageReqVO pageReqVO) {
@@ -207,28 +213,40 @@ public class AppApplicationServiceImpl implements AppApplicationService {
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public ApplicationCreateRespVO createApplication(ApplicationCreateReqVO createReqVO) {
         validApplicationCodeDuplicate(createReqVO.getAppCode(), null);
-        AppApplicationDO applicationDO = BeanUtils.toBean(createReqVO, AppApplicationDO.class);
-        applicationDO.setId(null);
-        applicationDO.setAppUid(findAndCreateAppUid());
-        applicationDO.setAppStatus(AppStatusEnum.OFFLINE.getValue());
+        return transactionTemplate.execute(transactionStatus -> {
 
-        if (StringUtils.isNoneBlank(createReqVO.getAppCode())) {
-            applicationDO.setAppCode(createReqVO.getAppCode());
-        } else {
-            applicationDO.setAppCode(AppUtils.createAppCode());
-        }
-        // 新增发布模式，新增空间id
-        applicationDO.setPublishModel(createReqVO.getPublishModel() == null ? CommonPublishModelEnum.InnerModel.getValue() : createReqVO.getPublishModel());
-        applicationRepository.save(applicationDO);
-        saveApplicationTags(applicationDO.getId(), createReqVO.getTagIds());
-        Long userId = SecurityFrameworkUtils.getLoginUserId();
-        authRoleService.createDefaultRole(applicationDO.getId(), userId);
-        createDatasource(applicationDO.getId(), applicationDO.getAppUid(), createReqVO.getDatasourceSaveReq());
-        buildAppMenuService.createDefaultBpmMenu(applicationDO.getId());
-        return BeanUtils.toBean(applicationDO, ApplicationCreateRespVO.class);
+            AppApplicationDO applicationDO = BeanUtils.toBean(createReqVO, AppApplicationDO.class);
+            applicationDO.setId(null);
+            applicationDO.setAppUid(findAndCreateAppUid());
+            applicationDO.setAppStatus(AppStatusEnum.OFFLINE.getValue());
+
+            if (StringUtils.isNoneBlank(createReqVO.getAppCode())) {
+                applicationDO.setAppCode(createReqVO.getAppCode());
+            } else {
+                applicationDO.setAppCode(AppUtils.createAppCode());
+            }
+            // 新增发布模式，新增空间id
+            applicationDO.setPublishModel(createReqVO.getPublishModel() == null ? CommonPublishModelEnum.InnerModel.getValue() : createReqVO.getPublishModel());
+            applicationRepository.save(applicationDO);
+            // 保存导航配置
+            AppNavigationDO appNavigationDO = new AppNavigationDO();
+            BeanUtils.copyProperties(createReqVO, appNavigationDO);
+            appNavigationDO.setId(null);
+            appNavigationDO.setApplicationId(applicationDO.getId());
+            appNavigationRepository.save(appNavigationDO);
+            // 保存标签
+            saveApplicationTags(applicationDO.getId(), createReqVO.getTagIds());
+            // 创建默认角色
+            Long userId = SecurityFrameworkUtils.getLoginUserId();
+            authRoleService.createDefaultRole(applicationDO.getId(), userId);
+            // 创建数据源
+            createDatasource(applicationDO.getId(), applicationDO.getAppUid(), createReqVO.getDatasourceSaveReq());
+            // 创建默认流程菜单
+            buildAppMenuService.createDefaultBpmMenu(applicationDO.getId());
+            return BeanUtils.toBean(applicationDO, ApplicationCreateRespVO.class);
+        });
     }
 
     private void createDatasource(Long appId, String appUid, DatasourceSaveReqDTO datasourceSaveReq) {
@@ -259,15 +277,31 @@ public class AppApplicationServiceImpl implements AppApplicationService {
         }
     }
 
+    private void saveApplicationNavigation(Long applicationId, ApplicationCreateReqVO createReqVO) {
+        AppNavigationDO appNavigationDO = appNavigationRepository.findByApplicationId(applicationId, VersionTagEnum.BUILD.getValue());
+        if (appNavigationDO == null) {
+            appNavigationDO = new AppNavigationDO();
+        }
+        appNavigationDO.setApplicationId(applicationId);
+        appNavigationDO.setVersionTag(VersionTagEnum.BUILD.getValue());
+        appNavigationDO.setIconName(createReqVO.getIconName());
+        appNavigationDO.setIconColor(createReqVO.getIconColor());
+        appNavigationDO.setThemeColor(createReqVO.getThemeColor());
+        appNavigationRepository.saveOrUpdate(appNavigationDO);
+    }
+
 
     @Override
     public void updateApplication(ApplicationCreateReqVO createReqVO) {
         appCommonService.validateApplicationExist(createReqVO.getId());
         validApplicationCodeDuplicate(createReqVO.getAppCode(), createReqVO.getId());
-        AppApplicationDO updateObj = BeanUtils.toBean(createReqVO, AppApplicationDO.class);
-        updateObj.setPublishModel(createReqVO.getPublishModel() == null ? CommonPublishModelEnum.InnerModel.getValue() : createReqVO.getPublishModel());
-        saveApplicationTags(createReqVO.getId(), createReqVO.getTagIds());
-        applicationRepository.updateById(updateObj);
+        transactionTemplate.executeWithoutResult(transactionStatus -> {
+            AppApplicationDO updateObj = BeanUtils.toBean(createReqVO, AppApplicationDO.class);
+            updateObj.setPublishModel(createReqVO.getPublishModel() == null ? CommonPublishModelEnum.InnerModel.getValue() : createReqVO.getPublishModel());
+            applicationRepository.updateById(updateObj);
+            saveApplicationTags(createReqVO.getId(), createReqVO.getTagIds());
+            saveApplicationNavigation(createReqVO.getId(), createReqVO);
+        });
     }
 
     @Override
@@ -351,19 +385,22 @@ public class AppApplicationServiceImpl implements AppApplicationService {
 
     @Override
     public ApplicationNavigationConfigVO getApplicationNavigationConfig(Long id) {
-        AppApplicationDO applicationDO = appCommonService.validateApplicationExist(id);
-        ApplicationNavigationConfigVO respVO = BeanUtils.toBean(applicationDO, ApplicationNavigationConfigVO.class);
+        appCommonService.validateApplicationExist(id);
+        AppNavigationDO appNavigationDO = appNavigationRepository.findByApplicationId(id, VersionTagEnum.BUILD.getValue());
+        ApplicationNavigationConfigVO respVO = BeanUtils.toBean(appNavigationDO, ApplicationNavigationConfigVO.class);
         return respVO;
     }
 
     @Override
     public void updateApplicationNavigationConfig(ApplicationNavigationConfigVO updateReqVO) {
-        AppApplicationDO applicationDO = appCommonService.validateApplicationExist(updateReqVO.getId());
-        applicationDO.setWebDefaultMenu(updateReqVO.getWebDefaultMenu());
-        applicationDO.setWebNavLayout(updateReqVO.getWebNavLayout());
-        applicationDO.setMobileDefaultMenu(updateReqVO.getMobileDefaultMenu());
-        applicationDO.setMobileNavLayout(updateReqVO.getMobileNavLayout());
-        applicationRepository.updateById(applicationDO);
+        appCommonService.validateApplicationExist(updateReqVO.getId());
+        AppNavigationDO appNavigationDO = appNavigationRepository.findByApplicationId(updateReqVO.getId(), VersionTagEnum.BUILD.getValue());
+        // 设置数据
+        appNavigationDO.setWebDefaultMenu(updateReqVO.getWebDefaultMenu());
+        appNavigationDO.setWebNavLayout(updateReqVO.getWebNavLayout());
+        appNavigationDO.setMobileDefaultMenu(updateReqVO.getMobileDefaultMenu());
+        appNavigationDO.setMobileNavLayout(updateReqVO.getMobileNavLayout());
+        appNavigationRepository.save(appNavigationDO);
     }
 
 }
