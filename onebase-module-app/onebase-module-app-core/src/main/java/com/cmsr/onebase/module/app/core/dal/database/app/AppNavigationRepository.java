@@ -19,4 +19,11 @@ public class AppNavigationRepository extends BaseBizRepository<AppNavigationMapp
                 .where(APP_NAVIGATION.APPLICATION_ID.eq(id));
         return this.getOne(queryWrapper);
     }
+
+    public AppNavigationDO findByApplicationIdAndVersionTag(Long id, Long versionTag) {
+        QueryWrapper queryWrapper = this.query()
+                .where(APP_NAVIGATION.APPLICATION_ID.eq(id))
+                .where(APP_NAVIGATION.VERSION_TAG.eq(versionTag));
+        return this.getOne(queryWrapper);
+    }
 }

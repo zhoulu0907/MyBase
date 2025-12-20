@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.app.runtime.service.app;
 
+import com.cmsr.onebase.framework.common.enums.VersionTagEnum;
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
@@ -101,8 +102,8 @@ public class RuntimeAppApplicationServiceImpl implements AppApplicationService {
         AppLeastInfo respVO = new AppLeastInfo();
         AppNavigationDO appNavigationDO = TenantManager.withoutTenantCondition(() ->
                 ApplicationManager.withoutApplicationIdAndVersionTag(() ->
-                appNavigationRepository.findByApplicationId(id)
-        ));
+                        appNavigationRepository.findByApplicationIdAndVersionTag(id, VersionTagEnum.RUNTIME.getValue())
+                ));
         if (appNavigationDO != null) {
             BeanUtils.copyProperties(appNavigationDO, respVO);
         }
