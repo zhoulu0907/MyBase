@@ -182,7 +182,7 @@ export const DraftBox: React.FC<DraftBoxProps> = ({ showFromPageData }) => {
     return firstThreeFields.map((fieldName) => ({
       title: fieldName,
       dataIndex: fieldName,
-      width: 100,
+      width: 150,
       ellipsis: true,
       render: (value: any) => {
         // 处理不同类型的值
@@ -248,11 +248,13 @@ export const DraftBox: React.FC<DraftBoxProps> = ({ showFromPageData }) => {
           </Popconfirm>
         </div>
         <Table
+          scroll={{ x: 'max-content' }}
           columns={[
             {
               title: '序号',
               dataIndex: 'index',
               width: 80,
+              fixed: 'left',
               render: (_: any, __: any, idx: number) => {
                 const pageSize = 10;
                 return (draftPageNo - 1) * pageSize + idx + 1;
@@ -261,7 +263,7 @@ export const DraftBox: React.FC<DraftBoxProps> = ({ showFromPageData }) => {
             {
               title: '暂存时间',
               dataIndex: 'timestamp',
-              width: 200,
+              width: 180,
               render: (timestamp: number) => {
                 return dayjs(timestamp).format('YYYY-MM-DD HH:mm:ss');
               }
@@ -270,7 +272,7 @@ export const DraftBox: React.FC<DraftBoxProps> = ({ showFromPageData }) => {
             {
               title: '操作',
               dataIndex: 'op',
-              width: 150,
+              width: 180,
               fixed: 'right',
               align: 'center',
               headerCellStyle: { textAlign: 'center' },
