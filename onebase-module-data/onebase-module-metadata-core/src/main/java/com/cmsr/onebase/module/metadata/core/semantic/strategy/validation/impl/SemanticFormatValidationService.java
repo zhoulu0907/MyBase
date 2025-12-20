@@ -28,7 +28,7 @@ public class SemanticFormatValidationService implements SemanticValidationServic
             if (field.getFieldTypeEnum() == SemanticFieldTypeEnum.AUTO_CODE) { continue; }
             if (!supports(field.getFieldType())) { continue; }
             if (value == null) { continue; }
-            List<MetadataValidationFormatDO> rules = context.getFormatRules().getOrDefault(field.getId(), Collections.emptyList());
+            List<MetadataValidationFormatDO> rules = context.getFormatRules().getOrDefault(field.getFieldUuid(), Collections.emptyList());
             if (rules.isEmpty()) { continue; }
             boolean hasEnabledRule = rules.stream().anyMatch(rule -> rule.getIsEnabled() != null && rule.getIsEnabled() == 1);
             if (!hasEnabledRule) { continue; }
