@@ -86,6 +86,12 @@
             <artifactId>mapstruct</artifactId>
         </dependency>
 
+        <!-- Guava (确保运行时可用) -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+
         <!-- OneBase 插件运行时 -->
         <dependency>
             <groupId>com.cmsr.onebase</groupId>

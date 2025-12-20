@@ -1,8 +1,8 @@
 package com.cmsr.onebase.plugin.simulator.controller;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.plugin.runtime.manager.OneBasePluginManager;
+import com.cmsr.onebase.plugin.simulator.constant.PluginErrorMessages;
 import com.cmsr.onebase.plugin.simulator.controller.plugin.vo.*;
 import com.cmsr.onebase.plugin.simulator.convert.PluginConvert;
 import io.swagger.v3.oas.annotations.Operation;
@@ -10,11 +10,9 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import org.pf4j.PluginState;
-import org.pf4j.PluginWrapper;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -22,7 +20,6 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 
@@ -52,43 +49,62 @@ public class PluginManagementController {
     @Resource(name = "oneBasePluginManager")
     private OneBasePluginManager pluginManager;
 
+    @Resource
+    private PluginConvert pluginConvert;
+
     @GetMapping("/list")
     @Operation(summary = "获取所有已加载的插件列表")
     public CommonResult<List<PluginRespVO>> listPlugins() {
         List<OneBasePluginManager.PluginInfo> plugins = pluginManager.getLoadedPlugins();
-        return success(PluginConvert.INSTANCE.convertList(plugins));
+        return success(pluginConvert.convertList(plugins));
     }
 
     @PostMapping("/{pluginId}/start")
     @Operation(summary = "启动指定插件")
-    @Parameter(name = "pluginId", description = "插件ID", required = true, example = "demo-plugin")
+    @Parameter(name = "pluginId", description = "插件ID", required = true, example = "hello-plugin")
     public CommonResult<PluginOperationResultItemVO> startPlugin(@PathVariable("pluginId") String pluginId) {
+        if (!isPluginExists(pluginId)) {
+            return CommonResult.error(404, String.format(PluginErrorMessages.PLUGIN_NOT_FOUND, pluginId));
+        }
         PluginState state = pluginManager.startPlugin(pluginId);
         return success(PluginOperationResultItemVO.success(pluginId, state.toString()));
     }
 
     @PostMapping("/{pluginId}/stop")
     @Operation(summary = "停止指定插件")
-    @Parameter(name = "pluginId", description = "插件ID", required = true, example = "demo-plugin")
+    @Parameter(name = "pluginId", description = "插件ID", required = true, example = "hello-plugin")
     public CommonResult<PluginOperationResultItemVO> stopPlugin(@PathVariable("pluginId") String pluginId) {
+        if (!isPluginExists(pluginId)) {
+            return CommonResult.error(404, String.format(PluginErrorMessages.PLUGIN_NOT_FOUND, pluginId));
+        }
         PluginState state = pluginManager.stopPlugin(pluginId);
         return success(PluginOperationResultItemVO.success(pluginId, state.toString()));
     }
 
     @PostMapping("/{pluginId}/reload")
     @Operation(summary = "重新加载指定插件")
-    @Parameter(name = "pluginId", description = "插件ID", required = true, example = "demo-plugin")
+    @Parameter(name = "pluginId", description = "插件ID", required = true, example = "hello-plugin")
     public CommonResult<PluginOperationResultItemVO> reloadPlugin(@PathVariable("pluginId") String pluginId) {
+        if (!isPluginExists(pluginId)) {
+            return CommonResult.error(404, String.format(PluginErrorMessages.PLUGIN_NOT_FOUND, pluginId));
+        }
         PluginState state = pluginManager.reloadPlugin(pluginId);
         return success(PluginOperationResultItemVO.success(pluginId, state.toString()));
     }
 
     @PostMapping("/load")
     @Operation(summary = "从指定路径加载插件")
-    @Parameter(name = "path", description = "插件文件路径（绝对或相对）", required = true, example = "/plugins/demo-plugin.zip")
+    @Parameter(name = "path", description = "插件文件路径（绝对或相对）", required = true, example = "plugins/hello-plugin-1.0.0-SNAPSHOT.zip")
     public CommonResult<PluginLoadRespVO> loadPlugin(@RequestParam("path") String path) {
         Path pluginPath = Paths.get(path);
+        if (!Files.exists(pluginPath)) {
+            return CommonResult.error(404, String.format(PluginErrorMessages.PLUGIN_FILE_NOT_FOUND, path));
+        }
+        
         String pluginId = pluginManager.loadPlugin(pluginPath);
+        if (pluginId == null) {
+            return CommonResult.error(500, String.format(PluginErrorMessages.PLUGIN_LOAD_FAILED, path));
+        }
         
         PluginLoadRespVO respVO = new PluginLoadRespVO();
         respVO.setPluginId(pluginId);
@@ -102,19 +118,17 @@ public class PluginManagementController {
 
     @GetMapping("/{pluginId}/info")
     @Operation(summary = "获取指定插件的详细信息")
-    @Parameter(name = "pluginId", description = "插件ID", required = true, example = "demo-plugin")
+    @Parameter(name = "pluginId", description = "插件ID", required = true, example = "hello-plugin")
     public CommonResult<PluginRespVO> getPluginInfo(@PathVariable("pluginId") String pluginId) {
         // 尝试从getPlugin获取PluginWrapper
         return pluginManager.getPlugin(pluginId)
-            .map(wrapper -> success(PluginConvert.INSTANCE.convert(wrapper)))
+            .map(wrapper -> success(pluginConvert.convert(wrapper)))
             // 如果getPlugin返回empty（如DEV模式），尝试从getLoadedPlugins获取PluginInfo
-            .orElseGet(() -> {
-                return pluginManager.getLoadedPlugins().stream()
-                    .filter(info -> info.getPluginId().equals(pluginId))
-                    .findFirst()
-                    .map(info -> success(PluginConvert.INSTANCE.convert(info)))
-                    .orElseThrow(() -> new IllegalArgumentException("Plugin not found: " + pluginId));
-            });
+            .orElseGet(() -> pluginManager.getLoadedPlugins().stream()
+                .filter(info -> info.getPluginId().equals(pluginId))
+                .findFirst()
+                .map(info -> success(pluginConvert.convert(info)))
+                .orElse(CommonResult.error(404, String.format(PluginErrorMessages.PLUGIN_NOT_FOUND, pluginId))));
     }
 
     @PostMapping("/start-all")
@@ -156,13 +170,16 @@ public class PluginManagementController {
 
     @PostMapping("/{pluginId}/unload")
     @Operation(summary = "卸载指定插件")
-    @Parameter(name = "pluginId", description = "插件ID", required = true, example = "demo-plugin")
+    @Parameter(name = "pluginId", description = "插件ID", required = true, example = "hello-plugin")
     public CommonResult<PluginOperationResultItemVO> unloadPlugin(@PathVariable("pluginId") String pluginId) {
+        if (!isPluginExists(pluginId)) {
+            return CommonResult.error(404, String.format(PluginErrorMessages.PLUGIN_NOT_FOUND, pluginId));
+        }
         boolean ok = pluginManager.unloadPlugin(pluginId);
         if (ok) {
             return success(PluginOperationResultItemVO.success(pluginId, "UNLOADED"));
         } else {
-            return CommonResult.error(500, "Failed to unload plugin: " + pluginId);
+            return CommonResult.error(500, String.format(PluginErrorMessages.PLUGIN_UNLOAD_FAILED, pluginId));
         }
     }
 
@@ -170,12 +187,12 @@ public class PluginManagementController {
     @Operation(summary = "上传并加载插件ZIP/JAR包")
     public CommonResult<PluginLoadRespVO> uploadPlugin(@RequestParam("file") MultipartFile file) throws IOException {
         if (file.isEmpty()) {
-            return CommonResult.error(400, "上传文件不能为空");
+            return CommonResult.error(400, PluginErrorMessages.UPLOAD_FILE_EMPTY);
         }
         
         String originalFilename = file.getOriginalFilename();
         if (originalFilename == null || (!originalFilename.endsWith(".zip") && !originalFilename.endsWith(".jar"))) {
-            return CommonResult.error(400, "仅支持上传ZIP或JAR文件");
+            return CommonResult.error(400, PluginErrorMessages.UPLOAD_FILE_FORMAT_ERROR);
         }
         
         Path pluginsDir = Paths.get("plugins");
@@ -196,6 +213,17 @@ public class PluginManagementController {
             .orElse("UNKNOWN"));
         
         return success(respVO);
+    }
+
+    /**
+     * 检查插件是否存在
+     *
+     * @param pluginId 插件ID
+     * @return 插件是否存在
+     */
+    private boolean isPluginExists(String pluginId) {
+        return pluginManager.getLoadedPlugins().stream()
+                .anyMatch(info -> info.getPluginId().equals(pluginId));
     }
 
 }
