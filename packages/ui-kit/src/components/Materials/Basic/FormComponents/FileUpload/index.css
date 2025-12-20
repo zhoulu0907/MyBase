@@ -21,14 +21,6 @@
   border-radius: 2px;
   object-fit: cover;
 }
-.uplaodList-text-item-name {
-  margin: 0 8px;
-  font-size: 14px;
-  line-height: 22px;
-  color: #1d2129;
-  display: inline-block;
-  flex: 1;
-}
 
 .uplaodList-text-item-name-hover:hover {
   text-decoration: underline;
