@@ -4,6 +4,7 @@ import com.cmsr.onebase.framework.common.enums.CommonPublishModelEnum;
 import com.cmsr.onebase.framework.common.enums.VersionTagEnum;
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.uid.UidGenerator;
@@ -126,10 +127,27 @@ public class BuildAppApplicationServiceImpl implements AppApplicationService {
             bean.setAppStatusText(AppStatusEnum.getText(v.getAppStatus()));
             return bean;
         }).toList();
+        enrichIcons(respVOS);
         enrichTags(respVOS);
         enrichUser(respVOS);
         enrichUserPhoto(respVOS);
         return new PageResult<>(respVOS, pageResult.getTotal());
+    }
+
+    private void enrichIcons(List<ApplicationRespVO> respVOS) {
+        List<Long> appIds = respVOS.stream().map(ApplicationRespVO::getId).collect(Collectors.toList());
+        List<AppNavigationDO> navigationDOS = ApplicationManager.withoutApplicationCondition(() -> appNavigationRepository.findByApplicationIds(appIds));
+        for (ApplicationRespVO respVO : respVOS) {
+            AppNavigationDO navigationDO = navigationDOS.stream()
+                    .filter(navigation -> navigation.getApplicationId().equals(respVO.getId()))
+                    .findFirst()
+                    .orElse(null);
+            if (navigationDO != null) {
+                respVO.setIconName(navigationDO.getIconName());
+                respVO.setIconColor(navigationDO.getIconColor());
+                respVO.setThemeColor(navigationDO.getThemeColor());
+            }
+        }
     }
 
     private void enrichTags(List<ApplicationRespVO> respVOS) {
