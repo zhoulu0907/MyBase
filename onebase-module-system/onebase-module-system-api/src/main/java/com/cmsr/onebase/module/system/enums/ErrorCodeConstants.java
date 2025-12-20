@@ -198,5 +198,11 @@ public interface ErrorCodeConstants {
     ErrorCode AUTH_LOGIN_APP_EXPIRE = new ErrorCode(1_002_025_015, "本企业用户无法登录，授权已过期。");
 
     ErrorCode CONFIG_NO_EXISTS = new ErrorCode(1_002_026_001, "配置项不存在");
-    ErrorCode CONFIG_ALREADY_ENABLE  = new ErrorCode(1_002_026_001, "当前已启用【{}】,不可开启【{}】");
+    ErrorCode CONFIG_ALREADY_ENABLE  = new ErrorCode(1_002_026_002, "当前已启用【{}】,不可开启【{}】");
+
+    ErrorCode CONFIG_SAAS_CORP_EXISTS = new ErrorCode(1_002_026_003, "空间内已创建企业无法禁用");
+    ErrorCode CONFIG_SAAS_APP_EXISTS  = new ErrorCode(1_002_026_003, "空间内已创建SAAS应用无法禁用");
+
+
+
 }

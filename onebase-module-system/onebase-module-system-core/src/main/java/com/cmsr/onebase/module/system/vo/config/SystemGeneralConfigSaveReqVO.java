@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.system.vo.config;
 
 import com.cmsr.onebase.framework.common.validation.InEnum;
-import com.cmsr.onebase.module.system.enums.config.ConfigCategoryEnum;
+import com.cmsr.onebase.module.system.enums.config.ConfigTypeEnum;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -11,8 +11,8 @@ public class SystemGeneralConfigSaveReqVO {
      * 参数分类
      */
     @Schema(description = "参数分类", example = "")
-    @InEnum(value = ConfigCategoryEnum.class, message = "参数类型必须是 {value}")
-    private String category;
+    @InEnum(value = ConfigTypeEnum.class, message = "参数类型必须是 {value}")
+    private String configType;
     /**
      * 参数名称
      */

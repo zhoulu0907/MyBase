@@ -180,9 +180,30 @@ public class BuildAuthenticationFilter extends OncePerRequestFilter implements A
             return null;
         }
         // 构建模拟用户
-        Long userId = Long.valueOf(token.substring(securityProperties.getMockSecret().length()));
-        return new LoginUser().setId(userId)
-                .setTenantId(WebFrameworkUtils.getTenantIdFromHeader(request));
+        // Long userId = Long.valueOf(token.substring(securityProperties.getMockSecret().length()));
+        token = token.substring(securityProperties.getMockSecret().length());
+        // 4d8fd6314da943f496b14f29b8f50000 -> 4d8fd6314da943f496b14f29b8f5d4f4
+        return buildLoginUserByInnerToken(token);
+    }
+
+    private LoginUser buildLoginUserByInnerToken(String token) {
+        try {
+            // 校验访问令牌
+            OAuth2AccessTokenCheckRespDTO accessToken = oauth2TokenApi.getAccessToken(token).getCheckedData();
+            if (accessToken == null) {
+                return null;
+            }
+            // 构建登录用户
+            return new LoginUser().setId(accessToken.getUserId()).setUserType(accessToken.getUserType())
+                    .setRunMode(accessToken.getRunMode())
+                    .setCorpId(accessToken.getCorpId())
+                    .setInfo(accessToken.getUserInfo()) // 额外的用户信息
+                    .setTenantId(accessToken.getTenantId()).setScopes(accessToken.getScopes())
+                    .setExpiresTime(accessToken.getExpiresTime());
+        } catch (ServiceException serviceException) {
+            // 校验 Token 不通过时，考虑到一些接口是无需登录的，所以直接返回 null 即可
+            return null;
+        }
     }
 
     private LoginUser buildLoginUserByHeader(HttpServletRequest request) {

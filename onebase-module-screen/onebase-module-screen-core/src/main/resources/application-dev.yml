@@ -1,0 +1,35 @@
+#dev环境  mysql
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://10.0.104.38:3306/dataview_dev?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&serverTimezone=GMT%2B8
+    username: root
+    password: onebase@2025
+    ### 连接池配置
+    druid:
+      initial-size: 5
+      max-active: 20
+      min-idle: 10
+      max-wait: 60000
+      validation-query: SELECT 1
+      test-on-borrow: true
+      test-on-return: false
+      test-while-idle: true
+      # 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒
+      time-between-eviction-runs-millis: 60000
+      # 配置一个连接在池中最小生存的时间，单位是毫秒
+      min-evictable-idle-time-millis: 300000
+
+# 开发环境特定的文件存储配置
+v2:
+  xnljmap:
+    oss: file:/Users/bty418/Documents/ob3.0/go-view-serve/fileserver/
+  fileurl: /Users/bty418/Documents/ob3.0/go-view-serve/fileserver
+  httpurl: http://127.0.0.1:8083/
+
+# 开发环境日志配置
+logging:
+  level:
+    root: INFO
+    com.cmsr.v2: DEBUG
+  # 开发环境日志直接输出到控制台，不需要文件

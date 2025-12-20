@@ -26,32 +26,32 @@ public class TenantThirdUserController {
 
     @PostMapping("/create")
     @Operation(summary = "新增三方用户")
-    @PreAuthorize("@ss.hasPermission('tenant:user:create')")
+    @PreAuthorize("@ss.hasPermission('tenant:third:create')")
     public CommonResult<Long> createUserAndUserAppRelation(@Valid @RequestBody ThirdUserAppCombinedInsertReqVO reqVO) {
-        Long id = userService.createUserAndUserAppRelation(reqVO);
+        Long id = userService.thirdUserCreateUserAndUserAppRelation(reqVO);
         return success(id);
     }
 
 
     @PostMapping("/update")
     @Operation(summary = "编辑三方用户")
-    @PreAuthorize("@ss.hasPermission('tenant:user:update')")
+    @PreAuthorize("@ss.hasPermission('tenant:third:update')")
     public CommonResult<Long> updateUserAndUserAppRelation(@Valid  @RequestBody ThirdUserAppCombinedUpdateReqVO reqVO) {
-        Long id = userService.updateUserAndUserAppRelation(reqVO);
+        Long id = userService.thirdUserUpdateUserAndUserAppRelation(reqVO);
         return success(id);
     }
 
     @PostMapping("/update-password")
     @Operation(summary = "重置三方用户密码")
-    @PreAuthorize("@ss.hasPermission('tenant:user:update-password')")
+    @PreAuthorize("@ss.hasPermission('tenant:third:update-password')")
     public CommonResult<Boolean> updateUserPassword(@Valid @RequestBody ThirdUserUpdatePasswordReqVO reqVO) {
-        userService.updateThirdUserPassword(reqVO.getId(), reqVO.getPassword());
+        userService.thirdUserUpdatePassword(reqVO.getId(), reqVO.getPassword());
         return success(true);
     }
 
     @PostMapping("/update-status")
     @Operation(summary = "修改三方用户状态")
-    @PreAuthorize("@ss.hasPermission('tenant:user:update')")
+    @PreAuthorize("@ss.hasPermission('tenant:third:update')")
     public CommonResult<Boolean> updateUserStatus(@Valid @RequestBody UserUpdateStatusReqVO reqVO) {
         userService.updateUserStatus(reqVO.getId(), reqVO.getStatus());
         return success(true);
@@ -60,7 +60,7 @@ public class TenantThirdUserController {
     @PostMapping("/delete")
     @Operation(summary = "删除三方用户")
     @Parameter(name = "id", description = "编号", required = true, example = "1024")
-    @PreAuthorize("@ss.hasPermission('tenant:user:delete')")
+    @PreAuthorize("@ss.hasPermission('tenant:third:delete')")
     public CommonResult<Boolean> deleteUser(@RequestParam("id") Long id) {
         userService.deleteUser(id);
         return success(true);
@@ -68,11 +68,20 @@ public class TenantThirdUserController {
 
     @GetMapping("/user-applications-page")
     @Operation(summary = "获得三方用户(包含授权列表)-分页")
-    @PreAuthorize("@ss.hasPermission('tenant:user:query')")
+    @PreAuthorize("@ss.hasPermission('tenant:third:query')")
     public CommonResult<PageResult<UserApplicationRespVO>> getUserAppRelationPage(@Valid UserAppPageSearchReqVO userAppPageReqVO) {
         PageResult<UserApplicationRespVO> pageResult = userService.getUserAppRelationPage(userAppPageReqVO);
         return success(pageResult);
     }
 
+
+
+    @GetMapping("/get")
+    @Operation(summary = "获得三方用户详情(包含授权app)")
+    @PreAuthorize("@ss.hasPermission('tenant:third:query')")
+    public CommonResult<UserApplicationRespVO> getThirdUserAndRelationApp(@RequestParam("id") Long id) {
+        UserApplicationRespVO userDetail = userService.getThirdUserAndRelationApp(id);
+        return success(userDetail);
+    }
 
 }

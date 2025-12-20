@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.app.build.service.resource;
 
-import com.cmsr.onebase.module.app.core.dto.appresource.ComponentDTO;
+import com.cmsr.onebase.module.app.core.dto.resource.ComponentDTO;
 import com.cmsr.onebase.module.app.core.provider.resource.ComponentServiceProvider;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;

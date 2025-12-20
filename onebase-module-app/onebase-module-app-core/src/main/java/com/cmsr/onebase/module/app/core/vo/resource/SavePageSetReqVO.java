@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.app.core.vo.resource;
 
 import java.util.List;
 
-import com.cmsr.onebase.module.app.core.dto.appresource.PageDTO;
+import com.cmsr.onebase.module.app.core.dto.resource.PageDTO;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;

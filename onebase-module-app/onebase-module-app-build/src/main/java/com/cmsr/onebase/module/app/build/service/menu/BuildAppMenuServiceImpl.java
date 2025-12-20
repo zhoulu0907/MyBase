@@ -15,8 +15,8 @@ import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageSetReposito
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppApplicationDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppMenuDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePagesetDO;
-import com.cmsr.onebase.module.app.core.dto.appresource.CopyPageSetDTO;
-import com.cmsr.onebase.module.app.core.dto.appresource.CreatePageSetDTO;
+import com.cmsr.onebase.module.app.core.dto.resource.CopyPageSetDTO;
+import com.cmsr.onebase.module.app.core.dto.resource.CreatePageSetDTO;
 import com.cmsr.onebase.module.app.core.enums.AppErrorCodeConstants;
 import com.cmsr.onebase.module.app.core.enums.menu.BpmMenuEnum;
 import com.cmsr.onebase.module.app.core.enums.menu.MenuTypeEnum;
@@ -30,6 +30,7 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.*;
@@ -65,6 +66,9 @@ public class BuildAppMenuServiceImpl implements BuildAppMenuService {
 
     @Autowired
     private AppAuthDataGroupRepository authDataGroupRepository;
+
+    @Autowired
+    private TransactionTemplate transactionTemplate;
 
     @Override
     public List<MenuListRespVO> listBpmApplicationMenu(Long applicationId) {
@@ -297,7 +301,7 @@ public class BuildAppMenuServiceImpl implements BuildAppMenuService {
     }
 
     private String validateParentMenuId(Long parentId) {
-        if (parentId == null) {
+        if (parentId == null || parentId <= 0) {
             return MenuUtils.ROOT_MENU_UUID;
         }
         AppMenuDO parentMenu = appCommonService.validateMenuExist(parentId);
@@ -384,28 +388,30 @@ public class BuildAppMenuServiceImpl implements BuildAppMenuService {
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public MenuCreateRespVO copyApplicationMenu(MenuCopyReqVO copyReqVO) {
         AppMenuDO menuDO = appCommonService.validateMenuExist(copyReqVO.getId());
         if (menuDO.getMenuType() == MenuTypeEnum.GROUP.getValue()) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_MENU_GROUP_NOT_ALLOW_COPY);
         }
-        Long sourceMenuId = menuDO.getId();
-        // 复制菜单
-        menuDO.setId(null);
-        menuDO.setMenuUuid(UuidUtils.getUuid());
-        menuDO.setMenuName(copyReqVO.getMenuName());
-        menuDO.setParentUuid(validateParentMenuId(copyReqVO.getParentId()));
-        menuDO.setMenuCode(MenuUtils.generateMenuCode());
-        appMenuRepository.save(menuDO);
-        // 复制页面
-        CopyPageSetDTO copyPageSetDTO = new CopyPageSetDTO();
-        copyPageSetDTO.setMenuId(sourceMenuId);
-        copyPageSetDTO.setNewMenuId(menuDO.getId());
-        pageSetService.copyPageSet(copyPageSetDTO);
-        //
-        MenuCreateRespVO menuCreateRespVO = BeanUtils.toBean(menuDO, MenuCreateRespVO.class);
-        return menuCreateRespVO;
+
+        return transactionTemplate.execute(transactionStatus -> {
+            AppMenuDO newMenuDO = BeanUtils.toBean(menuDO, AppMenuDO.class);
+            // 复制菜单
+            newMenuDO.setId(null);
+            newMenuDO.setMenuUuid(UuidUtils.getUuid());
+            newMenuDO.setMenuName(copyReqVO.getMenuName());
+            newMenuDO.setParentUuid(validateParentMenuId(copyReqVO.getParentId()));
+            newMenuDO.setMenuCode(MenuUtils.generateMenuCode());
+            appMenuRepository.save(newMenuDO);
+            // 复制页面
+            CopyPageSetDTO copyPageSetDTO = new CopyPageSetDTO();
+            copyPageSetDTO.setMenuDO(menuDO);
+            copyPageSetDTO.setNewMenuDO(newMenuDO);
+            pageSetService.copyPageSet(copyPageSetDTO);
+            //
+            MenuCreateRespVO menuCreateRespVO = BeanUtils.toBean(menuDO, MenuCreateRespVO.class);
+            return menuCreateRespVO;
+        });
     }
 
     @Override

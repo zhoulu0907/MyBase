@@ -88,7 +88,7 @@ public class RuntimeAuthController {
 
     @PostMapping("/third-login")
     @PermitAll
-    @Operation(summary = "企业登录（手机号）")
+    @Operation(summary = "第三方用户登录（手机号）")
     public CommonResult<ThirdAuthLoginRespVO> thirdLogin(@RequestBody @Valid ThirdAuthLoginReqVO reqVO) {
         return success(runtimeAuthService.thirdLogin(reqVO));
     }
@@ -142,7 +142,7 @@ public class RuntimeAuthController {
     @Operation(summary = "忘记密码")
     @PermitAll
     public CommonResult<Boolean> updateUserPassword(@Valid @RequestBody UserForgetPasswordReqVO reqVO) {
-        runtimeAuthService.forgetPassword(reqVO);
+        runtimeAuthService.thirdUserForgetPassword(reqVO);
         return success(true);
     }
 }

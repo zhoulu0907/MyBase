@@ -135,12 +135,15 @@ public class UserDataRepository extends DataRepository<AdminUserDO> {
      * @param deptIds 部门ID列表
      * @return 用户列表
      */
-    public List<AdminUserDO> findAllByDeptIds(Collection<Long> deptIds) {
+    public List<AdminUserDO> findAllByDeptIds(Collection<Long> deptIds, Integer userType) {
         if (deptIds == null || deptIds.isEmpty()) {
             return Collections.emptyList();
         }
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.in(AdminUserDO.DEPT_ID, deptIds);
+        if(null != userType){
+            configStore.eq(AdminUserDO.USER_TYPE, userType);
+        }
         return findAllByConfig(configStore);
     }
 
@@ -149,8 +152,17 @@ public class UserDataRepository extends DataRepository<AdminUserDO> {
      *
      * @return 用户列表
      */
-    public List<AdminUserDO> findAllNoDept() {
-        DefaultConfigStore configStore = new DefaultConfigStore();
+    public List<AdminUserDO> findNullDeptUser() {
+        DefaultConfigStore configStore = buildUserConfigStore();
+        configStore.isNull(AdminUserDO.DEPT_ID);
+        return findAllByConfig(configStore);
+    }
+
+
+    public List<AdminUserDO> findUserByUserType(Integer userType) {
+        DefaultConfigStore configStore =  new DefaultConfigStore();
+            configStore.eq(AdminUserDO.USER_TYPE, userType);
+
         configStore.isNull(AdminUserDO.DEPT_ID);
         return findAllByConfig(configStore);
     }
@@ -161,9 +173,12 @@ public class UserDataRepository extends DataRepository<AdminUserDO> {
      * @param nickname 昵称
      * @return 用户列表
      */
-    public List<AdminUserDO> findAllByNicknameLike(String nickname) {
+    public List<AdminUserDO> findAllByNicknameLike(String nickname, Integer userType) {
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.like(AdminUserDO.NICKNAME, nickname);
+        if (null != userType) {
+            configStore.eq(AdminUserDO.USER_TYPE, userType);
+        }
         return findAllByConfig(configStore);
     }
 

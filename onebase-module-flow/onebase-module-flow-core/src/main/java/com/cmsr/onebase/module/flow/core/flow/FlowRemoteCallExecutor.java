@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.flow.core.flow;
 
+import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.module.flow.context.graph.nodes.start.StartDateFieldNodeData;
 import com.cmsr.onebase.module.flow.context.graph.nodes.start.StartTimeNodeData;
 import com.cmsr.onebase.module.flow.core.config.FlowEnableCondition;
@@ -35,22 +36,22 @@ public class FlowRemoteCallExecutor {
     private FlowProcessCache flowProcessCache = FlowProcessCache.getInstance();
 
 
-    public ExecutorResult executeFlow(FlowRemoteCallRequest jobMessage) {
+    public ExecutorResult executeFlow(FlowRemoteCallRequest callRequest) {
         ExecutorResult executorResult;
         try {
             Map<String, Object> inputParams;
-            if (FlowRemoteCallRequest.JOB_TYPE_FIELD.equals(jobMessage.getJobType())) {
-                inputParams = createDateFieldInputParams(jobMessage);
-            } else if (FlowRemoteCallRequest.JOB_TYPE_TIME.equals(jobMessage.getJobType())) {
-                inputParams = createTimeInputParams(jobMessage);
+            if (FlowRemoteCallRequest.JOB_TYPE_FIELD.equals(callRequest.getJobType())) {
+                inputParams = createDateFieldInputParams(callRequest);
+            } else if (FlowRemoteCallRequest.JOB_TYPE_TIME.equals(callRequest.getJobType())) {
+                inputParams = createTimeInputParams(callRequest);
             } else {
-                return ExecutorResult.error("未知的流程类型:" + jobMessage.getJobType());
+                return ExecutorResult.error("未知的流程类型:" + callRequest.getJobType());
 
             }
-            log.info("处理流程消息: {}", jobMessage);
-            FlowProcessDO flowProcessDO = flowProcessCache.findProcessByProcessId(jobMessage.getProcessId());
+            log.info("处理流程消息: {}", callRequest);
+            FlowProcessDO flowProcessDO = flowProcessCache.findProcessByProcessId(callRequest.getProcessId());
             if (flowProcessDO == null) {
-                return ExecutorResult.error("流程不存在:" + jobMessage.getProcessId());
+                return ExecutorResult.error("流程不存在:" + callRequest.getProcessId());
             }
             ExecutorInput executorInput = createExecutorInput(flowProcessDO, inputParams);
             executorResult = flowProcessExecutor.startExecution(executorInput);
@@ -65,13 +66,20 @@ public class FlowRemoteCallExecutor {
     }
 
     private ExecutorInput createExecutorInput(FlowProcessDO flowProcessDO, Map<String, Object> inputParams) {
-        Long userDeptId = flowSystemProvider.findUserDeptId(flowProcessDO.getCreator());
+
         ExecutorInput executorInput = new ExecutorInput();
         executorInput.setTraceId(FlowUtils.generateTraceId());
         executorInput.setProcessId(flowProcessDO.getId());
         executorInput.setTriggerUserId(flowProcessDO.getCreator());
-        executorInput.setTriggerUserDeptId(userDeptId);
         executorInput.setInputParams(inputParams);
+        try {
+            //todo 忽略租户条件，等待删除
+            TenantContextHolder.setIgnore(true);
+            Long userDeptId = flowSystemProvider.findUserDeptId(flowProcessDO.getCreator());
+            executorInput.setTriggerUserDeptId(userDeptId);
+        } catch (Exception e) {
+            log.warn("获取用户部门信息异常：{}", e.getMessage(), e);
+        }
         return executorInput;
     }
 

@@ -17,8 +17,17 @@ public class AuthRoleMembersPageRespVO {
     @Schema(description = "成员ID")
     private Long memberId;
 
+    @Schema(description = "成员账号")
+    private String account;
+
     @Schema(description = "成员名称")
     private String name;
+
+    @Schema(description = "成员头像")
+    private String avatar;
+
+    @Schema(description = "创建来源")
+    private String createSourceText;
 
     @Schema(description = "成员类型")
     private String type;

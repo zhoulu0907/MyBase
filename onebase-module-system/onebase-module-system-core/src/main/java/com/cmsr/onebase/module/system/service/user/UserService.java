@@ -167,9 +167,9 @@ public interface UserService {
      * @param deptIds 部门数组
      * @return 用户数组
      */
-    List<AdminUserDO> getUserListByDeptIds(Collection<Long> deptIds);
+    List<AdminUserDO> getUserListByDeptIds(Collection<Long> deptIds, Integer userType);
 
-    List<AdminUserDO> getUserListNoDept();
+    List<AdminUserDO> getUserListNoDept(Integer userType);
 
     /**
      * 获得指定岗位的用户数组
@@ -223,7 +223,7 @@ public interface UserService {
      * @param nickname 昵称
      * @return 用户列表
      */
-    List<AdminUserDO> getUserListByNickname(String nickname);
+    List<AdminUserDO> getUserListByNickname(String nickname,Integer  userType);
 
     /**
      * 批量导入用户
@@ -336,7 +336,7 @@ public interface UserService {
      * 忘记密码
      * @param reqVO
      */
-    void forgetPassword(@Valid UserForgetPasswordReqVO reqVO);
+    void thirdUserForgetPassword(Long id, String password);
 
 
     /**
@@ -344,19 +344,19 @@ public interface UserService {
      * @param reqVO
      * @return
      */
-    ThirdSupplementUserResVO supplementUser(ThirdSupplementUserReqVO reqVO);
+    ThirdSupplementUserResVO thirdUserSupplementUser(ThirdSupplementUserReqVO reqVO);
     /**
      * 创建用户并关联应用
      * @param reqVO
      * @return
      */
-    Long createUserAndUserAppRelation( ThirdUserAppCombinedInsertReqVO reqVO);
+    Long thirdUserCreateUserAndUserAppRelation( ThirdUserAppCombinedInsertReqVO reqVO);
     /**
      * 更新用户并关联应用
      * @param reqVO
      * @return
      */
-    Long updateUserAndUserAppRelation(ThirdUserAppCombinedUpdateReqVO reqVO);
+    Long thirdUserUpdateUserAndUserAppRelation(ThirdUserAppCombinedUpdateReqVO reqVO);
 
 
     /**
@@ -372,7 +372,7 @@ public interface UserService {
      * @param id
      * @param password
      */
-    void updateThirdUserPassword(Long id, String password);
+    void thirdUserUpdatePassword(Long id, String password);
 
     /**
      * 获取用户信息
@@ -388,4 +388,11 @@ public interface UserService {
      * @return
      */
     Long thirdUserRegister(@Valid ThirdUserRegisterReqVO reqVO);
+
+    /**
+     * 获取第三方用户授权应用信息
+     * @param id
+     * @return
+     */
+    UserApplicationRespVO getThirdUserAndRelationApp(Long id);
 }
