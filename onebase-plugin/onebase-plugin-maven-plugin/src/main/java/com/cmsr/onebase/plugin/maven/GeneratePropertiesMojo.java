@@ -168,6 +168,9 @@ public class GeneratePropertiesMojo extends AbstractMojo {
 
     /**
      * 生成plugin.properties文件
+     * <p>
+     * 使用Unicode转义格式处理中文字符，确保符合Java Properties规范（ISO-8859-1编码）
+     * </p>
      */
     private void generatePluginProperties() throws MojoExecutionException {
         Properties props = new Properties();
@@ -202,12 +205,89 @@ public class GeneratePropertiesMojo extends AbstractMojo {
         }
 
         File propertiesFile = new File(outputDirectory, "plugin.properties");
-        try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(propertiesFile), StandardCharsets.UTF_8)) {
-            props.store(writer, "OneBase Plugin Properties - Auto Generated");
+        try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(propertiesFile), StandardCharsets.ISO_8859_1)) {
+            // 手动写入文件头
+            writer.write("# OneBase Plugin Properties - Auto Generated\n");
+            writer.write("# " + new java.util.Date().toString() + "\n");
+            
+            // 按照固定顺序写入属性，中文字符会自动转换为Unicode转义
+            writeProperty(writer, "plugin.id", props.getProperty("plugin.id"));
+            writeProperty(writer, "plugin.description", props.getProperty("plugin.description"));
+            writeProperty(writer, "plugin.class", props.getProperty("plugin.class"));
+            writeProperty(writer, "plugin.license", props.getProperty("plugin.license"));
+            writeProperty(writer, "plugin.version", props.getProperty("plugin.version"));
+            writeProperty(writer, "plugin.provider", props.getProperty("plugin.provider"));
+            
+            if (props.getProperty("plugin.dependencies") != null) {
+                writeProperty(writer, "plugin.dependencies", props.getProperty("plugin.dependencies"));
+            }
+            if (props.getProperty("plugin.requires") != null) {
+                writeProperty(writer, "plugin.requires", props.getProperty("plugin.requires"));
+            }
+            
             getLog().info("已生成: " + propertiesFile.getAbsolutePath());
         } catch (IOException e) {
             throw new MojoExecutionException("无法写入plugin.properties", e);
         }
+    }
+
+    /**
+     * 写入单个属性，将中文字符转换为Unicode转义格式
+     *
+     * @param writer 输出流
+     * @param key    属性键
+     * @param value  属性值
+     * @throws IOException IO异常
+     */
+    private void writeProperty(OutputStreamWriter writer, String key, String value) throws IOException {
+        if (value == null) {
+            return;
+        }
+        writer.write(escapeUnicode(key));
+        writer.write("=");
+        writer.write(escapeUnicode(value));
+        writer.write("\n");
+    }
+
+    /**
+     * 将字符串中的非ASCII字符转换为Unicode转义格式
+     * <p>
+     * 转义格式为反斜杠u加4位十六进制数字
+     * 符合Java Properties规范，确保中文等非Latin-1字符正确保存和读取
+     * </p>
+     *
+     * @param str 原始字符串
+     * @return 转义后的字符串
+     */
+    private String escapeUnicode(String str) {
+        if (str == null) {
+            return "";
+        }
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < str.length(); i++) {
+            char c = str.charAt(i);
+            // ASCII可打印字符（32-126）直接输出，其他字符转为Unicode转义
+            if (c >= 32 && c <= 126) {
+                // 特殊字符需要转义
+                if (c == '\\') {
+                    sb.append("\\\\");
+                } else if (c == '=') {
+                    sb.append("\\=");
+                } else if (c == ':') {
+                    sb.append("\\:");
+                } else if (c == '#') {
+                    sb.append("\\#");
+                } else if (c == '!') {
+                    sb.append("\\!");
+                } else {
+                    sb.append(c);
+                }
+            } else {
+                // 非ASCII字符转为Unicode转义
+                sb.append(String.format("\\u%04x", (int) c));
+            }
+        }
+        return sb.toString();
     }
 
     // Getter/Setter for testing
