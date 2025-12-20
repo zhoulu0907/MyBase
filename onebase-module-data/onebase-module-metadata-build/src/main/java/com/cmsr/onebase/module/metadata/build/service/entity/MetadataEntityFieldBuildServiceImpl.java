@@ -55,6 +55,8 @@ import com.cmsr.onebase.module.metadata.core.util.MetadataIdUuidConverter;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import com.mybatisflex.core.query.QueryColumn;
+import com.mybatisflex.core.query.QueryCondition;
 import com.mybatisflex.core.query.QueryWrapper;
 import org.anyline.entity.DataSet;
 import org.anyline.entity.DataRow;
@@ -451,8 +453,13 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         }
 
         if (queryVO.getKeyword() != null && !queryVO.getKeyword().trim().isEmpty()) {
-            queryWrapper.like(MetadataEntityFieldDO::getFieldName, queryVO.getKeyword())
-                    .or(MetadataEntityFieldDO::getDisplayName).like(queryVO.getKeyword());
+            // 构建OR条件并用括号包裹
+            String keyword = queryVO.getKeyword();
+            QueryColumn fieldNameCol = new QueryColumn("field_name");
+            QueryColumn displayNameCol = new QueryColumn("display_name");
+            QueryCondition orCondition = fieldNameCol.like(keyword).or(displayNameCol.like(keyword));
+            QueryCondition wrappedCondition = QueryCondition.createEmpty().and(orCondition);
+            queryWrapper.and(wrappedCondition);
         }
         if (queryVO.getIsSystemField() != null) {
             queryWrapper.eq(MetadataEntityFieldDO::getIsSystemField, queryVO.getIsSystemField());
@@ -473,8 +480,13 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             personWrapper.eq(MetadataEntityFieldDO::getFieldType, "USER");
             // 透传其它条件
             if (queryVO.getKeyword() != null && !queryVO.getKeyword().trim().isEmpty()) {
-                personWrapper.like(MetadataEntityFieldDO::getFieldName, queryVO.getKeyword())
-                        .or(MetadataEntityFieldDO::getDisplayName).like(queryVO.getKeyword());
+                // 构建OR条件并用括号包裹
+                String keyword = queryVO.getKeyword();
+                QueryColumn fieldNameCol = new QueryColumn("field_name");
+                QueryColumn displayNameCol = new QueryColumn("display_name");
+                QueryCondition orCondition = fieldNameCol.like(keyword).or(displayNameCol.like(keyword));
+                QueryCondition wrappedCondition = QueryCondition.createEmpty().and(orCondition);
+                personWrapper.and(wrappedCondition);
             }
             if (queryVO.getFieldCode() != null && !queryVO.getFieldCode().trim().isEmpty()) {
                 personWrapper.like(MetadataEntityFieldDO::getFieldCode, queryVO.getFieldCode());

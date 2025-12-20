@@ -43,6 +43,8 @@ import com.cmsr.onebase.module.metadata.core.util.MetadataIdUuidConverter;
 import com.cmsr.onebase.module.metadata.core.dal.database.FieldTypeMappingRepository;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.FieldTypeMappingDO;
 import com.cmsr.onebase.framework.aynline.AnylineDdlHelper;
+import com.mybatisflex.core.query.QueryColumn;
+import com.mybatisflex.core.query.QueryCondition;
 import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
@@ -824,10 +826,15 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
 
         // 删除实体关联关系
         if (entityUuid != null) {
-            QueryWrapper relationshipQueryWrapper = QueryWrapper.create()
-                    .eq(MetadataEntityRelationshipDO::getSourceEntityUuid, entityUuid)
-                    .or(MetadataEntityRelationshipDO::getTargetEntityUuid).eq(entityUuid);
-            List<MetadataEntityRelationshipDO> relationshipDOs = metadataEntityRelationshipBuildService.findAllByConfig(relationshipQueryWrapper);
+            // 构建OR条件并用括号包裹
+            QueryColumn sourceCol = new QueryColumn("source_entity_uuid");
+            QueryColumn targetCol = new QueryColumn("target_entity_uuid");
+            QueryCondition orCondition = sourceCol.eq(entityUuid).or(targetCol.eq(entityUuid));
+            QueryCondition wrappedCondition = QueryCondition.createEmpty().and(orCondition);
+            
+            QueryWrapper relationshipQueryWrapper = metadataEntityRelationshipRepository.query()
+                    .and(wrappedCondition);
+            List<MetadataEntityRelationshipDO> relationshipDOs = metadataEntityRelationshipRepository.list(relationshipQueryWrapper);
             for(MetadataEntityRelationshipDO relationshipDO : relationshipDOs){
                 metadataEntityRelationshipBuildService.deleteEntityRelationship(relationshipDO.getId());
             }
@@ -1056,12 +1063,21 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
                 .map(MetadataBusinessEntityDO::getEntityUuid)
                 .toList();
 
-        QueryWrapper relationshipQueryWrapper = QueryWrapper.create()
-                .in(MetadataEntityRelationshipDO::getSourceEntityUuid, entityUuids)
-                .or(MetadataEntityRelationshipDO::getTargetEntityUuid).in(entityUuids)
+        // 构建OR条件并用括号包裹，确保生成正确的SQL
+        // 正确的SQL: WHERE tenant_id = ? AND (application_id = ? AND version_tag = ?) 
+        //           AND (source_entity_uuid IN (...) OR target_entity_uuid IN (...))
+        QueryColumn sourceCol = new QueryColumn("source_entity_uuid");
+        QueryColumn targetCol = new QueryColumn("target_entity_uuid");
+        // 构建OR条件
+        QueryCondition orCondition = sourceCol.in(entityUuids).or(targetCol.in(entityUuids));
+        // 用空条件包裹OR条件，确保括号正确
+        QueryCondition wrappedCondition = QueryCondition.createEmpty().and(orCondition);
+        
+        QueryWrapper relationshipQueryWrapper = metadataEntityRelationshipRepository.query()
+                .and(wrappedCondition)
                 .orderBy(MetadataEntityRelationshipDO::getCreateTime, false);
 
-        List<MetadataEntityRelationshipDO> relationshipDOs = metadataEntityRelationshipBuildService.findAllByConfig(
+        List<MetadataEntityRelationshipDO> relationshipDOs = metadataEntityRelationshipRepository.list(
                 relationshipQueryWrapper);
 
         // 批量收集所有需要查询的字段UUID（性能优化：避免循环单条查询）
