@@ -99,7 +99,8 @@ public class RuntimeAppApplicationServiceImpl implements AppApplicationService {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_NOT_EXIST);
         }
         AppLeastInfo respVO = new AppLeastInfo();
-        AppNavigationDO appNavigationDO = TenantManager.withoutTenantCondition(() -> ApplicationManager.withoutApplicationIdAndVersionTag(() ->
+        AppNavigationDO appNavigationDO = TenantManager.withoutTenantCondition(() ->
+                ApplicationManager.withoutApplicationIdAndVersionTag(() ->
                 appNavigationRepository.findByApplicationId(id)
         ));
         if (appNavigationDO != null) {

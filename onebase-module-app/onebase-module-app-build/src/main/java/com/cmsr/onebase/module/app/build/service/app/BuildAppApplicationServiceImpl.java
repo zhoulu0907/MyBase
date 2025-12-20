@@ -392,20 +392,25 @@ public class BuildAppApplicationServiceImpl implements AppApplicationService {
     public ApplicationNavigationConfigVO getApplicationNavigationConfig(Long id) {
         appCommonService.validateApplicationExist(id);
         AppNavigationDO appNavigationDO = appNavigationRepository.findByApplicationId(id);
-        ApplicationNavigationConfigVO respVO = BeanUtils.toBean(appNavigationDO, ApplicationNavigationConfigVO.class);
-        return respVO;
+        if (appNavigationDO == null) {
+            appNavigationDO = new AppNavigationDO();
+        }
+        return BeanUtils.toBean(appNavigationDO, ApplicationNavigationConfigVO.class);
     }
 
     @Override
     public void updateApplicationNavigationConfig(ApplicationNavigationConfigVO updateReqVO) {
         appCommonService.validateApplicationExist(updateReqVO.getId());
         AppNavigationDO appNavigationDO = appNavigationRepository.findByApplicationId(updateReqVO.getId());
+        if (appNavigationDO == null) {
+            appNavigationDO = new AppNavigationDO();
+        }
         // 设置数据
         appNavigationDO.setWebDefaultMenu(updateReqVO.getWebDefaultMenu());
         appNavigationDO.setWebNavLayout(updateReqVO.getWebNavLayout());
         appNavigationDO.setMobileDefaultMenu(updateReqVO.getMobileDefaultMenu());
         appNavigationDO.setMobileNavLayout(updateReqVO.getMobileNavLayout());
-        appNavigationRepository.save(appNavigationDO);
+        appNavigationRepository.saveOrUpdate(appNavigationDO);
     }
 
 }
