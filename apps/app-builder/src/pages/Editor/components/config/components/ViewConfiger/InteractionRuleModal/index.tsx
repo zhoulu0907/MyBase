@@ -119,8 +119,8 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
       // 过滤图片、文件、子表
       .filter((item: any) => {
         return ![
-          FORM_COMPONENT_TYPES.IMG_UPLOAD,
-          FORM_COMPONENT_TYPES.FILE_UPLOAD,
+          //   FORM_COMPONENT_TYPES.IMG_UPLOAD,
+          //   FORM_COMPONENT_TYPES.FILE_UPLOAD,
           FORM_COMPONENT_TYPES.SUB_TABLE
         ].includes(item?.type);
       })
