@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.app.runtime.service.app;
 
 import com.cmsr.onebase.framework.common.enums.VersionTagEnum;
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.app.core.dal.database.app.AppApplicationRepository;
 import com.cmsr.onebase.module.app.core.dal.database.app.AppNavigationRepository;
@@ -12,8 +13,9 @@ import com.cmsr.onebase.module.app.core.dal.dataobject.AppNavigationDO;
 import com.cmsr.onebase.module.app.core.enums.AppErrorCodeConstants;
 import com.cmsr.onebase.module.app.core.enums.app.AppStatusEnum;
 import com.cmsr.onebase.module.app.core.vo.app.ApplicationNavigationConfigVO;
-import com.cmsr.onebase.module.app.runtime.vo.app.ApplicationRespVO;
-import com.cmsr.onebase.module.app.runtime.vo.tag.TagRespVO;
+import com.cmsr.onebase.module.app.core.vo.app.ApplicationRespVO;
+import com.cmsr.onebase.module.app.core.vo.tag.TagRespVO;
+import com.cmsr.onebase.module.app.runtime.vo.app.AppLeastInfo;
 import com.mybatisflex.core.tenant.TenantManager;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +35,7 @@ import java.util.List;
 @Service
 @Validated
 @Slf4j
-public class AppApplicationServiceImpl implements AppApplicationService {
+public class RuntimeAppApplicationServiceImpl implements AppApplicationService {
 
     @Autowired
     private AppApplicationRepository applicationRepository;
@@ -47,7 +49,6 @@ public class AppApplicationServiceImpl implements AppApplicationService {
     @Autowired
     private AppNavigationRepository appNavigationRepository;
 
-
     private List<TagRespVO> queryAppTags(Long appId) {
         List<Long> tagIds = applicationTagRepository.findTagIdsByApplicationId(appId);
         if (CollectionUtils.isEmpty(tagIds)) {
@@ -58,31 +59,55 @@ public class AppApplicationServiceImpl implements AppApplicationService {
                 .toList();
     }
 
+    /**
+     * // TODO 有问题的，绕行了
+     *
+     * @param id
+     * @return
+     */
     @Override
     public ApplicationRespVO getApplication(Long id) {
-        // TODO 有问题的，绕行了
         AppApplicationDO applicationDO = TenantManager.withoutTenantCondition(() -> applicationRepository.getById(id));
         if (applicationDO == null) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_NOT_EXIST);
         }
-        // AppCommonService.UserHelper userHelper =
-        // appCommonService.getUserHelper(applicationDO);
-        ApplicationRespVO respVO = BeanUtils.toBean(applicationDO, ApplicationRespVO.class, vo -> {
-            vo.setAppStatusText(AppStatusEnum.getText(vo.getAppStatus()));
-            vo.setTags(queryAppTags(vo.getId()));
-            // vo.setCreateUser(userHelper.getUserNickname(applicationDO.getCreator()));
-            // vo.setUpdateUser(userHelper.getUserNickname(applicationDO.getUpdater()));
-        });
+        ApplicationRespVO respVO = new ApplicationRespVO();
+
+        AppNavigationDO appNavigationDO = appNavigationRepository.findByApplicationId(id);
+        if (appNavigationDO != null) {
+            BeanUtils.copyProperties(appNavigationDO, respVO);
+        }
+        BeanUtils.copyProperties(applicationDO, respVO);
+        respVO.setAppStatusText(AppStatusEnum.getText(respVO.getAppStatus()));
+        respVO.setTags(queryAppTags(respVO.getId()));
         return respVO;
     }
 
     @Override
     public ApplicationNavigationConfigVO getApplicationNavigationConfig(Long id) {
-        AppNavigationDO appNavigationDO = appNavigationRepository.findByApplicationId(id, VersionTagEnum.RUNTIME.getValue());
+        AppNavigationDO appNavigationDO = appNavigationRepository.findByApplicationId(id);
         ApplicationNavigationConfigVO respVO = new ApplicationNavigationConfigVO();
         if (appNavigationDO != null) {
             BeanUtils.copyProperties(appNavigationDO, respVO);
         }
+        return respVO;
+    }
+
+    @Override
+    public AppLeastInfo getApplicationLeastInfo(Long id) {
+        AppApplicationDO applicationDO = TenantManager.withoutTenantCondition(() -> applicationRepository.getById(id));
+        if (applicationDO == null) {
+            throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_NOT_EXIST);
+        }
+        AppLeastInfo respVO = new AppLeastInfo();
+        AppNavigationDO appNavigationDO = TenantManager.withoutTenantCondition(() ->
+                ApplicationManager.withoutApplicationIdAndVersionTag(() ->
+                        appNavigationRepository.findByApplicationIdAndVersionTag(id, VersionTagEnum.RUNTIME.getValue())
+                ));
+        if (appNavigationDO != null) {
+            BeanUtils.copyProperties(appNavigationDO, respVO);
+        }
+        BeanUtils.copyProperties(applicationDO, respVO);
         return respVO;
     }
 
