@@ -115,9 +115,9 @@ export const OutputNodeConfig: React.FC<OutputNodeConfigProps> = ({ onRegisterSa
     }
     const res = await listAppETLDatasource({
       applicationId: curAppId,
-      writable: 1
+      readonly: 0
     });
-    console.log('res: ', res);
+
     setDatasourceOptions(res);
   };
 
