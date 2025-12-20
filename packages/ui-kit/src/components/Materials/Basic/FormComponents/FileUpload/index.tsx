@@ -101,7 +101,8 @@ const XFileUpload = memo(
               {getFileIcon(file)}
               <Typography.Ellipsis
                 showTooltip
-                className={`uplaodList-text-item-name ${showDownload ? 'uplaodList-text-item-name-hover' : ''}`}
+                // className={`uplaodList-text-item-name ${showDownload ? 'uplaodList-text-item-name-hover' : ''}`}
+                className={`${showDownload ? 'uplaodList-text-item-name-hover' : ''}`}
               >
                 {file.name}
               </Typography.Ellipsis>

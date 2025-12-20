@@ -19,13 +19,13 @@ import {
   dataMethodPageV2,
   DeleteMethodV2Params,
   getEntityFieldsWithChildren,
+  getFormDataPage,
   menuSignal,
   PageMethodV2Params,
-  getFormDataPage,
+  PageType,
   queryFlowExecForm,
   TRIGGER_EVENTS,
   VALIDATION_TYPE,
-  PageType,
   type AppEntityField
 } from '@onebase/app';
 import {
@@ -90,8 +90,15 @@ const XTable = memo(
 
     const { pageComponentSchemas: fromPageComponentSchemas, components } = useFormEditorSignal;
 
-    const { curPage, setDrawerVisible, setDrawerPageId, setDetailPageViewId, setRowDataId, setFlows, setBpmInstanceId } =
-      pagesRuntimeSignal;
+    const {
+      curPage,
+      setDrawerVisible,
+      setDrawerPageId,
+      setDetailPageViewId,
+      setRowDataId,
+      setFlows,
+      setBpmInstanceId
+    } = pagesRuntimeSignal;
     const { runtime = true, showFromPageData, showAddBtn = true, preview } = props;
     const hasOperationPermission = true;
 
@@ -263,7 +270,7 @@ const XTable = memo(
 
     useEffect(() => {
       getFinalColumns();
-    }, [showOpearate, columns, fixedOpearate, selectedRowId]);
+    }, [showOpearate, columns, fixedOpearate, selectedRowId, tablePageNo]);
 
     useEffect(() => {
       if (finalColumns && metaData) {
@@ -313,7 +320,10 @@ const XTable = memo(
                   );
 
                   if (dataFieldInfo && _record[dataFieldInfo.fieldName]) {
-                    dataField = [mainMetaData.tableName, `${mainMetaData.tableName}.${index}.${dataFieldInfo.fieldName}`];
+                    dataField = [
+                      mainMetaData.tableName,
+                      `${mainMetaData.tableName}.${index}.${dataFieldInfo.fieldName}`
+                    ];
                   }
                 }
 
@@ -362,7 +372,10 @@ const XTable = memo(
                     ...basicConfig,
                     config: {
                       ...basicConfig.config,
-                      dataField: [mainMetaData.tableName, `${mainMetaData.tableName}.${index}.${dataFieldInfo.fieldName}`],
+                      dataField: [
+                        mainMetaData.tableName,
+                        `${mainMetaData.tableName}.${index}.${dataFieldInfo.fieldName}`
+                      ],
                       label: {
                         display: false,
                         text: ''
@@ -465,7 +478,7 @@ const XTable = memo(
       if (!runtime || !metaData || !isRuntimeEnv()) {
         return;
       }
-      
+
       queryData = form.getFieldsValue();
 
       // TODO(mickey): 后续调试
@@ -504,14 +517,14 @@ const XTable = memo(
         pageSize: pageSize || 10,
         filters: filters
       };
-      let res:any
+      let res: any;
       if (props?.pageSetType === PageType.BPM) {
-        const params={
-	        menuId: curMenu.value?.id,
-	        tableName,
+        const params = {
+          menuId: curMenu.value?.id,
+          tableName,
           ...req
-        }
-       res = await getFormDataPage(params)
+        };
+        res = await getFormDataPage(params);
       } else {
         res = await dataMethodPageV2(tableName, curMenu.value?.id, req);
       }
