@@ -1,4 +1,4 @@
-import { Button, Grid, Message, Select } from '@arco-design/web-react';
+import { Grid, Message, Select } from '@arco-design/web-react';
 import {
   listAppETLDatasource,
   listETLTableColumns,
@@ -24,8 +24,6 @@ export const OutputNodeConfig: React.FC<OutputNodeConfigProps> = ({ onRegisterSa
   useSignals();
 
   const { curDrawerTab, setNodeData, curNode, nodeData } = etlEditorSignal;
-
-  const [isModalVisible, setIsModalVisible] = useState(false);
 
   const [datasourceOptions, setDatasourceOptions] = useState<ETLDatasourceOption[]>([]);
   const [datasourceType, setDatasourceType] = useState<string>('external');
@@ -131,10 +129,6 @@ export const OutputNodeConfig: React.FC<OutputNodeConfigProps> = ({ onRegisterSa
     setTableOptions(res);
   };
 
-  const openFieldModal = () => {
-    setIsModalVisible(true);
-  };
-
   const handleSelectTableOnChange = async (tableUuid: string) => {
     setSelectTableUUID(tableUuid);
     handleListETLTableColumns(tableUuid);
@@ -161,7 +155,7 @@ export const OutputNodeConfig: React.FC<OutputNodeConfigProps> = ({ onRegisterSa
     setTargetColumns(res);
   };
 
-  const handleFieldModalOk = (validFields: FieldMapping[]) => {
+  const handleFieldMappingChange = (validFields: FieldMapping[]) => {
     console.log('validFields: ', validFields);
     const payload = newPayload;
 
@@ -171,84 +165,81 @@ export const OutputNodeConfig: React.FC<OutputNodeConfigProps> = ({ onRegisterSa
     };
 
     payload.output = {
-      verified: true
+      verified: validFields.length > 0
     };
 
     setNewPayload(payload);
     setFieldMappings(validFields);
   };
 
+  const shouldShowFieldMapping =
+    curDrawerTab.value === ETLDrawerTab.DATA_CONFIG && selectDatasourceUUID && targetColumns.length > 0;
+
   return (
     <div className={styles.config}>
       {curDrawerTab.value === ETLDrawerTab.DATA_CONFIG && (
-        <div className={styles.dataConfig}>
-          <Row>同步数据源</Row>
-          <Row gutter={24}>
-            <Col span={12}>
-              <Select
-                style={{ width: '200px' }}
-                value={datasourceType}
-                onChange={handleDatasourceTypeOnChange}
-                options={[
-                  { label: '内部数据源', value: 'internal' },
-                  { label: '外部数据源', value: 'external' }
-                ]}
-              />
-            </Col>
-            <Col span={12}>
-              <Select
-                style={{ width: '200px' }}
-                placeholder="请选择数据源"
-                value={selectDatasourceUUID}
-                options={datasourceOptions.map((option) => ({ label: option.name, value: option.uuid }))}
-                onChange={handleDatasourceUUIDOnChange}
-              />
-            </Col>
-          </Row>
+        <div className={styles.dataConfigContainer}>
+          <div className={styles.leftPanel}>
+            <div className={styles.dataConfig}>
+              <Row>选择同步数据源</Row>
+              <Row gutter={24}>
+                <Col span={12}>
+                  <Select
+                    style={{ width: '200px' }}
+                    value={datasourceType}
+                    onChange={handleDatasourceTypeOnChange}
+                    options={[
+                      { label: '内部数据源', value: 'internal' },
+                      { label: '外部数据源', value: 'external' }
+                    ]}
+                  />
+                </Col>
+                <Col span={12}>
+                  <Select
+                    style={{ width: '200px' }}
+                    placeholder="请选择数据源"
+                    value={selectDatasourceUUID}
+                    options={datasourceOptions.map((option) => ({ label: option.name, value: option.uuid }))}
+                    onChange={handleDatasourceUUIDOnChange}
+                  />
+                </Col>
+              </Row>
 
-          <Row style={{ marginTop: '16px' }}>同步表单</Row>
-          <Row gutter={24}>
-            <Col span={12}>
-              <Select
-                style={{ width: '200px' }}
-                value={selectTableUUID}
-                options={tableOptions.map((option) => ({ label: option.name, value: option.uuid }))}
-                onChange={handleSelectTableOnChange}
+              <Row style={{ marginTop: '16px' }}>选择同步表单</Row>
+              <Row>
+                <Col span={24}>
+                  <Select
+                    style={{ width: '425px' }}
+                    value={selectTableUUID}
+                    options={tableOptions.map((option) => ({ label: option.name, value: option.uuid }))}
+                    onChange={handleSelectTableOnChange}
+                  />
+                </Col>
+              </Row>
+            </div>
+          </div>
+          {shouldShowFieldMapping && (
+            <div className={styles.rightPanel}>
+              <FieldModal
+                key={selectTableUUID}
+                targetColumns={targetColumns.map((option: ELTColumn) => ({
+                  fieldFqn: option.fieldFqn,
+                  fieldName: option.fieldName,
+                  fieldType: option.fieldType,
+                  displayName: option.displayName
+                }))}
+                enabled={shouldShowFieldMapping}
+                initialMappings={fieldMappings}
+                onChange={handleFieldMappingChange}
               />
-            </Col>
-            <Col span={12}>
-              <Button
-                style={{ width: '200px' }}
-                type="secondary"
-                onClick={openFieldModal}
-                disabled={!selectDatasourceUUID || !targetColumns.length}
-              >
-                设置同步字段
-              </Button>
-            </Col>
-          </Row>
+            </div>
+          )}
         </div>
       )}
 
       {curDrawerTab.value === ETLDrawerTab.DATA_PREVIEW && <div className={styles.dataPreview}></div>}
 
       {curDrawerTab.value === ETLDrawerTab.NODE_REMARK && <DataRemark />}
-
-      <FieldModal
-        targetColumns={targetColumns.map((option: ELTColumn) => ({
-          fieldFqn: option.fieldFqn,
-          fieldName: option.fieldName,
-          fieldType: option.fieldType,
-          displayName: option.displayName
-        }))}
-        isModalVisible={isModalVisible}
-        initialMappings={fieldMappings}
-        onClose={() => setIsModalVisible(false)}
-        onOk={(validFields) => {
-          handleFieldModalOk(validFields);
-          setIsModalVisible(false);
-        }}
-      />
     </div>
   );
 };
