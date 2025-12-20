@@ -39,10 +39,6 @@ const FieldModal: React.FC<FieldModalProps> = ({ isModalVisible, onClose, onOk, 
       return;
     }
 
-    console.log('graphData: ', graphData.value);
-    console.log('curNode: ', curNode.value);
-    console.log('nodeData: ', nodeData.value);
-
     // 根据 curNode.value.id 从 graphData 中找到对应的 sourceNodeID
     let sourceNodeIds = getSourceNodeIdsByTarget(graphData.value, curNode.value.id);
 
@@ -173,12 +169,17 @@ const FieldModal: React.FC<FieldModalProps> = ({ isModalVisible, onClose, onOk, 
         .filter((id) => !!id)
     );
 
-    return targetColumns
-      .filter((column) => (!targetType || column.fieldType === targetType) && !selectedIds.has(column.fieldFqn))
+    // TODO(mickey): targetType和fieldType匹配需要和后端商量后重构
+
+    const avaliableTargetOptions = targetColumns
+      //   .filter((column) => (!targetType || column.fieldType === targetType) && !selectedIds.has(column.fieldFqn))
+      .filter((column) => !selectedIds.has(column.fieldFqn))
       .map((column) => ({
         label: column.fieldName,
         value: column.fieldFqn
       }));
+
+    return avaliableTargetOptions;
   };
 
   return (
