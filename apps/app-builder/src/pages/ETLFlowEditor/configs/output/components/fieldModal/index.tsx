@@ -52,16 +52,17 @@ const FieldModal: React.FC<FieldModalProps> = ({ enabled, onChange, targetColumn
     // 根据 curNode.value.id 从 graphData 中找到对应的 sourceNodeID
     let sourceNodeIds = getSourceNodeIdsByTarget(graphData.value, curNode.value.id);
 
+    let outputCols: ELTColumn[] = [];
     if (sourceNodeIds && sourceNodeIds.length > 0) {
       const sourceNodeData = nodeData.value[sourceNodeIds[0]];
       console.log('sourceNodeData: ', sourceNodeData);
-      setOutputColumns(
+      outputCols =
         sourceNodeData?.output?.fields?.map((field: any) => ({
           fieldFqn: field.fieldFqn,
           fieldName: field.fieldName,
           fieldType: field.fieldType
-        })) ?? []
-      );
+        })) ?? [];
+      setOutputColumns(outputCols);
     } else {
       // 如果没有找到源节点，清空 outputColumns
       setOutputColumns([]);
@@ -72,6 +73,16 @@ const FieldModal: React.FC<FieldModalProps> = ({ enabled, onChange, targetColumn
       setFieldMappings(
         initialMappings.map((item) => ({
           ...item
+        }))
+      );
+    } else if (outputCols.length > 0) {
+      // 如果有输出字段，为每个输出字段创建一个映射，同步表字段为空
+      setFieldMappings(
+        outputCols.map((column) => ({
+          sourceFieldFqn: column.fieldFqn,
+          sourceFieldName: column.fieldName,
+          sourceFieldType: column.fieldType,
+          targetFieldName: ''
         }))
       );
     } else {
