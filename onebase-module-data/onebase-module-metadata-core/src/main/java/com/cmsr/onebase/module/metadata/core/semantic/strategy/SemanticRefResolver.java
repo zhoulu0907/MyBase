@@ -9,6 +9,7 @@ import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticRelationValueD
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticRowValueDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticFieldTypeEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.type.RefType;
+import com.cmsr.onebase.module.metadata.core.service.entity.MetadataEntityFieldCoreService;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldOptionDTO;
 import com.cmsr.onebase.module.metadata.core.enums.RelationshipTypeEnum;
@@ -66,6 +67,9 @@ public class SemanticRefResolver {
 
     @Resource
     private DynamicMetadataRepository dynamicMetadataRepository;
+
+    @Resource
+    private MetadataEntityFieldCoreService metadataEntityFieldCoreService;
 
     /**
      * 对实体值进行语义增强
@@ -129,7 +133,8 @@ public class SemanticRefResolver {
         Map<Long, MetadataEntityFieldDO> fieldSchemaMap = buildFieldSchemaMap(entity);
         Map<Long, List<SemanticFieldOptionDTO>> fieldOptionsCache = buildOptionsCacheFromEntity(entity, selectFieldIds);
         Map<Long, Map<String, String>> dictLabelCacheByFieldId = buildDictLabelCacheByFieldId(entity, selectFieldIds, fieldSchemaMap);
-        DataSelectionContext dataSelection = buildDataSelectionContext(entity, values.get(0));
+        // 修复：批量处理时需要收集所有记录的数据选择ID，而不是只用第一条记录
+        DataSelectionContext dataSelection = buildDataSelectionContextBatch(entity, values);
         Map<Long, FileListRespDTO> files = buildFileCache(fileIds);
 
         ResolveContext context = new ResolveContext(users, depts, fieldSchemaMap, fieldOptionsCache, dictLabelCacheByFieldId, dataSelection.metaByFieldUuid, dataSelection.mainsByTable, files);
@@ -442,7 +447,7 @@ public class SemanticRefResolver {
             List<Object> ids = new ArrayList<>(e.getValue());
             if (ids.isEmpty()) continue;
             List<Row> mains = dynamicMetadataRepository.selectMainByIds(table, pk, ids);
-            
+
             Map<Object, Row> rowById = new HashMap<>();
             for (Row r : mains) { rowById.put(r.get(pk), r); }
             mainsByTable.put(table, rowById);
@@ -467,7 +472,33 @@ public class SemanticRefResolver {
         return new DataSelectionContext(metaByFieldUuid, mainsByTable);
     }
 
-    
+    /**
+     * 批量构建数据选择上下文
+     *
+     * <p>收集所有记录的数据选择ID，一次性查询所有关联数据。</p>
+     *
+     * @param entity 实体Schema
+     * @param values 值模型列表
+     * @return 数据选择上下文
+     */
+    private DataSelectionContext buildDataSelectionContextBatch(SemanticEntitySchemaDTO entity, List<SemanticEntityValueDTO> values) {
+        Map<String, DataSelectMeta> metaByFieldUuid = buildDataSelectMeta(entity);
+        // 收集所有记录的数据选择ID
+        Map<String, Set<Object>> idsByTable = new HashMap<>();
+        if (values != null) {
+            for (SemanticEntityValueDTO value : values) {
+                Map<String, Set<Object>> singleIds = collectDataSelectIdsByTable(value, metaByFieldUuid);
+                for (Map.Entry<String, Set<Object>> entry : singleIds.entrySet()) {
+                    idsByTable.computeIfAbsent(entry.getKey(), k -> new HashSet<>()).addAll(entry.getValue());
+                }
+            }
+        }
+        Map<String, String> pkFieldByTable = buildPkFieldByTableFromMeta(metaByFieldUuid);
+        Map<String, Map<Object, Row>> mainsByTable = buildMainsByTable(idsByTable, pkFieldByTable);
+        return new DataSelectionContext(metaByFieldUuid, mainsByTable);
+    }
+
+
 
     /**
      * 构建文件字段的标准输出结构
@@ -522,7 +553,8 @@ public class SemanticRefResolver {
         Map<Object, Row> byId = mainsByTable.get(meta.tableName);
         mapListOrSingle(v, o -> {
             Object idObj = extractId(o);
-            Row r = byId == null ? null : byId.get(idObj);
+            // byId 的 key 是 Long 类型，需要统一转换后查找
+            Row r = byId == null ? null : byId.get(toLong(idObj));
             Map<String, Object> m = new HashMap<>();
             m.put("id", idObj);
             if (r != null && meta.selectFieldName != null) { m.put("name", r.get(meta.selectFieldName)); }
@@ -687,10 +719,22 @@ public class SemanticRefResolver {
      * @return 字段名或 null
      */
     private String getFieldNameByUuidFromConnector(SemanticRelationSchemaDTO c, String fieldUuid) {
-        if (c == null || c.getRelationAttributes() == null || fieldUuid == null) return null;
-        for (SemanticFieldSchemaDTO f : c.getRelationAttributes()) {
-            if (f != null && fieldUuid.equals(f.getFieldUuid())) return f.getFieldName();
+        if (c == null || fieldUuid == null) return null;
+        // 首先在 relationAttributes 中查找
+        if (c.getRelationAttributes() != null) {
+            for (SemanticFieldSchemaDTO f : c.getRelationAttributes()) {
+                if (f != null && fieldUuid.equals(f.getFieldUuid())) return f.getFieldName();
+            }
         }
+        // 后备方案：如果在 relationAttributes 中找不到，直接通过 UUID 查询数据库
+        if (metadataEntityFieldCoreService != null) {
+            MetadataEntityFieldDO fieldDO = metadataEntityFieldCoreService.getEntityFieldByUuid(fieldUuid);
+            if (fieldDO != null) {
+                log.debug("通过后备查询获取 selectFieldName: fieldUuid={}, fieldName={}", fieldUuid, fieldDO.getFieldName());
+                return fieldDO.getFieldName();
+            }
+        }
+        log.warn("无法获取 selectFieldName: fieldUuid={}, connector={}", fieldUuid, c.getRelationName());
         return null;
     }
 
@@ -744,6 +788,10 @@ public class SemanticRefResolver {
             if (options == null || options.isEmpty()) return null;
             String valueStr = String.valueOf(idOrVal);
             for (SemanticFieldOptionDTO opt : options) {
+                // 同时支持用 id 和 optionValue 匹配
+                if (opt.getId() != null && String.valueOf(opt.getId()).equals(valueStr)) {
+                    return opt.getOptionLabel();
+                }
                 if (opt.getOptionValue() != null && opt.getOptionValue().equals(valueStr)) {
                     return opt.getOptionLabel();
                 }
@@ -777,7 +825,7 @@ public class SemanticRefResolver {
         if (dictTypeIds.isEmpty()) return result;
 
         Map<Long, List<DictDataRespDTO>> dictDataBatch = dictDataApi.getDictDataListByTypeIds(dictTypeIds).getCheckedData();
-        
+
         if (log.isDebugEnabled()) { log.debug("dictDataBatch: {}", dictDataBatch); }
         if (dictDataBatch == null || dictDataBatch.isEmpty()) return result;
 

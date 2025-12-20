@@ -1,13 +1,15 @@
 package com.cmsr.onebase.module.flow.core.flow;
 
 import com.cmsr.onebase.module.flow.context.ExecuteContext;
+import com.cmsr.onebase.module.flow.context.ExecuteLog;
 import com.cmsr.onebase.module.flow.context.VariableContext;
 import com.cmsr.onebase.module.flow.context.graph.NodeData;
 import com.cmsr.onebase.module.flow.context.provider.FlowContextProvider;
+import com.cmsr.onebase.module.flow.core.config.FlowEnableCondition;
 import com.cmsr.onebase.module.flow.core.config.FlowProperties;
-import com.cmsr.onebase.module.flow.core.config.FlowRuntimeCondition;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowExecutionLogRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowExecutionLogDO;
+import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
 import com.cmsr.onebase.module.flow.core.enums.ExecutionResultEnum;
 import com.cmsr.onebase.module.flow.core.graph.FlowProcessCache;
 import com.cmsr.onebase.module.flow.core.utils.FlowUtils;
@@ -38,7 +40,7 @@ import java.util.UUID;
 @Setter
 @Slf4j
 @Component
-@Conditional(FlowRuntimeCondition.class)
+@Conditional(FlowEnableCondition.class)
 public class FlowProcessExecutor {
 
     @Autowired
@@ -56,6 +58,9 @@ public class FlowProcessExecutor {
     @Autowired
     private FlowProperties flowProperties;
 
+    private FlowProcessCache flowProcessCache = FlowProcessCache.getInstance();
+
+
     /**
      * 执行新流程（基于traceId和输入参数）
      */
@@ -65,7 +70,7 @@ public class FlowProcessExecutor {
             return ExecutorResult.error("traceId不能为空");
         }
         Long processId = executorInput.getProcessId();
-        if (!FlowProcessCache.isProcessExist(processId)) {
+        if (!flowProcessCache.isProcessExist(processId)) {
             return ExecutorResult.error("流程不存在: " + processId);
         }
         ExecuteContext executeContext = createExecuteContext(executorInput);
@@ -77,7 +82,7 @@ public class FlowProcessExecutor {
             VariableContext variableContext = new VariableContext();
             variableContext.setInputParams(executorInput.getInputParams());
             //初始化执行上下文
-            Map<String, NodeData> nodeData = FlowProcessCache.findNodeData(processId);
+            Map<String, NodeData> nodeData = flowProcessCache.findNodeData(processId);
             executeContext.setNodeDataMap(nodeData);
 
             executeContext.addLog("检查流程触发次数");
@@ -107,10 +112,12 @@ public class FlowProcessExecutor {
     }
 
     private ExecuteContext createExecuteContext(ExecutorInput executorInput) {
+        FlowProcessDO flowProcessDO = flowProcessCache.findProcessByProcessId(executorInput.getProcessId());
+        //
         ExecuteContext executeContext = new ExecuteContext();
         executeContext.setProcessId(executorInput.getProcessId());
         executeContext.setVersionTag(flowProperties.getVersionTag());
-        executeContext.setApplicationId(FlowProcessCache.findApplicationByProcessId(executorInput.getProcessId()));
+        executeContext.setApplicationId(flowProcessDO.getApplicationId());
         executeContext.setTraceId(executorInput.getTraceId());
         executeContext.setExecutionUuid(UUID.randomUUID().toString());
         executeContext.setTriggerUserId(executorInput.getTriggerUserId());
@@ -127,40 +134,37 @@ public class FlowProcessExecutor {
      */
     public ExecutorResult resumeExecution(ExecutorInput executorInput) {
         Long processId = executorInput.getProcessId();
-        if (!FlowProcessCache.isProcessExist(processId)) {
+        if (!flowProcessCache.isProcessExist(processId)) {
             return ExecutorResult.error("流程不存在: " + processId);
         }
         FlowExecutionLogDO executionLog = createNewExecutionLog(executorInput);
         ExecuteContext executeContext = null;
         try {
-            ExecuteContext tmpExecuteContext = new ExecuteContext();
+            ExecuteLog executeLog = new ExecuteLog();
             //初始化变量上下文
-            String executionUuid = executeContext.getExecutionUuid();
-            tmpExecuteContext.addLog("恢复变量上下文");
+            String executionUuid = executorInput.getExecutionUuid();
+            executeLog.addLog("恢复变量上下文");
             VariableContext variableContext = flowContextProvider.restoreVariableContext(executionUuid);
-            tmpExecuteContext.addLog("恢复变量上下文结束");
+            executeLog.addLog("恢复变量上下文结束");
             if (variableContext == null) {
                 throw new Exception("执行上下文不存在或已过期: " + executionUuid);
             }
             //初始化执行上下文
-            tmpExecuteContext.addLog("恢复执行上下文");
+            executeLog.addLog("恢复执行上下文");
             executeContext = flowContextProvider.restoreExecuteContext(executionUuid);
-            tmpExecuteContext.addLog("恢复执行上下文结束");
-            if (tmpExecuteContext == null) {
+            executeLog.addLog("恢复执行上下文结束");
+            if (executeContext == null) {
                 throw new Exception("执行上下文不存在或已过期: " + executionUuid);
             }
-            //
-            executeContext.setStopwatch(tmpExecuteContext.getStopwatch());
-            Map<String, NodeData> nodeData = FlowProcessCache.findNodeData(processId);
-            executeContext.setNodeDataMap(nodeData);
-
-            variableContext.setInputFields(executorInput.getInputParams());
-            variableContext.setOutputParams(Collections.emptyMap());
-
-            //重置执行结果
-            executeContext.resetNodeProcessResult();
             //执行上下文添加执行UUID
             executeContext.setExecutionUuid(UUID.randomUUID().toString());
+            executeContext.setExecuteLog(executeLog);
+            Map<String, NodeData> nodeData = flowProcessCache.findNodeData(processId);
+            executeContext.setNodeDataMap(nodeData);
+            executeContext.setSystemFields(executorInput.getSystemFields());
+
+            variableContext.setInputParams(executorInput.getInputParams());
+            variableContext.setOutputParams(Collections.emptyMap());
             //设置日志执行UUID
             executionLog.setTraceId(executeContext.getTraceId());
             executionLog.setExecutionUuid(executeContext.getExecutionUuid());
@@ -216,14 +220,15 @@ public class FlowProcessExecutor {
      * 创建新的执行日志
      */
     private FlowExecutionLogDO createNewExecutionLog(ExecutorInput executorInput) {
-        Long applicationId = FlowProcessCache.findApplicationByProcessId(executorInput.getProcessId());
+        FlowProcessDO flowProcessDO = flowProcessCache.findProcessByProcessId(executorInput.getProcessId());
         FlowExecutionLogDO log = new FlowExecutionLogDO();
-        log.setApplicationId(applicationId);
+        log.setApplicationId(flowProcessDO.getApplicationId());
         log.setProcessId(executorInput.getProcessId());
         log.setTriggerUserId(executorInput.getTriggerUserId());
         log.setCreator(executorInput.getTriggerUserId());
         log.setUpdater(executorInput.getTriggerUserId());
         log.setStartTime(LocalDateTime.now());
+        log.setTenantId(flowProcessDO.getTenantId());
         return log;
     }
 
@@ -255,8 +260,6 @@ public class FlowProcessExecutor {
         result.setCause(response.getCause());
         result.setExecutionEnd(executeContext.isExecuteEnd());
         result.setExecutionUuid(executeContext.getExecutionUuid());
-        result.setExecutionEndNodeType(executeContext.getExecutionEndNodeType());
-        result.setExecutionEndNodeTag(executeContext.getExecutionEndNodeTag());
         result.setOutputParams(variableContext.getOutputParams());
         if (Boolean.TRUE.equals(executeContext.getAbnormalTermination())) {
             result.setSuccess(false);

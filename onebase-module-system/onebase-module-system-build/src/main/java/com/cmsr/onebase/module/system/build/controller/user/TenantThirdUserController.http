@@ -1,0 +1,71 @@
+
+### 创建用户 /admin-api/system/user/create
+POST {{baseUrl}}/system/third-user/create
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+{
+  "nickName": "thirdUser4",
+  "mobile": "13800303044",
+  "email": "newuse43r1@test.com",
+  "password": "13@ery",
+  "status": 1,
+  "applicationIdList":[162947915524571136,162947915524571137]
+}
+
+
+### 创建用户 /admin-api/system/third-user/update
+POST {{baseUrl}}/system/third-user/update
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+{
+  "id": 186382940787703808,
+  "nickName": "thirdUser111",
+  "email": "newuse22r2@test.com",
+  "password": "13@ery",
+  "status": 1,
+  "applicationIdList":[162919276682641408]
+}
+
+
+
+
+
+### 创建用户 /admin-api/system/third-user/update
+GET {{baseUrl}}/system/third-user/user-applications-page
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+
+
+### 修改用户状态 /admin-api/system/third-user/update-status
+POST {{baseUrl}}/system/third-user/update-status
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "id": 174445938142773248,
+  "status":1
+}
+
+### 修改用户状态 /admin-api/system/third-user/update-password
+POST {{baseUrl}}/system/third-user/update-password
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "id": 174445938142773248,
+  "status": 0
+}
+
+### 创建用户 /admin-api/system/third-user/update
+GET {{baseUrl}}/system/third-user/get?id=186382940787703808
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+

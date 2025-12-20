@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.metadata.build.controller.admin.relationship;
 
+import com.cmsr.onebase.framework.common.event.AppEntityChangeEvent;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
@@ -20,6 +21,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -46,6 +48,9 @@ public class EntityRelationshipController {
     @Resource
     private MetadataIdUuidConverter idUuidConverter;
 
+    @Resource
+    ApplicationEventPublisher applicationEventPublisher;
+
     @PostMapping("/create")
     @Operation(summary = "创建实体间的关联关系")
     public CommonResult<EntityRelationshipRespVO> createEntityRelationship(@Valid @RequestBody EntityRelationshipSaveReqVO reqVO) {
@@ -53,6 +58,11 @@ public class EntityRelationshipController {
         reqVO.setApplicationId(String.valueOf(ApplicationManager.getApplicationId()));
         Long id = entityRelationshipService.createEntityRelationship(reqVO);
         EntityRelationshipRespVO result = entityRelationshipService.getEntityRelationshipDetail(id);
+        applicationEventPublisher.publishEvent(
+                AppEntityChangeEvent.builder()
+                        .applicationId(ApplicationManager.getApplicationId())
+                        .build()
+        );
         return success(result);
     }
 
@@ -82,6 +92,11 @@ public class EntityRelationshipController {
         // 从请求头获取应用ID
         reqVO.setApplicationId(String.valueOf(ApplicationManager.getApplicationId()));
         entityRelationshipService.updateEntityRelationship(reqVO);
+        applicationEventPublisher.publishEvent(
+                AppEntityChangeEvent.builder()
+                        .applicationId(ApplicationManager.getApplicationId())
+                        .build()
+        );
         return success(true);
     }
 
@@ -91,6 +106,11 @@ public class EntityRelationshipController {
     public CommonResult<Boolean> deleteEntityRelationship(@RequestParam("id") String id) {
         Long resolvedId = idUuidConverter.resolveRelationshipId(id);
         entityRelationshipService.deleteEntityRelationship(resolvedId);
+        applicationEventPublisher.publishEvent(
+                AppEntityChangeEvent.builder()
+                        .applicationId(ApplicationManager.getApplicationId())
+                        .build()
+        );
         return success(true);
     }
 
@@ -114,6 +134,11 @@ public class EntityRelationshipController {
         // 从请求头获取应用ID
         reqVO.setApplicationId(String.valueOf(ApplicationManager.getApplicationId()));
         ParentChildRelationshipRespVO result = entityRelationshipService.createParentChildRelationship(reqVO);
+        applicationEventPublisher.publishEvent(
+                AppEntityChangeEvent.builder()
+                        .applicationId(ApplicationManager.getApplicationId())
+                        .build()
+        );
         return success(result);
     }
 

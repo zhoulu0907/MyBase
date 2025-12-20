@@ -70,14 +70,14 @@ import static com.cmsr.onebase.module.system.enums.LogRecordConstants.*;
 import static java.util.Collections.singleton;
 
 /**
- * 租户 Service 实现类
+ * 空间 Service 实现类
  */
 @Service
 @Validated
 @Slf4j
 public class TenantServiceImpl implements TenantService {
 
-    // 租户管理员设置默认密码
+    // 空间管理员设置默认密码
     private static final String TENANT_ADMIN_PASSWORD = "AdminChina2025!";
 
     @SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection")
@@ -172,25 +172,34 @@ public class TenantServiceImpl implements TenantService {
     @LogRecord(type = SYSTEM_TENANT_TYPE, subType = SYSTEM_TENANT_CREATE_SUB_TYPE, bizNo = "{{#tenant.id}}",
             success = SYSTEM_TENANT_CREATE_SUCCESS)
     public Long createTenant(TenantInsertReqVO createReqVO) {
-        // 校验租户名称是否重复
+        // 1.1 校验租户名称是否重复
         validTenantNameDuplicate(createReqVO.getName(), null);
-        // 校验租户域名是否重复
+        // 1.2 校验租户域名是否重复
         if (StringUtils.isEmpty(createReqVO.getWebsite())) {
             throw exception(TENANT_WEBSITE_IS_NULL);
         } else {
             // 校验租户域名是否重复
             validTenantWebsiteDuplicate(createReqVO.getWebsite(), null);
         }
-        // 根据租户套餐编号获取租户套餐
+        // 2. 根据租户套餐编号获取租户套餐
         TenantPackageDO tenantPackage = tenantPackageService.getTenantPackageByCode(PackageTypeEnum.ALL.getCode());
         createReqVO.setPackageId(tenantPackage.getId());
 
+        // 3. 处理有效期
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         LocalDateTime expireTime = LocalDateTime.parse("2099-02-19 00:00:00", formatter);
         if (createReqVO.getExpireTime() == null) {
             createReqVO.setExpireTime(expireTime);
         }
 
+        // 4. 判断用户上限
+
+        // 4.1 先判断上限人数是否大于管理员数量
+        if (createReqVO.getAccountCount() < createReqVO.getTenantAdminUserReqVOList().size()) {
+            throw exception(LENANT_PERSON_COUNT_LESS_THEN_ADMIN, createReqVO.getAccountCount());
+        }
+
+        // 4.2 判断整体分配人数是否超过license限制
         LicenseDO license = licenseService.getLatestActiveLicense();
         // 检查分配人员数量是否超过license限制
         if (license != null) {
@@ -213,11 +222,12 @@ public class TenantServiceImpl implements TenantService {
             }
         }
 
+        // 5. 保存数据
         TenantDO tenant = BeanUtils.toBean(createReqVO, TenantDO.class);
         tenant.setPublishModel(createReqVO.getPublishModel() == null ? CommonPublishModelEnum.InnerModel.getValue() : createReqVO.getPublishModel());
         tenant = tenantDataRepository.insert(tenant);
 
-        // 创建租户的管理员1
+        // 6. 创建租户的管理员1
         TenantUtils.execute(tenant.getId(), () -> {
             // 创建管理员角色
             Long roleId = createTenantAdminRole();
@@ -229,7 +239,7 @@ public class TenantServiceImpl implements TenantService {
             createSystemUser(roleId, createReqVO);
         });
 
-        // 记录操作日志上下文
+        // 7. 记录操作日志上下文
         LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
 
         LogRecordContext.putVariable("loginUser", loginUser);
@@ -246,17 +256,50 @@ public class TenantServiceImpl implements TenantService {
         return existTenantCount;
     }
 
+    private Map<String, AdminUserDO> getUserMobileByUserNames(Set<String> usernamesList) {
+        List<AdminUserDO> userDOList = userService.getPlatformUserByUsernames(usernamesList);
+
+        Map<String, List<AdminUserDO>> userGroupMap = userDOList.stream()
+                .collect(Collectors.groupingBy(AdminUserDO::getUsername));
+
+        return userGroupMap.entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,  // username作为key
+                        entry -> {
+                            List<AdminUserDO> userList = entry.getValue();
+                            if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(userList)) {
+                                return userList.get(0);
+                            }
+                            return new AdminUserDO();  // 如果为空则返回空字符串
+                        }
+                ));
+
+    }
+
+
     private void createSystemUser(Long roleId, TenantInsertReqVO insertReqVO) {
         List<TenantAdminUserReqVO> adminUserReqVOList = insertReqVO.getTenantAdminUserReqVOList();
+
+        Set<String> usernamesList = adminUserReqVOList.stream()
+                .map(TenantAdminUserReqVO::getAdminUserName)
+                .collect(Collectors.toSet());
+
+        Map<String, AdminUserDO> usernameToFirstMobileMap = getUserMobileByUserNames(usernamesList);
+
         adminUserReqVOList.forEach(adminUserReqVO -> {
             UserInsertReqVO reqVO = new UserInsertReqVO();
             reqVO.setUsername(adminUserReqVO.getAdminUserName());
             reqVO.setNickname(adminUserReqVO.getAdminNickName());
-            reqVO.setMobile(adminUserReqVO.getAdminMobile());
-            reqVO.setEmail(adminUserReqVO.getAdminEmail());
+            if (null != usernameToFirstMobileMap.get(adminUserReqVO.getAdminUserName())) {
+                AdminUserDO platUser = usernameToFirstMobileMap.get(adminUserReqVO.getAdminUserName());
+                if (null != platUser) {
+                    reqVO.setMobile(platUser.getMobile());
+                    reqVO.setEmail(platUser.getEmail());
+                    reqVO.setPlatformUserId(platUser.getId());
+                }
+            }
             reqVO.setAdminType(AdminTypeEnum.SYSTEM.getType());
             reqVO.setPassword(TENANT_ADMIN_PASSWORD);
-            reqVO.setPlatformUserId(adminUserReqVO.getPlatformUserId());
             // 通过平台创建空间（Tenant）用户
             reqVO.setUserType(UserTypeEnum.TENANT.getValue());
             // 创建用户
@@ -277,19 +320,19 @@ public class TenantServiceImpl implements TenantService {
 
 
     private void createDeveloperAdminRole() {
-        RoleDO roleDO= roleService.getRoleByCode(RoleCodeEnum.APP_DEVELOPER.getCode());
-        if(roleDO==null) {
+        RoleDO roleDO = roleService.getRoleByCode(RoleCodeEnum.APP_DEVELOPER.getCode());
+        if (roleDO == null) {
             // 创建角色
             RoleInsertReqVO reqVO = new RoleInsertReqVO();
             reqVO.setName(RoleCodeEnum.APP_DEVELOPER.getName()).setCode(RoleCodeEnum.APP_DEVELOPER.getCode())
                     .setSort(0).setRemark("系统自动生成");
-              roleService.createRole(reqVO, RoleTypeEnum.SYSTEM.getType());
+            roleService.createRole(reqVO, RoleTypeEnum.SYSTEM.getType());
         }
     }
 
     private void createNormalUserRole() {
-        RoleDO roleDO= roleService.getRoleByCode(RoleCodeEnum.NORMAL_USER.getCode());
-        if(roleDO==null) {
+        RoleDO roleDO = roleService.getRoleByCode(RoleCodeEnum.NORMAL_USER.getCode());
+        if (roleDO == null) {
             // 创建角色
             RoleInsertReqVO reqVO = new RoleInsertReqVO();
             reqVO.setName(RoleCodeEnum.NORMAL_USER.getName()).setCode(RoleCodeEnum.NORMAL_USER.getCode())
@@ -360,18 +403,18 @@ public class TenantServiceImpl implements TenantService {
         if (updateObj.getStatus() != null) {
             row.put(TenantDO.STATUS, updateObj.getStatus());
         }
-        if (StringUtils.isNotEmpty(updateObj.getPublishModel()) ) {
+        if (StringUtils.isNotEmpty(updateObj.getPublishModel())) {
             row.put(TenantDO.PUBLISH_MODEL, updateObj.getPublishModel());
         }
 
-        if (StringUtils.isNotEmpty(updateObj.getLogoUrl()) ) {
+        if (StringUtils.isNotEmpty(updateObj.getLogoUrl())) {
             row.put(TenantDO.LOGO_URL, updateObj.getLogoUrl());
         }
 
         tenantDataRepository.updateByConfig(row, new DefaultConfigStore().eq(TenantDO.ID, updateObj.getId()));
         // 修改租户管理员
         if (updateReqVO.getTenantAdminUserUpdateReqVOSList() != null) {
-            if(updateReqVO.getTenantAdminUserUpdateReqVOSList().isEmpty()){
+            if (updateReqVO.getTenantAdminUserUpdateReqVOSList().isEmpty()) {
                 throw exception(TENANT_ADMIN_ISNULL);
             }
             TenantUtils.execute(updateObj.getId(), () -> {
@@ -407,19 +450,31 @@ public class TenantServiceImpl implements TenantService {
                 }
 
                 updateReqVO.getTenantAdminUserUpdateReqVOSList().forEach(adminUserReqVO -> {
+                    // 获取用户手机
+                    Set<String> usernamesList = updateReqVO.getTenantAdminUserUpdateReqVOSList().stream()
+                            .map(TenantAdminUserReqVO::getAdminUserName)
+                            .collect(Collectors.toSet());
+                    Map<String, AdminUserDO> usernameToFirstMobileMap = getUserMobileByUserNames(usernamesList);
+
                     // 已存在的用户
                     AdminUserDO newAdminUser = userService.getUserByUsername(adminUserReqVO.getAdminUserName());
                     // 判断前端上送的管理员是否已存在，存在则分配角色且不是老用户
                     if (newAdminUser == null) {
+
                         // 新管理员用户不存在，创建用户，并分配角色
                         UserInsertReqVO userInsertReqVO = new UserInsertReqVO();
                         userInsertReqVO.setUsername(adminUserReqVO.getAdminUserName());
                         userInsertReqVO.setNickname(adminUserReqVO.getAdminNickName());
-                        userInsertReqVO.setMobile(adminUserReqVO.getAdminMobile());
-                        userInsertReqVO.setEmail(adminUserReqVO.getAdminEmail());
+                        if (null != usernameToFirstMobileMap.get(adminUserReqVO.getAdminUserName())) {
+                            AdminUserDO platUser = usernameToFirstMobileMap.get(adminUserReqVO.getAdminUserName());
+                            if (null != platUser) {
+                                userInsertReqVO.setMobile(platUser.getMobile());
+                                userInsertReqVO.setEmail(platUser.getEmail());
+                                userInsertReqVO.setPlatformUserId(platUser.getId());
+                            }
+                        }
                         userInsertReqVO.setAdminType(AdminTypeEnum.SYSTEM.getType());
                         userInsertReqVO.setPassword(TENANT_ADMIN_PASSWORD);
-                        userInsertReqVO.setPlatformUserId(adminUserReqVO.getPlatformUserId());
                         // 新增的都是空间管理员
                         userInsertReqVO.setUserType(UserTypeEnum.TENANT.getValue());
                         // 创建用户

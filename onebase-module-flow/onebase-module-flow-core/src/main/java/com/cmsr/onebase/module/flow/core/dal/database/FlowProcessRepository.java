@@ -13,6 +13,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.cmsr.onebase.module.flow.core.dal.dataobject.table.FlowProcessTableDef.FLOW_PROCESS;
@@ -31,7 +32,7 @@ public class FlowProcessRepository extends BaseBizRepository<FlowProcessMapper, 
         return getObjAs(query, String.class);
     }
 
-    public Map<Long, String> selectProcessNames(List<Long> processIds) {
+    public Map<Long, String> selectProcessNames(Set<Long> processIds) {
         QueryWrapper query = this.query()
                 .select(FLOW_PROCESS.ID, FLOW_PROCESS.PROCESS_NAME)
                 .where(FLOW_PROCESS.ID.in(processIds));

@@ -50,7 +50,7 @@ public class AuthDefaultFactory {
 
     private static final String DEFAULT_OPERATION_TAGS = JsonUtils.toJsonString(List.of(CREATE, EDIT, DELETE, IMPORT, EXPORT, SHARE));
 
-    private static final String DEFAULT_DATA_FILTER = JsonUtils.toJsonString(List.of());
+    private static final String EMPTY_DATA_FILTER = JsonUtils.toJsonString(List.of());
 
     //应用 AppAuthPermissionDO
     public static AppAuthPermissionDO createDefaultAuthPermissionDO(AuthPermissionReq req) {
@@ -76,13 +76,14 @@ public class AuthDefaultFactory {
 
     //数据组权限 authDataGroupDOS
     public static AppAuthDataGroupDO createDefaultAuthDataGroupDO(AuthPermissionReq req) {
+
         AppAuthDataGroupDO adg = new AppAuthDataGroupDO();
         adg.setGroupName("默认权限");
         adg.setApplicationId(req.getApplicationId());
         adg.setRoleUuid(req.getRoleUuid());
         adg.setMenuUuid(req.getMenuUuid());
         adg.setScopeTags(JsonUtils.toJsonString(List.of(OWN_SUBMIT)));
-        adg.setDataFilter(DEFAULT_DATA_FILTER);
+        adg.setDataFilter(EMPTY_DATA_FILTER);
         adg.setOperationTags(JsonUtils.toJsonString(List.of(EDIT, DELETE)));
         return adg;
     }
@@ -91,7 +92,7 @@ public class AuthDefaultFactory {
         AppAuthDataGroupDO adg = new AppAuthDataGroupDO();
         adg.setGroupName("默认权限");
         adg.setScopeTags(JsonUtils.toJsonString(List.of(OWN_SUBMIT)));
-        adg.setDataFilter(DEFAULT_DATA_FILTER);
+        adg.setDataFilter(EMPTY_DATA_FILTER);
         adg.setOperationTags(JsonUtils.toJsonString(List.of(EDIT, DELETE)));
         return adg;
     }

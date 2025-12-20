@@ -26,6 +26,13 @@ public class AppMenuRepository extends BaseBizRepository<AppMenuMapper, AppMenuD
         return this.list(queryWrapper);
     }
 
+    public List<AppMenuDO> listByIdsAndOrder(List<Long> menuIds) {
+        QueryWrapper queryWrapper = this.query()
+                .where(APP_MENU.ID.in(menuIds))
+                .orderBy(APP_MENU.MENU_SORT, true);
+        return this.list(queryWrapper);
+    }
+
     public List<String> findMenuUuidListByApplication(Long applicationId) {
         QueryWrapper queryWrapper = this.query()
                 .select(APP_MENU.MENU_UUID)
@@ -57,7 +64,8 @@ public class AppMenuRepository extends BaseBizRepository<AppMenuMapper, AppMenuD
         QueryWrapper queryWrapper = this.query()
                 .where(APP_MENU.APPLICATION_ID.eq(applicationId))
                 .where(APP_MENU.MENU_TYPE.in(menuTypes))
-                .where(APP_MENU.IS_VISIBLE.eq(1));
+                .where(APP_MENU.IS_VISIBLE.eq(1))
+                .orderBy(AppMenuDO::getMenuSort, true);
         return list(queryWrapper);
     }
 
@@ -75,4 +83,12 @@ public class AppMenuRepository extends BaseBizRepository<AppMenuMapper, AppMenuD
                 .where(APP_MENU.MENU_UUID.eq(menuUuid));
         return this.getOne(queryWrapper);
     }
+
+    public boolean existsByEntityUuid(String entityUuid) {
+        QueryWrapper queryWrapper = this.query()
+                .where(APP_MENU.ENTITY_UUID.eq(entityUuid));
+        return this.exists(queryWrapper);
+    }
+
+
 }

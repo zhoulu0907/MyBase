@@ -24,11 +24,28 @@ public class BeanUtils {
                 .setFieldAccessLevel(Configuration.AccessLevel.PRIVATE);
     }
 
+    public static <T> T copyBean(T source) {
+        if (source == null) {
+            return null;
+        }
+        try {
+            T targetObject = (T) source.getClass().getDeclaredConstructor().newInstance();
+            MODEL_MAPPER.map(source, targetObject);
+            return targetObject;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public static <T> T toBean(Object source, Class<T> targetClass) {
         if (source == null) {
             return null;
         }
-        return MODEL_MAPPER.map(source, targetClass);
+        if (source.getClass().equals(targetClass)) {
+            return (T) copyBean(source);
+        } else {
+            return MODEL_MAPPER.map(source, targetClass);
+        }
     }
 
     public static <T> T toBean(Object source, Class<T> targetClass, Consumer<T> peek) {

@@ -13,7 +13,13 @@ public enum DeptTypeEnum {
     /**
      * 企业
      */
-    CORP("corp", "企业");
+    CORP("corp", "企业"),
+
+    /**
+     * 三方用户
+     */
+    THIRD("third", "三方用户");
+
     /**
      * 类型代码
      */

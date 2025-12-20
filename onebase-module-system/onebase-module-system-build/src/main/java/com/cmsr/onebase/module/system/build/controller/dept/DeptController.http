@@ -50,9 +50,16 @@ Content-Type: application/json
 
 
 ### 请求 /get-dept-users 接口 => 成功
-GET {{baseUrl}}/system/dept/get-dept-users?deptId=158401074156142592&keywords=
+GET {{baseUrl}}/system/dept/get-dept-users
 Authorization: Bearer {{token}}
-tenant-id: {{adminTenantId}}
+tenant-id: 168334577623138304
+
+### 请求 /get-dept-users 接口 => 成功
+GET {{baseUrl}}/app/auth-role/list-dept-users?userType=4&roleId=187881437703897090
+Authorization: Bearer {{token}}
+tenant-id: 168334577623138304
+
+
 
 ### 请求 /list 接口（带参数） => 成功
 GET {{baseUrl}}/system/dept/list
@@ -75,4 +82,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
 ### 请求 /get-depts-by-id 接口 => 成功
-http://localhost:48080/admin-api/lapp/auth-role/page-role-members?roleld=37775560235057154&pageNo=1&pageSize=10&t=1762757497126
+GET {{baseUrl}}/system/dept/get-third-depts
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+

@@ -66,4 +66,11 @@ public class AppVersionRepository extends BaseAppRepository<AppVersionMapper, Ap
                 .where(APP_VERSION.VERSION_TYPE.eq(VersionTypeEnum.RUNTIME.getValue()));
         return this.getOne(queryWrapper);
     }
+
+    public long countByApplicationIdAndName(Long applicationId, String versionNumber, String versionName) {
+        QueryWrapper queryWrapper = this.query()
+                .where(APP_VERSION.APPLICATION_ID.eq(applicationId))
+                .and(APP_VERSION.VERSION_NUMBER.eq(versionNumber).or(APP_VERSION.VERSION_NAME.eq(versionName)));
+        return count(queryWrapper);
+    }
 }

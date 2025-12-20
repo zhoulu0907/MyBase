@@ -96,7 +96,7 @@ public class TenantUserController {
         if (CollUtil.isEmpty(pageResult.getList())) {
             return success(new PageResult<>(pageResult.getTotal()));
         }
-        List<UserRespVO> userRespVOList =userService.getConvertUserPage(pageResult);
+        List<UserRespVO> userRespVOList = userService.getConvertUserPage(pageResult);
         return success(new PageResult<>(userRespVOList, pageResult.getTotal()));
     }
 
@@ -126,7 +126,7 @@ public class TenantUserController {
     @GetMapping("/simple-list-by-dept-id")
     @PreAuthorize("@ss.hasPermission('tenant:user:query')")
     @Operation(summary = "通过部门id获取用户精简信息列表", description = "只包含开启的用户，主要用于前端的下拉选项")
-    public CommonResult<List<UserDeptSimpleRespVO>> getSimpleUserListByDeptId (@Valid DeptSimpleListRespVO respVO) {
+    public CommonResult<List<UserDeptSimpleRespVO>> getSimpleUserListByDeptId(@Valid DeptSimpleListRespVO respVO) {
         List<AdminUserDO> list = userService.getUserListByStatusAndDeptId(respVO);
         // 拼接数据
         Map<Long, DeptDO> deptMap = deptService.getDeptMap(convertList(list, AdminUserDO::getDeptId));

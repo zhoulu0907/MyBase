@@ -39,44 +39,10 @@ public class AppAuthRoleDeptRepository extends ServiceImpl<AppAuthRoleDeptMapper
         }
     }
 
-    public List<AppAuthRoleDeptDO> findByRoleId(Long roleId) {
-        QueryWrapper queryWrapper = this.query()
-                .eq(AppAuthRoleDeptDO::getRoleId, roleId);
-        return list(queryWrapper);
-    }
-
-    public PageResult<AppAuthRoleDeptDO> findByRoleId(Long roleId, PageParam pageParam) {
-        QueryWrapper queryWrapper = this.query()
-                .eq(AppAuthRoleDeptDO::getRoleId, roleId);
-        Page<AppAuthRoleDeptDO> pageQuery = Page.of(pageParam.getPageNo(), pageParam.getPageSize());
-        Page<AppAuthRoleDeptDO> pageResult = this.page(pageQuery, queryWrapper);
-        return new PageResult<>(pageResult.getRecords(), pageResult.getTotalRow());
-    }
-
-
-    public void deleteRoleDept(Long roleId, List<Long> deptIds) {
-        this.updateChain()
-                .eq(AppAuthRoleDeptDO::getRoleId, roleId)
-                .in(AppAuthRoleDeptDO::getDeptId, deptIds)
-                .remove();
-    }
-
-    public void deleteRoleDept(Long roleId, Long deptId) {
-        this.updateChain()
-                .eq(AppAuthRoleDeptDO::getRoleId, roleId)
-                .eq(AppAuthRoleDeptDO::getDeptId, deptId)
-                .remove();
-    }
 
     public void deleteByRoleId(Long roleId) {
         this.updateChain()
                 .eq(AppAuthRoleDeptDO::getRoleId, roleId)
-                .remove();
-    }
-
-    public void deleteByDeptId(Long deptId) {
-        this.updateChain()
-                .eq(AppAuthRoleDeptDO::getDeptId, deptId)
                 .remove();
     }
 

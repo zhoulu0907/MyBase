@@ -20,8 +20,8 @@ public class PageServiceImpl implements PageService {
     }
 
     @Override
-    public List<PageDTO> getFormPageListByAppId(Long appId) {
-        return pageServiceProvider.getFormPageListByAppId(appId);
+    public List<PageDTO> getPageListByAppId(Long appId) {
+        return pageServiceProvider.getPageListByAppId(appId);
 
     }
 

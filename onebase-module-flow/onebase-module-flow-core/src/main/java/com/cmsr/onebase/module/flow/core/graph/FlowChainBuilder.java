@@ -2,10 +2,10 @@ package com.cmsr.onebase.module.flow.core.graph;
 
 import com.cmsr.onebase.module.flow.context.graph.JsonGraph;
 import com.cmsr.onebase.module.flow.context.graph.JsonGraphNode;
-import com.cmsr.onebase.module.flow.context.graph.nodes.IfBlockNodeData;
-import com.cmsr.onebase.module.flow.context.graph.nodes.LoopNodeData;
-import com.cmsr.onebase.module.flow.context.graph.nodes.SwitchCaseNodeData;
-import com.cmsr.onebase.module.flow.context.graph.nodes.SwitchConditionNodeData;
+import com.cmsr.onebase.module.flow.context.graph.nodes.logic.IfBlockNodeData;
+import com.cmsr.onebase.module.flow.context.graph.nodes.logic.LoopNodeData;
+import com.cmsr.onebase.module.flow.context.graph.nodes.logic.SwitchCaseNodeData;
+import com.cmsr.onebase.module.flow.context.graph.nodes.logic.SwitchConditionNodeData;
 import com.yomahub.liteflow.builder.el.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -49,13 +49,7 @@ public class FlowChainBuilder {
 
 
     private ELWrapper nodeDefine(JsonGraphNode node) {
-        if (StringUtils.equalsAny(node.getType(),
-                "dataAdd", "dataCalc", "dataDelete", "dataQueryMultiple", "dataQuery", "dataUpdate",
-                "modal", "refresh", "navigate", "javascript",
-                "startDateField", "startForm", "startEntity", "startTime", "startAPI", "startBPM",
-                "end", "log")) {
-            return toDefine(node);
-        } else if (StringUtils.equals(node.getType(), "ifBlock")) {
+        if (StringUtils.equals(node.getType(), "ifBlock")) {
             return ifBlockNodeDefine(node);
         } else if (StringUtils.equals(node.getType(), "ifCase")) {
             return ifCaseNodeDefine(node);
@@ -63,8 +57,9 @@ public class FlowChainBuilder {
             return loopNodeDefine(node);
         } else if (StringUtils.equals(node.getType(), "switchCondition")) {
             return switchNodeDefine(node);
+        } else {
+            return toDefine(node);
         }
-        throw new IllegalArgumentException("未知的节点类型: " + node.getType());
     }
 
     private ELWrapper loopNodeDefine(JsonGraphNode node) {
@@ -130,13 +125,13 @@ public class FlowChainBuilder {
 
     private ELWrapper ifBlockNodeDefine(JsonGraphNode jsonGraphNode) {
         if (CollectionUtils.isEmpty(jsonGraphNode.getBlocks())) {
-            return ELBus.node("noop").tag(jsonGraphNode.getId());
+            return ELBus.element("noop").tag(jsonGraphNode.getId());
         }
         return blocksNodeDefine(jsonGraphNode.getBlocks()).tag(jsonGraphNode.getId());
     }
 
     private CommonNodeELWrapper toDefine(JsonGraphNode node) {
-        return ELBus.node(node.getType()).tag(node.getId());
+        return ELBus.element(node.getType()).tag(node.getId());
     }
 
 }

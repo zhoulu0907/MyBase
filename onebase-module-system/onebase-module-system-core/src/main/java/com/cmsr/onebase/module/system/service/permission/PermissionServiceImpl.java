@@ -158,7 +158,7 @@ public class PermissionServiceImpl implements PermissionService {
             // permissions 和 tenantAllPermissions对比，命中一个即返回true
             return CollectionUtils.containsAny(corpAllPermissions, permissions);
         }
-        // 情况二：如果是开发管理员，赋予所有开发相关权限
+        // 情况二：如果是开发者，赋予所有开发相关权限
         boolean isDevAdmin = roleService.hasAnyDevloperAdmin(convertSet(roles, RoleDO::getId));
         if (isDevAdmin) {
             // 所有开发者的权限
@@ -632,7 +632,7 @@ public class PermissionServiceImpl implements PermissionService {
         // 1.4检查当前租户是否inner模式，并移除企业权限
         TenantDO tenantDO = tenantService.getTenant(user.getTenantId());
         if (CommonPublishModelEnum.InnerModel.getValue().equals(tenantDO.getPublishModel())) {
-            // 排除企业权限
+            // 内部模式排除企业权限
             menuList.removeIf(menu -> menu.getPermission() != null && menu.getPermission()
                     .startsWith(MenuConstants.MENU_TENANT_CORP));
         }

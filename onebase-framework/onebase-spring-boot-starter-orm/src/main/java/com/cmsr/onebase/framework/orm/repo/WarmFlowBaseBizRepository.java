@@ -1,11 +1,11 @@
 package com.cmsr.onebase.framework.orm.repo;
 
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
-import com.cmsr.onebase.framework.orm.entity.BaseBizEntity;
 import com.cmsr.onebase.framework.orm.entity.WarmFlowBizEntity;
 import com.mybatisflex.core.BaseMapper;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.*;
+import com.mybatisflex.core.update.UpdateChain;
 import com.mybatisflex.core.util.CollectionUtil;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -24,22 +24,61 @@ public class WarmFlowBaseBizRepository<M extends BaseMapper<T>, T extends WarmFl
         if (!QueryWrapperUtils.isQueryFilterable(queryWrapper)) {
             return;
         }
-        QueryTable queryTable = QueryWrapperUtils.getQueryTable(queryWrapper);
-        QueryColumn applicationColumn;
-        QueryColumn versionTagColumn;
-        if (queryTable != null) {
-            applicationColumn = new QueryColumn(queryTable, BaseBizEntity.APPLICATION_ID);
-            versionTagColumn = new QueryColumn(queryTable, BaseBizEntity.VERSION_TAG);
-        } else {
-            applicationColumn = new QueryColumn(BaseBizEntity.APPLICATION_ID);
-            versionTagColumn = new QueryColumn(BaseBizEntity.VERSION_TAG);
-        }
         Long applicationId = ApplicationManager.getApplicationId();
         Long versionTag = ApplicationManager.getVersionTag();
-        queryWrapper.and(applicationColumn.eq(applicationId).when(!ApplicationManager.isIgnoreApplicationCondition()));
-        queryWrapper.and(versionTagColumn.eq(versionTag).when(!ApplicationManager.isIgnoreVersionTagCondition()));
+        QueryColumn applicationIdColumn = QueryWrapperUtils.createApplicationIdColumn(this, queryWrapper);
+        QueryColumn versionTagColumn = QueryWrapperUtils.createVersionTagColumn(this, queryWrapper);
+        //
+        queryWrapper.where(
+                applicationIdColumn.eq(applicationId).when(!ApplicationManager.isIgnoreApplicationCondition())
+                        .and(versionTagColumn.eq(versionTag).when(!ApplicationManager.isIgnoreVersionTagCondition()))
+        );
     }
 
+    //region ===== 删除（删）操作 =====
+
+    /**
+     * <p>根据查询条件删除数据。
+     *
+     * @param query 查询条件
+     * @return {@code true} 删除成功，{@code false} 删除失败。
+     */
+    @Override
+    public boolean remove(QueryWrapper query) {
+        this.injectQueryFilter(query);
+        return super.remove(query);
+    }
+    //region ===== 更新（改）操作 =====
+
+    /**
+     * <p>根据查询条件更新数据。
+     *
+     * @param entity 实体类对象
+     * @param query  查询条件
+     * @return {@code true} 更新成功，{@code false} 更新失败。
+     * @apiNote 若实体类属性数据为 {@code null}，该属性不会新到数据库。
+     */
+    @Override
+    public boolean update(T entity, QueryWrapper query) {
+        this.injectQueryFilter(query);
+        return super.update(entity, query);
+    }
+
+    @Deprecated
+    @Override
+    public UpdateChain<T> updateChain() {
+        Long applicationId = ApplicationManager.getApplicationId();
+        Long versionTag = ApplicationManager.getVersionTag();
+        QueryColumn applicationIdColumn = QueryWrapperUtils.createApplicationIdColumn(this);
+        QueryColumn versionTagColumn = QueryWrapperUtils.createVersionTagColumn(this);
+        //
+        UpdateChain<T> updateChain = super.updateChain();
+        updateChain.where(applicationIdColumn.eq(applicationId).when(!ApplicationManager.isIgnoreApplicationCondition())
+                .and(versionTagColumn.eq(versionTag).when(!ApplicationManager.isIgnoreVersionTagCondition()))
+        );
+        return updateChain;
+    }
+    //endregion ===== 更新（改）操作 =====
 
     //region ===== 查询（查）操作 =====
 
@@ -191,7 +230,6 @@ public class WarmFlowBaseBizRepository<M extends BaseMapper<T>, T extends WarmFl
      */
     @Override
     public boolean exists(QueryWrapper query) {
-        this.injectQueryFilter(query);
         return exists(CPI.getWhereQueryCondition(query));
     }
 
@@ -245,15 +283,18 @@ public class WarmFlowBaseBizRepository<M extends BaseMapper<T>, T extends WarmFl
     //endregion ===== 分页查询操作 =====
 
     public boolean deleteAllApplicationData(Long applicationId) {
-        return this.updateChain()
-                .where(WarmFlowBizEntity.APPLICATION_ID, applicationId)
-                .remove();
+        QueryColumn applicationIdColumn = QueryWrapperUtils.createApplicationIdColumn(this);
+        //
+        QueryWrapper queryWrapper = QueryWrapper.create().where(applicationIdColumn.eq(applicationId));
+        return super.remove(queryWrapper);
     }
 
     public boolean deleteApplicationVersionData(Long applicationId, Long versionId) {
-        return this.updateChain()
-                .where(WarmFlowBizEntity.APPLICATION_ID, applicationId)
-                .and(WarmFlowBizEntity.VERSION_TAG, versionId)
-                .remove();
+        QueryColumn applicationIdColumn = QueryWrapperUtils.createApplicationIdColumn(this);
+        QueryColumn versionTagColumn = QueryWrapperUtils.createVersionTagColumn(this);
+        //
+        QueryWrapper queryWrapper = QueryWrapper.create()
+                .where(applicationIdColumn.eq(applicationId).and(versionTagColumn.eq(versionId)));
+        return super.remove(queryWrapper);
     }
 }

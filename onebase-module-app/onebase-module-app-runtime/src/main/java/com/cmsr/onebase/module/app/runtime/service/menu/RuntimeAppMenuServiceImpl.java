@@ -80,7 +80,7 @@ public class RuntimeAppMenuServiceImpl implements RuntimeAppMenuService {
         if (CollectionUtils.isEmpty(menuIds)) {
             return Collections.emptyList();
         }
-        List<AppMenuDO> menuDOS = appMenuRepository.listByIds(menuIds);
+        List<AppMenuDO> menuDOS = appMenuRepository.listByIdsAndOrder(menuIds);
         if (CollectionUtils.isEmpty(menuDOS)) {
             return Collections.emptyList();
         }

@@ -4,13 +4,15 @@ import com.cmsr.onebase.framework.common.enums.OwnerTagEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppApplicationDO;
 import com.cmsr.onebase.module.app.core.dal.mapper.AppApplicationMapper;
-import com.cmsr.onebase.module.app.core.enums.app.ApplicationStatusEnum;
+import com.cmsr.onebase.module.app.core.enums.app.AppPublishEnum;
+import com.cmsr.onebase.module.app.core.enums.app.AppStatusEnum;
 import com.cmsr.onebase.module.app.core.vo.app.ApplicationPageReqVO;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryMethods;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.core.row.Row;
 import com.mybatisflex.core.tenant.TenantManager;
+import com.mybatisflex.core.util.UpdateEntity;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -89,9 +91,10 @@ public class AppApplicationRepository extends ServiceImpl<AppApplicationMapper, 
         return list(queryWrapper);
     }
 
-    public List<AppApplicationDO> findAppApplicationByAppName(String appName) {
+    public List<AppApplicationDO> findAppApplicationByAppName(String appName, Integer status) {
         QueryWrapper queryWrapper = this.query()
                 .where(APP_APPLICATION.APP_NAME.eq(appName).when(StringUtils.isNotBlank(appName)))
+                .where(APP_APPLICATION.APP_STATUS.eq(status).when(status != null))
                 .orderBy(APP_APPLICATION.UPDATE_TIME, false)
                 .orderBy(APP_APPLICATION.CREATE_TIME, false);
         return list(queryWrapper);
@@ -130,13 +133,22 @@ public class AppApplicationRepository extends ServiceImpl<AppApplicationMapper, 
     }
 
     public void updateAppTimeByApplicationId(Long appId) {
+        QueryWrapper queryWrapper = this.query()
+                .where(APP_APPLICATION.ID.eq(appId));
+        AppApplicationDO appApplicationDO = UpdateEntity.of(AppApplicationDO.class);
+        appApplicationDO.setUpdateTime(LocalDateTime.now());
+        this.getMapper().updateByQuery(appApplicationDO, queryWrapper);
+    }
+
+    public void updateStatusByApplicationId(Long applicationId, AppStatusEnum status, AppPublishEnum publishStatus) {
         this.updateChain()
-                .set(APP_APPLICATION.UPDATE_TIME, LocalDateTime.now())
-                .where(APP_APPLICATION.ID.eq(appId))
+                .set(APP_APPLICATION.APP_STATUS, status.getValue())
+                .set(APP_APPLICATION.PUBLISH_STATUS, publishStatus.getValue())
+                .where(APP_APPLICATION.ID.eq(applicationId))
                 .update();
     }
 
-    public void updateAppStatusByApplicationId(Long applicationId, ApplicationStatusEnum status) {
+    public void updateAppStatusByApplicationId(Long applicationId, AppStatusEnum status) {
         this.updateChain()
                 .set(APP_APPLICATION.APP_STATUS, status.getValue())
                 .where(APP_APPLICATION.ID.eq(applicationId))

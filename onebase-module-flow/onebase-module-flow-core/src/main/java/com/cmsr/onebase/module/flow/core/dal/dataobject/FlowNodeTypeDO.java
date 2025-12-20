@@ -41,4 +41,10 @@ public class FlowNodeTypeDO extends BaseEntity {
     @Column(value = "sort_order")
     private Integer sortOrder;
 
+    @Column(value = "config_type")
+    private String configType;
+
+    @Column(value = "form_config")
+    private String formConfig;
+
 }

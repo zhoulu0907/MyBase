@@ -21,7 +21,7 @@ public enum AuthRoleTypeEnum {
     /**
      * 用户自定义角色
      */
-    CUSTOM_ROLE(3, null, "自定义角色"),
+    CUSTOM_ROLE(3, "ROLE_CUSTOM", "自定义角色"),
 
     /**
      * 外部用户
@@ -60,8 +60,10 @@ public enum AuthRoleTypeEnum {
      * @param value 角色类型值
      * @return true-允许添加和删除，false-不允许添加和删除
      */
-    public static boolean isSystemRoleType(Integer value) {
-        return SYSTEM_ADMIN.getValue().equals(value) || SYSTEM_USER.getValue().equals(value);
+    public static boolean isDefaultRoleType(Integer value) {
+        return SYSTEM_ADMIN.getValue().equals(value)
+                || SYSTEM_USER.getValue().equals(value)
+                || OUTER_USER.getValue().equals(value);
     }
 
     public static boolean isSystemAdminRole(Integer value) {

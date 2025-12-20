@@ -3,16 +3,19 @@ package com.cmsr.onebase.module.app.build.controller.app;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.app.build.service.app.AppApplicationService;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationCreateReqVO;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationCreateRespVO;
+import com.cmsr.onebase.module.app.core.vo.app.ApplicationNavigationConfigVO;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationRespVO;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationSimpleRespVO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppApplicationDO;
-import com.cmsr.onebase.module.app.core.enums.app.ApplicationStatusEnum;
+import com.cmsr.onebase.module.app.core.enums.app.AppStatusEnum;
 import com.cmsr.onebase.module.app.core.vo.app.ApplicationPageReqVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.security.PermitAll;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -46,7 +49,8 @@ public class AppApplicationController {
 
     @GetMapping("/get")
     @Operation(summary = "获得应用")
-    @PreAuthorize("@ss.hasPermission('tenant:app:query')")
+    @TenantIgnore
+    @PermitAll
     public CommonResult<ApplicationRespVO> getApplication(@RequestParam("id") Long id) {
         return CommonResult.success(appApplicationService.getApplication(id));
     }
@@ -94,7 +98,7 @@ public class AppApplicationController {
     @PreAuthorize("@ss.hasPermission('tenant:app:query')")
     @Operation(summary = "获取应用精简信息列表-不分页", description = "只包含被开启的应用，主要用于前端的下拉选项")
     public CommonResult<List<ApplicationSimpleRespVO>> getSimpleAppList() {
-        List<AppApplicationDO> list = appApplicationService.getSimpleAppList(ApplicationStatusEnum.PUBLISHED.getValue());
+        List<AppApplicationDO> list = appApplicationService.getSimpleAppList(AppStatusEnum.ONLINE.getValue());
         return success(BeanUtils.toBean(list, ApplicationSimpleRespVO.class));
     }
 
@@ -104,6 +108,21 @@ public class AppApplicationController {
     public CommonResult<List<ApplicationSimpleRespVO>> getSimpleAppListByName(@RequestParam(value = "appName", required = false) String appName) {
         List<AppApplicationDO> list = appApplicationService.getMySimpleAppListByName(appName);
         return success(BeanUtils.toBean(list, ApplicationSimpleRespVO.class));
+    }
+
+    @GetMapping("/get-navigation-config")
+    @Operation(summary = "获取应用导航配置")
+    @PreAuthorize("@ss.hasPermission('tenant:app:query')")
+    public CommonResult<ApplicationNavigationConfigVO> getApplicationNavigationConfig(@RequestParam("id") Long id) {
+        return CommonResult.success(appApplicationService.getApplicationNavigationConfig(id));
+    }
+
+    @PostMapping("/update-navigation-config")
+    @Operation(summary = "更新应用导航配置")
+    @PreAuthorize("@ss.hasPermission('tenant:app:update')")
+    public CommonResult<Boolean> updateApplicationNavigationConfig(@Validated @RequestBody ApplicationNavigationConfigVO updateReqVO) {
+        appApplicationService.updateApplicationNavigationConfig(updateReqVO);
+        return CommonResult.success(true);
     }
 
 }

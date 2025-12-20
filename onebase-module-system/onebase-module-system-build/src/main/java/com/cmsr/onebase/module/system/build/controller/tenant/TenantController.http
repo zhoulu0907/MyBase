@@ -1,4 +1,4 @@
-### 环境配置说明
+## 环境配置说明
 # 使用全局环境配置文件 http-client.env.json
 # 请在IntelliJ IDEA中选择对应环境: local/dev/test/gateway
 # 确保先在AuthController.http中登录获取token
