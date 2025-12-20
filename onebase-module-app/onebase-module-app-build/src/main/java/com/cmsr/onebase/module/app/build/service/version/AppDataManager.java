@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.app.build.service.version;
 
+import com.cmsr.onebase.module.app.core.dal.database.app.AppNavigationRepository;
 import com.cmsr.onebase.module.app.core.dal.database.auth.*;
 import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
 import com.cmsr.onebase.module.app.core.dal.database.resource.*;
@@ -40,8 +41,10 @@ public class AppDataManager {
     private AppAuthPermissionRepository authPermissionRepository;
 
     @Autowired
-    private AppAuthRoleRepository authRoleRepository;
+    private AppNavigationRepository navigationRepository;
 
+    @Autowired
+    private AppAuthRoleRepository authRoleRepository;
 
     public void moveRuntimeToHistory(Long applicationId, Long versionTag) {
         workbenchComponentRepository.moveRuntimeToHistory(applicationId, versionTag);
@@ -54,6 +57,7 @@ public class AppDataManager {
         authFieldRepository.moveRuntimeToHistory(applicationId, versionTag);
         authDataGroupRepository.moveRuntimeToHistory(applicationId, versionTag);
         authPermissionRepository.moveRuntimeToHistory(applicationId, versionTag);
+        navigationRepository.moveRuntimeToHistory(applicationId, versionTag);
     }
 
 
@@ -68,6 +72,7 @@ public class AppDataManager {
         authFieldRepository.copyEditToRuntime(applicationId);
         authDataGroupRepository.copyEditToRuntime(applicationId);
         authPermissionRepository.copyEditToRuntime(applicationId);
+        navigationRepository.copyEditToRuntime(applicationId);
     }
 
     // 3、历史版本数据回滚为运行态数据
@@ -94,6 +99,7 @@ public class AppDataManager {
         authFieldRepository.deleteApplicationVersionData(applicationId, versionTag);
         authDataGroupRepository.deleteApplicationVersionData(applicationId, versionTag);
         authPermissionRepository.deleteApplicationVersionData(applicationId, versionTag);
+        navigationRepository.deleteApplicationVersionData(applicationId, versionTag);
     }
 
     public void deleteAllApplicationData(Long applicationId) {
@@ -107,5 +113,7 @@ public class AppDataManager {
         authFieldRepository.deleteAllApplicationData(applicationId);
         authDataGroupRepository.deleteAllApplicationData(applicationId);
         authPermissionRepository.deleteAllApplicationData(applicationId);
+        authRoleRepository.deleteAllApplicationData(applicationId);
+        navigationRepository.deleteAllApplicationData(applicationId);
     }
 }

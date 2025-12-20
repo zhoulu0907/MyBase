@@ -1,11 +1,12 @@
-package com.cmsr.onebase.module.app.core.dto.appresource;
+package com.cmsr.onebase.module.app.core.dto.resource;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
+@Schema(description = "RPC 服务 - PageSetLabel Update DTO")
 @Data
-public class PageSetLabelRespDTO {
+public class PageSetLabelUpdateDTO {
 
     @Schema(description = "标签ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "1024")
     @NotNull(message = "标签ID不能为空")

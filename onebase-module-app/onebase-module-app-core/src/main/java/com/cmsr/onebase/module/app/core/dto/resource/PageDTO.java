@@ -1,8 +1,7 @@
-package com.cmsr.onebase.module.app.core.dto.appresource;
+package com.cmsr.onebase.module.app.core.dto.resource;
 
 import java.util.List;
 
-import jakarta.persistence.Column;
 import lombok.Data;
 
 @Data

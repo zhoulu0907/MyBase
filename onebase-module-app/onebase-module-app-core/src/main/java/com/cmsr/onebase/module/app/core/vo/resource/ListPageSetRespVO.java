@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.app.core.vo.resource;
 
-import com.cmsr.onebase.module.app.core.dto.appresource.PageSetRespDTO;
+import com.cmsr.onebase.module.app.core.dto.resource.PageSetRespDTO;
 import lombok.Data;
 
 import java.util.List;

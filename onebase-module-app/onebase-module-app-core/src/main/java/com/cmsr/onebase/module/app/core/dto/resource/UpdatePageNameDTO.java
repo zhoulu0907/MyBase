@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.app.core.dto.appresource;
+package com.cmsr.onebase.module.app.core.dto.resource;
 
 import lombok.Data;
 
