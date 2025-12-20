@@ -41,6 +41,7 @@ import { useFormEditorSignal } from 'src/signals/page_editor';
 import { ENTITY_FIELD_TYPE } from '../../../../DataFactory/const';
 import { COMPONENT_MAP } from '../../../componentsMap';
 import { getComponentSchema } from '../../../schema';
+import { DraftBox } from './DraftBox';
 import './index.css';
 import type { XTableConfig } from './schema';
 import TableSearch from './tableSerach';
@@ -673,6 +674,7 @@ const XTable = memo(
                   添加数据
                 </Button>
               )}
+              <DraftBox showFromPageData={showFromPageData} />
             </div>
             <Button type="text" onClick={() => handlePage()} icon={<IconRefresh />}></Button>
           </div>
