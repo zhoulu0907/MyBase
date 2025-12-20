@@ -70,6 +70,7 @@ export const OutputNodeConfig: React.FC<OutputNodeConfigProps> = ({ onRegisterSa
   const handleDatasourceTypeOnChange = (value: string) => {
     setDatasourceType(value);
     setSelectDatasourceUUID('');
+    setSelectTableUUID('');
     setTableOptions([]);
     setTargetColumns([]);
     setFieldMappings([]);
@@ -89,6 +90,7 @@ export const OutputNodeConfig: React.FC<OutputNodeConfigProps> = ({ onRegisterSa
 
   const handleDatasourceUUIDOnChange = (value: string) => {
     setSelectDatasourceUUID(value);
+    setSelectTableUUID('');
 
     setTargetColumns([]);
     setFieldMappings([]);
