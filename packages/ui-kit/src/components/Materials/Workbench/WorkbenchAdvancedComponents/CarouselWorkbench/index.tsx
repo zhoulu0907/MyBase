@@ -1,6 +1,6 @@
 import { Carousel, Form } from '@arco-design/web-react';
 import { memo } from 'react';
-import { STATUS_OPTIONS, STATUS_VALUES } from '../../core/constants';
+import { getFileUrlById } from '@onebase/platform-center';
 import styles from './index.module.css';
 import { type XCarouselConfig } from './schema';
 
@@ -32,7 +32,7 @@ const XCarousel = memo((props: XCarouselConfig & { runtime?: boolean }) => {
       >
         {carouselConfig.map((img, index) => (
           <div className={styles.imageWrapper} key={index} onClick={() => window.open(img.url)}>
-            <img className={styles.image} src={img.image} />
+            <img className={styles.image} src={img.image?.indexOf('data:') < 0 ? getFileUrlById(img.image) : img.image} />
             {/* <div className={styles.text}>{img.text}</div> */}
           </div>
         ))}

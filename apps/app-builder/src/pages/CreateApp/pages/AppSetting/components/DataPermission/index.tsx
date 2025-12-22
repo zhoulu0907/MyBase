@@ -45,10 +45,11 @@ interface IProps {
   appId: string;
   menuId: string;
   roleId: string;
+  roleType: number;
 }
 
 // 数据权限
-const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
+const DataPermission: FC<IProps> = ({ appId, menuId, roleId, roleType }: IProps) => {
   const [status, setStatus] = useState<'create' | 'edit'>('create');
   const [appEntityFields, setAppEntityFields] = useState<AppEntityField[]>([]);
   const [dataPermissionPerson, setDataPermissionPerson] = useState<AuthDataPermissionPersonVO[]>([]);
@@ -604,6 +605,7 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
           </Button>
           <DataPermissionModal
             roleId={roleId}
+            roleType={roleType}
             initialFormValues={editingPermData || initialFormValues}
             modalVisible={modalVisible}
             status={status}

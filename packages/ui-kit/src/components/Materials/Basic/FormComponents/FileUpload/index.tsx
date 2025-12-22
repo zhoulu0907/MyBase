@@ -99,10 +99,7 @@ const XFileUpload = memo(
           {filesList.map((file, index) => (
             <div key={file.uid} className="uplaodList-text-item">
               {getFileIcon(file)}
-              <Typography.Ellipsis
-                showTooltip
-                className={`uplaodList-text-item-name ${showDownload ? 'uplaodList-text-item-name-hover' : ''}`}
-              >
+              <Typography.Ellipsis showTooltip className={`${showDownload ? 'uplaodList-text-item-name-hover' : ''}`}>
                 {file.name}
               </Typography.Ellipsis>
               {file.percent && file.percent !== 100 ? (
@@ -131,7 +128,7 @@ const XFileUpload = memo(
                           menuId: curMenu.value?.id,
                           id: recordId || rowDataId.value,
                           fieldName: curFieldName,
-                          fileId: file.response.fileId || file.id
+                          fileId: file.response.fileId || file.uid
                         };
                         const fileUrl = await attachmentDownload(tableName, param);
                         downloadFileByUrl(fileUrl, file.name);

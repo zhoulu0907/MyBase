@@ -100,7 +100,7 @@ const VersionManagement: React.FC<VersionManagementProps> = ({
 
   const columns: ColumnProps<VersionRecord>[] = [
     {
-      title: '版本名称',
+      title: '名称',
       dataIndex: 'versionName',
       key: 'versionName',
       align: 'center',

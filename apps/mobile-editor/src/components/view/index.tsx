@@ -20,7 +20,7 @@ interface ViewProps {
   pageComponentSchemas: { [key: string]: EditConfig };
   layoutSubComponents: { [key: string]: any[][] };
 
-  pageViews: { [key: string]: PageView };
+  pageViews: any;
   curViewId: string;
   subTableComponents: { [key: string]: EditConfig[] };
   setCurViewId: (id: string) => void;
@@ -47,7 +47,6 @@ const View: React.FC<ViewProps> = ({
 }) => {
   useSignals();
 
-
   const [createForm] = useForm();
   const [createViewModalVisible, setCreateViewModalVisible] = useState(false);
   const [dropListVisible, setDropListVisible] = useState(false);
@@ -72,11 +71,11 @@ const View: React.FC<ViewProps> = ({
 
   const handleSelectView = (id: string) => {
     // 保存当前配置到editorSignalMap，切换视图后，载入新的配置到useFormEditorSignal
-    useEditorSignalMap.get(curViewId.value)!.setComponents(components);
+    useEditorSignalMap.get(curViewId)!.setComponents(components);
 
-    useEditorSignalMap.get(curViewId.value)!.loadPageComponentSchemas(pageComponentSchemas);
-    useEditorSignalMap.get(curViewId.value)!.loadLayoutSubComponents(layoutSubComponents);
-    useEditorSignalMap.get(curViewId.value)!.loadSubTableComponents(subTableComponents);
+    useEditorSignalMap.get(curViewId)!.loadPageComponentSchemas(pageComponentSchemas);
+    useEditorSignalMap.get(curViewId)!.loadLayoutSubComponents(layoutSubComponents);
+    useEditorSignalMap.get(curViewId)!.loadSubTableComponents(subTableComponents);
 
     // 切换到新视图
     switchToView(id);
@@ -86,12 +85,12 @@ const View: React.FC<ViewProps> = ({
     e.stopPropagation();
     console.log('copy view: ', id);
     // 保存当前配置到editorSignalMap
-    useEditorSignalMap.get(curViewId.value)!.setComponents(components);
-    useEditorSignalMap.get(curViewId.value)!.loadPageComponentSchemas(pageComponentSchemas);
-    useEditorSignalMap.get(curViewId.value)!.loadLayoutSubComponents(layoutSubComponents);
-    useEditorSignalMap.get(curViewId.value)!.loadSubTableComponents(subTableComponents);
+    useEditorSignalMap.get(curViewId)!.setComponents(components);
+    useEditorSignalMap.get(curViewId)!.loadPageComponentSchemas(pageComponentSchemas);
+    useEditorSignalMap.get(curViewId)!.loadLayoutSubComponents(layoutSubComponents);
+    useEditorSignalMap.get(curViewId)!.loadSubTableComponents(subTableComponents);
 
-    const view = pageViews.value[id];
+    const view = pageViews[id];
     if (!view) {
       return;
     }
@@ -183,7 +182,7 @@ const View: React.FC<ViewProps> = ({
     useEditorSignalMap.get(newId)!.loadPageComponentSchemas(newPageComponentSchemas);
     useEditorSignalMap.get(newId)!.loadLayoutSubComponents(newLayoutSubComponents);
     useEditorSignalMap.get(newId)!.loadSubTableComponents(newSubTableComponents);
-    // usePageViewEditorSignal.pageViews.value[newId] = newView;
+    // usePageViewEditorSignal.pageViews[newId] = newView;
 
     // 切换到新视图
     switchToView(newId);
@@ -204,11 +203,11 @@ const View: React.FC<ViewProps> = ({
           setDropListVisible(false);
         }}
       >
-        {Object.entries(pageViews.value).map(([id, view]: [string, any]) => {
+        {Object.entries(pageViews).map(([id, view]: [string, any]) => {
           return (
             <Menu.Item key={id} onClick={() => handleSelectView(id)}>
               <div key={id} className={styles.dropItem}>
-                {view.id === curViewId.value ? (
+                {view.id === curViewId ? (
                   <img className={styles.dropItemIcon} src={TickSVG} alt="tick" />
                 ) : (
                   <div style={{ width: '16px', height: '16px' }}></div>
@@ -280,7 +279,7 @@ const View: React.FC<ViewProps> = ({
   let oldPageViewName = '';
   const pageViewNameBlur = (e: any) => {
     if (e.currentTarget.value === '') {
-      updatePageViewName(curViewId.value, oldPageViewName);
+      updatePageViewName(curViewId, oldPageViewName);
     }
     setEditViewName(false);
     oldPageViewName = '';
@@ -292,9 +291,9 @@ const View: React.FC<ViewProps> = ({
         <Input
           size="small"
           autoFocus
-          defaultValue={pageViews.value[curViewId.value]?.pageName}
+          defaultValue={pageViews[curViewId]?.pageName}
           onChange={(e: any) => {
-            updatePageViewName(curViewId.value, e);
+            updatePageViewName(curViewId, e);
           }}
           onPressEnter={pageViewNameBlur}
           onBlur={pageViewNameBlur}
@@ -305,7 +304,7 @@ const View: React.FC<ViewProps> = ({
         />
       ) : (
         <div className={styles.viewTitle} onClick={() => setEditViewName(true)}>
-          <div className={styles.viewTitleText}>{pageViews.value[curViewId.value]?.pageName}</div> <IconEdit />
+          <div className={styles.viewTitleText}>{pageViews[curViewId]?.pageName}</div> <IconEdit />
         </div>
       )}
 
@@ -320,7 +319,7 @@ const View: React.FC<ViewProps> = ({
         }}
       >
         <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-          {showViewType(pageViews.value[curViewId.value])}
+          {showViewType(pageViews[curViewId])}
           <IconDown />
         </span>
       </Dropdown>

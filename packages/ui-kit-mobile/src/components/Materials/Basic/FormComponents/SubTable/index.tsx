@@ -33,7 +33,7 @@ import styles from './index.module.css';
 
 type XSubTableConfig = typeof FormSchema.XSubTableSchema.config;
 
-const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: boolean; defaultOptionsConfig?: any; form?: any; editLoading?: boolean }) => {
+const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: boolean; defaultOptionsConfig?: any; form?: any; editLoading?: boolean; useStoreSignals?: any; }) => {
   useSignals();
 
   const { id, label, tooltip, status, subTableConfig, verify, runtime = true, detailMode, pageType, form, editLoading, useStoreSignals } = props;
@@ -51,10 +51,10 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
     setShowDeleteButton,
     subTableComponents,
     setSubTableComponents
-  } = usePageEditorSignal(pageType || EDITOR_TYPES.FORM_EDITOR);
+  } = useStoreSignals || usePageEditorSignal(pageType || EDITOR_TYPES.FORM_EDITOR);
   const { subTableDataLength } = pagesRuntimeSignal;
 
-  // console.log('yyyyy------', { pageComponentSchemas, subTableComponents, mainEntity, subEntities});
+  // console.log('yyyyy------', useStoreSignals, { pageComponentSchemas, subTableComponents, mainEntity, subEntities});
 
   const [subTableData, setSubTableData] = useState<any[]>([]);
 
@@ -212,7 +212,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
       schema.config.verify = {
         ...schema.config.verify,
         required: currentField.isRequired,
-        noRepeat: currentField.isUnique
+        noRepeat: typeof schema.config?.verify?.noRepeat === 'boolean' ? ele.currentField === 1 : undefined
       };
 
       // 字段选项列表（单/多选字段专用） options

@@ -1,5 +1,6 @@
 import ExecuteFlows from '@/utils/flow';
 import { Form, Message, Modal } from '@arco-design/web-react';
+import DetailPop from '../TaskCenter/page/DetailPop';
 import {
   CATEGORY_TYPE,
   dataMethodCreateV2,
@@ -11,6 +12,7 @@ import {
   PageType,
   queryFlowExecForm,
   TRIGGER_EVENTS,
+  LISTTYPE,
   type AppEntityField,
   type DetailMethodV2Params,
   type GetPageSetIdReq,
@@ -19,7 +21,14 @@ import {
 } from '@onebase/app';
 import { fetchSubmitInstance } from '@onebase/app/src/services/app_runtime';
 import { pagesRuntimeSignal } from '@onebase/common';
-import { EDITOR_TYPES, ENTITY_FIELD_TYPE, FORM_COMPONENT_TYPES, useEditorSignalMap } from '@onebase/ui-kit';
+import {
+  EDITOR_TYPES,
+  ENTITY_FIELD_TYPE,
+  FORM_COMPONENT_TYPES,
+  STATUS_OPTIONS,
+  STATUS_VALUES,
+  useEditorSignalMap
+} from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useState } from 'react';
 import DetailRuntime from './DetailRuntime';
@@ -50,7 +59,11 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
     mainMetaDataFields,
     setMainMetaDataFields,
     subEntities,
-    setSubEntities
+    setSubEntities,
+    bpmInstanceId,
+    flows,
+    setFlows,
+    resetFlows
   } = pagesRuntimeSignal;
 
   const [pageSetId, setPageSetId] = useState('');
@@ -93,6 +106,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
     if (menuId) {
       handleGetPageSetId(menuId);
       setEditTargetId('');
+      resetFlows();
     }
   }, [menuId]);
 
@@ -112,14 +126,12 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
   }, [pageSetId]);
 
   const handleGetPageSetId = async (menuId: string) => {
-    // TODO(mickey多租户): 待runtime接口提供后打开
     const req: GetPageSetIdReq = { menuId: menuId };
     const res = await getPageSetId(req);
     setPageSetId(res);
   };
 
   // 收集信息弹窗
-  const [flows, setFlows] = useState<any[]>([]);
   const [inputParams, setInputParams] = useState<any>({});
 
   const [entityParam, setEntityParam] = useState<any>();
@@ -129,6 +141,9 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
     await form.validate();
     !isSave && setSubmitLoading(true);
     const fields = form.getFieldsValue();
+
+    const componentSchemas = useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value;
+    const subTableComponents = useEditorSignalMap.get(editPageViewId.value)?.subTableComponents.value;
 
     const formData = {} as any;
     const subFormData: Record<string, any[]> = {};
@@ -141,20 +156,16 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
           formData[field.fieldName] = (value || []).map((ele: any) => {
             return { name: ele.name, id: ele.response?.fileId || ele.id };
           });
-        } else if (field.fieldType === ENTITY_FIELD_TYPE.BOOLEAN.VALUE) {
-          formData[field.fieldName] = value;
         } else {
-          formData[field.fieldName] = value || null;
+          formData[field.fieldName] = value;
         }
       }
 
+      // 判断是子表
+      const subEntity = subEntities.value.find((ele: any) => ele.childTableName == key);
       // 处理子表逻辑
-      if (key.startsWith(FORM_COMPONENT_TYPES.SUB_TABLE)) {
-        const subEntityUuid = useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[key]?.config
-          ?.subTable;
-
-        const subEntity = subEntities.value.find((ele: any) => ele.childEntityUuid == subEntityUuid);
-        const subTableName = subEntity?.childTableName;
+      if (subEntity) {
+        const subTableName = subEntity.childTableName;
 
         //   过滤空行
         const subTableRows = [] as any;
@@ -183,9 +194,31 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
           }
           subTableRows.push(temp);
         }
+
         subFormData[subTableName] = subTableRows;
       }
     });
+
+    let subVerify = false;
+    const subComponentKeys = Object.keys(subTableComponents);
+    subComponentKeys.forEach((e) => {
+      if (
+        componentSchemas[e]?.config?.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] &&
+        componentSchemas[e]?.config?.verify?.required
+      ) {
+        const subEntity = subEntities.value.find(
+          (ele: any) => ele.childEntityUuid == componentSchemas[e]?.config?.subTable
+        );
+        if (subEntity?.childTableName && !subFormData[subEntity.childTableName]?.length) {
+          subVerify = true;
+        }
+      }
+    });
+    if (subVerify) {
+      Message.warning('子表单至少添加一行');
+      setSubmitLoading(false);
+      return;
+    }
 
     console.log('formData:   ', formData);
     console.log('subFormData:   ', subFormData);
@@ -322,10 +355,11 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
       const dataItem = res;
 
       const componentSchemas = useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value;
+      const subTableComponents = useEditorSignalMap.get(editPageViewId.value)?.subTableComponents.value;
 
       //   主表渲染逻辑
       if (dataItem && typeof dataItem === 'object') {
-        Object.entries(dataItem).forEach(([fieldName, value]) => {
+        Object.entries(dataItem).forEach(([fieldName, value]: [string, any]) => {
           const componentSchemaList = Object.keys(componentSchemas);
           const currentKey = componentSchemaList.find((key) =>
             componentSchemas?.[key]?.config?.dataField?.includes(fieldName)
@@ -336,7 +370,23 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
               currentSchema?.type === FORM_COMPONENT_TYPES.FILE_UPLOAD) &&
             Array.isArray(value)
           ) {
+            // 处理文件、图片
             formValues[fieldName] = (value || []).map((ele: any) => ({ ...ele, uid: ele.id }));
+          } else if (
+            (currentSchema?.type === FORM_COMPONENT_TYPES.RADIO ||
+              currentSchema?.type === FORM_COMPONENT_TYPES.SELECT_ONE) &&
+            typeof value === 'object' &&
+            value !== null
+          ) {
+            // 处理单选框、下拉列表
+            formValues[fieldName] = value?.id;
+          } else if (
+            (currentSchema?.type === FORM_COMPONENT_TYPES.CHECKBOX ||
+              currentSchema?.type === FORM_COMPONENT_TYPES.SELECT_MUTIPLE) &&
+            Array.isArray(value)
+          ) {
+            // 处理复选框、下拉多选列表
+            formValues[fieldName] = (value || []).map((ele: any) => ele.id);
           } else {
             formValues[fieldName] = value;
           }
@@ -351,40 +401,53 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
           subEntity.childTableName &&
           Object.prototype.hasOwnProperty.call(dataItem, subEntity.childTableName)
         ) {
-          console.log(`找到子表 ${subEntity.childTableName} 数据:`, dataItem[subEntity.childTableName]);
-
+          // 子表数据
           const subData = dataItem[subEntity.childTableName];
 
           Object.entries(componentSchemas).forEach(([key, schema]: [string, any]) => {
-            // pagesRuntimeSignal
-            if (
-              key.startsWith(FORM_COMPONENT_TYPES.SUB_TABLE) &&
-              schema?.config?.subTable == subEntity.childEntityUuid
-            ) {
+            // 找到子表
+            if (schema?.config?.subTable == subEntity.childEntityUuid) {
               pagesRuntimeSignal.setSubTableDataLength(key, (subData || []).length);
 
+              // 当前子表单的所有组件id
+              const componentIds = subTableComponents[key]?.map((ele: any) => ele.id);
               for (let idx = 0; idx < (subData || []).length; idx++) {
-                const keys = Object.keys((subData || [])[idx]);
-                for (let ele in componentSchemas) {
-                  const config = componentSchemas[ele]?.config;
-                  const fieldId = config?.dataField?.[1];
-                  if (keys.includes(fieldId)) {
-                    if (
-                      (componentSchemas[ele]?.type === FORM_COMPONENT_TYPES.IMG_UPLOAD ||
-                        componentSchemas[ele]?.type === FORM_COMPONENT_TYPES.FILE_UPLOAD) &&
-                      Array.isArray(subData[idx]?.[fieldId])
-                    ) {
-                      formValues[`${key}.${idx}.${fieldId}`] = (subData[idx]?.[fieldId] || []).map((ele: any) => ({
-                        ...ele,
-                        uid: ele.id
-                      }));
-                    } else {
-                      formValues[`${key}.${idx}.${fieldId}`] = subData[idx]?.[fieldId];
-                    }
+                for (let componentId of componentIds) {
+                  const fieldName = componentSchemas[componentId]?.config?.dataField?.[1];
+                  if (
+                    (componentSchemas[componentId]?.type === FORM_COMPONENT_TYPES.IMG_UPLOAD ||
+                      componentSchemas[componentId]?.type === FORM_COMPONENT_TYPES.FILE_UPLOAD) &&
+                    Array.isArray(subData[idx]?.[fieldName])
+                  ) {
+                    formValues[`${subEntity.childTableName}.${idx}.${fieldName}`] = (
+                      subData[idx]?.[fieldName] || []
+                    ).map((e: any) => ({
+                      ...e,
+                      uid: e.id
+                    }));
+                  } else if (
+                    (componentSchemas[componentId]?.type === FORM_COMPONENT_TYPES.RADIO ||
+                      componentSchemas[componentId]?.type === FORM_COMPONENT_TYPES.SELECT_ONE) &&
+                    typeof subData[idx]?.[fieldName] === 'object' &&
+                    subData[idx]?.[fieldName] !== null
+                  ) {
+                    // 处理单选框、下拉列表
+                    formValues[`${subEntity.childTableName}.${idx}.${fieldName}`] = subData[idx]?.[fieldName]?.id;
+                  } else if (
+                    (componentSchemas[componentId]?.type === FORM_COMPONENT_TYPES.CHECKBOX ||
+                      componentSchemas[componentId]?.type === FORM_COMPONENT_TYPES.SELECT_MUTIPLE) &&
+                    Array.isArray(subData[idx]?.[fieldName])
+                  ) {
+                    // 处理复选框、下拉多选列表
+                    formValues[`${subEntity.childTableName}.${idx}.${fieldName}`] = (
+                      subData[idx]?.[fieldName] || []
+                    ).map((ele: any) => ele.id);
+                  } else {
+                    formValues[`${subEntity.childTableName}.${idx}.${fieldName}`] = subData[idx]?.[fieldName];
                   }
                 }
                 // 补充id
-                formValues[`${key}.${idx}.id`] = subData[idx]?.id;
+                formValues[`${subEntity.childTableName}.${idx}.id`] = subData[idx]?.id;
               }
             }
           });
@@ -424,25 +487,48 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
     submitForm(true);
   };
 
+  const onBack = () => {
+    setPredictVisible(false);
+    setTimeout(() => setRefresh(Date.now()), 150);
+  };
+
   return (
     <div className={`${styles.previewPage} runtime-preview-formpage`}>
       <div className={styles.content}>
         {pageSetType === PageType.WORKBENCH ? (
           <WorkbenchRuntime pageSetId={pageSetId} runtime={runtime} />
         ) : (
-          <ListRuntime pageSetId={pageSetId} runtime={runtime} showFromPageData={showFromPageData} refresh={refresh} />
+          <ListRuntime
+            pageSetType={pageSetType}
+            pageSetId={pageSetId}
+            runtime={runtime}
+            showFromPageData={showFromPageData}
+            refresh={refresh}
+          />
         )}
 
-        <DetailRuntime
-          visible={drawerVisible.value}
-          onCancel={() => setDrawerVisible(false)}
-          form={form}
-          detailMode={detailMode}
-          onUpdate={() => submitForm()}
-          onCancelUpdate={cancelSubmitForm}
-          showFromPageData={showFromPageData}
-          editTargetId={editTargetId}
-        />
+        {pageSetType === PageType.NORMAL && (
+          <DetailRuntime
+            visible={drawerVisible.value}
+            onCancel={() => setDrawerVisible(false)}
+            form={form}
+            detailMode={detailMode}
+            onUpdate={() => submitForm()}
+            onCancelUpdate={cancelSubmitForm}
+            showFromPageData={showFromPageData}
+            editTargetId={editTargetId}
+          />
+        )}
+
+        {pageSetType === PageType.BPM && drawerVisible.value && bpmInstanceId.value && (
+          <DetailPop
+            detailPopVisible={drawerVisible.value}
+            setPopVisible={setDrawerVisible}
+            onBack={onBack}
+            rowData={{ instanceId: bpmInstanceId.value, pageSetId }}
+            listType={LISTTYPE.LIST}
+          />
+        )}
 
         {pageType == EDITOR_TYPES.FORM_EDITOR && (
           <EditRuntime
@@ -457,7 +543,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
       </div>
 
       {/* 收集信息弹窗 */}
-      <ExecuteFlows flows={flows} inputParams={inputParams}></ExecuteFlows>
+      <ExecuteFlows flows={flows.value} inputParams={inputParams}></ExecuteFlows>
       {isPredictVisible && (
         <Modal
           title=""

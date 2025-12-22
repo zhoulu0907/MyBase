@@ -113,12 +113,12 @@ export interface XCarouselConfig extends ICommonBaseWorkbenchType {
 const DEFAULT_CAROUSEL_CONTENT: Images[] = [
   {
     image: SlideOne,
-    text: 'Welcome to Workbench',
+    text: '轮播图1',
     url: ''
   },
   {
     image: SlideTwo,
-    text: 'Launch New Campaigns',
+    text: '轮播图2',
     url: ''
   }
 ];

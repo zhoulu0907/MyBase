@@ -14,13 +14,19 @@ import DynamicIcon from '@/components/DynamicIcon';
 import { iconMap } from '@/utils/const';
 import { IconPlus, IconRefresh } from '@arco-design/web-react/icon';
 import {
+  CATEGORY_TYPE,
   dataMethodDeleteV2,
   dataMethodPageV2,
   DeleteMethodV2Params,
   getEntityFieldsWithChildren,
+  getFormDataPage,
   menuSignal,
   PageMethodV2Params,
+  PageType,
+  queryFlowExecForm,
+  TRIGGER_EVENTS,
   VALIDATION_TYPE,
+  deleteFormDataPage,
   type AppEntityField
 } from '@onebase/app';
 import {
@@ -34,6 +40,9 @@ import dayjs from 'dayjs';
 import PreviewRender from 'src/components/render/PreviewRender';
 import { useFormEditorSignal } from 'src/signals/page_editor';
 import { ENTITY_FIELD_TYPE } from '../../../../DataFactory/const';
+import { COMPONENT_MAP } from '../../../componentsMap';
+import { getComponentSchema } from '../../../schema';
+import { DraftBox } from './DraftBox';
 import './index.css';
 import type { XTableConfig } from './schema';
 import TableSearch from './tableSerach';
@@ -80,9 +89,18 @@ const XTable = memo(
     }
   ) => {
     useSignals();
+
     const { pageComponentSchemas: fromPageComponentSchemas, components } = useFormEditorSignal;
 
-    const { setDrawerVisible, setDrawerPageId, setDetailPageViewId, setRowDataId } = pagesRuntimeSignal;
+    const {
+      curPage,
+      setDrawerVisible,
+      setDrawerPageId,
+      setDetailPageViewId,
+      setRowDataId,
+      setFlows,
+      setBpmInstanceId
+    } = pagesRuntimeSignal;
     const { runtime = true, showFromPageData, showAddBtn = true, preview } = props;
     const hasOperationPermission = true;
 
@@ -254,7 +272,7 @@ const XTable = memo(
 
     useEffect(() => {
       getFinalColumns();
-    }, [showOpearate, columns, fixedOpearate, selectedRowId]);
+    }, [showOpearate, columns, fixedOpearate, selectedRowId, tablePageNo]);
 
     useEffect(() => {
       if (finalColumns && metaData) {
@@ -304,7 +322,10 @@ const XTable = memo(
                   );
 
                   if (dataFieldInfo && _record[dataFieldInfo.fieldName]) {
-                    dataField = [mainMetaData.tableName, `${id}.${index}.${dataFieldInfo.fieldName}`];
+                    dataField = [
+                      mainMetaData.tableName,
+                      `${mainMetaData.tableName}.${index}.${dataFieldInfo.fieldName}`
+                    ];
                   }
                 }
 
@@ -315,7 +336,7 @@ const XTable = memo(
                     dataField:
                       dataField?.length > 0
                         ? dataField
-                        : [mainMetaData.tableName, `${id}.${index}.${column.dataIndex}`],
+                        : [mainMetaData.tableName, `${mainMetaData.tableName}.${index}.${column.dataIndex}`],
                     label: {
                       display: false,
                       text: ''
@@ -339,6 +360,42 @@ const XTable = memo(
                     recordId={_record.id}
                   />
                 );
+              }
+
+              // 系统字段 表单配置里没有就根据字段类型获取默认配置
+              if (mainMetaData?.parentFields?.length) {
+                const dataFieldInfo = mainMetaData.parentFields.find(
+                  (field: AppEntityField) => field.fieldName === columnId
+                );
+                const cpType = dataFieldInfo?.fieldType ? COMPONENT_MAP[dataFieldInfo.fieldType] : null;
+                if (cpType) {
+                  const basicConfig = getComponentSchema(cpType as any);
+                  const componentConfig = {
+                    ...basicConfig,
+                    config: {
+                      ...basicConfig.config,
+                      dataField: [
+                        mainMetaData.tableName,
+                        `${mainMetaData.tableName}.${index}.${dataFieldInfo.fieldName}`
+                      ],
+                      label: {
+                        display: false,
+                        text: ''
+                      },
+                      verify: { required: false },
+                      tooltip: ''
+                    }
+                  };
+                  return (
+                    <PreviewRender
+                      cpId={columnId}
+                      cpType={cpType}
+                      detailMode={true}
+                      pageComponentSchema={componentConfig}
+                      runtime={true}
+                    />
+                  );
+                }
               }
 
               return <span>{renderCellText(columnId, _text)}</span>;
@@ -446,7 +503,7 @@ const XTable = memo(
             nodeType: 'CONDITION',
             fieldName: key,
             operator: VALIDATION_TYPE.EQUALS,
-            fieldValue: typeof value === 'object' ? [value.id] : [value]
+            fieldValue: typeof value === 'object' ? [value?.id] : [value]
           });
         }
       });
@@ -460,10 +517,19 @@ const XTable = memo(
       const req: PageMethodV2Params = {
         pageNo: tablePageNo,
         pageSize: pageSize || 10,
-        filters: filters
+        filters: filterCondition && Object.keys(filterCondition).length > 0 ? filterCondition : filters
       };
-
-      const res = await dataMethodPageV2(tableName, curMenu.value?.id, req);
+      let res: any;
+      if (props?.pageSetType === PageType.BPM) {
+        const params = {
+          menuId: curMenu.value?.id,
+          tableName,
+          ...req
+        };
+        res = await getFormDataPage(params);
+      } else {
+        res = await dataMethodPageV2(tableName, curMenu.value?.id, req);
+      }
       console.log('res: ', res);
 
       const mainMetaData = await getEntityFieldsWithChildren(metaData);
@@ -485,18 +551,6 @@ const XTable = memo(
               const dateValue = new Date(newItem[key]);
               if (!isNaN(dateValue.getTime())) {
                 newItem[key] = dateValue.toLocaleDateString();
-              }
-            }
-
-            // 多选字段回显 逗号分割
-            const multiSelectField = mainMetaData.parentFields.find(
-              (field: AppEntityField) =>
-                field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE
-            );
-            if (multiSelectField && newItem[key]) {
-              if (Array.isArray(newItem[key])) {
-                newItem[key] =
-                  newItem[key].length > 1 ? newItem[key].map((item: string) => item).join(', ') : newItem[key];
               }
             }
 
@@ -523,7 +577,7 @@ const XTable = memo(
 
       console.log('newTableData: ', newTableData);
 
-      tableForm.setFieldsValue({ [id]: newTableData });
+      tableForm.setFieldsValue({ [mainMetaData.tableName]: newTableData });
       setTableData(newTableData);
       setTableTotal(total);
     };
@@ -532,13 +586,35 @@ const XTable = memo(
       if (!runtime) {
         return;
       }
+
+      const curFormPage = curPage.value?.pages?.find((ele: any) => ele.pageType === CATEGORY_TYPE.LIST);
+      console.log('curFormPage: ', curFormPage);
+      const pageId = curFormPage?.id;
+
+      const flowRes = pageId ? await queryFlowExecForm(pageId) : [];
+      console.log('flowRes: ', flowRes);
+
+      const deleteFlows = (flowRes || []).filter(
+        (ele: any) => ele.recordTriggerEvents && ele.recordTriggerEvents.includes(TRIGGER_EVENTS.DELETE)
+      );
+      setFlows(deleteFlows);
+
       console.log('删除数据 id: ', id);
 
       const req: DeleteMethodV2Params = {
         id: id
       };
-
-      const res = await dataMethodDeleteV2(tableName, curMenu.value?.id, req);
+      let res:any
+      if (props?.pageSetType === PageType.BPM){
+        const params={
+          menuId: curMenu.value?.id,
+          tableName,
+          ...req
+        }
+        res = await deleteFormDataPage(params)
+      } else {
+        res = await dataMethodDeleteV2(tableName, curMenu.value?.id, req);
+      }
 
       if (res) {
         Message.success('删除成功');
@@ -566,6 +642,8 @@ const XTable = memo(
           // 打开抽屉显示详情
           setDrawerVisible(true);
           redirectPageId && setDrawerPageId(redirectPageId);
+
+          record.bpm_instance_id && setBpmInstanceId(record.bpm_instance_id);
 
           handleEdit(record.id, false);
           if (runtime) {
@@ -607,6 +685,7 @@ const XTable = memo(
                   添加数据
                 </Button>
               )}
+              <DraftBox showFromPageData={showFromPageData} />
             </div>
             <Button type="text" onClick={() => handlePage()} icon={<IconRefresh />}></Button>
           </div>

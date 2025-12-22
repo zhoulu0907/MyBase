@@ -42,10 +42,7 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
   const { components: listComponents, pageComponentSchemas: listPageComponentSchemas } = useListEditorSignal;
   const { workbenchComponents, wbComponentSchemas } = useWorkbenchEditorSignal;
   const { editMode } = currentEditorSignal;
-
   const mobileEditorPreviewRef = useRef<MicroApp | null>(null);
-
-  //   const pageEditorSignal = usePageEditorSignal();
 
   const qiankunActions = initGlobalState({
     drag: false,
@@ -110,6 +107,7 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
       onCancel={() => {
         setVisible(false);
       }}
+      unmountOnExit
       bodyStyle={{ background: '#F2F3F5', padding: '0' }}
     >
       <div className={classNames(styles.previewPage, { [styles.mobilePreview]: editMode.value === EditMode.MOBILE })}>
@@ -134,6 +132,7 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
                         cpType={cp.type}
                         pageComponentSchema={listPageComponentSchemas.value[cp.id]}
                         runtime={true}
+                        pageType={pageType}
                         preview={true}
                       />
                     </div>

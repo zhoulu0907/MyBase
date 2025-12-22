@@ -39,7 +39,7 @@ export interface MetadataEntityField {
   isSystemField: number;
   isPrimaryKey: boolean;
   isRequired: boolean;
-  isUnique: boolean;
+  isUnique: number;
   allowNull: boolean;
   sortOrder: number;
   validationRulesId?: string;
@@ -206,6 +206,7 @@ export interface ValidationTypeItem {
 
 export interface EntityFieldOption {
   id: string;
+  optionUuid: string;
   fieldId: string;
   optionValue: string;
   optionLabel: string;

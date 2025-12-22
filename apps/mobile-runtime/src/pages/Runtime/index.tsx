@@ -4,7 +4,7 @@ import PreviewContainer from './components/preview';
 import { menuSignal } from '@onebase/app';
 
 const Runtime: React.FC = () => {
-  const { setCurMenu } = menuSignal;
+  const { curMenu, setCurMenu } = menuSignal;
   const [search] = useSearchParams();
   const curMenuId = search.get('curMenu') || '';
   useEffect(() => {
@@ -16,12 +16,15 @@ const Runtime: React.FC = () => {
       menuName: curMenuId,
       menuIcon: '',
       isVisible: 1,
+      pagesetType: curMenu.value?.pagesetType,
       children: []
     });
   }, [curMenuId]);
 
   const renderContent =
-    curMenuId.indexOf('TASK-') >= 0 ? null : <PreviewContainer menuId={curMenuId || ''} runtime={true} />;
+    curMenuId.indexOf('TASK-') >= 0 ? null : (
+      <PreviewContainer menuId={curMenuId || ''} runtime={true} pageSetType={curMenu.value?.pagesetType} />
+    );
 
   return <div>{renderContent}</div>;
 };

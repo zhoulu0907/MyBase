@@ -45,6 +45,10 @@ import type {
   TTextDefaultType
 } from '../../../types';
 
+import {
+  PageType
+} from '@onebase/app';
+
 export interface XTableSchema {
   editData: TXTableEditData;
   config: XTableConfig;
@@ -65,6 +69,7 @@ export type TXTableEditData = Array<
 >;
 
 export interface XTableConfig extends ICommonBaseType {
+  pageSetType?:PageType;
   /**
    * 输入框标题
    * text：标题

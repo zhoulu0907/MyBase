@@ -5,3 +5,4 @@ export * from './const';
 export * from './getPopupContainer';
 export * from './menuIcons';
 export * from './security';
+export * from './entityFieldConfig';

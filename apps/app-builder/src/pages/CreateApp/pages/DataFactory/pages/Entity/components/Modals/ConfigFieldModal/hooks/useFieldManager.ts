@@ -280,6 +280,7 @@ export const useFieldManager = (
     // 验证
     clearErrors: fieldValidation.clearErrors,
     setAllErrors: fieldValidation.setAllErrors,
+    clearFieldError: fieldValidation.clearFieldError,
 
     // 表单
     form

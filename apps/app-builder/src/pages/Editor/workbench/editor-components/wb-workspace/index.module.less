@@ -6,13 +6,23 @@
 
 // 工作台工作区容器
 .workbenchWorkspace {
-  flex: 1 1 0%;
-  width: auto;
-  height: calc(100vh - var(--editor-header-height));
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   box-sizing: border-box;
   background-color: #f2f3f5;
   display: flex;
   flex-direction: column;
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
 }
 
 // 工作区头部
@@ -251,6 +261,31 @@
     .deleteButton {
       color: #f53f3f;
     }
+  }
+}
+
+// 编辑器切换容器
+.editorSwitchContainer {
+  flex: 1 1 0%;
+  width: auto;
+  height: calc(100vh - var(--editor-header-height));
+  position: relative;
+  overflow: hidden;
+}
+
+.mobileeditordraglist {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &.active {
+    opacity: 1;
+    pointer-events: auto;
   }
 }
 

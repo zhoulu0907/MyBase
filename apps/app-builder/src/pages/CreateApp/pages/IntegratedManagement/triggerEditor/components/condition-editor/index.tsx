@@ -371,7 +371,18 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
           const found = parent.children.find((child) => child.key === params.value);
           if (found) {
             title = '' + parent.title + ' - ' + found.title;
-            break;
+            return title;
+          }
+
+          // 判断 parent.children 内的某个 child 是否还有 children(子表)
+          for (const child of parent.children) {
+            if (child.children && Array.isArray(child.children) && child.children.length > 0) {
+              const foundChild = child.children.find((child) => child.key === params.value);
+              if (foundChild) {
+                title = '' + parent.title + ' - ' + child.title + ' - ' + foundChild.title;
+                return title;
+              }
+            }
           }
         }
       }

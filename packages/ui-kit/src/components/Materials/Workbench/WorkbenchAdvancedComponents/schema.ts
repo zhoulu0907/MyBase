@@ -1,8 +1,8 @@
 import XCarouselWorkbench from './CarouselWorkbench/schema';
 
-const workbenchSchema = {
+const WorkbenchSchemaAdvanced = {
   XCarouselWorkbench
 };
 
-export default workbenchSchema;
+export default WorkbenchSchemaAdvanced;
 

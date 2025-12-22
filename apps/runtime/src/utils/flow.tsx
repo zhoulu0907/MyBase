@@ -1,7 +1,7 @@
-import { Form, Input, Modal, Grid } from '@arco-design/web-react';
-import { useEffect, useState } from 'react';
+import { Form, Grid, Input, Modal } from '@arco-design/web-react';
 import { triggerFlowExecForm } from '@onebase/app';
 import { FLOW_MODAL_CANCEL, FLOW_MODAL_TYPE, NodeType } from '@onebase/common';
+import { useEffect, useState } from 'react';
 
 interface Flow {
   [key: string]: any;
@@ -24,7 +24,6 @@ interface TriggerFlowRes {
   triggered: boolean;
   executionUuid: string;
   executionEnd: boolean;
-  nodeType: string;
   outputParams: {
     [key: string]: any;
   };
@@ -36,7 +35,7 @@ interface TriggerFlowRes {
  * pageId  获取flows
  * formData  表单数据
  * type  界面交互触发/表单实体触发
- * @returns 
+ * @returns
  */
 const ExecuteFlows: React.FC<FlowsProps> = ({ flows, inputParams }) => {
   let curFlowIndex = 0;
@@ -75,13 +74,13 @@ const ExecuteFlows: React.FC<FlowsProps> = ({ flows, inputParams }) => {
         return;
       }
       // 弹窗
-      if (res.nodeType === NodeType.MODAL) {
+      if (res.outputParams?.nodeType === NodeType.MODAL) {
         // 二次确认
-        if (res.outputParams.modalType === FLOW_MODAL_TYPE.CONFIRM) {
+        if (res.outputParams?.modalType === FLOW_MODAL_TYPE.CONFIRM) {
           confirmModalFlow(res);
         }
         // 信息收集
-        if (res.outputParams.modalType === FLOW_MODAL_TYPE.INFOR) {
+        if (res.outputParams?.modalType === FLOW_MODAL_TYPE.INFOR) {
           collectInfoModalFlow(res);
         }
       }
@@ -151,6 +150,7 @@ const ExecuteFlows: React.FC<FlowsProps> = ({ flows, inputParams }) => {
   };
 
   useEffect(() => {
+    console.log('flows: ', flows);
     if (flows?.length) {
       executeSingleFlow();
     }

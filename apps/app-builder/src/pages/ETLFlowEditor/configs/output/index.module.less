@@ -12,6 +12,32 @@
   font-weight: 400;
   overflow-x: hidden;
 
+  .dataConfigContainer {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    justify-content: flex-start;
+    box-sizing: border-box;
+    overflow: hidden;
+
+    .leftPanel {
+      flex: 0 0 500px;
+      border-right: 1px solid #e5e7eb;
+      overflow-y: auto;
+      overflow-x: hidden;
+      box-sizing: border-box;
+    }
+
+    .rightPanel {
+      flex: 1;
+      overflow: hidden;
+      box-sizing: border-box;
+      padding: 8px;
+    }
+  }
+
   .dataConfig {
     width: 100%;
     display: flex;

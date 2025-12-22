@@ -164,51 +164,28 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
       schema.config.verify = {
         ...schema.config.verify,
         required: currentField.isRequired,
-        noRepeat: currentField.isUnique
+        noRepeat:
+          typeof schema.config?.verify?.noRepeat === 'boolean' ? currentField.isUnique === 1 : undefined
       };
 
-      // 字段选项列表（单/多选字段专用） options
-      if (itemType === FORM_COMPONENT_TYPES.SELECT_ONE || itemType === FORM_COMPONENT_TYPES.SELECT_MUTIPLE) {
-        if (currentField.dictTypeId) {
-          const res = await getDictDetail(currentField.dictTypeId);
-          const dictDataList = res?.type ? await getDictDataListByType(res.type) : [];
-          const dictOptions = dictDataList?.filter((e: any) => e.status === 1); // 只显示启用状态的字典数据
-          if (dictOptions.length) {
-            const newDefaultOptionsConfig = {
-              type: DEFAULT_OPTIONS_TYPE.DICT,
-              disabled: true,
-              dictTypeId: currentField.dictTypeId,
-              colorMode: true,
-              colorModeType: COLOR_MODE_TYPES.POINT,
-              defaultOptions: dictOptions
-            };
-            schema.config.defaultOptionsConfig = {
-              ...schema.config.defaultOptionsConfig,
-              ...newDefaultOptionsConfig
-            };
-          }
-        } else if (currentField.options?.length) {
-          const newDefaultOptionsConfig = {
-            defaultOptions: currentField.options.map((e: any) => ({
-              label: e.optionLabel,
-              value: e.optionValue
-            }))
-          };
-          schema.config.defaultOptionsConfig = {
-            ...schema.config.defaultOptionsConfig,
-            disabled: true,
-            ...newDefaultOptionsConfig
-          };
-        }
-      }
       // 字段约束配置（长度/正则） constraints
       schema.config.constraints = currentField.constraints;
-      // 自动编号完整配置（含规则项） autoNumberConfig
-      if (itemType === FORM_COMPONENT_TYPES.AUTO_CODE) {
-        schema.config.autoCodeConfig = currentField.autoNumberConfig || schema.config.autoCodeConfig;
-        schema.config.autoCodeDisabled = currentField?.autoNumberConfig?.id ? true : false;
+      // 数据选择
+      if (itemType === FORM_COMPONENT_TYPES.DATA_SELECT) {
+        // 数据源
+        schema.config.selectedDataSource = {
+          ...schema.config.selectedDataSource,
+          entityUuid: currentField.dataSelectionConfig?.targetEntityUuid
+        };
+        // 回显字段  name
+        schema.config.displayFields = currentField.dataSelectionConfig?.targetFieldName
+          ? [
+            {
+              value: currentField.dataSelectionConfig?.targetFieldName
+            }
+          ]
+          : [];
       }
-      // 关联的字典类型ID    dictTypeId
     }
 
     schema.config.cpName = itemDisplayName;
@@ -324,17 +301,18 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
         ),
         dataIndex: fieldName,
         key: fieldName,
+        width: undefined as any,
         fixed: undefined as any,
         headerCellStyle: {
           minWidth: '200px'
         },
         bodyCellStyle: {
-          padding: '4px 0'
+          padding: '4px'
         },
         render: (_text: string, _record: any, index: number) => {
           const newConfig = {
             ...pageComponentSchemas[column.id].config,
-            dataField: [mainEntity.tableName, `${id}.${index}.${fieldName}`]
+            dataField: [mainEntity.tableName, `${subTableName}.${index}.${fieldName}`]
           };
           const finalConfig = applySubTableCellOverrides(newConfig, column.type);
           const pageSchema = { ...pageComponentSchemas[column.id], config: finalConfig };
@@ -368,6 +346,9 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
       tableColumns.forEach((ele, index) => {
         if (index < subTableConfig.columnFixed) {
           ele.fixed = 'left';
+          if (index !== 0 || ele.dataIndex !== 'index') {
+            ele.width = '200px';
+          }
         }
       });
     }
@@ -483,7 +464,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
         ) : (
           <div style={{ width: '100%', display: 'flex' }}>
             {subTableConfig?.showIndex && (
-              <div className="componentItem2" style={{ width: '62px', paddingTop: '18px' }}>
+              <div className="subComponentItem2" style={{ width: '62px', paddingTop: '18px' }}>
                 <div className="simulate-header-item">序号</div>
               </div>
             )}
@@ -541,7 +522,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                     data-cp-type={cp.type}
                     data-cp-displayname={cp.displayName}
                     data-cp-id={cp.id}
-                    className="componentItem"
+                    className="subComponentItem"
                     style={{
                       borderColor: curComponentID === cp.id ? '#4FAE7B' : 'transparent'
                     }}
@@ -610,7 +591,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                 ))}
             </ReactSortable>
             {subTableConfig?.showOperate && (
-              <div className="componentItem2" style={{ width: '64px', paddingTop: '18px' }}>
+              <div className="subComponentItem2" style={{ width: '64px', paddingTop: '18px' }}>
                 <div className="simulate-header-item">操作</div>
               </div>
             )}

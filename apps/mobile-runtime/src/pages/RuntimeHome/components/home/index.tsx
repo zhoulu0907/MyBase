@@ -83,6 +83,7 @@ const Home: React.FC<{ nickname: string }> = ({ nickname }) => {
       title: menu.menuName,
       isVisible: menu.isVisible,
       isPage: menu.menuType === MenuType.PAGE,
+      pagesetType: menu.pagesetType,
       // title1: (
       //   <RuntimeMenuItem
       //     menuID={menu.id}
