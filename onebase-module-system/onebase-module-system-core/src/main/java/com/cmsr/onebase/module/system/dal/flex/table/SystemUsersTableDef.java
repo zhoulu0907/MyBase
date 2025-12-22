@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.system.dal.table;
+package com.cmsr.onebase.module.system.dal.flex.table;
 
 import com.mybatisflex.core.query.QueryColumn;
 import com.mybatisflex.core.table.TableDef;
