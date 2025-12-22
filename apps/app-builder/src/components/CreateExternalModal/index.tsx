@@ -161,6 +161,7 @@ const CreateExternalModal: React.FC<CreateExternalModalProps> = ({ visible, onCl
             readonly: values.readonly ? 1 : 0,
             withCollect: 1
           });
+          Message.success('数据源更新成功');
           onCreate(res);
         } else {
           // 新建模式：使用创建接口
@@ -181,6 +182,7 @@ const CreateExternalModal: React.FC<CreateExternalModalProps> = ({ visible, onCl
             readonly: values.readonly ? 1 : 0,
             withCollect: 1
           });
+          Message.success('数据源创建成功');
           onCreate(res);
         }
 
