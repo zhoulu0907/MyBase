@@ -129,7 +129,7 @@ const XLCollapseLayout: XCollapseLayoutSchema = {
       display: true,
     },
     collapseStyle: {
-      showBordered: true,
+      showBordered: false,
       showDivider: true,
       titleColor: 'rgb(var(--primary-7))',
       shapeColor: 'rgb(var(--primary-7))'
