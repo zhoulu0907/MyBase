@@ -53,6 +53,7 @@ import type {
   ISecurityConfigType,
   IDateRangeConfigType
 } from '../../../types';
+import { ManipulateType } from 'dayjs';
 
 export interface XInputDatePickerSchema {
   editData: TXInputDatePickerEditData;
@@ -127,7 +128,7 @@ export interface XInputDatePickerConfig extends ICommonBaseType {
     earliestDynamicValue: string;
     earliestCustomType: string;
     earliestCustomValue: number;
-    earliestCustomValueType: string;
+    earliestCustomValueType: ManipulateType;
     earliestVariableValue: string;
     latestLimit: boolean;
     latestType: string;
@@ -135,7 +136,7 @@ export interface XInputDatePickerConfig extends ICommonBaseType {
     latestDynamicValue: string;
     latestCustomType: string;
     latestCustomValue: number;
-    latestCustomValueType: string;
+    latestCustomValueType: ManipulateType;
     latestVariableValue: string;
   };
 

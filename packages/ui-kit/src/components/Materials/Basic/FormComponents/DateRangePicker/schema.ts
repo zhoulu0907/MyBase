@@ -53,6 +53,7 @@ import type {
   ISecurityConfigType,
   TRadioDefaultType
 } from '../../../types';
+import { ManipulateType } from 'dayjs';
 
 export interface XInputDateRangePickerSchema {
   editData: TXInputDateRangePickerEditData;
@@ -128,7 +129,7 @@ export interface XInputDateRangePickerConfig extends ICommonBaseType {
     earliestDynamicValue: string;
     earliestCustomType: string;
     earliestCustomValue: number;
-    earliestCustomValueType: string;
+    earliestCustomValueType: ManipulateType;
     earliestVariableValue: string;
     latestLimit: boolean;
     latestType: string;
@@ -136,7 +137,7 @@ export interface XInputDateRangePickerConfig extends ICommonBaseType {
     latestDynamicValue: string;
     latestCustomType: string;
     latestCustomValue: number;
-    latestCustomValueType: string;
+    latestCustomValueType: ManipulateType;
     latestVariableValue: string;
   };
 
