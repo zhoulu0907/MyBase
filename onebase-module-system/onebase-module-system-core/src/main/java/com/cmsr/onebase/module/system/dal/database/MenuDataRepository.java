@@ -6,8 +6,10 @@ import com.cmsr.onebase.module.system.dal.flex.base.BaseDataServiceImpl;
 import com.cmsr.onebase.module.system.dal.flex.mapper.SystemMenuMapper;
 import com.cmsr.onebase.module.system.vo.menu.SystemMenuListReqVO;
 import org.apache.commons.lang3.StringUtils;
+import org.anyline.data.param.ConfigStore;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -110,5 +112,26 @@ public class MenuDataRepository extends BaseDataServiceImpl<SystemMenuMapper, Me
         return list(query()
                 .in(PERMISSION, codes)
                 .eq(STATUS, CommonStatusEnum.ENABLE.getStatus()));
+    }
+
+    /**
+     * 兼容 anyline：根据ID集合查询菜单列表
+     *
+     * @param ids 菜单ID集合
+     * @return 菜单列表
+     */
+    public List<MenuDO> findAllByIds(Collection<Long> ids) {
+        return super.findAllByIds(ids);
+    }
+
+    /**
+     * 兼容 anyline：按 ConfigStore 查询（仅支持最常用的 eq 条件）
+     *
+     * @param configs anyline ConfigStore
+     * @return 菜单列表
+     */
+    public List<MenuDO> findAllByConfig(ConfigStore configs) {
+        // 迁移期最小兼容：当前仅用于按状态获取启用菜单
+        return list(query().eq(MenuDO.STATUS, CommonStatusEnum.ENABLE.getStatus()));
     }
 }

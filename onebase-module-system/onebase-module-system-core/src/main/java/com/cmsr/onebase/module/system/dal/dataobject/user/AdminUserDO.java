@@ -47,7 +47,7 @@ public class AdminUserDO extends BaseTenantEntity implements BaseDOInterface {
     /**
      * 用户账号
      */
-    @Column("haus")
+    @Column(USERNAME)
     private String username;
 
     /**

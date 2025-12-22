@@ -53,10 +53,7 @@ public class OAuth2AccessTokenDataRepository extends BaseDataServiceImpl<SystemO
     }
 
     public long deleteByIds(Collection<Long> ids) {
-        if (ids == null || ids.isEmpty()) {
-            return 0L;
-        }
-        return mapper.deleteByIds(ids);
+        return super.deleteByIds(ids);
     }
 
     public PageResult<OAuth2AccessTokenDO> findPage(OAuth2AccessTokenPageReqVO reqVO) {

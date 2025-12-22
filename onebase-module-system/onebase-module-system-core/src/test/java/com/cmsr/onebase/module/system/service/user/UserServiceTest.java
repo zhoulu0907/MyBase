@@ -363,7 +363,7 @@ public class UserServiceTest {
         dept.setSort(1);
         dept.setStatus(CommonStatusEnum.ENABLE.getStatus());
         dept.setTenantId(0L);
-        return deptDataRepository.insert(dept);
+        return deptDataRepository.insertReturn(dept);
     }
 
     /**
@@ -378,7 +378,7 @@ public class UserServiceTest {
         role.setType(1);
         role.setDataScope(DataScopeEnum.ALL.getScope());
         role.setTenantId(0L);
-        return roleDataRepository.insert(role);
+        return roleDataRepository.insertReturn(role);
     }
 
     /**

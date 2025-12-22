@@ -660,7 +660,7 @@ public class DeptServiceTest {
         dept.setSort(1);
         dept.setStatus(CommonStatusEnum.ENABLE.getStatus());
         dept.setTenantId(0L);
-        return deptDataRepository.insert(dept);
+        return deptDataRepository.insertReturn(dept);
     }
 
     /**

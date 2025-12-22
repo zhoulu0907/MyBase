@@ -511,7 +511,6 @@ public class RoleDTOServiceTest {
      */
     private RoleDO createTestRole(Long roleId, String name, String code, Integer status) {
         RoleDO role = new RoleDO();
-        // 完全不设置ID，让Anyline使用SnowflakeIdGenerator自动生成
         role.setName(name);
         role.setCode(code);
         role.setSort(1);
@@ -520,8 +519,7 @@ public class RoleDTOServiceTest {
         role.setDataScope(DataScopeEnum.ALL.getScope());
         role.setRemark("测试角色");
         role.setTenantId(0L);
-        RoleDO saved = roleDataRepository.insert(role);
-        return saved;
+        return roleDataRepository.insertReturn(role);
     }
 }
 
