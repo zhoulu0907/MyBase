@@ -88,6 +88,13 @@ export const getDictDataListByPage = (params: PageParam & { dictType: string }):
 };
 
 /**
+ * 获取字典数据列表-不分页
+ */
+export const getDictDataListByTypeId = (dictTypeId: string): Promise<DictData[]> => {
+  return (isRuntimeEnv() ? runtimeService : systemService).get(`/dict-data/simple-list-by-type?dictTypeId=${dictTypeId}`);
+};
+
+/**
  * 获取字典数据详情
  */
 export const getDictDataDetail = (id: string): Promise<DictData> => {

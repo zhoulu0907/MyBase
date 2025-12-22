@@ -96,7 +96,7 @@ export const getUserListByName = (userNickName: string) => {
 };
 
 // 获得用户列表-支持搜索 用于设置管理员和主管
-export const getSimpleUser = (deptId: string,directFlag: boolean) => {
+export const getSimpleUser = (deptId: string, directFlag: boolean) => {
   return (isRuntimeEnv() ? runtimeCorpService : systemService).get(
     `/user/simple-list-by-dept-id?deptId=${deptId}&directFlag=${directFlag}`
   );

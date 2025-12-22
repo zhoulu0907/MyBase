@@ -3,21 +3,21 @@ import { useI18n } from '@/hooks/useI18n';
 import { Input, Layout, Tree } from '@arco-design/web-react';
 import { IconDown, IconSearch } from '@arco-design/web-react/icon';
 import {
+  ENTITY_TYPE,
   getAppNavigationConfig,
+  getEntityListWithFields,
   listApplicationMenu,
   menuSignal,
   MenuType,
   runtimeListApplicationBPMMenu,
   VisibleType,
-  getEntityFieldsWithChildren,
-  ENTITY_TYPE,
-  type ChildEntity,
   type ApplicationMenu,
+  type ChildEntity,
   type ListApplicationMenuReq
 } from '@onebase/app';
 import { TokenManager, UserPermissionManager } from '@onebase/common';
-import { useAppEntityStore } from '@onebase/ui-kit';
 import { getPermissionInfo } from '@onebase/platform-center';
+import { useAppEntityStore } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
@@ -118,15 +118,19 @@ const Runtime: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    getMainMetaData();
+    if (curMenu.value?.entityUuid) {
+      getMainMetaData(curMenu.value.entityUuid);
+    }
   }, [curMenu.value]);
 
-  const getMainMetaData = async () => {
-    if (!curMenu.value?.entityUuid) {
+  const getMainMetaData = async (entityUuid: string) => {
+    if (!entityUuid) {
       return;
     }
+    const entityListWithFields = await getEntityListWithFields({ entityUuids: [entityUuid] });
+    // console.log('entityListWithFields: ', entityListWithFields);
 
-    const entityWithChildren = await getEntityFieldsWithChildren(curMenu.value.entityUuid);
+    const [entityWithChildren] = entityListWithFields;
     if (entityWithChildren) {
       setMainEntity({
         entityId: entityWithChildren.entityId,
@@ -134,7 +138,7 @@ const Runtime: React.FC = () => {
         tableName: entityWithChildren.tableName,
         entityName: entityWithChildren.entityName,
         entityType: ENTITY_TYPE.MAIN,
-        fields: entityWithChildren.parentFields
+        fields: entityWithChildren.fields
       });
       if (entityWithChildren.childEntities && entityWithChildren.childEntities.length > 0) {
         // 返回新Promise对象，当所有输入Promise成功时返回结果数组（顺序与输入一致）
@@ -256,13 +260,13 @@ const Runtime: React.FC = () => {
       key: menu.menuCode,
       title: (
         <RuntimeMenuItem
-          menuID={menu.id}
+          menuID={menu.id || ''}
           menuIcon={menu.menuType === MenuType.BPM ? menu.menuCode : menu.menuIcon}
           maxWidth={maxWidth}
           label={menu.menuName}
           onClick={() => {
             if (menu.menuType == MenuType.PAGE || menu.menuType == MenuType.BPM) {
-              handleCurMenuUrl(menu.id);
+              handleCurMenuUrl(menu.id || '');
               setCurMenu(menu);
             }
           }}

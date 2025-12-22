@@ -45,6 +45,16 @@ export const hiddenSearchFieldTypes = [
   ENTITY_FIELD_TYPE.IMAGE
 ];
 
+/**
+ * 对实体字段进行排序：系统字段排在后面，非系统字段排在前面，相同类型按 displayName 排序
+ */
+const sortEntityFields = (a: MetadataEntityField, b: MetadataEntityField): number => {
+  if (a.isSystemField === b.isSystemField) {
+    return a.displayName.localeCompare(b.displayName);
+  }
+  return a.isSystemField ? 1 : -1;
+};
+
 const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
   handleMultiPropsChange,
   handlePropsChange,
@@ -325,6 +335,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
                 droplist={
                   <Menu>
                     {fieldList
+                      .sort(sortEntityFields)
                       .filter(
                         (item: MetadataEntityField) =>
                           !columnsConfig.some((col: any) => col.dataIndex === item.fieldName)
@@ -473,6 +484,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
                 }}
               >
                 {fieldList
+                  .sort(sortEntityFields)
                   .filter((item: MetadataEntityField) => {
                     return !hiddenSearchFieldTypes.includes(item.fieldType);
                   })

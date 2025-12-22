@@ -132,6 +132,7 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
       onCancel={() => {
         setVisible(false);
       }}
+      unmountOnExit
       bodyStyle={{ background: '#F2F3F5', padding: '0' }}
     >
       <div className={classNames(styles.previewPage, { [styles.mobilePreview]: editMode.value === EditMode.MOBILE })}>
@@ -156,6 +157,7 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
                         cpType={cp.type}
                         pageComponentSchema={listPageComponentSchemas.value[cp.id]}
                         runtime={true}
+                        pageType={pageType}
                         preview={true}
                       />
                     </div>

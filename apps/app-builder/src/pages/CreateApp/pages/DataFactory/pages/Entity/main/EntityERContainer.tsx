@@ -23,7 +23,7 @@ import {
   DeleteConfirmModal
 } from '../components/Modals';
 import type { DatasourceRecord } from './EntityPageContainer';
-import { RELATIONSHIP_TYPE_LABEL_MAP, type RelationshipType } from '@/pages/CreateApp/pages/DataFactory/utils/types';
+import { RELATIONSHIP_TYPE_LABEL_MAP, type RelationshipType } from '@/pages/CreateApp/pages/DataFactory/utils/relation';
 import styles from '../index.module.less';
 
 export const EntityERContainer: React.FC<{

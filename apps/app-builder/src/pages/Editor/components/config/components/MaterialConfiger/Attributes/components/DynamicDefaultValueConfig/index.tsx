@@ -161,6 +161,8 @@ const DynamicDefaultValueConfig: React.FC<DynamicDefaultValueConfigProps> = ({
           {item.valueType === 'string' && (
             <Input
               value={defaultValueConfig?.customValue}
+              minLength={configs.verify?.lengthLimit ? configs.verify?.minLength : undefined}
+              maxLength={configs.verify?.lengthLimit ? configs.verify?.maxLength : undefined}
               onChange={(value) => handleChange('customValue', value)}
               placeholder="请输入"
             />

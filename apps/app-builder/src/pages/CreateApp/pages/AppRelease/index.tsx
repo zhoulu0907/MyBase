@@ -127,6 +127,7 @@ const AppReleasePage: React.FC = () => {
 
       <PublishVersionModal
         applicationId={appId}
+        appName={appInfo?.appName}
         visible={publishModalVisible}
         onCancel={() => setPublishModalVisible(false)}
         onOk={handlePublishModalOk}
