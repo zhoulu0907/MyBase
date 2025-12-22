@@ -128,7 +128,7 @@ public class TenantDataRepository extends BaseDataServiceImpl<SystemTenantMapper
                 .eq(TenantDO.STATUS, status)
                 .ne(TenantDO.TENANT_CODE, TenantCodeEnum.PLATFORM_TENANT.getCode());
         if (excludeTenantId != null) {
-            queryWrapper.ne(TenantDO.ID, excludeTenantId);
+            queryWrapper.ne(TenantDO.COL_ID, excludeTenantId);
         }
         return count(queryWrapper);
     }
@@ -148,7 +148,7 @@ public class TenantDataRepository extends BaseDataServiceImpl<SystemTenantMapper
                 .eq(TenantDO.STATUS, status)
                 .ne(TenantDO.TENANT_CODE, TenantCodeEnum.PLATFORM_TENANT.getCode());
         if (excludeTenantId != null) {
-            queryWrapper.ne(TenantDO.ID, excludeTenantId);
+            queryWrapper.ne(TenantDO.COL_ID, excludeTenantId);
         }
         return list(queryWrapper);
     }

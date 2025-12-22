@@ -63,7 +63,7 @@ public class PostDataRepository extends BaseDataServiceImpl<SystemPostMapper, Po
     public List<PostDO> findListByIdsAndStatuses(Collection<Long> ids, Collection<Integer> statuses) {
         QueryWrapper queryWrapper = query();
         if (CollectionUtils.isNotEmpty(ids)) {
-            queryWrapper.in(PostDO.ID, ids);
+            queryWrapper.in(PostDO.COL_ID, ids);
         }
         if (CollectionUtils.isNotEmpty(statuses)) {
             queryWrapper.in(PostDO.STATUS, statuses);

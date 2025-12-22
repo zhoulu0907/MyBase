@@ -341,7 +341,7 @@ public class UserDataRepositoryOld extends DataRepository<AdminUserDO> {
 
     public List<AdminUserDO> findEnableUserByIds(Set<Long> userIds, String keyword, Integer status) {
         DefaultConfigStore configStore = buildUserConfigStore();
-        configStore.in(AdminUserDO.ID, userIds)
+        configStore.in(AdminUserDO.COL_ID, userIds)
                 .eq(AdminUserDO.STATUS, status)
                 .order(AdminUserDO.ADMIN_TYPE, Order.TYPE.ASC);
         // 根据关键词模糊查询
@@ -356,7 +356,7 @@ public class UserDataRepositoryOld extends DataRepository<AdminUserDO> {
 
     public List<AdminUserDO> findPlatformEnableUserByIds(Set<Long> userIds) {
         DefaultConfigStore configStore = buildUserConfigStore();
-        configStore.in(AdminUserDO.ID, userIds)
+        configStore.in(AdminUserDO.COL_ID, userIds)
                 .eq(AdminUserDO.STATUS, UserStatusEnum.NORMAL.getStatus())
                 .order(AdminUserDO.ADMIN_TYPE, Order.TYPE.ASC)
                 .order(BaseDO.CREATE_TIME, Order.TYPE.DESC);

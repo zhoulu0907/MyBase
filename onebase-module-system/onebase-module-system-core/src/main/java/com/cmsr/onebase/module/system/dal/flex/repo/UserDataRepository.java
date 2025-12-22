@@ -270,7 +270,7 @@ public class UserDataRepository extends BaseDataServiceImpl<SystemUsersMapper, A
 
     public List<AdminUserDO> findEnableUserByIds(Set<Long> userIds, String keyword, Integer status) {
         QueryWrapper queryWrapper = query()
-                .in(AdminUserDO.ID, userIds)
+                .in(AdminUserDO.COL_ID, userIds)
                 .eq(AdminUserDO.STATUS, status)
                 .orderBy(AdminUserDO.ADMIN_TYPE, true);
         // 根据关键词模糊查询
@@ -284,7 +284,7 @@ public class UserDataRepository extends BaseDataServiceImpl<SystemUsersMapper, A
 
     public List<AdminUserDO> findPlatformEnableUserByIds(Set<Long> userIds) {
         QueryWrapper queryWrapper = query()
-                .in(AdminUserDO.ID, userIds)
+                .in(AdminUserDO.COL_ID, userIds)
                 .eq(AdminUserDO.STATUS, UserStatusEnum.NORMAL.getStatus())
                 .orderBy(AdminUserDO.ADMIN_TYPE, true)
                 .orderBy(BaseDO.CREATE_TIME, false);
