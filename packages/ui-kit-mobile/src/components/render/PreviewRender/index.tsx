@@ -50,6 +50,7 @@ const LIST_LAZY_COMPONENT: string[] = [
   FORM_COMPONENT_TYPES.DATE_TIME_PICKER,
   FORM_COMPONENT_TYPES.FILE_UPLOAD,
   FORM_COMPONENT_TYPES.SELECT_MUTIPLE,
+  FORM_COMPONENT_TYPES.DATA_SELECT,
   // FORM_COMPONENT_TYPES.SUB_TABLE,
 ];
 
@@ -302,15 +303,17 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
           <FormComp.XSubTable cpName={cpId} id={cpId} {...componentConfig} editLoading={editLoading} runtime={runtime} detailMode={detailMode} form={form} useStoreSignals={useStoreSignals} editPreview={editPreview} />
         );
       case FORM_COMPONENT_TYPES.DATA_SELECT:
-      // return (
-      //   <FormComp.XDataSelect
-      //     cpName={cpId}
-      //     id={cpId}
-      //     {...componentConfig}
-      //     runtime={runtime}
-      //     detailMode={detailMode}
-      //   />
-      // );
+      return (
+        <FormComp.XDataSelect
+          cpName={cpId}
+          id={cpId}
+          {...componentConfig}
+          runtime={runtime}
+          detailMode={detailMode}
+          form={form}
+          editPreview={editPreview}
+        />
+      );
 
       //  布局组件
       case LAYOUT_COMPONENT_TYPES.COLUMN_LAYOUT:

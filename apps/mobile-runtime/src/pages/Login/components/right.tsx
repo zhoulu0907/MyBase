@@ -59,8 +59,13 @@ const Right: React.FC = () => {
     console.log('rawHash.startsWith(prefix)', rawHash.startsWith(prefix));
     if (rawHash.startsWith(prefix)) {
       const redirectURL = rawHash.replace(prefix, '');
-      const aid = getHashQueryParam('appId', redirectURL) || '';
-      const tid = getHashQueryParam('tenantId', redirectURL) || '';
+      let aid = getHashQueryParam('appId', redirectURL) || '';
+      let tid = getHashQueryParam('tenantId', redirectURL) || '';
+      if (!aid) {
+        const pathRedirect = (redirectURL.split('#/')[1] || '').split('/');
+        aid = pathRedirect[1] || aid || '';
+        tid = pathRedirect[2] || tid || '';
+      }
       setAppId(aid);
       setTenantId(tid);
     } else {
