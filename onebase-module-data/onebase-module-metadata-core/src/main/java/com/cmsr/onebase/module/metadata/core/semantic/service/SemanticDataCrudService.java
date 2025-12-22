@@ -389,7 +389,15 @@ public class SemanticDataCrudService {
                         if (rv != null) { connVals.put(c.getTargetEntityTableName(), rv); }
                     } else if (RelationshipTypeEnum.isConnectorRelationTable(c.getRelationshipType().getRelationshipType())) {
                         // 读取关系表连接器的值
-                        SemanticRelationValueDTO rv = readRelationConnector(c, id);
+                        SemanticFieldSchemaDTO targetFiledSchema = c.getRelationAttributes().stream().filter(attr ->
+                                attr.getFieldUuid().equals(c.getTargetKeyFieldUuid())).findFirst().orElse(null);
+                        if(targetFiledSchema == null) continue;
+                        String targetFiledName = targetFiledSchema.getFieldName();
+                        SemanticFieldSchemaDTO sourceFiledSchema = entity.getFields().stream().filter(filed ->
+                                filed.getFieldUuid().equals(c.getSourceKeyFieldUuid())).findFirst().orElse(null);
+                        if(sourceFiledSchema == null) continue;
+                        Object targetFiledValue = resultVal.getFieldValueMap().get(sourceFiledSchema.getFieldName()).getStoreValue();
+                        SemanticRelationValueDTO rv = readRelationConnector(c, targetFiledName, targetFiledValue);
                         if (rv != null) { connVals.put(c.getTargetEntityTableName(), rv); }
                     }
                 }
@@ -606,12 +614,11 @@ public class SemanticDataCrudService {
      * - ONE：返回首行映射；MANY：返回列表映射
      *
      * @param c 连接器定义
-     * @param parentId 父记录主键
+     * @param key value 关联字段名称 值
      * @return 连接器值（可能为 null）
      */
-    private SemanticRelationValueDTO readRelationConnector(SemanticRelationSchemaDTO c, Object parentId) {
-        String srcKey = "parent_id";
-        List<Row> rows = dynamicMetadataRepository.selectRelationRowsByParent(c.getTargetEntityTableName(), srcKey, parentId);
+    private SemanticRelationValueDTO readRelationConnector(SemanticRelationSchemaDTO c, String key, Object value) {
+        List<Row> rows = dynamicMetadataRepository.selectRelationRowsByCondition(c.getTargetEntityTableName(), key, value,true);
         if (rows == null || rows.isEmpty()) { return null; }
         SemanticRelationValueDTO relation = new SemanticRelationValueDTO();
         List<SemanticFieldSchemaDTO> attrs = c.getRelationAttributes();
@@ -746,14 +753,14 @@ public class SemanticDataCrudService {
             if (c.getCardinality() == SemanticConnectorCardinalityEnum.ONE) {
                 Map<String, SemanticFieldValueDTO<Object>> relDto = recordDTO.getEntityValue().getConnectorDTOObject(c.getTargetEntityTableName());
                 applyConnectorAutoNumbers(c, relDto);
-                if (relDto != null && !relDto.isEmpty()) { batches.computeIfAbsent(c.getTargetEntityTableName(), k -> new ArrayList<>()).add(semanticValueAssembler.buildRelationRow(relDto, uidGenerator)); }
+                if (relDto != null && !relDto.isEmpty()) { batches.computeIfAbsent(c.getTargetEntityTableName(), k -> new ArrayList<>()).add(semanticValueAssembler.buildRelationRow(recordDTO,c,relDto, uidGenerator)); }
             } else if (c.getCardinality() == SemanticConnectorCardinalityEnum.MANY) {
                 List<Map<String, SemanticFieldValueDTO<Object>>> list = recordDTO.getEntityValue().getConnectorDTOList(c.getTargetEntityTableName());
                 if (list != null) {
                     List<Row> rows = batches.computeIfAbsent(c.getTargetEntityTableName(), k -> new ArrayList<>());
                     for (Map<String, SemanticFieldValueDTO<Object>> relDto : list) { 
                         applyConnectorAutoNumbers(c, relDto);
-                        if (relDto != null && !relDto.isEmpty()) { rows.add(semanticValueAssembler.buildRelationRow(relDto, uidGenerator)); }
+                        if (relDto != null && !relDto.isEmpty()) { rows.add(semanticValueAssembler.buildRelationRow(recordDTO,c,relDto, uidGenerator)); }
                     }
                 }
             }
@@ -914,7 +921,7 @@ public class SemanticDataCrudService {
                     QueryWrapper uq = QueryWrapper.create().where(new QueryColumn(pk).eq(rv != null ? rv : rid));
                     dynamicMetadataRepository.updateByQuery(table, updateRow, uq);
                 } else {
-                    Row insertRow = semanticValueAssembler.buildRelationRow(dto, uidGenerator);
+                    Row insertRow = semanticValueAssembler.buildRelationRow(recordDTO,c,dto, uidGenerator);
                     if (!insertRow.containsKey("parent_id")) { insertRow.put("parent_id", parentId); }
                     dynamicMetadataRepository.insert(table, insertRow);
                 }
