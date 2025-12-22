@@ -31,7 +31,9 @@ import {
   SHOW_COMPONENT_TYPES,
   STATUS_OPTIONS,
   STATUS_VALUES,
+  useFormEditorSignal,
   usePageEditorSignal,
+  usePageViewEditorSignal,
   type GridItem
 } from '@onebase/ui-kit';
 import { getFileUrlById } from '@onebase/platform-center';
@@ -70,7 +72,21 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, mainEntity,
   const [form] = useForm();
 
   const pageEditorSignal = usePageEditorSignal();
-  const { components: listComponents, pageComponentSchemas: listPageComponentSchemas } = useListEditorSignal;
+  const {
+    clearComponents: clearFormComponents,
+    clearPageComponentSchemas: clearFormPageComponentSchemas,
+    clearLayoutSubComponents: clearFormLayoutSubComponents,
+    clearSubTableComponents: clearFormSubTableComponents
+  } = useFormEditorSignal;
+  const {
+    components: listComponents,
+    pageComponentSchemas: listPageComponentSchemas,
+    clearComponents: clearListComponents,
+    clearPageComponentSchemas: clearListPageComponentSchemas,
+    clearLayoutSubComponents: clearListLayoutSubComponents,
+    clearSubTableComponents: clearListSubTableComponents
+  } = useListEditorSignal;
+  const { clearPageViews, clearCurViewId } = usePageViewEditorSignal;
 
   const {
     curPage,
@@ -81,7 +97,9 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, mainEntity,
     mainMetaDataFields,
     setMainMetaDataFields,
     subEntities,
-    setSubEntities
+    setSubEntities,
+    setCurPage,
+    setEditPageViewId
   } = pagesRuntimeSignal;
   const [pageSetId, setPageSetId] = useState('');
   const [pageType, setPageType] = useState('');
@@ -94,6 +112,25 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, mainEntity,
   const [detailMode, setDetailMode] = useState(true);
   const [formDetails, setFormDetails] = useState<any>({}); // 表单数据
   const [refresh, setRefresh] = useState(Date.now());
+
+  /* 数据初始化，解决二次进入旧数据闪烁问题 */
+  useEffect(() => {
+    clearPageViews();
+    clearCurViewId();
+
+    setCurPage('');
+    setEditPageViewId('');
+
+    clearFormComponents();
+    clearFormPageComponentSchemas();
+    clearFormLayoutSubComponents();
+    clearFormSubTableComponents();
+
+    clearListComponents();
+    clearListPageComponentSchemas();
+    clearListLayoutSubComponents();
+    clearListSubTableComponents();
+  }, []);
 
   useEffect(() => {
     if (drawerVisible.value) {
@@ -118,6 +155,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, mainEntity,
 
   useEffect(() => {
     if (menuId) {
+
       handleGetPageSetId(menuId);
       setEditTargetId('');
     }
@@ -271,8 +309,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, mainEntity,
         } else {
           groups[groupIndex][fieldName] = value;
         }
-
-        console.log('xxx---', fieldName, value, fieldType);
       }
     });
 
@@ -281,13 +317,12 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, mainEntity,
       .map((k) => groups[k]);
 
     const subTableName = subEntities.value.find((ele: any) => ele.childEntityUuid == subEntityUuid)?.childTableName;
-    console.log('subTableName', subTableName, subData);
     if (subTableName) {
       subFormData[subTableName] = subData;
     }
 
-    console.log('formData:   ', formData);
-    console.log('subFormData:   ', subFormData);
+    // console.log('formData:   ', formData);
+    // console.log('subFormData:   ', subFormData);
     // return;
 
     // 接口判断 页面触发
@@ -296,7 +331,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, mainEntity,
     const flowRes = pageId ? await queryFlowExecForm(pageId) : [];
     setInputParams(formData);
 
-    console.log('editTargetId: ', editTargetId);
+    // console.log('editTargetId: ', editTargetId);
 
     if (editTargetId) {
       const req: UpdateMethodV2Params = {

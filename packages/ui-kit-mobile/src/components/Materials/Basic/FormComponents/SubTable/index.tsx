@@ -98,12 +98,9 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
 
   const rules: ITypeRules<ValidatorType.Custom>[] = [
     {
+      required: verify?.required,
       type: ValidatorType.Custom,
-      validator: (value, callback) => {
-        if (!value && verify?.required) {
-          callback(`${label.text}是必填项`);
-        }
-      }
+      message: `${label.text}是必填项`
     }
   ];
 
@@ -330,8 +327,9 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                           dataField: [mainEntity.tableName, `${id}.${index}.${fieldName}`]
                         };
                         const pageSchema = { ...pageComponentSchemas[subTable.id], config: newConfig };
+                        const isImageOrFile = pageSchema.type === FORM_COMPONENT_TYPES.IMG_UPLOAD || pageSchema.type === FORM_COMPONENT_TYPES.FILE_UPLOAD;
                         return (
-                          <Cell label={<Ellipsis text={config.cpName} />} key={subTable.id} style={{ padding: 0 }}>
+                          <Cell className={`${isImageOrFile ? 'verticalLayout' : ''}`} label={<Ellipsis text={config.cpName} />} key={subTable.id} style={{ padding: 0 }}>
                             <PreviewRender
                               editLoading={editLoading}
                               form={form}

@@ -5,6 +5,7 @@ import {
   listApplicationMenu,
   menuSignal,
   MenuType,
+  runtimeListApplicationBPMMenu,
   TASKMENU_TYPE,
   VisibleType,
   type ApplicationMenu,
@@ -33,6 +34,10 @@ interface TreeNode {
   children?: TreeNode[];
 }
 
+export type MobileLayout = 'GRID' | 'LIST';
+
+const AUTO_NAV_KEY = 'home_runtime_auto_nav_done';
+
 const Home: React.FC<{ nickname: string }> = ({ nickname }) => {
   useSignals();
   const navigate = useNavigate();
@@ -45,6 +50,8 @@ const Home: React.FC<{ nickname: string }> = ({ nickname }) => {
   const { appId } = useParams<{ appId?: string }>();
 
   const [treeData, setTreeData] = useState<TreeNode[]>([]);
+  const [mobileNavLayout, setMobileNavLayout] = useState<MobileLayout>();
+  const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
     if (appId) {
@@ -72,11 +79,19 @@ const Home: React.FC<{ nickname: string }> = ({ nickname }) => {
     const req: ListApplicationMenuReq = {
       applicationId: appID
     };
+    setLoading(true);
     const res = await listApplicationMenu(req);
+    const bpmRes = await runtimeListApplicationBPMMenu(req);
+    console.log(bpmRes);
+    let bpmData: any[] = [];
+    if (bpmRes && bpmRes.length > 0) {
+      bpmData = dealPage(bpmRes);
+    }
 
     // 处理数据
     const resPageList = res && res.length > 0 ? dealPage(res) : [];
-    const pageList = resPageList; //getMenuArr().concat(resPageList);
+    const pageList: any[] = bpmData.concat(resPageList);
+
     const treeData = convertMenuToTreeData(pageList);
     setTreeData(treeData);
     // 如果菜单列表不为空，默认选中第一个菜单
@@ -87,19 +102,31 @@ const Home: React.FC<{ nickname: string }> = ({ nickname }) => {
         id: appID
       });
 
-      if (appNavigationConfig.webDefaultMenu === 'default' || appNavigationConfig.webDefaultMenu === '') {
+      setLoading(false);
+      setMobileNavLayout(appNavigationConfig.mobileNavLayout);
+
+      if (appNavigationConfig.mobileDefaultMenu === 'default' || appNavigationConfig.mobileDefaultMenu === '') {
         const curMenuObj = curMenuId ? findMenuWithParents(pageList, [], curMenuId) : findMenuWithParents(pageList, []);
         if (curMenuObj) {
           setCurMenu(curMenuObj.node);
           sessionStorage.setItem('ENTITY_UUID', curMenuObj.node.entityUuid);
         }
       } else {
-        const curMenuObj = findMenuWithParents(pageList, [], appNavigationConfig.webDefaultMenu);
+        const curMenuObj = findMenuWithParents(pageList, [], appNavigationConfig.mobileDefaultMenu);
         if (curMenuObj) {
           setCurMenu(curMenuObj.node);
           sessionStorage.setItem('ENTITY_UUID', curMenuObj.node.entityUuid);
+
+          // 导航设置
+          const hasAutoNav = sessionStorage.getItem(AUTO_NAV_KEY);
+          if (!hasAutoNav) {
+            sessionStorage.setItem(AUTO_NAV_KEY, '1');
+            handlerItemClick(curMenuObj.node?.id);
+          }
         }
       }
+    } else {
+      setLoading(false);
     }
   };
 
@@ -189,7 +216,7 @@ const Home: React.FC<{ nickname: string }> = ({ nickname }) => {
       menuSort: 4,
       menuType: 1,
       parentId: '0'
-    },
+    }
   ];
 
   // 早上好，中午好，下午好，晚上好，根据当前时间判断
@@ -206,7 +233,8 @@ const Home: React.FC<{ nickname: string }> = ({ nickname }) => {
       greekString = '晚上好！';
     }
     return nickname + '，' + greekString;
-  }
+  };
+
   const handlerItemClick = (curMenuId: string) => {
     const sp = new URLSearchParams(location.search);
     sp.set('curMenu', String(curMenuId));
@@ -224,17 +252,18 @@ const Home: React.FC<{ nickname: string }> = ({ nickname }) => {
         <Grid
           className={styles.grid}
           columns={4}
-          data={
-            topCates.map((item, index) => ({
-              key: item.id,
-              img: <img className={styles.topcatesImg} src={[topcates1, topcates2, topcates3, topcates4][index]} alt="" />,
-              title: <span className={styles.topcatesTitle}>{item.menuName}</span>,
-              itemStyle: { padding: 0 },
-              onClick: () => handlerItemClick(item.id),
-            }))}
+          data={topCates.map((item, index) => ({
+            key: item.id,
+            img: (
+              <img className={styles.topcatesImg} src={[topcates1, topcates2, topcates3, topcates4][index]} alt="" />
+            ),
+            title: <span className={styles.topcatesTitle}>{item.menuName}</span>,
+            itemStyle: { padding: 0 },
+            onClick: () => handlerItemClick(item.id)
+          }))}
         ></Grid>
       </div>
-      <AppsList treeData={treeData} />
+      <AppsList treeData={treeData} mobileNavLayout={mobileNavLayout!} loading={loading} />
     </div>
   );
 };
