@@ -83,7 +83,6 @@ public class AdminUserDO extends BaseTenantEntity implements BaseDOInterface {
     /**
      * 岗位编号数组
      */
-    // @Transient //fixed NullP问题: 2025/7/20 需要以数组方式插入库里，anyline可能有bug导致null pointer，暂时Transient屏蔽
     @Column(value = POST_IDS, typeHandler = SetLongJsonTypeHandler.class)
     private Set<Long> postIds;
 

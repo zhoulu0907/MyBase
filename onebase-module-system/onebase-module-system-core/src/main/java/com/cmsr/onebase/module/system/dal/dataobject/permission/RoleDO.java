@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.system.dal.dataobject.permission;
 
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.orm.entity.BaseTenantEntity;
+import com.cmsr.onebase.module.system.dal.flex.typehandler.SetLongJsonTypeHandler;
 import com.cmsr.onebase.module.system.enums.permission.DataScopeEnum;
 import com.cmsr.onebase.module.system.enums.permission.RoleTypeEnum;
 import com.mybatisflex.annotation.Table;
@@ -84,8 +85,7 @@ public class RoleDO extends BaseTenantEntity {
      *
      * 适用于 {@link #dataScope} 的值为 {@link DataScopeEnum#DEPT_CUSTOM} 时
      */
-    @Column(value = DATA_SCOPE_DEPT_IDS)
-    // 添加类型转换注解，确保Set<Long>正确映射
+    @Column(value = DATA_SCOPE_DEPT_IDS, typeHandler = SetLongJsonTypeHandler.class)
     private Set<Long> dataScopeDeptIds;
 
 }
