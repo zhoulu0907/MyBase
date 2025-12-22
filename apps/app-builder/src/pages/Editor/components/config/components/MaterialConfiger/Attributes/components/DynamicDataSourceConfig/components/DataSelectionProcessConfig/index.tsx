@@ -211,7 +211,7 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
       nodeType: 'CONDITION',
       fieldName: item.fieldKey.split('.')[1],
       operator: item.op,
-      fieldValue: [item.value]
+      fieldValue: typeof item.value === 'object' ? [item.value.id] : [item.value]
     }));
 
     return {

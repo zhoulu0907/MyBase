@@ -45,6 +45,7 @@ import { DraftBox } from './DraftBox';
 import './index.css';
 import type { XTableConfig } from './schema';
 import TableSearch from './tableSerach';
+import isEmpty from 'lodash-es/isEmpty';
 
 const leftPanelWidth = 318;
 const rightPanelWidth = 310;
@@ -516,7 +517,7 @@ const XTable = memo(
       const req: PageMethodV2Params = {
         pageNo: tablePageNo,
         pageSize: pageSize || 10,
-        filters: filters
+        filters: isEmpty(filterCondition) ? filters : filterCondition
       };
       let res: any;
       if (props?.pageSetType === PageType.BPM) {
