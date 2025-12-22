@@ -71,7 +71,7 @@ const ghostBgColor = {
   disabled: '#FFF'
 };
 
-const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, subEntities: subEntitiesValues, pageSetType }) => {
+const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, mainEntity, subEntities: subEntitiesValues, pageSetType }) => {
   useSignals();
 
   const [form] = useForm();
