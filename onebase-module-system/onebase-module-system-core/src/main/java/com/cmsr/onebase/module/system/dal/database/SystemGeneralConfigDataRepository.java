@@ -92,4 +92,11 @@ public class SystemGeneralConfigDataRepository  extends DataRepository<SystemGen
         configs.order(SystemGeneralConfigDO.ID, org.anyline.entity.Order.TYPE.DESC);
         return findAllByConfig(configs);
     }
+
+    public SystemGeneralConfigDO getTenantConfigByKey(String key) {
+        DefaultConfigStore configs = new DefaultConfigStore();
+        configs.and(Compare.EQUAL, SystemGeneralConfigDO.CONFIG_KEY, key);
+        configs.and(Compare.EQUAL, SystemGeneralConfigDO.CONFIG_TYPE, ConfigTypeEnum.TENANT.getCode());
+        return findOne(configs);
+    }
 }

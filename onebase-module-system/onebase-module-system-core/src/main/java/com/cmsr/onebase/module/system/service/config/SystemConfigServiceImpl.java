@@ -130,6 +130,12 @@ public class SystemConfigServiceImpl implements SystemConfigService {
 
     }
 
+    @Override
+    public SystemGeneralConfigDO getTenantConfigByKey(String key) {
+        SystemGeneralConfigDO configDO = systemGeneralConfigDataRepository.getTenantConfigByKey(key);
+        return configDO;
+    }
+
     private void checkSaasExitsCorpOrApp() {
         // 如果是Saas模式,并且当前租户已存在企业，则不允许禁用
         List<CorpDO> corpList = corpService.getAllCorpList();
