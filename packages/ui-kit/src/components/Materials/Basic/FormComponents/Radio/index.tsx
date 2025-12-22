@@ -72,17 +72,7 @@ const XRadio = memo((props: XInputRadioConfig & { runtime?: boolean; detailMode?
           >
             {options.map((ele, index: number) => (
               <Radio key={index} value={ele.id}>
-                {ele.colorType ? <Tag
-                  style={{
-                    width: '8px',
-                    height: '8px',
-                    borderRadius: '50%',
-                    background: ele.colorType,
-                    display: 'inline-block',
-                    marginRight: '8px'
-                  }}
-                ></Tag> :
-                  <span>{ele.label}</span>}
+                {ele.colorType ? <Tag color={ele.colorType}>{ele.label}</Tag> : <span>{ele.label}</span>}
               </Radio>
             ))}
           </RadioGroup>
