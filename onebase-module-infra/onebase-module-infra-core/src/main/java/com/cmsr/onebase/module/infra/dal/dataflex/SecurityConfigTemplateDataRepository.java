@@ -10,6 +10,8 @@ import com.mybatisflex.spring.service.impl.ServiceImpl;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -69,14 +71,19 @@ public class SecurityConfigTemplateDataRepository extends ServiceImpl<SecurityCo
      */
     @TenantIgnore
     public List<SecurityConfigTemplateDO> findByTenantIdAndCategoryIdList(Long tenantId, List<Long> categoryIds) {
-        // 构造占位符
+        if (categoryIds == null || categoryIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+
         StringBuilder placeholders = new StringBuilder();
         for (int i = 0; i < categoryIds.size(); i++) {
-            if (i > 0) placeholders.append(",");
+            if (i > 0) {
+                placeholders.append(",");
+            }
             placeholders.append("?");
         }
 
-        String sql = """
+        String sqlPrefix = """
                 SELECT
                     t.id,
                     t.category_id,
@@ -96,15 +103,22 @@ public class SecurityConfigTemplateDataRepository extends ServiceImpl<SecurityCo
                     ON t.config_key = c.config_key
                     AND c.tenant_id = ?
                     AND c.deleted = 0
-                WHERE t.category_id in  (?)
+                WHERE t.category_id IN (
+                """;
+        String sqlSuffix = """
+                )
                     AND t.deleted = 0
                 ORDER BY t.sort_order ASC
                 """;
 
-        // 构造参数数组
-        List<Row> rows = Db.selectListBySql(sql, tenantId, categoryIds);
-        List<SecurityConfigTemplateDO> list = getSecurityConfigTemplateDOS(rows);
-        return list;
+        String sql = sqlPrefix + placeholders + sqlSuffix;
+
+        List<Object> params = new ArrayList<>(1 + categoryIds.size());
+        params.add(tenantId);
+        params.addAll(categoryIds);
+
+        List<Row> rows = Db.selectListBySql(sql, params.toArray());
+        return getSecurityConfigTemplateDOS(rows);
     }
 
     @NotNull
