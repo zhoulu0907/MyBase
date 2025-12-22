@@ -36,7 +36,7 @@ public class RuntimeThirdUserController {
 
 
     @PostMapping("/register")
-    @Operation(summary = "第三方用户补充用户信息")
+    @Operation(summary = "第三方用户补充用户信息注册并登录")
     @PermitAll
     public CommonResult<AuthLoginRespVO> thirdUserRegister(@RequestBody  @Valid ThirdSupplementUserReqVO reqVO) {
         return success(runtimeAuthService.thirdUserRegister(reqVO));
