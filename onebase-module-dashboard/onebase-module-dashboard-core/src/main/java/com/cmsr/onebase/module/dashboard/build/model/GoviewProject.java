@@ -16,7 +16,7 @@ import java.io.Serializable;
  * @author fc
  * @since 2023-04-30
  */
-@Table("t_goview_project")
+@Table("dashboard_project")
 @Data
 public class GoviewProject implements Serializable {
 

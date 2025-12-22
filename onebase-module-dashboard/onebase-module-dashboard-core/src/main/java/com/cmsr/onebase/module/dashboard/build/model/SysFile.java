@@ -15,7 +15,7 @@ import java.io.Serializable;
  * @author fc
  * @since 2022-12-22
  */
-@Table("t_sys_file")
+@Table("dashboard_file")
 public class SysFile implements Serializable {
 
     private static final long serialVersionUID = 1L;
