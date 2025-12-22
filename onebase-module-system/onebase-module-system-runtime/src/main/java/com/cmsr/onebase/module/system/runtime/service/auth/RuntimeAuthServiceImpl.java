@@ -83,35 +83,38 @@ import static com.cmsr.onebase.module.system.enums.LogRecordConstants.*;
 @Slf4j
 public class RuntimeAuthServiceImpl implements RuntimeAuthService {
 
+    @Value("${debug:false}")
+    private Boolean debug;
+
     @Resource
-    private UserService        userService;
+    private UserService userService;
     @Resource
-    private LoginLogService    loginLogService;
+    private LoginLogService loginLogService;
     @Resource
     private OAuth2TokenService oauth2TokenService;
     @Resource
-    private MemberService      memberService;
+    private MemberService memberService;
     @Resource
-    private Validator          validator;
+    private Validator validator;
     @Resource
-    private CaptchaService     captchaService;
+    private CaptchaService captchaService;
     @Resource
-    private SmsCodeApi         smsCodeApi;
+    private SmsCodeApi smsCodeApi;
     /**
      * 验证码的开关，默认为 true
      */
     @Value("${onebase.captcha.enable:true}")
     @Setter // 为了单测：开启或者关闭验证码
-    private Boolean            captchaEnable;
+    private Boolean captchaEnable;
     /**
      * 平台租户验证开关，默认为 false
      */
     @Value("${onebase.platform-tenant.enable-create-app:false}")
     @Setter // 为了单测：开启或者关闭验证码
-    private Boolean            platformTenantEnableCreateApp;
+    private Boolean platformTenantEnableCreateApp;
 
     @Resource
-    private TenantService     tenantService;
+    private TenantService tenantService;
     @Resource
     private SecurityConfigApi securityConfigApi;
 
@@ -362,7 +365,7 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
     public void thirdUserForgetPassword(UserForgetPasswordReqVO reqVO) {
 
         // 1.校验验证码
-        ThirdAuthLoginReqVO thirdAuthLoginReqVO=new ThirdAuthLoginReqVO();
+        ThirdAuthLoginReqVO thirdAuthLoginReqVO = new ThirdAuthLoginReqVO();
         thirdAuthLoginReqVO.setMobile(reqVO.getMobile());
         thirdAuthLoginReqVO.setVerifyCode(reqVO.getVerifyCode());
         thirdAuthLoginReqVO.setPassword(reqVO.getPassword());
