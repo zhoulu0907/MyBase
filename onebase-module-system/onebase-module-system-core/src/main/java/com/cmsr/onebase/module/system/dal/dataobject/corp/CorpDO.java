@@ -2,8 +2,8 @@
 package com.cmsr.onebase.module.system.dal.dataobject.corp;
 
 import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
-import jakarta.persistence.Column;
-import jakarta.persistence.Table;
+import com.mybatisflex.annotation.Table;
+import com.mybatisflex.annotation.Column;
 import lombok.Data;
 
 /**
@@ -13,7 +13,7 @@ import lombok.Data;
  * @date 2025-08-20
  */
 @Data
-@Table(name = "system_corp")
+@Table(value = "system_corp")
 public class CorpDO extends TenantBaseDO {
     public static final String CORP_NAME           = "corp_name";
     public static final String CORP_CODE           = "corp_code";
@@ -24,31 +24,31 @@ public class CorpDO extends TenantBaseDO {
     public static final String USER_LIMIT          = "user_limit";
     public static final String TENANT_ID           = "tenant_id";
 
-    @Column(name = "corp_name")
+    @Column(value = "corp_name")
     private String corpName;
 
-    @Column(name = "corp_code")
+    @Column(value = "corp_code")
     private String corpCode;
 
-    @Column(name = "industry_type")
+    @Column(value = "industry_type")
     private Long industryType;
 
-    @Column(name = "status")
+    @Column(value = "status")
     private Integer status;
 
-    @Column(name = "address")
+    @Column(value = "address")
     private String address;
 
-    @Column(name = "admin_id")
+    @Column(value = "admin_id")
     private Long adminId;
 
-    @Column(name = "user_limit")
+    @Column(value = "user_limit")
     private Integer userLimit;
 
-    @Column(name = "tenant_id")
+    @Column(value = "tenant_id")
     private Long tenantId;
 
-    @Column(name = "corp_logo")
+    @Column(value = "corp_logo")
     private String corpLogo;
 
 

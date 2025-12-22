@@ -7,8 +7,8 @@ import com.cmsr.onebase.framework.data.base.BaseDO;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.system.enums.oauth2.OAuth2GrantTypeEnum;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Table;
+import com.mybatisflex.annotation.Table;
+import com.mybatisflex.annotation.Column;
 import lombok.Data;
 
 /**
@@ -17,7 +17,7 @@ import lombok.Data;
  */
 @Data
 @TenantIgnore
-@Table(name = "system_oauth2_client")
+@Table(value = "system_oauth2_client")
 public class OAuth2ClientDO extends BaseDO {
 
     // 字段常量
@@ -40,83 +40,83 @@ public class OAuth2ClientDO extends BaseDO {
     /**
      * 客户端编号
      */
-    @Column(name = CLIENT_ID)
+    @Column(value = CLIENT_ID)
     private String clientId;
     /**
      * 客户端密钥
      */
-    @Column(name = SECRET)
+    @Column(value = SECRET)
     private String secret;
     /**
      * 应用名
      */
-    @Column(name = NAME)
+    @Column(value = NAME)
     private String name;
     /**
      * 应用图标
      */
-    @Column(name = LOGO)
+    @Column(value = LOGO)
     private String logo;
     /**
      * 应用描述
      */
-    @Column(name = DESCRIPTION)
+    @Column(value = DESCRIPTION)
     private String description;
     /**
      * 状态
      *
      * 枚举 {@link CommonStatusEnum}
      */
-    @Column(name = STATUS)
+    @Column(value = STATUS)
     private Integer status;
     /**
      * 访问令牌的有效期
      */
-    @Column(name = ACCESS_TOKEN_VALIDITY_SECONDS)
+    @Column(value = ACCESS_TOKEN_VALIDITY_SECONDS)
     private Integer accessTokenValiditySeconds;
     /**
      * 刷新令牌的有效期
      */
-    @Column(name = REFRESH_TOKEN_VALIDITY_SECONDS)
+    @Column(value = REFRESH_TOKEN_VALIDITY_SECONDS)
     private Integer refreshTokenValiditySeconds;
     /**
      * 可重定向的 URI 地址
      */
-    @Column(name = REDIRECT_URIS)
+    @Column(value = REDIRECT_URIS)
     private List<String> redirectUris;
     /**
      * 授权类型（模式）
      *
      * 枚举 {@link OAuth2GrantTypeEnum}
      */
-    @Column(name = AUTHORIZED_GRANT_TYPES)
+    @Column(value = AUTHORIZED_GRANT_TYPES)
     private List<String> authorizedGrantTypes;
     /**
      * 授权范围
      */
-    @Column(name = SCOPES)
+    @Column(value = SCOPES)
     private List<String> scopes;
     /**
      * 自动授权的 Scope
      *
      * code 授权时，如果 scope 在这个范围内，则自动通过
      */
-    @Column(name = AUTO_APPROVE_SCOPES)
+    @Column(value = AUTO_APPROVE_SCOPES)
     private List<String> autoApproveScopes;
     /**
      * 权限
      */
-    @Column(name = AUTHORITIES)
+    @Column(value = AUTHORITIES)
     private List<String> authorities;
     /**
      * 资源
      */
-    @Column(name = RESOURCE_IDS)
+    @Column(value = RESOURCE_IDS)
     private List<String> resourceIds;
     /**
      * 附加信息，JSON 格式
      */
-    @Column(name = ADDITIONAL_INFORMATION)
+    @Column(value = ADDITIONAL_INFORMATION)
     private String additionalInformation;
 
 }

@@ -1,10 +1,9 @@
 package com.cmsr.onebase.module.system.dal.dataobject.corpapprelation;
 
 import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
+import com.mybatisflex.annotation.Column;
+import com.mybatisflex.annotation.Table;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -14,8 +13,7 @@ import java.time.LocalDateTime;
  * 企业应用关联 DO
  */
 @Data
-@Entity
-@Table(name = "system_corp_app_relation")
+@Table(value = "system_corp_app_relation")
 @EqualsAndHashCode(callSuper = true)
 public class CorpAppRelationDO extends TenantBaseDO {
     public static final String APPLICATION_ID           = "application_id";
@@ -27,13 +25,13 @@ public class CorpAppRelationDO extends TenantBaseDO {
     /**
      * 应用id
      */
-    @Column(name = "application_id", length = 10, nullable = false)
+    @Column(value = "application_id")
     private Long applicationId;
 
     /**
      * 企业id
      */
-    @Column(name = "corp_id", length = 10, nullable = false)
+    @Column(value = "corp_id")
     private Long corpId;
 
     @Column

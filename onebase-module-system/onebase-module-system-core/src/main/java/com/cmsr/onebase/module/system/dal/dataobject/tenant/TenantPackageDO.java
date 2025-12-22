@@ -6,8 +6,8 @@ import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.data.base.BaseDO;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Table;
+import com.mybatisflex.annotation.Table;
+import com.mybatisflex.annotation.Column;
 import lombok.AllArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import lombok.Data;
@@ -19,7 +19,7 @@ import lombok.ToString;
  * 租户套餐 DO
  *
  */
-@Table(name = "system_tenant_package")
+@Table(value = "system_tenant_package")
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
@@ -39,31 +39,31 @@ public class TenantPackageDO extends BaseDO {
     /**
      * 套餐名，唯一
      */
-    @Column(name = NAME)
+    @Column(value = NAME)
     private String name;
     /**
      * 租户套餐状态
      *
      * 枚举 {@link CommonStatusEnum}
      */
-    @Column(name = STATUS)
+    @Column(value = STATUS)
     private Integer status;
     /**
      * 备注
      */
-    @Column(name = REMARK)
+    @Column(value = REMARK)
     private String remark;
 
     /**
      * 租户套餐编码
      */
-    @Column(name = CODE)
+    @Column(value = CODE)
     private String code;
 
     /**
      * 关联的菜单编号
      */
-    @Column(name = MENU_IDS)
+    @Column(value = MENU_IDS)
     private Set<Long> menuIds;
 
 }

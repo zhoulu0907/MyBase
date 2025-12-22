@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.system.dal.dataobject.dept;
 
-import jakarta.persistence.Table;
-import jakarta.persistence.Column;
+import com.mybatisflex.annotation.Table;
+import com.mybatisflex.annotation.Column;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.data.base.BaseDO;
 import lombok.Data;
@@ -11,7 +11,7 @@ import lombok.Data;
  *
  * @author ma
  */
-@Table(name = "system_post")
+@Table(value = "system_post")
 @Data
 public class PostDO extends BaseDO {
 
@@ -24,29 +24,29 @@ public class PostDO extends BaseDO {
     /**
      * 岗位名称
      */
-    @Column(name = NAME)
+    @Column(value = NAME)
     private String name;
     /**
      * 岗位编码
      */
-    @Column(name = CODE)
+    @Column(value = CODE)
     private String code;
     /**
      * 岗位排序
      */
-    @Column(name = SORT)
+    @Column(value = SORT)
     private Integer sort;
     /**
      * 状态
      *
      * 枚举 {@link CommonStatusEnum}
      */
-    @Column(name = STATUS)
+    @Column(value = STATUS)
     private Integer status;
     /**
      * 备注
      */
-    @Column(name = REMARK)
+    @Column(value = REMARK)
     private String remark;
 
 }

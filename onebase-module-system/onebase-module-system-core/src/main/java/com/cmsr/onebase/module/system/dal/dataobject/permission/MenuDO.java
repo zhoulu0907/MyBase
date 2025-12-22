@@ -5,8 +5,8 @@ import com.cmsr.onebase.framework.data.base.BaseDO;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.system.enums.permission.MenuTypeEnum;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Table;
+import com.mybatisflex.annotation.Table;
+import com.mybatisflex.annotation.Column;
 import lombok.Data;
 
 /**
@@ -16,7 +16,7 @@ import lombok.Data;
  */
 @Data
 @TenantIgnore
-@Table(name = "system_menu")
+@Table(value = "system_menu")
 public class MenuDO extends BaseDO {
 
     // 字段常量
@@ -49,7 +49,7 @@ public class MenuDO extends BaseDO {
     /**
      * 菜单名称
      */
-    @Column(name = NAME)
+    @Column(value = NAME)
     private String name;
     /**
      * 权限标识
@@ -61,53 +61,53 @@ public class MenuDO extends BaseDO {
      * - 对于后端，配合 @PreAuthorize 注解，配置 API 接口需要该权限，从而对 API 接口进行权限控制。
      * - 对于前端，配合前端标签，配置按钮是否展示，避免用户没有该权限时，结果可以看到该操作。
      */
-    @Column(name = PERMISSION)
+    @Column(value = PERMISSION)
     private String permission;
     /**
      * 菜单类型
      *
      * 枚举 {@link MenuTypeEnum}
      */
-    @Column(name = TYPE)
+    @Column(value = TYPE)
     private Integer type;
     /**
      * 显示顺序
      */
-    @Column(name = SORT)
+    @Column(value = SORT)
     private Integer sort;
     /**
      * 父菜单ID
      */
-    @Column(name = PARENT_ID)
+    @Column(value = PARENT_ID)
     private Long parentId;
     /**
      * 路由地址
      *
      * 如果 path 为 http(s) 时，则它是外链
      */
-    @Column(name = PATH)
+    @Column(value = PATH)
     private String path;
     /**
      * 菜单图标
      */
-    @Column(name = ICON)
+    @Column(value = ICON)
     private String icon;
     /**
      * 组件路径
      */
-    @Column(name = COMPONENT)
+    @Column(value = COMPONENT)
     private String component;
     /**
      * 组件名
      */
-    @Column(name = COMPONENT_NAME)
+    @Column(value = COMPONENT_NAME)
     private String componentName;
     /**
      * 状态
      *
      * 枚举 {@link CommonStatusEnum}
      */
-    @Column(name = STATUS)
+    @Column(value = STATUS)
     private Integer status;
     /**
      * 是否可见
@@ -115,7 +115,7 @@ public class MenuDO extends BaseDO {
      * 只有菜单、目录使用
      * 当设置为 true 时，该菜单不会展示在侧边栏，但是路由还是存在。例如说，一些独立的编辑页面 /edit/1024 等等
      */
-    @Column(name = VISIBLE)
+    @Column(value = VISIBLE)
     private Integer visible;
     /**
      * 是否缓存
@@ -123,14 +123,14 @@ public class MenuDO extends BaseDO {
      * 只有菜单、目录使用，否使用 Vue 路由的 keep-alive 特性
      * 注意：如果开启缓存，则必须填写 {@link #componentName} 属性，否则无法缓存
      */
-    @Column(name = KEEP_ALIVE)
+    @Column(value = KEEP_ALIVE)
     private Integer keepAlive;
     /**
      * 是否总是显示
      *
      * 如果为 false 时，当该菜单只有一个子菜单时，不展示自己，直接展示子菜单
      */
-    @Column(name = ALWAYS_SHOW)
+    @Column(value = ALWAYS_SHOW)
     private Integer alwaysShow;
 
 }

@@ -1,12 +1,12 @@
 package com.cmsr.onebase.module.system.dal.dataobject.config;
 
 import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
-import jakarta.persistence.Column;
-import jakarta.persistence.Table;
+import com.mybatisflex.annotation.Table;
+import com.mybatisflex.annotation.Column;
 import lombok.Data;
 
 @Data
-@Table(name = "system_config")
+@Table(value = "system_config")
 public class SystemGeneralConfigDO extends TenantBaseDO {
 
     public static final String CONFIG_TYPE = "config_type";
@@ -22,29 +22,29 @@ public class SystemGeneralConfigDO extends TenantBaseDO {
     /**
      * 参数分类
      */
-    @Column(name = CONFIG_TYPE)
+    @Column(value = CONFIG_TYPE)
     private String configType;
     /**
      * 参数名称
      */
-    @Column(name = NAME)
+    @Column(value = NAME)
     private String name;
     /**
      * 参数键名
      *
      */
-    @Column(name = CONFIG_KEY)
+    @Column(value = CONFIG_KEY)
     private String configKey;
     /**
      * 参数键值
      */
-    @Column(name = CONFIG_VALUE)
+    @Column(value = CONFIG_VALUE)
     private Object configValue;
 
     /**
      * 互斥项
      */
-    @Column(name = EXCLUSIVE_ITEM)
+    @Column(value = EXCLUSIVE_ITEM)
     private String exclusiveItem;
 
     /**
@@ -52,24 +52,24 @@ public class SystemGeneralConfigDO extends TenantBaseDO {
      *
      * 枚举
      */
-    @Column(name = STATUS)
+    @Column(value = STATUS)
     private Integer status;
 
     /**
      * 归属企业ID
      */
-    @Column(name = CORP_ID)
+    @Column(value = CORP_ID)
     private Long corpId;
 
     /**
      * appId
      */
-    @Column(name = APP_ID)
+    @Column(value = APP_ID)
     private Long appId;
 
     /**
      * 备注
      */
-    @Column(name = REMARK)
+    @Column(value = REMARK)
     private String remark;
 }

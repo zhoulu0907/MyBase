@@ -5,8 +5,8 @@ import com.cmsr.onebase.framework.data.base.BaseDO;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.system.framework.sms.core.enums.SmsChannelEnum;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Table;
+import com.mybatisflex.annotation.Table;
+import com.mybatisflex.annotation.Column;
 import lombok.Data;
 import lombok.ToString;
 
@@ -16,7 +16,7 @@ import lombok.ToString;
  * @author zzf
  * @since 2021-01-25
  */
-@Table(name = "system_sms_channel")
+@Table(value = "system_sms_channel")
 @Data
 @ToString(callSuper = true)
 @TenantIgnore
@@ -34,40 +34,40 @@ public class SmsChannelDO extends BaseDO {
     /**
      * 短信签名
      */
-    @Column(name = SIGNATURE)
+    @Column(value = SIGNATURE)
     private String signature;
     /**
      * 渠道编码
      *
      * 枚举 {@link SmsChannelEnum}
      */
-    @Column(name = CODE)
+    @Column(value = CODE)
     private String code;
     /**
      * 启用状态
      *
      * 枚举 {@link CommonStatusEnum}
      */
-    @Column(name = STATUS)
+    @Column(value = STATUS)
     private Integer status;
     /**
      * 备注
      */
-    @Column(name = REMARK)
+    @Column(value = REMARK)
     private String remark;
     /**
      * 短信 API 的账号
      */
-    @Column(name = API_KEY)
+    @Column(value = API_KEY)
     private String apiKey;
     /**
      * 短信 API 的密钥
      */
-    @Column(name = API_SECRET)
+    @Column(value = API_SECRET)
     private String apiSecret;
     /**
      * 短信发送回调 URL
      */
-    @Column(name = CALLBACK_URL)
+    @Column(value = CALLBACK_URL)
     private String callbackUrl;
 }

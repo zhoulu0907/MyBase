@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.system.dal.dataobject.logger;
 
-import jakarta.persistence.Table;
-import jakarta.persistence.Column;
+import com.mybatisflex.annotation.Table;
+import com.mybatisflex.annotation.Column;
 
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
@@ -15,7 +15,7 @@ import lombok.Data;
  * 注意，包括登录和登出两种行为
  *
  */
-@Table(name = "system_login_log")
+@Table(value = "system_login_log")
 @Data
 public class LoginLogDO extends TenantBaseDO {
 
@@ -33,48 +33,48 @@ public class LoginLogDO extends TenantBaseDO {
      *
      * 枚举 {@link LoginLogTypeEnum}
      */
-    @Column(name = LOG_TYPE)
+    @Column(value = LOG_TYPE)
     private Integer logType;
     /**
      * 链路追踪编号
      */
-    @Column(name = TRACE_ID)
+    @Column(value = TRACE_ID)
     private String traceId;
     /**
      * 用户编号
      */
-    @Column(name = USER_ID)
+    @Column(value = USER_ID)
     private Long userId;
     /**
      * 用户类型
      *
      * 枚举 {@link UserTypeEnum}
      */
-    @Column(name = USER_TYPE)
+    @Column(value = USER_TYPE)
     private Integer userType;
     /**
      * 用户账号
      *
      * 冗余，因为账号可以变更
      */
-    @Column(name = USERNAME)
+    @Column(value = USERNAME)
     private String username;
     /**
      * 登录结果
      *
      * 枚举 {@link LoginResultEnum}
      */
-    @Column(name = RESULT)
+    @Column(value = RESULT)
     private Integer result;
     /**
      * 用户 IP
      */
-    @Column(name = USER_IP)
+    @Column(value = USER_IP)
     private String userIp;
     /**
      * 浏览器 UA
      */
-    @Column(name = USER_AGENT)
+    @Column(value = USER_AGENT)
     private String userAgent;
 
 }

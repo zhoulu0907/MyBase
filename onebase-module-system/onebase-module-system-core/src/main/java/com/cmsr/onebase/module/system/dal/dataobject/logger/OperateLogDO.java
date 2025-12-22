@@ -3,15 +3,15 @@ package com.cmsr.onebase.module.system.dal.dataobject.logger;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Table;
+import com.mybatisflex.annotation.Table;
+import com.mybatisflex.annotation.Column;
 import lombok.Data;
 
 /**
  * 操作日志表
  *
  */
-@Table(name = "system_operate_log")
+@Table(value = "system_operate_log")
 @Data
 public class OperateLogDO extends TenantBaseDO {
 
@@ -33,71 +33,71 @@ public class OperateLogDO extends TenantBaseDO {
      *
      * 一般来说，通过链路追踪编号，可以将访问日志，错误日志，链路追踪日志，logger 打印日志等，结合在一起，从而进行排错。
      */
-    @Column(name = TRACE_ID)
+    @Column(value = TRACE_ID)
     private String traceId;
     /**
      * 用户编号
      *
      * 关联 MemberUserDO 的 id 属性，或者 AdminUserDO 的 id 属性
      */
-    @Column(name = USER_ID)
+    @Column(value = USER_ID)
     private Long userId;
     /**
      * 用户类型
      *
      * 关联 {@link  UserTypeEnum}
      */
-    @Column(name = USER_TYPE)
+    @Column(value = USER_TYPE)
     private Integer userType;
     /**
      * 操作模块类型
      */
-    @Column(name = TYPE)
+    @Column(value = TYPE)
     private String type;
     /**
      * 操作名
      */
-    @Column(name = SUB_TYPE)
+    @Column(value = SUB_TYPE)
     private String subType;
     /**
      * 操作模块业务编号
      */
-    @Column(name = BIZ_ID)
+    @Column(value = BIZ_ID)
     private Long bizId;
     /**
      * 日志内容，记录整个操作的明细
      *
      * 例如说，修改编号为 1 的用户信息，将性别从男改成女，将姓名从OneBase改成源码。
      */
-    @Column(name = ACTION)
+    @Column(value = ACTION)
     private String action;
     /**
      * 拓展字段，有些复杂的业务，需要记录一些字段 ( JSON 格式 )
      *
      * 例如说，记录订单编号，{ orderId: "1"}
      */
-    @Column(name = EXTRA)
+    @Column(value = EXTRA)
     private String extra;
 
     /**
      * 请求方法名
      */
-    @Column(name = REQUEST_METHOD)
+    @Column(value = REQUEST_METHOD)
     private String requestMethod;
     /**
      * 请求地址
      */
-    @Column(name = REQUEST_URL)
+    @Column(value = REQUEST_URL)
     private String requestUrl;
     /**
      * 用户 IP
      */
-    @Column(name = USER_IP)
+    @Column(value = USER_IP)
     private String userIp;
     /**
      * 浏览器 UA
      */
-    @Column(name = USER_AGENT)
+    @Column(value = USER_AGENT)
     private String userAgent;
 
 }
