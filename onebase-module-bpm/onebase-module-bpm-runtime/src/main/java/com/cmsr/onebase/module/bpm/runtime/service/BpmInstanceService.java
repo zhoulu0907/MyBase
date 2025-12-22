@@ -65,4 +65,11 @@ public interface BpmInstanceService {
      * @param reqVO 获取列表数据请求VO
      */
     PageResult<Map<String, Object>> formDataPage(BpmFormDataPageReqVO reqVO);
+
+    /**
+     * 删除表单数据
+     *
+     * @param reqVO 删除表单数据请求VO
+     */
+    void deleteFormData(BpmDeleteFormDataReqVO reqVO);
 }

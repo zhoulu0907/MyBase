@@ -475,6 +475,25 @@ public class DynamicMetadataRepository {
     }
 
     /**
+     * 查询关系表：根据关系键与值查询关联行。
+     * @param tableName     表名
+     * @param relationKey   关系键字段名（如某外键列）
+     * @param relationValue 关系值
+     * @param filterDeleted 是否过滤逻辑删除
+     * @return 结果列表；当值为空或不可解析为数值时返回空列表
+     */
+    public List<Row> selectRelationRowsByCondition(String tableName, String relationKey, Object relationValue, boolean filterDeleted) {
+        ApplicationDataSourceManager.useBizDatasourceByAppId(ApplicationManager.getApplicationId());
+        try {
+            QueryWrapper qw = QueryWrapper.create().where(new QueryColumn(relationKey).eq(relationValue));
+            if (filterDeleted) { qw.and(new QueryColumn(SystemFieldConstants.OPTIONAL.DELETED).eq(0)); }
+            return Db.selectListByQuery(tableName, qw);
+        } finally {
+            ApplicationDataSourceManager.clear();
+        }
+    }
+
+    /**
      * 分页查询：先计算总数，再按偏移量与页大小查询数据。
      *
      * @param tableName 表名

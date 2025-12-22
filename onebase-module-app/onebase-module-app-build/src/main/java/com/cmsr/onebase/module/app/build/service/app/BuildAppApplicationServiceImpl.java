@@ -122,6 +122,9 @@ public class BuildAppApplicationServiceImpl implements AppApplicationService {
     public PageResult<ApplicationRespVO> getApplicationPage(ApplicationPageReqVO pageReqVO) {
         Long userId = SecurityFrameworkUtils.getLoginUserId();
         PageResult<AppApplicationDO> pageResult = applicationRepository.selectPage(pageReqVO, userId);
+        if (CollectionUtils.isEmpty(pageResult.getList())) {
+            return PageResult.empty();
+        }
         List<ApplicationRespVO> respVOS = pageResult.getList().stream().map(v -> {
             ApplicationRespVO bean = BeanUtils.toBean(v, ApplicationRespVO.class);
             bean.setAppStatusText(AppStatusEnum.getText(v.getAppStatus()));
@@ -136,6 +139,9 @@ public class BuildAppApplicationServiceImpl implements AppApplicationService {
 
     private void enrichIcons(List<ApplicationRespVO> respVOS) {
         List<Long> appIds = respVOS.stream().map(ApplicationRespVO::getId).collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(appIds)) {
+            return;
+        }
         List<AppNavigationDO> navigationDOS = ApplicationManager.withoutApplicationCondition(() -> appNavigationRepository.findByApplicationIds(appIds));
         for (ApplicationRespVO respVO : respVOS) {
             AppNavigationDO navigationDO = navigationDOS.stream()
@@ -152,6 +158,9 @@ public class BuildAppApplicationServiceImpl implements AppApplicationService {
 
     private void enrichTags(List<ApplicationRespVO> respVOS) {
         List<Long> appIds = respVOS.stream().map(ApplicationRespVO::getId).collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(appIds)) {
+            return;
+        }
         List<TagRespVO> appTagDOS = tagRepository.selectTagVoByAppIds(appIds);
         for (ApplicationRespVO respVO : respVOS) {
             List<TagRespVO> tagRespVOS = appTagDOS.stream()
@@ -165,6 +174,9 @@ public class BuildAppApplicationServiceImpl implements AppApplicationService {
         Set<Long> userIds = respVOS.stream()
                 .flatMap(vo -> Stream.of(vo.getCreator(), vo.getUpdater()))
                 .collect(Collectors.toSet());
+        if (CollectionUtils.isEmpty(userIds)) {
+            return;
+        }
         AppCommonService.UserHelper userHelper = appCommonService.getUserHelper(userIds);
         for (ApplicationRespVO respVO : respVOS) {
             respVO.setCreateUser(userHelper.getUserNickname(respVO.getCreator()));
@@ -174,6 +186,9 @@ public class BuildAppApplicationServiceImpl implements AppApplicationService {
 
     private void enrichUserPhoto(List<ApplicationRespVO> respVOS) {
         List<Long> appIds = respVOS.stream().map(ApplicationRespVO::getId).collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(appIds)) {
+            return;
+        }
         Map<Long, List<AppUserPhotoDTO>> userListMap = appAuthRoleRepository.findUserPhotoList(appIds);
         for (ApplicationRespVO respVO : respVOS) {
             respVO.setUserPhotoList(userListMap.get(respVO.getId()));

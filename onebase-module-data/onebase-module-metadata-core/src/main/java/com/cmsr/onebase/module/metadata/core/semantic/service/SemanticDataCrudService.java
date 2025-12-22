@@ -276,9 +276,9 @@ public class SemanticDataCrudService {
         QueryWrapper qw = QueryWrapper.create().where(new QueryColumn(pkField).eq(dv != null ? dv : id));
         int resultCount = 0;
         if (hasDeletedField(entity.getFields())) {
-            resultCount = dynamicMetadataRepository.softDeleteByQuery(entity.getTableName(), qw, entity.getFields());
+            resultCount = dynamicMetadataRepository.softDeleteByQuery(entity.getTableName(), qw);
         } else {
-            resultCount = dynamicMetadataRepository.deleteByQuery(entity.getTableName(), qw, entity.getFields());
+            resultCount = dynamicMetadataRepository.deleteByQuery(entity.getTableName(), qw);
         }
         List<SemanticRelationSchemaDTO> connectors = entity.getConnectors();
         if (connectors != null && !connectors.isEmpty()) {
@@ -289,9 +289,9 @@ public class SemanticDataCrudService {
                     QueryWrapper cq = QueryWrapper.create().where(new QueryColumn("parent_id").eq(pv != null ? pv : id));
                     boolean hasDel = hasDeletedField(c.getRelationAttributes());
                     if (hasDel) {
-                        dynamicMetadataRepository.softDeleteByQuery(c.getTargetEntityTableName(), cq, c.getRelationAttributes());
+                        dynamicMetadataRepository.softDeleteByQuery(c.getTargetEntityTableName(), cq);
                     } else {
-                        dynamicMetadataRepository.deleteByQuery(c.getTargetEntityTableName(), cq, c.getRelationAttributes());
+                        dynamicMetadataRepository.deleteByQuery(c.getTargetEntityTableName(), cq);
                     }
                 }
             }
@@ -329,8 +329,8 @@ public class SemanticDataCrudService {
         semanticQueryConditionBuilder.apply(qw, fields, cond, null);
         qw = semanticQueryPermissionHelper.applyQueryPermissionFilter(qw, recordDTO.getRecordContext().getPermissionContext(), fields);
         int affected = hasDeletedField(fields)
-                ? dynamicMetadataRepository.softDeleteByQuery(entity.getTableName(), qw, fields)
-                : dynamicMetadataRepository.deleteByQuery(entity.getTableName(), qw, fields);
+                ? dynamicMetadataRepository.softDeleteByQuery(entity.getTableName(), qw)
+                : dynamicMetadataRepository.deleteByQuery(entity.getTableName(), qw);
         semanticWorkflowExecutor.postExecute(
                 recordDTO.getRecordContext().getOperationType(),
                 recordDTO.getRecordContext().getTraceId(),
@@ -362,7 +362,7 @@ public class SemanticDataCrudService {
         // 切换到目标数据源
         try {
             // 查询主表记录；若存在软删除字段则进行条件过滤
-            Row row = dynamicMetadataRepository.selectMainById(entity.getTableName(), pkField, id, hasDeletedField(entity.getFields()), entity.getFields());
+            Row row = dynamicMetadataRepository.selectMainById(entity.getTableName(), pkField, id, hasDeletedField(entity.getFields()));
             if (row == null) { return null; }
 
             Map<String, Object> result = new HashMap<>();
@@ -389,7 +389,15 @@ public class SemanticDataCrudService {
                         if (rv != null) { connVals.put(c.getTargetEntityTableName(), rv); }
                     } else if (RelationshipTypeEnum.isConnectorRelationTable(c.getRelationshipType().getRelationshipType())) {
                         // 读取关系表连接器的值
-                        SemanticRelationValueDTO rv = readRelationConnector(c, id);
+                        SemanticFieldSchemaDTO targetFiledSchema = c.getRelationAttributes().stream().filter(attr ->
+                                attr.getFieldUuid().equals(c.getTargetKeyFieldUuid())).findFirst().orElse(null);
+                        if(targetFiledSchema == null) continue;
+                        String targetFiledName = targetFiledSchema.getFieldName();
+                        SemanticFieldSchemaDTO sourceFiledSchema = entity.getFields().stream().filter(filed ->
+                                filed.getFieldUuid().equals(c.getSourceKeyFieldUuid())).findFirst().orElse(null);
+                        if(sourceFiledSchema == null) continue;
+                        Object targetFiledValue = resultVal.getFieldValueMap().get(sourceFiledSchema.getFieldName()).getStoreValue();
+                        SemanticRelationValueDTO rv = readRelationConnector(c, targetFiledName, targetFiledValue);
                         if (rv != null) { connVals.put(c.getTargetEntityTableName(), rv); }
                     }
                 }
@@ -425,7 +433,7 @@ public class SemanticDataCrudService {
         Integer pageSize = recordDTO.getRecordContext() == null ? null : recordDTO.getRecordContext().getPageSize();
         int pn = pageNo == null ? 1 : pageNo;
         int ps = pageSize == null ? 10 : pageSize;
-        PageResult<Row> pageRows = dynamicMetadataRepository.selectPageByQuery(entity.getTableName(), qw, pn, ps, fields);
+        PageResult<Row> pageRows = dynamicMetadataRepository.selectPageByQuery(entity.getTableName(), qw, pn, ps);
         List<Row> rows = pageRows.getList();
         List<Map<String, Object>> result = new ArrayList<>();
         List<SemanticEntityValueDTO> values = new ArrayList<>();
@@ -454,7 +462,7 @@ public class SemanticDataCrudService {
         if (qw == null) { qw = QueryWrapper.create(); }
         int pageSize = MAX_BATCH_LIMIT;
         int affected = 0;
-        PageResult<Row> pageRows = dynamicMetadataRepository.selectPageByQuery(entity.getTableName(), qw, 1, pageSize, entity.getFields());
+        PageResult<Row> pageRows = dynamicMetadataRepository.selectPageByQuery(entity.getTableName(), qw, 1, pageSize);
         List<Row> rows = pageRows.getList();
         if (rows != null) {
             for (Row row : rows) {
@@ -489,7 +497,7 @@ public class SemanticDataCrudService {
         if (qw == null) { qw = QueryWrapper.create(); }
         int pageSize = MAX_BATCH_LIMIT;
         List<Map<String, Object>> result = new ArrayList<>();
-        PageResult<Row> pageRows = dynamicMetadataRepository.selectPageByQuery(entity.getTableName(), qw, 1, pageSize, fields);
+        PageResult<Row> pageRows = dynamicMetadataRepository.selectPageByQuery(entity.getTableName(), qw, 1, pageSize);
         List<Row> rows = pageRows.getList();
         if (rows != null) {
             for (Row row : rows) {
@@ -583,7 +591,7 @@ public class SemanticDataCrudService {
      * @return 连接器值（可能为 null）
      */
     private SemanticRelationValueDTO readSubtableConnector(SemanticRelationSchemaDTO c, Object parentId) {
-        List<Row> rows = dynamicMetadataRepository.selectSubtableRowsByParent(c.getTargetEntityTableName(), parentId, c.getRelationAttributes());
+        List<Row> rows = dynamicMetadataRepository.selectSubtableRowsByParent(c.getTargetEntityTableName(), parentId);
         if (rows == null || rows.isEmpty()) { return null; }
         SemanticRelationValueDTO relation = new SemanticRelationValueDTO();
         List<SemanticFieldSchemaDTO> attrs = c.getRelationAttributes();
@@ -606,12 +614,11 @@ public class SemanticDataCrudService {
      * - ONE：返回首行映射；MANY：返回列表映射
      *
      * @param c 连接器定义
-     * @param parentId 父记录主键
+     * @param key value 关联字段名称 值
      * @return 连接器值（可能为 null）
      */
-    private SemanticRelationValueDTO readRelationConnector(SemanticRelationSchemaDTO c, Object parentId) {
-        String srcKey = "parent_id";
-        List<Row> rows = dynamicMetadataRepository.selectRelationRowsByParent(c.getTargetEntityTableName(), srcKey, parentId, c.getRelationAttributes());
+    private SemanticRelationValueDTO readRelationConnector(SemanticRelationSchemaDTO c, String key, Object value) {
+        List<Row> rows = dynamicMetadataRepository.selectRelationRowsByCondition(c.getTargetEntityTableName(), key, value,true);
         if (rows == null || rows.isEmpty()) { return null; }
         SemanticRelationValueDTO relation = new SemanticRelationValueDTO();
         List<SemanticFieldSchemaDTO> attrs = c.getRelationAttributes();
@@ -746,14 +753,14 @@ public class SemanticDataCrudService {
             if (c.getCardinality() == SemanticConnectorCardinalityEnum.ONE) {
                 Map<String, SemanticFieldValueDTO<Object>> relDto = recordDTO.getEntityValue().getConnectorDTOObject(c.getTargetEntityTableName());
                 applyConnectorAutoNumbers(c, relDto);
-                if (relDto != null && !relDto.isEmpty()) { batches.computeIfAbsent(c.getTargetEntityTableName(), k -> new ArrayList<>()).add(semanticValueAssembler.buildRelationRow(relDto, uidGenerator)); }
+                if (relDto != null && !relDto.isEmpty()) { batches.computeIfAbsent(c.getTargetEntityTableName(), k -> new ArrayList<>()).add(semanticValueAssembler.buildRelationRow(recordDTO,c,relDto, uidGenerator)); }
             } else if (c.getCardinality() == SemanticConnectorCardinalityEnum.MANY) {
                 List<Map<String, SemanticFieldValueDTO<Object>>> list = recordDTO.getEntityValue().getConnectorDTOList(c.getTargetEntityTableName());
                 if (list != null) {
                     List<Row> rows = batches.computeIfAbsent(c.getTargetEntityTableName(), k -> new ArrayList<>());
                     for (Map<String, SemanticFieldValueDTO<Object>> relDto : list) { 
                         applyConnectorAutoNumbers(c, relDto);
-                        if (relDto != null && !relDto.isEmpty()) { rows.add(semanticValueAssembler.buildRelationRow(relDto, uidGenerator)); }
+                        if (relDto != null && !relDto.isEmpty()) { rows.add(semanticValueAssembler.buildRelationRow(recordDTO,c,relDto, uidGenerator)); }
                     }
                 }
             }
@@ -836,7 +843,7 @@ public class SemanticDataCrudService {
             List<SemanticFieldSchemaDTO> attrs = c.getRelationAttributes();
             String childPk = getPrimaryKeyFieldName(attrs);
 
-            List<Row> existing = dynamicMetadataRepository.selectSubtableRowsByParent(table, parentId, attrs);
+            List<Row> existing = dynamicMetadataRepository.selectSubtableRowsByParent(table, parentId);
             Map<String, Row> existingById = new HashMap<>();
             for (Row r : existing) {
                 Object rid = r.get(childPk);
@@ -870,8 +877,8 @@ public class SemanticDataCrudService {
                 QueryWrapper dq = QueryWrapper.create()
                         .where(new QueryColumn("parent_id").eq(parentId))
                         .and(new QueryColumn(childPk).in(toLongListForIn(toDelete)));
-                if (hasDeletedField(attrs)) { dynamicMetadataRepository.softDeleteByQuery(table, dq, attrs); }
-                else { dynamicMetadataRepository.deleteByQuery(table, dq, attrs); }
+                if (hasDeletedField(attrs)) { dynamicMetadataRepository.softDeleteByQuery(table, dq); }
+                else { dynamicMetadataRepository.deleteByQuery(table, dq); }
             }
         }
     }
@@ -886,7 +893,7 @@ public class SemanticDataCrudService {
             List<SemanticFieldSchemaDTO> attrs = c.getRelationAttributes();
             String pk = getPrimaryKeyFieldName(attrs);
 
-            List<Row> existing = dynamicMetadataRepository.selectRelationRowsByParent(table, "parent_id", parentId, attrs);
+            List<Row> existing = dynamicMetadataRepository.selectRelationRowsByParent(table, "parent_id", parentId);
             Map<String, Row> existingById = new HashMap<>();
             for (Row r : existing) {
                 Object rid = r.get(pk);
@@ -914,7 +921,7 @@ public class SemanticDataCrudService {
                     QueryWrapper uq = QueryWrapper.create().where(new QueryColumn(pk).eq(rv != null ? rv : rid));
                     dynamicMetadataRepository.updateByQuery(table, updateRow, uq);
                 } else {
-                    Row insertRow = semanticValueAssembler.buildRelationRow(dto, uidGenerator);
+                    Row insertRow = semanticValueAssembler.buildRelationRow(recordDTO,c,dto, uidGenerator);
                     if (!insertRow.containsKey("parent_id")) { insertRow.put("parent_id", parentId); }
                     dynamicMetadataRepository.insert(table, insertRow);
                 }
@@ -926,8 +933,8 @@ public class SemanticDataCrudService {
                 QueryWrapper dq = QueryWrapper.create()
                         .where(new QueryColumn("parent_id").eq(parentId))
                         .and(new QueryColumn(pk).in(toLongListForIn(toDelete)));
-                if (hasDeletedField(attrs)) { dynamicMetadataRepository.softDeleteByQuery(table, dq, attrs); }
-                else { dynamicMetadataRepository.deleteByQuery(table, dq, attrs); }
+                if (hasDeletedField(attrs)) { dynamicMetadataRepository.softDeleteByQuery(table, dq); }
+                else { dynamicMetadataRepository.deleteByQuery(table, dq); }
             }
         }
     }
