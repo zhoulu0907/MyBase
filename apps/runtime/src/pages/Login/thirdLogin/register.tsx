@@ -65,28 +65,18 @@ const RegisterForm: React.FC<IRegisterProps> = ({ appId, isRelatedApp, tenantId,
           false
         );
 
-        console.log(TokenManager.getTokenInfo());
-
-        const redirectURL = getHashQueryParam('redirectURL');
-        if (redirectURL) {
-          navigate(`/onebase/${appId}/${tenantId}/runtime`);
+        setRegisterInfo(response);
+        if (isRelatedApp) {
+          setVisible(true);
         } else {
-          // 跳转到首页
-          navigate(`/onebase/runtime/?appId=${appId}`);
+          const redirectURL = getHashQueryParam('redirectURL');
+          if (redirectURL) {
+            navigate(`/onebase/${appId}/${tenantId}/runtime`);
+          } else {
+            // 跳转到首页
+            navigate(`/onebase/runtime/?appId=${appId}`);
+          }
         }
-
-        // setRegisterInfo(response);
-        // if (isRelatedApp) {
-        //   setVisible(true);
-        // } else {
-        //   const redirectURL = getHashQueryParam('redirectURL');
-        //   if (redirectURL) {
-        //     navigate(`/onebase/${appId}/${tenantId}/runtime`);
-        //   } else {
-        //     // 跳转到首页
-        //     navigate(`/onebase/runtime/?appId=${appId}`);
-        //   }
-        // }
       }
     } catch (error) {
       console.log('error');
