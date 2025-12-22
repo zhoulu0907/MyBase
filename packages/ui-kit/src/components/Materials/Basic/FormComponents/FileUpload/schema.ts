@@ -211,10 +211,10 @@ const XFileUpload: XInputFileUploadSchema = {
     tooltip: '',
     dataField: [],
     uploadType: UPLOAD_VALUES[UPLOAD_OPTIONS.TEXT],
-    buttonName:'点击上传',
+    buttonName: '点击上传',
     buttonType: UPLOAD_BUTTON_TYPES.PRIMARY,
-    showDownload: false,
-     verify: {
+    showDownload: true,
+    verify: {
       required: false,
       maxCount: 1,
       maxSize: 10,
