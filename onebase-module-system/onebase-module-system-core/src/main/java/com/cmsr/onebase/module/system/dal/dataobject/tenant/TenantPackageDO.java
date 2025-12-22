@@ -6,6 +6,7 @@ import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.orm.entity.BaseEntity;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 
+import com.cmsr.onebase.module.system.dal.flex.typehandler.SetLongJsonTypeHandler;
 import com.mybatisflex.annotation.Table;
 import com.mybatisflex.annotation.Column;
 import lombok.AllArgsConstructor;
@@ -58,7 +59,7 @@ public class TenantPackageDO extends BaseEntity {
     /**
      * 关联的菜单编号
      */
-    @Column(value = MENU_IDS)
+    @Column(value = MENU_IDS, typeHandler = SetLongJsonTypeHandler.class)
     private Set<Long> menuIds;
 
 }
