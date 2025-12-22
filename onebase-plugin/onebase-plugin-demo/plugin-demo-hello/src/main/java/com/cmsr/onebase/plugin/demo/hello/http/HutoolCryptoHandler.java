@@ -4,7 +4,9 @@ import cn.hutool.crypto.SecureUtil;
 import cn.hutool.crypto.digest.DigestUtil;
 import cn.hutool.crypto.symmetric.AES;
 import com.cmsr.onebase.plugin.api.HttpHandler;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,13 +22,15 @@ import java.util.Map;
  * @date 2025-12-20
  */
 @RestController
+@Slf4j
+@RequestMapping("/plugin/hello-plugin")
 public class HutoolCryptoHandler implements HttpHandler {
 
     /**
      * 测试Hutool加密功能
      * <p>访问路径：GET /plugin/hello-plugin/crypto?text=xxx</p>
      */
-    @GetMapping("/plugin/hello-plugin/crypto")
+    @GetMapping("/crypto")
     public Map<String, Object> cryptoTest(@RequestParam(defaultValue = "Hello OneBase Plugin") String text) {
         Map<String, Object> result = new HashMap<>();
         
@@ -40,7 +44,7 @@ public class HutoolCryptoHandler implements HttpHandler {
             result.put("sha256", sha256);
             
             // 3. AES加密
-            String key = "onebase123456789"; // 16位密钥
+            String key = "onebase123456789cys"; // 16位密钥
             AES aes = SecureUtil.aes(key.getBytes(StandardCharsets.UTF_8));
             String encrypted = aes.encryptHex(text);
             result.put("aesEncrypted", encrypted);
@@ -76,7 +80,7 @@ public class HutoolCryptoHandler implements HttpHandler {
      * 检查Hutool是否可用
      * <p>访问路径：GET /plugin/hello-plugin/check-hutool</p>
      */
-    @GetMapping("/plugin/hello-plugin/check-hutool")
+    @GetMapping("/check-hutool")
     public Map<String, Object> checkHutool() {
         Map<String, Object> result = new HashMap<>();
         
