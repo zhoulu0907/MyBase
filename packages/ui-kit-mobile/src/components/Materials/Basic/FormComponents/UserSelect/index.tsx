@@ -38,12 +38,9 @@ const XUserSelect = memo((props: XUserSelectConfig & { runtime?: boolean; detail
 
   const rules: ITypeRules<ValidatorType.Custom>[] = [
     {
+      required: verify?.required,
       type: ValidatorType.Custom,
-      validator: (value, callback) => {
-        if (!value && verify?.required) {
-          callback(`${label.text}是必填项`);
-        }
-      }
+      message: `${label.text}是必填项`
     }
   ];
 

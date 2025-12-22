@@ -47,11 +47,10 @@ const XSelectMutiple = memo((props: XSelectMutipleConfig & { runtime?: boolean; 
   const options = defaultOptionsConfig?.defaultOptions?.map(({ label, value }: { label: string; value: string | number }) => ({ label, value: String(value) }));
   const rules: ITypeRules<ValidatorType.Custom>[] = [
     {
+      required: verify?.required,
       type: ValidatorType.Custom,
+      message: `${label.text}是必填项`,
       validator: (value, callback) => {
-        if (value.length === 0 && verify?.required) {
-          callback(`${label.text}是必填项`);
-        }
         if (value.length > verify?.maxChecked) {
           callback(`选中数量不能大于${verify?.maxChecked}`);
         } else {

@@ -101,6 +101,8 @@ const ComponentEditRender: React.FC<ComponentRenderProps> = ({ cpId, cpType, pag
         return <FormComp.XUserSelect cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} form={form} isMultiple />;
       case FORM_COMPONENT_TYPES.SUB_TABLE:
         return <FormComp.XSubTable cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} useStoreSignals={useStoreSignals} />;
+      case FORM_COMPONENT_TYPES.DATA_SELECT:
+        return <FormComp.XDataSelect cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} form={form} />;
 
       //  展示组件
       case SHOW_COMPONENT_TYPES.INFO_NOTICE:

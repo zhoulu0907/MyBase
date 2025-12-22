@@ -19,6 +19,7 @@ import XAutoCode from './AutoCode';
 import XDeptSelect from './DeptSelect';
 import XUserSelect from './UserSelect';
 import XSubTable from './SubTable';
+import XDataSelect from './DataSelect';
 
 export const FormComp: any = {
   XInputText,
@@ -41,9 +42,10 @@ export const FormComp: any = {
   XAutoCode,
   XDeptSelect,
   XUserSelect,
-  XSubTable
+  XSubTable,
+  XDataSelect,
 };
 
-export { XInputText, XInputTextArea, XInputEmail, XInputPhone, XInputNumber, XDatePicker, XDateRangePicker, XDateTimePicker, XTimePicker, XSelectOne, XSelectMutiple, XCheckbox, XRadio, XSwitch, XImgUpload, XCarouselForm, XFileUpload, XAutoCode, XDeptSelect, XUserSelect, XSubTable };
+export { XInputText, XInputTextArea, XInputEmail, XInputPhone, XInputNumber, XDatePicker, XDateRangePicker, XDateTimePicker, XTimePicker, XSelectOne, XSelectMutiple, XCheckbox, XRadio, XSwitch, XImgUpload, XCarouselForm, XFileUpload, XAutoCode, XDeptSelect, XUserSelect, XSubTable, XDataSelect };
 
 export type FormComponentType = typeof FormComp;

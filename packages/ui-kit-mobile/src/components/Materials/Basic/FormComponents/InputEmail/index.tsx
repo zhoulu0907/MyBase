@@ -29,7 +29,9 @@ const XInputEmail = memo((props: XInputEmailConfig & { runtime?: boolean; detail
 
   const rules: ITypeRules<ValidatorType.Custom>[] = [
     {
+      required: verify?.required,
       type: ValidatorType.Custom,
+      message: `${label.text}是必填项`,
       validator: (value, callback) => {
         if (!value && verify?.required) {
           callback(`${label.text}是必填项`);
@@ -62,11 +64,8 @@ const XInputEmail = memo((props: XInputEmailConfig & { runtime?: boolean; detail
         <Input
           type="email"
           placeholder={placeholder}
-          style={{
-            width: '100%',
-            textAlign: align
-          }}
           inputStyle={{ textAlign: align }}
+          blockChangeWhenCompositing={true}
         />
       )}
     </Form.Item>
