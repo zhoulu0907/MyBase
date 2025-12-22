@@ -126,7 +126,7 @@ const XLCollapseLayout: XCollapseLayoutSchema = {
     ...baseDefault,
     label: {
       text: '分组布局',
-      display: null,
+      display: true,
     },
     collapseStyle: {
       showBordered: true,
