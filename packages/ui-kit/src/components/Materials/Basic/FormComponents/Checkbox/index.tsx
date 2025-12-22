@@ -76,7 +76,7 @@ const XCheckbox = memo((props: XInputCheckboxConfig & { runtime?: boolean; detai
           >
             {options.map((ele, index: number) => (
               <Checkbox key={index} value={ele.id}>
-                {ele.colorType && <span
+                {ele.colorType ? <Tag
                   style={{
                     width: '8px',
                     height: '8px',
@@ -85,8 +85,8 @@ const XCheckbox = memo((props: XInputCheckboxConfig & { runtime?: boolean; detai
                     display: 'inline-block',
                     marginRight: '8px'
                   }}
-                ></span>}
-                <span>{ele.label}</span>
+                ></Tag> :
+                  <span>{ele.label}</span>}
               </Checkbox>
             ))}
           </CheckboxGroup>
