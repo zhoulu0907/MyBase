@@ -43,7 +43,6 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
   const { components: listComponents, pageComponentSchemas: listPageComponentSchemas } = useListEditorSignal;
   const { workbenchComponents, wbComponentSchemas } = useWorkbenchEditorSignal;
   const { editMode } = currentEditorSignal;
-
   const mobileEditorPreviewRef = useRef<MicroApp | null>(null);
 
   const {

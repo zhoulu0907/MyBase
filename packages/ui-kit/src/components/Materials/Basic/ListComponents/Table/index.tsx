@@ -17,6 +17,7 @@ import {
   CATEGORY_TYPE,
   dataMethodDeleteV2,
   dataMethodPageV2,
+  deleteFormDataPage,
   DeleteMethodV2Params,
   getEntityFieldsWithChildren,
   getFormDataPage,
@@ -502,7 +503,7 @@ const XTable = memo(
             nodeType: 'CONDITION',
             fieldName: key,
             operator: VALIDATION_TYPE.EQUALS,
-            fieldValue: typeof value === 'object' ? [value.id] : [value]
+            fieldValue: typeof value === 'object' ? [value?.id] : [value]
           });
         }
       });
@@ -516,7 +517,7 @@ const XTable = memo(
       const req: PageMethodV2Params = {
         pageNo: tablePageNo,
         pageSize: pageSize || 10,
-        filters: filters
+        filters: filterCondition && Object.keys(filterCondition).length > 0 ? filterCondition : filters
       };
       let res: any;
       if (props?.pageSetType === PageType.BPM) {
@@ -585,6 +586,7 @@ const XTable = memo(
       if (!runtime) {
         return;
       }
+
       const curFormPage = curPage.value?.pages?.find((ele: any) => ele.pageType === CATEGORY_TYPE.LIST);
       console.log('curFormPage: ', curFormPage);
       const pageId = curFormPage?.id;
@@ -602,8 +604,17 @@ const XTable = memo(
       const req: DeleteMethodV2Params = {
         id: id
       };
-
-      const res = await dataMethodDeleteV2(tableName, curMenu.value?.id, req);
+      let res: any;
+      if (props?.pageSetType === PageType.BPM) {
+        const params = {
+          menuId: curMenu.value?.id,
+          tableName,
+          ...req
+        };
+        res = await deleteFormDataPage(params);
+      } else {
+        res = await dataMethodDeleteV2(tableName, curMenu.value?.id, req);
+      }
 
       if (res) {
         Message.success('删除成功');
@@ -674,7 +685,7 @@ const XTable = memo(
                   添加数据
                 </Button>
               )}
-              <DraftBox showFromPageData={showFromPageData} />
+              <DraftBox showFromPageData={showFromPageData} tableColumns={finalColumns} />
             </div>
             <Button type="text" onClick={() => handlePage()} icon={<IconRefresh />}></Button>
           </div>

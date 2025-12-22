@@ -5,6 +5,9 @@ export interface ConditionField {
   value: string;
   // 字段类型
   fieldType: string;
+
+  // 子表
+  children?: ConditionField[];
 }
 
 export enum VALIDATION_TYPE {

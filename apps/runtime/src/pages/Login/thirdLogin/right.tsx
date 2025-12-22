@@ -1,9 +1,11 @@
 import { DynamicIcon } from '@/components/DynamicIcon';
 
+import { ThirdLoginMap, ThirdLoginType } from '@/constants';
 import { appInfoSignal } from '@/store/app';
+import { filterSpace, phoneValidator } from '@/utils/validator';
 import { Button, Checkbox, Form, Input, Link, Message, Space, Tabs, Typography } from '@arco-design/web-react';
 import { IconLock, IconMobile } from '@arco-design/web-react/icon';
-import { getApplication } from '@onebase/app';
+import { getApplicationLeast } from '@onebase/app';
 import {
   getHashQueryParam,
   getOrCreateDeviceInfo,
@@ -20,7 +22,7 @@ import {
   runtimeThirdLogin,
   sendVerifyCodeApi,
   type RuntimeThirdLoginRequest,
-  type ThirdUserLoginResponse,
+  type ThirdUserLoginResponse
 } from '@onebase/platform-center';
 import { appIconMap } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
@@ -29,10 +31,8 @@ import { useNavigate } from 'react-router-dom';
 import { useI18n } from '../../../hooks/useI18n';
 import { useRememberMe } from '../../../hooks/useRememberMe';
 import styles from '../index.module.less';
-import { ThirdLoginMap, ThirdLoginType } from '@/constants';
 import RegisterForm from './register';
 import UpdatePasswordForm from './updatePassword';
-import { filterSpace, phoneValidator } from '@/utils/validator';
 
 const { Paragraph } = Typography;
 const TabPane = Tabs.TabPane;
@@ -97,7 +97,7 @@ const Right: React.FC = () => {
 
   const handleGetApplication = async () => {
     if (appId) {
-      const res = await getApplication({ id: appId });
+      const res = await getApplicationLeast({ id: appId });
       if (res) {
         setCurAppInfo(res);
       }
@@ -183,7 +183,7 @@ const Right: React.FC = () => {
         }
         return;
       } else {
-        if(response?.userUnRegistFlag) {
+        if (response?.userUnRegistFlag) {
           setVisibleRegister(true);
         }
         setIsRelatedApp(response?.userAppRelationFlag || false);
@@ -265,12 +265,20 @@ const Right: React.FC = () => {
               {ThirdLoginMap?.map((item) => {
                 return (
                   <TabPane key={item.value} title={item.label}>
-                    <Form.Item label="手机号" field="mobile" rules={[{ required: true, message: '请输入手机号'} , { validator: phoneValidator }]}>
+                    <Form.Item
+                      label="手机号"
+                      field="mobile"
+                      rules={[{ required: true, message: '请输入手机号' }, { validator: phoneValidator }]}
+                    >
                       <Input placeholder="输入手机号" maxLength={11} prefix={<IconMobile />} />
                     </Form.Item>
                     {item.value === ThirdLoginType.VERIFYCODE && (
                       <Form.Item>
-                       <VerifyInput userMobile={form.getFieldValue("mobile")} verifyType={"mobile"} sendVerifyCode={sendVerifyCodeApi} />
+                        <VerifyInput
+                          userMobile={form.getFieldValue('mobile')}
+                          verifyType={'mobile'}
+                          sendVerifyCode={sendVerifyCodeApi}
+                        />
                       </Form.Item>
                     )}
                     {item.value === ThirdLoginType.PASSWORD && (
@@ -351,7 +359,7 @@ const Right: React.FC = () => {
       {visibleRegister && (
         <RegisterForm
           appId={appId}
-          isRelatedApp = {isRelatedApp}
+          isRelatedApp={isRelatedApp}
           tenantId={tenantId}
           onGoBack={() => {
             setVisibleRegister(false);
