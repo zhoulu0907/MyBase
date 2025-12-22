@@ -107,6 +107,7 @@ export const DraftBox: React.FC<DraftBoxProps> = ({ showFromPageData, tableColum
       if (draftPageNo > maxPage && maxPage > 0) {
         setDraftPageNo(maxPage);
       } else if (updatedDrafts.length === 0) {
+        setShowDraftModal(false);
       }
     } catch (error) {
       console.error('删除草稿失败:', error);
