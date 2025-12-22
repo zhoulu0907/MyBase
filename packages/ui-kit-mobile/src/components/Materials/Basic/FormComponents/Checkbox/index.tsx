@@ -52,12 +52,9 @@ const XCheckbox = memo((props: XCheckboxConfig & { runtime?: boolean; detailMode
 
   const rules: ITypeRules<ValidatorType.Custom>[] = [
     {
+      required: verify?.required,
       type: ValidatorType.Custom,
-      validator: (value, callback) => {
-        if (!!value.length && verify?.required) {
-          callback(`${label.text}是必填项`);
-        }
-      }
+      message: `${label.text}是必填项`
     }
   ];
 

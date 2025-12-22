@@ -61,6 +61,7 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
         placeholder={placeholder}
         maxLength={verify?.max || 1000000000}
         suffix={showUnit ? unitValue : ''}
+        blockChangeWhenCompositing={true}
         inputStyle={{ textAlign: align }}
         style={{
           width: '100%',
@@ -72,12 +73,10 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
 
   const rules: ITypeRules<ValidatorType.Custom>[] = [
     {
+      required: verify?.required,
       type: ValidatorType.Custom,
+      message: `${label.text}是必填项`,
       validator: (value, callback) => {
-        if (!value && verify?.required) {
-          callback(`${label.text}是必填项`);
-        }
-
         if (value && verify?.numberLimit) {
           if (value < verify?.min!) {
             callback(`字数不能小于${verify?.min}`);
