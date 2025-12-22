@@ -932,7 +932,7 @@ public class SemanticDataCrudService {
             List<SemanticFieldSchemaDTO> attrs = c.getRelationAttributes();
             String childPk = getPrimaryKeyFieldName(attrs);
 
-            List<Row> existing = dynamicMetadataRepository.selectSubtableRonanwsByParent(table, parentId);
+            List<Row> existing = dynamicMetadataRepository.selectSubtableRowsByParent(table, parentId, entity.getFields());
             Map<String, Row> existingById = new HashMap<>();
             for (Row r : existing) {
                 Object rid = r.get(childPk);
