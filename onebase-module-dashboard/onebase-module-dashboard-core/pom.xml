@@ -40,6 +40,12 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-dashboard-api</artifactId>
+            <version>${revision}</version>
+        </dependency>
+
         <!-- Spring Boot Starter Web，默认会包含Jakarta EE依赖 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
