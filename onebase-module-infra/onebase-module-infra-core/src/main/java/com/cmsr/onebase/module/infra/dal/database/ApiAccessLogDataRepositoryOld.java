@@ -19,12 +19,12 @@ import java.time.LocalDateTime;
  * @date 2025-08-18
  */
 @Repository
-public class ApiAccessLogDataRepository extends DataRepository<ApiAccessLogDO> {
+public class ApiAccessLogDataRepositoryOld extends DataRepository<ApiAccessLogDO> {
 
     /**
      * 构造方法，指定默认实体类
      */
-    public ApiAccessLogDataRepository() {
+    public ApiAccessLogDataRepositoryOld() {
         super(ApiAccessLogDO.class);
     }
 

@@ -18,12 +18,12 @@ import java.util.List;
  * @date 2025-11-04
  */
 @Repository
-public class SecurityConfigTemplateDataRepository extends DataRepository<SecurityConfigTemplateDO> {
+public class SecurityConfigTemplateDataRepositoryOld extends DataRepository<SecurityConfigTemplateDO> {
 
     /**
      * 构造方法，指定默认实体类
      */
-    public SecurityConfigTemplateDataRepository() {
+    public SecurityConfigTemplateDataRepositoryOld() {
         super(SecurityConfigTemplateDO.class);
     }
 

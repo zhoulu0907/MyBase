@@ -6,7 +6,7 @@ import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.common.util.string.StrUtils;
 import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
-import com.cmsr.onebase.module.infra.dal.database.ApiAccessLogDataRepository;
+import com.cmsr.onebase.module.infra.dal.database.ApiAccessLogDataRepositoryOld;
 import com.cmsr.onebase.module.infra.dal.dataobject.logger.ApiAccessLogDO;
 import com.cmsr.onebase.module.infra.dal.vo.logger.apiaccesslog.ApiAccessLogPageReqVO;
 import jakarta.annotation.Resource;
@@ -29,7 +29,7 @@ import static com.cmsr.onebase.module.infra.dal.dataobject.logger.ApiAccessLogDO
 public class ApiAccessLogServiceImpl implements ApiAccessLogService {
 
     @Resource
-    private ApiAccessLogDataRepository apiAccessLogDataRepository;
+    private ApiAccessLogDataRepositoryOld apiAccessLogDataRepositoryOld;
 
     @Override
     public void createApiAccessLog(ApiAccessLogCreateReqDTO createDTO) {
@@ -43,23 +43,23 @@ public class ApiAccessLogServiceImpl implements ApiAccessLogService {
         }
         
         if (TenantContextHolder.getTenantId() != null) {
-            apiAccessLogDataRepository.insert(apiAccessLog);
+            apiAccessLogDataRepositoryOld.insert(apiAccessLog);
         } else {
             // 极端情况下，上下文中没有租户时，此时忽略租户上下文，避免插入失败！
-            TenantUtils.executeIgnore(() -> apiAccessLogDataRepository.insert(apiAccessLog));
+            TenantUtils.executeIgnore(() -> apiAccessLogDataRepositoryOld.insert(apiAccessLog));
         }
     }
 
     @Override
     public PageResult<ApiAccessLogDO> getApiAccessLogPage(ApiAccessLogPageReqVO pageReqVO) {
-        return apiAccessLogDataRepository.findPage(pageReqVO);
+        return apiAccessLogDataRepositoryOld.findPage(pageReqVO);
     }
 
     @Override
     @SuppressWarnings("DuplicatedCode")
     public Integer cleanAccessLog(Integer exceedDay, Integer deleteLimit) {
         LocalDateTime expireDate = LocalDateTime.now().minusDays(exceedDay);
-        return apiAccessLogDataRepository.cleanExpiredLogs(expireDate, deleteLimit);
+        return apiAccessLogDataRepositoryOld.cleanExpiredLogs(expireDate, deleteLimit);
     }
 
 }

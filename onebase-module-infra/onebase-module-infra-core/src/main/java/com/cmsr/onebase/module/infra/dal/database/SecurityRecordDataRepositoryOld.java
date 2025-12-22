@@ -15,12 +15,12 @@ import java.util.List;
  * @date 2025-11-12
  */
 @Repository
-public class SecurityRecordDataRepository extends DataRepository<SecurityRecordDO> {
+public class SecurityRecordDataRepositoryOld extends DataRepository<SecurityRecordDO> {
 
     /**
      * 构造方法，指定默认实体类
      */
-    public SecurityRecordDataRepository() {
+    public SecurityRecordDataRepositoryOld() {
         super(SecurityRecordDO.class);
     }
 

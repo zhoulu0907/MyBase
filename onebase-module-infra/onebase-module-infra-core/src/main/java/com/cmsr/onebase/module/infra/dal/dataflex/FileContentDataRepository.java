@@ -1,9 +1,10 @@
-package com.cmsr.onebase.module.infra.dal.database;
+package com.cmsr.onebase.module.infra.dal.dataflex;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
 import cn.hutool.core.collection.CollUtil;
-import com.cmsr.onebase.module.infra.dal.dataobject.file.FileContentDO;
-import org.anyline.data.param.init.DefaultConfigStore;
+import com.cmsr.onebase.module.infra.dal.dataflexdo.file.FileContentDO;
+import com.cmsr.onebase.module.infra.dal.mapper.file.FileContentMapper;
+import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.spring.service.impl.ServiceImpl;
 import org.springframework.stereotype.Repository;
 
 import java.util.Comparator;
@@ -12,20 +13,13 @@ import java.util.List;
 /**
  * 文件内容数据访问层
  *
- * 负责文件内容相关的数据操作，继承DataRepositoryNew，提供标准CRUD能力。
+ * 负责文件内容相关的数据操作，基于MyBatis-Flex实现
  *
  * @author matianyu
  * @date 2025-08-18
  */
 @Repository
-public class FileContentDataRepository extends DataRepository<FileContentDO> {
-
-    /**
-     * 构造方法，指定默认实体类
-     */
-    public FileContentDataRepository() {
-        super(FileContentDO.class);
-    }
+public class FileContentDataRepository extends ServiceImpl<FileContentMapper, FileContentDO> {
 
     /**
      * 根据配置ID和路径删除文件内容
@@ -34,9 +28,10 @@ public class FileContentDataRepository extends DataRepository<FileContentDO> {
      * @param path 文件路径
      */
     public void deleteByConfigIdAndPath(Long configId, String path) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.eq("configId", configId).eq("path", path);
-        deleteByConfig(configStore);
+        QueryWrapper queryWrapper = QueryWrapper.create();
+        queryWrapper.eq(FileContentDO.COLUMN_CONFIG_ID, configId)
+                .eq(FileContentDO.COLUMN_PATH, path);
+        this.remove(queryWrapper);
     }
 
     /**
@@ -47,10 +42,11 @@ public class FileContentDataRepository extends DataRepository<FileContentDO> {
      * @return 文件内容字节数组，如果不存在返回null
      */
     public byte[] getContentByConfigIdAndPath(Long configId, String path) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.eq(FileContentDO.COLUMN_CONFIG_ID, configId).eq(FileContentDO.COLUMN_PATH, path);
+        QueryWrapper queryWrapper = QueryWrapper.create();
+        queryWrapper.eq(FileContentDO.COLUMN_CONFIG_ID, configId)
+                .eq(FileContentDO.COLUMN_PATH, path);
 
-        List<FileContentDO> list = findAllByConfig(configStore);
+        List<FileContentDO> list = list(queryWrapper);
         if (CollUtil.isEmpty(list)) {
             return null;
         }
