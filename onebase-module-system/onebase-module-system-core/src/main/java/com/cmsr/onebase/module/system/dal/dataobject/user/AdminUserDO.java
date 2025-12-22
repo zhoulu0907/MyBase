@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.system.dal.dataobject.user;
 
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
-import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
+import com.cmsr.onebase.framework.orm.entity.BaseTenantEntity;
 import com.cmsr.onebase.module.system.enums.common.SexEnum;
 import jakarta.persistence.Column;
 import jakarta.persistence.Table;
@@ -22,7 +22,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "system_users")
-public class AdminUserDO extends TenantBaseDO {
+public class AdminUserDO extends BaseTenantEntity {
     public static final String USERNAME   = "username";
     // 新增各字段对应的常量
     public static final String PASSWORD   = "password";
