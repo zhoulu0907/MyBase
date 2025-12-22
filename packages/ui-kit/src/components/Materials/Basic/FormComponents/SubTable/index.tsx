@@ -301,6 +301,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
         ),
         dataIndex: fieldName,
         key: fieldName,
+        width: undefined as any,
         fixed: undefined as any,
         headerCellStyle: {
           minWidth: '200px'
@@ -345,6 +346,9 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
       tableColumns.forEach((ele, index) => {
         if (index < subTableConfig.columnFixed) {
           ele.fixed = 'left';
+          if (index !== 0 || ele.dataIndex !== 'index') {
+            ele.width = '200px';
+          }
         }
       });
     }

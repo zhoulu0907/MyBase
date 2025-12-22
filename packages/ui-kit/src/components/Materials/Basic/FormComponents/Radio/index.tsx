@@ -1,4 +1,4 @@
-import { Form, Radio } from '@arco-design/web-react';
+import { Form, Radio, Tag } from '@arco-design/web-react';
 import { nanoid } from 'nanoid';
 import { memo, useState, useEffect } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
@@ -72,17 +72,7 @@ const XRadio = memo((props: XInputRadioConfig & { runtime?: boolean; detailMode?
           >
             {options.map((ele, index: number) => (
               <Radio key={index} value={ele.id}>
-                {ele.colorType && <span
-                  style={{
-                    width: '8px',
-                    height: '8px',
-                    borderRadius: '50%',
-                    background: ele.colorType,
-                    display: 'inline-block',
-                    marginRight: '8px'
-                  }}
-                ></span>}
-                <span>{ele.label}</span>
+                {ele.colorType ? <Tag color={ele.colorType}>{ele.label}</Tag> : <span>{ele.label}</span>}
               </Radio>
             ))}
           </RadioGroup>
