@@ -1,36 +1,30 @@
 package com.cmsr.onebase.module.system.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.data.base.BaseDO;
-import com.cmsr.onebase.module.system.enums.tenant.SortEnum;
-import com.cmsr.onebase.module.system.vo.tenant.TenantPageReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
+import com.cmsr.onebase.module.system.dal.flex.base.BaseDataServiceImpl;
+import com.cmsr.onebase.module.system.dal.flex.mapper.SystemTenantMapper;
+import com.cmsr.onebase.module.system.enums.tenant.SortEnum;
 import com.cmsr.onebase.module.system.enums.tenant.TenantCodeEnum;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.Compare;
-import org.anyline.entity.Order;
+import com.cmsr.onebase.module.system.vo.tenant.TenantPageReqVO;
+import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryWrapper;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+import static com.cmsr.onebase.module.system.dal.flex.table.SystemTenantTableDef.SYSTEM_TENANT;
+
 /**
  * 租户数据访问层
  *
- * 负责租户相关的数据操作，继承DataRepositoryNew，提供标准CRUD能力。
- *
  * @author matianyu
- * @date 2025-08-18
+ * @date 2025-12-22
  */
 @Repository
-public class TenantDataRepository extends DataRepository<TenantDO> {
-
-    /**
-     * 构造方法，指定默认实体类
-     */
-    public TenantDataRepository() {
-        super(TenantDO.class);
-    }
+public class TenantDataRepository extends BaseDataServiceImpl<SystemTenantMapper, TenantDO> {
 
     /**
      * 根据租户名称查询租户
@@ -39,9 +33,10 @@ public class TenantDataRepository extends DataRepository<TenantDO> {
      * @return 租户对象
      */
     public TenantDO findByName(String name) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.eq(TenantDO.NAME, name);
-        return findOne(configStore);
+        if (StringUtils.isBlank(name)) {
+            return null;
+        }
+        return getOne(query().eq(TenantDO.NAME, name));
     }
 
     /**
@@ -51,9 +46,10 @@ public class TenantDataRepository extends DataRepository<TenantDO> {
      * @return 租户对象
      */
     public TenantDO findByWebsite(String website) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.eq(TenantDO.WEBSITE, website);
-        return findOne(configStore);
+        if (StringUtils.isBlank(website)) {
+            return null;
+        }
+        return getOne(query().eq(TenantDO.WEBSITE, website));
     }
 
     /**
@@ -63,9 +59,10 @@ public class TenantDataRepository extends DataRepository<TenantDO> {
      * @return 租户数量
      */
     public long countByPackageId(Long packageId) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.eq(TenantDO.PACKAGE_ID, packageId);
-        return countByConfig(configStore);
+        if (packageId == null) {
+            return 0L;
+        }
+        return count(query().eq(TenantDO.PACKAGE_ID, packageId));
     }
 
     /**
@@ -75,9 +72,10 @@ public class TenantDataRepository extends DataRepository<TenantDO> {
      * @return 租户数量
      */
     public long countByStatus(Integer status) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.eq(TenantDO.STATUS, status);
-        return countByConfig(configStore);
+        if (status == null) {
+            return 0L;
+        }
+        return count(query().eq(TenantDO.STATUS, status));
     }
 
     /**
@@ -87,9 +85,10 @@ public class TenantDataRepository extends DataRepository<TenantDO> {
      * @return 租户列表
      */
     public List<TenantDO> findAllByPackageId(Long packageId) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.eq(TenantDO.PACKAGE_ID, packageId);
-        return findAllByConfig(configStore);
+        if (packageId == null) {
+            return List.of();
+        }
+        return list(query().eq(TenantDO.PACKAGE_ID, packageId));
     }
 
     /**
@@ -99,10 +98,10 @@ public class TenantDataRepository extends DataRepository<TenantDO> {
      * @return 租户列表
      */
     public List<TenantDO> findAllByStatus(Integer status) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.eq(TenantDO.STATUS, status)
-                .order(TenantDO.CREATE_TIME, Order.TYPE.DESC);
-        return findAllByConfig(configStore);
+        if (status == null) {
+            return List.of();
+        }
+        return list(query().eq(TenantDO.STATUS, status).orderBy(TenantDO.CREATE_TIME, false));
     }
 
     /**
@@ -111,45 +110,47 @@ public class TenantDataRepository extends DataRepository<TenantDO> {
      * @return 租户列表
      */
     public List<TenantDO> findAll() {
-        return findAllByConfig(new DefaultConfigStore());
+        return list();
     }
 
     /**
-     * 根据状态和租户编码查询租户数量（排除平台租户）
+     * 根据状态统计租户数量（排除平台租户）
      *
      * @param status 状态
-     * @param excludeTenantId 排除的租户ID（可为null）
+     * @param excludeTenantId 排除的租户ID（可为 null）
      * @return 租户数量
      */
     public long countByStatusExcludePlatform(Integer status, Long excludeTenantId) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.eq(TenantDO.STATUS, status)
-                .and(Compare.NOT_EQUAL, TenantDO.TENANT_CODE, TenantCodeEnum.PLATFORM_TENANT.getCode());
-
-        if (excludeTenantId != null) {
-            configStore.and(Compare.NOT_EQUAL, TenantDO.ID, excludeTenantId);
+        if (status == null) {
+            return 0L;
         }
-
-        return countByConfig(configStore);
+        QueryWrapper queryWrapper = query()
+                .eq(TenantDO.STATUS, status)
+                .ne(TenantDO.TENANT_CODE, TenantCodeEnum.PLATFORM_TENANT.getCode());
+        if (excludeTenantId != null) {
+            queryWrapper.ne(TenantDO.ID, excludeTenantId);
+        }
+        return count(queryWrapper);
     }
 
     /**
      * 根据状态查询租户列表（排除平台租户）
      *
      * @param status 状态
-     * @param excludeTenantId 排除的租户ID（可为null）
+     * @param excludeTenantId 排除的租户ID（可为 null）
      * @return 租户列表
      */
     public List<TenantDO> findAllByStatusExcludePlatform(Integer status, Long excludeTenantId) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.eq(TenantDO.STATUS, status)
-                .and(Compare.NOT_EQUAL, TenantDO.TENANT_CODE, TenantCodeEnum.PLATFORM_TENANT.getCode());
-
-        if (excludeTenantId != null) {
-            configStore.and(Compare.NOT_EQUAL, TenantDO.ID, excludeTenantId);
+        if (status == null) {
+            return List.of();
         }
-
-        return findAllByConfig(configStore);
+        QueryWrapper queryWrapper = query()
+                .eq(TenantDO.STATUS, status)
+                .ne(TenantDO.TENANT_CODE, TenantCodeEnum.PLATFORM_TENANT.getCode());
+        if (excludeTenantId != null) {
+            queryWrapper.ne(TenantDO.ID, excludeTenantId);
+        }
+        return list(queryWrapper);
     }
 
     /**
@@ -158,30 +159,32 @@ public class TenantDataRepository extends DataRepository<TenantDO> {
      * @param pageReqVO 分页查询条件
      * @return 分页结果
      */
-
     public PageResult<TenantDO> findPage(TenantPageReqVO pageReqVO) {
-        Integer status = pageReqVO.getStatus();
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        // 按照关键词模糊查询
-        if (pageReqVO.getKeyword() != null && !pageReqVO.getKeyword().trim().isEmpty()) {
-            configStore.and(new DefaultConfigStore()
-                    .or(Compare.LIKE, TenantDO.NAME, pageReqVO.getKeyword())
-                    .or(Compare.LIKE, TenantDO.TENANT_CODE, pageReqVO.getKeyword()));
+        QueryWrapper queryWrapper = query();
+
+        // 根据关键词模糊查询
+        if (StringUtils.isNotBlank(pageReqVO.getKeyword())) {
+            queryWrapper.and(SYSTEM_TENANT.NAME.like(pageReqVO.getKeyword())
+                    .or(SYSTEM_TENANT.TENANT_CODE.like(pageReqVO.getKeyword()))
+            );
         }
 
-        // 按照状态查询
-        if (status != null) {
-            configStore.eq(TenantDO.STATUS, status);
+        // 按状态查询
+        if (pageReqVO.getStatus() != null) {
+            queryWrapper.eq(TenantDO.STATUS, pageReqVO.getStatus());
         }
 
         // 排除平台租户
-        configStore.and(Compare.NOT_EQUAL, TenantDO.TENANT_CODE, TenantCodeEnum.PLATFORM_TENANT.getCode());
+        queryWrapper.ne(TenantDO.TENANT_CODE, TenantCodeEnum.PLATFORM_TENANT.getCode());
 
-        if(pageReqVO.getSortType()!=null && pageReqVO.getSortType().equals(SortEnum.DESC.getValue())){
-            configStore.order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
-        }else{
-            configStore.order(BaseDO.CREATE_TIME, Order.TYPE.ASC);
+        // 排序
+        if (pageReqVO.getSortType() != null && pageReqVO.getSortType().equals(SortEnum.DESC.getValue())) {
+            queryWrapper.orderBy(BaseDO.CREATE_TIME, false);
+        } else {
+            queryWrapper.orderBy(BaseDO.CREATE_TIME, true);
         }
-        return findPageWithConditions(configStore, pageReqVO.getPageNo(), pageReqVO.getPageSize());
+
+        Page<TenantDO> page = page(Page.of(pageReqVO.getPageNo(), pageReqVO.getPageSize()), queryWrapper);
+        return new PageResult<>(page.getRecords(), page.getTotalRow());
     }
 }

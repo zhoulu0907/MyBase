@@ -4,6 +4,7 @@ import com.cmsr.onebase.framework.orm.entity.BaseEntity;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Table;
+import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -16,6 +17,7 @@ import java.time.LocalDateTime;
  */
 @Table(value = "system_sms_code")
 @Data
+@Builder
 @TenantIgnore
 public class SmsCodeDO extends BaseEntity {
 
