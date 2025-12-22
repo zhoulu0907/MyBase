@@ -412,6 +412,21 @@ export const DATE_DYNAMIC_TYPE = {
   CUSTOM: 'custom'
 } as const;
 
+// 自定义类型
+export const DATE_DYNAMIC_CUSTOM_TYPE = {
+  CURRENT: 'current',
+  PAST: 'past',
+  FUTURE: 'future',
+} as const;
+
+export const DATE_DYNAMIC_CUSTOM_VALUE_TYPE = {
+  DAY: 'day',
+  WEEK: 'week',
+  MONTH: 'month',
+  QUARTER: 'quarter',
+  YEAR: 'year'
+} as const;
+
 export const DATE_DYNAMIC_VALUE = {
   today: 0,
   yesterday: -1,
