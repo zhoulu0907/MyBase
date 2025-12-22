@@ -640,14 +640,14 @@ public class PermissionServiceImpl implements PermissionService {
         List<MenuDO> menuList = menuService.getAllActiveMenuList(menuIds);
 
         // 判断是否开启saas模式 ,第三方用户是否开启
-        SystemGeneralConfigDO configDO = systemConfigService.getTenantConfigByKey(SystemConfigKeyEnum.SaasModeConfig.getKey());
-        if (null == configDO ||  MenuConstants.DefaultSaasThirdUser.equals(configDO.getConfigValue())) {
+        SystemGeneralConfigDO saasConfigDO = systemConfigService.getTenantConfigByKey(SystemConfigKeyEnum.SaasModeConfig.getKey());
+        if (null == saasConfigDO ||  MenuConstants.DefaultSaasThirdUser.equals(saasConfigDO.getConfigValue())) {
             //   未开启 saas 模式  移除企业权限
             menuList.removeIf(menu -> menu.getPermission() != null && menu.getPermission()
                     .startsWith(MenuConstants.MENU_TENANT_CORP));
         }
 
-        SystemGeneralConfigDO thirdUserConfigDO = systemConfigService.getTenantConfigByKey(SystemConfigKeyEnum.SaasModeConfig.getKey());
+        SystemGeneralConfigDO thirdUserConfigDO = systemConfigService.getTenantConfigByKey(SystemConfigKeyEnum.ThirdUserConfig.getKey());
         if (null == thirdUserConfigDO ||  MenuConstants.DefaultSaasThirdUser.equals(thirdUserConfigDO.getConfigValue())) {
             //   未开启第三方用户模式  移除第三方用户权限
             menuList.removeIf(menu -> menu.getPermission() != null && menu.getPermission()
