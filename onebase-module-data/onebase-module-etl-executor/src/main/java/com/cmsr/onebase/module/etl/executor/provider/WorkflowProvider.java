@@ -7,7 +7,6 @@ import com.cmsr.onebase.module.etl.common.graph.NodeConfig;
 import com.cmsr.onebase.module.etl.common.graph.WorkflowGraph;
 import com.cmsr.onebase.module.etl.common.graph.conf.*;
 import com.cmsr.onebase.module.etl.executor.provider.dao.EtlDataSource;
-import com.cmsr.onebase.module.etl.executor.provider.dao.EtlFlinkMapping;
 import com.cmsr.onebase.module.etl.executor.provider.dao.EtlFlinkMappings;
 import com.cmsr.onebase.module.etl.executor.provider.dao.EtlTable;
 import com.cmsr.onebase.module.etl.executor.util.JacksonUtil;
@@ -72,10 +71,10 @@ public class WorkflowProvider {
         List<Field> fields = jdbcInputConfig.getFields();
 
         // 调用优化后的方法
-        complementFields(fields, etlColumns, flinkMappings);
+        complementFields(etlDataSource.getDatasourceType(), fields, etlColumns, flinkMappings);
     }
 
-    private void complementFields(List<Field> fields, List<ColumnData> etlColumns, EtlFlinkMappings flinkMappings) {
+    private void complementFields(String datasourceType, List<Field> fields, List<ColumnData> etlColumns, EtlFlinkMappings flinkMappings) {
         // 预构建查找表，提高查找效率
         Map<String, ColumnData> columnMap = etlColumns.stream()
                 .collect(Collectors.toMap(ColumnData::getName, column -> column));
@@ -88,12 +87,12 @@ public class WorkflowProvider {
             }
 
             String originType = etlColumn.getType();
-            EtlFlinkMapping etlFlinkMapping = flinkMappingMap.get(originType.toLowerCase());
-            if (etlFlinkMapping == null) {
+            String flinkType = flinkMappings.getFlinkType(datasourceType, originType.toLowerCase());
+            if (StringUtils.isBlank(flinkType)) {
                 throw new IllegalArgumentException(String.format("字段类型 %s 不存在映射", originType));
             }
 
-            field.setFieldType(etlFlinkMapping.getFlinkType());
+            field.setFieldType(flinkType);
             field.setLength(etlColumn.getLength());
             field.setPrecision(etlColumn.getPrecision());
             field.setScale(etlColumn.getScale());
@@ -117,18 +116,15 @@ public class WorkflowProvider {
         EtlFlinkMappings flinkMappings = queryProvider.findFlinkMapping();
         List<ColumnData> etlColumns = JacksonUtil.fromJson(etlTable.getMetaInfo(), TableData.class).getColumns();
         List<JdbcOutputMapper> jdbcOutputMappers = jdbcOutputConfig.getFields();
-        complementJdbcOutputMappers(jdbcOutputMappers, etlColumns, flinkMappings);
+        complementJdbcOutputMappers(etlDataSource.getDatasourceType(), jdbcOutputMappers, etlColumns, flinkMappings);
     }
 
-    private void complementJdbcOutputMappers(List<JdbcOutputMapper> jdbcOutputMappers, List<ColumnData> etlColumns, List<EtlFlinkMapping> flinkMappings) {
+    private void complementJdbcOutputMappers(String datasourceType, List<JdbcOutputMapper> jdbcOutputMappers, List<ColumnData> etlColumns, EtlFlinkMappings flinkMappings) {
         // 预构建查找表，提高查找效率
         Map<String, ColumnData> columnMap = etlColumns.stream()
                 .collect(Collectors.toMap(ColumnData::getName, column -> column));
 
         // 按类型名转小写构建映射，支持忽略大小写查找
-        Map<String, EtlFlinkMapping> flinkMappingMap = flinkMappings.stream()
-                .collect(Collectors.toMap(mapping -> mapping.getOriginType().toLowerCase(), mapping -> mapping));
-
         for (JdbcOutputMapper jdbcOutputMapper : jdbcOutputMappers) {
             String fieldName = StringUtils.substringAfterLast(jdbcOutputMapper.getTargetFieldName(), ".");
             ColumnData etlColumn = columnMap.get(fieldName);
@@ -136,12 +132,12 @@ public class WorkflowProvider {
                 throw new IllegalArgumentException(String.format("目标字段ID %s 不存在", jdbcOutputMapper));
             }
             String originType = etlColumn.getType();
-            EtlFlinkMapping etlFlinkMapping = flinkMappingMap.get(originType.toLowerCase());
-            if (etlFlinkMapping == null) {
+            String flinkType = flinkMappings.getFlinkType(datasourceType, originType.toLowerCase());
+            if (StringUtils.isBlank(flinkType)) {
                 throw new IllegalArgumentException(String.format("字段类型 %s 不存在映射", originType));
             }
             jdbcOutputMapper.setTargetFieldName(etlColumn.getName());
-            jdbcOutputMapper.setTargetFieldType(etlFlinkMapping.getFlinkType());
+            jdbcOutputMapper.setTargetFieldType(flinkType);
             jdbcOutputMapper.setTargetFieldLength(etlColumn.getLength());
             jdbcOutputMapper.setTargetFieldPrecision(etlColumn.getPrecision());
             jdbcOutputMapper.setTargetFieldScale(etlColumn.getScale());
