@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.infra.dal.dataflexdo.file;
 import com.cmsr.onebase.framework.orm.entity.BaseEntity;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.infra.framework.file.core.enums.FileStorageEnum;
+import com.cmsr.onebase.module.infra.dal.flex.typehandler.MapJsonTypeHandler;
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Table;
 import lombok.AllArgsConstructor;
@@ -57,7 +58,7 @@ public class FileConfigDO extends BaseEntity {
     /**
      * 支付渠道配置
      */
-    @Column(value = COLUMN_CONFIG)
+    @Column(value = COLUMN_CONFIG, typeHandler = MapJsonTypeHandler.class)
     private Map<String, Object> config;
 
 
