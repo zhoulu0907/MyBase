@@ -390,7 +390,7 @@ public class DeptServiceImpl implements DeptService {
             if(null == userType){
                 matchedDepts = deptDataRepository.findAllByNameAndStatus(reqVO.getKeywords(), null);
             } else if(UserTypeEnum.THIRD.getValue().equals(userType) ) {
-                matchedDepts = deptDataRepository.findAllByNameAndDeptType(reqVO.getKeywords(), DeptTypeEnum.THIRD.getCode());
+                matchedDepts = deptDataRepository.findDeptListByNameAndDeptType(reqVO.getKeywords(), DeptTypeEnum.THIRD.getCode());
             }
 
             respVO.setDeptList(BeanUtils.toBean(matchedDepts, DeptRespVO.class));
@@ -422,7 +422,7 @@ public class DeptServiceImpl implements DeptService {
             if (null == userType) {
                 rootDepts = deptDataRepository.findAllByParentId(DeptDO.PARENT_ID_ROOT);
             } else if(UserTypeEnum.THIRD.getValue().equals(userType) ) {
-                rootDepts = deptDataRepository.findAllDeptType(DeptTypeEnum.THIRD.getCode());
+                rootDepts = deptDataRepository.findDeptListByDeptType(DeptTypeEnum.THIRD.getCode());
             }
 
             respVO.setDeptList(BeanUtils.toBean(rootDepts, DeptRespVO.class));

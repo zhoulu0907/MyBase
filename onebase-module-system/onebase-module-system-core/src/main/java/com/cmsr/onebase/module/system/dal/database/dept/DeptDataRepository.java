@@ -183,7 +183,7 @@ public class DeptDataRepository extends DataRepository<DeptDO> {
         return findAllByConfig(configs);
     }
 
-    public List<DeptDO> findAllDeptType(String deptType) {
+    public List<DeptDO> findDeptListByDeptType(String deptType) {
         DefaultConfigStore configs = new DefaultConfigStore();
         configs.and(Compare.EQUAL, DeptDO.STATUS, CommonStatusEnum.ENABLE.getStatus());
         configs.and(Compare.EQUAL, DeptDO.DEPT_TYPE, deptType);
@@ -191,7 +191,7 @@ public class DeptDataRepository extends DataRepository<DeptDO> {
     }
 
 
-    public List<DeptDO> findAllByNameAndDeptType(String keywords, String deptType) {
+    public List<DeptDO> findDeptListByNameAndDeptType(String keywords, String deptType) {
         DefaultConfigStore configs = new DefaultConfigStore();
         if ( null  !=  keywords) {
             configs.and(Compare.LIKE, DeptDO.NAME, keywords);
