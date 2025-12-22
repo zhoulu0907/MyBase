@@ -43,6 +43,8 @@ import com.cmsr.onebase.module.system.service.user.UserService;
 import com.cmsr.onebase.module.system.vo.CaptchaVerificationReqVO;
 import com.cmsr.onebase.module.system.vo.auth.*;
 import com.cmsr.onebase.module.system.vo.corp.CorpRespVO;
+import com.cmsr.onebase.module.system.vo.user.ThirdSupplementUserReqVO;
+import com.cmsr.onebase.module.system.vo.user.ThirdUserRegisterReqVO;
 import com.cmsr.onebase.module.system.vo.user.UserAppVO;
 import com.cmsr.onebase.module.system.vo.user.UserForgetPasswordReqVO;
 import com.google.common.annotations.VisibleForTesting;
@@ -81,35 +83,38 @@ import static com.cmsr.onebase.module.system.enums.LogRecordConstants.*;
 @Slf4j
 public class RuntimeAuthServiceImpl implements RuntimeAuthService {
 
+    @Value("${debug:false}")
+    private Boolean debug;
+
     @Resource
-    private UserService        userService;
+    private UserService userService;
     @Resource
-    private LoginLogService    loginLogService;
+    private LoginLogService loginLogService;
     @Resource
     private OAuth2TokenService oauth2TokenService;
     @Resource
-    private MemberService      memberService;
+    private MemberService memberService;
     @Resource
-    private Validator          validator;
+    private Validator validator;
     @Resource
-    private CaptchaService     captchaService;
+    private CaptchaService captchaService;
     @Resource
-    private SmsCodeApi         smsCodeApi;
+    private SmsCodeApi smsCodeApi;
     /**
      * 验证码的开关，默认为 true
      */
     @Value("${onebase.captcha.enable:true}")
     @Setter // 为了单测：开启或者关闭验证码
-    private Boolean            captchaEnable;
+    private Boolean captchaEnable;
     /**
      * 平台租户验证开关，默认为 false
      */
     @Value("${onebase.platform-tenant.enable-create-app:false}")
     @Setter // 为了单测：开启或者关闭验证码
-    private Boolean            platformTenantEnableCreateApp;
+    private Boolean platformTenantEnableCreateApp;
 
     @Resource
-    private TenantService     tenantService;
+    private TenantService tenantService;
     @Resource
     private SecurityConfigApi securityConfigApi;
 
@@ -337,6 +342,8 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
                 // 判断用户是否关联应用
                 thirdAuthLoginRespVO.setUserAppRelationFlag(findUserAppRelationFlag(appId, user.getId()));
                 thirdAuthLoginRespVO.setUserUnRegistFlag(false);
+                thirdAuthLoginRespVO.setEmail(user.getEmail());
+                thirdAuthLoginRespVO.setNickName(user.getNickname());
                 authLoginRespVO.set(thirdAuthLoginRespVO);
                 LogRecordContext.putVariable("user", user);
             }
@@ -358,7 +365,7 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
     public void thirdUserForgetPassword(UserForgetPasswordReqVO reqVO) {
 
         // 1.校验验证码
-        ThirdAuthLoginReqVO thirdAuthLoginReqVO=new ThirdAuthLoginReqVO();
+        ThirdAuthLoginReqVO thirdAuthLoginReqVO = new ThirdAuthLoginReqVO();
         thirdAuthLoginReqVO.setMobile(reqVO.getMobile());
         thirdAuthLoginReqVO.setVerifyCode(reqVO.getVerifyCode());
         thirdAuthLoginReqVO.setPassword(reqVO.getPassword());
@@ -593,5 +600,18 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         reqVO.setPassword(pwdEnHelper.decryptHexStr(reqVO.getPassword()));
         userService.updateUserPassword(user.getId(), reqVO.getPassword());
     }
+
+
+
+
+    @Override
+    public AuthLoginRespVO thirdUserRegister(ThirdSupplementUserReqVO reqVO){
+        AdminUserDO user =userService.thirdUserRegister(reqVO);
+        return createAfterLoginSuccess(user.getUserType(), user.getCorpId(),
+                reqVO.getAppId(), user.getId(), reqVO.getMobile(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_MOBILE);
+
+    }
+
+
 
 }

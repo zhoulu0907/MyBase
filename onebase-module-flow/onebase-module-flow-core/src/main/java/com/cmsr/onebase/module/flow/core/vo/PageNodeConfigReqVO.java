@@ -10,7 +10,7 @@ import lombok.Data;
  */
 @Schema(description = "节点分类 - 分页查询节点分类请求参数")
 @Data
-public class PageNodeTypeReqVO extends PageParam {
+public class PageNodeConfigReqVO extends PageParam {
 
     @Schema(description = "level1_code")
     private String level1Code;
@@ -21,7 +21,7 @@ public class PageNodeTypeReqVO extends PageParam {
     @Schema(description = "level3_code")
     private String level3Code;
 
-    @Schema(description = "类别名称")
-    private String typeName;
+    @Schema(description = "节点名称")
+    private String nodeName;
 
 }

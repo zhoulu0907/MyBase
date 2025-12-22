@@ -27,7 +27,7 @@ public class SystemGeneralConfigDataRepository  extends DataRepository<SystemGen
 
     public List<SystemGeneralConfigDO> findTenantConfigList(String name,Integer status,String configType) {
         DefaultConfigStore configs = new DefaultConfigStore();
-
+        configs.and(Compare.EQUAL, SystemGeneralConfigDO.CONFIG_TYPE, ConfigTypeEnum.TENANT.getCode());
         if (StringUtils.isNotBlank(name)) {
             configs.and(Compare.LIKE, SystemGeneralConfigDO.NAME, name);
         }
@@ -91,5 +91,12 @@ public class SystemGeneralConfigDataRepository  extends DataRepository<SystemGen
         // 添加排序条件，按ID降序排列
         configs.order(SystemGeneralConfigDO.ID, org.anyline.entity.Order.TYPE.DESC);
         return findAllByConfig(configs);
+    }
+
+    public SystemGeneralConfigDO getTenantConfigByKey(String key) {
+        DefaultConfigStore configs = new DefaultConfigStore();
+        configs.and(Compare.EQUAL, SystemGeneralConfigDO.CONFIG_KEY, key);
+        configs.and(Compare.EQUAL, SystemGeneralConfigDO.CONFIG_TYPE, ConfigTypeEnum.TENANT.getCode());
+        return findOne(configs);
     }
 }
