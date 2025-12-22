@@ -133,24 +133,6 @@ public class OneBasePluginManager {
     }
 
     /**
-     * 启动所有插件
-     */
-    public void startAllPlugins() {
-        log.info("启动所有插件");
-        pluginManager.startPlugins();
-    }
-
-    /**
-     * 停止所有插件
-     */
-    public void stopAllPlugins() {
-        log.info("停止所有插件");
-        pluginManager.stopPlugins();
-    }
-
-    // ==================== 插件查询 ====================
-
-    /**
      * 获取所有插件
      *
      * @return 插件列表
@@ -343,12 +325,6 @@ public class OneBasePluginManager {
         // 重新加载并启动
         String newId = pluginManager.loadPlugin(pluginPath);
         PluginState state = pluginManager.startPlugin(newId);
-        if (state == PluginState.STARTED) {
-            try {
-                eventPublisher.publishEvent(new com.cmsr.onebase.plugin.runtime.event.PluginReloadedEvent(newId));
-            } catch (Exception ignore) {
-            }
-        }
         return state;
     }
 
