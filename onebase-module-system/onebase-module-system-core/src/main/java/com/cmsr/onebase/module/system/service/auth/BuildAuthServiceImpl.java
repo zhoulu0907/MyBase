@@ -68,34 +68,34 @@ import static com.cmsr.onebase.module.system.enums.LogRecordConstants.*;
 public class BuildAuthServiceImpl implements BuildAuthService {
 
     @Resource
-    private UserService        userService;
+    private UserService userService;
     @Resource
-    private LoginLogService    loginLogService;
+    private LoginLogService loginLogService;
     @Resource
     private OAuth2TokenService oauth2TokenService;
     @Resource
-    private MemberService      memberService;
+    private MemberService memberService;
     @Resource
-    private Validator          validator;
+    private Validator validator;
     @Resource
-    private CaptchaService     captchaService;
+    private CaptchaService captchaService;
     @Resource
-    private SmsCodeApi         smsCodeApi;
+    private SmsCodeApi smsCodeApi;
     /**
      * 验证码的开关，默认为 true
      */
     @Value("${onebase.captcha.enable:true}")
     @Setter // 为了单测：开启或者关闭验证码
-    private Boolean            captchaEnable;
+    private Boolean captchaEnable;
     /**
      * 平台租户验证开关，默认为 false
      */
     @Value("${onebase.platform-tenant.enable-create-app:false}")
     @Setter // 为了单测：开启或者关闭验证码
-    private Boolean            platformTenantEnableCreateApp;
+    private Boolean platformTenantEnableCreateApp;
 
     @Resource
-    private TenantService     tenantService;
+    private TenantService tenantService;
     @Resource
     private PermissionService permissionService;
     @Resource
@@ -254,7 +254,7 @@ public class BuildAuthServiceImpl implements BuildAuthService {
 
         // 2. 如果配置了验证码
         if (StringUtils.isBlank(reqVO.getVerifyCode())) {
-            return ;
+            return;
             // throw exception(AUTH_VERIFY_CODE_NULL);
         }
 
@@ -308,8 +308,18 @@ public class BuildAuthServiceImpl implements BuildAuthService {
         }
 
         // 登录场景，验证是否存在
-        if (userService.getUserByMobile(reqVO.getMobile()) == null) {
-            throw exception(AUTH_MOBILE_NOT_EXISTS);
+        if (
+                Objects.equals(SmsSceneEnum.MEMBER_LOGIN.getScene(), reqVO.getScene()) ||
+                        Objects.equals(SmsSceneEnum.ADMIN_MEMBER_LOGIN.getScene(), reqVO.getScene())) {
+            ResponseModel response = doValidateCaptcha(reqVO);
+            if (!response.isSuccess()) {
+                throw exception(AUTH_REGISTER_CAPTCHA_CODE_ERROR, response.getRepMsg());
+            }
+            // 校验手机号是否存在
+            if (userService.getUserByMobile(reqVO.getMobile()) == null) {
+                throw exception(AUTH_MOBILE_NOT_EXISTS);
+            }
+
         }
         // 发送验证码
         smsCodeApi.sendSmsCode(AuthConvert.INSTANCE.convert(reqVO).setCreateIp(getClientIP()));

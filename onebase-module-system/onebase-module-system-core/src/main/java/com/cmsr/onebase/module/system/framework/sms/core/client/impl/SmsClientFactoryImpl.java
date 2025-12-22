@@ -78,6 +78,8 @@ public class SmsClientFactoryImpl implements SmsClientFactory {
         switch (channelEnum) {
             case CMCC:
                 return new CMCCSmsClient(properties);
+            case INFOCLOUD_OPASS:
+                return new InfoCloudOpassClient(properties);
         }
         // 创建失败，错误日志 + 抛出异常
         log.error("[createSmsClient][配置({}) 找不到合适的客户端实现]", properties);
