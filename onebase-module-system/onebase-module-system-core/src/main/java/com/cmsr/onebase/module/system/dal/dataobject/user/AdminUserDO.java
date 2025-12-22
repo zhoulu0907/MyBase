@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.system.dal.dataobject.user;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.data.base.BaseDOInterface;
 import com.cmsr.onebase.framework.orm.entity.BaseTenantEntity;
+import com.cmsr.onebase.module.system.dal.flex.typehandler.SetLongJsonTypeHandler;
 import com.cmsr.onebase.module.system.enums.common.SexEnum;
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Table;
@@ -14,6 +15,9 @@ import java.util.Set;
 
 /**
  * 管理后台的用户 DO
+ *
+ * @author matianyu
+ * @date 2025-12-22
  */
 @Data
 @Table("system_users")
@@ -80,7 +84,7 @@ public class AdminUserDO extends BaseTenantEntity implements BaseDOInterface {
      * 岗位编号数组
      */
     // @Transient //fixed NullP问题: 2025/7/20 需要以数组方式插入库里，anyline可能有bug导致null pointer，暂时Transient屏蔽
-    @Column(POST_IDS)
+    @Column(value = POST_IDS, typeHandler = SetLongJsonTypeHandler.class)
     private Set<Long> postIds;
 
     /**
