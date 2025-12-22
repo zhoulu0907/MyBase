@@ -95,7 +95,7 @@ public class MenuDataRepository extends BaseDataServiceImpl<SystemMenuMapper, Me
         }
         return list(query()
                 .like(NAME, reqVO.getName(), StringUtils.isNotBlank(reqVO.getName()))
-                .likeRight(PERMISSION, reqVO.getCode(), StringUtils.isNotBlank(reqVO.getCode()))
+                .likeLeft(PERMISSION, reqVO.getCode(), StringUtils.isNotBlank(reqVO.getCode()))
                 .eq(STATUS, reqVO.getStatus(), reqVO.getStatus() != null));
     }
 
