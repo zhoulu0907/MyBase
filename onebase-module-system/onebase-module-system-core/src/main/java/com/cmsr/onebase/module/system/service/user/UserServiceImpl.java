@@ -190,7 +190,7 @@ public class UserServiceImpl implements UserService {
 
         // 2.2 插入关联岗位
         if (CollUtil.isNotEmpty(user.getPostIds())) {
-            userPostDataRepository.insertBatch(convertList(user.getPostIds(),
+            userPostDataRepository.saveBatch(convertList(user.getPostIds(),
                     postId -> new UserPostDO().setUserId(user.getId()).setPostId(postId)));
         }
 
@@ -378,7 +378,7 @@ public class UserServiceImpl implements UserService {
         Collection<Long> deletePostIds = CollUtil.subtract(dbPostIds, postIds);
         // 执行新增和删除。对于已经授权的岗位，不用做任何处理
         if (!CollUtil.isEmpty(createPostIds)) {
-            userPostDataRepository.insertBatch(convertList(createPostIds,
+            userPostDataRepository.saveBatch(convertList(createPostIds,
                     postId -> new UserPostDO().setUserId(userId).setPostId(postId)));
         }
         if (!CollUtil.isEmpty(deletePostIds)) {

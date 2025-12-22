@@ -5,11 +5,7 @@ import com.cmsr.onebase.framework.orm.entity.BaseEntity;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Table;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
-import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
 
@@ -19,10 +15,6 @@ import java.time.LocalDateTime;
  * @author ma
  */
 @Data
-@ToString(callSuper = true)
-@SuperBuilder
-@NoArgsConstructor
-@AllArgsConstructor
 @TenantIgnore
 @Table(value = "system_dict_type")
 public class DictTypeDO extends BaseEntity {

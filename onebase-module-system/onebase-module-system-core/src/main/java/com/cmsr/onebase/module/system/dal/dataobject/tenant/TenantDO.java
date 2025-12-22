@@ -3,10 +3,9 @@ package com.cmsr.onebase.module.system.dal.dataobject.tenant;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.orm.entity.BaseEntity;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
-import com.mybatisflex.annotation.Table;
 import com.mybatisflex.annotation.Column;
-import lombok.*;
-import lombok.experimental.SuperBuilder;
+import com.mybatisflex.annotation.Table;
+import lombok.Data;
 
 import java.time.LocalDateTime;
 
@@ -15,11 +14,6 @@ import java.time.LocalDateTime;
  *
  */
 @Data
-@EqualsAndHashCode(callSuper = true)
-@ToString(callSuper = true)
-@SuperBuilder
-@AllArgsConstructor
-@NoArgsConstructor
 @TenantIgnore
 @Table(value = "system_tenant")
 public class TenantDO extends BaseEntity {

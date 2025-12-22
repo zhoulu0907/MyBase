@@ -21,11 +21,6 @@ import lombok.ToString;
  */
 @Table(value = "system_tenant_package")
 @Data
-@EqualsAndHashCode(callSuper = true)
-@ToString(callSuper = true)
-@SuperBuilder
-@AllArgsConstructor
-@NoArgsConstructor
 @TenantIgnore
 public class TenantPackageDO extends BaseEntity {
 

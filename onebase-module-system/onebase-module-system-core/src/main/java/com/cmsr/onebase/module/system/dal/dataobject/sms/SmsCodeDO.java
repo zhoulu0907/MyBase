@@ -2,10 +2,10 @@ package com.cmsr.onebase.module.system.dal.dataobject.sms;
 
 import com.cmsr.onebase.framework.orm.entity.BaseEntity;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
-import com.mybatisflex.annotation.Table;
 import com.mybatisflex.annotation.Column;
-import lombok.*;
-import lombok.experimental.SuperBuilder;
+import com.mybatisflex.annotation.Table;
+import lombok.Data;
+
 import java.time.LocalDateTime;
 
 /**
@@ -16,9 +16,6 @@ import java.time.LocalDateTime;
  */
 @Table(value = "system_sms_code")
 @Data
-@SuperBuilder
-@NoArgsConstructor
-@AllArgsConstructor
 @TenantIgnore
 public class SmsCodeDO extends BaseEntity {
 

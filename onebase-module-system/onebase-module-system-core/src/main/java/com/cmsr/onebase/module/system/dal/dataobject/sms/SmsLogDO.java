@@ -1,18 +1,13 @@
 package com.cmsr.onebase.module.system.dal.dataobject.sms;
 
-import java.time.LocalDateTime;
-import java.util.Map;
-
 import com.cmsr.onebase.framework.orm.entity.BaseEntity;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
-
-import com.mybatisflex.annotation.Table;
 import com.mybatisflex.annotation.Column;
-import lombok.AllArgsConstructor;
-import lombok.experimental.SuperBuilder;
+import com.mybatisflex.annotation.Table;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+
+import java.time.LocalDateTime;
+import java.util.Map;
 
 /**
  * 短信日志 DO
@@ -22,10 +17,6 @@ import lombok.ToString;
  */
 @Table(value = "system_sms_log")
 @Data
-@ToString(callSuper = true)
-@SuperBuilder
-@AllArgsConstructor
-@NoArgsConstructor
 @TenantIgnore
 public class SmsLogDO extends BaseEntity {
 

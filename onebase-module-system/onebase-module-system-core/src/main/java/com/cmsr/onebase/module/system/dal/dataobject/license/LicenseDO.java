@@ -1,19 +1,17 @@
 package com.cmsr.onebase.module.system.dal.dataobject.license;
 
 import com.cmsr.onebase.framework.orm.entity.BaseEntity;
-import com.mybatisflex.annotation.Table;
 import com.mybatisflex.annotation.Column;
-import lombok.*;
-import lombok.experimental.SuperBuilder;import java.time.LocalDateTime;
+import com.mybatisflex.annotation.Table;
+import lombok.Data;
+
+import java.time.LocalDateTime;
 
 /**
  * 平台License信息
  */
 @Table(value = "system_license")
 @Data
-@SuperBuilder
-@NoArgsConstructor
-@AllArgsConstructor
 public class LicenseDO extends BaseEntity {
 
     public static final String ENTERPRISE_NAME    = "enterprise_name";

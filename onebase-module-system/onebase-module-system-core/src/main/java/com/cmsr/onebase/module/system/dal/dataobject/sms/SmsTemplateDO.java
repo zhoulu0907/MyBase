@@ -1,19 +1,14 @@
 package com.cmsr.onebase.module.system.dal.dataobject.sms;
 
-import java.util.List;
-
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.orm.entity.BaseEntity;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.system.enums.sms.SmsTemplateTypeEnum;
-
-import com.mybatisflex.annotation.Table;
 import com.mybatisflex.annotation.Column;
-import lombok.AllArgsConstructor;
-import lombok.experimental.SuperBuilder;
+import com.mybatisflex.annotation.Table;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+
+import java.util.List;
 
 /**
  * 短信模板 DO
@@ -23,10 +18,6 @@ import lombok.ToString;
  */
 @Table(value = "system_sms_template")
 @Data
-@ToString(callSuper = true)
-@SuperBuilder
-@NoArgsConstructor
-@AllArgsConstructor
 @TenantIgnore
 public class SmsTemplateDO extends BaseEntity {
 
