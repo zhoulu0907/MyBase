@@ -25,15 +25,6 @@ public class AppApplicationDO extends BaseTenantEntity {
     @Column(value = "app_mode", comment = "应用模式")
     private String appMode;
 
-    @Column(value = "theme_color", comment = "主题色")
-    private String themeColor;
-
-    @Column(value = "icon_name", comment = "图标名称")
-    private String iconName;
-
-    @Column(value = "icon_color", comment = "图标颜色")
-    private String iconColor;
-
     @Column(value = "version_url", comment = "版本URL")
     private String versionUrl;
 
@@ -51,28 +42,5 @@ public class AppApplicationDO extends BaseTenantEntity {
      */
     @Column(value = "publish_status", comment = "发布状态")
     private Integer publishStatus;
-    /**
-     * web端默认首页菜单
-     */
-    @Column(value = "web_default_menu", comment = "web端默认首页菜单")
-    private String webDefaultMenu;
-
-    /**
-     * web段导航布局
-     */
-    @Column(value = "web_nav_layout", comment = "web段导航布局")
-    private String webNavLayout;
-
-    /**
-     * 移动段首页菜单
-     */
-    @Column(value = "mobile_default_menu", comment = "移动段首页菜单")
-    private String mobileDefaultMenu;
-
-    /**
-     * 移动段当行布局
-     */
-    @Column(value = "mobile_nav_layout", comment = "移动段当行布局")
-    private String mobileNavLayout;
 
 }

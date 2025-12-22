@@ -545,13 +545,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<AdminUserDO> getUserListByDeptIds(Collection<Long> deptIds) {
-        return userDataRepository.findAllByDeptIds(deptIds);
+    public List<AdminUserDO> getUserListByDeptIds(Collection<Long> deptIds, Integer userType) {
+        return userDataRepository.findAllByDeptIds(deptIds, userType);
     }
 
     @Override
-    public List<AdminUserDO> getUserListNoDept() {
-        return userDataRepository.findAllNoDept();
+    public List<AdminUserDO> getUserListNoDept(Integer userType) {
+        if (null == userType) {
+            return userDataRepository.findNullDeptUser();
+        } else {
+            return userDataRepository.findUserByUserType(userType);
+        }
     }
 
     @Override
@@ -606,8 +610,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<AdminUserDO> getUserListByNickname(String nickname) {
-        return userDataRepository.findAllByNicknameLike(nickname);
+    public List<AdminUserDO> getUserListByNickname(String nickname, Integer userType) {
+        return userDataRepository.findAllByNicknameLike(nickname,userType);
     }
 
     /**
@@ -908,7 +912,7 @@ public class UserServiceImpl implements UserService {
         }
 
         // 批量查询指定部门的所有用户（不过滤状态）
-        List<AdminUserDO> users = userDataRepository.findAllByDeptIds(deptIds);
+        List<AdminUserDO> users = userDataRepository.findAllByDeptIds(deptIds,null);
 
         // 按部门ID分组统计人数
         return users.stream()
@@ -936,7 +940,7 @@ public class UserServiceImpl implements UserService {
         }
 
         // 2. 批量查询所有相关部门的用户
-        List<AdminUserDO> allUsers = userDataRepository.findAllByDeptIds(allDeptIds);
+        List<AdminUserDO> allUsers = userDataRepository.findAllByDeptIds(allDeptIds,null);
 
         // 3. 按部门ID分组统计直属人数
         Map<Long, Integer> directUserCountMap = allUsers.stream()
@@ -1372,10 +1376,19 @@ public class UserServiceImpl implements UserService {
         user.setMobile(reqVO.getMobile());
         user.setUserType(UserTypeEnum.THIRD.getValue());
         user.setStatus(UserStatusEnum.NORMAL.getStatus());
-        user.setUsername(reqVO.getNickName());
+        user.setUsername(reqVO.getMobile());// 用户名取手机号
+        user.setNickname(reqVO.getNickName());
+        user.setEmail(reqVO.getEmail());
         user.setPassword(encodePassword(reqVO.getPassword()));
         user.setCreateSource(CreateSourceEnum.SELF.getCode());
         userDataRepository.insert(user);
+
+
+        // 创建用户关联应用
+        UserAppRelationInertReqVO userAppRelationInertReqVO = new UserAppRelationInertReqVO();
+        userAppRelationInertReqVO.setUserId(user.getId());
+        userAppRelationInertReqVO.setApplicationIdList(Arrays.asList(reqVO.getAppId()));
+        userAppRelationService.createUserAppRelation(userAppRelationInertReqVO);
 
         // 5. 转换成返回结果
         ThirdSupplementUserResVO resVO = new ThirdSupplementUserResVO();

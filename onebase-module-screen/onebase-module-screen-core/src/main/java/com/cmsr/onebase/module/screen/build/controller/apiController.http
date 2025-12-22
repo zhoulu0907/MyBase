@@ -1,0 +1,18 @@
+## 环境配置说明
+# 使用全局环境配置文件 http-client.env.json
+# 请在IntelliJ IDEA中选择对应环境: local/dev/test/gateway
+# 确保先在AuthController.http中登录获取token
+
+### 登录接口
+POST {{baseUrl}}/dashboard/sys/login
+Authorization: Bearer {{token}}
+Content-Type: application/json
+tenant-id: {{adminTenantId}}
+
+{"username":"admin","password":"admin"}
+
+### 登出接口
+GET {{baseUrl}}/dashboard/sys/logout
+
+### 获取OSS信息接口
+GET {{baseUrl}}/dashboard/sys/getOssInfo

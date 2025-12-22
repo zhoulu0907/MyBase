@@ -43,7 +43,7 @@ onebase:
   platform-tenant:
     enable-create-app: true # 测试环境，暂时允许平台租户创建应用，方便登录接口测试；
   security:
-    mock-enable: false
+    mock-enable: true
   access-log: # 访问日志的配置项
     enable: false
   web:
@@ -70,3 +70,11 @@ liteflow:
   enable: false
   version-tag: 0
   js-server-address: http://10.0.104.41:28392
+
+# Goview配置
+# 开发环境特定的文件存储配置
+v2:
+  xnljmap:
+    oss: file:/Users/Documents/ob3.0/go-view-serve/fileserver/
+  fileurl: /Users/Documents/ob3.0/go-view-serve/fileserver
+  httpurl: http://127.0.0.1:8083/

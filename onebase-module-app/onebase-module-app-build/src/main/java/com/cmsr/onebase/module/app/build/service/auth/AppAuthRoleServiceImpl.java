@@ -127,6 +127,9 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
             vo.setId(v.getId());
             vo.setMemberId(v.getMemberId());
             vo.setName(v.getMemberName());
+            vo.setAvatar(v.getAvatar());
+            vo.setAccount(v.getAccount());
+            vo.setCreateSourceText(toCreateSourceText(v.getCreateSource()));
             vo.setType(v.getMemberType());
             vo.setDeptName(v.getDeptName());
             if (RoleMemberDTO.MEMBER_TYPE_USER.equals(v.getMemberType())) {
@@ -139,6 +142,19 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
             return vo;
         }).toList();
         return new PageResult(voResult, result.getTotal());
+    }
+
+    private String toCreateSourceText(String createSource) {
+        if (createSource == null || createSource.isEmpty()) {
+            return "";
+        }
+        if ("back".equals(createSource)) {
+            return "后台注册";
+        }
+        if ("self".equals(createSource)) {
+            return "自主注册";
+        }
+        return "";
     }
 
     @Override
@@ -218,6 +234,7 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
         deptAndUsersReqDTO.setDeptId(reqVO.getDeptId());
         deptAndUsersReqDTO.setKeywords(reqVO.getKeywords());
         deptAndUsersReqDTO.setExcludeUserIds(userIds);
+        deptAndUsersReqDTO.setUserType(reqVO.getUserType());
         return deptApi.getDeptAndUsers(deptAndUsersReqDTO).getData();
     }
 
