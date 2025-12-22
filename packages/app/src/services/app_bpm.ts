@@ -57,6 +57,10 @@ export const agentRevoke = (params: {id:string}) => {
 export const getFormDataPage = (params: any) => {
   return runtimeBpmService.post('/instance/form-data-page', params);
 };
+export const deleteFormDataPage = (params: any) => {
+  return runtimeBpmService.post('/instance/delete-form-data', params);
+};
+
 
 
 
