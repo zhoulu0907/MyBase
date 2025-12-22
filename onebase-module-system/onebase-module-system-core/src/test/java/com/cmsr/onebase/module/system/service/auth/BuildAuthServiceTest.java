@@ -8,16 +8,16 @@ import com.cmsr.onebase.framework.common.exception.ServiceException;
 import com.cmsr.onebase.module.system.api.sms.SmsCodeApi;
 import com.cmsr.onebase.module.system.api.sms.dto.code.SmsCodeSendReqDTO;
 import com.cmsr.onebase.module.system.api.sms.dto.code.SmsCodeUseReqDTO;
-import com.cmsr.onebase.module.system.dal.database.user.UserDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2AccessTokenDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
+import com.cmsr.onebase.module.system.dal.flex.repo.UserDataRepository;
 import com.cmsr.onebase.module.system.service.logger.LoginLogService;
 import com.cmsr.onebase.module.system.service.member.MemberService;
 import com.cmsr.onebase.module.system.service.oauth2.OAuth2TokenService;
 import com.cmsr.onebase.module.system.service.user.UserService;
 import com.cmsr.onebase.module.system.vo.auth.*;
+import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.annotation.Resource;
-import org.anyline.data.param.init.DefaultConfigStore;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -113,7 +113,7 @@ public class BuildAuthServiceTest {
      */
     @AfterEach
     public void tearDown() {
-        userDataRepository.deleteByConfig(new DefaultConfigStore());
+        userDataRepository.remove(new QueryWrapper());
     }
 
     /**

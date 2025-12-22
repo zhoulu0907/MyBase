@@ -1,27 +1,26 @@
 package com.cmsr.onebase.module.system.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.system.vo.sms.SmsChannelPageReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.sms.SmsChannelDO;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.Compare;
+import com.cmsr.onebase.module.system.dal.flex.base.BaseDataServiceImpl;
+import com.cmsr.onebase.module.system.dal.flex.mapper.SystemSmsChannelMapper;
+import com.cmsr.onebase.module.system.vo.sms.SmsChannelPageReqVO;
+import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryWrapper;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
  * 短信渠道数据访问层
  *
  * @author matianyu
- * @date 2025-08-11
+ * @date 2025-12-22
  */
 @Repository
-public class SmsChannelDataRepository extends DataRepository<SmsChannelDO> {
-
-    public SmsChannelDataRepository() {
-        super(SmsChannelDO.class);
-    }
+public class SmsChannelDataRepository extends BaseDataServiceImpl<SystemSmsChannelMapper, SmsChannelDO> {
 
     /**
      * 根据编码查找短信渠道
@@ -30,7 +29,10 @@ public class SmsChannelDataRepository extends DataRepository<SmsChannelDO> {
      * @return 短信渠道
      */
     public SmsChannelDO findOneByCode(String code) {
-        return findOne(new DefaultConfigStore().and(Compare.EQUAL, "code", code));
+        if (StringUtils.isBlank(code)) {
+            return null;
+        }
+        return getOne(query().eq(SmsChannelDO.CODE, code));
     }
 
     /**
@@ -40,7 +42,10 @@ public class SmsChannelDataRepository extends DataRepository<SmsChannelDO> {
      * @return 短信渠道列表
      */
     public List<SmsChannelDO> findListByStatus(Integer status) {
-        return findAllByConfig(new DefaultConfigStore().and(Compare.EQUAL, "status", status));
+        if (status == null) {
+            return Collections.emptyList();
+        }
+        return list(query().eq(SmsChannelDO.STATUS, status));
     }
 
     /**
@@ -50,15 +55,11 @@ public class SmsChannelDataRepository extends DataRepository<SmsChannelDO> {
      * @return 分页结果
      */
     public PageResult<SmsChannelDO> findPage(SmsChannelPageReqVO pageReqVO) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        
-        if (pageReqVO.getStatus() != null) {
-            configStore.and(Compare.EQUAL, "status", pageReqVO.getStatus());
-        }
-        if (pageReqVO.getSignature() != null) {
-            configStore.and(Compare.LIKE, "signature", pageReqVO.getSignature());
-        }
-        
-        return findPageWithConditions(configStore, pageReqVO.getPageNo(), pageReqVO.getPageSize());
+        QueryWrapper queryWrapper = query()
+                .eq(SmsChannelDO.STATUS, pageReqVO.getStatus(), pageReqVO.getStatus() != null)
+                .like(SmsChannelDO.SIGNATURE, pageReqVO.getSignature(), pageReqVO.getSignature() != null);
+
+        Page<SmsChannelDO> pageResult = page(Page.of(pageReqVO.getPageNo(), pageReqVO.getPageSize()), queryWrapper);
+        return new PageResult<>(pageResult.getRecords(), pageResult.getTotalRow());
     }
 }

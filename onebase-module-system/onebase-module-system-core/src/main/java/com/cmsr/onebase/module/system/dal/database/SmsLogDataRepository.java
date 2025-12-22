@@ -1,24 +1,21 @@
 package com.cmsr.onebase.module.system.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.system.vo.sms.SmsLogPageReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.sms.SmsLogDO;
-import org.anyline.data.param.init.DefaultConfigStore;
+import com.cmsr.onebase.module.system.dal.flex.base.BaseDataServiceImpl;
+import com.cmsr.onebase.module.system.dal.flex.mapper.SystemSmsLogMapper;
+import com.cmsr.onebase.module.system.vo.sms.SmsLogPageReqVO;
+import com.mybatisflex.core.paginate.Page;
 import org.springframework.stereotype.Repository;
 
 /**
  * 短信日志数据访问层
  *
  * @author matianyu
- * @date 2025-08-11
+ * @date 2025-12-22
  */
 @Repository
-public class SmsLogDataRepository extends DataRepository<SmsLogDO> {
-
-    public SmsLogDataRepository() {
-        super(SmsLogDO.class);
-    }
+public class SmsLogDataRepository extends BaseDataServiceImpl<SystemSmsLogMapper, SmsLogDO> {
 
     /**
      * 分页查询短信日志
@@ -27,7 +24,7 @@ public class SmsLogDataRepository extends DataRepository<SmsLogDO> {
      * @return 分页结果
      */
     public PageResult<SmsLogDO> findPage(SmsLogPageReqVO pageReqVO) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        return findPageWithConditions(configStore, pageReqVO.getPageNo(), pageReqVO.getPageSize());
+        Page<SmsLogDO> pageResult = page(Page.of(pageReqVO.getPageNo(), pageReqVO.getPageSize()), query());
+        return new PageResult<>(pageResult.getRecords(), pageResult.getTotalRow());
     }
 }

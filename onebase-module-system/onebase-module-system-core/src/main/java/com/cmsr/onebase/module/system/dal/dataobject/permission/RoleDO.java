@@ -1,11 +1,11 @@
 package com.cmsr.onebase.module.system.dal.dataobject.permission;
 
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
-import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
+import com.cmsr.onebase.framework.orm.entity.BaseTenantEntity;
 import com.cmsr.onebase.module.system.enums.permission.DataScopeEnum;
 import com.cmsr.onebase.module.system.enums.permission.RoleTypeEnum;
-import jakarta.persistence.Column;
-import jakarta.persistence.Table;
+import com.mybatisflex.annotation.Table;
+import com.mybatisflex.annotation.Column;
 import lombok.Data;
 
 import java.util.Set;
@@ -13,11 +13,11 @@ import java.util.Set;
 /**
  * 角色 DO
  *
- * @author ma
+ * @author matianyu
  */
 @Data
-@Table(name = "system_role")
-public class RoleDO extends TenantBaseDO {
+@Table(value = "system_role")
+public class RoleDO extends BaseTenantEntity {
 
     // 字段常量
     public static final String NAME                = "name";
@@ -38,38 +38,38 @@ public class RoleDO extends TenantBaseDO {
     /**
      * 角色名称
      */
-    @Column(name = NAME)
+    @Column(value = NAME)
     private String name;
     /**
      * 角色标识
      *
      * 枚举
      */
-    @Column(name = CODE)
+    @Column(value = CODE)
     private String code;
     /**
      * 角色排序
      */
-    @Column(name = SORT)
+    @Column(value = SORT)
     private Integer sort;
     /**
      * 角色状态
      *
      * 枚举 {@link CommonStatusEnum}
      */
-    @Column(name = STATUS)
+    @Column(value = STATUS)
     private Integer status;
     /**
      * 角色类型
      *
      * 枚举 {@link RoleTypeEnum}
      */
-    @Column(name = TYPE)
+    @Column(value = TYPE)
     private Integer type;
     /**
      * 备注
      */
-    @Column(name = REMARK)
+    @Column(value = REMARK)
     private String remark;
 
     /**
@@ -77,14 +77,14 @@ public class RoleDO extends TenantBaseDO {
      *
      * 枚举 {@link DataScopeEnum}
      */
-    @Column(name = DATA_SCOPE)
+    @Column(value = DATA_SCOPE)
     private Integer dataScope;
     /**
      * 数据范围(指定部门数组)
      *
      * 适用于 {@link #dataScope} 的值为 {@link DataScopeEnum#DEPT_CUSTOM} 时
      */
-    @Column(name = DATA_SCOPE_DEPT_IDS, columnDefinition="json")
+    @Column(value = DATA_SCOPE_DEPT_IDS)
     // 添加类型转换注解，确保Set<Long>正确映射
     private Set<Long> dataScopeDeptIds;
 

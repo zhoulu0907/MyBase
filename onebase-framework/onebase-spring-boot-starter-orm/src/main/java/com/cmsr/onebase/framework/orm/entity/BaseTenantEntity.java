@@ -12,8 +12,9 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class BaseTenantEntity extends BaseEntity {
+    public static final String TENANT_ID = "tenant_id";
 
-    @Column(value = "tenant_id", comment = "租户ID", tenantId = true)
+    @Column(value = TENANT_ID, comment = "租户ID", tenantId = true)
     private Long tenantId;
 
 }

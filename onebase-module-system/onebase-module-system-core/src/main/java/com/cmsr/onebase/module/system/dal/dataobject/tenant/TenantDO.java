@@ -1,12 +1,11 @@
 package com.cmsr.onebase.module.system.dal.dataobject.tenant;
 
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
-import com.cmsr.onebase.framework.data.base.BaseDO;
+import com.cmsr.onebase.framework.orm.entity.BaseEntity;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
-import jakarta.persistence.Column;
-import jakarta.persistence.Table;
-import lombok.*;
-import lombok.experimental.SuperBuilder;
+import com.mybatisflex.annotation.Column;
+import com.mybatisflex.annotation.Table;
+import lombok.Data;
 
 import java.time.LocalDateTime;
 
@@ -15,14 +14,9 @@ import java.time.LocalDateTime;
  *
  */
 @Data
-@EqualsAndHashCode(callSuper = true)
-@ToString(callSuper = true)
-@SuperBuilder
-@AllArgsConstructor
-@NoArgsConstructor
 @TenantIgnore
-@Table(name = "system_tenant")
-public class TenantDO extends BaseDO {
+@Table(value = "system_tenant")
+public class TenantDO extends BaseEntity {
 
     // 字段列名常量
     public static final String NAME = "name";
@@ -55,84 +49,84 @@ public class TenantDO extends BaseDO {
     /**
      * 空间名，唯一
      */
-    @Column(name = NAME)
+    @Column(value = NAME)
     private String name;
     /**
      * 联系人的用户编号
      * 关联 {@link com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO#getId()}
      */
-    @Column(name = ADMIN_USER_ID)
+    @Column(value = ADMIN_USER_ID)
     private Long adminUserId;
     /**
      * 空间状态
      * 枚举 {@link CommonStatusEnum}
      */
-    @Column(name = STATUS)
+    @Column(value = STATUS)
     private Integer status;
     /**
      * 绑定域名
      */
-    @Column(name = WEBSITE)
+    @Column(value = WEBSITE)
     private String website;
     /**
      * 绑定域名
      */
-    @Column(name = WEBSITE_H5)
+    @Column(value = WEBSITE_H5)
     private String websiteH5;
     /**
      * 租户套餐编号
      * 关联 {@link TenantPackageDO#getId()}
      * 特殊逻辑：系统内置租户，不使用套餐，暂时使用 {@link #PACKAGE_ID_SYSTEM} 标识
      */
-    @Column(name = PACKAGE_ID)
+    @Column(value = PACKAGE_ID)
     private Long packageId;
     /**
      * 过期时间
      */
-    @Column(name = EXPIRE_TIME)
+    @Column(value = EXPIRE_TIME)
     private LocalDateTime expireTime;
     /**
      * 账号数量上限
      */
-    @Column(name = ACCOUNT_COUNT)
+    @Column(value = ACCOUNT_COUNT)
     private Integer accountCount;
 
     /**
      * 租户编码 - 系统
      */
-    @Column(name = TENANT_CODE)
+    @Column(value = TENANT_CODE)
     private String tenantCode;
 
 
     /**
      * key
      */
-    @Column(name = TENANT_KEY)
+    @Column(value = TENANT_KEY)
     private String tenantkey;
 
     /**
      * secret
      */
-    @Column(name = TENANT_SECRET)
+    @Column(value = TENANT_SECRET)
     private String tenantSecret;
 
 
     /**
      * 访问地址
      */
-    @Column(name = "ACCESS_URL")
+    @Column(value = "ACCESS_URL")
     private String accessUrl;
 
     /**
      * saas功能是否开启默认0，开启1
      */
-    @Column(name = "PUBLISH_MODEL")
+    @Column(value = "PUBLISH_MODEL")
     private String publishModel;
 
     /**
      * 用户logo
      */
-    @Column(name = "LOGO_URL")
+    @Column(value = "LOGO_URL")
     private String logoUrl;
 
 }
