@@ -1,27 +1,23 @@
 package com.cmsr.onebase.module.metadata.core.semantic.dal;
 
-import com.mybatisflex.core.query.QueryWrapper;
-import com.mybatisflex.core.query.QueryColumn;
-import com.mybatisflex.core.query.QueryMethods;
-import com.mybatisflex.core.query.CPI;
-import com.mybatisflex.core.row.Db;
-import com.mybatisflex.core.row.Row;
-import jakarta.annotation.Resource;
-import lombok.extern.slf4j.Slf4j;
-
+import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.uid.UidGenerator;
 import com.cmsr.onebase.module.metadata.core.config.ApplicationDataSourceManager;
-
-import org.springframework.stereotype.Repository;
 import com.cmsr.onebase.module.metadata.core.semantic.constants.SystemFieldConstants;
+import com.mybatisflex.core.query.CPI;
+import com.mybatisflex.core.query.QueryColumn;
+import com.mybatisflex.core.query.QueryMethods;
+import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.core.row.Db;
+import com.mybatisflex.core.row.Row;
+import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
-
-import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldSchemaDTO;
 
 /**
  * 动态元数据通用数据访问仓库。
@@ -33,7 +29,7 @@ import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldSchemaDTO
  */
 @Repository
 @Slf4j
-public class DynamicMetadataRepository {
+public class DraftDynamicMetadataRepository {
 
 
     @Resource
@@ -58,7 +54,7 @@ public class DynamicMetadataRepository {
             setIfMissingOrNull(row, SystemFieldConstants.OPTIONAL.UPDATED_TIME, now);
             setIfMissingOrNull(row, SystemFieldConstants.OPTIONAL.DELETED, 0);
             setIfMissingOrNull(row, SystemFieldConstants.OPTIONAL.LOCK_VERSION, 0);
-            setIfMissingOrNull(row, SystemFieldConstants.OPTIONAL.DRAFT_STATUS, 0);
+            setIfMissingOrNull(row, SystemFieldConstants.OPTIONAL.DRAFT_STATUS, 1);
 
             if (userId != null) {
                 setIfMissingOrNull(row, SystemFieldConstants.REQUIRE.OWNER_ID, userId);
@@ -99,7 +95,7 @@ public class DynamicMetadataRepository {
                 setIfMissingOrNull(row, SystemFieldConstants.OPTIONAL.UPDATED_TIME, now);
                 setIfMissingOrNull(row, SystemFieldConstants.OPTIONAL.DELETED, 0);
                 setIfMissingOrNull(row, SystemFieldConstants.OPTIONAL.LOCK_VERSION, 0);
-                setIfMissingOrNull(row, SystemFieldConstants.OPTIONAL.DRAFT_STATUS, 0);
+                setIfMissingOrNull(row, SystemFieldConstants.OPTIONAL.DRAFT_STATUS, 1);
                 if (userId != null) {
                     setIfMissingOrNull(row, SystemFieldConstants.REQUIRE.OWNER_ID, userId);
                     setIfMissingOrNull(row, SystemFieldConstants.REQUIRE.CREATOR, userId);
@@ -119,24 +115,17 @@ public class DynamicMetadataRepository {
     /**
      * 根据条件更新记录。
      * 若未显式设置更新时间/更新人，则自动填充。
-     *
      * @param tableName 表名
      * @param row       更新内容
      * @param qw        条件包装器
      * @return 影响行数
      */
-    public int updateByQuery(String tableName, Row row, QueryWrapper qw) {
+/*    public int updateByQuery(String tableName, Row row, QueryWrapper qw) {
         ApplicationDataSourceManager.useBizDatasourceByAppId(ApplicationManager.getApplicationId());
         try {
-            if (row.containsKey(SystemFieldConstants.OPTIONAL.DRAFT_STATUS) || row.get(SystemFieldConstants.OPTIONAL.DRAFT_STATUS) != null) {
-                qw.and(new QueryColumn(SystemFieldConstants.OPTIONAL.DRAFT_STATUS).eq(0));
-            }
-            //qw.and(new QueryColumn(SystemFieldConstants.OPTIONAL.DRAFT_STATUS).eq(0));
             LocalDateTime now = LocalDateTime.now();
             Long userId = SecurityFrameworkUtils.getLoginUserId();
-            if (!row.containsKey(SystemFieldConstants.OPTIONAL.UPDATED_TIME) || row.get(SystemFieldConstants.OPTIONAL.UPDATED_TIME) == null) {
-                row.set(SystemFieldConstants.OPTIONAL.UPDATED_TIME, now);
-            }
+            if (!row.containsKey(SystemFieldConstants.OPTIONAL.UPDATED_TIME) || row.get(SystemFieldConstants.OPTIONAL.UPDATED_TIME) == null) { row.set(SystemFieldConstants.OPTIONAL.UPDATED_TIME, now); }
             if (userId != null) {
                 setIfMissingOrNull(row, SystemFieldConstants.REQUIRE.UPDATER, userId);
             }
@@ -144,7 +133,7 @@ public class DynamicMetadataRepository {
         } finally {
             ApplicationDataSourceManager.clear();
         }
-    }
+    }*/
 
     /**
      * 当字段缺失或值为空时设置默认值。
@@ -186,118 +175,80 @@ public class DynamicMetadataRepository {
     /**
      * 批量 ID 规范化：将列表中非空可解析的元素转换为 Long；
      * 过滤掉无效/空元素，返回不可变空列表表示无有效 ID。
-     *
      * @param ids 原始 ID 列表
      * @return Long 列表或空列表
      */
-    private List<?> toLongListIfNotEmpty(List<?> ids) {
-        if (ids == null || ids.isEmpty()) {
-            return List.of();
-        }
+/*    private List<?> toLongListIfNotEmpty(List<?> ids) {
+        if (ids == null || ids.isEmpty()) { return List.of(); }
         List<Object> out = new java.util.ArrayList<>(ids.size());
         for (Object id : ids) {
             Object v = toLongIfNotEmpty(id);
-            if (v != null) {
-                out.add(v);
-            }
+            if (v != null) { out.add(v); }
         }
         return out;
-    }
-
-    /**
-     * 判断字段列表中是否包含 draft_status 字段。
-     *
-     * @param fields 字段列表
-     * @return 包含返回 true，否则返回 false
-     */
-    private boolean hasDraftStatusField(List<SemanticFieldSchemaDTO> fields) {
-        if (fields == null) {
-            return false;
-        }
-        return fields.stream().anyMatch(f -> SystemFieldConstants.OPTIONAL.DRAFT_STATUS.equalsIgnoreCase(f.getFieldName()));
-    }
+    }*/
 
     /**
      * 软删除：将逻辑删除标志置为 1。
-     *
      * @param tableName 表名
      * @param qw        条件
-     * @param fields    字段列表，用于判断是否包含 draft_status 字段
      * @return 影响行数
      */
-    public int softDeleteByQuery(String tableName, QueryWrapper qw, List<SemanticFieldSchemaDTO> fields) {
+/*    public int softDeleteByQuery(String tableName, QueryWrapper qw) {
         ApplicationDataSourceManager.useBizDatasourceByAppId(ApplicationManager.getApplicationId());
         try {
             Row update = new Row();
             update.put(SystemFieldConstants.OPTIONAL.DELETED, 1);
-            if (hasDraftStatusField(fields)) {
-                qw.and(new QueryColumn(SystemFieldConstants.OPTIONAL.DRAFT_STATUS).eq(0));
-            }
             return Db.updateByQuery(tableName, update, qw);
         } finally {
             ApplicationDataSourceManager.clear();
         }
-    }
+    }*/
 
     /**
      * 物理删除：按条件直接删除记录。
-     *
      * @param tableName 表名
      * @param qw        条件
-     * @param fields    字段列表，用于判断是否包含 draft_status 字段
      * @return 影响行数
      */
-    public int deleteByQuery(String tableName, QueryWrapper qw, List<SemanticFieldSchemaDTO> fields) {
+/*    public int deleteByQuery(String tableName, QueryWrapper qw) {
         ApplicationDataSourceManager.useBizDatasourceByAppId(ApplicationManager.getApplicationId());
         try {
-            if (hasDraftStatusField(fields)) {
-                qw.and(new QueryColumn(SystemFieldConstants.OPTIONAL.DRAFT_STATUS).eq(0));
-            }
             return Db.deleteByQuery(tableName, qw);
         } finally {
             ApplicationDataSourceManager.clear();
         }
-    }
+    }*/
 
     /**
      * 按条件查询单条记录。
-     *
      * @param tableName 表名
      * @param qw        条件
-     * @param fields    字段列表，用于判断是否包含 draft_status 字段
      * @return 行数据；不存在时返回 null
      */
-    public Row selectOneByQuery(String tableName, QueryWrapper qw, List<SemanticFieldSchemaDTO> fields) {
+/*    public Row selectOneByQuery(String tableName, QueryWrapper qw) {
         ApplicationDataSourceManager.useBizDatasourceByAppId(ApplicationManager.getApplicationId());
         try {
-            if (hasDraftStatusField(fields)) {
-                qw.and(new QueryColumn(SystemFieldConstants.OPTIONAL.DRAFT_STATUS).eq(0));
-            }
             return Db.selectOneByQuery(tableName, qw);
         } finally {
             ApplicationDataSourceManager.clear();
         }
-    }
+    }*/
 
     /**
      * 按条件查询多条记录。
-     *
      * @param tableName 表名
      * @param qw        条件
-     * @param fields    字段列表，用于判断是否包含 draft_status 字段
      * @return 行数据列表
      */
-    public List<Row> selectListByQuery(String tableName, QueryWrapper qw, List<SemanticFieldSchemaDTO> fields) {
+/*    public List<Row> selectListByQuery(String tableName, QueryWrapper qw) {
         ApplicationDataSourceManager.useBizDatasourceByAppId(ApplicationManager.getApplicationId());
         try {
-            if (hasDraftStatusField(fields)) {
-                qw.and(new QueryColumn(SystemFieldConstants.OPTIONAL.DRAFT_STATUS).eq(0));
-            }
             return Db.selectListByQuery(tableName, qw);
         } finally {
             ApplicationDataSourceManager.clear();
         }
-    }
+    }*/
 
     /**
      * 根据主键 ID 查询主表记录。
@@ -307,10 +258,9 @@ public class DynamicMetadataRepository {
      * @param pkField       主键字段名
      * @param id            主键值
      * @param filterDeleted 是否过滤逻辑删除
-     * @param fields        字段列表，用于判断是否包含 draft_status 字段
      * @return 行数据；当 ID 为空或不可解析为数值时返回 null
      */
-    public Row selectMainById(String tableName, String pkField, Object id, boolean filterDeleted, List<SemanticFieldSchemaDTO> fields) {
+    public Row selectMainById(String tableName, String pkField, Object id, boolean filterDeleted) {
         ApplicationDataSourceManager.useBizDatasourceByAppId(ApplicationManager.getApplicationId());
         try {
             Object v = toLongIfNotEmpty(id);
@@ -320,9 +270,7 @@ public class DynamicMetadataRepository {
             QueryWrapper qw = QueryWrapper.create().where(new QueryColumn(pkField).eq(v));
             if (filterDeleted) {
                 qw.and(new QueryColumn(SystemFieldConstants.OPTIONAL.DELETED).eq(0));
-                if (hasDraftStatusField(fields)) {
-                    qw.and(new QueryColumn(SystemFieldConstants.OPTIONAL.DRAFT_STATUS).eq(0));
-                }
+                qw.and(new QueryColumn(SystemFieldConstants.OPTIONAL.DRAFT_STATUS).eq(1));
             }
             return Db.selectOneByQuery(tableName, qw);
         } finally {
@@ -332,74 +280,58 @@ public class DynamicMetadataRepository {
 
     /**
      * 根据主键 ID 查询主表记录（默认过滤逻辑删除）。
-     *
      * @param tableName 表名
      * @param pkField   主键字段名
      * @param id        主键值
-     * @param fields    字段列表，用于判断是否包含 draft_status 字段
      * @return 行数据；当 ID 为空或不可解析为数值时返回 null
      */
-    public Row selectMainById(String tableName, String pkField, Object id, List<SemanticFieldSchemaDTO> fields) {
-        return selectMainById(tableName, pkField, id, true, fields);
-    }
+/*    public Row selectMainById(String tableName, String pkField, Object id) {
+        return selectMainById(tableName, pkField, id, true);
+    }*/
 
     /**
      * 根据主键 ID 列表查询主表记录。
      * 将列表中有效 ID 统一转换为 Long 参与 IN 查询；可选过滤逻辑删除。
-     *
      * @param tableName     表名
      * @param pkField       主键字段名
      * @param ids           主键列表
      * @param filterDeleted 是否过滤逻辑删除
-     * @param fields        字段列表，用于判断是否包含 draft_status 字段
      * @return 结果列表；当列表为空或无有效 ID 返回空列表
      */
-    public List<Row> selectMainByIds(String tableName, String pkField, List<?> ids, boolean filterDeleted, List<SemanticFieldSchemaDTO> fields) {
-        if (ids == null || ids.isEmpty()) {
-            return List.of();
-        }
+/*    public List<Row> selectMainByIds(String tableName, String pkField, List<?> ids, boolean filterDeleted) {
+        if (ids == null || ids.isEmpty()) { return List.of(); }
         ApplicationDataSourceManager.useBizDatasourceByAppId(ApplicationManager.getApplicationId());
         try {
             List<?> v = toLongListIfNotEmpty(ids);
-            if (v.isEmpty()) {
-                return List.of();
-            }
+            if (v.isEmpty()) { return List.of(); }
             QueryWrapper qw = QueryWrapper.create().where(new QueryColumn(pkField).in(v));
-            if (filterDeleted) {
-                qw.and(new QueryColumn(SystemFieldConstants.OPTIONAL.DELETED).eq(0));
-                if (hasDraftStatusField(fields)) {
-                    qw.and(new QueryColumn(SystemFieldConstants.OPTIONAL.DRAFT_STATUS).eq(0));
-                }
-            }
+            if (filterDeleted) { qw.and(new QueryColumn(SystemFieldConstants.OPTIONAL.DELETED).eq(0)); }
             return Db.selectListByQuery(tableName, qw);
         } finally {
             ApplicationDataSourceManager.clear();
         }
-    }
+    }*/
 
     /**
      * 根据主键 ID 列表查询主表记录（默认过滤逻辑删除）。
-     *
      * @param tableName 表名
      * @param pkField   主键字段名
      * @param ids       主键列表
-     * @param fields    字段列表，用于判断是否包含 draft_status 字段
      * @return 结果列表；当列表为空或无有效 ID 返回空列表
      */
-    public List<Row> selectMainByIds(String tableName, String pkField, List<?> ids, List<SemanticFieldSchemaDTO> fields) {
-        return selectMainByIds(tableName, pkField, ids, true, fields);
-    }
+/*    public List<Row> selectMainByIds(String tableName, String pkField, List<?> ids) {
+        return selectMainByIds(tableName, pkField, ids, true);
+    }*/
 
     /**
      * 查询子表：根据父记录 ID（parent_id）查询关联行（默认过滤逻辑删除）。
      *
      * @param tableName 表名
      * @param parentId  父记录 ID
-     * @param fields    字段列表，用于判断是否包含 draft_status 字段
      * @return 结果列表；当 ID 为空或不可解析为数值时返回空列表
      */
-    public List<Row> selectSubtableRowsByParent(String tableName, Object parentId, List<SemanticFieldSchemaDTO> fields) {
-        return selectSubtableRowsByParent(tableName, parentId, true, fields);
+    public List<Row> selectSubtableRowsByParent(String tableName, Object parentId) {
+        return selectSubtableRowsByParent(tableName, parentId, true);
     }
 
     /**
@@ -408,10 +340,9 @@ public class DynamicMetadataRepository {
      * @param tableName     表名
      * @param parentId      父记录 ID
      * @param filterDeleted 是否过滤逻辑删除
-     * @param fields        字段列表，用于判断是否包含 draft_status 字段
      * @return 结果列表；当 ID 为空或不可解析为数值时返回空列表
      */
-    public List<Row> selectSubtableRowsByParent(String tableName, Object parentId, boolean filterDeleted, List<SemanticFieldSchemaDTO> fields) {
+    public List<Row> selectSubtableRowsByParent(String tableName, Object parentId, boolean filterDeleted) {
         ApplicationDataSourceManager.useBizDatasourceByAppId(ApplicationManager.getApplicationId());
         try {
             Object v = toLongIfNotEmpty(parentId);
@@ -421,9 +352,7 @@ public class DynamicMetadataRepository {
             QueryWrapper qw = QueryWrapper.create().where(new QueryColumn("parent_id").eq(v));
             if (filterDeleted) {
                 qw.and(new QueryColumn(SystemFieldConstants.OPTIONAL.DELETED).eq(0));
-                if (hasDraftStatusField(fields)) {
-                    qw.and(new QueryColumn(SystemFieldConstants.OPTIONAL.DRAFT_STATUS).eq(0));
-                }
+                qw.and(new QueryColumn(SystemFieldConstants.OPTIONAL.DRAFT_STATUS).eq(1));
             }
             return Db.selectListByQuery(tableName, qw);
         } finally {
@@ -437,11 +366,10 @@ public class DynamicMetadataRepository {
      * @param tableName     表名
      * @param relationKey   关系键字段名（如某外键列）
      * @param relationValue 关系值
-     * @param fields        字段列表，用于判断是否包含 draft_status 字段
      * @return 结果列表；当值为空或不可解析为数值时返回空列表
      */
-    public List<Row> selectRelationRowsByParent(String tableName, String relationKey, Object relationValue, List<SemanticFieldSchemaDTO> fields) {
-        return selectRelationRowsByParent(tableName, relationKey, relationValue, true, fields);
+    public List<Row> selectRelationRowsByParent(String tableName, String relationKey, Object relationValue) {
+        return selectRelationRowsByParent(tableName, relationKey, relationValue, true);
     }
 
     /**
@@ -451,10 +379,9 @@ public class DynamicMetadataRepository {
      * @param relationKey   关系键字段名（如某外键列）
      * @param relationValue 关系值
      * @param filterDeleted 是否过滤逻辑删除
-     * @param fields        字段列表，用于判断是否包含 draft_status 字段
      * @return 结果列表；当值为空或不可解析为数值时返回空列表
      */
-    public List<Row> selectRelationRowsByParent(String tableName, String relationKey, Object relationValue, boolean filterDeleted, List<SemanticFieldSchemaDTO> fields) {
+    public List<Row> selectRelationRowsByParent(String tableName, String relationKey, Object relationValue, boolean filterDeleted) {
         ApplicationDataSourceManager.useBizDatasourceByAppId(ApplicationManager.getApplicationId());
         try {
             Object v = toLongIfNotEmpty(relationValue);
@@ -464,29 +391,8 @@ public class DynamicMetadataRepository {
             QueryWrapper qw = QueryWrapper.create().where(new QueryColumn(relationKey).eq(v));
             if (filterDeleted) {
                 qw.and(new QueryColumn(SystemFieldConstants.OPTIONAL.DELETED).eq(0));
-                if (hasDraftStatusField(fields)) {
-                    qw.and(new QueryColumn(SystemFieldConstants.OPTIONAL.DRAFT_STATUS).eq(0));
-                }
+                qw.and(new QueryColumn(SystemFieldConstants.OPTIONAL.DRAFT_STATUS).eq(1));
             }
-            return Db.selectListByQuery(tableName, qw);
-        } finally {
-            ApplicationDataSourceManager.clear();
-        }
-    }
-
-    /**
-     * 查询关系表：根据关系键与值查询关联行。
-     * @param tableName     表名
-     * @param relationKey   关系键字段名（如某外键列）
-     * @param relationValue 关系值
-     * @param filterDeleted 是否过滤逻辑删除
-     * @return 结果列表；当值为空或不可解析为数值时返回空列表
-     */
-    public List<Row> selectRelationRowsByCondition(String tableName, String relationKey, Object relationValue, boolean filterDeleted) {
-        ApplicationDataSourceManager.useBizDatasourceByAppId(ApplicationManager.getApplicationId());
-        try {
-            QueryWrapper qw = QueryWrapper.create().where(new QueryColumn(relationKey).eq(relationValue));
-            if (filterDeleted) { qw.and(new QueryColumn(SystemFieldConstants.OPTIONAL.DELETED).eq(0)); }
             return Db.selectListByQuery(tableName, qw);
         } finally {
             ApplicationDataSourceManager.clear();
@@ -500,16 +406,13 @@ public class DynamicMetadataRepository {
      * @param qw        条件
      * @param pageNo    页号（从 1 开始）
      * @param pageSize  页大小
-     * @param fields    字段列表，用于判断是否包含 draft_status 字段
      * @return 包含数据列表与总数的结果
      */
-    public PageResult<Row> selectPageByQuery(String tableName, QueryWrapper qw, int pageNo, int pageSize, List<SemanticFieldSchemaDTO> fields) {
+    public PageResult<Row> selectPageByQuery(String tableName, QueryWrapper qw, int pageNo, int pageSize) {
         ApplicationDataSourceManager.useBizDatasourceByAppId(ApplicationManager.getApplicationId());
         try {
             QueryWrapper countQw = QueryWrapper.create().where(CPI.getWhereQueryCondition(qw));
-            if (hasDraftStatusField(fields)) {
-                countQw.and(new QueryColumn(SystemFieldConstants.OPTIONAL.DRAFT_STATUS).eq(0));
-            }
+            countQw.and(new QueryColumn(SystemFieldConstants.OPTIONAL.DRAFT_STATUS).eq(1));
             countQw.select(QueryMethods.count().as("total"));
             Row countRow = Db.selectOneByQuery(tableName, countQw);
             long total = 0L;
@@ -523,9 +426,7 @@ public class DynamicMetadataRepository {
                 }
             }
             int offset = Math.max(0, (pageNo - 1) * pageSize);
-            if (hasDraftStatusField(fields)) {
-                qw.and(new QueryColumn(SystemFieldConstants.OPTIONAL.DRAFT_STATUS).eq(0));
-            }
+            qw.and(new QueryColumn(SystemFieldConstants.OPTIONAL.DRAFT_STATUS).eq(1));
             qw.limit(offset, pageSize);
             List<Row> rows = Db.selectListByQuery(tableName, qw);
             return new PageResult<>(rows, total);
