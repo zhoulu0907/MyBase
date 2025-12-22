@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.system.dal.dataobject.permission;
 
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
-import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
+import com.cmsr.onebase.framework.orm.entity.BaseTenantEntity;
 import com.cmsr.onebase.module.system.enums.permission.DataScopeEnum;
 import com.cmsr.onebase.module.system.enums.permission.RoleTypeEnum;
 import com.mybatisflex.annotation.Table;
@@ -17,7 +17,7 @@ import java.util.Set;
  */
 @Data
 @Table(value = "system_role")
-public class RoleDO extends TenantBaseDO {
+public class RoleDO extends BaseTenantEntity {
 
     // 字段常量
     public static final String NAME                = "name";

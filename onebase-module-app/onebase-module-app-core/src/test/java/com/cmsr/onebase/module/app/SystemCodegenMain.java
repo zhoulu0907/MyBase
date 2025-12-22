@@ -13,7 +13,42 @@ public class SystemCodegenMain {
     private static final String DB_PASSWORD = "onebase@2025";
 
     private static final String[] tables = new String[]{
-            "system_users",
+            "system_config",
+            "system_corp",
+            "system_corp_app_relation",
+            "system_dept",
+            "system_dict_data",
+            "system_dict_type",
+            "system_license",
+            "system_login_log",
+            "system_mail_account",
+            "system_mail_log",
+            "system_mail_template",
+            "system_menu",
+            "system_oauth2_access_token",
+            "system_oauth2_approve",
+            "system_oauth2_client",
+            "system_oauth2_code",
+            "system_oauth2_refresh_token",
+            "system_operate_log",
+            "system_post",
+            "system_role",
+            "system_role_menu",
+            "system_sms_channel",
+            "system_sms_code",
+            "system_sms_log",
+            "system_sms_template",
+            "system_social_client",
+            "system_social_user",
+            "system_social_user_bind",
+            "system_tenant",
+            "system_tenant_admin",
+            "system_tenant_package",
+            "system_uid_worker_node",
+            "system_user_app_relation",
+            "system_user_post",
+            "system_user_role",
+            "system_users"
     };
     // com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO
     private static String basePackage = "com.cmsr.onebase.module.system.dal";

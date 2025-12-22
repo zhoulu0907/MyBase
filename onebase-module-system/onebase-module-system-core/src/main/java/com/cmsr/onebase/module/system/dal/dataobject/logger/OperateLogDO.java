@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.system.dal.dataobject.logger;
 
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
-import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
+import com.cmsr.onebase.framework.orm.entity.BaseTenantEntity;
 
 import com.mybatisflex.annotation.Table;
 import com.mybatisflex.annotation.Column;
@@ -13,7 +13,7 @@ import lombok.Data;
  */
 @Table(value = "system_operate_log")
 @Data
-public class OperateLogDO extends TenantBaseDO {
+public class OperateLogDO extends BaseTenantEntity {
 
     public static final String TRACE_ID        = "trace_id";
     public static final String USER_ID         = "user_id";

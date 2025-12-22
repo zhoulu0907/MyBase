@@ -4,8 +4,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
-import com.cmsr.onebase.framework.data.base.BaseDO;
 
+import com.cmsr.onebase.framework.orm.entity.BaseEntity;
 import com.mybatisflex.annotation.Table;
 import com.mybatisflex.annotation.Column;
 import lombok.Data;
@@ -16,7 +16,7 @@ import lombok.Data;
  */
 @Table(value = "system_oauth2_code")
 @Data
-public class OAuth2CodeDO extends BaseDO {
+public class OAuth2CodeDO extends BaseEntity {
 
     public static final String CODE         = "code";
     public static final String USER_ID      = "user_id";

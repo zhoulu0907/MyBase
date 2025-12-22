@@ -1,10 +1,10 @@
 package com.cmsr.onebase.module.system.dal.dataobject.license;
 
+import com.cmsr.onebase.framework.orm.entity.BaseEntity;
 import com.mybatisflex.annotation.Table;
 import com.mybatisflex.annotation.Column;
 import lombok.*;
 import lombok.experimental.SuperBuilder;import java.time.LocalDateTime;
-import com.cmsr.onebase.framework.data.base.BaseDO;
 
 /**
  * 平台License信息
@@ -14,7 +14,7 @@ import com.cmsr.onebase.framework.data.base.BaseDO;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class LicenseDO extends BaseDO{
+public class LicenseDO extends BaseEntity {
 
     public static final String ENTERPRISE_NAME    = "enterprise_name";
     public static final String ENTERPRISE_CODE    = "enterprise_code";

@@ -1,9 +1,9 @@
 package com.cmsr.onebase.module.system.dal.dataobject.dept;
 
+import com.cmsr.onebase.framework.orm.entity.BaseEntity;
 import com.mybatisflex.annotation.Table;
 import com.mybatisflex.annotation.Column;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
-import com.cmsr.onebase.framework.data.base.BaseDO;
 import lombok.Data;
 
 /**
@@ -13,7 +13,7 @@ import lombok.Data;
  */
 @Table(value = "system_post")
 @Data
-public class PostDO extends BaseDO {
+public class PostDO extends BaseEntity {
 
     public static final String NAME   = "name";
     public static final String CODE   = "code";

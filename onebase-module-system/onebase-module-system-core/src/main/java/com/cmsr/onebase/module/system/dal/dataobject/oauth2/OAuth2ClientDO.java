@@ -3,7 +3,7 @@ package com.cmsr.onebase.module.system.dal.dataobject.oauth2;
 import java.util.List;
 
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
-import com.cmsr.onebase.framework.data.base.BaseDO;
+import com.cmsr.onebase.framework.orm.entity.BaseEntity;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.system.enums.oauth2.OAuth2GrantTypeEnum;
 
@@ -18,7 +18,7 @@ import lombok.Data;
 @Data
 @TenantIgnore
 @Table(value = "system_oauth2_client")
-public class OAuth2ClientDO extends BaseDO {
+public class OAuth2ClientDO extends BaseEntity {
 
     // 字段常量
     public static final String CLIENT_ID                     = "client_id";

@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.system.dal.dataobject.permission;
 
-import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
+import com.cmsr.onebase.framework.orm.entity.BaseTenantEntity;
 import com.mybatisflex.annotation.Table;
 import com.mybatisflex.annotation.Column;
 import lombok.Data;
@@ -12,7 +12,7 @@ import lombok.Data;
  */
 @Table(value = "system_role_menu")
 @Data
-public class RoleMenuDO extends TenantBaseDO {
+public class RoleMenuDO extends BaseTenantEntity {
 
     // 字段常量
     public static final String ROLE_ID = "role_id";

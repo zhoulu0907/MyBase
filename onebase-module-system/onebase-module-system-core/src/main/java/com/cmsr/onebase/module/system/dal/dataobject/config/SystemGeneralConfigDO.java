@@ -1,13 +1,13 @@
 package com.cmsr.onebase.module.system.dal.dataobject.config;
 
-import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
+import com.cmsr.onebase.framework.orm.entity.BaseTenantEntity;
 import com.mybatisflex.annotation.Table;
 import com.mybatisflex.annotation.Column;
 import lombok.Data;
 
 @Data
 @Table(value = "system_config")
-public class SystemGeneralConfigDO extends TenantBaseDO {
+public class SystemGeneralConfigDO extends BaseTenantEntity {
 
     public static final String CONFIG_TYPE = "config_type";
     public static final String NAME        = "name";

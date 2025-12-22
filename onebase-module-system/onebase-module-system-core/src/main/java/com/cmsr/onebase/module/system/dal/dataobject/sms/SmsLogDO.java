@@ -3,7 +3,7 @@ package com.cmsr.onebase.module.system.dal.dataobject.sms;
 import java.time.LocalDateTime;
 import java.util.Map;
 
-import com.cmsr.onebase.framework.data.base.BaseDO;
+import com.cmsr.onebase.framework.orm.entity.BaseEntity;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 
 import com.mybatisflex.annotation.Table;
@@ -27,7 +27,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @NoArgsConstructor
 @TenantIgnore
-public class SmsLogDO extends BaseDO {
+public class SmsLogDO extends BaseEntity {
 
     // 字段列名常量
     public static final String CHANNEL_ID         = "channel_id";

@@ -1,9 +1,9 @@
 package com.cmsr.onebase.module.system.dal.dataobject.oauth2;
 
+import com.cmsr.onebase.framework.orm.entity.BaseEntity;
 import com.mybatisflex.annotation.Table;
 import com.mybatisflex.annotation.Column;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
-import com.cmsr.onebase.framework.data.base.BaseDO;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
  */
 @Table(value = "system_oauth2_approve")
 @Data
-public class OAuth2ApproveDO extends BaseDO {
+public class OAuth2ApproveDO extends BaseEntity {
 
     public static final String USER_ID      = "user_id";
     public static final String USER_TYPE    = "user_type";

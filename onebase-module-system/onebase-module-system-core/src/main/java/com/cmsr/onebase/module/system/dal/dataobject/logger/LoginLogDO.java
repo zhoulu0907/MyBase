@@ -1,10 +1,10 @@
 package com.cmsr.onebase.module.system.dal.dataobject.logger;
 
+import com.cmsr.onebase.framework.orm.entity.BaseTenantEntity;
 import com.mybatisflex.annotation.Table;
 import com.mybatisflex.annotation.Column;
 
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
-import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
 import com.cmsr.onebase.module.system.enums.logger.LoginLogTypeEnum;
 import com.cmsr.onebase.module.system.enums.logger.LoginResultEnum;
 import lombok.Data;
@@ -17,7 +17,7 @@ import lombok.Data;
  */
 @Table(value = "system_login_log")
 @Data
-public class LoginLogDO extends TenantBaseDO {
+public class LoginLogDO extends BaseTenantEntity {
 
     public static final String LOG_TYPE   = "log_type";
     public static final String TRACE_ID   = "trace_id";

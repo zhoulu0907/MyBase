@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.system.dal.dataobject.dept;
 
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
-import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
+import com.cmsr.onebase.framework.orm.entity.BaseTenantEntity;
 import com.mybatisflex.annotation.Table;
 import com.mybatisflex.annotation.Column;
 import lombok.Data;
@@ -13,7 +13,7 @@ import lombok.Data;
  */
 @Table(value = "system_dept")
 @Data
-public class DeptDO extends TenantBaseDO {
+public class DeptDO extends BaseTenantEntity {
 
     public static final Long PARENT_ID_ROOT = 0L;
 

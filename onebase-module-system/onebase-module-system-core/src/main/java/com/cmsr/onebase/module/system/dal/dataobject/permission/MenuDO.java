@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.system.dal.dataobject.permission;
 
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
-import com.cmsr.onebase.framework.data.base.BaseDO;
+import com.cmsr.onebase.framework.orm.entity.BaseEntity;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.system.enums.permission.MenuTypeEnum;
 
@@ -17,7 +17,7 @@ import lombok.Data;
 @Data
 @TenantIgnore
 @Table(value = "system_menu")
-public class MenuDO extends BaseDO {
+public class MenuDO extends BaseEntity {
 
     // 字段常量
     public static final String NAME           = "name";

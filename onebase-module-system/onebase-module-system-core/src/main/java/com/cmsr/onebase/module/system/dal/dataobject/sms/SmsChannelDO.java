@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.system.dal.dataobject.sms;
 
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
-import com.cmsr.onebase.framework.data.base.BaseDO;
+import com.cmsr.onebase.framework.orm.entity.BaseEntity;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.system.framework.sms.core.enums.SmsChannelEnum;
 
@@ -20,7 +20,7 @@ import lombok.ToString;
 @Data
 @ToString(callSuper = true)
 @TenantIgnore
-public class SmsChannelDO extends BaseDO {
+public class SmsChannelDO extends BaseEntity {
 
     // 字段列名常量
     public static final String SIGNATURE    = "signature";

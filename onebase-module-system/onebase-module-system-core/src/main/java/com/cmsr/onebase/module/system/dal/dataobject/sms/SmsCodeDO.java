@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.system.dal.dataobject.sms;
 
-import com.cmsr.onebase.framework.data.base.BaseDO;
+import com.cmsr.onebase.framework.orm.entity.BaseEntity;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.mybatisflex.annotation.Table;
 import com.mybatisflex.annotation.Column;
@@ -20,7 +20,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @TenantIgnore
-public class SmsCodeDO extends BaseDO {
+public class SmsCodeDO extends BaseEntity {
 
     // 字段列名常量
     public static final String MOBILE      = "mobile";

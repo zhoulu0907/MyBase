@@ -1,13 +1,13 @@
 package com.cmsr.onebase.module.system.dal.dataobject.dept;
 
-import com.cmsr.onebase.framework.data.base.BaseDO;
+import com.cmsr.onebase.framework.orm.entity.BaseEntity;
 import lombok.Data;
 import com.mybatisflex.annotation.Table;
 import com.mybatisflex.annotation.Column;
 
 @Table(value = "system_user_post")
 @Data
-public class UserPostDO extends BaseDO {
+public class UserPostDO extends BaseEntity {
     public static final String USER_ID = "user_id";
     public static final String POST_ID = "post_id";
 

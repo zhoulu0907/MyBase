@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.system.dal.dataobject.oauth2;
 
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
-import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
+import com.cmsr.onebase.framework.orm.entity.BaseTenantEntity;
 import com.mybatisflex.annotation.Table;
 import com.mybatisflex.annotation.Column;
 import lombok.Data;
@@ -17,7 +17,7 @@ import java.util.List;
 @Table(value = "system_oauth2_refresh_token")
 @Data
 @Accessors(chain = true)
-public class OAuth2RefreshTokenDO extends TenantBaseDO {
+public class OAuth2RefreshTokenDO extends BaseTenantEntity {
 
     public static final String REFRESH_TOKEN = "refresh_token";
     public static final String USER_ID       = "user_id";

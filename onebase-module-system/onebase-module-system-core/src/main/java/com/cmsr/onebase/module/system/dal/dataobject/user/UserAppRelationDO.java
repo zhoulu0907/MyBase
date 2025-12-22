@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.system.dal.dataobject.user;
 
-import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
+import com.cmsr.onebase.framework.orm.entity.BaseTenantEntity;
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Table;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -11,7 +11,7 @@ import lombok.Data;
  */
 @Data
 @Table(value = "system_user_app_relation")
-public class UserAppRelationDO extends TenantBaseDO {
+public class UserAppRelationDO extends BaseTenantEntity {
 
     public static final Long   PARENT_ID_ROOT = 0L;
     public static final String APPLICATION_ID = "application_id";

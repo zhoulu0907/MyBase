@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.system.dal.dataobject.tenant;
 
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
-import com.cmsr.onebase.framework.data.base.BaseDO;
+import com.cmsr.onebase.framework.orm.entity.BaseEntity;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.mybatisflex.annotation.Table;
 import com.mybatisflex.annotation.Column;
@@ -22,7 +22,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @TenantIgnore
 @Table(value = "system_tenant")
-public class TenantDO extends BaseDO {
+public class TenantDO extends BaseEntity {
 
     // 字段列名常量
     public static final String NAME = "name";

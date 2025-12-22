@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.system.dal.dataobject.dict;
 
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
-import com.cmsr.onebase.framework.data.base.BaseDO;
+import com.cmsr.onebase.framework.orm.entity.BaseEntity;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Table;
@@ -25,7 +25,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @TenantIgnore
 @Table(value = "system_dict_type")
-public class DictTypeDO extends BaseDO {
+public class DictTypeDO extends BaseEntity {
 
     // 字段名常量
     public static final String NAME            = "name";
