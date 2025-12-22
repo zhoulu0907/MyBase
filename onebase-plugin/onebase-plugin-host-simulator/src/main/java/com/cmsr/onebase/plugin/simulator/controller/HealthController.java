@@ -28,13 +28,15 @@ public class HealthController {
         response.put("version", "1.0.0");
         response.put("description", "OneBase 插件宿主模拟器 - 既能免打包快速 debug 又能全生命周期插件验证");
         response.put("apis", Map.of(
-            "插件列表", "GET /plugin/list",
-            "启动插件", "POST /plugin/{pluginId}/start",
-            "停止插件", "POST /plugin/{pluginId}/stop",
-            "重新加载插件", "POST /plugin/{pluginId}/reload",
-            "插件信息", "GET /plugin/{pluginId}/info",
-            "启动所有插件", "POST /plugin/start-all",
-            "停止所有插件", "POST /plugin/stop-all",
+            "插件列表", "GET /api/plugin/list",
+            "插件信息", "GET /api/plugin/{pluginId}/info",
+            "启动插件", "POST /api/plugin/{pluginId}/start",
+            "停止插件", "POST /api/plugin/{pluginId}/stop",
+            "加载插件", "POST /api/plugin/load",
+            "卸载插件", "POST /api/plugin/unload",
+            "重新加载插件", "POST /api/plugin/{pluginId}/reload",
+            "启动所有插件", "POST /api/plugin/start-all",
+            "停止所有插件", "POST /api/plugin/stop-all",
             "健康检查", "GET /health"
         ));
         return response;

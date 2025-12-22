@@ -38,7 +38,6 @@ import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
  * </ul>
  *
  * @author chengyuansen
- * @author matianyu
  * @date 2025-12-13
  */
 @Tag(name = "插件管理")
@@ -58,7 +57,20 @@ public class PluginManagementController {
         List<OneBasePluginManager.PluginInfo> plugins = pluginManager.getLoadedPlugins();
         return success(pluginConvert.convertList(plugins));
     }
-
+    @GetMapping("/{pluginId}/info")
+    @Operation(summary = "获取指定插件的详细信息")
+    @Parameter(name = "pluginId", description = "插件ID", required = true, example = "hello-plugin")
+    public CommonResult<PluginRespVO> getPluginInfo(@PathVariable("pluginId") String pluginId) {
+        // 尝试从getPlugin获取PluginWrapper
+        return pluginManager.getPlugin(pluginId)
+                .map(wrapper -> success(pluginConvert.convert(wrapper)))
+                // 如果getPlugin返回empty（如DEV模式），尝试从getLoadedPlugins获取PluginInfo
+                .orElseGet(() -> pluginManager.getLoadedPlugins().stream()
+                        .filter(info -> info.getPluginId().equals(pluginId))
+                        .findFirst()
+                        .map(info -> success(pluginConvert.convert(info)))
+                        .orElse(CommonResult.error(404, String.format(PluginErrorMessages.PLUGIN_NOT_FOUND, pluginId))));
+    }
     @PostMapping("/{pluginId}/start")
     @Operation(summary = "启动指定插件")
     @Parameter(name = "pluginId", description = "插件ID", required = true, example = "hello-plugin")
@@ -78,17 +90,6 @@ public class PluginManagementController {
             return CommonResult.error(404, String.format(PluginErrorMessages.PLUGIN_NOT_FOUND, pluginId));
         }
         PluginState state = pluginManager.stopPlugin(pluginId);
-        return success(PluginOperationResultItemVO.success(pluginId, state.toString()));
-    }
-
-    @PostMapping("/{pluginId}/reload")
-    @Operation(summary = "重新加载指定插件")
-    @Parameter(name = "pluginId", description = "插件ID", required = true, example = "hello-plugin")
-    public CommonResult<PluginOperationResultItemVO> reloadPlugin(@PathVariable("pluginId") String pluginId) {
-        if (!isPluginExists(pluginId)) {
-            return CommonResult.error(404, String.format(PluginErrorMessages.PLUGIN_NOT_FOUND, pluginId));
-        }
-        PluginState state = pluginManager.reloadPlugin(pluginId);
         return success(PluginOperationResultItemVO.success(pluginId, state.toString()));
     }
 
@@ -116,19 +117,30 @@ public class PluginManagementController {
         return success(respVO);
     }
 
-    @GetMapping("/{pluginId}/info")
-    @Operation(summary = "获取指定插件的详细信息")
+    @PostMapping("/{pluginId}/unload")
+    @Operation(summary = "卸载指定插件")
     @Parameter(name = "pluginId", description = "插件ID", required = true, example = "hello-plugin")
-    public CommonResult<PluginRespVO> getPluginInfo(@PathVariable("pluginId") String pluginId) {
-        // 尝试从getPlugin获取PluginWrapper
-        return pluginManager.getPlugin(pluginId)
-            .map(wrapper -> success(pluginConvert.convert(wrapper)))
-            // 如果getPlugin返回empty（如DEV模式），尝试从getLoadedPlugins获取PluginInfo
-            .orElseGet(() -> pluginManager.getLoadedPlugins().stream()
-                .filter(info -> info.getPluginId().equals(pluginId))
-                .findFirst()
-                .map(info -> success(pluginConvert.convert(info)))
-                .orElse(CommonResult.error(404, String.format(PluginErrorMessages.PLUGIN_NOT_FOUND, pluginId))));
+    public CommonResult<PluginOperationResultItemVO> unloadPlugin(@PathVariable("pluginId") String pluginId) {
+        if (!isPluginExists(pluginId)) {
+            return CommonResult.error(404, String.format(PluginErrorMessages.PLUGIN_NOT_FOUND, pluginId));
+        }
+        boolean ok = pluginManager.unloadPlugin(pluginId);
+        if (ok) {
+            return success(PluginOperationResultItemVO.success(pluginId, "UNLOADED"));
+        } else {
+            return CommonResult.error(500, String.format(PluginErrorMessages.PLUGIN_UNLOAD_FAILED, pluginId));
+        }
+    }
+
+    @PostMapping("/{pluginId}/reload")
+    @Operation(summary = "重新加载指定插件")
+    @Parameter(name = "pluginId", description = "插件ID", required = true, example = "hello-plugin")
+    public CommonResult<PluginOperationResultItemVO> reloadPlugin(@PathVariable("pluginId") String pluginId) {
+        if (!isPluginExists(pluginId)) {
+            return CommonResult.error(404, String.format(PluginErrorMessages.PLUGIN_NOT_FOUND, pluginId));
+        }
+        PluginState state = pluginManager.reloadPlugin(pluginId);
+        return success(PluginOperationResultItemVO.success(pluginId, state.toString()));
     }
 
     @PostMapping("/start-all")
@@ -166,21 +178,6 @@ public class PluginManagementController {
         }
         
         return success(new PluginBatchOperationRespVO(items));
-    }
-
-    @PostMapping("/{pluginId}/unload")
-    @Operation(summary = "卸载指定插件")
-    @Parameter(name = "pluginId", description = "插件ID", required = true, example = "hello-plugin")
-    public CommonResult<PluginOperationResultItemVO> unloadPlugin(@PathVariable("pluginId") String pluginId) {
-        if (!isPluginExists(pluginId)) {
-            return CommonResult.error(404, String.format(PluginErrorMessages.PLUGIN_NOT_FOUND, pluginId));
-        }
-        boolean ok = pluginManager.unloadPlugin(pluginId);
-        if (ok) {
-            return success(PluginOperationResultItemVO.success(pluginId, "UNLOADED"));
-        } else {
-            return CommonResult.error(500, String.format(PluginErrorMessages.PLUGIN_UNLOAD_FAILED, pluginId));
-        }
     }
 
     @PostMapping("/upload")
