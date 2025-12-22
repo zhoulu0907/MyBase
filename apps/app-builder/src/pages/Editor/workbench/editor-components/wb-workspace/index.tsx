@@ -2,7 +2,13 @@ import { Divider, Form } from '@arco-design/web-react';
 import { useEffect, useRef, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import { useSignals } from '@preact/signals-react/runtime';
-import { getWorkbenchComponentWidth, COMPONENT_GROUP_NAME, type GridItem, useWorkbenchSignal } from '@onebase/ui-kit';
+import {
+  getWorkbenchComponentWidth,
+  COMPONENT_GROUP_NAME,
+  type GridItem,
+  type WorkbenchComponentType,
+  useWorkbenchSignal
+} from '@onebase/ui-kit';
 import { currentEditorSignal } from '@onebase/ui-kit/src/signals/current_editor';
 import { loadMicroApp, initGlobalState, type MicroApp } from 'qiankun';
 import { EditMode, getMobileEditorURL } from '@onebase/common';
@@ -73,7 +79,7 @@ export default function WorkbenchWorkspace() {
 
   // 加载移动端拖拽子应用
   useEffect(() => {
-    if (editMode.value !== EditMode.MOBILE) {
+    if (mobileEditorDragRef.current) {
       return;
     }
     console.log('loading mobile-wb-editor-drag-list');
@@ -90,10 +96,12 @@ export default function WorkbenchWorkspace() {
     });
     mobileEditorDragRef.current = mobileEditorDrag;
 
+    // 只在组件卸载时卸载子应用
     return () => {
       mobileEditorDrag?.unmount();
+      mobileEditorDragRef.current = null;
     };
-  }, [editMode.value]);
+  }, []);
 
   // 事件处理
   const handlers = useWorkbenchHandlers({
@@ -148,70 +156,87 @@ export default function WorkbenchWorkspace() {
     }
   }, []);
 
-  return editMode.value === EditMode.MOBILE ? (
-    <div id="mobile-wb-editor-drag-list" className={styles.mobileeditordraglist}></div>
-  ) : (
-    <div className={styles.workbenchWorkspace}>
-      <div className={styles.workspaceHeader}>
-        <div className={styles.workspaceHeaderLeft}></div>
-        <div className={styles.workspaceHeaderRight}>
-          {/* TODO 撤回重做 */}
-          <div className={styles.editorStepCtrl}>
-            <img className={styles.pageModeIcon} src={PrevActiveIcon} />
-            <img className={styles.pageModeIcon} src={NextIcon} />
-          </div>
-          <Divider type="vertical" />
-          <div className={styles.pageModeCtrl}>
-            <img className={styles.pageModeIcon} src={PCActiveIcon} />
-            <img className={styles.pageModeIcon} src={MobileIcon} onClick={() => setEditMode(EditMode.MOBILE)} />
+  return (
+    <>
+      {/* 移动端、Web端切换 - 通过CSS控制显示/隐藏 */}
+      <div
+        id="mobile-wb-editor-drag-list"
+        className={styles.mobileeditordraglist}
+        style={{ display: editMode.value === EditMode.MOBILE ? 'block' : 'none' }}
+      ></div>
+      <div
+        className={styles.workbenchWorkspace}
+        style={{ display: editMode.value === EditMode.MOBILE ? 'none' : 'flex' }}
+      >
+        <div className={styles.workspaceHeader}>
+          <div className={styles.workspaceHeaderLeft}></div>
+          <div className={styles.workspaceHeaderRight}>
+            {/* TODO 撤回重做 */}
+            <div className={styles.editorStepCtrl}>
+              <img className={styles.pageModeIcon} src={PrevActiveIcon} />
+              <img className={styles.pageModeIcon} src={NextIcon} />
+            </div>
+            <Divider type="vertical" />
+            <div className={styles.pageModeCtrl}>
+              <img className={styles.pageModeIcon} src={PCActiveIcon} />
+              <img className={styles.pageModeIcon} src={MobileIcon} onClick={() => setEditMode(EditMode.MOBILE)} />
+            </div>
           </div>
         </div>
-      </div>
 
-      <Form>
-        <div ref={containerRef} className={styles.workspaceBody} id="workspace-body" onMouseDown={handleBodyMouseDown}>
-          <ReactSortable
-            id="workspace-content"
-            list={workbenchComponents}
-            setList={updateComponents}
-            filter={SORTABLE_CONFIG.filter}
-            preventOnFilter={SORTABLE_CONFIG.preventOnFilter}
-            sort={SORTABLE_CONFIG.sort}
-            forceFallback={SORTABLE_CONFIG.forceFallback}
-            className={styles.workspaceContent}
-            onAdd={handlers.handleComponentAdd}
-            onStart={handlers.handleDragStart}
-            group={{ name: COMPONENT_GROUP_NAME }}
+        <Form>
+          <div
+            ref={containerRef}
+            className={styles.workspaceBody}
+            id="workspace-body"
+            onMouseDown={handleBodyMouseDown}
           >
-            {workbenchComponents
-              ?.filter((cp: GridItem) => cp.type !== 'entity')
-              .map((cp: GridItem) => {
-                const currentWidth = getWorkbenchComponentWidth(wbComponentSchemas[cp.id], cp.type);
-                const isSelected = curComponentID === cp.id;
+            <ReactSortable
+              id="workspace-content"
+              list={workbenchComponents}
+              setList={updateComponents}
+              filter={SORTABLE_CONFIG.filter}
+              preventOnFilter={SORTABLE_CONFIG.preventOnFilter}
+              sort={SORTABLE_CONFIG.sort}
+              forceFallback={SORTABLE_CONFIG.forceFallback}
+              className={styles.workspaceContent}
+              onAdd={handlers.handleComponentAdd}
+              onStart={handlers.handleDragStart}
+              group={{ name: COMPONENT_GROUP_NAME }}
+            >
+              {workbenchComponents
+                ?.filter((cp: GridItem) => cp.type !== 'entity')
+                .map((cp: GridItem) => {
+                  const currentWidth = getWorkbenchComponentWidth(
+                    wbComponentSchemas[cp.id],
+                    cp.type as WorkbenchComponentType
+                  );
+                  const isSelected = curComponentID === cp.id;
 
-                return (
-                  <WorkbenchItem
-                    key={cp.id}
-                    component={cp}
-                    isSelected={isSelected}
-                    currentWidth={currentWidth}
-                    containerWidth={containerWidth}
-                    pageComponentSchema={wbComponentSchemas[cp.id]}
-                    onOperation={{
-                      show: handlers.handleShowComponent,
-                      copy: handlers.handleCopyComponent,
-                      delete: handlers.handleDeleteComponent,
-                      widthChange: handlers.handleWidthChange,
-                      select: handlers.handleSelectComponent
-                    }}
-                  />
-                );
-              })}
-          </ReactSortable>
+                  return (
+                    <WorkbenchItem
+                      key={cp.id}
+                      component={cp}
+                      isSelected={isSelected}
+                      currentWidth={currentWidth}
+                      containerWidth={containerWidth}
+                      pageComponentSchema={wbComponentSchemas[cp.id]}
+                      onOperation={{
+                        show: handlers.handleShowComponent,
+                        copy: handlers.handleCopyComponent,
+                        delete: handlers.handleDeleteComponent,
+                        widthChange: handlers.handleWidthChange,
+                        select: handlers.handleSelectComponent
+                      }}
+                    />
+                  );
+                })}
+            </ReactSortable>
 
-          {showEmpty && <EmptyState />}
-        </div>
-      </Form>
-    </div>
+            {showEmpty && <EmptyState />}
+          </div>
+        </Form>
+      </div>
+    </>
   );
 }

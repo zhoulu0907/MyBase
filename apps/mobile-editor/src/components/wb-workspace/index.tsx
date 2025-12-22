@@ -60,8 +60,6 @@ const WorkbenchWorkspace: React.FC<EditorWorkspaceProps> = ({ props }) => {
     setShowDeleteButton
   } = props;
 
-  console.log('--3--editMode: ', props, editMode);
-
   // 处理组件列表变化
   useEffect(() => {
     setShowEmpty(currentComponents?.length === 0);
