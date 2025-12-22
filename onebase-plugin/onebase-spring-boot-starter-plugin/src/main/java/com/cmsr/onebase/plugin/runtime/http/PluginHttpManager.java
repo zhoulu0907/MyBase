@@ -234,25 +234,40 @@ public class PluginHttpManager {
             return;
         }
 
+        // 1. 获取类级别的@RequestMapping前缀
+        String classLevelPrefix = "";
+        if (handlerClass.isAnnotationPresent(org.springframework.web.bind.annotation.RequestMapping.class)) {
+            org.springframework.web.bind.annotation.RequestMapping classMapping = 
+                handlerClass.getAnnotation(org.springframework.web.bind.annotation.RequestMapping.class);
+            String[] classPaths = classMapping.value().length > 0 ? classMapping.value() : classMapping.path();
+            if (classPaths.length > 0) {
+                classLevelPrefix = classPaths[0];
+            }
+        }
+
         boolean hasMapping = false;
         Method[] methods = handlerClass.getMethods();
 
+        // 2. 遍历方法，提取路径并组合
         for (Method method : methods) {
-            List<String> paths = extractMethodPaths(method);
-            if (paths.isEmpty()) {
+            List<String> methodPaths = extractMethodPaths(method);
+            if (methodPaths.isEmpty()) {
                 continue;
             }
 
             hasMapping = true;
-            for (String path : paths) {
+            for (String methodPath : methodPaths) {
+                // 3. 组合类级别前缀和方法级别路径
+                String fullPath = combinePath(classLevelPrefix, methodPath);
+                
                 // 记录映射元数据（不直接向Spring注册，使用代理模式）
                 String pid = pluginId != null ? pluginId : resolvePluginIdFromClassLoader(handlerClass.getClassLoader());
                 if (pid == null) {
                     pid = "unknown";
                 }
-                pluginMappings.computeIfAbsent(pid, k -> new ArrayList<>()).add(path);
+                pluginMappings.computeIfAbsent(pid, k -> new ArrayList<>()).add(fullPath);
                 log.debug("  记录映射元数据: {} -> {}#{} (plugin={})", 
-                         path, handlerClass.getName(), method.getName(), pid);
+                         fullPath, handlerClass.getName(), method.getName(), pid);
             }
         }
 
@@ -273,7 +288,7 @@ public class PluginHttpManager {
     }
 
     /**
-     * 提取方法的映射路径
+     * 提取方法的映射路径（仅方法级别，不包含类级别前缀）
      *
      * @param method 方法对象
      * @return 映射路径列表
@@ -314,6 +329,38 @@ public class PluginHttpManager {
         }
 
         return paths;
+    }
+    
+    /**
+     * 组合类级别前缀和方法级别路径
+     *
+     * @param prefix 类级别前缀
+     * @param suffix 方法级别路径
+     * @return 组合后的完整路径
+     */
+    private String combinePath(String prefix, String suffix) {
+        if (prefix == null || prefix.isEmpty()) {
+            return suffix;
+        }
+        if (suffix == null || suffix.isEmpty()) {
+            return prefix;
+        }
+        
+        // 确保前缀以 / 开头
+        if (!prefix.startsWith("/")) {
+            prefix = "/" + prefix;
+        }
+        // 移除前缀末尾的 /
+        if (prefix.endsWith("/")) {
+            prefix = prefix.substring(0, prefix.length() - 1);
+        }
+        
+        // 确保后缀以 / 开头
+        if (!suffix.startsWith("/")) {
+            suffix = "/" + suffix;
+        }
+        
+        return prefix + suffix;
     }
 
     /**

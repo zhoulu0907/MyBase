@@ -191,6 +191,20 @@ public class PluginHttpDispatcher {
         Method[] methods = handlerClass.getMethods();
         java.util.List<String> addedKeys = new java.util.ArrayList<>();
 
+        // 1. 获取类级别的@RequestMapping前缀
+        String classLevelPrefix = "";
+        if (handlerClass.isAnnotationPresent(org.springframework.web.bind.annotation.RequestMapping.class)) {
+            org.springframework.web.bind.annotation.RequestMapping classMapping = 
+                handlerClass.getAnnotation(org.springframework.web.bind.annotation.RequestMapping.class);
+            String[] classPaths = classMapping.value().length > 0 ? classMapping.value() : classMapping.path();
+            if (classPaths.length > 0) {
+                classLevelPrefix = classPaths[0];
+            }
+        }
+        
+        log.debug("  类级别前缀: {}", classLevelPrefix.isEmpty() ? "(无)" : classLevelPrefix);
+
+        // 2. 遍历方法级别的映射注解
         for (Method method : methods) {
             String[] paths = null;
             String httpMethod = null;
@@ -227,12 +241,15 @@ public class PluginHttpDispatcher {
             }
 
             if (paths != null && httpMethod != null) {
-                    for (String path : paths) {
-                    // 如果路径以 /plugin 开头，去掉这个前缀
+                for (String methodPath : paths) {
+                    // 3. 组合类级别前缀和方法级别路径
+                    String fullPath = combinePath(classLevelPrefix, methodPath);
+                    
+                    // 4. 如果路径以 /plugin 开头，去掉这个前缀
                     // 因为 PluginHttpHandler 的 @RequestMapping("/plugin") 会自动处理这个前缀
-                    String normalizedPath = path;
-                    if (path.startsWith("/plugin")) {
-                        normalizedPath = path.substring(7); // 去掉 "/plugin"
+                    String normalizedPath = fullPath;
+                    if (fullPath.startsWith("/plugin")) {
+                        normalizedPath = fullPath.substring(7); // 去掉 "/plugin"
                     }
                     
                     String key = buildRouteKey(httpMethod, normalizedPath);
@@ -259,6 +276,38 @@ public class PluginHttpDispatcher {
         }
         log.info("  Handler扫描完成: {} (本次新增 {} 个路由)", handlerClass.getName(), addedKeys.size());
         return addedKeys;
+    }
+    
+    /**
+     * 组合类级别前缀和方法级别路径
+     *
+     * @param prefix 类级别前缀
+     * @param suffix 方法级别路径
+     * @return 组合后的完整路径
+     */
+    private String combinePath(String prefix, String suffix) {
+        if (prefix == null || prefix.isEmpty()) {
+            return suffix;
+        }
+        if (suffix == null || suffix.isEmpty()) {
+            return prefix;
+        }
+        
+        // 确保前缀以 / 开头
+        if (!prefix.startsWith("/")) {
+            prefix = "/" + prefix;
+        }
+        // 移除前缀末尾的 /
+        if (prefix.endsWith("/")) {
+            prefix = prefix.substring(0, prefix.length() - 1);
+        }
+        
+        // 确保后缀以 / 开头
+        if (!suffix.startsWith("/")) {
+            suffix = "/" + suffix;
+        }
+        
+        return prefix + suffix;
     }
 
     /**

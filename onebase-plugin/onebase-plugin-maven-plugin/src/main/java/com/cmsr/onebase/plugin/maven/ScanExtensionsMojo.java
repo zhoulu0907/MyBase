@@ -252,7 +252,9 @@ public class ScanExtensionsMojo extends AbstractMojo {
     private class HttpHandlerRouteValidator extends ClassVisitor {
         private String className;
         private boolean isHttpHandler = false;
-        private final List<String> requestMappingPaths = new ArrayList<>();
+        private String classLevelPrefix = "";
+        private final List<String> methodLevelPaths = new ArrayList<>();
+        private final List<String> combinedPaths = new ArrayList<>();
 
         public HttpHandlerRouteValidator(String className) {
             super(Opcodes.ASM9);
@@ -284,7 +286,7 @@ public class ScanExtensionsMojo extends AbstractMojo {
                                 @Override
                                 public void visit(String name, Object value) {
                                     if (value instanceof String) {
-                                        requestMappingPaths.add((String) value);
+                                        classLevelPrefix = (String) value;
                                     }
                                 }
                             };
@@ -295,7 +297,7 @@ public class ScanExtensionsMojo extends AbstractMojo {
                     @Override
                     public void visit(String name, Object value) {
                         if (("value".equals(name) || "path".equals(name)) && value instanceof String) {
-                            requestMappingPaths.add((String) value);
+                            classLevelPrefix = (String) value;
                         }
                     }
                 };
@@ -325,7 +327,7 @@ public class ScanExtensionsMojo extends AbstractMojo {
                                         @Override
                                         public void visit(String name, Object value) {
                                             if (value instanceof String) {
-                                                requestMappingPaths.add((String) value);
+                                                methodLevelPaths.add((String) value);
                                             }
                                         }
                                     };
@@ -336,7 +338,7 @@ public class ScanExtensionsMojo extends AbstractMojo {
                             @Override
                             public void visit(String name, Object value) {
                                 if (("value".equals(name) || "path".equals(name)) && value instanceof String) {
-                                    requestMappingPaths.add((String) value);
+                                    methodLevelPaths.add((String) value);
                                 }
                             }
                         };
@@ -350,8 +352,60 @@ public class ScanExtensionsMojo extends AbstractMojo {
             return isHttpHandler;
         }
         
+        /**
+         * 获取组合后的完整路径列表
+         * 将类级别前缀与方法级别路径组合
+         */
         public List<String> getRequestMappingPaths() {
-            return requestMappingPaths;
+            if (combinedPaths.isEmpty()) {
+                buildCombinedPaths();
+            }
+            return combinedPaths;
+        }
+        
+        /**
+         * 组合类级别前缀和方法级别路径
+         */
+        private void buildCombinedPaths() {
+            // 如果只有类级别路径，没有方法级别路径
+            if (methodLevelPaths.isEmpty() && !classLevelPrefix.isEmpty()) {
+                combinedPaths.add(classLevelPrefix);
+                return;
+            }
+            
+            // 如果有方法级别路径
+            for (String methodPath : methodLevelPaths) {
+                String fullPath = combinePath(classLevelPrefix, methodPath);
+                combinedPaths.add(fullPath);
+            }
+        }
+        
+        /**
+         * 组合两个路径，处理斜杠
+         */
+        private String combinePath(String prefix, String suffix) {
+            if (prefix == null || prefix.isEmpty()) {
+                return suffix;
+            }
+            if (suffix == null || suffix.isEmpty()) {
+                return prefix;
+            }
+            
+            // 确保前缀以 / 开头
+            if (!prefix.startsWith("/")) {
+                prefix = "/" + prefix;
+            }
+            // 移除前缀末尾的 /
+            if (prefix.endsWith("/")) {
+                prefix = prefix.substring(0, prefix.length() - 1);
+            }
+            
+            // 确保后缀以 / 开头
+            if (!suffix.startsWith("/")) {
+                suffix = "/" + suffix;
+            }
+            
+            return prefix + suffix;
         }
     }
 

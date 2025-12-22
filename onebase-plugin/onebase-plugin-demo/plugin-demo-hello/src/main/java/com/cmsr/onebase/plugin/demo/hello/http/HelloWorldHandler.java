@@ -1,6 +1,7 @@
 package com.cmsr.onebase.plugin.demo.hello.http;
 
 import com.cmsr.onebase.plugin.api.HttpHandler;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,16 +30,18 @@ import java.util.Map;
  * @date 2025-12-13
  */
 @RestController
+@Slf4j
+@RequestMapping("/plugin/hello-plugin")
 public class HelloWorldHandler implements HttpHandler {
 
     /**
      * Hello World接口
      * <p>访问路径：GET /plugin/hello-plugin/hello?name=xxx</p>
      */
-    @GetMapping("/plugin/hello-plugin/hello")
+    @GetMapping("/hello")
     public Map<String, Object> hello(@RequestParam(defaultValue = "World") String name) {
         Map<String, Object> result = new HashMap<>();
-        result.put("message", "顶顶顶顶顶单打独斗, " + name + "!");
+        result.put("message", "hello, " + name + "!");
         result.put("timestamp", LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         result.put("plugin", "hello-plugin");
         
@@ -47,6 +50,22 @@ public class HelloWorldHandler implements HttpHandler {
         result.put("loadSource", loadSource);
         result.put("version", getVersionBySource(loadSource));
         
+        return result;
+    }
+
+    /**
+     * 处理 JSON 数据接口（测试 @RequestBody）
+     * <p>访问路径：POST /plugin/hello-plugin/process</p>
+     * <p>请求体示例：{"name": "OneBase", "value": 100}</p>
+     */
+    @PostMapping("/process")
+    public Map<String, Object> processData(@RequestBody Map<String, Object> data) {
+        Map<String, Object> result = new HashMap<>();
+        result.put("received", data);
+        result.put("size", data.size());
+        result.put("timestamp", LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+        result.put("plugin", "hello-plugin");
+        result.put("message", "数据处理成功");
         return result;
     }
     
@@ -67,42 +86,41 @@ public class HelloWorldHandler implements HttpHandler {
         try {
             ClassLoader classLoader = this.getClass().getClassLoader();
             String className = classLoader.getClass().getName();
-            System.out.println("[HelloWorldHandler] 检测加载来源 - ClassLoader类型: " + className);
+            log.info("[HelloWorldHandler] 检测加载来源 - ClassLoader类型: {}", className);
             
             // PF4J的PluginClassLoader表示从ZIP/JAR加载
             if (className.contains("PluginClassLoader")) {
-                System.out.println("[HelloWorldHandler] 检测结果: ZIP_PACKAGE (PluginClassLoader)");
+                log.info("[HelloWorldHandler] 检测结果: ZIP_PACKAGE (PluginClassLoader)");
                 return "ZIP_PACKAGE";
             }
             
             // 检查资源路径
             String resourcePath = this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath();
-            System.out.println("[HelloWorldHandler] 检测加载来源 - 资源路径: " + resourcePath);
+            log.info("[HelloWorldHandler] 检测加载来源 - 资源路径: {}", resourcePath);
             
             // 如果在BOOT-INF中，说明是Spring Boot打包的依赖，属于classpath方式
             if (resourcePath.contains("BOOT-INF")) {
-                System.out.println("[HelloWorldHandler] 检测结果: CLASSPATH_DIRECT (BOOT-INF依赖)");
+                log.info("[HelloWorldHandler] 检测结果: CLASSPATH_DIRECT (BOOT-INF依赖)");
                 return "CLASSPATH_DIRECT";
             }
             
             // 如果在Maven本地仓库(.m2/repository)或target/classes，也属于classpath方式
             if (resourcePath.contains(".m2/repository") || resourcePath.contains("target/classes") || resourcePath.contains("target\\classes")) {
-                System.out.println("[HelloWorldHandler] 检测结果: CLASSPATH_DIRECT (Maven依赖或编译输出)");
+                log.info("[HelloWorldHandler] 检测结果: CLASSPATH_DIRECT (Maven依赖或编译输出)");
                 return "CLASSPATH_DIRECT";
             }
             
             // 如果包含.zip/.jar且不在上述目录，则是真正的ZIP包加载
             if (resourcePath.contains(".zip") || resourcePath.contains(".jar")) {
-                System.out.println("[HelloWorldHandler] 检测结果: ZIP_PACKAGE (外部JAR/ZIP)");
+                log.info("[HelloWorldHandler] 检测结果: ZIP_PACKAGE (外部JAR/ZIP)");
                 return "ZIP_PACKAGE";
             }
             
             // 默认是从classpath加载（DEV模式）
-            System.out.println("[HelloWorldHandler] 检测结果: CLASSPATH_DIRECT (默认classpath)");
+            log.info("[HelloWorldHandler] 检测结果: CLASSPATH_DIRECT (默认classpath)");
             return "CLASSPATH_DIRECT";
         } catch (Exception e) {
-            System.err.println("[HelloWorldHandler] 检测加载来源失败: " + e.getMessage());
-            e.printStackTrace();
+            log.error("[HelloWorldHandler] 检测加载来源失败: {}", e.getMessage());
             return "CLASSPATH_DIRECT";
         }
     }
@@ -115,22 +133,6 @@ public class HelloWorldHandler implements HttpHandler {
             return "1.0.0-FROM-ZIP";
         }
         return "1.0.0-FROM-CLASSPATH";
-    }
-
-    /**
-     * 处理 JSON 数据接口（测试 @RequestBody）
-     * <p>访问路径：POST /plugin/hello-plugin/process</p>
-     * <p>请求体示例：{"name": "OneBase", "value": 100}</p>
-     */
-    @PostMapping("/plugin/hello-plugin/process")
-    public Map<String, Object> processData(@RequestBody Map<String, Object> data) {
-        Map<String, Object> result = new HashMap<>();
-        result.put("received", data);
-        result.put("size", data.size());
-        result.put("timestamp", LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-        result.put("plugin", "hello-plugin");
-        result.put("message", "数据处理成功");
-        return result;
     }
 }
 
