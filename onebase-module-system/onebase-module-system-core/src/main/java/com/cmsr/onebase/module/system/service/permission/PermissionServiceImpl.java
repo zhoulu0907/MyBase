@@ -4,7 +4,6 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import com.cmsr.onebase.framework.common.biz.system.permission.dto.DeptDataPermissionRespDTO;
-import com.cmsr.onebase.framework.common.enums.CommonPublishModelEnum;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
@@ -39,11 +38,11 @@ import com.cmsr.onebase.module.system.vo.permission.PermissionMenuRespVO;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.Sets;
+import com.mybatisflex.core.query.QueryWrapper;
 import com.mzt.logapi.context.LogRecordContext;
 import com.mzt.logapi.starter.annotation.LogRecord;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.data.param.init.DefaultConfigStore;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -525,7 +524,7 @@ public class PermissionServiceImpl implements PermissionService {
             return userRole;
         }).collect(Collectors.toList());
 
-        List<UserRoleDO> insertedList = userRoleDataRepository.upsertBatch(userRoleList);
+        userRoleDataRepository.upsertBatch(userRoleList);
         List<AdminUserDO> userList = userService.getUserList(userIds);
 
         // 记录操作日志上下文
@@ -535,20 +534,20 @@ public class PermissionServiceImpl implements PermissionService {
         LogRecordContext.putVariable("role", role);
         LogRecordContext.putVariable("userNames",
                 userList.stream().map(AdminUserDO::getNickname).collect(Collectors.joining(",")));
-        return CollUtil.isEmpty(insertedList) ? 0 : insertedList.size();
+        return CollUtil.isEmpty(userRoleList) ? 0 : userRoleList.size();
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     @TenantIgnore
     @LogRecord(type = SYSTEM_PERMISSION_TYPE, subType = SYSTEM_PERMISSION_DELETE_ROLE_USERS_SUB_TYPE, bizNo = "{{#role.id}}", success = SYSTEM_PERMISSION_DELETE_ROLE_USERS__SUCCESS)
-    public long deleteRoleUsers(Long roleId, Set<Long> userIds) {
+    public boolean deleteRoleUsers(Long roleId, Set<Long> userIds) {
         // 参数校验
         if (CollUtil.isEmpty(userIds)) {
-            return 0;
+            return false;
         }
 
-        long deleted = userRoleDataRepository.deleteByRoleIdAndUserIds(roleId, userIds);
+        boolean deleted = userRoleDataRepository.deleteByRoleIdAndUserIds(roleId, userIds);
 
         RoleDO role = roleService.getRole(roleId);
 
@@ -566,8 +565,8 @@ public class PermissionServiceImpl implements PermissionService {
 
     @Override
     public UserRoleDO getUserRoleByUserAndRoleId(Long userId, Long roleId) {
-        return userRoleDataRepository.findOne(
-                new DefaultConfigStore().eq(UserRoleDO.USER_ID, userId).eq(UserRoleDO.ROLE_ID, roleId));
+        return userRoleDataRepository.getOne(
+                new QueryWrapper().eq(UserRoleDO.USER_ID, userId).eq(UserRoleDO.ROLE_ID, roleId));
     }
 
     @Override

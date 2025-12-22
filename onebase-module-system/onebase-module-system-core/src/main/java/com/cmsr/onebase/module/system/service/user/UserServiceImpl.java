@@ -22,13 +22,13 @@ import com.cmsr.onebase.module.system.convert.user.UserConvert;
 import com.cmsr.onebase.module.system.dal.database.RoleDataRepository;
 import com.cmsr.onebase.module.system.dal.database.UserPostDataRepository;
 import com.cmsr.onebase.module.system.dal.database.UserRoleDataRepository;
-import com.cmsr.onebase.module.system.dal.database.user.UserDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.UserPostDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.UserRoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.UserAppRelationDO;
+import com.cmsr.onebase.module.system.dal.flex.repo.UserDataRepository;
 import com.cmsr.onebase.module.system.dal.redis.RedisKeyConstants;
 import com.cmsr.onebase.module.system.enums.dept.DeptCodeEnum;
 import com.cmsr.onebase.module.system.enums.dept.DeptTypeEnum;
@@ -45,12 +45,12 @@ import com.cmsr.onebase.module.system.service.permission.RoleService;
 import com.cmsr.onebase.module.system.service.post.PostService;
 import com.cmsr.onebase.module.system.service.tenant.TenantService;
 import com.cmsr.onebase.module.system.vo.auth.AuthRegisterReqVO;
-import com.cmsr.onebase.module.system.vo.auth.ThirdAuthLoginReqVO;
 import com.cmsr.onebase.module.system.vo.dept.DeptSaveReqVO;
 import com.cmsr.onebase.module.system.vo.dept.DeptSimpleListRespVO;
 import com.cmsr.onebase.module.system.vo.role.RoleInsertReqVO;
 import com.cmsr.onebase.module.system.vo.user.*;
 import com.google.common.annotations.VisibleForTesting;
+import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.core.tenant.TenantManager;
 import com.mzt.logapi.context.LogRecordContext;
 import com.mzt.logapi.service.impl.DiffParseFunction;
@@ -58,7 +58,6 @@ import com.mzt.logapi.starter.annotation.LogRecord;
 import jakarta.annotation.Resource;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.data.param.init.DefaultConfigStore;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -185,13 +184,13 @@ public class UserServiceImpl implements UserService {
         if (UserTypeEnum.CORP.getValue().equals(user.getUserType())) {
             user.setCorpId(loginUser.getCorpId());
         }
-        userDataRepository.insert(user);
+        userDataRepository.save(user);
         // 2.1.1 保存初始密码历史记录
         securityConfigApi.savePasswordHistory(user.getId(), user.getPassword());
 
         // 2.2 插入关联岗位
         if (CollUtil.isNotEmpty(user.getPostIds())) {
-            userPostDataRepository.insertBatch(convertList(user.getPostIds(),
+            userPostDataRepository.saveBatch(convertList(user.getPostIds(),
                     postId -> new UserPostDO().setUserId(user.getId()).setPostId(postId)));
         }
 
@@ -231,14 +230,14 @@ public class UserServiceImpl implements UserService {
             userDO.setAdminType(AdminTypeEnum.CUSTOM.getType());
         }
         userDO.setUserType(UserTypeEnum.CORP.getValue());
-        AdminUserDO adminUserDO = userDataRepository.insert(userDO);
+        userDataRepository.save(userDO);
 
         // 保存初始密码历史记录
-        securityConfigApi.savePasswordHistory(adminUserDO.getId(), adminUserDO.getPassword());
+        securityConfigApi.savePasswordHistory(userDO.getId(), userDO.getPassword());
 
         Long roleId = createCoreAdminRole();
-        permissionService.assignUserRoles(adminUserDO.getId(), singleton(roleId));
-        return adminUserDO.getId();
+        permissionService.assignUserRoles(userDO.getId(), singleton(roleId));
+        return userDO.getId();
     }
 
     private Long createCoreAdminRole() {
@@ -276,7 +275,7 @@ public class UserServiceImpl implements UserService {
             user.setAdminType(AdminTypeEnum.CUSTOM.getType());
         }
         user.setUserType(UserTypeEnum.PLATFORM.getValue());
-        userDataRepository.insert(user);
+        userDataRepository.save(user);
 
         // 保存初始密码历史记录
         securityConfigApi.savePasswordHistory(user.getId(), user.getPassword());
@@ -318,7 +317,7 @@ public class UserServiceImpl implements UserService {
         user.setStatus(CommonStatusEnum.ENABLE.getStatus()); // 默认开启
         user.setPassword(encodePassword(registerReqVO.getPassword())); //
         user.setUserType(registerReqVO.getUserType());
-        userDataRepository.insert(user);
+        userDataRepository.save(user);
 
         // 2.1 保存初始密码历史记录
         securityConfigApi.savePasswordHistory(user.getId(), user.getPassword());
@@ -379,7 +378,7 @@ public class UserServiceImpl implements UserService {
         Collection<Long> deletePostIds = CollUtil.subtract(dbPostIds, postIds);
         // 执行新增和删除。对于已经授权的岗位，不用做任何处理
         if (!CollUtil.isEmpty(createPostIds)) {
-            userPostDataRepository.insertBatch(convertList(createPostIds,
+            userPostDataRepository.saveBatch(convertList(createPostIds,
                     postId -> new UserPostDO().setUserId(userId).setPostId(postId)));
         }
         if (!CollUtil.isEmpty(deletePostIds)) {
@@ -448,8 +447,7 @@ public class UserServiceImpl implements UserService {
         tenantService.handleTenantInfo(tenant -> {
             // 如果用户的租户不是平台租户，则校验租户用户最大限额
             if (!tenant.getTenantCode().equals(TenantCodeEnum.PLATFORM_TENANT.getCode())) {
-                long count = userDataRepository.countByConfig(new DefaultConfigStore().eq(AdminUserDO.STATUS,
-                        UserStatusEnum.NORMAL.getStatus()));
+                long count = userDataRepository.count(new QueryWrapper().eq(AdminUserDO.STATUS, UserStatusEnum.NORMAL.getStatus()));
                 log.info(" count user four tenant, count={}", count);
                 if (count >= tenant.getAccountCount()) {
                     throw exception(USER_COUNT_MAX, tenant.getAccountCount());
@@ -540,7 +538,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public AdminUserDO getUser(Long id) {
-        AdminUserDO adminUserDo = userDataRepository.findById(id);
+        AdminUserDO adminUserDo = userDataRepository.getById(id);
         return adminUserDo;
     }
 
@@ -567,7 +565,7 @@ public class UserServiceImpl implements UserService {
         if (CollUtil.isEmpty(userIds)) {
             return Collections.emptyList();
         }
-        return userDataRepository.findAllByIds(userIds);
+        return userDataRepository.listByIds(userIds);
     }
 
     @Override
@@ -576,7 +574,7 @@ public class UserServiceImpl implements UserService {
         if (CollUtil.isEmpty(ids)) {
             return Collections.emptyList();
         }
-        return userDataRepository.findAllByIds(ids);
+        return userDataRepository.listByIds(ids);
     }
 
 
@@ -586,7 +584,7 @@ public class UserServiceImpl implements UserService {
         if (CollUtil.isEmpty(ids)) {
             return Collections.emptyList();
         }
-        return userDataRepository.findAllByIds(ids);
+        return userDataRepository.listByIds(ids);
     }
 
     @Override
@@ -595,7 +593,7 @@ public class UserServiceImpl implements UserService {
             return;
         }
         // 获得岗位信息
-        List<AdminUserDO> users = userDataRepository.findAllByIds(ids);
+        List<AdminUserDO> users = userDataRepository.listByIds(ids);
         Map<Long, AdminUserDO> userMap = CollectionUtils.convertMap(users, AdminUserDO::getId);
         // 校验
         ids.forEach(id -> {
@@ -651,7 +649,7 @@ public class UserServiceImpl implements UserService {
         if (id == null) {
             return null;
         }
-        AdminUserDO user = userDataRepository.findById(id);
+        AdminUserDO user = userDataRepository.getById(id);
         log.info("find user id is {}, user:{}", id, user);
         if (user == null) {
             throw exception(USER_NOT_EXISTS);
@@ -724,7 +722,7 @@ public class UserServiceImpl implements UserService {
      */
     @VisibleForTesting
     void validateOldPassword(Long id, String oldPassword) {
-        AdminUserDO user = userDataRepository.findById(id);
+        AdminUserDO user = userDataRepository.getById(id);
         if (user == null) {
             throw exception(USER_NOT_EXISTS);
         }
@@ -773,7 +771,7 @@ public class UserServiceImpl implements UserService {
             if (existUser == null) {
                 AdminUserDO newUser = BeanUtils.toBean(importUser, AdminUserDO.class)
                         .setPassword(encodePassword(initPassword)).setPostIds(new HashSet<>());
-                userDataRepository.insert(newUser);
+                userDataRepository.save(newUser);
                 // 保存初始密码历史记录
                 securityConfigApi.savePasswordHistory(newUser.getId(), newUser.getPassword());
                 respVO.getCreateUsernames().add(importUser.getUsername());
@@ -1115,7 +1113,7 @@ public class UserServiceImpl implements UserService {
         user.setCreateSource(CreateSourceEnum.BACK.getCode());
         user.setDeptId(reqVO.getDeptId());
         user.setAdminType(AdminTypeEnum.CUSTOM.getType());
-        userDataRepository.insert(user);
+        userDataRepository.save(user);
 
         // 创建关联关系
         setUserAppRelation(user.getId(), reqVO.getApplicationIdList());
@@ -1301,7 +1299,7 @@ public class UserServiceImpl implements UserService {
         user.setStatus(UserStatusEnum.NORMAL.getStatus());
         user.setUsername(reqVO.getMobile());
         user.setCreateSource(CreateSourceEnum.SELF.getCode());
-        userDataRepository.insert(user);
+        userDataRepository.save(user);
         return user.getId();
     }
 
@@ -1381,7 +1379,7 @@ public class UserServiceImpl implements UserService {
         user.setEmail(reqVO.getEmail());
         user.setPassword(encodePassword(reqVO.getPassword()));
         user.setCreateSource(CreateSourceEnum.SELF.getCode());
-        userDataRepository.insert(user);
+        userDataRepository.save(user);
 
 
         // 创建用户关联应用
