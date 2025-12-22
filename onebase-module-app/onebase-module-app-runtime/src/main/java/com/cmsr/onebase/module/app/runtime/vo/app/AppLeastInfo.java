@@ -25,4 +25,6 @@ public class AppLeastInfo {
     @Schema(description = "应用描述")
     private String description;
 
+    @Schema(description = "发布模式")
+    private String publishModel;
 }
