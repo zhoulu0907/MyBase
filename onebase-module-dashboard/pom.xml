@@ -9,12 +9,12 @@
         <version>${revision}</version>
     </parent>
 
-    <artifactId>onebase-module-screen</artifactId>
+    <artifactId>onebase-module-dashboard</artifactId>
     <modules>
-        <module>onebase-module-screen-api</module>
-        <module>onebase-module-screen-core</module>
-        <module>onebase-module-screen-runtime</module>
-        <module>onebase-module-screen-build</module>
+        <module>onebase-module-dashboard-api</module>
+        <module>onebase-module-dashboard-core</module>
+        <module>onebase-module-dashboard-runtime</module>
+        <module>onebase-module-dashboard-build</module>
     </modules>
     <packaging>pom</packaging>
 

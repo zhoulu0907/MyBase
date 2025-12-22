@@ -5,16 +5,24 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.cmsr.onebase</groupId>
-        <artifactId>onebase-module-screen</artifactId>
+        <artifactId>onebase-module-dashboard</artifactId>
         <version>${revision}</version>
     </parent>
 
-    <artifactId>onebase-module-screen-api</artifactId>
+    <artifactId>onebase-module-dashboard-build</artifactId>
     <packaging>jar</packaging>
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-dashboard-core</artifactId>
+            <version>${revision}</version>
+        </dependency>
+    </dependencies>
 
 </project>

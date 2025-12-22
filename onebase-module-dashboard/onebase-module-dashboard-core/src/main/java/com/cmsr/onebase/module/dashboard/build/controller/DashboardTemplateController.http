@@ -41,7 +41,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
 ### 4. 获取仪表盘模板
-GET {{baseUrl}}/dashboard/template/get?id=192459907207725056
+GET {{baseUrl}}/dashboard/template/get?id=192443689411117056
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 

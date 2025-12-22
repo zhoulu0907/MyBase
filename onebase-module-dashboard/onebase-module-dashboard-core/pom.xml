@@ -5,11 +5,11 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.cmsr.onebase</groupId>
-        <artifactId>onebase-module-screen</artifactId>
+        <artifactId>onebase-module-dashboard</artifactId>
         <version>${revision}</version>
     </parent>
 
-    <artifactId>onebase-module-screen-core</artifactId>
+    <artifactId>onebase-module-dashboard-core</artifactId>
     <packaging>jar</packaging>
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
