@@ -49,6 +49,16 @@ public interface SystemConfigService {
      */
     List<SystemGeneralConfigDO> getTenantConfigList(SystemConfigReqVO pageReqVO);
 
+
+
+    /**
+     * 获得参数配置分页
+     *
+     * @param  key
+     * @return 参数配置分页
+     */
+    SystemGeneralConfigDO getTenantConfigByKey(String key);
+
     /**
      * 更新参数配置状态
      *

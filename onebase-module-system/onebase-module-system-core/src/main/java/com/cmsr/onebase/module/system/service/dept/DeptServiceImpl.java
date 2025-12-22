@@ -376,7 +376,6 @@ public class DeptServiceImpl implements DeptService {
         Integer userType = reqVO.getUserType();
         DeptAndUsersRespVO respVO = new DeptAndUsersRespVO();
 
-
         // 判断是否有搜索关键词
         boolean hasKeywords = StrUtil.isNotBlank(reqVO.getKeywords());
         boolean hasDeptId = reqVO.getDeptId() != null && reqVO.getDeptId() > 0;
@@ -386,7 +385,14 @@ public class DeptServiceImpl implements DeptService {
             respVO.setDeptInfo(null);
 
             // 按部门名称模糊搜索部门
-            List<DeptDO> matchedDepts = deptDataRepository.findAllByNameAndStatus(reqVO.getKeywords(), null);
+            List<DeptDO> matchedDepts = new ArrayList<>();
+
+            if(null == userType){
+                matchedDepts = deptDataRepository.findAllByNameAndStatus(reqVO.getKeywords(), null);
+            } else if(UserTypeEnum.THIRD.getValue().equals(userType) ) {
+                matchedDepts = deptDataRepository.findDeptListByNameAndDeptType(reqVO.getKeywords(), DeptTypeEnum.THIRD.getCode());
+            }
+
             respVO.setDeptList(BeanUtils.toBean(matchedDepts, DeptRespVO.class));
 
             // 按用户昵称模糊搜索用户
@@ -412,7 +418,13 @@ public class DeptServiceImpl implements DeptService {
             respVO.setDeptInfo(null);
 
             // 获取所有一级部门（parentId = 0）
-            List<DeptDO> rootDepts = deptDataRepository.findAllByParentId(DeptDO.PARENT_ID_ROOT);
+            List<DeptDO> rootDepts =new ArrayList<>();
+            if (null == userType) {
+                rootDepts = deptDataRepository.findAllByParentId(DeptDO.PARENT_ID_ROOT);
+            } else if(UserTypeEnum.THIRD.getValue().equals(userType) ) {
+                rootDepts = deptDataRepository.findDeptListByDeptType(DeptTypeEnum.THIRD.getCode());
+            }
+
             respVO.setDeptList(BeanUtils.toBean(rootDepts, DeptRespVO.class));
 
             // 获取所有没有部门的用户（dept_id = null）
