@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.metadata.core.semantic.strategy;
 
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.module.flow.api.FlowProcessExecApi;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerReqDTO;
@@ -143,7 +144,7 @@ public class SemanticWorkflowExecutor {
         flowContext.put(SystemFieldConstants.REQUIRE.OWNER_ID, ObjectUtils.isEmpty(userId) ? null : String.valueOf(userId));
 
         reqDTO.setFlowContext(flowContext);
-
+        reqDTO.setApplicationId(ApplicationManager.getApplicationId());
         return reqDTO;
     }
 }
