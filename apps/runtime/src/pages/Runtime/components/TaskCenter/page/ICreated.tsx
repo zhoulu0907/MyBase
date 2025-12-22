@@ -54,22 +54,24 @@ const ICreated: FC = ({ appId }: any) => {
       render: (userArr: any) => {
         return (
           <div className="flex-bw-center">
-              {
-                userArr?.length > 0 ? <>
-                  <AvatarGroup className="color-avatar">
-                    {userArr.map((item: any, i: number) => {
-                      return <Avatar key={i}>
-                        {item?.avatar ? <img src={item?.avatar} /> : item?.userName?.charAt(0)}
-                      </Avatar>
-                    })}
-                  </AvatarGroup>
-                  <div style={{paddingLeft: '3px'}}>
-                    {userArr.map((item: any, i: number) => {
-                        return <span key={i}>{i > 0 ? `、${item?.userName}` : item?.userName}</span>
-                    })}
-                  </div>
-                </> : '-'
-              }
+            {userArr?.length > 0 ? (
+              <>
+                <AvatarGroup className="color-avatar">
+                  {userArr.map((item: any, i: number) => {
+                    return (
+                      <Avatar key={i}>{item?.avatar ? <img src={item?.avatar} /> : item?.userName?.charAt(0)}</Avatar>
+                    );
+                  })}
+                </AvatarGroup>
+                <div style={{ paddingLeft: '3px' }}>
+                  {userArr.map((item: any, i: number) => {
+                    return <span key={i}>{i > 0 ? `、${item?.userName}` : item?.userName}</span>;
+                  })}
+                </div>
+              </>
+            ) : (
+              '-'
+            )}
           </div>
         );
       },
@@ -79,7 +81,7 @@ const ICreated: FC = ({ appId }: any) => {
       title: '发起时间',
       dataIndex: 'submitTime',
       render: (value: number) => {
-        return dayjs(value).format('YYYY-MM-DD HH:mm:ss');
+        return value ? dayjs(value).format('YYYY-MM-DD HH:mm:ss') : '-';
       }
     },
     {
@@ -183,7 +185,7 @@ const ICreated: FC = ({ appId }: any) => {
           <b style={{ marginRight: '8px' }}>我创建的</b>
         </div>
         <TableSearch
-          uiConfig={{ hasInput: true, hasFilter: {dateTimeLabel: '创建时间'}, hasSort: true, hasBatch: false }}
+          uiConfig={{ hasInput: true, hasFilter: { dateTimeLabel: '创建时间' }, hasSort: true, hasBatch: false }}
           onReset={handleReset}
           onFilterChange={handleSearch}
         />
