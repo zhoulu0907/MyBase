@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.infra.dal.dataflexdo.ssecurity;
 
-import com.cmsr.onebase.framework.data.base.BaseDO;
+import com.cmsr.onebase.framework.orm.entity.BaseEntity;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Table;
@@ -19,7 +19,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Table("infra_security_config_category")
 @TenantIgnore
-public class SecurityConfigCategoryDO extends BaseDO {
+public class SecurityConfigCategoryDO extends BaseEntity {
 
     public static final String CATEGORY_CODE = "category_code";
     public static final String CATEGORY_NAME = "category_name";

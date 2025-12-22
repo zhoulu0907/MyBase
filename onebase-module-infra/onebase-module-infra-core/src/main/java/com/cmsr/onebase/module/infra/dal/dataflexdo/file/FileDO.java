@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.infra.dal.dataflexdo.file;
 
-import com.cmsr.onebase.framework.orm.entity.BaseTenantEntity;
+import com.cmsr.onebase.framework.orm.entity.BaseEntity;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Table;
@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table("infra_file")
-public class FileDO extends BaseTenantEntity {
+public class FileDO extends BaseEntity {
 
     // 字段常量定义
     public static final String COLUMN_CONFIG_ID = "config_id";

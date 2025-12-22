@@ -1,13 +1,11 @@
 package com.cmsr.onebase.module.infra.dal.dataflexdo.ssecurity;
 
-import com.cmsr.onebase.framework.data.base.BaseDO;
 import com.cmsr.onebase.framework.orm.entity.BaseTenantEntity;
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 /**
  * 租户安全记录表
