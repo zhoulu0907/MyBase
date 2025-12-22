@@ -1,5 +1,13 @@
 .pluginPage {
   padding: 20px;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  //   background-color: blue;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
 
   .search {
     width: 200px;
@@ -7,30 +15,54 @@
       border-radius: 24px;
     }
   }
-  .card {
-    border: 2px solid #009e9e;
-    border-radius: 16px;
 
-    .icon {
-      padding: 12px;
+  .cardContainer {
+    width: 100%;
+    height: 100%;
+    // background-color: red;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 16px;
+
+    .card {
+      width: calc((100% - 32px) / 3); // 一行显示3个组件：总宽度减去2个gap(16px*2=32px)，然后除以3
+      height: 100px;
+      border: 2px solid #009e9e;
       border-radius: 16px;
+      padding: 16px;
+      box-sizing: border-box;
       display: flex;
+      flex-direction: row;
       align-items: center;
-    }
+      justify-content: space-between;
 
-    .textContent {
-      display: flex;
-      flex-direction: column;
-
-      .name {
-        font-size: 16px;
-        font-weight: 500;
-        color: #272e3b;
+      .icon {
+        padding: 12px;
+        width: 32px;
+        height: 32px;
+        border-radius: 16px;
       }
-      .description {
-        color: #86909c;
-        max-width: 200px;
-        word-wrap: break-word;
+
+      .textContent {
+        display: flex;
+        flex-direction: column;
+
+        .name {
+          font-size: 16px;
+          font-weight: 500;
+          color: #272e3b;
+        }
+        .description {
+          color: #86909c;
+          max-width: 250px;
+          word-wrap: break-word;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
       }
     }
   }
