@@ -1,13 +1,13 @@
-import { Form, Input, Button, Typography, Link } from '@arco-design/web-react';
-import styles from './register.module.less';
-import { useState } from 'react';
-import ConfirmInfoForm from './confirmInfo';
-import { IconMobile } from '@arco-design/web-react/icon';
 import { emailValidator, filterSpace, phoneValidator } from '@/utils/validator';
-import { getHashQueryParam, getPublicKey, sm2Encrypt } from '@onebase/common';
-import { supplementUserInfoApi, type supplementUserInfoParams } from '@onebase/platform-center';
-import type { IRegisterProps, registerInfo } from './type';
+import { Button, Form, Input, Link, Typography } from '@arco-design/web-react';
+import { IconMobile } from '@arco-design/web-react/icon';
+import { getHashQueryParam, getOrCreateDeviceInfo, getPublicKey, sm2Encrypt } from '@onebase/common';
+import { thirdUserRegisterApi, type thirdUserRegisterParams } from '@onebase/platform-center';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import ConfirmInfoForm from './confirmInfo';
+import styles from './register.module.less';
+import type { IRegisterProps, registerInfo } from './type';
 
 // 补充用户信息页面
 const RegisterForm: React.FC<IRegisterProps> = ({ appId, isRelatedApp, tenantId, onGoBack }) => {
@@ -17,7 +17,7 @@ const RegisterForm: React.FC<IRegisterProps> = ({ appId, isRelatedApp, tenantId,
   const [loading, setLoading] = useState<boolean>(false);
   const [registerInfo, setRegisterInfo] = useState<registerInfo | null>(null);
 
-  const handleSubmitUserInfo = async() => {
+  const handleSubmitUserInfo = async () => {
     try {
       setLoading(true);
       // 先验证表单
@@ -26,19 +26,24 @@ const RegisterForm: React.FC<IRegisterProps> = ({ appId, isRelatedApp, tenantId,
         'X-Tenant-Id': tenantId
       };
       values.password = await sm2Encrypt(getPublicKey(), values?.password || '');
-      const registerParams: supplementUserInfoParams = {
+
+      const deviceId = await getOrCreateDeviceInfo();
+
+      const registerParams: thirdUserRegisterParams = {
         appId: appId,
         mobile: filterSpace(values?.mobile),
         email: filterSpace(values?.email),
         password: values?.password,
         nickName: filterSpace(values?.nickName),
+        deviceId: deviceId
       };
-      const response = await supplementUserInfoApi(registerParams, headers);
-      if(response && response.id) {
+      const response = await thirdUserRegisterApi(registerParams, headers);
+      console.log('response', response);
+      if (response) {
         setRegisterInfo(response);
-        if(isRelatedApp) {
+        if (isRelatedApp) {
           setVisible(true);
-        }else {
+        } else {
           const redirectURL = getHashQueryParam('redirectURL');
           if (redirectURL) {
             navigate(`/onebase/${appId}/${tenantId}/runtime`);
@@ -48,9 +53,9 @@ const RegisterForm: React.FC<IRegisterProps> = ({ appId, isRelatedApp, tenantId,
           }
         }
       }
-    }catch(error) {
-      console.log("error");
-    }finally {
+    } catch (error) {
+      console.log('error');
+    } finally {
       setLoading(false);
     }
   };
@@ -59,7 +64,7 @@ const RegisterForm: React.FC<IRegisterProps> = ({ appId, isRelatedApp, tenantId,
     <>
       {visible ? (
         <ConfirmInfoForm
-          initialValues = {registerInfo}
+          initialValues={registerInfo}
           onGoBack={() => {
             setVisible(false);
           }}
@@ -89,7 +94,7 @@ const RegisterForm: React.FC<IRegisterProps> = ({ appId, isRelatedApp, tenantId,
             </Form.Item>
 
             {/* 邮箱输入框（选填） */}
-            <Form.Item label="邮箱(选填)" field="email" rules={[{ validator:  emailValidator }]}>
+            <Form.Item label="邮箱(选填)" field="email" rules={[{ validator: emailValidator }]}>
               <Input placeholder="请输入邮箱" />
             </Form.Item>
 
@@ -115,30 +120,34 @@ const RegisterForm: React.FC<IRegisterProps> = ({ appId, isRelatedApp, tenantId,
               dependencies={['newPassword']}
               rules={[
                 { required: true, message: '请再次输入密码' },
-                 { min: 6, message: '密码长度不能少于6位' },
+                { min: 6, message: '密码长度不能少于6位' },
                 { max: 20, message: '密码长度不能超过20位' },
                 {
                   validator: (value: any, callback: (error?: string) => void) => {
-                if (!value) {
-                  callback('请再次输入密码');
-                } else if (registerForm.getFieldValue('password') !== value) {
-                  callback('两次输入的密码不一致');
-                } else {
-                  callback();
-                }
-              }
+                    if (!value) {
+                      callback('请再次输入密码');
+                    } else if (registerForm.getFieldValue('password') !== value) {
+                      callback('两次输入的密码不一致');
+                    } else {
+                      callback();
+                    }
+                  }
                 }
               ]}
             >
               <Input.Password placeholder="请输入确认密码" />
             </Form.Item>
 
-            {/* 确认按钮 */}
-            <Form.Item>
-              <Button type="primary" long size="large" className={styles.loginButton} onClick={handleSubmitUserInfo} loading={loading}>
-                确认
-              </Button>
-            </Form.Item>
+            <Button
+              type="primary"
+              long
+              size="large"
+              className={styles.loginButton}
+              onClick={handleSubmitUserInfo}
+              loading={loading}
+            >
+              确认
+            </Button>
           </Form>
         </div>
       )}

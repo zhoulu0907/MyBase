@@ -1,7 +1,18 @@
-
-import { externalUserListParams, createExternalUserParams, updateExternalPwdParams, updateExternalUserParams, updateStatusParams, pluginParams, updatePasswordParams, registerExternalUserParams, supplementUserInfoParams, loginConfigParams, Headers, updateLoginConfigParams } from "../types";
-import { systemService } from "./clients";
-import { runtimeService, userService } from "./clients/factory";
+import {
+  createExternalUserParams,
+  externalUserListParams,
+  Headers,
+  loginConfigParams,
+  pluginParams,
+  thirdUserRegisterParams,
+  updateExternalPwdParams,
+  updateExternalUserParams,
+  updateLoginConfigParams,
+  updatePasswordParams,
+  updateStatusParams
+} from '../types';
+import { systemService } from './clients';
+import { runtimeService, userService } from './clients/factory';
 
 //新增用户
 export const createExternalUserApi = (data: createExternalUserParams) => systemService.post('/third-user/create', data);
@@ -13,13 +24,18 @@ export const updateExternalUserApi = (data: updateExternalUserParams) => systemS
 export const deleteExternalUserApi = (id: string) => systemService.post(`/third-user/delete?id=${id}`);
 
 //获取用户列表-分页
-export const getExternalUserListApi = (data: externalUserListParams) => systemService.get('/third-user/user-applications-page', data);
+export const getExternalUserListApi = (data: externalUserListParams) =>
+  systemService.get('/third-user/user-applications-page', data);
 
 //重置用户密码
-export const updateExternalUserPwdApi = (data: updateExternalPwdParams) => systemService.post('/third-user/update-password', data);
+export const updateExternalUserPwdApi = (data: updateExternalPwdParams) =>
+  systemService.post('/third-user/update-password', data);
 
 //获取外部用户授权应用
-export const getAuthAppListApi = (userId?: string,appName?: string) => userService.post(`/user-app-relation/user-no-relation-app-list?userId=${userId ? userId : ""}&appName=${appName ? appName : ""}`);
+export const getAuthAppListApi = (userId?: string, appName?: string) =>
+  userService.post(
+    `/user-app-relation/user-no-relation-app-list?userId=${userId ? userId : ''}&appName=${appName ? appName : ''}`
+  );
 
 //修改用户状态
 export const updateStatusApi = (data: updateStatusParams) => systemService.post('/third-user/update-status', data);
@@ -31,16 +47,20 @@ export const getExternalDeptListApi = () => systemService.get('/dept/get-third-d
 export const getPluginListApi = (data: pluginParams) => systemService.get('/config/list', data);
 
 //修改状态-关闭/开启
-export const updatePluginStatusApi = (id: string, status: number) => systemService.post(`/config/update-status?id=${id}&status=${status}`);
+export const updatePluginStatusApi = (id: string, status: number) =>
+  systemService.post(`/config/update-status?id=${id}&status=${status}`);
 
 //忘记密码- 外部用户
-export const updatePasswordApi = (data: updatePasswordParams, headers: Headers) => runtimeService.post('/third-user/forget-password', data, { headers });
+export const updatePasswordApi = (data: updatePasswordParams, headers: Headers) =>
+  runtimeService.post('/third-user/forget-password', data, { headers });
 
-//补充外部用户信息
-export const supplementUserInfoApi = (data: supplementUserInfoParams, headers: Headers) => runtimeService.post('/third-user/supplement-user', data, { headers });
+//补充外部用户信息注册并登录
+export const thirdUserRegisterApi = (data: thirdUserRegisterParams, headers: Headers) =>
+  runtimeService.post('/third-user/register', data, { headers });
 
 //配置参数 -应用发布登录页
-export const loginConfigListByKeyApi = (data: loginConfigParams) => systemService.get(`/config/list-by-keys?configType=app&appId=${data.appId}&configKeys=${data.configKeys}`);
+export const loginConfigListByKeyApi = (data: loginConfigParams) =>
+  systemService.get(`/config/list-by-keys?configType=app&appId=${data.appId}&configKeys=${data.configKeys}`);
 
 //修改参数配置-应用发布登录页
 export const updateLoginConfigApi = (data: updateLoginConfigParams) => systemService.post('/config/update', data);
