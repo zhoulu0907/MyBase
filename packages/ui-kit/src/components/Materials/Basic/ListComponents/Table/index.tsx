@@ -503,7 +503,7 @@ const XTable = memo(
             nodeType: 'CONDITION',
             fieldName: key,
             operator: VALIDATION_TYPE.EQUALS,
-            fieldValue: typeof value === 'object' ? [value.id] : [value]
+            fieldValue: typeof value === 'object' ? [value?.id] : [value]
           });
         }
       });
@@ -517,7 +517,7 @@ const XTable = memo(
       const req: PageMethodV2Params = {
         pageNo: tablePageNo,
         pageSize: pageSize || 10,
-        filters: filters
+        filters: filterCondition && Object.keys(filterCondition).length > 0 ? filterCondition : filters
       };
       let res: any;
       if (props?.pageSetType === PageType.BPM) {
