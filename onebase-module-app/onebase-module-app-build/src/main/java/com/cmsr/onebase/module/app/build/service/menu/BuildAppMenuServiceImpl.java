@@ -15,8 +15,8 @@ import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageSetReposito
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppApplicationDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppMenuDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePagesetDO;
-import com.cmsr.onebase.module.app.core.dto.appresource.CopyPageSetDTO;
-import com.cmsr.onebase.module.app.core.dto.appresource.CreatePageSetDTO;
+import com.cmsr.onebase.module.app.core.dto.resource.CopyPageSetDTO;
+import com.cmsr.onebase.module.app.core.dto.resource.CreatePageSetDTO;
 import com.cmsr.onebase.module.app.core.enums.AppErrorCodeConstants;
 import com.cmsr.onebase.module.app.core.enums.menu.BpmMenuEnum;
 import com.cmsr.onebase.module.app.core.enums.menu.MenuTypeEnum;
