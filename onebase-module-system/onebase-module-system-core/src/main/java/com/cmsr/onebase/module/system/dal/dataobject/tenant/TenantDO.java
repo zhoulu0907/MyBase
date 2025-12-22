@@ -114,19 +114,19 @@ public class TenantDO extends BaseEntity {
     /**
      * 访问地址
      */
-    @Column(value = "ACCESS_URL")
+    @Column(value = ACCESS_URL)
     private String accessUrl;
 
     /**
      * saas功能是否开启默认0，开启1
      */
-    @Column(value = "PUBLISH_MODEL")
+    @Column(value = PUBLISH_MODEL)
     private String publishModel;
 
     /**
      * 用户logo
      */
-    @Column(value = "LOGO_URL")
+    @Column(value = LOGO_URL)
     private String logoUrl;
 
 }
