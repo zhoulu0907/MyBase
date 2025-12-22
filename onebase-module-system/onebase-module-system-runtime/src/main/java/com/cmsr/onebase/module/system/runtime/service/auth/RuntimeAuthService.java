@@ -83,9 +83,10 @@ public interface RuntimeAuthService {
      *
      */
     void thirdUserForgetPassword(@Valid UserForgetPasswordReqVO reqVO);
+
     /**
-     * 补充用户信息
+     * 注册用户-先注册创建用户，再登录。
      *
      */
-    ThirdAuthLoginRespVO supplementLogin(AdminUserDO user, ThirdSupplementUserReqVO reqVO);
+    AuthLoginRespVO thirdUserRegister(@Valid ThirdSupplementUserReqVO reqVO);
 }

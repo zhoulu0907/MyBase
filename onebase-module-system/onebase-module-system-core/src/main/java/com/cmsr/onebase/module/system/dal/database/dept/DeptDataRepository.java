@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.system.dal.database.dept;
 
 import com.cmsr.onebase.framework.aynline.DataRepository;
+import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.enums.XFromSceneTypeEnum;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.security.dto.LoginUser;
@@ -177,6 +178,26 @@ public class DeptDataRepository extends DataRepository<DeptDO> {
         }
         if (null != status) {
             configs.and(Compare.EQUAL, DeptDO.STATUS, status);
+        }
+        configs.order(DeptDO.SORT, org.anyline.entity.Order.TYPE.ASC);
+        return findAllByConfig(configs);
+    }
+
+    public List<DeptDO> findAllDeptType(String deptType) {
+        DefaultConfigStore configs = new DefaultConfigStore();
+        configs.and(Compare.EQUAL, DeptDO.STATUS, CommonStatusEnum.ENABLE.getStatus());
+        configs.and(Compare.EQUAL, DeptDO.DEPT_TYPE, deptType);
+        return findAllByConfig(configs);
+    }
+
+
+    public List<DeptDO> findAllByNameAndDeptType(String keywords, String deptType) {
+        DefaultConfigStore configs = new DefaultConfigStore();
+        if ( null  !=  keywords) {
+            configs.and(Compare.LIKE, DeptDO.NAME, keywords);
+        }
+        if (null != deptType) {
+            configs.and(Compare.EQUAL, DeptDO.DEPT_TYPE, deptType);
         }
         configs.order(DeptDO.SORT, org.anyline.entity.Order.TYPE.ASC);
         return findAllByConfig(configs);

@@ -44,6 +44,7 @@ import com.cmsr.onebase.module.system.vo.CaptchaVerificationReqVO;
 import com.cmsr.onebase.module.system.vo.auth.*;
 import com.cmsr.onebase.module.system.vo.corp.CorpRespVO;
 import com.cmsr.onebase.module.system.vo.user.ThirdSupplementUserReqVO;
+import com.cmsr.onebase.module.system.vo.user.ThirdUserRegisterReqVO;
 import com.cmsr.onebase.module.system.vo.user.UserAppVO;
 import com.cmsr.onebase.module.system.vo.user.UserForgetPasswordReqVO;
 import com.google.common.annotations.VisibleForTesting;
@@ -382,8 +383,9 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
     private boolean findUserAppRelationFlag(Long appId, Long userId) {
         List<UserAppVO> voList = userAppRelationService.getAppByUserId(userId);
         if (!CollectionUtils.isEmpty(voList)) {
-            return !voList.stream()
-                    .anyMatch(userAppVO -> null != userAppVO.getAppId() && userAppVO.getAppId().equals(appId));
+            boolean result = voList.stream()
+                    .anyMatch(vo -> vo.getAppId().equals(appId));
+            return !result;
         }
         return true;
     }
@@ -598,14 +600,16 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
     }
 
 
+
+
     @Override
-    public ThirdAuthLoginRespVO supplementLogin(AdminUserDO user, ThirdSupplementUserReqVO reqVO) {
-        AuthLoginRespVO vo = createAfterLoginSuccess(user.getUserType(), user.getCorpId(), reqVO.getAppId(), user.getId(), reqVO.getMobile(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_MOBILE);
-        ThirdAuthLoginRespVO thirdAuthLoginRespVO = BeanUtils.toBean(vo, ThirdAuthLoginRespVO.class);
-        // 判断用户是否关联应用
-        thirdAuthLoginRespVO.setUserAppRelationFlag(false);
-        thirdAuthLoginRespVO.setUserUnRegistFlag(false);
-        return thirdAuthLoginRespVO;
+    public AuthLoginRespVO thirdUserRegister(ThirdSupplementUserReqVO reqVO){
+        AdminUserDO user =userService.thirdUserRegister(reqVO);
+        return createAfterLoginSuccess(user.getUserType(), user.getCorpId(),
+                reqVO.getAppId(), user.getId(), reqVO.getMobile(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_MOBILE);
+
     }
+
+
 
 }

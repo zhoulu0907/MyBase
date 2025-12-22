@@ -1358,7 +1358,7 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public AdminUserDO thirdUserSupplementUser(ThirdSupplementUserReqVO reqVO) {
+    public AdminUserDO thirdUserRegister(ThirdSupplementUserReqVO reqVO) {
         // 1. 校验手机和邮箱
         validateThirdUserForCreateOrUpdate(null, reqVO.getMobile(), reqVO.getEmail());
         // 2: 验证空间用户数

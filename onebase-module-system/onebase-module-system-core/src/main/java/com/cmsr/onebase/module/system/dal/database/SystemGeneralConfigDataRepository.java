@@ -27,7 +27,7 @@ public class SystemGeneralConfigDataRepository  extends DataRepository<SystemGen
 
     public List<SystemGeneralConfigDO> findTenantConfigList(String name,Integer status,String configType) {
         DefaultConfigStore configs = new DefaultConfigStore();
-
+        configs.and(Compare.EQUAL, SystemGeneralConfigDO.CONFIG_TYPE, ConfigTypeEnum.TENANT.getCode());
         if (StringUtils.isNotBlank(name)) {
             configs.and(Compare.LIKE, SystemGeneralConfigDO.NAME, name);
         }
