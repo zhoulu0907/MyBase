@@ -10,6 +10,7 @@ import React, { useEffect, useState } from 'react';
 
 interface DraftBoxProps {
   showFromPageData?: Function;
+  tableColumns?: any[];
 }
 
 interface DraftItem {
@@ -21,8 +22,6 @@ interface DraftItem {
  * 获取草稿列表
  */
 const getDrafts = (viewId: string): DraftItem[] => {
-  console.log('viewId: ', viewId);
-  console.log('TokenManager.getTokenInfo(): ', TokenManager.getTokenInfo());
   try {
     const tokenInfo = TokenManager.getTokenInfo();
     if (!tokenInfo?.userId || !viewId) {
@@ -57,7 +56,7 @@ const getDrafts = (viewId: string): DraftItem[] => {
 /**
  * 草稿箱组件
  */
-export const DraftBox: React.FC<DraftBoxProps> = ({ showFromPageData }) => {
+export const DraftBox: React.FC<DraftBoxProps> = ({ showFromPageData, tableColumns }) => {
   useSignals();
 
   const { curViewId } = usePageViewEditorSignal;
@@ -164,31 +163,34 @@ export const DraftBox: React.FC<DraftBoxProps> = ({ showFromPageData }) => {
     }
   };
 
-  // 获取前3个字段的列定义
-  const getFieldColumns = (): any[] => {
-    if (draftList.length === 0) {
+  // 根据表格列生成草稿箱的列定义，显示所有字段
+  const getFieldColumns = (columns: any[]): any[] => {
+    if (!columns || columns.length === 0) {
       return [];
     }
 
-    // 从第一个草稿（最新的）中获取前3个字段
-    const firstDraft = draftList[0];
-    if (!firstDraft?.data || typeof firstDraft.data !== 'object') {
-      return [];
-    }
+    // 过滤掉序号、暂存时间和操作列
+    const filteredColumns = columns.filter((column) => {
+      const dataIndex = column.dataIndex;
+      // 排除序号、暂存时间和操作列
+      if (dataIndex === 'index' || dataIndex === 'timestamp' || dataIndex === 'op' || dataIndex === 'select') {
+        return false;
+      }
+      return true;
+    });
 
-    const fields = Object.keys(firstDraft.data);
-    const firstThreeFields = fields.slice(0, 3);
-
-    return firstThreeFields.map((fieldName) => ({
-      title: fieldName,
-      dataIndex: fieldName,
-      width: 150,
+    // 返回过滤后的列，使用表格列的中文名称
+    return filteredColumns.map((column) => ({
+      title: column.title,
+      dataIndex: column.dataIndex,
+      width: column.width || 150,
       ellipsis: true,
       render: (value: any) => {
         // 处理不同类型的值
         if (value === null || value === undefined) {
           return '-';
         }
+
         if (typeof value === 'object') {
           // 如果是对象，尝试获取 displayValue 或 userName 等属性
           if ('displayValue' in value && typeof value.displayValue !== 'undefined') {
@@ -196,6 +198,21 @@ export const DraftBox: React.FC<DraftBoxProps> = ({ showFromPageData }) => {
           }
           if ('userName' in value && typeof value.userName !== 'undefined') {
             return value.userName;
+          }
+          if ('name' in value && typeof value.name !== 'undefined') {
+            return value.name;
+          }
+          // 如果是数组，直接返回拼接后的字符串，多个值用逗号分隔
+          if (Array.isArray(value)) {
+            // 如果是数组，只拼接 name 字段
+            return value
+              .map((item) => {
+                if (item && typeof item === 'object' && 'name' in item) {
+                  return item.name;
+                }
+                return '-';
+              })
+              .join(', ');
           }
           return JSON.stringify(value);
         }
@@ -268,7 +285,7 @@ export const DraftBox: React.FC<DraftBoxProps> = ({ showFromPageData }) => {
                 return dayjs(timestamp).format('YYYY-MM-DD HH:mm:ss');
               }
             },
-            ...getFieldColumns(),
+            ...getFieldColumns(tableColumns || []),
             {
               title: '操作',
               dataIndex: 'op',

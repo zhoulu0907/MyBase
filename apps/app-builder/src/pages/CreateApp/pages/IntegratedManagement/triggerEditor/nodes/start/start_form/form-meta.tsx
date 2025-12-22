@@ -10,9 +10,11 @@ import {
   getPageMetadata,
   TRIGGER_EVENTS,
   type AppEntityField,
+  type ChildEntity,
   type ComponentConfig,
   type ConditionField,
-  type EntityFieldValidationTypes
+  type EntityFieldValidationTypes,
+  type MetadataEntityField
 } from '@onebase/app';
 import { getHashQueryParam } from '@onebase/common';
 import { useEffect, useState } from 'react';
@@ -26,6 +28,13 @@ import { updateStartFormOutputs } from './output';
 const CheckboxGroup = Checkbox.Group;
 const Option = Select.Option;
 const RadioGroup = Radio.Group;
+
+const sortEntityFields = (a: MetadataEntityField, b: MetadataEntityField): number => {
+  if (a.isSystemField === b.isSystemField) {
+    return a.displayName.localeCompare(b.displayName);
+  }
+  return a.isSystemField ? 1 : -1;
+};
 
 export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const isSidebar = useIsSidebar();
@@ -83,10 +92,13 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     if (res && res.metadata) {
       const entityWithChildren = await getEntityFieldsWithChildren(res.metadata);
 
+      console.log('entityWithChildren: ', entityWithChildren);
+
       const conditions: ConditionField[] = [];
       const fieldIds: string[] = [];
 
-      entityWithChildren.parentFields.forEach((item: AppEntityField) => {
+      // 主表字段
+      entityWithChildren.parentFields.sort(sortEntityFields).forEach((item: AppEntityField) => {
         fieldIds.push(item.fieldId);
         conditions.push({
           label: item.displayName,
@@ -94,6 +106,28 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
           fieldType: item.fieldType
         });
       });
+
+      //   子表字段
+      if (entityWithChildren.childEntities?.length > 0) {
+        entityWithChildren.childEntities.forEach((item: ChildEntity) => {
+          const childConditions: ConditionField[] = [];
+
+          item.childFields.sort(sortEntityFields).forEach((field: AppEntityField) => {
+            fieldIds.push(field.fieldId);
+            childConditions.push({
+              label: field.displayName,
+              value: `${entityWithChildren.tableName}.${item.childTableName}.${field.fieldName}`,
+              fieldType: field.fieldType
+            });
+          });
+          conditions.push({
+            label: item.childEntityName,
+            value: item.childTableName,
+            fieldType: '',
+            children: childConditions
+          });
+        });
+      }
 
       if (fieldIds?.length) {
         const newValidationTypes = await getFieldCheckTypeApi(fieldIds);
@@ -107,25 +141,33 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             for (const subEntity of entityWithChildren.childEntities) {
               const foundField = subEntity.childFields.find((field: AppEntityField) => field.fieldId == item.fieldId);
               if (foundField) {
-                item.fieldKey = `${subEntity.childTableName}.${foundField.fieldName}`;
+                item.fieldKey = `${entityWithChildren.tableName}.${subEntity.childTableName}.${foundField.fieldName}`;
               }
             }
           }
         });
+
         setValidationTypes(newValidationTypes);
       }
 
-      setConditionFields([
+      const newConditionFields: TreeSelectDataType[] = [
         {
           key: entityWithChildren.tableName,
           title: entityWithChildren.entityName,
           children: conditions.map((item) => ({
             key: item.value,
             title: item.label,
-            fieldType: item.fieldType
+            fieldType: item.fieldType,
+            children: item.children?.map((child: ConditionField) => ({
+              key: child.value,
+              title: child.label,
+              fieldType: child.fieldType
+            }))
           }))
         }
-      ]);
+      ];
+
+      setConditionFields(newConditionFields);
 
       updateStartFormOutputs(node.id, conditions);
     }

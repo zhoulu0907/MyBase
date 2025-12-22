@@ -15,6 +15,7 @@ const EditorPage: React.FC = () => {
 
   // 区分移动端还是手机端
   const { editMode } = currentEditorSignal;
+
   return (
     <div className={styles.editorPage}>
       <EditorHeader />
@@ -23,7 +24,7 @@ const EditorPage: React.FC = () => {
           <Route path={EDITOR_TYPES.FORM_EDITOR} element={<FormEditor editMode={editMode.value} />} />
           <Route path={EDITOR_TYPES.LIST_EDITOR} element={<ListEditor editMode={editMode.value} />} />
           <Route path={EDITOR_TYPES.FLOW_EDITOR} element={<FlowEditorPage />} />
-          <Route path={EDITOR_TYPES.WORKBENCH_EDITOR} element={<WorkbenchEditor />} />
+          <Route path={EDITOR_TYPES.WORKBENCH_EDITOR} element={<WorkbenchEditor editMode={editMode.value} />} />
         </Routes>
       </div>
     </div>

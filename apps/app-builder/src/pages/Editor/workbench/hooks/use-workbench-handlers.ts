@@ -14,12 +14,12 @@ interface UseWorkbenchHandlersParams {
   wbComponentSchemas: Record<string, WorkbenchComponentSchema>;
   setWbComponentSchemas: (id: string, schema: WorkbenchComponentSchema) => void;
   delWbComponentSchemas: (id: string) => void;
-  setWorkbenchComponents: (components: GridItem[]) => void;
+  setWorkbenchComponents: (workbenchComponents: GridItem[]) => void;
   setCurComponentID: (id: string) => void;
   clearCurComponentID: () => void;
   setCurComponentSchema: (schema: WorkbenchComponentSchema) => void;
   setShowDeleteButton: (show: boolean) => void;
-  components: GridItem[];
+  workbenchComponents: GridItem[];
 }
 
 /**
@@ -34,7 +34,7 @@ export function useWorkbenchHandlers({
   clearCurComponentID,
   setCurComponentSchema,
   setShowDeleteButton,
-  components
+  workbenchComponents
 }: UseWorkbenchHandlersParams) {
   // 取消隐藏组件
   const handleShowComponent = (componentId: string) => {
@@ -49,7 +49,7 @@ export function useWorkbenchHandlers({
   // 复制组件
   const handleCopyComponent = (comp: GridItem, originId: string) => {
     // 1. 将新组件添加到组件列表
-    const newComponents = [...components, comp];
+    const newComponents = [...workbenchComponents, comp];
     setWorkbenchComponents(newComponents);
 
     // 2. 获取原始组件的配置
@@ -93,7 +93,7 @@ export function useWorkbenchHandlers({
   // 删除组件
   const handleDeleteComponent = (componentId: string) => {
     delWbComponentSchemas(componentId);
-    const newComponents = components.filter((cp: GridItem) => cp.id !== componentId);
+    const newComponents = workbenchComponents.filter((cp: GridItem) => cp.id !== componentId);
     setWorkbenchComponents(newComponents);
     clearCurComponentID();
     setShowDeleteButton(false);

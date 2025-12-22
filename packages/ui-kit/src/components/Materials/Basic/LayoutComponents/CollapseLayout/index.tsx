@@ -62,6 +62,7 @@ const XCollapseLayout = memo((props: XCollapseLayoutConfig & { runtime?: boolean
     >
       <CollapseItem
         header={
+          label.display || label.display === null ?
           <Tooltip content={label.text}>
             <div className="collapse-title">
               <div className="collapse-title-shape" style={{ backgroundColor: collapseStyle.shapeColor }}></div>
@@ -69,7 +70,7 @@ const XCollapseLayout = memo((props: XCollapseLayoutConfig & { runtime?: boolean
                 {label.text}
               </div>
             </div>
-          </Tooltip>
+          </Tooltip> : <div className="collapse-title"></div>
         }
         showExpandIcon={collapsed !== COLLAPSED_VALUES[COLLAPSED_OPTIONS.DISABLED_COLLAPSED]}
         name="1"

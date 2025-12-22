@@ -110,3 +110,8 @@
   align-items: flex-start;
   /* justify-content: center; */
 }
+
+/* select 层级无法覆盖问题 */
+.pc-table-col-fixed-left {
+  z-index: 2;
+}

@@ -23,6 +23,7 @@ const Runtime: React.FC = () => {
       menuName: curMenuId,
       menuIcon: '',
       isVisible: 1,
+      pagesetType: curMenu.value?.pagesetType,
       children: []
     });
   }, [curMenuId]);
@@ -71,8 +72,7 @@ const Runtime: React.FC = () => {
   };
 
   const renderContent =
-    curMenuId.indexOf('TASK-') >= 0 ? null : <PreviewContainer menuId={curMenuId || ''} runtime={true} mainEntity={mainEntity} subEntities={subEntities} />;
-
+    curMenuId.indexOf('TASK-') >= 0 ? null : <PreviewContainer menuId={curMenuId || ''} runtime={true} mainEntity={mainEntity} subEntities={subEntities} pageSetType={curMenu.value?.pagesetType} />;
   return <div>{renderContent}</div>;
 };
 

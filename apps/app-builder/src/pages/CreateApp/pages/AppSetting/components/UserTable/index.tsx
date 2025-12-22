@@ -257,7 +257,6 @@ const UserMembers = (props: IProps) => {
       dataIndex: 'name',
       ellipsis: true,
       show: true,
-      align: 'center',
       render: (name: string, item: any) =>
         item.type === ROLE.USER ? (
           <>
@@ -272,14 +271,12 @@ const UserMembers = (props: IProps) => {
     {
       title: '账号',
       dataIndex: 'account',
-      align: 'center',
       show: true,
       render: (account: string) => <span>{account ?? '--'}</span>
     },
     {
       title: '来源',
       dataIndex: 'createSourceText',
-      align: 'center',
       show: isOuterUser,
       render: (source: string) => (
         <Tag
@@ -296,14 +293,12 @@ const UserMembers = (props: IProps) => {
     {
       title: '类型',
       dataIndex: 'typeName',
-      align: 'center',
       show: !isOuterUser
     },
     {
       title: '部门',
       dataIndex: 'deptName',
       ellipsis: true,
-      align: 'center',
       show: true,
       render: (deptName: string, item: any) =>
         !isOuterUser ? (

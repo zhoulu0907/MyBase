@@ -28,12 +28,16 @@ import {
   ENTITY_FIELD_TYPE,
   FORM_COMPONENT_TYPES,
   getComponentWidth,
+  getWorkbenchComponentWidth,
   SHOW_COMPONENT_TYPES,
   STATUS_OPTIONS,
   STATUS_VALUES,
   useFormEditorSignal,
+  useWorkbenchEditorSignal,
+  startLoadWorkbenchPageSet,
   usePageEditorSignal,
   usePageViewEditorSignal,
+  type WorkbenchComponentType,
   type GridItem
 } from '@onebase/ui-kit';
 import { getFileUrlById } from '@onebase/platform-center';
@@ -52,6 +56,7 @@ interface PreviewProps {
   runtime: boolean;
   mainEntity: AppEntity;
   subEntities: AppEntities;
+  pageSetType?: PageType;
 }
 
 const colorConfig = {
@@ -66,7 +71,7 @@ const ghostBgColor = {
   disabled: '#FFF'
 };
 
-const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, mainEntity, subEntities: subEntitiesValues }) => {
+const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, subEntities: subEntitiesValues, pageSetType }) => {
   useSignals();
 
   const [form] = useForm();
@@ -87,6 +92,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, mainEntity,
     clearSubTableComponents: clearListSubTableComponents
   } = useListEditorSignal;
   const { clearPageViews, clearCurViewId } = usePageViewEditorSignal;
+  const { workbenchComponents, wbComponentSchemas } = useWorkbenchEditorSignal;
 
   const {
     curPage,
@@ -170,11 +176,16 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, mainEntity,
 
   useEffect(() => {
     if (pageSetId) {
-      loadPageSetInfo(pageSetId);
-      getMainMetaData(pageSetId);
+      // 工作台页面使用专门的加载方法，不获取主表数据
+      if (pageSetType === PageType.WORKBENCH) {
+        startLoadWorkbenchPageSet({ pageSetId });
+      } else {
+        loadPageSetInfo(pageSetId);
+        getMainMetaData(pageSetId);
+      }
     }
     // 优先切换到列表页
-    setPageType(EDITOR_TYPES.LIST_EDITOR);
+    setPageType(pageSetType === PageType.WORKBENCH ? EDITOR_TYPES.WORKBENCH_EDITOR : EDITOR_TYPES.LIST_EDITOR);
   }, [pageSetId]);
 
   const handleGetPageSetId = async (menuId: string) => {
@@ -581,7 +592,30 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, mainEntity,
       />
 
       <div className={styles.content}>
-        {pageType === EDITOR_TYPES.LIST_EDITOR &&
+        {/* 工作台页面渲染 */}
+        {pageSetType === PageType.WORKBENCH && (
+          <>
+            {workbenchComponents.value.map((cp: GridItem) => {
+              const schema = wbComponentSchemas.value[cp.id];
+              return (
+                <Fragment key={cp.id}>
+                  <div
+                    className={styles.componentItem}
+                    style={{
+                      width: `calc(${getWorkbenchComponentWidth(schema, cp.type as WorkbenchComponentType)} - 8px)`,
+                      margin: '4px'
+                    }}
+                  >
+                    <PreviewRender cpId={cp.id} cpType={cp.type} pageComponentSchema={schema} runtime={runtime} />
+                  </div>
+                </Fragment>
+              );
+            })}
+          </>
+        )}
+
+        {/* 列表页面渲染 */}
+        {pageSetType !== PageType.WORKBENCH && pageType === EDITOR_TYPES.LIST_EDITOR &&
           (!listComponents.value?.length ? (
             <div className={styles.noData}>暂无数据</div>
           ) : (
@@ -610,7 +644,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, mainEntity,
             ))
           ))}
 
-        {pageType == EDITOR_TYPES.FORM_EDITOR && (
+        {pageSetType !== PageType.WORKBENCH && pageType == EDITOR_TYPES.FORM_EDITOR && (
           <Form layout="inline" form={form} className={styles.formWrapper}>
             {splitByDivider(useEditorSignalMap.get(editPageViewId.value)?.components.value).map((block, index) => {
               if (block.type === SHOW_COMPONENT_TYPES.DIVIDER) {

@@ -140,7 +140,7 @@ const AppsList: React.FC<IProps> = ({ treeData, mobileNavLayout, loading }) => {
       menuName: item.title,
       menuIcon: item.icon || '',
       isVisible: item.isVisible || 0,
-      pagesetType: item.entityUuid,
+      pagesetType: item.pagesetType,
       children: []
     });
     // sp.delete('curTab');
