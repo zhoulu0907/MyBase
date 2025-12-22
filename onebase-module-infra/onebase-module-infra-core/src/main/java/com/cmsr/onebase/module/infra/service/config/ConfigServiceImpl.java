@@ -2,8 +2,8 @@ package com.cmsr.onebase.module.infra.service.config;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.infra.convert.config.ConfigConvert;
-import com.cmsr.onebase.module.infra.dal.database.ConfigDataRepository;
-import com.cmsr.onebase.module.infra.dal.dataobject.config.ConfigDO;
+import com.cmsr.onebase.module.infra.dal.dataflex.ConfigDataRepository;
+import com.cmsr.onebase.module.infra.dal.dataflexdo.config.ConfigDO;
 import com.cmsr.onebase.module.infra.dal.vo.config.ConfigPageReqVO;
 import com.cmsr.onebase.module.infra.dal.vo.config.ConfigSaveReqVO;
 import com.cmsr.onebase.module.infra.enums.config.ConfigTypeEnum;
@@ -35,7 +35,7 @@ public class ConfigServiceImpl implements ConfigService {
         // 插入参数配置
         ConfigDO config = ConfigConvert.INSTANCE.convert(createReqVO);
         config.setType(ConfigTypeEnum.CUSTOM.getType());
-        configDataRepository.insert(config);
+        configDataRepository.save(config); // Changed from save to save
         return config.getId();
     }
 
@@ -48,7 +48,7 @@ public class ConfigServiceImpl implements ConfigService {
 
         // 更新参数配置
         ConfigDO updateObj = ConfigConvert.INSTANCE.convert(updateReqVO);
-        configDataRepository.update(updateObj);
+        configDataRepository.updateById(updateObj);
     }
 
     @Override
@@ -60,12 +60,12 @@ public class ConfigServiceImpl implements ConfigService {
             throw exception(CONFIG_CAN_NOT_DELETE_SYSTEM_TYPE);
         }
         // 删除
-        configDataRepository.deleteById(id);
+        configDataRepository.removeById(id);
     }
 
     @Override
     public ConfigDO getConfig(Long id) {
-        return configDataRepository.findById(id);
+        return configDataRepository.getById(id);
     }
 
     @Override
@@ -83,7 +83,7 @@ public class ConfigServiceImpl implements ConfigService {
         if (id == null) {
             return null;
         }
-        ConfigDO config = configDataRepository.findById(id);
+        ConfigDO config = configDataRepository.getById(id);
         if (config == null) {
             throw exception(CONFIG_NOT_EXISTS);
         }

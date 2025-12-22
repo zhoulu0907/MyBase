@@ -19,12 +19,12 @@ import org.springframework.stereotype.Repository;
  * @date 2025-08-18
  */
 @Repository
-public class FileConfigDataRepository extends DataRepository<FileConfigDO> {
+public class FileConfigDataRepositoryOld extends DataRepository<FileConfigDO> {
 
     /**
      * 构造方法，指定默认实体类
      */
-    public FileConfigDataRepository() {
+    public FileConfigDataRepositoryOld() {
         super(FileConfigDO.class);
     }
 

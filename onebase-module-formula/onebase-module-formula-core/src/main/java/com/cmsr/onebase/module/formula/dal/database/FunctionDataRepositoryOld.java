@@ -17,12 +17,12 @@ import java.util.List;
  * @date 2025-08-28
  */
 @Repository
-public class FunctionDataRepository extends DataRepository<FunctionDO> {
+public class FunctionDataRepositoryOld extends DataRepository<FunctionDO> {
 
     /**
      * 构造方法，指定默认实体类
      */
-    public FunctionDataRepository() {
+    public FunctionDataRepositoryOld() {
         super(FunctionDO.class);
     }
 

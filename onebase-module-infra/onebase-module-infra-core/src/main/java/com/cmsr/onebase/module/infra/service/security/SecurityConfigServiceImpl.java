@@ -5,12 +5,12 @@ import com.cmsr.onebase.framework.common.enums.SecurityCategoryCodeEnum;
 import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.infra.convert.security.SecurityConfigCategoryConvert;
-import com.cmsr.onebase.module.infra.dal.database.SecurityConfigCategoryDataRepository;
-import com.cmsr.onebase.module.infra.dal.database.SecurityConfigDataRepository;
-import com.cmsr.onebase.module.infra.dal.database.SecurityConfigTemplateDataRepository;
-import com.cmsr.onebase.module.infra.dal.dataobject.security.SecurityConfigCategoryDO;
+import com.cmsr.onebase.module.infra.dal.dataflex.SecurityConfigCategoryDataRepository;
+import com.cmsr.onebase.module.infra.dal.dataflex.SecurityConfigDataRepository;
+import com.cmsr.onebase.module.infra.dal.dataflex.SecurityConfigTemplateDataRepository;
+import com.cmsr.onebase.module.infra.dal.dataflexdo.ssecurity.SecurityConfigCategoryDO;
+import com.cmsr.onebase.module.infra.dal.dataflexdo.ssecurity.SecurityConfigTemplateDO;
 import com.cmsr.onebase.module.infra.dal.dataobject.security.SecurityConfigDO;
-import com.cmsr.onebase.module.infra.dal.dataobject.security.SecurityConfigTemplateDO;
 import com.cmsr.onebase.module.infra.dal.vo.app.AppTenantVO;
 import com.cmsr.onebase.module.infra.dal.vo.security.*;
 import com.cmsr.onebase.module.infra.enums.ErrorCodeConstants;
@@ -28,8 +28,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static com.cmsr.onebase.module.infra.enums.ErrorCodeConstants.*;
 import static com.cmsr.onebase.module.infra.dal.redis.RedisKeyConstants.SECURITY_TENANT_CONFIGS;
+import static com.cmsr.onebase.module.infra.enums.ErrorCodeConstants.*;
 
 /**
  * 安全配置服务实现类

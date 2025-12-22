@@ -11,7 +11,7 @@ Content-Type: application/json
 
 {
   "type": "TEXT",
-  "name": "CONCATENATE",
+  "name": "CONCATENATE123Gsp",
   "expression": "CONCATENATE(文本1,文本2,...)",
   "summary": "合并文本",
   "usage": "将多个文本合并成一个文本；字符串 1：初始文本字符串；字符串 2：要串联的其他文本字符串",
@@ -21,7 +21,7 @@ Content-Type: application/json
 }
 
 ### 请求 /get 接口 => 获取函数信息
-GET {{baseUrl}}/formula/function/get?id=1
+GET {{baseUrl}}/formula/function/get?id=192700648715452416
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
@@ -32,9 +32,9 @@ tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
 {
-  "id": 1,
+  "id": 192700648715452416,
   "type": "TEXT",
-  "name": "CONCATENATE",
+  "name": "CONCATENATE123",
   "expression": "CONCATENATE(文本1,文本2,...)",
   "summary": "合并文本函数",
   "usage": "将多个文本合并成一个文本；字符串 1：初始文本字符串；字符串 2：要串联的其他文本字符串",
@@ -50,7 +50,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
 ### 请求 /page 接口 => 获取函数分页
-GET {{baseUrl}}/formula/function/page?pageNo=1&pageSize=2&type=&name=
+GET {{baseUrl}}/formula/function/page?pageNo=1&pageSize=10&type=&name=
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
@@ -60,7 +60,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
 ### 请求 /delete 接口 => 删除函数
-POST {{baseUrl}}/formula/function/delete?id=1
+POST {{baseUrl}}/formula/function/delete?id=192700648715452416
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 

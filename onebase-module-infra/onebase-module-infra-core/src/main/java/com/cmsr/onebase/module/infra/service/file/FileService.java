@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.infra.service.file;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.infra.dal.dataobject.file.FileDO;
+import com.cmsr.onebase.module.infra.dal.dataflexdo.file.FileDO;
 import com.cmsr.onebase.module.infra.dal.vo.file.file.FileCreateReqVO;
 import com.cmsr.onebase.module.infra.dal.vo.file.file.FilePageReqVO;
 import com.cmsr.onebase.module.infra.dal.vo.file.file.FilePresignedUrlRespVO;

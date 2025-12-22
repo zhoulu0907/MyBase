@@ -5,8 +5,6 @@ import com.cmsr.onebase.module.infra.dal.dataobject.security.SecurityConfigDO;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-
 /**
  * 安全配置数据访问层
  *
@@ -14,12 +12,12 @@ import java.util.List;
  * @date 2025-11-04
  */
 @Repository
-public class SecurityConfigDataRepository extends DataRepository<SecurityConfigDO> {
+public class SecurityConfigDataRepositoryOld extends DataRepository<SecurityConfigDO> {
 
     /**
      * 构造方法，指定默认实体类
      */
-    public SecurityConfigDataRepository() {
+    public SecurityConfigDataRepositoryOld() {
         super(SecurityConfigDO.class);
     }
 

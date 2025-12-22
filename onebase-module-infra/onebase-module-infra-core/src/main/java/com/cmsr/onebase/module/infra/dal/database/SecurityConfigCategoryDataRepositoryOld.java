@@ -15,12 +15,12 @@ import java.util.List;
  * @date 2025-11-04
  */
 @Repository
-public class SecurityConfigCategoryDataRepository extends DataRepository<SecurityConfigCategoryDO> {
+public class SecurityConfigCategoryDataRepositoryOld extends DataRepository<SecurityConfigCategoryDO> {
 
     /**
      * 构造方法，指定默认实体类
      */
-    public SecurityConfigCategoryDataRepository() {
+    public SecurityConfigCategoryDataRepositoryOld() {
         super(SecurityConfigCategoryDO.class);
     }
 
