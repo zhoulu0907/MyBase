@@ -15,6 +15,7 @@ import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.system.convert.auth.AuthConvert;
 import com.cmsr.onebase.module.system.dal.database.RoleMenuDataRepository;
 import com.cmsr.onebase.module.system.dal.database.UserRoleDataRepository;
+import com.cmsr.onebase.module.system.dal.dataobject.config.SystemGeneralConfigDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.MenuDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleMenuDO;
@@ -23,10 +24,12 @@ import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantPackageDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.dal.redis.RedisKeyConstants;
+import com.cmsr.onebase.module.system.enums.config.SystemConfigKeyEnum;
 import com.cmsr.onebase.module.system.enums.permission.DataScopeEnum;
 import com.cmsr.onebase.module.system.enums.permission.MenuConstants;
 import com.cmsr.onebase.module.system.enums.permission.PackageTypeEnum;
 import com.cmsr.onebase.module.system.enums.permission.RoleCodeEnum;
+import com.cmsr.onebase.module.system.service.config.SystemConfigService;
 import com.cmsr.onebase.module.system.service.dept.DeptService;
 import com.cmsr.onebase.module.system.service.tenant.TenantPackageService;
 import com.cmsr.onebase.module.system.service.tenant.TenantService;
@@ -68,6 +71,8 @@ import static com.cmsr.onebase.module.system.enums.LogRecordConstants.*;
 @Slf4j
 public class PermissionServiceImpl implements PermissionService {
 
+    private static final String d = "0";
+
     @Resource
     private RoleService roleService;
     @Resource
@@ -90,6 +95,11 @@ public class PermissionServiceImpl implements PermissionService {
     private UserRoleDataRepository userRoleDataRepository;
     @Resource
     private RoleMenuDataRepository roleMenuDataRepository;
+
+
+    @Resource
+    private SystemConfigService systemConfigService;
+
 
     @Override
     public boolean isPlatformSuperAdmin(Long userId) {
@@ -158,7 +168,7 @@ public class PermissionServiceImpl implements PermissionService {
             // permissions 和 tenantAllPermissions对比，命中一个即返回true
             return CollectionUtils.containsAny(corpAllPermissions, permissions);
         }
-        // 情况二：如果是开发管理员，赋予所有开发相关权限
+        // 情况二：如果是开发者，赋予所有开发相关权限
         boolean isDevAdmin = roleService.hasAnyDevloperAdmin(convertSet(roles, RoleDO::getId));
         if (isDevAdmin) {
             // 所有开发者的权限
@@ -629,15 +639,22 @@ public class PermissionServiceImpl implements PermissionService {
         Set<Long> menuIds = permissionService.getRoleMenuListByRoleId(convertSet(roles, RoleDO::getId));
         List<MenuDO> menuList = menuService.getAllActiveMenuList(menuIds);
 
-        // 1.4检查当前租户是否inner模式，并移除企业权限
-        TenantDO tenantDO = tenantService.getTenant(user.getTenantId());
-        if (CommonPublishModelEnum.InnerModel.getValue().equals(tenantDO.getPublishModel())) {
-            // 排除企业权限
+        // 判断是否开启saas模式 ,第三方用户是否开启
+        SystemGeneralConfigDO saasConfigDO = systemConfigService.getTenantConfigByKey(SystemConfigKeyEnum.SaasModeConfig.getKey());
+        if (null == saasConfigDO ||  MenuConstants.DefaultSaasThirdUser.equals(saasConfigDO.getConfigValue())) {
+            //   未开启 saas 模式  移除企业权限
             menuList.removeIf(menu -> menu.getPermission() != null && menu.getPermission()
                     .startsWith(MenuConstants.MENU_TENANT_CORP));
         }
 
-        return AuthConvert.INSTANCE.convert(user, roles, menuList, code);
+        SystemGeneralConfigDO thirdUserConfigDO = systemConfigService.getTenantConfigByKey(SystemConfigKeyEnum.ThirdUserConfig.getKey());
+        if (null == thirdUserConfigDO ||  MenuConstants.DefaultSaasThirdUser.equals(thirdUserConfigDO.getConfigValue())) {
+            //   未开启第三方用户模式  移除第三方用户权限
+            menuList.removeIf(menu -> menu.getPermission() != null && menu.getPermission()
+                    .startsWith(MenuConstants.MENU_TENANT_THIRD));
+        }
+
+            return AuthConvert.INSTANCE.convert(user, roles, menuList, code);
     }
 
     /**

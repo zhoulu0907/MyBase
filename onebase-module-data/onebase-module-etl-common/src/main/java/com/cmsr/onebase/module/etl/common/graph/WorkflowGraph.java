@@ -20,7 +20,15 @@ public class WorkflowGraph {
 
     private DefaultDirectedGraph<Node, Edge> directedGraph;
 
+    private DefaultDirectedGraph<Node, Edge> directedGraph() {
+        init();
+        return directedGraph;
+    }
+
     public void init() {
+        if (directedGraph != null) {
+            return;
+        }
         directedGraph = new DefaultDirectedGraph<>(Edge.class);
         for (Node node : nodes) {
             directedGraph.addVertex(node);
@@ -46,7 +54,7 @@ public class WorkflowGraph {
 
     public List<Node> iterateNodes() {
         List<Node> result = new ArrayList<>();
-        TopologicalOrderIterator breadthFirstIterator = new TopologicalOrderIterator<>(directedGraph);
+        TopologicalOrderIterator breadthFirstIterator = new TopologicalOrderIterator<>(directedGraph());
         while (breadthFirstIterator.hasNext()) {
             result.add((Node) breadthFirstIterator.next());
         }
@@ -67,12 +75,12 @@ public class WorkflowGraph {
         startNodes.addAll(findStartNodes());
         Set<Node> endNodes = Set.of(findNodeById(endNodeId));
 
-        AllDirectedPaths<Node, Edge> allPathsFinder = new AllDirectedPaths<>(directedGraph);
+        AllDirectedPaths<Node, Edge> allPathsFinder = new AllDirectedPaths<>(directedGraph());
         List<GraphPath<Node, Edge>> allPaths = allPathsFinder.getAllPaths(
                 startNodes,
                 endNodes,
                 true,
-                directedGraph.vertexSet().size()
+                directedGraph().vertexSet().size()
         );
         WorkflowGraph subgraph = new WorkflowGraph();
         for (GraphPath<Node, Edge> path : allPaths) {
@@ -87,7 +95,7 @@ public class WorkflowGraph {
     public List<Node> findStartNodes() {
         List<Node> sourceNodes = new ArrayList<>();
         for (Node node : this.nodes) {
-            int inDegreeOf = directedGraph.inDegreeOf(node);
+            int inDegreeOf = directedGraph().inDegreeOf(node);
             if (inDegreeOf == 0) {
                 sourceNodes.add(node);
             }
@@ -98,7 +106,7 @@ public class WorkflowGraph {
     public List<Node> findEndNodes() {
         List<Node> targetNodes = new ArrayList<>();
         for (Node node : this.nodes) {
-            int outDegreeOf = directedGraph.outDegreeOf(node);
+            int outDegreeOf = directedGraph().outDegreeOf(node);
             if (outDegreeOf == 0) {
                 targetNodes.add(node);
             }

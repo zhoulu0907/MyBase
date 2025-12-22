@@ -1,0 +1,75 @@
+package com.cmsr.onebase.module.system.dal.dataobject.config;
+
+import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
+import jakarta.persistence.Column;
+import jakarta.persistence.Table;
+import lombok.Data;
+
+@Data
+@Table(name = "system_config")
+public class SystemGeneralConfigDO extends TenantBaseDO {
+
+    public static final String CONFIG_TYPE = "config_type";
+    public static final String NAME        = "name";
+    public static final String CONFIG_KEY = "config_key";
+    public static final String CONFIG_VALUE = "config_value";
+    public static final String CORP_ID = "corp_id";
+    public static final String APP_ID = "app_id";
+    public static final String STATUS = "status";
+    public static final String REMARK = "remark";
+    public static final String EXCLUSIVE_ITEM = "exclusive_item";
+
+    /**
+     * 参数分类
+     */
+    @Column(name = CONFIG_TYPE)
+    private String configType;
+    /**
+     * 参数名称
+     */
+    @Column(name = NAME)
+    private String name;
+    /**
+     * 参数键名
+     *
+     */
+    @Column(name = CONFIG_KEY)
+    private String configKey;
+    /**
+     * 参数键值
+     */
+    @Column(name = CONFIG_VALUE)
+    private Object configValue;
+
+    /**
+     * 互斥项
+     */
+    @Column(name = EXCLUSIVE_ITEM)
+    private String exclusiveItem;
+
+    /**
+     * 参数类型
+     *
+     * 枚举
+     */
+    @Column(name = STATUS)
+    private Integer status;
+
+    /**
+     * 归属企业ID
+     */
+    @Column(name = CORP_ID)
+    private Long corpId;
+
+    /**
+     * appId
+     */
+    @Column(name = APP_ID)
+    private Long appId;
+
+    /**
+     * 备注
+     */
+    @Column(name = REMARK)
+    private String remark;
+}

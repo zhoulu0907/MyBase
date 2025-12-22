@@ -5,9 +5,9 @@ import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.app.build.service.resource.PageService;
-import com.cmsr.onebase.module.app.core.dto.appresource.CreatePageViewDTO;
-import com.cmsr.onebase.module.app.core.dto.appresource.PageDTO;
-import com.cmsr.onebase.module.app.core.dto.appresource.UpdatePageNameDTO;
+import com.cmsr.onebase.module.app.core.dto.resource.CreatePageViewDTO;
+import com.cmsr.onebase.module.app.core.dto.resource.PageDTO;
+import com.cmsr.onebase.module.app.core.dto.resource.UpdatePageNameDTO;
 import com.cmsr.onebase.module.app.core.vo.resource.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -49,14 +49,14 @@ public class PageController {
         return CommonResult.success(updated);
     }
 
-    @PostMapping("/form/app_id")
+    @PostMapping("/app_id")
     @Operation(summary = "根据app_id获取表单页面")
-    public CommonResult<GetFormPageListByAppIdRespVO> getFormPageListByAppId(@RequestBody GetFormPageListByAppIdReqVO getFormPageListByAppIdReqVO) {
-        List<PageDTO> pageDtoList = pageService.getFormPageListByAppId(getFormPageListByAppIdReqVO.getAppId());
+    public CommonResult<GetPageListByAppIdRespVO> getPageListByAppId(@RequestBody GetPageListByAppIdReqVO getPageListByAppIdReqVO) {
+        List<PageDTO> pageDtoList = pageService.getPageListByAppId(getPageListByAppIdReqVO.getAppId());
 
-        GetFormPageListByAppIdRespVO getFormPageListByAppIdRespVO = new GetFormPageListByAppIdRespVO();
-        getFormPageListByAppIdRespVO.setPages(pageDtoList);
-        return CommonResult.success(getFormPageListByAppIdRespVO);
+        GetPageListByAppIdRespVO getPageListByAppIdRespVO = new GetPageListByAppIdRespVO();
+        getPageListByAppIdRespVO.setPages(pageDtoList);
+        return CommonResult.success(getPageListByAppIdRespVO);
     }
 
     @PostMapping("/metadata")

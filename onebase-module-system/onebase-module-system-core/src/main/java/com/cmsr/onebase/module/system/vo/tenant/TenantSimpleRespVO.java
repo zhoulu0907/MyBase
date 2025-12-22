@@ -4,18 +4,18 @@ import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
-@Schema(description = "管理后台 - 租户 Response VO")
+@Schema(description = "管理后台 - 空间 Response VO")
 @Data
 @ExcelIgnoreUnannotated
 public class TenantSimpleRespVO {
 
-    @Schema(description = "租户编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "1024")
+    @Schema(description = "空间编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "1024")
     private Long id;
 
-    @Schema(description = "租户编码", example = "1")
+    @Schema(description = "空间编码", example = "1")
     private String tenantCode;
 
-    @Schema(description = "租户名", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase")
+    @Schema(description = "空间名", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase")
     private String name;
 
     @Schema(description = "域名", example = "onebase")

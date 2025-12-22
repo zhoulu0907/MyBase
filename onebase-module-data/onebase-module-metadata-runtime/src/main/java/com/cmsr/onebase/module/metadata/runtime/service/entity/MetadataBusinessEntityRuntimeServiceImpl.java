@@ -336,6 +336,7 @@ public class MetadataBusinessEntityRuntimeServiceImpl implements MetadataBusines
         fieldVO.setApplicationId(fieldDO.getApplicationId());
         fieldVO.setStatus(fieldDO.getStatus());
         fieldVO.setFieldCode(fieldDO.getFieldCode());
+        fieldVO.setDictTypeId(fieldDO.getDictTypeId());
         return fieldVO;
     }
 

@@ -1,11 +1,13 @@
 package com.cmsr.onebase.module.system.dal.database.dept;
 
 import com.cmsr.onebase.framework.aynline.DataRepository;
+import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.enums.XFromSceneTypeEnum;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.enums.dept.DeptTypeEnum;
+import com.cmsr.onebase.module.system.vo.dept.DeptSaveReqVO;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Compare;
 import org.apache.commons.lang3.StringUtils;
@@ -157,4 +159,47 @@ public class DeptDataRepository extends DataRepository<DeptDO> {
         return findAllByConfig(configs);
     }
 
+    public DeptDO findDeptByCodeAndType(DeptSaveReqVO deptRespVO) {
+        DefaultConfigStore configs = new DefaultConfigStore();
+        if (StringUtils.isNotBlank(deptRespVO.getDeptType())) {
+            configs.and(DeptDO.DEPT_TYPE,deptRespVO.getDeptType());
+        }
+        if (StringUtils.isNotBlank(deptRespVO.getDeptCode())) {
+            configs.and(DeptDO.DEPT_CODE,deptRespVO.getDeptCode());
+        }
+        configs.order(DeptDO.SORT, org.anyline.entity.Order.TYPE.ASC);
+        return findOne(configs);
+    }
+
+    public List<DeptDO> getDefaultThirdDeptByDefaultCode(String deptCode, Integer status) {
+        DefaultConfigStore configs = new DefaultConfigStore();
+        if (StringUtils.isNotBlank(deptCode)) {
+            configs.and(Compare.EQUAL, DeptDO.DEPT_CODE, deptCode);
+        }
+        if (null != status) {
+            configs.and(Compare.EQUAL, DeptDO.STATUS, status);
+        }
+        configs.order(DeptDO.SORT, org.anyline.entity.Order.TYPE.ASC);
+        return findAllByConfig(configs);
+    }
+
+    public List<DeptDO> findDeptListByDeptType(String deptType) {
+        DefaultConfigStore configs = new DefaultConfigStore();
+        configs.and(Compare.EQUAL, DeptDO.STATUS, CommonStatusEnum.ENABLE.getStatus());
+        configs.and(Compare.EQUAL, DeptDO.DEPT_TYPE, deptType);
+        return findAllByConfig(configs);
+    }
+
+
+    public List<DeptDO> findDeptListByNameAndDeptType(String keywords, String deptType) {
+        DefaultConfigStore configs = new DefaultConfigStore();
+        if ( null  !=  keywords) {
+            configs.and(Compare.LIKE, DeptDO.NAME, keywords);
+        }
+        if (null != deptType) {
+            configs.and(Compare.EQUAL, DeptDO.DEPT_TYPE, deptType);
+        }
+        configs.order(DeptDO.SORT, org.anyline.entity.Order.TYPE.ASC);
+        return findAllByConfig(configs);
+    }
 }

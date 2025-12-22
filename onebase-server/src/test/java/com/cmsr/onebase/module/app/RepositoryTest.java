@@ -17,6 +17,7 @@ import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePageDO;
 import com.cmsr.onebase.module.app.core.dal.mapper.AppAuthRoleMapper;
 import com.cmsr.onebase.module.app.core.enums.menu.MenuTypeEnum;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessRepository;
+import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessTimeRepository;
 import com.cmsr.onebase.server.OneBaseServerApplication;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -65,6 +66,8 @@ public class RepositoryTest {
     @Autowired
     private AppPageRepository appPageRepository;
 
+    @Autowired
+    private FlowProcessTimeRepository flowProcessTimeRepository;
 
     @BeforeAll
     public static void before() {
@@ -111,6 +114,7 @@ public class RepositoryTest {
         ApplicationManager.setVersionTag(0L);
         TenantContextHolder.setTenantId(1L);
         //
+        flowProcessTimeRepository.updateJobStatusByAppId("success", 1234567890L);
     }
 
 }

@@ -25,20 +25,16 @@ public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity>
         if (!QueryWrapperUtils.isQueryFilterable(queryWrapper)) {
             return;
         }
-        QueryTable queryTable = QueryWrapperUtils.getQueryTable(queryWrapper);
-        QueryColumn applicationColumn;
-        QueryColumn versionTagColumn;
-        if (queryTable != null) {
-            applicationColumn = new QueryColumn(queryTable, QueryWrapperUtils.APPLICATION_ID);
-            versionTagColumn = new QueryColumn(queryTable, QueryWrapperUtils.VERSION_TAG);
-        } else {
-            applicationColumn = new QueryColumn(QueryWrapperUtils.APPLICATION_ID);
-            versionTagColumn = new QueryColumn(QueryWrapperUtils.VERSION_TAG);
-        }
         Long applicationId = ApplicationManager.getApplicationId();
         Long versionTag = ApplicationManager.getVersionTag();
-        queryWrapper.and(applicationColumn.eq(applicationId).when(!ApplicationManager.isIgnoreApplicationCondition()));
-        queryWrapper.and(versionTagColumn.eq(versionTag).when(!ApplicationManager.isIgnoreVersionTagCondition()));
+        //
+        QueryColumn applicationIdColumn = QueryWrapperUtils.createApplicationIdColumn(this, queryWrapper);
+        QueryColumn versionTagColumn = QueryWrapperUtils.createVersionTagColumn(this, queryWrapper);
+        //
+        queryWrapper.where(
+                applicationIdColumn.eq(applicationId).when(!ApplicationManager.isIgnoreApplicationCondition())
+                        .and(versionTagColumn.eq(versionTag).when(!ApplicationManager.isIgnoreVersionTagCondition()))
+        );
     }
 
     //region ===== 删除（删）操作 =====
@@ -76,9 +72,12 @@ public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity>
         Long applicationId = ApplicationManager.getApplicationId();
         Long versionTag = ApplicationManager.getVersionTag();
         //
+        QueryColumn applicationIdColumn = QueryWrapperUtils.createApplicationIdColumn(this);
+        QueryColumn versionTagColumn = QueryWrapperUtils.createVersionTagColumn(this);
+        //
         UpdateChain<T> updateChain = super.updateChain();
-        updateChain.where(QueryWrapperUtils.APPLICATION_COLUMN.eq(applicationId).when(!ApplicationManager.isIgnoreApplicationCondition())
-                .and(QueryWrapperUtils.VERSION_TAG_COLUMN.eq(versionTag).when(!ApplicationManager.isIgnoreVersionTagCondition()))
+        updateChain.where(applicationIdColumn.eq(applicationId).when(!ApplicationManager.isIgnoreApplicationCondition())
+                .and(versionTagColumn.eq(versionTag).when(!ApplicationManager.isIgnoreVersionTagCondition()))
         );
         return updateChain;
     }
@@ -291,12 +290,12 @@ public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity>
         // 实现备份逻辑
         // 执行update动作。
         // 1、update：把versionTag为1的数据update为新值（参数`versionTag`）
-        QueryColumn applicationIdCol = new QueryColumn(QueryWrapperUtils.APPLICATION_ID);
-        QueryColumn versionTagCol = new QueryColumn(QueryWrapperUtils.VERSION_TAG);
+        QueryColumn applicationIdColumn = QueryWrapperUtils.createApplicationIdColumn(this);
+        QueryColumn versionTagColumn = QueryWrapperUtils.createVersionTagColumn(this);
         super.updateChain()
-                .set(versionTagCol, versionTag)
-                .where(applicationIdCol.eq(applicationId))
-                .where(versionTagCol.eq(VersionTagEnum.RUNTIME.getValue()))
+                .set(versionTagColumn, versionTag)
+                .where(applicationIdColumn.eq(applicationId))
+                .where(versionTagColumn.eq(VersionTagEnum.RUNTIME.getValue()))
                 .update();
     }
 
@@ -306,11 +305,11 @@ public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity>
         // 执行select 和 insert 动作。
         // 1、select： versionTag为0的数据
         // 2、insert：把第一步查询出来的数据插入为versionTag为1
-        QueryColumn applicationIdCol = new QueryColumn(QueryWrapperUtils.APPLICATION_ID);
-        QueryColumn versionTagCol = new QueryColumn(QueryWrapperUtils.VERSION_TAG);
+        QueryColumn applicationIdColumn = QueryWrapperUtils.createApplicationIdColumn(this);
+        QueryColumn versionTagColumn = QueryWrapperUtils.createVersionTagColumn(this);
         QueryWrapper queryWrapper = QueryWrapper.create()
-                .where(applicationIdCol.eq(applicationId))
-                .where(versionTagCol.eq(VersionTagEnum.BUILD.getValue()));
+                .where(applicationIdColumn.eq(applicationId))
+                .where(versionTagColumn.eq(VersionTagEnum.BUILD.getValue()));
         List<T> entities = this.getMapper().selectListByQuery(queryWrapper);
         entities.forEach(entity -> {
             entity.setId(null);
@@ -325,11 +324,11 @@ public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity>
         // 执行select、insert 动作。
         // 1、select：查询versionTag为参数`versionTag`值的数据
         // 2、insert：插入第一步查询出来的数据，versionTag为1
-        QueryColumn applicationIdCol = new QueryColumn(QueryWrapperUtils.APPLICATION_ID);
-        QueryColumn versionTagCol = new QueryColumn(QueryWrapperUtils.VERSION_TAG);
+        QueryColumn applicationIdColumn = QueryWrapperUtils.createApplicationIdColumn(this);
+        QueryColumn versionTagColumn = QueryWrapperUtils.createVersionTagColumn(this);
         QueryWrapper queryWrapper = QueryWrapper.create()
-                .where(applicationIdCol.eq(applicationId))
-                .where(versionTagCol.eq(versionTag));
+                .where(applicationIdColumn.eq(applicationId))
+                .where(versionTagColumn.eq(versionTag));
         List<T> entities = this.getMapper().selectListByQuery(queryWrapper);
         entities.forEach(entity -> {
             entity.setId(null);
@@ -339,17 +338,16 @@ public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity>
     }
 
     public boolean deleteAllApplicationData(Long applicationId) {
-        QueryColumn applicationColumn = new QueryColumn(QueryWrapperUtils.APPLICATION_ID);
-        return super.updateChain()
-                .where(applicationColumn.eq(applicationId))
-                .remove();
+        QueryColumn applicationIdColumn = QueryWrapperUtils.createApplicationIdColumn(this);
+        QueryWrapper queryWrapper = QueryWrapper.create().where(applicationIdColumn.eq(applicationId));
+        return super.remove(queryWrapper);
     }
 
     public boolean deleteApplicationVersionData(Long applicationId, Long versionId) {
-        QueryColumn applicationColumn = new QueryColumn(QueryWrapperUtils.APPLICATION_ID);
-        QueryColumn versionTagColumn = new QueryColumn(QueryWrapperUtils.VERSION_TAG);
-        return super.updateChain()
-                .where(applicationColumn.eq(applicationId).and(versionTagColumn.eq(versionId)))
-                .remove();
+        QueryColumn applicationIdColumn = QueryWrapperUtils.createApplicationIdColumn(this);
+        QueryColumn versionTagColumn = QueryWrapperUtils.createVersionTagColumn(this);
+        QueryWrapper queryWrapper = QueryWrapper.create()
+                .where(applicationIdColumn.eq(applicationId).and(versionTagColumn.eq(versionId)));
+        return super.remove(queryWrapper);
     }
 }

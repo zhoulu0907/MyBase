@@ -24,15 +24,9 @@ public class BaseAppRepository<M extends BaseMapper<T>, T extends BaseAppEntity>
         if (!QueryWrapperUtils.isQueryFilterable(queryWrapper)) {
             return;
         }
-        QueryTable queryTable = QueryWrapperUtils.getQueryTable(queryWrapper);
-        QueryColumn applicationColumn;
-        if (queryTable != null) {
-            applicationColumn = new QueryColumn(queryTable, QueryWrapperUtils.APPLICATION_ID);
-        } else {
-            applicationColumn = new QueryColumn(QueryWrapperUtils.APPLICATION_ID);
-        }
         Long applicationId = ApplicationManager.getApplicationId();
-        queryWrapper.and(applicationColumn.eq(applicationId).when(!ApplicationManager.isIgnoreApplicationCondition()));
+        QueryColumn applicationIdColumn = QueryWrapperUtils.createApplicationIdColumn(this, queryWrapper);
+        queryWrapper.and(applicationIdColumn.eq(applicationId).when(!ApplicationManager.isIgnoreApplicationCondition()));
     }
 
 
@@ -69,9 +63,10 @@ public class BaseAppRepository<M extends BaseMapper<T>, T extends BaseAppEntity>
     @Override
     public UpdateChain<T> updateChain() {
         Long applicationId = ApplicationManager.getApplicationId();
+        QueryColumn applicationIdColumn = QueryWrapperUtils.createApplicationIdColumn(this);
         //
         UpdateChain<T> updateChain = super.updateChain();
-        updateChain.where(QueryWrapperUtils.APPLICATION_COLUMN.eq(applicationId).when(!ApplicationManager.isIgnoreApplicationCondition())
+        updateChain.where(applicationIdColumn.eq(applicationId).when(!ApplicationManager.isIgnoreApplicationCondition())
         );
         return updateChain;
     }
@@ -279,9 +274,8 @@ public class BaseAppRepository<M extends BaseMapper<T>, T extends BaseAppEntity>
     //endregion ===== 分页查询操作 =====
 
     public boolean deleteAllApplicationData(Long applicationId) {
-        QueryColumn applicationColumn = new QueryColumn(QueryWrapperUtils.APPLICATION_ID);
-        return super.updateChain()
-                .where(applicationColumn.eq(applicationId))
-                .remove();
+        QueryColumn applicationIdColumn = QueryWrapperUtils.createApplicationIdColumn(this);
+        QueryWrapper queryWrapper = QueryWrapper.create().where(applicationIdColumn.eq(applicationId));
+        return super.remove(queryWrapper);
     }
 }

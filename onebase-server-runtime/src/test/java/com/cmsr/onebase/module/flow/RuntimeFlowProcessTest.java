@@ -8,6 +8,7 @@ import com.cmsr.onebase.module.flow.context.graph.JsonGraph;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
 import com.cmsr.onebase.module.flow.core.flow.FlowRemoteCallExecutor;
+import com.cmsr.onebase.module.flow.core.flow.FlowRemoteCallRequest;
 import com.cmsr.onebase.module.flow.core.graph.FlowChainBuilder;
 import com.cmsr.onebase.module.flow.core.graph.FlowGraphBuilder;
 import com.cmsr.onebase.module.flow.core.impl.FlowProcessExecApiImpl;
@@ -24,6 +25,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -96,11 +99,12 @@ public class RuntimeFlowProcessTest {
     @Test
     public void testFormTrigger01() throws IOException {
         FormTriggerReqVO reqVO = new FormTriggerReqVO();
-        reqVO.setProcessId(183149380155572224L);
-        reqVO.setInputParams(Map.of(
-                "student_name", "小",
-                "birthday", "2025-12-01"
-        ));
+        reqVO.setProcessId(187687270821101647L);
+        Map<String, Object> inputParams = new HashMap<>();
+        inputParams.put("student_name", "小");
+        inputParams.put("birthday", "2025-10-10");
+
+        reqVO.setInputParams(inputParams);
         FormTriggerRespVO formTriggerRespVO = flowProcessExecService.triggerForm(reqVO);
         System.out.println(formTriggerRespVO);
     }
@@ -132,10 +136,21 @@ public class RuntimeFlowProcessTest {
     public void testFormTrigger03() throws IOException {
         FormTriggerReqVO reqVO = new FormTriggerReqVO();
         reqVO.setProcessId(181943095635476480L);
-        reqVO.setInputParams(Map.of(
-                "phone_nubmer", null
-        ));
+        Map<String, Object> inputParams = new HashMap<>();
+        inputParams.put("entity_date", null);
+        reqVO.setInputParams(inputParams);
         FormTriggerRespVO formTriggerRespVO = flowProcessExecService.triggerForm(reqVO);
         System.out.println(formTriggerRespVO);
     }
+
+    @Test
+    public void testFlowRemoteCallExecutor(){
+        FlowRemoteCallRequest callRequest = new FlowRemoteCallRequest();
+        callRequest.setApplicationId(184716905786900480L);
+        callRequest.setProcessId(187875373210075188L);
+        callRequest.setProcessName("流程测试");
+        callRequest.setJobType(FlowRemoteCallRequest.JOB_TYPE_FIELD);
+        flowRemoteCallExecutor.executeFlow(callRequest);
+    }
+
 }

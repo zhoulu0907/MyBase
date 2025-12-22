@@ -40,8 +40,9 @@ public class EntityRelationshipRuntimeController {
     public CommonResult<EntityWithChildrenRespVO> getEntityWithChildren(
             @RequestParam("entityId") String entityId,
             @RequestParam(value = "relationshipType", required = false) String relationshipType) {
-        Long resolvedEntityId = idUuidConverter.resolveEntityId(entityId);
-        EntityWithChildrenRespVO result = entityRelationshipService.getEntityWithChildrenById(resolvedEntityId, relationshipType);
+        // 将前端传入的entityId（可能是Long ID或UUID）统一转换为entityUuid
+        String entityUuid = idUuidConverter.toEntityUuid(entityId);
+        EntityWithChildrenRespVO result = entityRelationshipService.getEntityWithChildrenByUuid(entityUuid, relationshipType);
         return success(result);
     }
 

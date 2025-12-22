@@ -66,16 +66,6 @@ public class OneBaseTenantAutoConfiguration {
         return new TenantIgnoreAspect();
     }
 
-    // ========== WEB ==========
-    // @Bean
-    // public FilterRegistrationBean<TenantContextWebFilter> tenantContextWebFilter(TenantProperties tenantProperties) {
-    //     FilterRegistrationBean<TenantContextWebFilter> registrationBean = new FilterRegistrationBean<>();
-    //     registrationBean.setFilter(new TenantContextWebFilter());
-    //     registrationBean.setOrder(WebFilterOrderEnum.TENANT_CONTEXT_FILTER);
-    //     addIgnoreUrls(tenantProperties);
-    //     return registrationBean;
-    // }
-
     /**
      * 如果 Controller 接口上，有 {@link TenantIgnore} 注解，那么添加到忽略的 URL 中
      *

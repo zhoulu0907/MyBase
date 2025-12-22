@@ -22,13 +22,22 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 import static com.cmsr.onebase.framework.common.exception.enums.GlobalErrorCodeConstants.SEESION_TIMEOUT;
+import static com.cmsr.onebase.framework.common.exception.enums.GlobalErrorCodeConstants.UNAUTHORIZED;
+import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertList;
 
 /**
  * Token 过滤器，验证 token 的有效性
@@ -37,7 +46,7 @@ import static com.cmsr.onebase.framework.common.exception.enums.GlobalErrorCodeC
  */
 @RequiredArgsConstructor
 @Slf4j
-public class BuildAuthenticationFilter extends OncePerRequestFilter {
+public class BuildAuthenticationFilter extends OncePerRequestFilter implements ApplicationContextAware {
 
     private final SecurityProperties securityProperties;
 
@@ -47,6 +56,24 @@ public class BuildAuthenticationFilter extends OncePerRequestFilter {
 
     private final SecurityConfigApi securityConfigApi;
 
+    private ApplicationContext applicationContext;
+
+    private         List<String>      permitAllUrls;
+
+    private final AntPathMatcher pathMatcher = new AntPathMatcher();
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) {
+        this.applicationContext = applicationContext;
+        // 初始化时调用getPermitAllUrls方法并保存结果
+        try {
+            this.permitAllUrls = getPermitAllUrls();
+        } catch (Exception e) {
+            log.error("初始化免登录URL列表失败", e);
+            this.permitAllUrls = new ArrayList<>();
+        }
+    }
+
     @Override
     @SuppressWarnings("NullableProblems")
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
@@ -55,10 +82,14 @@ public class BuildAuthenticationFilter extends OncePerRequestFilter {
             // 如果是登录、登出、注册，那么从header中获取租户信息
             TenantContextHolder.setTenantId(WebFrameworkUtils.getTenantIdFromHeader(request));
             // 无需获取token和登录用户信息
+        } else if(isPermitAllRequest(request)){
+            // 如果是其他免登接口，暂保持和登录登出一致的逻辑，从header中获取租户信息
+            TenantContextHolder.setTenantId(WebFrameworkUtils.getTenantIdFromHeader(request));
         } else {
             // 其他接口，需要获取token和登录用户信息
             // 情况一，基于 header[login-user] 获得用户，例如说来自 Gateway 或者其它服务透传
-            LoginUser loginUser = buildLoginUserByHeader(request);
+            // LoginUser loginUser = buildLoginUserByHeader(request);
+            LoginUser loginUser = null;
             // 情况二，基于 Token 获得用户
             // 注意，这里主要满足直接使用 Nginx 直接转发到 Spring Cloud 服务的场景。
             String token = null;
@@ -89,11 +120,16 @@ public class BuildAuthenticationFilter extends OncePerRequestFilter {
                 // 会话空闲检查：排除登录和登出请求
                 boolean checkSuc = checkAndUpdateSessionIdle(loginUser, token);
                 if (!checkSuc) {
-                    log.error("[BuildAuthenticationFilter][长时间内无操作，自动登出。]");
+                    log.error("[BuildAuthenticationFilter][长时间内无操作，自动登出, 401 会话超时, userID={}]", loginUser.getId());
                     CommonResult<?> result = CommonResult.error(SEESION_TIMEOUT);
                     ServletUtils.writeJSON(response, result);
                     return; // 中断
                 }
+            } else {
+                log.error("[BuildAuthenticationFilter][无效的Token，401 登录已过期]");
+                CommonResult<?> result = CommonResult.error(UNAUTHORIZED);
+                ServletUtils.writeJSON(response, result);
+                return; // 中断
             }
         }
 
@@ -144,9 +180,30 @@ public class BuildAuthenticationFilter extends OncePerRequestFilter {
             return null;
         }
         // 构建模拟用户
-        Long userId = Long.valueOf(token.substring(securityProperties.getMockSecret().length()));
-        return new LoginUser().setId(userId)
-                .setTenantId(WebFrameworkUtils.getTenantIdFromHeader(request));
+        // Long userId = Long.valueOf(token.substring(securityProperties.getMockSecret().length()));
+        token = token.substring(securityProperties.getMockSecret().length());
+        // 4d8fd6314da943f496b14f29b8f50000 -> 4d8fd6314da943f496b14f29b8f5d4f4
+        return buildLoginUserByInnerToken(token);
+    }
+
+    private LoginUser buildLoginUserByInnerToken(String token) {
+        try {
+            // 校验访问令牌
+            OAuth2AccessTokenCheckRespDTO accessToken = oauth2TokenApi.getAccessToken(token).getCheckedData();
+            if (accessToken == null) {
+                return null;
+            }
+            // 构建登录用户
+            return new LoginUser().setId(accessToken.getUserId()).setUserType(accessToken.getUserType())
+                    .setRunMode(accessToken.getRunMode())
+                    .setCorpId(accessToken.getCorpId())
+                    .setInfo(accessToken.getUserInfo()) // 额外的用户信息
+                    .setTenantId(accessToken.getTenantId()).setScopes(accessToken.getScopes())
+                    .setExpiresTime(accessToken.getExpiresTime());
+        } catch (ServiceException serviceException) {
+            // 校验 Token 不通过时，考虑到一些接口是无需登录的，所以直接返回 null 即可
+            return null;
+        }
     }
 
     private LoginUser buildLoginUserByHeader(HttpServletRequest request) {
@@ -248,6 +305,71 @@ public class BuildAuthenticationFilter extends OncePerRequestFilter {
 
         log.debug("[checkAndUpdateSessionIdle][会话空闲key更新成功] userId={}, deviceId={}", loginUser.getId(), deviceId);
         return true;
+    }
+
+    /**
+     * 判断请求路径是否在免登录URL列表中
+     * 支持Ant风格路径匹配，如：/runtime/system/auth/**
+     *
+     * @param request HTTP请求
+     * @return 是否为免登录请求
+     */
+    private boolean isPermitAllRequest(HttpServletRequest request) {
+        String requestUri = request.getRequestURI();
+        if (permitAllUrls != null) {
+            for (String pattern : permitAllUrls) {
+                if (pathMatcher.match(pattern, requestUri)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+
+    /**
+     * 解析和获取免登接口
+     * 获取所有标注 @PermitAll 注解的Controller接口路径，以及 yaml 配置的免登录 URL 列表(securityProperties.getPermitAllUrls())
+     *
+     * @return
+     */
+    private List<String> getPermitAllUrls() {
+        List<String> result = new ArrayList<>();
+
+        // 添加配置文件中的免登录URL列表
+        if (securityProperties.getPermitAllUrls() != null) {
+            result.addAll(securityProperties.getPermitAllUrls());
+        }
+
+        // 获取带有@PermitAll注解的接口URL
+        if (applicationContext != null) {
+            RequestMappingHandlerMapping requestMappingHandlerMapping =
+                    applicationContext.getBean("requestMappingHandlerMapping", RequestMappingHandlerMapping.class);
+            if (requestMappingHandlerMapping != null) {
+                Map<RequestMappingInfo, HandlerMethod> handlerMethodMap = requestMappingHandlerMapping.getHandlerMethods();
+                for (Map.Entry<RequestMappingInfo, HandlerMethod> entry : handlerMethodMap.entrySet()) {
+                    HandlerMethod handlerMethod = entry.getValue();
+                    if (handlerMethod.hasMethodAnnotation(jakarta.annotation.security.PermitAll.class)) {
+                        RequestMappingInfo requestMappingInfo = entry.getKey();
+
+                        Set<String> urls = new HashSet<>();
+                        if (requestMappingInfo.getPatternsCondition() != null) {
+                            urls.addAll(requestMappingInfo.getPatternsCondition().getPatterns());
+                        }
+                        if (requestMappingInfo.getPathPatternsCondition() != null) {
+                            urls.addAll(convertList(requestMappingInfo.getPathPatternsCondition().getPatterns(),
+                                    pathPattern -> pathPattern.getPatternString()));
+                        }
+
+                        if (!urls.isEmpty()) {
+                            result.addAll(urls);
+                        }
+                    }
+                }
+            }
+        }
+
+        return result;
     }
 
 }

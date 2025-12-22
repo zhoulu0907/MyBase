@@ -8,7 +8,7 @@ POST {{baseUrl}}/system/auth/tenant-login
 Content-Type: application/json
 X-Tenant-Id: {{adminTenantId}}
 
-{"username":"admin","password":"admin123","captchaVerification":"n89lvlHjSOsQQ5kGXjNNtdnkfPnK2Y3YbPwvAEXoVyL0TqzrDumdg8MONVs+z5VaSPf4ni6QKFhhx0GcaXBF4pWVx9hsSsBZ8mysqU8u45E=",
+{"username":"admin","password":"e1845c18b2711120d72bbfa33d79b794fe245df27a00c96487b2fb2452d1b01b815a27701a446e7a7c1e2d222972b6315174f83dd465254e467b71a84f7827bb272d10994a7586862dd2f2ee778587de97a01b2a7306db618bbf7607e32ca59f3808611ca97136cb","captchaVerification":"n89lvlHjSOsQQ5kGXjNNtdnkfPnK2Y3YbPwvAEXoVyL0TqzrDumdg8MONVs+z5VaSPf4ni6QKFhhx0GcaXBF4pWVx9hsSsBZ8mysqU8u45E=",
  "deviceId":666}
 
 > {%

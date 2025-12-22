@@ -1,6 +1,8 @@
 package com.cmsr.onebase.module.metadata.build.controller.admin.validation;
 
+import com.cmsr.onebase.framework.common.event.AppEntityChangeEvent;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.module.metadata.core.util.MetadataIdUuidConverter;
 import com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationLengthRespVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationLengthSaveReqVO;
@@ -11,6 +13,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,6 +30,9 @@ public class ValidationLengthController {
 
     @Resource private MetadataValidationLengthBuildService lengthService;
 
+    @Resource
+    ApplicationEventPublisher applicationEventPublisher;
+
     @PostMapping("/get-by-field")
     @Operation(summary = "根据字段UUID获取长度校验")
     @Parameter(name = "id", description = "字段UUID", required = true)
@@ -37,13 +43,24 @@ public class ValidationLengthController {
     @PostMapping("/create")
     @Operation(summary = "创建长度校验")
     public CommonResult<Long> create(@Valid @RequestBody ValidationLengthSaveReqVO vo) {
-        return success(lengthService.create(vo));
+        Long id = lengthService.create(vo);
+        applicationEventPublisher.publishEvent(
+                AppEntityChangeEvent.builder()
+                        .applicationId(ApplicationManager.getApplicationId())
+                        .build()
+        );
+        return success(id);
     }
 
     @PostMapping("/update")
     @Operation(summary = "更新长度校验")
     public CommonResult<Boolean> update(@Valid @RequestBody ValidationLengthUpdateReqVO vo) {
         lengthService.update(vo);
+        applicationEventPublisher.publishEvent(
+                AppEntityChangeEvent.builder()
+                        .applicationId(ApplicationManager.getApplicationId())
+                        .build()
+        );
         return success(true);
     }
 
@@ -52,6 +69,11 @@ public class ValidationLengthController {
     @Parameter(name = "id", description = "字段UUID", required = true)
     public CommonResult<Boolean> deleteByField(@RequestParam("id") String fieldUuid) {
         lengthService.deleteByFieldId(fieldUuid);
+        applicationEventPublisher.publishEvent(
+                AppEntityChangeEvent.builder()
+                        .applicationId(ApplicationManager.getApplicationId())
+                        .build()
+        );
         return success(true);
     }
 
@@ -69,6 +91,11 @@ public class ValidationLengthController {
     public CommonResult<Boolean> delete(@RequestParam("id") String id) {
         Long resolvedId = idUuidConverter.resolveRuleGroupId(id);
         lengthService.deleteById(resolvedId);
+        applicationEventPublisher.publishEvent(
+                AppEntityChangeEvent.builder()
+                        .applicationId(ApplicationManager.getApplicationId())
+                        .build()
+        );
         return success(true);
     }
 }

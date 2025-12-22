@@ -10,10 +10,10 @@ import com.cmsr.onebase.module.app.core.dal.database.resource.AppWorkbenchPageRe
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePageDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePagesetDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourceWorkbenchPageDO;
-import com.cmsr.onebase.module.app.core.dto.appresource.PageDTO;
-import com.cmsr.onebase.module.app.core.dto.appresource.PageRespDTO;
-import com.cmsr.onebase.module.app.core.enums.appresource.AppResourceErrorCodeConstants;
-import com.cmsr.onebase.module.app.core.enums.appresource.PageTypeSetEnum;
+import com.cmsr.onebase.module.app.core.dto.resource.PageDTO;
+import com.cmsr.onebase.module.app.core.dto.resource.PageRespDTO;
+import com.cmsr.onebase.module.app.core.enums.resource.AppResourceErrorCodeConstants;
+import com.cmsr.onebase.module.app.core.enums.resource.PageTypeSetEnum;
 import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,7 +47,7 @@ public class PageServiceProvider {
         return BeanUtils.toBean(pageDO, PageRespDTO.class);
     }
 
-    public List<PageDTO> getFormPageListByAppId(Long applicationId) {
+    public List<PageDTO> getPageListByAppId(Long applicationId) {
         List<String> menuUuidList = menuRepository.findMenuUuidListByApplication(applicationId);
         if (CollectionUtils.isEmpty(menuUuidList)) {
             return Collections.emptyList();
@@ -56,7 +56,7 @@ public class PageServiceProvider {
         if (CollectionUtils.isEmpty(pageSetUuidList)) {
             return Collections.emptyList();
         }
-        List<AppResourcePageDO> pageDOList = pageRepository.findAllFormPageByPageSetUuids(applicationId, pageSetUuidList);
+        List<AppResourcePageDO> pageDOList = pageRepository.findAllPageByPageSetUuids(applicationId, pageSetUuidList);
         List<PageDTO> pageDTOList = BeanUtils.toBean(pageDOList, PageDTO.class);
         return pageDTOList;
     }

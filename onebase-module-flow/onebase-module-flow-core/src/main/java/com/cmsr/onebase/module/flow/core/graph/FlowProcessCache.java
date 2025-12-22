@@ -10,6 +10,9 @@ import com.cmsr.onebase.module.flow.context.graph.nodes.start.StartEntityNodeDat
 import com.cmsr.onebase.module.flow.context.graph.nodes.start.StartFormNodeData;
 import com.cmsr.onebase.module.flow.context.graph.nodes.start.StartTimeNodeData;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
+import com.cmsr.onebase.module.flow.core.utils.FlowUtils;
+import com.yomahub.liteflow.meta.LiteflowMetaOperator;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.Map;
@@ -21,23 +24,46 @@ import java.util.stream.Collectors;
  * @Author：huangjie
  * @Date：2025/9/4 18:16
  */
+@Slf4j
 public class FlowProcessCache {
 
-    private static ConcurrentHashMap<Long, FlowProcessDO> processCache = new ConcurrentHashMap<>();
+    private static volatile FlowProcessCache instance;
 
-    private static ConcurrentHashMap<Long, Map<String, NodeData>> flowNodeDataCache = new ConcurrentHashMap<>();
+    private FlowProcessCache() {
+    }
 
-    private static ConcurrentHashMap<Long, StartTimeNodeData> startTimeNodeDataCache = new ConcurrentHashMap<>();
+    public static FlowProcessCache getInstance() {
+        if (instance == null) {
+            synchronized (FlowProcessCache.class) {
+                if (instance == null) {
+                    instance = new FlowProcessCache();
+                }
+            }
+        }
+        return instance;
+    }
 
-    private static ConcurrentHashMap<Long, StartFormNodeData> startFormNodeDataCache = new ConcurrentHashMap<>();
 
-    private static ConcurrentHashMap<Long, StartEntityNodeData> startEntityNodeDataCache = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<Long, FlowProcessDO> processCache = new ConcurrentHashMap<>();
 
-    private static ConcurrentHashMap<Long, StartDateFieldNodeData> startDateFieldNodeDataCache = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<Long, Map<String, NodeData>> flowNodeDataCache = new ConcurrentHashMap<>();
 
-    public static void update(FlowProcessDO processDO, JsonGraph jsonGraph) {
+    private ConcurrentHashMap<Long, StartTimeNodeData> startTimeNodeDataCache = new ConcurrentHashMap<>();
+
+    private ConcurrentHashMap<Long, StartFormNodeData> startFormNodeDataCache = new ConcurrentHashMap<>();
+
+    private ConcurrentHashMap<Long, StartEntityNodeData> startEntityNodeDataCache = new ConcurrentHashMap<>();
+
+    private ConcurrentHashMap<Long, StartDateFieldNodeData> startDateFieldNodeDataCache = new ConcurrentHashMap<>();
+
+
+
+    public void update(FlowProcessDO processDO, JsonGraph jsonGraph) {
+        //
         Long processId = processDO.getId();
         Long applicationId = processDO.getApplicationId();
+        //
+        updateChain(processId, jsonGraph);
         //
         Map<String, NodeData> flowNodeData = jsonGraph.getNodeData();
         flowNodeDataCache.put(processId, flowNodeData);
@@ -71,27 +97,27 @@ public class FlowProcessCache {
     }
 
 
-    public static boolean isProcessExist(Long processId) {
+    public boolean isProcessExist(Long processId) {
         return flowNodeDataCache.containsKey(processId);
     }
 
-    public static Map<String, NodeData> findNodeData(Long processId) {
+    public Map<String, NodeData> findNodeData(Long processId) {
         return flowNodeDataCache.get(processId);
     }
 
-    public static StartTimeNodeData findStartTimeNodeDataByProcessId(Long processId) {
+    public StartTimeNodeData findStartTimeNodeDataByProcessId(Long processId) {
         return startTimeNodeDataCache.get(processId);
     }
 
-    public static StartFormNodeData findStartFormNodeDataByProcessId(Long processId) {
+    public StartFormNodeData findStartFormNodeDataByProcessId(Long processId) {
         return startFormNodeDataCache.get(processId);
     }
 
-    public static StartDateFieldNodeData findStartDateFieldNodeDataByProcessId(Long processId) {
+    public StartDateFieldNodeData findStartDateFieldNodeDataByProcessId(Long processId) {
         return startDateFieldNodeDataCache.get(processId);
     }
 
-    public static List<StartEntityNodeData> findStartEntityNodeDataByEntityName(Long applicationId, String entityName) {
+    public List<StartEntityNodeData> findStartEntityNodeDataByEntityName(Long applicationId, String entityName) {
         return startEntityNodeDataCache.values().stream()
                 .filter(startEntityNodeData ->
                         startEntityNodeData.getApplicationId().equals(applicationId)
@@ -100,7 +126,7 @@ public class FlowProcessCache {
                 .toList();
     }
 
-    public static List<StartFormNodeData> findStartFormNodeDataByPageId(Long applicationId, Long pageId) {
+    public List<StartFormNodeData> findStartFormNodeDataByPageId(Long applicationId, Long pageId) {
         return startFormNodeDataCache.values().stream()
                 .filter(startFormNodeData ->
                         startFormNodeData.getApplicationId().equals(applicationId)
@@ -108,14 +134,17 @@ public class FlowProcessCache {
                 .toList();
     }
 
-    public static Set<Long> findProcessByApplicationId(Long applicationId) {
-        return processCache.entrySet().stream()
-                .filter(entry -> entry.getValue().equals(applicationId))
-                .map(Map.Entry::getKey)
+    public Set<Long> findProcessByApplicationId(Long applicationId) {
+        return processCache.values().stream()
+                .filter(processDO -> processDO.getApplicationId().equals(applicationId))
+                .map(processDO -> processDO.getId())
                 .collect(Collectors.toSet());
     }
 
-    public static void deleteByProcessId(Long processId) {
+    public void deleteByProcessId(Long processId) {
+        //
+        removeChain(processId);
+        //
         flowNodeDataCache.remove(processId);
         startTimeNodeDataCache.remove(processId);
         startFormNodeDataCache.remove(processId);
@@ -124,8 +153,23 @@ public class FlowProcessCache {
         processCache.remove(processId);
     }
 
-    public static FlowProcessDO findProcessByProcessId(Long processId) {
+    public FlowProcessDO findProcessByProcessId(Long processId) {
         return processCache.get(processId);
     }
 
+    public List<FlowProcessDO> getAllProcess() {
+        return processCache.values().stream().toList();
+    }
+
+    private void updateChain(Long processId, JsonGraph jsonGraph) {
+        String flowChain = FlowChainBuilder.toFlowChain(jsonGraph);
+        log.debug("flowChain:{}", flowChain);
+        String chainId = FlowUtils.toFlowChainId(processId);
+        LiteflowMetaOperator.reloadOneChain(chainId, flowChain);
+    }
+
+    private void removeChain(Long processId) {
+        String chainId = FlowUtils.toFlowChainId(processId);
+        LiteflowMetaOperator.removeChain(chainId);
+    }
 }

@@ -146,4 +146,26 @@ public interface DeptService {
      * @return 所有直属上级部门列表
      */
     List<DeptDO> getParentDeptsListById(Long id, String idType);
+    /**
+     * 根据部门编号和部门类型，查询部门
+     *
+     * @param code 部门编号
+     * @param type 部门类型
+     * @return 部门
+     */
+    DeptDO findDeptByCodeAndType(DeptSaveReqVO deptRespVO);
+    /**
+     * 创建第三方部门
+     *
+     * @param deptRespVO 部门信息
+     * @return 部门编号
+     */
+    Long createThirdDefaultDept(DeptSaveReqVO deptRespVO);
+
+    /**
+     * 获得第三方部门列表
+     *
+     * @return 部门列表
+     */
+    List<DeptDO> getDefaultThirdDept();
 }

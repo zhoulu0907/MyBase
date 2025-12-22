@@ -10,10 +10,9 @@ import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
+import com.cmsr.onebase.module.system.dal.dataobject.user.UserAppRelationDO;
 import com.cmsr.onebase.module.system.enums.user.UserStatusEnum;
-import com.cmsr.onebase.module.system.vo.user.UserByDeptPageReqVO;
-import com.cmsr.onebase.module.system.vo.user.UserPageReqVO;
-import com.cmsr.onebase.module.system.vo.user.UserSimplePageReqVO;
+import com.cmsr.onebase.module.system.vo.user.*;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Compare;
@@ -136,12 +135,15 @@ public class UserDataRepository extends DataRepository<AdminUserDO> {
      * @param deptIds 部门ID列表
      * @return 用户列表
      */
-    public List<AdminUserDO> findAllByDeptIds(Collection<Long> deptIds) {
+    public List<AdminUserDO> findAllByDeptIds(Collection<Long> deptIds, Integer userType) {
         if (deptIds == null || deptIds.isEmpty()) {
             return Collections.emptyList();
         }
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.in(AdminUserDO.DEPT_ID, deptIds);
+        if(null != userType){
+            configStore.eq(AdminUserDO.USER_TYPE, userType);
+        }
         return findAllByConfig(configStore);
     }
 
@@ -150,8 +152,17 @@ public class UserDataRepository extends DataRepository<AdminUserDO> {
      *
      * @return 用户列表
      */
-    public List<AdminUserDO> findAllNoDept() {
-        DefaultConfigStore configStore = new DefaultConfigStore();
+    public List<AdminUserDO> findNullDeptUser() {
+        DefaultConfigStore configStore = buildUserConfigStore();
+        configStore.isNull(AdminUserDO.DEPT_ID);
+        return findAllByConfig(configStore);
+    }
+
+
+    public List<AdminUserDO> findUserByUserType(Integer userType) {
+        DefaultConfigStore configStore =  new DefaultConfigStore();
+            configStore.eq(AdminUserDO.USER_TYPE, userType);
+
         configStore.isNull(AdminUserDO.DEPT_ID);
         return findAllByConfig(configStore);
     }
@@ -162,9 +173,12 @@ public class UserDataRepository extends DataRepository<AdminUserDO> {
      * @param nickname 昵称
      * @return 用户列表
      */
-    public List<AdminUserDO> findAllByNicknameLike(String nickname) {
+    public List<AdminUserDO> findAllByNicknameLike(String nickname, Integer userType) {
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.like(AdminUserDO.NICKNAME, nickname);
+        if (null != userType) {
+            configStore.eq(AdminUserDO.USER_TYPE, userType);
+        }
         return findAllByConfig(configStore);
     }
 
@@ -381,7 +395,7 @@ public class UserDataRepository extends DataRepository<AdminUserDO> {
         return findAllByConfig(configStore);
     }
 
-    public List<AdminUserDO> getUserByUsernames(Set<String> usernames) {
+    public List<AdminUserDO> getPlatformUserByUsernames(Set<String> usernames) {
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.eq(AdminUserDO.STATUS, UserStatusEnum.NORMAL.getStatus())
                 .in(AdminUserDO.USERNAME, usernames)
@@ -389,5 +403,25 @@ public class UserDataRepository extends DataRepository<AdminUserDO> {
                 .order(AdminUserDO.ADMIN_TYPE, Order.TYPE.ASC)
                 .order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
         return findAllByConfig(configStore);
+    }
+
+    public PageResult<AdminUserDO> getThirdUserPage(UserAppPageSearchReqVO userAppPageReqVO) {
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        configStore.and(AdminUserDO.USER_TYPE, UserTypeEnum.THIRD.getValue());
+        // 根据关键词查询
+        if (null != userAppPageReqVO.getDeptId()){
+            configStore.eq(AdminUserDO.DEPT_ID, userAppPageReqVO.getDeptId());
+        }
+
+        if (null != userAppPageReqVO.getStatus()){
+            configStore.eq(AdminUserDO.STATUS, userAppPageReqVO.getStatus());
+        }
+        if (StringUtils.isNotBlank(userAppPageReqVO.getUserName())){
+            configStore.like(AdminUserDO.USERNAME, userAppPageReqVO.getUserName());
+        }
+        // 添加排序
+        configStore.order(AdminUserDO.ADMIN_TYPE, Order.TYPE.ASC).order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
+
+        return findPageWithConditions(configStore, userAppPageReqVO.getPageNo(), userAppPageReqVO.getPageSize());
     }
 }

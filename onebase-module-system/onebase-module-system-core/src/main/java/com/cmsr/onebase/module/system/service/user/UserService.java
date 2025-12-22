@@ -5,12 +5,15 @@ import cn.hutool.core.collection.CollUtil;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.system.vo.auth.AuthRegisterReqVO;
+import com.cmsr.onebase.module.system.vo.auth.ThirdAuthLoginReqVO;
 import com.cmsr.onebase.module.system.vo.dept.DeptSimpleListRespVO;
 import com.cmsr.onebase.module.system.vo.user.UserProfileUpdatePasswordReqVO;
 import com.cmsr.onebase.module.system.vo.user.UserProfileUpdateReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.vo.user.*;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 
 import java.util.*;
 
@@ -164,9 +167,9 @@ public interface UserService {
      * @param deptIds 部门数组
      * @return 用户数组
      */
-    List<AdminUserDO> getUserListByDeptIds(Collection<Long> deptIds);
+    List<AdminUserDO> getUserListByDeptIds(Collection<Long> deptIds, Integer userType);
 
-    List<AdminUserDO> getUserListNoDept();
+    List<AdminUserDO> getUserListNoDept(Integer userType);
 
     /**
      * 获得指定岗位的用户数组
@@ -220,7 +223,7 @@ public interface UserService {
      * @param nickname 昵称
      * @return 用户列表
      */
-    List<AdminUserDO> getUserListByNickname(String nickname);
+    List<AdminUserDO> getUserListByNickname(String nickname,Integer  userType);
 
     /**
      * 批量导入用户
@@ -330,10 +333,66 @@ public interface UserService {
     List<UserRespVO> getConvertUserPage(PageResult<AdminUserDO> pageResult);
 
     /**
+     * 忘记密码
+     * @param reqVO
+     */
+    void thirdUserForgetPassword(Long id, String password);
+
+
+    /**
+     * 补充用户信息
+     * @param reqVO
+     * @return
+     */
+    AdminUserDO thirdUserRegister(ThirdSupplementUserReqVO reqVO);
+    /**
+     * 创建用户并关联应用
+     * @param reqVO
+     * @return
+     */
+    Long thirdUserCreateUserAndUserAppRelation( ThirdUserAppCombinedInsertReqVO reqVO);
+    /**
+     * 更新用户并关联应用
+     * @param reqVO
+     * @return
+     */
+    Long thirdUserUpdateUserAndUserAppRelation(ThirdUserAppCombinedUpdateReqVO reqVO);
+
+
+    /**
+     * 获得用户授权应用列表-分页
+     *
+     * @param userAppPageReqVO 获取用户授权应用列表-分页请求参数
+     * @return 用户授权应用列表-分页结果
+     */
+    PageResult<UserApplicationRespVO> getUserAppRelationPage(@Valid UserAppPageSearchReqVO userAppPageReqVO);
+
+    /**
+     * 更新第三方用户密码
+     * @param id
+     * @param password
+     */
+    void thirdUserUpdatePassword(Long id, String password);
+
+    /**
      * 获取用户信息
      * @param usernamesList
      * @return
      */
     @TenantIgnore
-    List<AdminUserDO> getUserByUsernames(Set<String> usernamesList);
+    List<AdminUserDO> getPlatformUserByUsernames(Set<String> usernamesList);
+
+    /**
+     * 第三方用户注册
+     * @param reqVO
+     * @return
+     */
+    Long thirdUserRegister(@Valid ThirdUserRegisterReqVO reqVO);
+
+    /**
+     * 获取第三方用户授权应用信息
+     * @param id
+     * @return
+     */
+    UserApplicationRespVO getThirdUserAndRelationApp(Long id);
 }
