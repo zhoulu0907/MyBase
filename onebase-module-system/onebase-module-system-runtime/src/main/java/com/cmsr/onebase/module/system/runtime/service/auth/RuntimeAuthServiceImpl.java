@@ -383,9 +383,8 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
     private boolean findUserAppRelationFlag(Long appId, Long userId) {
         List<UserAppVO> voList = userAppRelationService.getAppByUserId(userId);
         if (!CollectionUtils.isEmpty(voList)) {
-            boolean result = voList.stream()
-                    .anyMatch(vo -> vo.getAppId().equals(appId));
-            return !result;
+            return !voList.stream()
+                    .anyMatch(userAppVO -> null != userAppVO.getAppId() && userAppVO.getAppId().equals(appId));
         }
         return true;
     }
