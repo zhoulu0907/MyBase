@@ -19,7 +19,7 @@ export interface FetchExecTaskReq {
 export interface GetFormDetailReq {
   taskId?: string;
   instanceId?: string;
-  from?: 'todo' | 'done' | 'created' | 'cc';
+  from?: 'todo' | 'done' | 'created' | 'cc' | 'list';
 }
 export interface GetDonePageList {
   appId?: string;
@@ -101,7 +101,8 @@ export enum LISTTYPE {
   WILLDO = 'willdo',
   IDONE = 'idone',
   ICREATED = 'icreated',
-  ICOPIED = 'icopied'
+  ICOPIED = 'icopied',
+  LIST = 'list'
 }
 export const BPMConfigButtonType = {
   APPROVE: 'approve',

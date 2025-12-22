@@ -1,6 +1,7 @@
 import appPermissionSVG from '@/assets/images/appRelease/app_auth.svg';
 import appReleaseSVG from '@/assets/images/appRelease/app_release.svg';
 import baseSettingSVG from '@/assets/images/appRelease/base_setting.svg';
+import loginPermissionSVG from '@/assets/images/appRelease/login_permission.svg';
 import navigatorSettingSVG from '@/assets/images/appRelease/navigator_setting.svg';
 import AppBreadcrumb from '@/components/Breadcrumb';
 import { type Options } from '@/components/CreateApp/const';
@@ -20,12 +21,12 @@ import { ReactSVG } from 'react-svg';
 import AppReleasePage from '../AppRelease';
 import AppPermission from './components/AppPermission';
 import BasicSetting from './components/BasicSetting';
+import LoginPermission from './components/LoginPermission';
 import NavigatorSetting from './components/NavigatorSetting';
 import styles from './index.module.less';
 
 const Sider = Layout.Sider;
 const Content = Layout.Content;
-const Footer = Layout.Footer;
 
 interface BreadcrumbItemType {
   key: string;
@@ -39,6 +40,7 @@ const AppSettingPage: FC = () => {
   const { curAppId, curAppInfo, setCurAppInfo } = useAppStore();
   const menuData = [
     { title: '基础设置', icon: baseSettingSVG, key: 'baseSetting' },
+    { title: '登录设置', icon: loginPermissionSVG, key: 'loginPermission' },
     { title: '应用权限', icon: appPermissionSVG, key: 'appPermission' },
     { title: '应用发布', icon: appReleaseSVG, key: 'appRelease' },
     { title: '导航设置', icon: navigatorSettingSVG, key: 'navigatorSetting' }
@@ -70,6 +72,13 @@ const AppSettingPage: FC = () => {
       getNavigatorData();
     }
   }, [curAppId]);
+
+  // 当切换到基础设置页面时，重新请求数据
+  useEffect(() => {
+    if (activeTab === 'baseSetting' && curAppId) {
+      getApplicationData();
+    }
+  }, [activeTab]);
 
   const getApplicationData = async () => {
     const params: GetApplicationReq = {
@@ -189,7 +198,7 @@ const AppSettingPage: FC = () => {
               {activeTab === 'appPermission' && <AppPermission />}
               {activeTab === 'appRelease' && <AppReleasePage />}
               {activeTab === 'navigatorSetting' && <NavigatorSetting form={navigatorForm} data={navigatorData} />}
-
+              {activeTab === 'loginPermission' && <LoginPermission appId={curAppId} />}
               {(activeTab === 'baseSetting' || activeTab === 'navigatorSetting') && (
                 <Button className={styles.saveButton} type="primary" loading={saveLoading} onClick={handleSave}>
                   保存

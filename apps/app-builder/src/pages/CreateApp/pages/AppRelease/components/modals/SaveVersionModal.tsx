@@ -52,7 +52,7 @@ const SaveVersionModal: React.FC<SaveVersionModalProps> = ({ visible, onCancel, 
       <Form form={form} layout="vertical" initialValues={formData} className={styles.form}>
         <Grid.Row gutter={16}>
           <Grid.Col span={16}>
-            <Form.Item label="版本名称" field="versionName" rules={[{ required: true, message: '请输入版本名称' }]}>
+            <Form.Item label="名称" field="versionName" rules={[{ required: true, message: '请输入名称' }]}>
               <Input placeholder="请输入" />
             </Form.Item>
           </Grid.Col>

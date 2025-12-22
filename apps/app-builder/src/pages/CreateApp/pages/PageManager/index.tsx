@@ -46,7 +46,7 @@ import { debounce } from 'lodash-es';
 import { useCallback, useEffect, useState, type FC } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { ReactSVG } from 'react-svg';
-import { RELATIONSHIP_TYPE } from '../DataFactory/utils/types';
+import { RELATIONSHIP_TYPE } from '../DataFactory/utils/relation';
 import CopyModal from './components/Modals/CopyModal';
 import CreateModal from './components/Modals/CreateModal';
 import RenameModal from './components/Modals/RenameModal';

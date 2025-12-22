@@ -1,7 +1,7 @@
 /**
  * 权限由三层组成：模块、功能、操作
- * 模块：租户管理、应用管理等
- * 功能：即各模块下的菜单，如租户管理模块下的用户管理、角色管理等菜单
+ * 模块：空间管理、应用管理等
+ * 功能：即各模块下的菜单，如空间管理模块下的用户管理、角色管理等菜单
  * 操作：主要为按钮，即菜单下的新增、编辑、删除、导入、导出等
  * 后端返回的操作权限标识格式：'模块:功能:操作'，如'system:user:create'
  * 本文件用于建立与后端权限标识对应的常量键名映射
@@ -25,7 +25,9 @@ export const TENANT_MENUS = {
   SECURITY: 'tenant:security', //安全设置
   INFO: 'tenant:info',  //空间信息
   CORP: 'tenant:corp', //企业管理
-  PROFILE: 'tenant:profile' //个人中心
+  PROFILE: 'tenant:profile', //个人中心
+  THIRD: 'tenant:third', //外部用户
+  PLUGIN: 'tenant:config' //插件管理
 };
 
 /** 空间管理-用户管理 */
@@ -48,7 +50,7 @@ export const TENANT_USER_PERMISSION = {
   EXPORT: TENANT_USER_EXPORT
 };
 
-/** 租户管理-应用管理 */
+/** 空间管理-应用管理 */
 export const TENANT_APP_QUERY = 'tenant:app:query'; // 查询应用
 export const TENANT_APP_CREATE = 'tenant:app:create'; // 新增应用
 export const TENANT_APP_UPDATE = 'tenant:app:update'; // 修改应用
@@ -60,7 +62,7 @@ export const TENANT_APP_PERMISSION = {
   DELETE: TENANT_APP_DELETE,
 };
 
-/** 租户管理-角色管理 */
+/** 空间管理-角色管理 */
 export const TENANT_ROLE_QUERY = 'tenant:role:query'; // 查询角色
 export const TENANT_ROLE_CREATE = 'tenant:role:create'; // 新增角色
 export const TENANT_ROLE_UPDATE = 'tenant:role:update'; // 修改角色
@@ -76,7 +78,7 @@ export const TENANT_ROLE_PERMISSION = {
   PERMISSION: TENANT_ROLE_ASSIGN_PERMISSION
 };
 
-/** 租户管理-组织管理 */
+/** 空间管理-组织管理 */
 export const TENANT_DEPT_QUERY = 'tenant:dept:query';
 export const TENANT_DEPT_CREATE = 'tenant:dept:create';
 export const TENANT_DEPT_SUB_DEPT = 'tenant:dept:update'; // todo 添加子部门 待确认
@@ -90,7 +92,7 @@ export const TENANT_DEPT_PERMISSION = {
   DELETE: TENANT_DEPT_DELETE
 };
 
-/** 租户管理-数据字典管理 */
+/** 空间管理-数据字典管理 */
 export const TENANT_DICT_QUERY = 'tenant:dict:query';
 export const TENANT_DICT_CREATE = 'tenant:dict:create';
 export const TENANT_DICT_UPDATE = 'tenant:dict:update';
@@ -104,7 +106,7 @@ export const TENANT_DICT_PERMISSION = {
   STATUS: TENANT_DICT_STATUS
 };
 
-/** 租户管理-空间信息 */
+/** 空间管理-空间信息 */
 export const TENANT_INFO_QUERY = 'tenant:info:query';
 export const TENANT_INFO_UPDATE = 'tenant:info:update';
 export const TENANT_INFO_PERMISSION = {
@@ -112,7 +114,29 @@ export const TENANT_INFO_PERMISSION = {
   UPDATE: TENANT_INFO_UPDATE
 };
 
-/**租户管理-租户个人信息 */
+/**空间管理-租户个人信息 */
+export const TENANT_CONFIG_QUERY = 'tenant:config:query';
+export const TENANT_CONFIG_UPDATE = 'tenant:config:update';
+export const TENANT_CONFIG_PERMISSION = {
+  QUERY: TENANT_CONFIG_QUERY,
+  UPDATE: TENANT_CONFIG_UPDATE
+};
+
+/**空间管理-外部用户 */
+export const TENANT_THIRD_QUERY = 'tenant:third:query';
+export const TENANT_THIRD_UPDATE = 'tenant:third:update';
+export const TENANT_THIRD_DELETE = 'tenant:third:delete';
+export const TENANT_THIRD_RESETPWD = 'tenant:third:update-password';
+export const TENANT_THIRD_ENABLE = 'tenant:third:enable';
+export const TENANT_THIRD_PERMISSION = {
+  QUERY: TENANT_THIRD_QUERY,
+  UPDATE: TENANT_THIRD_UPDATE,
+  DELETE: TENANT_THIRD_DELETE,
+  RESETPWD: TENANT_THIRD_RESETPWD,
+  ENABLE: TENANT_THIRD_ENABLE
+};
+
+/**空间管理-插件管理 */
 export const TENANT_PROFILE_QUERY = 'tenant:profile:query';
 export const TENANT_PROFILE_UPDATE = 'tenant:profile:update';
 export const TENANT_PROFILE_RESETPWD = 'tenant:profile:reset-pwd';

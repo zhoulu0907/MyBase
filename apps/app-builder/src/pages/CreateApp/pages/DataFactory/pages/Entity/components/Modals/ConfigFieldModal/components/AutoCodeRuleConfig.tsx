@@ -296,10 +296,10 @@ export const AutoCodeRuleConfig: React.FC<AutoCodeRuleConfigProps> = ({
               placeholder="请选择字段"
               className={styles.ruleInput}
               options={getFieldOptions(fields)}
-              value={findFieldPath((rule.format as string) || '', fields)}
+              value={findFieldPath((rule.refFieldUuid as string) || '', fields)}
               onChange={(value) => {
                 updateRule(rule.id!, {
-                  format: value[value.length - 1],
+                  refFieldUuid: value[value.length - 1],
                   fieldPath: value
                 });
               }}

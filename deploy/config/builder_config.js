@@ -1,8 +1,18 @@
 window.global_config = {
-    ENVIRONMENT: 'builder',
-	BASE_URL: 'http://s25029301301.dev.internal.virtueit.net:81/v1-snapshot/onebaseserver/admin-api',
-    PLATFORM_BASE_URL: 'http://s25029301301.dev.internal.virtueit.net:81/v1-snapshot/onebaseserver/platform',
-    RUNTIME_BASE_URL: 'http://s25029301301.dev.internal.virtueit.net:81/v1-snapshot/onebaseserverruntime/runtime',
-    RUNTIME_URL: 'http://s25029301301.dev.internal.virtueit.net:81/v0/appruntimemt',
-    MOBILE_EDITOR_URL: 'http://s25029301301.dev.internal.virtueit.net:81/v0/mobileeditor/'
-}
+  ENVIRONMENT: 'builder',
+  APP_KEY: 'onebase',
+  APP_SECRET: 'ac47af767231f0d08e3787b7d032443a2c7baedaeee07d596cff4525b94ce6a7',
+  BASE_URL: 'http://s25029301301.dev.internal.virtueit.net:81/v1-snapshot/onebaseserver/admin-api',
+  PLATFORM_BASE_URL: 'http://s25029301301.dev.internal.virtueit.net:81/v1-snapshot/onebaseserver/platform',
+  RUNTIME_BASE_URL: 'http://s25029301301.dev.internal.virtueit.net:81/v1-snapshot/onebaseserverruntime/runtime',
+  RESOURCE_URL:
+    'http://s25029301301.dev.internal.virtueit.net:81/v1-snapshot/onebaseserver/admin-api/infra/file/download',
+
+  MOBILE_EDITOR_URL: 'http://s25029301301.dev.internal.virtueit.net:81/v0/mobileeditor/',
+
+  RUNTIME_URL: 'http://s25029301301.dev.internal.virtueit.net:81/v0/appruntimemt',
+  RUNTIME_MOBILE_URL: 'http://localhost:9528',
+
+  PUBLIC_KEY:
+    '045efee7520c3ed4b3c6bb75424a3ae25039e25bd859731a1f6464cb7e5f7dfb419bcba55cc6adfb7f3e224a6e8949709a3664ff2dc4b822f50ee77bbd64ce3946'
+};

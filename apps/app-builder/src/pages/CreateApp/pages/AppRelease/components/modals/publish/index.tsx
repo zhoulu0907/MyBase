@@ -1,12 +1,13 @@
-import { Form, Grid, Input, Modal, Tag } from '@arco-design/web-react';
+import { Form, Grid, Input, Message, Modal, Tag } from '@arco-design/web-react';
 import { onlineApplication, OperationType, type OnlineApplicationReq } from '@onebase/app';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
 
 const TextArea = Input.TextArea;
 
 interface PublishVersionModalProps {
   applicationId: string;
+  appName?: string;
   visible: boolean;
   onCancel: () => void;
   onOk: (values: PublishVersionFormData) => void;
@@ -19,7 +20,13 @@ interface PublishVersionFormData {
   environment: string;
 }
 
-const PublishVersionModal: React.FC<PublishVersionModalProps> = ({ applicationId, visible, onCancel, onOk }) => {
+const PublishVersionModal: React.FC<PublishVersionModalProps> = ({
+  applicationId,
+  appName,
+  visible,
+  onCancel,
+  onOk
+}) => {
   const [loading, setLoading] = useState(false);
 
   const [form] = Form.useForm();
@@ -29,6 +36,23 @@ const PublishVersionModal: React.FC<PublishVersionModalProps> = ({ applicationId
     description: '',
     environment: '正式环境'
   });
+
+  // 当弹窗打开时，将应用名称填充到名称字段
+  useEffect(() => {
+    if (visible) {
+      // 重置表单到初始值
+      form.resetFields();
+      // 如果有应用名称，则设置到表单
+      // 使用 setTimeout 确保 setFieldsValue 在 resetFields 之后执行
+      if (appName) {
+        setTimeout(() => {
+          form.setFieldsValue({
+            versionName: appName
+          });
+        }, 0);
+      }
+    }
+  }, [visible, appName, form]);
 
   const handleOk = async () => {
     try {
@@ -46,11 +70,13 @@ const PublishVersionModal: React.FC<PublishVersionModalProps> = ({ applicationId
       const res = await onlineApplication(req);
       console.log(res);
 
+      Message.success('应用发布成功');
       setLoading(false);
       form.resetFields();
       onOk(values);
     } catch (error) {
       console.error('表单验证失败:', error);
+      Message.error('应用发布失败');
       setLoading(false);
     }
   };
@@ -73,7 +99,7 @@ const PublishVersionModal: React.FC<PublishVersionModalProps> = ({ applicationId
       <Form form={form} layout="vertical" initialValues={formData} className={styles.form}>
         <Grid.Row gutter={16}>
           <Grid.Col span={16}>
-            <Form.Item label="版本名称" field="versionName" rules={[{ required: true, message: '请输入版本名称' }]}>
+            <Form.Item label="名称" field="versionName" rules={[{ required: true, message: '请输入名称' }]}>
               <Input placeholder="请输入" />
             </Form.Item>
           </Grid.Col>
