@@ -363,7 +363,6 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
     const { list, total } = await getSimpleUserPage(param);
     setUserOptions(list || []);
     setUserTotal(total);
-    // console.log('res: ', res);
   };
 
   // 滚动加载

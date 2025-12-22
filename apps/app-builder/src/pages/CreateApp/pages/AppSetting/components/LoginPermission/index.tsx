@@ -1,18 +1,17 @@
 //登录设置
-import { useEffect, useState } from 'react';
-import { Switch, Typography, Upload, Button, Radio, Card, Space, Spin } from '@arco-design/web-react';
-import { IconUpload, IconRefresh, IconCopy } from '@arco-design/web-react/icon';
+import loginTemplateSvg from '@/assets/images/setting/login_template.svg';
+import { Button, Card, Radio, Space, Spin, Switch, Typography, Upload } from '@arco-design/web-react';
+import { IconCopy, IconRefresh, IconUpload } from '@arco-design/web-react/icon';
 import { copyToClipboard, getRuntimeURL, TokenManager } from '@onebase/common';
-import styles from './index.module.less';
-import loginBg from '../../../../../../assets/images/login_bg.svg';
-import loginBgMask from '../../../../../../assets/images/login_bg_mask.svg';
 import {
   loginConfigListByKeyApi,
   updateLoginConfigApi,
   type loginPermissionRes,
   type updateLoginConfigParams
 } from '@onebase/platform-center';
+import { useEffect, useState } from 'react';
 import { thirdUserConfigKey } from './constant';
+import styles from './index.module.less';
 
 interface ILoginPermissionProps {
   appId: string;
@@ -68,11 +67,11 @@ const LoginPermission: React.FC<ILoginPermissionProps> = ({ appId }) => {
   };
 
   const getEachConfigValue = (type: string) => {
-    const targetConfig = loginConfigData?.find(item => item.configKey === type);
-    return targetConfig ? targetConfig.configValue : "false";
+    const targetConfig = loginConfigData?.find((item) => item.configKey === type);
+    return targetConfig ? targetConfig.configValue : 'false';
   };
 
-  const canShowURL = JSON.parse(getEachConfigValue(thirdUserConfigKey.ENABLE) || '')
+  const canShowURL = JSON.parse(getEachConfigValue(thirdUserConfigKey.ENABLE) || '');
 
   return (
     <Spin loading={loading} style={{ width: '100%' }}>
@@ -83,18 +82,20 @@ const LoginPermission: React.FC<ILoginPermissionProps> = ({ appId }) => {
             <Typography.Text>允许外部用户登录</Typography.Text>
             <Switch
               onChange={(value: boolean) => {
-                handleSwitchChange(thirdUserConfigKey.ENABLE, JSON.stringify(value))
+                handleSwitchChange(thirdUserConfigKey.ENABLE, JSON.stringify(value));
               }}
               checked={canShowURL}
             />
           </Space>
-          {canShowURL && <div className={styles.linkContent}>
-            <span>本应用外部用户登录/注册地址:</span>
-            <div className={styles.linkText} onClick={() => navigateToRunTime(href)}>
-              www.onebase.com/app/externalusers
+          {canShowURL && (
+            <div className={styles.linkContent}>
+              <span>本应用外部用户登录/注册地址:</span>
+              <div className={styles.linkText} onClick={() => navigateToRunTime(href)}>
+                {href}
+              </div>
+              <IconCopy onClick={() => copyToClipboard(href)} style={{ fontSize: 16 }} />
             </div>
-            <IconCopy onClick={() => copyToClipboard(href)} style={{ fontSize: 16 }} />
-          </div>}
+          )}
         </div>
 
         {/* 中间：宣传区 + 登录预览区 + 右侧配置区 */}
@@ -105,7 +106,8 @@ const LoginPermission: React.FC<ILoginPermissionProps> = ({ appId }) => {
             style={{ width: 420, height: 500, flexShrink: 0 }}
             bodyStyle={{ padding: 0 }}
           >
-            {/* <img src={loginBg} width={210} height={500} alt="loginBg" className={styles.loginBg} /> */}
+            {/* TODO(shenyue): 改成真实渲染 */}
+            <img src={loginTemplateSvg} width={'100%'} height={'100%'} alt="loginBg" />
           </Card>
 
           {/* 右侧：配置区 */}

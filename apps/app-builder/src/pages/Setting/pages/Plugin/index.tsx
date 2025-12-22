@@ -1,13 +1,9 @@
-import { Card, Input, Message, Modal, Space, Spin, Switch, Tabs } from '@arco-design/web-react';
-import {
-  getPluginListApi,
-  type pluginParams,
-  updatePluginStatusApi
-} from '@onebase/platform-center';
+import externalUserSVG from '@/assets/images/external_user.svg';
+import { Input, Message, Modal, Space, Spin, Switch, Tabs } from '@arco-design/web-react';
+import { getPluginListApi, type pluginParams, updatePluginStatusApi } from '@onebase/platform-center';
 import { useEffect, useMemo, useState } from 'react';
 import { StatusEnumLabel, statusMapping, StatusValue } from './constants';
 import styles from './index.module.less';
-import externalUserSVG from '@/assets/images/external_user.svg';
 
 export interface PluginItem {
   id: string;
@@ -25,15 +21,15 @@ const PluginPage = () => {
 
   const renderStatus = (status: any) => {
     let value = null;
-    if(status === StatusValue.ALL) {
+    if (status === StatusValue.ALL) {
       value = null;
-    }else if(status === StatusValue.DISABLE) {
-      value = 0
-    }else if(status === StatusValue.ENABLE) {
-      value = 1
+    } else if (status === StatusValue.DISABLE) {
+      value = 0;
+    } else if (status === StatusValue.ENABLE) {
+      value = 1;
     }
     return value;
-  }
+  };
 
   const fetchPluginList = async (status: string = '') => {
     setLoading(true);
@@ -102,44 +98,39 @@ const PluginPage = () => {
         activeTab={currentTab}
         onChange={handleChangeTab}
         type="rounded"
-        extra={
-          <Input.Search
-            className={styles.search}
-            placeholder="搜索插件"
-            onChange={handleSearchChange}
-          />
-        }
+        extra={<Input.Search className={styles.search} placeholder="搜索插件" onChange={handleSearchChange} />}
       >
         {statusMapping.map((data: any) => {
           return (
             <Tabs.TabPane key={data.value} title={data.label}>
               <Spin loading={loading} style={{ width: '100%' }}>
-                <Space size={16}>
+                <div className={styles.cardContainer}>
                   {filterPlugin?.map((plugin, index) => {
                     return (
-                      <Card className={styles.card} key={index} hoverable>
-                        <Space size={48}>
-                          <Space size={16}>
-                            <div className={styles.icon} style={{backgroundColor: '#009E9E' }}>
-                              <img src={externalUserSVG} style={{width:'32px', height:'32px', filter: 'brightness(0) invert(1)'}}/>
-                            </div>
-                            <div className={styles.textContent}>
-                              <span className={styles.name}>{plugin.name}</span>
-                              <span className={styles.description}>{plugin.remark}</span>
-                            </div>
-                          </Space>
-                          <Space>
-                            <div>{plugin.status === 1 ? StatusEnumLabel.ENABLE : StatusEnumLabel.DISABLE}</div>
-                            <Switch
-                              checked={plugin.status === 1 ? true : false}
-                              onChange={(checked) => handleSwitchChange(plugin.id, plugin.name, checked)}
+                      <div className={styles.card} key={index}>
+                        <Space size={16}>
+                          <div className={styles.icon} style={{ backgroundColor: '#009E9E' }}>
+                            <img
+                              src={externalUserSVG}
+                              style={{ width: '32px', height: '32px', filter: 'brightness(0) invert(1)' }}
                             />
-                          </Space>
+                          </div>
+                          <div className={styles.textContent}>
+                            <span className={styles.name}>{plugin.name}</span>
+                            <span className={styles.description}>{plugin.remark}</span>
+                          </div>
                         </Space>
-                      </Card>
+                        <Space>
+                          <div>{plugin.status === 1 ? StatusEnumLabel.ENABLE : StatusEnumLabel.DISABLE}</div>
+                          <Switch
+                            checked={plugin.status === 1 ? true : false}
+                            onChange={(checked) => handleSwitchChange(plugin.id, plugin.name, checked)}
+                          />
+                        </Space>
+                      </div>
                     );
                   })}
-                </Space>
+                </div>
               </Spin>
             </Tabs.TabPane>
           );

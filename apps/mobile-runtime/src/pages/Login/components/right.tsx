@@ -1,8 +1,11 @@
+import logoIcon from '@/assets/images/logo-icon.svg';
+import { useI18n } from '@/hooks/useI18n';
+import { useRememberMe } from '@/hooks/useRememberMe';
 import { Button, Form, Input, Toast } from '@arco-design/mobile-react';
 import { useForm } from '@arco-design/mobile-react/esm/form';
 import { IconEyeInvisible, IconEyeVisible } from '@arco-design/mobile-react/esm/icon';
 import { ValidatorType } from '@arco-design/mobile-utils';
-import { getApplication, type Application } from '@onebase/app';
+import { getApplicationLeast, type Application } from '@onebase/app';
 import {
   DynamicIcon,
   getHashQueryParam,
@@ -29,11 +32,8 @@ import {
 import { appIconMap } from '@onebase/ui-kit';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import logoIcon from '@/assets/images/logo-icon.svg';
-import { useI18n } from '@/hooks/useI18n';
-import { useRememberMe } from '@/hooks/useRememberMe';
-import { SliderCaptcha } from './Captcha';
 import styles from '../index.module.less';
+import { SliderCaptcha } from './Captcha';
 
 const Right: React.FC = () => {
   const navigate = useNavigate();
@@ -100,7 +100,7 @@ const Right: React.FC = () => {
 
   const handleGetApplication = async () => {
     if (appId) {
-      const res = await getApplication({ id: appId });
+      const res = await getApplicationLeast({ id: appId });
       if (res) {
         setAppInfo(res);
       }
