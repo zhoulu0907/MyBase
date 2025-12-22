@@ -17,6 +17,7 @@ import com.cmsr.onebase.module.etl.common.preview.ColumnDefine;
 import com.cmsr.onebase.module.etl.core.dal.database.*;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.EtlDatasourceDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.EtlTableDO;
+import com.cmsr.onebase.module.etl.core.dto.FlinkMappings;
 import com.cmsr.onebase.module.etl.core.enums.CollectStatus;
 import com.cmsr.onebase.module.etl.core.enums.EtlErrorCodeConstants;
 import com.cmsr.onebase.module.etl.core.vo.DatasourcePageReqVO;
@@ -26,7 +27,6 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.metadata.type.DatabaseType;
 import org.apache.commons.lang3.BooleanUtils;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -35,9 +35,8 @@ import org.springframework.stereotype.Service;
 import javax.sql.DataSource;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
 @Service
 @Slf4j
@@ -276,33 +275,46 @@ public class EtlDatasourceServiceImpl implements EtlDatasourceService {
         if (datasourceDO == null) {
             throw ServiceExceptionUtil.exception(EtlErrorCodeConstants.DATASOURCE_NOT_EXIST);
         }
-        Map<String, String> flinkTypeMappings = flinkMappingRepository.findAllMappingsByDatasourceType(datasourceDO.getDatasourceType());
+        FlinkMappings flinkMappings = flinkMappingRepository.findByDatasourceType(datasourceDO.getDatasourceType());
         TableData tableData = JsonUtils.parseObject(tableDO.getMetaInfo(), TableData.class);
         List<ColumnData> columns = tableData.getColumns();
+        if (columns == null) {
+            return Collections.emptyList();
+        }
         return columns.stream()
-                .map(columnMeta -> {
-                    ColumnDefine columnDefine = new ColumnDefine();
-                    String fqn = String.format("%s.%s.%s.%s.%s", datasourceDO.getDatasourceUuid(),
-                            tableData.getCatalogName(),
-                            tableData.getSchemaName(),
-                            tableData.getName(),
-                            columnMeta.getName());
-                    columnDefine.setFieldFqn(fqn);
-                    String tableName = columnMeta.getName();
-                    String displayName = columnMeta.getDisplayName();
-                    String comment = columnMeta.getComment();
-                    String declaration = columnMeta.getDeclaration();
-                    columnDefine.setFieldName(tableName);
-                    columnDefine.setDisplayName(tableName);
-                    if (StringUtils.isNotBlank(comment)) columnDefine.setDisplayName(comment);
-                    if (StringUtils.isNotBlank(declaration) && !StringUtils.equals(declaration, comment))
-                        columnDefine.setDisplayName(declaration);
-                    if (StringUtils.isNotBlank(displayName) && !StringUtils.equals(tableName, displayName))
-                        columnDefine.setDisplayName(displayName);
-                    columnDefine.setFieldType(flinkTypeMappings.get(columnMeta.getType()));
-                    return columnDefine;
-                }).toList();
+                .map(columnData -> toColumnDefine(datasourceDO.getDatasourceType(), tableData, columnData, flinkMappings))
+                .toList();
     }
+
+    private ColumnDefine toColumnDefine(String datasourceType, TableData tableData, ColumnData columnData, FlinkMappings flinkMappings) {
+        ColumnDefine columnDefine = new ColumnDefine();
+        String fqn = String.format("%s.%s.%s.%s",
+                tableData.getCatalogName(),
+                tableData.getSchemaName(),
+                tableData.getName(),
+                columnData.getName());
+        String columnName = columnData.getName();
+        String displayName = columnData.getDisplayName();
+        String comment = columnData.getComment();
+        String declaration = columnData.getDeclaration();
+        String type = columnData.getType();
+
+        columnDefine.setFieldFqn(fqn);
+        columnDefine.setFieldName(columnName);
+
+        if (StringUtils.isNotBlank(declaration)) {
+            columnDefine.setDisplayName(declaration);
+        } else if (StringUtils.isNotBlank(comment)) {
+            columnDefine.setDisplayName(comment);
+        } else if (StringUtils.isNotBlank(displayName)) {
+            columnDefine.setDisplayName(displayName);
+        } else {
+            columnDefine.setDisplayName(columnName);
+        }
+        columnDefine.setFieldType(flinkMappings.getFlinkType(datasourceType, type));
+        return columnDefine;
+    }
+
 
     private void checkDatasourceCollectRunnable(EtlDatasourceDO datasourceDO, LocalDateTime plannedTime) {
         CollectStatus currentStatus = datasourceDO.getCollectStatus();
