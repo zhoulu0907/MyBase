@@ -267,7 +267,11 @@ const DynamicDateRangeConfig: React.FC<DynamicDateRangeConfigProps> = ({ handleP
                       value={configs[dateRangeKey]['earliestCustomType']}
                       options={customTypeOptions}
                       onChange={(value) => {
-                        handlePropsChange(dateRangeKey, { ...configs[dateRangeKey], earliestCustomType: value });
+                        handlePropsChange(dateRangeKey, {
+                          ...configs[dateRangeKey],
+                          earliestCustomType: value,
+                          earliestCustomValue: 1
+                        });
                       }}
                     />
                   </Grid.Col>
@@ -275,7 +279,11 @@ const DynamicDateRangeConfig: React.FC<DynamicDateRangeConfigProps> = ({ handleP
                     <Select
                       getPopupContainer={getPopupContainer}
                       value={configs[dateRangeKey]['earliestCustomValue']}
-                      options={customValueOptions}
+                      options={
+                        configs[dateRangeKey]['earliestCustomType'] === DATE_DYNAMIC_CUSTOM_TYPE.CURRENT
+                          ? [{ label: 1, value: 1 }]
+                          : customValueOptions
+                      }
                       onChange={(value) => {
                         handlePropsChange(dateRangeKey, { ...configs[dateRangeKey], earliestCustomValue: value });
                       }}
@@ -376,7 +384,11 @@ const DynamicDateRangeConfig: React.FC<DynamicDateRangeConfigProps> = ({ handleP
                       value={configs[dateRangeKey]['latestCustomType']}
                       options={customTypeOptions}
                       onChange={(value) => {
-                        handlePropsChange(dateRangeKey, { ...configs[dateRangeKey], latestCustomType: value });
+                        handlePropsChange(dateRangeKey, {
+                          ...configs[dateRangeKey],
+                          latestCustomType: value,
+                          latestCustomValue: 1
+                        });
                       }}
                     />
                   </Grid.Col>
@@ -384,7 +396,11 @@ const DynamicDateRangeConfig: React.FC<DynamicDateRangeConfigProps> = ({ handleP
                     <Select
                       getPopupContainer={getPopupContainer}
                       value={configs[dateRangeKey]['latestCustomValue']}
-                      options={customValueOptions}
+                      options={
+                        configs[dateRangeKey]['latestCustomType'] === DATE_DYNAMIC_CUSTOM_TYPE.CURRENT
+                          ? [{ label: 1, value: 1 }]
+                          : customValueOptions
+                      }
                       onChange={(value) => {
                         handlePropsChange(dateRangeKey, { ...configs[dateRangeKey], latestCustomValue: value });
                       }}
