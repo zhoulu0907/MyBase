@@ -156,18 +156,17 @@ export default function WorkbenchWorkspace() {
     }
   }, []);
 
+  const isMobileMode = editMode.value === EditMode.MOBILE;
+
   return (
-    <>
-      {/* 移动端、Web端切换 - 通过CSS控制显示/隐藏 */}
+    <div className={styles.editorSwitchContainer}>
+      {/* 移动端编辑器 */}
       <div
         id="mobile-wb-editor-drag-list"
-        className={styles.mobileeditordraglist}
-        style={{ display: editMode.value === EditMode.MOBILE ? 'block' : 'none' }}
+        className={`${styles.mobileeditordraglist} ${isMobileMode ? styles.active : ''}`}
       ></div>
-      <div
-        className={styles.workbenchWorkspace}
-        style={{ display: editMode.value === EditMode.MOBILE ? 'none' : 'flex' }}
-      >
+      {/* Web端编辑器 */}
+      <div className={`${styles.workbenchWorkspace} ${!isMobileMode ? styles.active : ''}`}>
         <div className={styles.workspaceHeader}>
           <div className={styles.workspaceHeaderLeft}></div>
           <div className={styles.workspaceHeaderRight}>
@@ -237,6 +236,6 @@ export default function WorkbenchWorkspace() {
           </div>
         </Form>
       </div>
-    </>
+    </div>
   );
 }
