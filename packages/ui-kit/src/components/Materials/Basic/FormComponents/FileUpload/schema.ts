@@ -213,7 +213,7 @@ const XFileUpload: XInputFileUploadSchema = {
     uploadType: UPLOAD_VALUES[UPLOAD_OPTIONS.TEXT],
     buttonName: '点击上传',
     buttonType: UPLOAD_BUTTON_TYPES.PRIMARY,
-    showDownload: true,
+    showDownload: false,
     verify: {
       required: false,
       maxCount: 1,
