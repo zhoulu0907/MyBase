@@ -28,9 +28,9 @@ public class FileConfigDataRepository extends ServiceImpl<FileConfigMapper, File
      * @param master 是否为主配置
      * @return 文件配置对象
      */
-    public FileConfigDO findByMaster(Boolean master) {
+    public FileConfigDO findByMaster(Integer master) {
         QueryWrapper queryWrapper = QueryWrapper.create();
-        queryWrapper.eq(FileConfigDO.COLUMN_MASTER, master);
+        queryWrapper.eq(FileConfigDO.COLUMN_MASTER, master, master != null);
         return getOne(queryWrapper);
     }
 
