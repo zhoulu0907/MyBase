@@ -132,6 +132,7 @@ const AppsList: React.FC<{ treeData: TreeNode[] }> = ({ treeData }) => {
       menuName: item.title,
       menuIcon: item.icon || '',
       isVisible: item.isVisible || 0,
+      pagesetType: item.pagesetType,
       children: []
     });
     // sp.delete('curTab');

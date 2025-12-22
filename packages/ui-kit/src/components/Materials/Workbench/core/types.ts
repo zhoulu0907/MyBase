@@ -83,6 +83,7 @@ export interface QuickEntryEntryConfig {
   linkAddress?: string;
   group?: string;
   entryDesc?: string;
+  menuUuid?: string;
 }
 
 /**
