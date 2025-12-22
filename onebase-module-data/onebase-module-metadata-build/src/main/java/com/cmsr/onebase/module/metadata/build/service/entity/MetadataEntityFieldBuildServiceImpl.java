@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.metadata.build.service.entity;
 
+import cn.hutool.core.util.IdUtil;
 import com.cmsr.onebase.framework.aynline.AnylineDdlHelper;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
@@ -2546,6 +2547,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 } else {
                     // 确实是新选项，新增
                     MetadataEntityFieldOptionDO d = new MetadataEntityFieldOptionDO();
+                    d.setOptionUuid(IdUtil.fastSimpleUUID()); // 生成选项UUID
                     d.setFieldUuid(fieldUuid);
                     d.setOptionLabel(opt.getOptionLabel());
                     d.setOptionValue(opt.getOptionValue());
