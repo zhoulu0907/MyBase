@@ -398,9 +398,9 @@ export default function EditorWorkspace() {
                     schema.config.verify = {
                       ...schema.config.verify,
                       required: field.isRequired,
-                      noRepeat: field.isUnique
+                      noRepeat: typeof schema.config?.verify?.noRepeat === 'boolean' ? field.isUnique === 1 : undefined
                     };
-                   
+
                     // 字段约束配置（长度/正则） constraints
                     schema.config.constraints = field.constraints;
                     // 数据选择
@@ -490,9 +490,9 @@ export default function EditorWorkspace() {
                     subSchema.config.verify = {
                       ...subSchema.config.verify,
                       required: ele.isRequired,
-                      noRepeat: ele.isUnique
+                      noRepeat: typeof subSchema.config?.verify?.noRepeat === 'boolean' ? ele.isUnique === 1 : undefined
                     };
-                   
+
                     // 字段约束配置（长度/正则） constraints
                     subSchema.config.constraints = ele.constraints;
                     // 数据选择
@@ -619,7 +619,8 @@ export default function EditorWorkspace() {
                   schema.config.verify = {
                     ...schema.config.verify,
                     required: currentField.isRequired,
-                    noRepeat: currentField.isUnique
+                    noRepeat:
+                      typeof schema.config?.verify?.noRepeat === 'boolean' ? currentField.isUnique === 1 : undefined
                   };
 
                   // 字段约束配置（长度/正则） constraints

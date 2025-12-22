@@ -1,3 +1,4 @@
+import UserProfileAvatar from '@/components/UserProfileAvatar';
 import {
   Button,
   Dropdown,
@@ -7,16 +8,18 @@ import {
   Popconfirm,
   Select,
   Table,
+  Tag,
   Tooltip,
   type TableColumnProps
 } from '@arco-design/web-react';
-import { IconDown, IconPlus } from '@arco-design/web-react/icon';
+import { IconDown, IconPlus, IconSearch } from '@arco-design/web-react/icon';
 import {
   getDeptUser,
   getRoleMembers,
   roleAddDept,
   roleAddUser,
   roleDeleteMember,
+  RoleType,
   type AuthRoleUsersPageRespVO,
   type DeptAndUsersRespDTO,
   type GetDeptUserReq,
@@ -50,6 +53,11 @@ const ADDTYPE = {
   DEPT: 'specifiedDepartment'
 } as const;
 
+const CREATESOURCE = {
+  CREATE: '后台创建',
+  REGISTER: '自主注册'
+} as const;
+
 // 用户成员列表
 const UserMembers = (props: IProps) => {
   const { roleInfo, memberList, memberTotal } = props;
@@ -75,10 +83,13 @@ const UserMembers = (props: IProps) => {
   const loadingDeptRef = useRef<Record<string, boolean>>({});
   const [, forceUpdate] = useState(0);
 
+  const isOuterUser = roleInfo?.roleType === RoleType.OUTERUSER;
+
   const dropList = (
     <Menu
-      onClickMenuItem={(key) => {
+      onClickMenuItem={async (key) => {
         setAddSelect(key);
+        await handleMembersVisible();
       }}
     >
       <Menu.Item key={ADDTYPE.USER}>
@@ -139,7 +150,14 @@ const UserMembers = (props: IProps) => {
         deptId,
         keywords
       };
-      const res = await getDeptUser(params);
+      let res = [];
+      if (!isOuterUser) {
+        res = await getDeptUser(params);
+      } else {
+        // 外部用户List TODO
+        res = await getDeptUser(params, RoleType.OUTERUSER);
+      }
+
       setDeptData(res);
     } catch (error) {
       console.error('获取部门用户信息失败 error:', error);
@@ -235,42 +253,85 @@ const UserMembers = (props: IProps) => {
 
   const columns: TableColumnProps[] = [
     {
-      title: '成员或部门',
+      title: `${!isOuterUser ? '成员或部门' : '成员'}`,
       dataIndex: 'name',
       ellipsis: true,
-      align: 'center'
+      show: true,
+      align: 'center',
+      render: (name: string, item: any) =>
+        item.type === ROLE.USER ? (
+          <>
+            {/* 头像 TODO */}
+            <UserProfileAvatar size={24} adminInfo={{ nickname: name, avatar: item?.avatar }} />
+            <span style={{ marginLeft: '4px' }}>{name}</span>
+          </>
+        ) : (
+          <span>{name}</span>
+        )
+    },
+    {
+      title: '账号',
+      dataIndex: 'account',
+      align: 'center',
+      show: true,
+      render: (account: string) => <span>{account ?? '--'}</span>
+    },
+    {
+      title: '来源',
+      dataIndex: 'createSourceText',
+      align: 'center',
+      show: isOuterUser,
+      render: (source: string) => (
+        <Tag
+          style={{
+            color: source === CREATESOURCE.CREATE ? '#009E9E' : '#1979FF',
+            height: '20px',
+            backgroundColor: source === CREATESOURCE.CREATE ? '#E8FFEF' : '#E8F5FF'
+          }}
+        >
+          {source}
+        </Tag>
+      )
     },
     {
       title: '类型',
       dataIndex: 'typeName',
-      align: 'center'
+      align: 'center',
+      show: !isOuterUser
     },
     {
       title: '部门',
       dataIndex: 'deptName',
       ellipsis: true,
       align: 'center',
-      render: (deptName: string, item: any) => (
-        <Tooltip
-          getPopupContainer={() => document.body}
-          content={
-            loadingDeptRef.current[item.memberId] ? '加载中...' : (cacheDeptListRef.current[item.memberId] ?? '未加载')
-          }
-          onVisibleChange={(visible) => {
-            // 按当前行的 id 去判断是否需要请求，而不是全局 content
-            if (visible && !cacheDeptListRef.current[item.memberId] && !loadingDeptRef.current[item.memberId]) {
-              fetchDeptData(item.memberId, item.type);
+      show: true,
+      render: (deptName: string, item: any) =>
+        !isOuterUser ? (
+          <Tooltip
+            getPopupContainer={() => document.body}
+            content={
+              loadingDeptRef.current[item.memberId]
+                ? '加载中...'
+                : (cacheDeptListRef.current[item.memberId] ?? '未加载')
             }
-          }}
-        >
-          <span>{deptName}</span>
-        </Tooltip>
-      )
+            onVisibleChange={(visible) => {
+              // 按当前行的 id 去判断是否需要请求，而不是全局 content
+              if (visible && !cacheDeptListRef.current[item.memberId] && !loadingDeptRef.current[item.memberId]) {
+                fetchDeptData(item.memberId, item.type);
+              }
+            }}
+          >
+            <span>{deptName ?? '--'}</span>
+          </Tooltip>
+        ) : (
+          <span>{deptName ?? '--'}</span>
+        )
     },
     {
       title: '操作',
       dataIndex: 'op',
       align: 'center',
+      show: true,
       render: (_, record) => (
         <Popconfirm
           focusLock
@@ -314,47 +375,80 @@ const UserMembers = (props: IProps) => {
   return (
     <div className={styles.adminWrapper}>
       <div className={styles.header}>
-        <Input
-          style={{ width: 284 }}
-          addBefore={
-            <Select
-              className={styles.searchSelect}
-              value={searchType}
-              onChange={(type) => {
-                setSearchType(type);
-              }}
-            >
-              <Select.Option value={ROLE.USER}>搜索成员</Select.Option>
-              <Select.Option value={ROLE.DEPT}>搜索部门</Select.Option>
-            </Select>
-          }
-          allowClear={true}
-          placeholder={`请输入${searchType === ROLE.USER ? '成员姓名' : '部门名称'}`}
-          onChange={(value) => debouncedSearch(value)}
-        />
-        <div>
-          {selectRowkeyArr.length > 0 && (
-            <Popconfirm
-              focusLock
-              title="移除部门或成员"
-              content="是否确认移除这些部门或成员？"
-              onOk={() => {
-                handleDeleteUser(selectRowkeyArr);
-              }}
-            >
-              <Button type="outline" status="danger" style={{ marginRight: '16px' }}>
-                批量删除
+        {!isOuterUser ? (
+          <>
+            <Input
+              style={{ width: 284 }}
+              addBefore={
+                <Select
+                  className={styles.searchSelect}
+                  value={searchType}
+                  onChange={(type) => {
+                    setSearchType(type);
+                  }}
+                >
+                  <Select.Option value={ROLE.USER}>搜索成员</Select.Option>
+                  <Select.Option value={ROLE.DEPT}>搜索部门</Select.Option>
+                </Select>
+              }
+              allowClear={true}
+              placeholder={`请输入${searchType === ROLE.USER ? '成员姓名' : '部门名称'}`}
+              onChange={(value) => debouncedSearch(value)}
+            />
+            <div>
+              {selectRowkeyArr.length > 0 && (
+                <Popconfirm
+                  focusLock
+                  title="移除部门或成员"
+                  content="是否确认移除这些部门或成员？"
+                  onOk={() => {
+                    handleDeleteUser(selectRowkeyArr);
+                  }}
+                >
+                  <Button type="outline" status="danger" style={{ marginRight: '16px' }}>
+                    批量删除
+                  </Button>
+                </Popconfirm>
+              )}
+              <Dropdown.Button type="primary" droplist={dropList} icon={<IconDown />} onClick={handleMembersVisible}>
+                {addSelect === ADDTYPE.USER ? '添加成员' : '添加部门'}
+              </Dropdown.Button>
+            </div>
+          </>
+        ) : (
+          <>
+            <div>
+              <Button type="primary" icon={<IconPlus />} onClick={handleMembersVisible}>
+                添加
               </Button>
-            </Popconfirm>
-          )}
-          <Dropdown.Button type="primary" droplist={dropList} icon={<IconDown />} onClick={handleMembersVisible}>
-            {addSelect === ADDTYPE.USER ? '添加成员' : '添加部门'}
-          </Dropdown.Button>
-        </div>
+              {selectRowkeyArr.length > 0 && (
+                <Popconfirm
+                  focusLock
+                  title="移除成员"
+                  content="是否确认移除这些成员？"
+                  onOk={() => {
+                    handleDeleteUser(selectRowkeyArr);
+                  }}
+                >
+                  <Button type="outline" status="danger" style={{ marginLeft: '8px' }}>
+                    批量删除
+                  </Button>
+                </Popconfirm>
+              )}
+            </div>
+            <Input
+              className={styles.appInput}
+              allowClear
+              suffix={<IconSearch />}
+              onChange={(value) => debouncedSearch(value)}
+              placeholder="输入用户姓名"
+            />
+          </>
+        )}
       </div>
       <Table
         className={styles.table}
-        columns={columns}
+        columns={columns.filter((c) => c.show)}
         data={userList}
         loading={userLoading}
         pagination={{ ...pagination, showTotal: true, onChange: handlePageChange }}

@@ -122,7 +122,9 @@ export interface ETLDatasourceOption {
 export interface ListAppETLDatasourceParams {
   applicationId: string;
   writable?: number;
+  readonly?: number;
 }
+
 export interface ListTableColumnsReq {
   tableUuid: string;
 }

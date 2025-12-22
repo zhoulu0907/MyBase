@@ -23,6 +23,7 @@ interface TableColumnsProps {
   deleteField: (id: string) => void;
   fields: FieldFormValues[];
   handleConfigConfirm: (fieldType: string, fieldId: string, configData: unknown, dictTypeId?: string) => void;
+  clearFieldError: (fieldKey: string) => void;
 }
 
 // 渲染表单字段组件
@@ -34,20 +35,35 @@ const renderFormField = (
   externalErrors: Record<string, string>,
   getFieldIndex: (fieldId: string) => number,
   children: React.ReactNode,
+  clearFieldError?: (fieldKey: string) => void,
   disabled?: boolean
 ) => {
   const fieldIndex = getFieldIndex(record.id || '');
   const errorKey = `fields.${fieldIndex}.${field}`;
+  const hasExternalError = !!externalErrors[errorKey];
 
   return (
     <Form.Item
       field={`fields.${fieldIndex}.${field}`}
       rules={rules as unknown[]}
       className={styles.fieldFormItem}
-      validateStatus={externalErrors[errorKey] ? 'error' : undefined}
-      help={externalErrors[errorKey]}
+      validateStatus={hasExternalError ? 'error' : undefined}
+      help={hasExternalError ? externalErrors[errorKey] : undefined}
     >
-      {React.cloneElement(children as React.ReactElement, { disabled })}
+      {React.cloneElement(children as React.ReactElement, {
+        disabled,
+        onChange: (...args: unknown[]) => {
+          // 当字段值改变时，让表单内部的验证机制控制验证状态
+          if (externalErrors[errorKey] && clearFieldError) {
+            clearFieldError(errorKey);
+          }
+          // 调用原来的 onChange
+          const originalOnChange = (children as React.ReactElement).props?.onChange;
+          if (typeof originalOnChange === 'function') {
+            originalOnChange(...args);
+          }
+        }
+      })}
     </Form.Item>
   );
 };
@@ -209,7 +225,8 @@ const TableColumns = ({
   externalErrors,
   getFieldIndex,
   deleteField,
-  handleConfigConfirm
+  handleConfigConfirm,
+  clearFieldError
 }: TableColumnsProps): ColumnConfig[] => {
   return [
     {
@@ -233,6 +250,7 @@ const TableColumns = ({
               externalErrors,
               getFieldIndex,
               <Input placeholder="由小写字母、数字、下划线组成，须以字母开头，不超过40个字符" size="mini" />,
+              clearFieldError,
               !record.id?.includes('field-')
             )
     },
@@ -256,7 +274,8 @@ const TableColumns = ({
               createFieldRules.displayName,
               externalErrors,
               getFieldIndex,
-              <Input size="mini" />
+              <Input size="mini" />,
+              clearFieldError
             )
     },
     {
@@ -294,7 +313,8 @@ const TableColumns = ({
                   handleConfigConfirm(ENTITY_FIELD_TYPE.AUTO_CODE.VALUE, record.id || '', autoNumberRule);
                 }
               }}
-            />
+            />,
+            clearFieldError
           )}
           <Form.Item
             className={styles.fieldFormItem}
@@ -335,7 +355,8 @@ const TableColumns = ({
               [],
               externalErrors,
               getFieldIndex,
-              <Input placeholder="请输入字段描述" size="mini" />
+              <Input placeholder="请输入字段描述" size="mini" />,
+              clearFieldError
             )
     },
     {

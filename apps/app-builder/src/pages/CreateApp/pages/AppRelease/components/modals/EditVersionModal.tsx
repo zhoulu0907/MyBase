@@ -1,5 +1,5 @@
+import { Form, Grid, Input, Modal } from '@arco-design/web-react';
 import React, { useState } from 'react';
-import { Modal, Form, Input, Grid } from '@arco-design/web-react';
 import styles from './EditVersionModal.module.less';
 
 const TextArea = Input.TextArea;
@@ -59,7 +59,7 @@ const EditVersionModal: React.FC<EditVersionModalProps> = ({
       <Form form={form} layout="vertical" initialValues={formData} className={styles.form}>
         <Grid.Row gutter={16}>
           <Grid.Col span={16}>
-            <Form.Item label="版本名称" field="versionName" rules={[{ required: true, message: '请输入版本名称' }]}>
+            <Form.Item label="名称" field="versionName" rules={[{ required: true, message: '请输入名称' }]}>
               <Input placeholder="请输入" />
             </Form.Item>
           </Grid.Col>

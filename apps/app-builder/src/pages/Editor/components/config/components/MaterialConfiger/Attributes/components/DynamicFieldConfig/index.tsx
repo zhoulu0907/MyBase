@@ -1,12 +1,8 @@
 import { Cascader, Form } from '@arco-design/web-react';
 import { FilterEntityFields, type AppEntity, type AppEntityField } from '@onebase/app';
-import { getDictDataListByType, getDictDetail } from '@onebase/platform-center';
 import {
-  COLOR_MODE_TYPES,
   COMPONENT_FIELD_MAP,
   CONFIG_TYPES,
-  DEFAULT_OPTIONS_TYPE,
-  FORM_COMPONENT_TYPES,
   getPopupContainer,
   useAppEntityStore,
   useFormEditorSignal,
@@ -25,6 +21,16 @@ export interface DynamicFieldConfigProps {
   item: any;
   configs: any;
 }
+
+/**
+ * 对实体字段进行排序：系统字段排在后面，非系统字段排在前面，相同类型按 displayName 排序
+ */
+const sortEntityFields = (a: AppEntityField, b: AppEntityField): number => {
+  if (a.isSystemField === b.isSystemField) {
+    return a.displayName.localeCompare(b.displayName);
+  }
+  return a.isSystemField ? 1 : -1;
+};
 
 const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({
   handlePropsChange,
@@ -67,6 +73,7 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({
 
     const cpTypes = COMPONENT_FIELD_MAP[fieldType];
     const mainEntityTree = mainEntity.fields
+      .sort(sortEntityFields)
       .filter((field: AppEntityField) => !FilterEntityFields.includes(field.fieldName))
       .filter((field: AppEntityField) => !cpTypes || cpTypes.length === 0 || cpTypes.includes(field.fieldType))
       .map((field: AppEntityField) => ({
@@ -80,6 +87,7 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({
       value: entity.tableName,
       label: entity.entityName,
       children: entity.fields
+        .sort(sortEntityFields)
         .filter((field: AppEntityField) => !FilterEntityFields.includes(field.fieldName))
         .filter((field: AppEntityField) => !cpTypes || cpTypes.length === 0 || cpTypes.includes(field.fieldType))
         .map((field: AppEntityField) => ({
@@ -139,7 +147,7 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({
           noRepeat: currentMainField.isUnique
         },
         constraints: currentMainField.constraints,
-        [item.key]: value,
+        [item.key]: value
       };
       handleConfigsChange(newConfigs);
     } else if (isSubEntity && currentSubField) {
@@ -154,7 +162,7 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({
           noRepeat: currentSubField.isUnique
         },
         constraints: currentSubField.constraints,
-        [item.key]: value,
+        [item.key]: value
       };
       handleConfigsChange(newConfigs);
     } else {
