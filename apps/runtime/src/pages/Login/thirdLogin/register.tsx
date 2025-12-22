@@ -38,6 +38,7 @@ const RegisterForm: React.FC<IRegisterProps> = ({ appId, isRelatedApp, tenantId,
         deviceId: deviceId
       };
       const response = await thirdUserRegisterApi(registerParams, headers);
+      //   TODO(mickey): remove debug log
       console.log('response', response);
       if (response) {
         setRegisterInfo(response);
