@@ -66,7 +66,7 @@ public class FileConfigServiceImpl implements FileConfigService {
                 @Override
                 public FileClient load(Long id) {
                     FileConfigDO config = Objects.equals(CACHE_MASTER_ID, id) ?
-                            fileConfigDataRepository.findByMaster(true)
+                            fileConfigDataRepository.findByMaster(NumberUtils.INTEGER_ONE)
                             : fileConfigDataRepository.getById(id);
                     if (config != null) {
                         fileClientFactory.createOrUpdateFileClient(config.getId(), config.getStorage(),
