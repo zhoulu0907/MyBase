@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.infra.dal.dataflexdo.file;
 
-import com.cmsr.onebase.framework.orm.entity.BaseTenantEntity;
+import com.cmsr.onebase.framework.orm.entity.BaseEntity;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Table;
@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table("infra_file_content")
-public class FileContentDO extends BaseTenantEntity {
+public class FileContentDO extends BaseEntity {
     // builder模式可正常运作
     public FileContentDO setId(Long id){
         super.setId(id);

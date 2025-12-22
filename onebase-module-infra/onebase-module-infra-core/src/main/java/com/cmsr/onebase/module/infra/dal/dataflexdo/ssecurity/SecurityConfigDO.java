@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.infra.dal.dataflexdo.ssecurity;
 
 import com.cmsr.onebase.framework.data.base.BaseDO;
+import com.cmsr.onebase.framework.orm.entity.BaseTenantEntity;
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Table;
 import lombok.AllArgsConstructor;
@@ -18,7 +19,7 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table("infra_security_config")
-public class SecurityConfigDO extends BaseDO {
+public class SecurityConfigDO extends BaseTenantEntity {
 
     public static final String TENANT_ID = "tenant_id";
     public static final String CONFIG_KEY = "config_key";

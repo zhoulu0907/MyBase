@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.infra.dal.dataflexdo.file;
 
-import com.cmsr.onebase.framework.orm.entity.BaseTenantEntity;
+import com.cmsr.onebase.framework.orm.entity.BaseEntity;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.infra.framework.file.core.enums.FileStorageEnum;
 import com.mybatisflex.annotation.Column;
@@ -8,7 +8,6 @@ import com.mybatisflex.annotation.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 import java.util.Map;
 
@@ -21,7 +20,7 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table("infra_file_config")
-public class FileConfigDO extends BaseTenantEntity {
+public class FileConfigDO extends BaseEntity {
 
     // 字段常量定义
     public static final String COLUMN_NAME = "name";
