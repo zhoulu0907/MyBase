@@ -26,6 +26,7 @@ import {
   queryFlowExecForm,
   TRIGGER_EVENTS,
   VALIDATION_TYPE,
+  deleteFormDataPage,
   type AppEntityField
 } from '@onebase/app';
 import {
@@ -585,6 +586,7 @@ const XTable = memo(
       if (!runtime) {
         return;
       }
+
       const curFormPage = curPage.value?.pages?.find((ele: any) => ele.pageType === CATEGORY_TYPE.LIST);
       console.log('curFormPage: ', curFormPage);
       const pageId = curFormPage?.id;
@@ -602,8 +604,17 @@ const XTable = memo(
       const req: DeleteMethodV2Params = {
         id: id
       };
-
-      const res = await dataMethodDeleteV2(tableName, curMenu.value?.id, req);
+      let res:any
+      if (props?.pageSetType === PageType.BPM){
+        const params={
+          menuId: curMenu.value?.id,
+          tableName,
+          ...req
+        }
+        res = await deleteFormDataPage(params)
+      } else {
+        res = await dataMethodDeleteV2(tableName, curMenu.value?.id, req);
+      }
 
       if (res) {
         Message.success('删除成功');
