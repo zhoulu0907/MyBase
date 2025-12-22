@@ -16,7 +16,6 @@ const XSelectOne = memo((props: XSelectOneConfig & { runtime?: boolean; detailMo
     status,
     verify,
     layout,
-    align,
     defaultOptionsConfig,
     runtime = true,
     detailMode
@@ -43,7 +42,7 @@ const XSelectOne = memo((props: XSelectOneConfig & { runtime?: boolean; detailMo
       rules={rules}
       displayType={FormInternalComponentType.Picker}
       style={{
-        textAlign: align,
+        textAlign: 'right',
         pointerEvents: (!runtime || detailMode) ? 'none' : 'unset',
         opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
       }}
@@ -59,13 +58,13 @@ const XSelectOne = memo((props: XSelectOneConfig & { runtime?: boolean; detailMo
             if (b[0]) {
               result = b[0].label
             }
-            result = defaultOptionsConfig.defaultOptions.find(op => op.value === a[0])?.label || a[0]
+            result = defaultOptionsConfig?.defaultOptions?.find(op => op.value === a[0])?.label || a[0]
             if (!result) {
               return <div className="arco-form-picker-link-container"><div className="arco-form-picker-link-container-placeholder">请选择</div></div>
             }
             return <div className="arco-form-picker-link-container">{result}</div>
           }}
-          data={[defaultOptionsConfig.defaultOptions.map(op => ({
+          data={[defaultOptionsConfig?.defaultOptions?.map(op => ({
             label: op.label,
             value: op.value
           }))]}

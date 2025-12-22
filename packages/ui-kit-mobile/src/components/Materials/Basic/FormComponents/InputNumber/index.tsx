@@ -57,6 +57,7 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
     // 非只读模式，渲染Input组件
     return (
       <Input
+        className='no-spin'
         type="number"
         placeholder={placeholder}
         maxLength={verify?.max || 1000000000}
