@@ -10,6 +10,7 @@ import org.pf4j.PluginWrapper;
 import org.springframework.context.ApplicationEventPublisher;
 
 import java.nio.file.Path;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -47,18 +48,114 @@ public class OneBasePluginManager {
      */
     public String loadPlugin(Path pluginPath) {
         log.info("加载插件: {}", pluginPath);
-        String pluginId = pluginManager.loadPlugin(pluginPath);
-        if (pluginId != null) {
-            log.info("插件加载成功: {}", pluginId);
-            try {
+        String pluginId = null;
+
+        // 先尝试查找是否已存在相同路径的已加载插件，减少重复加载产生的异常
+        try {
+            List<org.pf4j.PluginWrapper> plugins = pluginManager.getPlugins();
+            if (plugins != null) {
+                for (org.pf4j.PluginWrapper w : plugins) {
+                    Path p = w.getPluginPath();
+                    if (p != null) {
+                        try {
+                            if (isSamePluginPath(p, pluginPath)) {
+                                pluginId = w.getPluginId();
+                                break;
+                            }
+                        } catch (Exception ex) {
+                            log.debug("比较插件路径时出错: {} -> {}", p, pluginPath);
+                        }
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            log.debug("检查已加载插件列表时发生异常（可忽略）: {}", pluginPath, ex);
+        }
+
+        // 使用单一 try 来执行加载和事件发布，处理竞态导致的 PluginAlreadyLoadedException
+        try {
+            if (pluginId == null) {
+                pluginId = pluginManager.loadPlugin(pluginPath);
+            } else {
+                log.info("插件已存在，无需重复加载: {} -> {}", pluginPath, pluginId);
+            }
+
+            if (pluginId != null) {
+                log.info("插件加载成功: {}", pluginId);
                 org.pf4j.PluginWrapper wrapper = pluginManager.getPlugin(pluginId);
                 eventPublisher.publishEvent(new com.cmsr.onebase.plugin.runtime.event.PluginLoadedEvent(pluginId, wrapper));
-            } catch (Exception ignore) {
+            } else {
+                log.error("插件加载失败: {}", pluginPath);
             }
-        } else {
-            log.error("插件加载失败: {}", pluginPath);
+        } catch (org.pf4j.PluginAlreadyLoadedException pae) {
+            // 竞态情况下插件已被其它线程加载，尝试定位已加载的 pluginId 并发布事件
+            log.info("插件已加载（竞态）: {}", pluginPath);
+            try {
+                for (org.pf4j.PluginWrapper w : pluginManager.getPlugins()) {
+                    Path p = w.getPluginPath();
+                    if (p != null && isSamePluginPath(p, pluginPath)) {
+                        pluginId = w.getPluginId();
+                        break;
+                    }
+                }
+                if (pluginId != null) {
+                    org.pf4j.PluginWrapper wrapper = pluginManager.getPlugin(pluginId);
+                    eventPublisher.publishEvent(new com.cmsr.onebase.plugin.runtime.event.PluginLoadedEvent(pluginId, wrapper));
+                    log.info("已定位并发布已加载插件事件: {}", pluginId);
+                } else {
+                    log.warn("插件已加载但无法定位 pluginId: {}", pluginPath);
+                }
+            } catch (Exception ignore) {
+                log.warn("在处理 PluginAlreadyLoadedException 时发生异常（已忽略）: {}", pluginPath);
+            }
+        } catch (Exception e) {
+            log.error("加载插件或发布事件时发生错误: {}", pluginPath, e);
         }
+
         return pluginId;
+    }
+
+    private static Path getNormalize(Path p) {
+        return p.toAbsolutePath().normalize();
+    }
+
+    /**
+     * 判断已加载插件路径与待加载插件路径是否代表同一插件。
+     * PF4J 对 archive 会解压为目录，所以需要兼容目录-文件的比较。
+     */
+    private boolean isSamePluginPath(Path loadedPath, Path archivePath) {
+        Path lp = loadedPath.toAbsolutePath().normalize();
+        Path ap = archivePath.toAbsolutePath().normalize();
+        if (lp.equals(ap)) {
+            return true;
+        }
+        try {
+            // 如果已加载路径是目录，且目录下包含与 archive 同名的文件（例如原始 zip/jar），也认为是同一插件
+            if (Files.isDirectory(lp)) {
+                Path candidate = lp.resolve(ap.getFileName());
+                if (Files.exists(candidate)) {
+                    return true;
+                }
+            }
+            // 如果 archivePath 在已加载目录的父目录下，也可能是同一插件（常见 plugins/xxx.zip -> plugins/xxx/ 解压）
+            if (Files.isDirectory(lp) && ap.getParent() != null && lp.getParent() != null) {
+                if (lp.getParent().equals(ap.getParent())) {
+                    // 比较目录名与 archive 文件名（去掉扩展名）
+                    String dirName = lp.getFileName().toString();
+                    String fileBase = removeExtension(ap.getFileName().toString());
+                    if (dirName.equals(fileBase)) {
+                        return true;
+                    }
+                }
+            }
+        } catch (Exception ignore) {
+        }
+        return false;
+    }
+
+    private String removeExtension(String name) {
+        int idx = name.lastIndexOf('.');
+        return idx > 0 ? name.substring(0, idx) : name;
     }
 
     /**
