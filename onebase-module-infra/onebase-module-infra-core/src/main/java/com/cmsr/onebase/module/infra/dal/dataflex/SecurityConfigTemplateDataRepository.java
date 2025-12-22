@@ -4,7 +4,6 @@ import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.infra.dal.dataflexdo.ssecurity.SecurityConfigTemplateDO;
 import com.cmsr.onebase.module.infra.dal.mapper.ssecurity.SecurityConfigTemplateMapper;
 import com.cmsr.onebase.module.infra.dal.vo.app.AppTenantVO;
-import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.core.row.Db;
 import com.mybatisflex.core.row.Row;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
@@ -97,18 +96,13 @@ public class SecurityConfigTemplateDataRepository extends ServiceImpl<SecurityCo
                     ON t.config_key = c.config_key
                     AND c.tenant_id = ?
                     AND c.deleted = 0
-                WHERE t.category_id in  (${categoryIds})
+                WHERE t.category_id in  (?)
                     AND t.deleted = 0
                 ORDER BY t.sort_order ASC
                 """;
 
         // 构造参数数组
-        Object[] params = new Object[1 + categoryIds.size()];
-        params[0] = tenantId;
-        for (int i = 0; i < categoryIds.size(); i++) {
-            params[i + 1] = categoryIds.get(i);
-        }
-        List<Row> rows = Db.selectListBySql(sql, params);
+        List<Row> rows = Db.selectListBySql(sql, tenantId, categoryIds);
         List<SecurityConfigTemplateDO> list = getSecurityConfigTemplateDOS(rows);
         return list;
     }
