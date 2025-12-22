@@ -5,6 +5,8 @@ import {
   WEEK_OPTIONS_LABEL,
   DATE_EXTREME_TYPE,
   DATE_DYNAMIC_TYPE,
+  DATE_DYNAMIC_CUSTOM_TYPE,
+  DATE_DYNAMIC_CUSTOM_VALUE_TYPE,
   getPopupContainer,
   CONFIG_TYPES,
   ENTITY_FIELD_TYPE,
@@ -53,8 +55,28 @@ const DynamicDateRangeConfig: React.FC<DynamicDateRangeConfigProps> = ({ handleP
     { label: '7天前', value: DATE_DYNAMIC_TYPE.BEFOREWEEK },
     { label: '7天后', value: DATE_DYNAMIC_TYPE.AFTERWEEK },
     { label: '30天前', value: DATE_DYNAMIC_TYPE.BEFOREMONTH },
-    { label: '30天后', value: DATE_DYNAMIC_TYPE.AFTERMONTH }
+    { label: '30天后', value: DATE_DYNAMIC_TYPE.AFTERMONTH },
+    { label: '自定义', value: DATE_DYNAMIC_TYPE.CUSTOM }
   ];
+  // 动态值 自定义
+  const customTypeOptions = [
+    { label: '当前', value: DATE_DYNAMIC_CUSTOM_TYPE.CURRENT },
+    { label: '过去', value: DATE_DYNAMIC_CUSTOM_TYPE.PAST },
+    { label: '未来', value: DATE_DYNAMIC_CUSTOM_TYPE.FUTURE }
+  ];
+  const customValueOptions = [
+    ...Array.from({ length: 999 }, (_, i) => {
+      return { label: i + 1, value: i + 1 };
+    })
+  ];
+  const customValueTypeOptions = [
+    { label: '天', value: DATE_DYNAMIC_CUSTOM_VALUE_TYPE.DAY },
+    { label: '周', value: DATE_DYNAMIC_CUSTOM_VALUE_TYPE.WEEK },
+    { label: '月', value: DATE_DYNAMIC_CUSTOM_VALUE_TYPE.MONTH },
+    { label: '季', value: DATE_DYNAMIC_CUSTOM_VALUE_TYPE.QUARTER },
+    { label: '年', value: DATE_DYNAMIC_CUSTOM_VALUE_TYPE.YEAR }
+  ];
+
   const { mainEntity, subEntities } = useAppEntityStore();
 
   const [variableOptions, setVariableOptions] = useState<SelectOption[]>([]);
@@ -173,7 +195,7 @@ const DynamicDateRangeConfig: React.FC<DynamicDateRangeConfigProps> = ({ handleP
                 handlePropsChange(dateRangeKey, { ...configs[dateRangeKey], earliestLimit: value });
               }}
             >
-              最早可选日期时间
+              最早可选日期
             </Checkbox>
             <Grid.Row gutter={8} style={{ marginTop: '8px', marginBottom: '8px' }}>
               <Grid.Col span={8}>
@@ -234,6 +256,43 @@ const DynamicDateRangeConfig: React.FC<DynamicDateRangeConfigProps> = ({ handleP
                 )}
               </Grid.Col>
             </Grid.Row>
+
+            {/* 动态值  自定义 */}
+            {configs[dateRangeKey]['earliestType'] === DATE_EXTREME_TYPE.DYNAMIC &&
+              configs[dateRangeKey]['earliestDynamicValue'] === DATE_DYNAMIC_TYPE.CUSTOM && (
+                <Grid.Row gutter={8}>
+                  <Grid.Col span={8}>
+                    <Select
+                      getPopupContainer={getPopupContainer}
+                      value={configs[dateRangeKey]['earliestCustomType']}
+                      options={customTypeOptions}
+                      onChange={(value) => {
+                        handlePropsChange(dateRangeKey, { ...configs[dateRangeKey], earliestCustomType: value });
+                      }}
+                    />
+                  </Grid.Col>
+                  <Grid.Col span={8}>
+                    <Select
+                      getPopupContainer={getPopupContainer}
+                      value={configs[dateRangeKey]['earliestCustomValue']}
+                      options={customValueOptions}
+                      onChange={(value) => {
+                        handlePropsChange(dateRangeKey, { ...configs[dateRangeKey], earliestCustomValue: value });
+                      }}
+                    />
+                  </Grid.Col>
+                  <Grid.Col span={8}>
+                    <Select
+                      getPopupContainer={getPopupContainer}
+                      value={configs[dateRangeKey]['earliestCustomValueType']}
+                      options={customValueTypeOptions}
+                      onChange={(value) => {
+                        handlePropsChange(dateRangeKey, { ...configs[dateRangeKey], earliestCustomValueType: value });
+                      }}
+                    />
+                  </Grid.Col>
+                </Grid.Row>
+              )}
           </div>
         )}
 
@@ -245,7 +304,7 @@ const DynamicDateRangeConfig: React.FC<DynamicDateRangeConfigProps> = ({ handleP
                 handlePropsChange(dateRangeKey, { ...configs[dateRangeKey], latestLimit: value });
               }}
             >
-              最晚可选日期时间
+              最晚可选日期
             </Checkbox>
             <Grid.Row gutter={8} style={{ marginTop: '8px', marginBottom: '8px' }}>
               <Grid.Col span={8}>
@@ -306,6 +365,43 @@ const DynamicDateRangeConfig: React.FC<DynamicDateRangeConfigProps> = ({ handleP
                 )}
               </Grid.Col>
             </Grid.Row>
+
+            {/* 动态值  自定义 */}
+            {configs[dateRangeKey]['latestType'] === DATE_EXTREME_TYPE.DYNAMIC &&
+              configs[dateRangeKey]['latestDynamicValue'] === DATE_DYNAMIC_TYPE.CUSTOM && (
+                <Grid.Row gutter={8}>
+                  <Grid.Col span={8}>
+                    <Select
+                      getPopupContainer={getPopupContainer}
+                      value={configs[dateRangeKey]['latestCustomType']}
+                      options={customTypeOptions}
+                      onChange={(value) => {
+                        handlePropsChange(dateRangeKey, { ...configs[dateRangeKey], latestCustomType: value });
+                      }}
+                    />
+                  </Grid.Col>
+                  <Grid.Col span={8}>
+                    <Select
+                      getPopupContainer={getPopupContainer}
+                      value={configs[dateRangeKey]['latestCustomValue']}
+                      options={customValueOptions}
+                      onChange={(value) => {
+                        handlePropsChange(dateRangeKey, { ...configs[dateRangeKey], latestCustomValue: value });
+                      }}
+                    />
+                  </Grid.Col>
+                  <Grid.Col span={8}>
+                    <Select
+                      getPopupContainer={getPopupContainer}
+                      value={configs[dateRangeKey]['latestCustomValueType']}
+                      options={customValueTypeOptions}
+                      onChange={(value) => {
+                        handlePropsChange(dateRangeKey, { ...configs[dateRangeKey], latestCustomValueType: value });
+                      }}
+                    />
+                  </Grid.Col>
+                </Grid.Row>
+              )}
           </div>
         )}
       </Form.Item>
