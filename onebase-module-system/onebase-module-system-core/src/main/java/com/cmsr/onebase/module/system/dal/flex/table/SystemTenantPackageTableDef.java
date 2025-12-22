@@ -7,7 +7,7 @@ import com.mybatisflex.core.table.TableDef;
 /**
  * 租户套餐表 表定义层。
  *
- * @author xiaoc
+ * @author matianyu
  * @since 2025-12-22
  */
 public class SystemTenantPackageTableDef extends TableDef {

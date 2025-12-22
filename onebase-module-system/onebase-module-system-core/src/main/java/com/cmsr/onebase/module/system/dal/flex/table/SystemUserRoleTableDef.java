@@ -7,7 +7,7 @@ import com.mybatisflex.core.table.TableDef;
 /**
  * 用户和角色关联表 表定义层。
  *
- * @author xiaoc
+ * @author matianyu
  * @since 2025-12-22
  */
 public class SystemUserRoleTableDef extends TableDef {

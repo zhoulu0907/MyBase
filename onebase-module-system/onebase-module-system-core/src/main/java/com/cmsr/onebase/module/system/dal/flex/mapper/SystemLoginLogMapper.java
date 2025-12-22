@@ -6,7 +6,7 @@ import com.mybatisflex.core.BaseMapper;
 /**
  * 系统访问记录 映射层。
  *
- * @author xiaoc
+ * @author matianyu
  * @since 2025-12-22
  */
 public interface SystemLoginLogMapper extends BaseMapper<LoginLogDO> {

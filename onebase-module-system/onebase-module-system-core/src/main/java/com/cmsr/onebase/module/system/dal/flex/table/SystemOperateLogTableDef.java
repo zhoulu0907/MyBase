@@ -7,7 +7,7 @@ import com.mybatisflex.core.table.TableDef;
 /**
  * 操作日志记录 V2 版本 表定义层。
  *
- * @author xiaoc
+ * @author matianyu
  * @since 2025-12-22
  */
 public class SystemOperateLogTableDef extends TableDef {

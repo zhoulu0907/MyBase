@@ -6,7 +6,7 @@ import com.mybatisflex.core.BaseMapper;
 /**
  * 角色和菜单关联表 映射层。
  *
- * @author xiaoc
+ * @author matianyu
  * @since 2025-12-22
  */
 public interface SystemRoleMenuMapper extends BaseMapper<RoleMenuDO> {

@@ -8,6 +8,7 @@ import com.mybatisflex.spring.service.impl.ServiceImpl;
 /**
  * 新增基础方法，提供方法兼容和便利。
  *
+ * @author matianyu
  * @param <M>
  * @param <T>
  */

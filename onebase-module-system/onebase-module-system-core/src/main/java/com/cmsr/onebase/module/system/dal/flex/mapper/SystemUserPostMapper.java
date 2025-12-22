@@ -6,7 +6,7 @@ import com.mybatisflex.core.BaseMapper;
 /**
  * 用户岗位表 映射层。
  *
- * @author xiaoc
+ * @author matianyu
  * @since 2025-12-22
  */
 public interface SystemUserPostMapper extends BaseMapper<UserPostDO> {

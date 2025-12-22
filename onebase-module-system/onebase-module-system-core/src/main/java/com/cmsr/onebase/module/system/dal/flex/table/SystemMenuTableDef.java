@@ -7,7 +7,7 @@ import com.mybatisflex.core.table.TableDef;
 /**
  * 菜单权限表 表定义层。
  *
- * @author xiaoc
+ * @author matianyu
  * @since 2025-12-22
  */
 public class SystemMenuTableDef extends TableDef {

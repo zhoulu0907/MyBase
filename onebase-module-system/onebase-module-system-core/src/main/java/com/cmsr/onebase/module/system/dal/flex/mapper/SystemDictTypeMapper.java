@@ -6,7 +6,7 @@ import com.mybatisflex.core.BaseMapper;
 /**
  * 字典类型表 映射层。
  *
- * @author xiaoc
+ * @author matianyu
  * @since 2025-12-22
  */
 public interface SystemDictTypeMapper extends BaseMapper<DictTypeDO> {

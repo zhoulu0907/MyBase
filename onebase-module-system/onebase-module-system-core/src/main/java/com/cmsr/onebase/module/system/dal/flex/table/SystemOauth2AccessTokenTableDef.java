@@ -7,7 +7,7 @@ import com.mybatisflex.core.table.TableDef;
 /**
  * OAuth2 访问令牌 表定义层。
  *
- * @author xiaoc
+ * @author matianyu
  * @since 2025-12-22
  */
 public class SystemOauth2AccessTokenTableDef extends TableDef {

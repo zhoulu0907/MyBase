@@ -6,7 +6,7 @@ import com.mybatisflex.core.BaseMapper;
 /**
  * OAuth2 客户端表 映射层。
  *
- * @author xiaoc
+ * @author matianyu
  * @since 2025-12-22
  */
 public interface SystemOauth2ClientMapper extends BaseMapper<OAuth2ClientDO> {

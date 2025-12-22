@@ -6,7 +6,7 @@ import com.mybatisflex.core.BaseMapper;
 /**
  * 租户/空间表 映射层。
  *
- * @author xiaoc
+ * @author matianyu
  * @since 2025-12-22
  */
 public interface SystemTenantMapper extends BaseMapper<TenantDO> {

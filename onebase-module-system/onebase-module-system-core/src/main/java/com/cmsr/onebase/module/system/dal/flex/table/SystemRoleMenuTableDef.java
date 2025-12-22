@@ -7,7 +7,7 @@ import com.mybatisflex.core.table.TableDef;
 /**
  * 角色和菜单关联表 表定义层。
  *
- * @author xiaoc
+ * @author matianyu
  * @since 2025-12-22
  */
 public class SystemRoleMenuTableDef extends TableDef {

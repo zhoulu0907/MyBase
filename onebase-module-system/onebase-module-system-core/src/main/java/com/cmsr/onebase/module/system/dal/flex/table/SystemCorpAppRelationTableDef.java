@@ -7,7 +7,7 @@ import com.mybatisflex.core.table.TableDef;
 /**
  * 企业应用关联表 表定义层。
  *
- * @author xiaoc
+ * @author matianyu
  * @since 2025-12-22
  */
 public class SystemCorpAppRelationTableDef extends TableDef {

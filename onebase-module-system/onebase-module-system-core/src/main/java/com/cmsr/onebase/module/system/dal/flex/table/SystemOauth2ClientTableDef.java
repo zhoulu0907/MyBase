@@ -7,7 +7,7 @@ import com.mybatisflex.core.table.TableDef;
 /**
  * OAuth2 客户端表 表定义层。
  *
- * @author xiaoc
+ * @author matianyu
  * @since 2025-12-22
  */
 public class SystemOauth2ClientTableDef extends TableDef {

@@ -6,7 +6,7 @@ import com.mybatisflex.core.BaseMapper;
 /**
  * 操作日志记录 V2 版本 映射层。
  *
- * @author xiaoc
+ * @author matianyu
  * @since 2025-12-22
  */
 public interface SystemOperateLogMapper extends BaseMapper<OperateLogDO> {

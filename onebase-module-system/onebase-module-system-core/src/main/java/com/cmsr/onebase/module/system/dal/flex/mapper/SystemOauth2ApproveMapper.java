@@ -6,7 +6,7 @@ import com.mybatisflex.core.BaseMapper;
 /**
  * OAuth2 批准表 映射层。
  *
- * @author xiaoc
+ * @author matianyu
  * @since 2025-12-22
  */
 public interface SystemOauth2ApproveMapper extends BaseMapper<OAuth2ApproveDO> {

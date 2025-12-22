@@ -7,7 +7,7 @@ import com.mybatisflex.core.table.TableDef;
 /**
  * 字典数据表 表定义层。
  *
- * @author xiaoc
+ * @author matianyu
  * @since 2025-12-22
  */
 public class SystemDictDataTableDef extends TableDef {

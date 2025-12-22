@@ -6,7 +6,7 @@ import com.mybatisflex.core.BaseMapper;
 /**
  * 用户和角色关联表 映射层。
  *
- * @author xiaoc
+ * @author matianyu
  * @since 2025-12-22
  */
 public interface SystemUserRoleMapper extends BaseMapper<UserRoleDO> {

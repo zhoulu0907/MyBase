@@ -6,7 +6,7 @@ import com.mybatisflex.core.BaseMapper;
 /**
  * 短信渠道 映射层。
  *
- * @author xiaoc
+ * @author matianyu
  * @since 2025-12-22
  */
 public interface SystemSmsChannelMapper extends BaseMapper<SmsChannelDO> {

@@ -6,7 +6,7 @@ import com.mybatisflex.core.BaseMapper;
 /**
  * 平台License信息 映射层。
  *
- * @author xiaoc
+ * @author matianyu
  * @since 2025-12-22
  */
 public interface SystemLicenseMapper extends BaseMapper<LicenseDO> {
