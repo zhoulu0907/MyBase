@@ -1,7 +1,7 @@
 import { emailValidator, filterSpace, phoneValidator } from '@/utils/validator';
 import { Button, Form, Input, Link, Typography } from '@arco-design/web-react';
 import { IconMobile } from '@arco-design/web-react/icon';
-import { getHashQueryParam, getOrCreateDeviceInfo, getPublicKey, sm2Encrypt } from '@onebase/common';
+import { getHashQueryParam, getOrCreateDeviceInfo, getPublicKey, sm2Encrypt, TokenManager } from '@onebase/common';
 import { thirdUserRegisterApi, type thirdUserRegisterParams } from '@onebase/platform-center';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -38,21 +38,55 @@ const RegisterForm: React.FC<IRegisterProps> = ({ appId, isRelatedApp, tenantId,
         deviceId: deviceId
       };
       const response = await thirdUserRegisterApi(registerParams, headers);
-      //   TODO(mickey): remove debug log
-      console.log('response', response);
+
       if (response) {
-        setRegisterInfo(response);
-        if (isRelatedApp) {
-          setVisible(true);
+        if (appId && tenantId) {
+          TokenManager.setCurIdentifyId(`${appId}_${tenantId}`);
         } else {
-          const redirectURL = getHashQueryParam('redirectURL');
-          if (redirectURL) {
-            navigate(`/onebase/${appId}/${tenantId}/runtime`);
-          } else {
-            // 跳转到首页
-            navigate(`/onebase/runtime/?appId=${appId}`);
+          if (appId) {
+            TokenManager.setCurIdentifyId(appId);
+          }
+          if (tenantId) {
+            TokenManager.setCurIdentifyId(tenantId);
           }
         }
+
+        TokenManager.setToken(
+          {
+            userId: response.userId,
+            accessToken: response.accessToken,
+            refreshToken: response.refreshToken,
+            expiresTime: response.expiresTime,
+            tenantId: response.tenantId,
+            corpId: response.corpId,
+            loginSource: response.loginSource,
+            loginURL: window.location.href // 当前地址
+          },
+          false
+        );
+
+        console.log(TokenManager.getTokenInfo());
+
+        const redirectURL = getHashQueryParam('redirectURL');
+        if (redirectURL) {
+          navigate(`/onebase/${appId}/${tenantId}/runtime`);
+        } else {
+          // 跳转到首页
+          navigate(`/onebase/runtime/?appId=${appId}`);
+        }
+
+        // setRegisterInfo(response);
+        // if (isRelatedApp) {
+        //   setVisible(true);
+        // } else {
+        //   const redirectURL = getHashQueryParam('redirectURL');
+        //   if (redirectURL) {
+        //     navigate(`/onebase/${appId}/${tenantId}/runtime`);
+        //   } else {
+        //     // 跳转到首页
+        //     navigate(`/onebase/runtime/?appId=${appId}`);
+        //   }
+        // }
       }
     } catch (error) {
       console.log('error');
@@ -81,7 +115,7 @@ const RegisterForm: React.FC<IRegisterProps> = ({ appId, isRelatedApp, tenantId,
           <Typography.Title heading={2}>请补充用户信息</Typography.Title>
 
           {/* 表单区域 */}
-          <Form layout="vertical" form={registerForm} onSubmit={handleSubmitUserInfo}>
+          <Form layout="vertical" form={registerForm}>
             <Form.Item
               label="手机号"
               field="mobile"
