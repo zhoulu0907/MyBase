@@ -21,6 +21,10 @@ export const getApplication = (params: GetApplicationReq) => {
   return (isRuntimeEnv() ? runtimeAppService : appService).get(`/application/get?id=${params.id}`);
 };
 
+export const getApplicationLeast = (params: GetApplicationReq) => {
+  return (isRuntimeEnv() ? runtimeAppService : appService).get(`/application/least?id=${params.id}`);
+};
+
 export const createApplication = (params: CreateApplicationReq) => {
   return appService.post('/application/create', params);
 };
