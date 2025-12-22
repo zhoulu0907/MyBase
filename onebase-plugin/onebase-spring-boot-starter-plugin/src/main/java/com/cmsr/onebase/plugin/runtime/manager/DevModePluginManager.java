@@ -1,6 +1,7 @@
 package com.cmsr.onebase.plugin.runtime.manager;
 
 import com.cmsr.onebase.plugin.core.ExtensionPointScannerSpring;
+import com.cmsr.onebase.plugin.runtime.config.PluginProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.pf4j.*;
 
@@ -35,10 +36,12 @@ public class DevModePluginManager extends DefaultPluginManager {
      */
     private final ExtensionPointScannerSpring scanner;
 
-    public DevModePluginManager() {
+    public DevModePluginManager(PluginProperties pluginProperties) {
         super(Paths.get(System.getProperty("user.dir")));
-        this.scanner = new ExtensionPointScannerSpring();
-        log.debug("初始化开发模式插件管理器（DevModePluginManager）");
+        List<String> devPaths = pluginProperties != null && pluginProperties.isDevMode()
+                ? pluginProperties.getDevClassPaths() : Collections.emptyList();
+        this.scanner = new ExtensionPointScannerSpring(devPaths);
+        log.debug("初始化开发模式插件管理器（DevModePluginManager），devPaths={}", devPaths);
     }
 
     /**

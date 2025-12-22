@@ -93,7 +93,7 @@ public class PluginRuntimeAutoConfiguration {
             log.info("适用场景: IDE中直接启动和调试，支持断点调试");
             log.info("=".repeat(60));
             
-            DevModePluginManager pluginManager = new DevModePluginManager();
+            DevModePluginManager pluginManager = new DevModePluginManager(properties);
             
             // 根据autoLoad配置决定是否自动加载
             if (properties.isAutoLoad()) {

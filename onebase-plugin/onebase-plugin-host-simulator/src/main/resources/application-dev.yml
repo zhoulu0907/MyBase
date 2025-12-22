@@ -7,6 +7,9 @@ onebase:
     plugins-dir: ./plugins        # 插件目录（开发模式下该参数无效）
     auto-load: true               # 自动加载插件
     auto-start: true              # 自动启动插件
+    dev-class-paths:              # 开发模式下扩展点扫描目录（绝对路径），仅从目录扫描扩展点，不扫描jar/zip
+      - D:\\cmsr\\10_cmsr\\CodingSpace\\Java\\onebase-v3-be\\onebase-plugin\\onebase-plugin-demo\\plugin-demo-hello\\target\\classes
+      - D:\\cmsr\\10_cmsr\\CodingSpace\\Java\\onebase-v3-be\\onebase-plugin\\onebase-plugin-demo\\plugin-demo-test\\target\\classes
 
 logging:
   level:

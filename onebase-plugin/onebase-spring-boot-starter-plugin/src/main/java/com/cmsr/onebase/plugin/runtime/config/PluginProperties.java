@@ -61,6 +61,12 @@ public class PluginProperties {
      */
     private boolean autoStart = true;
 
+    /**
+     * 开发模式下的类路径列表（绝对路径）。
+     * 仅在dev模式下生效，用于指定扩展点扫描的目录（例如 target/classes）。
+     */
+    private java.util.List<String> devClassPaths = new java.util.ArrayList<>();
+
     public boolean isEnabled() {
         return enabled;
     }
@@ -166,5 +172,13 @@ public class PluginProperties {
 
     public void setAutoStart(boolean autoStart) {
         this.autoStart = autoStart;
+    }
+
+    public java.util.List<String> getDevClassPaths() {
+        return devClassPaths;
+    }
+
+    public void setDevClassPaths(java.util.List<String> devClassPaths) {
+        this.devClassPaths = devClassPaths;
     }
 }
