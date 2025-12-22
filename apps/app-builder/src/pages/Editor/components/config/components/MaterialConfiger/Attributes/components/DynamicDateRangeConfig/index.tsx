@@ -270,7 +270,10 @@ const DynamicDateRangeConfig: React.FC<DynamicDateRangeConfigProps> = ({ handleP
                         handlePropsChange(dateRangeKey, {
                           ...configs[dateRangeKey],
                           earliestCustomType: value,
-                          earliestCustomValue: 1
+                          earliestCustomValue:
+                            value === DATE_DYNAMIC_CUSTOM_TYPE.CURRENT
+                              ? 1
+                              : configs[dateRangeKey]['earliestCustomValue']
                         });
                       }}
                     />
@@ -387,7 +390,8 @@ const DynamicDateRangeConfig: React.FC<DynamicDateRangeConfigProps> = ({ handleP
                         handlePropsChange(dateRangeKey, {
                           ...configs[dateRangeKey],
                           latestCustomType: value,
-                          latestCustomValue: 1
+                          latestCustomValue:
+                            value === DATE_DYNAMIC_CUSTOM_TYPE.CURRENT ? 1 : configs[dateRangeKey]['latestCustomValue']
                         });
                       }}
                     />
