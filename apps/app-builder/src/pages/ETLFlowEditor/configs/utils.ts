@@ -169,8 +169,6 @@ export const handlePreviewData = async (
     }
   });
 
-  console.log('res: ', res);
-
   if (res) {
     setPreviewData(res);
   }

@@ -98,7 +98,6 @@ const Right: React.FC = () => {
   const handleGetApplication = async () => {
     if (appId) {
       const res = await getApplicationLeast({ id: appId });
-      console.log('res: ', res);
       if (res) {
         setCurAppInfo(res);
       }
