@@ -77,7 +77,7 @@ public class OneBasePluginManager {
             if (pluginId == null) {
                 pluginId = pluginManager.loadPlugin(pluginPath);
             } else {
-                log.info("插件已存在，无需重复加载: {} -> {}", pluginPath, pluginId);
+                log.info("插件已处于加载完成状态，无需重复加载: {} -> {}", pluginPath, pluginId);
             }
 
             if (pluginId != null) {
