@@ -412,7 +412,10 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
     <Layout className="XSubTable" style={runtime ? { border: 'none' } : {}}>
       <Form.Item
         label={
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }} onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+          }}>
             {label.display && label.text && (
               <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>
                 {verify?.required ? <span style={{ color: 'red', paddingRight: '4px' }}>*</span> : null}
@@ -425,7 +428,6 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                 type="outline"
                 size="small"
                 icon={<IconPlus />}
-                style={{ pointerEvents: runtime ? 'unset' : 'none', marginLeft: 'auto' }}
                 onClick={handleAdd}
               >
                 新增一项
