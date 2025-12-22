@@ -44,19 +44,22 @@ public class ApiSignHelper {
     }
 
     public boolean verifySignature(HttpServletRequest request) {
-        // 如果是本地请求，则跳过签名验证
+
+        // 0.1 加签开关
+        if(!signatureRedisDAO.isApiSignEnabled()){
+            return true;
+        }
+
+        // 0.2 如果是本地请求，则跳过签名验证
         if (isLocalRequest(request)) {
             return true;
         }
 
-        // 如果请求方IP在白名单请求，则跳过签名验证
+        // 0.3 如果请求方IP在白名单请求，则跳过签名验证
         if (isIpWhiteListRequest(request)) {
             return true;
         }
 
-        if(!signatureRedisDAO.isApiSignEnabled()){
-            return true;
-        }
 
         // 1.1 校验 Header
         verifyHeaders(request);
