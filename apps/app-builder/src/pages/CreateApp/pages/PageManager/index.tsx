@@ -14,6 +14,7 @@ import { IconDown, IconEmpty, IconPlus, IconSearch } from '@arco-design/web-reac
 import {
   copyApplicationMenu,
   createApplicationMenu,
+  createPageDashboardApi,
   deleteApplicationMenu,
   getEntityListByApp,
   getPageSetId,
@@ -424,11 +425,16 @@ const PageManagerPage: FC = () => {
   const handleScreenCreate = async (id?: string, screenMethod?: string) => {
     console.log('handleScreenCreate id:', id);
     console.log('handleScreenCreate screenMethod:', screenMethod);
-    // const req = await createScreenApi({
-    //   projectName: createForm.getFieldValue('menuName') || '新大屏',
-    //   remarks: null,
-    //   indexImage: null
-    // });
+    const res = await createPageDashboardApi({
+      applicationId: curAppId,
+      entityUuid: id,
+      menuName: createForm.getFieldValue('menuName'),
+      menuType: MenuType.PAGE,
+      menuIcon: createForm.getFieldValue('menuIcon'),
+      screenMethod: screenMethod,
+      parentId: createForm.getFieldValue('parentId') === RootParentPage.id ? '' : createForm.getFieldValue('parentId')
+    });
+    console.log('创建大屏 res:', res);
   };
   const handleCreate = async () => {
     createForm.validate(async (error) => {

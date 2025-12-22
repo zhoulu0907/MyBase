@@ -49,6 +49,11 @@ const PreviewPage: React.FC = () => {
     <>
       <div className={styles.previewPage}>
         <img className={styles.previewImg} src={imgSrc} />
+        <iframe
+          src="http://10.0.104.38:9091/#/project/dataset-form"
+          // frameborder="0"
+          style={{ width: '100vw', height: '100vh' }}
+        ></iframe>
       </div>
     </>
   );

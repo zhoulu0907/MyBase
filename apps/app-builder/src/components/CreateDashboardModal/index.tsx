@@ -5,9 +5,9 @@ import { useI18n } from '@/hooks/useI18n';
 import { webMenuIcons } from '@onebase/ui-kit';
 import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
-import screenNew from '@/assets/images/screen_new.svg';
-import screenTemplate from '@/assets/images/screen_template.svg';
-import screenLink from '@/assets/images/screen_link.svg';
+import dashboardNew from '@/assets/images/screen_new.svg';
+import dashboardTemplate from '@/assets/images/screen_template.svg';
+import dashboardLink from '@/assets/images/screen_link.svg';
 import screenChange from '@/assets/images/screen_change.svg';
 
 interface CreateModalProps {
@@ -44,13 +44,13 @@ const CreateModal: React.FC<CreateModalProps> = ({
 
   const [menuIcon, setMenuIcon] = useState<string>();
   const [visibleMenuIcon, setVisibleMenuIcon] = useState<boolean>(false);
-  const [screenMethod, setScreenMethod] = useState<string>('screenNew');
+  const [screenMethod, setScreenMethod] = useState<string>('dashboardNew');
   const [screenTemplateTab, setScreenTemplateTab] = useState<string>('allTemplate');
   const [screenMethodLoading, setScreenMethodLoading] = useState<boolean>(false);
   const [screenTemplateTabLoading, setScreenTemplateTabLoading] = useState<boolean>(false);
   const [screenPagination, setScreenPagination] = useState<{ current: number; pageSize: number; total: number }>({
     current: 1,
-    pageSize: screenMethod === 'screenNew' ? 4 : 8,
+    pageSize: screenMethod === 'dashboardNew' ? 4 : 8,
     total: 160
   });
   const [screenTemplateData, setScreenTemplateData] = useState<any[]>([
@@ -93,7 +93,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
     }));
     setScreenTemplateTab('allTemplate');
 
-    if (screenMethod !== 'screenNew' && screenTemplateData.length > 0 && !selectedTemplateId) {
+    if (screenMethod !== 'dashboardNew' && screenTemplateData.length > 0 && !selectedTemplateId) {
       setSelectedTemplateId(screenTemplateData[0].id);
     }
   }, [screenMethod]);
@@ -108,13 +108,13 @@ const CreateModal: React.FC<CreateModalProps> = ({
   const getScreenMethodData = () => {
     const baseData = [
       {
-        key: 'screenNew',
-        icon: screenNew,
+        key: 'dashboardNew',
+        icon: dashboardNew,
         screenName: '从空白页面新建'
       },
       {
-        key: 'screenTemplate',
-        icon: screenTemplate,
+        key: 'dashboardTemplate',
+        icon: dashboardTemplate,
         screenName: '从模版创建'
       }
     ];
@@ -123,8 +123,8 @@ const CreateModal: React.FC<CreateModalProps> = ({
       return [
         ...baseData,
         {
-          key: 'screenLink',
-          icon: screenLink,
+          key: 'dashboardLink',
+          icon: dashboardLink,
           screenName: '关联已有大屏'
         }
       ];
@@ -170,7 +170,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
     // console.log('换一批 handleScreenChange:', screenPagination);
     /**
      * TODO 换一批
-     * params: screenMethod == screenNew + change
+     * params: screenMethod == dashboardNew + change
      */
     setScreenPagination((prev) => ({
       ...prev,
@@ -182,7 +182,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
     console.log('handleSearchTemplate:', value);
     /**
      * TODO 搜索模版
-     * params: screenMethod !== screenNew + value
+     * params: screenMethod !== dashboardNew + value
      */
   };
 
@@ -190,7 +190,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
     // setScreenTemplateTabLoading(true);
     /**
      * TODO 切换模版tab
-     * params: screenMethod == screenTemplate + screenTemplateTab
+     * params: screenMethod == dashboardTemplate + screenTemplateTab
      */
     setScreenTemplateTab(value);
   };
@@ -200,7 +200,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
     console.log('handleChangePagination:', current);
     /**
      * TODO 改变分页
-     * params: screenMethod !== screenNew + screenPagination
+     * params: screenMethod !== dashboardNew + screenPagination
      */
     setScreenPagination((prev) => ({
       ...prev,
@@ -359,28 +359,28 @@ const CreateModal: React.FC<CreateModalProps> = ({
               ))}
             </div>
           </div>
-          <div className={styles.screenTemplate}>
+          <div className={styles.dashboardTemplate}>
             <div className={styles.screenTitle}>
               <div className={styles.screenTitleText}>
                 <span>
-                  {screenMethod === 'screenNew'
+                  {screenMethod === 'dashboardNew'
                     ? '热门模版'
-                    : screenMethod === 'screenTemplate'
+                    : screenMethod === 'dashboardTemplate'
                       ? '大屏模版'
                       : '已创建的大屏'}
                 </span>
               </div>
-              {screenMethod === 'screenNew' && (
+              {screenMethod === 'dashboardNew' && (
                 <div className={styles.screenChange} onClick={handleScreenChange}>
                   <img src={screenChange} alt="" />
                   <div>换一批</div>
                 </div>
               )}
             </div>
-            {screenMethod !== 'screenNew' && (
+            {screenMethod !== 'dashboardNew' && (
               <>
                 <div className={styles.screenTemplateSearch}>
-                  {screenMethod === 'screenTemplate' && (
+                  {screenMethod === 'dashboardTemplate' && (
                     <div className={styles.screenTemplateSearchTabs}>
                       {screenTemplateTabs.map((item) => (
                         <div
@@ -409,7 +409,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
                 </div>
               </>
             )}
-            {screenMethod === 'screenNew' && (
+            {screenMethod === 'dashboardNew' && (
               <>
                 <div className={styles.screenTemplateContent}>
                   {screenTemplateData.map((item, index) => (
@@ -418,7 +418,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
                 </div>
               </>
             )}
-            {screenMethod === 'screenTemplate' && (
+            {screenMethod === 'dashboardTemplate' && (
               <>
                 <div className={styles.screenTemplateContent}>
                   {screenTemplateData.map((item, index) => (
@@ -427,7 +427,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
                 </div>
               </>
             )}
-            {screenMethod === 'screenLink' && (
+            {screenMethod === 'dashboardLink' && (
               <>
                 <div className={styles.screenTemplateContent}>
                   {screenTemplateData.map((item, index) => (
@@ -436,7 +436,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
                 </div>
               </>
             )}
-            {screenMethod !== 'screenNew' && (
+            {screenMethod !== 'dashboardNew' && (
               <div className={styles.screenPagination}>
                 <Pagination
                   total={screenPagination.total}
