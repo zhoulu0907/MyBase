@@ -8,6 +8,7 @@ import com.cmsr.onebase.module.etl.common.graph.WorkflowGraph;
 import com.cmsr.onebase.module.etl.common.graph.conf.*;
 import com.cmsr.onebase.module.etl.executor.provider.dao.EtlDataSource;
 import com.cmsr.onebase.module.etl.executor.provider.dao.EtlFlinkMapping;
+import com.cmsr.onebase.module.etl.executor.provider.dao.EtlFlinkMappings;
 import com.cmsr.onebase.module.etl.executor.provider.dao.EtlTable;
 import com.cmsr.onebase.module.etl.executor.util.JacksonUtil;
 import lombok.Setter;
@@ -65,7 +66,8 @@ public class WorkflowProvider {
         jdbcConfig.setTableName(etlTable.getTableName());
         jdbcInputConfig.setJdbcConfig(jdbcConfig);
 
-        List<EtlFlinkMapping> flinkMappings = queryProvider.findFlinkMapping(jdbcConfig.getDatabaseType());
+        // todo jdbcConfig.getDatabaseType()
+        EtlFlinkMappings flinkMappings = queryProvider.findFlinkMapping();
         List<ColumnData> etlColumns = JacksonUtil.fromJson(etlTable.getMetaInfo(), TableData.class).getColumns();
         List<Field> fields = jdbcInputConfig.getFields();
 
@@ -73,14 +75,10 @@ public class WorkflowProvider {
         complementFields(fields, etlColumns, flinkMappings);
     }
 
-    private void complementFields(List<Field> fields, List<ColumnData> etlColumns, List<EtlFlinkMapping> flinkMappings) {
+    private void complementFields(List<Field> fields, List<ColumnData> etlColumns, EtlFlinkMappings flinkMappings) {
         // 预构建查找表，提高查找效率
         Map<String, ColumnData> columnMap = etlColumns.stream()
                 .collect(Collectors.toMap(ColumnData::getName, column -> column));
-
-        // 按类型名转小写构建映射，支持忽略大小写查找
-        Map<String, EtlFlinkMapping> flinkMappingMap = flinkMappings.stream()
-                .collect(Collectors.toMap(mapping -> mapping.getOriginType().toLowerCase(), mapping -> mapping));
 
         for (Field field : fields) {
             String fieldName = field.getFieldName();
@@ -115,7 +113,8 @@ public class WorkflowProvider {
         jdbcConfig.setTableName(etlTable.getTableName());
         jdbcOutputConfig.setJdbcConfig(jdbcConfig);
 
-        List<EtlFlinkMapping> flinkMappings = queryProvider.findFlinkMapping(jdbcConfig.getDatabaseType());
+        // todo jdbcConfig.getDatabaseType()
+        EtlFlinkMappings flinkMappings = queryProvider.findFlinkMapping();
         List<ColumnData> etlColumns = JacksonUtil.fromJson(etlTable.getMetaInfo(), TableData.class).getColumns();
         List<JdbcOutputMapper> jdbcOutputMappers = jdbcOutputConfig.getFields();
         complementJdbcOutputMappers(jdbcOutputMappers, etlColumns, flinkMappings);
