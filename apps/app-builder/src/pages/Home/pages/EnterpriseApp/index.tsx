@@ -7,6 +7,7 @@ import {
   Input,
   Link,
   Menu,
+  Modal,
   Pagination,
   Select,
   Spin,
@@ -212,6 +213,19 @@ const EnterpriseAppPage: React.FC = () => {
         {/* <Menu.Item key="3">应用管理</Menu.Item> */}
       </Menu>
     );
+  };
+
+  // 处理取消
+  const handleCancel = () => {
+    Modal.confirm({
+      title: '确认取消',
+      content: '确定要取消吗？',
+      okText: '确认',
+      cancelText: '取消',
+      onOk: () => {
+        setTagModalVisible(false);
+      }
+    });
   };
 
   return (
@@ -435,7 +449,7 @@ const EnterpriseAppPage: React.FC = () => {
           setTagModalVisible(false);
         }}
         onCancel={() => {
-          setTagModalVisible(false);
+          handleCancel();
         }}
       />
     </div>
