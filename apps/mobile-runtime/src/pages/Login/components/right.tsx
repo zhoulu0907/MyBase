@@ -61,9 +61,9 @@ const Right: React.FC = () => {
       const redirectURL = rawHash.replace(prefix, '');
       let aid = getHashQueryParam('appId', redirectURL) || '';
       let tid = getHashQueryParam('tenantId', redirectURL) || '';
-      if (!appId) {
+      if (!aid) {
         const pathRedirect = (redirectURL.split('#/')[1] || '').split('/');
-        aid = pathRedirect[1] || '';
+        aid = pathRedirect[1] || aid || '';
         tid = pathRedirect[2] || tid || '';
       }
       setAppId(aid);
