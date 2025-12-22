@@ -92,7 +92,7 @@ public class SystemUsersTableDef extends TableDef {
     /**
      * 用户昵称
      */
-    public static final QueryColumn NICKNAME = new QueryColumn(this, "nickname");
+    public final QueryColumn NICKNAME = new QueryColumn(this, "nickname");
 
     /**
      * 密码

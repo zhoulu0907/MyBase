@@ -3,13 +3,14 @@ package com.cmsr.onebase.module.system.service.dept;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.exception.ServiceException;
 import com.cmsr.onebase.module.system.dal.database.dept.DeptDataRepository;
-import com.cmsr.onebase.module.system.dal.database.user.UserDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
+import com.cmsr.onebase.module.system.dal.flex.repo.UserDataRepository;
 import com.cmsr.onebase.module.system.enums.user.UserStatusEnum;
 import com.cmsr.onebase.module.system.vo.dept.DeptListReqVO;
 import com.cmsr.onebase.module.system.vo.dept.DeptRespVO;
 import com.cmsr.onebase.module.system.vo.dept.DeptSaveReqVO;
+import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.annotation.Resource;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.junit.jupiter.api.AfterEach;
@@ -68,7 +69,7 @@ public class DeptServiceTest {
     @AfterEach
     public void tearDown() {
         // 清理测试数据
-        userDataRepository.deleteByConfig(new DefaultConfigStore());
+        userDataRepository.remove(new QueryWrapper());
         deptDataRepository.deleteByConfig(new DefaultConfigStore());
     }
 
@@ -679,7 +680,8 @@ public class DeptServiceTest {
         user.setMobile("138888888" + (username.hashCode() % 90 + 10)); // 生成不同的手机号
         user.setDeptId(deptId);
         user.setTenantId(0L);
-        return userDataRepository.insert(user);
+        userDataRepository.save(user);
+        return user;
     }
 }
 

@@ -9,6 +9,7 @@ import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.framework.data.base.BaseDO;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
+import com.cmsr.onebase.module.system.dal.flex.base.BaseDataServiceImpl;
 import com.cmsr.onebase.module.system.dal.flex.mapper.SystemUsersMapper;
 import com.cmsr.onebase.module.system.enums.user.UserStatusEnum;
 import com.cmsr.onebase.module.system.vo.user.UserAppPageSearchReqVO;
@@ -17,11 +18,9 @@ import com.cmsr.onebase.module.system.vo.user.UserPageReqVO;
 import com.cmsr.onebase.module.system.vo.user.UserSimplePageReqVO;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
-import com.mybatisflex.spring.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Compare;
-import org.anyline.entity.Order;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
@@ -47,7 +46,7 @@ import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
  */
 @Slf4j
 @Repository
-public class UserDataRepository extends ServiceImpl<SystemUsersMapper, AdminUserDO> {
+public class UserDataRepository extends BaseDataServiceImpl<SystemUsersMapper, AdminUserDO> {
 
     /**
      * 获取登录用户其用户所处的场景类型：平台/空间/企业
@@ -270,87 +269,79 @@ public class UserDataRepository extends ServiceImpl<SystemUsersMapper, AdminUser
     }
 
     public List<AdminUserDO> findEnableUserByIds(Set<Long> userIds, String keyword, Integer status) {
-        DefaultConfigStore configStore = buildUserConfigStore();
-        configStore.in(AdminUserDO.ID, userIds)
+        QueryWrapper queryWrapper = query()
+                .in(AdminUserDO.ID, userIds)
                 .eq(AdminUserDO.STATUS, status)
-                .order(AdminUserDO.ADMIN_TYPE, Order.TYPE.ASC);
+                .orderBy(AdminUserDO.ADMIN_TYPE, true);
         // 根据关键词模糊查询
         if (StringUtils.isNotBlank(keyword)) {
-            configStore.and(new DefaultConfigStore()
-                    .or(Compare.LIKE, AdminUserDO.USERNAME, keyword)
-                    .or(Compare.LIKE, NICKNAME, keyword));
+            queryWrapper.and(SYSTEM_USERS.USERNAME.like(keyword)
+                    .or(SYSTEM_USERS.NICKNAME.like(keyword)));
         }
-        configStore.order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
-        return findAllByConfig(configStore);
+        queryWrapper.orderBy(BaseDO.CREATE_TIME, false);
+        return list(queryWrapper);
     }
 
     public List<AdminUserDO> findPlatformEnableUserByIds(Set<Long> userIds) {
-        DefaultConfigStore configStore = buildUserConfigStore();
-        configStore.in(AdminUserDO.ID, userIds)
+        QueryWrapper queryWrapper = query()
+                .in(AdminUserDO.ID, userIds)
                 .eq(AdminUserDO.STATUS, UserStatusEnum.NORMAL.getStatus())
-                .order(AdminUserDO.ADMIN_TYPE, Order.TYPE.ASC)
-                .order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
-        return findAllByConfig(configStore);
+                .orderBy(AdminUserDO.ADMIN_TYPE, true)
+                .orderBy(BaseDO.CREATE_TIME, false);
+        return list(queryWrapper);
     }
 
 
     public List<AdminUserDO> getTenantExistUserCountByIds(List<Long> tenantIds) {
         // 平台获取用户统计，不需要分用户类型
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore
+        QueryWrapper queryWrapper = query()
                 .eq(AdminUserDO.STATUS, UserStatusEnum.NORMAL.getStatus())
                 .in(AdminUserDO.TENANT_ID, tenantIds)
-                .order(AdminUserDO.ADMIN_TYPE, Order.TYPE.ASC)
-                .order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
-        return findAllByConfig(configStore);
+                .orderBy(AdminUserDO.ADMIN_TYPE, true)
+                .orderBy(BaseDO.CREATE_TIME, false);
+        return list(queryWrapper);
     }
 
     public List<AdminUserDO> getCorpExistUserCountByCorpIds(List<Long> corpIds) {
         // 平台获取用户统计，不需要分用户类型
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore
+        QueryWrapper queryWrapper = query()
                 .eq(AdminUserDO.STATUS, UserStatusEnum.NORMAL.getStatus())
                 .in(AdminUserDO.CORP_ID, corpIds)
-                .order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
-        return findAllByConfig(configStore);
+                .orderBy(BaseDO.CREATE_TIME, false);
+        return list(queryWrapper);
     }
 
     public List<AdminUserDO> findAllByStatusAndDeptIds(Integer status, Set<Long> deptIds) {
-        DefaultConfigStore configStore = buildUserConfigStore();
-        configStore.eq(AdminUserDO.STATUS, status)
+        QueryWrapper queryWrapper = query()
+                .eq(AdminUserDO.STATUS, status)
                 .in(DEPT_ID, deptIds)
-                .order(AdminUserDO.ADMIN_TYPE, Order.TYPE.ASC)
-                .order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
-        return findAllByConfig(configStore);
+                .orderBy(AdminUserDO.ADMIN_TYPE, true)
+                .orderBy(BaseDO.CREATE_TIME, false);
+        return list(queryWrapper);
     }
 
     public List<AdminUserDO> getPlatformUserByUsernames(Set<String> usernames) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.eq(AdminUserDO.STATUS, UserStatusEnum.NORMAL.getStatus())
+        QueryWrapper queryWrapper = query()
+                .eq(AdminUserDO.STATUS, UserStatusEnum.NORMAL.getStatus())
                 .in(AdminUserDO.USERNAME, usernames)
                 .eq(AdminUserDO.USER_TYPE, UserTypeEnum.PLATFORM.getValue())
-                .order(AdminUserDO.ADMIN_TYPE, Order.TYPE.ASC)
-                .order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
-        return findAllByConfig(configStore);
+                .orderBy(AdminUserDO.ADMIN_TYPE, true)
+                .orderBy(BaseDO.CREATE_TIME, false);
+        return list(queryWrapper);
     }
 
     public PageResult<AdminUserDO> getThirdUserPage(UserAppPageSearchReqVO userAppPageReqVO) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and(AdminUserDO.USER_TYPE, UserTypeEnum.THIRD.getValue());
-        // 根据关键词查询
-        if (null != userAppPageReqVO.getDeptId()) {
-            configStore.eq(DEPT_ID, userAppPageReqVO.getDeptId());
-        }
+        QueryWrapper queryWrapper = query()
+                .eq(AdminUserDO.USER_TYPE, UserTypeEnum.THIRD.getValue())
+                // 根据关键词查询
+                .eq(DEPT_ID, userAppPageReqVO.getDeptId(), userAppPageReqVO.getDeptId() != null)
+                .eq(AdminUserDO.STATUS, userAppPageReqVO.getStatus(), userAppPageReqVO.getStatus() != null)
+                .like(AdminUserDO.USERNAME, userAppPageReqVO.getUserName(), StringUtils.isNotBlank(userAppPageReqVO.getUserName()))
+                // 添加排序
+                .orderBy(AdminUserDO.ADMIN_TYPE, true)
+                .orderBy(BaseDO.CREATE_TIME, false);
 
-        if (null != userAppPageReqVO.getStatus()) {
-            configStore.eq(AdminUserDO.STATUS, userAppPageReqVO.getStatus());
-        }
-        if (StringUtils.isNotBlank(userAppPageReqVO.getUserName())) {
-            configStore.like(AdminUserDO.USERNAME, userAppPageReqVO.getUserName());
-        }
-        // 添加排序
-        configStore.order(AdminUserDO.ADMIN_TYPE, Order.TYPE.ASC).order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
-
-        return findPageWithConditions(configStore, userAppPageReqVO.getPageNo(), userAppPageReqVO.getPageSize());
+        Page<AdminUserDO> pageResult = page(Page.of(userAppPageReqVO.getPageNo(), userAppPageReqVO.getPageSize()), queryWrapper);
+        return new PageResult<>(pageResult.getRecords(), pageResult.getTotalRow());
     }
 }

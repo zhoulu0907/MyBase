@@ -5,14 +5,15 @@ import com.cmsr.onebase.framework.common.exception.ServiceException;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.system.dal.database.RoleDataRepository;
 import com.cmsr.onebase.module.system.dal.database.UserRoleDataRepository;
-import com.cmsr.onebase.module.system.dal.database.user.UserDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
+import com.cmsr.onebase.module.system.dal.flex.repo.UserDataRepository;
 import com.cmsr.onebase.module.system.enums.permission.DataScopeEnum;
 import com.cmsr.onebase.module.system.enums.permission.RoleCodeEnum;
 import com.cmsr.onebase.module.system.enums.permission.RoleTypeEnum;
 import com.cmsr.onebase.module.system.vo.role.RoleInsertReqVO;
 import com.cmsr.onebase.module.system.vo.role.RolePageReqVO;
 import com.cmsr.onebase.module.system.vo.role.RoleUpdateReqVO;
+import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.annotation.Resource;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.junit.jupiter.api.AfterEach;
@@ -76,7 +77,7 @@ public class RoleDTOServiceTest {
         // 清理测试数据
         userRoleDataRepository.deleteByConfig(new DefaultConfigStore());
         roleDataRepository.deleteByConfig(new DefaultConfigStore());
-        userDataRepository.deleteByConfig(new DefaultConfigStore());
+        userDataRepository.remove(new QueryWrapper());
     }
 
     /**

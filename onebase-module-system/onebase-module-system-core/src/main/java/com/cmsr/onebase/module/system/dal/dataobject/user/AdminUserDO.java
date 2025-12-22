@@ -1,14 +1,12 @@
 package com.cmsr.onebase.module.system.dal.dataobject.user;
 
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
-import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
+import com.cmsr.onebase.framework.data.base.BaseDOInterface;
+import com.cmsr.onebase.framework.orm.entity.BaseTenantEntity;
 import com.cmsr.onebase.module.system.enums.common.SexEnum;
-import jakarta.persistence.Column;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
+import com.mybatisflex.annotation.Column;
+import com.mybatisflex.annotation.Table;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.time.LocalDateTime;
@@ -18,11 +16,8 @@ import java.util.Set;
  * 管理后台的用户 DO
  */
 @Data
-@SuperBuilder
-@NoArgsConstructor
-@AllArgsConstructor
-@Table(name = "system_users")
-public class AdminUserDO extends TenantBaseDO {
+@Table("system_users")
+public class AdminUserDO extends BaseTenantEntity implements BaseDOInterface {
     public static final String USERNAME   = "username";
     // 新增各字段对应的常量
     public static final String PASSWORD   = "password";
@@ -52,7 +47,7 @@ public class AdminUserDO extends TenantBaseDO {
     /**
      * 用户账号
      */
-    @Column(name = USERNAME)
+    @Column("haus")
     private String username;
 
     /**
@@ -60,44 +55,44 @@ public class AdminUserDO extends TenantBaseDO {
      * <p>
      * 因为目前使用 {@link BCryptPasswordEncoder} 加密器，所以无需自己处理 salt 盐
      */
-    @Column(name = PASSWORD)
+    @Column(PASSWORD)
     private String password;
 
     /**
      * 用户昵称
      */
-    @Column(name = NICKNAME)
+    @Column(NICKNAME)
     private String nickname;
 
     /**
      * 备注
      */
-    @Column(name = REMARK)
+    @Column(REMARK)
     private String remark;
 
     /**
      * 部门 ID
      */
-    @Column(name = DEPT_ID)
+    @Column(DEPT_ID)
     private Long deptId;
 
     /**
      * 岗位编号数组
      */
     // @Transient //fixed NullP问题: 2025/7/20 需要以数组方式插入库里，anyline可能有bug导致null pointer，暂时Transient屏蔽
-    @Column(name = POST_IDS)
+    @Column(POST_IDS)
     private Set<Long> postIds;
 
     /**
      * 用户邮箱
      */
-    @Column(name = EMAIL)
+    @Column(EMAIL)
     private String email;
 
     /**
      * 手机号码
      */
-    @Column(name = MOBILE)
+    @Column(MOBILE)
     private String mobile;
 
     /**
@@ -105,13 +100,13 @@ public class AdminUserDO extends TenantBaseDO {
      * <p>
      * 枚举类 {@link SexEnum}
      */
-    @Column(name = SEX)
+    @Column(SEX)
     private Integer sex;
 
     /**
      * 用户头像
      */
-    @Column(name = AVATAR)
+    @Column(AVATAR)
     private String avatar;
 
     /**
@@ -119,48 +114,48 @@ public class AdminUserDO extends TenantBaseDO {
      * <p>
      * 枚举 {@link CommonStatusEnum}
      */
-    @Column(name = STATUS)
+    @Column(STATUS)
     private Integer status;
 
     /**
      * 最后登录IP
      */
-    @Column(name = LOGIN_IP)
+    @Column(LOGIN_IP)
     private String loginIp;
 
     /**
      * 最后登录时间
      */
-    @Column(name = LOGIN_DATE)
+    @Column(LOGIN_DATE)
     private LocalDateTime loginDate;
 
     /**
      * 用户类型 see {@link com.cmsr.onebase.framework.common.enums.UserTypeEnum}
      */
-    @Column(name = USER_TYPE)
+    @Column(USER_TYPE)
     private Integer userType;
 
     /**
      * 管理员类型
      */
-    @Column(name = ADMIN_TYPE)
+    @Column(ADMIN_TYPE)
     private Integer adminType;
 
     /**
      * 创建来源 后台创建/自主注册
      */
-    @Column(name = CREATE_SOURCE)
+    @Column(CREATE_SOURCE)
     private String createSource;
 
     /**
      * 归属企业ID
      */
-    @Column(name = CORP_ID)
+    @Column(CORP_ID)
     private Long corpId;
 
     /**
      * 来自平台的克隆的用户id
      */
-    @Column(name = PLATFORM_USER_ID)
+    @Column(PLATFORM_USER_ID)
     private Long platformUserId;
 }

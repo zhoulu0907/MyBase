@@ -13,23 +13,31 @@ import java.time.LocalDateTime;
  */
 @Data
 public class BaseEntity {
+    public static final String ID = "id";
+    public static final String CREATE_TIME = "create_time";
+    public static final String UPDATE_TIME = "update_time";
+    public static final String CREATOR = "creator";
+    public static final String UPDATER = "updater";
+    public static final String DELETED = "deleted";
+
 
     @Id(comment = "主键ID")
+    @Column(value = ID, comment = "ID")
     private Long id;
 
-    @Column(value = "creator", comment = "创建人")
+    @Column(value = CREATOR, comment = "创建人")
     private Long creator;
 
-    @Column(value = "create_time", comment = "创建时间")
+    @Column(value = CREATE_TIME, comment = "创建时间")
     private LocalDateTime createTime;
 
-    @Column(value = "updater", comment = "更新人")
+    @Column(value = UPDATER, comment = "更新人")
     private Long updater;
 
-    @Column(value = "update_time", comment = "更新时间")
+    @Column(value = UPDATE_TIME, comment = "更新时间")
     private LocalDateTime updateTime;
 
-    @Column(value = "deleted", comment = "删除标识")
+    @Column(value = DELETED, comment = "删除标识")
     private Long deleted;
 
 }

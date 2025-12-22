@@ -10,7 +10,6 @@ import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
-import com.cmsr.onebase.module.system.dal.dataobject.user.UserAppRelationDO;
 import com.cmsr.onebase.module.system.enums.user.UserStatusEnum;
 import com.cmsr.onebase.module.system.vo.user.*;
 import lombok.extern.slf4j.Slf4j;
@@ -39,12 +38,12 @@ import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
  */
 @Slf4j
 @Repository
-public class UserDataRepository extends DataRepository<AdminUserDO> {
+public class UserDataRepositoryOld extends DataRepository<AdminUserDO> {
 
     /**
      * 构造方法，指定默认实体类
      */
-    public UserDataRepository() {
+    public UserDataRepositoryOld() {
         super(AdminUserDO.class);
     }
 
