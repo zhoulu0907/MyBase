@@ -9,7 +9,7 @@ import lombok.Data;
  */
 @Data
 @Schema(description = "节点分类")
-public class NodeTypeVO {
+public class NodeConfigVO {
 
     @Schema(description = "level1_code")
     private String level1Code;
@@ -20,11 +20,11 @@ public class NodeTypeVO {
     @Schema(description = "level3_code")
     private String level3Code;
 
-    @Schema(description = "type_name")
-    private String typeName;
+    @Schema(description = "类别名称")
+    private String nodeName;
 
-    @Schema(description = "type_code")
-    private String typeCode;
+    @Schema(description = "类别编码，唯一的")
+    private String nodeCode;
 
     @Schema(description = "简单备注")
     private String simpleRemark;

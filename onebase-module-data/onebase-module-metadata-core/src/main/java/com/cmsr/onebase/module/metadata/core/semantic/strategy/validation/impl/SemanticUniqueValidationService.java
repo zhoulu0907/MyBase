@@ -103,7 +103,7 @@ public class SemanticUniqueValidationService implements SemanticValidationServic
         qw.select(pkName);
         for (SemanticFieldSchemaDTO f : candidates) { qw.select(f.getFieldName()); }
 
-        List<Row> rows = dynamicMetadataRepository.selectListByQuery(entity.getTableName(), qw);
+        List<Row> rows = dynamicMetadataRepository.selectListByQuery(entity.getTableName(), qw, entity.getFields());
         if (rows == null || rows.isEmpty()) { return result; }
 
         for (Row row : rows) {

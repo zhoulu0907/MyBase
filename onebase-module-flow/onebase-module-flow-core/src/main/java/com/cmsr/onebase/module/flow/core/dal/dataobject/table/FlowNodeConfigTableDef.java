@@ -8,16 +8,16 @@ import com.mybatisflex.core.table.TableDef;
  *  表定义层。
  *
  * @author HuangJie
- * @since 2025-12-18
+ * @since 2025-12-22
  */
-public class FlowNodeTypeTableDef extends TableDef {
+public class FlowNodeConfigTableDef extends TableDef {
 
     private static final long serialVersionUID = 1L;
 
     /**
      * 
      */
-    public static final FlowNodeTypeTableDef FLOW_NODE_TYPE = new FlowNodeTypeTableDef();
+    public static final FlowNodeConfigTableDef FLOW_NODE_CONFIG = new FlowNodeConfigTableDef();
 
     /**
      * 主键Id
@@ -33,34 +33,27 @@ public class FlowNodeTypeTableDef extends TableDef {
     
     public final QueryColumn UPDATER = new QueryColumn(this, "updater");
 
-    
-    public final QueryColumn TENANT_ID = new QueryColumn(this, "tenant_id");
-
     /**
      * 类别编码，唯一的
      */
-    public final QueryColumn TYPE_CODE = new QueryColumn(this, "type_code");
+    public final QueryColumn NODE_CODE = new QueryColumn(this, "node_code");
 
     /**
      * 展示名称
      */
-    public final QueryColumn TYPE_NAME = new QueryColumn(this, "type_name");
+    public final QueryColumn NODE_NAME = new QueryColumn(this, "node_name");
+
+    
+    public final QueryColumn TENANT_ID = new QueryColumn(this, "tenant_id");
 
     
     public final QueryColumn SORT_ORDER = new QueryColumn(this, "sort_order");
 
-    /**
-     * 节点配置方式：code(代码)、form(动态表单)
-     */
-    public final QueryColumn CONFIG_TYPE = new QueryColumn(this, "config_type");
+    
+    public final QueryColumn CONN_CONFIG = new QueryColumn(this, "conn_config");
 
     
     public final QueryColumn CREATE_TIME = new QueryColumn(this, "create_time");
-
-    /**
-     * 动态表单配置json
-     */
-    public final QueryColumn FORM_CONFIG = new QueryColumn(this, "form_config");
 
     /**
      * 类别1，用于搜索
@@ -83,6 +76,9 @@ public class FlowNodeTypeTableDef extends TableDef {
     
     public final QueryColumn LOCK_VERSION = new QueryColumn(this, "lock_version");
 
+    
+    public final QueryColumn ACTION_CONFIG = new QueryColumn(this, "action_config");
+
     /**
      * 是否开启
      */
@@ -92,6 +88,12 @@ public class FlowNodeTypeTableDef extends TableDef {
      * 简单描述，一句话
      */
     public final QueryColumn SIMPLE_REMARK = new QueryColumn(this, "simple_remark");
+
+    
+    public final QueryColumn CONN_CONFIG_TYPE = new QueryColumn(this, "conn_config_type");
+
+    
+    public final QueryColumn ACTION_CONFIG_TYPE = new QueryColumn(this, "action_config_type");
 
     /**
      * 默认参数
@@ -111,19 +113,19 @@ public class FlowNodeTypeTableDef extends TableDef {
     /**
      * 默认字段，不包含逻辑删除或者 large 等字段。
      */
-    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, LEVEL1_CODE, LEVEL2_CODE, LEVEL3_CODE, TYPE_NAME, TYPE_CODE, SIMPLE_REMARK, DETAIL_DESCRIPTION, ACTIVE_STATUS, DEFAULT_PROPERTIES, SORT_ORDER, LOCK_VERSION, CREATOR, CREATE_TIME, UPDATER, UPDATE_TIME, DELETED, TENANT_ID, CONFIG_TYPE, FORM_CONFIG};
+    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, LEVEL1_CODE, LEVEL2_CODE, LEVEL3_CODE, NODE_NAME, NODE_CODE, SIMPLE_REMARK, DETAIL_DESCRIPTION, ACTIVE_STATUS, DEFAULT_PROPERTIES, CONN_CONFIG_TYPE, CONN_CONFIG, ACTION_CONFIG_TYPE, ACTION_CONFIG, SORT_ORDER, LOCK_VERSION, CREATOR, CREATE_TIME, UPDATER, UPDATE_TIME, DELETED, TENANT_ID};
 
-    public FlowNodeTypeTableDef() {
-        super("", "flow_node_type");
+    public FlowNodeConfigTableDef() {
+        super("", "flow_node_config");
     }
 
-    private FlowNodeTypeTableDef(String schema, String name, String alisa) {
+    private FlowNodeConfigTableDef(String schema, String name, String alisa) {
         super(schema, name, alisa);
     }
 
-    public FlowNodeTypeTableDef as(String alias) {
+    public FlowNodeConfigTableDef as(String alias) {
         String key = getNameWithSchema() + "." + alias;
-        return getCache(key, k -> new FlowNodeTypeTableDef("", "flow_node_type", alias));
+        return getCache(key, k -> new FlowNodeConfigTableDef("", "flow_node_config", alias));
     }
 
 }
