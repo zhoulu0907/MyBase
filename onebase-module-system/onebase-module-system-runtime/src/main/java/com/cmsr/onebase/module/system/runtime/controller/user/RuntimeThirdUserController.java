@@ -2,7 +2,10 @@ package com.cmsr.onebase.module.system.runtime.controller.user;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
+import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
+import com.cmsr.onebase.module.system.runtime.service.auth.RuntimeAuthService;
 import com.cmsr.onebase.module.system.service.user.UserService;
+import com.cmsr.onebase.module.system.vo.auth.ThirdAuthLoginRespVO;
 import com.cmsr.onebase.module.system.vo.user.ThirdSupplementUserReqVO;
 import com.cmsr.onebase.module.system.vo.user.ThirdSupplementUserResVO;
 import com.cmsr.onebase.module.system.vo.user.ThirdUserRegisterReqVO;
@@ -28,7 +31,8 @@ public class RuntimeThirdUserController {
 
     @Resource
     private UserService userService;
-
+    @Resource
+    private RuntimeAuthService runtimeAuthService;
 
     @PostMapping("/register")
     @Operation(summary = "第三方用户注册用户")
@@ -41,8 +45,8 @@ public class RuntimeThirdUserController {
     @PostMapping("/supplement-user")
     @Operation(summary = "第三方用户补充用户信息")
     @PermitAll
-    public CommonResult<ThirdSupplementUserResVO> thirdUserSupplementUser(@RequestBody  @Valid ThirdSupplementUserReqVO reqVO) {
-        ThirdSupplementUserResVO user = userService.thirdUserSupplementUser(reqVO);
-        return success(user);
+    public CommonResult<ThirdAuthLoginRespVO> thirdUserSupplementUser(@RequestBody  @Valid ThirdSupplementUserReqVO reqVO) {
+        AdminUserDO user = userService.thirdUserSupplementUser(reqVO);
+        return success(runtimeAuthService.supplementLogin(user,reqVO));
     }
 }

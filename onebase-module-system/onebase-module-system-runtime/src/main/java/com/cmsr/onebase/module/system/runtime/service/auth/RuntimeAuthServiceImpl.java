@@ -43,6 +43,7 @@ import com.cmsr.onebase.module.system.service.user.UserService;
 import com.cmsr.onebase.module.system.vo.CaptchaVerificationReqVO;
 import com.cmsr.onebase.module.system.vo.auth.*;
 import com.cmsr.onebase.module.system.vo.corp.CorpRespVO;
+import com.cmsr.onebase.module.system.vo.user.ThirdSupplementUserReqVO;
 import com.cmsr.onebase.module.system.vo.user.UserAppVO;
 import com.cmsr.onebase.module.system.vo.user.UserForgetPasswordReqVO;
 import com.google.common.annotations.VisibleForTesting;
@@ -337,6 +338,8 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
                 // 判断用户是否关联应用
                 thirdAuthLoginRespVO.setUserAppRelationFlag(findUserAppRelationFlag(appId, user.getId()));
                 thirdAuthLoginRespVO.setUserUnRegistFlag(false);
+                thirdAuthLoginRespVO.setEmail(user.getEmail());
+                thirdAuthLoginRespVO.setNickName(user.getNickname());
                 authLoginRespVO.set(thirdAuthLoginRespVO);
                 LogRecordContext.putVariable("user", user);
             }
@@ -592,6 +595,17 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         // 解密原文
         reqVO.setPassword(pwdEnHelper.decryptHexStr(reqVO.getPassword()));
         userService.updateUserPassword(user.getId(), reqVO.getPassword());
+    }
+
+
+    @Override
+    public ThirdAuthLoginRespVO supplementLogin(AdminUserDO user, ThirdSupplementUserReqVO reqVO) {
+        AuthLoginRespVO vo = createAfterLoginSuccess(user.getUserType(), user.getCorpId(), reqVO.getAppId(), user.getId(), reqVO.getMobile(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_MOBILE);
+        ThirdAuthLoginRespVO thirdAuthLoginRespVO = BeanUtils.toBean(vo, ThirdAuthLoginRespVO.class);
+        // 判断用户是否关联应用
+        thirdAuthLoginRespVO.setUserAppRelationFlag(false);
+        thirdAuthLoginRespVO.setUserUnRegistFlag(false);
+        return thirdAuthLoginRespVO;
     }
 
 }

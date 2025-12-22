@@ -344,7 +344,7 @@ public interface UserService {
      * @param reqVO
      * @return
      */
-    ThirdSupplementUserResVO thirdUserSupplementUser(ThirdSupplementUserReqVO reqVO);
+    AdminUserDO thirdUserSupplementUser(ThirdSupplementUserReqVO reqVO);
     /**
      * 创建用户并关联应用
      * @param reqVO

@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.system.runtime.service.auth;
 
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.vo.auth.*;
+import com.cmsr.onebase.module.system.vo.user.ThirdSupplementUserReqVO;
 import com.cmsr.onebase.module.system.vo.user.UserForgetPasswordReqVO;
 import jakarta.validation.Valid;
 
@@ -82,4 +83,9 @@ public interface RuntimeAuthService {
      *
      */
     void thirdUserForgetPassword(@Valid UserForgetPasswordReqVO reqVO);
+    /**
+     * 补充用户信息
+     *
+     */
+    ThirdAuthLoginRespVO supplementLogin(AdminUserDO user, ThirdSupplementUserReqVO reqVO);
 }

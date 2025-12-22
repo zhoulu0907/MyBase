@@ -1358,7 +1358,7 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public ThirdSupplementUserResVO thirdUserSupplementUser(ThirdSupplementUserReqVO reqVO) {
+    public AdminUserDO thirdUserSupplementUser(ThirdSupplementUserReqVO reqVO) {
         // 1. 校验手机和邮箱
         validateThirdUserForCreateOrUpdate(null, reqVO.getMobile(), reqVO.getEmail());
         // 2: 验证空间用户数
@@ -1390,13 +1390,8 @@ public class UserServiceImpl implements UserService {
         userAppRelationInertReqVO.setApplicationIdList(Arrays.asList(reqVO.getAppId()));
         userAppRelationService.createUserAppRelation(userAppRelationInertReqVO);
 
-        // 5. 转换成返回结果
-        ThirdSupplementUserResVO resVO = new ThirdSupplementUserResVO();
-        resVO.setId(user.getId());
-        resVO.setUserName(user.getUsername());
-        resVO.setNickName(user.getNickname());
-        resVO.setEmail(user.getEmail());
-        return resVO;
+
+        return user;
     }
 
 
