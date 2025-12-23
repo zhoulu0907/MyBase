@@ -203,7 +203,13 @@ const CreateApp = (props: IProps) => {
         <div className={styles.title}>
           基础信息<span>请填写应用的基础信息，如名称、描述与图标</span>
         </div>
-        <Form form={form} layout="vertical">
+        <Form
+          form={form}
+          layout="vertical"
+          initialValues={{
+            publishModel: PUBLISH_MODULE.INNER
+          }}
+        >
           <Form.Item field="iconName" hidden>
             <Input />
           </Form.Item>
