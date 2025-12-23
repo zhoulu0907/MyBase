@@ -21,7 +21,7 @@ public enum XFromSceneTypeEnum {
     /**
      * 外部用户
      */
-    THIRD("corp", "外部"),
+    THIRD("third", "外部"),
     /**
      * 全部类型
      */
