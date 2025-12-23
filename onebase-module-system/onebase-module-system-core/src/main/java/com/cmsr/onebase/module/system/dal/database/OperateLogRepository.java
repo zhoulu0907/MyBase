@@ -3,7 +3,7 @@ package com.cmsr.onebase.module.system.dal.database;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.system.api.logger.dto.OperateLogPageReqDTO;
 import com.cmsr.onebase.module.system.dal.dataobject.logger.OperateLogDO;
-import com.cmsr.onebase.module.system.dal.flex.base.BaseDataServiceImpl;
+import com.cmsr.onebase.framework.orm.repo.BaseDataRepository;
 import com.cmsr.onebase.module.system.dal.flex.mapper.SystemOperateLogMapper;
 import com.cmsr.onebase.module.system.vo.log.OperateLogPageReqVO;
 import com.mybatisflex.core.paginate.Page;
@@ -21,7 +21,7 @@ import static com.cmsr.onebase.framework.data.base.BaseDO.ID;
  * @date 2025-12-22
  */
 @Repository
-public class OperateLogRepository extends BaseDataServiceImpl<SystemOperateLogMapper, OperateLogDO> {
+public class OperateLogRepository extends BaseDataRepository<SystemOperateLogMapper, OperateLogDO> {
 
     /**
      * 分页查询操作日志（管理端）

@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.system.dal.database;
 
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.system.dal.dataobject.config.SystemGeneralConfigDO;
-import com.cmsr.onebase.module.system.dal.flex.base.BaseDataServiceImpl;
+import com.cmsr.onebase.framework.orm.repo.BaseDataRepository;
 import com.cmsr.onebase.module.system.dal.flex.mapper.SystemConfigMapper;
 import com.cmsr.onebase.module.system.enums.config.ConfigTypeEnum;
 import com.cmsr.onebase.module.system.vo.config.SystemGeneralConfigSearchVO;
@@ -32,7 +32,7 @@ import static com.cmsr.onebase.module.system.dal.flex.table.SystemConfigTableDef
  * @date 2025-12-22
  */
 @Repository
-public class SystemConfigDataRepository extends BaseDataServiceImpl<SystemConfigMapper, SystemGeneralConfigDO> {
+public class SystemConfigDataRepository extends BaseDataRepository<SystemConfigMapper, SystemGeneralConfigDO> {
 
     /**
      * 查询租户配置列表

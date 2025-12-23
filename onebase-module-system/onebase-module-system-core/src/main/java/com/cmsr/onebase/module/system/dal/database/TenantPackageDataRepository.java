@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.system.dal.database;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantPackageDO;
-import com.cmsr.onebase.module.system.dal.flex.base.BaseDataServiceImpl;
+import com.cmsr.onebase.framework.orm.repo.BaseDataRepository;
 import com.cmsr.onebase.module.system.dal.flex.mapper.SystemTenantPackageMapper;
 import com.cmsr.onebase.module.system.vo.tenant.TenantPackagePageReqVO;
 import com.mybatisflex.core.paginate.Page;
@@ -22,7 +22,7 @@ import static com.cmsr.onebase.framework.data.base.BaseDO.ID;
  * @date 2025-12-22
  */
 @Repository
-public class TenantPackageDataRepository extends BaseDataServiceImpl<SystemTenantPackageMapper, TenantPackageDO> {
+public class TenantPackageDataRepository extends BaseDataRepository<SystemTenantPackageMapper, TenantPackageDO> {
 
     /**
      * 根据名称查找租户套餐

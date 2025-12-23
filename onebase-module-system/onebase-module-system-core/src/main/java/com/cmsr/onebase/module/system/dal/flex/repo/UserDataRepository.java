@@ -9,7 +9,7 @@ import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.framework.data.base.BaseDO;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
-import com.cmsr.onebase.module.system.dal.flex.base.BaseDataServiceImpl;
+import com.cmsr.onebase.framework.orm.repo.BaseDataRepository;
 import com.cmsr.onebase.module.system.dal.flex.mapper.SystemUsersMapper;
 import com.cmsr.onebase.module.system.enums.user.UserStatusEnum;
 import com.cmsr.onebase.module.system.vo.user.UserAppPageSearchReqVO;
@@ -46,7 +46,7 @@ import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
  */
 @Slf4j
 @Repository
-public class UserDataRepository extends BaseDataServiceImpl<SystemUsersMapper, AdminUserDO> {
+public class UserDataRepository extends BaseDataRepository<SystemUsersMapper, AdminUserDO> {
 
     /**
      * 获取登录用户其用户所处的场景类型：平台/空间/企业
