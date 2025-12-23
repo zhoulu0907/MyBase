@@ -10,10 +10,11 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
 {
+  "templateName": "Dashboard Template 2",
   "content": "{\"layout2\": [], \"config2\": {}}",
   "templateType": "app",
   "hot": 1,
-  "appId": 184716905786900485,
+  "appId": 184716905786900486,
   "indexImage": "https://example.com/image3.jpg"
 }
 
@@ -24,12 +25,13 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
 {
-  "id": 194084006145392640,
+  "id": 194163497403187200,
+  "templateName": "Dashboard Template 1",
   "content": "{\"layout2\": [], \"config2\": {\"theme2\": \"dark2\"}}",
   "templateType": "system",
   "hot": 0,
   "appId": 184716905786900484,
-  "indexImage": "https://example.com/updated2-image.jpg"
+  "indexImage": "https://example.com/updated1-image.jpg"
 }
 
 ### 3. 删除仪表盘模板
@@ -39,7 +41,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
 ### 4. 获取仪表盘模板
-GET {{baseUrl}}/dashboard/template/get?id=194084006145392640
+GET {{baseUrl}}/dashboard/template/get?id=194163497403187200
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
@@ -49,6 +51,6 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
 ### 6. 分页查询仪表盘模板
-GET {{baseUrl}}/dashboard/template/page?templateType=&hot=&appId=&pageNo=1&pageSize=2
+GET {{baseUrl}}/dashboard/template/page?templateType=&hot=&appId=&pageNo=1&pageSize=10
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}

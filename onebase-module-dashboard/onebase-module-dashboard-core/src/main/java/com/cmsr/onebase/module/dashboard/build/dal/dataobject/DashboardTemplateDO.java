@@ -9,6 +9,9 @@ import lombok.Data;
 @Table("dashboard_template")
 public class DashboardTemplateDO extends BaseEntity {
 
+    @Column(value = "template_name", comment = "模板名称")
+    private String templateName; // 模板名称
+
     @Column(value = "content", comment = "模板内容")
     private String content;
 
