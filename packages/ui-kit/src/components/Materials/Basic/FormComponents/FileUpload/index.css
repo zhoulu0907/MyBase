@@ -20,6 +20,12 @@
   border-radius: 2px;
   object-fit: cover;
 }
+.uplaodList-text-item-name {
+  max-width: calc(100% - 54px);
+}
+.uplaodList-text-item-name-hover {
+  max-width: calc(100% - 82px);
+}
 
 .uplaodList-text-item-name-hover:hover {
   text-decoration: underline;

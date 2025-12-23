@@ -99,7 +99,7 @@ const XFileUpload = memo(
           {filesList.map((file, index) => (
             <div key={file.uid} className="uplaodList-text-item">
               {getFileIcon(file)}
-              <Typography.Ellipsis showTooltip className={`${showDownload ? 'uplaodList-text-item-name-hover' : ''}`}>
+              <Typography.Ellipsis showTooltip className={`${showDownload ? 'uplaodList-text-item-name-hover' : 'uplaodList-text-item-name'}`}>
                 {file.name}
               </Typography.Ellipsis>
               {file.percent && file.percent !== 100 ? (
