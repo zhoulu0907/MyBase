@@ -19,18 +19,23 @@ import com.cmsr.onebase.module.app.api.security.AppAuthSecurityApi;
 import com.cmsr.onebase.module.system.api.logger.dto.LoginLogCreateReqDTO;
 import com.cmsr.onebase.module.system.api.sms.SmsCodeApi;
 import com.cmsr.onebase.module.system.convert.auth.AuthConvert;
+import com.cmsr.onebase.module.system.dal.dataobject.config.SystemGeneralConfigDO;
 import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2AccessTokenDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
+import com.cmsr.onebase.module.system.enums.config.ConfigTypeEnum;
+import com.cmsr.onebase.module.system.enums.config.SystemConfigKeyEnum;
 import com.cmsr.onebase.module.system.enums.logger.LoginLogTypeEnum;
 import com.cmsr.onebase.module.system.enums.logger.LoginResultEnum;
 import com.cmsr.onebase.module.system.enums.login.LoginSourceEnum;
 import com.cmsr.onebase.module.system.enums.login.LongTypeEnum;
 import com.cmsr.onebase.module.system.enums.oauth2.OAuth2ClientConstants;
+import com.cmsr.onebase.module.system.enums.permission.MenuConstants;
 import com.cmsr.onebase.module.system.enums.permission.RoleCodeEnum;
 import com.cmsr.onebase.module.system.enums.tenant.TenantCodeEnum;
 import com.cmsr.onebase.module.system.framework.security.core.PwdEnHelper;
+import com.cmsr.onebase.module.system.service.config.SystemConfigService;
 import com.cmsr.onebase.module.system.service.corp.CorpService;
 import com.cmsr.onebase.module.system.service.corpapprelation.CorpAppRelationService;
 import com.cmsr.onebase.module.system.service.logger.LoginLogService;
@@ -42,6 +47,7 @@ import com.cmsr.onebase.module.system.service.user.UserAppRelationService;
 import com.cmsr.onebase.module.system.service.user.UserService;
 import com.cmsr.onebase.module.system.vo.CaptchaVerificationReqVO;
 import com.cmsr.onebase.module.system.vo.auth.*;
+import com.cmsr.onebase.module.system.vo.config.SystemConfigSearchReqVO;
 import com.cmsr.onebase.module.system.vo.corp.CorpRespVO;
 import com.cmsr.onebase.module.system.vo.user.ThirdSupplementUserReqVO;
 import com.cmsr.onebase.module.system.vo.user.ThirdUserRegisterReqVO;
@@ -63,8 +69,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
@@ -141,6 +146,9 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
 
     @Resource
     private PasswordEncoder passwordEncoder;
+
+    @Resource
+    private SystemConfigService systemConfigService;
 
     @Override
     public AdminUserDO authenticate(String username, String password) {
@@ -288,6 +296,12 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         // 1.校验验证码
         mobileValidateCaptcha(reqVO);
 
+        // 验证是否开启第三方用户
+        SystemGeneralConfigDO saasUserConfigDO = systemConfigService.getTenantConfigByKey(SystemConfigKeyEnum.SaasModeConfig.getKey());
+        if (null == saasUserConfigDO ||  MenuConstants.DefaultSaasThirdUser.equals(saasUserConfigDO.getConfigValue())) {
+            throw exception(AUTH_VERIFY_CORP_USER_ERROR);
+        }
+
         // 2.1 解密原文
         reqVO.setPassword(pwdEnHelper.decryptHexStr(reqVO.getPassword()));
         // 2.2 使用账号密码，进行登录
@@ -305,6 +319,30 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         return authLoginRespVO;
     }
 
+    private  void thirdValidConfig(Long appId){
+
+        // 验证是否开启第三方用户
+        SystemGeneralConfigDO thirdUserConfigDO = systemConfigService.getTenantConfigByKey(SystemConfigKeyEnum.ThirdUserConfig.getKey());
+        if (null == thirdUserConfigDO ||  MenuConstants.DefaultSaasThirdUser.equals(thirdUserConfigDO.getConfigValue())) {
+            throw exception(AUTH_VERIFY_THIRD_USER_ERROR);
+        }
+        SystemConfigSearchReqVO configSearchReqVO=new SystemConfigSearchReqVO();
+        configSearchReqVO.setAppId(appId);
+        configSearchReqVO.setConfigType(ConfigTypeEnum.APP.getCode());
+        Set<String> set =new HashSet<>();
+        set.add(SystemConfigKeyEnum.appThirdUserEnable.getKey());
+        configSearchReqVO.setConfigKeys(set);
+        List<SystemGeneralConfigDO>  configListByKeysAndAppId= systemConfigService.getTenantConfigListByKeysAndAppId(configSearchReqVO);
+        if (CollectionUtils.isEmpty(configListByKeysAndAppId)) {
+            throw exception(AUTH_VERIFY_APPTHIRDUSERENABLE_ERROR);
+        }else{
+            if (configListByKeysAndAppId.get(0).getConfigValue().equals(SystemConfigKeyEnum.appThirdUserEnable_DefaultValue)) {
+                throw exception(AUTH_VERIFY_APPTHIRDUSERENABLE_ERROR);
+            }
+        }
+    }
+
+
     @Override
     public ThirdAuthLoginRespVO thirdLogin(ThirdAuthLoginReqVO reqVO) {
 
@@ -317,6 +355,9 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         AtomicReference<ThirdAuthLoginRespVO> authLoginRespVO = new AtomicReference<>();
         // 设置应用所在的租户环境
         TenantUtils.execute(tenantId, () -> {
+            // 验证是否开启第三方用户,
+            thirdValidConfig(appId);
+
             AdminUserDO user = null;
             // 判断登录方式
             if (LongTypeEnum.PASSWORD.getCode().equals(reqVO.getLoginType())) {
@@ -366,6 +407,8 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
 
     @Override
     public void thirdUserForgetPassword(UserForgetPasswordReqVO reqVO) {
+
+        reqVO.setPassword(pwdEnHelper.decryptHexStr(reqVO.getPassword()));
 
         // 1.校验验证码
         ThirdAuthLoginReqVO thirdAuthLoginReqVO = new ThirdAuthLoginReqVO();

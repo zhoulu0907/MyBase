@@ -203,6 +203,8 @@ public interface ErrorCodeConstants {
     ErrorCode CONFIG_SAAS_CORP_EXISTS = new ErrorCode(1_002_026_003, "空间内已创建企业无法禁用");
     ErrorCode CONFIG_SAAS_APP_EXISTS  = new ErrorCode(1_002_026_003, "空间内已创建SAAS应用无法禁用");
 
-
+    ErrorCode AUTH_VERIFY_THIRD_USER_ERROR = new ErrorCode(1_002_000_104, "外部用户未开启无法登录");
+    ErrorCode AUTH_VERIFY_CORP_USER_ERROR = new ErrorCode(1_002_000_104, "Saas模块未开启无法登录");
+    ErrorCode AUTH_VERIFY_APPTHIRDUSERENABLE_ERROR = new ErrorCode(1_002_000_104, "应用三方用户登录未开启");
 
 }
