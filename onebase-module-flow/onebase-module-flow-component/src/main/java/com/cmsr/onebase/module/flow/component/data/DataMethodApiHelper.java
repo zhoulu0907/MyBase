@@ -140,7 +140,11 @@ public class DataMethodApiHelper {
     }
 
     public static String convertToFieldName(String fieldKey) {
-        return StringUtils.substringAfter(fieldKey, ".");
+        if (StringUtils.countMatches(fieldKey, ".") > 0) {
+            return StringUtils.substringAfter(fieldKey, ".");
+        } else {
+            return fieldKey;
+        }
     }
 
     public static SemanticOperatorEnum extractFromOperator(OpEnum operator) {
