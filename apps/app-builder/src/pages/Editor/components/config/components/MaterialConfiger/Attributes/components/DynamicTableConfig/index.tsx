@@ -214,11 +214,11 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
 
       {/* 表头配置 */}
       <FormItem layout="vertical" labelAlign="left" label={'表头配置'} className={styles.formItem}>
-        <Form.List initialValue={configs[columnsKey]} field={`${id}-${columnsKey}`}>
+        <Form.List field={`${id}-${columnsKey}`}>
           {(_fields, { remove }) => (
             <div className={styles.tableColumnList}>
               <ReactSortable
-                list={configs[columnsKey]}
+                list={columnsConfig}
                 setList={() => {}}
                 group={{
                   name: 'table-col-item'
@@ -250,7 +250,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
                   }
                 }}
               >
-                {configs[columnsKey].map((_col: any, idx: number) => (
+                {columnsConfig.map((_col: any, idx: number) => (
                   <div key={idx} className={styles.tableColumnItem}>
                     <IconDragDotVertical
                       // 支持拖拽的图标，别误删了：）
@@ -262,16 +262,16 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
                     />
                     <Input
                       size="small"
-                      value={configs[columnsKey][idx].title}
+                      value={_col.title}
                       onChange={(e) => {
-                        const newList = [...columnsConfig];
+                        const newList = columnsConfig;
                         newList[idx] = {
                           ...newList[idx],
                           title: e
                           //   dataIndex: e
                         };
                         setColumnsConfig(newList);
-                        handlePropsChange(columnsKey, newList);
+                        handlePropsChange(columnsKey, [...newList]);
                       }}
                       className={styles.tableColumnItemInput}
                       placeholder={`请输入第${idx + 1}项`}
@@ -280,23 +280,23 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
                       size="small"
                       max={500}
                       min={50}
-                      value={configs[columnsKey][idx].width}
+                      value={_col.width}
                       className={styles.tableColumnItemInput}
                       onChange={(e) => {
-                        const newList = [...columnsConfig];
+                        const newList = columnsConfig;
                         newList[idx] = {
                           ...newList[idx],
                           width: e
                         };
                         setColumnsConfig(newList);
-                        handlePropsChange(columnsKey, newList);
+                        handlePropsChange(columnsKey, [...newList]);
                       }}
                       placeholder="宽度"
                     />
                     <Checkbox
-                      checked={configs[columnsKey][idx].fixed || false}
+                      checked={_col.fixed || false}
                       onChange={(e) => {
-                        const newList = [...columnsConfig];
+                        const newList = columnsConfig;
                         if (newList[idx].width === undefined) {
                           Message.error('请先设置宽度');
                           return;
@@ -306,7 +306,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
                           fixed: e ? 'left' : false
                         };
                         setColumnsConfig(newList);
-                        handlePropsChange(columnsKey, newList);
+                        handlePropsChange(columnsKey, [...newList]);
                       }}
                     >
                       固定
