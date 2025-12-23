@@ -71,4 +71,4 @@ export const updateLoginConfigApi = (data: updateLoginConfigParams) => systemSer
 export const createExternalUserApp = (data: createExternalUserAppParams) => runtimeUserService.post('/user-app-relation/create', data);
 
 //忘记密码
-export const forgotPWD = (data: forgotPWDParams) => runtimeService.post('/auth/forget-password', data);
+export const forgotPWD = (data: forgotPWDParams, headers: Headers) => runtimeService.post('/auth/forget-password', data, { headers });

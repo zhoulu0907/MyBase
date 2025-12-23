@@ -3,13 +3,14 @@ import styles from './register.module.less';
 import { IconMobile } from '@arco-design/web-react/icon';
 import { useState } from 'react';
 import { forgotPWD, sendVerifyCodeApi, type forgotPWDParams } from '@onebase/platform-center';
-import { VerifyInput } from '@onebase/common';
+import { getPublicKey, sm2Encrypt, VerifyInput } from '@onebase/common';
 import { phoneValidator } from '@/utils/validator';
 
 interface IConfirmInfoProps {
+  tenantId: string;
   onGoBack: () => void;
 }
-const UpdatePasswordForm: React.FC<IConfirmInfoProps> = ({ onGoBack }) => {
+const UpdatePasswordForm: React.FC<IConfirmInfoProps> = ({ tenantId, onGoBack }) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState<boolean>(false);
   const [verifyCode, setVerifyCode] = useState<string>('');
@@ -19,12 +20,16 @@ const UpdatePasswordForm: React.FC<IConfirmInfoProps> = ({ onGoBack }) => {
       setLoading(true);
       // 先验证表单
       const values = await form.validate();
+      const headers = {
+        'X-Tenant-Id': tenantId
+      };
+      values.password = await sm2Encrypt(getPublicKey(), values?.password || '');
       const params: forgotPWDParams = {
         mobile: values.mobile,
         password: values.password,
         verifyCode: verifyCode
       };
-      await forgotPWD(params);
+      await forgotPWD(params, headers);
     } catch (error) {
       console.log('error');
     } finally {

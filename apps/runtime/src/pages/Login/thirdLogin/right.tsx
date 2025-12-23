@@ -2,7 +2,7 @@ import { DynamicIcon } from '@/components/DynamicIcon';
 
 import { ThirdLoginMap, ThirdLoginType } from '@/constants';
 import { appInfoSignal } from '@/store/app';
-import { emailValidator, filterSpace, phoneValidator } from '@/utils/validator';
+import { filterSpace, phoneValidator } from '@/utils/validator';
 import { Button, Checkbox, Form, Input, Link, Message, Space, Tabs, Typography } from '@arco-design/web-react';
 import { IconLock, IconMobile } from '@arco-design/web-react/icon';
 import { getApplicationLeast } from '@onebase/app';
@@ -387,6 +387,7 @@ const Right: React.FC = () => {
       {/* 忘记密码 */}
       {visbileUpdatePwd && (
         <UpdatePasswordForm
+          tenantId={tenantId}
           onGoBack={() => {
             setVisibleUpdatePwd(false);
           }}
