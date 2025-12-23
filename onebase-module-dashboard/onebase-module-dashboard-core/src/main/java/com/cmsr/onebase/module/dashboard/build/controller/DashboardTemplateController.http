@@ -11,11 +11,10 @@ tenant-id: {{adminTenantId}}
 
 {
   "content": "{\"layout2\": [], \"config2\": {}}",
-  "templateType": "analysis",
-  "hot": 0,
-  "appId": 184716905786900482,
-  "tenantId": {{adminTenantId}},
-  "indexImage": "https://example.com/image2.jpg"
+  "templateType": "app",
+  "hot": 1,
+  "appId": 184716905786900485,
+  "indexImage": "https://example.com/image3.jpg"
 }
 
 ### 2. 更新仪表盘模板
@@ -25,23 +24,22 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
 {
-  "id": 192459907207725056,
+  "id": 194084006145392640,
   "content": "{\"layout2\": [], \"config2\": {\"theme2\": \"dark2\"}}",
-  "templateType": "analysis",
-  "hot": 1,
-  "appId": 184716905786900482,
-  "tenantId": {{adminTenantId}},
+  "templateType": "system",
+  "hot": 0,
+  "appId": 184716905786900484,
   "indexImage": "https://example.com/updated2-image.jpg"
 }
 
 ### 3. 删除仪表盘模板
-POST {{baseUrl}}/dashboard/template/delete?id=192459907207725056
+POST {{baseUrl}}/dashboard/template/delete?id=194087888795828224
 Content-Type: application/json
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
 ### 4. 获取仪表盘模板
-GET {{baseUrl}}/dashboard/template/get?id=192443689411117056
+GET {{baseUrl}}/dashboard/template/get?id=194084006145392640
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
@@ -51,6 +49,6 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
 ### 6. 分页查询仪表盘模板
-GET {{baseUrl}}/dashboard/template/page?tempType=analysis&pageNo=1&pageSize=2
+GET {{baseUrl}}/dashboard/template/page?templateType=&hot=&appId=&pageNo=1&pageSize=2
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}

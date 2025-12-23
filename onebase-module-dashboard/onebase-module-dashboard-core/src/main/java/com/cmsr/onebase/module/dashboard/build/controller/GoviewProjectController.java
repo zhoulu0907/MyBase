@@ -188,7 +188,7 @@ public class GoviewProjectController  extends BaseController {
 	@ResponseBody
 	@PermitAll
 	@ApiSignIgnore
-	public AjaxResult saveData(GoviewProjectData data) {
+	public AjaxResult saveData(@RequestBody GoviewProjectData data) {
 
 		GoviewProject goviewProject= iGoviewProjectService.getById(data.getProjectId());
 		if(goviewProject==null) {

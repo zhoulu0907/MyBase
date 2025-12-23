@@ -12,6 +12,7 @@ import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -88,7 +89,7 @@ public class DashboardTemplateServiceImpl extends ServiceImpl<DashboardTemplateM
     @Override
     public PageResult<DashboardTemplateDO> getDashboardTemplatePage(DashboardTemplatePageReqVO pageReqVO) {
         QueryWrapper queryWrapper = QueryWrapper.create()
-                .eq(DashboardTemplateDO::getTemplateType, pageReqVO.getTemplateType(), pageReqVO.getTemplateType() != null)
+                .eq(DashboardTemplateDO::getTemplateType, pageReqVO.getTemplateType(), StringUtils.isNotBlank(pageReqVO.getTemplateType()))
                 .eq(DashboardTemplateDO::getHot, pageReqVO.getHot(), pageReqVO.getHot() != null)
                 .eq(DashboardTemplateDO::getAppId, pageReqVO.getAppId(), pageReqVO.getAppId() != null);
 

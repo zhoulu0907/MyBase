@@ -4,7 +4,7 @@
 # 确保先在AuthController.http中登录获取token
 
 ### 1. 分页查询项目列表
-GET {{baseUrl}}/dashboard/list?page=1&limit=10
+GET {{baseUrl}}/dashboard/list?page=1&limit=1
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
@@ -15,11 +15,11 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
 {
-  "projectName": "测试项目Gsp123",
+  "projectName": "Screen_test_Gsp",
   "state": -1,
-  "indexImage": "",
-  "remarks": "",
-  "appId": 184716905786900483,
+  "indexImage": "http://127.0.0.1:8083/oss/2025-04-23/1074956819610341376.png",
+  "remarks": "修改后的备注Gsp",
+  "appId": 1,
   "tenantId": {{adminTenantId}}
 
 }
@@ -30,7 +30,6 @@ Content-Type: application/json
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
-
 ### 4. 修改项目
 POST {{baseUrl}}/dashboard/edit
 Content-Type: application/json
@@ -38,8 +37,8 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
 {
-  "id": 193876318706401280,
-  "projectName": "测试项目Gsp125",
+  "id": 194097457982963712,
+  "projectName": "测试项目Gsp126",
   "state": 1,
   "indexImage": "image_url",
   "remarks": "修改后的备注Gsp"
@@ -70,10 +69,12 @@ tenant-id: {{adminTenantId}}
 ### 8. 保存项目数据
 POST {{baseUrl}}/dashboard/save/data
 Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
 
 {
-  "id": "{{$uuid}}",
-  "projectId": "{{projectId}}",
+  "projectId": 194097457982963712,
   "content": "{\"data\": \"示例内容\"}",
-  "remark": "保存的数据备注"
+  "remark": "保存的数据备注",
+  "appId": 1
 }
