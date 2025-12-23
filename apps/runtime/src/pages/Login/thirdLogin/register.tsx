@@ -10,7 +10,7 @@ import styles from './register.module.less';
 import type { IRegisterProps, registerInfo } from './type';
 
 // 补充用户信息页面
-const RegisterForm: React.FC<IRegisterProps> = ({ appId, isRelatedApp, tenantId, onGoBack }) => {
+const RegisterForm: React.FC<IRegisterProps> = ({ appId, isRelatedApp, tenantId, mobile, onGoBack }) => {
   const [registerForm] = Form.useForm();
   const navigate = useNavigate();
   const [visible, setVisible] = useState<boolean>(false);
@@ -105,13 +105,19 @@ const RegisterForm: React.FC<IRegisterProps> = ({ appId, isRelatedApp, tenantId,
           <Typography.Title heading={2}>请补充用户信息</Typography.Title>
 
           {/* 表单区域 */}
-          <Form layout="vertical" form={registerForm}>
+          <Form
+            layout="vertical"
+            form={registerForm}
+            initialValues={{
+              mobile: mobile
+            }}
+          >
             <Form.Item
               label="手机号"
               field="mobile"
               rules={[{ required: true, message: '请输入手机号' }, { validator: phoneValidator }]}
             >
-              <Input placeholder="输入手机号" maxLength={11} prefix={<IconMobile />} />
+              <Input placeholder="输入手机号" maxLength={11} prefix={<IconMobile />} readOnly />
             </Form.Item>
             {/* 姓名输入框 */}
             <Form.Item label="姓名" field="nickName" required rules={[{ required: true, message: '请输入姓名' }]}>

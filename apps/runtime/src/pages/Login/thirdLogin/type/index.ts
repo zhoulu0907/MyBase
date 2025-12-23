@@ -2,6 +2,7 @@ export interface IRegisterProps {
   appId: string;
   tenantId: string;
   isRelatedApp: boolean;
+  mobile: string;
   onGoBack: () => void;
 }
 
