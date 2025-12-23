@@ -99,20 +99,6 @@
             <version>1.0.0-SNAPSHOT</version>
         </dependency>
 
-        <!-- Hello Demo 插件依赖 (开发模式需要) -->
-        <dependency>
-            <groupId>com.cmsr.onebase.plugin.demo</groupId>
-            <artifactId>plugin-demo-hello</artifactId>
-            <version>1.0.0</version>
-        </dependency>
-
-        <!-- Test Demo 插件依赖 (开发模式需要) -->
-        <dependency>
-            <groupId>com.cmsr.onebase.plugin.demo</groupId>
-            <artifactId>plugin-demo-test</artifactId>
-            <version>1.0.0</version>
-        </dependency>
-
     </dependencies>
 
     <build>
