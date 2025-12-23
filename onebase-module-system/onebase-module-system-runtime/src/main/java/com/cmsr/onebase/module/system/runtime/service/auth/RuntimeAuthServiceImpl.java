@@ -684,20 +684,20 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
             throw exception(INTERNAL_SERVER_ERROR);
         }
         // 获取用户
-        AdminUserDO thirdpartyUser = null;
-        String userName = verifyCodeSend.getUserName();
-        if (StringUtils.isNotBlank(userName)) {
-            thirdpartyUser = userService.getUserByUsername(userName);
-        }
-        String mobile = verifyCodeSend.getUserMobile();
-        if (thirdpartyUser == null && StringUtils.isNotBlank(mobile)) {
-            thirdpartyUser = userService.getUserByMobile(mobile);
-        }
-        if (thirdpartyUser == null) {
-            throw exception(USER_NOT_EXISTS);
-        }
+        // AdminUserDO thirdpartyUser = null;
+        // String userName = verifyCodeSend.getUserName();
+        // if (StringUtils.isNotBlank(userName)) {
+        //     thirdpartyUser = userService.getUserByUsername(userName);
+        // }
+        // String mobile = verifyCodeSend.getUserMobile();
+        // if (thirdpartyUser == null && StringUtils.isNotBlank(mobile)) {
+        //     thirdpartyUser = userService.getUserByMobile(mobile);
+        // }
+        // if (thirdpartyUser == null) {
+        //     throw exception(USER_NOT_EXISTS);
+        // }
         SmsCodeSendReqDTO smsCodeSendReq = new SmsCodeSendReqDTO();
-        smsCodeSendReq.setMobile(thirdpartyUser.getMobile());
+        smsCodeSendReq.setMobile(verifyCodeSend.getUserMobile());
         smsCodeSendReq.setScene(SmsSceneEnum.MEMBER_LOGIN.getScene());
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         smsCodeSendReq.setCreateIp(request.getRemoteAddr());
