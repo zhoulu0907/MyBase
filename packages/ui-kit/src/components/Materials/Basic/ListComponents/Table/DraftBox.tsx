@@ -47,8 +47,6 @@ export const DraftBox: React.FC<DraftBoxProps> = ({ showFromPageData, tableColum
       };
     });
 
-    // console.log('newDraftTableData: ', newTableData);
-
     setDraftTableData(newTableData);
     draftForm.setFieldsValue({ [tableName]: newTableData });
     setDraftTotal(total);
@@ -68,8 +66,6 @@ export const DraftBox: React.FC<DraftBoxProps> = ({ showFromPageData, tableColum
 
   // 载入草稿
   const handleLoadDraft = (draft: any) => {
-    console.log('draft:   ', draft);
-
     localStorage.setItem('draftData', JSON.stringify(draft));
 
     // 打开编辑弹窗（新增模式）
@@ -78,8 +74,6 @@ export const DraftBox: React.FC<DraftBoxProps> = ({ showFromPageData, tableColum
     // 关闭草稿箱弹窗
     setShowDraftModal(false);
   };
-
-  //   console.log('draftTableColumns:   ', tableColumns);
 
   // 复用列表列的结构（保持原 render），仅去除 op/index，外侧补序号/操作
   const draftColumns = useMemo(() => {

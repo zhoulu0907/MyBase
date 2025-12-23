@@ -48,7 +48,6 @@ const XDeptSelect = memo((props: XInputDeptSelectConfig & { runtime?: boolean; d
   }, []);
 
   useEffect(() => {
-    console.log('dept fieldValue: ', fieldValue);
     if (runtime && fieldValue) {
       setCurrentSelectDept(fieldValue?.name);
       runtimeEditRef.current = true;

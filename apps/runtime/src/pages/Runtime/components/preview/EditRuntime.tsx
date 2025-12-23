@@ -63,11 +63,9 @@ const EditRuntime: React.FC<EditRuntimeProps> = ({
     if (!tableName || !menuId) return;
     try {
       const res: any = await getDraftPage(tableName, menuId, { pageNo: 1, pageSize: 10 });
-      console.log(res);
 
       const draftData = res?.list?.[0];
       if (draftData) {
-        console.log('draftData: ', draftData);
         setLatestDraft(draftData);
         const ts = draftData?.created_time || Date.now();
         setDraftTimestamp(ts);
@@ -102,8 +100,6 @@ const EditRuntime: React.FC<EditRuntimeProps> = ({
             // 清除临时数据
             localStorage.removeItem('draftData');
 
-            console.log('draftData: ', draftData);
-
             const componentSchemas = useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value;
             const subTableComponents = useEditorSignalMap.get(editPageViewId.value)?.subTableComponents.value;
 
@@ -116,7 +112,6 @@ const EditRuntime: React.FC<EditRuntimeProps> = ({
               setSubTableDataLength: pagesRuntimeSignal.setSubTableDataLength
             });
 
-            console.log('xxxformValues: ', formValues);
             // 直接载入数据
             form.setFieldsValue(formValues);
           } catch (error) {
@@ -153,7 +148,6 @@ const EditRuntime: React.FC<EditRuntimeProps> = ({
         setSubTableDataLength: pagesRuntimeSignal.setSubTableDataLength
       });
 
-      console.log('xxx2FormValues: ', formValues);
       form.setFieldsValue(formValues);
       // 触发表单值变化，更新组件状态
       await handleFormValuesChange({}, formValues);
