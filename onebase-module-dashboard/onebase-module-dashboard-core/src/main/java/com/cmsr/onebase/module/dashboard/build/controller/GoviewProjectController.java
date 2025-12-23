@@ -62,7 +62,8 @@ public class GoviewProjectController  extends BaseController {
 	@ApiSignIgnore
 	public ResultTable list(Tablepar tablepar){
 		Page<GoviewProject> page= new Page<GoviewProject>(tablepar.getPage(), tablepar.getLimit());
-        Page<GoviewProject> iPages = iGoviewProjectService.page(page, new QueryWrapper());
+        Page<GoviewProject> iPages = iGoviewProjectService.page(page, new QueryWrapper().eq(GoviewProject::getAppId,
+				tablepar.getAppId(),tablepar.getAppId() != null));
         ResultTable resultTable=new ResultTable();
 		resultTable.setData(iPages.getRecords());
 		resultTable.setCode(200);
@@ -188,7 +189,7 @@ public class GoviewProjectController  extends BaseController {
 	@ResponseBody
 	@PermitAll
 	@ApiSignIgnore
-	public AjaxResult saveData(GoviewProjectData data) {
+	public AjaxResult saveData(@RequestBody GoviewProjectData data) {
 
 		GoviewProject goviewProject= iGoviewProjectService.getById(data.getProjectId());
 		if(goviewProject==null) {

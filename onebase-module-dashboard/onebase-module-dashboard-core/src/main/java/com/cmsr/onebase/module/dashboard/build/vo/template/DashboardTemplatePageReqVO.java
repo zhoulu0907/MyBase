@@ -12,6 +12,11 @@ import lombok.EqualsAndHashCode;
 public class DashboardTemplatePageReqVO extends PageParam {
 
     /**
+     * 模板名称
+     */
+    private String templateName;
+
+    /**
      * 模板类型
      */
     private String templateType;

@@ -13,6 +13,9 @@ public class DashboardTemplateRespVO {
     @ApiModelProperty(value = "模板ID", required = true, example = "1")
     private String id;
 
+    @ApiModelProperty(value = "模板名称", required = true)
+    private String templateName;
+
     @ApiModelProperty(value = "模板内容（JSON格式）")
     private String content;
 
