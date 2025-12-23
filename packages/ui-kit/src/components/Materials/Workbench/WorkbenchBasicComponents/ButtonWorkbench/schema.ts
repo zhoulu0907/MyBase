@@ -17,13 +17,15 @@ import {
   IWbTextAlignConfigType,
   IWbMenuSelectorConfigType,
 } from '../../core/types';
-import { workbenchBaseConfig, workbenchBaseDefault, type ICommonBaseWorkbenchType, type TWorkbenchStatusSelectKeyType } from '../../config/workbenchShared';
+import { TWorkbenchWidthSelectKeyType, workbenchBaseConfig, workbenchBaseDefault, type ICommonBaseWorkbenchType, type TWorkbenchStatusSelectKeyType } from '../../config/workbenchShared';
 import {
   WORKBENCH_STATUS_OPTIONS,
   WORKBENCH_STATUS_VALUES,
   WORKBENCH_CONFIG_TYPES,
   CONFIG_TYPES,
-  VERTICAL_ALIGN_OPTIONS
+  VERTICAL_ALIGN_OPTIONS,
+  WORKBENCH_WIDTH_OPTIONS,
+  WORKBENCH_WIDTH_VALUES
 } from '../../core/constants';
 import { ALIGN_OPTIONS, ALIGN_VALUES } from '../../../constants';
 export interface XButtonWorkbenchSchema {
@@ -95,6 +97,11 @@ export interface XButtonWorkbenchConfig extends ICommonBaseWorkbenchType {
    * 可选值: 'default' | 'hidden' | 'readonly'
    */
   status?: TRadioDefaultType<TWorkbenchStatusSelectKeyType>;
+
+  /**
+   * 组件宽度
+   */
+  width: TSelectDefaultType<TWorkbenchWidthSelectKeyType>;
 }
 
 const XButtonWorkbench: XButtonWorkbenchSchema = {
@@ -172,7 +179,8 @@ const XButtonWorkbench: XButtonWorkbenchSchema = {
     jumpType: 'internal',
     jumpPageId: '',
     jumpExternalUrl: '',
-    status: WORKBENCH_STATUS_VALUES[WORKBENCH_STATUS_OPTIONS.DEFAULT]
+    status: WORKBENCH_STATUS_VALUES[WORKBENCH_STATUS_OPTIONS.DEFAULT],
+    width: WORKBENCH_WIDTH_VALUES[WORKBENCH_WIDTH_OPTIONS.FULL],
   }
 };
 

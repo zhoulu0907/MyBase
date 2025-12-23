@@ -2,7 +2,7 @@ import { memo, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@arco-design/mobile-react';
 import { workbenchSchema } from '@onebase/ui-kit';
-import { ApplicationMenu, listApplicationMenu } from '@onebase/app';
+import { type ApplicationMenu, listApplicationMenu, menuSignal } from '@onebase/app';
 import styles from './index.module.css';
 
 type XButtonWorkbenchConfig = typeof workbenchSchema.XButtonWorkbench.config;
@@ -27,6 +27,7 @@ const XButtonWorkbench = memo((props: XButtonWorkbenchConfig & { runtime?: boole
 
   const { appId } = useParams<{ appId?: string }>();
   const [appRuntimeMenu, setAppRuntimeMenu] = useState<ApplicationMenu[]>([]);
+  const { setCurMenu } = menuSignal;
 
   const navigate = useNavigate();
 
@@ -70,6 +71,19 @@ const XButtonWorkbench = memo((props: XButtonWorkbenchConfig & { runtime?: boole
           const newPath = location.pathname.replace('/runtime-home', '/runtime');
           const to = `${newPath}?${searchParams.toString()}`;
           navigate(to);
+
+          // 设置当前菜单
+          setCurMenu({
+            id: targetMenu.id || '',
+            menuCode: targetMenu.menuCode || '',
+            menuSort: targetMenu.menuSort || 1,
+            menuType: targetMenu.menuType || 1,
+            menuName: targetMenu.menuName || '',
+            menuIcon: targetMenu.menuIcon || '',
+            isVisible: targetMenu.isVisible || 1,
+            pagesetType: targetMenu.pagesetType,
+            children: targetMenu.children || []
+          });
         }
       }
     }

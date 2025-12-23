@@ -16,6 +16,7 @@ const XButtonWorkbench = memo((props: XButtonWorkbenchConfig & { runtime?: boole
       horizontal: 'center',
       vertical: 'middle'
     } as TWbTextAlignDefaultType,
+    width,
   } = props;
 
   const buttonText = label?.text || '按钮';
