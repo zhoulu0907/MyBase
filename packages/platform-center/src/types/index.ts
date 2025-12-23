@@ -12,3 +12,4 @@ export * from './role';
 export * from './security';
 export * from './tenant';
 export * from './user';
+export * from './dashbord';

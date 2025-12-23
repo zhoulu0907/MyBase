@@ -1,4 +1,4 @@
-import { createClient, getPlatformBackendURL, getRuntimeBackendURL } from '@onebase/common';
+import { createClient, getPlatformBackendURL, getRuntimeBackendURL, getDashbordDataSetUrl } from '@onebase/common';
 
 /**
  * 预定义的客户端实例
@@ -12,3 +12,4 @@ export const appService = createClient('/app');
 export const runtimeService = createClient('/system', getRuntimeBackendURL());
 export const runtimeInfraService = createClient('/infra', getRuntimeBackendURL());
 export const runtimeCorpService = createClient('/corp', getRuntimeBackendURL());
+export const dashbordDataSetService = createClient('/de2api', getDashbordDataSetUrl());

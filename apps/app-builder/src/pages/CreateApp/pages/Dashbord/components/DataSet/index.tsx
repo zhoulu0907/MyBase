@@ -1,79 +1,75 @@
 import { useEffect, useState, type FC } from 'react';
-import { Button, Input, Select, Table, Pagination, Space } from '@arco-design/web-react';
-import { IconPlus, IconSearch } from '@arco-design/web-react/icon';
+import { Button, Modal, Table, Pagination, Space, type TableColumnProps } from '@arco-design/web-react';
+import { IconPlus } from '@arco-design/web-react/icon';
 import styles from './index.module.less';
-
-const Option = Select.Option;
+import { DataSetList, DelDataSetList } from '@onebase/platform-center';
+// const Option = Select.Option;
 interface DataTable {
   name: string;
   type: string;
   founder: string;
   emModifyRecord: string;
+  id: string;
 }
 const DataSet: FC = () => {
-  const [status, setStatus] = useState<number | string>('');
-  const statusOptions = [
-    {
-      label: '全部类型',
-      value: ''
-    },
-    {
-      label: '数据表',
-      value: 0
-    },
-    {
-      label: '视图表',
-      value: 1
-    },
-    {
-      label: '表单',
-      value: 2
-    }
-  ];
-  const handleSearchChange = () => {};
-  const handleAdd = () => {};
-  const columns = [
+  const columns: TableColumnProps[] = [
     { title: '名称', dataIndex: 'name', key: 'name' },
-    { title: '类型', dataIndex: 'type', width: 140, key: 'type' },
     { title: '创建人', dataIndex: 'founder', key: 'founder' },
     { title: '修改人/修改时间', dataIndex: 'emModifyRecord', key: 'emModifyRecord' },
     {
       title: '操作',
       width: 100,
       key: 'operate',
+      align: 'center',
       render: (_: DataTable, record: DataTable) => (
         <Space size="mini">
           <Button type="text" onClick={() => handleEdit(record)}>
             编辑
           </Button>
+          <Button type="text" status="danger" onClick={() => handleDelete(record)}>
+            删除
+          </Button>
         </Space>
       )
     }
   ];
-  const data = [
-    {
-      id: 1,
-      name: 'zjl',
-      type: '表单',
-      founder: 'zjl',
-      emModifyRecord: '2025'
-    },
-    {
-      id: 2,
-      name: 'zjl',
-      type: '表单',
-      founder: 'zjl',
-      emModifyRecord: '2025'
-    }
-  ];
+
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [total, setTotal] = useState(1);
-  //编辑
-  const handleEdit = (record: DataTable) => {
-    console.log(record);
+  const [dataSet, setDataSet] = useState<any[]>([]);
+  //获取列表
+  useEffect(() => {
+    getDataSetList();
+  }, []);
+  const getDataSetList = async () => {
+    const res = await DataSetList({ busiFlag: 'dataset' });
+    setDataSet(res[0].children);
   };
-
+  // 新建
+  const handleAdd = () => {
+    window.open(`http://s25029301301.dev.internal.virtueit.net:81/v0/appdashboard/#/project/dataset-form`, '_blank');
+  };
+  //编辑
+  const handleEdit = async (record: DataTable) => {
+    window.open(
+      `http://s25029301301.dev.internal.virtueit.net:81/v0/appdashboard/#/project/dataset-form?id=${record.id}`,
+      '_blank'
+    );
+  };
+  //删除
+  const [deleteVisible, setDeleteVisible] = useState<boolean>(false);
+  const [dataSetId, setDataSetId] = useState<string>('');
+  const handleDelete = (record: DataTable) => {
+    setDataSetId(record.id);
+    setDeleteVisible(true);
+  };
+  const handleDeleteOk = async () => {
+    console.log('删除当前screen', dataSetId);
+    await DelDataSetList(dataSetId);
+    getDataSetList();
+    setDeleteVisible(false);
+  };
   return (
     <div className={styles.datasetPage}>
       <div className={styles.datasetTitle}>数据集</div>
@@ -81,30 +77,8 @@ const DataSet: FC = () => {
         <Button type="primary" icon={<IconPlus />} onClick={handleAdd}>
           新建数据集
         </Button>
-        <div>
-          <Select
-            placeholder="全部状态"
-            bordered={false}
-            style={{ width: 100 }}
-            onChange={(value) => setStatus(value)}
-            value={status}
-          >
-            {statusOptions.map((option, index) => (
-              <Option key={index} value={option.value}>
-                {option.label}
-              </Option>
-            ))}
-          </Select>
-          <Input
-            className={styles.appInput}
-            allowClear
-            suffix={<IconSearch />}
-            onChange={handleSearchChange}
-            placeholder="搜索"
-          />
-        </div>
       </div>
-      <Table rowKey="id" hover columns={columns} data={data} border={false} pagination={false} />
+      <Table rowKey="id" hover columns={columns} data={dataSet} border={false} pagination={false} />
       <div
         style={{
           display: 'flex',
@@ -125,6 +99,26 @@ const DataSet: FC = () => {
           sizeOptions={[10, 20, 50]}
         />
       </div>
+      {/* 删除卡片弹框 */}
+      <Modal
+        visible={deleteVisible}
+        onOk={handleDeleteOk}
+        onCancel={() => setDeleteVisible(false)}
+        autoFocus={false}
+        focusLock={true}
+        footer={
+          <>
+            <Button type="secondary" size="default" style={{ marginRight: 10 }} onClick={() => setDeleteVisible(false)}>
+              取消
+            </Button>
+            <Button type="primary" status="danger" size="default" onClick={handleDeleteOk}>
+              确认删除
+            </Button>
+          </>
+        }
+      >
+        <p style={{ fontSize: 16, fontWeight: 500, color: '#1D2129' }}>您确定要删除该数据集吗？</p>
+      </Modal>
     </div>
   );
 };

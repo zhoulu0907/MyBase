@@ -14,7 +14,7 @@ window.global_config = {
   //   RUNTIME_URL: 'http://localhost:9527',
   MOBILE_EDITOR_URL: '//localhost:4401',
   //   MOBILE_EDITOR_URL: '//localhost:4174',
-
+  APP_BUILDER_DATASET_URL: 'http://10.0.104.38:8100',
   RUNTIME_URL: 'http://localhost:9527',
   RUNTIME_MOBILE_URL: 'http://localhost:9528',
 
