@@ -212,7 +212,6 @@ const XDateTimePicker: XInputDateTimePickerSchema = {
       key: 'defaultValueConfig',
       name: '默认值',
       type: CONFIG_TYPES.DEFAULT_VALUE,
-      valueType: 'dateTime'
     },
     {
       key: 'dateFormat',

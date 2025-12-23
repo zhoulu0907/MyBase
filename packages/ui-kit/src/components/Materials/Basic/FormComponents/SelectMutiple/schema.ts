@@ -13,13 +13,13 @@ import {
 } from '../../../common';
 import {
   CONFIG_TYPES,
-  DEFAULT_OPTIONS_TYPE,
   LAYOUT_OPTIONS,
   LAYOUT_VALUES,
   STATUS_OPTIONS,
   STATUS_VALUES,
   WIDTH_OPTIONS,
-  WIDTH_VALUES
+  WIDTH_VALUES,
+  DEFAULT_VALUE_TYPES
 } from '../../../constants';
 import type {
   IDataFieldConfigType,
@@ -35,7 +35,8 @@ import type {
   TNumberDefaultType,
   TRadioDefaultType,
   TTextAreaDefaultType,
-  TTextDefaultType
+  TTextDefaultType,
+  IDefaultValueConfigType
 } from '../../../types';
 
 export interface XInputSelectMutipleSchema {
@@ -48,6 +49,7 @@ export type TXInputSelectMutipleEditData = Array<
   | ILabelConfigType
   | ITooltipConfigType
   | IDataFieldConfigType
+  | IDefaultValueConfigType
   | IMutipleSelectOptionsConfigType
   | IVerifyConfigType
   | IStatusConfigType<TStatusSelectKeyType>
@@ -75,6 +77,11 @@ export interface XInputSelectMutipleConfig extends ICommonBaseType {
    * 数据字段
    */
   dataField: TTextDefaultType[];
+
+  /**
+   * 默认值
+   */
+  defaultValueConfig?: any;
 
   /**
    * required：是否必填，未填写时提交报错
@@ -117,6 +124,11 @@ const XSelectMutiple: XInputSelectMutipleSchema = {
     },
     //  数据绑定
     ...dataFieldConfig,
+    {
+      key: 'defaultValueConfig',
+      name: '默认值',
+      type: CONFIG_TYPES.DEFAULT_VALUE,
+    },
     // 选项
     mutipleSelectOptionsConfig,
     // 选项分布方式
@@ -140,6 +152,11 @@ const XSelectMutiple: XInputSelectMutipleSchema = {
     },
     tooltip: '',
     dataField: [],
+    defaultValueConfig: {
+      type: DEFAULT_VALUE_TYPES.CUSTOM,
+      customValue: '',
+      formulaValue: ''
+    },
     verify: {
       required: false,
       maxChecked: 3

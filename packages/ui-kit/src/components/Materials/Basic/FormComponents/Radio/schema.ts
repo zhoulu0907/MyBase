@@ -24,8 +24,7 @@ import {
   STATUS_VALUES,
   WIDTH_OPTIONS,
   WIDTH_VALUES,
-  COLOR_MODE_TYPES,
-  DEFAULT_OPTIONS_TYPE
+  DEFAULT_VALUE_TYPES
 } from '../../../constants';
 import type {
   IAlignConfigType,
@@ -42,7 +41,8 @@ import type {
   TSelectDefaultType,
   TTextAreaDefaultType,
   TRadioDefaultType,
-  TTextDefaultType
+  TTextDefaultType,
+  IDefaultValueConfigType
 } from '../../../types';
 
 export interface XInputRadioSchema {
@@ -55,6 +55,7 @@ export type TXInputRadioEditData = Array<
   | ILabelConfigType
   | ITooltipConfigType
   | IDataFieldConfigType
+  | IDefaultValueConfigType
   | IRadioDataConfigType
   | IVerifyConfigType
   | IStatusConfigType<TStatusSelectKeyType>
@@ -83,6 +84,11 @@ export interface XInputRadioConfig extends ICommonBaseType {
    * 数据字段
    */
   dataField: TTextDefaultType[];
+
+  /**
+   * 默认值
+   */
+  defaultValueConfig?: any;
 
   /**
    * 单选框方向：水平（默认）、垂直
@@ -136,6 +142,11 @@ const XRadio: XInputRadioSchema = {
     },
     //  数据绑定
     ...dataFieldConfig,
+    {
+      key: 'defaultValueConfig',
+      name: '默认值',
+      type: CONFIG_TYPES.DEFAULT_VALUE,
+    },
     // 选项
     radioDataConfig,
     // 选项分布方式
@@ -162,6 +173,11 @@ const XRadio: XInputRadioSchema = {
     },
     tooltip: '',
     dataField: [],
+    defaultValueConfig: {
+      type: DEFAULT_VALUE_TYPES.CUSTOM,
+      customValue: '',
+      formulaValue: ''
+    },
     direction: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
     verify: {
       required: false,
