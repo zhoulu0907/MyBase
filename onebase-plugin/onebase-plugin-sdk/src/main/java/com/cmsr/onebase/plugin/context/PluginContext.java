@@ -1,9 +1,5 @@
 package com.cmsr.onebase.plugin.context;
 
-import com.cmsr.onebase.plugin.service.DataService;
-import com.cmsr.onebase.plugin.service.FileService;
-import com.cmsr.onebase.plugin.service.UserService;
-
 import java.util.Map;
 
 /**
@@ -97,49 +93,4 @@ public interface PluginContext {
      */
     Map<String, Object> getAttributes();
 
-    // ==================== 平台服务 ====================
-
-    /**
-     * 获取平台服务
-     * <p>
-     * 支持的服务类型：
-     * <ul>
-     *     <li>{@link DataService} - 数据操作服务</li>
-     *     <li>{@link UserService} - 用户信息服务</li>
-     *     <li>{@link FileService} - 文件操作服务</li>
-     * </ul>
-     * </p>
-     *
-     * @param serviceClass 服务接口Class
-     * @param <T>          服务类型
-     * @return 服务实例
-     */
-    <T> T getService(Class<T> serviceClass);
-
-    /**
-     * 获取数据服务（快捷方法）
-     *
-     * @return 数据服务
-     */
-    default DataService getDataService() {
-        return getService(DataService.class);
-    }
-
-    /**
-     * 获取用户服务（快捷方法）
-     *
-     * @return 用户服务
-     */
-    default UserService getUserService() {
-        return getService(UserService.class);
-    }
-
-    /**
-     * 获取文件服务（快捷方法）
-     *
-     * @return 文件服务
-     */
-    default FileService getFileService() {
-        return getService(FileService.class);
-    }
 }

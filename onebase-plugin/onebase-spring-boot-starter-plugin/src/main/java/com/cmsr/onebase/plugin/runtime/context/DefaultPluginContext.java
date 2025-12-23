@@ -2,9 +2,6 @@ package com.cmsr.onebase.plugin.runtime.context;
 
 import com.cmsr.onebase.plugin.context.PluginContext;
 import com.cmsr.onebase.plugin.context.PluginContextHolder;
-import com.cmsr.onebase.plugin.service.DataService;
-import com.cmsr.onebase.plugin.service.FileService;
-import com.cmsr.onebase.plugin.service.UserService;
 import org.springframework.context.ApplicationContext;
 
 import java.util.HashMap;
@@ -93,14 +90,6 @@ public class DefaultPluginContext implements PluginContext {
     @Override
     public Map<String, Object> getAttributes() {
         return attributes;
-    }
-
-    @Override
-    public <T> T getService(Class<T> serviceClass) {
-        if (applicationContext != null && applicationContext.getBeanNamesForType(serviceClass).length > 0) {
-            return applicationContext.getBean(serviceClass);
-        }
-        return null;
     }
 
     /**
