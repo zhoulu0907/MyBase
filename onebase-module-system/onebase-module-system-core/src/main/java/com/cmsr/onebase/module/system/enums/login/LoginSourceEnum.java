@@ -10,18 +10,23 @@ import java.util.Arrays;
 @AllArgsConstructor
 public enum LoginSourceEnum implements ArrayValuable<String> {
     /**
-     * 账密登录
+     * app账密登录
      */
     APPLOGIN ("app-login", "账密登录"),
     /**
-     * 手机登录
+     * app手机登录
      */
     APPLOGINMOBILE("app-login-mobile", "手机登录"),
 
     /**
-     * 公司登录
+     * 企业手机登录
      */
-    CORPLOGIN("corp-login", "企业手机登录");
+    CORPLOGIN("corp-login", "企业手机登录"),
+
+    /**
+     * 三方用户手机登录
+     */
+    THIRDUSERLOGIN("third-login", "三方用户登录");
 
 
     public static final String[] ARRAYS = Arrays.stream(values()).map(LoginSourceEnum::getCode).toArray(String[]::new);
