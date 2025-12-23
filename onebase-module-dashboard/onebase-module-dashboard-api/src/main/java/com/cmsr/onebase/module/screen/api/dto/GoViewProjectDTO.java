@@ -15,7 +15,7 @@ import java.io.Serializable;
 @Data
 public class GoViewProjectDTO implements Serializable {
 
-    private String id;
+    private Long id;
 
     private String projectName;
 

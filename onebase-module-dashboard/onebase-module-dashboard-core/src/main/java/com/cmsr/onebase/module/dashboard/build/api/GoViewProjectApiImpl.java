@@ -33,22 +33,22 @@ public class GoViewProjectApiImpl implements GoViewProjectApi {
 
 
     @Override
-    public String createDashboard(GoViewProjectDTO goViewProjectDTO) {
+    public Long createDashboard(GoViewProjectDTO goViewProjectDTO) {
         GoviewProject goviewProject = BeanUtil.toBean(goViewProjectDTO, GoviewProject.class);
         iGoviewProjectService.save(goviewProject);
         return goviewProject.getId();
     }
 
     @Override
-    public List<GoViewProjectDTO> getDashboard(String dashboardId) {
+    public List<GoViewProjectDTO> getDashboard(Long dashboardId) {
         GoviewProject goviewProject = iGoviewProjectService.getById(dashboardId);
         return List.of(BeanUtil.toBean(goviewProject, GoViewProjectDTO.class));
     }
 
     @Override
-    public String createDashboardByTemplate(String templateId) {
+    public Long createDashboardByTemplate(Long templateId) {
         // todo: 查询模板信息，创建数据大屏
-        DashboardTemplateDO dashboardTemplate = dashboardTemplateService.getDashboardTemplate(Long.parseLong(templateId));
+        DashboardTemplateDO dashboardTemplate = dashboardTemplateService.getDashboardTemplate(templateId);
         if (dashboardTemplate == null){
             return null;
         }
@@ -66,9 +66,8 @@ public class GoViewProjectApiImpl implements GoViewProjectApi {
         GoviewProjectData goviewProjectData = new GoviewProjectData();
         goviewProjectData.setProjectId(goviewProject.getId());
         goviewProjectData.setContent(dashboardTemplate.getContent());
-        goviewProjectData.setCreateTime(DateUtil.now());
         if (loginUser != null){
-            goviewProjectData.setCreateUserId(loginUser.getId().toString());
+            goviewProjectData.setCreator(loginUser.getId());
         }
         iGoviewProjectDataService.save(goviewProjectData);
         return goviewProject.getId();

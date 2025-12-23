@@ -24,8 +24,6 @@ public class GoviewProjectData extends BaseEntity {
 
     private Long projectId;
 
-    private String createUserId;
-
     private String content;
 
     private Long appId;

@@ -41,5 +41,5 @@ public class MenuCreateReqVO {
     private String createDashboardType;
 
     @Schema(description = "大屏/大屏模板id")
-    private String dashboardId;
+    private Long dashboardId;
 }

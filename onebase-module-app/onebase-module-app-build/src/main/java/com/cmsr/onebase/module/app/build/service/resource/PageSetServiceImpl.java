@@ -105,8 +105,8 @@ public class PageSetServiceImpl implements PageSetService {
                 }
             } else if (Objects.equals(createPageSetDTO.getCreateDashboardType(), DashboardCreateTypeSetEnum.DASHBOARD_TEMPLATE.getCode())){
                 //1.2 从模板创建数据大屏
-                String dashboardId = goViewProjectApi.createDashboardByTemplate(createPageSetDTO.getDashboardId());
-                if (StrUtil.isBlank(dashboardId)){
+                Long dashboardId = goViewProjectApi.createDashboardByTemplate(createPageSetDTO.getDashboardId());
+                if (dashboardId == null){
                     throw ServiceExceptionUtil.exception(AppResourceErrorCodeConstants.DASHBOARD_TEMPLATE_NOT_EXIST);
                 }
                 createPageSetDTO.setDashboardId(dashboardId);
@@ -118,7 +118,7 @@ public class PageSetServiceImpl implements PageSetService {
                 goViewProjectDTO.setState(-1);
                 goViewProjectDTO.setAppId(applicationId);
                 goViewProjectDTO.setCreateUserId(Objects.requireNonNull(SecurityFrameworkUtils.getLoginUserId()).toString());
-                String dashboardId = goViewProjectApi.createDashboard(goViewProjectDTO);
+                Long dashboardId = goViewProjectApi.createDashboard(goViewProjectDTO);
                 createPageSetDTO.setDashboardId(dashboardId);
             }
         }
@@ -146,7 +146,7 @@ public class PageSetServiceImpl implements PageSetService {
         }
 
         if (PageTypeSetEnum.isDashboardType(createPageSetDTO.getPageSetType())){
-            return pageSetDO.getDashboardId();
+            return String.valueOf(pageSetDO.getDashboardId());
         }
 
         // 创建空的表单设计页面和列表设计页面

@@ -37,5 +37,5 @@ public class CreatePageSetDTO {
     private String createDashboardType;
 
     @Schema(description = "数据大屏/模板id", requiredMode = Schema.RequiredMode.NOT_REQUIRED, example = "xxx")
-    private String dashboardId;
+    private Long dashboardId;
 }

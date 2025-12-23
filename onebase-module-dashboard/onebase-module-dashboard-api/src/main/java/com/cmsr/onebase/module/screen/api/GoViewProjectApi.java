@@ -12,11 +12,11 @@ import java.util.List;
 public interface GoViewProjectApi {
 
 
-    String createDashboard(GoViewProjectDTO goViewProjectDTO);
+    Long createDashboard(GoViewProjectDTO goViewProjectDTO);
 
-    List<GoViewProjectDTO> getDashboard(String dashboardId);
+    List<GoViewProjectDTO> getDashboard(Long dashboardId);
 
-    String createDashboardByTemplate(String templateId);
+    Long createDashboardByTemplate(Long templateId);
 
 
 }
