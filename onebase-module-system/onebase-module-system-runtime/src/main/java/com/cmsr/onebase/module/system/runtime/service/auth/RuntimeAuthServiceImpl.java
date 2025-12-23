@@ -344,11 +344,14 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
                 thirdAuthLoginRespVO.setUserUnRegistFlag(false);
                 thirdAuthLoginRespVO.setEmail(user.getEmail());
                 thirdAuthLoginRespVO.setNickName(user.getNickname());
+                thirdAuthLoginRespVO.setCorpId(user.getCorpId());
                 authLoginRespVO.set(thirdAuthLoginRespVO);
                 LogRecordContext.putVariable("user", user);
             }
         });
-        return authLoginRespVO.get();
+        ThirdAuthLoginRespVO authLogVO = authLoginRespVO.get();
+        authLogVO.setLoginSource(LoginSourceEnum.THIRDUSERLOGIN.getCode());
+        return authLogVO;
     }
 
     /**
