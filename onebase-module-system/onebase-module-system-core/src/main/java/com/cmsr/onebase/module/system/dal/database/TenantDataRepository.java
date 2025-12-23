@@ -3,7 +3,7 @@ package com.cmsr.onebase.module.system.dal.database;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.data.base.BaseDO;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
-import com.cmsr.onebase.module.system.dal.flex.base.BaseDataServiceImpl;
+import com.cmsr.onebase.framework.orm.repo.BaseDataRepository;
 import com.cmsr.onebase.module.system.dal.flex.mapper.SystemTenantMapper;
 import com.cmsr.onebase.module.system.enums.tenant.SortEnum;
 import com.cmsr.onebase.module.system.enums.tenant.TenantCodeEnum;
@@ -24,7 +24,7 @@ import static com.cmsr.onebase.module.system.dal.flex.table.SystemTenantTableDef
  * @date 2025-12-22
  */
 @Repository
-public class TenantDataRepository extends BaseDataServiceImpl<SystemTenantMapper, TenantDO> {
+public class TenantDataRepository extends BaseDataRepository<SystemTenantMapper, TenantDO> {
 
     /**
      * 根据租户名称查询租户

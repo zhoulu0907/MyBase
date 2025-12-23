@@ -6,7 +6,7 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.module.system.dal.dataobject.corp.CorpDO;
-import com.cmsr.onebase.module.system.dal.flex.base.BaseDataServiceImpl;
+import com.cmsr.onebase.framework.orm.repo.BaseDataRepository;
 import com.cmsr.onebase.module.system.dal.flex.mapper.SystemCorpMapper;
 import com.cmsr.onebase.module.system.vo.corp.CorpPageReqVO;
 import com.mybatisflex.core.paginate.Page;
@@ -30,7 +30,7 @@ import static com.cmsr.onebase.module.system.dal.flex.table.SystemCorpTableDef.S
  * @date 2025-12-22
  */
 @Repository
-public class CorpDataRepository extends BaseDataServiceImpl<SystemCorpMapper, CorpDO> {
+public class CorpDataRepository extends BaseDataRepository<SystemCorpMapper, CorpDO> {
 
     /**
      * 分页查询企业列表

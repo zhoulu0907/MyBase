@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.system.dal.database;
 
 import com.cmsr.onebase.module.system.dal.dataobject.permission.UserRoleDO;
-import com.cmsr.onebase.module.system.dal.flex.base.BaseDataServiceImpl;
+import com.cmsr.onebase.framework.orm.repo.BaseDataRepository;
 import com.cmsr.onebase.module.system.dal.flex.mapper.SystemUserRoleMapper;
 import org.springframework.stereotype.Repository;
 
@@ -19,7 +19,7 @@ import java.util.Set;
  * @date 2025-12-22
  */
 @Repository
-public class UserRoleDataRepository extends BaseDataServiceImpl<SystemUserRoleMapper, UserRoleDO> {
+public class UserRoleDataRepository extends BaseDataRepository<SystemUserRoleMapper, UserRoleDO> {
 
     /**
      * 根据用户ID查询用户角色关联
