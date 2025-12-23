@@ -81,10 +81,64 @@ java ... -jar ... \
 - **防抖设计**：智能合并短时间内的多次编译，避免重复重载。
 - **精确更新**：支持按类卸载和注册路由，最大程度保证运行时稳定性。
 
-### 3. 🐛 开箱即用的远程调试
+### 3. 🐛 远程调试配置
+
 启动脚本已默认配置 JVM 调试参数：
-`-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005`
-这意味着你可以随时连接调试，观察变量状态，排查疑难问题。
+```
+-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
+```
+
+#### IntelliJ IDEA 远程调试配置步骤
+
+**1. 创建 Remote JVM Debug 配置**
+   - 打开：`Run` → `Edit Configurations...`
+   - 点击 `+` → 选择 `Remote JVM Debug`
+
+**2. 配置参数**
+   ```
+   名称: Attach to Plugin Simulator (可自定义)
+   调试器模式: 附加到远程 JVM (Attach to remote JVM)
+   主机: localhost
+   端口: 5005
+   选择模块类路径: 你的插件模块名
+   ```
+
+**3. 关键配置说明**
+
+| 配置项 | 说明 |
+|--------|------|
+| **调试器模式** | 必须选择 **"附加到远程 JVM"**，因为模拟器作为服务器监听端口 |
+| **使用模块类路径** | **必须选择你的插件模块**（如 `plugin-demo-hello`），否则断点不会生效 |
+
+> **⚠️ 常见错误 1**：如果选择 `<无模块>` 或选择 `onebase-plugin-host-simulator` 模块，断点将无法触发！
+
+> **⚠️ 常见错误 2**：必须先启动模拟器后，再在 IDE 中启动配置好的调试！
+
+**4. 启动调试**
+   - 先启动 `start-dev.bat` (或 `.sh`)
+   - 在 IDE 中刚配置好的调试器上点击 Debug 按钮（绿色虫子图标）
+   - 确认 IDE 底部显示：`Connected to the target VM, address: 'localhost:5005'`
+
+**5. 设置断点**
+   - 在**插件项目**（如 `plugin-demo-hello`）的源码中打断点
+   - 在方法的**第一行代码**打断点（不是方法签名行）
+   - 发送 HTTP 请求触发断点
+
+#### 两种调试器模式的区别
+
+| 模式 | IDE 角色 | 适用场景 | 你的场景 |
+|------|----------|----------|----------|
+| **附加到远程 JVM** | 客户端（主动连接） | 应用已启动并监听调试端口 | ✅ **使用此模式** |
+| **侦听远程 JVM** | 服务器（被动等待） | IDE 先监听，应用启动时连接 | ❌ 不适用 |
+
+#### 调试验证
+```bash
+# 发送测试请求
+curl http://localhost:8080/plugin/hello-plugin/hello
+
+# 如果配置正确，IDE 会在断点处暂停
+# 你可以查看变量、单步执行、评估表达式等
+```
 
 ---
 
