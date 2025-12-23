@@ -404,7 +404,7 @@ public interface UserService {
     UserApplicationRespVO getThirdUserAndRelationApp(Long id);
 
     /**
-     * 获取第三方用户授权应用信息
+     *  确认用户信息，如果有修改就更新
      *
      * @param id
      * @return
