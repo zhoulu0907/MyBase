@@ -46,7 +46,12 @@ const AppSettingPage: FC = () => {
     { title: '导航设置', icon: navigatorSettingSVG, key: 'navigatorSetting' }
   ];
 
-  const [appData, setAppData] = useState<Application>();
+  const [appData, setAppData] = useState<Application>({
+    id: '',
+    appName: '',
+    appCode: '',
+    appStatus: 0
+  });
   const [navigatorData, setNavigatorData] = useState<any>();
   const [activeTab, setActiveTab] = useState('baseSetting');
   const [collapsed, setCollapsed] = useState<boolean>(false);
@@ -114,7 +119,7 @@ const AppSettingPage: FC = () => {
       try {
         if (error !== null) return;
         setSaveLoading(true);
-        const { appCode, appName, appMode, iconColor, iconName, description, tagIds, themeColor } = data;
+        const { appCode, appName, appMode, iconColor, iconName, description, tagIds, themeColor, publishModel } = data;
         const params: UpdateApplicationReq = {
           id: curAppId,
           appCode,
@@ -124,11 +129,14 @@ const AppSettingPage: FC = () => {
           iconColor,
           iconName,
           tagIds: tagIds?.map((t: Options) => t.value),
-          themeColor
+          themeColor,
+          publishModel
         };
         const res = await updateApplication(params);
         if (res) {
           Message.success('保存成功');
+          const newAppData = { ...appData, publishModel };
+          setAppData(newAppData);
           setCurAppInfo({
             ...curAppInfo,
             iconName: iconName || '',
