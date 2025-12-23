@@ -84,7 +84,6 @@ public class GoviewProjectController  extends BaseController {
     @PermitAll
 	@ApiSignIgnore
 	public AjaxResult add(@RequestBody GoviewProject goviewProject){
-		goviewProject.setCreateTime(DateUtil.now());
 		goviewProject.setState(-1);
 		boolean b=iGoviewProjectService.save(goviewProject);
 		if(b){
@@ -107,9 +106,8 @@ public class GoviewProjectController  extends BaseController {
 	@ResponseBody
 	@PermitAll
 	@ApiSignIgnore
-	public AjaxResult remove(String ids){
-		List<String> lista= ConvertUtil.toListStrArray(ids);
-		Boolean b=iGoviewProjectService.removeByIds(lista);
+	public AjaxResult remove(List<Long> ids){
+		Boolean b=iGoviewProjectService.removeByIds(ids);
 		if(b){
 			return success();
 		}else{

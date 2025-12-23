@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.dashboard.build.model;
 
+import com.cmsr.onebase.framework.orm.entity.BaseTenantEntity;
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Id;
 import com.mybatisflex.annotation.KeyType;
@@ -18,29 +19,17 @@ import java.io.Serializable;
  */
 @Table("dashboard_project")
 @Data
-public class GoviewProject implements Serializable {
-
-    private static final long serialVersionUID = 1L;
-
-    @Id(keyType = KeyType.Generator, value = "uuid")
-    private String id;
+public class GoviewProject extends BaseTenantEntity {
 
     private String projectName;
 
     private Integer state;
 
-    @Column(onInsertValue = "now()")
-    private String createTime;
-
     private String createUserId;
-
-    private Integer isDelete;
 
     private String indexImage;
 
     private String remarks;
-
-    private Long tenantId;
 
     private Long appId;
 

@@ -15,19 +15,17 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
 {
-  "id": "{{$uuid}}",
-  "projectName": "测试项目Gsp1",
+  "projectName": "测试项目Gsp123",
   "state": -1,
   "indexImage": "",
   "remarks": "",
-  "createTime": "new Date().getTime()",
-  "appId": 184716905786900480,
+  "appId": 184716905786900483,
   "tenantId": {{adminTenantId}}
 
 }
 
 ### 3. 删除项目
-POST {{baseUrl}}/dashboard/delete?ids=83348edd-f0cc-42a2-bab9-f29d257f1448
+POST {{baseUrl}}/dashboard/delete?ids=1234,12343333,111,1224456
 Content-Type: application/json
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
@@ -36,13 +34,15 @@ tenant-id: {{adminTenantId}}
 ### 4. 修改项目
 POST {{baseUrl}}/dashboard/edit
 Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
 
 {
-  "id": "{{projectId}}",
-  "projectName": "修改后的项目名称",
+  "id": 193876318706401280,
+  "projectName": "测试项目Gsp125",
   "state": 1,
   "indexImage": "image_url",
-  "remarks": "修改后的备注"
+  "remarks": "修改后的备注Gsp"
 }
 
 ### 5. 项目重命名
