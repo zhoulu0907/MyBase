@@ -21,7 +21,7 @@
 
 .inputDeptSelectPopupContainer {
   width: 100vw;
-  height: 100vh;
+  height: 100dvh;
   background-color: #fff;
   display: flex;
   flex-direction: column;
