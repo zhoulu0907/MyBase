@@ -22,7 +22,7 @@ public class FlowCodegenMain {
             "flow_connector_script",
             "flow_execution_log",
             "flow_node_category",
-            "flow_node_type",
+            "flow_node_config",
             "flow_process",
             "flow_process_date_field",
             "flow_process_time"

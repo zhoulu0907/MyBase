@@ -1,15 +1,14 @@
 package com.cmsr.onebase.module.system.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
-import com.cmsr.onebase.framework.common.pojo.PageResult;
 import cn.hutool.core.util.StrUtil;
-import com.cmsr.onebase.module.system.vo.license.LicensePageReqVO;
+import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.system.dal.dataobject.license.LicenseDO;
+import com.cmsr.onebase.module.system.dal.flex.base.BaseDataServiceImpl;
+import com.cmsr.onebase.module.system.dal.flex.mapper.SystemLicenseMapper;
 import com.cmsr.onebase.module.system.enums.license.LicenseStatusEnum;
-import org.anyline.data.param.ConfigStore;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.Compare;
-import org.anyline.entity.Order;
+import com.cmsr.onebase.module.system.vo.license.LicensePageReqVO;
+import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryWrapper;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -21,11 +20,7 @@ import java.util.List;
  * @date 2025-08-11
  */
 @Repository
-public class LicenseDataRepository extends DataRepository<LicenseDO> {
-
-    public LicenseDataRepository() {
-        super(LicenseDO.class);
-    }
+public class LicenseDataRepository extends BaseDataServiceImpl<SystemLicenseMapper, LicenseDO> {
 
     /**
      * 根据状态查找License
@@ -34,7 +29,7 @@ public class LicenseDataRepository extends DataRepository<LicenseDO> {
      * @return License详情
      */
     public LicenseDO findOneByStatus(String status) {
-        return findOne(new DefaultConfigStore().and(Compare.EQUAL, LicenseDO.STATUS, status));
+        return getOne(query().eq(LicenseDO.STATUS, status));
     }
 
     /**
@@ -44,30 +39,17 @@ public class LicenseDataRepository extends DataRepository<LicenseDO> {
      * @return 分页结果
      */
     public PageResult<LicenseDO> findPage(LicensePageReqVO reqVO) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
+        QueryWrapper queryWrapper = query()
+                .like(LicenseDO.ENTERPRISE_NAME, reqVO.getEnterpriseName(), StrUtil.isNotBlank(reqVO.getEnterpriseName()))
+                .eq(LicenseDO.ENTERPRISE_CODE, reqVO.getEnterpriseCode(), StrUtil.isNotBlank(reqVO.getEnterpriseCode()))
+                .eq(LicenseDO.PLATFORM_TYPE, reqVO.getPlatformType(), StrUtil.isNotBlank(reqVO.getPlatformType()))
+                .eq(LicenseDO.STATUS, reqVO.getStatus(), StrUtil.isNotBlank(reqVO.getStatus()))
+                .ge(LicenseDO.EXPIRE_TIME, reqVO.getExpireTimeFrom(), reqVO.getExpireTimeFrom() != null)
+                .le(LicenseDO.EXPIRE_TIME, reqVO.getExpireTimeTo(), reqVO.getExpireTimeTo() != null)
+                .orderBy(LicenseDO.STATUS, false);
 
-        if (StrUtil.isNotBlank(reqVO.getEnterpriseName())) {
-            configStore.and(Compare.LIKE, LicenseDO.ENTERPRISE_NAME, reqVO.getEnterpriseName());
-        }
-        if (StrUtil.isNotBlank(reqVO.getEnterpriseCode())) {
-            configStore.and(Compare.EQUAL, LicenseDO.ENTERPRISE_CODE, reqVO.getEnterpriseCode());
-        }
-        if (StrUtil.isNotBlank(reqVO.getPlatformType())) {
-            configStore.and(Compare.EQUAL, LicenseDO.PLATFORM_TYPE, reqVO.getPlatformType());
-        }
-        if (StrUtil.isNotBlank(reqVO.getStatus())) {
-            configStore.and(Compare.EQUAL, LicenseDO.STATUS, reqVO.getStatus());
-        }
-        if (reqVO.getExpireTimeFrom() != null) {
-            configStore.and(Compare.GREAT_EQUAL, LicenseDO.EXPIRE_TIME, reqVO.getExpireTimeFrom());
-        }
-        if (reqVO.getExpireTimeTo() != null) {
-            configStore.and(Compare.LESS_EQUAL, LicenseDO.EXPIRE_TIME, reqVO.getExpireTimeTo());
-        }
-
-        configStore.order(LicenseDO.STATUS, "desc");
-
-        return findPageWithConditions(configStore, reqVO.getPageNo(), reqVO.getPageSize());
+        Page<LicenseDO> pageResult = page(Page.of(reqVO.getPageNo(), reqVO.getPageSize()), queryWrapper);
+        return new PageResult<>(pageResult.getRecords(), pageResult.getTotalRow());
     }
 
     /**
@@ -75,8 +57,8 @@ public class LicenseDataRepository extends DataRepository<LicenseDO> {
      *
      * @return License列表
      */
-    public java.util.List<LicenseDO> findSimpleList() {
-        return findAllByConfig(new DefaultConfigStore());
+    public List<LicenseDO> findSimpleList() {
+        return list(query());
     }
 
     /**
@@ -85,9 +67,8 @@ public class LicenseDataRepository extends DataRepository<LicenseDO> {
      * @return License列表
      */
     public List<LicenseDO> findActiveLicenseList() {
-        ConfigStore config = new DefaultConfigStore()
-                .and(Compare.EQUAL, LicenseDO.STATUS, LicenseStatusEnum.ENABLE.getStatus())
-                .order(LicenseDO.CREATE_TIME, Order.TYPE.DESC);
-        return findAllByConfig(config);
+        return list(query()
+                .eq(LicenseDO.STATUS, LicenseStatusEnum.ENABLE.getStatus())
+                .orderBy(LicenseDO.CREATE_TIME, false));
     }
 }

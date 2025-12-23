@@ -1,26 +1,25 @@
 package com.cmsr.onebase.module.system.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleMenuDO;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.Compare;
+import com.cmsr.onebase.module.system.dal.flex.base.BaseDataServiceImpl;
+import com.cmsr.onebase.module.system.dal.flex.mapper.SystemRoleMenuMapper;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+
+import static com.cmsr.onebase.module.system.dal.dataobject.permission.RoleMenuDO.MENU_ID;
+import static com.cmsr.onebase.module.system.dal.dataobject.permission.RoleMenuDO.ROLE_ID;
 
 /**
  * 角色菜单权限数据访问层
  *
  * @author matianyu
- * @date 2025-08-11
+ * @date 2025-12-22
  */
 @Repository
-public class PermissionDataRepository extends DataRepository<RoleMenuDO> {
-
-    public PermissionDataRepository() {
-        super(RoleMenuDO.class);
-    }
+public class PermissionDataRepository extends BaseDataServiceImpl<SystemRoleMenuMapper, RoleMenuDO> {
 
     /**
      * 根据角色ID查询角色菜单列表
@@ -29,7 +28,10 @@ public class PermissionDataRepository extends DataRepository<RoleMenuDO> {
      * @return 角色菜单列表
      */
     public List<RoleMenuDO> findRoleMenuListByRoleId(Long roleId) {
-        return findAllByConfig(new DefaultConfigStore().and(Compare.EQUAL, RoleMenuDO.ROLE_ID, roleId));
+        if (roleId == null) {
+            return Collections.emptyList();
+        }
+        return list(query().eq(ROLE_ID, roleId));
     }
 
     /**
@@ -39,7 +41,10 @@ public class PermissionDataRepository extends DataRepository<RoleMenuDO> {
      * @return 角色菜单列表
      */
     public List<RoleMenuDO> findRoleMenuListByRoleIds(Collection<Long> roleIds) {
-        return findAllByConfig(new DefaultConfigStore().and(Compare.IN, RoleMenuDO.ROLE_ID, roleIds));
+        if (roleIds == null || roleIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return list(query().in(ROLE_ID, roleIds));
     }
 
     /**
@@ -49,7 +54,10 @@ public class PermissionDataRepository extends DataRepository<RoleMenuDO> {
      * @return 角色菜单列表
      */
     public List<RoleMenuDO> findRoleMenuListByMenuId(Long menuId) {
-        return findAllByConfig(new DefaultConfigStore().and(Compare.EQUAL, RoleMenuDO.MENU_ID, menuId));
+        if (menuId == null) {
+            return Collections.emptyList();
+        }
+        return list(query().eq(MENU_ID, menuId));
     }
 
     /**
@@ -59,7 +67,10 @@ public class PermissionDataRepository extends DataRepository<RoleMenuDO> {
      * @return 删除数量
      */
     public long deleteRoleMenuByRoleId(Long roleId) {
-        return deleteByConfig(new DefaultConfigStore().and(Compare.EQUAL, RoleMenuDO.ROLE_ID, roleId));
+        if (roleId == null) {
+            return 0L;
+        }
+        return mapper.deleteByQuery(query().eq(ROLE_ID, roleId));
     }
 
     /**
@@ -69,6 +80,9 @@ public class PermissionDataRepository extends DataRepository<RoleMenuDO> {
      * @return 删除数量
      */
     public long deleteRoleMenuByMenuId(Long menuId) {
-        return deleteByConfig(new DefaultConfigStore().and(Compare.EQUAL, RoleMenuDO.MENU_ID, menuId));
+        if (menuId == null) {
+            return 0L;
+        }
+        return mapper.deleteByQuery(query().eq(MENU_ID, menuId));
     }
 }

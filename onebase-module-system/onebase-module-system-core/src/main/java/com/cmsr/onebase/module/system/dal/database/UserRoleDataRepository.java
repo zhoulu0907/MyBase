@@ -1,31 +1,25 @@
 package com.cmsr.onebase.module.system.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.UserRoleDO;
-import org.anyline.data.param.init.DefaultConfigStore;
+import com.cmsr.onebase.module.system.dal.flex.base.BaseDataServiceImpl;
+import com.cmsr.onebase.module.system.dal.flex.mapper.SystemUserRoleMapper;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
 /**
  * 用户角色关联数据访问层
- *
- * 负责用户角色关联相关的数据操作，继承DataRepositoryNew，提供标准CRUD能力。
+ * <p>
+ * 基于 MyBatis-Flex 实现用户角色关联相关的 CRUD 及常用查询能力。
  *
  * @author matianyu
- * @date 2025-08-18
+ * @date 2025-12-22
  */
 @Repository
-public class UserRoleDataRepository extends DataRepository<UserRoleDO> {
-
-    /**
-     * 构造方法，指定默认实体类
-     */
-    public UserRoleDataRepository() {
-        super(UserRoleDO.class);
-    }
+public class UserRoleDataRepository extends BaseDataServiceImpl<SystemUserRoleMapper, UserRoleDO> {
 
     /**
      * 根据用户ID查询用户角色关联
@@ -34,9 +28,10 @@ public class UserRoleDataRepository extends DataRepository<UserRoleDO> {
      * @return 用户角色关联列表
      */
     public List<UserRoleDO> findListByUserId(Long userId) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.eq(UserRoleDO.USER_ID, userId);
-        return findAllByConfig(configStore);
+        if (userId == null) {
+            return Collections.emptyList();
+        }
+        return list(query().eq(UserRoleDO.USER_ID, userId));
     }
 
     /**
@@ -46,9 +41,10 @@ public class UserRoleDataRepository extends DataRepository<UserRoleDO> {
      * @return 用户角色关联列表
      */
     public List<UserRoleDO> findListByRoleIds(Long roleId) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.eq(UserRoleDO.ROLE_ID, roleId);
-        return findAllByConfig(configStore);
+        if (roleId == null) {
+            return Collections.emptyList();
+        }
+        return list(query().eq(UserRoleDO.ROLE_ID, roleId));
     }
 
     /**
@@ -58,8 +54,10 @@ public class UserRoleDataRepository extends DataRepository<UserRoleDO> {
      * @return 用户角色关联列表
      */
     public List<UserRoleDO> findListByRoleIds(Collection<Long> roleIds) {
-        return findAllByConfig(new DefaultConfigStore()
-                .in(UserRoleDO.ROLE_ID, roleIds));
+        if (roleIds == null || roleIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return list(query().in(UserRoleDO.ROLE_ID, roleIds));
     }
 
     /**
@@ -70,9 +68,10 @@ public class UserRoleDataRepository extends DataRepository<UserRoleDO> {
      * @return 用户角色关联对象
      */
     public UserRoleDO findByUserIdAndRoleId(Long userId, Long roleId) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.eq(UserRoleDO.USER_ID, userId).eq(UserRoleDO.ROLE_ID, roleId);
-        return findOne(configStore);
+        if (userId == null || roleId == null) {
+            return null;
+        }
+        return getOne(query().eq(UserRoleDO.USER_ID, userId).eq(UserRoleDO.ROLE_ID, roleId));
     }
 
     /**
@@ -81,9 +80,10 @@ public class UserRoleDataRepository extends DataRepository<UserRoleDO> {
      * @param userId 用户ID
      */
     public void deleteByUserId(Long userId) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.eq(UserRoleDO.USER_ID, userId);
-        deleteByConfig(configStore);
+        if (userId == null) {
+            return;
+        }
+        remove(query().eq(UserRoleDO.USER_ID, userId));
     }
 
     /**
@@ -93,51 +93,94 @@ public class UserRoleDataRepository extends DataRepository<UserRoleDO> {
      * @param userIds 用户ID列表
      */
     public void deleteByRoleIdAndUserIds(Long roleId, Collection<Long> userIds) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.eq(UserRoleDO.ROLE_ID, roleId).in(UserRoleDO.USER_ID, userIds);
-        deleteByConfig(configStore);
-    }
-
-    public long deleteByUserIdAndRoleIds(Long userId, Collection<Long> roleIds) {
-        return deleteByConfig(new DefaultConfigStore()
-                .eq(UserRoleDO.USER_ID, userId).in(UserRoleDO.ROLE_ID, roleIds));
-    }
-
-
-    public long deleteByRoleId(Long roleId) {
-        return deleteByConfig(new DefaultConfigStore()
-                .eq(UserRoleDO.ROLE_ID, roleId));
-    }
-
-    public long deleteByRoleIdAndUserIds(Long roleId, Set<Long> userIds) {
-        return deleteByConfig(new DefaultConfigStore()
-                .eq(UserRoleDO.ROLE_ID, roleId).in(UserRoleDO.USER_ID, userIds));
+        if (roleId == null || userIds == null || userIds.isEmpty()) {
+            return;
+        }
+        remove(query().eq(UserRoleDO.ROLE_ID, roleId).in(UserRoleDO.USER_ID, userIds));
     }
 
     /**
-     *  configStore.eq(UserRoleDO.TENANT_ID,tenantId); 
-     *  通过id，查询租户信息，前面忽略掉了切面的租户
-     * @param roleId
-     * @param tenantId
-     * @return
+     * 根据用户ID和角色ID列表删除用户角色关联
+     *
+     * @param userId 用户ID
+     * @param roleIds 角色ID列表
+     * @return 删除的行数
      */
-    public List<UserRoleDO> getUserRoleByRoleIdAndTenantId(Long roleId,Long tenantId) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.eq(UserRoleDO.ROLE_ID, roleId);
-        configStore.eq(UserRoleDO.TENANT_ID,tenantId);
-        return findAllByConfig(configStore);
+    public boolean deleteByUserIdAndRoleIds(Long userId, Collection<Long> roleIds) {
+        if (userId == null || roleIds == null || roleIds.isEmpty()) {
+            return false;
+        }
+        return remove(query().eq(UserRoleDO.USER_ID, userId).in(UserRoleDO.ROLE_ID, roleIds));
     }
 
+    /**
+     * 根据角色ID删除用户角色关联
+     *
+     * @param roleId 角色ID
+     * @return 删除的行数
+     */
+    public boolean deleteByRoleId(Long roleId) {
+        if (roleId == null) {
+            return false;
+        }
+        return remove(query().eq(UserRoleDO.ROLE_ID, roleId));
+    }
+
+    /**
+     * 根据角色ID和用户ID集合删除用户角色关联
+     *
+     * @param roleId 角色ID
+     * @param userIds 用户ID集合
+     * @return 删除的行数
+     */
+    public boolean deleteByRoleIdAndUserIds(Long roleId, Set<Long> userIds) {
+        if (roleId == null || userIds == null || userIds.isEmpty()) {
+            return false;
+        }
+        return remove(query().eq(UserRoleDO.ROLE_ID, roleId).in(UserRoleDO.USER_ID, userIds));
+    }
+
+    /**
+     * 通过角色ID和租户ID查询用户角色关联
+     * <p>
+     * 用于在忽略租户切面的场景下，通过 tenantId 精确查询。
+     *
+     * @param roleId 角色ID
+     * @param tenantId 租户ID
+     * @return 用户角色关联列表
+     */
+    public List<UserRoleDO> getUserRoleByRoleIdAndTenantId(Long roleId, Long tenantId) {
+        if (roleId == null || tenantId == null) {
+            return Collections.emptyList();
+        }
+        return list(query().eq(UserRoleDO.ROLE_ID, roleId).eq(UserRoleDO.TENANT_ID, tenantId));
+    }
+
+    /**
+     * 根据角色ID和用户ID查询是否存在对应关联
+     *
+     * @param roleId 角色ID
+     * @param userId 用户ID
+     * @return 用户角色关联列表
+     */
     public List<UserRoleDO> findAdminByRoleIdAndUserId(Long roleId, Long userId) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.eq(UserRoleDO.ROLE_ID, roleId);
-        configStore.eq(UserRoleDO.USER_ID, userId);
-        return findAllByConfig(configStore);
+        if (roleId == null || userId == null) {
+            return Collections.emptyList();
+        }
+        return list(query().eq(UserRoleDO.ROLE_ID, roleId).eq(UserRoleDO.USER_ID, userId));
     }
 
+    /**
+     * 根据用户ID列表查询用户角色关联
+     *
+     * @param userIds 用户ID列表
+     * @return 用户角色关联列表
+     */
     public List<UserRoleDO> getRoleByUserIds(List<Long> userIds) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.eq(UserRoleDO.USER_ID, userIds);
-        return findAllByConfig(configStore);
+        if (userIds == null || userIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return list(query().in(UserRoleDO.USER_ID, userIds));
     }
 }
+

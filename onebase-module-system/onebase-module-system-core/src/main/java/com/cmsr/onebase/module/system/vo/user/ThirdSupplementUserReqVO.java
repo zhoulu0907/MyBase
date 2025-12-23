@@ -14,6 +14,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ThirdSupplementUserReqVO {
 
+    @Schema(description = "设备Id", example = "a@b.cn")
+    private String deviceId;
+
     @Schema(description = "应用ID")
     private Long appId;
 

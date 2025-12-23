@@ -15,8 +15,9 @@ import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.security.config.SecurityProperties;
-import com.cmsr.onebase.module.infra.dal.database.FileDataRepository;
-import com.cmsr.onebase.module.infra.dal.dataobject.file.FileDO;
+import com.cmsr.onebase.module.infra.dal.database.FileDataRepositoryOld;
+import com.cmsr.onebase.module.infra.dal.dataflex.FileDataRepository;
+import com.cmsr.onebase.module.infra.dal.dataflexdo.file.FileDO;
 import com.cmsr.onebase.module.infra.dal.vo.file.file.FileCreateReqVO;
 import com.cmsr.onebase.module.infra.dal.vo.file.file.FilePageReqVO;
 import com.cmsr.onebase.module.infra.dal.vo.file.file.FilePresignedUrlRespVO;
@@ -153,12 +154,13 @@ public class FileServiceImpl implements FileService {
         if (loginUser != null){
             runMode = loginUser.getRunMode();
         }
-        FileDO fileDO = fileDataRepository.insert(new FileDO().setConfigId(client.getId())
+        FileDO fileDO = new FileDO().setConfigId(client.getId())
                 .setName(name).setPath(path).setUrl(url)
                 .setType(type).setSize(content.length)
                 .setMd5(md5)
                 .setVisitMode(visitMode)
-                .setRunMode(runMode));
+                .setRunMode(runMode);
+        fileDataRepository.save(fileDO);
         return fileDO.getId().toString();
     }
 
@@ -391,7 +393,7 @@ public class FileServiceImpl implements FileService {
     @Override
     public Long createFile(FileCreateReqVO createReqVO) {
         FileDO file = BeanUtils.toBean(createReqVO, FileDO.class);
-        fileDataRepository.insert(file);
+        fileDataRepository.save(file);
         return file.getId();
     }
 
@@ -406,11 +408,11 @@ public class FileServiceImpl implements FileService {
         client.delete(file.getPath());
 
         // 删除记录
-        fileDataRepository.deleteById(id);
+        fileDataRepository.removeById(id);
     }
 
     private FileDO validateFileExists(Long id) {
-        FileDO fileDO = fileDataRepository.findById(id);
+        FileDO fileDO = fileDataRepository.getById(id);
         if (fileDO == null) {
             throw exception(FILE_NOT_EXISTS);
         }
@@ -427,7 +429,7 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public List<FileDO> getFileListByIds(Collection<Long> ids) {
-        return fileDataRepository.findAllByIds(ids);
+        return fileDataRepository.listByIds(ids);
     }
 
     @Override

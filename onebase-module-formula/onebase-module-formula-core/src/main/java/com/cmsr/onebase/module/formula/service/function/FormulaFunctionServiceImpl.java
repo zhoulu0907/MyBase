@@ -6,8 +6,9 @@ import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.enums.FunctionTypeEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.formula.dal.database.FunctionDataRepository;
-import com.cmsr.onebase.module.formula.dal.dataobject.FunctionDO;
+import com.cmsr.onebase.framework.data.base.BaseDO;
+import com.cmsr.onebase.module.formula.dal.dataflex.FunctionDataRepository;
+import com.cmsr.onebase.module.formula.dal.dataflexdo.FunctionDO;
 import com.cmsr.onebase.module.formula.vo.function.FunctionGroupRespVo;
 import com.cmsr.onebase.module.formula.vo.function.FunctionInsertReqVO;
 import com.cmsr.onebase.module.formula.vo.function.FunctionListReqVO;
@@ -15,11 +16,11 @@ import com.cmsr.onebase.module.formula.vo.function.FunctionPageReqVO;
 import com.cmsr.onebase.module.formula.vo.function.FunctionRespVO;
 import com.cmsr.onebase.module.formula.vo.function.FunctionUpdateReqVO;
 import com.google.common.annotations.VisibleForTesting;
+import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.DefaultPageNavi;
-import org.anyline.entity.PageNavi;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
@@ -41,7 +42,7 @@ import static com.cmsr.onebase.module.formula.enums.ErrorCodeConstants.*;
 public class FormulaFunctionServiceImpl implements FormulaFunctionService {
 
     @Resource
-    private FunctionDataRepository  functionDataRepository;
+    private FunctionDataRepository functionDataRepository;
 
     @Override
     public Long createFunction(FunctionInsertReqVO createReqVO) {
@@ -50,8 +51,7 @@ public class FormulaFunctionServiceImpl implements FormulaFunctionService {
 
         // 插入函数
         FunctionDO function = BeanUtils.toBean(createReqVO, FunctionDO.class);
-        functionDataRepository.insert(function);
-
+        functionDataRepository.save(function);
         return function.getId();
     }
 
@@ -64,7 +64,7 @@ public class FormulaFunctionServiceImpl implements FormulaFunctionService {
 
         // 更新函数
         FunctionDO updateObj = BeanUtils.toBean(updateReqVO, FunctionDO.class);
-        functionDataRepository.updateStrict(updateObj);
+        functionDataRepository.updateById(updateObj);
     }
 
     @Override
@@ -72,12 +72,13 @@ public class FormulaFunctionServiceImpl implements FormulaFunctionService {
         // 校验是否存在
         validateFunctionExists(id);
         // 删除函数
-        functionDataRepository.deleteById(id);
+        functionDataRepository.removeById(id);
     }
 
     @Override
     public FunctionDO getFunction(Long id) {
-        return functionDataRepository.findById(id);
+        FunctionDO functionDO = functionDataRepository.getById(id);
+        return functionDO;
     }
 
     @Override
@@ -85,17 +86,48 @@ public class FormulaFunctionServiceImpl implements FormulaFunctionService {
         if (CollUtil.isEmpty(ids)) {
             return Collections.emptyList();
         }
-        return functionDataRepository.findAllByIds(new ArrayList<>(ids));
+        return functionDataRepository.listByIds(ids);
     }
 
     @Override
     public List<FunctionDO> getFunctionList(FunctionListReqVO reqVO) {
-        return functionDataRepository.findAllByConditions(reqVO.getType(), reqVO.getName(), reqVO.getStatus());
+        QueryWrapper queryWrapper = new QueryWrapper();
+
+        // 构建查询条件
+        if (StringUtils.isNotBlank(reqVO.getType())) {
+            queryWrapper.eq(FunctionDO.FIELD_TYPE, reqVO.getType());
+        }
+        if (StringUtils.isNotBlank(reqVO.getName())) {
+            queryWrapper.like(FunctionDO.FIELD_NAME, reqVO.getName());
+        }
+        if (reqVO.getStatus() != null) {
+            queryWrapper.eq(FunctionDO.FIELD_STATUS, reqVO.getStatus());
+        }
+
+        // 按创建时间降序排序
+        queryWrapper.orderBy("CREATE_TIME", false);
+
+        return functionDataRepository.list(queryWrapper);
     }
 
     @Override
     public List<FunctionGroupRespVo> getFunctionListGroupByType(FunctionListReqVO reqVO) {
-        List<FunctionDO> functionDOList = functionDataRepository.findAllByConditions(reqVO.getType(), reqVO.getName(), reqVO.getStatus());
+        // List<FunctionDO> functionDOList = functionDataRepository.findAllByConditions(reqVO.getType(), reqVO.getName(), reqVO.getStatus());
+        QueryWrapper queryWrapper = new QueryWrapper();
+
+        // 构建查询条件
+        if (StringUtils.isNotBlank(reqVO.getType())) {
+            queryWrapper.eq(FunctionDO.FIELD_TYPE, reqVO.getType());
+        }
+        if (StringUtils.isNotBlank(reqVO.getName())) {
+            queryWrapper.eq(FunctionDO.FIELD_NAME, reqVO.getName());
+        }
+        if (reqVO.getStatus() != null) {
+            queryWrapper.eq(FunctionDO.FIELD_STATUS, reqVO.getStatus());
+        }
+
+        List<FunctionDO> functionDOList = functionDataRepository.list(queryWrapper);
+
         // 按照类型分组
         Map<String, List<FunctionDO>> groupedFunctions = functionDOList.stream()
                 .collect(Collectors.groupingBy(FunctionDO::getType));
@@ -127,25 +159,9 @@ public class FormulaFunctionServiceImpl implements FormulaFunctionService {
 
     @Override
     public PageResult<FunctionDO> getFunctionPage(FunctionPageReqVO reqVO) {
-        DefaultConfigStore configs = new DefaultConfigStore();
 
-        // 构建查询条件
-        if (reqVO.getType() != null) {
-            configs.and(org.anyline.entity.Compare.EQUAL, FunctionDO.FIELD_TYPE, reqVO.getType());
-        }
-        if (reqVO.getName() != null) {
-            configs.and(org.anyline.entity.Compare.LIKE, FunctionDO.FIELD_NAME, reqVO.getName());
-        }
-        if (reqVO.getStatus() != null) {
-            configs.and(org.anyline.entity.Compare.EQUAL, FunctionDO.FIELD_STATUS, reqVO.getStatus());
-        }
-
-        // 设置分页参数
-        PageNavi page = new DefaultPageNavi(reqVO.getPageNo(), reqVO.getPageSize());
-        configs.setPageNavi(page);
-        configs.order(FunctionDO.CREATE_TIME, org.anyline.entity.Order.TYPE.DESC);
-
-        return functionDataRepository.findPageWithConditions(configs, reqVO.getPageNo(), reqVO.getPageSize());
+        return functionDataRepository.findPageWithConditions(reqVO.getPageNo(),reqVO.getPageSize(), reqVO.getName(),
+                reqVO.getType(), reqVO.getStatus());
     }
 
     @Override
@@ -172,7 +188,7 @@ public class FormulaFunctionServiceImpl implements FormulaFunctionService {
         if (id == null) {
             return;
         }
-        FunctionDO function = functionDataRepository.findById(id);
+        FunctionDO function = functionDataRepository.getById(id);
         if (function == null) {
             throw exception(FUNCTION_NOT_EXISTS);
         }
@@ -180,7 +196,7 @@ public class FormulaFunctionServiceImpl implements FormulaFunctionService {
 
     @VisibleForTesting
     void validateFunctionNameUnique(Long id, String name) {
-        FunctionDO function = functionDataRepository.findOneByName(name);
+        FunctionDO function = functionDataRepository.getOne(new QueryWrapper().eq(FunctionDO.FIELD_NAME, name));
         if (function == null) {
             return;
         }

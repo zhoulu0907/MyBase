@@ -1,17 +1,12 @@
 package com.cmsr.onebase.module.infra.service.security;
 
-import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static com.cmsr.onebase.module.infra.dal.redis.RedisKeyConstants.REDIS_KEY_FAIL_COUNT;
-import static com.cmsr.onebase.module.infra.dal.redis.RedisKeyConstants.REDIS_KEY_FAIL_SHARED_LOCK;
-import static com.cmsr.onebase.module.infra.dal.redis.RedisKeyConstants.REDIS_KEY_LOCK;
-
-import com.cmsr.onebase.module.infra.dal.database.SecurityRecordDataRepository;
-import com.cmsr.onebase.module.infra.service.security.dto.LoginFailureResult;
-import com.cmsr.onebase.module.infra.dal.dataobject.security.SecurityRecordDO;
+import com.cmsr.onebase.module.infra.dal.dataflex.SecurityRecordDataRepository;
+import com.cmsr.onebase.module.infra.dal.dataflexdo.ssecurity.SecurityRecordDO;
 import com.cmsr.onebase.module.infra.dal.vo.security.SecurityConfigItemRespVO;
+import com.cmsr.onebase.module.infra.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.infra.enums.security.SecurityConfigKey;
 import com.cmsr.onebase.module.infra.enums.security.SecurityRecordTypeEnum;
-import com.cmsr.onebase.module.infra.enums.ErrorCodeConstants;
+import com.cmsr.onebase.module.infra.service.security.dto.LoginFailureResult;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -21,6 +16,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
+import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static com.cmsr.onebase.module.infra.dal.redis.RedisKeyConstants.*;
 
 /**
  * 防暴力破解服务实现类
@@ -237,14 +235,13 @@ public class AntiBruteForceServiceImpl implements AntiBruteForceService {
      * @param lockDuration 锁定时长（分钟）
      */
     private void saveLockRecord(Long tenantId, Long userId, int lockDuration) {
-        SecurityRecordDO record = SecurityRecordDO.builder()
-                .tenantId(tenantId)
-                .userId(userId)
-                .recordType(SecurityRecordTypeEnum.LOGIN_LOCKED.getCode())
-                .recordValue(String.valueOf(lockDuration))
-                .build();
+        SecurityRecordDO record = new SecurityRecordDO();
+        record.setTenantId(tenantId);
+        record.setUserId(userId);
+        record.setRecordType(SecurityRecordTypeEnum.LOGIN_LOCKED.getCode());
+        record.setRecordValue(String.valueOf(lockDuration));
 
-        securityRecordDataRepository.insert(record);
+        securityRecordDataRepository.save(record);
         log.debug("已保存锁定记录到数据库，tenantId: {}, userId: {}", tenantId, userId);
     }
 
@@ -260,14 +257,13 @@ public class AntiBruteForceServiceImpl implements AntiBruteForceService {
      */
     @SuppressWarnings("unused")
     private void saveUnlockRecord(Long tenantId, Long userId, String unlockMethod) {
-        SecurityRecordDO record = SecurityRecordDO.builder()
-                .tenantId(tenantId)
-                .userId(userId)
-                .recordType(SecurityRecordTypeEnum.LOGIN_UNLOCKED.getCode())
-                .recordValue(unlockMethod)
-                .build();
+        SecurityRecordDO record = new SecurityRecordDO();
+        record.setTenantId(tenantId);
+        record.setUserId(userId);
+        record.setRecordType(SecurityRecordTypeEnum.LOGIN_UNLOCKED.getCode());
+        record.setRecordValue(unlockMethod);
 
-        securityRecordDataRepository.insert(record);
+        securityRecordDataRepository.save(record);
         log.debug("已保存解锁记录到数据库，tenantId: {}, userId: {}, 解锁方式: {}", tenantId, userId, unlockMethod);
     }
 

@@ -1,29 +1,33 @@
 package com.cmsr.onebase.module.system.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
-import com.cmsr.onebase.module.system.vo.menu.SystemMenuListReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.MenuDO;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.Compare;
+import com.cmsr.onebase.module.system.dal.flex.base.BaseDataServiceImpl;
+import com.cmsr.onebase.module.system.dal.flex.mapper.SystemMenuMapper;
+import com.cmsr.onebase.module.system.vo.menu.SystemMenuListReqVO;
 import org.apache.commons.lang3.StringUtils;
+import org.anyline.data.param.ConfigStore;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+
+import static com.cmsr.onebase.module.system.dal.dataobject.permission.MenuDO.COMPONENT_NAME;
+import static com.cmsr.onebase.module.system.dal.dataobject.permission.MenuDO.NAME;
+import static com.cmsr.onebase.module.system.dal.dataobject.permission.MenuDO.PARENT_ID;
+import static com.cmsr.onebase.module.system.dal.dataobject.permission.MenuDO.PERMISSION;
+import static com.cmsr.onebase.module.system.dal.dataobject.permission.MenuDO.STATUS;
 
 /**
  * 菜单数据访问层
  *
  * @author matianyu
- * @date 2025-08-11
+ * @date 2025-12-22
  */
 @Repository
-public class MenuDataRepository extends DataRepository<MenuDO> {
-
-    public MenuDataRepository() {
-        super(MenuDO.class);
-    }
+public class MenuDataRepository extends BaseDataServiceImpl<SystemMenuMapper, MenuDO> {
 
     /**
      * 根据父菜单ID统计子菜单数量
@@ -32,8 +36,11 @@ public class MenuDataRepository extends DataRepository<MenuDO> {
      * @return 子菜单数量
      */
     public int countByParentId(Long parentId) {
-        List<MenuDO> menuDOS = findAllByConfig(new DefaultConfigStore().and(Compare.EQUAL, "parent_id", parentId));
-        return menuDOS.size();
+        if (parentId == null) {
+            return 0;
+        }
+        long count = count(query().eq(PARENT_ID, parentId));
+        return (int) count;
     }
 
     /**
@@ -44,9 +51,10 @@ public class MenuDataRepository extends DataRepository<MenuDO> {
      * @return 菜单对象
      */
     public MenuDO findOneByParentIdAndName(Long parentId, String name) {
-        return findOne(new DefaultConfigStore()
-                .and(Compare.EQUAL, "parent_id", parentId)
-                .and(Compare.EQUAL, "name", name));
+        if (parentId == null || StringUtils.isBlank(name)) {
+            return null;
+        }
+        return getOne(query().eq(PARENT_ID, parentId).eq(NAME, name));
     }
 
     /**
@@ -56,7 +64,10 @@ public class MenuDataRepository extends DataRepository<MenuDO> {
      * @return 菜单对象
      */
     public MenuDO findOneByComponentName(String componentName) {
-        return findOne(new DefaultConfigStore().and(Compare.EQUAL, "component_name", componentName));
+        if (StringUtils.isBlank(componentName)) {
+            return null;
+        }
+        return getOne(query().eq(COMPONENT_NAME, componentName));
     }
 
     /**
@@ -66,7 +77,10 @@ public class MenuDataRepository extends DataRepository<MenuDO> {
      * @return 菜单列表
      */
     public List<MenuDO> findListByPermission(String permission) {
-        return findAllByConfig(new DefaultConfigStore().and(Compare.EQUAL, "permission", permission));
+        if (StringUtils.isBlank(permission)) {
+            return Collections.emptyList();
+        }
+        return list(query().eq(PERMISSION, permission));
     }
 
     /**
@@ -76,31 +90,48 @@ public class MenuDataRepository extends DataRepository<MenuDO> {
      * @return 菜单列表
      */
     public List<MenuDO> findList(SystemMenuListReqVO reqVO) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-
-        if (StringUtils.isNotBlank(reqVO.getName())) {
-            configStore.like(MenuDO.NAME, reqVO.getName());
+        if (reqVO == null) {
+            return Collections.emptyList();
         }
-        if (StringUtils.isNotBlank(reqVO.getCode())) {
-            configStore.startWith(MenuDO.PERMISSION, reqVO.getCode());
-        }
-        if (reqVO.getStatus() != null) {
-            configStore.eq(MenuDO.STATUS, reqVO.getStatus());
-        }
-
-        return findAllByConfig(configStore);
+        return list(query()
+                .like(NAME, reqVO.getName(), StringUtils.isNotBlank(reqVO.getName()))
+                .likeLeft(PERMISSION, reqVO.getCode(), StringUtils.isNotBlank(reqVO.getCode()))
+                .eq(STATUS, reqVO.getStatus(), reqVO.getStatus() != null));
     }
 
     /**
-     * 根据code查询菜单列表
+     * 根据 code 查询启用的菜单列表
      *
      * @param codes 查询条件
      * @return 菜单列表
      */
     public List<MenuDO> findAllEnableByCodes(Set<String> codes) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.in(MenuDO.PERMISSION, codes);
-        configStore.eq(MenuDO.STATUS, CommonStatusEnum.ENABLE.getStatus());
-        return findAllByConfig(configStore);
+        if (codes == null || codes.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return list(query()
+                .in(PERMISSION, codes)
+                .eq(STATUS, CommonStatusEnum.ENABLE.getStatus()));
+    }
+
+    /**
+     * 兼容 anyline：根据ID集合查询菜单列表
+     *
+     * @param ids 菜单ID集合
+     * @return 菜单列表
+     */
+    public List<MenuDO> findAllByIds(Collection<Long> ids) {
+        return super.findAllByIds(ids);
+    }
+
+    /**
+     * 兼容 anyline：按 ConfigStore 查询（仅支持最常用的 eq 条件）
+     *
+     * @param configs anyline ConfigStore
+     * @return 菜单列表
+     */
+    public List<MenuDO> findAllByConfig(ConfigStore configs) {
+        // 迁移期最小兼容：当前仅用于按状态获取启用菜单
+        return list(query().eq(MenuDO.STATUS, CommonStatusEnum.ENABLE.getStatus()));
     }
 }

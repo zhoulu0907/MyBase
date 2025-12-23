@@ -1,19 +1,14 @@
 package com.cmsr.onebase.module.system.dal.dataobject.sms;
 
-import java.util.List;
-
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
-import com.cmsr.onebase.framework.data.base.BaseDO;
+import com.cmsr.onebase.framework.orm.entity.BaseEntity;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.system.enums.sms.SmsTemplateTypeEnum;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.experimental.SuperBuilder;
+import com.mybatisflex.annotation.Column;
+import com.mybatisflex.annotation.Table;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+
+import java.util.List;
 
 /**
  * 短信模板 DO
@@ -21,14 +16,10 @@ import lombok.ToString;
  * @author zzf
  * @since 2021-01-25
  */
-@Table(name = "system_sms_template")
+@Table(value = "system_sms_template")
 @Data
-@ToString(callSuper = true)
-@SuperBuilder
-@NoArgsConstructor
-@AllArgsConstructor
 @TenantIgnore
-public class SmsTemplateDO extends BaseDO {
+public class SmsTemplateDO extends BaseEntity {
 
     // 字段列名常量
     public static final String TYPE            = "type";
@@ -49,46 +40,46 @@ public class SmsTemplateDO extends BaseDO {
      *
      * 枚举 {@link SmsTemplateTypeEnum}
      */
-    @Column(name = TYPE)
+    @Column(value = TYPE)
     private Integer type;
     /**
      * 启用状态
      *
      * 枚举 {@link CommonStatusEnum}
      */
-    @Column(name = STATUS)
+    @Column(value = STATUS)
     private Integer status;
     /**
      * 模板编码，保证唯一
      */
-    @Column(name = CODE)
+    @Column(value = CODE)
     private String code;
     /**
      * 模板名称
      */
-    @Column(name = NAME)
+    @Column(value = NAME)
     private String name;
     /**
      * 模板内容
      *
      * 内容的参数，使用 {} 包括，例如说 {name}
      */
-    @Column(name = CONTENT)
+    @Column(value = CONTENT)
     private String content;
     /**
      * 参数数组(自动根据内容生成)
      */
-    @Column(name = PARAMS)
+    @Column(value = PARAMS)
     private List<String> params;
     /**
      * 备注
      */
-    @Column(name = REMARK)
+    @Column(value = REMARK)
     private String remark;
     /**
      * 短信 API 的模板编号
      */
-    @Column(name = API_TEMPLATE_ID)
+    @Column(value = API_TEMPLATE_ID)
     private String apiTemplateId;
 
     // ========= 渠道相关字段 =========
@@ -98,14 +89,14 @@ public class SmsTemplateDO extends BaseDO {
      *
      * 关联 {@link SmsChannelDO#getId()}
      */
-    @Column(name = CHANNEL_ID)
+    @Column(value = CHANNEL_ID)
     private Long channelId;
     /**
      * 短信渠道编码
      *
      * 冗余 {@link SmsChannelDO#getCode()}
      */
-    @Column(name = CHANNEL_CODE)
+    @Column(value = CHANNEL_CODE)
     private String channelCode;
 
 }

@@ -1,28 +1,25 @@
 package com.cmsr.onebase.module.system.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.system.vo.sms.SmsTemplatePageReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.sms.SmsTemplateDO;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.Compare;
-import org.anyline.entity.Order;
+import com.cmsr.onebase.module.system.dal.flex.base.BaseDataServiceImpl;
+import com.cmsr.onebase.module.system.dal.flex.mapper.SystemSmsTemplateMapper;
+import com.cmsr.onebase.module.system.vo.sms.SmsTemplatePageReqVO;
+import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryWrapper;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
+import static com.cmsr.onebase.framework.data.base.BaseDO.ID;
 
 /**
  * 短信模板数据访问层
  *
  * @author matianyu
- * @date 2025-08-11
+ * @date 2025-12-22
  */
 @Repository
-public class SmsTemplateDataRepository extends DataRepository<SmsTemplateDO> {
-
-    public SmsTemplateDataRepository() {
-        super(SmsTemplateDO.class);
-    }
+public class SmsTemplateDataRepository extends BaseDataServiceImpl<SystemSmsTemplateMapper, SmsTemplateDO> {
 
     /**
      * 根据编码查找短信模板
@@ -31,7 +28,10 @@ public class SmsTemplateDataRepository extends DataRepository<SmsTemplateDO> {
      * @return 短信模板
      */
     public SmsTemplateDO findOneByCode(String code) {
-        return findOne(new DefaultConfigStore().and(Compare.EQUAL, SmsTemplateDO.CODE, code));
+        if (StringUtils.isBlank(code)) {
+            return null;
+        }
+        return getOne(query().eq(SmsTemplateDO.CODE, code));
     }
 
     /**
@@ -41,8 +41,9 @@ public class SmsTemplateDataRepository extends DataRepository<SmsTemplateDO> {
      * @return 分页结果
      */
     public PageResult<SmsTemplateDO> findPage(SmsTemplatePageReqVO pageReqVO) {
-        return findPageWithConditions(new DefaultConfigStore()
-                .order("id", Order.TYPE.DESC), pageReqVO.getPageNo(), pageReqVO.getPageSize());
+        QueryWrapper queryWrapper = query().orderBy(ID, false);
+        Page<SmsTemplateDO> pageResult = page(Page.of(pageReqVO.getPageNo(), pageReqVO.getPageSize()), queryWrapper);
+        return new PageResult<>(pageResult.getRecords(), pageResult.getTotalRow());
     }
 
     /**
@@ -52,8 +53,9 @@ public class SmsTemplateDataRepository extends DataRepository<SmsTemplateDO> {
      * @return 模板数量
      */
     public Long countByChannelId(Long channelId) {
-        List<SmsTemplateDO> list = findAllByConfig(new DefaultConfigStore()
-                .and(Compare.EQUAL, "channel_id", channelId));
-        return (long) list.size();
+        if (channelId == null) {
+            return 0L;
+        }
+        return count(query().eq(SmsTemplateDO.CHANNEL_ID, channelId));
     }
 }
