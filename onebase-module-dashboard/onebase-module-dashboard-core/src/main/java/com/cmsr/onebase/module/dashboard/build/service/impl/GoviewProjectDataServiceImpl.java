@@ -21,7 +21,7 @@ public class GoviewProjectDataServiceImpl extends ServiceImpl<GoviewProjectDataM
 	@Autowired
 	GoviewProjectDataMapper dataMapper;
 	@Override
-	public GoviewProjectData getProjectid(String projectId) {
+	public GoviewProjectData getProjectid(Long projectId) {
         QueryWrapper queryWrapper=new QueryWrapper();
         queryWrapper.eq(GoviewProjectData::getProjectId,projectId);
 		return dataMapper.selectOneByQuery(queryWrapper);
