@@ -1399,5 +1399,25 @@ public class UserServiceImpl implements UserService {
         commonUpdatePassword(id, password);
     }
 
+    @Override
+    public void updateUserByUserAppReqVO(UserAppRelationInertReqVO reqUser) {
+        // 校验邮箱唯一
+        validateEmailUnique(reqUser.getUserId(), reqUser.getEmail());
+        // 获取用户信息
+        AdminUserDO user = userDataRepository.getById(reqUser.getUserId());
+        if (null == user) {
+            return;
+        }
+        AdminUserDO updateUser = new AdminUserDO();
+        updateUser.setId(user.getId());
+        if(StringUtils.isNotBlank(reqUser.getEmail()) && !reqUser.getEmail().equals(user.getEmail())){
+            updateUser.setEmail(reqUser.getEmail());
+        }
+        if(StringUtils.isNotBlank(reqUser.getNickName()) &&  !reqUser.getNickName().equals(user.getNickname())){
+            updateUser.setNickname(reqUser.getNickName());
+        }
+        //更新用户
+        userDataRepository.update(updateUser);
+    }
 
 }

@@ -402,4 +402,12 @@ public interface UserService {
      * @return
      */
     UserApplicationRespVO getThirdUserAndRelationApp(Long id);
+
+    /**
+     * 获取第三方用户授权应用信息
+     *
+     * @param id
+     * @return
+     */
+    void updateUserByUserAppReqVO(UserAppRelationInertReqVO udpateUser);
 }
