@@ -43,6 +43,8 @@ export const CONFIG_TYPES = {
   UPLOAD_SIZE: 'UploadSize',
   // 图片、附件上传数量限制
   UPLOAD_LIMIT: 'UploadLimit',
+  // 图片、附件上传按钮配置
+  UPLOAD_BUTTON: 'UploadButton',
   // 图片、附件支持的文件类型
   // SUPPORT_FILE_TYPE: 'SupportFileType',
   // 图片压缩率

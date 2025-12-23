@@ -239,6 +239,13 @@ export interface IUploadLimitConfigType {
   type: typeof CONFIG_TYPES.UPLOAD_LIMIT;
 }
 
+// 文件上传按钮配置
+export interface IUploadButtonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.UPLOAD_BUTTON;
+}
+
 // 图片压缩率
 export interface IUploadCompressConfigType {
   key: string;
