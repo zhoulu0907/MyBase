@@ -1,24 +1,34 @@
 //登录设置
-import loginTemplateSvg from '@/assets/images/setting/login_template.svg';
-import { Button, Card, Radio, Space, Spin, Switch, Typography, Upload } from '@arco-design/web-react';
+import { Button, Card, Radio, Space, Spin, Switch, Typography } from '@arco-design/web-react';
 import { IconCopy, IconRefresh, IconUpload } from '@arco-design/web-react/icon';
-import { copyToClipboard, getRuntimeURL, TokenManager } from '@onebase/common';
+import {
+  copyToClipboard,
+  getRuntimeURL,
+  TokenManager,
+  UploadCommonComponent
+} from '@onebase/common';
 import {
   loginConfigListByKeyApi,
   updateLoginConfigApi,
+  uploadFile,
   type loginPermissionRes,
   type updateLoginConfigParams
 } from '@onebase/platform-center';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { thirdUserConfigKey } from './constant';
 import styles from './index.module.less';
+import loginBgMask from '@/assets/images/login_bg_mask.svg';
+import loginBg from '@/assets/images/login_bg.svg';
+import LoginForm from './loginForm';
 
 interface ILoginPermissionProps {
   appId: string;
 }
 
 const LoginPermission: React.FC<ILoginPermissionProps> = ({ appId }) => {
+  const uploadRef = useRef(null);
   const [loading, setLoading] = useState<boolean>(false);
+  const [imageUrl, setImageUrl] = useState<string>('');
   const tenantId = TokenManager.getTenantInfo()?.tenantId || '';
   const [loginConfigData, setLoginConfigData] = useState<loginPermissionRes[] | null>(null);
   const redirectURL = `${getRuntimeURL()}/#/onebase/runtime/?appId=${appId}&tenantId=${tenantId}`;
@@ -71,7 +81,12 @@ const LoginPermission: React.FC<ILoginPermissionProps> = ({ appId }) => {
     return targetConfig ? targetConfig.configValue : 'false';
   };
 
-  const canShowURL = JSON.parse(getEachConfigValue(thirdUserConfigKey.ENABLE) || '');
+  const convertStrToBoolean = (value: string) => {
+    const newValue = value === 'true' ? true : false;
+    return newValue;
+  };
+
+  const canShowURL = convertStrToBoolean(getEachConfigValue(thirdUserConfigKey.ENABLE) || '');
 
   return (
     <Spin loading={loading} style={{ width: '100%' }}>
@@ -100,14 +115,23 @@ const LoginPermission: React.FC<ILoginPermissionProps> = ({ appId }) => {
 
         {/* 中间：宣传区 + 登录预览区 + 右侧配置区 */}
         <div className={styles.bodyContent}>
-          <Card
-            className={styles.previewImage}
-            title="登录页预览"
-            style={{ width: 420, height: 500, flexShrink: 0 }}
-            bodyStyle={{ padding: 0 }}
-          >
+          <Card className={styles.previewImage} title="登录页预览" bodyStyle={{ padding: 0 }}>
             {/* TODO(shenyue): 改成真实渲染 */}
-            <img src={loginTemplateSvg} width={'100%'} height={'100%'} alt="loginBg" />
+            <div className={styles.wrapper}>
+              <div
+                className={styles.loginPageLeft}
+                style={{ backgroundImage: `url(${imageUrl ? imageUrl : loginBgMask})` }}
+              >
+                <img src={loginBg} alt="loginBg" className={styles.loginBg} />
+              </div>
+              <div className={styles.loginPageRight}>
+                <LoginForm
+                  appId={appId}
+                  showRegister={convertStrToBoolean(getEachConfigValue(thirdUserConfigKey.REGISTER_SHOW) || '')}
+                  showForgotPWD={convertStrToBoolean(getEachConfigValue(thirdUserConfigKey.FORGOT_PWD) || '')}
+                />
+              </div>
+            </div>
           </Card>
 
           {/* 右侧：配置区 */}
@@ -118,28 +142,42 @@ const LoginPermission: React.FC<ILoginPermissionProps> = ({ appId }) => {
             </Space>
 
             {/* 上传组件 */}
-            <Upload
-              action="/api/upload" // 替换为实际上传接口
-              listType="text"
-              showUploadList={false}
-              style={{ marginBottom: 16 }}
-            >
-              <Button type="primary" icon={<IconUpload />}>
-                点击上传
-              </Button>
-            </Upload>
-            <Button
-              type="default"
-              icon={<IconRefresh />}
-              style={{ marginLeft: 8 }}
-              onClick={() => console.log('重置展示图')}
-            >
-              重置
-            </Button>
-            <Typography.Text type="secondary" className={styles.rightText}>
-              支持jpg、gif、png格式, 不超过5M
-            </Typography.Text>
-
+            <>
+              <UploadCommonComponent
+                imagePreview={true}
+                onUpdateUrl={setImageUrl}
+                uploadRef={uploadRef}
+                getUploadFile={uploadFile}
+              />
+              <>
+                <Space direction="horizontal">
+                  <Button
+                    type="primary"
+                    icon={<IconUpload />}
+                    onClick={() => {
+                      (uploadRef as any).current?.getRootDOMNode()?.querySelector('input[type="file"]').click();
+                    }}
+                  >
+                    点击上传
+                  </Button>
+                  <Button
+                    type="default"
+                    icon={<IconRefresh />}
+                    style={{ marginLeft: 8 }}
+                    onClick={()=>{
+                      setImageUrl(loginBgMask)
+                    }}
+                  >
+                    重置
+                  </Button>
+                </Space>
+                <Space>
+                  <Typography.Text type="secondary" className={styles.rightText}>
+                    支持jpg、gif、png格式, 不超过5M
+                  </Typography.Text>
+                </Space>
+              </>
+            </>
             {/* 注册入口配置 */}
             <Typography.Text type="secondary" className={styles.rightText}>
               注册入口

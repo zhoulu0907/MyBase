@@ -33,6 +33,7 @@ import { useRememberMe } from '../../../hooks/useRememberMe';
 import styles from '../index.module.less';
 import RegisterForm from './register';
 import UpdatePasswordForm from './updatePassword';
+import ConfirmInfoForm from './confirmInfo';
 
 const { Paragraph } = Typography;
 const TabPane = Tabs.TabPane;
@@ -56,7 +57,8 @@ const Right: React.FC = () => {
   const [tenantId, setTenantId] = useState('');
   const [visibleRegister, setVisibleRegister] = useState<boolean>(false);
   const [visbileUpdatePwd, setVisibleUpdatePwd] = useState<boolean>(false);
-  const [isRelatedApp, setIsRelatedApp] = useState<boolean>(false);
+  const [visibleConfirmInfo, setVisibleConfirmInfo] = useState<boolean>(false);
+  const [verifyCode, setVerifyCode] = useState<string>('');
 
   // 手机号
   const [mobile, setMobile] = useState('');
@@ -168,7 +170,10 @@ const Right: React.FC = () => {
             corpId: response.corpId,
             loginSource: response.loginSource,
             userUnRegistFlag: response.userUnRegistFlag,
-            loginURL: window.location.href // 当前地址
+            loginURL: window.location.href,// 当前地址
+            userAppRelationFlag: response.userAppRelationFlag,
+            email: response.email,
+            nickName: response.nickName,
           },
           rememberMe
         );
@@ -178,18 +183,22 @@ const Right: React.FC = () => {
 
         Message.success(t('auth.loginSuccess'));
         const redirectURL = getHashQueryParam('redirectURL');
-        if (redirectURL) {
-          navigate(`/onebase/${appId}/${tenantId}/runtime`);
-        } else {
-          // 跳转到首页
-          navigate(`/onebase/runtime/?appId=${appId}`);
+        if(response.userAppRelationFlag) {
+          setVisibleConfirmInfo(true);
+          return;
+        }else {
+          if (redirectURL) {
+            navigate(`/onebase/${appId}/${tenantId}/runtime`);
+          } else {
+            // 跳转到首页
+            navigate(`/onebase/runtime/?appId=${appId}`);
+          }
         }
         return;
       } else {
         if (response?.userUnRegistFlag) {
           setVisibleRegister(true);
         }
-        setIsRelatedApp(response?.userAppRelationFlag || false);
       }
     } catch (error: any) {
       console.error('登录失败:', error);
@@ -236,7 +245,7 @@ const Right: React.FC = () => {
 
   return (
     <div className={styles.loginPageRight}>
-      {!visibleRegister && !visbileUpdatePwd && (
+      {!visibleRegister && !visbileUpdatePwd && !visibleConfirmInfo && (
         <div className={styles.loginFormContainer}>
           {curAppInfo.value.iconName && (
             <div className={styles.appInfo}>
@@ -283,6 +292,8 @@ const Right: React.FC = () => {
                           userMobile={form.getFieldValue('mobile')}
                           verifyType={'mobile'}
                           sendVerifyCode={sendVerifyCodeApi}
+                          verifyCode={verifyCode}
+                          onChange={setVerifyCode}
                         />
                       </Form.Item>
                     )}
@@ -364,7 +375,6 @@ const Right: React.FC = () => {
       {visibleRegister && (
         <RegisterForm
           appId={appId}
-          isRelatedApp={isRelatedApp}
           tenantId={tenantId}
           mobile={mobile}
           onGoBack={() => {
@@ -373,9 +383,17 @@ const Right: React.FC = () => {
         />
       )}
 
+      {/* 确认页面 */}
+      {visibleConfirmInfo && <ConfirmInfoForm
+        onGoBack={()=>setVisibleConfirmInfo(false)}
+        tenantId={tenantId}
+        appId={appId}
+      />}
+
       {/* 忘记密码 */}
       {visbileUpdatePwd && (
         <UpdatePasswordForm
+          tenantId={tenantId}
           onGoBack={() => {
             setVisibleUpdatePwd(false);
           }}
