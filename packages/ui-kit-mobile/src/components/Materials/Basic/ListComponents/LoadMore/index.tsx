@@ -126,13 +126,13 @@ const XLoadMore = memo(
               if (!result) return '-';
               if (Array.isArray(result)) {
                 if (result.length === 0) return;
-                if (['FILE'].includes(dataFieldInfo.fieldType)) {
+                if (['FILE', 'IMAGE'].includes(dataFieldInfo.fieldType)) {
                   const file = result[0];
                   return (
                     <div className="fileWrapper">
                       <Ellipsis text={file.name} />
                       <IconDownload
-                        style={{ color: 'rgb(var(--primary-6))' }}
+                        style={{ color: 'rgb(var(--primary-6))', marginLeft: '0.24rem', fontSize: '0.32rem' }}
                         onClick={async () => {
                           const param = {
                             menuId: curMenu.value?.id,
