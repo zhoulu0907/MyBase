@@ -35,4 +35,7 @@ public class AppResourcePagesetDO extends BaseBizEntity {
     @Column(value = "description", comment = "页面集描述")
     private String description;
 
+    @Column(value = "dashboard_id", comment = "数据大屏id")
+    private Long dashboardId;
+
 }
