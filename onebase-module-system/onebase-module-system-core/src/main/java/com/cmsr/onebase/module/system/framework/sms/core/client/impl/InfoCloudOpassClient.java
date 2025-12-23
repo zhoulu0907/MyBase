@@ -83,8 +83,7 @@ public class InfoCloudOpassClient extends AbstractSmsClient {
             return new SmsSendRespDTO().setSuccess(true)
                     .setApiRequestId(respObj.getString("requestId"))
                     .setSerialNo(respObj.getJSONObject("data").getString("msgId"))
-                    .setApiCode(respObj.getString("code"))
-                    .setApiMsg(respObj.getString("message"));
+                    .setApiCode(respObj.getString("code"));
         } else {
             return new SmsSendRespDTO().setSuccess(false)
                     .setApiRequestId(respObj.getString("requestId"))
