@@ -1,7 +1,6 @@
 import { Button, Checkbox, Form, Input, Space, Tabs, Typography } from '@arco-design/web-react';
 import { IconLock, IconMobile } from '@arco-design/web-react/icon';
 import { getApplication } from '@onebase/app';
-import { getHashQueryParam} from '@onebase/common';
 import { appIconMap } from '@onebase/ui-kit';
 import { useEffect, useState } from 'react';
 import styles from './index.module.less';
@@ -14,30 +13,16 @@ const { Paragraph } = Typography;
 const TabPane = Tabs.TabPane;
 
 interface ILoginFormProps {
+  appId: string;
   showForgotPWD: boolean;
   showRegister: boolean;
 }
 
-const LoginForm: React.FC<ILoginFormProps> = ({ showForgotPWD, showRegister }) => {
+const LoginForm: React.FC<ILoginFormProps> = ({ appId, showForgotPWD, showRegister }) => {
   const [form] = Form.useForm();
   const { t } = useI18n();
   const [loginType, setLoginType] = useState<string>(ThirdLoginType.VERIFYCODE);
-  const [appId, setAppId] = useState('');
   const { curAppInfo, setCurAppInfo } = useAppStore();
-
-  useEffect(() => {
-    // 从 window.location.hash 中解析 redirectURL，再从 redirectURL 解析 appId 和 tenantId
-    const rawHash = window.location.hash;
-    const prefix = '#/third/login?redirectURL=';
-    if (rawHash.startsWith(prefix)) {
-      const redirectURL = rawHash.replace(prefix, '');
-      let aid = getHashQueryParam('appId', redirectURL) || '';
-      setAppId(aid);
-    } else {
-      let aid = getHashQueryParam('appId') || '';
-      setAppId(aid);
-    }
-  }, []);
 
   const handleGetApplication = async () => {
     if (appId) {

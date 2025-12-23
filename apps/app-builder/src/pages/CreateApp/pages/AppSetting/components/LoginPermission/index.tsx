@@ -126,6 +126,7 @@ const LoginPermission: React.FC<ILoginPermissionProps> = ({ appId }) => {
               </div>
               <div className={styles.loginPageRight}>
                 <LoginForm
+                  appId={appId}
                   showRegister={convertStrToBoolean(getEachConfigValue(thirdUserConfigKey.REGISTER_SHOW) || '')}
                   showForgotPWD={convertStrToBoolean(getEachConfigValue(thirdUserConfigKey.FORGOT_PWD) || '')}
                 />
