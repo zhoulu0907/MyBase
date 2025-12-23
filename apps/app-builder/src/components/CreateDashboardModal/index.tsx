@@ -51,7 +51,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
     pageSize: 4
   });
   const [total, setTotal] = useState<number>(10);
-
+  const [templateName, setTemplateName] = useState<string>('');
   const [dashboardTemplateData, setDashboardTemplateData] = useState<any[]>([]);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
 
@@ -159,7 +159,8 @@ const CreateModal: React.FC<CreateModalProps> = ({
       hot: dashboardMethod === 'dashboardNew' ? IsHot.YES : IsHot.NO,
       templateType: dashboardTemplateTab === 'allTemplate' ? '' : dashboardTemplateTab,
       pageNo: dashboardPagination.current,
-      pageSize: dashboardMethod === 'dashboardNew' ? 4 : 8
+      pageSize: dashboardMethod === 'dashboardNew' ? 4 : 8,
+      templateName: templateName
     };
     const res = await getDashboardTemplateListApi(params);
     console.log('大屏模版 res:', res);
@@ -429,7 +430,9 @@ const CreateModal: React.FC<CreateModalProps> = ({
                       placeholder="请输入大屏名称搜索"
                       allowClear
                       style={{ width: 220 }}
+                      value={templateName}
                       onSearch={handleSearchTemplate}
+                      onChange={(value) => setTemplateName(value)}
                     />
                   </div>
                 </div>
