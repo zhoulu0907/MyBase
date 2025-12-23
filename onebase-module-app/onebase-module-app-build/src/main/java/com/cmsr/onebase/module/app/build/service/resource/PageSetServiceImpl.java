@@ -117,7 +117,6 @@ public class PageSetServiceImpl implements PageSetService {
                 goViewProjectDTO.setProjectName("新大屏");
                 goViewProjectDTO.setState(-1);
                 goViewProjectDTO.setAppId(applicationId);
-                goViewProjectDTO.setCreateUserId(Objects.requireNonNull(SecurityFrameworkUtils.getLoginUserId()).toString());
                 Long dashboardId = goViewProjectApi.createDashboard(goViewProjectDTO);
                 createPageSetDTO.setDashboardId(dashboardId);
             }

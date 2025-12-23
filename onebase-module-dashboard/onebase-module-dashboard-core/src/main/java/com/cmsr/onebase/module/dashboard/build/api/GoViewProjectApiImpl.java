@@ -52,22 +52,15 @@ public class GoViewProjectApiImpl implements GoViewProjectApi {
             return null;
         }
         Long applicationId = dashboardTemplate.getAppId();
-        LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
 
         GoviewProject goviewProject = new GoviewProject();
         goviewProject.setProjectName("新大屏");
         goviewProject.setState(-1);
         goviewProject.setAppId(applicationId);
-        if (loginUser != null){
-            goviewProject.setCreator(loginUser.getId());
-        }
         iGoviewProjectService.save(goviewProject);
         GoviewProjectData goviewProjectData = new GoviewProjectData();
         goviewProjectData.setProjectId(goviewProject.getId());
         goviewProjectData.setContent(dashboardTemplate.getContent());
-        if (loginUser != null){
-            goviewProjectData.setCreator(loginUser.getId());
-        }
         iGoviewProjectDataService.save(goviewProjectData);
         return goviewProject.getId();
     }
