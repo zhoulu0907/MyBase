@@ -25,16 +25,16 @@
 
 **Windows 示例**:
 ```batch
-java ... -jar ... ^
-  --onebase.plugin.mode=dev ^
-  --onebase.plugin.dev-class-paths=D:/workspace/my-plugin/target/classes
+java ... -jar ... 
+  --onebase.plugin.mode=dev
+  --onebase.plugin.dev-class-paths="D:/path1/my-plugin/target/classes，D:/path2/my-plugin/target/classes"
 ```
 
 **Mac/Linux 示例**:
 ```bash
 java ... -jar ... \
   --onebase.plugin.mode=dev \
-  --onebase.plugin.dev-class-paths=/Users/dev/workspace/my-plugin/target/classes
+  --onebase.plugin.dev-class-paths=/Users/dev/my-plugin/target/classes
 ```
 
 ### 3. 启动开发环境
