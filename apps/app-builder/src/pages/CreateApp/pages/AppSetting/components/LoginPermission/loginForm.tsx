@@ -1,8 +1,7 @@
 import { Button, Checkbox, Form, Input, Space, Tabs, Typography } from '@arco-design/web-react';
 import { IconLock, IconMobile } from '@arco-design/web-react/icon';
-import { getApplication, getApplicationLeast } from '@onebase/app';
-import { getHashQueryParam, VerifyInput } from '@onebase/common';
-import { sendVerifyCodeApi } from '@onebase/platform-center';
+import { getApplication } from '@onebase/app';
+import { getHashQueryParam} from '@onebase/common';
 import { appIconMap } from '@onebase/ui-kit';
 import { useEffect, useState } from 'react';
 import styles from './index.module.less';
@@ -24,7 +23,6 @@ const LoginForm: React.FC<ILoginFormProps> = ({ showForgotPWD, showRegister }) =
   const { t } = useI18n();
   const [loginType, setLoginType] = useState<string>(ThirdLoginType.VERIFYCODE);
   const [appId, setAppId] = useState('');
-  const [tenantId, setTenantId] = useState('');
   const { curAppInfo, setCurAppInfo } = useAppStore();
 
   useEffect(() => {
@@ -34,14 +32,10 @@ const LoginForm: React.FC<ILoginFormProps> = ({ showForgotPWD, showRegister }) =
     if (rawHash.startsWith(prefix)) {
       const redirectURL = rawHash.replace(prefix, '');
       let aid = getHashQueryParam('appId', redirectURL) || '';
-      let tid = getHashQueryParam('tenantId', redirectURL) || '';
       setAppId(aid);
-      setTenantId(tid);
     } else {
       let aid = getHashQueryParam('appId') || '';
-      let tid = getHashQueryParam('tenantId') || '';
       setAppId(aid);
-      setTenantId(tid);
     }
   }, []);
 
