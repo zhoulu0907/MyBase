@@ -1,7 +1,6 @@
 package com.cmsr.onebase.module.flow.runtime.controller;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
 import com.cmsr.onebase.module.flow.core.flow.ExecutorResult;
 import com.cmsr.onebase.module.flow.core.flow.FlowRemoteCallExecutor;
 import com.cmsr.onebase.module.flow.core.flow.FlowRemoteCallRequest;
@@ -9,11 +8,10 @@ import com.cmsr.onebase.module.flow.core.graph.FlowProcessCache;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 /**
  * 流程执行 - 执行控制器
@@ -39,8 +37,21 @@ public class FlowRemoteCallController {
 
     @GetMapping("/query")
     @Operation(summary = "查询流程")
-    public CommonResult<List<FlowProcessDO>> getProcess() {
-        List<FlowProcessDO> allProcess = flowProcessCache.getAllProcess();
-        return CommonResult.success(allProcess);
+    public CommonResult<Object> getProcess(@RequestParam(name = "type", required = false) String type) {
+        Object result = "";
+        if (StringUtils.isEmpty(type)) {
+            result = flowProcessCache.getAllProcess();
+        } else if ("form".equals(type)) {
+            result = flowProcessCache.getStartFormNodeDataCache();
+        } else if ("entity".equals(type)) {
+            result = flowProcessCache.getStartEntityNodeDataCache();
+        } else if ("time".equals(type)) {
+            result = flowProcessCache.getStartTimeNodeDataCache();
+        } else if ("date".equals(type)) {
+            result = flowProcessCache.getStartDateFieldNodeDataCache();
+        } else if ("all".equals(type)) {
+            result = flowProcessCache.getAllProcess();
+        }
+        return CommonResult.success(result);
     }
 }
