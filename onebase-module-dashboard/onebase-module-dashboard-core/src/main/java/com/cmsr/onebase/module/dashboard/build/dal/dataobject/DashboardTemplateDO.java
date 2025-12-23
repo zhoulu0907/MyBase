@@ -1,13 +1,13 @@
 package com.cmsr.onebase.module.dashboard.build.dal.dataobject;
 
-import com.cmsr.onebase.framework.orm.entity.BaseTenantEntity;
+import com.cmsr.onebase.framework.orm.entity.BaseEntity;
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Table;
 import lombok.Data;
 
 @Data
 @Table("dashboard_template")
-public class DashboardTemplateDO extends BaseTenantEntity {
+public class DashboardTemplateDO extends BaseEntity {
 
     @Column(value = "content", comment = "模板内容")
     private String content;
