@@ -22,6 +22,7 @@ public interface ErrorCodeConstants {
 
     ErrorCode AUTH_VERIFY_CODE_NULL = new ErrorCode(1_002_000_100, "验证码为空");
     ErrorCode AUTH_VERIFY_CODE_ERROR = new ErrorCode(1_002_000_100, "验证码错误");
+    ErrorCode AUTH_VERIFY_CODE_EXISTS = new ErrorCode(1_002_000_100, "请勿重复发送验证码");
 
     // ========== 菜单模块 1-002-001-000 ==========
     ErrorCode MENU_NAME_DUPLICATE = new ErrorCode(1_002_001_000, "已经存在该名字的菜单");

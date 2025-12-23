@@ -88,6 +88,22 @@ public class SmsCodeServiceImpl implements SmsCodeService {
         validateSmsCode0(reqDTO.getMobile(), reqDTO.getCode(), reqDTO.getScene());
     }
 
+    @Override
+    public boolean existsSmsCode(SmsCodeSendReqDTO reqDTO) {
+        SmsCodeDO lastSmsCode = smsCodeDataRepository.findLastByMobile(reqDTO.getMobile());
+        if (lastSmsCode == null) {
+            return false;
+        }
+        if (LocalDateTimeUtil.between(lastSmsCode.getCreateTime(), LocalDateTime.now()).toMillis()
+                >= smsCodeProperties.getExpireTimes().toMillis()) { // 验证码已过期
+            return false;
+        }
+        if (Boolean.TRUE.equals(lastSmsCode.getUsed())) {
+            return false;
+        }
+        return true;
+    }
+
     private SmsCodeDO validateSmsCode0(String mobile, String code, Integer scene) {
         // 校验验证码
         SmsCodeDO lastSmsCode = smsCodeDataRepository.findLastByMobileAndCodeAndScene(mobile, code, scene);
