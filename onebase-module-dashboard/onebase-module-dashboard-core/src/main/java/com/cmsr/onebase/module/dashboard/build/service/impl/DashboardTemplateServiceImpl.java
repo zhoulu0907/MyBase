@@ -90,6 +90,7 @@ public class DashboardTemplateServiceImpl extends ServiceImpl<DashboardTemplateM
     public PageResult<DashboardTemplateDO> getDashboardTemplatePage(DashboardTemplatePageReqVO pageReqVO) {
         QueryWrapper queryWrapper = QueryWrapper.create()
                 .eq(DashboardTemplateDO::getTemplateType, pageReqVO.getTemplateType(), StringUtils.isNotBlank(pageReqVO.getTemplateType()))
+                .like(DashboardTemplateDO::getTemplateName, pageReqVO.getTemplateName(), StringUtils.isNotBlank(pageReqVO.getTemplateName()))
                 .eq(DashboardTemplateDO::getHot, pageReqVO.getHot(), pageReqVO.getHot() != null)
                 .eq(DashboardTemplateDO::getAppId, pageReqVO.getAppId(), pageReqVO.getAppId() != null);
 

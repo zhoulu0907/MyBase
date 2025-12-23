@@ -13,6 +13,6 @@ import com.mybatisflex.core.service.IService;
  */
 public interface IGoviewProjectDataService extends IService<GoviewProjectData> {
 
-	public GoviewProjectData getProjectid(String projectId);
+	public GoviewProjectData getProjectid(Long projectId);
 
 }
