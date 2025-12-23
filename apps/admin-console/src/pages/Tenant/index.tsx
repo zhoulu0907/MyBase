@@ -188,7 +188,7 @@ const TenantManagement: React.FC = () => {
       okButtonProps: { status: 'danger' },
       onOk: async () => {
         if (data.name !== workspaceName) {
-          Message.warning('租户名不正确');
+          Message.warning('空间名称不正确');
           return Promise.reject();
         }
         await deletePlatformTenantApi(data.id!);

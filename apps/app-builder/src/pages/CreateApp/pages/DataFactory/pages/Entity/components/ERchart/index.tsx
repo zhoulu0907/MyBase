@@ -13,14 +13,13 @@ import {
   performAutoLayout,
   SectionCollapseHandler,
   toggleNodeShadow,
-  toggleEdgeSelected
+  toggleEdgeSelected,
+  LINE_HEAD_HEIGHT,
+  LINE_HEIGHT,
+  LINE_TITLE_HEIGHT,
+  NODE_WIDTH,
+  NODE_HEIGHT
 } from './utils';
-
-const LINE_HEAD_HEIGHT = 48;
-const LINE_HEIGHT = 34.8;
-const LINE_TITLE_HEIGHT = 44;
-const NODE_WIDTH = 280;
-const NODE_HEIGHT = 200;
 
 export interface ERchartRef {
   getGraphPositon: () => void;
@@ -313,13 +312,12 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
           ? [
               {
                 position: 0.5,
+                interactive: false,
                 attrs: {
                   label: {
                     text: edgeData.label,
                     fill: 'rgb(var(--primary-6))',
-                    fontSize: 12,
-                    textAnchor: 'middle',
-                    textVerticalAnchor: 'middle'
+                    fontSize: 12
                   }
                 }
               }
@@ -407,8 +405,7 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
             },
             interacting: {
               nodeMovable: mode === 'edit',
-              edgeMovable: mode === 'edit',
-              edgeLabelMovable: mode === 'edit'
+              edgeMovable: mode === 'edit'
             },
             panning: true, // 支持拖拽平移
             // 支持鼠标滚轮缩放

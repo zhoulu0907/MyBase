@@ -6,6 +6,7 @@ import { createClient, getPlatformBackendURL, getRuntimeBackendURL, getDashbordD
 export const systemService = createClient('/system');
 export const platformService = createClient('/system', getPlatformBackendURL());
 export const infraService = createClient('/infra');
+export const userService = createClient('/user');
 export const platformInfraService = createClient('/infra', getPlatformBackendURL());
 export const appService = createClient('/app');
 

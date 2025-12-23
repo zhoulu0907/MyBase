@@ -59,7 +59,6 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
       return;
     }
     const normalize = (data: any) => {
-      console.log('data: ', data, 'typeof data: ', typeof data);
       if (!data) return '';
       if (typeof data === 'object') {
         if (typeof data.id !== 'undefined' || typeof data.name !== 'undefined') {
@@ -100,7 +99,7 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
       }
     },
     selectDropdown: (value: any, option: any) => {
-      const data = dataList.find(item => item.id === value);
+      const data = dataList.find((item) => item.id === value);
       const name = option?.labelTitle ?? option.children ?? '';
       const nextValue = value ? { id: value, name } : '';
       setDataState(nextValue);

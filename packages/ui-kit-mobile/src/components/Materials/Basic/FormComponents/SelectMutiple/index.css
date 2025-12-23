@@ -11,6 +11,9 @@
   }
 }
 .selectMultipleWrapperOBMobile {
+  .selectMultipleCellOBMobile {
+    padding-right: 0;
+  }
   .arco-form-item-control {
     text-align: right;
   }

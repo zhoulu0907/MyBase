@@ -2,7 +2,7 @@ import { type EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/inter
 import { Collapse, Empty, Spin } from '@arco-design/web-react';
 import React, { useEffect, useState } from 'react';
 import { getEntityRelations } from '@onebase/app';
-import { ALL_RELATIONSHIP_TYPE_MAP, type RelationshipType } from '@/pages/CreateApp/pages/DataFactory/utils/types';
+import { ALL_RELATIONSHIP_TYPE_MAP, type RelationshipType } from '@/pages/CreateApp/pages/DataFactory/utils/relation';
 import styles from './Relations.module.less';
 
 // 数据方法接口定义

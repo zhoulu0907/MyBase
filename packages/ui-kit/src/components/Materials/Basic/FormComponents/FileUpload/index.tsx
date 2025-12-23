@@ -1,8 +1,9 @@
+import DownloadLink from '@/assets/images/download_link.svg';
 import { Button, Form, Message, Progress, Typography, Upload } from '@arco-design/web-react';
-import { IconClose, IconDelete, IconDownload, IconFile, IconUpload } from '@arco-design/web-react/icon';
+import { IconClose, IconDelete, IconDownload, IconUpload } from '@arco-design/web-react/icon';
 import { type UploadItem, type UploadListProps } from '@arco-design/web-react/lib/Upload';
 import { attachmentDownload, attachmentUpload, menuSignal } from '@onebase/app';
-import { pagesRuntimeSignal } from '@onebase/common';
+import { isRuntimeEnv, pagesRuntimeSignal } from '@onebase/common';
 import { nanoid } from 'nanoid';
 import { memo, useEffect, useState } from 'react';
 import { downloadFileByUrl } from 'src/utils/downloadFile';
@@ -89,17 +90,16 @@ const XFileUpload = memo(
           const index = file.name.lastIndexOf('.');
           const type = file.name.slice(index + 1);
         }
-        return <IconFile style={{ fontSize: '40px' }} />;
+
+        return <img src={DownloadLink} alt="download_link" />;
       };
+
       return (
         <div className="uplaodList-text">
           {filesList.map((file, index) => (
             <div key={file.uid} className="uplaodList-text-item">
               {getFileIcon(file)}
-              <Typography.Ellipsis
-                showTooltip
-                className={`uplaodList-text-item-name ${showDownload ? 'uplaodList-text-item-name-hover' : ''}`}
-              >
+              <Typography.Ellipsis showTooltip className={`${showDownload ? 'uplaodList-text-item-name-hover' : ''}`}>
                 {file.name}
               </Typography.Ellipsis>
               {file.percent && file.percent !== 100 ? (
@@ -128,7 +128,7 @@ const XFileUpload = memo(
                           menuId: curMenu.value?.id,
                           id: recordId || rowDataId.value,
                           fieldName: curFieldName,
-                          fileId: file.response.fileId || file.id
+                          fileId: file.response.fileId || file.uid
                         };
                         const fileUrl = await attachmentDownload(tableName, param);
                         downloadFileByUrl(fileUrl, file.name);
@@ -236,7 +236,7 @@ const XFileUpload = memo(
               width: '100%',
               pointerEvents: runtime ? 'unset' : 'none'
             }}
-            disabled={status !== STATUS_VALUES[STATUS_OPTIONS.DEFAULT] || detailMode}
+            disabled={status !== STATUS_VALUES[STATUS_OPTIONS.DEFAULT] || detailMode || !isRuntimeEnv()}
             showUploadList={{
               removeIcon: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? null : <IconDelete />
             }}

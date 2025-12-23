@@ -468,6 +468,7 @@ const TableSearch = memo((props: TableSearchConfig) => {
       showDropdown={showDropdown}
       onCancel={() => changeDropdown(false)}
       clickOtherToClose={false}
+      className={`search-form-wrapper-ob-loadmore ${runtime ? '' : 'search-form-wrapper-ob-loadmore-editor'}`}
       getScrollContainer={() => document.getElementById('ob-loadmore-dropdown-scroll-search')}
     >
       <div id="ob-loadmore-dropdown-scroll-search">

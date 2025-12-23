@@ -58,7 +58,14 @@ export default function WorkbenchPanel() {
       </div>
 
       <div className={styles.right}>
-        <Sider collapsed={!childCollapsed} collapsible collapsedWidth={0} trigger={null} width={270}>
+        <Sider
+          collapsed={!childCollapsed}
+          collapsible
+          collapsedWidth={0}
+          trigger={null}
+          width={270}
+          className={styles.rightSider}
+        >
           <div className={styles.rightHeader}>
             <div className={styles.title}>组件库</div>
 

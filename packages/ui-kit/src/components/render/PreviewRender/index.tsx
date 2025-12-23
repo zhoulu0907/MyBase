@@ -10,8 +10,11 @@ import {
   ListComp,
   SHOW_COMPONENT_TYPES,
   ShowComp,
-  getComponentConfig
+  getComponentConfig,
+  WORKBENCH_COMPONENT_TYPES,
+  WorkbenchComp
 } from 'src/components/Materials';
+import { PageType } from '@onebase/app';
 
 /**
  * 组件渲染的通用属性
@@ -43,6 +46,7 @@ interface PreviewRenderProps {
 
   // 表格数据id
   recordId?: string;
+  pageSetType?: PageType;
 }
 
 const PreviewRender: React.FC<PreviewRenderProps> = ({
@@ -56,7 +60,8 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
   refresh,
   pageType,
   cpState,
-  recordId
+  recordId,
+  pageSetType
 }) => {
   // 获取组件配置，使用深拷贝确保每次都是新对象
   const [componentConfig, setComponentConfig] = useState(() =>
@@ -357,6 +362,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
             preview={preview}
             showFromPageData={showFromPageData}
             refresh={refresh}
+            pageSetType={pageSetType}
           />
         );
       case LIST_COMPONENT_TYPES.CALENDAR:
@@ -386,6 +392,16 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
       case SHOW_COMPONENT_TYPES.DIVIDER:
         return <ShowComp.XDivider cpName={cpId} id={cpId} {...componentConfig} />;
 
+      // 工作台组件
+      case WORKBENCH_COMPONENT_TYPES.QUICK_ENTRY:
+        return <WorkbenchComp.XQuickEntry cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+      case WORKBENCH_COMPONENT_TYPES.TODO_CENTER:
+        return <WorkbenchComp.XTodoCenter cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+      case WORKBENCH_COMPONENT_TYPES.RICH_TEXT_WORKBENCH:
+        return <WorkbenchComp.XRichTextEditorWorkbench cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+      case WORKBENCH_COMPONENT_TYPES.CAROUSEL_WORKBENCH:
+        return <WorkbenchComp.XCarouselWorkbench cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+        
       default:
         return <div>未知组件类型: {cpType}</div>;
     }

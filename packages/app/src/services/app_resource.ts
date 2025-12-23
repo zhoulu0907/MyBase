@@ -44,7 +44,7 @@ export const getPageSetMetaData = (params: GetPageSetMainMetaDataReq) => {
 };
 
 export const getPageListByAppId = (params: GetPageListByAppIdReq) => {
-  return appService.post('/resource/page/form/app_id', params);
+  return appService.post('/resource/page/app_id', params);
 };
 
 export const getPageMetadata = (params: GetPageMetadataReq) => {

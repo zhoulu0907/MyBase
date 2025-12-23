@@ -8,8 +8,9 @@ type XInputTextAreaConfig = typeof FormSchema.XInputTextAreaSchema.config;
 import './index.css';
 import '../index.css';
 
-const XInputTextArea = memo((props: XInputTextAreaConfig & { runtime?: boolean; detailMode?: boolean }) => {
+const XInputTextArea = memo((props: XInputTextAreaConfig & { runtime?: boolean; detailMode?: boolean; form?: any; }) => {
   const {
+    form,
     label,
     dataField,
     placeholder,
@@ -38,6 +39,7 @@ const XInputTextArea = memo((props: XInputTextAreaConfig & { runtime?: boolean; 
         maxLength={verify?.lengthLimit ? verify?.maxLength : undefined}
         showStatistics={verify?.lengthLimit}
         statisticsMaxlength={verify?.lengthLimit ? verify?.maxLength : undefined}
+        blockChangeWhenCompositing={true}
         autosize={false}
         rows={minRows || 2}
         textareaStyle={{
@@ -53,12 +55,10 @@ const XInputTextArea = memo((props: XInputTextAreaConfig & { runtime?: boolean; 
 
   const rules: ITypeRules<ValidatorType.Custom>[] = [
     {
+      required: verify?.required,
       type: ValidatorType.Custom,
+      message: `${label.text}是必填项`,
       validator: (value, callback) => {
-        if (!value && verify?.required) {
-          callback(`${label.text}是必填项`);
-        }
-
         if (value && verify?.lengthLimit) {
           if (value.length < verify?.minLength!) {
             callback(`字数不能小于${verify?.minLength}`);
@@ -86,14 +86,14 @@ const XInputTextArea = memo((props: XInputTextAreaConfig & { runtime?: boolean; 
     >
       {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
         // 只读模式，渲染文本内容
-        <div style={{
+        <div className="readonlyText" style={{
           textAlign: align,
-          padding: '8px',
+          paddingTop: '0.16rem',
           whiteSpace: 'pre-wrap',
           wordBreak: 'break-word',
           minHeight: `${minRows * 24 + 16}px`
         }}>
-          --
+          {form?.getFieldValue(fieldId)}
         </div>
       ) : (
         renderContent()

@@ -3,7 +3,7 @@ import { useResourceStore } from '@/store/store_resource';
 import { Form, Message, Modal, Select, Grid } from '@arco-design/web-react';
 import { createRelation, getEntityFields, getEntityList } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
-import { DEFINE_RELATIONSHIP_OPTIONS } from '@/pages/CreateApp/pages/DataFactory/utils/types';
+import { DEFINE_RELATIONSHIP_OPTIONS } from '@/pages/CreateApp/pages/DataFactory/utils/relation';
 import styles from '../modal.module.less';
 
 interface RelationFormValues {

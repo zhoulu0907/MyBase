@@ -8,8 +8,9 @@ type XInputPhoneConfig = typeof FormSchema.XInputPhoneSchema.config;
 
 import '../index.css';
 
-const XInputPhone = memo((props: XInputPhoneConfig & { runtime?: boolean; detailMode?: boolean }) => {
+const XInputPhone = memo((props: XInputPhoneConfig & { runtime?: boolean; detailMode?: boolean; form?: any; }) => {
   const {
+    form,
     label,
     dataField,
     placeholder,
@@ -32,26 +33,22 @@ const XInputPhone = memo((props: XInputPhoneConfig & { runtime?: boolean; detail
     // 非只读模式，渲染Input组件
     return (
       <Input
+        type="tel"
         placeholder={placeholder}
         inputStyle={{
           textAlign: align
         }}
-        style={{
-          width: '100%'
-        }}
-        type="tel"
+        blockChangeWhenCompositing={true}
       />
     );
   };
 
   const rules: ITypeRules<ValidatorType.Custom>[] = [
     {
+      required: verify?.required,
       type: ValidatorType.Custom,
+      message: `${label.text}是必填项`,
       validator: (value, callback) => {
-        if (!value && verify?.required) {
-          callback(`${label.text}是必填项`);
-        }
-
         if (phoneType === PHONE_TYPE.MOBILE) {
           if (value && !(/^1[3-9]\d{9}$/).test(value)) {
             callback(`请输入有效的11位中国大陆手机号`);
@@ -82,12 +79,7 @@ const XInputPhone = memo((props: XInputPhoneConfig & { runtime?: boolean; detail
     >
       {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
         // 只读模式，渲染文本内容
-        <div style={{
-          textAlign: align,
-          padding: '8px'
-        }}>
-          --
-        </div>
+        <div className="readonlyText">{form?.getFieldValue(fieldId)}</div>
       ) : (
         renderContent()
       )}

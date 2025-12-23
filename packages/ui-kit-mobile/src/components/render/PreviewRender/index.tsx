@@ -8,10 +8,12 @@ import {
   getComponentConfig,
   ALIGN_OPTIONS,
   ALIGN_VALUES,
+  WORKBENCH_COMPONENT_TYPES,
 } from '@onebase/ui-kit';
 import { ListComp } from '@/components/Materials/Basic/ListComponents';
 import { FormComp } from '@/components/Materials/Basic/FormComponents';
 import { ShowComp } from '@/components/Materials/Basic/ShowComponents';
+import { WorkbenchComp } from '@/components/Materials/Workbench';
 
 /**
  * 组件渲染的通用属性
@@ -26,6 +28,9 @@ interface PreviewRenderProps {
 
   runtime: boolean;
 
+  /** 编辑预览模式 */
+  editPreview?: boolean;
+
   // 详情视图
   detailMode?: boolean;
 
@@ -38,6 +43,8 @@ interface PreviewRenderProps {
   lastOne?: boolean;
 
   editLoading?: boolean;
+  /** signal传递 */
+  useStoreSignals?: any;
 }
 
 const LIST_LAZY_COMPONENT: string[] = [
@@ -45,6 +52,7 @@ const LIST_LAZY_COMPONENT: string[] = [
   FORM_COMPONENT_TYPES.DATE_TIME_PICKER,
   FORM_COMPONENT_TYPES.FILE_UPLOAD,
   FORM_COMPONENT_TYPES.SELECT_MUTIPLE,
+  FORM_COMPONENT_TYPES.DATA_SELECT,
   // FORM_COMPONENT_TYPES.SUB_TABLE,
 ];
 
@@ -53,12 +61,14 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
   cpType,
   pageComponentSchema,
   runtime,
+  editPreview,
   detailMode,
   showFromPageData,
   refresh,
   editLoading,
   lastOne,
-  form
+  form,
+  useStoreSignals
 }) => {
 
   if (LIST_LAZY_COMPONENT.includes(cpType) && editLoading) {
@@ -74,7 +84,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
     switch (cpType) {
       case FORM_COMPONENT_TYPES.INPUT_TEXT:
         return (
-          <FormComp.XInputText cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} detailMode={detailMode} />
+          <FormComp.XInputText cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} detailMode={detailMode} form={form} />
         );
       case FORM_COMPONENT_TYPES.INPUT_TEXTAREA:
         return (
@@ -84,6 +94,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
             {...componentConfig}
             runtime={runtime}
             detailMode={detailMode}
+            form={form}
           />
         );
       case FORM_COMPONENT_TYPES.INPUT_EMAIL:
@@ -94,6 +105,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
             {...componentConfig}
             runtime={runtime}
             detailMode={detailMode}
+            form={form}
           />
         );
       case FORM_COMPONENT_TYPES.INPUT_PHONE:
@@ -104,6 +116,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
             {...componentConfig}
             runtime={runtime}
             detailMode={detailMode}
+            form={form}
           />
         );
       case FORM_COMPONENT_TYPES.INPUT_NUMBER:
@@ -114,6 +127,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
             {...componentConfig}
             runtime={runtime}
             detailMode={detailMode}
+            form={form}
           />
         );
       case FORM_COMPONENT_TYPES.DATE_PICKER:
@@ -135,6 +149,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
             {...componentConfig}
             runtime={runtime}
             detailMode={detailMode}
+            form={form}
           />
         );
       case FORM_COMPONENT_TYPES.TIME_PICKER:
@@ -145,6 +160,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
             {...componentConfig}
             runtime={runtime}
             detailMode={detailMode}
+            form={form}
           />
         );
       case FORM_COMPONENT_TYPES.DATE_TIME_PICKER:
@@ -160,19 +176,19 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
         );
       case FORM_COMPONENT_TYPES.SWITCH:
         return (
-          <FormComp.XSwitch cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} detailMode={detailMode} />
+          <FormComp.XSwitch cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} detailMode={detailMode} form={form} />
         );
       case FORM_COMPONENT_TYPES.RADIO:
         return (
-          <FormComp.XRadio cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} detailMode={detailMode} />
+          <FormComp.XRadio cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} detailMode={detailMode} form={form} />
         );
       case FORM_COMPONENT_TYPES.CHECKBOX:
         return (
-          <FormComp.XCheckbox cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} detailMode={detailMode} />
+          <FormComp.XCheckbox cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} detailMode={detailMode} form={form} />
         );
       case FORM_COMPONENT_TYPES.SELECT_ONE:
         return (
-          <FormComp.XSelectOne cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} detailMode={detailMode} />
+          <FormComp.XSelectOne cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} detailMode={detailMode} form={form} />
         );
       case FORM_COMPONENT_TYPES.SELECT_MUTIPLE:
         return (
@@ -248,7 +264,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
         );
       case FORM_COMPONENT_TYPES.AUTO_CODE:
         return (
-          <FormComp.XAutoCode cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} detailMode={detailMode} />
+          <FormComp.XAutoCode cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} detailMode={detailMode} form={form} />
         );
       case FORM_COMPONENT_TYPES.RELATED_FORM:
       // return (
@@ -286,18 +302,20 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
         );
       case FORM_COMPONENT_TYPES.SUB_TABLE:
         return (
-          <FormComp.XSubTable cpName={cpId} id={cpId} {...componentConfig} editLoading={editLoading} runtime={runtime} detailMode={detailMode} form={form} />
+          <FormComp.XSubTable cpName={cpId} id={cpId} {...componentConfig} editLoading={editLoading} runtime={runtime} detailMode={detailMode} form={form} useStoreSignals={useStoreSignals} editPreview={editPreview} />
         );
       case FORM_COMPONENT_TYPES.DATA_SELECT:
-      // return (
-      //   <FormComp.XDataSelect
-      //     cpName={cpId}
-      //     id={cpId}
-      //     {...componentConfig}
-      //     runtime={runtime}
-      //     detailMode={detailMode}
-      //   />
-      // );
+      return (
+        <FormComp.XDataSelect
+          cpName={cpId}
+          id={cpId}
+          {...componentConfig}
+          runtime={runtime}
+          detailMode={detailMode}
+          form={form}
+          editPreview={editPreview}
+        />
+      );
 
       //  布局组件
       case LAYOUT_COMPONENT_TYPES.COLUMN_LAYOUT:
@@ -347,6 +365,14 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
         return <ShowComp.XDivider cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case SHOW_COMPONENT_TYPES.PLACEHOLDER:
         return <ShowComp.XPlaceholder cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+
+      //  工作台组件
+      case WORKBENCH_COMPONENT_TYPES.QUICK_ENTRY:
+        return <WorkbenchComp.XQuickEntry cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+      case WORKBENCH_COMPONENT_TYPES.RICH_TEXT_WORKBENCH:
+        return <WorkbenchComp.XRichTextEditorWorkbench cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+      case WORKBENCH_COMPONENT_TYPES.CAROUSEL_WORKBENCH:
+        return <WorkbenchComp.XCarouselWorkbench cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
 
       default:
         return <div>未知组件类型: {cpType}</div>;

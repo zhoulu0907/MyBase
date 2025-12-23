@@ -46,7 +46,7 @@ import { debounce } from 'lodash-es';
 import { useCallback, useEffect, useState, type FC } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { ReactSVG } from 'react-svg';
-import { RELATIONSHIP_TYPE } from '../DataFactory/utils/types';
+import { RELATIONSHIP_TYPE } from '../DataFactory/utils/relation';
 import CopyModal from './components/Modals/CopyModal';
 import CreateModal from './components/Modals/CreateModal';
 import RenameModal from './components/Modals/RenameModal';
@@ -179,16 +179,15 @@ const PageManagerPage: FC = () => {
 
   useEffect(() => {
     const loadMainMetaData = async () => {
-      if (curMenu.value?.id) {
-        const req: GetPageSetIdReq = {
-          menuId: curMenu.value?.id
-        };
-        const pageSetId = await getPageSetId(req);
-        setMainMetaData(pageSetId);
-      }
+      console.log('loadMainMetaData curMenu.value: ', curMenu.value);
+      const req: GetPageSetIdReq = {
+        menuId: curMenu.value?.id
+      };
+      const pageSetId = await getPageSetId(req);
+      setMainMetaData(pageSetId);
     };
 
-    if (curMenu.value?.id) {
+    if (curMenu.value?.id && curMenu.value?.menuType === MenuType.PAGE) {
       loadMainMetaData();
     }
   }, [curMenu.value?.id]);
@@ -205,12 +204,14 @@ const PageManagerPage: FC = () => {
       key: menu.id,
       title: (
         <MyMenuItem
+          menuInfo={menu}
           showOption={showOption}
           menuID={menu.id || ''}
           isVisible={menu.isVisible}
           menuCode={menu.menuCode}
           menuName={menu.menuName}
           menuIcon={menu.menuIcon}
+          pagesetType={menu.pagesetType}
           isGroup={menu.menuType == MenuType.GROUP}
           maxWidth={maxWidth}
           label={menu.menuName}
@@ -476,8 +477,10 @@ const PageManagerPage: FC = () => {
         let editorType: string = EDITOR_TYPES.FORM_EDITOR;
         if (visibleCreateForm === 'workbench') {
           editorType = EDITOR_TYPES.WORKBENCH_EDITOR;
+          setCurMenu({ ...menuResp, pagesetType: PageType.WORKBENCH });
         } else {
           editorType = EDITOR_TYPES.FORM_EDITOR;
+          setCurMenu(menuResp);
         }
 
         navigate(`/onebase/${tenantId}/editor/${editorType}?pageSetId=${pageSetId}&appId=${curAppId}`);
@@ -781,7 +784,11 @@ const PageManagerPage: FC = () => {
                       </div>
 
                       <div className={styles.contentBody}>
-                        <PreviewContainer menuId={curMenu.value?.id} runtime={true} />
+                        <PreviewContainer
+                          menuId={curMenu.value?.id}
+                          runtime={true}
+                          pagesetType={curMenu.value?.pagesetType}
+                        />
                       </div>
                     </>
                   )}

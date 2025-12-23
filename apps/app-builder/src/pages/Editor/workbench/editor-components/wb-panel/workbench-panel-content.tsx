@@ -1,4 +1,3 @@
-import { useI18n } from '@/hooks/useI18n';
 import { Collapse } from '@arco-design/web-react';
 import IconCollapsedDown from '@/assets/images/collapse_down_icon.svg';
 import { ComponentList } from './component-list';
@@ -17,7 +16,6 @@ const COLLAPSE_ITEM_STYLE = {
  * 工作台组件面板内容
  */
 export function WorkbenchPanelContent({ keyword }: WorkbenchPanelContentProps) {
-  const { t } = useI18n();
   const basicItems = useWorkbenchItems({ keyword, category: 'basic' });
   const advancedItems = useWorkbenchItems({ keyword, category: 'advanced' });
 
@@ -30,7 +28,7 @@ export function WorkbenchPanelContent({ keyword }: WorkbenchPanelContentProps) {
       expandIcon={<img src={IconCollapsedDown} alt="" />}
     >
       <Collapse.Item
-        header={t('editor.basicComponent', '基础组件')}
+        header="基础组件"
         name="basic"
         key="basic"
         style={COLLAPSE_ITEM_STYLE.style}
@@ -44,7 +42,7 @@ export function WorkbenchPanelContent({ keyword }: WorkbenchPanelContentProps) {
       </Collapse.Item>
 
       <Collapse.Item
-        header={t('editor.advancedComponent', '高级组件')}
+        header="高级组件"
         name="advanced"
         key="advanced"
         style={COLLAPSE_ITEM_STYLE.style}
@@ -59,4 +57,3 @@ export function WorkbenchPanelContent({ keyword }: WorkbenchPanelContentProps) {
     </Collapse>
   );
 }
-

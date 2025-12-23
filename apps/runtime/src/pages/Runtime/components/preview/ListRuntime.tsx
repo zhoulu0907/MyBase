@@ -9,6 +9,7 @@ import {
   useListEditorSignal,
   type GridItem
 } from '@onebase/ui-kit';
+import { PageType } from '@onebase/app';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { Fragment, useEffect, useState } from 'react';
 import styles from './index.module.less';
@@ -18,9 +19,10 @@ interface ListRuntimeProps {
   runtime: boolean;
   showFromPageData: (id: string, toFormPage?: boolean) => void;
   refresh: number;
+  pageSetType?: PageType;
 }
 
-const ListRuntime: React.FC<ListRuntimeProps> = ({ pageSetId, runtime, showFromPageData, refresh }) => {
+const ListRuntime: React.FC<ListRuntimeProps> = ({ pageSetId, runtime, showFromPageData, refresh, pageSetType }) => {
   useSignals();
 
   const { components: listComponents, pageComponentSchemas: listPageComponentSchemas } = useListEditorSignal;
@@ -73,6 +75,7 @@ const ListRuntime: React.FC<ListRuntimeProps> = ({ pageSetId, runtime, showFromP
                   runtime={runtime}
                   showFromPageData={showFromPageData}
                   refresh={refresh}
+                  pageSetType={pageSetType}
                 />
               </div>
             </Fragment>

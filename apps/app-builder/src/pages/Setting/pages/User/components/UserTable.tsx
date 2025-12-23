@@ -96,7 +96,7 @@ export default function UserTable({
   const [resetPasswordModalVisible, setResetPasswordModalVisible] = useState(false);
   const [importModalVisible, setImportModalVisible] = useState(false); // 导入
   const [managerTypeModalVisible, setManagerTypeModalVisible] = useState<UserRole | null>(null); // 设置主管 or 管理员
-
+  const [isMultiple, setIsMultiple] = useState<boolean>(false);
   // 查询用户列表
   const getUserList = useCallback(
     async (searchValue?: string) => {
@@ -241,7 +241,7 @@ export default function UserTable({
       {
         title: '姓名',
         dataIndex: 'nickname',
-        width: 140,
+        width: 160,
         ellipsis: true,
         render: (_: any, record: UserRecord) => (
           <>
@@ -273,7 +273,7 @@ export default function UserTable({
           <span>{renderRoleList(record)}</span>
         )
       },
-      { title: '手机号', dataIndex: 'mobile', width: 140 },
+      { title: '手机号', dataIndex: 'mobile', width: 120 },
       {
         title: '邮箱',
         dataIndex: 'email',
@@ -369,6 +369,11 @@ export default function UserTable({
     if (!selectedDeptId) return Message.warning('请先选择部门');
     await getSimpleUsers({});
     setManagerTypeModalVisible(updateType);
+    if(updateType === UserRole.ADMIN) {
+      setIsMultiple(true);
+    }else {
+      setIsMultiple(false);
+    }
   };
 
   // 获取部门用户信息
@@ -525,6 +530,7 @@ export default function UserTable({
         visible={!!managerTypeModalVisible}
         data={userData}
         loading={memberLoading}
+        isMultiple={isMultiple}
         selectedMembers={selectedMembers || []}
         onSearch={debouncedUpdate}
         onConfirm={handleAddUser}

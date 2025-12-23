@@ -31,6 +31,7 @@ export interface ETLFlowMgmt {
 }
 
 export interface PingDatasourceReq {
+  id?: string;
   datasourceType: string;
   config: ETLDatasourceConfig;
 }
@@ -62,13 +63,25 @@ export interface UpdateDataSourceReq extends CreateDataSourceReq {
 
 export interface PageDatasourceReq {
   applicationId: string;
-  datasourceCode: string;
-  datasourceName: string;
-  datasourceType: string;
-  readonly: number;
-  collectStatus: string;
+  datasourceCode?: string;
+  datasourceName?: string;
+  datasourceType?: string;
+  readonly?: number;
+  collectStatus?: string;
   pageNo: number;
   pageSize: number;
+}
+
+export interface PageDatasourceItem {
+  id: string;
+  applicationId: string;
+  collectEndTime?: number;
+  collectStartTime?: number;
+  collectStatus?: string;
+  datasourceUuid?: string;
+  datasourceName?: string;
+  datasourceType?: string;
+  readonly?: number;
 }
 
 export interface PreviewDatasourceReq {
@@ -109,7 +122,9 @@ export interface ETLDatasourceOption {
 export interface ListAppETLDatasourceParams {
   applicationId: string;
   writable?: number;
+  readonly?: number;
 }
+
 export interface ListTableColumnsReq {
   tableUuid: string;
 }

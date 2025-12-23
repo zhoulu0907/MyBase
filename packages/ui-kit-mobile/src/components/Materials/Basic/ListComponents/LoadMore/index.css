@@ -36,6 +36,7 @@
     .search-form-wrapper {
       display: flex;
       align-items: center;
+      flex-direction: row;
     }
 
     .search-bar-form-item {
@@ -216,6 +217,24 @@
     .arco-button.arco-button-type-primary {
       background-color: rgb(var(--primary-6));
     }
+  }
+  .fileWrapper {
+    display: flex;
+    align-items: center;
+    &>div {
+      flex: 1;
+    }
+  }
+}
+
+.search-form-wrapper-ob-loadmore {
+  @media screen and (min-width: 900px) {
+    max-width: 450px !important;
+    left: 50% !important;
+    transform: translateX(-50%);
+  }
+  &.search-form-wrapper-ob-loadmore-editor {
+    left: calc(50% + 4px) !important;
   }
 }
 

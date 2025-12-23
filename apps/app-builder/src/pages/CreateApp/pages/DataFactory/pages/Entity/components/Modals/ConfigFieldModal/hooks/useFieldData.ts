@@ -43,17 +43,17 @@ export const useFieldData = (
       const res = await getEntityFieldsWithChildren(entity.entityId);
       const transformEntity = (entity: any, isChild = false) => ({
         label: isChild ? entity.childEntityName : entity.entityName,
-        value: isChild ? entity.childEntityId : entity.entityId,
+        value: isChild ? entity.childEntityUuid : entity.entityUuid,
         children: (isChild ? entity?.childFields || [] : entity?.parentFields || []).map((field: any) => ({
           label: field.displayName,
-          value: field.fieldId,
+          value: field.fieldUuid,
           fieldType: field.fieldType,
           isSystemField: field.isSystemField
         }))
       });
 
       const uniqueChildEntities = (res.childEntities || []).reduce((acc: any[], child: any) => {
-        const existingIndex = acc.findIndex((item) => item.childEntityId === child.childEntityId);
+        const existingIndex = acc.findIndex((item) => item.childEntityUuid === child.childEntityUuid);
         if (existingIndex === -1) {
           acc.push(child);
         }

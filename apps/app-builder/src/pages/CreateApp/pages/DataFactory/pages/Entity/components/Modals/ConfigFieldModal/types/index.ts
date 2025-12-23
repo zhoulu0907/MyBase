@@ -69,6 +69,7 @@ export interface FieldValidation {
   clearErrors: () => void;
   setFieldError: (fieldId: string, field: string, error: string) => void;
   setAllErrors: (errors: Record<string, string>) => void;
+  clearFieldError: (fieldKey: string) => void;
   errors: Record<string, string>;
 }
 
@@ -145,6 +146,7 @@ export interface AutoNumberRuleItem {
   resetCycle?: string;
   resetOnInitialChange?: number;
   startValue?: number;
+  refFieldUuid?: string;
 }
 
 // 资产及子表字段

@@ -10,9 +10,9 @@ import type { XInputUserSelectConfig } from './schema';
 
 import { getPopupContainer } from '@/utils';
 
-import { isRuntimeEnv } from '@onebase/common';
 import '../index.css';
 import './index.css';
+import { isRuntimeEnv, TokenManager } from '@onebase/common';
 
 const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const {
@@ -47,6 +47,7 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; d
   const runtimeRemoveRef = useRef<boolean>(false);
 
   const fieldValue = Form.useWatch(fieldName, form);
+  const tokenInfo = TokenManager.getTokenInfo();
 
   useEffect(() => {
     if (

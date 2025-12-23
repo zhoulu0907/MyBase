@@ -101,7 +101,6 @@ export function usePageEditorSignal(pageType?:string) {
     ? useListEditorSignal.clearSubTableComponents
     : useFormEditorSignal.clearSubTableComponents;
 
-
   return {
     curComponentID,
     setCurComponentID,

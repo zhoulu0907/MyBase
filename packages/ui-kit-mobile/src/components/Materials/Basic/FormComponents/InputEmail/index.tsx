@@ -7,8 +7,9 @@ import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, DEFAULT_VALUE_TYPE
 type XInputEmailConfig = typeof FormSchema.XInputEmailSchema.config;
 import '../index.css';
 
-const XInputEmail = memo((props: XInputEmailConfig & { runtime?: boolean; detailMode?: boolean }) => {
+const XInputEmail = memo((props: XInputEmailConfig & { runtime?: boolean; detailMode?: boolean; form?: any; }) => {
   const {
+    form,
     label,
     dataField,
     placeholder,
@@ -28,7 +29,9 @@ const XInputEmail = memo((props: XInputEmailConfig & { runtime?: boolean; detail
 
   const rules: ITypeRules<ValidatorType.Custom>[] = [
     {
+      required: verify?.required,
       type: ValidatorType.Custom,
+      message: `${label.text}是必填项`,
       validator: (value, callback) => {
         if (!value && verify?.required) {
           callback(`${label.text}是必填项`);
@@ -55,22 +58,14 @@ const XInputEmail = memo((props: XInputEmailConfig & { runtime?: boolean; detail
     >
       {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
         // 只读模式，渲染文本内容
-        <div style={{
-          textAlign: align,
-          padding: '8px'
-        }}>
-          --
-        </div>
+        <div className="readonlyText">{form?.getFieldValue(fieldId)}</div>
       ) : (
         // 编辑模式，渲染Input组件
         <Input
           type="email"
           placeholder={placeholder}
-          style={{
-            width: '100%',
-            textAlign: align
-          }}
           inputStyle={{ textAlign: align }}
+          blockChangeWhenCompositing={true}
         />
       )}
     </Form.Item>

@@ -15,7 +15,8 @@ import {
   type UpdatePagePermissionReq,
   type UpdateOperationPermissionReq,
   type AuthViewVO,
-  type UpdateViewPermissionReq
+  type UpdateViewPermissionReq,
+  PageType
 } from '@onebase/app';
 import styles from './index.module.less';
 import { IconEmpty } from '@arco-design/web-react/icon';
@@ -27,6 +28,7 @@ interface IProps {
   appId: string;
   menuId: string;
   roleId: string;
+  activeMenuPageType: number | undefined;
 }
 
 // 操作权限 Array
@@ -40,7 +42,7 @@ const PERMISSION_DICT = [
 ];
 
 // 功能权限
-const FuncPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
+const FuncPermission: FC<IProps> = ({ appId, menuId, roleId, activeMenuPageType }: IProps) => {
   const [form] = Form.useForm();
   const isPageAllowed = Form.useWatch('isPageAllowed', form);
   const isAllViewsAllowed = Form.useWatch('isAllViewsAllowed', form); // 监听字段变化
@@ -221,64 +223,69 @@ const FuncPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
             </div>
           </div>
 
-          <div className={styles.formItem}>
-            <div className={styles.itemHeader}>
-              <div className={styles.left}>操作权限</div>
-              <div className={styles.right}>
-                {PERMISSION_DICT.every((op) => funcPermission?.authOperationTags?.includes(op.value)) && '全部可操作'}
-              </div>
-            </div>
-            <div className={styles.itemContent}>
-              <Form.Item field="authOperations" noStyle>
-                <CheckboxGroup
-                  disabled={!isPageAllowed}
-                  options={PERMISSION_DICT}
-                  onChange={(values) => changeOperationPermission(values)}
-                />
-              </Form.Item>
-            </div>
-          </div>
-
-          {/*  视图权限 */}
-          <div className={styles.formItem}>
-            <div className={styles.itemHeader}>
-              <div className={styles.left}>视图权限</div>
-              <div className={styles.right}>{isAllViewsAllowed ? '全部可访问' : '部分可访问'}</div>
-            </div>
-            <div className={styles.viewItemContent}>
-              <Form.Item field="isAllViewsAllowed" noStyle>
-                <RadioGroup
-                  disabled={!isPageAllowed}
-                  direction="vertical"
-                  onChange={(value) => changeViewPermission(value)}
-                >
-                  <Radio value={FunViewPermission.AllViewVisitAllowed}>默认所有视图均可访问</Radio>
-                  <Radio value={FunViewPermission.ViewCustomFieldPermission}>自定义权限</Radio>
-                </RadioGroup>
-              </Form.Item>
-              {isAllViewsAllowed === FunViewPermission.ViewCustomFieldPermission && (
-                <div className={styles.checkboxGroup}>
-                  <Checkbox
-                    style={{ marginBottom: '5px' }}
-                    checked={isCustomAllViewsAllowed}
-                    indeterminate={viewPermIndeterminate}
-                    onChange={(value) => changeAllViewPermission(value)}
-                  >
-                    <span>全选</span>
-                  </Checkbox>
-                  <Form.Item field="authViews" noStyle>
+          {activeMenuPageType !== PageType.WORKBENCH && (
+            <>
+              <div className={styles.formItem}>
+                <div className={styles.itemHeader}>
+                  <div className={styles.left}>操作权限</div>
+                  <div className={styles.right}>
+                    {PERMISSION_DICT.every((op) => funcPermission?.authOperationTags?.includes(op.value)) &&
+                      '全部可操作'}
+                  </div>
+                </div>
+                <div className={styles.itemContent}>
+                  <Form.Item field="authOperations" noStyle>
                     <CheckboxGroup
-                      direction="vertical"
-                      options={viewPermissionOptions || []}
-                      onChange={(values) => {
-                        handleViewPermissionChange(values);
-                      }}
+                      disabled={!isPageAllowed}
+                      options={PERMISSION_DICT}
+                      onChange={(values) => changeOperationPermission(values)}
                     />
                   </Form.Item>
                 </div>
-              )}
-            </div>
-          </div>
+              </div>
+
+              {/*  视图权限 */}
+              <div className={styles.formItem}>
+                <div className={styles.itemHeader}>
+                  <div className={styles.left}>视图权限</div>
+                  <div className={styles.right}>{isAllViewsAllowed ? '全部可访问' : '部分可访问'}</div>
+                </div>
+                <div className={styles.viewItemContent}>
+                  <Form.Item field="isAllViewsAllowed" noStyle>
+                    <RadioGroup
+                      disabled={!isPageAllowed}
+                      direction="vertical"
+                      onChange={(value) => changeViewPermission(value)}
+                    >
+                      <Radio value={FunViewPermission.AllViewVisitAllowed}>默认所有视图均可访问</Radio>
+                      <Radio value={FunViewPermission.ViewCustomFieldPermission}>自定义权限</Radio>
+                    </RadioGroup>
+                  </Form.Item>
+                  {isAllViewsAllowed === FunViewPermission.ViewCustomFieldPermission && (
+                    <div className={styles.checkboxGroup}>
+                      <Checkbox
+                        style={{ marginBottom: '5px' }}
+                        checked={isCustomAllViewsAllowed}
+                        indeterminate={viewPermIndeterminate}
+                        onChange={(value) => changeAllViewPermission(value)}
+                      >
+                        <span>全选</span>
+                      </Checkbox>
+                      <Form.Item field="authViews" noStyle>
+                        <CheckboxGroup
+                          direction="vertical"
+                          options={viewPermissionOptions || []}
+                          onChange={(values) => {
+                            handleViewPermissionChange(values);
+                          }}
+                        />
+                      </Form.Item>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
         </Form>
       )}
     </>

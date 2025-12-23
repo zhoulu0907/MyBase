@@ -2,11 +2,14 @@ import { Button, Drawer, Form } from '@arco-design/web-react';
 import {
   EDITOR_TYPES,
   getComponentWidth,
+  getWorkbenchComponentWidth,
   PreviewRender,
   STATUS_OPTIONS,
   STATUS_VALUES,
   useFormEditorSignal,
   useListEditorSignal,
+  usePageEditorSignal,
+  useWorkbenchEditorSignal,
   type GridItem
 } from '@onebase/ui-kit';
 import classNames from 'classnames';
@@ -38,14 +41,38 @@ console.warn = (...args) => {
 const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType }) => {
   const { components: formComponents, pageComponentSchemas: formPageComponentSchemas } = useFormEditorSignal;
   const { components: listComponents, pageComponentSchemas: listPageComponentSchemas } = useListEditorSignal;
+  const { workbenchComponents, wbComponentSchemas } = useWorkbenchEditorSignal;
   const { editMode } = currentEditorSignal;
   const mobileEditorPreviewRef = useRef<MicroApp | null>(null);
+
+  const {
+    curComponentID,
+    setCurComponentID,
+    clearCurComponentID,
+    setCurComponentSchema,
+    setPageComponentSchemas,
+    delPageComponentSchemas,
+    showDeleteButton,
+    setShowDeleteButton,
+    subTableComponents,
+    setSubTableComponents,
+  } = usePageEditorSignal();
 
   const qiankunActions = initGlobalState({
     drag: false,
     components: pageType === EDITOR_TYPES.FORM_EDITOR ? formComponents.value : listComponents.value,
     pageComponentSchemas:
-      pageType === EDITOR_TYPES.FORM_EDITOR ? formPageComponentSchemas.value : listPageComponentSchemas.value
+      pageType === EDITOR_TYPES.FORM_EDITOR ? formPageComponentSchemas.value : listPageComponentSchemas.value,
+    curComponentID,
+    setCurComponentID,
+    clearCurComponentID,
+    setCurComponentSchema,
+    setPageComponentSchemas,
+    delPageComponentSchemas,
+    showDeleteButton,
+    setShowDeleteButton,
+    subTableComponents,
+    setSubTableComponents
   });
   useEffect(() => {
     console.log('loading mobile-editor-preview-list');
@@ -104,6 +131,7 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
       onCancel={() => {
         setVisible(false);
       }}
+      unmountOnExit
       bodyStyle={{ background: '#F2F3F5', padding: '0' }}
     >
       <div className={classNames(styles.previewPage, { [styles.mobilePreview]: editMode.value === EditMode.MOBILE })}>
@@ -128,6 +156,7 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
                         cpType={cp.type}
                         pageComponentSchema={listPageComponentSchemas.value[cp.id]}
                         runtime={true}
+                        pageType={pageType}
                         preview={true}
                       />
                     </div>
@@ -150,6 +179,37 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
               <div className={styles.footer}>
                 <Button type="default">取消</Button>
                 <Button type="primary">提交</Button>
+              </div>
+            </div>
+          )}
+
+          {pageType == EDITOR_TYPES.WORKBENCH_EDITOR && (
+            <div className={styles.fromContain}>
+              <div className={styles.previewForm}>
+                <Form layout="inline">
+                  {workbenchComponents.value.map((cp: GridItem) => (
+                    <Fragment key={cp.id}>
+                      {wbComponentSchemas?.value[cp.id]?.config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+                        <div
+                          key={cp.id}
+                          className={styles.componentItem}
+                          style={{
+                            width: `calc(${getWorkbenchComponentWidth(wbComponentSchemas.value[cp.id], cp.type)} - 8px)`,
+                            margin: '4px'
+                          }}
+                        >
+                          <PreviewRender
+                            cpId={cp.id}
+                            cpType={cp.type}
+                            pageComponentSchema={wbComponentSchemas.value[cp.id]}
+                            runtime={true}
+                            preview={true}
+                          />
+                        </div>
+                      )}
+                    </Fragment>
+                  ))}
+                </Form>
               </div>
             </div>
           )}

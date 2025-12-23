@@ -12,8 +12,12 @@ import {approvalConfigVar, displayStatusMap} from '../constant'
 const Step = Steps.Step;
 const AvatarGroup = Avatar.Group;
 
+let commentOpratorObx:any = {}
+let commentDomTimer:any = null;
+
 const DetailStep: FC<any> = ({ stepData }: any) => {
   const [current, setCurrent] = useState(0);
+  const [collapseObj, setCollapseObj] = useState<any>({})
 
   function renderDescript(nodeItem: any) {
     if (nodeItem) {
@@ -193,13 +197,27 @@ const DetailStep: FC<any> = ({ stepData }: any) => {
     const opperator = nodeItem?.operators?.[0];
     const userMap = displayStatusMap(opperator?.taskStatus);
     // 发起节点post_submitted 不需要显示 审批意见
-    const hasComment = opperator?.taskStatus !== 'post_submitted'
+    let hasComment = opperator?.taskStatus !== 'post_submitted'
+    let comment_key = opperator?.operator + opperator?.operatorTime + opperator?.taskStatus
+    if (opperator?.comment?.length && hasComment) {
+      hasComment = true
+      commentOpratorObx[comment_key] = opperator
+    } else {
+      hasComment = false
+    }
     return <>
       <div className="flex-bw-center user-temp">
         <p className="photo-img">{opperator?.avatar ? <img src={opperator.avatar} alt='' /> : opperator?.operator?.charAt(0)}</p>
         <div style={{ flex: 1 }}>
-          <p>{opperator?.operator}</p>
           <p className="flex-bw-center">
+            <span style={{fontSize: '14px'}}>{opperator?.operator}</span>
+            <span className="gray-color">
+              {(nodeItem?.displayTime || opperator?.operatorTime)
+                ? dayjs(nodeItem?.displayTime || opperator?.operatorTime).format('YYYY-MM-DD HH:mm:ss')
+                : '-'}
+            </span>
+          </p>
+          <p className="flex-bw-center get-width-temp">
             {
               (opperator?.autoCopyArr?.length > 0) ? 
                 <p style={{position: 'relative'}}>
@@ -207,20 +225,30 @@ const DetailStep: FC<any> = ({ stepData }: any) => {
                   <span className='auto-copy-color-span'>{opperator?.colorText}</span>
                   <span className='auto-copy-color-span absolute-span'>{opperator?.autoCopyArr?.length}人</span>
                 </p> : 
-                <span>
-                  <b className={`sp-options ${userMap?.labelColor}`}>{userMap?.label}</b>
-                  {(opperator?.comment && hasComment) && <span className="gray-color">&nbsp;({opperator?.comment})</span>}
-                </span>
+                <section>
+                  <p>
+                    <b className={`sp-options ${userMap?.labelColor}`}>{userMap?.label}</b>
+                    {hasComment && <span className={`gray-color many-node-comment ${collapseObj?.[comment_key]?.moreLineClass} ${collapseObj?.[comment_key]?.isOpen?'open':''}`} data-comment={comment_key}>({opperator.comment})</span>}
+                  </p>
+                  {(hasComment && collapseObj?.[comment_key]?.hasMoreBtn) && <p style={{textAlign: 'right'}}>
+                    <span style={{cursor: 'pointer'}} onClick={() => switchCollapse(opperator)}>{!collapseObj?.[comment_key]?.isOpen ? '展开' : '收起'}</span>
+                  </p>}
+                </section>
             }
-            <span className="gray-color">
-              {(nodeItem?.displayTime || opperator?.operatorTime)
-                ? dayjs(nodeItem?.displayTime || opperator?.operatorTime).format('YYYY-MM-DD HH:mm:ss')
-                : '-'}
-            </span>
           </p>
         </div>
       </div>
     </>
+  }
+
+  function switchCollapse(operatorItem: any) {
+    const key = operatorItem?.operator + operatorItem?.operatorTime + operatorItem?.taskStatus
+    const tempObx = JSON.parse(JSON.stringify(collapseObj))
+    const curColObx = tempObx[key]
+    if (curColObx) {
+      curColObx['isOpen'] = !curColObx['isOpen']
+    }
+    setCollapseObj(tempObx)
   }
 
   const ProcessFlow = ({ data }: any) => {
@@ -247,14 +275,62 @@ const DetailStep: FC<any> = ({ stepData }: any) => {
     );
   };
 
+  function clearDomTimer() {
+    if (commentDomTimer) {
+      clearTimeout(commentDomTimer)
+      commentDomTimer = null
+    }
+  }
+  function afterDomRender() {
+    // 计算dom
+    clearDomTimer()
+    commentDomTimer = window.setTimeout(() => {
+      clearDomTimer()
+      let $commentDomArr = document.querySelectorAll('.many-node-comment[data-comment]')
+      if ($commentDomArr?.length > 0) {
+        let displayHeight = 0;
+        let realHeight = 0;
+        let collapseObx = JSON.parse(JSON.stringify(collapseObj))
+        let domKey;
+        let tempDomWidth = 0;
+        let displayWidth = 0;
+        $commentDomArr.forEach($dom => {
+          displayHeight = $dom?.clientHeight || 0;
+          realHeight = $dom?.scrollHeight || 0;
+          if (displayHeight > 0 && realHeight > 0) {
+            tempDomWidth = document.querySelector('.get-width-temp')?.clientWidth || 0;
+            displayWidth = $dom.clientWidth || 0;
+            domKey = $dom.getAttribute('data-comment')
+            if (domKey) {
+              let curColObx = collapseObx[domKey] || {isOpen: false, hasMoreBtn: false, moreLineClass: 'one-line'};
+              if (realHeight > (displayHeight + 10)) {
+                curColObx.hasMoreBtn = true
+              }
+              if (displayWidth >= tempDomWidth) {
+                curColObx.moreLineClass = 'more-line'
+              }
+              collapseObx[domKey] = curColObx;
+              setCollapseObj(collapseObx)
+            }
+          }
+        })
+      }
+    }, 100)
+  }
+
   useEffect(() => {
     if (Array.isArray(stepData)) {
+      commentOpratorObx = {}
       for(let k = 0; k < stepData.length; k++) {
         if (stepData[k]?.isCurrent) {
           setCurrent(k + 1)
           break;
         }
       }
+      let tt = setTimeout(() => {
+        clearTimeout(tt)
+        afterDomRender()
+      }, 100);
     }
   }, [stepData]);
 

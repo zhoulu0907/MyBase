@@ -13,3 +13,4 @@ export * from './security';
 export * from './tenant';
 export * from './user';
 export * from './dashbord';
+export * from './externaluser';

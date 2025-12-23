@@ -1,5 +1,6 @@
 import { memo } from 'react';
 import { nanoid } from 'nanoid';
+import dayjs from 'dayjs';
 import { DatePicker, Ellipsis, Form } from '@arco-design/mobile-react';
 import { ValidatorType, ITypeRules } from '@arco-design/mobile-utils';
 
@@ -15,6 +16,7 @@ import '../index.css';
 
 const XDateTimePicker = memo((props: XDateTimePickerConfig & { runtime?: boolean; detailMode?: boolean; form?: any }) => {
   const {
+    form,
     label,
     dataField,
     status,
@@ -23,8 +25,7 @@ const XDateTimePicker = memo((props: XDateTimePickerConfig & { runtime?: boolean
     verify,
     layout,
     runtime = true,
-    detailMode,
-    form
+    detailMode
   } = props;
 
   // 生成唯一的字段ID
@@ -34,12 +35,9 @@ const XDateTimePicker = memo((props: XDateTimePickerConfig & { runtime?: boolean
 
   const rules: ITypeRules<ValidatorType.Custom>[] = [
     {
+      required: verify?.required,
       type: ValidatorType.Custom,
-      validator: (value, callback) => {
-        if (!value && verify?.required) {
-          callback(`${label.text}是必填项`);
-        }
-      }
+      message: `${label.text}是必填项`
     }
   ];
 
@@ -57,13 +55,15 @@ const XDateTimePicker = memo((props: XDateTimePickerConfig & { runtime?: boolean
       }}
     >
       {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
-        <div>--</div>
+        <div className="readonlyText">{dayjs(form?.getFieldValue(fieldId)).format('YYYY-MM-DD hh:mm:ss')}</div>
       ) : (
         <DatePicker
           title={label.text}
           maskClosable
           // typeArr={['year', 'month', 'date', 'hour', 'minute']}
           mode='datetime'
+          minTs={new Date(1900, 0, 1).getTime()}
+          maxTs={new Date(2099, 11, 31).getTime()}
           formatter={(value, type) => {
             const map = {
               year: '年',

@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   admin-console:
-    image: ${IMAGE_NAME_ADMIN_CONSOLE:-onebase-v3-fe/admin-console:latest}
+    image: ${IMAGE_NAME_ADMIN_CONSOLE:-onebase-v3-fe/fe-nginx:latest}
     container_name: onebase-admin-console
     ports:
       - '${ADMIN_CONSOLE_PORT:-4400}:80'
@@ -16,10 +16,11 @@ services:
       retries: 3
       start_period: 10s
     volumes:
+      - ./apps/admin-console/dist:/usr/share/nginx/html
       - ./config/console_config.js:/usr/share/nginx/html/config.js
 
   app-builder:
-    image: ${IMAGE_NAME_APP_BUILDER:-onebase-v3-fe/app-builder:latest}
+    image: ${IMAGE_NAME_APP_BUILDER:-onebase-v3-fe/fe-nginx:latest}
     container_name: onebase-app-builder
     ports:
       - '${APP_BUILDER_PORT:-4399}:80'
@@ -33,10 +34,11 @@ services:
       retries: 3
       start_period: 10s
     volumes:
+      - ./apps/app-builder/dist:/usr/share/nginx/html
       - ./config/builder_config.js:/usr/share/nginx/html/config.js
 
   runtime:
-    image: ${IMAGE_NAME_RUNTIME:-onebase-v3-fe/runtime:latest}
+    image: ${IMAGE_NAME_RUNTIME:-onebase-v3-fe/fe-nginx:latest}
     container_name: onebase-runtime
     ports:
       - '${RUNTIME_PORT:-9527}:80'
@@ -50,7 +52,44 @@ services:
       retries: 3
       start_period: 10s
     volumes:
+      - ./apps/runtime/dist:/usr/share/nginx/html
       - ./config/runtime_config.js:/usr/share/nginx/html/config.js
+
+  mobile-runtime:
+    image: ${IMAGE_NAME_MOBILE_RUNTIME:-onebase-v3-fe/fe-nginx:latest}
+    container_name: onebase-mobile-runtime
+    ports:
+      - '${MOBILE_RUNTIME_PORT:-9528}:80'
+    restart: unless-stopped
+    networks:
+      - onebase-network
+    healthcheck:
+      test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://localhost/']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    volumes:
+      - ./apps/mobile-runtime/dist:/usr/share/nginx/html
+      - ./config/mobile_runtime_config.js:/usr/share/nginx/html/config.js
+
+  mobile-editor:
+    image: ${IMAGE_NAME_MOBILE_EDITOR:-onebase-v3-fe/fe-nginx:latest}
+    container_name: onebase-mobile-editor
+    ports:
+      - '${MOBILE_EDITOR_PORT:-4401}:80'
+    restart: unless-stopped
+    networks:
+      - onebase-network
+    healthcheck:
+      test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://localhost/']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    volumes:
+      - ./apps/mobile-editor/dist:/usr/share/nginx/html
+      - ./config/mobile_editor_config.js:/usr/share/nginx/html/config.js
 
 networks:
   onebase-network:

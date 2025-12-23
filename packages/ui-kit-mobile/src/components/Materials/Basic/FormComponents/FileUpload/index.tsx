@@ -1,10 +1,13 @@
 import { Form, Uploader, Toast, Loading, Ellipsis } from '@arco-design/mobile-react';
 import { type UploadItem } from '@arco-design/mobile-react/lib/Upload';
-import { IconDelete, IconClose, IconDownload, IconFile } from '@arco-design/mobile-react/esm/icon';
+import { FileListMethods } from '@arco-design/mobile-react/cjs/uploader';
+import { IconDelete, IconClose, IconDownload } from '@arco-design/mobile-react/esm/icon';
 import { uploadFile } from '@onebase/platform-center';
 import { nanoid } from 'nanoid';
 import { memo, useState, useEffect } from 'react';
-import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, FormSchema } from '@onebase/ui-kit';
+import { attachmentDownload, menuSignal } from '@onebase/app';
+import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, FormSchema, downloadFileByUrl } from '@onebase/ui-kit';
+import DownloadLink from '@/assets/images/download_link.svg';
 import '../index.css';
 import './index.css'
 
@@ -17,9 +20,11 @@ interface FileItem {
   file?: File;
   name?: string;
   id?: string;
+  type: string;
+  response?: string;
 }
 
-const XFileUpload = memo((props: XFileUploadConfig & { runtime?: boolean; detailMode?: boolean; form?: any; }) => {
+const XFileUpload = memo((props: XFileUploadConfig & { runtime?: boolean; detailMode?: boolean; recordId?: string; form?: any; }) => {
   const {
     label,
     dataField,
@@ -28,8 +33,12 @@ const XFileUpload = memo((props: XFileUploadConfig & { runtime?: boolean; detail
     layout,
     runtime = true,
     detailMode,
-    form
+    form,
+    showDownload,
   } = props;
+
+  const [tableName, fieldName] = dataField;
+  const { curMenu } = menuSignal;
 
   const [filesList, setFilesList] = useState<FileItem[]>([]);
   const fieldId =
@@ -76,22 +85,22 @@ const XFileUpload = memo((props: XFileUploadConfig & { runtime?: boolean; detail
   };
 
   // 自定义文件列表展示
-  const renderUploadList = (fileListMethods) => {
+  const renderUploadList = (fileListMethods: FileListMethods) => {
     const getFileIcon = (file: UploadItem) => {
       if (file?.name) {
         // todo  根据文件类型展示不同icon
         const index = file.name.lastIndexOf('.');
         const type = file.name.slice(index + 1)
       }
-      return <IconFile style={{ fontSize: '40px' }} />
+      return <img src={DownloadLink} alt="download_link" />;
     }
     
     return (
       <div className="uplaodList-text">
-        {filesList.map(({ file, status, url, name }, index) => (
+        {filesList.map(({ id, type, status, url, name, response }, index) => (
           <div key={index} className="uplaodList-text-item">
-            {getFileIcon(file as UploadItem)}
-            <div className="uplaodList-text-item-name">{file?.name || name}</div>
+            {getFileIcon(type as UploadItem)}
+            <div className="uplaodList-text-item-name">{name}</div>
             {status && status !== 'loaded' ? (
               <div className="uplaodList-text-item-process">
                 <Loading type="circle" radius={7} />
@@ -102,16 +111,29 @@ const XFileUpload = memo((props: XFileUploadConfig & { runtime?: boolean; detail
               </div>
             ) : (
               <div className="uplaodList-text-item-opera">
-                <IconDownload
-                  onClick={() => {
-                    if (url && file?.name) {
-                      // downloadFileByUrl(file.url, file.name);
+                {showDownload && <IconDownload
+                  style={{ color: 'rgb(var(--primary-6))' }}
+                  onClick={async (e) => {
+                    e.stopPropagation();
+
+                    if (url && name) {
+                        const lastIndexOf = fieldName.lastIndexOf('.');
+                        const curFieldName = lastIndexOf === -1 ? fieldName : fieldName.slice(lastIndexOf + 1);
+                        const param = {
+                          menuId: curMenu.value?.id,
+                          id: form?.getFieldValue('id') || '',
+                          fieldName: curFieldName,
+                          fileId: id || response || ''
+                        };
+
+                        const fileUrl = await attachmentDownload(tableName, param);
+                        downloadFileByUrl(fileUrl, name);
                     }
                   }}
-                />
-                <IconDelete
+                />}
+                {!detailMode && <IconDelete
                   onClick={() => fileListMethods.deleteFile(index)}
-                />
+                />}
               </div>
             )}
           </div>

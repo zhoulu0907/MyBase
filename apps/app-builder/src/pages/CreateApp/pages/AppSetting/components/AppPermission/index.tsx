@@ -1,4 +1,4 @@
-import { Empty, Menu, Message, Popconfirm } from '@arco-design/web-react';
+import { Empty, Menu, Message, Popconfirm, Tabs } from '@arco-design/web-react';
 import { IconClose, IconEdit, IconPlus, IconUser } from '@arco-design/web-react/icon';
 import {
   createRole,
@@ -20,6 +20,7 @@ import { useSearchParams } from 'react-router-dom';
 import RoleInfo from '../Role';
 import styles from './index.module.less';
 import InputRoleName from './inputRoleName';
+import TabPane from '@arco-design/web-react/es/Tabs/tab-pane';
 
 const MenuItem = Menu.Item;
 
@@ -32,6 +33,7 @@ const AppPermission: FC = () => {
   const [searchParams] = useSearchParams();
   const appId = searchParams.get('appId') || '';
 
+  const [activeRoleTab, setActiveRoleTab] = useState<string>('1');
   const [activeTab, setActiveTab] = useState<string>('');
   const [showEmpty, setShowEmpty] = useState<boolean>(false);
   const [roleList, setRoleList] = useState<Role[]>([]);
@@ -42,6 +44,10 @@ const AppPermission: FC = () => {
   const [hoveredRoleId, setHoveredRoleId] = useState<string>(''); // 新增状态用于跟踪鼠标悬停的角色ID
 
   const adminData: Role | undefined = roleList?.find((role) => role.roleType === RoleType.ADMIN);
+  const userData: Role[] = roleList?.filter(
+    (role) => role.roleType !== RoleType.ADMIN && role.roleType !== RoleType.OUTERUSER
+  );
+  const outerUserData: Role[] = roleList?.filter((role) => role.roleType === RoleType.OUTERUSER);
   const notAdminData: Role | undefined = roleList?.find(
     (role) => role.roleType !== RoleType.ADMIN && role.id === activeTab
   );
@@ -133,12 +139,150 @@ const AppPermission: FC = () => {
     setShowEmpty(true);
   };
 
+  // 切换Tab
+  const handleActiveRoleTab = (value: string) => {
+    setActiveRoleTab(value);
+    switch (value) {
+      case RoleType.ADMIN.toString():
+        if (adminData) {
+          setActiveTab(adminData.id);
+        }
+        break;
+      case RoleType.USER.toString():
+        if (userData.length > 0) {
+          setActiveTab(userData[0].id);
+        }
+        break;
+      default:
+        if (outerUserData.length > 0) {
+          setActiveTab(outerUserData[0].id);
+        }
+        break;
+    }
+  };
+
   if (!adminData?.id) return null;
 
   return (
     <div className={styles.AppPermission}>
       <div className={styles.left}>
-        {adminData && adminData?.id && (
+        <Tabs defaultActiveTab="1" activeTab={activeRoleTab} onChange={handleActiveRoleTab} className={styles.roleTabs}>
+          <TabPane key={RoleType.ADMIN} title="管理角色">
+            <div>
+              <span className={styles.roleLabel}>全部管理角色(1)</span>
+              <Menu className={styles.menu} defaultSelectedKeys={[adminData.id]} onClickMenuItem={handleSelectmenu}>
+                {adminData && adminData?.id && (
+                  <MenuItem key={adminData?.id || ''}>
+                    <IconUser />
+                    {adminData?.roleName}
+                  </MenuItem>
+                )}
+              </Menu>
+            </div>
+          </TabPane>
+          <TabPane key={RoleType.USER} title="用户角色">
+            <div>
+              <div className={styles.userHeader}>
+                <span className={styles.roleLabel}>全部用户角色({userData.length})</span>
+                <div
+                  className={styles.addRoleBox}
+                  onClick={() => {
+                    setAddRole(true);
+                  }}
+                >
+                  <IconPlus className={styles.addRole} />
+                  新建
+                </div>
+              </div>
+
+              {userData.length > 0 && (
+                <Menu
+                  className={styles.menu}
+                  selectedKeys={[activeTab]}
+                  defaultSelectedKeys={[userData[0].id]}
+                  onClickMenuItem={handleSelectmenu}
+                >
+                  {userData.map((role) => (
+                    <MenuItem
+                      className={styles.menuItem}
+                      key={role.id ?? ''}
+                      onMouseEnter={() => setHoveredRoleId(role.id)} // 鼠标进入时设置hoveredRoleId
+                      onMouseLeave={() => setHoveredRoleId('')} // 鼠标离开时清空hoveredRoleId
+                    >
+                      <div className={styles.custom}>
+                        <IconUser className={styles.userIcon} />
+                        {updateRoleId === role.id ? (
+                          <InputRoleName
+                            defaultValue={role.roleName}
+                            onPressEnter={handlePressEnter}
+                            onBlur={(e) => {
+                              handlePressEnter(e);
+                              setUpdateRoleId('');
+                            }}
+                          />
+                        ) : (
+                          <>
+                            {role.roleName}
+                            {role.roleType === RoleType.CUSTOM && (
+                              <IconEdit
+                                onClick={() => setUpdateRoleId(role.id)}
+                                className={styles.editIcon}
+                                style={{
+                                  opacity: hoveredRoleId === role.id ? EditOpacity.show : EditOpacity.hide,
+                                  transition: 'opacity 0.2s'
+                                }}
+                              />
+                            )}
+                          </>
+                        )}
+                      </div>
+                      <Popconfirm
+                        focusLock
+                        title="删除角色"
+                        content="确定要删除这个角色吗？"
+                        onOk={() => handleDeleteRole(role.id)}
+                      >
+                        {role.roleType === RoleType.CUSTOM && <IconClose className={styles.deleteIcon} />}
+                      </Popconfirm>
+                    </MenuItem>
+                  ))}
+                  {addRole && (
+                    <div>
+                      <InputRoleName
+                        width={'100%'}
+                        onPressEnter={handlePressEnter}
+                        onBlur={(e) => {
+                          handlePressEnter(e);
+                          setAddRole(false);
+                        }}
+                      />
+                    </div>
+                  )}
+                </Menu>
+              )}
+            </div>
+          </TabPane>
+          <TabPane key={RoleType.OUTERUSER} title="外部角色">
+            <div>
+              <span className={styles.roleLabel}>全部外部用户角色({outerUserData.length})</span>
+              {outerUserData.length > 0 && (
+                <Menu
+                  className={styles.menu}
+                  defaultSelectedKeys={[outerUserData[0].id]}
+                  onClickMenuItem={handleSelectmenu}
+                >
+                  {outerUserData.map((item) => (
+                    <MenuItem key={item.id ?? ''}>
+                      <IconUser />
+                      {item.roleName}
+                    </MenuItem>
+                  ))}
+                </Menu>
+              )}
+            </div>
+          </TabPane>
+        </Tabs>
+        {/* {adminData && adminData?.id && (
           <Menu className={styles.menu} defaultSelectedKeys={[adminData.id]} onClickMenuItem={handleSelectmenu}>
             {
               <div className={styles.user} key={adminData?.id}>
@@ -221,7 +365,7 @@ const AppPermission: FC = () => {
         >
           <IconPlus className={styles.addRole} />
           添加角色
-        </div>
+        </div> */}
       </div>
       <div className={styles.right}>
         {!activeTab || showEmpty ? (

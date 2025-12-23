@@ -4,12 +4,17 @@ import {
   FORM_COMPONENT_TYPES,
   LIST_COMPONENT_TYPES,
   SHOW_COMPONENT_TYPES,
+  WORKBENCH_COMPONENT_TYPES,
   getComponentConfig,
   ALIGN_OPTIONS,
+  hasWorkbenchComponentSchema,
+  getWorkbenchComponentConfig,
+  WorkbenchComponentType,
 } from '@onebase/ui-kit';
 import { FormComp } from '@/components/Materials/Basic/FormComponents';
 import { ShowComp } from '@/components/Materials/Basic/ShowComponents';
 import { ListComp } from '@/components/Materials/Basic/ListComponents';
+import { WorkbenchComp } from '@/components/Materials/Workbench';
 
 // TODO(mickey): 解决样式隔离问题
 import '@arco-design/mobile-react/dist/style.css';
@@ -29,17 +34,23 @@ interface ComponentRenderProps {
   /** 组件预览状态 */
   runtime: boolean;
   form?: any;
+  /** signal传递 */
+  useStoreSignals?: any;
 }
 
 /**
  * ComponentRender 组件
  * 用于渲染传入的组件，支持适配各类组件
  */
-const ComponentEditRender: React.FC<ComponentRenderProps> = ({ cpId, cpType, pageComponentSchema, runtime, form }) => {
+const ComponentEditRender: React.FC<ComponentRenderProps> = ({ cpId, cpType, pageComponentSchema, runtime, form, useStoreSignals }) => {
+  
+  // 判断是否为工作台组件类型
+  const isWorkbenchType = hasWorkbenchComponentSchema(cpType);
+  
   // 获取组件配置
-
-  const componentConfig = getComponentConfig(pageComponentSchema, cpType);
+  const componentConfig = isWorkbenchType ? getWorkbenchComponentConfig(pageComponentSchema, cpType as WorkbenchComponentType) : getComponentConfig(pageComponentSchema, cpType);
   componentConfig.align = ALIGN_VALUES[ALIGN_OPTIONS.RIGHT];
+  componentConfig.width = '100%';
 
   // 渲染对应的组件
   const renderComponent = () => {
@@ -89,7 +100,9 @@ const ComponentEditRender: React.FC<ComponentRenderProps> = ({ cpId, cpType, pag
       case FORM_COMPONENT_TYPES.USER_MULTIPLE_SELECT:
         return <FormComp.XUserSelect cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} form={form} isMultiple />;
       case FORM_COMPONENT_TYPES.SUB_TABLE:
-        return <FormComp.XSubTable cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+        return <FormComp.XSubTable cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} useStoreSignals={useStoreSignals} />;
+      case FORM_COMPONENT_TYPES.DATA_SELECT:
+        return <FormComp.XDataSelect cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} form={form} />;
 
       //  展示组件
       case SHOW_COMPONENT_TYPES.INFO_NOTICE:
@@ -112,6 +125,15 @@ const ComponentEditRender: React.FC<ComponentRenderProps> = ({ cpId, cpType, pag
         return <ListComp.XLoadMore cpName={cpId} id={cpId} {...componentConfig} editMode={true} runtime={runtime} />;
       case LIST_COMPONENT_TYPES.CAROUSEL:
         return <ListComp.XCarousel cpName={cpId} id={cpId} {...componentConfig} editMode={true} runtime={runtime} />;
+
+      //  工作台组件
+      case WORKBENCH_COMPONENT_TYPES.QUICK_ENTRY:
+        return <WorkbenchComp.XQuickEntry cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+      case WORKBENCH_COMPONENT_TYPES.RICH_TEXT_WORKBENCH:
+        return <WorkbenchComp.XRichTextEditorWorkbench cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+      case WORKBENCH_COMPONENT_TYPES.CAROUSEL_WORKBENCH:
+        return <WorkbenchComp.XCarouselWorkbench cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+
       default:
         return <div>未知组件类型: {cpType}</div>;
     }

@@ -1,3 +1,4 @@
+import { FormulaEditor } from '@/components/FormulaEditor';
 import {
   Button,
   Divider,
@@ -15,8 +16,14 @@ import {
 import { IconDelete, IconLaunch, IconMoreVertical, IconPlus } from '@arco-design/web-react/icon';
 import { FieldType, InteractionActionType, VALIDATION_TYPE } from '@onebase/app';
 import { listToTree } from '@onebase/common';
-import { getDeptList, getSimpleUserPage } from '@onebase/platform-center';
-import { FORM_COMPONENT_TYPES, useFormEditorSignal, usePageViewEditorSignal } from '@onebase/ui-kit';
+import { getDeptList, getSimpleUserPage, type DictData } from '@onebase/platform-center';
+import {
+  FORM_COMPONENT_TYPES,
+  getFieldOptionsConfig,
+  useAppEntityStore,
+  useFormEditorSignal,
+  usePageViewEditorSignal
+} from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
@@ -85,6 +92,7 @@ interface Rule {
 
 const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, onCancel, onOk }) => {
   useSignals();
+  const { mainEntity, subEntities } = useAppEntityStore();
   const { components, pageComponentSchemas } = useFormEditorSignal;
   const { curViewId, pageViews, updatePageView } = usePageViewEditorSignal;
 
@@ -97,14 +105,22 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
   const [userTotal, setUserTotal] = useState<number | string>(0);
   const [fetching, setFetching] = useState<boolean>(false);
 
+  // 存储每个 cpId 对应的选项
+  const [fieldOptionsMap, setFieldOptionsMap] = useState<Record<string, DictData[]>>({});
+
+  // 公式
+  const [formulaVisible, setFormulaVisible] = useState<boolean>(false);
+  const [formulaFieldKey, setFormulaFieldKey] = useState<string>('');
+  const [formulaData, setFormulaData] = useState<string>('');
+
   // 获取组件下拉列表
   const getComponentOptions = () => {
     const cpOptions = Object.values(pageComponentSchemas.value)
       // 过滤图片、文件、子表
       .filter((item: any) => {
         return ![
-          FORM_COMPONENT_TYPES.IMG_UPLOAD,
-          FORM_COMPONENT_TYPES.FILE_UPLOAD,
+          //   FORM_COMPONENT_TYPES.IMG_UPLOAD,
+          //   FORM_COMPONENT_TYPES.FILE_UPLOAD,
           FORM_COMPONENT_TYPES.SUB_TABLE
         ].includes(item?.type);
       })
@@ -126,6 +142,8 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
   const isInitializingRef = React.useRef(false);
   // 使用 ref 存储上一次设置的 rule id，避免重复设置相同的值
   const lastSetRuleIdRef = React.useRef<string>('');
+  // 使用 ref 存储原始数据，用于取消时恢复
+  const originalRulesRef = React.useRef<Rule[]>([]);
 
   const [rules, setRules] = useState<Rule[]>([]);
   const [curRule, setCurRule] = useState<string>('');
@@ -133,10 +151,14 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
   // 当 modal 打开时，重新加载 rules
   useEffect(() => {
     if (visible) {
-      const initialRules = pageViews.value[curViewId.value]?.interactionRules || [];
-      setRules(initialRules);
-      if (initialRules.length > 0) {
-        setCurRule(initialRules[0].id);
+      const initialRules = pageViews.value[curViewId.value]?.interactionRules;
+      // 深拷贝原始数据，避免引用问题
+      // 如果 initialRules 是 undefined 或 null，使用空数组
+      const clonedRules = initialRules ? JSON.parse(JSON.stringify(initialRules)) : [];
+      originalRulesRef.current = clonedRules;
+      setRules(clonedRules);
+      if (clonedRules.length > 0) {
+        setCurRule(clonedRules[0].id);
         lastSetRuleIdRef.current = ''; // 重置，确保会设置表单
       } else {
         setCurRule('');
@@ -144,6 +166,12 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
       }
       handleGetUsers();
       hadleGetDept();
+    } else {
+      // 弹窗关闭时，重置状态
+      setRules([]);
+      setCurRule('');
+      lastSetRuleIdRef.current = '';
+      form.resetFields();
     }
   }, [visible, curViewId.value]);
 
@@ -195,6 +223,8 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
   };
 
   const handleCancel = () => {
+    // 不需要恢复 pageViews.value，因为 onValuesChange 只更新了 rules state，没有更新 pageViews.value
+    // 关闭弹窗后，下次打开时会从 pageViews.value 重新读取数据
     onCancel();
   };
 
@@ -248,7 +278,12 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
     });
   };
 
-  const renderValueFormItem: any = (cpId: string) => {
+  // 异步加载字段选项
+  const loadFieldOptions = async (cpId: string) => {
+    if (!cpId || fieldOptionsMap[cpId]) {
+      return; // 已经加载过或 cpId 为空
+    }
+
     const component = components.value.find((item: any) => item?.id === cpId);
     if (component?.type) {
       switch (component?.type) {
@@ -256,8 +291,49 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
         case FORM_COMPONENT_TYPES.SELECT_MUTIPLE:
         case FORM_COMPONENT_TYPES.RADIO:
         case FORM_COMPONENT_TYPES.CHECKBOX:
-          const options = pageComponentSchemas.value[cpId]?.config?.defaultOptionsConfig?.defaultOptions || [];
-          return <Select options={options} placeholder="请选择静态值" />;
+          const dataField = pageComponentSchemas.value[cpId]?.config.dataField;
+          if (dataField) {
+            const [, fieldName] = dataField;
+            let options: DictData[] = [];
+            const index = fieldName?.indexOf('.');
+            const lastIndex = fieldName?.lastIndexOf('.');
+            if (index !== -1) {
+              const subTableName = fieldName.slice(0, index);
+              const subFieldName = lastIndex === -1 ? fieldName : fieldName.slice(lastIndex + 1);
+              options = await getFieldOptionsConfig([subTableName, subFieldName], mainEntity, subEntities);
+            } else {
+              options = await getFieldOptionsConfig(dataField, mainEntity, subEntities);
+            }
+            setFieldOptionsMap((prev) => ({ ...prev, [cpId]: options }));
+          }
+          break;
+      }
+    }
+  };
+
+  // 同步渲染表单项组件
+  const renderValueFormItem = (cpId: string) => {
+    const component = components.value.find((item: any) => item?.id === cpId);
+    if (component?.type) {
+      switch (component?.type) {
+        case FORM_COMPONENT_TYPES.SELECT_ONE:
+        case FORM_COMPONENT_TYPES.SELECT_MUTIPLE:
+        case FORM_COMPONENT_TYPES.RADIO:
+        case FORM_COMPONENT_TYPES.CHECKBOX:
+          const options = fieldOptionsMap[cpId] || [];
+          // 如果选项还未加载，触发加载
+          if (cpId && !fieldOptionsMap[cpId]) {
+            loadFieldOptions(cpId);
+          }
+          return (
+            <Select options={options} placeholder="请选择静态值">
+              {options.map((ele, index: number) => (
+                <Select.Option key={index} value={ele.id}>
+                  {ele.label}
+                </Select.Option>
+              ))}
+            </Select>
+          );
         case FORM_COMPONENT_TYPES.USER_SELECT:
           return (
             <Select placeholder="请选择人员" allowClear showSearch={true} onPopupScroll={scrollHandler}>
@@ -287,7 +363,6 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
     const { list, total } = await getSimpleUserPage(param);
     setUserOptions(list || []);
     setUserTotal(total);
-    // console.log('res: ', res);
   };
 
   // 滚动加载
@@ -313,6 +388,20 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
     const res = await getDeptList({});
     const treeData = listToTree(res, {}, true);
     setDeptTree(treeData);
+  };
+
+  // 公式
+  const openFormulaEditor = (fieldKey: string) => {
+    setFormulaVisible(true);
+    setFormulaData(form.getFieldValue(fieldKey)?.formulaData);
+    setFormulaFieldKey(fieldKey);
+  };
+
+  const handleFormulaConfirm = (formulaData: string, formattedFormula: string, params: any) => {
+    setFormulaVisible(false);
+    form.setFieldValue(formulaFieldKey, { formulaData: formulaData, formula: formattedFormula, parameters: params });
+    setFormulaData('');
+    setFormulaFieldKey('');
   };
 
   return (
@@ -395,7 +484,7 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
             <Form
               layout="vertical"
               form={form}
-              onValuesChange={(changeValue: any, values: any) => {
+              onValuesChange={(_changeValue: any, values: any) => {
                 // 如果正在初始化表单，跳过更新 rules，避免无限循环
                 if (isInitializingRef.current) {
                   return;
@@ -462,6 +551,10 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
                                                           form.setFieldValue(item.field + '.op', undefined);
                                                           form.setFieldValue(item.field + '.operatorType', undefined);
                                                           form.setFieldValue(item.field + '.value', undefined);
+                                                          // 加载字段选项
+                                                          if (_value) {
+                                                            loadFieldOptions(_value);
+                                                          }
                                                         }}
                                                       />
                                                     </Form.Item>
@@ -543,7 +636,7 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
                                                             FieldType.FORMULA && (
                                                             <Form.Item field={item.field + '.value'}>
                                                               <Button
-                                                                //   onClick={() => openFormulaEditor(item.field + '.value')}
+                                                                onClick={() => openFormulaEditor(item.field + '.value')}
                                                                 long
                                                               >
                                                                 {form.getFieldValue(item.field + '.value')
@@ -673,7 +766,12 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
                                               <Select
                                                 className={styles.itemSelect}
                                                 options={cpOptions}
-                                                onChange={(_value) => {}}
+                                                onChange={(_value) => {
+                                                  // 加载字段选项
+                                                  if (_value) {
+                                                    loadFieldOptions(_value);
+                                                  }
+                                                }}
                                               />
                                             </Form.Item>
                                           </Grid.Col>
@@ -720,10 +818,7 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
 
                                             {form.getFieldValue(item.field + '.operatorType') == FieldType.FORMULA && (
                                               <Form.Item field={item.field + '.value'}>
-                                                <Button
-                                                  //   onClick={() => openFormulaEditor(item.field + '.value')}
-                                                  long
-                                                >
+                                                <Button onClick={() => openFormulaEditor(item.field + '.value')} long>
                                                   {form.getFieldValue(item.field + '.value')
                                                     ? '已设置公式'
                                                     : 'ƒx 编辑公式'}
@@ -771,6 +866,13 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
           )}
         </div>
       </div>
+
+      <FormulaEditor
+        initialFormula={formulaData}
+        visible={formulaVisible}
+        onCancel={() => setFormulaVisible(false)}
+        onConfirm={handleFormulaConfirm}
+      />
     </Modal>
   );
 };
