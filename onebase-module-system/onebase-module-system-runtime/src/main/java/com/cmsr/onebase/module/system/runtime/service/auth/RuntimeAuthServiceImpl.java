@@ -13,6 +13,7 @@ import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
 import com.cmsr.onebase.framework.common.util.validation.ValidationUtils;
+import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
 import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
@@ -62,6 +63,7 @@ import com.mybatisflex.core.tenant.TenantManager;
 import com.mzt.logapi.context.LogRecordContext;
 import com.mzt.logapi.starter.annotation.LogRecord;
 import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Validator;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -73,6 +75,8 @@ import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.util.HashSet;
 import java.util.List;
@@ -673,6 +677,7 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
     }
 
     @Override
+    @TenantIgnore
     public void sendSmsCode(VerifyCodeSendReqVO verifyCodeSend) {
         if (!Strings.CI.equals(SendTypeEnum.MOBILE.getCode(), verifyCodeSend.getSendType())) {
             log.error("发送验证码的类型是: {}, 而方法进入的是手机验证码发送", verifyCodeSend.getSendType());
@@ -694,7 +699,8 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         SmsCodeSendReqDTO smsCodeSendReq = new SmsCodeSendReqDTO();
         smsCodeSendReq.setMobile(thirdpartyUser.getMobile());
         smsCodeSendReq.setScene(SmsSceneEnum.MEMBER_LOGIN.getScene());
-
+        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+        smsCodeSendReq.setCreateIp(request.getRemoteAddr());
 
         CommonResult<Boolean> existsResp = smsCodeApi.existsCode(smsCodeSendReq);
         if (!existsResp.isSuccess()) {

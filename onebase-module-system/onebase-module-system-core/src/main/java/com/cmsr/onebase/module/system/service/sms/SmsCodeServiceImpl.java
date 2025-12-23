@@ -68,7 +68,7 @@ public class SmsCodeServiceImpl implements SmsCodeService {
                 randomInt(smsCodeProperties.getBeginCode(), smsCodeProperties.getEndCode() + 1));
         SmsCodeDO newSmsCode = SmsCodeDO.builder().mobile(mobile).code(code).scene(scene)
                 .todayIndex(lastSmsCode != null && isToday(lastSmsCode.getCreateTime()) ? lastSmsCode.getTodayIndex() + 1 : 1)
-                .createIp(ip).used(false).build();
+                .createIp(ip).used(0).build();
         smsCodeDataRepository.insert(newSmsCode);
         return code;
     }
@@ -78,7 +78,7 @@ public class SmsCodeServiceImpl implements SmsCodeService {
         // 检测验证码是否有效
         SmsCodeDO lastSmsCode = validateSmsCode0(reqDTO.getMobile(), reqDTO.getCode(), reqDTO.getScene());
         // 使用验证码
-        SmsCodeDO smsCodeDO = SmsCodeDO.builder().used(true).usedTime(LocalDateTime.now()).usedIp(reqDTO.getUsedIp()).build();
+        SmsCodeDO smsCodeDO = SmsCodeDO.builder().used(1).usedTime(LocalDateTime.now()).usedIp(reqDTO.getUsedIp()).build();
         smsCodeDO.setId(lastSmsCode.getId());
         smsCodeDataRepository.update(smsCodeDO);
     }
@@ -98,7 +98,7 @@ public class SmsCodeServiceImpl implements SmsCodeService {
                 >= smsCodeProperties.getExpireTimes().toMillis()) { // 验证码已过期
             return false;
         }
-        if (Boolean.TRUE.equals(lastSmsCode.getUsed())) {
+        if (lastSmsCode.getUsed() == 1) {
             return false;
         }
         return true;
@@ -117,7 +117,7 @@ public class SmsCodeServiceImpl implements SmsCodeService {
             throw exception(SMS_CODE_EXPIRED);
         }
         // 判断验证码是否已被使用
-        if (Boolean.TRUE.equals(lastSmsCode.getUsed())) {
+        if (lastSmsCode.getUsed() == 1) {
             throw exception(SMS_CODE_USED);
         }
         return lastSmsCode;
