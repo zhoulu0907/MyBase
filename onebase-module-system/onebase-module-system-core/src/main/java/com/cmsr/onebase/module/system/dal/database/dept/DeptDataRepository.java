@@ -64,6 +64,8 @@ public class DeptDataRepository extends BaseDataRepository<SystemDeptMapper, Dep
                 // 立即失败，抛出异常，防止数据越权
                 throw exception(CORP_ID_NULL);
             }
+        } else if (XFromSceneTypeEnum.THIRD.getCode().equals(fromSceneType)) {
+            queryWrapper.eq(DeptDO.DEPT_TYPE, DeptTypeEnum.THIRD.getCode());
         } else if (XFromSceneTypeEnum.ALL.getCode().equals(fromSceneType)) {
             // 不做任何处理，全量数据
         } else {
