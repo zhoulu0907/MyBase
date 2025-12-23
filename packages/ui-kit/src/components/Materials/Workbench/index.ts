@@ -49,7 +49,8 @@ export type {
   TWbColorDefaultType,
   IWbTextAlignConfigType,
   TWbTextAlignDefaultType,
-  IWbMenuSelectorConfigType
+  IWbMenuSelectorConfigType,
+  IWbSliderConfigType
 } from './core/types';
 
 export type {
