@@ -12,6 +12,9 @@
     color: #272e3b;
     margin-bottom: 0.24rem;
   }
+  & > .treeItem {
+    padding: 0 !important;
+  }
   .treeItem {
     font-size: 0.32rem;
     line-height: 1.12rem;
@@ -44,6 +47,15 @@
     color: #909399;
     padding-left: 0.36rem;
   }
+  .loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 3rem;
+  }
+  & > .treeItemGroup {
+    padding: 0 !important;
+  }
   .treeItemGroup {
     // border-bottom: 1px solid #e0e0e0;// #F2F3F5;
     :global {
@@ -57,6 +69,9 @@
         border-bottom: 1px solid #e0e0e0; // #F2F3F5;
         .arco-ellipsis {
           font-size: 0.32rem;
+        }
+        &::after {
+          border: none;
         }
       }
       .arco-collapse-icon svg,

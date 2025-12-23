@@ -13,6 +13,8 @@ import {
   PageType,
   queryFlowExecForm,
   TRIGGER_EVENTS,
+  type AppEntities,
+  type AppEntity,
   type AppEntityField,
   type DetailMethodV2Params,
   type GetPageSetIdReq,
@@ -34,6 +36,7 @@ import {
   useWorkbenchEditorSignal,
   startLoadWorkbenchPageSet,
   usePageEditorSignal,
+  usePageViewEditorSignal,
   type WorkbenchComponentType,
   type GridItem
 } from '@onebase/ui-kit';
@@ -51,6 +54,8 @@ import styles from './index.module.less';
 interface PreviewProps {
   menuId: string;
   runtime: boolean;
+  mainEntity: AppEntity;
+  subEntities: AppEntities;
   pageSetType?: PageType;
 }
 
@@ -66,13 +71,27 @@ const ghostBgColor = {
   disabled: '#FFF'
 };
 
-const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pageSetType }) => {
+const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, mainEntity, subEntities: subEntitiesValues, pageSetType }) => {
   useSignals();
 
   const [form] = useForm();
 
   const pageEditorSignal = usePageEditorSignal();
-  const { components: listComponents, pageComponentSchemas: listPageComponentSchemas } = useListEditorSignal;
+  const {
+    clearComponents: clearFormComponents,
+    clearPageComponentSchemas: clearFormPageComponentSchemas,
+    clearLayoutSubComponents: clearFormLayoutSubComponents,
+    clearSubTableComponents: clearFormSubTableComponents
+  } = useFormEditorSignal;
+  const {
+    components: listComponents,
+    pageComponentSchemas: listPageComponentSchemas,
+    clearComponents: clearListComponents,
+    clearPageComponentSchemas: clearListPageComponentSchemas,
+    clearLayoutSubComponents: clearListLayoutSubComponents,
+    clearSubTableComponents: clearListSubTableComponents
+  } = useListEditorSignal;
+  const { clearPageViews, clearCurViewId } = usePageViewEditorSignal;
   const { workbenchComponents, wbComponentSchemas } = useWorkbenchEditorSignal;
 
   const {
@@ -84,7 +103,9 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pageSetType
     mainMetaDataFields,
     setMainMetaDataFields,
     subEntities,
-    setSubEntities
+    setSubEntities,
+    setCurPage,
+    setEditPageViewId
   } = pagesRuntimeSignal;
   const [pageSetId, setPageSetId] = useState('');
   const [pageType, setPageType] = useState('');
@@ -97,6 +118,25 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pageSetType
   const [detailMode, setDetailMode] = useState(true);
   const [formDetails, setFormDetails] = useState<any>({}); // 表单数据
   const [refresh, setRefresh] = useState(Date.now());
+
+  /* 数据初始化，解决二次进入旧数据闪烁问题 */
+  useEffect(() => {
+    clearPageViews();
+    clearCurViewId();
+
+    setCurPage('');
+    setEditPageViewId('');
+
+    clearFormComponents();
+    clearFormPageComponentSchemas();
+    clearFormLayoutSubComponents();
+    clearFormSubTableComponents();
+
+    clearListComponents();
+    clearListPageComponentSchemas();
+    clearListLayoutSubComponents();
+    clearListSubTableComponents();
+  }, []);
 
   useEffect(() => {
     if (drawerVisible.value) {
@@ -121,6 +161,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pageSetType
 
   useEffect(() => {
     if (menuId) {
+
       handleGetPageSetId(menuId);
       setEditTargetId('');
     }
@@ -279,8 +320,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pageSetType
         } else {
           groups[groupIndex][fieldName] = value;
         }
-
-        console.log('xxx---', fieldName, value, fieldType);
       }
     });
 
@@ -289,13 +328,12 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pageSetType
       .map((k) => groups[k]);
 
     const subTableName = subEntities.value.find((ele: any) => ele.childEntityUuid == subEntityUuid)?.childTableName;
-    console.log('subTableName', subTableName, subData);
     if (subTableName) {
       subFormData[subTableName] = subData;
     }
 
-    console.log('formData:   ', formData);
-    console.log('subFormData:   ', subFormData);
+    // console.log('formData:   ', formData);
+    // console.log('subFormData:   ', subFormData);
     // return;
 
     // 接口判断 页面触发
@@ -304,7 +342,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pageSetType
     const flowRes = pageId ? await queryFlowExecForm(pageId) : [];
     setInputParams(formData);
 
-    console.log('editTargetId: ', editTargetId);
+    // console.log('editTargetId: ', editTargetId);
 
     if (editTargetId) {
       const req: UpdateMethodV2Params = {
@@ -431,15 +469,18 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pageSetType
               // const curOptions = curComponentSchema?.config?.defaultOptionsConfig?.defaultOptions || [];
               // const renderValue = curOptions.find(op => op.value === value.id)?.label || '-';
               // formValues[fieldName] = [renderValue];
-              formValues[fieldName] = [value.id];
+              formValues[fieldName] = value.id ? [value.id] : [];
             } else if (fieldType === ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE) {
               formValues[fieldName] = value.map((v) => v.id) || [];
             } else if (fieldType === ENTITY_FIELD_TYPE.USER.VALUE) {
               formValues[fieldName] = Object.entries(value).length > 0 ? [value.name] : value;
             } else if (fieldType === ENTITY_FIELD_TYPE.DEPARTMENT.VALUE) {
               formValues[fieldName] = value;
-            } else if (fieldType === ENTITY_FIELD_TYPE.IMAGE.VALUE || fieldType === ENTITY_FIELD_TYPE.FILE.VALUE) {
-              formValues[fieldName] = value.map((item: any) => {
+            } else if (
+              (fieldType === ENTITY_FIELD_TYPE.IMAGE.VALUE || fieldType === ENTITY_FIELD_TYPE.FILE.VALUE) &&
+              Array.isArray(value)
+            ) {
+              formValues[fieldName] = (value || []).map((item: any) => {
                 return {
                   ...item,
                   name: item.name,
@@ -500,10 +541,10 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pageSetType
                     } else if (fieldType === ENTITY_FIELD_TYPE.DEPARTMENT.VALUE) {
                       formValues[`${key}.${idx}.${fieldName}`] = subData[idx]?.[fieldName];
                     } else if (
-                      fieldType === ENTITY_FIELD_TYPE.IMAGE.VALUE ||
-                      fieldType === ENTITY_FIELD_TYPE.FILE.VALUE
+                      (fieldType === ENTITY_FIELD_TYPE.IMAGE.VALUE || fieldType === ENTITY_FIELD_TYPE.FILE.VALUE) &&
+                      Array.isArray(subData[idx]?.[fieldName])
                     ) {
-                      formValues[`${key}.${idx}.${fieldName}`] = subData[idx]?.[fieldName].map((item: any) => {
+                      formValues[`${key}.${idx}.${fieldName}`] = (subData[idx]?.[fieldName] || []).map((item: any) => {
                         return {
                           ...item,
                           name: item.name,
@@ -644,7 +685,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pageSetType
                             showFromPageData={() => {
                               setPageType(EDITOR_TYPES.FORM_EDITOR);
                             }}
-                            useStoreSignals={pageEditorSignal}
+                            useStoreSignals={{ ...pageEditorSignal, mainEntity, subEntities: subEntitiesValues }}
                           />
                         </div>
                       )}

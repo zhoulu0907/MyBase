@@ -13,6 +13,21 @@
     text-align: right;
   }
 
+  /* 彻底隐藏数字输入框右侧上下箭头 */
+  .no-spin {
+    /* Chrome / Edge / Safari */
+    input[type='number']::-webkit-outer-spin-button,
+    input[type='number']::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    /* Firefox */
+    input[type='number'] {
+      -moz-appearance: textfield;
+    }
+  }
+
   .arco-input-wrap,
   .arco-form-label-item {
     height: 100%;

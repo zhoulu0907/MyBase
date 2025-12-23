@@ -1,4 +1,4 @@
-import { Collapse, Ellipsis, Grid, Tabs } from '@arco-design/mobile-react';
+import { Collapse, Ellipsis, Grid, Loading, Tabs } from '@arco-design/mobile-react';
 import { menuSignal } from '@onebase/app';
 import React, { useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -6,13 +6,20 @@ import { ReactSVG } from 'react-svg';
 import { mobileMenuIcons } from '@onebase/ui-kit';
 import { splitAndFlatten, type TreeNode } from '@/utils/tree';
 import styles from './index.module.less';
+import type { MobileLayout } from '../home';
 
-const isGridLayout = true;
+interface IProps {
+  treeData: TreeNode[];
+  mobileNavLayout: MobileLayout;
+  loading: boolean;
+}
 
 const levelStyle = (level: number) => ({ padding: `0 ${level > 5 ? '0' : '0.24rem'}` });
 
-const AppsList: React.FC<{ treeData: TreeNode[] }> = ({ treeData }) => {
-  const allMobileMenuIcons = mobileMenuIcons.map((ele) => ele.children).reduce((acc, current) => acc.concat(current), []);
+const AppsList: React.FC<IProps> = ({ treeData, mobileNavLayout, loading }) => {
+  const allMobileMenuIcons = mobileMenuIcons
+    .map((ele) => ele.children)
+    .reduce((acc, current) => acc.concat(current), []);
   const { setCurMenu } = menuSignal;
   const navigate = useNavigate();
   const location = useLocation();
@@ -64,7 +71,6 @@ const AppsList: React.FC<{ treeData: TreeNode[] }> = ({ treeData }) => {
                 ''
               }
               style={{
-                marginRight: '0.16rem',
                 backgroundColor: 'transparent'
               }}
               beforeInjection={(svg) => {
@@ -80,7 +86,7 @@ const AppsList: React.FC<{ treeData: TreeNode[] }> = ({ treeData }) => {
         }
         value={itemData.key}
         content={
-          itemData.children && itemData.children.length > 0 ? (
+          itemData.children && itemData.children.length > 0 && !loading ? (
             itemData.children.map((child) => getGroupItem(child, level + 1))
           ) : (
             <div className={styles.treeNone}>无菜单</div>
@@ -125,7 +131,9 @@ const AppsList: React.FC<{ treeData: TreeNode[] }> = ({ treeData }) => {
     const sp = new URLSearchParams(location.search);
     sp.set('curMenu', String(item.id));
     setCurMenu({
+      ...item,
       id: item.id || '',
+      menuUuid: item.menuUuid,
       menuCode: item.key,
       menuSort: item.menuSort,
       menuType: item.menuType,
@@ -148,11 +156,11 @@ const AppsList: React.FC<{ treeData: TreeNode[] }> = ({ treeData }) => {
     };
   }, [treeData]);
 
-  if (!isGridLayout) {
+  if (mobileNavLayout === 'LIST') {
     return (
       <div className={styles.appsList}>
         <div className={styles.label}>应用菜单</div>
-        {treeData.length > 0 ? (
+        {treeData.length > 0 && !loading ? (
           treeData.map((item) => getGroupItem(item))
         ) : (
           <div className={styles.treeNone}>无菜单</div>
@@ -167,11 +175,18 @@ const AppsList: React.FC<{ treeData: TreeNode[] }> = ({ treeData }) => {
     <>
       <div className={styles.appsList} style={leafItems.length === 0 ? { marginBottom: '-0.32rem' } : {}}>
         <div className={styles.label}>应用菜单</div>
-        {leafItems.length > 0 && <GridLayout data={leafItems} isAppIcon />}
-        {leafItems.length === 0 && gridData.tabs.length === 0 && <div className={styles.treeNone}>无菜单</div>}
+        {loading && (
+          <div className={styles.loading}>
+            <Loading type="circle" color="rgb(var(--primary-6))" />
+          </div>
+        )}
+        {leafItems.length > 0 && !loading && <GridLayout data={leafItems} isAppIcon />}
+        {leafItems.length === 0 && gridData.tabs.length === 0 && !loading && (
+          <div className={styles.treeNone}>无菜单</div>
+        )}
       </div>
 
-      {gridData.tabs.length > 0 && (
+      {gridData.tabs.length > 0 && !loading && (
         <div className={styles.appsList}>
           <Tabs className={styles.tabs} tabs={gridData.tabs} tabBarArrange={'start'} tabBarHasDivider={false}>
             {gridData.grids.map((item) => (

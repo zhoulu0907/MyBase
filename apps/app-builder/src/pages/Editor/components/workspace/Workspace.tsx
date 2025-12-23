@@ -96,7 +96,6 @@ export default function EditorWorkspace() {
 
   const { editMode, setEditMode } = currentEditorSignal;
   const mobileEditorDragRef = useRef<MicroApp | null>(null);
-
   const qiankunActions = initGlobalState({
     mainEntity,
     subEntities,
@@ -131,13 +130,12 @@ export default function EditorWorkspace() {
     delSubTableComponents,
     batchDelSubTableComponents
   });
-
   useEffect(() => {
     if (editMode.value !== EditMode.MOBILE) {
       return;
     }
     console.log('loading mobile-editor-drag-list');
-
+    
     const mobileEditorDrag = loadMicroApp({
       name: 'mobile-editor-drag-list',
       entry: getMobileEditorURL(),

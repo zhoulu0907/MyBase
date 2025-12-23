@@ -98,6 +98,7 @@ const PluginPage = () => {
         activeTab={currentTab}
         onChange={handleChangeTab}
         type="rounded"
+        style={{ width: '100%' }}
         extra={<Input.Search className={styles.search} placeholder="搜索插件" onChange={handleSearchChange} />}
       >
         {statusMapping.map((data: any) => {

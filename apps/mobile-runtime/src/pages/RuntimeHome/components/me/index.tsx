@@ -21,6 +21,7 @@ const Me: React.FC<MeProps> = ({ nickname, username }) => {
   const handleLogout = () => {
     // 关闭弹窗
     window.modalInstance?.close();
+    sessionStorage.removeItem('ENTITY_UUID');
     // 跳转到登录页
     logout(navigate);
   };
