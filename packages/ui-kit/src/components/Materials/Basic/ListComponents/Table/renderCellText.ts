@@ -6,7 +6,6 @@ export const renderCellText = (columnId: string, v: any) => {
   if (v === null || v === undefined) return '';
 
   if (typeof v === 'object') {
-    console.log(v);
     if ('name' in v && typeof (v as any).name !== 'undefined') return (v as any).name;
     return '';
   }
