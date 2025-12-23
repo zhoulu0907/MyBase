@@ -1,19 +1,17 @@
 package com.cmsr.onebase.module.system.api.sms;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import com.cmsr.onebase.module.system.api.sms.dto.code.SmsCodeValidateReqDTO;
 import com.cmsr.onebase.module.system.api.sms.dto.code.SmsCodeSendReqDTO;
 import com.cmsr.onebase.module.system.api.sms.dto.code.SmsCodeUseReqDTO;
+import com.cmsr.onebase.module.system.api.sms.dto.code.SmsCodeValidateReqDTO;
 import com.cmsr.onebase.module.system.enums.ApiConstants;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-
-import jakarta.validation.Valid;
 
 @FeignClient(name = ApiConstants.NAME) // TODO 开发者：fallbackFactory =
 @Tag(name = "RPC 服务 - 短信验证码")
@@ -33,4 +31,7 @@ public interface SmsCodeApi {
     @Operation(summary = "检查验证码是否有效")
     CommonResult<Boolean> validateSmsCode(@Valid @RequestBody SmsCodeValidateReqDTO reqDTO);
 
+    @GetMapping(PREFIX + "/exists")
+    @Operation(summary = "检查验证码是否存在")
+    CommonResult<Boolean> existsCode(@Valid @RequestBody SmsCodeSendReqDTO reqDTO);
 }

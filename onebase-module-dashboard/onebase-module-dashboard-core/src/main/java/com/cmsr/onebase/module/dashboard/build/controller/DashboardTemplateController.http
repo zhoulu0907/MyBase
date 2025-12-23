@@ -26,16 +26,11 @@ tenant-id: {{adminTenantId}}
 
 {
   "id": 194163497403187200,
-  "templateName": "Dashboard Template 1",
-  "content": "{\"layout2\": [], \"config2\": {\"theme2\": \"dark2\"}}",
-  "templateType": "system",
-  "hot": 0,
-  "appId": 184716905786900484,
-  "indexImage": "https://example.com/updated1-image.jpg"
+  "templateName": "Dashboard Template 26"
 }
 
 ### 3. 删除仪表盘模板
-POST {{baseUrl}}/dashboard/template/delete?id=194087888795828224
+POST {{baseUrl}}/dashboard/template/delete?id=194163497403187200
 Content-Type: application/json
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
@@ -51,6 +46,6 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
 ### 6. 分页查询仪表盘模板
-GET {{baseUrl}}/dashboard/template/page?templateType=&hot=&appId=&pageNo=1&pageSize=10
+GET {{baseUrl}}/dashboard/template/page?pageNum=1&pageSize=5&templateType=system
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}

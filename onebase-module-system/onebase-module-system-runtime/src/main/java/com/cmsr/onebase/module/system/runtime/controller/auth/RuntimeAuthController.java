@@ -72,7 +72,6 @@ public class RuntimeAuthController {
     }
 
 
-
     @PostMapping("/corp-login")
     @PermitAll
     @Operation(summary = "企业登录（手机号）")
@@ -83,7 +82,6 @@ public class RuntimeAuthController {
                 securityProperties.getTokenHeader(), loginRespVO.getAccessToken()));
         return success(loginRespVO);
     }
-
 
 
     @PostMapping("/third-login")
@@ -110,7 +108,7 @@ public class RuntimeAuthController {
     @TenantIgnore
     @Operation(summary = "发送邮箱/手机验证码")
     public CommonResult<Boolean> sendVerifyCode(@RequestBody @Valid VerifyCodeSendReqVO reqVO) {
-        // authService.sendSmsCode(reqVO);
+        runtimeAuthService.sendSmsCode(reqVO);
         return success(true);
     }
 
