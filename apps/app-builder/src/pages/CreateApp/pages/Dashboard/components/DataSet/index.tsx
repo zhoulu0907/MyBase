@@ -47,14 +47,11 @@ const DataSet: FC = () => {
   };
   // 新建
   const handleAdd = () => {
-    window.open(`http://s25029301301.dev.internal.virtueit.net:81/v0/appdashboard/#/project/dataset-form`, '_blank');
+    window.open(`${window.location.origin}${window.location.pathname}#/project/dataset-form`, '_blank');
   };
   //编辑
   const handleEdit = async (record: DataTable) => {
-    window.open(
-      `http://s25029301301.dev.internal.virtueit.net:81/v0/appdashboard/#/project/dataset-form?id=${record.id}`,
-      '_blank'
-    );
+    window.open(`${window.location.origin}${window.location.pathname}#/project/dataset-form?id=${record.id}`, '_blank');
   };
   //删除
   const [deleteVisible, setDeleteVisible] = useState<boolean>(false);

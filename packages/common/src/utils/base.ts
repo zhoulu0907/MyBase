@@ -42,5 +42,5 @@ export const getRuntimeMobileURL = (): string => {
 };
 export const getDashbordDataSetUrl = (): string => {
   const dashbordDataSetUrl = (window as any).global_config?.APP_BUILDER_DATASET_URL;
-  return dashbordDataSetUrl || 'http://localhost:9527';
+  return dashbordDataSetUrl || 'http://localhost:9528';
 };
