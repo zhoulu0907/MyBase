@@ -1,18 +1,14 @@
 package com.cmsr.onebase.module.system.dal.dataobject.sms;
 
+import com.cmsr.onebase.framework.orm.entity.BaseEntity;
+import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
+import com.mybatisflex.annotation.Column;
+import com.mybatisflex.annotation.Table;
+import lombok.Builder;
+import lombok.Data;
+
 import java.time.LocalDateTime;
 import java.util.Map;
-
-import com.cmsr.onebase.framework.data.base.BaseDO;
-import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.experimental.SuperBuilder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 /**
  * 短信日志 DO
@@ -20,14 +16,11 @@ import lombok.ToString;
  * @author zzf
  * @since 2021-01-25
  */
-@Table(name = "system_sms_log")
+@Table(value = "system_sms_log")
 @Data
-@ToString(callSuper = true)
-@SuperBuilder
-@AllArgsConstructor
-@NoArgsConstructor
+@Builder
 @TenantIgnore
-public class SmsLogDO extends BaseDO {
+public class SmsLogDO extends BaseEntity {
 
     // 字段列名常量
     public static final String CHANNEL_ID         = "channel_id";
@@ -57,12 +50,12 @@ public class SmsLogDO extends BaseDO {
     /**
      * 短信渠道编号
      */
-    @Column(name = CHANNEL_ID)
+    @Column(value = CHANNEL_ID)
     private Long channelId;
     /**
      * 短信渠道编码
      */
-    @Column(name = CHANNEL_CODE)
+    @Column(value = CHANNEL_CODE)
     private String channelCode;
 
     // ========= 模板相关字段 =========
@@ -70,32 +63,32 @@ public class SmsLogDO extends BaseDO {
     /**
      * 模板编号
      */
-    @Column(name = TEMPLATE_ID)
+    @Column(value = TEMPLATE_ID)
     private Long templateId;
     /**
      * 模板编码
      */
-    @Column(name = TEMPLATE_CODE)
+    @Column(value = TEMPLATE_CODE)
     private String templateCode;
     /**
      * 短信类型
      */
-    @Column(name = TEMPLATE_TYPE)
+    @Column(value = TEMPLATE_TYPE)
     private Integer templateType;
     /**
      * 基于内容格式化后的内容
      */
-    @Column(name = TEMPLATE_CONTENT)
+    @Column(value = TEMPLATE_CONTENT)
     private String templateContent;
     /**
      * 基于参数生成的参数映射
      */
-    @Column(name = TEMPLATE_PARAMS)
+    @Column(value = TEMPLATE_PARAMS)
     private Map<String, Object> templateParams;
     /**
      * 短信 API 的模板编号
      */
-    @Column(name = API_TEMPLATE_ID)
+    @Column(value = API_TEMPLATE_ID)
     private String apiTemplateId;
 
     // ========= 手机相关字段 =========
@@ -103,17 +96,17 @@ public class SmsLogDO extends BaseDO {
     /**
      * 手机号
      */
-    @Column(name = MOBILE)
+    @Column(value = MOBILE)
     private String mobile;
     /**
      * 用户编号
      */
-    @Column(name = USER_ID)
+    @Column(value = USER_ID)
     private Long userId;
     /**
      * 用户类型
      */
-    @Column(name = USER_TYPE)
+    @Column(value = USER_TYPE)
     private Integer userType;
 
     // ========= 发送相关字段 =========
@@ -121,32 +114,32 @@ public class SmsLogDO extends BaseDO {
     /**
      * 发送状态
      */
-    @Column(name = SEND_STATUS)
+    @Column(value = SEND_STATUS)
     private Integer sendStatus;
     /**
      * 发送时间
      */
-    @Column(name = SEND_TIME)
+    @Column(value = SEND_TIME)
     private LocalDateTime sendTime;
     /**
      * 短信 API 发送结果的编码
      */
-    @Column(name = API_SEND_CODE)
+    @Column(value = API_SEND_CODE)
     private String apiSendCode;
     /**
      * 短信 API 发送失败的提示
      */
-    @Column(name = API_SEND_MSG)
+    @Column(value = API_SEND_MSG)
     private String apiSendMsg;
     /**
      * 短信 API 请求 ID
      */
-    @Column(name = API_REQUEST_ID)
+    @Column(value = API_REQUEST_ID)
     private String apiRequestId;
     /**
      * 短信 API 序号
      */
-    @Column(name = API_SERIAL_NO)
+    @Column(value = API_SERIAL_NO)
     private String apiSerialNo;
 
     // ========= 接收相关字段 =========
@@ -154,21 +147,21 @@ public class SmsLogDO extends BaseDO {
     /**
      * 接收状态
      */
-    @Column(name = RECEIVE_STATUS)
+    @Column(value = RECEIVE_STATUS)
     private Integer receiveStatus;
     /**
      * 接收时间
      */
-    @Column(name = RECEIVE_TIME)
+    @Column(value = RECEIVE_TIME)
     private LocalDateTime receiveTime;
     /**
      * 接收结果编码
      */
-    @Column(name = API_RECEIVE_CODE)
+    @Column(value = API_RECEIVE_CODE)
     private String apiReceiveCode;
     /**
      * 接收结果提示
      */
-    @Column(name = API_RECEIVE_MSG)
+    @Column(value = API_RECEIVE_MSG)
     private String apiReceiveMsg;
 }

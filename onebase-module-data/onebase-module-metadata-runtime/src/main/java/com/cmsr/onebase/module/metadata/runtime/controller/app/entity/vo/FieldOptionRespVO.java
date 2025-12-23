@@ -15,8 +15,11 @@ public class FieldOptionRespVO {
     @Schema(description = "选项ID")
     private String id;
     
-    @Schema(description = "字段ID")
-    private Long fieldId;
+    @Schema(description = "选项UUID")
+    private String optionUuid;
+    
+    @Schema(description = "字段UUID")
+    private String fieldUuid;
     
     @Schema(description = "显示名称")
     private String optionLabel;

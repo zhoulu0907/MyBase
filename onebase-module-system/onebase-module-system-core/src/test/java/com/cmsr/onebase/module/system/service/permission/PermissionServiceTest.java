@@ -14,6 +14,7 @@ import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleMenuDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.UserRoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
+import com.cmsr.onebase.module.system.dal.flex.repo.UserDataRepository;
 import com.cmsr.onebase.module.system.enums.permission.DataScopeEnum;
 import jakarta.annotation.Resource;
 import org.anyline.data.param.init.DefaultConfigStore;
@@ -73,6 +74,8 @@ public class PermissionServiceTest {
     private DeptDataRepository deptDataRepository;
     @Resource
     private MenuDataRepository menuDataRepository;
+    @Resource
+    private UserDataRepository userDataRepository;
 
     /**
      * 每个测试后清理数据
@@ -81,11 +84,10 @@ public class PermissionServiceTest {
     public void tearDown() {
         // 清理测试数据
         permissionDataRepository.deleteByConfig(new DefaultConfigStore());
-        permissionDataRepository.deleteByConfig(new DefaultConfigStore());
-        permissionDataRepository.deleteByConfig(new DefaultConfigStore());
-        permissionDataRepository.deleteByConfig(new DefaultConfigStore());
-        permissionDataRepository.deleteByConfig(new DefaultConfigStore());
-        permissionDataRepository.deleteByConfig(new DefaultConfigStore());
+        userRoleDataRepository.deleteByConfig(new DefaultConfigStore());
+        roleDataRepository.deleteByConfig(new DefaultConfigStore());
+        deptDataRepository.deleteByConfig(new DefaultConfigStore());
+        menuDataRepository.deleteByConfig(new DefaultConfigStore());
     }
 
     /**
@@ -310,10 +312,8 @@ public class PermissionServiceTest {
         }
 
         // 执行测试
-        long deletedRows = permissionService.deleteRoleUsers(role.getId(), deleteUserIds);
-        System.out.println("Deleted Rows: " + deletedRows);
-        // 验证结果
-        assertEquals(deleteUserIds.size(), deletedRows, "删除的行数应该正确");
+        boolean deleted = permissionService.deleteRoleUsers(role.getId(), deleteUserIds);
+        assertTrue(deleted, "删除操作应该返回 true");
 
         // 检查被删除的用户不再拥有该角色
         Set<Long> user1Roles = permissionService.getRoleIdsListByUserId(user1.getId());
@@ -365,7 +365,6 @@ public class PermissionServiceTest {
      */
     private AdminUserDO createTestUser(Long userId, String username) {
         AdminUserDO user = new AdminUserDO();
-        // 完全不设置ID，让Anyline使用SnowflakeIdGenerator自动生成
         user.setUsername(username);
         user.setNickname(username);
         user.setPassword("password");
@@ -373,8 +372,7 @@ public class PermissionServiceTest {
         user.setEmail(username + "@test.com");
         user.setMobile("1388888888" + (userId != null ? userId % 10 : 0));
         user.setTenantId(0L);
-        // AdminUserDO saved = permissionDataRepository.insert(user);
-        return user;
+        return userDataRepository.insertReturn(user);
     }
 
     /**
@@ -382,7 +380,6 @@ public class PermissionServiceTest {
      */
     private RoleDO createTestRole(Long roleId, String code, Integer status) {
         RoleDO role = new RoleDO();
-        // 完全不设置ID，让Anyline使用SnowflakeIdGenerator自动生成
         role.setName(code);
         role.setCode(code);
         role.setSort(1);
@@ -390,8 +387,7 @@ public class PermissionServiceTest {
         role.setType(1);
         role.setDataScope(DataScopeEnum.ALL.getScope());
         role.setTenantId(0L);
-        RoleDO saved = roleDataRepository.insert(role);
-        return saved;
+        return roleDataRepository.insertReturn(role);
     }
 
     /**
@@ -399,15 +395,13 @@ public class PermissionServiceTest {
      */
     private MenuDO createTestMenu(Long menuId, String name, String permission) {
         MenuDO menu = new MenuDO();
-        // 完全不设置ID，让Anyline使用SnowflakeIdGenerator自动生成
         menu.setName(name);
         menu.setPermission(permission);
-        menu.setType(2); // 按钮
+        menu.setType(2);
         menu.setSort(1);
         menu.setParentId(0L);
         menu.setStatus(CommonStatusEnum.ENABLE.getStatus());
-        MenuDO saved = menuDataRepository.insert(menu);
-        return saved;
+        return menuDataRepository.insertReturn(menu);
     }
 
     /**
@@ -415,14 +409,12 @@ public class PermissionServiceTest {
      */
     private DeptDO createTestDept(Long deptId, String name) {
         DeptDO dept = new DeptDO();
-        // 完全不设置ID，让Anyline使用SnowflakeIdGenerator自动生成
         dept.setName(name);
         dept.setParentId(0L);
         dept.setSort(1);
         dept.setStatus(CommonStatusEnum.ENABLE.getStatus());
         dept.setTenantId(0L);
-        DeptDO saved = deptDataRepository.insert(dept);
-        return saved;
+        return deptDataRepository.insertReturn(dept);
     }
 
     /**

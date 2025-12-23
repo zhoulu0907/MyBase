@@ -58,7 +58,7 @@ public class DynamicMetadataRepository {
             setIfMissingOrNull(row, SystemFieldConstants.OPTIONAL.UPDATED_TIME, now);
             setIfMissingOrNull(row, SystemFieldConstants.OPTIONAL.DELETED, 0);
             setIfMissingOrNull(row, SystemFieldConstants.OPTIONAL.LOCK_VERSION, 0);
-            setIfMissingOrNull(row, SystemFieldConstants.OPTIONAL.DRAFT_STATUS, 0);
+            //setIfMissingOrNull(row, SystemFieldConstants.OPTIONAL.DRAFT_STATUS, 0);
 
             if (userId != null) {
                 setIfMissingOrNull(row, SystemFieldConstants.REQUIRE.OWNER_ID, userId);
@@ -99,7 +99,7 @@ public class DynamicMetadataRepository {
                 setIfMissingOrNull(row, SystemFieldConstants.OPTIONAL.UPDATED_TIME, now);
                 setIfMissingOrNull(row, SystemFieldConstants.OPTIONAL.DELETED, 0);
                 setIfMissingOrNull(row, SystemFieldConstants.OPTIONAL.LOCK_VERSION, 0);
-                setIfMissingOrNull(row, SystemFieldConstants.OPTIONAL.DRAFT_STATUS, 0);
+                //setIfMissingOrNull(row, SystemFieldConstants.OPTIONAL.DRAFT_STATUS, 0);
                 if (userId != null) {
                     setIfMissingOrNull(row, SystemFieldConstants.REQUIRE.OWNER_ID, userId);
                     setIfMissingOrNull(row, SystemFieldConstants.REQUIRE.CREATOR, userId);
