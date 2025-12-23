@@ -527,7 +527,7 @@ export default function EditorWorkspace() {
                   }
                   setSubTableComponents(cpID, subFieldComponents);
                   entityList.push({ displayName: cpName, id: cpID, type: cpType });
-                } else if (item.entityId && item.entityId !== mainEntity.entityId) {
+                } else if (item.tableName && item.tableName !== mainEntity.tableName) {
                   // 子表 数据字段  不做任何操作
                 } else {
                   // 主表字段、普通字段
