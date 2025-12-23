@@ -25,8 +25,6 @@ public class GoviewProject extends BaseTenantEntity {
 
     private Integer state;
 
-    private String createUserId;
-
     private String indexImage;
 
     private String remarks;
