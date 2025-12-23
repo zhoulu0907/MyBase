@@ -32,4 +32,10 @@ public class CreatePageSetDTO {
 
     @Schema(description = "页面集主元数据", requiredMode = Schema.RequiredMode.REQUIRED, example = "xxx")
     private String mainMetadata;
+
+    @Schema(description = "数据大屏页面创建类型", requiredMode = Schema.RequiredMode.NOT_REQUIRED, example = "xxx")
+    private String createDashboardType;
+
+    @Schema(description = "数据大屏/模板id", requiredMode = Schema.RequiredMode.NOT_REQUIRED, example = "xxx")
+    private Long dashboardId;
 }

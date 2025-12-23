@@ -68,7 +68,7 @@
         </dependency>
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-module-screen-build</artifactId>
+            <artifactId>onebase-module-dashboard-build</artifactId>
             <version>${revision}</version>
         </dependency>
         <dependency>

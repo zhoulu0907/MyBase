@@ -146,8 +146,8 @@ public class RuntimeFlowProcessTest {
     @Test
     public void testFlowRemoteCallExecutor(){
         FlowRemoteCallRequest callRequest = new FlowRemoteCallRequest();
-        callRequest.setApplicationId(184716905786900480L);
-        callRequest.setProcessId(187875373210075188L);
+        callRequest.setApplicationId(173020283873034240L);
+        callRequest.setProcessId(193925435951546497L);
         callRequest.setProcessName("流程测试");
         callRequest.setJobType(FlowRemoteCallRequest.JOB_TYPE_FIELD);
         flowRemoteCallExecutor.executeFlow(callRequest);
