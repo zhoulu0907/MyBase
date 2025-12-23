@@ -8,6 +8,7 @@ import { DynamicIcon } from '@onebase/common';
 type TenantInfo = CorpDetailResponse & {
   iconColor?: string;
   iconName?: string;
+  appCode?: string;
 };
 
 interface ITenantLogoProps {
@@ -17,8 +18,12 @@ interface ITenantLogoProps {
 const TenantLogo: React.FC<ITenantLogoProps> = ({ tenantInfo }) => {
   return (
     <>
-      {/* <Image src={LogoSVG} alt="logo" height={28} />
-      <div className={styles.line}></div> */}
+      {!tenantInfo?.appCode && (
+        <>
+          <Image src={LogoSVG} alt="logo" height={28} />
+          <div className={styles.line}></div>
+        </>
+      )}
       {tenantInfo?.corpLogo ? (
         <Image src={tenantInfo?.corpLogo} height={28} alt="tenant-logo" />
       ) : (
@@ -36,7 +41,7 @@ const TenantLogo: React.FC<ITenantLogoProps> = ({ tenantInfo }) => {
           />
         </div>
       )}
-      <div className={styles.tenantName}>{tenantInfo?.corpName}</div>
+      <div className={styles.tenantName}>{tenantInfo?.corpName || tenantInfo?.appName}</div>
     </>
   );
 };

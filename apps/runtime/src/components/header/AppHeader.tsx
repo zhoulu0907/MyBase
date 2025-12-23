@@ -77,7 +77,8 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
       const tenantInfo = {
         iconColor: curAppInfo.value.iconColor,
         iconName: curAppInfo.value.iconName,
-        corpName: curAppInfo.value.appName
+        appName: curAppInfo.value.appName,
+        appCode: curAppInfo.value.appCode
       };
       setTenantInfoFromSession(tenantInfo);
     }
