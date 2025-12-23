@@ -1,4 +1,4 @@
-import { EditRender } from '@onebase/ui-kit';
+import { EditRender, WORKBENCH_COMPONENT_TYPES } from '@onebase/ui-kit';
 import { ResizableWorkbenchItem } from './resizable-workbench-item';
 import { OperationButtons } from './operatio-buttons';
 import type { WorkbenchItemProps } from '../../../types/workbench-component';
@@ -14,6 +14,11 @@ export function WorkbenchItem({
   pageComponentSchema,
   onOperation
 }: WorkbenchItemProps) {
+  // 按钮组件在 web 端完全隐藏，不渲染任何内容
+  if (component.type === WORKBENCH_COMPONENT_TYPES.BUTTON_WORKBENCH) {
+    return null;
+  }
+
   const handleSelect = () => {
     onOperation.select(component.id, component);
   };

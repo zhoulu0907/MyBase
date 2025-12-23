@@ -7,7 +7,8 @@ import {
   QuickEntryConfig,
   TodoCenterConfig,
   RichTextEditorWorkbenchConfig,
-  CarouselWorkbenchConfig
+  CarouselWorkbenchConfig,
+  ButtonWorkbenchConfig
 } from './ConfigsByComp';
 import styles from './index.module.less';
 import { useMemo } from 'react';
@@ -39,6 +40,8 @@ const WorkbenchConfiger = () => {
         return <RichTextEditorWorkbenchConfig />;
       case 'XCarouselWorkbench':
         return <CarouselWorkbenchConfig />;
+      case 'XButtonWorkbench':
+        return <ButtonWorkbenchConfig />;
       default:
         return <QuickEntryConfig />;
     }
