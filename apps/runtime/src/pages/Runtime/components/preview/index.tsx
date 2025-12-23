@@ -24,7 +24,7 @@ import { pagesRuntimeSignal } from '@onebase/common';
 import {
   EDITOR_TYPES,
   ENTITY_FIELD_TYPE,
-  FORM_COMPONENT_TYPES,
+  normalizeFormValues,
   STATUS_OPTIONS,
   STATUS_VALUES,
   useEditorSignalMap
@@ -363,111 +363,19 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
     const res = await dataMethodDetailV2(tableName, menuId, req);
     console.log(res);
 
-    // 遍历 res, 将数据回填到表单
-    const formValues: Record<string, any> = {};
+    let formValues: Record<string, any> = {};
 
     if (res) {
-      const dataItem = res;
-
       const componentSchemas = useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value;
       const subTableComponents = useEditorSignalMap.get(editPageViewId.value)?.subTableComponents.value;
 
-      //   主表渲染逻辑
-      if (dataItem && typeof dataItem === 'object') {
-        Object.entries(dataItem).forEach(([fieldName, value]: [string, any]) => {
-          const componentSchemaList = Object.keys(componentSchemas);
-          const currentKey = componentSchemaList.find((key) =>
-            componentSchemas?.[key]?.config?.dataField?.includes(fieldName)
-          );
-          const currentSchema = componentSchemas?.[currentKey];
-          if (
-            (currentSchema?.type === FORM_COMPONENT_TYPES.IMG_UPLOAD ||
-              currentSchema?.type === FORM_COMPONENT_TYPES.FILE_UPLOAD) &&
-            Array.isArray(value)
-          ) {
-            // 处理文件、图片
-            formValues[fieldName] = (value || []).map((ele: any) => ({ ...ele, uid: ele.id }));
-          } else if (
-            (currentSchema?.type === FORM_COMPONENT_TYPES.RADIO ||
-              currentSchema?.type === FORM_COMPONENT_TYPES.SELECT_ONE) &&
-            typeof value === 'object' &&
-            value !== null
-          ) {
-            // 处理单选框、下拉列表
-            formValues[fieldName] = value?.id;
-          } else if (
-            (currentSchema?.type === FORM_COMPONENT_TYPES.CHECKBOX ||
-              currentSchema?.type === FORM_COMPONENT_TYPES.SELECT_MUTIPLE) &&
-            Array.isArray(value)
-          ) {
-            // 处理复选框、下拉多选列表
-            formValues[fieldName] = (value || []).map((ele: any) => ele.id);
-          } else {
-            formValues[fieldName] = value;
-          }
-        });
-      }
-
-      //   子表渲染逻辑
-      for (const subEntity of subEntities.value) {
-        // 判断 res 对象内的 key 是否等于 subEntity.childTableName
-        if (
-          dataItem &&
-          subEntity.childTableName &&
-          Object.prototype.hasOwnProperty.call(dataItem, subEntity.childTableName)
-        ) {
-          // 子表数据
-          const subData = dataItem[subEntity.childTableName];
-
-          Object.entries(componentSchemas).forEach(([key, schema]: [string, any]) => {
-            // 找到子表
-            if (schema?.config?.subTable == subEntity.childEntityUuid) {
-              pagesRuntimeSignal.setSubTableDataLength(key, (subData || []).length);
-
-              // 当前子表单的所有组件id
-              const componentIds = subTableComponents[key]?.map((ele: any) => ele.id);
-              for (let idx = 0; idx < (subData || []).length; idx++) {
-                for (let componentId of componentIds) {
-                  const fieldName = componentSchemas[componentId]?.config?.dataField?.[1];
-                  if (
-                    (componentSchemas[componentId]?.type === FORM_COMPONENT_TYPES.IMG_UPLOAD ||
-                      componentSchemas[componentId]?.type === FORM_COMPONENT_TYPES.FILE_UPLOAD) &&
-                    Array.isArray(subData[idx]?.[fieldName])
-                  ) {
-                    formValues[`${subEntity.childTableName}.${idx}.${fieldName}`] = (
-                      subData[idx]?.[fieldName] || []
-                    ).map((e: any) => ({
-                      ...e,
-                      uid: e.id
-                    }));
-                  } else if (
-                    (componentSchemas[componentId]?.type === FORM_COMPONENT_TYPES.RADIO ||
-                      componentSchemas[componentId]?.type === FORM_COMPONENT_TYPES.SELECT_ONE) &&
-                    typeof subData[idx]?.[fieldName] === 'object' &&
-                    subData[idx]?.[fieldName] !== null
-                  ) {
-                    // 处理单选框、下拉列表
-                    formValues[`${subEntity.childTableName}.${idx}.${fieldName}`] = subData[idx]?.[fieldName]?.id;
-                  } else if (
-                    (componentSchemas[componentId]?.type === FORM_COMPONENT_TYPES.CHECKBOX ||
-                      componentSchemas[componentId]?.type === FORM_COMPONENT_TYPES.SELECT_MUTIPLE) &&
-                    Array.isArray(subData[idx]?.[fieldName])
-                  ) {
-                    // 处理复选框、下拉多选列表
-                    formValues[`${subEntity.childTableName}.${idx}.${fieldName}`] = (
-                      subData[idx]?.[fieldName] || []
-                    ).map((ele: any) => ele.id);
-                  } else {
-                    formValues[`${subEntity.childTableName}.${idx}.${fieldName}`] = subData[idx]?.[fieldName];
-                  }
-                }
-                // 补充id
-                formValues[`${subEntity.childTableName}.${idx}.id`] = subData[idx]?.id;
-              }
-            }
-          });
-        }
-      }
+      formValues = normalizeFormValues({
+        dataItem: res,
+        componentSchemas,
+        subEntities: subEntities.value,
+        subTableComponents,
+        setSubTableDataLength: pagesRuntimeSignal.setSubTableDataLength
+      });
     }
 
     console.log('formValues: ', formValues);
@@ -558,6 +466,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
             onSaveSubmit={onSaveSubmit}
             onSaveDraft={onSaveDraft}
             onCancel={cancelSubmitForm}
+            menuId={menuId}
+            tableName={tableName}
           />
         )}
       </div>

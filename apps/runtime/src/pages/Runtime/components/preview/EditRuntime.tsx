@@ -1,10 +1,11 @@
 import { Button, Form, Message, Modal } from '@arco-design/web-react';
 import { IconFullscreen, IconFullscreenExit } from '@arco-design/web-react/icon';
-import { PageType } from '@onebase/app';
-import { getRuntimeFormCacheKey, getRuntimeFormLoadDraftKey, pagesRuntimeSignal, TokenManager } from '@onebase/common';
+import { getDraftPage, PageType } from '@onebase/app';
+import { pagesRuntimeSignal } from '@onebase/common';
 import {
   EDITOR_TYPES,
   getComponentWidth,
+  normalizeFormValues,
   PreviewRender,
   STATUS_OPTIONS,
   STATUS_VALUES,
@@ -26,6 +27,8 @@ interface EditRuntimeProps {
   onSaveSubmit: () => void;
   onSaveDraft: () => void;
   onCancel: () => void;
+  menuId: string;
+  tableName: string;
 }
 
 const EditRuntime: React.FC<EditRuntimeProps> = ({
@@ -35,12 +38,14 @@ const EditRuntime: React.FC<EditRuntimeProps> = ({
   onSubmit,
   onSaveSubmit,
   onSaveDraft,
-  onCancel
+  onCancel,
+  menuId,
+  tableName
 }) => {
   useSignals();
 
   const { pageViews, curViewId } = usePageViewEditorSignal;
-  const { editPageViewId, curPage } = pagesRuntimeSignal;
+  const { editPageViewId, curPage, subEntities } = pagesRuntimeSignal;
 
   const [cpStates, setCpStates] = useState<Record<string, any>>({});
   const [showDraftModal, setShowDraftModal] = useState(false);
@@ -48,40 +53,30 @@ const EditRuntime: React.FC<EditRuntimeProps> = ({
   const [draftTimestamp, setDraftTimestamp] = useState<number | null>(null);
   const isLoadingFromDraftBoxRef = useRef(false);
 
-  // 获取草稿数据
-  const getDrafts = useCallback(() => {
+  const clearDraftCache = useCallback(() => {
+    localStorage.removeItem('draftData');
+    setLatestDraft(null);
+    setDraftTimestamp(null);
+  }, []);
+
+  const fetchLatestDraft = useCallback(async () => {
+    if (!tableName || !menuId) return;
     try {
-      const tokenInfo = TokenManager.getTokenInfo();
-      // 如果没有必要的数据，直接跳过
-      if (!tokenInfo?.userId || !curViewId.value) {
-        return null;
-      }
+      const res: any = await getDraftPage(tableName, menuId, { pageNo: 1, pageSize: 10 });
+      console.log(res);
 
-      const userId = tokenInfo.userId;
-      const viewId = curViewId.value;
-      const cacheKey = getRuntimeFormCacheKey(userId, viewId);
-      const rawDrafts = localStorage.getItem(cacheKey);
-
-      if (!rawDrafts) {
-        return null;
-      }
-
-      try {
-        const parsed = JSON.parse(rawDrafts);
-        const drafts = Array.isArray(parsed) ? parsed : [parsed];
-        // 过滤掉不符合格式的数据（必须有 data 和 timestamp）
-        const validDrafts = drafts.filter(
-          (draft: any) => draft && typeof draft === 'object' && 'data' in draft && 'timestamp' in draft
-        );
-        return validDrafts.length > 0 ? validDrafts : null;
-      } catch {
-        return null;
+      const draftData = res?.list?.[0];
+      if (draftData) {
+        console.log('draftData: ', draftData);
+        setLatestDraft(draftData);
+        const ts = draftData?.created_time || Date.now();
+        setDraftTimestamp(ts);
+        setShowDraftModal(true);
       }
     } catch (error) {
       console.error('获取草稿数据失败:', error);
-      return null;
     }
-  }, [curViewId.value]);
+  }, [menuId, tableName]);
 
   const handleFormValuesChange = async (_value: Partial<any>, values: Partial<any>) => {
     const states = await initInteractionRule(
@@ -96,60 +91,72 @@ const EditRuntime: React.FC<EditRuntimeProps> = ({
   useEffect(() => {
     if (isAdd) {
       // 先检查是否有从草稿箱传递的数据
-      const tokenInfo = TokenManager.getTokenInfo();
-      if (tokenInfo?.userId && curViewId.value) {
-        const userId = tokenInfo.userId;
-        const viewId = curViewId.value;
-        const loadDraftKey = getRuntimeFormLoadDraftKey(userId, viewId);
-        const loadDraftData = localStorage.getItem(loadDraftKey);
+      const loadDraftData = localStorage.getItem('draftData');
 
-        if (loadDraftData) {
-          // 从草稿箱传递的数据，直接载入，不需要二次确认
-          isLoadingFromDraftBoxRef.current = true;
-          const loadDraft = async () => {
-            try {
-              const draftData = JSON.parse(loadDraftData);
-              // 清除临时数据
-              localStorage.removeItem(loadDraftKey);
-              // 直接载入数据
-              form.setFieldsValue(draftData);
-              await handleFormValuesChange({}, draftData);
-              Message.success('已载入暂存数据');
-            } catch (error) {
-              console.error('载入草稿数据失败:', error);
-              Message.error('载入草稿数据失败');
-            }
-          };
-          loadDraft();
-          return;
-        }
+      if (loadDraftData) {
+        // 从草稿箱传递的数据，直接载入，不需要二次确认
+        isLoadingFromDraftBoxRef.current = true;
+        const loadDraft = async () => {
+          try {
+            const draftData = JSON.parse(loadDraftData);
+            // 清除临时数据
+            localStorage.removeItem('draftData');
+
+            console.log('draftData: ', draftData);
+
+            const componentSchemas = useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value;
+            const subTableComponents = useEditorSignalMap.get(editPageViewId.value)?.subTableComponents.value;
+
+            // 遍历 res, 将数据回填到表单
+            const formValues = normalizeFormValues({
+              dataItem: draftData,
+              componentSchemas,
+              subEntities: subEntities.value,
+              subTableComponents,
+              setSubTableDataLength: pagesRuntimeSignal.setSubTableDataLength
+            });
+
+            console.log('xxxformValues: ', formValues);
+            // 直接载入数据
+            form.setFieldsValue(formValues);
+          } catch (error) {
+            console.error('载入草稿数据失败:', error);
+            Message.error('载入草稿数据失败');
+          }
+        };
+        loadDraft();
+        return;
       }
 
       // 如果是从草稿箱载入的，不显示提示 Modal
       if (isLoadingFromDraftBoxRef.current) {
         return;
       }
-
-      // 检查是否有自动提示的草稿数据（仅当不是从草稿箱载入时）
-      const drafts = getDrafts();
-      if (drafts && drafts.length > 0) {
-        const latest = drafts[0]; // 最新的草稿在数组第一位
-        setLatestDraft(latest.data); // 只保存表单数据
-        setDraftTimestamp(latest.timestamp); // 保存时间戳用于显示
-        setShowDraftModal(true);
-      }
+      // 自动检测服务端草稿箱最新数据
+      fetchLatestDraft();
     } else {
       // 当 isAdd 变为 false 时，重置 ref
       isLoadingFromDraftBoxRef.current = false;
     }
-  }, [isAdd, getDrafts]);
+  }, [fetchLatestDraft, isAdd]);
 
   // 载入草稿数据
   const handleLoadDraft = async () => {
     if (latestDraft) {
-      form.setFieldsValue(latestDraft);
+      const componentSchemas = useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value;
+      const subTableComponents = useEditorSignalMap.get(editPageViewId.value)?.subTableComponents.value;
+      const formValues = normalizeFormValues({
+        dataItem: latestDraft,
+        componentSchemas,
+        subEntities: subEntities.value,
+        subTableComponents,
+        setSubTableDataLength: pagesRuntimeSignal.setSubTableDataLength
+      });
+
+      console.log('xxx2FormValues: ', formValues);
+      form.setFieldsValue(formValues);
       // 触发表单值变化，更新组件状态
-      await handleFormValuesChange({}, latestDraft);
+      await handleFormValuesChange({}, formValues);
       Message.success('已载入暂存数据');
     }
     setShowDraftModal(false);
@@ -158,8 +165,7 @@ const EditRuntime: React.FC<EditRuntimeProps> = ({
   // 取消载入草稿
   const handleCancelLoadDraft = () => {
     setShowDraftModal(false);
-    setLatestDraft(null);
-    setDraftTimestamp(null);
+    clearDraftCache();
   };
 
   const hiddenState = useCallback(
@@ -244,7 +250,7 @@ const EditRuntime: React.FC<EditRuntimeProps> = ({
         }
         onCancel={onCancel}
         autoFocus={false}
-        focusLock={true}
+        focusLock={false}
         style={{
           width: fullScreen ? '100vw' : '60vw',
           maxHeight: fullScreen ? '100vh' : '80vh',
