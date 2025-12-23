@@ -43,7 +43,7 @@ public class HelloWorldHandler implements HttpHandler {
         Map<String, Object> result = new HashMap<>();
         result.put("message", "hello, " + name + "!");
         result.put("timestamp", LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-        result.put("plugin", "hello-plugin");
+        result.put("plugin", "hello-plugin-00135");
         
         // 动态检测加载方式
         String loadSource = detectLoadSource();

@@ -36,11 +36,13 @@ public class DevModePluginManager extends DefaultPluginManager {
      */
     private final ExtensionPointScannerSpring scanner;
 
-    public DevModePluginManager(PluginProperties pluginProperties) {
+    public DevModePluginManager(PluginProperties pluginProperties,
+            org.springframework.context.ApplicationContext applicationContext) {
         super(Paths.get(System.getProperty("user.dir")));
         List<String> devPaths = pluginProperties != null && pluginProperties.isDevMode()
-                ? pluginProperties.getDevClassPaths() : Collections.emptyList();
-        this.scanner = new ExtensionPointScannerSpring(devPaths);
+                ? pluginProperties.getDevClassPaths()
+                : Collections.emptyList();
+        this.scanner = new ExtensionPointScannerSpring(devPaths, applicationContext);
         log.debug("初始化开发模式插件管理器（DevModePluginManager），devPaths={}", devPaths);
     }
 
@@ -62,7 +64,7 @@ public class DevModePluginManager extends DefaultPluginManager {
             log.debug("开发模式：虚拟插件未启动，返回空扩展点列表");
             return Collections.emptyList();
         }
-        
+
         log.debug("开发模式：扫描classpath查找 {} 扩展点", type.getName());
         return scanner.scanExtensions(type);
     }
@@ -79,14 +81,14 @@ public class DevModePluginManager extends DefaultPluginManager {
         log.debug("开发模式：getExtensions({}, {}) 被调用", type.getSimpleName(), pluginId);
         log.debug("  虚拟插件ID: {}, 请求插件ID: {}", DEV_PLUGIN_ID, pluginId);
         log.debug("  虚拟插件状态: {}", devPluginWrapper != null ? devPluginWrapper.getPluginState() : "NULL");
-        
+
         if (DEV_PLUGIN_ID.equals(pluginId)) {
             log.debug("开发模式：匹配虚拟插件 {}，委托给 getExtensions(Class)", pluginId);
             List<T> result = getExtensions(type);
             log.debug("开发模式：为虚拟插件 {} 获取到 {} 个 {} 扩展点", pluginId, result.size(), type.getSimpleName());
             return result;
         }
-        
+
         log.debug("开发模式：插件 {} 不是虚拟插件，返回空列表", pluginId);
         return Collections.emptyList();
     }
@@ -94,7 +96,7 @@ public class DevModePluginManager extends DefaultPluginManager {
     @Override
     public void loadPlugins() {
         log.info("开发模式：跳过ZIP/JAR插件加载，使用当前classpath");
-        
+
         // 创建虚拟插件包装器
         PluginDescriptor descriptor = new DefaultPluginDescriptor(
                 DEV_PLUGIN_ID,
@@ -103,17 +105,16 @@ public class DevModePluginManager extends DefaultPluginManager {
                 "1.0.0-DEV",
                 null,
                 null,
-                null
-        );
+                null);
 
         devPluginWrapper = new PluginWrapper(this, descriptor, Paths.get(""), getClass().getClassLoader());
         devPluginWrapper.setPluginState(PluginState.RESOLVED);
-        
+
         // 注册虚拟插件
         getPlugins().add(devPluginWrapper);
         getUnresolvedPlugins().remove(devPluginWrapper);
         getResolvedPlugins().add(devPluginWrapper);
-        
+
         log.info("已创建开发模式虚拟插件: {}", DEV_PLUGIN_ID);
     }
 

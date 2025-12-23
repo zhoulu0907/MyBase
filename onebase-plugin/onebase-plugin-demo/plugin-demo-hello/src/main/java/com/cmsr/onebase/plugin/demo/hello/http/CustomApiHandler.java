@@ -1,7 +1,10 @@
 package com.cmsr.onebase.plugin.demo.hello.http;
 
 import com.cmsr.onebase.plugin.api.HttpHandler;
+import org.springframework.context.ApplicationContext;
 import org.springframework.web.bind.annotation.*;
+
+import jakarta.annotation.Resource;
 
 import java.util.HashMap;
 import java.util.List;
@@ -20,8 +23,16 @@ import java.util.Map;
 public class CustomApiHandler implements HttpHandler {
 
     /**
+     * 注入 Spring ApplicationContext 以验证依赖注入功能
+     */
+    @Resource
+    private ApplicationContext applicationContext;
+
+    /**
      * 获取插件信息
-     * <p>访问路径：GET /plugin/hello-plugin/api/info</p>
+     * <p>
+     * 访问路径：GET /plugin/hello-plugin/api/info
+     * </p>
      */
     @GetMapping("/plugin/hello-plugin/api/info")
     public Map<String, Object> getPluginInfo() {
@@ -30,12 +41,26 @@ public class CustomApiHandler implements HttpHandler {
         info.put("version", "1.0.0");
         info.put("description", "OneBase插件开发示例");
         info.put("features", List.of("自定义函数", "数据处理器", "事件监听器", "HTTP接口"));
+
+        // 验证 Spring Bean 注入功能
+        if (applicationContext != null) {
+            info.put("springInjectionWorking", true);
+            info.put("springApplicationName", applicationContext.getApplicationName());
+            info.put("springBeanDefinitionCount", applicationContext.getBeanDefinitionCount());
+            info.put("springEnvironmentActive",
+                    String.join(",", applicationContext.getEnvironment().getActiveProfiles()));
+        } else {
+            info.put("springInjectionWorking", false);
+        }
+
         return info;
     }
 
     /**
      * 获取插件状态
-     * <p>访问路径：GET /plugin/hello-plugin/api/status</p>
+     * <p>
+     * 访问路径：GET /plugin/hello-plugin/api/status
+     * </p>
      */
     @GetMapping("/plugin/hello-plugin/api/status")
     public Map<String, Object> getStatus() {
@@ -47,7 +72,9 @@ public class CustomApiHandler implements HttpHandler {
 
     /**
      * 处理数据
-     * <p>访问路径：POST /plugin/hello-plugin/api/process</p>
+     * <p>
+     * 访问路径：POST /plugin/hello-plugin/api/process
+     * </p>
      */
     @PostMapping("/plugin/hello-plugin/api/process")
     public Map<String, Object> processData(@RequestBody Map<String, Object> data) {
@@ -58,4 +85,3 @@ public class CustomApiHandler implements HttpHandler {
         return result;
     }
 }
-

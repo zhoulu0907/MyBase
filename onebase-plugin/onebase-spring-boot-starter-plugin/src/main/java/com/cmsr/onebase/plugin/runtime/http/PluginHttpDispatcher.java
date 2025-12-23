@@ -45,13 +45,13 @@ public class PluginHttpDispatcher {
     /**
      * 构造函数
      *
-     * @param pluginManager      插件管理器
-     * @param handlerAdapter     Spring MVC 的请求处理适配器（用于参数解析、类型转换等）
-     * @param pluginProperties   插件配置属性
+     * @param pluginManager    插件管理器
+     * @param handlerAdapter   Spring MVC 的请求处理适配器（用于参数解析、类型转换等）
+     * @param pluginProperties 插件配置属性
      */
     public PluginHttpDispatcher(OneBasePluginManager pluginManager,
-                                RequestMappingHandlerAdapter handlerAdapter,
-                                PluginProperties pluginProperties) {
+            RequestMappingHandlerAdapter handlerAdapter,
+            PluginProperties pluginProperties) {
         this.pluginManager = pluginManager;
         this.handlerAdapter = handlerAdapter;
         this.pluginProperties = pluginProperties;
@@ -69,10 +69,10 @@ public class PluginHttpDispatcher {
             log.info("插件系统已禁用，跳过HTTP路由分发器初始化");
             return;
         }
-        
-        log.info("=" .repeat(60));
+
+        log.info("=".repeat(60));
         log.info("初始化插件HTTP路由分发器");
-        
+
         // 为了在卸载时能精确清理路由，我们按已启动的插件逐个查询其 HttpHandler 并记录所属 pluginId
         try {
             java.util.List<org.pf4j.PluginWrapper> started = pluginManager.getStartedPlugins();
@@ -104,7 +104,7 @@ public class PluginHttpDispatcher {
         }
 
         log.info("HTTP路由分发器已就绪，共注册 {} 个路由", routes.size());
-        log.info("=" .repeat(60));
+        log.info("=".repeat(60));
     }
 
     /**
@@ -143,7 +143,8 @@ public class PluginHttpDispatcher {
             return;
         }
 
-        java.util.List<String> registeredKeys = pluginRoutes.computeIfAbsent(pluginId, k -> new java.util.ArrayList<>());
+        java.util.List<String> registeredKeys = pluginRoutes.computeIfAbsent(pluginId,
+                k -> new java.util.ArrayList<>());
         int before = routes.size();
         for (HttpHandler handler : handlers) {
             try {
@@ -182,6 +183,77 @@ public class PluginHttpDispatcher {
     }
 
     /**
+     * 按类名卸载路由（用于热重载）
+     * <p>
+     * 移除所有由指定类注册的路由，用于热重载场景。
+     * </p>
+     *
+     * @param className 完整类名
+     */
+    public synchronized void unregisterHandlerByClassName(String className) {
+        if (className == null || className.isEmpty()) {
+            log.warn("类名为空，跳过卸载路由");
+            return;
+        }
+
+        java.util.List<String> keysToRemove = new java.util.ArrayList<>();
+
+        // 遍历所有路由，找到由该类注册的路由
+        for (Map.Entry<String, MethodHandler> entry : routes.entrySet()) {
+            MethodHandler handler = entry.getValue();
+            if (handler.getHandler().getClass().getName().equals(className)) {
+                keysToRemove.add(entry.getKey());
+            }
+        }
+
+        // 移除找到的路由
+        if (!keysToRemove.isEmpty()) {
+            for (String key : keysToRemove) {
+                routes.remove(key);
+                log.debug("已卸载路由: {} (类: {})", key, className);
+            }
+            log.info("已卸载类 {} 的 {} 个路由，当前路由总数: {}", className, keysToRemove.size(), routes.size());
+        } else {
+            log.debug("未找到类 {} 注册的路由", className);
+        }
+    }
+
+    /**
+     * 为指定 pluginId 注册单个 handler（用于热重载）
+     * <p>
+     * 简化版本的注册方法，用于热重载场景。
+     * </p>
+     *
+     * @param pluginId 插件ID
+     * @param handler  处理器对象
+     */
+    public synchronized void registerHandler(String pluginId, Object handler) {
+        if (handler == null) {
+            log.warn("处理器为空，跳过注册");
+            return;
+        }
+
+        java.util.List<String> registeredKeys = pluginRoutes.computeIfAbsent(pluginId,
+                k -> new java.util.ArrayList<>());
+        int before = routes.size();
+
+        try {
+            java.util.List<String> newKeys = scanHandlerMethods(handler);
+            if (newKeys != null && !newKeys.isEmpty()) {
+                for (String k : newKeys) {
+                    if (!registeredKeys.contains(k)) {
+                        registeredKeys.add(k);
+                    }
+                }
+            }
+            log.info("为 plugin {} 注册 handler {}，新增路由数: {}", pluginId, handler.getClass().getSimpleName(),
+                    routes.size() - before);
+        } catch (Exception e) {
+            log.error("注册 handler 时出错: {}", handler.getClass().getName(), e);
+        }
+    }
+
+    /**
      * 扫描处理器中的映射方法
      *
      * @param handler 处理器对象
@@ -194,14 +266,14 @@ public class PluginHttpDispatcher {
         // 1. 获取类级别的@RequestMapping前缀
         String classLevelPrefix = "";
         if (handlerClass.isAnnotationPresent(org.springframework.web.bind.annotation.RequestMapping.class)) {
-            org.springframework.web.bind.annotation.RequestMapping classMapping = 
-                handlerClass.getAnnotation(org.springframework.web.bind.annotation.RequestMapping.class);
+            org.springframework.web.bind.annotation.RequestMapping classMapping = handlerClass
+                    .getAnnotation(org.springframework.web.bind.annotation.RequestMapping.class);
             String[] classPaths = classMapping.value().length > 0 ? classMapping.value() : classMapping.path();
             if (classPaths.length > 0) {
                 classLevelPrefix = classPaths[0];
             }
         }
-        
+
         log.debug("  类级别前缀: {}", classLevelPrefix.isEmpty() ? "(无)" : classLevelPrefix);
 
         // 2. 遍历方法级别的映射注解
@@ -212,31 +284,31 @@ public class PluginHttpDispatcher {
             // 检查@GetMapping
             if (method.isAnnotationPresent(GetMapping.class)) {
                 GetMapping mapping = method.getAnnotation(GetMapping.class);
-                paths = mapping.value().length > 0 ? mapping.value() : new String[]{"/"};
+                paths = mapping.value().length > 0 ? mapping.value() : new String[] { "/" };
                 httpMethod = "GET";
             }
             // 检查@PostMapping
             else if (method.isAnnotationPresent(PostMapping.class)) {
                 PostMapping mapping = method.getAnnotation(PostMapping.class);
-                paths = mapping.value().length > 0 ? mapping.value() : new String[]{"/"};
+                paths = mapping.value().length > 0 ? mapping.value() : new String[] { "/" };
                 httpMethod = "POST";
             }
             // 检查@PutMapping
             else if (method.isAnnotationPresent(PutMapping.class)) {
                 PutMapping mapping = method.getAnnotation(PutMapping.class);
-                paths = mapping.value().length > 0 ? mapping.value() : new String[]{"/"};
+                paths = mapping.value().length > 0 ? mapping.value() : new String[] { "/" };
                 httpMethod = "PUT";
             }
             // 检查@DeleteMapping
             else if (method.isAnnotationPresent(DeleteMapping.class)) {
                 DeleteMapping mapping = method.getAnnotation(DeleteMapping.class);
-                paths = mapping.value().length > 0 ? mapping.value() : new String[]{"/"};
+                paths = mapping.value().length > 0 ? mapping.value() : new String[] { "/" };
                 httpMethod = "DELETE";
             }
             // 检查@PatchMapping
             else if (method.isAnnotationPresent(PatchMapping.class)) {
                 PatchMapping mapping = method.getAnnotation(PatchMapping.class);
-                paths = mapping.value().length > 0 ? mapping.value() : new String[]{"/"};
+                paths = mapping.value().length > 0 ? mapping.value() : new String[] { "/" };
                 httpMethod = "PATCH";
             }
 
@@ -244,23 +316,23 @@ public class PluginHttpDispatcher {
                 for (String methodPath : paths) {
                     // 3. 组合类级别前缀和方法级别路径
                     String fullPath = combinePath(classLevelPrefix, methodPath);
-                    
+
                     // 4. 如果路径以 /plugin 开头，去掉这个前缀
                     // 因为 PluginHttpHandler 的 @RequestMapping("/plugin") 会自动处理这个前缀
                     String normalizedPath = fullPath;
                     if (fullPath.startsWith("/plugin")) {
                         normalizedPath = fullPath.substring(7); // 去掉 "/plugin"
                     }
-                    
+
                     String key = buildRouteKey(httpMethod, normalizedPath);
                     MethodHandler oldHandler = routes.get(key);
                     if (oldHandler != null) {
                         log.warn("  ⚠ 路由冲突: {} {} 被覆盖!", httpMethod, normalizedPath);
-                        log.warn("    旧Handler: {} (哈希码: {})", 
-                                oldHandler.getHandler().getClass().getName(), 
+                        log.warn("    旧Handler: {} (哈希码: {})",
+                                oldHandler.getHandler().getClass().getName(),
                                 System.identityHashCode(oldHandler.getHandler()));
-                        log.warn("    新Handler: {} (哈希码: {})", 
-                                handler.getClass().getName(), 
+                        log.warn("    新Handler: {} (哈希码: {})",
+                                handler.getClass().getName(),
                                 System.identityHashCode(handler));
                     }
                     boolean replaced = routes.containsKey(key);
@@ -268,8 +340,8 @@ public class PluginHttpDispatcher {
                     if (!replaced) {
                         addedKeys.add(key);
                     }
-                    log.info("  ✓ 注册路由: {} {} -> {}.{} (Handler哈希码: {})", 
-                            httpMethod, normalizedPath, handlerClass.getSimpleName(), 
+                    log.info("  ✓ 注册路由: {} {} -> {}.{} (Handler哈希码: {})",
+                            httpMethod, normalizedPath, handlerClass.getSimpleName(),
                             method.getName(), System.identityHashCode(handler));
                 }
             }
@@ -277,7 +349,7 @@ public class PluginHttpDispatcher {
         log.info("  Handler扫描完成: {} (本次新增 {} 个路由)", handlerClass.getName(), addedKeys.size());
         return addedKeys;
     }
-    
+
     /**
      * 组合类级别前缀和方法级别路径
      *
@@ -292,7 +364,7 @@ public class PluginHttpDispatcher {
         if (suffix == null || suffix.isEmpty()) {
             return prefix;
         }
-        
+
         // 确保前缀以 / 开头
         if (!prefix.startsWith("/")) {
             prefix = "/" + prefix;
@@ -301,12 +373,12 @@ public class PluginHttpDispatcher {
         if (prefix.endsWith("/")) {
             prefix = prefix.substring(0, prefix.length() - 1);
         }
-        
+
         // 确保后缀以 / 开头
         if (!suffix.startsWith("/")) {
             suffix = "/" + suffix;
         }
-        
+
         return prefix + suffix;
     }
 
@@ -335,7 +407,7 @@ public class PluginHttpDispatcher {
      * @return 处理结果
      */
     public Object dispatch(HttpServletRequest request, HttpServletResponse response,
-                          String path, String httpMethod) {
+            String path, String httpMethod) {
         log.debug("分发请求: {} {}", httpMethod, path);
 
         // 首先尝试精确匹配
@@ -356,8 +428,7 @@ public class PluginHttpDispatcher {
             return Map.of(
                     "code", 404,
                     "message", "请求路径不存在: " + path,
-                    "success", false
-            );
+                    "success", false);
         }
 
         try {
@@ -370,8 +441,7 @@ public class PluginHttpDispatcher {
             return Map.of(
                     "code", 500,
                     "message", "执行错误: " + e.getMessage(),
-                    "success", false
-            );
+                    "success", false);
         }
     }
 
@@ -389,12 +459,12 @@ public class PluginHttpDispatcher {
             if (parts.length == 2) {
                 String method = parts[0];
                 String routePath = parts[1];
-                
+
                 // 方法匹配
                 if (!method.equals(httpMethod)) {
                     continue;
                 }
-                
+
                 // 路径匹配：完整匹配或routePath是前缀
                 if (path.equals(routePath) || path.startsWith(routePath + "/")) {
                     log.debug("  前缀匹配成功: {} {} 匹配 {} {}", httpMethod, path, method, routePath);
