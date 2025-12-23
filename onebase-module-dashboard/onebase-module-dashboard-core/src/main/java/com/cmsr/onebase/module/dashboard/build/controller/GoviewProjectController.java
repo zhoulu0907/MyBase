@@ -98,7 +98,7 @@ public class GoviewProjectController  extends BaseController {
 
 	/**
 	 * 项目表删除
-	 * @param ids
+	 * @param
 	 * @return
 	 */
 	//@Log(title = "项目表删除", action = "111")
