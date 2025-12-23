@@ -73,6 +73,13 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     if (tokenInfo?.corpId) {
       const tenantInfoRes = await getCorpDetailByIdApiInCorp(tokenInfo?.corpId);
       setTenantInfoFromSession(tenantInfoRes);
+    } else if (curAppInfo) {
+      const tenantInfo = {
+        iconColor: curAppInfo.value.iconColor,
+        iconName: curAppInfo.value.iconName,
+        corpName: curAppInfo.value.appName
+      };
+      setTenantInfoFromSession(tenantInfo);
     }
     UserPermissionManager.setUserPermissionInfo(res);
     const mobile = res.user?.mobile;
