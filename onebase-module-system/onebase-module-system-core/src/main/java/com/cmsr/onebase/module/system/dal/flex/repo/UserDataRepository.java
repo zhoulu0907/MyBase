@@ -83,6 +83,8 @@ public class UserDataRepository extends BaseDataRepository<SystemUsersMapper, Ad
             }
             configStore.and(Compare.EQUAL, DeptDO.CORP_ID, corpId);
             configStore.and(Compare.EQUAL, AdminUserDO.USER_TYPE, UserTypeEnum.CORP.getValue());
+        } else if (XFromSceneTypeEnum.THIRD.getCode().equals(fromSceneType)) {
+            configStore.and(Compare.EQUAL, AdminUserDO.USER_TYPE, UserTypeEnum.THIRD.getValue());
         } else if (XFromSceneTypeEnum.ALL.getCode().equals(fromSceneType)) {
             // 全部类型，不做任何处理
         } else {

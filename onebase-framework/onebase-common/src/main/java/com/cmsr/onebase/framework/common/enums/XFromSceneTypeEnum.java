@@ -19,6 +19,10 @@ public enum XFromSceneTypeEnum {
      */
     CORP("corp", "企业"),
     /**
+     * 外部用户
+     */
+    THIRD("corp", "外部"),
+    /**
      * 全部类型
      */
     ALL("all", "全部类型");
