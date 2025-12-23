@@ -15,7 +15,6 @@ import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.security.config.SecurityProperties;
-import com.cmsr.onebase.module.infra.dal.database.FileDataRepositoryOld;
 import com.cmsr.onebase.module.infra.dal.dataflex.FileDataRepository;
 import com.cmsr.onebase.module.infra.dal.dataflexdo.file.FileDO;
 import com.cmsr.onebase.module.infra.dal.vo.file.file.FileCreateReqVO;

@@ -4,7 +4,7 @@ import com.cmsr.onebase.framework.common.enums.CorpAppReationStatusEnum;
 import com.cmsr.onebase.framework.common.enums.CorpStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.system.dal.dataobject.corpapprelation.CorpAppRelationDO;
-import com.cmsr.onebase.module.system.dal.flex.base.BaseDataServiceImpl;
+import com.cmsr.onebase.framework.orm.repo.BaseDataRepository;
 import com.cmsr.onebase.module.system.dal.flex.mapper.SystemCorpAppRelationMapper;
 import com.cmsr.onebase.module.system.vo.corpapprelation.CorpAppPageReqVO;
 import com.cmsr.onebase.module.system.vo.corpapprelation.CorpAppRelationPageReqVO;
@@ -27,7 +27,7 @@ import static com.cmsr.onebase.module.system.dal.flex.table.SystemCorpAppRelatio
  * @date 2025-12-22
  */
 @Repository
-public class CorpAppRelationDataRepository extends BaseDataServiceImpl<SystemCorpAppRelationMapper, CorpAppRelationDO> {
+public class CorpAppRelationDataRepository extends BaseDataRepository<SystemCorpAppRelationMapper, CorpAppRelationDO> {
 
     /**
      * 分页查询企业应用关联

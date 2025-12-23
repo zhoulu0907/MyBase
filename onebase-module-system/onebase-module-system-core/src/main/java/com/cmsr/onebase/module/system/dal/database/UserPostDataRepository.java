@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.system.dal.database;
 
 import com.cmsr.onebase.module.system.dal.dataobject.dept.UserPostDO;
-import com.cmsr.onebase.module.system.dal.flex.base.BaseDataServiceImpl;
+import com.cmsr.onebase.framework.orm.repo.BaseDataRepository;
 import com.cmsr.onebase.module.system.dal.flex.mapper.SystemUserPostMapper;
 import org.springframework.stereotype.Repository;
 
@@ -18,7 +18,7 @@ import java.util.List;
  * @date 2025-12-22
  */
 @Repository
-public class UserPostDataRepository extends BaseDataServiceImpl<SystemUserPostMapper, UserPostDO> {
+public class UserPostDataRepository extends BaseDataRepository<SystemUserPostMapper, UserPostDO> {
 
     /**
      * 根据用户ID查询用户岗位关联

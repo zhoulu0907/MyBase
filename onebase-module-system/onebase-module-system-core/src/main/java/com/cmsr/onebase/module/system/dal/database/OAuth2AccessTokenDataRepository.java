@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.system.dal.database;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2AccessTokenDO;
-import com.cmsr.onebase.module.system.dal.flex.base.BaseDataServiceImpl;
+import com.cmsr.onebase.framework.orm.repo.BaseDataRepository;
 import com.cmsr.onebase.module.system.dal.flex.mapper.SystemOauth2AccessTokenMapper;
 import com.cmsr.onebase.module.system.vo.oauth.OAuth2AccessTokenPageReqVO;
 import com.mybatisflex.core.paginate.Page;
@@ -14,7 +14,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import static com.cmsr.onebase.framework.data.base.BaseDO.ID;
 import static com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2AccessTokenDO.ACCESS_TOKEN;
 import static com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2AccessTokenDO.CLIENT_ID;
 import static com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2AccessTokenDO.REFRESH_TOKEN;
@@ -29,7 +28,7 @@ import static com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2AccessT
  * @date 2025-12-22
  */
 @Repository
-public class OAuth2AccessTokenDataRepository extends BaseDataServiceImpl<SystemOauth2AccessTokenMapper, OAuth2AccessTokenDO> {
+public class OAuth2AccessTokenDataRepository extends BaseDataRepository<SystemOauth2AccessTokenMapper, OAuth2AccessTokenDO> {
 
     public OAuth2AccessTokenDO findByAccessToken(String accessToken) {
         if (StringUtils.isBlank(accessToken)) {

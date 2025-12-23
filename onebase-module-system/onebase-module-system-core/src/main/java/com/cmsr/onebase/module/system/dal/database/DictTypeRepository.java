@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.system.dal.database;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.system.dal.dataobject.dict.DictTypeDO;
-import com.cmsr.onebase.module.system.dal.flex.base.BaseDataServiceImpl;
+import com.cmsr.onebase.framework.orm.repo.BaseDataRepository;
 import com.cmsr.onebase.module.system.dal.flex.mapper.SystemDictTypeMapper;
 import com.cmsr.onebase.module.system.enums.dict.DictOwnerTypeEnum;
 import com.cmsr.onebase.module.system.vo.dicttype.DictTypeListReqVO;
@@ -31,7 +31,7 @@ import static com.cmsr.onebase.module.system.dal.dataobject.dict.DictTypeDO.TYPE
  * @date 2025-12-22
  */
 @Repository
-public class DictTypeRepository extends BaseDataServiceImpl<SystemDictTypeMapper, DictTypeDO> {
+public class DictTypeRepository extends BaseDataRepository<SystemDictTypeMapper, DictTypeDO> {
 
     /**
      * 分页查询字典类型

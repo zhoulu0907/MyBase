@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.system.dal.database;
 
 import com.cmsr.onebase.framework.common.enums.CorpAppReationStatusEnum;
 import com.cmsr.onebase.module.system.dal.dataobject.user.UserAppRelationDO;
-import com.cmsr.onebase.module.system.dal.flex.base.BaseDataServiceImpl;
+import com.cmsr.onebase.framework.orm.repo.BaseDataRepository;
 import com.cmsr.onebase.module.system.dal.flex.mapper.SystemUserAppRelationMapper;
 import com.cmsr.onebase.module.system.vo.user.UserAppPageReqVO;
 import org.apache.commons.collections4.CollectionUtils;
@@ -18,7 +18,7 @@ import java.util.List;
  * @date 2025-12-22
  */
 @Repository
-public class UserAppRelationDataRepository extends BaseDataServiceImpl<SystemUserAppRelationMapper, UserAppRelationDO> {
+public class UserAppRelationDataRepository extends BaseDataRepository<SystemUserAppRelationMapper, UserAppRelationDO> {
 
     public List<UserAppRelationDO> getUserAppRelationByUserId(Long userId) {
         if (userId == null) {

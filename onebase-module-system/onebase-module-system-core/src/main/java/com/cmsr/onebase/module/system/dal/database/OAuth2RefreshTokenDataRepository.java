@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.system.dal.database;
 
 import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2RefreshTokenDO;
-import com.cmsr.onebase.module.system.dal.flex.base.BaseDataServiceImpl;
+import com.cmsr.onebase.framework.orm.repo.BaseDataRepository;
 import com.cmsr.onebase.module.system.dal.flex.mapper.SystemOauth2RefreshTokenMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
@@ -15,7 +15,7 @@ import static com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2Refresh
  * @date 2025-12-22
  */
 @Repository
-public class OAuth2RefreshTokenDataRepository extends BaseDataServiceImpl<SystemOauth2RefreshTokenMapper, OAuth2RefreshTokenDO> {
+public class OAuth2RefreshTokenDataRepository extends BaseDataRepository<SystemOauth2RefreshTokenMapper, OAuth2RefreshTokenDO> {
 
     /**
      * 根据刷新令牌查找 OAuth2 刷新令牌

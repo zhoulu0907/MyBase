@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.system.dal.database;
 
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.MenuDO;
-import com.cmsr.onebase.module.system.dal.flex.base.BaseDataServiceImpl;
+import com.cmsr.onebase.framework.orm.repo.BaseDataRepository;
 import com.cmsr.onebase.module.system.dal.flex.mapper.SystemMenuMapper;
 import com.cmsr.onebase.module.system.vo.menu.SystemMenuListReqVO;
 import org.apache.commons.lang3.StringUtils;
@@ -27,7 +27,7 @@ import static com.cmsr.onebase.module.system.dal.dataobject.permission.MenuDO.ST
  * @date 2025-12-22
  */
 @Repository
-public class MenuDataRepository extends BaseDataServiceImpl<SystemMenuMapper, MenuDO> {
+public class MenuDataRepository extends BaseDataRepository<SystemMenuMapper, MenuDO> {
 
     /**
      * 根据父菜单ID统计子菜单数量

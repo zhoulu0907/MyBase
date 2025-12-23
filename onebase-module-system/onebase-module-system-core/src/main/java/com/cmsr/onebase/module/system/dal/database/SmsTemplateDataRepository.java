@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.system.dal.database;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.system.dal.dataobject.sms.SmsTemplateDO;
-import com.cmsr.onebase.module.system.dal.flex.base.BaseDataServiceImpl;
+import com.cmsr.onebase.framework.orm.repo.BaseDataRepository;
 import com.cmsr.onebase.module.system.dal.flex.mapper.SystemSmsTemplateMapper;
 import com.cmsr.onebase.module.system.vo.sms.SmsTemplatePageReqVO;
 import com.mybatisflex.core.paginate.Page;
@@ -19,7 +19,7 @@ import static com.cmsr.onebase.framework.data.base.BaseDO.ID;
  * @date 2025-12-22
  */
 @Repository
-public class SmsTemplateDataRepository extends BaseDataServiceImpl<SystemSmsTemplateMapper, SmsTemplateDO> {
+public class SmsTemplateDataRepository extends BaseDataRepository<SystemSmsTemplateMapper, SmsTemplateDO> {
 
     /**
      * 根据编码查找短信模板

@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.system.dal.database;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2AccessTokenDO;
-import com.cmsr.onebase.module.system.dal.flex.base.BaseDataServiceImpl;
+import com.cmsr.onebase.framework.orm.repo.BaseDataRepository;
 import com.cmsr.onebase.module.system.dal.flex.mapper.SystemOauth2AccessTokenMapper;
 import com.cmsr.onebase.module.system.vo.oauth.OAuth2AccessTokenPageReqVO;
 import com.mybatisflex.core.paginate.Page;
@@ -28,7 +28,7 @@ import static com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2AccessT
  * @date 2025-12-22
  */
 @Repository
-public class OAuth2TokenDataRepository extends BaseDataServiceImpl<SystemOauth2AccessTokenMapper, OAuth2AccessTokenDO> {
+public class OAuth2TokenDataRepository extends BaseDataRepository<SystemOauth2AccessTokenMapper, OAuth2AccessTokenDO> {
 
     /**
      * 根据访问令牌查找 OAuth2 访问令牌

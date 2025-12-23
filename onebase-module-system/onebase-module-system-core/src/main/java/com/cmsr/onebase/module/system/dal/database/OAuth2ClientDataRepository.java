@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.system.dal.database;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2ClientDO;
-import com.cmsr.onebase.module.system.dal.flex.base.BaseDataServiceImpl;
+import com.cmsr.onebase.framework.orm.repo.BaseDataRepository;
 import com.cmsr.onebase.module.system.dal.flex.mapper.SystemOauth2ClientMapper;
 import com.cmsr.onebase.module.system.vo.oauth.OAuth2ClientPageReqVO;
 import com.mybatisflex.core.paginate.Page;
@@ -21,7 +21,7 @@ import static com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2ClientD
  * @date 2025-12-22
  */
 @Repository
-public class OAuth2ClientDataRepository extends BaseDataServiceImpl<SystemOauth2ClientMapper, OAuth2ClientDO> {
+public class OAuth2ClientDataRepository extends BaseDataRepository<SystemOauth2ClientMapper, OAuth2ClientDO> {
 
     /**
      * 根据客户端ID查找 OAuth2 客户端
