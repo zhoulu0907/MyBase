@@ -1,8 +1,6 @@
 package com.cmsr.onebase.module.dashboard.build.api;
 
 import cn.hutool.core.bean.BeanUtil;
-import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
-import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.module.dashboard.build.dal.dataobject.DashboardTemplateDO;
 import com.cmsr.onebase.module.dashboard.build.model.GoviewProject;
 import com.cmsr.onebase.module.dashboard.build.model.GoviewProjectData;
