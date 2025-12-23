@@ -32,4 +32,8 @@ public class PageDTO {
 
     private String interactionRules;
 
+    private String projectName;
+
+    private String indexImage;
+
 }
