@@ -193,9 +193,9 @@ const Right: React.FC = () => {
         }
         return;
       } else {
-        // if (response?.userUnRegistFlag) {
-        //   setVisibleRegister(true);
-        // }
+        if (response?.userUnRegistFlag) {
+          setVisibleRegister(true);
+        }
       }
     } catch (error: any) {
       console.error('登录失败:', error);
