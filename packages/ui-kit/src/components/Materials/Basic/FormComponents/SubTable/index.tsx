@@ -1,11 +1,10 @@
 import CompDeleteIcon from '@/assets/images/app_delete.svg';
 import CompCopyIcon from '@/assets/images/copy_comp_icon.svg';
 import CompShowIcon from '@/assets/images/eye_off_icon.svg';
-import { Button, Divider, Form, Input, Layout, Table } from '@arco-design/web-react';
-import { IconDelete, IconPlus } from '@arco-design/web-react/icon';
+import { Button, Divider, Form, Input, Layout, Table, Tooltip } from '@arco-design/web-react';
+import { IconDelete, IconPlus, IconQuestionCircle } from '@arco-design/web-react/icon';
 import { ENTITY_TYPE_VALUE } from '@onebase/app';
 import { pagesRuntimeSignal } from '@onebase/common';
-import { getDictDataListByType, getDictDetail } from '@onebase/platform-center';
 import { useSignals } from '@preact/signals-react/runtime';
 import { nanoid } from 'nanoid';
 import { useEffect, useState } from 'react';
@@ -18,13 +17,7 @@ import { useAppEntityStore } from 'src/signals/store_entity';
 import { COMPONENT_GROUP_NAME, EDITOR_TYPES, type GridItem } from 'src/utils/const';
 import { v4 as uuidv4 } from 'uuid';
 import { ENTITY_COMPONENT_TYPES, FORM_COMPONENT_TYPES } from '../../../componentTypes';
-import {
-  COLOR_MODE_TYPES,
-  DEFAULT_OPTIONS_TYPE,
-  DEFAULT_VALUE_TYPES,
-  STATUS_OPTIONS,
-  STATUS_VALUES
-} from '../../../constants';
+import { DEFAULT_VALUE_TYPES, STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import { getComponentSchema } from '../../../schema';
 import './index.css';
 import { type XSubTableConfig } from './schema';
@@ -164,8 +157,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
       schema.config.verify = {
         ...schema.config.verify,
         required: currentField.isRequired,
-        noRepeat:
-          typeof schema.config?.verify?.noRepeat === 'boolean' ? currentField.isUnique === 1 : undefined
+        noRepeat: typeof schema.config?.verify?.noRepeat === 'boolean' ? currentField.isUnique === 1 : undefined
       };
 
       // 字段约束配置（长度/正则） constraints
@@ -180,10 +172,10 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
         // 回显字段  name
         schema.config.displayFields = currentField.dataSelectionConfig?.targetFieldName
           ? [
-            {
-              value: currentField.dataSelectionConfig?.targetFieldName
-            }
-          ]
+              {
+                value: currentField.dataSelectionConfig?.targetFieldName
+              }
+            ]
           : [];
       }
     }
@@ -287,7 +279,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
       tableColumns.push(indexColumn);
     }
     for (let [colIdx, column] of (subTableComponents[id] || []).entries()) {
-      const config = pageComponentSchemas[column.id].config
+      const config = pageComponentSchemas[column.id].config;
       const displayName = config.label.text || column.displayName;
       const required = config?.verify?.required;
       const [subTableName, fieldName] = config.dataField;
@@ -297,6 +289,11 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
           <>
             {required ? <span style={{ color: 'red', paddingRight: '4px' }}>*</span> : null}
             {displayName}
+            {config?.tooltip && (
+              <Tooltip content={config.tooltip}>
+                <IconQuestionCircle style={{ marginLeft: '4px', color: 'var(--color-text-4)' }} />
+              </Tooltip>
+            )}
           </>
         ),
         dataIndex: fieldName,
@@ -412,10 +409,13 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
     <Layout className="XSubTable" style={runtime ? { border: 'none' } : {}}>
       <Form.Item
         label={
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }} onClick={(event) => {
-            event.preventDefault();
-            event.stopPropagation();
-          }}>
+          <div
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}
+            onClick={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+            }}
+          >
             {label.display && label.text && (
               <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>
                 {verify?.required ? <span style={{ color: 'red', paddingRight: '4px' }}>*</span> : null}
@@ -424,12 +424,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
             )}
 
             {!detailMode && (
-              <Button
-                type="outline"
-                size="small"
-                icon={<IconPlus />}
-                onClick={handleAdd}
-              >
+              <Button type="outline" size="small" icon={<IconPlus />} onClick={handleAdd}>
                 新增一项
               </Button>
             )}
@@ -538,6 +533,11 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                       ) : null}
                       {pageComponentSchemas[cp.id]?.config.label.text ||
                         pageComponentSchemas[cp.id]?.config.displayName}
+                      {pageComponentSchemas[cp.id]?.config?.tooltip && (
+                        <Tooltip content={pageComponentSchemas[cp.id].config.tooltip}>
+                          <IconQuestionCircle style={{ marginLeft: '4px', color: 'var(--color-text-4)' }} />
+                        </Tooltip>
+                      )}
                     </div>
                     <EditRender
                       runtime={runtime}

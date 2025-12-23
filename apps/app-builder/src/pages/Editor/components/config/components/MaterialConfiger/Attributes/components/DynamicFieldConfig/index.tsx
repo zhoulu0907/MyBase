@@ -23,13 +23,13 @@ export interface DynamicFieldConfigProps {
 }
 
 /**
- * 对实体字段进行排序：系统字段排在后面，非系统字段排在前面，相同类型按 displayName 排序
+ * 对实体字段进行排序：系统字段排在后面，非系统字段排在前面
  */
 const sortEntityFields = (a: AppEntityField, b: AppEntityField): number => {
-  if (a.isSystemField === b.isSystemField) {
-    return a.displayName.localeCompare(b.displayName);
+  if (a.isSystemField !== b.isSystemField) {
+    return a.isSystemField ? 1 : -1;
   }
-  return a.isSystemField ? 1 : -1;
+  return 0;
 };
 
 const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({

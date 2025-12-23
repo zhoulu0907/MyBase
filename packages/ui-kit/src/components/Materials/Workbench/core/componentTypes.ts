@@ -50,6 +50,14 @@ const WORKBENCH_COMPONENT_DEFINITIONS: ReadonlyArray<WorkbenchComponentDefinitio
     icon: 'carousel_workbench_cp.svg',
     category: 'advanced',
     size: { h: 36, w: 118 }
+  },
+  {
+    key: 'BUTTON_WORKBENCH',
+    type: 'XButtonWorkbench',
+    displayName: '按钮',
+    icon: 'button_workbench_cp.svg',
+    category: 'basic',
+    size: { h: 36, w: 118 }
   }
 ] as const;
 

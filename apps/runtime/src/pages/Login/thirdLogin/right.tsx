@@ -60,6 +60,9 @@ const Right: React.FC = () => {
   const [visibleConfirmInfo, setVisibleConfirmInfo] = useState<boolean>(false);
   const [verifyCode, setVerifyCode] = useState<string>('');
 
+  // 手机号
+  const [mobile, setMobile] = useState('');
+
   useEffect(() => {
     // 从 window.location.hash 中解析 redirectURL，再从 redirectURL 解析 appId 和 tenantId
     const rawHash = window.location.hash;
@@ -212,12 +215,14 @@ const Right: React.FC = () => {
   // 验证码验证成功回调
   const handleCaptchaSuccess = async (token: string) => {
     const values = await form.getFieldsValue();
+    const mobile = filterSpace(values.mobile);
+    setMobile(mobile);
 
     const deviceId = await getOrCreateDeviceInfo();
     handleSubmit({
       appId: values.appId,
       loginType: values.loginType,
-      mobile: filterSpace(values.mobile),
+      mobile: mobile,
       password: values.password,
       captchaVerification: token,
       deviceId: deviceId
@@ -371,6 +376,7 @@ const Right: React.FC = () => {
         <RegisterForm
           appId={appId}
           tenantId={tenantId}
+          mobile={mobile}
           onGoBack={() => {
             setVisibleRegister(false);
           }}

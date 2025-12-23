@@ -30,10 +30,10 @@ const Option = Select.Option;
 const RadioGroup = Radio.Group;
 
 const sortEntityFields = (a: MetadataEntityField, b: MetadataEntityField): number => {
-  if (a.isSystemField === b.isSystemField) {
-    return a.displayName.localeCompare(b.displayName);
+  if (a.isSystemField !== b.isSystemField) {
+    return a.isSystemField ? 1 : -1;
   }
-  return a.isSystemField ? 1 : -1;
+  return 0;
 };
 
 export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
