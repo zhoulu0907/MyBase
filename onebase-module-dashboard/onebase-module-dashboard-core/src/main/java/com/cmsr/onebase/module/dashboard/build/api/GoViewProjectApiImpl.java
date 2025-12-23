@@ -1,7 +1,6 @@
 package com.cmsr.onebase.module.dashboard.build.api;
 
 import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.date.DateUtil;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.module.dashboard.build.dal.dataobject.DashboardTemplateDO;
@@ -60,7 +59,7 @@ public class GoViewProjectApiImpl implements GoViewProjectApi {
         goviewProject.setState(-1);
         goviewProject.setAppId(applicationId);
         if (loginUser != null){
-            goviewProject.setCreateUserId(loginUser.getId().toString());
+            goviewProject.setCreator(loginUser.getId());
         }
         iGoviewProjectService.save(goviewProject);
         GoviewProjectData goviewProjectData = new GoviewProjectData();
