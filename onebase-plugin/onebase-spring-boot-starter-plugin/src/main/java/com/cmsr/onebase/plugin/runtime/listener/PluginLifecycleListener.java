@@ -22,7 +22,7 @@ import java.util.List;
  * - 委托模式：将HTTP处理器的注册/注销委托给专门的管理器
  * </p>
  *
- * @author matianyu
+ * @author chengyuansen
  * @date 2025-12-17
  */
 @Slf4j

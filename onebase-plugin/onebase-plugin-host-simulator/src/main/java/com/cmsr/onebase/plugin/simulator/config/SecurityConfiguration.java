@@ -12,7 +12,7 @@ import org.springframework.security.web.SecurityFilterChain;
  * 允许所有插件相关接口匿名访问，方便测试和演示。
  * </p>
  *
- * @author matianyu
+ * @author chengyuansen
  * @date 2025-12-17
  */
 @Configuration

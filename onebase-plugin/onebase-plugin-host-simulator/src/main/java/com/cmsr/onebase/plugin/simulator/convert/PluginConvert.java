@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 /**
  * 插件信息转换器
  *
- * @author matianyu
+ * @author chengyuansen
  * @date 2025-12-17
  */
 @Component

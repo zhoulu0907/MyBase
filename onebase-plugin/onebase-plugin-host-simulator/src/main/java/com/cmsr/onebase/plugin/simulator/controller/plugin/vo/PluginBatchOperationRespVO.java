@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * 批量操作结果 Response VO
  *
- * @author matianyu
+ * @author chengyuansen
  * @date 2025-12-17
  */
 @Schema(description = "插件管理 - 批量操作结果 Response VO")

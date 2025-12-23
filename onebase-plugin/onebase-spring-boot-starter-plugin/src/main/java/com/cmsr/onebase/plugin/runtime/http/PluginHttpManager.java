@@ -31,7 +31,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * - 扩展友好：预留直接向Spring RequestMappingHandlerMapping注册的开关
  * </p>
  *
- * @author matianyu
+ * @author chengyuansen
  * @date 2025-12-17
  */
 @Slf4j

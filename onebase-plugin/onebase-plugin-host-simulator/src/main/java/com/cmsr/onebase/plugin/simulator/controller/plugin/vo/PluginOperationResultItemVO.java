@@ -6,7 +6,7 @@ import lombok.Data;
 /**
  * 插件操作结果项 Response VO
  *
- * @author matianyu
+ * @author chengyuansen
  * @date 2025-12-17
  */
 @Schema(description = "插件管理 - 操作结果项 Response VO")

@@ -18,7 +18,7 @@ import java.util.Map;
  * Hutool加密测试接口
  * 用于验证compile scope三方依赖能否被正确打包到ZIP并被PF4J加载
  *
- * @author matianyu
+ * @author chengyuansen
  * @date 2025-12-20
  */
 @RestController

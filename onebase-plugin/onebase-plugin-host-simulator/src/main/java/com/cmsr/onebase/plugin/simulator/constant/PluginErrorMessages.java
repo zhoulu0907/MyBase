@@ -3,7 +3,7 @@ package com.cmsr.onebase.plugin.simulator.constant;
 /**
  * 插件管理错误消息常量
  *
- * @author matianyu
+ * @author chengyuansen
  * @date 2025-12-20
  */
 public class PluginErrorMessages {
