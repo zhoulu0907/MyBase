@@ -143,6 +143,9 @@ const ComponentEditRender: React.FC<ComponentRenderProps> = ({ cpId, cpType, pag
         return <WorkbenchComp.XRichTextEditorWorkbench cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case WORKBENCH_COMPONENT_TYPES.CAROUSEL_WORKBENCH:
         return <WorkbenchComp.XCarouselWorkbench cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+      case WORKBENCH_COMPONENT_TYPES.BUTTON_WORKBENCH:
+        // 移动端独有组件，web 端静默处理
+        return null;
 
       default:
         return <div>未知组件类型: {cpType}</div>;

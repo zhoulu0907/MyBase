@@ -43,16 +43,26 @@ export const WORKBENCH_CONFIG_TYPES = {
   STATUS_RADIO: CONFIG_TYPES.STATUS_RADIO,
   WIDTH_RADIO: CONFIG_TYPES.WIDTH_RADIO,
   FORM_LAYOUT: CONFIG_TYPES.FORM_LAYOUT,
+  NUMBER_INPUT: CONFIG_TYPES.NUMBER_INPUT,
+  TEXT_ALIGN: CONFIG_TYPES.TEXT_ALIGN,
+  COLOR: CONFIG_TYPES.COLOR,
+  RADIO_DATA: CONFIG_TYPES.RADIO_DATA,
   // 工作台专属配置类型（以WB_开头）
+  // 公共
+  WB_SLIDER: 'Wb_Slider' as const,
+  WB_COLOR: 'Wb_Color' as const,
+  WB_TEXT_ALIGN: 'Wb_TextAlign' as const,
+  WB_MENU_SELECTOR: 'Wb_MenuSelector' as const,
   // 快捷入口
   WB_ENTRY_GROUP: 'Wb_EntryGroup' as const,
   WB_ENTRY_STYLE: 'Wb_EntryStyle' as const,
   WB_ENTRY_TITLE: 'Wb_EntryTitle' as const,
   // 轮播图
   WB_CAROUSEL_CONTENT: 'Wb_CarouselContent' as const,
-  WB_COLOR: 'Wb_Color' as const,
   WB_RICH_TEXT_CONTENT: 'Wb_RichTextContent' as const,
   WB_DATA_CONFIG: 'Wb_DataConfig' as const,
+  // 按钮组件
+  WB_JUMP_CONFIG: 'Wb_JumpConfig' as const,
 } as const;
 
 /**
@@ -115,3 +125,10 @@ export const DATA_CONFIG_RANGE: IBooleanConfigType[] = [
     type: WORKBENCH_CONFIG_TYPES.SWITCH_INPUT
   }
 ];
+
+// 垂直对齐方式
+export const VERTICAL_ALIGN_OPTIONS = {
+  TOP: 'top',
+  MIDDLE: 'middle',
+  BOTTOM: 'bottom'
+} as const;
