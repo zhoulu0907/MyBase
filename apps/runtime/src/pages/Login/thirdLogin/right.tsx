@@ -31,9 +31,9 @@ import { useNavigate } from 'react-router-dom';
 import { useI18n } from '../../../hooks/useI18n';
 import { useRememberMe } from '../../../hooks/useRememberMe';
 import styles from '../index.module.less';
+import ConfirmInfoForm from './confirmInfo';
 import RegisterForm from './register';
 import UpdatePasswordForm from './updatePassword';
-import ConfirmInfoForm from './confirmInfo';
 
 const { Paragraph } = Typography;
 const TabPane = Tabs.TabPane;
@@ -136,15 +136,21 @@ const Right: React.FC = () => {
 
       const deviceId = await getOrCreateDeviceInfo();
 
-      values.password = await sm2Encrypt(getPublicKey(), values.password || '');
-      const loginData: RuntimeThirdLoginRequest = {
+      let loginData: RuntimeThirdLoginRequest = {
         appId: appId,
         loginType: loginType,
         mobile: values.mobile,
-        password: values.password!,
         captchaVerification: captchaVerification,
         deviceId: deviceId
       };
+
+      if (loginType === ThirdLoginType.PASSWORD && !values.password) {
+        values.password = await sm2Encrypt(getPublicKey(), values.password || '');
+        loginData.password = values.password;
+      } else if (loginType === ThirdLoginType.VERIFYCODE) {
+        loginData.verifyCode = verifyCode;
+      }
+
       response = await runtimeThirdLogin(loginData, headers);
       if (response && response.accessToken) {
         // 使用 TokenManager 存储 token 信息
@@ -170,10 +176,10 @@ const Right: React.FC = () => {
             corpId: response.corpId,
             loginSource: response.loginSource,
             userUnRegistFlag: response.userUnRegistFlag,
-            loginURL: window.location.href,// 当前地址
+            loginURL: window.location.href, // 当前地址
             userAppRelationFlag: response.userAppRelationFlag,
             email: response.email,
-            nickName: response.nickName,
+            nickName: response.nickName
           },
           rememberMe
         );
@@ -183,10 +189,10 @@ const Right: React.FC = () => {
 
         Message.success(t('auth.loginSuccess'));
         const redirectURL = getHashQueryParam('redirectURL');
-        if(response.userAppRelationFlag) {
+        if (response.userAppRelationFlag) {
           setVisibleConfirmInfo(true);
           return;
-        }else {
+        } else {
           if (redirectURL) {
             navigate(`/onebase/${appId}/${tenantId}/runtime`);
           } else {
@@ -384,11 +390,9 @@ const Right: React.FC = () => {
       )}
 
       {/* 确认页面 */}
-      {visibleConfirmInfo && <ConfirmInfoForm
-        onGoBack={()=>setVisibleConfirmInfo(false)}
-        tenantId={tenantId}
-        appId={appId}
-      />}
+      {visibleConfirmInfo && (
+        <ConfirmInfoForm onGoBack={() => setVisibleConfirmInfo(false)} tenantId={tenantId} appId={appId} />
+      )}
 
       {/* 忘记密码 */}
       {visbileUpdatePwd && (
