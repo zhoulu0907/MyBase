@@ -86,15 +86,15 @@ const XInputTextArea = memo((props: XInputTextAreaConfig & { runtime?: boolean; 
     >
       {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
         // 只读模式，渲染文本内容
-        <div className="readonlyText" style={{
-          textAlign: align,
-          paddingTop: '0.16rem',
-          whiteSpace: 'pre-wrap',
-          wordBreak: 'break-word',
-          minHeight: `${minRows * 24 + 16}px`
-        }}>
-          {form?.getFieldValue(fieldId)}
-        </div>
+        <Textarea
+          className="readonlyText"
+          readOnly
+          style={{
+            textAlign: align,
+            minHeight: `${minRows * 24 + 16}px`
+          }}
+          value={form?.getFieldValue(fieldId) || (defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : '')}
+        />
       ) : (
         renderContent()
       )}

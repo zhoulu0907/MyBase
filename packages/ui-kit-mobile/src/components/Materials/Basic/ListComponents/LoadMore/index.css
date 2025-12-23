@@ -221,6 +221,10 @@
   .fileWrapper {
     display: flex;
     align-items: center;
+
+    .filename {
+      font-size: 0.28rem;
+    }
     &>div {
       flex: 1;
     }
