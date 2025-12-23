@@ -11,6 +11,7 @@ import com.cmsr.onebase.module.metadata.core.service.datasource.MetadataAppAndDa
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zaxxer.hikari.HikariDataSource;
+import org.anyline.metadata.type.DatabaseType;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -18,6 +19,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Slf4j
 public class ApplicationDataSourceManager {
@@ -25,6 +28,7 @@ public class ApplicationDataSourceManager {
     private static final Map<String, DataSource> CACHE = new ConcurrentHashMap<>();
     private static final Map<String, DataSource> CONFIG_CACHE = new ConcurrentHashMap<>();
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final Pattern PARAM_PATTERN = Pattern.compile("\\{([^{}:]+)(:[^{}]+)?\\}");
 
     public static String useBizDatasourceByAppId(Long appId) {
         if (appId == null) { return null; }
@@ -148,17 +152,8 @@ public class ApplicationDataSourceManager {
                 String port = str(cfg.get("port"));
                 String database = str(cfg.get("database"));
                 String type = dsDo == null ? null : dsDo.getDatasourceType();
-                String tp = type == null ? "" : type.toUpperCase();
-                String defaultPort = null;
-                String prefix = "jdbc:postgresql://";
-                if ("POSTGRESQL".equals(tp)) { defaultPort = "5432"; prefix = "jdbc:postgresql://"; }
-                else if ("MYSQL".equals(tp)) { defaultPort = "3306"; prefix = "jdbc:mysql://"; }
-                else if ("CLICKHOUSE".equals(tp)) { defaultPort = "8123"; prefix = "jdbc:clickhouse://"; }
-                else if ("KINGBASE".equals(tp)) { defaultPort = "5432"; prefix = "jdbc:kingbase://"; }
-                else if ("TDENGINE".equals(tp)) { defaultPort = "6030"; prefix = "jdbc:TAOS://"; }
-                String p = (port == null || port.isBlank()) ? (defaultPort == null ? "" : defaultPort) : port;
                 if (host != null && database != null) {
-                    url = prefix + host + (p.isBlank() ? "" : (":" + p)) + "/" + database;
+                    url = buildJdbcUrl(type, host, port, database);
                 }
             }
             String username = str(cfg.get("username"));
@@ -229,4 +224,57 @@ public class ApplicationDataSourceManager {
     private static String str(Object obj) { return obj == null ? null : String.valueOf(obj); }
 
     private static String buildKey(Long appId) { return "app_ds_" + appId; }
+
+    /**
+     * 使用 Anyline DatabaseType 构建 JDBC URL
+     * 复用框架内置的数据库类型配置，避免硬编码
+     */
+    private static String buildJdbcUrl(String datasourceType, String host, String port, String database) {
+        if (host == null || host.isBlank() || database == null || database.isBlank()) {
+            return null;
+        }
+        // 解析数据库类型，默认使用 PostgreSQL
+        DatabaseType dbType = DatabaseType.POSTGRESQL;
+        if (datasourceType != null && !datasourceType.isBlank()) {
+            try {
+                dbType = DatabaseType.valueOf(datasourceType.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                log.warn("未知的数据源类型: {}，使用默认 PostgreSQL", datasourceType);
+            }
+        }
+        // 获取 Anyline 内置的 URL 模板
+        String jdbcTemplate = dbType.url();
+        // Anyline 的 PostgreSQL 类数据源 URL 定义有问题，需要特殊处理
+        if ("org.postgresql.Driver".equals(dbType.driver())) {
+            jdbcTemplate = "jdbc:postgresql://{host}:{port:5432}/{database}";
+        }
+        // 替换模板中的占位符
+        StringBuffer sb = new StringBuffer();
+        Matcher matcher = PARAM_PATTERN.matcher(jdbcTemplate);
+        Map<String, String> properties = new HashMap<>();
+        properties.put("host", host);
+        properties.put("port", port != null && !port.isBlank() ? port : extractDefaultPort(jdbcTemplate));
+        properties.put("database", database);
+        while (matcher.find()) {
+            String propertyName = matcher.group(1);
+            String defaultValue = matcher.group(2);
+            String value = properties.get(propertyName);
+            if ((value == null || value.isBlank()) && defaultValue != null) {
+                value = defaultValue.substring(1); // 去掉冒号前缀
+            }
+            if (value != null && !value.isBlank()) {
+                matcher.appendReplacement(sb, Matcher.quoteReplacement(value));
+            }
+        }
+        matcher.appendTail(sb);
+        return sb.toString();
+    }
+
+    /**
+     * 从 URL 模板中提取默认端口号
+     */
+    private static String extractDefaultPort(String template) {
+        Matcher m = Pattern.compile("\\{port:(\\d+)\\}").matcher(template);
+        return m.find() ? m.group(1) : "5432";
+    }
 }
