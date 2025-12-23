@@ -1,6 +1,6 @@
 import MenuComp from '@/components/MenuIcon';
 import { Button, Form, Input, Modal, Pagination, Select, TreeSelect, type FormInstance } from '@arco-design/web-react';
-import { RootParentPage } from '@onebase/app';
+import { getDashboardListApi, getDashboardTemplateListApi, IsHot, RootParentPage } from '@onebase/app';
 import { webMenuIcons } from '@onebase/ui-kit';
 import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
@@ -46,33 +46,13 @@ const CreateModal: React.FC<CreateModalProps> = ({
   const [dashboardTemplateTab, setDashboardTemplateTab] = useState<string>('allTemplate');
   const [dashboardMethodLoading, setDashboardMethodLoading] = useState<boolean>(false);
   const [dashboardTemplateTabLoading, setDashboardTemplateTabLoading] = useState<boolean>(false);
-  const [dashboardPagination, setDashboardPagination] = useState<{ current: number; pageSize: number; total: number }>({
+  const [dashboardPagination, setDashboardPagination] = useState<{ current: number; pageSize: number }>({
     current: 1,
-    pageSize: dashboardMethod === 'dashboardNew' ? 4 : 8,
-    total: 160
+    pageSize: 4
   });
-  const [dashboardTemplateData, setDashboardTemplateData] = useState<any[]>([
-    {
-      id: 'template_1',
-      title: '这是大屏名称',
-      src: dashboardChange
-    },
-    {
-      id: 'template_2',
-      title: '这是大屏名称',
-      src: dashboardChange
-    },
-    {
-      id: 'template_3',
-      title: '这是大屏名称',
-      src: dashboardChange
-    },
-    {
-      id: 'template_4',
-      title: '这是大屏名称',
-      src: dashboardChange
-    }
-  ]);
+  const [total, setTotal] = useState<number>(10);
+
+  const [dashboardTemplateData, setDashboardTemplateData] = useState<any[]>([]);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
 
   useEffect(() => {
@@ -81,26 +61,49 @@ const CreateModal: React.FC<CreateModalProps> = ({
     } else {
       form.setFieldValue('menuIcon', 'FormPage');
     }
+    if (visibleCreateForm !== '') {
+      getDashboardTemplateList();
+    }
   }, [menuIcon, visibleCreateForm]);
 
   useEffect(() => {
     console.log('dashboardMethod:', dashboardMethod);
     setDashboardPagination((prev) => ({
       ...prev,
-      current: 1
+      current: 1,
+      pageSize: dashboardMethod === 'dashboardNew' ? 4 : 8
     }));
     setDashboardTemplateTab('allTemplate');
+    if (dashboardMethod !== 'dashboardLink') {
+      getDashboardTemplateList();
+    } else {
+      getDashboardList();
+    }
 
     if (dashboardMethod !== 'dashboardNew' && dashboardTemplateData.length > 0 && !selectedTemplateId) {
       setSelectedTemplateId(dashboardTemplateData[0].id);
     }
   }, [dashboardMethod]);
 
+  useEffect(() => {
+    // console.log('dashboardTemplateTab:', dashboardTemplateTab);
+    getDashboardTemplateList();
+  }, [dashboardTemplateTab]);
+
+  useEffect(() => {
+    console.log('dashboardPagination:', dashboardPagination.pageSize);
+    if (dashboardMethod !== 'dashboardLink') {
+      getDashboardTemplateList();
+    } else {
+      getDashboardList();
+    }
+  }, [dashboardPagination]);
+
   const nameMap = {
     page: '页面',
     group: '分组',
     workbench: '页面',
-    dashboard: '大屏名称'
+    screen: '大屏名称'
   };
 
   const getDashboardMethodData = () => {
@@ -139,11 +142,11 @@ const CreateModal: React.FC<CreateModalProps> = ({
     },
     {
       label: '系统模版',
-      value: 'systemTemplate'
+      value: 'system'
     },
     {
       label: '应用模版',
-      value: 'applicationTemplate'
+      value: 'app'
     }
   ];
 
@@ -151,7 +154,31 @@ const CreateModal: React.FC<CreateModalProps> = ({
     setMenuIcon('');
     onCancel();
   };
+  const getDashboardTemplateList = async () => {
+    const params = {
+      hot: dashboardMethod === 'dashboardNew' ? IsHot.YES : IsHot.NO,
+      templateType: dashboardTemplateTab === 'allTemplate' ? '' : dashboardTemplateTab,
+      page_no: dashboardPagination.current,
+      page_size: dashboardMethod === 'dashboardNew' ? 4 : 8
+    };
+    const res = await getDashboardTemplateListApi(params);
+    console.log('大屏模版 res:', res);
+    // setTotal(res.total);
+    setDashboardTemplateData(res.list);
+  };
 
+  const getDashboardList = async () => {
+    const params = {
+      page: dashboardPagination.current,
+      limit: 8
+    };
+    const res = await getDashboardListApi(params);
+    console.log('大屏 res:', res);
+    console.log('大屏 data:', res.data);
+    console.log('大屏 res.data.length:', res.data.length);
+    setDashboardTemplateData(res.data);
+    // setTotal(res.data.length);
+  };
   const handleChangeDashboardMethod = (value: string) => {
     setDashboardMethodLoading(true);
     /**
@@ -160,9 +187,9 @@ const CreateModal: React.FC<CreateModalProps> = ({
      */
     setDashboardMethod(value);
     setSelectedTemplateId('');
-    setTimeout(() => {
-      setDashboardMethodLoading(false);
-    }, 3000);
+    // setTimeout(() => {
+    //   setDashboardMethodLoading(false);
+    // }, 3000);
   };
   const handleDashboardChange = () => {
     // console.log('换一批 handleDashboardChange:', dashboardPagination);
@@ -174,6 +201,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
       ...prev,
       current: prev.current + 1 > 3 ? 1 : prev.current + 1
     }));
+    getDashboardTemplateList();
   };
 
   const handleSearchTemplate = (value: string) => {
@@ -195,7 +223,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
 
   const handleChangePagination = (current: number) => {
     // setDashboardTemplateTabLoading(true);
-    console.log('handleChangePagination:', current);
+    // console.log('handleChangePagination:', current);
     /**
      * TODO 改变分页
      * params: dashboardMethod !== dashboardNew + dashboardPagination
@@ -224,7 +252,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
       onClick={() => handleDashboardTemplateCard(item.id)}
     >
       <div className={styles.dashboardTemplateCardImg}>
-        <img src={item.src} alt="" />
+        <img src={item.indexImage} alt="" />
         <Button onClick={() => handlePreview(item.id)} className={styles.dashboardTemplateCardBtn}>
           预览
         </Button>
@@ -437,7 +465,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
             {dashboardMethod !== 'dashboardNew' && (
               <div className={styles.dashboardPagination}>
                 <Pagination
-                  total={dashboardPagination.total}
+                  total={total}
                   current={dashboardPagination.current}
                   pageSize={dashboardPagination.pageSize}
                   sizeOptions={[8]}

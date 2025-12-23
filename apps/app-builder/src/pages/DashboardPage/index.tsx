@@ -48,14 +48,23 @@ const PreviewPage: React.FC = () => {
   return (
     <>
       <div className={styles.previewPage}>
-        {/* <img className={styles.previewImg} src={imgSrc} /> */}
-        <iframe
+        {/* 由于目标站点设置了 X-Frame-Options: sameorigin，无法在 iframe 中加载 */}
+        {/* 改为在新窗口打开 */}
+        <div style={{ textAlign: 'center', padding: '20px' }}>
+          <p>预览页面将在新窗口中打开。</p>
+          <button
+            onClick={() => window.open('http://s25029301301.dev.internal.virtueit.net:81/v0/appdashboard/#/', '_blank')}
+          >
+            点击打开预览
+          </button>
+        </div>
+        {/* <iframe
           // src="http://s25029301301.dev.internal.virtueit.net:81/v0/appdashboard/#/project/dataset-form"
           src="http://s25029301301.dev.internal.virtueit.net:81/v0/appdashboard/#/"
           // src={`http://s25029301301.dev.internal.virtueit.net:81/v0/appdashboard/#/chat/home/${dashboardId}`}
           // frameborder="0"
           style={{ width: '100vw', height: '100vh' }}
-        ></iframe>
+        ></iframe> */}
       </div>
     </>
   );

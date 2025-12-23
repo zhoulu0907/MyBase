@@ -204,7 +204,7 @@ const LargeScreen: FC = () => {
       {/* 新建大屏 */}
       <CreateDashboardModal
         title="新建大屏"
-        type={'screen'}
+        type={'dashboard'}
         handleCreate={handleCreateOk}
         onCancel={() => {
           setVisibleCreateScreenForm('');
