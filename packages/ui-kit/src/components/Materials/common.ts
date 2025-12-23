@@ -5,6 +5,7 @@ import {
   DATE_OPTIONS,
   DATE_VALUES,
   TIME_VALUES,
+  DATE_TIME_VALUES,
   FILL_OPTIONS,
   FILL_VALUES,
   LAYOUT_OPTIONS,
@@ -158,34 +159,8 @@ export const alignConfig: IAlignConfigType<TAlignSelectKeyType> = {
 };
 
 export type TDateTypeSelectKeyType = (typeof DATE_VALUES)[keyof typeof DATE_VALUES];
+export type TDateTimeTypeSelectKeyType = (typeof DATE_TIME_VALUES)[keyof typeof DATE_TIME_VALUES];
 export type TTimeTypeSelectKeyType = (typeof TIME_VALUES)[keyof typeof TIME_VALUES];
-export const dateTypeConfig: IDateTypeConfigType<TDateTypeSelectKeyType> = {
-  key: 'dateType',
-  name: '日期格式',
-  type: CONFIG_TYPES.DATE_TYPE,
-  range: [
-    {
-      key: DATE_OPTIONS.YEAR,
-      text: DATE_OPTIONS.YEAR,
-      value: DATE_VALUES[DATE_OPTIONS.YEAR]
-    },
-    {
-      key: DATE_OPTIONS.MONTH,
-      text: DATE_OPTIONS.MONTH,
-      value: DATE_VALUES[DATE_OPTIONS.MONTH]
-    },
-    {
-      key: DATE_OPTIONS.DATE,
-      text: DATE_OPTIONS.DATE,
-      value: DATE_VALUES[DATE_OPTIONS.DATE]
-    },
-    {
-      key: DATE_OPTIONS.FULL,
-      text: DATE_OPTIONS.FULL,
-      value: DATE_VALUES[DATE_OPTIONS.FULL]
-    }
-  ]
-};
 
 export type TLayoutSelectKeyType = (typeof LAYOUT_VALUES)[keyof typeof LAYOUT_VALUES];
 export const layoutConfig: ILayoutConfigType<TLayoutSelectKeyType> = {
