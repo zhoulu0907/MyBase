@@ -41,7 +41,7 @@ const XLoadMore = memo(
     useSignals();
 
     const { pageComponentSchemas } = useFormEditorSignal;
-    const { setDrawerVisible, setDrawerPageId, setDetailPageViewId } = pagesRuntimeSignal;
+    const { setRowDataId, setDrawerPageId, setDetailPageViewId } = pagesRuntimeSignal;
     const { runtime = true, showFromPageData, showAddBtn = true } = props;
     const hasOperationPermission = true;
 
@@ -194,6 +194,7 @@ const XLoadMore = memo(
       if (!runtime) {
         return;
       }
+      setRowDataId('');
       showFromPageData?.(null, true);
     };
 
@@ -374,6 +375,7 @@ const XLoadMore = memo(
         return;
       }
 
+      setRowDataId(id);
       showFromPageData?.(id, toFormPage);
     };
 
