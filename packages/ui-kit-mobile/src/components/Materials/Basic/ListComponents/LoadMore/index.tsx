@@ -130,7 +130,7 @@ const XLoadMore = memo(
                   const file = result[0];
                   return (
                     <div className="fileWrapper">
-                      <Ellipsis text={file.name} />
+                      <Ellipsis className='filename' text={file.name} />
                       <IconDownload
                         style={{ color: 'rgb(var(--primary-6))', marginLeft: '0.24rem', fontSize: '0.32rem' }}
                         onClick={async () => {
