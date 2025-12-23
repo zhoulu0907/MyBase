@@ -309,11 +309,10 @@ const XTable = memo(
 
               // 表单配置
               if (cpId) {
-                // 组件类型
-                const cpType = components.value?.find((ele) => ele.id === cpId)?.type;
-
                 // 当前组件配置
                 const currentComponentSchemas = fromPageComponentSchemas.value[cpId];
+                // 组件类型
+                const cpType = currentComponentSchemas.type
                 // 覆盖配置
                 let dataField: string[] = [];
                 if (Array.isArray(mainMetaData?.parentFields)) {
