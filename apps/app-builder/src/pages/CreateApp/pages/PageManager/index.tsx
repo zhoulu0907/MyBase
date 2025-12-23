@@ -14,7 +14,6 @@ import { IconDown, IconEmpty, IconPlus, IconSearch } from '@arco-design/web-reac
 import {
   copyApplicationMenu,
   createApplicationMenu,
-  createPageDashboardApi,
   deleteApplicationMenu,
   getEntityListByApp,
   getPageSetId,
@@ -425,16 +424,41 @@ const PageManagerPage: FC = () => {
   const handleScreenCreate = async (id?: string, screenMethod?: string) => {
     console.log('handleScreenCreate id:', id);
     console.log('handleScreenCreate screenMethod:', screenMethod);
-    const res = await createPageDashboardApi({
-      applicationId: curAppId,
-      entityUuid: id,
-      menuName: createForm.getFieldValue('menuName'),
-      menuType: MenuType.PAGE,
-      menuIcon: createForm.getFieldValue('menuIcon'),
-      screenMethod: screenMethod,
-      parentId: createForm.getFieldValue('parentId') === RootParentPage.id ? '' : createForm.getFieldValue('parentId')
+    createForm.validate(async (error) => {
+      if (error !== null) return;
+      const req: CreateApplicationMenuReq = {
+        applicationId: curAppId,
+        parentId:
+          createForm.getFieldValue('parentId') === RootParentPage.id ? '' : createForm.getFieldValue('parentId'),
+        pageSetType: createForm.getFieldValue('pageSetType'),
+        menuName: createForm.getFieldValue('menuName'),
+        menuType: MenuType.PAGE,
+        menuIcon: createForm.getFieldValue('menuIcon'),
+        entityUuid: '',
+        createDashboardType: screenMethod,
+        dashboardId: id
+      };
+
+      const menuResp = await createApplicationMenu(req);
+      if (menuResp) {
+        Message.success('创建成功');
+      }
+      setVisibleCreateScreenForm('');
+      getMenuList(undefined, menuResp.id);
+
+      const pageSetId = await getPageSetId({
+        menuId: menuResp.id
+      });
+
+      console.log('pageSetId:', pageSetId);
+      if (pageSetId) {
+        // 跳转到编辑器
+        window.open(
+          `${window.location.origin}${window.location.pathname}#/onebase/dashboard/preview/193557494693232641`,
+          '_blank'
+        );
+      }
     });
-    console.log('创建大屏 res:', res);
   };
   const handleCreate = async () => {
     createForm.validate(async (error) => {

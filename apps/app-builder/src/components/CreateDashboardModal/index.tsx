@@ -1,7 +1,6 @@
 import MenuComp from '@/components/MenuIcon';
 import { Button, Form, Input, Modal, Pagination, Select, TreeSelect, type FormInstance } from '@arco-design/web-react';
 import { RootParentPage } from '@onebase/app';
-import { useI18n } from '@/hooks/useI18n';
 import { webMenuIcons } from '@onebase/ui-kit';
 import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
@@ -39,7 +38,6 @@ const CreateModal: React.FC<CreateModalProps> = ({
   // }, []);
 
   const allWebMenuIcons = webMenuIcons.map((ele) => ele.children).reduce((acc, current) => acc.concat(current), []);
-  const { t } = useI18n();
   const InputSearch = Input.Search;
 
   const [menuIcon, setMenuIcon] = useState<string>();
@@ -211,7 +209,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
   const handlePreview = (screenProjectId: string) => {
     // 在新窗口打开预览页面，使用 hash 路由
     window.open(
-      `${window.location.origin}${window.location.pathname}#/onebase/screen/preview/${screenProjectId}`,
+      `${window.location.origin}${window.location.pathname}#/onebase/dashboard/preview/${screenProjectId}`,
       '_blank'
     );
   };
@@ -329,11 +327,6 @@ const CreateModal: React.FC<CreateModalProps> = ({
               <Form.Item label="父级页面" field="parentId">
                 <TreeSelect treeData={treeData || {}} placeholder="请选择父级页面" allowClear />
               </Form.Item>
-              {visibleCreateForm === 'page' && entityListOptions && (
-                <Form.Item label="数据资产" field="entityUuid" rules={[{ required: true, message: '请选择数据资产' }]}>
-                  <Select options={entityListOptions} placeholder="请选择数据资产" allowClear />
-                </Form.Item>
-              )}
             </Form>
           </div>
         )}

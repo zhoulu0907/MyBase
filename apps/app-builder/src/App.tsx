@@ -65,7 +65,7 @@ function AppContent() {
       <Route path="/onebase/:tenantId/editor/*" element={<EditorPage />} />
       <Route path="/onebase/:tenantId/etl_editor/*" element={<ETLFlowEditorPage />} />
 
-      <Route path="/onebase/screen/preview/:screenProjectId" element={<DashboardPage />} />
+      <Route path="/onebase/dashboard/preview/:dashboardId" element={<DashboardPage />} />
 
       {/* 默认重定向到登录页 */}
       <Route path="/" element={<Navigate to="/login" replace />} />
