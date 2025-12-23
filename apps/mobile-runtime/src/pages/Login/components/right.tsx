@@ -377,7 +377,7 @@ const Right: React.FC = () => {
     <div className={styles.loginPageRight}>
       <div className={styles.titleContainer}>
         {getAppIcon()}
-        <h1 className={styles.title}>欢迎登录{appInfo?.appName ? ` ${appInfo.appName} 应用` : 'Onebase'}</h1>
+        <h1 className={styles.title}>欢迎登录{appInfo?.appName ? ` ${appInfo.appName}` : 'Onebase'}</h1>
       </div>
       <div className={styles.loginFormContainer}>
         <Form form={form} layout="vertical" onSubmit={handleLoginClick} className={styles.loginForm}>

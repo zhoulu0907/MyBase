@@ -79,7 +79,7 @@ const XInputPhone = memo((props: XInputPhoneConfig & { runtime?: boolean; detail
     >
       {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
         // 只读模式，渲染文本内容
-        <div className="readonlyText">{form?.getFieldValue(fieldId)}</div>
+        <Input className="readonlyText" readOnly value={form?.getFieldValue(fieldId) || (defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : '')}/>
       ) : (
         renderContent()
       )}
