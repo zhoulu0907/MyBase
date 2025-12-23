@@ -44,7 +44,7 @@ public class GoViewProjectApiImpl implements GoViewProjectApi {
 
     @Override
     public Long createDashboardByTemplate(Long templateId) {
-        // todo: 查询模板信息，创建数据大屏
+        // 查询模板信息，创建数据大屏
         DashboardTemplateDO dashboardTemplate = dashboardTemplateService.getDashboardTemplate(templateId);
         if (dashboardTemplate == null){
             return null;
@@ -55,10 +55,12 @@ public class GoViewProjectApiImpl implements GoViewProjectApi {
         goviewProject.setProjectName("新大屏");
         goviewProject.setState(-1);
         goviewProject.setAppId(applicationId);
+        goviewProject.setIndexImage(dashboardTemplate.getIndexImage());
         iGoviewProjectService.save(goviewProject);
         GoviewProjectData goviewProjectData = new GoviewProjectData();
         goviewProjectData.setProjectId(goviewProject.getId());
         goviewProjectData.setContent(dashboardTemplate.getContent());
+        goviewProjectData.setAppId(applicationId);
         iGoviewProjectDataService.save(goviewProjectData);
         return goviewProject.getId();
     }
