@@ -158,8 +158,8 @@ const CreateModal: React.FC<CreateModalProps> = ({
     const params = {
       hot: dashboardMethod === 'dashboardNew' ? IsHot.YES : IsHot.NO,
       templateType: dashboardTemplateTab === 'allTemplate' ? '' : dashboardTemplateTab,
-      page_no: dashboardPagination.current,
-      page_size: dashboardMethod === 'dashboardNew' ? 4 : 8
+      pageNo: dashboardPagination.current,
+      pageSize: dashboardMethod === 'dashboardNew' ? 4 : 8
     };
     const res = await getDashboardTemplateListApi(params);
     console.log('大屏模版 res:', res);

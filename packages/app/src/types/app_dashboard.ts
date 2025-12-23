@@ -11,9 +11,11 @@ export interface DashboardTemplateListParams {
   /** 热门模版 hot */
   hot?: IsHot;
   /** 页码 */
-  page_no: number;
+  pageNo: number;
   /** 页大小 */
-  page_size: number;
+  pageSize: number;
+  /** 搜索关键字 */
+  templateName?: string;
 }
 
 export interface DashboardListParams {

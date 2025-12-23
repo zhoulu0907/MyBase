@@ -4,6 +4,7 @@ import { IconPlus, IconSearch } from '@arco-design/web-react/icon';
 import { useEffect, useState, type FC } from 'react';
 import ScreenCard from '../DashbordCard';
 import styles from './index.module.less';
+import { getDashboardListApi } from '@onebase/app';
 const FormItem = Form.Item;
 const { useForm } = Form;
 interface dataList {
@@ -16,7 +17,7 @@ interface dataList {
 const LargeScreen: FC = () => {
   const [loading, setLoading] = useState(false);
   const [dataList, setDataList] = useState<dataList[]>();
-  const [total, setTotal] = useState(1);
+  const [total, setTotal] = useState(10);
   const [pageSize, setPageSize] = useState<number>();
   const [pageNo, setPageNo] = useState(1);
   useEffect(() => {
@@ -47,7 +48,18 @@ const LargeScreen: FC = () => {
         desc: '描述4'
       }
     ]);
+    getDashboardList();
   }, []);
+
+  const getDashboardList = async () => {
+    const params = {
+      page: pageNo,
+      limit: 10
+    };
+    const res = await getDashboardListApi(params);
+    setDataList(res.data);
+    setTotal(res.data.length);
+  };
   const handleSearchChange = () => {};
   // 创建大屏弹窗
   const [createForm] = Form.useForm();
@@ -79,8 +91,8 @@ const LargeScreen: FC = () => {
     console.log(item, '跳转到第三方');
   };
   //预览
-  const handlePreview = () => {
-    console.log('预览');
+  const handlePreview = (id: string) => {
+    console.log('预览:', id);
   };
 
   // 删除弹框
