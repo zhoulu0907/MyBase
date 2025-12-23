@@ -99,10 +99,7 @@ const XFileUpload = memo(
           {filesList.map((file, index) => (
             <div key={file.uid} className="uplaodList-text-item">
               {getFileIcon(file)}
-              <Typography.Ellipsis
-                showTooltip
-                className={`uplaodList-text-item-name ${showDownload ? 'uplaodList-text-item-name-hover' : ''}`}
-              >
+              <Typography.Ellipsis showTooltip className={`${showDownload ? 'uplaodList-text-item-name-hover' : 'uplaodList-text-item-name'}`}>
                 {file.name}
               </Typography.Ellipsis>
               {file.percent && file.percent !== 100 ? (
@@ -257,7 +254,7 @@ const XFileUpload = memo(
                   <div className="uplaodTriggerList">
                     <div className="uplaodTriggerList-content">
                       <IconUpload />
-                      <div className="uplaodTriggerList-tips">{buttonName || '点击或拖拽文件到此处上传'}</div>
+                      <div className="uplaodTriggerList-tips">点击或拖拽文件到此处上传</div>
                       <div className="uplaodTriggerList-describe">支持{verify?.fileFormat}格式</div>
                       <div className="uplaodTriggerList-describe">
                         最多上传{verify?.maxCount && verify?.maxCount > 0 ? verify?.maxCount : 1}

@@ -1,5 +1,6 @@
 import ExecuteFlows from '@/utils/flow';
 import { Form, Message, Modal } from '@arco-design/web-react';
+import DetailPop from '../TaskCenter/page/DetailPop';
 import {
   CATEGORY_TYPE,
   dataMethodCreateV2,
@@ -11,6 +12,7 @@ import {
   PageType,
   queryFlowExecForm,
   TRIGGER_EVENTS,
+  LISTTYPE,
   type AppEntityField,
   type DetailMethodV2Params,
   type GetPageSetIdReq,
@@ -19,7 +21,14 @@ import {
 } from '@onebase/app';
 import { fetchSubmitInstance } from '@onebase/app/src/services/app_runtime';
 import { pagesRuntimeSignal } from '@onebase/common';
-import { EDITOR_TYPES, ENTITY_FIELD_TYPE, FORM_COMPONENT_TYPES, useEditorSignalMap } from '@onebase/ui-kit';
+import {
+  EDITOR_TYPES,
+  ENTITY_FIELD_TYPE,
+  FORM_COMPONENT_TYPES,
+  STATUS_OPTIONS,
+  STATUS_VALUES,
+  useEditorSignalMap
+} from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useState } from 'react';
 import DetailRuntime from './DetailRuntime';
@@ -51,6 +60,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
     setMainMetaDataFields,
     subEntities,
     setSubEntities,
+    bpmInstanceId,
     flows,
     setFlows,
     resetFlows
@@ -132,6 +142,9 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
     !isSave && setSubmitLoading(true);
     const fields = form.getFieldsValue();
 
+    const componentSchemas = useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value;
+    const subTableComponents = useEditorSignalMap.get(editPageViewId.value)?.subTableComponents.value;
+
     const formData = {} as any;
     const subFormData: Record<string, any[]> = {};
     Object.entries(fields).forEach(([key, value]) => {
@@ -150,7 +163,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
 
       // 判断是子表
       const subEntity = subEntities.value.find((ele: any) => ele.childTableName == key);
-
       // 处理子表逻辑
       if (subEntity) {
         const subTableName = subEntity.childTableName;
@@ -182,9 +194,31 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
           }
           subTableRows.push(temp);
         }
+
         subFormData[subTableName] = subTableRows;
       }
     });
+
+    let subVerify = false;
+    const subComponentKeys = Object.keys(subTableComponents);
+    subComponentKeys.forEach((e) => {
+      if (
+        componentSchemas[e]?.config?.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] &&
+        componentSchemas[e]?.config?.verify?.required
+      ) {
+        const subEntity = subEntities.value.find(
+          (ele: any) => ele.childEntityUuid == componentSchemas[e]?.config?.subTable
+        );
+        if (subEntity?.childTableName && !subFormData[subEntity.childTableName]?.length) {
+          subVerify = true;
+        }
+      }
+    });
+    if (subVerify) {
+      Message.warning('子表单至少添加一行');
+      setSubmitLoading(false);
+      return;
+    }
 
     console.log('formData:   ', formData);
     console.log('subFormData:   ', subFormData);
@@ -453,25 +487,48 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
     submitForm(true);
   };
 
+  const onBack = () => {
+    setPredictVisible(false);
+    setTimeout(() => setRefresh(Date.now()), 150);
+  };
+
   return (
     <div className={`${styles.previewPage} runtime-preview-formpage`}>
       <div className={styles.content}>
         {pageSetType === PageType.WORKBENCH ? (
           <WorkbenchRuntime pageSetId={pageSetId} runtime={runtime} />
         ) : (
-          <ListRuntime pageSetId={pageSetId} runtime={runtime} showFromPageData={showFromPageData} refresh={refresh} />
+          <ListRuntime
+            pageSetType={pageSetType}
+            pageSetId={pageSetId}
+            runtime={runtime}
+            showFromPageData={showFromPageData}
+            refresh={refresh}
+          />
         )}
 
-        <DetailRuntime
-          visible={drawerVisible.value}
-          onCancel={() => setDrawerVisible(false)}
-          form={form}
-          detailMode={detailMode}
-          onUpdate={() => submitForm()}
-          onCancelUpdate={cancelSubmitForm}
-          showFromPageData={showFromPageData}
-          editTargetId={editTargetId}
-        />
+        {pageSetType === PageType.NORMAL && (
+          <DetailRuntime
+            visible={drawerVisible.value}
+            onCancel={() => setDrawerVisible(false)}
+            form={form}
+            detailMode={detailMode}
+            onUpdate={() => submitForm()}
+            onCancelUpdate={cancelSubmitForm}
+            showFromPageData={showFromPageData}
+            editTargetId={editTargetId}
+          />
+        )}
+
+        {pageSetType === PageType.BPM && drawerVisible.value && bpmInstanceId.value && (
+          <DetailPop
+            detailPopVisible={drawerVisible.value}
+            setPopVisible={setDrawerVisible}
+            onBack={onBack}
+            rowData={{ instanceId: bpmInstanceId.value, pageSetId }}
+            listType={LISTTYPE.LIST}
+          />
+        )}
 
         {pageType == EDITOR_TYPES.FORM_EDITOR && (
           <EditRuntime

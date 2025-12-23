@@ -17,7 +17,7 @@
   .uplaodList-text-item {
     display: flex;
     justify-content: space-between;
-    min-height: 0.8rem;
+    min-height: 0.5rem;
     margin-top: 0.2rem;
     padding: 0 0.12rem;
     border-radius: 4px;
@@ -33,12 +33,16 @@
       flex: 1 1 auto;
       width: 0;
       text-align: left;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
-    .uplaodList-text-item-opera {
+    .uplaodList-text-item-opera, .uplaodList-text-item-process {
       margin-left: 0;
-      height: 0.8rem;
+      height: 0.5rem;
       display: flex;
       align-items: center;
+      flex: unset;
     }
   }
 }

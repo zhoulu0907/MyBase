@@ -1,5 +1,5 @@
 /**
- * ER 图边(Edge)样式常量
+ * ER图样式常量
  */
 
 // 边的正常状态样式
@@ -26,3 +26,10 @@ export const EDGE_TRANSITION = {
   duration: 300,
   timing: 'ease-in-out'
 } as const;
+
+// 节点高度常量
+export const LINE_HEAD_HEIGHT = 48;
+export const LINE_HEIGHT = 34.8;
+export const LINE_TITLE_HEIGHT = 44;
+export const NODE_WIDTH = 280;
+export const NODE_HEIGHT = 200;

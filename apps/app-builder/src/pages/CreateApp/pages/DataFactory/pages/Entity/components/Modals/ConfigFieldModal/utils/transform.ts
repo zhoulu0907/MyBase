@@ -91,7 +91,11 @@ export const convertAutoNumberRuleToAutoCodeComp = (
           textValue: rule.textValue || ''
         };
       case AUTO_CODE_RULE_TYPE.FIELD_REF: {
-        const fieldPath = fields ? findFieldPath(rule.format || '', fields) : rule.format ? [rule.format] : [];
+        const fieldPath = fields
+          ? findFieldPath(rule.refFieldUuid || '', fields)
+          : rule.refFieldUuid
+            ? [rule.refFieldUuid]
+            : [];
         return {
           ...baseRule,
           fieldPath,

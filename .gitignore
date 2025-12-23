@@ -51,3 +51,5 @@ Thumbs.db
 .npmrc
 
 *.tar
+
+cosco_config/

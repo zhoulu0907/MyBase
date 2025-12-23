@@ -1,6 +1,12 @@
 :root {
   width: 100vw;
   height: 100dvh;
+  .arco-popup-content.bottom {
+    @media screen and (min-width: 900px) {
+      max-width: 450px;
+      left: calc(50vw - 225px);
+    }
+  }
 }
 
 .arco-message-wrapper {

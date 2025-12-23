@@ -1,0 +1,164 @@
+.subTableWrapperOBMobile {
+  display: flow-root !important;
+  > .arco-form-item-control-wrapper > .arco-form-item-control {
+    display: block;
+  }
+  .arco-form-item {
+    border: none !important;
+  }
+  .arco-cell:before {
+    transform: none !important;
+  }
+}
+
+.subTableContentOBMobile {
+  width: 100%;
+  min-height: 1rem;
+  box-sizing: border-box;
+  overflow-x: auto;
+  overflow-y: visible;
+}
+
+.componentItemSubtableOBMobile {
+  overflow: visible;
+  flex: 1 0 auto;
+  cursor: move;
+  box-sizing: border-box;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  transition: border-color 0.2s ease;
+  position: relative;
+  min-width: 200px;
+}
+
+.collapseSubtableOBMobile {
+  border: 0;
+  .arco-collapse-header {
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+    background-color: transparent !important;
+    padding: 0;
+    background-color: red;
+
+    &::after {
+      transform: none !important;
+      /* width: calc(100% - 0.32rem); */
+    }
+  }
+
+  .cell-content {
+    display: block;
+    text-align: right;
+  }
+
+  .arco-collapse-content-container {
+    padding: 0;
+  }
+
+  .cell-group-body bordered,
+  .arco-cell-group .cell-group-body {
+    background-color: transparent;
+  }
+
+  .arco-form-label-item {
+    display: none;
+  }
+
+  .inputTextWrapperOBMobile {
+    border: none !important;
+  }
+
+  .arco-cell-group .cell-group-body.bordered::before {
+    transform: none;
+    display: none;
+  }
+
+  .arco-cell:not(:first-of-type).bordered::before {
+    transform: none;
+  }
+
+  .arco-cell-group .cell-group-body.bordered::after {
+    transform: none;
+  }
+
+  .arco-cell.without-group.bordered::after {
+    transform: none;
+  }
+  .arco-cell-inner .cell-label {
+    width: 1.92rem;
+    min-width: 1.4rem;
+    margin-right: 0.12rem;
+    white-space: normal;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  /* :global(.uplaodList-text) {
+    width: calc(100% - 3rem);
+  } */
+  .arco-uploader-add {
+    margin-top: 0.24rem;
+  }
+  .fileUploadWrapperOBMobile {
+    min-height: auto;
+  }
+
+  .collapseHeaderSubtableObMobile {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-left: 0.16rem;
+  }
+  .arco-cell::before {
+    content: '';
+    width: 100%;
+    height: 1px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 1;
+    border-top-style: solid;
+    border-top-width: 1px;
+    border-top-color: #e5e6eb;
+    box-sizing: border-box;
+    transform-origin: left top;
+    pointer-events: none;
+    border-radius: 0;
+  }
+  .componentItemSubtableOBMobile:first-child .arco-cell::before {
+    display: none;
+  }
+}
+
+.onAddSubtableOBMobile {
+  text-align: center;
+  color: rgb(var(--primary-6));
+  font-family: "PingFang SC";
+  font-size: 0.32rem;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 0.48rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.2rem 0;
+  margin: 0 auto;
+}
+
+.verticalLayout {
+  .arco-cell-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding-top: 0.4rem;
+
+    .cell-content {
+      width: 100%;
+
+      & > div {
+        padding-left: 0;
+        padding-right: 0;
+      }
+    }
+  }
+}

@@ -100,7 +100,7 @@ export default function FieldModal({
                   key={i}
                   value={item.parentDisplayName ? item.parentDisplayName + item?.fieldName : item?.fieldName}
                 >
-                  {item.parentDisplayName ? item.parentDisplayName + ' _' + item?.displayName : item?.displayName}
+                  {item.parentDisplayName ? item.parentDisplayName + '.' + item?.displayName : item?.displayName}
                 </Checkbox>
               );
             })}
@@ -118,7 +118,7 @@ export default function FieldModal({
               return (
                 <div className="flex-btw arco-checkbox li" key={i}>
                   <span>
-                    {item.parentDisplayName ? item.parentDisplayName + ' _' + item?.displayName : item?.displayName}
+                    {item.parentDisplayName ? item.parentDisplayName + '.' + item?.displayName : item?.displayName}
                   </span>
                   <IconClose onClick={() => handleDelCked(item)} />
                 </div>

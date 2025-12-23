@@ -1,0 +1,76 @@
+.inputDataSelectOBMobile {
+  .readOnly {
+    border: none;
+  }
+  .cellDataSelectOBMobile {
+    padding-right: 0;
+    .selectValue {
+      text-align: right;
+      color: #1d2129;
+      font-size: 0.32rem;
+    }
+    .cell-content {
+      display: block;
+    }
+  }
+}
+
+
+
+.inputDataSelectPopupContainer {
+  width: 100vw;
+  height: 100vh;
+  max-width: 100%;
+  max-height: 100%;
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+  &.editPreview {
+    height: calc(80vh - 48px);
+  }
+
+  .loading {
+    width: 100%;
+    min-height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .popupHeaderOBMobile {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.24rem;
+
+    &>span {
+      color: #1d2129;
+      font-size: 0.36rem;
+    }
+  }
+
+  .itemContainer {
+    overflow: hidden auto;
+
+    .empty {
+      font-size: 0.36rem;
+      text-align: center;
+      padding: 2rem 0;
+    }
+
+    .item {
+      border-bottom: 1px solid #e5e6eb;
+      height: 1.08rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 0.32rem;
+      box-sizing: border-box;
+      .radio-text {
+        flex: 1;
+        color: #1D2129;
+        font-size: 0.32rem;
+      }
+    }
+  }
+}

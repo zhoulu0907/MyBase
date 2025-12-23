@@ -39,6 +39,7 @@ const XInputTextArea = memo((props: XInputTextAreaConfig & { runtime?: boolean; 
         maxLength={verify?.lengthLimit ? verify?.maxLength : undefined}
         showStatistics={verify?.lengthLimit}
         statisticsMaxlength={verify?.lengthLimit ? verify?.maxLength : undefined}
+        blockChangeWhenCompositing={true}
         autosize={false}
         rows={minRows || 2}
         textareaStyle={{
@@ -54,12 +55,10 @@ const XInputTextArea = memo((props: XInputTextAreaConfig & { runtime?: boolean; 
 
   const rules: ITypeRules<ValidatorType.Custom>[] = [
     {
+      required: verify?.required,
       type: ValidatorType.Custom,
+      message: `${label.text}是必填项`,
       validator: (value, callback) => {
-        if (!value && verify?.required) {
-          callback(`${label.text}是必填项`);
-        }
-
         if (value && verify?.lengthLimit) {
           if (value.length < verify?.minLength!) {
             callback(`字数不能小于${verify?.minLength}`);

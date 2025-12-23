@@ -29,6 +29,9 @@ import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { getPrecedingNodes } from '../../nodes/utils';
+import AsyncDeptSelectField from '../asyncField/AsyncDeptSelectField';
+import AsyncSelectField from '../asyncField/AsyncSelectField';
+import AsyncUserSelectField from '../asyncField/AsyncUserSelectField';
 import styles from './index.module.less';
 
 const Option = Select.Option;
@@ -180,7 +183,12 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
   };
 
   const StaticValueComponent = (fieldName: string, fieldId: string, op: string) => {
-    const fieldValidationType = entityFieldValidationTypes.find((cc) => cc.fieldId == getSplitFieldId(fieldId));
+    console.log('fieldName: ', fieldName);
+    console.log('fieldId: ', fieldId);
+    console.log('entityFieldValidationTypes: ', entityFieldValidationTypes);
+    // const fieldValidationType = entityFieldValidationTypes.find((cc) => cc.fieldId == getSplitFieldId(fieldId));
+    const fieldValidationType = entityFieldValidationTypes.find((cc) => cc.fieldId == fieldId);
+    console.log('fieldValidationType: ', fieldValidationType);
 
     if (
       fieldValidationType?.fieldTypeCode == ENTITY_FIELD_TYPE.TEXT.VALUE ||
@@ -310,6 +318,27 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
           <DatePicker showTime placeholder="请输入静态值" style={{ width: '100%' }} />
         </Form.Item>
       );
+    }
+
+    if (
+      fieldValidationType?.fieldTypeCode == ENTITY_FIELD_TYPE.RADIO.VALUE ||
+      fieldValidationType?.fieldTypeCode == ENTITY_FIELD_TYPE.SELECT.VALUE
+    ) {
+      return (
+        <AsyncSelectField
+          fieldName={fieldName}
+          fieldKey={fieldId}
+          entityFieldValidationTypes={entityFieldValidationTypes}
+        />
+      );
+    }
+
+    if (fieldValidationType?.fieldTypeCode == ENTITY_FIELD_TYPE.USER.VALUE) {
+      return <AsyncUserSelectField fieldName={fieldName} />;
+    }
+
+    if (fieldValidationType?.fieldTypeCode == ENTITY_FIELD_TYPE.DEPARTMENT.VALUE) {
+      return <AsyncDeptSelectField fieldName={fieldName} />;
     }
 
     return (
@@ -527,18 +556,19 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
     return '';
   };
 
-  const getSplitFieldId = (fieldId: string) => {
-    if (fieldId) {
-      const splits = fieldId.split('.');
-      if (splits.length > 1) {
-        return splits[1];
-      }
+  //   TODO(mickey): remove
+  //   const getSplitFieldId = (fieldId: string) => {
+  //     if (fieldId) {
+  //       const splits = fieldId.split('.');
+  //       if (splits.length > 1) {
+  //         return splits[1];
+  //       }
 
-      return '';
-    }
+  //       return '';
+  //     }
 
-    return '';
-  };
+  //     return '';
+  //   };
 
   const handleFormulaConfirm = (formulaData: string, formattedFormula: string, params: any) => {
     setFormulaVisible(false);

@@ -126,10 +126,10 @@ const XLCollapseLayout: XCollapseLayoutSchema = {
     ...baseDefault,
     label: {
       text: '分组布局',
-      display: null,
+      display: true,
     },
     collapseStyle: {
-      showBordered: true,
+      showBordered: false,
       showDivider: true,
       titleColor: 'rgb(var(--primary-7))',
       shapeColor: 'rgb(var(--primary-7))'

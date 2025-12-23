@@ -128,7 +128,9 @@
     "tenant": "个人中心",
     "profile": "个人中心",
     "edit": "编辑",
-    "createEnterprise": "创建企业"
+    "createEnterprise": "创建企业",
+    "plugin": "插件管理",
+    "externalUser": "外部用户"
   },
   "myApp": {
     "createApp": "零代码创建",
