@@ -1,18 +1,18 @@
 import ExecuteFlows from '@/utils/flow';
 import { Form, Message, Modal } from '@arco-design/web-react';
-import DetailPop from '../TaskCenter/page/DetailPop';
 import {
   CATEGORY_TYPE,
+  createDraft,
   dataMethodCreateV2,
   dataMethodDetailV2,
   dataMethodUpdateV2,
   getEntityFieldsWithChildren,
   getPageSetId,
   getPageSetMetaData,
+  LISTTYPE,
   PageType,
   queryFlowExecForm,
   TRIGGER_EVENTS,
-  LISTTYPE,
   type AppEntityField,
   type DetailMethodV2Params,
   type GetPageSetIdReq,
@@ -31,6 +31,7 @@ import {
 } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useState } from 'react';
+import DetailPop from '../TaskCenter/page/DetailPop';
 import DetailRuntime from './DetailRuntime';
 import EditRuntime from './EditRuntime';
 import FlowPredict from './flowPredict';
@@ -137,7 +138,12 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
   const [entityParam, setEntityParam] = useState<any>();
 
   // 提交表单
-  const submitForm = async (isSave = false) => {
+  /**
+   * 提交表单
+   * @param isSave 是否保存
+   * @param isDraft 是否是草稿
+   */
+  const submitForm = async (isSave = false, isDraft?: boolean) => {
     await form.validate();
     !isSave && setSubmitLoading(true);
     const fields = form.getFieldsValue();
@@ -281,7 +287,12 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
 
           console.log(req);
 
-          res = await dataMethodCreateV2(tableName, menuId, req);
+          if (isDraft) {
+            res = await createDraft(tableName, menuId, req);
+          } else {
+            res = await dataMethodCreateV2(tableName, menuId, req);
+          }
+
           console.log(res);
 
           setPageType(EDITOR_TYPES.LIST_EDITOR);
@@ -293,7 +304,11 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
         setFlows(createFlows);
         setPredictVisible(false);
         if (res) {
-          Message.success('创建成功');
+          if (isDraft) {
+            Message.success('保存草稿成功');
+          } else {
+            Message.success('创建成功');
+          }
           cancelSubmitForm();
         }
         setTimeout(() => setRefresh(Date.now()), 150);
@@ -487,6 +502,10 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
     submitForm(true);
   };
 
+  const onSaveDraft = () => {
+    submitForm(true, true);
+  };
+
   const onBack = () => {
     setPredictVisible(false);
     setTimeout(() => setRefresh(Date.now()), 150);
@@ -537,6 +556,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
             submitLoading={submitLoading}
             onSubmit={onSubmit}
             onSaveSubmit={onSaveSubmit}
+            onSaveDraft={onSaveDraft}
             onCancel={cancelSubmitForm}
           />
         )}

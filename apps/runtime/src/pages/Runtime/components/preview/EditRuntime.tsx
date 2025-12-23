@@ -24,10 +24,19 @@ interface EditRuntimeProps {
   submitLoading: boolean;
   onSubmit: () => void;
   onSaveSubmit: () => void;
+  onSaveDraft: () => void;
   onCancel: () => void;
 }
 
-const EditRuntime: React.FC<EditRuntimeProps> = ({ form, isAdd, submitLoading, onSubmit, onSaveSubmit, onCancel }) => {
+const EditRuntime: React.FC<EditRuntimeProps> = ({
+  form,
+  isAdd,
+  submitLoading,
+  onSubmit,
+  onSaveSubmit,
+  onSaveDraft,
+  onCancel
+}) => {
   useSignals();
 
   const { pageViews, curViewId } = usePageViewEditorSignal;
@@ -169,56 +178,6 @@ const EditRuntime: React.FC<EditRuntimeProps> = ({ form, isAdd, submitLoading, o
 
   const [fullScreen, setFullScreen] = useState(false);
 
-  const onStash = () => {
-    // 缓存当前数据到localStorage，key可以根据用户、视图等唯一性生成
-    try {
-      const tokenInfo = TokenManager.getTokenInfo();
-      if (!tokenInfo?.userId || !curViewId.value) {
-        return;
-      }
-
-      const userId = tokenInfo?.userId;
-      const viewId = curViewId.value;
-
-      const cacheKey = getRuntimeFormCacheKey(userId, viewId);
-      const formData = form.getFieldsValue();
-
-      // 先查缓存池，草稿箱存储为数组形式，最多只保留20条
-      const rawDrafts = localStorage.getItem(cacheKey);
-      let drafts: any[] = [];
-      if (rawDrafts) {
-        try {
-          const parsed = JSON.parse(rawDrafts);
-          drafts = Array.isArray(parsed) ? parsed : [parsed];
-        } catch {
-          drafts = [];
-        }
-      }
-
-      // 检查草稿数量是否已达上限
-      if (drafts.length >= 20) {
-        Message.warning('草稿数量已达上限，请删除无需的草稿后再暂存');
-        return;
-      }
-
-      // 存储为包含时间戳的格式，但不将时间戳保存到表单数据中
-      drafts.unshift({
-        data: formData,
-        timestamp: Date.now()
-      });
-
-      localStorage.setItem(cacheKey, JSON.stringify(drafts));
-      // 可以加提示，方便用户感知
-      Message.success('表单数据已暂存');
-      // 关闭窗口
-      onCancel();
-    } catch (error) {
-      // 可以加简单的错误处理，便于排查
-      console.error('暂存表单数据到localStorage失败:', error);
-      Message.error('暂存失败，请重试！');
-    }
-  };
-
   return (
     <>
       {/* 草稿数据载入提示 Modal */}
@@ -259,7 +218,7 @@ const EditRuntime: React.FC<EditRuntimeProps> = ({ form, isAdd, submitLoading, o
         visible
         footer={
           <div className={styles.footer}>
-            <Button type="default" onClick={onStash} loading={submitLoading}>
+            <Button type="default" onClick={onSaveDraft} loading={submitLoading}>
               暂存
             </Button>
             <div className={styles.footerRight}>
