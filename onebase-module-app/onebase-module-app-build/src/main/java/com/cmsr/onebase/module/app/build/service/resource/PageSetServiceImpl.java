@@ -1,7 +1,10 @@
 package com.cmsr.onebase.module.app.build.service.resource;
 
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
+import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.common.util.string.UuidUtils;
 import com.cmsr.onebase.module.app.build.util.PageUtils;
@@ -20,6 +23,10 @@ import com.cmsr.onebase.module.app.core.enums.resource.PageEnum;
 import com.cmsr.onebase.module.app.core.enums.resource.PageTypeSetEnum;
 import com.cmsr.onebase.module.app.core.provider.resource.PageSetServiceProvider;
 import com.cmsr.onebase.module.app.core.vo.resource.*;
+import com.cmsr.onebase.module.screen.api.GoViewProjectApi;
+import com.cmsr.onebase.module.screen.api.dto.GoViewProjectDTO;
+import com.cmsr.onebase.module.screen.api.enums.DashboardCreateTypeSetEnum;
+import jakarta.annotation.Resource;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -30,6 +37,7 @@ import org.springframework.validation.annotation.Validated;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Setter
@@ -55,6 +63,9 @@ public class PageSetServiceImpl implements PageSetService {
 
     @Autowired
     private AppMenuRepository appMenuRepository;
+
+    @Resource
+    private GoViewProjectApi goViewProjectApi;
 
     @Override
     public Long getPageSetIdByMenuId(Long menuId) {
@@ -82,6 +93,36 @@ public class PageSetServiceImpl implements PageSetService {
         if (appMenuDO == null) {
             throw ServiceExceptionUtil.exception(AppResourceErrorCodeConstants.APP_RESOURCE_MENU_NOT_EXIST);
         }
+
+        // 创建数据大屏页面逻辑
+        if (PageTypeSetEnum.isDashboardType(createPageSetDTO.getPageSetType())) {
+            //根据数据大屏的创建类型创建数据大屏页面
+            if (Objects.equals(createPageSetDTO.getCreateDashboardType(), DashboardCreateTypeSetEnum.DASHBOARD_LINK.getCode())){
+                //1.1 如果是绑定现有大屏，则查询数据大屏信息，如不存在则报错
+                List<GoViewProjectDTO> dashboardList = goViewProjectApi.getDashboard(createPageSetDTO.getDashboardId());
+                if (dashboardList.isEmpty()){
+                    throw ServiceExceptionUtil.exception(AppResourceErrorCodeConstants.DASHBOARD_NOT_EXIST);
+                }
+            } else if (Objects.equals(createPageSetDTO.getCreateDashboardType(), DashboardCreateTypeSetEnum.DASHBOARD_TEMPLATE.getCode())){
+                //1.2 从模板创建数据大屏
+                Long dashboardId = goViewProjectApi.createDashboardByTemplate(createPageSetDTO.getDashboardId());
+                if (dashboardId == null){
+                    throw ServiceExceptionUtil.exception(AppResourceErrorCodeConstants.DASHBOARD_TEMPLATE_NOT_EXIST);
+                }
+                createPageSetDTO.setDashboardId(dashboardId);
+            } else {
+                //1.3 从空白页创建数据大屏
+                GoViewProjectDTO goViewProjectDTO = new GoViewProjectDTO();
+
+                goViewProjectDTO.setProjectName("新大屏");
+                goViewProjectDTO.setState(-1);
+                goViewProjectDTO.setAppId(applicationId);
+                goViewProjectDTO.setCreateUserId(Objects.requireNonNull(SecurityFrameworkUtils.getLoginUserId()).toString());
+                Long dashboardId = goViewProjectApi.createDashboard(goViewProjectDTO);
+                createPageSetDTO.setDashboardId(dashboardId);
+            }
+        }
+
         String menuUuid = appMenuDO.getMenuUuid();
         //
         AppResourcePagesetDO pageSetDO = BeanUtils.toBean(createPageSetDTO, AppResourcePagesetDO.class);
@@ -90,6 +131,7 @@ public class PageSetServiceImpl implements PageSetService {
         pageSetDO.setPageSetUuid(UuidUtils.getUuid());
         pageSetDO.setPageSetCode(UUID.randomUUID().toString());
         pageSetDO.setPageSetType(createPageSetDTO.getPageSetType());
+        pageSetDO.setDashboardId(createPageSetDTO.getDashboardId());
         pageSetRepository.save(pageSetDO);
 
         /**
@@ -101,6 +143,10 @@ public class PageSetServiceImpl implements PageSetService {
              */
             workBenchPageSetService.initWorkbenchPage(pageSetDO);
             return pageSetDO.getPageSetCode();
+        }
+
+        if (PageTypeSetEnum.isDashboardType(createPageSetDTO.getPageSetType())){
+            return String.valueOf(pageSetDO.getDashboardId());
         }
 
         // 创建空的表单设计页面和列表设计页面

@@ -1,68 +1,74 @@
 package com.cmsr.onebase.module.system.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.system.vo.oauth.OAuth2AccessTokenPageReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2AccessTokenDO;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.Compare;
+import com.cmsr.onebase.module.system.dal.flex.base.BaseDataServiceImpl;
+import com.cmsr.onebase.module.system.dal.flex.mapper.SystemOauth2AccessTokenMapper;
+import com.cmsr.onebase.module.system.vo.oauth.OAuth2AccessTokenPageReqVO;
+import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryWrapper;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
-import org.apache.commons.lang3.StringUtils;
+import java.util.Collections;
 import java.util.List;
 
+import static com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2AccessTokenDO.ACCESS_TOKEN;
+import static com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2AccessTokenDO.CLIENT_ID;
+import static com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2AccessTokenDO.REFRESH_TOKEN;
+import static com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2AccessTokenDO.USER_ID;
+import static com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2AccessTokenDO.USER_TYPE;
+
 /**
- * OAuth2访问令牌数据访问层
+ * OAuth2 访问令牌数据访问层
+ *
+ * 注意：历史类名为 OAuth2TokenDataRepository，但实际实体为 OAuth2AccessTokenDO。
  *
  * @author matianyu
- * @date 2025-08-11
+ * @date 2025-12-22
  */
 @Repository
-public class OAuth2TokenDataRepository extends DataRepository<OAuth2AccessTokenDO> {
-
-    public OAuth2TokenDataRepository() {
-        super(OAuth2AccessTokenDO.class);
-    }
+public class OAuth2TokenDataRepository extends BaseDataServiceImpl<SystemOauth2AccessTokenMapper, OAuth2AccessTokenDO> {
 
     /**
-     * 根据访问令牌查找OAuth2访问令牌
+     * 根据访问令牌查找 OAuth2 访问令牌
      *
      * @param accessToken 访问令牌
-     * @return OAuth2访问令牌
+     * @return OAuth2 访问令牌
      */
     public OAuth2AccessTokenDO findOneByAccessToken(String accessToken) {
-        return findOne(new DefaultConfigStore().and(Compare.EQUAL, OAuth2AccessTokenDO.ACCESS_TOKEN, accessToken));
+        if (StringUtils.isBlank(accessToken)) {
+            return null;
+        }
+        return getOne(query().eq(ACCESS_TOKEN, accessToken));
     }
 
     /**
-     * 根据刷新令牌查找OAuth2访问令牌列表
+     * 根据刷新令牌查找 OAuth2 访问令牌列表
      *
      * @param refreshToken 刷新令牌
-     * @return OAuth2访问令牌列表
+     * @return OAuth2 访问令牌列表
      */
     public List<OAuth2AccessTokenDO> findListByRefreshToken(String refreshToken) {
-        return findAllByConfig(new DefaultConfigStore().and(Compare.EQUAL, OAuth2AccessTokenDO.REFRESH_TOKEN, refreshToken));
+        if (StringUtils.isBlank(refreshToken)) {
+            return Collections.emptyList();
+        }
+        return list(query().eq(REFRESH_TOKEN, refreshToken));
     }
 
     /**
-     * 分页查询OAuth2访问令牌
+     * 分页查询 OAuth2 访问令牌
      *
      * @param reqVO 分页查询参数
      * @return 分页结果
      */
     public PageResult<OAuth2AccessTokenDO> findPage(OAuth2AccessTokenPageReqVO reqVO) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
+        QueryWrapper queryWrapper = query()
+                .eq(USER_ID, reqVO.getUserId(), reqVO.getUserId() != null)
+                .eq(USER_TYPE, reqVO.getUserType(), reqVO.getUserType() != null)
+                .eq(CLIENT_ID, reqVO.getClientId(), StringUtils.isNotBlank(reqVO.getClientId()));
 
-        if (null != reqVO.getUserId()) {
-            configStore.and(Compare.EQUAL, OAuth2AccessTokenDO.USER_ID, reqVO.getUserId());
-        }
-        if (null != reqVO.getUserType()) {
-            configStore.and(Compare.EQUAL, OAuth2AccessTokenDO.USER_TYPE, reqVO.getUserType());
-        }
-        if (StringUtils.isNotBlank(reqVO.getClientId())) {
-            configStore.and(Compare.EQUAL, OAuth2AccessTokenDO.CLIENT_ID, reqVO.getClientId());
-        }
-
-        return findPageWithConditions(configStore, reqVO.getPageNo(), reqVO.getPageSize());
+        Page<OAuth2AccessTokenDO> pageResult = page(Page.of(reqVO.getPageNo(), reqVO.getPageSize()), queryWrapper);
+        return new PageResult<>(pageResult.getRecords(), pageResult.getTotalRow());
     }
 }

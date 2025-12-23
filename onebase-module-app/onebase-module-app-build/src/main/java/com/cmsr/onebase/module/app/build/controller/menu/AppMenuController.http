@@ -1,0 +1,17 @@
+### 获得企业授权应用列表-分页
+POST {{baseUrl}}/app/menu/create
+Authorization: Bearer ea9e2dfc30f74f448e69e617fe398cfc
+Content-Type: application/json
+
+{
+  "applicationId": "177228595925417984",
+  "menuName": "数字大屏",
+  "menuType": 1,
+  "menuIcon": "FormPage",
+  "menuParentId": "",
+  "createDashboardType": "dashboardNew",
+  "dashboardId": ""
+
+}
+
+

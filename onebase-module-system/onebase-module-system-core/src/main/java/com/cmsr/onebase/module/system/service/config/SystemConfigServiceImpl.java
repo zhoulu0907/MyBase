@@ -6,7 +6,7 @@ import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
 import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
-import com.cmsr.onebase.module.system.dal.database.SystemGeneralConfigDataRepository;
+import com.cmsr.onebase.module.system.dal.database.SystemConfigDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.config.SystemGeneralConfigDO;
 import com.cmsr.onebase.module.system.dal.dataobject.corp.CorpDO;
 import com.cmsr.onebase.module.system.enums.ErrorCodeConstants;
@@ -40,9 +40,9 @@ import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionU
 public class SystemConfigServiceImpl implements SystemConfigService {
 
     @Resource
-    private SystemGeneralConfigDataRepository systemGeneralConfigDataRepository;
+    private SystemConfigDataRepository systemConfigDataRepository;
     @Resource
-    private CorpService                       corpService;
+    private CorpService                corpService;
 
     @Resource
     private AppApplicationApi appApplicationApi;
@@ -51,9 +51,9 @@ public class SystemConfigServiceImpl implements SystemConfigService {
     public Long createConfig(SystemGeneralConfigSaveReqVO createReqVO) {
         // 使用正确的Bean转换方法
         SystemGeneralConfigDO systemGeneralConfigDO = BeanUtils.toBean(createReqVO, SystemGeneralConfigDO.class);
-        // 插入数据并返回ID
-        SystemGeneralConfigDO configDO = systemGeneralConfigDataRepository.insert(systemGeneralConfigDO);
-        return configDO.getId();
+        // 插入数据；insert 返回 boolean，ID 会回填到实体
+        systemConfigDataRepository.insert(systemGeneralConfigDO);
+        return systemGeneralConfigDO.getId();
     }
 
     public SystemGeneralConfigDO get(SystemGeneralConfigDO configDO, String key) {
@@ -71,7 +71,7 @@ public class SystemConfigServiceImpl implements SystemConfigService {
                 SystemConfigKeyEnum.appThirdUserRegisterShow.getKey().equals(updateReqVO.getConfigKey())) {
 
             // 先判断 key，appid 对于的数是否存在，
-            SystemGeneralConfigDO configDO = systemGeneralConfigDataRepository.findOneByConfigKeyAndAppId(updateReqVO.getConfigKey(), updateReqVO.getAppId());
+            SystemGeneralConfigDO configDO = systemConfigDataRepository.findOneByConfigKeyAndAppId(updateReqVO.getConfigKey(), updateReqVO.getAppId());
             if (null == configDO) {
                 SystemGeneralConfigDO insertConfigDO = new SystemGeneralConfigDO();
                 insertConfigDO.setId(null);
@@ -81,37 +81,37 @@ public class SystemConfigServiceImpl implements SystemConfigService {
                 insertConfigDO.setConfigKey(updateReqVO.getConfigKey());
                 insertConfigDO.setConfigValue(updateReqVO.getConfigValue());
                 insertConfigDO.setName(SystemConfigKeyEnum.getByKey(updateReqVO.getConfigKey()).getName());
-                systemGeneralConfigDataRepository.insert(insertConfigDO);
+                systemConfigDataRepository.insert(insertConfigDO);
             } else {
                 configDO.setConfigValue(updateReqVO.getConfigValue());
-                systemGeneralConfigDataRepository.update(configDO);
+                systemConfigDataRepository.update(configDO);
 
             }
         } else {
-            systemGeneralConfigDataRepository.update(systemGeneralConfigDO);
+            systemConfigDataRepository.update(systemGeneralConfigDO);
         }
 
     }
 
     @Override
     public void deleteConfig(Long id) {
-        systemGeneralConfigDataRepository.deleteById(id);
+        systemConfigDataRepository.deleteById(id);
     }
 
     @Override
     public SystemGeneralConfigDO getConfig(Long id) {
-        return systemGeneralConfigDataRepository.findById(id);
+        return systemConfigDataRepository.findById(id);
     }
 
     @Override
     public List<SystemGeneralConfigDO> getTenantConfigList(SystemConfigReqVO configReqVO) {
-        List<SystemGeneralConfigDO> configList = systemGeneralConfigDataRepository.findTenantConfigList(configReqVO.getName(), configReqVO.getStatus(), configReqVO.getConfigType());
+        List<SystemGeneralConfigDO> configList = systemConfigDataRepository.findTenantConfigList(configReqVO.getName(), configReqVO.getStatus(), configReqVO.getConfigType());
         if (CollectionUtils.isNotEmpty(configList)) {
             return configList;
         }
 
         if (StringUtils.isBlank(configReqVO.getName()) && null == configReqVO.getStatus()) {
-            List<SystemGeneralConfigDO> globalConfigList = systemGeneralConfigDataRepository.findGlobaConfigListByKeys(Arrays.asList(SystemConfigKeyEnum.ARRAYS));
+            List<SystemGeneralConfigDO> globalConfigList = systemConfigDataRepository.findGlobaConfigListByKeys(Arrays.asList(SystemConfigKeyEnum.ARRAYS));
             if (CollectionUtils.isEmpty(globalConfigList)) {
                 return new ArrayList<>();
             }
@@ -120,14 +120,20 @@ public class SystemConfigServiceImpl implements SystemConfigService {
                     configDO.setId(null);
                     configDO.setTenantId(TenantContextHolder.getTenantId());
                     configDO.setConfigType(ConfigTypeEnum.TENANT.getCode());
-                    systemGeneralConfigDataRepository.insert(configDO);
+                    systemConfigDataRepository.insert(configDO);
                 }
             });
 
         }
-        return systemGeneralConfigDataRepository.findTenantConfigList(configReqVO.getName(), configReqVO.getStatus(), configReqVO.getConfigType());
+        return systemConfigDataRepository.findTenantConfigList(configReqVO.getName(), configReqVO.getStatus(), configReqVO.getConfigType());
 
 
+    }
+
+    @Override
+    public SystemGeneralConfigDO getTenantConfigByKey(String key) {
+        SystemGeneralConfigDO configDO = systemConfigDataRepository.getTenantConfigByKey(key);
+        return configDO;
     }
 
     private void checkSaasExitsCorpOrApp() {
@@ -149,7 +155,7 @@ public class SystemConfigServiceImpl implements SystemConfigService {
 
     @Override
     public void updateStatus(Long id, Integer status) {
-        SystemGeneralConfigDO configDO = systemGeneralConfigDataRepository.findById(id);
+        SystemGeneralConfigDO configDO = systemConfigDataRepository.findById(id);
         if (null == configDO) {
             throw exception(ErrorCodeConstants.CONFIG_NO_EXISTS);
         }
@@ -172,7 +178,7 @@ public class SystemConfigServiceImpl implements SystemConfigService {
         if (StringUtils.isNotBlank(configDO.getExclusiveItem()) && CommonStatusEnum.ENABLE.getStatus().equals(status)) {
             SystemGeneralConfigSearchVO searchVO = getSystemGeneralConfigSearchVO(configDO);
             // 获取互斥数据 忽略租户条件,
-            SystemGeneralConfigDO config = systemGeneralConfigDataRepository.getConfigByDiffCategory(searchVO);
+            SystemGeneralConfigDO config = systemConfigDataRepository.getConfigByDiffCategory(searchVO);
             if (null != config) {
                 // 判断互斥数据是否已启用
                 if (CommonStatusEnum.ENABLE.getStatus().equals(config.getStatus())) {
@@ -185,10 +191,10 @@ public class SystemConfigServiceImpl implements SystemConfigService {
                     config.setConfigValue(CommonStatusEnum.ENABLE.getStatus().toString());
                     config.setStatus(CommonStatusEnum.ENABLE.getStatus());
                 }
-                systemGeneralConfigDataRepository.update(config);
+                systemConfigDataRepository.update(config);
             }
         }
-        systemGeneralConfigDataRepository.update(configDO);
+        systemConfigDataRepository.update(configDO);
     }
 
 
@@ -219,7 +225,7 @@ public class SystemConfigServiceImpl implements SystemConfigService {
         if (CollectionUtils.isEmpty(configKeys)) {
             return new ArrayList<>();
         }
-        List<SystemGeneralConfigDO> configDOList = systemGeneralConfigDataRepository.findConfigListByKeysAndAppId(configKeys, appId, category);
+        List<SystemGeneralConfigDO> configDOList = systemConfigDataRepository.findConfigListByKeysAndAppId(configKeys, appId, category);
         if (CollectionUtils.isNotEmpty(configDOList)) {
             return configDOList;
         }
@@ -228,7 +234,7 @@ public class SystemConfigServiceImpl implements SystemConfigService {
             if (SystemConfigKeyEnum.appThirdUserEnable.getKey().equals(configKey) ||
                     SystemConfigKeyEnum.appThirdUserForgetPwdShow.getKey().equals(configKey) ||
                     SystemConfigKeyEnum.appThirdUserRegisterShow.getKey().equals(configKey)) {
-                SystemGeneralConfigDO configDO = systemGeneralConfigDataRepository.findOneByConfigKeyAndAppId(configKey, appId);
+                SystemGeneralConfigDO configDO = systemConfigDataRepository.findOneByConfigKeyAndAppId(configKey, appId);
                 if (null == configDO) {
                     SystemGeneralConfigDO insertConfigDO = new SystemGeneralConfigDO();
                     insertConfigDO.setId(null);
@@ -248,12 +254,12 @@ public class SystemConfigServiceImpl implements SystemConfigService {
                         insertConfigDO.setName(SystemConfigKeyEnum.appThirdUserRegisterShow.getName());
                         insertConfigDO.setConfigValue(SystemConfigKeyEnum.appThirdUserRegisterShow_DefaultValue);
                     }
-                    systemGeneralConfigDataRepository.insert(insertConfigDO);
+                    systemConfigDataRepository.insert(insertConfigDO);
                 }
             }
         });
 
-        return systemGeneralConfigDataRepository.findConfigListByKeysAndAppId(configKeys, appId, category);
+        return systemConfigDataRepository.findConfigListByKeysAndAppId(configKeys, appId, category);
 
     }
 

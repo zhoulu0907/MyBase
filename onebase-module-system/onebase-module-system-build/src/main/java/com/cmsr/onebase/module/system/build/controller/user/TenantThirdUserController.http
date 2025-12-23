@@ -34,8 +34,8 @@ tenant-id: {{adminTenantId}}
 
 
 
-### 创建用户 /admin-api/system/third-user/update
-GET {{baseUrl}}/system/third-user/user-applications-page
+### 创建用户 /admin-api/system/third-user/user-applications-page
+GET {{baseUrl}}/system/third-user/user-applications-page?deptId=158088726951460864
 Content-Type: application/json
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}

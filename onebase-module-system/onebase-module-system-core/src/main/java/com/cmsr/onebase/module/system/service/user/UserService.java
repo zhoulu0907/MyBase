@@ -1,19 +1,14 @@
 package com.cmsr.onebase.module.system.service.user;
 
-import com.cmsr.onebase.framework.common.pojo.PageResult;
 import cn.hutool.core.collection.CollUtil;
+import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
-import com.cmsr.onebase.module.system.vo.auth.AuthRegisterReqVO;
-import com.cmsr.onebase.module.system.vo.auth.ThirdAuthLoginReqVO;
-import com.cmsr.onebase.module.system.vo.dept.DeptSimpleListRespVO;
-import com.cmsr.onebase.module.system.vo.user.UserProfileUpdatePasswordReqVO;
-import com.cmsr.onebase.module.system.vo.user.UserProfileUpdateReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
+import com.cmsr.onebase.module.system.vo.auth.AuthRegisterReqVO;
+import com.cmsr.onebase.module.system.vo.dept.DeptSimpleListRespVO;
 import com.cmsr.onebase.module.system.vo.user.*;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 
 import java.util.*;
 
@@ -69,7 +64,7 @@ public interface UserService {
      * @param adminType 修改管理员类型
      * @param id        用户编号
      */
-    void updateAdminType(Long id,  Integer adminType);
+    void updateAdminType(Long id, Integer adminType);
 
 
     /**
@@ -223,7 +218,7 @@ public interface UserService {
      * @param nickname 昵称
      * @return 用户列表
      */
-    List<AdminUserDO> getUserListByNickname(String nickname,Integer  userType);
+    List<AdminUserDO> getUserListByNickname(String nickname, Integer userType);
 
     /**
      * 批量导入用户
@@ -307,6 +302,7 @@ public interface UserService {
     boolean findAdminByRoleIdAndUserId(Long roleId, Long userId);
 
     Long getUserCountByCorpId(Long id);
+
     /**
      * 验证企业用户信息
      *
@@ -327,6 +323,7 @@ public interface UserService {
 
     /**
      * 转换用户数据信息
+     *
      * @param pageResult
      * @return
      */
@@ -334,6 +331,7 @@ public interface UserService {
 
     /**
      * 忘记密码
+     *
      * @param reqVO
      */
     void thirdUserForgetPassword(Long id, String password);
@@ -341,18 +339,23 @@ public interface UserService {
 
     /**
      * 补充用户信息
+     *
      * @param reqVO
      * @return
      */
-    ThirdSupplementUserResVO thirdUserSupplementUser(ThirdSupplementUserReqVO reqVO);
+    AdminUserDO thirdUserRegister(ThirdSupplementUserReqVO reqVO);
+
     /**
      * 创建用户并关联应用
+     *
      * @param reqVO
      * @return
      */
-    Long thirdUserCreateUserAndUserAppRelation( ThirdUserAppCombinedInsertReqVO reqVO);
+    Long thirdUserCreateUserAndUserAppRelation(ThirdUserAppCombinedInsertReqVO reqVO);
+
     /**
      * 更新用户并关联应用
+     *
      * @param reqVO
      * @return
      */
@@ -369,6 +372,7 @@ public interface UserService {
 
     /**
      * 更新第三方用户密码
+     *
      * @param id
      * @param password
      */
@@ -376,6 +380,7 @@ public interface UserService {
 
     /**
      * 获取用户信息
+     *
      * @param usernamesList
      * @return
      */
@@ -384,6 +389,7 @@ public interface UserService {
 
     /**
      * 第三方用户注册
+     *
      * @param reqVO
      * @return
      */
@@ -391,6 +397,7 @@ public interface UserService {
 
     /**
      * 获取第三方用户授权应用信息
+     *
      * @param id
      * @return
      */

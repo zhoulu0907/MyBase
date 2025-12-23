@@ -11,7 +11,6 @@ import com.cmsr.onebase.module.system.dal.database.LicenseDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.license.LicenseDO;
 import com.cmsr.onebase.module.system.enums.license.LicenseStatusEnum;
 import com.cmsr.onebase.module.system.service.license.LicenseService;
-import com.cmsr.onebase.module.system.service.user.UserService;
 import com.cmsr.onebase.module.system.util.encrypt.SM4Utils;
 import com.cmsr.onebase.module.system.vo.license.LicenseExportRespVO;
 import com.cmsr.onebase.module.system.vo.license.LicensePageReqVO;
@@ -21,7 +20,6 @@ import com.mzt.logapi.starter.annotation.LogRecord;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.data.param.init.DefaultConfigStore;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -179,8 +177,7 @@ public class LicenseServiceImpl implements LicenseService {
 
     @Override
     public List<LicenseDO> getEnableLicenseList() {
-        return licenseDataRepository.findAllByConfig(new DefaultConfigStore()
-                .eq(LicenseDO.STATUS, LicenseStatusEnum.ENABLE.getStatus()));
+        return licenseDataRepository.findActiveLicenseList();
     }
 
     @Override
@@ -190,7 +187,7 @@ public class LicenseServiceImpl implements LicenseService {
     public Long importLicense(MultipartFile file) {
 
         // 1. 解析License文件
-        byte[] encryptedBytes = null;
+        byte[] encryptedBytes;
         try {
             // 直接从MultipartFile获取字节数据并转换为字符串
             encryptedBytes = file.getBytes();
@@ -204,6 +201,9 @@ public class LicenseServiceImpl implements LicenseService {
         log.info("License解析内容: {}", decryptedContent);
         // 文件内容解析
         LicenseSaveReqVO licenseSaveReqVO = JsonUtils.parseObject(decryptedContent, LicenseSaveReqVO.class);
+        if (licenseSaveReqVO == null) {
+            throw exception(LICENSE_IMPORT_ERROR);
+        }
 
 
         // 2 查出所有已认证的license（在插入新License后再删除）
@@ -218,6 +218,9 @@ public class LicenseServiceImpl implements LicenseService {
 
         // 3 插入新的 License
         LocalDateTime expireTime = licenseSaveReqVO.getExpireTime();
+        if (expireTime == null) {
+            throw exception(LICENSE_IMPORT_ERROR);
+        }
         if (expireTime.isBefore(LocalDateTime.now())) {
             // 定义时间格式
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
