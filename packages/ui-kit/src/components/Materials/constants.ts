@@ -250,6 +250,12 @@ export const TIME_OPTIONS = {
   SECOND: '秒'
 } as const;
 
+// 日期时间选择格式
+export const DATE_TIME_OPTIONS = {
+  SECOND: '年-月-日 时:分:秒',
+  MINUTE: '年-月-日 时:分',
+} as const;
+
 export const DATE_VALUES = {
   [DATE_OPTIONS.YEAR]: 'year',
   [DATE_OPTIONS.MONTH]: 'month',
@@ -263,11 +269,21 @@ export const TIME_VALUES = {
   [TIME_OPTIONS.SECOND]: 'second',
 } as const;
 
+export const DATE_TIME_VALUES = {
+  [DATE_TIME_OPTIONS.SECOND]: 'second',
+  [DATE_TIME_OPTIONS.MINUTE]: 'minute',
+} as const;
+
 export const DATE_FORMAT = {
   [DATE_VALUES[DATE_OPTIONS.YEAR]]: 'YYYY',
   [DATE_VALUES[DATE_OPTIONS.MONTH]]: 'YYYY-MM',
   [DATE_VALUES[DATE_OPTIONS.DATE]]: 'YYYY-MM-DD',
   [DATE_VALUES[DATE_OPTIONS.FULL]]: 'YYYY-MM-DD HH:mm:ss',
+} as const;
+
+export const DATE_TIME_FORMAT = {
+  [DATE_TIME_VALUES[DATE_TIME_OPTIONS.SECOND]]: 'YYYY-MM-DD HH:mm:ss',
+  [DATE_TIME_VALUES[DATE_TIME_OPTIONS.MINUTE]]: 'YYYY-MM-DD HH:mm',
 } as const;
 
 export const TIME_FORMAT = {
