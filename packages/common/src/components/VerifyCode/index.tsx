@@ -17,7 +17,9 @@ export interface SendVerifyCodeRequest {
 export interface VerifyInputProps {
   verifyType: string;
   userMobile?: string;
+  verifyCode: string;
   sendVerifyCode: Function;
+  onChange?: (value: string) => void;
 }
 
 // localStorage key
@@ -27,10 +29,9 @@ const COUNTDOWN_DURATION = 60; // 倒计时时长（秒）
 /**
  * 验证弹窗组件，初始化时可执行传入的初始化方法
  */
-export const VerifyInput: React.FC<VerifyInputProps> = ({ userMobile, verifyType, sendVerifyCode }) => {
+export const VerifyInput: React.FC<VerifyInputProps> = ({ userMobile, verifyType, sendVerifyCode, verifyCode, onChange }) => {
   const [countdown, setCountdown] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [verifyCode, setVerifyCode] = useState('');
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   // 从 localStorage 恢复倒计时
@@ -135,11 +136,15 @@ export const VerifyInput: React.FC<VerifyInputProps> = ({ userMobile, verifyType
     }
   };
 
+  const handleChangeVerifyCode = (value: string) => {
+    onChange && onChange(value);
+  }
+
   return (
     <Input
       placeholder="请输入手机验证码"
       value={verifyCode}
-      onChange={(value) => setVerifyCode(value)}
+      onChange={handleChangeVerifyCode}
       suffix={
         <Button
           type="text"
