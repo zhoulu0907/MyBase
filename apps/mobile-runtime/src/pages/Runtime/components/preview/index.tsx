@@ -40,7 +40,6 @@ import {
   type WorkbenchComponentType,
   type GridItem
 } from '@onebase/ui-kit';
-import { getFileUrlById } from '@onebase/platform-center';
 
 import CustomNav from '@/pages/components/Nav';
 import { fetchSubmitInstance } from '@onebase/app/src/services/app_runtime';
@@ -486,7 +485,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, mainEntity,
                   name: item.name,
                   id: item.id,
                   response: item.response || item.id,
-                  url: getFileUrlById(item.id)
+                  status: fieldType === ENTITY_FIELD_TYPE.FILE.VALUE ? 'loaded' : 'loading',
                 };
               });
             } else {
@@ -550,7 +549,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, mainEntity,
                           name: item.name,
                           id: item.id,
                           response: item.response || item.id,
-                          url: getFileUrlById(item.id)
+                          status: fieldType === ENTITY_FIELD_TYPE.FILE.VALUE ? 'loaded' : 'loading',
                         };
                       });
                     } else {
