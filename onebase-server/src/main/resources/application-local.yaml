@@ -71,8 +71,7 @@ liteflow:
   version-tag: 0
   js-server-address: http://10.0.104.41:28392
 
-# Goview配置
-# 开发环境特定的文件存储配置
+# Goview配置 开发环境特定的文件存储配置
 v2:
   xnljmap:
     oss: file:/Users/Documents/ob3.0/go-view-serve/fileserver/
