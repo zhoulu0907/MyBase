@@ -486,7 +486,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, mainEntity,
                   name: item.name,
                   id: item.id,
                   response: item.response || item.id,
-                  url: getFileUrlById(item.id)
+                  status: 'loading',
+                  // url: getFileUrlById(item.id)
                 };
               });
             } else {
@@ -550,7 +551,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, mainEntity,
                           name: item.name,
                           id: item.id,
                           response: item.response || item.id,
-                          url: getFileUrlById(item.id)
+                          status: 'loading',
+                          // url: getFileUrlById(item.id)
                         };
                       });
                     } else {
