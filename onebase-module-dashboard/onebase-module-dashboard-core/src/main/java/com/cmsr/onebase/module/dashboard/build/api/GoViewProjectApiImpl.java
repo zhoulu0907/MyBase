@@ -58,10 +58,8 @@ public class GoViewProjectApiImpl implements GoViewProjectApi {
         GoviewProject goviewProject = new GoviewProject();
         goviewProject.setProjectName("新大屏");
         goviewProject.setState(-1);
-        goviewProject.setCreateTime(DateUtil.now());
         goviewProject.setAppId(applicationId);
         if (loginUser != null){
-            goviewProject.setTenantId(loginUser.getTenantId());
             goviewProject.setCreateUserId(loginUser.getId().toString());
         }
         iGoviewProjectService.save(goviewProject);
