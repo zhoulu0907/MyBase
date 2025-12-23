@@ -46,6 +46,9 @@
         <spring.boot.version>3.4.5</spring.boot.version>
         <mapstruct.version>1.6.3</mapstruct.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- Maven Plugins -->
+        <maven-jar-plugin.version>3.4.1</maven-jar-plugin.version>
+        <maven-plugin-annotations.version>3.13.1</maven-plugin-annotations.version>
     </properties>
 
     <dependencyManagement>
@@ -100,6 +103,24 @@
                             <arg>-parameters</arg>
                         </compilerArgs>
                     </configuration>
+                </plugin>
+                <!-- maven-jar-plugin 插件 -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>${maven-jar-plugin.version}</version>
+                </plugin>
+                <!-- maven-plugin-plugin 插件，用于开发 Maven 插件 -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-plugin-plugin</artifactId>
+                    <version>${maven-plugin-annotations.version}</version>
+                </plugin>
+                <!-- Spring Boot Maven 插件 -->
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                    <version>${spring.boot.version}</version>
                 </plugin>
             </plugins>
         </pluginManagement>
