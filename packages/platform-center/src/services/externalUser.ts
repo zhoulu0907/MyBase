@@ -72,3 +72,8 @@ export const createExternalUserApp = (data: createExternalUserAppParams) => runt
 
 //忘记密码
 export const forgotPWD = (data: forgotPWDParams, headers: Headers) => runtimeService.post('/auth/forget-password', data, { headers });
+
+// 查询用户详情
+export const getExternalUser = (id: string) => {
+  return systemService.get('/third-user/get?id=' + id);
+};
