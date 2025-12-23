@@ -3,7 +3,6 @@ import { Button, Modal, Table, Pagination, Space, type TableColumnProps } from '
 import { IconPlus } from '@arco-design/web-react/icon';
 import styles from './index.module.less';
 import { DataSetList, DelDataSetList } from '@onebase/platform-center';
-// const Option = Select.Option;
 interface DataTable {
   name: string;
   type: string;
@@ -65,7 +64,6 @@ const DataSet: FC = () => {
     setDeleteVisible(true);
   };
   const handleDeleteOk = async () => {
-    console.log('删除当前screen', dataSetId);
     await DelDataSetList(dataSetId);
     getDataSetList();
     setDeleteVisible(false);
