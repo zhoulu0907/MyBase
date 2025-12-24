@@ -1,6 +1,5 @@
 import { Carousel, Form } from '@arco-design/web-react';
 import { memo } from 'react';
-import { getFileUrlById } from '@onebase/platform-center';
 import { type XCarouselConfig } from './schema';
 import { useJump } from '../../hooks/useJump';
 import styles from './index.module.css';
@@ -44,7 +43,7 @@ const XCarousel = memo((props: XCarouselConfig & { runtime?: boolean }) => {
       >
         {carouselConfig.map((item, index) => (
           <div className={styles.imageWrapper} key={index} onClick={() => handleImgClick(item)}>
-            <img className={styles.image} src={item.image?.indexOf('data:') < 0 ? getFileUrlById(item.image) : item.image} />
+            <img className={styles.image} src={item.image} />
             {/* <div className={styles.text}>{item.text}</div> */}
           </div>
         ))}
