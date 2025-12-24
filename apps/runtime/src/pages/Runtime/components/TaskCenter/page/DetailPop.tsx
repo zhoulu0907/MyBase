@@ -39,13 +39,19 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
   const [isPredictVisible, setPredictVisible] = useState(false);
   const [entityParam, setEntityParam] = useState<any>();
   const [businessUuid, setBusinessUuid] = useState<any>();
+  const [defaultApprovalComment, setDefaultApprovalComment] = useState<any>();
   let confirmRef = useRef<any>(null);
   const formRef = useRef<any>(null);
-
   const [popupVisibleMap, setPopupVisibleMap] = useState<any>({});
-  console.log(popupVisibleMap, 'popupVisibleMap');
 
-  const setPopupVisibleByIndex = (index: number, visible: boolean) => {
+  const setPopupVisibleByIndex = (index: number, visible: boolean, item?: any) => {
+    if (item?.buttonName && detailData?.buttonConfigs) {
+      detailData?.buttonConfigs.forEach((element: any) => {
+        if (element.buttonName === item.buttonName) {
+          setDefaultApprovalComment(element.defaultApprovalComment);
+        }
+      });
+    }
     setPopupVisibleMap((prev: any) => {
       if (visible) {
         const newState: any = {};
@@ -167,6 +173,7 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
                       instanceId={rowData?.instanceId}
                       itemData={item}
                       isRequired={item?.approvalCommentRequired}
+                      defaultApprovalComment={defaultApprovalComment}
                     />
                   }
                   onOk={() => {
@@ -177,7 +184,7 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
                 >
                   <Button
                     type={item?.buttonType === BPMConfigButtonType.APPROVE ? 'primary' : 'outline'}
-                    onClick={() => setPopupVisibleByIndex(index, true)}
+                    onClick={() => setPopupVisibleByIndex(index, true, item)}
                   >
                     {item?.buttonName}
                   </Button>
