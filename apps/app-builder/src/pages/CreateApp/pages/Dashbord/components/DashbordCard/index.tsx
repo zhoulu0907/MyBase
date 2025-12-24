@@ -74,7 +74,7 @@ const ScreenCard: FC<CardProps> = ({ item, onDelete, onSaveAs, onEditScreen, onE
         </div>
         <div className={styles.cardState}>
           <div className={styles.cicile}></div>
-          <div>{item.state}</div>
+          <div>{item.state === '1' ? '已发布' : '未发布'}</div>
         </div>
       </div>
       <div className={`${styles.appCardFooter} ${styles.cardRemark}`}>
