@@ -4,7 +4,9 @@ import { IconPlus, IconSearch } from '@arco-design/web-react/icon';
 import { useEffect, useState, type FC } from 'react';
 import ScreenCard from '../DashbordCard';
 import styles from './index.module.less';
-import { getDashboardListApi, editDashboardInfoApi } from '@onebase/app';
+import { getDashboardListApi, editDashboardInfoApi, deleteDashboardApi } from '@onebase/app';
+import { useNavigate } from 'react-router-dom';
+import { TokenManager } from '@onebase/common';
 const FormItem = Form.Item;
 const { useForm } = Form;
 interface dataList {
@@ -21,9 +23,11 @@ interface dataList {
 const LargeScreen: FC = () => {
   const [loading, setLoading] = useState(false);
   const [dataList, setDataList] = useState<dataList[]>([]);
-  const [total, setTotal] = useState(10);
-  const [pageSize, setPageSize] = useState<number>();
+  const [total, setTotal] = useState(30);
+  const [pageSize, setPageSize] = useState<number>(10);
   const [pageNo, setPageNo] = useState(1);
+  const navigate = useNavigate();
+  const tokenInfo = TokenManager.getTokenInfo();
   useEffect(() => {
     setLoading(false);
     getDashboardList();
@@ -32,12 +36,12 @@ const LargeScreen: FC = () => {
   const getDashboardList = async () => {
     const params = {
       page: pageNo,
-      limit: 10
+      limit: pageSize
     };
     const res = await getDashboardListApi(params);
     console.log('res:', res);
     setDataList(res);
-    setTotal(res.length);
+    // setTotal(res.length);
   };
   const handleSearchChange = () => {};
   // 创建大屏弹窗
@@ -62,11 +66,14 @@ const LargeScreen: FC = () => {
   const handleEditOk = async () => {
     editForm.validate(async (error) => {
       if (error !== null) return;
-      const params = await editForm.validate();
-      const res = await editDashboardInfoApi(params);
-      console.log('res:', res);
+      try {
+        const params = await editForm.validate();
+        const res = await editDashboardInfoApi(params);
+        console.log('res:', res);
+        setEditVisible(false);
+        getDashboardList();
+      } catch (error) {}
     });
-    // setEditVisible(false);
   };
   //取消弹框
   const handleEditCancel = () => {
@@ -75,21 +82,26 @@ const LargeScreen: FC = () => {
   //编辑大屏
   const handleEdit = (item: dataList) => {
     console.log(item, '跳转到第三方');
+    navigate(`/onebase/${tokenInfo?.tenantId}/dashboard/edit/${item.id}`);
   };
   //预览
-  const handlePreview = () => {
-    console.log('预览:');
+  const handlePreview = (item: dataList) => {
+    console.log('预览 item:', item);
+    navigate(`/onebase/${tokenInfo?.tenantId}/dashboard/preview/${item.id}`);
   };
   // 删除弹框
   const [deleteVisible, setDeleteVisible] = useState<boolean>(false);
   const [ModalScreenName, setModalScreenName] = useState('');
+  const [screenId, setScreenId] = useState('');
   const handleDelete = (item: dataList) => {
     console.log(item);
     setModalScreenName(item.projectName);
+    setScreenId(item.id);
     setDeleteVisible(true);
   };
-  const handleDeleteScreenOk = () => {
+  const handleDeleteScreenOk = async () => {
     console.log('删除当前screen');
+    await deleteDashboardApi(screenId);
     setDeleteVisible(false);
   };
 

@@ -15,3 +15,13 @@ export const getDashboardListApi = (params: DashboardListParams) => {
 export const editDashboardInfoApi = (params: editDashboardInfoParams) => {
   return dashboardService.post('/edit', params);
 };
+
+// 删除大屏
+export const deleteDashboardApi = (params: string) => {
+  return dashboardService.post(`/delete?id=${params}`);
+};
+
+// 获取大屏详情
+export const getDashboardDetailApi = (params: string) => {
+  return dashboardService.get(`/getScreenDSLData?projectId=${params}`);
+};
