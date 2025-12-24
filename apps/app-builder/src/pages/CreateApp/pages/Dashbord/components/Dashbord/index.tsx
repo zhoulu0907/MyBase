@@ -8,46 +8,24 @@ import { getDashboardListApi } from '@onebase/app';
 const FormItem = Form.Item;
 const { useForm } = Form;
 interface dataList {
+  appId: string;
   id: string;
-  name: string;
+  projectName: string;
+  createTime: string;
+  indexImage: string;
+  remarks: string;
   state: string;
   desc: string;
 }
 
 const LargeScreen: FC = () => {
   const [loading, setLoading] = useState(false);
-  const [dataList, setDataList] = useState<dataList[]>();
+  const [dataList, setDataList] = useState<dataList[]>([]);
   const [total, setTotal] = useState(10);
   const [pageSize, setPageSize] = useState<number>();
   const [pageNo, setPageNo] = useState(1);
   useEffect(() => {
     setLoading(false);
-    setDataList([
-      {
-        id: '1',
-        name: '这是一个大屏名称',
-        state: '已发布',
-        desc: '描述1'
-      },
-      {
-        id: '2',
-        name: '这是一个大屏名称2',
-        state: '已发布',
-        desc: '描述2'
-      },
-      {
-        id: '3',
-        name: '这是一个大屏名称4',
-        state: '已发布',
-        desc: '描述3'
-      },
-      {
-        id: '4',
-        name: 'screen1',
-        state: '已发布',
-        desc: '描述4'
-      }
-    ]);
     getDashboardList();
   }, []);
 
@@ -57,8 +35,9 @@ const LargeScreen: FC = () => {
       limit: 10
     };
     const res = await getDashboardListApi(params);
-    setDataList(res.data);
-    setTotal(res.data.length);
+    console.log('res:', res);
+    setDataList(res);
+    setTotal(res.length);
   };
   const handleSearchChange = () => {};
   // 创建大屏弹窗
@@ -74,8 +53,8 @@ const LargeScreen: FC = () => {
 
   const handleEditScreen = (item: dataList) => {
     console.log(item, '编辑大屏弹框');
-    editForm.setFieldValue('name', item.name);
-    editForm.setFieldValue('desc', item.desc);
+    editForm.setFieldValue('name', item.projectName);
+    editForm.setFieldValue('desc', item.remarks);
     setEditVisible(true);
   };
   const handleEditOk = async () => {
@@ -91,8 +70,8 @@ const LargeScreen: FC = () => {
     console.log(item, '跳转到第三方');
   };
   //预览
-  const handlePreview = (id: string) => {
-    console.log('预览:', id);
+  const handlePreview = () => {
+    console.log('预览:');
   };
 
   // 删除弹框

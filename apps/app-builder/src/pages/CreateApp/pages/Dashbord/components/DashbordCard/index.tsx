@@ -7,8 +7,12 @@ import eye from '@/assets/images/screen/eye.png';
 import write from '@/assets/images/screen/write.png';
 import template from '@/assets/images/screen/template.png';
 interface dataList {
+  appId: string;
   id: string;
-  name: string;
+  projectName: string;
+  createTime: string;
+  indexImage: string;
+  remarks: string;
   state: string;
   desc: string;
 }
@@ -54,11 +58,11 @@ const ScreenCard: FC<CardProps> = ({ item, onDelete, onSaveAs, onEditScreen, onE
   return (
     <div className={styles.appCard}>
       <div className={styles.appCardImg}>
-        <img src={screen1} alt="" />
+        <img src={item.indexImage} alt="" />
       </div>
       <div className={`${styles.appCardFooter} ${styles.cardName}`}>
         <div>
-          {item.name}
+          {item.projectName}
           <IconEdit
             fontSize={16}
             style={{ marginLeft: 4, cursor: 'pointer' }}
@@ -75,7 +79,7 @@ const ScreenCard: FC<CardProps> = ({ item, onDelete, onSaveAs, onEditScreen, onE
       </div>
       <div className={`${styles.appCardFooter} ${styles.cardRemark}`}>
         <div>
-          更新于: <span>2025-11-11</span>
+          更新于: <span>{item.createTime}</span>
         </div>
         <div>
           <Space size={'medium'}>

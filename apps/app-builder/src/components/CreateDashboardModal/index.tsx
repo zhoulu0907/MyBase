@@ -175,10 +175,9 @@ const CreateModal: React.FC<CreateModalProps> = ({
     };
     const res = await getDashboardListApi(params);
     console.log('大屏 res:', res);
-    console.log('大屏 data:', res.data);
-    console.log('大屏 res.data.length:', res.data.length);
-    setDashboardTemplateData(res.data);
-    // setTotal(res.data.length);
+    console.log('大屏 res.data.length:', res.length);
+    setDashboardTemplateData(res);
+    setTotal(res.length);
   };
   const handleChangeDashboardMethod = (value: string) => {
     setDashboardMethodLoading(true);
