@@ -54,7 +54,7 @@ type XTableSelectProps = {
   onSelectedChange?: (value: any | null, fromDoubleClick?: boolean) => void;
   refreshAfterSelect?: boolean;
   //   隐藏草稿箱
-  hiddenDraft: boolean;
+  hiddenDraft?: boolean;
 };
 
 const XTable = memo(
