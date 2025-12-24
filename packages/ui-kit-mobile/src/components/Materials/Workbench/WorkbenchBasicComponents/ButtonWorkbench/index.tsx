@@ -1,8 +1,8 @@
-import { memo, useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { memo } from 'react';
+import { useParams } from 'react-router-dom';
 import { Button } from '@arco-design/mobile-react';
 import { workbenchSchema } from '@onebase/ui-kit';
-import { type ApplicationMenu, listApplicationMenu, menuSignal } from '@onebase/app';
+import { useJump } from '../../hooks/useJump';
 import styles from './index.module.css';
 
 type XButtonWorkbenchConfig = typeof workbenchSchema.XButtonWorkbench.config;
@@ -23,70 +23,17 @@ const XButtonWorkbench = memo((props: XButtonWorkbenchConfig & { runtime?: boole
   } = props;
 
   const textAlignHorizontal = textAlign.horizontal || 'center';
-  const textAlignVertical = textAlign.vertical || 'middle';
+  const textAlignVertical = textAlign.vertical || 'middle'
 
-  const { appId } = useParams<{ appId?: string }>();
-  const [appRuntimeMenu, setAppRuntimeMenu] = useState<ApplicationMenu[]>([]);
-  const { setCurMenu } = menuSignal;
-
-  const navigate = useNavigate();
-
-  // 获取应用运行态菜单数据
-  useEffect(() => {
-    if (!runtime || !appId) return;
-    getApplicationMenu();
-  }, [runtime, appId]);
-
-  const getApplicationMenu = async () => {
-    if (appId) {
-      const res = await listApplicationMenu({ applicationId: appId });
-      setAppRuntimeMenu(res || []);
-    }
-  };
+  const { handleJump } = useJump();
 
   // 处理按钮点击
-  const handleButtonClick = () => {
-    if (!runtime) return;
-
-    if (jumpType === 'external') {
-      // 跳转外部链接
-      if (jumpExternalUrl) {
-        if (jumpExternalUrl.startsWith('http://') || jumpExternalUrl.startsWith('https://')) {
-          window.open(jumpExternalUrl, '_blank');
-        } else {
-          navigate(jumpExternalUrl);
-        }
-      }
-    } else if (jumpType === 'internal') {
-      // 关联已有页面
-      if (jumpPageId) {
-        const targetMenu = appRuntimeMenu.find(
-          (menu) => menu.menuUuid === jumpPageId);
-
-        if (targetMenu && targetMenu.id) {
-          // 获取当前URL的查询参数，更新或添加 curMenu 参数
-          const searchParams = new URLSearchParams(location.search);
-          searchParams.set('curMenu', targetMenu.id);
-          // 将 /runtime-home 替换为 /runtime
-          const newPath = location.pathname.replace('/runtime-home', '/runtime');
-          const to = `${newPath}?${searchParams.toString()}`;
-          navigate(to);
-
-          // 设置当前菜单
-          setCurMenu({
-            id: targetMenu.id || '',
-            menuCode: targetMenu.menuCode || '',
-            menuSort: targetMenu.menuSort || 1,
-            menuType: targetMenu.menuType || 1,
-            menuName: targetMenu.menuName || '',
-            menuIcon: targetMenu.menuIcon || '',
-            isVisible: targetMenu.isVisible || 1,
-            pagesetType: targetMenu.pagesetType,
-            children: targetMenu.children || []
-          });
-        }
-      }
-    }
+  const handleButtonClick = async () => {
+    await handleJump({
+      menuUuid: jumpType === 'internal' ? jumpPageId : undefined,
+      linkAddress: jumpType === 'external' ? jumpExternalUrl : undefined,
+      runtime,
+    });
   };
 
   // 将垂直对齐值转换为 CSS 的 alignItems 值

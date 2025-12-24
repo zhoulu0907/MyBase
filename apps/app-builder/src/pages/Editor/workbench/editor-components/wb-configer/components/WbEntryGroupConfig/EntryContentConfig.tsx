@@ -7,6 +7,7 @@ import type { QuickEntryGroupConfig, QuickEntryGroupItemConfig } from '@onebase/
 import IconEntry from '@/assets/workbench/quick-entry/entry1.svg';
 import ConfigDrawer from '@/pages/Editor/workbench/components/configDrawer';
 import SelectMenuModal from './selectMenuModal';
+import MenuSelector from '@/pages/Editor/workbench/components/MenuSelector';
 import { getNextIndex } from '@/pages/Editor/workbench/utils/edit-data';
 import styles from './EntryContentConfig.module.less';
 
@@ -367,14 +368,11 @@ const EntryContentConfig = ({ onChange, value }: EntryContentConfigProps) => {
           {(values) => {
             return values.entryType === 'menu' ? (
               <FormItem label="选择菜单">
-                <div className={styles.menuPicker}>
-                  <Input readOnly value={values.menuUuid || '请选择菜单'} />
-                  <Button
-                    type="text"
-                    icon={<IconEdit />}
-                    onClick={() => setState((prev) => ({ ...prev, selectMenuModalVisible: true }))}
-                  />
-                </div>
+                <MenuSelector
+                  value={values.menuUuid}
+                  mode="single"
+                  onChange={(value) => handleEditEntry(values.entryId, 'menuUuid', value)}
+                />
               </FormItem>
             ) : (
               <FormItem label="链接地址" field="linkAddress">
