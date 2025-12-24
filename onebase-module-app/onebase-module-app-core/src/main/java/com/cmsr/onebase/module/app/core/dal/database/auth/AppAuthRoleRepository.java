@@ -3,10 +3,10 @@ package com.cmsr.onebase.module.app.core.dal.database.auth;
 import com.cmsr.onebase.framework.common.pojo.PageParam;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.orm.repo.BaseAppRepository;
-import com.cmsr.onebase.framework.orm.repo.BaseBizRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthRoleDO;
 import com.cmsr.onebase.module.app.core.dal.mapper.AppAuthRoleMapper;
 import com.cmsr.onebase.module.app.core.dto.auth.RoleMemberDTO;
+import com.cmsr.onebase.module.app.core.enums.auth.AuthRoleTypeEnum;
 import com.cmsr.onebase.module.app.core.vo.app.AppUserPhotoDTO;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
@@ -112,5 +112,14 @@ public class AppAuthRoleRepository extends BaseAppRepository<AppAuthRoleMapper, 
                 .where(APP_AUTH_ROLE.APPLICATION_ID.eq(applicationId))
                 .where(APP_AUTH_ROLE.ROLE_UUID.eq(roleUuid));
         return getOne(queryWrapper);
+    }
+
+    public AppAuthRoleDO findThirdpartyRoleByApplicationId(Long applicationId) {
+        QueryWrapper queryWrapper = this.query()
+                .where(APP_AUTH_ROLE.APPLICATION_ID.eq(applicationId)
+                        .and(APP_AUTH_ROLE.ROLE_CODE.eq(AuthRoleTypeEnum.OUTER_USER.getCode()))
+                        .and(APP_AUTH_ROLE.ROLE_NAME.eq(AuthRoleTypeEnum.OUTER_USER.getName()))
+                        .and(APP_AUTH_ROLE.ROLE_TYPE.eq(AuthRoleTypeEnum.OUTER_USER.getValue())));
+        return this.getOne(queryWrapper);
     }
 }

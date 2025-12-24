@@ -107,6 +107,11 @@ public class RuntimeApplicationContextHeaderFilter extends OncePerRequestFilter 
 
 
     private boolean hasApplicationPermission(Long userId, Long applicationId) {
-        return appAuthSecurityApi.hasApplicationPermission(userId, applicationId);
+        boolean hasApplicationPermission = appAuthSecurityApi.hasApplicationPermission(userId, applicationId);
+        //TODO 暂时这样弄这，如果没有权限，清理掉缓存
+        if (!hasApplicationPermission) {
+            appAuthSecurityApi.cleanAuthCache(userId, applicationId);
+        }
+        return hasApplicationPermission;
     }
 }

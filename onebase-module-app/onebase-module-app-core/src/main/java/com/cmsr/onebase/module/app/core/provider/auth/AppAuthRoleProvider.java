@@ -72,7 +72,7 @@ public class AppAuthRoleProvider {
 
     private List<AppAuthRoleDO> findRolesByDept(Long userId, Long applicationId) {
         // 获取用户的部门层次（包含用户所在部门及其所有上级部门）
-        List<DeptRespDTO> deptRespDTOS = TenantUtils.executeIgnore(() -> deptApi.getParentDeptsListByUserId(userId).getCheckedData());
+        List<DeptRespDTO> deptRespDTOS = TenantManager.withoutTenantCondition(() -> TenantUtils.executeIgnore(() -> deptApi.getParentDeptsListByUserId(userId).getCheckedData()));
         if (deptRespDTOS == null || deptRespDTOS.isEmpty()) {
             return Collections.emptyList();
         }

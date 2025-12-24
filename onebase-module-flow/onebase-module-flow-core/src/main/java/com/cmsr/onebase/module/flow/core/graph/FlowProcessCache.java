@@ -161,6 +161,22 @@ public class FlowProcessCache {
         return processCache.values().stream().toList();
     }
 
+    public ConcurrentHashMap<Long, StartTimeNodeData> getStartTimeNodeDataCache() {
+        return startTimeNodeDataCache;
+    }
+
+    public ConcurrentHashMap<Long, StartFormNodeData> getStartFormNodeDataCache() {
+        return startFormNodeDataCache;
+    }
+
+    public ConcurrentHashMap<Long, StartEntityNodeData> getStartEntityNodeDataCache() {
+        return startEntityNodeDataCache;
+    }
+
+    public ConcurrentHashMap<Long, StartDateFieldNodeData> getStartDateFieldNodeDataCache() {
+        return startDateFieldNodeDataCache;
+    }
+
     private void updateChain(Long processId, JsonGraph jsonGraph) {
         String flowChain = FlowChainBuilder.toFlowChain(jsonGraph);
         log.debug("flowChain:{}", flowChain);
