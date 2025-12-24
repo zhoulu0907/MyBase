@@ -52,6 +52,7 @@ const EditRuntime: React.FC<EditRuntimeProps> = ({
   const [latestDraft, setLatestDraft] = useState<any>(null);
   const [draftTimestamp, setDraftTimestamp] = useState<number | null>(null);
   const isLoadingFromDraftBoxRef = useRef(false);
+  const draftIdRef = useRef<string | null>(null); // 保存从草稿箱载入的草稿 ID
 
   const clearDraftCache = useCallback(() => {
     localStorage.removeItem('draftData');
@@ -99,6 +100,7 @@ const EditRuntime: React.FC<EditRuntimeProps> = ({
             const draftData = JSON.parse(loadDraftData);
             // 清除临时数据
             localStorage.removeItem('draftData');
+            draftIdRef.current = draftData?.id || null;
 
             const componentSchemas = useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value;
             const subTableComponents = useEditorSignalMap.get(editPageViewId.value)?.subTableComponents.value;
