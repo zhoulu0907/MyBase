@@ -26,7 +26,7 @@ class MenuCacheManager {
     }
 
     // 开始加载菜单
-    const loadPromise = listApplicationMenu({ applicationId: appId }).then((res) => {
+    const loadPromise = listApplicationMenu({ applicationId: appId }).then((res: ApplicationMenu[]) => {
       const menuList = res || [];
       this.menuCache.set(appId, menuList);
       this.loadingPromises.delete(appId);

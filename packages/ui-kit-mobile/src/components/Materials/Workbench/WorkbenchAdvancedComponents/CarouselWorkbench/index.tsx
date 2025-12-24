@@ -1,8 +1,10 @@
 import { Carousel } from '@arco-design/mobile-react';
 import { memo } from 'react';
-import { STATUS_OPTIONS, STATUS_VALUES, workbenchSchema } from '@onebase/ui-kit';
-import styles from './index.module.css';
+import { useParams } from 'react-router-dom';
+import { workbenchSchema } from '@onebase/ui-kit';
+import { useJump } from '../../hooks/useJump';
 import { getFileUrlById } from '@onebase/platform-center';
+import styles from './index.module.css';
 
 type XCarouselConfig = typeof workbenchSchema.XCarouselWorkbench.config;
 
@@ -17,14 +19,14 @@ const XCarousel = memo((props: XCarouselConfig & { runtime?: boolean }) => {
     runtime
   } = props;
 
-  const handleImageClick = (image: string) => {
-    if (!runtime) return;
+  const { handleJump } = useJump();
 
-    if (image.indexOf('data:') < 0) {
-      window.open(getFileUrlById(image));
-    } else {
-      window.open(image);
-    }
+  const handleImageClick = (item: any) => {
+    handleJump({
+      menuUuid: item.linkType === 'internal' ? item.internalPageId : undefined,
+      linkAddress: item.linkType === 'external' ? item.url : undefined,
+      runtime
+    });
   };
   return (
     <div className={styles.carouselWrapper}>
@@ -41,10 +43,10 @@ const XCarousel = memo((props: XCarouselConfig & { runtime?: boolean }) => {
         }}
         indicatorPosition="bottom"
       >
-        {carouselConfig.map((img, index) => (
-          <div className={styles.imageWrapper} key={index} onClick={() => handleImageClick(img.image)}>
-            <img className={styles.image} src={img.image.indexOf('data:') < 0 ? getFileUrlById(img.image) : img.image} />
-            {/* <div className={styles.text}>{img.text}</div> */}
+        {carouselConfig.map((item, index) => (
+          <div className={styles.imageWrapper} key={index} onClick={() => handleImageClick(item)}>
+            <img className={styles.image} src={item.image.indexOf('data:') < 0 ? getFileUrlById(item.image) : item.image} />
+            {/* <div className={styles.text}>{item.text}</div> */}
           </div>
         ))}
       </Carousel>
