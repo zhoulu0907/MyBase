@@ -1,5 +1,5 @@
 import { appService, dashboardService } from './clients';
-import { DashboardListParams, DashboardTemplateListParams } from '../types/app_dashboard';
+import { DashboardListParams, DashboardTemplateListParams, editDashboardInfoParams } from '../types/app_dashboard';
 
 // 获取模版列表接口
 export const getDashboardTemplateListApi = (params: DashboardTemplateListParams) => {
@@ -11,3 +11,7 @@ export const getDashboardListApi = (params: DashboardListParams) => {
   return dashboardService.get('/list', params);
 };
 
+// 修改大屏信息
+export const editDashboardInfoApi = (params: editDashboardInfoParams) => {
+  return dashboardService.post('/edit', params);
+};

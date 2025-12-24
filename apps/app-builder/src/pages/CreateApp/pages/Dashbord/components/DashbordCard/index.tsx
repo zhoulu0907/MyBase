@@ -10,7 +10,7 @@ interface dataList {
   appId: string;
   id: string;
   projectName: string;
-  createTime: string;
+  updateTime: string;
   indexImage: string;
   remarks: string;
   state: number;
@@ -25,6 +25,14 @@ interface CardProps {
   onPreview: (item: dataList) => void;
 }
 const ScreenCard: FC<CardProps> = ({ item, onDelete, onSaveAs, onEditScreen, onEdit, onPreview }) => {
+  // updateTime 后端返回的是时间戳 将时间戳变为 年月日的事件
+  const updateTime = (time: string) => {
+    const date = new Date(time);
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    return `${year}-${month}-${day}`;
+  };
   const menu = (
     <Menu style={{ borderRadius: 10 }}>
       <Menu.Item
@@ -72,14 +80,14 @@ const ScreenCard: FC<CardProps> = ({ item, onDelete, onSaveAs, onEditScreen, onE
             }}
           />
         </div>
-        <div className={styles.cardState}>
+        {/* <div className={styles.cardState}>
           <div className={styles.cicile}></div>
           <div>{item.state === 1 ? '已发布' : '未发布'}</div>
-        </div>
+        </div> */}
       </div>
       <div className={`${styles.appCardFooter} ${styles.cardRemark}`}>
         <div>
-          更新于: <span>{item.createTime}</span>
+          更新于: <span>{updateTime(item.updateTime)}</span>
         </div>
         <div>
           <Space size={'medium'}>

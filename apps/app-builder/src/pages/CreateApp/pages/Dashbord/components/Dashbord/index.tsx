@@ -4,14 +4,14 @@ import { IconPlus, IconSearch } from '@arco-design/web-react/icon';
 import { useEffect, useState, type FC } from 'react';
 import ScreenCard from '../DashbordCard';
 import styles from './index.module.less';
-import { getDashboardListApi } from '@onebase/app';
+import { getDashboardListApi, editDashboardInfoApi } from '@onebase/app';
 const FormItem = Form.Item;
 const { useForm } = Form;
 interface dataList {
   appId: string;
   id: string;
   projectName: string;
-  createTime: string;
+  updateTime: string;
   indexImage: string;
   remarks: string;
   state: number;
@@ -53,13 +53,20 @@ const LargeScreen: FC = () => {
 
   const handleEditScreen = (item: dataList) => {
     console.log(item, '编辑大屏弹框');
-    editForm.setFieldValue('name', item.projectName);
-    editForm.setFieldValue('desc', item.remarks);
+    console.log('tiem:', item);
+    editForm.setFieldValue('projectName', item.projectName);
+    editForm.setFieldValue('remarks', item.remarks);
+    editForm.setFieldValue('id', item.id);
     setEditVisible(true);
   };
   const handleEditOk = async () => {
-    await editForm.validate();
-    setEditVisible(false);
+    editForm.validate(async (error) => {
+      if (error !== null) return;
+      const params = await editForm.validate();
+      const res = await editDashboardInfoApi(params);
+      console.log('res:', res);
+    });
+    // setEditVisible(false);
   };
   //取消弹框
   const handleEditCancel = () => {
@@ -73,13 +80,12 @@ const LargeScreen: FC = () => {
   const handlePreview = () => {
     console.log('预览:');
   };
-
   // 删除弹框
   const [deleteVisible, setDeleteVisible] = useState<boolean>(false);
   const [ModalScreenName, setModalScreenName] = useState('');
   const handleDelete = (item: dataList) => {
     console.log(item);
-    setModalScreenName(item.name);
+    setModalScreenName(item.projectName);
     setDeleteVisible(true);
   };
   const handleDeleteScreenOk = () => {
@@ -146,11 +152,14 @@ const LargeScreen: FC = () => {
         onCancel={handleEditCancel}
       >
         <Form form={editForm} autoComplete="off">
-          <FormItem label="大屏名称" field="name" rules={[{ required: true, message: '请输入大屏名称' }]}>
+          <FormItem label="大屏名称" field="projectName" rules={[{ required: true, message: '请输入大屏名称' }]}>
             <Input placeholder="" />
           </FormItem>
-          <FormItem label="大屏描述" field="desc" rules={[{ required: true, message: '请输入大屏描述' }]}>
+          <FormItem label="大屏描述" field="remarks" rules={[{ required: true, message: '请输入大屏描述' }]}>
             <Input placeholder="" />
+          </FormItem>
+          <FormItem field="id" noStyle>
+            <Input type="hidden" />
           </FormItem>
         </Form>
       </Modal>

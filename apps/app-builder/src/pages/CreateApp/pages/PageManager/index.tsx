@@ -422,8 +422,6 @@ const PageManagerPage: FC = () => {
     handleDelete(menuID);
   };
   const handleScreenCreate = async (id?: string, screenMethod?: string) => {
-    console.log('handleScreenCreate id:', id);
-    console.log('handleScreenCreate screenMethod:', screenMethod);
     createForm.validate(async (error) => {
       if (error !== null) return;
       const req: CreateApplicationMenuReq = {

@@ -25,3 +25,16 @@ export interface DashboardListParams {
   limit: number;
 
 }
+/** 修改大屏信息 */
+export interface editDashboardInfoParams {
+  /** 大屏id */
+  id: string;
+  /** 大屏名称 */
+  projectName: string;
+  /** 大屏描述 */
+  remarks: string;
+  /** 大屏状态 */
+  state?: number;
+  /** 大屏缩略图 */
+  indexImage?: string;
+}
