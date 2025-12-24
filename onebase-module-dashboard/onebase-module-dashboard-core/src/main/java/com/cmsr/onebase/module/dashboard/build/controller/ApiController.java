@@ -47,7 +47,7 @@ public class ApiController  extends BaseController {
 				Map<String, Object> map = new HashMap<String, Object>();
 				map.put("userinfo", SaTokenUtil.getUser());
 				map.put("token", StpUtil.getTokenInfo());
-				return success().put("data", map);
+				return successData(0, map);
 			} else {
 				if (StrUtil.isNotBlank(user.getUsername()) && StrUtil.isNotBlank(user.getPassword())) {
 					// 直接查询用户
@@ -113,6 +113,6 @@ public class ApiController  extends BaseController {
 		ossInfo.put("defaultFormat", v2Config.getDefaultFormat());
 		ossInfo.put("xnljmap", v2Config.getXnljmap());
 
-		return success().put("data", ossInfo);
+		return successData(0, ossInfo);
 	}
 }
