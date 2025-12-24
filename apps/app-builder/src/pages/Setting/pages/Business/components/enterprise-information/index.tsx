@@ -5,6 +5,7 @@ import {
   Descriptions,
   Image,
   Input,
+  InputNumber,
   Message,
   Select,
   Space,
@@ -378,8 +379,8 @@ const EnterpriseInfoPage: React.FC = () => {
           value={formData?.userLimit}
           onChange={handleChange.bind(null, 'userLimit')}
           isEdit={isEdited}
-          component={Input}
-          componentProps={{ placeholder: '请输入用户上限' }}
+          component={InputNumber}
+          componentProps={{ placeholder: '请输入用户上限', max: 5000, min: 0 }}
         />
       )
     },

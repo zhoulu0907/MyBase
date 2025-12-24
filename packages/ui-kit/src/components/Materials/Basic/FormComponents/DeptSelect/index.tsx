@@ -52,19 +52,10 @@ const XDeptSelect = memo((props: XInputDeptSelectConfig & { runtime?: boolean; d
       setCurrentSelectDept(fieldValue?.name);
       runtimeEditRef.current = true;
     }
-    // TODO(siqi): 解释下这段作用
-    // else if (status !== STATUS_VALUES[STATUS_OPTIONS.READONLY] && !detailMode) {
-    //   setCurrentSelectDept('');
-    //   form.setFieldValue(fieldName, undefined);
-    // }
   }, [fieldValue]);
 
   useEffect(() => {
     getCurDeptTree(deptTree);
-    // TODO(siqi): 解释下这段作用
-    // if (status !== STATUS_VALUES[STATUS_OPTIONS.READONLY] && !detailMode) {
-    //   defaultDeptValue ? handleChange(defaultDeptValue) : form.setFieldValue(fieldName, undefined);
-    // }
   }, [selectScope]);
 
   useEffect(() => {
