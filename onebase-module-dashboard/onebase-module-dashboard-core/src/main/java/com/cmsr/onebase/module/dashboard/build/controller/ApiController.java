@@ -40,6 +40,7 @@ public class ApiController  extends BaseController {
 	@ResponseBody
 	@PermitAll
 	@ApiSignIgnore
+	@TenantIgnore
 	public AjaxResult APIlogin(@RequestBody SysUser user, HttpServletRequest request) {
 		try {
 			// 判断是否登陆
@@ -92,6 +93,7 @@ public class ApiController  extends BaseController {
 	@ResponseBody
 	@PermitAll
 	@ApiSignIgnore
+	@TenantIgnore
 	public AjaxResult logout() {
 		// 判断是否登陆
 		StpUtil.logout();
