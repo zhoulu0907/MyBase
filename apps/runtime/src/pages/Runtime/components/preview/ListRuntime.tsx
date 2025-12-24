@@ -45,10 +45,6 @@ const ListRuntime: React.FC<ListRuntimeProps> = ({ pageSetId, runtime, showFromP
     }
   }, [pageSetId]);
 
-  useEffect(() => {
-    console.log('listComponents: ', listComponents.value);
-  }, [listComponents.value]);
-
   return (
     <>
       {loading ? (
