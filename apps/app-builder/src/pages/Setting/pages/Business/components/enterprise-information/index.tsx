@@ -137,7 +137,7 @@ const EnterpriseInfoPage: React.FC = () => {
       await updateCorpApi({ ...formData, id: currentId });
       Message.success('企业基本信息保存成功');
     } catch (error) {
-      Message.error('企业基本信息保存失败');
+      console.log("error");
     } finally {
       setIsEdited(false);
     }
@@ -272,7 +272,7 @@ const EnterpriseInfoPage: React.FC = () => {
               <Image alt="头像" src={getFileUrlById(avatarUrl)} onError={handleImageError} width={160} height={80} />
             )
           }
-          label="logo"
+          type="logo"
           onChange={handleChange.bind(null, 'corpLogo')}
           isEdit={isEdited}
           component={Upload}
@@ -351,7 +351,7 @@ const EnterpriseInfoPage: React.FC = () => {
           onChange={handleChange.bind(null, 'industryType')}
           isEdit={isEdited}
           component={Select}
-          label="industryType"
+          type="industryType"
           componentProps={{
             placeholder: '请选择行业',
             options: industryOptions.map(
@@ -392,8 +392,9 @@ const EnterpriseInfoPage: React.FC = () => {
           value={formData?.status}
           onChange={handleChange.bind(null, 'status')}
           isEdit={isEdited}
+          type="status"
           component={Checkbox}
-          componentProps={{ placeholder: '请选择是否启用', checked: formData?.status === 0 ? false : true }}
+          componentProps={{ placeholder: '请选择是否启用', checked: formData?.status === 0 ? false : true}}
         />
       )
     }
