@@ -96,11 +96,10 @@ public class UserAppRelationServiceImpl implements UserAppRelationService {
                 corpAppRelationDO.setUserId(userAppReqVO.getUserId());
                 userAppRelationDataRepository.insert(corpAppRelationDO);
 
+                // 添加应用外部用户权限
                 ApplicationManager.withoutApplicationCondition(() -> {
                     appAuthRoleUser.grantThirdpartyUserPrivileges(userAppReqVO.getUserId(), appId);
                 });
-
-
             });
 
             // TODO: 添加应用外部用户相关代码
