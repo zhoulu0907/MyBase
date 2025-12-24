@@ -47,9 +47,10 @@ const XDateTimePicker = memo((props: XDateTimePickerConfig & { runtime?: boolean
       label={label.display && <Ellipsis text={label.text} />}
       field={fieldId}
       rules={rules}
+      layout={layout}
       initialValue={form?.getFieldValue(fieldId)}
       style={{
-        textAlign: 'right',
+        textAlign: layout === 'vertical' ? 'left' : 'right',
         pointerEvents: (!runtime || detailMode) ? 'none' : 'unset',
         opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
       }}

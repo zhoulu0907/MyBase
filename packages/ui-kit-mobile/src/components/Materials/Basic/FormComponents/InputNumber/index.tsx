@@ -63,11 +63,7 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
         maxLength={verify?.max || 1000000000}
         suffix={showUnit ? unitValue : ''}
         blockChangeWhenCompositing={true}
-        inputStyle={{ textAlign: align }}
-        style={{
-          width: '100%',
-          textAlignLast: align
-        }}
+        inputStyle={{ textAlign: layout === 'vertical' ? 'left' : 'right' }}
       />
     );
   };
@@ -96,6 +92,7 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
       className="inputTextWrapperOBMobile"
       field={fieldId}
       rules={rules}
+      layout={layout}
       label={label.display ? <Ellipsis text={label.text} /> : undefined}
       initialValue={defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : ''}
       style={{
@@ -105,7 +102,12 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
     >
       {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
         // 只读模式，渲染格式化的文本内容
-        <Input className="readonlyText" readOnly value={form?.getFieldValue(fieldId) || (defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : '')}/>
+        <Input
+          className="readonlyText"
+          readOnly
+          value={form?.getFieldValue(fieldId) || (defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : '')}
+          inputStyle={{ textAlign: layout === 'vertical' ? 'left' : 'right' }}
+        />
       ) : (
         renderContent()
       )}

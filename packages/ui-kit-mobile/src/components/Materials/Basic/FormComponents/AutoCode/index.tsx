@@ -28,19 +28,25 @@ const XautoCode = memo((props: XautoCodeConfig & { runtime?: boolean; detailMode
       className="inputTextWrapperOBMobile inputAutoWrapperOBMobile"
       label={label.display && <Ellipsis text={label.text} />}
       field={fieldId}
+      layout={layout}
       style={{
+        textAlign: layout === 'vertical' ? 'left' : 'right',
         pointerEvents: (!runtime || detailMode) ? 'none' : 'unset',
         opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
       }}
     >
-      {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
-        <div className="readonlyText">{form?.getFieldValue(fieldId)}</div>) : (
+      {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ?
+        <Input
+          className="readonlyText"
+          readOnly
+          value={form?.getFieldValue(fieldId)}
+          inputStyle={{ textAlign: layout === 'vertical' ? 'left' : 'right' }}
+        /> :
         <Input
           readOnly={true}
           placeholder={placeholder}
-          inputStyle={{ textAlign: 'right' }}
         />
-      )}
+      }
     </Form.Item>
   );
 });
