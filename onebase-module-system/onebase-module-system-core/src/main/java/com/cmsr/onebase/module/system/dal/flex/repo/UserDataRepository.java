@@ -7,11 +7,9 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.framework.data.base.BaseDO;
-import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
-import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.framework.orm.repo.BaseDataRepository;
+import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.dal.flex.mapper.SystemUsersMapper;
-import com.cmsr.onebase.module.system.enums.dept.DeptTypeEnum;
 import com.cmsr.onebase.module.system.enums.user.UserStatusEnum;
 import com.cmsr.onebase.module.system.vo.user.UserAppPageSearchReqVO;
 import com.cmsr.onebase.module.system.vo.user.UserByDeptPageReqVO;
@@ -20,8 +18,6 @@ import com.cmsr.onebase.module.system.vo.user.UserSimplePageReqVO;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.Compare;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
@@ -81,11 +77,11 @@ public class UserDataRepository extends BaseDataRepository<SystemUsersMapper, Ad
                 // 立即失败，抛出异常，防止数据越权
                 throw exception(CORP_ID_NULL);
             }
-            queryWrapper.eq(AdminUserDO.CORP_ID,  corpId);
-            queryWrapper.eq(AdminUserDO.USER_TYPE,  UserTypeEnum.CORP.getValue());
+            queryWrapper.eq(AdminUserDO.CORP_ID, corpId);
+            queryWrapper.eq(AdminUserDO.USER_TYPE, UserTypeEnum.CORP.getValue());
 
         } else if (XFromSceneTypeEnum.THIRD.getCode().equals(fromSceneType)) {
-            queryWrapper.eq(AdminUserDO.USER_TYPE,  UserTypeEnum.THIRD.getValue());
+            queryWrapper.eq(AdminUserDO.USER_TYPE, UserTypeEnum.THIRD.getValue());
         } else if (XFromSceneTypeEnum.ALL.getCode().equals(fromSceneType)) {
             // 全部类型，不做任何处理
         } else {
@@ -146,7 +142,7 @@ public class UserDataRepository extends BaseDataRepository<SystemUsersMapper, Ad
      * @return 用户列表
      */
     public List<AdminUserDO> findNullDeptUser() {
-        return list(query().isNull(DEPT_ID));
+        return list(buildUserQueryWrapper().isNull(DEPT_ID));
     }
 
 
@@ -248,7 +244,7 @@ public class UserDataRepository extends BaseDataRepository<SystemUsersMapper, Ad
      * @return 分页结果
      */
     public PageResult<AdminUserDO> findSimpleEnablePage(UserSimplePageReqVO reqVO) {
-        QueryWrapper queryWrapper =buildUserQueryWrapper().eq(AdminUserDO.STATUS, CommonStatusEnum.ENABLE.getStatus())
+        QueryWrapper queryWrapper = buildUserQueryWrapper().eq(AdminUserDO.STATUS, CommonStatusEnum.ENABLE.getStatus())
                 .like(NICKNAME, reqVO.getKeywords(), StringUtils.isNotBlank(reqVO.getKeywords()))
                 .orderBy(AdminUserDO.ADMIN_TYPE, true)
                 .orderBy(BaseDO.CREATE_TIME, false);
@@ -275,7 +271,7 @@ public class UserDataRepository extends BaseDataRepository<SystemUsersMapper, Ad
     }
 
     public List<AdminUserDO> findEnableUserByIds(Set<Long> userIds, String keyword, Integer status) {
-        QueryWrapper queryWrapper =buildUserQueryWrapper()
+        QueryWrapper queryWrapper = buildUserQueryWrapper()
                 .in(AdminUserDO.COL_ID, userIds)
                 .eq(AdminUserDO.STATUS, status)
                 .orderBy(AdminUserDO.ADMIN_TYPE, true);
@@ -289,7 +285,7 @@ public class UserDataRepository extends BaseDataRepository<SystemUsersMapper, Ad
     }
 
     public List<AdminUserDO> findPlatformEnableUserByIds(Set<Long> userIds) {
-        QueryWrapper queryWrapper = query()
+        QueryWrapper queryWrapper = buildUserQueryWrapper()
                 .in(AdminUserDO.COL_ID, userIds)
                 .eq(AdminUserDO.STATUS, UserStatusEnum.NORMAL.getStatus())
                 .orderBy(AdminUserDO.ADMIN_TYPE, true)
@@ -318,7 +314,7 @@ public class UserDataRepository extends BaseDataRepository<SystemUsersMapper, Ad
     }
 
     public List<AdminUserDO> findAllByStatusAndDeptIds(Integer status, Set<Long> deptIds) {
-        QueryWrapper queryWrapper =  buildUserQueryWrapper();
+        QueryWrapper queryWrapper = buildUserQueryWrapper();
         queryWrapper.eq(AdminUserDO.STATUS, status)
                 .in(DEPT_ID, deptIds)
                 .orderBy(AdminUserDO.ADMIN_TYPE, true)
