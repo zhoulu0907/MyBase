@@ -87,6 +87,7 @@
         <uuid-creator.version>6.1.1</uuid-creator.version>
         <!-- 插件框架相关 -->
         <pf4j.version>3.14.0</pf4j.version>
+        <pf4j-spring.version>0.10.0</pf4j-spring.version>
         <!-- Maven 插件开发相关 -->
         <maven.core.version>3.9.6</maven.core.version>
         <maven-plugin-api.version>3.9.6</maven-plugin-api.version>
@@ -625,6 +626,11 @@
                 <groupId>org.pf4j</groupId>
                 <artifactId>pf4j</artifactId>
                 <version>${pf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.pf4j</groupId>
+                <artifactId>pf4j-spring</artifactId>
+                <version>${pf4j-spring.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.cmsr.onebase</groupId>

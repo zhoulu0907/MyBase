@@ -47,15 +47,10 @@ public class HotReloadConfiguration {
      */
     @EventListener(ApplicationReadyEvent.class)
     public void initHotReload() {
-        log.info("=".repeat(60));
-        log.info("HotReloadConfiguration.initHotReload() 被调用");
-
         List<String> devClassPaths = pluginProperties.getDevClassPaths();
-        log.info("dev-class-paths 配置: {}", devClassPaths);
 
         if (devClassPaths == null || devClassPaths.isEmpty()) {
             log.warn("dev-class-paths 未配置，热重载功能不可用");
-            log.info("=".repeat(60));
             return;
         }
 
@@ -80,7 +75,6 @@ public class HotReloadConfiguration {
             watcher.start();
 
             log.info("热重载功能已启用");
-            log.info("=".repeat(60));
         } catch (Exception e) {
             log.error("初始化热重载功能失败", e);
         }

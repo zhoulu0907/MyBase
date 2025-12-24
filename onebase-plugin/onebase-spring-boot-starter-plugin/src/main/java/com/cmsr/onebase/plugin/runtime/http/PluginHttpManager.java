@@ -5,7 +5,11 @@ import com.cmsr.onebase.plugin.runtime.config.PluginProperties;
 import com.cmsr.onebase.plugin.runtime.manager.OneBasePluginManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.lang.Nullable;
+import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 import jakarta.annotation.PostConstruct;
@@ -35,7 +39,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @date 2025-12-17
  */
 @Slf4j
-public class PluginHttpManager {
+public class PluginHttpManager implements ApplicationContextAware {
 
     private final ObjectProvider<OneBasePluginManager> pluginManagerProvider;
     private final RequestMappingHandlerMapping handlerMapping; // optional, for direct registration mode
@@ -52,12 +56,12 @@ public class PluginHttpManager {
      * 构造函数
      *
      * @param pluginManagerProvider 插件管理器提供者
-     * @param handlerMapping Spring MVC的RequestMappingHandlerMapping（可选）
-     * @param pluginProperties 插件配置属性
+     * @param handlerMapping        Spring MVC的RequestMappingHandlerMapping（可选）
+     * @param pluginProperties      插件配置属性
      */
     public PluginHttpManager(ObjectProvider<OneBasePluginManager> pluginManagerProvider,
-                             @Nullable RequestMappingHandlerMapping handlerMapping,
-                             PluginProperties pluginProperties) {
+            @Nullable RequestMappingHandlerMapping handlerMapping,
+            PluginProperties pluginProperties) {
         this.pluginManagerProvider = pluginManagerProvider;
         this.handlerMapping = handlerMapping;
         this.pluginProperties = pluginProperties;
@@ -124,8 +128,8 @@ public class PluginHttpManager {
             }
         }
 
-        log.info("为插件 {} 注册完成，新增处理器数: {} (总处理器数: {})", 
-                 pluginId, registeredHandlers.size() - before, registeredHandlers.size());
+        log.info("为插件 {} 注册完成，新增处理器数: {} (总处理器数: {})",
+                pluginId, registeredHandlers.size() - before, registeredHandlers.size());
     }
 
     /**
@@ -150,12 +154,70 @@ public class PluginHttpManager {
         List<Object> handlers = pluginHandlers.remove(pluginId);
         if (handlers != null) {
             for (Object h : handlers) {
+                // 从 Spring MVC 注销
+                unregisterFromSpringMvc(h);
+
                 registeredHandlers.remove(h);
                 log.info("已移除HTTP处理器记录: {} (plugin={})", h.getClass().getName(), pluginId);
             }
         }
 
         log.info("插件 {} 的HTTP处理器和映射已移除", pluginId);
+    }
+
+    private ApplicationContext applicationContext;
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) {
+        this.applicationContext = applicationContext;
+    }
+
+    /**
+     * 从 Spring MVC 注销处理器
+     */
+    private void unregisterFromSpringMvc(Object handler) {
+        if (handlerMapping == null) {
+            log.debug("handlerMapping为空，无法从Spring MVC注销");
+            return;
+        }
+        try {
+            Map<RequestMappingInfo, HandlerMethod> map = handlerMapping.getHandlerMethods();
+            List<RequestMappingInfo> toRemove = new ArrayList<>();
+            for (Map.Entry<RequestMappingInfo, HandlerMethod> entry : map.entrySet()) {
+                Object bean = entry.getValue().getBean();
+                Object beanInstance = bean;
+
+                // 如果是Bean名称，则解析为实例
+                if (bean instanceof String && applicationContext != null) {
+                    try {
+                        beanInstance = applicationContext.getBean((String) bean);
+                    } catch (Exception ignore) {
+                        // Bean可能已不存在
+                        continue;
+                    }
+                }
+
+                // 比较 bean 实例
+                boolean match = (beanInstance == handler);
+                if (!match && beanInstance != null && handler != null) {
+                    // 尝试类名匹配 (Fallback: 适用于实例不一致但类一致的情况，例如代理)
+                    if (beanInstance.getClass().getName().equals(handler.getClass().getName())) {
+                        match = true;
+                    }
+                }
+
+                if (match) {
+                    toRemove.add(entry.getKey());
+                }
+            }
+
+            for (RequestMappingInfo info : toRemove) {
+                handlerMapping.unregisterMapping(info);
+                log.info("已从 Spring MVC 注销路由: {}", info);
+            }
+        } catch (Exception e) {
+            log.error("从 Spring MVC 注销处理器失败", e);
+        }
     }
 
     /**
@@ -222,7 +284,7 @@ public class PluginHttpManager {
     /**
      * 注册单个处理器的内部实现
      *
-     * @param pluginId 插件ID（可为null，将从ClassLoader推断）
+     * @param pluginId      插件ID（可为null，将从ClassLoader推断）
      * @param handlerObject 处理器对象
      */
     private void registerHandlerInternal(String pluginId, Object handlerObject) {
@@ -237,8 +299,8 @@ public class PluginHttpManager {
         // 1. 获取类级别的@RequestMapping前缀
         String classLevelPrefix = "";
         if (handlerClass.isAnnotationPresent(org.springframework.web.bind.annotation.RequestMapping.class)) {
-            org.springframework.web.bind.annotation.RequestMapping classMapping = 
-                handlerClass.getAnnotation(org.springframework.web.bind.annotation.RequestMapping.class);
+            org.springframework.web.bind.annotation.RequestMapping classMapping = handlerClass
+                    .getAnnotation(org.springframework.web.bind.annotation.RequestMapping.class);
             String[] classPaths = classMapping.value().length > 0 ? classMapping.value() : classMapping.path();
             if (classPaths.length > 0) {
                 classLevelPrefix = classPaths[0];
@@ -259,15 +321,16 @@ public class PluginHttpManager {
             for (String methodPath : methodPaths) {
                 // 3. 组合类级别前缀和方法级别路径
                 String fullPath = combinePath(classLevelPrefix, methodPath);
-                
+
                 // 记录映射元数据（不直接向Spring注册，使用代理模式）
-                String pid = pluginId != null ? pluginId : resolvePluginIdFromClassLoader(handlerClass.getClassLoader());
+                String pid = pluginId != null ? pluginId
+                        : resolvePluginIdFromClassLoader(handlerClass.getClassLoader());
                 if (pid == null) {
                     pid = "unknown";
                 }
                 pluginMappings.computeIfAbsent(pid, k -> new ArrayList<>()).add(fullPath);
-                log.debug("  记录映射元数据: {} -> {}#{} (plugin={})", 
-                         fullPath, handlerClass.getName(), method.getName(), pid);
+                log.debug("  记录映射元数据: {} -> {}#{} (plugin={})",
+                        fullPath, handlerClass.getName(), method.getName(), pid);
             }
         }
 
@@ -323,14 +386,15 @@ public class PluginHttpManager {
             }
         }
         if (method.isAnnotationPresent(org.springframework.web.bind.annotation.RequestMapping.class)) {
-            for (String p : method.getAnnotation(org.springframework.web.bind.annotation.RequestMapping.class).value()) {
+            for (String p : method.getAnnotation(org.springframework.web.bind.annotation.RequestMapping.class)
+                    .value()) {
                 paths.add(normalizePath(p));
             }
         }
 
         return paths;
     }
-    
+
     /**
      * 组合类级别前缀和方法级别路径
      *
@@ -345,7 +409,7 @@ public class PluginHttpManager {
         if (suffix == null || suffix.isEmpty()) {
             return prefix;
         }
-        
+
         // 确保前缀以 / 开头
         if (!prefix.startsWith("/")) {
             prefix = "/" + prefix;
@@ -354,12 +418,12 @@ public class PluginHttpManager {
         if (prefix.endsWith("/")) {
             prefix = prefix.substring(0, prefix.length() - 1);
         }
-        
+
         // 确保后缀以 / 开头
         if (!suffix.startsWith("/")) {
             suffix = "/" + suffix;
         }
-        
+
         return prefix + suffix;
     }
 

@@ -70,7 +70,6 @@ public class PluginHttpDispatcher {
             return;
         }
 
-        log.info("=".repeat(60));
         log.info("初始化插件HTTP路由分发器");
 
         // 为了在卸载时能精确清理路由，我们按已启动的插件逐个查询其 HttpHandler 并记录所属 pluginId
@@ -104,7 +103,6 @@ public class PluginHttpDispatcher {
         }
 
         log.info("HTTP路由分发器已就绪，共注册 {} 个路由", routes.size());
-        log.info("=".repeat(60));
     }
 
     /**
@@ -335,11 +333,9 @@ public class PluginHttpDispatcher {
                                 handler.getClass().getName(),
                                 System.identityHashCode(handler));
                     }
-                    boolean replaced = routes.containsKey(key);
                     routes.put(key, new MethodHandler(handler, method));
-                    if (!replaced) {
-                        addedKeys.add(key);
-                    }
+                    // 无论是否替换，都应记录该路由属于当前处理过程，确保在pluginRoutes中正确追踪
+                    addedKeys.add(key);
                     log.info("  ✓ 注册路由: {} {} -> {}.{} (Handler哈希码: {})",
                             httpMethod, normalizedPath, handlerClass.getSimpleName(),
                             method.getName(), System.identityHashCode(handler));

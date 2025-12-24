@@ -45,10 +45,22 @@
             <optional>true</optional>
         </dependency>
 
+        <!-- PF4J -->
+        <dependency>
+            <groupId>org.pf4j</groupId>
+            <artifactId>pf4j</artifactId>
+        </dependency>
+        <!-- PF4J-Spring：提供 SpringPluginManager 和自动 Bean 注册能力 -->
+        <dependency>
+            <groupId>org.pf4j</groupId>
+            <artifactId>pf4j-spring</artifactId>
+        </dependency>
+
         <!-- Lombok -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
+            <scope>provided</scope>
         </dependency>
 
         <!-- 测试 -->

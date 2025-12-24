@@ -14,18 +14,23 @@ import org.pf4j.DefaultPluginManager;
 import org.pf4j.PluginDescriptorFinder;
 import org.pf4j.PluginManager;
 import org.pf4j.PropertiesPluginDescriptorFinder;
+import org.pf4j.spring.SpringPluginManager;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import com.cmsr.onebase.plugin.runtime.interceptor.PluginSecurityInterceptor;
 import com.cmsr.onebase.plugin.runtime.listener.PluginLifecycleListener;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -45,6 +50,7 @@ import java.util.List;
 public class PluginRuntimeAutoConfiguration {
 
     private final PluginProperties properties;
+    private Path absolutePath;
 
     public PluginRuntimeAutoConfiguration(PluginProperties properties) {
         // 强校验 mode 配置，若非法立即抛出异常，拒绝启动
@@ -77,35 +83,46 @@ public class PluginRuntimeAutoConfiguration {
 
         PluginMode mode = properties.getPluginMode(); // 会在此处验证模式值，无效则抛异常
 
+        // 映射 onebase.plugin.mode 到 PF4J RuntimeMode
+        // dev → development, staging/prod → deployment
+        if (mode.isDev()) {
+            System.setProperty("pf4j.mode", "development");
+        } else {
+            System.setProperty("pf4j.mode", "deployment");
+        }
+
+        initLogs(properties);// 打印启动日志
+
         // DEV模式：只加载classpath下的扩展点
         if (mode.isDev()) {
-            log.info("=".repeat(60));
-            log.info("启用开发模式（mode=dev）");
-            log.info("插件加载策略: 只扫描classpath中的扩展点实现类");
-            log.info("支持的扩展点: DataProcessor, EventListener, HttpHandler");
-            log.info("适用场景: IDE中直接启动和调试，支持断点调试");
-            log.info("=".repeat(60));
-
+            // 创建 DEV 模式插件管理器
             DevModePluginManager pluginManager = new DevModePluginManager(properties, applicationContext);
-
-            // 根据autoLoad配置决定是否自动加载
-            if (properties.isAutoLoad()) {
-                pluginManager.loadPlugins();
-                log.info("已自动加载开发模式插件");
-            } else {
-                log.info("跳过自动加载插件（autoLoad=false）");
-            }
-
-            // 根据autoStart配置决定是否自动启动
-            if (properties.isAutoStart() && properties.isAutoLoad()) {
-                pluginManager.startPlugins();
-                log.info("已自动启动开发模式插件");
-            } else {
-                log.info("跳过自动启动插件（autoStart={} 或 autoLoad={}）", properties.isAutoStart(), properties.isAutoLoad());
-            }
-
-            return pluginManager;
+            // 配置并初始化插件管理器
+            return configureAndInitPluginManager(pluginManager);
         }
+
+        // STAGING模式：只加载plugin目录ZIP包扩展点
+        if (mode.isStaging()) {
+            // 创建 STAGING 模式插件管理器
+            SpringPluginManager pluginManager = createSpringPluginManager(this.absolutePath);
+            // 配置并初始化插件管理器
+            return configureAndInitPluginManager(pluginManager);
+        }
+
+        // PROD模式：使用SpringPluginManager加载plugin目录
+        SpringPluginManager pluginManager = createSpringPluginManager(this.absolutePath);
+        // 配置并初始化插件管理器
+        return configureAndInitPluginManager(pluginManager);
+    }
+
+    private void initLogs(PluginProperties properties) {
+        PluginMode mode = properties.getPluginMode();
+
+        // 确定实际的 pf4j.mode 映射值
+        String pf4jMode = mode.isDev() ? "development" : "deployment";
+
+        // DEV模式配置的classpath
+        List<String> devClassPaths = properties.getDevClassPaths();
 
         // STAGING和PROD模式都需要加载plugin目录
         String pluginsDirStr = properties.getPluginsDir();
@@ -118,102 +135,95 @@ public class PluginRuntimeAutoConfiguration {
         Path pluginsPath = Paths.get(pluginsDirStr);
         // 规范化路径，处理 .. 和 . 等相对符号
         Path normalizedPath = pluginsPath.normalize();
-        Path absolutePath = normalizedPath.toAbsolutePath();
+        this.absolutePath = normalizedPath.toAbsolutePath();
         String userDir = System.getProperty("user.dir");
 
-        // STAGING模式：只加载plugin目录ZIP包扩展点
-        if (mode.isStaging()) {
-            log.info("=".repeat(60));
-            log.info("启用预发布模式（mode=staging）");
-            log.info("插件加载策略: 只从plugin目录加载ZIP/JAR插件，不扫描classpath");
-            log.info("适用场景: 验证插件完整生命周期、测试ClassLoader隔离");
-            log.info("=".repeat(60));
-
-            log.info("========== 插件管理器初始化信息 ==========");
-            log.info("配置的插件目录（原始值）: {}", properties.getPluginsDir());
-            log.info("当前工作目录: {}", userDir);
-            log.info("规范化后的路径: {}", normalizedPath);
-            log.info("解析后的绝对路径: {}", absolutePath);
-            log.info("插件目录是否存在: {}", absolutePath.toFile().exists());
-            log.info("插件目录是否为目录: {}", absolutePath.toFile().isDirectory());
-            log.info("========================================");
-
-            DefaultPluginManager pluginManager = new DefaultPluginManager(absolutePath) {
-                @Override
-                protected PluginDescriptorFinder createPluginDescriptorFinder() {
-                    return new PropertiesPluginDescriptorFinder();
-                }
-
-                @Override
-                public <T> List<T> getExtensions(Class<T> type) {
-                    // Staging模式：只从已启动的插件中获取扩展点，不扫描classpath
-                    List<T> extensions = new ArrayList<>();
-                    for (org.pf4j.PluginWrapper plugin : getStartedPlugins()) {
-                        extensions.addAll(getExtensions(type, plugin.getPluginId()));
-                    }
-                    log.debug("Staging模式：从 {} 个插件中获取 {} 个 {} 扩展点",
-                            getStartedPlugins().size(), extensions.size(), type.getSimpleName());
-                    return extensions;
-                }
-            };
-
-            // 根据autoLoad配置决定是否自动加载
-            if (properties.isAutoLoad()) {
-                pluginManager.loadPlugins();
-                log.info("已自动加载 {} 个插件", pluginManager.getPlugins().size());
-            } else {
-                log.info("跳过自动加载插件（autoLoad=false）");
-            }
-
-            // 根据autoStart配置决定是否自动启动
-            if (properties.isAutoStart() && properties.isAutoLoad()) {
-                pluginManager.startPlugins();
-                log.info("已自动启动 {} 个插件", pluginManager.getStartedPlugins().size());
-            } else {
-                log.info("跳过自动启动插件（autoStart={} 或 autoLoad={}）", properties.isAutoStart(), properties.isAutoLoad());
-            }
-
-            return pluginManager;
+        // 构建加载策略描述
+        String strategy;
+        if (mode.isDev()) {
+            strategy = devClassPaths.isEmpty()
+                    ? "DEV 模式未配置 devClassPaths，不会加载任何扩展点（需配置 onebase.plugin.dev-class-paths）"
+                    : String.format("扫描配置目录中的扩展点实现类 %s", String.join(", ", devClassPaths));
+        } else {
+            strategy = String.format("加载插件目录 %s 中的 ZIP/JAR 插件包", this.absolutePath);
         }
 
-        // PROD模式：使用PF4J默认策略（classpath + plugin目录都扫描）
-        log.info("=".repeat(60));
-        log.info("启用生产模式（mode=prod）");
-        log.info("插件加载策略: 使用PF4J默认策略（classpath + plugin目录都扫描）");
-        log.info("适用场景: 生产环境，提供最大灵活性");
-        log.info("=".repeat(60));
+        log.info("启用模式: {}", mode.getValue());
+        log.info("映射运行模式: onebase.plugin.mode={} → pf4j.mode={}", mode.getValue(), pf4jMode);
 
-        log.info("========== 插件管理器初始化信息 ==========");
-        log.info("配置的插件目录（原始值）: {}", properties.getPluginsDir());
-        log.info("当前工作目录: {}", userDir);
-        log.info("规范化后的路径: {}", normalizedPath);
-        log.info("解析后的绝对路径: {}", absolutePath);
-        log.info("插件目录是否存在: {}", absolutePath.toFile().exists());
-        log.info("插件目录是否为目录: {}", absolutePath.toFile().isDirectory());
-        log.info("========================================");
+        // DEV 模式下如果 devClassPaths 为空，使用 WARN 级别提醒用户
+        if (mode.isDev() && devClassPaths.isEmpty()) {
+            log.warn("插件加载策略: {}", strategy);
+        } else {
+            log.info("插件加载策略: {}", strategy);
+        }
 
-        // 使用原生DefaultPluginManager，不覆写getExtensions()
-        DefaultPluginManager pluginManager = new DefaultPluginManager(absolutePath) {
+        // 只在非 DEV 模式下打印插件目录详细信息
+        if (!mode.isDev()) {
+            log.info("配置的插件目录（原始值）: {}", pluginsDirStr);
+            log.info("当前工作目录: {}", userDir);
+            log.info("规范化后的路径: {}", normalizedPath);
+            log.info("解析后的绝对路径: {}", this.absolutePath);
+            log.info("插件目录是否存在: {}", this.absolutePath.toFile().exists());
+            log.info("插件目录是否为目录: {}", this.absolutePath.toFile().isDirectory());
+        }
+    }
+
+    /**
+     * 创建基础的 SpringPluginManager 实例
+     *
+     * @param pluginsPath 插件目录路径
+     * @return SpringPluginManager 实例
+     */
+    private SpringPluginManager createSpringPluginManager(Path pluginsPath) {
+        return new SpringPluginManager(pluginsPath) {
             @Override
             protected PluginDescriptorFinder createPluginDescriptorFinder() {
                 return new PropertiesPluginDescriptorFinder();
             }
-        };
 
-        // 根据autoLoad配置决定是否自动加载
+            @Override
+            public void init() {
+                // 覆盖父类 init 方法，防止自动调用 loadPlugins/startPlugins
+                log.debug("覆盖 SpringPluginManager.init()，跳过默认的自动加载/启动");
+            }
+        };
+    }
+
+    /**
+     * 配置并初始化插件管理器
+     * 此方法被 DEV/STAGING/PROD 三种模式共用
+     *
+     * @param pluginManager SpringPluginManager 实例（可以是 DevModePluginManager）
+     * @return 配置好的插件管理器
+     */
+    private SpringPluginManager configureAndInitPluginManager(SpringPluginManager pluginManager) {
+        // 根据 autoLoad 配置决定是否加载插件
         if (properties.isAutoLoad()) {
             pluginManager.loadPlugins();
-            log.info("已自动加载 {} 个插件", pluginManager.getPlugins().size());
-        } else {
-            log.info("跳过自动加载插件（autoLoad=false）");
-        }
 
-        // 根据autoStart配置决定是否自动启动
-        if (properties.isAutoStart() && properties.isAutoLoad()) {
-            pluginManager.startPlugins();
-            log.info("已自动启动 {} 个插件", pluginManager.getStartedPlugins().size());
+            // DEV 模式和 STAGING/PROD 模式使用不同的日志描述
+            if (properties.isDevMode()) {
+                log.info("已创建开发模式虚拟插件（用于 classpath 扩展点扫描）");
+            } else {
+                int loadedCount = pluginManager.getPlugins().size();
+                log.info("已加载 {} 个插件", loadedCount);
+            }
+
+            // 根据 autoStart 配置决定是否启动插件
+            if (properties.isAutoStart()) {
+                pluginManager.startPlugins();
+
+                if (properties.isDevMode()) {
+                    log.info("已启动开发模式虚拟插件");
+                } else {
+                    log.info("已启动 {} 个插件", pluginManager.getStartedPlugins().size());
+                }
+            } else {
+                log.info("插件已加载但未启动（autoStart=false）");
+            }
         } else {
-            log.info("跳过自动启动插件（autoStart={} 或 autoLoad={}）", properties.isAutoStart(), properties.isAutoLoad());
+            log.info("插件管理器已就绪（autoLoad=false，插件未加载）");
         }
 
         return pluginManager;
@@ -229,9 +239,8 @@ public class PluginRuntimeAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public OneBasePluginManager oneBasePluginManager(PluginManager pluginManager, PluginProperties properties,
-            org.springframework.context.ApplicationEventPublisher eventPublisher) {
-        OneBasePluginManager oneBasePluginManager = new OneBasePluginManager(pluginManager, eventPublisher);
-        return oneBasePluginManager;
+            ApplicationEventPublisher eventPublisher) {
+        return new OneBasePluginManager(pluginManager, eventPublisher);
     }
 
     /**
@@ -255,8 +264,7 @@ public class PluginRuntimeAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    public EventDispatcher eventDispatcher(OneBasePluginManager pluginManager,
-            PluginContextFactory contextFactory) {
+    public EventDispatcher eventDispatcher(OneBasePluginManager pluginManager, PluginContextFactory contextFactory) {
         return new EventDispatcher(pluginManager, contextFactory);
     }
 
@@ -270,10 +278,8 @@ public class PluginRuntimeAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    public PluginHttpDispatcher pluginHttpDispatcher(
-            OneBasePluginManager oneBasePluginManager,
-            org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter requestMappingHandlerAdapter,
-            PluginProperties properties) {
+    public PluginHttpDispatcher pluginHttpDispatcher(OneBasePluginManager oneBasePluginManager,
+            RequestMappingHandlerAdapter requestMappingHandlerAdapter, PluginProperties properties) {
         return new PluginHttpDispatcher(oneBasePluginManager, requestMappingHandlerAdapter, properties);
     }
 
@@ -310,11 +316,9 @@ public class PluginRuntimeAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    @org.springframework.context.annotation.Lazy
-    public PluginHttpManager pluginHttpManager(
-            org.springframework.beans.factory.ObjectProvider<OneBasePluginManager> oneBasePluginManagerProvider,
-            org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping handlerMapping,
-            PluginProperties pluginProperties) {
+    @Lazy
+    public PluginHttpManager pluginHttpManager(ObjectProvider<OneBasePluginManager> oneBasePluginManagerProvider,
+            RequestMappingHandlerMapping handlerMapping, PluginProperties pluginProperties) {
         return new PluginHttpManager(oneBasePluginManagerProvider, handlerMapping, pluginProperties);
     }
 
@@ -324,8 +328,7 @@ public class PluginRuntimeAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public PluginLifecycleListener pluginLifecycleListener(OneBasePluginManager oneBasePluginManager,
-            PluginHttpDispatcher pluginHttpDispatcher,
-            PluginHttpManager pluginHttpManager) {
+            PluginHttpDispatcher pluginHttpDispatcher, PluginHttpManager pluginHttpManager) {
         return new PluginLifecycleListener(oneBasePluginManager, pluginHttpDispatcher, pluginHttpManager);
     }
 

@@ -3,23 +3,37 @@ package com.cmsr.onebase.plugin.runtime.manager;
 import com.cmsr.onebase.plugin.core.ExtensionPointScannerSpring;
 import com.cmsr.onebase.plugin.runtime.config.PluginProperties;
 import lombok.extern.slf4j.Slf4j;
-import org.pf4j.*;
+import org.pf4j.DefaultPluginDescriptor;
+import org.pf4j.PluginDescriptor;
+import org.pf4j.PluginState;
+import org.pf4j.PluginWrapper;
+import org.pf4j.spring.SpringPluginManager;
+import org.springframework.context.ApplicationContext;
 
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * 开发模式插件管理器
  * <p>
- * 用于开发调试场景，直接扫描当前classpath中的扩展点，无需打包成ZIP/JAR。
- * 适合在IDE中直接启动和调试插件代码。
+ * 用于开发阶段，直接扫描classpath中的扩展点实现类，无需打包成插件ZIP。
+ * 现在继承自 SpringPluginManager，利用 pf4j-spring 的能力自动注册扩展点为 Spring Bean。
  * </p>
  *
+ * <h3>主要特性</h3>
+ * <ul>
+ * <li>扫描指定classpath路径下的扩展点实现类</li>
+ * <li>自动将扩展点注册为 Spring Bean（通过 pf4j-spring 的 ExtensionsInjector）</li>
+ * <li>支持IDE中直接启动和调试</li>
+ * <li>无需打包插件ZIP，开发效率高</li>
+ * </ul>
+ *
  * @author chengyuansen
- * @date 2025-12-15
+ * @date 2025-12-18
  */
 @Slf4j
-public class DevModePluginManager extends DefaultPluginManager {
+public class DevModePluginManager extends SpringPluginManager {
 
     /**
      * 虚拟插件ID，用于开发模式下的扩展点
@@ -36,14 +50,32 @@ public class DevModePluginManager extends DefaultPluginManager {
      */
     private final ExtensionPointScannerSpring scanner;
 
-    public DevModePluginManager(PluginProperties pluginProperties,
-            org.springframework.context.ApplicationContext applicationContext) {
-        super(Paths.get(System.getProperty("user.dir")));
-        List<String> devPaths = pluginProperties != null && pluginProperties.isDevMode()
-                ? pluginProperties.getDevClassPaths()
+    /**
+     * 构造函数
+     *
+     * @param properties         插件配置属性
+     * @param applicationContext Spring应用上下文
+     */
+    public DevModePluginManager(PluginProperties properties, ApplicationContext applicationContext) {
+        super(); // Call to SpringPluginManager's default constructor
+        List<String> devPaths = properties != null && properties.isDevMode()
+                ? properties.getDevClassPaths()
                 : Collections.emptyList();
-        this.scanner = new ExtensionPointScannerSpring(devPaths, applicationContext);
-        log.debug("初始化开发模式插件管理器（DevModePluginManager），devPaths={}", devPaths);
+        this.scanner = new ExtensionPointScannerSpring(devPaths);
+    }
+
+    /**
+     * 覆盖 SpringPluginManager.init()
+     * <p>
+     * 禁止父类通过 @PostConstruct 自动调用 loadPlugins() 和 startPlugins()。
+     * 加载和启动逻辑移交给
+     * {@link com.cmsr.onebase.plugin.runtime.config.PluginRuntimeAutoConfiguration}
+     * 中的 configureAndInitPluginManager 方法统一控制。
+     * </p>
+     */
+    @Override
+    public void init() {
+        log.debug("覆盖 SpringPluginManager.init()，跳过默认的自动加载/启动");
     }
 
     /**
@@ -95,7 +127,6 @@ public class DevModePluginManager extends DefaultPluginManager {
 
     @Override
     public void loadPlugins() {
-        log.info("开发模式：跳过ZIP/JAR插件加载，使用当前classpath");
 
         // 创建虚拟插件包装器
         PluginDescriptor descriptor = new DefaultPluginDescriptor(
@@ -114,17 +145,13 @@ public class DevModePluginManager extends DefaultPluginManager {
         getPlugins().add(devPluginWrapper);
         getUnresolvedPlugins().remove(devPluginWrapper);
         getResolvedPlugins().add(devPluginWrapper);
-
-        log.info("已创建开发模式虚拟插件: {}", DEV_PLUGIN_ID);
     }
 
     @Override
     public void startPlugins() {
-        log.debug("开发模式：启动虚拟插件");
         if (devPluginWrapper != null) {
             devPluginWrapper.setPluginState(PluginState.STARTED);
             getStartedPlugins().add(devPluginWrapper);
-            log.debug("开发模式虚拟插件已启动");
         }
     }
 

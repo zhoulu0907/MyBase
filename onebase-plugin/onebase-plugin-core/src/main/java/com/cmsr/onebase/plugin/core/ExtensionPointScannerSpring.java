@@ -1,20 +1,6 @@
 package com.cmsr.onebase.plugin.core;
 
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.beans.factory.support.GenericBeanDefinition;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
-import org.springframework.core.type.filter.AssignableTypeFilter;
-import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
-import org.springframework.core.type.classreading.MetadataReader;
-import org.springframework.core.type.classreading.MetadataReaderFactory;
-import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
 
 import java.lang.reflect.Modifier;
 import java.net.URL;
@@ -45,22 +31,20 @@ public class ExtensionPointScannerSpring {
      * @return 扩展点实例列表
      */
     private final List<String> devClassPaths;
-    private final ApplicationContext applicationContext;
 
     public ExtensionPointScannerSpring() {
         this.devClassPaths = Collections.emptyList();
-        this.applicationContext = null;
     }
 
     /**
-     * 构造器，传入开发模式下的类路径目录列表（绝对路径）和 Spring 应用上下文
+     * 构造器，传入开发模式下的类路径目录列表（绝对路径）
+     * <p>
+     * 注意：此类只负责扫描和创建扩展点实例，Bean 注册由 pf4j-spring 的 ExtensionsInjector 自动处理
      * 
-     * @param devClassPaths      目录列表，仅从目录加载类文件，不从jar/zip加载
-     * @param applicationContext Spring 应用上下文，用于将扫描到的类注册为 Spring Bean
+     * @param devClassPaths 目录列表，仅从目录加载类文件，不从jar/zip加载
      */
-    public ExtensionPointScannerSpring(List<String> devClassPaths, ApplicationContext applicationContext) {
+    public ExtensionPointScannerSpring(List<String> devClassPaths) {
         this.devClassPaths = devClassPaths == null ? Collections.emptyList() : new ArrayList<>(devClassPaths);
-        this.applicationContext = applicationContext;
     }
 
     public <T> List<T> scanExtensions(Class<T> extensionType) {
@@ -100,7 +84,6 @@ public class ExtensionPointScannerSpring {
             URL[] urlArray = urls.toArray(new URL[0]);
             try (URLClassLoader urlClassLoader = new URLClassLoader(urlArray,
                     Thread.currentThread().getContextClassLoader())) {
-                MetadataReaderFactory readerFactory = new CachingMetadataReaderFactory();
 
                 // 遍历目录下的 class 文件，按包名方式扫描
                 for (String dir : devClassPaths) {
@@ -121,20 +104,12 @@ public class ExtensionPointScannerSpring {
                                     if (!extensionType.isAssignableFrom(clazz))
                                         return;
 
-                                    // 如果有 ApplicationContext，注册为 Spring Bean；否则使用反射创建实例
-                                    T instance;
-                                    if (applicationContext != null) {
-                                        instance = registerAsSpringBean(clazz, extensionType);
-                                        log.debug("发现扩展点并注册为 Spring Bean: {} -> {} (来自 {})",
-                                                extensionType.getSimpleName(), className, base);
-                                    } else {
-                                        @SuppressWarnings("unchecked")
-                                        T plainInstance = (T) clazz.getDeclaredConstructor().newInstance();
-                                        instance = plainInstance;
-                                        log.debug("发现扩展点: {} -> {} (来自 {})", extensionType.getSimpleName(), className,
-                                                base);
-                                    }
+                                    // 创建扩展点实例（Bean 注册由 ExtensionsInjector 自动处理）
+                                    @SuppressWarnings("unchecked")
+                                    T instance = (T) clazz.getDeclaredConstructor().newInstance();
                                     extensions.add(instance);
+                                    log.debug("发现扩展点: {} -> {} (来自 {})",
+                                            extensionType.getSimpleName(), className, base);
                                 } catch (ClassNotFoundException cnf) {
                                     log.debug("类未找到: {}", cnf.getMessage());
                                 } catch (NoClassDefFoundError nde) {
@@ -158,34 +133,6 @@ public class ExtensionPointScannerSpring {
 
         log.debug("共发现 {} 个 {} 扩展点", extensions.size(), extensionType.getSimpleName());
         return extensions;
-    }
-
-    /**
-     * 将扫描到的类注册为 Spring Bean
-     * 
-     * @param clazz         要注册的类
-     * @param extensionType 扩展点接口类型
-     * @param <T>           扩展点类型
-     * @return Spring 管理的 Bean 实例
-     */
-    private <T> T registerAsSpringBean(Class<?> clazz, Class<T> extensionType) {
-        ConfigurableApplicationContext ctx = (ConfigurableApplicationContext) applicationContext;
-        DefaultListableBeanFactory beanFactory = (DefaultListableBeanFactory) ctx.getBeanFactory();
-
-        String beanName = clazz.getName() + "_devPlugin";
-
-        // 检查是否已注册
-        if (!beanFactory.containsBean(beanName)) {
-            GenericBeanDefinition beanDef = new GenericBeanDefinition();
-            beanDef.setBeanClass(clazz);
-            beanDef.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
-
-            beanFactory.registerBeanDefinition(beanName, beanDef);
-            log.debug("已将 {} 注册为 Spring Bean: {}", clazz.getName(), beanName);
-        }
-
-        // 返回 Spring 管理的实例
-        return extensionType.cast(beanFactory.getBean(beanName));
     }
 
     /**
