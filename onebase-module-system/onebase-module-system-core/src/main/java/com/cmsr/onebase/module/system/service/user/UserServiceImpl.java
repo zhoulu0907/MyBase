@@ -227,7 +227,7 @@ public class UserServiceImpl implements UserService {
 
         userDO.setStatus(CommonStatusEnum.ENABLE.getStatus()); // 默认开启
         if (userDO.getAdminType() == null) {
-            userDO.setAdminType(AdminTypeEnum.CUSTOM.getType());
+            userDO.setAdminType(AdminTypeEnum.SYSTEM.getType());
         }
         userDO.setUserType(UserTypeEnum.CORP.getValue());
         userDataRepository.save(userDO);
