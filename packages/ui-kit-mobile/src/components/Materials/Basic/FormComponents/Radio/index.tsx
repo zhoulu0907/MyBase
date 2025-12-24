@@ -38,7 +38,7 @@ const XRadio = memo((props: XRadioConfig & { runtime?: boolean; detailMode?: boo
   return (
     <Form.Item
       className="inputTextWrapperOBMobile radioWrapperOBMobile"
-      label={label.display && <Ellipsis text={label.text} />}
+      label={label.display && <Ellipsis text={label.text} maxLine={2} />}
       field={fieldId}
       layout={layout}
       rules={rules}

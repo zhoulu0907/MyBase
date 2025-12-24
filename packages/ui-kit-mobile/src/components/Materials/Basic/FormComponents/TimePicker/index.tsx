@@ -34,7 +34,7 @@ const XTimePicker = memo((props: XTimePickerConfig & { runtime?: boolean; detail
       field=''
       rules={rules}
       layout={layout}
-      label={label.display && <Ellipsis text={label.text} />}
+      label={label.display && <Ellipsis text={label.text} maxLine={2} />}
       required={verify?.required}
       initialValue={defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : ''}
       style={{

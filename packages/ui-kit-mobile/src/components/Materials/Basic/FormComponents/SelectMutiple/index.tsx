@@ -1,11 +1,13 @@
-import { memo, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { nanoid } from 'nanoid';
 import { Checkbox, Ellipsis, Form, PopupSwiper, Cell, Button } from '@arco-design/mobile-react';
 import IconSquareChecked from '@arco-design/mobile-react/esm/icon/IconSquareChecked';
 import IconSquareUnchecked from '@arco-design/mobile-react/esm/icon/IconSquareUnchecked';
 import IconSquareDisabled from '@arco-design/mobile-react/esm/icon/IconSquareDisabled';
 import { ValidatorType, ITypeRules } from '@arco-design/mobile-utils';
-import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, FormSchema } from '@onebase/ui-kit';
+import { DictData } from '@onebase/platform-center';
+import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, DEFAULT_VALUE_TYPES, FormSchema, getFieldOptionsConfig, useAppEntityStore } from '@onebase/ui-kit';
+
 import '../index.css';
 import './index.css';
 
@@ -24,17 +26,20 @@ const XSelectMutiple = memo((props: XSelectMutipleConfig & { runtime?: boolean; 
     status,
     verify,
     layout,
-    defaultOptionsConfig,
+    defaultValueConfig,
     runtime = true,
     detailMode,
     form
   } = props;
+
+  const { mainEntity, subEntities } = useAppEntityStore();
 
   // 生成唯一的字段ID
   const fieldId = dataField && dataField.length > 0
     ? dataField[dataField.length - 1]
     : `${FORM_COMPONENT_TYPES.SELECT_MUTIPLE}_${nanoid()}`;
 
+  const [options, setOptions] = useState<DictData[]>([]);
   const [visible, setVisible] = useState(false);
   const [popupDirection] = useState<'bottom' | 'top' | 'left' | 'right'>('bottom');
   const [selectedKeys, setSelectedKeys] = useState<string[]>(() => {
@@ -42,10 +47,9 @@ const XSelectMutiple = memo((props: XSelectMutipleConfig & { runtime?: boolean; 
     if (Array.isArray(formValue) && formValue.length > 0) {
       return formValue.map(val => String(val));
     }
-    return defaultOptionsConfig?.defaultOptions.filter(ele => ele.isChosen)?.map(ele => String(ele.value)) || [];
+    return options?.filter(ele => ele?.isChosen)?.map(ele => String(ele.value)) || [];
   });
 
-  const options = defaultOptionsConfig?.defaultOptions?.map(({ label, value }: { label: string; value: string | number }) => ({ label, value: String(value) }));
   const rules: ITypeRules<ValidatorType.Custom>[] = [
     {
       required: verify?.required,
@@ -60,6 +64,17 @@ const XSelectMutiple = memo((props: XSelectMutipleConfig & { runtime?: boolean; 
       }
     }
   ];
+
+  useEffect(() => {
+    if (dataField?.length) {
+      getOptions()
+    }
+  }, [dataField])
+
+  const getOptions = async () => {
+    const newOptions = await getFieldOptionsConfig(dataField, mainEntity, subEntities);
+    setOptions(newOptions)
+  }
 
   const handleCancel = (e: any) => {
     e.stopPropagation();
@@ -77,18 +92,18 @@ const XSelectMutiple = memo((props: XSelectMutipleConfig & { runtime?: boolean; 
     if (selectedKeys.length === 0) {
       return <span className='selectMultipleValue'>请选择</span>;
     }
-    const selectedOptions = options?.filter(option => selectedKeys.includes(option.value));
+    const selectedOptions = options?.filter(option => selectedKeys.includes(option.id));
     return selectedOptions?.map(opt => opt.label).join(',');
   };
   
   return (
     <Form.Item
       className="inputTextWrapperOBMobile selectMultipleWrapperOBMobile"
-      label={label.display && <Ellipsis text={label.text} />}
+      label={label.display && <Ellipsis text={label.text} maxLine={2} />}
       field={fieldId}
       rules={rules}
       layout={layout}
-      initialValue={selectedKeys}
+      initialValue={defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : undefined}
       style={{
         textAlign: layout === 'vertical' ? 'left' : 'right',
         pointerEvents: (!runtime || detailMode) ? 'none' : 'unset',
@@ -96,7 +111,10 @@ const XSelectMutiple = memo((props: XSelectMutipleConfig & { runtime?: boolean; 
       }}
     >
       {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
-        <div className="readonlyText">{getSelectedLabels()}</div>
+        <div className="readonlyText">{form?.getFieldValue(fieldId) && Array.isArray(form?.getFieldValue(fieldId)) && form?.getFieldValue(fieldId).map((ele: any, index: number) => <div key={index} style={{ marginBottom: '0' }}>
+          {ele?.name || options.find((e => e.id === ele || e.id === ele?.id))?.label || '--'}
+          </div>)}
+        </div>
       ) : (
         <Cell
           className="selectMultipleCellOBMobile"
@@ -150,11 +168,11 @@ const XSelectMutiple = memo((props: XSelectMutipleConfig & { runtime?: boolean; 
                       }}
                     >
                       <Checkbox
-                        value={option.value}
+                        value={option.id}
                         icons={squareIcon}
                         style={{ marginRight: '0.2rem' }}
                       >
-                      <span style={{ fontSize: '0.28rem', color: '#333' }}>{option.label}</span>
+                      <span style={{ fontSize: 'var(--fontSize)', color: '#333' }}>{option.label}</span>
                       </Checkbox>
                     </div>
                   ))}

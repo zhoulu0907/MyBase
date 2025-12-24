@@ -18,7 +18,7 @@
   .selectMultipleValue {
     text-align: right;
     color: #1d2129;
-    font-size: 0.28rem;
+    font-size: var(--fontSize);
   }
 
   .verticalLayout {

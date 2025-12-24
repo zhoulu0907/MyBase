@@ -299,10 +299,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, mainEntity,
         } else if (fieldType === ENTITY_FIELD_TYPE.DATETIME.VALUE) {
           groups[groupIndex][fieldName] = value ? dayjs(value).format('YYYY-MM-DD hh:mm:ss') : '';
         } else if (fieldType === ENTITY_FIELD_TYPE.SELECT.VALUE) {
-          groups[groupIndex][fieldName] = {
-            id: value[0],
-            name: value[0]
-          };
+          groups[groupIndex][fieldName] = value[0];
         } else if (fieldType === ENTITY_FIELD_TYPE.USER.VALUE) {
           if (Array.isArray(value)) {
             const userData = formDetails?.[key];
@@ -317,7 +314,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, mainEntity,
             };
           }
         } else {
-          groups[groupIndex][fieldName] = value;
+          // groups[groupIndex][fieldName] = value;
         }
       }
     });
@@ -331,8 +328,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, mainEntity,
       subFormData[subTableName] = subData;
     }
 
-    // console.log('formData:   ', formData);
-    // console.log('subFormData:   ', subFormData);
+    console.log('formData:   ', formData);
+    console.log('subFormData:   ', subData, subFormData);
     // return;
 
     // 接口判断 页面触发
@@ -519,31 +516,30 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, mainEntity,
                 const keys = Object.keys((subData || [])[idx]);
                 for (let ele in componentSchemas) {
                   const config = componentSchemas[ele]?.config;
+                  const fieldNamePrev = config?.dataField?.[0];
                   const fieldName = config?.dataField?.[1];
                   const fieldType = subEntity.childFields.find((v) => v.fieldName === fieldName)?.fieldType;
 
                   if (keys.includes(fieldName)) {
                     if (fieldType === ENTITY_FIELD_TYPE.DATE.VALUE || fieldType === ENTITY_FIELD_TYPE.DATETIME.VALUE) {
-                      formValues[`${key}.${idx}.${fieldName}`] = dayjs(subData[idx]?.[fieldName]).valueOf();
+                      formValues[`${fieldNamePrev}.${idx}.${fieldName}`] = dayjs(subData[idx]?.[fieldName]).valueOf();
                     } else if (fieldType === ENTITY_FIELD_TYPE.SELECT.VALUE) {
                       const value = subData[idx]?.[fieldName];
-                      // const renderValue = config.defaultOptionsConfig.defaultOptions.find(v => v.value === value.id)?.label || '-';
-                      // formValues[`${key}.${idx}.${fieldName}`] = [renderValue];
-                      formValues[`${key}.${idx}.${fieldName}`] = [value.id];
+                      formValues[`${fieldNamePrev}.${idx}.${fieldName}`] = [value.id];
                     } else if (fieldType === ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE) {
                       const value = subData[idx]?.[fieldName];
-                      formValues[`${key}.${idx}.${fieldName}`] = value.map((v) => v.id) || [];
+                      formValues[`${fieldNamePrev}.${idx}.${fieldName}`] = value.map((v) => v.id) || [];
                     } else if (fieldType === ENTITY_FIELD_TYPE.USER.VALUE) {
                       const value = subData[idx]?.[fieldName];
-                      formValues[`${key}.${idx}.${fieldName}`] =
+                      formValues[`${fieldNamePrev}.${idx}.${fieldName}`] =
                         Object.entries(value).length > 0 ? [value.name] : value;
                     } else if (fieldType === ENTITY_FIELD_TYPE.DEPARTMENT.VALUE) {
-                      formValues[`${key}.${idx}.${fieldName}`] = subData[idx]?.[fieldName];
+                      formValues[`${fieldNamePrev}.${idx}.${fieldName}`] = subData[idx]?.[fieldName];
                     } else if (
                       (fieldType === ENTITY_FIELD_TYPE.IMAGE.VALUE || fieldType === ENTITY_FIELD_TYPE.FILE.VALUE) &&
                       Array.isArray(subData[idx]?.[fieldName])
                     ) {
-                      formValues[`${key}.${idx}.${fieldName}`] = (subData[idx]?.[fieldName] || []).map((item: any) => {
+                      formValues[`${fieldNamePrev}.${idx}.${fieldName}`] = (subData[idx]?.[fieldName] || []).map((item: any) => {
                         return {
                           ...item,
                           name: item.name,
@@ -553,11 +549,11 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, mainEntity,
                         };
                       });
                     } else {
-                      formValues[`${key}.${idx}.${fieldName}`] = subData[idx]?.[fieldName];
+                      formValues[`${fieldNamePrev}.${idx}.${fieldName}`] = subData[idx]?.[fieldName];
                     }
                   }
                 }
-                // 补充id
+                // 补充id todo key
                 formValues[`${key}.${idx}.id`] = subData[idx]?.id;
               }
             }

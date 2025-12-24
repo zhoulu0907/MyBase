@@ -147,7 +147,7 @@ const XDatePicker = memo((props: XDatePickerConfig & { runtime?: boolean; detail
       field={fieldId}
       rules={rules}
       layout={layout}
-      label={label.display && <Ellipsis text={label.text} />}
+      label={label.display && <Ellipsis text={label.text} maxLine={2} />}
       initialValue={form?.getFieldValue(fieldId)}
       style={{
         textAlign: layout === 'vertical' ? 'left' : 'right',
