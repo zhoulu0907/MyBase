@@ -76,7 +76,6 @@ const PublishVersionModal: React.FC<PublishVersionModalProps> = ({
       onOk(values);
     } catch (error) {
       console.error('表单验证失败:', error);
-      Message.error('应用发布失败');
       setLoading(false);
     }
   };

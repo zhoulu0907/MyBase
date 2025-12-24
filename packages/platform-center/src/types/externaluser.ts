@@ -258,6 +258,9 @@ export interface createExternalUserAppParams {
    * 用户Id
    */
   userId: string;
+
+  email?: string;
+  nickName?: string;
 }
 
 export interface forgotPWDParams {

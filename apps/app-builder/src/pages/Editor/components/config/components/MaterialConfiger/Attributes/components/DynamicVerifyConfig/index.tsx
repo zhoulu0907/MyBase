@@ -115,7 +115,6 @@ const DynamicVerifyConfig: React.FC<DynamicVerifyConfigProps> = ({ handlePropsCh
                   min={configs[verifyKey]['min'] || 0}
                   value={configs[verifyKey]['max']}
                   onChange={(value) => {
-                    if (value < configs[verifyKey]['max']) return;
                     handlePropsChange(verifyKey, { ...configs[verifyKey], max: value });
                   }}
                 />

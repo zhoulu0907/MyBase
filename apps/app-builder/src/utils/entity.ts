@@ -43,6 +43,8 @@ export const setMainMetaData = async (pageSetId: string) => {
       setSubEntities({
         entities: subEntities
       });
+    } else {
+      setSubEntities({ entities: [] });
     }
   }
 };

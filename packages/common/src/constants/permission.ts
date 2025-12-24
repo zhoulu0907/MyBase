@@ -55,11 +55,17 @@ export const TENANT_APP_QUERY = 'tenant:app:query'; // 查询应用
 export const TENANT_APP_CREATE = 'tenant:app:create'; // 新增应用
 export const TENANT_APP_UPDATE = 'tenant:app:update'; // 修改应用
 export const TENANT_APP_DELETE = 'tenant:app:delete'; // 删除应用
+export const TENANT_APP_TAKEDOWN = 'tenant:app:takedown'; // 下架
+export const TENANT_APP_PUBLISH = 'tenant:app:publish'; // 发布
+export const TENANT_APP_ENABLE = 'tenant:app:enable'; // 启用禁用
 export const TENANT_APP_PERMISSION = {
   QUERY: TENANT_APP_QUERY,
   CREATE: TENANT_APP_CREATE,
   UPDATE: TENANT_APP_UPDATE,
   DELETE: TENANT_APP_DELETE,
+  TAKEDOWN: TENANT_APP_TAKEDOWN,
+  PUBLISH: TENANT_APP_PUBLISH,
+  ENABLE: TENANT_APP_ENABLE
 };
 
 /** 空间管理-角色管理 */

@@ -63,7 +63,7 @@ const PreviewDataSelectModal: React.FC<PreviewDataSelectModalProps> = ({
             <XTable
               {...tableConfig}
               showAddBtn={false}
-              xTableSelectProps={{ showSelect: true, defaultSelectedId, onSelectedChange: handleSelectData }}
+              xTableSelectProps={{ showSelect: true, defaultSelectedId, onSelectedChange: handleSelectData, hiddenDraft: true }}
             />
           )}
         </div>

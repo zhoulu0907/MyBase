@@ -1,8 +1,8 @@
 import { emailValidator, filterSpace, phoneValidator } from '@/utils/validator';
-import { Button, Form, Grid, Input, Message, Modal, Select, Switch, TreeSelect } from '@arco-design/web-react';
+import { Button, Form, Grid, Input, Message, Modal, Switch, TreeSelect } from '@arco-design/web-react';
 import { CORP_DEPT_QUERY, hasPermission } from '@onebase/common';
-import type { RoleVO, SimpleRoleVO, UserVO } from '@onebase/platform-center';
-import { createUser, getSimpleRoleList, getUser, StatusEnum, updateUser, UserType } from '@onebase/platform-center';
+import type { SimpleRoleVO, UserVO } from '@onebase/platform-center';
+import { createUser, getUser, StatusEnum, updateUser, UserType } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
 
 const Row = Grid.Row;
@@ -35,21 +35,9 @@ export default function UserFormModal({
   const [loading, setLoading] = React.useState(false);
   const [statusCheckedValue, setStatusCheckedValue] = useState(false);
   const [hasDeptQueryPermission, setHasDeptQueryPermission] = useState(true);
-  const [roleList, setRoleList] = useState<RoleVO[]>([]);
-
-  // 获取角色列表
-  const fetchRoleList = async () => {
-    try {
-      const res = await getSimpleRoleList();
-      setRoleList(res);
-    } catch (error) {
-      console.log('error');
-    }
-  };
 
   useEffect(() => {
     if (visible) {
-      fetchRoleList();
       form.resetFields();
       if (initialValues) {
         form.setFieldsValue(initialValues);
@@ -155,7 +143,7 @@ export default function UserFormModal({
               disabled={mode === 'edit' && isSystemUser}
               rules={[{ required: true, message: '请输入手机号' }, { validator: phoneValidator }]}
             >
-              <Input placeholder="请输入" />
+              <Input placeholder="请输入" maxLength={11}/>
             </Form.Item>
           </Col>
         </Row>
@@ -204,22 +192,6 @@ export default function UserFormModal({
           <Col span={12}>
             <Form.Item label="启用状态" triggerPropName="checked" labelCol={{ span: 6 }} wrapperCol={{ span: 12 }}>
               <Switch checked={statusCheckedValue} onChange={setStatusCheckedValue} />
-            </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item label="角色" field="roleIds">
-              <Select
-                placeholder="选择角色"
-                mode="multiple"
-                allowClear
-                options={roleList.map((u) => ({
-                  label: u.name,
-                  value: u.id
-                }))}
-                filterOption={(inputValue: any, option: any) => {
-                  return option.props.children?.includes(inputValue);
-                }}
-              ></Select>
             </Form.Item>
           </Col>
         </Row>

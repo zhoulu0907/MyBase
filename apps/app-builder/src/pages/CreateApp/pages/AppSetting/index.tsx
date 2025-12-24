@@ -52,7 +52,6 @@ const AppSettingPage: FC = () => {
     appCode: '',
     appStatus: 0
   });
-  const [navigatorData, setNavigatorData] = useState<any>();
   const [activeTab, setActiveTab] = useState('baseSetting');
   const [collapsed, setCollapsed] = useState<boolean>(false);
   const [saveLoading, setSaveLoading] = useState<boolean>(false); // 保存按钮状态
@@ -74,7 +73,6 @@ const AppSettingPage: FC = () => {
   useEffect(() => {
     if (curAppId) {
       getApplicationData();
-      getNavigatorData();
     }
   }, [curAppId]);
 
@@ -83,7 +81,7 @@ const AppSettingPage: FC = () => {
     if (activeTab === 'baseSetting' && curAppId) {
       getApplicationData();
     }
-  }, [activeTab]);
+  }, [activeTab, curAppInfo]);
 
   const getApplicationData = async () => {
     const params: GetApplicationReq = {
@@ -91,11 +89,6 @@ const AppSettingPage: FC = () => {
     };
     const res = await getApplication(params);
     setAppData(res);
-  };
-
-  // todo 接口获取数据
-  const getNavigatorData = async () => {
-    setNavigatorData({});
   };
 
   const handleSave = () => {
@@ -205,13 +198,8 @@ const AppSettingPage: FC = () => {
               {activeTab === 'baseSetting' && <BasicSetting form={form} data={appData!} />}
               {activeTab === 'appPermission' && <AppPermission />}
               {activeTab === 'appRelease' && <AppReleasePage />}
-              {activeTab === 'navigatorSetting' && <NavigatorSetting form={navigatorForm} data={navigatorData} />}
+              {activeTab === 'navigatorSetting' && <NavigatorSetting form={navigatorForm} />}
               {activeTab === 'loginPermission' && <LoginPermission appId={curAppId} />}
-              {(activeTab === 'baseSetting' || activeTab === 'navigatorSetting') && (
-                <Button className={styles.saveButton} type="primary" loading={saveLoading} onClick={handleSave}>
-                  保存
-                </Button>
-              )}
             </Content>
           </div>
         </Layout>

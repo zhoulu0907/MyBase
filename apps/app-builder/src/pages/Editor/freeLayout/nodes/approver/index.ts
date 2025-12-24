@@ -127,7 +127,7 @@ export const ApproverNodeRegistry: FlowNodeRegistry = {
           }
         ],
         approverConfig: {
-          approverType: 'user',
+          handlerType: 'user',
           approvalMode: 'counter_sign'
         }
       }

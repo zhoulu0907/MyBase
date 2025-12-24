@@ -17,7 +17,7 @@ import {
 } from '@arco-design/web-react';
 import { IconEmpty, IconMoreVertical, IconSearch, IconSettings } from '@arco-design/web-react/icon';
 import { listApplication, type Application, type PageParam } from '@onebase/app';
-import { getCommonPaginationList, getRuntimeURL, TokenManager } from '@onebase/common';
+import { getCommonPaginationList, getRuntimeURL, hasPermission, TokenManager } from '@onebase/common';
 import { debounce } from 'lodash-es';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -192,24 +192,28 @@ const EnterpriseAppPage: React.FC = () => {
   const menu = (item: any) => {
     return (
       <Menu onPointerEnter={clearTimer} onPointerLeave={() => startCloseTimer(80)}>
-        <Menu.Item
-          key="1"
-          onClick={(e) => {
-            e.stopPropagation();
-            //TODO
-          }}
-        >
-          启用
-        </Menu.Item>
-        <Menu.Item
-          key="2"
-          onClick={(e) => {
-            e.stopPropagation();
-            //TODO
-          }}
-        >
-          下架
-        </Menu.Item>
+        {hasPermission(ACTIONS.ENABLE) && (
+          <Menu.Item
+            key="1"
+            onClick={(e) => {
+              e.stopPropagation();
+              //TODO
+            }}
+          >
+            启用
+          </Menu.Item>
+        )}
+        {hasPermission(ACTIONS.TAKEDOWN) && (
+          <Menu.Item
+            key="2"
+            onClick={(e) => {
+              e.stopPropagation();
+              //TODO
+            }}
+          >
+            下架
+          </Menu.Item>
+        )}
         {/* <Menu.Item key="3">应用管理</Menu.Item> */}
       </Menu>
     );

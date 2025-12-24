@@ -50,7 +50,7 @@ const XInputEmail = memo((props: XInputEmailConfig & { runtime?: boolean; detail
       field={fieldId}
       rules={rules}
       layout={layout}
-      label={label.display ? <Ellipsis text={label.text} /> : undefined}
+      label={label.display ? <Ellipsis text={label.text} maxLine={2} /> : undefined}
       initialValue={defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : ''}
       style={{
         pointerEvents: (!runtime || detailMode) ? 'none' : 'unset',

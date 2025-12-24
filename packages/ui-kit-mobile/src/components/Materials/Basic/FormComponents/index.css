@@ -1,3 +1,7 @@
+:root {
+  --fontSize: 0.28rem;
+}
+
 .inputTextWrapperOBMobile {
   width: 100%;
   margin-bottom: 0;
@@ -5,9 +9,10 @@
   box-sizing: border-box;
   border-bottom: 0.5px solid #e5e6eb !important;
   align-items: center !important;
+  overflow: hidden;
 
   .readonlyText {
-    font-size: 0.28rem;
+    font-size: var(--fontSize);
     color: #1d2129;
 
     .textarea {
@@ -60,7 +65,7 @@
 
   .arco-input {
     padding: 0;
-    font-size: 0.28rem;
+    font-size: var(--fontSize);
     border: none;
 
     &:hover,
@@ -72,7 +77,7 @@
 
   .arco-input-prefix {
     padding-right: 0.32rem;
-    font-size: 0.28rem;
+    font-size: var(--fontSize);
   }
 
   .arco-input-container .arco-input-label {
@@ -117,6 +122,6 @@
   border: none !important;
 }
 
-.arco-ellipsis {
-  font-size: 0.28rem;
+.arco-ellipsis, .arco-form-picker-link-container {
+  font-size: var(--fontSize);
 }

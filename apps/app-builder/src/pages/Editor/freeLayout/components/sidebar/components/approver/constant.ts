@@ -35,7 +35,7 @@ interface User {
 }
 
 export interface ApproverConfigType {
-  approverType?: string;
+  handlerType?: string;
   users?: User[];
   roles?: User[];
   approvalMode?: string;

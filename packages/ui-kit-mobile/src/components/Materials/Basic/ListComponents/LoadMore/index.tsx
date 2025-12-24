@@ -1,6 +1,5 @@
-// import filterIcon from '@/assets/images/filter.svg';
 import dayjs from 'dayjs';
-import { Button, Dialog, Dropdown, Ellipsis, LoadMore, SearchBar, Sticky, Toast, Form } from '@arco-design/mobile-react';
+import { Button, Dialog, Ellipsis, LoadMore, Sticky, Toast, Form } from '@arco-design/mobile-react';
 import { useForm } from '@arco-design/mobile-react/esm/form';
 import { IconDownload } from '@arco-design/mobile-react/esm/icon';
 import {
@@ -132,7 +131,7 @@ const XLoadMore = memo(
                     <div className="fileWrapper">
                       <Ellipsis className='filename' text={file.name} />
                       <IconDownload
-                        style={{ color: 'rgb(var(--primary-6))', marginLeft: '0.24rem', fontSize: '0.32rem' }}
+                        style={{ color: 'rgb(var(--primary-6))', marginLeft: '0.24rem', fontSize: '0.28rem' }}
                         onClick={async () => {
                           const param = {
                             menuId: curMenu.value?.id,

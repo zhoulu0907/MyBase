@@ -28,9 +28,9 @@ import { appIconMap } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useI18n } from '../../../hooks/useI18n';
-import { useRememberMe } from '../../../hooks/useRememberMe';
-import styles from '../index.module.less';
+import { useI18n } from '../../hooks/useI18n';
+import { useRememberMe } from '../../hooks/useRememberMe';
+import styles from './index.module.less';
 import ConfirmInfoForm from './confirmInfo';
 import RegisterForm from './register';
 import UpdatePasswordForm from './updatePassword';
@@ -144,7 +144,7 @@ const Right: React.FC = () => {
         deviceId: deviceId
       };
 
-      if (loginType === ThirdLoginType.PASSWORD && !values.password) {
+      if (loginType === ThirdLoginType.PASSWORD && values.password) {
         values.password = await sm2Encrypt(getPublicKey(), values.password || '');
         loginData.password = values.password;
       } else if (loginType === ThirdLoginType.VERIFYCODE) {
@@ -290,7 +290,7 @@ const Right: React.FC = () => {
                       field="mobile"
                       rules={[{ required: true, message: '请输入手机号' }, { validator: phoneValidator }]}
                     >
-                      <Input placeholder="输入手机号" maxLength={11} prefix={<IconMobile />} />
+                      <Input placeholder="输入手机号" maxLength={11} prefix={<IconMobile />} onChange={setMobile}/>
                     </Form.Item>
                     {item.value === ThirdLoginType.VERIFYCODE && (
                       <Form.Item>
@@ -397,10 +397,13 @@ const Right: React.FC = () => {
       {/* 忘记密码 */}
       {visbileUpdatePwd && (
         <UpdatePasswordForm
+          mobile={mobile}
           tenantId={tenantId}
           onGoBack={() => {
             setVisibleUpdatePwd(false);
           }}
+          setLoginType={setLoginType}
+          setVisibleUpdatePwd={setVisibleUpdatePwd}
         />
       )}
 

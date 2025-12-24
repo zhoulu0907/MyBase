@@ -207,8 +207,9 @@ const StaticCarouselList = ({ carouselConfig, maxSizeMB = 5, onConfigChange }: S
     try {
       const uploadImgId = await handleUpload(file);
       if (uploadImgId !== '') {
-        form.setFieldValue('image', uploadImgId);
-        setPendingValues(form.getFieldsValue());
+        const urlImg = getFileUrlById(uploadImgId);
+        form.setFieldValue('image', urlImg);
+        setPendingValues(form.getFieldsValue() as CarouselItem);
         Message.success('图片上传成功');
       } else {
         Message.error('图片上传失败');
@@ -304,11 +305,7 @@ const StaticCarouselList = ({ carouselConfig, maxSizeMB = 5, onConfigChange }: S
                     </div>
                     <div className={styles.imagePreview}>
                       {imageUrl ? (
-                        <img
-                          src={imageUrl.indexOf('data:') < 0 ? getFileUrlById(imageUrl) : imageUrl}
-                          alt="预览"
-                          className={styles.previewImage}
-                        />
+                        <img src={imageUrl} alt="预览" className={styles.previewImage} />
                       ) : (
                         <div className={styles.uploadPlaceholder}>
                           <IconPlus />

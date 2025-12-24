@@ -68,7 +68,7 @@ export const loginConfigListByKeyApi = (data: loginConfigParams) =>
 export const updateLoginConfigApi = (data: updateLoginConfigParams) => systemService.post('/config/update', data);
 
 //新增企业应用关联
-export const createExternalUserApp = (data: createExternalUserAppParams) => runtimeUserService.post('/user-app-relation/create', data);
+export const createExternalUserApp = (data: createExternalUserAppParams) => runtimeService.post('/user-app-relation/create', data);
 
 //忘记密码
 export const forgotPWD = (data: forgotPWDParams, headers: Headers) => runtimeService.post('/auth/forget-password', data, { headers });

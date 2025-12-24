@@ -66,7 +66,7 @@ export enum UserRole {
 }
 
 export const RoleLabelMap: Record<UserRole, string> = {
-  [UserRole.ADMIN]: '管理员',
+  [UserRole.ADMIN]: '部门接口人',
   [UserRole.DIRECTOR]: '主管'
 };
 
@@ -418,7 +418,7 @@ export default function UserTable({
             设置主管
           </Button>
           <Button permission={ACTIONS.CREATE} onClick={() => handleSetAdminOrDirector(UserRole.ADMIN)}>
-            设置管理员
+            设置部门接口人
           </Button>
         </Space>
       </div>

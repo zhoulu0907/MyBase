@@ -26,7 +26,7 @@ const XautoCode = memo((props: XautoCodeConfig & { runtime?: boolean; detailMode
   return (
     <Form.Item
       className="inputTextWrapperOBMobile inputAutoWrapperOBMobile"
-      label={label.display && <Ellipsis text={label.text} />}
+      label={label.display && <Ellipsis text={label.text} maxLine={2} />}
       field={fieldId}
       layout={layout}
       style={{
