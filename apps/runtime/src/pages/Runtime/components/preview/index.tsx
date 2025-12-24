@@ -233,7 +233,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
     const curFormPage = curPage.value?.pages?.find((ele: any) => ele.pageType === CATEGORY_TYPE.FORM);
     const pageId = curFormPage?.id;
     const flowRes = pageId ? await queryFlowExecForm(pageId) : [];
-    setInputParams(formData);
+    setInputParams({ ...formData, ...subFormData });
 
     console.log('editTargetId: ', editTargetId);
 
