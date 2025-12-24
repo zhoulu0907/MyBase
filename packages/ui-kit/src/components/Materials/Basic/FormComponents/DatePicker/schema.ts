@@ -210,7 +210,6 @@ const XDatePicker: XInputDatePickerSchema = {
       key: 'defaultValueConfig',
       name: '默认值',
       type: CONFIG_TYPES.DEFAULT_VALUE,
-      valueType: 'date'
     },
     {
       key: 'dateFormat',

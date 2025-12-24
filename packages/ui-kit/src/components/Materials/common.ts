@@ -568,7 +568,6 @@ export const defaultValueConfig: any = {
   key: 'defaultValueConfig',
   name: '默认值',
   type: CONFIG_TYPES.DEFAULT_VALUE,
-  valueType: 'string'
 }
 
 export const defaultValueModeConfig: any = {

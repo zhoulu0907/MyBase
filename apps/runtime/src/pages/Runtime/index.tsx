@@ -159,6 +159,8 @@ const Runtime: React.FC = () => {
         setSubEntities({
           entities: subEntities
         });
+      } else {
+        setSubEntities({ entities: [] });
       }
     }
   };

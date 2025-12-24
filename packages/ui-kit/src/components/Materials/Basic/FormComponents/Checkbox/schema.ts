@@ -24,8 +24,7 @@ import {
   STATUS_VALUES,
   WIDTH_OPTIONS,
   WIDTH_VALUES,
-  COLOR_MODE_TYPES,
-  DEFAULT_OPTIONS_TYPE
+  DEFAULT_VALUE_TYPES
 } from '../../../constants';
 import type {
   ICheckboxDataConfigType,
@@ -43,6 +42,7 @@ import type {
   TTextDefaultType,
   IAlignConfigType,
   TRadioDefaultType,
+  IDefaultValueConfigType
 } from '../../../types';
 
 export interface XInputCheckboxSchema {
@@ -55,6 +55,7 @@ export type TXInputCheckboxEditData = Array<
   | ILabelConfigType
   | ITooltipConfigType
   | IDataFieldConfigType
+  | IDefaultValueConfigType
   | ICheckboxDataConfigType
   | IVerifyConfigType
   | IStatusConfigType<TStatusSelectKeyType>
@@ -83,6 +84,11 @@ export interface XInputCheckboxConfig extends ICommonBaseType {
    * 数据字段
    */
   dataField: TTextDefaultType[];
+
+  /**
+   * 默认值
+   */
+  defaultValueConfig?: any;
 
   /**
    * 单选框方向：水平（默认）、垂直
@@ -136,6 +142,11 @@ const XCheckbox: XInputCheckboxSchema = {
     },
     //  数据绑定
     ...dataFieldConfig,
+    {
+      key: 'defaultValueConfig',
+      name: '默认值',
+      type: CONFIG_TYPES.DEFAULT_VALUE,
+    },
     // 选项
     checkboxDataConfig,
     // 选项分布方式
@@ -162,6 +173,11 @@ const XCheckbox: XInputCheckboxSchema = {
     },
     tooltip: '',
     dataField: [],
+    defaultValueConfig: {
+      type: DEFAULT_VALUE_TYPES.CUSTOM,
+      customValue: '',
+      formulaValue: ''
+    },
     direction: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
     verify: {
       required: false,
