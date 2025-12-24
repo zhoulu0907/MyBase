@@ -18,6 +18,21 @@ window.global_config = {
   RUNTIME_URL: 'http://localhost:9527',
   RUNTIME_MOBILE_URL: 'http://localhost:9528',
 
+  PLUGIN_BASE_URL: 'http://localhost:3001',
+
+  PLUGINS: [
+    {
+      name: 'ob-plugin-template',
+      version: '0.0.0',
+      displayName: '示例插件',
+      routePrefix: '/ob-plugin-template',
+      resources: {
+        js: 'http://localhost:3001/ob-plugin-template.umd.js',
+        css: 'http://localhost:3001/ob-plugin-template.css'
+      }
+    }
+  ],
+
   PUBLIC_KEY:
     '045efee7520c3ed4b3c6bb75424a3ae25039e25bd859731a1f6464cb7e5f7dfb419bcba55cc6adfb7f3e224a6e8949709a3664ff2dc4b822f50ee77bbd64ce3946'
 };

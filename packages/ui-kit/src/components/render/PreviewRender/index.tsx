@@ -1,7 +1,16 @@
 import { Form } from '@arco-design/web-react';
 import { cloneDeep } from 'lodash-es';
 import React, { useCallback, useEffect, useState } from 'react';
-import { getComponentConfig, getComponentImpl, getComponentDescriptor, isPluginComponentType } from 'src/components/Materials';
+import {
+  getComponentImpl,
+  getComponentDescriptor,
+  isPluginComponentType,
+  getComponentConfig,
+  hasWorkbenchComponentSchema,
+  getWorkbenchComponentConfig,
+  WORKBENCH_COMPONENT_MAP,
+  WorkbenchComponentType
+} from 'src/components/Materials';
 
 /**
  * 组件渲染的通用属性
@@ -49,9 +58,14 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
   recordId
 }) => {
   // 获取组件配置，使用深拷贝确保每次都是新对象
-  const [componentConfig, setComponentConfig] = useState(() =>
-    cloneDeep(getComponentConfig(pageComponentSchema, cpType))
-  );
+  const [componentConfig, setComponentConfig] = useState(() => {
+    const isWorkbench = hasWorkbenchComponentSchema(cpType);
+    return cloneDeep(
+      isWorkbench
+        ? getWorkbenchComponentConfig(pageComponentSchema, cpType as WorkbenchComponentType)
+        : getComponentConfig(pageComponentSchema, cpType)
+    );
+  });
 
   const { form } = Form.useFormContext();
 
@@ -72,9 +86,12 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
         return updatedConfig;
       });
     } else {
-      // 使用深拷贝确保每次都是新对象，避免引用共享问题
-      const newComponentConfig = cloneDeep(getComponentConfig(pageComponentSchema, cpType));
-
+      const isWorkbench = hasWorkbenchComponentSchema(cpType);
+      const newComponentConfig = cloneDeep(
+        isWorkbench
+          ? getWorkbenchComponentConfig(pageComponentSchema, cpType as WorkbenchComponentType)
+          : getComponentConfig(pageComponentSchema, cpType)
+      );
       setComponentConfig(newComponentConfig);
     }
   }, [cpState, pageComponentSchema, cpType]);
@@ -98,26 +115,30 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
 
   const renderComponent = useCallback(() => {
     const descriptor = getComponentDescriptor(cpType as any);
-    const Impl: any = getComponentImpl(cpType as any);
+    const Impl: any = getComponentImpl(cpType as any) ?? (WORKBENCH_COMPONENT_MAP as any)[cpType];
     if (!Impl) return <div>未知组件类型: {cpType}</div>;
 
     const baseProps: any = { cpName: cpId, id: cpId, ...componentConfig };
 
-    if (descriptor.template.category === 'form' || descriptor.template.category === 'show') {
+    if (descriptor) {
+      if (descriptor.template.category === 'form' || descriptor.template.category === 'show') {
+        baseProps.runtime = runtime;
+        baseProps.detailMode = detailMode;
+      }
+      if (descriptor.template.category === 'layout') {
+        baseProps.pageType = pageType;
+        baseProps.detailMode = detailMode;
+      }
+      if (descriptor.template.category === 'list') {
+        baseProps.runtime = runtime;
+        baseProps.preview = preview;
+        baseProps.showFromPageData = showFromPageData;
+        baseProps.refresh = refresh;
+      }
+    } else {
       baseProps.runtime = runtime;
       baseProps.detailMode = detailMode;
-    }
-
-    if (descriptor.template.category === 'layout') {
-      baseProps.pageType = pageType;
-      baseProps.detailMode = detailMode;
-    }
-
-    if (descriptor.template.category === 'list') {
-      baseProps.runtime = runtime;
       baseProps.preview = preview;
-      baseProps.showFromPageData = showFromPageData;
-      baseProps.refresh = refresh;
     }
 
     if (isPluginComponentType(cpType)) {

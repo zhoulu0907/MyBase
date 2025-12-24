@@ -6,22 +6,9 @@ import { useI18n } from '@/hooks/useI18n';
 import { useSignals } from '@preact/signals-react/runtime';
 import { Collapse, Input, Layout, Tabs } from '@arco-design/web-react';
 import { CATEGORY_TYPE } from '@onebase/app';
-import { buildTemplate, loadMaterialsPlugin, COMPONENT_GROUP_NAME, EDITOR_TYPES, type EditorType, listPluginComponentTypes, COMPONENT_REGISTRY } from '@onebase/ui-kit';
-import plugin from 'ob-plugin-template/src/index';
+import { buildTemplate, COMPONENT_GROUP_NAME, EDITOR_TYPES, type EditorType, listPluginComponentTypes, COMPONENT_REGISTRY } from '@onebase/ui-kit';
 
-loadMaterialsPlugin({
-  id: plugin.meta.name,
-  components: [
-    {
-      type: (plugin.components as any).PluginInputText.type,
-      schema: (plugin.components as any).PluginInputText.schema,
-      template: { ...(plugin.components as any).PluginInputText.template, category: 'form' },
-      fieldMap: (plugin.components as any).PluginInputText.fieldMap,
-      entityMap: (plugin.components as any).PluginInputText.entityMap,
-      component: (plugin.components as any).PluginInputText.component
-    }
-  ]
-});
+// 插件组件与配置渲染采用动态注册机制，物料面板仅消费注册结果
 import React, { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import { v4 as uuidv4 } from 'uuid';

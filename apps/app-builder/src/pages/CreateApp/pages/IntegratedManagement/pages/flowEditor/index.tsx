@@ -83,15 +83,12 @@ const FlowEditorPage: React.FC = () => {
   return (
     <div className={styles.flowEditorPage}>
       <div className={styles.header}>
-        <Button type="dashed" onClick={() => debug()}>
+        {/* <Button type="dashed" onClick={() => debug()}>
           调试（临时）未来会被干掉
-        </Button>
+        </Button> */}
         <Button type="primary" onClick={() => handleSaveAndRelease('save')}>
           保存
         </Button>
-        {/* <Button type="outline" style={{ marginLeft: '12px' }} onClick={() => handleSaveAndRelease('release')}>
-          发布
-        </Button> */}
       </div>
       <div className={styles.body}>
         <TriggerEditor />

@@ -1,7 +1,17 @@
 // ===== 导入 begin =====
 import { Form, Input } from '@arco-design/web-react'
 import { memo, useEffect, useMemo, useState } from 'react'
-import { genId, WIDTH_VALUES, WIDTH_OPTIONS } from '@ob/plugin/sdk'
+import {
+  genId,
+  WIDTH_VALUES,
+  WIDTH_OPTIONS,
+  STATUS_OPTIONS,
+  STATUS_VALUES,
+  isHidden,
+  computeInteractive,
+  formItemStyle,
+  wrapperStyle
+} from '@ob/plugin/sdk'
 // ===== 导入 end =====
 
 // ===== 组件定义 begin =====
@@ -13,18 +23,20 @@ const PluginInputText = memo((props: any) => {
     dataField = [],
     placeholder,
     tooltip,
-    status = 'default',
+    status = STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     defaultValueConfig,
     verify = {},
     align = 'left',
     layout = 'vertical',
     runtime = true,
     detailMode,
-    width = WIDTH_VALUES[WIDTH_OPTIONS.HALF]
+    width = WIDTH_VALUES[WIDTH_OPTIONS.HALF],
+    titleColor = 'inherit'
   } = props || {}
   // ===== 外部 props end =====
 
-  // ===== 内部状态 & 回显begin =====
+  // ===== 表单上下文与字段名与值读取 begin =====
+  // 模拟 useFormField 的部分逻辑，获取 fieldName
   const [fieldId, setFieldId] = useState('')
 
   useEffect(() => {
@@ -32,12 +44,24 @@ const PluginInputText = memo((props: any) => {
       setFieldId(dataField[dataField.length - 1] as string)
     }
   }, [dataField])
+  // ===== 表单上下文与字段名与值读取 end =====
 
+  // ===== 外部事件：选择数据 begin =====
+  // 暂无外部事件
+  // ===== 外部事件：选择数据 end =====
+
+  // ===== 内部状态 & 回显begin =====
   const initial = useMemo(() => {
     if (defaultValueConfig?.type === 'CUSTOM') return defaultValueConfig?.customValue ?? ''
     return ''
   }, [defaultValueConfig])
   // ===== 内部状态 & 回显 end =====
+
+  // ===== 内部事件 =====
+  const internalEvents = {
+    // 简单输入框通常由 Form.Item 自动接管 onChange，此处预留结构
+  }
+  // ===== 内部事件 =====
 
   // ===== 方法：帮助方法 begin =====
   const helpers = {
@@ -60,35 +84,44 @@ const PluginInputText = memo((props: any) => {
   // ===== 方法：帮助方法 end =====
 
   // ===== 渲染方法 begin =====
-  const renderRuntime = (isReadonly: boolean) => {
-    const hidden = status === 'hidden'
-    
+  const renderInteractiveContent = () => (
+    <Input
+      prefix={prefix}
+      placeholder={placeholder}
+      maxLength={verify?.lengthLimit ? verify?.maxLength : undefined}
+      style={{ width: '100%', textAlign: align as any }}
+    />
+  )
+
+  const renderReadonlyContent = () => {
+    return <div>{initial || '--'}</div>
+  }
+
+  const renderRuntime = (interactive: boolean) => {
+    const hidden = isHidden(status)
+
     return (
       <Form.Item
         label={
           label?.display && label?.text ? (
-            <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>{label.text}</span>
+            <span
+              className={tooltip ? 'tooltipLabelText' : 'labelText'}
+              style={{ color: titleColor }}
+            >
+              {label.text}
+            </span>
           ) : undefined
         }
-        field={fieldId ? fieldId : genId('XInputText')}
+        field={fieldId ? fieldId : genId('PluginInputText')}
         layout={layout}
         tooltip={tooltip}
         labelCol={layout === 'horizontal' ? { span: 10 } : {}}
         rules={helpers.getRules()}
         hidden={hidden}
-        style={{ margin: 0, opacity: status === 'hidden' ? 0.4 : 1 }}
+        style={formItemStyle(status)}
         initialValue={initial}
       >
-        {isReadonly ? (
-          <div>{initial || '--'}</div>
-        ) : (
-          <Input
-            prefix={prefix}
-            placeholder={placeholder}
-            maxLength={verify?.lengthLimit ? verify?.maxLength : undefined}
-            style={{ width: '100%', textAlign: align as any }}
-          />
-        )}
+        {interactive ? renderInteractiveContent() : renderReadonlyContent()}
       </Form.Item>
     )
   }
@@ -98,16 +131,21 @@ const PluginInputText = memo((props: any) => {
        <Form.Item
         label={
           label?.display && label?.text ? (
-            <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>{label.text}</span>
+            <span
+              className={tooltip ? 'tooltipLabelText' : 'labelText'}
+              style={{ color: titleColor }}
+            >
+              {label.text}
+            </span>
           ) : undefined
         }
-        field={fieldId ? fieldId : genId('XInputText')}
+        field={fieldId ? fieldId : genId('PluginInputText')}
         layout={layout}
         tooltip={tooltip}
         labelCol={layout === 'horizontal' ? { span: 10 } : {}}
         rules={helpers.getRules()}
         hidden={false} // Builder always shows
-        style={{ margin: 0, opacity: status === 'hidden' ? 0.4 : 1 }}
+        style={formItemStyle(status)}
         initialValue={initial}
       >
           <Input
@@ -121,11 +159,11 @@ const PluginInputText = memo((props: any) => {
   }
   // ===== 渲染方法 end =====
 
-  const isReadonly = status === 'readonly' || !!detailMode
+  const isInteractive = computeInteractive(status, runtime, detailMode)
 
   return (
-    <div className="formWrapper" style={{ width, display: 'inline-block', verticalAlign: 'top', paddingRight: 12 }}>
-      {runtime ? renderRuntime(isReadonly) : renderBuilder()}
+    <div className="formWrapper" style={wrapperStyle(width)}>
+      {runtime ? renderRuntime(isInteractive) : renderBuilder()}
     </div>
   )
 })

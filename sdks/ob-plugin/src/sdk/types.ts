@@ -1,6 +1,30 @@
 /** 宿主上下文与 SDK（供插件调用）；保持最小依赖与向后兼容 */
 export type Terminal = 'PC' | 'MOBILE';
-export interface Context { terminal: Terminal }
+
+export interface Entity {
+  entityUuid: string;
+  entityName: string;
+  tableName: string;
+  [key: string]: any;
+}
+
+export interface Field {
+  fieldName: string;
+  displayName: string;
+  fieldType: string;
+  [key: string]: any;
+}
+
+export interface EntityAPI {
+  listFields: () => string[];
+  getEntities: () => Entity[];
+  getFields: (entityId: string) => Field[];
+}
+
+export interface Context {
+  terminal: Terminal;
+  entity: EntityAPI;
+}
 export interface ErrorReportOptions { scope?: string }
 export interface UIAPI { reportError(error: unknown, options?: ErrorReportOptions): void }
 export interface HostSDK { context: Context; ui: UIAPI }
@@ -64,8 +88,8 @@ export interface LoadedPlugin {
   meta: PluginMeta;
   pages: Record<string, PluginPage>;
   components: Record<string, PluginComponent>;
+  configRenderers?: Record<string, PluginComponent>;
   methods: Record<string, PluginMethod>;
-  // 生命周期钩子
   initialize?: (sdk: any) => Promise<void>;
   destroy?: () => Promise<void>;
 }

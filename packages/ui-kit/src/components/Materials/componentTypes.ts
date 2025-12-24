@@ -18,11 +18,11 @@ export const LAYOUT_COMPONENT_TYPES = {
   ...BASE_LAYOUT_COMPONENT_TYPES,
   PREVIEW_COLUMN_LAYOUT: 'XPreviewColumnLayout',
   PREVIEW_TABS_LAYOUT: 'XPreviewTabsLayout',
-  PREVIEW_COLLAPSE_LAYOUT: 'XPreviewCollpaseLayout'
+  PREVIEW_COLLAPSE_LAYOUT: 'XPreviewCollapseLayout'
 } as Record<string, string> & {
   readonly PREVIEW_COLUMN_LAYOUT: 'XPreviewColumnLayout';
   readonly PREVIEW_TABS_LAYOUT: 'XPreviewTabsLayout';
-  readonly PREVIEW_COLLAPSE_LAYOUT: 'XPreviewCollpaseLayout';
+  readonly PREVIEW_COLLAPSE_LAYOUT: 'XPreviewCollapseLayout';
 };
 
 export const LIST_COMPONENT_TYPES = buildListComponentTypes();

@@ -26,8 +26,36 @@ export function validatePlugin(plugin: any, meta: PluginMeta): void {
     if (!c) {
       throw new Error(`Plugin ${meta.name} component[${key}] invalid: empty item`);
     }
-    if (c.component && typeof c.component !== 'function') {
-      throw new Error(`Plugin ${meta.name} component[${key}] invalid: component should be function`);
+    const hasType = typeof (c as any).type === 'string' && (c as any).type.length > 0;
+    if (hasType) {
+      if ((c as any).schema === undefined) {
+        throw new Error(`Plugin ${meta.name} component[${key}] invalid: schema required when type provided`);
+      }
+      if ((c as any).template === undefined) {
+        throw new Error(`Plugin ${meta.name} component[${key}] invalid: template required when type provided`);
+      }
+    }
+    const comp = (c as any).component;
+    const isFn = typeof comp === 'function';
+    const isObj = comp && typeof comp === 'object' && (comp as any).$$typeof;
+    if (!hasType && !comp) {
+      throw new Error(`Plugin ${meta.name} component[${key}] invalid: runtime component required`);
+    }
+    if (comp && !isFn && !isObj) {
+      throw new Error(`Plugin ${meta.name} component[${key}] invalid: component should be function or React component`);
     }
   });
+  if (plugin.configRenderers && typeof plugin.configRenderers === 'object') {
+    Object.entries(plugin.configRenderers as Record<string, PluginComponent>).forEach(([key, c]) => {
+      if (!c) {
+        throw new Error(`Plugin ${meta.name} config[${key}] invalid: empty item`);
+      }
+      const comp = (c as any).component;
+      const isFn = typeof comp === 'function';
+      const isObj = comp && typeof comp === 'object' && (comp as any).$$typeof;
+      if (!comp || (!isFn && !isObj)) {
+        throw new Error(`Plugin ${meta.name} config[${key}] invalid: renderer required`);
+      }
+    });
+  }
 }

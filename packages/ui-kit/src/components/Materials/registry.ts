@@ -44,10 +44,10 @@ const COMPONENT_TYPE = {
   // 布局
   COLUMN_LAYOUT: 'XColumnLayout',
   TABS_LAYOUT: 'XTabsLayout',
-  COLLAPSE_LAYOUT: 'XCollpaseLayout',
+  COLLAPSE_LAYOUT: 'XCollapseLayout',
   PREVIEW_COLUMN_LAYOUT: 'XPreviewColumnLayout',
   PREVIEW_TABS_LAYOUT: 'XPreviewTabsLayout',
-  PREVIEW_COLLAPSE_LAYOUT: 'XPreviewCollpaseLayout',
+  PREVIEW_COLLAPSE_LAYOUT: 'XPreviewCollapseLayout',
   // 表单
   INPUT_TEXT: 'XInputText',
   INPUT_TEXTAREA: 'XInputTextArea',
@@ -450,7 +450,6 @@ export const COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescript
     entityMap: []
   },
 }
-
 /**
  * 初始化运行期组件实现：按模板分类自动注入内置组件的 React 实现
  */
@@ -539,7 +538,15 @@ export function buildTemplate() {
       icon: descriptor.template.icon,
       category: descriptor.template.category
     }
-    templateGroups[descriptor.template.category].items.push(item)
+    
+    // 防错处理：确保分类存在，否则归类到 'form'
+    const group = templateGroups[descriptor.template.category];
+    if (group) {
+      group.items.push(item);
+    } else {
+      console.warn(`[buildTemplate] Unknown category "${descriptor.template.category}" for component "${componentType}". Fallback to "form".`);
+      templateGroups['form'].items.push(item);
+    }
   }
   return { base: [templateGroups.layout, templateGroups.form, templateGroups.list, templateGroups.show] }
 }

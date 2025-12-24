@@ -27,14 +27,13 @@ export default defineConfig(({ mode }) => ({
       fileName: () => 'ob-plugin-template.umd.js',
     },
     rollupOptions: {
-      external: ['react', 'react-dom', '@arco-design/web-react', 'react-router-dom', 'react-jsx-runtime'],
+      external: ['react', 'react-dom', '@arco-design/web-react', 'react-router-dom'],
       output: {
         globals: {
           react: 'React',
           'react-dom': 'ReactDOM',
           '@arco-design/web-react': 'Arco',
           'react-router-dom': 'ReactRouterDOM',
-          'react-jsx-runtime': 'ReactJSXRuntime',
         },
         assetFileNames: 'ob-plugin-template.css',
       }

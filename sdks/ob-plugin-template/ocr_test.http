@@ -1,0 +1,27 @@
+### OCR ID Card Identification Test
+# 注意：请将 < ./public/vite.svg 替换为您本地真实的身份证图片路径
+# VS Code REST Client 扩展支持 < 语法读取文件
+# 如果没有安装 REST Client，可以使用下方的 curl 命令进行测试
+
+POST http://10.0.104.33:8080/ocr/id_card
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="frontFile"; filename="front.jpg"
+Content-Type: image/jpeg
+
+< ./public/vite.svg
+
+--WebAppBoundary
+Content-Disposition: form-data; name="backFile"; filename="back.jpg"
+Content-Type: image/jpeg
+
+< ./public/vite.svg
+
+--WebAppBoundary--
+
+### cURL 命令示例 (供参考)
+# curl -X POST http://10.0.104.33:8080/ocr/id_card \
+#   -H "Content-Type: multipart/form-data" \
+#   -F "frontFile=@/path/to/your/front.jpg" \
+#   -F "backFile=@/path/to/your/back.jpg"

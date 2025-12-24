@@ -2,7 +2,10 @@ import {
   getComponentConfig,
   getComponentImpl,
   getComponentDescriptor,
-  WORKBENCH_COMPONENT_MAP
+  WORKBENCH_COMPONENT_MAP,
+  getWorkbenchComponentConfig,
+  WorkbenchComponentType,
+  hasWorkbenchComponentSchema
 } from 'src/components/Materials';
 
 import React from 'react';
@@ -26,11 +29,14 @@ interface ComponentRenderProps {
  * 用于渲染传入的组件，支持适配各类组件
  */
 const ComponentEditRender: React.FC<ComponentRenderProps> = ({ cpId, cpType, pageComponentSchema, runtime }) => {
+  // 判断是否为工作台组件类型
+  const isWorkbenchType = hasWorkbenchComponentSchema(cpType);
+  
   // 获取组件配置
-  const componentConfig = getComponentConfig(pageComponentSchema, cpType);
+  const componentConfig = isWorkbenchType ? getWorkbenchComponentConfig(pageComponentSchema, cpType as WorkbenchComponentType) : getComponentConfig(pageComponentSchema, cpType);
 
   const renderComponent = () => {
-    let Impl: any = getComponentImpl(cpType as any);
+    const Impl: any = getComponentImpl(cpType as any) ?? (WORKBENCH_COMPONENT_MAP as any)[cpType];
     let descriptor: any;
     try {
       descriptor = getComponentDescriptor(cpType as any);
@@ -38,10 +44,7 @@ const ComponentEditRender: React.FC<ComponentRenderProps> = ({ cpId, cpType, pag
       descriptor = undefined;
     }
 
-    if (!Impl) {
-      Impl = (WORKBENCH_COMPONENT_MAP as any)[cpType];
-      if (!Impl) return <div>未知组件类型: {cpType}</div>;
-    }
+    if (!Impl) return <div>未知组件类型: {cpType}</div>;
 
     const baseProps: any = { cpName: cpId, id: cpId, ...componentConfig };
 

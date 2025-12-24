@@ -124,3 +124,32 @@ export const WIDTH_VALUES = {
   [WIDTH_OPTIONS.THREE_QUARTERS]: '75%',
   [WIDTH_OPTIONS.FULL]: '100%'
 } as const;
+
+// 状态选项常量
+export const STATUS_OPTIONS = {
+  DEFAULT: '普通',
+  READONLY: '只读',
+  HIDDEN: '隐藏'
+} as const;
+
+export const STATUS_VALUES = {
+  [STATUS_OPTIONS.DEFAULT]: 'default',
+  [STATUS_OPTIONS.READONLY]: 'readonly',
+  [STATUS_OPTIONS.HIDDEN]: 'hidden'
+} as const;
+
+// 日期选项常量
+export const DATE_OPTIONS = {
+  YEAR: 'Year',
+  MONTH: 'Month',
+  DATE: 'Date',
+  DATETIME: 'DateTime'
+} as const;
+
+// 日期值映射
+export const DATE_VALUES = {
+  [DATE_OPTIONS.YEAR]: 'year',
+  [DATE_OPTIONS.MONTH]: 'month',
+  [DATE_OPTIONS.DATE]: 'date',
+  [DATE_OPTIONS.DATETIME]: 'datetime'
+} as const;

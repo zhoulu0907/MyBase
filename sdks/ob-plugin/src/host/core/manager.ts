@@ -2,7 +2,7 @@ import EventEmitter from 'eventemitter3';
 import { createHostSDK } from '../../sdk';
 import { loadCss, loadJs } from './resource';
 import { validatePlugin } from './validator';
-import type { Context, HostSDK, LoadedPlugin, PluginMeta, PluginRegistry, HostEvents } from '../../sdk/types';
+import type { Context, HostSDK, LoadedPlugin, PluginMeta, PluginRegistry, HostEvents, Entity, Field, UIAPI } from '../../sdk/types';
 
 /** 插件管理器：负责插件注册、资源加载、初始化/销毁、方法调用与事件分发 */
 export class PluginManager {
@@ -11,10 +11,18 @@ export class PluginManager {
   private registry = new Map<string, PluginRegistry>();
   private sdk: HostSDK;
 
-  constructor(context?: Context, emitter?: EventEmitter<HostEvents>) {
+  constructor(
+    context?: Omit<Context, 'entity'> & { entity?: Partial<Context['entity']> },
+    emitter?: EventEmitter<HostEvents>,
+    overrides?: {
+      ui?: UIAPI;
+      entities?: Entity[];
+      fields?: Record<string, Field[]>;
+    }
+  ) {
     this.emitter = emitter ?? new EventEmitter<HostEvents>();
-    const ctx: Context = context ?? { terminal: 'PC' };
-    this.sdk = createHostSDK(ctx);
+    const ctx = context ?? { terminal: 'PC' };
+    this.sdk = createHostSDK(ctx, overrides);
   }
 
   /** 事件总线 */
@@ -46,6 +54,7 @@ export class PluginManager {
 
   /** 加载并初始化插件 */
   async loadPlugin(pluginId: string): Promise<LoadedPlugin> {
+    console.error(`ob-plugin-template 插件加载中 ${pluginId}`)
     const key = this.resolveKey(pluginId);
     const item = this.registry.get(key);
     if (!item) throw new Error(`Plugin ${pluginId} not registered`);
@@ -57,7 +66,14 @@ export class PluginManager {
     item.status = 'loading';
     const { meta } = item;
     try {
-      if (meta.resources?.css) await loadCss(meta.resources.css);
+      if (meta.resources?.css) {
+        try {
+          await loadCss(meta.resources.css);
+        } catch (cssError) {
+          this.sdk.ui.reportError(cssError, { scope: 'plugin:css' } as any);
+          // CSS 加载失败不影响主流程；继续加载 JS
+        }
+      }
       const plugin = await loadJs(meta.resources?.js ?? '');
       validatePlugin(plugin, meta);
       const loaded: LoadedPlugin = { ...plugin, meta } as LoadedPlugin;
@@ -67,6 +83,7 @@ export class PluginManager {
       this.emitter.emit('plugin:loaded', { id: key });
       return loaded;
     } catch (error) {
+      console.error(`ob-plugin-template 插件加载失败 ${pluginId}`, error);
       item.status = 'error';
       this.emitter.emit('plugin:error', { id: key, error });
       throw error;

@@ -3,11 +3,12 @@ import '@icon-park/react/styles/index.css';
 import { NotFoundPage, TokenManager } from '@onebase/common';
 import { useEffect } from 'react';
 import { Navigate, Route, HashRouter as Router, Routes, useLocation, useMatch } from 'react-router-dom';
+import { initPlugins } from './plugin';
 import { EditorPage } from './pages/Editor';
 import { ETLFlowEditorPage } from './pages/ETLFlowEditor';
 import Home from './pages/Home';
 import Login from './pages/Login';
-import PreviewPage from './pages/ScreenPage/PreviewPage';
+import DashboardPage from './pages/DashboardPage';
 import SettingPage from './pages/Setting';
 
 function AppContent() {
@@ -32,6 +33,10 @@ function AppContent() {
   // 使用 useMatch 匹配包含 tenantId 的路由模式
   const match = useMatch('/onebase/:tenantId/*');
   const tenantId = match?.params.tenantId;
+
+  useEffect(() => {
+    initPlugins();
+  }, []);
 
   useEffect(() => {
     if (tenantId) {
@@ -65,7 +70,7 @@ function AppContent() {
       <Route path="/onebase/:tenantId/editor/*" element={<EditorPage />} />
       <Route path="/onebase/:tenantId/etl_editor/*" element={<ETLFlowEditorPage />} />
 
-      <Route path="/onebase/screen/preview/:screenProjectId" element={<PreviewPage />} />
+      <Route path="/onebase/screen/preview/:screenProjectId" element={<DashboardPage />} />
 
       {/* 默认重定向到登录页 */}
       <Route path="/" element={<Navigate to="/login" replace />} />

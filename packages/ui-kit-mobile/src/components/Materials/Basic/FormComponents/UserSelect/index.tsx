@@ -15,7 +15,6 @@ const XUserSelect = memo((props: XUserSelectConfig & { runtime?: boolean; detail
     status,
     verify,
     layout,
-    defaultOptionsConfig,
     runtime = true,
     detailMode,
     form
@@ -48,6 +47,8 @@ const XUserSelect = memo((props: XUserSelectConfig & { runtime?: boolean; detail
     }
   ];
 
+  const readonlyValue = Array.isArray(form?.getFieldValue(fieldId)) ? form?.getFieldValue(fieldId)[0] : '--';
+
   return (
     <Form.Item
       className="inputTextWrapperOBMobile"
@@ -61,8 +62,7 @@ const XUserSelect = memo((props: XUserSelectConfig & { runtime?: boolean; detail
       }}
     >
       {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
-        /* todo */
-        <div>{defaultOptionsConfig.defaultOptions.find((item: any) => item.value == '')?.label || '--'}</div>
+        <div className="readonlyText">{readonlyValue}</div>
       ) : (
         <Picker
           cascade={false}

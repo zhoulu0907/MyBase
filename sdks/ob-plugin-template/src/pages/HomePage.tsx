@@ -1,7 +1,6 @@
 import { Card, Button, Space, Typography, Form } from '@arco-design/web-react'
 import type { HostSDK } from '@ob/plugin/sdk'
 type ExtendedSDK = HostSDK & { ui: any; context: any }
-import PluginDemoComponent from '../components/DemoComponent'
 import PluginInputText from '../components/InputText'
 
 const { Title, Text } = Typography
@@ -16,14 +15,7 @@ export const HomePage = ({ sdk }: { sdk: ExtendedSDK }) => {
     <div>
       <Title heading={2}>示例插件首页</Title>
       <Text>这是一个完全隔离的插件，不依赖主工程代码</Text>
-      <Card style={{ margin: '20px 0' }}>
-        <Title heading={4}>插件组件示例</Title>
-        <PluginDemoComponent
-          message="测试消息"
-          onUpdate={(msg) => sdk.ui.notify('info', `组件更新：${msg}`)}
-          sdk={sdk}
-        />
-      </Card>
+      {/* 已移除 Demo 组件示例 */}
       <Card style={{ margin: '20px 0' }}>
         <Title heading={4}>XInputText（物料对齐）</Title>
         <Form>

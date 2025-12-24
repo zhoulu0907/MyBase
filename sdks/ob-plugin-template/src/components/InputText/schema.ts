@@ -6,6 +6,11 @@ export const InputTextSchema = {
     editData: [
       CONFIG_TYPES.LABEL_INPUT,
       {
+        key: 'titleColor',
+        name: '标题颜色',
+        type: 'ColorPickerSetter'
+      },
+      {
         key: 'prefix',
         name: '前缀',
         type: CONFIG_TYPES.TEXT_INPUT
@@ -28,7 +33,7 @@ export const InputTextSchema = {
       placeholder: '请输入',
       tooltip: '',
       dataField: [],
-      defaultValueConfig: { type: 'CUSTOM', customValue: '', formulaValue: '' },
+      defaultValueConfig: { type: 'custom', customValue: '', formulaValue: '' },
       verify: {
         required: false,
         noRepeat: false,
@@ -48,7 +53,8 @@ export const InputTextSchema = {
     w: 118,
     displayName: '单行文本',
     icon: 'text_input_cp.svg',
-    category: 'custom' as const
+    category: 'form',
+    isPlugin: true
   },
   fieldMap: ['text', 'longText', 'id'],
   entityMap: ['text', 'url', 'address', 'geography', 'password', 'encrypted', 'aggregate', 'id']

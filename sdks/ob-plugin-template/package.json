@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite serve src/dev --config vite.config.ts",
     "build": "tsc && vite build",
-    "copy:umd": "cp -f dist/ob-plugin-template.umd.js public/ob-plugin-template.umd.js && if [ -f dist/ob-plugin-template.css ]; then cp -f dist/ob-plugin-template.css public/ob-plugin-template.css; fi",
+    "copy:umd": "cp -f dist/ob-plugin-template.umd.js public/ob-plugin-template.umd.js",
     "dev:umd": "npm run build && npm run copy:umd && vite serve src/dev --config vite.config.ts",
     "lint": "eslint .",
     "preview": "vite build && vite preview --port 3001"

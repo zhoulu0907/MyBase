@@ -118,7 +118,7 @@ const Attributes = ({ cpID }: ConfigsProps) => {
   };
 
   const renderEditItem = (item: any, index: number) => {
-    return renderConfigItem({
+    const renderConfig =  renderConfigItem({
       id: cpID,
       item,
       index,
@@ -129,6 +129,7 @@ const Attributes = ({ cpID }: ConfigsProps) => {
       handleMultiPropsChange,
       handleLayoutChange
     });
+    return renderConfig;
   };
 
   // 可根据 id 获取/设置对应组件的属性，这里暂时未实现具体逻辑

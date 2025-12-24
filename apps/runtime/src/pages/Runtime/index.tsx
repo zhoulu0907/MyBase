@@ -23,7 +23,9 @@ import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import RuntimeMenuItem from './components/menuItem';
 import PreviewContainer from './components/preview';
+import { initPlugins } from '@/plugin';
 import './components/TaskCenter/style/taskSide.less';
+
 import TaskCenterPage from './components/TaskCenter/TaskCenterPage';
 import styles from './index.module.less';
 
@@ -114,6 +116,7 @@ const Runtime: React.FC = () => {
   }, [appId]);
 
   useEffect(() => {
+    initPlugins();
     getUserInfo();
   }, []);
 
@@ -256,13 +259,13 @@ const Runtime: React.FC = () => {
       key: menu.menuCode,
       title: (
         <RuntimeMenuItem
-          menuID={menu.id}
+          menuID={menu.id || ''}
           menuIcon={menu.menuType === MenuType.BPM ? menu.menuCode : menu.menuIcon}
           maxWidth={maxWidth}
           label={menu.menuName}
           onClick={() => {
             if (menu.menuType == MenuType.PAGE || menu.menuType == MenuType.BPM) {
-              handleCurMenuUrl(menu.id);
+              handleCurMenuUrl(menu.id || '');
               setCurMenu(menu);
             }
           }}
@@ -312,7 +315,12 @@ const Runtime: React.FC = () => {
             <TaskCenterPage curMenuCode={curMenu.value.menuCode} />
           ) : (
             <div className={styles.contentBody}>
-              <PreviewContainer menuId={curMenu.value?.id || ''} runtime={true} menuUuid={curMenu.value?.menuUuid} />
+              <PreviewContainer
+                menuId={curMenu.value?.id || ''}
+                runtime={true}
+                menuUuid={curMenu.value?.menuUuid}
+                pageSetType={curMenu.value?.pagesetType}
+              />
             </div>
           )}
         </Content>

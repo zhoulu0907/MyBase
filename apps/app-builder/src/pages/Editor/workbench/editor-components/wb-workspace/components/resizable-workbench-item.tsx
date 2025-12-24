@@ -18,7 +18,7 @@ interface ResizableWorkbenchItemProps {
 }
 
 /**
- * 可调整大小的工作台组件项
+ * 可调整宽度的工作台组件项
  */
 export function ResizableWorkbenchItem({
   componentId,

@@ -216,6 +216,7 @@ const Right: React.FC = () => {
             expiresTime: response.expiresTime,
             tenantId: response.tenantId,
             corpId: response.corpId,
+            loginSource: response.loginSource,
             loginURL: window.location.href // 当前地址
           },
           rememberMe

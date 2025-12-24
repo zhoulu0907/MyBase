@@ -151,3 +151,21 @@
   justify-content: center;
   flex-direction: column;
 }
+
+.editRuntimeContent {
+  /* 自定义滚动条样式，适配主要浏览器 */
+  overflow: auto;
+
+  /* 自定义滚动条样式 */
+  &::-webkit-scrollbar {
+    width: 0px;
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #e0e0e0;
+    border-radius: 0px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}

@@ -63,7 +63,7 @@ const EditRuntime: React.FC<EditRuntimeProps> = ({ form, isAdd, submitLoading, o
     <Modal
       title={
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '40px' }}>
-          <div>表单信息</div>
+          <div>{isAdd ? '添加数据' : '编辑数据'}</div>
           <div className={styles.titleEditIconArea}>
             {fullScreen ? (
               <IconFullscreenExit className={styles.fullscreenIcon} onClick={() => setFullScreen(false)} />
@@ -98,13 +98,21 @@ const EditRuntime: React.FC<EditRuntimeProps> = ({ form, isAdd, submitLoading, o
       onCancel={onCancel}
       autoFocus={false}
       focusLock={true}
-      style={{ width: fullScreen ? '100vw' : '60vw', maxHeight: fullScreen ? '100vh' : '80vh', overflow: 'auto' }}
+      style={{
+        width: fullScreen ? '100vw' : '60vw',
+        maxHeight: fullScreen ? '100vh' : '80vh',
+        minHeight: fullScreen ? '100vh' : '20vh',
+        overflow: 'auto'
+      }}
       alignCenter
       wrapClassName={
         fullScreen ? 'runtime-preview-formpage edit-modal edit-modal-fullscreen' : 'runtime-preview-formpage edit-modal'
       }
     >
-      <div style={{ maxHeight: fullScreen ? '80vh' : '55vh', overflow: 'auto' }}>
+      <div
+        className={styles.editRuntimeContent}
+        style={{ maxHeight: fullScreen ? '80vh' : '55vh', minHeight: fullScreen ? '80vh' : '20vh', overflow: 'auto' }}
+      >
         <Form
           layout="inline"
           labelCol={{ span: 10 }}

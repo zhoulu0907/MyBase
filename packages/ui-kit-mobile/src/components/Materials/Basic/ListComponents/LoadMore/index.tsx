@@ -1,7 +1,10 @@
-import filterIcon from '@/assets/images/filter.svg';
+// import filterIcon from '@/assets/images/filter.svg';
+import dayjs from 'dayjs';
 import { Button, Dialog, Dropdown, Ellipsis, LoadMore, SearchBar, Sticky, Toast, Form } from '@arco-design/mobile-react';
 import { useForm } from '@arco-design/mobile-react/esm/form';
+import { IconDownload } from '@arco-design/mobile-react/esm/icon';
 import {
+  attachmentDownload,
   dataMethodDeleteV2,
   dataMethodPageV2,
   DeleteMethodV2Params,
@@ -11,7 +14,7 @@ import {
   type AppEntityField,
 } from '@onebase/app';
 import { pagesRuntimeSignal } from '@onebase/common';
-import { BUTTON_OPTIONS, BUTTON_VALUES, ENTITY_FIELD_TYPE, RedirectMethod, useFormEditorSignal } from '@onebase/ui-kit';
+import { BUTTON_OPTIONS, BUTTON_VALUES, downloadFileByUrl, ENTITY_FIELD_TYPE, RedirectMethod, useFormEditorSignal } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import { memo, useEffect, useState } from 'react';
 import TableSearch from './tableSerach';
@@ -115,45 +118,70 @@ const XLoadMore = memo(
         newColumns = (columns || []).map((column) => {
           return {
             ...column,
-            render: (item: any, index: number) => {
+            render: (item: any) => {
               const dataFieldInfo = mainMetaData.parentFields.find(
                 (field: AppEntityField) => field.fieldName === column.dataIndex
               );
               const result = item[dataFieldInfo?.fieldName] || '';
               if (!result) return '-';
-              if (typeof result === 'object') {
-                return JSON.stringify(result);
+              if (Array.isArray(result)) {
+                if (result.length === 0) return;
+                if (['FILE'].includes(dataFieldInfo.fieldType)) {
+                  const file = result[0];
+                  return (
+                    <div className="fileWrapper">
+                      <Ellipsis text={file.name} />
+                      <IconDownload
+                        style={{ color: 'rgb(var(--primary-6))' }}
+                        onClick={async () => {
+                          const param = {
+                            menuId: curMenu.value?.id,
+                            id: item.id,
+                            fieldName: dataFieldInfo.fieldName,
+                            fileId: file.id
+                          };
+                          const fileUrl = await attachmentDownload(tableName, param);
+                          downloadFileByUrl(fileUrl, file.name);
+                        }}
+                      />
+                    </div>
+                  )
+                }
+              } else {
+                if (typeof result === 'object') {
+                  return JSON.stringify(result);
+                }
+                // if (['EMAIL', 'LONG_TEXT', 'TEXT', 'PHONE', 'NUMBER', 'DATE', 'DATETIME', 'URL', 'ADDRESS', 'AUTO_CODE', 'USER']
+                //   .includes(dataFieldInfo.fieldType)) {
+                //   return result || '-';
+                // }
+                const componentSchemasKeys = Object.keys(pageComponentSchemas.value || {});
+                const cpId = componentSchemasKeys.find((ele) => {
+                  return pageComponentSchemas.value[ele]?.config?.dataField?.includes(column.id);
+                });
+                if (!cpId) {
+                  return result;
+                }
+                // const currentComponentSchemas = pageComponentSchemas.value[cpId];
+                // if (['SELECT', 'MULTI_SELECT'].includes(dataFieldInfo.fieldType)) {
+                //   const arrayResult = Array.isArray(result) ? result : result.split(',').map((cItem: string) => cItem.trim())
+                //   const array = currentComponentSchemas.config.defaultOptionsConfig?.defaultOptions || []
+                //   const tmpR = array.map((dItem: any) => {
+                //     if (arrayResult.includes(dItem.value)) {
+                //       return dItem.label
+                //     }
+                //     return ''
+                //   }).filter((eItem: string) => eItem !== '')
+                //   return tmpR.join(',')
+                // }
+                // if (['BOOLEAN'].includes(dataFieldInfo.fieldType)) {
+                //   return result ? '是' : '否';
+                // }
+                // if (['DEPARTMENT'].includes(dataFieldInfo.fieldType)) {
+                //   return result?.deptName || '-';
+                // }
+                return result || '-';
               }
-              // if (['EMAIL', 'LONG_TEXT', 'TEXT', 'PHONE', 'NUMBER', 'DATE', 'DATETIME', 'URL', 'ADDRESS', 'AUTO_CODE', 'USER']
-              //   .includes(dataFieldInfo.fieldType)) {
-              //   return result || '-';
-              // }
-              const componentSchemasKeys = Object.keys(pageComponentSchemas.value || {});
-              const cpId = componentSchemasKeys.find((ele) => {
-                return pageComponentSchemas.value[ele]?.config?.dataField?.includes(column.id);
-              });
-              if (!cpId) {
-                return result;
-              }
-              // const currentComponentSchemas = pageComponentSchemas.value[cpId];
-              // if (['SELECT', 'MULTI_SELECT'].includes(dataFieldInfo.fieldType)) {
-              //   const arrayResult = Array.isArray(result) ? result : result.split(',').map((cItem: string) => cItem.trim())
-              //   const array = currentComponentSchemas.config.defaultOptionsConfig?.defaultOptions || []
-              //   const tmpR = array.map((dItem: any) => {
-              //     if (arrayResult.includes(dItem.value)) {
-              //       return dItem.label
-              //     }
-              //     return ''
-              //   }).filter((eItem: string) => eItem !== '')
-              //   return tmpR.join(',')
-              // }
-              // if (['BOOLEAN'].includes(dataFieldInfo.fieldType)) {
-              //   return result ? '是' : '否';
-              // }
-              // if (['DEPARTMENT'].includes(dataFieldInfo.fieldType)) {
-              //   return result?.deptName || '-';
-              // }
-              return result || '-';
             }
           };
         });
@@ -207,13 +235,24 @@ const XLoadMore = memo(
           // 优化：减少重复查找，提升可读性和性能
           if (Array.isArray(mainMetaData?.parentFields)) {
             const dataField = mainMetaData.parentFields.find(
-              (field: AppEntityField) => field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.DATE.VALUE
+              (field: AppEntityField) => field.fieldName === key && (field.fieldType === ENTITY_FIELD_TYPE.DATE.VALUE)
             );
             if (dataField && newItem[key]) {
               // 仅当字段类型为日期且有值时格式化
               const dateValue = new Date(newItem[key]);
               if (!isNaN(dateValue.getTime())) {
-                newItem[key] = dateValue.toLocaleDateString();
+                newItem[key] = dayjs(dateValue).format('YYYY-MM-DD');
+              }
+            }
+
+            const datatimeField = mainMetaData.parentFields.find(
+              (field: AppEntityField) => field.fieldName === key && (field.fieldType === ENTITY_FIELD_TYPE.DATETIME.VALUE)
+            );
+            if (datatimeField && newItem[key]) {
+              // 仅当字段类型为日期且有值时格式化
+              const dateValue = new Date(newItem[key]);
+              if (!isNaN(dateValue.getTime())) {
+                newItem[key] = dayjs(dateValue).format('YYYY-MM-DD HH:mm:ss');
               }
             }
 
@@ -254,7 +293,7 @@ const XLoadMore = memo(
                 field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.BOOLEAN.VALUE
             );
             if (switchField && typeof newItem[key] === 'boolean') {
-              newItem[key] = newItem[key] ? '是' : '否'
+              newItem[key] = newItem[key] ? '是' : '否';
             }
 
             // 单选列表 - 根据id返回对应label
@@ -264,9 +303,9 @@ const XLoadMore = memo(
             );
             if (selectField) {
               const curValue = newItem[key];
-              const curComponentSchema = Object.values(pageComponentSchemas.value).find(v => curValue.id.includes(v.id)) || {};
-              const curOptions = curComponentSchema?.config?.defaultOptionsConfig?.defaultOptions;
-              newItem[key] = curOptions.find(op => op.value === curValue.id)?.label || '-';
+              const curComponentSchema = Object.values(pageComponentSchemas.value).find(v => v.config.dataField?.includes(selectField.fieldName)) || {};
+              const curOptions = curComponentSchema?.config?.defaultOptionsConfig?.defaultOptions || [];
+              newItem[key] = curOptions.find(op => op.value === curValue.id)?.label || '';
             }
 
             // 数据选择
@@ -275,7 +314,16 @@ const XLoadMore = memo(
                 field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.DATA_SELECTION.VALUE
             );
             if (dateField) {
-              newItem[key] = newItem[key].name || '-'
+              newItem[key] = newItem[key].name || '-';
+            }
+
+            // 文件上传
+            const fileField = mainMetaData.parentFields.find(
+              (field: AppEntityField) =>
+                field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.FILE.VALUE
+            );
+            if (fileField) {
+              newItem[key] = newItem[key] || [];
             }
           }
         });

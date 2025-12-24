@@ -1,56 +1,74 @@
-import React from 'react'
+import React, { useEffect, useState, useMemo } from 'react'
 import ReactDOM from 'react-dom/client'
 import * as ReactRouterDOM from 'react-router-dom'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import { Layout, Menu, Button } from '@arco-design/web-react'
+import { BrowserRouter, Routes, Route, useNavigate, useLocation, useParams } from 'react-router-dom'
+import { Layout, Menu, Button, Typography, Empty, Breadcrumb } from '@arco-design/web-react'
 import * as Arco from '@arco-design/web-react'
 import '@arco-design/web-react/dist/css/arco.css'
 import plugin from '../index'
-import { HomePage } from '../pages/HomePage'
-import type { HostSDK } from '@ob/plugin/sdk'
+import type { HostSDK, LoadedPlugin } from '@ob/plugin/sdk'
 import { PluginManager } from '@ob/plugin/host'
+import { createMockHostSDK } from '@ob/plugin/mock'
+import { ComponentDebugger } from './ComponentDebugger'
+import { MOCK_ENTITIES, MOCK_FIELDS } from './mock/config'
 
 ;(window as any).React = React
 ;(window as any).ReactDOM = ReactDOM
 ;(window as any).Arco = Arco
 ;(window as any).ReactRouterDOM = ReactRouterDOM
 
-const mockSDK: HostSDK & {
-  context: HostSDK['context'] & {
-    router: { push: (path: string) => void; getCurrentPath: () => string }
-    storage: { set: (k: string, v: any) => void; get: (k: string) => any; remove: (k: string) => void }
-    events: { on: (ev: string, h: (...args: any[]) => void) => void; emit: (ev: string, ...args: any[]) => void }
-  }
-  ui: HostSDK['ui'] & { notify: (type: 'success'|'error'|'info', message: string) => void }
-} = {
-  context: {
-    terminal: 'PC',
-    router: {
-      push: (path) => window.history.pushState({}, '', path),
-      getCurrentPath: () => window.location.pathname
+// Initial mock SDK
+const mockContext = {
+  terminal: 'PC' as const,
+  router: {
+    push: (path: string) => window.history.pushState({}, '', path),
+    getCurrentPath: () => window.location.pathname
+  },
+  storage: {
+    set: (key: string, value: any) => localStorage.setItem(key, JSON.stringify(value)),
+    get: (key: string) => {
+      const val = localStorage.getItem(key)
+      return val ? JSON.parse(val) : null
     },
-    storage: {
-      set: (key, value) => localStorage.setItem(key, JSON.stringify(value)),
-      get: (key) => {
-        const val = localStorage.getItem(key)
-        return val ? JSON.parse(val) : null
-      },
-      remove: (key) => localStorage.removeItem(key)
+    remove: (key: string) => localStorage.removeItem(key)
+  },
+  events: {
+    on: (eventName: string, handler: any) => {
+      window.addEventListener(`lowcode:${eventName}`, (e: any) => handler(e.detail))
     },
-    events: {
-      on: (eventName, handler) => {
-        window.addEventListener(`lowcode:${eventName}`, (e: any) => handler(e.detail))
-      },
-      emit: (eventName, ...args) => {
-        window.dispatchEvent(new CustomEvent(`lowcode:${eventName}`, { detail: args }))
-      }
+    emit: (eventName: string, ...args: any[]) => {
+      window.dispatchEvent(new CustomEvent(`lowcode:${eventName}`, { detail: args }))
     }
   },
+  form: {
+    // Simple mock for form state (stored in window for persistence during component re-renders in dev)
+    getValue: (field: string) => {
+      const val = (window as any).__MOCK_FORM_STATE?.[field]
+      console.log(`[MockSDK] get form value: ${field} = ${val}`)
+      return val
+    },
+    setValue: (field: string, value: any) => {
+      console.log(`[MockSDK] set form value: ${field} = ${value}`)
+      ;(window as any).__MOCK_FORM_STATE = (window as any).__MOCK_FORM_STATE || {}
+      ;(window as any).__MOCK_FORM_STATE[field] = value
+      // Dispatch event for components to listen (if implemented)
+      window.dispatchEvent(new CustomEvent('mock:form:change', { detail: { field, value } }))
+    },
+    listFields: () => {
+      const fields = (window as any).__MOCK_FORM_FIELDS
+      return Array.isArray(fields) ? fields : ['docType', 'userName', 'userId']
+    }
+  }
+}
+
+const mockSDK = createMockHostSDK(mockContext as any, {
+  entities: MOCK_ENTITIES,
+  fields: MOCK_FIELDS,
   ui: {
     reportError: (error: unknown) => {
       console.error('[plugin-error]', error)
     },
-    notify: (type, message) => {
+    notify: (type: any, message: string) => {
       const el = document.createElement('div')
       el.style.position = 'fixed'
       el.style.top = '20px'
@@ -64,22 +82,55 @@ const mockSDK: HostSDK & {
       document.body.appendChild(el)
       setTimeout(() => el.remove(), 3000)
     }
-  }
+  } as any
+}) as any
+
+const PageRenderer = ({ plugin }: { plugin: LoadedPlugin }) => {
+  const { pageKey } = useParams()
+  const page = plugin.pages[pageKey || '']
+  
+  if (!page) return <Empty description={`Page ${pageKey} not found`} />
+  
+  const Component = page.component
+  return (
+    <div style={{ padding: 20 }}>
+      <Typography.Title heading={5}>{page.title}</Typography.Title>
+      <div style={{ border: '1px solid #eee', padding: 20, background: '#fff' }}>
+        <Component sdk={mockSDK} />
+      </div>
+    </div>
+  )
 }
 
-const DevApp: React.FC = () => {
-  const [loaded, setLoaded] = React.useState<any | null>(null)
-  const managerRef = React.useRef<PluginManager | null>(null)
+const ComponentRenderer = ({ plugin }: { plugin: LoadedPlugin }) => {
+  const { componentKey } = useParams()
+  const component = plugin.components[componentKey || '']
+  
+  if (!component) return <Empty description={`Component ${componentKey} not found`} />
+  
+  return <ComponentDebugger componentKey={componentKey!} component={component} plugin={plugin} sdk={mockSDK} />
+}
 
-  React.useEffect(() => {
+const AppContent: React.FC = () => {
+  const [loaded, setLoaded] = useState<LoadedPlugin | null>(null)
+  const navigate = useNavigate()
+  const location = useLocation()
+  
+  // Sync router
+  useEffect(() => {
+    mockSDK.context.router.push = (path: string) => navigate(path)
+  }, [navigate])
+
+  useEffect(() => {
     const isDev = (import.meta as any)?.env?.DEV
     if (isDev) {
-      setLoaded(plugin as any)
+      setLoaded(plugin as LoadedPlugin)
       return
     }
+    
+    // Simulate loading in production/preview
     ;(window as any)['ob-plugin-template'] = plugin
-    const pm = new PluginManager({ terminal: 'PC' })
-    managerRef.current = pm
+    const pm = new PluginManager(mockSDK.context)
     pm.registerPlugin({
       name: 'ob-plugin-template',
       version: '0.0.0',
@@ -89,32 +140,88 @@ const DevApp: React.FC = () => {
     })
     pm.loadPlugin('ob-plugin-template')
       .then((p) => { setLoaded(p) })
-      .catch(() => { setLoaded(plugin as any) })
-    return () => { pm.unloadPlugin('ob-plugin-template') }
+      .catch((e) => { 
+        console.error(e)
+        setLoaded(plugin as LoadedPlugin) 
+      })
   }, [])
 
-  const handleNavigate = (path: string) => window.history.pushState({}, '', path)
+  const menuItems = useMemo(() => {
+    if (!loaded) return []
+    
+    return [
+      {
+        key: 'pages',
+        title: '页面 (Pages)',
+        children: Object.entries(loaded.pages || {}).map(([key, page]: [string, any]) => ({
+          key: `/pages/${key}`,
+          title: page.title || key
+        }))
+      },
+      {
+        key: 'components',
+        title: '组件 (Components)',
+        children: Object.entries(loaded.components || {}).map(([key, comp]: [string, any]) => ({
+          key: `/components/${key}`,
+          title: comp.template?.displayName || key
+        }))
+      }
+    ]
+  }, [loaded])
+
+  if (!loaded) return <div>Loading plugin...</div>
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
-      <Layout.Sider width={200}>
-        <div style={{ padding: '16px', background: '#f5f5f5', textAlign: 'center' }}>插件独立预览</div>
-        <Menu mode="vertical" selectedKeys={[window.location.pathname]}>
-          <Menu.Item key="/" onClick={() => handleNavigate('/')}>插件首页</Menu.Item>
-          <Menu.Item key="/about" onClick={() => handleNavigate('/about')}>关于页面</Menu.Item>
+    <Layout style={{ height: '100vh', overflow: 'hidden' }}>
+      <Layout.Sider width={240} style={{ background: '#fff', borderRight: '1px solid #eee' }}>
+        <div style={{ padding: '16px', background: '#f7f8fa', textAlign: 'center', fontWeight: 'bold' }}>
+          {loaded.meta.displayName || loaded.meta.name}
+          <div style={{ fontSize: 12, color: '#999', fontWeight: 'normal' }}>Dev Environment</div>
+        </div>
+        <Menu 
+          mode="vertical" 
+          selectedKeys={[location.pathname]}
+          defaultOpenKeys={['pages', 'components']}
+          onClickMenuItem={(key) => navigate(key)}
+          style={{ height: 'calc(100% - 54px)', overflow: 'auto' }}
+        >
+          <Menu.Item key="/">Dashboard</Menu.Item>
+          
+          <Menu.SubMenu key="pages" title="Pages">
+            {menuItems.find(i => i.key === 'pages')?.children?.map(item => (
+              <Menu.Item key={item.key}>{item.title}</Menu.Item>
+            ))}
+          </Menu.SubMenu>
+          
+          <Menu.SubMenu key="components" title="Components">
+            {menuItems.find(i => i.key === 'components')?.children?.map(item => (
+              <Menu.Item key={item.key}>{item.title}</Menu.Item>
+            ))}
+          </Menu.SubMenu>
         </Menu>
       </Layout.Sider>
-      <Layout.Content style={{ padding: '20px', overflow: 'auto' }}>
-        <div style={{ marginBottom: '20px' }}>
-          <Button onClick={() => handleNavigate('/')} style={{ marginRight: 8 }}>首页</Button>
-          <Button onClick={() => handleNavigate('/about')}>关于</Button>
+      
+      <Layout.Content style={{ height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ padding: '12px 20px', background: '#fff', borderBottom: '1px solid #eee' }}>
+           <Breadcrumb>
+             <Breadcrumb.Item>Dev</Breadcrumb.Item>
+             <Breadcrumb.Item>{location.pathname === '/' ? 'Dashboard' : location.pathname.split('/')[1]}</Breadcrumb.Item>
+             <Breadcrumb.Item>{location.pathname.split('/')[2]}</Breadcrumb.Item>
+           </Breadcrumb>
         </div>
-        {loaded ? (
+        
+        <div style={{ flex: 1, overflow: 'hidden' }}>
           <Routes>
-            <Route path="/" element={<HomePage sdk={mockSDK as any} />} />
-            <Route path="/about" element={loaded.pages.about.component({ sdk: mockSDK }) as any} />
+            <Route path="/" element={
+              <div style={{ padding: 40, textAlign: 'center' }}>
+                <Typography.Title heading={3}>Welcome to Plugin Dev</Typography.Title>
+                <Typography.Text>Select a page or component from the sidebar to start debugging.</Typography.Text>
+              </div>
+            } />
+            <Route path="/pages/:pageKey" element={<PageRenderer plugin={loaded} />} />
+            <Route path="/components/:componentKey" element={<ComponentRenderer plugin={loaded} />} />
           </Routes>
-        ) : null}
+        </div>
       </Layout.Content>
     </Layout>
   )
@@ -122,6 +229,6 @@ const DevApp: React.FC = () => {
 
 ReactDOM.createRoot(document.getElementById('app')!).render(
   <BrowserRouter>
-    <DevApp />
+    <AppContent />
   </BrowserRouter>
 )

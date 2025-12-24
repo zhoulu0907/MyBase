@@ -18,17 +18,29 @@ export function loadJs(url: string): Promise<Omit<LoadedPlugin, 'meta'>> {
     const script = document.createElement('script');
     script.src = url;
     script.type = 'text/javascript';
+    const prevRequire = (window as any).require;
+    (window as any).require = (name: string) => {
+      if (name === 'react') return (window as any).React;
+      if (name === '@arco-design/web-react') return (window as any).Arco;
+      if (name === 'react-router-dom') return (window as any).ReactRouterDOM;
+      throw new Error(`Unsupported require: ${name}`);
+    };
     script.onload = () => {
       const base = url.split('/').pop()?.split('.')[0] ?? '';
-      const plugin = (window as any)[base];
+      const snake = base.replace(/-/g, '_');
+      const camel = base.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+      const plugin = (window as any)[base] || (window as any)[snake] || (window as any)[camel];
+      (window as any).require = prevRequire;
       if (!plugin) {
         reject(new Error(`Plugin ${base} not found in window`));
       } else {
         resolve(plugin);
       }
     };
-    script.onerror = () => reject(new Error(`Failed to load JS: ${url}`));
+    script.onerror = () => {
+      (window as any).require = prevRequire;
+      reject(new Error(`Failed to load JS: ${url}`));
+    };
     document.body.appendChild(script);
   });
 }
-

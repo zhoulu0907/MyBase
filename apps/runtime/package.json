@@ -18,6 +18,7 @@
     "@douyinfe/semi-icons": "^2.85.0",
     "@douyinfe/semi-ui": "^2.85.0",
     "@icon-park/react": "^1.4.2",
+    "@ob/plugin": "workspace:*",
     "@onebase/app": "workspace:*",
     "@onebase/common": "workspace:*",
     "@onebase/platform-center": "workspace:*",

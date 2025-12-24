@@ -7,11 +7,26 @@ interface MaterialCardProps {
   type: string;
   icon: string;
   id: string;
+  layout?: 'column' | 'row';
+  disabled?: boolean;
 }
 
-const MaterialCard: React.FC<MaterialCardProps> = ({ displayName, icon, type, id }) => {
+const MaterialCard: React.FC<MaterialCardProps> = ({
+  displayName,
+  icon,
+  type,
+  id,
+  layout = 'row',
+  disabled = false
+}) => {
   return (
-    <div className={styles.materialCard} data-cp-type={type} data-cp-displayname={displayName} data-cp-id={id}>
+    <div
+      className={`${styles.materialCard} ${styles[layout]} ${disabled && 'disabled-drag'} `}
+      data-cp-type={type}
+      data-cp-displayname={displayName}
+      data-cp-id={id}
+      style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+    >
       <div className={styles.icon}>{ICON_Map[icon]}</div>
       <div className={styles.text}>{displayName}</div>
     </div>
