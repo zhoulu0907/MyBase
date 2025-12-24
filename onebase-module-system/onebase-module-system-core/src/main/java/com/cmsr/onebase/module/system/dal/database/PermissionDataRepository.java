@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.system.dal.database;
 
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleMenuDO;
-import com.cmsr.onebase.module.system.dal.flex.base.BaseDataServiceImpl;
+import com.cmsr.onebase.framework.orm.repo.BaseDataRepository;
 import com.cmsr.onebase.module.system.dal.flex.mapper.SystemRoleMenuMapper;
 import org.springframework.stereotype.Repository;
 
@@ -19,7 +19,7 @@ import static com.cmsr.onebase.module.system.dal.dataobject.permission.RoleMenuD
  * @date 2025-12-22
  */
 @Repository
-public class PermissionDataRepository extends BaseDataServiceImpl<SystemRoleMenuMapper, RoleMenuDO> {
+public class PermissionDataRepository extends BaseDataRepository<SystemRoleMenuMapper, RoleMenuDO> {
 
     /**
      * 根据角色ID查询角色菜单列表

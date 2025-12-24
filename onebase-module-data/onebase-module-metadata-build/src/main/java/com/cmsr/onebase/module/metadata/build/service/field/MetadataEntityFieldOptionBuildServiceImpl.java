@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.metadata.build.service.field;
 
-import cn.hutool.core.util.IdUtil;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.framework.common.util.string.UuidUtils;
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.FieldOptionBatchSortReqVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.FieldOptionRespVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.FieldOptionSaveReqVO;
@@ -36,7 +36,7 @@ public class MetadataEntityFieldOptionBuildServiceImpl implements MetadataEntity
     public Long create(MetadataEntityFieldOptionDO option) {
         // 新增时生成 optionUuid
         if (option.getOptionUuid() == null || option.getOptionUuid().trim().isEmpty()) {
-            option.setOptionUuid(IdUtil.fastSimpleUUID());
+            option.setOptionUuid(UuidUtils.getUuid());
         }
         optionRepository.save(option);
         return option.getId();

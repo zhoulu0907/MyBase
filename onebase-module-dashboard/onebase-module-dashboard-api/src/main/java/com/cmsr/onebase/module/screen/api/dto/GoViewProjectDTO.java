@@ -23,10 +23,6 @@ public class GoViewProjectDTO implements Serializable {
 
     private String createTime;
 
-    private String createUserId;
-
-    private Integer isDelete;
-
     private String indexImage;
 
     private String remarks;

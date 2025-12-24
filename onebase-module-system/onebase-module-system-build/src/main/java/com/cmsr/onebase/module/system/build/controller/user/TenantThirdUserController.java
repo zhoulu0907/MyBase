@@ -29,6 +29,8 @@ public class TenantThirdUserController {
     @PreAuthorize("@ss.hasPermission('tenant:third:create')")
     public CommonResult<Long> createUserAndUserAppRelation(@Valid @RequestBody ThirdUserAppCombinedInsertReqVO reqVO) {
         Long id = userService.thirdUserCreateUserAndUserAppRelation(reqVO);
+        // TODO: 添加相关应用权限
+        // TODO: 应用用户表添加相关数据
         return success(id);
     }
 
@@ -36,7 +38,7 @@ public class TenantThirdUserController {
     @PostMapping("/update")
     @Operation(summary = "编辑三方用户")
     @PreAuthorize("@ss.hasPermission('tenant:third:update')")
-    public CommonResult<Long> updateUserAndUserAppRelation(@Valid  @RequestBody ThirdUserAppCombinedUpdateReqVO reqVO) {
+    public CommonResult<Long> updateUserAndUserAppRelation(@Valid @RequestBody ThirdUserAppCombinedUpdateReqVO reqVO) {
         Long id = userService.thirdUserUpdateUserAndUserAppRelation(reqVO);
         return success(id);
     }
@@ -73,7 +75,6 @@ public class TenantThirdUserController {
         PageResult<UserApplicationRespVO> pageResult = userService.getUserAppRelationPage(userAppPageReqVO);
         return success(pageResult);
     }
-
 
 
     @GetMapping("/get")

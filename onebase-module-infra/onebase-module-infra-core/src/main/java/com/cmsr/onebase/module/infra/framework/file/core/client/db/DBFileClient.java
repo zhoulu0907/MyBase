@@ -1,6 +1,5 @@
 package com.cmsr.onebase.module.infra.framework.file.core.client.db;
 
-import com.cmsr.onebase.module.infra.dal.database.FileContentDataRepositoryOld;
 import com.cmsr.onebase.module.infra.dal.dataflex.FileContentDataRepository;
 import com.cmsr.onebase.module.infra.dal.dataflexdo.file.FileContentDO;
 import com.cmsr.onebase.module.infra.framework.file.core.client.AbstractFileClient;

@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.system.dal.flex.base;
+package com.cmsr.onebase.framework.orm.repo;
 
 import com.cmsr.onebase.framework.data.base.BaseDO;
 import com.cmsr.onebase.framework.orm.entity.BaseEntity;
@@ -17,7 +17,7 @@ import java.util.List;
  * @param <M>
  * @param <T>
  */
-public class BaseDataServiceImpl<M extends BaseMapper<T>, T extends BaseEntity> extends ServiceImpl<M, T> {
+public class BaseDataRepository<M extends BaseMapper<T>, T extends BaseEntity> extends ServiceImpl<M, T> {
 
     /**
      * 新建

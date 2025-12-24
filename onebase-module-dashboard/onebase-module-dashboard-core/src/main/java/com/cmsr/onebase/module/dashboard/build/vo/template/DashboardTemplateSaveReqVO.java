@@ -14,6 +14,11 @@ public class DashboardTemplateSaveReqVO {
     private Long id;
 
     /**
+     * 模板名称
+     */
+    private String templateName;
+
+    /**
      * 模板内容（JSON格式）
      */
     private String content;

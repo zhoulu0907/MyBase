@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.metadata.build.service.entity;
 
-import cn.hutool.core.util.IdUtil;
+
 import com.cmsr.onebase.framework.aynline.AnylineDdlHelper;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
@@ -44,9 +44,6 @@ import com.cmsr.onebase.module.metadata.build.service.datasource.MetadataDatasou
 import com.cmsr.onebase.module.metadata.build.service.field.MetadataEntityFieldOptionBuildService;
 import com.cmsr.onebase.module.metadata.build.service.field.MetadataEntityFieldConstraintBuildService;
 import com.cmsr.onebase.module.metadata.build.service.number.AutoNumberConfigBuildService;
-import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.EntityFieldValidationTypesReqVO;
-import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.EntityFieldValidationTypesRespVO;
-import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.ValidationTypeItemRespVO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.number.MetadataAutoNumberConfigDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.number.MetadataAutoNumberRuleItemDO;
 import com.cmsr.onebase.module.metadata.core.enums.BusinessEntityTypeEnum;
@@ -2547,7 +2544,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 } else {
                     // 确实是新选项，新增
                     MetadataEntityFieldOptionDO d = new MetadataEntityFieldOptionDO();
-                    d.setOptionUuid(IdUtil.fastSimpleUUID()); // 生成选项UUID
+                    d.setOptionUuid(UuidUtils.getUuid()); // 生成选项UUID
                     d.setFieldUuid(fieldUuid);
                     d.setOptionLabel(opt.getOptionLabel());
                     d.setOptionValue(opt.getOptionValue());

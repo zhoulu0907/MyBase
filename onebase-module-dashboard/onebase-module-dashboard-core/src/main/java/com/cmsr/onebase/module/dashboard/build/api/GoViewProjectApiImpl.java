@@ -1,8 +1,6 @@
 package com.cmsr.onebase.module.dashboard.build.api;
 
 import cn.hutool.core.bean.BeanUtil;
-import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
-import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.module.dashboard.build.dal.dataobject.DashboardTemplateDO;
 import com.cmsr.onebase.module.dashboard.build.model.GoviewProject;
 import com.cmsr.onebase.module.dashboard.build.model.GoviewProjectData;
@@ -46,28 +44,23 @@ public class GoViewProjectApiImpl implements GoViewProjectApi {
 
     @Override
     public Long createDashboardByTemplate(Long templateId) {
-        // todo: 查询模板信息，创建数据大屏
+        // 查询模板信息，创建数据大屏
         DashboardTemplateDO dashboardTemplate = dashboardTemplateService.getDashboardTemplate(templateId);
         if (dashboardTemplate == null){
             return null;
         }
         Long applicationId = dashboardTemplate.getAppId();
-        LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
 
         GoviewProject goviewProject = new GoviewProject();
         goviewProject.setProjectName("新大屏");
         goviewProject.setState(-1);
         goviewProject.setAppId(applicationId);
-        if (loginUser != null){
-            goviewProject.setCreator(loginUser.getId());
-        }
+        goviewProject.setIndexImage(dashboardTemplate.getIndexImage());
         iGoviewProjectService.save(goviewProject);
         GoviewProjectData goviewProjectData = new GoviewProjectData();
         goviewProjectData.setProjectId(goviewProject.getId());
         goviewProjectData.setContent(dashboardTemplate.getContent());
-        if (loginUser != null){
-            goviewProjectData.setCreator(loginUser.getId());
-        }
+        goviewProjectData.setAppId(applicationId);
         iGoviewProjectDataService.save(goviewProjectData);
         return goviewProject.getId();
     }

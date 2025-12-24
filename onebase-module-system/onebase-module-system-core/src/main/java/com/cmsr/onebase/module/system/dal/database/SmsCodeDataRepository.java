@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.system.dal.database;
 
 import com.cmsr.onebase.module.system.dal.dataobject.sms.SmsCodeDO;
-import com.cmsr.onebase.module.system.dal.flex.base.BaseDataServiceImpl;
+import com.cmsr.onebase.framework.orm.repo.BaseDataRepository;
 import com.cmsr.onebase.module.system.dal.flex.mapper.SystemSmsCodeMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
@@ -15,7 +15,7 @@ import static com.cmsr.onebase.framework.data.base.BaseDO.CREATE_TIME;
  * @date 2025-12-22
  */
 @Repository
-public class SmsCodeDataRepository extends BaseDataServiceImpl<SystemSmsCodeMapper, SmsCodeDO> {
+public class SmsCodeDataRepository extends BaseDataRepository<SystemSmsCodeMapper, SmsCodeDO> {
 
     /**
      * 根据手机号查找最后一条短信验证码

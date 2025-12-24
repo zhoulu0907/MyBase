@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.system.dal.database;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.PostDO;
-import com.cmsr.onebase.module.system.dal.flex.base.BaseDataServiceImpl;
+import com.cmsr.onebase.framework.orm.repo.BaseDataRepository;
 import com.cmsr.onebase.module.system.dal.flex.mapper.SystemPostMapper;
 import com.cmsr.onebase.module.system.vo.post.PostPageReqVO;
 import com.mybatisflex.core.paginate.Page;
@@ -25,7 +25,7 @@ import static com.cmsr.onebase.framework.data.base.BaseDO.ID;
  * @date 2025-12-22
  */
 @Repository
-public class PostDataRepository extends BaseDataServiceImpl<SystemPostMapper, PostDO> {
+public class PostDataRepository extends BaseDataRepository<SystemPostMapper, PostDO> {
 
     /**
      * 根据岗位名称查询岗位

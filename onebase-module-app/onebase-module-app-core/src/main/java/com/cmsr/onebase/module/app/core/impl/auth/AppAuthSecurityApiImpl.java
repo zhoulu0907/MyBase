@@ -82,15 +82,15 @@ public class AppAuthSecurityApiImpl implements AppAuthSecurityApi {
 
     @Override
     public boolean hasApplicationPermission(Long userId, Long applicationId) {
-        String key = CacheUtils.keyForAuth(userId, applicationId);
-        RMapCache<String, Boolean> mapCache = redissonClient.getMapCache(key, CacheUtils.KRYO5_CODEC);
-        String hashKey = CacheUtils.keyForHasPerm();
-        Boolean hasPermission = mapCache.get(hashKey);
-        if (hasPermission != null) {
-            return hasPermission;
-        }
-        hasPermission = doHasApplicationPermission(userId, applicationId);
-        mapCache.put(hashKey, hasPermission, CacheUtils.CACHE_TTL, CacheUtils.CACHE_TTL_UNIT);
+        // String key = CacheUtils.keyForAuth(userId, applicationId);
+        // RMapCache<String, Boolean> mapCache = redissonClient.getMapCache(key, CacheUtils.KRYO5_CODEC);
+        // String hashKey = CacheUtils.keyForHasPerm();
+        // Boolean hasPermission = mapCache.get(hashKey);
+        // if (hasPermission != null) {
+        //     return hasPermission;
+        // }
+        boolean hasPermission = doHasApplicationPermission(userId, applicationId);
+        // mapCache.put(hashKey, hasPermission, CacheUtils.CACHE_TTL, CacheUtils.CACHE_TTL_UNIT);
         return hasPermission;
     }
 

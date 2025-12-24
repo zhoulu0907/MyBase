@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.system.dal.database;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.system.dal.dataobject.dict.DictDataDO;
-import com.cmsr.onebase.module.system.dal.flex.base.BaseDataServiceImpl;
+import com.cmsr.onebase.framework.orm.repo.BaseDataRepository;
 import com.cmsr.onebase.module.system.dal.flex.mapper.SystemDictDataMapper;
 import com.cmsr.onebase.module.system.vo.dictdata.DictDataPageReqVO;
 import com.mybatisflex.core.paginate.Page;
@@ -22,7 +22,7 @@ import java.util.List;
  * @date 2025-08-07
  */
 @Repository
-public class DictDataRepository extends BaseDataServiceImpl<SystemDictDataMapper, DictDataDO> {
+public class DictDataRepository extends BaseDataRepository<SystemDictDataMapper, DictDataDO> {
 
     /**
      * 根据状态和字典类型查询字典数据列表
