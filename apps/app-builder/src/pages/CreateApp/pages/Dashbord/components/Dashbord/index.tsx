@@ -14,7 +14,7 @@ interface dataList {
   createTime: string;
   indexImage: string;
   remarks: string;
-  state: string;
+  state: number;
   desc: string;
 }
 
