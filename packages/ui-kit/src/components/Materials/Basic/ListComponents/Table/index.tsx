@@ -461,8 +461,6 @@ const XTable = memo(
         return;
       }
 
-      console.log('handlePage ');
-
       queryData = form.getFieldsValue();
 
       // TODO(mickey): 后续调试

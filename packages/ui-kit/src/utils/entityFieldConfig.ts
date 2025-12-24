@@ -1,4 +1,5 @@
 import type { AppEntities, AppEntity, AppEntityField, EntityFieldOption } from '@onebase/app';
+import { getDictDataListByTypeId, type DictData } from '@onebase/platform-center';
 
 // 获取单个字段的配置
 export const getFieldConfig = (dataField: string[], mainEntity: AppEntity, subEntities: AppEntities) => {
@@ -41,10 +42,9 @@ export const getFieldOptionsConfig = async (dataField: string[], mainEntity: App
     return [];
   }
   if (currentField.dictTypeId) {
-    // const dictDataList = await getDictDataListByTypeId(currentField.dictTypeId);
-    // const dictOptions = dictDataList?.filter((e: DictData) => e.status === 1); // 只显示启用状态的字典数据
-    // return dictOptions || [];
-    return [];
+    const dictDataList = await getDictDataListByTypeId(currentField.dictTypeId);
+    const dictOptions = dictDataList?.filter((e: DictData) => e.status === 1); // 只显示启用状态的字典数据
+    return dictOptions || [];
   } else if (currentField.options?.length) {
     const newOptions = currentField.options.map((ele: EntityFieldOption) => ({
       id: ele.optionUuid || ele.id,
