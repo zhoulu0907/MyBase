@@ -489,7 +489,8 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                   const isMain = ele.tableName && ele.tableName === mainEntity.tableName;
                   // 同一个子表
                   const isSameSub = !ele.tableName || !dataField || ele.tableName === dataField;
-                  return !isTable && !isMain && isSameSub;
+                  const isForm = isFormComponent(ele.type || '');
+                  return !isTable && !isMain && isSameSub && isForm;
                 });
 
                 // setTimeout(() => {
