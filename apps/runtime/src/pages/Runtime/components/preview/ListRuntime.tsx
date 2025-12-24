@@ -1,6 +1,7 @@
 import DevelopEmpty from '@/assets/images/develop_empty.svg';
 
 import { Spin } from '@arco-design/web-react';
+import { PageType } from '@onebase/app';
 import {
   EDITOR_TYPES,
   getComponentWidth,
@@ -9,7 +10,6 @@ import {
   useListEditorSignal,
   type GridItem
 } from '@onebase/ui-kit';
-import { PageType } from '@onebase/app';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { Fragment, useEffect, useState } from 'react';
 import styles from './index.module.less';
@@ -44,6 +44,10 @@ const ListRuntime: React.FC<ListRuntimeProps> = ({ pageSetId, runtime, showFromP
       loadData();
     }
   }, [pageSetId]);
+
+  useEffect(() => {
+    console.log('listComponents: ', listComponents.value);
+  }, [listComponents.value]);
 
   return (
     <>
