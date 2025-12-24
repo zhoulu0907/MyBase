@@ -12,8 +12,11 @@ import {
   TIME_12_FORMAT,
   TIME_FORMAT,
   FORM_COMPONENT_TYPES,
-  usePageEditorSignal
+  usePageEditorSignal,
+  getFieldOptionsConfig,
+  useAppEntityStore
 } from '@onebase/ui-kit';
+import type { DictData } from '@onebase/platform-center';
 import { useSignals } from '@preact/signals-react/runtime';
 import { useEffect, useState } from 'react';
 import styles from '../../index.module.less';
@@ -33,6 +36,7 @@ const DynamicDefaultValueConfig: React.FC<DynamicDefaultValueConfigProps> = ({
   id
 }) => {
   useSignals();
+  const { mainEntity, subEntities } = useAppEntityStore();
 
   const defaultValueConfigKey = item.key || 'defaultValueConfig';
 
@@ -47,9 +51,21 @@ const DynamicDefaultValueConfig: React.FC<DynamicDefaultValueConfigProps> = ({
   const [errorText, setErrorText] = useState('');
   // 公式计算弹窗
   const [formulaVisible, setFormulaVisible] = useState<boolean>(false);
+  // 单选、多选下拉
+  const [options, setOptions] = useState<DictData[]>([]);
 
   useEffect(() => {
-    // todo 开关
+    if (
+      componentSchema?.type === FORM_COMPONENT_TYPES.RADIO ||
+      componentSchema?.type === FORM_COMPONENT_TYPES.CHECKBOX ||
+      componentSchema?.type === FORM_COMPONENT_TYPES.SELECT_ONE ||
+      componentSchema?.type === FORM_COMPONENT_TYPES.SELECT_MUTIPLE
+    ) {
+      getOptions();
+    }
+  }, [configs.dataField]);
+
+  useEffect(() => {
     if (componentSchema?.type === FORM_COMPONENT_TYPES.SWITCH) {
       const newValue = configs[defaultValueConfigKey].customValue === true ? 'true' : 'false';
       setDefaultValueConfig((prev) => ({ ...prev, ...configs[defaultValueConfigKey], customValue: newValue }));
@@ -57,6 +73,11 @@ const DynamicDefaultValueConfig: React.FC<DynamicDefaultValueConfigProps> = ({
       setDefaultValueConfig((prev) => ({ ...prev, ...configs[defaultValueConfigKey] }));
     }
   }, [configs[defaultValueConfigKey]]);
+
+  const getOptions = async () => {
+    const newOptions = await getFieldOptionsConfig(configs.dataField, mainEntity, subEntities);
+    setOptions(newOptions);
+  };
 
   const handleChange = (key: string, value: boolean | string) => {
     const newConfig = { ...configs[defaultValueConfigKey], [key]: value };
@@ -163,10 +184,40 @@ const DynamicDefaultValueConfig: React.FC<DynamicDefaultValueConfigProps> = ({
         );
       case FORM_COMPONENT_TYPES.RADIO:
       case FORM_COMPONENT_TYPES.SELECT_ONE:
+        return (
+          <Select
+            value={defaultValueConfig?.customValue}
+            getPopupContainer={getPopupContainer}
+            onChange={(value) => {
+              handleChange('customValue', value);
+            }}
+          >
+            {options.map((ele, index: number) => (
+              <Select.Option key={index} value={ele.id}>
+                {ele.label}
+              </Select.Option>
+            ))}
+          </Select>
+        );
 
       case FORM_COMPONENT_TYPES.CHECKBOX:
       case FORM_COMPONENT_TYPES.SELECT_MUTIPLE:
-        
+        return (
+          <Select
+            mode="multiple"
+            value={defaultValueConfig?.customValue}
+            getPopupContainer={getPopupContainer}
+            onChange={(value) => {
+              handleChange('customValue', value);
+            }}
+          >
+            {options.map((ele, index: number) => (
+              <Select.Option key={index} value={ele.id}>
+                {ele.label}
+              </Select.Option>
+            ))}
+          </Select>
+        );
 
       default:
         return (
