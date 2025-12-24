@@ -44,7 +44,10 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
   const { subTableDataLength } = pagesRuntimeSignal;
 
   // 判断拖拽的组件是否是表单组件
-  const isFormComponent = (type: string): boolean => {
+  const isFormComponent = (type?: string): boolean => {
+    if (!type) {
+      return false;
+    }
     let isForm = false;
     const keys = Object.keys(FORM_COMPONENT_TYPES);
     for (let key of keys) {
@@ -104,7 +107,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
       return;
     }
     // 只能拖拽表单 && 不能是子表单
-    const isForm = isFormComponent(itemType || '');
+    const isForm = isFormComponent(itemType);
     if (!itemType || !isForm || itemType === FORM_COMPONENT_TYPES.SUB_TABLE) {
       if (cpID) {
         const updatedColumns = subTableComponents[cpID]?.filter((cp) => cp.id !== cpID);
@@ -489,7 +492,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                   const isMain = ele.tableName && ele.tableName === mainEntity.tableName;
                   // 同一个子表
                   const isSameSub = !ele.tableName || !dataField || ele.tableName === dataField;
-                  const isForm = isFormComponent(ele.type || '');
+                  const isForm = isFormComponent(ele.type);
                   return !isTable && !isMain && isSameSub && isForm;
                 });
 
