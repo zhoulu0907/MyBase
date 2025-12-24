@@ -672,6 +672,7 @@ const XTable = memo(
                   tableColumns={finalColumns}
                   menuId={curMenu.value?.id}
                   tableName={tableName}
+                  refresh={refresh}
                 />
               )}
             </div>
