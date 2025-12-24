@@ -6,7 +6,7 @@ import Login from './pages/Login';
 import MyAppPage from './pages/MyApp';
 import Runtime from './pages/Runtime';
 import SettingPage from './pages/Setting';
-import ThirdLogin from './pages/Login/thirdLogin';
+import ThirdLogin from './pages/thirdLogin';
 
 function AppContent() {
   Message.config({

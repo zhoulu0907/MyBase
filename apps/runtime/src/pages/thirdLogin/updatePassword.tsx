@@ -5,12 +5,16 @@ import { useState } from 'react';
 import { forgotPWD, sendVerifyCodeApi, type forgotPWDParams } from '@onebase/platform-center';
 import { getPublicKey, sm2Encrypt, VerifyInput } from '@onebase/common';
 import { phoneValidator } from '@/utils/validator';
+import { ThirdLoginType } from '@/constants';
 
 interface IConfirmInfoProps {
+  mobile: string;
   tenantId: string;
+  setLoginType: (data: string) => void;
+  setVisibleUpdatePwd:  (data: boolean) => void;
   onGoBack: () => void;
 }
-const UpdatePasswordForm: React.FC<IConfirmInfoProps> = ({ tenantId, onGoBack }) => {
+const UpdatePasswordForm: React.FC<IConfirmInfoProps> = ({ tenantId, mobile, setLoginType,setVisibleUpdatePwd,  onGoBack }) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState<boolean>(false);
   const [verifyCode, setVerifyCode] = useState<string>('');
@@ -29,7 +33,11 @@ const UpdatePasswordForm: React.FC<IConfirmInfoProps> = ({ tenantId, onGoBack })
         password: values.password,
         verifyCode: verifyCode
       };
-      await forgotPWD(params, headers);
+      const res = await forgotPWD(params, headers);
+      if(res) {
+        setVisibleUpdatePwd(false);
+        setLoginType(ThirdLoginType.PASSWORD);
+      }
     } catch (error) {
       console.log('error');
     } finally {
@@ -46,7 +54,14 @@ const UpdatePasswordForm: React.FC<IConfirmInfoProps> = ({ tenantId, onGoBack })
       <Typography.Title heading={2}>找回密码</Typography.Title>
 
       {/* 表单区域 */}
-      <Form layout="vertical" form={form} style={{ marginTop: '40px' }}>
+      <Form
+        layout="vertical"
+        form={form}
+        style={{ marginTop: '40px' }}
+        initialValues={{
+          mobile: mobile
+        }}
+      >
         <Form.Item
           label="手机号"
           field="mobile"
