@@ -12,6 +12,8 @@ import com.mybatisflex.core.query.QueryWrapper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import static com.cmsr.onebase.framework.data.base.BaseDO.CREATE_TIME;
@@ -115,5 +117,18 @@ public class DictTypeRepository extends BaseDataRepository<SystemDictTypeMapper,
         }
 
         return queryWrapper;
+    }
+
+    /**
+     * 根据 ID 集合批量查询字典类型
+     *
+     * @param ids ID集合
+     * @return 字典类型列表
+     */
+    public List<DictTypeDO> findByIds(Collection<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return list(query().in(ID, ids));
     }
 }

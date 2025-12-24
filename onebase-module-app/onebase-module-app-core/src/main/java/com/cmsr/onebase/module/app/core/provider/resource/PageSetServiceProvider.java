@@ -52,6 +52,9 @@ public class PageSetServiceProvider {
 
     public Long getPageSetIdByMenuId(Long menuId) {
         AppMenuDO appMenuDO = appMenuRepository.getById(menuId);
+        if (appMenuDO == null) {
+            return null;
+        }
         AppResourcePagesetDO pagesetDO = appPageSetRepository.findPageSetByAppIdAndMenuUuid(
                 appMenuDO.getApplicationId(),
                 appMenuDO.getMenuUuid());

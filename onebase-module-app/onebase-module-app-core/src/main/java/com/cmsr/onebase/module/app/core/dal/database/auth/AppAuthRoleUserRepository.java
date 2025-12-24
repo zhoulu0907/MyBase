@@ -73,4 +73,10 @@ public class AppAuthRoleUserRepository extends ServiceImpl<AppAuthRoleUserMapper
         return list(queryWrapper);
     }
 
+    public boolean existsByUserIdAndRoleId(Long roleId, Long userId) {
+        QueryWrapper queryWrapper = this.query()
+                .eq(AppAuthRoleUserDO::getUserId, userId)
+                .eq(AppAuthRoleUserDO::getRoleId, roleId);
+        return this.exists(queryWrapper);
+    }
 }

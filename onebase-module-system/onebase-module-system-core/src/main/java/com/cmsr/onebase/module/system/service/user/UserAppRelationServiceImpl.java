@@ -4,15 +4,18 @@ import com.cmsr.onebase.framework.common.enums.CorpStatusEnum;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
 import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
+import com.cmsr.onebase.module.app.api.auth.AppAuthRoleUser;
 import com.cmsr.onebase.module.system.dal.database.UserAppRelationDataRepository;
-import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.UserAppRelationDO;
-import com.cmsr.onebase.module.system.vo.user.*;
+import com.cmsr.onebase.module.system.vo.user.UserAppPageReqVO;
+import com.cmsr.onebase.module.system.vo.user.UserAppRelationInertReqVO;
+import com.cmsr.onebase.module.system.vo.user.UserAppVO;
+import com.cmsr.onebase.module.system.vo.user.UserRelationAppReqVO;
 import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,7 +36,7 @@ public class UserAppRelationServiceImpl implements UserAppRelationService {
 
     @Resource
     @Lazy // 延迟，避免循环依赖报错
-    private UserService          userService;
+    private UserService userService;
 
     @Resource
     private UserAppRelationDataRepository userAppRelationDataRepository;
@@ -41,10 +44,12 @@ public class UserAppRelationServiceImpl implements UserAppRelationService {
     @Resource
     private AppApplicationApi appApplicationApi;
 
+    @Autowired
+    private AppAuthRoleUser appAuthRoleUser;
 
     @Override
     public List<UserAppRelationDO> getUserAppRelationList(UserAppPageReqVO userAppPageReqVO) {
-       return userAppRelationDataRepository.getUserAppRelationList(userAppPageReqVO);
+        return userAppRelationDataRepository.getUserAppRelationList(userAppPageReqVO);
     }
 
     @Override
@@ -89,7 +94,10 @@ public class UserAppRelationServiceImpl implements UserAppRelationService {
                 corpAppRelationDO.setStatus(CorpStatusEnum.ENABLE.getValue());
                 corpAppRelationDO.setUserId(userAppReqVO.getUserId());
                 userAppRelationDataRepository.insert(corpAppRelationDO);
+                appAuthRoleUser.grantThirdpartyUserPrivileges(userAppReqVO.getUserId(), appId);
             });
+
+            // TODO: 添加应用外部用户相关代码
         }
     }
 
