@@ -20,10 +20,12 @@ const ConfirmInfoForm:React.FC<IConfirmInfoProps> = ({ appId, tenantId, onGoBack
     try {
       setLoading(true);
       // 先验证表单
-      await form.validate();
+      const values = await form.validate();
       const params: createExternalUserAppParams = {
         userId: tokenInfo?.userId || '',
         applicationIdList:[appId],
+        email: values?.email || '',
+        nickName: values?.nickName || ''
       };
       const response = await createExternalUserApp(params);
 
