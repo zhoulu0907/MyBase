@@ -51,9 +51,10 @@ const XUserSelect = memo((props: XUserSelectConfig & { runtime?: boolean; detail
       className="inputTextWrapperOBMobile"
       label={label.display && <Ellipsis text={label.text} />}
       field={fieldId}
+      layout={layout}
       rules={rules}
       style={{
-        textAlign: 'right',
+        textAlign: layout === 'vertical' ? 'left' : 'right',
         pointerEvents: (!runtime || detailMode) ? 'none' : 'unset',
         opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
       }}
