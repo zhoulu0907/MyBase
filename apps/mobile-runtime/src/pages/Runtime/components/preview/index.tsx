@@ -40,7 +40,6 @@ import {
   type WorkbenchComponentType,
   type GridItem
 } from '@onebase/ui-kit';
-import { getFileUrlById } from '@onebase/platform-center';
 
 import CustomNav from '@/pages/components/Nav';
 import { fetchSubmitInstance } from '@onebase/app/src/services/app_runtime';
@@ -293,7 +292,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, mainEntity,
           groups[groupIndex] = {};
         }
 
-        const fieldType = subEntities.value[0].childFields.find((v) => v.fieldName === fieldName).fieldType;
+        const fieldType = subEntities.value[0].childFields.find((v) => v.fieldName === fieldName)?.fieldType;
         if (resetImageFile(groups[groupIndex], { fieldType, fieldName }, value)) {
         } else if (fieldType === ENTITY_FIELD_TYPE.DATE.VALUE) {
           groups[groupIndex][fieldName] = value ? dayjs(value).format('YYYY-MM-DD') : '';
@@ -486,7 +485,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, mainEntity,
                   name: item.name,
                   id: item.id,
                   response: item.response || item.id,
-                  url: getFileUrlById(item.id)
+                  status: fieldType === ENTITY_FIELD_TYPE.FILE.VALUE ? 'loaded' : 'loading',
                 };
               });
             } else {
@@ -550,7 +549,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, mainEntity,
                           name: item.name,
                           id: item.id,
                           response: item.response || item.id,
-                          url: getFileUrlById(item.id)
+                          status: fieldType === ENTITY_FIELD_TYPE.FILE.VALUE ? 'loaded' : 'loading',
                         };
                       });
                     } else {

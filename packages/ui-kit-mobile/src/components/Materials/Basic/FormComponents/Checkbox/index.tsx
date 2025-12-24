@@ -64,6 +64,7 @@ const XCheckbox = memo((props: XCheckboxConfig & { runtime?: boolean; detailMode
       field={fieldId}
       label={label.display && <Ellipsis text={label.text} />}
       rules={rules}
+      layout={layout}
       style={{
         textAlign: align || 'right',
         pointerEvents: (!runtime || detailMode) ? 'none' : 'unset',

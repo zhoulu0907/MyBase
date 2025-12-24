@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import PreviewContainer from './components/preview';
-import { ENTITY_TYPE, getEntityFieldsWithChildren, menuSignal, type ChildEntity } from '@onebase/app';
+import { ENTITY_TYPE, getEntityListWithFields, menuSignal, type ChildEntity } from '@onebase/app';
 import { useSignals } from '@preact/signals-react/runtime';
 import { useAppEntityStore } from '@onebase/ui-kit';
 
@@ -38,7 +38,8 @@ const Runtime: React.FC = () => {
       return;
     }
 
-    const entityWithChildren = await getEntityFieldsWithChildren(curMenu.value.entityUuid || sessionEntityUuid);
+    const entityListWithFields = await getEntityListWithFields({ entityUuids: [curMenu.value?.entityUuid || sessionEntityUuid] });
+    const [entityWithChildren] = entityListWithFields;
     if (entityWithChildren) {
       setMainEntity({
         entityId: entityWithChildren.entityId,
@@ -46,7 +47,7 @@ const Runtime: React.FC = () => {
         tableName: entityWithChildren.tableName,
         entityName: entityWithChildren.entityName,
         entityType: ENTITY_TYPE.MAIN,
-        fields: entityWithChildren.parentFields
+        fields: entityWithChildren.fields
       });
       if (entityWithChildren.childEntities && entityWithChildren.childEntities.length > 0) {
         // 返回新Promise对象，当所有输入Promise成功时返回结果数组（顺序与输入一致）
@@ -67,12 +68,22 @@ const Runtime: React.FC = () => {
         setSubEntities({
           entities: subEntities
         });
+      } else {
+        setSubEntities({ entities: [] });
       }
     }
   };
 
   const renderContent =
-    curMenuId.indexOf('TASK-') >= 0 ? null : <PreviewContainer menuId={curMenuId || ''} runtime={true} mainEntity={mainEntity} subEntities={subEntities} pageSetType={curMenu.value?.pagesetType} />;
+    curMenuId.indexOf('TASK-') >= 0 ? null : (
+      <PreviewContainer
+        menuId={curMenuId || ''}
+        runtime={true}
+        mainEntity={mainEntity}
+        subEntities={subEntities}
+        pageSetType={curMenu.value?.pagesetType}
+      />
+    );
   return <div>{renderContent}</div>;
 };
 

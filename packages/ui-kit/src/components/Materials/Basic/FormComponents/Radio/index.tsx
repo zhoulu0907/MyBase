@@ -2,7 +2,7 @@ import { Form, Radio, Tag } from '@arco-design/web-react';
 import { nanoid } from 'nanoid';
 import { memo, useState, useEffect } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
-import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
+import { STATUS_OPTIONS, STATUS_VALUES, DEFAULT_VALUE_TYPES } from '../../../constants';
 import '../index.css';
 import type { XInputRadioConfig } from './schema';
 import { useAppEntityStore } from '@/signals';
@@ -17,6 +17,7 @@ const XRadio = memo((props: XInputRadioConfig & { runtime?: boolean; detailMode?
     dataField,
     tooltip,
     status,
+    defaultValueConfig,
     verify,
     layout,
     direction,
@@ -60,6 +61,7 @@ const XRadio = memo((props: XInputRadioConfig & { runtime?: boolean; detailMode?
           margin: 0,
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
+        initialValue={defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : undefined}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
           <div>{fieldValue?.name || options.find((op) => op.id === fieldValue?.id || op.id === fieldValue)?.label || '--'}</div>

@@ -2,7 +2,7 @@ import { FORM_COMPONENT_TYPES } from '@/components/Materials/componentTypes';
 import { DatePicker, Form } from '@arco-design/web-react';
 import { nanoid } from 'nanoid';
 import { memo, useEffect, useState } from 'react';
-import { STATUS_OPTIONS, STATUS_VALUES, DATE_TIME_FORMAT } from '../../../constants';
+import { STATUS_OPTIONS, STATUS_VALUES, DATE_TIME_FORMAT, DEFAULT_VALUE_TYPES } from '../../../constants';
 import '../index.css';
 import type { XInputDateTimePickerConfig } from './schema';
 import { getPopupContainer, securityEncodeText } from '@/utils';
@@ -46,7 +46,7 @@ const XDateTimePicker = memo((props: XInputDateTimePickerConfig & { runtime?: bo
           margin: 0,
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
-        initialValue={defaultValueConfig?.customValue}
+        initialValue={defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : ''}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
           <div>{fieldValue ? securityEncodeText(security, dayjs(fieldValue).format(DATE_TIME_FORMAT[dateType])):'--'}</div>

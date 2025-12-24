@@ -119,7 +119,9 @@ const XDeptSelect = memo((props: XDeptSelectConfig & { runtime?: boolean; detail
       className="inputTextWrapperOBMobile inputDeptSelectOBMobile"
       label={label.display && <Ellipsis text={label.text} />}
       field={fieldId}
+      layout={layout}
       style={{
+        textAlign: layout === 'vertical' ? 'left' : 'right',
         pointerEvents: runtime ? 'unset' : 'none',
         opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
       }}
@@ -131,11 +133,12 @@ const XDeptSelect = memo((props: XDeptSelectConfig & { runtime?: boolean; detail
           className={styles.deptCell}
           onClick={() => setVisible(true)}
         >
-          {selectedParseDeptName ? <Ellipsis className={styles.selectValue} text={selectedParseDeptName} maxLine={1} /> : <div style={{ color: '#c9cdd4', fontSize: '0.32rem', textAlign: 'right' }}>请选择</div>}
+          {selectedParseDeptName ? <Ellipsis className={`${styles.selectValue} ${layout === 'vertical' ? styles.verticalLayout : ''}`} text={selectedParseDeptName} maxLine={1} /> :
+            <div className={`${styles.selectValue} ${layout === 'vertical' ? styles.verticalLayout : ''}`}>请选择</div>}
           <PopupSwiper visible={visible} close={(e) => handleCancel(e)} direction={popupDirection}>
             <div className={styles.inputDeptSelectPopupContainer}>
               <div className={styles.popupHeaderOBMobile}>
-                <IconArrowBack style={{ fontSize: '0.32rem' }} onClick={(e) => handleCancel(e)} />
+                <IconArrowBack style={{ fontSize: '0.28rem' }} onClick={(e) => handleCancel(e)} />
                 <span>{label?.text}</span>
                 <Button
                   inline

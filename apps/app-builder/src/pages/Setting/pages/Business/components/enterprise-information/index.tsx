@@ -5,6 +5,7 @@ import {
   Descriptions,
   Image,
   Input,
+  InputNumber,
   Message,
   Select,
   Space,
@@ -20,6 +21,7 @@ import {
   updateCorpApi,
   updateCorpAppApi,
   uploadFile,
+  getFileUrlById,
   type CorpAppParams,
   type corpListParams
 } from '@onebase/platform-center';
@@ -267,7 +269,7 @@ const EnterpriseInfoPage: React.FC = () => {
                 {displayCorpLogo(formData?.corpName)}
               </Button>
             ) : (
-              <Image alt="头像" src={avatarUrl} onError={handleImageError} width={160} height={80} />
+              <Image alt="头像" src={getFileUrlById(avatarUrl)} onError={handleImageError} width={160} height={80} />
             )
           }
           label="logo"
@@ -378,8 +380,8 @@ const EnterpriseInfoPage: React.FC = () => {
           value={formData?.userLimit}
           onChange={handleChange.bind(null, 'userLimit')}
           isEdit={isEdited}
-          component={Input}
-          componentProps={{ placeholder: '请输入用户上限' }}
+          component={InputNumber}
+          componentProps={{ placeholder: '请输入用户上限', max: 5000, min: 0 }}
         />
       )
     },

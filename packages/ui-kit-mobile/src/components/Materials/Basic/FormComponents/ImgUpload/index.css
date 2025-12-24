@@ -196,5 +196,7 @@
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-
+  .arco-image .image-loading-container .image-loading {
+    background-color: rgba(0, 0, 0, 0.3);
+  }
 }

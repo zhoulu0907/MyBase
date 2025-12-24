@@ -1,4 +1,10 @@
 import { SimpleRoleVO } from './role';
+
+export interface applicationList {
+  appId: string;
+  appName: string;
+}
+
 export interface UserVO {
   id: string;
   username: string;
@@ -17,6 +23,7 @@ export interface UserVO {
   createTime: Date;
   roles?: SimpleRoleVO[];
   adminType?: UserType;
+  userApplicationList?: applicationList[]
 }
 
 export enum UserType {

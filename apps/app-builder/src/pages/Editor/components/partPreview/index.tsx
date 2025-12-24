@@ -100,7 +100,7 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
   const getFormContent = () => {
     return formComponents.value.map((cp: GridItem) => (
       <Fragment key={cp.id}>
-        {formPageComponentSchemas.value[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+        {formPageComponentSchemas.value[cp.id]?.config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
           <div
             key={cp.id}
             className={styles.componentItem}

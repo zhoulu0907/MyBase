@@ -1,4 +1,5 @@
 export * from './app_bpm';
+export * from './app_dashboard';
 export * from './app_menu';
 export * from './app_resource';
 export * from './app_version';
@@ -7,6 +8,7 @@ export * from './etl';
 export * from './flow';
 export * from './formula';
 export * from './metadata_dataresource';
+export * from './metadata_draft';
 export * from './metadata_entity';
 export * from './metadata_method';
 export * from './metadata_method_v2';
@@ -16,4 +18,3 @@ export * from './role';
 export * from './tag';
 export * from './trigger_flow';
 export * from './upload';
-export * from './app_dashboard';

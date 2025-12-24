@@ -32,17 +32,20 @@ const XSwitch = memo((props: XSwitchConfig & { runtime?: boolean; detailMode?: b
       <Switch
         platform="android"
         text={{ on: fillText?.display ? fillText.checkedText : '', off: fillText?.display ? fillText.uncheckedText : '' }}
+        style={{ textAlign: layout === 'vertical' ? 'left' : 'right'  }}
       />
     );
   };
 
   return (
     <Form.Item
-      className="inputTextWrapperOBMobile switchWrapperOBMobile"
+      className={`inputTextWrapperOBMobile switchWrapperOBMobile ${layout === 'vertical' ? 'verticalLayout' : ''}`}
       field={fieldId}
+      layout={layout}
       label={label.display ? <Ellipsis text={label.text} /> : undefined}
       initialValue={defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : ''}
       style={{
+        textAlign: layout === 'vertical' ? 'left' : 'right',
         pointerEvents: (!runtime || detailMode) ? 'none' : 'unset',
         opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
       }}

@@ -1,16 +1,24 @@
 .inputTextWrapperOBMobile {
   width: 100%;
-  min-height: 1.08rem;
   margin-bottom: 0;
-  padding: 0 0.32rem;
+  padding: 0 0.28rem;
   box-sizing: border-box;
   border-bottom: 0.5px solid #e5e6eb !important;
   align-items: center !important;
 
   .readonlyText {
-    font-size: 0.32rem;
+    font-size: 0.28rem;
     color: #1d2129;
-    text-align: right;
+
+    .textarea {
+      padding-right: 0;
+
+      .arco-textarea {
+        text-align: right;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+    }
   }
 
   /* 彻底隐藏数字输入框右侧上下箭头 */
@@ -39,17 +47,10 @@
   }
 
   .arco-form-item-control-wrapper .arco-input-wrap.single-line {
-    height: 1.08rem;
-    line-height: 1.08rem;
     border: none !important;
     box-shadow: none !important;
   }
 
-  .arco-form-item-control {
-    /* display: unset; */
-    padding: 0;
-    justify-content: flex-end;
-  }
 
   .arco-form-item-message {
     margin: 0.08rem 0;
@@ -58,10 +59,8 @@
   }
 
   .arco-input {
-    line-height: 1.08rem;
-    height: 1.08rem;
     padding: 0;
-    font-size: 0.32rem;
+    font-size: 0.28rem;
     border: none;
 
     &:hover,
@@ -72,10 +71,8 @@
   }
 
   .arco-input-prefix {
-    line-height: 1.08rem;
-    height: 1.08rem;
     padding-right: 0.32rem;
-    font-size: 0.32rem;
+    font-size: 0.28rem;
   }
 
   .arco-input-container .arco-input-label {
@@ -88,7 +85,6 @@
 
   .arco-cell-inner {
     height: auto;
-    min-height: 1.08rem;
   }
 }
 
@@ -119,4 +115,8 @@
 .arco-cell.without-group.bordered::before,
 .arco-cell.without-group.bordered::after {
   border: none !important;
+}
+
+.arco-ellipsis {
+  font-size: 0.28rem;
 }
