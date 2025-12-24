@@ -598,7 +598,8 @@ export default function EditorWorkspace() {
               if (tableName && fieldName) {
                 // 获取当前字段数据源配置
                 const currentField = mainEntity.fields?.find((ele: AppEntityField) => ele.fieldName === fieldName);
-                if (currentField) {
+                // 非系统字段
+                if (currentField && currentField.isSystemField !== 1) {
                   // 数据长度 dataLength
                   // 小数位数 decimalPlaces
                   // 默认值 defaultValue => defaultValueConfig
