@@ -15,6 +15,9 @@ export interface TokenInfo {
   loginURL?: string;
   loginSource: string;   //控制是否显示企业管理后台
   userUnRegistFlag?: boolean; //控制外部用户是否需要注册
+  userAppRelationFlag?: boolean;  //是否关联应用
+  email?: string;
+  nickName?: string;
 }
 
 export class TokenManager {

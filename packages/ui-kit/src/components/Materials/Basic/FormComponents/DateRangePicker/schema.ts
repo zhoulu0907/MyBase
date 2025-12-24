@@ -29,7 +29,9 @@ import {
   WIDTH_VALUES,
   DEFAULT_VALUE_TYPES,
   DATE_EXTREME_TYPE,
-  DATE_DYNAMIC_TYPE
+  DATE_DYNAMIC_TYPE,
+  DATE_DYNAMIC_CUSTOM_TYPE,
+  DATE_DYNAMIC_CUSTOM_VALUE_TYPE
 } from '../../../constants';
 import type {
   IDataFieldConfigType,
@@ -51,6 +53,7 @@ import type {
   ISecurityConfigType,
   TRadioDefaultType
 } from '../../../types';
+import { ManipulateType } from 'dayjs';
 
 export interface XInputDateRangePickerSchema {
   editData: TXInputDateRangePickerEditData;
@@ -124,11 +127,17 @@ export interface XInputDateRangePickerConfig extends ICommonBaseType {
     earliestType: string;
     earliestStaticValue: string;
     earliestDynamicValue: string;
+    earliestCustomType: string;
+    earliestCustomValue: number;
+    earliestCustomValueType: ManipulateType;
     earliestVariableValue: string;
     latestLimit: boolean;
     latestType: string;
     latestStaticValue: string;
     latestDynamicValue: string;
+    latestCustomType: string;
+    latestCustomValue: number;
+    latestCustomValueType: ManipulateType;
     latestVariableValue: string;
   };
 
@@ -202,13 +211,11 @@ const XDateRangePicker: XInputDateRangePickerSchema = {
       key: 'startDefaultValueConfig',
       name: '开始日期默认值',
       type: CONFIG_TYPES.DEFAULT_VALUE,
-      valueType: 'date'
     },
     {
       key: 'endDefaultValueConfig',
       name: '结束日期默认值',
       type: CONFIG_TYPES.DEFAULT_VALUE,
-      valueType: 'date'
     },
     {
       key: 'dateFormat',
@@ -265,11 +272,17 @@ const XDateRangePicker: XInputDateRangePickerSchema = {
       earliestType: DATE_EXTREME_TYPE.DYNAMIC,
       earliestStaticValue: '',
       earliestDynamicValue: DATE_DYNAMIC_TYPE.TODAY,
+      earliestCustomType: DATE_DYNAMIC_CUSTOM_TYPE.CURRENT,
+      earliestCustomValue: 1,
+      earliestCustomValueType: DATE_DYNAMIC_CUSTOM_VALUE_TYPE.DAY,
       earliestVariableValue: '',
       latestLimit: false,
       latestType: DATE_EXTREME_TYPE.DYNAMIC,
       latestStaticValue: '',
       latestDynamicValue: DATE_DYNAMIC_TYPE.TODAY,
+      latestCustomType: DATE_DYNAMIC_CUSTOM_TYPE.CURRENT,
+      latestCustomValue: 1,
+      latestCustomValueType: DATE_DYNAMIC_CUSTOM_VALUE_TYPE.DAY,
       latestVariableValue: ''
     },
     verify: {

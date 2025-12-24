@@ -9,7 +9,7 @@ import {
   widthConfig,
   dateRangeConfig,
   type ICommonBaseType,
-  type TDateTypeSelectKeyType,
+  type TDateTimeTypeSelectKeyType,
   type TLayoutSelectKeyType,
   type TStatusSelectKeyType,
   type TAlignSelectKeyType,
@@ -21,6 +21,8 @@ import {
   CONFIG_TYPES,
   DATE_OPTIONS,
   DATE_VALUES,
+  DATE_TIME_VALUES,
+  DATE_TIME_OPTIONS,
   LAYOUT_OPTIONS,
   LAYOUT_VALUES,
   STATUS_OPTIONS,
@@ -29,7 +31,9 @@ import {
   WIDTH_VALUES,
   DEFAULT_VALUE_TYPES,
   DATE_EXTREME_TYPE,
-  DATE_DYNAMIC_TYPE
+  DATE_DYNAMIC_TYPE,
+  DATE_DYNAMIC_CUSTOM_TYPE,
+  DATE_DYNAMIC_CUSTOM_VALUE_TYPE
 } from '../../../constants';
 import type {
   IDataFieldConfigType,
@@ -48,8 +52,10 @@ import type {
   IDefaultValueConfigType,
   IAlignConfigType,
   ISecurityConfigType,
-  IDateRangeConfigType
+  IDateRangeConfigType,
+  IDateFormatConfigType
 } from '../../../types';
+import { ManipulateType } from 'dayjs';
 
 export interface XInputDateTimePickerSchema {
   editData: TXInputDateTimePickerEditData;
@@ -62,6 +68,7 @@ export type TXInputDateTimePickerEditData = Array<
   | ITooltipConfigType
   | IDataFieldConfigType
   | IDefaultValueConfigType
+  | IDateFormatConfigType
   | IDateRangeConfigType
   | IVerifyConfigType
   | IStatusConfigType<TStatusSelectKeyType>
@@ -106,7 +113,7 @@ export interface XInputDateTimePickerConfig extends ICommonBaseType {
    * 日期格式： 年、年月、年月日、年月日时
    * 可选值: 'YEAR' | 'MONTH' | 'DATE' | 'FULL'
    */
-  dateType: TDateTypeSelectKeyType;
+  dateType: TDateTimeTypeSelectKeyType;
 
   /**
    * 可选范围
@@ -121,11 +128,17 @@ export interface XInputDateTimePickerConfig extends ICommonBaseType {
     earliestType: string;
     earliestStaticValue: string;
     earliestDynamicValue: string;
+    earliestCustomType: string;
+    earliestCustomValue: number;
+    earliestCustomValueType: ManipulateType;
     earliestVariableValue: string;
     latestLimit: boolean;
     latestType: string;
     latestStaticValue: string;
     latestDynamicValue: string;
+    latestCustomType: string;
+    latestCustomValue: number;
+    latestCustomValueType: ManipulateType;
     latestVariableValue: string;
   };
 
@@ -199,7 +212,15 @@ const XDateTimePicker: XInputDateTimePickerSchema = {
       key: 'defaultValueConfig',
       name: '默认值',
       type: CONFIG_TYPES.DEFAULT_VALUE,
-      valueType: 'dateTime'
+    },
+    {
+      key: 'dateFormat',
+      name: '日期时间格式',
+      type: CONFIG_TYPES.DATE_FORMAT,
+      range: [
+        { label: DATE_TIME_OPTIONS.SECOND, value: DATE_TIME_VALUES[DATE_TIME_OPTIONS.SECOND] },
+        { label: DATE_TIME_OPTIONS.MINUTE, value: DATE_TIME_VALUES[DATE_TIME_OPTIONS.MINUTE] },
+      ]
     },
     dateRangeConfig,
     {
@@ -235,7 +256,7 @@ const XDateTimePicker: XInputDateTimePickerSchema = {
       customValue: '',
       formulaValue: ''
     },
-    dateType: DATE_VALUES[DATE_OPTIONS.DATE],
+    dateType: DATE_TIME_VALUES[DATE_TIME_OPTIONS.SECOND],
     dateRange: {
       weekLimit: false,
       week: [],
@@ -243,11 +264,17 @@ const XDateTimePicker: XInputDateTimePickerSchema = {
       earliestType: DATE_EXTREME_TYPE.DYNAMIC,
       earliestStaticValue: '',
       earliestDynamicValue: DATE_DYNAMIC_TYPE.TODAY,
+      earliestCustomType: DATE_DYNAMIC_CUSTOM_TYPE.CURRENT,
+      earliestCustomValue: 1,
+      earliestCustomValueType: DATE_DYNAMIC_CUSTOM_VALUE_TYPE.DAY,
       earliestVariableValue: '',
       latestLimit: false,
       latestType: DATE_EXTREME_TYPE.DYNAMIC,
       latestStaticValue: '',
       latestDynamicValue: DATE_DYNAMIC_TYPE.TODAY,
+      latestCustomType: DATE_DYNAMIC_CUSTOM_TYPE.CURRENT,
+      latestCustomValue: 1,
+      latestCustomValueType: DATE_DYNAMIC_CUSTOM_VALUE_TYPE.DAY,
       latestVariableValue: ''
     },
     verify: {

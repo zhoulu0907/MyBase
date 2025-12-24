@@ -1,0 +1,28 @@
+.buttonWrapper {
+  width: 100%;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1d2129;
+  margin-bottom: 12px;
+}
+
+.button {
+  width: 100%;
+  outline: none;
+  transition: opacity 0.2s;
+}
+
+/* 按钮背景色 */
+.button :global(.arco-button),
+.button :global(.arco-button.arco-button-type-primary),
+.button :global(.arco-button.arco-button-size-huge) {
+  background-color: var(--custom-bg-color, rgb(var(--primary-6))) !important;
+  min-height: 48px;
+  height: 48px;
+  box-sizing: border-box;
+}

@@ -44,6 +44,12 @@ import ColumnLayoutIcon from '@/assets/images/cp/col_layout_cp.svg';
 import ColpaseLayoutIcon from '@/assets/images/cp/colpase_layout_cp.svg';
 import TabsLayoutIcon from '@/assets/images/cp/tabs_layout_cp.svg';
 
+import QuickEntryIcon from '@/assets/images/cp/quick_entry_cp.svg';
+import RichTextEditorWorkbenchIcon from '@/assets/images/cp/rich_text_editor_workbench_cp.svg';
+import ButtonWorkbenchIcon from '@/assets/images/cp/button_workbench_cp.svg';
+
+import CarouselWorkbenchIcon from '@/assets/images/cp/carousel_workbench_cp.svg';
+
 export const ICON_Map: Record<string, React.ReactNode> = {
   // 表单组件
   'text_input_cp.svg': <img src={TextInputIcon} alt="XInputText" />,
@@ -94,7 +100,15 @@ export const ICON_Map: Record<string, React.ReactNode> = {
   // 布局组件
   'col_layout_cp.svg': <img src={ColumnLayoutIcon} alt="XColumnLayout" />,
   'tabs_layout_cp.svg': <img src={TabsLayoutIcon} alt="XTabsLayout" />,
-  'colpase_layout_cp.svg': <img src={ColpaseLayoutIcon} alt="XColpaseLayout" />
+  'colpase_layout_cp.svg': <img src={ColpaseLayoutIcon} alt="XColpaseLayout" />,
+
+  // 工作台基础组件
+  'quick_entry_cp.svg': <img src={QuickEntryIcon} alt="XQuickEntry" />,
+  'rich_text_editor_workbench_cp.svg': <img src={RichTextEditorWorkbenchIcon} alt="XRichTextEditorWorkbench" />,
+  'button_workbench_cp.svg': <img src={ButtonWorkbenchIcon} alt="XButtonWorkbench" />,
+  
+  // 工作台高级组件
+  'carousel_workbench_cp.svg': <img src={CarouselWorkbenchIcon} alt="XCarouselWorkbench" />,
 };
 
 // TODO 图标更新
@@ -148,5 +162,13 @@ export const ICON_Map_By_Type: Record<string, React.ReactNode> = {
   // 布局组件
   XColumnLayout: <img src={ColumnLayoutIcon} alt="XColumnLayout" />,
   XTabsLayout: <img src={TabsLayoutIcon} alt="XTabsLayout" />,
-  XColpaseLayout: <img src={ColpaseLayoutIcon} alt="XColpaseLayout" />
+  XColpaseLayout: <img src={ColpaseLayoutIcon} alt="XColpaseLayout" />,
+
+  // 工作台基础组件
+  XQuickEntry: <img src={QuickEntryIcon} alt="XQuickEntry" />,
+  XRichTextEditorWorkbench: <img src={RichTextEditorWorkbenchIcon} alt="XRichTextEditorWorkbench" />,
+  XButtonWorkbench: <img src={ButtonWorkbenchIcon} alt="XButtonWorkbench" />,
+
+  // 工作台高级组件
+  XCarouselWorkbench: <img src={CarouselWorkbenchIcon} alt="XCarouselWorkbench" />,
 };

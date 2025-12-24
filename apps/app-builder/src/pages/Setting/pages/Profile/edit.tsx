@@ -1,11 +1,11 @@
+import { filterSpace } from '@/utils';
+import { emailValidator, phoneValidator } from '@/utils/validator';
 import { Button, Form, Input, Message, Select, Spin, Tabs } from '@arco-design/web-react';
 import { UploadAvatarComponent, UserPermissionManager } from '@onebase/common';
 import { getLoginedUser, updateLoginedUser, updateLoginedUserPwd, uploadFile } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import styles from './index.module.less';
-import { emailValidator, phoneValidator } from '@/utils/validator';
-import { filterSpace } from '@/utils';
 
 const TabPane = Tabs.TabPane;
 const { Item: FormItem } = Form;
@@ -56,7 +56,7 @@ const ProfileEditPage: React.FC<IEditPageProps> = ({ avatarUrl, setAvatarUrl }) 
   const handleSubmit = async () => {
     try {
       const values = await form.validate();
-      const userPermissionInfo:any = UserPermissionManager.getUserPermissionInfo();
+      const userPermissionInfo: any = UserPermissionManager.getUserPermissionInfo();
       const req = {
         nickname: values.nickname,
         mobile: values.mobile?.includes('*') ? null : filterSpace(values.mobile),
@@ -64,11 +64,14 @@ const ProfileEditPage: React.FC<IEditPageProps> = ({ avatarUrl, setAvatarUrl }) 
         avatar: avatarUrl
       };
       await updateLoginedUser(req);
-      UserPermissionManager.setUserPermissionInfo({...userPermissionInfo, user: {
-        ...userPermissionInfo.user,
-        mobile: values.mobile,
-        nickname: values.nickname,
-      }});
+      UserPermissionManager.setUserPermissionInfo({
+        ...userPermissionInfo,
+        user: {
+          ...userPermissionInfo.user,
+          mobile: values.mobile,
+          nickname: values.nickname
+        }
+      });
       form.resetFields();
       setEncryptedMobile('');
       setEncryptedEmail('');

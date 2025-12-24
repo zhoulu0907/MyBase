@@ -35,6 +35,7 @@ import type {
   ITooltipConfigType,
   IUploadLimitConfigType,
   IUploadSizeConfigType,
+  IUploadButtonConfigType,
   IVerifyConfigType,
   IWidthConfigType,
   TBooleanDefaultType,
@@ -60,6 +61,7 @@ export type TXInputFileUploadEditData = Array<
   | IVerifyConfigType
   | IUploadSizeConfigType
   | IUploadLimitConfigType
+  | IUploadButtonConfigType
   | IStatusConfigType<TStatusSelectKeyType>
   | ILayoutConfigType<TLayoutSelectKeyType>
   | IWidthConfigType<TWidthSelectKeyType>
@@ -161,33 +163,13 @@ const XFileUpload: XInputFileUploadSchema = {
         },
       ]
     },
+
     {
       key: 'buttonName',
       name: '按钮名称',
-      type: CONFIG_TYPES.TEXT_INPUT
+      type: CONFIG_TYPES.UPLOAD_BUTTON
     },
-    {
-      key: 'buttonType',
-      name: '按钮类型',
-      type: CONFIG_TYPES.STATUS_RADIO,
-      range: [
-        {
-          key: UPLOAD_BUTTON_TYPES.PRIMARY,
-          text: '主要按钮',
-          value: UPLOAD_BUTTON_TYPES.PRIMARY
-        },
-        {
-          key: UPLOAD_BUTTON_TYPES.SECONDARY,
-          text: '次要按钮',
-          value: UPLOAD_BUTTON_TYPES.SECONDARY
-        },
-        {
-          key: UPLOAD_BUTTON_TYPES.OUTLINE,
-          text: '线框按钮',
-          value: UPLOAD_BUTTON_TYPES.OUTLINE
-        }
-      ]
-    },
+  
     {
       key: 'showDownload',
       name: '支持下载',

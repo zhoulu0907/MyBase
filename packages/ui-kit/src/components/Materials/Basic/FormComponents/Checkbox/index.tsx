@@ -2,7 +2,7 @@ import { Checkbox, Form, Space, Tag } from '@arco-design/web-react';
 import { nanoid } from 'nanoid';
 import { memo, useEffect, useState } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
-import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
+import { STATUS_OPTIONS, STATUS_VALUES, DEFAULT_VALUE_TYPES } from '../../../constants';
 import '../index.css';
 import type { XInputCheckboxConfig } from './schema';
 import { getFieldOptionsConfig } from '@/utils';
@@ -17,6 +17,7 @@ const XCheckbox = memo((props: XInputCheckboxConfig & { runtime?: boolean; detai
     dataField,
     tooltip,
     status,
+    defaultValueConfig,
     verify,
     layout,
     direction,
@@ -59,6 +60,7 @@ const XCheckbox = memo((props: XInputCheckboxConfig & { runtime?: boolean; detai
           margin: 0,
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
+        initialValue={defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : undefined}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
           <Space wrap size={[4, 4]}>

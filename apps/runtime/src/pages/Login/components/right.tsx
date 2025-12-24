@@ -3,7 +3,7 @@ import { DynamicIcon } from '@/components/DynamicIcon';
 import { appInfoSignal } from '@/store/app';
 import { Button, Checkbox, Form, Input, Message, Space, Typography } from '@arco-design/web-react';
 import { IconLock, IconMobile, IconUser } from '@arco-design/web-react/icon';
-import { getApplication } from '@onebase/app';
+import { getApplicationLeast } from '@onebase/app';
 import {
   getHashQueryParam,
   getOrCreateDeviceInfo,
@@ -118,7 +118,7 @@ const Right: React.FC = () => {
 
   const handleGetApplication = async () => {
     if (appId) {
-      const res = await getApplication({ id: appId });
+      const res = await getApplicationLeast({ id: appId });
       if (res) {
         setCurAppInfo(res);
       }

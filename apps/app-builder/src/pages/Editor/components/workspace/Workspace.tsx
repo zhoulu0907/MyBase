@@ -527,7 +527,7 @@ export default function EditorWorkspace() {
                   }
                   setSubTableComponents(cpID, subFieldComponents);
                   entityList.push({ displayName: cpName, id: cpID, type: cpType });
-                } else if (item.entityId && item.entityId !== mainEntity.entityId) {
+                } else if (item.tableName && item.tableName !== mainEntity.tableName) {
                   // 子表 数据字段  不做任何操作
                 } else {
                   // 主表字段、普通字段
@@ -598,7 +598,8 @@ export default function EditorWorkspace() {
               if (tableName && fieldName) {
                 // 获取当前字段数据源配置
                 const currentField = mainEntity.fields?.find((ele: AppEntityField) => ele.fieldName === fieldName);
-                if (currentField) {
+                // 非系统字段
+                if (currentField && currentField.isSystemField !== 1) {
                   // 数据长度 dataLength
                   // 小数位数 decimalPlaces
                   // 默认值 defaultValue => defaultValueConfig
