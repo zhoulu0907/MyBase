@@ -25,10 +25,10 @@ tenant-id: {{adminTenantId}}
 }
 
 ### 3. 删除项目
-POST {{baseUrl}}/dashboard/delete?id=1234
+POST {{baseUrl}}/dashboard/delete?id=111
 Content-Type: application/json
 Authorization: Bearer {{token}}
-tenant-id: {{adminTenantId}}
+tenant-id: 156421901678804992
 
 ### 4. 修改项目
 POST {{baseUrl}}/dashboard/edit

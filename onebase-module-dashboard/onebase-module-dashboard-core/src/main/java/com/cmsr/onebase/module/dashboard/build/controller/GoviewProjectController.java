@@ -1,10 +1,13 @@
 package com.cmsr.onebase.module.dashboard.build.controller;
 
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.date.DateUtil;
 import com.cmsr.onebase.framework.common.annotaion.ApiSignIgnore;
+import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.dashboard.build.common.base.BaseController;
 import com.cmsr.onebase.module.dashboard.build.common.config.V2Config;
 import com.cmsr.onebase.module.dashboard.build.common.domain.AjaxResult;
-import com.cmsr.onebase.module.dashboard.build.common.domain.ResultTable;
 import com.cmsr.onebase.module.dashboard.build.common.domain.Tablepar;
 import com.cmsr.onebase.module.dashboard.build.model.GoviewProject;
 import com.cmsr.onebase.module.dashboard.build.model.GoviewProjectData;
@@ -14,10 +17,7 @@ import com.cmsr.onebase.module.dashboard.build.model.vo.SysFileVo;
 import com.cmsr.onebase.module.dashboard.build.service.IGoviewProjectDataService;
 import com.cmsr.onebase.module.dashboard.build.service.IGoviewProjectService;
 import com.cmsr.onebase.module.dashboard.build.service.ISysFileService;
-import com.cmsr.onebase.module.dashboard.build.util.ConvertUtil;
 import com.cmsr.onebase.module.dashboard.build.util.SnowflakeIdWorker;
-import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.date.DateUtil;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import io.swagger.annotations.ApiOperation;
@@ -32,7 +32,6 @@ import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Date;
-import java.util.List;
 
 /**
  * <p>
@@ -60,16 +59,12 @@ public class GoviewProjectController  extends BaseController {
 	@ResponseBody
 	@PermitAll
 	@ApiSignIgnore
-	public ResultTable list(Tablepar tablepar){
-		Page<GoviewProject> page= new Page<GoviewProject>(tablepar.getPage(), tablepar.getLimit());
+	public CommonResult<PageResult<GoviewProject>> list(Tablepar tablepar){
+		Page<GoviewProject> page= new Page<>(tablepar.getPage(), tablepar.getLimit());
         Page<GoviewProject> iPages = iGoviewProjectService.page(page, new QueryWrapper().eq(GoviewProject::getAppId,
 				tablepar.getAppId(),tablepar.getAppId() != null));
-        ResultTable resultTable=new ResultTable();
-		resultTable.setData(iPages.getRecords());
-		resultTable.setCode(0);
-		resultTable.setCount(iPages.getTotalPage());
-		resultTable.setMsg("获取成功");
-		return resultTable;
+
+		return CommonResult.success(new PageResult<>(iPages.getRecords(), (long) iPages.getRecords().size()));
 	}
 
 
@@ -169,7 +164,7 @@ public class GoviewProjectController  extends BaseController {
 	@ResponseBody
 	@PermitAll
 	@ApiSignIgnore
-    public AjaxResult getScreenDSLData(Long projectId, ModelMap map)
+    public CommonResult<GoviewProjectVo>  getScreenDSLData(Long projectId, ModelMap map)
     {
 		GoviewProject goviewProject= iGoviewProjectService.getById(projectId);
 
@@ -178,9 +173,9 @@ public class GoviewProjectController  extends BaseController {
 			GoviewProjectVo goviewProjectVo=new GoviewProjectVo();
 			BeanUtils.copyProperties(goviewProject,goviewProjectVo);
 			goviewProjectVo.setContent(blogText.getContent());
-			return AjaxResult.successData(0,goviewProjectVo).put("msg","交易成功");
+			return CommonResult.success(goviewProjectVo);
 		}
-		return AjaxResult.successData(0, null).put("msg","无数据");
+		return CommonResult.success(null);
 
     }
 

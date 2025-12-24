@@ -95,6 +95,6 @@ public class DashboardTemplateServiceImpl extends ServiceImpl<DashboardTemplateM
                 .eq(DashboardTemplateDO::getAppId, pageReqVO.getAppId(), pageReqVO.getAppId() != null);
 
         Page<DashboardTemplateDO> page = dashboardTemplateMapper.paginate(pageReqVO.getPageNo(), pageReqVO.getPageSize(), queryWrapper);
-        return new PageResult<>(page.getRecords(), page.getTotalPage());
+        return new PageResult<>(page.getRecords(), (long) page.getRecords().size());
     }
 }

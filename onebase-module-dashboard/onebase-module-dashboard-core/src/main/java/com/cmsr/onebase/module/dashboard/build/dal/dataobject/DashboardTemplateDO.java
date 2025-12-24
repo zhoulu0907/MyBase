@@ -31,4 +31,7 @@ public class DashboardTemplateDO extends BaseEntity {
     @Column(value = "index_image", comment = "索引图片")
     private String indexImage;
 
+    @Column(value = "remarks", comment = "备注描述")
+    private String remarks;
+
 }
