@@ -31,6 +31,7 @@ import { useNavigate } from 'react-router-dom';
 import { useI18n } from '../../../hooks/useI18n';
 import { useRememberMe } from '../../../hooks/useRememberMe';
 import styles from '../index.module.less';
+import ConfirmInfoForm from './confirmInfo';
 import RegisterForm from './register';
 import UpdatePasswordForm from './updatePassword';
 
@@ -56,7 +57,11 @@ const Right: React.FC = () => {
   const [tenantId, setTenantId] = useState('');
   const [visibleRegister, setVisibleRegister] = useState<boolean>(false);
   const [visbileUpdatePwd, setVisibleUpdatePwd] = useState<boolean>(false);
-  const [isRelatedApp, setIsRelatedApp] = useState<boolean>(false);
+  const [visibleConfirmInfo, setVisibleConfirmInfo] = useState<boolean>(false);
+  const [verifyCode, setVerifyCode] = useState<string>('');
+
+  // 手机号
+  const [mobile, setMobile] = useState('');
 
   useEffect(() => {
     // 从 window.location.hash 中解析 redirectURL，再从 redirectURL 解析 appId 和 tenantId
@@ -131,15 +136,21 @@ const Right: React.FC = () => {
 
       const deviceId = await getOrCreateDeviceInfo();
 
-      values.password = await sm2Encrypt(getPublicKey(), values.password || '');
-      const loginData: RuntimeThirdLoginRequest = {
+      let loginData: RuntimeThirdLoginRequest = {
         appId: appId,
         loginType: loginType,
         mobile: values.mobile,
-        password: values.password!,
         captchaVerification: captchaVerification,
         deviceId: deviceId
       };
+
+      if (loginType === ThirdLoginType.PASSWORD && !values.password) {
+        values.password = await sm2Encrypt(getPublicKey(), values.password || '');
+        loginData.password = values.password;
+      } else if (loginType === ThirdLoginType.VERIFYCODE) {
+        loginData.verifyCode = verifyCode;
+      }
+
       response = await runtimeThirdLogin(loginData, headers);
       if (response && response.accessToken) {
         // 使用 TokenManager 存储 token 信息
@@ -165,7 +176,10 @@ const Right: React.FC = () => {
             corpId: response.corpId,
             loginSource: response.loginSource,
             userUnRegistFlag: response.userUnRegistFlag,
-            loginURL: window.location.href // 当前地址
+            loginURL: window.location.href, // 当前地址
+            userAppRelationFlag: response.userAppRelationFlag,
+            email: response.email,
+            nickName: response.nickName
           },
           rememberMe
         );
@@ -175,18 +189,22 @@ const Right: React.FC = () => {
 
         Message.success(t('auth.loginSuccess'));
         const redirectURL = getHashQueryParam('redirectURL');
-        if (redirectURL) {
-          navigate(`/onebase/${appId}/${tenantId}/runtime`);
+        if (response.userAppRelationFlag) {
+          setVisibleConfirmInfo(true);
+          return;
         } else {
-          // 跳转到首页
-          navigate(`/onebase/runtime/?appId=${appId}`);
+          if (redirectURL) {
+            navigate(`/onebase/${appId}/${tenantId}/runtime`);
+          } else {
+            // 跳转到首页
+            navigate(`/onebase/runtime/?appId=${appId}`);
+          }
         }
         return;
       } else {
         if (response?.userUnRegistFlag) {
           setVisibleRegister(true);
         }
-        setIsRelatedApp(response?.userAppRelationFlag || false);
       }
     } catch (error: any) {
       console.error('登录失败:', error);
@@ -203,12 +221,14 @@ const Right: React.FC = () => {
   // 验证码验证成功回调
   const handleCaptchaSuccess = async (token: string) => {
     const values = await form.getFieldsValue();
+    const mobile = filterSpace(values.mobile);
+    setMobile(mobile);
 
     const deviceId = await getOrCreateDeviceInfo();
     handleSubmit({
       appId: values.appId,
       loginType: values.loginType,
-      mobile: filterSpace(values.mobile),
+      mobile: mobile,
       password: values.password,
       captchaVerification: token,
       deviceId: deviceId
@@ -231,7 +251,7 @@ const Right: React.FC = () => {
 
   return (
     <div className={styles.loginPageRight}>
-      {!visibleRegister && !visbileUpdatePwd && (
+      {!visibleRegister && !visbileUpdatePwd && !visibleConfirmInfo && (
         <div className={styles.loginFormContainer}>
           {curAppInfo.value.iconName && (
             <div className={styles.appInfo}>
@@ -278,6 +298,8 @@ const Right: React.FC = () => {
                           userMobile={form.getFieldValue('mobile')}
                           verifyType={'mobile'}
                           sendVerifyCode={sendVerifyCodeApi}
+                          verifyCode={verifyCode}
+                          onChange={setVerifyCode}
                         />
                       </Form.Item>
                     )}
@@ -359,17 +381,23 @@ const Right: React.FC = () => {
       {visibleRegister && (
         <RegisterForm
           appId={appId}
-          isRelatedApp={isRelatedApp}
           tenantId={tenantId}
+          mobile={mobile}
           onGoBack={() => {
             setVisibleRegister(false);
           }}
         />
       )}
 
+      {/* 确认页面 */}
+      {visibleConfirmInfo && (
+        <ConfirmInfoForm onGoBack={() => setVisibleConfirmInfo(false)} tenantId={tenantId} appId={appId} />
+      )}
+
       {/* 忘记密码 */}
       {visbileUpdatePwd && (
         <UpdatePasswordForm
+          tenantId={tenantId}
           onGoBack={() => {
             setVisibleUpdatePwd(false);
           }}

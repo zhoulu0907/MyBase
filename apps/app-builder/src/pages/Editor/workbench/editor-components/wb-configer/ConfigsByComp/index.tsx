@@ -5,5 +5,13 @@ import QuickEntryConfig from './QuickEntryConfig';
 import TodoCenterConfig from './TodoCenterConfig';
 import RichTextEditorWorkbenchConfig from './RichTextEditorWorkbenchConfig';
 import CarouselWorkbenchConfig from './CarouselWorkbenchConfig';
+import ButtonWorkbenchConfig from './ButtonWorkbenchConfig';
 
-export { PageConfig, QuickEntryConfig, TodoCenterConfig, RichTextEditorWorkbenchConfig, CarouselWorkbenchConfig };
+export {
+  PageConfig,
+  QuickEntryConfig,
+  TodoCenterConfig,
+  RichTextEditorWorkbenchConfig,
+  CarouselWorkbenchConfig,
+  ButtonWorkbenchConfig
+};

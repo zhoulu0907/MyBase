@@ -28,9 +28,9 @@ import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { getPrecedingNodes } from '../../nodes/utils';
-import AsyncDeptSelectField from './AsyncDeptSelectField';
-import AsyncSelectField from './AsyncSelectField';
-import AsyncUserSelectField from './AsyncUserSelectField';
+import AsyncDeptSelectField from '../asyncField/AsyncDeptSelectField';
+import AsyncSelectField from '../asyncField/AsyncSelectField';
+import AsyncUserSelectField from '../asyncField/AsyncUserSelectField';
 import styles from './index.module.less';
 
 const Option = Select.Option;

@@ -61,7 +61,7 @@ const XQuickEntry = memo((props: XQuickEntryConfig & { runtime?: boolean; detail
 
   const handleClickEntry = (item: {
     linkAddress?: string;
-    menuId?: string;
+    menuUuid?: string;
   }) => {
     if (!runtime) return;
 
@@ -77,7 +77,7 @@ const XQuickEntry = memo((props: XQuickEntryConfig & { runtime?: boolean; detail
     }
 
     // 跳转应用菜单
-    if (item.menuId) {
+    if (item.menuUuid) {
       console.log('Navigate to menu:', item);
       // 在菜单数据中查找匹配的菜单（通过 id、menuCode 或 menuUuid 匹配）
       const targetMenu = appRuntimeMenu.find(
@@ -105,7 +105,7 @@ const XQuickEntry = memo((props: XQuickEntryConfig & { runtime?: boolean; detail
           children: targetMenu.children || []
         });
       } else {
-        console.warn('未找到对应菜单或菜单未配置 id', item.menuId);
+        console.warn('未找到对应菜单或菜单未配置 id', item.menuUuid);
       }
     }
   };
@@ -116,7 +116,7 @@ const XQuickEntry = memo((props: XQuickEntryConfig & { runtime?: boolean; detail
       entryIcon?: string;
       entryType?: string;
       linkAddress?: string;
-      menuId?: string;
+      menuUuid?: string;
       group?: string;
       entryDesc?: string;
     },
@@ -135,7 +135,7 @@ const XQuickEntry = memo((props: XQuickEntryConfig & { runtime?: boolean; detail
           onClick={() => handleClickEntry(item)}
           style={{
             pointerEvents: runtime ? 'unset' : 'none',
-            cursor: runtime && (item.linkAddress || item.menuId) ? 'pointer' : 'default'
+            cursor: runtime && (item.linkAddress || item.menuUuid) ? 'pointer' : 'default'
           }}
         >
           
@@ -159,7 +159,7 @@ const XQuickEntry = memo((props: XQuickEntryConfig & { runtime?: boolean; detail
         onClick={() => handleClickEntry(item)}
         style={{
           pointerEvents: runtime ? 'unset' : 'none',
-          cursor: runtime && (item.linkAddress || item.menuId) ? 'pointer' : 'default',
+          cursor: runtime && (item.linkAddress || item.menuUuid) ? 'pointer' : 'default',
           backgroundColor
         }}
       >

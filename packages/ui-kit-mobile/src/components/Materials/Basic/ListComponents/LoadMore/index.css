@@ -198,6 +198,7 @@
     flex-wrap: nowrap;
     align-items: center;
     justify-content: flex-end;
+    margin-top: 0.2rem;
 
     .arco-button.arco-button-size-mini {
       width: 1.2rem;
@@ -221,6 +222,10 @@
   .fileWrapper {
     display: flex;
     align-items: center;
+
+    .filename {
+      font-size: 0.28rem;
+    }
     &>div {
       flex: 1;
     }

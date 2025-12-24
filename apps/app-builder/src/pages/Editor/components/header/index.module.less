@@ -86,7 +86,7 @@
     display: flex;
     justify-content: flex-end;
     gap: 15px;
-    
+
     .editorStatusEditAfterPublished {
       font-size: 12px;
       font-weight: 400;
@@ -156,5 +156,33 @@
   .history {
     background: #e5e6eb;
     color: #86909c;
+  }
+}
+
+.errorMsgModal {
+  :global(.pc-modal-title) {
+    text-align: left;
+  }
+  :global(.pc-modal-footer) {
+    text-align: right;
+  }
+
+  .errorMsgContainer {
+    .errorMsgTitle {
+      color: rgba(0, 0, 0, 0.6);
+      margin-bottom: 8px;
+    }
+    .errorMsgContent {
+      border-radius: 4px;
+      background: #f7f8fa;
+      color: rgba(0, 0, 0, 0.6);
+      padding: 12px 16px;
+      .errorMsgItem{
+        margin-bottom: 8px;
+      }
+      .errorMsgNodeName {
+        margin-right: 4px;
+      }
+    }
   }
 }

@@ -9,10 +9,12 @@ import {
   updateExternalUserParams,
   updateLoginConfigParams,
   updatePasswordParams,
-  updateStatusParams
+  updateStatusParams,
+  createExternalUserAppParams,
+  forgotPWDParams
 } from '../types';
 import { systemService } from './clients';
-import { runtimeService, userService } from './clients/factory';
+import { runtimeService, runtimeUserService, userService } from './clients/factory';
 
 //新增用户
 export const createExternalUserApi = (data: createExternalUserParams) => systemService.post('/third-user/create', data);
@@ -64,3 +66,14 @@ export const loginConfigListByKeyApi = (data: loginConfigParams) =>
 
 //修改参数配置-应用发布登录页
 export const updateLoginConfigApi = (data: updateLoginConfigParams) => systemService.post('/config/update', data);
+
+//新增企业应用关联
+export const createExternalUserApp = (data: createExternalUserAppParams) => runtimeUserService.post('/user-app-relation/create', data);
+
+//忘记密码
+export const forgotPWD = (data: forgotPWDParams, headers: Headers) => runtimeService.post('/auth/forget-password', data, { headers });
+
+// 查询用户详情
+export const getExternalUser = (id: string) => {
+  return systemService.get('/third-user/get?id=' + id);
+};

@@ -51,6 +51,7 @@ const LIST_LAZY_COMPONENT: string[] = [
   FORM_COMPONENT_TYPES.DATE_PICKER,
   FORM_COMPONENT_TYPES.DATE_TIME_PICKER,
   FORM_COMPONENT_TYPES.FILE_UPLOAD,
+  FORM_COMPONENT_TYPES.IMG_UPLOAD,
   FORM_COMPONENT_TYPES.SELECT_MUTIPLE,
   FORM_COMPONENT_TYPES.DATA_SELECT,
   // FORM_COMPONENT_TYPES.SUB_TABLE,
@@ -373,7 +374,8 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
         return <WorkbenchComp.XRichTextEditorWorkbench cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case WORKBENCH_COMPONENT_TYPES.CAROUSEL_WORKBENCH:
         return <WorkbenchComp.XCarouselWorkbench cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
-
+      case WORKBENCH_COMPONENT_TYPES.BUTTON_WORKBENCH:
+        return <WorkbenchComp.XButtonWorkbench cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       default:
         return <div>未知组件类型: {cpType}</div>;
     }

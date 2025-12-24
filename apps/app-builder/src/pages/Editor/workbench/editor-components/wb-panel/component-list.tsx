@@ -45,22 +45,25 @@ export function ComponentList({ items, components, onItemsChange }: ComponentLis
         onItemsChange(items.map((item) => (item.type === cpType ? { ...item, id: e.item.id } : item)));
       }}
     >
-      {components.map((item) => {
-        // 如果是快捷入口组件且workspace中已存在，则禁用拖拽
-        const isDisabled = item.type === WORKBENCH_COMPONENT_TYPES.QUICK_ENTRY && hasQuickEntry;
+      {components
+        // 过滤掉按钮组件
+        .filter((item) => item.type !== WORKBENCH_COMPONENT_TYPES.BUTTON_WORKBENCH)
+        .map((item) => {
+          // 如果是快捷入口组件且workspace中已存在，则禁用拖拽
+          const isDisabled = item.type === WORKBENCH_COMPONENT_TYPES.QUICK_ENTRY && hasQuickEntry;
 
-        return (
-          <MaterialCard
-            key={item.type}
-            id={item.id}
-            displayName={item.displayName}
-            type={item.type}
-            icon={item.icon || ''}
-            layout="column"
-            disabled={isDisabled}
-          />
-        );
-      })}
+          return (
+            <MaterialCard
+              key={item.type}
+              id={item.id}
+              displayName={item.displayName}
+              type={item.type}
+              icon={item.icon || ''}
+              layout="column"
+              disabled={isDisabled}
+            />
+          );
+        })}
     </ReactSortable>
   );
 }

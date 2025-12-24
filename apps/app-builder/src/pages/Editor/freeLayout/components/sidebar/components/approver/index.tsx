@@ -97,7 +97,13 @@ export default function ApproveDreawer({ handleConfigSubmit, configData }: Appro
     if (!users.length && !roles.length) {
       errorMsg = '节点缺少审批人';
     }
-    if (!approverConfigData?.buttonConfigs?.length) {
+    let flag = false;
+    approverConfigData?.buttonConfigs?.forEach((item) => {
+      if (item.enabled) {
+        flag = true;
+      }
+    });
+    if (!flag) {
       errorMsg = '节点缺少按钮配置';
     }
     approverConfigData.errorMsg = errorMsg;

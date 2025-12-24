@@ -1,28 +1,28 @@
 import { Form, ColorPicker } from '@arco-design/web-react';
-import styles from '../../index.module.less';
 import { registerConfigRenderer } from '../../registry';
-import { WORKBENCH_CONFIG_TYPES } from '@onebase/ui-kit';
+import { WORKBENCH_CONFIG_TYPES, type IWbColorConfigType } from '@onebase/ui-kit';
+import styles from '../../index.module.less';
 
 interface Props {
-  handlePropsChange: (key: string, value: any) => void;
-  item: any;
-  configs: any;
+  handlePropsChange: (key: string, value: unknown) => void;
+  item: IWbColorConfigType;
+  configs: Record<string, unknown>;
 }
 
 const WbColorConfig = ({ handlePropsChange, item, configs }: Props) => {
   return (
     <Form.Item
-      className={styles.formItem}
+      className={styles.formItem || undefined}
       label={item.name}
       layout="horizontal"
       labelCol={{ span: 7 }}
       wrapperCol={{ span: 17 }}
       labelAlign="left"
     >
-      <div className={styles.colorPicker}>
+      <div className={styles.colorPicker || undefined}>
         <ColorPicker
           showText={!!configs[item.key]}
-          value={configs[item.key]}
+          value={configs[item.key] as string | undefined}
           onChange={(value) => {
             handlePropsChange(item.key, value);
           }}

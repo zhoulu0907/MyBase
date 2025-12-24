@@ -17,6 +17,15 @@ const XCarousel = memo((props: XCarouselConfig & { runtime?: boolean }) => {
     runtime
   } = props;
 
+  const handleImageClick = (image: string) => {
+    if (!runtime) return;
+
+    if (image.indexOf('data:') < 0) {
+      window.open(getFileUrlById(image));
+    } else {
+      window.open(image);
+    }
+  };
   return (
     <div className={styles.carouselWrapper}>
       {label.display &&
@@ -33,7 +42,7 @@ const XCarousel = memo((props: XCarouselConfig & { runtime?: boolean }) => {
         indicatorPosition="bottom"
       >
         {carouselConfig.map((img, index) => (
-          <div className={styles.imageWrapper} key={index} onClick={() => window.open(img.url)}>
+          <div className={styles.imageWrapper} key={index} onClick={() => handleImageClick(img.image)}>
             <img className={styles.image} src={img.image.indexOf('data:') < 0 ? getFileUrlById(img.image) : img.image} />
             {/* <div className={styles.text}>{img.text}</div> */}
           </div>

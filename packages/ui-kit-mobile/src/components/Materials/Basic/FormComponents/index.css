@@ -10,7 +10,20 @@
   .readonlyText {
     font-size: 0.32rem;
     color: #1d2129;
-    text-align: right;
+
+    .arco-input {
+      text-align: right;
+    }
+
+    .textarea {
+      padding-right: 0;
+
+      .arco-textarea {
+        text-align: right;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+    }
   }
 
   /* 彻底隐藏数字输入框右侧上下箭头 */
