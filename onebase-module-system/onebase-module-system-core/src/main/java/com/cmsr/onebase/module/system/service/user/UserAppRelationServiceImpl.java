@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.system.service.user;
 
 import com.cmsr.onebase.framework.common.enums.CorpStatusEnum;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
 import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
@@ -94,7 +95,12 @@ public class UserAppRelationServiceImpl implements UserAppRelationService {
                 corpAppRelationDO.setStatus(CorpStatusEnum.ENABLE.getValue());
                 corpAppRelationDO.setUserId(userAppReqVO.getUserId());
                 userAppRelationDataRepository.insert(corpAppRelationDO);
-                appAuthRoleUser.grantThirdpartyUserPrivileges(userAppReqVO.getUserId(), appId);
+
+                ApplicationManager.withoutApplicationCondition(() -> {
+                    appAuthRoleUser.grantThirdpartyUserPrivileges(userAppReqVO.getUserId(), appId);
+                });
+
+
             });
 
             // TODO: 添加应用外部用户相关代码
