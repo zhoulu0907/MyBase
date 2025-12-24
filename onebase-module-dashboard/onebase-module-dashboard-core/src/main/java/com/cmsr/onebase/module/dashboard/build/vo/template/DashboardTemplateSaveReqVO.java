@@ -48,4 +48,9 @@ public class DashboardTemplateSaveReqVO {
      */
     private String indexImage;
 
+    /**
+     * 备注描述
+     */
+    private String remarks;
+
 }
