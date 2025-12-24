@@ -21,6 +21,7 @@ import {
   updateCorpApi,
   updateCorpAppApi,
   uploadFile,
+  getFileUrlById,
   type CorpAppParams,
   type corpListParams
 } from '@onebase/platform-center';
@@ -268,7 +269,7 @@ const EnterpriseInfoPage: React.FC = () => {
                 {displayCorpLogo(formData?.corpName)}
               </Button>
             ) : (
-              <Image alt="头像" src={avatarUrl} onError={handleImageError} width={160} height={80} />
+              <Image alt="头像" src={getFileUrlById(avatarUrl)} onError={handleImageError} width={160} height={80} />
             )
           }
           label="logo"
