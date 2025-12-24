@@ -108,7 +108,7 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
   return (
     <Form.Item
       className="inputTextWrapperOBMobile inputDataSelectOBMobile"
-      label={label.display && <Ellipsis text={label.text} />}
+      label={label.display && <Ellipsis text={label.text} maxLine={2} />}
       field={fieldId}
       layout={layout}
       style={{
@@ -128,7 +128,7 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
           <PopupSwiper visible={visible} close={(e) => handleCancel(e)} direction="bottom">
             <div className={`inputDataSelectPopupContainer ${editPreview ? 'editPreview' : ''}`}>
               <div className="popupHeaderOBMobile">
-                <IconArrowBack style={{ fontSize: '0.28rem' }} onClick={(e) => handleCancel(e)} />
+                <IconArrowBack style={{ fontSize: 'var(--fontSize)' }} onClick={(e) => handleCancel(e)} />
                 <span>{label?.text}</span>
                 <Button
                   inline

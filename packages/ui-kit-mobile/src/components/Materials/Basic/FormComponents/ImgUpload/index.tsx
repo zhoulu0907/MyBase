@@ -117,7 +117,7 @@ const XImgUpload = memo((props: XImgUploadConfig & { runtime?: boolean; detailMo
     <Form.Item
       className="inputTextWrapperOBMobile ImgUploadWrapperOBMobile"
       label={
-        label.display && <Ellipsis text={label.text} />
+        label.display && <Ellipsis text={label.text} maxLine={2} />
       }
       layout="vertical"
       field={fieldId}

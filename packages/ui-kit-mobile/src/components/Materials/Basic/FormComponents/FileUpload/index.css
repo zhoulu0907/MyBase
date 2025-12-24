@@ -21,7 +21,7 @@
     padding: 0 0.12rem;
     border-radius: 4px;
     .arco-icon {
-      font-size: 0.28rem !important;
+      font-size: var(--fontSize) !important;
     }
     .uplaodList-text-item-name {
       margin: 0 0.12rem;

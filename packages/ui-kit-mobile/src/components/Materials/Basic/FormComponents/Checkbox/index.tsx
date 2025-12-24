@@ -62,7 +62,7 @@ const XCheckbox = memo((props: XCheckboxConfig & { runtime?: boolean; detailMode
     <Form.Item
       className="inputTextWrapperOBMobile"
       field={fieldId}
-      label={label.display && <Ellipsis text={label.text} />}
+      label={label.display && <Ellipsis text={label.text} maxLine={2} />}
       rules={rules}
       layout={layout}
       style={{

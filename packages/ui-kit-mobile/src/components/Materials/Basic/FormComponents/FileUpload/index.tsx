@@ -149,7 +149,7 @@ const XFileUpload = memo((props: XFileUploadConfig & { runtime?: boolean; detail
     <Form.Item
       className="inputTextWrapperOBMobile fileUploadWrapperOBMobile"
       label={
-        label.display && <Ellipsis text={label.text} />
+        label.display && <Ellipsis text={label.text} maxLine={2} />
       }
       layout="vertical"
       field={fieldId}

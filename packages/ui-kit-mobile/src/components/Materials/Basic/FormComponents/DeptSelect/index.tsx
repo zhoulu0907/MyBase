@@ -117,7 +117,7 @@ const XDeptSelect = memo((props: XDeptSelectConfig & { runtime?: boolean; detail
   return (
     <Form.Item
       className="inputTextWrapperOBMobile inputDeptSelectOBMobile"
-      label={label.display && <Ellipsis text={label.text} />}
+      label={label.display && <Ellipsis text={label.text} maxLine={2} />}
       field={fieldId}
       layout={layout}
       style={{
@@ -138,7 +138,7 @@ const XDeptSelect = memo((props: XDeptSelectConfig & { runtime?: boolean; detail
           <PopupSwiper visible={visible} close={(e) => handleCancel(e)} direction={popupDirection}>
             <div className={styles.inputDeptSelectPopupContainer}>
               <div className={styles.popupHeaderOBMobile}>
-                <IconArrowBack style={{ fontSize: '0.28rem' }} onClick={(e) => handleCancel(e)} />
+                <IconArrowBack style={{ fontSize: 'var(--fontSize)' }} onClick={(e) => handleCancel(e)} />
                 <span>{label?.text}</span>
                 <Button
                   inline

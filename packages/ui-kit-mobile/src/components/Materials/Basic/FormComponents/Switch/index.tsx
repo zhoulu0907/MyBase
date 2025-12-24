@@ -42,7 +42,7 @@ const XSwitch = memo((props: XSwitchConfig & { runtime?: boolean; detailMode?: b
       className={`inputTextWrapperOBMobile switchWrapperOBMobile ${layout === 'vertical' ? 'verticalLayout' : ''}`}
       field={fieldId}
       layout={layout}
-      label={label.display ? <Ellipsis text={label.text} /> : undefined}
+      label={label.display ? <Ellipsis text={label.text} maxLine={2} /> : undefined}
       initialValue={defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : ''}
       style={{
         textAlign: layout === 'vertical' ? 'left' : 'right',
