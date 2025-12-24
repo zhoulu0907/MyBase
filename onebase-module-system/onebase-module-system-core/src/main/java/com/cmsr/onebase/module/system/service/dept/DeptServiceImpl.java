@@ -24,8 +24,6 @@ import com.cmsr.onebase.module.system.vo.user.UserSimpleRespVO;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.DataRow;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -490,15 +488,14 @@ public class DeptServiceImpl implements DeptService {
     @Override
     public void updateAdminOrDirector(UserAdminOrDirectorUpdateReqVO reqVO) {
         // todo 验证部门是否存在/启用；验证空间/企业是否存在此用户
+        DeptDO updateObj = new DeptDO();
+        updateObj.setId(reqVO.getDeptId());
         if (reqVO.getUpdateType().equals(CorpConstant.LEADER_USER_ID)) {
-            DataRow row = new DataRow();
-            row.put(DeptDO.ADMIN_USER_ID, reqVO.getUserId());
-            deptDataRepository.updateByConfig(row, new DefaultConfigStore().eq(DeptDO.ID, reqVO.getDeptId()));
+            updateObj.setAdminUserId(reqVO.getUserId());
         } else {
-            DataRow row = new DataRow();
-            row.put(DeptDO.LEADER_USER_ID, reqVO.getUserId());
-            deptDataRepository.updateByConfig(row, new DefaultConfigStore().eq(DeptDO.ID, reqVO.getDeptId()));
+            updateObj.setLeaderUserId(reqVO.getUserId());
         }
+        deptDataRepository.update(updateObj);
     }
 
 
@@ -510,7 +507,8 @@ public class DeptServiceImpl implements DeptService {
     @Override
     public Long createThirdDefaultDept(DeptSaveReqVO deptRespVO) {
         DeptDO dept = BeanUtils.toBean(deptRespVO, DeptDO.class);
-       return deptDataRepository.insert(dept).getId();
+        deptDataRepository.insert(dept);
+        return dept.getId();
     }
 
     @Override

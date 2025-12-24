@@ -290,6 +290,8 @@ public class BuildAppMenuServiceImpl implements BuildAppMenuService {
         createPageSetDTO.setPageSetName(menuDO.getMenuName());
         createPageSetDTO.setDisplayName(menuDO.getMenuName());
         createPageSetDTO.setMainMetadata(String.valueOf(createReqVO.getEntityUuid()));
+        createPageSetDTO.setCreateDashboardType(createReqVO.getCreateDashboardType());
+        createPageSetDTO.setDashboardId(createReqVO.getDashboardId());
         pageSetService.createPageSet(createPageSetDTO);
         // 返回结果
         MenuCreateRespVO menuCreateRespVO = BeanUtils.toBean(menuDO, MenuCreateRespVO.class);

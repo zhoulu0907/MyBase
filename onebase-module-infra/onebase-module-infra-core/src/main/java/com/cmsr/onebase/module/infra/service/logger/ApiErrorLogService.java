@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.infra.service.logger;
 
 import com.cmsr.onebase.framework.common.biz.infra.logger.dto.ApiErrorLogCreateReqDTO;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.infra.dal.dataobject.logger.ApiErrorLogDO;
+import com.cmsr.onebase.module.infra.dal.dataflexdo.logger.ApiErrorLogDO;
 import com.cmsr.onebase.module.infra.dal.vo.logger.apierrorlog.ApiErrorLogPageReqVO;
 
 /**

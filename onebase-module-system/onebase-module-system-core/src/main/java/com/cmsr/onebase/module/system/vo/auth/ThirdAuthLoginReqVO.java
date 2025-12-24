@@ -1,7 +1,6 @@
 package com.cmsr.onebase.module.system.vo.auth;
 
 import com.cmsr.onebase.framework.common.validation.InEnum;
-import com.cmsr.onebase.module.system.enums.catcha.SendTypeEnum;
 import com.cmsr.onebase.module.system.enums.login.LongTypeEnum;
 import com.cmsr.onebase.module.system.vo.CaptchaVerificationReqVO;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -30,9 +29,9 @@ public class ThirdAuthLoginReqVO extends CaptchaVerificationReqVO {
     @Schema(description = "验证码",  example = "10")
     private String verifyCode;
 
-    @Schema(description = "密码/验证码",  example = "10")
+    @Schema(description = "密码/验证码",  example = "password： 密码，verifycode： 验证码")
     @NotBlank(message = "登录方式不能为空")
+
     @InEnum(value = LongTypeEnum.class, message = "返回值类型必须是 {value}")
     private String loginType;
-
 }

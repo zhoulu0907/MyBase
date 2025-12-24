@@ -1,75 +1,74 @@
 package com.cmsr.onebase.module.system.dal.dataobject.sms;
 
-import com.cmsr.onebase.framework.data.base.BaseDO;
+import com.cmsr.onebase.framework.orm.entity.BaseEntity;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
-import jakarta.persistence.Table;
-import jakarta.persistence.Column;
-import lombok.*;
-import lombok.experimental.SuperBuilder;
+import com.mybatisflex.annotation.Column;
+import com.mybatisflex.annotation.Table;
+import lombok.Builder;
+import lombok.Data;
+
 import java.time.LocalDateTime;
 
 /**
  * 手机验证码 DO
- *
+ * <p>
  * idx_mobile 索引：基于 {@link #mobile} 字段
  *
  */
-@Table(name = "system_sms_code")
+@Table(value = "system_sms_code")
 @Data
-@SuperBuilder
-@NoArgsConstructor
-@AllArgsConstructor
+@Builder
 @TenantIgnore
-public class SmsCodeDO extends BaseDO {
+public class SmsCodeDO extends BaseEntity {
 
     // 字段列名常量
-    public static final String MOBILE      = "mobile";
-    public static final String CODE        = "code";
-    public static final String SCENE       = "scene";
-    public static final String CREATE_IP   = "create_ip";
+    public static final String MOBILE = "mobile";
+    public static final String CODE = "code";
+    public static final String SCENE = "scene";
+    public static final String CREATE_IP = "create_ip";
     public static final String TODAY_INDEX = "today_index";
-    public static final String USED        = "used";
-    public static final String USED_TIME   = "used_time";
-    public static final String USED_IP     = "used_ip";
+    public static final String USED = "used";
+    public static final String USED_TIME = "used_time";
+    public static final String USED_IP = "used_ip";
 
     /**
      * 手机号
      */
-    @Column(name = MOBILE)
+    @Column(value = MOBILE)
     private String mobile;
     /**
      * 验证码
      */
-    @Column(name = CODE)
+    @Column(value = CODE)
     private String code;
     /**
      * 发送场景
      */
-    @Column(name = SCENE)
+    @Column(value = SCENE)
     private Integer scene;
     /**
      * 创建 IP
      */
-    @Column(name = CREATE_IP)
+    @Column(value = CREATE_IP)
     private String createIp;
     /**
      * 今日发送的第几条
      */
-    @Column(name = TODAY_INDEX)
+    @Column(value = TODAY_INDEX)
     private Integer todayIndex;
     /**
      * 是否使用
      */
-    @Column(name = USED)
-    private Boolean used;
+    @Column(value = USED)
+    private Integer used;
     /**
      * 使用时间
      */
-    @Column(name = USED_TIME)
+    @Column(value = USED_TIME)
     private LocalDateTime usedTime;
     /**
      * 使用 IP
      */
-    @Column(name = USED_IP)
+    @Column(value = USED_IP)
     private String usedIp;
 }

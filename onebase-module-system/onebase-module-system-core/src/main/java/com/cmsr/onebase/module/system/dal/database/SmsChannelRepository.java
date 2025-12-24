@@ -1,31 +1,28 @@
 package com.cmsr.onebase.module.system.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.system.vo.sms.SmsChannelPageReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.sms.SmsChannelDO;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.Compare;
+import com.cmsr.onebase.framework.orm.repo.BaseDataRepository;
+import com.cmsr.onebase.module.system.dal.flex.mapper.SystemSmsChannelMapper;
+import com.cmsr.onebase.module.system.vo.sms.SmsChannelPageReqVO;
+import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryWrapper;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+import static com.cmsr.onebase.framework.data.base.BaseDO.CREATE_TIME;
+import static com.cmsr.onebase.framework.data.base.BaseDO.ID;
+
 /**
  * 短信渠道数据访问层
  *
- * 负责短信渠道相关的数据操作，继承DataRepositoryNew，提供标准CRUD能力。
- *
  * @author matianyu
- * @date 2025-08-07
+ * @date 2025-12-22
  */
 @Repository
-public class SmsChannelRepository extends DataRepository<SmsChannelDO> {
-    /**
-     * 构造方法，指定默认实体类
-     */
-    public SmsChannelRepository() {
-        super(SmsChannelDO.class);
-    }
+public class SmsChannelRepository extends BaseDataRepository<SystemSmsChannelMapper, SmsChannelDO> {
 
     /**
      * 分页查询短信渠道
@@ -34,28 +31,18 @@ public class SmsChannelRepository extends DataRepository<SmsChannelDO> {
      * @return 分页结果
      */
     public PageResult<SmsChannelDO> findPage(SmsChannelPageReqVO reqVO) {
-        DefaultConfigStore configs = new DefaultConfigStore();
+        QueryWrapper queryWrapper = query()
+                .like(SmsChannelDO.SIGNATURE, reqVO.getSignature(), StringUtils.isNotBlank(reqVO.getSignature()))
+                .eq(SmsChannelDO.STATUS, reqVO.getStatus(), reqVO.getStatus() != null)
+                .orderBy(ID, false);
 
-        // 构建查询条件
-        if (reqVO.getSignature() != null && !reqVO.getSignature().trim().isEmpty()) {
-            configs.and(Compare.LIKE, SmsChannelDO.SIGNATURE, reqVO.getSignature());
-        }
-        if (reqVO.getStatus() != null) {
-            configs.and(Compare.EQUAL, SmsChannelDO.STATUS, reqVO.getStatus());
-        }
         if (reqVO.getCreateTime() != null && reqVO.getCreateTime().length == 2) {
-            if (reqVO.getCreateTime()[0] != null) {
-                configs.and(Compare.GREAT_EQUAL, SmsChannelDO.CREATE_TIME, reqVO.getCreateTime()[0]);
-            }
-            if (reqVO.getCreateTime()[1] != null) {
-                configs.and(Compare.LESS_EQUAL, SmsChannelDO.CREATE_TIME, reqVO.getCreateTime()[1]);
-            }
+            queryWrapper.ge(CREATE_TIME, reqVO.getCreateTime()[0], reqVO.getCreateTime()[0] != null);
+            queryWrapper.le(CREATE_TIME, reqVO.getCreateTime()[1], reqVO.getCreateTime()[1] != null);
         }
 
-        // 添加排序条件，按ID降序排列
-        configs.order(SmsChannelDO.ID, org.anyline.entity.Order.TYPE.DESC);
-
-        return findPageWithConditions(configs, reqVO.getPageNo(), reqVO.getPageSize());
+        Page<SmsChannelDO> pageResult = page(Page.of(reqVO.getPageNo(), reqVO.getPageSize()), queryWrapper);
+        return new PageResult<>(pageResult.getRecords(), pageResult.getTotalRow());
     }
 
     /**
@@ -64,6 +51,6 @@ public class SmsChannelRepository extends DataRepository<SmsChannelDO> {
      * @return 短信渠道列表
      */
     public List<SmsChannelDO> findAllList() {
-        return findAll();
+        return list();
     }
 }

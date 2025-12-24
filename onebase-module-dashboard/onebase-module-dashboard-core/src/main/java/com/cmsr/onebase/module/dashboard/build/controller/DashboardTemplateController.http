@@ -1,0 +1,51 @@
+## 环境配置说明
+# 使用全局环境配置文件 http-client.env.json
+# 请在IntelliJ IDEA中选择对应环境: local/dev/test/gateway
+# 确保先在AuthController.http中登录获取token
+
+### 1. 创建仪表盘模板
+POST {{baseUrl}}/dashboard/template/create
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+{
+  "templateName": "Dashboard Template 2",
+  "content": "{\"layout2\": [], \"config2\": {}}",
+  "templateType": "app",
+  "hot": 1,
+  "appId": 184716905786900486,
+  "indexImage": "https://example.com/image3.jpg"
+}
+
+### 2. 更新仪表盘模板
+POST {{baseUrl}}/dashboard/template/update
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+{
+  "id": 194163497403187200,
+  "templateName": "Dashboard Template 26"
+}
+
+### 3. 删除仪表盘模板
+POST {{baseUrl}}/dashboard/template/delete?id=194163497403187200
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+### 4. 获取仪表盘模板
+GET {{baseUrl}}/dashboard/template/get?id=194163497403187200
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+### 5. 获取仪表盘模板列表
+GET {{baseUrl}}/dashboard/template/list?ids=192459907207725056,192443689411117056
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+### 6. 分页查询仪表盘模板
+GET {{baseUrl}}/dashboard/template/page?pageNum=1&pageSize=5&templateType=system
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
