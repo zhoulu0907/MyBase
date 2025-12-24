@@ -119,4 +119,22 @@ public class DictDataRepository extends BaseDataRepository<SystemDictDataMapper,
                 .eq(DictDataDO.DICT_TYPE, dictType)
                 .in(DictDataDO.VALUE, values));
     }
+
+    /**
+     * 根据状态和多个字典类型批量查询字典数据列表
+     *
+     * @param status    状态
+     * @param dictTypes 字典类型集合
+     * @return 字典数据列表
+     */
+    public List<DictDataDO> findListByStatusAndDictTypes(Integer status, Collection<String> dictTypes) {
+        if (dictTypes == null || dictTypes.isEmpty()) {
+            return Collections.emptyList();
+        }
+        QueryWrapper queryWrapper = query()
+                .eq(DictDataDO.STATUS, status, status != null)
+                .in(DictDataDO.DICT_TYPE, dictTypes)
+                .orderBy(DictDataDO.SORT, true);
+        return list(queryWrapper);
+    }
 }

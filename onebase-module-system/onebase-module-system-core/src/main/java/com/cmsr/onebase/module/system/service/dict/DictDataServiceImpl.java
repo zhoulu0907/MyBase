@@ -23,9 +23,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
@@ -249,6 +253,45 @@ public class DictDataServiceImpl implements DictDataService {
         respVO.setDeleteCount(deletedIds.size());
 
         return respVO;
+    }
+
+    @Override
+    @TenantIgnore
+    public Map<String, List<DictDataDO>> getDictDataMapByTypes(Collection<String> dictTypes) {
+        if (dictTypes == null || dictTypes.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        // 批量查询所有字典类型的数据（一次性查询）
+        List<DictDataDO> allDataList = dictDataRepository.findListByStatusAndDictTypes(
+                CommonStatusEnum.ENABLE.getStatus(), dictTypes);
+        // 按 dictType 分组
+        return allDataList.stream()
+                .collect(Collectors.groupingBy(DictDataDO::getDictType));
+    }
+
+    @Override
+    @TenantIgnore
+    public Map<String, List<DictDataDO>> getDictDataMapByTypesAndTypeIds(Collection<String> dictTypes, Collection<Long> dictTypeIds) {
+        // 收集所有需要查询的字典类型
+        Set<String> allDictTypes = new HashSet<>();
+        
+        // 添加直接传入的字典类型
+        if (dictTypes != null && !dictTypes.isEmpty()) {
+            allDictTypes.addAll(dictTypes);
+        }
+        
+        // 如果提供了dictTypeIds，批量查询并转换为dictTypes
+        if (dictTypeIds != null && !dictTypeIds.isEmpty()) {
+            List<DictTypeDO> dictTypeList = dictTypeService.getDictTypesByIds(dictTypeIds);
+            for (DictTypeDO dictTypeDO : dictTypeList) {
+                if (dictTypeDO != null && dictTypeDO.getType() != null) {
+                    allDictTypes.add(dictTypeDO.getType());
+                }
+            }
+        }
+        
+        // 批量查询并按dictType分组
+        return getDictDataMapByTypes(allDictTypes);
     }
 
 }
