@@ -85,7 +85,7 @@ const SpaceInfo: React.FC = () => {
     if (!path) return '';
     const origin = window.location.origin;
     const normalizedPath = path.startsWith('/') ? path : `/${path}`;
-    return `${origin}/#/tenant${normalizedPath}`;
+    return `${origin}/#/tenant/${tokenInfo?.tenantId}/${normalizedPath}`;
   };
 
   // 重命名
