@@ -305,7 +305,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
         setSubmitLoading(false);
       }
     }
-
+    setPredictVisible(false);
     // 关闭页面后子表清空
     pagesRuntimeSignal.resetSubTableDataLength();
   };
