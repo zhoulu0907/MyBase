@@ -81,7 +81,7 @@ const AppSettingPage: FC = () => {
     if (activeTab === 'baseSetting' && curAppId) {
       getApplicationData();
     }
-  }, [activeTab]);
+  }, [activeTab, curAppInfo]);
 
   const getApplicationData = async () => {
     const params: GetApplicationReq = {
@@ -200,11 +200,6 @@ const AppSettingPage: FC = () => {
               {activeTab === 'appRelease' && <AppReleasePage />}
               {activeTab === 'navigatorSetting' && <NavigatorSetting form={navigatorForm} />}
               {activeTab === 'loginPermission' && <LoginPermission appId={curAppId} />}
-              {(activeTab === 'baseSetting' || activeTab === 'navigatorSetting') && (
-                <Button className={styles.saveButton} type="primary" loading={saveLoading} onClick={handleSave}>
-                  保存
-                </Button>
-              )}
             </Content>
           </div>
         </Layout>
