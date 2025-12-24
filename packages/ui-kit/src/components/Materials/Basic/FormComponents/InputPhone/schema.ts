@@ -175,7 +175,6 @@ const XInputPhone: XInputPhoneSchema = {
       key: 'defaultValueConfig',
       name: '默认值',
       type: CONFIG_TYPES.DEFAULT_VALUE,
-      valueType: 'phone'
     },
     {
       key: 'phoneType',

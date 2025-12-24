@@ -192,7 +192,6 @@ const XInputNumber: XInputNumberSchema = {
       key: 'defaultValueConfig',
       name: '默认值',
       type: CONFIG_TYPES.DEFAULT_VALUE,
-      valueType: 'number'
     },
     {
       key: 'numberFormat',
