@@ -283,10 +283,10 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
     if (!cpId || fieldOptionsMap[cpId]) {
       return; // 已经加载过或 cpId 为空
     }
+    const componentSchema = pageComponentSchemas.value[cpId];
 
-    const component = components.value.find((item: any) => item?.id === cpId);
-    if (component?.type) {
-      switch (component?.type) {
+    if (componentSchema?.type) {
+      switch (componentSchema.type) {
         case FORM_COMPONENT_TYPES.SELECT_ONE:
         case FORM_COMPONENT_TYPES.SELECT_MUTIPLE:
         case FORM_COMPONENT_TYPES.RADIO:
@@ -314,9 +314,9 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
 
   // 同步渲染表单项组件
   const renderValueFormItem = (cpId: string) => {
-    const component = components.value.find((item: any) => item?.id === cpId);
-    if (component?.type) {
-      switch (component?.type) {
+    const componentSchema = pageComponentSchemas.value[cpId];
+    if (componentSchema?.type) {
+      switch (componentSchema.type) {
         case FORM_COMPONENT_TYPES.SELECT_ONE:
         case FORM_COMPONENT_TYPES.SELECT_MUTIPLE:
         case FORM_COMPONENT_TYPES.RADIO:
