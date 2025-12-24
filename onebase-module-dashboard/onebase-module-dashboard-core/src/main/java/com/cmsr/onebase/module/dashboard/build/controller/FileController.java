@@ -132,7 +132,7 @@ public class FileController extends BaseController {
 		object.transferTo(desc);
 		SysFileVo sysFileVo=BeanUtil.copyProperties(sysFile, SysFileVo.class);
 		sysFileVo.setFileurl(v2Config.getHttpurl()+sysFile.getVirtualKey()+"/"+sysFile.getRelativePath()+"/"+sysFile.getFileName());
-		return AjaxResult.successData(200, sysFileVo);
+		return AjaxResult.successData(0, sysFileVo);
 	}
 
 
@@ -171,7 +171,7 @@ public class FileController extends BaseController {
 			iSysFileService.saveOrUpdate(sysFile);
 			SysFileVo sysFileVo=BeanUtil.copyProperties(sysFile, SysFileVo.class);
 			sysFileVo.setFileurl(v2Config.getHttpurl()+sysFile.getVirtualKey()+"/"+sysFile.getRelativePath()+"/"+sysFile.getFileName());
-			return AjaxResult.successData(200, sysFileVo);
+			return AjaxResult.successData(0, sysFileVo);
 		}
 		return AjaxResult.error();
 
@@ -192,7 +192,7 @@ public class FileController extends BaseController {
 		String fileurl=absolutePath+relativePath;
 		try {
 			String text=FileUtil.readUtf8String(fileurl);
-			return AjaxResult.successData(200, text);
+			return AjaxResult.successData(0, text);
 		}catch (IORuntimeException e) {
 			return AjaxResult.error("没有该文件");
 		}
@@ -265,7 +265,7 @@ public class FileController extends BaseController {
 		object.transferTo(desc);
 		SysFileVo sysFileVo=BeanUtil.copyProperties(sysFile, SysFileVo.class);
 		sysFileVo.setFileurl(v2Config.getHttpurl()+sysFile.getVirtualKey()+"/"+sysFile.getRelativePath()+"/"+sysFile.getFileName());
-		return AjaxResult.successData(200, sysFileVo);
+		return AjaxResult.successData(0, sysFileVo);
 	}
 
 
@@ -285,7 +285,7 @@ public class FileController extends BaseController {
 		if(sysFile!=null){
 			SysFileVo sysFileVo=BeanUtil.copyProperties(sysFile, SysFileVo.class);
 			sysFileVo.setFileurl(v2Config.getHttpurl()+sysFile.getVirtualKey()+"/"+sysFile.getRelativePath()+"/"+sysFile.getFileName());
-			return AjaxResult.successData(200, sysFileVo);
+			return AjaxResult.successData(0, sysFileVo);
 		}
 		return AjaxResult.error("没有该文件");
 
