@@ -90,11 +90,11 @@ public class UserAppRelationServiceImpl implements UserAppRelationService {
                 userAppRelationDataRepository.remove(queryWrapper);
 
                 // 验证是否重复提交，先删除后插入
-                UserAppRelationDO corpAppRelationDO = new UserAppRelationDO();
-                corpAppRelationDO.setApplicationId(appId);
-                corpAppRelationDO.setStatus(CorpStatusEnum.ENABLE.getValue());
-                corpAppRelationDO.setUserId(userAppReqVO.getUserId());
-                userAppRelationDataRepository.insert(corpAppRelationDO);
+                UserAppRelationDO userAppRelationDO = new UserAppRelationDO();
+                userAppRelationDO.setApplicationId(appId);
+                userAppRelationDO.setStatus(CorpStatusEnum.ENABLE.getValue());
+                userAppRelationDO.setUserId(userAppReqVO.getUserId());
+                userAppRelationDataRepository.insert(userAppRelationDO);
 
                 // 添加应用外部用户权限
                 ApplicationManager.withoutApplicationCondition(() -> {
