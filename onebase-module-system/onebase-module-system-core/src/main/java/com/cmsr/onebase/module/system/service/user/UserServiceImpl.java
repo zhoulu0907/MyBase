@@ -1402,6 +1402,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void thirdUserForgetPassword(Long id,String password) {
         //  被调用前，已经做过用户判断，  调用通用改密码的方法
+
         commonUpdatePassword(id, password);
     }
 
