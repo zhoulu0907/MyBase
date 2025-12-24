@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.system.service.user;
 
 import com.cmsr.onebase.framework.common.enums.CorpStatusEnum;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
 import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
@@ -89,12 +90,16 @@ public class UserAppRelationServiceImpl implements UserAppRelationService {
                 userAppRelationDataRepository.remove(queryWrapper);
 
                 // 验证是否重复提交，先删除后插入
-                UserAppRelationDO corpAppRelationDO = new UserAppRelationDO();
-                corpAppRelationDO.setApplicationId(appId);
-                corpAppRelationDO.setStatus(CorpStatusEnum.ENABLE.getValue());
-                corpAppRelationDO.setUserId(userAppReqVO.getUserId());
-                userAppRelationDataRepository.insert(corpAppRelationDO);
-                appAuthRoleUser.grantThirdpartyUserPrivileges(userAppReqVO.getUserId(), appId);
+                UserAppRelationDO userAppRelationDO = new UserAppRelationDO();
+                userAppRelationDO.setApplicationId(appId);
+                userAppRelationDO.setStatus(CorpStatusEnum.ENABLE.getValue());
+                userAppRelationDO.setUserId(userAppReqVO.getUserId());
+                userAppRelationDataRepository.insert(userAppRelationDO);
+
+                // 添加应用外部用户权限
+                ApplicationManager.withoutApplicationCondition(() -> {
+                    appAuthRoleUser.grantThirdpartyUserPrivileges(userAppReqVO.getUserId(), appId);
+                });
             });
 
             // TODO: 添加应用外部用户相关代码
