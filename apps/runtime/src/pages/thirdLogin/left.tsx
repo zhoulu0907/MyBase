@@ -1,7 +1,7 @@
 import React from 'react';
-import loginBg from '../../../assets/images/login_bg.svg';
-import loginBgMask from '../../../assets/images/login_bg_mask.svg';
-import styles from '../index.module.less';
+import loginBg from '../../assets/images/login_bg.svg';
+import loginBgMask from '../../assets/images/login_bg_mask.svg';
+import styles from './index.module.less';
 
 const Left: React.FC = () => {
   return (

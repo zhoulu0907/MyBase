@@ -237,7 +237,7 @@ export interface UpdateApplicationReq {
   /**
    * 标签ID
    */
-  tagIds?: number[];
+  tagIds?: string[];
   /**
    * 主题色
    */

@@ -68,12 +68,22 @@ const Runtime: React.FC = () => {
         setSubEntities({
           entities: subEntities
         });
+      } else {
+        setSubEntities({ entities: [] });
       }
     }
   };
 
   const renderContent =
-    curMenuId.indexOf('TASK-') >= 0 ? null : <PreviewContainer menuId={curMenuId || ''} runtime={true} mainEntity={mainEntity} subEntities={subEntities} pageSetType={curMenu.value?.pagesetType} />;
+    curMenuId.indexOf('TASK-') >= 0 ? null : (
+      <PreviewContainer
+        menuId={curMenuId || ''}
+        runtime={true}
+        mainEntity={mainEntity}
+        subEntities={subEntities}
+        pageSetType={curMenu.value?.pagesetType}
+      />
+    );
   return <div>{renderContent}</div>;
 };
 

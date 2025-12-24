@@ -6,6 +6,8 @@ import {
   Input,
   Layout,
   Menu,
+  Message,
+  Modal,
   Pagination,
   Select,
   Spin,
@@ -15,7 +17,7 @@ import {
 import { IconEmpty, IconMoreVertical, IconSearch } from '@arco-design/web-react/icon';
 import { type PageParam } from '@onebase/app';
 import { getCommonPaginationList, getRuntimeURL, TokenManager } from '@onebase/common';
-import { getCorpAuthorizedAppListApiInCorp } from '@onebase/platform-center';
+import { getCorpAuthorizedAppListApiInCorp, updateAuthAppStatusInCorp, type authAppStatusParams } from '@onebase/platform-center';
 import { debounce } from 'lodash-es';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
@@ -23,7 +25,7 @@ import noContentSVG from '@/assets/images/noContent.svg';
 import { DynamicIcon } from '@/components/DynamicIcon';
 
 import { AppHeader } from '@/components/header';
-import { StatusEnum, StatusEnumLabel } from '@/constants';
+import { StatusEnum, StatusEnumLabel, StatusLabelEnum } from '@/constants';
 import type { ApplicationList, TagProps } from '@/types';
 import { appIconMap } from '@onebase/ui-kit';
 import TagModal from './components/tagModal';
@@ -100,7 +102,7 @@ const MyAppPage: React.FC = () => {
       name,
       ownerTag,
       orderByTime,
-      status: 1,
+      status: 0,
       corpId: tokenInfo?.corpId || ''
     };
     const res = await getCommonPaginationList(getCorpAuthorizedAppListApiInCorp, req, setPageNo);
@@ -155,6 +157,33 @@ const MyAppPage: React.FC = () => {
     }, delay);
   };
 
+  const handleChangeStatus = async (item: any) => {
+    if (item.showStatus === 2) {
+      const params: authAppStatusParams = { id: item.id, status: '1' };
+      try {
+        await updateAuthAppStatusInCorp(params);
+        getApplicationList();
+      } catch (error) {
+        Message.error('启用失败');
+      }
+    } else {
+      const params: authAppStatusParams = { id: item.id, status: '0' };
+      return Modal.confirm({
+        title: `禁用应用(${item.applicationName})? `,
+        content: '禁用状态下，企业用户无法使用该应用，再次启用时用户可恢复正常使用',
+        okButtonProps: {
+          status: 'danger'
+        },
+        onOk: async () => {
+          await updateAuthAppStatusInCorp(params);
+          getApplicationList();
+          Message.success('禁用成功');
+        }
+      });
+    }
+  };
+
+
   const menu = (item: any) => {
     return (
       <Menu onPointerEnter={clearTimer} onPointerLeave={() => startCloseTimer(80)}>
@@ -162,21 +191,11 @@ const MyAppPage: React.FC = () => {
           key="1"
           onClick={(e) => {
             e.stopPropagation();
-            //TODO
+            handleChangeStatus(item);
           }}
         >
-          启用
+          {item.showStatus === 1 ? StatusLabelEnum.DISABLE : StatusLabelEnum.ENABLE}
         </Menu.Item>
-        <Menu.Item
-          key="2"
-          onClick={(e) => {
-            e.stopPropagation();
-            //TODO
-          }}
-        >
-          下架
-        </Menu.Item>
-        {/* <Menu.Item key="3">应用管理</Menu.Item> */}
       </Menu>
     );
   };
@@ -332,8 +351,7 @@ const MyAppPage: React.FC = () => {
                     </div>
                     <div className={styles.myAppCardFooter}>
                       <Button
-                        className={styles.footerBtn}
-                        type="outline"
+                        type={item.showStatus === StatusEnum.DISABLE ?'secondary' : 'outline'}
                         long
                         onClick={() => {
                           nagivateToRuntimeApp(item.applicationId);

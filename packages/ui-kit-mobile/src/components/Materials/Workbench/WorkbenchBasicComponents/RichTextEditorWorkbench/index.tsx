@@ -24,6 +24,7 @@ const XRichText = memo((props: XRichTextConfig & { runtime?: boolean; detailMode
     borderRadius: '4px',
     boxSizing: 'border-box' as const,
     minHeight: '100px',
+    fontSize: 'small'
   };
 
   return (

@@ -159,6 +159,8 @@ const Runtime: React.FC = () => {
         setSubEntities({
           entities: subEntities
         });
+      } else {
+        setSubEntities({ entities: [] });
       }
     }
   };
@@ -213,13 +215,18 @@ const Runtime: React.FC = () => {
       });
 
       if (appNavigationConfig.webDefaultMenu === 'default' || appNavigationConfig.webDefaultMenu === '') {
-        const curMenuObj = curMenuId ? findMenuWithParents(pageList, [], curMenuId) : findMenuWithParents(pageList, []);
+        let curMenuObj = curMenuId ? findMenuWithParents(pageList, [], curMenuId) : findMenuWithParents(pageList, []);
+
+        if (!curMenuObj) {
+          curMenuObj = findMenuWithParents(pageList, []);
+        }
         if (curMenuObj) {
           setExpandedKeys(curMenuObj.parentIds);
           setCurMenu(curMenuObj.node);
         }
       } else {
         const curMenuObj = findMenuWithParents(pageList, [], appNavigationConfig.webDefaultMenu);
+
         if (curMenuObj) {
           setExpandedKeys(curMenuObj.parentIds);
           setCurMenu(curMenuObj.node);

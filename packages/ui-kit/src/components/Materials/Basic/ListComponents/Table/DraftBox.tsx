@@ -3,21 +3,23 @@ import draftBoxIcon from '@/assets/images/draft.svg';
 import { Alert, Badge, Button, Divider, Form, Modal, Popconfirm, Space, Table } from '@arco-design/web-react';
 import { IconDelete } from '@arco-design/web-react/icon';
 import { getDraftPage } from '@onebase/app';
+import { isRuntimeEnv } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
 import dayjs from 'dayjs';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 interface DraftBoxProps {
   menuId: string;
   tableName: string;
   showFromPageData?: Function;
   tableColumns?: any[];
+  refresh?: number;
 }
 
 /**
  * 草稿箱组件
  */
-export const DraftBox: React.FC<DraftBoxProps> = ({ showFromPageData, tableColumns, menuId, tableName }) => {
+export const DraftBox: React.FC<DraftBoxProps> = ({ showFromPageData, tableColumns, menuId, tableName, refresh }) => {
   useSignals();
   const [draftForm] = Form.useForm();
 
@@ -26,6 +28,18 @@ export const DraftBox: React.FC<DraftBoxProps> = ({ showFromPageData, tableColum
   const [draftTotal, setDraftTotal] = useState<number>(0);
   const [draftPageNo, setDraftPageNo] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(10);
+
+  // 获取草稿总数（不打开弹窗）
+  const fetchDraftTotal = useCallback(async () => {
+    if (!tableName || !menuId || !isRuntimeEnv()) return;
+    try {
+      const res = await getDraftPage(tableName, menuId, { pageNo: 1, pageSize: 1 });
+      const { total = 0 } = res || {};
+      setDraftTotal(total);
+    } catch (error) {
+      console.error('获取草稿总数失败:', error);
+    }
+  }, [tableName, menuId]);
 
   // 打开草稿箱
   const handleGetDrafts = async () => {
@@ -57,6 +71,11 @@ export const DraftBox: React.FC<DraftBoxProps> = ({ showFromPageData, tableColum
   const handleStash = () => {
     handleGetDrafts();
   };
+
+  // 组件挂载、tableName/menuId 变化或 refresh 变化时，重新获取草稿总数
+  useEffect(() => {
+    fetchDraftTotal();
+  }, [fetchDraftTotal, refresh]);
 
   // 删除草稿
   const handleDeleteDraft = () => {};
@@ -140,7 +159,11 @@ export const DraftBox: React.FC<DraftBoxProps> = ({ showFromPageData, tableColum
       <Modal
         title="草稿箱"
         visible={showDraftModal}
-        onCancel={() => setShowDraftModal(false)}
+        onCancel={() => {
+          setShowDraftModal(false);
+          // 关闭弹窗时更新草稿总数，以防在弹窗内进行了删除操作
+          fetchDraftTotal();
+        }}
         footer={null}
         style={{ width: '1000px' }}
       >

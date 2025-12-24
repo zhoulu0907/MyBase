@@ -61,7 +61,7 @@ export const initialData: FlowDocumentJSON = {
       data: {
         runStatus: 'processing',
         approverConfig: {
-          approverType: 'user',
+          handlerType: 'user',
           users: [
             {
               userId: '130010051773104128',
