@@ -7,5 +7,6 @@ export {
   runtimeInfraService,
   runtimeService,
   systemService,
-  dashbordDataSetService
+  dashboardDataSetService,
+  dashboardService
 } from './factory';

@@ -1,93 +1,100 @@
-import { useEffect, useState, type FC } from 'react';
+import { useCallback, useRef, useEffect, useState, type FC } from 'react';
 import { Button, Input, Tabs, Typography, Modal, Form, Space, Pagination } from '@arco-design/web-react';
-import { IconPlus, IconSearch, IconDownload } from '@arco-design/web-react/icon';
+import { IconPlus, IconSearch } from '@arco-design/web-react/icon';
 import TemplateCard from '../TemplateCard';
 import styles from './index.module.less';
 import settings from '@/assets/images/screen/settings.png';
 import application from '@/assets/images/screen/application.png';
 import cloud from '@/assets/images/screen/cloud.png';
+import { DashboardTemplateParams, DelDashboardTemplate, upLoadDashboardTemplate } from '@onebase/platform-center';
+
 const TabPane = Tabs.TabPane;
 const FormItem = Form.Item;
 const { useForm } = Form;
 interface screenTemplate {
+  remarks: string;
   id: string;
-  name: string;
-  desc: string;
+  templateName: string;
+  templateType: string;
+  indexImage: string;
 }
 
 const ScreenTemplate: FC = () => {
-  const handleSearchChange = () => {};
+  // const [searchName, setSearchName] = useState<string>('');
+
   const handleAdd = () => {};
   const [applicationDataList, setApplicationDataList] = useState<screenTemplate[]>();
-  const [systemDataList, setSystemDataList] = useState<screenTemplate[]>();
+  // const [systemDataList, setSystemDataList] = useState<screenTemplate[]>();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(6);
   const [total, setTotal] = useState(1);
-  const [pageSize, setPageSize] = useState<number>();
-  const [pageNo, setPageNo] = useState(1);
+
+  //列表
+  const getTemplateList = async (tabType: string = 'app', searchValue: string = '') => {
+    const res = await DashboardTemplateParams({
+      pageNo: currentPage,
+      pageSize: pageSize,
+      type: tabType,
+      templateName: searchValue
+    });
+    setApplicationDataList(res.list);
+    setTotal(res.total);
+  };
+  // 处理分页变化
+  const handlePageChange = async (pageNum: number) => {
+    try {
+      setCurrentPage(pageNum);
+      getTemplateList();
+    } catch (error) {
+      console.error(error);
+    }
+  };
   useEffect(() => {
-    setApplicationDataList([
-      {
-        id: '110',
-        name: '应用1',
-        desc: '描述1'
-      },
-      {
-        id: '220',
-        name: '应用2',
-        desc: '描述2'
-      },
-      {
-        id: '222',
-        name: '应用3',
-        desc: '描述2'
-      },
-      {
-        id: '223',
-        name: '应用4',
-        desc: '描述2'
-      },
-      {
-        id: '224',
-        name: '应用5',
-        desc: '描述2'
-      },
-      {
-        id: '225',
-        name: '应用6',
-        desc: '描述2'
-      }
-    ]);
-    setSystemDataList([
-      {
-        id: '111',
-        name: '系统1',
-        desc: '系统描述1'
-      },
-      {
-        id: '112',
-        name: '系统1',
-        desc: '系统描述1'
-      },
-      {
-        id: '113',
-        name: '系统3',
-        desc: '系统描述1'
-      }
-    ]);
+    getTemplateList();
   }, []);
-  //编辑
-  // 编辑弹框
+  const [activeTab, setActiveTab] = useState('1');
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const handleSearchChange = useCallback(
+    (value: string) => {
+      // 清除之前的定时器
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+      // 设置新的定时器
+      searchTimeoutRef.current = setTimeout(() => {
+        console.log(value);
+        // 在这里执行搜索逻
+        getTemplateList(activeTab === '1' ? 'app' : 'system', value);
+      }, 1000);
+    },
+    [activeTab]
+  );
+  const handleTabChange = (key: string) => {
+    const tabType = key === '1' ? 'app' : 'system';
+    setActiveTab(key);
+    getTemplateList(tabType);
+  };
+  // 修改弹框
   const [editForm] = useForm();
   const [editVisible, setEditVisible] = useState<boolean>(false);
+  const [editid, setEditid] = useState('');
   const handleEditName = (item: screenTemplate) => {
-    console.log(item, '编辑模板名字弹框');
-    editForm.setFieldValue('name', item.name);
-    editForm.setFieldValue('desc', item.desc);
+    setEditid(item.id);
+    editForm.setFieldValue('templateName', item.templateName);
+    editForm.setFieldValue('remarks', item.remarks);
     setEditVisible(true);
   };
-  //编辑弹框确定按钮
+  //修改弹框确定按钮
   const handleEditOk = async () => {
     await editForm.validate();
+    upLoadDashboardTemplate({
+      id: editid,
+      templateName: editForm.getFieldValue('templateName'),
+      remarks: editForm.getFieldValue('remarks')
+    });
     setEditVisible(false);
+    const currentType = activeTab === '1' ? 'app' : 'system';
+    await getTemplateList(currentType);
   };
   const handleEditTemplate = (item: screenTemplate) => {
     console.log(item, '编辑模板');
@@ -105,10 +112,10 @@ const ScreenTemplate: FC = () => {
 
   const [importVisible, setImportVisible] = useState<boolean>(false);
   const [importForm] = useForm();
-  const handleImportTemplate = () => {
-    importForm.resetFields();
-    setImportVisible(true);
-  };
+  // const handleImportTemplate = () => {
+  //   importForm.resetFields();
+  //   setImportVisible(true);
+  // };
   const handleClickButtom = (name: string) => {
     setSelectedButton(name);
     importForm.setFieldValue('type', name);
@@ -116,29 +123,41 @@ const ScreenTemplate: FC = () => {
   const handleImportOk = async () => {
     importForm.setFieldValue('screeenFile', '');
     await importForm.validate();
-    console.log(importForm);
     setImportVisible(false);
   };
   //删除弹框
   const [deleteVisible, setDeleteVisible] = useState<boolean>(false);
   const [ModalScreenName, setModalScreenName] = useState('');
+  const [delid, setDelid] = useState('');
   const handleDelete = (item: screenTemplate) => {
-    console.log(item);
-    setModalScreenName(item.name);
+    setDelid(item.id);
+    setModalScreenName(item.templateName);
     setDeleteVisible(true);
   };
-  const handleDeleteOk = () => {
-    console.log('删除当前screen');
+  const handleDeleteOk = async () => {
+    await DelDashboardTemplate(delid);
     setDeleteVisible(false);
+    const currentType = activeTab === '1' ? 'app' : 'system';
+    await getTemplateList(currentType);
   };
+  const TabPaneList = [
+    {
+      key: '1',
+      title: '应用模板'
+    },
+    {
+      key: '2',
+      title: '系统模板'
+    }
+  ];
   return (
     <div className={styles.datasetPage}>
       <div className={styles.dataFilter}>
         <div className={styles.datasetTitle}>大屏模板</div>
         <div>
-          <Button style={{ marginRight: '6px' }} type="outline" icon={<IconDownload />} onClick={handleImportTemplate}>
+          {/* <Button style={{ marginRight: '6px' }} type="outline" icon={<IconDownload />} onClick={handleImportTemplate}>
             导入模板
-          </Button>
+          </Button> */}
           <Button type="primary" icon={<IconPlus />} onClick={handleAdd}>
             新建模板
           </Button>
@@ -152,51 +171,36 @@ const ScreenTemplate: FC = () => {
           onChange={handleSearchChange}
           placeholder="搜索"
         />
-        <Tabs defaultActiveTab="1">
-          <TabPane key="1" title="应用模板">
-            <Typography.Paragraph>
-              <div className={styles.appList}>
-                {applicationDataList?.map((item) => (
-                  <TemplateCard
-                    key={item.id}
-                    item={item}
-                    title="应用模板"
-                    onEditTemplate={handleEditName}
-                    onEdit={handleEditTemplate}
-                    onPreview={handlePreview}
-                    onDelete={handleDelete}
-                  />
-                ))}
-              </div>
-            </Typography.Paragraph>
-          </TabPane>
-          <TabPane key="2" title="系统模板">
-            <Typography.Paragraph>
-              <div className={styles.appList}>
-                {systemDataList?.map((item) => (
-                  <TemplateCard
-                    key={item.id}
-                    item={item}
-                    title="系统模板"
-                    onEditTemplate={handleEditName}
-                    onEdit={handleEditTemplate}
-                    onPreview={handlePreview}
-                    onDelete={handleDelete}
-                  />
-                ))}
-              </div>
-            </Typography.Paragraph>
-          </TabPane>
+        <Tabs defaultActiveTab="1" onChange={handleTabChange}>
+          {TabPaneList.map((item) => (
+            <TabPane key={item.key} title={item.title}>
+              <Typography.Paragraph>
+                <div className={styles.appList}>
+                  {applicationDataList?.map((item) => (
+                    <TemplateCard
+                      key={item.id}
+                      item={item}
+                      title="应用模板"
+                      onEditTemplate={handleEditName}
+                      onEdit={handleEditTemplate}
+                      onPreview={handlePreview}
+                      onDelete={handleDelete}
+                    />
+                  ))}
+                </div>
+              </Typography.Paragraph>
+            </TabPane>
+          ))}
         </Tabs>
       </div>
       <Pagination
-        className={styles.appPagination}
-        total={total}
-        current={pageNo}
+        current={currentPage}
         pageSize={pageSize}
-        onChange={(pNo, pSize) => {
-          setPageNo(pNo);
-          setPageSize(pSize);
+        total={total}
+        onChange={handlePageChange}
+        showTotal
+        style={{
+          justifyContent: 'flex-end'
         }}
       />
       {/* 编辑弹框 */}
@@ -207,10 +211,10 @@ const ScreenTemplate: FC = () => {
         onCancel={handleEditCancel}
       >
         <Form form={editForm} autoComplete="off">
-          <FormItem label="大屏名称" field="name" rules={[{ required: true, message: '请输入大屏名称' }]}>
+          <FormItem label="大屏名称" field="templateName" rules={[{ required: true, message: '请输入大屏名称' }]}>
             <Input placeholder="请输入名称,不超过20个字符" />
           </FormItem>
-          <FormItem label="大屏描述" field="desc" rules={[{ required: true, message: '请输入大屏描述' }]}>
+          <FormItem label="大屏描述" field="remarks" rules={[{ required: true, message: '请输入大屏描述' }]}>
             <Input placeholder="请输入描述信息" />
           </FormItem>
         </Form>
@@ -259,7 +263,7 @@ const ScreenTemplate: FC = () => {
           >
             <Input maxLength={20} placeholder="请输入名称,不超过20个字符" />
           </FormItem>
-          <FormItem label="描述信息" field="desc" rules={[{ required: true, message: '请输入大屏描述' }]}>
+          <FormItem label="描述信息" field="remarks" rules={[{ required: true, message: '请输入大屏描述' }]}>
             <Input.TextArea placeholder="请输入描述信息" />
           </FormItem>
           {importForm.getFieldValue('screeenFile') && (
@@ -300,7 +304,7 @@ const ScreenTemplate: FC = () => {
                 <img src={cloud} alt="" width="32px" height="32px" />
               </div>
               {importForm.getFieldValue('screeenFile') ? (
-                <div className={styles.uploadDescOk}>
+                <div className={styles.uploadremarksOk}>
                   <p>这是一个文件标题.json</p>
                   <p>
                     <Button type="text" size="mini">
@@ -312,7 +316,7 @@ const ScreenTemplate: FC = () => {
                   </p>
                 </div>
               ) : (
-                <div className={styles.uploadDesc}>
+                <div className={styles.uploadremarks}>
                   <p>
                     拖拽JSON文件到此处，或<span>点击上传</span>
                   </p>

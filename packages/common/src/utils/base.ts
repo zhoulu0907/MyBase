@@ -40,7 +40,7 @@ export const getRuntimeMobileURL = (): string => {
   const runtimeMobileUrl = (window as any).global_config?.RUNTIME_MOBILE_URL;
   return runtimeMobileUrl || 'http://localhost:9527';
 };
-export const getDashbordDataSetUrl = (): string => {
-  const dashbordDataSetUrl = (window as any).global_config?.APP_BUILDER_DATASET_URL;
-  return dashbordDataSetUrl || 'http://localhost:9528';
+export const getDashboardDataSetUrl = (): string => {
+  const dashboardDataSetUrl = (window as any).global_config?.APP_BUILDER_DATASET_URL;
+  return dashboardDataSetUrl || 'http://localhost:9528';
 };

@@ -6,7 +6,7 @@ import { Layout, Menu } from '@arco-design/web-react';
 import { useEffect, useState, type FC } from 'react';
 import DataSet from './components/DataSet';
 import Dashboard from './components/Dashboard';
-import DashbordTemplate from './components/DashboardTemplate';
+import DashboardTemplate from './components/DashboardTemplate';
 import AppBreadcrumb from '@/components/Breadcrumb';
 import styles from './index.module.less';
 
@@ -78,7 +78,7 @@ const DashboardPage: FC = () => {
             <div className={styles.contentInner}>
               {activeTab === 'dataSet' && <DataSet />}
               {activeTab === 'largeScreen' && <Dashboard />}
-              {activeTab === 'screenTemplate' && <DashbordTemplate />}
+              {activeTab === 'screenTemplate' && <DashboardTemplate />}
             </div>
           </Content>
         </div>
