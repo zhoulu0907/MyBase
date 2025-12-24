@@ -1,6 +1,4 @@
-import { getDictDataListByType, getDictDetail } from '@onebase/platform-center';
 import {
-  COLOR_MODE_TYPES,
   DEFAULT_VALUE_TYPES,
   EDITOR_TYPES,
   FORM_COMPONENT_TYPES,
@@ -18,7 +16,6 @@ import PCActiveIcon from '@/assets/images/pc_icon_active.svg';
 import {
   COMPONENT_GROUP_NAME,
   COMPONENT_MAP,
-  DEFAULT_OPTIONS_TYPE,
   EditRender,
   ENTITY_COMPONENT_TYPES,
   getComponentConfig,
@@ -135,7 +132,7 @@ export default function EditorWorkspace() {
       return;
     }
     console.log('loading mobile-editor-drag-list');
-    
+
     const mobileEditorDrag = loadMicroApp({
       name: 'mobile-editor-drag-list',
       entry: getMobileEditorURL(),
@@ -357,9 +354,16 @@ export default function EditorWorkspace() {
           <ReactSortable
             id="workspace-content"
             list={components}
-            setList={(newList) => {
+            setList={(newList, sortable, store) => {
+              //   console.log(sortable, store);
+              //   console.log(newList);
+              //   console.log(!sortable);
+              if (!sortable) {
+                return;
+              }
+
               const entityList: GridItem[] = [];
-              newList.forEach(async (item) => {
+              newList.forEach((item) => {
                 if (item.type == ENTITY_TYPE_VALUE.MAIN || item.entityType === ENTITY_TYPE.MAIN) {
                   // 主表业务实体
                   const fieldList = item.fields.filter(
@@ -555,6 +559,9 @@ export default function EditorWorkspace() {
                   entityList.push(item);
                 }
               });
+
+              //   console.log('entityList: ', entityList);
+
               setComponents(entityList);
             }}
             onAdd={async (e) => {
