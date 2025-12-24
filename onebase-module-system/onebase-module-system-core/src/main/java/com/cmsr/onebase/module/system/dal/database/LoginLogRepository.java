@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.system.dal.database;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.system.dal.dataobject.logger.LoginLogDO;
-import com.cmsr.onebase.module.system.dal.flex.base.BaseDataServiceImpl;
+import com.cmsr.onebase.framework.orm.repo.BaseDataRepository;
 import com.cmsr.onebase.module.system.dal.flex.mapper.SystemLoginLogMapper;
 import com.cmsr.onebase.module.system.vo.log.LoginLogPageReqVO;
 import com.mybatisflex.core.paginate.Page;
@@ -22,7 +22,7 @@ import static com.cmsr.onebase.framework.data.base.BaseDO.ID;
  * @date 2025-12-22
  */
 @Repository
-public class LoginLogRepository extends BaseDataServiceImpl<SystemLoginLogMapper, LoginLogDO> {
+public class LoginLogRepository extends BaseDataRepository<SystemLoginLogMapper, LoginLogDO> {
 
     /**
      * 分页查询登录日志

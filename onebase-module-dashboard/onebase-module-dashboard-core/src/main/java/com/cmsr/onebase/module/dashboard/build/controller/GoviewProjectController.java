@@ -62,10 +62,11 @@ public class GoviewProjectController  extends BaseController {
 	@ApiSignIgnore
 	public ResultTable list(Tablepar tablepar){
 		Page<GoviewProject> page= new Page<GoviewProject>(tablepar.getPage(), tablepar.getLimit());
-        Page<GoviewProject> iPages = iGoviewProjectService.page(page, new QueryWrapper());
+        Page<GoviewProject> iPages = iGoviewProjectService.page(page, new QueryWrapper().eq(GoviewProject::getAppId,
+				tablepar.getAppId(),tablepar.getAppId() != null));
         ResultTable resultTable=new ResultTable();
 		resultTable.setData(iPages.getRecords());
-		resultTable.setCode(200);
+		resultTable.setCode(0);
 		resultTable.setCount(iPages.getTotalPage());
 		resultTable.setMsg("获取成功");
 		return resultTable;
@@ -87,7 +88,7 @@ public class GoviewProjectController  extends BaseController {
 		goviewProject.setState(-1);
 		boolean b=iGoviewProjectService.save(goviewProject);
 		if(b){
-			return successData(200, goviewProject).put("msg", "创建成功");
+			return successData(0, goviewProject.getId()).put("msg", "交易成功");
 		}else{
 			return error();
 		}
@@ -97,7 +98,7 @@ public class GoviewProjectController  extends BaseController {
 
 	/**
 	 * 项目表删除
-	 * @param ids
+	 * @param
 	 * @return
 	 */
 	//@Log(title = "项目表删除", action = "111")
@@ -106,10 +107,10 @@ public class GoviewProjectController  extends BaseController {
 	@ResponseBody
 	@PermitAll
 	@ApiSignIgnore
-	public AjaxResult remove(List<Long> ids){
-		Boolean b=iGoviewProjectService.removeByIds(ids);
+	public AjaxResult remove(@RequestParam Long id){
+		Boolean b=iGoviewProjectService.removeById(id);
 		if(b){
-			return success();
+			return successData(0,id).put("msg", "交易成功");
 		}else{
 			return error();
 		}
@@ -124,7 +125,7 @@ public class GoviewProjectController  extends BaseController {
     {
 		Boolean b= iGoviewProjectService.updateById(goviewProject);
         if(b){
-        	return success();
+        	return successData(0,goviewProject).put("msg", "交易成功");
         }
         return error();
     }
@@ -140,7 +141,7 @@ public class GoviewProjectController  extends BaseController {
 
 		Boolean b=iGoviewProjectService.updateById(goviewProject);
 		if(b){
-        	return success();
+        	return successData(0,goviewProject.getId()).put("msg", "交易成功");
         }
 		return error();
     }
@@ -168,7 +169,7 @@ public class GoviewProjectController  extends BaseController {
 	@ResponseBody
 	@PermitAll
 	@ApiSignIgnore
-    public AjaxResult getScreenDSLData(String projectId, ModelMap map)
+    public AjaxResult getScreenDSLData(Long projectId, ModelMap map)
     {
 		GoviewProject goviewProject= iGoviewProjectService.getById(projectId);
 
@@ -177,9 +178,9 @@ public class GoviewProjectController  extends BaseController {
 			GoviewProjectVo goviewProjectVo=new GoviewProjectVo();
 			BeanUtils.copyProperties(goviewProject,goviewProjectVo);
 			goviewProjectVo.setContent(blogText.getContent());
-			return AjaxResult.successData(200,goviewProjectVo).put("msg","获取成功");
+			return AjaxResult.successData(0,goviewProjectVo).put("msg","交易成功");
 		}
-		return AjaxResult.successData(200, null).put("msg","无数据");
+		return AjaxResult.successData(0, null).put("msg","无数据");
 
     }
 
@@ -188,7 +189,7 @@ public class GoviewProjectController  extends BaseController {
 	@ResponseBody
 	@PermitAll
 	@ApiSignIgnore
-	public AjaxResult saveData(GoviewProjectData data) {
+	public AjaxResult saveData(@RequestBody GoviewProjectData data) {
 
 		GoviewProject goviewProject= iGoviewProjectService.getById(data.getProjectId());
 		if(goviewProject==null) {
@@ -198,10 +199,10 @@ public class GoviewProjectController  extends BaseController {
 		if(goviewProjectData!=null) {
 			 data.setId(goviewProjectData.getId());
 			 iGoviewProjectDataService.updateById(data);
-			 return success("数据保存成功");
+			return successData(0,data.getProjectId()).put("msg", "数据保存成功");
 		}else {
 			iGoviewProjectDataService.save(data);
-			return success("数据保存成功");
+			return successData(0,data.getProjectId()).put("msg", "数据保存成功");
 		}
 	}
 
@@ -250,7 +251,7 @@ public class GoviewProjectController  extends BaseController {
 		object.transferTo(desc);
 		SysFileVo sysFileVo=BeanUtil.copyProperties(sysFile, SysFileVo.class);
 		sysFileVo.setFileurl(v2Config.getHttpurl()+sysFile.getVirtualKey()+"/"+sysFile.getRelativePath()+"/"+sysFile.getFileName());
-		return successData(200, sysFileVo);
+		return successData(0, sysFileVo);
 	}
 
 

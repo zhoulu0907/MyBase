@@ -27,7 +27,7 @@ import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 @Tag(name = "外部用户服务 - 用户应用关系")
 @RestController
 @Validated
-@RequestMapping("/user/user-app-relation")
+@RequestMapping("/system/user-app-relation")
 public class UserAppRelationController {
 
     @Resource

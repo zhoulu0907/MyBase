@@ -5,7 +5,7 @@ import com.cmsr.onebase.framework.common.enums.XFromSceneTypeEnum;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
-import com.cmsr.onebase.module.system.dal.flex.base.BaseDataServiceImpl;
+import com.cmsr.onebase.framework.orm.repo.BaseDataRepository;
 import com.cmsr.onebase.module.system.dal.flex.mapper.SystemDeptMapper;
 import com.cmsr.onebase.module.system.enums.dept.DeptTypeEnum;
 import com.cmsr.onebase.module.system.vo.dept.DeptSaveReqVO;
@@ -29,7 +29,7 @@ import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
  * @date 2025-08-07
  */
 @Repository
-public class DeptDataRepository extends BaseDataServiceImpl<SystemDeptMapper, DeptDO> {
+public class DeptDataRepository extends BaseDataRepository<SystemDeptMapper, DeptDO> {
 
     /**
      * 获取登录用户其用户所处的场景类型：平台/空间/企业
@@ -64,6 +64,8 @@ public class DeptDataRepository extends BaseDataServiceImpl<SystemDeptMapper, De
                 // 立即失败，抛出异常，防止数据越权
                 throw exception(CORP_ID_NULL);
             }
+        } else if (XFromSceneTypeEnum.THIRD.getCode().equals(fromSceneType)) {
+            queryWrapper.eq(DeptDO.DEPT_TYPE, DeptTypeEnum.THIRD.getCode());
         } else if (XFromSceneTypeEnum.ALL.getCode().equals(fromSceneType)) {
             // 不做任何处理，全量数据
         } else {

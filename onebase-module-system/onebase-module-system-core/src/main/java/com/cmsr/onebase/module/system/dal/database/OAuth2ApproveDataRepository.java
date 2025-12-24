@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.system.dal.database;
 
 import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2ApproveDO;
-import com.cmsr.onebase.module.system.dal.flex.base.BaseDataServiceImpl;
+import com.cmsr.onebase.framework.orm.repo.BaseDataRepository;
 import com.cmsr.onebase.module.system.dal.flex.mapper.SystemOauth2ApproveMapper;
 import org.springframework.stereotype.Repository;
 
@@ -19,7 +19,7 @@ import static com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2Approve
  * @date 2025-12-22
  */
 @Repository
-public class OAuth2ApproveDataRepository extends BaseDataServiceImpl<SystemOauth2ApproveMapper, OAuth2ApproveDO> {
+public class OAuth2ApproveDataRepository extends BaseDataRepository<SystemOauth2ApproveMapper, OAuth2ApproveDO> {
 
     /**
      * 根据用户ID、用户类型和客户端ID查询批准列表

@@ -2,12 +2,12 @@ package com.cmsr.onebase.module.infra.service.logger;
 
 import com.cmsr.onebase.framework.common.biz.infra.logger.dto.ApiAccessLogCreateReqDTO;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.common.util.string.StrUtils;
-import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
-import com.cmsr.onebase.module.infra.dal.database.ApiAccessLogDataRepositoryOld;
-import com.cmsr.onebase.module.infra.dal.dataobject.logger.ApiAccessLogDO;
+import com.cmsr.onebase.module.infra.dal.dataflex.ApiAccessLogDataRepository;
+import com.cmsr.onebase.module.infra.dal.dataflexdo.logger.ApiAccessLogDO;
 import com.cmsr.onebase.module.infra.dal.vo.logger.apiaccesslog.ApiAccessLogPageReqVO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +29,7 @@ import static com.cmsr.onebase.module.infra.dal.dataobject.logger.ApiAccessLogDO
 public class ApiAccessLogServiceImpl implements ApiAccessLogService {
 
     @Resource
-    private ApiAccessLogDataRepositoryOld apiAccessLogDataRepositoryOld;
+    private ApiAccessLogDataRepository apiAccessLogDataRepository;
 
     @Override
     public void createApiAccessLog(ApiAccessLogCreateReqDTO createDTO) {
@@ -43,23 +43,23 @@ public class ApiAccessLogServiceImpl implements ApiAccessLogService {
         }
         
         if (TenantContextHolder.getTenantId() != null) {
-            apiAccessLogDataRepositoryOld.insert(apiAccessLog);
+            apiAccessLogDataRepository.save(apiAccessLog);
         } else {
             // 极端情况下，上下文中没有租户时，此时忽略租户上下文，避免插入失败！
-            TenantUtils.executeIgnore(() -> apiAccessLogDataRepositoryOld.insert(apiAccessLog));
+            TenantUtils.executeIgnore(() -> apiAccessLogDataRepository.save(apiAccessLog));
         }
     }
 
     @Override
     public PageResult<ApiAccessLogDO> getApiAccessLogPage(ApiAccessLogPageReqVO pageReqVO) {
-        return apiAccessLogDataRepositoryOld.findPage(pageReqVO);
+        return apiAccessLogDataRepository.findPage(pageReqVO);
     }
 
     @Override
     @SuppressWarnings("DuplicatedCode")
     public Integer cleanAccessLog(Integer exceedDay, Integer deleteLimit) {
         LocalDateTime expireDate = LocalDateTime.now().minusDays(exceedDay);
-        return apiAccessLogDataRepositoryOld.cleanExpiredLogs(expireDate, deleteLimit);
+        return apiAccessLogDataRepository.cleanExpiredLogs(expireDate, deleteLimit);
     }
 
 }

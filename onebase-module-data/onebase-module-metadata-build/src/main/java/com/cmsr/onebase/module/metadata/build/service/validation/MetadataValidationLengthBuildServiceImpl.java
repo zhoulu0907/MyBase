@@ -253,7 +253,17 @@ public class MetadataValidationLengthBuildServiceImpl implements MetadataValidat
         if (group == null) {
             return null;
         }
-        List<MetadataValidationLengthDO> list = lengthRepository.findByGroupUuid(group.getGroupUuid());
+        
+        // 查询长度校验记录，优先使用 groupUuid，如果为 null 则尝试用 groupId 的字符串形式查询（兼容历史数据）
+        List<MetadataValidationLengthDO> list;
+        String groupUuid = group.getGroupUuid();
+        if (groupUuid != null && !groupUuid.isEmpty()) {
+            list = lengthRepository.findByGroupUuid(groupUuid);
+        } else {
+            // 兼容历史数据：尝试用 groupId 字符串形式查询
+            list = lengthRepository.findByGroupUuid(String.valueOf(id));
+        }
+        
         if (list.isEmpty()) {
             return null;
         }
@@ -279,7 +289,16 @@ public class MetadataValidationLengthBuildServiceImpl implements MetadataValidat
         if (group == null) {
             return;
         }
-        List<MetadataValidationLengthDO> list = lengthRepository.findByGroupUuid(group.getGroupUuid());
+        
+        // 查询长度校验记录，优先使用 groupUuid，如果为 null 则尝试用 groupId 的字符串形式查询（兼容历史数据）
+        List<MetadataValidationLengthDO> list;
+        String groupUuid = group.getGroupUuid();
+        if (groupUuid != null && !groupUuid.isEmpty()) {
+            list = lengthRepository.findByGroupUuid(groupUuid);
+        } else {
+            list = lengthRepository.findByGroupUuid(String.valueOf(id));
+        }
+        
         String fieldUuid = null;
         
         // 删除子表记录
@@ -336,8 +355,14 @@ public class MetadataValidationLengthBuildServiceImpl implements MetadataValidat
             // 检查是否还有其他校验记录引用这个分组
             boolean hasOtherReferences = false;
             
-            // 检查长度校验表
-            List<MetadataValidationLengthDO> lengthRecords = lengthRepository.findByGroupUuid(group.getGroupUuid());
+            // 检查长度校验表，优先使用 groupUuid，如果为 null 则尝试用 groupId 字符串形式查询
+            List<MetadataValidationLengthDO> lengthRecords;
+            String groupUuid = group.getGroupUuid();
+            if (groupUuid != null && !groupUuid.isEmpty()) {
+                lengthRecords = lengthRepository.findByGroupUuid(groupUuid);
+            } else {
+                lengthRecords = lengthRepository.findByGroupUuid(String.valueOf(groupId));
+            }
             if (!lengthRecords.isEmpty()) {
                 hasOtherReferences = true;
             }

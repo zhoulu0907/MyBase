@@ -3,7 +3,7 @@ package com.cmsr.onebase.module.system.dal.database;
 import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.system.dal.dataobject.license.LicenseDO;
-import com.cmsr.onebase.module.system.dal.flex.base.BaseDataServiceImpl;
+import com.cmsr.onebase.framework.orm.repo.BaseDataRepository;
 import com.cmsr.onebase.module.system.dal.flex.mapper.SystemLicenseMapper;
 import com.cmsr.onebase.module.system.enums.license.LicenseStatusEnum;
 import com.cmsr.onebase.module.system.vo.license.LicensePageReqVO;
@@ -20,7 +20,7 @@ import java.util.List;
  * @date 2025-08-11
  */
 @Repository
-public class LicenseDataRepository extends BaseDataServiceImpl<SystemLicenseMapper, LicenseDO> {
+public class LicenseDataRepository extends BaseDataRepository<SystemLicenseMapper, LicenseDO> {
 
     /**
      * 根据状态查找License

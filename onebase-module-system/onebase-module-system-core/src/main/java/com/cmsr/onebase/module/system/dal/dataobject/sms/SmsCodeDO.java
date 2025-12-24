@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 
 /**
  * 手机验证码 DO
- *
+ * <p>
  * idx_mobile 索引：基于 {@link #mobile} 字段
  *
  */
@@ -22,14 +22,14 @@ import java.time.LocalDateTime;
 public class SmsCodeDO extends BaseEntity {
 
     // 字段列名常量
-    public static final String MOBILE      = "mobile";
-    public static final String CODE        = "code";
-    public static final String SCENE       = "scene";
-    public static final String CREATE_IP   = "create_ip";
+    public static final String MOBILE = "mobile";
+    public static final String CODE = "code";
+    public static final String SCENE = "scene";
+    public static final String CREATE_IP = "create_ip";
     public static final String TODAY_INDEX = "today_index";
-    public static final String USED        = "used";
-    public static final String USED_TIME   = "used_time";
-    public static final String USED_IP     = "used_ip";
+    public static final String USED = "used";
+    public static final String USED_TIME = "used_time";
+    public static final String USED_IP = "used_ip";
 
     /**
      * 手机号
@@ -60,7 +60,7 @@ public class SmsCodeDO extends BaseEntity {
      * 是否使用
      */
     @Column(value = USED)
-    private Boolean used;
+    private Integer used;
     /**
      * 使用时间
      */

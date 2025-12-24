@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.system.dal.database;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.system.dal.dataobject.sms.SmsChannelDO;
-import com.cmsr.onebase.module.system.dal.flex.base.BaseDataServiceImpl;
+import com.cmsr.onebase.framework.orm.repo.BaseDataRepository;
 import com.cmsr.onebase.module.system.dal.flex.mapper.SystemSmsChannelMapper;
 import com.cmsr.onebase.module.system.vo.sms.SmsChannelPageReqVO;
 import com.mybatisflex.core.paginate.Page;
@@ -20,7 +20,7 @@ import java.util.List;
  * @date 2025-12-22
  */
 @Repository
-public class SmsChannelDataRepository extends BaseDataServiceImpl<SystemSmsChannelMapper, SmsChannelDO> {
+public class SmsChannelDataRepository extends BaseDataRepository<SystemSmsChannelMapper, SmsChannelDO> {
 
     /**
      * 根据编码查找短信渠道

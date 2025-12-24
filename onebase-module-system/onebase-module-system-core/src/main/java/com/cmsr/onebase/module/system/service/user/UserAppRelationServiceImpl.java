@@ -5,13 +5,17 @@ import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
 import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
 import com.cmsr.onebase.module.system.dal.database.UserAppRelationDataRepository;
+import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.UserAppRelationDO;
 import com.cmsr.onebase.module.system.vo.user.*;
 import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.Collections;
@@ -27,6 +31,9 @@ import java.util.stream.Collectors;
 @Validated
 public class UserAppRelationServiceImpl implements UserAppRelationService {
 
+    @Resource
+    @Lazy // 延迟，避免循环依赖报错
+    private UserService          userService;
 
     @Resource
     private UserAppRelationDataRepository userAppRelationDataRepository;
@@ -59,7 +66,14 @@ public class UserAppRelationServiceImpl implements UserAppRelationService {
     }
 
     @Override
+    @Transactional
     public void createUserAppRelation(UserAppRelationInertReqVO userAppReqVO) {
+
+        if (null != userAppReqVO.getUserId()) {
+            userService.updateUserByUserAppReqVO(userAppReqVO);
+        }
+
+        // 保存关联关联
         if (!CollectionUtils.isEmpty(userAppReqVO.getApplicationIdList())) {
             // 插入
             userAppReqVO.getApplicationIdList().forEach(appId -> {

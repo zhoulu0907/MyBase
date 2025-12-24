@@ -79,17 +79,16 @@ public class InfoCloudOpassClient extends AbstractSmsClient {
          * }
          */
         JSONObject respObj = response.getBody().getObject();
-        if (response.isSuccess()) {
+        if (response.isSuccess() && respObj.getInt("code") == 200) {
             return new SmsSendRespDTO().setSuccess(true)
                     .setApiRequestId(respObj.getString("requestId"))
                     .setSerialNo(respObj.getJSONObject("data").getString("msgId"))
-                    .setApiCode(respObj.getString("code"))
-                    .setApiMsg(respObj.getString("message"));
+                    .setApiCode(respObj.getString("code"));
         } else {
             return new SmsSendRespDTO().setSuccess(false)
                     .setApiRequestId(respObj.getString("requestId"))
                     .setApiCode(respObj.getString("code"))
-                    .setApiMsg(respObj.getString("message"));
+                    .setApiMsg(respObj.getString("message") + ":" + respObj.getJSONObject("data").toString());
         }
     }
 
