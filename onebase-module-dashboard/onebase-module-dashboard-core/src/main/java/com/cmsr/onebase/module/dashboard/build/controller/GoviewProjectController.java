@@ -5,6 +5,7 @@ import cn.hutool.core.date.DateUtil;
 import com.cmsr.onebase.framework.common.annotaion.ApiSignIgnore;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.dashboard.build.common.base.BaseController;
 import com.cmsr.onebase.module.dashboard.build.common.config.V2Config;
 import com.cmsr.onebase.module.dashboard.build.common.domain.AjaxResult;
@@ -113,6 +114,7 @@ public class GoviewProjectController  extends BaseController {
     @ResponseBody
 	@PermitAll
 	@ApiSignIgnore
+	@TenantIgnore
     public AjaxResult editSave(@RequestBody GoviewProject goviewProject)
     {
 		Boolean b= iGoviewProjectService.updateById(goviewProject);
@@ -143,6 +145,7 @@ public class GoviewProjectController  extends BaseController {
 	@ResponseBody
 	@PermitAll
 	@ApiSignIgnore
+	@TenantIgnore
     public AjaxResult updateVisible(@RequestBody GoviewProject goviewProject){
     	if(goviewProject.getState()==-1||goviewProject.getState()==1) {
 
@@ -160,6 +163,7 @@ public class GoviewProjectController  extends BaseController {
 	@ResponseBody
 	@PermitAll
 	@ApiSignIgnore
+	@TenantIgnore
     public CommonResult<GoviewProjectVo>  getScreenDSLData(Long projectId, ModelMap map)
     {
 		GoviewProject goviewProject= iGoviewProjectService.getById(projectId);
@@ -180,6 +184,7 @@ public class GoviewProjectController  extends BaseController {
 	@ResponseBody
 	@ApiSignIgnore
 	@PermitAll
+	@TenantIgnore
 	public AjaxResult saveData(@RequestBody GoviewProjectData data) {
 
 		GoviewProject goviewProject= iGoviewProjectService.getById(data.getProjectId());
@@ -206,6 +211,7 @@ public class GoviewProjectController  extends BaseController {
 	@PostMapping("/upload")
 	@PermitAll
 	@ApiSignIgnore
+	@TenantIgnore
 	public AjaxResult upload(@RequestBody MultipartFile object) throws IOException{
 		String fileName = object.getOriginalFilename();
 		//默认文件格式

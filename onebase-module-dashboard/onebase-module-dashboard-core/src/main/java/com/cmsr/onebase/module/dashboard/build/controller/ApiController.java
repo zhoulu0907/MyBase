@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.dashboard.build.controller;
 
 import com.cmsr.onebase.framework.common.annotaion.ApiSignIgnore;
+import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.dashboard.build.common.base.BaseController;
 import com.cmsr.onebase.module.dashboard.build.common.config.V2Config;
 import com.cmsr.onebase.module.dashboard.build.common.domain.AjaxResult;
@@ -103,6 +104,7 @@ public class ApiController  extends BaseController {
 	@ResponseBody
 	@PermitAll
 	@ApiSignIgnore
+	@TenantIgnore
 	public AjaxResult getOssInfo() {
 		Map<String, Object> ossInfo = new HashMap<>();
 		ossInfo.put("bucketName", "oss");
