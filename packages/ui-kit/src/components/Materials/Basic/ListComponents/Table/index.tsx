@@ -53,6 +53,8 @@ type XTableSelectProps = {
   defaultSelectedId?: string | number | null;
   onSelectedChange?: (value: any | null, fromDoubleClick?: boolean) => void;
   refreshAfterSelect?: boolean;
+  //   隐藏草稿箱
+  hiddenDraft: boolean;
 };
 
 const XTable = memo(
@@ -663,12 +665,15 @@ const XTable = memo(
                   添加数据
                 </Button>
               )}
-              <DraftBox
-                showFromPageData={showFromPageData}
-                tableColumns={finalColumns}
-                menuId={curMenu.value?.id}
-                tableName={tableName}
-              />
+
+              {!props?.xTableSelectProps?.hiddenDraft && (
+                <DraftBox
+                  showFromPageData={showFromPageData}
+                  tableColumns={finalColumns}
+                  menuId={curMenu.value?.id}
+                  tableName={tableName}
+                />
+              )}
             </div>
             <Button type="text" onClick={() => handlePage()} icon={<IconRefresh />}></Button>
           </div>
