@@ -14,7 +14,7 @@ export interface ApplicationMenu {
   menuIcon: string;
   menuUuid?: string;
   isVisible: number;
-  children: ApplicationMenu[];
+  children?: ApplicationMenu[];
 }
 
 export enum MenuType {
