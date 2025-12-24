@@ -18,7 +18,7 @@ import {
 import { getApplicationSimple, type Application, type PageParam } from '@onebase/app';
 import { TENANT_PROFILE_PERMISSION as ACTIONS, hasPermission /* UserPermissionManager */ } from '@onebase/common';
 import type { CorpDetailResponse, DictData, PostSimpleRespVO, RoleSimpleRespVO } from '@onebase/platform-center';
-import { getCorpListApi, getDictDataByType, getLoginedUser } from '@onebase/platform-center';
+import { getCorpListApi, getDictDataByType, getLoginedUser, getFileUrlById } from '@onebase/platform-center';
 import { appIconMap } from '@onebase/ui-kit';
 import dayjs from 'dayjs';
 import React, { useEffect, useState } from 'react';
@@ -71,7 +71,8 @@ const ProfilePage: React.FC = () => {
     try {
       setLoading(true);
       const res = await getLoginedUser();
-      setUserInfo(res);
+      const avatar = res?.avatar ? getFileUrlById(res.avatar) : null;
+      setUserInfo({...res, avatar});
       if (res?.id) {
         await fetchIndustryDict(res.id);
       }
