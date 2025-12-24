@@ -22,7 +22,9 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 
@@ -55,6 +57,26 @@ public class RuntimeDictDataController {
         }
         List<DictDataDO> list = dictDataService.getDictDataList(CommonStatusEnum.ENABLE.getStatus(), dictType);
         return success(BeanUtils.toBean(list, DictDataSimpleRespVO.class));
+    }
+
+    @GetMapping("/simple-list-by-types")
+    @Operation(summary = "根据多个dict type获得字典数据列表", description = "批量获取多个字典类型的数据，按dictType分组返回")
+    @Parameter(name = "dictTypes", description = "字典类型列表", required = false)
+    @Parameter(name = "dictTypeIds", description = "字典类型ID列表", required = false)
+    // 无需添加权限认证，因为前端全局都需要
+    public CommonResult<Map<String, List<DictDataSimpleRespVO>>> getSimpleDictDataListByTypes(
+            @RequestParam(value = "dictTypes", required = false) List<String> dictTypes,
+            @RequestParam(value = "dictTypeIds", required = false) List<Long> dictTypeIds) {
+        // 调用 Service 层批量查询（封装了所有业务逻辑）
+        Map<String, List<DictDataDO>> dictDataMap = dictDataService.getDictDataMapByTypesAndTypeIds(dictTypes, dictTypeIds);
+        
+        // 转换DO到VO
+        Map<String, List<DictDataSimpleRespVO>> result = new HashMap<>();
+        for (Map.Entry<String, List<DictDataDO>> entry : dictDataMap.entrySet()) {
+            result.put(entry.getKey(), BeanUtils.toBean(entry.getValue(), DictDataSimpleRespVO.class));
+        }
+        
+        return success(result);
     }
 
 

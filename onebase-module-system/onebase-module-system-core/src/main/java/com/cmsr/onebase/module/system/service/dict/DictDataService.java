@@ -11,6 +11,7 @@ import org.springframework.lang.Nullable;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 字典数据 Service 接口
@@ -125,5 +126,24 @@ public interface DictDataService {
      * @return 批量操作结果
      */
     DictDataBatchRespVO batchOperateDictData(DictDataBatchReqVO batchReqVO);
+
+    /**
+     * 根据多个字典类型批量获取字典数据列表（按dictType分组）
+     *
+     * @param dictTypes 字典类型集合
+     * @return 按dictType分组的字典数据 Map，key为dictType，value为该类型对应的字典数据列表
+     */
+    Map<String, List<DictDataDO>> getDictDataMapByTypes(Collection<String> dictTypes);
+
+    /**
+     * 根据字典类型和字典类型ID批量获取字典数据列表（按dictType分组）
+     * <p>
+     * 封装了所有业务逻辑：将dictTypeIds转换为dictTypes，然后批量查询并分组返回
+     *
+     * @param dictTypes   字典类型集合
+     * @param dictTypeIds 字典类型ID集合
+     * @return 按dictType分组的字典数据 Map
+     */
+    Map<String, List<DictDataDO>> getDictDataMapByTypesAndTypeIds(Collection<String> dictTypes, Collection<Long> dictTypeIds);
 
 }
