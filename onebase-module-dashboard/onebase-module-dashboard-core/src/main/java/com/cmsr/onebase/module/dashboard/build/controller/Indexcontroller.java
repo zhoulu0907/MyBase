@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.dashboard.build.controller;
 
 import com.cmsr.onebase.framework.common.annotaion.ApiSignIgnore;
+import jakarta.annotation.security.PermitAll;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -13,6 +14,7 @@ public class Indexcontroller {
 
 	@GetMapping("/")
 	@ApiSignIgnore
+	@PermitAll
 	public void index(HttpServletResponse response) throws IOException {
 		response.setContentType("text/html; charset=utf-8");
 		PrintWriter out = response.getWriter();

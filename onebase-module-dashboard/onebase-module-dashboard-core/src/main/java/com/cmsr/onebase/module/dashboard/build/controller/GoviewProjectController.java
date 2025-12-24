@@ -57,7 +57,6 @@ public class GoviewProjectController  extends BaseController {
 	@ApiOperation(value = "分页跳转", notes = "分页跳转")
 	@GetMapping("/list")
 	@ResponseBody
-	@PermitAll
 	@ApiSignIgnore
 	public CommonResult<PageResult<GoviewProject>> list(Tablepar tablepar){
 		Page<GoviewProject> page= new Page<>(tablepar.getPage(), tablepar.getLimit());
@@ -77,7 +76,6 @@ public class GoviewProjectController  extends BaseController {
 	@ApiOperation(value = "新增", notes = "新增")
 	@PostMapping("/create")
 	@ResponseBody
-    @PermitAll
 	@ApiSignIgnore
 	public AjaxResult add(@RequestBody GoviewProject goviewProject){
 		goviewProject.setState(-1);
@@ -100,7 +98,6 @@ public class GoviewProjectController  extends BaseController {
 	@ApiOperation(value = "删除", notes = "删除")
 	@PostMapping("/delete")
 	@ResponseBody
-	@PermitAll
 	@ApiSignIgnore
 	public AjaxResult remove(@RequestParam Long id){
 		Boolean b=iGoviewProjectService.removeById(id);
@@ -129,7 +126,6 @@ public class GoviewProjectController  extends BaseController {
 	@ApiOperation(value = "项目重命名", notes = "项目重命名")
     @PostMapping("/rename")
     @ResponseBody
-	@PermitAll
 	@ApiSignIgnore
     public AjaxResult rename(@RequestBody GoviewProject goviewProject)
     {
@@ -182,8 +178,8 @@ public class GoviewProjectController  extends BaseController {
 	@ApiOperation(value = "保存项目数据", notes = "保存项目数据")
 	@PostMapping("/save/data")
 	@ResponseBody
-	@PermitAll
 	@ApiSignIgnore
+	@PermitAll
 	public AjaxResult saveData(@RequestBody GoviewProjectData data) {
 
 		GoviewProject goviewProject= iGoviewProjectService.getById(data.getProjectId());
