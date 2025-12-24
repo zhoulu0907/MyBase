@@ -4,16 +4,17 @@ import { useFormEditorSignal, useListEditorSignal } from '../signals/page_editor
 
 import { useLocation } from 'react-router-dom';
 
-export function usePageEditorSignal(pageType?:string) {
-
+export function usePageEditorSignal(pageType?: string) {
   const path = useLocation().pathname;
-  
+
   /**
    * 表单设计页、新增、编辑、详情页  使用 useFormEditorSignal
    * 其余  使用 useListEditorSignal
    */
-  const useList = !(pageType && pageType.indexOf(EDITOR_TYPES.FORM_EDITOR) !== -1 ||
-    path.endsWith(`/${EDITOR_TYPES.FORM_EDITOR}`));
+  const useList = !(
+    (pageType && pageType.indexOf(EDITOR_TYPES.FORM_EDITOR) !== -1) ||
+    path.endsWith(`/${EDITOR_TYPES.FORM_EDITOR}`)
+  );
 
   // 优化：避免多次调用 createCurrentEditorSignal，提升性能和可读性
   const curComponentID = currentEditorSignal.curComponentID.value;
@@ -130,6 +131,6 @@ export function usePageEditorSignal(pageType?:string) {
     setSubTableComponents,
     delSubTableComponents,
     batchDelSubTableComponents,
-    clearSubTableComponents,
+    clearSubTableComponents
   };
 }
