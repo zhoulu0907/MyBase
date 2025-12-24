@@ -1,13 +1,12 @@
 import { Tabs } from '@arco-design/web-react';
 import { IconRight } from '@arco-design/web-react/icon';
 import type { CSSProperties } from 'react';
-import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import { memo, useEffect, useState } from 'react';
-import { listApplicationMenu, type ApplicationMenu, menuSignal } from '@onebase/app';
+import { memo } from 'react';
 import { WORKBENCH_STATUS_OPTIONS, WORKBENCH_STATUS_VALUES, QUICK_ENTRY_THEME_OPTIONS, QUICK_ENTRY_THEME_VALUES } from '../../core/constants';
 import type { QuickEntryTitleConfig, QuickEntryStyleConfig, QuickEntryGroupConfig } from '../../core/types';
 import { type XQuickEntryConfig } from './schema';
 import { getDefaultIcon } from './getDefaultIcon';
+import { useJump } from '../../hooks/useJump';
 import './index.css';
 
 // 主题三使用的颜色数组（对应 arcoPalette.primary 的颜色，添加 20% 透明度）
@@ -31,11 +30,7 @@ const defaultGroupConfig: QuickEntryGroupConfig = {
 
 const XQuickEntry = memo((props: XQuickEntryConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const { id, status, width, titleConfig, styleConfig, groupConfig, runtime } = props;
-  const navigate = useNavigate();
-  const { appId } = useParams<{ appId?: string }>();
-  const [appRuntimeMenu, setAppRuntimeMenu] = useState<ApplicationMenu[]>([]);
-  const location = useLocation();
-  const { curMenu, setCurMenu } = menuSignal;
+  const { handleJump } = useJump();
 
   const finalTitleConfig = titleConfig || defaultTitleConfig;
   const finalStyleConfig = styleConfig || defaultStyleConfig;
@@ -44,52 +39,15 @@ const XQuickEntry = memo((props: XQuickEntryConfig & { runtime?: boolean; detail
   const groups = finalGroupConfig?.groups ?? [];
   const enableGroup = Boolean(finalGroupConfig?.enableGroup);
 
-  // 获取应用运行态菜单数据
-  useEffect(() => {
-    if (!runtime) return;
-    getApplicationMenu();
-  }, [runtime]);
-
-  const getApplicationMenu = async () => {
-    if (appId) {
-      const res = await listApplicationMenu({ applicationId: appId as string });
-      setAppRuntimeMenu(res);
-      console.log('res', res);
-    }
-  };
-
   const handleClickEntry = (item: {
     linkAddress?: string;
     menuUuid?: string;
   }) => {
-    if (!runtime) return;
-
-    // 跳转链接
-      if (item.linkAddress) {
-      if (item.linkAddress.startsWith('http')) {
-        window.open(item.linkAddress);
-      } else {
-        console.log('Navigate to:', item.linkAddress);
-        navigate(item.linkAddress);
-      }
-      return;
-    }
-
-    // 跳转应用菜单
-    if (item.menuUuid) {
-      console.log('Navigate to menu:', item);
-      const targetMenu = appRuntimeMenu.find(menu => menu.menuUuid === item.menuUuid);
-      if (targetMenu && targetMenu.id) {
-        // 获取当前URL的查询参数, 更新或添加 curMenu 参数
-        const searchParams = new URLSearchParams(location.search);
-        searchParams.set('curMenu', targetMenu.id);
-        const newPath = `${location.pathname}?${searchParams.toString()}`;
-        navigate(newPath);
-        setCurMenu(targetMenu);
-      } else {
-        console.warn('未找到对应菜单或菜单未配置 id', item.menuUuid);
-      }
-    }
+    handleJump({
+      menuUuid: item.menuUuid,
+      linkAddress: item.linkAddress,
+      runtime,
+    })
   };
 
   const renderEntryItem = (
