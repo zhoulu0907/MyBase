@@ -10,6 +10,7 @@ import com.cmsr.onebase.module.system.enums.logger.LoginLogTypeEnum;
 import com.cmsr.onebase.module.system.runtime.service.auth.RuntimeAuthService;
 import com.cmsr.onebase.module.system.service.permission.PermissionService;
 import com.cmsr.onebase.module.system.vo.auth.*;
+import com.cmsr.onebase.module.system.vo.user.UserForgetPasswordReqVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
@@ -71,7 +72,6 @@ public class RuntimeAuthController {
     }
 
 
-
     @PostMapping("/corp-login")
     @PermitAll
     @Operation(summary = "企业登录（手机号）")
@@ -81,6 +81,14 @@ public class RuntimeAuthController {
         response.addHeader("Set-Cookie", String.format("%s=%s; HttpOnly",
                 securityProperties.getTokenHeader(), loginRespVO.getAccessToken()));
         return success(loginRespVO);
+    }
+
+
+    @PostMapping("/third-login")
+    @PermitAll
+    @Operation(summary = "第三方用户登录（手机号）")
+    public CommonResult<ThirdAuthLoginRespVO> thirdLogin(@RequestBody @Valid ThirdAuthLoginReqVO reqVO) {
+        return success(runtimeAuthService.thirdLogin(reqVO));
     }
 
     @PostMapping("/logout")
@@ -100,7 +108,7 @@ public class RuntimeAuthController {
     @TenantIgnore
     @Operation(summary = "发送邮箱/手机验证码")
     public CommonResult<Boolean> sendVerifyCode(@RequestBody @Valid VerifyCodeSendReqVO reqVO) {
-        // authService.sendSmsCode(reqVO);
+        runtimeAuthService.sendSmsCode(reqVO);
         return success(true);
     }
 
@@ -125,5 +133,14 @@ public class RuntimeAuthController {
     @Operation(summary = "获取登录用户的权限信息")
     public CommonResult<AuthPermissionInfoRespVO> getPermissionInfo(@RequestParam(value = "code", required = false) String code) {
         return success(permissionService.getPermissionInfo(code));
+    }
+
+
+    @PostMapping("/forget-password")
+    @Operation(summary = "忘记密码")
+    @PermitAll
+    public CommonResult<Boolean> updateUserPassword(@Valid @RequestBody UserForgetPasswordReqVO reqVO) {
+        runtimeAuthService.thirdUserForgetPassword(reqVO);
+        return success(true);
     }
 }

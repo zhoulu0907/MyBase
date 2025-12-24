@@ -1,0 +1,8 @@
+### 获取租户编号 /runtime/system/simple-list
+GET {{baseUrl}}/system/user/simple-list
+Authorization: Bearer {{token}}
+
+
+### 获得指定部门的用户简要分页列表
+GET {{baseUrl}}/system/user/simple-page
+Authorization: Bearer {{token}}

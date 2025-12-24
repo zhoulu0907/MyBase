@@ -1,12 +1,13 @@
 package com.cmsr.onebase.module.infra.core.api.security;
 
-import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.framework.common.biz.security.SecurityConfigApi;
 import com.cmsr.onebase.framework.common.biz.security.dto.LoginFailureResultDTO;
 import com.cmsr.onebase.framework.common.biz.security.dto.PasswordExpiryCheckDTO;
-import com.cmsr.onebase.module.infra.dal.database.SecurityRecordDataRepository;
-import com.cmsr.onebase.module.infra.dal.dataobject.security.SecurityRecordDO;
+import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.framework.common.security.TenantContextHolder;
+import com.cmsr.onebase.module.infra.dal.dataflex.SecurityRecordDataRepository;
+import com.cmsr.onebase.module.infra.dal.dataflexdo.ssecurity.SecurityRecordDO;
+import com.cmsr.onebase.module.infra.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.infra.enums.security.SecurityRecordTypeEnum;
 import com.cmsr.onebase.module.infra.service.security.AntiBruteForceService;
 import com.cmsr.onebase.module.infra.service.security.SecurityConfigService;
@@ -125,13 +126,14 @@ public class SecurityConfigApiImpl implements SecurityConfigApi {
         Long tenantId = TenantContextHolder.getTenantId();
 
         // 创建新的历史记录
-        SecurityRecordDO newRecord = SecurityRecordDO.builder()
-                .tenantId(tenantId)
-                .userId(userId)
-                .recordType(SecurityRecordTypeEnum.PASSWORD_HISTORY.getCode())
-                .recordValue(encodedPassword)
-                .build();
-        securityRecordDataRepository.insert(newRecord);
+
+        SecurityRecordDO newRecord = new SecurityRecordDO();
+        newRecord.setTenantId(tenantId);
+        newRecord.setUserId(userId);
+        newRecord.setRecordType(SecurityRecordTypeEnum.PASSWORD_HISTORY.getCode());
+        newRecord.setRecordValue(encodedPassword);
+
+        securityRecordDataRepository.save(newRecord);
 
         return success(Boolean.TRUE);
     }
@@ -172,13 +174,16 @@ public class SecurityConfigApiImpl implements SecurityConfigApi {
         if (passwordAge > expiryDays) {
             // 密码已过期
             int daysExpired = (int) (passwordAge - expiryDays);
-            return success(PasswordExpiryCheckDTO.builder()
-                    .type("expired")
-                    .daysExpired(daysExpired)
-                    .passwordAge((int) passwordAge)
-                    .expiryDays(expiryDays)
-                    .message(String.format("您的密码已过期%d天，请尽快修改密码", daysExpired))
-                    .build());
+
+            throw exception(ErrorCodeConstants.PASSWORD_EXPIRED, daysExpired);
+
+//            return success(PasswordExpiryCheckDTO.builder()
+//                    .type("expired")
+//                    .daysExpired(daysExpired)
+//                    .passwordAge((int) passwordAge)
+//                    .expiryDays(expiryDays)
+//                    .message(String.format("您的密码已过期%d天，请尽快修改密码", daysExpired))
+//                    .build());
         } else {
             // 密码未过期
             return success(PasswordExpiryCheckDTO.builder()

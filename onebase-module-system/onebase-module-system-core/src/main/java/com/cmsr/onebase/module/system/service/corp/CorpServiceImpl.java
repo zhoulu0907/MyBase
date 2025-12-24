@@ -31,8 +31,6 @@ import com.mzt.logapi.context.LogRecordContext;
 import com.mzt.logapi.starter.annotation.LogRecord;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.DataRow;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Lazy;
@@ -128,7 +126,8 @@ public class CorpServiceImpl implements CorpService {
         CorpDO corpDO = BeanUtils.toBean(reqVO, CorpDO.class);
         corpDO.setTenantId(TenantContextHolder.getTenantId());
         corpDO.setStatus(CommonStatusEnum.ENABLE.getStatus());
-        return corpDataRepository.insert(corpDO).getId();
+        corpDataRepository.insert(corpDO);
+        return corpDO.getId();
     }
 
     private Integer getExistUserLimitExcludeCorp(Long corpId) {
@@ -214,11 +213,8 @@ public class CorpServiceImpl implements CorpService {
 
     @Transactional(rollbackFor = Exception.class)
     public void updateCorpAdminIdById(Long corpId, Long adminId) {
-        //  企业修改管理员Id
-        DataRow row = new DataRow();
-        row.put(CorpDO.ADMIN_ID, adminId);
-        corpDataRepository.updateByConfig(row, new DefaultConfigStore().eq(CorpDO.ID, corpId));
-
+        // 企业修改管理员Id
+        corpDataRepository.updateCorpAdminId(corpId, adminId);
     }
 
 
@@ -427,10 +423,8 @@ public class CorpServiceImpl implements CorpService {
 
     @Override
     public void updateStatus(Long id, Long status) {
-        //  企业禁用/开启
-        DataRow row = new DataRow();
-        row.put(CorpDO.STATUS, status);
-        corpDataRepository.updateByConfig(row, new DefaultConfigStore().eq(CorpDO.ID, id));
+        // 企业禁用/开启
+        corpDataRepository.updateStatus(id, status == null ? null : status.intValue());
     }
 
 
@@ -463,6 +457,11 @@ public class CorpServiceImpl implements CorpService {
     public void checkCorpAdminUser(CorpAdminReqVO corpAdminReqVO) {
         AdminUserDO user = BeanUtils.toBean(corpAdminReqVO, AdminUserDO.class);
         userService.checkCorpAdminUser(user);
+    }
+
+    @Override
+    public List<CorpDO> getAllCorpList() {
+        return corpDataRepository.getAllCorpList();
     }
 
 }

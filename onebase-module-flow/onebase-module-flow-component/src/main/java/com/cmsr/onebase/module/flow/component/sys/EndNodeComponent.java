@@ -1,7 +1,6 @@
 package com.cmsr.onebase.module.flow.component.sys;
 
 import com.cmsr.onebase.module.flow.context.ExecuteContext;
-import com.cmsr.onebase.module.flow.context.graph.nodes.EndNodeData;
 import com.yomahub.liteflow.annotation.LiteflowComponent;
 import com.yomahub.liteflow.core.NodeComponent;
 import lombok.extern.slf4j.Slf4j;

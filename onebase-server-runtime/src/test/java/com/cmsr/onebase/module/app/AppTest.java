@@ -10,7 +10,7 @@ import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthDataGroupReposi
 import com.cmsr.onebase.module.app.core.impl.auth.AppAuthSecurityApiImpl;
 import com.cmsr.onebase.module.app.core.provider.auth.AppAuthDataGroupProvider;
 import com.cmsr.onebase.module.app.core.vo.menu.MenuListRespVO;
-import com.cmsr.onebase.module.app.runtime.service.menu.AppMenuService;
+import com.cmsr.onebase.module.app.runtime.service.menu.RuntimeAppMenuService;
 import com.cmsr.onebase.module.app.runtime.vo.menu.MenuPermissionVO;
 import com.cmsr.onebase.server.runtime.OneBaseServerRuntimeApplication;
 import lombok.Setter;
@@ -41,7 +41,7 @@ public class AppTest {
     private AppAuthSecurityApiImpl appAuthSecurityApi;
 
     @Autowired
-    private AppMenuService appMenuService;
+    private RuntimeAppMenuService runtimeAppMenuService;
 
     @Autowired
     private AppApplicationApi appApplicationApi;
@@ -50,7 +50,7 @@ public class AppTest {
     public void testSimple() throws IOException {
         TenantContextHolder.setIgnore(true);
         RTSecurityContext.mockLoginUser(3386012505007460352L, 46699591748616192L);
-        List<MenuListRespVO> menuListRespVOS = appMenuService.listApplicationMenu();
+        List<MenuListRespVO> menuListRespVOS = runtimeAppMenuService.listApplicationMenu();
         System.out.println(menuListRespVOS);
     }
 
@@ -58,7 +58,7 @@ public class AppTest {
     public void testSimple2() throws IOException {
         TenantContextHolder.setIgnore(true);
         RTSecurityContext.mockLoginUser(3386012505007460352L, 46699591748616192L);
-        MenuPermissionVO menuPermission = appMenuService.getMenuPermission(47012574606491648L);
+        MenuPermissionVO menuPermission = runtimeAppMenuService.getMenuPermission(47012574606491648L);
         System.out.println(menuPermission);
     }
 
@@ -66,7 +66,7 @@ public class AppTest {
     public void testGraph() throws IOException {
         TenantContextHolder.setIgnore(true);
         RTSecurityContext.mockLoginUser(3386012505007460352L, 46699591748616192L);
-        MenuPermissionVO menuPermissionVO = appMenuService.getMenuPermission(95847916169691136L);
+        MenuPermissionVO menuPermissionVO = runtimeAppMenuService.getMenuPermission(95847916169691136L);
         System.out.println(menuPermissionVO);
     }
 
@@ -94,7 +94,7 @@ public class AppTest {
 
     @Test
     public void testGraph5() throws IOException {
-        ApplicationDTO result = appApplicationApi.findAppApplicationById(163852177939464192L);
+        ApplicationDTO result = appApplicationApi.findAppApplicationById(181672186277396480L);
         System.out.println(result);
     }
 

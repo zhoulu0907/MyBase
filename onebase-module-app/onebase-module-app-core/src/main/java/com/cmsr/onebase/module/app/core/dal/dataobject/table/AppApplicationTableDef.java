@@ -8,7 +8,7 @@ import com.mybatisflex.core.table.TableDef;
  * 应用管理表 表定义层。
  *
  * @author HuangJie
- * @since 2025-12-01
+ * @since 2025-12-13
  */
 public class AppApplicationTableDef extends TableDef {
 
@@ -44,45 +44,30 @@ public class AppApplicationTableDef extends TableDef {
      */
     public final QueryColumn APP_NAME = new QueryColumn(this, "app_name");
 
-    
+
     public final QueryColumn CREATOR = new QueryColumn(this, "creator");
 
-    
+
     public final QueryColumn DELETED = new QueryColumn(this, "deleted");
 
-    
+
     public final QueryColumn UPDATER = new QueryColumn(this, "updater");
 
-    /**
-     * 应用图标
-     */
-    public final QueryColumn ICON_NAME = new QueryColumn(this, "icon_name");
 
-    
     public final QueryColumn TENANT_ID = new QueryColumn(this, "tenant_id");
 
     /**
-     * 状态（编辑、发布）
+     * 状态（1上线、0下线）
      */
     public final QueryColumn APP_STATUS = new QueryColumn(this, "app_status");
 
-    /**
-     * 图标颜色
-     */
-    public final QueryColumn ICON_COLOR = new QueryColumn(this, "icon_color");
 
-    
     public final QueryColumn CREATE_TIME = new QueryColumn(this, "create_time");
 
-    /**
-     * 主题颜色
-     */
-    public final QueryColumn THEME_COLOR = new QueryColumn(this, "theme_color");
 
-    
     public final QueryColumn UPDATE_TIME = new QueryColumn(this, "update_time");
 
-    
+
     public final QueryColumn VERSION_URL = new QueryColumn(this, "version_url");
 
     /**
@@ -90,13 +75,19 @@ public class AppApplicationTableDef extends TableDef {
      */
     public final QueryColumn DESCRIPTION = new QueryColumn(this, "description");
 
-    
+
     public final QueryColumn LOCK_VERSION = new QueryColumn(this, "lock_version");
 
     /**
      * 内部模式 inner，SaaS模式 saas
      */
     public final QueryColumn PUBLISH_MODEL = new QueryColumn(this, "publish_model");
+
+    /**
+     * 发布状态，0从未发布 1发布过
+     */
+    public final QueryColumn PUBLISH_STATUS = new QueryColumn(this, "publish_status");
+
 
     /**
      * 所有字段。
@@ -106,7 +97,7 @@ public class AppApplicationTableDef extends TableDef {
     /**
      * 默认字段，不包含逻辑删除或者 large 等字段。
      */
-    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, APP_UID, APP_NAME, APP_CODE, APP_MODE, THEME_COLOR, ICON_NAME, ICON_COLOR, APP_STATUS, VERSION_URL, DESCRIPTION, LOCK_VERSION, CREATOR, CREATE_TIME, UPDATER, UPDATE_TIME, DELETED, TENANT_ID, PUBLISH_MODEL};
+    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, APP_UID, APP_NAME, APP_CODE, APP_MODE, APP_STATUS, VERSION_URL, DESCRIPTION, LOCK_VERSION, CREATOR, CREATE_TIME, UPDATER, UPDATE_TIME, DELETED, TENANT_ID, PUBLISH_MODEL, PUBLISH_STATUS};
 
     public AppApplicationTableDef() {
         super("", "app_application");

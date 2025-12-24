@@ -22,5 +22,9 @@ public class AuthRoleDeptAndUsersReqVO {
     @Schema(description = "搜索关键词", example = "onebase")
     private String keywords;
 
+    @Schema(description = "用户类型", example = "")
+    private Integer userType;
+
+
 
 }

@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.infra.framework.file.core.client.db;
 
-import com.cmsr.onebase.module.infra.dal.database.FileContentDataRepository;
-import com.cmsr.onebase.module.infra.dal.dataobject.file.FileContentDO;
+import com.cmsr.onebase.module.infra.dal.dataflex.FileContentDataRepository;
+import com.cmsr.onebase.module.infra.dal.dataflexdo.file.FileContentDO;
 import com.cmsr.onebase.module.infra.framework.file.core.client.AbstractFileClient;
 
 /**
@@ -24,7 +24,7 @@ public class DBFileClient extends AbstractFileClient<DBFileClientConfig> {
     public String upload(byte[] content, String path, String type) {
         FileContentDO contentDO = new FileContentDO().setConfigId(getId())
                 .setPath(path).setContent(content);
-        fileContentDataRepository.insert(contentDO);
+        fileContentDataRepository.save(contentDO);
         // 拼接返回路径
         return super.formatFileUrl(config.getDomain(), path);
     }

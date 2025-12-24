@@ -16,9 +16,9 @@ import com.cmsr.onebase.module.etl.core.dal.database.EtlFlinkMappingRepository;
 import com.cmsr.onebase.module.etl.core.dal.database.EtlTableRepository;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.EtlDatasourceDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.EtlTableDO;
+import com.cmsr.onebase.module.etl.core.dto.FlinkMappings;
 import com.cmsr.onebase.module.etl.core.enums.EtlErrorCodeConstants;
 import com.cmsr.onebase.module.etl.core.enums.MetadataType;
-import com.github.f4b6a3.uuid.UuidCreator;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.datasource.DataSourceHolder;
@@ -59,7 +59,13 @@ public class DataInspectServiceImpl implements DataInspectService {
 
     @Override
     public boolean testConnection(TestConnectionVO pingVO) {
-        EtlDatasourceDO datasourceDO = BeanUtils.toBean(pingVO, EtlDatasourceDO.class);
+        Long datasourceId = pingVO.getId();
+        EtlDatasourceDO datasourceDO;
+        if (datasourceId == null) {
+            datasourceDO = BeanUtils.toBean(pingVO, EtlDatasourceDO.class);
+        } else {
+            datasourceDO = datasourceRepository.getById(datasourceId);
+        }
         DataSource datasource = dataSourceFactory.constructDataSource(datasourceDO, true);
         String runnerKey = "ping-" + UuidUtils.getUuid();
 
@@ -103,11 +109,11 @@ public class DataInspectServiceImpl implements DataInspectService {
                 case VIEW -> table = temporary.metadata().view(tableDO.getTableName());
                 default -> throw ServiceExceptionUtil.exception(EtlErrorCodeConstants.ILLEGAL_METADATA_TYPE);
             }
-            Map<String, String> fieldTypeMapping = flinkMappingRepository.findAllMappingsByDatasourceType(datasourceType);
+            FlinkMappings fieldTypeMapping = flinkMappingRepository.findByDatasourceType(datasourceType);
             DataPreview dataPreview = new DataPreview();
             TableData tableData = JsonUtils.parseObject(tableDO.getMetaInfo(), TableData.class);
             List<ColumnData> columnDataList = tableData.getColumns();
-            List<PreviewColumn> columnList = extractPreviewColumns(columnDataList, fieldTypeMapping);
+            List<PreviewColumn> columnList = extractPreviewColumns(datasourceType, columnDataList, fieldTypeMapping);
             dataPreview.setColumns(columnList);
             ConfigStore cs = new DefaultConfigStore();
             cs.limit(inspectSize);
@@ -134,14 +140,14 @@ public class DataInspectServiceImpl implements DataInspectService {
         }
     }
 
-    private static List<PreviewColumn> extractPreviewColumns(List<ColumnData> columnDataList, Map<String, String> fieldTypeMapping) {
+    private static List<PreviewColumn> extractPreviewColumns(String datasourceType, List<ColumnData> columnDataList, FlinkMappings fieldTypeMapping) {
         List<PreviewColumn> columnList = new ArrayList<>(columnDataList.size());
         for (ColumnData columnData : columnDataList) {
             PreviewColumn previewColumn = new PreviewColumn();
 
             String columnName = columnData.getName();
             String displayName = columnData.getDisplayName();
-            String flinkType = fieldTypeMapping.get(columnData.getType());
+            String flinkType = fieldTypeMapping.getFlinkType(datasourceType, columnData.getType());
             previewColumn.setDataIndex("_" + columnName);
             previewColumn.setTitle(displayName);
             previewColumn.setFieldType(flinkType);

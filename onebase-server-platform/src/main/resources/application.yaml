@@ -79,7 +79,7 @@ spring:
         core-size: 10
         max-size: 30
         queue-capacity: 10
-        keep-alive: 300
+        keep-alive: 30s
         thread-name-prefix: onebase-executor-
 
 --- #################### 验证码相关配置 ####################

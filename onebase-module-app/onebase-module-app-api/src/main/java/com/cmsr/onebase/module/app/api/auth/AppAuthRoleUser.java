@@ -18,4 +18,5 @@ public interface AppAuthRoleUser {
 
     List<AuthRoleDTO> findRolesByUserId(Long userId);
 
+    void grantThirdpartyUserPrivileges(Long userId, Long applicationId);
 }

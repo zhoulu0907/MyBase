@@ -10,7 +10,6 @@ import com.cmsr.onebase.module.flow.context.condition.Conditions;
 import com.cmsr.onebase.module.flow.context.express.ExpressionItem;
 import com.cmsr.onebase.module.flow.context.express.OrExpression;
 import com.cmsr.onebase.module.flow.context.graph.InLoopDepth;
-import com.cmsr.onebase.module.flow.context.graph.nodes.DataUpdateNodeData;
 import com.cmsr.onebase.module.flow.context.provider.FlowConditionsProvider;
 import com.cmsr.onebase.module.metadata.api.semantic.SemanticDynamicDataApi;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntityValueDTO;
@@ -73,7 +72,7 @@ public class DataUpdateNodeComponent extends SkippableNodeComponent {
         List<ExpressionItem> expressionItems = flowConditionsProvider.formatConditionItemsForValue(conditionItems, vars);
         Map<String, Object> data = new HashMap<>();
         for (ExpressionItem expressionItem : expressionItems) {
-            data.put(expressionItem.getFieldKey(), expressionItem.getFieldValue());
+            data.put(DataMethodApiHelper.convertToFieldName(expressionItem.getFieldKey()), expressionItem.getFieldValue());
         }
         Map<String, String> systemFields = DataMethodApiHelper.extractSystemFields(executeContext);
         data.putAll(systemFields);

@@ -1,14 +1,20 @@
 package com.cmsr.onebase.module.app.build.service.version;
 
+import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.app.build.service.AppCommonService;
-import com.cmsr.onebase.module.app.build.vo.version.VersionCreateReqVO;
+import com.cmsr.onebase.module.app.build.vo.version.VersionOnlineReq;
 import com.cmsr.onebase.module.app.build.vo.version.VersionPageReqVo;
 import com.cmsr.onebase.module.app.build.vo.version.VersionPageRespVO;
+import com.cmsr.onebase.module.app.core.dal.database.app.AppApplicationRepository;
 import com.cmsr.onebase.module.app.core.dal.database.version.AppVersionRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppApplicationDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppVersionDO;
+import com.cmsr.onebase.module.app.core.enums.AppErrorCodeConstants;
+import com.cmsr.onebase.module.app.core.enums.app.AppPublishEnum;
+import com.cmsr.onebase.module.app.core.enums.app.AppStatusEnum;
 import com.cmsr.onebase.module.app.core.enums.version.VersionTypeEnum;
 import com.cmsr.onebase.module.bpm.api.datamanager.BpmDataManager;
 import com.cmsr.onebase.module.flow.api.FlowDataManager;
@@ -30,6 +36,9 @@ import java.util.List;
 @Service
 @Validated
 public class AppVersionServiceImpl implements AppVersionService {
+
+    @Autowired
+    private AppApplicationRepository applicationRepository;
 
     @Autowired
     private AppVersionRepository versionRepository;
@@ -68,11 +77,10 @@ public class AppVersionServiceImpl implements AppVersionService {
     }
 
     @Override
-    public void createApplicationVersion(VersionCreateReqVO createReqVO) {
+    public void onlineApplication(VersionOnlineReq createReqVO) {
         AppApplicationDO applicationDO = appCommonService.validateApplicationExist(createReqVO.getApplicationId());
         Long applicationId = applicationDO.getId();
-        // 删除当前运行版本数据
-        flowDataManager.deleteRuntimeData(applicationId);
+        validateVersionUnique(applicationId, createReqVO.getVersionNumber());
         //
         transactionTemplate.executeWithoutResult(transactionStatus -> {
             // 找打当前Runtime版本信息，肯定能找到，因为发布的时候会同步创建一个，把当前版本信息变成历史状态
@@ -94,13 +102,41 @@ public class AppVersionServiceImpl implements AppVersionService {
             flowDataManager.copyEditToRuntime(applicationId);
             // 创建新的版本信息
             AppVersionDO newRunVersionDO = createNewVersion(createReqVO, applicationId);
+            applicationRepository.updateStatusByApplicationId(applicationId, AppStatusEnum.ONLINE, AppPublishEnum.ONCE_PUBLISHED);
             versionRepository.save(newRunVersionDO);
         });
         // online services that required
-        flowDataManager.onlineRuntimeData(applicationId);
+        flowDataManager.updateRuntimeData(applicationId);
     }
 
-    private AppVersionDO createNewVersion(VersionCreateReqVO createReqVO, Long applicationId) {
+    private void validateVersionUnique(Long applicationId, String versionNumber) {
+        long count = versionRepository.countByApplicationIdAndName(applicationId, versionNumber);
+        if (count > 0) {
+            throw ServiceExceptionUtil.exception(AppErrorCodeConstants.VERSION_DUPLICATE);
+        }
+    }
+
+    @Override
+    public void offlineApplication() {
+        Long applicationId = ApplicationManager.getRequiredApplicationId();
+        transactionTemplate.executeWithoutResult(transactionStatus -> {
+            AppVersionDO currentRunVersion = versionRepository.findByApplicationIdAndVersionType(applicationId, VersionTypeEnum.RUNTIME.getValue());
+            if (currentRunVersion != null) {
+                currentRunVersion.setVersionType(VersionTypeEnum.HISTORY.getValue());
+                versionRepository.updateById(currentRunVersion);
+                Long historyVersionTag = currentRunVersion.getId();
+                // 备份当前版本为历史版本
+                metadataVersionManager.moveMetaDataRuntimeToHistory(applicationId, historyVersionTag);
+                appDataManager.moveRuntimeToHistory(applicationId, historyVersionTag);
+                bpmDataManager.moveRuntimeToHistory(applicationId, historyVersionTag);
+                flowDataManager.moveRuntimeToHistory(applicationId, historyVersionTag);
+            }
+            applicationRepository.updateAppStatusByApplicationId(applicationId, AppStatusEnum.OFFLINE);
+        });
+        flowDataManager.deleteRuntimeData(applicationId);
+    }
+
+    private AppVersionDO createNewVersion(VersionOnlineReq createReqVO, Long applicationId) {
         AppVersionDO newRunVersionDO = new AppVersionDO();
         newRunVersionDO.setApplicationId(applicationId);
         newRunVersionDO.setVersionName(createReqVO.getVersionName());
@@ -120,7 +156,26 @@ public class AppVersionServiceImpl implements AppVersionService {
 
     @Override
     public void deleteApplicationVersion(Long versionId) {
-        versionRepository.removeById(versionId);
+        AppVersionDO versionDO = versionRepository.getById(versionId);
+        if (versionDO == null) {
+            throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_VERSION_NOT_EXIST);
+        }
+        if (versionDO.getVersionType() == VersionTypeEnum.BUILD.getValue()) {
+            throw new IllegalArgumentException("不允许删除当前运行的版本");
+        }
+        if (versionDO.getVersionType() == VersionTypeEnum.RUNTIME.getValue()) {
+            throw new IllegalArgumentException("不允许删除当前运行的版本");
+        }
+        Long applicationId = versionDO.getApplicationId();
+        transactionTemplate.executeWithoutResult(transactionStatus -> {
+            // 删除对应的信息
+            metadataVersionManager.deleteApplicationVersionData(applicationId, versionId);
+            bpmDataManager.removeApplicationVersion(applicationId, versionId);
+            appDataManager.deleteApplicationVersionData(applicationId, versionId);
+            flowDataManager.deleteApplicationVersionData(applicationId, versionId);
+            // 删除版本
+            versionRepository.removeById(versionId);
+        });
     }
 
 

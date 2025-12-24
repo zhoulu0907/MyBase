@@ -5,10 +5,10 @@ import com.cmsr.onebase.framework.orm.entity.BaseAppEntity;
 import com.mybatisflex.core.BaseMapper;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.*;
+import com.mybatisflex.core.update.UpdateChain;
 import com.mybatisflex.core.util.CollectionUtil;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -18,42 +18,59 @@ import java.util.List;
 public class BaseAppRepository<M extends BaseMapper<T>, T extends BaseAppEntity> extends ServiceImpl<M, T> {
 
     protected void injectQueryFilter(QueryWrapper queryWrapper) {
-        if (!canFilter(queryWrapper)) {
+        if (ApplicationManager.isIgnoreApplicationCondition()) {
             return;
         }
-        List<QueryTable> queryTables = CPI.getQueryTables(queryWrapper);
-        QueryColumn applicationColumn;
-        if (CollectionUtils.isEmpty(queryTables)) {
-            applicationColumn = new QueryColumn(BaseAppEntity.APPLICATION_ID);
-        } else {
-            applicationColumn = new QueryColumn(queryTables.get(0), BaseAppEntity.APPLICATION_ID);
+        if (!QueryWrapperUtils.isQueryFilterable(queryWrapper)) {
+            return;
         }
         Long applicationId = ApplicationManager.getApplicationId();
-        queryWrapper.and(applicationColumn.eq(applicationId));
+        QueryColumn applicationIdColumn = QueryWrapperUtils.createApplicationIdColumn(this, queryWrapper);
+        queryWrapper.and(applicationIdColumn.eq(applicationId).when(!ApplicationManager.isIgnoreApplicationCondition()));
     }
 
-    private boolean canFilter(QueryWrapper queryWrapper) {
-        if (ApplicationManager.isIgnoreApplicationCondition()) {
-            return false;
-        }
-        // 不处理UNION类型
-        List<UnionWrapper> unions = CPI.getUnions(queryWrapper);
-        if (CollectionUtils.isNotEmpty(unions)) {
 
-            return false;
-        }
-        // 不处理子查询
-        List<QueryWrapper> childSelect = CPI.getChildSelect(queryWrapper);
-        if (CollectionUtils.isNotEmpty(childSelect)) {
-            return false;
-        }
-        List<QueryTable> queryTables = CPI.getQueryTables(queryWrapper);
-        if (CollectionUtils.isNotEmpty(queryTables) && queryTables.size() > 1) {
-            return false;
-        }
-        // 需要处理
-        return true;
+    //region ===== 删除（删）操作 =====
+
+    /**
+     * <p>根据查询条件删除数据。
+     *
+     * @param query 查询条件
+     * @return {@code true} 删除成功，{@code false} 删除失败。
+     */
+    @Override
+    public boolean remove(QueryWrapper query) {
+        this.injectQueryFilter(query);
+        return super.remove(query);
     }
+    //region ===== 更新（改）操作 =====
+
+    /**
+     * <p>根据查询条件更新数据。
+     *
+     * @param entity 实体类对象
+     * @param query  查询条件
+     * @return {@code true} 更新成功，{@code false} 更新失败。
+     * @apiNote 若实体类属性数据为 {@code null}，该属性不会新到数据库。
+     */
+    @Override
+    public boolean update(T entity, QueryWrapper query) {
+        this.injectQueryFilter(query);
+        return super.update(entity, query);
+    }
+
+    @Deprecated
+    @Override
+    public UpdateChain<T> updateChain() {
+        Long applicationId = ApplicationManager.getApplicationId();
+        QueryColumn applicationIdColumn = QueryWrapperUtils.createApplicationIdColumn(this);
+        //
+        UpdateChain<T> updateChain = super.updateChain();
+        updateChain.where(applicationIdColumn.eq(applicationId).when(!ApplicationManager.isIgnoreApplicationCondition())
+        );
+        return updateChain;
+    }
+    //endregion ===== 更新（改）操作 =====
 
     //region ===== 查询（查）操作 =====
 
@@ -205,7 +222,6 @@ public class BaseAppRepository<M extends BaseMapper<T>, T extends BaseAppEntity>
      */
     @Override
     public boolean exists(QueryWrapper query) {
-        this.injectQueryFilter(query);
         return exists(CPI.getWhereQueryCondition(query));
     }
 
@@ -256,4 +272,10 @@ public class BaseAppRepository<M extends BaseMapper<T>, T extends BaseAppEntity>
         return getMapper().paginateAs(page, query, asType);
     }
     //endregion ===== 分页查询操作 =====
+
+    public boolean deleteAllApplicationData(Long applicationId) {
+        QueryColumn applicationIdColumn = QueryWrapperUtils.createApplicationIdColumn(this);
+        QueryWrapper queryWrapper = QueryWrapper.create().where(applicationIdColumn.eq(applicationId));
+        return super.remove(queryWrapper);
+    }
 }

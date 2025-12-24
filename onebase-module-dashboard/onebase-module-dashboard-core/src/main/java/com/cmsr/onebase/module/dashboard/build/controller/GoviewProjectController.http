@@ -1,0 +1,82 @@
+## 环境配置说明
+# 使用全局环境配置文件 http-client.env.json
+# 请在IntelliJ IDEA中选择对应环境: local/dev/test/gateway
+# 确保先在AuthController.http中登录获取token
+
+### 1. 分页查询项目列表
+GET {{baseUrl}}/dashboard/list?page=1&limit=3&appId=1
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+### 2. 创建新项目
+POST {{baseUrl}}/dashboard/create
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+{
+  "projectName": "Screen_test_Gsp1",
+  "state": -1,
+  "indexImage": "http://127.0.0.1:8083/oss/2025-04-23/1074956819610341376.png",
+  "remarks": "修改后的备注Gsp",
+  "appId": 1,
+  "tenantId": {{adminTenantId}}
+
+}
+
+### 3. 删除项目
+POST {{baseUrl}}/dashboard/delete?id=1234
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+### 4. 修改项目
+POST {{baseUrl}}/dashboard/edit
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+{
+  "id": 194268741281972224,
+  "projectName": "测试项目Gsp126631",
+  "state": 1,
+  "indexImage": "image_url1",
+  "remarks": "修改后的备注Gsp11"
+}
+
+### 5. 项目重命名
+POST {{baseUrl}}/dashboard/rename
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+{
+  "id": "194268741281972224",
+  "projectName": "重命名后的项目1"
+}
+
+### 6. 发布/取消项目状态
+PUT {{baseUrl}}/dashboard/publish
+Content-Type: application/json
+
+{
+  "id": "{{projectId}}",
+  "state": 1
+}
+
+### 7. 获取项目存储数据
+GET {{baseUrl}}/dashboard/getScreenDSLData?projectId=194097457982963712
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+### 8. 保存项目数据
+POST {{baseUrl}}/dashboard/save/data
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+{
+  "projectId": 194097457982963712,
+  "content": "{\"data1\": \"示例内容\"}",
+  "remark": "保存的数据备注1",
+  "appId": 1
+}

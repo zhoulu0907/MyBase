@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.app.runtime.service.resource;
 
-import com.cmsr.onebase.module.app.core.dto.appresource.PageSetRespDTO;
+import com.cmsr.onebase.module.app.core.dto.resource.PageSetRespDTO;
 import com.cmsr.onebase.module.app.core.provider.resource.PageSetServiceProvider;
 import com.cmsr.onebase.module.app.core.vo.resource.ListPageSetReqVO;
 import com.cmsr.onebase.module.app.core.vo.resource.ListPageSetRespVO;

@@ -17,6 +17,11 @@ public class EntityFieldQueryVO {
     private String entityId;
 
     /**
+     * 实体UUID
+     */
+    private String entityUuid;
+
+    /**
      * 表名（与entityId二选一）
      */
     private String tableName;

@@ -24,6 +24,16 @@
         <dependency>
             <groupId>com.mybatis-flex</groupId>
             <artifactId>mybatis-flex-spring-boot3-starter</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>spring-batch-core</artifactId>
+                    <groupId>org.springframework.batch</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>spring-batch-infrastructure</artifactId>
+                    <groupId>org.springframework.batch</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.github.pagehelper</groupId>
@@ -39,6 +49,10 @@
                     <groupId>org.mybatis</groupId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.persistence</groupId>
+            <artifactId>jakarta.persistence-api</artifactId>
         </dependency>
         <dependency>
             <groupId>com.github.f4b6a3</groupId>
@@ -101,7 +115,7 @@
         <dependency>
             <groupId>com.dameng</groupId>
             <artifactId>DmJdbcDriver18</artifactId>
-           <!-- <optional>true</optional>-->
+            <!-- <optional>true</optional>-->
         </dependency>
         <dependency>
             <groupId>cn.com.kingbase</groupId>

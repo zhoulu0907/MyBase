@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.metadata.build.service.entity;
 
+
 import com.cmsr.onebase.framework.aynline.AnylineDdlHelper;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
@@ -43,9 +44,6 @@ import com.cmsr.onebase.module.metadata.build.service.datasource.MetadataDatasou
 import com.cmsr.onebase.module.metadata.build.service.field.MetadataEntityFieldOptionBuildService;
 import com.cmsr.onebase.module.metadata.build.service.field.MetadataEntityFieldConstraintBuildService;
 import com.cmsr.onebase.module.metadata.build.service.number.AutoNumberConfigBuildService;
-import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.EntityFieldValidationTypesReqVO;
-import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.EntityFieldValidationTypesRespVO;
-import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.ValidationTypeItemRespVO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.number.MetadataAutoNumberConfigDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.number.MetadataAutoNumberRuleItemDO;
 import com.cmsr.onebase.module.metadata.core.enums.BusinessEntityTypeEnum;
@@ -55,6 +53,8 @@ import com.cmsr.onebase.module.metadata.core.util.MetadataIdUuidConverter;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import com.mybatisflex.core.query.QueryColumn;
+import com.mybatisflex.core.query.QueryCondition;
 import com.mybatisflex.core.query.QueryWrapper;
 import org.anyline.entity.DataSet;
 import org.anyline.entity.DataRow;
@@ -417,9 +417,13 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
     public List<MetadataEntityFieldDO> getEntityFieldListByConditions(EntityFieldQueryVO queryVO) {
         QueryWrapper queryWrapper = QueryWrapper.create();
 
-        // 将entityId转换为entityUuid（兼容前端传入数字ID或UUID）
+        // 优先使用 entityUuid，其次将 entityId 转换为 entityUuid（兼容前端传入数字ID或UUID）
         String entityUuid = null;
-        if (queryVO.getEntityId() != null && !queryVO.getEntityId().trim().isEmpty()) {
+        if (queryVO.getEntityUuid() != null && !queryVO.getEntityUuid().trim().isEmpty()) {
+            // 直接使用前端传递的 entityUuid
+            entityUuid = queryVO.getEntityUuid().trim();
+            queryWrapper.eq(MetadataEntityFieldDO::getEntityUuid, entityUuid);
+        } else if (queryVO.getEntityId() != null && !queryVO.getEntityId().trim().isEmpty()) {
             entityUuid = idUuidConverter.toEntityUuid(queryVO.getEntityId().trim());
             queryWrapper.eq(MetadataEntityFieldDO::getEntityUuid, entityUuid);
         } else if (queryVO.getTableName() != null && !queryVO.getTableName().trim().isEmpty()) {
@@ -434,14 +438,26 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             }
         }
 
+        // 安全检查：如果没有指定任何实体标识条件（entityUuid、entityId、tableName），返回空列表
+        // 防止查询出所有数据造成数据泄露
+        if (entityUuid == null) {
+            log.warn("getEntityFieldListByConditions: 未指定实体标识条件（entityUuid/entityId/tableName），返回空列表");
+            return java.util.Collections.emptyList();
+        }
+
         // 支持fieldName精确过滤
         if (queryVO.getFieldName() != null && !queryVO.getFieldName().trim().isEmpty()) {
             queryWrapper.eq(MetadataEntityFieldDO::getFieldName, queryVO.getFieldName().trim());
         }
 
         if (queryVO.getKeyword() != null && !queryVO.getKeyword().trim().isEmpty()) {
-            queryWrapper.like(MetadataEntityFieldDO::getFieldName, queryVO.getKeyword())
-                    .or(MetadataEntityFieldDO::getDisplayName).like(queryVO.getKeyword());
+            // 构建OR条件并用括号包裹
+            String keyword = queryVO.getKeyword();
+            QueryColumn fieldNameCol = new QueryColumn("field_name");
+            QueryColumn displayNameCol = new QueryColumn("display_name");
+            QueryCondition orCondition = fieldNameCol.like(keyword).or(displayNameCol.like(keyword));
+            QueryCondition wrappedCondition = QueryCondition.createEmpty().and(orCondition);
+            queryWrapper.and(wrappedCondition);
         }
         if (queryVO.getIsSystemField() != null) {
             queryWrapper.eq(MetadataEntityFieldDO::getIsSystemField, queryVO.getIsSystemField());
@@ -462,8 +478,13 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             personWrapper.eq(MetadataEntityFieldDO::getFieldType, "USER");
             // 透传其它条件
             if (queryVO.getKeyword() != null && !queryVO.getKeyword().trim().isEmpty()) {
-                personWrapper.like(MetadataEntityFieldDO::getFieldName, queryVO.getKeyword())
-                        .or(MetadataEntityFieldDO::getDisplayName).like(queryVO.getKeyword());
+                // 构建OR条件并用括号包裹
+                String keyword = queryVO.getKeyword();
+                QueryColumn fieldNameCol = new QueryColumn("field_name");
+                QueryColumn displayNameCol = new QueryColumn("display_name");
+                QueryCondition orCondition = fieldNameCol.like(keyword).or(displayNameCol.like(keyword));
+                QueryCondition wrappedCondition = QueryCondition.createEmpty().and(orCondition);
+                personWrapper.and(wrappedCondition);
             }
             if (queryVO.getFieldCode() != null && !queryVO.getFieldCode().trim().isEmpty()) {
                 personWrapper.like(MetadataEntityFieldDO::getFieldCode, queryVO.getFieldCode());
@@ -831,12 +852,50 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                         physicalTableOps.add(renameOp);
                     }
 
-                    // 收集ALTER操作
-                    MetadataEntityFieldDO full = metadataEntityFieldRepository.getById(origin.getId());
-                    PhysicalTableOperation alterOp = new PhysicalTableOperation();
-                    alterOp.setOperationType("ALTER");
-                    alterOp.setFieldInfo(full);
-                    physicalTableOps.add(alterOp);
+                    // 检查是否有影响物理表结构的属性发生变化
+                    // 只有当以下属性发生变化时才需要执行 ALTER 操作：
+                    // - fieldType (字段类型)
+                    // - dataLength (数据长度)
+                    // - decimalPlaces (小数位数)
+                    // - defaultValue (默认值)
+                    // 注意：isRequired (是否必填) 不影响DDL，校验在应用层进行
+                    boolean needAlter = false;
+                    
+                    // 检查字段类型是否变化
+                    if (item.getFieldType() != null && !item.getFieldType().equals(origin.getFieldType())) {
+                        needAlter = true;
+                        log.debug("字段 {} 类型发生变化: {} -> {}", origin.getFieldName(), origin.getFieldType(), item.getFieldType());
+                    }
+                    
+                    // 检查数据长度是否变化
+                    if (maxLength != null && !maxLength.equals(origin.getDataLength())) {
+                        needAlter = true;
+                        log.debug("字段 {} 长度发生变化: {} -> {}", origin.getFieldName(), origin.getDataLength(), maxLength);
+                    }
+                    
+                    // 检查小数位数是否变化
+                    if (item.getDecimalPlaces() != null && !item.getDecimalPlaces().equals(origin.getDecimalPlaces())) {
+                        needAlter = true;
+                        log.debug("字段 {} 小数位数发生变化: {} -> {}", origin.getFieldName(), origin.getDecimalPlaces(), item.getDecimalPlaces());
+                    }
+                    
+                    // 检查默认值是否变化
+                    if (item.getDefaultValue() != null && !item.getDefaultValue().equals(origin.getDefaultValue())) {
+                        needAlter = true;
+                        log.debug("字段 {} 默认值发生变化: {} -> {}", origin.getFieldName(), origin.getDefaultValue(), item.getDefaultValue());
+                    }
+                    
+                    // 只有当需要修改物理表时才收集 ALTER 操作
+                    if (needAlter) {
+                        MetadataEntityFieldDO full = metadataEntityFieldRepository.getById(origin.getId());
+                        PhysicalTableOperation alterOp = new PhysicalTableOperation();
+                        alterOp.setOperationType("ALTER");
+                        alterOp.setFieldInfo(full);
+                        physicalTableOps.add(alterOp);
+                        log.info("字段 {} 需要修改物理表结构", origin.getFieldName());
+                    } else {
+                        log.debug("字段 {} 无物理表结构变化，跳过 ALTER 操作", origin.getFieldName());
+                    }
                 }
                 resp.getUpdatedIds().add(item.getId());
 
@@ -1613,7 +1672,8 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
 
                 // 使用 Anyline 原生 API 构建 Column 对象
                 String columnType = mapFieldType(field.getFieldType(), field.getDataLength());
-                boolean nullable = field.getIsRequired() == null || !BooleanStatusEnum.isYes(field.getIsRequired());
+                // 所有校验在应用层进行，DDL中不设置 NOT NULL 约束，因此 nullable 始终为 true
+                boolean nullable = true;
                 
                 Column column = AnylineDdlHelper.buildColumn(
                         tableName,
@@ -1761,6 +1821,8 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
 
     /**
      * 使用 Anyline 原生 API 修改列（适用于达梦数据库）
+     * <p>
+     * 注意：所有校验（必填、唯一、长度、范围、格式等）均在应用层进行，不在DDL中生成约束
      *
      * @param service   Anyline 服务实例
      * @param tableName 表名
@@ -1769,8 +1831,8 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
     private void alterColumnWithAnyline(AnylineService<?> service, String tableName, MetadataEntityFieldDO field) {
         // 将业务字段类型映射为数据库类型
         String dbTypeName = mapFieldType(field.getFieldType(), field.getDataLength());
-        // isRequired=1 表示必填，对应 nullable=false
-        boolean nullable = field.getIsRequired() == null || !BooleanStatusEnum.isYes(field.getIsRequired());
+        // 所有校验在应用层进行，DDL中不设置 NOT NULL 约束，因此 nullable 始终为 true
+        boolean nullable = true;
 
         // 构建 Anyline Column 对象
         Column column = AnylineDdlHelper.buildColumn(
@@ -1839,6 +1901,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
      * <p>
      * 注意：调用此方法前必须先使用checkColumnExists()检查列是否存在
      * 不使用IF NOT EXISTS语法以兼容达梦等数据库
+     * 所有校验（必填、唯一、长度、范围、格式等）均在应用层进行，不在DDL中生成约束
      */
     private String generateAddColumnDDL(String tableName, MetadataEntityFieldDO field) {
         StringBuilder ddl = new StringBuilder();
@@ -1849,11 +1912,6 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         // 字段类型映射
         String columnType = mapFieldType(field.getFieldType(), field.getDataLength());
         ddl.append(columnType);
-
-        // 是否必填 - 使用新的枚举值：1-是，0-否
-        if (field.getIsRequired() != null && BooleanStatusEnum.isYes(field.getIsRequired())) {
-            ddl.append(" NOT NULL");
-        }
 
         // 默认值 - 根据字段类型正确格式化
         if (field.getDefaultValue() != null && !field.getDefaultValue().trim().isEmpty()) {
@@ -1878,8 +1936,10 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
      * 生成修改字段的DDL语句（跨数据库兼容）
      * <p>
      * 根据不同数据库类型生成对应的ALTER COLUMN语法：
-     * - PostgreSQL/KingBase: ALTER COLUMN ... TYPE / SET/DROP NOT NULL
-     * - 达梦(DM): MODIFY "column" TYPE NOT NULL/NULL
+     * - PostgreSQL/KingBase: ALTER COLUMN ... TYPE
+     * - 达梦(DM): MODIFY "column" TYPE
+     * <p>
+     * 注意：所有校验（必填、唯一、长度、范围、格式等）均在应用层进行，不在DDL中生成约束
      *
      * @param datasourceType 数据库类型
      * @param tableName      表名
@@ -1897,8 +1957,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             switch (dbType) {
                 case PostgreSQL:
                 case KingBase:
-                    // PostgreSQL/金仓：需要分开修改类型和约束
-                    // 1. 修改字段类型
+                    // PostgreSQL/金仓：修改字段类型
                     ddl.append("ALTER TABLE \"").append(tableName)
                             .append("\" ALTER COLUMN \"").append(fieldName)
                             .append("\" TYPE ").append(columnType);
@@ -1911,18 +1970,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
 
                     ddl.append(";\n");
 
-                    // 2. 修改是否允许为空
-                    if (field.getIsRequired() != null) {
-                        ddl.append("ALTER TABLE \"").append(tableName)
-                                .append("\" ALTER COLUMN \"").append(fieldName).append("\"");
-                        if (BooleanStatusEnum.isYes(field.getIsRequired())) {
-                            ddl.append(" SET NOT NULL;\n");
-                        } else {
-                            ddl.append(" DROP NOT NULL;\n");
-                        }
-                    }
-
-                    // 3. 修改默认值 - 根据字段类型正确格式化
+                    // 修改默认值 - 根据字段类型正确格式化
                     if (field.getDefaultValue() != null && !field.getDefaultValue().trim().isEmpty()) {
                         String formattedValue = formatDefaultValue(field.getFieldType(), field.getDefaultValue());
                         if (formattedValue != null) {
@@ -1934,19 +1982,10 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                     break;
 
                 case DM:
-                    // 达梦：使用MODIFY，类型和约束一起修改
+                    // 达梦：使用MODIFY，修改类型和默认值
                     ddl.append("ALTER TABLE \"").append(tableName)
                             .append("\" MODIFY \"").append(fieldName)
                             .append("\" ").append(columnType);
-
-                    // 添加约束
-                    if (field.getIsRequired() != null) {
-                        if (BooleanStatusEnum.isYes(field.getIsRequired())) {
-                            ddl.append(" NOT NULL");
-                        } else {
-                            ddl.append(" NULL");
-                        }
-                    }
 
                     // 添加默认值 - 根据字段类型正确格式化
                     if (field.getDefaultValue() != null && !field.getDefaultValue().trim().isEmpty()) {
@@ -1986,68 +2025,18 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
 
     /**
      * 生成PostgreSQL/KingBase的USING子句，用于类型转换
-     * 使用CASE WHEN进行安全的类型转换，无效数据将被设为NULL
+     * <p>
+     * 注意：根据产品需求，不再使用 USING 子句进行数据类型转换。
+     * 如果数据不兼容目标类型，数据库将直接抛出异常，由调用方处理。
      * 
      * @param fieldType 目标字段类型
      * @param fieldName 字段名
-     * @return USING子句，如果不需要则返回null
+     * @return 始终返回null，不使用USING子句
      */
     private String generateUsingClause(String fieldType, String fieldName) {
-        if (fieldType == null) {
-            return null;
-        }
-
-        String quotedFieldName = "\"" + fieldName + "\"";
-        // 先将列转换为TEXT类型，这样可以处理从任何类型（包括已经是目标类型）的转换
-        String textFieldName = quotedFieldName + "::text";
-
-        // 需要显式类型转换的字段类型，使用CASE WHEN进行安全转换
-        switch (fieldType.toUpperCase()) {
-            case "DATETIME":
-            case "TIMESTAMP":
-                // VARCHAR/TEXT 转 TIMESTAMP：使用CASE WHEN处理无效数据
-                // 正则表达式检查是否为有效的时间戳格式
-                return "CASE WHEN " + textFieldName + " ~ '^\\\\d{4}-\\\\d{2}-\\\\d{2}' " +
-                        "THEN " + textFieldName + "::timestamp " +
-                        "ELSE NULL END";
-
-            case "DATE":
-                // VARCHAR/TEXT 转 DATE：使用CASE WHEN处理无效数据
-                return "CASE WHEN " + textFieldName + " ~ '^\\\\d{4}-\\\\d{2}-\\\\d{2}' " +
-                        "THEN " + textFieldName + "::date " +
-                        "ELSE NULL END";
-
-            case "NUMBER":
-            case "NUMERIC":
-            case "DECIMAL":
-                // VARCHAR/TEXT 转 NUMERIC：使用CASE WHEN处理无效数据
-                // 检查是否为数字格式（支持小数和负数）
-                return "CASE WHEN " + textFieldName + " ~ '^-?\\\\d+\\\\.?\\\\d*$' " +
-                        "THEN " + textFieldName + "::numeric " +
-                        "ELSE NULL END";
-
-            case "INTEGER":
-            case "INT":
-            case "BIGINT":
-                // VARCHAR/TEXT 转 INTEGER：使用CASE WHEN处理无效数据
-                // 检查是否为整数格式
-                return "CASE WHEN " + textFieldName + " ~ '^-?\\\\d+$' " +
-                        "THEN " + textFieldName + "::integer " +
-                        "ELSE NULL END";
-
-            case "BOOLEAN":
-            case "BOOL":
-                // VARCHAR/TEXT 转 BOOLEAN：使用CASE WHEN处理无效数据
-                // 支持常见的布尔值表示
-                return "CASE WHEN " + textFieldName
-                        + " IN ('true', 'false', 't', 'f', '1', '0', 'yes', 'no', 'y', 'n') " +
-                        "THEN " + textFieldName + "::boolean " +
-                        "ELSE NULL END";
-
-            default:
-                // 其他类型通常可以自动转换，不需要USING子句
-                return null;
-        }
+        // 不再使用 USING 子句进行数据转换
+        // 如果数据不兼容目标类型，数据库将直接抛出异常
+        return null;
     }
 
     /**
@@ -2078,6 +2067,10 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
 
     /**
      * 统一执行物理表操作
+     * <p>
+     * 优化策略：
+     * - DROP/RENAME/ADD 操作仍然逐个执行
+     * - ALTER 操作合并为一条 DDL 语句执行（仅针对 PostgreSQL/KingBase）
      *
      * @param datasource 数据源信息
      * @param tableName  表名
@@ -2091,32 +2084,217 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
 
         log.info("开始批量执行物理表操作，表名: {}, 操作数量: {}", tableName, operations.size());
 
+        // 分类收集操作
+        List<PhysicalTableOperation> dropOps = new java.util.ArrayList<>();
+        List<PhysicalTableOperation> renameOps = new java.util.ArrayList<>();
+        List<PhysicalTableOperation> alterOps = new java.util.ArrayList<>();
+        List<PhysicalTableOperation> addOps = new java.util.ArrayList<>();
+
         for (PhysicalTableOperation op : operations) {
+            switch (op.getOperationType()) {
+                case "DROP":
+                    dropOps.add(op);
+                    break;
+                case "RENAME":
+                    renameOps.add(op);
+                    break;
+                case "ALTER":
+                    alterOps.add(op);
+                    break;
+                case "ADD":
+                    addOps.add(op);
+                    break;
+                default:
+                    log.warn("未知的物理表操作类型: {}", op.getOperationType());
+            }
+        }
+
+        // 1. 先执行 DROP 操作
+        for (PhysicalTableOperation op : dropOps) {
             try {
-                switch (op.getOperationType()) {
-                    case "DROP":
-                        dropColumnFromTable(datasource, tableName, op.getFieldName());
-                        break;
-                    case "RENAME":
-                        renameColumnInTable(datasource, tableName, op.getOldFieldName(), op.getFieldName());
-                        break;
-                    case "ALTER":
-                        alterColumnInTable(datasource, tableName, op.getFieldInfo());
-                        break;
-                    case "ADD":
-                        addColumnToTable(datasource, tableName, op.getFieldInfo());
-                        break;
-                    default:
-                        log.warn("未知的物理表操作类型: {}", op.getOperationType());
-                }
+                dropColumnFromTable(datasource, tableName, op.getFieldName());
             } catch (Exception e) {
-                log.error("执行物理表操作失败，操作类型: {}, 字段名: {}, 错误: {}",
-                        op.getOperationType(), op.getFieldName(), e.getMessage(), e);
+                log.error("执行 DROP 操作失败，字段名: {}, 错误: {}", op.getFieldName(), e.getMessage(), e);
+                throw new RuntimeException("物理表操作失败: " + e.getMessage(), e);
+            }
+        }
+
+        // 2. 执行 RENAME 操作
+        for (PhysicalTableOperation op : renameOps) {
+            try {
+                renameColumnInTable(datasource, tableName, op.getOldFieldName(), op.getFieldName());
+            } catch (Exception e) {
+                log.error("执行 RENAME 操作失败，旧字段名: {}, 新字段名: {}, 错误: {}",
+                        op.getOldFieldName(), op.getFieldName(), e.getMessage(), e);
+                throw new RuntimeException("物理表操作失败: " + e.getMessage(), e);
+            }
+        }
+
+        // 3. 合并执行 ALTER 操作（优化性能）
+        if (!alterOps.isEmpty()) {
+            try {
+                executeBatchAlterOperations(datasource, tableName, alterOps);
+            } catch (Exception e) {
+                log.error("执行批量 ALTER 操作失败，错误: {}", e.getMessage(), e);
+                throw new RuntimeException("物理表操作失败: " + e.getMessage(), e);
+            }
+        }
+
+        // 4. 最后执行 ADD 操作
+        for (PhysicalTableOperation op : addOps) {
+            try {
+                addColumnToTable(datasource, tableName, op.getFieldInfo());
+            } catch (Exception e) {
+                log.error("执行 ADD 操作失败，字段名: {}, 错误: {}",
+                        op.getFieldInfo().getFieldName(), e.getMessage(), e);
                 throw new RuntimeException("物理表操作失败: " + e.getMessage(), e);
             }
         }
 
         log.info("批量执行物理表操作完成，表名: {}", tableName);
+    }
+
+    /**
+     * 批量执行 ALTER 操作
+     * <p>
+     * 将多个 ALTER 操作合并为一条 DDL 语句执行，减少数据库交互次数。
+     * 对于达梦数据库，仍然使用 Anyline 原生 API 逐个执行。
+     *
+     * @param datasource 数据源信息
+     * @param tableName  表名
+     * @param alterOps   ALTER 操作列表
+     */
+    private void executeBatchAlterOperations(MetadataDatasourceDO datasource, String tableName,
+            List<PhysicalTableOperation> alterOps) {
+        if (alterOps == null || alterOps.isEmpty()) {
+            return;
+        }
+
+        String datasourceType = datasource.getDatasourceType();
+        DatabaseType dbType;
+        try {
+            dbType = DatabaseType.valueOf(datasourceType);
+        } catch (IllegalArgumentException e) {
+            log.warn("未知的数据库类型: {}，使用逐个执行方式", datasourceType);
+            // 未知数据库类型，逐个执行
+            for (PhysicalTableOperation op : alterOps) {
+                alterColumnInTable(datasource, tableName, op.getFieldInfo());
+            }
+            return;
+        }
+
+        if (dbType == DatabaseType.DM) {
+            // 达梦数据库：使用 Anyline API 逐个执行（因为 MODIFY 语法不支持合并）
+            log.info("达梦数据库逐个执行 ALTER 操作，操作数量: {}", alterOps.size());
+            for (PhysicalTableOperation op : alterOps) {
+                alterColumnInTable(datasource, tableName, op.getFieldInfo());
+            }
+        } else {
+            // PostgreSQL/KingBase：合并为一条 DDL 语句执行
+            log.info("合并执行 ALTER 操作，操作数量: {}", alterOps.size());
+            executeMergedAlterDDL(datasource, tableName, alterOps, datasourceType);
+        }
+    }
+
+    /**
+     * 执行合并的 ALTER DDL 语句（适用于 PostgreSQL/KingBase）
+     * <p>
+     * PostgreSQL 支持在一条 ALTER TABLE 语句中包含多个 ALTER COLUMN 子句。
+     * 例如：
+     * <pre>
+     * ALTER TABLE "table_name"
+     *     ALTER COLUMN "col1" TYPE VARCHAR(100),
+     *     ALTER COLUMN "col2" SET NOT NULL;
+     * </pre>
+     *
+     * @param datasource     数据源信息
+     * @param tableName      表名
+     * @param alterOps       ALTER 操作列表
+     * @param datasourceType 数据库类型
+     */
+    private void executeMergedAlterDDL(MetadataDatasourceDO datasource, String tableName,
+            List<PhysicalTableOperation> alterOps, String datasourceType) {
+        try {
+            TenantUtils.executeIgnore(() -> {
+                AnylineService<?> service = temporaryDatasourceService.createTemporaryService(datasource);
+
+                // 先校验表是否存在
+                if (!AnylineDdlHelper.tableExists(service, tableName)) {
+                    throw new RuntimeException("表 " + tableName + " 不存在，请先创建表");
+                }
+
+                // 生成合并的 DDL 语句
+                StringBuilder mergedDdl = new StringBuilder();
+                StringBuilder commentDdl = new StringBuilder();
+
+                for (int i = 0; i < alterOps.size(); i++) {
+                    PhysicalTableOperation op = alterOps.get(i);
+                    MetadataEntityFieldDO field = op.getFieldInfo();
+                    String fieldName = field.getFieldName();
+
+                    // 检查列是否存在
+                    if (!AnylineDdlHelper.columnExists(service, tableName, fieldName)) {
+                        log.warn("列 {} 不存在于表 {} 中，跳过 ALTER 操作", fieldName, tableName);
+                        continue;
+                    }
+
+                    String columnType = mapFieldType(field.getFieldType(), field.getDataLength());
+
+                    // 生成该字段的 ALTER COLUMN 子句
+                    // 1. 修改字段类型
+                    if (mergedDdl.length() > 0) {
+                        mergedDdl.append(",\n    ");
+                    } else {
+                        mergedDdl.append("ALTER TABLE \"").append(tableName).append("\"\n    ");
+                    }
+                    mergedDdl.append("ALTER COLUMN \"").append(fieldName).append("\" TYPE ").append(columnType);
+
+                    // 2. 修改是否允许为空（需要单独的 ALTER COLUMN 语句）
+                    if (field.getIsRequired() != null) {
+                        mergedDdl.append(",\n    ALTER COLUMN \"").append(fieldName).append("\"");
+                        if (BooleanStatusEnum.isYes(field.getIsRequired())) {
+                            mergedDdl.append(" SET NOT NULL");
+                        } else {
+                            mergedDdl.append(" DROP NOT NULL");
+                        }
+                    }
+
+                    // 3. 修改默认值（需要单独的 ALTER COLUMN 语句）
+                    if (field.getDefaultValue() != null && !field.getDefaultValue().trim().isEmpty()) {
+                        String formattedValue = formatDefaultValue(field.getFieldType(), field.getDefaultValue());
+                        if (formattedValue != null) {
+                            mergedDdl.append(",\n    ALTER COLUMN \"").append(fieldName)
+                                    .append("\" SET DEFAULT ").append(formattedValue);
+                        }
+                    }
+
+                    // 4. 字段注释（需要单独执行）
+                    if (field.getDescription() != null && !field.getDescription().trim().isEmpty()) {
+                        commentDdl.append("COMMENT ON COLUMN \"").append(tableName).append("\".\"");
+                        commentDdl.append(fieldName).append("\" IS '").append(field.getDescription()).append("';\n");
+                    }
+                }
+
+                // 执行合并的 ALTER TABLE 语句
+                if (mergedDdl.length() > 0) {
+                    mergedDdl.append(";");
+                    String alterSql = mergedDdl.toString();
+                    log.info("执行合并的 ALTER DDL: {}", alterSql);
+                    AnylineDdlHelper.executeDDL(service, alterSql);
+                }
+
+                // 执行注释语句
+                if (commentDdl.length() > 0) {
+                    log.debug("执行字段注释 DDL: {}", commentDdl);
+                    AnylineDdlHelper.executeDDL(service, commentDdl.toString());
+                }
+
+                return null;
+            });
+        } catch (Exception e) {
+            log.error("执行合并 ALTER DDL 失败: {}", e.getMessage(), e);
+            throw new RuntimeException("修改列失败", e);
+        }
     }
 
     /**
@@ -2366,6 +2544,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 } else {
                     // 确实是新选项，新增
                     MetadataEntityFieldOptionDO d = new MetadataEntityFieldOptionDO();
+                    d.setOptionUuid(UuidUtils.getUuid()); // 生成选项UUID
                     d.setFieldUuid(fieldUuid);
                     d.setOptionLabel(opt.getOptionLabel());
                     d.setOptionValue(opt.getOptionValue());
@@ -2609,6 +2788,19 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 Set<Long> processedRuleIds = new java.util.HashSet<>();
 
                 for (AutoNumberRuleVO ruleReq : otherRules) {
+                    // FIELD_REF类型特殊处理：确保refFieldUuid有值
+                    if ("FIELD_REF".equalsIgnoreCase(ruleReq.getItemType())) {
+                        String resolvedRefFieldUuid = resolveFieldRefUuid(ruleReq);
+                        if (resolvedRefFieldUuid == null || resolvedRefFieldUuid.trim().isEmpty()) {
+                            log.error("FIELD_REF类型规则项缺少引用字段UUID，跳过保存。itemOrder={}, format={}, refFieldUuid={}",
+                                    ruleReq.getItemOrder(), ruleReq.getFormat(), ruleReq.getRefFieldUuid());
+                            throw new IllegalArgumentException("FIELD_REF类型规则项必须指定引用字段UUID");
+                        }
+                        ruleReq.setRefFieldUuid(resolvedRefFieldUuid);
+                        // 清空format，因为FIELD_REF类型不需要format字段
+                        ruleReq.setFormat(null);
+                    }
+
                     // 如果提供了ID，尝试更新现有规则项
                     if (ruleReq.getId() != null) {
                         MetadataAutoNumberRuleItemDO existingRule = existingRulesMap.get(ruleReq.getId());
@@ -2674,6 +2866,40 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 log.info("删除字段 {} 的自动编号配置", fieldUuid);
             }
         }
+    }
+
+    /**
+     * 解析FIELD_REF类型规则项的引用字段UUID
+     * <p>
+     * 兼容处理逻辑：
+     * 1. 如果 refFieldUuid 不为空，直接返回
+     * 2. 如果 refFieldUuid 为空但 format 有值，尝试将 format 作为字段标识符（可能是ID或UUID）转换为UUID
+     * 3. 否则返回 null
+     *
+     * @param ruleReq 规则项请求VO
+     * @return 解析后的字段UUID，如果无法解析则返回null
+     */
+    private String resolveFieldRefUuid(AutoNumberRuleVO ruleReq) {
+        // 1. 优先使用 refFieldUuid
+        if (ruleReq.getRefFieldUuid() != null && !ruleReq.getRefFieldUuid().trim().isEmpty()) {
+            return ruleReq.getRefFieldUuid();
+        }
+
+        // 2. 尝试从 format 字段获取并转换（兼容前端将字段ID放在format的情况）
+        if (ruleReq.getFormat() != null && !ruleReq.getFormat().trim().isEmpty()) {
+            try {
+                String resolvedUuid = idUuidConverter.toFieldUuid(ruleReq.getFormat());
+                log.info("FIELD_REF规则项兼容处理：从 format={} 转换得到 refFieldUuid={}",
+                        ruleReq.getFormat(), resolvedUuid);
+                return resolvedUuid;
+            } catch (Exception e) {
+                log.warn("FIELD_REF规则项转换失败：无法将 format={} 转换为字段UUID，错误: {}",
+                        ruleReq.getFormat(), e.getMessage());
+            }
+        }
+
+        // 3. 无法解析
+        return null;
     }
 
     /**
@@ -3433,6 +3659,11 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         }
         
         return result;
+    }
+
+    @Override
+    public List<MetadataEntityFieldDO> getByFieldUuids(java.util.Collection<String> fieldUuids) {
+        return metadataEntityFieldRepository.getByFieldUuids(fieldUuids);
     }
 
 }

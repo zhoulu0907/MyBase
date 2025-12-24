@@ -1,6 +1,5 @@
 package com.cmsr.onebase.module.app.build.vo.app;
 
-import cn.hutool.core.annotation.Alias;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 

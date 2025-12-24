@@ -448,39 +448,6 @@ COMMENT ON COLUMN "public"."metadata_validation_rule_definition"."field_value2" 
 COMMENT ON COLUMN "public"."metadata_validation_rule_definition"."status" IS '状态：1-激活，0-非激活';
 
 -- Table Definition
-CREATE TABLE "public"."infra_config_1" (
-    "id" int4 NOT NULL,
-    "category" varchar(50) NOT NULL,
-    "type" int2 NOT NULL,
-    "name" varchar(100) NOT NULL DEFAULT ''::character varying,
-    "config_key" varchar(100) NOT NULL DEFAULT ''::character varying,
-    "value" varchar(500) NOT NULL DEFAULT ''::character varying,
-    "visible" int2 NOT NULL,
-    "remark" varchar(500) DEFAULT NULL::character varying,
-    "creator" int8 DEFAULT 0,
-    "create_time" timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updater" int8 DEFAULT 0,
-    "update_time" timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "deleted" int8 NOT NULL DEFAULT 0,
-    PRIMARY KEY ("id")
-);
-
--- Column Comment
-COMMENT ON COLUMN "public"."infra_config_1"."id" IS '参数主键';
-COMMENT ON COLUMN "public"."infra_config_1"."category" IS '参数分组';
-COMMENT ON COLUMN "public"."infra_config_1"."type" IS '参数类型';
-COMMENT ON COLUMN "public"."infra_config_1"."name" IS '参数名称';
-COMMENT ON COLUMN "public"."infra_config_1"."config_key" IS '参数键名';
-COMMENT ON COLUMN "public"."infra_config_1"."value" IS '参数键值';
-COMMENT ON COLUMN "public"."infra_config_1"."visible" IS '是否可见';
-COMMENT ON COLUMN "public"."infra_config_1"."remark" IS '备注';
-COMMENT ON COLUMN "public"."infra_config_1"."creator" IS '创建者';
-COMMENT ON COLUMN "public"."infra_config_1"."create_time" IS '创建时间';
-COMMENT ON COLUMN "public"."infra_config_1"."updater" IS '更新者';
-COMMENT ON COLUMN "public"."infra_config_1"."update_time" IS '更新时间';
-COMMENT ON COLUMN "public"."infra_config_1"."deleted" IS '是否删除';
-
--- Table Definition
 CREATE TABLE "public"."metadata_entity_field_option" (
     "id" int8 NOT NULL,
     "field_id" int8 NOT NULL,

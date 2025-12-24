@@ -8,6 +8,8 @@ import com.mybatisflex.annotation.UpdateListener;
 import com.mybatisflex.core.FlexGlobalConfig;
 import com.mybatisflex.core.audit.AuditManager;
 import com.mybatisflex.core.keygen.KeyGeneratorFactory;
+import com.mybatisflex.core.logicdelete.LogicDeleteManager;
+import com.mybatisflex.core.logicdelete.impl.TimeStampLogicDeleteProcessor;
 import com.mybatisflex.core.query.QueryColumnBehavior;
 import com.mybatisflex.spring.boot.MyBatisFlexCustomizer;
 import lombok.Setter;
@@ -35,22 +37,24 @@ public class MybatisFlexConfiguration implements MyBatisFlexCustomizer {
     @Autowired
     private SnowflakeIdGenerator snowflakeIdGenerator;
 
+    @Autowired
+    private DefaultEntityListener defaultEntityListener;
+
     @Override
     public void customize(FlexGlobalConfig defaultConfig) {
         // 不忽略任何条件，默认行为，容易隐藏深层次的问题
         QueryColumnBehavior.setIgnoreFunction(o -> false);
         // logic delete
         defaultConfig.setLogicDeleteColumn("deleted");
-        defaultConfig.setNormalValueOfLogicDelete(0);
-        defaultConfig.setDeletedValueOfLogicDelete(System.currentTimeMillis());
+        LogicDeleteManager.setProcessor(new TimeStampLogicDeleteProcessor());
 
         Map<Class<?>, List<InsertListener>> insertListenerMap = new HashMap<>();
-        insertListenerMap.put(BaseEntity.class, List.of(new DefaultEntityListener()));
-        insertListenerMap.put(WarmFlowBaseEntity.class, List.of(new DefaultEntityListener()));
+        insertListenerMap.put(BaseEntity.class, List.of(defaultEntityListener));
+        insertListenerMap.put(WarmFlowBaseEntity.class, List.of(defaultEntityListener));
 
         Map<Class<?>, List<UpdateListener>> updateListenerMap = new HashMap<>();
-        updateListenerMap.put(BaseEntity.class, List.of(new DefaultEntityListener()));
-        updateListenerMap.put(WarmFlowBaseEntity.class, List.of(new DefaultEntityListener()));
+        updateListenerMap.put(BaseEntity.class, List.of(defaultEntityListener));
+        updateListenerMap.put(WarmFlowBaseEntity.class, List.of(defaultEntityListener));
 
         // base information listener
         defaultConfig.setEntityInsertListeners(insertListenerMap);

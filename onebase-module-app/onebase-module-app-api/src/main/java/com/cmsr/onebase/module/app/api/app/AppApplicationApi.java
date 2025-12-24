@@ -26,4 +26,9 @@ public interface AppApplicationApi {
     void updateAppTimeById(Long appId);
 
     Map<Long, List<TagVO>> queryAppTags(List<Long> appIds);
+
+    boolean existsEntityRelation(String entityUuid, String entityName);
+
+    boolean existsEntityFieldRelation(String entityUuid, String entityName, String fieldUuid, String fieldName);
+
 }

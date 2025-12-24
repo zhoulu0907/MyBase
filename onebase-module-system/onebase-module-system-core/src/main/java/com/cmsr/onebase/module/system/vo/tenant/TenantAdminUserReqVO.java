@@ -16,7 +16,7 @@ public class TenantAdminUserReqVO {
     private String adminUserName;
 
     @Schema(description = "管理员手机", example = "15888888888")
-    @NotBlank(message = "管理员手机不能为空")
+   // @NotBlank(message = "管理员手机不能为空")
     private String adminMobile;
 
     @Schema(description = "管理员邮箱", example = "user@abc.com")

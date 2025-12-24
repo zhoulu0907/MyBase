@@ -6,7 +6,7 @@ import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
-import com.cmsr.onebase.module.infra.dal.dataobject.file.FileDO;
+import com.cmsr.onebase.module.infra.dal.dataflexdo.file.FileDO;
 import com.cmsr.onebase.module.infra.dal.vo.file.file.FilePageReqVO;
 import com.cmsr.onebase.module.infra.dal.vo.file.file.FileRespVO;
 import com.cmsr.onebase.module.infra.dal.vo.file.file.FileUploadReqVO;
@@ -41,6 +41,7 @@ public class FileController {
 
     @PostMapping("/upload")
     @Operation(summary = "上传文件", description = "模式一：后端上传文件")
+    @ApiSignIgnore
     public CommonResult<String> uploadFile(@Valid FileUploadReqVO uploadReqVO) throws Exception {
         if (FileVisitModeEnum.PERMISSION.getValue().equals(uploadReqVO.getVisitMode())) {
             return CommonResult.error(BAD_REQUEST);

@@ -1,6 +1,6 @@
 
 # 查看更多 .gitignore 配置 -> https://help.github.com/articles/ignoring-files/
-
+logs
 target/
 !.mvn/wrapper/maven-wrapper.jar
 

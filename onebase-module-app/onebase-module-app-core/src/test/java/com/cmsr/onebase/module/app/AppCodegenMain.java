@@ -23,6 +23,7 @@ public class AppCodegenMain {
             "app_auth_role_user",
             "app_auth_view",
             "app_menu",
+            "app_navigation",
             "app_resource_component",
             "app_resource_page",
 //            "app_resource_page_metadata",
@@ -66,8 +67,8 @@ public class AppCodegenMain {
         globalConfig.setEntityWithLombok(true);
         globalConfig.setEntityLombokAllArgsConstructorEnable(false);
         globalConfig.setEntityLombokNoArgsConstructorEnable(false);
-        globalConfig.setEntityOverwriteEnable(true);
         globalConfig.setEntityJdkVersion(17);
+        globalConfig.setEntityOverwriteEnable(true);
         //生成Mapper
         globalConfig.setMapperGenerateEnable(true);
         globalConfig.setMapperPackage(basePackage + ".mapper");
@@ -76,6 +77,7 @@ public class AppCodegenMain {
         globalConfig.setMapperXmlGenerateEnable(true);
         globalConfig.setMapperXmlOverwriteEnable(true);
         globalConfig.setMapperXmlPath(sourceDir);
+        globalConfig.setMapperXmlOverwriteEnable(true);
         //生成代码
         Generator generator = new Generator(dataSource, globalConfig);
         generator.generate();
@@ -89,6 +91,7 @@ public class AppCodegenMain {
         globalConfig.enableTableDef();
         globalConfig.setTableDefOverwriteEnable(true);
         globalConfig.setTableDefPackage(basePackage + ".dataobject.table");
+        globalConfig.setEntityOverwriteEnable(true);
         //生成代码
         Generator generator = new Generator(dataSource, globalConfig);
         generator.generate();

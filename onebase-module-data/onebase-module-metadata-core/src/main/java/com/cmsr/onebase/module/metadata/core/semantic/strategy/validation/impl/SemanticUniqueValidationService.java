@@ -37,7 +37,7 @@ public class SemanticUniqueValidationService implements SemanticValidationServic
             Object value = data.get(field.getFieldName());
             if (operationType == SemanticDataMethodOpEnum.UPDATE && value == null) { continue; }
             if (field.getFieldTypeEnum() == SemanticFieldTypeEnum.AUTO_CODE) { continue; }
-            List<MetadataValidationUniqueDO> rules = context.getUniqueRules().getOrDefault(field.getId(), java.util.Collections.emptyList());
+            List<MetadataValidationUniqueDO> rules = context.getUniqueRules().getOrDefault(field.getFieldUuid(), java.util.Collections.emptyList());
             if (rules.isEmpty()) { continue; }
             boolean hasEnabledRule = rules.stream().anyMatch(rule -> rule.getIsEnabled() != null && rule.getIsEnabled() == 1);
             if (!hasEnabledRule) { continue; }
@@ -103,7 +103,7 @@ public class SemanticUniqueValidationService implements SemanticValidationServic
         qw.select(pkName);
         for (SemanticFieldSchemaDTO f : candidates) { qw.select(f.getFieldName()); }
 
-        List<Row> rows = dynamicMetadataRepository.selectListByQuery(entity.getTableName(), qw);
+        List<Row> rows = dynamicMetadataRepository.selectListByQuery(entity.getTableName(), qw, entity.getFields());
         if (rows == null || rows.isEmpty()) { return result; }
 
         for (Row row : rows) {

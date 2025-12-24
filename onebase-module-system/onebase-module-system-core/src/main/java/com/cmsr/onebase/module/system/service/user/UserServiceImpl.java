@@ -14,41 +14,50 @@ import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.common.util.validation.ValidationUtils;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
+import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
+import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
 import com.cmsr.onebase.module.app.api.auth.AppAuthRoleUser;
 import com.cmsr.onebase.module.infra.api.config.ConfigApi;
 import com.cmsr.onebase.module.system.convert.user.UserConvert;
 import com.cmsr.onebase.module.system.dal.database.RoleDataRepository;
 import com.cmsr.onebase.module.system.dal.database.UserPostDataRepository;
 import com.cmsr.onebase.module.system.dal.database.UserRoleDataRepository;
-import com.cmsr.onebase.module.system.dal.database.user.UserDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.UserPostDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.UserRoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
+import com.cmsr.onebase.module.system.dal.dataobject.user.UserAppRelationDO;
+import com.cmsr.onebase.module.system.dal.flex.repo.UserDataRepository;
 import com.cmsr.onebase.module.system.dal.redis.RedisKeyConstants;
+import com.cmsr.onebase.module.system.enums.dept.DeptCodeEnum;
+import com.cmsr.onebase.module.system.enums.dept.DeptTypeEnum;
 import com.cmsr.onebase.module.system.enums.permission.AdminTypeEnum;
 import com.cmsr.onebase.module.system.enums.permission.RoleCodeEnum;
 import com.cmsr.onebase.module.system.enums.permission.RoleTypeEnum;
 import com.cmsr.onebase.module.system.enums.tenant.TenantCodeEnum;
+import com.cmsr.onebase.module.system.enums.user.CreateSourceEnum;
 import com.cmsr.onebase.module.system.enums.user.UserStatusEnum;
+import com.cmsr.onebase.module.system.framework.security.core.PwdEnHelper;
 import com.cmsr.onebase.module.system.service.dept.DeptService;
 import com.cmsr.onebase.module.system.service.permission.PermissionService;
 import com.cmsr.onebase.module.system.service.permission.RoleService;
 import com.cmsr.onebase.module.system.service.post.PostService;
 import com.cmsr.onebase.module.system.service.tenant.TenantService;
 import com.cmsr.onebase.module.system.vo.auth.AuthRegisterReqVO;
+import com.cmsr.onebase.module.system.vo.dept.DeptSaveReqVO;
 import com.cmsr.onebase.module.system.vo.dept.DeptSimpleListRespVO;
 import com.cmsr.onebase.module.system.vo.role.RoleInsertReqVO;
 import com.cmsr.onebase.module.system.vo.user.*;
 import com.google.common.annotations.VisibleForTesting;
+import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.core.tenant.TenantManager;
 import com.mzt.logapi.context.LogRecordContext;
 import com.mzt.logapi.service.impl.DiffParseFunction;
 import com.mzt.logapi.starter.annotation.LogRecord;
 import jakarta.annotation.Resource;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.data.param.init.DefaultConfigStore;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -79,24 +88,26 @@ import static java.util.Collections.singleton;
 @Validated
 public class UserServiceImpl implements UserService {
 
-    static final String USER_INIT_PASSWORD_KEY = "system.user.init-password";
-
+    static final String USER_INIT_PASSWORD_KEY    = "system.user.init-password";
     static final String USER_REGISTER_ENABLED_KEY = "system.user.register-enabled";
 
+    // 三方用户设置默认密码
+    private static final String THIRD_USER_PASSWORD = "ThirdChina2025!";
+
     @Resource
-    private DeptService deptService;
+    private DeptService       deptService;
     @Resource
-    private PostService postService;
+    private PostService       postService;
     @Resource
     private PermissionService permissionService;
     @Resource
-    private PasswordEncoder passwordEncoder;
+    private PasswordEncoder   passwordEncoder;
     @Resource
     @Lazy // 延迟，避免循环依赖报错
-    private TenantService tenantService;
+    private TenantService     tenantService;
 
     @Resource
-    private ConfigApi configApi;
+    private ConfigApi   configApi;
     @Lazy
     @Resource
     private RoleService roleService;
@@ -119,6 +130,16 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private RoleDataRepository roleDataRepository;
 
+    @Resource
+    private UserAppRelationService userAppRelationService;
+
+
+    @Resource
+    private AppApplicationApi appApplicationApi;
+
+    @Resource
+    private PwdEnHelper pwdEnHelper;
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     @LogRecord(type = SYSTEM_USER_TYPE, subType = SYSTEM_USER_CREATE_SUB_TYPE, bizNo = "{{#user.id}}",
@@ -132,17 +153,7 @@ public class UserServiceImpl implements UserService {
         // 如果是启用状态，校验当前租户下的用户数量有没有超过最大限额
         if (Objects.equals(CommonStatusEnum.ENABLE.getStatus(), createReqVO.getStatus())) {
             // 1.1 校验账户配合
-            tenantService.handleTenantInfo(tenant -> {
-                // 如果用户的租户不是平台租户，则校验租户用户最大限额
-                if (!tenant.getTenantCode().equals(TenantCodeEnum.PLATFORM_TENANT.getCode())) {
-                    long count = userDataRepository.countByConfig(new DefaultConfigStore().eq(AdminUserDO.STATUS,
-                            UserStatusEnum.NORMAL.getStatus()));
-                    log.info(" count user four tenant, count={}", count);
-                    if (count >= tenant.getAccountCount()) {
-                        throw exception(USER_COUNT_MAX, tenant.getAccountCount());
-                    }
-                }
-            });
+            validateTenantUserCountMaxLimit();
         }
         // 1.2 校验正确性
         validateUserForCreateOrUpdate(null, createReqVO.getUsername(),
@@ -173,13 +184,13 @@ public class UserServiceImpl implements UserService {
         if (UserTypeEnum.CORP.getValue().equals(user.getUserType())) {
             user.setCorpId(loginUser.getCorpId());
         }
-        userDataRepository.insert(user);
+        userDataRepository.save(user);
         // 2.1.1 保存初始密码历史记录
         securityConfigApi.savePasswordHistory(user.getId(), user.getPassword());
 
         // 2.2 插入关联岗位
         if (CollUtil.isNotEmpty(user.getPostIds())) {
-            userPostDataRepository.insertBatch(convertList(user.getPostIds(),
+            userPostDataRepository.saveBatch(convertList(user.getPostIds(),
                     postId -> new UserPostDO().setUserId(user.getId()).setPostId(postId)));
         }
 
@@ -219,14 +230,14 @@ public class UserServiceImpl implements UserService {
             userDO.setAdminType(AdminTypeEnum.CUSTOM.getType());
         }
         userDO.setUserType(UserTypeEnum.CORP.getValue());
-        AdminUserDO adminUserDO = userDataRepository.insert(userDO);
+        userDataRepository.save(userDO);
 
         // 保存初始密码历史记录
-        securityConfigApi.savePasswordHistory(adminUserDO.getId(), adminUserDO.getPassword());
+        securityConfigApi.savePasswordHistory(userDO.getId(), userDO.getPassword());
 
         Long roleId = createCoreAdminRole();
-        permissionService.assignUserRoles(adminUserDO.getId(), singleton(roleId));
-        return adminUserDO.getId();
+        permissionService.assignUserRoles(userDO.getId(), singleton(roleId));
+        return userDO.getId();
     }
 
     private Long createCoreAdminRole() {
@@ -264,7 +275,7 @@ public class UserServiceImpl implements UserService {
             user.setAdminType(AdminTypeEnum.CUSTOM.getType());
         }
         user.setUserType(UserTypeEnum.PLATFORM.getValue());
-        userDataRepository.insert(user);
+        userDataRepository.save(user);
 
         // 保存初始密码历史记录
         securityConfigApi.savePasswordHistory(user.getId(), user.getPassword());
@@ -306,7 +317,7 @@ public class UserServiceImpl implements UserService {
         user.setStatus(CommonStatusEnum.ENABLE.getStatus()); // 默认开启
         user.setPassword(encodePassword(registerReqVO.getPassword())); //
         user.setUserType(registerReqVO.getUserType());
-        userDataRepository.insert(user);
+        userDataRepository.save(user);
 
         // 2.1 保存初始密码历史记录
         securityConfigApi.savePasswordHistory(user.getId(), user.getPassword());
@@ -323,23 +334,7 @@ public class UserServiceImpl implements UserService {
         // 1. 校验正确性
         AdminUserDO oldUser = validateUserForCreateOrUpdate(updateReqVO.getId(), updateReqVO.getUsername(),
                 updateReqVO.getMobile(), updateReqVO.getEmail(), updateReqVO.getDeptId(), updateReqVO.getPostIds());
-        if (updateReqVO.getStatus() != null) {
-
-            if (updateReqVO.getStatus() != oldUser.getStatus() && updateReqVO.getStatus() == CommonStatusEnum.ENABLE.getStatus()) {
-                // 1.1 校验账户配合
-                tenantService.handleTenantInfo(tenant -> {
-                    // 如果用户的租户不是平台租户，则校验租户用户最大限额
-                    if (!tenant.getTenantCode().equals(TenantCodeEnum.PLATFORM_TENANT.getCode())) {
-                        long count = userDataRepository.countByConfig(new DefaultConfigStore().eq(AdminUserDO.STATUS,
-                                UserStatusEnum.NORMAL.getStatus()));
-                        log.info(" count user four tenant, count={}", count);
-                        if (count >= tenant.getAccountCount()) {
-                            throw exception(USER_COUNT_MAX, tenant.getAccountCount());
-                        }
-                    }
-                });
-            }
-        }
+        checkTenantUserCountLimit(updateReqVO.getStatus(), oldUser);
         // 2.1 更新用户
         AdminUserDO updateObj = BeanUtils.toBean(updateReqVO, AdminUserDO.class);
         userDataRepository.update(updateObj);
@@ -383,7 +378,7 @@ public class UserServiceImpl implements UserService {
         Collection<Long> deletePostIds = CollUtil.subtract(dbPostIds, postIds);
         // 执行新增和删除。对于已经授权的岗位，不用做任何处理
         if (!CollUtil.isEmpty(createPostIds)) {
-            userPostDataRepository.insertBatch(convertList(createPostIds,
+            userPostDataRepository.saveBatch(convertList(createPostIds,
                     postId -> new UserPostDO().setUserId(userId).setPostId(postId)));
         }
         if (!CollUtil.isEmpty(deletePostIds)) {
@@ -410,17 +405,27 @@ public class UserServiceImpl implements UserService {
     public void updateUserPassword(Long id, UserProfileUpdatePasswordReqVO reqVO) {
         // 校验旧密码密码
         validateOldPassword(id, reqVO.getOldPassword());
-        // 弱密码校验
-        securityConfigApi.validatePassword(reqVO.getNewPassword());
+        // 调用更新密码逻辑
+        AdminUserDO user =  commonUpdatePassword(id, reqVO.getNewPassword());
+    }
+
+    // 密码更新逻辑
+    public AdminUserDO commonUpdatePassword(Long id, String newPassword){
+
+        //校验密码强度
+        securityConfigApi.validatePassword(newPassword);
         // 历史密码校验
-        securityConfigApi.validatePasswordHistory(id, reqVO.getNewPassword());
+        securityConfigApi.validatePasswordHistory(id, newPassword);
         // 执行更新
         AdminUserDO updateObj = new AdminUserDO().setId(id);
-        updateObj.setPassword(encodePassword(reqVO.getNewPassword())); // 加密密码
+        updateObj.setPassword(encodePassword(newPassword)); // 加密密码
         userDataRepository.update(updateObj);
         // 保存密码历史
         securityConfigApi.savePasswordHistory(id, updateObj.getPassword());
+        return updateObj;
     }
+
+
 
     @Override
     @LogRecord(type = SYSTEM_USER_TYPE, subType = SYSTEM_USER_UPDATE_PASSWORD_SUB_TYPE, bizNo = "{{#id}}",
@@ -429,22 +434,35 @@ public class UserServiceImpl implements UserService {
         // 1. 校验用户存在
         AdminUserDO user = validateUserExists(id);
 
-        // 2. 弱密码校验
-        securityConfigApi.validatePassword(password);
+        //2. 使用用户入参密码
+        AdminUserDO updateObj =    commonUpdatePassword(user.getId(), password);
 
-        // 3. 更新密码
-        AdminUserDO updateObj = new AdminUserDO();
-        updateObj.setId(id);
-        updateObj.setPassword(encodePassword(password)); // 加密密码
-        userDataRepository.update(updateObj);
-
-        // 4. 记录操作日志上下文
+        // 3. 记录操作日志上下文
         LogRecordContext.putVariable("user", user);
         LogRecordContext.putVariable("newPassword", updateObj.getPassword());
+
+    }
+
+    public void validateTenantUserCountMaxLimit(){
+        tenantService.handleTenantInfo(tenant -> {
+            // 如果用户的租户不是平台租户，则校验租户用户最大限额
+            if (!tenant.getTenantCode().equals(TenantCodeEnum.PLATFORM_TENANT.getCode())) {
+                long count = userDataRepository.count(new QueryWrapper().eq(AdminUserDO.STATUS, UserStatusEnum.NORMAL.getStatus()));
+                log.info(" count user four tenant, count={}", count);
+                if (count >= tenant.getAccountCount()) {
+                    throw exception(USER_COUNT_MAX, tenant.getAccountCount());
+                }
+            }
+        });
     }
 
     @Override
     public void updateUserStatus(Long id, Integer status) {
+        if(CommonStatusEnum.ENABLE.getStatus().equals(status) ){
+            validateTenantUserCountMaxLimit();
+        }
+
+
         // 校验用户存在
         validateUserExists(id);
         // 更新状态
@@ -520,18 +538,22 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public AdminUserDO getUser(Long id) {
-        AdminUserDO adminUserDo = userDataRepository.findById(id);
+        AdminUserDO adminUserDo = userDataRepository.getById(id);
         return adminUserDo;
     }
 
     @Override
-    public List<AdminUserDO> getUserListByDeptIds(Collection<Long> deptIds) {
-        return userDataRepository.findAllByDeptIds(deptIds);
+    public List<AdminUserDO> getUserListByDeptIds(Collection<Long> deptIds, Integer userType) {
+        return userDataRepository.findAllByDeptIds(deptIds, userType);
     }
 
     @Override
-    public List<AdminUserDO> getUserListNoDept() {
-        return userDataRepository.findAllNoDept();
+    public List<AdminUserDO> getUserListNoDept(Integer userType) {
+        if (null == userType) {
+            return userDataRepository.findNullDeptUser();
+        } else {
+            return userDataRepository.findUserByUserType(userType);
+        }
     }
 
     @Override
@@ -543,7 +565,7 @@ public class UserServiceImpl implements UserService {
         if (CollUtil.isEmpty(userIds)) {
             return Collections.emptyList();
         }
-        return userDataRepository.findAllByIds(userIds);
+        return userDataRepository.listByIds(userIds);
     }
 
     @Override
@@ -552,7 +574,7 @@ public class UserServiceImpl implements UserService {
         if (CollUtil.isEmpty(ids)) {
             return Collections.emptyList();
         }
-        return userDataRepository.findAllByIds(ids);
+        return userDataRepository.listByIds(ids);
     }
 
 
@@ -562,7 +584,7 @@ public class UserServiceImpl implements UserService {
         if (CollUtil.isEmpty(ids)) {
             return Collections.emptyList();
         }
-        return userDataRepository.findAllByIds(ids);
+        return userDataRepository.listByIds(ids);
     }
 
     @Override
@@ -571,7 +593,7 @@ public class UserServiceImpl implements UserService {
             return;
         }
         // 获得岗位信息
-        List<AdminUserDO> users = userDataRepository.findAllByIds(ids);
+        List<AdminUserDO> users = userDataRepository.listByIds(ids);
         Map<Long, AdminUserDO> userMap = CollectionUtils.convertMap(users, AdminUserDO::getId);
         // 校验
         ids.forEach(id -> {
@@ -586,8 +608,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<AdminUserDO> getUserListByNickname(String nickname) {
-        return userDataRepository.findAllByNicknameLike(nickname);
+    public List<AdminUserDO> getUserListByNickname(String nickname, Integer userType) {
+        return userDataRepository.findAllByNicknameLike(nickname,userType);
     }
 
     /**
@@ -627,7 +649,7 @@ public class UserServiceImpl implements UserService {
         if (id == null) {
             return null;
         }
-        AdminUserDO user = userDataRepository.findById(id);
+        AdminUserDO user = userDataRepository.getById(id);
         log.info("find user id is {}, user:{}", id, user);
         if (user == null) {
             throw exception(USER_NOT_EXISTS);
@@ -700,7 +722,7 @@ public class UserServiceImpl implements UserService {
      */
     @VisibleForTesting
     void validateOldPassword(Long id, String oldPassword) {
-        AdminUserDO user = userDataRepository.findById(id);
+        AdminUserDO user = userDataRepository.getById(id);
         if (user == null) {
             throw exception(USER_NOT_EXISTS);
         }
@@ -749,7 +771,7 @@ public class UserServiceImpl implements UserService {
             if (existUser == null) {
                 AdminUserDO newUser = BeanUtils.toBean(importUser, AdminUserDO.class)
                         .setPassword(encodePassword(initPassword)).setPostIds(new HashSet<>());
-                userDataRepository.insert(newUser);
+                userDataRepository.save(newUser);
                 // 保存初始密码历史记录
                 securityConfigApi.savePasswordHistory(newUser.getId(), newUser.getPassword());
                 respVO.getCreateUsernames().add(importUser.getUsername());
@@ -777,13 +799,13 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<AdminUserDO> getUserListByStatusAndDeptId(DeptSimpleListRespVO reqVO) {
         // 获取部门条件：查询指定部门的子部门编号们，包括自身
-        Long deptId=reqVO.getDeptId();
-        boolean directFlag= reqVO.getDirectFlag() == null || reqVO.getDirectFlag();
-        Set<Long> deptIds =new HashSet<>();
-        if (directFlag){
-             deptIds.add(deptId);
-        }else{
-             deptIds=  getDeptCondition(deptId);
+        Long deptId = reqVO.getDeptId();
+        boolean directFlag = reqVO.getDirectFlag() == null || reqVO.getDirectFlag();
+        Set<Long> deptIds = new HashSet<>();
+        if (directFlag) {
+            deptIds.add(deptId);
+        } else {
+            deptIds = getDeptCondition(deptId);
         }
         return userDataRepository.findAllByStatusAndDeptIds(CommonStatusEnum.ENABLE.getStatus(), deptIds);
 
@@ -815,7 +837,7 @@ public class UserServiceImpl implements UserService {
         Map<Long, RoleDO> roleDOMap = roleDOList.stream()
                 .collect(Collectors.toMap(RoleDO::getId, Function.identity()));
 
-        //通过用户分组
+        // 通过用户分组
         Map<Long, List<UserRoleDO>> userRoleMap = userRoleDOList.stream()
                 .collect(Collectors.groupingBy(UserRoleDO::getUserId));
 
@@ -838,6 +860,13 @@ public class UserServiceImpl implements UserService {
             user.setRoles(roleRespVOs);
         });
         return userRespVOList;
+    }
+
+
+    @Override
+    @TenantIgnore
+    public List<AdminUserDO> getPlatformUserByUsernames(Set<String> usernamesList) {
+        return userDataRepository.getPlatformUserByUsernames(usernamesList);
     }
 
     @Override
@@ -881,7 +910,7 @@ public class UserServiceImpl implements UserService {
         }
 
         // 批量查询指定部门的所有用户（不过滤状态）
-        List<AdminUserDO> users = userDataRepository.findAllByDeptIds(deptIds);
+        List<AdminUserDO> users = userDataRepository.findAllByDeptIds(deptIds,null);
 
         // 按部门ID分组统计人数
         return users.stream()
@@ -909,7 +938,7 @@ public class UserServiceImpl implements UserService {
         }
 
         // 2. 批量查询所有相关部门的用户
-        List<AdminUserDO> allUsers = userDataRepository.findAllByDeptIds(allDeptIds);
+        List<AdminUserDO> allUsers = userDataRepository.findAllByDeptIds(allDeptIds,null);
 
         // 3. 按部门ID分组统计直属人数
         Map<Long, Integer> directUserCountMap = allUsers.stream()
@@ -1043,6 +1072,352 @@ public class UserServiceImpl implements UserService {
 
         // 校验角色是否存在且有效
         roleService.validateRoleList(roleIds);
+    }
+
+
+
+    // ---------------------------------第三方用户方法分割线-----------------------------------------------
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    @LogRecord(type = SYSTEM_USER_TYPE_THRID, subType = SYSTEM_USER_CREATE_SUB_TYPE, bizNo = "{{#user.id}}",
+            success = SYSTEM_USER_CREATE_SUCCESS)
+    public Long thirdUserCreateUserAndUserAppRelation(ThirdUserAppCombinedInsertReqVO reqVO) {
+        // 验证用户数据，确保用户不存在
+        // 如果为空，默认为开启状态
+        if (null == reqVO.getStatus()) {
+            reqVO.setStatus(CommonStatusEnum.ENABLE.getStatus()); // 默认开启
+        }
+        // 如果是启用状态，校验当前租户下的用户数量有没有超过最大限额
+        if (Objects.equals(CommonStatusEnum.ENABLE.getStatus(), reqVO.getStatus())) {
+            // 1.1 校验账户配合
+            validateTenantUserCountMaxLimit();
+        }
+        // 校验手机，邮箱
+        validateThirdUserForCreateOrUpdate(null, reqVO.getMobile(), reqVO.getEmail());
+
+        if (null == reqVO.getDeptId()) {
+            // 三方用户 默认部门，不存在就新建部门
+            Long deptId = createThirdDefaultDept();
+            reqVO.setDeptId(deptId);
+        }
+
+
+        // 创建用户
+        AdminUserDO user = BeanUtils.toBean(reqVO, AdminUserDO.class);
+        user.setPassword(encodePassword(THIRD_USER_PASSWORD));
+        user.setUsername(reqVO.getMobile());
+        user.setNickname(reqVO.getNickName());
+        user.setUserType(UserTypeEnum.THIRD.getValue());
+        user.setStatus(UserStatusEnum.NORMAL.getStatus());
+        user.setCreateSource(CreateSourceEnum.BACK.getCode());
+        user.setDeptId(reqVO.getDeptId());
+        user.setAdminType(AdminTypeEnum.CUSTOM.getType());
+        userDataRepository.save(user);
+
+        // 创建关联关系
+        setUserAppRelation(user.getId(), reqVO.getApplicationIdList());
+
+        //  保存初始密码历史记录
+        securityConfigApi.savePasswordHistory(user.getId(), user.getPassword());
+
+        // 3. 记录操作日志上下文
+        LogRecordContext.putVariable("user", user);
+
+        return user.getId();
+    }
+
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    @LogRecord(type = SYSTEM_USER_TYPE_THRID, subType = SYSTEM_USER_UPDATE_SUB_TYPE, bizNo = "{{#updateReqVO.id}}",
+            success = SYSTEM_USER_UPDATE_SUCCESS)
+    public Long thirdUserUpdateUserAndUserAppRelation(ThirdUserAppCombinedUpdateReqVO updateReqVO) {
+        AdminUserDO oldUser = validateThirdUserForCreateOrUpdate(updateReqVO.getId(), null, updateReqVO.getEmail());
+        checkTenantUserCountLimit(updateReqVO.getStatus(), oldUser);
+        // 2.1 更新用户
+        AdminUserDO updateObj = BeanUtils.toBean(updateReqVO, AdminUserDO.class);
+        userDataRepository.update(updateObj);
+        // 创建关联关系
+        setUserAppRelation(updateReqVO.getId(), updateReqVO.getApplicationIdList());
+        // 3. 记录操作日志上下文
+        LogRecordContext.putVariable(DiffParseFunction.OLD_OBJECT, BeanUtils.toBean(oldUser, UserInsertReqVO.class));
+        LogRecordContext.putVariable("user", oldUser);
+        return updateReqVO.getId();
+    }
+
+    // 获取三方用户部门是否存在
+    private Long createThirdDefaultDept() {
+        DeptSaveReqVO deptRespVO = new DeptSaveReqVO();
+
+        deptRespVO.setDeptType(DeptTypeEnum.THIRD.getCode());
+        deptRespVO.setDeptCode(DeptCodeEnum.DEFAULT_THIRD_DEPT.getCode());
+        DeptDO deptDO = deptService.findDeptByCodeAndType(deptRespVO);
+
+        if (null == deptDO) {
+            deptRespVO.setName(DeptCodeEnum.DEFAULT_THIRD_DEPT.getName());
+            deptRespVO.setParentId(DeptDO.PARENT_ID_ROOT);
+            deptRespVO.setStatus(CommonStatusEnum.ENABLE.getStatus());
+            return deptService.createThirdDefaultDept(deptRespVO);
+        }
+        return deptDO.getId();
+    }
+
+
+    @Override
+    public void thirdUserUpdatePassword(Long id, String password) {
+        // 1. 校验用户存在
+        AdminUserDO user = validateUserExists(id);
+
+        //2. 第三方密码，目前取默认值，若以后用户可以自定义，使用入参 password
+        commonUpdatePassword(user.getId(), THIRD_USER_PASSWORD);
+    }
+
+    private void checkTenantUserCountLimit(Integer status, AdminUserDO oldUser) {
+        if (status != null) {
+            if (!status.equals(oldUser.getStatus()) &&  CommonStatusEnum.ENABLE.getStatus().equals(status)) {
+                // 1.1 校验账户配合
+                validateTenantUserCountMaxLimit();
+            }
+        }
+    }
+
+    private void setUserAppRelation(Long userId, List<Long> applicationIdList) {
+        UserAppRelationInertReqVO relationInertReqVO = new UserAppRelationInertReqVO();
+        relationInertReqVO.setUserId(userId);
+        relationInertReqVO.setApplicationIdList(applicationIdList);
+        userAppRelationService.createUserAppRelation(relationInertReqVO);
+    }
+
+    private AdminUserDO validateThirdUserForCreateOrUpdate(Long id, String mobile, String email) {
+        // 校验用户存在
+        AdminUserDO user = validateUserExists(id);
+        // 校验手机号唯一
+        validateMobileUnique(null, mobile);
+        // 校验邮箱唯一
+        validateEmailUnique(id, email);
+        return user;
+    }
+
+
+    @Override
+    public PageResult<UserApplicationRespVO> getUserAppRelationPage(UserAppPageSearchReqVO userReqVO) {
+        // 1. 查询用户分页数据
+        PageResult<AdminUserDO> pageResult = userDataRepository.getThirdUserPage(userReqVO);
+        List<AdminUserDO> userDOList = pageResult.getList();
+
+        // 2. 如果没有用户数据，直接返回空结果
+        if (org.apache.commons.collections4.CollectionUtils.isEmpty(userDOList)) {
+            return new PageResult<>(Collections.emptyList(), pageResult.getTotal());
+        }
+
+        // 3. 提取用户ID集合，用于后续查询用户应用关联关系
+        Set<Long> userIds = userDOList.stream().map(AdminUserDO::getId).collect(Collectors.toSet());
+        UserAppPageReqVO vo = new UserAppPageReqVO();
+        vo.setUserIds(userIds);
+
+        // 4. 查询用户与应用的关联关系列表
+        List<UserAppRelationDO> userAppRelationList = userAppRelationService.getUserAppRelationList(vo);
+
+        // 5. 如果没有关联关系数据，只返回用户基本信息
+        if (org.apache.commons.collections4.CollectionUtils.isEmpty(userAppRelationList)) {
+            return new PageResult<>(pageResult.getList().stream()
+                    .map(user -> {
+                        UserApplicationRespVO userApplicationRespVO = BeanUtils.toBean(user, UserApplicationRespVO.class);
+                        userApplicationRespVO.setId(user.getId());
+                        userApplicationRespVO.setNickName(user.getNickname());
+                        return userApplicationRespVO;
+                    })
+                    .collect(Collectors.toList()), pageResult.getTotal());
+        }
+
+        // 6. 按用户ID分组关联关系数据，方便后续匹配
+        Map<Long, List<UserAppRelationDO>> userAppRelationMap = userAppRelationList.stream()
+                .collect(Collectors.groupingBy(UserAppRelationDO::getUserId));
+
+        // 7. 提取所有关联的应用ID，并查询应用详细信息
+        Set<Long> appId = userAppRelationList.stream().map(UserAppRelationDO::getApplicationId).collect(Collectors.toSet());
+        List<ApplicationDTO> appList = appApplicationApi.findAppApplicationByAppIds(appId);
+        Map<Long, ApplicationDTO> appMap = appList.stream().collect(Collectors.toMap(ApplicationDTO::getId, item -> item));
+
+        // 8. 构建最终的返回结果，包含用户信息和关联的应用信息
+        return new PageResult<>(pageResult.getList().stream()
+                .map(user -> {
+                    UserApplicationRespVO userApplicationRespVO = BeanUtils.toBean(user, UserApplicationRespVO.class);
+                    userApplicationRespVO.setId(user.getId());
+                    userApplicationRespVO.setNickName(user.getNickname());
+
+                    // 9. 获取当前用户关联的应用关系列表
+                    List<UserAppRelationDO> appRelationDOList = userAppRelationMap.get(user.getId());
+                    if (!org.apache.commons.collections4.CollectionUtils.isEmpty(appRelationDOList)) {
+                        // 10. 将应用关系转换为应用详情信息
+                        userApplicationRespVO.setUserApplicationList(appRelationDOList.stream()
+                                .map(appRelationDO -> {
+                                    UserAppVO userAppVO = new UserAppVO();
+                                    ApplicationDTO appDTO = appMap.get(appRelationDO.getApplicationId());
+                                    if (null != appDTO) {
+                                        userAppVO.setAppId(appDTO.getId());
+                                        userAppVO.setAppName(appDTO.getAppName());
+                                        userAppVO.setIconName(appDTO.getIconName());
+                                        userAppVO.setIconColor(appDTO.getIconColor());
+                                    }
+                                    return userAppVO;
+                                })
+                                .collect(Collectors.toList())
+                        );
+                    }
+                    return userApplicationRespVO;
+                })
+                .collect(Collectors.toList()), pageResult.getTotal());
+    }
+
+    private void checkAppAndGetTenantId(Long appId) {
+        ApplicationDTO applicationDTO = TenantManager.withoutTenantCondition(() -> appApplicationApi.findAppApplicationById(appId));
+        if (applicationDTO == null) {
+            throw exception(AUTH_LOGIN_APP_DELETE_OR_DISABLE);
+        }
+    }
+
+
+    @Override
+    public Long thirdUserRegister(ThirdUserRegisterReqVO reqVO) {
+        //TODO  验证码 验证逻辑
+
+        // 1.1 校验账户配合
+        validateTenantUserCountMaxLimit();
+        // 1.2 校验手机号唯一
+        validateMobileUnique(null, reqVO.getMobile());
+        // 1.3 验证app存在
+        checkAppAndGetTenantId(reqVO.getAppId());
+        // 1.4 新增用户
+        AdminUserDO user = new AdminUserDO();
+        user.setPassword(encodePassword(THIRD_USER_PASSWORD)); // 加密密码
+        // 管理员类型：内置/自定义
+        user.setAdminType(AdminTypeEnum.CUSTOM.getType());
+        user.setMobile(reqVO.getMobile());
+        user.setUserType(UserTypeEnum.THIRD.getValue());
+        user.setStatus(UserStatusEnum.NORMAL.getStatus());
+        user.setUsername(reqVO.getMobile());
+        user.setCreateSource(CreateSourceEnum.SELF.getCode());
+        userDataRepository.save(user);
+        return user.getId();
+    }
+
+    @Override
+    public UserApplicationRespVO getThirdUserAndRelationApp(Long id) {
+
+        // 1.获取用户基本信息
+        AdminUserDO user = getUser(id);
+        if (user == null) {
+            return null;
+        }
+        UserApplicationRespVO userApplicationRespVO =    BeanUtils.toBean(user, UserApplicationRespVO.class);
+        userApplicationRespVO.setNickName(user.getNickname());
+        // 2. 获取用户关联的应用关系列表
+        Set<Long> userIds = new HashSet<>();
+        userIds.add(user.getId());
+        UserAppPageReqVO vo = new UserAppPageReqVO();
+        vo.setUserIds(userIds);
+
+        // 3. 查询用户与应用的关联关系列表
+        List<UserAppRelationDO> userAppRelationList = userAppRelationService.getUserAppRelationList(vo);
+        if (org.apache.commons.collections4.CollectionUtils.isEmpty(userAppRelationList)) {
+            return userApplicationRespVO;
+        }
+        // 4. 提取所有关联的应用ID，并查询应用详细信息
+        Set<Long> appId = userAppRelationList.stream().map(UserAppRelationDO::getApplicationId).collect(Collectors.toSet());
+        List<ApplicationDTO> appList = appApplicationApi.findAppApplicationByAppIds(appId);
+
+        Map<Long, List<UserAppRelationDO>> userAppRelationMap = userAppRelationList.stream()
+                .collect(Collectors.groupingBy(UserAppRelationDO::getUserId));
+        //5. 获取当前用户关联的应用关系列表
+        List<UserAppRelationDO> appRelationDOList = userAppRelationMap.get(user.getId());
+        Map<Long, ApplicationDTO> appMap = appList.stream().collect(Collectors.toMap(ApplicationDTO::getId, item -> item));
+
+        //6. 将应用关系转换为应用详情信息
+        userApplicationRespVO.setUserApplicationList(appRelationDOList.stream()
+                        .map(appRelationDO -> {
+                            UserAppVO userAppVO = new UserAppVO();
+                            ApplicationDTO appDTO = appMap.get(appRelationDO.getApplicationId());
+                            if (null != appDTO) {
+                                userAppVO.setAppId(appDTO.getId());
+                                userAppVO.setAppName(appDTO.getAppName());
+                                userAppVO.setIconName(appDTO.getIconName());
+                                userAppVO.setIconColor(appDTO.getIconColor());
+                            }
+                            return userAppVO;
+                        })
+                        .collect(Collectors.toList()));
+        // 转换为响应对象
+        return  userApplicationRespVO;
+    }
+
+
+
+
+    @Override
+    public AdminUserDO thirdUserRegister(ThirdSupplementUserReqVO reqVO) {
+        // 1. 校验手机和邮箱
+        validateThirdUserForCreateOrUpdate(null, reqVO.getMobile(), reqVO.getEmail());
+        // 2: 验证空间用户数
+        validateTenantUserCountMaxLimit();
+        // 3 验证app存在
+        checkAppAndGetTenantId(reqVO.getAppId());
+        // 4. 解密原文
+        reqVO.setPassword(pwdEnHelper.decryptHexStr(reqVO.getPassword()));
+        // 5. 弱密码校验
+        securityConfigApi.validatePassword(reqVO.getPassword());
+        // 6. 注册用户信息
+        AdminUserDO user =  new AdminUserDO();
+        // 管理员类型：内置/自定义
+        user.setAdminType(AdminTypeEnum.CUSTOM.getType());
+        user.setMobile(reqVO.getMobile());
+        user.setUserType(UserTypeEnum.THIRD.getValue());
+        user.setStatus(UserStatusEnum.NORMAL.getStatus());
+        user.setUsername(reqVO.getMobile());// 用户名取手机号
+        user.setNickname(reqVO.getNickName());
+        user.setEmail(reqVO.getEmail());
+        user.setPassword(encodePassword(reqVO.getPassword()));
+        user.setCreateSource(CreateSourceEnum.SELF.getCode());
+        userDataRepository.save(user);
+
+
+        // 创建用户关联应用
+        UserAppRelationInertReqVO userAppRelationInertReqVO = new UserAppRelationInertReqVO();
+        userAppRelationInertReqVO.setUserId(user.getId());
+        userAppRelationInertReqVO.setApplicationIdList(Arrays.asList(reqVO.getAppId()));
+        userAppRelationService.createUserAppRelation(userAppRelationInertReqVO);
+
+
+        return user;
+    }
+
+
+    @Override
+    public void thirdUserForgetPassword(Long id,String password) {
+        //  被调用前，已经做过用户判断，  调用通用改密码的方法
+        commonUpdatePassword(id, password);
+    }
+
+    @Override
+    public void updateUserByUserAppReqVO(UserAppRelationInertReqVO reqUser) {
+        // 校验邮箱唯一
+        validateEmailUnique(reqUser.getUserId(), reqUser.getEmail());
+        // 获取用户信息
+        AdminUserDO user = userDataRepository.getById(reqUser.getUserId());
+        if (null == user) {
+            return;
+        }
+        AdminUserDO updateUser = new AdminUserDO();
+        updateUser.setId(user.getId());
+        if(StringUtils.isNotBlank(reqUser.getEmail()) && !reqUser.getEmail().equals(user.getEmail())){
+            updateUser.setEmail(reqUser.getEmail());
+        }
+        if(StringUtils.isNotBlank(reqUser.getNickName()) &&  !reqUser.getNickName().equals(user.getNickname())){
+            updateUser.setNickname(reqUser.getNickName());
+        }
+        //更新用户
+        userDataRepository.update(updateUser);
     }
 
 }

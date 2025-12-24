@@ -1,6 +1,8 @@
 package com.cmsr.onebase.module.metadata.build.controller.admin.validation;
 
+import com.cmsr.onebase.framework.common.event.AppEntityChangeEvent;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.module.metadata.core.util.MetadataIdUuidConverter;
 import com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationRuleGroupRespVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationRuleGroupSaveReqVO;
@@ -12,6 +14,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -43,6 +46,9 @@ public class ValidationSelfDefinedController {
     @Resource
     private ModelMapper modelMapper;
 
+    @Resource
+    ApplicationEventPublisher applicationEventPublisher;
+
     @PostMapping("/create")
     @Operation(summary = "创建自定义校验规则组")
     public CommonResult<Long> create(@Valid @RequestBody ValidationRuleGroupSaveReqVO createReqVO) {
@@ -50,7 +56,13 @@ public class ValidationSelfDefinedController {
         // 修复：正确处理 entityId 和 entityUuid 的转换
         String entityUuid = idUuidConverter.resolveEntityUuid(createReqVO.getEntityUuid(), createReqVO.getEntityId());
         createReqVO.setEntityUuid(entityUuid);
-        return success(validationRuleGroupService.createValidationRuleGroup(createReqVO));
+        Long id = validationRuleGroupService.createValidationRuleGroup(createReqVO);
+        applicationEventPublisher.publishEvent(
+                AppEntityChangeEvent.builder()
+                        .applicationId(ApplicationManager.getApplicationId())
+                        .build()
+        );
+        return success(id);
     }
 
     @PostMapping("/update")
@@ -63,6 +75,11 @@ public class ValidationSelfDefinedController {
             updateReqVO.setEntityUuid(entityUuid);
         }
         validationRuleGroupService.updateValidationRuleGroup(updateReqVO);
+        applicationEventPublisher.publishEvent(
+                AppEntityChangeEvent.builder()
+                        .applicationId(ApplicationManager.getApplicationId())
+                        .build()
+        );
         return success(true);
     }
 
@@ -72,6 +89,11 @@ public class ValidationSelfDefinedController {
     public CommonResult<Boolean> delete(@RequestParam("id") String id) {
         Long resolvedId = idUuidConverter.resolveRuleGroupId(id);
         validationRuleGroupService.deleteValidationRuleGroup(resolvedId);
+        applicationEventPublisher.publishEvent(
+                AppEntityChangeEvent.builder()
+                        .applicationId(ApplicationManager.getApplicationId())
+                        .build()
+        );
         return success(true);
     }
 

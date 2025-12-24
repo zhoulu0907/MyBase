@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.app.build.service.version;
 
+import com.cmsr.onebase.module.app.core.dal.database.app.AppNavigationRepository;
 import com.cmsr.onebase.module.app.core.dal.database.auth.*;
 import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
 import com.cmsr.onebase.module.app.core.dal.database.resource.*;
@@ -40,8 +41,10 @@ public class AppDataManager {
     private AppAuthPermissionRepository authPermissionRepository;
 
     @Autowired
-    private AppAuthRoleRepository authRoleRepository;
+    private AppNavigationRepository navigationRepository;
 
+    @Autowired
+    private AppAuthRoleRepository authRoleRepository;
 
     public void moveRuntimeToHistory(Long applicationId, Long versionTag) {
         workbenchComponentRepository.moveRuntimeToHistory(applicationId, versionTag);
@@ -54,6 +57,7 @@ public class AppDataManager {
         authFieldRepository.moveRuntimeToHistory(applicationId, versionTag);
         authDataGroupRepository.moveRuntimeToHistory(applicationId, versionTag);
         authPermissionRepository.moveRuntimeToHistory(applicationId, versionTag);
+        navigationRepository.moveRuntimeToHistory(applicationId, versionTag);
     }
 
 
@@ -68,6 +72,7 @@ public class AppDataManager {
         authFieldRepository.copyEditToRuntime(applicationId);
         authDataGroupRepository.copyEditToRuntime(applicationId);
         authPermissionRepository.copyEditToRuntime(applicationId);
+        navigationRepository.copyEditToRuntime(applicationId);
     }
 
     // 3、历史版本数据回滚为运行态数据
@@ -81,5 +86,34 @@ public class AppDataManager {
     // 4、历史版本数据回滚为编辑态数据
     public void historyToEdit(Long applicationId, Long versionTag) {
         // 实现回滚到编辑态逻辑，没想好！
+    }
+
+    public void deleteApplicationVersionData(Long applicationId, Long versionTag) {
+        workbenchComponentRepository.deleteApplicationVersionData(applicationId, versionTag);
+        resourceComponentRepository.deleteApplicationVersionData(applicationId, versionTag);
+        workbenchPageRepository.deleteApplicationVersionData(applicationId, versionTag);
+        resourcePageRepository.deleteApplicationVersionData(applicationId, versionTag);
+        resourcePageSetRepository.deleteApplicationVersionData(applicationId, versionTag);
+        menuRepository.deleteApplicationVersionData(applicationId, versionTag);
+        authViewRepository.deleteApplicationVersionData(applicationId, versionTag);
+        authFieldRepository.deleteApplicationVersionData(applicationId, versionTag);
+        authDataGroupRepository.deleteApplicationVersionData(applicationId, versionTag);
+        authPermissionRepository.deleteApplicationVersionData(applicationId, versionTag);
+        navigationRepository.deleteApplicationVersionData(applicationId, versionTag);
+    }
+
+    public void deleteAllApplicationData(Long applicationId) {
+        workbenchComponentRepository.deleteAllApplicationData(applicationId);
+        resourceComponentRepository.deleteAllApplicationData(applicationId);
+        workbenchPageRepository.deleteAllApplicationData(applicationId);
+        resourcePageRepository.deleteAllApplicationData(applicationId);
+        resourcePageSetRepository.deleteAllApplicationData(applicationId);
+        menuRepository.deleteAllApplicationData(applicationId);
+        authViewRepository.deleteAllApplicationData(applicationId);
+        authFieldRepository.deleteAllApplicationData(applicationId);
+        authDataGroupRepository.deleteAllApplicationData(applicationId);
+        authPermissionRepository.deleteAllApplicationData(applicationId);
+        authRoleRepository.deleteAllApplicationData(applicationId);
+        navigationRepository.deleteAllApplicationData(applicationId);
     }
 }

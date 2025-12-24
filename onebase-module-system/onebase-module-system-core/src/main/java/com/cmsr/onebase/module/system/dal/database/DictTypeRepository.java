@@ -1,34 +1,37 @@
 package com.cmsr.onebase.module.system.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.module.system.dal.dataobject.dict.DictTypeDO;
+import com.cmsr.onebase.framework.orm.repo.BaseDataRepository;
+import com.cmsr.onebase.module.system.dal.flex.mapper.SystemDictTypeMapper;
 import com.cmsr.onebase.module.system.enums.dict.DictOwnerTypeEnum;
 import com.cmsr.onebase.module.system.vo.dicttype.DictTypeListReqVO;
 import com.cmsr.onebase.module.system.vo.dicttype.DictTypePageReqVO;
-import com.cmsr.onebase.module.system.dal.dataobject.dict.DictTypeDO;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.Compare;
+import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryWrapper;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
 import java.util.List;
+
+import static com.cmsr.onebase.framework.data.base.BaseDO.CREATE_TIME;
+import static com.cmsr.onebase.framework.data.base.BaseDO.ID;
+import static com.cmsr.onebase.module.system.dal.dataobject.dict.DictTypeDO.DICT_OWNER_ID;
+import static com.cmsr.onebase.module.system.dal.dataobject.dict.DictTypeDO.DICT_OWNER_TYPE;
+import static com.cmsr.onebase.module.system.dal.dataobject.dict.DictTypeDO.NAME;
+import static com.cmsr.onebase.module.system.dal.dataobject.dict.DictTypeDO.STATUS;
+import static com.cmsr.onebase.module.system.dal.dataobject.dict.DictTypeDO.TYPE;
 
 /**
  * 字典类型数据访问层
  *
- * 负责字典类型相关的数据操作，继承DataRepositoryNew，提供标准CRUD能力。
+ * 负责字典类型相关的数据操作。
  *
  * @author matianyu
- * @date 2025-08-07
+ * @date 2025-12-22
  */
 @Repository
-public class DictTypeRepository extends DataRepository<DictTypeDO> {
-    /**
-     * 构造方法，指定默认实体类
-     */
-    public DictTypeRepository() {
-        super(DictTypeDO.class);
-    }
+public class DictTypeRepository extends BaseDataRepository<SystemDictTypeMapper, DictTypeDO> {
 
     /**
      * 分页查询字典类型
@@ -37,47 +40,12 @@ public class DictTypeRepository extends DataRepository<DictTypeDO> {
      * @return 分页结果
      */
     public PageResult<DictTypeDO> findPage(DictTypePageReqVO reqVO) {
-        DefaultConfigStore configs = new DefaultConfigStore();
+        QueryWrapper queryWrapper = buildQueryWrapper(reqVO.getName(), reqVO.getType(), reqVO.getStatus(),
+                reqVO.getCreateTime(), reqVO.getDictOwnerType(), reqVO.getDictOwnerId())
+                .orderBy(ID, false);
 
-        // 构建查询条件
-        if (reqVO.getName() != null && !reqVO.getName().trim().isEmpty()) {
-            configs.and(Compare.LIKE, DictTypeDO.NAME, reqVO.getName());
-        }
-        if (reqVO.getType() != null && !reqVO.getType().trim().isEmpty()) {
-            configs.and(Compare.LIKE, DictTypeDO.TYPE, reqVO.getType());
-        }
-        if (reqVO.getStatus() != null) {
-            configs.and(Compare.EQUAL, DictTypeDO.STATUS, reqVO.getStatus());
-        }
-        if (reqVO.getCreateTime() != null && reqVO.getCreateTime().length == 2) {
-            LocalDateTime startTime = reqVO.getCreateTime()[0];
-            LocalDateTime endTime = reqVO.getCreateTime()[1];
-            if (startTime != null) {
-                configs.and(Compare.GREAT_EQUAL, DictTypeDO.CREATE_TIME, startTime);
-            }
-            if (endTime != null) {
-                configs.and(Compare.LESS_EQUAL, DictTypeDO.CREATE_TIME, endTime);
-            }
-        }
-
-        // 字典所有者类型过滤条件
-        if (reqVO.getDictOwnerType() != null && !reqVO.getDictOwnerType().trim().isEmpty()) {
-            configs.and(Compare.EQUAL, DictTypeDO.DICT_OWNER_TYPE, reqVO.getDictOwnerType());
-            
-            // 仅当字典所有者类型为 app 时才过滤字典所有者ID
-            // 租户类型字典是公共字典，不限制 dictOwnerId
-            if (DictOwnerTypeEnum.isApp(reqVO.getDictOwnerType()) && reqVO.getDictOwnerId() != null) {
-                configs.and(Compare.EQUAL, DictTypeDO.DICT_OWNER_ID, reqVO.getDictOwnerId());
-            }
-        } else if (reqVO.getDictOwnerId() != null) {
-            // 如果未指定字典所有者类型，但指定了字典所有者ID，则过滤字典所有者ID
-            configs.and(Compare.EQUAL, DictTypeDO.DICT_OWNER_ID, reqVO.getDictOwnerId());
-        }
-
-        // 添加排序条件，按ID降序排列
-        configs.order(DictTypeDO.ID, org.anyline.entity.Order.TYPE.DESC);
-
-        return findPageWithConditions(configs, reqVO.getPageNo(), reqVO.getPageSize());
+        Page<DictTypeDO> pageResult = page(Page.of(reqVO.getPageNo(), reqVO.getPageSize()), queryWrapper);
+        return new PageResult<>(pageResult.getRecords(), pageResult.getTotalRow());
     }
 
     /**
@@ -87,9 +55,7 @@ public class DictTypeRepository extends DataRepository<DictTypeDO> {
      * @return 字典类型对象
      */
     public DictTypeDO findOneByType(String type) {
-        DefaultConfigStore configs = new DefaultConfigStore();
-        configs.and(Compare.EQUAL, DictTypeDO.TYPE, type);
-        return findOne(configs);
+        return getOne(query().eq(TYPE, type));
     }
 
     /**
@@ -99,9 +65,7 @@ public class DictTypeRepository extends DataRepository<DictTypeDO> {
      * @return 字典类型对象
      */
     public DictTypeDO findOneByName(String name) {
-        DefaultConfigStore configs = new DefaultConfigStore();
-        configs.and(Compare.EQUAL, DictTypeDO.NAME, name);
-        return findOne(configs);
+        return getOne(query().eq(NAME, name));
     }
 
     /**
@@ -110,7 +74,7 @@ public class DictTypeRepository extends DataRepository<DictTypeDO> {
      * @return 字典类型列表
      */
     public List<DictTypeDO> findAllList() {
-        return findAllByConfig(new DefaultConfigStore());
+        return list();
     }
 
     /**
@@ -120,46 +84,36 @@ public class DictTypeRepository extends DataRepository<DictTypeDO> {
      * @return 字典类型列表
      */
     public List<DictTypeDO> findList(DictTypeListReqVO reqVO) {
-        DefaultConfigStore configs = new DefaultConfigStore();
+        QueryWrapper queryWrapper = buildQueryWrapper(reqVO.getName(), reqVO.getType(), reqVO.getStatus(),
+                reqVO.getCreateTime(), reqVO.getDictOwnerType(), reqVO.getDictOwnerId())
+                .orderBy(ID, false);
+        return list(queryWrapper);
+    }
 
-        // 构建查询条件
-        if (reqVO.getName() != null && !reqVO.getName().trim().isEmpty()) {
-            configs.and(Compare.LIKE, DictTypeDO.NAME, reqVO.getName());
-        }
-        if (reqVO.getType() != null && !reqVO.getType().trim().isEmpty()) {
-            configs.and(Compare.LIKE, DictTypeDO.TYPE, reqVO.getType());
-        }
-        if (reqVO.getStatus() != null) {
-            configs.and(Compare.EQUAL, DictTypeDO.STATUS, reqVO.getStatus());
-        }
-        if (reqVO.getCreateTime() != null && reqVO.getCreateTime().length == 2) {
-            LocalDateTime startTime = reqVO.getCreateTime()[0];
-            LocalDateTime endTime = reqVO.getCreateTime()[1];
-            if (startTime != null) {
-                configs.and(Compare.GREAT_EQUAL, DictTypeDO.CREATE_TIME, startTime);
-            }
-            if (endTime != null) {
-                configs.and(Compare.LESS_EQUAL, DictTypeDO.CREATE_TIME, endTime);
-            }
+    private QueryWrapper buildQueryWrapper(String name, String type, Integer status, java.time.LocalDateTime[] createTime,
+                                          String dictOwnerType, Long dictOwnerId) {
+        QueryWrapper queryWrapper = query()
+                .like(NAME, name, StringUtils.isNotBlank(name))
+                .like(TYPE, type, StringUtils.isNotBlank(type))
+                .eq(STATUS, status, status != null);
+
+        if (createTime != null && createTime.length == 2) {
+            queryWrapper.ge(CREATE_TIME, createTime[0], createTime[0] != null);
+            queryWrapper.le(CREATE_TIME, createTime[1], createTime[1] != null);
         }
 
         // 字典所有者类型过滤条件
-        if (reqVO.getDictOwnerType() != null && !reqVO.getDictOwnerType().trim().isEmpty()) {
-            configs.and(Compare.EQUAL, DictTypeDO.DICT_OWNER_TYPE, reqVO.getDictOwnerType());
-            
-            // 仅当字典所有者类型为 app 时才过滤字典所有者ID
-            // 租户类型字典是公共字典，不限制 dictOwnerId
-            if (DictOwnerTypeEnum.isApp(reqVO.getDictOwnerType()) && reqVO.getDictOwnerId() != null) {
-                configs.and(Compare.EQUAL, DictTypeDO.DICT_OWNER_ID, reqVO.getDictOwnerId());
+        if (StringUtils.isNotBlank(dictOwnerType)) {
+            queryWrapper.eq(DICT_OWNER_TYPE, dictOwnerType);
+            // 仅当字典所有者类型为 app 时才过滤字典所有者ID；tenant 类型字典为公共字典，不限制 dictOwnerId
+            if (DictOwnerTypeEnum.isApp(dictOwnerType) && dictOwnerId != null) {
+                queryWrapper.eq(DICT_OWNER_ID, dictOwnerId);
             }
-        } else if (reqVO.getDictOwnerId() != null) {
-            // 如果未指定字典所有者类型，但指定了字典所有者ID，则过滤字典所有者ID
-            configs.and(Compare.EQUAL, DictTypeDO.DICT_OWNER_ID, reqVO.getDictOwnerId());
+        } else if (dictOwnerId != null) {
+            // 未指定所有者类型但指定了所有者ID时，按所有者ID过滤
+            queryWrapper.eq(DICT_OWNER_ID, dictOwnerId);
         }
 
-        // 添加排序条件，按ID降序排列
-        configs.order(DictTypeDO.ID, org.anyline.entity.Order.TYPE.DESC);
-
-        return findAllByConfig(configs);
+        return queryWrapper;
     }
 }

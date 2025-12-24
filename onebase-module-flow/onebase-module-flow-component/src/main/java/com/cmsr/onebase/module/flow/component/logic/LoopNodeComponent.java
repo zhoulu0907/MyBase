@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.flow.component.logic;
 
 import com.cmsr.onebase.module.flow.context.ExecuteContext;
 import com.cmsr.onebase.module.flow.context.VariableContext;
-import com.cmsr.onebase.module.flow.context.graph.nodes.LoopNodeData;
+import com.cmsr.onebase.module.flow.context.graph.nodes.logic.LoopNodeData;
 import com.yomahub.liteflow.annotation.LiteflowComponent;
 import com.yomahub.liteflow.core.NodeIteratorComponent;
 import lombok.Setter;

@@ -104,7 +104,11 @@ public class FieldTypeConvertor {
         if (value instanceof Long) {
             return value;
         }
-        return Long.parseLong(value.toString());
+        String stringValue = value.toString().trim().toLowerCase();
+        if (StringUtils.isEmpty(stringValue)) {
+            return null;
+        }
+        return Long.parseLong(stringValue);
     }
 
     private static Object convertBoolean(Object value) {
@@ -135,6 +139,9 @@ public class FieldTypeConvertor {
             return v.toLocalDate();
         }
         String stringValue = value.toString();
+        if (StringUtils.isEmpty(stringValue)) {
+            return null;
+        }
         try {
             return LocalDate.parse(stringValue, DATE_FORMATTER);
         } catch (DateTimeParseException e) {
@@ -146,7 +153,11 @@ public class FieldTypeConvertor {
         if (value instanceof BigDecimal) {
             return value;
         }
-        return new BigDecimal(value.toString());
+        String stringValue = value.toString();
+        if (StringUtils.isEmpty(stringValue)) {
+            return null;
+        }
+        return new BigDecimal(stringValue);
     }
 
 

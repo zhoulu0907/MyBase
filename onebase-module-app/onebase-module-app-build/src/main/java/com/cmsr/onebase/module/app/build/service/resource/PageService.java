@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.app.build.service.resource;
 
-import com.cmsr.onebase.module.app.core.dto.appresource.*;
+import com.cmsr.onebase.module.app.core.dto.resource.*;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,7 +12,7 @@ public interface PageService {
 
     Boolean updatePageName(UpdatePageNameDTO updatePageNameVO);
 
-    List<PageDTO> getFormPageListByAppId(Long appId);
+    List<PageDTO> getPageListByAppId(Long appId);
 
     String getMetadataByPageId(Long pageId);
 
