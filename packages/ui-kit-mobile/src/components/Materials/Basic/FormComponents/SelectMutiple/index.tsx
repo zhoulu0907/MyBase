@@ -23,6 +23,7 @@ const XSelectMutiple = memo((props: XSelectMutipleConfig & { runtime?: boolean; 
     dataField,
     status,
     verify,
+    layout,
     defaultOptionsConfig,
     runtime = true,
     detailMode,
@@ -74,7 +75,7 @@ const XSelectMutiple = memo((props: XSelectMutipleConfig & { runtime?: boolean; 
   // 获取选中的标签文本（用于显示在Cell中）
   const getSelectedLabels = () => {
     if (selectedKeys.length === 0) {
-      return <span style={{ color: '#c9cdd4' }}>请选择</span>;
+      return <span className='selectMultipleValue'>请选择</span>;
     }
     const selectedOptions = options?.filter(option => selectedKeys.includes(option.value));
     return selectedOptions?.map(opt => opt.label).join(',');
@@ -86,8 +87,10 @@ const XSelectMutiple = memo((props: XSelectMutipleConfig & { runtime?: boolean; 
       label={label.display && <Ellipsis text={label.text} />}
       field={fieldId}
       rules={rules}
+      layout={layout}
       initialValue={selectedKeys}
       style={{
+        textAlign: layout === 'vertical' ? 'left' : 'right',
         pointerEvents: (!runtime || detailMode) ? 'none' : 'unset',
         opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
       }}
@@ -99,7 +102,7 @@ const XSelectMutiple = memo((props: XSelectMutipleConfig & { runtime?: boolean; 
           className="selectMultipleCellOBMobile"
           onClick={() => setVisible(true)}
         >
-          <Ellipsis className="selectMultipleValue" text={getSelectedLabels()} maxLine={1} />
+          <Ellipsis className={`selectMultipleValue ${layout === 'vertical' ? 'verticalLayout' : ''}`} text={getSelectedLabels()} maxLine={1} />
           <PopupSwiper className="selectMultiplePopupOBMobile" visible={visible} close={(e) => handleCancel(e)} direction={popupDirection}>
             <div>
               <div style={{ 
@@ -151,7 +154,7 @@ const XSelectMutiple = memo((props: XSelectMutipleConfig & { runtime?: boolean; 
                         icons={squareIcon}
                         style={{ marginRight: '0.2rem' }}
                       >
-                      <span style={{ fontSize: '0.32rem', color: '#333' }}>{option.label}</span>
+                      <span style={{ fontSize: '0.28rem', color: '#333' }}>{option.label}</span>
                       </Checkbox>
                     </div>
                   ))}

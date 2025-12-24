@@ -292,7 +292,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, mainEntity,
           groups[groupIndex] = {};
         }
 
-        const fieldType = subEntities.value[0].childFields.find((v) => v.fieldName === fieldName).fieldType;
+        const fieldType = subEntities.value[0].childFields.find((v) => v.fieldName === fieldName)?.fieldType;
         if (resetImageFile(groups[groupIndex], { fieldType, fieldName }, value)) {
         } else if (fieldType === ENTITY_FIELD_TYPE.DATE.VALUE) {
           groups[groupIndex][fieldName] = value ? dayjs(value).format('YYYY-MM-DD') : '';

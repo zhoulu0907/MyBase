@@ -16,6 +16,7 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
     label,
     dataField,
     status,
+    layout,
     runtime = true,
     isMultiple = false,
     displayFields,
@@ -109,6 +110,7 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
       className="inputTextWrapperOBMobile inputDataSelectOBMobile"
       label={label.display && <Ellipsis text={label.text} />}
       field={fieldId}
+      layout={layout}
       style={{
         pointerEvents: runtime ? 'unset' : 'none',
         opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
@@ -121,11 +123,12 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
           className="cellDataSelectOBMobile"
           onClick={() => setVisible(true)}
         >
-          {selectedParseDataName ? <Ellipsis className="selectValue" text={selectedParseDataName} maxLine={1} /> : <div style={{ color: '#c9cdd4', fontSize: '0.32rem', textAlign: 'right' }}>请选择</div>}
+          {selectedParseDataName ? <Ellipsis className={`selectValue ${layout === 'vertical' ? 'verticalLayout' : ''}`} text={selectedParseDataName} maxLine={1} /> :
+            <div className={`selectValue ${layout === 'vertical' ? 'verticalLayout' : ''}`}>请选择</div>}
           <PopupSwiper visible={visible} close={(e) => handleCancel(e)} direction="bottom">
             <div className={`inputDataSelectPopupContainer ${editPreview ? 'editPreview' : ''}`}>
               <div className="popupHeaderOBMobile">
-                <IconArrowBack style={{ fontSize: '0.32rem' }} onClick={(e) => handleCancel(e)} />
+                <IconArrowBack style={{ fontSize: '0.28rem' }} onClick={(e) => handleCancel(e)} />
                 <span>{label?.text}</span>
                 <Button
                   inline
