@@ -2,7 +2,7 @@ import MenuComp from '@/components/MenuIcon';
 import { Button, Form, Input, Modal, Pagination, Select, TreeSelect, type FormInstance } from '@arco-design/web-react';
 import { getDashboardListApi, getDashboardTemplateListApi, IsHot, RootParentPage } from '@onebase/app';
 import { webMenuIcons } from '@onebase/ui-kit';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import styles from './index.module.less';
 import dashboardNew from '@/assets/images/dashboard_new.svg';
 import dashboardTemplate from '@/assets/images/dashboard_template.svg';
@@ -62,6 +62,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
       form.setFieldValue('menuIcon', 'FormPage');
     }
     if (visibleCreateForm !== '') {
+      // 初始化时调用一次
       getDashboardTemplateList();
     }
   }, [menuIcon, visibleCreateForm]);
@@ -74,29 +75,19 @@ const CreateModal: React.FC<CreateModalProps> = ({
       pageSize: dashboardMethod === 'dashboardNew' ? 4 : 8
     }));
     setDashboardTemplateTab('allTemplate');
-    if (dashboardMethod !== 'dashboardLink') {
-      getDashboardTemplateList();
-    } else {
-      getDashboardList();
-    }
 
     if (dashboardMethod !== 'dashboardNew' && dashboardTemplateData.length > 0 && !selectedTemplateId) {
       setSelectedTemplateId(dashboardTemplateData[0].id);
     }
+    // 不再在这里调用，避免重复
   }, [dashboardMethod]);
 
   useEffect(() => {
-    // console.log('dashboardTemplateTab:', dashboardTemplateTab);
-    getDashboardTemplateList();
+    // 不再在这里调用，避免重复
   }, [dashboardTemplateTab]);
 
   useEffect(() => {
-    console.log('dashboardPagination:', dashboardPagination.pageSize);
-    if (dashboardMethod !== 'dashboardLink') {
-      getDashboardTemplateList();
-    } else {
-      getDashboardList();
-    }
+    // 不再在这里调用，避免重复
   }, [dashboardPagination]);
 
   const nameMap = {
@@ -151,34 +142,46 @@ const CreateModal: React.FC<CreateModalProps> = ({
   ];
 
   const handleCloseModal = () => {
+    setDashboardMethod('dashboardNew');
     setMenuIcon('');
     onCancel();
   };
-  const getDashboardTemplateList = async () => {
-    const params = {
-      hot: dashboardMethod === 'dashboardNew' ? IsHot.YES : IsHot.NO,
-      templateType: dashboardTemplateTab === 'allTemplate' ? '' : dashboardTemplateTab,
-      pageNo: dashboardPagination.current,
-      pageSize: dashboardMethod === 'dashboardNew' ? 4 : 8,
-      templateName: templateName
-    };
-    const res = await getDashboardTemplateListApi(params);
-    console.log('大屏模版 res:', res);
-    // setTotal(res.total);
-    setDashboardTemplateData(res.list);
-  };
+  const getDashboardTemplateList = useCallback(
+    async (
+      method = dashboardMethod,
+      tab = dashboardTemplateTab,
+      pagination = dashboardPagination,
+      name = templateName
+    ) => {
+      const params = {
+        hot: method === 'dashboardNew' ? IsHot.YES : IsHot.NO,
+        templateType: tab === 'allTemplate' ? '' : tab,
+        pageNo: pagination.current,
+        pageSize: method === 'dashboardNew' ? 4 : 8,
+        templateName: name
+      };
+      const res = await getDashboardTemplateListApi(params);
+      console.log('大屏模版 res:', res);
+      // setTotal(res.total);
+      setDashboardTemplateData(res.list);
+    },
+    [dashboardMethod, dashboardTemplateTab, dashboardPagination, templateName]
+  );
 
-  const getDashboardList = async () => {
-    const params = {
-      page: dashboardPagination.current,
-      limit: 8
-    };
-    const res = await getDashboardListApi(params);
-    console.log('大屏 res:', res);
-    console.log('大屏 res.data.length:', res.length);
-    setDashboardTemplateData(res);
-    setTotal(res.length);
-  };
+  const getDashboardList = useCallback(
+    async (pagination = dashboardPagination) => {
+      const params = {
+        page: pagination.current,
+        limit: 8
+      };
+      const res = await getDashboardListApi(params);
+      console.log('大屏 res:', res);
+      console.log('大屏 res.data.length:', res.length);
+      setDashboardTemplateData(res);
+      setTotal(res.length);
+    },
+    [dashboardPagination]
+  );
   const handleChangeDashboardMethod = (value: string) => {
     setDashboardMethodLoading(true);
     /**
@@ -187,6 +190,12 @@ const CreateModal: React.FC<CreateModalProps> = ({
      */
     setDashboardMethod(value);
     setSelectedTemplateId('');
+    // 立即调用获取数据，避免滞后，使用新值
+    if (value !== 'dashboardLink') {
+      getDashboardTemplateList(value);
+    } else {
+      getDashboardList();
+    }
     // setTimeout(() => {
     //   setDashboardMethodLoading(false);
     // }, 3000);
@@ -197,11 +206,11 @@ const CreateModal: React.FC<CreateModalProps> = ({
      * TODO 换一批
      * params: dashboardMethod == dashboardNew + change
      */
-    setDashboardPagination((prev) => ({
-      ...prev,
-      current: prev.current + 1 > 3 ? 1 : prev.current + 1
-    }));
-    getDashboardTemplateList();
+    const newCurrent = dashboardPagination.current + 1 > 3 ? 1 : dashboardPagination.current + 1;
+    const newPagination = { ...dashboardPagination, current: newCurrent };
+    setDashboardPagination(newPagination);
+    // 立即调用获取数据，避免滞后
+    getDashboardTemplateList(dashboardMethod, dashboardTemplateTab, newPagination);
   };
 
   const handleSearchTemplate = (value: string) => {
@@ -210,6 +219,12 @@ const CreateModal: React.FC<CreateModalProps> = ({
      * TODO 搜索模版
      * params: dashboardMethod !== dashboardNew + value
      */
+    setTemplateName(value);
+    // 重置分页到第一页
+    const newPagination = { ...dashboardPagination, current: 1 };
+    setDashboardPagination(newPagination);
+    // 立即调用获取数据，避免滞后
+    getDashboardTemplateList(dashboardMethod, dashboardTemplateTab, newPagination, value);
   };
 
   const handleChangeTemplateTab = (value: string = '') => {
@@ -219,6 +234,8 @@ const CreateModal: React.FC<CreateModalProps> = ({
      * params: dashboardMethod == dashboardTemplate + dashboardTemplateTab
      */
     setDashboardTemplateTab(value);
+    // 立即调用获取数据，避免滞后
+    getDashboardTemplateList(dashboardMethod, value);
   };
 
   const handleChangePagination = (current: number) => {
@@ -228,10 +245,14 @@ const CreateModal: React.FC<CreateModalProps> = ({
      * TODO 改变分页
      * params: dashboardMethod !== dashboardNew + dashboardPagination
      */
-    setDashboardPagination((prev) => ({
-      ...prev,
-      current
-    }));
+    const newPagination = { ...dashboardPagination, current };
+    setDashboardPagination(newPagination);
+    // 立即调用获取数据，避免滞后
+    if (dashboardMethod !== 'dashboardLink') {
+      getDashboardTemplateList(dashboardMethod, dashboardTemplateTab, newPagination);
+    } else {
+      getDashboardList(newPagination);
+    }
   };
 
   const handlePreview = (dashboardProjectId: string) => {
@@ -257,7 +278,9 @@ const CreateModal: React.FC<CreateModalProps> = ({
           预览
         </Button>
       </div>
-      <div className={styles.dashboardTemplateCardTitle}>{item.title}</div>
+      <div className={styles.dashboardTemplateCardTitle}>
+        {dashboardMethod !== 'dashboardLink' ? item.templateName : item.projectName}
+      </div>
     </div>
   );
 
@@ -480,11 +503,13 @@ const CreateModal: React.FC<CreateModalProps> = ({
             )}
           </div>
         </div>
-        <MenuComp
-          style={{ transform: visibleMenuIcon ? 'translateX(0)' : '' }}
-          onSelected={setMenuIcon}
-          handleBack={() => setVisibleMenuIcon(false)}
-        />
+        {type === 'page' && (
+          <MenuComp
+            style={{ transform: visibleMenuIcon ? 'translateX(0)' : '' }}
+            onSelected={setMenuIcon}
+            handleBack={() => setVisibleMenuIcon(false)}
+          />
+        )}
       </div>
     </Modal>
   );
