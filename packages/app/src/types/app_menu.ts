@@ -68,6 +68,8 @@ export interface CreateApplicationMenuReq {
   //   entityId?: string;
   entityUuid?: string;
   pageType?: string;
+  createDashboardType?: string;
+  dashboardId?: string;
 }
 
 export interface UpdateApplicationMenuNameReq {

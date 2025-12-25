@@ -1,19 +1,18 @@
 import MenuComp from '@/components/MenuIcon';
 import { Button, Form, Input, Modal, Pagination, Select, TreeSelect, type FormInstance } from '@arco-design/web-react';
-import { RootParentPage } from '@onebase/app';
-import { useI18n } from '@/hooks/useI18n';
+import { getDashboardListApi, getDashboardTemplateListApi, IsHot, RootParentPage } from '@onebase/app';
 import { webMenuIcons } from '@onebase/ui-kit';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import styles from './index.module.less';
-import screenNew from '@/assets/images/screen_new.svg';
-import screenTemplate from '@/assets/images/screen_template.svg';
-import screenLink from '@/assets/images/screen_link.svg';
-import screenChange from '@/assets/images/screen_change.svg';
+import dashboardNew from '@/assets/images/dashboard_new.svg';
+import dashboardTemplate from '@/assets/images/dashboard_template.svg';
+import dashboardLink from '@/assets/images/dashboard_link.svg';
+import dashboardChange from '@/assets/images/dashboard_change.svg';
 
 interface CreateModalProps {
   title: string;
-  type: 'page' | 'screen';
-  handleCreate: (selectedTemplateId?: string, screenMethod?: string) => void;
+  type: 'page' | 'dashboard';
+  handleCreate: (selectedTemplateId?: string, dashboardMethod?: string) => void;
   onCancel: () => void;
   visibleCreateForm: string;
   form: FormInstance;
@@ -39,42 +38,21 @@ const CreateModal: React.FC<CreateModalProps> = ({
   // }, []);
 
   const allWebMenuIcons = webMenuIcons.map((ele) => ele.children).reduce((acc, current) => acc.concat(current), []);
-  const { t } = useI18n();
   const InputSearch = Input.Search;
 
   const [menuIcon, setMenuIcon] = useState<string>();
   const [visibleMenuIcon, setVisibleMenuIcon] = useState<boolean>(false);
-  const [screenMethod, setScreenMethod] = useState<string>('screenNew');
-  const [screenTemplateTab, setScreenTemplateTab] = useState<string>('allTemplate');
-  const [screenMethodLoading, setScreenMethodLoading] = useState<boolean>(false);
-  const [screenTemplateTabLoading, setScreenTemplateTabLoading] = useState<boolean>(false);
-  const [screenPagination, setScreenPagination] = useState<{ current: number; pageSize: number; total: number }>({
+  const [dashboardMethod, setDashboardMethod] = useState<string>('dashboardNew');
+  const [dashboardTemplateTab, setDashboardTemplateTab] = useState<string>('allTemplate');
+  const [dashboardMethodLoading, setDashboardMethodLoading] = useState<boolean>(false);
+  const [dashboardTemplateTabLoading, setDashboardTemplateTabLoading] = useState<boolean>(false);
+  const [dashboardPagination, setDashboardPagination] = useState<{ current: number; pageSize: number }>({
     current: 1,
-    pageSize: screenMethod === 'screenNew' ? 4 : 8,
-    total: 160
+    pageSize: 4
   });
-  const [screenTemplateData, setScreenTemplateData] = useState<any[]>([
-    {
-      id: 'template_1',
-      title: '这是大屏名称',
-      src: screenChange
-    },
-    {
-      id: 'template_2',
-      title: '这是大屏名称',
-      src: screenChange
-    },
-    {
-      id: 'template_3',
-      title: '这是大屏名称',
-      src: screenChange
-    },
-    {
-      id: 'template_4',
-      title: '这是大屏名称',
-      src: screenChange
-    }
-  ]);
+  const [total, setTotal] = useState<number>(10);
+  const [templateName, setTemplateName] = useState<string>('');
+  const [dashboardTemplateData, setDashboardTemplateData] = useState<any[]>([]);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
 
   useEffect(() => {
@@ -83,20 +61,26 @@ const CreateModal: React.FC<CreateModalProps> = ({
     } else {
       form.setFieldValue('menuIcon', 'FormPage');
     }
+    if (visibleCreateForm !== '') {
+      // 初始化时调用一次
+      getDashboardTemplateList();
+    }
   }, [menuIcon, visibleCreateForm]);
 
   useEffect(() => {
-    console.log('screenMethod:', screenMethod);
-    setScreenPagination((prev) => ({
+    console.log('dashboardMethod:', dashboardMethod);
+    setDashboardPagination((prev) => ({
       ...prev,
-      current: 1
+      current: 1,
+      pageSize: dashboardMethod === 'dashboardNew' ? 4 : 8
     }));
-    setScreenTemplateTab('allTemplate');
+    setDashboardTemplateTab('allTemplate');
 
-    if (screenMethod !== 'screenNew' && screenTemplateData.length > 0 && !selectedTemplateId) {
-      setSelectedTemplateId(screenTemplateData[0].id);
+    if (dashboardMethod !== 'dashboardNew' && dashboardTemplateData.length > 0 && !selectedTemplateId) {
+      setSelectedTemplateId(dashboardTemplateData[0].id);
     }
-  }, [screenMethod]);
+    // 不再在这里调用，避免重复
+  }, [dashboardMethod]);
 
   const nameMap = {
     page: '页面',
@@ -105,17 +89,17 @@ const CreateModal: React.FC<CreateModalProps> = ({
     screen: '大屏名称'
   };
 
-  const getScreenMethodData = () => {
+  const getDashboardMethodData = () => {
     const baseData = [
       {
-        key: 'screenNew',
-        icon: screenNew,
-        screenName: '从空白页面新建'
+        key: 'dashboardNew',
+        icon: dashboardNew,
+        dashboardName: '从空白页面新建'
       },
       {
-        key: 'screenTemplate',
-        icon: screenTemplate,
-        screenName: '从模版创建'
+        key: 'dashboardTemplate',
+        icon: dashboardTemplate,
+        dashboardName: '从模版创建'
       }
     ];
 
@@ -123,115 +107,172 @@ const CreateModal: React.FC<CreateModalProps> = ({
       return [
         ...baseData,
         {
-          key: 'screenLink',
-          icon: screenLink,
-          screenName: '关联已有大屏'
+          key: 'dashboardLink',
+          icon: dashboardLink,
+          dashboardName: '关联已有大屏'
         }
       ];
     }
 
     return baseData;
   };
-  const screenMethodData = getScreenMethodData();
+  const dashboardMethodData = getDashboardMethodData();
 
-  const screenTemplateTabs = [
+  const dashboardTemplateTabs = [
     {
       label: '全部',
       value: 'allTemplate'
     },
     {
       label: '系统模版',
-      value: 'systemTemplate'
+      value: 'system'
     },
     {
       label: '应用模版',
-      value: 'applicationTemplate'
+      value: 'app'
     }
   ];
 
   const handleCloseModal = () => {
+    setDashboardMethod('dashboardNew');
     setMenuIcon('');
     onCancel();
   };
+  const getDashboardTemplateList = useCallback(
+    async (
+      method = dashboardMethod,
+      tab = dashboardTemplateTab,
+      pagination = dashboardPagination,
+      name = templateName
+    ) => {
+      const params = {
+        hot: method === 'dashboardNew' ? IsHot.YES : IsHot.NO,
+        templateType: tab === 'allTemplate' ? '' : tab,
+        pageNo: pagination.current,
+        pageSize: method === 'dashboardNew' ? 4 : 8,
+        templateName: name
+      };
+      const res = await getDashboardTemplateListApi(params);
+      console.log('大屏模版 res:', res);
+      setTotal(res.total);
+      setDashboardTemplateData(res.list);
+    },
+    [dashboardMethod, dashboardTemplateTab, dashboardPagination, templateName]
+  );
 
-  const handleChangeScreenMethod = (value: string) => {
-    setScreenMethodLoading(true);
+  const getDashboardList = useCallback(
+    async (pagination = dashboardPagination) => {
+      const params = {
+        page: pagination.current,
+        limit: 8
+      };
+      const res = await getDashboardListApi(params);
+      console.log('大屏 res:', res);
+      console.log('大屏 res.data.length:', res.length);
+      setDashboardTemplateData(res.list);
+      setTotal(res.total);
+    },
+    [dashboardPagination]
+  );
+  const handleChangeDashboardMethod = (value: string) => {
+    setDashboardMethodLoading(true);
     /**
      * TODO 切换大屏创建方式
-     * params: screenMethod
+     * params: dashboardMethod
      */
-    setScreenMethod(value);
+    setDashboardMethod(value);
     setSelectedTemplateId('');
-    setTimeout(() => {
-      setScreenMethodLoading(false);
-    }, 3000);
+    // 立即调用获取数据，避免滞后，使用新值
+    if (value !== 'dashboardLink') {
+      getDashboardTemplateList(value);
+    } else {
+      getDashboardList();
+    }
+    // setTimeout(() => {
+    //   setDashboardMethodLoading(false);
+    // }, 3000);
   };
-  const handleScreenChange = () => {
-    // console.log('换一批 handleScreenChange:', screenPagination);
+  const handleDashboardChange = () => {
+    // console.log('换一批 handleDashboardChange:', dashboardPagination);
     /**
      * TODO 换一批
-     * params: screenMethod == screenNew + change
+     * params: dashboardMethod == dashboardNew + change
      */
-    setScreenPagination((prev) => ({
-      ...prev,
-      current: prev.current + 1 > 3 ? 1 : prev.current + 1
-    }));
+    const newCurrent = dashboardPagination.current + 1 > 3 ? 1 : dashboardPagination.current + 1;
+    const newPagination = { ...dashboardPagination, current: newCurrent };
+    setDashboardPagination(newPagination);
+    // 立即调用获取数据，避免滞后
+    getDashboardTemplateList(dashboardMethod, dashboardTemplateTab, newPagination);
   };
 
   const handleSearchTemplate = (value: string) => {
     console.log('handleSearchTemplate:', value);
     /**
      * TODO 搜索模版
-     * params: screenMethod !== screenNew + value
+     * params: dashboardMethod !== dashboardNew + value
      */
+    setTemplateName(value);
+    // 重置分页到第一页
+    const newPagination = { ...dashboardPagination, current: 1 };
+    setDashboardPagination(newPagination);
+    // 立即调用获取数据，避免滞后
+    getDashboardTemplateList(dashboardMethod, dashboardTemplateTab, newPagination, value);
   };
 
   const handleChangeTemplateTab = (value: string = '') => {
-    // setScreenTemplateTabLoading(true);
+    // setDashboardTemplateTabLoading(true);
     /**
      * TODO 切换模版tab
-     * params: screenMethod == screenTemplate + screenTemplateTab
+     * params: dashboardMethod == dashboardTemplate + dashboardTemplateTab
      */
-    setScreenTemplateTab(value);
+    setDashboardTemplateTab(value);
+    // 立即调用获取数据，避免滞后
+    getDashboardTemplateList(dashboardMethod, value);
   };
 
   const handleChangePagination = (current: number) => {
-    // setScreenTemplateTabLoading(true);
-    console.log('handleChangePagination:', current);
+    // setDashboardTemplateTabLoading(true);
+    // console.log('handleChangePagination:', current);
     /**
      * TODO 改变分页
-     * params: screenMethod !== screenNew + screenPagination
+     * params: dashboardMethod !== dashboardNew + dashboardPagination
      */
-    setScreenPagination((prev) => ({
-      ...prev,
-      current
-    }));
+    const newPagination = { ...dashboardPagination, current };
+    setDashboardPagination(newPagination);
+    // 立即调用获取数据，避免滞后
+    if (dashboardMethod !== 'dashboardLink') {
+      getDashboardTemplateList(dashboardMethod, dashboardTemplateTab, newPagination);
+    } else {
+      getDashboardList(newPagination);
+    }
   };
 
-  const handlePreview = (screenProjectId: string) => {
+  const handlePreview = (dashboardProjectId: string) => {
     // 在新窗口打开预览页面，使用 hash 路由
     window.open(
-      `${window.location.origin}${window.location.pathname}#/onebase/screen/preview/${screenProjectId}`,
+      `http://s25029301301.dev.internal.virtueit.net:81/v0/appdashboard/#/chart/preview/${dashboardProjectId}`,
       '_blank'
     );
   };
 
-  const handleScreenTemplateCard = (id: string) => {
+  const handleDashboardTemplateCard = (id: string) => {
     setSelectedTemplateId(id);
   };
 
-  const screenTemplateCard = (item: any) => (
+  const dashboardTemplateCard = (item: any) => (
     <div
-      className={`${styles.screenTemplateCard} ${selectedTemplateId === item.id ? styles.screenTemplateCardSelected : ''}`}
-      onClick={() => handleScreenTemplateCard(item.id)}
+      className={`${styles.dashboardTemplateCard} ${selectedTemplateId === item.id ? styles.dashboardTemplateCardSelected : ''}`}
+      onClick={() => handleDashboardTemplateCard(item.id)}
     >
-      <div className={styles.screenTemplateCardImg}>
-        <img src={item.src} alt="" />
-        <Button onClick={() => handlePreview(item.id)} className={styles.screenTemplateCardBtn}>
+      <div className={styles.dashboardTemplateCardImg}>
+        <img src={item.indexImage} alt="" />
+        <Button onClick={() => handlePreview(item.id)} className={styles.dashboardTemplateCardBtn}>
           预览
         </Button>
       </div>
-      <div className={styles.screenTemplateCardTitle}>{item.title}</div>
+      <div className={styles.dashboardTemplateCardTitle}>
+        {dashboardMethod !== 'dashboardLink' ? item.templateName : item.projectName}
+      </div>
     </div>
   );
 
@@ -239,19 +280,19 @@ const CreateModal: React.FC<CreateModalProps> = ({
     <Modal
       title={title}
       visible={visibleCreateForm !== ''}
-      onOk={() => handleCreate(selectedTemplateId, screenMethod)}
+      onOk={() => handleCreate(selectedTemplateId, dashboardMethod)}
       onCancel={handleCloseModal}
       closable={!visibleMenuIcon}
       autoFocus={false}
       focusLock={true}
       unmountOnExit={true}
-      className={type === 'page' ? styles.createPageModal : styles.createScreenModal}
+      className={type === 'page' ? styles.createPageModal : styles.createDashboardModal}
       footer={
         <div style={{ textAlign: 'right', visibility: !visibleMenuIcon ? 'visible' : 'hidden' }}>
           <Button type="default" onClick={handleCloseModal} style={{ marginRight: 12 }}>
             取消
           </Button>
-          <Button type="primary" onClick={() => handleCreate(selectedTemplateId, screenMethod)}>
+          <Button type="primary" onClick={() => handleCreate(selectedTemplateId, dashboardMethod)}>
             创建
           </Button>
         </div>
@@ -337,57 +378,57 @@ const CreateModal: React.FC<CreateModalProps> = ({
             </Form>
           </div>
         )}
-        <div className={styles.screenContainer}>
-          <div className={styles.screenCreationMethod}>
+        <div className={styles.dashboardContainer}>
+          <div className={styles.dashboardCreationMethod}>
             <div className={styles.infoTitle}>
               <span>大屏创建方式</span>
             </div>
-            <div className={styles.screenCreationMethodContent}>
-              {screenMethodData.map((item) => (
+            <div className={styles.dashboardCreationMethodContent}>
+              {dashboardMethodData.map((item) => (
                 <div
                   className={
-                    item.key === screenMethod
-                      ? styles.screenCreationMethodContentItemActive
-                      : styles.screenCreationMethodContentItem
+                    item.key === dashboardMethod
+                      ? styles.dashboardCreationMethodContentItemActive
+                      : styles.dashboardCreationMethodContentItem
                   }
                   key={item.key}
-                  onClick={() => handleChangeScreenMethod(item.key)}
+                  onClick={() => handleChangeDashboardMethod(item.key)}
                 >
                   <img src={item.icon} alt="" />
-                  <div className={styles.screenCreationMethodContentItemText}>{item.screenName}</div>
+                  <div className={styles.dashboardCreationMethodContentItemText}>{item.dashboardName}</div>
                 </div>
               ))}
             </div>
           </div>
-          <div className={styles.screenTemplate}>
-            <div className={styles.screenTitle}>
-              <div className={styles.screenTitleText}>
+          <div className={styles.dashboardTemplate}>
+            <div className={styles.dashboardTitle}>
+              <div className={styles.dashboardTitleText}>
                 <span>
-                  {screenMethod === 'screenNew'
+                  {dashboardMethod === 'dashboardNew'
                     ? '热门模版'
-                    : screenMethod === 'screenTemplate'
+                    : dashboardMethod === 'dashboardTemplate'
                       ? '大屏模版'
                       : '已创建的大屏'}
                 </span>
               </div>
-              {screenMethod === 'screenNew' && (
-                <div className={styles.screenChange} onClick={handleScreenChange}>
-                  <img src={screenChange} alt="" />
+              {dashboardMethod === 'dashboardNew' && (
+                <div className={styles.dashboardChange} onClick={handleDashboardChange}>
+                  <img src={dashboardChange} alt="" />
                   <div>换一批</div>
                 </div>
               )}
             </div>
-            {screenMethod !== 'screenNew' && (
+            {dashboardMethod !== 'dashboardNew' && (
               <>
-                <div className={styles.screenTemplateSearch}>
-                  {screenMethod === 'screenTemplate' && (
-                    <div className={styles.screenTemplateSearchTabs}>
-                      {screenTemplateTabs.map((item) => (
+                <div className={styles.dashboardTemplateSearch}>
+                  {dashboardMethod === 'dashboardTemplate' && (
+                    <div className={styles.dashboardTemplateSearchTabs}>
+                      {dashboardTemplateTabs.map((item) => (
                         <div
                           className={
-                            screenTemplateTab === item.value
-                              ? styles.screenTemplateSearchTabsItemActive
-                              : styles.screenTemplateSearchTabsItem
+                            dashboardTemplateTab === item.value
+                              ? styles.dashboardTemplateSearchTabsItemActive
+                              : styles.dashboardTemplateSearchTabsItem
                           }
                           key={item.value}
                           onClick={() => handleChangeTemplateTab(item.value)}
@@ -403,60 +444,64 @@ const CreateModal: React.FC<CreateModalProps> = ({
                       placeholder="请输入大屏名称搜索"
                       allowClear
                       style={{ width: 220 }}
+                      value={templateName}
                       onSearch={handleSearchTemplate}
+                      onChange={(value) => setTemplateName(value)}
                     />
                   </div>
                 </div>
               </>
             )}
-            {screenMethod === 'screenNew' && (
+            {dashboardMethod === 'dashboardNew' && (
               <>
-                <div className={styles.screenTemplateContent}>
-                  {screenTemplateData.map((item, index) => (
-                    <div key={index}>{screenTemplateCard(item)}</div>
+                <div className={styles.dashboardTemplateContent}>
+                  {dashboardTemplateData.map((item, index) => (
+                    <div key={index}>{dashboardTemplateCard(item)}</div>
                   ))}
                 </div>
               </>
             )}
-            {screenMethod === 'screenTemplate' && (
+            {dashboardMethod === 'dashboardTemplate' && (
               <>
-                <div className={styles.screenTemplateContent}>
-                  {screenTemplateData.map((item, index) => (
-                    <div key={index}>{screenTemplateCard(item)}</div>
+                <div className={styles.dashboardTemplateContent}>
+                  {dashboardTemplateData.map((item, index) => (
+                    <div key={index}>{dashboardTemplateCard(item)}</div>
                   ))}
                 </div>
               </>
             )}
-            {screenMethod === 'screenLink' && (
+            {dashboardMethod === 'dashboardLink' && (
               <>
-                <div className={styles.screenTemplateContent}>
-                  {screenTemplateData.map((item, index) => (
-                    <div key={index}>{screenTemplateCard(item)}</div>
+                <div className={styles.dashboardTemplateContent}>
+                  {dashboardTemplateData.map((item, index) => (
+                    <div key={index}>{dashboardTemplateCard(item)}</div>
                   ))}
                 </div>
               </>
             )}
-            {screenMethod !== 'screenNew' && (
-              <div className={styles.screenPagination}>
+            {dashboardMethod !== 'dashboardNew' && (
+              <div className={styles.dashboardPagination}>
                 <Pagination
-                  total={screenPagination.total}
-                  current={screenPagination.current}
-                  pageSize={screenPagination.pageSize}
+                  total={total}
+                  current={dashboardPagination.current}
+                  pageSize={dashboardPagination.pageSize}
                   sizeOptions={[8]}
                   showTotal
                   sizeCanChange
                   onChange={handleChangePagination}
-                  disabled={screenTemplateTabLoading}
+                  disabled={dashboardTemplateTabLoading}
                 />
               </div>
             )}
           </div>
         </div>
-        <MenuComp
-          style={{ transform: visibleMenuIcon ? 'translateX(0)' : '' }}
-          onSelected={setMenuIcon}
-          handleBack={() => setVisibleMenuIcon(false)}
-        />
+        {type === 'page' && (
+          <MenuComp
+            style={{ transform: visibleMenuIcon ? 'translateX(0)' : '' }}
+            onSelected={setMenuIcon}
+            handleBack={() => setVisibleMenuIcon(false)}
+          />
+        )}
       </div>
     </Modal>
   );

@@ -1,74 +1,126 @@
 import CreateDashboardModal from '@/components/CreateDashboardModal';
 import { Button, Form, Input, Modal, Pagination, Spin } from '@arco-design/web-react';
 import { IconPlus, IconSearch } from '@arco-design/web-react/icon';
-import { useEffect, useState, type FC } from 'react';
+import { useCallback, useEffect, useState, type FC } from 'react';
 import ScreenCard from '../DashboardCard';
 import styles from './index.module.less';
+import { useSearchParams } from 'react-router-dom';
+import { throttle } from 'lodash-es';
+import {
+  getDashboardListApi,
+  editDashboardInfoApi,
+  deleteDashboardApi,
+  saveDashboardAsTemplateApi,
+  getDashboardIdApi
+} from '@onebase/app';
+import { TokenManager } from '@onebase/common';
 const FormItem = Form.Item;
 const { useForm } = Form;
 interface dataList {
+  appId: string;
   id: string;
-  name: string;
-  state: string;
+  projectName: string;
+  updateTime: string;
+  indexImage: string;
+  remarks: string;
+  state: number;
   desc: string;
 }
 
 const Dashboard: FC = () => {
   const [loading, setLoading] = useState(false);
-  const [dataList, setDataList] = useState<dataList[]>();
-  const [total, setTotal] = useState(1);
-  const [pageSize, setPageSize] = useState<number>();
+  const [dataList, setDataList] = useState<dataList[]>([]);
+  const [total, setTotal] = useState(30);
+  const [pageSize, setPageSize] = useState<number>(10);
   const [pageNo, setPageNo] = useState(1);
+  const [searchText, setSearchText] = useState<string>('');
+
+  const [dashboardData, setDashboardData] = useState<dataList>();
+  const [searchParams] = useSearchParams();
+  const appId = searchParams.get('appId');
+  const dashboardType = 'dashboard';
+  const tokenInfo = TokenManager.getTokenInfo();
+  const tenantId = tokenInfo?.tenantId;
+  const accessToken = tokenInfo?.accessToken;
   useEffect(() => {
     setLoading(false);
-    setDataList([
-      {
-        id: '1',
-        name: '这是一个大屏名称',
-        state: '已发布',
-        desc: '描述1'
-      },
-      {
-        id: '2',
-        name: '这是一个大屏名称2',
-        state: '已发布',
-        desc: '描述2'
-      },
-      {
-        id: '3',
-        name: '这是一个大屏名称4',
-        state: '已发布',
-        desc: '描述3'
-      },
-      {
-        id: '4',
-        name: 'screen1',
-        state: '已发布',
-        desc: '描述4'
-      }
-    ]);
+    console.log('tokenInfo:', tokenInfo);
+    getDashboardList();
   }, []);
-  const handleSearchChange = () => {};
+
+  const getDashboardList = async (searchText?: string) => {
+    const params = {
+      page: pageNo,
+      limit: pageSize,
+      searchText: searchText
+    };
+    const res = await getDashboardListApi(params);
+    console.log('res:', res);
+    setDataList(res.list);
+    setTotal(res.total);
+  };
+  const throttledSearch = useCallback(
+    throttle((value: string) => {
+      setPageNo(1); // 重置到第一页
+      getDashboardList(value); // 重新获取数据，传入搜索值
+    }, 1000), // 1000ms 节流延迟
+    [getDashboardList] // 依赖数组，只包含 getDashboardList
+  );
+
+  const handleSearchChange = (value: string) => {
+    setSearchText(value);
+    throttledSearch(value);
+  };
   // 创建大屏弹窗
   const [createForm] = Form.useForm();
   const [visibleCreateScreenForm, setVisibleCreateScreenForm] = useState('');
   const handleAdd = () => {
     setVisibleCreateScreenForm('screen');
   };
-  const handleCreateOk = () => {};
+  const handleCreateOk = async (id?: string) => {
+    console.log('新建大屏 id:', id);
+    if (!id && appId) {
+      const params = {
+        projectName: '新大屏',
+        tenantId: tenantId,
+        appId: appId
+      };
+      const dashboardId = await getDashboardIdApi(params);
+      window.open(
+        `http://s25029301301.dev.internal.virtueit.net:81/v0/appdashboard/#/chart/home/${dashboardId}/${appId}/${dashboardType}`,
+        '_blank'
+      );
+    }
+    window.open(
+      `http://s25029301301.dev.internal.virtueit.net:81/v0/appdashboard/#/chart/home/${id}/${appId}/${dashboardType}`,
+      '_blank'
+    );
+    setVisibleCreateScreenForm('');
+    getDashboardList();
+  };
   // 编辑弹框
   const [editForm] = useForm();
   const [editVisible, setEditVisible] = useState<boolean>(false);
 
   const handleEditScreen = (item: dataList) => {
     console.log(item, '编辑大屏弹框');
-    editForm.setFieldValue('name', item.name);
-    editForm.setFieldValue('desc', item.desc);
+    console.log('tiem:', item);
+    editForm.setFieldValue('projectName', item.projectName);
+    editForm.setFieldValue('remarks', item.remarks);
+    editForm.setFieldValue('id', item.id);
     setEditVisible(true);
   };
   const handleEditOk = async () => {
-    await editForm.validate();
-    setEditVisible(false);
+    editForm.validate(async (error) => {
+      if (error !== null) return;
+      try {
+        const params = await editForm.validate();
+        const res = await editDashboardInfoApi(params);
+        console.log('res:', res);
+        setEditVisible(false);
+        getDashboardList();
+      } catch (error) {}
+    });
   };
   //取消弹框
   const handleEditCancel = () => {
@@ -76,35 +128,59 @@ const Dashboard: FC = () => {
   };
   //编辑大屏
   const handleEdit = (item: dataList) => {
-    console.log(item, '跳转到第三方');
+    window.open(
+      `http://s25029301301.dev.internal.virtueit.net:81/v0/appdashboard/#/chart/home/${item.id}/${appId}/${dashboardType}`,
+      '_blank'
+    );
   };
   //预览
-  const handlePreview = () => {
-    console.log('预览');
+  const handlePreview = (item: dataList) => {
+    console.log('预览 item:', item);
+    window.open(
+      `http://s25029301301.dev.internal.virtueit.net:81/v0/appdashboard/#/chart/preview/${item.id}/${appId}/${dashboardType}`,
+      '_blank'
+    );
   };
-
   // 删除弹框
   const [deleteVisible, setDeleteVisible] = useState<boolean>(false);
   const [ModalScreenName, setModalScreenName] = useState('');
+  const [screenId, setScreenId] = useState('');
   const handleDelete = (item: dataList) => {
-    console.log(item);
-    setModalScreenName(item.name);
+    setModalScreenName(item.projectName);
+    setScreenId(item.id);
     setDeleteVisible(true);
   };
-  const handleDeleteScreenOk = () => {
+  const handleDeleteScreenOk = async () => {
     console.log('删除当前screen');
+    await deleteDashboardApi(screenId);
+    getDashboardList();
     setDeleteVisible(false);
   };
 
   // 另存为模板
   const [onSaveVisible, setOnSaveVisible] = useState<boolean>(false);
-  const handleOnSaveAs = () => {
-    console.log('存模板');
+  const handleOnSaveAs = (item: dataList) => {
+    console.log('handleOnSaveAs item:', item);
+    setDashboardData(item);
     setOnSaveVisible(true);
   };
-  const handleOnSaveAsOk = () => {
-    console.log('确认存模板');
-    setOnSaveVisible(false);
+  const handleOnSaveAsOk = async () => {
+    console.log('handleOnSaveAsOk dashboardData:', dashboardData);
+    console.log('handleOnSaveAsOk:', typeof appId);
+    if (dashboardData && appId) {
+      const params = {
+        id: dashboardData?.id,
+        appId: appId
+      };
+      try {
+        const resp = await saveDashboardAsTemplateApi(params);
+        console.log('另存为 res:', resp);
+        getDashboardList();
+        // 页面提示创建成功
+      } catch (error) {}
+      setOnSaveVisible(false);
+      setDashboardData(undefined);
+    }
   };
 
   return (
@@ -121,6 +197,7 @@ const Dashboard: FC = () => {
         suffix={<IconSearch />}
         onChange={handleSearchChange}
         placeholder="搜索"
+        value={searchText}
       />
       <Spin className={styles.appListLoading} loading={loading} size={40} tip="加载中...">
         <div className={styles.appList}>
@@ -155,11 +232,14 @@ const Dashboard: FC = () => {
         onCancel={handleEditCancel}
       >
         <Form form={editForm} autoComplete="off">
-          <FormItem label="大屏名称" field="name" rules={[{ required: true, message: '请输入大屏名称' }]}>
+          <FormItem label="大屏名称" field="projectName" rules={[{ required: true, message: '请输入大屏名称' }]}>
             <Input placeholder="" />
           </FormItem>
-          <FormItem label="大屏描述" field="desc" rules={[{ required: true, message: '请输入大屏描述' }]}>
+          <FormItem label="大屏描述" field="remarks" rules={[{ required: true, message: '请输入大屏描述' }]}>
             <Input placeholder="" />
+          </FormItem>
+          <FormItem field="id" noStyle>
+            <Input type="hidden" />
           </FormItem>
         </Form>
       </Modal>
@@ -204,7 +284,7 @@ const Dashboard: FC = () => {
       {/* 新建大屏 */}
       <CreateDashboardModal
         title="新建大屏"
-        type={'screen'}
+        type={'dashboard'}
         handleCreate={handleCreateOk}
         onCancel={() => {
           setVisibleCreateScreenForm('');

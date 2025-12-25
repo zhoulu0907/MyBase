@@ -10,5 +10,6 @@ export {
   runtimeBpmService,
   runtimeFlowService,
   runtimeListdataService,
-  runtimeMetadataService
+  runtimeMetadataService,
+  dashboardService
 } from './factory';
