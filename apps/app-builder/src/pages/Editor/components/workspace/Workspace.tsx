@@ -359,11 +359,7 @@ export default function EditorWorkspace() {
           <ReactSortable
             id="workspace-content"
             list={components}
-            setList={(newList, sortable, store) => {
-              console.log(newList);
-              //   console.log(sortable, store);
-              //   console.log(newList);
-              //   console.log(!sortable);
+            setList={(newList, sortable, _store) => {
               if (!sortable) {
                 return;
               }
