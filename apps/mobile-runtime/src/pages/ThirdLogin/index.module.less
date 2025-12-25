@@ -1,0 +1,189 @@
+.thirdLoginPage {
+  width: 100%;
+  height: 100dvh;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0) 100%),
+    url('@/assets/images/login_banner.svg');
+  background-position: top center;
+  background-size: contain;
+  background-repeat: no-repeat;
+
+  // 内容区域
+  .loginPageContent {
+    padding: 2rem 0.64rem 0.56rem;
+    position: relative;
+    min-height: calc(100dvh - 2.56rem);
+
+    .titleContainer {
+      margin-bottom: 1.1rem;
+      :global {
+        .i-icon {
+          border-radius: 6px;
+        }
+      }
+      .loginLogo {
+        width: 1.28rem;
+        height: 1.28rem;
+        margin-bottom: 0.48rem;
+        vertical-align: middle;
+      }
+
+      .title {
+        color: #272e3b;
+        font-size: 0.4rem;
+        font-weight: 600;
+        line-height: 0.6rem;
+        margin: 0;
+      }
+    }
+    .tabs {
+      font-size: 0.28rem;
+      :global(.arco-tab-cell.vertical.line) {
+        color: #86909c;
+        z-index: 2;
+      }
+      :global(.arco-tab-cell.vertical:not(.custom).line.active) {
+        color: @primary-color;
+        z-index: 2;
+      }
+    }
+    .loginForm {
+      // 确保表单在固定高度内正确显示
+      min-height: 40dvh;
+
+      :global(.arco-form-item) {
+        border: 0;
+      }
+      .loginFormIcon {
+        width: 0.432rem;
+        height: 0.48rem;
+      }
+      .loginFormSuffix {
+        color: @primary-color;
+        font-size: 0.32rem;
+        box-sizing: border-box;
+        padding-right: 0.32rem;
+      }
+
+      .rememberMeContainer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .passwordItem {
+        margin: 0.48rem 0 0.2rem;
+      }
+      .togglePassword {
+        display: flex;
+        padding-right: 0.16rem;
+      }
+      .forgotPassword {
+        text-align: right;
+        color: @primary-color;
+        font-size: 0.32rem;
+      }
+      .smsContainer {
+        width: 100%;
+
+        .smsButton {
+          flex: 1;
+          min-width: 120px;
+          height: 40px;
+          border-radius: 6px;
+          font-weight: 500;
+        }
+      }
+
+      .formActions {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      .loginButton {
+        height: 0.88rem;
+        margin: 0.8rem 0;
+        font-size: 0.3rem;
+        line-height: 0.88rem;
+        border-radius: 2px;
+        background: rgb(var(--primary-6));
+        box-shadow: 0 4px 8px 0 rgba(0, 94, 115, 0.15);
+      }
+      .tips {
+        text-align: center;
+      }
+    }
+    // 输入框样式修改
+    :global {
+      .arco-form-item {
+        border: none;
+      }
+      .arco-form-item-control {
+        padding: 0;
+        border-radius: 0.08rem;
+        background-color: #f2f3f5;
+      }
+      .arco-form-item.arco-form-item-vertical .arco-form-label-item {
+        margin-bottom: 0.1rem;
+      }
+      .arco-form-item.arco-form-item-vertical .arco-input-wrap {
+        border: none !important;
+      }
+      .arco-input-wrap input {
+        height: 0.96rem;
+        line-height: 0.96rem;
+        border-radius: 8px;
+        padding: 0 0.32rem;
+      }
+
+      .arco-input-prefix {
+        text-align: right;
+        width: 0.8rem;
+        box-sizing: border-box;
+      }
+
+      .arco-input-suffix {
+        padding-left: 0;
+      }
+
+      @autofill-bgcolor: transparent;
+      @autofill-textcolor: currentColor;
+
+      input:-webkit-autofill,
+      input:-webkit-autofill:hover,
+      input:-webkit-autofill:focus,
+      input:-webkit-autofill:active {
+        box-shadow: 0 0 0 1000px @autofill-bgcolor inset !important;
+        -webkit-text-fill-color: @autofill-textcolor !important;
+        transition: background-color 5000s ease-in-out 0s !important;
+      }
+
+      .arco-form-item-control-wrapper .arco-input-wrap.single-line {
+        height: auto;
+        line-height: unset;
+        box-shadow: none;
+      }
+      .arco-form-item-message {
+        margin-top: 0.1rem;
+        padding-left: 0.32rem;
+      }
+    }
+
+    .loginFooter {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      text-align: center;
+      padding: 0.6rem;
+
+      .footerText {
+        font-size: 0.28rem;
+        color: #272e3b;
+        margin: 0;
+        span {
+          color: @primary-color;
+        }
+      }
+    }
+  }
+}
