@@ -1,5 +1,6 @@
 import { memo, useEffect, useRef } from 'react';
 import { nanoid } from 'nanoid';
+import { ITypeRules, ValidatorType } from '@arco-design/mobile-utils';
 import { Toast, ImagePicker, Form, Ellipsis, ImagePreview } from '@arco-design/mobile-react';
 import { attachmentDownload, attachmentUpload, menuSignal } from '@onebase/app';
 import { pagesRuntimeSignal } from '@onebase/common';
@@ -7,7 +8,6 @@ import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, FormSchema } from 
 import './index.css';
 
 type XImgUploadConfig = typeof FormSchema.XImgUploadSchema.config;
-
 
 const XImgUpload = memo((props: XImgUploadConfig & { runtime?: boolean; detailMode?: boolean; form?: any }) => {
   const {
@@ -103,6 +103,7 @@ const XImgUpload = memo((props: XImgUploadConfig & { runtime?: boolean; detailMo
     } catch (error) {
     }
   };
+
   const onClick = (e: React.MouseEvent, image: any, index: number) => {
     window.modalInstance = ImagePreview.open({
       showLoading: true,
@@ -113,6 +114,15 @@ const XImgUpload = memo((props: XImgUploadConfig & { runtime?: boolean; detailMo
       images: (form.getFieldValue(fieldId) || []).map((item: any) => ({ src: item.url })),
     });
   }
+
+  const rules: ITypeRules<ValidatorType.Custom>[] = [
+      {
+        required: verify?.required,
+        type: ValidatorType.Custom,
+        message: `${label.text}是必填项`
+      }
+    ];
+
   return (
     <Form.Item
       className="inputTextWrapperOBMobile ImgUploadWrapperOBMobile"
@@ -121,7 +131,7 @@ const XImgUpload = memo((props: XImgUploadConfig & { runtime?: boolean; detailMo
       }
       layout="vertical"
       field={fieldId}
-      required={verify?.required}
+      rules={rules}
       trigger="fileList"
       style={{
         pointerEvents: runtime ? 'unset' : 'none',
