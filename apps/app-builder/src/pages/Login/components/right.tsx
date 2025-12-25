@@ -294,9 +294,9 @@ const Right: React.FC = () => {
               <Checkbox checked={rememberMe} onChange={handleRememberMeChange}>
                 {t('auth.rememberMe')}
               </Checkbox>
-              <Button type="text" size="small">
+              {/* <Button type="text" size="small">
                 {t('auth.forgotPassword')}
-              </Button>
+              </Button> */}
             </Space>
           </Form.Item>
 
