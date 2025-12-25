@@ -47,13 +47,11 @@ public class SysFile implements Serializable {
      */
     private String absolutePath;
 
-
     private LocalDateTime createTime;
 
-
-
-
-
-
+    /**
+     * 文件标识
+     */
+    private Long fileId;
 
 }

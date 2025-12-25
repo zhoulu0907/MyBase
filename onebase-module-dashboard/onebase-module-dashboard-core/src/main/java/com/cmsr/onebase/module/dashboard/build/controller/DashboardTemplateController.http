@@ -10,13 +10,13 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
 {
-  "templateName": "Dashboard Template 3",
-  "content": "{\"layout2\": [], \"config2\": {}}",
+  "templateName": "",
+  "content": "",
   "templateType": "app",
-  "hot": 0,
+  "hot": null,
   "appId": 184716905786900486,
-  "indexImage": "https://example.com/image3.jpg",
-  "remarks": "备注2"
+  "indexImage": null,
+  "remarks": null
 }
 
 ### 2. 更新仪表盘模板

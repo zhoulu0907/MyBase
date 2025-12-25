@@ -176,6 +176,7 @@ public class GoviewProjectController  extends BaseController {
 		if(blogText!=null) {
 			GoviewProjectVo goviewProjectVo=new GoviewProjectVo();
 			BeanUtils.copyProperties(goviewProject,goviewProjectVo);
+			goviewProjectVo.setId(String.valueOf(goviewProject.getId()));
 			goviewProjectVo.setContent(blogText.getContent());
 			return CommonResult.success(goviewProjectVo);
 		}
@@ -311,21 +312,15 @@ public class GoviewProjectController  extends BaseController {
 		sysFile.setVirtualKey(virtualKey);
 		sysFile.setAbsolutePath(absolutePath.replace("file:",""));
 
+		CommonResult<String> result = fileApi.dashboardUpload(new FileCreateReqDTO().setName(object.getOriginalFilename())
+				.setType(object.getContentType()).setContent(object.getBytes()));
+		// 保存文件标识
+		sysFile.setFileId(Long.valueOf(result.getData()));
+
 		iSysFileService.saveOrUpdate(sysFile);
 
-		return fileApi.dashboardUpload(new FileCreateReqDTO().setName(object.getOriginalFilename())
-				.setType(object.getContentType()).setContent(object.getBytes()));
+		return result;
 	}
 
-
-	@GetMapping("/download/{id}")
-	@Operation(summary = "获取文件内容")
-	@PermitAll
-	@TenantIgnore
-	@ApiSignIgnore
-	@Parameter(name = "id", description = "文件编号", required = true)
-	public void getFileContent(@PathVariable("id") Long id, HttpServletRequest request, HttpServletResponse response) throws Exception {
-		fileApi.dashboardDownload(id, request, response);
-	}
 
 }
