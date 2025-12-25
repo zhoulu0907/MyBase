@@ -73,8 +73,7 @@ public class SystemPermissionServiceImpl implements SystemPermissionService {
         if (userId == null) {
             return false;
         }
-        return true; // TODO SIT环境临时放开
-        // return hasAnyPermissionsCache.get(new KeyValue<>(userId, Arrays.asList(permissions)));
+        return hasAnyPermissionsCache.get(new KeyValue<>(userId, Arrays.asList(permissions)));
     }
 
     @Override
