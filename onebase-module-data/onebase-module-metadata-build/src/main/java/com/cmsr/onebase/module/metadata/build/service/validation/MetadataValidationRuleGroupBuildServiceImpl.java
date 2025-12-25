@@ -410,45 +410,50 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
             return new ArrayList<>();
         }
 
-        // 转换为VO并建立映射关系
-        List<ValidationRuleDefinitionVO> allRuleVOs = allRules.stream()
-                .map(rule -> modelMapper.map(rule, ValidationRuleDefinitionVO.class))
-                .toList();
-        Map<Long, ValidationRuleDefinitionVO> ruleMap = new HashMap<>();
-        for (ValidationRuleDefinitionVO ruleVO : allRuleVOs) {
-            ruleMap.put(ruleVO.getId(), ruleVO);
+        // 建立ID到DO的映射关系（用于父子关系匹配）
+        Map<Long, MetadataValidationRuleDefinitionDO> doMap = new HashMap<>();
+        for (MetadataValidationRuleDefinitionDO rule : allRules) {
+            doMap.put(rule.getId(), rule);
         }
 
-        // 找到主OR节点（顶级LOGIC节点且logicOperator为OR）
-        ValidationRuleDefinitionVO mainOrRule = null;
-        for (ValidationRuleDefinitionVO ruleVO : allRuleVOs) {
-            if (ruleVO.getParentRuleId() == null && "LOGIC".equals(ruleVO.getLogicType()) && "OR".equals(ruleVO.getLogicOperator())) {
-                mainOrRule = ruleVO;
+        // 找到主OR节点（顶级LOGIC节点且logicOperator为OR，parentRuleUuid为空）
+        MetadataValidationRuleDefinitionDO mainOrRuleDO = null;
+        for (MetadataValidationRuleDefinitionDO rule : allRules) {
+            if ((rule.getParentRuleUuid() == null || rule.getParentRuleUuid().isEmpty()) 
+                    && "LOGIC".equals(rule.getLogicType()) 
+                    && "OR".equals(rule.getLogicOperator())) {
+                mainOrRuleDO = rule;
                 break;
             }
         }
 
-        if (mainOrRule == null) {
+        if (mainOrRuleDO == null) {
+            log.info("未找到主OR节点，返回空列表");
             return new ArrayList<>();
         }
+
+        String mainOrRuleIdStr = String.valueOf(mainOrRuleDO.getId());
+        log.info("找到主OR节点，id: {}", mainOrRuleIdStr);
 
         // 构建二维数组结构
         List<List<ValidationRuleDefinitionVO>> valueRules = new ArrayList<>();
 
-        // 获取主OR节点的所有子规则
-        for (ValidationRuleDefinitionVO ruleVO : allRuleVOs) {
-            if (mainOrRule.getId().equals(ruleVO.getParentRuleId())) {
-                if ("CONDITION".equals(ruleVO.getLogicType())) {
+        // 获取主OR节点的所有子规则（通过 parentRuleUuid 匹配）
+        for (MetadataValidationRuleDefinitionDO rule : allRules) {
+            if (mainOrRuleIdStr.equals(rule.getParentRuleUuid())) {
+                if ("CONDITION".equals(rule.getLogicType())) {
                     // 直接是条件规则，单独成组
                     List<ValidationRuleDefinitionVO> singleGroup = new ArrayList<>();
-                    singleGroup.add(ruleVO);
+                    singleGroup.add(convertToVO(rule));
                     valueRules.add(singleGroup);
-                } else if ("LOGIC".equals(ruleVO.getLogicType()) && "AND".equals(ruleVO.getLogicOperator())) {
+                } else if ("LOGIC".equals(rule.getLogicType()) && "AND".equals(rule.getLogicOperator())) {
                     // AND分组，获取其所有子条件
+                    String andGroupIdStr = String.valueOf(rule.getId());
                     List<ValidationRuleDefinitionVO> andGroup = new ArrayList<>();
-                    for (ValidationRuleDefinitionVO conditionVO : allRuleVOs) {
-                        if (ruleVO.getId().equals(conditionVO.getParentRuleId()) && "CONDITION".equals(conditionVO.getLogicType())) {
-                            andGroup.add(conditionVO);
+                    for (MetadataValidationRuleDefinitionDO conditionRule : allRules) {
+                        if (andGroupIdStr.equals(conditionRule.getParentRuleUuid()) 
+                                && "CONDITION".equals(conditionRule.getLogicType())) {
+                            andGroup.add(convertToVO(conditionRule));
                         }
                     }
                     if (!andGroup.isEmpty()) {
@@ -458,7 +463,24 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
             }
         }
 
+        log.info("构建完成，valueRules组数: {}", valueRules.size());
         return valueRules;
+    }
+
+    /**
+     * 将DO转换为VO
+     */
+    private ValidationRuleDefinitionVO convertToVO(MetadataValidationRuleDefinitionDO rule) {
+        ValidationRuleDefinitionVO vo = modelMapper.map(rule, ValidationRuleDefinitionVO.class);
+        // 手动处理 parentRuleUuid -> parentRuleId 的转换
+        if (rule.getParentRuleUuid() != null && !rule.getParentRuleUuid().isEmpty()) {
+            try {
+                vo.setParentRuleId(Long.valueOf(rule.getParentRuleUuid()));
+            } catch (NumberFormatException e) {
+                log.warn("无法将 parentRuleUuid '{}' 转换为 Long", rule.getParentRuleUuid());
+            }
+        }
+        return vo;
     }
 
     /**
