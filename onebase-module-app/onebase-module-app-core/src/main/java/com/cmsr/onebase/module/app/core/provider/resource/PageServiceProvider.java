@@ -14,9 +14,6 @@ import com.cmsr.onebase.module.app.core.dto.resource.PageDTO;
 import com.cmsr.onebase.module.app.core.dto.resource.PageRespDTO;
 import com.cmsr.onebase.module.app.core.enums.resource.AppResourceErrorCodeConstants;
 import com.cmsr.onebase.module.app.core.enums.resource.PageTypeSetEnum;
-import com.cmsr.onebase.module.screen.api.GoViewProjectApi;
-import com.cmsr.onebase.module.screen.api.dto.GoViewProjectDTO;
-import jakarta.annotation.Resource;
 import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,9 +38,8 @@ public class PageServiceProvider {
     @Autowired
     private AppWorkbenchPageRepository workbenchPageRepository;
 
-    @Resource
-    private GoViewProjectApi goViewProjectApi;
-
+    // @Resource
+    // private GoViewProjectApi goViewProjectApi;
 
     public PageRespDTO getPage(Long pageId) {
         AppResourcePageDO pageDO = pageRepository.getById(pageId);
@@ -95,9 +91,10 @@ public class PageServiceProvider {
             List<AppResourceWorkbenchPageDO> workbenchPageDOList = workbenchPageRepository.findByPageSetUuid(applicationId, pageSetUuid);
             return BeanUtils.toBean(workbenchPageDOList, PageDTO.class);
         } else if(PageTypeSetEnum.isDashboardType(pageSetType)){
-            //数据大屏类型 查询数据大屏信息
-            List<GoViewProjectDTO> dashboardList = goViewProjectApi.getDashboard(pageSetDO.getDashboardId());
-            return BeanUtils.toBean(dashboardList, PageDTO.class);
+            // //数据大屏类型 查询数据大屏信息
+            // List<GoViewProjectDTO> dashboardList = goViewProjectApi.getDashboard(pageSetDO.getDashboardId());
+            // return BeanUtils.toBean(dashboardList, PageDTO.class);
+            return Collections.emptyList();
         } else {
             // 普通表单或流程表单类型，查询普通页面表
             List<AppResourcePageDO> pageDOList = pageRepository.findAllFormPageByAppIdAndPageSetUuid(applicationId, pageSetUuid);
