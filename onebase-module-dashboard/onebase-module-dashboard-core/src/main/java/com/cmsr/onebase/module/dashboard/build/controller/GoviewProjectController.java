@@ -64,7 +64,7 @@ public class GoviewProjectController  extends BaseController {
 	@GetMapping("/list")
 	@ResponseBody
 	@ApiSignIgnore
-	public CommonResult<PageResult<GoviewProject>> list(Tablepar tablepar){
+	public CommonResult<Page<GoviewProject>> list(Tablepar tablepar){
 
 		if (tablepar.getPage() == null && tablepar.getLimit() == null) {
 			tablepar.setPage(1);
@@ -76,7 +76,7 @@ public class GoviewProjectController  extends BaseController {
 				.like(GoviewProject::getProjectName, tablepar.getSearchText(), StringUtils.isNotBlank(tablepar.getSearchText() ));
 		Page<GoviewProject> iPages = iGoviewProjectService.page(page, queryWrapper);
 
-		return CommonResult.success(new PageResult<>(iPages.getRecords(), (long) iPages.getRecords().size()));
+		return CommonResult.success(iPages);
 	}
 
 
