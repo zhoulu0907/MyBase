@@ -66,7 +66,7 @@ const XSelectMutiple = memo((props: XSelectMutipleConfig & { runtime?: boolean; 
       type: ValidatorType.Custom,
       message: `${label.text}是必填项`,
       validator: (value, callback) => {
-        if (value.length > verify?.maxChecked) {
+        if (value?.length > verify?.maxChecked) {
           callback(`选中数量不能大于${verify?.maxChecked}`);
         } else {
           callback();
