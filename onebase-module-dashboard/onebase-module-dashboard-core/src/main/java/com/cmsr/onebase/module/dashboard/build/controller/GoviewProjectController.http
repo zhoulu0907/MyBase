@@ -4,7 +4,7 @@
 # 确保先在AuthController.http中登录获取token
 
 ### 1. 分页查询项目列表
-GET {{baseUrl}}/dashboard/list?page=1&limit=3&appId=1
+GET {{baseUrl}}/dashboard/list?searchText=测试
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
@@ -18,7 +18,7 @@ tenant-id: {{adminTenantId}}
   "projectName": "Screen_test_Gsp1",
   "indexImage": "",
   "remarks": "",
-  "appId": 1,
+  "appId": "1234516",
   "tenantId": {{adminTenantId}}
 
 }
