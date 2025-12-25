@@ -1,7 +1,7 @@
 import { filterSpace } from '@/utils';
 import { emailValidator, phoneValidator } from '@/utils/validator';
 import { Button, Form, Input, Message, Select, Spin, Tabs } from '@arco-design/web-react';
-import { UploadAvatarComponent, UserPermissionManager } from '@onebase/common';
+import { getPublicKey, sm2Encrypt, UploadAvatarComponent, UserPermissionManager } from '@onebase/common';
 import { getLoginedUser, updateLoginedUser, updateLoginedUserPwd, uploadFile } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -85,6 +85,10 @@ const ProfileEditPage: React.FC<IEditPageProps> = ({ avatarUrl, setAvatarUrl }) 
   const handleSubmitPassword = async () => {
     try {
       const values = await passwordForm.validate();
+
+      values.oldPassword = await sm2Encrypt(getPublicKey(), values.oldPassword);
+      values.newPassword = await sm2Encrypt(getPublicKey(), values.newPassword);
+
       const req = {
         oldPassword: values.oldPassword,
         newPassword: values.confirmNewPassword

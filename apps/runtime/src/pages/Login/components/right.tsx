@@ -154,7 +154,9 @@ const Right: React.FC = () => {
 
       const deviceId = await getOrCreateDeviceInfo();
 
-      values.password = await sm2Encrypt(getPublicKey(), values.password);
+      if (values.password) {
+        values.password = await sm2Encrypt(getPublicKey(), values.password);
+      }
 
       if (curAppInfo.value.publishModel === PUBLISH_MODULE.SASS) {
         const sassloginData: RuntimeMobileLoginRequest = {

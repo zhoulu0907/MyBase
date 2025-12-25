@@ -27,7 +27,7 @@ interface dataList {
   desc: string;
 }
 
-const LargeScreen: FC = () => {
+const Dashboard: FC = () => {
   const [loading, setLoading] = useState(false);
   const [dataList, setDataList] = useState<dataList[]>([]);
   const [total, setTotal] = useState(30);
@@ -292,4 +292,4 @@ const LargeScreen: FC = () => {
     </div>
   );
 };
-export default LargeScreen;
+export default Dashboard;

@@ -29,16 +29,17 @@ const Runtime: React.FC = () => {
   }, [curMenuId]);
 
   useEffect(() => {
-    getMainMetaData();
-  }, [curMenu.value]);
+    if (curMenu.value?.menuCode) {
+      getMainMetaData(curMenu.value?.entityUuid || localStorage.getItem('curMenu-entityUuid') || '');
+    }
+    }, [curMenu.value]);
 
-  const getMainMetaData = async () => {
-    const sessionEntityUuid = sessionStorage.getItem('ENTITY_UUID');
-    if (!(curMenu.value?.entityUuid || sessionEntityUuid)) {
+  const getMainMetaData = async (entityUuid: string) => {
+    if (!entityUuid) {
       return;
     }
+    const entityListWithFields = await getEntityListWithFields({ entityUuids: [entityUuid] });
 
-    const entityListWithFields = await getEntityListWithFields({ entityUuids: [curMenu.value?.entityUuid || sessionEntityUuid] });
     const [entityWithChildren] = entityListWithFields;
     if (entityWithChildren) {
       setMainEntity({
@@ -73,6 +74,7 @@ const Runtime: React.FC = () => {
       }
     }
   };
+
 
   const renderContent =
     curMenuId.indexOf('TASK-') >= 0 ? null : (
