@@ -138,33 +138,34 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
     isDropdownMode: () => props.selectMethod === 'dropdown'
   };
 
+  const fetchOptions = async () => {
+    if (!runtime || !isRuntimeEnv()) {
+      return;
+    }
+
+    const tableName = props?.selectedDataSource?.tableName;
+    if (!tableName) return;
+    const { curMenu } = menuSignal;
+    const req: PageMethodV2Params = {
+      pageNo: 1,
+      pageSize: 100
+    };
+
+    const res = await dataMethodPageV2(tableName, curMenu.value?.id, req);
+    const lastKey = (displayFields || []).length ? displayFields[displayFields.length - 1]?.value : undefined;
+    const list = Array.isArray(res?.list) ? res.list : [];
+    const opts = list.map((item: any) => ({
+      label: lastKey ? (item?.[lastKey] ?? '') : '',
+      value: item?.id ?? item?.id
+    }));
+    setOptions(opts);
+    setDataList(list);
+  };
+
   // ===== 方法：帮助方法 end =====
 
   useEffect(() => {
-    const fetchOptions = async () => {
-      if (!runtime || !isRuntimeEnv()) {
-        return;
-      }
-
-      const tableName = props?.selectedDataSource?.tableName;
-      if (!tableName) return;
-      const { curMenu } = menuSignal;
-      const req: PageMethodV2Params = {
-        pageNo: 1,
-        pageSize: 100
-      };
-
-      const res = await dataMethodPageV2(tableName, curMenu.value?.id, req);
-      const lastKey = (displayFields || []).length ? displayFields[displayFields.length - 1]?.value : undefined;
-      const list = Array.isArray(res?.list) ? res.list : [];
-      const opts = list.map((item: any) => ({
-        label: lastKey ? (item?.[lastKey] ?? '') : '',
-        value: item?.id ?? item?.id
-      }));
-      setOptions(opts);
-      setDataList(list);
-    };
-    if (helpers.isDropdownMode()) {
+    if (isInteractive && helpers.isDropdownMode()) {
       fetchOptions();
     }
   }, [

@@ -1,11 +1,28 @@
 version: '3.8'
 
 services:
+  onebase-nginx:
+    image: ${IMAGE_NAME_ONEBASE_NGINX:-onebase-v3-fe/fe-nginx:latest}
+    container_name: onebase-nginx
+    ports:
+      - '${ONEBASE_NGINX_PORT:-4400}:80'
+    restart: unless-stopped
+    networks:
+      - onebase-network
+    healthcheck:
+      test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://localhost/']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    volumes:
+      - ./config/nginx.conf:/etc/nginx/conf.d/default.conf
+
   admin-console:
     image: ${IMAGE_NAME_ADMIN_CONSOLE:-onebase-v3-fe/fe-nginx:latest}
     container_name: onebase-admin-console
     ports:
-      - '${ADMIN_CONSOLE_PORT:-4400}:80'
+      - '${ADMIN_CONSOLE_PORT:-4402}:80'
     restart: unless-stopped
     networks:
       - onebase-network

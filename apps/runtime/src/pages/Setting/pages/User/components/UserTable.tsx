@@ -4,7 +4,14 @@ import StatusTag, { getStatusLabel } from '@/components/StatusTag';
 import { Dropdown, Input, Menu, Message, Modal, Pagination, Select, Space, Table, Tag } from '@arco-design/web-react';
 import { IconDownload, IconMoreVertical, IconPlus, IconUpload } from '@arco-design/web-react/icon';
 import { type AuthRoleUsersPageRespVO } from '@onebase/app';
-import { CORP_USER_PERMISSION as ACTIONS, AddMembers, hasAllPermissions, hasPermission } from '@onebase/common';
+import {
+  CORP_USER_PERMISSION as ACTIONS,
+  AddMembers,
+  getPublicKey,
+  hasAllPermissions,
+  hasPermission,
+  sm2Encrypt
+} from '@onebase/common';
 import type { PageParam, UpdateAdminOrDirectorReq, UserVO } from '@onebase/platform-center';
 import {
   deleteUser,
@@ -177,6 +184,7 @@ export default function UserTable({
 
     try {
       setResetPasswordModalVisible(false);
+      password = await sm2Encrypt(getPublicKey(), password);
       await resetUserPassword(resetPasswordUser.id, password);
 
       Message.success('密码已重置');

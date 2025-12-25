@@ -42,7 +42,7 @@
     .search-bar-form-item {
       flex: 1;
       .arco-form-label-item {
-        display: none;
+        /* display: none; */
       }
       .arco-form-item-control {
         padding: 0;

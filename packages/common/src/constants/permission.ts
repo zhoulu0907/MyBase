@@ -231,3 +231,9 @@ export const CORP_INFO_PERMISSION = {
   QUERY: CORP_INFO_QUERY,
   UPDATE: CORP_INFO_UPDATE
 };
+
+/** 企业管理-授权应用 */
+export const CORP_APP_AUTH_ENABLE = 'corp:app-auth:enable'; //禁用启用
+export const CORP_APP_AUTH_PERMISSION = {
+  ENABLE: CORP_APP_AUTH_ENABLE
+};
