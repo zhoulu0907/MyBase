@@ -181,7 +181,6 @@ public class GoviewProjectController  extends BaseController {
 			return CommonResult.success(goviewProjectVo);
 		}
 		return CommonResult.success(null);
-
     }
 
 	@ApiOperation(value = "保存项目数据", notes = "保存项目数据")
