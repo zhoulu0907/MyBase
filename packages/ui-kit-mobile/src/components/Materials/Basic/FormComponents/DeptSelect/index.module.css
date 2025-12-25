@@ -27,9 +27,14 @@
 .inputDeptSelectPopupContainer {
   width: 100vw;
   height: 100dvh;
-  background-color: #fff;
+  max-width: 100%;
+  max-height: 100%;
+   background-color: #fff;
   display: flex;
   flex-direction: column;
+  &.editPreview {
+    height: calc(80vh - 48px);
+  }
 
   .popupHeaderOBMobile {
     display: flex;

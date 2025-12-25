@@ -1,6 +1,6 @@
 import { memo, useEffect, useState } from 'react';
 import { nanoid } from 'nanoid';
-import { Checkbox, Ellipsis, Form, PopupSwiper, Cell, Button } from '@arco-design/mobile-react';
+import { Checkbox, Ellipsis, Form, PopupSwiper, Cell } from '@arco-design/mobile-react';
 import IconSquareChecked from '@arco-design/mobile-react/esm/icon/IconSquareChecked';
 import IconSquareUnchecked from '@arco-design/mobile-react/esm/icon/IconSquareUnchecked';
 import IconSquareDisabled from '@arco-design/mobile-react/esm/icon/IconSquareDisabled';
@@ -47,9 +47,19 @@ const XSelectMutiple = memo((props: XSelectMutipleConfig & { runtime?: boolean; 
     if (Array.isArray(formValue) && formValue.length > 0) {
       return formValue.map(val => String(val));
     }
-    return options?.filter(ele => ele?.isChosen)?.map(ele => String(ele.value)) || [];
+    return [];
   });
 
+  useEffect(() => {
+    if (dataField?.length) {
+      getOptions()
+    }
+  }, [dataField])
+
+  const getOptions = async () => {
+    const newOptions = await getFieldOptionsConfig(dataField, mainEntity, subEntities);
+    setOptions(newOptions)
+  }
   const rules: ITypeRules<ValidatorType.Custom>[] = [
     {
       required: verify?.required,
@@ -64,17 +74,6 @@ const XSelectMutiple = memo((props: XSelectMutipleConfig & { runtime?: boolean; 
       }
     }
   ];
-
-  useEffect(() => {
-    if (dataField?.length) {
-      getOptions()
-    }
-  }, [dataField])
-
-  const getOptions = async () => {
-    const newOptions = await getFieldOptionsConfig(dataField, mainEntity, subEntities);
-    setOptions(newOptions)
-  }
 
   const handleCancel = (e: any) => {
     e.stopPropagation();

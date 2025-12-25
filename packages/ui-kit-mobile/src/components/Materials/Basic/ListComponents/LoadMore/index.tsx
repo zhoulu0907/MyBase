@@ -262,8 +262,9 @@ const XLoadMore = memo(
                 field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE
             );
             if (multiSelectField && newItem[key]) {
+              
               if (Array.isArray(newItem[key])) {
-                newItem[key] = newItem[key].map((item: any) => item?.id).join(', ');
+                newItem[key] = newItem[key].map((item: any) => item.name || item?.id).join(', ');
               }
             }
 
