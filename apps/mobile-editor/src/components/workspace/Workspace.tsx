@@ -550,7 +550,7 @@ const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({ props, isListEditor =
                     }
                     setSubTableComponents(cpID, subFieldComponents);
                     entityList.push({ displayName: cpName, id: cpID, type: cpType });
-                  } else if (item.entityId && item.entityId !== mainEntity.entityId) {
+                  } else if (item.entityId && item.entityId !== mainEntity?.entityId) {
                     // 子表 数据字段  不做任何操作
                   } else {
                     // 主表字段、普通字段
