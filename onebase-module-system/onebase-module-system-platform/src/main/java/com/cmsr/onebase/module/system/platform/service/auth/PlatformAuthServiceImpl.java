@@ -70,12 +70,6 @@ public class PlatformAuthServiceImpl implements PlatformAuthService {
     @Value("${onebase.captcha.enable:true}")
     @Setter // 为了单测：开启或者关闭验证码
     private Boolean            captchaEnable;
-    /**
-     * 平台租户验证开关，默认为 false
-     */
-    @Value("${onebase.platform-tenant.enable-create-app:false}")
-    @Setter // 为了单测：开启或者关闭验证码
-    private Boolean            platformTenantEnableCreateApp;
 
     @Resource
     private TenantService     tenantService;

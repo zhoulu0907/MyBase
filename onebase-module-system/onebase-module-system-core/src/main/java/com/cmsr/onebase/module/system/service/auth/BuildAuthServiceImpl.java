@@ -184,25 +184,6 @@ public class BuildAuthServiceImpl implements BuildAuthService {
         }
     }
 
-
-    @Override
-    public AuthLoginRespVO adminLogin(UserLoginReqVO reqVO) {
-        // 1. 校验验证码
-        validateCaptcha(reqVO);
-
-        // 2. 使用账号密码，进行登录
-        AdminUserDO user = authenticate(reqVO.getUsername(), reqVO.getPassword());
-
-        // 3. 校验是否是平台管理员
-        boolean isAdmin = permissionService.isPlatformSuperAdmin(user.getId());
-        if (!isAdmin) {
-            throw exception(AUTH_LOGIN_USER_NOT_ADMIN_ERROR);
-        }
-
-        // 4. 创建 Token 令牌，记录登录日志
-        return createTokenAfterLoginSuccess(user.getUserType(), user.getId(), reqVO.getUsername(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_USERNAME);
-    }
-
     @Override
     @LogRecord(type = LOGIN_USER_TYPE, subType = LOGIN_USER_TENANT_SUB_TYPE, bizNo = "{{#user.id}}",
             success = LOGIN_USER_TENANT_SUCCESS)

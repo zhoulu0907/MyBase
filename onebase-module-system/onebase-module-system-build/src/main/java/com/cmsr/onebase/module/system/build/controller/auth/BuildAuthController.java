@@ -93,12 +93,12 @@ public class BuildAuthController {
         return success(permissionService.getPermissionInfo(code));
     }
 
-    @PostMapping("/register")
-    @PermitAll
-    @Operation(summary = "注册用户")
-    public CommonResult<AuthLoginRespVO> register(@RequestBody @Valid AuthRegisterReqVO registerReqVO) {
-        return success(authService.register(registerReqVO));
-    }
+    // @PostMapping("/register")
+    // @PermitAll
+    // @Operation(summary = "注册用户")
+    // public CommonResult<AuthLoginRespVO> register(@RequestBody @Valid AuthRegisterReqVO registerReqVO) {
+    //     return success(authService.register(registerReqVO));
+    // }
 
     // ========== 验证码 ==========
     @PostMapping("/send-verify-code")
