@@ -6,14 +6,18 @@ import styles from './index.module.less';
 import eye from '@/assets/images/screen/eye.png';
 interface dataList {
   id: string;
-  name: string;
-  desc: string;
+  templateName: string;
+  templateType: string;
+  remarks: string;
+  indexImage: string;
 }
 interface CardProps {
   item: {
+    remarks: string;
     id: string;
-    name: string;
-    desc: string;
+    templateName: string;
+    templateType: string;
+    indexImage: string;
   };
   title: string;
   onEditTemplate: (item: dataList) => void;
@@ -43,11 +47,11 @@ const ScreenCard: FC<CardProps> = ({ item, title, onEditTemplate, onEdit, onPrev
   return (
     <div className={styles.appCard}>
       <div className={styles.appCardImg}>
-        <img src={screenTemplate} alt="" />
+        <img src={item.indexImage} alt="" />
       </div>
       <div className={`${styles.appCardFooter} ${styles.cardName}`}>
         <div>
-          {item.name}
+          {item.templateName}
           <IconEdit
             fontSize={16}
             style={{ marginLeft: 4 }}
@@ -59,7 +63,7 @@ const ScreenCard: FC<CardProps> = ({ item, title, onEditTemplate, onEdit, onPrev
         </div>
         <div className={styles.cardState}>{title}</div>
       </div>
-      <div className={styles.dec}>描述信息描述信息描述信息描述信息描述信息描述信息描述信息。</div>
+      <div className={styles.dec}>{item.remarks}</div>
 
       <div className={styles.footer}>
         <Space size={'medium'}>

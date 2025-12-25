@@ -47,3 +47,6 @@ export const getMobileEditorURL = (): string => {
 export const getResourceURL = (): string => {
   return envConfig?.RESOURCE_URL;
 };
+export const getDashBoardURL = (): string => {
+  return envConfig?.APP_BUILDER_DASHBOARD_URL;
+};

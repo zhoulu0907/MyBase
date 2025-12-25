@@ -2,7 +2,7 @@ import CreateDashboardModal from '@/components/CreateDashboardModal';
 import { Button, Form, Input, Modal, Pagination, Spin } from '@arco-design/web-react';
 import { IconPlus, IconSearch } from '@arco-design/web-react/icon';
 import { useEffect, useState, type FC } from 'react';
-import ScreenCard from '../DashbordCard';
+import ScreenCard from '../DashboardCard';
 import styles from './index.module.less';
 const FormItem = Form.Item;
 const { useForm } = Form;
@@ -13,7 +13,7 @@ interface dataList {
   desc: string;
 }
 
-const LargeScreen: FC = () => {
+const Dashboard: FC = () => {
   const [loading, setLoading] = useState(false);
   const [dataList, setDataList] = useState<dataList[]>();
   const [total, setTotal] = useState(1);
@@ -215,4 +215,4 @@ const LargeScreen: FC = () => {
     </div>
   );
 };
-export default LargeScreen;
+export default Dashboard;
