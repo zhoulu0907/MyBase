@@ -42,3 +42,7 @@ export const getRuntimeMobileURL = (): string => {
   const runtimeMobileUrl = envConfig?.RUNTIME_MOBILE_URL;
   return runtimeMobileUrl || 'http://localhost:9527';
 };
+export const getDashboardDataSetUrl = (): string => {
+  const dashboardDataSetUrl = (window as any).global_config?.APP_BUILDER_DATASET_URL;
+  return dashboardDataSetUrl || 'http://localhost:9528';
+};
