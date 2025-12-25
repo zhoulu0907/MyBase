@@ -29,14 +29,8 @@ import {
   VALIDATION_TYPE,
   type AppEntityField
 } from '@onebase/app';
-import {
-  isRuntimeEnv,
-  pagesRuntimeSignal,
-  SYSTEM_FIELD_CREATED_TIME,
-  SYSTEM_FIELD_UPDATED_TIME
-} from '@onebase/common';
+import { isRuntimeEnv, pagesRuntimeSignal } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
-import dayjs from 'dayjs';
 import PreviewRender from 'src/components/render/PreviewRender';
 import { useFormEditorSignal } from 'src/signals/page_editor';
 import { ENTITY_FIELD_TYPE } from '../../../../DataFactory/const';
@@ -44,6 +38,7 @@ import { COMPONENT_MAP } from '../../../componentsMap';
 import { getComponentSchema } from '../../../schema';
 import { DraftBox } from './DraftBox';
 import './index.css';
+import { renderCellText } from './renderCellText';
 import type { XTableConfig } from './schema';
 import TableSearch from './tableSerach';
 
@@ -58,23 +53,8 @@ type XTableSelectProps = {
   defaultSelectedId?: string | number | null;
   onSelectedChange?: (value: any | null, fromDoubleClick?: boolean) => void;
   refreshAfterSelect?: boolean;
-};
-
-//TODO: 优化元数据的显示内容，根据不同的类型在此显示不同的内容
-const renderCellText = (columnId: string, v: any) => {
-  if (v === null || v === undefined) return '';
-
-  if (typeof v === 'object') {
-    if ('displayValue' in v && typeof (v as any).displayValue !== 'undefined') return (v as any).displayValue;
-    if ('userName' in v && typeof (v as any).userName !== 'undefined') return (v as any).userName as any;
-    return '';
-  }
-
-  if (columnId === SYSTEM_FIELD_CREATED_TIME || columnId === SYSTEM_FIELD_UPDATED_TIME) {
-    return dayjs(v).format('YYYY-MM-DD HH:mm:ss');
-  }
-
-  return v as any;
+  //   隐藏草稿箱
+  hiddenDraft?: boolean;
 };
 
 const XTable = memo(
@@ -309,11 +289,10 @@ const XTable = memo(
 
               // 表单配置
               if (cpId) {
-                // 组件类型
-                const cpType = components.value?.find((ele) => ele.id === cpId)?.type;
-
                 // 当前组件配置
                 const currentComponentSchemas = fromPageComponentSchemas.value[cpId];
+                // 组件类型
+                const cpType = currentComponentSchemas.type;
                 // 覆盖配置
                 let dataField: string[] = [];
                 if (Array.isArray(mainMetaData?.parentFields)) {
@@ -403,6 +382,7 @@ const XTable = memo(
           };
         });
       }
+
       const indexColumn = {
         title: '序号',
         dataIndex: 'index',
@@ -685,7 +665,16 @@ const XTable = memo(
                   添加数据
                 </Button>
               )}
-              <DraftBox showFromPageData={showFromPageData} tableColumns={finalColumns} />
+
+              {!props?.xTableSelectProps?.hiddenDraft && (
+                <DraftBox
+                  showFromPageData={showFromPageData}
+                  tableColumns={finalColumns}
+                  menuId={curMenu.value?.id}
+                  tableName={tableName}
+                  refresh={refresh}
+                />
+              )}
             </div>
             <Button type="text" onClick={() => handlePage()} icon={<IconRefresh />}></Button>
           </div>

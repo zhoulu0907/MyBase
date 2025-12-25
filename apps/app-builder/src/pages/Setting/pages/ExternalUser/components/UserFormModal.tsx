@@ -15,7 +15,13 @@ import {
 } from '@arco-design/web-react';
 import { formatTimeYMDHMS } from '@onebase/common';
 import type { SimpleRoleVO, UserVO } from '@onebase/platform-center';
-import { createExternalUserApi, getAuthAppListApi, getUser, StatusEnum, updateExternalUserApi } from '@onebase/platform-center';
+import {
+  createExternalUserApi,
+  getAuthAppListApi,
+  getExternalUser,
+  StatusEnum,
+  updateExternalUserApi
+} from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
 import styles from '../index.module.less';
 import type { authorizedAppList } from '../../Business/types/appItem';
@@ -87,8 +93,12 @@ export default function UserFormModal({
       if (initialValues.mobile?.includes('*')) {
         setEncryptedMobile(initialValues.mobile);
       }
-      getUser(initialValues.id).then((user: UserVO) => {
-        form.setFieldsValue({ roleIds: user.roles?.map((item: SimpleRoleVO) => item.id) });
+      getExternalUser(initialValues.id).then((user: UserVO) => {
+        const defaultSelectedIds = user.userApplicationList?.map(data => data.appId)?.filter(Boolean) ?? [];
+        form.setFieldsValue({
+          roleIds: user.roles?.map((item: SimpleRoleVO) => item.id),
+          applicationIdList: defaultSelectedIds
+        });
       });
     }
   }, [visible, mode, initialValues, form]);
@@ -178,7 +188,7 @@ export default function UserFormModal({
                 []
               }
             >
-              <Input placeholder="请输入" />
+              <Input placeholder="请输入" maxLength={11}/>
             </Form.Item>
           </Col>
         </Row>

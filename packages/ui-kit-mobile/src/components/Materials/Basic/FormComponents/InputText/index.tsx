@@ -35,9 +35,7 @@ const XInputText = memo((props: XInputTextConfig & { runtime?: boolean; detailMo
       <Input
         placeholder={placeholder}
         maxLength={verify?.lengthLimit ? verify?.maxLength : undefined}
-        inputStyle={{
-          textAlign: align
-        }}
+        inputStyle={{ textAlign: layout === 'vertical' ? 'left' : 'right' }}
         blockChangeWhenCompositing={true}
       />
     );
@@ -65,7 +63,8 @@ const XInputText = memo((props: XInputTextConfig & { runtime?: boolean; detailMo
       className="inputTextWrapperOBMobile"
       field={fieldId}
       rules={rules}
-      label={label.display ? <Ellipsis text={label.text} /> : undefined}
+      layout={layout}
+      label={label.display ? <Ellipsis text={label.text} maxLine={2} /> : undefined}
       initialValue={defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : ''}
       style={{
         pointerEvents: (!runtime || detailMode) ? 'none' : 'unset',
@@ -73,8 +72,13 @@ const XInputText = memo((props: XInputTextConfig & { runtime?: boolean; detailMo
       }}
     >
       {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
-        // 只读模式，渲染文本内容 TODO 主表不展示
-        <div className="readonlyText">{form?.getFieldValue(fieldId) || (defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : '')}</div>
+        // 只读模式，渲染文本内容
+        <Input
+          className="readonlyText"
+          readOnly
+          value={form?.getFieldValue(fieldId) || (defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : '')}
+          inputStyle={{ textAlign: layout === 'vertical' ? 'left' : 'right' }}
+        />
       ) : (
         renderContent()
       )}

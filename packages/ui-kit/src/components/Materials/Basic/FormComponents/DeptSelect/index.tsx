@@ -42,7 +42,7 @@ const XDeptSelect = memo((props: XInputDeptSelectConfig & { runtime?: boolean; d
   const fieldValue = Form.useWatch(fieldName, form);
 
   useEffect(() => {
-    if(status !== STATUS_VALUES[STATUS_OPTIONS.READONLY] && !detailMode) {
+    if (status !== STATUS_VALUES[STATUS_OPTIONS.READONLY] && !detailMode) {
       fetchDeptList();
     }
   }, []);
@@ -51,21 +51,22 @@ const XDeptSelect = memo((props: XInputDeptSelectConfig & { runtime?: boolean; d
     if (runtime && fieldValue) {
       setCurrentSelectDept(fieldValue?.name);
       runtimeEditRef.current = true;
-    } else if (status !== STATUS_VALUES[STATUS_OPTIONS.READONLY] && !detailMode){
-      setCurrentSelectDept('');
-      form.setFieldValue(fieldName, undefined);
     }
   }, [fieldValue]);
 
   useEffect(() => {
     getCurDeptTree(deptTree);
-    if (status !== STATUS_VALUES[STATUS_OPTIONS.READONLY] && !detailMode) {
-      defaultDeptValue ? handleChange(defaultDeptValue) : form.setFieldValue(fieldName, undefined);
-    }
   }, [selectScope]);
 
   useEffect(() => {
-    if(runtime && defaultDeptValue && !fieldValue && !runtimeEditRef.current && status !== STATUS_VALUES[STATUS_OPTIONS.READONLY] && !detailMode) {
+    if (
+      runtime &&
+      defaultDeptValue &&
+      !fieldValue &&
+      !runtimeEditRef.current &&
+      status !== STATUS_VALUES[STATUS_OPTIONS.READONLY] &&
+      !detailMode
+    ) {
       if (!deptFlatTree || deptFlatTree.length === 0) return; // 等待数据
       handleChange(defaultDeptValue);
     }

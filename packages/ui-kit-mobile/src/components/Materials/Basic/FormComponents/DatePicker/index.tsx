@@ -128,6 +128,7 @@ const XDatePicker = memo((props: XDatePickerConfig & { runtime?: boolean; detail
           };
           return `${value}${map[type] || ''}`;
         }}
+        contentStyle={{ marginTop: layout === 'vertical' ? '0.3rem' : 0 }}
       />
     )
   };
@@ -145,10 +146,11 @@ const XDatePicker = memo((props: XDatePickerConfig & { runtime?: boolean; detail
       className="inputTextWrapperOBMobile"
       field={fieldId}
       rules={rules}
-      label={label.display && <Ellipsis text={label.text} />}
+      layout={layout}
+      label={label.display && <Ellipsis text={label.text} maxLine={2} />}
       initialValue={form?.getFieldValue(fieldId)}
       style={{
-        textAlign: align,
+        textAlign: layout === 'vertical' ? 'left' : 'right',
         pointerEvents: (!runtime || detailMode) ? 'none' : 'unset',
         opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
       }}

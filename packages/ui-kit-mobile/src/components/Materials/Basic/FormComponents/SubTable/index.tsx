@@ -295,7 +295,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
       field=""
       rules={rules}
       layout="vertical"
-      label={label.display ? <Ellipsis text={label.text} /> : undefined}
+      label={label.display ? <Ellipsis text={label.text} maxLine={2} /> : undefined}
       style={{
         opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
       }}
@@ -321,15 +321,15 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                       subTableComponents[id] &&
                       subTableComponents[id].map((subTable: any) => {
                         const config = pageComponentSchemas[subTable.id].config;
-                        const [_subTableName, fieldName] = config.dataField;
+                        const [subTableName, fieldName] = config.dataField;
                         const newConfig = {
                           ...config,
-                          dataField: [mainEntity.tableName, `${id}.${index}.${fieldName}`]
+                          dataField: [mainEntity.tableName, `${subTableName}.${index}.${fieldName}`]
                         };
                         const pageSchema = { ...pageComponentSchemas[subTable.id], config: newConfig };
-                        const isImageOrFile = pageSchema.type === FORM_COMPONENT_TYPES.IMG_UPLOAD || pageSchema.type === FORM_COMPONENT_TYPES.FILE_UPLOAD;
+                        // const isImageOrFile = pageSchema.type === FORM_COMPONENT_TYPES.IMG_UPLOAD || pageSchema.type === FORM_COMPONENT_TYPES.FILE_UPLOAD;
                         return (
-                          <Cell className={`${isImageOrFile ? 'verticalLayout' : ''}`} label={<Ellipsis text={config.cpName} />} key={subTable.id} style={{ padding: 0 }}>
+                          <Cell className={'verticalLayout'} label={<Ellipsis text={config.cpName} maxLine={2} />} key={subTable.id} style={{ padding: 0 }} >
                             <PreviewRender
                               editLoading={editLoading}
                               form={form}
@@ -429,7 +429,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                               onSubComponentClick(e, cp);
                             }}
                           >
-                            <Cell label={<Ellipsis text={config.cpName} />} key={cp.id} style={{ padding: 0 }}>
+                            <Cell label={<Ellipsis text={config.cpName} maxLine={2} />} key={cp.id} style={{ padding: 0 }}>
                               <EditRender
                                 runtime={runtime}
                                 cpId={cp.id}

@@ -146,7 +146,6 @@ const XSwitch: XInputSwitchSchema = {
       key: 'defaultValueConfig',
       name: '默认值',
       type: CONFIG_TYPES.DEFAULT_VALUE,
-      valueType: 'boolean'
     },
     switchFillTextConfig,
     // 显示状态

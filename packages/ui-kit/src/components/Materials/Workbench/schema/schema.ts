@@ -5,6 +5,7 @@ export type { WorkbenchComponentSchema } from '../registry/componentRegistry';
 import WorkbenchSchemaBasic from '../WorkbenchBasicComponents/schema';
 import WorkbenchSchemaAdvanced from '../WorkbenchAdvancedComponents/schema';
 import { WORKBENCH_COMPONENT_TYPE_VALUES, type WorkbenchComponentType } from '../core/componentTypes';
+import { WORKBENCH_WIDTH_OPTIONS, WORKBENCH_WIDTH_VALUES } from '../core/constants';
 
 type WorkbenchComponentSchemaMap = Record<WorkbenchComponentType, WorkbenchComponentSchema>;
 
@@ -75,7 +76,7 @@ export function getWorkbenchComponentWidth(
   const resolvedSchema = schema?.config?.width
     ? (schema as WorkbenchComponentSchema)
     : getWorkbenchComponentSchema(itemType);
-  return resolvedSchema.config.width || '';
+  return resolvedSchema.config.width || WORKBENCH_WIDTH_VALUES[WORKBENCH_WIDTH_OPTIONS.FULL];
 }
 
 /**

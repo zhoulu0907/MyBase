@@ -334,7 +334,9 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
             };
           }
           if (page.pageType === CATEGORY_TYPE.FORM) {
-            useEditorSignalMap.get(page.pageUuid)!.setLayoutSubComponents(component.parentCode, colComponents as any[][]);
+            useEditorSignalMap
+              .get(page.pageUuid)!
+              .setLayoutSubComponents(component.parentCode, colComponents as any[][]);
           } else if (page.pageType === CATEGORY_TYPE.LIST) {
             setListLayoutSubComponents(component.parentCode, colComponents as any[][]);
           }

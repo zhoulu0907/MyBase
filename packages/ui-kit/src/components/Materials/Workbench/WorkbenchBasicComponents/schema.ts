@@ -4,6 +4,7 @@ import XRichTextEditorWorkbench from './RichTextEditorWorkbench/schema';
 import XInformationList from './InformationList/schema';
 import XTodoList from './TodoList/schema';
 import XWelcomeCard from './WelcomeCard/schema';
+import XButtonWorkbench from './ButtonWorkbench/schema';
 
 const WorkbenchSchemaBasic = {
   XQuickEntry,
@@ -11,7 +12,8 @@ const WorkbenchSchemaBasic = {
   XRichTextEditorWorkbench,
   XInformationList,
   XTodoList,
-  XWelcomeCard
+  XWelcomeCard,
+  XButtonWorkbench
 };
 
 export default WorkbenchSchemaBasic;

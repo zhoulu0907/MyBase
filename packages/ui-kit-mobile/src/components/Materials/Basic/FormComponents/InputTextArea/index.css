@@ -5,10 +5,8 @@
   }
 
   .arco-input-prefix {
-    line-height: 1.08rem;
-    height: 1.08rem;
     padding-right: 0.32rem;
-    font-size: 0.32rem;
+    font-size: var(--fontSize);
   }
 
   .arco-input-wrap {
@@ -33,8 +31,7 @@
     line-height: 0.48rem;
     height: 0.96rem;
     padding: 0;
-    margin: 0.32rem 0;
-    font-size: 0.32rem;
+    font-size: var(--fontSize);
 
     &:hover,
     &:focus {
@@ -45,7 +42,7 @@
 
   .arco-input-container .statistic-text {
     color: #86909C;
-    font-size: 0.28rem;
+    font-size: var(--fontSize);
     bottom: 0.32rem;
     right: 0.32rem;
   }

@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState, type FC } from 'react';
-import { Drawer, Grid, Tag, Button, Popconfirm, Tooltip } from '@arco-design/web-react';
+import { Drawer, Grid, Tag, Button, Popconfirm, Tooltip, Modal } from '@arco-design/web-react';
 import { IconFullscreen, IconLink, IconDoubleRight, IconFullscreenExit } from '@arco-design/web-react/icon';
 import ExpendSp from '@/assets/images/task_center/expend-sp.svg';
 import ProPreviewImg from '@/assets/images/task_center/process-preview.svg';
@@ -10,6 +10,7 @@ import { getFormDetail, getOperatorRecord, fetchExecTask } from '@onebase/app/sr
 import PreviewContainer from './DetailForm';
 import FlowView from '../../../../../../../app-builder/src/pages/Editor/components/flowView';
 import { type FetchExecTaskReq } from '@onebase/app';
+import FlowPredict from '../../../../Runtime/components/preview/flowPredict';
 const Row = Grid.Row;
 const Col = Grid.Col;
 
@@ -35,11 +36,22 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
   const [stepData, setStepData] = useState();
   const [detailData, setDetailData] = useState<any>();
   const [flowViewVisible, setFlowViewVisible] = useState(false);
+  const [isPredictVisible, setPredictVisible] = useState(false);
+  const [entityParam, setEntityParam] = useState<any>();
+  const [businessUuid, setBusinessUuid] = useState<any>();
+  const [defaultApprovalComment, setDefaultApprovalComment] = useState<any>();
   let confirmRef = useRef<any>(null);
   const formRef = useRef<any>(null);
-
   const [popupVisibleMap, setPopupVisibleMap] = useState<any>({});
-  const setPopupVisibleByIndex = (index: number, visible: boolean) => {
+
+  const setPopupVisibleByIndex = (index: number, visible: boolean, item?: any) => {
+    if (item?.buttonName && detailData?.buttonConfigs) {
+      detailData?.buttonConfigs.forEach((element: any) => {
+        if (element.buttonName === item.buttonName) {
+          setDefaultApprovalComment(element.defaultApprovalComment);
+        }
+      });
+    }
     setPopupVisibleMap((prev: any) => {
       if (visible) {
         const newState: any = {};
@@ -82,6 +94,16 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
   const fetchExec = async (value: any) => {
     const buttonType = value?.buttonType;
     const fieldData = await formRef.current.getFormData();
+
+    if (buttonType === BPMConfigButtonType.SUBMIT && !isPredictVisible) {
+      setEntityParam({
+        tableName: detailData?.formData?.tableName,
+        data: fieldData
+      });
+      setBusinessUuid(rowData.businessUuid);
+      setPredictVisible(true);
+      return;
+    }
     try {
       const req: FetchExecTaskReq = {
         buttonType,
@@ -93,6 +115,7 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
         }
       };
       await fetchExecTask(req);
+      setPredictVisible(false);
       onBack && onBack();
     } catch (error) {}
   };
@@ -150,6 +173,7 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
                       instanceId={rowData?.instanceId}
                       itemData={item}
                       isRequired={item?.approvalCommentRequired}
+                      defaultApprovalComment={defaultApprovalComment}
                     />
                   }
                   onOk={() => {
@@ -160,7 +184,7 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
                 >
                   <Button
                     type={item?.buttonType === BPMConfigButtonType.APPROVE ? 'primary' : 'outline'}
-                    onClick={() => setPopupVisibleByIndex(index, true)}
+                    onClick={() => setPopupVisibleByIndex(index, true, item)}
                   >
                     {item?.buttonName}
                   </Button>
@@ -207,7 +231,7 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
       listType === LISTTYPE.WILLDO ||
       listType === LISTTYPE.IDONE ||
       listType === LISTTYPE.ICREATED ||
-      listType === LISTTYPE.ICOPIED||
+      listType === LISTTYPE.ICOPIED ||
       listType === LISTTYPE.LIST
     ) {
       fetchStepData();
@@ -294,6 +318,19 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
         instanceId={rowData?.instanceId}
         businessUuid={rowData?.businessUuid}
       />
+
+      {isPredictVisible && (
+        <Modal
+          title=""
+          visible={isPredictVisible}
+          onOk={() => fetchExec({ buttonType: BPMConfigButtonType.SUBMIT })}
+          onCancel={() => setPredictVisible(false)}
+          autoFocus={false}
+          focusLock={true}
+        >
+          <FlowPredict entityParam={entityParam} businessUuid={businessUuid} />
+        </Modal>
+      )}
     </section>
   );
 };

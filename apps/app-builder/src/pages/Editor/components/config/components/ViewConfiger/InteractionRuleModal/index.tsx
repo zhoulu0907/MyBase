@@ -283,10 +283,10 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
     if (!cpId || fieldOptionsMap[cpId]) {
       return; // 已经加载过或 cpId 为空
     }
+    const componentSchema = pageComponentSchemas.value[cpId];
 
-    const component = components.value.find((item: any) => item?.id === cpId);
-    if (component?.type) {
-      switch (component?.type) {
+    if (componentSchema?.type) {
+      switch (componentSchema.type) {
         case FORM_COMPONENT_TYPES.SELECT_ONE:
         case FORM_COMPONENT_TYPES.SELECT_MUTIPLE:
         case FORM_COMPONENT_TYPES.RADIO:
@@ -304,6 +304,7 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
             } else {
               options = await getFieldOptionsConfig(dataField, mainEntity, subEntities);
             }
+
             setFieldOptionsMap((prev) => ({ ...prev, [cpId]: options }));
           }
           break;
@@ -313,27 +314,20 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
 
   // 同步渲染表单项组件
   const renderValueFormItem = (cpId: string) => {
-    const component = components.value.find((item: any) => item?.id === cpId);
-    if (component?.type) {
-      switch (component?.type) {
+    const componentSchema = pageComponentSchemas.value[cpId];
+    if (componentSchema?.type) {
+      switch (componentSchema.type) {
         case FORM_COMPONENT_TYPES.SELECT_ONE:
         case FORM_COMPONENT_TYPES.SELECT_MUTIPLE:
         case FORM_COMPONENT_TYPES.RADIO:
         case FORM_COMPONENT_TYPES.CHECKBOX:
-          const options = fieldOptionsMap[cpId] || [];
+          const fieldOptions = fieldOptionsMap[cpId] || [];
           // 如果选项还未加载，触发加载
           if (cpId && !fieldOptionsMap[cpId]) {
             loadFieldOptions(cpId);
           }
-          return (
-            <Select options={options} placeholder="请选择静态值">
-              {options.map((ele, index: number) => (
-                <Select.Option key={index} value={ele.id}>
-                  {ele.label}
-                </Select.Option>
-              ))}
-            </Select>
-          );
+
+          return <Select options={fieldOptions} placeholder="请选择静态值" />;
         case FORM_COMPONENT_TYPES.USER_SELECT:
           return (
             <Select placeholder="请选择人员" allowClear showSearch={true} onPopupScroll={scrollHandler}>

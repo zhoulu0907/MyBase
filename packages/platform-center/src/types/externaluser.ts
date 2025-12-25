@@ -248,3 +248,32 @@ export interface updateLoginConfigParams {
    */
   remark?: string;
 }
+
+export interface createExternalUserAppParams {
+  /**
+   * 应用id
+   */
+  applicationIdList: string[];
+  /**
+   * 用户Id
+   */
+  userId: string;
+
+  email?: string;
+  nickName?: string;
+}
+
+export interface forgotPWDParams {
+    /**
+     * 手机号
+     */
+    mobile: string;
+    /**
+     * 密码
+     */
+    password: string;
+    /**
+     * 验证码
+     */
+    verifyCode: string;
+}
