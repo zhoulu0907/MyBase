@@ -6,6 +6,7 @@ import com.cmsr.onebase.module.etl.common.graph.conf.JdbcOutputConfig;
 import com.cmsr.onebase.module.etl.common.graph.conf.JdbcOutputMapper;
 import com.cmsr.onebase.module.etl.executor.action.CreateTableAction;
 import com.cmsr.onebase.module.etl.executor.action.ExecuteSqlAction;
+import com.cmsr.onebase.module.etl.executor.util.DataSourceUtil;
 import com.cmsr.onebase.module.etl.executor.util.FlinkUtil;
 import com.cmsr.onebase.module.etl.executor.util.JooqUtil;
 import lombok.ToString;
@@ -44,7 +45,7 @@ public class JdbcOutputNode extends Node<JdbcOutputConfig> implements CreateTabl
                 .option(JdbcConnectorOptions.DRIVER, config.getJdbcConfig().getDriver())
                 .option(JdbcConnectorOptions.URL, config.getJdbcConfig().getJdbcUrl())
                 .option(JdbcConnectorOptions.USERNAME, config.getJdbcConfig().getUsername())
-                .option(JdbcConnectorOptions.PASSWORD, config.getJdbcConfig().getPassword())
+                .option(JdbcConnectorOptions.PASSWORD, DataSourceUtil.getDecryptoPassword(config.getJdbcConfig().getPassword()))
                 .option(JdbcConnectorOptions.TABLE_NAME, config.getJdbcConfig().getTableName())
                 .build();
         log.info("create table: {}, {}", getId(), tableDescriptor);

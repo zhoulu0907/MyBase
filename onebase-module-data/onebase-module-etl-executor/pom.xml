@@ -110,6 +110,16 @@
             <version>1.7.36</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-crypto</artifactId>
+            <version>5.8.35</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk18on</artifactId>
+            <version>1.78.1</version>
+        </dependency>
         <!--<dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>

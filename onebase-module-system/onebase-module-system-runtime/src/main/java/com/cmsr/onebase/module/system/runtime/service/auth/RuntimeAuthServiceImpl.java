@@ -421,6 +421,7 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
     @Override
     public void thirdUserForgetPassword(UserForgetPasswordReqVO reqVO) {
 
+        // 解密原文
         reqVO.setPassword(pwdEnHelper.decryptHexStr(reqVO.getPassword()));
 
         // 1.校验验证码
