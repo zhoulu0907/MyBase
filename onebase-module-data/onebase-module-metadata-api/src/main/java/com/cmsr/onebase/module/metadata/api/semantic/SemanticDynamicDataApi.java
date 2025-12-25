@@ -165,7 +165,7 @@ public interface SemanticDynamicDataApi {
      * @param body 条件与更新内容请求体（`tableName` + `semanticConditionDTO` + `updateProperties`）
      * @return 更新后的语义值列表
      */
-    List<SemanticEntityValueDTO> UpdateSubTableDataByCondition(@Valid @RequestBody SemanticTargetConditionVO body);
+    List<SemanticEntityValueDTO> updateSubTableDataByCondition(@Valid @RequestBody SemanticTargetConditionVO body);
 
     /**
      * 插入实体数据（编辑态调用）

@@ -315,7 +315,7 @@ public class SemanticDynamicDataApiImpl implements SemanticDynamicDataApi {
     }
 
     @Override
-    public List<SemanticEntityValueDTO> UpdateSubTableDataByCondition(SemanticTargetConditionVO body) {
+    public List<SemanticEntityValueDTO> updateSubTableDataByCondition(SemanticTargetConditionVO body) {
         // 1) 参数校验
         String tableName = body == null ? null : body.getTableName();
         if (tableName == null || tableName.isBlank()) { return List.of(); }
