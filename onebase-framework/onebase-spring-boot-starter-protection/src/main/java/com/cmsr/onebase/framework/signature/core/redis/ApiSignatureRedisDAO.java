@@ -42,7 +42,7 @@ public class ApiSignatureRedisDAO {
         // 从redis中读取配置
         // stringRedisTemplate.opsForValue().set(SIGNATURE_ENABLE, "true");
         String enable = stringRedisTemplate.opsForValue().get(SIGNATURE_ENABLE);
-        return "true".equalsIgnoreCase(enable);
+        return !"false".equalsIgnoreCase(enable);
     }
 
 
