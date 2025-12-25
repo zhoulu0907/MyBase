@@ -6,7 +6,7 @@ import postgresqlIcon from '@/assets/images/etl/postgresql.png';
 import { Button, Checkbox, Form, Grid, Input, Message, Modal, Radio, Select, Steps } from '@arco-design/web-react';
 import { createETLDataSource, updateETLDatasource } from '@onebase/app';
 import { pingETLDataSource } from '@onebase/app/src/services';
-import { getHashQueryParam } from '@onebase/common';
+import { getHashQueryParam, getPublicKey, sm2Encrypt } from '@onebase/common';
 import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
 
@@ -143,6 +143,8 @@ const CreateExternalModal: React.FC<CreateExternalModalProps> = ({ visible, onCl
         console.log('values', values);
         if (isEditMode && initialData) {
           // 编辑模式：使用更新接口
+          values.password = await sm2Encrypt(getPublicKey(), values.password);
+
           const res = await updateETLDatasource({
             id: initialData.id!,
             datasourceName: values.datasourceName,
@@ -165,6 +167,9 @@ const CreateExternalModal: React.FC<CreateExternalModalProps> = ({ visible, onCl
           onCreate(res);
         } else {
           // 新建模式：使用创建接口
+
+          values.password = await sm2Encrypt(getPublicKey(), values.password);
+
           const res = await createETLDataSource({
             datasourceName: values.datasourceName,
             datasourceType: values.datasourceType,
@@ -219,6 +224,7 @@ const CreateExternalModal: React.FC<CreateExternalModalProps> = ({ visible, onCl
 
   const handleTestConnection = async () => {
     form.validate().then(async (values) => {
+      values.password = await sm2Encrypt(getPublicKey(), values.password);
       const res = await pingETLDataSource({
         id: initialData?.id,
         datasourceType: values.datasourceType,

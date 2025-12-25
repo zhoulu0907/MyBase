@@ -16,13 +16,12 @@ const encryptConfig = async () => {
 
   //   这里放config.js的配置
   const obj = {
-    ENVIRONMENT: 'runtime',
-    APP_KEY: 'onebase',
-    APP_SECRET: 'xxx',
-    BASE_URL: 'xxx',
-    RUNTIME_BASE_URL: 'xxx',
-    FILE_DETAIL_URL: 'xxx',
-    PUBLIC_KEY: 'xxx'
+    ENVIRONMENT: '',
+    APP_KEY: '',
+    RUNTIME_BASE_URL: '',
+    RUNTIME_URL: '',
+    RESOURCE_URL: '',
+    PUBLIC_KEY: ''
   };
 
   console.log('原始配置对象:');

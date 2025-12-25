@@ -54,3 +54,5 @@ Thumbs.db
 
 cosco_config/
 devops_config/
+
+scripts/encrypt-config.ts
