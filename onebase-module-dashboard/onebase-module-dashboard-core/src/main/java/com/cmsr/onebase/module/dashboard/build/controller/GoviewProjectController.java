@@ -185,7 +185,7 @@ public class GoviewProjectController  extends BaseController {
 	@ApiSignIgnore
 	@PermitAll
 	@TenantIgnore
-	public AjaxResult saveData(@RequestBody GoviewProjectData data) {
+	public AjaxResult saveData(GoviewProjectData data) {
 
 		GoviewProject goviewProject= iGoviewProjectService.getById(data.getProjectId());
 		if(goviewProject==null) {
@@ -212,7 +212,7 @@ public class GoviewProjectController  extends BaseController {
 	@PermitAll
 	@ApiSignIgnore
 	@TenantIgnore
-	public AjaxResult upload(@RequestBody MultipartFile object) throws IOException{
+	public AjaxResult upload(MultipartFile object) throws IOException{
 		String fileName = object.getOriginalFilename();
 		//默认文件格式
 		String suffixName=v2Config.getDefaultFormat();
