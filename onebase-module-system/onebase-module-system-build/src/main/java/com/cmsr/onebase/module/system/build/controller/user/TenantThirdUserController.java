@@ -47,7 +47,7 @@ public class TenantThirdUserController {
     @Operation(summary = "重置三方用户密码")
     @PreAuthorize("@ss.hasPermission('tenant:third:update-password')")
     public CommonResult<Boolean> updateUserPassword(@Valid @RequestBody ThirdUserUpdatePasswordReqVO reqVO) {
-        userService.thirdUserUpdatePassword(reqVO.getId(), reqVO.getPassword());
+        userService.thirdUserUpdatePassword(reqVO.getId());
         return success(true);
     }
 

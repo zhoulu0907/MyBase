@@ -160,6 +160,9 @@ public class UserServiceImpl implements UserService {
                 createReqVO.getMobile(), createReqVO.getEmail(), createReqVO.getDeptId(), createReqVO.getPostIds());
         // 1.3 校验角色权限
         validateRoleIds(createReqVO.getRoleIds());
+
+        // 密码解密
+        createReqVO.setPassword(pwdEnHelper.decryptHexStr(createReqVO.getPassword()));
         // 1.4 弱密码校验
         securityConfigApi.validatePassword(createReqVO.getPassword());
 
@@ -265,6 +268,8 @@ public class UserServiceImpl implements UserService {
         //  校验正确性
         validateUserForCreateOrUpdate(null, createReqVO.getUsername(),
                 createReqVO.getMobile(), createReqVO.getEmail(), createReqVO.getDeptId(), createReqVO.getPostIds());
+        // 密码解密
+        createReqVO.setPassword(pwdEnHelper.decryptHexStr(createReqVO.getPassword()));
         // 弱密码校验
         securityConfigApi.validatePassword(createReqVO.getPassword());
         // 插入用户
@@ -309,6 +314,10 @@ public class UserServiceImpl implements UserService {
         });
         // 1.3 校验正确性
         validateUserForCreateOrUpdate(null, registerReqVO.getUsername(), null, null, null, null);
+
+        // 密码解密
+        registerReqVO.setPassword(pwdEnHelper.decryptHexStr(registerReqVO.getPassword()));
+
         // 1.4 弱密码校验
         securityConfigApi.validatePassword(registerReqVO.getPassword());
 
@@ -403,6 +412,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void updateUserPassword(Long id, UserProfileUpdatePasswordReqVO reqVO) {
+        // 4. 解密原文
+        reqVO.setOldPassword(pwdEnHelper.decryptHexStr(reqVO.getOldPassword()));
+        reqVO.setNewPassword(pwdEnHelper.decryptHexStr(reqVO.getNewPassword()));
+
+
         // 校验旧密码密码
         validateOldPassword(id, reqVO.getOldPassword());
         // 调用更新密码逻辑
@@ -440,6 +454,9 @@ public class UserServiceImpl implements UserService {
     public void updateUserPassword(Long id, String password) {
         // 1. 校验用户存在
         AdminUserDO user = validateUserExists(id);
+
+        // 4. 解密原文
+        password = pwdEnHelper.decryptHexStr(password);
 
         //2. 使用用户入参密码
         AdminUserDO updateObj =    commonUpdatePassword(user.getId(), password);
@@ -1172,7 +1189,7 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public void thirdUserUpdatePassword(Long id, String password) {
+    public void thirdUserUpdatePassword(Long id) {
         // 1. 校验用户存在
         AdminUserDO user = validateUserExists(id);
         //2. 第三方密码，目前取默认值，若以后用户可以自定义，使用入参 password

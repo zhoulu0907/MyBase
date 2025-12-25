@@ -374,9 +374,8 @@ public interface UserService {
      * 更新第三方用户密码
      *
      * @param id
-     * @param password
      */
-    void thirdUserUpdatePassword(Long id, String password);
+    void thirdUserUpdatePassword(Long id);
 
     /**
      * 获取用户信息
