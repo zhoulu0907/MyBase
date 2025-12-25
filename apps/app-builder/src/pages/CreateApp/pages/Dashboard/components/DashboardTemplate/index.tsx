@@ -13,6 +13,7 @@ import {
   createDashboardTemplate
 } from '@onebase/platform-center';
 import { useLocation } from 'react-router-dom';
+import { getDashBoardURL } from '@onebase/common';
 
 const TabPane = Tabs.TabPane;
 const FormItem = Form.Item;
@@ -29,13 +30,11 @@ const ScreenTemplate: FC = () => {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const appId = searchParams.get('appId');
+  const resourceUrl = getDashBoardURL();
   //创建模板
   const handleAdd = async () => {
     const res = await createDashboardTemplate({ templateType: 'template', appId: appId });
-    window.open(
-      `http://s25029301301.dev.internal.virtueit.net:81/v0/appdashboard/#/chart/home/${res}/template`,
-      '_blank'
-    );
+    window.open(`${resourceUrl}chart/home/${res}/template`, '_blank');
   };
   const [applicationDataList, setApplicationDataList] = useState<screenTemplate[]>();
   const [currentPage, setCurrentPage] = useState(1);
@@ -111,10 +110,7 @@ const ScreenTemplate: FC = () => {
   };
   const handleEditTemplate = (item: screenTemplate) => {
     console.log(item, '编辑模板');
-    window.open(
-      `http://s25029301301.dev.internal.virtueit.net:81/v0/appdashboard/#/chart/home/${item.id}/applicationId`,
-      '_blank'
-    );
+    window.open(`${resourceUrl}chart/home/${item.id}/applicationId`, '_blank');
   };
   //取消弹框
   const handleEditCancel = () => {
@@ -123,10 +119,7 @@ const ScreenTemplate: FC = () => {
   //预览
   const handlePreview = (item: screenTemplate) => {
     console.log(item, '预览');
-    window.open(
-      `http://s25029301301.dev.internal.virtueit.net:81/v0/appdashboard/#/chart/preview/:${item.id}`,
-      '_blank'
-    );
+    window.open(`${resourceUrl}chart/preview/:${item.id}`, '_blank');
   };
   //导入模板
   const [selectedButton, setSelectedButton] = useState('');

@@ -4,13 +4,14 @@ import { IconPlus } from '@arco-design/web-react/icon';
 import styles from './index.module.less';
 import { DataSetParams, DelDataSetList } from '@onebase/platform-center';
 import { useLocation } from 'react-router-dom';
-import { format } from 'date-fns';
-import { TokenManager } from '@onebase/common';
+// import { format } from 'date-fns';
+import dayjs from 'dayjs';
+import { TokenManager, getDashBoardURL } from '@onebase/common';
 
 interface DataTable {
   name: string;
   type: string;
-  creatBy: string;
+  createTime: string;
   lastUpdateTime: string;
   id: string;
   updateBy: string;
@@ -18,7 +19,7 @@ interface DataTable {
 const DataSet: FC = () => {
   const columns: TableColumnProps[] = [
     { title: '名称', dataIndex: 'name', key: 'name' },
-    { title: '创建人', dataIndex: 'creatBy', key: 'creatBy' },
+    { title: '创建时间', dataIndex: 'createTime', key: 'createTime' },
     { title: '修改人/修改时间', dataIndex: 'lastUpdateTime', key: 'lastUpdateTime' },
     {
       title: '操作',
@@ -51,9 +52,10 @@ const DataSet: FC = () => {
   const getDataSetList = async () => {
     const { records, total } = await DataSetParams({ pageNum: currentPage, pageSize: pageSize, applicationId: appId });
     records.forEach((item: DataTable) => {
-      const timedate = new Date(Number(item.lastUpdateTime));
-      const formattedDate = format(timedate, 'yyyy-MM-dd HH:mm:ss');
-      item.lastUpdateTime = item.updateBy + '/' + formattedDate;
+      const formattedDate = dayjs(Number(item.lastUpdateTime)).format('YYYY-MM-DD HH:mm:ss');
+      const formatCreateTime = dayjs(Number(item.createTime)).format('YYYY-MM-DD HH:mm:ss');
+      item.lastUpdateTime = formattedDate;
+      item.createTime = formatCreateTime;
     });
     setDataSetList(records);
     setTotal(total);
@@ -67,21 +69,18 @@ const DataSet: FC = () => {
       console.error(error);
     }
   };
-
+  const resourceUrl = getDashBoardURL();
   // 新建
   const handleAdd = async () => {
     const tokenInfo = TokenManager.getTokenInfo();
     window.open(
-      `http://s25029301301.dev.internal.virtueit.net:81/v0/appdashboard/#/project/dataset-form?appId=${appId}&tenantId=${tokenInfo.tenantId}&userId=${tokenInfo.userId}`,
+      `${resourceUrl}project/dataset-form?appId=${appId}&tenantId=${tokenInfo?.tenantId}&userId=${tokenInfo?.userId}`,
       '_blank'
     );
   };
   //编辑
   const handleEdit = async (record: DataTable) => {
-    window.open(
-      `http://s25029301301.dev.internal.virtueit.net:81/v0/appdashboard/#/project/dataset-form?editId=${record.id}`,
-      '_blank'
-    );
+    window.open(`${resourceUrl}project/dataset-form?editId=${record.id}`, '_blank');
   };
   //删除
   const [deleteVisible, setDeleteVisible] = useState<boolean>(false);
