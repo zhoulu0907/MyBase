@@ -1,9 +1,9 @@
-import { PRIVATE_KEY, sm2Decrypt } from './crypto';
+import { CONFIG_PRIVATE_KEY, sm2Decrypt } from './crypto';
 
 export const getProdConfig = () => {
   const config = (window as any).global_config?.CONFIG;
   if (config) {
-    const decryptedData = sm2Decrypt(PRIVATE_KEY, config);
+    const decryptedData = sm2Decrypt(CONFIG_PRIVATE_KEY, config);
     return JSON.parse(decryptedData as string);
   }
 
