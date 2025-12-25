@@ -172,7 +172,7 @@ const DynamicDefaultValueConfig: React.FC<DynamicDefaultValueConfigProps> = ({
             step={configs.step}
             min={configs.verify?.numberLimit ? configs.verify?.min : undefined}
             max={configs.verify?.numberLimit ? configs.verify?.max : undefined}
-            precision={configs?.numberFormat.showPrecision ? configs.numberFormat.precision : 0}
+            precision={configs?.numberFormat?.showPrecision ? configs.numberFormat.precision : 0}
             formatter={(value) => {
               return configs?.numberFormat.useThousandsSeparator
                 ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
