@@ -49,7 +49,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
 ### 6. 分页查询仪表盘模板
-GET {{devUrl}}/dashboard/template/page?templateType=system
+GET {{baseUrl}}/dashboard/template/page?templateType=system
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 

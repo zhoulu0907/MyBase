@@ -4,7 +4,7 @@
 # 确保先在AuthController.http中登录获取token
 
 ### 1. 分页查询项目列表
-GET {{baseUrl}}/dashboard/list?searchText=测试
+GET {{baseUrl}}/dashboard/list
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
