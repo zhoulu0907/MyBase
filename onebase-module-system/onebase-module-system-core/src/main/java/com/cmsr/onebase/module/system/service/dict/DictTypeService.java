@@ -6,6 +6,7 @@ import com.cmsr.onebase.module.system.vo.dicttype.DictTypePageReqVO;
 import com.cmsr.onebase.module.system.vo.dicttype.DictTypeSaveReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.dict.DictTypeDO;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -74,5 +75,13 @@ public interface DictTypeService {
      * @return 字典类型列表
      */
     List<DictTypeDO> getDictTypeList(DictTypeListReqVO reqVO);
+
+    /**
+     * 根据 ID 集合批量获取字典类型
+     *
+     * @param ids ID集合
+     * @return 字典类型列表
+     */
+    List<DictTypeDO> getDictTypesByIds(Collection<Long> ids);
 
 }

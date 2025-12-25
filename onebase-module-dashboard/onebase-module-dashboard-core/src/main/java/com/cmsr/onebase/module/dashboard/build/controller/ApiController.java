@@ -1,5 +1,7 @@
 package com.cmsr.onebase.module.dashboard.build.controller;
 
+import com.cmsr.onebase.framework.common.annotaion.ApiSignIgnore;
+import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.dashboard.build.common.base.BaseController;
 import com.cmsr.onebase.module.dashboard.build.common.config.V2Config;
 import com.cmsr.onebase.module.dashboard.build.common.domain.AjaxResult;
@@ -11,6 +13,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import com.mybatisflex.core.query.QueryWrapper;
 import io.swagger.annotations.ApiOperation;
+import jakarta.annotation.security.PermitAll;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +38,9 @@ public class ApiController  extends BaseController {
 	@ApiOperation(value = "登陆", notes = "登陆")
 	@PostMapping("/login")
 	@ResponseBody
+	@PermitAll
+	@ApiSignIgnore
+	@TenantIgnore
 	public AjaxResult APIlogin(@RequestBody SysUser user, HttpServletRequest request) {
 		try {
 			// 判断是否登陆
@@ -42,7 +48,7 @@ public class ApiController  extends BaseController {
 				Map<String, Object> map = new HashMap<String, Object>();
 				map.put("userinfo", SaTokenUtil.getUser());
 				map.put("token", StpUtil.getTokenInfo());
-				return success().put("data", map);
+				return successData(0, map);
 			} else {
 				if (StrUtil.isNotBlank(user.getUsername()) && StrUtil.isNotBlank(user.getPassword())) {
 					// 直接查询用户
@@ -85,6 +91,9 @@ public class ApiController  extends BaseController {
 	@ApiOperation(value = "登陆", notes = "登陆")
 	@GetMapping("/logout")
 	@ResponseBody
+	@PermitAll
+	@ApiSignIgnore
+	@TenantIgnore
 	public AjaxResult logout() {
 		// 判断是否登陆
 		StpUtil.logout();
@@ -95,6 +104,9 @@ public class ApiController  extends BaseController {
 	@ApiOperation(value = "获取oss地址", notes = "获取oss地址")
 	@GetMapping("/getOssInfo")
 	@ResponseBody
+	@PermitAll
+	@ApiSignIgnore
+	@TenantIgnore
 	public AjaxResult getOssInfo() {
 		Map<String, Object> ossInfo = new HashMap<>();
 		ossInfo.put("bucketName", "oss");
@@ -103,6 +115,6 @@ public class ApiController  extends BaseController {
 		ossInfo.put("defaultFormat", v2Config.getDefaultFormat());
 		ossInfo.put("xnljmap", v2Config.getXnljmap());
 
-		return success().put("data", ossInfo);
+		return successData(0, ossInfo);
 	}
 }

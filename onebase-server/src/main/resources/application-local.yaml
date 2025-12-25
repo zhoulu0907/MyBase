@@ -74,6 +74,6 @@ liteflow:
 # Goview配置 开发环境特定的文件存储配置
 v2:
   xnljmap:
-    oss: file:/Users/Documents/ob3.0/go-view-serve/fileserver/
-  fileurl: /Users/Documents/ob3.0/go-view-serve/fileserver
-  httpurl: http://127.0.0.1:8083/
+    oss: file:/data/backend/fileserver_ft/
+  fileurl: /data/backend/fileserver_ft
+  httpurl: http://10.0.104.38:8083/

@@ -118,9 +118,16 @@ public class MetadataValidationLengthBuildServiceImpl implements MetadataValidat
         // 转换VO为DO并设置必要字段
         MetadataValidationLengthDO data = BeanUtils.toBean(vo, MetadataValidationLengthDO.class);
         data.setEntityUuid(field.getEntityUuid());
-        data.setApplicationId(field.getId()); // 使用field.getId()作为applicationId
+        data.setApplicationId(field.getApplicationId()); // 使用字段的applicationId
         MetadataValidationRuleGroupDO group = ruleGroupService.getValidationRuleGroup(groupId);
-        data.setGroupUuid(group.getGroupUuid());
+        // 确保 groupUuid 不为空，如果为空则生成并更新规则组
+        String groupUuid = group.getGroupUuid();
+        if (groupUuid == null || groupUuid.isEmpty()) {
+            groupUuid = com.cmsr.onebase.framework.common.util.string.UuidUtils.getUuid();
+            group.setGroupUuid(groupUuid);
+            ruleGroupRepository.updateById(group);
+        }
+        data.setGroupUuid(groupUuid);
         data.setPromptMessage(vo.getPopPrompt());
         // 保存长度校验规则
         lengthRepository.saveOrUpdate(data);
@@ -166,6 +173,12 @@ public class MetadataValidationLengthBuildServiceImpl implements MetadataValidat
             }
             if (existingGroup != null && canReuse) {
                 targetGroupUuid = existingGroup.getGroupUuid();
+                // 确保 groupUuid 不为空，如果为空则生成并更新规则组
+                if (targetGroupUuid == null || targetGroupUuid.isEmpty()) {
+                    targetGroupUuid = com.cmsr.onebase.framework.common.util.string.UuidUtils.getUuid();
+                    existingGroup.setGroupUuid(targetGroupUuid);
+                    ruleGroupRepository.updateById(existingGroup);
+                }
                 // 如果复用已有规则组，需要根据请求更新组级别配置(popPrompt/valMethod/popType)，避免列表查询仍显示旧值
                 boolean needGroupUpdate = false;
                 ValidationRuleGroupSaveReqVO updateGroupVO = new ValidationRuleGroupSaveReqVO();
