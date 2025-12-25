@@ -16,9 +16,8 @@ tenant-id: {{adminTenantId}}
 
 {
   "projectName": "Screen_test_Gsp1",
-  "state": -1,
-  "indexImage": "http://127.0.0.1:8083/oss/2025-04-23/1074956819610341376.png",
-  "remarks": "修改后的备注Gsp",
+  "indexImage": "",
+  "remarks": "",
   "appId": 1,
   "tenantId": {{adminTenantId}}
 
@@ -65,21 +64,15 @@ Content-Type: application/json
 }
 
 ### 7. 获取项目存储数据
-GET {{devUrl}}/dashboard/getScreenDSLData?projectId=194097457982963712
+GET {{baseUrl}}/dashboard/getScreenDSLData?projectId=194097457982963712
 #Authorization: Bearer {{token}}
 #tenant-id: {{adminTenantId}}
 ### 8. 保存项目数据
 POST {{baseUrl}}/dashboard/save/data
-Content-Type: application/json
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryLYmJRphMIHBgEdNg
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
-{
-  "projectId": 194097457982963712,
-  "content": "{\"editCanvasConfig\":{\"projectName\":\"新项目\",\"width\":1920,\"height\":1080,\"filterShow\":false,\"hueRotate\":0,\"saturate\":1,\"contrast\":1,\"brightness\":1,\"opacity\":1,\"rotateZ\":0,\"rotateX\":0,\"rotateY\":0,\"skewX\":0,\"skewY\":0,\"blendMode\":\"normal\",\"background\":null,\"backgroundImage\":null,\"selectColor\":true,\"chartThemeColor\":\"dark\",\"chartCustomThemeColorInfo\":null,\"chartThemeSetting\":{\"title\":{\"show\":true,\"textStyle\":{\"color\":\"#BFBFBF\",\"fontSize\":18},\"subtextStyle\":{\"color\":\"#A2A2A2\",\"fontSize\":14}},\"xAxis\":{\"show\":true,\"name\":\"\",\"nameGap\":15,\"nameTextStyle\":{\"color\":\"#B9B8CE\",\"fontSize\":12},\"inverse\":false,\"axisLabel\":{\"show\":true,\"fontSize\":12,\"color\":\"#B9B8CE\",\"rotate\":0},\"position\":\"bottom\",\"axisLine\":{\"show\":true,\"lineStyle\":{\"color\":\"#B9B8CE\",\"width\":1},\"onZero\":true},\"axisTick\":{\"show\":true,\"length\":5},\"splitLine\":{\"show\":false,\"lineStyle\":{\"color\":\"#484753\",\"width\":1,\"type\":\"solid\"}},\"yAxis\":{\"show\":true,\"name\":\"\",\"nameGap\":15,\"nameTextStyle\":{\"color\":\"#B9B8CE\",\"fontSize\":12},\"inverse\":false,\"axisLabel\":{\"show\":true,\"fontSize\":12,\"color\":\"#B9B8CE\",\"rotate\":0},\"position\":\"left\",\"axisLine\":{\"show\":true,\"lineStyle\":{\"color\":\"#B9B8CE\",\"width\":1},\"onZero\":true},\"axisTick\":{\"show\":true,\"length\":5},\"splitLine\":{\"show\":true,\"lineStyle\":{\"color\":\"#484753\",\"width\":1,\"type\":\"solid\"}},\"legend\":{\"show\":true,\"type\":\"scroll\",\"x\":\"center\",\"y\":\"top\",\"icon\":\"circle\",\"orient\":\"horizontal\",\"textStyle\":{\"color\":\"#B9B8CE\",\"fontSize\":18},\"itemHeight\":15,\"itemWidth\":15,\"pageTextStyle\":{\"color\":\"#B9B8CE\"}},\"grid\":{\"show\":false,\"left\":\"10%\",\"top\":\"60\",\"right\":\"10%\",\"bottom\":\"60\"},\"dataset\":null,\"renderer\":\"svg\"},\"vChartThemeName\":\"vScreenVolcanoBlue\",\"previewScaleType\":\"fit\"},\"componentList\":[{\"id\":\"id_454klhl42nc000\",\"isGroup\":false,\"attr\":{\"x\":707,\"y\":363,\"w\":500,\"h\":300,\"offsetX\":0,\"offsetY\":0,\"zIndex\":-1},\"styles\":{\"filterShow\":false,\"hueRotate\":0,\"saturate\":1,\"contrast\":1,\"brightness\":1,\"opacity\":1,\"rotateZ\":0,\"rotateX\":0,\"rotateY\":0,\"skewX\":0,\"skewY\":0,\"blendMode\":\"normal\",\"animations\":[]},\"preview\":{\"overFlowHidden\":false},\"status\":{\"lock\":false,\"hide\":false},\"request\":{\"requestDataType\":0,\"requestHttpType\":\"get\",\"requestUrl\":\"\",\"requestInterval\":null,\"requestIntervalUnit\":\"second\",\"requestContentType\":0,\"requestParamsBodyType\":\"none\",\"requestSQLContent\":{\"sql\":\"select * from  where\"},\"requestParams\":{\"Body\":{\"form-data\":{},\"x-www-form-urlencoded\":{},\"json\":\"\",\"xml\":\"\"},\"Header\":{},\"Params\":{}}},\"filter\":null}]}",
-  "remark": "保存的数据备注1",
-  "appId": 1
-}
 
 ### 9. 上传文件
 # 注意: 请在当前目录放置 example.png 文件用于测试
@@ -87,6 +80,8 @@ POST {{baseUrl}}/dashboard/upload
 Content-Type: multipart/form-data; boundary=WebAppBoundary
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
+
+
 
 --WebAppBoundary
 Content-Disposition: form-data; name="object"; filename="example.png"
