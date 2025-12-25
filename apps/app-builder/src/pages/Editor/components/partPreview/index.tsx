@@ -55,7 +55,7 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
     showDeleteButton,
     setShowDeleteButton,
     subTableComponents,
-    setSubTableComponents,
+    setSubTableComponents
   } = usePageEditorSignal();
 
   const qiankunActions = initGlobalState({
@@ -75,10 +75,10 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
     setSubTableComponents
   });
   useEffect(() => {
-    console.log('loading mobile-editor-preview-list');
     if (editMode.value !== EditMode.MOBILE || !visible) {
       return;
     }
+    console.log('loading mobile-editor-preview-list');
 
     const mobileEditorPreview = loadMicroApp({
       name: 'mobile-editor-preview-list',
@@ -100,7 +100,7 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
   const getFormContent = () => {
     return formComponents.value.map((cp: GridItem) => (
       <Fragment key={cp.id}>
-        {formPageComponentSchemas.value[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+        {formPageComponentSchemas.value[cp.id]?.config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
           <div
             key={cp.id}
             className={styles.componentItem}

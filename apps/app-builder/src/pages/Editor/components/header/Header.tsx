@@ -177,8 +177,82 @@ export default function EditorHeader() {
   const sessionData = sessionStorage.getItem('EDITOR_PAGE_INFO') || '{}';
   const pageInfo = JSON.parse(sessionData);
   const { currentFlowId, setCurrnetFlowId, editorRef, flowData, configData } = useFlowEditorStor();
+
+  const showConfirm = (errorMsgList: any) => {
+    Modal.confirm({
+      title: '保存失败',
+      className: styles.errorMsgModal,
+      content: (
+        <div className={styles.errorMsgContainer}>
+          <div className={styles.errorMsgTitle}>以下内容不完善，请修改后保存</div>
+          <div className={styles.errorMsgContent}>
+            {errorMsgList.map((item: any, index: number) => (
+              <div key={index} className={styles.errorMsgItem}>
+                <span className={styles.errorMsgNodeName}>{item.nodeName}:</span>
+                <span>{item.errorMsg}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      ),
+      footer: (
+        <Button onClick={() => Modal.destroyAll()} type="primary">
+          确定
+        </Button>
+      ),
+      okButtonProps: {
+        status: 'danger'
+      },
+      onOk: () => {
+        return new Promise((resolve, reject) => {
+          setTimeout(Math.random() > 0.5 ? resolve : reject, 1000);
+        }).catch((e) => {
+          Message.error({
+            content: 'Error occurs!'
+          });
+          throw e;
+        });
+      }
+    });
+  };
   const onFlowSave = async (isCreate?: boolean) => {
     const data = editorRef?.document.toJSON();
+    const errorMsgList: any = [];
+    data?.nodes.forEach((item) => {
+      if (item.type === 'approver') {
+        if (
+          (item.data.approverConfig.handlerType === 'user' &&
+            (!item.data.approverConfig.users || item.data.approverConfig.users.length === 0)) ||
+          (item.data.approverConfig.handlerType === 'role' &&
+            (!item.data.approverConfig.roles || item.data.approverConfig.roles.length === 0))
+        ) {
+          errorMsgList.push({ nodeName: item.data.name, errorMsg: '节点缺少审批人' });
+        }
+        let flag = false;
+        item.data.buttonConfigs?.forEach((button: any) => {
+          if (button.enabled) {
+            flag = true;
+          }
+        });
+        if (!flag) {
+          errorMsgList.push({ nodeName: item.data.name, errorMsg: '节点缺少按钮配置' });
+        }
+      }
+      if (item.type === 'cc') {
+        if (
+          (item.data.copyReceiverConfig.handlerType === 'user' &&
+            (!item.data.copyReceiverConfig.users || item.data.copyReceiverConfig.users.length === 0)) ||
+          (item.data.copyReceiverConfig.handlerType === 'role' &&
+            (!item.data.copyReceiverConfig.roles || item.data.copyReceiverConfig.roles.length === 0))
+        ) {
+          errorMsgList.push({ nodeName: item.data.name, errorMsg: '节点缺少抄送人' });
+        }
+      }
+    });
+    if (errorMsgList.length) {
+      showConfirm(errorMsgList);
+      return;
+    }
     const currentJsonData = normalizeNodes(data);
     currentJsonData.edges?.forEach((item) => {
       if (item.data) {
@@ -195,15 +269,13 @@ export default function EditorHeader() {
       bpmDefJson: JSON.stringify(currentJsonData),
       globalConfig: configData
     };
-
-    console.log(flowData);
-
     return save(params).then((res: any) => {
       setFlowId(res);
       Message.success(isCreate ? '创建成功' : '保存成功');
       if (isCreate) {
         setCurrnetFlowId(res);
       }
+      return true;
     });
   };
 
@@ -427,7 +499,10 @@ export default function EditorHeader() {
   const handleExecTask = async () => {
     try {
       if (activeTab === EDITOR_TYPES.FLOW_EDITOR) {
-        await onFlowSave();
+        const res = await onFlowSave();
+        if (!res) {
+          return;
+        }
       }
       const res = await fetchPublish({ id: flowId });
       getVersonList();

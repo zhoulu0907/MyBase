@@ -9,6 +9,6 @@ export const convertName = (status: number) => {
 }
 
 export const formatIndustryType = (optionList:industryTypeOption[], value?: string) => {
-    const filteredOption =  optionList.find(item => item.value === value);
+    const filteredOption =  optionList?.find(item => item.value === value);
     return filteredOption ? filteredOption.label : value;
 }

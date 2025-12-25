@@ -1,4 +1,4 @@
-import { isPlatformEnv, isRuntimeEnv } from '@onebase/common';
+import { getResourceURL, isPlatformEnv, isRuntimeEnv } from '@onebase/common';
 import { BatchUpdateSecurityConfigsParams, GetTenantSecurityConfigParams } from '../types';
 import { infraService, platformInfraService, runtimeInfraService } from './clients';
 
@@ -25,9 +25,10 @@ export const uploadFile = (data: any, onProgress?: UploadProgressCallback) => {
 export const getFileListByIds = (ids: string[]) => {
   return envService.get(`/file/list-by-ids?ids=${ids}`);
 };
+
 // 获取文件内容
 export const getFileUrlById = (id: string) => {
-  const resourceUrl = (window as any).global_config?.RESOURCE_URL;
+  const resourceUrl = getResourceURL();
   return `${resourceUrl}/${id}`;
 };
 

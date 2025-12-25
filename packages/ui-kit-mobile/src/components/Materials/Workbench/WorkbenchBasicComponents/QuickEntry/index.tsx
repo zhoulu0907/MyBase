@@ -1,13 +1,11 @@
 import { Tabs } from '@arco-design/mobile-react';
 import { IconArrowIn } from '@arco-design/mobile-react/esm/icon';
 import type { CSSProperties } from 'react';
-import { nanoid } from 'nanoid';
-import { memo, useEffect, useState } from 'react';
-import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import { listApplicationMenu, menuSignal, type ApplicationMenu } from '@onebase/app';
+import { memo } from 'react';
 import { WORKBENCH_STATUS_OPTIONS, WORKBENCH_STATUS_VALUES, QUICK_ENTRY_THEME_OPTIONS, QUICK_ENTRY_THEME_VALUES, workbenchSchema } from '@onebase/ui-kit';
 import type { QuickEntryTitleConfig, QuickEntryStyleConfig, QuickEntryGroupConfig } from '@onebase/ui-kit';
 import { getDefaultIcon } from './getDefaultIcon';
+import { useJump } from '../../hooks/useJump';
 import './index.css';
 
 type XQuickEntryConfig = typeof workbenchSchema.XQuickEntry.config;
@@ -33,11 +31,6 @@ const defaultGroupConfig: QuickEntryGroupConfig = {
 
 const XQuickEntry = memo((props: XQuickEntryConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const { id, status, width, titleConfig, styleConfig, groupConfig, runtime } = props;
-  const navigate = useNavigate();
-  const { appId } = useParams<{ appId?: string }>();
-  const [appRuntimeMenu, setAppRuntimeMenu] = useState<ApplicationMenu[]>([]);
-  const location = useLocation();
-  const { setCurMenu } = menuSignal;
 
   const finalTitleConfig = titleConfig || defaultTitleConfig;
   const finalStyleConfig = styleConfig || defaultStyleConfig;
@@ -46,68 +39,16 @@ const XQuickEntry = memo((props: XQuickEntryConfig & { runtime?: boolean; detail
   const groups = finalGroupConfig?.groups ?? [];
   const enableGroup = Boolean(finalGroupConfig?.enableGroup);
 
-  // 获取应用运行态菜单数据
-  useEffect(() => {
-    if (!runtime || !appId) return;
-    getApplicationMenu();
-  }, [runtime, appId]);
-
-  const getApplicationMenu = async () => {
-    if (appId) {
-      const res = await listApplicationMenu({ applicationId: appId });
-      setAppRuntimeMenu(res || []);
-    }
-  };
-
-  const handleClickEntry = (item: {
+  const { handleJump } = useJump();
+  const handleClickEntry = async (item: {
     linkAddress?: string;
-    menuId?: string;
+    menuUuid?: string;
   }) => {
-    if (!runtime) return;
-
-    // 跳转链接
-    if (item.linkAddress) {
-      if (item.linkAddress.startsWith('http')) {
-        window.open(item.linkAddress);
-      } else {
-        console.log('Navigate to:', item.linkAddress);
-        navigate(item.linkAddress);
-      }
-      return;
-    }
-
-    // 跳转应用菜单
-    if (item.menuId) {
-      console.log('Navigate to menu:', item);
-      // 在菜单数据中查找匹配的菜单（通过 id、menuCode 或 menuUuid 匹配）
-      const targetMenu = appRuntimeMenu.find(
-        (menu) => menu.menuUuid === item.menuUuid);
-
-      if (targetMenu && targetMenu.id) {
-        // 获取当前URL的查询参数，更新或添加 curMenu 参数
-        const searchParams = new URLSearchParams(location.search);
-        searchParams.set('curMenu', targetMenu.id);
-        // 将 /runtime-home 替换为 /runtime
-        const newPath = location.pathname.replace('/runtime-home', '/runtime');
-        const to = `${newPath}?${searchParams.toString()}`;
-        navigate(to);
-
-        // 设置当前菜单
-        setCurMenu({
-          id: targetMenu.id || '',
-          menuCode: targetMenu.menuCode || '',
-          menuSort: targetMenu.menuSort || 1,
-          menuType: targetMenu.menuType || 1,
-          menuName: targetMenu.menuName || '',
-          menuIcon: targetMenu.menuIcon || '',
-          isVisible: targetMenu.isVisible || 1,
-          pagesetType: targetMenu.pagesetType,
-          children: targetMenu.children || []
-        });
-      } else {
-        console.warn('未找到对应菜单或菜单未配置 id', item.menuId);
-      }
-    }
+    await handleJump({
+      linkAddress: item.linkAddress,
+      menuUuid: item.menuUuid,
+      runtime
+    });
   };
 
   const renderEntryItem = (
@@ -116,7 +57,7 @@ const XQuickEntry = memo((props: XQuickEntryConfig & { runtime?: boolean; detail
       entryIcon?: string;
       entryType?: string;
       linkAddress?: string;
-      menuId?: string;
+      menuUuid?: string;
       group?: string;
       entryDesc?: string;
     },
@@ -135,7 +76,7 @@ const XQuickEntry = memo((props: XQuickEntryConfig & { runtime?: boolean; detail
           onClick={() => handleClickEntry(item)}
           style={{
             pointerEvents: runtime ? 'unset' : 'none',
-            cursor: runtime && (item.linkAddress || item.menuId) ? 'pointer' : 'default'
+            cursor: runtime && (item.linkAddress || item.menuUuid) ? 'pointer' : 'default'
           }}
         >
           
@@ -159,7 +100,7 @@ const XQuickEntry = memo((props: XQuickEntryConfig & { runtime?: boolean; detail
         onClick={() => handleClickEntry(item)}
         style={{
           pointerEvents: runtime ? 'unset' : 'none',
-          cursor: runtime && (item.linkAddress || item.menuId) ? 'pointer' : 'default',
+          cursor: runtime && (item.linkAddress || item.menuUuid) ? 'pointer' : 'default',
           backgroundColor
         }}
       >

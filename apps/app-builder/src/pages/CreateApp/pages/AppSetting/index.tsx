@@ -46,8 +46,12 @@ const AppSettingPage: FC = () => {
     { title: '导航设置', icon: navigatorSettingSVG, key: 'navigatorSetting' }
   ];
 
-  const [appData, setAppData] = useState<Application>();
-  const [navigatorData, setNavigatorData] = useState<any>();
+  const [appData, setAppData] = useState<Application>({
+    id: '',
+    appName: '',
+    appCode: '',
+    appStatus: 0
+  });
   const [activeTab, setActiveTab] = useState('baseSetting');
   const [collapsed, setCollapsed] = useState<boolean>(false);
   const [saveLoading, setSaveLoading] = useState<boolean>(false); // 保存按钮状态
@@ -69,7 +73,6 @@ const AppSettingPage: FC = () => {
   useEffect(() => {
     if (curAppId) {
       getApplicationData();
-      getNavigatorData();
     }
   }, [curAppId]);
 
@@ -78,7 +81,7 @@ const AppSettingPage: FC = () => {
     if (activeTab === 'baseSetting' && curAppId) {
       getApplicationData();
     }
-  }, [activeTab]);
+  }, [activeTab, curAppInfo]);
 
   const getApplicationData = async () => {
     const params: GetApplicationReq = {
@@ -86,11 +89,6 @@ const AppSettingPage: FC = () => {
     };
     const res = await getApplication(params);
     setAppData(res);
-  };
-
-  // todo 接口获取数据
-  const getNavigatorData = async () => {
-    setNavigatorData({});
   };
 
   const handleSave = () => {
@@ -114,7 +112,7 @@ const AppSettingPage: FC = () => {
       try {
         if (error !== null) return;
         setSaveLoading(true);
-        const { appCode, appName, appMode, iconColor, iconName, description, tagIds, themeColor } = data;
+        const { appCode, appName, appMode, iconColor, iconName, description, tagIds, themeColor, publishModel } = data;
         const params: UpdateApplicationReq = {
           id: curAppId,
           appCode,
@@ -124,11 +122,14 @@ const AppSettingPage: FC = () => {
           iconColor,
           iconName,
           tagIds: tagIds?.map((t: Options) => t.value),
-          themeColor
+          themeColor,
+          publishModel
         };
         const res = await updateApplication(params);
         if (res) {
           Message.success('保存成功');
+          const newAppData = { ...appData, publishModel };
+          setAppData(newAppData);
           setCurAppInfo({
             ...curAppInfo,
             iconName: iconName || '',
@@ -197,9 +198,9 @@ const AppSettingPage: FC = () => {
               {activeTab === 'baseSetting' && <BasicSetting form={form} data={appData!} />}
               {activeTab === 'appPermission' && <AppPermission />}
               {activeTab === 'appRelease' && <AppReleasePage />}
-              {activeTab === 'navigatorSetting' && <NavigatorSetting form={navigatorForm} data={navigatorData} />}
+              {activeTab === 'navigatorSetting' && <NavigatorSetting form={navigatorForm} />}
               {activeTab === 'loginPermission' && <LoginPermission appId={curAppId} />}
-              {(activeTab === 'baseSetting' || activeTab === 'navigatorSetting') && (
+              {activeTab === 'navigatorSetting' && (
                 <Button className={styles.saveButton} type="primary" loading={saveLoading} onClick={handleSave}>
                   保存
                 </Button>

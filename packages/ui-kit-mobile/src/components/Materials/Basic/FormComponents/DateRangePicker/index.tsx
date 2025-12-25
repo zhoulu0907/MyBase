@@ -65,21 +65,22 @@ const XDateRangePicker = memo((props: XDateRangePickerConfig & { runtime?: boole
   return (
     <Form.Item
       className="inputTextWrapperOBMobile"
-      label={label.display && <Ellipsis text={label.text} />}
+      label={label.display && <Ellipsis text={label.text} maxLine={2} />}
       field={fieldId}
       rules={rules}
+      layout={layout}
       initialValue={[
         startDefaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? startDefaultValueConfig?.customValue : '',
         endDefaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? endDefaultValueConfig?.customValue : ''
       ]}
       style={{
-        textAlign: align,
+        textAlign: layout === 'vertical' ? 'left' : 'right',
         pointerEvents: (!runtime || detailMode) ? 'none' : 'unset',
         opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
       }}
     >
       {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
-        <div className="readonlyText">--</div>
+        <div className="readonlyText" style={{ textAlign: layout === 'vertical' ? 'left' : 'right' }}>--</div>
       ) : (
         renderContent()
       )}

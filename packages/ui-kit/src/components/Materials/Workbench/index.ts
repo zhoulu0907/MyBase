@@ -7,7 +7,7 @@ import { WorkbenchAdvancedComp } from './WorkbenchAdvancedComponents';
 
 // 组件导出
 export const WorkbenchComp = { ...WorkbenchBasicComp, ...WorkbenchAdvancedComp };
-export { WORKBENCH_CONFIG_TYPES, QUICK_ENTRY_THEME_OPTIONS, QUICK_ENTRY_THEME_VALUES, WORKBENCH_STATUS_OPTIONS, WORKBENCH_STATUS_VALUES } from './core/constants';
+export { WORKBENCH_CONFIG_TYPES, QUICK_ENTRY_THEME_OPTIONS, QUICK_ENTRY_THEME_VALUES, WORKBENCH_STATUS_OPTIONS, WORKBENCH_STATUS_VALUES, VERTICAL_ALIGN_OPTIONS } from './core/constants';
 
 // 类型常量导出
 export {
@@ -44,5 +44,27 @@ export type {
   QuickEntryStyleConfig,
   QuickEntryGroupConfig,
   QuickEntryGroupItemConfig,
-  QuickEntryEntryConfig
+  QuickEntryEntryConfig,
+  IWbColorConfigType,
+  TWbColorDefaultType,
+  IWbTextAlignConfigType,
+  TWbTextAlignDefaultType,
+  IWbMenuSelectorConfigType,
+  IWbSliderConfigType
 } from './core/types';
+
+export type {
+  ICommonBaseWorkbenchType,
+  TWorkbenchWidthSelectKeyType,
+  TWorkbenchStatusSelectKeyType
+} from './config/workbenchShared';
+
+// 配置导出
+export {
+  workbenchBaseConfig,
+  workbenchBaseDefault,
+  workbenchWidthConfig
+} from './config/workbenchShared';
+
+export { menuCacheManager } from './utils/menu-cache';
+

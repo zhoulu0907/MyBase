@@ -49,7 +49,8 @@ const XInputEmail = memo((props: XInputEmailConfig & { runtime?: boolean; detail
       className="inputTextWrapperOBMobile"
       field={fieldId}
       rules={rules}
-      label={label.display ? <Ellipsis text={label.text} /> : undefined}
+      layout={layout}
+      label={label.display ? <Ellipsis text={label.text} maxLine={2} /> : undefined}
       initialValue={defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : ''}
       style={{
         pointerEvents: (!runtime || detailMode) ? 'none' : 'unset',
@@ -58,13 +59,18 @@ const XInputEmail = memo((props: XInputEmailConfig & { runtime?: boolean; detail
     >
       {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
         // 只读模式，渲染文本内容
-        <div className="readonlyText">{form?.getFieldValue(fieldId)}</div>
+        <Input
+          className="readonlyText"
+          readOnly
+          value={form?.getFieldValue(fieldId) || (defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : '')}
+          inputStyle={{ textAlign: layout === 'vertical' ? 'left' : 'right' }}
+        />
       ) : (
         // 编辑模式，渲染Input组件
         <Input
           type="email"
           placeholder={placeholder}
-          inputStyle={{ textAlign: align }}
+          inputStyle={{ textAlign: layout === 'vertical' ? 'left' : 'right' }}
           blockChangeWhenCompositing={true}
         />
       )}

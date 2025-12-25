@@ -1,6 +1,5 @@
-// import filterIcon from '@/assets/images/filter.svg';
 import dayjs from 'dayjs';
-import { Button, Dialog, Dropdown, Ellipsis, LoadMore, SearchBar, Sticky, Toast, Form } from '@arco-design/mobile-react';
+import { Button, Dialog, Ellipsis, LoadMore, Sticky, Toast, Form } from '@arco-design/mobile-react';
 import { useForm } from '@arco-design/mobile-react/esm/form';
 import { IconDownload } from '@arco-design/mobile-react/esm/icon';
 import {
@@ -41,7 +40,7 @@ const XLoadMore = memo(
     useSignals();
 
     const { pageComponentSchemas } = useFormEditorSignal;
-    const { setDrawerVisible, setDrawerPageId, setDetailPageViewId } = pagesRuntimeSignal;
+    const { setRowDataId, setDrawerPageId, setDetailPageViewId } = pagesRuntimeSignal;
     const { runtime = true, showFromPageData, showAddBtn = true } = props;
     const hasOperationPermission = true;
 
@@ -126,13 +125,13 @@ const XLoadMore = memo(
               if (!result) return '-';
               if (Array.isArray(result)) {
                 if (result.length === 0) return;
-                if (['FILE'].includes(dataFieldInfo.fieldType)) {
+                if (['FILE', 'IMAGE'].includes(dataFieldInfo.fieldType)) {
                   const file = result[0];
                   return (
                     <div className="fileWrapper">
-                      <Ellipsis text={file.name} />
+                      <Ellipsis className='filename' text={file.name} />
                       <IconDownload
-                        style={{ color: 'rgb(var(--primary-6))' }}
+                        style={{ color: 'rgb(var(--primary-6))', marginLeft: '0.24rem', fontSize: '0.28rem' }}
                         onClick={async () => {
                           const param = {
                             menuId: curMenu.value?.id,
@@ -194,6 +193,7 @@ const XLoadMore = memo(
       if (!runtime) {
         return;
       }
+      setRowDataId('');
       showFromPageData?.(null, true);
     };
 
@@ -262,8 +262,9 @@ const XLoadMore = memo(
                 field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE
             );
             if (multiSelectField && newItem[key]) {
+              
               if (Array.isArray(newItem[key])) {
-                newItem[key] = newItem[key].map((item: any) => item?.id).join(', ');
+                newItem[key] = newItem[key].map((item: any) => item.name || item?.id).join(', ');
               }
             }
 
@@ -374,6 +375,7 @@ const XLoadMore = memo(
         return;
       }
 
+      setRowDataId(id);
       showFromPageData?.(id, toFormPage);
     };
 

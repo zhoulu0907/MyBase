@@ -9,7 +9,7 @@ import {
   widthConfig,
   dateRangeConfig,
   type ICommonBaseType,
-  type TDateTypeSelectKeyType,
+  type TDateTimeTypeSelectKeyType,
   type TLayoutSelectKeyType,
   type TStatusSelectKeyType,
   type TAlignSelectKeyType,
@@ -21,6 +21,8 @@ import {
   CONFIG_TYPES,
   DATE_OPTIONS,
   DATE_VALUES,
+  DATE_TIME_VALUES,
+  DATE_TIME_OPTIONS,
   LAYOUT_OPTIONS,
   LAYOUT_VALUES,
   STATUS_OPTIONS,
@@ -50,7 +52,8 @@ import type {
   IDefaultValueConfigType,
   IAlignConfigType,
   ISecurityConfigType,
-  IDateRangeConfigType
+  IDateRangeConfigType,
+  IDateFormatConfigType
 } from '../../../types';
 import { ManipulateType } from 'dayjs';
 
@@ -65,6 +68,7 @@ export type TXInputDateTimePickerEditData = Array<
   | ITooltipConfigType
   | IDataFieldConfigType
   | IDefaultValueConfigType
+  | IDateFormatConfigType
   | IDateRangeConfigType
   | IVerifyConfigType
   | IStatusConfigType<TStatusSelectKeyType>
@@ -109,7 +113,7 @@ export interface XInputDateTimePickerConfig extends ICommonBaseType {
    * 日期格式： 年、年月、年月日、年月日时
    * 可选值: 'YEAR' | 'MONTH' | 'DATE' | 'FULL'
    */
-  dateType: TDateTypeSelectKeyType;
+  dateType: TDateTimeTypeSelectKeyType;
 
   /**
    * 可选范围
@@ -208,7 +212,15 @@ const XDateTimePicker: XInputDateTimePickerSchema = {
       key: 'defaultValueConfig',
       name: '默认值',
       type: CONFIG_TYPES.DEFAULT_VALUE,
-      valueType: 'dateTime'
+    },
+    {
+      key: 'dateFormat',
+      name: '日期时间格式',
+      type: CONFIG_TYPES.DATE_FORMAT,
+      range: [
+        { label: DATE_TIME_OPTIONS.SECOND, value: DATE_TIME_VALUES[DATE_TIME_OPTIONS.SECOND] },
+        { label: DATE_TIME_OPTIONS.MINUTE, value: DATE_TIME_VALUES[DATE_TIME_OPTIONS.MINUTE] },
+      ]
     },
     dateRangeConfig,
     {
@@ -244,7 +256,7 @@ const XDateTimePicker: XInputDateTimePickerSchema = {
       customValue: '',
       formulaValue: ''
     },
-    dateType: DATE_VALUES[DATE_OPTIONS.DATE],
+    dateType: DATE_TIME_VALUES[DATE_TIME_OPTIONS.SECOND],
     dateRange: {
       weekLimit: false,
       week: [],

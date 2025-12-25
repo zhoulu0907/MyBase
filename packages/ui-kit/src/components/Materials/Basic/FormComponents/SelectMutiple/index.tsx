@@ -1,6 +1,6 @@
 import { Form, Select, Space, Tag } from '@arco-design/web-react';
 import { memo, useEffect, useState } from 'react';
-import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
+import { STATUS_OPTIONS, STATUS_VALUES, DEFAULT_VALUE_TYPES } from '../../../constants';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { nanoid } from 'nanoid';
 import '../index.css';
@@ -15,6 +15,7 @@ const XSelectMutiple = memo((props: XInputSelectMutipleConfig & { runtime?: bool
     dataField,
     tooltip,
     status,
+    defaultValueConfig,
     verify,
     layout,
     runtime = true,
@@ -60,6 +61,7 @@ const XSelectMutiple = memo((props: XInputSelectMutipleConfig & { runtime?: bool
           margin: 0,
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
+        initialValue={defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : undefined}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
           <Space wrap size={[4, 4]}>

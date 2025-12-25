@@ -3,16 +3,16 @@ import { nanoid } from 'nanoid';
 import { Input, Form, Ellipsis } from '@arco-design/mobile-react';
 import { ValidatorType, ITypeRules } from '@arco-design/mobile-utils';
 
-import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, DEFAULT_VALUE_TYPES, FormSchema } from '@onebase/ui-kit';
+import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, DEFAULT_VALUE_TYPES, FormSchema, securityEncodeText } from '@onebase/ui-kit';
 type XInputNumberConfig = typeof FormSchema.XInputNumberSchema.config;
 import '../index.css';
 
 const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; detailMode?: boolean; form?: any; }) => {
   const {
-    form,
     label,
     placeholder,
     dataField,
+    tooltip,
     status,
     defaultValueConfig,
     verify,
@@ -21,7 +21,9 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
     layout,
     runtime = true,
     detailMode,
-    numberFormat
+    numberFormat,
+    security,
+    form
   } = props;
 
   const { showUnit, unitValue, showPrecision, precision, showPercent, useThousandsSeparator } = numberFormat;
@@ -31,26 +33,33 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
     ? dataField[dataField.length - 1]
     : `${FORM_COMPONENT_TYPES.INPUT_NUMBER}_${nanoid()}`;
 
-  const detailValue = (value: number) => {
-    let result = '';
-    if (showPercent) {
-      value = value * 100;
-    }
-    if (showPrecision) {
-      result = value.toFixed(precision);
-    }
-    if (useThousandsSeparator) {
-      result = `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-    }
-    if (showPercent) {
-      result = `${result}%`;
-    }
-    if (showUnit) {
-      result = `${result}${unitValue}`;
-    }
+  const helpers = {
+    detailValue: (value: number) => {
+      let result = (value || '').toString();
+      if (!value) {
+        return result;
+      } else {
+        value = Number(value);
+      }
+      if (showPercent) {
+        value = value * 100;
+      }
+      if (showPrecision && value) {
+        result = Number(value).toFixed(precision);
+      }
+      if (useThousandsSeparator) {
+        result = `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+      }
+      if (showPercent) {
+        result = `${result}%`;
+      }
+      if (showUnit) {
+        result = `${result}${unitValue}`;
+      }
 
-    return result.toString();
-  };
+      return (result || '').toString();
+    }
+  }
 
   // 根据是否为只读模式确定内容
   const renderContent = () => {
@@ -63,11 +72,7 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
         maxLength={verify?.max || 1000000000}
         suffix={showUnit ? unitValue : ''}
         blockChangeWhenCompositing={true}
-        inputStyle={{ textAlign: align }}
-        style={{
-          width: '100%',
-          textAlignLast: align
-        }}
+        inputStyle={{ textAlign: layout === 'vertical' ? 'left' : 'right' }}
       />
     );
   };
@@ -80,9 +85,9 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
       validator: (value, callback) => {
         if (value && verify?.numberLimit) {
           if (value < verify?.min!) {
-            callback(`字数不能小于${verify?.min}`);
+            callback(`数字不能小于${verify?.min}`);
           } else if (value > verify?.max!) {
-            callback(`字数不能大于${verify?.max}`);
+            callback(`数字不能大于${verify?.max}`);
           }
         } else {
           callback();
@@ -96,7 +101,8 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
       className="inputTextWrapperOBMobile"
       field={fieldId}
       rules={rules}
-      label={label.display ? <Ellipsis text={label.text} /> : undefined}
+      layout={layout}
+      label={label.display ? <Ellipsis text={label.text} maxLine={2} /> : undefined}
       initialValue={defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : ''}
       style={{
         pointerEvents: (!runtime || detailMode) ? 'none' : 'unset',
@@ -105,7 +111,9 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
     >
       {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
         // 只读模式，渲染格式化的文本内容
-        <div className="readonlyText">{form?.getFieldValue(fieldId)}</div>
+        <div className="readonlyText">
+          {securityEncodeText(security, helpers.detailValue(form?.getFieldValue(fieldId)))}
+        </div>
       ) : (
         renderContent()
       )}

@@ -1,5 +1,20 @@
+import { CONFIG_PRIVATE_KEY, sm2Decrypt } from './crypto';
+
+export const getProdConfig = () => {
+  const config = (window as any).global_config?.CONFIG;
+  if (config) {
+    const decryptedData = sm2Decrypt(CONFIG_PRIVATE_KEY, config);
+    return JSON.parse(decryptedData as string);
+  }
+
+  return null;
+};
+
+export const envConfig = process.env.NODE_ENV === 'production' ? getProdConfig() : (window as any).global_config;
+
+// 平台、空间、应用端环境
 export const getEnv = (): string => {
-  const environment = (window as any).global_config?.ENVIRONMENT;
+  const environment = envConfig?.ENVIRONMENT;
   return environment;
 };
 
@@ -16,15 +31,19 @@ export const isRuntimeEnv = (): boolean => {
 };
 
 export const getSignatureConfig = (): { appKey: string; appSecret: string } => {
-  const appKey = (window as any).global_config?.APP_KEY;
-  const appSecret = (window as any).global_config?.APP_SECRET;
+  const appKey = envConfig?.APP_KEY;
+  const appSecret = envConfig?.APP_SECRET;
   return { appKey, appSecret };
 };
 
 export const getPublicKey = (): string => {
-  return (window as any).global_config?.PUBLIC_KEY;
+  return envConfig?.PUBLIC_KEY;
 };
 
 export const getMobileEditorURL = (): string => {
-  return (window as any).global_config?.MOBILE_EDITOR_URL;
+  return envConfig?.MOBILE_EDITOR_URL;
+};
+
+export const getResourceURL = (): string => {
+  return envConfig?.RESOURCE_URL;
 };

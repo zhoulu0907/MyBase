@@ -15,3 +15,4 @@ export const runtimeService = createClient('/system', getRuntimeBackendURL());
 export const runtimeInfraService = createClient('/infra', getRuntimeBackendURL());
 export const runtimeCorpService = createClient('/corp', getRuntimeBackendURL());
 export const dashboardDataSetService = createClient('/de2api', getDashboardDataSetUrl());
+export const runtimeUserService = createClient('/user', getRuntimeBackendURL());

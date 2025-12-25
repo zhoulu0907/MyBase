@@ -28,6 +28,9 @@ import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { getPrecedingNodes } from '../../nodes/utils';
+import AsyncDeptSelectField from '../asyncField/AsyncDeptSelectField';
+import AsyncSelectField from '../asyncField/AsyncSelectField';
+import AsyncUserSelectField from '../asyncField/AsyncUserSelectField';
 import styles from './index.module.less';
 
 const Option = Select.Option;
@@ -227,6 +230,27 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
           <DatePicker showTime placeholder="请输入静态值" />
         </Form.Item>
       );
+    }
+
+    if (
+      fieldValidationType?.fieldTypeCode == ENTITY_FIELD_TYPE.RADIO.VALUE ||
+      fieldValidationType?.fieldTypeCode == ENTITY_FIELD_TYPE.SELECT.VALUE
+    ) {
+      return (
+        <AsyncSelectField
+          fieldName={fieldName}
+          fieldKey={fieldKey}
+          entityFieldValidationTypes={entityFieldValidationTypes}
+        />
+      );
+    }
+
+    if (fieldValidationType?.fieldTypeCode == ENTITY_FIELD_TYPE.USER.VALUE) {
+      return <AsyncUserSelectField fieldName={fieldName} />;
+    }
+
+    if (fieldValidationType?.fieldTypeCode == ENTITY_FIELD_TYPE.DEPARTMENT.VALUE) {
+      return <AsyncDeptSelectField fieldName={fieldName} />;
     }
 
     return (

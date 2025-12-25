@@ -1,11 +1,11 @@
 import { Form, Uploader, Toast, Loading, Ellipsis } from '@arco-design/mobile-react';
 import { type UploadItem } from '@arco-design/mobile-react/lib/Upload';
 import { FileListMethods } from '@arco-design/mobile-react/cjs/uploader';
+import { ITypeRules, ValidatorType } from '@arco-design/mobile-utils';
 import { IconDelete, IconClose, IconDownload } from '@arco-design/mobile-react/esm/icon';
-import { uploadFile } from '@onebase/platform-center';
 import { nanoid } from 'nanoid';
 import { memo, useState, useEffect } from 'react';
-import { attachmentDownload, menuSignal } from '@onebase/app';
+import { attachmentDownload, attachmentUpload, menuSignal } from '@onebase/app';
 import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, FormSchema, downloadFileByUrl } from '@onebase/ui-kit';
 import DownloadLink from '@/assets/images/download_link.svg';
 import '../index.css';
@@ -56,11 +56,15 @@ const XFileUpload = memo((props: XFileUploadConfig & { runtime?: boolean; detail
     formData.append('file', file);
 
     try {
-      const res = await uploadFile(formData);
-      return {
-        name: file.name,
-        response: res
-      };
+      if (runtime) {
+        const res = await attachmentUpload(tableName, formData);
+        return {
+          name: file.name,
+          response: res
+        };
+      } else {
+        return '';
+      }
     } catch (error) {
       Toast.toast({
         content: '上传失败，请重试',
@@ -94,7 +98,7 @@ const XFileUpload = memo((props: XFileUploadConfig & { runtime?: boolean; detail
       }
       return <img src={DownloadLink} alt="download_link" />;
     }
-    
+
     return (
       <div className="uplaodList-text">
         {filesList.map(({ id, type, status, url, name, response }, index) => (
@@ -117,17 +121,17 @@ const XFileUpload = memo((props: XFileUploadConfig & { runtime?: boolean; detail
                     e.stopPropagation();
 
                     if (url && name) {
-                        const lastIndexOf = fieldName.lastIndexOf('.');
-                        const curFieldName = lastIndexOf === -1 ? fieldName : fieldName.slice(lastIndexOf + 1);
-                        const param = {
-                          menuId: curMenu.value?.id,
-                          id: form?.getFieldValue('id') || '',
-                          fieldName: curFieldName,
-                          fileId: id || response || ''
-                        };
+                      const lastIndexOf = fieldName.lastIndexOf('.');
+                      const curFieldName = lastIndexOf === -1 ? fieldName : fieldName.slice(lastIndexOf + 1);
+                      const param = {
+                        menuId: curMenu.value?.id,
+                        id: form?.getFieldValue('id') || '',
+                        fieldName: curFieldName,
+                        fileId: id || response || ''
+                      };
 
-                        const fileUrl = await attachmentDownload(tableName, param);
-                        downloadFileByUrl(fileUrl, name);
+                      const fileUrl = await attachmentDownload(tableName, param);
+                      downloadFileByUrl(fileUrl, name);
                     }
                   }}
                 />}
@@ -142,15 +146,23 @@ const XFileUpload = memo((props: XFileUploadConfig & { runtime?: boolean; detail
     );
   };
 
+  const rules: ITypeRules<ValidatorType.Custom>[] = [
+    {
+      required: verify?.required,
+      type: ValidatorType.Custom,
+      message: `${label.text}是必填项`
+    }
+  ];
+
   return (
     <Form.Item
       className="inputTextWrapperOBMobile fileUploadWrapperOBMobile"
       label={
-        label.display && <Ellipsis text={label.text} />
+        label.display && <Ellipsis text={label.text} maxLine={2} />
       }
       layout="vertical"
       field={fieldId}
-      required={verify?.required}
+      rules={rules}
       trigger="fileList"
       style={{
         pointerEvents: runtime ? 'unset' : 'none',

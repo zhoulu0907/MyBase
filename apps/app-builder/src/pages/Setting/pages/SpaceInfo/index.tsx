@@ -85,7 +85,7 @@ const SpaceInfo: React.FC = () => {
     if (!path) return '';
     const origin = window.location.origin;
     const normalizedPath = path.startsWith('/') ? path : `/${path}`;
-    return `${origin}/#/tenant${normalizedPath}`;
+    return `${origin}/#/tenant/${tokenInfo?.tenantId}/${normalizedPath}`;
   };
 
   // 重命名
@@ -152,9 +152,10 @@ const SpaceInfo: React.FC = () => {
             <div className={styles.baseInfo}>
               <div className={styles.infoCardPrimaryLeft}>
                 <div className={styles.avatarSection}>
-                  <Tooltip content="修改Logo">
+                  <Tooltip content="修改Logo" disabled={!hasPermission(ACTIONS.UPDATE)}>
                     {
                       <Upload
+                        disabled={!hasPermission(ACTIONS.UPDATE)}
                         limit={1}
                         accept="image/*"
                         listType="picture-card"

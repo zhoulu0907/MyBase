@@ -22,8 +22,8 @@ const squareIcon = {
   activeDisabled: <IconSquareChecked />
 }
 
-const XDeptSelect = memo((props: XDeptSelectConfig & { runtime?: boolean; detailMode?: boolean; isMultiple: boolean; form?: any; }) => {
-  const { label, dataField, status, verify, layout, runtime = true, isMultiple = false, form } = props;
+const XDeptSelect = memo((props: XDeptSelectConfig & { runtime?: boolean; detailMode?: boolean; isMultiple: boolean; form?: any; editPreview?: boolean }) => {
+  const { label, dataField, status, verify, layout, runtime = true, isMultiple = false, form, editPreview = false } = props;
   const [visible, setVisible] = useState(false);
   const [popupDirection] = useState<'bottom' | 'top' | 'left' | 'right'>('bottom');
 
@@ -117,9 +117,11 @@ const XDeptSelect = memo((props: XDeptSelectConfig & { runtime?: boolean; detail
   return (
     <Form.Item
       className="inputTextWrapperOBMobile inputDeptSelectOBMobile"
-      label={label.display && <Ellipsis text={label.text} />}
+      label={label.display && <Ellipsis text={label.text} maxLine={2} />}
       field={fieldId}
+      layout={layout}
       style={{
+        textAlign: layout === 'vertical' ? 'left' : 'right',
         pointerEvents: runtime ? 'unset' : 'none',
         opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
       }}
@@ -131,11 +133,12 @@ const XDeptSelect = memo((props: XDeptSelectConfig & { runtime?: boolean; detail
           className={styles.deptCell}
           onClick={() => setVisible(true)}
         >
-          {selectedParseDeptName ? <Ellipsis className={styles.selectValue} text={selectedParseDeptName} maxLine={1} /> : <div style={{ color: '#c9cdd4', fontSize: '0.32rem', textAlign: 'right' }}>请选择</div>}
+          {selectedParseDeptName ? <Ellipsis className={`${styles.selectValue} ${layout === 'vertical' ? styles.verticalLayout : ''}`} text={selectedParseDeptName} maxLine={1} /> :
+            <div className={`${styles.selectValue} ${layout === 'vertical' ? styles.verticalLayout : ''}`}>请选择</div>}
           <PopupSwiper visible={visible} close={(e) => handleCancel(e)} direction={popupDirection}>
-            <div className={styles.inputDeptSelectPopupContainer}>
+            <div className={`${styles.inputDeptSelectPopupContainer} ${editPreview ? styles.editPreview : ''}`}>
               <div className={styles.popupHeaderOBMobile}>
-                <IconArrowBack style={{ fontSize: '0.32rem' }} onClick={(e) => handleCancel(e)} />
+                <IconArrowBack style={{ fontSize: 'var(--fontSize)' }} onClick={(e) => handleCancel(e)} />
                 <span>{label?.text}</span>
                 <Button
                   inline
@@ -205,8 +208,14 @@ const XDeptSelect = memo((props: XDeptSelectConfig & { runtime?: boolean; detail
                           key={item.key}
                           value={item.key}
                           checked={selectedKeys.includes(item.key)}
-                          onChange={() => {
+                          onChange={(checked, _value, e) => {
                             setSelectedKeys([item.key]);
+                            if (!isMultiple && checked) {
+                              e.stopPropagation();
+                              const curSelectDept = getDeptData(deptData?.deptList, [item.key]);
+                              form?.setFieldValue(fieldId, curSelectDept);
+                              setVisible(false);
+                            }
                           }}
                         >
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.16rem' }}>

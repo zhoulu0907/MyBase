@@ -133,8 +133,7 @@
 .onAddSubtableOBMobile {
   text-align: center;
   color: rgb(var(--primary-6));
-  font-family: "PingFang SC";
-  font-size: 0.32rem;
+  font-size: var(--fontSize);
   font-style: normal;
   font-weight: 500;
   line-height: 0.48rem;

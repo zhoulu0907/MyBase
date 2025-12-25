@@ -14,11 +14,18 @@
   .selectMultipleCellOBMobile {
     padding-right: 0;
   }
-  .arco-form-item-control {
+
+  .selectMultipleValue {
     text-align: right;
+    color: #1d2129;
+    font-size: var(--fontSize);
   }
+
+  .verticalLayout {
+    text-align: left;
+  }
+
   .arco-cell .cell-content {
-    justify-content: flex-end;
     color: #1d2129;
   }
 }

@@ -17,6 +17,7 @@ const XInputTextArea = memo((props: XInputTextAreaConfig & { runtime?: boolean; 
     defaultValueConfig,
     verify,
     align,
+    layout,
     status,
     minRows = 1,
     runtime = true,
@@ -43,8 +44,8 @@ const XInputTextArea = memo((props: XInputTextAreaConfig & { runtime?: boolean; 
         autosize={false}
         rows={minRows || 2}
         textareaStyle={{
-          height: 0.25 * (minRows || 2) * 2 + 'rem',
-          textAlign: align
+          // minHeight: 0.25 * (minRows || 2) + 'rem',
+          textAlign: layout === 'vertical' ? 'left' : 'right'
         }}
         style={{
           width: '100%'
@@ -77,7 +78,8 @@ const XInputTextArea = memo((props: XInputTextAreaConfig & { runtime?: boolean; 
       className={`inputTextWrapperOBMobile inputTextAreaWrapperOBMobile ${verify?.lengthLimit ? 'showStatistics' : ''}`}
       field={fieldId}
       rules={rules}
-      label={label.display ? <Ellipsis text={label.text} /> : undefined}
+      layout={layout}
+      label={label.display ? <Ellipsis text={label.text} maxLine={2} /> : undefined}
       initialValue={defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : ''}
       style={{
         pointerEvents: (!runtime || detailMode) ? 'none' : 'unset',
@@ -86,15 +88,18 @@ const XInputTextArea = memo((props: XInputTextAreaConfig & { runtime?: boolean; 
     >
       {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
         // 只读模式，渲染文本内容
-        <div className="readonlyText" style={{
-          textAlign: align,
-          paddingTop: '0.16rem',
-          whiteSpace: 'pre-wrap',
-          wordBreak: 'break-word',
-          minHeight: `${minRows * 24 + 16}px`
-        }}>
-          {form?.getFieldValue(fieldId)}
-        </div>
+        <Textarea
+          className="readonlyText"
+          readOnly
+          style={{
+            textAlign: align,
+            minHeight: `${(minRows * 24 + 16) / 50}rem`
+          }}
+          textareaStyle={{
+            textAlign: layout === 'vertical' ? 'left' : 'right'
+          }}
+          value={form?.getFieldValue(fieldId) || (defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : '')}
+        />
       ) : (
         renderContent()
       )}

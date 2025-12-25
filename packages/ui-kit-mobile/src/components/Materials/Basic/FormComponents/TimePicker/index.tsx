@@ -33,11 +33,12 @@ const XTimePicker = memo((props: XTimePickerConfig & { runtime?: boolean; detail
       className="inputTextWrapperOBMobile"
       field=''
       rules={rules}
-      label={label.display && <Ellipsis text={label.text} />}
+      layout={layout}
+      label={label.display && <Ellipsis text={label.text} maxLine={2} />}
       required={verify?.required}
       initialValue={defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : ''}
       style={{
-        textAlign: 'right',
+        textAlign: layout === 'vertical' ? 'left' : 'right',
         pointerEvents: (!runtime || detailMode) ? 'none' : 'unset',
         opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
       }}

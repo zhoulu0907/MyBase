@@ -1,4 +1,4 @@
-import { Form, Grid, Input, Popconfirm, Radio, Select, type FormInstance } from '@arco-design/web-react';
+import { Form, Grid, Input, Popconfirm, Radio, Select, Modal, type FormInstance } from '@arco-design/web-react';
 import { useEffect, useRef, useState } from 'react';
 
 import {
@@ -43,6 +43,7 @@ interface IProps {
 const CreateApp = (props: IProps) => {
   const { previewBgColor, form, data, status, style, dataSourceCreated, isOwnDatasource, onCreateDatasource } = props;
   const isOpenedSaaS = hasPermission(TENANT_MENUS.CORP);
+  const [publishModelDisabled, setPublishModelDisabled] = useState<boolean>(false); // 发布模式是否禁止修改
   const [tagList, setTagList] = useState<ListTagReq[]>([]); // 标签列表
   const [iconName, setIconName] = useState<Application['iconName']>();
   const [iconColor, setIconColor] = useState<Application['iconColor']>();
@@ -62,10 +63,16 @@ const CreateApp = (props: IProps) => {
 
   useEffect(() => {
     if (status === 'create') {
+      setPublishModelDisabled(false);
       setIconName(sample(appIcon)!);
       setIconColor(sample(appIconColor)!);
     } else {
       if (data && Object.values(data).length) {
+        if (data?.publishModel === PUBLISH_MODULE.SASS) {
+          setPublishModelDisabled(true);
+        } else {
+          setPublishModelDisabled(false);
+        }
         form.setFieldsValue({
           ...data,
           tagIds: data.tags?.map((v) => {
@@ -149,6 +156,32 @@ const CreateApp = (props: IProps) => {
     actionRef.current = null;
   };
 
+  // 发布模式改变
+  const publishModelChange = (value: PUBLISH_MODULE) => {
+    // 编辑时，转换成SaaS应用 弹出二次确认弹框
+    if (status === 'update' && value === PUBLISH_MODULE.SASS) {
+      Modal.confirm({
+        title: `请确认是否将发布模式切换至SaaS模式`,
+        content: (
+          <div style={{color:'#4E5969'}}>
+            <p>当前应用为“内部模式”。切换至 SaaS 模式将带来以下变化：</p>
+            <ul>
+              <li>不可回退：切换后无法再切回内部模式</li>
+              <li>清除人员数据：为适配多企业使用，原“用户角色”中的人员配置将被清空</li>
+              <li>需配置角色：请在发布前设置好所需角色，发布时必须至少配置一个角色</li>
+              <li>发布后不可修改：应用发布后，“用户角色”配置将锁定，不可变更</li>
+            </ul>
+            <p>确认切换前，请务必做好准备。</p>
+          </div>
+        ),
+        onOk:()=>{},
+        onCancel:()=>{
+          form.setFieldValue('publishModel',PUBLISH_MODULE.INNER)
+        },
+      });
+    }
+  };
+
   return (
     <div className={styles.createApp} style={style}>
       <div className={styles.preview} style={{ backgroundColor: previewBgColor }}>
@@ -203,7 +236,13 @@ const CreateApp = (props: IProps) => {
         <div className={styles.title}>
           基础信息<span>请填写应用的基础信息，如名称、描述与图标</span>
         </div>
-        <Form form={form} layout="vertical">
+        <Form
+          form={form}
+          layout="vertical"
+          initialValues={{
+            publishModel: PUBLISH_MODULE.INNER
+          }}
+        >
           <Form.Item field="iconName" hidden>
             <Input />
           </Form.Item>
@@ -386,7 +425,7 @@ const CreateApp = (props: IProps) => {
           </Form.Item>
           {isOpenedSaaS && (
             <Form.Item field="publishModel" label="发布模式" rules={[{ required: true, message: '请选择发布模式' }]}>
-              <Radio.Group>
+              <Radio.Group disabled={publishModelDisabled} onChange={publishModelChange}>
                 <Radio value={PUBLISH_MODULE.INNER}>内部模式</Radio>
                 <Radio value={PUBLISH_MODULE.SASS}>SaaS模式</Radio>
               </Radio.Group>

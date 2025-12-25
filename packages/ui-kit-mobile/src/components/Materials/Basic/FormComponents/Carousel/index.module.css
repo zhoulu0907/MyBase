@@ -21,14 +21,14 @@
 
   .text {
     color: #FFF;
-    font-size: 0.28rem;
+    font-size: var(--fontSize);
     position: absolute;
     bottom: 0.48rem;
     left: 0.24rem;
   }
 
   .label {
-    font-size: 0.32rem;
+    font-size: var(--fontSize);
     color: #1d2129;
     line-height: 0.86rem;
     white-space: nowrap;

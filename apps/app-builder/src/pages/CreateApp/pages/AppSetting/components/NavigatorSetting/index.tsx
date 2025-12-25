@@ -18,11 +18,10 @@ import styles from './index.module.less';
 
 interface IProps {
   form: FormInstance;
-  data?: any;
 }
 const NavigatorSetting = (props: IProps) => {
   const { curAppId } = useAppStore();
-  const { form, data } = props;
+  const { form } = props;
   const webHomeType = Form.useWatch('webHomeType', form);
   const mobileHomeType = Form.useWatch('mobileHomeType', form);
 
@@ -34,10 +33,6 @@ const NavigatorSetting = (props: IProps) => {
     getPages();
     handleGetNavigationConfig();
   }, []);
-
-  useEffect(() => {
-    form.setFieldsValue(data);
-  }, [data]);
 
   // 监听 webHomeType 变化，从 default 切换到 custom 时清空下拉菜单值
   useEffect(() => {
@@ -60,8 +55,8 @@ const NavigatorSetting = (props: IProps) => {
       id: curAppId
     };
     const res = await getAppNavigationConfig(params);
-    const webHomeTypeValue = res.webDefaultMenu === 'default' ? 'default' : 'custom';
-    const mobileHomeTypeValue = res.mobileDefaultMenu === 'default' ? 'default' : 'custom';
+    const webHomeTypeValue = res.webDefaultMenu || 'default';
+    const mobileHomeTypeValue = res.mobileDefaultMenu || 'default';
     form.setFieldsValue({
       webNavLayout: res.webNavLayout || 'SIDEBAR',
       mobileNavLayout: res.mobileNavLayout || 'GRID',
