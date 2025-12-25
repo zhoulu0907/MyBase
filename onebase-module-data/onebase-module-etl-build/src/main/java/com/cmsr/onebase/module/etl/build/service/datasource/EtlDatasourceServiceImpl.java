@@ -211,7 +211,8 @@ public class EtlDatasourceServiceImpl implements EtlDatasourceService {
         String datasourceUuid = datasourceDO.getDatasourceUuid();
         log.info("提交元数据采集任务，数据源ID: {}", datasourceId);
         try {
-            DataSource datasource = datasourceFactory.constructDataSource(datasourceDO, false);
+            ConnectCryptoProperties connectProperties = JsonUtils.parseObject(datasourceDO.getConfig(), ConnectCryptoProperties.class);
+            DataSource datasource = datasourceFactory.constructDataSource(datasourceDO.getDatasourceType(), connectProperties, false);
             CatalogData catalogData = metadataCollector.collectCatalog(datasourceId, datasource);
             metadataManager.saveMetadata(applicationId, datasourceUuid, catalogData);
             LocalDateTime endTime = LocalDateTime.now();

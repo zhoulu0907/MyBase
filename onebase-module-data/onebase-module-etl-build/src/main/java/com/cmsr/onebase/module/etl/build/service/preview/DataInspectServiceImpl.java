@@ -2,7 +2,6 @@ package com.cmsr.onebase.module.etl.build.service.preview;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
-import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.common.util.string.UuidUtils;
 import com.cmsr.onebase.module.etl.build.service.DatasourceFactory;
 import com.cmsr.onebase.module.etl.build.vo.datasource.TestConnectionVO;
@@ -19,6 +18,7 @@ import com.cmsr.onebase.module.etl.core.dal.dataobject.EtlTableDO;
 import com.cmsr.onebase.module.etl.core.dto.FlinkMappings;
 import com.cmsr.onebase.module.etl.core.enums.EtlErrorCodeConstants;
 import com.cmsr.onebase.module.etl.core.enums.MetadataType;
+import com.cmsr.onebase.module.etl.core.vo.ConnectCryptoProperties;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.datasource.DataSourceHolder;
@@ -61,12 +61,15 @@ public class DataInspectServiceImpl implements DataInspectService {
     public boolean testConnection(TestConnectionVO pingVO) {
         Long datasourceId = pingVO.getId();
         EtlDatasourceDO datasourceDO;
+        String datasourceType = pingVO.getDatasourceType();
+        ConnectCryptoProperties connectProperties;
         if (datasourceId == null) {
-            datasourceDO = BeanUtils.toBean(pingVO, EtlDatasourceDO.class);
+            connectProperties = pingVO.getConfig();
         } else {
             datasourceDO = datasourceRepository.getById(datasourceId);
+            connectProperties = JsonUtils.parseObject(datasourceDO.getConfig(), ConnectCryptoProperties.class);
         }
-        DataSource datasource = dataSourceFactory.constructDataSource(datasourceDO, true);
+        DataSource datasource = dataSourceFactory.constructDataSource(datasourceType, connectProperties, true);
         String runnerKey = "ping-" + UuidUtils.getUuid();
 
         try {
@@ -96,8 +99,8 @@ public class DataInspectServiceImpl implements DataInspectService {
         if (tableDO == null) {
             throw ServiceExceptionUtil.exception(EtlErrorCodeConstants.TABLE_NOT_EXIST);
         }
-
-        DataSource dataSource = dataSourceFactory.constructDataSource(datasourceDO, true);
+        ConnectCryptoProperties connectProperties = JsonUtils.parseObject(datasourceDO.getConfig(), ConnectCryptoProperties.class);
+        DataSource dataSource = dataSourceFactory.constructDataSource(datasourceType, connectProperties, true);
         String runnerKey = "preview-" + datasourceUuid + UuidUtils.getUuid();
         try {
             DataSourceHolder.reg(runnerKey, dataSource);
