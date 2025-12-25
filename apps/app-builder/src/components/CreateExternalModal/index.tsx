@@ -143,7 +143,9 @@ const CreateExternalModal: React.FC<CreateExternalModalProps> = ({ visible, onCl
         console.log('values', values);
         if (isEditMode && initialData) {
           // 编辑模式：使用更新接口
-          values.password = await sm2Encrypt(getPublicKey(), values.password);
+          if (values.password) {
+            values.password = await sm2Encrypt(getPublicKey(), values.password);
+          }
 
           const res = await updateETLDatasource({
             id: initialData.id!,
@@ -168,7 +170,9 @@ const CreateExternalModal: React.FC<CreateExternalModalProps> = ({ visible, onCl
         } else {
           // 新建模式：使用创建接口
 
-          values.password = await sm2Encrypt(getPublicKey(), values.password);
+          if (values.password) {
+            values.password = await sm2Encrypt(getPublicKey(), values.password);
+          }
 
           const res = await createETLDataSource({
             datasourceName: values.datasourceName,
@@ -224,7 +228,9 @@ const CreateExternalModal: React.FC<CreateExternalModalProps> = ({ visible, onCl
 
   const handleTestConnection = async () => {
     form.validate().then(async (values) => {
-      values.password = await sm2Encrypt(getPublicKey(), values.password);
+      if (values.password) {
+        values.password = await sm2Encrypt(getPublicKey(), values.password);
+      }
       const res = await pingETLDataSource({
         id: initialData?.id,
         datasourceType: values.datasourceType,

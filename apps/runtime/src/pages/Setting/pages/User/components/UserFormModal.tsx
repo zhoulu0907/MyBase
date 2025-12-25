@@ -76,7 +76,9 @@ export default function UserFormModal({
 
     try {
       const values = await form.validate();
-      values.password = await sm2Encrypt(getPublicKey(), values.password);
+      if (values.password) {
+        values.password = await sm2Encrypt(getPublicKey(), values.password);
+      }
 
       const params = {
         ...values,
