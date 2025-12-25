@@ -49,7 +49,7 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({
   const [filterFieldCheckType, setFilterFieldCheckType] = useState<EntityFieldValidationTypes[]>([]);
   // 创建默认条件行
   const createDefaultConditionRow = (): ConditionRow => ({
-    fieldId: '',
+    fieldUuid: '',
     operator: 'equals',
     valueType: 'custom',
     fieldValue: '',
@@ -70,7 +70,7 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({
         const conditions = res?.valueRules.map((item) => {
           return {
             conditions: item.map((item) => ({
-              fieldId: item.fieldId,
+              fieldUuid: item.fieldUuid,
               op: item.operator,
               operatorType: item.valueType,
               value: item.fieldValue
@@ -98,7 +98,7 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({
         rgName: values.rgName,
         valueRules: values.filterCondition.map((item) =>
           item.conditions.map((item) => ({
-            fieldId: item.fieldId,
+            fieldUuid: item.fieldUuid,
             operator: item.op,
             valueType: item.operatorType,
             fieldValue: item.value
@@ -148,7 +148,7 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({
         title: res.entityName,
         children: res?.parentFields.map((item) => {
           return {
-            key: item.fieldId,
+            key: item.fieldUuid,
             title: item.displayName,
             fieldType: item.fieldType
           };
@@ -168,7 +168,7 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({
         key: entity.childEntityId,
         children: entity.childFields.map((item) => ({
           title: item.displayName,
-          key: item.fieldId,
+          key: item.fieldUuid,
           fieldType: item.fieldType
         }))
       };
@@ -176,7 +176,7 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({
     setAllOptions([...parentFields, ...childFields]);
     setParentOptions(parentFields);
 
-    getFieldCheckType(res?.parentFields?.map((item) => item.fieldId));
+    getFieldCheckType(res?.parentFields?.map((item) => item.fieldUuid));
   };
 
   // 批量获取字段可选校验类型

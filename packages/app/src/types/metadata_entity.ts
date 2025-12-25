@@ -162,12 +162,12 @@ export interface UpdateRelationReqVO extends CreateRelationReqVO {
 
 // 数据规则相关接口
 export interface ConditionRow {
-  fieldId: string;
+  fieldUuid: string;
   operator: string;
   valueType: string;
   fieldValue: string;
   logicOperator: 'AND' | 'OR';
-  logicType: 'CONDITION';
+  logicType?: 'CONDITION';
 }
 
 export interface CreateRuleReqVO {
