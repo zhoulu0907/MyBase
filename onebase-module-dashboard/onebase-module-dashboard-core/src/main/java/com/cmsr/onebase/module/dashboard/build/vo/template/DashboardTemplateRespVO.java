@@ -46,4 +46,7 @@ public class DashboardTemplateRespVO {
     @ApiModelProperty(value = "索引图片")
     private String indexImage;
 
+    @ApiModelProperty(value = "备注描述")
+    private String remarks;
+
 }

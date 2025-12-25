@@ -227,7 +227,7 @@ public class UserServiceImpl implements UserService {
 
         userDO.setStatus(CommonStatusEnum.ENABLE.getStatus()); // 默认开启
         if (userDO.getAdminType() == null) {
-            userDO.setAdminType(AdminTypeEnum.CUSTOM.getType());
+            userDO.setAdminType(AdminTypeEnum.SYSTEM.getType());
         }
         userDO.setUserType(UserTypeEnum.CORP.getValue());
         userDataRepository.save(userDO);
@@ -411,6 +411,15 @@ public class UserServiceImpl implements UserService {
 
     // 密码更新逻辑
     public AdminUserDO commonUpdatePassword(Long id, String newPassword){
+        AdminUserDO updateObj =  commonNotSaveHistoryUpdatePassword(id, newPassword);
+        // 保存密码历史
+        securityConfigApi.savePasswordHistory(id, updateObj.getPassword());
+        return updateObj;
+    }
+
+
+    // 重置密码和忘记密码登，不需要保存修改历史，修改有次数限制，到达次数之后，无法在继续修改
+    public AdminUserDO commonNotSaveHistoryUpdatePassword(Long id, String newPassword){
 
         //校验密码强度
         securityConfigApi.validatePassword(newPassword);
@@ -420,8 +429,6 @@ public class UserServiceImpl implements UserService {
         AdminUserDO updateObj = new AdminUserDO().setId(id);
         updateObj.setPassword(encodePassword(newPassword)); // 加密密码
         userDataRepository.update(updateObj);
-        // 保存密码历史
-        securityConfigApi.savePasswordHistory(id, updateObj.getPassword());
         return updateObj;
     }
 
@@ -1168,9 +1175,8 @@ public class UserServiceImpl implements UserService {
     public void thirdUserUpdatePassword(Long id, String password) {
         // 1. 校验用户存在
         AdminUserDO user = validateUserExists(id);
-
         //2. 第三方密码，目前取默认值，若以后用户可以自定义，使用入参 password
-        commonUpdatePassword(user.getId(), THIRD_USER_PASSWORD);
+        commonNotSaveHistoryUpdatePassword(user.getId(), THIRD_USER_PASSWORD);
     }
 
     private void checkTenantUserCountLimit(Integer status, AdminUserDO oldUser) {
@@ -1396,6 +1402,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void thirdUserForgetPassword(Long id,String password) {
         //  被调用前，已经做过用户判断，  调用通用改密码的方法
+
         commonUpdatePassword(id, password);
     }
 

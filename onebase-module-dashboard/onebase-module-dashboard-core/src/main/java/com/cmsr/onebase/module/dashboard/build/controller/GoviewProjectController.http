@@ -25,10 +25,10 @@ tenant-id: {{adminTenantId}}
 }
 
 ### 3. 删除项目
-POST {{baseUrl}}/dashboard/delete?id=1234
+POST {{baseUrl}}/dashboard/delete?id=111
 Content-Type: application/json
 Authorization: Bearer {{token}}
-tenant-id: {{adminTenantId}}
+tenant-id: 156421901678804992
 
 ### 4. 修改项目
 POST {{baseUrl}}/dashboard/edit
@@ -65,9 +65,9 @@ Content-Type: application/json
 }
 
 ### 7. 获取项目存储数据
-GET {{baseUrl}}/dashboard/getScreenDSLData?projectId=194097457982963712
-Authorization: Bearer {{token}}
-tenant-id: {{adminTenantId}}
+GET {{devUrl}}/dashboard/getScreenDSLData?projectId=194097457982963712
+#Authorization: Bearer {{token}}
+#tenant-id: {{adminTenantId}}
 ### 8. 保存项目数据
 POST {{baseUrl}}/dashboard/save/data
 Content-Type: application/json

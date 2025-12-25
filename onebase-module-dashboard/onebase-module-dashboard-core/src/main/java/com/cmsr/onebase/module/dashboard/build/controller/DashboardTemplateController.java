@@ -7,8 +7,8 @@ import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.dashboard.build.dal.dataobject.DashboardTemplateDO;
 import com.cmsr.onebase.module.dashboard.build.service.IDashboardTemplateService;
 import com.cmsr.onebase.module.dashboard.build.vo.template.DashboardTemplatePageReqVO;
-import com.cmsr.onebase.module.dashboard.build.vo.template.DashboardTemplateSaveReqVO;
 import com.cmsr.onebase.module.dashboard.build.vo.template.DashboardTemplateRespVO;
+import com.cmsr.onebase.module.dashboard.build.vo.template.DashboardTemplateSaveReqVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import jakarta.annotation.Resource;
@@ -41,8 +41,8 @@ public class DashboardTemplateController {
      */
     @PostMapping("/create")
     @ApiOperation("创建仪表盘模板")
-    @PermitAll
     @ApiSignIgnore
+    @PermitAll
     public CommonResult<Long> createDashboardTemplate(@RequestBody @Validated DashboardTemplateSaveReqVO saveReqVO) {
         return success(dashboardTemplateService.createDashboardTemplate(saveReqVO));
     }
@@ -70,7 +70,6 @@ public class DashboardTemplateController {
      */
     @PostMapping("/delete")
     @ApiOperation("删除仪表盘模板")
-    @PermitAll
     @ApiSignIgnore
     public CommonResult<Boolean> deleteDashboardTemplate(@RequestParam("id") Long id) {
         dashboardTemplateService.deleteDashboardTemplate(id);
@@ -85,7 +84,6 @@ public class DashboardTemplateController {
      */
     @GetMapping("/get")
     @ApiOperation("获取仪表盘模板")
-    @PermitAll
     @ApiSignIgnore
     public CommonResult<DashboardTemplateRespVO> getDashboardTemplate(@RequestParam("id") Long id) {
         DashboardTemplateDO template = dashboardTemplateService.getDashboardTemplate(id);
@@ -100,7 +98,6 @@ public class DashboardTemplateController {
      */
     @GetMapping("/list")
     @ApiOperation("获取仪表盘模板列表")
-    @PermitAll
     @ApiSignIgnore
     public CommonResult<List<DashboardTemplateRespVO>> getDashboardTemplateList(@RequestParam("ids") List<Long> ids) {
         List<DashboardTemplateDO> list = dashboardTemplateService.getDashboardTemplateList(ids);
@@ -115,7 +112,6 @@ public class DashboardTemplateController {
      */
     @GetMapping("/page")
     @ApiOperation("分页查询仪表盘模板")
-    @PermitAll
     @ApiSignIgnore
     public CommonResult<PageResult<DashboardTemplateRespVO>> getDashboardTemplatePage(DashboardTemplatePageReqVO pageReqVO) {
         PageResult<DashboardTemplateDO> pageResult = dashboardTemplateService.getDashboardTemplatePage(pageReqVO);
