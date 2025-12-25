@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.dashboard.build.controller;
 
 import com.cmsr.onebase.framework.common.annotaion.ApiSignIgnore;
+import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.dashboard.build.common.base.BaseController;
 import com.cmsr.onebase.module.dashboard.build.common.config.V2Config;
 import com.cmsr.onebase.module.dashboard.build.common.domain.AjaxResult;
@@ -39,6 +40,7 @@ public class ApiController  extends BaseController {
 	@ResponseBody
 	@PermitAll
 	@ApiSignIgnore
+	@TenantIgnore
 	public AjaxResult APIlogin(@RequestBody SysUser user, HttpServletRequest request) {
 		try {
 			// 判断是否登陆
@@ -46,7 +48,7 @@ public class ApiController  extends BaseController {
 				Map<String, Object> map = new HashMap<String, Object>();
 				map.put("userinfo", SaTokenUtil.getUser());
 				map.put("token", StpUtil.getTokenInfo());
-				return success().put("data", map);
+				return successData(0, map);
 			} else {
 				if (StrUtil.isNotBlank(user.getUsername()) && StrUtil.isNotBlank(user.getPassword())) {
 					// 直接查询用户
@@ -91,6 +93,7 @@ public class ApiController  extends BaseController {
 	@ResponseBody
 	@PermitAll
 	@ApiSignIgnore
+	@TenantIgnore
 	public AjaxResult logout() {
 		// 判断是否登陆
 		StpUtil.logout();
@@ -103,6 +106,7 @@ public class ApiController  extends BaseController {
 	@ResponseBody
 	@PermitAll
 	@ApiSignIgnore
+	@TenantIgnore
 	public AjaxResult getOssInfo() {
 		Map<String, Object> ossInfo = new HashMap<>();
 		ossInfo.put("bucketName", "oss");
@@ -111,6 +115,6 @@ public class ApiController  extends BaseController {
 		ossInfo.put("defaultFormat", v2Config.getDefaultFormat());
 		ossInfo.put("xnljmap", v2Config.getXnljmap());
 
-		return success().put("data", ossInfo);
+		return successData(0, ossInfo);
 	}
 }
