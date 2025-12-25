@@ -4,7 +4,7 @@
     display: block;
   }
   .arco-form-item {
-    border: none !important;
+    /* border: none !important; */
   }
   .arco-cell:before {
     transform: none !important;
@@ -61,11 +61,11 @@
   }
 
   .arco-form-label-item {
-    display: none;
+    /* display: none; */
   }
 
   .inputTextWrapperOBMobile {
-    border: none !important;
+    /* border: none !important; */
   }
 
   .arco-cell-group .cell-group-body.bordered::before {
@@ -155,7 +155,7 @@
       width: 100%;
 
       & > div {
-        padding-left: 0;
+        /* padding-left: 0; */
         padding-right: 0;
       }
     }

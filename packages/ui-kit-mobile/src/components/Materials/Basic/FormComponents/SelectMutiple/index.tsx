@@ -60,6 +60,7 @@ const XSelectMutiple = memo((props: XSelectMutipleConfig & { runtime?: boolean; 
     const newOptions = await getFieldOptionsConfig(dataField, mainEntity, subEntities);
     setOptions(newOptions)
   }
+
   const rules: ITypeRules<ValidatorType.Custom>[] = [
     {
       required: verify?.required,

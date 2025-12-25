@@ -16,6 +16,7 @@
   }
 
   .selectMultipleValue {
+    width: 100%;
     text-align: right;
     color: #1d2129;
     font-size: var(--fontSize);
