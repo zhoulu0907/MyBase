@@ -18,6 +18,7 @@ import {
   getEntityListByApp,
   getPageSetId,
   listApplicationMenu,
+  listPageView,
   menuSignal,
   MenuType,
   PageType,
@@ -428,7 +429,7 @@ const PageManagerPage: FC = () => {
         applicationId: curAppId,
         parentId:
           createForm.getFieldValue('parentId') === RootParentPage.id ? '' : createForm.getFieldValue('parentId'),
-        pageSetType: createForm.getFieldValue('pageSetType'),
+        pageSetType: 4,
         menuName: createForm.getFieldValue('menuName'),
         menuType: MenuType.PAGE,
         menuIcon: createForm.getFieldValue('menuIcon'),
@@ -448,11 +449,11 @@ const PageManagerPage: FC = () => {
         menuId: menuResp.id
       });
 
-      console.log('pageSetId:', pageSetId);
-      if (pageSetId) {
+      const dashboardId = await listPageView({ pageSetId });
+      if (dashboardId) {
         // 跳转到编辑器
         window.open(
-          `${window.location.origin}${window.location.pathname}#/onebase/dashboard/preview/193557494693232641`,
+          `http://s25029301301.dev.internal.virtueit.net:81/v0/appdashboard/#/chart/home/${dashboardId}`,
           '_blank'
         );
       }
@@ -866,7 +867,6 @@ const PageManagerPage: FC = () => {
       <CreateScreenModal
         title={title}
         type={'page'}
-        // handleCreate={handleCreate}
         handleCreate={handleScreenCreate}
         onCancel={() => {
           setVisibleCreateScreenForm('');

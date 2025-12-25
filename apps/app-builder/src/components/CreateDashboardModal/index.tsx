@@ -154,7 +154,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
       };
       const res = await getDashboardTemplateListApi(params);
       console.log('大屏模版 res:', res);
-      // setTotal(res.total);
+      setTotal(res.total);
       setDashboardTemplateData(res.list);
     },
     [dashboardMethod, dashboardTemplateTab, dashboardPagination, templateName]
@@ -250,7 +250,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
   const handlePreview = (dashboardProjectId: string) => {
     // 在新窗口打开预览页面，使用 hash 路由
     window.open(
-      `http://s25029301301.dev.internal.virtueit.net:81/v0/appdashboard/#/chat/preview/${dashboardProjectId}/${tenantId}/${accessToken}`,
+      `http://s25029301301.dev.internal.virtueit.net:81/v0/appdashboard/#/chart/preview/${dashboardProjectId}`,
       '_blank'
     );
   };
