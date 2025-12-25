@@ -10,9 +10,10 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
 {
-  "templateName": "",
+  "id": 194097457982963712,
+  "templateName": "9527",
   "content": "",
-  "templateType": "app",
+  "templateType": "",
   "hot": null,
   "appId": 184716905786900486,
   "indexImage": null,
@@ -51,3 +52,15 @@ tenant-id: {{adminTenantId}}
 GET {{devUrl}}/dashboard/template/page?templateType=system
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
+
+### 7. 另存为仪表盘模板
+POST {{baseUrl}}/dashboard/template/saveOtherDashboardTemplate
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+{
+  "id": 194097457982963712,
+  "templateName": "另存为模板",
+  "appId": 184716905786900484
+}

@@ -84,10 +84,10 @@ tenant-id: {{adminTenantId}}
 
 
 --WebAppBoundary
-Content-Disposition: form-data; name="object"; filename="example.png"
-Content-Type: image/png
+Content-Disposition: form-data; name="object"; filename="p1.jpg"
+Content-Type: image/jpeg
 
-< ./example.png
+< ./p1.jpg
 --WebAppBoundary--
 
 ### 10. 下载文件
