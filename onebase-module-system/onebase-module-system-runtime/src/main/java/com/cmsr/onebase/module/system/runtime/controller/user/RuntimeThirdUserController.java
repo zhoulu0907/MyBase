@@ -1,7 +1,12 @@
 package com.cmsr.onebase.module.system.runtime.controller.user;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
+import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
+import com.cmsr.onebase.module.system.runtime.service.auth.RuntimeAuthService;
 import com.cmsr.onebase.module.system.service.user.UserService;
+import com.cmsr.onebase.module.system.vo.auth.AuthLoginRespVO;
+import com.cmsr.onebase.module.system.vo.auth.ThirdAuthLoginRespVO;
 import com.cmsr.onebase.module.system.vo.user.ThirdSupplementUserReqVO;
 import com.cmsr.onebase.module.system.vo.user.ThirdSupplementUserResVO;
 import com.cmsr.onebase.module.system.vo.user.ThirdUserRegisterReqVO;
@@ -25,33 +30,15 @@ import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 @Validated
 public class RuntimeThirdUserController {
 
+
     @Resource
-    private UserService userService;
+    private RuntimeAuthService runtimeAuthService;
 
 
     @PostMapping("/register")
-    @Operation(summary = "第三方注册用户")
+    @Operation(summary = "第三方用户补充用户信息注册并登录")
     @PermitAll
-    public CommonResult<Long> register(@RequestBody  @Valid ThirdUserRegisterReqVO reqVO) {
-        Long userId = userService.thirdUserRegister(reqVO);
-        return success(userId);
+    public CommonResult<AuthLoginRespVO> thirdUserRegister(@RequestBody  @Valid ThirdSupplementUserReqVO reqVO) {
+        return success(runtimeAuthService.thirdUserRegister(reqVO));
     }
-
-    @PostMapping("/supplement-user")
-    @Operation(summary = "补充用户信息")
-    @PermitAll
-    public CommonResult<ThirdSupplementUserResVO> supplementUser(@RequestBody  @Valid ThirdSupplementUserReqVO reqVO) {
-        ThirdSupplementUserResVO user = userService.supplementUser(reqVO);
-        return success(user);
-    }
-
-
-    @PostMapping("/forget-password")
-    @Operation(summary = "忘记密码")
-    @PermitAll
-    public CommonResult<Boolean> updateUserPassword(@Valid @RequestBody UserForgetPasswordReqVO reqVO) {
-        userService.forgetPassword(reqVO);
-        return success(true);
-    }
-
 }

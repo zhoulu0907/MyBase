@@ -43,7 +43,7 @@ onebase:
   platform-tenant:
     enable-create-app: true # 测试环境，暂时允许平台租户创建应用，方便登录接口测试；
   security:
-    mock-enable: false
+    mock-enable: true
   access-log: # 访问日志的配置项
     enable: false
   web:
@@ -67,6 +67,13 @@ justauth:
     timeout: 24h # 超时时长，目前只对 Redis 缓存生效，默认 3 分钟
 
 liteflow:
-  enable: true
+  enable: false
   version-tag: 0
   js-server-address: http://10.0.104.41:28392
+
+# Goview配置 开发环境特定的文件存储配置
+v2:
+  xnljmap:
+    oss: file:/data/backend/fileserver_ft/
+  fileurl: /data/backend/fileserver_ft
+  httpurl: http://10.0.104.38:8083/

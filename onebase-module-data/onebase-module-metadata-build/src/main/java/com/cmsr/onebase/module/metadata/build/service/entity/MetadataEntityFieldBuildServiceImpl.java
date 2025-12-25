@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.metadata.build.service.entity;
 
+
 import com.cmsr.onebase.framework.aynline.AnylineDdlHelper;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
@@ -43,9 +44,6 @@ import com.cmsr.onebase.module.metadata.build.service.datasource.MetadataDatasou
 import com.cmsr.onebase.module.metadata.build.service.field.MetadataEntityFieldOptionBuildService;
 import com.cmsr.onebase.module.metadata.build.service.field.MetadataEntityFieldConstraintBuildService;
 import com.cmsr.onebase.module.metadata.build.service.number.AutoNumberConfigBuildService;
-import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.EntityFieldValidationTypesReqVO;
-import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.EntityFieldValidationTypesRespVO;
-import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.ValidationTypeItemRespVO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.number.MetadataAutoNumberConfigDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.number.MetadataAutoNumberRuleItemDO;
 import com.cmsr.onebase.module.metadata.core.enums.BusinessEntityTypeEnum;
@@ -55,6 +53,8 @@ import com.cmsr.onebase.module.metadata.core.util.MetadataIdUuidConverter;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import com.mybatisflex.core.query.QueryColumn;
+import com.mybatisflex.core.query.QueryCondition;
 import com.mybatisflex.core.query.QueryWrapper;
 import org.anyline.entity.DataSet;
 import org.anyline.entity.DataRow;
@@ -451,8 +451,13 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         }
 
         if (queryVO.getKeyword() != null && !queryVO.getKeyword().trim().isEmpty()) {
-            queryWrapper.like(MetadataEntityFieldDO::getFieldName, queryVO.getKeyword())
-                    .or(MetadataEntityFieldDO::getDisplayName).like(queryVO.getKeyword());
+            // 构建OR条件并用括号包裹
+            String keyword = queryVO.getKeyword();
+            QueryColumn fieldNameCol = new QueryColumn("field_name");
+            QueryColumn displayNameCol = new QueryColumn("display_name");
+            QueryCondition orCondition = fieldNameCol.like(keyword).or(displayNameCol.like(keyword));
+            QueryCondition wrappedCondition = QueryCondition.createEmpty().and(orCondition);
+            queryWrapper.and(wrappedCondition);
         }
         if (queryVO.getIsSystemField() != null) {
             queryWrapper.eq(MetadataEntityFieldDO::getIsSystemField, queryVO.getIsSystemField());
@@ -473,8 +478,13 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             personWrapper.eq(MetadataEntityFieldDO::getFieldType, "USER");
             // 透传其它条件
             if (queryVO.getKeyword() != null && !queryVO.getKeyword().trim().isEmpty()) {
-                personWrapper.like(MetadataEntityFieldDO::getFieldName, queryVO.getKeyword())
-                        .or(MetadataEntityFieldDO::getDisplayName).like(queryVO.getKeyword());
+                // 构建OR条件并用括号包裹
+                String keyword = queryVO.getKeyword();
+                QueryColumn fieldNameCol = new QueryColumn("field_name");
+                QueryColumn displayNameCol = new QueryColumn("display_name");
+                QueryCondition orCondition = fieldNameCol.like(keyword).or(displayNameCol.like(keyword));
+                QueryCondition wrappedCondition = QueryCondition.createEmpty().and(orCondition);
+                personWrapper.and(wrappedCondition);
             }
             if (queryVO.getFieldCode() != null && !queryVO.getFieldCode().trim().isEmpty()) {
                 personWrapper.like(MetadataEntityFieldDO::getFieldCode, queryVO.getFieldCode());
@@ -847,8 +857,8 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                     // - fieldType (字段类型)
                     // - dataLength (数据长度)
                     // - decimalPlaces (小数位数)
-                    // - isRequired (是否必填，影响 NOT NULL 约束)
                     // - defaultValue (默认值)
+                    // 注意：isRequired (是否必填) 不影响DDL，校验在应用层进行
                     boolean needAlter = false;
                     
                     // 检查字段类型是否变化
@@ -867,12 +877,6 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                     if (item.getDecimalPlaces() != null && !item.getDecimalPlaces().equals(origin.getDecimalPlaces())) {
                         needAlter = true;
                         log.debug("字段 {} 小数位数发生变化: {} -> {}", origin.getFieldName(), origin.getDecimalPlaces(), item.getDecimalPlaces());
-                    }
-                    
-                    // 检查是否必填变化
-                    if (item.getIsRequired() != null && !item.getIsRequired().equals(origin.getIsRequired())) {
-                        needAlter = true;
-                        log.debug("字段 {} 必填属性发生变化: {} -> {}", origin.getFieldName(), origin.getIsRequired(), item.getIsRequired());
                     }
                     
                     // 检查默认值是否变化
@@ -1668,7 +1672,8 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
 
                 // 使用 Anyline 原生 API 构建 Column 对象
                 String columnType = mapFieldType(field.getFieldType(), field.getDataLength());
-                boolean nullable = field.getIsRequired() == null || !BooleanStatusEnum.isYes(field.getIsRequired());
+                // 所有校验在应用层进行，DDL中不设置 NOT NULL 约束，因此 nullable 始终为 true
+                boolean nullable = true;
                 
                 Column column = AnylineDdlHelper.buildColumn(
                         tableName,
@@ -1816,6 +1821,8 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
 
     /**
      * 使用 Anyline 原生 API 修改列（适用于达梦数据库）
+     * <p>
+     * 注意：所有校验（必填、唯一、长度、范围、格式等）均在应用层进行，不在DDL中生成约束
      *
      * @param service   Anyline 服务实例
      * @param tableName 表名
@@ -1824,8 +1831,8 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
     private void alterColumnWithAnyline(AnylineService<?> service, String tableName, MetadataEntityFieldDO field) {
         // 将业务字段类型映射为数据库类型
         String dbTypeName = mapFieldType(field.getFieldType(), field.getDataLength());
-        // isRequired=1 表示必填，对应 nullable=false
-        boolean nullable = field.getIsRequired() == null || !BooleanStatusEnum.isYes(field.getIsRequired());
+        // 所有校验在应用层进行，DDL中不设置 NOT NULL 约束，因此 nullable 始终为 true
+        boolean nullable = true;
 
         // 构建 Anyline Column 对象
         Column column = AnylineDdlHelper.buildColumn(
@@ -1894,6 +1901,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
      * <p>
      * 注意：调用此方法前必须先使用checkColumnExists()检查列是否存在
      * 不使用IF NOT EXISTS语法以兼容达梦等数据库
+     * 所有校验（必填、唯一、长度、范围、格式等）均在应用层进行，不在DDL中生成约束
      */
     private String generateAddColumnDDL(String tableName, MetadataEntityFieldDO field) {
         StringBuilder ddl = new StringBuilder();
@@ -1904,11 +1912,6 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         // 字段类型映射
         String columnType = mapFieldType(field.getFieldType(), field.getDataLength());
         ddl.append(columnType);
-
-        // 是否必填 - 使用新的枚举值：1-是，0-否
-        if (field.getIsRequired() != null && BooleanStatusEnum.isYes(field.getIsRequired())) {
-            ddl.append(" NOT NULL");
-        }
 
         // 默认值 - 根据字段类型正确格式化
         if (field.getDefaultValue() != null && !field.getDefaultValue().trim().isEmpty()) {
@@ -1933,8 +1936,10 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
      * 生成修改字段的DDL语句（跨数据库兼容）
      * <p>
      * 根据不同数据库类型生成对应的ALTER COLUMN语法：
-     * - PostgreSQL/KingBase: ALTER COLUMN ... TYPE / SET/DROP NOT NULL
-     * - 达梦(DM): MODIFY "column" TYPE NOT NULL/NULL
+     * - PostgreSQL/KingBase: ALTER COLUMN ... TYPE
+     * - 达梦(DM): MODIFY "column" TYPE
+     * <p>
+     * 注意：所有校验（必填、唯一、长度、范围、格式等）均在应用层进行，不在DDL中生成约束
      *
      * @param datasourceType 数据库类型
      * @param tableName      表名
@@ -1952,8 +1957,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             switch (dbType) {
                 case PostgreSQL:
                 case KingBase:
-                    // PostgreSQL/金仓：需要分开修改类型和约束
-                    // 1. 修改字段类型
+                    // PostgreSQL/金仓：修改字段类型
                     ddl.append("ALTER TABLE \"").append(tableName)
                             .append("\" ALTER COLUMN \"").append(fieldName)
                             .append("\" TYPE ").append(columnType);
@@ -1966,18 +1970,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
 
                     ddl.append(";\n");
 
-                    // 2. 修改是否允许为空
-                    if (field.getIsRequired() != null) {
-                        ddl.append("ALTER TABLE \"").append(tableName)
-                                .append("\" ALTER COLUMN \"").append(fieldName).append("\"");
-                        if (BooleanStatusEnum.isYes(field.getIsRequired())) {
-                            ddl.append(" SET NOT NULL;\n");
-                        } else {
-                            ddl.append(" DROP NOT NULL;\n");
-                        }
-                    }
-
-                    // 3. 修改默认值 - 根据字段类型正确格式化
+                    // 修改默认值 - 根据字段类型正确格式化
                     if (field.getDefaultValue() != null && !field.getDefaultValue().trim().isEmpty()) {
                         String formattedValue = formatDefaultValue(field.getFieldType(), field.getDefaultValue());
                         if (formattedValue != null) {
@@ -1989,19 +1982,10 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                     break;
 
                 case DM:
-                    // 达梦：使用MODIFY，类型和约束一起修改
+                    // 达梦：使用MODIFY，修改类型和默认值
                     ddl.append("ALTER TABLE \"").append(tableName)
                             .append("\" MODIFY \"").append(fieldName)
                             .append("\" ").append(columnType);
-
-                    // 添加约束
-                    if (field.getIsRequired() != null) {
-                        if (BooleanStatusEnum.isYes(field.getIsRequired())) {
-                            ddl.append(" NOT NULL");
-                        } else {
-                            ddl.append(" NULL");
-                        }
-                    }
 
                     // 添加默认值 - 根据字段类型正确格式化
                     if (field.getDefaultValue() != null && !field.getDefaultValue().trim().isEmpty()) {
@@ -2560,6 +2544,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 } else {
                     // 确实是新选项，新增
                     MetadataEntityFieldOptionDO d = new MetadataEntityFieldOptionDO();
+                    d.setOptionUuid(UuidUtils.getUuid()); // 生成选项UUID
                     d.setFieldUuid(fieldUuid);
                     d.setOptionLabel(opt.getOptionLabel());
                     d.setOptionValue(opt.getOptionValue());

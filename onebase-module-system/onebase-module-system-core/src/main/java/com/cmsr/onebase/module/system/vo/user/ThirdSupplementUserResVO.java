@@ -17,7 +17,6 @@ public class ThirdSupplementUserResVO {
     private Long id;
 
     @Schema(description = "用户账号", example = "onebase")
-
     private String userName;
 
     @ExcelProperty("用户名称")

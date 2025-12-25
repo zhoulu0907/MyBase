@@ -54,8 +54,8 @@ public class SemanticUpdateExecutor {
             // 4) 功能权限校验
             semanticPermissionValidator.validate(record);
             
-            // // 5) 数据校验（RecordDTO 简化入口）
-            // semanticValidationManager.validate(record);
+            // 5) 数据校验（必填、长度、范围、格式、唯一等）
+            semanticValidationManager.validate(record);
             
             // 6) 数据存储：CRUDQ 服务（RecordDTO 入口）
             semanticDataCrudService.update(record);

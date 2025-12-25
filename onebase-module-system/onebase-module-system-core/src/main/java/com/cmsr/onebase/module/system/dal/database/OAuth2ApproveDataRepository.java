@@ -1,25 +1,25 @@
 package com.cmsr.onebase.module.system.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2ApproveDO;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.Compare;
+import com.cmsr.onebase.framework.orm.repo.BaseDataRepository;
+import com.cmsr.onebase.module.system.dal.flex.mapper.SystemOauth2ApproveMapper;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collections;
 import java.util.List;
 
+import static com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2ApproveDO.CLIENT_ID;
+import static com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2ApproveDO.USER_ID;
+import static com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2ApproveDO.USER_TYPE;
+
 /**
- * OAuth2批准数据访问层
+ * OAuth2 批准数据访问层
  *
  * @author matianyu
- * @date 2025-08-11
+ * @date 2025-12-22
  */
 @Repository
-public class OAuth2ApproveDataRepository extends DataRepository<OAuth2ApproveDO> {
-
-    public OAuth2ApproveDataRepository() {
-        super(OAuth2ApproveDO.class);
-    }
+public class OAuth2ApproveDataRepository extends BaseDataRepository<SystemOauth2ApproveMapper, OAuth2ApproveDO> {
 
     /**
      * 根据用户ID、用户类型和客户端ID查询批准列表
@@ -30,9 +30,12 @@ public class OAuth2ApproveDataRepository extends DataRepository<OAuth2ApproveDO>
      * @return 批准列表
      */
     public List<OAuth2ApproveDO> findListByUserIdAndUserTypeAndClientId(Long userId, Integer userType, String clientId) {
-        return findAllByConfig(new DefaultConfigStore()
-                .and(Compare.EQUAL, "user_id", userId)
-                .and(Compare.EQUAL, "user_type", userType)
-                .and(Compare.EQUAL, "client_id", clientId));
+        if (userId == null || userType == null || clientId == null || clientId.trim().isEmpty()) {
+            return Collections.emptyList();
+        }
+        return list(query()
+                .eq(USER_ID, userId)
+                .eq(USER_TYPE, userType)
+                .eq(CLIENT_ID, clientId));
     }
 }

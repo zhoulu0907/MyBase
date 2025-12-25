@@ -9,8 +9,10 @@ import com.cmsr.onebase.module.app.api.appresource.AppResourceApi;
 import com.cmsr.onebase.module.app.api.appresource.dto.AppMenuRespDTO;
 import com.cmsr.onebase.module.app.api.appresource.dto.AppPagesetRespDTO;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
+import com.cmsr.onebase.module.bpm.core.dal.database.BpmFlowAgentInsRepository;
 import com.cmsr.onebase.module.bpm.core.dal.database.BpmFlowInsBizExtRepository;
 import com.cmsr.onebase.module.bpm.core.dal.database.ext.BpmFlowDefinitionRepositoryExt;
+import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowAgentInsDO;
 import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowInsBizExtDO;
 import com.cmsr.onebase.module.bpm.core.dal.mapper.BpmInstanceMapper;
 import com.cmsr.onebase.module.bpm.core.dto.BpmDefinitionExtDTO;
@@ -39,6 +41,7 @@ import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticFieldTyp
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticOperatorEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.type.BpmSystemFieldEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticPageConditionVO;
+import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticTargetBodyVO;
 import com.cmsr.onebase.module.system.api.user.AdminUserApi;
 import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
 import com.mybatisflex.core.query.QueryWrapper;
@@ -58,6 +61,7 @@ import org.dromara.warm.flow.core.entity.Task;
 import org.dromara.warm.flow.core.enums.PublishStatus;
 import org.dromara.warm.flow.core.enums.SkipType;
 import org.dromara.warm.flow.core.service.DefService;
+import org.dromara.warm.flow.core.service.HisTaskService;
 import org.dromara.warm.flow.core.service.InsService;
 import org.dromara.warm.flow.core.service.TaskService;
 import org.jetbrains.annotations.NotNull;
@@ -91,6 +95,12 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
 
     @Resource(name = "bpmTaskService")
     private TaskService taskService;
+
+    @Resource(name = "bpmHisTaskService")
+    private HisTaskService hisTaskService;
+
+    @Resource
+    private BpmFlowAgentInsRepository flowAgentInsRepository;
 
     @Resource
     private FlowInstanceRepository flowInstanceRepository;
@@ -531,7 +541,7 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
 
         // menuId转menuUuid
         AppMenuRespDTO appMenuRespDTO = appResourceApi.getAppMenuById(reqVO.getMenuId());
-        bpmAppResourceValidator.validateMenu(appMenuRespDTO, appMenuRespDTO.getApplicationId());
+        bpmAppResourceValidator.validateMenuAndPageset(appMenuRespDTO, appMenuRespDTO.getApplicationId());
 
         String menuUuid = appMenuRespDTO.getMenuUuid();
 
@@ -784,7 +794,52 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         // return new PageResult<>(list, entityPageResult.getTotal());
     }
 
-   /**
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteFormData(BpmDeleteFormDataReqVO reqVO) {
+        // menuId转menuUuid
+        AppMenuRespDTO appMenuRespDTO = appResourceApi.getAppMenuById(reqVO.getMenuId());
+        bpmAppResourceValidator.validateMenuAndPageset(appMenuRespDTO, ApplicationManager.getApplicationId());
+
+        String menuUuid = appMenuRespDTO.getMenuUuid();
+
+        // 先删除流程相关的数据
+        // 查询实例信息，理论上只有一条
+        QueryWrapper instanceQueryWrapper = QueryWrapper.create();
+        instanceQueryWrapper.eq(FlowInstance::getBusinessId, String.valueOf(reqVO.getId()));
+        instanceQueryWrapper.eq(FlowInstance::getFormPath, menuUuid);
+
+        FlowInstance flowInstance = flowInstanceRepository.getOne(instanceQueryWrapper);
+
+        if (flowInstance != null) {
+            // 删除待办任务
+            taskService.deleteByInsIds(Collections.singletonList(flowInstance.getId()));
+
+            // 删除已办务任务
+            hisTaskService.deleteByInsIds(Collections.singletonList(flowInstance.getId()));
+
+            // 删除代理信息
+            QueryWrapper agentInsDelWrapper = QueryWrapper.create();
+            agentInsDelWrapper.eq(BpmFlowAgentInsDO::getInstanceId, flowInstance.getId());
+            flowAgentInsRepository.remove(agentInsDelWrapper);
+
+            // 删除流程实例数据
+            flowInstanceRepository.removeById(flowInstance.getId());
+
+            // 删除流程扩展信息
+            QueryWrapper insExtDelWrapper = QueryWrapper.create();
+            insExtDelWrapper.eq(BpmFlowInsBizExtDO::getInstanceId, flowInstance.getId());
+            flowInsExtRepository.remove(insExtDelWrapper);
+        }
+
+        // 最后删除元数据，todo 需要进行权限判断
+        SemanticTargetBodyVO deleteBodyVO = new SemanticTargetBodyVO();
+        deleteBodyVO.setTableName(reqVO.getTableName());
+        deleteBodyVO.setId(reqVO.getId());
+        semanticDynamicDataApi.deleteDataById(deleteBodyVO);
+    }
+
+    /**
      * 获取实体数据
      *
      * @return 获取流程表单数据响应

@@ -44,7 +44,10 @@ public class RuntimeApplicationContextHeaderFilter extends OncePerRequestFilter 
 
     private RequestMatcher systemRequestMatcher = new AntPathRequestMatcher("/runtime/system/**");
     private RequestMatcher corpRequestMatcher = new AntPathRequestMatcher("/runtime/corp/**");
+    //todo 这里要删除
     private RequestMatcher appGetRequestMatcher = new AntPathRequestMatcher("/runtime/app/application/get");
+    private RequestMatcher appLeastRequestMatcher = new AntPathRequestMatcher("/runtime/app/application/least");
+
 
     /**
      * 企业接口和系统接口不做App校验
@@ -56,6 +59,7 @@ public class RuntimeApplicationContextHeaderFilter extends OncePerRequestFilter 
         return systemRequestMatcher.matches(request)
                 || corpRequestMatcher.matches(request)
                 || appGetRequestMatcher.matches(request)
+                || appLeastRequestMatcher.matches(request)
                 || RemoteCallAuthenticationFilter.flowRemoteCallRequestMatcher.matches(request);
     }
 
@@ -63,16 +67,15 @@ public class RuntimeApplicationContextHeaderFilter extends OncePerRequestFilter 
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
         try {
-            // 如果是系统、企业相关接口，不做App校验，直接放行
-            if (doFilter(request)) {
-                chain.doFilter(request, response);
-                return;
-            }
-
             if (dataIsolation) {
                 ApplicationManager.setVersionTag(VersionTagEnum.RUNTIME.getValue());
             } else {
                 ApplicationManager.setVersionTag(VersionTagEnum.BUILD.getValue());
+            }
+            // 如果是系统、企业相关接口，不做App校验，直接放行
+            if (doFilter(request)) {
+                chain.doFilter(request, response);
+                return;
             }
             LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
             Long applicationId = null;
@@ -104,6 +107,11 @@ public class RuntimeApplicationContextHeaderFilter extends OncePerRequestFilter 
 
 
     private boolean hasApplicationPermission(Long userId, Long applicationId) {
-        return appAuthSecurityApi.hasApplicationPermission(userId, applicationId);
+        boolean hasApplicationPermission = appAuthSecurityApi.hasApplicationPermission(userId, applicationId);
+        //TODO 暂时这样弄这，如果没有权限，清理掉缓存
+        if (!hasApplicationPermission) {
+            appAuthSecurityApi.cleanAuthCache(userId, applicationId);
+        }
+        return hasApplicationPermission;
     }
 }

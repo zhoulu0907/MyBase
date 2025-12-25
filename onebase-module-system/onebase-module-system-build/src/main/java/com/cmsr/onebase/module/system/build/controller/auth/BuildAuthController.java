@@ -28,12 +28,12 @@ import org.springframework.web.bind.annotation.*;
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 
 /**
- *  编辑态登录认证相关接口
- *  1. 空间登录 tenant-login
- *  2. 企业登录 corp-login
+ * 编辑态登录认证相关接口
+ * 1. 空间登录 tenant-login
+ * 2. 企业登录 corp-login
  *
- *  @author matianyu
- *  @date 2025-11
+ * @author matianyu
+ * @date 2025-11
  */
 @Tag(name = "管理后台 - 登录&认证")
 @RestController
@@ -45,9 +45,9 @@ public class BuildAuthController {
     @Resource
     private BuildAuthService authService;
     @Resource
-    private UserService      userService;
+    private UserService userService;
     @Resource
-    private RoleService      roleService;
+    private RoleService roleService;
     @Resource
     private MenuService menuService;
     @Resource
@@ -60,7 +60,7 @@ public class BuildAuthController {
     @PermitAll
     @Operation(summary = "空间登录（账密）")
     public CommonResult<AuthLoginRespVO> tenantLogin(@RequestBody @Valid AuthLoginReqVO reqVO, HttpServletResponse response) {
-        AuthLoginRespVO respVO= authService.login(reqVO);
+        AuthLoginRespVO respVO = authService.login(reqVO);
         // 设置Cookie
         response.addHeader("Set-Cookie", String.format("%s=%s; HttpOnly",
                 securityProperties.getTokenHeader(), respVO.getAccessToken()));
@@ -93,12 +93,12 @@ public class BuildAuthController {
         return success(permissionService.getPermissionInfo(code));
     }
 
-    @PostMapping("/register")
-    @PermitAll
-    @Operation(summary = "注册用户")
-    public CommonResult<AuthLoginRespVO> register(@RequestBody @Valid AuthRegisterReqVO registerReqVO) {
-        return success(authService.register(registerReqVO));
-    }
+    // @PostMapping("/register")
+    // @PermitAll
+    // @Operation(summary = "注册用户")
+    // public CommonResult<AuthLoginRespVO> register(@RequestBody @Valid AuthRegisterReqVO registerReqVO) {
+    //     return success(authService.register(registerReqVO));
+    // }
 
     // ========== 验证码 ==========
     @PostMapping("/send-verify-code")
@@ -106,7 +106,7 @@ public class BuildAuthController {
     @TenantIgnore
     @Operation(summary = "发送邮箱/手机验证码")
     public CommonResult<Boolean> sendVerifyCode(@RequestBody @Valid VerifyCodeSendReqVO reqVO) {
-        // authService.sendSmsCode(reqVO);
+//        authService.sendSmsCode(reqVO);
         return success(true);
     }
 

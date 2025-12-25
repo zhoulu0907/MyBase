@@ -93,9 +93,21 @@ public class BpmInstanceController {
      */
     @PostMapping("/form-data-page")
     @Operation(summary = "流程实体数据分页")
-    public CommonResult<PageResult<Map<String, Object>>> formDataPage(@RequestBody BpmFormDataPageReqVO   reqVO) {
+    public CommonResult<PageResult<Map<String, Object>>> formDataPage(@RequestBody @Valid BpmFormDataPageReqVO reqVO) {
         log.info("获取列表数据: {}", reqVO);
         return CommonResult.success(bpmInstanceService.formDataPage(reqVO)) ;
     }
 
+    /**
+     * 获取列表数据
+     *
+     * @param reqVO
+     */
+    @PostMapping("/delete-form-data")
+    @Operation(summary = "删除流程实体数据")
+    public CommonResult<Boolean> deleteFormData(@RequestBody @Valid BpmDeleteFormDataReqVO reqVO) {
+        log.info("删除流程实体数据: {}", reqVO);
+        bpmInstanceService.deleteFormData(reqVO);
+        return CommonResult.success(true);
+    }
 }

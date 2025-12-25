@@ -72,7 +72,7 @@ public class DataUpdateNodeComponent extends SkippableNodeComponent {
         List<ExpressionItem> expressionItems = flowConditionsProvider.formatConditionItemsForValue(conditionItems, vars);
         Map<String, Object> data = new HashMap<>();
         for (ExpressionItem expressionItem : expressionItems) {
-            data.put(expressionItem.getFieldKey(), expressionItem.getFieldValue());
+            data.put(DataMethodApiHelper.convertToFieldName(expressionItem.getFieldKey()), expressionItem.getFieldValue());
         }
         Map<String, String> systemFields = DataMethodApiHelper.extractSystemFields(executeContext);
         data.putAll(systemFields);

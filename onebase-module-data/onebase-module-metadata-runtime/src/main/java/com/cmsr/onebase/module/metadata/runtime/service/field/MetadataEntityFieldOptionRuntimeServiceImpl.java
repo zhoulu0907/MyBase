@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.metadata.runtime.service.field;
 
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.framework.common.util.string.UuidUtils;
 import com.cmsr.onebase.module.metadata.runtime.controller.app.entity.vo.FieldOptionBatchSortReqVO;
 import com.cmsr.onebase.module.metadata.runtime.controller.app.entity.vo.FieldOptionRespVO;
 import com.cmsr.onebase.module.metadata.runtime.controller.app.entity.vo.FieldOptionSaveReqVO;
@@ -50,6 +51,10 @@ public class MetadataEntityFieldOptionRuntimeServiceImpl implements MetadataEnti
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long create(MetadataEntityFieldOptionDO option) {
+        // 新增时生成 optionUuid
+        if (option.getOptionUuid() == null || option.getOptionUuid().trim().isEmpty()) {
+            option.setOptionUuid(UuidUtils.getUuid());
+        }
         optionRepository.insert(option);
         return option.getId();
     }

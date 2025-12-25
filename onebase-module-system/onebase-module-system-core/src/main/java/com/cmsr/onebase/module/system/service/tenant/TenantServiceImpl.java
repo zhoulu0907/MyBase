@@ -225,7 +225,7 @@ public class TenantServiceImpl implements TenantService {
         // 5. 保存数据
         TenantDO tenant = BeanUtils.toBean(createReqVO, TenantDO.class);
         tenant.setPublishModel(createReqVO.getPublishModel() == null ? CommonPublishModelEnum.InnerModel.getValue() : createReqVO.getPublishModel());
-        tenant = tenantDataRepository.insert(tenant);
+        tenantDataRepository.insert(tenant);
 
         // 6. 创建租户的管理员1
         TenantUtils.execute(tenant.getId(), () -> {
@@ -386,32 +386,15 @@ public class TenantServiceImpl implements TenantService {
             });
         }
         // 先更新租户
-        TenantDO updateObj = BeanUtils.toBean(updateReqVO, TenantDO.class);
-
-        DataRow row = new DataRow();
-        row.put(TenantDO.ID, updateObj.getId());
-
-        if (StringUtils.isNotEmpty(updateObj.getName())) {
-            row.put(TenantDO.NAME, updateObj.getName());
-        }
-        if (StringUtils.isNotEmpty(updateObj.getWebsite())) {
-            row.put(TenantDO.WEBSITE, updateObj.getWebsite());
-        }
-        if (updateObj.getAccountCount() != null) {
-            row.put(TenantDO.ACCOUNT_COUNT, updateObj.getAccountCount());
-        }
-        if (updateObj.getStatus() != null) {
-            row.put(TenantDO.STATUS, updateObj.getStatus());
-        }
-        if (StringUtils.isNotEmpty(updateObj.getPublishModel())) {
-            row.put(TenantDO.PUBLISH_MODEL, updateObj.getPublishModel());
-        }
-
-        if (StringUtils.isNotEmpty(updateObj.getLogoUrl())) {
-            row.put(TenantDO.LOGO_URL, updateObj.getLogoUrl());
-        }
-
-        tenantDataRepository.updateByConfig(row, new DefaultConfigStore().eq(TenantDO.ID, updateObj.getId()));
+        TenantDO updateObj = new TenantDO();
+        updateObj.setId(updateReqVO.getId());
+        updateObj.setName(updateReqVO.getName());
+        updateObj.setWebsite(updateReqVO.getWebsite());
+        updateObj.setAccountCount(updateReqVO.getAccountCount());
+        updateObj.setStatus(updateReqVO.getStatus());
+        updateObj.setPublishModel(updateReqVO.getPublishModel());
+        updateObj.setLogoUrl(updateReqVO.getLogoUrl());
+        tenantDataRepository.update(updateObj);
         // 修改租户管理员
         if (updateReqVO.getTenantAdminUserUpdateReqVOSList() != null) {
             if (updateReqVO.getTenantAdminUserUpdateReqVOSList().isEmpty()) {
@@ -810,3 +793,4 @@ public class TenantServiceImpl implements TenantService {
         return tenantProperties == null || Boolean.FALSE.equals(tenantProperties.getEnable());
     }
 }
+

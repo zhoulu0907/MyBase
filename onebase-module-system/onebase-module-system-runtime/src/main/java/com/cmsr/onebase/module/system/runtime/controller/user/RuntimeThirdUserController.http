@@ -1,28 +1,17 @@
  ### 请求 /login 接口 => 成功   ##verifycode/password
-POST {{baseUrl}}/third/user/supplement-user
-Content-Type: application/json
-Authorization: Bearer {{token}}
-X-Tenant-Id: 156421901678804992
-
-{
-  "userId": 111,
-  "password":"2f09c45d45fc7086f83e9757711fe6207915416f656d4494b5f29d2ba7268ba86d9e0001b712781a5feba3ed691e6276893f7ece3e890a37972f29de0a0775743b939a02977aea43240f730054c1f1c8aa79622071a0417f58f3590fef952255fc031ed882487818f2ae3fab86ef68",
-  "username": "testuser",
-  "nickname": "测试用户",
-  "email": "test@example.com",
-  "avatar": "https://example.com/avatar.jpg"
-
-}
-
-
-### 请求 /login 接口 => 成功   ##verifycode/password
 POST {{baseUrl}}/system/third-user/register
 Content-Type: application/json
 Authorization: Bearer {{token}}
 X-Tenant-Id: 156421901678804992
 
 {
-  "mobile": 158945648592,
-  "appId":"1111111111",
-  "verifyCode": "testuserqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq"
+  "appId":"177228595925417984",
+  "password":"ae61b79d21e870717365d944806e340e36f8480f5ac095c7d3c2afe67ad1dc4fa420b316383f3c8cd43e94a47fc7c752fd51e44b4637b9ce658653761fbc9335627562b18b4cbe89dc13d9b005ca660f87ebc9e8ff6dcd12682fea75ed38e6a58dadd7e95f830dc78580ca48be544e",
+  "nickName": "nickName1219",
+  "mobile": "15996669973",
+  "email": "469999@13.com",
+  "deviceId": "88888888"
 }
+
+
+

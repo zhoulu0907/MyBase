@@ -22,6 +22,7 @@ public interface ErrorCodeConstants {
 
     ErrorCode AUTH_VERIFY_CODE_NULL = new ErrorCode(1_002_000_100, "验证码为空");
     ErrorCode AUTH_VERIFY_CODE_ERROR = new ErrorCode(1_002_000_100, "验证码错误");
+    ErrorCode AUTH_VERIFY_CODE_EXISTS = new ErrorCode(1_002_000_100, "请勿重复发送验证码");
 
     // ========== 菜单模块 1-002-001-000 ==========
     ErrorCode MENU_NAME_DUPLICATE = new ErrorCode(1_002_001_000, "已经存在该名字的菜单");
@@ -198,5 +199,15 @@ public interface ErrorCodeConstants {
     ErrorCode AUTH_LOGIN_APP_EXPIRE = new ErrorCode(1_002_025_015, "本企业用户无法登录，授权已过期。");
 
     ErrorCode CONFIG_NO_EXISTS = new ErrorCode(1_002_026_001, "配置项不存在");
-    ErrorCode CONFIG_ALREADY_ENABLE  = new ErrorCode(1_002_026_001, "当前已启用【{}】,不可开启【{}】");
+    ErrorCode CONFIG_ALREADY_ENABLE  = new ErrorCode(1_002_026_002, "当前已启用【{}】,不可开启【{}】");
+
+    ErrorCode CONFIG_SAAS_CORP_EXISTS = new ErrorCode(1_002_026_003, "空间内已创建企业无法禁用");
+    ErrorCode CONFIG_SAAS_APP_EXISTS  = new ErrorCode(1_002_026_003, "空间内已创建SAAS应用无法禁用");
+
+    ErrorCode AUTH_VERIFY_THIRD_USER_ERROR = new ErrorCode(1_002_000_104, "外部用户未开启无法登录");
+    ErrorCode AUTH_VERIFY_CORP_USER_ERROR = new ErrorCode(1_002_000_104, "Saas模块未开启无法登录");
+    ErrorCode AUTH_VERIFY_APPTHIRDUSERENABLE_ERROR = new ErrorCode(1_002_000_104, "应用三方用户登录未开启");
+
+    ErrorCode AUTH_VERIFY_NO_CORP_LOGIN_ERROR = new ErrorCode(1_002_000_105, "非企业账号无法登录企业");
+
 }

@@ -4,7 +4,7 @@ import com.cmsr.onebase.framework.orm.repo.BaseBizRepository;
 import com.cmsr.onebase.module.app.api.appresource.dto.PageRespDTO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePageDO;
 import com.cmsr.onebase.module.app.core.dal.mapper.AppResourcePageMapper;
-import com.cmsr.onebase.module.app.core.enums.appresource.PageEnum;
+import com.cmsr.onebase.module.app.core.enums.resource.PageEnum;
 import com.mybatisflex.core.query.QueryWrapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Repository;
@@ -79,6 +79,13 @@ public class AppPageRepository extends BaseBizRepository<AppResourcePageMapper, 
                 .where(APP_RESOURCE_PAGE.APPLICATION_ID.eq(applicationId))
                 .where(APP_RESOURCE_PAGE.PAGESET_UUID.eq(pageSetUuid));
         return this.objListAs(queryWrapper, Long.class);
+    }
+
+    public List<AppResourcePageDO> findByAppIdAndPageSetUuid(Long applicationId, String pageSetUuid) {
+        QueryWrapper queryWrapper = this.query()
+                .where(APP_RESOURCE_PAGE.APPLICATION_ID.eq(applicationId))
+                .where(APP_RESOURCE_PAGE.PAGESET_UUID.eq(pageSetUuid));
+        return this.list(queryWrapper);
     }
 
 

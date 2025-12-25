@@ -6,44 +6,54 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
 {
-  "nickName": "thirdUser11311",
-  "mobile": "13800303041",
-  "email": "newuse13r1@test.com",
+  "nickName": "thirdUser4",
+  "mobile": "13800303044",
+  "email": "newuse43r1@test.com",
   "password": "13@ery",
   "status": 1,
   "applicationIdList":[162947915524571136,162947915524571137]
 }
 
 
-### 创建用户 /admin-api/system/third/update
+### 创建用户 /admin-api/system/third-user/update
 POST {{baseUrl}}/system/third-user/update
 Content-Type: application/json
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
 {
-  "id": 185181999209512960,
+  "id": 186382940787703808,
   "nickName": "thirdUser111",
-  "email": "newuser2@test.com",
+  "email": "newuse22r2@test.com",
   "password": "13@ery",
   "status": 1,
-  "applicationIdList":[162947915524571136,162947915524571137,162947915524571138,162947915524571138]
+  "applicationIdList":[162919276682641408]
 }
 
 
 
 
 
-### 创建用户 /admin-api/system/third/update
-GET {{baseUrl}}/system/third-user/user-applications-page
+### 创建用户 /admin-api/system/third-user/user-applications-page
+GET {{baseUrl}}/system/third-user/user-applications-page?deptId=158088726951460864
 Content-Type: application/json
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
 
 
-### 修改用户状态 /admin-api/system/third/update-status
-POST {{baseUrl}}/system/third/update-status
+### 修改用户状态 /admin-api/system/third-user/update-status
+POST {{baseUrl}}/system/third-user/update-status
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "id": 174445938142773248,
+  "status":1
+}
+
+### 修改用户状态 /admin-api/system/third-user/update-password
+POST {{baseUrl}}/system/third-user/update-password
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
@@ -52,12 +62,10 @@ Authorization: Bearer {{token}}
   "status": 0
 }
 
-### 修改用户状态 /admin-api/system/third/update-password
-POST {{baseUrl}}/system/third/update-password
+### 创建用户 /admin-api/system/third-user/update
+GET {{baseUrl}}/system/third-user/get?id=186382940787703808
 Content-Type: application/json
 Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
 
-{
-  "id": 174445938142773248,
-  "status": 0
-}
+

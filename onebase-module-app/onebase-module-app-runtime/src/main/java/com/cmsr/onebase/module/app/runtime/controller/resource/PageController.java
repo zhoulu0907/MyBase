@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.app.runtime.controller.resource;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import com.cmsr.onebase.module.app.core.dto.appresource.PageDTO;
+import com.cmsr.onebase.module.app.core.dto.resource.PageDTO;
 import com.cmsr.onebase.module.app.core.vo.resource.*;
 import com.cmsr.onebase.module.app.runtime.service.resource.PageService;
 import io.swagger.v3.oas.annotations.Operation;

@@ -61,10 +61,20 @@ public class FieldTypeHelper {
         if (fieldSchemaMap == null) {
             return SemanticFieldTypeEnum.TEXT;
         }
-        SemanticFieldSchemaDTO semanticFieldSchemaDTO = fieldSchemaMap.get(fieldName);
+        String name = convertToFieldName(fieldName);
+        SemanticFieldSchemaDTO semanticFieldSchemaDTO = fieldSchemaMap.get(name);
         if (semanticFieldSchemaDTO == null) {
             return SemanticFieldTypeEnum.TEXT;
         }
         return semanticFieldSchemaDTO.getFieldTypeEnum();
     }
+
+    public static String convertToFieldName(String fieldKey) {
+        if (StringUtils.countMatches(fieldKey, ".") > 0) {
+            return StringUtils.substringAfter(fieldKey, ".");
+        } else {
+            return fieldKey;
+        }
+    }
+
 }

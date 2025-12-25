@@ -1,0 +1,99 @@
+## 环境配置说明
+# 使用全局环境配置文件 http-client.env.json
+# 请在IntelliJ IDEA中选择对应环境: local/dev/test/gateway
+# 确保先在AuthController.http中登录获取token
+
+### 1. 分页查询项目列表
+GET {{baseUrl}}/dashboard/list?page=1&limit=3&appId=1
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+### 2. 创建新项目
+POST {{baseUrl}}/dashboard/create
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+{
+  "projectName": "Screen_test_Gsp1",
+  "indexImage": "",
+  "remarks": "",
+  "appId": 1,
+  "tenantId": {{adminTenantId}}
+
+}
+
+### 3. 删除项目
+POST {{baseUrl}}/dashboard/delete?id=111
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: 156421901678804992
+
+### 4. 修改项目
+POST {{baseUrl}}/dashboard/edit
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+{
+  "id": 194268741281972224,
+  "projectName": "测试项目Gsp126631",
+  "state": 1,
+  "indexImage": "image_url1",
+  "remarks": "修改后的备注Gsp11"
+}
+
+### 5. 项目重命名
+POST {{baseUrl}}/dashboard/rename
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+{
+  "id": "194268741281972224",
+  "projectName": "重命名后的项目1"
+}
+
+### 6. 发布/取消项目状态
+PUT {{baseUrl}}/dashboard/publish
+Content-Type: application/json
+
+{
+  "id": "{{projectId}}",
+  "state": 1
+}
+
+### 7. 获取项目存储数据
+GET {{baseUrl}}/dashboard/getScreenDSLData?projectId=194097457982963712
+#Authorization: Bearer {{token}}
+#tenant-id: {{adminTenantId}}
+### 8. 保存项目数据
+POST {{baseUrl}}/dashboard/save/data
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryLYmJRphMIHBgEdNg
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+
+### 9. 上传文件
+# 注意: 请在当前目录放置 example.png 文件用于测试
+POST {{baseUrl}}/dashboard/upload
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+
+
+--WebAppBoundary
+Content-Disposition: form-data; name="object"; filename="example.png"
+Content-Type: image/png
+
+< ./example.png
+--WebAppBoundary--
+
+### 10. 下载文件
+GET {{baseUrl}}/dashboard/download/195526651307786240
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+
+

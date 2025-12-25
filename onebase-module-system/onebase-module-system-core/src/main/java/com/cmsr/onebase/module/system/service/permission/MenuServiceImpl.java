@@ -20,8 +20,6 @@ import com.mzt.logapi.context.LogRecordContext;
 import com.mzt.logapi.starter.annotation.LogRecord;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.data.param.ConfigStore;
-import org.anyline.data.param.init.DefaultConfigStore;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
@@ -138,9 +136,7 @@ public class MenuServiceImpl implements MenuService {
 
     @Override
     public List<MenuDO> getAllEnableMenuList() {
-        ConfigStore configs = new DefaultConfigStore();
-        configs.eq(MenuDO.STATUS, CommonStatusEnum.ENABLE.getStatus());
-        return menuDataRepository.findAllByConfig(configs);
+        return menuDataRepository.list(menuDataRepository.query().eq(MenuDO.STATUS, CommonStatusEnum.ENABLE.getStatus()));
     }
 
     @Override
