@@ -208,4 +208,6 @@ public interface ErrorCodeConstants {
     ErrorCode AUTH_VERIFY_CORP_USER_ERROR = new ErrorCode(1_002_000_104, "Saas模块未开启无法登录");
     ErrorCode AUTH_VERIFY_APPTHIRDUSERENABLE_ERROR = new ErrorCode(1_002_000_104, "应用三方用户登录未开启");
 
+    ErrorCode AUTH_VERIFY_NO_CORP_LOGIN_ERROR = new ErrorCode(1_002_000_105, "非企业账号无法登录企业");
+
 }

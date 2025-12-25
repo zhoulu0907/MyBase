@@ -81,14 +81,12 @@ public class UserAppRelationServiceImpl implements UserAppRelationService {
 
         // 保存关联关联
         if (!CollectionUtils.isEmpty(userAppReqVO.getApplicationIdList())) {
+            // 先删除后插入
+            QueryWrapper queryWrapper = new QueryWrapper()
+                    .eq(UserAppRelationDO.USER_ID, userAppReqVO.getUserId());
+            userAppRelationDataRepository.remove(queryWrapper);
             // 插入
             userAppReqVO.getApplicationIdList().forEach(appId -> {
-                // 先删除后插入
-                QueryWrapper queryWrapper = new QueryWrapper()
-                        .eq(UserAppRelationDO.USER_ID, userAppReqVO.getUserId())
-                        .eq(UserAppRelationDO.APPLICATION_ID, appId);
-                userAppRelationDataRepository.remove(queryWrapper);
-
                 // 验证是否重复提交，先删除后插入
                 UserAppRelationDO userAppRelationDO = new UserAppRelationDO();
                 userAppRelationDO.setApplicationId(appId);

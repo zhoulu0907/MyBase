@@ -149,7 +149,7 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
             return "";
         }
         if ("back".equals(createSource)) {
-            return "后台注册";
+            return "后台创建";
         }
         if ("self".equals(createSource)) {
             return "自主注册";
