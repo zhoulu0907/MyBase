@@ -9,7 +9,7 @@ import java.io.Serializable;
 import java.util.List;
 
 @Data
-@NodeType("script")
+@NodeType("javascript")
 public class ScriptNodeData extends NodeData implements Serializable {
 
     /**
