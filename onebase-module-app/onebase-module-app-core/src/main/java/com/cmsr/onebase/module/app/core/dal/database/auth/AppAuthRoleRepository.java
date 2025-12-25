@@ -118,7 +118,6 @@ public class AppAuthRoleRepository extends BaseAppRepository<AppAuthRoleMapper, 
         QueryWrapper queryWrapper = this.query()
                 .where(APP_AUTH_ROLE.APPLICATION_ID.eq(applicationId)
                         .and(APP_AUTH_ROLE.ROLE_CODE.eq(AuthRoleTypeEnum.OUTER_USER.getCode()))
-                        .and(APP_AUTH_ROLE.ROLE_NAME.eq(AuthRoleTypeEnum.OUTER_USER.getName()))
                         .and(APP_AUTH_ROLE.ROLE_TYPE.eq(AuthRoleTypeEnum.OUTER_USER.getValue())));
         return this.getOne(queryWrapper);
     }
