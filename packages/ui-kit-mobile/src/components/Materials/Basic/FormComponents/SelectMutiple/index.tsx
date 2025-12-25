@@ -1,6 +1,6 @@
 import { memo, useEffect, useState } from 'react';
 import { nanoid } from 'nanoid';
-import { Checkbox, Ellipsis, Form, PopupSwiper, Cell, Button } from '@arco-design/mobile-react';
+import { Checkbox, Ellipsis, Form, PopupSwiper, Cell } from '@arco-design/mobile-react';
 import IconSquareChecked from '@arco-design/mobile-react/esm/icon/IconSquareChecked';
 import IconSquareUnchecked from '@arco-design/mobile-react/esm/icon/IconSquareUnchecked';
 import IconSquareDisabled from '@arco-design/mobile-react/esm/icon/IconSquareDisabled';
@@ -47,23 +47,8 @@ const XSelectMutiple = memo((props: XSelectMutipleConfig & { runtime?: boolean; 
     if (Array.isArray(formValue) && formValue.length > 0) {
       return formValue.map(val => String(val));
     }
-    return options?.filter(ele => ele?.isChosen)?.map(ele => String(ele.value)) || [];
+    return [];
   });
-
-  const rules: ITypeRules<ValidatorType.Custom>[] = [
-    {
-      required: verify?.required,
-      type: ValidatorType.Custom,
-      message: `${label.text}是必填项`,
-      validator: (value, callback) => {
-        if (value.length > verify?.maxChecked) {
-          callback(`选中数量不能大于${verify?.maxChecked}`);
-        } else {
-          callback();
-        }
-      }
-    }
-  ];
 
   useEffect(() => {
     if (dataField?.length) {
@@ -75,6 +60,20 @@ const XSelectMutiple = memo((props: XSelectMutipleConfig & { runtime?: boolean; 
     const newOptions = await getFieldOptionsConfig(dataField, mainEntity, subEntities);
     setOptions(newOptions)
   }
+  const rules: ITypeRules<ValidatorType.Custom>[] = [
+    {
+      required: verify?.required,
+      type: ValidatorType.Custom,
+      message: `${label.text}是必填项`,
+      validator: (value, callback) => {
+        if (value?.length > verify?.maxChecked) {
+          callback(`选中数量不能大于${verify?.maxChecked}`);
+        } else {
+          callback();
+        }
+      }
+    }
+  ];
 
   const handleCancel = (e: any) => {
     e.stopPropagation();

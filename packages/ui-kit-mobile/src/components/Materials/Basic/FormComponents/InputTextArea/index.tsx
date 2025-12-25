@@ -44,7 +44,7 @@ const XInputTextArea = memo((props: XInputTextAreaConfig & { runtime?: boolean; 
         autosize={false}
         rows={minRows || 2}
         textareaStyle={{
-          minHeight: 0.25 * (minRows || 2) + 'rem',
+          // minHeight: 0.25 * (minRows || 2) + 'rem',
           textAlign: layout === 'vertical' ? 'left' : 'right'
         }}
         style={{
