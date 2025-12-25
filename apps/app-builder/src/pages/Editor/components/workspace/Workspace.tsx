@@ -3,7 +3,9 @@ import {
   EDITOR_TYPES,
   FORM_COMPONENT_TYPES,
   STATUS_OPTIONS,
-  STATUS_VALUES
+  STATUS_VALUES,
+  useFormEditorSignal,
+  useListEditorSignal
 } from '@onebase/ui-kit';
 import { cloneDeep } from 'lodash-es';
 import { useEffect, useRef, useState } from 'react';
@@ -74,7 +76,7 @@ export default function EditorWorkspace() {
     setPageComponentSchemas,
     delPageComponentSchemas,
     batchDelPageComponentSchemas,
-    components,
+    // components,
     addComponents,
     setComponents,
     delComponents,
@@ -89,6 +91,9 @@ export default function EditorWorkspace() {
     delSubTableComponents,
     batchDelSubTableComponents
   } = usePageEditorSignal();
+
+  const components = isFormEditor ? useFormEditorSignal.components.value : useListEditorSignal.components.value;
+
   const { pageViews, curViewId, setCurViewId, updatePageViewName } = usePageViewEditorSignal;
 
   const { editMode, setEditMode } = currentEditorSignal;
@@ -355,6 +360,7 @@ export default function EditorWorkspace() {
             id="workspace-content"
             list={components}
             setList={(newList, sortable, store) => {
+              console.log(newList);
               //   console.log(sortable, store);
               //   console.log(newList);
               //   console.log(!sortable);
