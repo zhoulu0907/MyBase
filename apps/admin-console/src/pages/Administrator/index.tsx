@@ -180,8 +180,9 @@ const Administrator: React.FC = () => {
       const values = await createForm.validate();
 
       // 构建符合 cratePlatformAdminReq 类型的提交数据
-
-      values.password = await sm2Encrypt(getPublicKey(), values.password);
+      if (values.password) {
+        values.password = await sm2Encrypt(getPublicKey(), values.password);
+      }
 
       const submitData: cratePlatformAdminReq = {
         username: values.account,
