@@ -122,6 +122,7 @@ const PageManagerPage: FC = () => {
 
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
   const [searchResult, setSearchResult] = useState<boolean>(false); // 菜单搜索结果
+  const dashboardPageType = 4;
 
   const initTreeItemWidth = 146;
   const cutTreeItemWidth = 25;
@@ -429,7 +430,7 @@ const PageManagerPage: FC = () => {
         applicationId: curAppId,
         parentId:
           createForm.getFieldValue('parentId') === RootParentPage.id ? '' : createForm.getFieldValue('parentId'),
-        pageSetType: 4,
+        pageSetType: dashboardPageType,
         menuName: createForm.getFieldValue('menuName'),
         menuType: MenuType.PAGE,
         menuIcon: createForm.getFieldValue('menuIcon'),

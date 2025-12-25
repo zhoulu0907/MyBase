@@ -4,7 +4,13 @@ import { IconPlus, IconSearch } from '@arco-design/web-react/icon';
 import { useEffect, useState, type FC } from 'react';
 import ScreenCard from '../DashbordCard';
 import styles from './index.module.less';
-import { getDashboardListApi, editDashboardInfoApi, deleteDashboardApi } from '@onebase/app';
+import { useSearchParams } from 'react-router-dom';
+import {
+  getDashboardListApi,
+  editDashboardInfoApi,
+  deleteDashboardApi,
+  saveDashboardAsTemplateApi
+} from '@onebase/app';
 import { TokenManager } from '@onebase/common';
 const FormItem = Form.Item;
 const { useForm } = Form;
@@ -27,6 +33,9 @@ const LargeScreen: FC = () => {
   const [pageNo, setPageNo] = useState(1);
   const [dashboardName, setDashboardName] = useState<string>('');
 
+  const [dashboardData, setDashboardData] = useState<dataList>();
+  const [searchParams] = useSearchParams();
+  const appId = searchParams.get('appId');
   const tokenInfo = TokenManager.getTokenInfo();
   const tenantId = tokenInfo?.tenantId;
   const accessToken = tokenInfo?.accessToken;
@@ -99,9 +108,9 @@ const LargeScreen: FC = () => {
   const [ModalScreenName, setModalScreenName] = useState('');
   const [screenId, setScreenId] = useState('');
   const handleDelete = (item: dataList) => {
-    console.log(item);
     setModalScreenName(item.projectName);
     setScreenId(item.id);
+    setDashboardData(item);
     setDeleteVisible(true);
   };
   const handleDeleteScreenOk = async () => {
@@ -112,13 +121,27 @@ const LargeScreen: FC = () => {
 
   // 另存为模板
   const [onSaveVisible, setOnSaveVisible] = useState<boolean>(false);
-  const handleOnSaveAs = () => {
-    console.log('存模板');
+  const handleOnSaveAs = (item: dataList) => {
+    console.log('handleOnSaveAs item:', item);
+    setDashboardData(item);
     setOnSaveVisible(true);
   };
-  const handleOnSaveAsOk = () => {
-    console.log('确认存模板');
-    setOnSaveVisible(false);
+  const handleOnSaveAsOk = async () => {
+    console.log('handleOnSaveAsOk dashboardData:', dashboardData);
+    console.log('handleOnSaveAsOk:', typeof appId);
+    if (dashboardData && appId) {
+      const params = {
+        id: dashboardData?.id,
+        appId: appId
+      };
+      try {
+        const resp = await saveDashboardAsTemplateApi(params);
+        console.log('另存为 res:', resp);
+        getDashboardList();
+        // 页面提示创建成功
+      } catch (error) {}
+      setOnSaveVisible(false);
+    }
   };
 
   return (

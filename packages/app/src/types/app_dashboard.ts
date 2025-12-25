@@ -38,3 +38,11 @@ export interface editDashboardInfoParams {
   /** 大屏缩略图 */
   indexImage?: string;
 }
+
+// 大屏另存为模版
+export interface saveDashboardAsTemplateParams {
+  /** 大屏id */
+  id: string;
+  /** appId */
+  appId: string;
+}
