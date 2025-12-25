@@ -526,20 +526,22 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
 
         log.info("查询字段名称：groupId={}, validationType={}", groupId, validationType);
 
-        // 先获取规则组的 groupUuid，用于查询校验记录
+        // 获取规则组信息
         MetadataValidationRuleGroupDO group = validationRuleGroupRepository.getById(groupId);
-        String groupUuid = null;
-        if (group != null) {
-            groupUuid = group.getGroupUuid();
-        }
-        // 如果 groupUuid 为 null，则使用 groupId 的字符串形式作为备选（兼容历史数据）
-        String queryGroupUuid = (groupUuid != null && !groupUuid.isEmpty()) ? groupUuid : String.valueOf(groupId);
-
+        String groupUuid = (group != null) ? group.getGroupUuid() : null;
+        
+        // 修复：校验记录中的 groupUuid 字段可能存储的是 groupId 的字符串形式或真正的 UUID
+        // 需要同时用两种形式查询
+        String groupIdStr = String.valueOf(groupId);
+        
         try {
             switch (validationType) {
                 case "REQUIRED":
-                    // 查询必填校验关联的字段
-                    var requiredFields = requiredRepository.findByGroupUuid(queryGroupUuid);
+                    // 查询必填校验关联的字段（同时用 groupId 和 groupUuid 查询）
+                    var requiredFields = requiredRepository.findByGroupUuid(groupIdStr);
+                    if ((requiredFields == null || requiredFields.isEmpty()) && groupUuid != null && !groupUuid.equals(groupIdStr)) {
+                        requiredFields = requiredRepository.findByGroupUuid(groupUuid);
+                    }
                     log.info("查询到必填校验字段数量：{}", requiredFields != null ? requiredFields.size() : 0);
                     if (requiredFields != null) {
                         for (var field : requiredFields) {
@@ -555,7 +557,10 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
 
                 case "LENGTH":
                     // 查询长度校验关联的字段
-                    var lengthFields = lengthRepository.findByGroupUuid(queryGroupUuid);
+                    var lengthFields = lengthRepository.findByGroupUuid(groupIdStr);
+                    if ((lengthFields == null || lengthFields.isEmpty()) && groupUuid != null && !groupUuid.equals(groupIdStr)) {
+                        lengthFields = lengthRepository.findByGroupUuid(groupUuid);
+                    }
                     log.info("查询到长度校验字段数量：{}", lengthFields != null ? lengthFields.size() : 0);
                     if (lengthFields != null) {
                         for (var field : lengthFields) {
@@ -571,7 +576,10 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
 
                 case "UNIQUE":
                     // 查询唯一性校验关联的字段
-                    var uniqueFields = uniqueRepository.findByGroupUuid(queryGroupUuid);
+                    var uniqueFields = uniqueRepository.findByGroupUuid(groupIdStr);
+                    if ((uniqueFields == null || uniqueFields.isEmpty()) && groupUuid != null && !groupUuid.equals(groupIdStr)) {
+                        uniqueFields = uniqueRepository.findByGroupUuid(groupUuid);
+                    }
                     log.info("查询到唯一性校验字段数量：{}", uniqueFields != null ? uniqueFields.size() : 0);
                     if (uniqueFields != null) {
                         for (var field : uniqueFields) {
@@ -587,7 +595,10 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
 
                 case "RANGE":
                     // 查询范围校验关联的字段
-                    var rangeFields = rangeRepository.findByGroupUuid(queryGroupUuid);
+                    var rangeFields = rangeRepository.findByGroupUuid(groupIdStr);
+                    if ((rangeFields == null || rangeFields.isEmpty()) && groupUuid != null && !groupUuid.equals(groupIdStr)) {
+                        rangeFields = rangeRepository.findByGroupUuid(groupUuid);
+                    }
                     log.info("查询到范围校验字段数量：{}", rangeFields != null ? rangeFields.size() : 0);
                     if (rangeFields != null) {
                         for (var field : rangeFields) {
@@ -603,7 +614,10 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
 
                 case "FORMAT":
                     // 查询格式校验关联的字段
-                    var formatFields = formatRepository.findByGroupUuid(queryGroupUuid);
+                    var formatFields = formatRepository.findByGroupUuid(groupIdStr);
+                    if ((formatFields == null || formatFields.isEmpty()) && groupUuid != null && !groupUuid.equals(groupIdStr)) {
+                        formatFields = formatRepository.findByGroupUuid(groupUuid);
+                    }
                     log.info("查询到格式校验字段数量：{}", formatFields != null ? formatFields.size() : 0);
                     if (formatFields != null) {
                         for (var field : formatFields) {
@@ -619,7 +633,10 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
 
                 case "CHILD_NOT_EMPTY":
                     // 查询子表非空校验关联的字段
-                    var childNotEmptyFields = childNotEmptyRepository.findByGroupUuid(queryGroupUuid);
+                    var childNotEmptyFields = childNotEmptyRepository.findByGroupUuid(groupIdStr);
+                    if ((childNotEmptyFields == null || childNotEmptyFields.isEmpty()) && groupUuid != null && !groupUuid.equals(groupIdStr)) {
+                        childNotEmptyFields = childNotEmptyRepository.findByGroupUuid(groupUuid);
+                    }
                     log.info("查询到子表非空校验字段数量：{}", childNotEmptyFields != null ? childNotEmptyFields.size() : 0);
                     if (childNotEmptyFields != null) {
                         for (var field : childNotEmptyFields) {
