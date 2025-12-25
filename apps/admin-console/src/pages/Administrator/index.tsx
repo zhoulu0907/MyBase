@@ -254,7 +254,7 @@ const Administrator: React.FC = () => {
   const handleUpdate = async () => {
     await editForm.validate();
     const newPassword = editForm.getFieldValue('password');
-    const confirmPassword = editForm.getFieldValue('confirmPassword');
+    let confirmPassword = editForm.getFieldValue('confirmPassword');
 
     const newEmail = editForm.getFieldValue('email');
     const id = currentUser?.id!;
@@ -271,6 +271,9 @@ const Administrator: React.FC = () => {
         return;
       }
       try {
+        if (confirmPassword) {
+          confirmPassword = await sm2Encrypt(getPublicKey(), confirmPassword);
+        }
         await updatePlatformAdminPasswordApi({ id: id, password: confirmPassword });
         getPlatformAdminList();
         Message.success('密码修改成功');
