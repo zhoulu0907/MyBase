@@ -45,6 +45,7 @@ const XautoCode = memo((props: XautoCodeConfig & { runtime?: boolean; detailMode
         <Input
           readOnly={true}
           placeholder={placeholder}
+          inputStyle={{ textAlign: layout === 'vertical' ? 'left' : 'right' }}
         />
       }
     </Form.Item>

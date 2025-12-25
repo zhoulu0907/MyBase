@@ -16,8 +16,18 @@ import {
 } from '@arco-design/web-react';
 import { IconEmpty, IconMoreVertical, IconSearch } from '@arco-design/web-react/icon';
 import { type PageParam } from '@onebase/app';
-import { getCommonPaginationList, getRuntimeURL, TokenManager } from '@onebase/common';
-import { getCorpAuthorizedAppListApiInCorp, updateAuthAppStatusInCorp, type authAppStatusParams } from '@onebase/platform-center';
+import {
+  CORP_APP_AUTH_PERMISSION,
+  getCommonPaginationList,
+  getRuntimeURL,
+  hasPermission,
+  TokenManager
+} from '@onebase/common';
+import {
+  getCorpAuthorizedAppListApiInCorp,
+  updateAuthAppStatusInCorp,
+  type authAppStatusParams
+} from '@onebase/platform-center';
 import { debounce } from 'lodash-es';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
@@ -182,7 +192,7 @@ const MyAppPage: React.FC = () => {
       });
     }
   };
-
+  
 
   const menu = (item: any) => {
     return (
@@ -313,7 +323,7 @@ const MyAppPage: React.FC = () => {
                           </div>
                         </div>
                         <Dropdown
-                          droplist={menu(item)}
+                          droplist={hasPermission(CORP_APP_AUTH_PERMISSION.ENABLE) ? menu(item) : null}
                           trigger="click"
                           position="bottom"
                           popupVisible={optionVisibleId === item.id}
@@ -351,7 +361,7 @@ const MyAppPage: React.FC = () => {
                     </div>
                     <div className={styles.myAppCardFooter}>
                       <Button
-                        type={item.showStatus === StatusEnum.DISABLE ?'secondary' : 'outline'}
+                        type={item.showStatus === StatusEnum.DISABLE ? 'secondary' : 'outline'}
                         long
                         onClick={() => {
                           nagivateToRuntimeApp(item.applicationId);
