@@ -57,6 +57,6 @@ public interface IDashboardTemplateService {
      * @param pageReqVO 分页查询条件
      * @return 仪表盘模板分页列表
      */
-    Page<DashboardTemplateDO> getDashboardTemplatePage(DashboardTemplatePageReqVO pageReqVO);
+    PageResult<DashboardTemplateDO> getDashboardTemplatePage(DashboardTemplatePageReqVO pageReqVO);
 
 }

@@ -153,11 +153,7 @@ public class DashboardTemplateController {
     @ApiOperation("分页查询模板")
     @ApiSignIgnore
     public CommonResult<PageResult<DashboardTemplateRespVO>> getDashboardTemplatePage(DashboardTemplatePageReqVO pageReqVO) {
-        Page<DashboardTemplateDO> dashboardTemplatePage = dashboardTemplateService.getDashboardTemplatePage(pageReqVO);
-        PageResult<DashboardTemplateRespVO> pageResult = new PageResult<>(
-                BeanUtils.toBean(dashboardTemplatePage.getRecords(), DashboardTemplateRespVO.class),
-                dashboardTemplatePage.getTotalRow()
-        );
-        return success(pageResult);
+        PageResult<DashboardTemplateDO> pageResult = dashboardTemplateService.getDashboardTemplatePage(pageReqVO);
+        return success(BeanUtils.toBean(pageResult, DashboardTemplateRespVO.class));
     }
 }
