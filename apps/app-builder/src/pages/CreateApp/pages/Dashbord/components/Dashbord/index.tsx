@@ -5,7 +5,6 @@ import { useEffect, useState, type FC } from 'react';
 import ScreenCard from '../DashbordCard';
 import styles from './index.module.less';
 import { getDashboardListApi, editDashboardInfoApi, deleteDashboardApi } from '@onebase/app';
-import { useNavigate } from 'react-router-dom';
 import { TokenManager } from '@onebase/common';
 const FormItem = Form.Item;
 const { useForm } = Form;
@@ -26,10 +25,14 @@ const LargeScreen: FC = () => {
   const [total, setTotal] = useState(30);
   const [pageSize, setPageSize] = useState<number>(10);
   const [pageNo, setPageNo] = useState(1);
-  const navigate = useNavigate();
+  const [dashboardName, setDashboardName] = useState<string>('');
+
   const tokenInfo = TokenManager.getTokenInfo();
+  const tenantId = tokenInfo?.tenantId;
+  const accessToken = tokenInfo?.accessToken;
   useEffect(() => {
     setLoading(false);
+    console.log('tokenInfo:', tokenInfo);
     getDashboardList();
   }, []);
 
@@ -40,8 +43,8 @@ const LargeScreen: FC = () => {
     };
     const res = await getDashboardListApi(params);
     console.log('res:', res);
-    setDataList(res);
-    // setTotal(res.length);
+    setDataList(res.list);
+    setTotal(res.total);
   };
   const handleSearchChange = () => {};
   // 创建大屏弹窗
@@ -81,13 +84,15 @@ const LargeScreen: FC = () => {
   };
   //编辑大屏
   const handleEdit = (item: dataList) => {
-    console.log(item, '跳转到第三方');
-    navigate(`/onebase/${tokenInfo?.tenantId}/dashboard/edit/${item.id}`);
+    window.open(`http://s25029301301.dev.internal.virtueit.net:81/v0/appdashboard/#/chart/home/${item.id}`, '_blank');
   };
   //预览
   const handlePreview = (item: dataList) => {
     console.log('预览 item:', item);
-    navigate(`/onebase/${tokenInfo?.tenantId}/dashboard/preview/${item.id}`);
+    window.open(
+      `http://s25029301301.dev.internal.virtueit.net:81/v0/appdashboard/#/chart/preview/${item.id}`,
+      '_blank'
+    );
   };
   // 删除弹框
   const [deleteVisible, setDeleteVisible] = useState<boolean>(false);
@@ -130,6 +135,7 @@ const LargeScreen: FC = () => {
         suffix={<IconSearch />}
         onChange={handleSearchChange}
         placeholder="搜索"
+        value={dashboardName}
       />
       <Spin className={styles.appListLoading} loading={loading} size={40} tip="加载中...">
         <div className={styles.appList}>

@@ -82,14 +82,6 @@ const CreateModal: React.FC<CreateModalProps> = ({
     // 不再在这里调用，避免重复
   }, [dashboardMethod]);
 
-  useEffect(() => {
-    // 不再在这里调用，避免重复
-  }, [dashboardTemplateTab]);
-
-  useEffect(() => {
-    // 不再在这里调用，避免重复
-  }, [dashboardPagination]);
-
   const nameMap = {
     page: '页面',
     group: '分组',
@@ -177,8 +169,8 @@ const CreateModal: React.FC<CreateModalProps> = ({
       const res = await getDashboardListApi(params);
       console.log('大屏 res:', res);
       console.log('大屏 res.data.length:', res.length);
-      setDashboardTemplateData(res);
-      setTotal(res.length);
+      setDashboardTemplateData(res.list);
+      setTotal(res.total);
     },
     [dashboardPagination]
   );
@@ -258,7 +250,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
   const handlePreview = (dashboardProjectId: string) => {
     // 在新窗口打开预览页面，使用 hash 路由
     window.open(
-      `${window.location.origin}${window.location.pathname}#/onebase/dashboard/preview/${dashboardProjectId}`,
+      `http://s25029301301.dev.internal.virtueit.net:81/v0/appdashboard/#/chat/preview/${dashboardProjectId}/${tenantId}/${accessToken}`,
       '_blank'
     );
   };
