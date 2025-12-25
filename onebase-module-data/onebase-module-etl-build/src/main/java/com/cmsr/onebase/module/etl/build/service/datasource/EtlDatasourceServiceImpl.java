@@ -11,7 +11,6 @@ import com.cmsr.onebase.module.etl.build.service.collector.MetadataManager;
 import com.cmsr.onebase.module.etl.build.vo.datasource.*;
 import com.cmsr.onebase.module.etl.common.entity.CatalogData;
 import com.cmsr.onebase.module.etl.common.entity.ColumnData;
-import com.cmsr.onebase.module.etl.common.entity.JdbcDatasourceConfig;
 import com.cmsr.onebase.module.etl.common.entity.TableData;
 import com.cmsr.onebase.module.etl.common.preview.ColumnDefine;
 import com.cmsr.onebase.module.etl.core.dal.database.*;
@@ -20,6 +19,7 @@ import com.cmsr.onebase.module.etl.core.dal.dataobject.EtlTableDO;
 import com.cmsr.onebase.module.etl.core.dto.FlinkMappings;
 import com.cmsr.onebase.module.etl.core.enums.CollectStatus;
 import com.cmsr.onebase.module.etl.core.enums.EtlErrorCodeConstants;
+import com.cmsr.onebase.module.etl.core.vo.ConnectCryptoProperties;
 import com.cmsr.onebase.module.etl.core.vo.DatasourcePageReqVO;
 import com.github.f4b6a3.uuid.UuidCreator;
 import com.mybatisflex.core.row.Db;
@@ -80,9 +80,9 @@ public class EtlDatasourceServiceImpl implements EtlDatasourceService {
         }
         DatasourceRespVO datasourceRespVO = DatasourceRespVO.convertFrom(datasourceDO);
         // 前端不需要使用config中的内容
-        ConnectProperties connectProperties = JsonUtils.parseObject(datasourceDO.getConfig(), ConnectProperties.class);
+        ConnectDesensitizeProperties connectDesensitizeProperties = JsonUtils.parseObject(datasourceDO.getConfig(), ConnectDesensitizeProperties.class);
         if (datasourceDO.getConfig() != null) {
-            datasourceRespVO.setConfig(connectProperties);
+            datasourceRespVO.setConfig(connectDesensitizeProperties);
         }
         return datasourceRespVO;
     }
@@ -144,14 +144,14 @@ public class EtlDatasourceServiceImpl implements EtlDatasourceService {
         }
         oldDatasource.setDatasourceName(updateReqVO.getDatasourceName());
         oldDatasource.setDeclaration(updateReqVO.getDeclaration());
-        ConnectProperties connectProperties = updateReqVO.getConfig();
-        JdbcDatasourceConfig rawConfig = BeanUtils.toBean(connectProperties, JdbcDatasourceConfig.class);
+        ConnectCryptoProperties connectProperties = updateReqVO.getConfig();
+        ConnectCryptoProperties newProperties = BeanUtils.copyBean(connectProperties);
         String newPwd = connectProperties.getPassword();
         if (StringUtils.isBlank(newPwd)) {
             String oldPwd = JsonUtils.parseTree(oldDatasource.getConfig()).get("password").asText();
-            rawConfig.setPassword(oldPwd);
+            newProperties.setPassword(oldPwd);
         }
-        oldDatasource.setConfig(JsonUtils.toJsonString(rawConfig));
+        oldDatasource.setConfig(JsonUtils.toJsonString(newProperties));
         oldDatasource.setReadonly(updateReqVO.getReadonly());
         // udpate collect status to `required`, demonds user to execute at least once
         oldDatasource.setCollectStatus(CollectStatus.REQUIRED);
@@ -162,14 +162,14 @@ public class EtlDatasourceServiceImpl implements EtlDatasourceService {
     private void complementJdbcDatasourceProperties(EtlDatasourceDO datasourceDO) {
         String datasourceType = datasourceDO.getDatasourceType();
         DatabaseType databaseType = DatasourceFactory.parseDatabaseType(datasourceType);
-        JdbcDatasourceConfig jdbcDatasourceConfig = JsonUtils.parseObject(datasourceDO.getConfig(), JdbcDatasourceConfig.class);
-        jdbcDatasourceConfig.setDriver(databaseType.driver());
-        String connectMode = jdbcDatasourceConfig.getConnectMode();
+        ConnectCryptoProperties connectProperties = JsonUtils.parseObject(datasourceDO.getConfig(), ConnectCryptoProperties.class);
+        connectProperties.setDriver(databaseType.driver());
+        String connectMode = connectProperties.getConnectMode();
         if (StringUtils.isBlank(connectMode) || Strings.CI.equals(connectMode, "default")) {
-            String jdbcUrl = DatasourceFactory.buildJdbcConnectionString(datasourceType, jdbcDatasourceConfig);
-            jdbcDatasourceConfig.setJdbcUrl(jdbcUrl);
+            String jdbcUrl = DatasourceFactory.buildJdbcConnectionString(datasourceType, connectProperties);
+            connectProperties.setJdbcUrl(jdbcUrl);
         }
-        datasourceDO.setConfig(JsonUtils.toJsonString(jdbcDatasourceConfig));
+        datasourceDO.setConfig(JsonUtils.toJsonString(connectProperties));
     }
 
     @Override

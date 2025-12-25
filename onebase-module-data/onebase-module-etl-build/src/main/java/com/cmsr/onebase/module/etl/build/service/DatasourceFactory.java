@@ -2,9 +2,9 @@ package com.cmsr.onebase.module.etl.build.service;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
-import com.cmsr.onebase.module.etl.common.entity.JdbcDatasourceConfig;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.EtlDatasourceDO;
 import com.cmsr.onebase.module.etl.core.enums.EtlErrorCodeConstants;
+import com.cmsr.onebase.module.etl.core.vo.ConnectCryptoProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.metadata.type.DatabaseType;
 import org.apache.commons.lang3.ObjectUtils;
@@ -27,18 +27,18 @@ public class DatasourceFactory {
 
     public DataSource constructDataSource(EtlDatasourceDO datasourceDO, boolean oneshot) {
         // 1. 获取数据库类型
-        JdbcDatasourceConfig jdbcDatasourceConfig = JsonUtils.parseObject(datasourceDO.getConfig(), JdbcDatasourceConfig.class);
-        String connectMode = jdbcDatasourceConfig.getConnectMode();
-        String jdbcConnection = jdbcDatasourceConfig.getJdbcUrl();
+        ConnectCryptoProperties connectProperties = JsonUtils.parseObject(datasourceDO.getConfig(), ConnectCryptoProperties.class);
+        String connectMode = connectProperties.getConnectMode();
+        String jdbcConnection = connectProperties.getJdbcUrl();
         if (StringUtils.isBlank(jdbcConnection)) {
             if (Strings.CI.equals(connectMode, "default")) {
-                jdbcConnection = buildJdbcConnectionString(datasourceDO.getDatasourceType(), jdbcDatasourceConfig);
+                jdbcConnection = buildJdbcConnectionString(datasourceDO.getDatasourceType(), connectProperties);
             } else {
                 throw new IllegalStateException();
             }
         }
         // 2. 创建DataSource
-        String username = jdbcDatasourceConfig.getUsername();
+        String username = connectProperties.getUsername();
         String password = JsonUtils.parseTree(datasourceDO.getConfig()).get("password").asText();
         if (StringUtils.isBlank(username) || StringUtils.isBlank(password)) {
             throw ServiceExceptionUtil.exception(EtlErrorCodeConstants.DATASOURCE_PROPERTY_INSUFFICIENT);
@@ -80,7 +80,7 @@ public class DatasourceFactory {
         return parseType;
     }
 
-    public static String buildJdbcConnectionString(String databaseType, JdbcDatasourceConfig jdbcDatasourceConfig) {
+    public static String buildJdbcConnectionString(String databaseType, ConnectCryptoProperties jdbcDatasourceConfig) {
         DatabaseType dbType = parseDatabaseType(databaseType);
         // 直接使用Anyline提供的URL模板
         String jdbcTemplate = dbType.url();

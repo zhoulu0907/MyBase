@@ -11,7 +11,7 @@ import java.io.IOException;
  * @Author：huangjie
  * @Date：2025/8/31 9:37
  */
-public class PasswordJsonSerializer extends JsonSerializer<String> {
+public class PasswordDesensitizeSerializer extends JsonSerializer<String> {
 
     /**
      * [密码] 固定长度的12位占位符
