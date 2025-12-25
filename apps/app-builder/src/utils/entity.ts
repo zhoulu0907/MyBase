@@ -13,8 +13,8 @@ export const setMainMetaData = async (pageSetId: string) => {
   const [entityWithChildren] = entityListWithFields;
   console.log('entityWithChildren: ', entityWithChildren);
 
-  // 主表数据
   if (entityWithChildren) {
+    // 主表数据
     setMainEntity({
       entityId: entityWithChildren.entityId,
       entityUuid: entityWithChildren.entityUuid,
@@ -24,6 +24,7 @@ export const setMainMetaData = async (pageSetId: string) => {
       fields: entityWithChildren.fields
     });
 
+    // 子表数据
     if (entityWithChildren.childEntities && entityWithChildren.childEntities.length > 0) {
       // 返回新Promise对象，当所有输入Promise成功时返回结果数组（顺序与输入一致）
       const allChildFields = await Promise.all(
@@ -46,5 +47,28 @@ export const setMainMetaData = async (pageSetId: string) => {
     } else {
       setSubEntities({ entities: [] });
     }
+
+    // TODO(mickey): 批量获取字典内容，移除组件中每次获取system/dict-data/simple-list-by-type?dictTypeId的接口
+    // // 收集主表字段中的 dictTypeId
+    // const mainDictTypeIds = entityWithChildren.fields
+    //   .filter((field: AppEntityField) => field.dictTypeId)
+    //   .map((field: AppEntityField) => field.dictTypeId!);
+
+    // // 收集子表字段中的 dictTypeId
+    // const childDictTypeIds: string[] = [];
+    // if (entityWithChildren.childEntities && entityWithChildren.childEntities.length > 0) {
+    //   entityWithChildren.childEntities.forEach((childEntity: ChildEntity) => {
+    //     if (childEntity.childFields) {
+    //       const childFieldDictTypeIds = childEntity.childFields
+    //         .filter((field: AppEntityField) => field.dictTypeId)
+    //         .map((field: AppEntityField) => field.dictTypeId!);
+    //       childDictTypeIds.push(...childFieldDictTypeIds);
+    //     }
+    //   });
+    // }
+
+    // // 合并并去重
+    // const dictTypeIds = Array.from(new Set([...mainDictTypeIds, ...childDictTypeIds]));
+    // console.log('dictTypeIds: ', dictTypeIds);
   }
 };
