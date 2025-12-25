@@ -1,7 +1,7 @@
 export interface DataSetParamsType {
   pageNum: number;
   pageSize: number;
-  // applicationId?:string
+  applicationId?:string | undefined
 
 }
 export interface DashboardTemplateParamsType {

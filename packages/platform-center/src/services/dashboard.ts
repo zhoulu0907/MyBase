@@ -29,3 +29,7 @@ export const DelDashboardTemplate = (id?: string) => {
 export const upLoadDashboardTemplate = (params:{id:string,templateName:string,remarks:string}) => {
   return dashboardService.post(`/template/update`,params);
 };
+//新建模板
+export const createDashboardTemplate = (params:{templateType:string,appId:string | undefined}) => {
+  return dashboardService.post(`/template/create`,params);
+};

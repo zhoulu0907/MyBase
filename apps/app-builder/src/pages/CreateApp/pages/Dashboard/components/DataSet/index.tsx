@@ -3,7 +3,10 @@ import { Button, Modal, Table, Pagination, Space, type TableColumnProps } from '
 import { IconPlus } from '@arco-design/web-react/icon';
 import styles from './index.module.less';
 import { DataSetParams, DelDataSetList } from '@onebase/platform-center';
+import { useLocation } from 'react-router-dom';
 import { format } from 'date-fns';
+import { TokenManager } from '@onebase/common';
+
 interface DataTable {
   name: string;
   type: string;
@@ -38,22 +41,21 @@ const DataSet: FC = () => {
   const [pageSize, setPageSize] = useState(10);
   const [total, setTotal] = useState(1);
   const [dataSetList, setDataSetList] = useState<any[]>([]);
-
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const appId = searchParams.get('appId');
   //获取列表
   useEffect(() => {
     getDataSetList();
-  }, []);
+  }, [appId]);
   const getDataSetList = async () => {
-    const { records, total } = await DataSetParams({ pageNum: currentPage, pageSize: pageSize });
-    // const newRecords = records.forEach((item: DataTable) => {
-    //   // console.log(item.lastUpdateTime);
-    //   const timedate = new Date(item.lastUpdateTime);
-    //   // const formattedDate = format(timedate, 'yyyy-MM-dd HH:mm:ss');
-    //   item.lastUpdateTime = item.updateBy + '/' + timedate;
-    // });
-    // console.log(newRecords, 'newRecords');
+    const { records, total } = await DataSetParams({ pageNum: currentPage, pageSize: pageSize, applicationId: appId });
+    records.forEach((item: DataTable) => {
+      const timedate = new Date(Number(item.lastUpdateTime));
+      const formattedDate = format(timedate, 'yyyy-MM-dd HH:mm:ss');
+      item.lastUpdateTime = item.updateBy + '/' + formattedDate;
+    });
     setDataSetList(records);
-    console.log(dataSetList);
     setTotal(total);
   };
   // 处理分页变化
@@ -67,23 +69,28 @@ const DataSet: FC = () => {
   };
 
   // 新建
-  const handleAdd = () => {
-    window.open(`http://s25029301301.dev.internal.virtueit.net:81/v0/appdashboard/#/project/dataset`, '_blank');
+  const handleAdd = async () => {
+    const tokenInfo = TokenManager.getTokenInfo();
+    window.open(
+      `http://s25029301301.dev.internal.virtueit.net:81/v0/appdashboard/#/project/dataset-form?appId=${appId}&tenantId=${tokenInfo.tenantId}&userId=${tokenInfo.userId}`,
+      '_blank'
+    );
   };
   //编辑
   const handleEdit = async (record: DataTable) => {
-    window.open(`${window.location.origin}${window.location.pathname}#/project/dataset-form?id=${record.id}`, '_blank');
+    window.open(
+      `http://s25029301301.dev.internal.virtueit.net:81/v0/appdashboard/#/project/dataset-form?editId=${record.id}`,
+      '_blank'
+    );
   };
   //删除
   const [deleteVisible, setDeleteVisible] = useState<boolean>(false);
   const [dataSetId, setDataSetId] = useState<string>('');
   const handleDelete = (record: DataTable) => {
-    console.log(record);
     setDataSetId(record.id);
     setDeleteVisible(true);
   };
   const handleDeleteOk = async () => {
-    console.log(dataSetId);
     await DelDataSetList(dataSetId);
     setDeleteVisible(false);
     getDataSetList();

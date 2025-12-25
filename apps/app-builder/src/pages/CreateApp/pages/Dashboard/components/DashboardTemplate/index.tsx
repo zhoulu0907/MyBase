@@ -6,7 +6,13 @@ import styles from './index.module.less';
 import settings from '@/assets/images/screen/settings.png';
 import application from '@/assets/images/screen/application.png';
 import cloud from '@/assets/images/screen/cloud.png';
-import { DashboardTemplateParams, DelDashboardTemplate, upLoadDashboardTemplate } from '@onebase/platform-center';
+import {
+  DashboardTemplateParams,
+  DelDashboardTemplate,
+  upLoadDashboardTemplate,
+  createDashboardTemplate
+} from '@onebase/platform-center';
+import { useLocation } from 'react-router-dom';
 
 const TabPane = Tabs.TabPane;
 const FormItem = Form.Item;
@@ -20,15 +26,24 @@ interface screenTemplate {
 }
 
 const ScreenTemplate: FC = () => {
-  // const [searchName, setSearchName] = useState<string>('');
-
-  const handleAdd = () => {};
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const appId = searchParams.get('appId');
+  //创建模板
+  const handleAdd = async () => {
+    const res = await createDashboardTemplate({ templateType: 'template', appId: appId });
+    window.open(
+      `http://s25029301301.dev.internal.virtueit.net:81/v0/appdashboard/#/chart/home/${res}/template`,
+      '_blank'
+    );
+  };
   const [applicationDataList, setApplicationDataList] = useState<screenTemplate[]>();
-  // const [systemDataList, setSystemDataList] = useState<screenTemplate[]>();
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(6);
   const [total, setTotal] = useState(1);
-
+  useEffect(() => {
+    getTemplateList();
+  }, []);
   //列表
   const getTemplateList = async (tabType: string = 'app', searchValue: string = '') => {
     const res = await DashboardTemplateParams({
@@ -49,9 +64,7 @@ const ScreenTemplate: FC = () => {
       console.error(error);
     }
   };
-  useEffect(() => {
-    getTemplateList();
-  }, []);
+
   const [activeTab, setActiveTab] = useState('1');
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const handleSearchChange = useCallback(
@@ -98,6 +111,10 @@ const ScreenTemplate: FC = () => {
   };
   const handleEditTemplate = (item: screenTemplate) => {
     console.log(item, '编辑模板');
+    window.open(
+      `http://s25029301301.dev.internal.virtueit.net:81/v0/appdashboard/#/chart/home/${item.id}/applicationId`,
+      '_blank'
+    );
   };
   //取消弹框
   const handleEditCancel = () => {
@@ -106,10 +123,13 @@ const ScreenTemplate: FC = () => {
   //预览
   const handlePreview = (item: screenTemplate) => {
     console.log(item, '预览');
+    window.open(
+      `http://s25029301301.dev.internal.virtueit.net:81/v0/appdashboard/#/chart/preview/:${item.id}`,
+      '_blank'
+    );
   };
   //导入模板
   const [selectedButton, setSelectedButton] = useState('');
-
   const [importVisible, setImportVisible] = useState<boolean>(false);
   const [importForm] = useForm();
   // const handleImportTemplate = () => {
