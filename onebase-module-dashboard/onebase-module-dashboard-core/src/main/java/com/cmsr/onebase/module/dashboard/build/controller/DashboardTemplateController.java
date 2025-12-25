@@ -14,12 +14,12 @@ import com.cmsr.onebase.module.dashboard.build.service.IGoviewProjectService;
 import com.cmsr.onebase.module.dashboard.build.vo.template.DashboardTemplatePageReqVO;
 import com.cmsr.onebase.module.dashboard.build.vo.template.DashboardTemplateRespVO;
 import com.cmsr.onebase.module.dashboard.build.vo.template.DashboardTemplateSaveReqVO;
+import com.mybatisflex.core.paginate.Page;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import jakarta.annotation.Resource;
 import jakarta.annotation.security.PermitAll;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 

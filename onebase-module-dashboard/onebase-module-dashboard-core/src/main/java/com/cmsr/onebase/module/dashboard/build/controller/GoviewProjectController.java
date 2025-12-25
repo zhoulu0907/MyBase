@@ -76,7 +76,7 @@ public class GoviewProjectController  extends BaseController {
 				.like(GoviewProject::getProjectName, tablepar.getSearchText(), StringUtils.isNotBlank(tablepar.getSearchText() ));
 		Page<GoviewProject> iPages = iGoviewProjectService.page(page, queryWrapper);
 
-		return CommonResult.success(new PageResult<>(iPages.getRecords(), (long) iPages.getRecords().size()));
+		return CommonResult.success(new PageResult<>(iPages.getRecords(), (long) iPages.getTotalRow()));
 	}
 
 
