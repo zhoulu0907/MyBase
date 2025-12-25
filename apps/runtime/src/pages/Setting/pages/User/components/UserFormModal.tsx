@@ -1,6 +1,6 @@
 import { emailValidator, filterSpace, phoneValidator } from '@/utils/validator';
 import { Button, Form, Grid, Input, Message, Modal, Switch, TreeSelect } from '@arco-design/web-react';
-import { CORP_DEPT_QUERY, hasPermission } from '@onebase/common';
+import { CORP_DEPT_QUERY, getPublicKey, hasPermission, sm2Encrypt } from '@onebase/common';
 import type { SimpleRoleVO, UserVO } from '@onebase/platform-center';
 import { createUser, getUser, StatusEnum, updateUser, UserType } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
@@ -76,6 +76,8 @@ export default function UserFormModal({
 
     try {
       const values = await form.validate();
+      values.password = await sm2Encrypt(getPublicKey(), values.password);
+
       const params = {
         ...values,
         mobile: filterSpace(values.mobile),
@@ -143,7 +145,7 @@ export default function UserFormModal({
               disabled={mode === 'edit' && isSystemUser}
               rules={[{ required: true, message: '请输入手机号' }, { validator: phoneValidator }]}
             >
-              <Input placeholder="请输入" maxLength={11}/>
+              <Input placeholder="请输入" maxLength={11} />
             </Form.Item>
           </Col>
         </Row>

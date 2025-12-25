@@ -40,7 +40,7 @@ export const sm2Decrypt = (privateKey: string, data: string) => {
 };
 
 // 配置环境加密用
-export const PUBLIC_KEY =
+export const CONFIG_PUBLIC_KEY =
   '04d63308f82df17ee6b8c87aded985d97e39820e49162ccd21f0bbdeefc8ad550561d293dbc108f16fd1860c42627f801707b8efab41a43865d23f12def43b8b31';
 
-export const PRIVATE_KEY = 'bd55dd5a2fdc3c5915e064983fb05d44a2d6c2ea941411af31455fe53875f076';
+export const CONFIG_PRIVATE_KEY = 'bd55dd5a2fdc3c5915e064983fb05d44a2d6c2ea941411af31455fe53875f076';
