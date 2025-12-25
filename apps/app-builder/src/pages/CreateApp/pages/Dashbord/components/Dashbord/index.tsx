@@ -9,7 +9,8 @@ import {
   getDashboardListApi,
   editDashboardInfoApi,
   deleteDashboardApi,
-  saveDashboardAsTemplateApi
+  saveDashboardAsTemplateApi,
+  getDashboardIdApi
 } from '@onebase/app';
 import { TokenManager } from '@onebase/common';
 const FormItem = Form.Item;
@@ -36,6 +37,7 @@ const LargeScreen: FC = () => {
   const [dashboardData, setDashboardData] = useState<dataList>();
   const [searchParams] = useSearchParams();
   const appId = searchParams.get('appId');
+  const dashboardType = 'dashboard';
   const tokenInfo = TokenManager.getTokenInfo();
   const tenantId = tokenInfo?.tenantId;
   const accessToken = tokenInfo?.accessToken;
@@ -62,7 +64,25 @@ const LargeScreen: FC = () => {
   const handleAdd = () => {
     setVisibleCreateScreenForm('screen');
   };
-  const handleCreateOk = () => {};
+  const handleCreateOk = async (id?: string) => {
+    console.log('新建大屏 id:', id);
+    if (!id && appId) {
+      const params = {
+        projectName: '新大屏',
+        tenantId: tenantId,
+        appId: appId
+      };
+      const dashboardId = await getDashboardIdApi(params);
+      window.open(
+        `http://s25029301301.dev.internal.virtueit.net:81/v0/appdashboard/#/chart/home/${dashboardId}/${appId}/${dashboardType}`,
+        '_blank'
+      );
+    }
+    window.open(
+      `http://s25029301301.dev.internal.virtueit.net:81/v0/appdashboard/#/chart/home/${id}/${appId}/${dashboardType}`,
+      '_blank'
+    );
+  };
   // 编辑弹框
   const [editForm] = useForm();
   const [editVisible, setEditVisible] = useState<boolean>(false);
@@ -110,12 +130,12 @@ const LargeScreen: FC = () => {
   const handleDelete = (item: dataList) => {
     setModalScreenName(item.projectName);
     setScreenId(item.id);
-    setDashboardData(item);
     setDeleteVisible(true);
   };
   const handleDeleteScreenOk = async () => {
     console.log('删除当前screen');
     await deleteDashboardApi(screenId);
+    getDashboardList();
     setDeleteVisible(false);
   };
 
@@ -141,6 +161,8 @@ const LargeScreen: FC = () => {
         // 页面提示创建成功
       } catch (error) {}
       setOnSaveVisible(false);
+      // 重置 dashboardData
+      setDashboardData(undefined);
     }
   };
 

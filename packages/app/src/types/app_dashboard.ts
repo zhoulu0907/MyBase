@@ -46,3 +46,12 @@ export interface saveDashboardAsTemplateParams {
   /** appId */
   appId: string;
 }
+
+export interface getDashboardIdParams {
+  /** 大屏名称 */
+  projectName: string;
+  /** 租户id */
+  tenantId: string;
+  /** appId */
+  appId: string;
+}

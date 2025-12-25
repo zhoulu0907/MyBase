@@ -88,6 +88,9 @@ const PageManagerPage: FC = () => {
   const { t } = useI18n();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const appId = searchParams.get('appId');
+
+  const dashboardType = 'dashboard';
 
   const { tenantId } = useParams();
 
@@ -450,11 +453,11 @@ const PageManagerPage: FC = () => {
         menuId: menuResp.id
       });
 
-      const dashboardId = await listPageView({ pageSetId });
+      const dashboardInfo = await listPageView({ pageSetId });
+      const dashboardId = dashboardInfo.pages && dashboardInfo.pages.length > 0 ? dashboardInfo.pages[0].id : null;
       if (dashboardId) {
-        // 跳转到编辑器
         window.open(
-          `http://s25029301301.dev.internal.virtueit.net:81/v0/appdashboard/#/chart/home/${dashboardId}`,
+          `http://s25029301301.dev.internal.virtueit.net:81/v0/appdashboard/#/chart/home/${dashboardId}/${appId}/${dashboardType}`,
           '_blank'
         );
       }

@@ -1,5 +1,5 @@
 import { appService, dashboardService } from './clients';
-import { DashboardListParams, DashboardTemplateListParams, editDashboardInfoParams, saveDashboardAsTemplateParams } from '../types/app_dashboard';
+import { DashboardListParams, DashboardTemplateListParams, editDashboardInfoParams, getDashboardIdParams, saveDashboardAsTemplateParams } from '../types/app_dashboard';
 
 // 获取模版列表接口
 export const getDashboardTemplateListApi = (params: DashboardTemplateListParams) => {
@@ -29,4 +29,9 @@ export const getDashboardDetailApi = (params: string) => {
 // 大屏另存为模版
 export const saveDashboardAsTemplateApi = (params: saveDashboardAsTemplateParams) => {
   return dashboardService.post(`/template/saveOtherDashboardTemplate`, params);
+};
+
+// 大屏报表获取大屏id
+export const getDashboardIdApi = (params: getDashboardIdParams) => {
+  return dashboardService.post(`/create`, params);
 };
