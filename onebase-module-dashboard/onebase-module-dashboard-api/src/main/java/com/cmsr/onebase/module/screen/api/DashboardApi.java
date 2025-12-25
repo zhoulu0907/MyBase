@@ -9,7 +9,7 @@ import java.util.List;
  * @Author：huangjie
  * @Date：2025/10/27 14:29
  */
-public interface GoViewProjectApi {
+public interface DashboardApi {
 
 
     Long createDashboard(GoViewProjectDTO goViewProjectDTO);

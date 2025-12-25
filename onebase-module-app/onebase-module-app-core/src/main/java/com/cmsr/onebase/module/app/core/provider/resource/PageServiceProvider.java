@@ -14,7 +14,6 @@ import com.cmsr.onebase.module.app.core.dto.resource.PageDTO;
 import com.cmsr.onebase.module.app.core.dto.resource.PageRespDTO;
 import com.cmsr.onebase.module.app.core.enums.resource.AppResourceErrorCodeConstants;
 import com.cmsr.onebase.module.app.core.enums.resource.PageTypeSetEnum;
-import com.cmsr.onebase.module.screen.api.GoViewProjectApi;
 import com.cmsr.onebase.module.screen.api.dto.GoViewProjectDTO;
 import jakarta.annotation.Resource;
 import lombok.Setter;
@@ -42,7 +41,7 @@ public class PageServiceProvider {
     private AppWorkbenchPageRepository workbenchPageRepository;
 
     @Resource
-    private GoViewProjectApi goViewProjectApi;
+    private DashboardServiceProvider dashboardServiceProvider;
 
 
     public PageRespDTO getPage(Long pageId) {
@@ -96,7 +95,7 @@ public class PageServiceProvider {
             return BeanUtils.toBean(workbenchPageDOList, PageDTO.class);
         } else if(PageTypeSetEnum.isDashboardType(pageSetType)){
             //数据大屏类型 查询数据大屏信息
-            List<GoViewProjectDTO> dashboardList = goViewProjectApi.getDashboard(pageSetDO.getDashboardId());
+            List<GoViewProjectDTO> dashboardList = dashboardServiceProvider.getDashboard(pageSetDO.getDashboardId());
             return BeanUtils.toBean(dashboardList, PageDTO.class);
         } else {
             // 普通表单或流程表单类型，查询普通页面表

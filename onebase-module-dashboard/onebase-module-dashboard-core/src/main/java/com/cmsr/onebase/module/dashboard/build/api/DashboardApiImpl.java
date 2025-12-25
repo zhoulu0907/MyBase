@@ -7,7 +7,7 @@ import com.cmsr.onebase.module.dashboard.build.model.GoviewProjectData;
 import com.cmsr.onebase.module.dashboard.build.service.IDashboardTemplateService;
 import com.cmsr.onebase.module.dashboard.build.service.IGoviewProjectDataService;
 import com.cmsr.onebase.module.dashboard.build.service.IGoviewProjectService;
-import com.cmsr.onebase.module.screen.api.GoViewProjectApi;
+import com.cmsr.onebase.module.screen.api.DashboardApi;
 import com.cmsr.onebase.module.screen.api.dto.GoViewProjectDTO;
 import jakarta.annotation.Resource;
 import org.springframework.validation.annotation.Validated;
@@ -17,7 +17,7 @@ import java.util.List;
 
 @RestController // 提供 RESTful API 接口，给 Feign 调用
 @Validated
-public class GoViewProjectApiImpl implements GoViewProjectApi {
+public class DashboardApiImpl implements DashboardApi {
 
     @Resource
     private IGoviewProjectService iGoviewProjectService;
