@@ -581,23 +581,30 @@ const PageManagerPage: FC = () => {
       Message.error('请选择菜单');
       return;
     }
-
+    console.log('name', name, 'icon', icon);
+    console.log('curMenu:', curMenu.value);
     const req: GetPageSetIdReq = {
       menuId: curMenu.value?.id
     };
     const pageSetId = await getPageSetId(req);
-
     if (!pageSetId) {
       Message.error('请先创建页面集');
       return;
     }
-
-    const editorType =
-      curPage.value?.pageSetType === PageType.WORKBENCH ? EDITOR_TYPES.WORKBENCH_EDITOR : EDITOR_TYPES.FORM_EDITOR;
-
-    // 把编辑页菜单数据保存起来；
-    sessionStorage.setItem('EDITOR_PAGE_INFO', JSON.stringify({ id: curMenu.value?.id, name, icon }));
-    navigate(`/onebase/${tenantId}/editor/${editorType}?pageSetId=${pageSetId}&appId=${curAppId}`);
+    if (curMenu.value?.pagesetType === dashboardPageType) {
+      const dashboardInfo = await listPageView({ pageSetId });
+      const dashboardId = dashboardInfo.pages && dashboardInfo.pages.length > 0 ? dashboardInfo.pages[0].id : null;
+      window.open(
+        `http://s25029301301.dev.internal.virtueit.net:81/v0/appdashboard/#/chart/home/${dashboardId}/${appId}/${dashboardType}`,
+        '_blank'
+      );
+    } else {
+      const editorType =
+        curPage.value?.pageSetType === PageType.WORKBENCH ? EDITOR_TYPES.WORKBENCH_EDITOR : EDITOR_TYPES.FORM_EDITOR;
+      // 把编辑页菜单数据保存起来；
+      sessionStorage.setItem('EDITOR_PAGE_INFO', JSON.stringify({ id: curMenu.value?.id, name, icon }));
+      navigate(`/onebase/${tenantId}/editor/${editorType}?pageSetId=${pageSetId}&appId=${curAppId}`);
+    }
   };
 
   // 菜单搜索

@@ -23,7 +23,8 @@ export interface DashboardListParams {
   page: number;
   /** 大屏页大小 */
   limit: number;
-
+  /** 关键字 */
+  searchText?: string;
 }
 /** 修改大屏信息 */
 export interface editDashboardInfoParams {

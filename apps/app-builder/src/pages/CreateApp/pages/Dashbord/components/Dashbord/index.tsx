@@ -1,10 +1,11 @@
 import CreateDashboardModal from '@/components/CreateDashboardModal';
 import { Button, Form, Input, Modal, Pagination, Spin } from '@arco-design/web-react';
 import { IconPlus, IconSearch } from '@arco-design/web-react/icon';
-import { useEffect, useState, type FC } from 'react';
+import { useCallback, useEffect, useState, type FC } from 'react';
 import ScreenCard from '../DashbordCard';
 import styles from './index.module.less';
 import { useSearchParams } from 'react-router-dom';
+import { throttle } from 'lodash-es';
 import {
   getDashboardListApi,
   editDashboardInfoApi,
@@ -32,7 +33,7 @@ const LargeScreen: FC = () => {
   const [total, setTotal] = useState(30);
   const [pageSize, setPageSize] = useState<number>(10);
   const [pageNo, setPageNo] = useState(1);
-  const [dashboardName, setDashboardName] = useState<string>('');
+  const [searchText, setSearchText] = useState<string>('');
 
   const [dashboardData, setDashboardData] = useState<dataList>();
   const [searchParams] = useSearchParams();
@@ -47,17 +48,29 @@ const LargeScreen: FC = () => {
     getDashboardList();
   }, []);
 
-  const getDashboardList = async () => {
+  const getDashboardList = async (searchText?: string) => {
     const params = {
       page: pageNo,
-      limit: pageSize
+      limit: pageSize,
+      searchText: searchText
     };
     const res = await getDashboardListApi(params);
     console.log('res:', res);
     setDataList(res.list);
     setTotal(res.total);
   };
-  const handleSearchChange = () => {};
+  const throttledSearch = useCallback(
+    throttle((value: string) => {
+      setPageNo(1); // 重置到第一页
+      getDashboardList(value); // 重新获取数据，传入搜索值
+    }, 1000), // 1000ms 节流延迟
+    [getDashboardList] // 依赖数组，只包含 getDashboardList
+  );
+
+  const handleSearchChange = (value: string) => {
+    setSearchText(value);
+    throttledSearch(value);
+  };
   // 创建大屏弹窗
   const [createForm] = Form.useForm();
   const [visibleCreateScreenForm, setVisibleCreateScreenForm] = useState('');
@@ -82,6 +95,8 @@ const LargeScreen: FC = () => {
       `http://s25029301301.dev.internal.virtueit.net:81/v0/appdashboard/#/chart/home/${id}/${appId}/${dashboardType}`,
       '_blank'
     );
+    setVisibleCreateScreenForm('');
+    getDashboardList();
   };
   // 编辑弹框
   const [editForm] = useForm();
@@ -161,7 +176,6 @@ const LargeScreen: FC = () => {
         // 页面提示创建成功
       } catch (error) {}
       setOnSaveVisible(false);
-      // 重置 dashboardData
       setDashboardData(undefined);
     }
   };
@@ -180,7 +194,7 @@ const LargeScreen: FC = () => {
         suffix={<IconSearch />}
         onChange={handleSearchChange}
         placeholder="搜索"
-        value={dashboardName}
+        value={searchText}
       />
       <Spin className={styles.appListLoading} loading={loading} size={40} tip="加载中...">
         <div className={styles.appList}>
