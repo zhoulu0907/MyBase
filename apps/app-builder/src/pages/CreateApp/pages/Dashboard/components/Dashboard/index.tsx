@@ -2,7 +2,7 @@ import CreateDashboardModal from '@/components/CreateDashboardModal';
 import { Button, Form, Input, Modal, Pagination, Spin } from '@arco-design/web-react';
 import { IconPlus, IconSearch } from '@arco-design/web-react/icon';
 import { useCallback, useEffect, useState, type FC } from 'react';
-import ScreenCard from '../DashbordCard';
+import ScreenCard from '../DashboardCard';
 import styles from './index.module.less';
 import { useSearchParams } from 'react-router-dom';
 import { throttle } from 'lodash-es';
@@ -128,13 +128,16 @@ const Dashboard: FC = () => {
   };
   //编辑大屏
   const handleEdit = (item: dataList) => {
-    window.open(`http://s25029301301.dev.internal.virtueit.net:81/v0/appdashboard/#/chart/home/${item.id}`, '_blank');
+    window.open(
+      `http://s25029301301.dev.internal.virtueit.net:81/v0/appdashboard/#/chart/home/${item.id}/${appId}/${dashboardType}`,
+      '_blank'
+    );
   };
   //预览
   const handlePreview = (item: dataList) => {
     console.log('预览 item:', item);
     window.open(
-      `http://s25029301301.dev.internal.virtueit.net:81/v0/appdashboard/#/chart/preview/${item.id}`,
+      `http://s25029301301.dev.internal.virtueit.net:81/v0/appdashboard/#/chart/preview/${item.id}/${appId}/${dashboardType}`,
       '_blank'
     );
   };
