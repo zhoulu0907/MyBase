@@ -82,6 +82,7 @@ tenant-id: {{adminTenantId}}
 }
 
 ### 9. 上传文件
+# 注意: 请在当前目录放置 example.png 文件用于测试
 POST {{baseUrl}}/dashboard/upload
 Content-Type: multipart/form-data; boundary=WebAppBoundary
 Authorization: Bearer {{token}}
@@ -94,16 +95,10 @@ Content-Type: image/png
 < ./example.png
 --WebAppBoundary--
 
-### 10. 上传JPG文件
-POST {{baseUrl}}/dashboard/upload
-Content-Type: multipart/form-data; boundary=WebAppBoundary
+### 10. 下载文件
+GET {{baseUrl}}/dashboard/download/195526651307786240
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
---WebAppBoundary
-Content-Disposition: form-data; name="object"; filename="example.jpg"
-Content-Type: image/jpeg
 
-< ./example.jpg
---WebAppBoundary--
 

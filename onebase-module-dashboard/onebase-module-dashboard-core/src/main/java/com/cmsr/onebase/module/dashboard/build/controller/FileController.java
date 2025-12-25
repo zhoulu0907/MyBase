@@ -122,7 +122,7 @@ public class FileController extends BaseController {
 		sysFile.setFileName(fileSuffixName);
 		sysFile.setFileSize(Integer.parseInt(filesize+""));
 		sysFile.setFileSuffix(suffixName);
-		sysFile.setCreateTime(DateUtil.formatLocalDateTime(LocalDateTime.now()));
+		sysFile.setCreateTime(LocalDateTime.now());
 		String filepath=DateUtil.formatDate(new Date());
 		sysFile.setRelativePath(filepath);
 		sysFile.setVirtualKey(virtualKey);
@@ -154,7 +154,7 @@ public class FileController extends BaseController {
 			sysFile.setId(SnowflakeIdWorker.getUUID());
 			sysFile.setFileName(fileSuffixName);
 			sysFile.setFileSuffix(suffixName);
-			sysFile.setCreateTime(DateUtil.formatLocalDateTime(LocalDateTime.now()));
+			sysFile.setCreateTime(LocalDateTime.now());
 			String filepath=DateUtil.formatDate(new Date());
 			sysFile.setRelativePath(filepath);
 			sysFile.setVirtualKey(virtualKey);
@@ -255,7 +255,7 @@ public class FileController extends BaseController {
 		sysFile.setFileName(fileSuffixName);
 		sysFile.setFileSize(Integer.parseInt(filesize+""));
 		sysFile.setFileSuffix(suffixName);
-		sysFile.setCreateTime(DateUtil.formatLocalDateTime(LocalDateTime.now()));
+		sysFile.setCreateTime(LocalDateTime.now());
 		String filepath=relativePath.substring(0,relativePath.lastIndexOf("/"));
 		sysFile.setRelativePath(filepath);
 		sysFile.setVirtualKey(virtualKey);

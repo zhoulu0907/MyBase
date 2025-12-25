@@ -169,6 +169,11 @@
             <artifactId>spring-boot-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-infra-api</artifactId>
+            <version>${revision}</version>
+        </dependency>
 
     </dependencies>
 
