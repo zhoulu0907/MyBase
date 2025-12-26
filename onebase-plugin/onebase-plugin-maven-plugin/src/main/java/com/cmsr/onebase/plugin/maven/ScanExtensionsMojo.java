@@ -214,7 +214,7 @@ public class ScanExtensionsMojo extends AbstractMojo {
                 getLog().error(error);
                 routeValidationErrors.add(error);
             } else {
-                getLog().info("  ✓ 路由校验通过: " + path);
+                getLog().info("  √ 路由校验通过: " + path);
             }
         }
     }
