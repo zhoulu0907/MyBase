@@ -1,7 +1,6 @@
 // import ExecuteFlows from '@/utils/flow';
 import { Button, Form, PopupSwiper, Toast } from '@arco-design/mobile-react';
 import { useForm } from '@arco-design/mobile-react/esm/form';
-import dayjs from 'dayjs';
 import {
   CATEGORY_TYPE,
   dataMethodCreateV2,
@@ -22,6 +21,7 @@ import {
   type UpdateMethodV2Params
 } from '@onebase/app';
 import { pagesRuntimeSignal } from '@onebase/common';
+import dayjs from 'dayjs';
 
 import {
   EDITOR_TYPES,
@@ -30,24 +30,24 @@ import {
   getComponentWidth,
   getWorkbenchComponentWidth,
   SHOW_COMPONENT_TYPES,
+  startLoadWorkbenchPageSet,
   STATUS_OPTIONS,
   STATUS_VALUES,
   useFormEditorSignal,
-  useWorkbenchEditorSignal,
-  startLoadWorkbenchPageSet,
   usePageEditorSignal,
   usePageViewEditorSignal,
-  type WorkbenchComponentType,
-  type GridItem
+  useWorkbenchEditorSignal,
+  type GridItem,
+  type WorkbenchComponentType
 } from '@onebase/ui-kit';
 
 import CustomNav from '@/pages/components/Nav';
+import { splitByDivider } from '@/utils/tree';
 import { fetchSubmitInstance } from '@onebase/app/src/services/app_runtime';
 import { startLoadPageSet, useEditorSignalMap, useListEditorSignal } from '@onebase/ui-kit';
 import { PreviewRender } from '@onebase/ui-kit-mobile';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { Fragment, useEffect, useState } from 'react';
-import { splitByDivider } from '@/utils/tree';
 import styles from './index.module.less';
 
 interface PreviewProps {
@@ -70,7 +70,13 @@ const ghostBgColor = {
   disabled: '#FFF'
 };
 
-const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, mainEntity, subEntities: subEntitiesValues, pageSetType }) => {
+const PreviewContainer: React.FC<PreviewProps> = ({
+  menuId,
+  runtime,
+  mainEntity,
+  subEntities: subEntitiesValues,
+  pageSetType
+}) => {
   useSignals();
 
   const [form] = useForm();
@@ -279,7 +285,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, mainEntity,
         });
 
       // 处理子表逻辑
-      const subEntity = subEntities.value.some(v => key.startsWith(v.childTableName));
+      const subEntity = subEntities.value.find((v: any) => key.startsWith(v.childTableName));
       if (subEntity) {
         const parts = key.split('.');
         subEntityUuid = parts[0];
@@ -366,14 +372,14 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, mainEntity,
             businessId: curPage?.value?.id,
             entity: {
               entityId: tableName,
-              data: { ...formData, ...subFormData }
+              data: { ...formData, ...groups }
             }
           };
           res = await fetchSubmitInstance(reqFlow);
           setPageType(EDITOR_TYPES.FORM_EDITOR);
         } else {
           console.log(formData);
-          const req: InsertMethodV2Params = { ...formData, ...subFormData };
+          const req: InsertMethodV2Params = { ...formData, ...groups };
           console.log(req);
 
           res = await dataMethodCreateV2(tableName, menuId, req);
@@ -476,7 +482,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, mainEntity,
                   name: item.name,
                   id: item.id,
                   response: item.response || item.id,
-                  status: fieldType === ENTITY_FIELD_TYPE.FILE.VALUE ? 'loaded' : 'loading',
+                  status: fieldType === ENTITY_FIELD_TYPE.FILE.VALUE ? 'loaded' : 'loading'
                 };
               });
             } else {
@@ -533,15 +539,17 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, mainEntity,
                       (fieldType === ENTITY_FIELD_TYPE.IMAGE.VALUE || fieldType === ENTITY_FIELD_TYPE.FILE.VALUE) &&
                       Array.isArray(subData[idx]?.[fieldName])
                     ) {
-                      formValues[`${subTableName}.${idx}.${fieldName}`] = (subData[idx]?.[fieldName] || []).map((item: any) => {
-                        return {
-                          ...item,
-                          name: item.name,
-                          id: item.id,
-                          response: item.response || item.id,
-                          status: fieldType === ENTITY_FIELD_TYPE.FILE.VALUE ? 'loaded' : 'loading'
-                        };
-                      });
+                      formValues[`${subTableName}.${idx}.${fieldName}`] = (subData[idx]?.[fieldName] || []).map(
+                        (item: any) => {
+                          return {
+                            ...item,
+                            name: item.name,
+                            id: item.id,
+                            response: item.response || item.id,
+                            status: fieldType === ENTITY_FIELD_TYPE.FILE.VALUE ? 'loaded' : 'loading'
+                          };
+                        }
+                      );
                     } else {
                       formValues[`${subTableName}.${idx}.${fieldName}`] = subData[idx]?.[fieldName];
                     }
@@ -604,7 +612,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, mainEntity,
         )}
 
         {/* 列表页面渲染 */}
-        {pageSetType !== PageType.WORKBENCH && pageType === EDITOR_TYPES.LIST_EDITOR &&
+        {pageSetType !== PageType.WORKBENCH &&
+          pageType === EDITOR_TYPES.LIST_EDITOR &&
           (!listComponents.value?.length ? (
             <div className={styles.noData}>暂无数据</div>
           ) : (
@@ -657,27 +666,27 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, mainEntity,
               }
               return (
                 <div className={styles.formComp} key={index}>
-                  {block.items.map(cp => (
+                  {block.items.map((cp) => (
                     <Fragment key={cp.id}>
                       {useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id].config.status !==
                         STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
-                          <div key={cp.id} className={styles.componentItem}>
-                            <PreviewRender
-                              cpId={cp.id}
-                              cpType={cp.type}
-                              pageComponentSchema={
-                                useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id]
-                              }
-                              editLoading={editLoading}
-                              form={form}
-                              runtime={true}
-                              showFromPageData={() => {
-                                setPageType(EDITOR_TYPES.FORM_EDITOR);
-                              }}
-                              useStoreSignals={{ ...pageEditorSignal, mainEntity, subEntities: subEntitiesValues }}
-                            />
-                          </div>
-                        )}
+                        <div key={cp.id} className={styles.componentItem}>
+                          <PreviewRender
+                            cpId={cp.id}
+                            cpType={cp.type}
+                            pageComponentSchema={
+                              useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id]
+                            }
+                            editLoading={editLoading}
+                            form={form}
+                            runtime={true}
+                            showFromPageData={() => {
+                              setPageType(EDITOR_TYPES.FORM_EDITOR);
+                            }}
+                            useStoreSignals={{ ...pageEditorSignal, mainEntity, subEntities: subEntitiesValues }}
+                          />
+                        </div>
+                      )}
                     </Fragment>
                   ))}
                 </div>
@@ -731,28 +740,28 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, mainEntity,
                 <Fragment key={cp.id}>
                   {useEditorSignalMap.get(detailPageViewId.value)?.pageComponentSchemas.value[cp.id].config.status !==
                     STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
-                      <div
-                        key={cp.id}
-                        className={styles.componentItem}
-                        style={{
-                          width: getComponentWidth(
-                            useEditorSignalMap.get(detailPageViewId.value)?.pageComponentSchemas.value[cp.id],
-                            cp.type
-                          )
-                        }}
-                      >
-                        <PreviewRender
-                          cpId={cp.id}
-                          cpType={cp.type}
-                          pageComponentSchema={
-                            useEditorSignalMap.get(detailPageViewId.value)?.pageComponentSchemas.value[cp.id]
-                          }
-                          runtime={true}
-                          detailMode={detailMode}
-                          showFromPageData={() => { }}
-                        />
-                      </div>
-                    )}
+                    <div
+                      key={cp.id}
+                      className={styles.componentItem}
+                      style={{
+                        width: getComponentWidth(
+                          useEditorSignalMap.get(detailPageViewId.value)?.pageComponentSchemas.value[cp.id],
+                          cp.type
+                        )
+                      }}
+                    >
+                      <PreviewRender
+                        cpId={cp.id}
+                        cpType={cp.type}
+                        pageComponentSchema={
+                          useEditorSignalMap.get(detailPageViewId.value)?.pageComponentSchemas.value[cp.id]
+                        }
+                        runtime={true}
+                        detailMode={detailMode}
+                        showFromPageData={() => {}}
+                      />
+                    </div>
+                  )}
                 </Fragment>
               ))}
 
