@@ -122,7 +122,6 @@ const AsyncSelectField: React.FC<AsyncSelectFieldProps> = ({
     setLoading(true);
     try {
       const loadedOptions = await getFieldOptionsConfig(dataField, mainEntity, subEntities);
-      console.log('loadedOptions: ', loadedOptions);
       setOptions(loadedOptions);
     } catch (error) {
       console.error('Failed to load field options:', error);
