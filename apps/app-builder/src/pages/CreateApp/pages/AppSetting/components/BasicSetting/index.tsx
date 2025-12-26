@@ -157,14 +157,14 @@ const BasicSetting = (props: IProps) => {
     <div className={styles.basicSetting}>
       {/* 基础信息 */}
       <div className={styles.title}>
-        <div className={styles.leftShape} style={{ ['--left-shape-theme-color' as any]: themeColor }} />
+        <div className={styles.leftShape} />
         <Title heading={6} style={{ margin: 0 }}>
           基础信息
         </Title>
         <IconEdit
           onClick={() => setEditModalVisible(true)}
           style={{
-            color: themeColor,
+            color: '#009E9E',
             cursor: 'pointer'
           }}
         />
@@ -292,7 +292,7 @@ const BasicSetting = (props: IProps) => {
 
       {/* 应用模式 */}
       <div className={styles.title}>
-        <div className={styles.leftShape} style={{ ['--left-shape-theme-color' as any]: themeColor }} />
+        <div className={styles.leftShape} />
         <Title heading={6} style={{ margin: 0 }}>
           应用模式
         </Title>
@@ -349,7 +349,7 @@ const BasicSetting = (props: IProps) => {
 
       {/* 发布模式 */}
       <div className={styles.title}>
-        <div className={styles.leftShape} style={{ ['--left-shape-theme-color' as any]: data?.themeColor }} />
+        <div className={styles.leftShape} />
         <Title heading={6} style={{ margin: 0 }}>
           发布模式
         </Title>
