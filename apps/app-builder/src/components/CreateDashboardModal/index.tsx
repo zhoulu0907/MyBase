@@ -8,6 +8,7 @@ import dashboardNew from '@/assets/images/dashboard_new.svg';
 import dashboardTemplate from '@/assets/images/dashboard_template.svg';
 import dashboardLink from '@/assets/images/dashboard_link.svg';
 import dashboardChange from '@/assets/images/dashboard_change.svg';
+import { getFileUrlById } from '@onebase/platform-center';
 
 interface CreateModalProps {
   title: string;
@@ -32,11 +33,6 @@ const CreateModal: React.FC<CreateModalProps> = ({
   treeData = [],
   entityListOptions
 }) => {
-  // useEffect(() => {
-  //   console.log('entityListOptions:', entityListOptions);
-  //   console.log('form:', form);
-  // }, []);
-
   const allWebMenuIcons = webMenuIcons.map((ele) => ele.children).reduce((acc, current) => acc.concat(current), []);
   const InputSearch = Input.Search;
 
@@ -156,7 +152,16 @@ const CreateModal: React.FC<CreateModalProps> = ({
       const res = await getDashboardTemplateListApi(params);
       console.log('大屏模版 res:', res);
       setTotal(res.total);
-      setDashboardTemplateData(res.list);
+      const newData = res.list;
+      setDashboardTemplateData(newData);
+      if (method !== 'dashboardNew' && newData.length > 0) {
+        const isSelectedInNewData = newData.some((item) => item.id === selectedTemplateId);
+        if (!isSelectedInNewData) {
+          setSelectedTemplateId(newData[0].id);
+        }
+      } else if (method !== 'dashboardNew' && newData.length === 0) {
+        setSelectedTemplateId(''); // 如果没有数据，清空选中状态
+      }
     },
     [dashboardMethod, dashboardTemplateTab, dashboardPagination, templateName]
   );
@@ -170,10 +175,21 @@ const CreateModal: React.FC<CreateModalProps> = ({
       const res = await getDashboardListApi(params);
       console.log('大屏 res:', res);
       console.log('大屏 res.data.length:', res.length);
-      setDashboardTemplateData(res.list);
+      const newData = res.list;
+      setDashboardTemplateData(newData);
       setTotal(res.total);
+
+      // 检查当前选中的大屏是否在新数据中，如果不在则选中第一项
+      if (newData.length > 0) {
+        const isSelectedInNewData = newData.some((item) => item.id === selectedTemplateId);
+        if (!isSelectedInNewData) {
+          setSelectedTemplateId(newData[0].id);
+        }
+      } else if (newData.length === 0) {
+        setSelectedTemplateId(''); // 如果没有数据，清空选中状态
+      }
     },
-    [dashboardPagination]
+    [dashboardPagination, selectedTemplateId]
   );
   const handleChangeDashboardMethod = (value: string) => {
     setDashboardMethodLoading(true);
@@ -266,7 +282,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
       onClick={() => handleDashboardTemplateCard(item.id)}
     >
       <div className={styles.dashboardTemplateCardImg}>
-        <img src={item.indexImage} alt="" />
+        <img src={getFileUrlById(item.indexImage)} alt="" />
         <Button onClick={() => handlePreview(item.id)} className={styles.dashboardTemplateCardBtn}>
           预览
         </Button>
