@@ -190,7 +190,7 @@ export const FilterEntityFields = ['lock_version', 'deleted', 'parent_id'];
 // 字段验证类型(大于、小于、等于、包含 ...)
 export interface EntityFieldValidationTypes {
   fieldId: string;
-  fieldUuid: string;
+  fieldUuid?: string;
   //   TODO(mickey): 需要卞老师补充字段名称
   fieldName: string;
   fieldKey: string;
