@@ -4,7 +4,7 @@
 # 确保先在AuthController.http中登录获取token
 
 ### 1. 分页查询项目列表
-GET {{baseUrl}}/dashboard/list?page=1&limit=3&appId=1
+GET {{baseUrl}}/dashboard/list
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
@@ -16,10 +16,9 @@ tenant-id: {{adminTenantId}}
 
 {
   "projectName": "Screen_test_Gsp1",
-  "state": -1,
-  "indexImage": "http://127.0.0.1:8083/oss/2025-04-23/1074956819610341376.png",
-  "remarks": "修改后的备注Gsp",
-  "appId": 1,
+  "indexImage": "",
+  "remarks": "",
+  "appId": "1234516",
   "tenantId": {{adminTenantId}}
 
 }
@@ -66,17 +65,35 @@ Content-Type: application/json
 
 ### 7. 获取项目存储数据
 GET {{baseUrl}}/dashboard/getScreenDSLData?projectId=194097457982963712
-Authorization: Bearer {{token}}
-tenant-id: {{adminTenantId}}
+#Authorization: Bearer {{token}}
+#tenant-id: {{adminTenantId}}
 ### 8. 保存项目数据
 POST {{baseUrl}}/dashboard/save/data
-Content-Type: application/json
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryLYmJRphMIHBgEdNg
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
-{
-  "projectId": 194097457982963712,
-  "content": "{\"data1\": \"示例内容\"}",
-  "remark": "保存的数据备注1",
-  "appId": 1
-}
+
+### 9. 上传文件
+# 注意: 请在当前目录放置 example.png 文件用于测试
+POST {{baseUrl}}/dashboard/upload
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+
+
+--WebAppBoundary
+Content-Disposition: form-data; name="object"; filename="p1.jpg"
+Content-Type: image/jpeg
+
+< ./p1.jpg
+--WebAppBoundary--
+
+### 10. 下载文件
+GET {{baseUrl}}/dashboard/download/195526651307786240
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+
+

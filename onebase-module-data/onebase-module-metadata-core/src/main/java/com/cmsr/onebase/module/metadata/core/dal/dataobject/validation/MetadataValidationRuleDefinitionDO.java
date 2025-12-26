@@ -1,7 +1,6 @@
 package com.cmsr.onebase.module.metadata.core.dal.dataobject.validation;
 
 import com.cmsr.onebase.framework.orm.entity.BaseBizEntity;
-import com.cmsr.onebase.framework.orm.entity.BaseTenantEntity;
 import com.cmsr.onebase.module.metadata.core.enums.ValidationStatusEnum;
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Table;
@@ -94,18 +93,7 @@ public class MetadataValidationRuleDefinitionDO extends BaseBizEntity {
     @Column(value = "status", comment = "状态：1-激活，0-非激活")
     private Integer status;
 
-    /**
-     * 应用ID
-     */
-    @Column(value = "application_id", comment = "应用ID")
-    private Long applicationId;
-
-    /**
-     * 版本标识
-     * <p>
-     * 用于跨应用、跨版本的唯一标识，与 application_id 组成联合唯一约束
-     */
-    @Column(value = "version_tag", comment = "版本标识")
-    private Long versionTag;
+    // 注意：applicationId 和 versionTag 字段已在父类 BaseBizEntity 中定义，
+    // 此处删除重复定义以避免字段冲突问题
 
 }

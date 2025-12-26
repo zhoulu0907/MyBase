@@ -4,21 +4,30 @@ import com.cmsr.onebase.framework.common.annotaion.ApiSignIgnore;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.dashboard.build.dal.dataobject.DashboardTemplateDO;
+import com.cmsr.onebase.module.dashboard.build.model.GoviewProject;
+import com.cmsr.onebase.module.dashboard.build.model.GoviewProjectData;
 import com.cmsr.onebase.module.dashboard.build.service.IDashboardTemplateService;
+import com.cmsr.onebase.module.dashboard.build.service.IGoviewProjectDataService;
+import com.cmsr.onebase.module.dashboard.build.service.IGoviewProjectService;
 import com.cmsr.onebase.module.dashboard.build.vo.template.DashboardTemplatePageReqVO;
 import com.cmsr.onebase.module.dashboard.build.vo.template.DashboardTemplateRespVO;
 import com.cmsr.onebase.module.dashboard.build.vo.template.DashboardTemplateSaveReqVO;
+import com.mybatisflex.core.paginate.Page;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import jakarta.annotation.Resource;
 import jakarta.annotation.security.PermitAll;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
+import static com.cmsr.onebase.module.dashboard.build.enums.TemplateTypeEnum.APP_TYPE;
+import static com.cmsr.onebase.module.dashboard.build.enums.TemplateTypeEnum.SYSTEM_TYPE;
 
 /**
  * 仪表盘模板 Controller
@@ -33,6 +42,11 @@ public class DashboardTemplateController {
     @Resource
     private IDashboardTemplateService dashboardTemplateService;
 
+    @Resource
+    private IGoviewProjectDataService iGoviewProjectDataService;
+
+    @Resource
+    private IGoviewProjectService iGoviewProjectService;
     /**
      * 创建仪表盘模板
      *
@@ -40,10 +54,32 @@ public class DashboardTemplateController {
      * @return 仪表盘模板ID
      */
     @PostMapping("/create")
-    @ApiOperation("创建仪表盘模板")
-    @PermitAll
+    @ApiOperation("创建模板")
     @ApiSignIgnore
     public CommonResult<Long> createDashboardTemplate(@RequestBody @Validated DashboardTemplateSaveReqVO saveReqVO) {
+        if (StringUtils.isBlank(saveReqVO.getTemplateType())) {
+            saveReqVO.setTemplateType(SYSTEM_TYPE.getValue());
+        }
+        return success(dashboardTemplateService.createDashboardTemplate(saveReqVO));
+    }
+
+    /**
+     * 创建仪表盘模板
+     *
+     * @param saveReqVO 创建信息
+     * @return 仪表盘模板ID
+     */
+    @PostMapping("/saveOtherDashboardTemplate")
+    @ApiOperation("另存为模板")
+    @ApiSignIgnore
+    public CommonResult<Long> saveOtherDashboardTemplate(@RequestBody DashboardTemplateSaveReqVO saveReqVO) {
+
+        saveReqVO.setTemplateType(APP_TYPE.getValue());
+        GoviewProject goviewProject= iGoviewProjectService.getById(saveReqVO.getId());
+        GoviewProjectData goviewProjectData = iGoviewProjectDataService.getProjectid(saveReqVO.getId());
+        saveReqVO.setContent(goviewProjectData.getContent());
+        saveReqVO.setIndexImage(goviewProject.getIndexImage());
+
         return success(dashboardTemplateService.createDashboardTemplate(saveReqVO));
     }
 
@@ -57,6 +93,7 @@ public class DashboardTemplateController {
     @ApiOperation("更新仪表盘模板")
     @PermitAll
     @ApiSignIgnore
+    @TenantIgnore
     public CommonResult<Boolean> updateDashboardTemplate(@RequestBody @Validated DashboardTemplateSaveReqVO saveReqVO) {
         dashboardTemplateService.updateDashboardTemplate(saveReqVO);
         return success(true);
@@ -70,7 +107,6 @@ public class DashboardTemplateController {
      */
     @PostMapping("/delete")
     @ApiOperation("删除仪表盘模板")
-    @PermitAll
     @ApiSignIgnore
     public CommonResult<Boolean> deleteDashboardTemplate(@RequestParam("id") Long id) {
         dashboardTemplateService.deleteDashboardTemplate(id);
@@ -84,9 +120,10 @@ public class DashboardTemplateController {
      * @return 仪表盘模板信息
      */
     @GetMapping("/get")
-    @ApiOperation("获取仪表盘模板")
-    @PermitAll
+    @ApiOperation("获取模板")
     @ApiSignIgnore
+    @PermitAll
+    @TenantIgnore
     public CommonResult<DashboardTemplateRespVO> getDashboardTemplate(@RequestParam("id") Long id) {
         DashboardTemplateDO template = dashboardTemplateService.getDashboardTemplate(id);
         return success(BeanUtils.toBean(template, DashboardTemplateRespVO.class));
@@ -99,8 +136,7 @@ public class DashboardTemplateController {
      * @return 仪表盘模板列表
      */
     @GetMapping("/list")
-    @ApiOperation("获取仪表盘模板列表")
-    @PermitAll
+    @ApiOperation("获取模板列表")
     @ApiSignIgnore
     public CommonResult<List<DashboardTemplateRespVO>> getDashboardTemplateList(@RequestParam("ids") List<Long> ids) {
         List<DashboardTemplateDO> list = dashboardTemplateService.getDashboardTemplateList(ids);
@@ -114,8 +150,7 @@ public class DashboardTemplateController {
      * @return 仪表盘模板分页列表
      */
     @GetMapping("/page")
-    @ApiOperation("分页查询仪表盘模板")
-    @PermitAll
+    @ApiOperation("分页查询模板")
     @ApiSignIgnore
     public CommonResult<PageResult<DashboardTemplateRespVO>> getDashboardTemplatePage(DashboardTemplatePageReqVO pageReqVO) {
         PageResult<DashboardTemplateDO> pageResult = dashboardTemplateService.getDashboardTemplatePage(pageReqVO);

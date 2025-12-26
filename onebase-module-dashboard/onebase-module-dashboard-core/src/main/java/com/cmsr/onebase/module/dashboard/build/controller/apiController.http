@@ -16,3 +16,6 @@ GET {{baseUrl}}/dashboard/sys/logout
 
 ### 获取OSS信息接口
 GET {{baseUrl}}/dashboard/sys/getOssInfo
+#Authorization: Bearer {{token}}
+Content-Type: application/json
+#tenant-id: {{adminTenantId}}
