@@ -179,7 +179,7 @@ const DynamicDefaultValueConfig: React.FC<DynamicDefaultValueConfigProps> = ({
                 : value.toString();
             }}
             parser={(value) => value.replace(/,/g, '')}
-            suffix={configs?.numberFormat?.showUnit ? configs.numberFormat.unitValue : ''}
+            suffix={configs?.numberFormat?.showUnit && configs.numberFormat?.unitValue ? configs.numberFormat.unitValue : ''}
           />
         );
       case FORM_COMPONENT_TYPES.RADIO:
