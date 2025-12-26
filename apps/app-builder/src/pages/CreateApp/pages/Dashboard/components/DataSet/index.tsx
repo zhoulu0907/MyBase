@@ -1,11 +1,11 @@
-import { useEffect, useState, type FC } from 'react';
-import { Button, Modal, Table, Pagination, Space, type TableColumnProps } from '@arco-design/web-react';
+import { Button, Modal, Pagination, Space, Table, type TableColumnProps } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
 import styles from './index.module.less';
 import { DataSetParams, DelDataSetList } from '@onebase/platform-center';
 import { useLocation } from 'react-router-dom';
-import dayjs from 'dayjs';
 import { TokenManager, getDashBoardURL } from '@onebase/common';
+import dayjs from 'dayjs';
+import { useEffect, useState, type FC } from 'react';
 
 interface DataTable {
   name: string;

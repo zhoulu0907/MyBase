@@ -144,7 +144,10 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
    * @param isDraft 是否是草稿
    */
   const submitForm = async (isSave = false, isDraft?: boolean) => {
-    await form.validate();
+    if (!isDraft) {
+      await form.validate();
+    }
+
     !isSave && setSubmitLoading(true);
     const fields = form.getFieldsValue();
 
