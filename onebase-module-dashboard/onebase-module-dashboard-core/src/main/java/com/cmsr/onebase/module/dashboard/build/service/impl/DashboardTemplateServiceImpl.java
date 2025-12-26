@@ -11,12 +11,12 @@ import com.cmsr.onebase.module.dashboard.build.vo.template.DashboardTemplateSave
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import jakarta.annotation.Resource;
 import java.util.List;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
@@ -95,6 +95,6 @@ public class DashboardTemplateServiceImpl extends ServiceImpl<DashboardTemplateM
                 .eq(DashboardTemplateDO::getAppId, pageReqVO.getAppId(), pageReqVO.getAppId() != null);
 
         Page<DashboardTemplateDO> page = dashboardTemplateMapper.paginate(pageReqVO.getPageNo(), pageReqVO.getPageSize(), queryWrapper);
-        return new PageResult<>(page.getRecords(), (long) page.getTotalRow());
+        return new PageResult<>(page.getRecords(), page.getTotalRow());
     }
 }
