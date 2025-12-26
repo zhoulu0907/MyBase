@@ -34,6 +34,7 @@ public class OAuth2AccessTokenDO extends BaseTenantEntity {
     public static final String              CORP_ID       = "corp_id";
     public static final String              APP_ID        = "app_id";
     public static final String              RUN_MODE      = "run_mode";
+    public static final String              LOGIN_PLATFORM  = "login_platform";
     /**
      * 访问令牌
      */
@@ -96,4 +97,11 @@ public class OAuth2AccessTokenDO extends BaseTenantEntity {
      */
     @Column(value = RUN_MODE)
     private String runMode;
+
+
+    /**
+     *  PC = 'pc',  MOBILE = 'mobile',
+     */
+    @Column(value = LOGIN_PLATFORM)
+    private String loginPlatform;
 }

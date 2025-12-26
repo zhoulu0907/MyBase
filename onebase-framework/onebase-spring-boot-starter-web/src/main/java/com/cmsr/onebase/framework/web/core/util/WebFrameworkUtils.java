@@ -2,7 +2,6 @@ package com.cmsr.onebase.framework.web.core.util;
 
 import cn.hutool.core.util.NumberUtil;
 import com.cmsr.onebase.framework.common.enums.RpcConstants;
-import com.cmsr.onebase.framework.common.enums.TerminalEnum;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.web.config.WebProperties;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,7 +16,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 public class WebFrameworkUtils {
 
     @Deprecated
-    public static final String HEADER_TENANT_ID       = "tenant-id";
+    public static final String HEADER_TENANT_ID = "tenant-id";
     public static final String HEADER_VISIT_TENANT_ID = "X-Visit-Tenant-Id";
 
 
@@ -69,15 +68,6 @@ public class WebFrameworkUtils {
 
     public static Long getLoginUserId() {
         return SecurityFrameworkUtils.getLoginUserId();
-    }
-
-    public static Integer getTerminal() {
-        HttpServletRequest request = getRequest();
-        if (request == null) {
-            return TerminalEnum.UNKNOWN.getTerminal();
-        }
-        String terminalValue = request.getHeader(HEADER_TERMINAL);
-        return NumberUtil.parseInt(terminalValue, TerminalEnum.UNKNOWN.getTerminal());
     }
 
     public static HttpServletRequest getRequest() {

@@ -164,8 +164,10 @@ public class FlowProcessManager {
             for (Long oldId : oldIds) {
                 log.info("删除遗留的job: {}-{}", applicationId, oldId);
                 jobSchedulerClient.deleteJob(applicationId, oldId);
-                flowProcessTimeRepository.deleteByProcessId(oldId);
-                flowProcessDateFieldRepository.deleteByProcessId(oldId);
+                TenantManager.withoutTenantCondition(() -> {
+                    flowProcessTimeRepository.deleteByProcessId(oldId);
+                    flowProcessDateFieldRepository.deleteByProcessId(oldId);
+                });
             }
         });
     }

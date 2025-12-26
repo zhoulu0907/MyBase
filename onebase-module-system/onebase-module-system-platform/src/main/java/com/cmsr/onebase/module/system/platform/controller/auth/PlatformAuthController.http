@@ -13,7 +13,8 @@ tag: {{tag}}
 {
   "username": "admin",
   "password": "b2b3091d8090ff1a3bfdf0ee1c5505ccd501c717a70fbe135475d7e53bc82b0b86ade391a640937c2c93a0fb7f8a9227a963434f9a78d4b09fd0d3a8551960cc2d2770a52345b1cc03654d9315ac974675e4600d9fd7f698bd15d548a6d2f4a100cdb7d3c62b85ca",
-  "deviceId":666
+  "deviceId":666,
+  "loginPlatform": "pc"
 }
 
 > {%

@@ -131,7 +131,9 @@ public class PlatformAuthServiceImpl implements PlatformAuthService {
         // 使用账号密码，进行登录
         AdminUserDO user = authenticate(reqVO.getUsername(), reqVO.getPassword());
         LogRecordContext.putVariable("user", user);
-        return createTokenAfterLoginSuccess(user.getId(), user.getUserType(), reqVO.getUsername(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_USERNAME);
+        AuthLoginRespVO loginRespVO = createTokenAfterLoginSuccess(user.getId(), user.getUserType(), reqVO.getUsername(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_USERNAME, reqVO.getLoginPlatform());
+        loginRespVO.setLoginPlatform(reqVO.getLoginPlatform());
+        return loginRespVO;
     }
 
     private void createLoginLog(Long userId, String username,
@@ -173,14 +175,14 @@ public class PlatformAuthServiceImpl implements PlatformAuthService {
         return captchaService.verification(captchaVO);
     }
 
-    private AuthLoginRespVO createTokenAfterLoginSuccess(Long userId, Integer userType, String username, String deviceId, LoginLogTypeEnum logType) {
+    private AuthLoginRespVO createTokenAfterLoginSuccess(Long userId, Integer userType, String username, String deviceId, LoginLogTypeEnum logType,String loginPlatform) {
         // 插入登陆日志
         createLoginLog(userId, username, logType, LoginResultEnum.SUCCESS);
         // 创建访问令牌
         OAuth2AccessTokenDO accessTokenDO = oauth2TokenService.createAccessTokenWithMode(
                 RunModeEnum.PLATFORM.getValue(), null, null,
                 userId, userType,
-                OAuth2ClientConstants.CLIENT_ID_DEFAULT, null);
+                OAuth2ClientConstants.CLIENT_ID_DEFAULT, null, loginPlatform);
 
         // 检查并限制设备数，踢出超限的设备
         List<String> removedTokens = securityConfigApi.checkAndLimitDevices(
