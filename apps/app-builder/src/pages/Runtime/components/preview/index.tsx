@@ -159,10 +159,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
       const res = await listPageView({
         pageSetId: pageSetId
       });
-      console.log('res:---->', res);
       if (res && res.pages && res.pages.length > 0) {
         const imgRes = await getFileUrlById(res.pages[0].indexImage);
-        console.log('imgRes 地址:', imgRes);
         setDashboardImgUrl(imgRes);
       }
     } catch (error) {
