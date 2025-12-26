@@ -5,8 +5,8 @@ import { ReactSVG } from 'react-svg';
 import { Layout, Menu } from '@arco-design/web-react';
 import { useEffect, useState, type FC } from 'react';
 import DataSet from './components/DataSet';
-import LargeScreen from './components/Dashbord';
-import ScreenTemplate from './components/DashbordTemplate';
+import Dashboard from './components/Dashboard';
+import DashboardTemplate from './components/DashboardTemplate';
 import AppBreadcrumb from '@/components/Breadcrumb';
 import styles from './index.module.less';
 
@@ -18,7 +18,7 @@ interface BreadcrumbItemType {
   path?: string;
 }
 
-const Dashboard: FC = () => {
+const DashboardPage: FC = () => {
   const menuData = [
     { title: '数据集', icon: baseSettingSVG, key: 'dataSet' },
     { title: '大屏', icon: appPermissionSVG, key: 'largeScreen' },
@@ -77,8 +77,8 @@ const Dashboard: FC = () => {
           <Content className={styles.content}>
             <div className={styles.contentInner}>
               {activeTab === 'dataSet' && <DataSet />}
-              {activeTab === 'largeScreen' && <LargeScreen />}
-              {activeTab === 'screenTemplate' && <ScreenTemplate />}
+              {activeTab === 'largeScreen' && <Dashboard />}
+              {activeTab === 'screenTemplate' && <DashboardTemplate />}
             </div>
           </Content>
         </div>
@@ -87,4 +87,4 @@ const Dashboard: FC = () => {
   );
 };
 
-export default Dashboard;
+export default DashboardPage;

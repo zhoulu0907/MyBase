@@ -66,7 +66,7 @@ const XCheckbox = memo((props: XCheckboxConfig & { runtime?: boolean; detailMode
       rules={rules}
       layout={layout}
       style={{
-        textAlign: align || 'right',
+        textAlign: layout === 'vertical' ? 'left' : 'right',
         pointerEvents: (!runtime || detailMode) ? 'none' : 'unset',
         opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
       }}

@@ -12,4 +12,5 @@ export * from './role';
 export * from './security';
 export * from './tenant';
 export * from './user';
+export * from './dashboard';
 export * from './externaluser';

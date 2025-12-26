@@ -18,6 +18,7 @@ import {
   getEntityListByApp,
   getPageSetId,
   listApplicationMenu,
+  listPageView,
   menuSignal,
   MenuType,
   PageType,
@@ -87,6 +88,9 @@ const PageManagerPage: FC = () => {
   const { t } = useI18n();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const appId = searchParams.get('appId');
+
+  const dashboardType = 'dashboard';
 
   const { tenantId } = useParams();
 
@@ -121,6 +125,7 @@ const PageManagerPage: FC = () => {
 
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
   const [searchResult, setSearchResult] = useState<boolean>(false); // 菜单搜索结果
+  const dashboardPageType = 4;
 
   const initTreeItemWidth = 146;
   const cutTreeItemWidth = 25;
@@ -422,13 +427,41 @@ const PageManagerPage: FC = () => {
     handleDelete(menuID);
   };
   const handleScreenCreate = async (id?: string, screenMethod?: string) => {
-    console.log('handleScreenCreate id:', id);
-    console.log('handleScreenCreate screenMethod:', screenMethod);
-    // const req = await createScreenApi({
-    //   projectName: createForm.getFieldValue('menuName') || '新大屏',
-    //   remarks: null,
-    //   indexImage: null
-    // });
+    createForm.validate(async (error) => {
+      if (error !== null) return;
+      const req: CreateApplicationMenuReq = {
+        applicationId: curAppId,
+        parentId:
+          createForm.getFieldValue('parentId') === RootParentPage.id ? '' : createForm.getFieldValue('parentId'),
+        pageSetType: dashboardPageType,
+        menuName: createForm.getFieldValue('menuName'),
+        menuType: MenuType.PAGE,
+        menuIcon: createForm.getFieldValue('menuIcon'),
+        entityUuid: '',
+        createDashboardType: screenMethod,
+        dashboardId: id
+      };
+
+      const menuResp = await createApplicationMenu(req);
+      if (menuResp) {
+        Message.success('创建成功');
+      }
+      setVisibleCreateScreenForm('');
+      getMenuList(undefined, menuResp.id);
+
+      const pageSetId = await getPageSetId({
+        menuId: menuResp.id
+      });
+
+      const dashboardInfo = await listPageView({ pageSetId });
+      const dashboardId = dashboardInfo.pages && dashboardInfo.pages.length > 0 ? dashboardInfo.pages[0].id : null;
+      if (dashboardId) {
+        window.open(
+          `http://s25029301301.dev.internal.virtueit.net:81/v0/appdashboard/#/chart/home/${dashboardId}/${appId}/${dashboardType}`,
+          '_blank'
+        );
+      }
+    });
   };
   const handleCreate = async () => {
     createForm.validate(async (error) => {
@@ -548,23 +581,30 @@ const PageManagerPage: FC = () => {
       Message.error('请选择菜单');
       return;
     }
-
+    console.log('name', name, 'icon', icon);
+    console.log('curMenu:', curMenu.value);
     const req: GetPageSetIdReq = {
       menuId: curMenu.value?.id
     };
     const pageSetId = await getPageSetId(req);
-
     if (!pageSetId) {
       Message.error('请先创建页面集');
       return;
     }
-
-    const editorType =
-      curPage.value?.pageSetType === PageType.WORKBENCH ? EDITOR_TYPES.WORKBENCH_EDITOR : EDITOR_TYPES.FORM_EDITOR;
-
-    // 把编辑页菜单数据保存起来；
-    sessionStorage.setItem('EDITOR_PAGE_INFO', JSON.stringify({ id: curMenu.value?.id, name, icon }));
-    navigate(`/onebase/${tenantId}/editor/${editorType}?pageSetId=${pageSetId}&appId=${curAppId}`);
+    if (curMenu.value?.pagesetType === dashboardPageType) {
+      const dashboardInfo = await listPageView({ pageSetId });
+      const dashboardId = dashboardInfo.pages && dashboardInfo.pages.length > 0 ? dashboardInfo.pages[0].id : null;
+      window.open(
+        `http://s25029301301.dev.internal.virtueit.net:81/v0/appdashboard/#/chart/home/${dashboardId}/${appId}/${dashboardType}`,
+        '_blank'
+      );
+    } else {
+      const editorType =
+        curPage.value?.pageSetType === PageType.WORKBENCH ? EDITOR_TYPES.WORKBENCH_EDITOR : EDITOR_TYPES.FORM_EDITOR;
+      // 把编辑页菜单数据保存起来；
+      sessionStorage.setItem('EDITOR_PAGE_INFO', JSON.stringify({ id: curMenu.value?.id, name, icon }));
+      navigate(`/onebase/${tenantId}/editor/${editorType}?pageSetId=${pageSetId}&appId=${curAppId}`);
+    }
   };
 
   // 菜单搜索
@@ -838,7 +878,6 @@ const PageManagerPage: FC = () => {
       <CreateScreenModal
         title={title}
         type={'page'}
-        // handleCreate={handleCreate}
         handleCreate={handleScreenCreate}
         onCancel={() => {
           setVisibleCreateScreenForm('');

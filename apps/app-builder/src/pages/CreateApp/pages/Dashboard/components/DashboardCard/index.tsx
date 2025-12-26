@@ -7,9 +7,13 @@ import eye from '@/assets/images/screen/eye.png';
 import write from '@/assets/images/screen/write.png';
 import template from '@/assets/images/screen/template.png';
 interface dataList {
+  appId: string;
   id: string;
-  name: string;
-  state: string;
+  projectName: string;
+  updateTime: string;
+  indexImage: string;
+  remarks: string;
+  state: number;
   desc: string;
 }
 interface CardProps {
@@ -21,6 +25,14 @@ interface CardProps {
   onPreview: (item: dataList) => void;
 }
 const ScreenCard: FC<CardProps> = ({ item, onDelete, onSaveAs, onEditScreen, onEdit, onPreview }) => {
+  // updateTime 后端返回的是时间戳 将时间戳变为 年月日的事件
+  const updateTime = (time: string) => {
+    const date = new Date(time);
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    return `${year}-${month}-${day}`;
+  };
   const menu = (
     <Menu style={{ borderRadius: 10 }}>
       <Menu.Item
@@ -54,11 +66,11 @@ const ScreenCard: FC<CardProps> = ({ item, onDelete, onSaveAs, onEditScreen, onE
   return (
     <div className={styles.appCard}>
       <div className={styles.appCardImg}>
-        <img src={screen1} alt="" />
+        <img src={item.indexImage} alt="" />
       </div>
       <div className={`${styles.appCardFooter} ${styles.cardName}`}>
         <div>
-          {item.name}
+          {item.projectName}
           <IconEdit
             fontSize={16}
             style={{ marginLeft: 4, cursor: 'pointer' }}
@@ -68,14 +80,14 @@ const ScreenCard: FC<CardProps> = ({ item, onDelete, onSaveAs, onEditScreen, onE
             }}
           />
         </div>
-        <div className={styles.cardState}>
+        {/* <div className={styles.cardState}>
           <div className={styles.cicile}></div>
-          <div>{item.state}</div>
-        </div>
+          <div>{item.state === 1 ? '已发布' : '未发布'}</div>
+        </div> */}
       </div>
       <div className={`${styles.appCardFooter} ${styles.cardRemark}`}>
         <div>
-          更新于: <span>2025-11-11</span>
+          更新于: <span>{updateTime(item.updateTime)}</span>
         </div>
         <div>
           <Space size={'medium'}>
