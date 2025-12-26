@@ -130,8 +130,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
         }
       };
 
-      // 工作台页面不获取主表数据
-      if (pagesetType === PageType.WORKBENCH) {
+      // 工作台、大屏页面不获取主表数据
+      if (pagesetType === PageType.WORKBENCH || pagesetType === PageType.DASHBOARD) {
         loadPageSetInfo(pageSetId).finally(() => {
           setLoading(false);
         });
