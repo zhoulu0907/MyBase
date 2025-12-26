@@ -91,7 +91,7 @@ public class DashboardProjectController extends BaseController {
         goviewProject.setState(-1);
         boolean b = dashboardProjectService.save(goviewProject);
         if (b) {
-            return successData(0, goviewProject.getId()).put("msg", "交易成功");
+            return successData(0, goviewProject.getId()).put("msg", "新增成功");
         } else {
             return error();
         }
@@ -112,7 +112,7 @@ public class DashboardProjectController extends BaseController {
     public AjaxResult remove(@RequestParam Long id) {
         Boolean b = dashboardProjectService.removeById(id);
         if (b) {
-            return successData(0, id).put("msg", "交易成功");
+            return successData(0, id).put("msg", "删除成功");
         } else {
             return error();
         }
@@ -127,7 +127,7 @@ public class DashboardProjectController extends BaseController {
     public AjaxResult editSave(@RequestBody DashboardProject goviewProject) {
         Boolean b = dashboardProjectService.updateById(goviewProject);
         if (b) {
-            return successData(0, goviewProject).put("msg", "交易成功");
+            return successData(0, goviewProject).put("msg", "保存成功");
         }
         return error();
     }
@@ -141,7 +141,7 @@ public class DashboardProjectController extends BaseController {
 
         Boolean b = dashboardProjectService.updateById(goviewProject);
         if (b) {
-            return successData(0, goviewProject.getId()).put("msg", "交易成功");
+            return successData(0, goviewProject.getId()).put("msg", "操作成功");
         }
         return error();
     }
