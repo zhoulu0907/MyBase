@@ -16,6 +16,7 @@ import com.cmsr.onebase.module.dashboard.build.model.vo.DashboardProjectVO;
 import com.cmsr.onebase.module.dashboard.build.service.DashboardFileService;
 import com.cmsr.onebase.module.dashboard.build.service.DashboardProjectDataService;
 import com.cmsr.onebase.module.dashboard.build.service.DashboardProjectService;
+import com.cmsr.onebase.module.dashboard.build.service.impl.DashboardProjectServiceImpl;
 import com.cmsr.onebase.module.dashboard.build.util.SnowflakeIdWorker;
 import com.cmsr.onebase.module.infra.api.file.FileApi;
 import com.cmsr.onebase.module.infra.api.file.dto.FileCreateReqDTO;
@@ -265,5 +266,20 @@ public class DashboardProjectController extends BaseController {
         return result;
     }
 
+
+    /**
+     * 从模板创建大屏
+     *
+     * @param templateId 从模板创建大屏
+     * @return
+     * @throws Exception
+     */
+    @PostMapping("/create-dashboard-by-template")
+    @ApiOperation("从模板创建大屏")
+    @ApiSignIgnore
+    public CommonResult<Long> createDashboardByTemplate(@RequestParam("templateId") Long templateId) throws IOException {
+
+        return CommonResult.success(dashboardProjectService.createDashboardByTemplate(templateId));
+    }
 
 }

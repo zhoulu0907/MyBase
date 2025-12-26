@@ -5,7 +5,7 @@ import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.dashboard.build.dal.dataobject.DashboardTemplateDO;
 import com.cmsr.onebase.module.dashboard.build.dal.mapper.DashboardTemplateMapper;
-import com.cmsr.onebase.module.dashboard.build.service.IDashboardTemplateService;
+import com.cmsr.onebase.module.dashboard.build.service.DashboardTemplateService;
 import com.cmsr.onebase.module.dashboard.build.vo.template.DashboardTemplatePageReqVO;
 import com.cmsr.onebase.module.dashboard.build.vo.template.DashboardTemplateSaveReqVO;
 import com.mybatisflex.core.paginate.Page;
@@ -29,7 +29,7 @@ import static com.cmsr.onebase.module.dashboard.build.enums.ErrorCodeConstants.T
  */
 @Slf4j
 @Service
-public class DashboardTemplateServiceImpl extends ServiceImpl<DashboardTemplateMapper, DashboardTemplateDO> implements IDashboardTemplateService {
+public class DashboardTemplateServiceImpl extends ServiceImpl<DashboardTemplateMapper, DashboardTemplateDO> implements DashboardTemplateService {
 
     @Resource
     private DashboardTemplateMapper dashboardTemplateMapper;
