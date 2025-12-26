@@ -39,7 +39,7 @@ import {
   type UpdateApplicationMenuOrderReq,
   type UpdateApplicationMenuVisibleReq
 } from '@onebase/app';
-import { pagesRuntimeSignal } from '@onebase/common';
+import { getDashBoardURL, pagesRuntimeSignal } from '@onebase/common';
 import { EDITOR_TYPES } from '@onebase/ui-kit';
 import { currentEditorSignal } from '@onebase/ui-kit/src/signals/current_editor';
 import { useSignals } from '@preact/signals-react/runtime';
@@ -99,6 +99,7 @@ const PageManagerPage: FC = () => {
   const [createForm] = Form.useForm();
   const [renameForm] = Form.useForm();
   const [copyForm] = Form.useForm();
+  const resourceUrl = getDashBoardURL();
   // 创建弹窗
   const [visibleCreateForm, setVisibleCreateForm] = useState('');
   // 创建大屏弹窗
@@ -456,10 +457,7 @@ const PageManagerPage: FC = () => {
       const dashboardInfo = await listPageView({ pageSetId });
       const dashboardId = dashboardInfo.pages && dashboardInfo.pages.length > 0 ? dashboardInfo.pages[0].id : null;
       if (dashboardId) {
-        window.open(
-          `http://s25029301301.dev.internal.virtueit.net:81/v0/appdashboard/#/chart/home/${dashboardId}/${appId}/${dashboardType}`,
-          '_blank'
-        );
+        window.open(`${resourceUrl}chart/home/${dashboardId}/${appId}/${dashboardType}`, '_blank');
       }
     });
   };
