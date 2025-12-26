@@ -1,5 +1,6 @@
 import logoIcon from '@/assets/images/logo-icon.svg';
 import phoneIcon from '@/assets/images/login/phone.svg';
+import passwordIcon from '@/assets/images/login/password.svg';
 import { Tabs, Form, Input, Button, Toast } from '@arco-design/mobile-react';
 import { type IFormInstance } from '@arco-design/mobile-react/esm/form';
 import { ValidatorType } from '@arco-design/mobile-utils';
@@ -380,7 +381,35 @@ const LoginContent: React.FC = () => {
             </Button>
             <p className={styles.tips}>没有账号？登录即注册</p>
           </Form>
-          <div>23</div>
+          <Form ref={passwordFormRef} layout="vertical" className={styles.loginForm}>
+            <Form.Item label="手机号" field="mobile" rules={rules.mobile}>
+              <Input
+                label={<img src={phoneIcon} alt="logo" className={styles.loginFormIcon} />}
+                placeholder="请输入手机号"
+                maxLength={11}
+                onChange={(_, value) => setUserMobile(value)}
+              />
+            </Form.Item>
+            <Form.Item field="password" label="密码" rules={rules.password}>
+              <Input
+                type="password"
+                label={<img src={passwordIcon} alt="logo" className={styles.loginFormIcon} />}
+                placeholder="请输入密码"
+              />
+            </Form.Item>
+            <Button
+              type="primary"
+              size="large"
+              loading={loading}
+              className={styles.loginButton}
+              onClick={handleLoginClick}
+            >
+              登录
+            </Button>
+            <p className={styles.tips}>
+              没有账号？ <span onClick={() => setActiveTab(0)}>短信验证码登录</span>，登录即注册
+            </p>
+          </Form>
         </Tabs>
       </div>
       <div className={styles.loginFooter}>
