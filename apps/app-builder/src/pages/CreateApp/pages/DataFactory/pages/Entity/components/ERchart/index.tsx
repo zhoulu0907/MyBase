@@ -462,7 +462,7 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
           // 移动距离超过阈值则判断为在拖拽
           const deltaX = Math.abs(x - dragStartPosition.x);
           const deltaY = Math.abs(y - dragStartPosition.y);
-          const threshold = 5;
+          const threshold = 3;
 
           if (deltaX > threshold || deltaY > threshold) {
             isDragging = true;
