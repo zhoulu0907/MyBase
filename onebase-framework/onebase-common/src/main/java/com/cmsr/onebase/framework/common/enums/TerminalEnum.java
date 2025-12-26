@@ -12,7 +12,7 @@ import java.util.Arrays;
  */
 @RequiredArgsConstructor
 @Getter
-public enum TerminalEnum implements ArrayValuable<Integer> {
+public enum TerminalEnum implements ArrayValuable<String> {
 
     UNKNOWN("unknown", "未知"), // 目的：在无法解析到 terminal 时，使用它
     WECHAT_MINI_PROGRAM("wechat_mini_program", "微信小程序"),
@@ -20,7 +20,7 @@ public enum TerminalEnum implements ArrayValuable<Integer> {
     MOBILE("mobile", "手机"),
     ;
 
-    public static final Integer[] ARRAYS = Arrays.stream(values()).map(TerminalEnum::getTerminal).toArray(Integer[]::new);
+    public static final String[] ARRAYS = Arrays.stream(values()).map(TerminalEnum::getTerminal).toArray(String[]::new);
 
     /**
      * 终端
@@ -32,7 +32,7 @@ public enum TerminalEnum implements ArrayValuable<Integer> {
     private final String name;
 
     @Override
-    public Integer[] array() {
+    public String[] array() {
         return ARRAYS;
     }
 }
