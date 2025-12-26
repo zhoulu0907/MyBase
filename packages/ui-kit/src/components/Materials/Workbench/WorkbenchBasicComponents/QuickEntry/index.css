@@ -88,7 +88,7 @@
 .quick-entry-theme-theme-three .quick-entry-items {
   display: grid;
   justify-content: space-between;
-  grid-template-columns: repeat(auto-fit, 190px);
+  grid-template-columns: repeat(auto-fit, 22%);
   gap: min(10px);
   border-radius: 8px;
 }
@@ -100,9 +100,10 @@
   flex-direction: row;
   align-items: center;
   gap: 10px;
-  width: 158px;
+  width: 100%;
   padding: 16px;
   border-radius: 8px;
+  box-sizing: border-box;
 }
 
 .quick-entry-theme-theme-one .quick-entry-item-theme-one:hover {
