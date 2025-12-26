@@ -3,19 +3,12 @@ import passwordIcon from '@/assets/images/login/password.svg';
 import CustomNav from '@/pages/components/Nav';
 import { Form, Input, Button } from '@arco-design/mobile-react';
 import { type IFormInstance } from '@arco-design/mobile-react/esm/form';
-import { IconSuccessCircle } from '@arco-design/mobile-react/esm/icon';
+import { IconSuccessCircle, IconEyeVisible, IconEyelashInvisible } from '@arco-design/mobile-react/esm/icon';
 import { ValidatorType } from '@arco-design/mobile-utils';
 import { useRef, useState } from 'react';
 import VerifyCode from '../ThirdLogin/components/VerifyCode';
-import {
-  sendVerifyCodeApi,
-  forgotPWD,
-  checkCaptchaApi,
-  runtimeThirdLogin,
-  type forgotPWDParams,
-  type ThirdUserLoginResponse
-} from '@onebase/platform-center';
-import { getOrCreateDeviceInfo, getPublicKey, sm2Encrypt, TokenManager, getHashQueryParam } from '@onebase/common';
+import { sendVerifyCodeApi, forgotPWD, type forgotPWDParams } from '@onebase/platform-center';
+import { getPublicKey, sm2Encrypt, getHashQueryParam } from '@onebase/common';
 import { useNavigate } from 'react-router-dom';
 import styles from './index.module.less';
 
@@ -31,6 +24,9 @@ const ForgetPassword = () => {
   const formRef = useRef<FormRef>(null);
   const [loading, setLoading] = useState(false);
   const [userMobile, setUserMobile] = useState('');
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showComfirmPassword, setShowComfirmPassword] = useState(false);
 
   // 校验规则
   const rules = {
@@ -75,7 +71,7 @@ const ForgetPassword = () => {
         }
       }
     ],
-    confirmNewPassword: [
+    confirmPassword: [
       {
         type: ValidatorType.Custom,
         validator: (val: string, callback: (error?: string) => void) => {
@@ -142,13 +138,27 @@ const ForgetPassword = () => {
           </Form.Item>
           <Form.Item label="密码" field="password" rules={rules.password}>
             <Input
-              label={<img src={passwordIcon} alt="password" className={styles.popupFormIcon} />}
+              type={showPassword ? 'text' : 'password'}
+              label={<img src={passwordIcon} alt="password" />}
+              suffix={
+                <div className={styles.eye} onClick={() => setShowPassword((prev) => !prev)}>
+                  {showPassword ? <IconEyelashInvisible /> : <IconEyeVisible />}
+                </div>
+              }
               placeholder="请输入新密码"
-              type="password"
             />
           </Form.Item>
-          <Form.Item label="确认密码" field="confirmNewPassword" rules={rules.confirmNewPassword}>
-            <Input type="password" label={<IconSuccessCircle />} placeholder="请再次输入新密码" />
+          <Form.Item label="确认密码" field="confirmPassword" rules={rules.confirmPassword}>
+            <Input
+              type={showComfirmPassword ? 'text' : 'password'}
+              label={<IconSuccessCircle />}
+              suffix={
+                <div className={styles.eye} onClick={() => setShowComfirmPassword((prev) => !prev)}>
+                  {showComfirmPassword ? <IconEyelashInvisible /> : <IconEyeVisible />}
+                </div>
+              }
+              placeholder="请再次输入新密码"
+            />
           </Form.Item>
         </Form>
         <Button type="primary" size="large" className={styles.submitBtn} loading={loading} onClick={handleSubmit}>

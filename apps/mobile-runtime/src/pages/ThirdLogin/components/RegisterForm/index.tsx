@@ -2,12 +2,17 @@ import emailIcon from '@/assets/images/login/email.svg';
 import passwordIcon from '@/assets/images/login/password.svg';
 import { Form, Input, Button, Popup } from '@arco-design/mobile-react';
 import { type IFormInstance } from '@arco-design/mobile-react/esm/form';
-import { IconUser, IconSuccessCircle } from '@arco-design/mobile-react/esm/icon';
+import {
+  IconArrowBack,
+  IconUser,
+  IconSuccessCircle,
+  IconEyeVisible,
+  IconEyelashInvisible
+} from '@arco-design/mobile-react/esm/icon';
 import { ValidatorType } from '@arco-design/mobile-utils';
 import { useRef, useState } from 'react';
 import { getOrCreateDeviceInfo, getPublicKey, sm2Encrypt, TokenManager } from '@onebase/common';
 import { thirdUserRegisterApi, type thirdUserRegisterParams } from '@onebase/platform-center';
-import CustomNav from '@/pages/components/Nav';
 import styles from '../../index.module.less';
 
 interface IRegisterProps {
@@ -27,6 +32,8 @@ interface FormRef {
 const RegisterForm: React.FC<IRegisterProps> = ({ visible, appId, mobile, tenantId, onOk, onCancel }) => {
   const formRef = useRef<FormRef>(null);
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showComfirmPassword, setShowComfirmPassword] = useState(false);
   // 校验规则
   const rules = {
     username: [
@@ -149,7 +156,9 @@ const RegisterForm: React.FC<IRegisterProps> = ({ visible, appId, mobile, tenant
   return (
     <Popup visible={visible} close={onCancel} direction="bottom" maskClosable={false} className={styles.popup}>
       <div className={styles.popupContent}>
-        <CustomNav title="" />
+        <div className={styles.popupBack}>
+          <IconArrowBack onClick={onCancel} />
+        </div>
 
         <div className={styles.popupHeader}>
           <div className={styles.popupTitle}>请补充用户信息</div>
@@ -166,13 +175,27 @@ const RegisterForm: React.FC<IRegisterProps> = ({ visible, appId, mobile, tenant
           </Form.Item>
           <Form.Item label="密码" field="password" rules={rules.password}>
             <Input
+              type={showPassword ? 'text' : 'password'}
               label={<img src={passwordIcon} alt="password" className={styles.popupFormIcon} />}
+              suffix={
+                <div className={styles.eye} onClick={() => setShowPassword((prev) => !prev)}>
+                  {showPassword ? <IconEyelashInvisible /> : <IconEyeVisible />}
+                </div>
+              }
               placeholder="请输入密码"
-              type="password"
             />
           </Form.Item>
           <Form.Item label="确认密码" field="confirmNewPassword" rules={rules.confirmNewPassword}>
-            <Input type="password" label={<IconSuccessCircle />} placeholder="请输入确认密码" />
+            <Input
+              type={showComfirmPassword ? 'text' : 'password'}
+              label={<IconSuccessCircle />}
+              suffix={
+                <div className={styles.eye} onClick={() => setShowComfirmPassword((prev) => !prev)}>
+                  {showComfirmPassword ? <IconEyelashInvisible /> : <IconEyeVisible />}
+                </div>
+              }
+              placeholder="请输入确认密码"
+            />
           </Form.Item>
         </Form>
         <div className={styles.popupBtn}>

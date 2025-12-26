@@ -17,7 +17,7 @@ function AppContent() {
       {/* 登录页面不需要认证 */}
       <Route path="/login" element={<Login />} />
       <Route path="/third/login" element={<ThirdLogin />} />
-      <Route path="/onebase/forget-password" element={<ForgetPassword />} />
+      <Route path="/onebase/forget-password/:tenantId" element={<ForgetPassword />} />
 
       <Route path="/onebase/runtime/" element={<Runtime />} />
 

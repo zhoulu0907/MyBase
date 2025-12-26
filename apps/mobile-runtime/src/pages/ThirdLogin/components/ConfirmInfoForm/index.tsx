@@ -1,12 +1,11 @@
 import emailIcon from '@/assets/images/login/email.svg';
 import { Form, Input, Button, Popup } from '@arco-design/mobile-react';
 import { type IFormInstance } from '@arco-design/mobile-react/esm/form';
-import { IconUser } from '@arco-design/mobile-react/esm/icon';
+import { IconArrowBack, IconUser } from '@arco-design/mobile-react/esm/icon';
 import { ValidatorType } from '@arco-design/mobile-utils';
 import { useRef, useState } from 'react';
 import { TokenManager } from '@onebase/common';
 import { createExternalUserApp, type createExternalUserAppParams } from '@onebase/platform-center';
-import CustomNav from '@/pages/components/Nav';
 import styles from '../../index.module.less';
 
 interface IConfirmInfoProps {
@@ -80,7 +79,9 @@ const ConfirmInfoForm: React.FC<IConfirmInfoProps> = ({ visible, appId, tenantId
   return (
     <Popup visible={visible} close={onCancel} direction="bottom" maskClosable={false} className={styles.popup}>
       <div className={styles.popupContent}>
-        <CustomNav title="" />
+        <div className={styles.popupBack}>
+          <IconArrowBack onClick={onCancel} />
+        </div>
 
         <div className={styles.popupHeader}>
           <div className={styles.popupTitle}>请确认用户信息</div>
