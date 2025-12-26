@@ -211,10 +211,11 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
       });
       const bpmNewColumns = bpmColumn.concat(newColumns);
       setColumnsConfig(bpmNewColumns);
+      handlePropsChange(columnsKey, bpmNewColumns);
     } else {
       setColumnsConfig(newColumns);
+      handlePropsChange(columnsKey, newColumns);
     }
-    handlePropsChange(columnsKey, newColumns);
   };
 
   return (
