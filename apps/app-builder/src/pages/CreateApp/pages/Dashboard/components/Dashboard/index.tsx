@@ -48,7 +48,7 @@ const Dashboard: FC = () => {
     getDashboardList();
   }, []);
 
-  const getDashboardList = async (searchText?: string) => {
+  const getDashboardList = async (searchText?: string, pageNo: number = 1) => {
     const params = {
       page: pageNo,
       limit: pageSize,
@@ -79,7 +79,7 @@ const Dashboard: FC = () => {
   };
   const handleCreateOk = async (id?: string) => {
     console.log('新建大屏 id:', id);
-    if (!id && appId) {
+    if (!id && appId && tenantId) {
       const params = {
         projectName: '新大屏',
         tenantId: tenantId,
@@ -222,6 +222,7 @@ const Dashboard: FC = () => {
         onChange={(pNo, pSize) => {
           setPageNo(pNo);
           setPageSize(pSize);
+          getDashboardList(searchText, pNo);
         }}
       />
       {/* 编辑弹框 */}
