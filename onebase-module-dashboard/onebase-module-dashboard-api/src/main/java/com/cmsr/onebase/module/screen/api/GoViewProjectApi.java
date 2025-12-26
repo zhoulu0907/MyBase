@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.screen.api;
 
 
-import com.cmsr.onebase.module.screen.api.dto.GoViewProjectDTO;
+//import com.cmsr.onebase.module.screen.api.dto.GoViewProjectDTO;
 
 import java.util.List;
 
@@ -11,9 +11,9 @@ import java.util.List;
 public interface GoViewProjectApi {
 
 
-    Long createDashboard(GoViewProjectDTO goViewProjectDTO);
+    //Long createDashboard(GoViewProjectDTO goViewProjectDTO);
 
-    List<GoViewProjectDTO> getDashboard(Long dashboardId);
+    //List<GoViewProjectDTO> getDashboard(Long dashboardId);
 
     Long createDashboardByTemplate(Long templateId);
 
