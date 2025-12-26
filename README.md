@@ -83,3 +83,14 @@ onebase/
 
 1. 积极用AI，辅助编程。有条件上cursor 或 github copilot，没条件至少要用阿里的通义灵码等工具。
 2. 不盲信AI。由人理解和分析逻辑，由人来严格阅读和验证AI的代码，人来对代码的可读性、性能负责，不可以测通就直接无脑提交。
+
+
+1. 保存换到发布位置，去掉发布，加主题。 高优
+2. 保存，中间loading 保存中 ，高优。
+3. 保存性能优化：upload+edit 与 savedata 异步并发；低
+4. 页面大屏，没有预览图。高优
+5. 新建指标绑定图标时异常；
+6. 
+
+http://s25029301301.dev.internal.virtueit.net:81/v1-snapshot/onebaseserver/admin-api/dashboard/template/page?&templateType=&pageNo=1&pageSize=8&templateName=&_t=1766737513195
+http://s25029301301.dev.internal.virtueit.net:81/v1-snapshot/onebaseserver/admin-api/dashboard/template/page?templateType=app&pageNo=1&pageSize=6&templateName=&_t=1766737574349
