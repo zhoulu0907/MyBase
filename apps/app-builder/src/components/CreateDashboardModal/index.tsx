@@ -9,6 +9,7 @@ import dashboardTemplate from '@/assets/images/dashboard_template.svg';
 import dashboardLink from '@/assets/images/dashboard_link.svg';
 import dashboardChange from '@/assets/images/dashboard_change.svg';
 import { getFileUrlById } from '@onebase/platform-center';
+import { getDashBoardURL } from '@onebase/common';
 
 interface CreateModalProps {
   title: string;
@@ -40,6 +41,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
   const [visibleMenuIcon, setVisibleMenuIcon] = useState<boolean>(false);
   const [dashboardMethod, setDashboardMethod] = useState<string>('dashboardNew');
   const [dashboardTemplateTab, setDashboardTemplateTab] = useState<string>('allTemplate');
+  const resourceUrl = getDashBoardURL();
   const [dashboardMethodLoading, setDashboardMethodLoading] = useState<boolean>(false);
   const [dashboardTemplateTabLoading, setDashboardTemplateTabLoading] = useState<boolean>(false);
   const [dashboardPagination, setDashboardPagination] = useState<{ current: number; pageSize: number }>({
@@ -266,10 +268,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
 
   const handlePreview = (dashboardProjectId: string) => {
     // 在新窗口打开预览页面，使用 hash 路由
-    window.open(
-      `http://s25029301301.dev.internal.virtueit.net:81/v0/appdashboard/#/chart/preview/${dashboardProjectId}/${dashboardType}`,
-      '_blank'
-    );
+    window.open(`${resourceUrl}chart/preview/${dashboardProjectId}/${dashboardType}`, '_blank');
   };
 
   const handleDashboardTemplateCard = (id: string) => {

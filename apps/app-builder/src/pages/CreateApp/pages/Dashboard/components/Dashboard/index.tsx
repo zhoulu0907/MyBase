@@ -13,7 +13,7 @@ import {
   saveDashboardAsTemplateApi,
   getDashboardIdApi
 } from '@onebase/app';
-import { TokenManager } from '@onebase/common';
+import { getDashBoardURL, TokenManager } from '@onebase/common';
 const FormItem = Form.Item;
 const { useForm } = Form;
 interface dataList {
@@ -66,7 +66,7 @@ const Dashboard: FC = () => {
     }, 1000), // 1000ms 节流延迟
     [getDashboardList] // 依赖数组，只包含 getDashboardList
   );
-
+  const resourceUrl = getDashBoardURL();
   const handleSearchChange = (value: string) => {
     setSearchText(value);
     throttledSearch(value);
@@ -86,15 +86,9 @@ const Dashboard: FC = () => {
         appId: appId
       };
       const dashboardId = await getDashboardIdApi(params);
-      window.open(
-        `http://s25029301301.dev.internal.virtueit.net:81/v0/appdashboard/#/chart/home/${dashboardId}/${appId}/${dashboardType}`,
-        '_blank'
-      );
+      window.open(`${resourceUrl}chart/home/${dashboardId}/${appId}/${dashboardType}`, '_blank');
     }
-    window.open(
-      `http://s25029301301.dev.internal.virtueit.net:81/v0/appdashboard/#/chart/home/${id}/${appId}/${dashboardType}`,
-      '_blank'
-    );
+    window.open(`${resourceUrl}chart/home/${id}/${appId}/${dashboardType}`, '_blank');
     setVisibleCreateScreenForm('');
     getDashboardList();
   };
@@ -128,18 +122,12 @@ const Dashboard: FC = () => {
   };
   //编辑大屏
   const handleEdit = (item: dataList) => {
-    window.open(
-      `http://s25029301301.dev.internal.virtueit.net:81/v0/appdashboard/#/chart/home/${item.id}/${appId}/${dashboardType}`,
-      '_blank'
-    );
+    window.open(`${resourceUrl}chart/home/${item.id}/${appId}/${dashboardType}`, '_blank');
   };
   //预览
   const handlePreview = (item: dataList) => {
     console.log('预览 item:', item);
-    window.open(
-      `http://s25029301301.dev.internal.virtueit.net:81/v0/appdashboard/#/chart/preview/${item.id}/${dashboardType}`,
-      '_blank'
-    );
+    window.open(`${resourceUrl}chart/preview/${item.id}/${dashboardType}`, '_blank');
   };
   // 删除弹框
   const [deleteVisible, setDeleteVisible] = useState<boolean>(false);
