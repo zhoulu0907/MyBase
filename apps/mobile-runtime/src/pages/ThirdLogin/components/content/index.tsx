@@ -9,21 +9,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getApplicationLeast, type Application } from '@onebase/app';
 import {
-  forgotPWD,
   sendVerifyCodeApi,
   getCaptchaApi,
   checkCaptchaApi,
-  sassLogin,
-  innerLogin,
-  login,
-  runtimeCorpLogin,
   runtimeThirdLogin,
-  type forgotPWDParams,
-  type LoginRequest,
-  type LoginResponse,
-  type RuntimeAccountLoginRequest,
-  type RuntimeCorpLoginRequest,
-  type RuntimeMobileLoginRequest,
   type RuntimeThirdLoginRequest,
   type ThirdUserLoginResponse
 } from '@onebase/platform-center';
@@ -31,7 +20,6 @@ import { appIconMap } from '@onebase/ui-kit';
 import {
   DynamicIcon,
   getOrCreateDeviceInfo,
-  PUBLISH_MODULE,
   sm2Encrypt,
   TokenManager,
   getPublicKey,
@@ -430,21 +418,21 @@ const LoginContent: React.FC = () => {
       />
 
       {/* 确认页面 */}
-      {visibleConfirmInfo && (
-        <ConfirmInfoForm onGoBack={() => setVisibleConfirmInfo(false)} tenantId={tenantId} appId={appId} />
-      )}
+      <ConfirmInfoForm
+        visible={visibleConfirmInfo}
+        closePopup={() => setVisibleConfirmInfo(false)}
+        tenantId={tenantId}
+        appId={appId}
+      />
 
       {/* 注册页面 */}
-      {visibleRegister && (
-        <RegisterForm
-          appId={appId}
-          tenantId={tenantId}
-          mobile={userMobile}
-          onGoBack={() => {
-            setVisibleRegister(false);
-          }}
-        />
-      )}
+      <RegisterForm
+        visible={visibleRegister}
+        appId={appId}
+        tenantId={tenantId}
+        mobile={userMobile}
+        closePopup={() => setVisibleRegister(false)}
+      />
     </div>
   );
 };
