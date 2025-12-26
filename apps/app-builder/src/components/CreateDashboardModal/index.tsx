@@ -54,6 +54,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
   const [templateName, setTemplateName] = useState<string>('');
   const [dashboardTemplateData, setDashboardTemplateData] = useState<any[]>([]);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
+  const dashboardType = 'dashboard';
 
   useEffect(() => {
     if (menuIcon) {
@@ -250,7 +251,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
   const handlePreview = (dashboardProjectId: string) => {
     // 在新窗口打开预览页面，使用 hash 路由
     window.open(
-      `http://s25029301301.dev.internal.virtueit.net:81/v0/appdashboard/#/chart/preview/${dashboardProjectId}`,
+      `http://s25029301301.dev.internal.virtueit.net:81/v0/appdashboard/#/chart/preview/${dashboardProjectId}/${dashboardType}`,
       '_blank'
     );
   };

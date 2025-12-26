@@ -137,7 +137,7 @@ const Dashboard: FC = () => {
   const handlePreview = (item: dataList) => {
     console.log('预览 item:', item);
     window.open(
-      `http://s25029301301.dev.internal.virtueit.net:81/v0/appdashboard/#/chart/preview/${item.id}/${appId}/${dashboardType}`,
+      `http://s25029301301.dev.internal.virtueit.net:81/v0/appdashboard/#/chart/preview/${item.id}/${dashboardType}`,
       '_blank'
     );
   };
