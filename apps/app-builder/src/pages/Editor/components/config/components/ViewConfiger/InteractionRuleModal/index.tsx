@@ -7,6 +7,7 @@ import {
   Grid,
   Input,
   Menu,
+  Message,
   Modal,
   Select,
   Switch,
@@ -503,7 +504,27 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
                   </Form.Item>
                 </Col>
                 <Col span={12}>
-                  <Form.Item label="启用状态" field="enabled" triggerPropName="checked">
+                  <Form.Item
+                    label="启用状态"
+                    field="enabled"
+                    triggerPropName="checked"
+                    normalize={(value) => {
+                      // 如果已经有10个启用的规则，则阻止并提示，返回当前值
+                      const maxEnabledCount = 10;
+                      if (value) {
+                        const currentRuleId = form.getFieldValue('id');
+                        const enabledCount = rules.filter((rule) => rule.id !== currentRuleId && rule.enabled).length;
+
+                        if (enabledCount >= maxEnabledCount) {
+                          Message.warning(`最多只能启用${maxEnabledCount}个规则`);
+                          // 返回当前值，阻止切换
+                          return form.getFieldValue('enabled') || false;
+                        }
+                      }
+
+                      return value;
+                    }}
+                  >
                     <Switch />
                   </Form.Item>
                 </Col>
