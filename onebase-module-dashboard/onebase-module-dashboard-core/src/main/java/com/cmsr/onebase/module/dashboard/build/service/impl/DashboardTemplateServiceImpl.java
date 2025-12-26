@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.dashboard.build.service.impl;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.dashboard.build.dal.dataobject.DashboardTemplateDO;
@@ -37,6 +38,11 @@ public class DashboardTemplateServiceImpl extends ServiceImpl<DashboardTemplateM
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long createDashboardTemplate(DashboardTemplateSaveReqVO saveReqVO) {
+
+        if (saveReqVO.getHot() == null) {
+            saveReqVO.setHot(0);
+        }
+
         SecurityFrameworkUtils.getLoginUserId();
         DashboardTemplateDO templateDO = BeanUtils.toBean(saveReqVO, DashboardTemplateDO.class);
         templateDO.setId(null);
@@ -88,11 +94,12 @@ public class DashboardTemplateServiceImpl extends ServiceImpl<DashboardTemplateM
 
     @Override
     public PageResult<DashboardTemplateDO> getDashboardTemplatePage(DashboardTemplatePageReqVO pageReqVO) {
+
         QueryWrapper queryWrapper = QueryWrapper.create()
                 .eq(DashboardTemplateDO::getTemplateType, pageReqVO.getTemplateType(), StringUtils.isNotBlank(pageReqVO.getTemplateType()))
                 .like(DashboardTemplateDO::getTemplateName, pageReqVO.getTemplateName(), StringUtils.isNotBlank(pageReqVO.getTemplateName()))
                 .eq(DashboardTemplateDO::getHot, pageReqVO.getHot(), pageReqVO.getHot() != null)
-                .eq(DashboardTemplateDO::getAppId, pageReqVO.getAppId(), pageReqVO.getAppId() != null)
+                .eq(DashboardTemplateDO::getAppId, ApplicationManager.getApplicationId())
                 .orderBy(DashboardTemplateDO::getCreateTime, false);
 
         Page<DashboardTemplateDO> page = dashboardTemplateMapper.paginate(pageReqVO.getPageNo(), pageReqVO.getPageSize(), queryWrapper);

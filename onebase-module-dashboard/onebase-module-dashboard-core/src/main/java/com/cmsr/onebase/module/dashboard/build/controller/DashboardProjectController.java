@@ -4,6 +4,7 @@ import cn.hutool.core.date.DateUtil;
 import com.cmsr.onebase.framework.common.annotaion.ApiSignIgnore;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.dashboard.build.common.base.BaseController;
 import com.cmsr.onebase.module.dashboard.build.common.config.V2Config;
@@ -69,7 +70,7 @@ public class DashboardProjectController extends BaseController {
         }
         Page<DashboardProject> page = new Page<>(tablepar.getPage(), tablepar.getLimit());
         QueryWrapper queryWrapper = new QueryWrapper()
-                .eq(DashboardProject::getAppId, tablepar.getAppId(), tablepar.getAppId() != null)
+                .eq(DashboardProject::getAppId, ApplicationManager.getApplicationId())
                 .like(DashboardProject::getProjectName, tablepar.getSearchText(), StringUtils.isNotBlank(tablepar.getSearchText()))
                 .orderBy(DashboardProject::getCreateTime, false);
 
