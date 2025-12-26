@@ -268,21 +268,12 @@ const LoginContent: React.FC = () => {
         saveRememberMe(values.mobile!, rememberMe);
 
         Toast.success('登录成功');
-        const redirectURL = getHashQueryParam('redirectURL');
         if (response.userAppRelationFlag) {
           setVisibleConfirmInfo(true);
           return;
-        } else if (redirectURL) {
-          if (!appId) {
-            //企业登录
-            navigate(`/onebase/${tenantId}/runtime-home`);
-          } else {
-            //saas模式 或者inner模式
-            navigate(`/onebase/${appId}/${tenantId}/runtime-home`);
-          }
         } else {
-          // 跳转到首页
-          navigate(`/onebase/${appId}/${tenantId}/runtime-home/`);
+          // 跳转
+          goPage();
         }
         return;
       } else {
@@ -295,6 +286,23 @@ const LoginContent: React.FC = () => {
       Toast.error(error.message || '登录失败');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // 登录完成 跳转页面
+  const goPage = () => {
+    const redirectURL = getHashQueryParam('redirectURL');
+    if (redirectURL) {
+      if (!appId) {
+        //企业登录
+        navigate(`/onebase/${tenantId}/runtime-home`);
+      } else {
+        //saas模式 或者inner模式
+        navigate(`/onebase/${appId}/${tenantId}/runtime-home`);
+      }
+    } else {
+      // 跳转到首页
+      navigate(`/onebase/${appId}/${tenantId}/runtime-home/`);
     }
   };
 
@@ -420,18 +428,26 @@ const LoginContent: React.FC = () => {
       {/* 确认页面 */}
       <ConfirmInfoForm
         visible={visibleConfirmInfo}
-        closePopup={() => setVisibleConfirmInfo(false)}
+        onCancel={() => setVisibleConfirmInfo(false)}
+        onOk={() => {
+          setVisibleConfirmInfo(false);
+          goPage();
+        }}
         tenantId={tenantId}
         appId={appId}
       />
 
-      {/* 注册页面 */}
+      {/* 补充用户信息页面 */}
       <RegisterForm
         visible={visibleRegister}
         appId={appId}
         tenantId={tenantId}
         mobile={userMobile}
-        closePopup={() => setVisibleRegister(false)}
+        onCancel={() => setVisibleRegister(false)}
+        onOk={() => {
+          setVisibleRegister(false);
+          goPage();
+        }}
       />
     </div>
   );
