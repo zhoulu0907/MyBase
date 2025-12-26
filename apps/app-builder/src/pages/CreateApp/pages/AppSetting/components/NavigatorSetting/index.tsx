@@ -97,7 +97,7 @@ const NavigatorSetting = (props: IProps) => {
       <div className={styles.navigatorSetting}>
         <div className={styles.moduleTitle}>web端导航设置</div>
 
-        <Form.Item label="web端首页" field="webHomeType" initialValue="default">
+        <Form.Item label="web端首页" field="webHomeType" initialValue="default" style={{ marginBottom: 10 }}>
           <Radio.Group direction="vertical">
             <Radio value="default">
               <span>默认首页</span>
@@ -166,7 +166,7 @@ const NavigatorSetting = (props: IProps) => {
       <div className={styles.navigatorSetting}>
         <div className={styles.moduleTitle}>移动端导航设置</div>
 
-        <Form.Item label="移动端首页" field="mobileHomeType" initialValue="default">
+        <Form.Item label="移动端首页" field="mobileHomeType" initialValue="default" style={{ marginBottom: 10 }}>
           <Radio.Group direction="vertical">
             <Radio value="default">
               <span>默认首页</span>
