@@ -42,7 +42,7 @@ import { currentEditorSignal } from '@onebase/ui-kit/src/signals/current_editor'
 import { initGlobalState, loadMicroApp, type MicroApp } from 'qiankun';
 
 import { Divider, Form } from '@arco-design/web-react';
-import { ENTITY_TYPE, ENTITY_TYPE_VALUE, type AppEntityField } from '@onebase/app';
+import { ENTITY_TYPE, ENTITY_TYPE_VALUE, type AppEntityField, menuSignal } from '@onebase/app';
 import { EditMode, getHashQueryParam, getMobileEditorURL } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
 import 'react-grid-layout/css/styles.css';
@@ -53,6 +53,7 @@ export default function EditorWorkspace() {
   const [showEmpty, setShowEmpty] = useState(true);
   const [isFormEditor, setIsFormEditor] = useState(false);
   const [pageSetId, setPageSetId] = useState('');
+  const { curMenu } = menuSignal;
 
   useEffect(() => {
     const pageSetId = getHashQueryParam('pageSetId');
@@ -721,6 +722,7 @@ export default function EditorWorkspace() {
                     cpType={cp.type}
                     runtime={false}
                     pageComponentSchema={pageComponentSchemas[cp.id]}
+                    pageSetType={curMenu?.value?.pagesetType}
                   />
 
                   {curComponentID === cp.id && showDeleteButton && (

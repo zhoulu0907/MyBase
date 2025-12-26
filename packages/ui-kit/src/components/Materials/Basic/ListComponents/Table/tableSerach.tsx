@@ -7,6 +7,7 @@ import { COMPONENT_MAP, FORM_COMPONENT_TYPES, FormComp, getComponentSchema } fro
 import { useFormEditorSignal } from 'src/signals/page_editor';
 import { v4 as uuidv4 } from 'uuid';
 import { DEFAULT_VALUE_TYPES, STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
+import { PageType } from '@onebase/app';
 import './index.css';
 
 interface TableSearchConfig {
@@ -15,12 +16,13 @@ interface TableSearchConfig {
   runtime: boolean;
   onSearch?: () => void;
   onReset?: () => void;
+  pageSetType?:number
 }
 
 const TableSearch = memo((props: TableSearchConfig) => {
   useSignals();
 
-  const { searchItems, labelColSpan, runtime, onSearch, onReset } = props;
+  const { searchItems, labelColSpan, runtime, onSearch, onReset, pageSetType } = props;
   const count = searchItems?.length || 0;
   const remainder = count % 4;
   const placeholderCount = remainder === 0 ? 3 : 4 - remainder - 1;
@@ -30,13 +32,26 @@ const TableSearch = memo((props: TableSearchConfig) => {
   const { mainEntity } = useAppEntityStore();
 
   const renderSearchItem = (item: any) => {
-    const fieldType = mainEntity.fields.find((field) => field.fieldName === item.value)?.fieldType;
+    const copyMainEntity = { ...mainEntity };
+
+    if(pageSetType === PageType.BPM){
+      const bpmOther:any = [
+        { displayName: '流程标题', fieldName: 'bpm_title', fieldType: 'TEXT', },
+        { displayName: '发起人', fieldName: 'bpm_initiator_id', fieldType: 'USER' },
+        { displayName: '发起时间', fieldName: 'bpm_submit_time', fieldType: 'DATETIME' },
+        { displayName: '流程状态', fieldName: 'bpm_status', fieldType: 'SELECT' },
+        { displayName: '当前节点', fieldName: 'bpm_current_node', fieldType: 'SELECT' }
+      ];
+      copyMainEntity.fields = [...copyMainEntity.fields, ...bpmOther];
+    }
+    
+    const fieldType = copyMainEntity.fields.find((field) => field.fieldName === item.value)?.fieldType;
 
     if (!fieldType) {
       return;
     }
 
-    const dataField = [mainEntity.tableName, item.value];
+    const dataField = [copyMainEntity.tableName, item.value];
 
     const cpType = COMPONENT_MAP[fieldType as any];
 

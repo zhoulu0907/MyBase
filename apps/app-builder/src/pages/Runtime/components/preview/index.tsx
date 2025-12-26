@@ -202,7 +202,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
     // }
     // return res;
   };
-
   return (
     <div className={styles.previewPage}>
       <div className={styles.content}>
@@ -229,6 +228,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
                     runtime={runtime}
                     preview={preview}
                     showFromPageData={showFromPageData}
+                    pageSetType={pagesetType}
                   />
                 </div>
               )}
