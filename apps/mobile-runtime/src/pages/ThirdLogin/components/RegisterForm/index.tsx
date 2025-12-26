@@ -96,61 +96,63 @@ const RegisterForm: React.FC<IRegisterProps> = ({ visible, appId, mobile, tenant
   };
 
   const handleSubmit = async () => {
-    formRef.current?.form.validateFields().then(async (valid) => {
-      // 表单验证通过
-      if (valid) {
-        const values = formRef.current?.form.getFieldsValue();
-        if (!values) {
-          return;
-        }
-        setLoading(true);
-
-        const headers = {
-          'X-Tenant-Id': tenantId
-        };
-        const password = await sm2Encrypt(getPublicKey(), values?.password || '');
-
-        const deviceId = await getOrCreateDeviceInfo();
-
-        const registerParams: thirdUserRegisterParams = {
-          appId: appId,
-          mobile: filterSpace(mobile),
-          email: filterSpace(values?.email),
-          password: password,
-          nickName: filterSpace(values?.nickName),
-          deviceId: deviceId
-        };
-        const response = await thirdUserRegisterApi(registerParams, headers);
-
-        if (response) {
-          if (appId && tenantId) {
-            TokenManager.setCurIdentifyId(`${appId}_${tenantId}`);
-          } else {
-            if (appId) {
-              TokenManager.setCurIdentifyId(appId);
-            }
-            if (tenantId) {
-              TokenManager.setCurIdentifyId(tenantId);
-            }
-          }
-
-          TokenManager.setToken(
-            {
-              userId: response.userId,
-              accessToken: response.accessToken,
-              refreshToken: response.refreshToken,
-              expiresTime: response.expiresTime,
-              tenantId: response.tenantId,
-              corpId: response.corpId,
-              loginSource: response.loginSource,
-              loginURL: window.location.href // 当前地址
-            },
-            false
-          );
-          onOk();
-        }
+    try {
+      await formRef.current?.form.validateFields();
+      const values = formRef.current?.form.getFieldsValue();
+      if (!values) {
+        return;
       }
-    });
+      setLoading(true);
+
+      const headers = {
+        'X-Tenant-Id': tenantId
+      };
+      const password = await sm2Encrypt(getPublicKey(), values?.password || '');
+
+      const deviceId = await getOrCreateDeviceInfo();
+
+      const registerParams: thirdUserRegisterParams = {
+        appId: appId,
+        mobile: filterSpace(mobile),
+        email: filterSpace(values?.email),
+        password: password,
+        nickName: filterSpace(values?.nickName),
+        deviceId: deviceId
+      };
+      const response = await thirdUserRegisterApi(registerParams, headers);
+
+      if (response) {
+        if (appId && tenantId) {
+          TokenManager.setCurIdentifyId(`${appId}_${tenantId}`);
+        } else {
+          if (appId) {
+            TokenManager.setCurIdentifyId(appId);
+          }
+          if (tenantId) {
+            TokenManager.setCurIdentifyId(tenantId);
+          }
+        }
+
+        TokenManager.setToken(
+          {
+            userId: response.userId,
+            accessToken: response.accessToken,
+            refreshToken: response.refreshToken,
+            expiresTime: response.expiresTime,
+            tenantId: response.tenantId,
+            corpId: response.corpId,
+            loginSource: response.loginSource,
+            loginURL: window.location.href // 当前地址
+          },
+          false
+        );
+        onOk();
+      }
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

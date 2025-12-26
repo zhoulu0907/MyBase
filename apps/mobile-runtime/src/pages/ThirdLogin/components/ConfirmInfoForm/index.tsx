@@ -54,26 +54,28 @@ const ConfirmInfoForm: React.FC<IConfirmInfoProps> = ({ visible, appId, tenantId
   };
 
   const handleSubmit = async () => {
-    formRef.current?.form.validateFields().then(async (valid) => {
-      // 表单验证通过
-      if (valid) {
-        const values = formRef.current?.form.getFieldsValue();
-        if (!values) {
-          return;
-        }
-        setLoading(true);
-        const params: createExternalUserAppParams = {
-          userId: tokenInfo?.userId || '',
-          applicationIdList: [appId],
-          email: values?.email || '',
-          nickName: values?.nickName || ''
-        };
-        const response = await createExternalUserApp(params);
-        if (response) {
-          onOk();
-        }
+    try {
+      await formRef.current?.form.validateFields();
+      const values = formRef.current?.form.getFieldsValue();
+      if (!values) {
+        return;
       }
-    });
+      setLoading(true);
+      const params: createExternalUserAppParams = {
+        userId: tokenInfo?.userId || '',
+        applicationIdList: [appId],
+        email: values?.email || '',
+        nickName: values?.nickName || ''
+      };
+      const response = await createExternalUserApp(params);
+      if (response) {
+        onOk();
+      }
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
