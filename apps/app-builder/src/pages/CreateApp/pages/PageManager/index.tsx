@@ -592,10 +592,7 @@ const PageManagerPage: FC = () => {
     if (curMenu.value?.pagesetType === dashboardPageType) {
       const dashboardInfo = await listPageView({ pageSetId });
       const dashboardId = dashboardInfo.pages && dashboardInfo.pages.length > 0 ? dashboardInfo.pages[0].id : null;
-      window.open(
-        `http://s25029301301.dev.internal.virtueit.net:81/v0/appdashboard/#/chart/home/${dashboardId}/${appId}/${dashboardType}`,
-        '_blank'
-      );
+      window.open(`${resourceUrl}chart/home/${dashboardId}/${appId}/${dashboardType}`, '_blank');
     } else {
       const editorType =
         curPage.value?.pageSetType === PageType.WORKBENCH ? EDITOR_TYPES.WORKBENCH_EDITOR : EDITOR_TYPES.FORM_EDITOR;
