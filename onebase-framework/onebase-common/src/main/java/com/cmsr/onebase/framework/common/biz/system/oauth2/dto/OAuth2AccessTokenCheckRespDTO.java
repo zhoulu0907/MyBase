@@ -43,4 +43,10 @@ public class OAuth2AccessTokenCheckRespDTO implements Serializable {
     @InEnum(value = RunModeEnum.class, message = "运行模式值必须是{value}")
     private String runMode;
 
+    /**
+     *  PC = 'pc',  MOBILE = 'mobile',
+     */
+    @Schema(description = "登录来源", example = "pc/mobile")
+    private String loginPlatform;
+
 }
