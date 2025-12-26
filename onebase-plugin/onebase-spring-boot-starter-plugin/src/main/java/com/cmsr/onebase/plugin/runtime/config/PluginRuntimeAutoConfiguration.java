@@ -300,7 +300,7 @@ public class PluginRuntimeAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    public PluginControllerRegistrar pluginControllerRegistrar(RequestMappingHandlerMapping handlerMapping) {
+    public PluginControllerRegistrar pluginControllerRegistrar(@Lazy RequestMappingHandlerMapping handlerMapping) {
         return new PluginControllerRegistrar(handlerMapping);
     }
 

@@ -54,6 +54,13 @@ public class PluginControllerRegistrar {
             return;
         }
 
+        // 防止重复注册：如果插件的 Controller 已经注册过，直接返回
+        if (pluginMappings.containsKey(pluginId)) {
+            log.warn("插件 {} 的 Controller 已注册，跳过重复注册（已注册 {} 个路由）",
+                    pluginId, pluginMappings.get(pluginId).size());
+            return;
+        }
+
         log.info("开始注册插件 {} 的 {} 个 Controller", pluginId, handlers.size());
 
         List<RequestMappingInfo> mappingInfos = new ArrayList<>();
@@ -103,6 +110,14 @@ public class PluginControllerRegistrar {
         for (Method method : controllerClass.getMethods()) {
             RequestMappingInfo mappingInfo = createMappingInfo(method, classPaths);
             if (mappingInfo != null) {
+                // 检查路由是否已经注册（防止与 Spring Boot 自动注册冲突）
+                if (handlerMapping.getHandlerMethods().containsKey(mappingInfo)) {
+                    log.debug("路由 {} 已存在，跳过注册（可能已被 Spring Boot 自动注册）",
+                            mappingInfo.getPatternValues());
+                    mappingInfos.add(mappingInfo); // 仍然记录，用于后续卸载
+                    continue;
+                }
+
                 // 注册到 Spring MVC
                 handlerMapping.registerMapping(mappingInfo, controller, method);
                 mappingInfos.add(mappingInfo);

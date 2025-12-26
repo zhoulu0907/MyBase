@@ -180,38 +180,6 @@ public class PluginManagementController {
         return success(new PluginBatchOperationRespVO(items));
     }
 
-    @PostMapping("/upload")
-    @Operation(summary = "上传并加载插件ZIP/JAR包")
-    public CommonResult<PluginLoadRespVO> uploadPlugin(@RequestParam("file") MultipartFile file) throws IOException {
-        if (file.isEmpty()) {
-            return CommonResult.error(400, PluginErrorMessages.UPLOAD_FILE_EMPTY);
-        }
-        
-        String originalFilename = file.getOriginalFilename();
-        if (originalFilename == null || (!originalFilename.endsWith(".zip") && !originalFilename.endsWith(".jar"))) {
-            return CommonResult.error(400, PluginErrorMessages.UPLOAD_FILE_FORMAT_ERROR);
-        }
-        
-        Path pluginsDir = Paths.get("plugins");
-        if (!Files.exists(pluginsDir)) {
-            Files.createDirectories(pluginsDir);
-        }
-        
-        Path targetPath = pluginsDir.resolve(originalFilename);
-        Files.copy(file.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
-        
-        String pluginId = pluginManager.loadPlugin(targetPath);
-        
-        PluginLoadRespVO respVO = new PluginLoadRespVO();
-        respVO.setPluginId(pluginId);
-        respVO.setPluginPath(targetPath.toString());
-        respVO.setState(pluginManager.getPlugin(pluginId)
-            .map(w -> w.getPluginState().toString())
-            .orElse("UNKNOWN"));
-        
-        return success(respVO);
-    }
-
     /**
      * 检查插件是否存在
      *
