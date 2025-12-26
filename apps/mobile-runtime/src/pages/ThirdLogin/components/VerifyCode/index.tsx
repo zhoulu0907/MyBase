@@ -1,7 +1,7 @@
 import safeIcon from '@/assets/images/login/safe.svg';
 import { Tabs, Form, Input, Button, Toast } from '@arco-design/mobile-react';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import styles from '../../index.module.less';
+import styles from './index.module.less';
 
 interface VerifyInputProps {
   value?: string;
@@ -24,7 +24,7 @@ interface SendVerifyCodeRequest {
   sendType: string;
 }
 
-const VerifyCode: React.FC<VerifyInputProps> = ({value,userMobile,verifyType,sendVerifyCode,onChange}) => {
+const VerifyCode: React.FC<VerifyInputProps> = ({ value, userMobile, verifyType, sendVerifyCode, onChange }) => {
   const handleChange = (newValue: string) => {
     onChange && onChange(newValue);
   };
@@ -122,6 +122,7 @@ const VerifyCode: React.FC<VerifyInputProps> = ({value,userMobile,verifyType,sen
 
   return (
     <Input
+      className={styles.verifyCode}
       label={<img src={safeIcon} alt="logo" className={styles.loginFormIcon} />}
       suffix={
         <Button
