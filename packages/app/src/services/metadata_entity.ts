@@ -229,10 +229,19 @@ export const getRelationById = (id: string) => {
  * @param entityId 实体ID
  * @returns 实体名称及其关联的子表信息
  */
-export const getEntityFieldsWithChildren = (entityId: string) => {
-  return (isRuntimeEnv() ? runtimeMetadataService : metadataService).post(
-    '/entity-relationship/entity-with-children?entityId=' + entityId
-  );
+export const getEntityFieldsWithChildren = (
+  entityId: string,
+  fieldType?: string,
+  operator?: string
+) => {
+  let url = '/entity-relationship/entity-with-children?entityId=' + entityId;
+  if (fieldType) {
+    url += '&fieldType=' + fieldType;
+  }
+  if (operator) {
+    url += '&operator=' + operator;
+  }
+  return (isRuntimeEnv() ? runtimeMetadataService : metadataService).post(url);
 };
 
 /**

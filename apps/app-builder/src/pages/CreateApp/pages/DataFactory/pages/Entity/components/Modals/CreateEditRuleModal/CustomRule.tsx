@@ -49,7 +49,7 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({
   const [filterFieldCheckType, setFilterFieldCheckType] = useState<EntityFieldValidationTypes[]>([]);
   // 创建默认条件行
   const createDefaultConditionRow = (): ConditionRow => ({
-    fieldUuid: '',
+    fieldId: '',
     operator: 'equals',
     valueType: 'custom',
     fieldValue: '',
@@ -70,7 +70,7 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({
         const conditions = res?.valueRules.map((item) => {
           return {
             conditions: item.map((item) => ({
-              fieldUuid: item.fieldUuid,
+              fieldId: item.fieldId,
               op: item.operator,
               operatorType: item.valueType,
               value: item.fieldValue
@@ -98,7 +98,7 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({
         rgName: values.rgName,
         valueRules: values.filterCondition.map((item) =>
           item.conditions.map((item) => ({
-            fieldUuid: item.fieldUuid,
+            fieldId: item.fieldId,
             operator: item.op,
             valueType: item.operatorType,
             fieldValue: item.value
@@ -148,7 +148,7 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({
         title: res.entityName,
         children: res?.parentFields.map((item) => {
           return {
-            key: item.fieldUuid,
+            key: item.fieldId,
             title: item.displayName,
             fieldType: item.fieldType
           };
@@ -168,7 +168,7 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({
         key: entity.childEntityId,
         children: entity.childFields.map((item) => ({
           title: item.displayName,
-          key: item.fieldUuid,
+          key: item.fieldId,
           fieldType: item.fieldType
         }))
       };
@@ -176,13 +176,64 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({
     setAllOptions([...parentFields, ...childFields]);
     setParentOptions(parentFields);
 
-    getFieldCheckType(res?.parentFields?.map((item) => item.fieldUuid));
+    getFieldCheckType(res?.parentFields?.map((item) => item.fieldId));
   };
 
   // 批量获取字段可选校验类型
   const getFieldCheckType = async (fieldIds: string[]) => {
     const res = await getFieldCheckTypeApi(fieldIds);
     setFilterFieldCheckType(res);
+  };
+
+  // 根据字段类型和操作符动态加载变量选项
+  const loadVariableOptions = async (fieldType: string, operator?: string) => {
+    try {
+      // 如果字段类型和操作符都存在，则调用接口获取变量列表
+      if (fieldType && operator) {
+        const res = await getEntityFieldsWithChildren(entity.id, fieldType, operator);
+
+        // 处理主表字段
+        const parentFields = [
+          {
+            key: res.entityId,
+            title: res.entityName,
+            children:
+              res?.parentFields?.map((item: any) => {
+                return {
+                  key: item.fieldId,
+                  title: item.displayName,
+                  fieldType: item.fieldType
+                };
+              }) || []
+          }
+        ];
+
+        // 处理子表字段
+        const rawChildEntities = res?.childEntities || [];
+        const uniqueChildEntities = Array.from(
+          new Map(rawChildEntities.map((entity: any) => [entity.childEntityId, entity])).values()
+        );
+
+        const childFields = uniqueChildEntities.map((entity: any) => {
+          return {
+            title: entity.childEntityName,
+            key: entity.childEntityId,
+            children:
+              entity.childFields?.map((item: any) => ({
+                title: item.displayName,
+                key: item.fieldId,
+                fieldType: item.fieldType
+              })) || []
+          };
+        });
+
+        setAllOptions([...parentFields, ...childFields]);
+      }
+    } catch (error) {
+      console.error('加载变量选项失败:', error);
+      // 出错时加载默认选项
+      await loadFieldOptions();
+    }
   };
 
   // 初始化表单数据
@@ -230,6 +281,7 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({
             fields={parentOptions}
             entityFieldValidationTypes={filterFieldCheckType}
             variableOptions={allOptions}
+            onFieldOrOperatorChange={loadVariableOptions}
           />
         </Form.Item>
 
