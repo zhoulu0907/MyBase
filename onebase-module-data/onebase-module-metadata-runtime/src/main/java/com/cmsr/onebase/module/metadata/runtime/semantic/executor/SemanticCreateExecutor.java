@@ -1,17 +1,14 @@
 package com.cmsr.onebase.module.metadata.runtime.semantic.executor;
 
-import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticDataMethodOpEnum;
+import com.cmsr.onebase.framework.common.util.object.ObjectUtils;
+import com.cmsr.onebase.framework.uid.UidGenerator;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticRecordDTO;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticDataMethodOpEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticMethodCodeEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.service.SemanticDataCrudService;
-import com.cmsr.onebase.module.metadata.core.semantic.strategy.SemanticDataIntegrityValidator;
-import com.cmsr.onebase.module.metadata.core.semantic.strategy.SemanticMergeRecordAssembler;
-import com.cmsr.onebase.module.metadata.core.semantic.strategy.SemanticPermissionContextLoader;
-import com.cmsr.onebase.module.metadata.core.semantic.strategy.SemanticPermissionValidator;
-import com.cmsr.onebase.module.metadata.core.semantic.strategy.SemanticProcessLogger;
+import com.cmsr.onebase.module.metadata.core.semantic.strategy.*;
 import com.cmsr.onebase.module.metadata.core.semantic.strategy.validation.SemanticValidationManager;
 import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticMergeBodyVO;
-import com.cmsr.onebase.framework.uid.UidGenerator;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -68,7 +65,10 @@ public class SemanticCreateExecutor {
             Map<String, Object> result = semanticDataCrudService.readById(record);
 
             //
-            semanticDataCrudService.deleteByDraftId(record, draftId);
+            if (!ObjectUtils.isBlank(draftId)) {
+                semanticDataCrudService.deleteByDraftId(record, draftId);
+            }
+
 
             // 8) 日志记录：当前类 logProcess
             semanticProcessLogger.log(record);
