@@ -2,6 +2,7 @@ import { NotFoundPage } from '@onebase/common';
 import { Navigate, Route, HashRouter as Router, Routes } from 'react-router-dom';
 import Login from './pages/Login';
 import ThirdLogin from './pages/ThirdLogin';
+import ForgetPassword from './pages/ForgetPassword';
 import Runtime from './pages/Runtime';
 import RuntimeHome from './pages/RuntimeHome';
 import RuntimeHomeProtocol from './pages/RuntimeHome/components/Protocol';
@@ -15,8 +16,9 @@ function AppContent() {
     <Routes>
       {/* 登录页面不需要认证 */}
       <Route path="/login" element={<Login />} />
-      <Route path='/third/login' element={<ThirdLogin />} />
-      
+      <Route path="/third/login" element={<ThirdLogin />} />
+      <Route path="/onebase/forget-password" element={<ForgetPassword />} />
+
       <Route path="/onebase/runtime/" element={<Runtime />} />
 
       <Route path="/onebase/:appId/:tenantId/runtime-home/" element={<RuntimeHome />} />
