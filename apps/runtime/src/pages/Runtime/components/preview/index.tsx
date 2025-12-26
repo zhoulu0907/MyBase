@@ -148,6 +148,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
       await form.validate();
     }
 
+    const draftId = form.getFieldValue('draftId');
+
     !isSave && setSubmitLoading(true);
     const fields = form.getFieldsValue();
 
@@ -293,7 +295,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
           if (isDraft) {
             res = await createDraft(tableName, menuId, req);
           } else {
-            res = await dataMethodCreateV2(tableName, menuId, req);
+            res = await dataMethodCreateV2(tableName, menuId, req, draftId);
           }
 
           console.log(res);

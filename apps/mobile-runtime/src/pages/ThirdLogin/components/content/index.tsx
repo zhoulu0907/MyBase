@@ -1,36 +1,37 @@
-import logoIcon from '@/assets/images/logo-icon.svg';
-import phoneIcon from '@/assets/images/login/phone.svg';
 import passwordIcon from '@/assets/images/login/password.svg';
-import { Tabs, Form, Input, Button, Toast } from '@arco-design/mobile-react';
+import phoneIcon from '@/assets/images/login/phone.svg';
+import logoIcon from '@/assets/images/logo-icon.svg';
+import { useRememberMe } from '@/hooks/useRememberMe';
+import { Button, Form, Input, Tabs, Toast } from '@arco-design/mobile-react';
 import { type IFormInstance } from '@arco-design/mobile-react/esm/form';
 import { ValidatorType } from '@arco-design/mobile-utils';
-import { useRememberMe } from '@/hooks/useRememberMe';
-import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { getApplicationLeast, type Application } from '@onebase/app';
 import {
-  sendVerifyCodeApi,
-  getCaptchaApi,
+  DynamicIcon,
+  getHashQueryParam,
+  getOrCreateDeviceInfo,
+  getPublicKey,
+  sm2Encrypt,
+  TokenManager,
+  type SliderCaptchaRef
+} from '@onebase/common';
+import {
   checkCaptchaApi,
+  getCaptchaApi,
+  LoginPlatform,
   runtimeThirdLogin,
+  sendVerifyCodeApi,
   type RuntimeThirdLoginRequest,
   type ThirdUserLoginResponse
 } from '@onebase/platform-center';
 import { appIconMap } from '@onebase/ui-kit';
-import {
-  DynamicIcon,
-  getOrCreateDeviceInfo,
-  sm2Encrypt,
-  TokenManager,
-  getPublicKey,
-  getHashQueryParam,
-  type SliderCaptchaRef
-} from '@onebase/common';
-import VerifyCode from '../VerifyCode';
-import ConfirmInfoForm from '../ConfirmInfoForm';
-import RegisterForm from '../RegisterForm';
+import React, { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { SliderCaptcha } from '../../../Login/components/Captcha';
 import styles from '../../index.module.less';
+import ConfirmInfoForm from '../ConfirmInfoForm';
+import RegisterForm from '../RegisterForm';
+import VerifyCode from '../VerifyCode';
 
 interface FormRef {
   dom: HTMLFormElement;
@@ -234,7 +235,8 @@ const LoginContent: React.FC = () => {
         loginType: values.loginType,
         mobile: values.mobile,
         captchaVerification: captchaVerification,
-        deviceId: values.deviceId
+        deviceId: values.deviceId,
+        loginPlatform: LoginPlatform.MOBILE
       };
       if (values.loginType === 'password' && values.password) {
         // 密码加密
