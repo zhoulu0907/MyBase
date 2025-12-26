@@ -11,7 +11,8 @@ import {
   editDashboardInfoApi,
   deleteDashboardApi,
   saveDashboardAsTemplateApi,
-  getDashboardIdApi
+  getDashboardIdApi,
+  getDashboardIdFromTemplateApi
 } from '@onebase/app';
 import { getDashBoardURL, TokenManager } from '@onebase/common';
 const FormItem = Form.Item;
@@ -79,6 +80,11 @@ const Dashboard: FC = () => {
   };
   const handleCreateOk = async (id?: string) => {
     console.log('新建大屏 id:', id);
+    if (id) {
+      const dashboardId = await getDashboardIdFromTemplateApi(id);
+      console.log('dashboardId:', dashboardId);
+      window.open(`${resourceUrl}chart/home/${dashboardId}/${appId}/${dashboardType}`, '_blank');
+    }
     if (!id && appId && tenantId) {
       const params = {
         projectName: '新大屏',
@@ -88,7 +94,7 @@ const Dashboard: FC = () => {
       const dashboardId = await getDashboardIdApi(params);
       window.open(`${resourceUrl}chart/home/${dashboardId}/${appId}/${dashboardType}`, '_blank');
     }
-    window.open(`${resourceUrl}chart/home/${id}/${appId}/${dashboardType}`, '_blank');
+    // window.open(`${resourceUrl}chart/home/${id}/${appId}/${dashboardType}`, '_blank');
     setVisibleCreateScreenForm('');
     getDashboardList();
   };

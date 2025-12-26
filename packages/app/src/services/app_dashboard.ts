@@ -5,7 +5,10 @@ import { DashboardListParams, DashboardTemplateListParams, editDashboardInfoPara
 export const getDashboardTemplateListApi = (params: DashboardTemplateListParams) => {
   return dashboardService.get(`/template/page`, params); 
 };
-
+//从模版获取大屏id
+export const getDashboardIdFromTemplateApi = (params: string) => {
+  return dashboardService.post(`/create-dashboard-by-template?templateId=${params}`);
+};
 // 获取大屏列表接口 
 export const getDashboardListApi = (params: DashboardListParams) => {
   return dashboardService.get('/list', params);

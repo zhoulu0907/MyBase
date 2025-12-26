@@ -55,6 +55,7 @@ import MyMenuItem from './components/MyMenuItem';
 import TaskCenterPage from './components/TaskCenter/TaskCenterPage';
 import TaskCenterSide from './components/TaskCenter/taskTreeSide';
 import styles from './index.module.less';
+import { getDashboardIdFromTemplateApi } from '@onebase/app/src/services';
 
 const TreeNode = Tree.Node;
 const MenuItem = Menu.Item;
@@ -430,34 +431,41 @@ const PageManagerPage: FC = () => {
   const handleScreenCreate = async (id?: string, screenMethod?: string) => {
     createForm.validate(async (error) => {
       if (error !== null) return;
-      const req: CreateApplicationMenuReq = {
-        applicationId: curAppId,
-        parentId:
-          createForm.getFieldValue('parentId') === RootParentPage.id ? '' : createForm.getFieldValue('parentId'),
-        pageSetType: dashboardPageType,
-        menuName: createForm.getFieldValue('menuName'),
-        menuType: MenuType.PAGE,
-        menuIcon: createForm.getFieldValue('menuIcon'),
-        entityUuid: '',
-        createDashboardType: screenMethod,
-        dashboardId: id
-      };
-
-      const menuResp = await createApplicationMenu(req);
-      if (menuResp) {
-        Message.success('创建成功');
-      }
-      setVisibleCreateScreenForm('');
-      getMenuList(undefined, menuResp.id);
-
-      const pageSetId = await getPageSetId({
-        menuId: menuResp.id
-      });
-
-      const dashboardInfo = await listPageView({ pageSetId });
-      const dashboardId = dashboardInfo.pages && dashboardInfo.pages.length > 0 ? dashboardInfo.pages[0].id : null;
-      if (dashboardId) {
+      console.log('创建大屏参数 id、screenMethod：', id, screenMethod);
+      if (id) {
+        const dashboardId = await getDashboardIdFromTemplateApi(id);
+        console.log('dashboardId:', dashboardId);
         window.open(`${resourceUrl}chart/home/${dashboardId}/${appId}/${dashboardType}`, '_blank');
+      } else {
+        const req: CreateApplicationMenuReq = {
+          applicationId: curAppId,
+          parentId:
+            createForm.getFieldValue('parentId') === RootParentPage.id ? '' : createForm.getFieldValue('parentId'),
+          pageSetType: dashboardPageType,
+          menuName: createForm.getFieldValue('menuName'),
+          menuType: MenuType.PAGE,
+          menuIcon: createForm.getFieldValue('menuIcon'),
+          entityUuid: '',
+          createDashboardType: screenMethod,
+          dashboardId: id
+        };
+
+        const menuResp = await createApplicationMenu(req);
+        if (menuResp) {
+          Message.success('创建成功');
+        }
+        setVisibleCreateScreenForm('');
+        getMenuList(undefined, menuResp.id);
+
+        const pageSetId = await getPageSetId({
+          menuId: menuResp.id
+        });
+
+        const dashboardInfo = await listPageView({ pageSetId });
+        const dashboardId = dashboardInfo.pages && dashboardInfo.pages.length > 0 ? dashboardInfo.pages[0].id : null;
+        if (dashboardId) {
+          window.open(`${resourceUrl}chart/home/${dashboardId}/${appId}/${dashboardType}`, '_blank');
+        }
       }
     });
   };
