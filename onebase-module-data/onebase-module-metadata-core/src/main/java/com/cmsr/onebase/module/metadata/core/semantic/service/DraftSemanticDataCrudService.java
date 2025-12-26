@@ -1164,7 +1164,7 @@ public class DraftSemanticDataCrudService {
 
         Long userId = recordDTO.getRecordContext().getLoginUserCtx().getUserId();
         // 构建主键条件并执行删除（软删优先）
-        QueryWrapper qw = QueryWrapper.create().where(new QueryColumn("creator").eq(userId));
+        QueryWrapper qw = QueryWrapper.create().where(new QueryColumn("creator").eq(userId.toString()));
         int resultCount = 0;
         if (hasDeletedField(entity.getFields())) {
             resultCount = draftDynamicMetadataRepository.softDeleteByQuery(entity.getTableName(), qw);
@@ -1178,7 +1178,7 @@ public class DraftSemanticDataCrudService {
                     continue;
                 }
                 if (RelationshipTypeEnum.isSubtableRelationship(c.getRelationshipType().getRelationshipType())) {
-                    QueryWrapper cq = QueryWrapper.create().where(new QueryColumn("creator").eq(userId));
+                    QueryWrapper cq = QueryWrapper.create().where(new QueryColumn("creator").eq(userId.toString()));
                     boolean hasDel = hasDeletedField(c.getRelationAttributes());
                     if (hasDel) {
                         draftDynamicMetadataRepository.softDeleteByQuery(c.getTargetEntityTableName(), cq);
