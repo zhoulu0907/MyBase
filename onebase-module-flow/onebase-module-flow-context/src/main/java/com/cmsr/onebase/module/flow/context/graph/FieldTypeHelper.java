@@ -7,8 +7,10 @@ import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticFieldTyp
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @Author：huangjie
@@ -75,6 +77,26 @@ public class FieldTypeHelper {
         } else {
             return fieldKey;
         }
+    }
+
+    public static Set<String> extractTableNames(List<Conditions> filterCondition) {
+        if (CollectionUtils.isEmpty(filterCondition)) {
+            return Set.of();
+        }
+        Set<String> tableNames = new HashSet<>();
+        for (Conditions conditions : filterCondition) {
+            for (ConditionItem condition : conditions.getConditions()) {
+                String fieldKey = condition.getFieldKey();
+                if (StringUtils.isEmpty(fieldKey)) {
+                    continue;
+                }
+                String[] strings = StringUtils.split(fieldKey, '.');
+                if (strings.length == 3) {
+                    tableNames.add(strings[1]);
+                }
+            }
+        }
+        return tableNames;
     }
 
 }
