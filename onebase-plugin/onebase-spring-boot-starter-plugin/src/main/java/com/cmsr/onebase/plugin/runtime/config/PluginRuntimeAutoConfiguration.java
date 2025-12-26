@@ -300,16 +300,23 @@ public class PluginRuntimeAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    public PluginControllerRegistrar pluginControllerRegistrar(@Lazy RequestMappingHandlerMapping handlerMapping) {
+    public PluginControllerRegistrar pluginControllerRegistrar(RequestMappingHandlerMapping handlerMapping) {
         return new PluginControllerRegistrar(handlerMapping);
     }
 
     /**
      * 插件安全拦截器
+     * <p>
+     * 使用 @Lazy 注入 OneBasePluginManager,打破循环依赖:
+     * requestMappingHandlerMapping → pluginSecurityInterceptor →
+     * oneBasePluginManager →
+     * pluginControllerRegistrar → requestMappingHandlerMapping
+     * </p>
      */
     @Bean
     @ConditionalOnMissingBean
-    public PluginSecurityInterceptor pluginSecurityInterceptor(OneBasePluginManager oneBasePluginManager,
+    public PluginSecurityInterceptor pluginSecurityInterceptor(
+            @Lazy OneBasePluginManager oneBasePluginManager, // 使用 @Lazy 打破循环
             PluginProperties properties) {
         return new PluginSecurityInterceptor(oneBasePluginManager, properties);
     }

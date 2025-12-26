@@ -332,28 +332,29 @@ public class PluginControllerRegistrar {
 
         log.info("热重载：注销 Controller {}", className);
 
-        List<RequestMappingInfo> mappingInfos = pluginMappings.get(pluginId);
-        if (mappingInfos == null) {
-            return;
-        }
+        // 直接遍历 handlerMapping 中的所有路由,按 className 匹配
+        // 不依赖 RequestMappingInfo.equals(),更可靠
+        Map<RequestMappingInfo, HandlerMethod> allMethods = new HashMap<>(handlerMapping.getHandlerMethods());
 
-        // 找到该 Controller 对应的路由并注销
-        Iterator<RequestMappingInfo> iterator = mappingInfos.iterator();
-        while (iterator.hasNext()) {
-            RequestMappingInfo mappingInfo = iterator.next();
-            HandlerMethod handlerMethod = handlerMapping.getHandlerMethods().get(mappingInfo);
-            if (handlerMethod != null && handlerMethod.getBeanType().getName().equals(className)) {
-                handlerMapping.unregisterMapping(mappingInfo);
-                iterator.remove();
-                log.debug("注销路由: {}", mappingInfo.getPatternValues());
+        List<RequestMappingInfo> unregistered = new ArrayList<>();
+        for (Map.Entry<RequestMappingInfo, HandlerMethod> entry : allMethods.entrySet()) {
+            if (entry.getValue().getBeanType().getName().equals(className)) {
+                handlerMapping.unregisterMapping(entry.getKey());
+                unregistered.add(entry.getKey());
+                log.debug("注销路由: {}", entry.getKey().getPatternValues());
             }
         }
 
-        // 如果该插件的所有路由都已注销，清空 pluginMappings 中的记录
-        // 这样热重载时重新注册不会被防重复检查拦截
-        if (mappingInfos.isEmpty()) {
-            pluginMappings.remove(pluginId);
-            log.debug("插件 {} 的所有路由已注销，清理 pluginMappings", pluginId);
+        // 清理 pluginMappings (按路径匹配,不依赖 equals)
+        List<RequestMappingInfo> mappingInfos = pluginMappings.get(pluginId);
+        if (mappingInfos != null) {
+            mappingInfos.removeIf(info -> unregistered.stream()
+                    .anyMatch(unregisteredInfo -> info.getPatternValues().equals(unregisteredInfo.getPatternValues())));
+
+            if (mappingInfos.isEmpty()) {
+                pluginMappings.remove(pluginId);
+                log.debug("插件 {} 的所有路由已注销，清理 pluginMappings", pluginId);
+            }
         }
 
         controllerToPlugin.remove(className);

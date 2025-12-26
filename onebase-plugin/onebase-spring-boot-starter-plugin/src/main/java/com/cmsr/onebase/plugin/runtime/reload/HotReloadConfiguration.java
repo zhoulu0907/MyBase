@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
 
 import jakarta.annotation.PreDestroy;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
@@ -58,15 +59,16 @@ public class HotReloadConfiguration {
             log.info("初始化热重载功能");
             log.info("监听路径: {}", devClassPaths);
 
-            // 使用第一个路径作为 classes root
-            // 假设所有 dev-class-paths 都指向同一个项目的不同模块的 target/classes
-            String firstPath = devClassPaths.get(0);
+            // 将所有 devClassPaths 转换为 Path 列表
+            List<Path> classesRoots = devClassPaths.stream()
+                    .map(Paths::get)
+                    .collect(java.util.stream.Collectors.toList());
 
-            // 创建热重载管理器
+            // 创建热重载管理器,传入所有路径
             hotReloadManager = new HotReloadManager(
                     applicationContext,
                     controllerRegistrar,
-                    Paths.get(firstPath));
+                    classesRoots);
 
             // 创建文件监听器
             watcher = new DevClassPathWatcher(devClassPaths, hotReloadManager);

@@ -14,6 +14,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -34,7 +35,7 @@ public class HotReloadManager {
 
     private final ApplicationContext applicationContext;
     private final PluginControllerRegistrar controllerRegistrar;
-    private final Path classesRoot;
+    private final List<Path> classesRoots;
 
     /**
      * 记录每个类对应的 ClassLoader
@@ -49,10 +50,10 @@ public class HotReloadManager {
 
     public HotReloadManager(ApplicationContext applicationContext,
             PluginControllerRegistrar controllerRegistrar,
-            Path classesRoot) {
+            List<Path> classesRoots) {
         this.applicationContext = applicationContext;
         this.controllerRegistrar = controllerRegistrar;
-        this.classesRoot = classesRoot;
+        this.classesRoots = classesRoots;
     }
 
     /**
@@ -69,7 +70,7 @@ public class HotReloadManager {
             unloadExtension(className);
 
             // 2. 创建新的 ClassLoader 加载更新后的类
-            URLClassLoader newClassLoader = createClassLoader(classesRoot);
+            URLClassLoader newClassLoader = createClassLoader();
             Class<?> newClass = newClassLoader.loadClass(className);
 
             // 3. 检查是否是 HttpHandler
@@ -144,12 +145,24 @@ public class HotReloadManager {
     /**
      * 创建新的 ClassLoader
      * <p>
-     * 关键修复：使用父类加载器优先加载 com.cmsr.onebase.plugin.api 包下的类，
+     * 包含所有 devClassPaths,支持多插件目录的热重载。
+     * 使用父类加载器优先加载 com.cmsr.onebase.plugin.api 包下的类，
      * 避免 ClassLoader 隔离导致的类型检查失败。
      * </p>
      */
-    private URLClassLoader createClassLoader(Path classesRoot) throws Exception {
-        URL[] urls = new URL[] { classesRoot.toUri().toURL() };
+    private URLClassLoader createClassLoader() throws Exception {
+        // 将所有 classesRoots 转换为 URL 数组
+        URL[] urls = classesRoots.stream()
+                .map(path -> {
+                    try {
+                        return path.toUri().toURL();
+                    } catch (Exception e) {
+                        throw new RuntimeException("Failed to convert path to URL: " + path, e);
+                    }
+                })
+                .toArray(URL[]::new);
+
+        log.debug("创建 ClassLoader，包含 {} 个路径: {}", urls.length, classesRoots);
 
         // 使用自定义 ClassLoader，对 plugin API 包使用父类加载器优先
         return new URLClassLoader(urls, getClass().getClassLoader()) {
