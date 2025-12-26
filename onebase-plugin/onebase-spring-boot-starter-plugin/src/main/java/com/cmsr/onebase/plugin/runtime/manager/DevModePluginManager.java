@@ -51,6 +51,17 @@ public class DevModePluginManager extends SpringPluginManager {
     private final ExtensionPointScannerSpring scanner;
 
     /**
+     * Spring 应用上下文，用于依赖注入
+     */
+    private final ApplicationContext applicationContext;
+
+    /**
+     * 扩展点缓存，避免重复扫描和注册
+     * Key: 扩展点类型, Value: 扩展点实例列表
+     */
+    private final java.util.Map<Class<?>, java.util.List<?>> extensionCache = new java.util.concurrent.ConcurrentHashMap<>();
+
+    /**
      * 构造函数
      *
      * @param properties         插件配置属性
@@ -58,6 +69,7 @@ public class DevModePluginManager extends SpringPluginManager {
      */
     public DevModePluginManager(PluginProperties properties, ApplicationContext applicationContext) {
         super(); // Call to SpringPluginManager's default constructor
+        this.applicationContext = applicationContext;
         List<String> devPaths = properties != null && properties.isDevMode()
                 ? properties.getDevClassPaths()
                 : Collections.emptyList();
@@ -90,6 +102,7 @@ public class DevModePluginManager extends SpringPluginManager {
      * </p>
      */
     @Override
+    @SuppressWarnings("unchecked")
     public <T> List<T> getExtensions(Class<T> type) {
         // 检查虚拟插件是否已启动
         if (devPluginWrapper == null || devPluginWrapper.getPluginState() != PluginState.STARTED) {
@@ -97,8 +110,44 @@ public class DevModePluginManager extends SpringPluginManager {
             return Collections.emptyList();
         }
 
+        // 检查缓存
+        if (extensionCache.containsKey(type)) {
+            log.debug("开发模式：从缓存返回 {} 扩展点", type.getSimpleName());
+            return (List<T>) extensionCache.get(type);
+        }
+
         log.debug("开发模式：扫描classpath查找 {} 扩展点", type.getName());
-        return scanner.scanExtensions(type);
+        List<T> extensions = scanner.scanExtensions(type);
+
+        // 为扩展点实例注入 Spring 依赖并注册为 Bean
+        if (applicationContext != null) {
+            org.springframework.beans.factory.config.AutowireCapableBeanFactory beanFactory = applicationContext
+                    .getAutowireCapableBeanFactory();
+
+            for (T extension : extensions) {
+                try {
+                    // 1. 注入依赖
+                    beanFactory.autowireBean(extension);
+
+                    // 2. 注册为 Spring Bean（使用类名作为 Bean 名称）
+                    String beanName = extension.getClass().getName();
+                    if (beanFactory instanceof org.springframework.beans.factory.support.DefaultListableBeanFactory) {
+                        ((org.springframework.beans.factory.support.DefaultListableBeanFactory) beanFactory)
+                                .registerSingleton(beanName, extension);
+                        log.debug("已为扩展点 {} 注入依赖并注册为 Spring Bean", extension.getClass().getSimpleName());
+                    } else {
+                        log.debug("已为扩展点 {} 注入依赖（无法注册为 Bean）", extension.getClass().getSimpleName());
+                    }
+                } catch (Exception e) {
+                    log.warn("为扩展点 {} 注入依赖或注册 Bean 失败: {}", extension.getClass().getSimpleName(), e.getMessage());
+                }
+            }
+        }
+
+        // 缓存结果
+        extensionCache.put(type, extensions);
+
+        return extensions;
     }
 
     /**
@@ -142,9 +191,26 @@ public class DevModePluginManager extends SpringPluginManager {
         devPluginWrapper.setPluginState(PluginState.RESOLVED);
 
         // 注册虚拟插件
-        getPlugins().add(devPluginWrapper);
-        getUnresolvedPlugins().remove(devPluginWrapper);
-        getResolvedPlugins().add(devPluginWrapper);
+        // 注意：不调用 getPlugins().add()，因为 getPlugins() 返回不可修改的列表
+        // devPluginWrapper 会通过 getPlugins() 方法返回
+    }
+
+    @Override
+    public List<PluginWrapper> getPlugins() {
+        // DEV 模式下，返回包含虚拟插件的列表
+        if (devPluginWrapper != null) {
+            return Collections.singletonList(devPluginWrapper);
+        }
+        return Collections.emptyList();
+    }
+
+    @Override
+    public PluginWrapper getPlugin(String pluginId) {
+        // DEV 模式下，检查是否请求虚拟插件
+        if (DEV_PLUGIN_ID.equals(pluginId) && devPluginWrapper != null) {
+            return devPluginWrapper;
+        }
+        return super.getPlugin(pluginId);
     }
 
     @Override
@@ -190,8 +256,8 @@ public class DevModePluginManager extends SpringPluginManager {
     public boolean unloadPlugin(String pluginId) {
         if (DEV_PLUGIN_ID.equals(pluginId) && devPluginWrapper != null) {
             stopPlugin(pluginId);
-            getPlugins().remove(devPluginWrapper);
-            getResolvedPlugins().remove(devPluginWrapper);
+            // 不需要从 getPlugins() 移除，因为 getPlugins() 是基于 devPluginWrapper 动态返回的
+            // 也不需要从 getResolvedPlugins() 移除，因为我们没有添加到父类的列表中
             devPluginWrapper = null;
             return true;
         }

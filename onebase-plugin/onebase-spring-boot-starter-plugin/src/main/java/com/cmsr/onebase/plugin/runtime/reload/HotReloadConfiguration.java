@@ -1,7 +1,7 @@
 package com.cmsr.onebase.plugin.runtime.reload;
 
 import com.cmsr.onebase.plugin.runtime.config.PluginProperties;
-import com.cmsr.onebase.plugin.runtime.http.PluginHttpDispatcher;
+import com.cmsr.onebase.plugin.runtime.http.PluginControllerRegistrar;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -29,17 +29,17 @@ public class HotReloadConfiguration {
 
     private final PluginProperties pluginProperties;
     private final ApplicationContext applicationContext;
-    private final PluginHttpDispatcher httpDispatcher;
+    private final PluginControllerRegistrar controllerRegistrar;
 
     private DevClassPathWatcher watcher;
     private HotReloadManager hotReloadManager;
 
     public HotReloadConfiguration(PluginProperties pluginProperties,
             ApplicationContext applicationContext,
-            PluginHttpDispatcher httpDispatcher) {
+            PluginControllerRegistrar controllerRegistrar) {
         this.pluginProperties = pluginProperties;
         this.applicationContext = applicationContext;
-        this.httpDispatcher = httpDispatcher;
+        this.controllerRegistrar = controllerRegistrar;
     }
 
     /**
@@ -65,7 +65,7 @@ public class HotReloadConfiguration {
             // 创建热重载管理器
             hotReloadManager = new HotReloadManager(
                     applicationContext,
-                    httpDispatcher,
+                    controllerRegistrar,
                     Paths.get(firstPath));
 
             // 创建文件监听器

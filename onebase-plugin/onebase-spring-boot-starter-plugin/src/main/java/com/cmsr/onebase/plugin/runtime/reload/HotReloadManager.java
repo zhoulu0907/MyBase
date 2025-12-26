@@ -1,7 +1,7 @@
 package com.cmsr.onebase.plugin.runtime.reload;
 
 import com.cmsr.onebase.plugin.api.HttpHandler;
-import com.cmsr.onebase.plugin.runtime.http.PluginHttpDispatcher;
+import com.cmsr.onebase.plugin.runtime.http.PluginControllerRegistrar;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
@@ -13,6 +13,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -32,7 +33,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class HotReloadManager {
 
     private final ApplicationContext applicationContext;
-    private final PluginHttpDispatcher httpDispatcher;
+    private final PluginControllerRegistrar controllerRegistrar;
     private final Path classesRoot;
 
     /**
@@ -47,10 +48,10 @@ public class HotReloadManager {
     private final Map<String, String> beanNameMap = new ConcurrentHashMap<>();
 
     public HotReloadManager(ApplicationContext applicationContext,
-            PluginHttpDispatcher httpDispatcher,
+            PluginControllerRegistrar controllerRegistrar,
             Path classesRoot) {
         this.applicationContext = applicationContext;
-        this.httpDispatcher = httpDispatcher;
+        this.controllerRegistrar = controllerRegistrar;
         this.classesRoot = classesRoot;
     }
 
@@ -77,11 +78,15 @@ public class HotReloadManager {
                 String beanName = registerSpringBean(newClass, className);
                 beanNameMap.put(className, beanName);
 
-                // 5. 注册 HTTP 路由
+                // 5. 注册 HTTP 路由（使用新的 PluginControllerRegistrar）
                 ConfigurableListableBeanFactory beanFactory = ((ConfigurableApplicationContext) applicationContext)
                         .getBeanFactory();
                 Object handlerInstance = beanFactory.getBean(beanName);
-                httpDispatcher.registerHandler("dev-mode-plugin", handlerInstance);
+
+                // 将单个 handler 包装为 List 并注册
+                @SuppressWarnings("unchecked")
+                HttpHandler handler = (HttpHandler) handlerInstance;
+                controllerRegistrar.registerControllers("dev-mode-plugin", Collections.singletonList(handler));
 
                 log.info("热重载成功: {} (Bean: {})", className, beanName);
             } else {
@@ -105,8 +110,8 @@ public class HotReloadManager {
         log.debug("卸载扩展点: {}", className);
 
         try {
-            // 1. 卸载 HTTP 路由
-            httpDispatcher.unregisterHandlerByClassName(className);
+            // 1. 卸载 HTTP 路由（使用新的 PluginControllerRegistrar）
+            controllerRegistrar.unregisterControllerByClassName(className);
 
             // 2. 卸载 Spring Bean
             String beanName = beanNameMap.get(className);
@@ -138,11 +143,26 @@ public class HotReloadManager {
 
     /**
      * 创建新的 ClassLoader
+     * <p>
+     * 关键修复：使用父类加载器优先加载 com.cmsr.onebase.plugin.api 包下的类，
+     * 避免 ClassLoader 隔离导致的类型检查失败。
+     * </p>
      */
     private URLClassLoader createClassLoader(Path classesRoot) throws Exception {
         URL[] urls = new URL[] { classesRoot.toUri().toURL() };
-        // 使用父类加载器，但优先从新的 URL 加载
-        return new URLClassLoader(urls, getClass().getClassLoader());
+
+        // 使用自定义 ClassLoader，对 plugin API 包使用父类加载器优先
+        return new URLClassLoader(urls, getClass().getClassLoader()) {
+            @Override
+            public Class<?> loadClass(String name) throws ClassNotFoundException {
+                // 对于插件 API 包（HttpHandler 等接口），强制使用父类加载器
+                if (name.startsWith("com.cmsr.onebase.plugin.api.")) {
+                    return getParent().loadClass(name);
+                }
+                // 其他类使用默认的双亲委派机制
+                return super.loadClass(name);
+            }
+        };
     }
 
     /**

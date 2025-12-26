@@ -3,22 +3,27 @@ package com.cmsr.onebase.plugin.runtime.manager;
 import com.cmsr.onebase.plugin.api.DataProcessor;
 import com.cmsr.onebase.plugin.api.EventListener;
 import com.cmsr.onebase.plugin.api.HttpHandler;
+import com.cmsr.onebase.plugin.runtime.event.PluginDeletedEvent;
+import com.cmsr.onebase.plugin.runtime.event.PluginLoadedEvent;
+import com.cmsr.onebase.plugin.runtime.event.PluginStartedEvent;
+import com.cmsr.onebase.plugin.runtime.event.PluginStoppedEvent;
+import com.cmsr.onebase.plugin.runtime.event.PluginUnloadedEvent;
+import com.cmsr.onebase.plugin.runtime.http.PluginControllerRegistrar;
+import com.cmsr.onebase.plugin.api.HttpHandler;
 import lombok.extern.slf4j.Slf4j;
+import org.pf4j.PluginAlreadyLoadedException;
 import org.pf4j.PluginManager;
 import org.pf4j.PluginState;
 import org.pf4j.PluginWrapper;
 import org.springframework.context.ApplicationEventPublisher;
 
-import java.nio.file.Path;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import org.pf4j.DefaultPluginManager;
-import org.pf4j.PluginDescriptorFinder;
-import org.pf4j.PropertiesPluginDescriptorFinder;
 
 /**
  * 插件管理器
@@ -34,10 +39,15 @@ public class OneBasePluginManager {
 
     private final PluginManager pluginManager;
     private final ApplicationEventPublisher eventPublisher;
+    private PluginControllerRegistrar controllerRegistrar;
 
     public OneBasePluginManager(PluginManager pluginManager, ApplicationEventPublisher eventPublisher) {
         this.pluginManager = pluginManager;
         this.eventPublisher = eventPublisher;
+    }
+
+    public void setControllerRegistrar(PluginControllerRegistrar controllerRegistrar) {
+        this.controllerRegistrar = controllerRegistrar;
     }
 
     /**
@@ -82,16 +92,16 @@ public class OneBasePluginManager {
 
             if (pluginId != null) {
                 log.info("插件加载成功: {}", pluginId);
-                org.pf4j.PluginWrapper wrapper = pluginManager.getPlugin(pluginId);
-                eventPublisher.publishEvent(new com.cmsr.onebase.plugin.runtime.event.PluginLoadedEvent(pluginId, wrapper));
+                PluginWrapper wrapper = pluginManager.getPlugin(pluginId);
+                eventPublisher.publishEvent(new PluginLoadedEvent(pluginId, wrapper));
             } else {
                 log.error("插件加载失败: {}", pluginPath);
             }
-        } catch (org.pf4j.PluginAlreadyLoadedException pae) {
+        } catch (PluginAlreadyLoadedException pae) {
             // 竞态情况下插件已被其它线程加载，尝试定位已加载的 pluginId 并发布事件
             log.info("插件已加载（竞态）: {}", pluginPath);
             try {
-                for (org.pf4j.PluginWrapper w : pluginManager.getPlugins()) {
+                for (PluginWrapper w : pluginManager.getPlugins()) {
                     Path p = w.getPluginPath();
                     if (p != null && isSamePluginPath(p, pluginPath)) {
                         pluginId = w.getPluginId();
@@ -99,8 +109,8 @@ public class OneBasePluginManager {
                     }
                 }
                 if (pluginId != null) {
-                    org.pf4j.PluginWrapper wrapper = pluginManager.getPlugin(pluginId);
-                    eventPublisher.publishEvent(new com.cmsr.onebase.plugin.runtime.event.PluginLoadedEvent(pluginId, wrapper));
+                    PluginWrapper wrapper = pluginManager.getPlugin(pluginId);
+                    eventPublisher.publishEvent(new PluginLoadedEvent(pluginId, wrapper));
                     log.info("已定位并发布已加载插件事件: {}", pluginId);
                 } else {
                     log.warn("插件已加载但无法定位 pluginId: {}", pluginPath);
@@ -113,6 +123,14 @@ public class OneBasePluginManager {
         }
 
         return pluginId;
+    }
+
+    /**
+     * 加载所有插件 (通常用于重新扫描插件目录)
+     */
+    public void loadPlugins() {
+        log.info("加载所有插件");
+        pluginManager.loadPlugins();
     }
 
     private static Path getNormalize(Path p) {
@@ -165,11 +183,24 @@ public class OneBasePluginManager {
      * @return 是否成功
      */
     public boolean unloadPlugin(String pluginId) {
+        // 防御性检查：插件是否存在
+        PluginWrapper wrapper = pluginManager.getPlugin(pluginId);
+        if (wrapper == null) {
+            log.warn("插件 {} 不存在，无法卸载", pluginId);
+            return false;
+        }
+
         log.info("卸载插件: {}", pluginId);
+
+        // 1. 先注销 Controller
+        if (controllerRegistrar != null) {
+            controllerRegistrar.unregisterControllers(pluginId);
+        }
+
         boolean ok = pluginManager.unloadPlugin(pluginId);
         if (ok) {
             try {
-                eventPublisher.publishEvent(new com.cmsr.onebase.plugin.runtime.event.PluginUnloadedEvent(pluginId));
+                eventPublisher.publishEvent(new PluginUnloadedEvent(pluginId));
             } catch (Exception ignore) {
             }
         }
@@ -183,14 +214,34 @@ public class OneBasePluginManager {
      * @return 插件状态
      */
     public PluginState startPlugin(String pluginId) {
+        // 防御性检查：插件是否存在
+        PluginWrapper wrapper = pluginManager.getPlugin(pluginId);
+        if (wrapper == null) {
+            log.warn("插件 {} 不存在，无法启动", pluginId);
+            return null;
+        }
+
+        // 防御性检查：如果插件已经启动，直接返回，避免重复注册 Controller
+        if (wrapper.getPluginState() == PluginState.STARTED) {
+            log.warn("插件 {} 已经处于启动状态，忽略启动请求", pluginId);
+            return PluginState.STARTED;
+        }
+
         log.info("启动插件: {}", pluginId);
         PluginState state = pluginManager.startPlugin(pluginId);
         try {
             if (state == PluginState.STARTED) {
-                org.pf4j.PluginWrapper wrapper = pluginManager.getPlugin(pluginId);
-                eventPublisher.publishEvent(new com.cmsr.onebase.plugin.runtime.event.PluginStartedEvent(pluginId, wrapper));
+                // 注册 Controller
+                if (controllerRegistrar != null) {
+                    List<HttpHandler> handlers = getHttpHandlers(pluginId);
+                    controllerRegistrar.registerControllers(pluginId, handlers);
+                }
+
+                PluginWrapper pluginWrapper = pluginManager.getPlugin(pluginId);
+                eventPublisher.publishEvent(new PluginStartedEvent(pluginId, pluginWrapper));
             }
         } catch (Exception ignore) {
+            log.warn("插件启动后的回调处理异常（已忽略）: {}", pluginId, ignore);
         }
         return state;
     }
@@ -202,11 +253,31 @@ public class OneBasePluginManager {
      * @return 插件状态
      */
     public PluginState stopPlugin(String pluginId) {
+        // 防御性检查：如果插件不存在或已停止，直接返回
+        PluginWrapper wrapper = pluginManager.getPlugin(pluginId);
+        if (wrapper == null) {
+            log.warn("插件 {} 不存在，无法停止", pluginId);
+            return null;
+        }
+
+        if (wrapper.getPluginState() == PluginState.STOPPED) {
+            log.warn("插件 {} 已经处于停止状态，忽略停止请求", pluginId);
+            return PluginState.STOPPED;
+        }
+
         log.info("停止插件: {}", pluginId);
         PluginState state = pluginManager.stopPlugin(pluginId);
-        try {
-            eventPublisher.publishEvent(new com.cmsr.onebase.plugin.runtime.event.PluginStoppedEvent(pluginId));
-        } catch (Exception ignore) {
+
+        if (state == PluginState.STOPPED) {
+            // 注销 Controller
+            if (controllerRegistrar != null) {
+                controllerRegistrar.unregisterControllers(pluginId);
+            }
+
+            try {
+                eventPublisher.publishEvent(new PluginStoppedEvent(pluginId));
+            } catch (Exception ignore) {
+            }
         }
         return state;
     }
@@ -218,11 +289,27 @@ public class OneBasePluginManager {
      * @return 是否成功
      */
     public boolean deletePlugin(String pluginId) {
+        // 防御性检查：插件是否存在
+        PluginWrapper wrapper = pluginManager.getPlugin(pluginId);
+        if (wrapper == null) {
+            log.warn("插件 {} 不存在，无法删除", pluginId);
+            return false;
+        }
+
+        // PF4J 的 deletePlugin 会自动先停止插件，所以不需要我们手动阻止
+        // 但我们需要手动处理 Controller 路由的注销，因为 PF4J 不知道这些
+        if (wrapper.getPluginState() == PluginState.STARTED) {
+            log.info("插件 {} 正在运行，正在停止并注销路由...", pluginId);
+            if (controllerRegistrar != null) {
+                controllerRegistrar.unregisterControllers(pluginId);
+            }
+        }
+
         log.info("删除插件: {}", pluginId);
         boolean ok = pluginManager.deletePlugin(pluginId);
         if (ok) {
             try {
-                eventPublisher.publishEvent(new com.cmsr.onebase.plugin.runtime.event.PluginDeletedEvent(pluginId));
+                eventPublisher.publishEvent(new PluginDeletedEvent(pluginId));
             } catch (Exception ignore) {
             }
         }
@@ -370,12 +457,12 @@ public class OneBasePluginManager {
         log.debug("开始获取已加载的插件列表");
         List<org.pf4j.PluginWrapper> plugins = pluginManager.getPlugins();
         log.debug("获取到的插件列表大小: {}", plugins != null ? plugins.size() : "null");
-        
+
         if (plugins == null) {
             log.warn("插件管理器返回了null插件列表");
             return new ArrayList<>();
         }
-        
+
         return plugins.stream()
                 .filter(Objects::nonNull)
                 .map(wrapper -> {
@@ -386,15 +473,13 @@ public class OneBasePluginManager {
                                 wrapper.getPluginId(),
                                 "Unknown",
                                 "Unknown",
-                                wrapper.getPluginState().name()
-                        );
+                                wrapper.getPluginState().name());
                     }
                     return new PluginInfo(
                             wrapper.getPluginId(),
                             wrapper.getDescriptor().getPluginDescription(),
                             wrapper.getDescriptor().getVersion(),
-                            wrapper.getPluginState().name()
-                    );
+                            wrapper.getPluginState().name());
                 })
                 .collect(Collectors.toList());
     }
@@ -431,8 +516,8 @@ public class OneBasePluginManager {
      * @param pluginId 插件ID
      * @return HttpHandler 列表
      */
-    public java.util.List<com.cmsr.onebase.plugin.api.HttpHandler> getHttpHandlers(String pluginId) {
-        return pluginManager.getExtensions(com.cmsr.onebase.plugin.api.HttpHandler.class, pluginId);
+    public java.util.List<HttpHandler> getHttpHandlers(String pluginId) {
+        return pluginManager.getExtensions(HttpHandler.class, pluginId);
     }
 
     /**

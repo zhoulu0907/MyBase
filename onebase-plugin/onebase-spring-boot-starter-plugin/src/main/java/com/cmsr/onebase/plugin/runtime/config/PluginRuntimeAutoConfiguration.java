@@ -1,10 +1,10 @@
 package com.cmsr.onebase.plugin.runtime.config;
 
+import com.cmsr.onebase.plugin.api.HttpHandler;
 import com.cmsr.onebase.plugin.core.PluginMode;
 import com.cmsr.onebase.plugin.runtime.context.PluginContextFactory;
 import com.cmsr.onebase.plugin.runtime.executor.EventDispatcher;
-import com.cmsr.onebase.plugin.runtime.http.PluginHttpDispatcher;
-import com.cmsr.onebase.plugin.runtime.http.PluginHttpHandler;
+import com.cmsr.onebase.plugin.runtime.http.PluginControllerRegistrar;
 import com.cmsr.onebase.plugin.runtime.http.PluginHttpManager;
 import com.cmsr.onebase.plugin.runtime.manager.DevModePluginManager;
 import com.cmsr.onebase.plugin.runtime.manager.OneBasePluginManager;
@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.pf4j.DefaultPluginManager;
 import org.pf4j.PluginDescriptorFinder;
 import org.pf4j.PluginManager;
+import org.pf4j.PluginWrapper;
 import org.pf4j.PropertiesPluginDescriptorFinder;
 import org.pf4j.spring.SpringPluginManager;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -24,10 +25,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import com.cmsr.onebase.plugin.runtime.interceptor.PluginSecurityInterceptor;
-import com.cmsr.onebase.plugin.runtime.listener.PluginLifecycleListener;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -239,8 +238,26 @@ public class PluginRuntimeAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public OneBasePluginManager oneBasePluginManager(PluginManager pluginManager, PluginProperties properties,
-            ApplicationEventPublisher eventPublisher) {
-        return new OneBasePluginManager(pluginManager, eventPublisher);
+            ApplicationEventPublisher eventPublisher, ObjectProvider<PluginControllerRegistrar> registrarProvider) {
+        OneBasePluginManager manager = new OneBasePluginManager(pluginManager, eventPublisher);
+
+        // 设置 Controller 注册器
+        registrarProvider.ifAvailable(registrar -> {
+            manager.setControllerRegistrar(registrar);
+
+            // 为已启动的插件注册 Controller
+            // （因为 pluginManager.startPlugins() 在此之前已经调用过了）
+            for (PluginWrapper plugin : pluginManager.getStartedPlugins()) {
+                String pluginId = plugin.getPluginId();
+                List<HttpHandler> handlers = manager.getHttpHandlers(pluginId);
+                if (handlers != null && !handlers.isEmpty()) {
+                    log.info("为已启动的插件 {} 注册 {} 个 Controller", pluginId, handlers.size());
+                    registrar.registerControllers(pluginId, handlers);
+                }
+            }
+        });
+
+        return manager;
     }
 
     /**
@@ -269,30 +286,22 @@ public class PluginRuntimeAutoConfiguration {
     }
 
     /**
-     * 配置插件HTTP分发器
-     *
-     * @param oneBasePluginManager         插件管理器
-     * @param requestMappingHandlerAdapter Spring MVC 的请求处理适配器
-     * @param properties                   插件配置属性
-     * @return 分发器
+     * 插件HTTP管理器（简化版，仅用于查询）
      */
     @Bean
     @ConditionalOnMissingBean
-    public PluginHttpDispatcher pluginHttpDispatcher(OneBasePluginManager oneBasePluginManager,
-            RequestMappingHandlerAdapter requestMappingHandlerAdapter, PluginProperties properties) {
-        return new PluginHttpDispatcher(oneBasePluginManager, requestMappingHandlerAdapter, properties);
+    @Lazy
+    public PluginHttpManager pluginHttpManager(ObjectProvider<OneBasePluginManager> oneBasePluginManagerProvider) {
+        return new PluginHttpManager(oneBasePluginManagerProvider);
     }
 
     /**
-     * 配置插件HTTP处理器（代理控制器）
-     *
-     * @param pluginHttpDispatcher 分发器
-     * @return 处理器
+     * 插件Controller注册器
      */
     @Bean
     @ConditionalOnMissingBean
-    public PluginHttpHandler pluginHttpHandler(PluginHttpDispatcher pluginHttpDispatcher) {
-        return new PluginHttpHandler(pluginHttpDispatcher);
+    public PluginControllerRegistrar pluginControllerRegistrar(RequestMappingHandlerMapping handlerMapping) {
+        return new PluginControllerRegistrar(handlerMapping);
     }
 
     /**
@@ -304,32 +313,4 @@ public class PluginRuntimeAutoConfiguration {
             PluginProperties properties) {
         return new PluginSecurityInterceptor(oneBasePluginManager, properties);
     }
-
-    /**
-     * 插件HTTP管理器（统一HTTP处理模块，整合了原HttpHandlerRegistry、HttpRoutingManager、HttpHandlerInitializer）
-     * <p>
-     * 负责：
-     * 1. 启动时发现并注册插件的HttpHandler
-     * 2. 运行时注册/注销插件的HTTP处理器
-     * 3. 管理路由元数据（pluginId -> handlers/mappings）
-     * </p>
-     */
-    @Bean
-    @ConditionalOnMissingBean
-    @Lazy
-    public PluginHttpManager pluginHttpManager(ObjectProvider<OneBasePluginManager> oneBasePluginManagerProvider,
-            RequestMappingHandlerMapping handlerMapping, PluginProperties pluginProperties) {
-        return new PluginHttpManager(oneBasePluginManagerProvider, handlerMapping, pluginProperties);
-    }
-
-    /**
-     * 插件生命周期监听器（负责在插件启动/停止/卸载时注册或注销路由）
-     */
-    @Bean
-    @ConditionalOnMissingBean
-    public PluginLifecycleListener pluginLifecycleListener(OneBasePluginManager oneBasePluginManager,
-            PluginHttpDispatcher pluginHttpDispatcher, PluginHttpManager pluginHttpManager) {
-        return new PluginLifecycleListener(oneBasePluginManager, pluginHttpDispatcher, pluginHttpManager);
-    }
-
 }
