@@ -4,7 +4,7 @@
 # 确保先在AuthController.http中登录获取token
 
 ### 1. 分页查询项目列表
-GET {{baseUrl}}/dashboard/list?page=1&limit=3&appId=1
+GET {{baseUrl}}/dashboard/list
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
@@ -18,13 +18,13 @@ tenant-id: {{adminTenantId}}
   "projectName": "Screen_test_Gsp1",
   "indexImage": "",
   "remarks": "",
-  "appId": 1,
+  "appId": "1234516",
   "tenantId": {{adminTenantId}}
 
 }
 
 ### 3. 删除项目
-POST {{baseUrl}}/dashboard/delete?id=111
+POST {{baseUrl}}/dashboard/delete?id=198361054850023424
 Content-Type: application/json
 Authorization: Bearer {{token}}
 tenant-id: 156421901678804992
@@ -81,17 +81,17 @@ Content-Type: multipart/form-data; boundary=WebAppBoundary
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
-
-
 --WebAppBoundary
-Content-Disposition: form-data; name="object"; filename="example.png"
+Content-Disposition: form-data; name="object"; filename="test.jpg"
 Content-Type: image/png
 
-< ./example.png
+< ./test.png
 --WebAppBoundary--
 
+
+
 ### 10. 下载文件
-GET {{baseUrl}}/dashboard/download/195526651307786240
+GET {{baseUrl}}/infra/file/download/198342328792547328
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 

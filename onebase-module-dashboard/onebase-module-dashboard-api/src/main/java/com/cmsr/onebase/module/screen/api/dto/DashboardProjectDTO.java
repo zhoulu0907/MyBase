@@ -9,11 +9,11 @@ import java.io.Serializable;
  *
  * </p>
  *
- * @author fc
+ * @author mty
  * @since 2023-04-30
  */
 @Data
-public class GoViewProjectDTO implements Serializable {
+public class DashboardProjectDTO implements Serializable {
 
     private Long id;
 
