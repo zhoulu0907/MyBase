@@ -24,6 +24,8 @@ const XInputPhone = memo((props: XInputPhoneConfig & { runtime?: boolean; detail
     detailMode
   } = props;
 
+  const textAlign = layout === 'vertical' ? 'left' : 'right';
+
   // 生成唯一的字段ID
   const fieldId = dataField && dataField.length > 0
     ? dataField[dataField.length - 1]
@@ -79,12 +81,10 @@ const XInputPhone = memo((props: XInputPhoneConfig & { runtime?: boolean; detail
     >
       {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
         // 只读模式，渲染文本内容
-        <Input
+        <div
           className="readonlyText"
-          readOnly
-          value={form?.getFieldValue(fieldId) || (defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : '')}
-          inputStyle={{ textAlign: layout === 'vertical' ? 'left' : 'right' }}
-        />
+          style={{ textAlign }}
+        >{form?.getFieldValue(fieldId) || (defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : '') || '--'}</div>
       ) : (
         renderContent()
       )}

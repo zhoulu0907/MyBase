@@ -1,6 +1,7 @@
 import { memo } from 'react';
 import { nanoid } from 'nanoid';
 import { Switch, Form, Ellipsis } from '@arco-design/mobile-react';
+import { FormInternalComponentType } from '@arco-design/mobile-react/esm/form';
 import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, DEFAULT_VALUE_TYPES, FormSchema } from '@onebase/ui-kit';
 import './index.css';
 import '../index.css';
@@ -30,9 +31,7 @@ const XSwitch = memo((props: XSwitchConfig & { runtime?: boolean; detailMode?: b
     // 非只读模式，渲染Switch组件
     return (
       <Switch
-        platform="android"
         text={{ on: fillText?.display ? fillText.checkedText : '', off: fillText?.display ? fillText.uncheckedText : '' }}
-        style={{ textAlign: layout === 'vertical' ? 'left' : 'right'  }}
       />
     );
   };
@@ -42,17 +41,20 @@ const XSwitch = memo((props: XSwitchConfig & { runtime?: boolean; detailMode?: b
       className={`inputTextWrapperOBMobile switchWrapperOBMobile ${layout === 'vertical' ? 'verticalLayout' : ''}`}
       field={fieldId}
       layout={layout}
+      trigger='checked'
+      displayType={FormInternalComponentType.Switch}
       label={label.display ? <Ellipsis text={label.text} maxLine={2} /> : undefined}
-      initialValue={defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : ''}
+      initialValue={defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : false}
       style={{
-        textAlign: layout === 'vertical' ? 'left' : 'right',
         pointerEvents: (!runtime || detailMode) ? 'none' : 'unset',
         opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
       }}
     >
       {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
         // 只读模式，渲染文本内容
-        <div className="readonlyText">{form?.getFieldValue(fieldId) ? '开启' : '关闭'}</div>
+        <div className="readonlyText">{form?.getFieldValue(fieldId)
+          ? (fillText?.display && fillText.checkedText) || '开启'
+          : (fillText?.display && fillText.uncheckedText) || '关闭'}</div>
       ) : (
         renderContent()
       )}

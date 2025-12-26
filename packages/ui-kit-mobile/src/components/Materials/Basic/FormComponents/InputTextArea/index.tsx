@@ -73,6 +73,8 @@ const XInputTextArea = memo((props: XInputTextAreaConfig & { runtime?: boolean; 
     }
   ];
 
+  const textAlign = layout === 'vertical' ? 'left' : 'right';
+
   return (
     <Form.Item
       className={`inputTextWrapperOBMobile inputTextAreaWrapperOBMobile ${verify?.lengthLimit ? 'showStatistics' : ''}`}
@@ -88,18 +90,10 @@ const XInputTextArea = memo((props: XInputTextAreaConfig & { runtime?: boolean; 
     >
       {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
         // 只读模式，渲染文本内容
-        <Textarea
+        <div
           className="readonlyText"
-          readOnly
-          style={{
-            textAlign: align,
-            // minHeight: `${(minRows * 24 + 16) / 50}rem`
-          }}
-          textareaStyle={{
-            textAlign: layout === 'vertical' ? 'left' : 'right'
-          }}
-          value={form?.getFieldValue(fieldId) || (defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : '')}
-        />
+          style={{ textAlign }}
+        >{form?.getFieldValue(fieldId)  || (defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : '') || '--'}</div>
       ) : (
         renderContent()
       )}
