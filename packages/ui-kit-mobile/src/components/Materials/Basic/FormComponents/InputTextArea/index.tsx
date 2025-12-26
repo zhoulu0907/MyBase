@@ -61,14 +61,13 @@ const XInputTextArea = memo((props: XInputTextAreaConfig & { runtime?: boolean; 
       message: `${label.text}是必填项`,
       validator: (value, callback) => {
         if (value && verify?.lengthLimit) {
-          if (value.length < verify?.minLength!) {
+          if (verify?.minLength && value.length < verify.minLength) {
             callback(`字数不能小于${verify?.minLength}`);
-          } else if (verify?.maxLength && value.length > verify?.maxLength) {
+          } else if (verify?.maxLength && value.length > verify.maxLength) {
             callback(`字数不能大于${verify?.maxLength}`);
           }
-        } else {
-          callback();
         }
+        callback();
       }
     }
   ];
