@@ -95,9 +95,9 @@ const DeptMember = (props: IProps) => {
   };
 
   // 构建部门完整路径
-  const buildDepartmentPath = () => {
+  const buildDepartmentPath = (deptName: string) => {
     const deptNames = breadcrumbs.slice(1).map((breadcrumb) => breadcrumb.title);
-    return deptNames.length > 0 ? deptNames.join('/') : '未分配部门';
+    return deptNames.length > 0 ? deptNames.join('/') : (deptName ? deptName : '未分配部门');
   };
 
   return (
@@ -157,7 +157,7 @@ const DeptMember = (props: IProps) => {
                             {
                               key: item.key,
                               name: item.title,
-                              department: buildDepartmentPath(),    // 使用构建的完整路径
+                              department: buildDepartmentPath(item.deptName),    // 使用构建的完整路径
                               email: item.email
                             }
                           ];
