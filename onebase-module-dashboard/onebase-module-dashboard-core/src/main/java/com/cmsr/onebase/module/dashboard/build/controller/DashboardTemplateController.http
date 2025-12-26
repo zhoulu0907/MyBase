@@ -45,9 +45,10 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
 ### 6. 分页查询仪表盘模板
-GET {{baseUrl}}/dashboard/template/page?templateType=system&hot=1
+GET {{baseUrl}}/dashboard/template/page
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
+X-Application-Id: 197067548137062400
 
 ### 7. 另存为仪表盘模板
 POST {{baseUrl}}/dashboard/template/saveOtherDashboardTemplate
