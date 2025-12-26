@@ -48,7 +48,6 @@ const EditRuntime: React.FC<EditRuntimeProps> = ({
 
   const [cpStates, setCpStates] = useState<Record<string, any>>({});
   const isLoadingFromDraftBoxRef = useRef(false);
-  const draftIdRef = useRef<string | null>(null); // 保存从草稿箱载入的草稿 ID
 
   const fetchLatestDraft = useCallback(async () => {
     if (!tableName || !menuId) return;
@@ -76,43 +75,6 @@ const EditRuntime: React.FC<EditRuntimeProps> = ({
   // 检查并提示草稿数据
   useEffect(() => {
     if (isAdd) {
-      // 先检查是否有从草稿箱传递的数据
-      const loadDraftData = localStorage.getItem('draftData');
-      //   console.log('loadDraftData: ', loadDraftData);
-
-      //   if (loadDraftData) {
-      //     // 从草稿箱传递的数据，直接载入，不需要二次确认
-      //     isLoadingFromDraftBoxRef.current = true;
-      //     const loadDraft = async () => {
-      //       try {
-      //         const draftData = JSON.parse(loadDraftData);
-      //         // 清除临时数据
-      //         localStorage.removeItem('draftData');
-      //         draftIdRef.current = draftData?.id || null;
-
-      //         const componentSchemas = useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value;
-      //         const subTableComponents = useEditorSignalMap.get(editPageViewId.value)?.subTableComponents.value;
-
-      //         // 遍历 res, 将数据回填到表单
-      //         const formValues = normalizeFormValues({
-      //           dataItem: draftData,
-      //           componentSchemas,
-      //           subEntities: subEntities.value,
-      //           subTableComponents,
-      //           setSubTableDataLength: pagesRuntimeSignal.setSubTableDataLength
-      //         });
-
-      //         // 直接载入数据
-      //         form.setFieldsValue(formValues);
-      //       } catch (error) {
-      //         console.error('载入草稿数据失败:', error);
-      //         Message.error('载入草稿数据失败');
-      //       }
-      //     };
-      //     loadDraft();
-      //     return;
-      //   }
-
       // 如果是从草稿箱载入的，不显示提示 Modal
       if (isLoadingFromDraftBoxRef.current) {
         return;
@@ -142,7 +104,6 @@ const EditRuntime: React.FC<EditRuntimeProps> = ({
       form.setFieldsValue(formValues);
       form.setFieldValue('draftId', draftData.id);
 
-      console.log('formValues: ', form.getFieldsValue());
       // 触发表单值变化，更新组件状态
       await handleFormValuesChange({}, formValues);
       Message.success('已载入暂存数据');
