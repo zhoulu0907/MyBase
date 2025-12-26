@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Button, Input, Space, List, Breadcrumb, Avatar, Typography, Spin, Radio, Checkbox } from '@arco-design/web-react';
 import { IconRight, IconClose } from '@arco-design/web-react/icon';
 import { formatDeptAndUsers } from './const';
+import { SelectDeptMember } from './components/selectDeptMember';
 
 interface IData {
   children: IData[];
@@ -94,12 +95,6 @@ const DeptMember = (props: IProps) => {
     setBreadcrumbs(breadcrumbs.slice(0, index + 1));
   };
 
-  // 构建部门完整路径
-  const buildDepartmentPath = (deptName?: string) => {
-    const deptNames = breadcrumbs.slice(1).map((breadcrumb) => breadcrumb.title);
-    return deptNames.length > 0 ? deptNames.join('/') : (deptName ? deptName : '未分配部门');
-  };
-
   return (
       <div
         style={{
@@ -146,49 +141,22 @@ const DeptMember = (props: IProps) => {
             <Spin loading={loading} block style={{ height: '100%' }}>
               {renderData?.children?.map((item: any) =>
                 item.type === 'user' && !isSelectDepartment ? (
-                  <div key={`user-${item.key}`} style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 }}>
-                    {isMultiple ? (
-                      <Checkbox checked={selectedKeys.includes(item.key)}
-                      onChange={(e) => {
-                        if (e) {
-                          setSelectedKeys([...selectedKeys, item.key]);
-                          const newSelectedMembers = [
-                            ...selectedMembers,
-                            {
-                              key: item.key,
-                              name: item.title,
-                              department: buildDepartmentPath(item?.deptName),    // 使用构建的完整路径
-                              email: item.email
-                            }
-                          ];
-                          if (onUpdateSelectedMembers) {
-                            onUpdateSelectedMembers(newSelectedMembers);
-                          }
-                        } else {
-                          removeMember(item.key);
-                        }
-                      }}/>
-                    ) : (
-                        <Radio key={item.key}
-                           checked={selectedKeys.includes(item.key)}
-                            onChange={() => {
-                                setSelectedKeys([item.key])
-                                const newSelectedMembers = [
-                                    {
-                                        key: item.key,
-                                        name: item.title,
-                                        department: buildDepartmentPath(item?.deptName),
-                                        email: item.email
-                                    }];
-                                if (onUpdateSelectedMembers) {
-                                    onUpdateSelectedMembers(newSelectedMembers);
-                                }}}/>
-                    )}
-                    <Avatar size={24} style={{ backgroundColor: 'rgb(var(--primary-6))' }}>
-                      {item.title?.slice(0, 1) || 'U'}
-                    </Avatar>
-                    <span>{item.title}</span>
-                  </div>
+                <div key={`user-${item.key}`} style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 }}>
+                  <SelectDeptMember
+                    deptInfo={item}
+                    breadCrumbs={breadcrumbs}
+                    selectedKeys={selectedKeys}
+                    selectedMembers={selectedMembers}
+                    isMultiple={isMultiple}
+                    setSelectedKeys={setSelectedKeys}
+                    onUpdateSelectedMembers={onUpdateSelectedMembers}
+                    removeMember={removeMember}
+                  />
+                  <Avatar size={24} style={{ backgroundColor: 'rgb(var(--primary-6))' }}>
+                    {item.title?.slice(0, 1) || 'U'}
+                  </Avatar>
+                  <span>{item.title}</span>
+                </div>
                 ) : item.type !== 'user' && isSelectDepartment ? (
                   <div
                     key={`dept-${item.key}`}
@@ -201,44 +169,16 @@ const DeptMember = (props: IProps) => {
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 }}>
-                      {isMultiple ? (
-                        <Checkbox checked={selectedKeys.includes(item.key)}
-                        onChange={(e) => {
-                          if (e) {
-                            setSelectedKeys([...selectedKeys, item.key]);
-                            const newSelectedMembers = [
-                              ...selectedMembers,
-                              {
-                                key: item.key,
-                                name: item.title,
-                                department: buildDepartmentPath(item?.deptName),
-                                email: item.email
-                              }
-                            ];
-                            if (onUpdateSelectedMembers) {
-                              onUpdateSelectedMembers(newSelectedMembers);
-                            }
-                          } else {
-                            removeMember(item.key);
-                          }
-                        }}/>
-                      ) : (
-                        <Radio key={item.key}
-                             checked={selectedKeys.includes(item.key)}
-                             onChange={(e) => {
-                                console.log(e)
-                                setSelectedKeys([item.key]);
-                                const newSelectedMembers = [
-                                    {
-                                        key: item.key,
-                                        name: item.title,
-                                        department: buildDepartmentPath(item?.deptName),
-                                        email: item.email
-                                    }];
-                                if (onUpdateSelectedMembers) {
-                                    onUpdateSelectedMembers(newSelectedMembers);
-                                }}}/>
-                      )}
+                     <SelectDeptMember
+                        deptInfo={item}
+                        breadCrumbs={breadcrumbs}
+                        selectedKeys={selectedKeys}
+                        selectedMembers={selectedMembers}
+                        isMultiple={isMultiple}
+                        setSelectedKeys={setSelectedKeys}
+                        onUpdateSelectedMembers={onUpdateSelectedMembers}
+                        removeMember={removeMember}
+                      />
                       <Avatar size={24} style={{ backgroundColor: 'rgb(var(--primary-6))' }}>
                         部
                       </Avatar>
