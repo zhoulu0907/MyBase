@@ -6,15 +6,14 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.dashboard.build.dal.dataobject.DashboardTemplateDO;
-import com.cmsr.onebase.module.dashboard.build.model.GoviewProject;
-import com.cmsr.onebase.module.dashboard.build.model.GoviewProjectData;
+import com.cmsr.onebase.module.dashboard.build.model.DashboardProject;
+import com.cmsr.onebase.module.dashboard.build.model.DashboardProjectData;
 import com.cmsr.onebase.module.dashboard.build.service.IDashboardTemplateService;
-import com.cmsr.onebase.module.dashboard.build.service.IGoviewProjectDataService;
-import com.cmsr.onebase.module.dashboard.build.service.IGoviewProjectService;
+import com.cmsr.onebase.module.dashboard.build.service.DashboardProjectDataService;
+import com.cmsr.onebase.module.dashboard.build.service.DashboardProjectService;
 import com.cmsr.onebase.module.dashboard.build.vo.template.DashboardTemplatePageReqVO;
 import com.cmsr.onebase.module.dashboard.build.vo.template.DashboardTemplateRespVO;
 import com.cmsr.onebase.module.dashboard.build.vo.template.DashboardTemplateSaveReqVO;
-import com.mybatisflex.core.paginate.Page;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import jakarta.annotation.Resource;
@@ -45,10 +44,10 @@ public class DashboardTemplateController {
     private IDashboardTemplateService dashboardTemplateService;
 
     @Resource
-    private IGoviewProjectDataService iGoviewProjectDataService;
+    private DashboardProjectDataService dashboardProjectDataService;
 
     @Resource
-    private IGoviewProjectService iGoviewProjectService;
+    private DashboardProjectService dashboardProjectService;
 
     /**
      * 创建仪表盘模板
@@ -78,8 +77,8 @@ public class DashboardTemplateController {
     public CommonResult<Long> saveOtherDashboardTemplate(@RequestBody DashboardTemplateSaveReqVO saveReqVO) {
 
         saveReqVO.setTemplateType(APP_TYPE.getValue());
-        GoviewProject goviewProject = iGoviewProjectService.getById(saveReqVO.getId());
-        GoviewProjectData goviewProjectData = iGoviewProjectDataService.getProjectid(saveReqVO.getId());
+        DashboardProject goviewProject = dashboardProjectService.getById(saveReqVO.getId());
+        DashboardProjectData goviewProjectData = dashboardProjectDataService.getProjectid(saveReqVO.getId());
         if (goviewProjectData == null) {
             throw exception(DASHBOARD_CONTENT_NOT_EXIST);
         }
