@@ -25,7 +25,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
+import static com.cmsr.onebase.module.dashboard.build.enums.ErrorCodeConstants.DASHBOARD_CONTENT_NOT_EXIST;
 import static com.cmsr.onebase.module.dashboard.build.enums.TemplateTypeEnum.APP_TYPE;
 import static com.cmsr.onebase.module.dashboard.build.enums.TemplateTypeEnum.SYSTEM_TYPE;
 
@@ -47,6 +49,7 @@ public class DashboardTemplateController {
 
     @Resource
     private IGoviewProjectService iGoviewProjectService;
+
     /**
      * 创建仪表盘模板
      *
@@ -75,8 +78,11 @@ public class DashboardTemplateController {
     public CommonResult<Long> saveOtherDashboardTemplate(@RequestBody DashboardTemplateSaveReqVO saveReqVO) {
 
         saveReqVO.setTemplateType(APP_TYPE.getValue());
-        GoviewProject goviewProject= iGoviewProjectService.getById(saveReqVO.getId());
+        GoviewProject goviewProject = iGoviewProjectService.getById(saveReqVO.getId());
         GoviewProjectData goviewProjectData = iGoviewProjectDataService.getProjectid(saveReqVO.getId());
+        if (goviewProjectData == null) {
+            throw exception(DASHBOARD_CONTENT_NOT_EXIST);
+        }
         saveReqVO.setContent(goviewProjectData.getContent());
         saveReqVO.setIndexImage(goviewProject.getIndexImage());
 
