@@ -211,7 +211,7 @@ const ScreenTemplate: FC = () => {
       />
       {/* 编辑弹框 */}
       <Modal
-        title={<div style={{ textAlign: 'left', fontWeight: 500 }}>修改大屏信息</div>}
+        title={<div style={{ textAlign: 'left', fontWeight: 500 }}>修改模板信息</div>}
         visible={editVisible}
         onOk={handleEditOk}
         onCancel={handleEditCancel}

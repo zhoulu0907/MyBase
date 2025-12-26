@@ -185,7 +185,6 @@ const PageManagerPage: FC = () => {
 
   useEffect(() => {
     const loadMainMetaData = async () => {
-      console.log('loadMainMetaData curMenu.value: ', curMenu.value);
       const req: GetPageSetIdReq = {
         menuId: curMenu.value?.id
       };
@@ -591,6 +590,7 @@ const PageManagerPage: FC = () => {
     }
     if (curMenu.value?.pagesetType === dashboardPageType) {
       const dashboardInfo = await listPageView({ pageSetId });
+
       const dashboardId = dashboardInfo.pages && dashboardInfo.pages.length > 0 ? dashboardInfo.pages[0].id : null;
       window.open(
         `http://s25029301301.dev.internal.virtueit.net:81/v0/appdashboard/#/chart/home/${dashboardId}/${appId}/${dashboardType}`,

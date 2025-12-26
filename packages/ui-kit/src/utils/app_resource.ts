@@ -369,7 +369,6 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
   const res = await listPageView({
     pageSetId: pageSetId
   });
-
   if (res && res.pages) {
     // 如果没有视图选中，就选中默认视图
 

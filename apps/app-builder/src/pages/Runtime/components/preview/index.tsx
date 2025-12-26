@@ -5,6 +5,7 @@ import {
   getPageSetId,
   getPageSetMetaData,
   PageType,
+  listPageView,
   type AppEntityField,
   type GetPageSetIdReq
 } from '@onebase/app';
@@ -27,6 +28,7 @@ import {
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { Fragment, useCallback, useEffect, useState } from 'react';
 import styles from './index.module.less';
+import { getFileUrlById } from '@onebase/platform-center';
 
 interface PreviewProps {
   menuId: string;
@@ -36,7 +38,6 @@ interface PreviewProps {
 
 const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType }) => {
   useSignals();
-
   const [form] = Form.useForm();
 
   const {
@@ -116,6 +117,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
       handleGetData(editTargetId);
     }
   }, [tableName, mainMetaData]);
+  const [screenImg, setScreenImg] = useState('');
 
   useEffect(() => {
     if (pageSetId) {
@@ -139,9 +141,18 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
         loadData();
       }
     }
+    getImgIndex(pageSetId);
     // 优先切换到列表页
     setPageType(pagesetType === PageType.WORKBENCH ? EDITOR_TYPES.WORKBENCH_EDITOR : EDITOR_TYPES.LIST_EDITOR);
   }, [pageSetId]);
+
+  const getImgIndex = async (pageSetId: string) => {
+    const res = await listPageView({
+      pageSetId: pageSetId
+    });
+    console.log(res.pages[0].indexImage, pagesetType, 'img===================');
+    setScreenImg(res.pages[0].indexImage);
+  };
 
   const loadPageSetInfo = async (pageSetId: string) => {
     // 工作台使用独立加载逻辑
@@ -164,7 +175,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
   };
 
   const cancelSubmitForm = () => {
-    console.log('取消提交');
     form.resetFields();
 
     setPageType(EDITOR_TYPES.LIST_EDITOR);
@@ -175,7 +185,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
     form.resetFields();
 
     if (id && id !== '') {
-      console.log('edit row id: ', id);
       setEditTargetId(id);
       // 直接获取数据，避免依赖状态变化触发
       if (tableName) {
@@ -237,7 +246,11 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
         ) : (
           pageType === EDITOR_TYPES.LIST_EDITOR && (
             <div className={styles.noData}>
-              <img src={EditorEmpty} alt="暂无数据" />
+              {screenImg ? (
+                <img src={getFileUrlById(screenImg)} alt="大屏图片" />
+              ) : (
+                <img src={EditorEmpty} alt="暂无数据" />
+              )}
             </div>
           )
         )}
