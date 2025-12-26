@@ -409,7 +409,7 @@ const LoginContent: React.FC = () => {
               />
             </Form.Item>
             <div className={styles.forgotPassword}>
-              <span onClick={() => navigate('/onebase/forget-password')}>忘记密码</span>
+              <span onClick={() => navigate(`/onebase/forget-password/${tenantId}`)}>忘记密码</span>
             </div>
             <Button
               type="primary"

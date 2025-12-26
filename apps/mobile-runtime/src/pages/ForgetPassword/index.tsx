@@ -1,8 +1,7 @@
 import phoneIcon from '@/assets/images/login/phone.svg';
-import safeIcon from '@/assets/images/login/safe.svg';
 import passwordIcon from '@/assets/images/login/password.svg';
 import CustomNav from '@/pages/components/Nav';
-import { Form, Input, Button, Popup } from '@arco-design/mobile-react';
+import { Form, Input, Button } from '@arco-design/mobile-react';
 import { type IFormInstance } from '@arco-design/mobile-react/esm/form';
 import { IconSuccessCircle } from '@arco-design/mobile-react/esm/icon';
 import { ValidatorType } from '@arco-design/mobile-utils';
@@ -10,12 +9,14 @@ import { useRef, useState } from 'react';
 import VerifyCode from '../ThirdLogin/components/VerifyCode';
 import {
   sendVerifyCodeApi,
-  getCaptchaApi,
+  forgotPWD,
   checkCaptchaApi,
   runtimeThirdLogin,
-  type RuntimeThirdLoginRequest,
+  type forgotPWDParams,
   type ThirdUserLoginResponse
 } from '@onebase/platform-center';
+import { getOrCreateDeviceInfo, getPublicKey, sm2Encrypt, TokenManager, getHashQueryParam } from '@onebase/common';
+import { useNavigate } from 'react-router-dom';
 import styles from './index.module.less';
 
 interface FormRef {
@@ -24,6 +25,9 @@ interface FormRef {
 }
 
 const ForgetPassword = () => {
+  const navigate = useNavigate();
+  const tenantId = getHashQueryParam('tenantId') || '';
+
   const formRef = useRef<FormRef>(null);
   const [loading, setLoading] = useState(false);
   const [userMobile, setUserMobile] = useState('');
@@ -87,6 +91,38 @@ const ForgetPassword = () => {
     ]
   };
 
+  const handleSubmit = async () => {
+    try {
+      await formRef.current?.form.validateFields();
+      const values = formRef.current?.form.getFieldsValue();
+      if (!values) {
+        return;
+      }
+      setLoading(true);
+
+      const headers = {
+        'X-Tenant-Id': tenantId
+      };
+      const password = await sm2Encrypt(getPublicKey(), values?.password || '');
+
+      const params: forgotPWDParams = {
+        mobile: values.mobile,
+        password: password,
+        verifyCode: values.verifyCode
+      };
+      const res = await forgotPWD(params, headers);
+
+      if (res) {
+        navigate(-1);
+      }
+      setLoading(true);
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className={styles.forgetPassword}>
       <CustomNav title="" />
@@ -98,12 +134,26 @@ const ForgetPassword = () => {
               label={<img src={phoneIcon} alt="phone" className={styles.loginFormIcon} />}
               placeholder="请输入手机号"
               maxLength={11}
+              onChange={(_, value) => setUserMobile(value)}
             />
           </Form.Item>
           <Form.Item label="短信验证码" field="verifyCode" rules={rules.verifyCode}>
             <VerifyCode userMobile={userMobile} verifyType={'mobile'} sendVerifyCode={sendVerifyCodeApi} />
           </Form.Item>
+          <Form.Item label="密码" field="password" rules={rules.password}>
+            <Input
+              label={<img src={passwordIcon} alt="password" className={styles.popupFormIcon} />}
+              placeholder="请输入新密码"
+              type="password"
+            />
+          </Form.Item>
+          <Form.Item label="确认密码" field="confirmNewPassword" rules={rules.confirmNewPassword}>
+            <Input type="password" label={<IconSuccessCircle />} placeholder="请再次输入新密码" />
+          </Form.Item>
         </Form>
+        <Button type="primary" size="large" className={styles.submitBtn} loading={loading} onClick={handleSubmit}>
+          确认
+        </Button>
       </div>
     </div>
   );
