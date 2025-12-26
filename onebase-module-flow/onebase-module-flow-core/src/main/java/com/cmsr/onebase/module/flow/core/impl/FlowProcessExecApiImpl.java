@@ -8,6 +8,7 @@ import com.cmsr.onebase.module.flow.context.express.ExpressionExecutor;
 import com.cmsr.onebase.module.flow.context.express.OrExpression;
 import com.cmsr.onebase.module.flow.context.graph.nodes.start.StartEntityNodeData;
 import com.cmsr.onebase.module.flow.context.provider.FlowConditionsProvider;
+import com.cmsr.onebase.module.flow.context.table.RowData;
 import com.cmsr.onebase.module.flow.core.flow.ExecutorInput;
 import com.cmsr.onebase.module.flow.core.flow.ExecutorResult;
 import com.cmsr.onebase.module.flow.core.flow.FlowProcessExecutor;
@@ -113,7 +114,7 @@ public class FlowProcessExecApiImpl implements FlowProcessExecApi {
 
     private EntityTriggerRespDTO entityTrigger(EntityTriggerReqDTO reqDTO, StartEntityNodeData nodeData) {
         FlowProcessExecutor flowProcessExecutor = flowProcessExecutorObjectProvider.getIfAvailable();
-        Map<String, Object> inputData = reqDTO.toInputData();
+        RowData inputData = reqDTO.toInputData();
         EntityTriggerRespDTO respDTO = new EntityTriggerRespDTO(reqDTO.getTraceId(), nodeData.getProcessId());
         //先判断
         if (flowProcessExecutor == null) {

@@ -72,7 +72,7 @@ public class RuntimeAppMenuServiceImpl implements RuntimeAppMenuService {
     public List<MenuListRespVO> listApplicationMenu() {
         Long userId = SecurityFrameworkUtils.getLoginUserId();
         Long applicationId = ApplicationManager.getRequiredApplicationId();
-        //
+        // TODO 临时方案，后面要修改
         appAuthSecurityApi.cleanAuthCache(userId, applicationId);
         appAuthSecurityApi.loadAuthCache(userId, applicationId);
         //
@@ -84,16 +84,25 @@ public class RuntimeAppMenuServiceImpl implements RuntimeAppMenuService {
         if (CollectionUtils.isEmpty(menuDOS)) {
             return Collections.emptyList();
         }
-        return convertToMenuListRespVOS(menuDOS);
+        LinkedList<MenuListRespVO> menuListRespVOS = convertToMenuListRespVOS(menuDOS);
+        // 过滤掉没有子菜单的菜单
+        Iterator<MenuListRespVO> iterator = menuListRespVOS.iterator();
+        while (iterator.hasNext()) {
+            MenuListRespVO menu = iterator.next();
+            if (MenuTypeEnum.isGroup(menu.getMenuType()) && CollectionUtils.isEmpty(menu.getChildren())) {
+                iterator.remove();
+            }
+        }
+        return menuListRespVOS;
     }
 
-    private List<MenuListRespVO> convertToMenuListRespVOS(List<AppMenuDO> menuDOS) {
+    private LinkedList<MenuListRespVO> convertToMenuListRespVOS(List<AppMenuDO> menuDOS) {
         List<MenuListRespVO> menuListRespList = BeanUtils.toBean(menuDOS, MenuListRespVO.class);
         enrichPagesetType(menuListRespList);
         // 把第一层的菜单添加到列表中
-        List<MenuListRespVO> levelOneMenus = menuListRespList.stream()
+        LinkedList<MenuListRespVO> levelOneMenus = menuListRespList.stream()
                 .filter(v -> MenuUtils.ROOT_MENU_UUID.equals(v.getParentUuid()))
-                .toList();
+                .collect(Collectors.toCollection(LinkedList::new));
         // 递归实现每个菜单的子菜单
         for (MenuListRespVO respVO : levelOneMenus) {
             LinkedList<MenuListRespVO> children = recursiveGetChildren(respVO.getMenuUuid(), menuListRespList);
@@ -108,8 +117,11 @@ public class RuntimeAppMenuServiceImpl implements RuntimeAppMenuService {
         for (MenuListRespVO respVO : listRespVOS) {
             if (Objects.equals(respVO.getParentUuid(), parentUuid)) {
                 // 只有父菜单的uuid等于当前菜单的父菜单的uuid时，才添加子菜单，继续递归
-                children.add(respVO);
-                respVO.setChildren(recursiveGetChildren(respVO.getMenuUuid(), listRespVOS));
+                LinkedList<MenuListRespVO> vos = recursiveGetChildren(respVO.getMenuUuid(), listRespVOS);
+                if (CollectionUtils.isNotEmpty(vos)) {
+                    respVO.setChildren(vos);
+                    children.add(respVO);
+                }
             }
         }
         return children.isEmpty() ? null : children;

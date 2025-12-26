@@ -29,6 +29,8 @@ import org.anyline.entity.DataSet;
 import org.anyline.metadata.Table;
 import org.anyline.proxy.ServiceProxy;
 import org.anyline.service.AnylineService;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -68,6 +70,11 @@ public class DataInspectServiceImpl implements DataInspectService {
         } else {
             datasourceDO = datasourceRepository.getById(datasourceId);
             connectProperties = JsonUtils.parseObject(datasourceDO.getConfig(), ConnectCryptoProperties.class);
+            String inputPwd = pingVO.getConfig().getPassword();
+            String storedPwd = connectProperties.getPassword();
+            if (StringUtils.isNotBlank(inputPwd) && !Strings.CS.equals(inputPwd, storedPwd)) {
+                connectProperties.setPassword(inputPwd);
+            }
         }
         DataSource datasource = dataSourceFactory.constructDataSource(datasourceType, connectProperties, true);
         String runnerKey = "ping-" + UuidUtils.getUuid();

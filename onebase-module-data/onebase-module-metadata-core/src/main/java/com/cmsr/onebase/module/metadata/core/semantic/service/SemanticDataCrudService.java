@@ -129,7 +129,7 @@ public class SemanticDataCrudService {
             return;
         }
         // 创建数据前置触发前 添加所有的参数
-        Map<String, SemanticFieldValueDTO<Object>> allFieldValueMapToCreate = addAllFieldBeforeWorkFlowTrigger(recordDTO,TriggerEventEnum.BEFORE_CREATE);
+        Map<String, SemanticFieldValueDTO<Object>> allFieldValueMapToCreate = addAllFieldBeforeWorkFlowTrigger(recordDTO, TriggerEventEnum.BEFORE_CREATE);
         // 前置工作流：用于校验、默认值填充、上下文准备等
         semanticWorkflowExecutor.preExecute(
                 recordDTO.getRecordContext().getOperationType(),
@@ -165,7 +165,7 @@ public class SemanticDataCrudService {
         }
 
         // 创建数据后置触发前 添加所有的参数
-        Map<String, SemanticFieldValueDTO<Object>> allFieldValueMapCreated = addAllFieldBeforeWorkFlowTrigger(recordDTO,TriggerEventEnum.AFTER_CREATE);
+        Map<String, SemanticFieldValueDTO<Object>> allFieldValueMapCreated = addAllFieldBeforeWorkFlowTrigger(recordDTO, TriggerEventEnum.AFTER_CREATE);
         // 后置工作流：可做审计、事件发布、缓存刷新等
         log.debug("开始执行后置工作流ID: {} OPER:{}, TABLE: {}",
                 recordDTO.getRecordContext().getTraceId(),
@@ -202,7 +202,7 @@ public class SemanticDataCrudService {
             return;
         }
         // 更新数据前置触发前 添加所有的参数 前置后置触发之前都需要添加该方法 每次都从db中查询最新的数据行
-        Map<String, SemanticFieldValueDTO<Object>> allFieldValueMapToUpdate = addAllFieldBeforeWorkFlowTrigger(recordDTO,TriggerEventEnum.BEFORE_UPDATE);
+        Map<String, SemanticFieldValueDTO<Object>> allFieldValueMapToUpdate = addAllFieldBeforeWorkFlowTrigger(recordDTO, TriggerEventEnum.BEFORE_UPDATE);
         // 前置工作流：参数校验、权限校验、上下文准备
         semanticWorkflowExecutor.preExecute(
                 recordDTO.getRecordContext().getOperationType(),
@@ -239,7 +239,7 @@ public class SemanticDataCrudService {
             upsertRelationConnectors(recordDTO, parentId);
         }
         // 更新数据后置触发前 添加所有的参数
-        Map<String, SemanticFieldValueDTO<Object>> allFieldValueMapUpdated = addAllFieldBeforeWorkFlowTrigger(recordDTO,TriggerEventEnum.AFTER_UPDATE);
+        Map<String, SemanticFieldValueDTO<Object>> allFieldValueMapUpdated = addAllFieldBeforeWorkFlowTrigger(recordDTO, TriggerEventEnum.AFTER_UPDATE);
         // 后置工作流：审计、事件发布等
         semanticWorkflowExecutor.postExecute(
                 recordDTO.getRecordContext().getOperationType(),
@@ -270,7 +270,7 @@ public class SemanticDataCrudService {
             return 0;
         }
         // 删除数据触发之前 添加所有的参数
-        Map<String, SemanticFieldValueDTO<Object>> valueDTOMapDeleted = addAllFieldBeforeWorkFlowTrigger(recordDTO,TriggerEventEnum.BEFORE_DELETE);
+        Map<String, SemanticFieldValueDTO<Object>> valueDTOMapDeleted = addAllFieldBeforeWorkFlowTrigger(recordDTO, TriggerEventEnum.BEFORE_DELETE);
         // 前置工作流：权限校验、审计记录准备等
         semanticWorkflowExecutor.preExecute(
                 recordDTO.getRecordContext().getOperationType(),
@@ -509,6 +509,12 @@ public class SemanticDataCrudService {
             }
         }
         return affected;
+    }
+
+    public void deleteByDraftId(SemanticRecordDTO recordDTO, Long draftId) {
+        SemanticEntitySchemaDTO entity = recordDTO.getEntitySchema();
+        String primaryKey = getPrimaryKeyFieldName(entity.getFields());
+        dynamicMetadataRepository.deleteByDrafId(entity.getTableName(), primaryKey, draftId);
     }
 
     /**
@@ -1174,35 +1180,36 @@ public class SemanticDataCrudService {
 
     /**
      * 流程触发前 添加实体的所有参数
+     *
      * @param recordDTO
      */
-    private Map<String, SemanticFieldValueDTO<Object>> addAllFieldBeforeWorkFlowTrigger(SemanticRecordDTO recordDTO, TriggerEventEnum eventEnum){
-        log.info("补全实体{}流程触发需要的所有参数值,触发类型：{}",recordDTO.getEntitySchema().getTableName(),eventEnum.getCode().contains("Delete")? "删除" : eventEnum);
+    private Map<String, SemanticFieldValueDTO<Object>> addAllFieldBeforeWorkFlowTrigger(SemanticRecordDTO recordDTO, TriggerEventEnum eventEnum) {
+        log.info("补全实体{}流程触发需要的所有参数值,触发类型：{}", recordDTO.getEntitySchema().getTableName(), eventEnum.getCode().contains("Delete") ? "删除" : eventEnum);
         Map<String, SemanticFieldValueDTO<Object>> valueDTOMap = new HashMap<>();
         List<SemanticFieldSchemaDTO> fields = recordDTO.getEntitySchema().getFields();
         Object id = recordDTO.getEntityValue().getId();
-        if(id == null){
+        if (id == null) {
             Map<String, SemanticFieldValueDTO<Object>> fieldValueMap = recordDTO.getEntityValue().getFieldValueMap();
-            for(SemanticFieldSchemaDTO semanticFieldSchemaDTO : fields){
+            for (SemanticFieldSchemaDTO semanticFieldSchemaDTO : fields) {
                 String fieldName = semanticFieldSchemaDTO.getFieldName();
-                if(fieldValueMap.containsKey(fieldName)) {
-                    valueDTOMap.put(fieldName,fieldValueMap.get(fieldName));
-                }else{
+                if (fieldValueMap.containsKey(fieldName)) {
+                    valueDTOMap.put(fieldName, fieldValueMap.get(fieldName));
+                } else {
                     SemanticFieldValueDTO semanticFieldValueDTO = new SemanticFieldValueDTO(SemanticFieldTypeEnum.valueOf(semanticFieldSchemaDTO.getFieldType()));
                     semanticFieldValueDTO.setFieldId(semanticFieldSchemaDTO.getId());
                     semanticFieldValueDTO.setFieldUuid(semanticFieldSchemaDTO.getFieldUuid());
                     semanticFieldValueDTO.setTableName(semanticFieldValueDTO.getTableName());
                     semanticFieldValueDTO.setFieldName(fieldName);
                     semanticFieldValueDTO.setRawValue(null);
-                    valueDTOMap.put(fieldName,semanticFieldValueDTO);
+                    valueDTOMap.put(fieldName, semanticFieldValueDTO);
                 }
             }
             return valueDTOMap;
         }
         QueryWrapper qw = QueryWrapper.create().where(new QueryColumn("id").eq(toLongIfNotEmpty(id)))
                 .and(new QueryColumn("deleted").eq(0));
-        Row row = dynamicMetadataRepository.selectOneByQuery(recordDTO.getEntitySchema().getTableName(),qw,fields);
-        for(SemanticFieldSchemaDTO semanticFieldSchemaDTO : fields){
+        Row row = dynamicMetadataRepository.selectOneByQuery(recordDTO.getEntitySchema().getTableName(), qw, fields);
+        for (SemanticFieldSchemaDTO semanticFieldSchemaDTO : fields) {
             String fieldName = semanticFieldSchemaDTO.getFieldName();
             Object value = row.get(fieldName);
             SemanticFieldValueDTO semanticFieldValueDTO = new SemanticFieldValueDTO(SemanticFieldTypeEnum.valueOf(semanticFieldSchemaDTO.getFieldType()));
@@ -1211,7 +1218,7 @@ public class SemanticDataCrudService {
             semanticFieldValueDTO.setTableName(semanticFieldValueDTO.getTableName());
             semanticFieldValueDTO.setFieldName(fieldName);
             semanticFieldValueDTO.setRawValue(value);
-            valueDTOMap.put(fieldName,semanticFieldValueDTO);
+            valueDTOMap.put(fieldName, semanticFieldValueDTO);
         }
         return valueDTOMap;
     }
