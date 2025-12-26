@@ -4,7 +4,6 @@ import { IconPlus } from '@arco-design/web-react/icon';
 import styles from './index.module.less';
 import { DataSetParams, DelDataSetList } from '@onebase/platform-center';
 import { useLocation } from 'react-router-dom';
-// import { format } from 'date-fns';
 import dayjs from 'dayjs';
 import { TokenManager, getDashBoardURL } from '@onebase/common';
 
@@ -80,7 +79,7 @@ const DataSet: FC = () => {
   };
   //编辑
   const handleEdit = async (record: DataTable) => {
-    window.open(`${resourceUrl}project/dataset-form?editId=${record.id}`, '_blank');
+    window.open(`${resourceUrl}project/dataset-form?id=${record.id}`, '_blank');
   };
   //删除
   const [deleteVisible, setDeleteVisible] = useState<boolean>(false);
