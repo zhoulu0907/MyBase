@@ -10,15 +10,9 @@ const XautoCode = memo((props: XautoCodeConfig & { runtime?: boolean; detailMode
   const { label, dataField, tooltip, placeholder, status, layout, runtime = true, detailMode } = props;
 
   const { form } = Form.useFormContext();
-  const [fieldId, setFieldId] = useState('');
 
+  const fieldId = dataField.length > 0 ? dataField[dataField.length - 1]: `${FORM_COMPONENT_TYPES.AUTO_CODE}_${nanoid()}`
   const fieldValue = Form.useWatch(fieldId, form);
-
-  useEffect(() => {
-    if (dataField.length > 0) {
-      setFieldId(dataField[dataField.length - 1]);
-    }
-  }, [dataField]);
 
   return (
     <div className="formWrapper">
@@ -30,7 +24,7 @@ const XautoCode = memo((props: XautoCodeConfig & { runtime?: boolean; detailMode
         layout={layout}
         tooltip={tooltip}
         labelCol={layout === 'horizontal' ? { span: 10 } : {}}
-        field={dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.AUTO_CODE}_${nanoid()}`}
+        field={fieldId}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
           margin: 0,
