@@ -39,11 +39,11 @@ public class SemanticCreateExecutor {
     @Resource
     private UidGenerator uidGenerator;
 
-    public Map<String, Object> execute(String tableName, Long menuId, String traceId, SemanticMergeBodyVO body) {
-        return doExecuteProcess(tableName, menuId, traceId, body);
+    public Map<String, Object> execute(String tableName, Long menuId, String traceId, SemanticMergeBodyVO body, Long draftId) {
+        return doExecuteProcess(tableName, menuId, traceId, body, draftId);
     }
 
-    public Map<String, Object> doExecuteProcess(String tableName, Long menuId, String traceId, SemanticMergeBodyVO body) {
+    public Map<String, Object> doExecuteProcess(String tableName, Long menuId, String traceId, SemanticMergeBodyVO body, Long draftId) {
         try {
             // 1) 构建 RecordDTO（包含实体校验与基本数据映射）
             SemanticRecordDTO record = semanticMergeRecordAssembler.assembleMergeBody(tableName, body, menuId, traceId,
@@ -57,16 +57,19 @@ public class SemanticCreateExecutor {
 
             // 4) 功能权限校验
             semanticPermissionValidator.validate(record);
-            
+
             // 5) 数据校验（RecordDTO 简化入口）
             semanticValidationManager.validate(record);
 
             // 6) 数据存储：CRUDQ 服务（RecordDTO 入口）
             semanticDataCrudService.create(record);
-            
+
             // 7) 数据查询：通过 DataCrudService 读取主表数据
             Map<String, Object> result = semanticDataCrudService.readById(record);
-            
+
+            //
+            semanticDataCrudService.deleteByDraftId(record, draftId);
+
             // 8) 日志记录：当前类 logProcess
             semanticProcessLogger.log(record);
             return result;
