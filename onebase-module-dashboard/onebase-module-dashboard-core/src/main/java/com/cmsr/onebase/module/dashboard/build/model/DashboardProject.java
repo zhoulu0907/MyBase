@@ -9,12 +9,12 @@ import lombok.Data;
  *
  * </p>
  *
- * @author fc
+ * @author mty
  * @since 2023-04-30
  */
 @Table("dashboard_project")
 @Data
-public class GoviewProject extends BaseTenantEntity {
+public class DashboardProject extends BaseTenantEntity {
 
     private String projectName;
 

@@ -20,8 +20,8 @@ import com.cmsr.onebase.module.app.core.enums.resource.PageEnum;
 import com.cmsr.onebase.module.app.core.enums.resource.PageTypeSetEnum;
 import com.cmsr.onebase.module.app.core.provider.resource.PageSetServiceProvider;
 import com.cmsr.onebase.module.app.core.vo.resource.*;
-import com.cmsr.onebase.module.screen.api.GoViewProjectApi;
-import com.cmsr.onebase.module.screen.api.dto.GoViewProjectDTO;
+import com.cmsr.onebase.module.screen.api.DashboardProjectApi;
+import com.cmsr.onebase.module.screen.api.dto.DashboardProjectDTO;
 import com.cmsr.onebase.module.screen.api.enums.DashboardCreateTypeSetEnum;
 import jakarta.annotation.Resource;
 import lombok.Setter;
@@ -62,7 +62,7 @@ public class PageSetServiceImpl implements PageSetService {
     private AppMenuRepository appMenuRepository;
 
     @Resource
-    private GoViewProjectApi goViewProjectApi;
+    private DashboardProjectApi dashboardProjectApi;
 
     @Override
     public Long getPageSetIdByMenuId(Long menuId) {
@@ -96,25 +96,25 @@ public class PageSetServiceImpl implements PageSetService {
             //根据数据大屏的创建类型创建数据大屏页面
             if (Objects.equals(createPageSetDTO.getCreateDashboardType(), DashboardCreateTypeSetEnum.DASHBOARD_LINK.getCode())){
                 //1.1 如果是绑定现有大屏，则查询数据大屏信息，如不存在则报错
-                List<GoViewProjectDTO> dashboardList = goViewProjectApi.getDashboard(createPageSetDTO.getDashboardId());
+                List<DashboardProjectDTO> dashboardList = dashboardProjectApi.getDashboard(createPageSetDTO.getDashboardId());
                 if (dashboardList.isEmpty()){
                     throw ServiceExceptionUtil.exception(AppResourceErrorCodeConstants.DASHBOARD_NOT_EXIST);
                 }
             } else if (Objects.equals(createPageSetDTO.getCreateDashboardType(), DashboardCreateTypeSetEnum.DASHBOARD_TEMPLATE.getCode())){
                 //1.2 从模板创建数据大屏
-                Long dashboardId = goViewProjectApi.createDashboardByTemplate(createPageSetDTO.getDashboardId());
+                Long dashboardId = dashboardProjectApi.createDashboardByTemplate(createPageSetDTO.getDashboardId());
                 if (dashboardId == null){
                     throw ServiceExceptionUtil.exception(AppResourceErrorCodeConstants.DASHBOARD_TEMPLATE_NOT_EXIST);
                 }
                 createPageSetDTO.setDashboardId(dashboardId);
             } else {
                 //1.3 从空白页创建数据大屏
-                GoViewProjectDTO goViewProjectDTO = new GoViewProjectDTO();
+                DashboardProjectDTO dashboardProjectDTO = new DashboardProjectDTO();
 
-                goViewProjectDTO.setProjectName("新大屏");
-                goViewProjectDTO.setState(-1);
-                goViewProjectDTO.setAppId(applicationId);
-                Long dashboardId = goViewProjectApi.createDashboard(goViewProjectDTO);
+                dashboardProjectDTO.setProjectName("新大屏");
+                dashboardProjectDTO.setState(-1);
+                dashboardProjectDTO.setAppId(applicationId);
+                Long dashboardId = dashboardProjectApi.createDashboard(dashboardProjectDTO);
                 createPageSetDTO.setDashboardId(dashboardId);
             }
         }
