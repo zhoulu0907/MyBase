@@ -45,9 +45,11 @@ public class JsonGraphMapper {
                     if (annotation != null) {
                         Class<? extends NodeData> nodeDataClass = (Class<? extends NodeData>) clazz;
                         TYPE_CLASS_MAP.put(annotation.value(), nodeDataClass);
+                        log.debug("加载节点类型[{}] @{}", annotation.value(), nodeDataClass.getName());
                     }
                 }
             }
+            log.debug("初始化节点数据类型映射成功");
         } catch (Exception e) {
             log.error("初始化节点数据类型映射失败", e);
         }
@@ -77,6 +79,7 @@ public class JsonGraphMapper {
 
         private NodeData getNodeDataByType(JsonNode dataNode, String type, ObjectMapper mapper) throws com.fasterxml.jackson.core.JsonProcessingException {
             Class<? extends NodeData> dataClass = TYPE_CLASS_MAP.get(type);
+            log.debug("获取到节点类型:{}, 节点内容: {}", type, dataNode.toString());
             if (dataClass != null) {
                 return mapper.treeToValue(dataNode, dataClass);
             }

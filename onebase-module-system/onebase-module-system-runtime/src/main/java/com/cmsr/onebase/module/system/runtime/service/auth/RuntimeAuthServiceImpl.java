@@ -8,6 +8,7 @@ import com.cmsr.onebase.framework.common.biz.security.dto.LoginFailureResultDTO;
 import com.cmsr.onebase.framework.common.biz.security.dto.PasswordExpiryCheckDTO;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.enums.RunModeEnum;
+import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
@@ -319,6 +320,9 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         reqVO.setPassword(pwdEnHelper.decryptHexStr(reqVO.getPassword()));
         // 2.2 使用账号密码，进行登录
         AdminUserDO user = mobileAuthenticate(reqVO.getMobile(), reqVO.getPassword());
+        if (!Objects.equals(UserTypeEnum.CORP.getValue(), user.getUserType())) {
+            throw exception(AUTH_VERIFY_NO_CORP_LOGIN_ERROR);
+        }
 
         // 验证企业状态是否异常
         checkCropStatus(user.getCorpId());
@@ -473,8 +477,14 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         smsCodeValidateReq.setCode(reqVO.getVerifyCode());
         smsCodeValidateReq.setMobile(reqVO.getMobile());
         smsCodeValidateReq.setScene(SmsSceneEnum.MEMBER_LOGIN.getScene());
-        smsCodeApi.validateSmsCode(smsCodeValidateReq);
-
+        CommonResult<Boolean> validateResp = smsCodeApi.validateSmsCode(smsCodeValidateReq);
+        if (!validateResp.isSuccess()) {
+            throw exception(INTERNAL_SERVER_ERROR);
+        }
+        boolean validateResult = validateResp.getData();
+        if (validateResult) {
+            return;
+        }
         throw exception(AUTH_VERIFY_CODE_ERROR);
     }
 

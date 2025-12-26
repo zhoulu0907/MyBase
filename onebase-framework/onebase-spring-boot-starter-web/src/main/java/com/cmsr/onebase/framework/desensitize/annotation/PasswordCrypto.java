@@ -1,7 +1,7 @@
 package com.cmsr.onebase.framework.desensitize.annotation;
 
-import com.cmsr.onebase.framework.desensitize.serializer.PasswordDesensitizeDeserializer;
-import com.cmsr.onebase.framework.desensitize.serializer.PasswordDesensitizeSerializer;
+import com.cmsr.onebase.framework.desensitize.serializer.PasswordDecryptoDeserializer;
+import com.cmsr.onebase.framework.desensitize.serializer.PasswordEncryptoSerializer;
 import com.fasterxml.jackson.annotation.JacksonAnnotationsInside;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -16,8 +16,8 @@ import java.lang.annotation.*;
 @Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 @JacksonAnnotationsInside
-@JsonSerialize(using = PasswordDesensitizeSerializer.class)
-@JsonDeserialize(using = PasswordDesensitizeDeserializer.class)
-public @interface PasswordDesensitize {
+@JsonSerialize(using = PasswordEncryptoSerializer.class)
+@JsonDeserialize(using = PasswordDecryptoDeserializer.class)
+public @interface PasswordCrypto {
 
 }

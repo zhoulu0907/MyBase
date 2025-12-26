@@ -10,13 +10,14 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
 {
-  "templateName": "Dashboard Template 3",
-  "content": "{\"layout2\": [], \"config2\": {}}",
-  "templateType": "app",
-  "hot": 0,
+  "id": 194097457982963712,
+  "templateName": "9527",
+  "content": "",
+  "templateType": "",
+  "hot": null,
   "appId": 184716905786900486,
-  "indexImage": "https://example.com/image3.jpg",
-  "remarks": "备注2"
+  "indexImage": null,
+  "remarks": null
 }
 
 ### 2. 更新仪表盘模板
@@ -48,6 +49,17 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
 ### 6. 分页查询仪表盘模板
-GET {{devUrl}}/dashboard/template/page?templateType=system
+GET {{baseUrl}}/dashboard/template/page?templateType=system
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
+
+### 7. 另存为仪表盘模板
+POST {{baseUrl}}/dashboard/template/saveOtherDashboardTemplate
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+{
+  "id": 193960070569099264,
+  "appId": 172828401912610816
+}

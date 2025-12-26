@@ -8,7 +8,7 @@ import org.apache.commons.lang3.Strings;
 
 import java.io.IOException;
 
-public class PasswordJsonDeserializer extends JsonDeserializer<String> {
+public class PasswordDesensitizeDeserializer extends JsonDeserializer<String> {
 
     @Override
     public String deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {

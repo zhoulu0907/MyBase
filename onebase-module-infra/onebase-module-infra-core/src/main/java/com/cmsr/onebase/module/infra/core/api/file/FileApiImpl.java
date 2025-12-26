@@ -47,9 +47,4 @@ public class FileApiImpl implements FileApi {
                 createReqDTO.getDirectory(), createReqDTO.getType(), FileVisitModeEnum.PUBLIC.getValue()));
     }
 
-    @Override
-    public void dashboardDownload(Long id, HttpServletRequest request, HttpServletResponse response) throws Exception {
-        fileService.getFileContent(id, request, response, FileVisitModeEnum.PUBLIC.getValue());
-    }
-
 }
