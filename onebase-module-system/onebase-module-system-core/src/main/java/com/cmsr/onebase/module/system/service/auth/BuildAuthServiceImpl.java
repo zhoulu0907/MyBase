@@ -318,7 +318,7 @@ public class BuildAuthServiceImpl implements BuildAuthService {
             throw exception(USER_NOT_EXISTS);
         }
         // 创建 Token 令牌，记录登录日志
-        return createTokenAfterLoginSuccess(user.getUserType(), user.getId(), reqVO.getMobile(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_MOBILE,null);
+        return createTokenAfterLoginSuccess(user.getUserType(), user.getId(), reqVO.getMobile(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_MOBILE, null);
     }
 
     private void createLoginLog(Long userId, String username,
@@ -467,7 +467,7 @@ public class BuildAuthServiceImpl implements BuildAuthService {
         Long userId = userService.registerUser(registerReqVO);
 
         // 3. 创建 Token 令牌，记录登录日志
-        return createTokenAfterLoginSuccess(null, userId, registerReqVO.getUsername(), registerReqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_USERNAME,null);
+        return createTokenAfterLoginSuccess(null, userId, registerReqVO.getUsername(), registerReqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_USERNAME, null);
     }
 
     @VisibleForTesting
