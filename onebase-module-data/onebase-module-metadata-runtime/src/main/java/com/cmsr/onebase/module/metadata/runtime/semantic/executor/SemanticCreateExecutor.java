@@ -1,17 +1,14 @@
 package com.cmsr.onebase.module.metadata.runtime.semantic.executor;
 
-import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticDataMethodOpEnum;
+import com.cmsr.onebase.framework.common.util.object.ObjectUtils;
+import com.cmsr.onebase.framework.uid.UidGenerator;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticRecordDTO;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticDataMethodOpEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticMethodCodeEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.service.SemanticDataCrudService;
-import com.cmsr.onebase.module.metadata.core.semantic.strategy.SemanticDataIntegrityValidator;
-import com.cmsr.onebase.module.metadata.core.semantic.strategy.SemanticMergeRecordAssembler;
-import com.cmsr.onebase.module.metadata.core.semantic.strategy.SemanticPermissionContextLoader;
-import com.cmsr.onebase.module.metadata.core.semantic.strategy.SemanticPermissionValidator;
-import com.cmsr.onebase.module.metadata.core.semantic.strategy.SemanticProcessLogger;
+import com.cmsr.onebase.module.metadata.core.semantic.strategy.*;
 import com.cmsr.onebase.module.metadata.core.semantic.strategy.validation.SemanticValidationManager;
 import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticMergeBodyVO;
-import com.cmsr.onebase.framework.uid.UidGenerator;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -39,11 +36,11 @@ public class SemanticCreateExecutor {
     @Resource
     private UidGenerator uidGenerator;
 
-    public Map<String, Object> execute(String tableName, Long menuId, String traceId, SemanticMergeBodyVO body) {
-        return doExecuteProcess(tableName, menuId, traceId, body);
+    public Map<String, Object> execute(String tableName, Long menuId, String traceId, SemanticMergeBodyVO body, Long draftId) {
+        return doExecuteProcess(tableName, menuId, traceId, body, draftId);
     }
 
-    public Map<String, Object> doExecuteProcess(String tableName, Long menuId, String traceId, SemanticMergeBodyVO body) {
+    public Map<String, Object> doExecuteProcess(String tableName, Long menuId, String traceId, SemanticMergeBodyVO body, Long draftId) {
         try {
             // 1) 构建 RecordDTO（包含实体校验与基本数据映射）
             SemanticRecordDTO record = semanticMergeRecordAssembler.assembleMergeBody(tableName, body, menuId, traceId,
@@ -57,16 +54,22 @@ public class SemanticCreateExecutor {
 
             // 4) 功能权限校验
             semanticPermissionValidator.validate(record);
-            
+
             // 5) 数据校验（RecordDTO 简化入口）
             semanticValidationManager.validate(record);
 
             // 6) 数据存储：CRUDQ 服务（RecordDTO 入口）
             semanticDataCrudService.create(record);
-            
+
             // 7) 数据查询：通过 DataCrudService 读取主表数据
             Map<String, Object> result = semanticDataCrudService.readById(record);
-            
+
+            //
+            if (!ObjectUtils.isBlank(draftId)) {
+                semanticDataCrudService.deleteByDraftId(record, draftId);
+            }
+
+
             // 8) 日志记录：当前类 logProcess
             semanticProcessLogger.log(record);
             return result;

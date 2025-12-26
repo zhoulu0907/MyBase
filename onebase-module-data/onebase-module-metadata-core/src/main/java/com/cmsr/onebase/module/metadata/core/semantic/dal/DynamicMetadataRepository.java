@@ -1,27 +1,24 @@
 package com.cmsr.onebase.module.metadata.core.semantic.dal;
 
-import com.mybatisflex.core.query.QueryWrapper;
-import com.mybatisflex.core.query.QueryColumn;
-import com.mybatisflex.core.query.QueryMethods;
-import com.mybatisflex.core.query.CPI;
-import com.mybatisflex.core.row.Db;
-import com.mybatisflex.core.row.Row;
-import jakarta.annotation.Resource;
-import lombok.extern.slf4j.Slf4j;
-
+import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.uid.UidGenerator;
 import com.cmsr.onebase.module.metadata.core.config.ApplicationDataSourceManager;
-
-import org.springframework.stereotype.Repository;
 import com.cmsr.onebase.module.metadata.core.semantic.constants.SystemFieldConstants;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldSchemaDTO;
+import com.mybatisflex.core.query.CPI;
+import com.mybatisflex.core.query.QueryColumn;
+import com.mybatisflex.core.query.QueryMethods;
+import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.core.row.Db;
+import com.mybatisflex.core.row.Row;
+import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
-
-import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldSchemaDTO;
 
 /**
  * 动态元数据通用数据访问仓库。
@@ -259,6 +256,17 @@ public class DynamicMetadataRepository {
         }
     }
 
+    public int deleteByDrafId(String tableName, String primaryKey, Long draftId) {
+        ApplicationDataSourceManager.useBizDatasourceByAppId(ApplicationManager.getApplicationId());
+        try {
+            QueryWrapper qw = QueryWrapper.create(new QueryColumn(primaryKey).eq(draftId));
+
+            return Db.deleteByQuery(tableName, qw);
+        } finally {
+            ApplicationDataSourceManager.clear();
+        }
+    }
+
     /**
      * 按条件查询单条记录。
      *
@@ -476,6 +484,7 @@ public class DynamicMetadataRepository {
 
     /**
      * 查询关系表：根据关系键与值查询关联行。
+     *
      * @param tableName     表名
      * @param relationKey   关系键字段名（如某外键列）
      * @param relationValue 关系值
@@ -486,7 +495,9 @@ public class DynamicMetadataRepository {
         ApplicationDataSourceManager.useBizDatasourceByAppId(ApplicationManager.getApplicationId());
         try {
             QueryWrapper qw = QueryWrapper.create().where(new QueryColumn(relationKey).eq(relationValue));
-            if (filterDeleted) { qw.and(new QueryColumn(SystemFieldConstants.OPTIONAL.DELETED).eq(0)); }
+            if (filterDeleted) {
+                qw.and(new QueryColumn(SystemFieldConstants.OPTIONAL.DELETED).eq(0));
+            }
             return Db.selectListByQuery(tableName, qw);
         } finally {
             ApplicationDataSourceManager.clear();

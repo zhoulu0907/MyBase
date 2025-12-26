@@ -1,8 +1,6 @@
 package com.cmsr.onebase.module.dashboard.build.model;
 
-import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Id;
-import com.mybatisflex.annotation.KeyType;
 import com.mybatisflex.annotation.Table;
 import lombok.Data;
 
@@ -14,17 +12,17 @@ import java.time.LocalDateTime;
  *
  * </p>
  *
- * @author fc
+ * @author mty
  * @since 2022-12-22
  */
 @Data
 @Table("dashboard_file")
-public class SysFile implements Serializable {
+public class DashboardFile implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @Id(keyType = KeyType.Generator, value = "uuid")
-    private String id;
+    @Id(comment = "主键ID")
+    private Long id;
 
     private String fileName;
 
