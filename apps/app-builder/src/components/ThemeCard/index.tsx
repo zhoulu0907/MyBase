@@ -1,9 +1,9 @@
+import { useState } from 'react';
 import { Space } from '@arco-design/web-react';
 import checkSVG from '@/assets/images/appBasic/mode_check_icon.svg';
 import { appThemeColor } from '@/components/CreateApp/const';
-import styles from './index.module.less';
-import { useState } from 'react';
 import { defaultTheme } from '@/pages/Home/pages/EnterpriseApp/const';
+import styles from './index.module.less';
 
 interface IProps {
   themeColor: string;

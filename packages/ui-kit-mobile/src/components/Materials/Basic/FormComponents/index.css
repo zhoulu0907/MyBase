@@ -121,3 +121,7 @@
 .arco-cell.without-group.bordered::after {
   border: none !important;
 }
+
+.arco-form-picker-link-container {
+  font-size: var(--fontSize);
+}

@@ -34,7 +34,9 @@ export enum PageType {
   // 流程表单
   BPM = 2,
   // 工作台
-  WORKBENCH = 3
+  WORKBENCH = 3,
+  // 仪表盘
+  DASHBOARD = 4
 }
 
 export enum CATEGORY_TYPE {
