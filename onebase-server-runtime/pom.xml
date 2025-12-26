@@ -89,11 +89,11 @@
             <artifactId>onebase-module-system-core</artifactId>
             <version>${revision}</version>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>com.cmsr.onebase</groupId>-->
-<!--            <artifactId>onebase-module-dashboard-runtime</artifactId>-->
-<!--            <version>${revision}</version>-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-dashboard-runtime</artifactId>
+            <version>${revision}</version>
+        </dependency>
 
         <!-- 动态鉴权 -->
         <!--<dependency>

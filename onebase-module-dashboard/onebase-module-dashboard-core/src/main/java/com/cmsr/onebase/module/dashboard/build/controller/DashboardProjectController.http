@@ -91,7 +91,7 @@ Content-Type: image/png
 
 
 ### 10. 下载文件
-GET {{baseUrl}}/infra/file/download/198342328792547328
+GET {{baseUrl}}/infra/file/download/198369971202424832
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 

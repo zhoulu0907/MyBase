@@ -69,7 +69,9 @@ public class DashboardProjectController extends BaseController {
         Page<DashboardProject> page = new Page<>(tablepar.getPage(), tablepar.getLimit());
         QueryWrapper queryWrapper = new QueryWrapper()
                 .eq(DashboardProject::getAppId, tablepar.getAppId(), tablepar.getAppId() != null)
-                .like(DashboardProject::getProjectName, tablepar.getSearchText(), StringUtils.isNotBlank(tablepar.getSearchText()));
+                .like(DashboardProject::getProjectName, tablepar.getSearchText(), StringUtils.isNotBlank(tablepar.getSearchText()))
+                .orderBy(DashboardProject::getCreateTime, false);
+
         Page<DashboardProject> iPages = dashboardProjectService.page(page, queryWrapper);
 
         return CommonResult.success(new PageResult<>(iPages.getRecords(), iPages.getTotalRow()));
@@ -207,67 +209,6 @@ public class DashboardProjectController extends BaseController {
             return successData(0, data.getProjectId()).put("msg", "数据保存成功");
         }
     }
-
-    // /**
-    //  * 上传文件
-    //  * @param object 文件流对象
-    //  * @return
-    //  * @throws Exception
-    //  */
-    // @PostMapping("/upload")
-    // @PermitAll
-    // @ApiSignIgnore
-    // @TenantIgnore
-    // public AjaxResult upload(MultipartFile object) throws IOException{
-    // 	String fileName = object.getOriginalFilename();
-    // 	//默认文件格式
-    // 	String suffixName=v2Config.getDefaultFormat();
-    // 	String mediaKey="";
-    // 	Long filesize= object.getSize();
-    // 	//文件名字
-    // 	String fileSuffixName="";
-    // 	if(fileName.lastIndexOf(".")!=-1) {//有后缀
-    // 		 suffixName = fileName.substring(fileName.lastIndexOf(".")).toLowerCase();
-    // 		 //mediaKey=MD5.create().digestHex(fileName);
-    // 		 mediaKey=SnowflakeIdWorker.getUUID();
-    // 		 fileSuffixName=mediaKey+suffixName;
-    // 	}else {//无后缀
-    // 		//取得唯一id
-    // 		 //mediaKey = MD5.create().digestHex(fileName+suffixName);
-    // 		mediaKey= SnowflakeIdWorker.getUUID();
-    // 		//fileSuffixName=mediaKey+suffixName;
-    // 	}
-    // 	String virtualKey=FileController.getFirstNotNull(v2Config.getXnljmap());
-    // 	String absolutePath=v2Config.getXnljmap().get(FileController.getFirstNotNull(v2Config.getXnljmap()));
-    // 	SysFile sysFile=new SysFile();
-    // 	sysFile.setId(SnowflakeIdWorker.getUUID());
-    // 	sysFile.setFileName(fileSuffixName);
-    // 	sysFile.setFileSize(Integer.parseInt(filesize+""));
-    // 	sysFile.setFileSuffix(suffixName);
-    // 	sysFile.setCreateTime(LocalDateTime.now());
-    // 	String filepath=DateUtil.formatDate(new Date());
-    // 	sysFile.setRelativePath(filepath);
-    // 	sysFile.setVirtualKey(virtualKey);
-    // 	sysFile.setAbsolutePath(absolutePath.replace("file:",""));
-    // 	iSysFileService.saveOrUpdate(sysFile);
-    // 	File uploadDir = new File(v2Config.getFileurl() + File.separator + filepath);
-    // 	if (!uploadDir.exists()) {
-    // 		boolean dirCreated = uploadDir.mkdirs();
-    // 		if (!dirCreated) {
-    // 			throw new IOException("无法创建上传目录: " + uploadDir.getAbsolutePath());
-    // 		}
-    // 	}
-    // 	File desc = new File(uploadDir, fileSuffixName);
-    // 	// 确保目标文件存在后再进行传输
-    // 	if (!desc.exists()) {
-    // 		desc.createNewFile();
-    // 	}
-    // 	object.transferTo(desc);
-    // 	SysFileVo sysFileVo=BeanUtil.copyProperties(sysFile, SysFileVo.class);
-    // 	sysFileVo.setFileurl(v2Config.getHttpurl()+sysFile.getVirtualKey()+"/"+sysFile.getRelativePath()+"/"+sysFile.getFileName());
-    // 	return successData(0, sysFileVo);
-    // }
-
 
     /**
      * 上传文件

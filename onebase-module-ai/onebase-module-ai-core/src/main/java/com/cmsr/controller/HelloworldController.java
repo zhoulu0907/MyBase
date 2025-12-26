@@ -30,12 +30,12 @@ import static org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvis
 import static org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY;
 
 /**
- * @author yuluo打
+ * @author mty
  * @author <a href="mailto:yuluo08290126@gmail.com">yuluo</a>
  */
 
 @RestController
-@RequestMapping("/helloworld")
+@RequestMapping("/ai/helloworld")
 public class HelloworldController {
 
 	private static final String DEFAULT_PROMPT = "你是一个博学的智能聊天助手，请根据用户提问回答！";
