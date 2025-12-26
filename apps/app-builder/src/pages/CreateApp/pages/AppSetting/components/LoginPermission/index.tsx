@@ -115,7 +115,7 @@ const LoginPermission: React.FC<ILoginPermissionProps> = ({ appId }) => {
 
         {/* 中间：宣传区 + 登录预览区 + 右侧配置区 */}
         <div className={styles.bodyContent}>
-          <Card className={styles.previewImage} title="登录页预览" bodyStyle={{ padding: 0 }}>
+          <Card className={styles.previewImage} bodyStyle={{ padding: 0 }}>
             {/* TODO(shenyue): 改成真实渲染 */}
             <div className={styles.wrapper}>
               <div

@@ -1,4 +1,5 @@
 import { PageParam } from '../types';
+import { DeleteDraftParams } from '../types/metadata_draft';
 import { runtimeMetadataService } from './clients';
 
 export const createDraft = (tableName: string, menuId: string, data: any) => {
@@ -13,11 +14,14 @@ export const getDraftPage = (tableName: string, menuId: string, pageParam: PageP
   return runtimeMetadataService.post(`/draft/${tableName}/page?menuId=${menuId}`, pageParam);
 };
 
-// TODO(mickey): 等天宇提供真实接口，目前mock
-export const deleteDraft = (tableName: string, menuId: string, id: string) => {
-  return runtimeMetadataService.post(`/draft/${tableName}/delete?menuId=${menuId}&id=${id}`);
+export const deleteDraft = (tableName: string, menuId: string, params: DeleteDraftParams) => {
+  return runtimeMetadataService.post(`/draft/${tableName}/delete?menuId=${menuId}`, params);
 };
 
-export const batchDeleteDraft = (tableName: string, menuId: string) => {
-  return runtimeMetadataService.post(`/draft/${tableName}/delete?menuId=${menuId}`);
+export const deleteDraftTable = (tableName: string, menuId: string) => {
+  return runtimeMetadataService.post(`/draft/${tableName}/deletebytable?menuId=${menuId}`);
+};
+
+export const updateDraft = (tableName: string, menuId: string, data: any) => {
+  return runtimeMetadataService.post(`/draft/${tableName}/update?menuId=${menuId}`, data);
 };

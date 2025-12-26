@@ -68,15 +68,15 @@ const LoginForm: React.FC<ILoginFormProps> = ({ appId, showForgotPWD, showRegist
         <h1 className={styles.title}>欢迎登录</h1>
 
         <Form form={form} layout="vertical" className={styles.loginForm}>
-          <Tabs activeTab={loginType} onChange={setLoginType}>
+          <Tabs activeTab={loginType} onChange={setLoginType} className={styles.loginTab}>
             {ThirdLoginMap?.map((item) => {
               return (
                 <TabPane key={item.value} title={item.label}>
-                  <Form.Item label="手机号" field="mobile" disabled>
+                  <Form.Item label="手机号" field="mobile" disabled className={styles.loginFormItem}>
                     <Input placeholder="输入手机号" maxLength={11} prefix={<IconMobile />} />
                   </Form.Item>
                   {item.value === ThirdLoginType.VERIFYCODE && (
-                    <Form.Item>
+                    <Form.Item label="验证码" className={styles.loginFormItem}>
                       <Input
                         placeholder="请输入手机验证码"
                         disabled
@@ -89,12 +89,12 @@ const LoginForm: React.FC<ILoginFormProps> = ({ appId, showForgotPWD, showRegist
                     </Form.Item>
                   )}
                   {item.value === ThirdLoginType.PASSWORD && (
-                    <Form.Item field="password" label="密码" disabled>
+                    <Form.Item field="password" label="密码" disabled className={styles.loginFormItem}>
                       <Input.Password placeholder={t('auth.password')} allowClear size="large" prefix={<IconLock />} />
                     </Form.Item>
                   )}
 
-                  <Form.Item>
+                  <Form.Item className={styles.loginFormItem}>
                     <Space className={styles.formActions}>
                       <Checkbox>{t('auth.rememberMe')}</Checkbox>
                       {showForgotPWD && (
@@ -105,7 +105,7 @@ const LoginForm: React.FC<ILoginFormProps> = ({ appId, showForgotPWD, showRegist
                     </Space>
                   </Form.Item>
 
-                  <Form.Item>
+                  <Form.Item className={styles.loginFormItem}>
                     <Button type="primary" htmlType="submit" long size="large" className={styles.loginButton}>
                       {t('auth.loginButton')}
                     </Button>
