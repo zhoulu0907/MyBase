@@ -44,77 +44,7 @@
         color: var(--color-text-3);
         font-size: 12px;
         line-height: 20px;
-      }
-
-      .avatarWrap {
-        position: relative;
-        width: 80px;
-        height: 80px;
-        cursor: pointer;
-      }
-
-      /* overlay 初始不可见，hover 时淡入 */
-      .avatarOverlay {
-        position: absolute;
-        inset: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-direction: column;
-        gap: 8px;
-        background: rgba(0, 0, 0, 0);
-        border-radius: 12px;
-        pointer-events: none;
-        opacity: 0;
-        transform: translateY(6px);
-        transition:
-          opacity 180ms ease,
-          transform 180ms ease,
-          background 180ms;
-      }
-
-      /* hover 显示，并允许点击 */
-      .avatarWrap:hover .avatarOverlay {
-        opacity: 1;
-        transform: translateY(0);
-        background: rgba(29, 33, 41, 0.6);
-        pointer-events: auto;
-      }
-
-      /* 摄像头按钮样式 */
-      .cameraBox {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #fff;
-        // background: rgba(29, 33, 41, 0.6);
-        font-size: 24px;
-      }
-
-      /* 简易气泡提示，位于 overlay 上方 */
-      .tooltip {
-        background: #1f2933; /* 深色气泡 */
-        color: #fff;
-        padding: 6px 10px;
-        border-radius: 4px;
-        font-size: 12px;
-        line-height: 1;
-        white-space: nowrap;
-        box-shadow: 0 6px 14px rgba(0, 0, 0, 0.16);
-        transform: translateY(-6px);
-      }
-
-      /* 可选：隐藏 tooltip 初始，hover 时显示更平滑 */
-      .avatarOverlay .tooltip {
-        opacity: 0;
-        transform: translateY(-4px);
-        transition:
-          opacity 160ms,
-          transform 160ms;
-      }
-      .avatarWrap:hover .avatarOverlay .tooltip {
-        opacity: 1;
-        transform: translateY(0);
+        min-height: 20px;
       }
     }
 
@@ -230,44 +160,5 @@
   :global(.arco-modal-footer) {
     text-align: right;
     margin-top: 20px;
-  }
-}
-
-.editApp {
-  .avatarWrapper {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 3px;
-    margin-bottom: 12px;
-
-    .avatar {
-      width: 32px;
-      height: 32px;
-      color: #fff;
-      border-radius: 4px;
-      background-color: #d9d9d9;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-  }
-
-  .avatarColor {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
-
-    .color {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      cursor: pointer;
-      border-radius: 50%;
-      box-sizing: border-box;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
   }
 }
