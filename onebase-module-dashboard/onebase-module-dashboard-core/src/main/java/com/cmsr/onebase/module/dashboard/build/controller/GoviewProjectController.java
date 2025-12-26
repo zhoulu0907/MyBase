@@ -28,6 +28,7 @@ import jakarta.annotation.Resource;
 import jakarta.annotation.security.PermitAll;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.ModelMap;
@@ -64,11 +65,18 @@ public class GoviewProjectController  extends BaseController {
 	@ResponseBody
 	@ApiSignIgnore
 	public CommonResult<PageResult<GoviewProject>> list(Tablepar tablepar){
-		Page<GoviewProject> page= new Page<>(tablepar.getPage(), tablepar.getLimit());
-        Page<GoviewProject> iPages = iGoviewProjectService.page(page, new QueryWrapper().eq(GoviewProject::getAppId,
-				tablepar.getAppId(),tablepar.getAppId() != null));
 
-		return CommonResult.success(new PageResult<>(iPages.getRecords(), (long) iPages.getRecords().size()));
+		if (tablepar.getPage() == null && tablepar.getLimit() == null) {
+			tablepar.setPage(1);
+			tablepar.setLimit(10);
+		}
+		Page<GoviewProject> page= new Page<>(tablepar.getPage(), tablepar.getLimit());
+		QueryWrapper queryWrapper = new QueryWrapper()
+				.eq(GoviewProject::getAppId, tablepar.getAppId(), tablepar.getAppId() != null)
+				.like(GoviewProject::getProjectName, tablepar.getSearchText(), StringUtils.isNotBlank(tablepar.getSearchText() ));
+		Page<GoviewProject> iPages = iGoviewProjectService.page(page, queryWrapper);
+
+		return CommonResult.success(new PageResult<>(iPages.getRecords(), (long) iPages.getTotalRow()));
 	}
 
 

@@ -167,6 +167,10 @@ public class SemanticDataCrudService {
         // 创建数据后置触发前 添加所有的参数
         Map<String, SemanticFieldValueDTO<Object>> allFieldValueMapCreated = addAllFieldBeforeWorkFlowTrigger(recordDTO,TriggerEventEnum.AFTER_CREATE);
         // 后置工作流：可做审计、事件发布、缓存刷新等
+        log.debug("开始执行后置工作流ID: {} OPER:{}, TABLE: {}",
+                recordDTO.getRecordContext().getTraceId(),
+                recordDTO.getRecordContext().getOperationType(),
+                entity.getTableName());
         semanticWorkflowExecutor.postExecute(
                 recordDTO.getRecordContext().getOperationType(),
                 recordDTO.getRecordContext().getTraceId(),
