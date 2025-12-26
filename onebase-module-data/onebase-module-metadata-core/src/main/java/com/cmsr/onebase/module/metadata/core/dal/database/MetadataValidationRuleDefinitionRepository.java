@@ -31,9 +31,8 @@ public class MetadataValidationRuleDefinitionRepository extends BaseBizRepositor
      * @return 规则定义列表
      */
     public List<MetadataValidationRuleDefinitionDO> selectByGroupId(Long groupId) {
-        QueryWrapper queryWrapper = this.query()
-                .orderBy(MetadataValidationRuleDefinitionDO::getId, true);
-        return list(queryWrapper);
+        // 修复：使用 groupId 转换为字符串后按 groupUuid 过滤
+        return selectByGroupUuid(String.valueOf(groupId));
     }
 
     /**

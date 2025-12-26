@@ -134,18 +134,18 @@
 
 
         <!-- Sa-Token 权限认证，在线文档：https://sa-token.cc -->
-        <dependency>
-            <groupId>cn.dev33</groupId>
-            <artifactId>sa-token-spring-boot3-starter</artifactId>
-            <version>1.34.0</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>cn.dev33</groupId>-->
+<!--            <artifactId>sa-token-spring-boot3-starter</artifactId>-->
+<!--            <version>1.34.0</version>-->
+<!--        </dependency>-->
 
         <!-- Sa-Token Servlet 适配器 -->
-        <dependency>
-            <groupId>cn.dev33</groupId>
-            <artifactId>sa-token-jakarta-servlet</artifactId>
-            <version>1.34.0</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>cn.dev33</groupId>-->
+<!--            <artifactId>sa-token-jakarta-servlet</artifactId>-->
+<!--            <version>1.34.0</version>-->
+<!--        </dependency>-->
 
         <!-- javax.servlet-api -->
         <dependency>
@@ -168,6 +168,11 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-test</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-infra-api</artifactId>
+            <version>${revision}</version>
         </dependency>
 
     </dependencies>

@@ -4,15 +4,15 @@ import lombok.Data;
 
 /**
  * boostrap table post 参数
- * @author fc
+ * @author mty
  *
  */
 @Data
 public class Tablepar {
 
-	private int page;//页码
+	private Integer page;//页码
 
-	private int limit;//数量
+	private Integer limit;//数量
 
 	private String orderByColumn;//排序字段
 

@@ -79,7 +79,7 @@ public class FlowGraphBuilder {
 
     private void traverseNodeAndEnrichData(Long applicationId, JsonGraphNode node) {
         if (node.getData() instanceof ScriptNodeData scriptNodeData) {
-            FlowConnectorScriptDO connectorScriptDO = TenantManager.withoutTenantCondition(() -> connectorScriptRepository.findByApplicationAndUuid(applicationId, scriptNodeData.getActionUuid()));
+            FlowConnectorScriptDO connectorScriptDO = TenantManager.withoutTenantCondition(() -> connectorScriptRepository.findByApplicationAndUuid(applicationId, scriptNodeData.getActionId(), scriptNodeData.getActionUuid()));
             scriptNodeData.setScript(connectorScriptDO.getRawScript());
             scriptNodeData.setInputSchema(connectorScriptDO.getInputSchema());
             scriptNodeData.setOutputSchema(connectorScriptDO.getOutputSchema());

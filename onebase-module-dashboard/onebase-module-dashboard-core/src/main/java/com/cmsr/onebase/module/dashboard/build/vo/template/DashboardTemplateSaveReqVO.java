@@ -39,11 +39,6 @@ public class DashboardTemplateSaveReqVO {
     private Long appId;
 
     /**
-     * 租户ID
-     */
-    private Long tenantId;
-
-    /**
      * 索引图片
      */
     private String indexImage;

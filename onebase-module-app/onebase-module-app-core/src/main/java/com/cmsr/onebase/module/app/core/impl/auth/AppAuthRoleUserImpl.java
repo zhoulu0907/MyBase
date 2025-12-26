@@ -55,7 +55,7 @@ public class AppAuthRoleUserImpl implements AppAuthRoleUser {
         // TODO: 理论上这边的insert方法是要手动添加租户条件的，由于上层调用未配置，暂时忽略
         AppAuthRoleDO roleDO = appAuthRoleRepository.findThirdpartyRoleByApplicationId(applicationId);
         if (roleDO == null) {
-            throw new IllegalStateException("应用" + applicationId + "不存在外部用户");
+            throw new IllegalStateException("应用(" + applicationId + ")不存在外部用户角色");
         }
         boolean exists = appAuthRoleUserRepository.existsByUserIdAndRoleId(roleDO.getId(), userId);
         if (!exists) {
