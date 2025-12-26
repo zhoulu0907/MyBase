@@ -9,8 +9,8 @@ import com.cmsr.onebase.module.dashboard.build.dal.dataobject.DashboardTemplateD
 import com.cmsr.onebase.module.dashboard.build.model.DashboardProject;
 import com.cmsr.onebase.module.dashboard.build.model.DashboardProjectData;
 import com.cmsr.onebase.module.dashboard.build.service.IDashboardTemplateService;
-import com.cmsr.onebase.module.dashboard.build.service.IGoviewProjectDataService;
-import com.cmsr.onebase.module.dashboard.build.service.IGoviewProjectService;
+import com.cmsr.onebase.module.dashboard.build.service.DashboardProjectDataService;
+import com.cmsr.onebase.module.dashboard.build.service.DashboardProjectService;
 import com.cmsr.onebase.module.dashboard.build.vo.template.DashboardTemplatePageReqVO;
 import com.cmsr.onebase.module.dashboard.build.vo.template.DashboardTemplateRespVO;
 import com.cmsr.onebase.module.dashboard.build.vo.template.DashboardTemplateSaveReqVO;
@@ -44,10 +44,10 @@ public class DashboardTemplateController {
     private IDashboardTemplateService dashboardTemplateService;
 
     @Resource
-    private IGoviewProjectDataService iGoviewProjectDataService;
+    private DashboardProjectDataService dashboardProjectDataService;
 
     @Resource
-    private IGoviewProjectService iGoviewProjectService;
+    private DashboardProjectService dashboardProjectService;
 
     /**
      * 创建仪表盘模板
@@ -77,8 +77,8 @@ public class DashboardTemplateController {
     public CommonResult<Long> saveOtherDashboardTemplate(@RequestBody DashboardTemplateSaveReqVO saveReqVO) {
 
         saveReqVO.setTemplateType(APP_TYPE.getValue());
-        DashboardProject goviewProject = iGoviewProjectService.getById(saveReqVO.getId());
-        DashboardProjectData goviewProjectData = iGoviewProjectDataService.getProjectid(saveReqVO.getId());
+        DashboardProject goviewProject = dashboardProjectService.getById(saveReqVO.getId());
+        DashboardProjectData goviewProjectData = dashboardProjectDataService.getProjectid(saveReqVO.getId());
         if (goviewProjectData == null) {
             throw exception(DASHBOARD_CONTENT_NOT_EXIST);
         }

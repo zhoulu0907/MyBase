@@ -8,10 +8,10 @@ import com.mybatisflex.core.service.IService;
  *  服务类
  * </p>
  *
- * @author fc
+ * @author mty
  * @since 2022-12-22
  */
-public interface ISysFileService extends IService<DashboardFile> {
+public interface DashboardFileService extends IService<DashboardFile> {
 
 
 	public DashboardFile selectByExamplefileName(String filename);

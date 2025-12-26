@@ -16,7 +16,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/dashboard/sys")
-public class ApiController  extends BaseController {
+public class DashboardOssController extends BaseController {
 
 
 	// @Autowired

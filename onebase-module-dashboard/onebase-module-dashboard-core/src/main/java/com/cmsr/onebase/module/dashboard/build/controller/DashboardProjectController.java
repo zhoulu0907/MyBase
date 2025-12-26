@@ -12,10 +12,10 @@ import com.cmsr.onebase.module.dashboard.build.common.domain.Tablepar;
 import com.cmsr.onebase.module.dashboard.build.model.DashboardFile;
 import com.cmsr.onebase.module.dashboard.build.model.DashboardProject;
 import com.cmsr.onebase.module.dashboard.build.model.DashboardProjectData;
-import com.cmsr.onebase.module.dashboard.build.model.vo.GoviewProjectVo;
-import com.cmsr.onebase.module.dashboard.build.service.IGoviewProjectDataService;
-import com.cmsr.onebase.module.dashboard.build.service.IGoviewProjectService;
-import com.cmsr.onebase.module.dashboard.build.service.ISysFileService;
+import com.cmsr.onebase.module.dashboard.build.model.vo.DashboardProjectVO;
+import com.cmsr.onebase.module.dashboard.build.service.DashboardFileService;
+import com.cmsr.onebase.module.dashboard.build.service.DashboardProjectDataService;
+import com.cmsr.onebase.module.dashboard.build.service.DashboardProjectService;
 import com.cmsr.onebase.module.dashboard.build.util.SnowflakeIdWorker;
 import com.cmsr.onebase.module.infra.api.file.FileApi;
 import com.cmsr.onebase.module.infra.api.file.dto.FileCreateReqDTO;
@@ -26,7 +26,6 @@ import jakarta.annotation.Resource;
 import jakarta.annotation.security.PermitAll;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -40,22 +39,22 @@ import java.util.Date;
  * 前端控制器
  * </p>
  *
- * @author fc
+ * @author mty
  * @since 2023-04-30
  */
 @RestController
 @RequestMapping("/dashboard")
-public class GoviewProjectController extends BaseController {
-    @Autowired
-    private ISysFileService           iSysFileService;
-    @Autowired
-    private V2Config                  v2Config;
-    @Autowired
-    private IGoviewProjectService     iGoviewProjectService;
-    @Autowired
-    private IGoviewProjectDataService iGoviewProjectDataService;
+public class DashboardProjectController extends BaseController {
     @Resource
-    private FileApi                   fileApi;
+    private DashboardFileService dashboardFileService;
+    @Resource
+    private V2Config             v2Config;
+    @Resource
+    private DashboardProjectService     dashboardProjectService;
+    @Resource
+    private DashboardProjectDataService dashboardProjectDataService;
+    @Resource
+    private FileApi                     fileApi;
 
     @ApiOperation(value = "分页跳转", notes = "分页跳转")
     @GetMapping("/list")
@@ -71,7 +70,7 @@ public class GoviewProjectController extends BaseController {
         QueryWrapper queryWrapper = new QueryWrapper()
                 .eq(DashboardProject::getAppId, tablepar.getAppId(), tablepar.getAppId() != null)
                 .like(DashboardProject::getProjectName, tablepar.getSearchText(), StringUtils.isNotBlank(tablepar.getSearchText()));
-        Page<DashboardProject> iPages = iGoviewProjectService.page(page, queryWrapper);
+        Page<DashboardProject> iPages = dashboardProjectService.page(page, queryWrapper);
 
         return CommonResult.success(new PageResult<>(iPages.getRecords(), iPages.getTotalRow()));
     }
@@ -90,7 +89,7 @@ public class GoviewProjectController extends BaseController {
     @ApiSignIgnore
     public AjaxResult add(@RequestBody DashboardProject goviewProject) {
         goviewProject.setState(-1);
-        boolean b = iGoviewProjectService.save(goviewProject);
+        boolean b = dashboardProjectService.save(goviewProject);
         if (b) {
             return successData(0, goviewProject.getId()).put("msg", "交易成功");
         } else {
@@ -111,7 +110,7 @@ public class GoviewProjectController extends BaseController {
     @ResponseBody
     @ApiSignIgnore
     public AjaxResult remove(@RequestParam Long id) {
-        Boolean b = iGoviewProjectService.removeById(id);
+        Boolean b = dashboardProjectService.removeById(id);
         if (b) {
             return successData(0, id).put("msg", "交易成功");
         } else {
@@ -126,7 +125,7 @@ public class GoviewProjectController extends BaseController {
     @ApiSignIgnore
     @TenantIgnore
     public AjaxResult editSave(@RequestBody DashboardProject goviewProject) {
-        Boolean b = iGoviewProjectService.updateById(goviewProject);
+        Boolean b = dashboardProjectService.updateById(goviewProject);
         if (b) {
             return successData(0, goviewProject).put("msg", "交易成功");
         }
@@ -140,7 +139,7 @@ public class GoviewProjectController extends BaseController {
     @ApiSignIgnore
     public AjaxResult rename(@RequestBody DashboardProject goviewProject) {
 
-        Boolean b = iGoviewProjectService.updateById(goviewProject);
+        Boolean b = dashboardProjectService.updateById(goviewProject);
         if (b) {
             return successData(0, goviewProject.getId()).put("msg", "交易成功");
         }
@@ -157,7 +156,7 @@ public class GoviewProjectController extends BaseController {
     public AjaxResult updateVisible(@RequestBody DashboardProject goviewProject) {
         if (goviewProject.getState() == -1 || goviewProject.getState() == 1) {
 
-            Boolean b = iGoviewProjectService.updateById(goviewProject);
+            Boolean b = dashboardProjectService.updateById(goviewProject);
             if (b) {
                 return success();
             }
@@ -172,16 +171,16 @@ public class GoviewProjectController extends BaseController {
     @PermitAll
     @ApiSignIgnore
     @TenantIgnore
-    public CommonResult<GoviewProjectVo> getScreenDSLData(Long projectId, ModelMap map) {
-        DashboardProject goviewProject = iGoviewProjectService.getById(projectId);
+    public CommonResult<DashboardProjectVO> getScreenDSLData(Long projectId, ModelMap map) {
+        DashboardProject goviewProject = dashboardProjectService.getById(projectId);
 
-        DashboardProjectData blogText = iGoviewProjectDataService.getProjectid(projectId);
+        DashboardProjectData blogText = dashboardProjectDataService.getProjectid(projectId);
         if (blogText != null) {
-            GoviewProjectVo goviewProjectVo = new GoviewProjectVo();
-            BeanUtils.copyProperties(goviewProject, goviewProjectVo);
-            goviewProjectVo.setId(String.valueOf(goviewProject.getId()));
-            goviewProjectVo.setContent(blogText.getContent());
-            return CommonResult.success(goviewProjectVo);
+            DashboardProjectVO dashboardProjectVO = new DashboardProjectVO();
+            BeanUtils.copyProperties(goviewProject, dashboardProjectVO);
+            dashboardProjectVO.setId(String.valueOf(goviewProject.getId()));
+            dashboardProjectVO.setContent(blogText.getContent());
+            return CommonResult.success(dashboardProjectVO);
         }
         return CommonResult.success(null);
     }
@@ -194,27 +193,27 @@ public class GoviewProjectController extends BaseController {
     @TenantIgnore
     public AjaxResult saveData(DashboardProjectData data) {
 
-        DashboardProject goviewProject = iGoviewProjectService.getById(data.getProjectId());
+        DashboardProject goviewProject = dashboardProjectService.getById(data.getProjectId());
         if (goviewProject == null) {
             return error("没有该项目ID");
         }
-        DashboardProjectData goviewProjectData = iGoviewProjectDataService.getOne(new QueryWrapper().eq(DashboardProjectData::getProjectId, goviewProject.getId()));
+        DashboardProjectData goviewProjectData = dashboardProjectDataService.getOne(new QueryWrapper().eq(DashboardProjectData::getProjectId, goviewProject.getId()));
         if (goviewProjectData != null) {
             data.setId(goviewProjectData.getId());
-            iGoviewProjectDataService.updateById(data);
+            dashboardProjectDataService.updateById(data);
             return successData(0, data.getProjectId()).put("msg", "数据保存成功");
         } else {
-            iGoviewProjectDataService.save(data);
+            dashboardProjectDataService.save(data);
             return successData(0, data.getProjectId()).put("msg", "数据保存成功");
         }
     }
 
-    /**
-     * 上传文件
-     * @param object 文件流对象
-     * @return
-     * @throws Exception
-     */
+    // /**
+    //  * 上传文件
+    //  * @param object 文件流对象
+    //  * @return
+    //  * @throws Exception
+    //  */
     // @PostMapping("/upload")
     // @PermitAll
     // @ApiSignIgnore
@@ -301,11 +300,11 @@ public class GoviewProjectController extends BaseController {
             mediaKey = SnowflakeIdWorker.getUUID();
             // fileSuffixName=mediaKey+suffixName;
         }
-        String virtualKey = FileController.getFirstNotNull(v2Config.getXnljmap());
-        String absolutePath = v2Config.getXnljmap().get(FileController.getFirstNotNull(v2Config.getXnljmap()));
+        String virtualKey = DashboardFileController.getFirstNotNull(v2Config.getXnljmap());
+        String absolutePath = v2Config.getXnljmap().get(DashboardFileController.getFirstNotNull(v2Config.getXnljmap()));
 
         DashboardFile sysFile = new DashboardFile();
-        sysFile.setId(SnowflakeIdWorker.getUUID());
+        // sysFile.setId(SnowflakeIdWorker.getUUID());
         sysFile.setFileName(fileSuffixName);
         sysFile.setFileSize(Integer.parseInt(filesize + ""));
         sysFile.setFileSuffix(suffixName);
@@ -320,7 +319,7 @@ public class GoviewProjectController extends BaseController {
         // 保存文件标识
         sysFile.setFileId(Long.valueOf(result.getData()));
 
-        iSysFileService.saveOrUpdate(sysFile);
+        dashboardFileService.saveOrUpdate(sysFile);
 
         return result;
     }

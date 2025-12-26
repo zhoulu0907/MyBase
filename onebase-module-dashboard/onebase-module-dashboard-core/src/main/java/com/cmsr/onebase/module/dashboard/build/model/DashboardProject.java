@@ -9,7 +9,7 @@ import lombok.Data;
  *
  * </p>
  *
- * @author fc
+ * @author mty
  * @since 2023-04-30
  */
 @Table("dashboard_project")

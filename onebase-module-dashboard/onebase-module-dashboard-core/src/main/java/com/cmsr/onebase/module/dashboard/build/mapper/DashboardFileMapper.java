@@ -9,10 +9,10 @@ import org.apache.ibatis.annotations.Mapper;
  *  Mapper 接口
  * </p>
  *
- * @author fc
+ * @author mty
  * @since 2022-12-22
  */
 @Mapper
-public interface SysFileMapper extends BaseMapper<DashboardFile> {
+public interface DashboardFileMapper extends BaseMapper<DashboardFile> {
 
 }

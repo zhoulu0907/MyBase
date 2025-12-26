@@ -8,10 +8,10 @@ import com.mybatisflex.core.service.IService;
  *  服务类
  * </p>
  *
- * @author fc
+ * @author mty
  * @since 2023-04-30
  */
-public interface IGoviewProjectDataService extends IService<DashboardProjectData> {
+public interface DashboardProjectDataService extends IService<DashboardProjectData> {
 
 	public DashboardProjectData getProjectid(Long projectId);
 

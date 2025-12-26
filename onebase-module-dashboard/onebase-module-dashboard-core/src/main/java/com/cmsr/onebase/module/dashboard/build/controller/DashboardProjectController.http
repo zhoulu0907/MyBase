@@ -81,17 +81,17 @@ Content-Type: multipart/form-data; boundary=WebAppBoundary
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
-
-
 --WebAppBoundary
-Content-Disposition: form-data; name="object"; filename="p1.jpg"
-Content-Type: image/jpeg
+Content-Disposition: form-data; name="object"; filename="test.jpg"
+Content-Type: image/png
 
-< ./p1.jpg
+< ./test.png
 --WebAppBoundary--
 
+
+
 ### 10. 下载文件
-GET {{baseUrl}}/dashboard/download/195526651307786240
+GET {{baseUrl}}/infra/file/download/198342328792547328
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 

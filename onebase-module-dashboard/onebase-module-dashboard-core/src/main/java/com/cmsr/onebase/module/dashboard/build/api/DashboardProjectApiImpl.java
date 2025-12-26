@@ -5,10 +5,10 @@ import com.cmsr.onebase.module.dashboard.build.dal.dataobject.DashboardTemplateD
 import com.cmsr.onebase.module.dashboard.build.model.DashboardProject;
 import com.cmsr.onebase.module.dashboard.build.model.DashboardProjectData;
 import com.cmsr.onebase.module.dashboard.build.service.IDashboardTemplateService;
-import com.cmsr.onebase.module.dashboard.build.service.IGoviewProjectDataService;
-import com.cmsr.onebase.module.dashboard.build.service.IGoviewProjectService;
-import com.cmsr.onebase.module.screen.api.GoViewProjectApi;
-import com.cmsr.onebase.module.screen.api.dto.GoViewProjectDTO;
+import com.cmsr.onebase.module.dashboard.build.service.DashboardProjectDataService;
+import com.cmsr.onebase.module.dashboard.build.service.DashboardProjectService;
+import com.cmsr.onebase.module.screen.api.DashboardProjectApi;
+import com.cmsr.onebase.module.screen.api.dto.DashboardProjectDTO;
 import jakarta.annotation.Resource;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,29 +17,29 @@ import java.util.List;
 
 @RestController // 提供 RESTful API 接口，给 Feign 调用
 @Validated
-public class GoViewProjectApiImpl implements GoViewProjectApi {
+public class DashboardProjectApiImpl implements DashboardProjectApi {
 
     @Resource
-    private IGoviewProjectService iGoviewProjectService;
+    private DashboardProjectService dashboardProjectService;
 
     @Resource
-    private IGoviewProjectDataService iGoviewProjectDataService;
+    private DashboardProjectDataService dashboardProjectDataService;
 
     @Resource
     private IDashboardTemplateService dashboardTemplateService;
 
 
     @Override
-    public Long createDashboard(GoViewProjectDTO goViewProjectDTO) {
-        DashboardProject dashboardProject = BeanUtil.toBean(goViewProjectDTO, DashboardProject.class);
-        iGoviewProjectService.save(dashboardProject);
+    public Long createDashboard(DashboardProjectDTO dashboardProjectDTO) {
+        DashboardProject dashboardProject = BeanUtil.toBean(dashboardProjectDTO, DashboardProject.class);
+        dashboardProjectService.save(dashboardProject);
         return dashboardProject.getId();
     }
 
     @Override
-    public List<GoViewProjectDTO> getDashboard(Long dashboardId) {
-        DashboardProject dashboardProject = iGoviewProjectService.getById(dashboardId);
-        return List.of(BeanUtil.toBean(dashboardProject, GoViewProjectDTO.class));
+    public List<DashboardProjectDTO> getDashboard(Long dashboardId) {
+        DashboardProject dashboardProject = dashboardProjectService.getById(dashboardId);
+        return List.of(BeanUtil.toBean(dashboardProject, DashboardProjectDTO.class));
     }
 
     @Override
@@ -56,12 +56,12 @@ public class GoViewProjectApiImpl implements GoViewProjectApi {
         dashboardProject.setState(-1);
         dashboardProject.setAppId(applicationId);
         dashboardProject.setIndexImage(dashboardTemplate.getIndexImage());
-        iGoviewProjectService.save(dashboardProject);
+        dashboardProjectService.save(dashboardProject);
         DashboardProjectData dashboardProjectData = new DashboardProjectData();
         dashboardProjectData.setProjectId(dashboardProject.getId());
         dashboardProjectData.setContent(dashboardTemplate.getContent());
         dashboardProjectData.setAppId(applicationId);
-        iGoviewProjectDataService.save(dashboardProjectData);
+        dashboardProjectDataService.save(dashboardProjectData);
         return dashboardProject.getId();
     }
 }

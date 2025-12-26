@@ -9,10 +9,10 @@ import org.apache.ibatis.annotations.Mapper;
  *  Mapper 接口
  * </p>
  *
- * @author fc
+ * @author mty
  * @since 2023-04-30
  */
 @Mapper
-public interface GoviewProjectDataMapper extends BaseMapper<DashboardProjectData> {
+public interface DashboardProjectDataMapper extends BaseMapper<DashboardProjectData> {
 
 }

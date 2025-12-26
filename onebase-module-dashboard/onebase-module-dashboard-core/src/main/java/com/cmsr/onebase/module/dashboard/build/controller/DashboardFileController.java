@@ -6,7 +6,7 @@ import com.cmsr.onebase.module.dashboard.build.common.config.V2Config;
 import com.cmsr.onebase.module.dashboard.build.common.domain.AjaxResult;
 import com.cmsr.onebase.module.dashboard.build.model.DashboardFile;
 import com.cmsr.onebase.module.dashboard.build.model.vo.SysFileVo;
-import com.cmsr.onebase.module.dashboard.build.service.ISysFileService;
+import com.cmsr.onebase.module.dashboard.build.service.DashboardFileService;
 import com.cmsr.onebase.module.dashboard.build.util.SnowflakeIdWorker;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.codec.Base64;
@@ -45,13 +45,13 @@ import java.util.Map.Entry;
 @RequestMapping("/dashboard/file")
 @Component("dashboardFileController")
 @Slf4j
-public class FileController extends BaseController {
+public class DashboardFileController extends BaseController {
 
 
 	@Autowired
-	private V2Config v2Config;
+	private V2Config             v2Config;
 	@Autowired
-	private ISysFileService iSysFileService;
+	private DashboardFileService dashboardFileService;
 
 	/**
 	 * 删除文件
@@ -63,7 +63,7 @@ public class FileController extends BaseController {
 	@PermitAll
 	@ApiSignIgnore
 	public AjaxResult remove(String ids){
-		Boolean b=iSysFileService.removeByIds(StrUtil.split(ids, ',',-1));
+		Boolean b= dashboardFileService.removeByIds(StrUtil.split(ids, ',',-1));
 		if(b){
 			return success();
 		}else{
@@ -77,7 +77,7 @@ public class FileController extends BaseController {
 	@PermitAll
 	@ApiSignIgnore
 	public AjaxResult update(String id,@RequestBody MultipartFile object) throws IllegalStateException, IOException{
-		DashboardFile dashboardFile =iSysFileService.getById(id);
+		DashboardFile dashboardFile = dashboardFileService.getById(id);
 		if(dashboardFile !=null){
 			String fileurl= dashboardFile.getAbsolutePath()+ dashboardFile.getRelativePath()+File.separator+ dashboardFile.getFileName();
 			object.transferTo(new File(fileurl));
@@ -118,7 +118,7 @@ public class FileController extends BaseController {
 		String virtualKey=getFirstNotNull(v2Config.getXnljmap());
 		String absolutePath=v2Config.getXnljmap().get(getFirstNotNull(v2Config.getXnljmap()));
 		DashboardFile dashboardFile =new DashboardFile();
-		dashboardFile.setId(SnowflakeIdWorker.getUUID());
+		// dashboardFile.setId(SnowflakeIdWorker.getUUID());
 		dashboardFile.setFileName(fileSuffixName);
 		dashboardFile.setFileSize(Integer.parseInt(filesize+""));
 		dashboardFile.setFileSuffix(suffixName);
@@ -127,7 +127,7 @@ public class FileController extends BaseController {
 		dashboardFile.setRelativePath(filepath);
 		dashboardFile.setVirtualKey(virtualKey);
 		dashboardFile.setAbsolutePath(absolutePath.replace("file:",""));
-		iSysFileService.saveOrUpdate(dashboardFile);
+		dashboardFileService.saveOrUpdate(dashboardFile);
 		File desc = getAbsoluteFile(v2Config.getFileurl()+File.separator+filepath,fileSuffixName);
 		object.transferTo(desc);
 		SysFileVo sysFileVo=BeanUtil.copyProperties(dashboardFile, SysFileVo.class);
@@ -151,7 +151,7 @@ public class FileController extends BaseController {
 			String virtualKey=getFirstNotNull(v2Config.getXnljmap());
 			String absolutePath=v2Config.getXnljmap().get(getFirstNotNull(v2Config.getXnljmap()));
 			DashboardFile dashboardFile =new DashboardFile();
-			dashboardFile.setId(SnowflakeIdWorker.getUUID());
+			// dashboardFile.setId(SnowflakeIdWorker.getUUID());
 			dashboardFile.setFileName(fileSuffixName);
 			dashboardFile.setFileSuffix(suffixName);
 			dashboardFile.setCreateTime(LocalDateTime.now());
@@ -168,7 +168,7 @@ public class FileController extends BaseController {
 				e.printStackTrace();
 			}
 			dashboardFile.setFileSize(Integer.parseInt(file.length()+""));
-			iSysFileService.saveOrUpdate(dashboardFile);
+			dashboardFileService.saveOrUpdate(dashboardFile);
 			SysFileVo sysFileVo=BeanUtil.copyProperties(dashboardFile, SysFileVo.class);
 			sysFileVo.setFileurl(v2Config.getHttpurl()+ dashboardFile.getVirtualKey()+"/"+ dashboardFile.getRelativePath()+"/"+ dashboardFile.getFileName());
 			return AjaxResult.successData(0, sysFileVo);
@@ -251,7 +251,7 @@ public class FileController extends BaseController {
 		String virtualKey=key;
 		String absolutePath=v2Config.getXnljmap().get(key).replace("file:", "");
 		DashboardFile dashboardFile =new DashboardFile();
-		dashboardFile.setId(SnowflakeIdWorker.getUUID());
+		// dashboardFile.setId(SnowflakeIdWorker.getUUID());
 		dashboardFile.setFileName(fileSuffixName);
 		dashboardFile.setFileSize(Integer.parseInt(filesize+""));
 		dashboardFile.setFileSuffix(suffixName);
@@ -260,7 +260,7 @@ public class FileController extends BaseController {
 		dashboardFile.setRelativePath(filepath);
 		dashboardFile.setVirtualKey(virtualKey);
 		dashboardFile.setAbsolutePath(absolutePath);
-		iSysFileService.saveOrUpdate(dashboardFile);
+		dashboardFileService.saveOrUpdate(dashboardFile);
 		File desc = getAbsoluteFile(absolutePath+filepath,fileSuffixName);
 		object.transferTo(desc);
 		SysFileVo sysFileVo=BeanUtil.copyProperties(dashboardFile, SysFileVo.class);
@@ -281,7 +281,7 @@ public class FileController extends BaseController {
 	@PermitAll
 	@ApiSignIgnore
 	public AjaxResult getFileid(@PathVariable("id") String id){
-		DashboardFile dashboardFile =iSysFileService.getById(id);
+		DashboardFile dashboardFile = dashboardFileService.getById(id);
 		if(dashboardFile !=null){
 			SysFileVo sysFileVo=BeanUtil.copyProperties(dashboardFile, SysFileVo.class);
 			sysFileVo.setFileurl(v2Config.getHttpurl()+ dashboardFile.getVirtualKey()+"/"+ dashboardFile.getRelativePath()+"/"+ dashboardFile.getFileName());
@@ -301,7 +301,7 @@ public class FileController extends BaseController {
 	@PermitAll
 	@ApiSignIgnore
 	public void getFileid302(@PathVariable("id") String id,HttpServletResponse response) throws IOException{
-		DashboardFile dashboardFile =iSysFileService.getById(id);
+		DashboardFile dashboardFile = dashboardFileService.getById(id);
 		if(dashboardFile !=null){
 			String str=v2Config.getHttpurl()+ dashboardFile.getVirtualKey()+"/"+ dashboardFile.getRelativePath()+"/"+ dashboardFile.getFileName();
 			response.sendRedirect(str);
@@ -324,7 +324,7 @@ public class FileController extends BaseController {
 	@ApiSignIgnore
 	public Object list(long current, long size){
 		Page<DashboardFile> page= new Page<DashboardFile>(current, size);
-        return iSysFileService.page(page, new QueryWrapper());
+        return dashboardFileService.page(page, new QueryWrapper());
 	}
 
 
