@@ -3,22 +3,13 @@ package com.cmsr.onebase.module.dashboard.build.controller;
 import com.cmsr.onebase.framework.common.annotaion.ApiSignIgnore;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.dashboard.build.common.base.BaseController;
-import com.cmsr.onebase.module.dashboard.build.common.config.V2Config;
 import com.cmsr.onebase.module.dashboard.build.common.domain.AjaxResult;
-import com.cmsr.onebase.module.dashboard.build.model.SysUser;
-import com.cmsr.onebase.module.dashboard.build.service.ISysUserService;
-import com.cmsr.onebase.module.dashboard.build.util.SaTokenUtil;
-import cn.dev33.satoken.stp.StpUtil;
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.crypto.SecureUtil;
-import com.mybatisflex.core.query.QueryWrapper;
 import io.swagger.annotations.ApiOperation;
 import jakarta.annotation.security.PermitAll;
-import jakarta.servlet.http.HttpServletRequest;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,78 +18,9 @@ import java.util.Map;
 @RequestMapping("/dashboard/sys")
 public class ApiController  extends BaseController {
 
-	private static final Logger logger = LoggerFactory.getLogger(ApiController.class);
 
-	@Autowired
-	private ISysUserService iSysUserService;
-
-	@Autowired
-	private V2Config v2Config;
-
-	@ApiOperation(value = "登陆", notes = "登陆")
-	@PostMapping("/login")
-	@ResponseBody
-	@PermitAll
-	@ApiSignIgnore
-	@TenantIgnore
-	public AjaxResult APIlogin(@RequestBody SysUser user, HttpServletRequest request) {
-		try {
-			// 判断是否登陆
-			if (StpUtil.isLogin()) {
-				Map<String, Object> map = new HashMap<String, Object>();
-				map.put("userinfo", SaTokenUtil.getUser());
-				map.put("token", StpUtil.getTokenInfo());
-				return successData(0, map);
-			} else {
-				if (StrUtil.isNotBlank(user.getUsername()) && StrUtil.isNotBlank(user.getPassword())) {
-					// 直接查询用户
-                    QueryWrapper queryWrapper = new QueryWrapper();
-					queryWrapper.eq(SysUser::getUsername, user.getUsername());
-
-					try {
-						SysUser sysUser = iSysUserService.getOne(queryWrapper);
-
-						if (sysUser != null) {
-							// 验证密码 - 对用户输入的密码进行MD5加密，然后与数据库中存储的密码比较
-							String inputPasswordMd5 = SecureUtil.md5(user.getPassword());
-							if (inputPasswordMd5.equals(sysUser.getPassword())) {
-								StpUtil.login(sysUser.getId());
-								SaTokenUtil.setUser(sysUser);
-
-								Map<String, Object> map = new HashMap<String, Object>();
-								map.put("userinfo", sysUser);
-								map.put("token", StpUtil.getTokenInfo());
-
-								return success().put("data", map);
-							}
-						}
-						return error(500, "账户或者密码错误");
-					} catch (Exception e) {
-						logger.error("数据库查询用户异常: " + e.getMessage(), e);
-						return error(500, "数据库查询异常: " + e.getMessage());
-					}
-				} else {
-					return error(500, "账户密码不能为空");
-				}
-			}
-		} catch (Exception e) {
-			logger.error("登录失败: " + e.getMessage(), e);
-			return error(500, "登录失败：" + e.getMessage());
-		}
-	}
-
-
-	@ApiOperation(value = "登陆", notes = "登陆")
-	@GetMapping("/logout")
-	@ResponseBody
-	@PermitAll
-	@ApiSignIgnore
-	@TenantIgnore
-	public AjaxResult logout() {
-		// 判断是否登陆
-		StpUtil.logout();
-		return success();
-	}
+	// @Autowired
+	// private V2Config v2Config;
 
 
 	@ApiOperation(value = "获取oss地址", notes = "获取oss地址")
@@ -110,10 +32,14 @@ public class ApiController  extends BaseController {
 	public AjaxResult getOssInfo() {
 		Map<String, Object> ossInfo = new HashMap<>();
 		ossInfo.put("bucketName", "oss");
-		ossInfo.put("requestUrl", v2Config.getHttpurl());
-		ossInfo.put("fileBasePath", v2Config.getFileurl());
-		ossInfo.put("defaultFormat", v2Config.getDefaultFormat());
-		ossInfo.put("xnljmap", v2Config.getXnljmap());
+		// ossInfo.put("requestUrl", v2Config.getHttpurl());
+		// ossInfo.put("fileBasePath", v2Config.getFileurl());
+		// ossInfo.put("defaultFormat", v2Config.getDefaultFormat());
+		// ossInfo.put("xnljmap", v2Config.getXnljmap());
+		ossInfo.put("requestUrl", "");
+		ossInfo.put("fileBasePath", "");
+		ossInfo.put("defaultFormat", "");
+		ossInfo.put("xnljmap", "");
 
 		return successData(0, ossInfo);
 	}

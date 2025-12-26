@@ -2,8 +2,8 @@ package com.cmsr.onebase.module.dashboard.build.api;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.cmsr.onebase.module.dashboard.build.dal.dataobject.DashboardTemplateDO;
-import com.cmsr.onebase.module.dashboard.build.model.GoviewProject;
-import com.cmsr.onebase.module.dashboard.build.model.GoviewProjectData;
+import com.cmsr.onebase.module.dashboard.build.model.DashboardProject;
+import com.cmsr.onebase.module.dashboard.build.model.DashboardProjectData;
 import com.cmsr.onebase.module.dashboard.build.service.IDashboardTemplateService;
 import com.cmsr.onebase.module.dashboard.build.service.IGoviewProjectDataService;
 import com.cmsr.onebase.module.dashboard.build.service.IGoviewProjectService;
@@ -31,15 +31,15 @@ public class GoViewProjectApiImpl implements GoViewProjectApi {
 
     @Override
     public Long createDashboard(GoViewProjectDTO goViewProjectDTO) {
-        GoviewProject goviewProject = BeanUtil.toBean(goViewProjectDTO, GoviewProject.class);
-        iGoviewProjectService.save(goviewProject);
-        return goviewProject.getId();
+        DashboardProject dashboardProject = BeanUtil.toBean(goViewProjectDTO, DashboardProject.class);
+        iGoviewProjectService.save(dashboardProject);
+        return dashboardProject.getId();
     }
 
     @Override
     public List<GoViewProjectDTO> getDashboard(Long dashboardId) {
-        GoviewProject goviewProject = iGoviewProjectService.getById(dashboardId);
-        return List.of(BeanUtil.toBean(goviewProject, GoViewProjectDTO.class));
+        DashboardProject dashboardProject = iGoviewProjectService.getById(dashboardId);
+        return List.of(BeanUtil.toBean(dashboardProject, GoViewProjectDTO.class));
     }
 
     @Override
@@ -51,17 +51,17 @@ public class GoViewProjectApiImpl implements GoViewProjectApi {
         }
         Long applicationId = dashboardTemplate.getAppId();
 
-        GoviewProject goviewProject = new GoviewProject();
-        goviewProject.setProjectName("新大屏");
-        goviewProject.setState(-1);
-        goviewProject.setAppId(applicationId);
-        goviewProject.setIndexImage(dashboardTemplate.getIndexImage());
-        iGoviewProjectService.save(goviewProject);
-        GoviewProjectData goviewProjectData = new GoviewProjectData();
-        goviewProjectData.setProjectId(goviewProject.getId());
-        goviewProjectData.setContent(dashboardTemplate.getContent());
-        goviewProjectData.setAppId(applicationId);
-        iGoviewProjectDataService.save(goviewProjectData);
-        return goviewProject.getId();
+        DashboardProject dashboardProject = new DashboardProject();
+        dashboardProject.setProjectName("新大屏");
+        dashboardProject.setState(-1);
+        dashboardProject.setAppId(applicationId);
+        dashboardProject.setIndexImage(dashboardTemplate.getIndexImage());
+        iGoviewProjectService.save(dashboardProject);
+        DashboardProjectData dashboardProjectData = new DashboardProjectData();
+        dashboardProjectData.setProjectId(dashboardProject.getId());
+        dashboardProjectData.setContent(dashboardTemplate.getContent());
+        dashboardProjectData.setAppId(applicationId);
+        iGoviewProjectDataService.save(dashboardProjectData);
+        return dashboardProject.getId();
     }
 }

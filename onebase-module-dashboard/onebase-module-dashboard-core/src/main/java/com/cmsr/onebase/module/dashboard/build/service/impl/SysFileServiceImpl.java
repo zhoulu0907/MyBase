@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.dashboard.build.service.impl;
 
 import com.cmsr.onebase.module.dashboard.build.mapper.SysFileMapper;
-import com.cmsr.onebase.module.dashboard.build.model.SysFile;
+import com.cmsr.onebase.module.dashboard.build.model.DashboardFile;
 import com.cmsr.onebase.module.dashboard.build.service.ISysFileService;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
@@ -17,15 +17,15 @@ import org.springframework.stereotype.Service;
  * @since 2022-12-22
  */
 @Service
-public class SysFileServiceImpl extends ServiceImpl<SysFileMapper, SysFile> implements ISysFileService {
+public class SysFileServiceImpl extends ServiceImpl<SysFileMapper, DashboardFile> implements ISysFileService {
 
 	@Autowired
 	private SysFileMapper sysFileMapper;
 
 	@Override
-	public SysFile selectByExamplefileName(String filename) {
-		SysFile sysFile=sysFileMapper.selectOneByQuery(new QueryWrapper().eq(SysFile::getFileName, filename));
-        return sysFile;
+	public DashboardFile selectByExamplefileName(String filename) {
+		DashboardFile dashboardFile =sysFileMapper.selectOneByQuery(new QueryWrapper().eq(DashboardFile::getFileName, filename));
+        return dashboardFile;
 	}
 
 }

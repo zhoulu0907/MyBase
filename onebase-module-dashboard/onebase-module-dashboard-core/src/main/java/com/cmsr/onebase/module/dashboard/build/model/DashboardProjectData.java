@@ -14,7 +14,7 @@ import lombok.Data;
  */
 @Table("dashboard_project_data")
 @Data
-public class GoviewProjectData extends BaseEntity {
+public class DashboardProjectData extends BaseEntity {
 
     private Long projectId;
 

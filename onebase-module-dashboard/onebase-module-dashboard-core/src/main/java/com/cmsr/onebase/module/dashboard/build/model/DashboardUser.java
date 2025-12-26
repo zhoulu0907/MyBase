@@ -17,7 +17,7 @@ import java.io.Serializable;
  */
 @Table("dashboard_user")
 @Data
-public class SysUser implements Serializable {
+public class DashboardUser implements Serializable {
 
     private static final long serialVersionUID = 1L;
 

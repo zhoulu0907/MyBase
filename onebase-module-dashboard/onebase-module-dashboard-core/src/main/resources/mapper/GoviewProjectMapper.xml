@@ -3,7 +3,7 @@
 <mapper namespace="com.cmsr.onebase.module.dashboard.build.mapper.GoviewProjectMapper">
 
     <!-- 通用查询映射结果 -->
-    <resultMap id="BaseResultMap" type="com.cmsr.onebase.module.dashboard.build.model.GoviewProject">
+    <resultMap id="BaseResultMap" type="com.cmsr.onebase.module.dashboard.build.model.DashboardProject">
         <id column="id" property="id" />
         <result column="project_name" property="projectName" />
         <result column="state" property="state" />

@@ -1,6 +1,5 @@
 package com.cmsr.onebase.module.dashboard.build.model;
 
-import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Id;
 import com.mybatisflex.annotation.KeyType;
 import com.mybatisflex.annotation.Table;
@@ -19,7 +18,7 @@ import java.time.LocalDateTime;
  */
 @Data
 @Table("dashboard_file")
-public class SysFile implements Serializable {
+public class DashboardFile implements Serializable {
 
     private static final long serialVersionUID = 1L;
 

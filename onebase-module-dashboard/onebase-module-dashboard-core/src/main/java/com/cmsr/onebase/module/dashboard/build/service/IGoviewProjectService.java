@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.dashboard.build.service;
 
-import com.cmsr.onebase.module.dashboard.build.model.GoviewProject;
+import com.cmsr.onebase.module.dashboard.build.model.DashboardProject;
 import com.mybatisflex.core.service.IService;
 
 /**
@@ -11,6 +11,6 @@ import com.mybatisflex.core.service.IService;
  * @author fc
  * @since 2023-04-30
  */
-public interface IGoviewProjectService extends IService<GoviewProject> {
+public interface IGoviewProjectService extends IService<DashboardProject> {
 
 }

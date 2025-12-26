@@ -9,9 +9,9 @@ import com.cmsr.onebase.module.dashboard.build.common.base.BaseController;
 import com.cmsr.onebase.module.dashboard.build.common.config.V2Config;
 import com.cmsr.onebase.module.dashboard.build.common.domain.AjaxResult;
 import com.cmsr.onebase.module.dashboard.build.common.domain.Tablepar;
-import com.cmsr.onebase.module.dashboard.build.model.GoviewProject;
-import com.cmsr.onebase.module.dashboard.build.model.GoviewProjectData;
-import com.cmsr.onebase.module.dashboard.build.model.SysFile;
+import com.cmsr.onebase.module.dashboard.build.model.DashboardProject;
+import com.cmsr.onebase.module.dashboard.build.model.DashboardProjectData;
+import com.cmsr.onebase.module.dashboard.build.model.DashboardFile;
 import com.cmsr.onebase.module.dashboard.build.model.vo.GoviewProjectVo;
 import com.cmsr.onebase.module.dashboard.build.service.IGoviewProjectDataService;
 import com.cmsr.onebase.module.dashboard.build.service.IGoviewProjectService;
@@ -63,9 +63,9 @@ public class GoviewProjectController  extends BaseController {
 	@GetMapping("/list")
 	@ResponseBody
 	@ApiSignIgnore
-	public CommonResult<PageResult<GoviewProject>> list(Tablepar tablepar){
-		Page<GoviewProject> page= new Page<>(tablepar.getPage(), tablepar.getLimit());
-        Page<GoviewProject> iPages = iGoviewProjectService.page(page, new QueryWrapper().eq(GoviewProject::getAppId,
+	public CommonResult<PageResult<DashboardProject>> list(Tablepar tablepar){
+		Page<DashboardProject> page= new Page<>(tablepar.getPage(), tablepar.getLimit());
+        Page<DashboardProject> iPages = iGoviewProjectService.page(page, new QueryWrapper().eq(DashboardProject::getAppId,
 				tablepar.getAppId(),tablepar.getAppId() != null));
 
 		return CommonResult.success(new PageResult<>(iPages.getRecords(), (long) iPages.getRecords().size()));
@@ -82,11 +82,11 @@ public class GoviewProjectController  extends BaseController {
 	@PostMapping("/create")
 	@ResponseBody
 	@ApiSignIgnore
-	public AjaxResult add(@RequestBody GoviewProject goviewProject){
-		goviewProject.setState(-1);
-		boolean b=iGoviewProjectService.save(goviewProject);
+	public AjaxResult add(@RequestBody DashboardProject dashboardProject){
+		dashboardProject.setState(-1);
+		boolean b=iGoviewProjectService.save(dashboardProject);
 		if(b){
-			return successData(0, goviewProject.getId()).put("msg", "交易成功");
+			return successData(0, dashboardProject.getId()).put("msg", "交易成功");
 		}else{
 			return error();
 		}
@@ -119,11 +119,11 @@ public class GoviewProjectController  extends BaseController {
 	@PermitAll
 	@ApiSignIgnore
 	@TenantIgnore
-    public AjaxResult editSave(@RequestBody GoviewProject goviewProject)
+    public AjaxResult editSave(@RequestBody DashboardProject dashboardProject)
     {
-		Boolean b= iGoviewProjectService.updateById(goviewProject);
+		Boolean b= iGoviewProjectService.updateById(dashboardProject);
         if(b){
-        	return successData(0,goviewProject).put("msg", "交易成功");
+        	return successData(0, dashboardProject).put("msg", "交易成功");
         }
         return error();
     }
@@ -133,12 +133,12 @@ public class GoviewProjectController  extends BaseController {
     @PostMapping("/rename")
     @ResponseBody
 	@ApiSignIgnore
-    public AjaxResult rename(@RequestBody GoviewProject goviewProject)
+    public AjaxResult rename(@RequestBody DashboardProject dashboardProject)
     {
 
-		Boolean b=iGoviewProjectService.updateById(goviewProject);
+		Boolean b=iGoviewProjectService.updateById(dashboardProject);
 		if(b){
-        	return successData(0,goviewProject.getId()).put("msg", "交易成功");
+        	return successData(0, dashboardProject.getId()).put("msg", "交易成功");
         }
 		return error();
     }
@@ -150,10 +150,10 @@ public class GoviewProjectController  extends BaseController {
 	@PermitAll
 	@ApiSignIgnore
 	@TenantIgnore
-    public AjaxResult updateVisible(@RequestBody GoviewProject goviewProject){
-    	if(goviewProject.getState()==-1||goviewProject.getState()==1) {
+    public AjaxResult updateVisible(@RequestBody DashboardProject dashboardProject){
+    	if(dashboardProject.getState()==-1|| dashboardProject.getState()==1) {
 
-    		Boolean b=iGoviewProjectService.updateById(goviewProject);
+    		Boolean b=iGoviewProjectService.updateById(dashboardProject);
     		if(b){
             	return success();
             }
@@ -170,12 +170,12 @@ public class GoviewProjectController  extends BaseController {
 	@TenantIgnore
     public CommonResult<GoviewProjectVo>  getScreenDSLData(Long projectId, ModelMap map)
     {
-		GoviewProject goviewProject= iGoviewProjectService.getById(projectId);
+		DashboardProject dashboardProject = iGoviewProjectService.getById(projectId);
 
-		GoviewProjectData blogText=iGoviewProjectDataService.getProjectid(projectId);
+		DashboardProjectData blogText=iGoviewProjectDataService.getProjectid(projectId);
 		if(blogText!=null) {
 			GoviewProjectVo goviewProjectVo=new GoviewProjectVo();
-			BeanUtils.copyProperties(goviewProject,goviewProjectVo);
+			BeanUtils.copyProperties(dashboardProject,goviewProjectVo);
 			goviewProjectVo.setContent(blogText.getContent());
 			return CommonResult.success(goviewProjectVo);
 		}
@@ -189,15 +189,15 @@ public class GoviewProjectController  extends BaseController {
 	@ApiSignIgnore
 	@PermitAll
 	@TenantIgnore
-	public AjaxResult saveData(GoviewProjectData data) {
+	public AjaxResult saveData(DashboardProjectData data) {
 
-		GoviewProject goviewProject= iGoviewProjectService.getById(data.getProjectId());
-		if(goviewProject==null) {
+		DashboardProject dashboardProject = iGoviewProjectService.getById(data.getProjectId());
+		if(dashboardProject ==null) {
 			return error("没有该项目ID");
 		}
-		GoviewProjectData goviewProjectData= iGoviewProjectDataService.getOne(new QueryWrapper().eq(GoviewProjectData::getProjectId, goviewProject.getId()));
-		if(goviewProjectData!=null) {
-			 data.setId(goviewProjectData.getId());
+		DashboardProjectData dashboardProjectData = iGoviewProjectDataService.getOne(new QueryWrapper().eq(DashboardProjectData::getProjectId, dashboardProject.getId()));
+		if(dashboardProjectData !=null) {
+			 data.setId(dashboardProjectData.getId());
 			 iGoviewProjectDataService.updateById(data);
 			return successData(0,data.getProjectId()).put("msg", "数据保存成功");
 		}else {
@@ -300,18 +300,18 @@ public class GoviewProjectController  extends BaseController {
 		String virtualKey=FileController.getFirstNotNull(v2Config.getXnljmap());
 		String absolutePath=v2Config.getXnljmap().get(FileController.getFirstNotNull(v2Config.getXnljmap()));
 
-		SysFile sysFile=new SysFile();
-		sysFile.setId(SnowflakeIdWorker.getUUID());
-		sysFile.setFileName(fileSuffixName);
-		sysFile.setFileSize(Integer.parseInt(filesize+""));
-		sysFile.setFileSuffix(suffixName);
-		sysFile.setCreateTime(LocalDateTime.now());
+		DashboardFile dashboardFile =new DashboardFile();
+		dashboardFile.setId(SnowflakeIdWorker.getUUID());
+		dashboardFile.setFileName(fileSuffixName);
+		dashboardFile.setFileSize(Integer.parseInt(filesize+""));
+		dashboardFile.setFileSuffix(suffixName);
+		dashboardFile.setCreateTime(LocalDateTime.now());
 		String filepath= DateUtil.formatDate(new Date());
-		sysFile.setRelativePath(filepath);
-		sysFile.setVirtualKey(virtualKey);
-		sysFile.setAbsolutePath(absolutePath.replace("file:",""));
+		dashboardFile.setRelativePath(filepath);
+		dashboardFile.setVirtualKey(virtualKey);
+		dashboardFile.setAbsolutePath(absolutePath.replace("file:",""));
 
-		iSysFileService.saveOrUpdate(sysFile);
+		iSysFileService.saveOrUpdate(dashboardFile);
 
 		return fileApi.dashboardUpload(new FileCreateReqDTO().setName(object.getOriginalFilename())
 				.setType(object.getContentType()).setContent(object.getBytes()));

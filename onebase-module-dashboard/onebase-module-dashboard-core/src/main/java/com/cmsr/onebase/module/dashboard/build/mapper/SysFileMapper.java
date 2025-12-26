@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.dashboard.build.mapper;
 
-import com.cmsr.onebase.module.dashboard.build.model.SysFile;
+import com.cmsr.onebase.module.dashboard.build.model.DashboardFile;
 import com.mybatisflex.core.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -13,6 +13,6 @@ import org.apache.ibatis.annotations.Mapper;
  * @since 2022-12-22
  */
 @Mapper
-public interface SysFileMapper extends BaseMapper<SysFile> {
+public interface SysFileMapper extends BaseMapper<DashboardFile> {
 
 }

@@ -4,7 +4,7 @@ import com.cmsr.onebase.framework.common.annotaion.ApiSignIgnore;
 import com.cmsr.onebase.module.dashboard.build.common.base.BaseController;
 import com.cmsr.onebase.module.dashboard.build.common.config.V2Config;
 import com.cmsr.onebase.module.dashboard.build.common.domain.AjaxResult;
-import com.cmsr.onebase.module.dashboard.build.model.SysFile;
+import com.cmsr.onebase.module.dashboard.build.model.DashboardFile;
 import com.cmsr.onebase.module.dashboard.build.model.vo.SysFileVo;
 import com.cmsr.onebase.module.dashboard.build.service.ISysFileService;
 import com.cmsr.onebase.module.dashboard.build.util.SnowflakeIdWorker;
@@ -77,9 +77,9 @@ public class FileController extends BaseController {
 	@PermitAll
 	@ApiSignIgnore
 	public AjaxResult update(String id,@RequestBody MultipartFile object) throws IllegalStateException, IOException{
-		SysFile sysFile=iSysFileService.getById(id);
-		if(sysFile!=null){
-			String fileurl=sysFile.getAbsolutePath()+sysFile.getRelativePath()+File.separator+sysFile.getFileName();
+		DashboardFile dashboardFile =iSysFileService.getById(id);
+		if(dashboardFile !=null){
+			String fileurl= dashboardFile.getAbsolutePath()+ dashboardFile.getRelativePath()+File.separator+ dashboardFile.getFileName();
 			object.transferTo(new File(fileurl));
 			return success("修改成功");
 		}else{
@@ -117,21 +117,21 @@ public class FileController extends BaseController {
 		}
 		String virtualKey=getFirstNotNull(v2Config.getXnljmap());
 		String absolutePath=v2Config.getXnljmap().get(getFirstNotNull(v2Config.getXnljmap()));
-		SysFile sysFile=new SysFile();
-		sysFile.setId(SnowflakeIdWorker.getUUID());
-		sysFile.setFileName(fileSuffixName);
-		sysFile.setFileSize(Integer.parseInt(filesize+""));
-		sysFile.setFileSuffix(suffixName);
-		sysFile.setCreateTime(LocalDateTime.now());
+		DashboardFile dashboardFile =new DashboardFile();
+		dashboardFile.setId(SnowflakeIdWorker.getUUID());
+		dashboardFile.setFileName(fileSuffixName);
+		dashboardFile.setFileSize(Integer.parseInt(filesize+""));
+		dashboardFile.setFileSuffix(suffixName);
+		dashboardFile.setCreateTime(LocalDateTime.now());
 		String filepath=DateUtil.formatDate(new Date());
-		sysFile.setRelativePath(filepath);
-		sysFile.setVirtualKey(virtualKey);
-		sysFile.setAbsolutePath(absolutePath.replace("file:",""));
-		iSysFileService.saveOrUpdate(sysFile);
+		dashboardFile.setRelativePath(filepath);
+		dashboardFile.setVirtualKey(virtualKey);
+		dashboardFile.setAbsolutePath(absolutePath.replace("file:",""));
+		iSysFileService.saveOrUpdate(dashboardFile);
 		File desc = getAbsoluteFile(v2Config.getFileurl()+File.separator+filepath,fileSuffixName);
 		object.transferTo(desc);
-		SysFileVo sysFileVo=BeanUtil.copyProperties(sysFile, SysFileVo.class);
-		sysFileVo.setFileurl(v2Config.getHttpurl()+sysFile.getVirtualKey()+"/"+sysFile.getRelativePath()+"/"+sysFile.getFileName());
+		SysFileVo sysFileVo=BeanUtil.copyProperties(dashboardFile, SysFileVo.class);
+		sysFileVo.setFileurl(v2Config.getHttpurl()+ dashboardFile.getVirtualKey()+"/"+ dashboardFile.getRelativePath()+"/"+ dashboardFile.getFileName());
 		return AjaxResult.successData(0, sysFileVo);
 	}
 
@@ -150,15 +150,15 @@ public class FileController extends BaseController {
 			String fileSuffixName=mediaKey+suffixName;
 			String virtualKey=getFirstNotNull(v2Config.getXnljmap());
 			String absolutePath=v2Config.getXnljmap().get(getFirstNotNull(v2Config.getXnljmap()));
-			SysFile sysFile=new SysFile();
-			sysFile.setId(SnowflakeIdWorker.getUUID());
-			sysFile.setFileName(fileSuffixName);
-			sysFile.setFileSuffix(suffixName);
-			sysFile.setCreateTime(LocalDateTime.now());
+			DashboardFile dashboardFile =new DashboardFile();
+			dashboardFile.setId(SnowflakeIdWorker.getUUID());
+			dashboardFile.setFileName(fileSuffixName);
+			dashboardFile.setFileSuffix(suffixName);
+			dashboardFile.setCreateTime(LocalDateTime.now());
 			String filepath=DateUtil.formatDate(new Date());
-			sysFile.setRelativePath(filepath);
-			sysFile.setVirtualKey(virtualKey);
-			sysFile.setAbsolutePath(absolutePath.replace("file:",""));
+			dashboardFile.setRelativePath(filepath);
+			dashboardFile.setVirtualKey(virtualKey);
+			dashboardFile.setAbsolutePath(absolutePath.replace("file:",""));
 			File desc = getAbsoluteFile(v2Config.getFileurl()+File.separator+filepath,fileSuffixName);
 			File file=null;
 			try {
@@ -167,10 +167,10 @@ public class FileController extends BaseController {
 				System.out.println("错误base64："+base64str);
 				e.printStackTrace();
 			}
-			sysFile.setFileSize(Integer.parseInt(file.length()+""));
-			iSysFileService.saveOrUpdate(sysFile);
-			SysFileVo sysFileVo=BeanUtil.copyProperties(sysFile, SysFileVo.class);
-			sysFileVo.setFileurl(v2Config.getHttpurl()+sysFile.getVirtualKey()+"/"+sysFile.getRelativePath()+"/"+sysFile.getFileName());
+			dashboardFile.setFileSize(Integer.parseInt(file.length()+""));
+			iSysFileService.saveOrUpdate(dashboardFile);
+			SysFileVo sysFileVo=BeanUtil.copyProperties(dashboardFile, SysFileVo.class);
+			sysFileVo.setFileurl(v2Config.getHttpurl()+ dashboardFile.getVirtualKey()+"/"+ dashboardFile.getRelativePath()+"/"+ dashboardFile.getFileName());
 			return AjaxResult.successData(0, sysFileVo);
 		}
 		return AjaxResult.error();
@@ -250,21 +250,21 @@ public class FileController extends BaseController {
 		}
 		String virtualKey=key;
 		String absolutePath=v2Config.getXnljmap().get(key).replace("file:", "");
-		SysFile sysFile=new SysFile();
-		sysFile.setId(SnowflakeIdWorker.getUUID());
-		sysFile.setFileName(fileSuffixName);
-		sysFile.setFileSize(Integer.parseInt(filesize+""));
-		sysFile.setFileSuffix(suffixName);
-		sysFile.setCreateTime(LocalDateTime.now());
+		DashboardFile dashboardFile =new DashboardFile();
+		dashboardFile.setId(SnowflakeIdWorker.getUUID());
+		dashboardFile.setFileName(fileSuffixName);
+		dashboardFile.setFileSize(Integer.parseInt(filesize+""));
+		dashboardFile.setFileSuffix(suffixName);
+		dashboardFile.setCreateTime(LocalDateTime.now());
 		String filepath=relativePath.substring(0,relativePath.lastIndexOf("/"));
-		sysFile.setRelativePath(filepath);
-		sysFile.setVirtualKey(virtualKey);
-		sysFile.setAbsolutePath(absolutePath);
-		iSysFileService.saveOrUpdate(sysFile);
+		dashboardFile.setRelativePath(filepath);
+		dashboardFile.setVirtualKey(virtualKey);
+		dashboardFile.setAbsolutePath(absolutePath);
+		iSysFileService.saveOrUpdate(dashboardFile);
 		File desc = getAbsoluteFile(absolutePath+filepath,fileSuffixName);
 		object.transferTo(desc);
-		SysFileVo sysFileVo=BeanUtil.copyProperties(sysFile, SysFileVo.class);
-		sysFileVo.setFileurl(v2Config.getHttpurl()+sysFile.getVirtualKey()+"/"+sysFile.getRelativePath()+"/"+sysFile.getFileName());
+		SysFileVo sysFileVo=BeanUtil.copyProperties(dashboardFile, SysFileVo.class);
+		sysFileVo.setFileurl(v2Config.getHttpurl()+ dashboardFile.getVirtualKey()+"/"+ dashboardFile.getRelativePath()+"/"+ dashboardFile.getFileName());
 		return AjaxResult.successData(0, sysFileVo);
 	}
 
@@ -281,10 +281,10 @@ public class FileController extends BaseController {
 	@PermitAll
 	@ApiSignIgnore
 	public AjaxResult getFileid(@PathVariable("id") String id){
-		SysFile sysFile=iSysFileService.getById(id);
-		if(sysFile!=null){
-			SysFileVo sysFileVo=BeanUtil.copyProperties(sysFile, SysFileVo.class);
-			sysFileVo.setFileurl(v2Config.getHttpurl()+sysFile.getVirtualKey()+"/"+sysFile.getRelativePath()+"/"+sysFile.getFileName());
+		DashboardFile dashboardFile =iSysFileService.getById(id);
+		if(dashboardFile !=null){
+			SysFileVo sysFileVo=BeanUtil.copyProperties(dashboardFile, SysFileVo.class);
+			sysFileVo.setFileurl(v2Config.getHttpurl()+ dashboardFile.getVirtualKey()+"/"+ dashboardFile.getRelativePath()+"/"+ dashboardFile.getFileName());
 			return AjaxResult.successData(0, sysFileVo);
 		}
 		return AjaxResult.error("没有该文件");
@@ -301,9 +301,9 @@ public class FileController extends BaseController {
 	@PermitAll
 	@ApiSignIgnore
 	public void getFileid302(@PathVariable("id") String id,HttpServletResponse response) throws IOException{
-		SysFile sysFile=iSysFileService.getById(id);
-		if(sysFile!=null){
-			String str=v2Config.getHttpurl()+sysFile.getVirtualKey()+"/"+sysFile.getRelativePath()+"/"+sysFile.getFileName();
+		DashboardFile dashboardFile =iSysFileService.getById(id);
+		if(dashboardFile !=null){
+			String str=v2Config.getHttpurl()+ dashboardFile.getVirtualKey()+"/"+ dashboardFile.getRelativePath()+"/"+ dashboardFile.getFileName();
 			response.sendRedirect(str);
 		}
 	}
@@ -323,7 +323,7 @@ public class FileController extends BaseController {
 	@PermitAll
 	@ApiSignIgnore
 	public Object list(long current, long size){
-		Page<SysFile> page= new Page<SysFile>(current, size);
+		Page<DashboardFile> page= new Page<DashboardFile>(current, size);
         return iSysFileService.page(page, new QueryWrapper());
 	}
 

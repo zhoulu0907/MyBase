@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.dashboard.build.service;
 
-import com.cmsr.onebase.module.dashboard.build.model.SysFile;
+import com.cmsr.onebase.module.dashboard.build.model.DashboardFile;
 import com.mybatisflex.core.service.IService;
 
 /**
@@ -11,8 +11,8 @@ import com.mybatisflex.core.service.IService;
  * @author fc
  * @since 2022-12-22
  */
-public interface ISysFileService extends IService<SysFile> {
+public interface ISysFileService extends IService<DashboardFile> {
 
 
-	public SysFile selectByExamplefileName(String filename);
+	public DashboardFile selectByExamplefileName(String filename);
 }
