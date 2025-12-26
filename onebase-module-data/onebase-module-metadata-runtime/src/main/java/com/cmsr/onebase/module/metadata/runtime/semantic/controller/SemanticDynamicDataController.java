@@ -45,13 +45,15 @@ public class SemanticDynamicDataController {
      *
      * @param tableName 表名，用于解析实体ID
      * @param menuId 菜单ID（用于权限与上下文）
+     * @param draftId 草稿ID（可选）
      * @param body 语义化合并请求体，顶层键为业务字段或连接器
      * @param request HTTP 请求对象，用于读取 `X-Trace-Id`
      * @param response HTTP 响应对象，用于回写 `X-Trace-Id`
      * @return 创建后的动态数据响应
      */
     public CommonResult<Map<String, Object>> create(@PathVariable("tableName") String tableName,
-                                                    @RequestParam("menuId") Long menuId, @RequestParam("draftId") Long draftId,
+                                                    @RequestParam("menuId") Long menuId,
+                                                    @RequestParam(value = "draftId", required = false) Long draftId,
                                                     @RequestBody SemanticMergeBodyVO body,
                                                     HttpServletRequest request,
                                                     HttpServletResponse response) {
