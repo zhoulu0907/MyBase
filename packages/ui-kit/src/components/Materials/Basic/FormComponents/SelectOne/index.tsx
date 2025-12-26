@@ -1,13 +1,13 @@
-import { getPopupContainer, getFieldOptionsConfig } from '@/utils';
+import { useAppEntityStore } from '@/signals';
+import { getFieldOptionsConfig, getPopupContainer } from '@/utils';
 import { Form, Select } from '@arco-design/web-react';
+import type { DictData } from '@onebase/platform-center';
 import { nanoid } from 'nanoid';
 import { memo, useEffect, useState } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
-import { STATUS_OPTIONS, STATUS_VALUES, DEFAULT_VALUE_TYPES } from '../../../constants';
+import { DEFAULT_VALUE_TYPES, STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import '../index.css';
 import type { XInputSelectOneConfig } from './schema';
-import { useAppEntityStore } from '@/signals';
-import type { DictData } from '@onebase/platform-center';
 
 const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const { label, dataField, tooltip, status, verify, layout, runtime = true, detailMode, defaultValueConfig } = props;
@@ -22,14 +22,14 @@ const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean; det
 
   useEffect(() => {
     if (dataField?.length) {
-      getOptions()
+      getOptions();
     }
-  }, [dataField])
+  }, [dataField]);
 
   const getOptions = async () => {
     const newOptions = await getFieldOptionsConfig(dataField, mainEntity, subEntities);
-    setOptions(newOptions)
-  }
+    setOptions(newOptions);
+  };
 
   return (
     <div className="formWrapper">
@@ -48,10 +48,14 @@ const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean; det
           margin: 0,
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
-        initialValue={defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : undefined}
+        initialValue={
+          defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : undefined
+        }
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
-          <div>{fieldValue?.name || options.find((op) => op.id === fieldValue?.id || op.id === fieldValue)?.label || '--'}</div>
+          <div>
+            {fieldValue?.name || options.find((op) => op.id === fieldValue?.id || op.id === fieldValue)?.label || '--'}
+          </div>
         ) : (
           <Select
             placeholder="请选择"
@@ -65,7 +69,11 @@ const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean; det
               pointerEvents: runtime ? 'unset' : 'none'
             }}
           >
-            {options.map((ele, index: number) => (<Select.Option key={index} value={ele.id}>{ele.label}</Select.Option>))}
+            {options.map((ele, index: number) => (
+              <Select.Option key={index} value={ele.id}>
+                {ele.label}
+              </Select.Option>
+            ))}
           </Select>
         )}
       </Form.Item>
