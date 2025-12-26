@@ -174,12 +174,12 @@ const DynamicDefaultValueConfig: React.FC<DynamicDefaultValueConfigProps> = ({
             max={configs.verify?.numberLimit ? configs.verify?.max : undefined}
             precision={configs?.numberFormat?.showPrecision ? configs.numberFormat.precision : 0}
             formatter={(value) => {
-              return configs?.numberFormat.useThousandsSeparator
+              return configs?.numberFormat?.useThousandsSeparator
                 ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
                 : value.toString();
             }}
             parser={(value) => value.replace(/,/g, '')}
-            suffix={configs?.numberFormat.showUnit ? configs.numberFormat.unitValue : ''}
+            suffix={configs?.numberFormat?.showUnit ? configs.numberFormat.unitValue : ''}
           />
         );
       case FORM_COMPONENT_TYPES.RADIO:
