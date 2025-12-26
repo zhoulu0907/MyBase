@@ -38,6 +38,11 @@ public class DashboardTemplateServiceImpl extends ServiceImpl<DashboardTemplateM
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long createDashboardTemplate(DashboardTemplateSaveReqVO saveReqVO) {
+
+        if (saveReqVO.getHot() == null) {
+            saveReqVO.setHot(0);
+        }
+
         SecurityFrameworkUtils.getLoginUserId();
         DashboardTemplateDO templateDO = BeanUtils.toBean(saveReqVO, DashboardTemplateDO.class);
         templateDO.setId(null);
