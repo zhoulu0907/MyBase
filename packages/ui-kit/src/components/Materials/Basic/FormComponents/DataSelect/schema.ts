@@ -187,7 +187,7 @@ const XDataSelect: XDataSelectSchema = {
     },
     {
       key: 'tooltip',
-      name: '描述信息',
+      name: '字段描述',
       type: CONFIG_TYPES.TOOLTIP_INPUT
     },
     ...dataFieldConfig,
