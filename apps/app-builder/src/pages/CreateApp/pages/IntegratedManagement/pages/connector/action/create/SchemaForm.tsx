@@ -11,7 +11,7 @@ import {
   type FormInstance
 } from '@arco-design/web-react';
 import { IconDelete, IconPlus } from '@arco-design/web-react/icon';
-import { ENTITY_FIELD_TYPE, getPopupContainer } from '@onebase/ui-kit';
+import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
 import { useEffect } from 'react';
 
 interface SchemaFormProps {
@@ -67,7 +67,7 @@ const SchemaForm: React.FC<SchemaFormProps> = ({ form, schema, fieldPrefix = 'sc
         return (
           <Form.Item field={field.field + '.value'}>
             <DatePicker
-              getPopupContainer={getPopupContainer}
+              getPopupContainer={() => document.body}
               format="YYYY-MM-DD"
               style={{ width: '100%' }}
               placeholder="默认值"
@@ -78,7 +78,7 @@ const SchemaForm: React.FC<SchemaFormProps> = ({ form, schema, fieldPrefix = 'sc
         return (
           <Form.Item field={field.field + '.value'}>
             <DatePicker
-              getPopupContainer={getPopupContainer}
+              getPopupContainer={() => document.body}
               showTime
               format="YYYY-MM-DD HH:mm:ss"
               style={{ width: '100%' }}
@@ -90,7 +90,7 @@ const SchemaForm: React.FC<SchemaFormProps> = ({ form, schema, fieldPrefix = 'sc
         return (
           <Form.Item field={field.field + '.value'}>
             <TimePicker
-              getPopupContainer={getPopupContainer}
+              getPopupContainer={() => document.body}
               format="HH:mm:ss"
               style={{ width: '100%' }}
               placeholder="默认值"
@@ -141,7 +141,7 @@ const SchemaForm: React.FC<SchemaFormProps> = ({ form, schema, fieldPrefix = 'sc
                 <Grid.Col span={7}>
                   <Form.Item field={field.field + '.type'}>
                     <Select
-                      getPopupContainer={getPopupContainer}
+                      getPopupContainer={() => document.body}
                       placeholder="字段类型"
                       options={FIELD_TYPES}
                       onChange={() => {
@@ -165,6 +165,7 @@ const SchemaForm: React.FC<SchemaFormProps> = ({ form, schema, fieldPrefix = 'sc
                   <Button
                     type="text"
                     status="danger"
+                    disabled={fields.length === 1}
                     icon={<IconDelete />}
                     onClick={() => remove(index)}
                     title="删除字段"

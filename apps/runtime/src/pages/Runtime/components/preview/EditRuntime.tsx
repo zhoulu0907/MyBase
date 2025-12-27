@@ -1,6 +1,6 @@
 import { Button, Form, Input, Message, Modal } from '@arco-design/web-react';
 import { IconFullscreen, IconFullscreenExit } from '@arco-design/web-react/icon';
-import { getDraftPage, PageType } from '@onebase/app';
+import { PageType } from '@onebase/app';
 import { pagesRuntimeSignal } from '@onebase/common';
 import {
   EDITOR_TYPES,
@@ -38,8 +38,8 @@ const EditRuntime: React.FC<EditRuntimeProps> = ({
   onSaveSubmit,
   onSaveDraft,
   onCancel,
-  menuId,
-  tableName
+  menuId: _menuId,
+  tableName: _tableName
 }) => {
   useSignals();
 
@@ -49,66 +49,75 @@ const EditRuntime: React.FC<EditRuntimeProps> = ({
   const [cpStates, setCpStates] = useState<Record<string, any>>({});
   const isLoadingFromDraftBoxRef = useRef(false);
 
-  const fetchLatestDraft = useCallback(async () => {
-    if (!tableName || !menuId) return;
-    try {
-      const res: any = await getDraftPage(tableName, menuId, { pageNo: 1, pageSize: 10 });
+  const handleFormValuesChange = useCallback(
+    async (_value: Partial<any>, values: Partial<any>) => {
+      const states = await initInteractionRule(
+        values,
+        pageViews.value[curViewId.value]?.interactionRules,
+        useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value
+      );
+      setCpStates(states);
+    },
+    [pageViews.value, curViewId.value, editPageViewId.value]
+  );
 
-      const draftData = res?.list?.[0];
+  // 载入草稿数据
+  const handleLoadDraft = useCallback(
+    async (draftData: any) => {
       if (draftData) {
-        handleLoadDraft(draftData);
+        console.log('latestDraft: ', draftData);
+        const componentSchemas = useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value;
+        const subTableComponents = useEditorSignalMap.get(editPageViewId.value)?.subTableComponents.value;
+        const formValues = normalizeFormValues({
+          dataItem: draftData,
+          componentSchemas,
+          subEntities: subEntities.value,
+          subTableComponents,
+          setSubTableDataLength: pagesRuntimeSignal.setSubTableDataLength
+        });
+
+        form.setFieldsValue(formValues);
+        form.setFieldValue('draftId', draftData.id);
+
+        // 触发表单值变化，更新组件状态
+        await handleFormValuesChange({}, formValues);
+        Message.success('已载入暂存数据');
       }
-    } catch (error) {
-      console.error('获取草稿数据失败:', error);
-    }
-  }, [menuId, tableName]);
+    },
+    [editPageViewId.value, subEntities.value, form, handleFormValuesChange]
+  );
 
-  const handleFormValuesChange = async (_value: Partial<any>, values: Partial<any>) => {
-    const states = await initInteractionRule(
-      values,
-      pageViews.value[curViewId.value]?.interactionRules,
-      useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value
-    );
-    setCpStates(states);
-  };
-
-  // 检查并提示草稿数据
+  // 检查并载入草稿数据（仅当从草稿箱点击"继续编辑"时）
   useEffect(() => {
     if (isAdd) {
-      // 如果是从草稿箱载入的，不显示提示 Modal
+      // 如果是从草稿箱载入的，不重复处理
       if (isLoadingFromDraftBoxRef.current) {
         return;
       }
-      // 自动检测服务端草稿箱最新数据
-      fetchLatestDraft();
+
+      // 只检查 localStorage 中是否有草稿数据（从草稿箱点击"继续编辑"时保存的）
+      // 直接点击"添加数据"时，不自动载入服务端草稿数据
+      const draftDataFromStorage = localStorage.getItem('draftData');
+      if (draftDataFromStorage) {
+        try {
+          const draftData = JSON.parse(draftDataFromStorage);
+          // 清除 localStorage 中的数据，避免重复载入
+          localStorage.removeItem('draftData');
+          // 标记为从草稿箱载入，避免重复提示
+          isLoadingFromDraftBoxRef.current = true;
+          // 载入草稿数据
+          handleLoadDraft(draftData);
+        } catch (error) {
+          console.error('解析 localStorage 草稿数据失败:', error);
+          // 解析失败时清除无效数据
+          localStorage.removeItem('draftData');
+        }
+      }
     } else {
       // 当 isAdd 变为 false 时，重置 ref
       isLoadingFromDraftBoxRef.current = false;
     }
-  }, [fetchLatestDraft, isAdd]);
-
-  // 载入草稿数据
-  const handleLoadDraft = async (draftData: any) => {
-    if (draftData) {
-      console.log('latestDraft: ', draftData);
-      const componentSchemas = useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value;
-      const subTableComponents = useEditorSignalMap.get(editPageViewId.value)?.subTableComponents.value;
-      const formValues = normalizeFormValues({
-        dataItem: draftData,
-        componentSchemas,
-        subEntities: subEntities.value,
-        subTableComponents,
-        setSubTableDataLength: pagesRuntimeSignal.setSubTableDataLength
-      });
-
-      form.setFieldsValue(formValues);
-      form.setFieldValue('draftId', draftData.id);
-
-      // 触发表单值变化，更新组件状态
-      await handleFormValuesChange({}, formValues);
-      Message.success('已载入暂存数据');
-    }
-  };
+  }, [isAdd, handleLoadDraft]);
 
   const hiddenState = useCallback(
     (cpId: string) => {
@@ -146,9 +155,11 @@ const EditRuntime: React.FC<EditRuntimeProps> = ({
         footer={
           <div className={styles.footer}>
             <div>
-              <Button type="default" onClick={onSaveDraft} loading={submitLoading} hidden={!isAdd}>
-                暂存
-              </Button>
+              {isAdd && (
+                <Button type="default" onClick={onSaveDraft} loading={submitLoading}>
+                  暂存
+                </Button>
+              )}
             </div>
             <div className={styles.footerRight}>
               {curPage?.value?.pageSetType === PageType.BPM && isAdd && (
