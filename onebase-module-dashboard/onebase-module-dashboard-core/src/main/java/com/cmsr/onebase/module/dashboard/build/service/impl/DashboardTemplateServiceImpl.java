@@ -7,6 +7,7 @@ import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.dashboard.build.dal.dataobject.DashboardTemplateDO;
 import com.cmsr.onebase.module.dashboard.build.dal.mapper.DashboardTemplateMapper;
 import com.cmsr.onebase.module.dashboard.build.enums.TemplateTypeEnum;
+import com.cmsr.onebase.module.dashboard.build.model.DashboardProjectData;
 import com.cmsr.onebase.module.dashboard.build.service.DashboardTemplateService;
 import com.cmsr.onebase.module.dashboard.build.vo.template.DashboardTemplatePageReqVO;
 import com.cmsr.onebase.module.dashboard.build.vo.template.DashboardTemplateSaveReqVO;
@@ -15,10 +16,12 @@ import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -56,12 +59,15 @@ public class DashboardTemplateServiceImpl extends ServiceImpl<DashboardTemplateM
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void updateDashboardTemplate(DashboardTemplateSaveReqVO saveReqVO) {
+    public void updateDashboardTemplate(DashboardProjectData saveReqVO) {
         // 校验存在
-        validateDashboardTemplateExists(saveReqVO.getId());
+        validateDashboardTemplateExists(saveReqVO.getProjectId());
 
         // 更新
-        DashboardTemplateDO updateObj = BeanUtils.toBean(saveReqVO, DashboardTemplateDO.class);
+        DashboardTemplateDO updateObj = new DashboardTemplateDO();
+        updateObj.setId(saveReqVO.getProjectId());
+        updateObj.setContent(saveReqVO.getContent());
+
         updateObj.setUpdater(SecurityFrameworkUtils.getLoginUserId());
         dashboardTemplateMapper.update(updateObj);
     }
@@ -77,20 +83,21 @@ public class DashboardTemplateServiceImpl extends ServiceImpl<DashboardTemplateM
     }
 
     private void validateDashboardTemplateExists(Long id) {
-
-        if (dashboardTemplateMapper.selectOneById(id) == null) {
+        if (id == null || dashboardTemplateMapper.selectOneById(id) == null) {
             throw exception(TEMPLATE_NOT_EXISTS);
         }
     }
 
     @Override
     public DashboardTemplateDO getDashboardTemplate(Long id) {
-
         return dashboardTemplateMapper.selectOneById(id);
     }
 
     @Override
     public List<DashboardTemplateDO> getDashboardTemplateList(List<Long> ids) {
+        if(CollectionUtils.isEmpty(ids)){
+            return Collections.emptyList();
+        }
         return dashboardTemplateMapper.selectListByIds(ids);
     }
 

@@ -19,6 +19,7 @@ import io.swagger.annotations.ApiOperation;
 import jakarta.annotation.Resource;
 import jakarta.annotation.security.PermitAll;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -89,17 +90,17 @@ public class DashboardTemplateController {
     }
 
     /**
-     * 更新仪表盘模板
-     *
+     * 更新仪表盘模板（JSON 请求）
+     * 说明：部分前端会使用 FormData 提交，其中 content 可能是较大的 JSON 字符串。
      * @param saveReqVO 更新信息
      * @return 是否更新成功
      */
-    @PostMapping("/update")
+    @PostMapping(value = "/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ApiOperation("更新仪表盘模板")
     @PermitAll
     @ApiSignIgnore
     @TenantIgnore
-    public CommonResult<Boolean> updateDashboardTemplate(@RequestBody @Validated DashboardTemplateSaveReqVO saveReqVO) {
+    public CommonResult<Boolean> updateDashboardTemplate(@ModelAttribute @Validated DashboardProjectData saveReqVO) {
         dashboardTemplateService.updateDashboardTemplate(saveReqVO);
         return success(true);
     }
