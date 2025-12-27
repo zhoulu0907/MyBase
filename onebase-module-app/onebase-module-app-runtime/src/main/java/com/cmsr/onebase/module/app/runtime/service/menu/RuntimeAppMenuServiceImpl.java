@@ -25,6 +25,7 @@ import com.cmsr.onebase.module.app.runtime.vo.menu.MenuPermissionVO;
 import jakarta.annotation.Resource;
 import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
@@ -63,7 +64,13 @@ public class RuntimeAppMenuServiceImpl implements RuntimeAppMenuService {
     public List<MenuListRespVO> listBpmApplicationMenu() {
         Long applicationId = ApplicationManager.getApplicationId();
         LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
-        TerminalEnum terminalEnum = TerminalEnum.ofTerminal(loginUser.getLoginPlatform());
+        String loginPlatform = loginUser.getLoginPlatform();
+        TerminalEnum terminalEnum;
+        if (StringUtils.isNotBlank(loginPlatform)) {
+            terminalEnum = TerminalEnum.ofTerminal(loginPlatform);
+        } else {
+            terminalEnum = TerminalEnum.PC;
+        }
         // 获取应用下所有可见的BPM类型菜单
         List<AppMenuDO> menuDOS = appMenuRepository.findByApplicationIdAndType(applicationId, Set.of(MenuTypeEnum.BPM.getValue()));
         // 返回菜单
@@ -86,7 +93,13 @@ public class RuntimeAppMenuServiceImpl implements RuntimeAppMenuService {
         Long userId = SecurityFrameworkUtils.getLoginUserId();
         Long applicationId = ApplicationManager.getRequiredApplicationId();
         LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
-        TerminalEnum terminalEnum = TerminalEnum.ofTerminal(loginUser.getLoginPlatform());
+        String loginPlatform = loginUser.getLoginPlatform();
+        TerminalEnum terminalEnum;
+        if (StringUtils.isNotBlank(loginPlatform)) {
+            terminalEnum = TerminalEnum.ofTerminal(loginPlatform);
+        } else {
+            terminalEnum = TerminalEnum.PC;
+        }
         // TODO 临时方案，后面要修改
         appAuthSecurityApi.cleanAuthCache(userId, applicationId);
         appAuthSecurityApi.loadAuthCache(userId, applicationId);
