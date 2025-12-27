@@ -157,7 +157,9 @@ public class RuntimeAppMenuServiceImpl implements RuntimeAppMenuService {
             if (Objects.equals(respVO.getParentUuid(), parentUuid)) {
                 // 只有父菜单的uuid等于当前菜单的父菜单的uuid时，才添加子菜单，继续递归
                 LinkedList<MenuListRespVO> vos = recursiveGetChildren(respVO.getMenuUuid(), listRespVOS);
-                if (MenuTypeEnum.isGroup(respVO.getMenuType()) && CollectionUtils.isNotEmpty(vos)) {
+                if (MenuTypeEnum.isGroup(respVO.getMenuType()) && CollectionUtils.isEmpty(vos)) {
+                    // 过滤掉没有子菜单的菜单
+                } else {
                     respVO.setChildren(vos);
                     children.add(respVO);
                 }
