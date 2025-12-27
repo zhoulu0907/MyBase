@@ -15,10 +15,10 @@ import {
   getComponentSchema,
   STATUS_OPTIONS,
   STATUS_VALUES,
+  useFormEditorSignal,
+  usePageViewEditorSignal,
   WIDTH_OPTIONS,
   WIDTH_VALUES,
-  usePageViewEditorSignal,
-  useFormEditorSignal,
   type GridItem
 } from '@onebase/ui-kit';
 import { EditRender } from '@onebase/ui-kit-mobile';
@@ -692,7 +692,6 @@ const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({ props, isListEditor =
                   }
 
                   if (dataLabel) {
-                    console.log(schema);
                     schema.config.label.text = dataLabel;
                   }
 
