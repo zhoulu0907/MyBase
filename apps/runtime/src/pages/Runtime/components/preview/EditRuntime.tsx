@@ -155,9 +155,11 @@ const EditRuntime: React.FC<EditRuntimeProps> = ({
         footer={
           <div className={styles.footer}>
             <div>
-              <Button type="default" onClick={onSaveDraft} loading={submitLoading} hidden={!isAdd}>
-                暂存
-              </Button>
+              {isAdd && (
+                <Button type="default" onClick={onSaveDraft} loading={submitLoading}>
+                  暂存
+                </Button>
+              )}
             </div>
             <div className={styles.footerRight}>
               {curPage?.value?.pageSetType === PageType.BPM && isAdd && (
