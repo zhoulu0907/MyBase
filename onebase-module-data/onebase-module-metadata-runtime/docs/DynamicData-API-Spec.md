@@ -124,12 +124,94 @@
   "data": {},
   "pageNo": 1,
   "pageSize": 20,
-  "sortField": "name",
-  "sortDirection": "DESC",
-  "filters": { "status": 1 }
+  "sortBy": [ { "field": "name", "direction": "DESC" } ],
+  "filters": {
+    "nodeType": "GROUP",
+    "combinator": "AND",
+    "children": [
+      { "nodeType": "CONDITION", "fieldName": "status", "operator": "EQUALS", "fieldValue": [1] },
+      { "nodeType": "CONDITION", "fieldName": "name", "operator": "CONTAINS", "fieldValue": ["张"] }
+    ]
+  }
 }
 ```
 - 响应：`CommonResult<PageResult<DynamicDataRespVO>>`
+
+#### 过滤配置
+- 支持两种结构：
+  - 简单键值：`{"status": 1, "name": "张"}`（等价于 `EQUALS` 与默认 `CONTAINS` 的退化处理，字符串默认模糊匹配）
+  - 条件对象：`{"cond1": {"fieldName":"status","operator":"EQUALS","value":1}}`
+- 操作符可选值：
+  - 比较：`EQUALS`、`NOT_EQUALS`、`GREATER_THAN`、`GREATER_EQUALS`、`LESS_THAN`、`LESS_EQUALS`
+  - 文本：`CONTAINS`、`NOT_CONTAINS`
+  - 时间：`EARLIER_THAN`、`LATER_THAN`、`RANGE`（`{"start":...,"end":...}` 任意一端可省略）
+  - 集合：`EXISTS_IN`、`NOT_EXISTS_IN`
+  - 空值：`IS_EMPTY`、`IS_NOT_EMPTY`
+- 字段与默认：
+  - `fieldName` 必须为主实体已定义字段；未知字段忽略
+  - 未指定 `operator` 时默认 `CONTAINS`
+  - `deleted`、`tenant_id` 自动忽略，系统会追加 `deleted=0`
+- 示例：
+```json
+{
+  "filters": {
+    "f1": { "fieldName": "status", "operator": "CONTAINS", "value": 1 },
+    "f2": { "fieldName": "name", "operator": "CONTAINS", "value": "张" },
+    "f3": { "fieldName": "amount", "operator": "RANGE", "value": { "start": 50, "end": 200 } },
+    "f4": { "fieldName": "created_at", "operator": "EARLIER_THAN", "value": "2025-12-01 00:00:00" },
+    "f5": { "fieldName": "category", "operator": "EXISTS_IN", "value": ["A","B"] }
+  }
+}
+```
+
+参考实现：
+- 条件解析：`onebase-module-data/onebase-module-metadata-runtime/src/main/java/com/cmsr/onebase/module/metadata/runtime/controller/app/datamethod/datamethodImpl/MetadataDataMethodQueryImpl.java:236`
+- 计数与列表过滤：`onebase-module-data/onebase-module-metadata-runtime/src/main/java/com/cmsr/onebase/module/metadata/runtime/controller/app/datamethod/datamethodImpl/MetadataDataMethodQueryImpl.java:285`
+- 操作符映射：`onebase-module-data/onebase-module-metadata-runtime/src/main/java/com/cmsr/onebase/module/metadata/runtime/controller/app/datamethod/datamethodImpl/MetadataDataMethodQueryImpl.java:349`
+
+### 条件配置设计
+- 条件模型：`SemanticConditionDTO`（树形结构）
+  - 组节点：`{"nodeType":"GROUP","combinator":"AND|OR","children":[...]}`
+  - 条件节点：`{"nodeType":"CONDITION","fieldName":"xxx"|"fieldUuid":"...","operator":"...","fieldValue":[...],"conditionType":"MAIN_CONDITION|SUB_CONDITION"}`
+  - 字段解析优先级：先用 `fieldName`，缺失时按 `fieldUuid` 解析为字段名。实现位置 `onebase-module-data/onebase-module-metadata-core/src/main/java/com/cmsr/onebase/module/metadata/core/semantic/strategy/SemanticQueryConditionBuilder.java:175`
+- 操作符语义（核心映射）：
+  - 空操作符：字符串走 `LIKE`，其他类型走 `=`。实现位置 `onebase-module-data/onebase-module-metadata-core/src/main/java/com/cmsr/onebase/module/metadata/core/semantic/strategy/SemanticQueryConditionBuilder.java:79`
+  - 比较：`EQUALS(EQ)`、`NOT_EQUALS(NE)`、`GREATER_THAN(GT)`、`GREATER_EQUALS(GE)`、`LESS_THAN(LT)`、`LESS_EQUALS(LE)`（`QueryColumn.eq/ne/gt/ge/lt/le`）
+  - 文本：`CONTAINS`→`LIKE`，`NOT_CONTAINS`→`NOT LIKE`
+  - 集合：`EXISTS_IN`→`IN`，`NOT_EXISTS_IN`→`NOT IN`
+  - 组合包含：`CONTAINS_ALL`（所有值 AND 组合 LIKE）、`CONTAINS_ANY`（任一值 OR 组合 LIKE）、`NOT_CONTAINS_ALL`（任一值 OR 组合 NOT LIKE）、`NOT_CONTAINS_ANY`（所有值 AND 组合 NOT LIKE）。实现位置 `.../SemanticQueryConditionBuilder.java:123`
+  - 时间：`LATER_THAN`→`>`，`EARLIER_THAN`→`<`，`RANGE`→`>= start AND <= end`（`fieldValue` 顺序为 `[start,end]`，可缺省任一端）。实现位置 `.../SemanticQueryConditionBuilder.java:109`, `...:113`, `...:114`
+  - 空值：`IS_EMPTY`（`IS NULL OR = ''`）、`IS_NOT_EMPTY`（`IS NOT NULL AND != ''`）。实现位置 `.../SemanticQueryConditionBuilder.java:159`
+- 值类型与转换：
+  - 后端按字段类型强制转换（数值、日期/时间、布尔等）。字符串缺省按 `LIKE`；集合运算按列表元素转换。
+  - 空字符串规范：业务值归一为 `null`；示例实现 `onebase-module-data/onebase-module-metadata-common/.../SemanticFieldValueDTO.java:296`。
+- 嵌套示例：
+```json
+{
+  "filters": {
+    "nodeType": "GROUP",
+    "combinator": "AND",
+    "children": [
+      { "nodeType": "GROUP", "combinator": "OR", "children": [
+        { "nodeType": "CONDITION", "fieldName": "name", "operator": "CONTAINS_ANY", "fieldValue": ["张","李"] },
+        { "nodeType": "CONDITION", "fieldName": "mobile", "operator": "CONTAINS", "fieldValue": ["138"] }
+      ]},
+      { "nodeType": "CONDITION", "fieldName": "status", "operator": "EXISTS_IN", "fieldValue": [1,2] },
+      { "nodeType": "CONDITION", "fieldName": "created_at", "operator": "RANGE", "fieldValue": ["2025-01-01 00:00:00","2025-12-31 23:59:59"] },
+      { "nodeType": "CONDITION", "fieldName": "amount", "operator": "GREATER_EQUALS", "fieldValue": [100] },
+      { "nodeType": "CONDITION", "fieldName": "remark", "operator": "IS_NOT_EMPTY", "fieldValue": [] }
+    ]
+  },
+  "sortBy": [
+    { "field": "created_at", "direction": "DESC" },
+    { "field": "id", "direction": "DESC" }
+  ]
+}
+```
+- 约束与默认：
+  - 未识别字段直接忽略；系统字段如 `deleted`、`tenant_id` 不可作为条件，系统会默认追加 `deleted=0`（分页实现位置 `onebase-module-data/onebase-module-metadata-runtime/.../MetadataDataMethodQueryImpl.java:266`）
+  - `fieldValue` 为数组：`IN/NOT_IN` 使用全量列表；`RANGE` `[start,end]`；其他取首值。
+  - 排序缺省按主键降序（实现位置 `.../SemanticQueryConditionBuilder.java:42`）
 
 ## 控制器传输逻辑
 - 路由解析：`{tableName}` 由服务层解析实体模型
