@@ -21,6 +21,7 @@ import {
   getCaptchaApi,
   innerLogin,
   login,
+  LoginPlatform,
   runtimeCorpLogin,
   sassLogin,
   type LoginRequest,
@@ -145,7 +146,8 @@ const Right: React.FC = () => {
           mobile: (values as RuntimeMobileLoginRequest).mobile!,
           appId: appId,
           captchaVerification: captchaVerification,
-          deviceId: deviceId
+          deviceId: deviceId,
+          loginPlatform: LoginPlatform.MOBILE
         };
 
         response = await sassLogin(sassloginData, headers);
@@ -155,7 +157,8 @@ const Right: React.FC = () => {
           username: (values as RuntimeAccountLoginRequest).username!,
           appId: appId,
           captchaVerification: captchaVerification,
-          deviceId: deviceId
+          deviceId: deviceId,
+          loginPlatform: LoginPlatform.MOBILE
         };
         response = await innerLogin(innerloginData, headers);
       } else if (!appId) {
@@ -163,7 +166,8 @@ const Right: React.FC = () => {
           password: values.password!,
           mobile: (values as RuntimeCorpLoginRequest).mobile!,
           captchaVerification: captchaVerification,
-          deviceId: deviceId
+          deviceId: deviceId,
+          loginPlatform: LoginPlatform.MOBILE
         };
         response = await runtimeCorpLogin(innerloginData, headers);
       } else {
@@ -171,7 +175,8 @@ const Right: React.FC = () => {
           username: (values as LoginRequest).username!,
           password: values.password!,
           captchaVerification: captchaVerification,
-          deviceId: deviceId
+          deviceId: deviceId,
+          loginPlatform: LoginPlatform.MOBILE
         };
 
         response = await login(loginData, headers);
@@ -199,6 +204,7 @@ const Right: React.FC = () => {
             expiresTime: response.expiresTime,
             tenantId: response.tenantId,
             corpId: response.corpId,
+            loginSource: response.loginSource,
             loginURL: window.location.href // 当前地址
           },
           rememberMe

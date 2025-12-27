@@ -44,6 +44,8 @@ const XInputEmail = memo((props: XInputEmailConfig & { runtime?: boolean; detail
     }
   ];
 
+  const textAlign = layout === 'vertical' ? 'left' : 'right';
+
   return (
     <Form.Item
       className="inputTextWrapperOBMobile"
@@ -59,18 +61,16 @@ const XInputEmail = memo((props: XInputEmailConfig & { runtime?: boolean; detail
     >
       {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
         // 只读模式，渲染文本内容
-        <Input
+        <div
           className="readonlyText"
-          readOnly
-          value={form?.getFieldValue(fieldId) || (defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : '')}
-          inputStyle={{ textAlign: layout === 'vertical' ? 'left' : 'right' }}
-        />
+          style={{ textAlign }}
+        >{form?.getFieldValue(fieldId)  || (defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : '') || '--'}</div>
       ) : (
         // 编辑模式，渲染Input组件
         <Input
           type="email"
           placeholder={placeholder}
-          inputStyle={{ textAlign: layout === 'vertical' ? 'left' : 'right' }}
+          inputStyle={{ textAlign }}
           blockChangeWhenCompositing={true}
         />
       )}

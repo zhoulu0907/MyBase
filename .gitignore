@@ -52,7 +52,9 @@ Thumbs.db
 
 *.tar
 
+
 cosco_config/
 devops_config/
 
 scripts/encrypt-config.ts
+scripts/deploy.sh

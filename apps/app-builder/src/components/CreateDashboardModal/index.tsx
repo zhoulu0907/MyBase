@@ -145,7 +145,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
       name = templateName
     ) => {
       const params = {
-        hot: method === 'dashboardNew' ? IsHot.YES : IsHot.NO,
+        ...(method === 'dashboardNew' && { hot: IsHot.YES }),
         templateType: tab === 'allTemplate' ? '' : tab,
         pageNo: pagination.current,
         pageSize: method === 'dashboardNew' ? 4 : 8,

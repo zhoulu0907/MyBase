@@ -1,36 +1,37 @@
-import logoIcon from '@/assets/images/logo-icon.svg';
-import phoneIcon from '@/assets/images/login/phone.svg';
 import passwordIcon from '@/assets/images/login/password.svg';
-import { Tabs, Form, Input, Button, Toast } from '@arco-design/mobile-react';
+import phoneIcon from '@/assets/images/login/phone.svg';
+import logoIcon from '@/assets/images/logo-icon.svg';
+import { useRememberMe } from '@/hooks/useRememberMe';
+import { Button, Form, Input, Tabs, Toast } from '@arco-design/mobile-react';
 import { type IFormInstance } from '@arco-design/mobile-react/esm/form';
 import { ValidatorType } from '@arco-design/mobile-utils';
-import { useRememberMe } from '@/hooks/useRememberMe';
-import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { getApplicationLeast, type Application } from '@onebase/app';
 import {
-  sendVerifyCodeApi,
-  getCaptchaApi,
+  DynamicIcon,
+  getHashQueryParam,
+  getOrCreateDeviceInfo,
+  getPublicKey,
+  sm2Encrypt,
+  TokenManager,
+  type SliderCaptchaRef
+} from '@onebase/common';
+import {
   checkCaptchaApi,
+  getCaptchaApi,
+  LoginPlatform,
   runtimeThirdLogin,
+  sendVerifyCodeApi,
   type RuntimeThirdLoginRequest,
   type ThirdUserLoginResponse
 } from '@onebase/platform-center';
 import { appIconMap } from '@onebase/ui-kit';
-import {
-  DynamicIcon,
-  getOrCreateDeviceInfo,
-  sm2Encrypt,
-  TokenManager,
-  getPublicKey,
-  getHashQueryParam,
-  type SliderCaptchaRef
-} from '@onebase/common';
-import VerifyCode from '../VerifyCode';
-import ConfirmInfoForm from '../ConfirmInfoForm';
-import RegisterForm from '../RegisterForm';
+import React, { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { SliderCaptcha } from '../../../Login/components/Captcha';
 import styles from '../../index.module.less';
+import ConfirmInfoForm from '../ConfirmInfoForm';
+import RegisterForm from '../RegisterForm';
+import VerifyCode from '../VerifyCode';
 
 interface FormRef {
   dom: HTMLFormElement;
@@ -93,8 +94,22 @@ const LoginContent: React.FC = () => {
       {
         type: ValidatorType.Custom,
         validator: (val: string, callback: (error?: string) => void) => {
+          const mobileRegex = /^1[3-9]\d{9}$/;
           if (!val) {
             callback('请输入手机号');
+          } else if (!mobileRegex.test(val)) {
+            callback('请输入正确的手机号');
+          }
+          callback();
+        }
+      }
+    ],
+    verifyCode: [
+      {
+        type: ValidatorType.Custom,
+        validator: (val: string, callback: (error?: string) => void) => {
+          if (!val) {
+            callback('请输入验证码');
           } else {
             callback();
           }
@@ -220,7 +235,8 @@ const LoginContent: React.FC = () => {
         loginType: values.loginType,
         mobile: values.mobile,
         captchaVerification: captchaVerification,
-        deviceId: values.deviceId
+        deviceId: values.deviceId,
+        loginPlatform: LoginPlatform.MOBILE
       };
       if (values.loginType === 'password' && values.password) {
         // 密码加密
@@ -293,6 +309,7 @@ const LoginContent: React.FC = () => {
   const goPage = () => {
     const redirectURL = getHashQueryParam('redirectURL');
     if (redirectURL) {
+      debugger;
       if (!appId) {
         //企业登录
         navigate(`/onebase/${tenantId}/runtime-home`);
@@ -357,13 +374,13 @@ const LoginContent: React.FC = () => {
           <Form ref={verifyCodeFormRef} layout="vertical" className={styles.loginForm}>
             <Form.Item label="手机号" field="mobile" rules={rules.mobile}>
               <Input
-                label={<img src={phoneIcon} alt="logo" className={styles.loginFormIcon} />}
+                label={<img src={phoneIcon} alt="phone" className={styles.loginFormIcon} />}
                 placeholder="请输入手机号"
                 maxLength={11}
                 onChange={(_, value) => setUserMobile(value)}
               />
             </Form.Item>
-            <Form.Item label="短信验证码" field="verifyCode">
+            <Form.Item label="短信验证码" field="verifyCode" rules={rules.verifyCode}>
               <VerifyCode userMobile={userMobile} verifyType={'mobile'} sendVerifyCode={sendVerifyCodeApi} />
             </Form.Item>
             <Button
@@ -380,7 +397,7 @@ const LoginContent: React.FC = () => {
           <Form ref={passwordFormRef} layout="vertical" className={styles.loginForm}>
             <Form.Item label="手机号" field="mobile" rules={rules.mobile}>
               <Input
-                label={<img src={phoneIcon} alt="logo" className={styles.loginFormIcon} />}
+                label={<img src={phoneIcon} alt="phone" className={styles.loginFormIcon} />}
                 placeholder="请输入手机号"
                 maxLength={11}
                 onChange={(_, value) => setUserMobile(value)}
@@ -389,10 +406,13 @@ const LoginContent: React.FC = () => {
             <Form.Item field="password" label="密码" rules={rules.password}>
               <Input
                 type="password"
-                label={<img src={passwordIcon} alt="logo" className={styles.loginFormIcon} />}
+                label={<img src={passwordIcon} alt="password" className={styles.loginFormIcon} />}
                 placeholder="请输入密码"
               />
             </Form.Item>
+            <div className={styles.forgotPassword}>
+              <span onClick={() => navigate(`/onebase/forget-password/${tenantId}`)}>忘记密码</span>
+            </div>
             <Button
               type="primary"
               size="large"

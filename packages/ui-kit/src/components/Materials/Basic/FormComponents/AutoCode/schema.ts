@@ -1,13 +1,12 @@
 import {
+  autoCodeConfig,
   baseConfig,
   baseDefault,
   dataFieldConfig,
   layoutConfig,
   statusConfig,
   widthConfig,
-  autoCodeConfig,
   type ICommonBaseType,
-  type TAlignSelectKeyType,
   type TLayoutSelectKeyType,
   type TStatusSelectKeyType,
   type TWidthSelectKeyType
@@ -33,7 +32,7 @@ import type {
   TBooleanDefaultType,
   TRadioDefaultType,
   TTextAreaDefaultType,
-  TTextDefaultType,
+  TTextDefaultType
 } from '../../../types';
 
 // 输入框组件的schema
@@ -58,10 +57,10 @@ export type TXautoCodeEditData = Array<
 
 export interface XautoCodeConfig extends ICommonBaseType {
   /**
-  * 输入框标题
-  * text：标题
-  * display：是否显示
-  */
+   * 输入框标题
+   * text：标题
+   * display：是否显示
+   */
   label: {
     text: TTextDefaultType;
     display: TBooleanDefaultType;
@@ -82,13 +81,11 @@ export interface XautoCodeConfig extends ICommonBaseType {
    */
   dataField: TTextDefaultType[];
 
-
   /**
    * 组件状态：可用、隐藏、只读
    * 可选值: 'default' | 'hidden' | 'readonly'
    */
   status?: TRadioDefaultType<TStatusSelectKeyType>;
-
 
   /**
    * 表单的布局：水平、垂直（默认）
@@ -117,7 +114,7 @@ const XautoCode: XautoCodeSchema = {
     },
     {
       key: 'tooltip',
-      name: '描述信息',
+      name: '字段描述',
       type: CONFIG_TYPES.TOOLTIP_INPUT
     },
     ...dataFieldConfig,
@@ -137,7 +134,7 @@ const XautoCode: XautoCodeSchema = {
     dataField: [],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
-    width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
+    width: WIDTH_VALUES[WIDTH_OPTIONS.HALF]
   }
 };
 

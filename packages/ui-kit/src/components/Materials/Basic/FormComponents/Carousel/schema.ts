@@ -7,7 +7,6 @@ import {
   statusConfig,
   widthConfig,
   type ICommonBaseType,
-  type TAlignSelectKeyType,
   type TFillSelectKeyType,
   type TLayoutSelectKeyType,
   type TStatusSelectKeyType,
@@ -143,7 +142,7 @@ const XCarousel: XCarouselSchema = {
     },
     {
       key: 'tooltip',
-      name: '描述信息',
+      name: '字段描述',
       type: CONFIG_TYPES.TOOLTIP_INPUT
     },
     carouselConfig,
@@ -185,7 +184,7 @@ const XCarousel: XCarouselSchema = {
     },
     width: WIDTH_VALUES[WIDTH_OPTIONS.FULL],
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
-    status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
+    status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT]
   }
 };
 

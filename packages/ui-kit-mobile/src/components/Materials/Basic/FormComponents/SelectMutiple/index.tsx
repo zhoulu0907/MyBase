@@ -33,6 +33,7 @@ const XSelectMutiple = memo((props: XSelectMutipleConfig & { runtime?: boolean; 
   } = props;
 
   const { mainEntity, subEntities } = useAppEntityStore();
+  const textAlign = layout === 'vertical' ? 'left' : 'right';
 
   // 生成唯一的字段ID
   const fieldId = dataField && dataField.length > 0
@@ -95,7 +96,7 @@ const XSelectMutiple = memo((props: XSelectMutipleConfig & { runtime?: boolean; 
     const selectedOptions = options?.filter(option => selectedKeys.includes(option.id));
     return selectedOptions?.map(opt => opt.label).join(',');
   };
-  
+
   return (
     <Form.Item
       className="inputTextWrapperOBMobile selectMultipleWrapperOBMobile"
@@ -105,15 +106,20 @@ const XSelectMutiple = memo((props: XSelectMutipleConfig & { runtime?: boolean; 
       layout={layout}
       initialValue={defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : undefined}
       style={{
-        textAlign: layout === 'vertical' ? 'left' : 'right',
+        textAlign,
         pointerEvents: (!runtime || detailMode) ? 'none' : 'unset',
         opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
       }}
     >
       {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
-        <div className="readonlyText">{form?.getFieldValue(fieldId) && Array.isArray(form?.getFieldValue(fieldId)) && form?.getFieldValue(fieldId).map((ele: any, index: number) => <div key={index} style={{ marginBottom: '0' }}>
-          {ele?.name || options.find((e => e.id === ele || e.id === ele?.id))?.label || '--'}
-          </div>)}
+        <div className="readonlyText">
+          {form?.getFieldValue(fieldId) ?
+            Array.isArray(form?.getFieldValue(fieldId)) &&
+            form?.getFieldValue(fieldId).map((ele: any, index: number) => (
+              <div key={index} style={{ marginBottom: '0' }}>
+                {ele?.name || options.find((e => e.id === ele || e.id === ele?.id))?.label}
+              </div>)) : '--'
+          }
         </div>
       ) : (
         <Cell
@@ -123,17 +129,17 @@ const XSelectMutiple = memo((props: XSelectMutipleConfig & { runtime?: boolean; 
           <Ellipsis className={`selectMultipleValue ${layout === 'vertical' ? 'verticalLayout' : ''}`} text={getSelectedLabels()} maxLine={1} />
           <PopupSwiper className="selectMultiplePopupOBMobile" visible={visible} close={(e) => handleCancel(e)} direction={popupDirection}>
             <div>
-              <div style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center', 
-                padding: '0.24rem 0.32rem', 
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '0.24rem 0.32rem',
                 borderBottom: '1px solid #f0f0f0',
                 position: 'relative'
               }}>
                 <div
                   className="popup-btn popup-btn-cancel"
-                  onClick={(e) => handleCancel(e)} 
+                  onClick={(e) => handleCancel(e)}
                 >
                   取消
                 </div>
@@ -145,7 +151,7 @@ const XSelectMutiple = memo((props: XSelectMutipleConfig & { runtime?: boolean; 
                   确定
                 </div>
               </div>
-              
+
               <div className="checkbox-group-outer">
                 <Checkbox.Group
                   className="selectCheckoutOBMobile"
@@ -156,13 +162,13 @@ const XSelectMutiple = memo((props: XSelectMutipleConfig & { runtime?: boolean; 
                     setSelectedKeys(values);
                   }}
                 >
-                  {options?.map((option) => (
-                    <div 
-                      key={option.value} 
+                  {options?.map((option, index) => (
+                    <div
+                      key={option.value}
                       className="checkbox-item"
-                      style={{ 
-                        padding: '0 0.32rem', 
-                        borderBottom: '1px solid #f5f5f5',
+                      style={{
+                        padding: '0 0.32rem',
+                        borderBottom: index !== options.length - 1 ? '1px solid #f5f5f5' : 'none',
                         display: 'flex',
                         alignItems: 'center'
                       }}
@@ -172,7 +178,7 @@ const XSelectMutiple = memo((props: XSelectMutipleConfig & { runtime?: boolean; 
                         icons={squareIcon}
                         style={{ marginRight: '0.2rem' }}
                       >
-                      <span style={{ fontSize: 'var(--fontSize)', color: '#333' }}>{option.label}</span>
+                        <span style={{ fontSize: 'var(--fontSize)', color: '#333' }}>{option.label}</span>
                       </Checkbox>
                     </div>
                   ))}

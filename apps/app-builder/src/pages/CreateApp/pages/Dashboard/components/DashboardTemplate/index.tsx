@@ -42,7 +42,7 @@ const ScreenTemplate: FC = () => {
   const [total, setTotal] = useState(1);
   useEffect(() => {
     getTemplateList();
-  }, []);
+  }, [currentPage]);
   //列表
   const getTemplateList = async (tabType: string = 'app', searchValue: string = '') => {
     const res = await DashboardTemplateParams({
@@ -56,12 +56,8 @@ const ScreenTemplate: FC = () => {
   };
   // 处理分页变化
   const handlePageChange = async (pageNum: number) => {
-    try {
-      setCurrentPage(pageNum);
-      getTemplateList();
-    } catch (error) {
-      console.error(error);
-    }
+    setCurrentPage(pageNum);
+    getTemplateList();
   };
 
   const [activeTab, setActiveTab] = useState('1');
@@ -109,8 +105,7 @@ const ScreenTemplate: FC = () => {
     await getTemplateList(currentType);
   };
   const handleEditTemplate = (item: screenTemplate) => {
-    console.log(item, '编辑模板');
-    window.open(`${resourceUrl}chart/home/${item.id}/applicationId`, '_blank');
+    window.open(`${resourceUrl}chart/home/${item.id}/${appId}/template`, '_blank');
   };
   //取消弹框
   const handleEditCancel = () => {
@@ -118,8 +113,7 @@ const ScreenTemplate: FC = () => {
   };
   //预览
   const handlePreview = (item: screenTemplate) => {
-    console.log(item, '预览');
-    window.open(`${resourceUrl}chart/preview/:${item.id}`, '_blank');
+    window.open(`${resourceUrl}chart/preview/${item.id}/template`, '_blank');
   };
   //导入模板
   const [selectedButton, setSelectedButton] = useState('');
@@ -193,7 +187,6 @@ const ScreenTemplate: FC = () => {
                     <TemplateCard
                       key={item.id}
                       item={item}
-                      title="应用模板"
                       onEditTemplate={handleEditName}
                       onEdit={handleEditTemplate}
                       onPreview={handlePreview}

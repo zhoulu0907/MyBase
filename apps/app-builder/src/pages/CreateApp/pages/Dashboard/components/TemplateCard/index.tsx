@@ -4,6 +4,7 @@ import { Space, Button, Menu, Dropdown } from '@arco-design/web-react';
 import screenTemplate from '@/assets/images/screen/screenTemplate.png';
 import styles from './index.module.less';
 import eye from '@/assets/images/screen/eye.png';
+import { getFileUrlById } from '@onebase/platform-center';
 interface dataList {
   id: string;
   templateName: string;
@@ -19,13 +20,12 @@ interface CardProps {
     templateType: string;
     indexImage: string;
   };
-  title: string;
   onEditTemplate: (item: dataList) => void;
   onEdit: (item: dataList) => void;
   onPreview: (item: dataList) => void;
   onDelete: (item: dataList) => void;
 }
-const ScreenCard: FC<CardProps> = ({ item, title, onEditTemplate, onEdit, onPreview, onDelete }) => {
+const ScreenCard: FC<CardProps> = ({ item, onEditTemplate, onEdit, onPreview, onDelete }) => {
   const menu = (
     <Menu style={{ borderRadius: 10 }}>
       <Menu.Item
@@ -47,7 +47,7 @@ const ScreenCard: FC<CardProps> = ({ item, title, onEditTemplate, onEdit, onPrev
   return (
     <div className={styles.appCard}>
       <div className={styles.appCardImg}>
-        <img src={item.indexImage} alt="" />
+        <img src={getFileUrlById(item.indexImage)} alt="" />
       </div>
       <div className={`${styles.appCardFooter} ${styles.cardName}`}>
         <div>
@@ -61,7 +61,7 @@ const ScreenCard: FC<CardProps> = ({ item, title, onEditTemplate, onEdit, onPrev
             }}
           />
         </div>
-        <div className={styles.cardState}>{title}</div>
+        <div className={styles.cardState}>{item.templateType === 'app' ? '应用模板' : '系统模板'}</div>
       </div>
       <div className={styles.dec}>{item.remarks}</div>
 
