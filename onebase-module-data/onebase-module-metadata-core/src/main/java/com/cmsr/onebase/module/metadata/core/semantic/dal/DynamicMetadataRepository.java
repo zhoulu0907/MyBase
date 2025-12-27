@@ -256,17 +256,6 @@ public class DynamicMetadataRepository {
         }
     }
 
-    public int deleteByDrafId(String tableName, String primaryKey, Long draftId) {
-        ApplicationDataSourceManager.useBizDatasourceByAppId(ApplicationManager.getApplicationId());
-        try {
-            QueryWrapper qw = QueryWrapper.create(new QueryColumn(primaryKey).eq(draftId));
-
-            return Db.deleteByQuery(tableName, qw);
-        } finally {
-            ApplicationDataSourceManager.clear();
-        }
-    }
-
     /**
      * 按条件查询单条记录。
      *

@@ -5,6 +5,7 @@ import com.cmsr.onebase.framework.uid.UidGenerator;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticRecordDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticDataMethodOpEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticMethodCodeEnum;
+import com.cmsr.onebase.module.metadata.core.semantic.service.DraftSemanticDataCrudService;
 import com.cmsr.onebase.module.metadata.core.semantic.service.SemanticDataCrudService;
 import com.cmsr.onebase.module.metadata.core.semantic.strategy.*;
 import com.cmsr.onebase.module.metadata.core.semantic.strategy.validation.SemanticValidationManager;
@@ -26,6 +27,8 @@ public class SemanticCreateExecutor {
     private SemanticValidationManager semanticValidationManager;
     @Resource
     private SemanticDataCrudService semanticDataCrudService;
+    @Resource
+    private DraftSemanticDataCrudService draftSemanticDataCrudService;
     @Resource
     private SemanticMergeRecordAssembler semanticMergeRecordAssembler;
     @Resource
@@ -64,13 +67,13 @@ public class SemanticCreateExecutor {
             // 7) 数据查询：通过 DataCrudService 读取主表数据
             Map<String, Object> result = semanticDataCrudService.readById(record);
 
-            //
+            // 8) 删除草稿数据：如果有draftId，删除对应的草稿记录
             if (!ObjectUtils.isBlank(draftId)) {
-                semanticDataCrudService.deleteByDraftId(record, draftId);
+                draftSemanticDataCrudService.deleteByDraftId(record, draftId);
             }
 
 
-            // 8) 日志记录：当前类 logProcess
+            // 9) 日志记录：当前类 logProcess
             semanticProcessLogger.log(record);
             return result;
         } catch (Exception e) {
