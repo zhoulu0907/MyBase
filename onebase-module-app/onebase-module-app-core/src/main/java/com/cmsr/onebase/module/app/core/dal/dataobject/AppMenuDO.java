@@ -40,7 +40,16 @@ public class AppMenuDO extends BaseBizEntity {
     @Column(value = "action_target", comment = "菜单动作")
     private String actionTarget;
 
-    @Column(value = "is_visible", comment = "是否可见")
-    private Integer isVisible;
+    /**
+     * PC端是否可见 (1:可见, 0:不可见)
+     */
+    @Column(value = "is_visible_pc", comment = "PC端是否可见")
+    private Integer isVisiblePc;
+
+    /**
+     * 移动端是否可见 (1:可见, 0:不可见)
+     */
+    @Column(value = "is_visible_mobile", comment = "移动端是否可见")
+    private Integer isVisibleMobile;
 
 }
