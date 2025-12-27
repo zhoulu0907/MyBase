@@ -13,7 +13,8 @@ export interface ApplicationMenu {
   pagesetType: number;
   menuIcon: string;
   menuUuid?: string;
-  isVisible: number;
+  isVisiblePc: number;
+  isVisibleMobile: number;
   children?: ApplicationMenu[];
 }
 

@@ -34,8 +34,12 @@ export const updateApplicationMenuOrder = (params: UpdateApplicationMenuOrderReq
   return appService.post('/menu/update-order', params);
 };
 
-export const updateApplicationMenuVisible = (params: UpdateApplicationMenuVisibleReq) => {
-  return appService.post(`/menu/update-visible?id=${params.id}&visible=${params.visible}`);
+export const updateApplicationMenuVisiblePC = (params: UpdateApplicationMenuVisibleReq) => {
+  return appService.post(`/menu/update-visible-pc?id=${params.id}&visible=${params.visible}`);
+};
+
+export const updateApplicationMenuVisibleMobile = (params: UpdateApplicationMenuVisibleReq) => {
+  return appService.post(`/menu/update-visible-mobile?id=${params.id}&visible=${params.visible}`);
 };
 
 export const getApplicationMenuPermission = (menuId: string) => {
