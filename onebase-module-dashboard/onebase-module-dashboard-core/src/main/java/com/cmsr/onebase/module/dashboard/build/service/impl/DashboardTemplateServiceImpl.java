@@ -6,6 +6,7 @@ import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.dashboard.build.dal.dataobject.DashboardTemplateDO;
 import com.cmsr.onebase.module.dashboard.build.dal.mapper.DashboardTemplateMapper;
+import com.cmsr.onebase.module.dashboard.build.enums.TemplateTypeEnum;
 import com.cmsr.onebase.module.dashboard.build.service.DashboardTemplateService;
 import com.cmsr.onebase.module.dashboard.build.vo.template.DashboardTemplatePageReqVO;
 import com.cmsr.onebase.module.dashboard.build.vo.template.DashboardTemplateSaveReqVO;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.module.dashboard.build.enums.ErrorCodeConstants.TEMPLATE_NOT_EXISTS;
@@ -94,14 +96,16 @@ public class DashboardTemplateServiceImpl extends ServiceImpl<DashboardTemplateM
 
     @Override
     public PageResult<DashboardTemplateDO> getDashboardTemplatePage(DashboardTemplatePageReqVO pageReqVO) {
-
         QueryWrapper queryWrapper = QueryWrapper.create()
+                .select("id", "template_name", "template_type", "hot", "app_id", "index_image", "remarks", "create_time", "creator", "updater", "update_time")
                 .eq(DashboardTemplateDO::getTemplateType, pageReqVO.getTemplateType(), StringUtils.isNotBlank(pageReqVO.getTemplateType()))
                 .like(DashboardTemplateDO::getTemplateName, pageReqVO.getTemplateName(), StringUtils.isNotBlank(pageReqVO.getTemplateName()))
                 .eq(DashboardTemplateDO::getHot, pageReqVO.getHot(), pageReqVO.getHot() != null)
-                .eq(DashboardTemplateDO::getAppId, ApplicationManager.getApplicationId())
                 .orderBy(DashboardTemplateDO::getCreateTime, false);
 
+        if(!Objects.equals(pageReqVO.getTemplateType(), TemplateTypeEnum.SYSTEM_TYPE.getValue())){
+            queryWrapper.eq(DashboardTemplateDO::getAppId, ApplicationManager.getApplicationId());
+        }
         Page<DashboardTemplateDO> page = dashboardTemplateMapper.paginate(pageReqVO.getPageNo(), pageReqVO.getPageSize(), queryWrapper);
         return new PageResult<>(page.getRecords(), page.getTotalRow());
     }
