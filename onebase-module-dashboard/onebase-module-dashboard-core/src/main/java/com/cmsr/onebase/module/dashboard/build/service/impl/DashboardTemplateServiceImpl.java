@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static com.cmsr.onebase.module.dashboard.build.enums.ErrorCodeConstants.TEMPLATE_CANT_NOT_UPATE_DEL;
 import static com.cmsr.onebase.module.dashboard.build.enums.ErrorCodeConstants.TEMPLATE_NOT_EXISTS;
 
 /**
@@ -61,7 +62,7 @@ public class DashboardTemplateServiceImpl extends ServiceImpl<DashboardTemplateM
     @Transactional(rollbackFor = Exception.class)
     public void updateDashboardTemplate(DashboardProjectData saveReqVO) {
         // 校验存在
-        validateDashboardTemplateExists(saveReqVO.getProjectId());
+        validateDashboardTemplate(saveReqVO.getProjectId());
 
         // 更新
         DashboardTemplateDO updateObj = new DashboardTemplateDO();
@@ -76,15 +77,22 @@ public class DashboardTemplateServiceImpl extends ServiceImpl<DashboardTemplateM
     @Transactional(rollbackFor = Exception.class)
     public void deleteDashboardTemplate(Long id) {
         // 校验存在
-        validateDashboardTemplateExists(id);
+        validateDashboardTemplate(id);
 
         // 删除
         dashboardTemplateMapper.deleteById(id);
     }
 
-    private void validateDashboardTemplateExists(Long id) {
-        if (id == null || dashboardTemplateMapper.selectOneById(id) == null) {
+    private void validateDashboardTemplate(Long id) {
+        if(id == null){
             throw exception(TEMPLATE_NOT_EXISTS);
+        }
+        DashboardTemplateDO templateDO = dashboardTemplateMapper.selectOneById(id);
+        if (templateDO == null) {
+            throw exception(TEMPLATE_NOT_EXISTS);
+        }
+        if(Objects.equals(templateDO.getTemplateType(), TemplateTypeEnum.SYSTEM_TYPE.getValue())){
+            throw exception(TEMPLATE_CANT_NOT_UPATE_DEL);
         }
     }
 
