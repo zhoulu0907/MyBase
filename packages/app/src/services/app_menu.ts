@@ -38,6 +38,10 @@ export const updateApplicationMenuVisible = (params: UpdateApplicationMenuVisibl
   return appService.post(`/menu/update-visible?id=${params.id}&visible=${params.visible}`);
 };
 
+export const getApplicationMenuPermission = (menuId: string) => {
+  return runtimeAppService.post(`/menu/permission?menuId=${menuId}`);
+};
+
 export const copyApplicationMenu = (params: CopyApplicationMenuReq) => {
   return appService.post('/menu/copy', params);
 };
