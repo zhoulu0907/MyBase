@@ -8,7 +8,6 @@ import {
 } from '../../components/CommonWorkbenchAttributes';
 import { findItem } from '../../../../utils/edit-data';
 import styles from '../../index.module.less';
-import type { CarouselContentMeta } from './types';
 
 const CollapseItem = Collapse.Item;
 
@@ -20,13 +19,18 @@ const SECTION_KEYS = {
 
 const CarouselWorkbenchConfig = () => {
   const { editData, configs, handlePropsChange, renderEditItem } = UseWorkbenchAttributeContext();
-  const [activeKeys, setActiveKeys] = useState<string[]>([SECTION_KEYS.TITLE, SECTION_KEYS.CONTENT]);
+  const [activeKeys, setActiveKeys] = useState<string[]>([
+    SECTION_KEYS.TITLE,
+    SECTION_KEYS.CONTENT,
+    SECTION_KEYS.CAROUSEL
+  ]);
 
   const configItems = useMemo(() => {
     return {
       label: findItem(editData, 'label'),
+      autoplay: findItem(editData, 'autoplay'),
       interval: findItem(editData, 'interval'),
-      carouselConfig: findItem(editData, 'carouselConfig'),
+      fillStyle: findItem(editData, 'fillStyle'),
       carouselContent: findItem(editData, 'carouselContent')
     };
   }, [editData]);
@@ -46,8 +50,9 @@ const CarouselWorkbenchConfig = () => {
             {configItems.label && <div>{renderEditItem(configItems.label)}</div>}
           </CollapseItem>
           <CollapseItem header="轮播配置" name={SECTION_KEYS.CAROUSEL} contentStyle={PanelContentStyle}>
+            {configItems.autoplay && <div>{renderEditItem(configItems.autoplay)}</div>}
             {configItems.interval && <div>{renderEditItem(configItems.interval)}</div>}
-            {configItems.carouselConfig && <div>{renderEditItem(configItems.carouselConfig)}</div>}
+            {configItems.fillStyle && <div>{renderEditItem(configItems.fillStyle)}</div>}
           </CollapseItem>
           <CollapseItem header="轮播内容" name={SECTION_KEYS.CONTENT} contentStyle={PanelContentStyle}>
             {cpID && configItems.carouselContent && (
