@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @Author：huangjie
  * @Date：2025/11/17 16:01
  */
-@Tag(name = "节点配置", description = "流程节点配置")
+@Tag(name = "连接器配置", description = "连接器节点配置")
 @RestController
 @RequestMapping("/flow/node-config")
 @Validated
@@ -29,7 +29,7 @@ public class FlowNodeConfigController {
     @Resource
     private FlowNodeConfigService flowNodeConfigService;
 
-    @Operation(summary = "获取流程节点配置列表")
+    @Operation(summary = "获取连接器节点配置列表")
     @GetMapping("/page")
     public CommonResult<PageResult<NodeConfigVO>> pageNodeType(PageNodeConfigReqVO reqVO) {
         PageResult<NodeConfigVO> result = flowNodeConfigService.pageNodeType(reqVO);
