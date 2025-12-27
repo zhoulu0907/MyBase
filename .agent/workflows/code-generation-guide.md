@@ -1,249 +1,116 @@
 ---
-description: 代码生成规范和模板
+description: AI 代码生成完整指南 (SDLC)
 ---
 
-# 代码生成指南
+# AI 代码生成完整指南
 
-本指南专为 AI 代码生成设计，提供具体的代码模板、生成规范和验证清单。
+本指南专为 AI 代码生成设计，整合了开发流程的所有标准和规范，按照软件开发生命周期 (SDLC) 组织。
 
-## 代码生成规范
+## 0. AI 交互偏好
 
-### 导入规范
-- **强制要求**: 避免使用全限定类名，必须先导入后使用
-  - ✅ 正确: `import com.cmsr.onebase.User; ... User user = new User();`
-  - ❌ 错误: `com.cmsr.onebase.User user = new com.cmsr.onebase.User();`
-- **导入顺序**: 
-  1. Java 标准库 (`java.*`, `javax.*`)
-  2. 第三方库 (`org.*`, `com.*`)
-  3. 项目内部包 (`com.cmsr.onebase.*`)
-- **避免通配符**: 不使用 `import com.cmsr.onebase.*`
+### 语言设置
+- **响应语言**: 中文（简体中文）
+- **代码注释**: 中文
+- **文档说明**: 中文
+- **异常信息**: 保持英文原文，但提供中文解释
 
-### 文档和注释规范
+### 交互风格
+- **技术深度**: 提供详细的技术说明和原理解释
+- **代码示例**: 包含完整的、可运行的代码示例
+- **最佳实践**: 主动提供相关的最佳实践建议
+- **问题排查**: 提供系统化的排查步骤和解决方案
 
-使用标准的 JavaDoc 注释规范，确保代码的可读性和可维护性。
+---
 
-#### 类/接口注释
-所有类和接口必须使用标准 JavaDoc 注释：
-```java
-/**
- * 用户服务，处理用户相关业务逻辑
- *
- * @author matianyu
- * @date 2025-12-27
- */
-public class UserService {
+## 1. 需求分析阶段 (Requirements)
+
+在开始编码前，必须明确需求。
+
+### 1.1 任务分析
+- **理解需求**: 仔细阅读需求描述或 Bug 报告
+- **复述需求**: 用自己的话复述需求，确认理解正确
+- **识别影响**: 确定受影响的模块和组件
+- **评估风险**: 识别技术难点和潜在风险
+- **制定方案**: 基于最佳实践设计实现方案
+
+---
+
+## 2. 设计阶段 (Design)
+
+### 2.1 分层架构规范
 ```
-
-**要求**:
-- 必须包含类/接口的定义、主要用途或功能描述
-- 必须注明作者（`@author`）和创建日期（`@date`）
-- 作者使用当前主机用户名
-- 日期使用当前日期（格式：yyyy-MM-dd）
-
-#### 方法注释
-所有公共方法必须使用 JavaDoc 注释：
-```java
-/**
- * 根据 ID 查询用户
- *
- * @param userId 用户 ID
- * @return 用户信息，不存在时抛出异常
- * @throws BusinessException 用户不存在时抛出
- */
-public UserDTO findById(Long userId) {
+Controller 层  → 处理 HTTP 请求，参数验证
+    ↓
+Service 层     → 业务逻辑，事务控制
+    ↓
+Repository 层  → 数据访问，SQL 操作
 ```
+**规则**:
+- Controller 不直接调用 Repository
+- Service 层方法使用 `@Transactional` 控制事务
+- 跨模块调用通过接口，避免直接依赖
 
-**要求**:
-- 必须描述方法的主要功能
-- 对所有入参使用 `@param` 进行详细说明
-- 对返回值使用 `@return` 进行详细说明
-- 如有异常抛出，使用 `@throws` 注明异常类型及说明
+### 2.2 接口设计
+- **RESTful**: 使用标准 HTTP 方法 (GET, POST, PUT, DELETE)
+- **URL 命名**: 小写连字符 (e.g., `/api/user-profiles`)
+- **响应格式**: 统一使用 `Result<T>`
+- **数据传输**: 使用 DTO 传递数据，不暴露 Entity
 
-#### 字段注释
-重要字段应添加注释，说明用途和含义：
-```java
-/** 用户数据访问接口 */
-private final UserRepository userRepository;
+### 2.3 开发原则
+1. **单一职责 (SRP)**: 每个类/方法只做一件事
+2. **开闭原则 (OCP)**: 对扩展开放，对修改关闭
+3. **依赖倒置 (DIP)**: 依赖抽象而非具体实现
+4. **DRY 原则**: 不重复代码
+5. **KISS 原则**: 保持简单
+6. **YAGNI 原则**: 避免无用功能
 
-/** 缓存管理器 */
-private final CacheManager cacheManager;
-```
+---
 
-#### 代码注释
-为复杂逻辑、特殊处理等添加行内注释：
-```java
-// 业务校验：检查用户名是否已存在
-if (userRepository.existsByUsername(request.getUsername())) {
-    throw new BusinessException("用户名已存在");
-}
+## 3. 编码阶段 (Coding)
 
-// 创建实体并设置默认值
-User user = new User();
-user.setStatus(UserStatus.ACTIVE); // 默认状态为激活
-```
+### 3.1 编码规范
 
-#### TODO 标记
-使用 TODO 标记待完成或待优化的工作：
-```java
-// TODO: 优化批量查询性能
-List<User> users = userRepository.findAllById(userIds);
+#### 3.1.1 Java 代码风格
+- **类命名**: PascalCase (`UserController`, `UserService`)
+- **方法命名**: camelCase (`findById`, `createUser`)
+- **常量命名**: UPPER_SNAKE_CASE
+- **包命名**: `com.cmsr.onebase.<module>.<submodule>`
 
-// TODO: 添加缓存支持
-public UserDTO findById(Long userId) {
-```
+#### 3.1.2 导入规范
+- **禁止**: 全限定类名、通配符导入 (`import com.cmsr.*`)
+- **顺序**: java.* -> 第三方库 -> 项目内部包
 
+#### 3.1.3 注释规范 (JavaDoc)
+- **类/接口**: 必须包含 `@author` (当前主机用户名) 和 `@date`
+- **方法**: 必须包含 `@param`, `@return`, `@throws`
+- **字段**: 重要字段简要说明
+- **TODO**: 标记待办事项
 
-### 异常处理规范
+#### 3.1.4 异常处理
+- **工具类**: 静态导入 `ServiceExceptionUtil.exception`
+- **错误码**: 在 `ErrorCodeConstants` 定义，支持占位符
+- **抛出**: `throw exception(ErrorCodeConstants.USER_NOT_EXISTS);`
+- **捕获**: 不吞异常，必须记录日志或抛出
 
-#### 导入异常工具类
-在类文件顶部使用静态导入：
-```java
-import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
-```
+#### 3.1.5 日志记录
+- **框架**: SLF4J + Logback
+- **级别**: INFO (关键流程), ERROR (异常), DEBUG (开发调试)
+- **脱敏**: 严禁记录密码、Token 等敏感信息
+- **清晰**: 包含足够的上下文信息 (如 `userId`, 参数)
 
-#### 定义错误码
-在模块的 `ErrorCodeConstants` 接口中定义错误码：
-```java
-public interface ErrorCodeConstants {
-    // ========== 用户管理 1-002-001-000 ==========
-    ErrorCode USER_NOT_EXISTS = new ErrorCode(1_002_001_000, "用户不存在");
-    ErrorCode USER_USERNAME_EXISTS = new ErrorCode(1_002_001_001, "用户名已存在");
-    ErrorCode USER_EMAIL_EXISTS = new ErrorCode(1_002_001_002, "邮箱已被使用");
-    
-    // 支持占位符的错误码
-    ErrorCode USER_STATUS_INVALID = new ErrorCode(1_002_001_003, "用户状态[{}]无效");
-}
-```
+### 3.2 代码模板
 
-**错误码规范**:
-- 使用下划线分隔的大写命名
-- 错误码采用分段式：`模块_功能_错误类型`
-- 数字编码：`1_模块编号_功能编号_错误序号`
-- 支持使用 `{}` 作为占位符
-
-#### 抛出异常
-使用 `exception()` 方法抛出异常：
-
-**基本用法**:
-```java
-// 无参数
-if (user == null) {
-    throw exception(ErrorCodeConstants.USER_NOT_EXISTS);
-}
-
-// 带参数（填充占位符）
-if (invalidStatus) {
-    throw exception(ErrorCodeConstants.USER_STATUS_INVALID, status);
-}
-
-// 多个参数
-throw exception(ErrorCodeConstants.USER_OPERATION_FAILED, userId, operation);
-```
-
-**实际示例**:
-```java
-/**
- * 根据 ID 查询用户
- *
- * @param userId 用户 ID
- * @return 用户信息
- * @throws ServiceException 用户不存在时抛出
- */
-public UserDTO findById(Long userId) {
-    User user = userRepository.findById(userId)
-        .orElseThrow(() -> exception(ErrorCodeConstants.USER_NOT_EXISTS));
-    return UserConverter.toDTO(user);
-}
-
-/**
- * 创建用户
- *
- * @param request 创建用户请求
- * @return 创建的用户信息
- * @throws ServiceException 用户名已存在时抛出
- */
-@Transactional(rollbackFor = Exception.class)
-public UserDTO createUser(CreateUserRequest request) {
-    // 业务校验：检查用户名是否已存在
-    if (userRepository.existsByUsername(request.getUsername())) {
-        throw exception(ErrorCodeConstants.USER_USERNAME_EXISTS);
-    }
-    
-    // 业务逻辑...
-}
-```
-
-#### 异常捕获和处理
-**不吞异常**: 必须记录日志或向上抛出
-```java
-// ✅ 正确：记录日志并抛出
-try {
-    // 业务逻辑
-} catch (Exception e) {
-    log.error("操作失败: userId={}", userId, e);
-    throw exception(ErrorCodeConstants.USER_OPERATION_FAILED, userId);
-}
-
-// ❌ 错误：空 catch 块
-try {
-    // 业务逻辑
-} catch (Exception e) {
-    // 空 catch 块，异常被吞掉
-}
-```
-
-**异常转换**:
-```java
-try {
-    // 调用外部服务
-    externalService.call();
-} catch (ExternalException e) {
-    log.error("外部服务调用失败", e);
-    throw exception(ErrorCodeConstants.EXTERNAL_SERVICE_ERROR, e.getMessage());
-}
-```
-
-### 日志记录规范
-- **关键节点记录**: 方法入口、关键分支、异常
-  ```java
-  public UserDTO createUser(CreateUserRequest request) {
-      log.info("创建用户: {}", request.getUsername());
-      
-      // 业务逻辑
-      
-      log.info("用户创建成功: userId={}", user.getId());
-      return userDTO;
-  }
-  ```
-
-- **日志级别使用**:
-  - `DEBUG`: 详细的调试信息（仅开发环境）
-  - `INFO`: 重要的业务流程节点
-  - `WARN`: 潜在问题，但不影响运行
-  - `ERROR`: 错误异常，需要关注
-
-- **敏感信息脱敏**: 不记录密码、token 等
-  ```java
-  log.info("用户登录: username={}", username); // ✅
-  log.info("用户登录: password={}", password); // ❌
-  ```
-
-## 代码模板
-
-### Controller 层模板
-
+#### Controller 模板
 ```java
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
 import javax.validation.Valid;
 
 /**
  * 用户管理控制器
- *
- * @author matianyu
+ * @author chengyuansen
  * @date 2025-12-27
  */
 @Slf4j
@@ -257,7 +124,6 @@ public class UserController {
 
     /**
      * 创建用户
-     *
      * @param request 创建用户请求
      * @return 创建的用户信息
      */
@@ -267,361 +133,260 @@ public class UserController {
         UserDTO user = userService.createUser(request);
         return Result.success(user);
     }
-
-    /**
-     * 查询用户
-     *
-     * @param id 用户 ID
-     * @return 用户信息
-     */
-    @GetMapping("/{id}")
-    public Result<UserDTO> getUser(@PathVariable Long id) {
-        UserDTO user = userService.findById(id);
-        return Result.success(user);
-    }
-
-    /**
-     * 更新用户
-     *
-     * @param id 用户 ID
-     * @param request 更新用户请求
-     * @return 操作结果
-     */
-    @PutMapping("/{id}")
-    public Result<Void> updateUser(@PathVariable Long id, 
-                                    @Valid @RequestBody UpdateUserRequest request) {
-        userService.updateUser(id, request);
-        return Result.success();
-    }
-
-    /**
-     * 删除用户
-     *
-     * @param id 用户 ID
-     * @return 操作结果
-     */
-    @DeleteMapping("/{id}")
-    public Result<Void> deleteUser(@PathVariable Long id) {
-        userService.deleteUser(id);
-        return Result.success();
-    }
 }
 ```
 
-**关键点**:
-- 使用 `@Resource` 注入依赖（不建议使用 `@Autowired`）
-- 使用 `@Valid` 进行参数校验
-- 统一返回 `Result<T>` 格式
-- 记录关键操作日志
-
-### Service 层模板
-
+#### Service 模板
 ```java
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 
 /**
  * 用户服务实现
- *
- * @author matianyu
+ * @author chengyuansen
  * @date 2025-12-27
  */
 @Slf4j
 @Service
 public class UserService {
 
-    /** 用户数据访问接口 */
     @Resource
     private UserRepository userRepository;
 
     /**
      * 创建用户
-     *
-     * @param request 创建用户请求
-     * @return 创建的用户信息
      * @throws ServiceException 用户名已存在时抛出
      */
     @Transactional(rollbackFor = Exception.class)
     public UserDTO createUser(CreateUserRequest request) {
-        log.info("创建用户: {}", request.getUsername());
-        
-        // 业务校验：检查用户名是否已存在
         if (userRepository.existsByUsername(request.getUsername())) {
             throw exception(ErrorCodeConstants.USER_USERNAME_EXISTS);
         }
-        
-        // 创建实体
-        User user = new User();
-        user.setUsername(request.getUsername());
-        user.setEmail(request.getEmail());
-        
-        // 保存
-        user = userRepository.save(user);
-        
-        log.info("用户创建成功: userId={}", user.getId());
+        // ... 业务逻辑
         return UserConverter.toDTO(user);
-    }
-
-    /**
-     * 根据 ID 查询用户
-     *
-     * @param userId 用户 ID
-     * @return 用户信息
-     * @throws ServiceException 用户不存在时抛出
-     */
-    public UserDTO findById(Long userId) {
-        User user = userRepository.findById(userId)
-            .orElseThrow(() -> exception(ErrorCodeConstants.USER_NOT_EXISTS));
-        return UserConverter.toDTO(user);
-    }
-
-    /**
-     * 更新用户
-     *
-     * @param userId 用户 ID
-     * @param request 更新用户请求
-     * @throws ServiceException 用户不存在时抛出
-     */
-    @Transactional(rollbackFor = Exception.class)
-    public void updateUser(Long userId, UpdateUserRequest request) {
-        User user = userRepository.findById(userId)
-            .orElseThrow(() -> exception(ErrorCodeConstants.USER_NOT_EXISTS));
-        
-        user.setEmail(request.getEmail());
-        userRepository.save(user);
-        
-        log.info("用户更新成功: userId={}", userId);
-    }
-
-    /**
-     * 删除用户
-     *
-     * @param userId 用户 ID
-     * @throws ServiceException 用户不存在时抛出
-     */
-    @Transactional(rollbackFor = Exception.class)
-    public void deleteUser(Long userId) {
-        if (!userRepository.existsById(userId)) {
-            throw exception(ErrorCodeConstants.USER_NOT_EXISTS);
-        }
-        
-        userRepository.deleteById(userId);
-        log.info("用户删除成功: userId={}", userId);
     }
 }
 ```
 
-**关键点**:
-- 静态导入 `ServiceExceptionUtil.exception`
-- 使用 `@Resource` 注入依赖（不建议使用 `@Autowired`）
-- 写操作使用 `@Transactional(rollbackFor = Exception.class)`
-- 使用 `exception(ErrorCodeConstants.XXX)` 抛出业务异常
-- 记录关键操作日志
-- 使用 Converter 转换实体和 DTO
-
-### Repository 层模板
-
+#### Repository 模板 (MyBatis-Flex)
 ```java
-import com.cmsr.onebase.module.user.dal.dataflexdo.UserDO;
-import com.cmsr.onebase.module.user.dal.mapper.UserMapper;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-
 /**
  * 用户数据访问层
- *
- * @author matianyu
+ * @author chengyuansen
  * @date 2025-12-27
  */
 @Repository
 public class UserDataRepository extends ServiceImpl<UserMapper, UserDO> {
 
-    /**
-     * 根据用户名查询用户
-     *
-     * @param username 用户名
-     * @return 用户信息，不存在返回 null
-     */
     public UserDO findByUsername(String username) {
         QueryWrapper queryWrapper = QueryWrapper.create();
         queryWrapper.eq(UserDO.USERNAME, username);
         return getOne(queryWrapper);
     }
-
-    /**
-     * 检查用户名是否存在
-     *
-     * @param username 用户名
-     * @return 存在返回 true，否则返回 false
-     */
-    public boolean existsByUsername(String username) {
-        QueryWrapper queryWrapper = QueryWrapper.create();
-        queryWrapper.eq(UserDO.USERNAME, username);
-        return count(queryWrapper) > 0;
-    }
-
-    /**
-     * 根据邮箱查询用户
-     *
-     * @param email 邮箱地址
-     * @return 用户信息，不存在返回 null
-     */
-    public UserDO findByEmail(String email) {
-        QueryWrapper queryWrapper = QueryWrapper.create();
-        queryWrapper.eq(UserDO.EMAIL, email);
-        return getOne(queryWrapper);
-    }
-
-    /**
-     * 查询所有激活用户，按创建时间降序
-     *
-     * @return 用户列表
-     */
-    public List<UserDO> findAllActive() {
-        QueryWrapper queryWrapper = QueryWrapper.create();
-        queryWrapper.eq(UserDO.STATUS, UserStatus.ACTIVE);
-        queryWrapper.orderBy(UserDO.CREATE_TIME, false);
-        return list(queryWrapper);
-    }
 }
 ```
 
-**关键点**:
-- 继承 `ServiceImpl<Mapper, DO>`（MyBatis-Flex）
-- 使用 `QueryWrapper` 构建查询条件
-- 方法命名清晰描述查询意图
-- 添加完整的 JavaDoc 注释
+### 3.3 性能与安全
 
-## 验证清单
+#### 性能优化
+- **数据库**: 添加索引，避免 N+1 (使用 JOIN/批量)，使用分页
+- **缓存**: 合理使用 Redis (分布式) 和 Caffeine (本地)
+- **代码**: 避免循环内数据库调用，使用 StringBuilder，及时关闭资源
 
-生成代码后，AI 应自动检查以下项：
+#### 安全实践
+- **输入验证**: 使用 `@Valid`, `@NotNull`，过滤特殊字符
+- **SQL 注入**: 必须使用参数化查询 (MyBatis/JPA 默认支持)
+- **敏感数据**: 密码 BCrypt 加密，日志脱敏
 
-### 基础规范
+---
+
+## 4. 测试阶段 (Testing)
+
+### 4.1 测试策略
+- **金字塔模型**: 单元测试 (Unit) > 集成测试 (Integration) > 端到端测试 (E2E)
+- **原则**: 尽早测试，测试即文档
+
+### 4.2 测试分类
+1. **单元测试**: JUnit 5 + Mockito。针对 Service/Utils，不依赖外部资源。
+2. **集成测试**: `@SpringBootTest`。验证组件协作、DB 交互。
+3. **API 测试**: `MockMvc`。验证 Controller 接口。
+
+### 4.3 最佳实践
+- **隔离**: 测试用例独立，自动清理数据 (`@Transactional`)
+- **断言**: 清晰明确 (AssertJ)
+- **Mock**: 只 Mock 外部依赖
+- **覆盖率**: 核心分支 > 85%
+
+### 4.4 调试技巧
+- **日志调试**: 开启 DEBUG 日志
+- **常见问题**:
+  - `400`: 参数校验失败
+  - `404`: 路径错误
+  - `500`: 查看异常堆栈
+  - `NPE`: Mock 对象未注入
+
+---
+
+## 5. 构建阶段 (Build)
+
+### 5.1 环境准备
+- **JDK**: Java 17
+- **Maven**: 3.8+
+
+### 5.2 构建命令
+```bash
+# 快速构建 (跳过测试) - 开发用
+mvn clean install -DskipTests -T 8
+
+# 完整构建 (含测试) - CI 用
+mvn clean install -T 8
+
+# 指定模块构建
+mvn clean install -pl module-name -am -T 8
+```
+
+---
+
+## 6. 开发工具配置
+
+### Maven 配置
+- 编码: UTF-8
+- 版本管理: `onebase-dependencies`
+
+### IDE 配置
+- Lombok: 开启
+- 格式化: 遵循项目规范
+- 自动导入: 优化顺序
+
+---
+
+## 7. 跨模块协作
+
+### 模块依赖原则
+- 业务模块不直接依赖其他业务模块
+- 通过接口和事件进行模块间通信
+- 共享代码放在 `onebase-framework`
+- 避免循环依赖
+
+### 接口设计
+- 定义清晰的接口契约
+- 使用 DTO 传递数据
+- 版本化 API 接口
+
+---
+
+## 8. ✅ 验证清单 (Checklist)
+
+生成代码后，AI 必须自动检查以下所有项目：
+
+### 8.1 基础规范
 - [ ] 所有类都有导入语句，无全限定类名
 - [ ] 所有类/接口都有 JavaDoc 注释（包含 `@author` 和 `@date`）
 - [ ] 所有公共方法都有 JavaDoc 注释（包含 `@param`、`@return`、`@throws`）
 - [ ] 重要字段都有注释说明
 - [ ] 复杂逻辑有行内注释
 - [ ] 待完成工作有 TODO 标记
+- [ ] 类、方法、属性命名准确易懂
 
-### 异常处理
+### 8.2 异常处理
 - [ ] 静态导入 `ServiceExceptionUtil.exception`
 - [ ] 在 `ErrorCodeConstants` 中定义错误码
 - [ ] 使用 `exception(ErrorCodeConstants.XXX)` 抛出异常
 - [ ] 所有 catch 块都记录日志或抛出异常
 - [ ] 异常信息使用错误码，支持占位符
 
-### 日志记录
+### 8.3 日志记录
 - [ ] 关键操作有日志记录（INFO 级别）
 - [ ] 异常有日志记录（ERROR 级别）
 - [ ] 敏感信息已脱敏
+- [ ] 日志信息清晰且必要
 
-### 事务管理
+### 8.4 事务管理
 - [ ] 写操作使用 `@Transactional(rollbackFor = Exception.class)`
 - [ ] 事务边界在 Service 层
 
-### 响应格式
+### 8.5 响应格式
 - [ ] Controller 返回统一的 `Result<T>` 格式
 - [ ] 使用 `@Valid` 进行参数校验
 
-### 依赖注入
+### 8.6 依赖注入
 - [ ] 统一使用 `@Resource` 注入依赖
 - [ ] 避免使用 `@Autowired`
 
-### 编译验证
+### 8.7 编译验证
 - [ ] 代码可以成功编译，无语法错误
 - [ ] 所有导入的类和包都存在
 - [ ] 方法签名和类型匹配正确
 
-### 测试验证
+### 8.8 测试验证
 - [ ] 同步修改影响范围内的单元测试代码
 - [ ] 运行影响范围内的单元测试
 - [ ] 确保所有测试用例通过
 - [ ] 新增功能必须有对应的测试用例
 - [ ] 测试分支覆盖率达到要求（> 85%）
 
-### 影响范围说明
+### 8.9 质量保证
+- [ ] 功能完整性：是否满足所有需求，无遗漏
+- [ ] 逻辑正确性：代码逻辑是否正确，无缺陷
+- [ ] 性能优化：是否存在性能隐患（N+1 查询、大循环等）
+- [ ] 安全检查：是否存在安全漏洞（SQL 注入、XSS、权限绕过等）
+
+### 8.10 影响范围说明
 - [ ] 明确说明本次代码变更影响的模块
 - [ ] 说明是否影响现有接口（新增/修改/删除）
 - [ ] 说明是否需要数据库变更
 - [ ] 说明是否影响其他模块的调用
 
-## 常见场景示例
+---
 
-### 场景 1: 分页查询
+## 9. 常见场景示例
 
+### 9.1 分页查询
 ```java
 @GetMapping
 public Result<Page<UserDTO>> listUsers(
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "20") int size) {
-    
     Pageable pageable = PageRequest.of(page, size);
     Page<User> userPage = userRepository.findAll(pageable);
-    Page<UserDTO> dtoPage = userPage.map(UserConverter::toDTO);
-    
-    return Result.success(dtoPage);
+    return Result.success(userPage.map(UserConverter::toDTO));
 }
 ```
 
-### 场景 2: 条件查询
-
+### 9.2 条件查询
 ```java
 public List<UserDTO> searchUsers(UserSearchRequest request) {
-    // 使用 Specification 或 QueryDSL
-    Specification<User> spec = (root, query, cb) -> {
-        List<Predicate> predicates = new ArrayList<>();
-        
-        if (StringUtils.hasText(request.getUsername())) {
-            predicates.add(cb.like(root.get("username"), "%" + request.getUsername() + "%"));
-        }
-        
-        if (request.getStatus() != null) {
-            predicates.add(cb.equal(root.get("status"), request.getStatus()));
-        }
-        
-        return cb.and(predicates.toArray(new Predicate[0]));
-    };
-    
-    List<User> users = userRepository.findAll(spec);
-    return users.stream().map(UserConverter::toDTO).collect(Collectors.toList());
+    QueryWrapper query = QueryWrapper.create();
+    if (StringUtils.hasText(request.getName())) {
+        query.like(UserDO.NAME, request.getName());
+    }
+    return list(query).stream().map(UserConverter::toDTO).toList();
 }
 ```
 
-### 场景 3: 批量操作
-
+### 9.3 批量操作
 ```java
 @Transactional(rollbackFor = Exception.class)
-public void batchUpdateStatus(List<Long> userIds, UserStatus status) {
-    log.info("批量更新用户状态: count={}, status={}", userIds.size(), status);
-    
-    List<User> users = userRepository.findAllById(userIds);
-    users.forEach(user -> user.setStatus(status));
-    userRepository.saveAll(users);
-    
-    log.info("批量更新完成");
+public void batchUpdateStatus(List<Long> ids, Integer status) {
+    log.info("批量更新: ids={}, status={}", ids, status);
+    QueryWrapper query = QueryWrapper.create().in(UserDO.ID, ids);
+    UserDO update = new UserDO();
+    update.setStatus(status);
+    update(update, query);
 }
 ```
 
-### 场景 4: 缓存使用
-
+### 9.4 缓存使用
 ```java
-@Cacheable(value = "users", key = "#userId")
-public UserDTO findById(Long userId) {
-    User user = userRepository.findById(userId)
-        .orElseThrow(() -> new BusinessException("用户不存在"));
-    return UserConverter.toDTO(user);
-}
-
-@CacheEvict(value = "users", key = "#userId")
-public void updateUser(Long userId, UpdateUserRequest request) {
-    // 更新逻辑
+@Cacheable(value = "users", key = "#id")
+public UserDTO findById(Long id) {
+    // ...
 }
 ```
