@@ -1,6 +1,8 @@
 package com.cmsr.onebase.module.flow.context.express;
 
 import com.cmsr.onebase.module.flow.context.enums.OperatorTypeEnum;
+import com.cmsr.onebase.module.flow.context.table.RowData;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.jexl3.JexlBuilder;
 import org.apache.commons.jexl3.JexlEngine;
@@ -25,13 +27,46 @@ import java.util.*;
  * @Author：huangjie
  * @Date：2025/9/16 21:11
  */
+@Slf4j
 public class ExpressionExecutor implements Serializable {
 
     private JexlEngine jexlEngine;
 
     public ExpressionExecutor() {
         JexlPermissions permissions = JexlPermissions.UNRESTRICTED;
-        this.jexlEngine = new JexlBuilder().permissions(permissions).arithmetic(new ExtJexlArithmetic(true)).silent(false).create();
+        this.jexlEngine = new JexlBuilder().permissions(permissions).arithmetic(new ExtJexlArithmetic(false)).silent(false).create();
+    }
+
+    public boolean evaluateInput(OrExpression orExpression, RowData rowData) {
+        if (rowData.hasSubTable()) {
+            List<Map<String, Object>> mapList = rowData.flatRowData();
+            for (Map<String, Object> map : mapList) {
+                boolean result = evaluateInput(orExpression, map);
+                if (result) {
+                    return true;
+                }
+            }
+            return false;
+        } else {
+            return evaluate(orExpression, rowData);
+        }
+    }
+
+    public boolean evaluateInput(OrExpression orExpression, Map<String, Object> vars) {
+        return evaluate(orExpression, vars);
+    }
+
+    public boolean evaluateContext(OrExpression orExpression, Map<String, Object> vars) {
+        formatFieldKeyForContext(orExpression);
+        return evaluate(orExpression, vars);
+    }
+
+    private void formatFieldKeyForContext(OrExpression orExpression) {
+        for (AndExpression andExpression : orExpression.getAndExpressions()) {
+            for (ExpressionItem expressionItem : andExpression.getExpressionItems()) {
+                expressionItem.setFieldKey(formatItemKey(expressionItem.getFieldKey()));
+            }
+        }
     }
 
     /**
@@ -40,18 +75,21 @@ public class ExpressionExecutor implements Serializable {
      * 根据Condition类的注释：条件项之间是OR关系
      * 根据ConditionItem类的注释：规则项之间是AND关系
      */
-    public boolean evaluate(OrExpression orExpression, Map<String, Object> vars) {
+    private boolean evaluate(OrExpression orExpression, Map<String, Object> vars) {
         String fullExpression = null;
         try {
             fullExpression = buildConditionExpression(orExpression);
             JexlExpression expression = jexlEngine.createExpression(fullExpression);
             MapContext jc = new MapContext(vars);
-            Object result = expression.evaluate(jc);
-            return result instanceof Boolean ? (Boolean) result : Boolean.FALSE;
+            Boolean result = (Boolean) expression.evaluate(jc);
+            if (result == null) {
+                log.warn("表达式执行结果为空, 执行表达式: {}, 输入参数: {}", fullExpression, vars);
+                return false;
+            } else {
+                return result;
+            }
         } catch (Exception e) {
-            String msg = "表达式执行异常, 执行表达式:" + orExpression
-                    + ", 输入条件:" + vars
-                    + ", 完整表达式:" + Objects.toString(fullExpression, "");
+            String msg = "表达式执行异常, 执行表达式: " + Objects.toString(fullExpression, orExpression.toString()) + ", 输入参数:" + vars;
             throw new RuntimeException(msg, e);
         }
     }
@@ -126,8 +164,8 @@ public class ExpressionExecutor implements Serializable {
         if (key.contains(".")) {
             String key1 = StringUtils.substringBefore(key, ".");
             String key2 = StringUtils.substringAfter(key, ".");
-            if (!key2.startsWith("'") || !key2.endsWith("'")) {
-                return String.format("%s.'%s'", key1, key2);
+            if (!key2.startsWith("[") || !key2.endsWith("]")) {
+                return String.format("%s['%s']", key1, key2);
             }
         }
         return key;
@@ -141,7 +179,7 @@ public class ExpressionExecutor implements Serializable {
      */
     public String buildExpression(ExpressionItem expressionItem) {
         expressionItem = ExpressionItem.copy(expressionItem);
-        expressionItem.setFieldKey(formatItemKey(expressionItem.getFieldKey()));
+        //expressionItem.setFieldKey(expressionItem.getFieldKey());
         switch (expressionItem.getOp()) {
             case EQUALS:
                 return String.format("%s == %s", expressionItem.getFieldKey(), formatValue(expressionItem));

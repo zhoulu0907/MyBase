@@ -25,7 +25,7 @@ import java.util.List;
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertList;
 
-@Tag(name = "管理后台 - 租户")
+@Tag(name = "管理后台 - 空间")
 @RestController
 @RequestMapping("/system/tenant")
 @Component("oldTenantController")
@@ -37,8 +37,8 @@ public class TenantController {
     @GetMapping("/get-id-by-name")
     @PermitAll
     @TenantIgnore
-    @Operation(summary = "使用租户名，获得租户编号", description = "登录界面，根据用户的租户名，获得租户编号")
-    @Parameter(name = "name", description = "租户名", required = true, example = "1024")
+    @Operation(summary = "使用空间名，获得空间编号", description = "登录界面，根据用户的空间名，获得空间编号")
+    @Parameter(name = "name", description = "空间名", required = true, example = "1024")
     public CommonResult<Long> getTenantIdByName(@RequestParam("name") String name) {
         TenantDO tenant = tenantService.getTenantByName(name);
         return success(tenant != null ? tenant.getId() : null);
@@ -47,7 +47,7 @@ public class TenantController {
     @GetMapping({"simple-list"})
     @PermitAll
     @TenantIgnore
-    @Operation(summary = "获取租户精简信息列表", description = "只包含被开启的租户，用于【首页】功能的选择租户选项")
+    @Operation(summary = "获取空间精简信息列表", description = "只包含被开启的空间，用于【首页】功能的选择空间选项")
     public CommonResult<List<TenantRespVO>> getTenantSimpleList() {
         List<TenantDO> list = tenantService.getTenantListByStatus(CommonStatusEnum.ENABLE.getStatus());
         return success(convertList(list, tenantDO ->
@@ -57,7 +57,7 @@ public class TenantController {
     @GetMapping("/get-by-website")
     @PermitAll
     @TenantIgnore
-    @Operation(summary = "使用域名，获得租户信息", description = "登录界面，根据用户的域名，获得租户信息")
+    @Operation(summary = "使用域名，获得空间信息", description = "登录界面，根据用户的域名，获得空间信息")
     @Parameter(name = "website", description = "域名", required = true, example = "onebase")
     public CommonResult<TenantSimpleRespVO> getTenantByWebsite(@RequestParam("website") String website) {
         TenantDO tenant = tenantService.getTenantByWebsite(website);
@@ -68,7 +68,7 @@ public class TenantController {
     }
 
     @PostMapping("/update")
-    @Operation(summary = "更新租户")
+    @Operation(summary = "更新空间")
     @PreAuthorize("@ss.hasPermission('tenant:info:update')")
     public CommonResult<Boolean> updateTenant(@Valid @RequestBody TenantUpdateReqVO updateReqVO) {
         tenantService.updateTenant(updateReqVO);
@@ -77,7 +77,7 @@ public class TenantController {
 
 
     @GetMapping("/get")
-    @Operation(summary = "获得租户(安全考虑仅获取用户所属租户)")
+    @Operation(summary = "获得空间(安全考虑仅获取用户所属空间)")
     @Parameter(name = "id", description = "编号", required = true, example = "1024")
     @PreAuthorize("@ss.hasPermission('tenant:info:query')")
     public CommonResult<TenantRespVO> getTenant(@RequestParam("id") Long id) {
@@ -85,7 +85,7 @@ public class TenantController {
     }
 
     @GetMapping("/get-simple-tenant-by-id")
-    @Operation(summary = "获得租户(免登录)")
+    @Operation(summary = "获得空间(免登录)")
     @PermitAll
     @TenantIgnore
     public CommonResult<TenantSimpleRespVO> getSimpleTenantById(@RequestParam(value = "id") Long id) {

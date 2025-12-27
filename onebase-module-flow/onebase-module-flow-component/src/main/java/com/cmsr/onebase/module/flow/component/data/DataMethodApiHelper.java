@@ -17,7 +17,7 @@ import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticOperator
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticSortDirectionEnum;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -140,7 +140,11 @@ public class DataMethodApiHelper {
     }
 
     public static String convertToFieldName(String fieldKey) {
-        return StringUtils.substringAfter(fieldKey, ".");
+        if (StringUtils.countMatches(fieldKey, ".") > 0) {
+            return StringUtils.substringAfter(fieldKey, ".");
+        } else {
+            return fieldKey;
+        }
     }
 
     public static SemanticOperatorEnum extractFromOperator(OpEnum operator) {

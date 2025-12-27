@@ -2,7 +2,6 @@ package com.cmsr.onebase.module.etl.build.service.preview;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
-import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.common.util.string.UuidUtils;
 import com.cmsr.onebase.module.etl.build.service.DatasourceFactory;
 import com.cmsr.onebase.module.etl.build.vo.datasource.TestConnectionVO;
@@ -16,9 +15,10 @@ import com.cmsr.onebase.module.etl.core.dal.database.EtlFlinkMappingRepository;
 import com.cmsr.onebase.module.etl.core.dal.database.EtlTableRepository;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.EtlDatasourceDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.EtlTableDO;
+import com.cmsr.onebase.module.etl.core.dto.FlinkMappings;
 import com.cmsr.onebase.module.etl.core.enums.EtlErrorCodeConstants;
 import com.cmsr.onebase.module.etl.core.enums.MetadataType;
-import com.github.f4b6a3.uuid.UuidCreator;
+import com.cmsr.onebase.module.etl.core.vo.ConnectCryptoProperties;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.datasource.DataSourceHolder;
@@ -29,6 +29,8 @@ import org.anyline.entity.DataSet;
 import org.anyline.metadata.Table;
 import org.anyline.proxy.ServiceProxy;
 import org.anyline.service.AnylineService;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -59,8 +61,22 @@ public class DataInspectServiceImpl implements DataInspectService {
 
     @Override
     public boolean testConnection(TestConnectionVO pingVO) {
-        EtlDatasourceDO datasourceDO = BeanUtils.toBean(pingVO, EtlDatasourceDO.class);
-        DataSource datasource = dataSourceFactory.constructDataSource(datasourceDO, true);
+        Long datasourceId = pingVO.getId();
+        EtlDatasourceDO datasourceDO;
+        String datasourceType = pingVO.getDatasourceType();
+        ConnectCryptoProperties connectProperties;
+        if (datasourceId == null) {
+            connectProperties = pingVO.getConfig();
+        } else {
+            datasourceDO = datasourceRepository.getById(datasourceId);
+            connectProperties = JsonUtils.parseObject(datasourceDO.getConfig(), ConnectCryptoProperties.class);
+            String inputPwd = pingVO.getConfig().getPassword();
+            String storedPwd = connectProperties.getPassword();
+            if (StringUtils.isNotBlank(inputPwd) && !Strings.CS.equals(inputPwd, storedPwd)) {
+                connectProperties.setPassword(inputPwd);
+            }
+        }
+        DataSource datasource = dataSourceFactory.constructDataSource(datasourceType, connectProperties, true);
         String runnerKey = "ping-" + UuidUtils.getUuid();
 
         try {
@@ -90,8 +106,8 @@ public class DataInspectServiceImpl implements DataInspectService {
         if (tableDO == null) {
             throw ServiceExceptionUtil.exception(EtlErrorCodeConstants.TABLE_NOT_EXIST);
         }
-
-        DataSource dataSource = dataSourceFactory.constructDataSource(datasourceDO, true);
+        ConnectCryptoProperties connectProperties = JsonUtils.parseObject(datasourceDO.getConfig(), ConnectCryptoProperties.class);
+        DataSource dataSource = dataSourceFactory.constructDataSource(datasourceType, connectProperties, true);
         String runnerKey = "preview-" + datasourceUuid + UuidUtils.getUuid();
         try {
             DataSourceHolder.reg(runnerKey, dataSource);
@@ -103,11 +119,11 @@ public class DataInspectServiceImpl implements DataInspectService {
                 case VIEW -> table = temporary.metadata().view(tableDO.getTableName());
                 default -> throw ServiceExceptionUtil.exception(EtlErrorCodeConstants.ILLEGAL_METADATA_TYPE);
             }
-            Map<String, String> fieldTypeMapping = flinkMappingRepository.findAllMappingsByDatasourceType(datasourceType);
+            FlinkMappings fieldTypeMapping = flinkMappingRepository.findByDatasourceType(datasourceType);
             DataPreview dataPreview = new DataPreview();
             TableData tableData = JsonUtils.parseObject(tableDO.getMetaInfo(), TableData.class);
             List<ColumnData> columnDataList = tableData.getColumns();
-            List<PreviewColumn> columnList = extractPreviewColumns(columnDataList, fieldTypeMapping);
+            List<PreviewColumn> columnList = extractPreviewColumns(datasourceType, columnDataList, fieldTypeMapping);
             dataPreview.setColumns(columnList);
             ConfigStore cs = new DefaultConfigStore();
             cs.limit(inspectSize);
@@ -134,14 +150,14 @@ public class DataInspectServiceImpl implements DataInspectService {
         }
     }
 
-    private static List<PreviewColumn> extractPreviewColumns(List<ColumnData> columnDataList, Map<String, String> fieldTypeMapping) {
+    private static List<PreviewColumn> extractPreviewColumns(String datasourceType, List<ColumnData> columnDataList, FlinkMappings fieldTypeMapping) {
         List<PreviewColumn> columnList = new ArrayList<>(columnDataList.size());
         for (ColumnData columnData : columnDataList) {
             PreviewColumn previewColumn = new PreviewColumn();
 
             String columnName = columnData.getName();
             String displayName = columnData.getDisplayName();
-            String flinkType = fieldTypeMapping.get(columnData.getType());
+            String flinkType = fieldTypeMapping.getFlinkType(datasourceType, columnData.getType());
             previewColumn.setDataIndex("_" + columnName);
             previewColumn.setTitle(displayName);
             previewColumn.setFieldType(flinkType);

@@ -18,7 +18,6 @@ import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.enums.logger.LoginLogTypeEnum;
 import com.cmsr.onebase.module.system.enums.logger.LoginResultEnum;
 import com.cmsr.onebase.module.system.enums.oauth2.OAuth2ClientConstants;
-import com.cmsr.onebase.module.system.enums.tenant.TenantCodeEnum;
 import com.cmsr.onebase.module.system.framework.security.core.PwdEnHelper;
 import com.cmsr.onebase.module.system.service.logger.LoginLogService;
 import com.cmsr.onebase.module.system.service.oauth2.OAuth2TokenService;
@@ -71,12 +70,6 @@ public class PlatformAuthServiceImpl implements PlatformAuthService {
     @Value("${onebase.captcha.enable:true}")
     @Setter // 为了单测：开启或者关闭验证码
     private Boolean            captchaEnable;
-    /**
-     * 平台租户验证开关，默认为 false
-     */
-    @Value("${onebase.platform-tenant.enable-create-app:false}")
-    @Setter // 为了单测：开启或者关闭验证码
-    private Boolean            platformTenantEnableCreateApp;
 
     @Resource
     private TenantService     tenantService;
@@ -135,26 +128,12 @@ public class PlatformAuthServiceImpl implements PlatformAuthService {
         // 解密原文
         reqVO.setPassword(pwdEnHelper.decryptHexStr(reqVO.getPassword()));
 
-        // 增加日志输出，便于调试
-        log.debug("platformTenantEnableCreateApp配置值: {}", platformTenantEnableCreateApp);
-        // 确保配置值不为null，并且为false时才执行校验
-        if (Boolean.FALSE.equals(platformTenantEnableCreateApp)) {
-            log.info("平台租户创建应用功能已禁用，开始校验租户信息");
-            // 校验当前用户绑定的租户是否为平台租户，是则不允许登录
-            tenantService.handleTenantInfo(tenant -> {
-                if (tenant.getTenantCode().equals(TenantCodeEnum.PLATFORM_TENANT.getCode())) {
-                    log.warn("平台租户用户尝试登录，但平台租户创建应用功能已禁用");
-                    throw exception(AUTH_LOGIN_PLATFORM_TENANT_ERROR);
-                }
-            });
-        } else {
-            log.debug("平台租户创建应用功能已启用，跳过租户校验");
-        }
-
         // 使用账号密码，进行登录
         AdminUserDO user = authenticate(reqVO.getUsername(), reqVO.getPassword());
         LogRecordContext.putVariable("user", user);
-        return createTokenAfterLoginSuccess(user.getId(), user.getUserType(), reqVO.getUsername(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_USERNAME);
+        AuthLoginRespVO loginRespVO = createTokenAfterLoginSuccess(user.getId(), user.getUserType(), reqVO.getUsername(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_USERNAME, reqVO.getLoginPlatform());
+        loginRespVO.setLoginPlatform(reqVO.getLoginPlatform());
+        return loginRespVO;
     }
 
     private void createLoginLog(Long userId, String username,
@@ -196,14 +175,14 @@ public class PlatformAuthServiceImpl implements PlatformAuthService {
         return captchaService.verification(captchaVO);
     }
 
-    private AuthLoginRespVO createTokenAfterLoginSuccess(Long userId, Integer userType, String username, String deviceId, LoginLogTypeEnum logType) {
+    private AuthLoginRespVO createTokenAfterLoginSuccess(Long userId, Integer userType, String username, String deviceId, LoginLogTypeEnum logType,String loginPlatform) {
         // 插入登陆日志
         createLoginLog(userId, username, logType, LoginResultEnum.SUCCESS);
         // 创建访问令牌
         OAuth2AccessTokenDO accessTokenDO = oauth2TokenService.createAccessTokenWithMode(
                 RunModeEnum.PLATFORM.getValue(), null, null,
                 userId, userType,
-                OAuth2ClientConstants.CLIENT_ID_DEFAULT, null);
+                OAuth2ClientConstants.CLIENT_ID_DEFAULT, null, loginPlatform);
 
         // 检查并限制设备数，踢出超限的设备
         List<String> removedTokens = securityConfigApi.checkAndLimitDevices(

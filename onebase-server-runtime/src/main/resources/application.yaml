@@ -1,7 +1,13 @@
 spring:
   application:
     name: onebase-v3
-
+  task:
+    execution:
+      pool:
+        core-size: 10
+        max-size: 30
+        queue-capacity: 100
+        keep-alive: 30s
   profiles:
     active: local
 
@@ -13,8 +19,8 @@ spring:
   servlet:
     # 文件上传相关配置项
     multipart:
-      max-file-size: 16MB # 单个文件大小
-      max-request-size: 32MB # 设置总上传的文件大小
+      max-file-size: 32MB # 单个文件大小
+      max-request-size: 64MB # 设置总上传的文件大小
 
   # Jackson 配置项
   jackson:
@@ -91,19 +97,19 @@ onebase:
     email: xingyu4j@vip.qq.com
     license: MIT
     license-url: https://gitee.com/zhijiantianya/onebase_v3/blob/master/LICENSE
-  codegen:
-    base-package: ${onebase.info.base-package}
-    db-schemas: ${spring.datasource.dynamic.datasource.master.name}
-    front-type: 20 # 前端模版的类型，参见 CodegenFrontTypeEnum 枚举类
-    vo-type: 10 # VO 的类型，参见 CodegenVOTypeEnum 枚举类
-    delete-batch-enable: true # 是否生成批量删除接口
-    unit-test-enable: false # 是否生成单元测试
+  security:
+    mock-enable: false
+    permit-all-urls: # 显式放行认证、注册、刷新、验证码、以及必要静态资源/健康检查，避免 @PermitAll 被覆盖导致 401
+      - /runtime/system/captcha/**
+      - /runtime/infra/file/download/**
+      - /runtime/app/application/get
   tenant: # 多租户相关配置项
     enable: true
     ignore-urls:
-      - /jmreport/* # 积木报表，无法携带租户编号
       - /runtime/flow/remote-call/*
-      - /runtime/app/application/get/**
+      - /runtime/system/captcha/**
+      - /runtime/infra/file/download/**
+      - /runtime/app/application/get
     ignore-visit-urls:
       - /admin-api/system/user/profile/**
       - /admin-api/system/auth/**
@@ -122,8 +128,8 @@ onebase:
     expire-times: 10m
     send-frequency: 1m
     send-maximum-quantity-per-day: 10
-    begin-code: 9999 # 这里配置 9999 的原因是，测试方便。
-    end-code: 9999 # 这里配置 9999 的原因是，测试方便。
+    begin-code: 000000 # 这里配置 9999 的原因是，测试方便。
+    end-code: 999999 # 这里配置 9999 的原因是，测试方便。
 
 debug: false
 

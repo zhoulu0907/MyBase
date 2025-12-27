@@ -26,6 +26,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import com.cmsr.onebase.framework.common.util.string.UuidUtils;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -110,6 +112,10 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
         // 设置默认状态
         if (ruleGroup.getRgStatus() == null) {
             ruleGroup.setRgStatus(StatusEnumUtil.ACTIVE);
+        }
+        // 自动生成 groupUuid（如果为空）
+        if (ruleGroup.getGroupUuid() == null || ruleGroup.getGroupUuid().isEmpty()) {
+            ruleGroup.setGroupUuid(UuidUtils.getUuid());
         }
 
         validationRuleGroupRepository.saveOrUpdate(ruleGroup);
@@ -260,6 +266,8 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
             group.setRgName(rgName);
             group.setRgDesc("字段" + fieldId + "的规则组");
             group.setRgStatus(StatusEnumUtil.ACTIVE);
+            // 自动生成 groupUuid
+            group.setGroupUuid(UuidUtils.getUuid());
             // 同步entityUuid
             var fieldDO = entityFieldRepository.getById(fieldId);
             if (fieldDO != null) {
@@ -402,45 +410,50 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
             return new ArrayList<>();
         }
 
-        // 转换为VO并建立映射关系
-        List<ValidationRuleDefinitionVO> allRuleVOs = allRules.stream()
-                .map(rule -> modelMapper.map(rule, ValidationRuleDefinitionVO.class))
-                .toList();
-        Map<Long, ValidationRuleDefinitionVO> ruleMap = new HashMap<>();
-        for (ValidationRuleDefinitionVO ruleVO : allRuleVOs) {
-            ruleMap.put(ruleVO.getId(), ruleVO);
+        // 建立ID到DO的映射关系（用于父子关系匹配）
+        Map<Long, MetadataValidationRuleDefinitionDO> doMap = new HashMap<>();
+        for (MetadataValidationRuleDefinitionDO rule : allRules) {
+            doMap.put(rule.getId(), rule);
         }
 
-        // 找到主OR节点（顶级LOGIC节点且logicOperator为OR）
-        ValidationRuleDefinitionVO mainOrRule = null;
-        for (ValidationRuleDefinitionVO ruleVO : allRuleVOs) {
-            if (ruleVO.getParentRuleId() == null && "LOGIC".equals(ruleVO.getLogicType()) && "OR".equals(ruleVO.getLogicOperator())) {
-                mainOrRule = ruleVO;
+        // 找到主OR节点（顶级LOGIC节点且logicOperator为OR，parentRuleUuid为空）
+        MetadataValidationRuleDefinitionDO mainOrRuleDO = null;
+        for (MetadataValidationRuleDefinitionDO rule : allRules) {
+            if ((rule.getParentRuleUuid() == null || rule.getParentRuleUuid().isEmpty()) 
+                    && "LOGIC".equals(rule.getLogicType()) 
+                    && "OR".equals(rule.getLogicOperator())) {
+                mainOrRuleDO = rule;
                 break;
             }
         }
 
-        if (mainOrRule == null) {
+        if (mainOrRuleDO == null) {
+            log.info("未找到主OR节点，返回空列表");
             return new ArrayList<>();
         }
+
+        String mainOrRuleIdStr = String.valueOf(mainOrRuleDO.getId());
+        log.info("找到主OR节点，id: {}", mainOrRuleIdStr);
 
         // 构建二维数组结构
         List<List<ValidationRuleDefinitionVO>> valueRules = new ArrayList<>();
 
-        // 获取主OR节点的所有子规则
-        for (ValidationRuleDefinitionVO ruleVO : allRuleVOs) {
-            if (mainOrRule.getId().equals(ruleVO.getParentRuleId())) {
-                if ("CONDITION".equals(ruleVO.getLogicType())) {
+        // 获取主OR节点的所有子规则（通过 parentRuleUuid 匹配）
+        for (MetadataValidationRuleDefinitionDO rule : allRules) {
+            if (mainOrRuleIdStr.equals(rule.getParentRuleUuid())) {
+                if ("CONDITION".equals(rule.getLogicType())) {
                     // 直接是条件规则，单独成组
                     List<ValidationRuleDefinitionVO> singleGroup = new ArrayList<>();
-                    singleGroup.add(ruleVO);
+                    singleGroup.add(convertToVO(rule));
                     valueRules.add(singleGroup);
-                } else if ("LOGIC".equals(ruleVO.getLogicType()) && "AND".equals(ruleVO.getLogicOperator())) {
+                } else if ("LOGIC".equals(rule.getLogicType()) && "AND".equals(rule.getLogicOperator())) {
                     // AND分组，获取其所有子条件
+                    String andGroupIdStr = String.valueOf(rule.getId());
                     List<ValidationRuleDefinitionVO> andGroup = new ArrayList<>();
-                    for (ValidationRuleDefinitionVO conditionVO : allRuleVOs) {
-                        if (ruleVO.getId().equals(conditionVO.getParentRuleId()) && "CONDITION".equals(conditionVO.getLogicType())) {
-                            andGroup.add(conditionVO);
+                    for (MetadataValidationRuleDefinitionDO conditionRule : allRules) {
+                        if (andGroupIdStr.equals(conditionRule.getParentRuleUuid()) 
+                                && "CONDITION".equals(conditionRule.getLogicType())) {
+                            andGroup.add(convertToVO(conditionRule));
                         }
                     }
                     if (!andGroup.isEmpty()) {
@@ -450,7 +463,24 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
             }
         }
 
+        log.info("构建完成，valueRules组数: {}", valueRules.size());
         return valueRules;
+    }
+
+    /**
+     * 将DO转换为VO
+     */
+    private ValidationRuleDefinitionVO convertToVO(MetadataValidationRuleDefinitionDO rule) {
+        ValidationRuleDefinitionVO vo = modelMapper.map(rule, ValidationRuleDefinitionVO.class);
+        // 手动处理 parentRuleUuid -> parentRuleId 的转换
+        if (rule.getParentRuleUuid() != null && !rule.getParentRuleUuid().isEmpty()) {
+            try {
+                vo.setParentRuleId(Long.valueOf(rule.getParentRuleUuid()));
+            } catch (NumberFormatException e) {
+                log.warn("无法将 parentRuleUuid '{}' 转换为 Long", rule.getParentRuleUuid());
+            }
+        }
+        return vo;
     }
 
     /**
@@ -496,11 +526,22 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
 
         log.info("查询字段名称：groupId={}, validationType={}", groupId, validationType);
 
+        // 获取规则组信息
+        MetadataValidationRuleGroupDO group = validationRuleGroupRepository.getById(groupId);
+        String groupUuid = (group != null) ? group.getGroupUuid() : null;
+        
+        // 修复：校验记录中的 groupUuid 字段可能存储的是 groupId 的字符串形式或真正的 UUID
+        // 需要同时用两种形式查询
+        String groupIdStr = String.valueOf(groupId);
+        
         try {
             switch (validationType) {
                 case "REQUIRED":
-                    // 查询必填校验关联的字段
-                    var requiredFields = requiredRepository.findByGroupId(groupId);
+                    // 查询必填校验关联的字段（同时用 groupId 和 groupUuid 查询）
+                    var requiredFields = requiredRepository.findByGroupUuid(groupIdStr);
+                    if ((requiredFields == null || requiredFields.isEmpty()) && groupUuid != null && !groupUuid.equals(groupIdStr)) {
+                        requiredFields = requiredRepository.findByGroupUuid(groupUuid);
+                    }
                     log.info("查询到必填校验字段数量：{}", requiredFields != null ? requiredFields.size() : 0);
                     if (requiredFields != null) {
                         for (var field : requiredFields) {
@@ -516,7 +557,10 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
 
                 case "LENGTH":
                     // 查询长度校验关联的字段
-                    var lengthFields = lengthRepository.findByGroupId(groupId);
+                    var lengthFields = lengthRepository.findByGroupUuid(groupIdStr);
+                    if ((lengthFields == null || lengthFields.isEmpty()) && groupUuid != null && !groupUuid.equals(groupIdStr)) {
+                        lengthFields = lengthRepository.findByGroupUuid(groupUuid);
+                    }
                     log.info("查询到长度校验字段数量：{}", lengthFields != null ? lengthFields.size() : 0);
                     if (lengthFields != null) {
                         for (var field : lengthFields) {
@@ -532,7 +576,10 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
 
                 case "UNIQUE":
                     // 查询唯一性校验关联的字段
-                    var uniqueFields = uniqueRepository.findByGroupId(groupId);
+                    var uniqueFields = uniqueRepository.findByGroupUuid(groupIdStr);
+                    if ((uniqueFields == null || uniqueFields.isEmpty()) && groupUuid != null && !groupUuid.equals(groupIdStr)) {
+                        uniqueFields = uniqueRepository.findByGroupUuid(groupUuid);
+                    }
                     log.info("查询到唯一性校验字段数量：{}", uniqueFields != null ? uniqueFields.size() : 0);
                     if (uniqueFields != null) {
                         for (var field : uniqueFields) {
@@ -548,7 +595,10 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
 
                 case "RANGE":
                     // 查询范围校验关联的字段
-                    var rangeFields = rangeRepository.findByGroupId(groupId);
+                    var rangeFields = rangeRepository.findByGroupUuid(groupIdStr);
+                    if ((rangeFields == null || rangeFields.isEmpty()) && groupUuid != null && !groupUuid.equals(groupIdStr)) {
+                        rangeFields = rangeRepository.findByGroupUuid(groupUuid);
+                    }
                     log.info("查询到范围校验字段数量：{}", rangeFields != null ? rangeFields.size() : 0);
                     if (rangeFields != null) {
                         for (var field : rangeFields) {
@@ -564,7 +614,10 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
 
                 case "FORMAT":
                     // 查询格式校验关联的字段
-                    var formatFields = formatRepository.findByGroupId(groupId);
+                    var formatFields = formatRepository.findByGroupUuid(groupIdStr);
+                    if ((formatFields == null || formatFields.isEmpty()) && groupUuid != null && !groupUuid.equals(groupIdStr)) {
+                        formatFields = formatRepository.findByGroupUuid(groupUuid);
+                    }
                     log.info("查询到格式校验字段数量：{}", formatFields != null ? formatFields.size() : 0);
                     if (formatFields != null) {
                         for (var field : formatFields) {
@@ -580,7 +633,10 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
 
                 case "CHILD_NOT_EMPTY":
                     // 查询子表非空校验关联的字段
-                    var childNotEmptyFields = childNotEmptyRepository.findByGroupId(groupId);
+                    var childNotEmptyFields = childNotEmptyRepository.findByGroupUuid(groupIdStr);
+                    if ((childNotEmptyFields == null || childNotEmptyFields.isEmpty()) && groupUuid != null && !groupUuid.equals(groupIdStr)) {
+                        childNotEmptyFields = childNotEmptyRepository.findByGroupUuid(groupUuid);
+                    }
                     log.info("查询到子表非空校验字段数量：{}", childNotEmptyFields != null ? childNotEmptyFields.size() : 0);
                     if (childNotEmptyFields != null) {
                         for (var field : childNotEmptyFields) {

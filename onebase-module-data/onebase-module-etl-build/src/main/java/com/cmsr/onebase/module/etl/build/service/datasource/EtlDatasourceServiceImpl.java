@@ -4,13 +4,11 @@ import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
+import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.etl.build.service.DatasourceFactory;
 import com.cmsr.onebase.module.etl.build.service.collector.MetadataCollector;
 import com.cmsr.onebase.module.etl.build.service.collector.MetadataManager;
-import com.cmsr.onebase.module.etl.build.vo.datasource.DatasourceRespVO;
-import com.cmsr.onebase.module.etl.build.vo.datasource.EtlDatasourceCreateReqVO;
-import com.cmsr.onebase.module.etl.build.vo.datasource.EtlDatasourceUpdateReqVO;
-import com.cmsr.onebase.module.etl.build.vo.datasource.MetaBriefVO;
+import com.cmsr.onebase.module.etl.build.vo.datasource.*;
 import com.cmsr.onebase.module.etl.common.entity.CatalogData;
 import com.cmsr.onebase.module.etl.common.entity.ColumnData;
 import com.cmsr.onebase.module.etl.common.entity.TableData;
@@ -18,8 +16,10 @@ import com.cmsr.onebase.module.etl.common.preview.ColumnDefine;
 import com.cmsr.onebase.module.etl.core.dal.database.*;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.EtlDatasourceDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.EtlTableDO;
+import com.cmsr.onebase.module.etl.core.dto.FlinkMappings;
 import com.cmsr.onebase.module.etl.core.enums.CollectStatus;
 import com.cmsr.onebase.module.etl.core.enums.EtlErrorCodeConstants;
+import com.cmsr.onebase.module.etl.core.vo.ConnectCryptoProperties;
 import com.cmsr.onebase.module.etl.core.vo.DatasourcePageReqVO;
 import com.github.f4b6a3.uuid.UuidCreator;
 import com.mybatisflex.core.row.Db;
@@ -28,14 +28,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.anyline.metadata.type.DatabaseType;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 
 import javax.sql.DataSource;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 @Service
 @Slf4j
@@ -78,8 +79,10 @@ public class EtlDatasourceServiceImpl implements EtlDatasourceService {
             throw ServiceExceptionUtil.exception(EtlErrorCodeConstants.DATASOURCE_NOT_EXIST);
         }
         DatasourceRespVO datasourceRespVO = DatasourceRespVO.convertFrom(datasourceDO);
+        // 前端不需要使用config中的内容
+        ConnectDesensitizeProperties connectDesensitizeProperties = JsonUtils.parseObject(datasourceDO.getConfig(), ConnectDesensitizeProperties.class);
         if (datasourceDO.getConfig() != null) {
-            datasourceRespVO.setConfig(JsonUtils.parseTree(datasourceDO.getConfig()));
+            datasourceRespVO.setConfig(connectDesensitizeProperties);
         }
         return datasourceRespVO;
     }
@@ -141,7 +144,14 @@ public class EtlDatasourceServiceImpl implements EtlDatasourceService {
         }
         oldDatasource.setDatasourceName(updateReqVO.getDatasourceName());
         oldDatasource.setDeclaration(updateReqVO.getDeclaration());
-        oldDatasource.setConfig(JsonUtils.toJsonString(updateReqVO.getConfig()));
+        ConnectCryptoProperties connectProperties = updateReqVO.getConfig();
+        ConnectCryptoProperties newProperties = BeanUtils.copyBean(connectProperties);
+        String newPwd = connectProperties.getPassword();
+        if (StringUtils.isBlank(newPwd)) {
+            String oldPwd = JsonUtils.parseTree(oldDatasource.getConfig()).get("password").asText();
+            newProperties.setPassword(oldPwd);
+        }
+        oldDatasource.setConfig(JsonUtils.toJsonString(newProperties));
         oldDatasource.setReadonly(updateReqVO.getReadonly());
         // udpate collect status to `required`, demonds user to execute at least once
         oldDatasource.setCollectStatus(CollectStatus.REQUIRED);
@@ -152,14 +162,14 @@ public class EtlDatasourceServiceImpl implements EtlDatasourceService {
     private void complementJdbcDatasourceProperties(EtlDatasourceDO datasourceDO) {
         String datasourceType = datasourceDO.getDatasourceType();
         DatabaseType databaseType = DatasourceFactory.parseDatabaseType(datasourceType);
-        Map connectionProperties = JsonUtils.parseObject(datasourceDO.getConfig(), Map.class);
-        connectionProperties.put("driver", databaseType.driver());
-        String connectMode = (String) connectionProperties.getOrDefault("connectMode", "default");
-        if (StringUtils.equalsIgnoreCase(connectMode, "default")) {
-            String jdbcUrl = DatasourceFactory.buildJdbcConnectionString(datasourceType, connectionProperties);
-            connectionProperties.put("jdbcUrl", jdbcUrl);
+        ConnectCryptoProperties connectProperties = JsonUtils.parseObject(datasourceDO.getConfig(), ConnectCryptoProperties.class);
+        connectProperties.setDriver(databaseType.driver());
+        String connectMode = connectProperties.getConnectMode();
+        if (StringUtils.isBlank(connectMode) || Strings.CI.equals(connectMode, "default")) {
+            String jdbcUrl = DatasourceFactory.buildJdbcConnectionString(datasourceType, connectProperties);
+            connectProperties.setJdbcUrl(jdbcUrl);
         }
-        datasourceDO.setConfig(JsonUtils.toJsonString(connectionProperties));
+        datasourceDO.setConfig(JsonUtils.toJsonString(connectProperties));
     }
 
     @Override
@@ -201,7 +211,8 @@ public class EtlDatasourceServiceImpl implements EtlDatasourceService {
         String datasourceUuid = datasourceDO.getDatasourceUuid();
         log.info("提交元数据采集任务，数据源ID: {}", datasourceId);
         try {
-            DataSource datasource = datasourceFactory.constructDataSource(datasourceDO, false);
+            ConnectCryptoProperties connectProperties = JsonUtils.parseObject(datasourceDO.getConfig(), ConnectCryptoProperties.class);
+            DataSource datasource = datasourceFactory.constructDataSource(datasourceDO.getDatasourceType(), connectProperties, false);
             CatalogData catalogData = metadataCollector.collectCatalog(datasourceId, datasource);
             metadataManager.saveMetadata(applicationId, datasourceUuid, catalogData);
             LocalDateTime endTime = LocalDateTime.now();
@@ -265,33 +276,46 @@ public class EtlDatasourceServiceImpl implements EtlDatasourceService {
         if (datasourceDO == null) {
             throw ServiceExceptionUtil.exception(EtlErrorCodeConstants.DATASOURCE_NOT_EXIST);
         }
-        Map<String, String> flinkTypeMappings = flinkMappingRepository.findAllMappingsByDatasourceType(datasourceDO.getDatasourceType());
+        FlinkMappings flinkMappings = flinkMappingRepository.findByDatasourceType(datasourceDO.getDatasourceType());
         TableData tableData = JsonUtils.parseObject(tableDO.getMetaInfo(), TableData.class);
         List<ColumnData> columns = tableData.getColumns();
+        if (columns == null) {
+            return Collections.emptyList();
+        }
         return columns.stream()
-                .map(columnMeta -> {
-                    ColumnDefine columnDefine = new ColumnDefine();
-                    String fqn = String.format("%s.%s.%s.%s.%s", datasourceDO.getDatasourceUuid(),
-                            tableData.getCatalogName(),
-                            tableData.getSchemaName(),
-                            tableData.getName(),
-                            columnMeta.getName());
-                    columnDefine.setFieldFqn(fqn);
-                    String tableName = columnMeta.getName();
-                    String displayName = columnMeta.getDisplayName();
-                    String comment = columnMeta.getComment();
-                    String declaration = columnMeta.getDeclaration();
-                    columnDefine.setFieldName(tableName);
-                    columnDefine.setDisplayName(tableName);
-                    if (StringUtils.isNotBlank(comment)) columnDefine.setDisplayName(comment);
-                    if (StringUtils.isNotBlank(declaration) && !StringUtils.equals(declaration, comment))
-                        columnDefine.setDisplayName(declaration);
-                    if (StringUtils.isNotBlank(displayName) && !StringUtils.equals(tableName, displayName))
-                        columnDefine.setDisplayName(displayName);
-                    columnDefine.setFieldType(flinkTypeMappings.get(columnMeta.getType()));
-                    return columnDefine;
-                }).toList();
+                .map(columnData -> toColumnDefine(datasourceDO.getDatasourceType(), tableData, columnData, flinkMappings))
+                .toList();
     }
+
+    private ColumnDefine toColumnDefine(String datasourceType, TableData tableData, ColumnData columnData, FlinkMappings flinkMappings) {
+        ColumnDefine columnDefine = new ColumnDefine();
+        String fqn = String.format("%s.%s.%s.%s",
+                tableData.getCatalogName(),
+                tableData.getSchemaName(),
+                tableData.getName(),
+                columnData.getName());
+        String columnName = columnData.getName();
+        String displayName = columnData.getDisplayName();
+        String comment = columnData.getComment();
+        String declaration = columnData.getDeclaration();
+        String type = columnData.getType();
+
+        columnDefine.setFieldFqn(fqn);
+        columnDefine.setFieldName(columnName);
+
+        if (StringUtils.isNotBlank(declaration)) {
+            columnDefine.setDisplayName(declaration);
+        } else if (StringUtils.isNotBlank(comment)) {
+            columnDefine.setDisplayName(comment);
+        } else if (StringUtils.isNotBlank(displayName)) {
+            columnDefine.setDisplayName(displayName);
+        } else {
+            columnDefine.setDisplayName(columnName);
+        }
+        columnDefine.setFieldType(flinkMappings.getFlinkType(datasourceType, type));
+        return columnDefine;
+    }
+
 
     private void checkDatasourceCollectRunnable(EtlDatasourceDO datasourceDO, LocalDateTime plannedTime) {
         CollectStatus currentStatus = datasourceDO.getCollectStatus();

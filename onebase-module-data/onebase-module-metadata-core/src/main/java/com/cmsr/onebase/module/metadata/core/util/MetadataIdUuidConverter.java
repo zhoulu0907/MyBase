@@ -258,6 +258,8 @@ public class MetadataIdUuidConverter {
      * <p>
      * 支持传入Long类型ID的字符串形式或UUID，自动识别并转换为UUID。
      * 判断逻辑：纯数字 → 视为ID，查库转换；非纯数字 → 直接作为UUID返回
+     * <p>
+     * 注意：此方法使用不受application_id和version_tag限制的查询，用于跨版本查询实体。
      *
      * @param identifier 标识符（可以是Long ID的字符串形式或UUID）
      * @return 实体UUID
@@ -274,8 +276,8 @@ public class MetadataIdUuidConverter {
             return identifier;
         }
 
-        // 纯数字 -> 视为ID，查库转换
-        MetadataBusinessEntityDO entity = entityRepository.getBusinessEntityById(identifier);
+        // 纯数字 -> 视为ID，查库转换（使用不受过滤条件限制的方法）
+        MetadataBusinessEntityDO entity = entityRepository.getBusinessEntityByIdIgnoreFilter(identifier);
         if (entity == null) {
             log.warn("通过ID查询业务实体失败，实体不存在: id={}", identifier);
             throw new ServiceException(BUSINESS_ENTITY_NOT_EXISTS);
@@ -353,7 +355,8 @@ public class MetadataIdUuidConverter {
     /**
      * 解析业务实体UUID
      * <p>
-     * 优先使用uuid参数，若为空则通过id查询转换
+     * 优先使用uuid参数，若为空则通过id查询转换。
+     * 注意：此方法使用不受application_id和version_tag限制的查询，用于跨版本查询实体。
      *
      * @param uuid 实体UUID（优先使用）
      * @param id   实体ID（兼容旧版，当uuid为空时使用）
@@ -366,9 +369,9 @@ public class MetadataIdUuidConverter {
             return uuid;
         }
 
-        // 2. UUID为空，尝试通过ID查询
+        // 2. UUID为空，尝试通过ID查询（使用不受过滤条件限制的方法）
         if (CharSequenceUtil.isNotBlank(id)) {
-            MetadataBusinessEntityDO entity = entityRepository.getBusinessEntityById(id);
+            MetadataBusinessEntityDO entity = entityRepository.getBusinessEntityByIdIgnoreFilter(id);
             if (entity == null) {
                 log.warn("通过ID查询业务实体失败，实体不存在: id={}", id);
                 throw new ServiceException(BUSINESS_ENTITY_NOT_EXISTS);
@@ -484,7 +487,8 @@ public class MetadataIdUuidConverter {
     /**
      * 解析业务实体UUID（可选字段版本）
      * <p>
-     * 当uuid和id都为空时返回null而不是抛出异常
+     * 当uuid和id都为空时返回null而不是抛出异常。
+     * 注意：此方法使用不受application_id和version_tag限制的查询，用于跨版本查询实体。
      *
      * @param uuid 实体UUID（优先使用）
      * @param id   实体ID（兼容旧版，当uuid为空时使用）
@@ -497,9 +501,9 @@ public class MetadataIdUuidConverter {
             return uuid;
         }
 
-        // 2. UUID为空，尝试通过ID查询
+        // 2. UUID为空，尝试通过ID查询（使用不受过滤条件限制的方法）
         if (CharSequenceUtil.isNotBlank(id)) {
-            MetadataBusinessEntityDO entity = entityRepository.getBusinessEntityById(id);
+            MetadataBusinessEntityDO entity = entityRepository.getBusinessEntityByIdIgnoreFilter(id);
             if (entity == null) {
                 log.warn("通过ID查询业务实体失败，实体不存在: id={}", id);
                 throw new ServiceException(BUSINESS_ENTITY_NOT_EXISTS);

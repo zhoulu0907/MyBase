@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.util.Objects;
 
 /**
- * 多租户 Security Web 过滤器
+ * 多空间 Security Web 过滤器
  * 1. 如果是登陆的用户，校验是否有权限访问该租户，避免越权问题。
  * 2. 如果请求未带租户的编号，检查是否是忽略的 URL，否则也不允许访问。
  * 3. 校验租户是合法，例如说被禁用、到期
@@ -67,7 +67,7 @@ public class TenantSecurityWebFilter extends ApiRequestFilter {
                         user.getTenantId(), user.getId(), user.getUserType(),
                         TenantContextHolder.getTenantId(), request.getRequestURI(), request.getMethod());
                 ServletUtils.writeJSON(response, CommonResult.error(GlobalErrorCodeConstants.FORBIDDEN.getCode(),
-                        "您无权访问该租户的数据"));
+                        "您无权访问该空间的数据"));
                 return;
             }
         }
@@ -76,9 +76,9 @@ public class TenantSecurityWebFilter extends ApiRequestFilter {
         if (!isIgnoreUrl(request)) {
             // 2. 如果请求未带租户的编号，不允许访问。
             if (tenantId == null) {
-                log.error("[doFilterInternal][URL({}/{}) 未传递租户编号]", request.getRequestURI(), request.getMethod());
+                log.error("[doFilterInternal][URL({}/{}) 未传递空间编号]", request.getRequestURI(), request.getMethod());
                 ServletUtils.writeJSON(response, CommonResult.error(GlobalErrorCodeConstants.BAD_REQUEST.getCode(),
-                        "请求的租户标识未传递，请进行排查"));
+                        "请求的空间标识未传递，请进行排查"));
                 return;
             }
             // 3. 校验租户是合法，例如说被禁用、到期

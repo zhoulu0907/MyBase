@@ -22,7 +22,7 @@ public class FlowCodegenMain {
             "flow_connector_script",
             "flow_execution_log",
             "flow_node_category",
-            "flow_node_type",
+            "flow_node_config",
             "flow_process",
             "flow_process_date_field",
             "flow_process_time"
@@ -54,12 +54,10 @@ public class FlowCodegenMain {
         globalConfig.setEntityPackage(basePackage + ".dataobject");
         globalConfig.setEntityClassSuffix("DO");
         globalConfig.setEntitySuperClass(BaseBizEntity.class);
-        globalConfig.setEntityWithBaseClassEnable(true);
         globalConfig.setEntityGenerateEnable(true);
         globalConfig.setEntityWithLombok(true);
         globalConfig.setEntityLombokAllArgsConstructorEnable(false);
         globalConfig.setEntityLombokNoArgsConstructorEnable(false);
-        globalConfig.setEntityOverwriteEnable(true);
         globalConfig.setEntityJdkVersion(17);
         globalConfig.setEntityOverwriteEnable(true);
 

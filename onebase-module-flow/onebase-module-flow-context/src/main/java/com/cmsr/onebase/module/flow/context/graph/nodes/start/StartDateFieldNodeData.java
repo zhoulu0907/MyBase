@@ -167,7 +167,7 @@ public class StartDateFieldNodeData extends NodeData implements FieldTypeProcess
 
     @Override
     public void processFieldTypes(Map<String, Map<String, SemanticFieldSchemaDTO>> fieldInfoMap) {
-        SemanticFieldTypeEnum fieldTypeEnum = FieldTypeHelper.findFieldTypeEnum(getTableName(), getOffsetFieldName(), fieldInfoMap);
+        SemanticFieldTypeEnum fieldTypeEnum = FieldTypeHelper.findFieldTypeEnum(tableName, offsetFieldName, fieldInfoMap);
         setOffsetFiledTypeEnum(fieldTypeEnum);
         //
         FieldTypeHelper.processConditionList( getFilterCondition(), fieldInfoMap, 2);

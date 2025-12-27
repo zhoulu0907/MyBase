@@ -61,16 +61,16 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public OAuth2AccessTokenDO createAccessToken(Long userId, Integer userType, String clientId, List<String> scopes) {
-        return createAccessTokenWithMode(null, null, null, userId, userType, clientId, scopes);
+        return createAccessTokenWithMode(null, null, null, userId, userType, clientId, scopes,null);
     }
 
     @Override
-    public OAuth2AccessTokenDO createAccessTokenWithMode(String runMode, Long corpId, Long appId, Long userId, Integer userType, String clientId, List<String> scopes) {
+    public OAuth2AccessTokenDO createAccessTokenWithMode(String runMode, Long corpId, Long appId, Long userId, Integer userType, String clientId, List<String> scopes, String loginPlatform) {
         OAuth2ClientDO clientDO = oauth2ClientService.validOAuthClientFromCache(clientId);
         // 创建刷新令牌
         OAuth2RefreshTokenDO refreshTokenDO = createOAuth2RefreshToken(runMode, corpId, appId, userId, userType, clientDO, scopes);
         // 创建访问令牌
-        return createOAuth2AccessToken(runMode, refreshTokenDO, clientDO);
+        return createOAuth2AccessToken(runMode, refreshTokenDO, clientDO, loginPlatform);
     }
 
     @Override
@@ -120,7 +120,7 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
         }
 
         // 创建访问令牌
-        OAuth2AccessTokenDO newAccessTokenDO = createOAuth2AccessToken(null, refreshTokenDO, clientDO);
+        OAuth2AccessTokenDO newAccessTokenDO = createOAuth2AccessToken(null, refreshTokenDO, clientDO, null);
 
         // 将新Token添加到在线设备记录：如果反查到deviceId则使用，否则直接存储新Token
         if (StrUtil.isNotBlank(deviceId)) {
@@ -198,7 +198,7 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
         return oauth2AccessTokenDataRepository.findPage(reqVO);
     }
 
-    private OAuth2AccessTokenDO createOAuth2AccessToken(String runMode, OAuth2RefreshTokenDO refreshTokenDO, OAuth2ClientDO clientDO) {
+    private OAuth2AccessTokenDO createOAuth2AccessToken(String runMode, OAuth2RefreshTokenDO refreshTokenDO, OAuth2ClientDO clientDO,String loginPlatform) {
         OAuth2AccessTokenDO accessTokenDO = new OAuth2AccessTokenDO().setAccessToken(generateAccessToken())
                 .setRunMode(runMode)
                 .setUserId(refreshTokenDO.getUserId()).setUserType(refreshTokenDO.getUserType())
@@ -207,6 +207,7 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
                 .setUserInfo(buildUserInfo(refreshTokenDO.getUserId(), refreshTokenDO.getUserType()))
                 .setClientId(clientDO.getClientId()).setScopes(refreshTokenDO.getScopes())
                 .setRefreshToken(refreshTokenDO.getRefreshToken())
+                .setLoginPlatform(loginPlatform)
                 .setExpiresTime(LocalDateTime.now().plusSeconds(clientDO.getAccessTokenValiditySeconds()));
         accessTokenDO.setTenantId(TenantContextHolder.getTenantId()); // 手动设置租户编号，避免缓存到 Redis 的时候，无对应的租户编号
         oauth2AccessTokenDataRepository.insert(accessTokenDO);

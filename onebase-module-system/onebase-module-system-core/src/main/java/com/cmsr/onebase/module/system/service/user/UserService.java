@@ -1,20 +1,16 @@
 package com.cmsr.onebase.module.system.service.user;
 
-import com.cmsr.onebase.framework.common.pojo.PageResult;
 import cn.hutool.core.collection.CollUtil;
+import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
+import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
+import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.vo.auth.AuthRegisterReqVO;
 import com.cmsr.onebase.module.system.vo.dept.DeptSimpleListRespVO;
-import com.cmsr.onebase.module.system.vo.user.UserProfileUpdatePasswordReqVO;
-import com.cmsr.onebase.module.system.vo.user.UserProfileUpdateReqVO;
-import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.vo.user.*;
 import jakarta.validation.Valid;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 后台用户 Service 接口
@@ -68,7 +64,7 @@ public interface UserService {
      * @param adminType 修改管理员类型
      * @param id        用户编号
      */
-    void updateAdminType(Long id,  Integer adminType);
+    void updateAdminType(Long id, Integer adminType);
 
 
     /**
@@ -166,9 +162,9 @@ public interface UserService {
      * @param deptIds 部门数组
      * @return 用户数组
      */
-    List<AdminUserDO> getUserListByDeptIds(Collection<Long> deptIds);
+    List<AdminUserDO> getUserListByDeptIds(Collection<Long> deptIds, Integer userType);
 
-    List<AdminUserDO> getUserListNoDept();
+    List<AdminUserDO> getUserListNoDept(Integer userType);
 
     /**
      * 获得指定岗位的用户数组
@@ -222,7 +218,7 @@ public interface UserService {
      * @param nickname 昵称
      * @return 用户列表
      */
-    List<AdminUserDO> getUserListByNickname(String nickname);
+    List<AdminUserDO> getUserListByNickname(String nickname, Integer userType);
 
     /**
      * 批量导入用户
@@ -306,6 +302,7 @@ public interface UserService {
     boolean findAdminByRoleIdAndUserId(Long roleId, Long userId);
 
     Long getUserCountByCorpId(Long id);
+
     /**
      * 验证企业用户信息
      *
@@ -326,8 +323,90 @@ public interface UserService {
 
     /**
      * 转换用户数据信息
+     *
      * @param pageResult
      * @return
      */
     List<UserRespVO> getConvertUserPage(PageResult<AdminUserDO> pageResult);
+
+    /**
+     * 忘记密码
+     *
+     * @param reqVO
+     */
+    void thirdUserForgetPassword(Long id, String password);
+
+
+    /**
+     * 补充用户信息
+     *
+     * @param reqVO
+     * @return
+     */
+    AdminUserDO thirdUserRegister(ThirdSupplementUserReqVO reqVO);
+
+    /**
+     * 创建用户并关联应用
+     *
+     * @param reqVO
+     * @return
+     */
+    Long thirdUserCreateUserAndUserAppRelation(ThirdUserAppCombinedInsertReqVO reqVO);
+
+    /**
+     * 更新用户并关联应用
+     *
+     * @param reqVO
+     * @return
+     */
+    Long thirdUserUpdateUserAndUserAppRelation(ThirdUserAppCombinedUpdateReqVO reqVO);
+
+
+    /**
+     * 获得用户授权应用列表-分页
+     *
+     * @param userAppPageReqVO 获取用户授权应用列表-分页请求参数
+     * @return 用户授权应用列表-分页结果
+     */
+    PageResult<UserApplicationRespVO> getUserAppRelationPage(@Valid UserAppPageSearchReqVO userAppPageReqVO);
+
+    /**
+     * 更新第三方用户密码
+     *
+     * @param id
+     */
+    void thirdUserUpdatePassword(Long id);
+
+    /**
+     * 获取用户信息
+     *
+     * @param usernamesList
+     * @return
+     */
+    @TenantIgnore
+    List<AdminUserDO> getPlatformUserByUsernames(Set<String> usernamesList);
+
+    /**
+     * 第三方用户注册
+     *
+     * @param reqVO
+     * @return
+     */
+    Long thirdUserRegister(@Valid ThirdUserRegisterReqVO reqVO);
+
+    /**
+     * 获取第三方用户授权应用信息
+     *
+     * @param id
+     * @return
+     */
+    UserApplicationRespVO getThirdUserAndRelationApp(Long id);
+
+    /**
+     *  确认用户信息，如果有修改就更新
+     *
+     * @param id
+     * @return
+     */
+    void updateUserByUserAppReqVO(UserAppRelationInertReqVO udpateUser);
 }

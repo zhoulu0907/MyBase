@@ -7,11 +7,11 @@ import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageRepository;
 import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageSetRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePageDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePagesetDO;
-import com.cmsr.onebase.module.app.core.dto.appresource.CreatePageViewDTO;
-import com.cmsr.onebase.module.app.core.dto.appresource.PageDTO;
-import com.cmsr.onebase.module.app.core.dto.appresource.UpdatePageNameDTO;
-import com.cmsr.onebase.module.app.core.enums.appresource.PageEnum;
-import com.cmsr.onebase.module.app.core.enums.appresource.ViewEnmu;
+import com.cmsr.onebase.module.app.core.dto.resource.CreatePageViewDTO;
+import com.cmsr.onebase.module.app.core.dto.resource.PageDTO;
+import com.cmsr.onebase.module.app.core.dto.resource.UpdatePageNameDTO;
+import com.cmsr.onebase.module.app.core.enums.resource.PageEnum;
+import com.cmsr.onebase.module.app.core.enums.resource.ViewEnmu;
 import com.cmsr.onebase.module.app.core.provider.resource.PageServiceProvider;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,8 +79,8 @@ public class PageServiceImpl implements PageService {
     }
 
     @Override
-    public List<PageDTO> getFormPageListByAppId(Long appId) {
-        return pageServiceProvider.getFormPageListByAppId(appId);
+    public List<PageDTO> getPageListByAppId(Long appId) {
+        return pageServiceProvider.getPageListByAppId(appId);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.app.core.dal.database.auth;
 
+import com.cmsr.onebase.framework.common.enums.VersionTagEnum;
 import com.cmsr.onebase.framework.orm.repo.BaseBizRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthFieldDO;
 import com.cmsr.onebase.module.app.core.dal.mapper.AppAuthFieldMapper;
@@ -21,7 +22,7 @@ import static com.cmsr.onebase.module.app.core.dal.dataobject.table.AppAuthField
 @Repository
 public class AppAuthFieldRepository extends BaseBizRepository<AppAuthFieldMapper, AppAuthFieldDO> {
 
-    public List<AppAuthFieldDO> findByQuery(AuthPermissionReq reqVO) {
+    public List<AppAuthFieldDO> findByQueryRequest(AuthPermissionReq reqVO) {
         QueryWrapper queryWrapper = this.query()
                 .where(APP_AUTH_FIELD.APPLICATION_ID.eq(reqVO.getApplicationId()))
                 .where(APP_AUTH_FIELD.ROLE_UUID.eq(reqVO.getRoleUuid()))
@@ -29,12 +30,12 @@ public class AppAuthFieldRepository extends BaseBizRepository<AppAuthFieldMapper
         return list(queryWrapper);
     }
 
-    public void deleteByQuery(AuthPermissionReq reqVO) {
-        this.updateChain()
+    public void deleteByQueryRequest(AuthPermissionReq reqVO) {
+        QueryWrapper queryWrapper = this.query()
                 .where(APP_AUTH_FIELD.APPLICATION_ID.eq(reqVO.getApplicationId()))
                 .where(APP_AUTH_FIELD.ROLE_UUID.eq(reqVO.getRoleUuid()))
-                .where(APP_AUTH_FIELD.MENU_UUID.eq(reqVO.getMenuUuid()))
-                .remove();
+                .where(APP_AUTH_FIELD.MENU_UUID.eq(reqVO.getMenuUuid()));
+        super.remove(queryWrapper);
     }
 
     public List<AppAuthFieldDO> findByAppIdAndRoleIdsAndMenuId(Long applicationId, Set<String> roleUuids, String menuUuid) {
@@ -45,9 +46,11 @@ public class AppAuthFieldRepository extends BaseBizRepository<AppAuthFieldMapper
         return list(queryWrapper);
     }
 
-    public void deleteByMenuUuid(String menuUuid) {
+    public void deleteByMenuUuid(Long applicationId, String menuUuid) {
         this.updateChain()
                 .where(APP_AUTH_FIELD.MENU_UUID.eq(menuUuid))
+                .where(APP_AUTH_FIELD.APPLICATION_ID.eq(applicationId))
+                .where(APP_AUTH_FIELD.VERSION_TAG.eq(VersionTagEnum.BUILD.getValue()))
                 .remove();
     }
 }

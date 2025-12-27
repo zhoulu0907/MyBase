@@ -82,15 +82,15 @@ public class AppAuthSecurityApiImpl implements AppAuthSecurityApi {
 
     @Override
     public boolean hasApplicationPermission(Long userId, Long applicationId) {
-        String key = CacheUtils.keyForAuth(userId, applicationId);
-        RMapCache<String, Boolean> mapCache = redissonClient.getMapCache(key, CacheUtils.KRYO5_CODEC);
-        String hashKey = CacheUtils.keyForHasPerm();
-        Boolean hasPermission = mapCache.get(hashKey);
-        if (hasPermission != null) {
-            return hasPermission;
-        }
-        hasPermission = doHasApplicationPermission(userId, applicationId);
-        mapCache.put(hashKey, hasPermission, CacheUtils.CACHE_TTL, CacheUtils.CACHE_TTL_UNIT);
+        // String key = CacheUtils.keyForAuth(userId, applicationId);
+        // RMapCache<String, Boolean> mapCache = redissonClient.getMapCache(key, CacheUtils.KRYO5_CODEC);
+        // String hashKey = CacheUtils.keyForHasPerm();
+        // Boolean hasPermission = mapCache.get(hashKey);
+        // if (hasPermission != null) {
+        //     return hasPermission;
+        // }
+        boolean hasPermission = doHasApplicationPermission(userId, applicationId);
+        // mapCache.put(hashKey, hasPermission, CacheUtils.CACHE_TTL, CacheUtils.CACHE_TTL_UNIT);
         return hasPermission;
     }
 
@@ -171,13 +171,15 @@ public class AppAuthSecurityApiImpl implements AppAuthSecurityApi {
 
     public Boolean doHasApplicationPermission(Long userId, Long applicationId) {
         UserRoleDTO userRoleDTO = appAuthRoleProvider.findUserRoleByApplication(userId, applicationId);
-        if (userRoleDTO != null && userRoleDTO.isAdminRole()) {
+        if (userRoleDTO != null &&
+                (userRoleDTO.isAdminRole()
+                        || CollectionUtils.isNotEmpty(userRoleDTO.getRoleIds())
+                        || CollectionUtils.isNotEmpty(userRoleDTO.getRoleUuids())
+                )
+        ) {
             return true;
         }
-        if (userRoleDTO == null || CollectionUtils.isEmpty(userRoleDTO.getRoleIds()) || CollectionUtils.isEmpty(userRoleDTO.getRoleUuids())) {
-            return false;
-        }
-        return true;
+        return false;
     }
 
     public boolean doIsApplicationAdmin(Long userId, Long applicationId) {

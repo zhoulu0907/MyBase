@@ -3,11 +3,12 @@ package com.cmsr.onebase.module.flow;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerReqDTO;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerRespDTO;
 import com.cmsr.onebase.module.flow.api.dto.TriggerEventEnum;
+import com.cmsr.onebase.module.flow.context.condition.SimpleField;
 import com.cmsr.onebase.module.flow.context.graph.JsonGraph;
-import com.cmsr.onebase.module.flow.context.graph.nodes.ModalNodeData;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
 import com.cmsr.onebase.module.flow.core.flow.FlowRemoteCallExecutor;
+import com.cmsr.onebase.module.flow.core.flow.FlowRemoteCallRequest;
 import com.cmsr.onebase.module.flow.core.graph.FlowChainBuilder;
 import com.cmsr.onebase.module.flow.core.graph.FlowGraphBuilder;
 import com.cmsr.onebase.module.flow.core.impl.FlowProcessExecApiImpl;
@@ -24,9 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 
 /**
@@ -68,7 +67,7 @@ public class RuntimeFlowProcessTest {
         reqDTO.setTraceId(UUID.randomUUID().toString());
         reqDTO.setTriggerEvent(TriggerEventEnum.BEFORE_CREATE);
         reqDTO.setApplicationId(173020283873034240L);
-        reqDTO.setTableName("xzqd_student_info");
+        reqDTO.setTableName("xzqd_student_info2");
         reqDTO.setFlowContext(Map.of(
                 SystemFieldConstants.REQUIRE.CREATOR, "155019577667616800",
                 SystemFieldConstants.REQUIRE.UPDATER, "155019577667616800",
@@ -77,12 +76,18 @@ public class RuntimeFlowProcessTest {
         ));
         SemanticFieldValueDTO name = SemanticFieldValueDTO.ofType(SemanticFieldTypeEnum.TEXT);
         name.setFieldName("student_name");
-        name.setRawValue("小");
-        SemanticFieldValueDTO age = SemanticFieldValueDTO.ofType(SemanticFieldTypeEnum.NUMBER);
-        age.setFieldName("gender");
-        age.setRawValue(8);
+        name.setRawValue("小明");
 
-        reqDTO.setFieldData(List.of(name, age));
+        SemanticFieldValueDTO birthday = SemanticFieldValueDTO.ofType(SemanticFieldTypeEnum.DATE);
+        birthday.setFieldName("birthday");
+        birthday.setRawValue("2025-12-01");
+
+        SemanticFieldValueDTO age = SemanticFieldValueDTO.ofType(SemanticFieldTypeEnum.TEXT);
+        age.setFieldName("gender");
+        age.setRawValue("男");
+
+
+        reqDTO.setFieldData(List.of(name, birthday, age));
         EntityTriggerRespDTO respDTO = flowProcessExecApi.entityTrigger(reqDTO);
         System.out.println(respDTO);
     }
@@ -90,11 +95,25 @@ public class RuntimeFlowProcessTest {
     @Test
     public void testFormTrigger01() throws IOException {
         FormTriggerReqVO reqVO = new FormTriggerReqVO();
-        reqVO.setProcessId(181941429188165632L);
-        reqVO.setInputParams(Map.of(
-                "student_name", "小",
-                "birthday", "2025-12-01"
-        ));
+        reqVO.setProcessId(195502410512138240L);
+        Map<String, Object> inputParams = new HashMap<>();
+        inputParams.put("class_name", "3年级2班");
+        List<Map<String, Object>> courses = new ArrayList<>();
+        inputParams.put("xzqd_course_schedule", courses);
+        {
+            Map<String, Object> course = new HashMap<>();
+            course.put("subject", "语文");
+            course.put("classroom", "4教");
+            courses.add(course);
+        }
+        {
+            Map<String, Object> course = new HashMap<>();
+            course.put("subject", "数学");
+            course.put("classroom", "5教");
+            courses.add(course);
+        }
+
+        reqVO.setInputParams(inputParams);
         FormTriggerRespVO formTriggerRespVO = flowProcessExecService.triggerForm(reqVO);
         System.out.println(formTriggerRespVO);
     }
@@ -102,16 +121,16 @@ public class RuntimeFlowProcessTest {
     @Test
     public void testFormTrigger02() throws IOException {
         FormTriggerReqVO reqVO = new FormTriggerReqVO();
-        reqVO.setProcessId(181941429188165632L);
-        reqVO.setExecutionUuid("ade06ee4-cb06-4700-af58-f4551e14439f");
+        reqVO.setProcessId(183149380155572224L);
+        reqVO.setExecutionUuid("69e1b4e6-a0fe-458d-a0fe-99c5527e0191");
 
-        ModalNodeData.Field field1 = new ModalNodeData.Field();
+        SimpleField field1 = new SimpleField();
         field1.setId("7VGW8DgADiKOFqlxU5JGG");
         field1.setFieldName("abc");
         field1.setFieldType("TEXT");
         field1.setValue("v1");
 
-        ModalNodeData.Field field2 = new ModalNodeData.Field();
+        SimpleField field2 = new SimpleField();
         field2.setId("pMtN_4Xz63M1jw31IUGqu");
         field2.setFieldName("abc");
         field2.setFieldType("TEXT");
@@ -121,4 +140,26 @@ public class RuntimeFlowProcessTest {
         FormTriggerRespVO formTriggerRespVO = flowProcessExecService.triggerForm(reqVO);
         System.out.println(formTriggerRespVO);
     }
+
+    @Test
+    public void testFormTrigger03() throws IOException {
+        FormTriggerReqVO reqVO = new FormTriggerReqVO();
+        reqVO.setProcessId(181943095635476480L);
+        Map<String, Object> inputParams = new HashMap<>();
+        inputParams.put("entity_date", null);
+        reqVO.setInputParams(inputParams);
+        FormTriggerRespVO formTriggerRespVO = flowProcessExecService.triggerForm(reqVO);
+        System.out.println(formTriggerRespVO);
+    }
+
+    @Test
+    public void testFlowRemoteCallExecutor() {
+        FlowRemoteCallRequest callRequest = new FlowRemoteCallRequest();
+        callRequest.setApplicationId(173020283873034240L);
+        callRequest.setProcessId(193925435951546497L);
+        callRequest.setProcessName("流程测试");
+        callRequest.setJobType(FlowRemoteCallRequest.JOB_TYPE_FIELD);
+        flowRemoteCallExecutor.executeFlow(callRequest);
+    }
+
 }

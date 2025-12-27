@@ -1,7 +1,6 @@
 package com.cmsr.onebase.module.etl.build.vo.datasource;
 
 import com.cmsr.onebase.module.etl.core.dal.dataobject.EtlDatasourceDO;
-import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import org.apache.commons.lang3.BooleanUtils;
@@ -31,7 +30,7 @@ public class DatasourceRespVO {
     private String datasourceType;
 
     @Schema(description = "数据源配置信息")
-    private JsonNode config;
+    private ConnectDesensitizeProperties config;
 
     @Schema(description = "只读")
     private Boolean readonly;

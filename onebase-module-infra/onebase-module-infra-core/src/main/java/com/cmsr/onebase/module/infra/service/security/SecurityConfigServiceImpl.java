@@ -5,12 +5,12 @@ import com.cmsr.onebase.framework.common.enums.SecurityCategoryCodeEnum;
 import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.infra.convert.security.SecurityConfigCategoryConvert;
-import com.cmsr.onebase.module.infra.dal.database.SecurityConfigCategoryDataRepository;
-import com.cmsr.onebase.module.infra.dal.database.SecurityConfigDataRepository;
-import com.cmsr.onebase.module.infra.dal.database.SecurityConfigTemplateDataRepository;
-import com.cmsr.onebase.module.infra.dal.dataobject.security.SecurityConfigCategoryDO;
-import com.cmsr.onebase.module.infra.dal.dataobject.security.SecurityConfigDO;
-import com.cmsr.onebase.module.infra.dal.dataobject.security.SecurityConfigTemplateDO;
+import com.cmsr.onebase.module.infra.dal.dataflex.SecurityConfigCategoryDataRepository;
+import com.cmsr.onebase.module.infra.dal.dataflex.SecurityConfigDataRepository;
+import com.cmsr.onebase.module.infra.dal.dataflex.SecurityConfigTemplateDataRepository;
+import com.cmsr.onebase.module.infra.dal.dataflexdo.ssecurity.SecurityConfigCategoryDO;
+import com.cmsr.onebase.module.infra.dal.dataflexdo.ssecurity.SecurityConfigDO;
+import com.cmsr.onebase.module.infra.dal.dataflexdo.ssecurity.SecurityConfigTemplateDO;
 import com.cmsr.onebase.module.infra.dal.vo.app.AppTenantVO;
 import com.cmsr.onebase.module.infra.dal.vo.security.*;
 import com.cmsr.onebase.module.infra.enums.ErrorCodeConstants;
@@ -28,8 +28,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static com.cmsr.onebase.module.infra.enums.ErrorCodeConstants.*;
 import static com.cmsr.onebase.module.infra.dal.redis.RedisKeyConstants.SECURITY_TENANT_CONFIGS;
+import static com.cmsr.onebase.module.infra.enums.ErrorCodeConstants.*;
 
 /**
  * 安全配置服务实现类
@@ -107,7 +107,7 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
         validateConfigUpdates(tenantId, updateReqVOList);
 
         for (SecurityConfigUpdateReqVO updateReqVO : updateReqVOList) {
-            updateSingleConfig(tenantId, updateReqVO);
+            updateSingleConfig(updateReqVO);
         }
 
         log.info("批量更新租户安全配置完成，tenantId: {}, 配置项数量: {}，已自动清除缓存", tenantId, updateReqVOList.size());
@@ -116,11 +116,10 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
     /**
      * 更新单个配置项
      *
-     * @param tenantId    租户ID
      * @param updateReqVO 更新请求
      */
-    private void updateSingleConfig(Long tenantId, SecurityConfigUpdateReqVO updateReqVO) {
-        SecurityConfigDO config = securityConfigDataRepository.findByTenantIdAndKey(tenantId, updateReqVO.getConfigKey());
+    private void updateSingleConfig(SecurityConfigUpdateReqVO updateReqVO) {
+        SecurityConfigDO config = securityConfigDataRepository.findByKey(updateReqVO.getConfigKey());
 
         if (SecurityConfigKey.desensitizedField.getConfigKey().equals(updateReqVO.getConfigKey()) && StrUtil.isBlank(updateReqVO.getConfigValue())){
             updateReqVO.setConfigValue(" ");
@@ -128,12 +127,10 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
 
         if (config == null) {
             // 如果不存在，创建新配置
-            config = SecurityConfigDO.builder()
-                    .tenantId(tenantId)
-                    .configKey(updateReqVO.getConfigKey())
-                    .configValue(updateReqVO.getConfigValue())
-                    .build();
-            securityConfigDataRepository.insert(config);
+            config = new SecurityConfigDO();
+            config.setConfigKey(updateReqVO.getConfigKey());
+            config.setConfigValue(updateReqVO.getConfigValue());
+            securityConfigDataRepository.save(config);
         } else {
             // 如果存在，更新配置
             config.setConfigValue(updateReqVO.getConfigValue());

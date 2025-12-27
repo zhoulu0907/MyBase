@@ -41,8 +41,6 @@ onebase:
     request-timeout: 86400 # 签名请求超时时间（秒）
   captcha:
     enable: false # 本地环境，暂时关闭图片验证码，方便登录等接口的测试；
-  security:
-    mock-enable: false
   access-log: # 访问日志的配置项
     enable: false
   web:
@@ -67,10 +65,17 @@ justauth:
 
 liteflow:
   enable: true
-  version-tag: 0
+  version-tag: 1
   print-banner: true
   js-server-address: http://10.0.104.41:28392
 
 metadata:
   runtime:
     enable-auth-check: false
+
+# Goview配置 开发环境特定的文件存储配置
+v2:
+  xnljmap:
+    oss: file:/Users/Documents/ob3.0/go-view-serve/fileserver/
+  fileurl: /Users/Documents/ob3.0/go-view-serve/fileserver
+  httpurl: http://127.0.0.1:8083/

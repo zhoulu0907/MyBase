@@ -203,7 +203,7 @@ public class SemanticValueAssembler {
      * @param uidGenerator 主键生成器，用于生成 `id`
      * @return 关系表 {@link Row}
      */
-    public Row buildRelationRow(Map<String, SemanticFieldValueDTO<Object>> data, UidGenerator uidGenerator) {
+    public Row buildRelationRow(SemanticRecordDTO recordDTO,SemanticRelationSchemaDTO c,Map<String, SemanticFieldValueDTO<Object>> data, UidGenerator uidGenerator) {
         Row relRow = new Row();
         if (data != null) {
             for (Map.Entry<String, SemanticFieldValueDTO<Object>> e : data.entrySet()) {
@@ -212,6 +212,27 @@ public class SemanticValueAssembler {
             }
         }
         relRow.set("id", uidGenerator.getUID());
+        // 查询关联字段设置对应的值
+        String  sourceKeyFieldUuid = c.getSourceKeyFieldUuid();
+        String  targetKeyFieldUuid =  c.getTargetKeyFieldUuid();
+        SemanticEntitySchemaDTO mainScheme = recordDTO.getEntitySchema();
+        List<SemanticFieldSchemaDTO> semanticFieldSchemaDTOS = mainScheme.getFields();
+        SemanticFieldSchemaDTO sourceFieldSchemaDTO = semanticFieldSchemaDTOS.stream().filter(semanticFieldSchemaDTO ->
+                semanticFieldSchemaDTO.getFieldUuid().equals(sourceKeyFieldUuid)).findFirst().orElse(null);
+        if(sourceFieldSchemaDTO == null) return null;
+        String sourceFileName = sourceFieldSchemaDTO.getFieldName();
+        List<SemanticFieldSchemaDTO> targetAttributes = c.getRelationAttributes();
+        SemanticFieldSchemaDTO targetFieldSchemaDTO = targetAttributes.stream().filter(semanticFieldSchemaDTO ->
+                semanticFieldSchemaDTO.getFieldUuid().equals(targetKeyFieldUuid)).findFirst().orElse(null);
+        if(targetFieldSchemaDTO == null) return null;
+        String relFieldName = targetFieldSchemaDTO.getFieldName();
+        if("parent_id".equals(relFieldName)){
+            Object relFiledValue = recordDTO.getEntityValue().getId();
+            relRow.set(relFieldName,relFiledValue);
+        }else{
+            Object relFiledValue = recordDTO.getEntityValue().getFieldValueMap().get(sourceFileName).getStoreValue();
+            relRow.set(relFieldName,relFiledValue);
+        }
         return relRow;
     }
 }

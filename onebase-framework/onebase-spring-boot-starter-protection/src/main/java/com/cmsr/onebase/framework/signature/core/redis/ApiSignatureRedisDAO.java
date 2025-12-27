@@ -36,11 +36,31 @@ public class ApiSignatureRedisDAO {
 
     private static final String SIGNATURE_ENABLE = "system:security:api-sign-enable";
 
+    private static final String SIGNATURE_IP_WHITE_LIST = "system:security:api-sign-ip-whitelist";
+
     public boolean isApiSignEnabled() {
         // 从redis中读取配置
         // stringRedisTemplate.opsForValue().set(SIGNATURE_ENABLE, "true");
         String enable = stringRedisTemplate.opsForValue().get(SIGNATURE_ENABLE);
-        return "true".equalsIgnoreCase(enable);
+        return !"false".equalsIgnoreCase(enable);
+    }
+
+
+    /**
+     * 获取IP白名单,英文逗号分割
+     * @return
+     */
+    public String getIpWhiteList() {
+        return stringRedisTemplate.opsForValue().get(SIGNATURE_IP_WHITE_LIST);
+    }
+
+    /**
+     * 设置IP白名单
+     * @param ipWhiteList 英文逗号分割
+     * @return
+     */
+    public Boolean setIpWhiteList(String ipWhiteList) {
+        return stringRedisTemplate.opsForValue().setIfAbsent(SIGNATURE_IP_WHITE_LIST, ipWhiteList);
     }
 
     // ========== 验签随机数 ==========

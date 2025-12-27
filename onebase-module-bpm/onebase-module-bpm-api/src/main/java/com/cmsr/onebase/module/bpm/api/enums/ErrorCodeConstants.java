@@ -137,6 +137,12 @@ public interface ErrorCodeConstants {
 
     ErrorCode MAIN_TABLE_FIELD_NO_EDIT_PERMISSION = new ErrorCode(1_009_002_042, "主表字段没有编辑权限");
 
+    ErrorCode REQUIRED_BUSINESS_UUID_MISSING = new ErrorCode(1_009_002_043, "业务UUID为空");
+
+    ErrorCode CANNOT_TRANSFER_TO_SELF = new ErrorCode(1_009_002_043, "不能将流程转交给自己或被代理人");
+
+    ErrorCode TARGET_HANDLER_USER_NOT_EXISTS = new ErrorCode(1_009_002_044, "目标处理人不存在");
+
     // ============= 系统相关错误 =============
 
     ErrorCode DEPT_API_CALL_FAILED = new ErrorCode(1_009_003_001, "部门接口调用失败");

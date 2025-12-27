@@ -8,6 +8,7 @@ import com.cmsr.onebase.module.flow.context.express.ExpressionExecutor;
 import com.cmsr.onebase.module.flow.context.express.OrExpression;
 import com.cmsr.onebase.module.flow.context.graph.nodes.start.StartEntityNodeData;
 import com.cmsr.onebase.module.flow.context.provider.FlowConditionsProvider;
+import com.cmsr.onebase.module.flow.context.table.RowData;
 import com.cmsr.onebase.module.flow.core.flow.ExecutorInput;
 import com.cmsr.onebase.module.flow.core.flow.ExecutorResult;
 import com.cmsr.onebase.module.flow.core.flow.FlowProcessExecutor;
@@ -42,8 +43,27 @@ public class FlowProcessExecApiImpl implements FlowProcessExecApi {
 
     private ExpressionExecutor expressionExecutor = new ExpressionExecutor();
 
+    private FlowProcessCache flowProcessCache = FlowProcessCache.getInstance();
+
     @Override
     public EntityTriggerRespDTO entityTrigger(EntityTriggerReqDTO reqDTO) {
+        log.info("entityTrigger req: {}", reqDTO);
+        try {
+            EntityTriggerRespDTO respDTO = doEntityTrigger(reqDTO);
+            log.info("entityTrigger resp: {}", respDTO);
+            return respDTO;
+        } catch (Exception e) {
+            log.error("entityTrigger error: {}", reqDTO, e);
+            EntityTriggerRespDTO respDTO = new EntityTriggerRespDTO(reqDTO.getTraceId());
+            respDTO.setSuccess(false);
+            respDTO.setTriggered(false);
+            respDTO.setMessage("执行异常");
+            respDTO.setCause(e);
+            return respDTO;
+        }
+    }
+
+    private EntityTriggerRespDTO doEntityTrigger(EntityTriggerReqDTO reqDTO) {
         if (reqDTO.getApplicationId() == null) {
             EntityTriggerRespDTO respDTO = new EntityTriggerRespDTO(reqDTO.getTraceId());
             respDTO.setSuccess(false);
@@ -59,7 +79,7 @@ public class FlowProcessExecApiImpl implements FlowProcessExecApi {
             return respDTO;
         }
 
-        List<StartEntityNodeData> entityNodeDataList = FlowProcessCache.findStartEntityNodeDataByEntityName(reqDTO.getApplicationId(), reqDTO.getTableName());
+        List<StartEntityNodeData> entityNodeDataList = flowProcessCache.findStartEntityNodeDataByEntityName(reqDTO.getApplicationId(), reqDTO.getTableName());
         if (CollectionUtils.isEmpty(entityNodeDataList)) {
             EntityTriggerRespDTO respDTO = new EntityTriggerRespDTO(reqDTO.getTraceId());
             respDTO.setSuccess(true);
@@ -94,7 +114,7 @@ public class FlowProcessExecApiImpl implements FlowProcessExecApi {
 
     private EntityTriggerRespDTO entityTrigger(EntityTriggerReqDTO reqDTO, StartEntityNodeData nodeData) {
         FlowProcessExecutor flowProcessExecutor = flowProcessExecutorObjectProvider.getIfAvailable();
-        Map<String, Object> inputData = reqDTO.toInputData();
+        RowData inputData = reqDTO.toInputData();
         EntityTriggerRespDTO respDTO = new EntityTriggerRespDTO(reqDTO.getTraceId(), nodeData.getProcessId());
         //先判断
         if (flowProcessExecutor == null) {
@@ -110,7 +130,7 @@ public class FlowProcessExecApiImpl implements FlowProcessExecApi {
             }
             if (CollectionUtils.isNotEmpty(nodeData.getFilterCondition())) {
                 OrExpression orExpression = flowConditionsProvider.formatConditionsForExpression(nodeData.getFilterCondition(), inputData);
-                boolean isMatch = expressionExecutor.evaluate(orExpression, inputData);
+                boolean isMatch = expressionExecutor.evaluateInput(orExpression, inputData);
                 if (!isMatch) {
                     respDTO.setSuccess(true);
                     respDTO.setTriggered(false);

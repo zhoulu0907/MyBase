@@ -13,13 +13,17 @@ import com.cmsr.onebase.module.app.core.dal.dataobject.AppMenuDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourceComponentDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePageDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePagesetDO;
-import com.cmsr.onebase.module.app.core.dto.appresource.CopyPageSetDTO;
-import com.cmsr.onebase.module.app.core.dto.appresource.CreatePageSetDTO;
-import com.cmsr.onebase.module.app.core.enums.appresource.AppResourceErrorCodeConstants;
-import com.cmsr.onebase.module.app.core.enums.appresource.PageEnum;
-import com.cmsr.onebase.module.app.core.enums.appresource.PageTypeSetEnum;
+import com.cmsr.onebase.module.app.core.dto.resource.CopyPageSetDTO;
+import com.cmsr.onebase.module.app.core.dto.resource.CreatePageSetDTO;
+import com.cmsr.onebase.module.app.core.enums.resource.AppResourceErrorCodeConstants;
+import com.cmsr.onebase.module.app.core.enums.resource.PageEnum;
+import com.cmsr.onebase.module.app.core.enums.resource.PageTypeSetEnum;
 import com.cmsr.onebase.module.app.core.provider.resource.PageSetServiceProvider;
 import com.cmsr.onebase.module.app.core.vo.resource.*;
+import com.cmsr.onebase.module.screen.api.DashboardProjectApi;
+import com.cmsr.onebase.module.screen.api.dto.DashboardProjectDTO;
+import com.cmsr.onebase.module.screen.api.enums.DashboardCreateTypeSetEnum;
+import jakarta.annotation.Resource;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -30,6 +34,7 @@ import org.springframework.validation.annotation.Validated;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Setter
@@ -55,6 +60,9 @@ public class PageSetServiceImpl implements PageSetService {
 
     @Autowired
     private AppMenuRepository appMenuRepository;
+
+    @Resource
+    private DashboardProjectApi dashboardProjectApi;
 
     @Override
     public Long getPageSetIdByMenuId(Long menuId) {
@@ -82,6 +90,35 @@ public class PageSetServiceImpl implements PageSetService {
         if (appMenuDO == null) {
             throw ServiceExceptionUtil.exception(AppResourceErrorCodeConstants.APP_RESOURCE_MENU_NOT_EXIST);
         }
+
+        // 创建数据大屏页面逻辑
+        if (PageTypeSetEnum.isDashboardType(createPageSetDTO.getPageSetType())) {
+            //根据数据大屏的创建类型创建数据大屏页面
+            if (Objects.equals(createPageSetDTO.getCreateDashboardType(), DashboardCreateTypeSetEnum.DASHBOARD_LINK.getCode())){
+                //1.1 如果是绑定现有大屏，则查询数据大屏信息，如不存在则报错
+                List<DashboardProjectDTO> dashboardList = dashboardProjectApi.getDashboard(createPageSetDTO.getDashboardId());
+                if (dashboardList.isEmpty()){
+                    throw ServiceExceptionUtil.exception(AppResourceErrorCodeConstants.DASHBOARD_NOT_EXIST);
+                }
+            } else if (Objects.equals(createPageSetDTO.getCreateDashboardType(), DashboardCreateTypeSetEnum.DASHBOARD_TEMPLATE.getCode())){
+                //1.2 从模板创建数据大屏
+                Long dashboardId = dashboardProjectApi.createDashboardByTemplate(createPageSetDTO.getDashboardId());
+                if (dashboardId == null){
+                    throw ServiceExceptionUtil.exception(AppResourceErrorCodeConstants.DASHBOARD_TEMPLATE_NOT_EXIST);
+                }
+                createPageSetDTO.setDashboardId(dashboardId);
+            } else {
+                //1.3 从空白页创建数据大屏
+                DashboardProjectDTO goViewProjectDTO = new DashboardProjectDTO();
+
+                goViewProjectDTO.setProjectName("新大屏");
+                goViewProjectDTO.setState(-1);
+                goViewProjectDTO.setAppId(applicationId);
+                Long dashboardId = dashboardProjectApi.createDashboard(goViewProjectDTO);
+                createPageSetDTO.setDashboardId(dashboardId);
+            }
+        }
+
         String menuUuid = appMenuDO.getMenuUuid();
         //
         AppResourcePagesetDO pageSetDO = BeanUtils.toBean(createPageSetDTO, AppResourcePagesetDO.class);
@@ -90,6 +127,7 @@ public class PageSetServiceImpl implements PageSetService {
         pageSetDO.setPageSetUuid(UuidUtils.getUuid());
         pageSetDO.setPageSetCode(UUID.randomUUID().toString());
         pageSetDO.setPageSetType(createPageSetDTO.getPageSetType());
+        pageSetDO.setDashboardId(createPageSetDTO.getDashboardId());
         pageSetRepository.save(pageSetDO);
 
         /**
@@ -101,6 +139,10 @@ public class PageSetServiceImpl implements PageSetService {
              */
             workBenchPageSetService.initWorkbenchPage(pageSetDO);
             return pageSetDO.getPageSetCode();
+        }
+
+        if (PageTypeSetEnum.isDashboardType(createPageSetDTO.getPageSetType())){
+            return String.valueOf(pageSetDO.getDashboardId());
         }
 
         // 创建空的表单设计页面和列表设计页面
@@ -176,10 +218,14 @@ public class PageSetServiceImpl implements PageSetService {
 
     @Override
     public String copyPageSet(CopyPageSetDTO copyPageSetDTO) {
-        Long oldMenuId = copyPageSetDTO.getMenuId();
-        Long newMenuId = copyPageSetDTO.getNewMenuId();
-        AppMenuDO oldMenuDO = appMenuRepository.getById(oldMenuId);
-        AppMenuDO newMenuDO = appMenuRepository.getById(newMenuId);
+        AppMenuDO oldMenuDO = copyPageSetDTO.getMenuDO();
+        AppMenuDO newMenuDO = copyPageSetDTO.getNewMenuDO();
+        if (oldMenuDO == null || newMenuDO == null) {
+            Long oldMenuId = copyPageSetDTO.getMenuId();
+            Long newMenuId = copyPageSetDTO.getNewMenuId();
+            oldMenuDO = appMenuRepository.getById(oldMenuId);
+            newMenuDO = appMenuRepository.getById(newMenuId);
+        }
         Long applicationId = oldMenuDO.getApplicationId();
         AppResourcePagesetDO oldPageSetDO = pageSetRepository.findPageSetByAppIdAndMenuUuid(applicationId, oldMenuDO.getMenuUuid());
         if (oldPageSetDO == null) {
@@ -194,30 +240,24 @@ public class PageSetServiceImpl implements PageSetService {
         pageSetRepository.save(newPageSetDO);
 
         // 复制页面其余内容
-        List<Long> pageIdList = pageRepository.findIdsByAppIdAndPageSetUuid(applicationId, oldPageSetDO.getPageSetUuid());
-        if (CollectionUtils.isEmpty(pageIdList)) {
+        List<AppResourcePageDO> oldPageList = pageRepository.findByAppIdAndPageSetUuid(applicationId, oldPageSetDO.getPageSetUuid());
+        if (CollectionUtils.isEmpty(oldPageList)) {
             return newPageSetDO.getPageSetCode();
         }
-        for (Long pageId : pageIdList) {
-            AppResourcePageDO oldPageDO = pageRepository.getById(pageId);
-            if (oldPageDO == null) {
-                throw ServiceExceptionUtil.exception(AppResourceErrorCodeConstants.PAGE_NOT_EXIST);
-            }
+        for (AppResourcePageDO oldPageDO : oldPageList) {
             AppResourcePageDO newPageDO = BeanUtils.toBean(oldPageDO, AppResourcePageDO.class);
             newPageDO.setId(null);
-            newPageDO.setApplicationId(applicationId);
             newPageDO.setPageUuid(UuidUtils.getUuid());
             newPageDO.setPageSetUuid(newPageSetDO.getPageSetUuid());
             pageRepository.save(newPageDO);
 
-            List<AppResourceComponentDO> componentDOs = componentRepository.findByAppIdAndPageUuid(applicationId, oldPageDO.getPageUuid());
-            if (CollectionUtils.isEmpty(componentDOs)) {
+            List<AppResourceComponentDO> oldComponentList = componentRepository.findByAppIdAndPageUuid(applicationId, oldPageDO.getPageUuid());
+            if (CollectionUtils.isEmpty(oldComponentList)) {
                 continue;
             }
-            for (AppResourceComponentDO componentDO : componentDOs) {
-                AppResourceComponentDO newComponentDO = BeanUtils.toBean(componentDO, AppResourceComponentDO.class);
+            for (AppResourceComponentDO oldComponentDO : oldComponentList) {
+                AppResourceComponentDO newComponentDO = BeanUtils.toBean(oldComponentDO, AppResourceComponentDO.class);
                 newComponentDO.setId(null);
-                newComponentDO.setApplicationId(applicationId);
                 newComponentDO.setComponentUuid(UuidUtils.getUuid());
                 newComponentDO.setPageUuid(newPageDO.getPageUuid());
                 componentRepository.save(newComponentDO);

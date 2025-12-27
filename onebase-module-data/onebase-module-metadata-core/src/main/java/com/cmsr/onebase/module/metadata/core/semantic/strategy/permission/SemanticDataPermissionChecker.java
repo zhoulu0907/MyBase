@@ -87,7 +87,7 @@ public class SemanticDataPermissionChecker implements SemanticRuntimePermissionC
             String tableName = recordDTO.getEntitySchema().getTableName();
             String pkField = getPrimaryKeyFieldName(recordDTO.getEntitySchema().getFields());
             Object idVal = recordDTO.getEntityValue().getId();
-            Row r = dynamicMetadataRepository.selectMainById(tableName, pkField, idVal, true);
+            Row r = dynamicMetadataRepository.selectMainById(tableName, pkField, idVal, true, recordDTO.getEntitySchema().getFields());
             dataRow = (r == null) ? new LinkedHashMap<>() : buildDataRowFromRow(r, recordDTO.getEntitySchema().getFields());
         }
         List<SemanticFieldSchemaDTO> fields = recordDTO.getEntitySchema().getFields();

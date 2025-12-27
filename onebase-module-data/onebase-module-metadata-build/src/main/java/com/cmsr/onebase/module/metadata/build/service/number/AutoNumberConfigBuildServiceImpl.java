@@ -13,6 +13,7 @@ import com.cmsr.onebase.module.metadata.core.dal.database.MetadataAutoNumberRule
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataAutoNumberStateRepository;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataAutoNumberResetLogRepository;
 import com.cmsr.onebase.module.metadata.core.enums.AutoNumberItemTypeEnum;
+import com.cmsr.onebase.module.metadata.core.util.MetadataIdUuidConverter;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -44,6 +45,9 @@ public class AutoNumberConfigBuildServiceImpl implements AutoNumberConfigBuildSe
 
     @Resource
     private MetadataAutoNumberResetLogRepository resetLogRepository;
+
+    @Resource
+    private MetadataIdUuidConverter idUuidConverter;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -196,7 +200,13 @@ public class AutoNumberConfigBuildServiceImpl implements AutoNumberConfigBuildSe
             } else if (AutoNumberItemTypeEnum.DATE.getCode().equals(rule.getItemType())) {
                 ruleItem.setFormat(rule.getFormat());
             } else if (AutoNumberItemTypeEnum.FIELD_REF.getCode().equals(rule.getItemType())) {
-                ruleItem.setRefFieldUuid(rule.getRefFieldUuid());
+                // FIELD_REF类型兼容处理：尝试从format字段转换refFieldUuid
+                String refFieldUuid = resolveFieldRefUuid(rule);
+                if (refFieldUuid == null || refFieldUuid.trim().isEmpty()) {
+                    throw new ServiceException(GlobalErrorCodeConstants.BAD_REQUEST.getCode(),
+                            "FIELD_REF类型规则项必须指定引用字段UUID");
+                }
+                ruleItem.setRefFieldUuid(refFieldUuid);
             }
             
             ruleItemRepository.save(ruleItem);
@@ -308,5 +318,39 @@ public class AutoNumberConfigBuildServiceImpl implements AutoNumberConfigBuildSe
             throw new ServiceException(GlobalErrorCodeConstants.BAD_REQUEST.getCode(), 
                     "规则项的排序序号不能重复");
         }
+    }
+
+    /**
+     * 解析FIELD_REF类型规则项的引用字段UUID
+     * <p>
+     * 兼容处理逻辑：
+     * 1. 如果 refFieldUuid 不为空，直接返回
+     * 2. 如果 refFieldUuid 为空但 format 有值，尝试将 format 作为字段标识符（可能是ID或UUID）转换为UUID
+     * 3. 否则返回 null
+     *
+     * @param ruleReq 规则项请求VO
+     * @return 解析后的字段UUID，如果无法解析则返回null
+     */
+    private String resolveFieldRefUuid(AutoNumberRuleVO ruleReq) {
+        // 1. 优先使用 refFieldUuid
+        if (ruleReq.getRefFieldUuid() != null && !ruleReq.getRefFieldUuid().trim().isEmpty()) {
+            return ruleReq.getRefFieldUuid();
+        }
+
+        // 2. 尝试从 format 字段获取并转换（兼容前端将字段ID放在format的情况）
+        if (ruleReq.getFormat() != null && !ruleReq.getFormat().trim().isEmpty()) {
+            try {
+                String resolvedUuid = idUuidConverter.toFieldUuid(ruleReq.getFormat());
+                log.info("FIELD_REF规则项兼容处理：从 format={} 转换得到 refFieldUuid={}",
+                        ruleReq.getFormat(), resolvedUuid);
+                return resolvedUuid;
+            } catch (Exception e) {
+                log.warn("FIELD_REF规则项转换失败：无法将 format={} 转换为字段UUID，错误: {}",
+                        ruleReq.getFormat(), e.getMessage());
+            }
+        }
+
+        // 3. 无法解析
+        return null;
     }
 }

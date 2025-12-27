@@ -7,8 +7,8 @@ import com.cmsr.onebase.module.app.core.dal.database.resource.AppComponentReposi
 import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourceComponentDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePageDO;
-import com.cmsr.onebase.module.app.core.dto.appresource.ComponentDTO;
-import com.cmsr.onebase.module.app.core.enums.appresource.AppResourceErrorCodeConstants;
+import com.cmsr.onebase.module.app.core.dto.resource.ComponentDTO;
+import com.cmsr.onebase.module.app.core.enums.resource.AppResourceErrorCodeConstants;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

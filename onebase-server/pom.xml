@@ -68,6 +68,11 @@
         </dependency>
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-dashboard-build</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-module-metadata-build</artifactId>
             <version>${revision}</version>
             <exclusions>

@@ -13,8 +13,8 @@ spring:
   servlet:
     # 文件上传相关配置项
     multipart:
-      max-file-size: 16MB # 单个文件大小
-      max-request-size: 32MB # 设置总上传的文件大小
+      max-file-size: 32MB # 单个文件大小
+      max-request-size: 64MB # 设置总上传的文件大小
 
   # Jackson 配置项
   jackson:
@@ -79,7 +79,7 @@ spring:
         core-size: 10
         max-size: 30
         queue-capacity: 10
-        keep-alive: 300
+        keep-alive: 30s
         thread-name-prefix: onebase-executor-
 
 --- #################### 验证码相关配置 ####################

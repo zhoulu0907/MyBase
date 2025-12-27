@@ -13,6 +13,7 @@ import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.dal.redis.RedisKeyConstants;
 import com.cmsr.onebase.module.system.enums.corp.CorpConstant;
+import com.cmsr.onebase.module.system.enums.dept.DeptCodeEnum;
 import com.cmsr.onebase.module.system.enums.dept.DeptTypeEnum;
 import com.cmsr.onebase.module.system.enums.dept.IdTypeEnum;
 import com.cmsr.onebase.module.system.service.permission.PermissionService;
@@ -23,8 +24,6 @@ import com.cmsr.onebase.module.system.vo.user.UserSimpleRespVO;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.DataRow;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -125,7 +124,7 @@ public class DeptServiceImpl implements DeptService {
             throw exception(DEPT_EXITS_CHILDREN);
         }
         // 如果一个部门有用户，则不能删除
-        List<AdminUserDO> userListByDeptIds = userService.getUserListByDeptIds(Collections.singleton(id));
+        List<AdminUserDO> userListByDeptIds = userService.getUserListByDeptIds(Collections.singleton(id),null);
         if (CollectionUtils.isNotEmpty(userListByDeptIds)) {
             throw exception(DEPT_DEL_FAILD_EXISTS_USERS);
         }
@@ -372,6 +371,7 @@ public class DeptServiceImpl implements DeptService {
 
     @Override
     public DeptAndUsersRespVO getDeptAndUsers(DeptAndUsersReqVO reqVO) {
+        Integer userType = reqVO.getUserType();
         DeptAndUsersRespVO respVO = new DeptAndUsersRespVO();
 
         // 判断是否有搜索关键词
@@ -383,11 +383,18 @@ public class DeptServiceImpl implements DeptService {
             respVO.setDeptInfo(null);
 
             // 按部门名称模糊搜索部门
-            List<DeptDO> matchedDepts = deptDataRepository.findAllByNameAndStatus(reqVO.getKeywords(), null);
+            List<DeptDO> matchedDepts = new ArrayList<>();
+
+            if(null == userType){
+                matchedDepts = deptDataRepository.findAllByNameAndStatus(reqVO.getKeywords(), null);
+            } else if(UserTypeEnum.THIRD.getValue().equals(userType) ) {
+                matchedDepts = deptDataRepository.findDeptListByNameAndDeptType(reqVO.getKeywords(), DeptTypeEnum.THIRD.getCode());
+            }
+
             respVO.setDeptList(BeanUtils.toBean(matchedDepts, DeptRespVO.class));
 
             // 按用户昵称模糊搜索用户
-            List<AdminUserDO> matchedUsers = userService.getUserListByNickname(reqVO.getKeywords());
+            List<AdminUserDO> matchedUsers = userService.getUserListByNickname(reqVO.getKeywords(),userType);
             respVO.setUserList(BeanUtils.toBean(matchedUsers, UserSimpleRespVO.class));
 
         } else if (hasDeptId) {
@@ -401,7 +408,7 @@ public class DeptServiceImpl implements DeptService {
             respVO.setDeptList(BeanUtils.toBean(childDepts, DeptRespVO.class));
 
             // 获取直属用户
-            List<AdminUserDO> directUsers = userService.getUserListByDeptIds(Collections.singletonList(reqVO.getDeptId()));
+            List<AdminUserDO> directUsers = userService.getUserListByDeptIds(Collections.singletonList(reqVO.getDeptId()), userType);
             respVO.setUserList(BeanUtils.toBean(directUsers, UserSimpleRespVO.class));
 
         } else {
@@ -409,11 +416,17 @@ public class DeptServiceImpl implements DeptService {
             respVO.setDeptInfo(null);
 
             // 获取所有一级部门（parentId = 0）
-            List<DeptDO> rootDepts = deptDataRepository.findAllByParentId(DeptDO.PARENT_ID_ROOT);
+            List<DeptDO> rootDepts =new ArrayList<>();
+            if (null == userType) {
+                rootDepts = deptDataRepository.findAllByParentId(DeptDO.PARENT_ID_ROOT);
+            } else if(UserTypeEnum.THIRD.getValue().equals(userType) ) {
+                rootDepts = deptDataRepository.findDeptListByDeptType(DeptTypeEnum.THIRD.getCode());
+            }
+
             respVO.setDeptList(BeanUtils.toBean(rootDepts, DeptRespVO.class));
 
             // 获取所有没有部门的用户（dept_id = null）
-            List<AdminUserDO> usersWithoutDept = userService.getUserListNoDept();
+            List<AdminUserDO> usersWithoutDept = userService.getUserListNoDept(userType);
             respVO.setUserList(BeanUtils.toBean(usersWithoutDept, UserSimpleRespVO.class));
         }
 
@@ -475,15 +488,32 @@ public class DeptServiceImpl implements DeptService {
     @Override
     public void updateAdminOrDirector(UserAdminOrDirectorUpdateReqVO reqVO) {
         // todo 验证部门是否存在/启用；验证空间/企业是否存在此用户
+        DeptDO updateObj = new DeptDO();
+        updateObj.setId(reqVO.getDeptId());
         if (reqVO.getUpdateType().equals(CorpConstant.LEADER_USER_ID)) {
-            DataRow row = new DataRow();
-            row.put(DeptDO.ADMIN_USER_ID, reqVO.getUserId());
-            deptDataRepository.updateByConfig(row, new DefaultConfigStore().eq(DeptDO.ID, reqVO.getDeptId()));
+            updateObj.setAdminUserId(reqVO.getUserId());
         } else {
-            DataRow row = new DataRow();
-            row.put(DeptDO.LEADER_USER_ID, reqVO.getUserId());
-            deptDataRepository.updateByConfig(row, new DefaultConfigStore().eq(DeptDO.ID, reqVO.getDeptId()));
+            updateObj.setLeaderUserId(reqVO.getUserId());
         }
+        deptDataRepository.update(updateObj);
+    }
+
+
+    @Override
+    public DeptDO findDeptByCodeAndType(DeptSaveReqVO deptRespVO) {
+       return deptDataRepository.findDeptByCodeAndType(deptRespVO);
+    }
+
+    @Override
+    public Long createThirdDefaultDept(DeptSaveReqVO deptRespVO) {
+        DeptDO dept = BeanUtils.toBean(deptRespVO, DeptDO.class);
+        deptDataRepository.insert(dept);
+        return dept.getId();
+    }
+
+    @Override
+    public List<DeptDO> getDefaultThirdDept() {
+        return deptDataRepository.getDefaultThirdDeptByDefaultCode(DeptCodeEnum.DEFAULT_THIRD_DEPT.getCode(), CommonStatusEnum.ENABLE.getStatus());
     }
 
 }

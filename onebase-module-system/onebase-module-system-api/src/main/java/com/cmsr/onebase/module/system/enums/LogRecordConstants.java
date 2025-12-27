@@ -11,6 +11,7 @@ public interface LogRecordConstants {
     // ======================= SYSTEM_USER 用户 =======================
 
     String SYSTEM_USER_TYPE = "SYSTEM 用户";
+    String SYSTEM_USER_TYPE_THRID = "三方用户";
     String SYSTEM_USER_CREATE_SUB_TYPE = "创建用户";
     String SYSTEM_USER_CREATE_SUCCESS = LOGIN_USER + "创建了用户【{{#user.nickname}}】";
     String SYSTEM_USER_UPDATE_SUB_TYPE = "更新用户";
@@ -72,15 +73,15 @@ public interface LogRecordConstants {
     String SYSTEM_LICENSE_IMPORT_SUB_TYPE = "导入凭证";
     String SYSTEM_LICENSE_IMPORT_SUCCESS = LOGIN_USER + "导入凭证【{{#licenseId}}】";
 
-    // ======================= TENANT 租户 =======================
+    // ======================= TENANT 空间 =======================
 
-    String SYSTEM_TENANT_TYPE = "SYSTEM 租户";
-    String SYSTEM_TENANT_CREATE_SUB_TYPE = "创建租户";
-    String SYSTEM_TENANT_CREATE_SUCCESS = LOGIN_USER +"创建了租户【{{#tenant.name}}】";
-    String SYSTEM_TENANT_UPDATE_SUB_TYPE = "更新租户";
-    String SYSTEM_TENANT_UPDATE_SUCCESS = LOGIN_USER +"更新了租户【{{#tenant.name}}】";
-    String SYSTEM_TENANT_DELETE_SUB_TYPE = "删除租户";
-    String SYSTEM_TENANT_DELETE_SUCCESS = LOGIN_USER +"删除了租户【{{#tenant.name}}】";
+    String SYSTEM_TENANT_TYPE = "SYSTEM 空间";
+    String SYSTEM_TENANT_CREATE_SUB_TYPE = "创建空间";
+    String SYSTEM_TENANT_CREATE_SUCCESS = LOGIN_USER +"创建了空间【{{#tenant.name}}】";
+    String SYSTEM_TENANT_UPDATE_SUB_TYPE = "更新空间";
+    String SYSTEM_TENANT_UPDATE_SUCCESS = LOGIN_USER +"更新了空间【{{#tenant.name}}】";
+    String SYSTEM_TENANT_DELETE_SUB_TYPE = "删除空间";
+    String SYSTEM_TENANT_DELETE_SUCCESS = LOGIN_USER +"删除了空间【{{#tenant.name}}】";
 
     // ======================= OAUTH 授权=======================
 

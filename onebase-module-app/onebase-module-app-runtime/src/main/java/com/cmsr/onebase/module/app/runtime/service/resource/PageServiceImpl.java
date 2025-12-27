@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.app.runtime.service.resource;
 
-import com.cmsr.onebase.module.app.core.dto.appresource.PageDTO;
-import com.cmsr.onebase.module.app.core.dto.appresource.PageRespDTO;
+import com.cmsr.onebase.module.app.core.dto.resource.PageDTO;
+import com.cmsr.onebase.module.app.core.dto.resource.PageRespDTO;
 import com.cmsr.onebase.module.app.core.provider.resource.PageServiceProvider;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
@@ -20,8 +20,8 @@ public class PageServiceImpl implements PageService {
     }
 
     @Override
-    public List<PageDTO> getFormPageListByAppId(Long appId) {
-        return pageServiceProvider.getFormPageListByAppId(appId);
+    public List<PageDTO> getPageListByAppId(Long appId) {
+        return pageServiceProvider.getPageListByAppId(appId);
 
     }
 

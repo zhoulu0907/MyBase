@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.flow.context;
 
-import lombok.Getter;
-import lombok.Setter;
+import com.cmsr.onebase.module.flow.context.table.RowData;
+import com.cmsr.onebase.module.flow.context.table.TableData;
 
 import java.io.Serializable;
 import java.util.Collections;
@@ -15,17 +15,17 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class VariableContext implements Serializable {
 
-    private Map<String, Object> inputParams = Collections.emptyMap();
+    private RowData inputParams = new RowData();
 
     private Map<String, Object> nodeVariables = new ConcurrentHashMap<>();
 
     private Map<String, Object> outputParams = Collections.emptyMap();
 
-    @Getter
-    @Setter
-    private Map<String, Object> inputFields = Collections.emptyMap();
+    public RowData getInputParams() {
+        return inputParams;
+    }
 
-    public void setInputParams(Map<String, Object> inputParams) {
+    public void setInputParams(RowData inputParams) {
         if (inputParams != null) {
             this.inputParams = inputParams;
         }
