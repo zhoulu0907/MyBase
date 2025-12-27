@@ -1,11 +1,12 @@
 package com.cmsr.onebase.module.dashboard.build.service.impl;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.dashboard.build.dal.dataobject.DashboardTemplateDO;
 import com.cmsr.onebase.module.dashboard.build.dal.mapper.DashboardTemplateMapper;
-import com.cmsr.onebase.module.dashboard.build.service.IDashboardTemplateService;
+import com.cmsr.onebase.module.dashboard.build.service.DashboardTemplateService;
 import com.cmsr.onebase.module.dashboard.build.vo.template.DashboardTemplatePageReqVO;
 import com.cmsr.onebase.module.dashboard.build.vo.template.DashboardTemplateSaveReqVO;
 import com.mybatisflex.core.paginate.Page;
@@ -29,7 +30,7 @@ import static com.cmsr.onebase.module.dashboard.build.enums.ErrorCodeConstants.T
  */
 @Slf4j
 @Service
-public class DashboardTemplateServiceImpl extends ServiceImpl<DashboardTemplateMapper, DashboardTemplateDO> implements IDashboardTemplateService {
+public class DashboardTemplateServiceImpl extends ServiceImpl<DashboardTemplateMapper, DashboardTemplateDO> implements DashboardTemplateService {
 
     @Resource
     private DashboardTemplateMapper dashboardTemplateMapper;
@@ -37,6 +38,11 @@ public class DashboardTemplateServiceImpl extends ServiceImpl<DashboardTemplateM
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long createDashboardTemplate(DashboardTemplateSaveReqVO saveReqVO) {
+
+        if (saveReqVO.getHot() == null) {
+            saveReqVO.setHot(0);
+        }
+
         SecurityFrameworkUtils.getLoginUserId();
         DashboardTemplateDO templateDO = BeanUtils.toBean(saveReqVO, DashboardTemplateDO.class);
         templateDO.setId(null);
@@ -88,11 +94,12 @@ public class DashboardTemplateServiceImpl extends ServiceImpl<DashboardTemplateM
 
     @Override
     public PageResult<DashboardTemplateDO> getDashboardTemplatePage(DashboardTemplatePageReqVO pageReqVO) {
+
         QueryWrapper queryWrapper = QueryWrapper.create()
                 .eq(DashboardTemplateDO::getTemplateType, pageReqVO.getTemplateType(), StringUtils.isNotBlank(pageReqVO.getTemplateType()))
                 .like(DashboardTemplateDO::getTemplateName, pageReqVO.getTemplateName(), StringUtils.isNotBlank(pageReqVO.getTemplateName()))
                 .eq(DashboardTemplateDO::getHot, pageReqVO.getHot(), pageReqVO.getHot() != null)
-                .eq(DashboardTemplateDO::getAppId, pageReqVO.getAppId(), pageReqVO.getAppId() != null)
+                .eq(DashboardTemplateDO::getAppId, ApplicationManager.getApplicationId())
                 .orderBy(DashboardTemplateDO::getCreateTime, false);
 
         Page<DashboardTemplateDO> page = dashboardTemplateMapper.paginate(pageReqVO.getPageNo(), pageReqVO.getPageSize(), queryWrapper);

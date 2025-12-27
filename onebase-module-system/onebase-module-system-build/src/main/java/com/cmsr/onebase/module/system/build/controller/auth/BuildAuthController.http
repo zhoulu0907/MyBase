@@ -9,7 +9,9 @@ Content-Type: application/json
 X-Tenant-Id: {{adminTenantId}}
 
 {"username":"admin","password":"e1845c18b2711120d72bbfa33d79b794fe245df27a00c96487b2fb2452d1b01b815a27701a446e7a7c1e2d222972b6315174f83dd465254e467b71a84f7827bb272d10994a7586862dd2f2ee778587de97a01b2a7306db618bbf7607e32ca59f3808611ca97136cb","captchaVerification":"n89lvlHjSOsQQ5kGXjNNtdnkfPnK2Y3YbPwvAEXoVyL0TqzrDumdg8MONVs+z5VaSPf4ni6QKFhhx0GcaXBF4pWVx9hsSsBZ8mysqU8u45E=",
- "deviceId":666}
+ "deviceId":666
+  , "loginPlatform": "pc"
+}
 
 > {%
     // 登录成功后自动更新token到环境变量
@@ -25,19 +27,13 @@ X-Tenant-Id: {{adminTenantId}}
 ### 请求 /login 接口 => 成功
 POST {{baseUrl}}/system/auth/tenant-login
 Content-Type: application/json
-#X-Tenant-Id: 153539686553452544
-X-Tenant-Id: 1
+X-Tenant-Id: 158088726951460864
 tag: {{tag}}
 
-{"username":"admin","password":"admin123","captchaVerification":"n89lvlHjSOsQQ5kGXjNNtdnkfPnK2Y3YbPwvAEXoVyL0TqzrDumdg8MONVs+z5VaSPf4ni6QKFhhx0GcaXBF4pWVx9hsSsBZ8mysqU8u45E=",
+{"username":"gaoguoqing","password":"ae61b79d21e870717365d944806e340e36f8480f5ac095c7d3c2afe67ad1dc4fa420b316383f3c8cd43e94a47fc7c752fd51e44b4637b9ce658653761fbc9335627562b18b4cbe89dc13d9b005ca660f87ebc9e8ff6dcd12682fea75ed38e6a58dadd7e95f830dc78580ca48be544e","captchaVerification":"n89lvlHjSOsQQ5kGXjNNtdnkfPnK2Y3YbPwvAEXoVyL0TqzrDumdg8MONVs+z5VaSPf4ni6QKFhhx0GcaXBF4pWVx9hsSsBZ8mysqU8u45E=",
   "deviceId":666}
 
-#{
-#  "username": "admin",
-#  "password": "AdminChina2025!",
-#  "captchaVerification": "UiXVbPBz2XVbr7pdOfIuR78qXvgiWZAg9UDiH27YsSrkyZja+6iDVorl9d2otg0yGqcH5k8a1VJopEwvzobmFdGhkjSIBFjbyaLGKYsoXbY=",
-#  "deviceId": "50dddd1e2dcbb0f792b0fe3e9028890b"
-#}
+
 
 > {%
     // 登录成功后自动更新token到环境变量

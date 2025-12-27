@@ -4,7 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import com.cmsr.onebase.module.dashboard.build.dal.dataobject.DashboardTemplateDO;
 import com.cmsr.onebase.module.dashboard.build.model.DashboardProject;
 import com.cmsr.onebase.module.dashboard.build.model.DashboardProjectData;
-import com.cmsr.onebase.module.dashboard.build.service.IDashboardTemplateService;
+import com.cmsr.onebase.module.dashboard.build.service.DashboardTemplateService;
 import com.cmsr.onebase.module.dashboard.build.service.DashboardProjectDataService;
 import com.cmsr.onebase.module.dashboard.build.service.DashboardProjectService;
 import com.cmsr.onebase.module.screen.api.DashboardProjectApi;
@@ -26,7 +26,7 @@ public class DashboardProjectApiImpl implements DashboardProjectApi {
     private DashboardProjectDataService dashboardProjectDataService;
 
     @Resource
-    private IDashboardTemplateService dashboardTemplateService;
+    private DashboardTemplateService dashboardTemplateService;
 
 
     @Override

@@ -8,7 +8,7 @@ import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.dashboard.build.dal.dataobject.DashboardTemplateDO;
 import com.cmsr.onebase.module.dashboard.build.model.DashboardProject;
 import com.cmsr.onebase.module.dashboard.build.model.DashboardProjectData;
-import com.cmsr.onebase.module.dashboard.build.service.IDashboardTemplateService;
+import com.cmsr.onebase.module.dashboard.build.service.DashboardTemplateService;
 import com.cmsr.onebase.module.dashboard.build.service.DashboardProjectDataService;
 import com.cmsr.onebase.module.dashboard.build.service.DashboardProjectService;
 import com.cmsr.onebase.module.dashboard.build.vo.template.DashboardTemplatePageReqVO;
@@ -41,7 +41,7 @@ import static com.cmsr.onebase.module.dashboard.build.enums.TemplateTypeEnum.SYS
 public class DashboardTemplateController {
 
     @Resource
-    private IDashboardTemplateService dashboardTemplateService;
+    private DashboardTemplateService dashboardTemplateService;
 
     @Resource
     private DashboardProjectDataService dashboardProjectDataService;

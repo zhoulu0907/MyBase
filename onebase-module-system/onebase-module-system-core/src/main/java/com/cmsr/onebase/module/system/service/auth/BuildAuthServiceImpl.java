@@ -219,9 +219,10 @@ public class BuildAuthServiceImpl implements BuildAuthService {
         // 使用账号密码，进行登录
         AdminUserDO user = authenticate(reqVO.getUsername(), reqVO.getPassword());
 
-        AuthLoginRespVO authLoginRespVO = createTokenAfterLoginSuccess(user.getUserType(), user.getId(), reqVO.getUsername(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_USERNAME);
+        AuthLoginRespVO authLoginRespVO = createTokenAfterLoginSuccess(user.getUserType(), user.getId(), reqVO.getUsername(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_USERNAME, reqVO.getLoginPlatform());
         // 设置是否管理员
         authLoginRespVO.setAdminFlag(findAdminFlag(RoleCodeEnum.TENANT_ADMIN.getCode(), user.getId()));
+        authLoginRespVO.setLoginPlatform(reqVO.getLoginPlatform());
         LogRecordContext.putVariable("user", user);
         return authLoginRespVO;
     }
@@ -257,7 +258,7 @@ public class BuildAuthServiceImpl implements BuildAuthService {
         // 验证企业状态是否异常
         checkCropStatus(user.getCorpId());
 
-        AuthLoginRespVO authLoginRespVO = createCorpAfterLoginSuccess(user.getUserType(), user.getCorpId(), user.getId(), reqVO.getMobile(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_MOBILE);
+        AuthLoginRespVO authLoginRespVO = createCorpAfterLoginSuccess(user.getUserType(), user.getCorpId(), user.getId(), reqVO.getMobile(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_MOBILE, reqVO.getLoginPlatform());
         // 设置是否管理员
         authLoginRespVO.setAdminFlag(findAdminFlag(RoleCodeEnum.CORP_ADMIN.getCode(), user.getId()));
         // 回显当前登录用户的企业id
@@ -317,7 +318,7 @@ public class BuildAuthServiceImpl implements BuildAuthService {
             throw exception(USER_NOT_EXISTS);
         }
         // 创建 Token 令牌，记录登录日志
-        return createTokenAfterLoginSuccess(user.getUserType(), user.getId(), reqVO.getMobile(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_MOBILE);
+        return createTokenAfterLoginSuccess(user.getUserType(), user.getId(), reqVO.getMobile(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_MOBILE,null);
     }
 
     private void createLoginLog(Long userId, String username,
@@ -370,18 +371,18 @@ public class BuildAuthServiceImpl implements BuildAuthService {
         return captchaService.verification(captchaVO);
     }
 
-    private AuthLoginRespVO createTokenAfterLoginSuccess(Integer userType, Long userId, String username, String deviceId, LoginLogTypeEnum logType) {
-        return createCorpAfterLoginSuccess(userType, null, userId, username, deviceId, logType);
+    private AuthLoginRespVO createTokenAfterLoginSuccess(Integer userType, Long userId, String username, String deviceId, LoginLogTypeEnum logType,String loginPlatform) {
+        return createCorpAfterLoginSuccess(userType, null, userId, username, deviceId, logType, loginPlatform);
     }
 
-    private AuthLoginRespVO createCorpAfterLoginSuccess(Integer userType, Long corpId, Long userId, String username, String deviceId, LoginLogTypeEnum logType) {
+    private AuthLoginRespVO createCorpAfterLoginSuccess(Integer userType, Long corpId, Long userId, String username, String deviceId, LoginLogTypeEnum logType,String loginPlatform) {
         // 插入登陆日志
         createLoginLog(userId, username, logType, LoginResultEnum.SUCCESS);
         // 创建访问令牌
         OAuth2AccessTokenDO accessTokenDO = oauth2TokenService.createAccessTokenWithMode(
                 RunModeEnum.BUILD.getValue(), corpId, null,
                 userId, userType,
-                OAuth2ClientConstants.CLIENT_ID_DEFAULT, null);
+                OAuth2ClientConstants.CLIENT_ID_DEFAULT, null, loginPlatform);
 
         // 检查并限制设备数，踢出超限的设备
         List<String> removedTokens = securityConfigApi.checkAndLimitDevices(userId, deviceId, accessTokenDO.getAccessToken()).getData();
@@ -466,7 +467,7 @@ public class BuildAuthServiceImpl implements BuildAuthService {
         Long userId = userService.registerUser(registerReqVO);
 
         // 3. 创建 Token 令牌，记录登录日志
-        return createTokenAfterLoginSuccess(null, userId, registerReqVO.getUsername(), registerReqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_USERNAME);
+        return createTokenAfterLoginSuccess(null, userId, registerReqVO.getUsername(), registerReqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_USERNAME,null);
     }
 
     @VisibleForTesting

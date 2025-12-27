@@ -96,4 +96,9 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
 
+### 11. 从模板创建大屏
+POST {{baseUrl}}/dashboard/create-dashboard-by-template?templateId=198517700897931264
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
 

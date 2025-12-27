@@ -4,6 +4,7 @@ import cn.hutool.core.date.DateUtil;
 import com.cmsr.onebase.framework.common.annotaion.ApiSignIgnore;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.dashboard.build.common.base.BaseController;
 import com.cmsr.onebase.module.dashboard.build.common.config.V2Config;
@@ -16,6 +17,7 @@ import com.cmsr.onebase.module.dashboard.build.model.vo.DashboardProjectVO;
 import com.cmsr.onebase.module.dashboard.build.service.DashboardFileService;
 import com.cmsr.onebase.module.dashboard.build.service.DashboardProjectDataService;
 import com.cmsr.onebase.module.dashboard.build.service.DashboardProjectService;
+import com.cmsr.onebase.module.dashboard.build.service.impl.DashboardProjectServiceImpl;
 import com.cmsr.onebase.module.dashboard.build.util.SnowflakeIdWorker;
 import com.cmsr.onebase.module.infra.api.file.FileApi;
 import com.cmsr.onebase.module.infra.api.file.dto.FileCreateReqDTO;
@@ -68,7 +70,7 @@ public class DashboardProjectController extends BaseController {
         }
         Page<DashboardProject> page = new Page<>(tablepar.getPage(), tablepar.getLimit());
         QueryWrapper queryWrapper = new QueryWrapper()
-                .eq(DashboardProject::getAppId, tablepar.getAppId(), tablepar.getAppId() != null)
+                .eq(DashboardProject::getAppId, ApplicationManager.getApplicationId())
                 .like(DashboardProject::getProjectName, tablepar.getSearchText(), StringUtils.isNotBlank(tablepar.getSearchText()))
                 .orderBy(DashboardProject::getCreateTime, false);
 
@@ -265,5 +267,20 @@ public class DashboardProjectController extends BaseController {
         return result;
     }
 
+
+    /**
+     * 从模板创建大屏
+     *
+     * @param templateId 从模板创建大屏
+     * @return
+     * @throws Exception
+     */
+    @PostMapping("/create-dashboard-by-template")
+    @ApiOperation("从模板创建大屏")
+    @ApiSignIgnore
+    public CommonResult<Long> createDashboardByTemplate(@RequestParam("templateId") Long templateId) throws IOException {
+
+        return CommonResult.success(dashboardProjectService.createDashboardByTemplate(templateId));
+    }
 
 }
