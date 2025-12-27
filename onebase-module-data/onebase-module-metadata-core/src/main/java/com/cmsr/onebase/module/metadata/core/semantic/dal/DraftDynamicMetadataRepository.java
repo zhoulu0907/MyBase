@@ -224,6 +224,26 @@ public class DraftDynamicMetadataRepository {
     }
 
     /**
+     * 根据草稿ID删除草稿记录（物理删除）。
+     * 仅删除 draft_status=1 的草稿数据。
+     *
+     * @param tableName  表名
+     * @param primaryKey 主键字段名
+     * @param draftId    草稿ID（主键值）
+     * @return 影响行数
+     */
+    public int deleteByDraftId(String tableName, String primaryKey, Long draftId) {
+        ApplicationDataSourceManager.useBizDatasourceByAppId(ApplicationManager.getApplicationId());
+        try {
+            QueryWrapper qw = QueryWrapper.create().where(new QueryColumn(primaryKey).eq(draftId));
+            qw.and(new QueryColumn(SystemFieldConstants.OPTIONAL.DRAFT_STATUS).eq(1));
+            return Db.deleteByQuery(tableName, qw);
+        } finally {
+            ApplicationDataSourceManager.clear();
+        }
+    }
+
+    /**
      * 按条件查询单条记录。
      * @param tableName 表名
      * @param qw        条件
