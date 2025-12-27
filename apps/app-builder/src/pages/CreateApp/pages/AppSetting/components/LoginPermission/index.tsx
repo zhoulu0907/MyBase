@@ -1,12 +1,9 @@
 //登录设置
+import loginBg from '@/assets/images/login_bg.svg';
+import loginBgMask from '@/assets/images/login_bg_mask.svg';
 import { Button, Card, Radio, Space, Spin, Switch, Typography } from '@arco-design/web-react';
-import { IconCopy, IconRefresh, IconUpload } from '@arco-design/web-react/icon';
-import {
-  copyToClipboard,
-  getRuntimeURL,
-  TokenManager,
-  UploadCommonComponent
-} from '@onebase/common';
+import { IconRefresh, IconUpload } from '@arco-design/web-react/icon';
+import { getRuntimeMobileURL, getRuntimeURL, TokenManager, UploadCommonComponent } from '@onebase/common';
 import {
   loginConfigListByKeyApi,
   updateLoginConfigApi,
@@ -16,9 +13,8 @@ import {
 } from '@onebase/platform-center';
 import { useEffect, useRef, useState } from 'react';
 import { thirdUserConfigKey } from './constant';
+import ExternalLoginLinks from './ExternalLoginLinks';
 import styles from './index.module.less';
-import loginBgMask from '@/assets/images/login_bg_mask.svg';
-import loginBg from '@/assets/images/login_bg.svg';
 import LoginForm from './loginForm';
 
 interface ILoginPermissionProps {
@@ -32,7 +28,8 @@ const LoginPermission: React.FC<ILoginPermissionProps> = ({ appId }) => {
   const tenantId = TokenManager.getTenantInfo()?.tenantId || '';
   const [loginConfigData, setLoginConfigData] = useState<loginPermissionRes[] | null>(null);
   const redirectURL = `${getRuntimeURL()}/#/onebase/runtime/?appId=${appId}&tenantId=${tenantId}`;
-  const href = `${getRuntimeURL()}/#/third/login?redirectURL=${redirectURL}`;
+  const hrefPC = `${getRuntimeURL()}/#/third/login?redirectURL=${redirectURL}`;
+  const hrefMobile = `${getRuntimeMobileURL()}/#/third/login?redirectURL=${redirectURL}`;
 
   const fetchLoginConfig = async () => {
     try {
@@ -94,23 +91,17 @@ const LoginPermission: React.FC<ILoginPermissionProps> = ({ appId }) => {
         {/* 顶部：登录设置开关 + 外部地址链接 */}
         <div className={styles.headerContent}>
           <Space>
+            <Typography.Text bold>登录设置</Typography.Text>
             <Typography.Text>允许外部用户登录</Typography.Text>
             <Switch
+              size="small"
               onChange={(value: boolean) => {
                 handleSwitchChange(thirdUserConfigKey.ENABLE, JSON.stringify(value));
               }}
               checked={canShowURL}
             />
           </Space>
-          {canShowURL && (
-            <div className={styles.linkContent}>
-              <span>本应用外部用户登录/注册地址:</span>
-              <div className={styles.linkText} onClick={() => navigateToRunTime(href)}>
-                {href}
-              </div>
-              <IconCopy onClick={() => copyToClipboard(href)} style={{ fontSize: 16 }} />
-            </div>
-          )}
+          {canShowURL && <ExternalLoginLinks hrefPC={hrefPC} hrefMobile={hrefMobile} onNavigate={navigateToRunTime} />}
         </div>
 
         {/* 中间：宣传区 + 登录预览区 + 右侧配置区 */}
@@ -137,7 +128,9 @@ const LoginPermission: React.FC<ILoginPermissionProps> = ({ appId }) => {
           {/* 右侧：配置区 */}
           <div className={styles.rightContent}>
             <Space>
-              展示图
+              <Typography.Text type="primary" bold style={{ color: '#000000' }}>
+                展示图
+              </Typography.Text>
               <Typography.Text type="secondary">(建议尺寸: 720*900)</Typography.Text>
             </Space>
 
@@ -164,8 +157,8 @@ const LoginPermission: React.FC<ILoginPermissionProps> = ({ appId }) => {
                     type="default"
                     icon={<IconRefresh />}
                     style={{ marginLeft: 8 }}
-                    onClick={()=>{
-                      setImageUrl(loginBgMask)
+                    onClick={() => {
+                      setImageUrl(loginBgMask);
                     }}
                   >
                     重置

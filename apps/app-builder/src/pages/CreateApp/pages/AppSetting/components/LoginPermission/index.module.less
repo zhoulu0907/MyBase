@@ -1,6 +1,12 @@
+@space: 16px;
+
 .loginWrapper {
   background-color: #ffffff;
-  padding: 16px 24px;
+
+  width: 100%;
+  height: 100%;
+  padding: @space;
+  box-sizing: border-box;
 
   .headerContent {
     display: flex;
@@ -11,6 +17,22 @@
     .linkContent {
       display: flex;
       align-items: center;
+      gap: 4px;
+
+      .appLabel {
+        color: #ff8001;
+      }
+
+      .linkLabel {
+        color: #5c636d;
+        margin-right: 16px;
+      }
+
+      .platformLabel {
+        color: #a5a9b2;
+        margin-left: 4px;
+      }
+
       .linkText {
         margin-left: 10px;
         color: #009e9e;
@@ -20,6 +42,32 @@
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+      }
+
+      .copyIcon {
+        font-size: 16px;
+        margin-right: 16px;
+        cursor: pointer;
+        color: #86909c;
+        transition: color 0.2s;
+
+        &:hover {
+          color: #009e9e;
+        }
+      }
+
+      .webLink {
+        display: inline-flex;
+        align-items: center;
+      }
+
+      .mobileLink {
+        display: inline-flex;
+        align-items: center;
+
+        .copyIcon {
+          margin-right: 0;
+        }
       }
     }
   }
@@ -37,6 +85,7 @@
           .loginBg {
             width: 100%;
             height: 100%;
+            max-height: 90vh;
             object-fit: cover;
           }
         }
