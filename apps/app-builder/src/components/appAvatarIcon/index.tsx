@@ -1,14 +1,14 @@
-import { useEffect, useRef, useState } from 'react';
+import checkIcon from '@/assets/images/check_icon.svg';
+import { useAppStore } from '@/store';
 import { Avatar, Form, Input, Message, Popconfirm, Tooltip, type FormInstance } from '@arco-design/web-react';
+import { IconCamera } from '@arco-design/web-react/icon';
+import { updateApplication, type Application, type UpdateApplicationReq } from '@onebase/app';
 import { DynamicIcon } from '@onebase/common';
 import { appIconMap } from '@onebase/ui-kit';
-import { appIcon, appIconColor } from '../CreateApp/const';
-import { IconCamera } from '@arco-design/web-react/icon';
-import checkIcon from '@/assets/images/check_icon.svg';
-import { updateApplication, type Application, type UpdateApplicationReq } from '@onebase/app';
-import { useAppStore } from '@/store';
-import styles from './index.module.less';
 import sample from 'lodash-es/sample';
+import { useEffect, useRef, useState } from 'react';
+import { appIcon, appIconColor } from '../CreateApp/const';
+import styles from './index.module.less';
 
 interface IProps {
   data?: Application;
@@ -34,7 +34,6 @@ const AppAvatarIcon = (props: IProps) => {
 
   useEffect(() => {
     if (data && data?.id) {
-      console.log('data', data);
       setIconName(data.iconName);
       setIconColor(data.iconColor);
       initialRef.current = { iconName: data.iconName, iconColor: data.iconColor };

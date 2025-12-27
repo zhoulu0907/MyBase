@@ -1,20 +1,20 @@
-import { useState, useEffect } from 'react';
-import { Button, Card, Message, Modal, Space, Tag, Tooltip, type FormInstance } from '@arco-design/web-react';
-import Title from '@arco-design/web-react/es/Typography/title';
-import Paragraph from '@arco-design/web-react/es/Typography/paragraph';
-import { IconEdit, IconInfoCircle } from '@arco-design/web-react/icon';
-import checkSVG from '@/assets/images/appBasic/mode_check_icon.svg';
 import dataSVG from '@/assets/images/appBasic/app_data_mode.svg';
-import pageDesignSVG from '@/assets/images/appBasic/page_design.svg';
 import previewSVG from '@/assets/images/appBasic/app_review.svg';
 import internalSVG from '@/assets/images/appBasic/internal_mode.svg';
+import checkSVG from '@/assets/images/appBasic/mode_check_icon.svg';
+import pageDesignSVG from '@/assets/images/appBasic/page_design.svg';
 import saasSVG from '@/assets/images/appBasic/saas_mode.svg';
-import { defaultTheme, ThemeColorMap } from '@/pages/Home/pages/EnterpriseApp/const';
-import { getDatasourceList, updateApplication, type Application, type UpdateApplicationReq } from '@onebase/app';
-import EditAppModal from './components/EditAppModal';
-import { hasPermission, PUBLISH_MODULE, TENANT_MENUS } from '@onebase/common';
 import ThememCard from '@/components/ThemeCard';
 import AppAvatarIcon from '@/components/appAvatarIcon';
+import { defaultTheme, ThemeColorMap } from '@/pages/Home/pages/EnterpriseApp/const';
+import { Button, Card, Message, Modal, Space, Tag, Tooltip, type FormInstance } from '@arco-design/web-react';
+import Paragraph from '@arco-design/web-react/es/Typography/paragraph';
+import Title from '@arco-design/web-react/es/Typography/title';
+import { IconEdit, IconInfoCircle } from '@arco-design/web-react/icon';
+import { getDatasourceList, updateApplication, type Application, type UpdateApplicationReq } from '@onebase/app';
+import { hasPermission, PUBLISH_MODULE, TENANT_MENUS } from '@onebase/common';
+import { useEffect, useState } from 'react';
+import EditAppModal from './components/EditAppModal';
 import styles from './index.module.less';
 
 interface IProps {
@@ -36,7 +36,6 @@ const BasicSetting = (props: IProps) => {
   useEffect(() => {
     if (data && data?.id) {
       getDatasourceDetail();
-      console.log('data', data);
       setThemeColor(data.themeColor);
       setPublishModel(data.publishModel);
     }
