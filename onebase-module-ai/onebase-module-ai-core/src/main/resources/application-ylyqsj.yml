@@ -1,8 +1,8 @@
-#人力资源大屏DSL
+#医疗药企
 ylyqsjDSL: |
   {
     "editCanvasConfig": {
-      "projectName": "医疗药企大数据监管",
+      "projectName": "医疗药企数据大屏",
       "width": 1920,
       "height": 1080,
       "filterShow": false,
