@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Objects;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static com.cmsr.onebase.module.dashboard.build.enums.ErrorCodeConstants.TEMPLATE_CANT_NOT_UPATE_DEL;
 import static com.cmsr.onebase.module.dashboard.build.enums.ErrorCodeConstants.TEMPLATE_NOT_EXISTS;
 
 /**
@@ -91,9 +90,10 @@ public class DashboardTemplateServiceImpl extends ServiceImpl<DashboardTemplateM
         if (templateDO == null) {
             throw exception(TEMPLATE_NOT_EXISTS);
         }
-        if(Objects.equals(templateDO.getTemplateType(), TemplateTypeEnum.SYSTEM_TYPE.getValue())){
-            throw exception(TEMPLATE_CANT_NOT_UPATE_DEL);
-        }
+        // TODO 暂时注掉系统模板不能修改和删除，便于操作
+        // if(Objects.equals(templateDO.getTemplateType(), TemplateTypeEnum.SYSTEM_TYPE.getValue())){
+        //     throw exception(TEMPLATE_CANT_NOT_UPATE_DEL);
+        // }
     }
 
     @Override
