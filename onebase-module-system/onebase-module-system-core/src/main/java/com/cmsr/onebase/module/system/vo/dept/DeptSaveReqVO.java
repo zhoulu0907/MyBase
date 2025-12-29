@@ -9,6 +9,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
+import java.util.Set;
+
 @Schema(description = "管理后台 - 部门创建/修改 Request VO")
 @Data
 public class DeptSaveReqVO {
@@ -49,6 +51,9 @@ public class DeptSaveReqVO {
 
     @Schema(description = "管理员UserID", example = "")
     private Long adminUserId;
+
+    @Schema(description = " 接口人UserIds", example = "")
+    private Set<Long> adminUserIds;
 
     @Schema(description = "部门类型", example = "")
     private String deptType;

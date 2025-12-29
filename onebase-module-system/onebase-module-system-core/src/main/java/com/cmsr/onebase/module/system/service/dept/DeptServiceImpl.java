@@ -298,10 +298,13 @@ public class DeptServiceImpl implements DeptService {
         // 2. 批量获取领导用户信息
         Map<Long, AdminUserDO> leaderUserMap = userService.getUserMap(leaderUserIds);
 
-        List<Long> directorUserIds = deptList.stream().map(DeptDO::getAdminUserId).filter(Objects::nonNull).collect(Collectors.toList());
-
+        List<Long> adminUserIds = deptList.stream()
+                .map(DeptDO::getAdminUserIds)
+                .filter(Objects::nonNull)
+                .flatMap(Set::stream)  // 将多个 Set<Long> 展平为 Stream<Long>
+                .collect(Collectors.toList());  // 收集为 List<Long>
         // 2. 批量获取部门主管用户信息
-        Map<Long, AdminUserDO> directorUserMap = userService.getUserMap(directorUserIds);
+        Map<Long, AdminUserDO> directorUserMap = userService.getUserMap(adminUserIds);
 
         // 4. 设置每个部门的人数和领导姓名
         respList.forEach(dept -> {
@@ -316,11 +319,13 @@ public class DeptServiceImpl implements DeptService {
                     dept.setLeaderUserName(leader.getNickname());
                 }
             }
-            if (dept.getAdminUserId() != null) {
-                AdminUserDO deptDirector = directorUserMap.get(dept.getAdminUserId());
-                if (deptDirector != null) {
-                    dept.setAdminUserName(deptDirector.getNickname());
-                }
+            if (CollectionUtils.isNotEmpty(dept.getAdminUserIds())) {
+                String adminUserNamesStr = dept.getAdminUserIds().stream()
+                        .map(directorUserMap::get)
+                        .filter(Objects::nonNull)
+                        .map(AdminUserDO::getNickname)
+                        .collect(Collectors.joining(","));
+                dept.setAdminUserName(adminUserNamesStr);
             }
         });
 
@@ -344,9 +349,11 @@ public class DeptServiceImpl implements DeptService {
         Map<Long, Integer> deptUserCountMap = userService.getUserCountByDeptIdsIncludeChildren(deptIds);
         // 2. 批量获取领导用户信息
         Map<Long, AdminUserDO> leaderUserMap = userService.getUserMap(leaderUserIds);
-        List<Long> directorUserIds = dept.getAdminUserId() != null ? Collections.singletonList(dept.getLeaderUserId()) : Collections.emptyList();
-        // . 批量获取部门主管用户信息
-        Map<Long, AdminUserDO> directorUserMap = userService.getUserMap(directorUserIds);
+
+        Set<Long> adminUserIds = dept.getAdminUserIds()==null?null:dept.getAdminUserIds();
+
+        // . 批量获取接口人用户信息
+        Map<Long, AdminUserDO> directorUserMap = userService.getUserMap(adminUserIds);
 
         // 设置部门人数（包含下级部门）
         Integer userCount = deptUserCountMap.getOrDefault(id, 0);
@@ -359,11 +366,13 @@ public class DeptServiceImpl implements DeptService {
                 respVO.setLeaderUserName(leader.getNickname());
             }
         }
-        if (dept.getAdminUserId() != null) {
-            AdminUserDO deptDirector = directorUserMap.get(dept.getAdminUserId());
-            if (deptDirector != null) {
-                respVO.setAdminUserName(deptDirector.getNickname());
-            }
+        if (CollectionUtils.isNotEmpty(dept.getAdminUserIds())) {
+            String adminUserNamesStr = dept.getAdminUserIds().stream()
+                    .map(directorUserMap::get)
+                    .filter(Objects::nonNull)
+                    .map(AdminUserDO::getNickname)
+                    .collect(Collectors.joining(","));
+            respVO.setAdminUserName(adminUserNamesStr);
         }
 
         return respVO;
@@ -491,9 +500,14 @@ public class DeptServiceImpl implements DeptService {
         DeptDO updateObj = new DeptDO();
         updateObj.setId(reqVO.getDeptId());
         if (reqVO.getUpdateType().equals(CorpConstant.LEADER_USER_ID)) {
-            updateObj.setAdminUserId(reqVO.getUserId());
+            updateObj.setAdminUserIds(reqVO.getAdminUserIds());
         } else {
-            updateObj.setLeaderUserId(reqVO.getUserId());
+            Set<Long> adminUserIds = reqVO.getAdminUserIds();
+            if (CollectionUtils.isNotEmpty(adminUserIds)) {
+                Long firstAdminUserId = CollUtil.getFirst(adminUserIds);
+                updateObj.setLeaderUserId(firstAdminUserId);
+            }
+
         }
         deptDataRepository.update(updateObj);
     }

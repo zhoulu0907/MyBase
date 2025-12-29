@@ -30,5 +30,10 @@ public class TenantAdminUserResVO {
     @Schema(description = "管理员头像", example = "")
     private String adminAvatar;
 
+    @Schema(description = "所属部门名称", example = "")
+    private String deptName;
+
+
+
 
 }
