@@ -34,13 +34,20 @@ const WORKBENCH_COMPONENT_DEFINITIONS: ReadonlyArray<WorkbenchComponentDefinitio
   //   isPlaceholder: true
   // },
   {
+    key: 'WELCOME_CARD',
+    type: 'XWelcomeCard',
+    displayName: '欢迎卡片',
+    icon: 'welcome_card_cp.svg',
+    category: 'basic',
+    size: { h: 36, w: 118 }
+  },
+  {
     key: 'RICH_TEXT_WORKBENCH',
     type: 'XRichTextEditorWorkbench',
     displayName: '富文本',
     icon: 'rich_text_editor_workbench_cp.svg',
     category: 'basic',
     size: { h: 36, w: 118 },
-    description: '富文本编辑器组件开发中，当前为占位实现',
     isPlaceholder: true
   },
   {
