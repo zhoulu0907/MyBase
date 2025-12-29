@@ -72,6 +72,7 @@ public interface ErrorCodeConstants {
 
     ErrorCode METADATA_DATA_METHOD_RUNTIME_MENU_ID_REQUIRED = new ErrorCode(1_003_006_005, "菜单ID不能为空");
 
-
+    // ========== 草稿相关 1-003-011-000 ==========
+    ErrorCode DRAFT_COUNT_EXCEED_LIMIT = new ErrorCode(1_003_011_000, "当前用户在该表的草稿数量已达到上限（{}条），请先处理已有草稿");
 
 }

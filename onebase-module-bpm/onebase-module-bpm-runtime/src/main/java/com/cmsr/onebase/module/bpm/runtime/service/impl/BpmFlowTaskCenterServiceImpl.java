@@ -80,8 +80,6 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
     @Resource
     private BpmAppResourceValidator bpmAppResourceValidator;
 
-    private final BpmTaskCenterConvert bpmTaskCenterConvert = BpmTaskCenterConvert.INSTANCE;
-
     private List<String> splitToList(String str) {
         if (StringUtils.isBlank(str)) {
             return Collections.emptyList();
@@ -186,7 +184,7 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         Set<String> menuUuids = new HashSet<>();
 
         for (BpmTodoTaskDTO flowTaskExt : pageResult.getResult()) {
-            BpmFlowTodoTaskVO todoTaskVO = bpmTaskCenterConvert.toTodoTaskVO(flowTaskExt);
+            BpmFlowTodoTaskVO todoTaskVO = BpmTaskCenterConvert.toTodoTaskVO(flowTaskExt);
 
             // 处理代理逻辑
             handleAgentLogic(todoTaskVO, flowTaskExt.getAgentId(), flowTaskExt.getBpmTitle(), loginUserId);
@@ -243,7 +241,7 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         List<BpmFlowDoneTaskVO> doneTaskList = new ArrayList<>();
         Set<String> menuUuids = new HashSet<>();
         for (BpmDoneTaskDTO doneTaskDTO : pageResult.getResult()) {
-            BpmFlowDoneTaskVO doneTaskVO = bpmTaskCenterConvert.toDoneTaskVO(doneTaskDTO);
+            BpmFlowDoneTaskVO doneTaskVO = BpmTaskCenterConvert.toDoneTaskVO(doneTaskDTO);
             // 处理代理逻辑
             handleAgentLogic(doneTaskVO, doneTaskDTO.getAgentId(), doneTaskDTO.getBpmTitle(), loginUserId);
             doneTaskList.add(doneTaskVO);
@@ -292,7 +290,7 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         List<BpmMyCreatedVO> list = new ArrayList<>();
         Set<String> menuUuids = new HashSet<>();
         for (BpmMyInstanceDTO flowInstance : pageResult.getResult()) {
-            BpmMyCreatedVO bpmMyCreatedVO = bpmTaskCenterConvert.toMyCreatedVO(flowInstance);
+            BpmMyCreatedVO bpmMyCreatedVO = BpmTaskCenterConvert.toMyCreatedVO(flowInstance);
 
             //设置当前节点处理人
             List<Task> flowTaskList = taskService.getByInsId(flowInstance.getId());
@@ -411,7 +409,7 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         Set<String> menuUuids = new HashSet<>();
 
         for (BpmCcRecordDTO ccRecord : pageResult.getResult()) {
-            BpmCcTaskPageResVO ccTaskVO = bpmTaskCenterConvert.toCcTaskVO(ccRecord);
+            BpmCcTaskPageResVO ccTaskVO = BpmTaskCenterConvert.toCcTaskVO(ccRecord);
             // 处理代理逻辑
             handleAgentLogic(ccTaskVO, ccRecord.getAgentId(), ccRecord.getBpmTitle(), loginUserId);
             copyTaskList.add(ccTaskVO);
