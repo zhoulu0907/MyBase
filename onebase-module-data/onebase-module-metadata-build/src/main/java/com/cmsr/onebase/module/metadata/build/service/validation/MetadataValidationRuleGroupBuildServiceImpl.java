@@ -358,7 +358,7 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
             if (andGroup.size() == 1) {
                 // 只有一个条件，直接添加到主OR节点下
                 ValidationRuleDefinitionVO singleRule = andGroup.get(0);
-                MetadataValidationRuleDefinitionDO ruleDO = modelMapper.map(singleRule, MetadataValidationRuleDefinitionDO.class);
+                MetadataValidationRuleDefinitionDO ruleDO = convertVoToDo(singleRule);
                 ruleDO.setGroupUuid(String.valueOf(groupId));
                 ruleDO.setParentRuleUuid(String.valueOf(mainOrRuleId));
                 ruleDO.setLogicType("CONDITION");
@@ -379,7 +379,7 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
 
                 // 添加AND分组内的所有条件
                 for (ValidationRuleDefinitionVO conditionRule : andGroup) {
-                    MetadataValidationRuleDefinitionDO ruleDO = modelMapper.map(conditionRule, MetadataValidationRuleDefinitionDO.class);
+                    MetadataValidationRuleDefinitionDO ruleDO = convertVoToDo(conditionRule);
                     ruleDO.setGroupUuid(String.valueOf(groupId));
                     ruleDO.setParentRuleUuid(String.valueOf(andGroupRuleId));
                     ruleDO.setLogicType("CONDITION");
@@ -390,6 +390,32 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
                 }
             }
         }
+    }
+
+    /**
+     * 将VO转换为DO，并正确处理entityUuid和fieldUuid
+     *
+     * @param vo 规则定义VO
+     * @return 规则定义DO
+     */
+    private MetadataValidationRuleDefinitionDO convertVoToDo(ValidationRuleDefinitionVO vo) {
+        MetadataValidationRuleDefinitionDO ruleDO = modelMapper.map(vo, MetadataValidationRuleDefinitionDO.class);
+
+        // 处理entityUuid：优先使用VO中的entityUuid，若为空则通过entityId转换
+        String entityUuid = idUuidConverter.resolveEntityUuidOptional(vo.getEntityUuid(),
+                vo.getEntityId() != null ? String.valueOf(vo.getEntityId()) : null);
+        if (entityUuid != null) {
+            ruleDO.setEntityUuid(entityUuid);
+        }
+
+        // 处理fieldUuid：优先使用VO中的fieldUuid，若为空则通过fieldId转换
+        String fieldUuid = idUuidConverter.resolveFieldUuidOptional(vo.getFieldUuid(),
+                vo.getFieldId() != null ? String.valueOf(vo.getFieldId()) : null);
+        if (fieldUuid != null) {
+            ruleDO.setFieldUuid(fieldUuid);
+        }
+
+        return ruleDO;
     }
 
     /**

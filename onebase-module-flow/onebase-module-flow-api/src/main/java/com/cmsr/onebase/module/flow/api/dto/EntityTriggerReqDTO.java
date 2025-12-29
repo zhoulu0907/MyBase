@@ -1,10 +1,10 @@
 package com.cmsr.onebase.module.flow.api.dto;
 
+import com.cmsr.onebase.module.flow.context.table.RowData;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldValueDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -34,8 +34,8 @@ public class EntityTriggerReqDTO {
     @Schema(description = "数据，字段名称和字段数据, key是字段的columnName, value是字段值")
     private List<SemanticFieldValueDTO<Object>> fieldData;
 
-    public Map<String, Object> toInputData() {
-        Map<String, Object> inputData = new HashMap<>();
+    public RowData toInputData() {
+        RowData inputData = new RowData();
         for (SemanticFieldValueDTO<?> fieldValueDTO : fieldData) {
             inputData.put(tableName + "." + fieldValueDTO.getFieldName(), fieldValueDTO.getRawValue());
         }

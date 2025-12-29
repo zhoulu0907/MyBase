@@ -2,16 +2,16 @@ package com.cmsr.onebase.module.dashboard.build.service;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.dashboard.build.dal.dataobject.DashboardTemplateDO;
+import com.cmsr.onebase.module.dashboard.build.model.DashboardProjectData;
 import com.cmsr.onebase.module.dashboard.build.vo.template.DashboardTemplatePageReqVO;
 import com.cmsr.onebase.module.dashboard.build.vo.template.DashboardTemplateSaveReqVO;
-import com.mybatisflex.core.paginate.Page;
 
 import java.util.List;
 
 /**
  * 仪表盘模板Service接口
  */
-public interface IDashboardTemplateService {
+public interface DashboardTemplateService {
 
     /**
      * 创建仪表盘模板
@@ -26,7 +26,7 @@ public interface IDashboardTemplateService {
      *
      * @param saveReqVO 更新信息
      */
-    void updateDashboardTemplate(DashboardTemplateSaveReqVO saveReqVO);
+    void updateDashboardTemplate(DashboardProjectData saveReqVO);
 
     /**
      * 删除仪表盘模板
