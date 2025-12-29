@@ -39,8 +39,7 @@ public class DashboardProjectServiceImpl extends ServiceImpl<DashboardProjectMap
         if (dashboardTemplate == null){
             throw exception(DASHBOARD_CONTENT_NOT_EXIST);
         }
-        Long applicationId = ApplicationManager.getApplicationId();;
-
+        Long applicationId = ApplicationManager.getApplicationId();
         DashboardProject dashboardProject = new DashboardProject();
         dashboardProject.setProjectName("新大屏");
         dashboardProject.setState(-1);
