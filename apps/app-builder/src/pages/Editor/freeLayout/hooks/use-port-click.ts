@@ -57,8 +57,8 @@ export const usePortClick = () => {
     const nodePosition = WorkflowNodePanelUtils.adjustNodePosition({
       nodeType,
       position: {
-        x: mousePos.x + 100,
-        y: mousePos.y
+        x: port.point.x - 140,
+        y: port.point.y + 100
       },
       fromPort: port,
       containerNode,
