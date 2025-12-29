@@ -33,8 +33,8 @@ const ScreenTemplate: FC = () => {
   const resourceUrl = getDashBoardURL();
   //创建模板
   const handleAdd = async () => {
-    const res = await createDashboardTemplate({ templateType: 'template', appId: appId });
-    window.open(`${resourceUrl}chart/home/${res}/template`, '_blank');
+    const res = await createDashboardTemplate({ templateType: 'app', appId: appId });
+    window.open(`${resourceUrl}chart/home/${res}/${appId}/template`, '_blank');
   };
   const [applicationDataList, setApplicationDataList] = useState<screenTemplate[]>();
   const [currentPage, setCurrentPage] = useState(1);
