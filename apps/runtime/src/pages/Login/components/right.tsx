@@ -68,15 +68,19 @@ const Right: React.FC = () => {
       const match = redirectURL.match(/onebase\/(.*?)\/(.*?)\//);
       const tid = match && match.length > 1 ? match[1] : '';
       const aid = match && match.length > 2 ? match[2] : '';
+      let apid = getHashQueryParam('appId', redirectURL) || '';
+      let teid = getHashQueryParam('tenantId', redirectURL) || '';
 
-      setAppId(aid);
-      setTenantId(tid);
+      setAppId(apid || aid);
+      setTenantId(teid || tid);
     } else {
       const match = rawHash.match(/onebase\/(.*?)\/(.*?)\//);
       const tid = match && match.length > 1 ? match[1] : '';
       const aid = match && match.length > 2 ? match[2] : '';
-      setAppId(aid);
-      setTenantId(tid);
+      let apid = getHashQueryParam('appId') || '';
+      let teid = getHashQueryParam('tenantId') || '';
+      setAppId(apid || aid);
+      setTenantId(teid || tid);
     }
   }, []);
 

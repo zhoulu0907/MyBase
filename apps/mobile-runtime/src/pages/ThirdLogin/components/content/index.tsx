@@ -309,7 +309,6 @@ const LoginContent: React.FC = () => {
   const goPage = () => {
     const redirectURL = getHashQueryParam('redirectURL');
     if (redirectURL) {
-      debugger;
       if (!appId) {
         //企业登录
         navigate(`/onebase/${tenantId}/runtime-home`);
