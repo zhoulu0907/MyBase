@@ -94,13 +94,13 @@ public class PageSetServiceImpl implements PageSetService {
         // 创建数据大屏页面逻辑
         if (PageTypeSetEnum.isDashboardType(createPageSetDTO.getPageSetType())) {
             //根据数据大屏的创建类型创建数据大屏页面
-            if (Objects.equals(createPageSetDTO.getCreateDashboardType(), DashboardCreateTypeSetEnum.DASHBOARD_LINK.getCode())){
+            if (Objects.equals(createPageSetDTO.getCreateDashboardType(), DashboardCreateTypeSetEnum.DASHBOARD_LINK_CREATE.getCode())){
                 //1.1 如果是绑定现有大屏，则查询数据大屏信息，如不存在则报错
                 List<DashboardProjectDTO> dashboardList = dashboardProjectApi.getDashboard(createPageSetDTO.getDashboardId());
                 if (dashboardList.isEmpty()){
                     throw ServiceExceptionUtil.exception(AppResourceErrorCodeConstants.DASHBOARD_NOT_EXIST);
                 }
-            } else if (Objects.equals(createPageSetDTO.getCreateDashboardType(), DashboardCreateTypeSetEnum.DASHBOARD_TEMPLATE.getCode())){
+            } else if (Objects.equals(createPageSetDTO.getCreateDashboardType(), DashboardCreateTypeSetEnum.DASHBOARD_TEMPLATE_CREATE.getCode())){
                 //1.2 从模板创建数据大屏
                 Long dashboardId = dashboardProjectApi.createDashboardByTemplate(createPageSetDTO.getDashboardId());
                 if (dashboardId == null){
