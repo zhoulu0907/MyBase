@@ -29,7 +29,6 @@ public class DeptDO extends BaseTenantEntity {
     public static final String EMAIL          = "email";
     public static final String STATUS         = "status";
     public static final String REMARK         = "remark";
-    public static final String ADMIN_USER_ID  = "admin_user_id";
     public static final String ADMIN_USER_IDS  = "admin_user_ids";
     public static final String CORP_ID        = "corp_id";
     public static final String DEPT_TYPE      = "dept_type";
