@@ -251,10 +251,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({
         } else if (field.fieldType === ENTITY_FIELD_TYPE.DATETIME.VALUE) {
           formData[field.fieldName] = value ? dayjs(value).format('YYYY-MM-DD hh:mm:ss') : '';
         } else if (field.fieldType === ENTITY_FIELD_TYPE.SELECT.VALUE) {
-          formData[field.fieldName] = {
-            id: value[0],
-            name: value[0]
-          };
+          formData[field.fieldName] = value[0];
         } else if (field.fieldType === ENTITY_FIELD_TYPE.USER.VALUE && Array.isArray(value)) {
           let userTempData = userSelectData;
           if (userTempData.length === 0) {

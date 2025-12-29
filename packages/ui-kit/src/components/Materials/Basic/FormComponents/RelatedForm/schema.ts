@@ -1,22 +1,17 @@
 import {
-  alignConfig,
   baseConfig,
   baseDefault,
   dataFieldConfig,
-  labelColSpanConfig,
   layoutConfig,
   relatedFormdataFieldConfig,
   statusConfig,
   widthConfig,
   type ICommonBaseType,
-  type TAlignSelectKeyType,
   type TLayoutSelectKeyType,
   type TStatusSelectKeyType,
   type TWidthSelectKeyType
 } from 'src/components/Materials/common';
 import {
-  ALIGN_OPTIONS,
-  ALIGN_VALUES,
   CONFIG_TYPES,
   LAYOUT_OPTIONS,
   LAYOUT_VALUES,
@@ -26,25 +21,17 @@ import {
   WIDTH_VALUES
 } from 'src/components/Materials/constants';
 import type {
-  IAlignConfigType,
-  IBooleanConfigType,
-  IColorConfigType,
   IDataFieldConfigType,
   ILabelConfigType,
   ILayoutConfigType,
-  INumberConfigType,
   IPlaceholderConfigType,
   IRelatedFormDataConfigType,
   IStatusConfigType,
-  ITextAreaConfigType,
   ITextConfigType,
   ITooltipConfigType,
-  IVerifyConfigType,
   IWidthConfigType,
   TBooleanDefaultType,
-  TNumberDefaultType,
   TRadioDefaultType,
-  TSelectDefaultType,
   TTextAreaDefaultType,
   TTextDefaultType
 } from 'src/components/Materials/types';
@@ -106,7 +93,7 @@ export interface XRelatedFormConfig extends ICommonBaseType {
    * 可选值: 'default' | 'hidden' | 'readonly'
    */
   status?: TRadioDefaultType<TStatusSelectKeyType>;
- 
+
   /**
    * 表单的布局：水平、垂直（默认）
    * 可选值: 'vertical' | 'horizontal'
@@ -134,7 +121,7 @@ const XRelatedForm: XRelatedFormSchema = {
     },
     {
       key: 'tooltip',
-      name: '描述信息',
+      name: '字段描述',
       type: CONFIG_TYPES.TOOLTIP_INPUT
     },
     ...dataFieldConfig,
@@ -155,7 +142,7 @@ const XRelatedForm: XRelatedFormSchema = {
     relatedFormDataField: [],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
-    width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
+    width: WIDTH_VALUES[WIDTH_OPTIONS.HALF]
   }
 };
 

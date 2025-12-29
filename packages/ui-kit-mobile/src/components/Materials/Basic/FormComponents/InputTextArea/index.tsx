@@ -3,7 +3,7 @@ import { nanoid } from 'nanoid';
 import { Textarea, Form, Ellipsis } from '@arco-design/mobile-react';
 import { ValidatorType, ITypeRules } from '@arco-design/mobile-utils';
 
-import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, DEFAULT_VALUE_TYPES, FormSchema } from '@onebase/ui-kit';
+import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, DEFAULT_VALUE_TYPES, FormSchema, securityEncodeText } from '@onebase/ui-kit';
 type XInputTextAreaConfig = typeof FormSchema.XInputTextAreaSchema.config;
 import './index.css';
 import '../index.css';
@@ -21,7 +21,8 @@ const XInputTextArea = memo((props: XInputTextAreaConfig & { runtime?: boolean; 
     status,
     minRows = 1,
     runtime = true,
-    detailMode
+    detailMode,
+    security
   } = props;
 
   // 生成唯一的字段ID
@@ -61,14 +62,13 @@ const XInputTextArea = memo((props: XInputTextAreaConfig & { runtime?: boolean; 
       message: `${label.text}是必填项`,
       validator: (value, callback) => {
         if (value && verify?.lengthLimit) {
-          if (value.length < verify?.minLength!) {
+          if (verify?.minLength && value.length < verify.minLength) {
             callback(`字数不能小于${verify?.minLength}`);
-          } else if (verify?.maxLength && value.length > verify?.maxLength) {
+          } else if (verify?.maxLength && value.length > verify.maxLength) {
             callback(`字数不能大于${verify?.maxLength}`);
           }
-        } else {
-          callback();
         }
+        callback();
       }
     }
   ];
@@ -93,7 +93,7 @@ const XInputTextArea = memo((props: XInputTextAreaConfig & { runtime?: boolean; 
         <div
           className="readonlyText"
           style={{ textAlign }}
-        >{form?.getFieldValue(fieldId)  || (defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : '') || '--'}</div>
+        >{securityEncodeText(security, form?.getFieldValue(fieldId))}</div>
       ) : (
         renderContent()
       )}

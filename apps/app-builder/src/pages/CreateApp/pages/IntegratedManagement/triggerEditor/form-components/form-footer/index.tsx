@@ -54,7 +54,7 @@ export function FormFooter({ nodeInfo }: { nodeInfo: any }) {
       const originalNodeData = nodeData.value[nodeId.value];
       const formInfo = nodeInfo.props.form.getFieldsValue();
       console.log('original nodeData: ', originalNodeData);
-      console.log('formInfo', formInfo);
+      console.log('formInfo: ', formInfo);
 
       let param = { ...formInfo };
       const curNode = searchNodeById(nodeId.value, nodes.value);
@@ -386,6 +386,7 @@ export function FormFooter({ nodeInfo }: { nodeInfo: any }) {
           });
         }
       }
+
       setNodeData(nodeId.value, param);
     }
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import { FIELD_TYPE, FIELD_TYPE_LABEL, ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
-import { Button, Checkbox, Form, Input, Select, Space } from '@arco-design/web-react';
-import { IconSelectAll, IconSettings, IconEdit } from '@arco-design/web-react/icon';
+import { Button, Checkbox, Form, Input, Select, Space, Tooltip } from '@arco-design/web-react';
+import { IconSelectAll, IconSettings, IconEdit, IconQuestionCircle } from '@arco-design/web-react/icon';
 import { createFieldRules } from '@/pages/CreateApp/pages/DataFactory/utils/rules';
 import { FIELD_CONSTRAINT_LENGTH_ENABLED, FIELD_CONSTRAINT_REGEX_ENABLED } from '@onebase/ui-kit';
 import { ModalPopover } from '@/components/ModalPopover';
@@ -233,7 +233,10 @@ const TableColumns = ({
       title: (
         <>
           <span className={styles.requiredDot}>*</span>
-          <span>字段名称</span>
+          <span style={{ marginRight: 6 }}>字段名称</span>
+          <Tooltip content="由小写字母、数字、下划线组成，须以字母开头，不超过40个字符">
+            <IconQuestionCircle style={{ color: '#8f8a8a' }} />
+          </Tooltip>
         </>
       ),
       dataIndex: 'fieldName',
@@ -249,7 +252,7 @@ const TableColumns = ({
               createFieldRules.fieldName,
               externalErrors,
               getFieldIndex,
-              <Input placeholder="由小写字母、数字、下划线组成，须以字母开头，不超过40个字符" size="mini" />,
+              <Input size="mini" />,
               clearFieldError,
               !record.id?.includes('field-')
             )

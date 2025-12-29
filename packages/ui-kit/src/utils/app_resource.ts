@@ -300,7 +300,7 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
     //   载入布局组件内的组件配置
     page.components.forEach((component: ComponentConfig) => {
       if (component.parentCode !== '' && component.parentCode !== null) {
-        if (component.parentCode.indexOf(FORM_COMPONENT_TYPES.SUB_TABLE) !== -1) {
+        if (component.parentCode?.indexOf(FORM_COMPONENT_TYPES.SUB_TABLE) !== -1) {
           const colComponents = newSubTableComponentsMap.get(component.parentCode);
           if (colComponents) {
             colComponents[component.containerIndex] = {
