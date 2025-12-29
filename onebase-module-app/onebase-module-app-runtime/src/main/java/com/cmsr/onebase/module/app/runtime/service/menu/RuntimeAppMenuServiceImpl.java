@@ -1,7 +1,9 @@
 package com.cmsr.onebase.module.app.runtime.service.menu;
 
+import com.cmsr.onebase.framework.common.enums.TerminalEnum;
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
+import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.app.api.security.bo.OperationPermission;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthViewRepository;
@@ -14,6 +16,7 @@ import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePageDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePagesetDO;
 import com.cmsr.onebase.module.app.core.dto.auth.UserRoleDTO;
 import com.cmsr.onebase.module.app.core.enums.menu.MenuTypeEnum;
+import com.cmsr.onebase.module.app.core.enums.menu.MenuVisibleEnum;
 import com.cmsr.onebase.module.app.core.impl.auth.AppAuthSecurityApiImpl;
 import com.cmsr.onebase.module.app.core.provider.auth.AppAuthRoleProvider;
 import com.cmsr.onebase.module.app.core.utils.MenuUtils;
@@ -22,6 +25,7 @@ import com.cmsr.onebase.module.app.runtime.vo.menu.MenuPermissionVO;
 import jakarta.annotation.Resource;
 import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
@@ -59,19 +63,43 @@ public class RuntimeAppMenuServiceImpl implements RuntimeAppMenuService {
     @Override
     public List<MenuListRespVO> listBpmApplicationMenu() {
         Long applicationId = ApplicationManager.getApplicationId();
+        LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
+        String loginPlatform = loginUser.getLoginPlatform();
+        TerminalEnum terminalEnum;
+        if (StringUtils.isNotBlank(loginPlatform)) {
+            terminalEnum = TerminalEnum.ofTerminal(loginPlatform);
+        } else {
+            terminalEnum = TerminalEnum.PC;
+        }
         // 获取应用下所有可见的BPM类型菜单
-        List<AppMenuDO> menuDOS = appMenuRepository.findVisibleByAppIdAndType(applicationId,
-                Set.of(MenuTypeEnum.BPM.getValue()));
+        List<AppMenuDO> menuDOS = appMenuRepository.findByApplicationIdAndType(applicationId, Set.of(MenuTypeEnum.BPM.getValue()));
         // 返回菜单
         return menuDOS.stream()
+                .filter(v -> {
+                    if (terminalEnum == TerminalEnum.PC && MenuVisibleEnum.isVisible(v.getIsVisiblePc())) {
+                        return true;
+                    }
+                    if (terminalEnum == TerminalEnum.MOBILE && MenuVisibleEnum.isVisible(v.getIsVisibleMobile())) {
+                        return true;
+                    }
+                    return false;
+                })
                 .map(v -> BeanUtils.toBean(v, MenuListRespVO.class))
-                .collect(Collectors.toCollection(LinkedList::new));
+                .toList();
     }
 
     @Override
     public List<MenuListRespVO> listApplicationMenu() {
         Long userId = SecurityFrameworkUtils.getLoginUserId();
         Long applicationId = ApplicationManager.getRequiredApplicationId();
+        LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
+        String loginPlatform = loginUser.getLoginPlatform();
+        TerminalEnum terminalEnum;
+        if (StringUtils.isNotBlank(loginPlatform)) {
+            terminalEnum = TerminalEnum.ofTerminal(loginPlatform);
+        } else {
+            terminalEnum = TerminalEnum.PC;
+        }
         // TODO 临时方案，后面要修改
         appAuthSecurityApi.cleanAuthCache(userId, applicationId);
         appAuthSecurityApi.loadAuthCache(userId, applicationId);
@@ -81,6 +109,17 @@ public class RuntimeAppMenuServiceImpl implements RuntimeAppMenuService {
             return Collections.emptyList();
         }
         List<AppMenuDO> menuDOS = appMenuRepository.listByIdsAndOrder(menuIds);
+        menuDOS = menuDOS.stream().filter(
+                v -> {
+                    if (terminalEnum == TerminalEnum.PC && MenuVisibleEnum.isVisible(v.getIsVisiblePc())) {
+                        return true;
+                    }
+                    if (terminalEnum == TerminalEnum.MOBILE && MenuVisibleEnum.isVisible(v.getIsVisibleMobile())) {
+                        return true;
+                    }
+                    return false;
+                }
+        ).toList();
         if (CollectionUtils.isEmpty(menuDOS)) {
             return Collections.emptyList();
         }
@@ -118,7 +157,9 @@ public class RuntimeAppMenuServiceImpl implements RuntimeAppMenuService {
             if (Objects.equals(respVO.getParentUuid(), parentUuid)) {
                 // 只有父菜单的uuid等于当前菜单的父菜单的uuid时，才添加子菜单，继续递归
                 LinkedList<MenuListRespVO> vos = recursiveGetChildren(respVO.getMenuUuid(), listRespVOS);
-                if (CollectionUtils.isNotEmpty(vos)) {
+                if (MenuTypeEnum.isGroup(respVO.getMenuType()) && CollectionUtils.isEmpty(vos)) {
+                    // 过滤掉没有子菜单的菜单
+                } else {
                     respVO.setChildren(vos);
                     children.add(respVO);
                 }
