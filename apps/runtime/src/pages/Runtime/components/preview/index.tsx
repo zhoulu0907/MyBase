@@ -435,9 +435,9 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
   return (
     <div className={`${styles.previewPage} runtime-preview-formpage`}>
       <div className={styles.content}>
-        {pageSetType === PageType.WORKBENCH ? (
-          <WorkbenchRuntime pageSetId={pageSetId} runtime={runtime} />
-        ) : (
+        {pageSetType === PageType.WORKBENCH && <WorkbenchRuntime pageSetId={pageSetId} runtime={runtime} />}
+
+        {pageType === EDITOR_TYPES.LIST_EDITOR && (
           <ListRuntime
             pageSetType={pageSetType}
             pageSetId={pageSetId}
