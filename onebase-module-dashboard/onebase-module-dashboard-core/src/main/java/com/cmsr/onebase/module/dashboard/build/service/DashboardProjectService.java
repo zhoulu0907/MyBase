@@ -12,5 +12,7 @@ import com.mybatisflex.core.service.IService;
  * @since 2023-04-30
  */
 public interface DashboardProjectService extends IService<DashboardProject> {
+    // 从模板创建大屏
+    public Long createDashboardByTemplate(Long templateId);
 
 }

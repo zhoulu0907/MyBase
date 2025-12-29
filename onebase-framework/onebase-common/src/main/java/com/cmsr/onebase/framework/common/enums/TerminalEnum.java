@@ -14,8 +14,9 @@ import java.util.Arrays;
 @Getter
 public enum TerminalEnum implements ArrayValuable<String> {
 
-    UNKNOWN("unknown", "未知"), // 目的：在无法解析到 terminal 时，使用它
+    // UNKNOWN("unknown", "未知"), // 默认PC
     WECHAT_MINI_PROGRAM("wechat_mini_program", "微信小程序"),
+    // 默认PC
     PC("pc", "PC端"),
     MOBILE("mobile", "手机"),
     ;
@@ -35,4 +36,11 @@ public enum TerminalEnum implements ArrayValuable<String> {
     public String[] array() {
         return ARRAYS;
     }
+
+    public static TerminalEnum ofTerminal(String terminal) {
+        return Arrays.stream(TerminalEnum.values())
+                .filter(item -> item.getTerminal().equalsIgnoreCase(terminal))
+                .findFirst().orElseThrow();
+    }
+
 }

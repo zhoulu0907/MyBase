@@ -1,6 +1,5 @@
 package com.cmsr.onebase.module.system.vo;
 
-import com.cmsr.onebase.framework.common.enums.LoginPlatformEnum;
 import com.cmsr.onebase.framework.common.enums.TerminalEnum;
 import com.cmsr.onebase.framework.common.validation.InEnum;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -23,8 +22,11 @@ public class CaptchaVerificationReqVO {
     @NotEmpty(message = "设备ID不能为空")
     private String deviceId;
 
-
-   // @InEnum(value = TerminalEnum.class ,message = "登录来源类型必须为{value}")
+    /**
+     * 平台类型：pc、mobile等
+     */
+    @Schema(description = "登录端类型", example = "pc/mobile...")
+    @InEnum(value = TerminalEnum.class ,message = "登录来源类型必须为{value}")
     private String loginPlatform;
 
     /**

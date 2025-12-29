@@ -46,7 +46,7 @@ public class OAuth2AccessTokenCheckRespDTO implements Serializable {
     /**
      *  PC = 'pc',  MOBILE = 'mobile',
      */
-    @Schema(description = "登录来源", example = "pc/mobile")
+    @Schema(description = "登录来源", example = "pc/mobile...")
     private String loginPlatform;
 
 }

@@ -86,7 +86,6 @@ public class BuildAppMenuServiceImpl implements BuildAppMenuService {
     public void createDefaultBpmMenu(Long applicationId) {
         List<AppMenuDO> menuDOList = new ArrayList<>();
         int menuSort = 0;
-
         for (BpmMenuEnum bpmMenuEnum : BpmMenuEnum.values()) {
             AppMenuDO menuDO = new AppMenuDO();
             menuDO.setApplicationId(applicationId);
@@ -97,11 +96,10 @@ public class BuildAppMenuServiceImpl implements BuildAppMenuService {
             menuDO.setMenuType(MenuTypeEnum.BPM.getValue());
             menuDO.setMenuName(bpmMenuEnum.getText());
             menuDO.setMenuIcon("icon-folder");
-            menuDO.setIsVisible(0);
-
+            menuDO.setIsVisiblePc(NumberUtils.INTEGER_ONE);
+            menuDO.setIsVisibleMobile(NumberUtils.INTEGER_ONE);
             menuDOList.add(menuDO);
         }
-
         appMenuRepository.saveBatch(menuDOList);
     }
 
@@ -279,7 +277,8 @@ public class BuildAppMenuServiceImpl implements BuildAppMenuService {
         menuDO.setMenuName(createReqVO.getMenuName());
         menuDO.setMenuIcon(createReqVO.getMenuIcon());
         menuDO.setMenuSort(generateMenuSort(applicationDO.getId()));
-        menuDO.setIsVisible(NumberUtils.INTEGER_ONE);
+        menuDO.setIsVisiblePc(NumberUtils.INTEGER_ONE);
+        menuDO.setIsVisibleMobile(NumberUtils.INTEGER_ONE);
         menuDO.setEntityUuid(createReqVO.getEntityUuid());
         appMenuRepository.save(menuDO);
         // 创建页面集
@@ -383,9 +382,16 @@ public class BuildAppMenuServiceImpl implements BuildAppMenuService {
     }
 
     @Override
-    public void updateApplicationMenuVisible(Long id, Integer visible) {
+    public void updateApplicationMenuVisiblePc(Long id, Integer visible) {
         AppMenuDO menuDO = appCommonService.validateMenuExist(id);
-        menuDO.setIsVisible(visible);
+        menuDO.setIsVisiblePc(visible);
+        appMenuRepository.updateById(menuDO);
+    }
+
+    @Override
+    public void updateApplicationMenuVisibleMobile(Long id, Integer visible) {
+        AppMenuDO menuDO = appCommonService.validateMenuExist(id);
+        menuDO.setIsVisibleMobile(visible);
         appMenuRepository.updateById(menuDO);
     }
 
