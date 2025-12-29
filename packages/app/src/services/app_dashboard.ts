@@ -1,6 +1,14 @@
 import { appService, dashboardService } from './clients';
 import { DashboardListParams, DashboardTemplateListParams, editDashboardInfoParams, getDashboardIdParams, saveDashboardAsTemplateParams } from '../types/app_dashboard';
 
+
+// 创建大屏类型
+export enum DashBoardCreateType {
+  DashboardNew = 'dashboardNew', // 新建大屏
+  DashboardTemplate = 'dashboardTemplate', // 大屏模版
+  DashboardLink = 'dashboardLink' // 关联已创建大屏
+}
+
 // 获取模版列表接口
 export const getDashboardTemplateListApi = (params: DashboardTemplateListParams) => {
   return dashboardService.get(`/template/page`, params); 

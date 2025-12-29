@@ -118,7 +118,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
       handleGetData(editTargetId);
     }
   }, [tableName, mainMetaData]);
-  const [screenImg, setScreenImg] = useState('');
 
   useEffect(() => {
     if (pageSetId) {
@@ -259,11 +258,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
         ) : (
           pageType === EDITOR_TYPES.LIST_EDITOR && (
             <div className={styles.noData}>
-              {screenImg ? (
-                <img src={getFileUrlById(screenImg)} alt="大屏图片" />
-              ) : (
-                <img src={EditorEmpty} alt="暂无数据" />
-              )}
+              <img src={EditorEmpty} alt="暂无数据" />
             </div>
           )
         )}
