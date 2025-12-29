@@ -1,4 +1,4 @@
-import { createHostSDK } from '@ob/plugin/sdk';
+import { createHostSDK, pluginEmitter } from '@ob/plugin/sdk';
 import { PluginManager } from '@ob/plugin/host';
 import * as ReactDOM from 'react-dom';
 import * as ReactRouterDOM from 'react-router-dom';
@@ -30,6 +30,21 @@ export async function initPlugins() {
       return sub?.fields || [];
     };
 
+    // 通过事件桥接的表单赋值方法，供插件在 runtime 下调用
+    const setFieldValue = (name: string, value: any) => {
+      pluginEmitter.emit('set-field', { name, value });
+    };
+
+    const setFieldsValue = (values: Record<string, any>) => {
+      pluginEmitter.emit('set-fields', { values });
+    };
+    const setSubRowFieldValue = (tableName: string, rowIndex: number, fieldName: string, value: any) => {
+      pluginEmitter.emit('set-subrow-field', { tableName, rowIndex, fieldName, value });
+    };
+    const setSubRowFieldsValue = (tableName: string, rowIndex: number, values: Record<string, any>) => {
+      pluginEmitter.emit('set-subrow-fields', { tableName, rowIndex, values });
+    };
+
     const ui = {
       notify: (type: string, message: string) => {
         const fn = (Arco as any)?.Message?.[type] || (Arco as any)?.Message?.info;
@@ -41,7 +56,12 @@ export async function initPlugins() {
       }
     };
 
-    const context = { terminal: 'PC', entity: { getEntities, getFields } } as any;
+    const events = {
+      on: (event: string, handler: (payload: any) => void) => pluginEmitter.on(event as any, handler as any),
+      off: (event: string, handler: (payload: any) => void) => pluginEmitter.off(event as any, handler as any),
+      emit: (event: string, payload?: any) => pluginEmitter.emit(event as any, payload)
+    };
+    const context = { terminal: 'PC', events, entity: { getEntities, getFields, setFieldValue, setFieldsValue, setSubRowFieldValue, setSubRowFieldsValue } } as any;
     const sdk = createHostSDK(context, { ui } as any);
     const pm = new PluginManager(context);
     

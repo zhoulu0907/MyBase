@@ -6,6 +6,7 @@ import Login from './pages/Login';
 import MyAppPage from './pages/MyApp';
 import Runtime from './pages/Runtime';
 import SettingPage from './pages/Setting';
+import ThirdLogin from './pages/thirdLogin';
 
 function AppContent() {
   Message.config({
@@ -18,6 +19,7 @@ function AppContent() {
     <Routes>
       {/* 登录页面不需要认证 */}
       <Route path="/login" element={<Login />} />
+      <Route path='/third/login' element={<ThirdLogin />} />
 
       <Route path="/onebase/runtime/" element={<Runtime />} />
 

@@ -42,10 +42,9 @@ const DynamicSelectScopeConfig: React.FC<DynamicSelectScopeConfigProps> = ({
     if (!checked) {
       getDeptUsers({});
       setSelectedDepts([]);
-      handlePropsChange(configs[item.key], []);
       handleMultiPropsChange?.([
         { key: 'isSelectScope', value: checked },
-        { key: configs[item.key], value: [] }
+        { key: item.key, value: [] }
       ]);
     } else {
       handlePropsChange('isSelectScope', checked);

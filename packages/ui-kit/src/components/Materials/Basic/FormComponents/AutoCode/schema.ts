@@ -61,11 +61,11 @@ export type TXautoCodeEditData = Array<
 >;
 
 export interface XautoCodeConfig extends ICommonBaseType {
-   /**
-   * 输入框标题
-   * text：标题
-   * display：是否显示
-   */
+  /**
+  * 输入框标题
+  * text：标题
+  * display：是否显示
+  */
   label: {
     text: TTextDefaultType;
     display: TBooleanDefaultType;
@@ -86,9 +86,6 @@ export interface XautoCodeConfig extends ICommonBaseType {
    */
   dataField: TTextDefaultType[];
 
-   // 编码规则
-  autoCodeConfig?: any,
-  autoCodeDisabled?: boolean,
 
   /**
    * 组件状态：可用、隐藏、只读
@@ -117,7 +114,7 @@ const XautoCode: XautoCodeSchema = {
     tooltipConfig,
     ...dataFieldConfig,
     autoCodeConfig,
-     statusConfig,
+    statusConfig,
     layoutConfig,
     widthConfig
   ],
@@ -130,8 +127,6 @@ const XautoCode: XautoCodeSchema = {
     placeholder: '自动生成无需填写',
     tooltip: '',
     dataField: [],
-    autoCodeConfig: {},
-    autoCodeDisabled: false,
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],

@@ -4,7 +4,7 @@ import { Input } from '@arco-design/web-react';
 interface IProps {
   defaultValue?: string;
   placeholder?: string;
-  width?: number;
+  width?: string | number;
   onPressEnter: (e: any) => Promise<void>;
   onBlur?: (e: any) => void;
 }

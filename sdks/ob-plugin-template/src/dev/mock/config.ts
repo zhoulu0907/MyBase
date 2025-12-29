@@ -9,18 +9,27 @@ export const MOCK_ENTITIES = [
 
 export const MOCK_FIELDS: Record<string, any[]> = {
   'mock_entity_1': [
-    { fieldName: 'name', displayName: 'Name', fieldType: 'text' },
-    { fieldName: 'age', displayName: 'Age', fieldType: 'number' },
-    { fieldName: 'email', displayName: 'Email', fieldType: 'text' }
+    { fieldName: 'name', displayName: 'Name', fieldType: 'TEXT' },
+    { fieldName: 'age', displayName: 'Age', fieldType: 'NUMBER' },
+    { fieldName: 'email', displayName: 'Email', fieldType: 'TEXT' },
+    {
+      fieldName: 'status',
+      displayName: 'Status',
+      fieldType: 'SELECT',
+      options: [
+        { optionLabel: 'Pending', optionValue: 'pending' },
+        { optionLabel: 'Paid', optionValue: 'paid' },
+        { optionLabel: 'Cancelled', optionValue: 'cancelled' }
+      ]
+    }
   ],
   'mock_entity_2': [
-    { fieldName: 'order_no', displayName: 'Order No', fieldType: 'text' },
-    { fieldName: 'amount', displayName: 'Amount', fieldType: 'number' },
-    { fieldName: 'status', displayName: 'Status', fieldType: 'text' }
+    { fieldName: 'order_no', displayName: 'Order No', fieldType: 'TEXT' },
+    { fieldName: 'amount', displayName: 'Amount', fieldType: 'NUMBER' }
   ],
   'mock_entity_3': [
-    { fieldName: 'product_name', displayName: 'Product Name', fieldType: 'text' },
-    { fieldName: 'price', displayName: 'Price', fieldType: 'number' }
+    { fieldName: 'product_name', displayName: 'Product Name', fieldType: 'TEXT' },
+    { fieldName: 'price', displayName: 'Price', fieldType: 'NUMBER' }
   ]
 };
 

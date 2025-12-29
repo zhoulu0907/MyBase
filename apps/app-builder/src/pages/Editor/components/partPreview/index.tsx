@@ -8,6 +8,7 @@ import {
   STATUS_VALUES,
   useFormEditorSignal,
   useListEditorSignal,
+  usePageEditorSignal,
   useWorkbenchEditorSignal,
   type GridItem
 } from '@onebase/ui-kit';
@@ -42,14 +43,36 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
   const { components: listComponents, pageComponentSchemas: listPageComponentSchemas } = useListEditorSignal;
   const { workbenchComponents, wbComponentSchemas } = useWorkbenchEditorSignal;
   const { editMode } = currentEditorSignal;
-
   const mobileEditorPreviewRef = useRef<MicroApp | null>(null);
+
+  const {
+    curComponentID,
+    setCurComponentID,
+    clearCurComponentID,
+    setCurComponentSchema,
+    setPageComponentSchemas,
+    delPageComponentSchemas,
+    showDeleteButton,
+    setShowDeleteButton,
+    subTableComponents,
+    setSubTableComponents,
+  } = usePageEditorSignal();
 
   const qiankunActions = initGlobalState({
     drag: false,
     components: pageType === EDITOR_TYPES.FORM_EDITOR ? formComponents.value : listComponents.value,
     pageComponentSchemas:
-      pageType === EDITOR_TYPES.FORM_EDITOR ? formPageComponentSchemas.value : listPageComponentSchemas.value
+      pageType === EDITOR_TYPES.FORM_EDITOR ? formPageComponentSchemas.value : listPageComponentSchemas.value,
+    curComponentID,
+    setCurComponentID,
+    clearCurComponentID,
+    setCurComponentSchema,
+    setPageComponentSchemas,
+    delPageComponentSchemas,
+    showDeleteButton,
+    setShowDeleteButton,
+    subTableComponents,
+    setSubTableComponents
   });
   useEffect(() => {
     console.log('loading mobile-editor-preview-list');
@@ -77,7 +100,7 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
   const getFormContent = () => {
     return formComponents.value.map((cp: GridItem) => (
       <Fragment key={cp.id}>
-        {formPageComponentSchemas.value[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+        {formPageComponentSchemas.value[cp.id]?.config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
           <div
             key={cp.id}
             className={styles.componentItem}
@@ -108,6 +131,7 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
       onCancel={() => {
         setVisible(false);
       }}
+      unmountOnExit
       bodyStyle={{ background: '#F2F3F5', padding: '0' }}
     >
       <div className={classNames(styles.previewPage, { [styles.mobilePreview]: editMode.value === EditMode.MOBILE })}>
@@ -132,6 +156,7 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
                         cpType={cp.type}
                         pageComponentSchema={listPageComponentSchemas.value[cp.id]}
                         runtime={true}
+                        pageType={pageType}
                         preview={true}
                       />
                     </div>

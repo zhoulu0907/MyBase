@@ -58,7 +58,7 @@ export default function FieldConfig({ setCcRecipientsConfigData, fieldPermConfig
       title: '字段名称',
       dataIndex: 'fieldName',
       render: (val: any, row: any) => {
-        return row.parentDisplayName ? row.parentDisplayName + ' _' + row.displayName : row.displayName;
+        return row.parentDisplayName ? row.parentDisplayName + '.' + row.displayName : row.displayName;
       }
     },
     {

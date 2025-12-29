@@ -13,7 +13,11 @@ export interface TokenInfo {
   tenantId?: string; // 租户id
   corpId?: string; // 企业id
   loginURL?: string;
-  loginSource: string;
+  loginSource: string;   //控制是否显示企业管理后台
+  userUnRegistFlag?: boolean; //控制外部用户是否需要注册
+  userAppRelationFlag?: boolean;  //是否关联应用
+  email?: string;
+  nickName?: string;
 }
 
 export class TokenManager {

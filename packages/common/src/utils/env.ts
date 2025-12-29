@@ -28,3 +28,7 @@ export const getPublicKey = (): string => {
 export const getMobileEditorURL = (): string => {
   return (window as any).global_config?.MOBILE_EDITOR_URL;
 };
+
+export const getResourceURL = (): string => {
+  return (window as any).global_config?.RESOURCE_URL;
+};

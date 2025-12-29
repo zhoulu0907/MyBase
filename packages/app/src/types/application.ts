@@ -242,6 +242,9 @@ export interface UpdateApplicationReq {
    * 主题色
    */
   themeColor?: string;
+
+  // 发布模式
+  publishModel?: string;
 }
 
 export interface UpdateApplicationNameReq {

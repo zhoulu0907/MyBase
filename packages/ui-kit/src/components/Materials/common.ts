@@ -780,6 +780,15 @@ export const timeFormatConfig: ITimeFormatConfigType<TTimeTypeSelectKeyType> = {
     { label: '时:分:秒', value: 'second' }
   ]
 }
+ export const dateTimeimeFormatConfig: any = {
+  key: 'dateFormat',
+  name: '日期时间格式',
+  type: 'DateTimeFormat',
+  range: [
+    { label: '年-月-日 时:分:秒', value: 'second' },
+    { label: '年-月-日 时:分', value: 'minute' },
+  ]
+}
 
 export const numberFormatConfig: INumberFormatConfigType = {
   key: 'numberFormat',

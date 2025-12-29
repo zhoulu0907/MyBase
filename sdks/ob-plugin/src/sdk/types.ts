@@ -19,11 +19,22 @@ export interface EntityAPI {
   listFields: () => string[];
   getEntities: () => Entity[];
   getFields: (entityId: string) => Field[];
+  setFieldValue?: (name: string, value: any) => void;
+  setFieldsValue?: (values: Record<string, any>) => void;
+  setSubRowFieldValue?: (tableName: string, rowIndex: number, fieldName: string, value: any) => void;
+  setSubRowFieldsValue?: (tableName: string, rowIndex: number, values: Record<string, any>) => void;
+}
+
+export interface EventsAPI {
+  on: (event: string, handler: (payload: any) => void) => void;
+  off: (event: string, handler: (payload: any) => void) => void;
+  emit: (event: string, payload?: any) => void;
 }
 
 export interface Context {
   terminal: Terminal;
   entity: EntityAPI;
+  events?: EventsAPI;
 }
 export interface ErrorReportOptions { scope?: string }
 export interface UIAPI { reportError(error: unknown, options?: ErrorReportOptions): void }

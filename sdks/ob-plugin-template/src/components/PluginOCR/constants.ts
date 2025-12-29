@@ -1,5 +1,5 @@
 export const OCR_TYPES = [
-  { label: '通用文本识别', value: 'general' },
+  // { label: '通用文本识别', value: 'general' },
   { label: '身份证识别(正面)', value: 'id_card_front' },
   { label: '身份证识别(双面)', value: 'id_card_both' }
 ];
@@ -18,6 +18,7 @@ export const OCR_FIELDS = {
   ],
   id_card_back: [
     { key: 'issue_authority', label: '签发机关' },
-    { key: 'valid_period', label: '有效期限' }
+    { key: 'valid_from', label: '签发日期' },
+    { key: 'valid_to', label: '失效日期' }
   ]
 };

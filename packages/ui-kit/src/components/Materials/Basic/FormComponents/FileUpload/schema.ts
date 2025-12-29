@@ -41,6 +41,7 @@ import type {
   ITooltipConfigType,
   IUploadLimitConfigType,
   IUploadSizeConfigType,
+  IUploadButtonConfigType,
   IVerifyConfigType,
   IWidthConfigType,
   TBooleanDefaultType,
@@ -66,6 +67,7 @@ export type TXInputFileUploadEditData = Array<
   | IVerifyConfigType
   | IUploadSizeConfigType
   | IUploadLimitConfigType
+  | IUploadButtonConfigType
   | IStatusConfigType<TStatusSelectKeyType>
   | ILayoutConfigType<TLayoutSelectKeyType>
   | IWidthConfigType<TWidthSelectKeyType>
@@ -161,10 +163,10 @@ const XFileUpload: XInputFileUploadSchema = {
     tooltip: '',
     dataField: [],
     uploadType: UPLOAD_VALUES[UPLOAD_OPTIONS.TEXT],
-    buttonName:'点击上传',
+    buttonName: '点击上传',
     buttonType: UPLOAD_BUTTON_TYPES.PRIMARY,
     showDownload: false,
-     verify: {
+    verify: {
       required: false,
       maxCount: 1,
       maxSize: 10,

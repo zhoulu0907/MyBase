@@ -10,12 +10,11 @@ import {
   STATUS_OPTIONS,
   STATUS_VALUES,
   DEFAULT_VALUE_TYPES,
-  DATE_EXTREME_TYPE,
-  DATE_DYNAMIC_VALUE
 } from '../../../constants';
 import '../index.css';
 import type { XInputDateRangePickerConfig } from './schema';
 import { getPopupContainer, securityEncodeText } from '@/utils';
+import { handelDisabledDate } from '../date';
 
 const XDateRangePicker = memo((props: XInputDateRangePickerConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const {
@@ -40,86 +39,6 @@ const XDateRangePicker = memo((props: XInputDateRangePickerConfig & { runtime?: 
 
   // 确保 dateType 有默认值，避免 Form.Item 中没有元素
   const currentDateType = (dateType !== DATE_VALUES[DATE_OPTIONS.FULL] && dateType) || DATE_VALUES[DATE_OPTIONS.DATE];
-
-  // 禁用判断
-  const handelDisabledDate = (current: any): boolean => {
-    // 当前
-    const currentDate = new Date(current);
-    // 今日零点
-    const today = dayjs(new Date()).format('YYYY-MM-DD') + ' 00:00:00';
-    const todatTime = new Date(today).getTime();
-
-    // 最早可选日期时间
-    if (dateRange?.earliestLimit) {
-      // 静态值
-      const currentTime = currentDate.getTime();
-      if (dateRange.earliestType === DATE_EXTREME_TYPE.STATIC && dateRange.earliestStaticValue) {
-        const earliestTime = new Date(dateRange.earliestStaticValue).getTime();
-        if (currentTime < earliestTime) {
-          return true;
-        }
-      }
-
-      // 动态值  DATE_DYNAMIC_VALUE  DATE_DYNAMIC_TYPE
-      if (dateRange.earliestType === DATE_EXTREME_TYPE.DYNAMIC && dateRange.earliestDynamicValue) {
-        const earliestTime =
-          todatTime +
-          (DATE_DYNAMIC_VALUE[dateRange.earliestDynamicValue as keyof typeof DATE_DYNAMIC_VALUE] || 0) *
-          24 *
-          3600 *
-          1000;
-        if (currentTime < earliestTime) {
-          return true;
-        }
-      }
-
-      // 变量
-      if (dateRange.earliestType === DATE_EXTREME_TYPE.VARIABLE && dateRange.earliestVariableValue) {
-        const earliestVariableValue = form.getFieldValue(dateRange.earliestVariableValue);
-        if (earliestVariableValue) {
-          const earliestTime = new Date(earliestVariableValue).getTime()
-          if (currentTime < earliestTime) {
-            return true
-          }
-        }
-      }
-    }
-
-    // 最晚可选日期时间
-    if (dateRange?.latestLimit) {
-      // 静态值
-      const currentTime = currentDate.getTime();
-      if (dateRange.latestType === DATE_EXTREME_TYPE.STATIC && dateRange.latestStaticValue) {
-        const latestTime = new Date(dateRange.latestStaticValue).getTime();
-        if (currentTime > latestTime) {
-          return true;
-        }
-      }
-
-      // 动态值  DATE_DYNAMIC_VALUE  DATE_DYNAMIC_TYPE
-      if (dateRange.latestType === DATE_EXTREME_TYPE.DYNAMIC && dateRange.latestDynamicValue) {
-        const latestTime =
-          todatTime +
-          (DATE_DYNAMIC_VALUE[dateRange.latestDynamicValue as keyof typeof DATE_DYNAMIC_VALUE] || 0) * 24 * 3600 * 1000;
-        if (currentTime > latestTime) {
-          return true;
-        }
-      }
-
-      // 变量
-      if (dateRange.latestType === DATE_EXTREME_TYPE.VARIABLE && dateRange.latestVariableValue) {
-        const latestVariableValue = form.getFieldValue(dateRange.latestVariableValue)
-        if (latestVariableValue) {
-          const latestTime = new Date(latestVariableValue).getTime()
-          if (currentTime > latestTime) {
-            return true
-          }
-        }
-      }
-    }
-
-    return false;
-  };
 
   return (
     <div className="formWrapper">
@@ -155,7 +74,9 @@ const XDateRangePicker = memo((props: XInputDateRangePickerConfig & { runtime?: 
           </div>
         ) : (
           <DatePicker.RangePicker
-            disabledDate={handelDisabledDate}
+            disabledDate={(current) => {
+              return handelDisabledDate(current, dateRange, form)
+            }}
             format={DATE_FORMAT[dateType]}
             mode={currentDateType}
             showTime={dateType === DATE_VALUES[DATE_OPTIONS.FULL]}

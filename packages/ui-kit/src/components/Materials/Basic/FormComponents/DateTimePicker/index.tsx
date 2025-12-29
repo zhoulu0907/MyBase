@@ -2,11 +2,12 @@ import { FORM_COMPONENT_TYPES } from '@/components/Materials/componentTypes';
 import { DatePicker, Form } from '@arco-design/web-react';
 import { nanoid } from 'nanoid';
 import { memo, useEffect, useState } from 'react';
-import { STATUS_OPTIONS, STATUS_VALUES, DEFAULT_VALUE_TYPES, DATE_EXTREME_TYPE, WEEK_OPTIONS_NUMBER, DATE_DYNAMIC_VALUE } from '../../../constants';
+import { STATUS_OPTIONS, STATUS_VALUES, DATE_TIME_FORMAT, DEFAULT_VALUE_TYPES } from '../../../constants';
 import '../index.css';
 import type { XInputDateTimePickerConfig } from './schema';
 import { getPopupContainer, securityEncodeText } from '@/utils';
 import dayjs from 'dayjs';
+import { handelDisabledDate } from '../date';
 
 const XDateTimePicker = memo((props: XInputDateTimePickerConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const {
@@ -16,6 +17,7 @@ const XDateTimePicker = memo((props: XInputDateTimePickerConfig & { runtime?: bo
     status,
     defaultValueConfig,
     dateRange,
+    dateType,
     verify,
     layout,
     runtime = true,
@@ -26,87 +28,6 @@ const XDateTimePicker = memo((props: XInputDateTimePickerConfig & { runtime?: bo
   const { form } = Form.useFormContext();
   const fieldId = dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.DATE_TIME_PICKER}_${nanoid()}`
   const fieldValue = Form.useWatch(fieldId, form);
-
-  // 禁用判断
-  const handelDisabledDate = (current: any): boolean => {
-    // 当前
-    const currentDate = new Date(current);
-    // 今日零点
-    const today = dayjs(new Date()).format('YYYY-MM-DD') + ' 00:00:00';
-    const todatTime = new Date(today).getTime();
-    // 特定星期
-    if (dateRange?.weekLimit && dateRange.week.length) {
-      const currentDay = currentDate.getDay();
-      const flag = dateRange.week.some((ele: string) => WEEK_OPTIONS_NUMBER[ele as keyof typeof WEEK_OPTIONS_NUMBER] === currentDay)
-      if (!flag) {
-        return true;
-      }
-    }
-
-    // 最早可选日期时间
-    if (dateRange?.earliestLimit) {
-      // 静态值
-      const currentTime = currentDate.getTime();
-      if (dateRange.earliestType === DATE_EXTREME_TYPE.STATIC && dateRange.earliestStaticValue) {
-        const earliestTime = new Date(dateRange.earliestStaticValue).getTime()
-        if (currentTime < earliestTime) {
-          return true
-        }
-      }
-
-      // 动态值  DATE_DYNAMIC_VALUE  DATE_DYNAMIC_TYPE
-      if (dateRange.earliestType === DATE_EXTREME_TYPE.DYNAMIC && dateRange.earliestDynamicValue) {
-        const earliestTime = todatTime + (DATE_DYNAMIC_VALUE[dateRange.earliestDynamicValue as keyof typeof DATE_DYNAMIC_VALUE] || 0) * 24 * 3600 * 1000
-        if (currentTime < earliestTime) {
-          return true
-        }
-      }
-
-      // 变量
-      if (dateRange.earliestType === DATE_EXTREME_TYPE.VARIABLE && dateRange.earliestVariableValue) {
-        const earliestVariableValue = form.getFieldValue(dateRange.earliestVariableValue);
-        if (earliestVariableValue) {
-          const earliestTime = new Date(earliestVariableValue).getTime()
-          if (currentTime < earliestTime) {
-            return true
-          }
-        }
-      }
-    }
-
-    // 最晚可选日期时间
-    if (dateRange?.latestLimit) {
-      // 静态值
-      const currentTime = currentDate.getTime();
-      if (dateRange.latestType === DATE_EXTREME_TYPE.STATIC && dateRange.latestStaticValue) {
-        const latestTime = new Date(dateRange.latestStaticValue).getTime()
-        if (currentTime > latestTime) {
-          return true
-        }
-      }
-
-      // 动态值  DATE_DYNAMIC_VALUE  DATE_DYNAMIC_TYPE
-      if (dateRange.latestType === DATE_EXTREME_TYPE.DYNAMIC && dateRange.latestDynamicValue) {
-        const latestTime = todatTime + (DATE_DYNAMIC_VALUE[dateRange.latestDynamicValue as keyof typeof DATE_DYNAMIC_VALUE] || 0) * 24 * 3600 * 1000
-        if (currentTime > latestTime) {
-          return true
-        }
-      }
-
-      // 变量
-      if (dateRange.latestType === DATE_EXTREME_TYPE.VARIABLE && dateRange.latestVariableValue) {
-        const latestVariableValue = form.getFieldValue(dateRange.latestVariableValue)
-        if (latestVariableValue) {
-          const latestTime = new Date(latestVariableValue).getTime()
-          if (currentTime > latestTime) {
-            return true
-          }
-        }
-      }
-    }
-
-    return false;
-  }
 
   return (
     <div className="formWrapper">
@@ -125,16 +46,18 @@ const XDateTimePicker = memo((props: XInputDateTimePickerConfig & { runtime?: bo
           margin: 0,
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
-        initialValue={defaultValueConfig?.customValue}
+        initialValue={defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : ''}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
-          <div>{securityEncodeText(security, fieldValue)}</div>
+          <div>{fieldValue ? securityEncodeText(security, dayjs(fieldValue).format(DATE_TIME_FORMAT[dateType])):'--'}</div>
         ) : (
           <DatePicker
             showTime
-            format="YYYY-MM-DD HH:mm:ss"
+            format={DATE_TIME_FORMAT[dateType]}
             getPopupContainer={getPopupContainer}
-            disabledDate={handelDisabledDate}
+            disabledDate={(current) => {
+              return handelDisabledDate(current, dateRange, form)
+            }}
             style={{
               width: '100%',
               pointerEvents: runtime ? 'unset' : 'none'

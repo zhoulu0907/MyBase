@@ -3,7 +3,6 @@ import { nanoid } from 'nanoid';
 import { formMeta } from './formMeta';
 import ccto from '../../assets/bpmLogo/ccto.png';
 
-
 export const CcRecipientsNodeRegistry: FlowNodeRegistry = {
   type: 'cc',
   name: '抄送人',
@@ -34,7 +33,11 @@ export const CcRecipientsNodeRegistry: FlowNodeRegistry = {
       id: `ccRecipients_${nanoid(5)}`,
       type: 'cc',
       data: {
-        name: '抄送人'
+        name: '抄送人',
+        errorMsg: '节点缺少抄送人',
+        copyReceiverConfig: {
+          handlerType: 'user'
+        }
       }
     };
   }

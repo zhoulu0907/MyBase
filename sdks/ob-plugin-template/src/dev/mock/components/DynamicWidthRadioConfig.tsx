@@ -21,7 +21,9 @@ const DynamicWidthRadioConfig = ({ onChange, item, value }: Props) => {
       >
         {item.range?.map((option: any) => (
           <Radio key={option.key} value={option.value} className={styles.widthRadio}>
-            {option.text?.startsWith('editor.') ? option.text.split('.').pop() : option.text}
+            {option.text?.startsWith('editor.')
+              ? option.text.split('.').pop()
+              : option.text }
           </Radio>
         ))}
       </Radio.Group>

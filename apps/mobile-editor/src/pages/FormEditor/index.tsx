@@ -43,6 +43,8 @@ const FormEditor: React.FC<FormEditorProps & { instanceId: string }> = ({ instan
               cpType={cp.type}
               pageComponentSchema={formPageComponentSchemas[cp.id]}
               runtime={true}
+              editPreview={true}
+              useStoreSignals={props}
             />
           </div>
         )}

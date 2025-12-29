@@ -96,7 +96,6 @@ export default function EditorWorkspace() {
 
   const { editMode, setEditMode } = currentEditorSignal;
   const mobileEditorDragRef = useRef<MicroApp | null>(null);
-
   const qiankunActions = initGlobalState({
     mainEntity,
     subEntities,
@@ -131,13 +130,12 @@ export default function EditorWorkspace() {
     delSubTableComponents,
     batchDelSubTableComponents
   });
-
   useEffect(() => {
     if (editMode.value !== EditMode.MOBILE) {
       return;
     }
     console.log('loading mobile-editor-drag-list');
-
+    
     const mobileEditorDrag = loadMicroApp({
       name: 'mobile-editor-drag-list',
       entry: getMobileEditorURL(),
@@ -398,52 +396,27 @@ export default function EditorWorkspace() {
                     schema.config.verify = {
                       ...schema.config.verify,
                       required: field.isRequired,
-                      noRepeat: field.isUnique
+                      noRepeat: typeof schema.config?.verify?.noRepeat === 'boolean' ? field.isUnique === 1 : undefined
                     };
 
-                    // 字段选项列表（单/多选字段专用） options COMPONENT_MAP
-                    if (cpType === FORM_COMPONENT_TYPES.SELECT_ONE || cpType === FORM_COMPONENT_TYPES.SELECT_MUTIPLE) {
-                      // 判断是否引用字典数据
-                      if (field.dictTypeId) {
-                        const res = await getDictDetail(field.dictTypeId);
-                        const dictDataList = res?.type ? await getDictDataListByType(res.type) : [];
-                        const dictOptions = dictDataList?.filter((e: any) => e.status === 1); // 只显示启用状态的字典数据
-                        if (dictOptions.length) {
-                          const newDefaultOptionsConfig = {
-                            type: DEFAULT_OPTIONS_TYPE.DICT,
-                            disabled: true,
-                            dictTypeId: field.dictTypeId,
-                            colorMode: true,
-                            colorModeType: COLOR_MODE_TYPES.POINT,
-                            defaultOptions: dictOptions
-                          };
-                          schema.config.defaultOptionsConfig = {
-                            ...schema.config.defaultOptionsConfig,
-                            ...newDefaultOptionsConfig
-                          };
-                        }
-                      } else if (field.options?.length) {
-                        const newDefaultOptionsConfig = {
-                          defaultOptions: field.options.map((e: any) => ({
-                            label: e.optionLabel,
-                            value: e.optionValue
-                          }))
-                        };
-                        schema.config.defaultOptionsConfig = {
-                          ...schema.config.defaultOptionsConfig,
-                          disabled: true,
-                          ...newDefaultOptionsConfig
-                        };
-                      }
-                    }
                     // 字段约束配置（长度/正则） constraints
                     schema.config.constraints = field.constraints;
-                    // 自动编号完整配置（含规则项） autoNumberConfig
-                    if (cpType === FORM_COMPONENT_TYPES.AUTO_CODE) {
-                      schema.config.autoCodeConfig = field.autoNumberConfig || schema.config.autoCodeConfig;
-                      schema.config.autoCodeDisabled = field?.autoNumberConfig?.id ? true : false;
+                    // 数据选择
+                    if (cpType === FORM_COMPONENT_TYPES.DATA_SELECT) {
+                      // 数据源
+                      schema.config.selectedDataSource = {
+                        ...schema.config.selectedDataSource,
+                        entityUuid: field.dataSelectionConfig?.targetEntityUuid
+                      };
+                      // 回显字段  name
+                      schema.config.displayFields = field.dataSelectionConfig?.targetFieldName
+                        ? [
+                            {
+                              value: field.dataSelectionConfig?.targetFieldName
+                            }
+                          ]
+                        : [];
                     }
-                    // 关联的字典类型ID    dictTypeId
 
                     schema.config.cpName = field.displayName;
                     schema.config.id = cpID;
@@ -515,54 +488,27 @@ export default function EditorWorkspace() {
                     subSchema.config.verify = {
                       ...subSchema.config.verify,
                       required: ele.isRequired,
-                      noRepeat: ele.isUnique
+                      noRepeat: typeof subSchema.config?.verify?.noRepeat === 'boolean' ? ele.isUnique === 1 : undefined
                     };
 
-                    // 字段选项列表（单/多选字段专用） options
-                    if (
-                      subType === FORM_COMPONENT_TYPES.SELECT_ONE ||
-                      subType === FORM_COMPONENT_TYPES.SELECT_MUTIPLE
-                    ) {
-                      if (ele.dictTypeId) {
-                        const res = await getDictDetail(ele.dictTypeId);
-                        const dictDataList = res?.type ? await getDictDataListByType(res.type) : [];
-                        const dictOptions = dictDataList?.filter((e: any) => e.status === 1); // 只显示启用状态的字典数据
-                        if (dictOptions.length) {
-                          const newDefaultOptionsConfig = {
-                            type: DEFAULT_OPTIONS_TYPE.DICT,
-                            disabled: true,
-                            dictTypeId: ele.dictTypeId,
-                            colorMode: true,
-                            colorModeType: COLOR_MODE_TYPES.POINT,
-                            defaultOptions: dictOptions
-                          };
-                          subSchema.config.defaultOptionsConfig = {
-                            ...subSchema.config.defaultOptionsConfig,
-                            ...newDefaultOptionsConfig
-                          };
-                        }
-                      } else if (ele.options?.length) {
-                        const newDefaultOptionsConfig = {
-                          defaultOptions: ele.options.map((e: any) => ({
-                            label: e.optionLabel,
-                            value: e.optionValue
-                          }))
-                        };
-                        subSchema.config.defaultOptionsConfig = {
-                          ...subSchema.config.defaultOptionsConfig,
-                          disabled: true,
-                          ...newDefaultOptionsConfig
-                        };
-                      }
-                    }
                     // 字段约束配置（长度/正则） constraints
                     subSchema.config.constraints = ele.constraints;
-                    // 自动编号完整配置（含规则项） autoNumberConfig
-                    if (subType === FORM_COMPONENT_TYPES.AUTO_CODE) {
-                      subSchema.config.autoCodeConfig = ele.autoNumberConfig || subSchema.config.autoCodeConfig;
-                      subSchema.config.autoCodeDisabled = ele?.autoNumberConfig?.id ? true : false;
+                    // 数据选择
+                    if (subType === FORM_COMPONENT_TYPES.DATA_SELECT) {
+                      // 数据源
+                      subSchema.config.selectedDataSource = {
+                        ...subSchema.config.selectedDataSource,
+                        entityUuid: ele.dataSelectionConfig?.targetEntityUuid
+                      };
+                      // 回显字段  name
+                      subSchema.config.displayFields = ele.dataSelectionConfig?.targetFieldName
+                        ? [
+                            {
+                              value: ele.dataSelectionConfig?.targetFieldName
+                            }
+                          ]
+                        : [];
                     }
-                    // 关联的字典类型ID    dictTypeId
 
                     subSchema.config.cpName = ele.displayName;
                     subSchema.config.id = subId;
@@ -581,7 +527,7 @@ export default function EditorWorkspace() {
                   }
                   setSubTableComponents(cpID, subFieldComponents);
                   entityList.push({ displayName: cpName, id: cpID, type: cpType });
-                } else if (item.entityId && item.entityId !== mainEntity.entityId) {
+                } else if (item.tableName && item.tableName !== mainEntity.tableName) {
                   // 子表 数据字段  不做任何操作
                 } else {
                   // 主表字段、普通字段
@@ -652,7 +598,8 @@ export default function EditorWorkspace() {
               if (tableName && fieldName) {
                 // 获取当前字段数据源配置
                 const currentField = mainEntity.fields?.find((ele: AppEntityField) => ele.fieldName === fieldName);
-                if (currentField) {
+                // 非系统字段
+                if (currentField && currentField.isSystemField !== 1) {
                   // 数据长度 dataLength
                   // 小数位数 decimalPlaces
                   // 默认值 defaultValue => defaultValueConfig
@@ -671,54 +618,28 @@ export default function EditorWorkspace() {
                   schema.config.verify = {
                     ...schema.config.verify,
                     required: currentField.isRequired,
-                    noRepeat: currentField.isUnique
+                    noRepeat:
+                      typeof schema.config?.verify?.noRepeat === 'boolean' ? currentField.isUnique === 1 : undefined
                   };
 
-                  // 字段选项列表（单/多选字段专用） options
-                  if (
-                    itemType === FORM_COMPONENT_TYPES.SELECT_ONE ||
-                    itemType === FORM_COMPONENT_TYPES.SELECT_MUTIPLE
-                  ) {
-                    if (currentField.dictTypeId) {
-                      const res = await getDictDetail(currentField.dictTypeId);
-                      const dictDataList = res?.type ? await getDictDataListByType(res.type) : [];
-                      const dictOptions = dictDataList?.filter((e: any) => e.status === 1); // 只显示启用状态的字典数据
-                      if (dictOptions.length) {
-                        const newDefaultOptionsConfig = {
-                          type: DEFAULT_OPTIONS_TYPE.DICT,
-                          disabled: true,
-                          dictTypeId: currentField.dictTypeId,
-                          colorMode: true,
-                          colorModeType: COLOR_MODE_TYPES.POINT,
-                          defaultOptions: dictOptions
-                        };
-                        schema.config.defaultOptionsConfig = {
-                          ...schema.config.defaultOptionsConfig,
-                          ...newDefaultOptionsConfig
-                        };
-                      }
-                    } else if (currentField.options?.length) {
-                      const newDefaultOptionsConfig = {
-                        defaultOptions: currentField.options.map((e) => ({
-                          label: e.optionLabel,
-                          value: e.optionValue
-                        }))
-                      };
-                      schema.config.defaultOptionsConfig = {
-                        ...schema.config.defaultOptionsConfig,
-                        disabled: true,
-                        ...newDefaultOptionsConfig
-                      };
-                    }
-                  }
                   // 字段约束配置（长度/正则） constraints
                   schema.config.constraints = currentField.constraints;
-                  // 自动编号完整配置（含规则项） autoNumberConfig
-                  if (itemType === FORM_COMPONENT_TYPES.AUTO_CODE) {
-                    schema.config.autoCodeConfig = currentField.autoNumberConfig || schema.config.autoCodeConfig;
-                    schema.config.autoCodeDisabled = currentField?.autoNumberConfig?.id ? true : false;
+                  // 数据选择
+                  if (itemType === FORM_COMPONENT_TYPES.DATA_SELECT) {
+                    // 数据源
+                    schema.config.selectedDataSource = {
+                      ...schema.config.selectedDataSource,
+                      entityUuid: currentField.dataSelectionConfig?.targetEntityUuid
+                    };
+                    // 回显字段  name
+                    schema.config.displayFields = currentField.dataSelectionConfig?.targetFieldName
+                      ? [
+                          {
+                            value: currentField.dataSelectionConfig?.targetFieldName
+                          }
+                        ]
+                      : [];
                   }
-                  // 关联的字典类型ID    dictTypeId
                 }
                 schema.config.dataField = [tableName, fieldName];
                 schema.config.status = STATUS_VALUES[STATUS_OPTIONS.DEFAULT];

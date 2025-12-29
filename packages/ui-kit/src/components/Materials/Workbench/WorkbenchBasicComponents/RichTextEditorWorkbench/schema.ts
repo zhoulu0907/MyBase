@@ -14,13 +14,16 @@ import {
 import type {
   IDataFieldConfigType,
   ILabelConfigType,
+  ITextConfigType,
   TBooleanDefaultType,
   TRadioDefaultType,
   TSelectDefaultType,
   TTextDefaultType,
-  IDefaultValueConfigType
+  IDefaultValueConfigType,
+  IWbColorConfigType,
+  IWbRichTextContentConfigType,
+  TWbColorDefaultType
 } from '../../core/types';
-import type {TWbColorDefaultType} from '../../core/types';
 import { WORKBENCH_CONFIG_TYPES, WORKBENCH_STATUS_OPTIONS, WORKBENCH_STATUS_VALUES } from '../../core/constants';
 import type { TWorkbenchStatusSelectKeyType } from '../../config/workbenchShared';
 
@@ -31,6 +34,9 @@ export interface XRichTextSchema {
 
 export type TXRichTextEditData = Array<
   | ILabelConfigType
+  | ITextConfigType
+  | IWbColorConfigType
+  | IWbRichTextContentConfigType
   | IDataFieldConfigType
   | IDefaultValueConfigType
 >;

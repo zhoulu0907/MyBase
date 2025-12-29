@@ -205,8 +205,14 @@ const XDeptSelect = memo((props: XDeptSelectConfig & { runtime?: boolean; detail
                           key={item.key}
                           value={item.key}
                           checked={selectedKeys.includes(item.key)}
-                          onChange={() => {
+                          onChange={(checked, _value, e) => {
                             setSelectedKeys([item.key]);
+                            if (!isMultiple && checked) {
+                              e.stopPropagation();
+                              const curSelectDept = getDeptData(deptData?.deptList, [item.key]);
+                              form?.setFieldValue(fieldId, curSelectDept);
+                              setVisible(false);
+                            }
                           }}
                         >
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.16rem' }}>

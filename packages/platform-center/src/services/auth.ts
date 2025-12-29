@@ -6,6 +6,7 @@ import {
   RuntimeAccountLoginRequest,
   RuntimeCorpLoginRequest,
   RuntimeMobileLoginRequest,
+  RuntimeThirdLoginRequest,
   SendVerifyCodeRequest,
   TenantLoginRequest
 } from '../types';
@@ -39,6 +40,10 @@ export const runtimeCorpLogin = (req: RuntimeCorpLoginRequest, headers: Headers)
   return runtimeService.post('/auth/corp-login', req, { headers });
 };
 
+export const runtimeThirdLogin = (req: RuntimeThirdLoginRequest, headers: Headers) => {
+  return runtimeService.post('/auth/third-login', req, { headers });
+};
+
 // TODO(mickey): 重构合并
 
 export const platformLogout = () => {
@@ -54,7 +59,7 @@ export const runtimeLogout = () => {
 };
 
 export const sendVerifyCodeApi = (data: SendVerifyCodeRequest) => {
-  return systemService.post('/auth/send-verify-code', data);
+  return (isRuntimeEnv() ? runtimeService : systemService).post('/auth/send-verify-code', data);
 };
 
 // 获取验证码 /system/captcha/get

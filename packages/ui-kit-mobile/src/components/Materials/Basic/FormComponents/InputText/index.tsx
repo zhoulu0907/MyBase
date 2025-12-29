@@ -38,21 +38,17 @@ const XInputText = memo((props: XInputTextConfig & { runtime?: boolean; detailMo
         inputStyle={{
           textAlign: align
         }}
-        style={{
-          width: '100%'
-        }}
+        blockChangeWhenCompositing={true}
       />
     );
   };
 
   const rules: ITypeRules<ValidatorType.Custom>[] = [
     {
+      required: verify?.required,
       type: ValidatorType.Custom,
+      message: `${label.text}是必填项`,
       validator: (value, callback) => {
-        if (!value && verify?.required) {
-          callback(`${label.text}是必填项`);
-        }
-
         if (value && verify?.lengthLimit) {
           if (value.length < verify?.minLength!) {
             callback(`字数不能小于${verify?.minLength}`);
@@ -77,8 +73,8 @@ const XInputText = memo((props: XInputTextConfig & { runtime?: boolean; detailMo
       }}
     >
       {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
-        // 只读模式，渲染文本内容 TODO 主表不展示
-        <div className="readonlyText">{form?.getFieldValue(fieldId)}</div>
+        // 只读模式，渲染文本内容
+        <Input className="readonlyText" readOnly value={form?.getFieldValue(fieldId) || (defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : '')}/>
       ) : (
         renderContent()
       )}

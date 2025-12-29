@@ -11,6 +11,7 @@ import {
   WORKBENCH_COMPONENT_MAP,
   WorkbenchComponentType
 } from 'src/components/Materials';
+import { PageType } from '@onebase/app';
 
 /**
  * 组件渲染的通用属性
@@ -42,6 +43,7 @@ interface PreviewRenderProps {
 
   // 表格数据id
   recordId?: string;
+  pageSetType?: PageType;
 }
 
 const PreviewRender: React.FC<PreviewRenderProps> = ({
@@ -55,7 +57,8 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
   refresh,
   pageType,
   cpState,
-  recordId
+  recordId,
+  pageSetType
 }) => {
   // 获取组件配置，使用深拷贝确保每次都是新对象
   const [componentConfig, setComponentConfig] = useState(() => {

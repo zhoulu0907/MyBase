@@ -61,6 +61,8 @@ const TableSearch = memo((props: TableSearchConfig) => {
         dataField,
         defaultValue: undefined,
         defaultValueConfig: { type: DEFAULT_VALUE_TYPES.CUSTOM, customValue: null },
+        defaultDeptValue: undefined,     // 清空search是部门选择的默认值
+        defaultUserValue: undefined,     // 清空search是人员选择的默认值
         status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
         verify: { required: false },
         tooltip: '',
@@ -84,6 +86,8 @@ const TableSearch = memo((props: TableSearchConfig) => {
         dataField,
         defaultValue: undefined,
         defaultValueConfig: { type: DEFAULT_VALUE_TYPES.CUSTOM, customValue: null },
+        defaultDeptValue: undefined,  // 清空search是部门选择的默认值
+        defaultUserValue: undefined,  // 清空search是人员选择的默认值
         status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
         verify: { required: false },
         tooltip: '',

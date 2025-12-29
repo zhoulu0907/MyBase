@@ -1,4 +1,5 @@
 import React from 'react';
+import { EditMode } from '@onebase/common';
 import { WorkbenchConfiger, WorkbenchPanel, WorkbenchWorkspace } from '../../workbench';
 
 import styles from './index.module.less';
@@ -8,10 +9,10 @@ import styles from './index.module.less';
  * 集成面板、工作区、配置区
  */
 
-const WorkbenchEditor: React.FC = () => {
+const WorkbenchEditor: React.FC<{ editMode?: string }> = ({ editMode }) => {
   return (
     <div className={styles.workbenchEditorPage}>
-      <WorkbenchPanel />
+      {editMode !== EditMode.MOBILE && <WorkbenchPanel />}
       <WorkbenchWorkspace />
       <WorkbenchConfiger />
     </div>

@@ -16,7 +16,7 @@ export const PluginOCRSchema = {
       },
       // 显示方式
       {
-        type: CONFIG_TYPES.RADIO_DATA,
+        type: CONFIG_TYPES.RADIO_INPUT,
         key: 'displayMode',
         name: '显示方式',
         range: [
@@ -27,7 +27,7 @@ export const PluginOCRSchema = {
       },
       // 识别触发
       {
-        type: CONFIG_TYPES.RADIO_DATA,
+        type: CONFIG_TYPES.RADIO_INPUT,
         key: 'triggerMode',
         name: '识别触发',
         range: [
@@ -56,33 +56,11 @@ export const PluginOCRSchema = {
           uncheckedText: '关闭'
         }
       },
-      // 5. 识别内容 - 是否指定
+      // 5. OCR 识别类型配置
       {
-        type: CONFIG_TYPES.STATUS_RADIO,
-        key: 'recognitionMode',
-        name: '识别内容-模式',
-        range: [
-          { key: 'fixed', value: 'fixed', text: '指定类型' }
-          // { key: 'linked', value: 'linked', text: '数据联动' } // 暂不显示
-        ]
-      },
-      // 6. 识别内容 - 识别类型 (仅在 fixed 模式下生效)
-      {
-        type: CONFIG_TYPES.STATUS_RADIO,
-        key: 'recognitionType',
-        name: '识别内容-类型',
-        range: OCR_TYPES.map((o) => ({ key: String(o.value), value: o.value, text: o.label })),
-        // 暂时移除依赖，确保始终显示，避免线上环境依赖判断异常
-        // dependency: {
-        //   key: 'recognitionMode',
-        //   value: 'fixed'
-        // }
-      },
-      // 7. 识别内容 - 数据绑定规则配置 (自定义复杂配置)
-      {
-        type: 'OCRBindingSetter',
-        key: 'bindingRules',
-        name: '识别内容-数据绑定'
+        type: 'OCRSettingsSetter',
+        key: 'ocrConfig',
+        name: 'OCR 识别类型配置'
       },
       // 8. 校验
       CONFIG_TYPES.VERIFY,
@@ -96,11 +74,13 @@ export const PluginOCRSchema = {
       label: { text: '文字识别', display: true },
       description: '图片类型支持PNG、JPG、JPEG、BMP，大小不超过5M',
       previewEnabled: true,
-      recognitionMode: 'fixed',
-      recognitionType: 'general',
+      ocrConfig: {
+        recognitionMode: 'fixed',
+        recognitionType: 'id_card_front',
+        bindingRules: []
+      },
       displayMode: 'click',
-      triggerMode: 'button',
-      bindingRules: [],
+      triggerMode: 'auto',
       verify: {
         required: false
       },

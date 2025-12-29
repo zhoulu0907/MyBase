@@ -1,10 +1,10 @@
 import { Form, Uploader, Toast, Loading, Ellipsis } from '@arco-design/mobile-react';
 import { type UploadItem } from '@arco-design/mobile-react/lib/Upload';
+import { FileListMethods } from '@arco-design/mobile-react/cjs/uploader';
 import { IconDelete, IconClose, IconDownload } from '@arco-design/mobile-react/esm/icon';
-import { uploadFile } from '@onebase/platform-center';
 import { nanoid } from 'nanoid';
 import { memo, useState, useEffect } from 'react';
-import { attachmentDownload, menuSignal } from '@onebase/app';
+import { attachmentDownload, attachmentUpload, menuSignal } from '@onebase/app';
 import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, FormSchema, downloadFileByUrl } from '@onebase/ui-kit';
 import DownloadLink from '@/assets/images/download_link.svg';
 import '../index.css';
@@ -55,11 +55,15 @@ const XFileUpload = memo((props: XFileUploadConfig & { runtime?: boolean; detail
     formData.append('file', file);
 
     try {
-      const res = await uploadFile(formData);
-      return {
-        name: file.name,
-        response: res
-      };
+      if (runtime) {
+        const res = await attachmentUpload(tableName, formData);
+        return {
+          name: file.name,
+          response: res
+        };
+      } else {
+        return '';
+      }
     } catch (error) {
       Toast.toast({
         content: '上传失败，请重试',
@@ -84,7 +88,7 @@ const XFileUpload = memo((props: XFileUploadConfig & { runtime?: boolean; detail
   };
 
   // 自定义文件列表展示
-  const renderUploadList = (fileListMethods: any) => {
+  const renderUploadList = (fileListMethods: FileListMethods) => {
     const getFileIcon = (file: UploadItem) => {
       if (file?.name) {
         // todo  根据文件类型展示不同icon

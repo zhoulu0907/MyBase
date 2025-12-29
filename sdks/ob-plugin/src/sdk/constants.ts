@@ -9,6 +9,8 @@ export const CONFIG_TYPES = {
   SWITCH_INPUT: 'SwitchInput',
   DATE_INPUT: 'DateInput',
   CHECKED: 'Checked',
+  RADIO_INPUT: 'RadioInput',
+
 
   // 组件标题输入
   LABEL_INPUT: 'LabelInput',

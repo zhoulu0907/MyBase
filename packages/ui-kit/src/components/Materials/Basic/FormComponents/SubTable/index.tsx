@@ -1,11 +1,10 @@
 import CompDeleteIcon from '@/assets/images/app_delete.svg';
 import CompCopyIcon from '@/assets/images/copy_comp_icon.svg';
 import CompShowIcon from '@/assets/images/eye_off_icon.svg';
-import { Button, Divider, Form, Input, Layout, Table } from '@arco-design/web-react';
-import { IconDelete, IconPlus } from '@arco-design/web-react/icon';
+import { Button, Divider, Form, Input, Layout, Table, Tooltip } from '@arco-design/web-react';
+import { IconDelete, IconPlus, IconQuestionCircle } from '@arco-design/web-react/icon';
 import { ENTITY_TYPE_VALUE } from '@onebase/app';
 import { pagesRuntimeSignal } from '@onebase/common';
-import { getDictDataListByType, getDictDetail } from '@onebase/platform-center';
 import { useSignals } from '@preact/signals-react/runtime';
 import { nanoid } from 'nanoid';
 import { useEffect, useState } from 'react';
@@ -111,7 +110,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
       return;
     }
     // 只能拖拽表单 && 不能是子表单
-    const isForm = isFormComponent(itemType || '');
+    const isForm = isFormComponent(itemType);
     if (!itemType || !isForm || itemType === FORM_COMPONENT_TYPES.SUB_TABLE) {
       if (cpID) {
         const updatedColumns = subTableComponents[cpID]?.filter((cp) => cp.id !== cpID);
@@ -164,51 +163,27 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
       schema.config.verify = {
         ...schema.config.verify,
         required: currentField.isRequired,
-        noRepeat: currentField.isUnique
+        noRepeat: typeof schema.config?.verify?.noRepeat === 'boolean' ? currentField.isUnique === 1 : undefined
       };
 
-      // 字段选项列表（单/多选字段专用） options
-      if (itemType === FORM_COMPONENT_TYPES.SELECT_ONE || itemType === FORM_COMPONENT_TYPES.SELECT_MUTIPLE) {
-        if (currentField.dictTypeId) {
-          const res = await getDictDetail(currentField.dictTypeId);
-          const dictDataList = res?.type ? await getDictDataListByType(res.type) : [];
-          const dictOptions = dictDataList?.filter((e: any) => e.status === 1); // 只显示启用状态的字典数据
-          if (dictOptions.length) {
-            const newDefaultOptionsConfig = {
-              type: DEFAULT_OPTIONS_TYPE.DICT,
-              disabled: true,
-              dictTypeId: currentField.dictTypeId,
-              colorMode: true,
-              colorModeType: COLOR_MODE_TYPES.POINT,
-              defaultOptions: dictOptions
-            };
-            schema.config.defaultOptionsConfig = {
-              ...schema.config.defaultOptionsConfig,
-              ...newDefaultOptionsConfig
-            };
-          }
-        } else if (currentField.options?.length) {
-          const newDefaultOptionsConfig = {
-            defaultOptions: currentField.options.map((e: any) => ({
-              label: e.optionLabel,
-              value: e.optionValue
-            }))
-          };
-          schema.config.defaultOptionsConfig = {
-            ...schema.config.defaultOptionsConfig,
-            disabled: true,
-            ...newDefaultOptionsConfig
-          };
-        }
-      }
       // 字段约束配置（长度/正则） constraints
       schema.config.constraints = currentField.constraints;
-      // 自动编号完整配置（含规则项） autoNumberConfig
-      if (itemType === FORM_COMPONENT_TYPES.AUTO_CODE) {
-        schema.config.autoCodeConfig = currentField.autoNumberConfig || schema.config.autoCodeConfig;
-        schema.config.autoCodeDisabled = currentField?.autoNumberConfig?.id ? true : false;
+      // 数据选择
+      if (itemType === FORM_COMPONENT_TYPES.DATA_SELECT) {
+        // 数据源
+        schema.config.selectedDataSource = {
+          ...schema.config.selectedDataSource,
+          entityUuid: currentField.dataSelectionConfig?.targetEntityUuid
+        };
+        // 回显字段  name
+        schema.config.displayFields = currentField.dataSelectionConfig?.targetFieldName
+          ? [
+              {
+                value: currentField.dataSelectionConfig?.targetFieldName
+              }
+            ]
+          : [];
       }
-      // 关联的字典类型ID    dictTypeId
     }
 
     // 兜底：当未提供表名（如插件表单组件），尝试从已存在的同子表组件推断子表表名
@@ -317,7 +292,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
       tableColumns.push(indexColumn);
     }
     for (let [colIdx, column] of (subTableComponents[id] || []).entries()) {
-      const config = pageComponentSchemas[column.id].config
+      const config = pageComponentSchemas[column.id].config;
       const displayName = config.label.text || column.displayName;
       const required = config?.verify?.required;
       const [subTableName, fieldName] = config.dataField;
@@ -327,21 +302,27 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
           <>
             {required ? <span style={{ color: 'red', paddingRight: '4px' }}>*</span> : null}
             {displayName}
+            {config?.tooltip && (
+              <Tooltip content={config.tooltip}>
+                <IconQuestionCircle style={{ marginLeft: '4px', color: 'var(--color-text-4)' }} />
+              </Tooltip>
+            )}
           </>
         ),
         dataIndex: fieldName,
         key: fieldName,
+        width: undefined as any,
         fixed: undefined as any,
         headerCellStyle: {
           minWidth: '200px'
         },
         bodyCellStyle: {
-          padding: '4px 0'
+          padding: '4px'
         },
         render: (_text: string, _record: any, index: number) => {
           const newConfig = {
             ...pageComponentSchemas[column.id].config,
-            dataField: [mainEntity.tableName, `${id}.${index}.${fieldName}`]
+            dataField: [mainEntity.tableName, `${subTableName}.${index}.${fieldName}`]
           };
           const finalConfig = applySubTableCellOverrides(newConfig, column.type);
           const pageSchema = { ...pageComponentSchemas[column.id], config: finalConfig };
@@ -375,6 +356,9 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
       tableColumns.forEach((ele, index) => {
         if (index < subTableConfig.columnFixed) {
           ele.fixed = 'left';
+          if (index !== 0 || ele.dataIndex !== 'index') {
+            ele.width = '200px';
+          }
         }
       });
     }
@@ -438,7 +422,13 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
     <Layout className="XSubTable" style={runtime ? { border: 'none' } : {}}>
       <Form.Item
         label={
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+          <div
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}
+            onClick={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+            }}
+          >
             {label.display && label.text && (
               <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>
                 {verify?.required ? <span style={{ color: 'red', paddingRight: '4px' }}>*</span> : null}
@@ -447,13 +437,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
             )}
 
             {!detailMode && (
-              <Button
-                type="outline"
-                size="small"
-                icon={<IconPlus />}
-                style={{ pointerEvents: runtime ? 'unset' : 'none', marginLeft: 'auto' }}
-                onClick={handleAdd}
-              >
+              <Button type="outline" size="small" icon={<IconPlus />} onClick={handleAdd}>
                 新增一项
               </Button>
             )}
@@ -490,7 +474,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
         ) : (
           <div style={{ width: '100%', display: 'flex' }}>
             {subTableConfig?.showIndex && (
-              <div className="componentItem2" style={{ width: '62px', paddingTop: '18px' }}>
+              <div className="subComponentItem2" style={{ width: '62px', paddingTop: '18px' }}>
                 <div className="simulate-header-item">序号</div>
               </div>
             )}
@@ -518,7 +502,8 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                   const isMain = ele.tableName && ele.tableName === mainEntity.tableName;
                   // 同一个子表
                   const isSameSub = !ele.tableName || !dataField || ele.tableName === dataField;
-                  return !isTable && !isMain && isSameSub;
+                  const isForm = isFormComponent(ele.type);
+                  return !isTable && !isMain && isSameSub && isForm;
                 });
 
                 // setTimeout(() => {
@@ -548,7 +533,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                     data-cp-type={cp.type}
                     data-cp-displayname={cp.displayName}
                     data-cp-id={cp.id}
-                    className="componentItem"
+                    className="subComponentItem"
                     style={{
                       borderColor: curComponentID === cp.id ? '#4FAE7B' : 'transparent'
                     }}
@@ -562,6 +547,11 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                       ) : null}
                       {pageComponentSchemas[cp.id]?.config.label.text ||
                         pageComponentSchemas[cp.id]?.config.displayName}
+                      {pageComponentSchemas[cp.id]?.config?.tooltip && (
+                        <Tooltip content={pageComponentSchemas[cp.id].config.tooltip}>
+                          <IconQuestionCircle style={{ marginLeft: '4px', color: 'var(--color-text-4)' }} />
+                        </Tooltip>
+                      )}
                     </div>
                     <EditRender
                       runtime={runtime}
@@ -617,7 +607,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                 ))}
             </ReactSortable>
             {subTableConfig?.showOperate && (
-              <div className="componentItem2" style={{ width: '64px', paddingTop: '18px' }}>
+              <div className="subComponentItem2" style={{ width: '64px', paddingTop: '18px' }}>
                 <div className="simulate-header-item">操作</div>
               </div>
             )}

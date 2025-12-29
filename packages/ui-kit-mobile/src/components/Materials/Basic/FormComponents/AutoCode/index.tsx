@@ -24,24 +24,24 @@ const XautoCode = memo((props: XautoCodeConfig & { runtime?: boolean; detailMode
     : `${FORM_COMPONENT_TYPES.AUTO_CODE}_${nanoid()}`;
 
   return (
-      <Form.Item
-        className="inputTextWrapperOBMobile inputAutoWrapperOBMobile"
-        label={label.display && <Ellipsis text={label.text} />}
-        field={fieldId}
-        style={{
-          pointerEvents: (!runtime || detailMode) ? 'none' : 'unset',
-          opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
-        }}
-      >
-        {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
-        <div className="readonlyText">{form?.getFieldValue(fieldId)}</div>        ) : (
-          <Input
-            readOnly={true}
-            placeholder={placeholder}
-            inputStyle={{ textAlign: 'right' }}
-          />
-        )}
-      </Form.Item>
+    <Form.Item
+      className="inputTextWrapperOBMobile inputAutoWrapperOBMobile"
+      label={label.display && <Ellipsis text={label.text} />}
+      field={fieldId}
+      style={{
+        pointerEvents: (!runtime || detailMode) ? 'none' : 'unset',
+        opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
+      }}
+    >
+      {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
+        <div className="readonlyText">{form?.getFieldValue(fieldId)}</div>) : (
+        <Input
+          readOnly={true}
+          placeholder={placeholder}
+          inputStyle={{ textAlign: 'right' }}
+        />
+      )}
+    </Form.Item>
   );
 });
 

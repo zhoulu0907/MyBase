@@ -3,7 +3,7 @@ import type { GradientColor } from '@arco-design/web-react/es/ColorPicker/interf
 import { useEffect, useState } from 'react';
 import { registerConfigRenderer } from '../../registry';
 
-import { CONFIG_TYPES } from '@onebase/ui-kit/src/components/Materials/constants';
+import { CONFIG_TYPES } from '@onebase/ui-kit';
 
 import styles from './index.module.less';
 

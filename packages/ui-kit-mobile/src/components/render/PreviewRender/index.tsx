@@ -8,10 +8,12 @@ import {
   getComponentConfig,
   ALIGN_OPTIONS,
   ALIGN_VALUES,
+  WORKBENCH_COMPONENT_TYPES,
 } from '@onebase/ui-kit';
 import { ListComp } from '@/components/Materials/Basic/ListComponents';
 import { FormComp } from '@/components/Materials/Basic/FormComponents';
 import { ShowComp } from '@/components/Materials/Basic/ShowComponents';
+import { WorkbenchComp } from '@/components/Materials/Workbench';
 
 /**
  * 组件渲染的通用属性
@@ -25,6 +27,9 @@ interface PreviewRenderProps {
   pageComponentSchema: any;
 
   runtime: boolean;
+
+  /** 编辑预览模式 */
+  editPreview?: boolean;
 
   // 详情视图
   detailMode?: boolean;
@@ -46,7 +51,9 @@ const LIST_LAZY_COMPONENT: string[] = [
   FORM_COMPONENT_TYPES.DATE_PICKER,
   FORM_COMPONENT_TYPES.DATE_TIME_PICKER,
   FORM_COMPONENT_TYPES.FILE_UPLOAD,
+  FORM_COMPONENT_TYPES.IMG_UPLOAD,
   FORM_COMPONENT_TYPES.SELECT_MUTIPLE,
+  FORM_COMPONENT_TYPES.DATA_SELECT,
   // FORM_COMPONENT_TYPES.SUB_TABLE,
 ];
 
@@ -55,6 +62,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
   cpType,
   pageComponentSchema,
   runtime,
+  editPreview,
   detailMode,
   showFromPageData,
   refresh,
@@ -295,18 +303,20 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
         );
       case FORM_COMPONENT_TYPES.SUB_TABLE:
         return (
-          <FormComp.XSubTable cpName={cpId} id={cpId} {...componentConfig} editLoading={editLoading} runtime={runtime} detailMode={detailMode} form={form} useStoreSignals={useStoreSignals} />
+          <FormComp.XSubTable cpName={cpId} id={cpId} {...componentConfig} editLoading={editLoading} runtime={runtime} detailMode={detailMode} form={form} useStoreSignals={useStoreSignals} editPreview={editPreview} />
         );
       case FORM_COMPONENT_TYPES.DATA_SELECT:
-      // return (
-      //   <FormComp.XDataSelect
-      //     cpName={cpId}
-      //     id={cpId}
-      //     {...componentConfig}
-      //     runtime={runtime}
-      //     detailMode={detailMode}
-      //   />
-      // );
+      return (
+        <FormComp.XDataSelect
+          cpName={cpId}
+          id={cpId}
+          {...componentConfig}
+          runtime={runtime}
+          detailMode={detailMode}
+          form={form}
+          editPreview={editPreview}
+        />
+      );
 
       //  布局组件
       case LAYOUT_COMPONENT_TYPES.COLUMN_LAYOUT:
@@ -357,6 +367,15 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
       case SHOW_COMPONENT_TYPES.PLACEHOLDER:
         return <ShowComp.XPlaceholder cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
 
+      //  工作台组件
+      case WORKBENCH_COMPONENT_TYPES.QUICK_ENTRY:
+        return <WorkbenchComp.XQuickEntry cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+      case WORKBENCH_COMPONENT_TYPES.RICH_TEXT_WORKBENCH:
+        return <WorkbenchComp.XRichTextEditorWorkbench cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+      case WORKBENCH_COMPONENT_TYPES.CAROUSEL_WORKBENCH:
+        return <WorkbenchComp.XCarouselWorkbench cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+      case WORKBENCH_COMPONENT_TYPES.BUTTON_WORKBENCH:
+        return <WorkbenchComp.XButtonWorkbench cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       default:
         return <div>未知组件类型: {cpType}</div>;
     }

@@ -28,6 +28,9 @@ import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { getPrecedingNodes } from '../../nodes/utils';
+import AsyncDeptSelectField from '../asyncField/AsyncDeptSelectField';
+import AsyncSelectField from '../asyncField/AsyncSelectField';
+import AsyncUserSelectField from '../asyncField/AsyncUserSelectField';
 import styles from './index.module.less';
 
 const Option = Select.Option;
@@ -229,6 +232,27 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
       );
     }
 
+    if (
+      fieldValidationType?.fieldTypeCode == ENTITY_FIELD_TYPE.RADIO.VALUE ||
+      fieldValidationType?.fieldTypeCode == ENTITY_FIELD_TYPE.SELECT.VALUE
+    ) {
+      return (
+        <AsyncSelectField
+          fieldName={fieldName}
+          fieldKey={fieldKey}
+          entityFieldValidationTypes={entityFieldValidationTypes}
+        />
+      );
+    }
+
+    if (fieldValidationType?.fieldTypeCode == ENTITY_FIELD_TYPE.USER.VALUE) {
+      return <AsyncUserSelectField fieldName={fieldName} />;
+    }
+
+    if (fieldValidationType?.fieldTypeCode == ENTITY_FIELD_TYPE.DEPARTMENT.VALUE) {
+      return <AsyncDeptSelectField fieldName={fieldName} />;
+    }
+
     return (
       <Form.Item field={fieldName}>
         <Input placeholder="请输入静态值" />
@@ -371,7 +395,18 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
           const found = parent.children.find((child) => child.key === params.value);
           if (found) {
             title = '' + parent.title + ' - ' + found.title;
-            break;
+            return title;
+          }
+
+          // 判断 parent.children 内的某个 child 是否还有 children(子表)
+          for (const child of parent.children) {
+            if (child.children && Array.isArray(child.children) && child.children.length > 0) {
+              const foundChild = child.children.find((child) => child.key === params.value);
+              if (foundChild) {
+                title = '' + parent.title + ' - ' + child.title + ' - ' + foundChild.title;
+                return title;
+              }
+            }
           }
         }
       }

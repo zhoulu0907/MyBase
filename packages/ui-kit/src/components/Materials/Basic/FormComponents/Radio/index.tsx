@@ -2,9 +2,12 @@ import { Form, Radio, Tag } from '@arco-design/web-react';
 import { nanoid } from 'nanoid';
 import { memo, useState, useEffect } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
-import { STATUS_OPTIONS, STATUS_VALUES, COLOR_MODE_TYPES } from '../../../constants';
+import { STATUS_OPTIONS, STATUS_VALUES, DEFAULT_VALUE_TYPES } from '../../../constants';
 import '../index.css';
 import type { XInputRadioConfig } from './schema';
+import { useAppEntityStore } from '@/signals';
+import { getFieldOptionsConfig } from '@/utils';
+import type { DictData } from '@onebase/platform-center';
 
 const RadioGroup = Radio.Group;
 
@@ -14,24 +17,32 @@ const XRadio = memo((props: XInputRadioConfig & { runtime?: boolean; detailMode?
     dataField,
     tooltip,
     status,
-    defaultOptionsConfig,
+    defaultValueConfig,
     verify,
     layout,
     direction,
     runtime = true,
     detailMode
   } = props;
+  const { mainEntity, subEntities } = useAppEntityStore();
 
   const { form } = Form.useFormContext();
-  const [fieldId, setFieldId] = useState('');
-
+  const fieldId =
+    dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.RADIO}_${nanoid()}`;
   const fieldValue = Form.useWatch(fieldId, form);
 
+  const [options, setOptions] = useState<DictData[]>([]);
+
   useEffect(() => {
-    if (dataField.length > 0) {
-      setFieldId(dataField[dataField.length - 1]);
+    if (dataField?.length) {
+      getOptions()
     }
-  }, [dataField]);
+  }, [dataField])
+
+  const getOptions = async () => {
+    const newOptions = await getFieldOptionsConfig(dataField, mainEntity, subEntities);
+    setOptions(newOptions)
+  }
 
   return (
     <div className="formWrapper">
@@ -40,20 +51,20 @@ const XRadio = memo((props: XInputRadioConfig & { runtime?: boolean; detailMode?
           label.display &&
           label.text && <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>{label.text}</span>
         }
-        field={fieldId ? fieldId : `${FORM_COMPONENT_TYPES.RADIO}_${nanoid()}`}
+        field={fieldId}
         layout={layout}
         tooltip={tooltip}
         labelCol={layout === 'horizontal' ? { span: 10 } : {}}
-        rules={[{ required: verify?.required, message:`${label.text}是必填项` }]}
+        rules={[{ required: verify?.required, message: `${label.text}是必填项` }]}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
           margin: 0,
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
-        initialValue={defaultOptionsConfig?.defaultOptions.find(ele => ele.isChosen)?.value}
+        initialValue={defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : undefined}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
-          <div>{fieldValue && defaultOptionsConfig?.defaultOptions?.find((op) => op.value === fieldValue?.id)?.label || '--'}</div>
+          <div>{fieldValue?.name || options.find((op) => op.id === fieldValue?.id || op.id === fieldValue)?.label || '--'}</div>
         ) : (
           <RadioGroup
             direction={direction}
@@ -61,24 +72,9 @@ const XRadio = memo((props: XInputRadioConfig & { runtime?: boolean; detailMode?
               pointerEvents: runtime ? 'unset' : 'none'
             }}
           >
-            {defaultOptionsConfig?.defaultOptions.map((ele, index: number) => (
-              <Radio key={index} value={ele.value}>
-                {defaultOptionsConfig.colorMode ? <>
-                  {defaultOptionsConfig.colorModeType === COLOR_MODE_TYPES.TAG ?
-                    <Tag color={ele.colorType || "rgb(var(--primary-7))"}>{ele.label}</Tag> : <>
-                      <span
-                        style={{
-                          width: '8px',
-                          height: '8px',
-                          borderRadius: '50%',
-                          background: ele.colorType || "rgb(var(--primary-7))",
-                          display: 'inline-block',
-                          marginRight: '8px'
-                        }}
-                      ></span>
-                      <span>{ele.label}</span>
-                    </>}
-                </> : <>{ele.label}</>}
+            {options.map((ele, index: number) => (
+              <Radio key={index} value={ele.id}>
+                {ele.colorType ? <Tag color={ele.colorType}>{ele.label}</Tag> : <span>{ele.label}</span>}
               </Radio>
             ))}
           </RadioGroup>

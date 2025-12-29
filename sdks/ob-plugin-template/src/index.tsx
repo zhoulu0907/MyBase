@@ -2,6 +2,7 @@ import { HomePage } from './pages/HomePage'
 import PluginInputText from './components/InputText'
 import PluginOCR from './components/PluginOCR'
 import OCRBindingSetter from './components/Setters/OCRBindingSetter'
+import OCRSettingsSetter from './components/Setters/OCRSettingsSetter'
 import ColorPickerSetter from './components/Setters/ColorPickerSetter'
 import { InputTextSchema } from './components/InputText/schema'
 import { PluginOCRSchema } from './components/PluginOCR/schema'
@@ -48,6 +49,10 @@ plugin.registerConfigRenderers({
   OCRBindingSetter: {
     type: 'OCRBindingSetter',
     component: OCRBindingSetter
+  },
+  OCRSettingsSetter: {
+    type: 'OCRSettingsSetter',
+    component: OCRSettingsSetter
   }
 })
 

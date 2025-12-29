@@ -31,7 +31,9 @@ export type {
   IWidthConfigType,
   ILayoutConfigType,
   IDefaultValueConfigType,
-  IVerifyConfigType
+  IVerifyConfigType,
+  IColorConfigType,
+  IAlignConfigType
 } from '../../types';
 
 // ========== Workbench 特有类型 ==========
@@ -40,6 +42,16 @@ import { WORKBENCH_CONFIG_TYPES } from './constants';
 
 // 默认值类型
 export type TWbColorDefaultType = string;
+
+// 滑块配置
+export interface IWbSliderConfigType {
+  key: string;
+  name: string;
+  type: typeof WORKBENCH_CONFIG_TYPES.WB_SLIDER;
+  min?: number;
+  max?: number;
+  step?: number;
+}
 
 // 颜色配置
 export interface IWbColorConfigType {
@@ -83,6 +95,7 @@ export interface QuickEntryEntryConfig {
   linkAddress?: string;
   group?: string;
   entryDesc?: string;
+  menuUuid?: string;
 }
 
 /**
@@ -144,4 +157,48 @@ export interface IDataConfigConfigType {
   name: string;
   type: typeof WORKBENCH_CONFIG_TYPES.WB_DATA_CONFIG;
   range: IBooleanConfigType[];
+}
+
+/**
+ * 按钮跳转配置
+ */
+export interface ButtonJumpConfig {
+  jumpType: 'internal' | 'external'; // 关联已有页面 | 跳转外部链接
+  jumpPageId?: string; // 页面ID
+  jumpExternalUrl?: string; // 外部链接
+}
+
+/**
+ * 按钮跳转配置类型
+ */
+export interface IButtonJumpConfigType {
+  key: string;
+  name: string;
+  type: typeof WORKBENCH_CONFIG_TYPES.WB_JUMP_CONFIG;
+}
+
+/**
+ * 菜单选择器配置类型
+ */
+export interface IWbMenuSelectorConfigType {
+  key: string;
+  name: string;
+  type: typeof WORKBENCH_CONFIG_TYPES.WB_MENU_SELECTOR;
+}
+
+/**
+ * 文本对齐方式配置（包含水平和垂直）
+ */
+export interface IWbTextAlignConfigType {
+  key: string;
+  name: string;
+  type: typeof WORKBENCH_CONFIG_TYPES.WB_TEXT_ALIGN;
+}
+
+/**
+ * 文本对齐默认值类型
+ */
+export interface TWbTextAlignDefaultType {
+  horizontal: string;
+  vertical: string;
 }

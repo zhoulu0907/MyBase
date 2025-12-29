@@ -123,7 +123,9 @@ const XSubTable: XSubTableSchema = {
     tooltipConfig,
     verifyConfig,
     subTableConfig,
-    layoutConfig,
+    // 显示状态
+    statusConfig,
+    // layoutConfig,
     widthConfig
   ],
   config: {

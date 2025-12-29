@@ -29,7 +29,9 @@ const XInputEmail = memo((props: XInputEmailConfig & { runtime?: boolean; detail
 
   const rules: ITypeRules<ValidatorType.Custom>[] = [
     {
+      required: verify?.required,
       type: ValidatorType.Custom,
+      message: `${label.text}是必填项`,
       validator: (value, callback) => {
         if (!value && verify?.required) {
           callback(`${label.text}是必填项`);
@@ -56,17 +58,14 @@ const XInputEmail = memo((props: XInputEmailConfig & { runtime?: boolean; detail
     >
       {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
         // 只读模式，渲染文本内容
-        <div className="readonlyText">{form?.getFieldValue(fieldId)}</div>
+        <Input className="readonlyText" readOnly value={form?.getFieldValue(fieldId) || (defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : '')}/>
       ) : (
         // 编辑模式，渲染Input组件
         <Input
           type="email"
           placeholder={placeholder}
-          style={{
-            width: '100%',
-            textAlign: align
-          }}
           inputStyle={{ textAlign: align }}
+          blockChangeWhenCompositing={true}
         />
       )}
     </Form.Item>

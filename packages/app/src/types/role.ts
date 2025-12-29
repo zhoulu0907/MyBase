@@ -6,7 +6,7 @@
  * 2: 普通用户
  * 3: 自定义用户
  */
-type userType = 1 | 2 | 3;
+type userType = 1 | 2 | 3 | 4;
 
 /**
  * 角色状态常量
@@ -18,6 +18,7 @@ export const RoleType = {
   ADMIN: 1,
   USER: 2,
   CUSTOM: 3,
+  OUTERUSER: 4
 } as const;
 
 export interface Role {

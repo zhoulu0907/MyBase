@@ -1,4 +1,5 @@
 import { type HostSDK, type Context, type UIAPI, type Entity, type Field } from '../sdk/types';
+// 使用 context.events 进行监听，避免不同包实例导致事件总线不一致
 import { CONFIG_TYPES, STATUS_OPTIONS, STATUS_VALUES, WIDTH_OPTIONS, WIDTH_VALUES } from '../sdk/constants';
 
 /**
@@ -36,6 +37,25 @@ export function createMockHostSDK(
       ...(context.entity || {})
     }
   };
+
+  try {
+    const anyGlobal = globalThis as any;
+    if (!anyGlobal.__ob_mock_emitter_subscribed && (finalContext as any)?.events?.on) {
+      (finalContext as any).events.on('set-field', (payload: any) => {
+        console.log('[mock-emitter] set-field', payload);
+      });
+      (finalContext as any).events.on('set-fields', (payload: any) => {
+        console.log('[mock-emitter] set-fields', payload);
+      });
+      (finalContext as any).events.on('set-subrow-field', (payload: any) => {
+        console.log('[mock-emitter] set-subrow-field', payload);
+      });
+      (finalContext as any).events.on('set-subrow-fields', (payload: any) => {
+        console.log('[mock-emitter] set-subrow-fields', payload);
+      });
+      anyGlobal.__ob_mock_emitter_subscribed = true;
+    }
+  } catch {}
 
   return {
     context: finalContext,

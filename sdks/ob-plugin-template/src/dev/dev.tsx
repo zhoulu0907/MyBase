@@ -85,6 +85,16 @@ const mockSDK = createMockHostSDK(mockContext as any, {
   } as any
 }) as any
 
+// 保持仅监听 emitter 打印事件，mock 不注入实体赋值方法
+
+(mockSDK as any).debug = {
+  log: (...args: any[]) => {
+    try {
+      console.log('[mock-debug]', ...args)
+    } catch {}
+  }
+}
+
 const PageRenderer = ({ plugin }: { plugin: LoadedPlugin }) => {
   const { pageKey } = useParams()
   const page = plugin.pages[pageKey || '']
@@ -144,6 +154,32 @@ const AppContent: React.FC = () => {
         console.error(e)
         setLoaded(plugin as LoadedPlugin) 
       })
+  }, [])
+
+  useEffect(() => {
+    const unwrap = (payload: any) => (Array.isArray(payload) && payload.length === 1 ? payload[0] : payload)
+    const logSetField = (payload: any) => {
+      console.log('[mock-emitter] set-field', unwrap(payload))
+    }
+    const logSetFields = (payload: any) => {
+      console.log('[mock-emitter] set-fields', unwrap(payload))
+    }
+    const logSetSubRowField = (payload: any) => {
+      console.log('[mock-emitter] set-subrow-field', unwrap(payload))
+    }
+    const logSetSubRowFields = (payload: any) => {
+      console.log('[mock-emitter] set-subrow-fields', unwrap(payload))
+    }
+    mockSDK.context?.events?.on?.('set-field', logSetField)
+    mockSDK.context?.events?.on?.('set-fields', logSetFields)
+    mockSDK.context?.events?.on?.('set-subrow-field', logSetSubRowField)
+    mockSDK.context?.events?.on?.('set-subrow-fields', logSetSubRowFields)
+    return () => {
+      mockSDK.context?.events?.off?.('set-field', logSetField)
+      mockSDK.context?.events?.off?.('set-fields', logSetFields)
+      mockSDK.context?.events?.off?.('set-subrow-field', logSetSubRowField)
+      mockSDK.context?.events?.off?.('set-subrow-fields', logSetSubRowFields)
+    }
   }, [])
 
   const menuItems = useMemo(() => {

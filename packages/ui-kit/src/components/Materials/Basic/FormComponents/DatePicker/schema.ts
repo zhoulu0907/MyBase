@@ -35,7 +35,9 @@ import {
   WIDTH_VALUES,
   DEFAULT_VALUE_TYPES,
   DATE_EXTREME_TYPE,
-  DATE_DYNAMIC_TYPE
+  DATE_DYNAMIC_TYPE,
+  DATE_DYNAMIC_CUSTOM_TYPE,
+  DATE_DYNAMIC_CUSTOM_VALUE_TYPE
 } from '../../../constants';
 import type {
   IDataFieldConfigType,
@@ -58,6 +60,7 @@ import type {
   IDateRangeConfigType,
   ICommonConfigType
 } from '../../../types';
+import { ManipulateType } from 'dayjs';
 
 export interface XInputDatePickerSchema {
   editData: TXInputDatePickerEditData;
@@ -131,11 +134,17 @@ export interface XInputDatePickerConfig extends ICommonBaseType {
     earliestType: string;
     earliestStaticValue: string;
     earliestDynamicValue: string;
+    earliestCustomType: string;
+    earliestCustomValue: number;
+    earliestCustomValueType: ManipulateType;
     earliestVariableValue: string;
     latestLimit: boolean;
     latestType: string;
     latestStaticValue: string;
     latestDynamicValue: string;
+    latestCustomType: string;
+    latestCustomValue: number;
+    latestCustomValueType: ManipulateType;
     latestVariableValue: string;
   };
 
@@ -200,7 +209,7 @@ const XDatePicker: XInputDatePickerSchema = {
     // 显示状态
     statusConfig,
     // 对齐方式
-    alignConfig,
+    // alignConfig,
     // 布局方式
     layoutConfig,
     securityConfig,
@@ -229,11 +238,17 @@ const XDatePicker: XInputDatePickerSchema = {
       earliestType: DATE_EXTREME_TYPE.DYNAMIC,
       earliestStaticValue: '',
       earliestDynamicValue: DATE_DYNAMIC_TYPE.TODAY,
+      earliestCustomType: DATE_DYNAMIC_CUSTOM_TYPE.CURRENT,
+      earliestCustomValue: 1,
+      earliestCustomValueType: DATE_DYNAMIC_CUSTOM_VALUE_TYPE.DAY,
       earliestVariableValue: '',
       latestLimit: false,
       latestType: DATE_EXTREME_TYPE.DYNAMIC,
       latestStaticValue: '',
       latestDynamicValue: DATE_DYNAMIC_TYPE.TODAY,
+      latestCustomType: DATE_DYNAMIC_CUSTOM_TYPE.CURRENT,
+      latestCustomValue: 1,
+      latestCustomValueType: DATE_DYNAMIC_CUSTOM_VALUE_TYPE.DAY,
       latestVariableValue: ''
     },
     verify: {

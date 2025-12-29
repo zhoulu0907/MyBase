@@ -24,22 +24,21 @@ import {
   usePageEditorSignal,
   hasComponentSchema
 } from '@onebase/ui-kit';
-import { getComponentDescriptor } from '@onebase/ui-kit/src/components/Materials/registry';
-import { useAppEntityStore } from '@onebase/ui-kit/src/signals/store_entity';
+import { getComponentDescriptor } from '@onebase/ui-kit';
 import { ENTITY_TYPE_VALUE } from '@onebase/app';
 import { EditRender, PreviewRender } from '@/components/render';
 import CompDeleteIcon from '@/assets/images/app_delete.svg';
 import CompCopyIcon from '@/assets/images/copy_comp_icon.svg';
 import CompShowIcon from '@/assets/images/eye_off_icon.svg';
-import styles from './index.module.css';
+import './index.css';
 
 type XSubTableConfig = typeof FormSchema.XSubTableSchema.config;
 
-const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: boolean; defaultOptionsConfig?: any; form?: any; editLoading?: boolean; useStoreSignals?: any; }) => {
+const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: boolean; defaultOptionsConfig?: any; form?: any; editLoading?: boolean; useStoreSignals?: any; editPreview?: boolean; }) => {
   useSignals();
 
-  const { id, label, tooltip, status, subTableConfig, verify, runtime = true, detailMode, pageType, form, editLoading, useStoreSignals } = props;
-  const { mainEntity, subEntities } = useAppEntityStore();
+  const { id, label, tooltip, status, subTableConfig, verify, runtime = true, detailMode, pageType, form, editLoading, useStoreSignals, editPreview } = props;
+  const { mainEntity, subEntities } = useStoreSignals;
 
   const {
     curComponentID,
@@ -53,11 +52,8 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
     setShowDeleteButton,
     subTableComponents,
     setSubTableComponents
-  } = useStoreSignals || usePageEditorSignal(pageType || EDITOR_TYPES.FORM_EDITOR);
+  } = runtime && !editPreview ? usePageEditorSignal(pageType || EDITOR_TYPES.FORM_EDITOR) : useStoreSignals;
   const { subTableDataLength } = pagesRuntimeSignal;
-
-  // console.log('yyyyy------', useStoreSignals, { pageComponentSchemas, subTableComponents, mainEntity, subEntities});
-
   const [subTableData, setSubTableData] = useState<any[]>([]);
 
   useEffect(() => {
@@ -103,12 +99,9 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
 
   const rules: ITypeRules<ValidatorType.Custom>[] = [
     {
+      required: verify?.required,
       type: ValidatorType.Custom,
-      validator: (value, callback) => {
-        if (!value && verify?.required) {
-          callback(`${label.text}是必填项`);
-        }
-      }
+      message: `${label.text}是必填项`
     }
   ];
 
@@ -213,7 +206,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
       schema.config.verify = {
         ...schema.config.verify,
         required: currentField.isRequired,
-        noRepeat: currentField.isUnique
+        noRepeat: typeof schema.config?.verify?.noRepeat === 'boolean' ? ele.currentField === 1 : undefined
       };
 
       // 字段选项列表（单/多选字段专用） options
@@ -305,7 +298,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
 
   return (
     <Form.Item
-      className={`inputTextWrapperOBMobile ${styles.subTableWrapperOBMobile}`}
+      className={`inputTextWrapperOBMobile subTableWrapperOBMobile`}
       field=""
       rules={rules}
       layout="vertical"
@@ -319,10 +312,10 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
           <>
             {subTableData.map((item, index) => (
               <Collapse
-                className={styles.collapseOBMobile}
+                className="collapseSubtableOBMobile"
                 key={item.key}
                 header={
-                  <div className={styles.collapseHeader}>
+                  <div className="collapseHeaderSubtableObMobile">
                     #{index + 1}
                     <IconDelete onClick={(e) => handleDelete(e, item.key)} />
                   </div>
@@ -334,15 +327,16 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                     {subTableComponents &&
                       subTableComponents[id] &&
                       subTableComponents[id].map((subTable: any) => {
-                        const schema = pageComponentSchemas[subTable.id];
-
-                        const config = {
-                          ...schema.config,
-                          dataField: [`${id}.${item.key}.${schema.config?.dataField?.[1] || subTable.id}`]
+                        const config = pageComponentSchemas[subTable.id].config;
+                        const [_subTableName, fieldName] = config.dataField;
+                        const newConfig = {
+                          ...config,
+                          dataField: [mainEntity.tableName, `${id}.${index}.${fieldName}`]
                         };
-                        const pageSchema = { ...schema, config };
+                        const pageSchema = { ...pageComponentSchemas[subTable.id], config: newConfig };
+                        const isImageOrFile = pageSchema.type === FORM_COMPONENT_TYPES.IMG_UPLOAD || pageSchema.type === FORM_COMPONENT_TYPES.FILE_UPLOAD;
                         return (
-                          <Cell label={<Ellipsis text={config.cpName} />} key={subTable.id} style={{ padding: 0 }}>
+                          <Cell className={`${isImageOrFile ? 'verticalLayout' : ''}`} label={<Ellipsis text={config.cpName} />} key={subTable.id} style={{ padding: 0 }}>
                             <PreviewRender
                               editLoading={editLoading}
                               form={form}
@@ -361,7 +355,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
               />
             ))}
             {!detailMode && <div
-              className={styles.onAddOBMobile}
+              className="onAddSubtableOBMobile"
               onClick={handleAdd}
               style={{ pointerEvents: runtime ? 'unset' : 'none' }}>
               <IconAdd style={{ marginRight: '0.16rem' }} />
@@ -371,9 +365,9 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
         ) : (
           <div style={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
             <Collapse
-              className={styles.collapseOBMobile}
+              className="collapseSubtableOBMobile"
               header={
-                <div className={styles.collapseHeader}>
+                <div className="collapseHeaderSubtableObMobile">
                   #1<IconDelete />
                 </div>
               }
@@ -416,7 +410,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                     animation={150}
                     fallbackOnBody={true}
                     swapThreshold={0.65}
-                    className={styles.subTableContent}
+                    className="subTableContentOBMobile"
                     onStart={onSubStart}
                   >
                     {subTableComponents &&
@@ -434,7 +428,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                             data-cp-displayname={cp.displayName}
                             data-cp-id={cp.id}
                             data-id={cp.id}
-                            className={styles.componentItem}
+                            className="componentItemSubtableOBMobile"
                             style={{
                               borderColor: curComponentID === cp.id ? 'rgb(var(--primary-6))' : 'transparent'
                             }}
@@ -503,7 +497,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
               }
             />
             {!detailMode && <div
-              className={styles.onAddOBMobile}
+              className="onAddSubtableOBMobile"
               onClick={handleAdd}
               style={{ pointerEvents: runtime ? 'unset' : 'none' }}>
               <IconAdd style={{ marginRight: '0.16rem' }} />

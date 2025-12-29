@@ -14,11 +14,11 @@ import {
   verifyConfig,
   securityConfig,
   type ICommonBaseType,
-  type TDateTypeSelectKeyType,
   type TLayoutSelectKeyType,
   type TStatusSelectKeyType,
   type TAlignSelectKeyType,
-  type TWidthSelectKeyType
+  type TWidthSelectKeyType,
+  dateTimeimeFormatConfig
 } from '../../../common';
 import {
   ALIGN_VALUES,
@@ -26,6 +26,8 @@ import {
   CONFIG_TYPES,
   DATE_OPTIONS,
   DATE_VALUES,
+  DATE_TIME_VALUES,
+  DATE_TIME_OPTIONS,
   LAYOUT_OPTIONS,
   LAYOUT_VALUES,
   STATUS_OPTIONS,
@@ -34,7 +36,9 @@ import {
   WIDTH_VALUES,
   DEFAULT_VALUE_TYPES,
   DATE_EXTREME_TYPE,
-  DATE_DYNAMIC_TYPE
+  DATE_DYNAMIC_TYPE,
+  DATE_DYNAMIC_CUSTOM_TYPE,
+  DATE_DYNAMIC_CUSTOM_VALUE_TYPE
 } from '../../../constants';
 import type {
   IDataFieldConfigType,
@@ -54,8 +58,10 @@ import type {
   IAlignConfigType,
   ISecurityConfigType,
   IDateRangeConfigType,
-  ICommonConfigType
+  ICommonConfigType,
+  IDateFormatConfigType
 } from '../../../types';
+import { ManipulateType } from 'dayjs';
 
 export interface XInputDateTimePickerSchema {
   editData: TXInputDateTimePickerEditData;
@@ -68,6 +74,7 @@ export type TXInputDateTimePickerEditData = Array<
   | ITooltipConfigType
   | IDataFieldConfigType
   | IDefaultValueConfigType
+  | IDateFormatConfigType<string>
   | IDateRangeConfigType
   | IVerifyConfigType
   | IStatusConfigType<TStatusSelectKeyType>
@@ -110,10 +117,10 @@ export interface XInputDateTimePickerConfig extends ICommonBaseType {
   defaultValueConfig?: any;
 
   /**
-   * 日期格式： 年、年月、年月日、年月日时
-   * 可选值: 'YEAR' | 'MONTH' | 'DATE' | 'FULL'
+   * 日期格式：年月日时分秒
+   * 可选值: DATE_TIME_OPTIONS
    */
-  dateType: TDateTypeSelectKeyType;
+  dateType: string;
 
   /**
    * 可选范围
@@ -128,11 +135,17 @@ export interface XInputDateTimePickerConfig extends ICommonBaseType {
     earliestType: string;
     earliestStaticValue: string;
     earliestDynamicValue: string;
+    earliestCustomType: string;
+    earliestCustomValue: number;
+    earliestCustomValueType: ManipulateType;
     earliestVariableValue: string;
     latestLimit: boolean;
     latestType: string;
     latestStaticValue: string;
     latestDynamicValue: string;
+    latestCustomType: string;
+    latestCustomValue: number;
+    latestCustomValueType: ManipulateType;
     latestVariableValue: string;
   };
 
@@ -191,12 +204,13 @@ const XDateTimePicker: XInputDateTimePickerSchema = {
     ...dataFieldConfig,
     // 默认值
     defaultDateTimeValueConfig,
+    dateTimeimeFormatConfig,
     dateRangeConfig,
     verifyConfig,
     // 显示状态
     statusConfig,
     // 对齐方式
-    alignConfig,
+    // alignConfig,
     // 布局方式
     layoutConfig,
     securityConfig,
@@ -217,7 +231,7 @@ const XDateTimePicker: XInputDateTimePickerSchema = {
       customValue: '',
       formulaValue: ''
     },
-    dateType: DATE_VALUES[DATE_OPTIONS.DATE],
+    dateType: DATE_TIME_VALUES[DATE_TIME_OPTIONS.SECOND],
     dateRange: {
       weekLimit: false,
       week: [],
@@ -225,11 +239,17 @@ const XDateTimePicker: XInputDateTimePickerSchema = {
       earliestType: DATE_EXTREME_TYPE.DYNAMIC,
       earliestStaticValue: '',
       earliestDynamicValue: DATE_DYNAMIC_TYPE.TODAY,
+      earliestCustomType: DATE_DYNAMIC_CUSTOM_TYPE.CURRENT,
+      earliestCustomValue: 1,
+      earliestCustomValueType: DATE_DYNAMIC_CUSTOM_VALUE_TYPE.DAY,
       earliestVariableValue: '',
       latestLimit: false,
       latestType: DATE_EXTREME_TYPE.DYNAMIC,
       latestStaticValue: '',
       latestDynamicValue: DATE_DYNAMIC_TYPE.TODAY,
+      latestCustomType: DATE_DYNAMIC_CUSTOM_TYPE.CURRENT,
+      latestCustomValue: 1,
+      latestCustomValueType: DATE_DYNAMIC_CUSTOM_VALUE_TYPE.DAY,
       latestVariableValue: ''
     },
     verify: {

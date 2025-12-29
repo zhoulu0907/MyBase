@@ -27,8 +27,7 @@ import {
   STATUS_VALUES,
   WIDTH_OPTIONS,
   WIDTH_VALUES,
-  COLOR_MODE_TYPES,
-  DEFAULT_OPTIONS_TYPE
+  DEFAULT_VALUE_TYPES
 } from '../../../constants';
 import type {
   ICheckboxDataConfigType,
@@ -47,6 +46,7 @@ import type {
   IAlignConfigType,
   TRadioDefaultType,
   ICommonConfigType,
+  IDefaultValueConfigType
 } from '../../../types';
 
 export interface XInputCheckboxSchema {
@@ -59,6 +59,7 @@ export type TXInputCheckboxEditData = Array<
   | ILabelConfigType
   | ITooltipConfigType
   | IDataFieldConfigType
+  | IDefaultValueConfigType
   | ICheckboxDataConfigType
   | IVerifyConfigType
   | IStatusConfigType<TStatusSelectKeyType>
@@ -90,16 +91,9 @@ export interface XInputCheckboxConfig extends ICommonBaseType {
   dataField: TTextDefaultType[];
 
   /**
-   * 选项
+   * 默认值
    */
-  defaultOptionsConfig?: {
-    type: string;
-    dictTypeId?: string;
-    disabled?: boolean;
-    defaultOptions: { label: string; value: any;[property: string]: any }[];
-    colorMode?: boolean;
-    colorModeType?: string;
-  }
+  defaultValueConfig?: any;
 
   /**
    * 单选框方向：水平（默认）、垂直
@@ -145,6 +139,11 @@ const XCheckbox: XInputCheckboxSchema = {
     tooltipConfig,
     //  数据绑定
     ...dataFieldConfig,
+    {
+      key: 'defaultValueConfig',
+      name: '默认值',
+      type: CONFIG_TYPES.DEFAULT_VALUE,
+    },
     // 选项
     checkboxDataConfig,
     // 选项分布方式
@@ -167,32 +166,10 @@ const XCheckbox: XInputCheckboxSchema = {
     },
     tooltip: '',
     dataField: [],
-    defaultOptionsConfig: {
-      type: DEFAULT_OPTIONS_TYPE.CUSTOM,
-      disabled: false,
-      dictTypeId: '',
-      colorMode: false,
-      colorModeType: COLOR_MODE_TYPES.TAG,
-      defaultOptions: [
-        {
-          label: '选项一',
-          colorType: '',
-          isChosen: false,
-          value: '选项一'
-        },
-        {
-          label: '选项二',
-          colorType: '',
-          isChosen: false,
-          value: '选项二'
-        },
-        {
-          label: '选项三',
-          colorType: '',
-          isChosen: false,
-          value: '选项三'
-        }
-      ],
+    defaultValueConfig: {
+      type: DEFAULT_VALUE_TYPES.CUSTOM,
+      customValue: '',
+      formulaValue: ''
     },
     direction: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
     verify: {

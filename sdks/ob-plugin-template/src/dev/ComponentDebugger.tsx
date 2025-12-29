@@ -66,14 +66,14 @@ const StandardSetters: Record<string, React.FC<any>> = {
   [CONFIG_TYPES.LABEL_INPUT]: ({ value, onChange, label = '标题' }) => (
     <DynamicLabelInputConfig onChange={onChange} value={value} item={{ name: label, key: 'mock' }} />
   ),
-  [CONFIG_TYPES.STATUS_RADIO]: ({ value, onChange, label = '状态' }) => (
+  [CONFIG_TYPES.STATUS_RADIO]: ({ value, onChange, label = '状态', options }) => (
     <DynamicWidthRadioConfig 
       onChange={onChange} 
       value={value} 
       item={{ 
         name: label, 
         key: 'mock',
-        range: [
+        range: options || [
           { key: 'default', value: 'default', text: '默认' },
           { key: 'disabled', value: 'disabled', text: '禁用' },
           { key: 'hidden', value: 'hidden', text: '隐藏' },
@@ -82,14 +82,14 @@ const StandardSetters: Record<string, React.FC<any>> = {
       }} 
     />
   ),
-  [CONFIG_TYPES.WIDTH_RADIO]: ({ value, onChange, label = '宽度' }) => (
+  [CONFIG_TYPES.WIDTH_RADIO]: ({ value, onChange, label = '宽度', options }) => (
     <DynamicWidthRadioConfig 
       onChange={onChange} 
       value={value} 
       item={{ 
         name: label, 
         key: 'mock',
-        range: [
+        range: options || [
           { key: '25%', value: '25%', text: '25%' },
           { key: '50%', value: '50%', text: '50%' },
           { key: '75%', value: '75%', text: '75%' },
@@ -104,14 +104,14 @@ const StandardSetters: Record<string, React.FC<any>> = {
   [CONFIG_TYPES.FIELD_DATA]: ({ value, onChange, label = '字段绑定' }) => (
     <DynamicTextInputConfig onChange={onChange} value={value} item={{ name: label, key: 'mock' }} />
   ),
-  [CONFIG_TYPES.TEXT_ALIGN]: ({ value, onChange, label = '对齐方式' }) => (
+  [CONFIG_TYPES.TEXT_ALIGN]: ({ value, onChange, label = '对齐方式', options }) => (
     <DynamicWidthRadioConfig 
       onChange={onChange} 
       value={value} 
       item={{ 
         name: label, 
         key: 'mock',
-        range: [
+        range: options || [
           { key: 'left', value: 'left', text: '左对齐' },
           { key: 'center', value: 'center', text: '居中' },
           { key: 'right', value: 'right', text: '右对齐' }
@@ -119,14 +119,14 @@ const StandardSetters: Record<string, React.FC<any>> = {
       }} 
     />
   ),
-  [CONFIG_TYPES.FORM_LAYOUT]: ({ value, onChange, label = '布局方式' }) => (
+  [CONFIG_TYPES.FORM_LAYOUT]: ({ value, onChange, label = '布局方式', options }) => (
     <DynamicWidthRadioConfig 
       onChange={onChange} 
       value={value} 
       item={{ 
         name: label, 
         key: 'mock',
-        range: [
+        range: options || [
           { key: 'horizontal', value: 'horizontal', text: '水平' },
           { key: 'vertical', value: 'vertical', text: '垂直' }
         ]
@@ -142,14 +142,14 @@ const StandardSetters: Record<string, React.FC<any>> = {
   [CONFIG_TYPES.UPLOAD_COMPRESS]: ({ value, onChange, label = '压缩图片' }) => (
      <DynamicTextInputConfig onChange={onChange} value={value} item={{ name: label, key: 'mock' }} />
   ),
-  [CONFIG_TYPES.RADIO_DATA]: ({ value, onChange, label, options }) => (
-    <DynamicWidthRadioConfig 
+  [CONFIG_TYPES.RADIO_INPUT]: ({ value, onChange, label, options }) => (
+     <DynamicWidthRadioConfig 
       onChange={onChange} 
       value={value} 
       item={{ 
         name: label, 
         key: 'mock',
-        range: options?.map((opt: any) => ({ key: opt.value, value: opt.value, text: opt.label }))
+        range: options
       }} 
     />
   )
@@ -228,7 +228,8 @@ export const ComponentDebugger: React.FC<ComponentDebuggerProps> = ({ componentK
       // In StandardSetters map above: 
       // [CONFIG_TYPES.SELECT_INPUT]: ({ ..., options }) => ...
       // So we just need to pass options from item.options or item.props.options
-      const options = item.options || item.props?.options;
+      // Also pass range as options if available
+      const options = item.options || item.props?.options || item.range;
 
       return (
         <div key={key || idx} style={{ marginBottom: 16 }}>
@@ -267,6 +268,7 @@ export const ComponentDebugger: React.FC<ComponentDebuggerProps> = ({ componentK
 
   // Mock value state for controlled components (like PluginOCR)
   const [value, setValue] = useState<any>(null);
+  const [form] = Form.useForm();
 
   // If the component has `value` and `onChange` in its props (based on config or convention), we should wire them up
   // However, `config` contains props passed to the component. 
@@ -281,6 +283,13 @@ export const ComponentDebugger: React.FC<ComponentDebuggerProps> = ({ componentK
     console.log('[ComponentDebugger] Value Changed:', v);
   };
 
+  const linkFieldKey = (config?.ocrConfig as any)?.linkConfig?.linkField;
+  const linkVal = Form.useWatch(linkFieldKey || '', form);
+  useEffect(() => {
+    if (!linkFieldKey) return;
+    console.log('[mock-link-change]', linkFieldKey, linkVal);
+  }, [linkFieldKey, linkVal]);
+
   return (
     <Layout style={{ height: '100%', flexDirection: 'row' }}>
       <Layout.Content style={{ padding: 20, flex: 1, overflow: 'auto', display: 'flex', flexDirection: 'column' }}>
@@ -290,15 +299,99 @@ export const ComponentDebugger: React.FC<ComponentDebuggerProps> = ({ componentK
           padding: 20, 
           minHeight: 200, 
           background: '#fff',
-          borderRadius: 4
+          borderRadius: 4,
+          position: 'relative'
         }}>
           {Comp ? (
-            <Form>
+            <Form form={form}>
               <Comp 
                 {...compProps} 
                 value={value} 
                 onChange={handleValueChange} 
               />
+              {(() => {
+                const linkMode = compProps?.ocrConfig?.recognitionMode === 'linked'
+                const linkFieldKey = compProps?.ocrConfig?.linkConfig?.linkField
+                const rules = Array.isArray(compProps?.ocrConfig?.linkConfig?.rules) ? compProps.ocrConfig.linkConfig.rules : []
+                if (!linkMode || !linkFieldKey) return null
+                const toOption = (v: any) => {
+                  const raw = typeof v === 'object' ? (v?.optionValue ?? v?.id ?? v?.value ?? JSON.stringify(v)) : v
+                  const val = typeof raw === 'number' ? raw : String(raw)
+                  return { label: String(val), value: val }
+                }
+                const dedup = new Map<string | number, { label: string; value: string | number }>()
+                rules.forEach((r: any) => {
+                  if (r?.whenValue === undefined || r?.whenValue === null) return
+                  const opt = toOption(r.whenValue)
+                  dedup.set(opt.value, opt)
+                })
+                const options = Array.from(dedup.values())
+                if (options.length > 0) {
+                  return (
+                    <Form.Item 
+                      field={linkFieldKey}
+                      style={{
+                        position: 'absolute',
+                        left: 12,
+                        bottom: 12,
+                        background: 'rgba(255,255,255,0.95)',
+                        padding: '8px 12px',
+                        border: '1px solid #eee',
+                        borderRadius: 8,
+                        boxShadow: '0 6px 16px rgba(0,0,0,0.08)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 8
+                      }}
+                    >
+                      <span style={{ color: '#86909c', fontSize: 12 }}>联动字段值</span>
+                      <Select 
+                        allowClear 
+                        options={options} 
+                        placeholder="选择联动值以切换识别类型" 
+                        style={{ width: 200 }} 
+                        labelInValue
+                        onChange={(v) => {
+                          // Simulate Data Dictionary structure: { id, name, value, label }
+                          if (v && typeof v === 'object') {
+                            form.setFieldValue(linkFieldKey, {
+                              id: v.value,
+                              name: v.label,
+                              value: v.value,
+                              label: v.label,
+                              optionValue: v.value,
+                              optionLabel: v.label
+                            });
+                          } else {
+                            form.setFieldValue(linkFieldKey, v);
+                          }
+                        }}
+                      />
+                    </Form.Item>
+                  )
+                }
+                return (
+                  <Form.Item 
+                    field={linkFieldKey}
+                    style={{
+                      position: 'absolute',
+                      left: 12,
+                      bottom: 12,
+                      background: 'rgba(255,255,255,0.95)',
+                      padding: '8px 12px',
+                      border: '1px solid #eee',
+                      borderRadius: 8,
+                      boxShadow: '0 6px 16px rgba(0,0,0,0.08)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 8
+                    }}
+                  >
+                    <span style={{ color: '#86909c', fontSize: 12 }}>联动字段值</span>
+                    <Input placeholder="输入联动值以切换识别类型" style={{ width: 200 }} />
+                  </Form.Item>
+                )
+              })()}
             </Form>
           ) : (
             <Empty description="No Component Implementation" />

@@ -57,10 +57,12 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
     // 非只读模式，渲染Input组件
     return (
       <Input
+        className='no-spin'
         type="number"
         placeholder={placeholder}
         maxLength={verify?.max || 1000000000}
         suffix={showUnit ? unitValue : ''}
+        blockChangeWhenCompositing={true}
         inputStyle={{ textAlign: align }}
         style={{
           width: '100%',
@@ -72,12 +74,10 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
 
   const rules: ITypeRules<ValidatorType.Custom>[] = [
     {
+      required: verify?.required,
       type: ValidatorType.Custom,
+      message: `${label.text}是必填项`,
       validator: (value, callback) => {
-        if (!value && verify?.required) {
-          callback(`${label.text}是必填项`);
-        }
-
         if (value && verify?.numberLimit) {
           if (value < verify?.min!) {
             callback(`字数不能小于${verify?.min}`);
@@ -105,7 +105,7 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
     >
       {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
         // 只读模式，渲染格式化的文本内容
-        <div className="readonlyText">{form?.getFieldValue(fieldId)}</div>
+        <Input className="readonlyText" readOnly value={form?.getFieldValue(fieldId) || (defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : '')}/>
       ) : (
         renderContent()
       )}

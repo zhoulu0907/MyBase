@@ -193,7 +193,7 @@ const NavigatorSetting = (props: IProps) => {
                     getPopupContainer={getPopupContainer}
                     treeData={menuTree}
                     placeholder="请选择"
-                    fieldNames={{ key: 'id', title: 'menuName' }}
+                    fieldNames={{ key: 'menuUuid', title: 'menuName' }}
                   ></TreeSelect>
                 </Form.Item>
               )}

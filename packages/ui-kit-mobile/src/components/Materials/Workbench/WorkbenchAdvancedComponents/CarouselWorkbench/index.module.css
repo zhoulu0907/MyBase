@@ -1,0 +1,40 @@
+.carouselWrapper {
+  width: 100%;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.carousel {
+  width: 100%;
+  height: 100%;
+  :global(.pc-carousel-indicator-wrapper-bottom) {
+    background: none;
+  }
+}
+
+.imageWrapper {
+  width: 100%;
+  height: 100%;
+  /* aspect-ratio: 16 / 9; */
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  max-height: 300px;
+  object-fit: contain;
+}
+
+.text {
+  color: #FFF;
+  font-size: 14px;
+  position: absolute;
+  bottom: 24px;
+  left: 12px;
+}
+
+.title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1d2129;
+}

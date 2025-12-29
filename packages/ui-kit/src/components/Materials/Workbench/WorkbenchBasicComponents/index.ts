@@ -7,6 +7,7 @@ import XRichTextEditorWorkbench from './RichTextEditorWorkbench';
 import XInformationList from './InformationList';
 import XTodoList from './TodoList';
 import XWelcomeCard from './WelcomeCard';
+import XButtonWorkbench from './ButtonWorkbench';
 
 export const WorkbenchBasicComp = {
   XQuickEntry,
@@ -14,6 +15,7 @@ export const WorkbenchBasicComp = {
   XRichTextEditorWorkbench,
   XInformationList,
   XTodoList,
-  XWelcomeCard
+  XWelcomeCard,
+  XButtonWorkbench
 } satisfies Record<WorkbenchComponentType, ComponentType<any>>;
 

@@ -184,7 +184,7 @@ const XTimePicker: XInputTimePickerSchema = {
     // 显示状态
     statusConfig,
     // 对齐方式
-    alignConfig,
+    // alignConfig,
     // 布局方式
     layoutConfig,
     securityConfig,
