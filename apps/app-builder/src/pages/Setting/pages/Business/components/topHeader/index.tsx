@@ -22,7 +22,7 @@ export const TopHeader: React.FC<topHeaderProps> = ({
   setSearchInputValue
 }) => {
   const tenantId = TokenManager.getTenantInfo()?.tenantId || '';
-  const redirectURL = `${getRuntimeURL()}/#/onebase/runtime/?tenantId=${tenantId}`;
+  const redirectURL = `${getRuntimeURL()}/#/onebase/${tenantId}/runtime/`;
   const href = `${getRuntimeURL()}/#/login?redirectURL=${redirectURL}`;
 
   const navigateToRunTime = (text: string) => {

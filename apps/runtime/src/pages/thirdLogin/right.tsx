@@ -185,7 +185,7 @@ const Right: React.FC = () => {
             navigate(`/onebase/${tenantId}/${appId}/runtime`);
           } else {
             // 跳转到首页
-            navigate(`/onebase/runtime/?appId=${appId}`);
+            navigate(`/onebase/${tenantId}/runtime/`);
           }
         }
         return;

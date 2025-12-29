@@ -215,7 +215,7 @@ const AppManagement: React.FC = () => {
   };
 
   const nagivateToRuntimeApp = (appId: string) => {
-    const appUrl = `${getRuntimeURL()}/#/onebase/runtime/?appId=${appId}&tenantId=${tenantId}`;
+    const appUrl = `${getRuntimeURL()}/#/onebase/${tenantId}/${appId}/runtime/`;
 
     const newWindow = window.open('', '_blank');
     if (newWindow) {
