@@ -15,12 +15,13 @@ import {
 } from '@arco-design/web-react';
 import { IconCamera, IconCopy, IconEdit } from '@arco-design/web-react/icon';
 import { TENANT_INFO_PERMISSION as ACTIONS, Cropper, hasPermission, TokenManager } from '@onebase/common';
-import type { PlatformTenantInfo } from '@onebase/platform-center';
 import {
   getTenantInfo,
   PlatformTenantPublishMode,
   updateTenant,
-  uploadFile
+  uploadFile,
+  getFileUrlById,
+  type PlatformTenantInfo
 } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
@@ -212,7 +213,7 @@ const SpaceInfo: React.FC = () => {
                         {logoUrl ? (
                           <Image
                             className={styles.reUploadLogo}
-                            src={logoUrl}
+                            src={getFileUrlById(logoUrl)}
                             width={160}
                             height={80}
                             preview={false}

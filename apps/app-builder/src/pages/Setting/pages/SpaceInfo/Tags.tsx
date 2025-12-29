@@ -1,4 +1,5 @@
 import { Avatar, Popover, Tag, Grid } from '@arco-design/web-react';
+import { getFileUrlById } from '@onebase/platform-center';
 import styles from './index.module.less';
 
 const { Row, Col } = Grid;
@@ -21,7 +22,7 @@ const Tags = ({ data }: IProps) => {
       <div>
         {tag.adminAvatar ? (
           <Avatar size={size} style={{ marginRight: 4 }}>
-            <img src={tag.adminAvatar} alt="avatar" />
+            <img src={getFileUrlById(tag.adminAvatar)} alt="avatar" />
           </Avatar>
         ) : (
           <Avatar size={size} style={{ marginRight: 4 }}>
