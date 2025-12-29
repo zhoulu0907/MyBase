@@ -22,13 +22,13 @@ public class DashboardServiceProvider {
 
     public Long createDashboard(String createType, Long dashboardId) {
         //根据数据大屏的创建类型创建数据大屏页面
-        if (Objects.equals(createType, DashboardCreateTypeSetEnum.DASHBOARD_LINK.getCode())){
+        if (Objects.equals(createType, DashboardCreateTypeSetEnum.DASHBOARD_LINK_CREATE.getCode())){
             //1.1 如果是绑定现有大屏，则查询数据大屏信息，如不存在则报错
             List<DashboardProjectDTO> dashboardList = dashboardApi.getDashboard(dashboardId);
             if (dashboardList.isEmpty()){
                 throw ServiceExceptionUtil.exception(AppResourceErrorCodeConstants.DASHBOARD_NOT_EXIST);
             }
-        } else if (Objects.equals(createType, DashboardCreateTypeSetEnum.DASHBOARD_TEMPLATE.getCode())){
+        } else if (Objects.equals(createType, DashboardCreateTypeSetEnum.DASHBOARD_TEMPLATE_CREATE.getCode())){
             //1.2 从模板创建数据大屏
             Long newDashboardId = dashboardApi.createDashboardByTemplate(dashboardId);
             if (dashboardId == null){
