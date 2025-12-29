@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.dashboard.build.service.impl;
 
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.module.dashboard.build.dal.dataobject.DashboardTemplateDO;
 import com.cmsr.onebase.module.dashboard.build.mapper.DashboardProjectMapper;
 import com.cmsr.onebase.module.dashboard.build.model.DashboardProject;
@@ -38,7 +39,7 @@ public class DashboardProjectServiceImpl extends ServiceImpl<DashboardProjectMap
         if (dashboardTemplate == null){
             throw exception(DASHBOARD_CONTENT_NOT_EXIST);
         }
-        Long applicationId = dashboardTemplate.getAppId();
+        Long applicationId = ApplicationManager.getApplicationId();;
 
         DashboardProject dashboardProject = new DashboardProject();
         dashboardProject.setProjectName("新大屏");
