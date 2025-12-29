@@ -134,12 +134,13 @@ const EnterpriseInfoPage: React.FC = () => {
 
   const handleSubmitInfo = async () => {
     try {
-      await updateCorpApi({ ...formData, id: currentId });
-      Message.success('企业基本信息保存成功');
+      const res = await updateCorpApi({ ...formData, id: currentId });
+      if (res) {
+        Message.success('企业基本信息保存成功');
+        setIsEdited(false);
+      }
     } catch (error) {
-      console.log("error");
-    } finally {
-      setIsEdited(false);
+      console.log('error');
     }
   };
 
