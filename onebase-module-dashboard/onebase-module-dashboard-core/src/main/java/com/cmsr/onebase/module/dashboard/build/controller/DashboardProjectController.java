@@ -17,7 +17,6 @@ import com.cmsr.onebase.module.dashboard.build.model.vo.DashboardProjectVO;
 import com.cmsr.onebase.module.dashboard.build.service.DashboardFileService;
 import com.cmsr.onebase.module.dashboard.build.service.DashboardProjectDataService;
 import com.cmsr.onebase.module.dashboard.build.service.DashboardProjectService;
-import com.cmsr.onebase.module.dashboard.build.service.impl.DashboardProjectServiceImpl;
 import com.cmsr.onebase.module.dashboard.build.util.SnowflakeIdWorker;
 import com.cmsr.onebase.module.infra.api.file.FileApi;
 import com.cmsr.onebase.module.infra.api.file.dto.FileCreateReqDTO;
@@ -62,7 +61,7 @@ public class DashboardProjectController extends BaseController {
     @GetMapping("/list")
     @ResponseBody
     @ApiSignIgnore
-    public CommonResult<PageResult<DashboardProject>> list(Tablepar tablepar) {
+    public CommonResult<PageResult<DashboardProject>> page(Tablepar tablepar) {
 
         if (tablepar.getPage() == null && tablepar.getLimit() == null) {
             tablepar.setPage(1);

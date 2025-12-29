@@ -36,4 +36,11 @@ public enum TerminalEnum implements ArrayValuable<String> {
     public String[] array() {
         return ARRAYS;
     }
+
+    public static TerminalEnum ofTerminal(String terminal) {
+        return Arrays.stream(TerminalEnum.values())
+                .filter(item -> item.getTerminal().equalsIgnoreCase(terminal))
+                .findFirst().orElseThrow();
+    }
+
 }
