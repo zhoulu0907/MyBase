@@ -6,6 +6,7 @@ import { IconLock, IconMobile, IconUser } from '@arco-design/web-react/icon';
 import { getApplicationLeast } from '@onebase/app';
 import {
   getHashQueryParam,
+  getHashTenantIdAndAppId,
   getOrCreateDeviceInfo,
   getPublicKey,
   PUBLISH_MODULE,
@@ -61,29 +62,7 @@ const Right: React.FC = () => {
 
   useEffect(() => {
     // 从 window.location.hash 中解析 redirectURL，再从 redirectURL 解析 appId 和 tenantId
-    const rawHash = window.location.hash;
-    const prefix = '#/login?redirectURL=';
-    if (rawHash.startsWith(prefix)) {
-      const redirectURL = rawHash.replace(prefix, '');
-      const tmatch = redirectURL.match(/\/onebase\/(\d+)\//);
-      const amatch = redirectURL.match(/\/onebase\/(\d+)\/(\d+)\//);
-      const tid = tmatch && tmatch.length > 1 ? tmatch[1] : '';
-      const aid = amatch && amatch.length > 2 ? amatch[2] : '';
-      let apid = getHashQueryParam('appId', redirectURL) || '';
-      let teid = getHashQueryParam('tenantId', redirectURL) || '';
-
-      setAppId(apid || aid);
-      setTenantId(teid || tid);
-    } else {
-      const tmatch = rawHash.match(/\/onebase\/(\d+)\//);
-      const amatch = rawHash.match(/\/onebase\/(\d+)\/(\d+)\//);
-      const tid = tmatch && tmatch.length > 1 ? tmatch[1] : '';
-      const aid = amatch && amatch.length > 2 ? amatch[2] : '';
-      let apid = getHashQueryParam('appId') || '';
-      let teid = getHashQueryParam('tenantId') || '';
-      setAppId(apid || aid);
-      setTenantId(teid || tid);
-    }
+    getHashTenantIdAndAppId(setTenantId, setAppId);
   }, []);
 
   // 使用记住我hook
