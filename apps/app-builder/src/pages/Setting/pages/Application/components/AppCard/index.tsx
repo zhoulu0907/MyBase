@@ -4,6 +4,7 @@ import { Avatar, Divider, Dropdown, Menu, Space, Tag, Tooltip, Typography } from
 import { IconDelete, IconEdit, IconMoreVertical } from '@arco-design/web-react/icon';
 import { type Application } from '@onebase/app';
 import { appIconMap } from '@onebase/ui-kit';
+import { getFileUrlById } from '@onebase/platform-center';
 import dayjs from 'dayjs';
 import React from 'react';
 import { ApplicationStatus, ApplicationStatusLabel, defaultTheme, TagColor, ThemeColorMap } from '../../const';
@@ -151,7 +152,7 @@ const AppCard: React.FC<AppCardProps> = ({
                 {item?.userPhotoList?.map((item: developUser, index: number) => {
                   return item.avatar ? (
                     <Avatar key={index}>
-                      <img src={item.avatar} alt="avatar" />
+                      <img src={getFileUrlById(item.avatar)} alt="avatar" />
                     </Avatar>
                   ) : (
                     <Avatar key={index} style={{ backgroundColor: '#009e9e' }}>
