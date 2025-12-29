@@ -18,6 +18,7 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,7 +47,7 @@ public class DashboardTemplateServiceImpl extends ServiceImpl<DashboardTemplateM
     public Long createDashboardTemplate(DashboardTemplateSaveReqVO saveReqVO) {
 
         if (saveReqVO.getHot() == null) {
-            saveReqVO.setHot(0);
+            saveReqVO.setHot(NumberUtils.INTEGER_ZERO);
         }
 
         SecurityFrameworkUtils.getLoginUserId();
