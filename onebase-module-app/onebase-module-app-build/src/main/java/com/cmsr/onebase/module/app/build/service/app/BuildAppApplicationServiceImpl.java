@@ -358,6 +358,9 @@ public class BuildAppApplicationServiceImpl implements AppApplicationService {
         if (!StringUtils.equals(name, applicationDO.getAppName())) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_NAME_ERROR);
         }
+        if (AppStatusEnum.isOnline(applicationDO.getAppStatus())) {
+            throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_ONLINE_ERROR);
+        }
         etlDataManager.offlineAllByApplication(id);
         flowDataManager.deleteRuntimeData(id);
         transactionTemplate.executeWithoutResult(transactionStatus -> {
