@@ -59,6 +59,7 @@ import MyMenuItem from './components/MyMenuItem';
 import TaskCenterPage from './components/TaskCenter/TaskCenterPage';
 import TaskCenterSide from './components/TaskCenter/taskTreeSide';
 import styles from './index.module.less';
+import { DashBoardCreateType } from '@onebase/app/src/services/app_dashboard';
 
 const TreeNode = Tree.Node;
 const MenuItem = Menu.Item;
@@ -434,10 +435,24 @@ const PageManagerPage: FC = () => {
   };
   //页面设计新建大屏创建
   const handleScreenCreate = async (id?: string, screenMethod?: string) => {
-    console.log(id, screenMethod);
+    console.log('创建大屏参数 id、screenMethod：', id, screenMethod);
+    
+    if (screenMethod === DashBoardCreateType.DashboardTemplate && !id) {
+      // 通过模板创建，模板ID不可为空
+      Message.error('请选择一个模板');
+      return;
+    }else if(screenMethod === DashBoardCreateType.DashboardLink && !id){
+      // 关联大屏创建，关联大屏ID不可为空
+      Message.error('请选择一个大屏');
+      return;
+    }
+    // 产品需求：当新建大屏且选择了模板时，更新为通过模板创建。
+    if(screenMethod === DashBoardCreateType.DashboardNew && id){
+        screenMethod = DashBoardCreateType.DashboardTemplate;
+    }
+
     createForm.validate(async (error) => {
       if (error !== null) return;
-      console.log('创建大屏参数 id、screenMethod：', id, screenMethod);
       const req: CreateApplicationMenuReq = {
         applicationId: curAppId,
         parentId:
@@ -461,7 +476,7 @@ const PageManagerPage: FC = () => {
       });
       const dashboardInfo = await listPageView({ pageSetId });
       const dashboardId = dashboardInfo.pages && dashboardInfo.pages.length > 0 ? dashboardInfo.pages[0].id : null;
-      if (screenMethod !== 'dashboardLink') {
+      if (screenMethod !== DashBoardCreateType.DashboardLink) {
         window.open(`${resourceUrl}chart/home/${dashboardId}/${appId}/${dashboardType}`, '_blank');
       }
     });
