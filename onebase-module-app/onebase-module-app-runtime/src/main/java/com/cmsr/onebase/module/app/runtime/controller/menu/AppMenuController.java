@@ -39,7 +39,7 @@ public class AppMenuController {
         return success(runtimeAppMenuService.listApplicationMenu());
     }
 
-    @PostMapping("/permission")
+    @GetMapping("/permission")
     @Operation(summary = "应用菜单权限")
     public CommonResult<MenuPermissionVO> getMenuPermission(@RequestParam("menuId") Long menuId) {
         return success(runtimeAppMenuService.getMenuPermission(menuId));

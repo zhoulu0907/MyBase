@@ -29,4 +29,6 @@ public interface AppAuthSecurityApi {
 
     FieldPermission getMenuFieldPermission(Long userId, Long applicationId, Long menuId);
 
+    List<String> getMenuViewUuids(Long userId, Long applicationId, Long menuId);
+
 }
