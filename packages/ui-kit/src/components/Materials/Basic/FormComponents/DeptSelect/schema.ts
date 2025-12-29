@@ -81,8 +81,8 @@ export interface XInputDeptSelectConfig extends ICommonBaseType {
   tooltip?: TTextAreaDefaultType;
 
   /**
-    * 数据字段
-  */
+   * 数据字段
+   */
   dataField: TTextDefaultType[];
 
   /**
@@ -91,7 +91,7 @@ export interface XInputDeptSelectConfig extends ICommonBaseType {
    */
   status?: TSelectDefaultType<TStatusSelectKeyType>;
 
-   /**
+  /**
    * 默认值方式
    */
   defaultValueMode?: TTextDefaultType;
@@ -157,7 +157,7 @@ const XDeptSelect: XInputDeptSelectSchema = {
     },
     {
       key: 'tooltip',
-      name: '描述信息',
+      name: '字段描述',
       type: CONFIG_TYPES.TOOLTIP_INPUT
     },
     ...dataFieldConfig,

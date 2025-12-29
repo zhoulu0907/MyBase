@@ -128,7 +128,12 @@ export default function RolePage() {
   const OperationButtons = useMemo(
     () => (
       <Space size="small">
-        <Button type="secondary" permission={ACTIONS.UPDATE} onClick={() => openRoleModal(activeRole || null)}>
+        <Button
+          type="secondary"
+          permission={ACTIONS.UPDATE}
+          disabled={activeRole?.type === RoleType.SYSTEM}
+          onClick={() => openRoleModal(activeRole || null)}
+        >
           编辑
         </Button>
         <Button
@@ -182,7 +187,7 @@ export default function RolePage() {
 
                   <TabPane key="permission" title="关联权限">
                     <PlaceholderPanel hasPermission={hasPermission(ACTIONS.PERMISSION)}>
-                      <PermissionList selectedRoleId={activeRoleId} type={activeRole?.type}/>
+                      <PermissionList selectedRoleId={activeRoleId} type={activeRole?.type} />
                     </PlaceholderPanel>
                   </TabPane>
                 </Tabs>

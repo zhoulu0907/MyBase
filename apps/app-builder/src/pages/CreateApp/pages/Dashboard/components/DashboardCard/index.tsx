@@ -6,6 +6,7 @@ import screen1 from '@/assets/images/screen/screen1.png';
 import eye from '@/assets/images/screen/eye.png';
 import write from '@/assets/images/screen/write.png';
 import template from '@/assets/images/screen/template.png';
+import { getFileUrlById } from '@onebase/platform-center';
 interface dataList {
   appId: string;
   id: string;
@@ -66,7 +67,7 @@ const ScreenCard: FC<CardProps> = ({ item, onDelete, onSaveAs, onEditScreen, onE
   return (
     <div className={styles.appCard}>
       <div className={styles.appCardImg}>
-        <img src={item.indexImage} alt="" />
+        <img src={getFileUrlById(item.indexImage)} alt="" />
       </div>
       <div className={`${styles.appCardFooter} ${styles.cardName}`}>
         <div>

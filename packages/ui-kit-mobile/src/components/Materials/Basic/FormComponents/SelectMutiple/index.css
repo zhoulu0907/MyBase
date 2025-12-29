@@ -18,7 +18,7 @@
   .selectMultipleValue {
     width: 100%;
     text-align: right;
-    color: #1d2129;
+    color: #c9cdd4;
     font-size: var(--fontSize);
   }
 
@@ -44,7 +44,7 @@
   .checkbox-group-outer {
     padding: 0.32rem 0;
     background-color: #fff;
-    min-height: 3rem;
+    min-height: 5rem;
     max-height: 50dvh;
     display: flex;
     justify-content: center;

@@ -58,12 +58,13 @@ const ConnectorPage: React.FC = () => {
       level1Code: level1Code || ''
     };
     const res = await getCommonPaginationList(listConnectFlowNode, req, setPageNo);
-    console.log('res :', res);
+
     if (res) {
       setConnectFlowNodeList(res.list || []);
       setTotal(res.total || 0);
-      setLoading(false);
     }
+
+    setLoading(false);
   };
 
   const handleListConnectFlowNodeCategory = async () => {

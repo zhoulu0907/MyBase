@@ -27,6 +27,8 @@ const XInputText = memo((props: XInputTextConfig & { runtime?: boolean; detailMo
   const fieldId = dataField && dataField.length > 0
     ? dataField[dataField.length - 1]
     : `${FORM_COMPONENT_TYPES.INPUT_TEXT}_${nanoid()}`;
+  
+  const textAlign = layout === 'vertical' ? 'left' : 'right';
 
   // 根据是否为只读模式确定内容
   const renderContent = () => {
@@ -35,7 +37,7 @@ const XInputText = memo((props: XInputTextConfig & { runtime?: boolean; detailMo
       <Input
         placeholder={placeholder}
         maxLength={verify?.lengthLimit ? verify?.maxLength : undefined}
-        inputStyle={{ textAlign: layout === 'vertical' ? 'left' : 'right' }}
+        inputStyle={{ textAlign }}
         blockChangeWhenCompositing={true}
       />
     );
@@ -48,12 +50,13 @@ const XInputText = memo((props: XInputTextConfig & { runtime?: boolean; detailMo
       message: `${label.text}是必填项`,
       validator: (value, callback) => {
         if (value && verify?.lengthLimit) {
-          if (value.length < verify?.minLength!) {
+           if (verify?.minLength && value.length < verify.minLength) {
             callback(`字数不能小于${verify?.minLength}`);
-          } else if (verify?.maxLength && value.length > verify?.maxLength) {
+          } else if (verify?.maxLength && value.length > verify.maxLength) {
             callback(`字数不能大于${verify?.maxLength}`);
           }
         }
+        callback();
       }
     }
   ];
@@ -73,12 +76,10 @@ const XInputText = memo((props: XInputTextConfig & { runtime?: boolean; detailMo
     >
       {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
         // 只读模式，渲染文本内容
-        <Input
+        <div
           className="readonlyText"
-          readOnly
-          value={form?.getFieldValue(fieldId) || (defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : '')}
-          inputStyle={{ textAlign: layout === 'vertical' ? 'left' : 'right' }}
-        />
+          style={{ textAlign }}
+        >{form?.getFieldValue(fieldId)  || (defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : '') || '--'}</div>
       ) : (
         renderContent()
       )}

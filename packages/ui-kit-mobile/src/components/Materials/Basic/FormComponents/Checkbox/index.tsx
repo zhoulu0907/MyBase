@@ -34,8 +34,8 @@ const XCheckbox = memo((props: XCheckboxConfig & { runtime?: boolean; detailMode
     detailMode
   } = props;
 
+  const textAlign = layout === 'vertical' ? 'left' : 'right';
   const fieldId = dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.CHECKBOX}_${nanoid()}`
-
   // 根据是否为只读模式确定内容
   const renderContent = () => {
     // 非只读模式，渲染Input组件
@@ -66,14 +66,13 @@ const XCheckbox = memo((props: XCheckboxConfig & { runtime?: boolean; detailMode
       rules={rules}
       layout={layout}
       style={{
-        textAlign: layout === 'vertical' ? 'left' : 'right',
         pointerEvents: (!runtime || detailMode) ? 'none' : 'unset',
         opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
       }}
     >
       {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
         // 只读模式，渲染文本内容
-        <div className="readonlyText">{form?.getFieldValue(fieldId)}</div>
+        <div className="readonlyText" style={{ textAlign }}>{form?.getFieldValue(fieldId)}</div>
       ) : (
         renderContent()
       )}

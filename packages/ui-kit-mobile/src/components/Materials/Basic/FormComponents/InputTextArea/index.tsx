@@ -61,17 +61,18 @@ const XInputTextArea = memo((props: XInputTextAreaConfig & { runtime?: boolean; 
       message: `${label.text}是必填项`,
       validator: (value, callback) => {
         if (value && verify?.lengthLimit) {
-          if (value.length < verify?.minLength!) {
+          if (verify?.minLength && value.length < verify.minLength) {
             callback(`字数不能小于${verify?.minLength}`);
-          } else if (verify?.maxLength && value.length > verify?.maxLength) {
+          } else if (verify?.maxLength && value.length > verify.maxLength) {
             callback(`字数不能大于${verify?.maxLength}`);
           }
-        } else {
-          callback();
         }
+        callback();
       }
     }
   ];
+
+  const textAlign = layout === 'vertical' ? 'left' : 'right';
 
   return (
     <Form.Item
@@ -88,18 +89,10 @@ const XInputTextArea = memo((props: XInputTextAreaConfig & { runtime?: boolean; 
     >
       {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
         // 只读模式，渲染文本内容
-        <Textarea
+        <div
           className="readonlyText"
-          readOnly
-          style={{
-            textAlign: align,
-            // minHeight: `${(minRows * 24 + 16) / 50}rem`
-          }}
-          textareaStyle={{
-            textAlign: layout === 'vertical' ? 'left' : 'right'
-          }}
-          value={form?.getFieldValue(fieldId) || (defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : '')}
-        />
+          style={{ textAlign }}
+        >{form?.getFieldValue(fieldId)  || (defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : '') || '--'}</div>
       ) : (
         renderContent()
       )}

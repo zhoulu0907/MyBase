@@ -23,7 +23,7 @@ export interface WorkbenchAttributeContext {
   handleConfigsChange: (config: WorkbenchConfig) => void;
   handleMultiPropsChange: (updates: { key: string; value: unknown }[]) => void;
   handleLayoutChange: (key: string, value: unknown) => void;
-  renderEditItem: (item: WorkbenchEditItem, index: number) => JSX.Element | null;
+  renderEditItem: ({ item, index }: { item: WorkbenchEditItem; index: number }) => JSX.Element | null;
 }
 
 export function useWorkbenchAttributeContext(): WorkbenchAttributeContext {
@@ -109,7 +109,7 @@ export function useWorkbenchAttributeContext(): WorkbenchAttributeContext {
     handlePropsChange(key, value);
   };
 
-  const renderEditItem = (item: WorkbenchEditItem, index: number) =>
+  const renderEditItem = ({ item, index }: { item: WorkbenchEditItem; index: number }) =>
     renderConfigItem({
       id: cpID || '',
       item,

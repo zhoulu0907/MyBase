@@ -1,11 +1,11 @@
 import { Button, Modal, Pagination, Space, Table, type TableColumnProps } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
-import { TokenManager, getDashBoardURL } from '@onebase/common';
+import styles from './index.module.less';
 import { DataSetParams, DelDataSetList } from '@onebase/platform-center';
+import { useLocation } from 'react-router-dom';
+import { TokenManager, getDashBoardURL } from '@onebase/common';
 import dayjs from 'dayjs';
 import { useEffect, useState, type FC } from 'react';
-import { useLocation } from 'react-router-dom';
-import styles from './index.module.less';
 
 interface DataTable {
   name: string;
@@ -79,7 +79,7 @@ const DataSet: FC = () => {
   };
   //编辑
   const handleEdit = async (record: DataTable) => {
-    window.open(`${resourceUrl}project/dataset-form?editId=${record.id}`, '_blank');
+    window.open(`${resourceUrl}project/dataset-form?id=${record.id}`, '_blank');
   };
   //删除
   const [deleteVisible, setDeleteVisible] = useState<boolean>(false);

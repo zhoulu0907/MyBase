@@ -8,8 +8,17 @@ import {
 } from '../types';
 import { runtimeMetadataService } from './clients';
 
-export const dataMethodCreateV2 = (tableName: string, menuId: string, params: InsertMethodV2Params) => {
-  return runtimeMetadataService.post(`/${tableName}/create?menuId=${menuId}`, params);
+export const dataMethodCreateV2 = (
+  tableName: string,
+  menuId: string,
+  params: InsertMethodV2Params,
+  draftId?: string
+) => {
+  let url = `/${tableName}/create?menuId=${menuId}`;
+  if (draftId) {
+    url += `&draftId=${draftId}`;
+  }
+  return runtimeMetadataService.post(url, params);
 };
 
 export const dataMethodUpdateV2 = (tableName: string, menuId: string, params: UpdateMethodV2Params) => {

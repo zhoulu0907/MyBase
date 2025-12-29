@@ -21,6 +21,7 @@ import {
   type UpdateMethodV2Params
 } from '@onebase/app';
 import { pagesRuntimeSignal } from '@onebase/common';
+import { getSimpleUserList } from '@onebase/platform-center';
 import dayjs from 'dayjs';
 
 import {
@@ -121,7 +122,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({
 
   // 当前时间戳
   const [detailMode, setDetailMode] = useState(true);
-  const [formDetails, setFormDetails] = useState<any>({}); // 表单数据
+  const [userSelectData, setUserSelectData] = useState<any>([]); // 人员选择数据
   const [refresh, setRefresh] = useState(Date.now());
 
   /* 数据初始化，解决二次进入旧数据闪烁问题 */
@@ -234,7 +235,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({
     const subFormData = {} as any;
     const groups = [] as any;
     let subEntityUuid: string = '';
-    Object.entries(fields).forEach(([key, value]) => {
+    Object.entries(fields).forEach(async ([key, value]) => {
       console.log('key: ', key, '   value: ', value);
       // 处理主表逻辑
       const field = (mainMetaDataFields.value || [])
@@ -254,19 +255,18 @@ const PreviewContainer: React.FC<PreviewProps> = ({
             id: value[0],
             name: value[0]
           };
-        } else if (field.fieldType === ENTITY_FIELD_TYPE.USER.VALUE) {
-          if (Array.isArray(value)) {
-            const userData = formDetails?.[key];
-            formData[field.fieldName] = {
-              id: userData?.id,
-              name: value[0]
-            };
-          } else {
-            formData[field.fieldName] = {
-              id: value.id,
-              name: value.name
-            };
+        } else if (field.fieldType === ENTITY_FIELD_TYPE.USER.VALUE && Array.isArray(value)) {
+          let userTempData = userSelectData;
+          if (userTempData.length === 0) {
+            const userList = await getSimpleUserList();
+            userTempData = userList;
+            setUserSelectData(userList);
           }
+          const userData = userTempData.find(item => item.nickname === value[0]);
+          formData[field.fieldName] = {
+            id: userData?.id,
+            name: userData?.nickname
+          };
         } else {
           formData[field.fieldName] = value;
         }
@@ -299,19 +299,18 @@ const PreviewContainer: React.FC<PreviewProps> = ({
           subFormData[key] = value ? dayjs(value).format('YYYY-MM-DD hh:mm:ss') : '';
         } else if (fieldType === ENTITY_FIELD_TYPE.SELECT.VALUE) {
           subFormData[key] = value[0];
-        } else if (fieldType === ENTITY_FIELD_TYPE.USER.VALUE) {
-          if (Array.isArray(value)) {
-            const userData = formDetails?.[key];
-            subFormData[key] = {
-              id: userData?.id,
-              name: value[0]
-            };
-          } else {
-            subFormData[key] = {
-              id: value.id,
-              name: value.name
-            };
+        } else if (fieldType === ENTITY_FIELD_TYPE.USER.VALUE && Array.isArray(value)) {
+          let userTempData = userSelectData;
+          if (userTempData.length === 0) {
+            const userList = await getSimpleUserList();
+            userTempData = userList;
+            setUserSelectData(userList);
           }
+          const userData = userTempData.find(item => item.nickname === value[0]);
+          subFormData[key] = {
+            id: userData?.id,
+            name: userData?.nickname
+          };
         } else {
           subFormData[key] = value;
         }
@@ -447,7 +446,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({
     const formValues: Record<string, any> = {};
 
     if (res) {
-      setFormDetails(res);
       const dataItem = res;
       const fieldIdNameMap: Record<string, string> = {};
       (mainMetaDataFields.value || []).forEach((field: AppEntityField) => {
@@ -469,7 +467,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({
             } else if (fieldType === ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE) {
               formValues[fieldName] = value.map((v) => v.id) || [];
             } else if (fieldType === ENTITY_FIELD_TYPE.USER.VALUE) {
-              formValues[fieldName] = Object.entries(value).length > 0 ? [value.name] : value;
+              formValues[fieldName] = value?.name ? [value.name] : [];
             } else if (fieldType === ENTITY_FIELD_TYPE.DEPARTMENT.VALUE) {
               formValues[fieldName] = value;
             } else if (
@@ -531,8 +529,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({
                       formValues[`${subTableName}.${idx}.${fieldName}`] = value.map((v) => v.id) || [];
                     } else if (fieldType === ENTITY_FIELD_TYPE.USER.VALUE) {
                       const value = subData[idx]?.[fieldName];
-                      formValues[`${subTableName}.${idx}.${fieldName}`] =
-                        Object.entries(value).length > 0 ? [value.name] : value;
+                      formValues[`${subTableName}.${idx}.${fieldName}`] = value?.name ? [value.name] : [];
                     } else if (fieldType === ENTITY_FIELD_TYPE.DEPARTMENT.VALUE) {
                       formValues[`${subTableName}.${idx}.${fieldName}`] = subData[idx]?.[fieldName];
                     } else if (
@@ -576,6 +573,11 @@ const PreviewContainer: React.FC<PreviewProps> = ({
 
   const curFormPage =
     curPage.value?.pages?.find((ele: any) => ele.pageType === CATEGORY_TYPE.LIST)?.pageName || '标题_列表';
+  const curWorkbenchPage =
+    curPage.value?.pages?.find((ele: any) => ele.pageType === CATEGORY_TYPE.WORKBENCH)?.pageName || '标题_工作台';
+
+  const navTitle =
+    pageType === EDITOR_TYPES.WORKBENCH_EDITOR ? curWorkbenchPage : curFormPage.slice(0, curFormPage.length - 3);
 
   return (
     <div className={styles.previewPage}>
@@ -583,9 +585,13 @@ const PreviewContainer: React.FC<PreviewProps> = ({
         {curFormPage.slice(0, curFormPage.length - 3)}
       </Sticky> */}
       <CustomNav
-        title={curFormPage.slice(0, curFormPage.length - 3)}
+        title={navTitle}
         style={{ background: '#fff' }}
-        toBack={pageType === EDITOR_TYPES.LIST_EDITOR ? undefined : () => setPageType(EDITOR_TYPES.LIST_EDITOR)}
+        toBack={
+          pageType === EDITOR_TYPES.LIST_EDITOR || pageType === EDITOR_TYPES.WORKBENCH_EDITOR
+            ? undefined
+            : () => setPageType(EDITOR_TYPES.LIST_EDITOR)
+        }
       />
 
       <div className={styles.content}>

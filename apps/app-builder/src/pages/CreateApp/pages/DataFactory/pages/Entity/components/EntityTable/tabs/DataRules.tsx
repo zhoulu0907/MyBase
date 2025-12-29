@@ -81,7 +81,8 @@ const DataRules: React.FC<DataRulesProps> = ({ entity, activeTab }) => {
       [VALIDATION_TYPES.LENGTH]: ruleService.deleteLengthRule,
       [VALIDATION_TYPES.RANGE]: ruleService.deleteRangeRule,
       [VALIDATION_TYPES.FORMAT]: ruleService.deleteFormatRule,
-      [VALIDATION_TYPES.CHILD_NOT_EMPTY]: ruleService.deleteChildNotEmptyRule
+      [VALIDATION_TYPES.CHILD_NOT_EMPTY]: ruleService.deleteChildNotEmptyRule,
+      [VALIDATION_TYPES.SELF_DEFINED]: ruleService.deleteCustomRule
     };
 
     try {

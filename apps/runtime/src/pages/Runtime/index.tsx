@@ -10,7 +10,6 @@ import {
   menuSignal,
   MenuType,
   runtimeListApplicationBPMMenu,
-  VisibleType,
   type ApplicationMenu,
   type ChildEntity,
   type ListApplicationMenuReq
@@ -66,8 +65,6 @@ const Runtime: React.FC = () => {
   const cutTreeItemWidth = 25;
   const { curMenu, setCurMenu } = menuSignal;
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
-
-  const [nickname, setNickname] = useState('U');
 
   //   useEffect(() => {
   //     // 从 window.location.hash 中解析 redirectURL，再从 redirectURL 解析 appId 和 tenantId
@@ -168,20 +165,17 @@ const Runtime: React.FC = () => {
   const getUserInfo = async () => {
     const res = await getPermissionInfo();
     UserPermissionManager.setUserPermissionInfo(res);
-    setNickname(res.user.nickname);
   };
 
   // 递归处理 去除隐藏的页面
   const dealPage = (array: ApplicationMenu[]) => {
     let treeList: ApplicationMenu[] = [];
     array.forEach((item: ApplicationMenu) => {
-      if (item.isVisible === VisibleType.SHOW) {
-        let childrenList: ApplicationMenu[] = [];
-        if (item.children && item.children.length > 0) {
-          childrenList = dealPage(item.children);
-        }
-        treeList.push({ ...item, children: childrenList });
+      let childrenList: ApplicationMenu[] = [];
+      if (item.children && item.children.length > 0) {
+        childrenList = dealPage(item.children);
       }
+      treeList.push({ ...item, children: childrenList });
     });
     return treeList;
   };
@@ -255,9 +249,12 @@ const Runtime: React.FC = () => {
   };
 
   // 更新当前路由的 curMenu（不刷新页面）
-  const handleCurMenuUrl = (curMenuId: string) => {
+  const handleCurMenuUrl = async (curMenuId: string) => {
     const sp = new URLSearchParams(location.search);
     sp.set('curMenu', String(curMenuId));
+    // const permission = await getApplicationMenuPermission(curMenuId);
+    // console.log('permission: ', permission);
+
     const to = `${location.pathname}?${sp.toString()}`;
     navigate(to, { replace: true });
   };

@@ -13,6 +13,7 @@ import {
   PageType,
   queryFlowExecForm,
   TRIGGER_EVENTS,
+  updateDraft,
   type AppEntityField,
   type DetailMethodV2Params,
   type GetPageSetIdReq,
@@ -144,7 +145,12 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
    * @param isDraft 是否是草稿
    */
   const submitForm = async (isSave = false, isDraft?: boolean) => {
-    await form.validate();
+    if (!isDraft) {
+      await form.validate();
+    }
+
+    const draftId = form.getFieldValue('draftId');
+
     !isSave && setSubmitLoading(true);
     const fields = form.getFieldsValue();
 
@@ -288,9 +294,16 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
           console.log(req);
 
           if (isDraft) {
-            res = await createDraft(tableName, menuId, req);
+            if (draftId) {
+              res = await updateDraft(tableName, menuId, {
+                ...req,
+                id: draftId
+              });
+            } else {
+              res = await createDraft(tableName, menuId, req);
+            }
           } else {
-            res = await dataMethodCreateV2(tableName, menuId, req);
+            res = await dataMethodCreateV2(tableName, menuId, req, draftId);
           }
 
           console.log(res);

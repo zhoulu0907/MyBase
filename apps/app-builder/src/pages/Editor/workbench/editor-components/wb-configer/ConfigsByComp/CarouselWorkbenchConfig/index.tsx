@@ -13,19 +13,26 @@ const CollapseItem = Collapse.Item;
 
 const SECTION_KEYS = {
   TITLE: 'title',
+  CAROUSEL: 'carousel',
   CONTENT: 'content'
 } as const;
 
 const CarouselWorkbenchConfig = () => {
   const { editData, configs, handlePropsChange, renderEditItem } = UseWorkbenchAttributeContext();
-  const [activeKeys, setActiveKeys] = useState<string[]>([SECTION_KEYS.TITLE, SECTION_KEYS.CONTENT]);
+  const [activeKeys, setActiveKeys] = useState<string[]>([
+    SECTION_KEYS.TITLE,
+    SECTION_KEYS.CONTENT,
+    SECTION_KEYS.CAROUSEL
+  ]);
 
-  const labelItem = useMemo(() => {
-    return findItem(editData, 'label');
-  }, [editData]);
-
-  const carouselContentItem = useMemo(() => {
-    return findItem(editData, 'carouselContent');
+  const configItems = useMemo(() => {
+    return {
+      label: findItem(editData, 'label'),
+      autoplay: findItem(editData, 'autoplay'),
+      interval: findItem(editData, 'interval'),
+      fillStyle: findItem(editData, 'fillStyle'),
+      carouselContent: findItem(editData, 'carouselContent')
+    };
   }, [editData]);
 
   return (
@@ -40,13 +47,18 @@ const CarouselWorkbenchConfig = () => {
           className={styles.collapseConfigs}
         >
           <CollapseItem header="标题配置" name={SECTION_KEYS.TITLE} contentStyle={PanelContentStyle}>
-            {labelItem && <div>{renderEditItem(labelItem.item, labelItem.index)}</div>}
+            {configItems.label && <div>{renderEditItem(configItems.label)}</div>}
+          </CollapseItem>
+          <CollapseItem header="轮播配置" name={SECTION_KEYS.CAROUSEL} contentStyle={PanelContentStyle}>
+            {configItems.autoplay && <div>{renderEditItem(configItems.autoplay)}</div>}
+            {configItems.interval && <div>{renderEditItem(configItems.interval)}</div>}
+            {configItems.fillStyle && <div>{renderEditItem(configItems.fillStyle)}</div>}
           </CollapseItem>
           <CollapseItem header="轮播内容" name={SECTION_KEYS.CONTENT} contentStyle={PanelContentStyle}>
-            {cpID && carouselContentItem && (
+            {cpID && configItems.carouselContent && (
               <WorkbenchCarouselContentConfig
                 id={cpID}
-                item={carouselContentItem.item}
+                item={configItems.carouselContent.item}
                 configs={configs}
                 handlePropsChange={handlePropsChange}
               />
