@@ -90,7 +90,7 @@ public class PageSetServiceImpl implements PageSetService {
 
         // 创建数据大屏页面逻辑
         if (PageTypeSetEnum.isDashboardType(createPageSetDTO.getPageSetType())) {
-            Long dashboard = dashboardServiceProvider.createDashboard(createPageSetDTO.getCreateDashboardType(), createPageSetDTO.getDashboardId(),createPageSetDTO.getPageSetName());
+            Long dashboard = dashboardServiceProvider.createDashboard(createPageSetDTO.getCreateDashboardType(), createPageSetDTO.getDashboardId(), createPageSetDTO.getPageSetName());
             if (dashboard != null){
                 createPageSetDTO.setDashboardId(dashboard);
             }
