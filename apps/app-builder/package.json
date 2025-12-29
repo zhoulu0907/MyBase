@@ -69,6 +69,7 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
     "formula-editor-react": "^1.0.0",
+    "html2canvas": "^1.4.1",
     "i18next": "^25.3.2",
     "i18next-browser-languagedetector": "^8.2.0",
     "install": "^0.13.0",
