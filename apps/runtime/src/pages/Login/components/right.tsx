@@ -31,7 +31,7 @@ import {
 import { appIconMap } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useI18n } from '../../../hooks/useI18n';
 import { useRememberMe } from '../../../hooks/useRememberMe';
 import styles from '../index.module.less';
