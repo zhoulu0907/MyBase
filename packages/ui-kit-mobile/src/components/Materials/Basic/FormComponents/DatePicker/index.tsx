@@ -4,7 +4,7 @@ import dayjs from 'dayjs';
 import { DatePicker, Ellipsis, Form } from '@arco-design/mobile-react';
 import { ItemType } from '@arco-design/mobile-react/cjs/date-picker';
 import { ValidatorType, ITypeRules } from '@arco-design/mobile-utils';
-import { FORM_COMPONENT_TYPES, DATE_OPTIONS, DATE_VALUES, STATUS_OPTIONS, STATUS_VALUES, FormSchema, DATE_EXTREME_TYPE, DATE_DYNAMIC_VALUE } from '@onebase/ui-kit';
+import { FORM_COMPONENT_TYPES, DATE_OPTIONS, DATE_VALUES, STATUS_OPTIONS, STATUS_VALUES, FormSchema, DATE_EXTREME_TYPE, DATE_DYNAMIC_VALUE, securityEncodeText } from '@onebase/ui-kit';
 type XDatePickerConfig = typeof FormSchema.XDatePickerSchema.config;
 import '../index.css';
 
@@ -20,6 +20,7 @@ const XDatePicker = memo((props: XDatePickerConfig & { runtime?: boolean; detail
     runtime = true,
     detailMode,
     form,
+    security,
     dateRange,
     defaultValueConfig
   } = props;
@@ -142,6 +143,22 @@ const XDatePicker = memo((props: XDatePickerConfig & { runtime?: boolean; detail
     }
   ];
 
+  const renderTime = () => {
+    const fieldValue = form.getFieldValue(fieldId);
+    switch (dateType) {
+      case DATE_VALUES[DATE_OPTIONS.YEAR]:
+        return <>{securityEncodeText(security, dayjs(fieldValue).format('YYYY'))}</>;
+      case DATE_VALUES[DATE_OPTIONS.MONTH]:
+        return <>{securityEncodeText(security, dayjs(fieldValue).format('YYYY-MM'))}</>;
+      case DATE_VALUES[DATE_OPTIONS.DATE]:
+        return <>{securityEncodeText(security, dayjs(fieldValue).format('YYYY-MM-DD'))}</>;
+      case DATE_VALUES[DATE_OPTIONS.FULL]:
+        return <>{securityEncodeText(security, dayjs(fieldValue).format('YYYY-MM-DD HH:mm:ss'))}</>;
+      default:
+        return '--';
+    }
+  };
+
   return (
     <Form.Item
       className="inputTextWrapperOBMobile"
@@ -149,7 +166,7 @@ const XDatePicker = memo((props: XDatePickerConfig & { runtime?: boolean; detail
       rules={rules}
       layout={layout}
       label={label.display && <Ellipsis text={label.text} maxLine={2} />}
-      initialValue={form?.getFieldValue(fieldId)}
+      initialValue={defaultValueConfig.customValue}
       style={{
         textAlign,
         pointerEvents: (!runtime || detailMode) ? 'none' : 'unset',
@@ -157,7 +174,7 @@ const XDatePicker = memo((props: XDatePickerConfig & { runtime?: boolean; detail
       }}
     >
       {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
-        <div className="readonlyText">{form?.getFieldValue(fieldId) ? dayjs(form?.getFieldValue(fieldId)).format('YYYY-MM-DD') : '--'}</div>
+        <div className="readonlyText">{form?.getFieldValue(fieldId) ? renderTime() : '--'}</div>
       ) : (
         renderDatePicker()
       )}

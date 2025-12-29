@@ -13,7 +13,7 @@ import {
   type AppEntityField,
 } from '@onebase/app';
 import { pagesRuntimeSignal } from '@onebase/common';
-import { BUTTON_OPTIONS, BUTTON_VALUES, downloadFileByUrl, ENTITY_FIELD_TYPE, RedirectMethod, useFormEditorSignal } from '@onebase/ui-kit';
+import { BUTTON_OPTIONS, BUTTON_VALUES, downloadFileByUrl, ENTITY_FIELD_TYPE, getFieldOptionsConfig, RedirectMethod, useAppEntityStore, useFormEditorSignal } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import { memo, useEffect, useState } from 'react';
 import TableSearch from './tableSerach';
@@ -64,6 +64,7 @@ const XLoadMore = memo(
     } = props;
 
     const { curMenu } = menuSignal;
+    const { mainEntity, subEntities } = useAppEntityStore();
 
     const [finalColumns, setFinalColumns] = useState<any[]>();
     // 实际查询用的参数
@@ -122,6 +123,7 @@ const XLoadMore = memo(
                 (field: AppEntityField) => field.fieldName === column.dataIndex
               );
               const result = item[dataFieldInfo?.fieldName] || '';
+              console.log('resultresult', item, result)
               if (!result) return '-';
               if (Array.isArray(result)) {
                 if (result.length === 0) return;
@@ -229,9 +231,9 @@ const XLoadMore = memo(
 
       const { list = [], total = 0 } = res;
 
-      const newTableData = (list || []).map((item: any) => {
+      const newTableData = await Promise.all((list || []).map(async (item: any) => {
         const newItem = item;
-        Object.entries(newItem).forEach(([key, value]) => {
+        for (const [key, value] of Object.entries(newItem)) {
           // 优化：减少重复查找，提升可读性和性能
           if (Array.isArray(mainMetaData?.parentFields)) {
             const dataField = mainMetaData.parentFields.find(
@@ -261,11 +263,9 @@ const XLoadMore = memo(
               (field: AppEntityField) =>
                 field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE
             );
-            if (multiSelectField && newItem[key]) {
-
-              if (Array.isArray(newItem[key])) {
-                newItem[key] = newItem[key].map((item: any) => item.name || item?.id).join(', ');
-              }
+            if (multiSelectField && newItem[key] && Array.isArray(newItem[key])) {
+              const newOptions = await getFieldOptionsConfig([tableName, key], mainEntity, subEntities)
+              newItem[key] = newOptions.filter(op => newItem[key].find(v => op.id === v.id)).map(v => v.label).join(', ')
             }
 
             // 人员选择单选
@@ -304,9 +304,8 @@ const XLoadMore = memo(
             );
             if (selectField) {
               const curValue = newItem[key];
-              const curComponentSchema = Object.values(pageComponentSchemas.value).find(v => v.config.dataField?.includes(selectField.fieldName)) || {};
-              const curOptions = curComponentSchema?.config?.defaultOptionsConfig?.defaultOptions || [];
-              newItem[key] = curOptions.find(op => op.value === curValue.id)?.label || '';
+              const newOptions = await getFieldOptionsConfig([tableName, key], mainEntity, subEntities)
+              newItem[key] = newOptions.find(op => op.id === curValue?.id)?.label || '-';
             }
 
             // 数据选择
@@ -327,13 +326,13 @@ const XLoadMore = memo(
               newItem[key] = newItem[key] || [];
             }
           }
-        });
+        };
 
         return {
           ...newItem,
           key: item.id
         };
-      });
+      }));
       setLoading(false);
       setTableData(req.pageNo === 1 ? newTableData : [...tableData, ...newTableData]);
       setTableTotal(total);
