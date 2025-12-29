@@ -62,9 +62,9 @@ const Home: React.FC<{ nickname: string }> = ({ nickname }) => {
 
   // 递归处理 去除隐藏的页面
   const dealPage = (array: ApplicationMenu[]) => {
-    const treeList: ApplicationMenu[] = [];
+    let treeList: ApplicationMenu[] = [];
     array.forEach((item: ApplicationMenu) => {
-      if (item.isVisibleMobile === VisibleType.SHOW) {
+      if (item.isVisible === VisibleType.SHOW) {
         let childrenList: ApplicationMenu[] = [];
         if (item.children && item.children.length > 0) {
           childrenList = dealPage(item.children);
@@ -91,8 +91,6 @@ const Home: React.FC<{ nickname: string }> = ({ nickname }) => {
     // 处理数据
     const resPageList = res && res.length > 0 ? dealPage(res) : [];
     const pageList: any[] = bpmData.concat(resPageList);
-
-    console.log('resPageList', resPageList);
 
     const treeData = convertMenuToTreeData(pageList);
     setTreeData(treeData);
