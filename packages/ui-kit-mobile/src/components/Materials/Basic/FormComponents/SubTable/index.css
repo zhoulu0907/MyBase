@@ -4,7 +4,7 @@
     display: block;
   }
   .arco-form-item {
-    border: none !important;
+    /* border: none !important; */
   }
   .arco-cell:before {
     transform: none !important;
@@ -61,11 +61,11 @@
   }
 
   .arco-form-label-item {
-    display: none;
+    /* display: none; */
   }
 
   .inputTextWrapperOBMobile {
-    border: none !important;
+    /* border: none !important; */
   }
 
   .arco-cell-group .cell-group-body.bordered::before {
@@ -109,22 +109,7 @@
     justify-content: space-between;
     margin-left: 0.16rem;
   }
-  .arco-cell::before {
-    content: '';
-    width: 100%;
-    height: 1px;
-    position: absolute;
-    left: 0;
-    top: 0;
-    z-index: 1;
-    border-top-style: solid;
-    border-top-width: 1px;
-    border-top-color: #e5e6eb;
-    box-sizing: border-box;
-    transform-origin: left top;
-    pointer-events: none;
-    border-radius: 0;
-  }
+
   .componentItemSubtableOBMobile:first-child .arco-cell::before {
     display: none;
   }
@@ -155,7 +140,7 @@
       width: 100%;
 
       & > div {
-        padding-left: 0;
+        /* padding-left: 0; */
         padding-right: 0;
       }
     }

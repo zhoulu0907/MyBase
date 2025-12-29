@@ -1,6 +1,7 @@
 import { Form, Uploader, Toast, Loading, Ellipsis } from '@arco-design/mobile-react';
 import { type UploadItem } from '@arco-design/mobile-react/lib/Upload';
 import { FileListMethods } from '@arco-design/mobile-react/cjs/uploader';
+import { ITypeRules, ValidatorType } from '@arco-design/mobile-utils';
 import { IconDelete, IconClose, IconDownload } from '@arco-design/mobile-react/esm/icon';
 import { nanoid } from 'nanoid';
 import { memo, useState, useEffect } from 'react';
@@ -97,7 +98,7 @@ const XFileUpload = memo((props: XFileUploadConfig & { runtime?: boolean; detail
       }
       return <img src={DownloadLink} alt="download_link" />;
     }
-    
+
     return (
       <div className="uplaodList-text">
         {filesList.map(({ id, type, status, url, name, response }, index) => (
@@ -120,17 +121,17 @@ const XFileUpload = memo((props: XFileUploadConfig & { runtime?: boolean; detail
                     e.stopPropagation();
 
                     if (url && name) {
-                        const lastIndexOf = fieldName.lastIndexOf('.');
-                        const curFieldName = lastIndexOf === -1 ? fieldName : fieldName.slice(lastIndexOf + 1);
-                        const param = {
-                          menuId: curMenu.value?.id,
-                          id: form?.getFieldValue('id') || '',
-                          fieldName: curFieldName,
-                          fileId: id || response || ''
-                        };
+                      const lastIndexOf = fieldName.lastIndexOf('.');
+                      const curFieldName = lastIndexOf === -1 ? fieldName : fieldName.slice(lastIndexOf + 1);
+                      const param = {
+                        menuId: curMenu.value?.id,
+                        id: form?.getFieldValue('id') || '',
+                        fieldName: curFieldName,
+                        fileId: id || response || ''
+                      };
 
-                        const fileUrl = await attachmentDownload(tableName, param);
-                        downloadFileByUrl(fileUrl, name);
+                      const fileUrl = await attachmentDownload(tableName, param);
+                      downloadFileByUrl(fileUrl, name);
                     }
                   }}
                 />}
@@ -145,6 +146,14 @@ const XFileUpload = memo((props: XFileUploadConfig & { runtime?: boolean; detail
     );
   };
 
+  const rules: ITypeRules<ValidatorType.Custom>[] = [
+    {
+      required: verify?.required,
+      type: ValidatorType.Custom,
+      message: `${label.text}是必填项`
+    }
+  ];
+
   return (
     <Form.Item
       className="inputTextWrapperOBMobile fileUploadWrapperOBMobile"
@@ -153,7 +162,7 @@ const XFileUpload = memo((props: XFileUploadConfig & { runtime?: boolean; detail
       }
       layout="vertical"
       field={fieldId}
-      required={verify?.required}
+      rules={rules}
       trigger="fileList"
       style={{
         pointerEvents: runtime ? 'unset' : 'none',

@@ -17,6 +17,7 @@ const XautoCode = memo((props: XautoCodeConfig & { runtime?: boolean; detailMode
     detailMode
   } = props;
 
+  const textAlign = layout === 'vertical' ? 'left' : 'right';
 
   // 生成唯一的字段ID
   const fieldId = dataField && dataField.length > 0
@@ -30,21 +31,16 @@ const XautoCode = memo((props: XautoCodeConfig & { runtime?: boolean; detailMode
       field={fieldId}
       layout={layout}
       style={{
-        textAlign: layout === 'vertical' ? 'left' : 'right',
         pointerEvents: (!runtime || detailMode) ? 'none' : 'unset',
         opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
       }}
     >
       {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ?
-        <Input
-          className="readonlyText"
-          readOnly
-          value={form?.getFieldValue(fieldId)}
-          inputStyle={{ textAlign: layout === 'vertical' ? 'left' : 'right' }}
-        /> :
+        <div className="readonlyText" style={{ textAlign }}>{form?.getFieldValue(fieldId) || '--'}</div> :
         <Input
           readOnly={true}
           placeholder={placeholder}
+          inputStyle={{ textAlign }}
         />
       }
     </Form.Item>

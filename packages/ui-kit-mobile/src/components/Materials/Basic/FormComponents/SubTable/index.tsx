@@ -254,7 +254,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
 
     schema.config.cpName = itemDisplayName;
     schema.config.label.text = itemDisplayName;
-    schema.config.label.display = false;
+    // schema.config.label.display = false;
     schema.config.dataField = tableName ? [tableName, fieldName] : [];
     schema.config.id = cpID;
     const props = {
@@ -322,14 +322,15 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                       subTableComponents[id].map((subTable: any) => {
                         const config = pageComponentSchemas[subTable.id].config;
                         const [subTableName, fieldName] = config.dataField;
+                        config.label.display = true; // todo 不知道哪里统一设置成false了
                         const newConfig = {
                           ...config,
                           dataField: [mainEntity.tableName, `${subTableName}.${index}.${fieldName}`]
                         };
                         const pageSchema = { ...pageComponentSchemas[subTable.id], config: newConfig };
-                        // const isImageOrFile = pageSchema.type === FORM_COMPONENT_TYPES.IMG_UPLOAD || pageSchema.type === FORM_COMPONENT_TYPES.FILE_UPLOAD;
+
                         return (
-                          <Cell className={'verticalLayout'} label={<Ellipsis text={config.cpName} maxLine={2} />} key={subTable.id} style={{ padding: 0 }} >
+                          <div className={'verticalLayout'} key={subTable.id}>
                             <PreviewRender
                               editLoading={editLoading}
                               form={form}
@@ -340,7 +341,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                               runtime={true}
                             // showFromPageData={showFromPageData}
                             />
-                          </Cell>
+                          </div>
                         );
                       })}
                   </Cell.Group>

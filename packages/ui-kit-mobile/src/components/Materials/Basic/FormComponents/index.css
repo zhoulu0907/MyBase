@@ -122,6 +122,6 @@
   border: none !important;
 }
 
-.arco-ellipsis, .arco-form-picker-link-container {
+.arco-form-picker-link-container {
   font-size: var(--fontSize);
 }

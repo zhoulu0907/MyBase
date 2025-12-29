@@ -15,10 +15,10 @@ import {
   getComponentSchema,
   STATUS_OPTIONS,
   STATUS_VALUES,
+  useFormEditorSignal,
+  usePageViewEditorSignal,
   WIDTH_OPTIONS,
   WIDTH_VALUES,
-  usePageViewEditorSignal,
-  useFormEditorSignal,
   type GridItem
 } from '@onebase/ui-kit';
 import { EditRender } from '@onebase/ui-kit-mobile';
@@ -550,7 +550,7 @@ const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({ props, isListEditor =
                     }
                     setSubTableComponents(cpID, subFieldComponents);
                     entityList.push({ displayName: cpName, id: cpID, type: cpType });
-                  } else if (item.entityId && item.entityId !== mainEntity.entityId) {
+                  } else if (item.entityId && item.entityId !== mainEntity?.entityId) {
                     // 子表 数据字段  不做任何操作
                   } else {
                     // 主表字段、普通字段
@@ -692,7 +692,6 @@ const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({ props, isListEditor =
                   }
 
                   if (dataLabel) {
-                    console.log(schema);
                     schema.config.label.text = dataLabel;
                   }
 

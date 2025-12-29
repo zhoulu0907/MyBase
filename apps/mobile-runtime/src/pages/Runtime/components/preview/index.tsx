@@ -1,7 +1,6 @@
 // import ExecuteFlows from '@/utils/flow';
 import { Button, Form, PopupSwiper, Toast } from '@arco-design/mobile-react';
 import { useForm } from '@arco-design/mobile-react/esm/form';
-import dayjs from 'dayjs';
 import {
   CATEGORY_TYPE,
   dataMethodCreateV2,
@@ -22,6 +21,8 @@ import {
   type UpdateMethodV2Params
 } from '@onebase/app';
 import { pagesRuntimeSignal } from '@onebase/common';
+import { getSimpleUserList } from '@onebase/platform-center';
+import dayjs from 'dayjs';
 
 import {
   EDITOR_TYPES,
@@ -30,24 +31,24 @@ import {
   getComponentWidth,
   getWorkbenchComponentWidth,
   SHOW_COMPONENT_TYPES,
+  startLoadWorkbenchPageSet,
   STATUS_OPTIONS,
   STATUS_VALUES,
   useFormEditorSignal,
-  useWorkbenchEditorSignal,
-  startLoadWorkbenchPageSet,
   usePageEditorSignal,
   usePageViewEditorSignal,
-  type WorkbenchComponentType,
-  type GridItem
+  useWorkbenchEditorSignal,
+  type GridItem,
+  type WorkbenchComponentType
 } from '@onebase/ui-kit';
 
 import CustomNav from '@/pages/components/Nav';
+import { splitByDivider } from '@/utils/tree';
 import { fetchSubmitInstance } from '@onebase/app/src/services/app_runtime';
 import { startLoadPageSet, useEditorSignalMap, useListEditorSignal } from '@onebase/ui-kit';
 import { PreviewRender } from '@onebase/ui-kit-mobile';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { Fragment, useEffect, useState } from 'react';
-import { splitByDivider } from '@/utils/tree';
 import styles from './index.module.less';
 
 interface PreviewProps {
@@ -70,7 +71,13 @@ const ghostBgColor = {
   disabled: '#FFF'
 };
 
-const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, mainEntity, subEntities: subEntitiesValues, pageSetType }) => {
+const PreviewContainer: React.FC<PreviewProps> = ({
+  menuId,
+  runtime,
+  mainEntity,
+  subEntities: subEntitiesValues,
+  pageSetType
+}) => {
   useSignals();
 
   const [form] = useForm();
@@ -115,7 +122,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, mainEntity,
 
   // 当前时间戳
   const [detailMode, setDetailMode] = useState(true);
-  const [formDetails, setFormDetails] = useState<any>({}); // 表单数据
+  const [userSelectData, setUserSelectData] = useState<any>([]); // 人员选择数据
   const [refresh, setRefresh] = useState(Date.now());
 
   /* 数据初始化，解决二次进入旧数据闪烁问题 */
@@ -160,7 +167,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, mainEntity,
 
   useEffect(() => {
     if (menuId) {
-
       handleGetPageSetId(menuId);
       setEditTargetId('');
     }
@@ -227,9 +233,9 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, mainEntity,
 
     const formData = {} as any;
     const subFormData = {} as any;
-    const groups = {} as any;
+    const groups = [] as any;
     let subEntityUuid: string = '';
-    Object.entries(fields).forEach(([key, value]) => {
+    Object.entries(fields).forEach(async ([key, value]) => {
       console.log('key: ', key, '   value: ', value);
       // 处理主表逻辑
       const field = (mainMetaDataFields.value || [])
@@ -249,23 +255,23 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, mainEntity,
             id: value[0],
             name: value[0]
           };
-        } else if (field.fieldType === ENTITY_FIELD_TYPE.USER.VALUE) {
-          if (Array.isArray(value)) {
-            const userData = formDetails?.[key];
-            formData[field.fieldName] = {
-              id: userData?.id,
-              name: value[0]
-            };
-          } else {
-            formData[field.fieldName] = {
-              id: value.id,
-              name: value.name
-            };
+        } else if (field.fieldType === ENTITY_FIELD_TYPE.USER.VALUE && Array.isArray(value)) {
+          let userTempData = userSelectData;
+          if (userTempData.length === 0) {
+            const userList = await getSimpleUserList();
+            userTempData = userList;
+            setUserSelectData(userList);
           }
+          const userData = userTempData.find(item => item.nickname === value[0]);
+          formData[field.fieldName] = {
+            id: userData?.id,
+            name: userData?.nickname
+          };
         } else {
           formData[field.fieldName] = value;
         }
       }
+
       !(typeof value === 'object') &&
         Object.values(listPageComponentSchemas.value).forEach((item) => {
           if (!item.config.columns || item.config.status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]) {
@@ -279,58 +285,51 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, mainEntity,
         });
 
       // 处理子表逻辑
-      if (key.startsWith(FORM_COMPONENT_TYPES.SUB_TABLE)) {
+      const subEntity = subEntities.value.find((v: any) => key.startsWith(v.childTableName));
+      if (subEntity) {
         const parts = key.split('.');
-
-        subEntityUuid = useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[parts[0]]?.config
-          ?.subTable;
-
-        const groupIndex = parts[parts.length - 2];
+        subEntityUuid = parts[0];
+        // const groupIndex = parts[parts.length - 2];
         const fieldName = parts[parts.length - 1];
 
-        if (!groups[groupIndex]) {
-          groups[groupIndex] = {};
-        }
-
         const fieldType = subEntities.value[0].childFields.find((v) => v.fieldName === fieldName)?.fieldType;
-        if (resetImageFile(groups[groupIndex], { fieldType, fieldName }, value)) {
-        } else if (fieldType === ENTITY_FIELD_TYPE.DATE.VALUE) {
-          groups[groupIndex][fieldName] = value ? dayjs(value).format('YYYY-MM-DD') : '';
+        if (fieldType === ENTITY_FIELD_TYPE.DATE.VALUE) {
+          subFormData[key] = value ? dayjs(value).format('YYYY-MM-DD') : '';
         } else if (fieldType === ENTITY_FIELD_TYPE.DATETIME.VALUE) {
-          groups[groupIndex][fieldName] = value ? dayjs(value).format('YYYY-MM-DD hh:mm:ss') : '';
+          subFormData[key] = value ? dayjs(value).format('YYYY-MM-DD hh:mm:ss') : '';
         } else if (fieldType === ENTITY_FIELD_TYPE.SELECT.VALUE) {
-          groups[groupIndex][fieldName] = value[0];
-        } else if (fieldType === ENTITY_FIELD_TYPE.USER.VALUE) {
-          if (Array.isArray(value)) {
-            const userData = formDetails?.[key];
-            groups[groupIndex][fieldName] = {
-              id: userData?.id,
-              name: value[0]
-            };
-          } else {
-            groups[groupIndex][fieldName] = {
-              id: value.id,
-              name: value.name
-            };
+          subFormData[key] = value[0];
+        } else if (fieldType === ENTITY_FIELD_TYPE.USER.VALUE && Array.isArray(value)) {
+          let userTempData = userSelectData;
+          if (userTempData.length === 0) {
+            const userList = await getSimpleUserList();
+            userTempData = userList;
+            setUserSelectData(userList);
           }
+          const userData = userTempData.find(item => item.nickname === value[0]);
+          subFormData[key] = {
+            id: userData?.id,
+            name: userData?.nickname
+          };
         } else {
-          // groups[groupIndex][fieldName] = value;
+          subFormData[key] = value;
         }
       }
     });
 
-    const subData = Object.keys(groups)
-      .sort((a, b) => Number(a) - Number(b))
-      .map((k) => groups[k]);
+    const result = Object.entries(subFormData).reduce((acc, [key, val]) => {
+      const [, i, field] = key.split('.');
+      acc[i] ??= {};
+      acc[i][field] = val;
+      return acc;
+    }, []);
 
-    const subTableName = subEntities.value.find((ele: any) => ele.childEntityUuid == subEntityUuid)?.childTableName;
-    if (subTableName) {
-      subFormData[subTableName] = subData;
+    if (subEntityUuid) {
+      groups[subEntityUuid] = result;
     }
 
     console.log('formData:   ', formData);
-    console.log('subFormData:   ', subData, subFormData);
-    // return;
+    console.log('subFormData:   ', subFormData);
 
     // 接口判断 页面触发
     const curFormPage = curPage.value?.pages?.find((ele: any) => ele.pageType === CATEGORY_TYPE.FORM);
@@ -344,7 +343,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, mainEntity,
       const req: UpdateMethodV2Params = {
         id: editTargetId,
         ...formData,
-        ...subFormData
+        ...groups
       };
       console.log('req: ', req);
       const res = await dataMethodUpdateV2(tableName, menuId, req);
@@ -372,14 +371,14 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, mainEntity,
             businessId: curPage?.value?.id,
             entity: {
               entityId: tableName,
-              data: { ...formData, ...subFormData }
+              data: { ...formData, ...groups }
             }
           };
           res = await fetchSubmitInstance(reqFlow);
           setPageType(EDITOR_TYPES.FORM_EDITOR);
         } else {
           console.log(formData);
-          const req: InsertMethodV2Params = { ...formData, ...subFormData };
+          const req: InsertMethodV2Params = { ...formData, ...groups };
           console.log(req);
 
           res = await dataMethodCreateV2(tableName, menuId, req);
@@ -447,7 +446,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, mainEntity,
     const formValues: Record<string, any> = {};
 
     if (res) {
-      setFormDetails(res);
       const dataItem = res;
       const fieldIdNameMap: Record<string, string> = {};
       (mainMetaDataFields.value || []).forEach((field: AppEntityField) => {
@@ -469,7 +467,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, mainEntity,
             } else if (fieldType === ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE) {
               formValues[fieldName] = value.map((v) => v.id) || [];
             } else if (fieldType === ENTITY_FIELD_TYPE.USER.VALUE) {
-              formValues[fieldName] = Object.entries(value).length > 0 ? [value.name] : value;
+              formValues[fieldName] = value?.name ? [value.name] : [];
             } else if (fieldType === ENTITY_FIELD_TYPE.DEPARTMENT.VALUE) {
               formValues[fieldName] = value;
             } else if (
@@ -482,7 +480,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, mainEntity,
                   name: item.name,
                   id: item.id,
                   response: item.response || item.id,
-                  status: fieldType === ENTITY_FIELD_TYPE.FILE.VALUE ? 'loaded' : 'loading',
+                  status: fieldType === ENTITY_FIELD_TYPE.FILE.VALUE ? 'loaded' : 'loading'
                 };
               });
             } else {
@@ -516,45 +514,46 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, mainEntity,
                 const keys = Object.keys((subData || [])[idx]);
                 for (let ele in componentSchemas) {
                   const config = componentSchemas[ele]?.config;
-                  const fieldNamePrev = config?.dataField?.[0];
+                  const subTableName = config?.dataField?.[0];
                   const fieldName = config?.dataField?.[1];
                   const fieldType = subEntity.childFields.find((v) => v.fieldName === fieldName)?.fieldType;
 
                   if (keys.includes(fieldName)) {
                     if (fieldType === ENTITY_FIELD_TYPE.DATE.VALUE || fieldType === ENTITY_FIELD_TYPE.DATETIME.VALUE) {
-                      formValues[`${fieldNamePrev}.${idx}.${fieldName}`] = dayjs(subData[idx]?.[fieldName]).valueOf();
+                      formValues[`${subTableName}.${idx}.${fieldName}`] = dayjs(subData[idx]?.[fieldName]).valueOf();
                     } else if (fieldType === ENTITY_FIELD_TYPE.SELECT.VALUE) {
                       const value = subData[idx]?.[fieldName];
-                      formValues[`${fieldNamePrev}.${idx}.${fieldName}`] = [value.id];
+                      formValues[`${subTableName}.${idx}.${fieldName}`] = [value.id];
                     } else if (fieldType === ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE) {
                       const value = subData[idx]?.[fieldName];
-                      formValues[`${fieldNamePrev}.${idx}.${fieldName}`] = value.map((v) => v.id) || [];
+                      formValues[`${subTableName}.${idx}.${fieldName}`] = value.map((v) => v.id) || [];
                     } else if (fieldType === ENTITY_FIELD_TYPE.USER.VALUE) {
                       const value = subData[idx]?.[fieldName];
-                      formValues[`${fieldNamePrev}.${idx}.${fieldName}`] =
-                        Object.entries(value).length > 0 ? [value.name] : value;
+                      formValues[`${subTableName}.${idx}.${fieldName}`] = value?.name ? [value.name] : [];
                     } else if (fieldType === ENTITY_FIELD_TYPE.DEPARTMENT.VALUE) {
-                      formValues[`${fieldNamePrev}.${idx}.${fieldName}`] = subData[idx]?.[fieldName];
+                      formValues[`${subTableName}.${idx}.${fieldName}`] = subData[idx]?.[fieldName];
                     } else if (
                       (fieldType === ENTITY_FIELD_TYPE.IMAGE.VALUE || fieldType === ENTITY_FIELD_TYPE.FILE.VALUE) &&
                       Array.isArray(subData[idx]?.[fieldName])
                     ) {
-                      formValues[`${fieldNamePrev}.${idx}.${fieldName}`] = (subData[idx]?.[fieldName] || []).map((item: any) => {
-                        return {
-                          ...item,
-                          name: item.name,
-                          id: item.id,
-                          response: item.response || item.id,
-                          status: fieldType === ENTITY_FIELD_TYPE.FILE.VALUE ? 'loaded' : 'loading',
-                        };
-                      });
+                      formValues[`${subTableName}.${idx}.${fieldName}`] = (subData[idx]?.[fieldName] || []).map(
+                        (item: any) => {
+                          return {
+                            ...item,
+                            name: item.name,
+                            id: item.id,
+                            response: item.response || item.id,
+                            status: fieldType === ENTITY_FIELD_TYPE.FILE.VALUE ? 'loaded' : 'loading'
+                          };
+                        }
+                      );
                     } else {
-                      formValues[`${fieldNamePrev}.${idx}.${fieldName}`] = subData[idx]?.[fieldName];
+                      formValues[`${subTableName}.${idx}.${fieldName}`] = subData[idx]?.[fieldName];
                     }
+                    // 补充id
+                    formValues[`${subTableName}.${idx}.id`] = subData[idx]?.id;
                   }
                 }
-                // 补充id todo key
-                formValues[`${key}.${idx}.id`] = subData[idx]?.id;
               }
             }
           });
@@ -610,7 +609,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, mainEntity,
         )}
 
         {/* 列表页面渲染 */}
-        {pageSetType !== PageType.WORKBENCH && pageType === EDITOR_TYPES.LIST_EDITOR &&
+        {pageSetType !== PageType.WORKBENCH &&
+          pageType === EDITOR_TYPES.LIST_EDITOR &&
           (!listComponents.value?.length ? (
             <div className={styles.noData}>暂无数据</div>
           ) : (
@@ -663,7 +663,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, mainEntity,
               }
               return (
                 <div className={styles.formComp} key={index}>
-                  {block.items.map(cp => (
+                  {block.items.map((cp) => (
                     <Fragment key={cp.id}>
                       {useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id].config.status !==
                         STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
