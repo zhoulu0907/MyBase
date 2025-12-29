@@ -63,7 +63,7 @@ const RegisterForm: React.FC<IRegisterProps> = ({ appId, tenantId, mobile, onGoB
         );
         const redirectURL = getHashQueryParam('redirectURL');
         if (redirectURL) {
-          navigate(`/onebase/${appId}/${tenantId}/runtime`);
+          navigate(`/onebase/${tenantId}/${appId}/runtime`);
         } else {
           // 跳转到首页
           navigate(`/onebase/runtime/?appId=${appId}`);

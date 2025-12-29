@@ -30,7 +30,7 @@ import {
 import { appIconMap } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useI18n } from '../../../hooks/useI18n';
 import { useRememberMe } from '../../../hooks/useRememberMe';
 import styles from '../index.module.less';
@@ -65,13 +65,16 @@ const Right: React.FC = () => {
     const prefix = '#/login?redirectURL=';
     if (rawHash.startsWith(prefix)) {
       const redirectURL = rawHash.replace(prefix, '');
-      let aid = getHashQueryParam('appId', redirectURL) || '';
-      let tid = getHashQueryParam('tenantId', redirectURL) || '';
+      const match = redirectURL.match(/onebase\/(.*?)\/(.*?)\//);
+      const tid = match && match.length > 1 ? match[1] : '';
+      const aid = match && match.length > 2 ? match[2] : '';
+
       setAppId(aid);
       setTenantId(tid);
     } else {
-      let aid = getHashQueryParam('appId') || '';
-      let tid = getHashQueryParam('tenantId') || '';
+      const match = rawHash.match(/onebase\/(.*?)\/(.*?)\//);
+      const tid = match && match.length > 1 ? match[1] : '';
+      const aid = match && match.length > 2 ? match[2] : '';
       setAppId(aid);
       setTenantId(tid);
     }
@@ -244,7 +247,7 @@ const Right: React.FC = () => {
           } else {
             //saas模式 或者inner模式
             // navigate(`/onebase/runtime/?appId=${appId}&tenantId=${tenantId}`);
-            navigate(`/onebase/${appId}/${tenantId}/runtime`);
+            navigate(`/onebase/${tenantId}/${appId}/runtime`);
           }
         } else {
           // 跳转到首页

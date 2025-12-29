@@ -229,11 +229,11 @@ const Right: React.FC = () => {
             navigate(`/onebase/${tenantId}/runtime-home`);
           } else {
             //saas模式 或者inner模式
-            navigate(`/onebase/${appId}/${tenantId}/runtime-home`);
+            navigate(`/onebase/${tenantId}/${appId}/runtime-home`);
           }
         } else {
           // 跳转到首页
-          navigate(`/onebase/${appId}/${tenantId}/runtime-home/`);
+          navigate(`/onebase/${tenantId}/${appId}/runtime-home/`);
         }
 
         return;

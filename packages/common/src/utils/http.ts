@@ -136,10 +136,13 @@ export class HttpClient {
               } else {
                 const redirectURL = getHashQueryParam('redirectURL') || window.location.href;
                 const pathURL = window.location.pathname;
+                // 正则匹配路径中的 tententId
+                const match = window.location.href.match(/onebase\/(.*?)\//);
+                const newTenantId = match && match.length > 1 ? match[1] : ''
                 if (isPlatformEnv()) {
                   window.location.href = `${pathURL}#/login`;
                 } else if (isBuilderEnv()) {
-                  window.location.href = `${pathURL}#/tenant/${tenantId}/?redirectURL=${redirectURL}`;
+                  window.location.href = `${pathURL}#/tenant/${tenantId || newTenantId}/?redirectURL=${redirectURL}`;
                 } else if (isRuntimeEnv()) {
                   window.location.href = `${pathURL}#/login?redirectURL=${redirectURL}`;
                 } else {
