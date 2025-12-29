@@ -15,7 +15,7 @@ public interface DashboardProjectApi {
 
     List<DashboardProjectDTO> getDashboard(Long dashboardId);
 
-    Long createDashboardByTemplate(Long templateId);
+    Long createDashboardByTemplate(Long templateId, String dashboardName);
 
 
 }

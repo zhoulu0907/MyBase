@@ -460,4 +460,35 @@ public class DraftDynamicMetadataRepository {
             ApplicationDataSourceManager.clear();
         }
     }
+
+    /**
+     * 统计指定用户在指定表中的草稿数量
+     *
+     * @param tableName 表名
+     * @param userId    用户ID
+     * @return 草稿数量
+     */
+    public long countDraftByUser(String tableName, Long userId) {
+        ApplicationDataSourceManager.useBizDatasourceByAppId(ApplicationManager.getApplicationId());
+        try {
+            QueryWrapper qw = QueryWrapper.create()
+                    .where(new QueryColumn(SystemFieldConstants.OPTIONAL.DELETED).eq(0))
+                    .and(new QueryColumn(SystemFieldConstants.OPTIONAL.DRAFT_STATUS).eq(1))
+                    .and(new QueryColumn(SystemFieldConstants.REQUIRE.CREATOR).eq(userId));
+            qw.select(QueryMethods.count().as("total"));
+            Row countRow = Db.selectOneByQuery(tableName, qw);
+            if (countRow != null) {
+                Object tv = countRow.get("total");
+                if (tv != null) {
+                    try {
+                        return Long.parseLong(String.valueOf(tv));
+                    } catch (Exception ignored) {
+                    }
+                }
+            }
+            return 0L;
+        } finally {
+            ApplicationDataSourceManager.clear();
+        }
+    }
 }

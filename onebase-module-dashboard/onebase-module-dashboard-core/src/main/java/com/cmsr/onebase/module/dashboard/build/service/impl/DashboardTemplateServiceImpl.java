@@ -18,6 +18,7 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +27,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static com.cmsr.onebase.module.dashboard.build.dal.table.DashboardTemplateTableDef.DASHBOARD_TEMPLATE;
 import static com.cmsr.onebase.module.dashboard.build.enums.ErrorCodeConstants.TEMPLATE_NOT_EXISTS;
 
 /**
@@ -45,7 +47,7 @@ public class DashboardTemplateServiceImpl extends ServiceImpl<DashboardTemplateM
     public Long createDashboardTemplate(DashboardTemplateSaveReqVO saveReqVO) {
 
         if (saveReqVO.getHot() == null) {
-            saveReqVO.setHot(0);
+            saveReqVO.setHot(NumberUtils.INTEGER_ZERO);
         }
 
         SecurityFrameworkUtils.getLoginUserId();
@@ -83,7 +85,7 @@ public class DashboardTemplateServiceImpl extends ServiceImpl<DashboardTemplateM
     }
 
     private void validateDashboardTemplate(Long id) {
-        if(id == null){
+        if (id == null) {
             throw exception(TEMPLATE_NOT_EXISTS);
         }
         DashboardTemplateDO templateDO = dashboardTemplateMapper.selectOneById(id);
@@ -103,7 +105,7 @@ public class DashboardTemplateServiceImpl extends ServiceImpl<DashboardTemplateM
 
     @Override
     public List<DashboardTemplateDO> getDashboardTemplateList(List<Long> ids) {
-        if(CollectionUtils.isEmpty(ids)){
+        if (CollectionUtils.isEmpty(ids)) {
             return Collections.emptyList();
         }
         return dashboardTemplateMapper.selectListByIds(ids);
@@ -113,13 +115,23 @@ public class DashboardTemplateServiceImpl extends ServiceImpl<DashboardTemplateM
     public PageResult<DashboardTemplateDO> getDashboardTemplatePage(DashboardTemplatePageReqVO pageReqVO) {
         QueryWrapper queryWrapper = QueryWrapper.create()
                 .select("id", "template_name", "template_type", "hot", "app_id", "index_image", "remarks", "create_time", "creator", "updater", "update_time")
-                .eq(DashboardTemplateDO::getTemplateType, pageReqVO.getTemplateType(), StringUtils.isNotBlank(pageReqVO.getTemplateType()))
                 .like(DashboardTemplateDO::getTemplateName, pageReqVO.getTemplateName(), StringUtils.isNotBlank(pageReqVO.getTemplateName()))
                 .eq(DashboardTemplateDO::getHot, pageReqVO.getHot(), pageReqVO.getHot() != null)
                 .orderBy(DashboardTemplateDO::getCreateTime, false);
 
-        if(!Objects.equals(pageReqVO.getTemplateType(), TemplateTypeEnum.SYSTEM_TYPE.getValue())){
-            queryWrapper.eq(DashboardTemplateDO::getAppId, ApplicationManager.getApplicationId());
+        if (Objects.equals(pageReqVO.getTemplateType(), TemplateTypeEnum.APP_TYPE.getValue())) {
+            // 应用:  templateType = app & appID
+            queryWrapper.eq(DashboardTemplateDO::getAppId, ApplicationManager.getApplicationId())
+                    .eq(DashboardTemplateDO::getTemplateType, pageReqVO.getTemplateType(), StringUtils.isNotBlank(pageReqVO.getTemplateType()));
+        } else if (Objects.equals(pageReqVO.getTemplateType(), TemplateTypeEnum.SYSTEM_TYPE.getValue())) {
+            // 系统:  templateType = system
+            queryWrapper.eq(DashboardTemplateDO::getTemplateType, pageReqVO.getTemplateType(), StringUtils.isNotBlank(pageReqVO.getTemplateType()));
+        } else {
+            // 全部： templateType = system or (templateType = app & appID)
+            queryWrapper.and(
+                    DASHBOARD_TEMPLATE.TEMPLATE_TYPE.eq(TemplateTypeEnum.SYSTEM_TYPE.getValue())
+                            .or(DASHBOARD_TEMPLATE.TEMPLATE_TYPE.eq(TemplateTypeEnum.APP_TYPE.getValue()).and(DASHBOARD_TEMPLATE.APP_ID.eq(ApplicationManager.getApplicationId())))
+            );
         }
         Page<DashboardTemplateDO> page = dashboardTemplateMapper.paginate(pageReqVO.getPageNo(), pageReqVO.getPageSize(), queryWrapper);
         return new PageResult<>(page.getRecords(), page.getTotalRow());
