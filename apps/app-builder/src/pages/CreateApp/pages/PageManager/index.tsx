@@ -190,6 +190,7 @@ const PageManagerPage: FC = () => {
 
   useEffect(() => {
     const loadMainMetaData = async () => {
+      console.log('loadMainMetaData curMenu.value: ', curMenu.value);
       const req: GetPageSetIdReq = {
         menuId: curMenu.value?.id
       };

@@ -187,6 +187,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
   };
 
   const cancelSubmitForm = () => {
+    console.log('取消提交');
     form.resetFields();
 
     setPageType(EDITOR_TYPES.LIST_EDITOR);
@@ -197,6 +198,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
     form.resetFields();
 
     if (id && id !== '') {
+      console.log('edit row id: ', id);
       setEditTargetId(id);
       // 直接获取数据，避免依赖状态变化触发
       if (tableName) {
