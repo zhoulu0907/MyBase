@@ -20,7 +20,7 @@ public class AppResourcePagesetDO extends BaseBizEntity {
     @Column(value = "pageset_code", comment = "页面集编码")
     private String pageSetCode;
 
-    @Column(value = "pageset_type", comment = "页面集类型 1-普通表单 2-流程表单 3-工作台")
+    @Column(value = "pageset_type", comment = "页面集类型 1-普通表单 2-流程表单 3-工作台 4-数据大屏")
     private Integer pageSetType;
 
     @Column(value = "main_metadata", comment = "页面主元数据")

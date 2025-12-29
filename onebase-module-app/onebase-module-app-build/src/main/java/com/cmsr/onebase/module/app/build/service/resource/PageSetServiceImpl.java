@@ -18,11 +18,9 @@ import com.cmsr.onebase.module.app.core.dto.resource.CreatePageSetDTO;
 import com.cmsr.onebase.module.app.core.enums.resource.AppResourceErrorCodeConstants;
 import com.cmsr.onebase.module.app.core.enums.resource.PageEnum;
 import com.cmsr.onebase.module.app.core.enums.resource.PageTypeSetEnum;
+import com.cmsr.onebase.module.app.core.provider.resource.DashboardServiceProvider;
 import com.cmsr.onebase.module.app.core.provider.resource.PageSetServiceProvider;
 import com.cmsr.onebase.module.app.core.vo.resource.*;
-import com.cmsr.onebase.module.screen.api.DashboardProjectApi;
-import com.cmsr.onebase.module.screen.api.dto.DashboardProjectDTO;
-import com.cmsr.onebase.module.screen.api.enums.DashboardCreateTypeSetEnum;
 import jakarta.annotation.Resource;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -34,7 +32,6 @@ import org.springframework.validation.annotation.Validated;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
 @Setter
@@ -62,7 +59,7 @@ public class PageSetServiceImpl implements PageSetService {
     private AppMenuRepository appMenuRepository;
 
     @Resource
-    private DashboardProjectApi dashboardProjectApi;
+    private DashboardServiceProvider dashboardServiceProvider;
 
     @Override
     public Long getPageSetIdByMenuId(Long menuId) {
@@ -93,29 +90,9 @@ public class PageSetServiceImpl implements PageSetService {
 
         // 创建数据大屏页面逻辑
         if (PageTypeSetEnum.isDashboardType(createPageSetDTO.getPageSetType())) {
-            //根据数据大屏的创建类型创建数据大屏页面
-            if (Objects.equals(createPageSetDTO.getCreateDashboardType(), DashboardCreateTypeSetEnum.DASHBOARD_LINK_CREATE.getCode())){
-                //1.1 如果是绑定现有大屏，则查询数据大屏信息，如不存在则报错
-                List<DashboardProjectDTO> dashboardList = dashboardProjectApi.getDashboard(createPageSetDTO.getDashboardId());
-                if (dashboardList.isEmpty()){
-                    throw ServiceExceptionUtil.exception(AppResourceErrorCodeConstants.DASHBOARD_NOT_EXIST);
-                }
-            } else if (Objects.equals(createPageSetDTO.getCreateDashboardType(), DashboardCreateTypeSetEnum.DASHBOARD_TEMPLATE_CREATE.getCode())){
-                //1.2 从模板创建数据大屏
-                Long dashboardId = dashboardProjectApi.createDashboardByTemplate(createPageSetDTO.getDashboardId());
-                if (dashboardId == null){
-                    throw ServiceExceptionUtil.exception(AppResourceErrorCodeConstants.DASHBOARD_TEMPLATE_NOT_EXIST);
-                }
-                createPageSetDTO.setDashboardId(dashboardId);
-            } else {
-                //1.3 从空白页创建数据大屏
-                DashboardProjectDTO goViewProjectDTO = new DashboardProjectDTO();
-
-                goViewProjectDTO.setProjectName("新大屏");
-                goViewProjectDTO.setState(-1);
-                goViewProjectDTO.setAppId(applicationId);
-                Long dashboardId = dashboardProjectApi.createDashboard(goViewProjectDTO);
-                createPageSetDTO.setDashboardId(dashboardId);
+            Long dashboard = dashboardServiceProvider.createDashboard(createPageSetDTO.getCreateDashboardType(), createPageSetDTO.getDashboardId());
+            if (dashboard != null){
+                createPageSetDTO.setDashboardId(dashboard);
             }
         }
 

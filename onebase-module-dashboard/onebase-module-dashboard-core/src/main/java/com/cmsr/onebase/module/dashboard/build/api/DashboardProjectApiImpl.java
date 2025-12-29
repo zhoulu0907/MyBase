@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.dashboard.build.api;
 
 import cn.hutool.core.bean.BeanUtil;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.module.dashboard.build.dal.dataobject.DashboardTemplateDO;
 import com.cmsr.onebase.module.dashboard.build.model.DashboardProject;
 import com.cmsr.onebase.module.dashboard.build.model.DashboardProjectData;
@@ -49,7 +50,7 @@ public class DashboardProjectApiImpl implements DashboardProjectApi {
         if (dashboardTemplate == null){
             return null;
         }
-        Long applicationId = dashboardTemplate.getAppId();
+        Long applicationId = ApplicationManager.getApplicationId();
 
         DashboardProject dashboardProject = new DashboardProject();
         dashboardProject.setProjectName("新大屏");
