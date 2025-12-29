@@ -347,6 +347,8 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
         AppAuthViewDO authViewDO = null;
         if (authViewVO.getId() != null) {
             authViewDO = authViewRepository.getById(authViewVO.getId());
+        } else if (authViewVO.getViewUuid() != null) {
+            authViewDO = authViewRepository.findByAppIdAndUuid(permissionReq.getApplicationId(), authViewVO.getViewUuid());
         }
         if (authViewDO == null) {
             authViewDO = new AppAuthViewDO();

@@ -5,24 +5,19 @@ import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.app.api.security.bo.OperationPermission;
+import com.cmsr.onebase.module.app.api.security.AppAuthSecurityApi;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthViewRepository;
 import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
 import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageRepository;
 import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageSetRepository;
-import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthViewDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppMenuDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePageDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePagesetDO;
-import com.cmsr.onebase.module.app.core.dto.auth.UserRoleDTO;
 import com.cmsr.onebase.module.app.core.enums.menu.MenuTypeEnum;
 import com.cmsr.onebase.module.app.core.enums.menu.MenuVisibleEnum;
-import com.cmsr.onebase.module.app.core.impl.auth.AppAuthSecurityApiImpl;
 import com.cmsr.onebase.module.app.core.provider.auth.AppAuthRoleProvider;
 import com.cmsr.onebase.module.app.core.utils.MenuUtils;
 import com.cmsr.onebase.module.app.core.vo.menu.MenuListRespVO;
 import com.cmsr.onebase.module.app.runtime.vo.menu.MenuPermissionVO;
-import jakarta.annotation.Resource;
 import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -42,17 +37,17 @@ import java.util.stream.Collectors;
 @Validated
 public class RuntimeAppMenuServiceImpl implements RuntimeAppMenuService {
 
-    @Resource
+    @Autowired
     private AppMenuRepository appMenuRepository;
 
-    @Resource
+    @Autowired
     private AppPageSetRepository appPageSetRepository;
 
     @Autowired
     private AppAuthRoleProvider appAuthRoleProvider;
 
-    @Resource
-    private AppAuthSecurityApiImpl appAuthSecurityApi;
+    @Autowired
+    private AppAuthSecurityApi appAuthSecurityApi;
 
     @Autowired
     private AppAuthViewRepository appAuthViewRepository;
@@ -102,7 +97,6 @@ public class RuntimeAppMenuServiceImpl implements RuntimeAppMenuService {
         }
         // TODO 临时方案，后面要修改
         appAuthSecurityApi.cleanAuthCache(userId, applicationId);
-        appAuthSecurityApi.loadAuthCache(userId, applicationId);
         //
         List<Long> menuIds = appAuthSecurityApi.getVisibleMenuIds(userId, applicationId);
         if (CollectionUtils.isEmpty(menuIds)) {
@@ -190,35 +184,8 @@ public class RuntimeAppMenuServiceImpl implements RuntimeAppMenuService {
         MenuPermissionVO menuPermissionVO = new MenuPermissionVO();
         menuPermissionVO.setOperationPermission(appAuthSecurityApi.getMenuOperationPermission(userId, applicationId, menuId));
         menuPermissionVO.setFieldPermission(appAuthSecurityApi.getMenuFieldPermission(userId, applicationId, menuId));
-        menuPermissionVO.setViewUuids(findMenuViews(userId, applicationId, menuId));
+        menuPermissionVO.setViewUuids(appAuthSecurityApi.getMenuViewUuids(userId, applicationId, menuId));
         return menuPermissionVO;
-    }
-
-    /**
-     * 要缓存
-     */
-    public Set<String> findMenuViews(Long userId, Long applicationId, Long menuId) {
-        UserRoleDTO userRoleDTO = appAuthRoleProvider.findUserRoleByApplication(userId, applicationId);
-        if (userRoleDTO.isAdminRole()) {
-            return findMenuAllViews(applicationId, menuId);
-        }
-        OperationPermission menuOperationPermission = appAuthSecurityApi.getMenuOperationPermission(userId, applicationId, menuId);
-        if (menuOperationPermission.isAllFieldsAllowed()) {
-            return findMenuAllViews(applicationId, menuId);
-        }
-        //
-        Set<String> roleUuids = userRoleDTO.getRoleUuids();
-        AppMenuDO menuDO = appMenuRepository.getById(menuId);
-        String menuUuid = menuDO.getMenuUuid();
-        //
-        List<AppAuthViewDO> authViewDOS = appAuthViewRepository.findByAppIdAndRoleUuidsAndMenuUuid(applicationId, roleUuids, menuUuid);
-        Set<String> result = authViewDOS.stream().map(AppAuthViewDO::getViewUuid).collect(Collectors.toSet());
-        return result;
-    }
-
-    private Set<String> findMenuAllViews(Long applicationId, Long menuId) {
-        List<AppResourcePageDO> pages = appPageRepository.findPagesByMenuId(menuId);
-        return pages.stream().map(AppResourcePageDO::getPageUuid).collect(Collectors.toSet());
     }
 
 }
