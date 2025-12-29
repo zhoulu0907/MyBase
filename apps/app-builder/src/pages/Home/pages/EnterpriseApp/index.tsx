@@ -30,15 +30,7 @@ import { PermissionButton } from '@/components/PermissionControl';
 import { TENANT_APP_PERMISSION as ACTIONS } from '@onebase/common';
 import { appIconMap } from '@onebase/ui-kit';
 import TagModal from './components/tagModal';
-import {
-  appOptions,
-  calculateMaxItems,
-  createTimeOptions,
-  defaultTheme,
-  statusOptions,
-  TagColor,
-  ThemeColorMap
-} from './const';
+import { calculateMaxItems, createTimeOptions, defaultTheme, TagColor, ThemeColorMap } from './const';
 import styles from './index.module.less';
 
 const Option = Select.Option;
@@ -54,9 +46,7 @@ const EnterpriseAppPage: React.FC = () => {
   const [total, setTotal] = useState(0);
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
-  const [ownerTag, setOwnerTag] = useState<0 | 1>(0);
   const [orderByTime, setOrderByTime] = useState<'create' | 'update'>('create');
-  const [status, setStatus] = useState<number | string>('');
 
   const [tagModalVisible, setTagModalVisible] = useState<boolean>(false);
 
@@ -81,22 +71,16 @@ const EnterpriseAppPage: React.FC = () => {
 
   useEffect(() => {
     pageSize && getApplicationList();
-  }, [pageNo, pageSize, name, orderByTime, status, ownerTag]);
+  }, [pageNo, pageSize, name, orderByTime]);
 
   useEffect(() => {
-    // 只有ownerTag和status会影响应用列表长度
-    if ((ownerTag === 0 || status === 0) && dataList?.length === 0) {
-      setAapplicationEmpty(true);
-    } else {
-      setAapplicationEmpty(false);
-    }
-    if ((ownerTag === 1 || status === 1) && dataList?.length === 0) {
+    if (dataList?.length === 0) {
       setAapplicationEmpty(false);
       setAapplicationFilterEmpty(true);
     } else {
       setAapplicationFilterEmpty(false);
     }
-  }, [ownerTag, status, dataList]);
+  }, [dataList]);
 
   const getApplicationList = async () => {
     try {
@@ -106,9 +90,8 @@ const EnterpriseAppPage: React.FC = () => {
         pageNo,
         pageSize: pageSize || 8,
         name,
-        ownerTag,
         orderByTime,
-        status: 1
+        status: 1 // 默认已上线
       };
       const res = await getCommonPaginationList(listApplication, req, setPageNo);
       if (res) {
@@ -267,20 +250,6 @@ const EnterpriseAppPage: React.FC = () => {
             {/* 筛选下拉框 */}
             <div>
               <Select
-                placeholder="全部应用"
-                bordered={false}
-                style={{ width: 100 }}
-                value={ownerTag}
-                onChange={(value) => setOwnerTag(value)}
-              >
-                {appOptions.map((option, index) => (
-                  <Option key={index} value={option.value}>
-                    {option.label}
-                  </Option>
-                ))}
-              </Select>
-              <Divider type="vertical" />
-              <Select
                 placeholder="按创建时间排序"
                 bordered={false}
                 style={{ width: 138 }}
@@ -294,19 +263,6 @@ const EnterpriseAppPage: React.FC = () => {
                 ))}
               </Select>
               <Divider type="vertical" />
-              <Select
-                placeholder="全部状态"
-                bordered={false}
-                style={{ width: 100 }}
-                onChange={(value) => setStatus(value)}
-                value={status}
-              >
-                {statusOptions.map((option, index) => (
-                  <Option key={index} value={option.value}>
-                    {option.label}
-                  </Option>
-                ))}
-              </Select>
               <Button
                 type="text"
                 icon={<IconSettings />}
