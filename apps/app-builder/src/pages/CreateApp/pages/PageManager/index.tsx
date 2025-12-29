@@ -26,7 +26,6 @@ import {
   RootParentPage,
   updateApplicationMenu,
   updateApplicationMenuOrder,
-  updateApplicationMenuVisible,
   VisibleType,
   type ApplicationMenu,
   type CopyApplicationMenuReq,
@@ -39,6 +38,11 @@ import {
   type UpdateApplicationMenuOrderReq,
   type UpdateApplicationMenuVisibleReq
 } from '@onebase/app';
+import {
+  getDashboardIdFromTemplateApi,
+  updateApplicationMenuVisibleMobile,
+  updateApplicationMenuVisiblePC
+} from '@onebase/app/src/services';
 import { getDashBoardURL, pagesRuntimeSignal } from '@onebase/common';
 import { EDITOR_TYPES } from '@onebase/ui-kit';
 import { currentEditorSignal } from '@onebase/ui-kit/src/signals/current_editor';
@@ -212,7 +216,8 @@ const PageManagerPage: FC = () => {
           menuInfo={menu}
           showOption={showOption}
           menuID={menu.id || ''}
-          isVisible={menu.isVisible}
+          isVisiblePc={menu.isVisiblePc}
+          isVisibleMobile={menu.isVisibleMobile}
           menuCode={menu.menuCode}
           menuName={menu.menuName}
           menuIcon={menu.menuIcon}
@@ -411,12 +416,13 @@ const PageManagerPage: FC = () => {
   };
 
   // 更新应用菜单可见性  显示/隐藏
-  const triggerHide = async (menuID: string, isVisible: number) => {
+  const triggerHide = async (menuID: string, isVisible: number, platform: 'pc' | 'mobile') => {
     const req: UpdateApplicationMenuVisibleReq = {
       id: menuID,
       visible: isVisible === VisibleType.HIDDEN ? VisibleType.SHOW : VisibleType.HIDDEN
     };
-    const res = await updateApplicationMenuVisible(req);
+    const res =
+      platform === 'pc' ? await updateApplicationMenuVisiblePC(req) : await updateApplicationMenuVisibleMobile(req);
     if (res) {
       Message.success(`${isVisible === VisibleType.HIDDEN ? '取消隐藏' : '隐藏'}成功`);
     }
@@ -429,34 +435,41 @@ const PageManagerPage: FC = () => {
   const handleScreenCreate = async (id?: string, screenMethod?: string) => {
     createForm.validate(async (error) => {
       if (error !== null) return;
-      const req: CreateApplicationMenuReq = {
-        applicationId: curAppId,
-        parentId:
-          createForm.getFieldValue('parentId') === RootParentPage.id ? '' : createForm.getFieldValue('parentId'),
-        pageSetType: dashboardPageType,
-        menuName: createForm.getFieldValue('menuName'),
-        menuType: MenuType.PAGE,
-        menuIcon: createForm.getFieldValue('menuIcon'),
-        entityUuid: '',
-        createDashboardType: screenMethod,
-        dashboardId: id
-      };
-
-      const menuResp = await createApplicationMenu(req);
-      if (menuResp) {
-        Message.success('创建成功');
-      }
-      setVisibleCreateScreenForm('');
-      getMenuList(undefined, menuResp.id);
-
-      const pageSetId = await getPageSetId({
-        menuId: menuResp.id
-      });
-
-      const dashboardInfo = await listPageView({ pageSetId });
-      const dashboardId = dashboardInfo.pages && dashboardInfo.pages.length > 0 ? dashboardInfo.pages[0].id : null;
-      if (dashboardId) {
+      console.log('创建大屏参数 id、screenMethod：', id, screenMethod);
+      if (id) {
+        const dashboardId = await getDashboardIdFromTemplateApi(id);
+        console.log('dashboardId:', dashboardId);
         window.open(`${resourceUrl}chart/home/${dashboardId}/${appId}/${dashboardType}`, '_blank');
+      } else {
+        const req: CreateApplicationMenuReq = {
+          applicationId: curAppId,
+          parentId:
+            createForm.getFieldValue('parentId') === RootParentPage.id ? '' : createForm.getFieldValue('parentId'),
+          pageSetType: dashboardPageType,
+          menuName: createForm.getFieldValue('menuName'),
+          menuType: MenuType.PAGE,
+          menuIcon: createForm.getFieldValue('menuIcon'),
+          entityUuid: '',
+          createDashboardType: screenMethod,
+          dashboardId: id
+        };
+
+        const menuResp = await createApplicationMenu(req);
+        if (menuResp) {
+          Message.success('创建成功');
+        }
+        setVisibleCreateScreenForm('');
+        getMenuList(undefined, menuResp.id);
+
+        const pageSetId = await getPageSetId({
+          menuId: menuResp.id
+        });
+
+        const dashboardInfo = await listPageView({ pageSetId });
+        const dashboardId = dashboardInfo.pages && dashboardInfo.pages.length > 0 ? dashboardInfo.pages[0].id : null;
+        if (dashboardId) {
+          window.open(`${resourceUrl}chart/home/${dashboardId}/${appId}/${dashboardType}`, '_blank');
+        }
       }
     });
   };
@@ -592,10 +605,7 @@ const PageManagerPage: FC = () => {
       const dashboardInfo = await listPageView({ pageSetId });
 
       const dashboardId = dashboardInfo.pages && dashboardInfo.pages.length > 0 ? dashboardInfo.pages[0].id : null;
-      window.open(
-        `http://s25029301301.dev.internal.virtueit.net:81/v0/appdashboard/#/chart/home/${dashboardId}/${appId}/${dashboardType}`,
-        '_blank'
-      );
+      window.open(`${resourceUrl}chart/home/${dashboardId}/${appId}/${dashboardType}`, '_blank');
     } else {
       const editorType =
         curPage.value?.pageSetType === PageType.WORKBENCH ? EDITOR_TYPES.WORKBENCH_EDITOR : EDITOR_TYPES.FORM_EDITOR;

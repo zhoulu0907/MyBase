@@ -1,7 +1,6 @@
 import {
   baseConfig,
   baseDefault,
-  layoutConfig,
   statusConfig,
   subTableConfig,
   widthConfig,
@@ -79,23 +78,23 @@ export interface XSubTableConfig extends ICommonBaseType {
     required: TBooleanDefaultType;
   };
   subTableConfig?: {
-    showIndex: boolean;       // 显示序号列
-    showOperate: boolean;     // 显示操作列
-    editRow: boolean;         // 可编辑已有数据
-    deleteRow: boolean;       // 可删除已有数据
-    operateFixed: boolean;    // 操作列冻结
-    pageSize: number;         // 分页条数
-    columnFixed: number;      // 左侧列冻结
-  },
+    showIndex: boolean; // 显示序号列
+    showOperate: boolean; // 显示操作列
+    editRow: boolean; // 可编辑已有数据
+    deleteRow: boolean; // 可删除已有数据
+    operateFixed: boolean; // 操作列冻结
+    pageSize: number; // 分页条数
+    columnFixed: number; // 左侧列冻结
+  };
   /**
    * 组件状态：可用、隐藏、只读
    * 可选值: 'default' | 'hidden' | 'readonly'
    */
   status?: TSelectDefaultType<TStatusSelectKeyType>;
   /**
-     * 表单的布局：水平、垂直（默认）
-     * 可选值: 'vertical' | 'horizontal'
-     */
+   * 表单的布局：水平、垂直（默认）
+   * 可选值: 'vertical' | 'horizontal'
+   */
   layout?: TLayoutSelectKeyType;
 
   /**
@@ -121,7 +120,7 @@ const XSubTable: XSubTableSchema = {
     },
     {
       key: 'tooltip',
-      name: '描述信息',
+      name: '字段描述',
       type: CONFIG_TYPES.TOOLTIP_INPUT
     },
     {
@@ -143,7 +142,7 @@ const XSubTable: XSubTableSchema = {
     },
     tooltip: '',
     verify: {
-      required: false,
+      required: false
     },
     subTableConfig: {
       showIndex: true,
@@ -155,7 +154,7 @@ const XSubTable: XSubTableSchema = {
       columnFixed: 0
     },
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
-    width: WIDTH_VALUES[WIDTH_OPTIONS.FULL],
+    width: WIDTH_VALUES[WIDTH_OPTIONS.FULL]
   }
 };
 

@@ -8,8 +8,8 @@ import {
   type ICommonBaseType,
   type TLayoutSelectKeyType,
   type TStatusSelectKeyType,
-  type TUploadSelectKeyType,
   type TUploadButtonType,
+  type TUploadSelectKeyType,
   type TWidthSelectKeyType
 } from '../../../common';
 import {
@@ -18,12 +18,12 @@ import {
   LAYOUT_VALUES,
   STATUS_OPTIONS,
   STATUS_VALUES,
+  UPLOAD_BUTTON_TYPES,
   UPLOAD_OPTIONS,
-  UPLOAD_VALUES,
   UPLOAD_TYPE_OPTIONS,
+  UPLOAD_VALUES,
   WIDTH_OPTIONS,
-  WIDTH_VALUES,
-  UPLOAD_BUTTON_TYPES
+  WIDTH_VALUES
 } from '../../../constants';
 import type {
   IBooleanConfigType,
@@ -33,16 +33,16 @@ import type {
   IStatusConfigType,
   ITextConfigType,
   ITooltipConfigType,
+  IUploadButtonConfigType,
   IUploadLimitConfigType,
   IUploadSizeConfigType,
-  IUploadButtonConfigType,
   IVerifyConfigType,
   IWidthConfigType,
   TBooleanDefaultType,
   TNumberDefaultType,
   TSelectDefaultType,
   TTextAreaDefaultType,
-  TTextDefaultType,
+  TTextDefaultType
 } from '../../../types';
 
 export interface XInputFileUploadSchema {
@@ -113,7 +113,6 @@ export interface XInputFileUploadConfig extends ICommonBaseType {
     fileFormat: TTextDefaultType;
   };
 
-
   /**
    * 组件状态：可用、隐藏、只读
    * 可选值: 'default' | 'hidden' | 'readonly'
@@ -142,7 +141,7 @@ const XFileUpload: XInputFileUploadSchema = {
     },
     {
       key: 'tooltip',
-      name: '描述信息',
+      name: '字段描述',
       type: CONFIG_TYPES.TOOLTIP_INPUT
     },
     ...dataFieldConfig,
@@ -160,7 +159,7 @@ const XFileUpload: XInputFileUploadSchema = {
           key: UPLOAD_OPTIONS.LIST,
           text: UPLOAD_TYPE_OPTIONS.LIST,
           value: UPLOAD_VALUES[UPLOAD_OPTIONS.LIST]
-        },
+        }
       ]
     },
 
@@ -169,7 +168,7 @@ const XFileUpload: XInputFileUploadSchema = {
       name: '按钮名称',
       type: CONFIG_TYPES.UPLOAD_BUTTON
     },
-  
+
     {
       key: 'showDownload',
       name: '支持下载',
@@ -204,7 +203,7 @@ const XFileUpload: XInputFileUploadSchema = {
     },
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
-    width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
+    width: WIDTH_VALUES[WIDTH_OPTIONS.HALF]
   }
 };
 

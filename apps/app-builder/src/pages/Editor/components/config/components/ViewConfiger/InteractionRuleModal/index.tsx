@@ -1,11 +1,16 @@
 import { FormulaEditor } from '@/components/FormulaEditor';
+import AsyncDeptSelectField from '@/pages/CreateApp/pages/IntegratedManagement/triggerEditor/components/asyncField/AsyncDeptSelectField';
+import AsyncSelectField from '@/pages/CreateApp/pages/IntegratedManagement/triggerEditor/components/asyncField/AsyncSelectField';
+import AsyncUserSelectField from '@/pages/CreateApp/pages/IntegratedManagement/triggerEditor/components/asyncField/AsyncUserSelectField';
 import {
   Button,
+  DatePicker,
   Divider,
   Dropdown,
   Form,
   Grid,
   Input,
+  InputNumber,
   Menu,
   Message,
   Modal,
@@ -19,6 +24,7 @@ import { FieldType, InteractionActionType, VALIDATION_TYPE } from '@onebase/app'
 import { listToTree } from '@onebase/common';
 import { getDeptList, getSimpleUserPage, type DictData } from '@onebase/platform-center';
 import {
+  ENTITY_FIELD_TYPE,
   FORM_COMPONENT_TYPES,
   getFieldOptionsConfig,
   useAppEntityStore,
@@ -279,6 +285,35 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
     });
   };
 
+  const handleCopyRule = (ruleId: string) => {
+    setRules((prevRules) => {
+      const ruleToCopy = prevRules.find((rule) => rule.id === ruleId);
+      if (!ruleToCopy) {
+        return prevRules;
+      }
+
+      // 深拷贝规则
+      const copiedRule: Rule = JSON.parse(JSON.stringify(ruleToCopy));
+
+      // 生成新的 id
+      copiedRule.id = uuidv4().replaceAll('-', '');
+
+      // 设置启用状态为禁用
+      copiedRule.enabled = 0;
+
+      // 修改名称，添加"副本"后缀
+      copiedRule.name = `${copiedRule.name} 副本`;
+
+      // 将新规则添加到列表末尾
+      const newRules = [...prevRules, copiedRule];
+
+      // 选中新复制的规则
+      setCurRule(copiedRule.id);
+
+      return newRules;
+    });
+  };
+
   // 异步加载字段选项
   const loadFieldOptions = async (cpId: string) => {
     if (!cpId || fieldOptionsMap[cpId]) {
@@ -399,6 +434,178 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
     setFormulaFieldKey('');
   };
 
+  const StaticValueComponent = (fieldName: string, cpId: string, op: string) => {
+    const cpConfig = Object.values(pageComponentSchemas.value).find((cp: any) => cp.id == cpId) as any;
+
+    const cpType = cpConfig?.type;
+
+    if (
+      cpType == FORM_COMPONENT_TYPES.SELECT_ONE ||
+      cpType == FORM_COMPONENT_TYPES.SELECT_MUTIPLE ||
+      cpType == FORM_COMPONENT_TYPES.RADIO ||
+      cpType == FORM_COMPONENT_TYPES.CHECKBOX
+    ) {
+      return <AsyncSelectField fieldName={fieldName} curDataField={cpConfig?.config.dataField} />;
+    }
+
+    if (cpType == FORM_COMPONENT_TYPES.INPUT_NUMBER) {
+      if (op == VALIDATION_TYPE.RANGE) {
+        return (
+          <Form.Item style={{ height: '12px' }}>
+            <Form.List
+              field={fieldName}
+              rules={[
+                {
+                  validator: (list: any[] | undefined, callback: (msg?: string) => void) => {
+                    if (Array.isArray(list) && list.length === 2) {
+                      const [first, second] = list;
+                      // 只校验有值的情况
+                      if (
+                        first !== undefined &&
+                        second !== undefined &&
+                        first !== null &&
+                        second !== null &&
+                        second <= first
+                      ) {
+                        callback();
+                        return;
+                      }
+                    }
+                    callback();
+                  }
+                }
+              ]}
+            >
+              {(list) => {
+                return (
+                  <div className={styles.inputNumberWrapper}>
+                    {list.map((item) => {
+                      return (
+                        <Form.Item key={item.key} field={item.field}>
+                          <InputNumber style={{ width: '100%' }} />
+                        </Form.Item>
+                      );
+                    })}
+                  </div>
+                );
+              }}
+            </Form.List>
+          </Form.Item>
+        );
+      }
+
+      if (cpType == FORM_COMPONENT_TYPES.DATE_PICKER) {
+        return (
+          <Form.Item field={fieldName}>
+            <Input placeholder="请输入静态值" />
+          </Form.Item>
+        );
+      }
+
+      return (
+        <Form.Item field={fieldName}>
+          <Input placeholder="请输入静态值" />
+        </Form.Item>
+      );
+
+      if (
+        fieldValidationType?.fieldTypeCode == ENTITY_FIELD_TYPE.TEXT.VALUE ||
+        fieldValidationType?.fieldTypeCode == ENTITY_FIELD_TYPE.LONG_TEXT.VALUE ||
+        fieldValidationType?.fieldTypeCode == ENTITY_FIELD_TYPE.EMAIL.VALUE ||
+        fieldValidationType?.fieldTypeCode == ENTITY_FIELD_TYPE.PHONE.VALUE ||
+        fieldValidationType?.fieldTypeCode == ENTITY_FIELD_TYPE.URL.VALUE ||
+        fieldValidationType?.fieldTypeCode == ENTITY_FIELD_TYPE.ADDRESS.VALUE
+      ) {
+        return (
+          <Form.Item field={fieldName}>
+            <Input placeholder="请输入静态值" />
+          </Form.Item>
+        );
+      }
+
+      return (
+        <Form.Item field={fieldName}>
+          <InputNumber placeholder="请输入静态值" />
+        </Form.Item>
+      );
+    }
+
+    if (cpType == FORM_COMPONENT_TYPES.SWITCH) {
+      return (
+        <Form.Item field={fieldName} triggerPropName="checked">
+          <Switch />
+        </Form.Item>
+      );
+    }
+
+    if (cpType == FORM_COMPONENT_TYPES.DATE_PICKER) {
+      if (op == VALIDATION_TYPE.RANGE) {
+        return (
+          <Form.Item
+            field={fieldName}
+            normalize={(value) => {
+              return {
+                begin: value && value[0],
+                end: value && value[1]
+              };
+            }}
+            formatter={(value) => {
+              return value && value.begin ? [value.begin, value.end] : [];
+            }}
+          >
+            <DatePicker.RangePicker />
+          </Form.Item>
+        );
+      }
+      return (
+        <Form.Item field={fieldName}>
+          <DatePicker placeholder="请输入静态值" />
+        </Form.Item>
+      );
+    }
+
+    if (cpType == FORM_COMPONENT_TYPES.DATE_TIME_PICKER) {
+      if (op == VALIDATION_TYPE.RANGE) {
+        return (
+          <Form.Item
+            field={fieldName}
+            normalize={(value) => {
+              return {
+                begin: value && value[0],
+                end: value && value[1]
+              };
+            }}
+            formatter={(value) => {
+              return value && value.begin ? [value.begin, value.end] : [];
+            }}
+          >
+            <DatePicker.RangePicker showTime />
+          </Form.Item>
+        );
+      }
+
+      return (
+        <Form.Item field={fieldName}>
+          <DatePicker showTime placeholder="请输入静态值" />
+        </Form.Item>
+      );
+    }
+
+    if (cpType == FORM_COMPONENT_TYPES.USER_SELECT) {
+      return <AsyncUserSelectField fieldName={fieldName} />;
+    }
+
+    if (cpType == FORM_COMPONENT_TYPES.DEPT_SELECT) {
+      return <AsyncDeptSelectField fieldName={fieldName} />;
+    }
+
+    return (
+      <Form.Item field={fieldName}>
+        <Input placeholder="请输入静态值" />
+      </Form.Item>
+    );
+  };
+
   return (
     <Modal
       style={{ width: 1200, height: 800 }}
@@ -432,7 +639,15 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
                   <Dropdown
                     droplist={
                       <Menu>
-                        <Menu.Item key="copy">复制</Menu.Item>
+                        <Menu.Item
+                          key="copy"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            handleCopyRule(rule.id);
+                          }}
+                        >
+                          复制
+                        </Menu.Item>
                         <Menu.Item
                           key="move-up"
                           onClick={(event) => {
@@ -499,8 +714,17 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
               </Form.Item>
               <Row gutter={16}>
                 <Col span={12}>
-                  <Form.Item label="规则名称" field="name">
-                    <Input />
+                  <Form.Item
+                    label="规则名称"
+                    field="name"
+                    rules={[
+                      {
+                        maxLength: 30,
+                        message: '规则名称不能超过30个字符'
+                      }
+                    ]}
+                  >
+                    <Input maxLength={30} showWordLimit />
                   </Form.Item>
                 </Col>
                 <Col span={12}>
@@ -632,13 +856,12 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
                                                           )}
                                                           {/* 静态值 */}
                                                           {form.getFieldValue(item.field + '.operatorType') ==
-                                                            FieldType.VALUE && (
-                                                            <Form.Item field={item.field + '.value'}>
-                                                              {renderValueFormItem(
-                                                                form.getFieldValue(item.field + '.cpId')
-                                                              )}
-                                                            </Form.Item>
-                                                          )}
+                                                            FieldType.VALUE &&
+                                                            StaticValueComponent(
+                                                              item.field + '.value',
+                                                              form.getFieldValue(item.field + '.cpId'),
+                                                              form.getFieldValue(item.field + '.op')
+                                                            )}
                                                           {/* 变量 */}
                                                           {form.getFieldValue(item.field + '.operatorType') ==
                                                             FieldType.VARIABLES && (

@@ -61,6 +61,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
   const [editTargetId, setEditTargetId] = useState('');
   const [loading, setLoading] = useState(false);
   const preview = true;
+  const [dashboardImgUrl, setDashboardImgUrl] = useState<string>('');
 
   useEffect(() => {
     const appId = getHashQueryParam('appId');
@@ -132,8 +133,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
         }
       };
 
-      // 工作台页面不获取主表数据
-      if (pagesetType === PageType.WORKBENCH) {
+      // 工作台、大屏页面不获取主表数据
+      if (pagesetType === PageType.WORKBENCH || pagesetType === PageType.DASHBOARD) {
         loadPageSetInfo(pageSetId).finally(() => {
           setLoading(false);
         });
@@ -141,19 +142,31 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
         loadData();
       }
     }
-    getImgIndex(pageSetId);
-    // 优先切换到列表页
-    setPageType(pagesetType === PageType.WORKBENCH ? EDITOR_TYPES.WORKBENCH_EDITOR : EDITOR_TYPES.LIST_EDITOR);
+
+    if (pageSetId && pagesetType === PageType.DASHBOARD) {
+      getDashboardId(pageSetId);
+      setPageType(EDITOR_TYPES.DASHBOARD_PREVIEW);
+    } else if (pagesetType === PageType.WORKBENCH) {
+      setPageType(EDITOR_TYPES.WORKBENCH_EDITOR);
+    } else {
+      setPageType(EDITOR_TYPES.LIST_EDITOR);
+    }
   }, [pageSetId]);
 
-  const getImgIndex = async (pageSetId: string) => {
-    const res = await listPageView({
-      pageSetId: pageSetId
-    });
-    console.log(res.pages[0].indexImage, pagesetType, 'img===================');
-    setScreenImg(res.pages[0].indexImage);
+  useEffect(() => {}, []);
+  const getDashboardId = async (pageSetId: string) => {
+    try {
+      const res = await listPageView({
+        pageSetId: pageSetId
+      });
+      if (res && res.pages && res.pages.length > 0) {
+        const imgRes = await getFileUrlById(res.pages[0].indexImage);
+        setDashboardImgUrl(imgRes);
+      }
+    } catch (error) {
+      console.error('获取页面视图失败:', error);
+    }
   };
-
   const loadPageSetInfo = async (pageSetId: string) => {
     // 工作台使用独立加载逻辑
     if (pagesetType === PageType.WORKBENCH) {
@@ -254,7 +267,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
             </div>
           )
         )}
-
         {pageType == EDITOR_TYPES.FORM_EDITOR && (
           <Form layout="inline" form={form}>
             {useEditorSignalMap.get(editPageViewId.value)?.components.value.map((cp: GridItem) => (
@@ -330,6 +342,12 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
               </Fragment>
             ))}
           </Form>
+        )}
+
+        {pageType === EDITOR_TYPES.DASHBOARD_PREVIEW && dashboardImgUrl && (
+          <div className={styles.dashboardPreview}>
+            <img src={dashboardImgUrl} alt="大屏预览" />
+          </div>
         )}
       </div>
     </div>
