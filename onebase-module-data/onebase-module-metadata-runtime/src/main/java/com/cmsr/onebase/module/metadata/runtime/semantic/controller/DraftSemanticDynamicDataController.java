@@ -160,7 +160,7 @@ public class DraftSemanticDynamicDataController {
      */
     public CommonResult<Boolean> deleteByTable(@PathVariable("tableName") String tableName,
                                                @RequestParam("menuId") Long menuId,
-                                               @RequestBody SemanticTargetBodyVO body,
+                                               @RequestBody(required = false) SemanticTargetBodyVO body,
                                                HttpServletRequest request,
                                                HttpServletResponse response) {
         String traceId = request.getHeader("X-Trace-Id");
