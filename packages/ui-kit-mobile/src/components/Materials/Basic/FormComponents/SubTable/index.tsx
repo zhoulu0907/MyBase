@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { ReactSortable } from 'react-sortablejs';
 import { useSignals } from '@preact/signals-react/runtime';
@@ -316,13 +316,13 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                 value={item.key + ''}
                 defaultActive
                 content={
-                  <Cell.Group>
+                  <Fragment>
                     {subTableComponents &&
                       subTableComponents[id] &&
                       subTableComponents[id].map((subTable: any) => {
                         const config = pageComponentSchemas[subTable.id].config;
                         const [subTableName, fieldName] = config.dataField;
-                        config.label.display = true; // todo 不知道哪里统一设置成false了
+                        config.label.display = true;
                         const newConfig = {
                           ...config,
                           dataField: [mainEntity.tableName, `${subTableName}.${index}.${fieldName}`]
@@ -344,7 +344,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                           </div>
                         );
                       })}
-                  </Cell.Group>
+                  </Fragment>
                 }
               />
             ))}
@@ -368,126 +368,120 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
               value={''}
               defaultActive
               content={
-                <Cell.Group>
-                  <ReactSortable
-                    id={`workspace-content-subtable-${id}`}
-                    list={subTableComponents[id] || []}
-                    setList={(newList) => {
-                      const dataFieldPage = subTableComponents[id]?.find(
-                        (ele) => pageComponentSchemas[ele.id].config?.dataField?.[0]
-                      );
-                      // 已有的数据源子表id
-                      const dataField = pageComponentSchemas?.[dataFieldPage?.id]?.config?.dataField?.[0];
-                      /**
-                       * 不允许拖拽主、子表嵌套
-                       * 拖拽的子表项必须是同一个子表
-                       */
-                      const newSubList = (newList || []).filter((ele) => {
-                        // 主表、子表
-                        const isTable =
-                          ele.type === ENTITY_TYPE_VALUE.MAIN ||
-                          ele.type === ENTITY_TYPE_VALUE.SUB ||
-                          ele.type === 'XSubTable';
-                        // 主表数据
-                        const isMain = ele.tableName && ele.tableName === mainEntity.tableName;
-                        // 同一个子表
-                        const isSameSub = !ele.tableName || !dataField || ele.tableName === dataField;
-                        return !isTable && !isMain && isSameSub;
-                      });
+                <ReactSortable
+                  id={`workspace-content-subtable-${id}`}
+                  list={subTableComponents[id] || []}
+                  setList={(newList) => {
+                    const dataFieldPage = subTableComponents[id]?.find(
+                      (ele) => pageComponentSchemas[ele.id].config?.dataField?.[0]
+                    );
+                    // 已有的数据源子表id
+                    const dataField = pageComponentSchemas?.[dataFieldPage?.id]?.config?.dataField?.[0];
+                    /**
+                     * 不允许拖拽主、子表嵌套
+                     * 拖拽的子表项必须是同一个子表
+                     */
+                    const newSubList = (newList || []).filter((ele) => {
+                      // 主表、子表
+                      const isTable =
+                        ele.type === ENTITY_TYPE_VALUE.MAIN ||
+                        ele.type === ENTITY_TYPE_VALUE.SUB ||
+                        ele.type === 'XSubTable';
+                      // 主表数据
+                      const isMain = ele.tableName && ele.tableName === mainEntity.tableName;
+                      // 同一个子表
+                      const isSameSub = !ele.tableName || !dataField || ele.tableName === dataField;
+                      return !isTable && !isMain && isSameSub;
+                    });
 
-                      setSubTableComponents(id, newSubList);
-                    }}
-                    onAdd={onSubAdd}
-                    group={{ name: COMPONENT_GROUP_NAME }}
-                    sort={true}
-                    forceFallback={true}
-                    animation={150}
-                    fallbackOnBody={true}
-                    swapThreshold={0.65}
-                    className="subTableContentOBMobile"
-                    onStart={onSubStart}
-                  >
-                    {subTableComponents &&
-                      subTableComponents[id] &&
-                      subTableComponents[id].map((cp: GridItem, index: number) => {
-                        const schema = pageComponentSchemas[cp.id];
-                        const config = {
-                          ...schema.config,
-                        };
+                    setSubTableComponents(id, newSubList);
+                  }}
+                  onAdd={onSubAdd}
+                  group={{ name: COMPONENT_GROUP_NAME }}
+                  sort={true}
+                  forceFallback={true}
+                  animation={150}
+                  fallbackOnBody={true}
+                  swapThreshold={0.65}
+                  className="subTableContentOBMobile"
+                  onStart={onSubStart}
+                >
+                  {subTableComponents &&
+                    subTableComponents[id] &&
+                    subTableComponents[id].map((cp: GridItem, index: number) => {
+                      const schema = pageComponentSchemas[cp.id];
+                      const config = schema.config;
+                      config.label.display = true;
 
-                        return (
-                          <div
-                            key={cp.id}
-                            data-cp-type={cp.type}
-                            data-cp-displayname={cp.displayName}
-                            data-cp-id={cp.id}
-                            data-id={cp.id}
-                            className="componentItemSubtableOBMobile"
-                            style={{
-                              borderColor: curComponentID === cp.id ? 'rgb(var(--primary-6))' : 'transparent'
-                            }}
-                            onClick={(e) => {
-                              onSubComponentClick(e, cp);
-                            }}
-                          >
-                            <Cell label={<Ellipsis text={config.cpName} maxLine={2} />} key={cp.id} style={{ padding: 0 }}>
-                              <EditRender
-                                runtime={runtime}
-                                cpId={cp.id}
-                                cpType={cp.type}
-                                pageComponentSchema={pageComponentSchemas[cp.id]}
-                              />
-                            </Cell>
+                      return (
+                        <div
+                          key={cp.id}
+                          data-cp-type={cp.type}
+                          data-cp-displayname={cp.displayName}
+                          data-cp-id={cp.id}
+                          data-id={cp.id}
+                          className="componentItemSubtableOBMobile"
+                          style={{
+                            borderColor: curComponentID === cp.id ? 'rgb(var(--primary-6))' : 'transparent'
+                          }}
+                          onClick={(e) => {
+                            onSubComponentClick(e, cp);
+                          }}
+                        >
+                          <EditRender
+                            runtime={runtime}
+                            cpId={cp.id}
+                            cpType={cp.type}
+                            pageComponentSchema={schema}
+                          />
 
-                            {/* 操作按钮 */}
-                            {curComponentID === cp.id && showDeleteButton && (
-                              <div className="operationArea">
-                                {pageComponentSchemas[cp.id]?.config.status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
-                                  <>
-                                    <div
-                                      className="copyButton"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        console.debug('取消隐藏组件: ', cp);
-                                        handleShowComponent(cp.id);
-                                      }}
-                                    >
-                                      <img src={CompShowIcon} alt="component show" />
-                                    </div>
-                                    {/* <Divider className="divider" type="vertical" /> todo */}
-                                  </>
-                                )}
+                          {/* 操作按钮 */}
+                          {curComponentID === cp.id && showDeleteButton && (
+                            <div className="operationArea">
+                              {schema?.config.status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+                                <>
+                                  <div
+                                    className="copyButton"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      console.debug('取消隐藏组件: ', cp);
+                                      handleShowComponent(cp.id);
+                                    }}
+                                  >
+                                    <img src={CompShowIcon} alt="component show" />
+                                  </div>
+                                  {/* <Divider className="divider" type="vertical" /> todo */}
+                                </>
+                              )}
 
-                                <div
-                                  className="copyButton"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    console.log('复制组件: ', cp);
-                                    handleCopyComponent({ ...cp, id: `${cp.type}-${uuidv4()}` }, cp.id, index);
-                                  }}
-                                >
-                                  <img src={CompCopyIcon} alt="component copy" />
-                                </div>
-                                {/* <Divider className="divider" type="vertical" /> todo */}
-
-                                <div
-                                  className="deleteButton"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    console.log('删除组件: ', cp.id);
-                                    handleDeleteComponent(cp.id);
-                                  }}
-                                >
-                                  <img src={CompDeleteIcon} alt="component delete" />
-                                </div>
+                              <div
+                                className="copyButton"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  console.log('复制组件: ', cp);
+                                  handleCopyComponent({ ...cp, id: `${cp.type}-${uuidv4()}` }, cp.id, index);
+                                }}
+                              >
+                                <img src={CompCopyIcon} alt="component copy" />
                               </div>
-                            )}
-                          </div>
-                        )
-                      })}
-                  </ReactSortable>
+                              {/* <Divider className="divider" type="vertical" /> todo */}
 
-                </Cell.Group>
+                              <div
+                                className="deleteButton"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  console.log('删除组件: ', cp.id);
+                                  handleDeleteComponent(cp.id);
+                                }}
+                              >
+                                <img src={CompDeleteIcon} alt="component delete" />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )
+                    })}
+                </ReactSortable>
               }
             />
             {!detailMode && <div

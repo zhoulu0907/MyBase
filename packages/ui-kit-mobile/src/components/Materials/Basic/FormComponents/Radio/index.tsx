@@ -10,8 +10,9 @@ import './index.css';
 type XRadioConfig = typeof FormSchema.XRadioSchema.config;
 const RadioGroup = Radio.Group;
 
-const XRadio = memo((props: XRadioConfig & { runtime?: boolean; detailMode?: boolean }) => {
+const XRadio = memo((props: XRadioConfig & { runtime?: boolean; detailMode?: boolean; form?: any; }) => {
   const {
+    form,
     label,
     dataField,
     tooltip,
@@ -30,7 +31,7 @@ const XRadio = memo((props: XRadioConfig & { runtime?: boolean; detailMode?: boo
   const fieldId = dataField && dataField.length > 0
     ? dataField[dataField.length - 1]
     : `${FORM_COMPONENT_TYPES.RADIO}_${nanoid()}`;
-  
+
   const [options, setOptions] = useState<DictData[]>([]);
 
   const rules: ITypeRules<ValidatorType.Custom>[] = [
@@ -67,7 +68,7 @@ const XRadio = memo((props: XRadioConfig & { runtime?: boolean; detailMode?: boo
       }}
     >
       {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? (
-        <div>--</div>
+        <div>{form?.getFieldValue(fieldId)?.name || options.find((op) => op.id === form?.getFieldValue(fieldId)?.id || op.id === form?.getFieldValue(fieldId))?.label || '--'}</div>
       ) : (
         <RadioGroup
           options={options}

@@ -3,7 +3,7 @@ import { nanoid } from 'nanoid';
 import { Input, Form, Ellipsis } from '@arco-design/mobile-react';
 import { ValidatorType, ITypeRules } from '@arco-design/mobile-utils';
 
-import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, PHONE_TYPE, DEFAULT_VALUE_TYPES, FormSchema } from '@onebase/ui-kit';
+import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, PHONE_TYPE, DEFAULT_VALUE_TYPES, FormSchema, securityEncodeText } from '@onebase/ui-kit';
 type XInputPhoneConfig = typeof FormSchema.XInputPhoneSchema.config;
 
 import '../index.css';
@@ -21,7 +21,8 @@ const XInputPhone = memo((props: XInputPhoneConfig & { runtime?: boolean; detail
     status,
     phoneType,
     runtime = true,
-    detailMode
+    detailMode,
+    security
   } = props;
 
   const textAlign = layout === 'vertical' ? 'left' : 'right';
@@ -84,7 +85,7 @@ const XInputPhone = memo((props: XInputPhoneConfig & { runtime?: boolean; detail
         <div
           className="readonlyText"
           style={{ textAlign }}
-        >{form?.getFieldValue(fieldId) || (defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : '') || '--'}</div>
+        >{securityEncodeText(security, form?.getFieldValue(fieldId))}</div>
       ) : (
         renderContent()
       )}
