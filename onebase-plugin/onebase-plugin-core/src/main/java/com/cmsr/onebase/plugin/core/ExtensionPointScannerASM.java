@@ -11,7 +11,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 
 /**
@@ -123,7 +126,7 @@ public class ExtensionPointScannerASM {
 
         @Override
         public void visit(int version, int access, String name, String signature,
-                          String superName, String[] interfaces) {
+                String superName, String[] interfaces) {
             this.className = toClassName(name);
 
             // 检查是否实现了扩展点接口

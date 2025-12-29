@@ -10,7 +10,7 @@ import com.cmsr.onebase.plugin.runtime.test.api.StagingModeApiTest;
 import com.cmsr.onebase.plugin.runtime.test.exception.PluginExceptionScenariosTest;
 import com.cmsr.onebase.plugin.runtime.test.integration.PluginSystemIntegrationTest;
 import com.cmsr.onebase.plugin.runtime.test.lifecycle.PluginLifecycleTest;
-import com.cmsr.onebase.plugin.runtime.test.reload.HotReloadTest;
+import com.cmsr.onebase.plugin.runtime.test.reload.DevModeHotReloadTest;
 import org.junit.platform.suite.api.SelectClasses;
 import org.junit.platform.suite.api.Suite;
 import org.junit.platform.suite.api.SuiteDisplayName;
@@ -61,7 +61,7 @@ import org.junit.platform.suite.api.SuiteDisplayName;
         PluginLifecycleTest.class,
 
         // 热重载测试
-        HotReloadTest.class,
+        DevModeHotReloadTest.class,
 
         // 插件异常场景测试
         PluginExceptionScenariosTest.class

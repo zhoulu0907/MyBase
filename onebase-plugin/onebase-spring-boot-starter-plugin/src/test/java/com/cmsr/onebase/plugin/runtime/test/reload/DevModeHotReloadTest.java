@@ -40,9 +40,9 @@ import static org.assertj.core.api.Assertions.assertThat;
                 "onebase.plugin.dev-class-paths[0]=../onebase-plugin-demo/plugin-demo-hello/target/classes",
                 "onebase.plugin.dev-class-paths[1]=../onebase-plugin-demo/plugin-demo-test/target/classes"
 })
-public class HotReloadTest {
+public class DevModeHotReloadTest {
 
-        private static final Logger log = LoggerFactory.getLogger(HotReloadTest.class);
+        private static final Logger log = LoggerFactory.getLogger(DevModeHotReloadTest.class);
 
         @LocalServerPort
         private int port;

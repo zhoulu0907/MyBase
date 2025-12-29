@@ -13,6 +13,8 @@ import org.springframework.context.ApplicationContext;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 开发模式插件管理器
@@ -59,7 +61,7 @@ public class DevModePluginManager extends SpringPluginManager {
      * 扩展点缓存，避免重复扫描和注册
      * Key: 扩展点类型, Value: 扩展点实例列表
      */
-    private final java.util.Map<Class<?>, java.util.List<?>> extensionCache = new java.util.concurrent.ConcurrentHashMap<>();
+    private final Map<Class<?>, List<?>> extensionCache = new ConcurrentHashMap<>();
 
     /**
      * 构造函数
