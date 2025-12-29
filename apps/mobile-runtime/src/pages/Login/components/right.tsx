@@ -57,23 +57,26 @@ const Right: React.FC = () => {
     // 从 window.location.hash 中解析 redirectURL，再从 redirectURL 解析 appId 和 tenantId
     const rawHash = window.location.hash;
     const prefix = '#/login?redirectURL=';
-    console.log('rawHash.startsWith(prefix)', rawHash.startsWith(prefix));
     if (rawHash.startsWith(prefix)) {
       const redirectURL = rawHash.replace(prefix, '');
-      let aid = getHashQueryParam('appId', redirectURL) || '';
-      let tid = getHashQueryParam('tenantId', redirectURL) || '';
-      if (!aid) {
-        const pathRedirect = (redirectURL.split('#/')[1] || '').split('/');
-        aid = pathRedirect[1] || aid || '';
-        tid = pathRedirect[2] || tid || '';
-      }
-      setAppId(aid);
-      setTenantId(tid);
+      const tmatch = redirectURL.match(/\/onebase\/(\d+)\//);
+      const amatch = redirectURL.match(/\/onebase\/(\d+)\/(\d+)\//);
+      const tid = tmatch && tmatch.length > 1 ? tmatch[1] : '';
+      const aid = amatch && amatch.length > 2 ? amatch[2] : '';
+      let apid = getHashQueryParam('appId', redirectURL) || '';
+      let teid = getHashQueryParam('tenantId', redirectURL) || '';
+
+      setAppId(apid || aid);
+      setTenantId(teid || tid);
     } else {
-      const aid = getHashQueryParam('appId') || '';
-      const tid = getHashQueryParam('tenantId') || '';
-      setAppId(aid);
-      setTenantId(tid);
+      const tmatch = rawHash.match(/\/onebase\/(\d+)\//);
+      const amatch = rawHash.match(/\/onebase\/(\d+)\/(\d+)\//);
+      const tid = tmatch && tmatch.length > 1 ? tmatch[1] : '';
+      const aid = amatch && amatch.length > 2 ? amatch[2] : '';
+      let apid = getHashQueryParam('appId') || '';
+      let teid = getHashQueryParam('tenantId') || '';
+      setAppId(apid || aid);
+      setTenantId(teid || tid);
     }
   }, []);
 

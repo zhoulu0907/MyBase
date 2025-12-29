@@ -66,9 +66,9 @@ const Right: React.FC = () => {
     if (rawHash.startsWith(prefix)) {
       const redirectURL = rawHash.replace(prefix, '');
       const tmatch = redirectURL.match(/\/onebase\/(\d+)\//);
-      const amatch2 = redirectURL.match(/\/onebase\/(\d+)\/(\d+)\//);
+      const amatch = redirectURL.match(/\/onebase\/(\d+)\/(\d+)\//);
       const tid = tmatch && tmatch.length > 1 ? tmatch[1] : '';
-      const aid = amatch2 && amatch2.length > 2 ? amatch2[2] : '';
+      const aid = amatch && amatch.length > 2 ? amatch[2] : '';
       let apid = getHashQueryParam('appId', redirectURL) || '';
       let teid = getHashQueryParam('tenantId', redirectURL) || '';
 
@@ -76,9 +76,9 @@ const Right: React.FC = () => {
       setTenantId(teid || tid);
     } else {
       const tmatch = rawHash.match(/\/onebase\/(\d+)\//);
-      const amatch2 = rawHash.match(/\/onebase\/(\d+)\/(\d+)\//);
+      const amatch = rawHash.match(/\/onebase\/(\d+)\/(\d+)\//);
       const tid = tmatch && tmatch.length > 1 ? tmatch[1] : '';
-      const aid = amatch2 && amatch2.length > 2 ? amatch2[2] : '';
+      const aid = amatch && amatch.length > 2 ? amatch[2] : '';
       let apid = getHashQueryParam('appId') || '';
       let teid = getHashQueryParam('tenantId') || '';
       setAppId(apid || aid);
