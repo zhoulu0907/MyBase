@@ -171,13 +171,11 @@ const Runtime: React.FC = () => {
   const dealPage = (array: ApplicationMenu[]) => {
     let treeList: ApplicationMenu[] = [];
     array.forEach((item: ApplicationMenu) => {
-      //   if (item.isVisible === VisibleType.SHOW) {
       let childrenList: ApplicationMenu[] = [];
       if (item.children && item.children.length > 0) {
         childrenList = dealPage(item.children);
       }
       treeList.push({ ...item, children: childrenList });
-      //   }
     });
     return treeList;
   };
@@ -251,9 +249,12 @@ const Runtime: React.FC = () => {
   };
 
   // 更新当前路由的 curMenu（不刷新页面）
-  const handleCurMenuUrl = (curMenuId: string) => {
+  const handleCurMenuUrl = async (curMenuId: string) => {
     const sp = new URLSearchParams(location.search);
     sp.set('curMenu', String(curMenuId));
+    // const permission = await getApplicationMenuPermission(curMenuId);
+    // console.log('permission: ', permission);
+
     const to = `${location.pathname}?${sp.toString()}`;
     navigate(to, { replace: true });
   };
