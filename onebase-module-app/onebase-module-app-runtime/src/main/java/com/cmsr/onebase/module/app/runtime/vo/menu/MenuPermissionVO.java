@@ -4,6 +4,7 @@ import com.cmsr.onebase.module.app.api.security.bo.FieldPermission;
 import com.cmsr.onebase.module.app.api.security.bo.OperationPermission;
 import lombok.Data;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -17,6 +18,6 @@ public class MenuPermissionVO {
 
     private FieldPermission fieldPermission;
 
-    private Set<String> viewUuids;
+    private List<String> viewUuids;
 
 }
