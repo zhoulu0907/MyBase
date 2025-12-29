@@ -92,3 +92,10 @@ export interface Options {
   label: string;
   value: string;
 }
+
+// 创建大屏类型
+export enum DashBoardCreateType {
+  DashboardNew = 'dashboardNew', // 新建大屏
+  DashboardTemplate = 'dashboardTemplate', // 大屏模版
+  DashboardLink = 'dashboardLink' // 关联已创建大屏
+}
