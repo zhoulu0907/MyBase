@@ -240,7 +240,7 @@ const SpaceInfo: React.FC = () => {
                     )}
                   </div>
                   <div className={styles.enterpriseId}>
-                    企业ID：<Text copyable>{spaceInfo.id}</Text>
+                   空间ID：<Text copyable>{spaceInfo.id}</Text>
                   </div>
                 </div>
               </div>
