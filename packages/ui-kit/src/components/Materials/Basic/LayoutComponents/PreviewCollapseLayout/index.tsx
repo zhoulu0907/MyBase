@@ -58,14 +58,14 @@ const XPreviewCollapseLayout = memo((props: XCollapseLayoutConfig & { detailMode
       <CollapseItem
         header={
           label.display || label.display === null ?
-          <Tooltip content={label.text}>
-            <div className="collapse-title">
-              <div className="collapse-title-shape" style={{ backgroundColor: collapseStyle.shapeColor }}></div>
-              <div className="collapse-title-ellipsis" style={{ color: collapseStyle.titleColor }}>
-                {label.text}
+            <Tooltip content={label.text}>
+              <div className="collapse-title">
+                <div className="collapse-title-shape" style={{ backgroundColor: collapseStyle.shapeColor }}></div>
+                <div className="collapse-title-ellipsis" style={{ color: collapseStyle.titleColor }}>
+                  {label.text}
+                </div>
               </div>
-            </div>
-          </Tooltip> : <div className="collapse-title"></div>
+            </Tooltip> : <div className="collapse-title"></div>
         }
         showExpandIcon={collapsed !== COLLAPSED_VALUES[COLLAPSED_OPTIONS.DISABLED_COLLAPSED]}
         name="1"
@@ -81,6 +81,8 @@ const XPreviewCollapseLayout = memo((props: XCollapseLayoutConfig & { detailMode
             <ReactSortable
               id={`workspace-content-${id}-${index}`}
               className="content"
+              sort={false}
+              disabled
               list={colComponents[index]}
               setList={(newList) => {
                 colComponents[index] = newList;

@@ -43,7 +43,7 @@
 
 
     .componentItem {
-      cursor: move;
+      cursor: default;
       /* padding: 6px; */
       box-sizing: border-box;
       border: 1px dashed transparent;
