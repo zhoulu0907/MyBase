@@ -59,7 +59,7 @@ import MyMenuItem from './components/MyMenuItem';
 import TaskCenterPage from './components/TaskCenter/TaskCenterPage';
 import TaskCenterSide from './components/TaskCenter/taskTreeSide';
 import styles from './index.module.less';
-import { DashBoardCreateType } from '@onebase/app/src/services/app_dashboard';
+import { DashBoardCreateType } from '@onebase/app';
 
 const TreeNode = Tree.Node;
 const MenuItem = Menu.Item;
@@ -190,6 +190,7 @@ const PageManagerPage: FC = () => {
 
   useEffect(() => {
     const loadMainMetaData = async () => {
+      console.log('loadMainMetaData curMenu.value: ', curMenu.value);
       const req: GetPageSetIdReq = {
         menuId: curMenu.value?.id
       };

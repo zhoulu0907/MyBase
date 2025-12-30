@@ -10,7 +10,7 @@ import dashboardLink from '@/assets/images/dashboard_link.svg';
 import dashboardChange from '@/assets/images/dashboard_change.svg';
 import { getFileUrlById } from '@onebase/platform-center';
 import { getDashBoardURL } from '@onebase/common';
-import { DashBoardCreateType } from '@onebase/app/src/services/app_dashboard';
+import { DashBoardCreateType } from '@onebase/app';
 
 interface CreateModalProps {
   title: string;
