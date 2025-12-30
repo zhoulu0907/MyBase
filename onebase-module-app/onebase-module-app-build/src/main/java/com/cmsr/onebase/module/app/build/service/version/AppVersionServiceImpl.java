@@ -68,6 +68,7 @@ public class AppVersionServiceImpl implements AppVersionService {
         List<VersionPageRespVO> respVOS = pageResult.getList().stream()
                 .map(v -> {
                     VersionPageRespVO bean = BeanUtils.toBean(v, VersionPageRespVO.class);
+                    bean.setCreatorName(userHelper.getUserNickname(v.getCreator()));
                     bean.setUpdaterName(userHelper.getUserNickname(v.getUpdater()));
                     bean.setVersionTypeLabel(VersionTypeEnum.getLabel(v.getVersionType()));
                     return bean;
