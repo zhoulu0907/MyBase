@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.cmsr.onebase</groupId>
+        <artifactId>onebase-plugin</artifactId>
+        <version>${revision}</version>
+    </parent>
+
+    <artifactId>onebase-plugin-host-simulator</artifactId>
+    <packaging>jar</packaging>
+
+    <name>${project.artifactId}</name>
+    <description>
+        OneBase 插件宿主模拟器 - 既能免打包快速 debug 又能全生命周期插件验证
+        
+        【双模式支持】
+        1. IDE 快速调试模式：无需打包，直接在 IDE 中 Debug 运行（5-10秒启动）
+           - 通过 ComponentScan 自动扫描依赖中的插件
+           - 支持断点调试、热重载
+           - 适合开发迭代
+        
+        2. 完整验证模式：打包插件 ZIP，验证完整生命周期（加载、启动、停止、卸载）
+           - 从 plugins 目录加载 ZIP 插件包
+           - 完整的插件生命周期管理
+           - 适合集成测试和验证
+    </description>
+
+    <dependencies>
+        <!-- Spring Boot Starter Web -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <!-- OneBase Common Framework -->
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-common</artifactId>
+            <exclusions>
+                <!-- 排除Spring Security，我们自己配置 -->
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-security</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!-- Spring Security（简化配置） -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+
+        <!-- Swagger/OpenAPI -->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+        </dependency>
+
+        <!-- MapStruct -->
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct</artifactId>
+        </dependency>
+
+        <!-- Guava (确保运行时可用) -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+
+        <!-- OneBase 插件运行时 -->
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-spring-boot-starter-plugin</artifactId>
+        </dependency>
+
+        <!-- Lombok -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Spring Boot Maven Plugin: 打包为可执行 fat JAR -->
+            <!-- 使用 classifier 保留原始 JAR，同时生成可执行 JAR -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>com.cmsr.onebase.plugin.simulator.PluginHostSimulatorApplication</mainClass>
+                    <!-- 使用 classifier 保留原始 JAR，供其他模块依赖使用 -->
+                    <!-- 打包后会生成: -->
+                    <!--   onebase-plugin-host-simulator-xxx.jar (原始 JAR，可被其他模块依赖) -->
+                    <!--   onebase-plugin-host-simulator-xxx-exec.jar (可执行 fat JAR) -->
+                    <classifier>exec</classifier>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

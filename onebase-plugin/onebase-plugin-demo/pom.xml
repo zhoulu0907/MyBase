@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.cmsr.onebase</groupId>
+        <artifactId>onebase-plugin</artifactId>
+        <version>${revision}</version>
+    </parent>
+
+    <artifactId>onebase-plugin-demo</artifactId>
+    <packaging>pom</packaging>
+
+    <name>${project.artifactId}</name>
+    <description>OneBase低代码平台插件开发示例</description>
+
+    <modules>
+        <!-- 子模块列表 -->
+        <module>plugin-demo-hello</module>
+        <module>plugin-demo-test</module>
+    </modules>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <!-- OneBase插件Maven插件 - 提供自动生成和打包能力 -->
+                <plugin>
+                    <groupId>com.cmsr.onebase</groupId>
+                    <artifactId>onebase-plugin-maven-plugin</artifactId>
+                    <version>${revision}</version>
+                </plugin>
+
+                <!-- Maven JAR插件 - 禁止生成插件相关的MANIFEST属性 -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+</project>

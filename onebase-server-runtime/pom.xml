@@ -116,6 +116,10 @@
             <groupId>cn.com.kingbase</groupId>
             <artifactId>kingbase8</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-spring-boot-starter-plugin</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
