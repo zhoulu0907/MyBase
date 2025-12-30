@@ -1,4 +1,3 @@
-import { useAppStore } from '@/store';
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { triggerNodeOutputSignal } from '@/store/singals/trigger_node_output';
 import { Button, Message } from '@arco-design/web-react';
@@ -14,8 +13,6 @@ import styles from './index.module.less';
 const FlowEditorPage: React.FC = () => {
   const { nodeData, nodes, flowId } = triggerEditorSignal;
   const { getTriggerNodeOutput } = triggerNodeOutputSignal;
-
-  const { curAppId } = useAppStore();
 
   const dealProcessDefinition = (newNodes: any[]): any[] => {
     const processDefinitionJson = newNodes.map((item) => {
