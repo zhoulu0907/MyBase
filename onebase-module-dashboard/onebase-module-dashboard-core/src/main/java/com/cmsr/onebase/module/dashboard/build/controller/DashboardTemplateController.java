@@ -100,7 +100,7 @@ public class DashboardTemplateController {
     @PermitAll
     @ApiSignIgnore
     @TenantIgnore
-    public CommonResult<Boolean> updateDashboardTemplate(@ModelAttribute @Validated DashboardProjectData saveReqVO) {
+    public CommonResult<Boolean> updateDashboardTemplate(@ModelAttribute @Validated DashboardTemplateSaveReqVO saveReqVO) {
         dashboardTemplateService.updateDashboardTemplate(saveReqVO);
         return success(true);
     }

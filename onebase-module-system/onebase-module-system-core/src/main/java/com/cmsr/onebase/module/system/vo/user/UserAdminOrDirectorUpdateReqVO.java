@@ -5,6 +5,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
+import java.util.Set;
+
 
 @Schema(description = "管理后台 - 修改部门管理员/主管 Req VO")
 @Data
@@ -19,8 +21,7 @@ public class UserAdminOrDirectorUpdateReqVO {
     @Schema(description = "部门Id", example = "2")
     private Long deptId;
 
-    @NotNull(message = "用户id不能为空")
-    @Schema(description = "用户id")
-    private Long userId;
+    @Schema(description = " 接口人UserIds", example = "")
+    private Set<Long> adminUserIds;
 
 }

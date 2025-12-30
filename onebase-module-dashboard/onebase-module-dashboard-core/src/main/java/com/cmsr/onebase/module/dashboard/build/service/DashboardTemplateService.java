@@ -26,7 +26,7 @@ public interface DashboardTemplateService {
      *
      * @param saveReqVO 更新信息
      */
-    void updateDashboardTemplate(DashboardProjectData saveReqVO);
+    void updateDashboardTemplate(DashboardTemplateSaveReqVO saveReqVO);
 
     /**
      * 删除仪表盘模板
