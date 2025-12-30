@@ -18,8 +18,7 @@ import {
   WORKBENCH_STATUS_VALUES,
   WORKBENCH_WIDTH_OPTIONS,
   WORKBENCH_WIDTH_VALUES,
-  QUICK_ENTRY_THEME_OPTIONS,
-  QUICK_ENTRY_THEME_VALUES
+  WORKBENCH_THEME_OPTIONS
 } from '../../core/constants';
 import type {
   IEntryGroupConfigType,
@@ -71,7 +70,7 @@ const XQuickEntry: XQuickEntrySchema = {
       enableGroup: false
     },
     styleConfig: {
-      theme: QUICK_ENTRY_THEME_VALUES[QUICK_ENTRY_THEME_OPTIONS.THEME_1]
+      theme: WORKBENCH_THEME_OPTIONS.THEME_1
     },
     groupConfig: {
       enableGroup: false,

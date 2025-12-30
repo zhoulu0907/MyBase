@@ -63,6 +63,8 @@ export const WORKBENCH_CONFIG_TYPES = {
   WB_DATA_CONFIG: 'Wb_DataConfig' as const,
   // 按钮组件
   WB_JUMP_CONFIG: 'Wb_JumpConfig' as const,
+  // 欢迎卡片
+  WB_THEME_SELECTOR: 'Wb_ThemeSelector' as const,
 } as const;
 
 /**
@@ -79,18 +81,12 @@ export {
 };
 
 /**
- * 快捷入口样式选项
+ * 样式选项
  */
-export const QUICK_ENTRY_THEME_OPTIONS = {
-  THEME_1: '样式一',
-  THEME_2: '样式二',
-  THEME_3: '样式三'
-} as const;
-
-export const QUICK_ENTRY_THEME_VALUES = {
-  [QUICK_ENTRY_THEME_OPTIONS.THEME_1]: 'theme-one',
-  [QUICK_ENTRY_THEME_OPTIONS.THEME_2]: 'theme-two',
-  [QUICK_ENTRY_THEME_OPTIONS.THEME_3]: 'theme-three'
+export const WORKBENCH_THEME_OPTIONS = {
+  THEME_1: 'theme-one',
+  THEME_2: 'theme-two',
+  THEME_3: 'theme-three'
 } as const;
 
 /**

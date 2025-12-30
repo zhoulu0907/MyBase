@@ -202,3 +202,12 @@ export interface TWbTextAlignDefaultType {
   horizontal: string;
   vertical: string;
 }
+
+/**
+ * 欢迎卡片样式配置类型
+ */
+export interface IThemeConfigType {
+  key: string;
+  name: string;
+  type: typeof WORKBENCH_CONFIG_TYPES.WB_THEME_SELECTOR;
+}
