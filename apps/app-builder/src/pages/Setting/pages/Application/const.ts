@@ -57,7 +57,7 @@ export const statusOptions = [
 
 export enum TagColor {
   'arcoblue',
-  'red',
+  'blue',
   'orangered'
 }
 
@@ -66,7 +66,7 @@ export enum ApplicationStatus {
 }
 
 export enum ApplicationStatusLabel {
-  ITERATE = '迭代中'
+  ITERATE = '有更新'
 }
 
 export const avatarBgColor = ['#009E9E', '#24B28F', '#1979FF', '#7E5AEA', '#EB693A', '#EBBC00'];

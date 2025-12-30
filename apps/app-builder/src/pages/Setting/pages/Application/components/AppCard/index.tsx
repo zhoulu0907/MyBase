@@ -7,7 +7,7 @@ import { appIconMap } from '@onebase/ui-kit';
 import { getFileUrlById, PlatformTenantPublishMode } from '@onebase/platform-center';
 import dayjs from 'dayjs';
 import React from 'react';
-import { ApplicationStatus, ApplicationStatusLabel, defaultTheme, TagColor, ThemeColorMap } from '../../const';
+import { ApplicationStatus, ApplicationStatusLabel, TagColor } from '../../const';
 import styles from './index.module.less';
 import type { developUser } from '@onebase/app/src/types';
 import { hasPermission, TENANT_APP_PERMISSION as ACTIONS } from '@onebase/common';
