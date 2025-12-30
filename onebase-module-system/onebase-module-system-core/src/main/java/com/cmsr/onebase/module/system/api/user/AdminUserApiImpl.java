@@ -6,7 +6,7 @@ import cn.hutool.core.util.ObjUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.common.util.collection.MapUtils;
-import com.cmsr.onebase.module.system.api.dept.dto.DeptAndUsersApiReqVO;
+import com.cmsr.onebase.module.system.api.dept.dto.UserPageApiReqVO;
 import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
 import com.cmsr.onebase.module.system.api.user.dto.UserByDeptPageReqDTO;
 import com.cmsr.onebase.module.system.api.user.dto.UserSimpleRespDTO;
@@ -101,8 +101,8 @@ public class AdminUserApiImpl implements AdminUserApi {
     }
 
     @Override
-    public CommonResult<PageResult<UserSimpleRespDTO>> getUsersExcludeUserIds(DeptAndUsersApiReqVO pageReqVO) {
-        PageResult<UserSimpleRespVO> result = userService.getUsersExcludeUserIds(pageReqVO);
+    public CommonResult<PageResult<UserSimpleRespDTO>> getUsersPage(UserPageApiReqVO pageReqVO) {
+        PageResult<UserSimpleRespVO> result = userService.getUserPage(pageReqVO);
         return success(BeanUtils.toBean(result, UserSimpleRespDTO.class));
 
     }

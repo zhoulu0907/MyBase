@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.system.service.dept;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
-import com.cmsr.onebase.module.system.api.dept.dto.DeptAndUsersApiReqVO;
+import com.cmsr.onebase.module.system.api.dept.dto.DeptPageApiReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.vo.dept.*;
 import com.cmsr.onebase.module.system.vo.user.UserAdminOrDirectorUpdateReqVO;
@@ -178,5 +178,5 @@ public interface DeptService {
      * @param reqVO 筛选条件请求 VO
      * @return 部门列表
      */
-    PageResult<DeptRespVO> getDeptsExcludeDeptIds(@Valid DeptAndUsersApiReqVO reqVO);
+    PageResult<DeptRespVO> getDeptPage(@Valid DeptPageApiReqVO reqVO);
 }

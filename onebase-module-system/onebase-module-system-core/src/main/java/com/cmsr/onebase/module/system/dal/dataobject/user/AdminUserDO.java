@@ -22,8 +22,8 @@ import java.util.Set;
 @Data
 @Table("system_users")
 public class AdminUserDO extends BaseTenantEntity implements BaseDOInterface {
-    public static final String IDID   = "id";
-    public static final String USERNAME   = "username";
+    public static final String P_ID     = "id";
+    public static final String USERNAME = "username";
     // 新增各字段对应的常量
     public static final String PASSWORD   = "password";
     public static final String NICKNAME   = "nickname";

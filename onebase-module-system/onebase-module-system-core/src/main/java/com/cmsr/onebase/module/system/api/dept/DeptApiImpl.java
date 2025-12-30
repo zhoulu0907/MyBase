@@ -3,10 +3,7 @@ package com.cmsr.onebase.module.system.api.dept;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.system.api.dept.dto.DeptAndUsersApiReqVO;
-import com.cmsr.onebase.module.system.api.dept.dto.DeptAndUsersReqDTO;
-import com.cmsr.onebase.module.system.api.dept.dto.DeptAndUsersRespDTO;
-import com.cmsr.onebase.module.system.api.dept.dto.DeptRespDTO;
+import com.cmsr.onebase.module.system.api.dept.dto.*;
 import com.cmsr.onebase.module.system.enums.dept.IdTypeEnum;
 import com.cmsr.onebase.module.system.vo.dept.DeptAndUsersRespVO;
 import com.cmsr.onebase.module.system.convert.dept.DeptConvert;
@@ -66,8 +63,8 @@ public class DeptApiImpl implements DeptApi {
     }
 
     @Override
-    public CommonResult<PageResult<DeptRespDTO>> getDeptsExcludeDeptIds(@Valid DeptAndUsersApiReqVO reqVO) {
-        PageResult<DeptRespVO> result = deptService.getDeptsExcludeDeptIds(reqVO);
+    public CommonResult<PageResult<DeptRespDTO>> getDeptPage(@Valid DeptPageApiReqVO reqVO) {
+        PageResult<DeptRespVO> result = deptService.getDeptPage(reqVO);
         return success(BeanUtils.toBean(result, DeptRespDTO.class));
     }
 }

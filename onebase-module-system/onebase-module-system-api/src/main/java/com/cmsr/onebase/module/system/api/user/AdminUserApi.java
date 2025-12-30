@@ -3,7 +3,7 @@ package com.cmsr.onebase.module.system.api.user;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
-import com.cmsr.onebase.module.system.api.dept.dto.DeptAndUsersApiReqVO;
+import com.cmsr.onebase.module.system.api.dept.dto.UserPageApiReqVO;
 import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
 import com.cmsr.onebase.module.system.api.user.dto.UserByDeptPageReqDTO;
 import com.cmsr.onebase.module.system.api.user.dto.UserSimpleRespDTO;
@@ -95,7 +95,9 @@ public interface AdminUserApi {
      *
      * @param pageReqVO 部门、关键字、分页等信息
      */
-    CommonResult<PageResult<UserSimpleRespDTO>> getUsersExcludeUserIds(@Valid DeptAndUsersApiReqVO pageReqVO);
+    @GetMapping(PREFIX + "/get-user-page")
+    @Operation(summary = "获取用户分页信息", description = "获取用户分页信息")
+    CommonResult<PageResult<UserSimpleRespDTO>> getUsersPage(@Valid UserPageApiReqVO pageReqVO);
 
 }
 

@@ -18,7 +18,7 @@ import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
 import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
 import com.cmsr.onebase.module.app.api.auth.AppAuthRoleUser;
 import com.cmsr.onebase.module.infra.api.config.ConfigApi;
-import com.cmsr.onebase.module.system.api.dept.dto.DeptAndUsersApiReqVO;
+import com.cmsr.onebase.module.system.api.dept.dto.UserPageApiReqVO;
 import com.cmsr.onebase.module.system.convert.user.UserConvert;
 import com.cmsr.onebase.module.system.dal.database.RoleDataRepository;
 import com.cmsr.onebase.module.system.dal.database.UserPostDataRepository;
@@ -1449,7 +1449,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public PageResult<UserSimpleRespVO> getUsersExcludeUserIds(DeptAndUsersApiReqVO pageReqVO) {
+    public PageResult<UserSimpleRespVO> getUserPage(UserPageApiReqVO pageReqVO) {
         PageResult<AdminUserDO> userDOList = userDataRepository.selectPage(UserStatusEnum.NORMAL.getStatus(), pageReqVO);
         if(org.apache.commons.collections4.CollectionUtils.isEmpty(userDOList.getList())){
             return PageResult.empty();

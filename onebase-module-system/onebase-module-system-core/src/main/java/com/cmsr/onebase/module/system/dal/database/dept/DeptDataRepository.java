@@ -6,13 +6,11 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.framework.data.base.BaseDO;
-import com.cmsr.onebase.module.system.api.dept.dto.DeptAndUsersApiReqVO;
-import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.framework.orm.repo.BaseDataRepository;
-import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
+import com.cmsr.onebase.module.system.api.dept.dto.DeptPageApiReqVO;
+import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.dal.flex.mapper.SystemDeptMapper;
 import com.cmsr.onebase.module.system.enums.dept.DeptTypeEnum;
-import com.cmsr.onebase.module.system.vo.dept.DeptRespVO;
 import com.cmsr.onebase.module.system.vo.dept.DeptSaveReqVO;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
@@ -25,7 +23,6 @@ import java.util.Collections;
 import java.util.List;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO.NICKNAME;
 import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
 
 /**
@@ -184,10 +181,10 @@ public class DeptDataRepository extends BaseDataRepository<SystemDeptMapper, Dep
 
 
 
-    public PageResult<DeptDO> selectPage(Integer status, DeptAndUsersApiReqVO pageReqVO) {
+    public PageResult<DeptDO> selectPage(Integer status, DeptPageApiReqVO pageReqVO) {
         QueryWrapper queryWrapper = buildDeptQueryWrapper().eq(DeptDO.STATUS, status)
                 .like(DeptDO.NAME, pageReqVO.getKeywords(), StringUtils.isNotBlank(pageReqVO.getKeywords()))
-                .notIn(DeptDO.IDID, pageReqVO.getExcludeDeptIds(), CollectionUtils.isNotEmpty(pageReqVO.getExcludeDeptIds()))
+                .notIn(DeptDO.P_ID, pageReqVO.getExcludeDeptIds(), CollectionUtils.isNotEmpty(pageReqVO.getExcludeDeptIds()))
                 .orderBy(BaseDO.CREATE_TIME, false);
         Page<DeptDO> pageResult = page(Page.of(pageReqVO.getPageNo(), pageReqVO.getPageSize()), queryWrapper);
         return new PageResult<DeptDO>(pageResult.getRecords(), pageResult.getTotalRow());

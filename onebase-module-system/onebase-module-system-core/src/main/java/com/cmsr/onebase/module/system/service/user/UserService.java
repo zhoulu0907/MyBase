@@ -4,10 +4,9 @@ import cn.hutool.core.collection.CollUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
-import com.cmsr.onebase.module.system.api.dept.dto.DeptAndUsersApiReqVO;
+import com.cmsr.onebase.module.system.api.dept.dto.UserPageApiReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.vo.auth.AuthRegisterReqVO;
-import com.cmsr.onebase.module.system.vo.dept.DeptRespVO;
 import com.cmsr.onebase.module.system.vo.dept.DeptSimpleListRespVO;
 import com.cmsr.onebase.module.system.vo.user.*;
 import jakarta.validation.Valid;
@@ -417,5 +416,5 @@ public interface UserService {
      * @param pageReqVO
      * @return
      */
-    PageResult<UserSimpleRespVO> getUsersExcludeUserIds(@Valid DeptAndUsersApiReqVO pageReqVO);
+    PageResult<UserSimpleRespVO> getUserPage(@Valid UserPageApiReqVO pageReqVO);
 }

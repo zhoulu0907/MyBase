@@ -9,8 +9,7 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.system.api.dept.dto.DeptAndUsersApiReqVO;
-import com.cmsr.onebase.module.system.api.user.dto.UserSimpleRespDTO;
+import com.cmsr.onebase.module.system.api.dept.dto.DeptPageApiReqVO;
 import com.cmsr.onebase.module.system.dal.database.dept.DeptDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
@@ -39,7 +38,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertSet;
 import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
 
@@ -536,7 +534,7 @@ public class DeptServiceImpl implements DeptService {
     }
 
     @Override
-    public PageResult<DeptRespVO> getDeptsExcludeDeptIds(DeptAndUsersApiReqVO reqVO) {
+    public PageResult<DeptRespVO> getDeptPage(DeptPageApiReqVO reqVO) {
 
         // 查询部门数据
         PageResult<DeptDO> result = deptDataRepository.selectPage(UserStatusEnum.NORMAL.getStatus(), reqVO);

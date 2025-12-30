@@ -14,14 +14,11 @@ import java.util.Collection;
  */
 @Schema(description = "管理后台 - 部门和用户查询 Request VO")
 @Data
-public class DeptAndUsersApiReqVO extends PageParam {
+public class DeptPageApiReqVO extends PageParam {
 
 
     @Schema(description = "搜索关键词", example = "onebase")
     private String keywords;
-
-    @Schema(description = "排除的userIDs", example = "100")
-    private Collection<Long> excludeUserIds;
 
     @Schema(description = "排除的deptIds", example = "100")
     private Collection<Long> excludeDeptIds;
