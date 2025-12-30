@@ -35,7 +35,7 @@ public class AppAuthRoleRepository extends BaseAppRepository<AppAuthRoleMapper, 
 
     public List<AppAuthRoleDO> findByApplicationId(Long applicationId) {
         QueryWrapper queryWrapper = this.query()
-                .eq(AppAuthRoleDO::getApplicationId, applicationId)
+                .where(APP_AUTH_ROLE.APPLICATION_ID.eq(applicationId))
                 .orderBy(AppAuthRoleDO::getRoleType, true)
                 .orderBy(AppAuthRoleDO::getRoleName, true);
         return this.list(queryWrapper);
@@ -43,23 +43,31 @@ public class AppAuthRoleRepository extends BaseAppRepository<AppAuthRoleMapper, 
 
     public AppAuthRoleDO findByApplicationIdAndRoleName(Long applicationId, String roleName) {
         QueryWrapper queryWrapper = this.query()
-                .eq(AppAuthRoleDO::getApplicationId, applicationId)
-                .eq(AppAuthRoleDO::getRoleName, roleName);
+                .where(APP_AUTH_ROLE.APPLICATION_ID.eq(applicationId))
+                .where(APP_AUTH_ROLE.ROLE_NAME.eq(roleName));
         return getOne(queryWrapper);
     }
 
-    public AppAuthRoleDO findByAppIdAndRoleCode(Long applicationId, String roleCode) {
+    public AppAuthRoleDO findOneByAppIdAndRoleType(Long applicationId, Integer roleType) {
         QueryWrapper queryWrapper = this.query()
-                .eq(AppAuthRoleDO::getApplicationId, applicationId)
-                .eq(AppAuthRoleDO::getRoleCode, roleCode);
+                .where(APP_AUTH_ROLE.APPLICATION_ID.eq(applicationId))
+                .where(APP_AUTH_ROLE.ROLE_TYPE.eq(roleType));
         return getOne(queryWrapper);
     }
+
+    public List<AppAuthRoleDO> findByAppIdAndRoleType(Long applicationId, Integer roleType) {
+        QueryWrapper queryWrapper = this.query()
+                .where(APP_AUTH_ROLE.APPLICATION_ID.eq(applicationId))
+                .where(APP_AUTH_ROLE.ROLE_TYPE.eq(roleType));
+        return list(queryWrapper);
+    }
+
 
     public AppAuthRoleDO findByApplicationIdAndRoleNameAndIdNot(Long applicationId, String roleName, Long roleId) {
         QueryWrapper queryWrapper = this.query()
-                .eq(AppAuthRoleDO::getApplicationId, applicationId)
-                .eq(AppAuthRoleDO::getRoleName, roleName)
-                .eq(AppAuthRoleDO::getId, roleId);
+                .where(APP_AUTH_ROLE.APPLICATION_ID.eq(applicationId))
+                .where(APP_AUTH_ROLE.ROLE_NAME.eq(roleName))
+                .where(APP_AUTH_ROLE.ID.ne(roleId));
         return getOne(queryWrapper);
     }
 
