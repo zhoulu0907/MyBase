@@ -36,13 +36,24 @@ export const getFieldConfig = (dataField: string[], mainEntity: AppEntity, subEn
 };
 
 // 通过配置获取下拉选项
-export const getFieldOptionsConfig = async (dataField: string[], mainEntity: AppEntity, subEntities: AppEntities) => {
+export const getFieldOptionsConfig = async (
+  dataField: string[],
+  mainEntity: AppEntity,
+  subEntities: AppEntities,
+  dictMap?: any
+) => {
   const currentField = getFieldConfig(dataField, mainEntity, subEntities);
   if (!currentField) {
     return [];
   }
   if (currentField.dictTypeId) {
-    const dictDataList = await getDictDataListByTypeId(currentField.dictTypeId);
+    let dictDataList: DictData[] = [];
+    if (dictMap) {
+      dictDataList = dictMap[currentField.dictTypeId] || [];
+    } else {
+      dictDataList = await getDictDataListByTypeId(currentField.dictTypeId);
+    }
+
     const dictOptions = dictDataList?.filter((e: DictData) => e.status === 1); // 只显示启用状态的字典数据
     return dictOptions || [];
   } else if (currentField.options?.length) {

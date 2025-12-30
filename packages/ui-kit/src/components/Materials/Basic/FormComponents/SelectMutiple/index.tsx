@@ -1,27 +1,19 @@
+import { menuDictSignal, useAppEntityStore } from '@/signals';
+import { getFieldOptionsConfig, getPopupContainer } from '@/utils';
 import { Form, Select, Space, Tag } from '@arco-design/web-react';
-import { memo, useEffect, useState } from 'react';
-import { STATUS_OPTIONS, STATUS_VALUES, DEFAULT_VALUE_TYPES } from '../../../constants';
-import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
+import type { DictData } from '@onebase/platform-center';
 import { nanoid } from 'nanoid';
+import { memo, useEffect, useState } from 'react';
+import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
+import { DEFAULT_VALUE_TYPES, STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import '../index.css';
 import type { XInputSelectMutipleConfig } from './schema';
-import { getPopupContainer, getFieldOptionsConfig } from '@/utils';
-import { useAppEntityStore } from '@/signals';
-import type { DictData } from '@onebase/platform-center';
 
 const XSelectMutiple = memo((props: XInputSelectMutipleConfig & { runtime?: boolean; detailMode?: boolean }) => {
-  const {
-    label,
-    dataField,
-    tooltip,
-    status,
-    defaultValueConfig,
-    verify,
-    layout,
-    runtime = true,
-    detailMode
-  } = props;
+  const { label, dataField, tooltip, status, defaultValueConfig, verify, layout, runtime = true, detailMode } = props;
   const { mainEntity, subEntities } = useAppEntityStore();
+
+  const { appDict } = menuDictSignal;
 
   const { form } = Form.useFormContext();
   const fieldId =
@@ -32,14 +24,14 @@ const XSelectMutiple = memo((props: XInputSelectMutipleConfig & { runtime?: bool
 
   useEffect(() => {
     if (dataField?.length) {
-      getOptions()
+      getOptions();
     }
-  }, [dataField])
+  }, [dataField]);
 
   const getOptions = async () => {
-    const newOptions = await getFieldOptionsConfig(dataField, mainEntity, subEntities);
-    setOptions(newOptions)
-  }
+    const newOptions = await getFieldOptionsConfig(dataField, mainEntity, subEntities, appDict.value);
+    setOptions(newOptions);
+  };
 
   return (
     <div className="formWrapper">
@@ -52,22 +44,25 @@ const XSelectMutiple = memo((props: XInputSelectMutipleConfig & { runtime?: bool
         layout={layout}
         tooltip={tooltip}
         labelCol={layout === 'horizontal' ? { span: 10 } : {}}
-        rules={[
-          { required: verify?.required, message: `${label.text}是必填项` },
-          { maxLength: verify?.maxChecked }
-        ]}
+        rules={[{ required: verify?.required, message: `${label.text}是必填项` }, { maxLength: verify?.maxChecked }]}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
           margin: 0,
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
-        initialValue={defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : undefined}
+        initialValue={
+          defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : undefined
+        }
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
           <Space wrap size={[4, 4]}>
-            {fieldValue && Array.isArray(fieldValue) && fieldValue.map((ele: any, index: number) => <Tag key={index} style={{ marginBottom: '0' }}>
-              {ele?.name || options.find((e => e.id === ele || e.id === ele?.id))?.label || '--'}
-            </Tag>)}
+            {fieldValue &&
+              Array.isArray(fieldValue) &&
+              fieldValue.map((ele: any, index: number) => (
+                <Tag key={index} style={{ marginBottom: '0' }}>
+                  {ele?.name || options.find((e) => e.id === ele || e.id === ele?.id)?.label || '--'}
+                </Tag>
+              ))}
           </Space>
         ) : (
           <Select
@@ -83,7 +78,11 @@ const XSelectMutiple = memo((props: XInputSelectMutipleConfig & { runtime?: bool
               pointerEvents: runtime ? 'unset' : 'none'
             }}
           >
-            {options.map((ele, index: number) => (<Select.Option key={index} value={ele.id}>{ele.label}</Select.Option>))}
+            {options.map((ele, index: number) => (
+              <Select.Option key={index} value={ele.id}>
+                {ele.label}
+              </Select.Option>
+            ))}
           </Select>
         )}
       </Form.Item>

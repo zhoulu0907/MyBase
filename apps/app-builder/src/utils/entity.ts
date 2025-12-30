@@ -1,8 +1,15 @@
-import { ENTITY_TYPE, getEntityListWithFields, getPageSetMetaData, type ChildEntity } from '@onebase/app';
+import {
+  ENTITY_TYPE,
+  getEntityListWithFields,
+  getPageSetMetaData,
+  type AppEntityField,
+  type ChildEntity
+} from '@onebase/app';
+import { getDictDataByTypes, type DictData } from '@onebase/platform-center';
 import { useAppEntityStore } from '@onebase/ui-kit';
 
 // 获取主表对应的主实体信息
-export const setMainMetaData = async (pageSetId: string) => {
+export const setMainMetaData = async (pageSetId: string, setDictData?: (dictMap: Map<string, DictData[]>) => void) => {
   console.log('载入页面集对应实体信息, 页面集ID: ', pageSetId);
   // 在普通函数中使用 getState() 而不是 Hook，避免 "Invalid hook call" 错误
   const { setMainEntity, /* setAppEntities, */ setSubEntities } = useAppEntityStore.getState();
@@ -49,26 +56,33 @@ export const setMainMetaData = async (pageSetId: string) => {
     }
 
     // TODO(mickey): 批量获取字典内容，移除组件中每次获取system/dict-data/simple-list-by-type?dictTypeId的接口
-    // // 收集主表字段中的 dictTypeId
-    // const mainDictTypeIds = entityWithChildren.fields
-    //   .filter((field: AppEntityField) => field.dictTypeId)
-    //   .map((field: AppEntityField) => field.dictTypeId!);
+    // 收集主表字段中的 dictTypeId
+    const mainDictTypeIds = entityWithChildren.fields
+      .filter((field: AppEntityField) => field.dictTypeId)
+      .map((field: AppEntityField) => field.dictTypeId!);
 
-    // // 收集子表字段中的 dictTypeId
-    // const childDictTypeIds: string[] = [];
-    // if (entityWithChildren.childEntities && entityWithChildren.childEntities.length > 0) {
-    //   entityWithChildren.childEntities.forEach((childEntity: ChildEntity) => {
-    //     if (childEntity.childFields) {
-    //       const childFieldDictTypeIds = childEntity.childFields
-    //         .filter((field: AppEntityField) => field.dictTypeId)
-    //         .map((field: AppEntityField) => field.dictTypeId!);
-    //       childDictTypeIds.push(...childFieldDictTypeIds);
-    //     }
-    //   });
-    // }
+    // 收集子表字段中的 dictTypeId
+    const childDictTypeIds: string[] = [];
+    if (entityWithChildren.childEntities && entityWithChildren.childEntities.length > 0) {
+      entityWithChildren.childEntities.forEach((childEntity: ChildEntity) => {
+        if (childEntity.childFields) {
+          const childFieldDictTypeIds = childEntity.childFields
+            .filter((field: AppEntityField) => field.dictTypeId)
+            .map((field: AppEntityField) => field.dictTypeId!);
+          childDictTypeIds.push(...childFieldDictTypeIds);
+        }
+      });
+    }
 
-    // // 合并并去重
-    // const dictTypeIds = Array.from(new Set([...mainDictTypeIds, ...childDictTypeIds]));
-    // console.log('dictTypeIds: ', dictTypeIds);
+    // 合并并去重
+    const dictTypeIds = Array.from(new Set([...mainDictTypeIds, ...childDictTypeIds]));
+    console.log('dictTypeIds: ', dictTypeIds);
+
+    const res = await getDictDataByTypes({ dictTypeIds: dictTypeIds });
+    console.log('xxxxxxxres: ', res);
+
+    if (setDictData) {
+      setDictData(res as any);
+    }
   }
 };

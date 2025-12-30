@@ -7,9 +7,9 @@ import activeListDesignSVG from '@/assets/images/list_design_active_icon.svg';
 import defaultListDesignSVG from '@/assets/images/list_design_default_icon.svg';
 import activePageSettingSVG from '@/assets/images/page_setting_active_icon.svg';
 import defaultPageSettingSVG from '@/assets/images/page_setting_default_icon.svg';
+import previewSVG from '@/assets/images/preview_icon.svg';
 import activeWorkbenchDesignSVG from '@/assets/images/workbench_design_active_icon.svg';
 import defaultWorkbenchDesignSVG from '@/assets/images/workbench_design_default_icon.svg';
-import previewSVG from '@/assets/images/preview_icon.svg';
 import DynamicIcon from '@/components/DynamicIcon';
 import { useI18n } from '@/hooks/useI18n';
 import RenameModal from '@/pages/CreateApp/pages/PageManager/components/Modals/RenameModal';
@@ -40,11 +40,11 @@ import { getHashQueryParam } from '@onebase/common';
 import {
   appIconMap,
   EDITOR_TYPES,
+  menuDictSignal,
   startLoadPageSet,
-  startSavePageSet,
   startLoadWorkbenchPageSet,
+  startSavePageSet,
   startSaveWorkbenchPageSet,
-  useAppEntityStore,
   useFlowPageEditorSignal,
   useFormEditorSignal,
   useListEditorSignal,
@@ -151,6 +151,8 @@ export default function EditorHeader() {
 
   const { workbenchComponents, wbComponentSchemas, clearWorkbenchComponents, clearWbComponentSchemas } =
     useWorkbenchEditorSignal;
+
+  const { batchSetAppDict } = menuDictSignal;
 
   // const { setMainEntity, /* setAppEntities, */ setSubEntities } = useAppEntityStore();
   const { curMenu, setCurMenu } = menuSignal;
@@ -358,7 +360,7 @@ export default function EditorHeader() {
       handleGetAppInfo(pageSetId);
       // 工作台设计页不获取主表数据
       if (activeTab !== EDITOR_TYPES.WORKBENCH_EDITOR) {
-        setMainMetaData(pageSetId);
+        setMainMetaData(pageSetId, batchSetAppDict);
       }
 
       loadPageSetInfo(pageSetId);
