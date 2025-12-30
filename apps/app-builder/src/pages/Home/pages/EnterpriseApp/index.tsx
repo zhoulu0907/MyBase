@@ -127,7 +127,7 @@ const EnterpriseAppPage: React.FC = () => {
 
     const newWindow = window.open('', '_blank');
     if (newWindow) {
-      const redirectURL = `${getRuntimeURL()}/#/onebase/runtime/?appId=${appId}&tenantId=${tenantId}`;
+      const redirectURL = `${getRuntimeURL()}/#/onebase/${tenantId}/${appId}/runtime/`;
       newWindow.location.href = `${getRuntimeURL()}/#/login?redirectURL=${redirectURL}`;
     }
   };

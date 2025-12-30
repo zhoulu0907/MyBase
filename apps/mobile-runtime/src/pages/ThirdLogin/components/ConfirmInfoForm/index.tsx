@@ -27,14 +27,12 @@ const ConfirmInfoForm: React.FC<IConfirmInfoProps> = ({ visible, appId, tenantId
   const tokenInfo = TokenManager.getTokenInfo();
   // 校验规则
   const rules = {
-    username: [
+    nickName: [
       {
         type: ValidatorType.Custom,
         validator: (val: string, callback: (error?: string) => void) => {
           if (!val) {
-            callback('请输入账号');
-          } else if (val.length < 3) {
-            callback('账号至少3个字符');
+            callback('请输入姓名');
           }
           callback();
         }
@@ -44,9 +42,6 @@ const ConfirmInfoForm: React.FC<IConfirmInfoProps> = ({ visible, appId, tenantId
       {
         type: ValidatorType.Custom,
         validator: (val: string, callback: (error?: string) => void) => {
-          if (val) {
-            callback('请输入账号');
-          }
           callback();
         }
       }
@@ -90,7 +85,7 @@ const ConfirmInfoForm: React.FC<IConfirmInfoProps> = ({ visible, appId, tenantId
           <div className={styles.popupDescribe}>检测到您的预留信息，确认身份即可登录</div>
         </div>
         <Form ref={formRef} layout="vertical" className={styles.popupForm}>
-          <Form.Item label="姓名" field="nickName" rules={rules.username}>
+          <Form.Item label="姓名" field="nickName" rules={rules.nickName}>
             <Input label={<IconUser />} placeholder="请输入姓名" />
           </Form.Item>
           <Form.Item label="邮箱(选填)" field="email" rules={rules.email}>
