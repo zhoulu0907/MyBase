@@ -47,8 +47,13 @@ export async function initInteractionRule(
         }
       });
 
-      const jexl = new Jexl();
-      const result = await jexl.eval(expression, fieldMap);
+      //   console.log('expression: ', expression);
+      //   console.log('fieldMap: ', fieldMap);
+      let result = false;
+      if (expression) {
+        const jexl = new Jexl();
+        result = await jexl.eval(expression, fieldMap);
+      }
 
       //   console.log('jexl eval result: ', result);
 
