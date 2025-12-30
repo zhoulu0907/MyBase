@@ -49,11 +49,6 @@ export const renderForm = ({}: FormRenderProps<FlowNodeJSON['data']>) => {
     setCurrentStep(current);
   };
 
-  //   useEffect(() => {
-  //     console.log(node.id);
-  //     console.log(triggerEditorSignal.nodeData.value[node.id]);
-  //   }, []);
-
   useEffect(() => {
     getConnectInstanceList();
   }, []);
