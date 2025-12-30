@@ -89,7 +89,6 @@ public class FormulaFunctionController {
 
     @GetMapping("/list-group-by-type")
     @Operation(summary = "根据类型获取函数分组列表")
-    @TenantIgnore
     public CommonResult<List<FunctionGroupRespVo>> getFunctionListGroupByType(@Valid FunctionListReqVO reqVO) {
         List<FunctionGroupRespVo> functionListGroupByType = functionService.getFunctionListGroupByType(
                 reqVO.setStatus(CommonStatusEnum.ENABLE.getStatus()));
