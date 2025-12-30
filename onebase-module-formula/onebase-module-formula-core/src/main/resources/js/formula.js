@@ -4774,6 +4774,11 @@ function _typeof(o) {
     return user;
   }
 
+  function GETUSERNAME(name) {
+    console.log(name);
+    return name;
+  }
+
   function GETDEPT(id,name) {
     console.log(id,name);
     var dept = {
@@ -8525,7 +8530,7 @@ function _typeof(o) {
       var year = today.getFullYear();
       var month = today.getMonth() + 1;
       var day = today.getDate();
-      return year + "/" + padZero(month) + "/" + padZero(day);
+      return year + "-" + padZero(month) + "-" + padZero(day);
     }
   }
   function WEEKDAY(serial_number, return_type) {
@@ -11360,6 +11365,7 @@ function _typeof(o) {
   exports.LCM = LCM;
   exports.LEFT = LEFT;
   exports.GETUSER = GETUSER;
+  exports.GETUSERNAME = GETUSERNAME;
   exports.GETDEPT = GETDEPT;
   exports.GETUPDEPT = GETUPDEPT;
   exports.GETROLE = GETROLE;

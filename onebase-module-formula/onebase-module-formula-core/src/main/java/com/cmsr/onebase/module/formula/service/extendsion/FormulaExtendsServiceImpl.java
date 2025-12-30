@@ -67,7 +67,12 @@ public class FormulaExtendsServiceImpl implements FormulaExtendsService {
             }
             return;
         }
-
+        if (formula.contains(GETUSERNAME)) {
+            if (user != null) {
+                parameters.put(NAME, user.getNickname());
+            }
+            return;
+        }
         // 检查公式是否包含部门相关函数
         if (formula.contains(GETDEPT)) {
             if (dept != null) {

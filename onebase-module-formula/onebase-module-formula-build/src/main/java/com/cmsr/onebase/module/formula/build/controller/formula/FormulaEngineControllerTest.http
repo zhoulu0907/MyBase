@@ -206,6 +206,16 @@ Content-Type: application/json
   "parameters": {}
 }
 
+### GETUSERNAME
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "GETUSERNAME(name)",
+  "parameters": {}
+}
+
 ### GETDEPT
 POST {{baseUrl}}/formula/engine/execute-formula
 Authorization: Bearer {{token}}
@@ -611,7 +621,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "HOUR('2025-10-27')" }
+{ "formula": "HOUR('2025-10-27 14:30:00')" }
 
 ### TODAY
 POST {{baseUrl}}/formula/engine/execute-formula
