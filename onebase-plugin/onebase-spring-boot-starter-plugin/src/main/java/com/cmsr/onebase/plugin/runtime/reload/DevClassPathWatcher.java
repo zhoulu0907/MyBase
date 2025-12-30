@@ -170,6 +170,10 @@ public class DevClassPathWatcher {
                 Thread.currentThread().interrupt();
                 log.info("DevClassPathWatcher 监听线程被中断");
                 break;
+            } catch (ClosedWatchServiceException e) {
+                // WatchService 已关闭，这是正常的关闭流程
+                log.debug("WatchService 已关闭，监听线程退出");
+                break;
             } catch (Exception e) {
                 log.error("处理文件变更事件时出错", e);
             }
