@@ -12,12 +12,13 @@ import {
   MenuType,
   runtimeListApplicationBPMMenu,
   type ApplicationMenu,
+  type AppEntityField,
   type ChildEntity,
   type ListApplicationMenuReq
 } from '@onebase/app';
 import { menuPermissionSignal, TokenManager, UserPermissionManager } from '@onebase/common';
-import { getPermissionInfo } from '@onebase/platform-center';
-import { useAppEntityStore } from '@onebase/ui-kit';
+import { getPermissionInfo, getDictDataByTypes } from '@onebase/platform-center';
+import { useAppEntityStore, menuDictSignal } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
@@ -50,6 +51,7 @@ const Runtime: React.FC = () => {
   useSignals();
   const { setMainEntity, setSubEntities } = useAppEntityStore();
   const { setMenuPermission } = menuPermissionSignal;
+  const { batchSetAppDict } = menuDictSignal;
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -145,6 +147,34 @@ const Runtime: React.FC = () => {
         });
       } else {
         setSubEntities({ entities: [] });
+      }
+      // 收集主表字段中的 dictTypeId
+      const mainDictTypeIds = entityWithChildren.fields
+        .filter((field: AppEntityField) => field.dictTypeId)
+        .map((field: AppEntityField) => field.dictTypeId!);
+
+      // 收集子表字段中的 dictTypeId
+      const childDictTypeIds: string[] = [];
+      if (entityWithChildren.childEntities && entityWithChildren.childEntities.length > 0) {
+        entityWithChildren.childEntities.forEach((childEntity: ChildEntity) => {
+          if (childEntity.childFields) {
+            const childFieldDictTypeIds = childEntity.childFields
+              .filter((field: AppEntityField) => field.dictTypeId)
+              .map((field: AppEntityField) => field.dictTypeId!);
+            childDictTypeIds.push(...childFieldDictTypeIds);
+          }
+        });
+      }
+
+      // 合并并去重
+      const dictTypeIds = Array.from(new Set([...mainDictTypeIds, ...childDictTypeIds]));
+      console.log('dictTypeIds: ', dictTypeIds);
+
+      const res = await getDictDataByTypes({ dictTypeIds: dictTypeIds });
+      console.log('dictDataList: ', res);
+
+      if (batchSetAppDict) {
+        batchSetAppDict(res as any);
       }
     }
   };
