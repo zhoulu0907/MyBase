@@ -3,7 +3,6 @@ import {
   FORM_COMPONENT_TYPES,
   LAYOUT_COMPONENT_TYPES,
   LIST_COMPONENT_TYPES,
-  // LayoutComp,
   SHOW_COMPONENT_TYPES,
   getComponentConfig,
   ALIGN_OPTIONS,
@@ -13,6 +12,7 @@ import {
 import { ListComp } from '@/components/Materials/Basic/ListComponents';
 import { FormComp } from '@/components/Materials/Basic/FormComponents';
 import { ShowComp } from '@/components/Materials/Basic/ShowComponents';
+import { LayoutComp } from '@/components/Materials/Basic/LayoutComponents';
 import { WorkbenchComp } from '@/components/Materials/Workbench';
 
 /**
@@ -45,6 +45,9 @@ interface PreviewRenderProps {
   editLoading?: boolean;
   /** signal传递 */
   useStoreSignals?: any;
+
+  /** form表单改动的值 */
+  formValues?: any;
 }
 
 const LIST_LAZY_COMPONENT: string[] = [
@@ -54,6 +57,7 @@ const LIST_LAZY_COMPONENT: string[] = [
   FORM_COMPONENT_TYPES.IMG_UPLOAD,
   FORM_COMPONENT_TYPES.SELECT_MUTIPLE,
   FORM_COMPONENT_TYPES.DATA_SELECT,
+  // FORM_COMPONENT_TYPES.INPUT_TEXT,
   // FORM_COMPONENT_TYPES.SUB_TABLE,
 ];
 
@@ -69,6 +73,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
   editLoading,
   lastOne,
   form,
+  formValues,
   useStoreSignals
 }) => {
 
@@ -80,306 +85,88 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
 
   componentConfig.align = ALIGN_VALUES[ALIGN_OPTIONS.RIGHT];
   componentConfig.width = '100%';
+
+  const extraProps = {
+    form,
+    formValues,
+    detailMode,
+  };
+
+  const ComponentRegistry: Record<string, { component: any, extraProps?: object }> = {
+    // 表单组件
+    [FORM_COMPONENT_TYPES.INPUT_TEXT]: { component: FormComp.XInputText, extraProps },
+    [FORM_COMPONENT_TYPES.INPUT_TEXTAREA]: { component: FormComp.XInputTextArea, extraProps },
+    [FORM_COMPONENT_TYPES.INPUT_EMAIL]: { component: FormComp.XInputEmail, extraProps },
+    [FORM_COMPONENT_TYPES.INPUT_PHONE]: { component: FormComp.XInputPhone, extraProps },
+    [FORM_COMPONENT_TYPES.INPUT_NUMBER]: { component: FormComp.XInputNumber, extraProps },
+    [FORM_COMPONENT_TYPES.DATE_PICKER]: { component: FormComp.XDatePicker, extraProps },
+    [FORM_COMPONENT_TYPES.DATE_RANGE_PICKER]: { component: FormComp.XDateRangePicker, extraProps },
+    [FORM_COMPONENT_TYPES.TIME_PICKER]: { component: FormComp.XTimePicker, extraProps },
+    [FORM_COMPONENT_TYPES.DATE_TIME_PICKER]: { component: FormComp.XDateTimePicker, extraProps },
+    [FORM_COMPONENT_TYPES.SWITCH]: { component: FormComp.XSwitch, extraProps },
+    [FORM_COMPONENT_TYPES.RADIO]: { component: FormComp.XRadio, extraProps },
+    [FORM_COMPONENT_TYPES.CHECKBOX]: { component: FormComp.XCheckbox, extraProps },
+    [FORM_COMPONENT_TYPES.SELECT_ONE]: { component: FormComp.XSelectOne, extraProps },
+    [FORM_COMPONENT_TYPES.SELECT_MUTIPLE]: { component: FormComp.XSelectMutiple, extraProps },
+    [FORM_COMPONENT_TYPES.USER_SELECT]: { component: FormComp.XUserSelect, extraProps },
+    [FORM_COMPONENT_TYPES.USER_MULTIPLE_SELECT]: { component: FormComp.XUserSelect, extraProps: { ...extraProps, isMultiple: true } },
+    [FORM_COMPONENT_TYPES.DEPT_SELECT]: { component: FormComp.XDeptSelect, extraProps: { ...extraProps, editPreview } },
+    [FORM_COMPONENT_TYPES.DEPT_MULTIPLE_SELECT]: { component: FormComp.XDeptSelect, extraProps: { ...extraProps, editPreview, isMultiple: true } },
+    [FORM_COMPONENT_TYPES.FILE_UPLOAD]: { component: FormComp.XFileUpload, extraProps },
+    [FORM_COMPONENT_TYPES.IMG_UPLOAD]: { component: FormComp.XImgUpload, extraProps },
+    [FORM_COMPONENT_TYPES.AUTO_CODE]: { component: FormComp.XAutoCode, extraProps },
+    // [FORM_COMPONENT_TYPES.RELATED_FORM]: { component: FormComp.XRelatedForm, extraProps },
+    [FORM_COMPONENT_TYPES.CAROUSEL_FORM]: { component: FormComp.XCarouselForm, extraProps },
+    [FORM_COMPONENT_TYPES.SUB_TABLE]: { component: FormComp.XSubTable, extraProps: { ...extraProps, editLoading, useStoreSignals, editPreview } },
+    [FORM_COMPONENT_TYPES.DATA_SELECT]: { component: FormComp.XDataSelect, extraProps: { ...extraProps, editPreview } },
+
+    //  布局组件
+    [LAYOUT_COMPONENT_TYPES.COLUMN_LAYOUT]: { component: LayoutComp.XPreviewColumnLayout, extraProps: { useStoreSignals, editPreview } },
+    [LAYOUT_COMPONENT_TYPES.TABS_LAYOUT]: { component: LayoutComp.XPreviewTabsLayout, extraProps: { useStoreSignals, editPreview } },
+    [LAYOUT_COMPONENT_TYPES.COLLAPSE_LAYOUT]: { component: LayoutComp.XPreviewCollapseLayout, extraProps: { useStoreSignals, editPreview } },
+
+    // 列表组件
+    [LIST_COMPONENT_TYPES.TABLE]: { component: ListComp.XLoadMore, extraProps: { manuClick: !lastOne, showFromPageData } },
+    // [LIST_COMPONENT_TYPES.CALENDAR]: { component: ListComp.XCalendar },
+    // [LIST_COMPONENT_TYPES.TIMELINE]: { component: ListComp.XTimeline },
+    [LIST_COMPONENT_TYPES.CAROUSEL]: { component: ListComp.XCarousel },
+    // [LIST_COMPONENT_TYPES.LIST]: { component: ListComp.XList },
+    // [LIST_COMPONENT_TYPES.COLLAPSE]: { component: ListComp.XCollapse },
+
+    //  展示组件
+    [SHOW_COMPONENT_TYPES.INFO_NOTICE]: { component: ShowComp.XInfoNotice },
+    [SHOW_COMPONENT_TYPES.IMAGE]: { component: ShowComp.XImage },
+    [SHOW_COMPONENT_TYPES.FILE]: { component: ShowComp.XFile },
+    [SHOW_COMPONENT_TYPES.TEXT]: { component: ShowComp.XText },
+    [SHOW_COMPONENT_TYPES.WEB_VIEW]: { component: ShowComp.XWebView },
+    [SHOW_COMPONENT_TYPES.DIVIDER]: { component: ShowComp.XDivider },
+    [SHOW_COMPONENT_TYPES.PLACEHOLDER]: { component: ShowComp.XPlaceholder },
+
+    //  工作台组件
+    [WORKBENCH_COMPONENT_TYPES.QUICK_ENTRY]: { component: WorkbenchComp.XQuickEntry },
+    [WORKBENCH_COMPONENT_TYPES.RICH_TEXT_WORKBENCH]: { component: WorkbenchComp.XRichTextEditorWorkbench },
+    [WORKBENCH_COMPONENT_TYPES.CAROUSEL_WORKBENCH]: { component: WorkbenchComp.XCarouselWorkbench },
+    [WORKBENCH_COMPONENT_TYPES.BUTTON_WORKBENCH]: { component: WorkbenchComp.XButtonWorkbench }
+  };
+
   // 渲染对应的组件
   const renderComponent = () => {
-    switch (cpType) {
-      case FORM_COMPONENT_TYPES.INPUT_TEXT:
-        return (
-          <FormComp.XInputText cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} detailMode={detailMode} form={form} />
-        );
-      case FORM_COMPONENT_TYPES.INPUT_TEXTAREA:
-        return (
-          <FormComp.XInputTextArea
-            cpName={cpId}
-            id={cpId}
-            {...componentConfig}
-            runtime={runtime}
-            detailMode={detailMode}
-            form={form}
-          />
-        );
-      case FORM_COMPONENT_TYPES.INPUT_EMAIL:
-        return (
-          <FormComp.XInputEmail
-            cpName={cpId}
-            id={cpId}
-            {...componentConfig}
-            runtime={runtime}
-            detailMode={detailMode}
-            form={form}
-          />
-        );
-      case FORM_COMPONENT_TYPES.INPUT_PHONE:
-        return (
-          <FormComp.XInputPhone
-            cpName={cpId}
-            id={cpId}
-            {...componentConfig}
-            runtime={runtime}
-            detailMode={detailMode}
-            form={form}
-          />
-        );
-      case FORM_COMPONENT_TYPES.INPUT_NUMBER:
-        return (
-          <FormComp.XInputNumber
-            cpName={cpId}
-            id={cpId}
-            {...componentConfig}
-            runtime={runtime}
-            detailMode={detailMode}
-            form={form}
-          />
-        );
-      case FORM_COMPONENT_TYPES.DATE_PICKER:
-        return (
-          <FormComp.XDatePicker
-            cpName={cpId}
-            id={cpId}
-            {...componentConfig}
-            runtime={runtime}
-            form={form}
-            detailMode={detailMode}
-          />
-        );
-      case FORM_COMPONENT_TYPES.DATE_RANGE_PICKER:
-        return (
-          <FormComp.XDateRangePicker
-            cpName={cpId}
-            id={cpId}
-            {...componentConfig}
-            runtime={runtime}
-            detailMode={detailMode}
-            form={form}
-          />
-        );
-      case FORM_COMPONENT_TYPES.TIME_PICKER:
-        return (
-          <FormComp.XTimePicker
-            cpName={cpId}
-            id={cpId}
-            {...componentConfig}
-            runtime={runtime}
-            detailMode={detailMode}
-            form={form}
-          />
-        );
-      case FORM_COMPONENT_TYPES.DATE_TIME_PICKER:
-        return (
-          <FormComp.XDateTimePicker
-            cpName={cpId}
-            id={cpId}
-            {...componentConfig}
-            runtime={runtime}
-            form={form}
-            detailMode={detailMode}
-          />
-        );
-      case FORM_COMPONENT_TYPES.SWITCH:
-        return (
-          <FormComp.XSwitch cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} detailMode={detailMode} form={form} />
-        );
-      case FORM_COMPONENT_TYPES.RADIO:
-        return (
-          <FormComp.XRadio cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} detailMode={detailMode} form={form} />
-        );
-      case FORM_COMPONENT_TYPES.CHECKBOX:
-        return (
-          <FormComp.XCheckbox cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} detailMode={detailMode} form={form} />
-        );
-      case FORM_COMPONENT_TYPES.SELECT_ONE:
-        return (
-          <FormComp.XSelectOne cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} detailMode={detailMode} form={form} />
-        );
-      case FORM_COMPONENT_TYPES.SELECT_MUTIPLE:
-        return (
-          <FormComp.XSelectMutiple
-            cpName={cpId}
-            id={cpId}
-            {...componentConfig}
-            runtime={runtime}
-            detailMode={detailMode}
-            form={form}
-          />
-        );
-      case FORM_COMPONENT_TYPES.USER_SELECT:
-        return (
-          <FormComp.XUserSelect
-            cpName={cpId}
-            id={cpId}
-            {...componentConfig}
-            runtime={runtime}
-            detailMode={detailMode}
-            form={form}
-          />
-        );
-      case FORM_COMPONENT_TYPES.USER_MULTIPLE_SELECT:
-        return (
-          <FormComp.XUserSelect
-            cpName={cpId}
-            id={cpId}
-            {...componentConfig}
-            runtime={runtime}
-            detailMode={detailMode}
-            form={form}
-            isMultiple
-          />
-        );
-      case FORM_COMPONENT_TYPES.DEPT_SELECT:
-        return (
-          <FormComp.XDeptSelect
-            cpName={cpId}
-            id={cpId}
-            {...componentConfig}
-            runtime={runtime}
-            detailMode={detailMode}
-            form={form}
-            editPreview={editPreview}
-          />
-        );
-      case FORM_COMPONENT_TYPES.DEPT_MULTIPLE_SELECT:
-        return (
-          <FormComp.XDeptSelect
-            cpName={cpId}
-            id={cpId}
-            {...componentConfig}
-            runtime={runtime}
-            detailMode={detailMode}
-            form={form}
-            isMultiple
-          />
-        );
-      case FORM_COMPONENT_TYPES.FILE_UPLOAD:
-        return (
-          <FormComp.XFileUpload
-            cpName={cpId}
-            id={cpId}
-            {...componentConfig}
-            runtime={runtime}
-            detailMode={detailMode}
-            form={form}
-          />
-        );
-      case FORM_COMPONENT_TYPES.IMG_UPLOAD:
-        return (
-          <FormComp.XImgUpload cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} detailMode={detailMode} form={form} />
-        );
-      case FORM_COMPONENT_TYPES.AUTO_CODE:
-        return (
-          <FormComp.XAutoCode cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} detailMode={detailMode} form={form} />
-        );
-      case FORM_COMPONENT_TYPES.RELATED_FORM:
-      // return (
-      //   <FormComp.XRelatedForm
-      //     cpName={cpId}
-      //     id={cpId}
-      //     {...componentConfig}
-      //     runtime={runtime}
-      //     detailMode={detailMode}
-      //   />
-      // );
-      case FORM_COMPONENT_TYPES.STATIC_TEXT:
-      // return (
-      //   <FormComp.XStaticText
-      //     cpName={cpId}
-      //     id={cpId}
-      //     {...componentConfig}
-      //     runtime={runtime}
-      //     detailMode={detailMode}
-      //   />
-      // );
-      case FORM_COMPONENT_TYPES.RICH_TEXT:
-      // return (
-      //   <FormComp.XRichText cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} detailMode={detailMode} />
-      // );
-      case FORM_COMPONENT_TYPES.CAROUSEL_FORM:
-        return (
-          <FormComp.XCarouselForm
-            cpName={cpId}
-            id={cpId}
-            {...componentConfig}
-            runtime={runtime}
-            detailMode={detailMode}
-          />
-        );
-      case FORM_COMPONENT_TYPES.SUB_TABLE:
-        return (
-          <FormComp.XSubTable cpName={cpId} id={cpId} {...componentConfig} editLoading={editLoading} runtime={runtime} detailMode={detailMode} form={form} useStoreSignals={useStoreSignals} editPreview={editPreview} />
-        );
-      case FORM_COMPONENT_TYPES.DATA_SELECT:
-      return (
-        <FormComp.XDataSelect
-          cpName={cpId}
-          id={cpId}
-          {...componentConfig}
-          runtime={runtime}
-          detailMode={detailMode}
-          form={form}
-          editPreview={editPreview}
-        />
-      );
+    const commonProps = {
+      id: cpId,
+      cpName: cpId,
+      runtime,
+      ...componentConfig,
+    };
 
-      //  布局组件
-      case LAYOUT_COMPONENT_TYPES.COLUMN_LAYOUT:
-      // return <LayoutComp.XPreviewColumnLayout {...componentConfig} cpName={cpId} id={cpId} />;
-      case LAYOUT_COMPONENT_TYPES.TABS_LAYOUT:
-      // return <LayoutComp.XPreviewTabsLayout {...componentConfig} cpName={cpId} id={cpId} />;
-      case LAYOUT_COMPONENT_TYPES.COLLAPSE_LAYOUT:
-        // return <LayoutComp.XPreviewCollapseLayout {...componentConfig} cpName={cpId} id={cpId} />;
-        return null
-      //  列表组件
-      case LIST_COMPONENT_TYPES.TABLE:
-        return <ListComp.XLoadMore cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} manuClick={!lastOne} showFromPageData={showFromPageData} />;
-      // return (
-      //   <ListComp.XTable
-      //     cpName={cpId}
-      //     id={cpId}
-      //     {...componentConfig}
-      //     runtime={runtime}
-      //     showFromPageData={showFromPageData}
-      //     refresh={refresh}
-      //   />
-      // );
-      case LIST_COMPONENT_TYPES.CALENDAR:
-      // return <ListComp.XCalendar cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
-      case LIST_COMPONENT_TYPES.TIMELINE:
-      // return <ListComp.XTimeline cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
-      case LIST_COMPONENT_TYPES.CAROUSEL:
-        return <ListComp.XCarousel cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
-      case LIST_COMPONENT_TYPES.LIST:
-      // return <ListComp.XList cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
-      case LIST_COMPONENT_TYPES.COLLAPSE:
-        // return <ListComp.XCollapse cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
-        return <div>todo: ListComp</div>
+    const item = ComponentRegistry[cpType];
 
-      //  展示组件
-      case SHOW_COMPONENT_TYPES.INFO_NOTICE:
-        return <ShowComp.XInfoNotice cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
-      case SHOW_COMPONENT_TYPES.IMAGE:
-        return <ShowComp.XImage cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
-      case SHOW_COMPONENT_TYPES.FILE:
-        return <ShowComp.XFile cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
-      case SHOW_COMPONENT_TYPES.TEXT:
-        return <ShowComp.XText cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
-      case SHOW_COMPONENT_TYPES.WEB_VIEW:
-        return <ShowComp.XWebView cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
-      case SHOW_COMPONENT_TYPES.DIVIDER:
-        return <ShowComp.XDivider cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
-      case SHOW_COMPONENT_TYPES.PLACEHOLDER:
-        return <ShowComp.XPlaceholder cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+    if (!item) return null;
 
-      //  工作台组件
-      case WORKBENCH_COMPONENT_TYPES.QUICK_ENTRY:
-        return <WorkbenchComp.XQuickEntry cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
-      case WORKBENCH_COMPONENT_TYPES.RICH_TEXT_WORKBENCH:
-        return <WorkbenchComp.XRichTextEditorWorkbench cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
-      case WORKBENCH_COMPONENT_TYPES.CAROUSEL_WORKBENCH:
-        return <WorkbenchComp.XCarouselWorkbench cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
-      case WORKBENCH_COMPONENT_TYPES.BUTTON_WORKBENCH:
-        return <WorkbenchComp.XButtonWorkbench cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
-      default:
-        return <div>未知组件类型: {cpType}</div>;
-    }
+    const { component: SpecificComponent, extraProps } = item;
+
+    return (
+      <SpecificComponent {...commonProps} {...extraProps} />
+    );
   };
 
   return <>{renderComponent()}</>;
