@@ -351,7 +351,7 @@ public class UserDataRepository extends BaseDataRepository<SystemUsersMapper, Ad
     public PageResult<AdminUserDO> selectPage(Integer status, DeptAndUsersApiReqVO pageReqVO) {
         QueryWrapper queryWrapper = buildUserQueryWrapper().eq(AdminUserDO.STATUS, status)
                 .like(NICKNAME, pageReqVO.getKeywords(), StringUtils.isNotBlank(pageReqVO.getKeywords()))
-                .notIn(AdminUserDO.ID, pageReqVO.getExcludeUserIds(), CollectionUtils.isNotEmpty(pageReqVO.getExcludeUserIds()))
+                .notIn(AdminUserDO.IDID, pageReqVO.getExcludeUserIds(), CollectionUtils.isNotEmpty(pageReqVO.getExcludeUserIds()))
                 .orderBy(AdminUserDO.ADMIN_TYPE, true)
                 .orderBy(BaseDO.CREATE_TIME, false);
         Page<AdminUserDO> pageResult = page(Page.of(pageReqVO.getPageNo(), pageReqVO.getPageSize()), queryWrapper);

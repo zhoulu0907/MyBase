@@ -36,6 +36,7 @@ import com.cmsr.onebase.module.system.enums.permission.RoleTypeEnum;
 import com.cmsr.onebase.module.system.enums.tenant.TenantCodeEnum;
 import com.cmsr.onebase.module.system.enums.tenant.TenantStatusEnum;
 import com.cmsr.onebase.module.system.enums.user.UserStatusEnum;
+import com.cmsr.onebase.module.system.framework.security.core.PwdEnHelper;
 import com.cmsr.onebase.module.system.service.corp.CorpService;
 import com.cmsr.onebase.module.system.service.dept.DeptService;
 import com.cmsr.onebase.module.system.service.license.LicenseService;
@@ -57,6 +58,7 @@ import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.DataRow;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -114,6 +116,9 @@ public class TenantServiceImpl implements TenantService {
 
     @Resource
     private DeptService deptService;
+
+    @Resource
+    private PwdEnHelper pwdEnHelper;
 
     @Override
     public List<Long> getTenantIdList() {
@@ -462,7 +467,7 @@ public class TenantServiceImpl implements TenantService {
                             }
                         }
                         userInsertReqVO.setAdminType(AdminTypeEnum.SYSTEM.getType());
-                        userInsertReqVO.setPassword(TENANT_ADMIN_PASSWORD);
+                        userInsertReqVO.setPassword(pwdEnHelper.encryptHexStr(TENANT_ADMIN_PASSWORD));
                         // 新增的都是空间管理员
                         userInsertReqVO.setUserType(UserTypeEnum.TENANT.getValue());
                         // 创建用户

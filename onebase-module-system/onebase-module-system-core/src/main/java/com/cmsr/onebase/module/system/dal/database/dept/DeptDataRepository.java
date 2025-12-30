@@ -187,7 +187,7 @@ public class DeptDataRepository extends BaseDataRepository<SystemDeptMapper, Dep
     public PageResult<DeptDO> selectPage(Integer status, DeptAndUsersApiReqVO pageReqVO) {
         QueryWrapper queryWrapper = buildDeptQueryWrapper().eq(DeptDO.STATUS, status)
                 .like(DeptDO.NAME, pageReqVO.getKeywords(), StringUtils.isNotBlank(pageReqVO.getKeywords()))
-                .notIn(DeptDO.ID, pageReqVO.getExcludeDeptIds(), CollectionUtils.isNotEmpty(pageReqVO.getExcludeDeptIds()))
+                .notIn(DeptDO.IDID, pageReqVO.getExcludeDeptIds(), CollectionUtils.isNotEmpty(pageReqVO.getExcludeDeptIds()))
                 .orderBy(BaseDO.CREATE_TIME, false);
         Page<DeptDO> pageResult = page(Page.of(pageReqVO.getPageNo(), pageReqVO.getPageSize()), queryWrapper);
         return new PageResult<DeptDO>(pageResult.getRecords(), pageResult.getTotalRow());
