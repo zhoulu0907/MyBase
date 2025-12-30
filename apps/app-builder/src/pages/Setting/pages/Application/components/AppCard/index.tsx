@@ -37,16 +37,11 @@ const AppCard: React.FC<AppCardProps> = ({
     } else if (model === PlatformTenantPublishMode.saas) {
       return 'SaaS模式';
     }
-    return '';
+    return '未知模式';
   };
 
   const getColor = (model?: string) => {
-    if (model === PlatformTenantPublishMode.inner) {
-      return 'cyan';
-    } else if (model === PlatformTenantPublishMode.saas) {
-      return 'blue';
-    }
-    return '';
+    return model === PlatformTenantPublishMode.inner ? 'cyan' : 'blue';
   };
 
   const getDevelopStatus = (developStatus?: string) => {
@@ -173,7 +168,7 @@ const AppCard: React.FC<AppCardProps> = ({
             <Tag color={getColor(item.publishModel)} className={styles.tag}>
               {getModel(item.publishModel)}
             </Tag>
-            {item.tags && item.tags.length > 0 && <Divider type="vertical" style={{margin: '0'}}/>}
+            {item.tags && item.tags.length > 0 && <Divider type="vertical" style={{ margin: '0' }} />}
             {item.tags?.map((tag: { id: string; tagName: string }) => (
               <Tag
                 key={tag.id}
