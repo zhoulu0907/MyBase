@@ -5,28 +5,27 @@ import { logout } from '@/utils/session';
 import { Button, Divider, Dropdown, Layout, Menu, Typography } from '@arco-design/web-react';
 import { IconApps, IconExport } from '@arco-design/web-react/icon';
 import { TokenManager, UserPermissionManager } from '@onebase/common';
-import { CodeType, getPermissionInfo, getTenantInfo, systemLogout } from '@onebase/platform-center';
+import { CodeType, getPermissionInfo, getTenantInfo, systemLogout, type TenantInfo } from '@onebase/platform-center';
 import { userPermissionSignal } from '@/store/singals/user_permission';
 import { getTenantInfoFromSession, setTenantInfoFromSession } from '@/utils';
 import React, { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import styles from './header.module.less';
 import TenantLogo from '@/components/TenantLogo';
-import { useTenantInfoStore } from '@/store/store_tenantInfo';
 
 const { Header } = Layout;
 
 interface HeaderProps {
   className?: string;
   avatarUrl: string;
+  tenantInfo: TenantInfo | null;
 }
 
-const AppHeader: React.FC<HeaderProps> = ({ className, avatarUrl }) => {
+const AppHeader: React.FC<HeaderProps> = ({ className, avatarUrl, tenantInfo }) => {
   const navigate = useNavigate();
   const { t } = useI18n();
 
   const { tenantId } = useParams();
-  const { curTenantInfo } = useTenantInfoStore();
 
   // 获取用户信息
   const tokenInfo = TokenManager.getTokenInfo();
@@ -83,7 +82,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className, avatarUrl }) => {
     <Header className={`${styles.header} ${className || ''}`}>
       <div className={styles.headerContent}>
         <div className={styles.logo} onClick={() => navigate(`/onebase/${tenantId}/home/enterprise-app`)}>
-          <TenantLogo tenantInfo={curTenantInfo} />
+          <TenantLogo tenantInfo={tenantInfo} />
         </div>
 
         <div className={styles.userInfo}>

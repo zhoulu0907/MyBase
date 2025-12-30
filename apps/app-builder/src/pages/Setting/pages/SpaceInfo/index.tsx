@@ -26,14 +26,12 @@ import {
 import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
 import Tags from './Tags';
-import { useTenantInfoStore } from '@/store/store_tenantInfo';
 
 const { Col, Row } = Grid;
 const { Text } = Typography;
 
-const SpaceInfo: React.FC = () => {
+const SpaceInfo: React.FC<{ onTenantInfoChange?: (info: PlatformTenantInfo) => void }> = ({ onTenantInfoChange }) => {
   const [form] = Form.useForm();
-  const { curTenantInfo, setTenantInfo } = useTenantInfoStore();
   const [spaceInfo, setSpaceInfo] = useState<PlatformTenantInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [logoUrl, setLogoUrl] = useState<string>();
@@ -178,10 +176,11 @@ const SpaceInfo: React.FC = () => {
                                 });
 
                                 if (res) {
-                                  setTenantInfo({
-                                    ...curTenantInfo,
+                                  const newInfo = {
+                                    ...(spaceInfo as PlatformTenantInfo),
                                     logoUrl: uploadImgUrl
-                                  });
+                                  };
+                                  onTenantInfoChange?.(newInfo);
                                 }
                               } catch (error) {
                                 console.error('更新信息失败:', error);
