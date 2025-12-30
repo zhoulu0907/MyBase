@@ -43,7 +43,7 @@ export const updateApplicationMenuVisibleMobile = (params: UpdateApplicationMenu
 };
 
 export const getApplicationMenuPermission = (menuId: string) => {
-  return runtimeAppService.post(`/menu/permission?menuId=${menuId}`);
+  return runtimeAppService.get(`/menu/permission?menuId=${menuId}`);
 };
 
 export const copyApplicationMenu = (params: CopyApplicationMenuReq) => {

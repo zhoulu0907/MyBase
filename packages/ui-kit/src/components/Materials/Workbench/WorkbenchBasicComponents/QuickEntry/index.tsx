@@ -1,13 +1,15 @@
 import { Tabs } from '@arco-design/web-react';
 import { IconRight } from '@arco-design/web-react/icon';
 import type { CSSProperties } from 'react';
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
+import { ReactSVG } from 'react-svg';
 import { WORKBENCH_STATUS_OPTIONS, WORKBENCH_STATUS_VALUES, QUICK_ENTRY_THEME_OPTIONS, QUICK_ENTRY_THEME_VALUES } from '../../core/constants';
 import type { QuickEntryTitleConfig, QuickEntryStyleConfig, QuickEntryGroupConfig } from '../../core/types';
+import { mobileMenuIcons } from '@/utils/menuIcons';
 import { type XQuickEntryConfig } from './schema';
 import { getDefaultIcon } from './getDefaultIcon';
 import { useJump } from '../../hooks/useJump';
-import './index.css';
+import styles from './index.module.css';
 
 // 主题三使用的颜色数组（对应 arcoPalette.primary 的颜色，添加 20% 透明度）
 const THEME_THREE_COLORS = ['#24b28f20', '#eb693a20', '#1979ff20', '#7e5aea20', '#009e9e20', '#ebbc0020'];
@@ -39,6 +41,12 @@ const XQuickEntry = memo((props: XQuickEntryConfig & { runtime?: boolean; detail
   const groups = finalGroupConfig?.groups ?? [];
   const enableGroup = Boolean(finalGroupConfig?.enableGroup);
 
+  // 扁平化所有菜单图标，用于查找
+  const allWebMenuIcons = useMemo(
+    () => mobileMenuIcons.map((ele) => ele.children).reduce((acc, current) => acc.concat(current), []),
+    []
+  );
+
   const handleClickEntry = (item: {
     linkAddress?: string;
     menuUuid?: string;
@@ -48,6 +56,41 @@ const XQuickEntry = memo((props: XQuickEntryConfig & { runtime?: boolean; detail
       linkAddress: item.linkAddress,
       runtime,
     })
+  };
+
+  // 图标渲染(使用移动端菜单图标库)
+  const getSvgIcon = (icon: string, index: number) => {
+    const bgColor = THEME_THREE_COLORS[index % THEME_THREE_COLORS.length].slice(0, 7);
+    const iconSrc =
+      allWebMenuIcons.find((ele) => ele.code === icon)?.icon ||
+      '';
+
+    // 如果找不到图标或图标为空，使用默认图标
+    if (!icon || !iconSrc) {
+      return (
+        <img
+          src={getDefaultIcon(index)}
+          alt=""
+          className={styles.quickEntryItemIconImage}
+        />
+      );
+    }
+
+    return (
+      <ReactSVG
+        className={styles.quickEntryItemIcon}
+        src={iconSrc}
+        style={{
+          backgroundColor: bgColor
+        }}
+        beforeInjection={(svg: SVGElement) => {
+          svg.querySelectorAll('*').forEach((el: Element) => el.removeAttribute('fill'));
+          svg.setAttribute('fill', 'white');
+          svg.setAttribute('width', '24px');
+          svg.setAttribute('height', '24px');
+        }}
+      />
+    );
   };
 
   const renderEntryItem = (
@@ -66,21 +109,21 @@ const XQuickEntry = memo((props: XQuickEntryConfig & { runtime?: boolean; detail
     const isThemeOne = theme === QUICK_ENTRY_THEME_VALUES[QUICK_ENTRY_THEME_OPTIONS.THEME_1];
     const isThemeTwo = theme === QUICK_ENTRY_THEME_VALUES[QUICK_ENTRY_THEME_OPTIONS.THEME_2];
     const isThemeThree = theme === QUICK_ENTRY_THEME_VALUES[QUICK_ENTRY_THEME_OPTIONS.THEME_3];
+
     // 样式一：图标 + 名称（垂直布局）
     if (isThemeOne) {
       return (
         <div
           key={`${item.entryName}-${item.group}-${index}`}
-          className="quick-entry-item quick-entry-item-theme-one"
+          className={`${styles.quickEntryItem} ${styles.quickEntryItemThemeOne}`}
           onClick={() => handleClickEntry(item)}
           style={{
             pointerEvents: runtime ? 'unset' : 'none',
             cursor: runtime && (item.linkAddress || item.menuUuid) ? 'pointer' : 'default'
           }}
         >
-
-          <img src={item.entryIcon || getDefaultIcon(index)} alt={item.entryName} className="quick-entry-item-icon-image" />
-          <div className="quick-entry-item-title">{item.entryName}</div>
+          {getSvgIcon(item.entryIcon || '', index)}
+          <div className={styles.quickEntryItemTitle}>{item.entryName}</div>
         </div>
       );
     }
@@ -93,8 +136,7 @@ const XQuickEntry = memo((props: XQuickEntryConfig & { runtime?: boolean; detail
     return (
       <div
         key={`${item.entryName}-${item.group}-${index}`}
-        className={`quick-entry-item ${isThemeTwo ? 'quick-entry-item-theme-two' : 'quick-entry-item-theme-three'
-          }`}
+        className={`${styles.quickEntryItem} ${isThemeTwo ? styles.quickEntryItemThemeTwo : styles.quickEntryItemThemeThree}`}
         onClick={() => handleClickEntry(item)}
         style={{
           pointerEvents: runtime ? 'unset' : 'none',
@@ -102,10 +144,10 @@ const XQuickEntry = memo((props: XQuickEntryConfig & { runtime?: boolean; detail
           backgroundColor
         }}
       >
-        <img src={item.entryIcon || getDefaultIcon(index)} alt={item.entryName} className="quick-entry-item-icon-image" />
-        <div className="quick-entry-item-meta">
-          <div className="quick-entry-item-title">{item.entryName}</div>
-          {item.entryDesc && <div className="quick-entry-item-desc">{item.entryDesc}</div>}
+        {getSvgIcon(item.entryIcon || '', index)}
+        <div className={styles.quickEntryItemMeta}>
+          <div className={styles.quickEntryItemTitle}>{item.entryName}</div>
+          {item.entryDesc && <div className={styles.quickEntryItemDesc}>{item.entryDesc}</div>}
         </div>
       </div>
     );
@@ -121,7 +163,7 @@ const XQuickEntry = memo((props: XQuickEntryConfig & { runtime?: boolean; detail
         <Tabs defaultActiveTab={groups[0]?.groupName || `group-0`}>
           {groups.map((group, groupIndex) => (
             <Tabs.TabPane key={group.groupName || `group-${groupIndex}`} title={group.groupName}>
-              <div className="quick-entry-items">
+              <div className={styles.quickEntryItems}>
                 {group.entries?.map((item) => {
                   const currentIndex = globalIndex++;
                   return renderEntryItem(item, currentIndex);
@@ -133,7 +175,7 @@ const XQuickEntry = memo((props: XQuickEntryConfig & { runtime?: boolean; detail
       );
     } else {
       return (
-        <div className="quick-entry-items">
+        <div className={styles.quickEntryItems}>
           {allItems.map((item, index) => renderEntryItem(item, index))}
         </div>
       );
@@ -167,14 +209,27 @@ const XQuickEntry = memo((props: XQuickEntryConfig & { runtime?: boolean; detail
     return null;
   }
 
+  const themeClassMap: Record<string, string> = {
+    'theme-one': styles.quickEntryThemeOne,
+    'theme-two': styles.quickEntryThemeTwo,
+    'theme-three': styles.quickEntryThemeThree
+  };
+
   return (
-    <div className={`quick-entry ${themeClass ? `quick-entry-theme-${themeClass}` : ''}`} style={containerStyle}>
+    <div
+      className={`${styles.quickEntry} ${themeClass ? themeClassMap[themeClass] || '' : ''}`}
+      style={containerStyle}
+    >
       {(finalTitleConfig?.showTitle || finalTitleConfig?.showMore) && (
-        <div className="quick-entry-header">
+        <div className={styles.quickEntryHeader}>
           {finalTitleConfig?.showTitle && (
-            <span className="quick-entry-header-title">{finalTitleConfig?.titleName || '快捷入口'}</span>
+            <span className={styles.quickEntryHeaderTitle}>{finalTitleConfig?.titleName || '快捷入口'}</span>
           )}
-          {finalTitleConfig?.showMore && <span className="quick-entry-more">更多 <IconRight /></span>}
+          {finalTitleConfig?.showMore && (
+            <span className={styles.quickEntryMore}>
+              更多 <IconRight />
+            </span>
+          )}
         </div>
       )}
       {renderContent()}

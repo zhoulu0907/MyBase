@@ -33,13 +33,13 @@ const QuickEntryConfig = () => {
                 className={styles.collapseConfigs}
               >
                 <CollapseItem header="样式库" name="style" contentStyle={PanelContentStyle}>
-                  {styleConfigItem && renderEditItem(styleConfigItem.item, styleConfigItem.index)}
+                  {styleConfigItem && renderEditItem(styleConfigItem)}
                 </CollapseItem>
                 <CollapseItem header="标题配置" name="title" contentStyle={PanelContentStyle}>
-                  {titleConfigItem && renderEditItem(titleConfigItem.item, titleConfigItem.index)}
+                  {titleConfigItem && renderEditItem(titleConfigItem)}
                 </CollapseItem>
                 <CollapseItem header="入口配置" name="entry" contentStyle={PanelContentStyle}>
-                  {entryConfigItem && renderEditItem(entryConfigItem.item, entryConfigItem.index)}
+                  {entryConfigItem && renderEditItem(entryConfigItem)}
                 </CollapseItem>
               </Collapse>
             </div>

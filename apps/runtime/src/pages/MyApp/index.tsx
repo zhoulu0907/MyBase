@@ -143,7 +143,7 @@ const MyAppPage: React.FC = () => {
     setCurAppId(appId);
     const tenantId = TokenManager.getTenantInfo()?.tenantId || '';
 
-    const redirectURL = `${getRuntimeURL()}/#/onebase/${appId}/${tenantId}/runtime`;
+    const redirectURL = `${getRuntimeURL()}/#/onebase/${tenantId}/${appId}/runtime`;
     console.log('redirectURL: ', redirectURL);
 
     window.open(redirectURL, '_blank');

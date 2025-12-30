@@ -99,7 +99,7 @@ export const AuthorizedApp:React.FC<IAuthorizedAppProps> = ({
             ),
         },
         {
-            title: '授权启效时间',
+            title: '授权起效时间',
             dataIndex: 'authorizationTime',
             width: 200,
             render: (timeValue: string) => (

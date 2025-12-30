@@ -13,6 +13,7 @@ import {
   PageType,
   queryFlowExecForm,
   TRIGGER_EVENTS,
+  updateDraft,
   type AppEntityField,
   type DetailMethodV2Params,
   type GetPageSetIdReq,
@@ -293,7 +294,14 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
           console.log(req);
 
           if (isDraft) {
-            res = await createDraft(tableName, menuId, req);
+            if (draftId) {
+              res = await updateDraft(tableName, menuId, {
+                ...req,
+                id: draftId
+              });
+            } else {
+              res = await createDraft(tableName, menuId, req);
+            }
           } else {
             res = await dataMethodCreateV2(tableName, menuId, req, draftId);
           }
@@ -427,9 +435,9 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
   return (
     <div className={`${styles.previewPage} runtime-preview-formpage`}>
       <div className={styles.content}>
-        {pageSetType === PageType.WORKBENCH ? (
-          <WorkbenchRuntime pageSetId={pageSetId} runtime={runtime} />
-        ) : (
+        {pageSetType === PageType.WORKBENCH && <WorkbenchRuntime pageSetId={pageSetId} runtime={runtime} />}
+
+        {pageType === EDITOR_TYPES.LIST_EDITOR && (
           <ListRuntime
             pageSetType={pageSetType}
             pageSetId={pageSetId}

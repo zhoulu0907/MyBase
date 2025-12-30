@@ -36,14 +36,12 @@ const RegisterForm: React.FC<IRegisterProps> = ({ visible, appId, mobile, tenant
   const [showComfirmPassword, setShowComfirmPassword] = useState(false);
   // 校验规则
   const rules = {
-    username: [
+    nickName: [
       {
         type: ValidatorType.Custom,
         validator: (val: string, callback: (error?: string) => void) => {
           if (!val) {
-            callback('请输入账号');
-          } else if (val.length < 3) {
-            callback('账号至少3个字符');
+            callback('请输入姓名');
           }
           callback();
         }
@@ -53,9 +51,6 @@ const RegisterForm: React.FC<IRegisterProps> = ({ visible, appId, mobile, tenant
       {
         type: ValidatorType.Custom,
         validator: (val: string, callback: (error?: string) => void) => {
-          if (val) {
-            callback('请输入账号');
-          }
           callback();
         }
       }
@@ -65,7 +60,7 @@ const RegisterForm: React.FC<IRegisterProps> = ({ visible, appId, mobile, tenant
         type: ValidatorType.Custom,
         validator: (val: string, callback: (error?: string) => void) => {
           if (!val) {
-            callback('请输入账号');
+            callback('请输入密码');
           } else if (val.length < 6) {
             callback('密码长度不能少于6位');
           } else if (val.length > 20) {
@@ -166,7 +161,7 @@ const RegisterForm: React.FC<IRegisterProps> = ({ visible, appId, mobile, tenant
           <div className={styles.popupTitle}>请补充用户信息</div>
         </div>
         <Form ref={formRef} layout="vertical" className={styles.popupForm}>
-          <Form.Item label="姓名" field="nickName" rules={rules.username}>
+          <Form.Item label="姓名" field="nickName" rules={rules.nickName}>
             <Input label={<IconUser />} placeholder="请输入姓名" />
           </Form.Item>
           <Form.Item label="邮箱(选填)" field="email" rules={rules.email}>

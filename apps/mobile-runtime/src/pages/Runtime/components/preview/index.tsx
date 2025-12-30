@@ -120,6 +120,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({
   const [editTargetId, setEditTargetId] = useState('');
   const [editLoading, setEditLoading] = useState(false);
 
+  const [formValues, setFormValues] = useState({}); // form 实时改动后的值集合
+
   // 当前时间戳
   const [detailMode, setDetailMode] = useState(true);
   const [userSelectData, setUserSelectData] = useState<any>([]); // 人员选择数据
@@ -568,8 +570,17 @@ const PreviewContainer: React.FC<PreviewProps> = ({
     return res;
   };
 
+  const handleValuesChange = (_: any, allValues: any) => {
+    setFormValues(allValues);
+  };
+
   const curFormPage =
     curPage.value?.pages?.find((ele: any) => ele.pageType === CATEGORY_TYPE.LIST)?.pageName || '标题_列表';
+  const curWorkbenchPage =
+    curPage.value?.pages?.find((ele: any) => ele.pageType === CATEGORY_TYPE.WORKBENCH)?.pageName || '标题_工作台';
+
+  const navTitle =
+    pageType === EDITOR_TYPES.WORKBENCH_EDITOR ? curWorkbenchPage : curFormPage.slice(0, curFormPage.length - 3);
 
   return (
     <div className={styles.previewPage}>
@@ -577,9 +588,13 @@ const PreviewContainer: React.FC<PreviewProps> = ({
         {curFormPage.slice(0, curFormPage.length - 3)}
       </Sticky> */}
       <CustomNav
-        title={curFormPage.slice(0, curFormPage.length - 3)}
+        title={navTitle}
         style={{ background: '#fff' }}
-        toBack={pageType === EDITOR_TYPES.LIST_EDITOR ? undefined : () => setPageType(EDITOR_TYPES.LIST_EDITOR)}
+        toBack={
+          pageType === EDITOR_TYPES.LIST_EDITOR || pageType === EDITOR_TYPES.WORKBENCH_EDITOR
+            ? undefined
+            : () => setPageType(EDITOR_TYPES.LIST_EDITOR)
+        }
       />
 
       <div className={styles.content}>
@@ -637,7 +652,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({
           ))}
 
         {pageSetType !== PageType.WORKBENCH && pageType == EDITOR_TYPES.FORM_EDITOR && (
-          <Form layout="inline" form={form} className={styles.formWrapper}>
+          <Form layout="inline" form={form} className={styles.formWrapper} onValuesChange={handleValuesChange}>
             {splitByDivider(useEditorSignalMap.get(editPageViewId.value)?.components.value).map((block, index) => {
               if (block.type === SHOW_COMPONENT_TYPES.DIVIDER) {
                 return (
@@ -674,6 +689,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({
                             editLoading={editLoading}
                             form={form}
                             runtime={true}
+                            formValues={formValues}
                             showFromPageData={() => {
                               setPageType(EDITOR_TYPES.FORM_EDITOR);
                             }}

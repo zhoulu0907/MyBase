@@ -28,7 +28,7 @@ const WorkbenchAttributes: FC<WorkbenchAttributesProps> = ({ renderPanels }) => 
         <Form autoComplete="off" layout="vertical">
           {renderPanels
             ? renderPanels({ ...ctx, cpID })
-            : editData.map((item, index) => <div key={`${item.key}-${index}`}>{renderEditItem(item, index)}</div>)}
+            : editData.map((item, index) => <div key={`${item.key}-${index}`}>{renderEditItem({ item, index })}</div>)}
 
           <ComponentIdFormItem cpID={cpID} />
         </Form>

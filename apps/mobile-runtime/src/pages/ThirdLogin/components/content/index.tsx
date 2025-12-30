@@ -9,6 +9,7 @@ import { getApplicationLeast, type Application } from '@onebase/app';
 import {
   DynamicIcon,
   getHashQueryParam,
+  getHashTenantIdAndAppId,
   getOrCreateDeviceInfo,
   getPublicKey,
   sm2Encrypt,
@@ -123,25 +124,7 @@ const LoginContent: React.FC = () => {
 
   // 从 window.location.hash 中解析 redirectURL，再从 redirectURL 解析 appId 和 tenantId
   useEffect(() => {
-    const rawHash = window.location.hash;
-    const prefix = '#/third/login?redirectURL=';
-    if (rawHash.startsWith(prefix)) {
-      const redirectURL = rawHash.replace(prefix, '');
-      let aid = getHashQueryParam('appId', redirectURL) || '';
-      let tid = getHashQueryParam('tenantId', redirectURL) || '';
-      if (!aid) {
-        const pathRedirect = (redirectURL.split('#/')[1] || '').split('/');
-        aid = pathRedirect[1] || aid || '';
-        tid = pathRedirect[2] || tid || '';
-      }
-      setAppId(aid);
-      setTenantId(tid);
-    } else {
-      const aid = getHashQueryParam('appId') || '';
-      const tid = getHashQueryParam('tenantId') || '';
-      setAppId(aid);
-      setTenantId(tid);
-    }
+    getHashTenantIdAndAppId(setTenantId, setAppId);
   }, []);
 
   useEffect(() => {
@@ -309,17 +292,16 @@ const LoginContent: React.FC = () => {
   const goPage = () => {
     const redirectURL = getHashQueryParam('redirectURL');
     if (redirectURL) {
-      debugger;
       if (!appId) {
         //企业登录
         navigate(`/onebase/${tenantId}/runtime-home`);
       } else {
         //saas模式 或者inner模式
-        navigate(`/onebase/${appId}/${tenantId}/runtime-home`);
+        navigate(`/onebase/${tenantId}/${appId}/runtime-home`);
       }
     } else {
       // 跳转到首页
-      navigate(`/onebase/${appId}/${tenantId}/runtime-home/`);
+      navigate(`/onebase/${tenantId}/${appId}/runtime-home/`);
     }
   };
 
