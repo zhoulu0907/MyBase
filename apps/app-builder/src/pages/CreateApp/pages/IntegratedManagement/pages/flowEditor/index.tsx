@@ -3,7 +3,6 @@ import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { triggerNodeOutputSignal } from '@/store/singals/trigger_node_output';
 import { Button, Message } from '@arco-design/web-react';
 import { ProcessStatus, updateFlowMgmtDefinition } from '@onebase/app';
-import { refreshFlowMgmt } from '@onebase/app/src/services';
 import React from 'react';
 import TriggerEditor from '../../triggerEditor';
 import styles from './index.module.less';
@@ -73,19 +72,9 @@ const FlowEditorPage: React.FC = () => {
     }
   };
 
-  const debug = async () => {
-    const res = await refreshFlowMgmt(curAppId);
-    if (res) {
-      Message.success(`刷新成功`);
-    }
-  };
-
   return (
     <div className={styles.flowEditorPage}>
       <div className={styles.header}>
-        {/* <Button type="dashed" onClick={() => debug()}>
-          调试（临时）未来会被干掉
-        </Button> */}
         <Button type="primary" onClick={() => handleSaveAndRelease('save')}>
           保存
         </Button>
