@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.formula.dal.dataflexdo;
 
+import com.cmsr.onebase.framework.orm.entity.BaseEntity;
 import com.cmsr.onebase.framework.orm.entity.BaseTenantEntity;
 import com.mybatisflex.annotation.Table;
 import jakarta.persistence.Column;
@@ -7,7 +8,7 @@ import lombok.Data;
 
 @Data
 @Table(value = FunctionDO.TABLE_NAME)
-public class FunctionDO extends BaseTenantEntity {
+public class FunctionDO extends BaseEntity {
 
     public static final String TABLE_NAME = "formula_function";
     // 字段名常量

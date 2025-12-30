@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.app.build.vo.auth;
+package com.cmsr.onebase.module.app.core.vo.auth;
 
 import com.cmsr.onebase.framework.common.pojo.PageParam;
 import io.swagger.v3.oas.annotations.media.Schema;

@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.app.build.controller.auth;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.app.build.service.auth.AppAuthRoleService;
+import com.cmsr.onebase.module.app.build.service.auth.BuildAppAuthRoleService;
 import com.cmsr.onebase.module.app.build.vo.auth.*;
 import com.cmsr.onebase.module.system.api.dept.dto.DeptAndUsersRespDTO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,14 +25,14 @@ import java.util.List;
 public class AppAuthRoleController {
 
     @Resource
-    private AppAuthRoleService authRoleService;
+    private BuildAppAuthRoleService authRoleService;
 
     /**
      * 获取角色列表
      */
     @GetMapping("/list")
     @Operation(summary = "获取角色列表")
-    public CommonResult<List<AuthRoleListRespVO>> getRoleList(
+    public CommonResult<List<com.cmsr.onebase.module.app.core.vo.auth.AuthRoleListRespVO>> getRoleList(
             @RequestParam(value = "applicationId") Long applicationId) {
         return CommonResult.success(authRoleService.getRoleList(applicationId));
     }
@@ -40,14 +40,14 @@ public class AppAuthRoleController {
 
     @GetMapping("/page-role-members")
     @Operation(summary = "获取角色成员列表")
-    public CommonResult<PageResult<AuthRoleMembersPageRespVO>> pageRoleUsers(@Validated AuthRoleMembersPageReqVO reqVO) {
+    public CommonResult<PageResult<com.cmsr.onebase.module.app.core.vo.auth.AuthRoleMembersPageRespVO>> pageRoleUsers(@Validated com.cmsr.onebase.module.app.core.vo.auth.AuthRoleMembersPageReqVO reqVO) {
         return CommonResult.success(authRoleService.pageRoleMembers(reqVO));
     }
 
 
     @GetMapping("/list-dept-users")
     @Operation(summary = "获取部门用户列表")
-    public CommonResult<DeptAndUsersRespDTO> listDeptUsers(@Validated AuthRoleDeptAndUsersReqVO reqVO) {
+    public CommonResult<DeptAndUsersRespDTO> listDeptUsers(@Validated com.cmsr.onebase.module.app.core.vo.auth.AuthRoleDeptAndUsersReqVO reqVO) {
         return CommonResult.success(authRoleService.listDeptUsers(reqVO));
     }
 
@@ -79,7 +79,7 @@ public class AppAuthRoleController {
      */
     @PostMapping("/add-user")
     @Operation(summary = "角色添加用户")
-    public CommonResult<Boolean> addRoleUser(@Valid @RequestBody AuthRoleAddUserReqVO reqVO) {
+    public CommonResult<Boolean> addRoleUser(@Valid @RequestBody com.cmsr.onebase.module.app.core.vo.auth.AuthRoleAddUserReqVO reqVO) {
         authRoleService.addRoleUser(reqVO);
         return CommonResult.success(true);
     }
@@ -106,7 +106,7 @@ public class AppAuthRoleController {
      */
     @PostMapping("/add-dept")
     @Operation(summary = "角色添加部门")
-    public CommonResult<Boolean> addRoleDept(@Valid @RequestBody AuthRoleAddDeptReqVO reqVO) {
+    public CommonResult<Boolean> addRoleDept(@Valid @RequestBody com.cmsr.onebase.module.app.core.vo.auth.AuthRoleAddDeptReqVO reqVO) {
         authRoleService.addRoleDept(reqVO);
         return CommonResult.success(true);
     }
@@ -127,7 +127,7 @@ public class AppAuthRoleController {
 
     @PostMapping("/delete-member")
     @Operation(summary = "角色删除成员")
-    public CommonResult<Boolean> deleteRoleDept(@Valid @RequestBody AuthRoleDeleteMemberReqVO reqVO) {
+    public CommonResult<Boolean> deleteRoleDept(@Valid @RequestBody com.cmsr.onebase.module.app.core.vo.auth.AuthRoleDeleteMemberReqVO reqVO) {
         authRoleService.deleteRoleMember(reqVO);
         return CommonResult.success(true);
     }
