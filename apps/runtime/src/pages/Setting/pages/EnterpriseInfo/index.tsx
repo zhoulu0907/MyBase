@@ -251,7 +251,7 @@ const SpaceInfo: React.FC = () => {
               {/* 统计信息 */}
               <div className={styles.statsSection}>
                 <div className={styles.statCard}>
-                  <div className={styles.statLabel}>用户人数(个)</div>
+                  <div className={styles.statLabel}>用户人数(人)</div>
                   <div className={styles.statValue}>{enterpriseInfo.userCount || 0}</div>
                 </div>
                 <div className={styles.statCard}>
