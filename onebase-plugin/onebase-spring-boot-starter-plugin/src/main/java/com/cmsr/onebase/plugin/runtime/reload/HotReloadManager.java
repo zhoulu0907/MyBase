@@ -108,7 +108,7 @@ public class HotReloadManager {
      * @param className 完整类名
      */
     public synchronized void unloadExtension(String className) {
-        log.debug("卸载扩展点: {}", className);
+        log.info("卸载扩展点: {}", className);
 
         try {
             // 1. 卸载 HTTP 路由（使用新的 PluginControllerRegistrar）
@@ -121,7 +121,7 @@ public class HotReloadManager {
                         .getBeanFactory();
                 if (beanFactory instanceof DefaultListableBeanFactory) {
                     ((DefaultListableBeanFactory) beanFactory).removeBeanDefinition(beanName);
-                    log.debug("已移除 Spring Bean: {}", beanName);
+                    log.info("已移除 Spring Bean: {}", beanName);
                 }
                 beanNameMap.remove(className);
             }
@@ -131,7 +131,7 @@ public class HotReloadManager {
             if (oldClassLoader != null) {
                 try {
                     oldClassLoader.close();
-                    log.debug("已关闭旧的 ClassLoader: {}", className);
+                    log.info("已关闭旧的 ClassLoader: {}", className);
                 } catch (Exception e) {
                     log.warn("关闭 ClassLoader 失败: {}", className, e);
                 }
@@ -161,7 +161,7 @@ public class HotReloadManager {
                 })
                 .toArray(URL[]::new);
 
-        log.debug("创建 ClassLoader，包含 {} 个路径: {}", urls.length, classesRoots);
+        log.info("创建 ClassLoader，包含 {} 个路径: {}", urls.length, classesRoots);
 
         // Child-First ClassLoader：只对能在 URL 中找到的类使用子加载器
         return new URLClassLoader(urls, getClass().getClassLoader()) {
