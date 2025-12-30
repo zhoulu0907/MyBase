@@ -14,6 +14,7 @@ import { IconDown, IconEmpty, IconPlus, IconSearch } from '@arco-design/web-reac
 import {
   copyApplicationMenu,
   createApplicationMenu,
+  DashBoardCreateType,
   deleteApplicationMenu,
   getEntityListByApp,
   getPageSetId,
@@ -38,13 +39,9 @@ import {
   type UpdateApplicationMenuOrderReq,
   type UpdateApplicationMenuVisibleReq
 } from '@onebase/app';
-import {
-  getDashboardIdFromTemplateApi,
-  updateApplicationMenuVisibleMobile,
-  updateApplicationMenuVisiblePC
-} from '@onebase/app/src/services';
+import { updateApplicationMenuVisibleMobile, updateApplicationMenuVisiblePC } from '@onebase/app/src/services';
 import { getDashBoardURL, pagesRuntimeSignal } from '@onebase/common';
-import { EDITOR_TYPES } from '@onebase/ui-kit';
+import { EDITOR_TYPES, menuDictSignal } from '@onebase/ui-kit';
 import { currentEditorSignal } from '@onebase/ui-kit/src/signals/current_editor';
 import { useSignals } from '@preact/signals-react/runtime';
 import { debounce } from 'lodash-es';
@@ -59,7 +56,6 @@ import MyMenuItem from './components/MyMenuItem';
 import TaskCenterPage from './components/TaskCenter/TaskCenterPage';
 import TaskCenterSide from './components/TaskCenter/taskTreeSide';
 import styles from './index.module.less';
-import { DashBoardCreateType } from '@onebase/app';
 
 const TreeNode = Tree.Node;
 const MenuItem = Menu.Item;
@@ -137,6 +133,7 @@ const PageManagerPage: FC = () => {
   const cutTreeItemWidth = 25;
 
   const { clearEditMode } = currentEditorSignal;
+  const { batchSetAppDict } = menuDictSignal;
 
   const findFirstPage: any = (nodes: ApplicationMenu[]) =>
     nodes.reduce((found, node) => {
@@ -195,7 +192,7 @@ const PageManagerPage: FC = () => {
         menuId: curMenu.value?.id
       };
       const pageSetId = await getPageSetId(req);
-      setMainMetaData(pageSetId);
+      setMainMetaData(pageSetId, batchSetAppDict);
     };
 
     if (curMenu.value?.id && curMenu.value?.menuType === MenuType.PAGE) {
@@ -437,19 +434,19 @@ const PageManagerPage: FC = () => {
   //页面设计新建大屏创建
   const handleScreenCreate = async (id?: string, screenMethod?: string) => {
     console.log('创建大屏参数 id、screenMethod：', id, screenMethod);
-    
+
     if (screenMethod === DashBoardCreateType.DashboardTemplate && !id) {
       // 通过模板创建，模板ID不可为空
       Message.error('请选择一个模板');
       return;
-    }else if(screenMethod === DashBoardCreateType.DashboardLink && !id){
+    } else if (screenMethod === DashBoardCreateType.DashboardLink && !id) {
       // 关联大屏创建，关联大屏ID不可为空
       Message.error('请选择一个大屏');
       return;
     }
     // 产品需求：当新建大屏且选择了模板时，更新为通过模板创建。
-    if(screenMethod === DashBoardCreateType.DashboardNew && id){
-        screenMethod = DashBoardCreateType.DashboardTemplate;
+    if (screenMethod === DashBoardCreateType.DashboardNew && id) {
+      screenMethod = DashBoardCreateType.DashboardTemplate;
     }
 
     createForm.validate(async (error) => {
