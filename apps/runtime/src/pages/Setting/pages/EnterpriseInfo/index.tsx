@@ -157,9 +157,10 @@ const SpaceInfo: React.FC = () => {
             <div className={styles.baseInfo}>
               <div className={styles.infoCardPrimaryLeft}>
                 <div className={styles.avatarSection}>
-                  <Tooltip content="修改Logo">
+                  <Tooltip content="修改Logo" disabled={!hasPermission(ACTIONS.UPDATE)}>
                     {
                       <Upload
+                        disabled={!hasPermission(ACTIONS.UPDATE)}
                         limit={1}
                         accept="image/*"
                         listType="picture-card"
