@@ -45,10 +45,11 @@ const XDateTimePicker = memo((props: XDateTimePickerConfig & { runtime?: boolean
     }
   ];
 
-
   // 时间范围判断
   const dateSelectRange = () => {
-    let earliestDate, latestDate;
+    const initStart = new Date(1900, 0, 1).getTime();
+    const initEnd = new Date(2099, 11, 31).getTime();
+    let validDate = { startTs: initStart, endTs: initEnd };
     // 今日零点
     const today = dayjs(new Date()).format('YYYY-MM-DD') + ' 00:00:00';
     const todatTime = new Date(today).getTime();
@@ -58,13 +59,13 @@ const XDateTimePicker = memo((props: XDateTimePickerConfig & { runtime?: boolean
       // 静态值
       if (dateRange.earliestType === DATE_EXTREME_TYPE.STATIC && dateRange.earliestStaticValue) {
         const earliestTime = new Date(dateRange.earliestStaticValue).getTime()
-        earliestDate = earliestTime
+        validDate.startTs = earliestTime
       }
 
       // 动态值  DATE_DYNAMIC_VALUE  DATE_DYNAMIC_TYPE
       if (dateRange.earliestType === DATE_EXTREME_TYPE.DYNAMIC && dateRange.earliestDynamicValue) {
         const earliestTime = todatTime + (DATE_DYNAMIC_VALUE[dateRange.earliestDynamicValue as keyof typeof DATE_DYNAMIC_VALUE] || 0) * 24 * 3600 * 1000
-        earliestDate = earliestTime
+        validDate.startTs = earliestTime
       }
 
       // 变量
@@ -72,7 +73,7 @@ const XDateTimePicker = memo((props: XDateTimePickerConfig & { runtime?: boolean
         const earliestVariableValue = form?.getFieldValue(dateRange.earliestVariableValue);
         if (earliestVariableValue) {
           const earliestTime = new Date(earliestVariableValue).getTime()
-          earliestDate = earliestTime
+          validDate.startTs = earliestTime
         }
       }
     }
@@ -82,13 +83,13 @@ const XDateTimePicker = memo((props: XDateTimePickerConfig & { runtime?: boolean
       // 静态值
       if (dateRange.latestType === DATE_EXTREME_TYPE.STATIC && dateRange.latestStaticValue) {
         const latestTime = new Date(dateRange.latestStaticValue).getTime()
-        latestDate = latestTime
+        validDate.endTs = latestTime
       }
 
       // 动态值  DATE_DYNAMIC_VALUE  DATE_DYNAMIC_TYPE
       if (dateRange.latestType === DATE_EXTREME_TYPE.DYNAMIC && dateRange.latestDynamicValue) {
         const latestTime = todatTime + (DATE_DYNAMIC_VALUE[dateRange.latestDynamicValue as keyof typeof DATE_DYNAMIC_VALUE] || 0) * 24 * 3600 * 1000
-        latestDate = latestTime
+        validDate.endTs = latestTime
       }
 
       // 变量
@@ -96,14 +97,13 @@ const XDateTimePicker = memo((props: XDateTimePickerConfig & { runtime?: boolean
         const latestVariableValue = form?.getFieldValue(dateRange.latestVariableValue)
         if (latestVariableValue) {
           const latestTime = new Date(latestVariableValue).getTime()
-          latestDate = latestTime
+          validDate.endTs = latestTime
         }
       }
     }
 
     return {
-      earliestDate: earliestDate || new Date(1900, 0, 1).getTime(),
-      latestDate: latestDate || new Date(2099, 11, 31).getTime(),
+      ...validDate
     }
   };
 
@@ -129,8 +129,8 @@ const XDateTimePicker = memo((props: XDateTimePickerConfig & { runtime?: boolean
           maskClosable
           // typeArr={['year', 'month', 'date', 'hour', 'minute']}
           mode='datetime'
-          minTs={dateSelectRange().earliestDate}
-          maxTs={dateSelectRange().latestDate}
+          minTs={dateSelectRange().startTs}
+          maxTs={dateSelectRange().endTs}
           formatter={(value, type) => {
             const map = {
               year: '年',

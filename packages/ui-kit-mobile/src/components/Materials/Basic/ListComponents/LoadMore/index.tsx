@@ -123,7 +123,6 @@ const XLoadMore = memo(
                 (field: AppEntityField) => field.fieldName === column.dataIndex
               );
               const result = item[dataFieldInfo?.fieldName] || '';
-              console.log('resultresult', item, result)
               if (!result) return '-';
               if (Array.isArray(result)) {
                 if (result.length === 0) return;
