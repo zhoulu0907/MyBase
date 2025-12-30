@@ -48,6 +48,8 @@ import java.util.List;
 @EnableConfigurationProperties(PluginProperties.class)
 public class PluginRuntimeAutoConfiguration {
 
+    public static final String DEVELOPMENT = "development";
+    public static final String DEPLOYMENT = "deployment";
     private final PluginProperties properties;
     private Path absolutePath;
 
@@ -85,9 +87,9 @@ public class PluginRuntimeAutoConfiguration {
         // 映射 onebase.plugin.mode 到 PF4J RuntimeMode
         // dev → development, staging/prod → deployment
         if (mode.isDev()) {
-            System.setProperty("pf4j.mode", "development");
+            System.setProperty("pf4j.mode", DEVELOPMENT);
         } else {
-            System.setProperty("pf4j.mode", "deployment");
+            System.setProperty("pf4j.mode", DEPLOYMENT);
         }
 
         initLogs(properties);// 打印启动日志
@@ -118,7 +120,7 @@ public class PluginRuntimeAutoConfiguration {
         PluginMode mode = properties.getPluginMode();
 
         // 确定实际的 pf4j.mode 映射值
-        String pf4jMode = mode.isDev() ? "development" : "deployment";
+        String pf4jMode = mode.isDev() ? DEVELOPMENT : DEPLOYMENT;
 
         // DEV模式配置的classpath
         List<String> devClassPaths = properties.getDevClassPaths();
