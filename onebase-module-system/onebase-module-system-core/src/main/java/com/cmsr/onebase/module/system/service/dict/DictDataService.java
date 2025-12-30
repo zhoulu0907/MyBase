@@ -136,14 +136,14 @@ public interface DictDataService {
     Map<String, List<DictDataDO>> getDictDataMapByTypes(Collection<String> dictTypes);
 
     /**
-     * 根据字典类型和字典类型ID批量获取字典数据列表（按dictType分组）
+     * 根据字典类型和字典类型ID批量获取字典数据列表（按dictTypeId分组）
      * <p>
      * 封装了所有业务逻辑：将dictTypeIds转换为dictTypes，然后批量查询并分组返回
      *
      * @param dictTypes   字典类型集合
      * @param dictTypeIds 字典类型ID集合
-     * @return 按dictType分组的字典数据 Map
+     * @return 按dictTypeId分组的字典数据 Map
      */
-    Map<String, List<DictDataDO>> getDictDataMapByTypesAndTypeIds(Collection<String> dictTypes, Collection<Long> dictTypeIds);
+    Map<Long, List<DictDataDO>> getDictDataMapByTypesAndTypeIds(Collection<String> dictTypes, Collection<Long> dictTypeIds);
 
 }
