@@ -6,7 +6,7 @@ import { memo } from 'react';
 import { COMPONENT_MAP, FORM_COMPONENT_TYPES, FormComp, getComponentSchema } from 'src/components/Materials';
 import { useFormEditorSignal } from 'src/signals/page_editor';
 import { v4 as uuidv4 } from 'uuid';
-import { DEFAULT_VALUE_TYPES, STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
+import { DEFAULT_VALUE_TYPES, STATUS_OPTIONS, STATUS_VALUES,SELECT_OPTIONS_BPM } from '../../../constants';
 import { PageType } from '@onebase/app';
 import './index.css';
 
@@ -35,14 +35,7 @@ const TableSearch = memo((props: TableSearchConfig) => {
     const copyMainEntity = { ...mainEntity };
 
     if(pageSetType === PageType.BPM){
-      const bpmOther:any = [
-        { displayName: '流程标题', fieldName: 'bpm_title', fieldType: 'TEXT', },
-        { displayName: '发起人', fieldName: 'bpm_initiator_id', fieldType: 'USER' },
-        { displayName: '发起时间', fieldName: 'bpm_submit_time', fieldType: 'DATETIME' },
-        { displayName: '流程状态', fieldName: 'bpm_status', fieldType: 'SELECT' },
-        { displayName: '当前节点', fieldName: 'bpm_current_node', fieldType: 'SELECT' }
-      ];
-      copyMainEntity.fields = [...copyMainEntity.fields, ...bpmOther];
+      copyMainEntity.fields = [...copyMainEntity.fields, ...SELECT_OPTIONS_BPM];
     }
     
     const fieldType = copyMainEntity.fields.find((field) => field.fieldName === item.value)?.fieldType;

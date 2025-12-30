@@ -8,7 +8,13 @@ import {
   menuSignal,
   PageType
 } from '@onebase/app';
-import { CONFIG_TYPES, ENTITY_FIELD_TYPE, getPopupContainer, useAppEntityStore } from '@onebase/ui-kit';
+import {
+  CONFIG_TYPES,
+  ENTITY_FIELD_TYPE,
+  getPopupContainer,
+  useAppEntityStore,
+  SELECT_OPTIONS_BPM
+} from '@onebase/ui-kit';
 import React, { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import styles from '../../index.module.less';
@@ -22,14 +28,6 @@ export interface DynamicTableConfigProps {
   configs: any;
   id: string;
 }
-
-const selectOptions = [
-  { value: 'bpm_title', displayName: '流程标题', fieldName: 'bpm_title', fieldType: 'TEXT' },
-  { value: 'bpm_initiator_id', displayName: '发起人', fieldName: 'bpm_initiator_id', fieldType: 'TEXT' },
-  { value: 'bpm_submit_time', displayName: '发起时间', fieldName: 'bpm_submit_time', fieldType: 'TEXT' },
-  { value: 'bpm_status', displayName: '流程状态', fieldName: 'bpm_status', fieldType: 'TEXT' },
-  { value: 'bpm_current_node', displayName: '当前节点', fieldName: 'bpm_current_node', fieldType: 'TEXT' }
-];
 
 // 暂时不能在表格展示的数据类型
 export const hiddenFieldTypes = [
@@ -178,7 +176,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
 
     const newFieldList = res
       .filter((item: MetadataEntityField) => !FilterEntityFields.includes(item.fieldName))
-      .concat(curMenu?.value?.pagesetType === PageType.BPM ? selectOptions : []);
+      .concat(curMenu?.value?.pagesetType === PageType.BPM ? SELECT_OPTIONS_BPM : []);
 
     const newFieldListNotSystemField = res.filter(
       (item: MetadataEntityField) => item.isSystemField !== 1 && !item.disabled
@@ -201,7 +199,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
     }));
 
     if (curMenu?.value?.pagesetType === PageType.BPM) {
-      const bpmColumn = selectOptions.map((item) => {
+      const bpmColumn = SELECT_OPTIONS_BPM.map((item:any) => {
         return {
           title: item.displayName,
           dataIndex: item.fieldName,
