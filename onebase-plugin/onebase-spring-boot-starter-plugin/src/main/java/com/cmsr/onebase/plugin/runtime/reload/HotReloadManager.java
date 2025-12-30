@@ -145,9 +145,8 @@ public class HotReloadManager {
     /**
      * 创建新的 ClassLoader
      * <p>
-     * 包含所有 devClassPaths,支持多插件目录的热重载。
-     * 使用父类加载器优先加载 com.cmsr.onebase.plugin.api 包下的类，
-     * 避免 ClassLoader 隔离导致的类型检查失败。
+     * 使用 Child-First（子类优先）策略加载插件类，确保热重载时能加载到新的类文件。
+     * 策略：只有在 URL 中能找到的类才使用 Child-First，其他所有类都委托给父加载器。
      * </p>
      */
     private URLClassLoader createClassLoader() throws Exception {
@@ -164,16 +163,32 @@ public class HotReloadManager {
 
         log.debug("创建 ClassLoader，包含 {} 个路径: {}", urls.length, classesRoots);
 
-        // 使用自定义 ClassLoader，对 plugin API 包使用父类加载器优先
+        // Child-First ClassLoader：只对能在 URL 中找到的类使用子加载器
         return new URLClassLoader(urls, getClass().getClassLoader()) {
             @Override
             public Class<?> loadClass(String name) throws ClassNotFoundException {
-                // 对于插件 API 包（HttpHandler 等接口），强制使用父类加载器
-                if (name.startsWith("com.cmsr.onebase.plugin.api.")) {
-                    return getParent().loadClass(name);
+                synchronized (getClassLoadingLock(name)) {
+                    // 1. 检查是否已加载
+                    Class<?> loadedClass = findLoadedClass(name);
+                    if (loadedClass != null) {
+                        return loadedClass;
+                    }
+
+                    // 2. 插件 API 接口必须由父加载器加载，否则 instanceof 检查会失败
+                    if (name.startsWith("com.cmsr.onebase.plugin.api.")) {
+                        return getParent().loadClass(name);
+                    }
+
+                    // 3. Child-First：先尝试在自己的 URL 中查找
+                    // findClass() 只在 URL（target/classes）中查找，
+                    // 如果找不到会抛出 ClassNotFoundException
+                    try {
+                        return findClass(name);
+                    } catch (ClassNotFoundException e) {
+                        // 4. 自己找不到，委托给父加载器
+                        return getParent().loadClass(name);
+                    }
                 }
-                // 其他类使用默认的双亲委派机制
-                return super.loadClass(name);
             }
         };
     }

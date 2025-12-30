@@ -90,11 +90,17 @@
     <build>
         <plugins>
             <!-- Spring Boot Maven Plugin: 打包为可执行 fat JAR -->
+            <!-- 使用 classifier 保留原始 JAR，同时生成可执行 JAR -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
                     <mainClass>com.cmsr.onebase.plugin.simulator.PluginHostSimulatorApplication</mainClass>
+                    <!-- 使用 classifier 保留原始 JAR，供其他模块依赖使用 -->
+                    <!-- 打包后会生成: -->
+                    <!--   onebase-plugin-host-simulator-xxx.jar (原始 JAR，可被其他模块依赖) -->
+                    <!--   onebase-plugin-host-simulator-xxx-exec.jar (可执行 fat JAR) -->
+                    <classifier>exec</classifier>
                 </configuration>
                 <executions>
                     <execution>

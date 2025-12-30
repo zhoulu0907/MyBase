@@ -106,4 +106,38 @@
             </plugin>
         </plugins>
     </build>
+
+    <!-- ==================== 本地调试支持 ==================== -->
+    <profiles>
+        <!-- 本地调试模式：mvn spring-boot:run -Pdebug-local -->
+        <profile>
+            <id>debug-local</id>
+            <!-- 在此 profile 激活时，添加模拟器作为项目依赖 -->
+            <dependencies>
+                <dependency>
+                    <groupId>com.cmsr.onebase</groupId>
+                    <artifactId>onebase-plugin-host-simulator</artifactId>
+                    <version>${revision}</version>
+                </dependency>
+            </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-maven-plugin</artifactId>
+                        <configuration>
+                            <!-- 使用模拟器的主类启动 -->
+                            <mainClass>com.cmsr.onebase.plugin.simulator.PluginHostSimulatorApplication</mainClass>
+                            <jvmArguments>
+                                <!-- 开启 DEV 模式 -->
+                                -Donebase.plugin.mode=dev
+                                <!-- 指定插件 classpath 为当前项目的编译输出目录 -->
+                                -Donebase.plugin.dev-class-paths=${project.build.outputDirectory}
+                            </jvmArguments>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
