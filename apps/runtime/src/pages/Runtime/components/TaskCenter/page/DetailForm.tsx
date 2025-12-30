@@ -279,7 +279,11 @@ const PreviewContainer = forwardRef<any, PreviewProps>((props: PreviewProps, ref
                 <div
                   key={cp.id}
                   style={{
-                    width: getComponentWidth(newCompents && newCompents[cp.id], cp.type)
+                    width: `calc(${getComponentWidth(
+                      useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id],
+                      cp.type
+                    )} - 8px)`,
+                    margin: '4px'
                   }}
                 >
                   <PreviewRender
