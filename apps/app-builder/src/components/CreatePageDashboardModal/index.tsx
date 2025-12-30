@@ -183,8 +183,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
       setDashboardTemplateData(newData);
       setTotal(res.total);
 
-      setSelectedTemplateId(''); 
-
+      setSelectedTemplateId('');
     },
     [dashboardPagination, selectedTemplateId]
   );
@@ -202,15 +201,14 @@ const CreateModal: React.FC<CreateModalProps> = ({
     } else {
       getDashboardList();
     }
-
   };
   const handleDashboardChange = () => {
-    // console.log('换一批 handleDashboardChange:', dashboardPagination);
-    /**
-     * TODO 换一批
-     * params: dashboardMethod == dashboardNew + change
-     */
-    const newCurrent = dashboardPagination.current + 1 > 3 ? 1 : dashboardPagination.current + 1;
+    let newCurrent = 1;
+    if (dashboardTemplateData.length < 4) {
+      newCurrent = 1;
+    } else {
+      newCurrent = dashboardPagination.current + 1;
+    }
     const newPagination = { ...dashboardPagination, current: newCurrent };
     setDashboardPagination(newPagination);
     // 立即调用获取数据，避免滞后
@@ -232,14 +230,12 @@ const CreateModal: React.FC<CreateModalProps> = ({
   };
 
   const handleChangeTemplateTab = (value: string = '') => {
-
     setDashboardTemplateTab(value);
     // 立即调用获取数据，避免滞后
     getDashboardTemplateList(dashboardMethod, value);
   };
 
   const handleChangePagination = (current: number) => {
-
     const newPagination = { ...dashboardPagination, current };
     setDashboardPagination(newPagination);
     // 立即调用获取数据，避免滞后

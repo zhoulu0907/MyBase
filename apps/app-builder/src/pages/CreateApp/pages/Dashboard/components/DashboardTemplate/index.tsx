@@ -95,7 +95,7 @@ const ScreenTemplate: FC = () => {
   //修改弹框确定按钮
   const handleEditOk = async () => {
     await editForm.validate();
-    upLoadDashboardTemplate({
+    await upLoadDashboardTemplate({
       id: editid,
       templateName: editForm.getFieldValue('templateName'),
       remarks: editForm.getFieldValue('remarks')
@@ -217,10 +217,10 @@ const ScreenTemplate: FC = () => {
         onCancel={handleEditCancel}
       >
         <Form form={editForm} autoComplete="off">
-          <FormItem label="大屏名称" field="templateName" rules={[{ required: true, message: '请输入大屏名称' }]}>
+          <FormItem label="模板名称" field="templateName" rules={[{ required: true, message: '请输入大屏名称' }]}>
             <Input placeholder="请输入名称,不超过20个字符" />
           </FormItem>
-          <FormItem label="大屏描述" field="remarks" rules={[{ required: true, message: '请输入大屏描述' }]}>
+          <FormItem label="模板描述" field="remarks" rules={[{ required: true, message: '请输入大屏描述' }]}>
             <Input placeholder="请输入描述信息" />
           </FormItem>
         </Form>
