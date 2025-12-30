@@ -175,7 +175,10 @@ public class DeptDataRepository extends BaseDataRepository<SystemDeptMapper, Dep
     }
 
     public List<DeptDO> findDeptListByNameAndDeptType(String keywords, String deptType) {
-        return null;
+        return list(query()
+                .like(DeptDO.NAME, keywords, keywords != null)
+                .eq(DeptDO.DEPT_TYPE, deptType, deptType != null)
+                .orderBy(DeptDO.SORT, true));
     }
 
 
