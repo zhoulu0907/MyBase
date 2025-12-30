@@ -45,6 +45,7 @@ public class RuntimeApplicationContextHeaderFilter extends OncePerRequestFilter 
     private RequestMatcher systemRequestMatcher = new AntPathRequestMatcher("/runtime/system/**");
     private RequestMatcher corpRequestMatcher = new AntPathRequestMatcher("/runtime/corp/**");
     //todo 这里要删除
+    private RequestMatcher appRoleRequestMatcher = new AntPathRequestMatcher("/runtime/app/auth-role/**");
     private RequestMatcher appGetRequestMatcher = new AntPathRequestMatcher("/runtime/app/application/get");
     private RequestMatcher appLeastRequestMatcher = new AntPathRequestMatcher("/runtime/app/application/least");
 
@@ -58,6 +59,7 @@ public class RuntimeApplicationContextHeaderFilter extends OncePerRequestFilter 
     private boolean doFilter(HttpServletRequest request) {
         return systemRequestMatcher.matches(request)
                 || corpRequestMatcher.matches(request)
+                || appRoleRequestMatcher.matches(request)
                 || appGetRequestMatcher.matches(request)
                 || appLeastRequestMatcher.matches(request)
                 || RemoteCallAuthenticationFilter.flowRemoteCallRequestMatcher.matches(request);

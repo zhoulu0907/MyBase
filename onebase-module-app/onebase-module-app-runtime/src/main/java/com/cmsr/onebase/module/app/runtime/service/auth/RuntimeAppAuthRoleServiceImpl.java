@@ -2,9 +2,7 @@ package com.cmsr.onebase.module.app.runtime.service.auth;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleDeptRepository;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleRepository;
-import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleUserRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthRoleDO;
 import com.cmsr.onebase.module.app.core.enums.auth.AuthRoleTypeEnum;
 import com.cmsr.onebase.module.app.core.provider.auth.AppAuthRoleServiceProvider;
@@ -12,7 +10,6 @@ import com.cmsr.onebase.module.app.core.vo.auth.AuthRoleDeptAndUsersReqVO;
 import com.cmsr.onebase.module.app.core.vo.auth.AuthRoleListRespVO;
 import com.cmsr.onebase.module.app.core.vo.auth.AuthRoleMembersPageReqVO;
 import com.cmsr.onebase.module.app.core.vo.auth.AuthRoleMembersPageRespVO;
-import com.cmsr.onebase.module.system.api.dept.DeptApi;
 import com.cmsr.onebase.module.system.api.dept.dto.DeptAndUsersRespDTO;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -33,16 +30,6 @@ public class RuntimeAppAuthRoleServiceImpl implements RuntimeAppAuthRoleService 
 
     @Autowired
     private AppAuthRoleRepository appAuthRoleRepository;
-
-    @Autowired
-    private AppAuthRoleUserRepository appAuthRoleUserRepository;
-
-    @Autowired
-    private AppAuthRoleDeptRepository appAuthRoleDeptRepository;
-
-
-    @Autowired
-    private DeptApi deptApi;
 
     @Autowired
     private AppAuthRoleServiceProvider appAuthRoleServiceProvider;
