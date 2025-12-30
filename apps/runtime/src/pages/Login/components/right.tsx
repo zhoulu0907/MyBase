@@ -6,6 +6,7 @@ import { IconLock, IconMobile, IconUser } from '@arco-design/web-react/icon';
 import { getApplicationLeast } from '@onebase/app';
 import {
   getHashQueryParam,
+  getHashTenantIdAndAppId,
   getOrCreateDeviceInfo,
   getPublicKey,
   PUBLISH_MODULE,
@@ -61,20 +62,7 @@ const Right: React.FC = () => {
 
   useEffect(() => {
     // 从 window.location.hash 中解析 redirectURL，再从 redirectURL 解析 appId 和 tenantId
-    const rawHash = window.location.hash;
-    const prefix = '#/login?redirectURL=';
-    if (rawHash.startsWith(prefix)) {
-      const redirectURL = rawHash.replace(prefix, '');
-      let aid = getHashQueryParam('appId', redirectURL) || '';
-      let tid = getHashQueryParam('tenantId', redirectURL) || '';
-      setAppId(aid);
-      setTenantId(tid);
-    } else {
-      let aid = getHashQueryParam('appId') || '';
-      let tid = getHashQueryParam('tenantId') || '';
-      setAppId(aid);
-      setTenantId(tid);
-    }
+    getHashTenantIdAndAppId(setTenantId, setAppId);
   }, []);
 
   // 使用记住我hook
@@ -244,11 +232,11 @@ const Right: React.FC = () => {
           } else {
             //saas模式 或者inner模式
             // navigate(`/onebase/runtime/?appId=${appId}&tenantId=${tenantId}`);
-            navigate(`/onebase/${appId}/${tenantId}/runtime`);
+            navigate(`/onebase/${tenantId}/${appId}/runtime`);
           }
         } else {
           // 跳转到首页
-          navigate(`/onebase/runtime/?appId=${appId}`);
+          navigate(`/onebase/${tenantId}/runtime/`);
         }
 
         return;

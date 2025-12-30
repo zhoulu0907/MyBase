@@ -21,10 +21,10 @@ function AppContent() {
       <Route path="/login" element={<Login />} />
       <Route path='/third/login' element={<ThirdLogin />} />
 
-      <Route path="/onebase/runtime/" element={<Runtime />} />
+      {/* <Route path="/onebase/runtime/" element={<Runtime />} /> */}
 
-      <Route path="/onebase/:appId/:tenantId/runtime/" element={<Runtime />} />
-      <Route path="/onebase/:appId/runtime/" element={<Runtime />} />
+      <Route path="/onebase/:tenantId/:appId/runtime/" element={<Runtime />} />
+      {/* <Route path="/onebase/:appId/runtime/" element={<Runtime />} /> */}
 
       {/* <Route path="/onebase/runtime/:appId/" element={<Runtime />} />
       <Route path="/onebase/runtime/:appId/:tenantId" element={<Runtime />} /> */}

@@ -32,10 +32,10 @@ const ConfirmInfoForm:React.FC<IConfirmInfoProps> = ({ appId, tenantId, onGoBack
       if (response) {
         const redirectURL = getHashQueryParam('redirectURL');
         if (redirectURL) {
-          navigate(`/onebase/${appId}/${tenantId}/runtime`);
+          navigate(`/onebase/${tenantId}/${appId}/runtime`);
         } else {
           // 跳转到首页
-          navigate(`/onebase/runtime/?appId=${appId}`);
+          navigate(`/onebase/${tenantId}/runtime/`);
         }
       }
     } catch (error) {

@@ -27,7 +27,7 @@ const LoginPermission: React.FC<ILoginPermissionProps> = ({ appId }) => {
   const [imageUrl, setImageUrl] = useState<string>('');
   const tenantId = TokenManager.getTenantInfo()?.tenantId || '';
   const [loginConfigData, setLoginConfigData] = useState<loginPermissionRes[] | null>(null);
-  const redirectURL = `${getRuntimeURL()}/#/onebase/runtime/?appId=${appId}&tenantId=${tenantId}`;
+  const redirectURL = `${getRuntimeURL()}/#/onebase/${tenantId}/${appId}/runtime/`;
   const hrefPC = `${getRuntimeURL()}/#/third/login?redirectURL=${redirectURL}`;
   const hrefMobile = `${getRuntimeMobileURL()}/#/third/login?redirectURL=${redirectURL}`;
 
