@@ -27,7 +27,7 @@ REM
 REM --spring.profiles.active=dev: 激活 dev 配置文件
 
 java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 ^
-     -jar target\onebase-plugin-host-simulator-1.0.0-SNAPSHOT.jar ^
+     -jar target\onebase-plugin-host-simulator-1.0.0-SNAPSHOT-exec.jar ^
      --spring.profiles.active=dev
 
 pause
