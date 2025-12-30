@@ -5,11 +5,11 @@ import {
   type AppEntityField,
   type ChildEntity
 } from '@onebase/app';
-import { getDictDataByTypes, type DictData } from '@onebase/platform-center';
+import { getDictDataByTypes } from '@onebase/platform-center';
 import { useAppEntityStore } from '@onebase/ui-kit';
 
 // 获取主表对应的主实体信息
-export const setMainMetaData = async (pageSetId: string, setDictData?: (dictMap: Map<string, DictData[]>) => void) => {
+export const setMainMetaData = async (pageSetId: string, setDictData?: (dictMap: any) => void) => {
   console.log('载入页面集对应实体信息, 页面集ID: ', pageSetId);
   // 在普通函数中使用 getState() 而不是 Hook，避免 "Invalid hook call" 错误
   const { setMainEntity, /* setAppEntities, */ setSubEntities } = useAppEntityStore.getState();
@@ -79,10 +79,10 @@ export const setMainMetaData = async (pageSetId: string, setDictData?: (dictMap:
     console.log('dictTypeIds: ', dictTypeIds);
 
     const res = await getDictDataByTypes({ dictTypeIds: dictTypeIds });
-    console.log('xxxxxxxres: ', res);
+    console.log('dictDataList: ', res);
 
     if (setDictData) {
-      setDictData(res as any);
+      setDictData(res);
     }
   }
 };
