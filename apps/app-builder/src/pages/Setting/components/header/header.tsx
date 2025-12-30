@@ -12,6 +12,7 @@ import React, { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import styles from './header.module.less';
 import TenantLogo from '@/components/TenantLogo';
+import { useTenantInfoStore } from '@/store/store_tenantInfo';
 
 const { Header } = Layout;
 
@@ -25,6 +26,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className, avatarUrl }) => {
   const { t } = useI18n();
 
   const { tenantId } = useParams();
+  const { curTenantInfo } = useTenantInfoStore();
 
   // 获取用户信息
   const tokenInfo = TokenManager.getTokenInfo();
@@ -77,13 +79,11 @@ const AppHeader: React.FC<HeaderProps> = ({ className, avatarUrl }) => {
     </Menu>
   );
 
-  const tenantInfo = getTenantInfoFromSession();
-
   return (
     <Header className={`${styles.header} ${className || ''}`}>
       <div className={styles.headerContent}>
         <div className={styles.logo} onClick={() => navigate(`/onebase/${tenantId}/home/enterprise-app`)}>
-          <TenantLogo tenantInfo={tenantInfo} />
+          <TenantLogo tenantInfo={curTenantInfo} />
         </div>
 
         <div className={styles.userInfo}>
