@@ -27,7 +27,7 @@ export const DelDashboardTemplate = (id?: string) => {
 };
 //修改
 export const upLoadDashboardTemplate = (params:{id:string,templateName:string,remarks:string}) => {
-  return dashboardService.post(`/template/update?id=${params.id}&templateName=${params.templateName}&remarks=${params.remarks}`);
+  return dashboardService.post(`/template/edit?id=${params.id}&templateName=${params.templateName}&remarks=${params.remarks}`);
 };
 //新建模板
 export const createDashboardTemplate = (params:{templateType:string,appId:string | undefined}) => {
