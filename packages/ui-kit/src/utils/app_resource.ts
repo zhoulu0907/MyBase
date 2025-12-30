@@ -211,10 +211,11 @@ export async function startSavePageSet(params: SavePageSetParams, onSuccess?: Fu
 export interface LoadPageSetParams {
   pageSetId: string;
   runtime?: boolean;
+  allowViewUuids?: string[];
 }
 
 export async function startLoadPageSet(params: LoadPageSetParams) {
-  const { pageSetId } = params;
+  const { pageSetId, allowViewUuids } = params;
 
   const { setPageViews, curViewId, setCurViewId } = usePageViewEditorSignal;
 
@@ -243,6 +244,12 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
   const pageSet = await loadPageSet(loadPageSetReq);
   setCurPage(pageSet);
   console.log('载入页面集数据: ', pageSet);
+
+  //   //   如果allowViewUuids不为空，则过滤掉不在allowViewUuids中的视图
+  //   if (allowViewUuids && allowViewUuids.length > 0) {
+  //     pageSet.pages = pageSet.pages.filter((page: PageSet) => allowViewUuids.includes(page.pageUuid));
+  //     console.log('过滤后的页面集数据: ', pageSet.pages);
+  //   }
 
   pageSet.pages.forEach((page: PageSet) => {
     useEditorSignalMap.set(page.pageUuid, createPageEditorSignal());
@@ -300,7 +307,7 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
     //   载入布局组件内的组件配置
     page.components.forEach((component: ComponentConfig) => {
       if (component.parentCode !== '' && component.parentCode !== null) {
-        if (component.parentCode.indexOf(FORM_COMPONENT_TYPES.SUB_TABLE) !== -1) {
+        if (component.parentCode?.indexOf(FORM_COMPONENT_TYPES.SUB_TABLE) !== -1) {
           const colComponents = newSubTableComponentsMap.get(component.parentCode);
           if (colComponents) {
             colComponents[component.containerIndex] = {
@@ -369,7 +376,6 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
   const res = await listPageView({
     pageSetId: pageSetId
   });
-
   if (res && res.pages) {
     // 如果没有视图选中，就选中默认视图
 

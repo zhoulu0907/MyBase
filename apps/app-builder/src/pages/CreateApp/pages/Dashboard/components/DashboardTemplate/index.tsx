@@ -33,8 +33,8 @@ const ScreenTemplate: FC = () => {
   const resourceUrl = getDashBoardURL();
   //创建模板
   const handleAdd = async () => {
-    const res = await createDashboardTemplate({ templateType: 'template', appId: appId });
-    window.open(`${resourceUrl}chart/home/${res}/template`, '_blank');
+    const res = await createDashboardTemplate({ templateType: 'app', appId: appId });
+    window.open(`${resourceUrl}chart/home/${res}/${appId}/template`, '_blank');
   };
   const [applicationDataList, setApplicationDataList] = useState<screenTemplate[]>();
   const [currentPage, setCurrentPage] = useState(1);
@@ -211,7 +211,7 @@ const ScreenTemplate: FC = () => {
       />
       {/* 编辑弹框 */}
       <Modal
-        title={<div style={{ textAlign: 'left', fontWeight: 500 }}>修改大屏信息</div>}
+        title={<div style={{ textAlign: 'left', fontWeight: 500 }}>修改模板信息</div>}
         visible={editVisible}
         onOk={handleEditOk}
         onCancel={handleEditCancel}

@@ -251,10 +251,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({
         } else if (field.fieldType === ENTITY_FIELD_TYPE.DATETIME.VALUE) {
           formData[field.fieldName] = value ? dayjs(value).format('YYYY-MM-DD hh:mm:ss') : '';
         } else if (field.fieldType === ENTITY_FIELD_TYPE.SELECT.VALUE) {
-          formData[field.fieldName] = {
-            id: value[0],
-            name: value[0]
-          };
+          formData[field.fieldName] = value[0];
         } else if (field.fieldType === ENTITY_FIELD_TYPE.USER.VALUE && Array.isArray(value)) {
           let userTempData = userSelectData;
           if (userTempData.length === 0) {
@@ -573,6 +570,11 @@ const PreviewContainer: React.FC<PreviewProps> = ({
 
   const curFormPage =
     curPage.value?.pages?.find((ele: any) => ele.pageType === CATEGORY_TYPE.LIST)?.pageName || '标题_列表';
+  const curWorkbenchPage =
+    curPage.value?.pages?.find((ele: any) => ele.pageType === CATEGORY_TYPE.WORKBENCH)?.pageName || '标题_工作台';
+
+  const navTitle =
+    pageType === EDITOR_TYPES.WORKBENCH_EDITOR ? curWorkbenchPage : curFormPage.slice(0, curFormPage.length - 3);
 
   return (
     <div className={styles.previewPage}>
@@ -580,9 +582,13 @@ const PreviewContainer: React.FC<PreviewProps> = ({
         {curFormPage.slice(0, curFormPage.length - 3)}
       </Sticky> */}
       <CustomNav
-        title={curFormPage.slice(0, curFormPage.length - 3)}
+        title={navTitle}
         style={{ background: '#fff' }}
-        toBack={pageType === EDITOR_TYPES.LIST_EDITOR ? undefined : () => setPageType(EDITOR_TYPES.LIST_EDITOR)}
+        toBack={
+          pageType === EDITOR_TYPES.LIST_EDITOR || pageType === EDITOR_TYPES.WORKBENCH_EDITOR
+            ? undefined
+            : () => setPageType(EDITOR_TYPES.LIST_EDITOR)
+        }
       />
 
       <div className={styles.content}>

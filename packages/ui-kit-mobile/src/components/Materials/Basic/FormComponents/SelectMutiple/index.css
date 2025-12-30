@@ -22,6 +22,10 @@
     font-size: var(--fontSize);
   }
 
+  .hasValue {
+    color: #1d2129;
+  }
+
   .verticalLayout {
     text-align: left;
   }

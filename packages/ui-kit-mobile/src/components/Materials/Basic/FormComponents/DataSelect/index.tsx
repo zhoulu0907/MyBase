@@ -6,7 +6,7 @@ import { dataMethodPageV2, menuSignal, PageMethodV2Params } from '@onebase/app';
 
 import { isRuntimeEnv } from '@onebase/common';
 
-import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, FormSchema } from '@onebase/ui-kit';
+import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, FormSchema, useFormEditorSignal } from '@onebase/ui-kit';
 type XDataSelectConfig = typeof FormSchema.XDataSelectSchema.config;
 
 import './index.css';
@@ -21,8 +21,12 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
     isMultiple = false,
     displayFields,
     editPreview,
+    detailMode,
+    fillRuleSetting,
     form
   } = props;
+  const { pageComponentSchemas: fromPageComponentSchemas } = useFormEditorSignal;
+
   const [visible, setVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const fieldId = dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.DEPT_SELECT}_${props.id}`;
@@ -30,11 +34,11 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
   const formValue = form?.getFieldValue(fieldId) || {};
   const [selectedKeys, setSelectedKeys] = useState<string[]>([formValue.id]);
   const [lastSelectedKeys, setLastSelectedKeys] = useState<string[]>([formValue.id]);
-
+  
   const [pageNo, setPageNo] = useState<number>(1);
   const [keyword, setKeyword] = useState<string>('');
   const [options, setOptions] = useState<any[]>([]);
-
+  const [dataList, setDataList] = useState<any[]>([]);
 
   const getData = async () => {
     if (!visible || !runtime || !isRuntimeEnv()) {
@@ -63,6 +67,7 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
 
     setLoading(false);
     setOptions(opts);
+    setDataList(list);
   }
 
   useEffect(() => {
@@ -77,10 +82,29 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
 
   const handleConfirm = (e: any) => {
     e.stopPropagation();
+    const value = options.find((item) => item.id === selectedKeys[0]);
     setLastSelectedKeys(selectedKeys);
-    form.setFieldValue(fieldId, options.find((item) => item.id === selectedKeys[0]));
+    form.setFieldValue(fieldId, value);
+
+    const data = dataList.find((item) => item.id === selectedKeys[0]);
+    fillDatabyRule(data);
     setVisible(false);
   };
+
+  const fillDatabyRule = (data: any) => {
+    if (fillRuleSetting.length > 0) {
+      fillRuleSetting.forEach((item) => {
+        const value = data?.[item.fieldName];
+          const dataField = fromPageComponentSchemas.value[item.selectComponentID].config.dataField;
+          if (dataField.length > 0) {
+            const fieldName =
+              fromPageComponentSchemas.value[item.selectComponentID].config.dataField[dataField.length - 1];
+            console.log('fieldName', fieldName, value)
+            form?.setFieldValue(fieldName, value);
+          }
+        });
+      }
+  }
 
   const removeMember = (key: string) => {
     const newKeys = selectedKeys.filter((k) => k !== key);
@@ -116,7 +140,7 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
         opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
       }}
     >
-      {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? (
+      {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] && !detailMode ? (
         <div className="readonlyText">{selectedParseDataName}</div>
       ) : (
         <Cell

@@ -3,7 +3,7 @@ import CreatePageIcon from '@/assets/images/addpage.svg';
 import CreateWorkbenchIcon from '@/assets/images/addworkbench.svg';
 import EditIcon from '@/assets/images/edit_menu_icon.svg';
 import PageManagerGuide from '@/assets/images/page_manaager_guide.svg';
-import CreateScreenModal from '@/components/CreateDashboardModal';
+import CreateScreenModal from '@/components/CreatePageDashboardModal';
 import { useI18n } from '@/hooks/useI18n';
 import PreviewContainer from '@/pages/Runtime/components/preview';
 import { useAppStore } from '@/store/store_app';
@@ -59,6 +59,7 @@ import MyMenuItem from './components/MyMenuItem';
 import TaskCenterPage from './components/TaskCenter/TaskCenterPage';
 import TaskCenterSide from './components/TaskCenter/taskTreeSide';
 import styles from './index.module.less';
+import { DashBoardCreateType } from '@onebase/app';
 
 const TreeNode = Tree.Node;
 const MenuItem = Menu.Item;
@@ -433,44 +434,51 @@ const PageManagerPage: FC = () => {
   const triggerDelete = (menuID: string) => {
     handleDelete(menuID);
   };
+  //页面设计新建大屏创建
   const handleScreenCreate = async (id?: string, screenMethod?: string) => {
+    console.log('创建大屏参数 id、screenMethod：', id, screenMethod);
+    
+    if (screenMethod === DashBoardCreateType.DashboardTemplate && !id) {
+      // 通过模板创建，模板ID不可为空
+      Message.error('请选择一个模板');
+      return;
+    }else if(screenMethod === DashBoardCreateType.DashboardLink && !id){
+      // 关联大屏创建，关联大屏ID不可为空
+      Message.error('请选择一个大屏');
+      return;
+    }
+    // 产品需求：当新建大屏且选择了模板时，更新为通过模板创建。
+    if(screenMethod === DashBoardCreateType.DashboardNew && id){
+        screenMethod = DashBoardCreateType.DashboardTemplate;
+    }
+
     createForm.validate(async (error) => {
       if (error !== null) return;
-      console.log('创建大屏参数 id、screenMethod：', id, screenMethod);
-      if (id) {
-        const dashboardId = await getDashboardIdFromTemplateApi(id);
-        console.log('dashboardId:', dashboardId);
+      const req: CreateApplicationMenuReq = {
+        applicationId: curAppId,
+        parentId:
+          createForm.getFieldValue('parentId') === RootParentPage.id ? '' : createForm.getFieldValue('parentId'),
+        pageSetType: dashboardPageType,
+        menuName: createForm.getFieldValue('menuName'),
+        menuType: MenuType.PAGE,
+        menuIcon: createForm.getFieldValue('menuIcon'),
+        entityUuid: '',
+        createDashboardType: screenMethod,
+        dashboardId: id
+      };
+      const menuResp = await createApplicationMenu(req);
+      if (menuResp) {
+        Message.success('创建成功');
+      }
+      setVisibleCreateScreenForm('');
+      getMenuList(undefined, menuResp.id);
+      const pageSetId = await getPageSetId({
+        menuId: menuResp.id
+      });
+      const dashboardInfo = await listPageView({ pageSetId });
+      const dashboardId = dashboardInfo.pages && dashboardInfo.pages.length > 0 ? dashboardInfo.pages[0].id : null;
+      if (screenMethod !== DashBoardCreateType.DashboardLink) {
         window.open(`${resourceUrl}chart/home/${dashboardId}/${appId}/${dashboardType}`, '_blank');
-      } else {
-        const req: CreateApplicationMenuReq = {
-          applicationId: curAppId,
-          parentId:
-            createForm.getFieldValue('parentId') === RootParentPage.id ? '' : createForm.getFieldValue('parentId'),
-          pageSetType: dashboardPageType,
-          menuName: createForm.getFieldValue('menuName'),
-          menuType: MenuType.PAGE,
-          menuIcon: createForm.getFieldValue('menuIcon'),
-          entityUuid: '',
-          createDashboardType: screenMethod,
-          dashboardId: id
-        };
-
-        const menuResp = await createApplicationMenu(req);
-        if (menuResp) {
-          Message.success('创建成功');
-        }
-        setVisibleCreateScreenForm('');
-        getMenuList(undefined, menuResp.id);
-
-        const pageSetId = await getPageSetId({
-          menuId: menuResp.id
-        });
-
-        const dashboardInfo = await listPageView({ pageSetId });
-        const dashboardId = dashboardInfo.pages && dashboardInfo.pages.length > 0 ? dashboardInfo.pages[0].id : null;
-        if (dashboardId) {
-          window.open(`${resourceUrl}chart/home/${dashboardId}/${appId}/${dashboardType}`, '_blank');
-        }
       }
     });
   };
@@ -604,6 +612,7 @@ const PageManagerPage: FC = () => {
     }
     if (curMenu.value?.pagesetType === dashboardPageType) {
       const dashboardInfo = await listPageView({ pageSetId });
+
       const dashboardId = dashboardInfo.pages && dashboardInfo.pages.length > 0 ? dashboardInfo.pages[0].id : null;
       window.open(`${resourceUrl}chart/home/${dashboardId}/${appId}/${dashboardType}`, '_blank');
     } else {

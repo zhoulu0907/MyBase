@@ -1,0 +1,201 @@
+.createPageModal {
+  width: 1223px;
+}
+.createDashboardModal {
+  width: 940px;
+}
+
+.createContainer {
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  
+  .infoTitle,
+  .dashboardTitle {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 16px;
+  }
+  
+  .dashboardTitle {
+    display: flex;
+    justify-content: space-between;
+    
+    .dashboardChange {
+      display: flex;
+      gap: 8px;
+      font-weight: normal;
+      color: #009E9E;
+      cursor: pointer;
+    }
+  }
+  
+  .dashboardTemplateSearch {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    
+    .dashboardTemplateSearchTabs {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      
+      .dashboardTemplateSearchTabsItem,
+      .dashboardTemplateSearchTabsItemActive {
+        box-sizing: border-box;
+        height: 30px;
+        cursor: pointer;
+      }
+      
+      .dashboardTemplateSearchTabsItemActive {
+        font-weight: 700;
+        color: #009E9E;
+        border-bottom: 2px solid #009E9E;
+      }
+    }
+  }
+  
+  .infoContainer {
+    width: 275px;
+    height: 100%;
+    padding-right: 8px;
+    
+    .infoForm {
+      width: 100%;
+      top: 0;
+      left: 0;
+      transform: translateX(0);
+      transition: transform 0.3s ease;
+      padding: 0 20px 0 0;
+      box-sizing: border-box;
+    }
+  }
+  
+  .dashboardContainer {
+    flex: 1;
+    
+    .dashboardCreationMethod {
+      padding-bottom: 16px;
+      
+      .dashboardCreationMethodContent {
+        display: flex;
+        justify-content: start;
+        gap: 8px;
+        
+        .dashboardCreationMethodContentItem,
+        .dashboardCreationMethodContentItemActive {
+          box-sizing: border-box;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          width: 258px;
+          height: 50px;
+          padding: 8px 12px;
+          border-radius: 8px;
+          border: 1px solid #E5E6EB;
+          background: #fff;
+          cursor: pointer;
+        }
+        
+        .dashboardCreationMethodContentItemActive {
+          border: 2px solid #009E9E;
+          background: #E8FFFE;
+        }
+      }
+    }
+    
+    .dashboardTemplate {
+      .dashboardTemplateContent {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+      
+      .dashboardPagination {
+        display: flex;
+        justify-content: right;
+        margin: 8px 20px 0 0;
+      }
+    }
+  }
+}
+
+.dashboardTemplateCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  
+  .dashboardTemplateCardImg {
+    box-sizing: border-box;
+    position: relative;
+    width: 216px;
+    height: 152px;
+    border-radius: 16px;
+    padding: 22px 16px;
+    border: 1px solid #E5E6EB;
+    background: linear-gradient(180deg, rgba(232, 255, 254, 0.45) 0%, rgba(255, 255, 255, 0.45) 100%);
+    
+    img {
+      width: 100%;
+      height: 100%;
+      transition: transform 0.3s ease-in-out;
+    }
+    
+    .dashboardTemplateCardBtn {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: absolute;
+      box-sizing: border-box;
+      width: 40px;
+      height: 26px;
+      font-size: 12px;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      opacity: 0;
+      transition: opacity 0.3s ease-in-out;
+      border-radius: 4px;
+      border: 1px solid var(--Neutral-300, #E5E6EB);
+      background: var(--Neutral-000, #FFF);
+    }
+    
+    &:hover {
+      img {
+        transform: translateY(-14px);
+      }
+      
+      .dashboardTemplateCardBtn {
+        opacity: 1;
+      }
+    }
+  }
+  
+  .dashboardTemplateCardTitle {
+    height: 36px;
+    line-height: 36px;
+  }
+}
+
+.dashboardTemplateCardSelected {
+    .dashboardTemplateCardImg {
+      box-sizing: border-box;
+      width: 216px;
+      height: 152px;
+      border-radius: 16px;
+      border: 2px solid #009E9E;
+      background: 
+        linear-gradient(180deg, rgba(232, 255, 254, 0.45) 0%, rgba(255, 255, 255, 0.45) 100%),
+        linear-gradient(0deg, #FFF 0%, #FFF 100%),
+        var(--Neutral-000, #FFF);
+      box-shadow: 
+        0 12px 48px 16px rgba(0, 0, 0, 0.03),
+        0 9px 28px 0 rgba(0, 0, 0, 0.05),
+        0 6px 16px -8px rgba(0, 0, 0, 0.08);
+    }
+    
+    .dashboardTemplateCardTitle {
+      font-weight: 700;
+    }
+  }

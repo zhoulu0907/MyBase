@@ -116,19 +116,25 @@ const AppManagement: React.FC = () => {
   }, [ownerTag, status, dataList]);
 
   const getApplicationList = async () => {
-    setLoading(true);
-    const req: PageParam = {
-      pageNo,
-      pageSize: pageSize || 8,
-      name,
-      ownerTag,
-      orderByTime,
-      status: status === '' ? null : Number(status)
-    };
-    const res = await getCommonPaginationList(listApplication, req, setPageNo);
-    if (res) {
-      setDataList(res.list || []);
-      setTotal(res.total || 0);
+    try {
+      setLoading(true);
+      const req: PageParam = {
+        pageNo,
+        pageSize: pageSize || 8,
+        name,
+        ownerTag,
+        orderByTime,
+        status: status === '' ? null : Number(status)
+      };
+      const res = await getCommonPaginationList(listApplication, req, setPageNo);
+      if (res) {
+        setDataList(res.list || []);
+        setTotal(res.total || 0);
+        setLoading(false);
+      }
+    }catch(error) {
+      console.log("error", error);
+    }finally {
       setLoading(false);
     }
   };
