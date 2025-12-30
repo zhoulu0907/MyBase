@@ -48,6 +48,8 @@ const XPreviewColumnLayout = (props: XColumnLayoutConfig & { detailMode?: boolea
             setList={(newList) => {
               colComponents[index] = newList;
             }}
+            sort={false}
+            disabled
             group={{
               name: COMPONENT_GROUP_NAME
             }}
