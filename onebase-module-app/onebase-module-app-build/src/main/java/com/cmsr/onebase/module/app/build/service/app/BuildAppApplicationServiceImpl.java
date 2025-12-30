@@ -9,7 +9,7 @@ import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.uid.UidGenerator;
 import com.cmsr.onebase.module.app.build.service.AppCommonService;
-import com.cmsr.onebase.module.app.build.service.auth.AppAuthRoleService;
+import com.cmsr.onebase.module.app.build.service.auth.BuildAppAuthRoleService;
 import com.cmsr.onebase.module.app.build.service.menu.BuildAppMenuService;
 import com.cmsr.onebase.module.app.build.service.version.AppDataManager;
 import com.cmsr.onebase.module.app.build.util.AppUtils;
@@ -86,7 +86,7 @@ public class BuildAppApplicationServiceImpl implements AppApplicationService {
     private AppCommonService appCommonService;
 
     @Autowired
-    private AppAuthRoleService authRoleService;
+    private BuildAppAuthRoleService authRoleService;
 
     @Autowired
     private MetadataDatasourceApi metadataDatasourceApi;

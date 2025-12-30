@@ -131,4 +131,17 @@ public class DictTypeRepository extends BaseDataRepository<SystemDictTypeMapper,
         }
         return list(query().in(ID, ids));
     }
+
+    /**
+     * 根据类型集合批量查询字典类型
+     *
+     * @param types 类型集合
+     * @return 字典类型列表
+     */
+    public List<DictTypeDO> findListByTypes(Collection<String> types) {
+        if (types == null || types.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return list(query().in(TYPE, types));
+    }
 }
