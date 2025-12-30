@@ -50,7 +50,8 @@ export const getFieldOptionsConfig = async (
     let dictDataList: DictData[] = [];
     if (dictMap) {
       dictDataList = dictMap[currentField.dictTypeId] || [];
-    } else {
+    }
+    if (dictDataList.length == 0) {
       dictDataList = await getDictDataListByTypeId(currentField.dictTypeId);
     }
 
