@@ -106,6 +106,22 @@ public class DashboardTemplateController {
     }
 
     /**
+     * 更新仪表盘模板（JSON 请求）
+     * 说明：部分前端会使用 FormData 提交，其中 content 可能是较大的 JSON 字符串。
+     * @param saveReqVO 更新信息
+     * @return 是否更新成功
+     */
+    @PostMapping(value = "/edit")
+    @ApiOperation("更新模板")
+    @PermitAll
+    @ApiSignIgnore
+    @TenantIgnore
+    public CommonResult<Boolean> updateDashboardTemplateName(@RequestBody DashboardTemplateSaveReqVO saveReqVO) {
+        dashboardTemplateService.updateDashboardTemplate(saveReqVO);
+        return success(true);
+    }
+
+    /**
      * 删除仪表盘模板
      *
      * @param id 仪表盘模板ID
