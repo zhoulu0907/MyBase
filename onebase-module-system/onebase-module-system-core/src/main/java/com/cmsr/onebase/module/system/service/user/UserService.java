@@ -4,8 +4,10 @@ import cn.hutool.core.collection.CollUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
+import com.cmsr.onebase.module.system.api.dept.dto.DeptAndUsersApiReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.vo.auth.AuthRegisterReqVO;
+import com.cmsr.onebase.module.system.vo.dept.DeptRespVO;
 import com.cmsr.onebase.module.system.vo.dept.DeptSimpleListRespVO;
 import com.cmsr.onebase.module.system.vo.user.*;
 import jakarta.validation.Valid;
@@ -409,4 +411,11 @@ public interface UserService {
      * @return
      */
     void updateUserByUserAppReqVO(UserAppRelationInertReqVO udpateUser);
+    /**
+     * 获取部门下非当前用户的用户列表
+     *
+     * @param pageReqVO
+     * @return
+     */
+    PageResult<UserSimpleRespVO> getUsersExcludeUserIds(@Valid DeptAndUsersApiReqVO pageReqVO);
 }

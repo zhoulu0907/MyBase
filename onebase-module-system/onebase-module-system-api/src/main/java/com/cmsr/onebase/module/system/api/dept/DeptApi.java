@@ -1,7 +1,9 @@
 package com.cmsr.onebase.module.system.api.dept;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
+import com.cmsr.onebase.module.system.api.dept.dto.DeptAndUsersApiReqVO;
 import com.cmsr.onebase.module.system.api.dept.dto.DeptAndUsersReqDTO;
 import com.cmsr.onebase.module.system.api.dept.dto.DeptAndUsersRespDTO;
 import com.cmsr.onebase.module.system.api.dept.dto.DeptRespDTO;
@@ -64,5 +66,15 @@ public interface DeptApi {
     @Operation(summary = "根据用户ID获取其所属部门及其父部门列表")
     @Parameter(name = "ids", description = "根据用户ID获取其所属部门及其父部门列表", example = "1", required = true)
     CommonResult<List<DeptRespDTO>> getParentDeptsListByUserId(@RequestParam("userId") Long userId);
+
+
+    /**
+         * 获得排除指定部门编号的部门列表
+         *
+         * @param reqVO 请求参数
+         * @return 部门列表
+         */
+    CommonResult<PageResult<DeptRespDTO>> getDeptsExcludeDeptIds(@Valid @RequestParam DeptAndUsersApiReqVO reqVO);
+
 
 }

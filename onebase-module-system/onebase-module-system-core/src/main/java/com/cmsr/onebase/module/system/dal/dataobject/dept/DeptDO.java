@@ -17,7 +17,7 @@ import java.util.Set;
 @Table(value = "system_dept")
 @Data
 public class DeptDO extends BaseTenantEntity {
-
+    public static final String ID           = "id";
     public static final Long PARENT_ID_ROOT = 0L;
 
     // 列名常量

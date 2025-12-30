@@ -6,6 +6,7 @@ import cn.hutool.core.util.ObjUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.common.util.collection.MapUtils;
+import com.cmsr.onebase.module.system.api.dept.dto.DeptAndUsersApiReqVO;
 import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
 import com.cmsr.onebase.module.system.api.user.dto.UserByDeptPageReqDTO;
 import com.cmsr.onebase.module.system.api.user.dto.UserSimpleRespDTO;
@@ -14,6 +15,7 @@ import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.service.dept.DeptService;
 import com.cmsr.onebase.module.system.service.user.UserService;
 import com.cmsr.onebase.module.system.vo.user.UserByDeptPageReqVO;
+import com.cmsr.onebase.module.system.vo.user.UserSimpleRespVO;
 import jakarta.annotation.Resource;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RestController;
@@ -96,6 +98,13 @@ public class AdminUserApiImpl implements AdminUserApi {
     public CommonResult<PageResult<UserSimpleRespDTO>> getUserPageByDept(UserByDeptPageReqDTO reqDTO) {
         PageResult<AdminUserDO>  result = userService.getUserByDeptPage(BeanUtils.toBean(reqDTO, UserByDeptPageReqVO.class));
         return success(BeanUtils.toBean(result, UserSimpleRespDTO.class));
+    }
+
+    @Override
+    public CommonResult<PageResult<UserSimpleRespDTO>> getUsersExcludeUserIds(DeptAndUsersApiReqVO pageReqVO) {
+        PageResult<UserSimpleRespVO> result = userService.getUsersExcludeUserIds(pageReqVO);
+        return success(BeanUtils.toBean(result, UserSimpleRespDTO.class));
+
     }
 
 }

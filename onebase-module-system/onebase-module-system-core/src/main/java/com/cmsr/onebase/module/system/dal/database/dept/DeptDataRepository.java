@@ -2,14 +2,21 @@ package com.cmsr.onebase.module.system.dal.database.dept;
 
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.enums.XFromSceneTypeEnum;
+import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.security.dto.LoginUser;
+import com.cmsr.onebase.framework.data.base.BaseDO;
+import com.cmsr.onebase.module.system.api.dept.dto.DeptAndUsersApiReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.framework.orm.repo.BaseDataRepository;
+import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.dal.flex.mapper.SystemDeptMapper;
 import com.cmsr.onebase.module.system.enums.dept.DeptTypeEnum;
+import com.cmsr.onebase.module.system.vo.dept.DeptRespVO;
 import com.cmsr.onebase.module.system.vo.dept.DeptSaveReqVO;
+import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
@@ -18,6 +25,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO.NICKNAME;
 import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
 
 /**
@@ -167,9 +175,18 @@ public class DeptDataRepository extends BaseDataRepository<SystemDeptMapper, Dep
     }
 
     public List<DeptDO> findDeptListByNameAndDeptType(String keywords, String deptType) {
-        return list(query()
-                .like(DeptDO.NAME, keywords, keywords != null)
-                .eq(DeptDO.DEPT_TYPE, deptType, deptType != null)
-                .orderBy(DeptDO.SORT, true));
+        return null;
+    }
+
+
+
+
+    public PageResult<DeptDO> selectPage(Integer status, DeptAndUsersApiReqVO pageReqVO) {
+        QueryWrapper queryWrapper = buildDeptQueryWrapper().eq(DeptDO.STATUS, status)
+                .like(DeptDO.NAME, pageReqVO.getKeywords(), StringUtils.isNotBlank(pageReqVO.getKeywords()))
+                .notIn(DeptDO.ID, pageReqVO.getExcludeDeptIds(), CollectionUtils.isNotEmpty(pageReqVO.getExcludeDeptIds()))
+                .orderBy(BaseDO.CREATE_TIME, false);
+        Page<DeptDO> pageResult = page(Page.of(pageReqVO.getPageNo(), pageReqVO.getPageSize()), queryWrapper);
+        return new PageResult<DeptDO>(pageResult.getRecords(), pageResult.getTotalRow());
     }
 }

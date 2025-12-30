@@ -1,9 +1,12 @@
 package com.cmsr.onebase.module.system.service.dept;
 
+import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
+import com.cmsr.onebase.module.system.api.dept.dto.DeptAndUsersApiReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.vo.dept.*;
 import com.cmsr.onebase.module.system.vo.user.UserAdminOrDirectorUpdateReqVO;
+import jakarta.validation.Valid;
 
 import java.util.*;
 
@@ -168,4 +171,12 @@ public interface DeptService {
      * @return 部门列表
      */
     List<DeptDO> getDefaultThirdDept();
+
+    /**
+     * 获得部门列表，排除指定编号的部门
+     *
+     * @param reqVO 筛选条件请求 VO
+     * @return 部门列表
+     */
+    PageResult<DeptRespVO> getDeptsExcludeDeptIds(@Valid DeptAndUsersApiReqVO reqVO);
 }

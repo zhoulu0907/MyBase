@@ -5,9 +5,12 @@ import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
+import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.system.api.dept.dto.DeptAndUsersApiReqVO;
+import com.cmsr.onebase.module.system.api.user.dto.UserSimpleRespDTO;
 import com.cmsr.onebase.module.system.dal.database.dept.DeptDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
@@ -16,6 +19,7 @@ import com.cmsr.onebase.module.system.enums.corp.CorpConstant;
 import com.cmsr.onebase.module.system.enums.dept.DeptCodeEnum;
 import com.cmsr.onebase.module.system.enums.dept.DeptTypeEnum;
 import com.cmsr.onebase.module.system.enums.dept.IdTypeEnum;
+import com.cmsr.onebase.module.system.enums.user.UserStatusEnum;
 import com.cmsr.onebase.module.system.service.permission.PermissionService;
 import com.cmsr.onebase.module.system.service.user.UserService;
 import com.cmsr.onebase.module.system.vo.dept.*;
@@ -35,6 +39,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertSet;
 import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
 
@@ -528,6 +533,22 @@ public class DeptServiceImpl implements DeptService {
     @Override
     public List<DeptDO> getDefaultThirdDept() {
         return deptDataRepository.getDefaultThirdDeptByDefaultCode(DeptCodeEnum.DEFAULT_THIRD_DEPT.getCode(), CommonStatusEnum.ENABLE.getStatus());
+    }
+
+    @Override
+    public PageResult<DeptRespVO> getDeptsExcludeDeptIds(DeptAndUsersApiReqVO reqVO) {
+
+        // 查询部门数据
+        PageResult<DeptDO> result = deptDataRepository.selectPage(UserStatusEnum.NORMAL.getStatus(), reqVO);
+        if(CollectionUtils.isEmpty(result.getList())){
+            return PageResult.empty();
+        }
+
+        // 转换为 DeptRespVO 列表
+        List<DeptRespVO> deptRespList = BeanUtils.toBean(result.getList(), DeptRespVO.class);
+
+        // 返回转换后的分页结果
+        return new PageResult<>(deptRespList, result.getTotal());
     }
 
 }

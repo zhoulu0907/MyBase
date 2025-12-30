@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.system.api.user;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
+import com.cmsr.onebase.module.system.api.dept.dto.DeptAndUsersApiReqVO;
 import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
 import com.cmsr.onebase.module.system.api.user.dto.UserByDeptPageReqDTO;
 import com.cmsr.onebase.module.system.api.user.dto.UserSimpleRespDTO;
@@ -89,4 +90,12 @@ public interface AdminUserApi {
     @Operation(summary = "获得指定部门的用户简要分页列表", description = "获取指定部门的直属用户简要信息（分页），isRecurseSub为true时包含所有下级部门用户")
     CommonResult<PageResult<UserSimpleRespDTO>>  getUserPageByDept(@Valid @RequestParam UserByDeptPageReqDTO reqDTO);
 
+    /**
+     * 获得部门下的用户列表，排除指定用户编号
+     *
+     * @param pageReqVO 部门、关键字、分页等信息
+     */
+    CommonResult<PageResult<UserSimpleRespDTO>> getUsersExcludeUserIds(@Valid DeptAndUsersApiReqVO pageReqVO);
+
 }
+
