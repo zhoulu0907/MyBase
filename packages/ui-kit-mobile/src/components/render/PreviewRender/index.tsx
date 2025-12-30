@@ -12,7 +12,7 @@ import {
 import { ListComp } from '@/components/Materials/Basic/ListComponents';
 import { FormComp } from '@/components/Materials/Basic/FormComponents';
 import { ShowComp } from '@/components/Materials/Basic/ShowComponents';
-import { LayoutComp } from '@/components/Materials/Basic/LayoutComponents';
+// import { LayoutComp } from '@/components/Materials/Basic/LayoutComponents';
 import { WorkbenchComp } from '@/components/Materials/Workbench';
 
 /**
@@ -121,9 +121,9 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
     [FORM_COMPONENT_TYPES.DATA_SELECT]: { component: FormComp.XDataSelect, extraProps: { ...extraProps, editPreview } },
 
     //  布局组件
-    [LAYOUT_COMPONENT_TYPES.COLUMN_LAYOUT]: { component: LayoutComp.XPreviewColumnLayout, extraProps: { useStoreSignals, editPreview } },
-    [LAYOUT_COMPONENT_TYPES.TABS_LAYOUT]: { component: LayoutComp.XPreviewTabsLayout, extraProps: { useStoreSignals, editPreview } },
-    [LAYOUT_COMPONENT_TYPES.COLLAPSE_LAYOUT]: { component: LayoutComp.XPreviewCollapseLayout, extraProps: { useStoreSignals, editPreview } },
+    // [LAYOUT_COMPONENT_TYPES.COLUMN_LAYOUT]: { component: LayoutComp.XPreviewColumnLayout, extraProps: { useStoreSignals, editPreview } },
+    // [LAYOUT_COMPONENT_TYPES.TABS_LAYOUT]: { component: LayoutComp.XPreviewTabsLayout, extraProps: { useStoreSignals, editPreview } },
+    // [LAYOUT_COMPONENT_TYPES.COLLAPSE_LAYOUT]: { component: LayoutComp.XPreviewCollapseLayout, extraProps: { useStoreSignals, editPreview } },
 
     // 列表组件
     [LIST_COMPONENT_TYPES.TABLE]: { component: ListComp.XLoadMore, extraProps: { manuClick: !lastOne, showFromPageData } },
