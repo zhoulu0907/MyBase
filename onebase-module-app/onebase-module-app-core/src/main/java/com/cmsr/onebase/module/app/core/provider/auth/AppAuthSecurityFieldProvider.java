@@ -21,7 +21,7 @@ import java.util.*;
 @Slf4j
 @Setter
 @Service
-public class AppAuthFieldProvider {
+public class AppAuthSecurityFieldProvider {
 
     @Autowired
     private AppAuthFieldRepository appAuthFieldRepository;

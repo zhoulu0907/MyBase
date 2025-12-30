@@ -8,7 +8,7 @@ import com.cmsr.onebase.module.app.api.security.bo.FieldPermission;
 import com.cmsr.onebase.module.app.api.security.bo.OperationPermission;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthDataGroupRepository;
 import com.cmsr.onebase.module.app.core.impl.auth.AppAuthSecurityApiImpl;
-import com.cmsr.onebase.module.app.core.provider.auth.AppAuthDataGroupProvider;
+import com.cmsr.onebase.module.app.core.provider.auth.AppAuthSecurityDataGroupProvider;
 import com.cmsr.onebase.module.app.core.vo.menu.MenuListRespVO;
 import com.cmsr.onebase.module.app.runtime.service.menu.RuntimeAppMenuService;
 import com.cmsr.onebase.module.app.runtime.vo.menu.MenuPermissionVO;
@@ -35,7 +35,7 @@ public class AppTest {
     private AppAuthDataGroupRepository appAuthDataGroupRepository;
 
     @Autowired
-    private AppAuthDataGroupProvider appAuthDataGroupProvider;
+    private AppAuthSecurityDataGroupProvider appAuthSecurityDataGroupProvider;
 
     @Autowired
     private AppAuthSecurityApiImpl appAuthSecurityApi;

@@ -29,7 +29,7 @@ import java.util.Set;
 @Slf4j
 @Setter
 @Service
-public class AppAuthDataGroupProvider {
+public class AppAuthSecurityDataGroupProvider {
 
     @Autowired
     private AppAuthDataGroupRepository appAuthDataGroupRepository;

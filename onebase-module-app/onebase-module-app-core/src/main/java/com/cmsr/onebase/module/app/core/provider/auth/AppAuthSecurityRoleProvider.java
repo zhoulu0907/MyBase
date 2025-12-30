@@ -1,7 +1,6 @@
 package com.cmsr.onebase.module.app.core.provider.auth;
 
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
-import com.cmsr.onebase.module.app.core.dal.database.AppSqlQueryRepository;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleDeptRepository;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthRoleDO;
@@ -27,13 +26,10 @@ import java.util.stream.Collectors;
 @Slf4j
 @Setter
 @Service
-public class AppAuthRoleProvider {
+public class AppAuthSecurityRoleProvider {
 
     @Autowired
     private AppAuthRoleRepository appAuthRoleRepository;
-
-    @Autowired
-    private AppSqlQueryRepository appSqlQueryRepository;
 
     @Autowired
     private AppAuthRoleDeptRepository appAuthRoleDeptRepository;

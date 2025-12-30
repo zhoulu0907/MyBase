@@ -22,7 +22,7 @@ import java.util.Set;
 @Slf4j
 @Setter
 @Service
-public class AppAuthPermissionProvider {
+public class AppAuthSecurityPermissionProvider {
 
     @Autowired
     private AppAuthPermissionRepository appAuthPermissionRepository;
