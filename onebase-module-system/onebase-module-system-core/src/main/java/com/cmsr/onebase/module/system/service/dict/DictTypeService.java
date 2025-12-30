@@ -84,4 +84,12 @@ public interface DictTypeService {
      */
     List<DictTypeDO> getDictTypesByIds(Collection<Long> ids);
 
+    /**
+     * 根据类型集合批量获取字典类型
+     *
+     * @param types 类型集合
+     * @return 字典类型列表
+     */
+    List<DictTypeDO> getDictTypesByTypes(Collection<String> types);
+
 }
