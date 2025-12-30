@@ -95,7 +95,7 @@ const ScreenTemplate: FC = () => {
   //修改弹框确定按钮
   const handleEditOk = async () => {
     await editForm.validate();
-    upLoadDashboardTemplate({
+    await upLoadDashboardTemplate({
       id: editid,
       templateName: editForm.getFieldValue('templateName'),
       remarks: editForm.getFieldValue('remarks')
