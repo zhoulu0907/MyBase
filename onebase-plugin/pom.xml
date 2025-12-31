@@ -12,6 +12,8 @@
     <modules>
         <module>onebase-plugin-sdk</module>
         <module>onebase-plugin-core</module>
+        <module>onebase-plugin-build</module>
+        <module>onebase-plugin-runtime</module>
         <module>onebase-spring-boot-starter-plugin</module>
         <module>onebase-plugin-maven-plugin</module>
         <module>onebase-plugin-demo</module>
