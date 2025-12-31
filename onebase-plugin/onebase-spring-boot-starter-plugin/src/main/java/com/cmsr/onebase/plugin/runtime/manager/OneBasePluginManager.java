@@ -133,6 +133,37 @@ public class OneBasePluginManager {
         pluginManager.loadPlugins();
     }
 
+    /**
+     * 加载并启动插件（一步到位）
+     * <p>
+     * 这是 {@link #loadPlugin(Path)} 和 {@link #startPlugin(String)} 的组合方法，
+     * 提供更便捷的插件安装体验。
+     * </p>
+     *
+     * @param pluginPath 插件文件路径（JAR或ZIP）
+     * @return 插件状态，如果加载或启动失败则返回 null
+     */
+    public PluginState loadAndStartPlugin(Path pluginPath) {
+        log.info("加载并启动插件: {}", pluginPath);
+
+        // 1. 加载插件
+        String pluginId = loadPlugin(pluginPath);
+        if (pluginId == null) {
+            log.error("插件加载失败，无法启动: {}", pluginPath);
+            return null;
+        }
+
+        // 2. 启动插件
+        PluginState state = startPlugin(pluginId);
+        if (state == PluginState.STARTED) {
+            log.info("插件加载并启动成功: {} ({})", pluginId, pluginPath);
+        } else {
+            log.warn("插件加载成功但启动失败: {} ({}), 状态: {}", pluginId, pluginPath, state);
+        }
+
+        return state;
+    }
+
     private static Path getNormalize(Path p) {
         return p.toAbsolutePath().normalize();
     }
@@ -280,6 +311,37 @@ public class OneBasePluginManager {
             }
         }
         return state;
+    }
+
+    /**
+     * 停止并卸载插件（一步到位）
+     * <p>
+     * 这是 {@link #stopPlugin(String)} 和 {@link #unloadPlugin(String)} 的组合方法，
+     * 提供更便捷的插件移除体验。
+     * </p>
+     *
+     * @param pluginId 插件ID
+     * @return 是否成功卸载
+     */
+    public boolean stopAndUnloadPlugin(String pluginId) {
+        log.info("停止并卸载插件: {}", pluginId);
+
+        // 1. 停止插件
+        PluginState state = stopPlugin(pluginId);
+        if (state == null) {
+            log.error("插件停止失败，无法停止: {}", pluginId);
+            return false;
+        }
+
+        // 2. 卸载插件
+        boolean ok = unloadPlugin(pluginId);
+        if (ok) {
+            log.info("插件停止并卸载成功: {}", pluginId);
+        } else {
+            log.warn("插件停止成功但卸载失败: {}", pluginId);
+        }
+
+        return ok;
     }
 
     /**
