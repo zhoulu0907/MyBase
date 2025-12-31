@@ -26,6 +26,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.Comparator;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.APPLICATION_AUTH_TENANT_NOT_EXISTS;
@@ -238,6 +239,10 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
         if (CollectionUtils.isEmpty(applicationDTOList)) {
             return  new ArrayList<>();
         }
+        // 按创建时间倒序排列
+        applicationDTOList = applicationDTOList.stream()
+                .sorted(Comparator.comparing(ApplicationDTO::getCreateTime, Comparator.nullsLast(Comparator.naturalOrder())).reversed())
+                .collect(Collectors.toList());
         if (null == relationAppReqVO.getCorpId()) {
             // 用于企业创建时拉取全部应用
             return applicationDTOList;
