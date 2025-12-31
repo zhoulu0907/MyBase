@@ -122,6 +122,11 @@ public class DictTypeServiceImpl implements DictTypeService {
         return dictTypeRepository.findByIds(ids);
     }
 
+    @Override
+    public List<DictTypeDO> getDictTypesByTypes(Collection<String> types) {
+        return dictTypeRepository.findListByTypes(types);
+    }
+
     @VisibleForTesting
     void validateDictTypeNameUnique(Long id, String name) {
         DictTypeDO dictType = dictTypeRepository.findOneByName(name);

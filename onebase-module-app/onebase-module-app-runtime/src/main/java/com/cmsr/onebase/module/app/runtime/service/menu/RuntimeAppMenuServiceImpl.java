@@ -6,15 +6,12 @@ import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.app.api.security.AppAuthSecurityApi;
-import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthViewRepository;
 import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
-import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageRepository;
 import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageSetRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppMenuDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePagesetDO;
 import com.cmsr.onebase.module.app.core.enums.menu.MenuTypeEnum;
 import com.cmsr.onebase.module.app.core.enums.menu.MenuVisibleEnum;
-import com.cmsr.onebase.module.app.core.provider.auth.AppAuthRoleProvider;
 import com.cmsr.onebase.module.app.core.utils.MenuUtils;
 import com.cmsr.onebase.module.app.core.vo.menu.MenuListRespVO;
 import com.cmsr.onebase.module.app.runtime.vo.menu.MenuPermissionVO;
@@ -44,16 +41,7 @@ public class RuntimeAppMenuServiceImpl implements RuntimeAppMenuService {
     private AppPageSetRepository appPageSetRepository;
 
     @Autowired
-    private AppAuthRoleProvider appAuthRoleProvider;
-
-    @Autowired
     private AppAuthSecurityApi appAuthSecurityApi;
-
-    @Autowired
-    private AppAuthViewRepository appAuthViewRepository;
-
-    @Autowired
-    private AppPageRepository appPageRepository;
 
     @Override
     public List<MenuListRespVO> listBpmApplicationMenu() {

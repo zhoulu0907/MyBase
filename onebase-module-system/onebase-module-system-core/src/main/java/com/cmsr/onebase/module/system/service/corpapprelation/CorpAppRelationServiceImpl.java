@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.system.service.corpapprelation;
 
 
+import com.cmsr.onebase.framework.common.enums.CommonPublishModelEnum;
 import com.cmsr.onebase.framework.common.enums.CorpAppReationStatusEnum;
 import com.cmsr.onebase.framework.common.enums.CorpStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
@@ -17,6 +18,7 @@ import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.Strings;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -25,6 +27,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.Comparator;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.APPLICATION_AUTH_TENANT_NOT_EXISTS;
@@ -135,7 +138,7 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
         // if(!Objects.equals(corpId, loginCorpId)){
         //     throw exception(CORP_ID_COMPARE_ERROR);
         // }
-        Map<Long, ApplicationDTO> applicationMap = getApplicationDoMap(pageReqVO.getAppName());
+        Map<Long, ApplicationDTO> applicationMap = getApplicationDoMap(pageReqVO.getName());
         List<Long> applicationIds = new ArrayList<>(applicationMap.keySet());
         if(CollectionUtils.isEmpty(applicationIds)){
             return new PageResult<CorpApplicationRespVO>();
@@ -157,7 +160,15 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
         List<CorpApplicationRespVO> filteredList = pageResult.getList().stream()
                 .map(corpDO -> convertToRespVO(corpDO, applicationMap, finalTagMap))
                 .collect(Collectors.toList());
+
         // 返回过滤后的结果和总数
+        if (Strings.CI.equals(pageReqVO.getOrderByTime(), "create")) {
+            filteredList.sort(Comparator.comparing(CorpApplicationRespVO::getCreateTime).reversed());
+        }
+        if (Strings.CI.equals(pageReqVO.getOrderByTime(), "update")) {
+            filteredList.sort(Comparator.comparing(CorpApplicationRespVO::getUpdateTime).reversed());
+        }
+
         return new PageResult<>(filteredList, pageResult.getTotal());
     }
 
@@ -230,6 +241,17 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
     @Override
     public List<ApplicationDTO> getCorpNoRelationAppList(CorpRelationAppReqVO relationAppReqVO) {
         List<ApplicationDTO> applicationDTOList = appApplicationApi.findAppApplicationByAppName(relationAppReqVO.getAppName());
+        // 过滤，只保留 publishModel 为 SAAS 的应用
+        applicationDTOList = applicationDTOList.stream()
+                .filter(app -> CommonPublishModelEnum.SaaSModel.getValue().equals(app.getPublishModel()))
+                .collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(applicationDTOList)) {
+            return  new ArrayList<>();
+        }
+        // 按创建时间倒序排列
+        applicationDTOList = applicationDTOList.stream()
+                .sorted(Comparator.comparing(ApplicationDTO::getCreateTime, Comparator.nullsLast(Comparator.naturalOrder())).reversed())
+                .collect(Collectors.toList());
         if (null == relationAppReqVO.getCorpId()) {
             // 用于企业创建时拉取全部应用
             return applicationDTOList;

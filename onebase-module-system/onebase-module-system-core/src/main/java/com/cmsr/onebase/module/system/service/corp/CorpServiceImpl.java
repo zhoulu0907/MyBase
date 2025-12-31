@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.system.service.corp;
 
+import cn.hutool.core.util.ObjUtil;
 import com.cmsr.onebase.framework.common.biz.system.dict.DictDataCommonApi;
 import com.cmsr.onebase.framework.common.biz.system.dict.dto.DictDataRespDTO;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
@@ -125,7 +126,7 @@ public class CorpServiceImpl implements CorpService {
 
         CorpDO corpDO = BeanUtils.toBean(reqVO, CorpDO.class);
         corpDO.setTenantId(TenantContextHolder.getTenantId());
-        corpDO.setStatus(CommonStatusEnum.ENABLE.getStatus());
+
         corpDataRepository.insert(corpDO);
         return corpDO.getId();
     }
@@ -156,22 +157,37 @@ public class CorpServiceImpl implements CorpService {
         }
     }
 
-    private void validCorpNameDuplicate(String name) {
+    private void validCorpNameDuplicate(String name, Long corpId) {
         if (StringUtils.isBlank(name)) {
             return;
         }
         CorpDO corpDO = corpDataRepository.findCorpByName(name);
-        if (corpDO != null) {
+        if (corpDO == null) {
+            return;
+        }
+        // 如果 id 为空，说明不用比较是否为相同名字的租户
+        if (corpId == null) {
+            throw exception(CORP_NAME_EXISTS, name);
+        }
+        if (!corpDO.getId().equals(corpId)) {
             throw exception(CORP_NAME_EXISTS, name);
         }
     }
 
-    private void validCorpIdDuplicate(String corpCode) {
+    private void validCorpCodeDuplicate(String corpCode, Long corpId) {
         if (StringUtils.isBlank(corpCode)) {
             return;
         }
         CorpDO corpDO = corpDataRepository.findCorpByCorpCode(corpCode);
-        if (corpDO != null) {
+        if (corpDO == null) {
+            return;
+        }
+
+        // 如果 id 为空，说明不用比较是否为相同名字的租户
+        if (corpId == null) {
+            throw exception(CORP_ID_EXISTS, corpCode);
+        }
+        if (!corpDO.getId().equals(corpId)) {
             throw exception(CORP_ID_EXISTS, corpCode);
         }
     }
@@ -185,6 +201,10 @@ public class CorpServiceImpl implements CorpService {
         if (checkCorp == null) {
             throw exception(CORP_NO_EXISTS, reqVO.getCorpName());
         }
+        // 用于校验企业名称是否已存在
+        validCorpNameDuplicate(reqVO.getCorpName(),reqVO.getId());
+        validCorpCodeDuplicate(reqVO.getCorpCode(),reqVO.getId());
+
         if (null != reqVO.getUserLimit()) {
             //  检查1：用户数下限，不能小于企业已有开启状态的用户实际数量
             validCorpUserMinCountLimit(reqVO.getUserLimit(), reqVO.getId());
@@ -440,9 +460,9 @@ public class CorpServiceImpl implements CorpService {
 
     public void validCreateCorp(CorpReqVO corpReqVO) {
         // 用于校验企业名称是否已存在
-        validCorpNameDuplicate(corpReqVO.getCorpName());
+        validCorpNameDuplicate(corpReqVO.getCorpName(),null);
         // 用于校验企业ID是否已存在
-        validCorpIdDuplicate(corpReqVO.getCorpCode());
+        validCorpCodeDuplicate(corpReqVO.getCorpCode(),null);
         // 用于校验企业用户数量是否超过限制（如大于500）
         validCorpUserMaxCountLimit(corpReqVO.getUserLimit(), null);
     }

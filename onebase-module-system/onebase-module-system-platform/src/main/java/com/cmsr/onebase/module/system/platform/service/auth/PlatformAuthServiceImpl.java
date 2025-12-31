@@ -175,7 +175,7 @@ public class PlatformAuthServiceImpl implements PlatformAuthService {
         return captchaService.verification(captchaVO);
     }
 
-    private AuthLoginRespVO createTokenAfterLoginSuccess(Long userId, Integer userType, String username, String deviceId, LoginLogTypeEnum logType,String loginPlatform) {
+    private AuthLoginRespVO createTokenAfterLoginSuccess(Long userId, Integer userType, String username, String deviceId, LoginLogTypeEnum logType, String loginPlatform) {
         // 插入登陆日志
         createLoginLog(userId, username, logType, LoginResultEnum.SUCCESS);
         // 创建访问令牌

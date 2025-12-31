@@ -6,19 +6,22 @@ import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.common.util.string.UuidUtils;
 import com.cmsr.onebase.module.app.build.service.AppCommonService;
 import com.cmsr.onebase.module.app.build.util.AuthUtils;
-import com.cmsr.onebase.module.app.build.vo.auth.*;
+import com.cmsr.onebase.module.app.build.vo.auth.AuthRoleCreateReqVO;
+import com.cmsr.onebase.module.app.build.vo.auth.AuthRoleCreateRespVO;
+import com.cmsr.onebase.module.app.core.vo.auth.AuthRoleListRespVO;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleDeptRepository;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleRepository;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleUserRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppApplicationDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthRoleDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthRoleDeptDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthRoleUserDO;
-import com.cmsr.onebase.module.app.core.dto.auth.RoleMemberDTO;
 import com.cmsr.onebase.module.app.core.enums.AppErrorCodeConstants;
 import com.cmsr.onebase.module.app.core.enums.auth.AuthRoleTypeEnum;
+import com.cmsr.onebase.module.app.core.provider.auth.AppAuthRoleServiceProvider;
+import com.cmsr.onebase.module.app.core.vo.auth.AuthRoleDeptAndUsersReqVO;
+import com.cmsr.onebase.module.app.core.vo.auth.AuthRoleMembersPageReqVO;
+import com.cmsr.onebase.module.app.core.vo.auth.AuthRoleMembersPageRespVO;
 import com.cmsr.onebase.module.system.api.dept.DeptApi;
-import com.cmsr.onebase.module.system.api.dept.dto.DeptAndUsersReqDTO;
 import com.cmsr.onebase.module.system.api.dept.dto.DeptAndUsersRespDTO;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -35,7 +38,7 @@ import java.util.List;
 @Slf4j
 @Setter
 @Service
-public class AppAuthRoleServiceImpl implements AppAuthRoleService {
+public class BuildAppAuthRoleServiceImpl implements BuildAppAuthRoleService {
 
     @Autowired
     private AppAuthRoleRepository appAuthRoleRepository;
@@ -52,6 +55,9 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
     @Autowired
     private DeptApi deptApi;
 
+    @Autowired
+    private AppAuthRoleServiceProvider appAuthRoleServiceProvider;
+
     @Override
     public List<AuthRoleListRespVO> getRoleList(Long applicationId) {
         AppApplicationDO applicationDO = appCommonService.validateApplicationExist(applicationId);
@@ -67,7 +73,7 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
     @Override
     public void createDefaultRole(Long applicationId, Long userId) {
         {
-            AppAuthRoleDO existRole = appAuthRoleRepository.findByAppIdAndRoleCode(applicationId, AuthRoleTypeEnum.SYSTEM_ADMIN.getCode());
+            AppAuthRoleDO existRole = appAuthRoleRepository.findOneByAppIdAndRoleType(applicationId, AuthRoleTypeEnum.SYSTEM_ADMIN.getValue());
             if (existRole == null) {
                 AppAuthRoleDO authRoleDO = new AppAuthRoleDO();
                 authRoleDO.setApplicationId(applicationId);
@@ -92,7 +98,7 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
             }
         }
         {
-            AppAuthRoleDO existRole = appAuthRoleRepository.findByAppIdAndRoleCode(applicationId, AuthRoleTypeEnum.SYSTEM_USER.getCode());
+            AppAuthRoleDO existRole = appAuthRoleRepository.findOneByAppIdAndRoleType(applicationId, AuthRoleTypeEnum.SYSTEM_USER.getValue());
             if (existRole == null) {
                 AppAuthRoleDO authRoleDO = new AppAuthRoleDO();
                 authRoleDO.setApplicationId(applicationId);
@@ -104,7 +110,7 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
             }
         }
         {
-            AppAuthRoleDO existRole = appAuthRoleRepository.findByAppIdAndRoleCode(applicationId, AuthRoleTypeEnum.OUTER_USER.getCode());
+            AppAuthRoleDO existRole = appAuthRoleRepository.findOneByAppIdAndRoleType(applicationId, AuthRoleTypeEnum.OUTER_USER.getValue());
             if (existRole == null) {
                 AppAuthRoleDO authRoleDO = new AppAuthRoleDO();
                 authRoleDO.setApplicationId(applicationId);
@@ -120,42 +126,9 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
 
     @Override
     public PageResult<AuthRoleMembersPageRespVO> pageRoleMembers(AuthRoleMembersPageReqVO reqVO) {
-        appCommonService.validateRoleExist(reqVO.getRoleId());
-        PageResult<RoleMemberDTO> result = appAuthRoleRepository.findRoleMembers(reqVO.getRoleId(), reqVO.getMemberName(), reqVO.getMemberType(), reqVO);
-        List<AuthRoleMembersPageRespVO> voResult = result.getList().stream().map(v -> {
-            AuthRoleMembersPageRespVO vo = new AuthRoleMembersPageRespVO();
-            vo.setId(v.getId());
-            vo.setMemberId(v.getMemberId());
-            vo.setName(v.getMemberName());
-            vo.setAvatar(v.getAvatar());
-            vo.setAccount(v.getAccount());
-            vo.setCreateSourceText(toCreateSourceText(v.getCreateSource()));
-            vo.setType(v.getMemberType());
-            vo.setDeptName(v.getDeptName());
-            if (RoleMemberDTO.MEMBER_TYPE_USER.equals(v.getMemberType())) {
-                vo.setTypeName("成员");
-            } else if (v.getIsIncludeChild() != null && v.getIsIncludeChild() == 0) {
-                vo.setTypeName("本部门");
-            } else if (v.getIsIncludeChild() != null && v.getIsIncludeChild() == 1) {
-                vo.setTypeName("本部门及子部门");
-            }
-            return vo;
-        }).toList();
-        return new PageResult(voResult, result.getTotal());
+        return appAuthRoleServiceProvider.pageRoleMembers(reqVO);
     }
 
-    private String toCreateSourceText(String createSource) {
-        if (createSource == null || createSource.isEmpty()) {
-            return "";
-        }
-        if ("back".equals(createSource)) {
-            return "后台创建";
-        }
-        if ("self".equals(createSource)) {
-            return "自主注册";
-        }
-        return "";
-    }
 
     @Override
     public AuthRoleCreateRespVO createRole(AuthRoleCreateReqVO reqVO) {
@@ -185,34 +158,18 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void addRoleUser(AuthRoleAddUserReqVO reqVO) {
-        AppAuthRoleDO authRoleDO = appCommonService.validateRoleExist(reqVO.getRoleId());
-        appAuthRoleUserRepository.addRoleUser(reqVO.getRoleId(), reqVO.getUserIds());
+    public void addRoleUser(com.cmsr.onebase.module.app.core.vo.auth.AuthRoleAddUserReqVO reqVO) {
+        appAuthRoleServiceProvider.addRoleUser(reqVO);
     }
 
     @Override
-    public void addRoleDept(AuthRoleAddDeptReqVO reqVO) {
-        AppAuthRoleDO authRoleDO = appCommonService.validateRoleExist(reqVO.getRoleId());
-        appAuthRoleDeptRepository.addRoleDept(reqVO.getRoleId(), reqVO.getDeptIds(), reqVO.getIsIncludeChild());
+    public void addRoleDept(com.cmsr.onebase.module.app.core.vo.auth.AuthRoleAddDeptReqVO reqVO) {
+        appAuthRoleServiceProvider.addRoleDept(reqVO);
     }
 
     @Override
-    public void deleteRoleMember(AuthRoleDeleteMemberReqVO reqVO) {
-        AppAuthRoleDO authRoleDO = appCommonService.validateRoleExist(reqVO.getRoleId());
-        for (AuthRoleDeleteMemberReqVO.DeleteMember member : reqVO.getMembers()) {
-            if (RoleMemberDTO.MEMBER_TYPE_USER.equalsIgnoreCase(member.getMemberType())) {
-                AppAuthRoleUserDO authRoleUserDO = appAuthRoleUserRepository.getById(member.getId());
-                if (authRoleUserDO != null) {
-                    appAuthRoleUserRepository.removeById(member.getId());
-                }
-            }
-            if (RoleMemberDTO.MEMBER_TYPE_DEPT.equalsIgnoreCase(member.getMemberType())) {
-                AppAuthRoleDeptDO authRoleDeptDO = appAuthRoleDeptRepository.getById(member.getId());
-                if (authRoleDeptDO != null) {
-                    appAuthRoleDeptRepository.removeById(member.getId());
-                }
-            }
-        }
+    public void deleteRoleMember(com.cmsr.onebase.module.app.core.vo.auth.AuthRoleDeleteMemberReqVO reqVO) {
+        appAuthRoleServiceProvider.deleteRoleMember(reqVO);
     }
 
     @Override
@@ -229,13 +186,7 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
 
     @Override
     public DeptAndUsersRespDTO listDeptUsers(AuthRoleDeptAndUsersReqVO reqVO) {
-        List<Long> userIds = appAuthRoleUserRepository.findByRoleId(reqVO.getRoleId()).stream().map(v -> v.getUserId()).toList();
-        DeptAndUsersReqDTO deptAndUsersReqDTO = new DeptAndUsersReqDTO();
-        deptAndUsersReqDTO.setDeptId(reqVO.getDeptId());
-        deptAndUsersReqDTO.setKeywords(reqVO.getKeywords());
-        deptAndUsersReqDTO.setExcludeUserIds(userIds);
-        deptAndUsersReqDTO.setUserType(reqVO.getUserType());
-        return deptApi.getDeptAndUsers(deptAndUsersReqDTO).getData();
+        return appAuthRoleServiceProvider.listDeptUsers(reqVO);
     }
 
     private void checkRoleNameExists(Long applicationId, String roleName) {

@@ -55,7 +55,7 @@ tenant-id: {{adminTenantId}}
 
 
 ### 请求 /delete 接口 => 成功
-POST {{baseUrl}}/system/corp-app-relation/corp-no-applications-list?corpId=146825072112500736&appName=订单系统
+POST {{baseUrl}}/system/corp-app-relation/corp-no-relation-app-list
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
