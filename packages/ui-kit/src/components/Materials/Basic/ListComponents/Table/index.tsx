@@ -66,6 +66,7 @@ const XTable = memo(
       showAddBtn?: boolean;
       refresh?: number;
       xTableSelectProps?: XTableSelectProps;
+      pageSetType?: number;
     }
   ) => {
     useSignals();
@@ -82,7 +83,7 @@ const XTable = memo(
       setFlows,
       setBpmInstanceId
     } = pagesRuntimeSignal;
-    const { runtime = true, showFromPageData, showAddBtn = true, preview } = props;
+    const { runtime = true, showFromPageData, showAddBtn = true, preview, pageSetType } = props;
     const hasOperationPermission = true;
 
     const {
@@ -116,7 +117,6 @@ const XTable = memo(
       refresh,
       filterCondition
     } = props;
-
     const { curMenu } = menuSignal;
     const [tableForm] = Form.useForm();
 
@@ -657,6 +657,7 @@ const XTable = memo(
                   runtime={runtime}
                   onSearch={handleSearch}
                   onReset={handleReset}
+                  pageSetType={pageSetType}
                 />
               </Form>
             </div>
