@@ -12,13 +12,13 @@ import {
   PageMethodV2Params,
   type AppEntityField,
 } from '@onebase/app';
-import { pagesRuntimeSignal } from '@onebase/common';
+import { menuPermissionSignal, pagesRuntimeSignal } from '@onebase/common';
 import { BUTTON_OPTIONS, BUTTON_VALUES, downloadFileByUrl, ENTITY_FIELD_TYPE, getFieldOptionsConfig, menuDictSignal, RedirectMethod, useAppEntityStore, useFormEditorSignal } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import { memo, useEffect, useState } from 'react';
 import TableSearch from './tableSerach';
-import './index.css';
 import type { XLoadMoreConfig } from './schema';
+import './index.css';
 
 type XTableSelectProps = {
   showSelect: boolean;
@@ -40,6 +40,7 @@ const XLoadMore = memo(
     useSignals();
 
     const { pageComponentSchemas } = useFormEditorSignal;
+    const { canCreate, canEdit, canDelete } = menuPermissionSignal;
     const { setRowDataId, setDrawerPageId, setDetailPageViewId } = pagesRuntimeSignal;
     const { runtime = true, showFromPageData, showAddBtn = true } = props;
     const hasOperationPermission = true;
@@ -345,7 +346,6 @@ const XLoadMore = memo(
       window.modalInstance = Dialog.confirm({
         title: '删除确认',
         children: '确定删除？删除后不可恢复！',
-        platform: 'ios',
         okText: '删除',
         cancelText: '取消',
         onOk: () => {
@@ -410,7 +410,7 @@ const XLoadMore = memo(
       if (noEdit) return;
       return (
         <div className="list-body-item-btns">
-          <Button
+          {canDelete.value && <Button
             color="#1D2129"
             borderColor="#86909C"
             type="ghost"
@@ -419,10 +419,10 @@ const XLoadMore = memo(
             onClick={() => handleDeleteAction(item.id)}
           >
             删除
-          </Button>
-          <Button type="primary" size="mini" className="list-body-item-btn" onClick={() => handleEdit(item.id, true)}>
+          </Button>}
+          {canEdit.value && <Button type="primary" size="mini" className="list-body-item-btn" onClick={() => handleEdit(item.id, true)}>
             编辑
-          </Button>
+          </Button>}
         </div>
       );
     };
@@ -471,7 +471,7 @@ const XLoadMore = memo(
     return (
       <div className="loadmore-list-wrapper-OBMobile">
         {getTopSearch()}
-        {showAddBtn && <div className="list-create-btn" onClick={handleCreate}></div>}
+        {showAddBtn && canCreate.value && <div className="list-create-btn" onClick={handleCreate}></div>}
         <div className="list-body-wrapper">
           {(editMode ? [{}] : tableData).map((item, index) => (
             <div key={index} className="list-body-item-wrapper" onClick={() => handleRowClick(item)}>
