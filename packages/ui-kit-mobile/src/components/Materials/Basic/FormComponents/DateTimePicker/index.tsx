@@ -114,7 +114,6 @@ const XDateTimePicker = memo((props: XDateTimePickerConfig & { runtime?: boolean
       field={fieldId}
       rules={rules}
       layout={layout}
-      initialValue={form?.getFieldValue(fieldId)}
       style={{
         textAlign,
         pointerEvents: (!runtime || detailMode) ? 'none' : 'unset',

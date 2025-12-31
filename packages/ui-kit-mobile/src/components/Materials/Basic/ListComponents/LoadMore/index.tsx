@@ -13,7 +13,7 @@ import {
   type AppEntityField,
 } from '@onebase/app';
 import { pagesRuntimeSignal } from '@onebase/common';
-import { BUTTON_OPTIONS, BUTTON_VALUES, downloadFileByUrl, ENTITY_FIELD_TYPE, getFieldOptionsConfig, RedirectMethod, useAppEntityStore, useFormEditorSignal } from '@onebase/ui-kit';
+import { BUTTON_OPTIONS, BUTTON_VALUES, downloadFileByUrl, ENTITY_FIELD_TYPE, getFieldOptionsConfig, menuDictSignal, RedirectMethod, useAppEntityStore, useFormEditorSignal } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import { memo, useEffect, useState } from 'react';
 import TableSearch from './tableSerach';
@@ -64,6 +64,7 @@ const XLoadMore = memo(
     } = props;
 
     const { curMenu } = menuSignal;
+    const { appDict } = menuDictSignal;
     const { mainEntity, subEntities } = useAppEntityStore();
 
     const [finalColumns, setFinalColumns] = useState<any[]>();
@@ -263,8 +264,8 @@ const XLoadMore = memo(
                 field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE
             );
             if (multiSelectField && newItem[key] && Array.isArray(newItem[key])) {
-              const newOptions = await getFieldOptionsConfig([tableName, key], mainEntity, subEntities)
-              newItem[key] = newOptions.filter(op => newItem[key].find(v => op.id === v.id)).map(v => v.label).join(', ')
+              const newOptions = await getFieldOptionsConfig([tableName, key], mainEntity, subEntities, appDict.value);
+              newItem[key] = newOptions.filter(op => newItem[key].find(v => op.id === v.id)).map(v => v.label).join('，');
             }
 
             // 人员选择单选
@@ -303,7 +304,7 @@ const XLoadMore = memo(
             );
             if (selectField) {
               const curValue = newItem[key];
-              const newOptions = await getFieldOptionsConfig([tableName, key], mainEntity, subEntities)
+              const newOptions = await getFieldOptionsConfig([tableName, key], mainEntity, subEntities, appDict.value);
               newItem[key] = newOptions.find(op => op.id === curValue?.id)?.label || '-';
             }
 
