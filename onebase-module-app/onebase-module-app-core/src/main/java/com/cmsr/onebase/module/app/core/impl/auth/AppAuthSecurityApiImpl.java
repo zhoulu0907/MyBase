@@ -3,15 +3,19 @@ package com.cmsr.onebase.module.app.core.impl.auth;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.module.app.api.security.AppAuthSecurityApi;
 import com.cmsr.onebase.module.app.api.security.bo.*;
+import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthViewRepository;
 import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
+import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthPermissionDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthViewDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppMenuDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePageDO;
 import com.cmsr.onebase.module.app.core.dto.auth.UserRoleDTO;
 import com.cmsr.onebase.module.app.core.enums.menu.MenuTypeEnum;
-import com.cmsr.onebase.module.app.core.provider.auth.AppAuthDataGroupProvider;
-import com.cmsr.onebase.module.app.core.provider.auth.AppAuthFieldProvider;
-import com.cmsr.onebase.module.app.core.provider.auth.AppAuthPermissionProvider;
-import com.cmsr.onebase.module.app.core.provider.auth.AppAuthRoleProvider;
+import com.cmsr.onebase.module.app.core.provider.auth.AppAuthSecurityDataGroupProvider;
+import com.cmsr.onebase.module.app.core.provider.auth.AppAuthSecurityFieldProvider;
+import com.cmsr.onebase.module.app.core.provider.auth.AppAuthSecurityPermissionProvider;
+import com.cmsr.onebase.module.app.core.provider.auth.AppAuthSecurityRoleProvider;
 import com.cmsr.onebase.module.app.core.provider.menu.AppMenuProvider;
 import com.cmsr.onebase.module.app.core.utils.CacheUtils;
 import lombok.Setter;
@@ -43,19 +47,25 @@ public class AppAuthSecurityApiImpl implements AppAuthSecurityApi {
     private AppMenuRepository appMenuRepository;
 
     @Autowired
-    private AppAuthRoleProvider appAuthRoleProvider;
+    private AppAuthSecurityRoleProvider appAuthSecurityRoleProvider;
 
     @Autowired
     private AppMenuProvider appMenuProvider;
 
     @Autowired
-    private AppAuthPermissionProvider appAuthPermissionProvider;
+    private AppAuthSecurityPermissionProvider appAuthSecurityPermissionProvider;
 
     @Autowired
-    private AppAuthDataGroupProvider appAuthDataGroupProvider;
+    private AppAuthSecurityDataGroupProvider appAuthSecurityDataGroupProvider;
 
     @Autowired
-    private AppAuthFieldProvider appAuthFieldProvider;
+    private AppAuthSecurityFieldProvider appAuthSecurityFieldProvider;
+
+    @Autowired
+    private AppPageRepository appPageRepository;
+
+    @Autowired
+    private AppAuthViewRepository appAuthViewRepository;
 
     /**
      * 通用缓存获取方法
@@ -141,6 +151,14 @@ public class AppAuthSecurityApiImpl implements AppAuthSecurityApi {
         return getFromCache(key, field, () -> doGetMenuFieldPermission(userId, applicationId, menuId));
     }
 
+    @Override
+    public List<String> getMenuViewUuids(Long userId, Long applicationId, Long menuId) {
+        String key = CacheUtils.authHashKey(userId, applicationId);
+        String field = CacheUtils.fieldForView(menuId);
+        return getFromCache(key, field, () -> doGetMenuViewUuids(userId, applicationId, menuId));
+    }
+
+
     public UserRoleDTO getUserRoleDTO(Long userId, Long applicationId) {
         String hashKey = CacheUtils.authHashKey(userId, applicationId);
         String field = CacheUtils.fieldForUserRole();
@@ -148,7 +166,7 @@ public class AppAuthSecurityApiImpl implements AppAuthSecurityApi {
     }
 
     private UserRoleDTO doGetUserRoleDTO(Long userId, Long applicationId) {
-        return appAuthRoleProvider.findUserRoleByApplication(userId, applicationId);
+        return appAuthSecurityRoleProvider.findUserRoleByApplication(userId, applicationId);
     }
 
     public boolean doCheckMenuEntity(Long applicationId, Long menuId, String entityUuid) {
@@ -166,14 +184,14 @@ public class AppAuthSecurityApiImpl implements AppAuthSecurityApi {
 
 
     public List<Long> doGetVisibleMenuIds(Long userId, Long applicationId) {
-        UserRoleDTO userRoleDTO = appAuthRoleProvider.findUserRoleByApplication(userId, applicationId);
+        UserRoleDTO userRoleDTO = getUserRoleDTO(userId, applicationId);
         List<AppMenuDO> menuDOS = appMenuRepository.findByApplicationIdAndType(applicationId,
                 Set.of(MenuTypeEnum.PAGE.getValue(), MenuTypeEnum.GROUP.getValue()));
         if (userRoleDTO.isAdminRole()) {
             return menuDOS.stream().map(AppMenuDO::getId).toList();
         }
         Set<String> roleUuids = userRoleDTO.getRoleUuids();
-        List<AppAuthPermissionDO> permissions = appAuthPermissionProvider.findPermissions(applicationId, roleUuids);
+        List<AppAuthPermissionDO> permissions = appAuthSecurityPermissionProvider.findPermissions(applicationId, roleUuids);
         Set<String> menuUuidBlacklist = new HashSet<>();
         for (AppAuthPermissionDO permission : permissions) {
             if (!NumberUtils.INTEGER_ONE.equals(permission.getIsPageAllowed()) && StringUtils.isNotEmpty(permission.getMenuUuid()))
@@ -184,7 +202,7 @@ public class AppAuthSecurityApiImpl implements AppAuthSecurityApi {
 
     public OperationPermission doGetMenuOperationPermission(Long userId, Long applicationId, Long menuId) {
         OperationPermission operationPermission = new OperationPermission();
-        UserRoleDTO userRoleDTO = appAuthRoleProvider.findUserRoleByApplication(userId, applicationId);
+        UserRoleDTO userRoleDTO = getUserRoleDTO(userId, applicationId);
         if (userRoleDTO != null && userRoleDTO.isAdminRole()) {
             operationPermission.allAllow();
             return operationPermission;
@@ -198,7 +216,7 @@ public class AppAuthSecurityApiImpl implements AppAuthSecurityApi {
         AppMenuDO appMenuDO = appMenuProvider.findByMenuId(menuId);
         String menuUuid = appMenuDO.getMenuUuid();
         //
-        List<AppAuthPermissionDO> permissionDOs = appAuthPermissionProvider.findPermissions(applicationId, roleUuids, menuUuid);
+        List<AppAuthPermissionDO> permissionDOs = appAuthSecurityPermissionProvider.findPermissions(applicationId, roleUuids, menuUuid);
         for (AppAuthPermissionDO permissionDO : permissionDOs) {
             if (NumberUtils.INTEGER_ONE.equals(permissionDO.getIsPageAllowed())) {
                 operationPermission.setPageAllowed(true);
@@ -232,7 +250,7 @@ public class AppAuthSecurityApiImpl implements AppAuthSecurityApi {
 
     public DataPermission doGetMenuDataPermission(Long userId, Long applicationId, Long menuId) {
         DataPermission dataPermission = new DataPermission();
-        UserRoleDTO userRoleDTO = appAuthRoleProvider.findUserRoleByApplication(userId, applicationId);
+        UserRoleDTO userRoleDTO = getUserRoleDTO(userId, applicationId);
         if (userRoleDTO != null && userRoleDTO.isAdminRole()) {
             dataPermission.setAllAllowed(true);
             dataPermission.setAllDenied(false);
@@ -248,7 +266,7 @@ public class AppAuthSecurityApiImpl implements AppAuthSecurityApi {
         AppMenuDO appMenuDO = appMenuProvider.findByMenuId(menuId);
         String menuUuid = appMenuDO.getMenuUuid();
         //
-        List<DataPermissionGroup> dataGroups = appAuthDataGroupProvider.findDataGroups(applicationId, roleUuids, menuUuid);
+        List<DataPermissionGroup> dataGroups = appAuthSecurityDataGroupProvider.findDataGroups(applicationId, roleUuids, menuUuid);
         dataPermission.setGroups(dataGroups);
         dataPermission.setAllAllowed(false);
         dataPermission.setAllDenied(false);
@@ -259,7 +277,7 @@ public class AppAuthSecurityApiImpl implements AppAuthSecurityApi {
 
     public FieldPermission doGetMenuFieldPermission(Long userId, Long applicationId, Long menuId) {
         FieldPermission fieldPermission = new FieldPermission();
-        UserRoleDTO userRoleDTO = appAuthRoleProvider.findUserRoleByApplication(userId, applicationId);
+        UserRoleDTO userRoleDTO = getUserRoleDTO(userId, applicationId);
         if (userRoleDTO != null && userRoleDTO.isAdminRole()) {
             fieldPermission.setAllAllowed(true);
             fieldPermission.setAllDenied(false);
@@ -286,7 +304,7 @@ public class AppAuthSecurityApiImpl implements AppAuthSecurityApi {
         AppMenuDO appMenuDO = appMenuProvider.findByMenuId(menuId);
         String menuUuid = appMenuDO.getMenuUuid();
         //
-        List<FieldPermissionItem> fields = appAuthFieldProvider.findFields(applicationId, roleUuids, menuUuid);
+        List<FieldPermissionItem> fields = appAuthSecurityFieldProvider.findFields(applicationId, roleUuids, menuUuid);
         fieldPermission.setAllAllowed(false);
         fieldPermission.setAllDenied(false);
         fieldPermission.setFields(fields);
@@ -294,5 +312,29 @@ public class AppAuthSecurityApiImpl implements AppAuthSecurityApi {
         return fieldPermission;
     }
 
+
+    private List<String> doGetMenuViewUuids(Long userId, Long applicationId, Long menuId) {
+        UserRoleDTO userRoleDTO = getUserRoleDTO(userId, applicationId);
+        if (userRoleDTO.isAdminRole()) {
+            return findMenuAllViews(applicationId, menuId);
+        }
+        OperationPermission menuOperationPermission = getMenuOperationPermission(userId, applicationId, menuId);
+        if (menuOperationPermission.isAllViewsAllowed()) {
+            return findMenuAllViews(applicationId, menuId);
+        }
+        //
+        Set<String> roleUuids = userRoleDTO.getRoleUuids();
+        AppMenuDO menuDO = appMenuRepository.getById(menuId);
+        String menuUuid = menuDO.getMenuUuid();
+        //
+        List<AppAuthViewDO> authViewDOS = appAuthViewRepository.findByAppIdAndRoleUuidsAndMenuUuid(applicationId, roleUuids, menuUuid);
+        List<String> result = authViewDOS.stream().filter(v -> NumberUtils.INTEGER_ONE.equals(v.getIsAllowed())).map(AppAuthViewDO::getViewUuid).toList();
+        return result;
+    }
+
+    private List<String> findMenuAllViews(Long applicationId, Long menuId) {
+        List<AppResourcePageDO> pages = appPageRepository.findPagesByMenuId(menuId);
+        return pages.stream().map(AppResourcePageDO::getPageUuid).toList();
+    }
 
 }

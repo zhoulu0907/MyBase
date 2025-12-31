@@ -46,4 +46,11 @@ public class AppAuthViewRepository extends BaseBizRepository<AppAuthViewMapper, 
         return this.list(queryWrapper);
     }
 
+    public AppAuthViewDO findByAppIdAndUuid(Long applicationId, String viewUuid) {
+        QueryWrapper queryWrapper = this.query()
+                .where(APP_AUTH_VIEW.APPLICATION_ID.eq(applicationId))
+                .where(APP_AUTH_VIEW.VIEW_UUID.eq(viewUuid));
+        return this.getOne(queryWrapper);
+    }
+
 }

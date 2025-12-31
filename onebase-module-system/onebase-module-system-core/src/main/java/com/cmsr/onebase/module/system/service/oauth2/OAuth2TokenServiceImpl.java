@@ -61,7 +61,7 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public OAuth2AccessTokenDO createAccessToken(Long userId, Integer userType, String clientId, List<String> scopes) {
-        return createAccessTokenWithMode(null, null, null, userId, userType, clientId, scopes,null);
+        return createAccessTokenWithMode(null, null, null, userId, userType, clientId, scopes, null);
     }
 
     @Override
@@ -198,7 +198,7 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
         return oauth2AccessTokenDataRepository.findPage(reqVO);
     }
 
-    private OAuth2AccessTokenDO createOAuth2AccessToken(String runMode, OAuth2RefreshTokenDO refreshTokenDO, OAuth2ClientDO clientDO,String loginPlatform) {
+    private OAuth2AccessTokenDO createOAuth2AccessToken(String runMode, OAuth2RefreshTokenDO refreshTokenDO, OAuth2ClientDO clientDO, String loginPlatform) {
         OAuth2AccessTokenDO accessTokenDO = new OAuth2AccessTokenDO().setAccessToken(generateAccessToken())
                 .setRunMode(runMode)
                 .setUserId(refreshTokenDO.getUserId()).setUserType(refreshTokenDO.getUserType())

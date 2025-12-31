@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.dashboard.build.api;
 
 import cn.hutool.core.bean.BeanUtil;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.module.dashboard.build.dal.dataobject.DashboardTemplateDO;
 import com.cmsr.onebase.module.dashboard.build.model.DashboardProject;
 import com.cmsr.onebase.module.dashboard.build.model.DashboardProjectData;
@@ -10,6 +11,7 @@ import com.cmsr.onebase.module.dashboard.build.service.DashboardProjectService;
 import com.cmsr.onebase.module.screen.api.DashboardProjectApi;
 import com.cmsr.onebase.module.screen.api.dto.DashboardProjectDTO;
 import jakarta.annotation.Resource;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -43,17 +45,17 @@ public class DashboardProjectApiImpl implements DashboardProjectApi {
     }
 
     @Override
-    public Long createDashboardByTemplate(Long templateId) {
+    public Long createDashboardByTemplate(Long templateId, String dashboardName) {
         // 查询模板信息，创建数据大屏
         DashboardTemplateDO dashboardTemplate = dashboardTemplateService.getDashboardTemplate(templateId);
         if (dashboardTemplate == null){
             return null;
         }
-        Long applicationId = dashboardTemplate.getAppId();
+        Long applicationId = ApplicationManager.getApplicationId();
 
         DashboardProject dashboardProject = new DashboardProject();
-        dashboardProject.setProjectName("新大屏");
-        dashboardProject.setState(-1);
+        dashboardProject.setProjectName(dashboardName);
+        dashboardProject.setState(NumberUtils.INTEGER_MINUS_ONE);
         dashboardProject.setAppId(applicationId);
         dashboardProject.setIndexImage(dashboardTemplate.getIndexImage());
         dashboardProjectService.save(dashboardProject);

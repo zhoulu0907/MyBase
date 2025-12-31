@@ -59,20 +59,17 @@ public class RuntimeDictDataController {
         return success(BeanUtils.toBean(list, DictDataSimpleRespVO.class));
     }
 
-    @GetMapping("/simple-list-by-types")
-    @Operation(summary = "根据多个dict type获得字典数据列表", description = "批量获取多个字典类型的数据，按dictType分组返回")
-    @Parameter(name = "dictTypes", description = "字典类型列表", required = false)
-    @Parameter(name = "dictTypeIds", description = "字典类型ID列表", required = false)
+    @PostMapping("/simple-list-by-types")
+    @Operation(summary = "根据多个dict type获得字典数据列表", description = "批量获取多个字典类型的数据，按dictTypeId分组返回")
     // 无需添加权限认证，因为前端全局都需要
-    public CommonResult<Map<String, List<DictDataSimpleRespVO>>> getSimpleDictDataListByTypes(
-            @RequestParam(value = "dictTypes", required = false) List<String> dictTypes,
-            @RequestParam(value = "dictTypeIds", required = false) List<Long> dictTypeIds) {
+    public CommonResult<Map<Long, List<DictDataSimpleRespVO>>> getSimpleDictDataListByTypes(
+            @Valid @RequestBody DictDataListByTypesReqVO reqVO) {
         // 调用 Service 层批量查询（封装了所有业务逻辑）
-        Map<String, List<DictDataDO>> dictDataMap = dictDataService.getDictDataMapByTypesAndTypeIds(dictTypes, dictTypeIds);
+        Map<Long, List<DictDataDO>> dictDataMap = dictDataService.getDictDataMapByTypesAndTypeIds(reqVO.getDictTypes(), reqVO.getDictTypeIds());
         
         // 转换DO到VO
-        Map<String, List<DictDataSimpleRespVO>> result = new HashMap<>();
-        for (Map.Entry<String, List<DictDataDO>> entry : dictDataMap.entrySet()) {
+        Map<Long, List<DictDataSimpleRespVO>> result = new HashMap<>();
+        for (Map.Entry<Long, List<DictDataDO>> entry : dictDataMap.entrySet()) {
             result.put(entry.getKey(), BeanUtils.toBean(entry.getValue(), DictDataSimpleRespVO.class));
         }
         

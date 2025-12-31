@@ -2,9 +2,12 @@ package com.cmsr.onebase.module.system.dal.dataobject.dept;
 
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.orm.entity.BaseTenantEntity;
+import com.mybatisflex.annotation.Table;
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Table;
 import lombok.Data;
+
+import java.util.Set;
 
 /**
  * 部门表
@@ -14,8 +17,8 @@ import lombok.Data;
 @Table(value = "system_dept")
 @Data
 public class DeptDO extends BaseTenantEntity {
-
-    public static final Long PARENT_ID_ROOT = 0L;
+    public static final String P_ID           = "id";
+    public static final Long   PARENT_ID_ROOT = 0L;
 
     // 列名常量
     public static final String NAME           = "name";
@@ -26,7 +29,7 @@ public class DeptDO extends BaseTenantEntity {
     public static final String EMAIL          = "email";
     public static final String STATUS         = "status";
     public static final String REMARK         = "remark";
-    public static final String ADMIN_USER_ID  = "admin_user_id";
+    public static final String ADMIN_USER_IDS  = "admin_user_ids";
     public static final String CORP_ID        = "corp_id";
     public static final String DEPT_TYPE      = "dept_type";
     public static final String DEPT_CODE      = "dept_code";
@@ -56,10 +59,11 @@ public class DeptDO extends BaseTenantEntity {
     private Long    leaderUserId;
 
     /**
-     * 管理员id
+     * 接口人UserIds
      */
-    @Column(value = ADMIN_USER_ID)
-    private Long adminUserId;
+
+    @Column(value = ADMIN_USER_IDS, typeHandler = SetLongJsonTypeHandler.class)
+    private Set<Long> adminUserIds;
 
     /**
      * 联系电话

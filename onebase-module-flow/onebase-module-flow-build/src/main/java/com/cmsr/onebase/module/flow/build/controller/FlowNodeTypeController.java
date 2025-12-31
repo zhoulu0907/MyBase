@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @Author：huangjie
  * @Date：2025/11/17 16:01
  */
-@Tag(name = "节点分类", description = "流程节点分类")
+@Tag(name = "废弃-节点分类", description = "流程节点分类")
 @RestController
 @RequestMapping("/flow/node-type")
 @Validated
