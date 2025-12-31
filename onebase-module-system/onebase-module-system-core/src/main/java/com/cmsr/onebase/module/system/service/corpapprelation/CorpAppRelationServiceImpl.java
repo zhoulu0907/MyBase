@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.system.service.corpapprelation;
 
 
+import com.cmsr.onebase.framework.common.enums.CommonPublishModelEnum;
 import com.cmsr.onebase.framework.common.enums.CorpAppReationStatusEnum;
 import com.cmsr.onebase.framework.common.enums.CorpStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
@@ -26,6 +27,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.Comparator;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.APPLICATION_AUTH_TENANT_NOT_EXISTS;
@@ -239,6 +241,17 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
     @Override
     public List<ApplicationDTO> getCorpNoRelationAppList(CorpRelationAppReqVO relationAppReqVO) {
         List<ApplicationDTO> applicationDTOList = appApplicationApi.findAppApplicationByAppName(relationAppReqVO.getAppName());
+        // 过滤，只保留 publishModel 为 SAAS 的应用
+        applicationDTOList = applicationDTOList.stream()
+                .filter(app -> CommonPublishModelEnum.SaaSModel.getValue().equals(app.getPublishModel()))
+                .collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(applicationDTOList)) {
+            return  new ArrayList<>();
+        }
+        // 按创建时间倒序排列
+        applicationDTOList = applicationDTOList.stream()
+                .sorted(Comparator.comparing(ApplicationDTO::getCreateTime, Comparator.nullsLast(Comparator.naturalOrder())).reversed())
+                .collect(Collectors.toList());
         if (null == relationAppReqVO.getCorpId()) {
             // 用于企业创建时拉取全部应用
             return applicationDTOList;
