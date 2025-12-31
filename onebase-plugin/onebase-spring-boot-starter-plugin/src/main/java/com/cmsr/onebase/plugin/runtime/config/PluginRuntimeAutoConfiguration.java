@@ -144,7 +144,7 @@ public class PluginRuntimeAutoConfiguration {
         if (mode.isDev()) {
             strategy = devClassPaths.isEmpty()
                     ? "DEV 模式未配置 devClassPaths，不会加载任何扩展点（需配置 onebase.plugin.dev-class-paths）"
-                    : String.format("扫描配置目录中的扩展点实现类 %s", String.join(", ", devClassPaths));
+                    : String.format("扫描配置目录 %s", String.join(", ", devClassPaths));
         } else {
             strategy = String.format("加载插件目录 %s 中的 ZIP/JAR 插件包", this.absolutePath);
         }
