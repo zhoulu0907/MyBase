@@ -18,7 +18,7 @@ import {
 } from '@onebase/app';
 import { menuPermissionSignal, TokenManager, UserPermissionManager } from '@onebase/common';
 import { getPermissionInfo, getDictDataByTypes } from '@onebase/platform-center';
-import { useAppEntityStore, menuDictSignal } from '@onebase/ui-kit';
+import { useAppEntityStore, menuDictSignal, setMainMetaData } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
@@ -118,64 +118,7 @@ const Runtime: React.FC = () => {
 
     const [entityWithChildren] = entityListWithFields;
     if (entityWithChildren) {
-      setMainEntity({
-        entityId: entityWithChildren.entityId,
-        entityUuid: entityWithChildren.entityUuid,
-        tableName: entityWithChildren.tableName,
-        entityName: entityWithChildren.entityName,
-        entityType: ENTITY_TYPE.MAIN,
-        fields: entityWithChildren.fields
-      });
-      if (entityWithChildren.childEntities && entityWithChildren.childEntities.length > 0) {
-        // 返回新Promise对象，当所有输入Promise成功时返回结果数组（顺序与输入一致）
-        const allChildFields = await Promise.all(
-          entityWithChildren.childEntities.map(async (entity: ChildEntity) => {
-            return entity.childFields;
-          })
-        );
-        const subEntities = entityWithChildren.childEntities.map((entity: ChildEntity, index: number) => ({
-          entityId: entity.childEntityId,
-          entityUuid: entity.childEntityUuid,
-          tableName: entity.childTableName,
-          entityName: entity.childEntityName,
-          entityType: ENTITY_TYPE.SUB,
-          fields: allChildFields[index]
-        }));
-
-        setSubEntities({
-          entities: subEntities
-        });
-      } else {
-        setSubEntities({ entities: [] });
-      }
-      // 收集主表字段中的 dictTypeId
-      const mainDictTypeIds = entityWithChildren.fields
-        .filter((field: AppEntityField) => field.dictTypeId)
-        .map((field: AppEntityField) => field.dictTypeId!);
-
-      // 收集子表字段中的 dictTypeId
-      const childDictTypeIds: string[] = [];
-      if (entityWithChildren.childEntities && entityWithChildren.childEntities.length > 0) {
-        entityWithChildren.childEntities.forEach((childEntity: ChildEntity) => {
-          if (childEntity.childFields) {
-            const childFieldDictTypeIds = childEntity.childFields
-              .filter((field: AppEntityField) => field.dictTypeId)
-              .map((field: AppEntityField) => field.dictTypeId!);
-            childDictTypeIds.push(...childFieldDictTypeIds);
-          }
-        });
-      }
-
-      // 合并并去重
-      const dictTypeIds = Array.from(new Set([...mainDictTypeIds, ...childDictTypeIds]));
-      console.log('dictTypeIds: ', dictTypeIds);
-
-      const res = await getDictDataByTypes({ dictTypeIds: dictTypeIds });
-      console.log('dictDataList: ', res);
-
-      if (batchSetAppDict) {
-        batchSetAppDict(res as any);
-      }
+      setMainMetaData(entityWithChildren, setMainEntity, setSubEntities, batchSetAppDict);
     }
   };
 
