@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.system.dal.dataobject.dept;
 
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.orm.entity.BaseTenantEntity;
-import com.mybatisflex.annotation.Table;
+import com.cmsr.onebase.module.system.dal.flex.typehandler.SetLongJsonTypeHandler;
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Table;
 import lombok.Data;
