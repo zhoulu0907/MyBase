@@ -348,10 +348,23 @@ public class UserServiceImpl implements UserService {
             success = SYSTEM_USER_UPDATE_SUCCESS)
     @CacheEvict(value = RedisKeyConstants.USER_FIND_BY_DEPT_IDS, allEntries = true, beforeInvocation = true)
     public void updateUser(UserUpdateReqVO updateReqVO) {
-        // 1. 校验正确性
+        // 1.1 校验正确性
         AdminUserDO oldUser = validateUserForCreateOrUpdate(updateReqVO.getId(), updateReqVO.getUsername(),
                 updateReqVO.getMobile(), updateReqVO.getEmail(), updateReqVO.getDeptId(), updateReqVO.getPostIds());
         checkTenantUserCountLimit(updateReqVO.getStatus(), oldUser);
+        //1.2 检查用户部门
+        if (oldUser.getDeptId() != null && !oldUser.getDeptId().equals(updateReqVO.getDeptId())){
+            DeptDO dept = deptService.getDept(oldUser.getDeptId());
+            if (Objects.equals(dept.getLeaderUserId(), oldUser.getId())){
+                throw exception(USER_DEPT_LEADER_NOT_ALLOW_CHANGE, dept.getName());
+            }
+            if (!dept.getAdminUserIds().isEmpty()){
+                if (dept.getAdminUserIds().contains(oldUser.getId())){
+                    throw exception(USER_DEPT_ADMIN_NOT_ALLOW_CHANGE, dept.getName());
+                }
+            }
+        }
+
         // 2.1 更新用户
         AdminUserDO updateObj = BeanUtils.toBean(updateReqVO, AdminUserDO.class);
         userDataRepository.update(updateObj);
