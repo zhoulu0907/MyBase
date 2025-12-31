@@ -86,8 +86,12 @@ const ProfileEditPage: React.FC<IEditPageProps> = ({ avatarUrl, setAvatarUrl }) 
     try {
       const values = await passwordForm.validate();
 
-      values.oldPassword = await sm2Encrypt(getPublicKey(), values.oldPassword);
-      values.newPassword = await sm2Encrypt(getPublicKey(), values.newPassword);
+      if (values.oldPassword) {
+        values.oldPassword = await sm2Encrypt(getPublicKey(), values.oldPassword);
+      }
+      if (values.confirmNewPassword) {
+        values.confirmNewPassword = await sm2Encrypt(getPublicKey(), values.confirmNewPassword);
+      }
 
       const req = {
         oldPassword: values.oldPassword,

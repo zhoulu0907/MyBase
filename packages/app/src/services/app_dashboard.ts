@@ -1,6 +1,7 @@
 import { appService, dashboardService } from './clients';
 import { DashboardListParams, DashboardTemplateListParams, editDashboardInfoParams, getDashboardIdParams, saveDashboardAsTemplateParams } from '../types/app_dashboard';
 
+
 // 获取模版列表接口
 export const getDashboardTemplateListApi = (params: DashboardTemplateListParams) => {
   return dashboardService.get(`/template/page`, params); 

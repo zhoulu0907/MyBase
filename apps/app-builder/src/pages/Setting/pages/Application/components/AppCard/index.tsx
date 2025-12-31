@@ -4,9 +4,10 @@ import { Avatar, Divider, Dropdown, Menu, Space, Tag, Tooltip, Typography } from
 import { IconDelete, IconEdit, IconMoreVertical } from '@arco-design/web-react/icon';
 import { type Application } from '@onebase/app';
 import { appIconMap } from '@onebase/ui-kit';
+import { getFileUrlById, PlatformTenantPublishMode } from '@onebase/platform-center';
 import dayjs from 'dayjs';
 import React from 'react';
-import { ApplicationStatus, ApplicationStatusLabel, defaultTheme, TagColor, ThemeColorMap } from '../../const';
+import { ApplicationStatus, ApplicationStatusLabel, TagColor } from '../../const';
 import styles from './index.module.less';
 import type { developUser } from '@onebase/app/src/types';
 import { hasPermission, TENANT_APP_PERMISSION as ACTIONS } from '@onebase/common';
@@ -30,11 +31,32 @@ const AppCard: React.FC<AppCardProps> = ({
   onLaunch,
   onDelete
 }) => {
+  const getModel = (model?: string) => {
+    if (model === PlatformTenantPublishMode.inner) {
+      return '内部模式';
+    } else if (model === PlatformTenantPublishMode.saas) {
+      return 'SaaS模式';
+    }
+    return '未知模式';
+  };
+
+  const getColor = (model?: string) => {
+    return model === PlatformTenantPublishMode.inner ? 'cyan' : 'blue';
+  };
+
   const getDevelopStatus = (developStatus?: string) => {
     if (developStatus === ApplicationStatus.ITERATE) {
       return ApplicationStatusLabel.ITERATE;
     }
     return '';
+  };
+
+  const getTagColor = (item: Application) => {
+    return item.appStatus === 0 ? '#4E5969' : '#00B42A';
+  };
+
+  const getTagBackgroundColor = (item: Application) => {
+    return item.appStatus === 0 ? '#F7F8FA' : '#E8FFEA';
   };
 
   const menu = (
@@ -85,7 +107,6 @@ const AppCard: React.FC<AppCardProps> = ({
                 <Tooltip content={item.appName}>
                   <div className={styles.appTitle}>{item.appName}</div>
                 </Tooltip>
-
                 <div className={styles.tagWrapper}>
                   {item?.developStatus && (
                     <Tag
@@ -110,8 +131,31 @@ const AppCard: React.FC<AppCardProps> = ({
                   </Tag>
                 </div>
               </div>
-
-              <div className={styles.updateTime}>更新时间：{dayjs(item?.updateTime).format('YYYY-MM-DD HH:mm:ss')}</div>
+              <div className={styles.tagAndTime}>
+                <div className={styles.online}>
+                  <Tag
+                    color={TagColor[item.appStatus]}
+                    style={{
+                      fontSize: 12,
+                      fontWeight: 400,
+                      color: getTagColor(item),
+                      backgroundColor: getTagBackgroundColor(item)
+                    }}
+                    className={styles.tag}
+                  >
+                    <span
+                      className={styles.circle}
+                      style={{
+                        backgroundColor: getTagColor(item)
+                      }}
+                    ></span>
+                    <span>{item.appStatusText}</span>
+                  </Tag>
+                </div>
+                <div className={styles.updateTime}>
+                  更新时间：{dayjs(item?.updateTime).format('YYYY-MM-DD HH:mm:ss')}
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -121,13 +165,16 @@ const AppCard: React.FC<AppCardProps> = ({
             <div className={styles.appDesc}>{item.description ?? '该应用暂无介绍。'}</div>
           </Tooltip>
           <div className={styles.appTags}>
+            <Tag color={getColor(item.publishModel)} className={styles.tag}>
+              {getModel(item.publishModel)}
+            </Tag>
+            {item.tags && item.tags.length > 0 && <Divider type="vertical" style={{ margin: '0' }} />}
             {item.tags?.map((tag: { id: string; tagName: string }) => (
               <Tag
                 key={tag.id}
                 style={{
-                  color: item.themeColor || defaultTheme,
-                  height: '22px',
-                  backgroundColor: ThemeColorMap[item.themeColor ?? defaultTheme]
+                  color: '#4E5969',
+                  backgroundColor: '#F2F3F5'
                 }}
               >
                 {tag.tagName}
@@ -151,7 +198,7 @@ const AppCard: React.FC<AppCardProps> = ({
                 {item?.userPhotoList?.map((item: developUser, index: number) => {
                   return item.avatar ? (
                     <Avatar key={index}>
-                      <img src={item.avatar} alt="avatar" />
+                      <img src={getFileUrlById(item.avatar)} alt="avatar" />
                     </Avatar>
                   ) : (
                     <Avatar key={index} style={{ backgroundColor: '#009e9e' }}>

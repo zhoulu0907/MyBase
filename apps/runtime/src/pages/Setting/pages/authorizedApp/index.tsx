@@ -68,7 +68,7 @@ const AuthorizedApplication = () => {
       )
     },
     {
-      title: '授权启效时间',
+      title: '授权起效时间',
       dataIndex: 'authorizationTime',
       width: 180,
       render: (timeValue: string) => <div>{formatTimeYMDHMS(timeValue)}</div>

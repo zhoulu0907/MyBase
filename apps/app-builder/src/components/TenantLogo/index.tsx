@@ -12,7 +12,9 @@ const TenantLogo: React.FC<ITenantLogoProps> = ({ tenantInfo }) => {
     <>
       <Image src={LogoSVG} alt="logo" height={28} />
       <div className={styles.line}></div>
-      {tenantInfo?.logoUrl && <Image src={getFileUrlById(tenantInfo.logoUrl)} height={28} alt="tenant-logo" />}
+      {(tenantInfo?.logoUrl && <Image src={getFileUrlById(tenantInfo.logoUrl)} height={28} alt="tenant-logo" />) || (
+        <></>
+      )}
       <div className={styles.tenantName}>{tenantInfo?.name}</div>
     </>
   );

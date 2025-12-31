@@ -2,6 +2,7 @@ import DevelopEmpty from '@/assets/images/develop_empty.svg';
 
 import { Spin } from '@arco-design/web-react';
 import { PageType } from '@onebase/app';
+import { menuPermissionSignal } from '@onebase/common';
 import {
   EDITOR_TYPES,
   getComponentWidth,
@@ -26,6 +27,7 @@ const ListRuntime: React.FC<ListRuntimeProps> = ({ pageSetId, runtime, showFromP
   useSignals();
 
   const { components: listComponents, pageComponentSchemas: listPageComponentSchemas } = useListEditorSignal;
+  const { menuPermission } = menuPermissionSignal;
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -33,7 +35,11 @@ const ListRuntime: React.FC<ListRuntimeProps> = ({ pageSetId, runtime, showFromP
       const loadData = async () => {
         setLoading(true);
         try {
-          await startLoadPageSet({ pageSetId, runtime: true });
+          await startLoadPageSet({
+            pageSetId,
+            runtime: true,
+            allowViewUuids: menuPermission.value?.viewUuids || []
+          });
         } finally {
           // 数据加载完成后，延迟一小段时间确保组件已更新
           setTimeout(() => {

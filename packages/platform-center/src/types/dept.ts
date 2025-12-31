@@ -40,7 +40,7 @@ export interface UpdateAdminOrDirectorReq {
   /**
    * 用户id
    */
-  userId: string;
+  adminUserIds: string[];
 }
 
 export interface GetDeptUserReq {

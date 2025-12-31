@@ -29,7 +29,7 @@ import {
   VALIDATION_TYPE,
   type AppEntityField
 } from '@onebase/app';
-import { isRuntimeEnv, pagesRuntimeSignal } from '@onebase/common';
+import { isRuntimeEnv, menuPermissionSignal, pagesRuntimeSignal } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
 import PreviewRender from 'src/components/render/PreviewRender';
 import { useFormEditorSignal } from 'src/signals/page_editor';
@@ -66,11 +66,13 @@ const XTable = memo(
       showAddBtn?: boolean;
       refresh?: number;
       xTableSelectProps?: XTableSelectProps;
+      pageSetType?: number;
     }
   ) => {
     useSignals();
 
     const { pageComponentSchemas: fromPageComponentSchemas, components } = useFormEditorSignal;
+    const { menuPermission, canCreate, canEdit, canDelete } = menuPermissionSignal;
 
     const {
       curPage,
@@ -81,7 +83,7 @@ const XTable = memo(
       setFlows,
       setBpmInstanceId
     } = pagesRuntimeSignal;
-    const { runtime = true, showFromPageData, showAddBtn = true, preview } = props;
+    const { runtime = true, showFromPageData, showAddBtn = true, preview, pageSetType } = props;
     const hasOperationPermission = true;
 
     const {
@@ -115,7 +117,6 @@ const XTable = memo(
       refresh,
       filterCondition
     } = props;
-
     const { curMenu } = menuSignal;
     const [tableForm] = Form.useForm();
 
@@ -148,7 +149,7 @@ const XTable = memo(
           <Space size={4}>
             {operationButton?.map((opearate, index) => (
               <Tooltip content={!hasOperationPermission && '无操作权限'} key={index}>
-                {opearate.type === TableOperationButton.EDIT && opearate.display && (
+                {opearate.type === TableOperationButton.EDIT && opearate.display && canEdit.value && (
                   <Button
                     type="text"
                     size="small"
@@ -180,7 +181,7 @@ const XTable = memo(
                   </Button>
                 )}
 
-                {opearate.type === TableOperationButton.DELETE && opearate.display && (
+                {opearate.type === TableOperationButton.DELETE && opearate.display && canDelete.value && (
                   <div
                     style={{
                       whiteSpace: 'nowrap',
@@ -397,7 +398,9 @@ const XTable = memo(
       };
       if (showOpearate) {
         opearate.fixed = fixedOpearate ? 'right' : null;
-        newColumns.push(opearate);
+        if (canEdit.value || canDelete.value) {
+          newColumns.push(opearate);
+        }
       } else {
         newColumns = newColumns.filter((v) => v.dataIndex !== 'op');
       }
@@ -654,19 +657,20 @@ const XTable = memo(
                   runtime={runtime}
                   onSearch={handleSearch}
                   onReset={handleReset}
+                  pageSetType={pageSetType}
                 />
               </Form>
             </div>
           ) : null}
           <div className="headerActions">
             <div className="addButton">
-              {showAddBtn && (
+              {showAddBtn && canCreate.value && (
                 <Button type="primary" onClick={handleCreate} icon={<IconPlus />}>
                   添加数据
                 </Button>
               )}
 
-              {!props?.xTableSelectProps?.hiddenDraft && (
+              {!props?.xTableSelectProps?.hiddenDraft && canCreate.value && (
                 <DraftBox
                   showFromPageData={showFromPageData}
                   tableColumns={finalColumns}

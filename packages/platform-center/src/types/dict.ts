@@ -33,3 +33,7 @@ export interface BatchConfigDictDataParams {
   updateList: DictData[];
   deleteIds: string[];
 }
+
+export interface GetDictDataByTypesParams {
+  dictTypeIds: string[];
+}

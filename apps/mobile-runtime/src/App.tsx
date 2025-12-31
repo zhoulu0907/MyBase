@@ -19,14 +19,14 @@ function AppContent() {
       <Route path="/third/login" element={<ThirdLogin />} />
       <Route path="/onebase/forget-password/:tenantId" element={<ForgetPassword />} />
 
-      <Route path="/onebase/runtime/" element={<Runtime />} />
+      {/* <Route path="/onebase/runtime/" element={<Runtime />} /> */}
 
-      <Route path="/onebase/:appId/:tenantId/runtime-home/" element={<RuntimeHome />} />
+      <Route path="/onebase/:tenantId/:appId/runtime-home/" element={<RuntimeHome />} />
       <Route path="/onebase/runtime-home/protocol" element={<RuntimeHomeProtocol />} />
       <Route path="/onebase/runtime-home/privacy" element={<RuntimeHomePrivacy />} />
       <Route path="/onebase/runtime-home/about" element={<RuntimeHomeAbout />} />
 
-      <Route path="/onebase/:appId/:tenantId/runtime" element={<Runtime />} />
+      <Route path="/onebase/:tenantId/:appId/runtime" element={<Runtime />} />
 
       {/* 默认重定向到登录页 */}
       <Route path="/" element={<Navigate to="/login" replace />} />

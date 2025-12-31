@@ -3,7 +3,7 @@ import { nanoid } from 'nanoid';
 import { Input, Form, Ellipsis } from '@arco-design/mobile-react';
 import { ValidatorType, ITypeRules } from '@arco-design/mobile-utils';
 
-import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, DEFAULT_VALUE_TYPES, FormSchema } from '@onebase/ui-kit';
+import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, DEFAULT_VALUE_TYPES, FormSchema, securityEncodeText } from '@onebase/ui-kit';
 type XInputEmailConfig = typeof FormSchema.XInputEmailSchema.config;
 import '../index.css';
 
@@ -19,7 +19,8 @@ const XInputEmail = memo((props: XInputEmailConfig & { runtime?: boolean; detail
     align,
     layout,
     runtime = true,
-    detailMode
+    detailMode,
+    security
   } = props;
 
   // 生成唯一的字段ID
@@ -64,7 +65,7 @@ const XInputEmail = memo((props: XInputEmailConfig & { runtime?: boolean; detail
         <div
           className="readonlyText"
           style={{ textAlign }}
-        >{form?.getFieldValue(fieldId)  || (defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : '') || '--'}</div>
+        >{securityEncodeText(security, form?.getFieldValue(fieldId))}</div>
       ) : (
         // 编辑模式，渲染Input组件
         <Input

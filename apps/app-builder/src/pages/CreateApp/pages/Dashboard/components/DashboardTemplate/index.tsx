@@ -33,8 +33,8 @@ const ScreenTemplate: FC = () => {
   const resourceUrl = getDashBoardURL();
   //创建模板
   const handleAdd = async () => {
-    const res = await createDashboardTemplate({ templateType: 'template', appId: appId });
-    window.open(`${resourceUrl}chart/home/${res}/template`, '_blank');
+    const res = await createDashboardTemplate({ templateType: 'app', appId: appId });
+    window.open(`${resourceUrl}chart/home/${res}/${appId}/template`, '_blank');
   };
   const [applicationDataList, setApplicationDataList] = useState<screenTemplate[]>();
   const [currentPage, setCurrentPage] = useState(1);
@@ -95,7 +95,7 @@ const ScreenTemplate: FC = () => {
   //修改弹框确定按钮
   const handleEditOk = async () => {
     await editForm.validate();
-    upLoadDashboardTemplate({
+    await upLoadDashboardTemplate({
       id: editid,
       templateName: editForm.getFieldValue('templateName'),
       remarks: editForm.getFieldValue('remarks')
@@ -211,16 +211,16 @@ const ScreenTemplate: FC = () => {
       />
       {/* 编辑弹框 */}
       <Modal
-        title={<div style={{ textAlign: 'left', fontWeight: 500 }}>修改大屏信息</div>}
+        title={<div style={{ textAlign: 'left', fontWeight: 500 }}>修改模板信息</div>}
         visible={editVisible}
         onOk={handleEditOk}
         onCancel={handleEditCancel}
       >
         <Form form={editForm} autoComplete="off">
-          <FormItem label="大屏名称" field="templateName" rules={[{ required: true, message: '请输入大屏名称' }]}>
+          <FormItem label="模板名称" field="templateName" rules={[{ required: true, message: '请输入大屏名称' }]}>
             <Input placeholder="请输入名称,不超过20个字符" />
           </FormItem>
-          <FormItem label="大屏描述" field="remarks" rules={[{ required: true, message: '请输入大屏描述' }]}>
+          <FormItem label="模板描述" field="remarks" rules={[{ required: true, message: '请输入大屏描述' }]}>
             <Input placeholder="请输入描述信息" />
           </FormItem>
         </Form>

@@ -15,3 +15,29 @@ export function getHashQueryParam(key: string, hash?: string): string | null {
   }
   return null;
 }
+
+// 从 window.location.hash 中解析 redirectURL，再从 redirectURL 解析 appId 和 tenantId
+export function getHashTenantIdAndAppId(setTenantId: (tenantId: string) => void, setAppId: (appId: string) => void) {
+  const rawHash = window.location.hash;
+  const prefix = '#/login?redirectURL=';
+  if (rawHash.startsWith(prefix)) {
+    const redirectURL = rawHash.replace(prefix, '');
+    setTenantIdAndAppId(redirectURL)
+  } else {
+    setTenantIdAndAppId(rawHash)
+  }
+
+  function setTenantIdAndAppId(url: string) {
+    // tenantId
+    const tenantId = getHashQueryParam('tenantId', url) || '';
+    const tenantIdMatch = url.match(/\/onebase\/(\d+)\//);
+    const matchTenantId = tenantIdMatch && tenantIdMatch.length > 1 ? tenantIdMatch[1] : '';
+    setTenantId(tenantId || matchTenantId);
+
+    // appId
+    const appId = getHashQueryParam('appId', url) || '';
+    const appIdMatch = url.match(/\/onebase\/(\d+)\/(\d+)\//);
+    const matchAppId = appIdMatch && appIdMatch.length > 2 ? appIdMatch[2] : '';
+    setAppId(appId || matchAppId);
+  }
+}

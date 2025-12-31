@@ -1,5 +1,6 @@
-import type { AppEntities, AppEntity, AppEntityField, EntityFieldOption } from '@onebase/app';
-import { getDictDataListByTypeId, type DictData } from '@onebase/platform-center';
+import type { AppEntities, AppEntity, AppEntityField, ChildEntity, EntityFieldOption } from '@onebase/app';
+import { ENTITY_TYPE } from '@onebase/app';
+import { getDictDataListByTypeId, getDictDataByTypes, type DictData } from '@onebase/platform-center';
 
 // 获取单个字段的配置
 export const getFieldConfig = (dataField: string[], mainEntity: AppEntity, subEntities: AppEntities) => {
@@ -36,13 +37,25 @@ export const getFieldConfig = (dataField: string[], mainEntity: AppEntity, subEn
 };
 
 // 通过配置获取下拉选项
-export const getFieldOptionsConfig = async (dataField: string[], mainEntity: AppEntity, subEntities: AppEntities) => {
+export const getFieldOptionsConfig = async (
+  dataField: string[],
+  mainEntity: AppEntity,
+  subEntities: AppEntities,
+  dictMap?: any
+) => {
   const currentField = getFieldConfig(dataField, mainEntity, subEntities);
   if (!currentField) {
     return [];
   }
   if (currentField.dictTypeId) {
-    const dictDataList = await getDictDataListByTypeId(currentField.dictTypeId);
+    let dictDataList: DictData[] = [];
+    if (dictMap) {
+      dictDataList = dictMap[currentField.dictTypeId] || [];
+    }
+    if (dictDataList.length == 0) {
+      dictDataList = await getDictDataListByTypeId(currentField.dictTypeId);
+    }
+
     const dictOptions = dictDataList?.filter((e: DictData) => e.status === 1); // 只显示启用状态的字典数据
     return dictOptions || [];
   } else if (currentField.options?.length) {
@@ -68,3 +81,63 @@ export const getFieldAutoCodeConfig = async (dataField: string[], mainEntity: Ap
   }
   return [];
 };
+
+// 设置实体及其字段配置
+export const setMainMetaData = async (
+  entityWithChildren: any,
+  setMainEntity: (mainEntity: any) => void,
+  setSubEntities: (subEntities: any) => void,
+  setDictData?: (dictMap: any) => void
+) => {
+  if (entityWithChildren) {
+    setMainEntity({
+      entityId: entityWithChildren.entityId,
+      entityUuid: entityWithChildren.entityUuid,
+      tableName: entityWithChildren.tableName,
+      entityName: entityWithChildren.entityName,
+      entityType: ENTITY_TYPE.MAIN,
+      fields: entityWithChildren.fields
+    });
+
+    const subEntities = entityWithChildren.childEntities?.map((entity: ChildEntity) => ({
+      entityId: entity.childEntityId,
+      entityUuid: entity.childEntityUuid,
+      tableName: entity.childTableName,
+      entityName: entity.childEntityName,
+      entityType: ENTITY_TYPE.SUB,
+      fields: entity.childFields
+    }))
+    setSubEntities({
+      entities: subEntities || []
+    });
+
+    // 收集主表字段中的 dictTypeId
+    const mainDictTypeIds = entityWithChildren.fields
+      .filter((field: AppEntityField) => field.dictTypeId)
+      .map((field: AppEntityField) => field.dictTypeId!);
+
+    // 收集子表字段中的 dictTypeId
+    const childDictTypeIds: string[] = [];
+    if (entityWithChildren.childEntities && entityWithChildren.childEntities.length > 0) {
+      entityWithChildren.childEntities.forEach((childEntity: ChildEntity) => {
+        if (childEntity.childFields) {
+          const childFieldDictTypeIds = childEntity.childFields
+            .filter((field: AppEntityField) => field.dictTypeId)
+            .map((field: AppEntityField) => field.dictTypeId!);
+          childDictTypeIds.push(...childFieldDictTypeIds);
+        }
+      });
+    }
+
+    // 合并并去重
+    const dictTypeIds = Array.from(new Set([...mainDictTypeIds, ...childDictTypeIds]));
+    console.log('dictTypeIds: ', dictTypeIds);
+
+    const res = await getDictDataByTypes({ dictTypeIds: dictTypeIds });
+    console.log('dictDataList: ', res);
+
+    if (setDictData) {
+      setDictData(res);
+    }
+  }
+}
