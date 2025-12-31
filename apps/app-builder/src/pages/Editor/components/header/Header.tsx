@@ -18,7 +18,6 @@ import { useBasicEditorStore } from '@/store';
 import { useFlowEditorStor } from '@/store/index';
 import { useAppStore } from '@/store/store_app';
 import { useResourceStore } from '@/store/store_resource';
-import { setMainMetaData } from '@/utils/entity';
 import { Breadcrumb, Button, Form, Message, Modal, Tabs } from '@arco-design/web-react';
 import { IconArrowLeft, IconInfoCircleFill } from '@arco-design/web-react/icon';
 import {
@@ -32,6 +31,8 @@ import {
   PageType,
   save,
   updateApplicationMenu,
+  getPageSetMetaData,
+  getEntityListWithFields,
   type GetApplicationReq,
   type ListApplicationMenuReq,
   type UpdateApplicationMenuNameReq
@@ -51,6 +52,8 @@ import {
   usePageEditorSignal,
   usePageViewEditorSignal,
   useWorkbenchEditorSignal,
+  useAppEntityStore,
+  setMainMetaData,
   type SavePageSetParams,
   type SaveWorkbenchPageSetParams
 } from '@onebase/ui-kit';
@@ -154,7 +157,7 @@ export default function EditorHeader() {
 
   const { batchSetAppDict } = menuDictSignal;
 
-  // const { setMainEntity, /* setAppEntities, */ setSubEntities } = useAppEntityStore();
+  const { setMainEntity, setSubEntities } = useAppEntityStore();
   const { curMenu, setCurMenu } = menuSignal;
   const { curAppId, setCurAppId } = useAppStore();
 
@@ -360,7 +363,7 @@ export default function EditorHeader() {
       handleGetAppInfo(pageSetId);
       // 工作台设计页不获取主表数据
       if (activeTab !== EDITOR_TYPES.WORKBENCH_EDITOR) {
-        setMainMetaData(pageSetId, batchSetAppDict);
+        loadMainMetaData(pageSetId);
       }
 
       loadPageSetInfo(pageSetId);
@@ -370,6 +373,14 @@ export default function EditorHeader() {
       }
     }
   }, [pageSetId]);
+
+  const loadMainMetaData = async (pageSetId: string) => {
+    const mainMetaData = await getPageSetMetaData({ pageSetId: pageSetId });
+    const entityListWithFields = await getEntityListWithFields({ entityUuids: [mainMetaData] });
+    const [entityWithChildren] = entityListWithFields;
+    console.log('entityWithChildren: ', entityWithChildren);
+    setMainMetaData(entityWithChildren, setMainEntity, setSubEntities, batchSetAppDict);
+  };
 
   const loadPageSetInfo = async (pagesetId: string) => {
     // 工作台使用独立加载逻辑
