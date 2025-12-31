@@ -63,7 +63,10 @@ const XWelcomeCard = memo((props: XWelcomeCardConfig & { runtime?: boolean }) =>
           )}
 
           <div className={styles.welcomeCardContent}>
-            <div className={styles.welcomeCardTitle}>{userName ? userName + '，' : ''} {welcomeText ? welcomeText : ''}</div>
+            <div className={styles.welcomeCardTitle}>
+              {(welcomeText?.display && userName) ? userName + '，' : ''}
+              {welcomeText?.text || ''}
+            </div>
             {theme !== WORKBENCH_THEME_OPTIONS.THEME_3 && <div className={styles.welcomeCardDesc}>{welcomeDesc}</div>}
           </div>
         </div>

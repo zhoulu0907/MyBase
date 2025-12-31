@@ -42,8 +42,6 @@ const WbThemeSelectorConfig = ({
     (() => <div style={{ padding: '20px', textAlign: 'center', color: '#86909c' }}>未传入配置</div>);
 
   // 兼容两种数据结构：
-  // 1. 对象形式：{ theme: string } (如 styleConfig)
-  // 2. 字符串形式：string (如 theme)
   const currentTheme = useMemo(() => {
     const value = configs?.[item.key];
     if (typeof value === 'string') {
@@ -58,12 +56,8 @@ const WbThemeSelectorConfig = ({
 
   const handleThemeChange = useCallback(
     (theme: string) => {
-      console.log('currentTheme', currentTheme);
-      console.log('theme', theme);
       if (currentTheme === theme) return;
       const currentValue = configs?.[item.key];
-      // 如果当前值是字符串，直接更新为字符串
-      // 如果当前值是对象，更新对象的 theme 属性
       if (typeof currentValue === 'string') {
         handlePropsChange(item.key, theme);
       } else {

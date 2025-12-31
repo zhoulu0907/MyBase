@@ -50,7 +50,8 @@ export type {
   IWbTextAlignConfigType,
   TWbTextAlignDefaultType,
   IWbMenuSelectorConfigType,
-  IWbSliderConfigType
+  IWbSliderConfigType,
+  IWbCheckInputConfigType
 } from './core/types';
 
 export type {

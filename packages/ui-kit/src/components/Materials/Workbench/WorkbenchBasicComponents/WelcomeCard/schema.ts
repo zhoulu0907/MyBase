@@ -20,7 +20,7 @@ import {
   WORKBENCH_CONFIG_TYPES,
   WORKBENCH_THEME_OPTIONS
 } from '../../core/constants';
-import { ILabelConfigType, IBooleanConfigType, TBooleanDefaultType, TTextDefaultType, IThemeConfigType } from '../../core/types';
+import { ILabelConfigType, IBooleanConfigType, TBooleanDefaultType, TTextDefaultType, IThemeConfigType, IWbCheckInputConfigType } from '../../core/types';
 import { IDataConfigConfigType } from '../../core/types';
 
 export interface XWelcomeCardSchema {
@@ -36,18 +36,18 @@ export type TXWelcomeCardEditData = Array<
   | IBooleanConfigType
   | IDataConfigConfigType
   | IThemeConfigType
+  | IWbCheckInputConfigType
 >;
 
 export interface XWelcomeCardConfig extends ICommonBaseWorkbenchType {
   componentName: string;
-  label: {
+  welcomeText: {
     text: TTextDefaultType;
     display: TBooleanDefaultType;
   };
   theme: string;
   userAvatar: TTextDefaultType;
   userName: TTextDefaultType;
-  welcomeText: TTextDefaultType;
   welcomeDesc: TTextDefaultType;
   status?: TRadioDefaultType<TWorkbenchStatusSelectKeyType>;
   width: TSelectDefaultType<TWorkbenchWidthSelectKeyType>;
@@ -57,7 +57,8 @@ const XWelcomeCard: XWelcomeCardSchema = {
   editData: [...workbenchBaseConfig, workbenchStatusConfig, workbenchWidthConfig, {
     key: 'welcomeText',
     name: '欢迎语',
-    type: WORKBENCH_CONFIG_TYPES.LABEL_INPUT
+    type: WORKBENCH_CONFIG_TYPES.WB_CHECK_INPUT,
+    checkboxLabel: '显示用户名'
   }, 
   {
     key: 'theme',
@@ -73,8 +74,8 @@ const XWelcomeCard: XWelcomeCardSchema = {
   config: {
     ...workbenchBaseDefault,
     componentName: 'TodoCenter',
-    label: {
-      text: '待办中心',
+    welcomeText: {
+      text: '下午好！',
       display: true
     },
     userAvatar: '',
@@ -82,7 +83,6 @@ const XWelcomeCard: XWelcomeCardSchema = {
     theme: WORKBENCH_THEME_OPTIONS.THEME_1,
     width: WORKBENCH_WIDTH_VALUES[WORKBENCH_WIDTH_OPTIONS.QUARTER],
     status: WORKBENCH_STATUS_VALUES[WORKBENCH_STATUS_OPTIONS.DEFAULT],
-    welcomeText: '下午好！',
     welcomeDesc: '开心工作，认真生活'
   }
 };

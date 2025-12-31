@@ -65,6 +65,7 @@ export const WORKBENCH_CONFIG_TYPES = {
   WB_JUMP_CONFIG: 'Wb_JumpConfig' as const,
   // 欢迎卡片
   WB_THEME_SELECTOR: 'Wb_ThemeSelector' as const,
+  WB_CHECK_INPUT: 'Wb_CheckInput' as const,
 } as const;
 
 /**

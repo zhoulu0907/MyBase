@@ -31,8 +31,8 @@ export function StyleLibrary({ handlePropsChange, item, configs }: StyleLibraryP
 
     // 从 configs 中获取数据，提供默认值
     const userName = (configs.userName as string) || '用户';
-    const welcomeText = (configs.welcomeText as string) || '下午好！';
-    const welcomeDesc = (configs.welcomeDesc as string) || '开心工作，认真生活';
+    const welcomeText = '下午好！';
+    const welcomeDesc = '开心工作，认真生活';
     const userAvatar = configs.userAvatar as string | undefined;
     const currentTime = dayjs().format('YYYY-MM-DD HH:mm:ss');
 
