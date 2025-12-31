@@ -11,13 +11,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import org.pf4j.PluginState;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -66,7 +63,7 @@ public class PluginManagementController {
                 .map(wrapper -> success(pluginConvert.convert(wrapper)))
                 // 如果getPlugin返回empty（如DEV模式），尝试从getLoadedPlugins获取PluginInfo
                 .orElseGet(() -> pluginManager.getLoadedPlugins().stream()
-                        .filter(info -> info.getPluginId().equals(pluginId))
+                        .filter(info -> info.pluginId().equals(pluginId))
                         .findFirst()
                         .map(info -> success(pluginConvert.convert(info)))
                         .orElse(CommonResult.error(404, String.format(PluginErrorMessages.PLUGIN_NOT_FOUND, pluginId))));
@@ -151,10 +148,10 @@ public class PluginManagementController {
         
         for (OneBasePluginManager.PluginInfo plugin : plugins) {
             try {
-                PluginState state = pluginManager.startPlugin(plugin.getPluginId());
-                items.add(PluginOperationResultItemVO.success(plugin.getPluginId(), state.toString()));
+                PluginState state = pluginManager.startPlugin(plugin.pluginId());
+                items.add(PluginOperationResultItemVO.success(plugin.pluginId(), state.toString()));
             } catch (Exception e) {
-                items.add(PluginOperationResultItemVO.error(plugin.getPluginId(), e.getMessage()));
+                items.add(PluginOperationResultItemVO.error(plugin.pluginId(), e.getMessage()));
             }
         }
         
@@ -170,10 +167,10 @@ public class PluginManagementController {
         
         for (OneBasePluginManager.PluginInfo plugin : plugins) {
             try {
-                PluginState state = pluginManager.stopPlugin(plugin.getPluginId());
-                items.add(PluginOperationResultItemVO.success(plugin.getPluginId(), state.toString()));
+                PluginState state = pluginManager.stopPlugin(plugin.pluginId());
+                items.add(PluginOperationResultItemVO.success(plugin.pluginId(), state.toString()));
             } catch (Exception e) {
-                items.add(PluginOperationResultItemVO.error(plugin.getPluginId(), e.getMessage()));
+                items.add(PluginOperationResultItemVO.error(plugin.pluginId(), e.getMessage()));
             }
         }
         
@@ -188,7 +185,7 @@ public class PluginManagementController {
      */
     private boolean isPluginExists(String pluginId) {
         return pluginManager.getLoadedPlugins().stream()
-                .anyMatch(info -> info.getPluginId().equals(pluginId));
+                .anyMatch(info -> info.pluginId().equals(pluginId));
     }
 
 }

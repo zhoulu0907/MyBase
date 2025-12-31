@@ -9,7 +9,8 @@ import com.cmsr.onebase.plugin.runtime.event.PluginStartedEvent;
 import com.cmsr.onebase.plugin.runtime.event.PluginStoppedEvent;
 import com.cmsr.onebase.plugin.runtime.event.PluginUnloadedEvent;
 import com.cmsr.onebase.plugin.runtime.http.PluginControllerRegistrar;
-import com.cmsr.onebase.plugin.api.HttpHandler;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.pf4j.PluginAlreadyLoadedException;
 import org.pf4j.PluginManager;
@@ -37,17 +38,15 @@ import java.util.stream.Collectors;
 @Slf4j
 public class OneBasePluginManager {
 
+    @Getter
     private final PluginManager pluginManager;
     private final ApplicationEventPublisher eventPublisher;
+    @Setter
     private PluginControllerRegistrar controllerRegistrar;
 
     public OneBasePluginManager(PluginManager pluginManager, ApplicationEventPublisher eventPublisher) {
         this.pluginManager = pluginManager;
         this.eventPublisher = eventPublisher;
-    }
-
-    public void setControllerRegistrar(PluginControllerRegistrar controllerRegistrar) {
-        this.controllerRegistrar = controllerRegistrar;
     }
 
     /**
@@ -115,8 +114,8 @@ public class OneBasePluginManager {
                 } else {
                     log.warn("插件已加载但无法定位 pluginId: {}", pluginPath);
                 }
-            } catch (Exception ignore) {
-                log.warn("在处理 PluginAlreadyLoadedException 时发生异常（已忽略）: {}", pluginPath);
+            } catch (Exception e) {
+                log.error("在处理 PluginAlreadyLoadedException 时发生异常: {}", pluginPath,e);
             }
         } catch (Exception e) {
             log.error("加载插件或发布事件时发生错误: {}", pluginPath, e);
@@ -232,7 +231,8 @@ public class OneBasePluginManager {
         if (ok) {
             try {
                 eventPublisher.publishEvent(new PluginUnloadedEvent(pluginId));
-            } catch (Exception ignore) {
+            } catch (Exception e) {
+                log.error("发布插件卸载事件失败: {}", pluginId, e);
             }
         }
         return ok;
@@ -271,8 +271,8 @@ public class OneBasePluginManager {
                 PluginWrapper pluginWrapper = pluginManager.getPlugin(pluginId);
                 eventPublisher.publishEvent(new PluginStartedEvent(pluginId, pluginWrapper));
             }
-        } catch (Exception ignore) {
-            log.warn("插件启动后的回调处理异常（已忽略）: {}", pluginId, ignore);
+        } catch (Exception e) {
+            log.error("插件启动后的回调处理异常: {}", pluginId, e);
         }
         return state;
     }
@@ -307,7 +307,8 @@ public class OneBasePluginManager {
 
             try {
                 eventPublisher.publishEvent(new PluginStoppedEvent(pluginId));
-            } catch (Exception ignore) {
+            } catch (Exception e) {
+                log.error("发布插件停止事件失败: {}", pluginId, e);
             }
         }
         return state;
@@ -372,7 +373,8 @@ public class OneBasePluginManager {
         if (ok) {
             try {
                 eventPublisher.publishEvent(new PluginDeletedEvent(pluginId));
-            } catch (Exception ignore) {
+            } catch (Exception e) {
+                log.error("发布插件删除事件失败: {}", pluginId, e);
             }
         }
         return ok;
@@ -502,15 +504,6 @@ public class OneBasePluginManager {
     }
 
     /**
-     * 获取底层的PF4J PluginManager
-     *
-     * @return PluginManager
-     */
-    public PluginManager getPluginManager() {
-        return pluginManager;
-    }
-
-    /**
      * 获取已加载的插件列表（返回插件信息摘要）
      *
      * @return 插件信息列表
@@ -585,33 +578,7 @@ public class OneBasePluginManager {
     /**
      * 插件信息DTO
      */
-    public static class PluginInfo {
-        private final String pluginId;
-        private final String description;
-        private final String version;
-        private final String state;
+    public record PluginInfo(String pluginId, String description, String version, String state) {
 
-        public PluginInfo(String pluginId, String description, String version, String state) {
-            this.pluginId = pluginId;
-            this.description = description;
-            this.version = version;
-            this.state = state;
-        }
-
-        public String getPluginId() {
-            return pluginId;
-        }
-
-        public String getDescription() {
-            return description;
-        }
-
-        public String getVersion() {
-            return version;
-        }
-
-        public String getState() {
-            return state;
-        }
     }
 }
