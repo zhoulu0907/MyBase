@@ -115,7 +115,7 @@ public class OneBasePluginManager {
                     log.warn("插件已加载但无法定位 pluginId: {}", pluginPath);
                 }
             } catch (Exception e) {
-                log.error("在处理 PluginAlreadyLoadedException 时发生异常: {}", pluginPath,e);
+                log.error("在处理 PluginAlreadyLoadedException 时发生异常: {}", pluginPath, e);
             }
         } catch (Exception e) {
             log.error("加载插件或发布事件时发生错误: {}", pluginPath, e);
@@ -196,7 +196,8 @@ public class OneBasePluginManager {
                     }
                 }
             }
-        } catch (Exception ignore) {
+        } catch (Exception e) {
+            log.debug("比较插件路径时发生异常: {} vs {}", loadedPath, archivePath, e);
         }
         return false;
     }
