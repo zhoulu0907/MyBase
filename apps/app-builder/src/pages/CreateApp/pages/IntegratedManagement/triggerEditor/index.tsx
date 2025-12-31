@@ -71,7 +71,7 @@ const TriggerEditor = () => {
       let nodes = processDefinitionJson.nodes || [];
 
       for (let item of nodes) {
-        data = { ...data, [item.id]: { ...item.data, output: item.output } };
+        data = { ...data, [item.id]: { ...item.data, id: item.id, output: item.output } };
         if (item.blocks) {
           // 递归初始化blocks数据
           data = initBlocksData(item.blocks, data);

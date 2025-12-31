@@ -6,7 +6,8 @@ import { memo } from 'react';
 import { COMPONENT_MAP, FORM_COMPONENT_TYPES, FormComp, getComponentSchema } from 'src/components/Materials';
 import { useFormEditorSignal } from 'src/signals/page_editor';
 import { v4 as uuidv4 } from 'uuid';
-import { DEFAULT_VALUE_TYPES, STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
+import { DEFAULT_VALUE_TYPES, STATUS_OPTIONS, STATUS_VALUES,SELECT_OPTIONS_BPM } from '../../../constants';
+import { PageType } from '@onebase/app';
 import './index.css';
 
 interface TableSearchConfig {
@@ -15,12 +16,13 @@ interface TableSearchConfig {
   runtime: boolean;
   onSearch?: () => void;
   onReset?: () => void;
+  pageSetType?:number
 }
 
 const TableSearch = memo((props: TableSearchConfig) => {
   useSignals();
 
-  const { searchItems, labelColSpan, runtime, onSearch, onReset } = props;
+  const { searchItems, labelColSpan, runtime, onSearch, onReset, pageSetType } = props;
   const count = searchItems?.length || 0;
   const remainder = count % 4;
   const placeholderCount = remainder === 0 ? 3 : 4 - remainder - 1;
@@ -30,13 +32,19 @@ const TableSearch = memo((props: TableSearchConfig) => {
   const { mainEntity } = useAppEntityStore();
 
   const renderSearchItem = (item: any) => {
-    const fieldType = mainEntity.fields.find((field) => field.fieldName === item.value)?.fieldType;
+    const copyMainEntity = { ...mainEntity };
+
+    if(pageSetType === PageType.BPM){
+      copyMainEntity.fields = [...copyMainEntity.fields, ...SELECT_OPTIONS_BPM];
+    }
+    
+    const fieldType = copyMainEntity.fields.find((field) => field.fieldName === item.value)?.fieldType;
 
     if (!fieldType) {
       return;
     }
 
-    const dataField = [mainEntity.tableName, item.value];
+    const dataField = [copyMainEntity.tableName, item.value];
 
     const cpType = COMPONENT_MAP[fieldType as any];
 

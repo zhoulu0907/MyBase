@@ -12,13 +12,13 @@ import {
   PageMethodV2Params,
   type AppEntityField,
 } from '@onebase/app';
-import { pagesRuntimeSignal } from '@onebase/common';
-import { BUTTON_OPTIONS, BUTTON_VALUES, downloadFileByUrl, ENTITY_FIELD_TYPE, getFieldOptionsConfig, RedirectMethod, useAppEntityStore, useFormEditorSignal } from '@onebase/ui-kit';
+import { menuPermissionSignal, pagesRuntimeSignal } from '@onebase/common';
+import { BUTTON_OPTIONS, BUTTON_VALUES, downloadFileByUrl, ENTITY_FIELD_TYPE, getFieldOptionsConfig, menuDictSignal, RedirectMethod, useAppEntityStore, useFormEditorSignal } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import { memo, useEffect, useState } from 'react';
 import TableSearch from './tableSerach';
-import './index.css';
 import type { XLoadMoreConfig } from './schema';
+import './index.css';
 
 type XTableSelectProps = {
   showSelect: boolean;
@@ -40,6 +40,7 @@ const XLoadMore = memo(
     useSignals();
 
     const { pageComponentSchemas } = useFormEditorSignal;
+    const { canCreate, canEdit, canDelete } = menuPermissionSignal;
     const { setRowDataId, setDrawerPageId, setDetailPageViewId } = pagesRuntimeSignal;
     const { runtime = true, showFromPageData, showAddBtn = true } = props;
     const hasOperationPermission = true;
@@ -64,6 +65,7 @@ const XLoadMore = memo(
     } = props;
 
     const { curMenu } = menuSignal;
+    const { appDict } = menuDictSignal;
     const { mainEntity, subEntities } = useAppEntityStore();
 
     const [finalColumns, setFinalColumns] = useState<any[]>();
@@ -263,8 +265,8 @@ const XLoadMore = memo(
                 field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE
             );
             if (multiSelectField && newItem[key] && Array.isArray(newItem[key])) {
-              const newOptions = await getFieldOptionsConfig([tableName, key], mainEntity, subEntities)
-              newItem[key] = newOptions.filter(op => newItem[key].find(v => op.id === v.id)).map(v => v.label).join(', ')
+              const newOptions = await getFieldOptionsConfig([tableName, key], mainEntity, subEntities, appDict.value);
+              newItem[key] = newOptions.filter(op => newItem[key].find(v => op.id === v.id)).map(v => v.label).join('，');
             }
 
             // 人员选择单选
@@ -303,7 +305,7 @@ const XLoadMore = memo(
             );
             if (selectField) {
               const curValue = newItem[key];
-              const newOptions = await getFieldOptionsConfig([tableName, key], mainEntity, subEntities)
+              const newOptions = await getFieldOptionsConfig([tableName, key], mainEntity, subEntities, appDict.value);
               newItem[key] = newOptions.find(op => op.id === curValue?.id)?.label || '-';
             }
 
@@ -344,7 +346,6 @@ const XLoadMore = memo(
       window.modalInstance = Dialog.confirm({
         title: '删除确认',
         children: '确定删除？删除后不可恢复！',
-        platform: 'ios',
         okText: '删除',
         cancelText: '取消',
         onOk: () => {
@@ -409,7 +410,7 @@ const XLoadMore = memo(
       if (noEdit) return;
       return (
         <div className="list-body-item-btns">
-          <Button
+          {canDelete.value && <Button
             color="#1D2129"
             borderColor="#86909C"
             type="ghost"
@@ -418,10 +419,10 @@ const XLoadMore = memo(
             onClick={() => handleDeleteAction(item.id)}
           >
             删除
-          </Button>
-          <Button type="primary" size="mini" className="list-body-item-btn" onClick={() => handleEdit(item.id, true)}>
+          </Button>}
+          {canEdit.value && <Button type="primary" size="mini" className="list-body-item-btn" onClick={() => handleEdit(item.id, true)}>
             编辑
-          </Button>
+          </Button>}
         </div>
       );
     };
@@ -470,7 +471,7 @@ const XLoadMore = memo(
     return (
       <div className="loadmore-list-wrapper-OBMobile">
         {getTopSearch()}
-        {showAddBtn && <div className="list-create-btn" onClick={handleCreate}></div>}
+        {showAddBtn && canCreate.value && <div className="list-create-btn" onClick={handleCreate}></div>}
         <div className="list-body-wrapper">
           {(editMode ? [{}] : tableData).map((item, index) => (
             <div key={index} className="list-body-item-wrapper" onClick={() => handleRowClick(item)}>

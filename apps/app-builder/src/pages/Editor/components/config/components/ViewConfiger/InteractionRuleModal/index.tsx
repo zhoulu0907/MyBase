@@ -24,7 +24,6 @@ import { FieldType, InteractionActionType, VALIDATION_TYPE } from '@onebase/app'
 import { listToTree } from '@onebase/common';
 import { getDeptList, getSimpleUserPage, type DictData } from '@onebase/platform-center';
 import {
-  ENTITY_FIELD_TYPE,
   FORM_COMPONENT_TYPES,
   getFieldOptionsConfig,
   useAppEntityStore,
@@ -505,27 +504,6 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
       return (
         <Form.Item field={fieldName}>
           <Input placeholder="请输入静态值" />
-        </Form.Item>
-      );
-
-      if (
-        fieldValidationType?.fieldTypeCode == ENTITY_FIELD_TYPE.TEXT.VALUE ||
-        fieldValidationType?.fieldTypeCode == ENTITY_FIELD_TYPE.LONG_TEXT.VALUE ||
-        fieldValidationType?.fieldTypeCode == ENTITY_FIELD_TYPE.EMAIL.VALUE ||
-        fieldValidationType?.fieldTypeCode == ENTITY_FIELD_TYPE.PHONE.VALUE ||
-        fieldValidationType?.fieldTypeCode == ENTITY_FIELD_TYPE.URL.VALUE ||
-        fieldValidationType?.fieldTypeCode == ENTITY_FIELD_TYPE.ADDRESS.VALUE
-      ) {
-        return (
-          <Form.Item field={fieldName}>
-            <Input placeholder="请输入静态值" />
-          </Form.Item>
-        );
-      }
-
-      return (
-        <Form.Item field={fieldName}>
-          <InputNumber placeholder="请输入静态值" />
         </Form.Item>
       );
     }

@@ -22,6 +22,8 @@ import ProfileEditPage from './pages/Profile/edit';
 import SecurityPage from './pages/Security';
 import PluginPage from './pages/Plugin';
 import ExternalUserPage from './pages/ExternalUser';
+import { getTenantInfoFromSession, setTenantInfoFromSession } from '@/utils';
+import { type TenantInfo } from '@onebase/platform-center';
 
 const Content = Layout.Content;
 
@@ -29,13 +31,20 @@ const SettingPage: React.FC = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string>('');
 
+  const [tenantInfo, setTenantInfo] = useState<TenantInfo | null>(() => getTenantInfoFromSession());
+
+  const handleTenantInfoChange = (info: TenantInfo) => {
+    setTenantInfo(info);
+    setTenantInfoFromSession(info); // 继续保持和 session 同步
+  };
+
   const handleCollapse = (collapsed: boolean) => {
     setCollapsed(collapsed);
   };
 
   return (
     <Layout className={styles.settingPage}>
-      <AppHeader className={styles.settingPageHeader} avatarUrl={avatarUrl} />
+      <AppHeader className={styles.settingPageHeader} avatarUrl={avatarUrl} tenantInfo={tenantInfo} />
 
       <Layout className={styles.settingPageContent}>
         <AppSider collapsed={collapsed} onCollapse={handleCollapse} />
@@ -51,7 +60,7 @@ const SettingPage: React.FC = () => {
                 <Route path="organization" element={<OrganizationPage />} />
                 <Route path="system-dict" element={<SystemDictPage />} />
                 <Route path="security" element={<SecurityPage />} />
-                <Route path="spaceInfo" element={<SpaceInfo />} />
+                <Route path="spaceInfo" element={<SpaceInfo onTenantInfoChange={handleTenantInfoChange} />} />
                 <Route path="profile" element={<ProfilePage />} />
                 <Route path="plugin" element={<PluginPage />} />
                 <Route path="externalUser" element={<ExternalUserPage />} />

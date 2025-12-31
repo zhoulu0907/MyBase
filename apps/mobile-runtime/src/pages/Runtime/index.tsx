@@ -1,9 +1,10 @@
 import React, { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import PreviewContainer from './components/preview';
-import { ENTITY_TYPE, getEntityListWithFields, menuSignal, type ChildEntity } from '@onebase/app';
+import { getApplicationMenuPermission, getEntityListWithFields, menuSignal } from '@onebase/app';
 import { useSignals } from '@preact/signals-react/runtime';
-import { useAppEntityStore } from '@onebase/ui-kit';
+import { menuDictSignal, setMainMetaData, useAppEntityStore } from '@onebase/ui-kit';
+import { menuPermissionSignal } from '@onebase/common';
 
 const Runtime: React.FC = () => {
   useSignals();
@@ -11,8 +12,12 @@ const Runtime: React.FC = () => {
   const { mainEntity, subEntities, setMainEntity, setSubEntities } = useAppEntityStore();
 
   const { curMenu, setCurMenu } = menuSignal;
+  const { batchSetAppDict } = menuDictSignal;
+  const { setMenuPermission } = menuPermissionSignal;
+
   const [search] = useSearchParams();
   const curMenuId = search.get('curMenu') || '';
+
   useEffect(() => {
     setCurMenu({
       ...curMenu.value,
@@ -29,10 +34,11 @@ const Runtime: React.FC = () => {
   }, [curMenuId]);
 
   useEffect(() => {
-    if (curMenu.value?.menuCode) {
+    if (curMenu.value?.entityUuid) {
       getMainMetaData(curMenu.value?.entityUuid || localStorage.getItem('curMenu-entityUuid') || '');
+      getMenuPermission(curMenu.value.id);
     }
-    }, [curMenu.value]);
+  }, [curMenu.value]);
 
   const getMainMetaData = async (entityUuid: string) => {
     if (!entityUuid) {
@@ -42,39 +48,15 @@ const Runtime: React.FC = () => {
 
     const [entityWithChildren] = entityListWithFields;
     if (entityWithChildren) {
-      setMainEntity({
-        entityId: entityWithChildren.entityId,
-        entityUuid: entityWithChildren.entityUuid,
-        tableName: entityWithChildren.tableName,
-        entityName: entityWithChildren.entityName,
-        entityType: ENTITY_TYPE.MAIN,
-        fields: entityWithChildren.fields
-      });
-      if (entityWithChildren.childEntities && entityWithChildren.childEntities.length > 0) {
-        // 返回新Promise对象，当所有输入Promise成功时返回结果数组（顺序与输入一致）
-        const allChildFields = await Promise.all(
-          entityWithChildren.childEntities.map(async (entity: ChildEntity) => {
-            return entity.childFields;
-          })
-        );
-        const subEntities = entityWithChildren.childEntities.map((entity: ChildEntity, index: number) => ({
-          entityId: entity.childEntityId,
-          entityUuid: entity.childEntityUuid,
-          tableName: entity.childTableName,
-          entityName: entity.childEntityName,
-          entityType: ENTITY_TYPE.SUB,
-          fields: allChildFields[index]
-        }));
-
-        setSubEntities({
-          entities: subEntities
-        });
-      } else {
-        setSubEntities({ entities: [] });
-      }
+      setMainMetaData(entityWithChildren, setMainEntity, setSubEntities, batchSetAppDict);
     }
   };
 
+  const getMenuPermission = async (menuId: string) => {
+    const permission = await getApplicationMenuPermission(menuId);
+    console.log('permission: ', permission);
+    setMenuPermission(permission);
+  };
 
   const renderContent =
     curMenuId.indexOf('TASK-') >= 0 ? null : (

@@ -196,15 +196,16 @@ export function FormulaEditor({ fieldName, visible, onCancel, onConfirm, initial
     if (!functionSearch) return funcList;
     let filteredData: functionGroup[] = [];
     funcList?.forEach((item: functionGroup) => {
-      const functionIndex: number = item.functions?.findIndex(
-        (f) =>
-          f.name.toLowerCase().includes(functionSearch.toLowerCase()) ||
-          f.summary.toLowerCase().includes(functionSearch.toLowerCase())
-      );
-      if (functionIndex >= 0) {
+      const matchingFunctions =
+        item.functions?.filter(
+          (f) =>
+            f.name.toLowerCase().includes(functionSearch.toLowerCase()) ||
+            f.summary.toLowerCase().includes(functionSearch.toLowerCase())
+        ) || [];
+      if (matchingFunctions.length > 0) {
         filteredData.push({
           type: item.type,
-          functions: [item.functions[functionIndex]]
+          functions: matchingFunctions
         });
       }
     });
