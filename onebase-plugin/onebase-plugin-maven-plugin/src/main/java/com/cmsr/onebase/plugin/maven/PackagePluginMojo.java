@@ -49,6 +49,7 @@ public class PackagePluginMojo extends AbstractMojo {
      * - onebase-spring-boot-starter-plugin: 插件运行时，由宿主提供
      * - onebase-plugin-core: 插件核心，由宿主提供
      * - onebase-plugin-host-simulator: 模拟器，仅用于本地调试
+     * - spring-boot-starter-web: Spring Boot Web starter，由宿主提供，该依赖提供RestController注解等
      * </p>
      */
     private static final Set<String> HOST_PROVIDED_ARTIFACTS = Set.of(
@@ -56,7 +57,8 @@ public class PackagePluginMojo extends AbstractMojo {
             "onebase-common",
             "onebase-spring-boot-starter-plugin",
             "onebase-plugin-core",
-            "onebase-plugin-host-simulator");
+            "onebase-plugin-host-simulator",
+            "spring-boot-starter-web");
 
     private static final int BUFFER_SIZE = 8192;
 
