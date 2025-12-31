@@ -251,7 +251,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
             <div className={styles.tableColumnList}>
               <ReactSortable
                 list={columnsConfig}
-                setList={() => {}}
+                setList={setColumnsConfig}
                 group={{
                   name: 'table-col-item'
                 }}
