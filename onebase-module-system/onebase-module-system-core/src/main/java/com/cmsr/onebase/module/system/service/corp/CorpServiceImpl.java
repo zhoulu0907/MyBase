@@ -97,6 +97,7 @@ public class CorpServiceImpl implements CorpService {
     public CorpAdminUserRespVO createCorpCombined(CorpCombinedVo corpCombineReqVO) {
         // 保存基础数据
         Long corpId = createCorp(corpCombineReqVO.getCorpReqVO());
+
         // 保存系统管理员
         CorpAdminUserRespVO vo = createAdminUser(corpCombineReqVO.getCorpAdminReqVO(), corpId);
         // 保存关联关系
@@ -149,6 +150,14 @@ public class CorpServiceImpl implements CorpService {
         TenantDO tenantDO = tenantService.getTenant(loginUser.getTenantId());
         // 空间用户总数
         Integer tenantUserLimit = tenantDO.getAccountCount();
+
+        // 验证空间目前已存在用户数
+        Long tenantUserCount = tenantService.getTenantExistUserCount(loginUser.getTenantId());
+        if (tenantUserCount  >= tenantUserLimit) {
+            Integer remainingCount = Math.toIntExact(tenantUserLimit - tenantUserCount);
+            throw exception(CORP_USER_LIMIT_COUNT_CHECK, tenantUserLimit, remainingCount);
+        }
+
         // 获取企业已存在数量
         Integer existUserLimit = getExistUserLimitExcludeCorp(corpId);
         if (existUserLimit + userCount > tenantUserLimit) {
