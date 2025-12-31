@@ -47,6 +47,7 @@ import TabsLayoutIcon from '@/assets/images/cp/tabs_layout_cp.svg';
 import QuickEntryIcon from '@/assets/images/cp/quick_entry_cp.svg';
 import RichTextEditorWorkbenchIcon from '@/assets/images/cp/rich_text_editor_workbench_cp.svg';
 import ButtonWorkbenchIcon from '@/assets/images/cp/button_workbench_cp.svg';
+import WelcomeCardIcon from '@/assets/images/cp/welcome_card_cp.svg';
 
 import CarouselWorkbenchIcon from '@/assets/images/cp/carousel_workbench_cp.svg';
 
@@ -106,7 +107,7 @@ export const ICON_Map: Record<string, React.ReactNode> = {
   'quick_entry_cp.svg': <img src={QuickEntryIcon} alt="XQuickEntry" />,
   'rich_text_editor_workbench_cp.svg': <img src={RichTextEditorWorkbenchIcon} alt="XRichTextEditorWorkbench" />,
   'button_workbench_cp.svg': <img src={ButtonWorkbenchIcon} alt="XButtonWorkbench" />,
-  
+  'welcome_card_cp.svg': <img src={WelcomeCardIcon} alt="XWelcomeCard" />,
   // 工作台高级组件
   'carousel_workbench_cp.svg': <img src={CarouselWorkbenchIcon} alt="XCarouselWorkbench" />,
 };
@@ -168,7 +169,7 @@ export const ICON_Map_By_Type: Record<string, React.ReactNode> = {
   XQuickEntry: <img src={QuickEntryIcon} alt="XQuickEntry" />,
   XRichTextEditorWorkbench: <img src={RichTextEditorWorkbenchIcon} alt="XRichTextEditorWorkbench" />,
   XButtonWorkbench: <img src={ButtonWorkbenchIcon} alt="XButtonWorkbench" />,
-
+  XWelcomeCard: <img src={WelcomeCardIcon} alt="XWelcomeCard" />,
   // 工作台高级组件
   XCarouselWorkbench: <img src={CarouselWorkbenchIcon} alt="XCarouselWorkbench" />,
 };

@@ -135,6 +135,8 @@ const ComponentEditRender: React.FC<ComponentRenderProps> = ({ cpId, cpType, pag
         return <WorkbenchComp.XCarouselWorkbench cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case WORKBENCH_COMPONENT_TYPES.BUTTON_WORKBENCH:
         return <WorkbenchComp.XButtonWorkbench cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+      case WORKBENCH_COMPONENT_TYPES.WELCOME_CARD:
+        return <WorkbenchComp.XWelcomeCard cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       
       default:
         return <div>未知组件类型: {cpType}</div>;
