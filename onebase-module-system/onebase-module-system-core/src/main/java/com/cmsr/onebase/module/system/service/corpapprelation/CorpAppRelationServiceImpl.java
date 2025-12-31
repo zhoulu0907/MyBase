@@ -17,6 +17,7 @@ import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.Strings;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -135,7 +136,7 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
         // if(!Objects.equals(corpId, loginCorpId)){
         //     throw exception(CORP_ID_COMPARE_ERROR);
         // }
-        Map<Long, ApplicationDTO> applicationMap = getApplicationDoMap(pageReqVO.getAppName());
+        Map<Long, ApplicationDTO> applicationMap = getApplicationDoMap(pageReqVO.getName());
         List<Long> applicationIds = new ArrayList<>(applicationMap.keySet());
         if(CollectionUtils.isEmpty(applicationIds)){
             return new PageResult<CorpApplicationRespVO>();
@@ -157,7 +158,15 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
         List<CorpApplicationRespVO> filteredList = pageResult.getList().stream()
                 .map(corpDO -> convertToRespVO(corpDO, applicationMap, finalTagMap))
                 .collect(Collectors.toList());
+
         // 返回过滤后的结果和总数
+        if (Strings.CI.equals(pageReqVO.getOrderByTime(), "create")) {
+            filteredList.sort(Comparator.comparing(CorpApplicationRespVO::getCreateTime).reversed());
+        }
+        if (Strings.CI.equals(pageReqVO.getOrderByTime(), "update")) {
+            filteredList.sort(Comparator.comparing(CorpApplicationRespVO::getUpdateTime).reversed());
+        }
+
         return new PageResult<>(filteredList, pageResult.getTotal());
     }
 

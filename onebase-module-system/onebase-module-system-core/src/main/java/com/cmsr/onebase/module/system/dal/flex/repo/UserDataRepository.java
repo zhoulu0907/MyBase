@@ -148,7 +148,7 @@ public class UserDataRepository extends BaseDataRepository<SystemUsersMapper, Ad
 
 
     public List<AdminUserDO> findUserByUserType(Integer userType) {
-        return list(query()
+        return list(buildUserQueryWrapper()
                 .isNull(DEPT_ID)
                 .eq(AdminUserDO.USER_TYPE, userType));
     }

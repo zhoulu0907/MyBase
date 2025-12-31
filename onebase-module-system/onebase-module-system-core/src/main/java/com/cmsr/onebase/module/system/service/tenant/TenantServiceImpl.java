@@ -309,7 +309,7 @@ public class TenantServiceImpl implements TenantService {
                 }
             }
             reqVO.setAdminType(AdminTypeEnum.SYSTEM.getType());
-            reqVO.setPassword(TENANT_ADMIN_PASSWORD);
+            reqVO.setPassword(pwdEnHelper.encryptHexStr(TENANT_ADMIN_PASSWORD));
             // 通过平台创建空间（Tenant）用户
             reqVO.setUserType(UserTypeEnum.TENANT.getValue());
             // 创建用户
