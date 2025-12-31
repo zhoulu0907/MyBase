@@ -4,33 +4,18 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.cmsr.onebase</groupId>
+    <!-- 继承 onebase-plugin-demo 父模块 -->
+    <parent>
+        <groupId>com.cmsr.onebase</groupId>
+        <artifactId>onebase-plugin-demo</artifactId>
+        <version>${revision}</version>
+    </parent>
+
     <artifactId>plugin-demo-hello</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>${project.artifactId}</name>
     <description>OneBase插件开发示例 - Hello模块</description>
-
-    <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.parameters>true</maven.compiler.parameters>
-    </properties>
-
-    <dependencyManagement>
-        <dependencies>
-            <!-- 导入 OneBase BOM，统一版本管理 -->
-            <dependency>
-                <groupId>com.cmsr.onebase</groupId>
-                <artifactId>onebase-dependencies</artifactId>
-                <version>1.0.0-SNAPSHOT</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
 
     <dependencies>
         <!-- OneBase 插件 SDK -->
@@ -66,7 +51,6 @@
             <plugin>
                 <groupId>com.cmsr.onebase</groupId>
                 <artifactId>onebase-plugin-maven-plugin</artifactId>
-                <version>1.0.0-SNAPSHOT</version>
                 <executions>
                     <!-- 1. 自动生成插件主类 GeneratedPlugin - 包名通过 generatedPackage 参数指定 -->
                     <execution>
@@ -97,7 +81,7 @@
                         </configuration>
                     </execution>
 
-                    <!-- 3. 自动扫描扩展点，生成META-INF/extensions.idx索引文件 (无需额外配置) -->
+                    <!-- 3. 扫描扩展点并生成索引 -->
                     <execution>
                         <id>scan-extensions</id>
                         <goals>
@@ -105,7 +89,7 @@
                         </goals>
                     </execution>
 
-                    <!-- 4. 自动打包成 ZIP (无需额外配置) -->
+                    <!-- 4. 打包插件为 ZIP -->
                     <execution>
                         <id>package-plugin</id>
                         <goals>
@@ -115,23 +99,18 @@
                 </executions>
             </plugin>
 
-            <!-- Maven Compiler插件 -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-            </plugin>
-
-            <!-- Maven JAR插件 - 禁止生成插件相关的MANIFEST属性 -->
+            <!-- Maven JAR插件 - 配置JAR打包选项 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <configuration>
                     <archive>
-                        <!-- 不添加任何PF4J插件属性到MANIFEST.MF -->
+                        <!-- 禁止生成Maven描述符，避免与PF4J冲突 -->
                         <addMavenDescriptor>false</addMavenDescriptor>
                     </archive>
                 </configuration>
             </plugin>
+
         </plugins>
     </build>
 </project>
