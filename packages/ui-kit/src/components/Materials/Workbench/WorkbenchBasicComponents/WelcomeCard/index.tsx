@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react';
-import { memo, useMemo } from 'react';
+import { memo, useMemo, useState, useEffect } from 'react';
+import dayjs from 'dayjs';
 import { WORKBENCH_STATUS_OPTIONS, WORKBENCH_STATUS_VALUES, WORKBENCH_THEME_OPTIONS } from '../../core/constants';
 import type { XWelcomeCardConfig } from './schema';
 import styles from './index.module.css';
@@ -18,6 +19,21 @@ const containerStyle: CSSProperties = {
 const XWelcomeCard = memo((props: XWelcomeCardConfig & { runtime?: boolean }) => {
   const { status, runtime, theme, userAvatar, userName, welcomeText, welcomeDesc } = props;
   const hiddenStatusValue = WORKBENCH_STATUS_VALUES[WORKBENCH_STATUS_OPTIONS.HIDDEN];
+  const [currentTime, setCurrentTime] = useState(() => dayjs().format('YYYY-MM-DD HH:mm:ss'));
+
+  useEffect(() => {
+    if (!runtime) {
+      return;
+    }
+
+    const timer = setInterval(() => {
+      setCurrentTime(dayjs().format('YYYY-MM-DD HH:mm:ss'));
+    }, 1000);
+
+    return () => {
+      clearInterval(timer);
+    };
+  }, [runtime]);
 
   if (runtime && status === hiddenStatusValue) {
     return null;
@@ -38,16 +54,26 @@ const XWelcomeCard = memo((props: XWelcomeCardConfig & { runtime?: boolean }) =>
     <div style={containerStyle}>
       <div className={styles.welcomeCard} style={{ height: cardHeight }}>
         <img src={backgroundImage} alt="background" className={styles.backgroundImage} />
-        {userAvatar ? (
-          <img src={userAvatar} alt="userAvatar" className={styles.userAvatar} />
-        ) : (
-          <div className={styles.userAvatar}>{userName.charAt(0)}</div>
-        )}
 
-        <div className={styles.welcomeCardContent}>
-          <div className={styles.welcomeCardTitle}>{userName ? userName + '，' : ''} {welcomeText ? welcomeText : ''}</div>
-          <div className={styles.welcomeCardDesc}>{welcomeDesc}</div>
+        <div className={styles.welcomeCardContentWrapper}>
+          {userAvatar ? (
+            <img src={userAvatar} alt="userAvatar" className={styles.userAvatar} />
+          ) : (
+            <div className={styles.userAvatar}>{userName.charAt(0)}</div>
+          )}
+
+          <div className={styles.welcomeCardContent}>
+            <div className={styles.welcomeCardTitle}>{userName ? userName + '，' : ''} {welcomeText ? welcomeText : ''}</div>
+            {theme !== WORKBENCH_THEME_OPTIONS.THEME_3 && <div className={styles.welcomeCardDesc}>{welcomeDesc}</div>}
+          </div>
         </div>
+
+        {theme === WORKBENCH_THEME_OPTIONS.THEME_3 && (
+          <>
+            <div className={styles.welcomeCardDescTheme3}>{welcomeDesc}</div>
+            <div className={styles.currentTime}>当前时间：{currentTime}</div>
+          </>
+        )}
       </div>
     </div>
   );

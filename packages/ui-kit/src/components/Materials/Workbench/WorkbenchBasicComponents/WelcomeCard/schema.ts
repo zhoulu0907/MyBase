@@ -18,7 +18,6 @@ import {
   WORKBENCH_WIDTH_OPTIONS,
   WORKBENCH_WIDTH_VALUES,
   WORKBENCH_CONFIG_TYPES,
-  DATA_CONFIG_RANGE,
   WORKBENCH_THEME_OPTIONS
 } from '../../core/constants';
 import { ILabelConfigType, IBooleanConfigType, TBooleanDefaultType, TTextDefaultType, IThemeConfigType } from '../../core/types';

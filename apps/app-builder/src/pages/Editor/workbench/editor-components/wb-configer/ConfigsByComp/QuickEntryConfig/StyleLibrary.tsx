@@ -1,6 +1,3 @@
-import { Button, Grid } from '@arco-design/web-react';
-import { IconSwap } from '@arco-design/web-react/icon';
-import { useState, useCallback, useMemo } from 'react';
 import IconEntry1 from '@/assets/workbench/quick-entry/entry1.svg';
 import IconEntry2 from '@/assets/workbench/quick-entry/entry2.svg';
 import IconEntry3 from '@/assets/workbench/quick-entry/entry3.svg';
@@ -8,16 +5,13 @@ import IconEntry4 from '@/assets/workbench/quick-entry/entry4.svg';
 import IconEntry5 from '@/assets/workbench/quick-entry/entry5.svg';
 import IconEntry6 from '@/assets/workbench/quick-entry/entry6.svg';
 import arcoPalette from '@/constants/arco-palette.json';
-import ConfigDrawer from '@/pages/Editor/workbench/components/configDrawer';
-import { registerConfigRenderer } from '../../registry';
-import { WORKBENCH_CONFIG_TYPES, WORKBENCH_THEME_OPTIONS, type IEntryStyleConfigType } from '@onebase/ui-kit';
-import styles from './index.module.less';
+import { WORKBENCH_THEME_OPTIONS } from '@onebase/ui-kit';
+import WbThemeSelectorConfig from '../../components/WbThemeSelectorConfig';
+import styles from '../../components/WbThemeSelectorConfig/index.module.less';
 
-const Row = Grid.Row;
-
-interface Props {
+interface StyleLibraryProps {
   handlePropsChange: (key: string, value: unknown) => void;
-  item: IEntryStyleConfigType;
+  item: { key: string };
   configs: Record<string, unknown>;
 }
 
@@ -30,25 +24,13 @@ const entryOptions = [
   { label: '名称六', icon: IconEntry6, desc: '辅助描述文案' }
 ];
 
-const WbEntryStyleConfig = ({ handlePropsChange, item, configs }: Props) => {
-  const [drawerVisible, setDrawerVisible] = useState(false);
-
-  const currentStyleConfig = useMemo(() => {
-    const value = configs?.[item.key];
-    return (value as { theme?: string }) || { theme: WORKBENCH_THEME_OPTIONS.THEME_1 };
-  }, [configs, item.key]);
-
-  const currentTheme = currentStyleConfig.theme || WORKBENCH_THEME_OPTIONS.THEME_1;
-
-  const handleThemeChange = useCallback(
-    (theme: string) => {
-      if (currentTheme === theme) return;
-      handlePropsChange(item.key, { ...currentStyleConfig, theme });
-    },
-    [currentTheme, currentStyleConfig, handlePropsChange, item.key]
-  );
-
-  const renderPreviewCard = (theme: string, isShowActive = true) => {
+export function StyleLibrary({ handlePropsChange, item, configs }: StyleLibraryProps) {
+  const renderPreviewCard = (
+    theme: string,
+    isShowActive: boolean,
+    currentTheme: string,
+    onThemeChange: (theme: string) => void
+  ) => {
     switch (theme) {
       // 样式一
       case WORKBENCH_THEME_OPTIONS.THEME_1:
@@ -61,7 +43,7 @@ const WbEntryStyleConfig = ({ handlePropsChange, item, configs }: Props) => {
               ' ' +
               (currentTheme === WORKBENCH_THEME_OPTIONS.THEME_1 && isShowActive && styles.previewCardActive)
             }
-            onClick={() => handleThemeChange(WORKBENCH_THEME_OPTIONS.THEME_1)}
+            onClick={() => onThemeChange(WORKBENCH_THEME_OPTIONS.THEME_1)}
           >
             <div className={styles.previewCardInner}>
               {entryOptions.map((item) => (
@@ -85,7 +67,7 @@ const WbEntryStyleConfig = ({ handlePropsChange, item, configs }: Props) => {
               ' ' +
               (currentTheme === WORKBENCH_THEME_OPTIONS.THEME_2 && isShowActive && styles.previewCardActive)
             }
-            onClick={() => handleThemeChange(WORKBENCH_THEME_OPTIONS.THEME_2)}
+            onClick={() => onThemeChange(WORKBENCH_THEME_OPTIONS.THEME_2)}
           >
             <div className={styles.previewCardInner}>
               {entryOptions.slice(0, 2).map((card) => (
@@ -112,7 +94,7 @@ const WbEntryStyleConfig = ({ handlePropsChange, item, configs }: Props) => {
               ' ' +
               (currentTheme === WORKBENCH_THEME_OPTIONS.THEME_3 && isShowActive && styles.previewCardActive)
             }
-            onClick={() => handleThemeChange(WORKBENCH_THEME_OPTIONS.THEME_3)}
+            onClick={() => onThemeChange(WORKBENCH_THEME_OPTIONS.THEME_3)}
           >
             <div className={styles.previewCardInner}>
               {entryOptions.slice(0, 2).map((card, index) => (
@@ -131,40 +113,17 @@ const WbEntryStyleConfig = ({ handlePropsChange, item, configs }: Props) => {
             </div>
           </div>
         );
+      default:
+        return null;
     }
   };
 
-  // 样式库抽屉内容
-  const renderDrawerContent = () => (
-    <div className={styles.drawerContent}>
-      {renderPreviewCard(WORKBENCH_THEME_OPTIONS.THEME_1)}
-      {renderPreviewCard(WORKBENCH_THEME_OPTIONS.THEME_2)}
-      {renderPreviewCard(WORKBENCH_THEME_OPTIONS.THEME_3)}
-    </div>
-  );
-
   return (
-    <div className={styles.styleLibrary}>
-      <div className={styles.styleOptions}>
-        <Row gutter={[8, 8]}>{renderPreviewCard(currentTheme, false)}</Row>
-      </div>
-      <Button
-        type="outline"
-        className={styles.changeStyleBtn}
-        icon={<IconSwap />}
-        onClick={() => setDrawerVisible(true)}
-      >
-        更改样式
-      </Button>
-      <ConfigDrawer visible={drawerVisible} title="切换外观样式" onClose={() => setDrawerVisible(false)}>
-        {renderDrawerContent()}
-      </ConfigDrawer>
-    </div>
+    <WbThemeSelectorConfig
+      handlePropsChange={handlePropsChange}
+      item={item}
+      configs={configs}
+      renderPreviewCard={renderPreviewCard}
+    />
   );
-};
-
-export default WbEntryStyleConfig;
-
-registerConfigRenderer(WORKBENCH_CONFIG_TYPES.WB_ENTRY_STYLE, ({ handlePropsChange, item, configs }) => (
-  <WbEntryStyleConfig handlePropsChange={handlePropsChange} item={item as IEntryStyleConfigType} configs={configs} />
-));
+}

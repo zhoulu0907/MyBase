@@ -22,7 +22,7 @@ import {
 } from '../../core/constants';
 import type {
   IEntryGroupConfigType,
-  IEntryStyleConfigType,
+  IThemeConfigType,
   IEntryTitleConfigType,
   QuickEntryTitleConfig,
   QuickEntryStyleConfig,
@@ -36,7 +36,7 @@ export interface XQuickEntrySchema {
 export type TXQuickEntryEditData = Array<
   | ITextConfigType
   | IEntryGroupConfigType
-  | IEntryStyleConfigType
+  | IThemeConfigType
   | IEntryTitleConfigType
   | IStatusConfigType<TWorkbenchStatusSelectKeyType>
   | IWidthConfigType<TWorkbenchWidthSelectKeyType>

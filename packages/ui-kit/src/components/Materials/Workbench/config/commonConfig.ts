@@ -2,7 +2,7 @@
  * Workbench 独有配置
  */
 import { DATA_CONFIG_RANGE, WORKBENCH_CONFIG_TYPES } from '../core/constants';
-import type { IEntryGroupConfigType, IDataConfigConfigType, IEntryStyleConfigType, IEntryTitleConfigType } from '../core/types';
+import type { IEntryGroupConfigType, IDataConfigConfigType, IEntryTitleConfigType, IThemeConfigType } from '../core/types';
 
 export const entryGroupConfig: IEntryGroupConfigType = {
   key: 'groupConfig',
@@ -10,10 +10,10 @@ export const entryGroupConfig: IEntryGroupConfigType = {
   type: WORKBENCH_CONFIG_TYPES.WB_ENTRY_GROUP
 };
 
-export const entryStyleConfig: IEntryStyleConfigType = {
+export const entryStyleConfig: IThemeConfigType = {
   key: 'styleConfig',
   name: '样式库',
-  type: WORKBENCH_CONFIG_TYPES.WB_ENTRY_STYLE
+  type: WORKBENCH_CONFIG_TYPES.WB_THEME_SELECTOR
 };
 
 export const entryTitleConfig: IEntryTitleConfigType = {

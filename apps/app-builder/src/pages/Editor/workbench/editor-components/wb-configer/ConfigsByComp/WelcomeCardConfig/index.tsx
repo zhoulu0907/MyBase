@@ -3,8 +3,9 @@ import { UserPermissionManager } from '@onebase/common';
 import { useEffect, useState } from 'react';
 import { WorkbenchAttributes, PanelContentStyle } from '../../components/CommonWorkbenchAttributes';
 import { findItem } from '../../../../utils/edit-data';
-import styles from '../../index.module.less';
 import type { WorkbenchAttributeContext } from '../../components/CommonWorkbenchAttributes/useWorkbenchAttributeContext';
+import { StyleLibrary } from './StyleLibrary';
+import styles from '../../index.module.less';
 
 const CollapseItem = Collapse.Item;
 
@@ -17,12 +18,16 @@ const WelcomeCardPanels = ({
   editData,
   renderEditItem,
   handleMultiPropsChange,
+  handlePropsChange,
+  configs,
   activeKeys,
   setActiveKeys
 }: {
   editData: WorkbenchAttributeContext['editData'];
   renderEditItem: WorkbenchAttributeContext['renderEditItem'];
   handleMultiPropsChange: WorkbenchAttributeContext['handleMultiPropsChange'];
+  handlePropsChange: WorkbenchAttributeContext['handlePropsChange'];
+  configs: WorkbenchAttributeContext['configs'];
   activeKeys: string[];
   setActiveKeys: (keys: string[]) => void;
 }) => {
@@ -61,7 +66,11 @@ const WelcomeCardPanels = ({
           name={SECTION_KEYS.THEME}
           contentStyle={PanelContentStyle}
         >
-          <div>{renderEditItem(themeConfig)}</div>
+          <StyleLibrary
+            handlePropsChange={handlePropsChange}
+            item={themeConfig.item as { key: string }}
+            configs={configs}
+          />
         </CollapseItem>
       )}
 
@@ -87,11 +96,13 @@ const ButtonWorkbenchConfig = () => {
 
   return (
     <WorkbenchAttributes
-      renderPanels={({ editData, renderEditItem, handleMultiPropsChange }) => (
+      renderPanels={({ editData, renderEditItem, handleMultiPropsChange, handlePropsChange, configs }) => (
         <WelcomeCardPanels
           editData={editData}
           renderEditItem={renderEditItem}
           handleMultiPropsChange={handleMultiPropsChange}
+          handlePropsChange={handlePropsChange}
+          configs={configs}
           activeKeys={activeKeys}
           setActiveKeys={setActiveKeys}
         />
