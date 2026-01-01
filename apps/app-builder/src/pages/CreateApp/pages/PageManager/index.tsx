@@ -440,6 +440,7 @@ const PageManagerPage: FC = () => {
   const triggerDelete = (menuID: string) => {
     handleDelete(menuID);
   };
+
   //页面设计新建大屏创建
   const handleScreenCreate = async (id?: string, screenMethod?: string) => {
     console.log('创建大屏参数 id、screenMethod：', id, screenMethod);
@@ -488,6 +489,7 @@ const PageManagerPage: FC = () => {
       }
     });
   };
+
   const handleCreate = async () => {
     createForm.validate(async (error) => {
       if (error !== null) return;

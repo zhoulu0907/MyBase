@@ -1,7 +1,7 @@
 import {
+  getWorkbenchComponentWidth,
   PreviewRender,
   startLoadWorkbenchPageSet,
-  getWorkbenchComponentWidth,
   useWorkbenchEditorSignal,
   type GridItem,
   type WorkbenchComponentType
@@ -34,7 +34,7 @@ const WorkbenchRuntime: React.FC<WorkbenchRuntimeProps> = ({ pageSetId, runtime 
         const sanitizedSchema = {
           ...schema
         };
-        console.log('cp: ', sanitizedSchema);
+        // console.log('cp: ', sanitizedSchema);
         return (
           <Fragment key={cp.id}>
             <div
