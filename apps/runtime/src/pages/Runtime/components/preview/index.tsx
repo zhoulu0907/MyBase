@@ -9,6 +9,7 @@ import {
   getEntityFieldsWithChildren,
   getPageSetId,
   getPageSetMetaData,
+  listPageView,
   LISTTYPE,
   PageType,
   queryFlowExecForm,
@@ -22,6 +23,7 @@ import {
 } from '@onebase/app';
 import { fetchSubmitInstance } from '@onebase/app/src/services/app_runtime';
 import { pagesRuntimeSignal } from '@onebase/common';
+import { getFileUrlById } from '@onebase/platform-center';
 import {
   EDITOR_TYPES,
   ENTITY_FIELD_TYPE,
@@ -76,11 +78,12 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
 
   const [editTargetId, setEditTargetId] = useState('');
 
-  // 当前时间戳
   const [detailMode, setDetailMode] = useState(true);
   const [refresh, setRefresh] = useState(Date.now());
   const [isPredictVisible, setPredictVisible] = useState(false);
   const [isAdd, setAdd] = useState(false);
+
+  const [dashboardImgUrl, setDashboardImgUrl] = useState<string>('');
 
   useEffect(() => {
     if (drawerVisible.value) {
@@ -104,6 +107,23 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
     setSubEntities(entityWithChildren.childEntities);
   };
 
+  const getDashboardId = async (pageSetId: string) => {
+    try {
+      const res = await listPageView({
+        pageSetId: pageSetId
+      });
+
+      console.log('xxxx:   ', res);
+      if (res && res.pages && res.pages.length > 0) {
+        const imgRes = await getFileUrlById(res.pages[0].indexImage);
+        console.log(imgRes);
+        setDashboardImgUrl(imgRes);
+      }
+    } catch (error) {
+      console.error('获取页面视图失败:', error);
+    }
+  };
+
   useEffect(() => {
     if (menuId) {
       handleGetPageSetId(menuId);
@@ -123,8 +143,16 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
     // 工作台和大屏页面不获取主表数据
     if (pageSetId && pageSetType !== PageType.WORKBENCH && pageSetType !== PageType.DASHBOARD) {
       getMainMetaData(pageSetId);
+      setPageType(EDITOR_TYPES.LIST_EDITOR);
+      return;
     }
-    setPageType(EDITOR_TYPES.LIST_EDITOR);
+
+    if (pageSetType == PageType.DASHBOARD) {
+      getDashboardId(pageSetId);
+
+      setPageType(EDITOR_TYPES.DASHBOARD_PREVIEW);
+      return;
+    }
   }, [pageSetId]);
 
   const handleGetPageSetId = async (menuId: string) => {
@@ -482,6 +510,12 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
             menuId={menuId}
             tableName={tableName}
           />
+        )}
+
+        {pageType == EDITOR_TYPES.DASHBOARD_PREVIEW && dashboardImgUrl && (
+          <div className={styles.dashboardPreview}>
+            <img src={dashboardImgUrl} alt="大屏预览" />
+          </div>
         )}
       </div>
 
