@@ -1,3 +1,10 @@
+/**
+ * OCR 类型与字段映射
+ *
+ * 用途：为搭建器与运行态提供识别类型选项与结果字段标准化映射。
+ * - `OCR_TYPES` 提供下拉选项
+ * - `OCR_FIELDS` 规范各识别类型的结构化结果字段
+ */
 export const OCR_TYPES = [
   // { label: '通用文本识别', value: 'general' },
   { label: '身份证识别(正面)', value: 'id_card_front' },

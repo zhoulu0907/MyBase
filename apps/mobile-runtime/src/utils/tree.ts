@@ -161,7 +161,7 @@ export const splitAndFlatten = (treeData: TreeNode[]) => {
 
 // 表单组件根据分割线组件进行分割
 export const splitByDivider = (data: any[]) => {
-  if (!data) return;
+  if (!data) return [];
   const result = [] as any[];
   let buffer = [] as any[];
 

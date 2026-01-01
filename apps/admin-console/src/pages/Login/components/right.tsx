@@ -67,7 +67,9 @@ const Right: React.FC = () => {
         'X-Tenant-Id': tenantId
       };
 
-      values.password = await sm2Encrypt(getPublicKey(), values.password);
+      if (values.password) {
+        values.password = await sm2Encrypt(getPublicKey(), values.password);
+      }
       const loginResp = await adminLogin(values, headers);
       // 显示成功消息并跳转
       if (loginResp.accessToken) {

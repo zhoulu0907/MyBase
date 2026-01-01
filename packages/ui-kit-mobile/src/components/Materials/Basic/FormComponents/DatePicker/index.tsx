@@ -27,6 +27,7 @@ const XDatePicker = memo((props: XDatePickerConfig & { runtime?: boolean; detail
   // 生成唯一的字段ID
   const fieldId = dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.DATE_PICKER}_${nanoid()}`
 
+  const textAlign = layout === 'vertical' ? 'left' : 'right';
   const currentDateType = dateType || DATE_VALUES[DATE_OPTIONS.DATE];
 
   // 时间范围判断
@@ -128,6 +129,7 @@ const XDatePicker = memo((props: XDatePickerConfig & { runtime?: boolean; detail
           };
           return `${value}${map[type] || ''}`;
         }}
+        contentStyle={{ marginTop: layout === 'vertical' ? '0.3rem' : 0 }}
       />
     )
   };
@@ -145,16 +147,17 @@ const XDatePicker = memo((props: XDatePickerConfig & { runtime?: boolean; detail
       className="inputTextWrapperOBMobile"
       field={fieldId}
       rules={rules}
-      label={label.display && <Ellipsis text={label.text} />}
+      layout={layout}
+      label={label.display && <Ellipsis text={label.text} maxLine={2} />}
       initialValue={form?.getFieldValue(fieldId)}
       style={{
-        textAlign: align,
+        textAlign,
         pointerEvents: (!runtime || detailMode) ? 'none' : 'unset',
         opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
       }}
     >
       {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
-        <div className="readonlyText">{dayjs(form?.getFieldValue(fieldId)).format('YYYY-MM-DD')}</div>
+        <div className="readonlyText">{form?.getFieldValue(fieldId) ? dayjs(form?.getFieldValue(fieldId)).format('YYYY-MM-DD') : '--'}</div>
       ) : (
         renderDatePicker()
       )}

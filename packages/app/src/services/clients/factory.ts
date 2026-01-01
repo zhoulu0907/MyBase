@@ -9,6 +9,8 @@ export const flowService = createClient('/flow');
 export const formulaService = createClient('/formula');
 export const bpmService = createClient('/bpm');
 export const etlService = createClient('/etl');
+export const dashboardService = createClient('/dashboard');
+
 
 export const runtimeAppService = createClient('/app', getRuntimeBackendURL());
 export const runtimeBpmService = createClient('/bpm', getRuntimeBackendURL());

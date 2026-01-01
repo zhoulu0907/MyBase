@@ -1,6 +1,5 @@
-// import filterIcon from '@/assets/images/filter.svg';
 import dayjs from 'dayjs';
-import { Button, Dialog, Dropdown, Ellipsis, LoadMore, SearchBar, Sticky, Toast, Form } from '@arco-design/mobile-react';
+import { Button, Dialog, Ellipsis, LoadMore, Sticky, Toast, Form } from '@arco-design/mobile-react';
 import { useForm } from '@arco-design/mobile-react/esm/form';
 import { IconDownload } from '@arco-design/mobile-react/esm/icon';
 import {
@@ -75,7 +74,7 @@ const XLoadMore = memo(
     const [tablePageNo, setTablePageNo] = useState<number>(1);
     const [loading, setLoading] = useState<boolean>(false);
     const [showDropdown, setShowDropdown] = useState(false);
-    const [ localMainMetaData, setLocalMainMetaData] = useState<AppEntityField[]>();
+    const [localMainMetaData, setLocalMainMetaData] = useState<AppEntityField[]>();
 
     const [searchForm] = useForm();
 
@@ -106,7 +105,7 @@ const XLoadMore = memo(
         return localMainMetaData;
       }
 
-      const result =  await getEntityFieldsWithChildren(metaData);
+      const result = await getEntityFieldsWithChildren(metaData);
       setLocalMainMetaData(result);
       return result;
     }
@@ -132,7 +131,7 @@ const XLoadMore = memo(
                     <div className="fileWrapper">
                       <Ellipsis className='filename' text={file.name} />
                       <IconDownload
-                        style={{ color: 'rgb(var(--primary-6))', marginLeft: '0.24rem', fontSize: '0.32rem' }}
+                        style={{ color: 'rgb(var(--primary-6))', marginLeft: '0.24rem', fontSize: '0.28rem' }}
                         onClick={async () => {
                           const param = {
                             menuId: curMenu.value?.id,
@@ -223,7 +222,7 @@ const XLoadMore = memo(
         pageNo: tablePageNo,
         pageSize: pageSize || 10
       };
-      
+
       const res = await dataMethodPageV2(tableName, curMenu.value?.id, req);
 
       const mainMetaData = await getMainMetaData();
@@ -263,8 +262,9 @@ const XLoadMore = memo(
                 field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE
             );
             if (multiSelectField && newItem[key]) {
+
               if (Array.isArray(newItem[key])) {
-                newItem[key] = newItem[key].map((item: any) => item?.id).join(', ');
+                newItem[key] = newItem[key].map((item: any) => item.name || item?.id).join(', ');
               }
             }
 
@@ -362,7 +362,7 @@ const XLoadMore = memo(
       const req: DeleteMethodV2Params = {
         id: id
       };
-      
+
       const res = await dataMethodDeleteV2(tableName, curMenu.value?.id, req);
       if (res) {
         Toast.success('删除成功');
@@ -471,7 +471,7 @@ const XLoadMore = memo(
 
     return (
       <div className="loadmore-list-wrapper-OBMobile">
-        { getTopSearch() }
+        {getTopSearch()}
         {showAddBtn && <div className="list-create-btn" onClick={handleCreate}></div>}
         <div className="list-body-wrapper">
           {(editMode ? [{}] : tableData).map((item, index) => (

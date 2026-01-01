@@ -17,6 +17,7 @@ const XautoCode = memo((props: XautoCodeConfig & { runtime?: boolean; detailMode
     detailMode
   } = props;
 
+  const textAlign = layout === 'vertical' ? 'left' : 'right';
 
   // 生成唯一的字段ID
   const fieldId = dataField && dataField.length > 0
@@ -26,21 +27,22 @@ const XautoCode = memo((props: XautoCodeConfig & { runtime?: boolean; detailMode
   return (
     <Form.Item
       className="inputTextWrapperOBMobile inputAutoWrapperOBMobile"
-      label={label.display && <Ellipsis text={label.text} />}
+      label={label.display && <Ellipsis text={label.text} maxLine={2} />}
       field={fieldId}
+      layout={layout}
       style={{
         pointerEvents: (!runtime || detailMode) ? 'none' : 'unset',
         opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
       }}
     >
-      {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
-        <div className="readonlyText">{form?.getFieldValue(fieldId)}</div>) : (
+      {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ?
+        <div className="readonlyText" style={{ textAlign }}>{form?.getFieldValue(fieldId) || '--'}</div> :
         <Input
           readOnly={true}
           placeholder={placeholder}
-          inputStyle={{ textAlign: 'right' }}
+          inputStyle={{ textAlign }}
         />
-      )}
+      }
     </Form.Item>
   );
 });

@@ -22,6 +22,11 @@ export interface LoginRequest {
    * 设备id
    */
   deviceId: string;
+
+  /**
+   * 登录平台 判断手机还是PC端登录
+   */
+  loginPlatform?: LoginPlatform;
 }
 
 export interface TenantLoginRequest {
@@ -41,6 +46,11 @@ export interface TenantLoginRequest {
    * 设备id
    */
   deviceId: string;
+}
+
+export enum LoginPlatform {
+  PC = 'pc',
+  MOBILE = 'mobile'
 }
 
 export interface RuntimeAccountLoginRequest {
@@ -65,6 +75,11 @@ export interface RuntimeAccountLoginRequest {
    * 设备id
    */
   deviceId: string;
+
+  /**
+   * 登录平台 判断手机还是PC端登录
+   */
+  loginPlatform?: LoginPlatform;
 }
 
 export interface RuntimeCorpLoginRequest {
@@ -85,39 +100,49 @@ export interface RuntimeCorpLoginRequest {
    * 设备id
    */
   deviceId: string;
+
+  /**
+   * 登录平台 判断手机还是PC端登录
+   */
+  loginPlatform?: LoginPlatform;
 }
 
 export interface RuntimeThirdLoginRequest {
-    /**
-     * 应用ID
-     */
-    appId: string;
-    /**
-     * ========== 图片验证码相关 ==========
-     * 验证码，验证码开启时，需要传递
-     */
-    captchaVerification?: string;
-    /**
-     * ========== 设备标识相关 ==========
-     * 设备ID，用于多设备管理和限制
-     */
-    deviceId: string;
-    /**
-     * 密码/验证码
-     */
-    loginType: string;
-    /**
-     * 手机号
-     */
-    mobile: string;
-    /**
-     * 密码
-     */
-    password?: string;
-    /**
-     * 验证码
-     */
-    verifyCode?: string;
+  /**
+   * 应用ID
+   */
+  appId: string;
+  /**
+   * ========== 图片验证码相关 ==========
+   * 验证码，验证码开启时，需要传递
+   */
+  captchaVerification?: string;
+  /**
+   * ========== 设备标识相关 ==========
+   * 设备ID，用于多设备管理和限制
+   */
+  deviceId: string;
+  /**
+   * 密码/验证码
+   */
+  loginType: string;
+  /**
+   * 手机号
+   */
+  mobile: string;
+  /**
+   * 密码
+   */
+  password?: string;
+  /**
+   * 验证码
+   */
+  verifyCode?: string;
+
+  /**
+   * 登录平台 判断手机还是PC端登录
+   */
+  loginPlatform?: LoginPlatform;
 }
 
 export interface RuntimeMobileLoginRequest {
@@ -143,6 +168,11 @@ export interface RuntimeMobileLoginRequest {
    * 设备id
    */
   deviceId: string;
+
+  /**
+   * 登录平台 判断手机还是PC端登录
+   */
+  loginPlatform?: LoginPlatform;
 }
 
 export interface LoginResponse {
@@ -153,7 +183,7 @@ export interface LoginResponse {
   tenantId: string; // 租户id
   tenantWebsite: string; // 租户网址
   corpId: string; // 企业id
-  loginSource: string //来源
+  loginSource: string; //来源
 }
 
 export interface TenantLoginResponse {
@@ -174,7 +204,7 @@ export interface ThirdUserLoginResponse {
   tenantId: string; // 租户id
   tenantWebsite: string; // 租户网址
   corpId?: string; // 企业id
-  loginSource: string //来源
+  loginSource: string; //来源
   userUnRegistFlag: boolean;
   userAppRelationFlag?: boolean; //是否关联应用
   email?: string;

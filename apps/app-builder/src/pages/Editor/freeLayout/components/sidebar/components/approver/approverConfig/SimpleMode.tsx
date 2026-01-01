@@ -19,7 +19,7 @@ const SimpleMode = ({ setApprovalConfigData, approverConfig }: ApproverConfig) =
 
   const [userOptions, setUserOptions] = useState<any[]>([]);
   const [roleOptions, setRoleOptions] = useState<any[]>([]);
-  const [simpleCkType, setSimpleCkType] = useState<string>(approverConfig?.approverType || 'user');
+  const [simpleCkType, setSimpleCkType] = useState<string>(approverConfig?.handlerType || 'user');
   const [form] = Form.useForm();
   const [selectedUser, setSelectedUser] = useState<string[]>([]);
   const [selectedRole, setSelectedRole] = useState<string[]>([]);
@@ -110,7 +110,7 @@ const SimpleMode = ({ setApprovalConfigData, approverConfig }: ApproverConfig) =
       itemKey = 'roleId';
     }
     const obj:any = {
-      approverType: simpleCkType
+      handlerType: simpleCkType
     }
     if (selOptions?.length > 0) {
       obj[dataKey] = selOptions.filter((item: any) => {
@@ -139,7 +139,7 @@ const SimpleMode = ({ setApprovalConfigData, approverConfig }: ApproverConfig) =
       role: { key: 'roles', formField: 'role', idField: 'roleId' },
       user: { key: 'users', formField: 'user', idField: 'userId' }
     } as const;
-    const config = configMap[approverConfig?.approverType as keyof typeof configMap];
+    const config = configMap[approverConfig?.handlerType as keyof typeof configMap];
     const dataArray = config ? approverConfig?.[config.key] : undefined;
     if (dataArray && dataArray.length > 0) {
       const formData = form.getFieldsValue([config.formField]);
@@ -156,16 +156,16 @@ const SimpleMode = ({ setApprovalConfigData, approverConfig }: ApproverConfig) =
   }, []);
 
   const setInitData = () => {
-    const { approverType, users = [], roles = [] } = approverConfig;
-    if (approverType) {
-      setSimpleCkType(approverType);
-      if (approverType === 'user') {
+    const { handlerType, users = [], roles = [] } = approverConfig;
+    if (handlerType) {
+      setSimpleCkType(handlerType);
+      if (handlerType === 'user') {
         const userArr = users.map((item: any) => item.userId);
         prevUserIdsRef.current = userArr
         form.setFieldsValue({
           user: userArr
         });
-      } else if (approverType === 'role') {
+      } else if (handlerType === 'role') {
         form.setFieldsValue({
           role: roles.map((item: any) => item.roleId)
         });

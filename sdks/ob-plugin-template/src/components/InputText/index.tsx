@@ -1,3 +1,10 @@
+/**
+ * XInputText 组件（单行文本输入）
+ *
+ * 用途：与宿主 UI-Kit 表单能力对齐的插件组件，支持搭建器与运行态。
+ * 绑定：通过 `dataField` 提供的字段路径在表单上下文中进行值读写；若未提供则生成兜底 ID。
+ * 运行态/构建态：由 `runtime` 与 `detailMode` 配合 `status` 计算交互性。
+ */
 // ===== 导入 begin =====
 import { Form, Input } from '@arco-design/web-react'
 import { memo, useEffect, useMemo, useState } from 'react'
@@ -54,13 +61,11 @@ const PluginInputText = memo((props: any) => {
   const initial = useMemo(() => {
     if (defaultValueConfig?.type === 'CUSTOM') return defaultValueConfig?.customValue ?? ''
     return ''
-  }, [defaultValueConfig])
+  }, [defaultValueConfig?.type, defaultValueConfig?.customValue])
   // ===== 内部状态 & 回显 end =====
 
   // ===== 内部事件 =====
-  const internalEvents = {
-    // 简单输入框通常由 Form.Item 自动接管 onChange，此处预留结构
-  }
+  // 事件由 Form.Item 接管，无需内部声明
   // ===== 内部事件 =====
 
   // ===== 方法：帮助方法 begin =====

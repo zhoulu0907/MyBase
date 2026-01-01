@@ -1,6 +1,13 @@
 .switchWrapperOBMobile {
   .arco-form-item-control {
     display: flex;
-    justify-content: end;
+    justify-content: flex-end;
+  }
+}
+
+.verticalLayout {
+  .arco-form-item-control {
+    display: flex;
+    justify-content: flex-start;
   }
 }

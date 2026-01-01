@@ -143,6 +143,7 @@ const AppsList: React.FC<IProps> = ({ treeData, mobileNavLayout, loading }) => {
       pagesetType: item.pagesetType,
       children: []
     });
+    localStorage.setItem('curMenu-entityUuid', item.entityUuid);
     // sp.delete('curTab');
     const to = `${location.pathname.replace('/runtime-home', '/runtime')}?${sp.toString()}`;
     navigate(to);

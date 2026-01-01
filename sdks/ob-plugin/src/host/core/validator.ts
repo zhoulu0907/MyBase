@@ -58,4 +58,32 @@ export function validatePlugin(plugin: any, meta: PluginMeta): void {
       }
     });
   }
+
+  // 可选：方法元信息校验（仅在提供时校验一致性与基本结构）
+  if (plugin.methodsMeta && typeof plugin.methodsMeta === 'object') {
+    Object.entries(plugin.methodsMeta as Record<string, any>).forEach(([key, metaItem]) => {
+      if (!metaItem || typeof metaItem !== 'object') {
+        throw new Error(`Plugin ${meta.name} methodsMeta[${key}] invalid: object required`);
+      }
+      if (metaItem.key && metaItem.key !== key) {
+        throw new Error(`Plugin ${meta.name} methodsMeta[${key}] invalid: key mismatch`);
+      }
+      if (metaItem.params) {
+        if (!Array.isArray(metaItem.params)) {
+          throw new Error(`Plugin ${meta.name} methodsMeta[${key}] invalid: params must be array`);
+        }
+        metaItem.params.forEach((p: any, i: number) => {
+          if (!p || typeof p !== 'object' || typeof p.name !== 'string') {
+            throw new Error(`Plugin ${meta.name} methodsMeta[${key}].params[${i}] invalid`);
+          }
+        });
+      }
+      if (metaItem.returns && typeof metaItem.returns !== 'object') {
+        throw new Error(`Plugin ${meta.name} methodsMeta[${key}] invalid: returns must be object`);
+      }
+      if (plugin.methods && !plugin.methods[key]) {
+        throw new Error(`Plugin ${meta.name} methodsMeta[${key}] invalid: method not found`);
+      }
+    });
+  }
 }

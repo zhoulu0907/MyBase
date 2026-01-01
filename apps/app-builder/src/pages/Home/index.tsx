@@ -5,7 +5,7 @@ import CreateAppPage from '../CreateApp';
 import AppSettingPage from '../CreateApp/pages/AppSetting';
 import DataFactoryPage from '../CreateApp/pages/DataFactory';
 import IntegratedManagementPage from '../CreateApp/pages/IntegratedManagement';
-import Dashboard from '../CreateApp/pages/Dashbord';
+import Dashboard from '../CreateApp/pages/Dashboard';
 import PageManagerPage from '../CreateApp/pages/PageManager';
 import { AppHeader } from './components/header';
 import styles from './index.module.less';

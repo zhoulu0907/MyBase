@@ -10,9 +10,9 @@ import type { XInputUserSelectConfig } from './schema';
 
 import { getPopupContainer } from '@/utils';
 
+import { isRuntimeEnv, TokenManager } from '@onebase/common';
 import '../index.css';
 import './index.css';
-import { isRuntimeEnv, TokenManager } from '@onebase/common';
 
 const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const {
@@ -49,14 +49,10 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; d
   const fieldValue = Form.useWatch(fieldName, form);
   const tokenInfo = TokenManager.getTokenInfo();
 
+  const isInteractive = runtime && status !== STATUS_VALUES[STATUS_OPTIONS.READONLY] && !detailMode;
+
   useEffect(() => {
-    if (
-      runtime &&
-      status !== STATUS_VALUES[STATUS_OPTIONS.READONLY] &&
-      !detailMode &&
-      keywords === '' &&
-      (!selectScope || selectScope.length === 0)
-    ) {
+    if (isInteractive && keywords === '' && (!selectScope || selectScope.length === 0)) {
       getUserData('');
     } else if (keywords === '') {
     }
@@ -140,6 +136,9 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; d
   );
 
   const getUserData = async (inputValue: string) => {
+    if (!isInteractive) {
+      return;
+    }
     setFetching(true);
     setKeywords(inputValue);
     const param = {
@@ -176,15 +175,10 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; d
   };
 
   const handleSelectChange = (id: string) => {
-    console.log('value: ', id);
-    console.log('userData: ', userData);
-
     const user = userData.find((item) => item.id === id);
 
     setCurrentSelectUser(user?.nickname);
     setCurrentSelectUserID(id);
-
-    console.log('fieldName: ', fieldName);
 
     form.setFieldValue(fieldName, {
       id: id,

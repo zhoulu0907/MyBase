@@ -6,5 +6,7 @@ export {
   runtimeCorpService,
   runtimeInfraService,
   runtimeService,
-  systemService
+  systemService,
+  dashboardDataSetService,
+  dashboardService
 } from './factory';

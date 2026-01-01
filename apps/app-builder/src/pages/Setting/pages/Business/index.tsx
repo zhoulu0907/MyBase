@@ -19,6 +19,7 @@ import {
   disabledCorpApi,
   getCorpListApi,
   getDictDataListByType,
+  getFileUrlById,
   type corpListParams
 } from '@onebase/platform-center';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -41,7 +42,7 @@ const BusinessPage: React.FC = () => {
       render: (data: string, record: any) => (
         <>
           {data ? (
-            <Image src={data} width={72} height={36} />
+            <Image src={getFileUrlById(data)} width={72} height={36} />
           ) : (
             <div className={styles.corpLogo}>{displayCorpLogo(record?.corpName)}</div>
           )}

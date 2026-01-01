@@ -1,3 +1,12 @@
+/**
+ * 插件首页页面（HomePage）
+ *
+ * 作用：演示如何在插件内部使用宿主提供的 SDK 与示例组件。
+ * 关键点：
+ * - 通过 `sdk.context.storage` 读写插件私有存储
+ * - 通过 `sdk.ui.notify` 进行提示
+ * - 通过 `sdk.context.events.emit` 触发宿主事件
+ */
 import { Card, Button, Space, Typography, Form } from '@arco-design/web-react'
 import type { HostSDK } from '@ob/plugin/sdk'
 type ExtendedSDK = HostSDK & { ui: any; context: any }
@@ -7,8 +16,10 @@ const { Title, Text } = Typography
 
 export const HomePage = ({ sdk }: { sdk: ExtendedSDK }) => {
   const handleCallSDK = () => {
+    // 向宿主提供的存储写入并读取数据
     sdk.context.storage.set('plugin-demo-key', { time: new Date().toISOString() })
     const data = sdk.context.storage.get('plugin-demo-key')
+    // 使用宿主的通知能力进行提示
     sdk.ui.notify('success', `SDK调用成功：${JSON.stringify(data)}`)
   }
   return (

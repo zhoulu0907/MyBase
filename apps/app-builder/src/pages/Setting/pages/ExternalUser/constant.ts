@@ -6,7 +6,7 @@ export enum CreateSourceValue {
     SELF = 'self'
 }
 export const CreateSource: CreateSourceType = {
-  back: '后台注册',
+  back: '后台创建',
   self: '自主注册'
 };
 

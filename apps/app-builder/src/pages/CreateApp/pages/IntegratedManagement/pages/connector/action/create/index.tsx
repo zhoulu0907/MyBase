@@ -1,4 +1,4 @@
-import { Button, Form, Grid, Input, Message, Switch } from '@arco-design/web-react';
+import { Button, Form, Grid, Input, Message, Tabs } from '@arco-design/web-react';
 import {
   createScriptAction,
   getScriptAction,
@@ -14,10 +14,11 @@ import styles from './index.module.less';
 import { javascript } from '@codemirror/lang-javascript';
 import CodeMirror, { EditorView } from '@uiw/react-codemirror';
 import SchemaForm from './SchemaForm';
-import { jsonToJsonSchema, schemaToFormData } from './util';
+import { jsonToJsonSchema } from './util';
 
 const Row = Grid.Row;
 const Col = Grid.Col;
+const TabPane = Tabs.TabPane;
 
 export interface CreateScriptActionPageProps {
   onSuccess: Function;
@@ -67,8 +68,8 @@ const CreateScriptActionPage: React.FC<CreateScriptActionPageProps> = ({ onSucce
         inputSchema: res.inputSchema || [],
         outputSchema: res.outputSchema || []
       });
-      setInputSchema(res.inputSchema || [])
-      setOutputSchema(res.outputSchema || [])
+      setInputSchema(res.inputSchema || []);
+      setOutputSchema(res.outputSchema || []);
     }
   };
 
@@ -362,78 +363,57 @@ const CreateScriptActionPage: React.FC<CreateScriptActionPageProps> = ({ onSucce
           </Form.Item>
         </Row>
         <Row>
-          <Col span={22}>
-            <div className={styles.title}>动作入参</div>
-          </Col>
-          <Col span={2}>
-            {/* <Switch
-              checkedText="图形"
-              uncheckedText="文本"
-              checked={inputEditType === EditTypeEnum.Visual}
-              onChange={handleInputParameterChange}
-            ></Switch> */}
-          </Col>
+          <Tabs defaultActiveTab="actionInput" style={{ width: '100%' }}>
+            <TabPane key="actionInput" title="动作入参">
+              {inputEditType === EditTypeEnum.Json && (
+                <Row>
+                  <Form.Item field="inputParameter">
+                    <Input.TextArea placeholder="请输入动作入参（JSON格式）" rows={4} />
+                  </Form.Item>
+                </Row>
+              )}
+              {inputEditType === EditTypeEnum.Visual && inputSchema && (
+                <Row>
+                  <Form.Item field="inputSchema">
+                    <SchemaForm form={form} schema={inputSchema} fieldPrefix="inputSchema" />
+                  </Form.Item>
+                </Row>
+              )}
+            </TabPane>
+
+            <TabPane key="actionScript" title="设置动作JS">
+              <Row>
+                <Form.Item field="rawScript">
+                  <CodeMirror
+                    height="400px"
+                    className={styles.editor}
+                    extensions={customExtensions}
+                    value={rawScript}
+                    onChange={(value) => form.setFieldsValue({ rawScript: value })}
+                  ></CodeMirror>
+                </Form.Item>
+              </Row>
+            </TabPane>
+
+            <TabPane key="actionOutput" title="动作出参">
+              {outputEditType === EditTypeEnum.Json && (
+                <Row>
+                  <Form.Item field="outputParameter">
+                    <Input.TextArea placeholder="请输入动作出参（JSON格式）" rows={4} />
+                  </Form.Item>
+                </Row>
+              )}
+              {outputEditType === EditTypeEnum.Visual && outputSchema && (
+                <Row>
+                  <Form.Item field="outputSchema">
+                    <SchemaForm form={form} schema={outputSchema} fieldPrefix="outputSchema" />
+                  </Form.Item>
+                </Row>
+              )}
+            </TabPane>
+          </Tabs>
         </Row>
 
-        {inputEditType === EditTypeEnum.Json && (
-          <Row>
-            <Form.Item field="inputParameter">
-              <Input.TextArea placeholder="请输入动作入参（JSON格式）" rows={4} />
-            </Form.Item>
-          </Row>
-        )}
-        {inputEditType === EditTypeEnum.Visual && inputSchema && (
-          <Row>
-            <Form.Item field="inputSchema">
-              <SchemaForm form={form} schema={inputSchema} fieldPrefix="inputSchema" />
-            </Form.Item>
-          </Row>
-        )}
-
-        <Row>
-          <div className={styles.title}>设置动作JS</div>
-        </Row>
-
-        <Row>
-          <Form.Item field="rawScript">
-            <CodeMirror
-              height="100px"
-              className={styles.editor}
-              extensions={customExtensions}
-              value={rawScript}
-              onChange={(value) => form.setFieldsValue({ rawScript: value })}
-            ></CodeMirror>
-          </Form.Item>
-        </Row>
-
-        <Row>
-          <Col span={22}>
-            <div className={styles.title}>动作出参</div>
-          </Col>
-          <Col span={2}>
-            {/* <Switch
-              checkedText="图形"
-              uncheckedText="文本"
-              checked={outputEditType === EditTypeEnum.Visual}
-              onChange={handleOutputParameterChange}
-            ></Switch> */}
-          </Col>
-        </Row>
-
-        {outputEditType === EditTypeEnum.Json && (
-          <Row>
-            <Form.Item field="outputParameter">
-              <Input.TextArea placeholder="请输入动作出参（JSON格式）" rows={4} />
-            </Form.Item>
-          </Row>
-        )}
-        {outputEditType === EditTypeEnum.Visual && outputSchema && (
-          <Row>
-            <Form.Item field="outputSchema">
-              <SchemaForm form={form} schema={outputSchema} fieldPrefix="outputSchema" />
-            </Form.Item>
-          </Row>
-        )}
         <Row gutter={16}>
           <Col span={1.5}>
             <Button type="primary" onClick={handleSubmit}>

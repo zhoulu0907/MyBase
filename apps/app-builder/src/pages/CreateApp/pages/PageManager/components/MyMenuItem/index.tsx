@@ -17,8 +17,8 @@ import {
   PageType,
   RootParentPage,
   VisibleType,
-  type GetPageSetIdReq,
-  type ApplicationMenu
+  type ApplicationMenu,
+  type GetPageSetIdReq
 } from '@onebase/app';
 import { EDITOR_TYPES, webMenuIcons } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
@@ -39,7 +39,8 @@ const MenuItem = Menu.Item;
 interface MenuItemProps {
   showOption: boolean;
   menuID: string;
-  isVisible: number;
+  isVisiblePc: number;
+  isVisibleMobile: number;
   menuCode: string;
   menuName: string;
   label: string;
@@ -51,7 +52,7 @@ interface MenuItemProps {
   triggerCreate?: (formType: string) => void;
   triggerRename?: () => void;
   triggerCopy?: () => void;
-  triggerHide?: (menuID: string, isVisible: number) => void;
+  triggerHide?: (menuID: string, isVisible: number, platform: 'pc' | 'mobile') => void;
   triggerDelete?: (menuID: string) => void;
   maxWidth: number;
   renameForm: FormInstance;
@@ -64,7 +65,8 @@ interface MenuItemProps {
 const MyMenuItem: React.FC<MenuItemProps> = ({
   showOption,
   menuID,
-  isVisible,
+  isVisiblePc,
+  isVisibleMobile,
   menuName,
   label,
   menuIcon,
@@ -134,16 +136,32 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
         key="visible"
         onClick={(e) => {
           e.stopPropagation();
-          triggerHide && triggerHide(menuID, isVisible);
+          triggerHide && triggerHide(menuID, isVisiblePc, 'pc');
         }}
       >
-        {isVisible === VisibleType.HIDDEN ? (
-          <img src={VisibleIcon} alt="隐藏" />
+        {isVisiblePc === VisibleType.HIDDEN ? (
+          <img src={VisibleIcon} alt="隐藏web端" />
         ) : (
-          <img src={HiddenIcon} alt="取消隐藏" />
+          <img src={HiddenIcon} alt="取消隐藏web端" />
         )}
-        {isVisible === VisibleType.HIDDEN ? '取消隐藏' : '隐藏'}
+        {isVisiblePc === VisibleType.HIDDEN ? '取消隐藏web端' : '隐藏web端'}
       </MenuItem>
+      <MenuItem
+        className={styles.menuContent}
+        key="visible"
+        onClick={(e) => {
+          e.stopPropagation();
+          triggerHide && triggerHide(menuID, isVisibleMobile, 'mobile');
+        }}
+      >
+        {isVisibleMobile === VisibleType.HIDDEN ? (
+          <img src={VisibleIcon} alt="隐藏移动端" />
+        ) : (
+          <img src={HiddenIcon} alt="取消隐藏移动端" />
+        )}
+        {isVisibleMobile === VisibleType.HIDDEN ? '取消隐藏移动端' : '隐藏移动端'}
+      </MenuItem>
+
       {!isGroup && copyForm && triggerCopy && (
         <MenuItem
           className={styles.menuContent}
@@ -229,7 +247,7 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
 
   return (
     <div
-      className={`${styles.myMenuItem} ${isVisible === VisibleType.HIDDEN ? 'menu-hidden' : ''}`}
+      className={`${styles.myMenuItem} ${isVisiblePc === VisibleType.HIDDEN || isVisibleMobile === VisibleType.HIDDEN ? 'menu-hidden' : ''}`}
       onContextMenu={(e) => {
         // 支持右键弹出菜单
         setPopupVisible(true);
@@ -274,7 +292,7 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
           </span>
         </div>
       </Tooltip>
-      {isVisible === VisibleType.HIDDEN && (
+      {(isVisiblePc === VisibleType.HIDDEN || isVisibleMobile === VisibleType.HIDDEN) && (
         <div className={styles.eyeVisible}>
           <IconEyeInvisible />
         </div>

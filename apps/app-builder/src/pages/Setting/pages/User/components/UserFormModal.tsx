@@ -1,7 +1,7 @@
 import { filterSpace } from '@/utils';
 import { emailValidator, phoneValidator } from '@/utils/validator';
 import { Button, Form, Grid, Input, Message, Modal, Select, Space, Switch, TreeSelect } from '@arco-design/web-react';
-import { UploadAvatarComponent, hasPermission, TENANT_DEPT_QUERY } from '@onebase/common';
+import { getPublicKey, hasPermission, sm2Encrypt, TENANT_DEPT_QUERY, UploadAvatarComponent } from '@onebase/common';
 import type { RoleVO, SimpleRoleVO, UserVO } from '@onebase/platform-center';
 import {
   createUser,
@@ -118,6 +118,10 @@ export default function UserFormModal({
 
     try {
       const values = await form.validate();
+
+      if (values.password && mode === 'create') {
+        values.password = await sm2Encrypt(getPublicKey(), values.password);
+      }
       const params = {
         ...values,
         avatar: avatarUrl,

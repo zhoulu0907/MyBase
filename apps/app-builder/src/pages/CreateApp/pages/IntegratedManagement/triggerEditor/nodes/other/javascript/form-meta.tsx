@@ -119,12 +119,13 @@ export const renderForm = ({}: FormRenderProps<FlowNodeJSON['data']>) => {
       } else {
         setInputParameter([]);
       }
-      const outputSchema = JSON.stringify(res.outputSchema || [])
+      const outputSchema = JSON.stringify(res.outputSchema || []);
       payloadForm.setFieldValue('outputParameter', outputSchema);
     }
   };
 
   const renderInputParameter = useCallback(() => {
+    console.log(payloadForm.getFieldsValue());
     return <InputParameterForm inputParameter={inputParameter} form={payloadForm} nodeId={node.id} />;
   }, [inputParameter, node.id]);
 

@@ -25,7 +25,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
         <FormContent>
           <Form
             form={payloadForm}
-            initialValues={{ ...triggerEditorSignal.nodeData.value[node.id] }}
+            initialValues={{ statusCode: 'true', ...triggerEditorSignal.nodeData.value[node.id] }}
             layout="vertical"
             requiredSymbol={{ position: 'end' }}
           >
@@ -33,7 +33,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
               <Input disabled />
             </Form.Item>
             
-            <Form.Item label="状态码" field="statusCode" initialValue={'true'}>
+            <Form.Item label="状态码" field="statusCode">
               <Select
                 placeholder="请选择"
                 options={[

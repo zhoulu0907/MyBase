@@ -4,16 +4,19 @@ import { useFormEditorSignal, useListEditorSignal } from '../signals/page_editor
 
 import { useLocation } from 'react-router-dom';
 
-export function usePageEditorSignal(pageType?:string) {
-
+export function usePageEditorSignal(pageType?: string) {
   const path = useLocation().pathname;
-  
+
   /**
    * 表单设计页、新增、编辑、详情页  使用 useFormEditorSignal
    * 其余  使用 useListEditorSignal
    */
-  const useList = !(pageType && pageType.indexOf(EDITOR_TYPES.FORM_EDITOR) !== -1 ||
-    path.endsWith(`/${EDITOR_TYPES.FORM_EDITOR}`));
+  const useList = !(
+    (pageType && pageType.indexOf(EDITOR_TYPES.FORM_EDITOR) !== -1) ||
+    path.endsWith(`/${EDITOR_TYPES.FORM_EDITOR}`)
+  );
+
+  const editorSignal = useList ? useListEditorSignal : useFormEditorSignal;
 
   // 优化：避免多次调用 createCurrentEditorSignal，提升性能和可读性
   const curComponentID = currentEditorSignal.curComponentID.value;
@@ -22,84 +25,51 @@ export function usePageEditorSignal(pageType?:string) {
 
   const { setCurComponentID, setCurComponentSchema, clearCurComponentID, setShowDeleteButton } = currentEditorSignal;
 
-  const components = useList ? useListEditorSignal.components.value : useFormEditorSignal.components?.value;
+  // 统一从缓存的 signal 对象中获取所有属性，避免重复判断
+  const components = editorSignal.components.value;
 
-  const setComponents = useList ? useListEditorSignal.setComponents : useFormEditorSignal.setComponents;
+  const setComponents = editorSignal.setComponents;
 
-  const delComponents = useList ? useListEditorSignal.delComponents : useFormEditorSignal.delComponents;
+  const delComponents = editorSignal.delComponents;
 
-  const addComponents = useList ? useListEditorSignal.addComponents : useFormEditorSignal.addComponents;
+  const addComponents = editorSignal.addComponents;
 
-  const clearComponents = useList ? useListEditorSignal.clearComponents : useFormEditorSignal.clearComponents;
+  const clearComponents = editorSignal.clearComponents;
 
-  const pageComponentSchemas = useList
-    ? useListEditorSignal.pageComponentSchemas.value
-    : useFormEditorSignal.pageComponentSchemas?.value;
+  const pageComponentSchemas = editorSignal.pageComponentSchemas.value;
 
-  const loadPageComponentSchemas = useList
-    ? useListEditorSignal.loadPageComponentSchemas
-    : useFormEditorSignal.loadPageComponentSchemas;
+  const loadPageComponentSchemas = editorSignal.loadPageComponentSchemas;
 
-  const setPageComponentSchemas = useList
-    ? useListEditorSignal.setPageComponentSchemas
-    : useFormEditorSignal.setPageComponentSchemas;
+  const setPageComponentSchemas = editorSignal.setPageComponentSchemas;
 
-  const delPageComponentSchemas = useList
-    ? useListEditorSignal.delPageComponentSchemas
-    : useFormEditorSignal.delPageComponentSchemas;
+  const delPageComponentSchemas = editorSignal.delPageComponentSchemas;
 
-  const batchDelPageComponentSchemas = useList
-    ? useListEditorSignal.batchDelPageComponentSchemas
-    : useFormEditorSignal.batchDelPageComponentSchemas;
+  const batchDelPageComponentSchemas = editorSignal.batchDelPageComponentSchemas;
 
-  const clearPageComponentSchemas = useList
-    ? useListEditorSignal.clearPageComponentSchemas
-    : useFormEditorSignal.clearPageComponentSchemas;
+  const clearPageComponentSchemas = editorSignal.clearPageComponentSchemas;
 
-  const layoutSubComponents = useList
-    ? useListEditorSignal.layoutSubComponents.value
-    : useFormEditorSignal.layoutSubComponents?.value;
+  const layoutSubComponents = editorSignal.layoutSubComponents.value;
 
-  const loadLayoutSubComponents = useList
-    ? useListEditorSignal.loadLayoutSubComponents
-    : useFormEditorSignal.loadLayoutSubComponents;
+  const loadLayoutSubComponents = editorSignal.loadLayoutSubComponents;
 
-  const setLayoutSubComponents = useList
-    ? useListEditorSignal.setLayoutSubComponents
-    : useFormEditorSignal.setLayoutSubComponents;
+  const setLayoutSubComponents = editorSignal.setLayoutSubComponents;
 
-  const delLayoutSubComponents = useList
-    ? useListEditorSignal.delLayoutSubComponents
-    : useFormEditorSignal.delLayoutSubComponents;
+  const delLayoutSubComponents = editorSignal.delLayoutSubComponents;
 
-  const batchDelLayoutSubComponents = useList
-    ? useListEditorSignal.batchDelLayoutSubComponents
-    : useFormEditorSignal.batchDelLayoutSubComponents;
+  const batchDelLayoutSubComponents = editorSignal.batchDelLayoutSubComponents;
 
-  const clearLayoutSubComponents = useList
-    ? useListEditorSignal.clearLayoutSubComponents
-    : useFormEditorSignal.clearLayoutSubComponents;
+  const clearLayoutSubComponents = editorSignal.clearLayoutSubComponents;
 
   // 子表单
-  const subTableComponents = useList
-    ? useListEditorSignal.subTableComponents.value
-    : useFormEditorSignal.subTableComponents?.value;
+  const subTableComponents = editorSignal.subTableComponents.value;
 
-  const setSubTableComponents = useList
-    ? useListEditorSignal.setSubTableComponents
-    : useFormEditorSignal.setSubTableComponents;
+  const setSubTableComponents = editorSignal.setSubTableComponents;
 
-  const delSubTableComponents = useList
-    ? useListEditorSignal.delSubTableComponents
-    : useFormEditorSignal.delSubTableComponents;
+  const delSubTableComponents = editorSignal.delSubTableComponents;
 
-  const batchDelSubTableComponents = useList
-    ? useListEditorSignal.batchDelSubTableComponents
-    : useFormEditorSignal.batchDelSubTableComponents;
+  const batchDelSubTableComponents = editorSignal.batchDelSubTableComponents;
 
-  const clearSubTableComponents = useList
-    ? useListEditorSignal.clearSubTableComponents
-    : useFormEditorSignal.clearSubTableComponents;
+  const clearSubTableComponents = editorSignal.clearSubTableComponents;
 
   return {
     curComponentID,
@@ -130,6 +100,6 @@ export function usePageEditorSignal(pageType?:string) {
     setSubTableComponents,
     delSubTableComponents,
     batchDelSubTableComponents,
-    clearSubTableComponents,
+    clearSubTableComponents
   };
 }

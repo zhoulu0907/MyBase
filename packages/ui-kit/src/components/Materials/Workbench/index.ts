@@ -65,3 +65,6 @@ export {
   workbenchBaseDefault,
   workbenchWidthConfig
 } from './config/workbenchShared';
+
+export { menuCacheManager } from './utils/menu-cache';
+

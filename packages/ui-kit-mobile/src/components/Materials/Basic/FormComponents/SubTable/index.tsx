@@ -261,8 +261,8 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
 
     schema.config.cpName = itemDisplayName;
     schema.config.label.text = itemDisplayName;
-    schema.config.label.display = false;
-    schema.config.dataField = tableName ? (fieldName ? [tableName, fieldName] : [tableName]) : [];
+    // schema.config.label.display = false;
+    schema.config.dataField = tableName ? [tableName, fieldName] : [];
     schema.config.id = cpID;
     const props = {
       id: cpID,
@@ -302,7 +302,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
       field=""
       rules={rules}
       layout="vertical"
-      label={label.display ? <Ellipsis text={label.text} /> : undefined}
+      label={label.display ? <Ellipsis text={label.text} maxLine={2} /> : undefined}
       style={{
         opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
       }}
@@ -328,15 +328,16 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                       subTableComponents[id] &&
                       subTableComponents[id].map((subTable: any) => {
                         const config = pageComponentSchemas[subTable.id].config;
-                        const [_subTableName, fieldName] = config.dataField;
+                        const [subTableName, fieldName] = config.dataField;
+                        config.label.display = true; // todo 不知道哪里统一设置成false了
                         const newConfig = {
                           ...config,
-                          dataField: [mainEntity.tableName, `${id}.${index}.${fieldName}`]
+                          dataField: [mainEntity.tableName, `${subTableName}.${index}.${fieldName}`]
                         };
                         const pageSchema = { ...pageComponentSchemas[subTable.id], config: newConfig };
-                        const isImageOrFile = pageSchema.type === FORM_COMPONENT_TYPES.IMG_UPLOAD || pageSchema.type === FORM_COMPONENT_TYPES.FILE_UPLOAD;
+
                         return (
-                          <Cell className={`${isImageOrFile ? 'verticalLayout' : ''}`} label={<Ellipsis text={config.cpName} />} key={subTable.id} style={{ padding: 0 }}>
+                          <div className={'verticalLayout'} key={subTable.id}>
                             <PreviewRender
                               editLoading={editLoading}
                               form={form}
@@ -347,7 +348,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                               runtime={true}
                             // showFromPageData={showFromPageData}
                             />
-                          </Cell>
+                          </div>
                         );
                       })}
                   </Cell.Group>
@@ -436,7 +437,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                               onSubComponentClick(e, cp);
                             }}
                           >
-                            <Cell label={<Ellipsis text={config.cpName} />} key={cp.id} style={{ padding: 0 }}>
+                            <Cell label={<Ellipsis text={config.cpName} maxLine={2} />} key={cp.id} style={{ padding: 0 }}>
                               <EditRender
                                 runtime={runtime}
                                 cpId={cp.id}

@@ -6,6 +6,7 @@ export * from './fingerprint';
 export * from './http';
 export * from './httpClient';
 export * from './list';
+export * from './menuPermission';
 export * from './router';
 export * from './signature';
 export * from './token';

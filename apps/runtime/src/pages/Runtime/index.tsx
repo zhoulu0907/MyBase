@@ -4,18 +4,18 @@ import { Input, Layout, Tree } from '@arco-design/web-react';
 import { IconDown, IconSearch } from '@arco-design/web-react/icon';
 import {
   ENTITY_TYPE,
+  getApplicationMenuPermission,
   getAppNavigationConfig,
   getEntityListWithFields,
   listApplicationMenu,
   menuSignal,
   MenuType,
   runtimeListApplicationBPMMenu,
-  VisibleType,
   type ApplicationMenu,
   type ChildEntity,
   type ListApplicationMenuReq
 } from '@onebase/app';
-import { TokenManager, UserPermissionManager } from '@onebase/common';
+import { menuPermissionSignal, TokenManager, UserPermissionManager } from '@onebase/common';
 import { getPermissionInfo } from '@onebase/platform-center';
 import { useAppEntityStore } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
@@ -51,12 +51,10 @@ interface TreeNode {
 const Runtime: React.FC = () => {
   useSignals();
   const { setMainEntity, setSubEntities } = useAppEntityStore();
+  const { setMenuPermission } = menuPermissionSignal;
 
   const navigate = useNavigate();
   const location = useLocation();
-
-  //   const [appId, setAppId] = useState('');
-  //   const [tenantId, setTenantId] = useState('');
 
   const [search] = useSearchParams();
   const curMenuId = search.get('curMenu');
@@ -68,21 +66,6 @@ const Runtime: React.FC = () => {
   const cutTreeItemWidth = 25;
   const { curMenu, setCurMenu } = menuSignal;
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
-
-  const [nickname, setNickname] = useState('U');
-
-  //   useEffect(() => {
-  //     // 从 window.location.hash 中解析 redirectURL，再从 redirectURL 解析 appId 和 tenantId
-  //     const curAppId = getHashQueryParam('appId');
-  //     const curTenantId = getHashQueryParam('tenantId');
-  //     if (curAppId) {
-  //       setAppId(curAppId);
-  //     }
-
-  //     if (curTenantId) {
-  //       setTenantId(curTenantId);
-  //     }
-  //   }, []);
 
   const { appId, tenantId } = useParams();
 
@@ -123,6 +106,7 @@ const Runtime: React.FC = () => {
   useEffect(() => {
     if (curMenu.value?.entityUuid) {
       getMainMetaData(curMenu.value.entityUuid);
+      getMenuPermission(curMenu.value.id);
     }
   }, [curMenu.value]);
 
@@ -168,23 +152,26 @@ const Runtime: React.FC = () => {
     }
   };
 
+  const getMenuPermission = async (menuId: string) => {
+    const permission = await getApplicationMenuPermission(menuId);
+    console.log('permission: ', permission);
+    setMenuPermission(permission);
+  };
+
   const getUserInfo = async () => {
     const res = await getPermissionInfo();
     UserPermissionManager.setUserPermissionInfo(res);
-    setNickname(res.user.nickname);
   };
 
   // 递归处理 去除隐藏的页面
   const dealPage = (array: ApplicationMenu[]) => {
     let treeList: ApplicationMenu[] = [];
     array.forEach((item: ApplicationMenu) => {
-      if (item.isVisible === VisibleType.SHOW) {
-        let childrenList: ApplicationMenu[] = [];
-        if (item.children && item.children.length > 0) {
-          childrenList = dealPage(item.children);
-        }
-        treeList.push({ ...item, children: childrenList });
+      let childrenList: ApplicationMenu[] = [];
+      if (item.children && item.children.length > 0) {
+        childrenList = dealPage(item.children);
       }
+      treeList.push({ ...item, children: childrenList });
     });
     return treeList;
   };
@@ -218,13 +205,18 @@ const Runtime: React.FC = () => {
       });
 
       if (appNavigationConfig.webDefaultMenu === 'default' || appNavigationConfig.webDefaultMenu === '') {
-        const curMenuObj = curMenuId ? findMenuWithParents(pageList, [], curMenuId) : findMenuWithParents(pageList, []);
+        let curMenuObj = curMenuId ? findMenuWithParents(pageList, [], curMenuId) : findMenuWithParents(pageList, []);
+
+        if (!curMenuObj) {
+          curMenuObj = findMenuWithParents(pageList, []);
+        }
         if (curMenuObj) {
           setExpandedKeys(curMenuObj.parentIds);
           setCurMenu(curMenuObj.node);
         }
       } else {
         const curMenuObj = findMenuWithParents(pageList, [], appNavigationConfig.webDefaultMenu);
+
         if (curMenuObj) {
           setExpandedKeys(curMenuObj.parentIds);
           setCurMenu(curMenuObj.node);
@@ -253,9 +245,10 @@ const Runtime: React.FC = () => {
   };
 
   // 更新当前路由的 curMenu（不刷新页面）
-  const handleCurMenuUrl = (curMenuId: string) => {
+  const handleCurMenuUrl = async (curMenuId: string) => {
     const sp = new URLSearchParams(location.search);
     sp.set('curMenu', String(curMenuId));
+
     const to = `${location.pathname}?${sp.toString()}`;
     navigate(to, { replace: true });
   };

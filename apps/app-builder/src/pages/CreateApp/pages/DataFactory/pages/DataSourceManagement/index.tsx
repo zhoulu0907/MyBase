@@ -1,7 +1,7 @@
 import CreateExternalModal from '@/components/CreateExternalModal';
 import { useAppStore } from '@/store';
 import { Button, Input, Message, Pagination, Spin } from '@arco-design/web-react';
-import { IconPlus } from '@douyinfe/semi-icons';
+import { IconPlus } from '@arco-design/web-react/icon';
 import { deleteETLDatasource, getETLDatasource, pageETLDatasource, type PageDatasourceItem } from '@onebase/app';
 import { debounce } from 'lodash-es';
 import React, { useCallback, useEffect, useState } from 'react';

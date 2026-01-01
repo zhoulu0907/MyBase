@@ -4,6 +4,7 @@ import {
   getEntityFieldsWithChildren,
   getPageSetId,
   getPageSetMetaData,
+  listPageView,
   PageType,
   type AppEntityField,
   type GetPageSetIdReq
@@ -21,12 +22,15 @@ import {
   useEditorSignalMap,
   useListEditorSignal,
   useWorkbenchEditorSignal,
+  useAppEntityStore,
   type GridItem,
   type WorkbenchComponentType
 } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { Fragment, useCallback, useEffect, useState } from 'react';
 import styles from './index.module.less';
+import { getFileUrlById } from '@onebase/platform-center';
+import { pluginBridge } from '@/plugin/bridge';
 
 interface PreviewProps {
   menuId: string;
@@ -49,6 +53,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
   const { workbenchComponents, wbComponentSchemas, clearWorkbenchComponents, clearWbComponentSchemas } =
     useWorkbenchEditorSignal;
 
+  const { setMainEntity, setSubEntities } = useAppEntityStore();
+
   const { editPageViewId } = pagesRuntimeSignal;
 
   const [appId, setAppId] = useState('');
@@ -60,6 +66,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
   const [editTargetId, setEditTargetId] = useState('');
   const [loading, setLoading] = useState(false);
   const preview = true;
+  const [dashboardImgUrl, setDashboardImgUrl] = useState<string>('');
 
   useEffect(() => {
     const appId = getHashQueryParam('appId');
@@ -78,6 +85,19 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
 
     setTableName(entityWithChildren.tableName);
     setMainMetaDataFields(entityWithChildren.parentFields);
+
+    // Update entity store for plugins
+    if (entityWithChildren) {
+      setMainEntity({
+        entityId: entityWithChildren.entityId,
+        entityName: entityWithChildren.entityName,
+        tableName: entityWithChildren.tableName,
+        fields: entityWithChildren.parentFields,
+        entityUuid: (entityWithChildren as any).entityUuid || '',
+        entityType: 'main'
+      } as any);
+      setSubEntities({ entities: entityWithChildren.childEntities || [] });
+    }
   };
 
   const handleGetPageSetId = useCallback(async (menuId: string) => {
@@ -130,8 +150,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
         }
       };
 
-      // 工作台页面不获取主表数据
-      if (pagesetType === PageType.WORKBENCH) {
+      // 工作台、大屏页面不获取主表数据
+      if (pagesetType === PageType.WORKBENCH || pagesetType === PageType.DASHBOARD) {
         loadPageSetInfo(pageSetId).finally(() => {
           setLoading(false);
         });
@@ -139,10 +159,30 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
         loadData();
       }
     }
-    // 优先切换到列表页
-    setPageType(pagesetType === PageType.WORKBENCH ? EDITOR_TYPES.WORKBENCH_EDITOR : EDITOR_TYPES.LIST_EDITOR);
+
+    if (pageSetId && pagesetType === PageType.DASHBOARD) {
+      getDashboardId(pageSetId);
+      setPageType(EDITOR_TYPES.DASHBOARD_PREVIEW);
+    } else if (pagesetType === PageType.WORKBENCH) {
+      setPageType(EDITOR_TYPES.WORKBENCH_EDITOR);
+    } else {
+      setPageType(EDITOR_TYPES.LIST_EDITOR);
+    }
   }, [pageSetId]);
 
+  const getDashboardId = async (pageSetId: string) => {
+    try {
+      const res = await listPageView({
+        pageSetId: pageSetId
+      });
+      if (res && res.pages && res.pages.length > 0) {
+        const imgRes = await getFileUrlById(res.pages[0].indexImage);
+        setDashboardImgUrl(imgRes);
+      }
+    } catch (error) {
+      console.error('获取页面视图失败:', error);
+    }
+  };
   const loadPageSetInfo = async (pageSetId: string) => {
     // 工作台使用独立加载逻辑
     if (pagesetType === PageType.WORKBENCH) {
@@ -203,6 +243,15 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
     // return res;
   };
 
+  React.useEffect(() => {
+    pluginBridge.registerContext({ form, appId, pageSetId, menuId });
+    console.log('[Preview] Form instance registered in bridge context', { appId, pageSetId, menuId });
+    return () => {
+      pluginBridge.registerContext({ form: undefined });
+      console.log('[Preview] Form instance unregistered from bridge context');
+    };
+  }, [form, appId, pageSetId, menuId]);
+
   return (
     <div className={styles.previewPage}>
       <div className={styles.content}>
@@ -241,7 +290,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
             </div>
           )
         )}
-
         {pageType == EDITOR_TYPES.FORM_EDITOR && (
           <Form layout="inline" form={form}>
             {useEditorSignalMap.get(editPageViewId.value)?.components.value.map((cp: GridItem) => (
@@ -317,6 +365,12 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
               </Fragment>
             ))}
           </Form>
+        )}
+
+        {pageType === EDITOR_TYPES.DASHBOARD_PREVIEW && dashboardImgUrl && (
+          <div className={styles.dashboardPreview}>
+            <img src={dashboardImgUrl} alt="大屏预览" />
+          </div>
         )}
       </div>
     </div>

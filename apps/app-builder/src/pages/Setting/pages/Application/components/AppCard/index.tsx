@@ -4,11 +4,13 @@ import { Avatar, Divider, Dropdown, Menu, Space, Tag, Tooltip, Typography } from
 import { IconDelete, IconEdit, IconMoreVertical } from '@arco-design/web-react/icon';
 import { type Application } from '@onebase/app';
 import { appIconMap } from '@onebase/ui-kit';
+import { getFileUrlById } from '@onebase/platform-center';
 import dayjs from 'dayjs';
 import React from 'react';
 import { ApplicationStatus, ApplicationStatusLabel, defaultTheme, TagColor, ThemeColorMap } from '../../const';
 import styles from './index.module.less';
 import type { developUser } from '@onebase/app/src/types';
+import { hasPermission, TENANT_APP_PERMISSION as ACTIONS } from '@onebase/common';
 
 const AvatarGroup = Avatar.Group;
 
@@ -50,17 +52,19 @@ const AppCard: React.FC<AppCardProps> = ({
           访问应用
         </div>
       </Menu.Item>
-      <Menu.Item
-        key="2"
-        onClick={(e) => {
-          e.stopPropagation();
-          onDelete(item);
-        }}
-        style={{ color: 'red' }}
-      >
-        <IconDelete style={{ marginRight: 4 }} />
-        删除
-      </Menu.Item>
+      {hasPermission(ACTIONS.DELETE) && (
+        <Menu.Item
+          key="2"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete(item);
+          }}
+          style={{ color: 'red' }}
+        >
+          <IconDelete style={{ marginRight: 4 }} />
+          删除
+        </Menu.Item>
+      )}
     </Menu>
   );
 
@@ -148,7 +152,7 @@ const AppCard: React.FC<AppCardProps> = ({
                 {item?.userPhotoList?.map((item: developUser, index: number) => {
                   return item.avatar ? (
                     <Avatar key={index}>
-                      <img src={item.avatar} alt="avatar" />
+                      <img src={getFileUrlById(item.avatar)} alt="avatar" />
                     </Avatar>
                   ) : (
                     <Avatar key={index} style={{ backgroundColor: '#009e9e' }}>
@@ -170,7 +174,9 @@ const AppCard: React.FC<AppCardProps> = ({
 
         <div className={styles.footerRight}>
           <Space>
-            <IconEdit className={styles.operationIcon} fontSize={16} onClick={() => onEdit(item.id)} />
+            {hasPermission(ACTIONS.UPDATE) && (
+              <IconEdit className={styles.operationIcon} fontSize={16} onClick={() => onEdit(item.id)} />
+            )}
             <Dropdown
               droplist={menu}
               trigger="click"

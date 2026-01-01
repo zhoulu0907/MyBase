@@ -63,10 +63,10 @@ type themeColor = string;
 type bgColor = string;
 export const ThemeColorMap: Record<themeColor, bgColor> = {
   '#009E9E': '#E8FFEF',
-  '#24B28F': '#E8F1FF',
+  '#24B28F': '#E8FFEB',
   '#1979FF': '#E8F5FF',
   '#7E5AEA': '#F2E8FF',
   '#EB693A': '#FFF2E8',
   '#EBBC00': '#FFFEE8',
-  '#4FAE7B': '#E8FFEF'
+  '#4FAE7B': '#E8F8FF'
 };

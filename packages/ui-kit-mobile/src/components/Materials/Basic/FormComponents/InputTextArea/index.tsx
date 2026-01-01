@@ -17,6 +17,7 @@ const XInputTextArea = memo((props: XInputTextAreaConfig & { runtime?: boolean; 
     defaultValueConfig,
     verify,
     align,
+    layout,
     status,
     minRows = 1,
     runtime = true,
@@ -43,8 +44,8 @@ const XInputTextArea = memo((props: XInputTextAreaConfig & { runtime?: boolean; 
         autosize={false}
         rows={minRows || 2}
         textareaStyle={{
-          height: 0.25 * (minRows || 2) * 2 + 'rem',
-          textAlign: align
+          // minHeight: 0.25 * (minRows || 2) + 'rem',
+          textAlign: layout === 'vertical' ? 'left' : 'right'
         }}
         style={{
           width: '100%'
@@ -60,24 +61,26 @@ const XInputTextArea = memo((props: XInputTextAreaConfig & { runtime?: boolean; 
       message: `${label.text}是必填项`,
       validator: (value, callback) => {
         if (value && verify?.lengthLimit) {
-          if (value.length < verify?.minLength!) {
+          if (verify?.minLength && value.length < verify.minLength) {
             callback(`字数不能小于${verify?.minLength}`);
-          } else if (value.length > verify?.maxLength!) {
+          } else if (verify?.maxLength && value.length > verify.maxLength) {
             callback(`字数不能大于${verify?.maxLength}`);
           }
-        } else {
-          callback();
         }
+        callback();
       }
     }
   ];
+
+  const textAlign = layout === 'vertical' ? 'left' : 'right';
 
   return (
     <Form.Item
       className={`inputTextWrapperOBMobile inputTextAreaWrapperOBMobile ${verify?.lengthLimit ? 'showStatistics' : ''}`}
       field={fieldId}
       rules={rules}
-      label={label.display ? <Ellipsis text={label.text} /> : undefined}
+      layout={layout}
+      label={label.display ? <Ellipsis text={label.text} maxLine={2} /> : undefined}
       initialValue={defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : ''}
       style={{
         pointerEvents: (!runtime || detailMode) ? 'none' : 'unset',
@@ -86,15 +89,10 @@ const XInputTextArea = memo((props: XInputTextAreaConfig & { runtime?: boolean; 
     >
       {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
         // 只读模式，渲染文本内容
-        <Textarea
+        <div
           className="readonlyText"
-          readOnly
-          style={{
-            textAlign: align,
-            minHeight: `${minRows * 24 + 16}px`
-          }}
-          value={form?.getFieldValue(fieldId) || (defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : '')}
-        />
+          style={{ textAlign }}
+        >{form?.getFieldValue(fieldId)  || (defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : '') || '--'}</div>
       ) : (
         renderContent()
       )}

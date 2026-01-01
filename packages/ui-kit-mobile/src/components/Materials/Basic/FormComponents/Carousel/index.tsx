@@ -25,7 +25,7 @@ const XCarousel = memo((props: XCarouselConfig & { runtime?: boolean; detailMode
   return (
     <div className={`inputTextWrapperOBMobile ${styles.carouselWrapperOBMobile}`}>
       <div className={styles.label}>
-        {label.display && label.text ? <Ellipsis text={label.text} /> : ''}
+        {label.display && label.text ? <Ellipsis text={label.text} maxLine={2} /> : ''}
       </div>
       <Carousel
         className={styles.carousel}

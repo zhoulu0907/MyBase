@@ -1,7 +1,7 @@
 .createPageModal {
   width: 1223px;
 }
-.createScreenModal {
+.createDashboardModal {
   width: 940px;
 }
 
@@ -12,17 +12,17 @@
   display: flex;
   
   .infoTitle,
-  .screenTitle {
+  .dashboardTitle {
     font-size: 16px;
     font-weight: 700;
     margin-bottom: 16px;
   }
   
-  .screenTitle {
+  .dashboardTitle {
     display: flex;
     justify-content: space-between;
     
-    .screenChange {
+    .dashboardChange {
       display: flex;
       gap: 8px;
       font-weight: normal;
@@ -31,24 +31,24 @@
     }
   }
   
-  .screenTemplateSearch {
+  .dashboardTemplateSearch {
     display: flex;
     justify-content: space-between;
     margin-bottom: 16px;
     
-    .screenTemplateSearchTabs {
+    .dashboardTemplateSearchTabs {
       display: flex;
       align-items: center;
       gap: 32px;
       
-      .screenTemplateSearchTabsItem,
-      .screenTemplateSearchTabsItemActive {
+      .dashboardTemplateSearchTabsItem,
+      .dashboardTemplateSearchTabsItemActive {
         box-sizing: border-box;
         height: 30px;
         cursor: pointer;
       }
       
-      .screenTemplateSearchTabsItemActive {
+      .dashboardTemplateSearchTabsItemActive {
         font-weight: 700;
         color: #009E9E;
         border-bottom: 2px solid #009E9E;
@@ -72,19 +72,19 @@
     }
   }
   
-  .screenContainer {
+  .dashboardContainer {
     flex: 1;
     
-    .screenCreationMethod {
+    .dashboardCreationMethod {
       padding-bottom: 16px;
       
-      .screenCreationMethodContent {
+      .dashboardCreationMethodContent {
         display: flex;
         justify-content: start;
         gap: 8px;
         
-        .screenCreationMethodContentItem,
-        .screenCreationMethodContentItemActive {
+        .dashboardCreationMethodContentItem,
+        .dashboardCreationMethodContentItemActive {
           box-sizing: border-box;
           display: flex;
           align-items: center;
@@ -98,21 +98,21 @@
           cursor: pointer;
         }
         
-        .screenCreationMethodContentItemActive {
+        .dashboardCreationMethodContentItemActive {
           border: 2px solid #009E9E;
           background: #E8FFFE;
         }
       }
     }
     
-    .screenTemplate {
-      .screenTemplateContent {
+    .dashboardTemplate {
+      .dashboardTemplateContent {
         display: flex;
         flex-wrap: wrap;
         gap: 12px;
       }
       
-      .screenPagination {
+      .dashboardPagination {
         display: flex;
         justify-content: right;
         margin: 8px 20px 0 0;
@@ -121,12 +121,12 @@
   }
 }
 
-.screenTemplateCard {
+.dashboardTemplateCard {
   display: flex;
   flex-direction: column;
   align-items: center;
   
-  .screenTemplateCardImg {
+  .dashboardTemplateCardImg {
     box-sizing: border-box;
     position: relative;
     width: 216px;
@@ -142,7 +142,7 @@
       transition: transform 0.3s ease-in-out;
     }
     
-    .screenTemplateCardBtn {
+    .dashboardTemplateCardBtn {
       display: flex;
       justify-content: center;
       align-items: center;
@@ -166,20 +166,20 @@
         transform: translateY(-14px);
       }
       
-      .screenTemplateCardBtn {
+      .dashboardTemplateCardBtn {
         opacity: 1;
       }
     }
   }
   
-  .screenTemplateCardTitle {
+  .dashboardTemplateCardTitle {
     height: 36px;
     line-height: 36px;
   }
 }
 
-.screenTemplateCardSelected {
-    .screenTemplateCardImg {
+.dashboardTemplateCardSelected {
+    .dashboardTemplateCardImg {
       box-sizing: border-box;
       width: 216px;
       height: 152px;
@@ -195,7 +195,7 @@
         0 6px 16px -8px rgba(0, 0, 0, 0.08);
     }
     
-    .screenTemplateCardTitle {
+    .dashboardTemplateCardTitle {
       font-weight: 700;
     }
   }

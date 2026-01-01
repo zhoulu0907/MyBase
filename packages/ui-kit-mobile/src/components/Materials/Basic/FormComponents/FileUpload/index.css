@@ -1,5 +1,4 @@
 .fileUploadWrapperOBMobile {
-  padding-bottom: 0.24rem;
   .arco-form-label-item {
     margin: 0.24rem 0;
   }
@@ -22,11 +21,8 @@
     padding: 0 0.12rem;
     border-radius: 4px;
     .arco-icon {
-      font-size: 0.32rem !important;
+      font-size: var(--fontSize) !important;
     }
-     /* .arco-icon-file {
-       width: 0.8rem;
-     } */
     .uplaodList-text-item-name {
       margin: 0 0.12rem;
       font-size: 0.26rem;

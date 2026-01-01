@@ -1,3 +1,11 @@
+/**
+ * ColorPickerSetter（颜色选择配置器）
+ *
+ * 作用：在搭建器中提供基础颜色选择能力。
+ * 说明：
+ * - 左侧为预设色，右侧为自由取色器
+ * - `value/onChange` 采用受控模式，由宿主驱动
+ */
 import { Radio, Form, ColorPicker } from '@arco-design/web-react'
 
 const ColorPickerSetter = (props: any) => {

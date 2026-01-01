@@ -7,9 +7,9 @@ import type { TreeSelectDataType } from '@arco-design/web-react/es/TreeSelect/in
 import { IconLaunch } from '@arco-design/web-react/icon';
 import { FieldType, type ConditionField } from '@onebase/app';
 import { NodeType } from '@onebase/common';
+import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { getPrecedingNodes } from '../../../nodes/utils';
-import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
 
 const Row = Grid.Row;
 const Col = Grid.Col;
@@ -70,7 +70,7 @@ export const InputParameterFieldItem: React.FC<InputParameterFieldItemProps> = (
       </Col>
 
       <Col span={5}>
-        <Form.Item field={`${fieldName}.operatorType`} style={{ marginBottom: 0 }} initialValue={FieldType.VALUE}>
+        <Form.Item field={`${fieldName}.operatorType`} style={{ marginBottom: 0 }}>
           <Select
             placeholder="选择类型"
             options={valueTypeOptions}

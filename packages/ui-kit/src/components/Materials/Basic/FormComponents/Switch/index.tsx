@@ -21,15 +21,7 @@ const XSwitch = memo((props: XInputSwitchConfig & { runtime?: boolean; detailMod
     detailMode
   } = props;
 
-  // 直接根据 dataField 计算 fieldId，确保总是使用最新的值
-
-  const [fieldId, setFieldId] = useState('');
-
-  useEffect(() => {
-    if (dataField.length > 0) {
-      setFieldId(dataField[dataField.length - 1]);
-    }
-  }, [dataField]);
+  const fieldId = dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.SWITCH}_${nanoid()}`
 
   const { form, fieldValue } = useFormFieldWatch(dataField);
 
@@ -40,7 +32,7 @@ const XSwitch = memo((props: XInputSwitchConfig & { runtime?: boolean; detailMod
           label.display &&
           label.text && <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>{label.text}</span>
         }
-        field={fieldId ? fieldId : `${FORM_COMPONENT_TYPES.SWITCH}_${nanoid()}`}
+        field={fieldId}
         layout={layout}
         tooltip={tooltip}
         labelCol={layout === 'horizontal' ? { span: 10 } : {}}

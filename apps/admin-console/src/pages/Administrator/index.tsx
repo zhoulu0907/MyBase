@@ -2,6 +2,7 @@ import { formatTimestamp } from '@/utils/date';
 import { Button, Form, Input, Message, Modal, Select, Space, Table, Tag, Tooltip } from '@arco-design/web-react';
 import Text from '@arco-design/web-react/es/Typography/text';
 import { IconSearch } from '@arco-design/web-react/icon';
+import { getPublicKey, sm2Encrypt } from '@onebase/common';
 import {
   PlatformAdminUserType,
   createPlatformAdminApi,
@@ -179,6 +180,10 @@ const Administrator: React.FC = () => {
       const values = await createForm.validate();
 
       // 构建符合 cratePlatformAdminReq 类型的提交数据
+      if (values.password) {
+        values.password = await sm2Encrypt(getPublicKey(), values.password);
+      }
+
       const submitData: cratePlatformAdminReq = {
         username: values.account,
         nickname: values.nickname,
@@ -249,7 +254,7 @@ const Administrator: React.FC = () => {
   const handleUpdate = async () => {
     await editForm.validate();
     const newPassword = editForm.getFieldValue('password');
-    const confirmPassword = editForm.getFieldValue('confirmPassword');
+    let confirmPassword = editForm.getFieldValue('confirmPassword');
 
     const newEmail = editForm.getFieldValue('email');
     const id = currentUser?.id!;
@@ -266,6 +271,9 @@ const Administrator: React.FC = () => {
         return;
       }
       try {
+        if (confirmPassword) {
+          confirmPassword = await sm2Encrypt(getPublicKey(), confirmPassword);
+        }
         await updatePlatformAdminPasswordApi({ id: id, password: confirmPassword });
         getPlatformAdminList();
         Message.success('密码修改成功');

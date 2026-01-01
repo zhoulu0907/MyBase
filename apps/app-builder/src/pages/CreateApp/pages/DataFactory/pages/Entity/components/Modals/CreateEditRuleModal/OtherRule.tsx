@@ -11,7 +11,7 @@ interface RuleFormValues {
   validationType: string;
   formatValidationType?: string;
   rgName: string;
-  fieldId?: string;
+  fieldUuid?: string;
   childEntityId?: string;
   popPrompt: string;
   popType: string;
@@ -194,9 +194,9 @@ const CreateOtherRule: React.FC<CreateRuleModalProps> = ({
     try {
       const res = await ruleService.getEntityFieldsWithChildren(entity.id);
 
-      const parentFields = res.parentFields.map((field: { displayName: string; fieldId: string }) => ({
+      const parentFields = res.parentFields.map((field: { displayName: string; fieldUuid: string }) => ({
         label: field.displayName,
-        value: field.fieldId
+        value: field.fieldUuid
       }));
 
       const childEntities = res.childEntities.map((item: { childEntityName: string; childEntityId: string }) => ({
@@ -255,7 +255,7 @@ const CreateOtherRule: React.FC<CreateRuleModalProps> = ({
         </Form.Item>
 
         {ruleType !== VALIDATION_TYPES.CHILD_NOT_EMPTY && (
-          <Form.Item label="校验数据项" field="fieldId" rules={[{ required: true, message: '请选择校验数据项' }]}>
+          <Form.Item label="校验数据项" field="fieldUuid" rules={[{ required: true, message: '请选择校验数据项' }]}>
             <Select
               placeholder="请选择校验数据项"
               options={fieldOptions}

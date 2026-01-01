@@ -7,3 +7,4 @@ export * from './menuIcons';
 export * from './normalizeFormValues';
 export * from './security';
 export * from './workbench_resource';
+export * from './common';

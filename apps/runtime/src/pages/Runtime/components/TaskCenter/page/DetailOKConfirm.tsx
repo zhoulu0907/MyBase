@@ -27,7 +27,7 @@ const maxFileSizeMB = 50;
 
 const DetailOKConfirm: FC = forwardRef((props: any, ref: any) => {
   const [userOptions, setUserOptions] = useState<any[]>([]);
-  const { onSetPopupVisible, onBack, taskId, instanceId, isRequired } = props;
+  const { onSetPopupVisible, onBack, taskId, instanceId, isRequired, defaultApprovalComment } = props;
   const [form] = Form.useForm();
   const [imgUpList, setImgUpList] = useState<any>();
 
@@ -127,7 +127,11 @@ const DetailOKConfirm: FC = forwardRef((props: any, ref: any) => {
           </FormItem>
         )}
         <div className="form-item-title">审批意见</div>
-        <FormItem field="name" rules={[{ required: isRequired, message: '请输入审批意见' }]}>
+        <FormItem
+          field="name"
+          rules={[{ required: isRequired, message: '请输入审批意见' }]}
+          initialValue={defaultApprovalComment}
+        >
           <Input.TextArea maxLength={500} showWordLimit placeholder="请输入审批意见" wrapperStyle={{ width: '100%' }} />
         </FormItem>
         <div className="form-item-title">

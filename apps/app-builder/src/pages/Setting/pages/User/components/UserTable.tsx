@@ -1,10 +1,19 @@
 import { PermissionButton as Button } from '@/components/PermissionControl';
 import PlaceholderPanel from '@/components/PlaceholderPanel';
 import StatusTag, { getStatusLabel } from '@/components/StatusTag';
+import UserProfileAvatar from '@/components/UserProfileAvatar';
+import { isSystemUser } from '@/utils';
 import { Dropdown, Input, Menu, Message, Modal, Pagination, Select, Space, Table, Tag } from '@arco-design/web-react';
 import { IconDownload, IconMoreVertical, IconPlus, IconUpload } from '@arco-design/web-react/icon';
 import { type AuthRoleUsersPageRespVO } from '@onebase/app';
-import { TENANT_USER_PERMISSION as ACTIONS, AddMembers, hasAllPermissions, hasPermission } from '@onebase/common';
+import {
+  TENANT_USER_PERMISSION as ACTIONS,
+  AddMembers,
+  getPublicKey,
+  hasAllPermissions,
+  hasPermission,
+  sm2Encrypt
+} from '@onebase/common';
 import type { PageParam, UpdateAdminOrDirectorReq, UserVO } from '@onebase/platform-center';
 import {
   deleteUser,
@@ -15,15 +24,13 @@ import {
   resetUserPassword,
   StatusEnum,
   updateAdminOrDirector,
-  updateUserStatus,
+  updateUserStatus
 } from '@onebase/platform-center';
 import { debounce } from 'lodash-es';
 import { useCallback, useEffect, useState } from 'react';
 import s from '../index.module.less';
 import PasswordModal from './PasswordModal';
 import UserFormModal from './UserFormModal';
-import UserProfileAvatar from '@/components/UserProfileAvatar';
-import { isSystemUser } from '@/utils';
 
 interface DataItem {
   id: string;
@@ -67,7 +74,7 @@ export enum UserRole {
 }
 
 export const RoleLabelMap: Record<UserRole, string> = {
-  [UserRole.ADMIN]: '管理员',
+  [UserRole.ADMIN]: '部门接口人',
   [UserRole.DIRECTOR]: '主管'
 };
 
@@ -178,6 +185,7 @@ export default function UserTable({
 
     try {
       setResetPasswordModalVisible(false);
+      password = await sm2Encrypt(getPublicKey(), password);
       await resetUserPassword(resetPasswordUser.id, password);
 
       Message.success('密码已重置');
@@ -269,9 +277,7 @@ export default function UserTable({
         dataIndex: 'roles',
         width: 130,
         ellipsis: true,
-        render: (_: any, record: UserRecord) =>(
-          <span>{renderRoleList(record)}</span>
-        )
+        render: (_: any, record: UserRecord) => <span>{renderRoleList(record)}</span>
       },
       { title: '手机号', dataIndex: 'mobile', width: 120 },
       {
@@ -369,9 +375,9 @@ export default function UserTable({
     if (!selectedDeptId) return Message.warning('请先选择部门');
     await getSimpleUsers({});
     setManagerTypeModalVisible(updateType);
-    if(updateType === UserRole.ADMIN) {
+    if (updateType === UserRole.ADMIN) {
       setIsMultiple(true);
-    }else {
+    } else {
       setIsMultiple(false);
     }
   };
@@ -434,7 +440,7 @@ export default function UserTable({
             设置主管
           </Button>
           <Button permission={ACTIONS.CREATE} onClick={() => handleSetAdminOrDirector(UserRole.ADMIN)}>
-            设置管理员
+            设置部门接口人
           </Button>
         </Space>
       </div>

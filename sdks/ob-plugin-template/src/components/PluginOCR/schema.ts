@@ -1,3 +1,12 @@
+/**
+ * PluginOCR 组件的搭建器 Schema
+ *
+ * 结构说明：
+ * - `schema.editData`：识别模式、类型、描述、预览开关与绑定配置入口
+ * - `schema.config`：运行默认值（含 `ocrConfig`），与 UI-Kit 表单约定字段一致
+ * - `template`：物料区展示信息
+ * - `fieldMap/entityMap`：与宿主能力对齐的映射参考
+ */
 import { CONFIG_TYPES, WIDTH_VALUES, WIDTH_OPTIONS } from '@ob/plugin/sdk';
 import { OCR_TYPES } from './constants';
 

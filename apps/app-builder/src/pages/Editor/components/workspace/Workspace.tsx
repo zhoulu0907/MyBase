@@ -1,11 +1,11 @@
-import { getDictDataListByType, getDictDetail } from '@onebase/platform-center';
 import {
-  COLOR_MODE_TYPES,
   DEFAULT_VALUE_TYPES,
   EDITOR_TYPES,
   FORM_COMPONENT_TYPES,
   STATUS_OPTIONS,
-  STATUS_VALUES
+  STATUS_VALUES,
+  useFormEditorSignal,
+  useListEditorSignal
 } from '@onebase/ui-kit';
 import { cloneDeep } from 'lodash-es';
 import { useEffect, useRef, useState } from 'react';
@@ -18,7 +18,6 @@ import PCActiveIcon from '@/assets/images/pc_icon_active.svg';
 import {
   COMPONENT_GROUP_NAME,
   COMPONENT_MAP,
-  DEFAULT_OPTIONS_TYPE,
   EditRender,
   ENTITY_COMPONENT_TYPES,
   getComponentConfig,
@@ -77,7 +76,7 @@ export default function EditorWorkspace() {
     setPageComponentSchemas,
     delPageComponentSchemas,
     batchDelPageComponentSchemas,
-    components,
+    // components,
     addComponents,
     setComponents,
     delComponents,
@@ -92,6 +91,9 @@ export default function EditorWorkspace() {
     delSubTableComponents,
     batchDelSubTableComponents
   } = usePageEditorSignal();
+
+  const components = isFormEditor ? useFormEditorSignal.components.value : useListEditorSignal.components.value;
+
   const { pageViews, curViewId, setCurViewId, updatePageViewName } = usePageViewEditorSignal;
 
   const { editMode, setEditMode } = currentEditorSignal;
@@ -135,7 +137,7 @@ export default function EditorWorkspace() {
       return;
     }
     console.log('loading mobile-editor-drag-list');
-    
+
     const mobileEditorDrag = loadMicroApp({
       name: 'mobile-editor-drag-list',
       entry: getMobileEditorURL(),
@@ -357,9 +359,13 @@ export default function EditorWorkspace() {
           <ReactSortable
             id="workspace-content"
             list={components}
-            setList={(newList) => {
+            setList={(newList, sortable, _store) => {
+              if (!sortable) {
+                return;
+              }
+
               const entityList: GridItem[] = [];
-              newList.forEach(async (item) => {
+              newList.forEach((item) => {
                 if (item.type == ENTITY_TYPE_VALUE.MAIN || item.entityType === ENTITY_TYPE.MAIN) {
                   // 主表业务实体
                   const fieldList = item.fields.filter(
@@ -555,6 +561,9 @@ export default function EditorWorkspace() {
                   entityList.push(item);
                 }
               });
+
+              //   console.log('entityList: ', entityList);
+
               setComponents(entityList);
             }}
             onAdd={async (e) => {

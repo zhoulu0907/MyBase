@@ -234,6 +234,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
             runtime={runtime}
             detailMode={detailMode}
             form={form}
+            editPreview={editPreview}
           />
         );
       case FORM_COMPONENT_TYPES.DEPT_MULTIPLE_SELECT:

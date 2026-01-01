@@ -21,6 +21,7 @@ import {
   updateCorpApi,
   updateCorpAppApi,
   uploadFile,
+  getFileUrlById,
   type CorpAppParams,
   type corpListParams
 } from '@onebase/platform-center';
@@ -133,12 +134,13 @@ const EnterpriseInfoPage: React.FC = () => {
 
   const handleSubmitInfo = async () => {
     try {
-      await updateCorpApi({ ...formData, id: currentId });
-      Message.success('企业基本信息保存成功');
+      const res = await updateCorpApi({ ...formData, id: currentId });
+      if (res) {
+        Message.success('企业基本信息保存成功');
+        setIsEdited(false);
+      }
     } catch (error) {
-      Message.error('企业基本信息保存失败');
-    } finally {
-      setIsEdited(false);
+      console.log('error');
     }
   };
 
@@ -268,10 +270,10 @@ const EnterpriseInfoPage: React.FC = () => {
                 {displayCorpLogo(formData?.corpName)}
               </Button>
             ) : (
-              <Image alt="头像" src={avatarUrl} onError={handleImageError} width={160} height={80} />
+              <Image alt="头像" src={getFileUrlById(avatarUrl)} onError={handleImageError} width={160} height={80} />
             )
           }
-          label="logo"
+          type="logo"
           onChange={handleChange.bind(null, 'corpLogo')}
           isEdit={isEdited}
           component={Upload}
@@ -350,7 +352,7 @@ const EnterpriseInfoPage: React.FC = () => {
           onChange={handleChange.bind(null, 'industryType')}
           isEdit={isEdited}
           component={Select}
-          label="industryType"
+          type="industryType"
           componentProps={{
             placeholder: '请选择行业',
             options: industryOptions.map(
@@ -391,8 +393,9 @@ const EnterpriseInfoPage: React.FC = () => {
           value={formData?.status}
           onChange={handleChange.bind(null, 'status')}
           isEdit={isEdited}
+          type="status"
           component={Checkbox}
-          componentProps={{ placeholder: '请选择是否启用', checked: formData?.status === 0 ? false : true }}
+          componentProps={{ placeholder: '请选择是否启用', checked: formData?.status === 0 ? false : true}}
         />
       )
     }

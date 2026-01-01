@@ -18,11 +18,10 @@ import styles from './index.module.less';
 
 interface IProps {
   form: FormInstance;
-  data?: any;
 }
 const NavigatorSetting = (props: IProps) => {
   const { curAppId } = useAppStore();
-  const { form, data } = props;
+  const { form } = props;
   const webHomeType = Form.useWatch('webHomeType', form);
   const mobileHomeType = Form.useWatch('mobileHomeType', form);
 
@@ -34,10 +33,6 @@ const NavigatorSetting = (props: IProps) => {
     getPages();
     handleGetNavigationConfig();
   }, []);
-
-  useEffect(() => {
-    form.setFieldsValue(data);
-  }, [data]);
 
   // 监听 webHomeType 变化，从 default 切换到 custom 时清空下拉菜单值
   useEffect(() => {
@@ -60,8 +55,8 @@ const NavigatorSetting = (props: IProps) => {
       id: curAppId
     };
     const res = await getAppNavigationConfig(params);
-    const webHomeTypeValue = res.webDefaultMenu === 'default' ? 'default' : 'custom';
-    const mobileHomeTypeValue = res.mobileDefaultMenu === 'default' ? 'default' : 'custom';
+    const webHomeTypeValue = res.webDefaultMenu || 'default';
+    const mobileHomeTypeValue = res.mobileDefaultMenu || 'default';
     form.setFieldsValue({
       webNavLayout: res.webNavLayout || 'SIDEBAR',
       mobileNavLayout: res.mobileNavLayout || 'GRID',
@@ -102,7 +97,7 @@ const NavigatorSetting = (props: IProps) => {
       <div className={styles.navigatorSetting}>
         <div className={styles.moduleTitle}>web端导航设置</div>
 
-        <Form.Item label="web端首页" field="webHomeType" initialValue="default">
+        <Form.Item label="web端首页" field="webHomeType" initialValue="default" style={{ marginBottom: 10 }}>
           <Radio.Group direction="vertical">
             <Radio value="default">
               <span>默认首页</span>
@@ -171,7 +166,7 @@ const NavigatorSetting = (props: IProps) => {
       <div className={styles.navigatorSetting}>
         <div className={styles.moduleTitle}>移动端导航设置</div>
 
-        <Form.Item label="移动端首页" field="mobileHomeType" initialValue="default">
+        <Form.Item label="移动端首页" field="mobileHomeType" initialValue="default" style={{ marginBottom: 10 }}>
           <Radio.Group direction="vertical">
             <Radio value="default">
               <span>默认首页</span>

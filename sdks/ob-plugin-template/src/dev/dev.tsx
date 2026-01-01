@@ -164,21 +164,11 @@ const AppContent: React.FC = () => {
     const logSetFields = (payload: any) => {
       console.log('[mock-emitter] set-fields', unwrap(payload))
     }
-    const logSetSubRowField = (payload: any) => {
-      console.log('[mock-emitter] set-subrow-field', unwrap(payload))
-    }
-    const logSetSubRowFields = (payload: any) => {
-      console.log('[mock-emitter] set-subrow-fields', unwrap(payload))
-    }
     mockSDK.context?.events?.on?.('set-field', logSetField)
     mockSDK.context?.events?.on?.('set-fields', logSetFields)
-    mockSDK.context?.events?.on?.('set-subrow-field', logSetSubRowField)
-    mockSDK.context?.events?.on?.('set-subrow-fields', logSetSubRowFields)
     return () => {
       mockSDK.context?.events?.off?.('set-field', logSetField)
       mockSDK.context?.events?.off?.('set-fields', logSetFields)
-      mockSDK.context?.events?.off?.('set-subrow-field', logSetSubRowField)
-      mockSDK.context?.events?.off?.('set-subrow-fields', logSetSubRowFields)
     }
   }, [])
 

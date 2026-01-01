@@ -15,8 +15,8 @@ import {
   type ICommonBaseType,
   type TLayoutSelectKeyType,
   type TStatusSelectKeyType,
-  type TUploadSelectKeyType,
   type TUploadButtonType,
+  type TUploadSelectKeyType,
   type TWidthSelectKeyType
 } from '../../../common';
 import {
@@ -24,11 +24,12 @@ import {
   LAYOUT_VALUES,
   STATUS_OPTIONS,
   STATUS_VALUES,
+  UPLOAD_BUTTON_TYPES,
   UPLOAD_OPTIONS,
+  UPLOAD_TYPE_OPTIONS,
   UPLOAD_VALUES,
   WIDTH_OPTIONS,
-  WIDTH_VALUES,
-  UPLOAD_BUTTON_TYPES
+  WIDTH_VALUES
 } from '../../../constants';
 import type {
   IBooleanConfigType,
@@ -39,16 +40,16 @@ import type {
   IStatusConfigType,
   ITextConfigType,
   ITooltipConfigType,
+  IUploadButtonConfigType,
   IUploadLimitConfigType,
   IUploadSizeConfigType,
-  IUploadButtonConfigType,
   IVerifyConfigType,
   IWidthConfigType,
   TBooleanDefaultType,
   TNumberDefaultType,
   TSelectDefaultType,
   TTextAreaDefaultType,
-  TTextDefaultType,
+  TTextDefaultType
 } from '../../../types';
 
 export interface XInputFileUploadSchema {
@@ -120,7 +121,6 @@ export interface XInputFileUploadConfig extends ICommonBaseType {
     fileFormat: TTextDefaultType;
   };
 
-
   /**
    * 组件状态：可用、隐藏、只读
    * 可选值: 'default' | 'hidden' | 'readonly'
@@ -174,7 +174,7 @@ const XFileUpload: XInputFileUploadSchema = {
     },
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
-    width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
+    width: WIDTH_VALUES[WIDTH_OPTIONS.HALF]
   }
 };
 

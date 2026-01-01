@@ -185,6 +185,57 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({
     setFilterFieldCheckType(res);
   };
 
+  // 根据字段类型和操作符动态加载变量选项
+  const loadVariableOptions = async (fieldType: string, operator?: string) => {
+    try {
+      // 如果字段类型和操作符都存在，则调用接口获取变量列表
+      if (fieldType && operator) {
+        const res = await getEntityFieldsWithChildren(entity.id, fieldType, operator);
+
+        // 处理主表字段
+        const parentFields = [
+          {
+            key: res.entityId,
+            title: res.entityName,
+            children:
+              res?.parentFields?.map((item: any) => {
+                return {
+                  key: item.fieldId,
+                  title: item.displayName,
+                  fieldType: item.fieldType
+                };
+              }) || []
+          }
+        ];
+
+        // 处理子表字段
+        const rawChildEntities = res?.childEntities || [];
+        const uniqueChildEntities = Array.from(
+          new Map(rawChildEntities.map((entity: any) => [entity.childEntityId, entity])).values()
+        );
+
+        const childFields = uniqueChildEntities.map((entity: any) => {
+          return {
+            title: entity.childEntityName,
+            key: entity.childEntityId,
+            children:
+              entity.childFields?.map((item: any) => ({
+                title: item.displayName,
+                key: item.fieldId,
+                fieldType: item.fieldType
+              })) || []
+          };
+        });
+
+        setAllOptions([...parentFields, ...childFields]);
+      }
+    } catch (error) {
+      console.error('加载变量选项失败:', error);
+      // 出错时加载默认选项
+      await loadFieldOptions();
+    }
+  };
+
   // 初始化表单数据
   React.useEffect(() => {
     if (visible) {
@@ -230,6 +281,7 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({
             fields={parentOptions}
             entityFieldValidationTypes={filterFieldCheckType}
             variableOptions={allOptions}
+            onFieldOrOperatorChange={loadVariableOptions}
           />
         </Form.Item>
 

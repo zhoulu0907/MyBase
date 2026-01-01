@@ -3,7 +3,6 @@ import CompCopyIcon from '@/assets/images/copy_comp_icon.svg';
 import CompShowIcon from '@/assets/images/eye_off_icon.svg';
 import { Divider } from '@arco-design/web-react';
 import { ENTITY_TYPE, ENTITY_TYPE_VALUE, type AppEntityField } from '@onebase/app';
-import { getDictDataListByType, getDictDetail } from '@onebase/platform-center';
 import { useSignals } from '@preact/signals-react/runtime';
 import { cloneDeep } from 'lodash-es';
 import React from 'react';
@@ -15,8 +14,6 @@ import {
 } from 'src/components/Materials/componentTypes';
 import { COMPONENT_MAP } from 'src/components/Materials/componentsMap';
 import {
-  COLOR_MODE_TYPES,
-  DEFAULT_OPTIONS_TYPE,
   DEFAULT_VALUE_TYPES,
   STATUS_OPTIONS,
   STATUS_VALUES,
@@ -74,6 +71,8 @@ const LayoutReactSortable: React.FC<LayoutReactSortableProps> = ({
     let tableName = e.item.getAttribute('data-table-name') || pageComponentSchemas[cpID!]?.config?.dataField?.[0];
     let fieldName = e.item.getAttribute('data-field-name') || pageComponentSchemas[cpID!]?.config?.dataField?.[1];
 
+    const dataLabel = e.item.getAttribute('data-label') || pageComponentSchemas[cpID!]?.config?.label?.text;
+
     // 子表字段不允许
     if (
       (tableName && tableName !== mainEntity.tableName) ||
@@ -92,6 +91,60 @@ const LayoutReactSortable: React.FC<LayoutReactSortableProps> = ({
     schema.config.id = cpID;
     schema.config.dataField = tableName && fieldName ? [tableName, fieldName] : [];
 
+    // 主表 字段组件
+    if (tableName && fieldName) {
+      // 获取当前字段数据源配置
+      const currentField = mainEntity.fields?.find((ele: AppEntityField) => ele.fieldName === fieldName);
+      // 非系统字段
+      if (currentField && currentField.isSystemField !== 1) {
+        // 数据长度 dataLength
+        // 小数位数 decimalPlaces
+        // 默认值 defaultValue => defaultValueConfig
+        if (schema.config.defaultValueConfig) {
+          const defaultValueConfig = {
+            ...schema.config.defaultValueConfig,
+            type: DEFAULT_VALUE_TYPES.CUSTOM,
+            customValue: currentField.defaultValue
+          };
+          schema.config.defaultValueConfig = defaultValueConfig;
+        }
+        // 字段描述 description
+        schema.config.tooltip = currentField.description;
+        // 是否必填：1-是，0-不是 isRequired
+        // 是否唯一：1-是，0-不是 isUnique
+        schema.config.verify = {
+          ...schema.config.verify,
+          required: currentField.isRequired,
+          noRepeat: typeof schema.config?.verify?.noRepeat === 'boolean' ? currentField.isUnique === 1 : undefined
+        };
+
+        // 字段约束配置（长度/正则） constraints
+        schema.config.constraints = currentField.constraints;
+        // 数据选择
+        if (itemType === FORM_COMPONENT_TYPES.DATA_SELECT) {
+          // 数据源
+          schema.config.selectedDataSource = {
+            ...schema.config.selectedDataSource,
+            entityUuid: currentField.dataSelectionConfig?.targetEntityUuid
+          };
+          // 回显字段  name
+          schema.config.displayFields = currentField.dataSelectionConfig?.targetFieldName
+            ? [
+                {
+                  value: currentField.dataSelectionConfig?.targetFieldName
+                }
+              ]
+            : [];
+        }
+      }
+      schema.config.dataField = [tableName, fieldName];
+      schema.config.status = STATUS_VALUES[STATUS_OPTIONS.DEFAULT];
+    }
+
+    if (dataLabel) {
+      schema.config.label.text = dataLabel;
+    }
+
     const props = {
       id: cpID,
       type: itemType,
@@ -103,10 +156,8 @@ const LayoutReactSortable: React.FC<LayoutReactSortableProps> = ({
     }
 
     setPageComponentSchemas(cpID!, props);
-
     setCurComponentID(cpID!);
     setCurComponentSchema(props);
-
     setShowDeleteButton(false);
   };
   // 排序
@@ -150,8 +201,7 @@ const LayoutReactSortable: React.FC<LayoutReactSortableProps> = ({
           schema.config.verify = {
             ...schema.config.verify,
             required: field.isRequired,
-            noRepeat: 
-              typeof schema.config?.verify?.noRepeat === 'boolean' ? field.isUnique === 1 : undefined
+            noRepeat: typeof schema.config?.verify?.noRepeat === 'boolean' ? field.isUnique === 1 : undefined
           };
 
           // 字段约束配置（长度/正则） constraints
@@ -166,10 +216,10 @@ const LayoutReactSortable: React.FC<LayoutReactSortableProps> = ({
             // 回显字段  name
             schema.config.displayFields = field.dataSelectionConfig?.targetFieldName
               ? [
-                {
-                  value: field.dataSelectionConfig?.targetFieldName
-                }
-              ]
+                  {
+                    value: field.dataSelectionConfig?.targetFieldName
+                  }
+                ]
               : [];
           }
 
@@ -258,10 +308,10 @@ const LayoutReactSortable: React.FC<LayoutReactSortableProps> = ({
             // 回显字段  name
             subSchema.config.displayFields = ele.dataSelectionConfig?.targetFieldName
               ? [
-                {
-                  value: ele.dataSelectionConfig?.targetFieldName
-                }
-              ]
+                  {
+                    value: ele.dataSelectionConfig?.targetFieldName
+                  }
+                ]
               : [];
           }
 

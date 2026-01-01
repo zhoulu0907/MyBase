@@ -24,6 +24,7 @@ import {
   PlatformTenantPublishMode,
   updatePlatformTenantApi,
   uploadFile,
+  getFileUrlById,
   type TenantAdminUserResVO,
   type UpdateTenantParams,
   type UserVO
@@ -237,7 +238,7 @@ const EditTenant = () => {
                       }}
                     >
                       {logoUrl ? (
-                        <Image className={styles.tenantLogo} preview width={160} height={80} src={logoUrl} />
+                        <Image className={styles.tenantLogo} preview width={160} height={80} src={getFileUrlById(logoUrl)} />
                       ) : (
                         <div className={styles.tenantLogo}>{tenantInfo?.name.slice(0, 6)}</div>
                       )}
@@ -260,7 +261,7 @@ const EditTenant = () => {
                 ) : (
                   <>
                     {logoUrl ? (
-                      <Image className={styles.tenantLogo} preview width={160} height={80} src={logoUrl} />
+                      <Image className={styles.tenantLogo} preview width={160} height={80} src={getFileUrlById(logoUrl)} />
                     ) : (
                       <div className={styles.tenantLogo}>{tenantInfo?.name.slice(0, 6)}</div>
                     )}

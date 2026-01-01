@@ -145,7 +145,9 @@ const Right: React.FC = () => {
 
       const deviceId = await getOrCreateDeviceInfo();
 
-      values.password = await sm2Encrypt(getPublicKey(), values.password);
+      if (values.password) {
+        values.password = await sm2Encrypt(getPublicKey(), values.password);
+      }
 
       const loginData: LoginRequest = {
         username: values.username!,
@@ -294,9 +296,9 @@ const Right: React.FC = () => {
               <Checkbox checked={rememberMe} onChange={handleRememberMeChange}>
                 {t('auth.rememberMe')}
               </Checkbox>
-              <Button type="text" size="small">
+              {/* <Button type="text" size="small">
                 {t('auth.forgotPassword')}
-              </Button>
+              </Button> */}
             </Space>
           </Form.Item>
 

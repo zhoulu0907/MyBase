@@ -90,6 +90,8 @@ export interface ConditionEditorProps {
   form: FormInstance;
   // 可选变量下拉选项， 如果不传默认从节点id中计算后获取
   variableOptions?: TreeSelectDataType[];
+  // 当字段或操作符变化时的回调函数，用于动态加载变量选项
+  onFieldOrOperatorChange?: (fieldType: string, operator?: string) => void;
 }
 
 /**
@@ -102,7 +104,8 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
   form,
   label,
   required,
-  variableOptions
+  variableOptions,
+  onFieldOrOperatorChange
 }) => {
   useSignals();
 
@@ -285,6 +288,19 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
     return title;
   };
 
+  // 从 fields 中查找字段类型
+  const findFieldType = (fieldId: string): string | undefined => {
+    for (const parent of fields) {
+      if (parent.children && Array.isArray(parent.children)) {
+        const found = parent.children.find((child: any) => child.key === fieldId);
+        if (found && found.fieldType) {
+          return found.fieldType;
+        }
+      }
+    }
+    return undefined;
+  };
+
   const handleFormulaConfirm = (formulaData: string, formattedFormula: string, params: any) => {
     setFormulaVisible(false);
     form.setFieldValue(formulaFieldKey, { formulaData: formulaData, formula: formattedFormula, parameters: params });
@@ -398,13 +414,27 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
                                                   className={styles.itemSelect}
                                                   disabled={form.getFieldValue(item.field + '.op') == undefined}
                                                   options={opCodeOptions}
-                                                  onChange={() => {
+                                                  onChange={(_value) => {
                                                     form.setFieldValue(item.field + '.value', undefined);
                                                     // 如果是范围类型 需要用数组兜底
                                                     if (
                                                       form.getFieldValue(item.field + '.op') == VALIDATION_TYPE.RANGE
                                                     ) {
                                                       form.setFieldValue(item.field + '.value', [undefined, undefined]);
+                                                    }
+                                                    // // 选择变量时，触发变量选项更新
+                                                    const fieldId = form.getFieldValue(item.field + '.fieldId');
+                                                    const op = form.getFieldValue(item.field + '.op');
+                                                    if (
+                                                      onFieldOrOperatorChange &&
+                                                      fieldId &&
+                                                      op &&
+                                                      _value === FieldType.VARIABLES
+                                                    ) {
+                                                      const fieldType = findFieldType(fieldId);
+                                                      if (fieldType) {
+                                                        onFieldOrOperatorChange(fieldType, op);
+                                                      }
                                                     }
                                                   }}
                                                 ></Select>

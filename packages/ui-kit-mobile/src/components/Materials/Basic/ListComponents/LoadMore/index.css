@@ -5,13 +5,16 @@
   overflow-y: auto;
   min-height: 3rem;
   max-height: 100%;
+
   .searchItem {
     padding: 0;
   }
+
   .searchActions {
     margin: 0.36rem 0 0.28rem;
   }
 }
+
 .loadmore-list-wrapper-OBMobile {
   height: 100%;
   border-radius: 0.16rem;
@@ -33,6 +36,7 @@
     @media screen and (min-width: 900px) {
       max-width: calc(450px - 0.64rem) !important;
     }
+
     .search-form-wrapper {
       display: flex;
       align-items: center;
@@ -41,9 +45,11 @@
 
     .search-bar-form-item {
       flex: 1;
+
       .arco-form-label-item {
-        display: none;
+        /* display: none; */
       }
+
       .arco-form-item-control {
         padding: 0;
       }
@@ -137,6 +143,7 @@
       line-height: 0.6rem;
       border-radius: 0.16rem;
       border: 1px solid #fff;
+
       &:nth-last-child(2) {
         margin-bottom: 0;
       }
@@ -219,6 +226,7 @@
       background-color: rgb(var(--primary-6));
     }
   }
+
   .fileWrapper {
     display: flex;
     align-items: center;
@@ -226,6 +234,7 @@
     .filename {
       font-size: 0.28rem;
     }
+
     &>div {
       flex: 1;
     }
@@ -238,29 +247,18 @@
     left: 50% !important;
     transform: translateX(-50%);
   }
+
   &.search-form-wrapper-ob-loadmore-editor {
     left: calc(50% + 4px) !important;
   }
 }
 
-/* .arco-dialog-content {TODO: confirm dialog 宽度问题
-  max-width: 80%;
-
-  @media screen and (min-width: 900px) {
-    max-width: 400px;
+.arco-dialog-footer {
+  .dialog-footer-button.cancel {
+    color: #1d2129;
   }
 
-  .arco-dialog-header.ios {
-    font-size: 0.4rem;
-    padding-top: 0.4rem;
+  .dialog-footer-button.confirm {
+    color: rgb(var(--primary-6));
   }
-
-  .arco-dialog-body.ios {
-    font-size: 0.32rem;
-  }
-
-  .arco-dialog-footer.ios .dialog-footer-button {
-    font-size: 0.32rem;
-    height: 0.96rem;
-  }
-} */
+}

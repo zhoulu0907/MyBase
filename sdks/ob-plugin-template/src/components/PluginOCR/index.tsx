@@ -1,3 +1,16 @@
+/**
+ * OCR 识别组件（PluginOCR）
+ *
+ * 能力概述：
+ * - 支持单面/双面身份证识别，展示图片回显与识别结果
+ * - 通过 `ocrConfig` 配置固定识别或数据联动识别（根据其他字段值切换识别类型）
+ * - 受控值结构：单面 `{ file, result }`；双面 `[ { file, result }, { file, result } ]`
+ * - 可按绑定规则将识别结果写回宿主的表单字段
+ *
+ * 外部依赖：
+ * - `fetch('http://10.0.104.33:8080/ocr/id_card')` 为示例接口地址，请在实际接入时替换为安全的后台服务
+ * - 建议通过宿主提供的配置或环境变量注入后端地址，避免硬编码
+ */
 // ===== 导入 begin =====
 import React, { useState, useEffect, useMemo } from 'react';
 import { Upload, Button, Message, Spin, Image, Space, Typography, Card, Form, Input, Popover } from '@arco-design/web-react';
@@ -459,7 +472,7 @@ const PluginOCR = React.memo((props: PluginOCRProps) => {
     }
     console.log('[PluginOCR] recognition type changed', { prevType: lastTypeRef.current, nextType: currentType})
     lastTypeRef.current = currentType;
-  }, [currentType, fieldId, form, onChange]);
+  }, [currentType, fieldId, form, onChange, sdk]);
 
   // ===== 外部 API 调用 begin =====
   const callOCRIdCardAPI = React.useCallback(async (frontFile?: File, backFile?: File) => {
@@ -486,8 +499,8 @@ const PluginOCR = React.memo((props: PluginOCRProps) => {
   // ===== 外部 API 调用 end =====
 
   // ===== 内部事件 begin =====
-  const handleDualIdentify = async () => {
-    // console.log('[PluginOCR] handleDualIdentify triggered, current value:', fieldValue);
+  const handleDualIdentify = React.useCallback(async () => {
+    console.log('[PluginOCR] handleDualIdentify triggered, current value:', fieldValue);
     
     const values = Array.isArray(fieldValue) ? fieldValue : [];
     const frontVal = values[0];
@@ -569,25 +582,22 @@ const PluginOCR = React.memo((props: PluginOCRProps) => {
         ...buildAssignments(parsed.back, (rulesObj as any).bindingsBack)
       };
       if (Object.keys(assignments).length > 0) {
-        const setAll = (sdk as any)?.context?.entity?.setFieldsValue;
-        if (typeof setAll === 'function') {
-          try { setAll(assignments); } catch {}
-        } else {
-          try { (sdk as any)?.context?.events?.emit?.('set-fields', { values: assignments }); } catch {}
+        const setFieldsValue = (sdk as any)?.context?.entity?.setFieldsValue;
+        console.log('[PluginOCR] Assignments:', assignments);
+        try { setFieldsValue(assignments); } catch (e) {
+          console.error('[PluginOCR] Set fields value failed:', e);
         }
       }
-
-      
     } catch (e: any) {
       console.error('[PluginOCR] Identification failed:', e);
       // sdk?.ui?.notify?.('error', e.message || '识别失败');
     } finally {
       setRecognizing(false);
     }
-  };
+  }, [fieldValue, sdk, callOCRIdCardAPI, onChange]);
   // ===== 内部事件 end =====
 
-  const handleSingleIdentify = async () => {
+  const handleSingleIdentify = React.useCallback(async () => {
     const file = fieldValue?.file?.originFile;
     if (!file) {
       sdk?.ui?.notify?.('warning', '请先上传图片');
@@ -634,6 +644,7 @@ const PluginOCR = React.memo((props: PluginOCRProps) => {
       const assignments = buildAssignments(frontNorm, (rulesObj as any).bindings);
       if (Object.keys(assignments).length > 0) {
         const setAll = (sdk as any)?.context?.entity?.setFieldsValue;
+        console.log('[PluginOCR] Assignments:', assignments, setAll);
         if (typeof setAll === 'function') {
           try { setAll(assignments); } catch {}
         } else {
@@ -646,7 +657,7 @@ const PluginOCR = React.memo((props: PluginOCRProps) => {
     } finally {
       setRecognizing(false);
     }
-  };
+  }, [fieldValue, callOCRIdCardAPI, onChange, resolveFieldName]);
 
   // ===== 渲染方法 begin =====
   const renderInteractiveContent = () => {
@@ -780,7 +791,7 @@ const PluginOCR = React.memo((props: PluginOCRProps) => {
     if (frontFile && backFile) {
       handleDualIdentify();
     }
-  }, [fieldValue, currentType, triggerMode]);
+  }, [fieldValue, currentType, triggerMode, handleDualIdentify]);
 
   // 自动识别：单面模式下，选择文件且触发模式为 auto 时，调用单面识别
   useEffect(() => {
@@ -790,7 +801,7 @@ const PluginOCR = React.memo((props: PluginOCRProps) => {
     if (file && !hasResult) {
       handleSingleIdentify();
     }
-  }, [fieldValue, currentType, triggerMode]);
+  }, [fieldValue, currentType, triggerMode, handleSingleIdentify]);
 
   const setTargetFieldValue = React.useCallback((targetField: string, valueToSet: any) => {
     const segs = String(fieldId).split('.');

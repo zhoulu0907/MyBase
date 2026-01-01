@@ -13,6 +13,7 @@ import {
   PageType,
   queryFlowExecForm,
   TRIGGER_EVENTS,
+  updateDraft,
   type AppEntityField,
   type DetailMethodV2Params,
   type GetPageSetIdReq,
@@ -31,7 +32,7 @@ import {
 } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useState } from 'react';
-import { pluginEmitter } from '@ob/plugin/sdk';
+import { pluginBridge } from '@/plugin/bridge';
 import DetailPop from '../TaskCenter/page/DetailPop';
 import DetailRuntime from './DetailRuntime';
 import EditRuntime from './EditRuntime';
@@ -145,7 +146,12 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
    * @param isDraft 是否是草稿
    */
   const submitForm = async (isSave = false, isDraft?: boolean) => {
-    await form.validate();
+    if (!isDraft) {
+      await form.validate();
+    }
+
+    const draftId = form.getFieldValue('draftId');
+
     !isSave && setSubmitLoading(true);
     const fields = form.getFieldsValue();
 
@@ -234,7 +240,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
     const curFormPage = curPage.value?.pages?.find((ele: any) => ele.pageType === CATEGORY_TYPE.FORM);
     const pageId = curFormPage?.id;
     const flowRes = pageId ? await queryFlowExecForm(pageId) : [];
-    setInputParams(formData);
+    setInputParams({ ...formData, ...subFormData });
 
     console.log('editTargetId: ', editTargetId);
 
@@ -289,9 +295,16 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
           console.log(req);
 
           if (isDraft) {
-            res = await createDraft(tableName, menuId, req);
+            if (draftId) {
+              res = await updateDraft(tableName, menuId, {
+                ...req,
+                id: draftId
+              });
+            } else {
+              res = await createDraft(tableName, menuId, req);
+            }
           } else {
-            res = await dataMethodCreateV2(tableName, menuId, req);
+            res = await dataMethodCreateV2(tableName, menuId, req, draftId);
           }
 
           console.log(res);
@@ -321,7 +334,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
         setSubmitLoading(false);
       }
     }
-
+    setPredictVisible(false);
     // 关闭页面后子表清空
     pagesRuntimeSignal.resetSubTableDataLength();
   };
@@ -421,81 +434,18 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
   };
 
   React.useEffect(() => {
-    const onSetField = (payload: any) => {
-      const { name, value } = payload || {};
-      if (!name) return;
-      const currentVal = form.getFieldValue(name);
-      if (currentVal !== value) form.setFieldValue(name, value);
-    };
-    const onSetFields = (payload: any) => {
-      const { values } = payload || {};
-      if (!values || typeof values !== 'object') return;
-      form.setFieldsValue(values);
-    };
-    const onSetSubRowField = (payload: any) => {
-      const { tableName, rowIndex, fieldName, value } = payload || {};
-      if (!tableName || typeof rowIndex !== 'number' || !fieldName) return;
-      const rows = form.getFieldValue(tableName) || [];
-      const nextRows = Array.isArray(rows) ? [...rows] : [];
-      while (nextRows.length <= rowIndex) nextRows.push({});
-      const row = { ...(nextRows[rowIndex] || {}) };
-      row[`${tableName}.${fieldName}`] = value;
-      nextRows[rowIndex] = row;
-      form.setFieldsValue({ [tableName]: nextRows });
-      try {
-        const componentSchemas = useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value;
-        const subEntity = subEntities.value.find((e: any) => e.childTableName == tableName);
-        if (subEntity) {
-          Object.entries(componentSchemas || {}).forEach(([key, schema]: [string, any]) => {
-            if (schema?.config?.subTable == subEntity.childEntityUuid) {
-              pagesRuntimeSignal.setSubTableDataLength(key, nextRows.length);
-            }
-          });
-        }
-      } catch {}
-    };
-    const onSetSubRowFields = (payload: any) => {
-      const { tableName, rowIndex, values } = payload || {};
-      if (!tableName || typeof rowIndex !== 'number' || !values || typeof values !== 'object') return;
-      const rows = form.getFieldValue(tableName) || [];
-      const nextRows = Array.isArray(rows) ? [...rows] : [];
-      while (nextRows.length <= rowIndex) nextRows.push({});
-      const row = { ...(nextRows[rowIndex] || {}) };
-      Object.entries(values).forEach(([k, v]) => {
-        row[`${tableName}.${k}`] = v;
-      });
-      nextRows[rowIndex] = row;
-      form.setFieldsValue({ [tableName]: nextRows });
-      try {
-        const componentSchemas = useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value;
-        const subEntity = subEntities.value.find((e: any) => e.childTableName == tableName);
-        if (subEntity) {
-          Object.entries(componentSchemas || {}).forEach(([key, schema]: [string, any]) => {
-            if (schema?.config?.subTable == subEntity.childEntityUuid) {
-              pagesRuntimeSignal.setSubTableDataLength(key, nextRows.length);
-            }
-          });
-        }
-      } catch {}
-    };
-    pluginEmitter.on('set-field', onSetField);
-    pluginEmitter.on('set-fields', onSetFields);
-    pluginEmitter.on('set-subrow-field', onSetSubRowField);
-    pluginEmitter.on('set-subrow-fields', onSetSubRowFields);
+    pluginBridge.registerContext({ form });
     return () => {
-      pluginEmitter.off('set-field', onSetField);
-      pluginEmitter.off('set-fields', onSetFields);
-      pluginEmitter.off('set-subrow-field', onSetSubRowField);
-      pluginEmitter.off('set-subrow-fields', onSetSubRowFields);
+      pluginBridge.registerContext({ form: undefined });
     };
   }, [form]);
 
   return (
     <div className={`${styles.previewPage} runtime-preview-formpage`}>
       <div className={styles.content}>
-        {pageSetType === PageType.WORKBENCH ? (
-          <WorkbenchRuntime pageSetId={pageSetId} runtime={runtime} />
-        ) : (
+        {pageSetType === PageType.WORKBENCH && <WorkbenchRuntime pageSetId={pageSetId} runtime={runtime} />}
+
+        {pageType === EDITOR_TYPES.LIST_EDITOR && (
           <ListRuntime
             pageSetType={pageSetType}
             pageSetId={pageSetId}

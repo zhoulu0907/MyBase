@@ -63,13 +63,15 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
 
   const getInfo = async () => {
     const res = await getPermissionInfo(CodeType.TENANT);
-    const tenantInfoRes = await getTenantInfo(tenantId || '');
     UserPermissionManager.setUserPermissionInfo(res);
     userPermissionSignal.setPermissionInfo(res);
     if (res.user) {
       setAdminInfo(res.user);
     }
-    setTenantInfoFromSession(tenantInfoRes);
+    const tenantInfoRes = await getTenantInfo(tenantId || '');
+    if(tenantInfoRes) {
+      setTenantInfoFromSession(tenantInfoRes);
+    }
   };
 
   const maskMobile = (value?: string) => {

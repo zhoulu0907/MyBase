@@ -3,6 +3,6 @@
   white-space: nowrap;
   text-overflow: ellipsis;
   overflow: hidden;
-  font-size: 0.28rem;
+  font-size: var(--fontSize);
   margin-bottom: 0.12rem;
 }

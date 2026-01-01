@@ -2,7 +2,7 @@ import clearIcon from '@/assets/images/clear.svg';
 import draftBoxIcon from '@/assets/images/draft.svg';
 import { Alert, Badge, Button, Divider, Form, Modal, Popconfirm, Space, Table } from '@arco-design/web-react';
 import { IconDelete } from '@arco-design/web-react/icon';
-import { getDraftPage } from '@onebase/app';
+import { deleteDraft, deleteDraftTable, getDraftPage } from '@onebase/app';
 import { isRuntimeEnv } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
 import dayjs from 'dayjs';
@@ -78,10 +78,16 @@ export const DraftBox: React.FC<DraftBoxProps> = ({ showFromPageData, tableColum
   }, [fetchDraftTotal, refresh]);
 
   // 删除草稿
-  const handleDeleteDraft = () => {};
+  const handleDeleteDraft = async (id: string) => {
+    await deleteDraft(tableName, menuId, { id });
+    handleGetDrafts();
+  };
 
   // 一键清空草稿箱
-  const handleClearAllDrafts = () => {};
+  const handleClearAllDrafts = async () => {
+    await deleteDraftTable(tableName, menuId);
+    handleGetDrafts();
+  };
 
   // 载入草稿
   const handleLoadDraft = (draft: any) => {
@@ -131,7 +137,11 @@ export const DraftBox: React.FC<DraftBoxProps> = ({ showFromPageData, tableColum
                 继续编辑
               </Button>
               <Divider type="vertical" />
-              <Popconfirm title="确认删除" content="删除后无法恢复，是否确认删除？" onOk={() => handleDeleteDraft()}>
+              <Popconfirm
+                title="确认删除"
+                content="删除后无法恢复，是否确认删除？"
+                onOk={() => handleDeleteDraft(record.id)}
+              >
                 <Button type="text" size="small" status="danger" icon={<IconDelete />}>
                   删除
                 </Button>

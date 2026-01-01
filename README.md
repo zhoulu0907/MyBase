@@ -117,12 +117,74 @@ make build-packages # 仅所有包
 | `make lint`           | 运行代码检查                            |
 | `make preview`        | 预览构建结果                            |
 
+#### npm 脚本命令
+
+| 命令                  | 描述                 |
+| --------------------- | -------------------- |
+| `pnpm encrypt:config` | 运行配置文件加密工具 |
+
 ### 脚本命令
 
 | 脚本                 | 描述               |
 | -------------------- | ------------------ |
 | `./scripts/dev.sh`   | 交互式开发启动脚本 |
 | `./scripts/build.sh` | 交互式构建脚本     |
+
+### 配置文件加密工具
+
+项目提供了配置文件加密工具，用于生成生产环境的加密配置。
+
+#### 使用方法
+
+```bash
+# 使用 npm 脚本运行（推荐）
+pnpm encrypt:config
+
+# 或直接使用 tsx 运行
+npx tsx scripts/encrypt-config.ts
+```
+
+#### 使用步骤
+
+1. **编辑配置对象**
+
+   打开 `scripts/encrypt-config.ts` 文件，修改 `obj` 对象中的配置项：
+
+   ```typescript
+   const obj = {
+     ENVIRONMENT: 'runtime',
+     APP_KEY: 'onebase',
+     APP_SECRET: 'xxx',
+     BASE_URL: 'xxx',
+     RUNTIME_BASE_URL: 'xxx',
+     FILE_DETAIL_URL: 'xxx',
+     PUBLIC_KEY: 'xxx'
+   };
+   ```
+
+2. **运行加密脚本**
+
+   执行加密命令后，脚本会：
+   - 显示原始配置对象
+   - 使用 SM2 算法加密配置
+   - 输出加密后的字符串
+   - 自动解密验证配置正确性
+
+3. **使用加密结果**
+
+   将输出的加密字符串复制到生产环境的 `config.js` 文件中：
+
+   ```javascript
+   window.global_config = {
+     CONFIG: '加密后的字符串'
+   };
+   ```
+
+#### 注意事项
+
+- 加密使用的密钥定义在 `packages/common/src/utils/crypto.ts` 中
+- 生产环境会自动使用私钥解密配置
+- 请妥善保管私钥，不要泄露到公共仓库
 
 ### 子项目命令
 

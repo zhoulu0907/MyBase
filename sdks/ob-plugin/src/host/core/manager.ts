@@ -2,7 +2,7 @@ import EventEmitter from 'eventemitter3';
 import { createHostSDK } from '../../sdk';
 import { loadCss, loadJs } from './resource';
 import { validatePlugin } from './validator';
-import type { Context, HostSDK, LoadedPlugin, PluginMeta, PluginRegistry, HostEvents, Entity, Field, UIAPI } from '../../sdk/types';
+import type { Context, HostSDK, LoadedPlugin, PluginMeta, PluginRegistry, HostEvents, Entity, Field, UIAPI, PluginMethodMeta } from '../../sdk/types';
 
 /** 插件管理器：负责插件注册、资源加载、初始化/销毁、方法调用与事件分发 */
 export class PluginManager {
@@ -83,7 +83,9 @@ export class PluginManager {
       this.emitter.emit('plugin:loaded', { id: key });
       return loaded;
     } catch (error) {
+      // 统一上报 JS 加载错误，便于监控与定位
       console.error(`ob-plugin-template 插件加载失败 ${pluginId}`, error);
+      this.sdk.ui.reportError(error, { scope: 'plugin:js' } as any);
       item.status = 'error';
       this.emitter.emit('plugin:error', { id: key, error });
       throw error;
@@ -98,18 +100,48 @@ export class PluginManager {
     if (plugin.destroy) await plugin.destroy();
     this.plugins.delete(key);
     const reg = this.registry.get(key);
-    if (reg) this.registry.set(pluginId, { ...reg, status: 'registered' });
+    // 使用真实 key 写回注册表，避免 name/routePrefix 混用导致状态项错位
+    if (reg) this.registry.set(key, { ...reg, status: 'registered' });
     this.emitter.emit('plugin:unloaded', { id: key });
   }
 
   /** 跨插件方法调用 */
+  // 方法发现：优先返回结构化元信息，便于宿主生成文档或可视化
+  listMethods(pluginId: string): (string | PluginMethodMeta)[] {
+    const key = this.resolveKey(pluginId);
+    const plugin = this.plugins.get(key);
+    if (!plugin) return [];
+    if (plugin.methodsMeta) return Object.values(plugin.methodsMeta);
+    return Object.keys(plugin.methods || {});
+  }
+
   async callMethod(pluginId: string, methodKey: string, ...args: any[]): Promise<any> {
     const key = this.resolveKey(pluginId);
     const plugin = this.plugins.get(key);
     if (!plugin) throw new Error(`Plugin ${pluginId} not loaded`);
     const fn = plugin.methods?.[methodKey];
     if (!fn || typeof fn !== 'function') throw new Error(`Plugin ${pluginId} has no method ${methodKey}`);
-    return await fn(...args);
+    const tail = args[args.length - 1];
+    // 可选调用参数：支持超时与 SDK 注入；不破坏原有签名
+    const hasOptions = tail && typeof tail === 'object' && ('timeout' in tail || 'injectSDK' in tail);
+    const options = hasOptions ? (args.pop() as any) : {};
+    this.emitter.emit('plugin:method:start', { id: key, method: methodKey });
+    const exec = async () => (options && options.injectSDK ? await (fn as any)(this.sdk, ...args) : await fn(...args));
+    try {
+      if (options && typeof options.timeout === 'number' && options.timeout > 0) {
+        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error(`Method ${methodKey} timeout`)), options.timeout));
+        const result = await Promise.race([exec(), timeoutPromise]);
+        this.emitter.emit('plugin:method:end', { id: key, method: methodKey });
+        return result;
+      } else {
+        const result = await exec();
+        this.emitter.emit('plugin:method:end', { id: key, method: methodKey });
+        return result;
+      }
+    } catch (error) {
+      this.emitter.emit('plugin:method:error', { id: key, method: methodKey, error });
+      throw error;
+    }
   }
 
   /** 获取所有已加载插件 */

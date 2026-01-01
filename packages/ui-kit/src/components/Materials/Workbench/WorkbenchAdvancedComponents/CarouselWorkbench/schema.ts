@@ -1,8 +1,11 @@
 import {
+  fillConfig,
+  type TFillSelectKeyType
+} from '@/components/Materials/common';
+import {
   workbenchBaseConfig,
   workbenchBaseDefault,
   type ICommonBaseWorkbenchType,
-  type TWorkbenchLayoutSelectKeyType,
   type TWorkbenchStatusSelectKeyType
 } from '../../config/workbenchShared';
 import { WORKBENCH_CONFIG_TYPES, WORKBENCH_STATUS_OPTIONS, WORKBENCH_STATUS_VALUES } from '../../core/constants';
@@ -11,6 +14,7 @@ import type {
   ILabelConfigType,
   ILayoutConfigType,
   INumberConfigType,
+  ISelectConfigType,
   IStatusConfigType,
   ITextAreaConfigType,
   ITextConfigType,
@@ -18,12 +22,13 @@ import type {
   TBooleanDefaultType,
   TNumberDefaultType,
   TRadioDefaultType,
+  TSelectDefaultType,
   TTextDefaultType
 } from '../../core/types';
 import type { ICarouselContentConfigType, IVerifyConfigType } from '../../core/types';
 import SlideOne from '@/assets/workbench/carousel/slide-1.svg';
 import SlideTwo from '@/assets/workbench/carousel/slide-2.svg';
-import SlideThree from '@/assets/workbench/carousel/slide-3.svg';
+import { FILL_OPTIONS, FILL_VALUES } from '@/components/Materials/constants';
 
 export interface XCarouselSchema {
   editData: TXCarouselEditData;
@@ -38,10 +43,12 @@ export type TXCarouselEditData = Array<
   | IVerifyConfigType
   | TTextDefaultType
   | IStatusConfigType<TWorkbenchStatusSelectKeyType>
-  | ILayoutConfigType<TWorkbenchLayoutSelectKeyType>
+  | IStatusConfigType<TFillSelectKeyType>
   | ITextAreaConfigType
   | ILabelConfigType
   | ITooltipConfigType
+  | ISelectConfigType<any>
+  | ILayoutConfigType<any>
 >;
 
 interface Images {
@@ -61,9 +68,17 @@ export interface XCarouselConfig extends ICommonBaseWorkbenchType {
     display: TBooleanDefaultType;
   };
   /**
+   * 自动轮播
+   */
+  autoplay?: TBooleanDefaultType;
+  /**
    * 轮播间隔，单位秒
    */
   interval?: TNumberDefaultType;
+  /**
+   * 填充方式
+   */
+  fillStyle?: TSelectDefaultType<TFillSelectKeyType>;
   /**
    * 图片列表
    */
@@ -153,19 +168,30 @@ const carouselContentConfig: ICarouselContentConfigType = {
       max: 50,
       defaultValue: 10
     },
-    staticFieldKey: 'carouselConfig'
+    staticFieldKey: 'carouselConfig',
   }
 };
 
 const XCarousel: XCarouselSchema = {
   editData: [
     ...workbenchBaseConfig,
+    carouselContentConfig,
     {
       key: 'label',
       name: '标题名称',
       type: WORKBENCH_CONFIG_TYPES.LABEL_INPUT
     },
-    carouselContentConfig
+    {
+      key: 'autoplay',
+      name: '自动轮播',
+      type: WORKBENCH_CONFIG_TYPES.SWITCH_INPUT
+    },
+    {
+      key: 'interval',
+      name: '轮播间隔',
+      type: WORKBENCH_CONFIG_TYPES.NUMBER_INPUT
+    },
+    fillConfig
   ],
   config: {
     ...workbenchBaseDefault,
@@ -174,7 +200,9 @@ const XCarousel: XCarouselSchema = {
       display: true
     },
     carouselConfig: DEFAULT_CAROUSEL_CONTENT,
-    interval: 3,
+    autoplay: false,
+    interval: 4,
+    fillStyle: FILL_VALUES[FILL_OPTIONS.COVER],
     verify: {
       required: false,
       maxCount: 10,

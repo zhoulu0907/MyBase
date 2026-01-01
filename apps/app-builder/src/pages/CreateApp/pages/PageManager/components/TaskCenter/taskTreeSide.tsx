@@ -1,17 +1,17 @@
-import { useEffect, useState, type FC } from 'react';
-import { Tree, Form, Message } from '@arco-design/web-react';
+import { Form, Message, Tree } from '@arco-design/web-react';
+import { IconDragDotVertical } from '@arco-design/web-react/icon';
 import {
   MenuType,
   listApplicationBPMMenu,
   updateApplicationMenu,
   updateApplicationMenuOrder,
-  type UpdateApplicationMenuNameReq,
   type ApplicationMenu,
   type ListApplicationMenuReq,
+  type UpdateApplicationMenuNameReq,
   type UpdateApplicationMenuOrderReq
 } from '@onebase/app';
+import { useEffect, useState, type FC } from 'react';
 import MyMenuItem from '../MyMenuItem';
-import { IconSettings, IconDragDotVertical } from '@arco-design/web-react/icon';
 import RenameForm from './modal/renameForm';
 
 import './style/taskSide.less';
@@ -35,7 +35,7 @@ interface ComProps {
   searchResult: any;
   setSearchResult: any;
   setShowGuide: any;
-  triggerHide: (menuID: string, isVisible: number) => void;
+  triggerHide: (menuID: string, isVisible: number, platform: 'pc' | 'mobile') => void;
 }
 
 const TaskCenterTreeSide: FC<ComProps> = ({
@@ -57,8 +57,11 @@ const TaskCenterTreeSide: FC<ComProps> = ({
       title: (
         <MyMenuItem
           showOption={showOption}
-          menuID={menu.id}
-          isVisible={menu.isVisible}
+          menuID={menu.id || ''}
+          menuInfo={menu}
+          pagesetType={menu.pagesetType}
+          isVisiblePc={menu.isVisiblePc}
+          isVisibleMobile={menu.isVisibleMobile}
           menuCode={menu.menuCode}
           menuName={menu.menuName}
           menuIcon={menu.menuCode}
@@ -77,7 +80,7 @@ const TaskCenterTreeSide: FC<ComProps> = ({
             }
           }}
           triggerRename={() => setVisibleRenameForm(true)}
-          triggerHide={() => onTriggerHide(menu.id, menu.isVisible)}
+          triggerHide={onTriggerHide}
           renameForm={renameForm}
         />
       ),
@@ -108,7 +111,7 @@ const TaskCenterTreeSide: FC<ComProps> = ({
     getBpmMenuList();
   };
   const loop = (data: any, key: string, callback: (item: any, index: number, arr: any) => void) => {
-    data.some((item:any, index:any, arr:any) => {
+    data.some((item: any, index: any, arr: any) => {
       if (item.key === key) {
         callback(item, index, arr);
         return true;
@@ -118,7 +121,7 @@ const TaskCenterTreeSide: FC<ComProps> = ({
   };
   const handleDrop = async ({ dragNode, dropNode, dropPosition }: any) => {
     if (dropPosition === 0) {
-    //   Message.warning('仅支持拖拽到节点上下方调整顺序，禁止拖入节点内部');
+      //   Message.warning('仅支持拖拽到节点上下方调整顺序，禁止拖入节点内部');
       return;
     }
     if (!dropNode || dragNode.props._key === dropNode.props._key) {
@@ -163,8 +166,8 @@ const TaskCenterTreeSide: FC<ComProps> = ({
       setSearchResult(false);
     }
   };
-  const onTriggerHide = async (menuId: string, isVisible: number) => {
-    await triggerHide(menuId, isVisible);
+  const onTriggerHide = async (menuId: string, isVisible: number, platform: 'pc' | 'mobile') => {
+    await triggerHide(menuId, isVisible, platform);
     getBpmMenuList();
   };
 

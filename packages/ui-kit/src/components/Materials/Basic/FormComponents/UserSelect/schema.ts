@@ -95,14 +95,14 @@ export interface XInputUserSelectConfig extends ICommonBaseType {
    */
   status?: TSelectDefaultType<TStatusSelectKeyType>;
 
-   /**
+  /**
    * 默认值方式
    */
   defaultValueMode?: TTextDefaultType;
 
   /**
-  * 人员默认值
-  */
+   * 人员默认值
+   */
   defaultUserValue?: TTextDefaultType;
 
   /**

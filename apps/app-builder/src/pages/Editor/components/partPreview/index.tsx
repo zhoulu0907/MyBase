@@ -1,3 +1,4 @@
+import { pluginBridge } from '@/plugin/bridge';
 import { Button, Drawer, Form } from '@arco-design/web-react';
 import {
   EDITOR_TYPES,
@@ -15,7 +16,7 @@ import {
 import classNames from 'classnames';
 import { initGlobalState, loadMicroApp, type MicroApp } from 'qiankun';
 
-import { EditMode, getMobileEditorURL } from '@onebase/common';
+import { EditMode, getHashQueryParam, getMobileEditorURL } from '@onebase/common';
 import { currentEditorSignal } from '@onebase/ui-kit/src/signals/current_editor';
 import React, { Fragment, useEffect, useRef } from 'react';
 import styles from './index.module.less';
@@ -44,6 +45,30 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
   const { workbenchComponents, wbComponentSchemas } = useWorkbenchEditorSignal;
   const { editMode } = currentEditorSignal;
   const mobileEditorPreviewRef = useRef<MicroApp | null>(null);
+  const [form] = Form.useForm();
+  const [appId, setAppId] = React.useState('');
+  const [pageSetId, setPageSetId] = React.useState('');
+
+  useEffect(() => {
+    const appId = getHashQueryParam('appId');
+    const pageSetId = getHashQueryParam('pageSetId');
+    setAppId(appId || '');
+    setPageSetId(pageSetId || '');
+  }, []);
+
+  useEffect(() => {
+    if (visible) {
+      pluginBridge.registerContext({ form, appId, pageSetId });
+      console.log('[PartPreview] Context registered', { appId, pageSetId });
+    } else {
+      pluginBridge.registerContext({ form: undefined });
+    }
+    return () => {
+      if (visible) {
+        pluginBridge.registerContext({ form: undefined });
+      }
+    };
+  }, [visible, form, appId, pageSetId]);
 
   const {
     curComponentID,
@@ -55,7 +80,7 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
     showDeleteButton,
     setShowDeleteButton,
     subTableComponents,
-    setSubTableComponents,
+    setSubTableComponents
   } = usePageEditorSignal();
 
   const qiankunActions = initGlobalState({
@@ -75,10 +100,10 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
     setSubTableComponents
   });
   useEffect(() => {
-    console.log('loading mobile-editor-preview-list');
     if (editMode.value !== EditMode.MOBILE || !visible) {
       return;
     }
+    console.log('loading mobile-editor-preview-list');
 
     const mobileEditorPreview = loadMicroApp({
       name: 'mobile-editor-preview-list',
@@ -171,7 +196,7 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
                 {editMode.value === EditMode.MOBILE ? (
                   <div id="mobile-editor-preview-list" style={{ width: '100%' }}></div>
                 ) : (
-                  <Form layout="inline" labelCol={{ span: 10 }} wrapperCol={{ span: 14 }}>
+                  <Form form={form} layout="inline" labelCol={{ span: 10 }} wrapperCol={{ span: 14 }}>
                     {getFormContent()}
                   </Form>
                 )}
@@ -186,7 +211,7 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
           {pageType == EDITOR_TYPES.WORKBENCH_EDITOR && (
             <div className={styles.fromContain}>
               <div className={styles.previewForm}>
-                <Form layout="inline">
+                <Form form={form} layout="inline">
                   {workbenchComponents.value.map((cp: GridItem) => (
                     <Fragment key={cp.id}>
                       {wbComponentSchemas?.value[cp.id]?.config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (

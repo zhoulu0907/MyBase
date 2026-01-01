@@ -217,15 +217,13 @@ export default function EditorHeader() {
   };
   const onFlowSave = async (isCreate?: boolean) => {
     const data = editorRef?.document.toJSON();
-    console.log(data);
-
     const errorMsgList: any = [];
     data?.nodes.forEach((item) => {
       if (item.type === 'approver') {
         if (
-          (item.data.approverConfig.approverType === 'user' &&
+          (item.data.approverConfig.handlerType === 'user' &&
             (!item.data.approverConfig.users || item.data.approverConfig.users.length === 0)) ||
-          (item.data.approverConfig.approverType === 'role' &&
+          (item.data.approverConfig.handlerType === 'role' &&
             (!item.data.approverConfig.roles || item.data.approverConfig.roles.length === 0))
         ) {
           errorMsgList.push({ nodeName: item.data.name, errorMsg: '节点缺少审批人' });
@@ -251,8 +249,6 @@ export default function EditorHeader() {
         }
       }
     });
-
-    console.log(errorMsgList);
     if (errorMsgList.length) {
       showConfirm(errorMsgList);
       return;

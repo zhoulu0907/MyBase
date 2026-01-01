@@ -1,9 +1,10 @@
 import React from 'react';
 import { Space } from '@arco-design/web-react';
 import { formatIndustryType } from '../../utils';
+import { getStatusLabel } from '@/components/StatusTag';
 
 interface FormItemProps {
-  label?: string;
+  type?: string;
   logoContent?: React.ReactNode;
   value: any;
   onChange: (value: any) => void;
@@ -15,7 +16,7 @@ interface FormItemProps {
 
 const EditableFormItem: React.FC<FormItemProps> = ({
   logoContent,
-  label,
+  type,
   value,
   onChange,
   isEdit,
@@ -31,15 +32,18 @@ const EditableFormItem: React.FC<FormItemProps> = ({
       return value.join(', ');
     }
 
-    if(label=== "industryType") {
+    if(type=== "industryType") {
       return formatIndustryType(componentProps?.options, value);
+    }
+    if(type === 'status') {
+      return getStatusLabel(value);
     }
 
     return value;
   };
 
   const renderEditContent = () => {
-    if (label === "logo") {
+    if (type === "logo") {
       return (
         <Space direction='vertical'>
           {value}

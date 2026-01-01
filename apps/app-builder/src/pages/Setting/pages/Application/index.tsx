@@ -116,19 +116,25 @@ const AppManagement: React.FC = () => {
   }, [ownerTag, status, dataList]);
 
   const getApplicationList = async () => {
-    setLoading(true);
-    const req: PageParam = {
-      pageNo,
-      pageSize: pageSize || 8,
-      name,
-      ownerTag,
-      orderByTime,
-      status: status === '' ? null : Number(status)
-    };
-    const res = await getCommonPaginationList(listApplication, req, setPageNo);
-    if (res) {
-      setDataList(res.list || []);
-      setTotal(res.total || 0);
+    try {
+      setLoading(true);
+      const req: PageParam = {
+        pageNo,
+        pageSize: pageSize || 8,
+        name,
+        ownerTag,
+        orderByTime,
+        status: status === '' ? null : Number(status)
+      };
+      const res = await getCommonPaginationList(listApplication, req, setPageNo);
+      if (res) {
+        setDataList(res.list || []);
+        setTotal(res.total || 0);
+        setLoading(false);
+      }
+    }catch(error) {
+      console.log("error", error);
+    }finally {
       setLoading(false);
     }
   };
@@ -410,7 +416,6 @@ const AppManagement: React.FC = () => {
           </div>
         }
         visible={createVisible}
-        simple
         unmountOnExit
         footer={
           <Space style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -460,16 +465,15 @@ const AppManagement: React.FC = () => {
         }
         confirmLoading={true}
         onCancel={() => setCreateVisible(false)}
-        style={{ width: '1300px' }}
+        style={{ width: '1030px' }}
         className={styles.createAppModal}
       >
         <div className={styles.createAppWrapper}>
           <CreateAppModal
             form={form}
-            status="create"
-            previewBgColor="#F2F3F5BF"
             dataSourceCreated={!!datasource}
             onCreateDatasource={() => setCreateType('datasource')}
+            isCreateVisible={createVisible}
             style={{
               position: 'absolute',
               transform: createType === 'app' ? 'translateX(0)' : 'translateX(-100%)'
@@ -482,7 +486,7 @@ const AppManagement: React.FC = () => {
             setDbTypeSelect={setDbTypeSelect}
             style={{
               position: 'absolute',
-              padding: '0 200px',
+              padding: '0 150px',
               boxSizing: 'border-box',
               transform: createType === 'datasource' ? 'translateX(0)' : 'translateX(100%)'
             }}

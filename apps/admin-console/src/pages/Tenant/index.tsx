@@ -18,6 +18,7 @@ import {
   PlatformTenantSort,
   PlatformTenantStatus,
   updatePlatformTenantApi,
+  getFileUrlById,
   type PlatformTenantInfo,
   type UpdateTenantParams
 } from '@onebase/platform-center';
@@ -278,7 +279,7 @@ const TenantManagement: React.FC = () => {
             <div className={styles.tenantItem} key={tenant.id}>
               <div className={styles.left}>
                 {tenant.logoUrl ? (
-                  <img className={styles.tenantLogo} src={tenant.logoUrl} alt="" />
+                  <img className={styles.tenantLogo} src={getFileUrlById(tenant.logoUrl)} alt="" />
                 ) : (
                   <div className={styles.tenantLogo}>{tenant?.name?.slice(0, 6)}</div>
                 )}

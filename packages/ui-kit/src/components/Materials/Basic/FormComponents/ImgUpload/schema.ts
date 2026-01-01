@@ -2,12 +2,12 @@ import {
   baseConfig,
   baseDefault,
   dataFieldConfig,
+  imageHandleConfig,
   layoutConfig,
   listTypeConfig,
-  uploadTypeConfig,
   statusConfig,
+  uploadTypeConfig,
   widthConfig,
-  imageHandleConfig,
   labelConfig,
   tooltipConfig,
   verifyConfig,
@@ -30,13 +30,13 @@ import {
 } from '../../../constants';
 import type {
   IDataFieldConfigType,
+  IImageHandleConfigType,
   ILabelConfigType,
   ILayoutConfigType,
   IStatusConfigType,
   ITooltipConfigType,
   IVerifyConfigType,
   IWidthConfigType,
-  IImageHandleConfigType,
   ICommonConfigType,
   TBooleanDefaultType,
   TNumberDefaultType,
@@ -64,9 +64,9 @@ export type TXInputImgUploadEditData = Array<
 >;
 
 interface IMAGE_HANDLE {
-  autoCompress: boolean, // 自动压缩图片
-  addWatermark: boolean, //添加水印
-  watermarkText?: string // 水印文案
+  autoCompress: boolean; // 自动压缩图片
+  addWatermark: boolean; //添加水印
+  watermarkText?: string; // 水印文案
 }
 
 export interface XInputImgUploadConfig extends ICommonBaseType {
@@ -99,7 +99,7 @@ export interface XInputImgUploadConfig extends ICommonBaseType {
    */
   listType?: TSelectDefaultType<TUploadSelectKeyType>;
 
-  // 图片处理 
+  // 图片处理
   imageHandle?: IMAGE_HANDLE;
 
   /**
@@ -169,7 +169,7 @@ const XImgUpload: XInputImgUploadSchema = {
     },
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
-    width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
+    width: WIDTH_VALUES[WIDTH_OPTIONS.HALF]
   }
 };
 

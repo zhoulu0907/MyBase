@@ -31,10 +31,16 @@ export const sm2Encrypt = async (publicKey: string, data: string) => {
   return encryptData;
 };
 
-export const sm2Decrypt = async (privateKey: string, data: string) => {
+export const sm2Decrypt = (privateKey: string, data: string) => {
   const cipherMode = 1; // 1 - C1C3C2，0 - C1C2C3，默认为1
   let decryptData = sm2.doDecrypt(data, privateKey, cipherMode, {
     asn1: false
   }); // 解密结果
   return decryptData;
 };
+
+// 配置环境加密用
+export const CONFIG_PUBLIC_KEY =
+  '04d63308f82df17ee6b8c87aded985d97e39820e49162ccd21f0bbdeefc8ad550561d293dbc108f16fd1860c42627f801707b8efab41a43865d23f12def43b8b31';
+
+export const CONFIG_PRIVATE_KEY = 'bd55dd5a2fdc3c5915e064983fb05d44a2d6c2ea941411af31455fe53875f076';

@@ -1,3 +1,12 @@
+/**
+ * XInputText 组件的搭建器 Schema
+ *
+ * 结构说明：
+ * - `schema.editData`：搭建器面板的配置项声明（由宿主映射至具体 Setter 组件）
+ * - `schema.config`：组件完整的默认配置（与 UI-Kit 表单约定字段一致）
+ * - `template`：用于物料区展示的尺寸与元数据
+ * - `fieldMap/entityMap`：宿主用于字段/实体能力对齐的参考映射
+ */
 import { CONFIG_TYPES, WIDTH_VALUES, WIDTH_OPTIONS } from '@ob/plugin/sdk'
 
 export const InputTextSchema = {

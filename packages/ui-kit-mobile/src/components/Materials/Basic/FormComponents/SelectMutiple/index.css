@@ -14,11 +14,19 @@
   .selectMultipleCellOBMobile {
     padding-right: 0;
   }
-  .arco-form-item-control {
+
+  .selectMultipleValue {
+    width: 100%;
     text-align: right;
+    color: #c9cdd4;
+    font-size: var(--fontSize);
   }
+
+  .verticalLayout {
+    text-align: left;
+  }
+
   .arco-cell .cell-content {
-    justify-content: flex-end;
     color: #1d2129;
   }
 }
@@ -36,7 +44,7 @@
   .checkbox-group-outer {
     padding: 0.32rem 0;
     background-color: #fff;
-    min-height: 3rem;
+    min-height: 5rem;
     max-height: 50dvh;
     display: flex;
     justify-content: center;
