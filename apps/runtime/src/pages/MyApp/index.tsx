@@ -143,7 +143,7 @@ const MyAppPage: React.FC = () => {
     setCurAppId(appId);
     const tenantId = TokenManager.getTenantInfo()?.tenantId || '';
 
-    const redirectURL = `${getRuntimeURL()}/#/onebase/${appId}/${tenantId}/runtime`;
+    const redirectURL = `${getRuntimeURL()}/#/onebase/${tenantId}/${appId}/runtime`;
     console.log('redirectURL: ', redirectURL);
 
     window.open(redirectURL, '_blank');
@@ -232,49 +232,19 @@ const MyAppPage: React.FC = () => {
               />
 
               {/* 筛选下拉框 */}
-              <div>
-                <Select
-                  placeholder="全部应用"
-                  bordered={false}
-                  style={{ width: 100 }}
-                  value={ownerTag}
-                  onChange={(value) => setOwnerTag(value)}
-                >
-                  {appOptions.map((option, index) => (
-                    <Option key={index} value={option.value}>
-                      {option.label}
-                    </Option>
-                  ))}
-                </Select>
-                <Divider type="vertical" />
-                <Select
-                  placeholder="按创建时间排序"
-                  bordered={false}
-                  style={{ width: 138 }}
-                  onChange={(value) => setOrderByTime(value)}
-                  value={orderByTime}
-                >
-                  {createTimeOptions.map((option, index) => (
-                    <Option key={index} value={option.value}>
-                      {option.label}
-                    </Option>
-                  ))}
-                </Select>
-                <Divider type="vertical" />
-                <Select
-                  placeholder="全部状态"
-                  bordered={false}
-                  style={{ width: 100 }}
-                  onChange={(value) => setStatus(value)}
-                  value={status}
-                >
-                  {statusOptions.map((option, index) => (
-                    <Option key={index} value={option.value}>
-                      {option.label}
-                    </Option>
-                  ))}
-                </Select>
-              </div>
+              <Select
+                placeholder="按创建时间排序"
+                bordered={false}
+                style={{ width: 138 }}
+                onChange={(value) => setOrderByTime(value)}
+                value={orderByTime}
+              >
+                {createTimeOptions.map((option, index) => (
+                  <Option key={index} value={option.value}>
+                    {option.label}
+                  </Option>
+                ))}
+              </Select>
             </div>
 
             {/* 我的应用列表 */}

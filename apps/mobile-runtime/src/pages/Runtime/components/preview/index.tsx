@@ -120,6 +120,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({
   const [editTargetId, setEditTargetId] = useState('');
   const [editLoading, setEditLoading] = useState(false);
 
+  const [formValues, setFormValues] = useState({}); // form 实时改动后的值集合
+
   // 当前时间戳
   const [detailMode, setDetailMode] = useState(true);
   const [userSelectData, setUserSelectData] = useState<any>([]); // 人员选择数据
@@ -251,10 +253,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({
         } else if (field.fieldType === ENTITY_FIELD_TYPE.DATETIME.VALUE) {
           formData[field.fieldName] = value ? dayjs(value).format('YYYY-MM-DD hh:mm:ss') : '';
         } else if (field.fieldType === ENTITY_FIELD_TYPE.SELECT.VALUE) {
-          formData[field.fieldName] = {
-            id: value[0],
-            name: value[0]
-          };
+          formData[field.fieldName] = value[0];
         } else if (field.fieldType === ENTITY_FIELD_TYPE.USER.VALUE && Array.isArray(value)) {
           let userTempData = userSelectData;
           if (userTempData.length === 0) {
@@ -571,6 +570,10 @@ const PreviewContainer: React.FC<PreviewProps> = ({
     return res;
   };
 
+  const handleValuesChange = (_: any, allValues: any) => {
+    setFormValues(allValues);
+  };
+
   const curFormPage =
     curPage.value?.pages?.find((ele: any) => ele.pageType === CATEGORY_TYPE.LIST)?.pageName || '标题_列表';
   const curWorkbenchPage =
@@ -649,7 +652,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({
           ))}
 
         {pageSetType !== PageType.WORKBENCH && pageType == EDITOR_TYPES.FORM_EDITOR && (
-          <Form layout="inline" form={form} className={styles.formWrapper}>
+          <Form layout="inline" form={form} className={styles.formWrapper} onValuesChange={handleValuesChange}>
             {splitByDivider(useEditorSignalMap.get(editPageViewId.value)?.components.value).map((block, index) => {
               if (block.type === SHOW_COMPONENT_TYPES.DIVIDER) {
                 return (
@@ -686,6 +689,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({
                             editLoading={editLoading}
                             form={form}
                             runtime={true}
+                            formValues={formValues}
                             showFromPageData={() => {
                               setPageType(EDITOR_TYPES.FORM_EDITOR);
                             }}

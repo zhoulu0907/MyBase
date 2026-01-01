@@ -405,10 +405,11 @@ export default function UserTable({
   const handleAddUser = async (selectedMembers: any[]) => {
     console.log('添加成员 selectedMembers:', selectedMembers);
     if (!selectedDeptId || !managerTypeModalVisible) return;
+    const keyIds = selectedMembers?.map(item => item.key).filter(Boolean) || [];
     const params: UpdateAdminOrDirectorReq = {
       deptId: `${selectedDeptId}`,
       updateType: managerTypeModalVisible,
-      userId: selectedMembers[0].key
+      adminUserIds: keyIds
     };
     await updateAdminOrDirector(params);
     setManagerTypeModalVisible(null);

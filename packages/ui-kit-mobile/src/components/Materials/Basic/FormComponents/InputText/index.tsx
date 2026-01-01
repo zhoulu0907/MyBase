@@ -3,7 +3,7 @@ import { nanoid } from 'nanoid';
 import { Input, Form, Ellipsis } from '@arco-design/mobile-react';
 import { ValidatorType, ITypeRules } from '@arco-design/mobile-utils';
 
-import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, DEFAULT_VALUE_TYPES, FormSchema } from '@onebase/ui-kit';
+import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, DEFAULT_VALUE_TYPES, FormSchema, securityEncodeText } from '@onebase/ui-kit';
 type XInputTextConfig = typeof FormSchema.XInputTextSchema.config;
 
 import '../index.css';
@@ -19,6 +19,7 @@ const XInputText = memo((props: XInputTextConfig & { runtime?: boolean; detailMo
     verify,
     align,
     layout,
+    security,
     runtime = true,
     detailMode
   } = props;
@@ -79,7 +80,7 @@ const XInputText = memo((props: XInputTextConfig & { runtime?: boolean; detailMo
         <div
           className="readonlyText"
           style={{ textAlign }}
-        >{form?.getFieldValue(fieldId)  || (defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : '') || '--'}</div>
+        >{securityEncodeText(security, form?.getFieldValue(fieldId))}</div>
       ) : (
         renderContent()
       )}

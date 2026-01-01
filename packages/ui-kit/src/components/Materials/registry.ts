@@ -7,12 +7,14 @@
 import { cloneDeep } from 'lodash-es'
 import { baseSchema as BasicSchema } from './Basic/schema'
 import { FormComp, LayoutComp, ListComp, ShowComp } from './Basic'
+import { WorkbenchComp } from './Workbench'
+import { workbenchSchema } from './Workbench/schema/schema'
 import { ENTITY_FIELD_TYPE } from '@/components/DataFactory'
 import type { ComponentType } from './componentTypes'
 import type { ComponentType as ReactComponentType } from 'react'
 
 /** 组件分类类型 */
-type ComponentCategory = 'layout' | 'form' | 'list' | 'show'
+type ComponentCategory = 'layout' | 'form' | 'list' | 'show' | 'workbench'
 
 /**
  * 组件模板展示信息（用于左侧物料面板）
@@ -90,21 +92,20 @@ const COMPONENT_TYPE = {
   FILE: 'XFile',
   WEB_VIEW: 'XWebView',
   DIVIDER: 'XDivider',
-  PLACEHOLDER: 'XPlaceholder'
+  PLACEHOLDER: 'XPlaceholder',
+  // 工作台
+  QUICK_ENTRY: 'XQuickEntry',
+  CAROUSEL_WORKBENCH: 'XCarouselWorkbench',
+  RICH_TEXT_WORKBENCH: 'XRichTextEditorWorkbench',
+  BUTTON_WORKBENCH: 'XButtonWorkbench',
+  WELCOME_CARD: 'XWelcomeCard'
 } as const
 
 
 /**
- * 组件注册表：使用组件类型字符串作为 key（例如 'XInputText'）
+ * 基础组件注册表（不包含工作台组件）
  */
-/**
- * 设计目标：
- * - 作为所有组件元信息的单一事实来源（Single Source of Truth）
- * - 支持内置组件与插件组件统一建模与查询
- * 字段说明：
- * - `type`、`schema`、`template`、`fieldMap`、`entityMap`、`component`
- */
-export const COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescriptor>> = {
+const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescriptor>> = {
   [COMPONENT_TYPE.COLUMN_LAYOUT]: {
     type: COMPONENT_TYPE.COLUMN_LAYOUT,
     schema: cloneDeep(BasicSchema.XColumnLayout),
@@ -450,6 +451,63 @@ export const COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescript
     entityMap: []
   },
 }
+
+/**
+ * 工作台组件注册表
+ */
+const WORKBENCH_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescriptor>> = {
+  [COMPONENT_TYPE.QUICK_ENTRY]: {
+    type: COMPONENT_TYPE.QUICK_ENTRY,
+    schema: cloneDeep(workbenchSchema.XQuickEntry),
+    template: { h: 36, w: 118, displayName: '快捷入口', icon: 'quick_entry_cp.svg', category: 'workbench' },
+    fieldMap: [],
+    entityMap: []
+  },
+  [COMPONENT_TYPE.CAROUSEL_WORKBENCH]: {
+    type: COMPONENT_TYPE.CAROUSEL_WORKBENCH,
+    schema: cloneDeep(workbenchSchema.XCarouselWorkbench),
+    template: { h: 36, w: 118, displayName: '轮播图', icon: 'carousel_workbench_cp.svg', category: 'workbench' },
+    fieldMap: [],
+    entityMap: []
+  },
+  [COMPONENT_TYPE.RICH_TEXT_WORKBENCH]: {
+    type: COMPONENT_TYPE.RICH_TEXT_WORKBENCH,
+    schema: cloneDeep(workbenchSchema.XRichTextEditorWorkbench),
+    template: { h: 36, w: 118, displayName: '富文本', icon: 'rich_text_editor_workbench_cp.svg', category: 'workbench' },
+    fieldMap: [],
+    entityMap: []
+  },
+  [COMPONENT_TYPE.BUTTON_WORKBENCH]: {
+    type: COMPONENT_TYPE.BUTTON_WORKBENCH,
+    schema: cloneDeep(workbenchSchema.XButtonWorkbench),
+    template: { h: 36, w: 118, displayName: '按钮', icon: 'button_workbench_cp.svg', category: 'workbench' },
+    fieldMap: [],
+    entityMap: []
+  },
+  [COMPONENT_TYPE.WELCOME_CARD]: {
+    type: COMPONENT_TYPE.WELCOME_CARD,
+    schema: cloneDeep(workbenchSchema.XWelcomeCard),
+    template: { h: 36, w: 118, displayName: '欢迎卡片', icon: 'welcome_card_cp.svg', category: 'workbench' },
+    fieldMap: [],
+    entityMap: []
+  },
+}
+
+/**
+ * 组件注册表：使用组件类型字符串作为 key（例如 'XInputText'）
+ */
+/**
+ * 设计目标：
+ * - 作为所有组件元信息的单一事实来源（Single Source of Truth）
+ * - 支持内置组件与插件组件统一建模与查询
+ * 字段说明：
+ * - `type`、`schema`、`template`、`fieldMap`、`entityMap`、`component`
+ */
+export const COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescriptor>> = {
+  ...BASIC_COMPONENT_REGISTRY,
+  ...WORKBENCH_COMPONENT_REGISTRY
+}
+
 /**
  * 初始化运行期组件实现：按模板分类自动注入内置组件的 React 实现
  */
@@ -462,6 +520,7 @@ export function initComponentImplementations(): void {
     else if (category === 'layout') impl = (LayoutComp as any)[type]
     else if (category === 'list') impl = (ListComp as any)[type]
     else if (category === 'show') impl = (ShowComp as any)[type]
+    else if (category === 'workbench') impl = (WorkbenchComp as any)[type]
     if (impl) descriptor.component = impl
   }
 }
@@ -518,7 +577,8 @@ export function buildTemplate() {
     layout: { category: 'layout', items: [] },
     form: { category: 'form', items: [] },
     list: { category: 'list', items: [] },
-    show: { category: 'show', items: [] }
+    show: { category: 'show', items: [] },
+    workbench: { category: 'workbench', items: [] }
   }
   for (const componentType of listComponentTypes()) {
     if (
@@ -548,7 +608,7 @@ export function buildTemplate() {
       templateGroups['form'].items.push(item);
     }
   }
-  return { base: [templateGroups.layout, templateGroups.form, templateGroups.list, templateGroups.show] }
+  return { base: [templateGroups.layout, templateGroups.form, templateGroups.list, templateGroups.show, templateGroups.workbench] }
 }
 
 /**

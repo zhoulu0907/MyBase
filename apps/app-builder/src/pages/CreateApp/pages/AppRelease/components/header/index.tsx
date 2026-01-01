@@ -23,7 +23,7 @@ interface AppStatusHeaderProps {
 
 const AppStatusHeader: React.FC<AppStatusHeaderProps> = ({ appInfo, onReleaseToggle, onOfflineToggle }) => {
   const tenantId = TokenManager.getTenantInfo()?.tenantId || '';
-  const redirectURL = `${getRuntimeURL()}/#/onebase/runtime/?tenantId=${tenantId}&appId=${appInfo.id}`;
+  const redirectURL = `${getRuntimeURL()}/#/onebase/${tenantId}/${appInfo.id}/runtime/`;
   const runtimeURL = `${getRuntimeURL()}/#/login?redirectURL=${redirectURL}`;
   const runtimeMobileURL = `${getRuntimeMobileURL()}/#/login?redirectURL=${redirectURL}`;
 

@@ -77,7 +77,7 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
         className="no-spin"
         type="number"
         placeholder={placeholder}
-        maxLength={verify?.max || 1000000000}
+        maxLength={verify?.max || Infinity}
         suffix={showUnit ? unitValue : ''}
         blockChangeWhenCompositing={true}
         inputStyle={{ textAlign: layout === 'vertical' ? 'left' : 'right' }}
@@ -120,7 +120,7 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
       {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
         // 只读模式，渲染格式化的文本内容
         <div className="readonlyText">
-          {securityEncodeText(security, helpers.detailValue(form?.getFieldValue(fieldId))) || '--'}
+          {securityEncodeText(security, helpers.detailValue(form?.getFieldValue(fieldId)))}
         </div>
       ) : (
         renderContent()

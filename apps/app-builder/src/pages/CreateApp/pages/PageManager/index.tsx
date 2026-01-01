@@ -3,17 +3,17 @@ import CreatePageIcon from '@/assets/images/addpage.svg';
 import CreateWorkbenchIcon from '@/assets/images/addworkbench.svg';
 import EditIcon from '@/assets/images/edit_menu_icon.svg';
 import PageManagerGuide from '@/assets/images/page_manaager_guide.svg';
-import CreateScreenModal from '@/components/CreateDashboardModal';
+import CreateScreenModal from '@/components/CreatePageDashboardModal';
 import { useI18n } from '@/hooks/useI18n';
 import PreviewContainer from '@/pages/Runtime/components/preview';
 import { useAppStore } from '@/store/store_app';
-import { setMainMetaData } from '@/utils/entity';
 import { addParentIdToChildren } from '@/utils/menu';
 import { Button, Dropdown, Form, Input, Layout, Menu, Message, Tree } from '@arco-design/web-react';
 import { IconDown, IconEmpty, IconPlus, IconSearch } from '@arco-design/web-react/icon';
 import {
   copyApplicationMenu,
   createApplicationMenu,
+  DashBoardCreateType,
   deleteApplicationMenu,
   getEntityListByApp,
   getPageSetId,
@@ -27,6 +27,8 @@ import {
   updateApplicationMenu,
   updateApplicationMenuOrder,
   VisibleType,
+  getPageSetMetaData,
+  getEntityListWithFields,
   type ApplicationMenu,
   type CopyApplicationMenuReq,
   type CreateApplicationMenuReq,
@@ -38,13 +40,9 @@ import {
   type UpdateApplicationMenuOrderReq,
   type UpdateApplicationMenuVisibleReq
 } from '@onebase/app';
-import {
-  getDashboardIdFromTemplateApi,
-  updateApplicationMenuVisibleMobile,
-  updateApplicationMenuVisiblePC
-} from '@onebase/app/src/services';
+import { updateApplicationMenuVisibleMobile, updateApplicationMenuVisiblePC } from '@onebase/app/src/services';
 import { getDashBoardURL, pagesRuntimeSignal } from '@onebase/common';
-import { EDITOR_TYPES } from '@onebase/ui-kit';
+import { EDITOR_TYPES, menuDictSignal, useAppEntityStore, setMainMetaData } from '@onebase/ui-kit';
 import { currentEditorSignal } from '@onebase/ui-kit/src/signals/current_editor';
 import { useSignals } from '@preact/signals-react/runtime';
 import { debounce } from 'lodash-es';
@@ -88,6 +86,7 @@ const menuStyles = {
 
 const PageManagerPage: FC = () => {
   useSignals();
+  const { setMainEntity, setSubEntities } = useAppEntityStore();
 
   const { t } = useI18n();
   const navigate = useNavigate();
@@ -136,6 +135,7 @@ const PageManagerPage: FC = () => {
   const cutTreeItemWidth = 25;
 
   const { clearEditMode } = currentEditorSignal;
+  const { batchSetAppDict } = menuDictSignal;
 
   const findFirstPage: any = (nodes: ApplicationMenu[]) =>
     nodes.reduce((found, node) => {
@@ -188,19 +188,26 @@ const PageManagerPage: FC = () => {
   }, [treeData, searchResult]);
 
   useEffect(() => {
-    const loadMainMetaData = async () => {
-      console.log('loadMainMetaData curMenu.value: ', curMenu.value);
-      const req: GetPageSetIdReq = {
-        menuId: curMenu.value?.id
-      };
-      const pageSetId = await getPageSetId(req);
-      setMainMetaData(pageSetId);
-    };
-
     if (curMenu.value?.id && curMenu.value?.menuType === MenuType.PAGE) {
       loadMainMetaData();
     }
   }, [curMenu.value?.id]);
+
+  const loadMainMetaData = async () => {
+    console.log('loadMainMetaData curMenu.value: ', curMenu.value);
+    const req: GetPageSetIdReq = {
+      menuId: curMenu.value?.id
+    };
+    const pageSetId = await getPageSetId(req);
+    console.log('载入页面集对应实体信息, 页面集ID: ', pageSetId);
+
+    const mainMetaData = await getPageSetMetaData({ pageSetId: pageSetId });
+
+    const entityListWithFields = await getEntityListWithFields({ entityUuids: [mainMetaData] });
+    const [entityWithChildren] = entityListWithFields;
+    console.log('entityWithChildren: ', entityWithChildren);
+    setMainMetaData(entityWithChildren, setMainEntity, setSubEntities, batchSetAppDict);
+  };
 
   // 将接口返回的菜单数据（res）转换为 Tree 组件可用的 treeData 格式
   // TODO(mickey): showOption重构
@@ -433,44 +440,51 @@ const PageManagerPage: FC = () => {
   const triggerDelete = (menuID: string) => {
     handleDelete(menuID);
   };
+  //页面设计新建大屏创建
   const handleScreenCreate = async (id?: string, screenMethod?: string) => {
+    console.log('创建大屏参数 id、screenMethod：', id, screenMethod);
+
+    if (screenMethod === DashBoardCreateType.DashboardTemplate && !id) {
+      // 通过模板创建，模板ID不可为空
+      Message.error('请选择一个模板');
+      return;
+    } else if (screenMethod === DashBoardCreateType.DashboardLink && !id) {
+      // 关联大屏创建，关联大屏ID不可为空
+      Message.error('请选择一个大屏');
+      return;
+    }
+    // 产品需求：当新建大屏且选择了模板时，更新为通过模板创建。
+    if (screenMethod === DashBoardCreateType.DashboardNew && id) {
+      screenMethod = DashBoardCreateType.DashboardTemplate;
+    }
+
     createForm.validate(async (error) => {
       if (error !== null) return;
-      console.log('创建大屏参数 id、screenMethod：', id, screenMethod);
-      if (id) {
-        const dashboardId = await getDashboardIdFromTemplateApi(id);
-        console.log('dashboardId:', dashboardId);
+      const req: CreateApplicationMenuReq = {
+        applicationId: curAppId,
+        parentId:
+          createForm.getFieldValue('parentId') === RootParentPage.id ? '' : createForm.getFieldValue('parentId'),
+        pageSetType: dashboardPageType,
+        menuName: createForm.getFieldValue('menuName'),
+        menuType: MenuType.PAGE,
+        menuIcon: createForm.getFieldValue('menuIcon'),
+        entityUuid: '',
+        createDashboardType: screenMethod,
+        dashboardId: id
+      };
+      const menuResp = await createApplicationMenu(req);
+      if (menuResp) {
+        Message.success('创建成功');
+      }
+      setVisibleCreateScreenForm('');
+      getMenuList(undefined, menuResp.id);
+      const pageSetId = await getPageSetId({
+        menuId: menuResp.id
+      });
+      const dashboardInfo = await listPageView({ pageSetId });
+      const dashboardId = dashboardInfo.pages && dashboardInfo.pages.length > 0 ? dashboardInfo.pages[0].id : null;
+      if (screenMethod !== DashBoardCreateType.DashboardLink) {
         window.open(`${resourceUrl}chart/home/${dashboardId}/${appId}/${dashboardType}`, '_blank');
-      } else {
-        const req: CreateApplicationMenuReq = {
-          applicationId: curAppId,
-          parentId:
-            createForm.getFieldValue('parentId') === RootParentPage.id ? '' : createForm.getFieldValue('parentId'),
-          pageSetType: dashboardPageType,
-          menuName: createForm.getFieldValue('menuName'),
-          menuType: MenuType.PAGE,
-          menuIcon: createForm.getFieldValue('menuIcon'),
-          entityUuid: '',
-          createDashboardType: screenMethod,
-          dashboardId: id
-        };
-
-        const menuResp = await createApplicationMenu(req);
-        if (menuResp) {
-          Message.success('创建成功');
-        }
-        setVisibleCreateScreenForm('');
-        getMenuList(undefined, menuResp.id);
-
-        const pageSetId = await getPageSetId({
-          menuId: menuResp.id
-        });
-
-        const dashboardInfo = await listPageView({ pageSetId });
-        const dashboardId = dashboardInfo.pages && dashboardInfo.pages.length > 0 ? dashboardInfo.pages[0].id : null;
-        if (dashboardId) {
-          window.open(`${resourceUrl}chart/home/${dashboardId}/${appId}/${dashboardType}`, '_blank');
-        }
       }
     });
   };
@@ -604,6 +618,7 @@ const PageManagerPage: FC = () => {
     }
     if (curMenu.value?.pagesetType === dashboardPageType) {
       const dashboardInfo = await listPageView({ pageSetId });
+
       const dashboardId = dashboardInfo.pages && dashboardInfo.pages.length > 0 ? dashboardInfo.pages[0].id : null;
       window.open(`${resourceUrl}chart/home/${dashboardId}/${appId}/${dashboardType}`, '_blank');
     } else {

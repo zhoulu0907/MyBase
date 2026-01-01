@@ -10,6 +10,7 @@ import dashboardLink from '@/assets/images/dashboard_link.svg';
 import dashboardChange from '@/assets/images/dashboard_change.svg';
 import { getFileUrlById } from '@onebase/platform-center';
 import { getDashBoardURL } from '@onebase/common';
+import { DashBoardCreateType } from '@onebase/app';
 
 interface CreateModalProps {
   title: string;
@@ -39,7 +40,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
 
   const [menuIcon, setMenuIcon] = useState<string>();
   const [visibleMenuIcon, setVisibleMenuIcon] = useState<boolean>(false);
-  const [dashboardMethod, setDashboardMethod] = useState<string>('dashboardNew');
+  const [dashboardMethod, setDashboardMethod] = useState<string>(DashBoardCreateType.DashboardNew);
   const [dashboardTemplateTab, setDashboardTemplateTab] = useState<string>('allTemplate');
   const resourceUrl = getDashBoardURL();
   const [dashboardMethodLoading, setDashboardMethodLoading] = useState<boolean>(false);
@@ -71,11 +72,15 @@ const CreateModal: React.FC<CreateModalProps> = ({
     setDashboardPagination((prev) => ({
       ...prev,
       current: 1,
-      pageSize: dashboardMethod === 'dashboardNew' ? 4 : 8
+      pageSize: dashboardMethod === DashBoardCreateType.DashboardNew ? 4 : 8
     }));
     setDashboardTemplateTab('allTemplate');
 
-    if (dashboardMethod !== 'dashboardNew' && dashboardTemplateData.length > 0 && !selectedTemplateId) {
+    if (
+      dashboardMethod !== DashBoardCreateType.DashboardNew &&
+      dashboardTemplateData.length > 0 &&
+      !selectedTemplateId
+    ) {
       setSelectedTemplateId(dashboardTemplateData[0].id);
     }
     // 不再在这里调用，避免重复
@@ -91,12 +96,12 @@ const CreateModal: React.FC<CreateModalProps> = ({
   const getDashboardMethodData = () => {
     const baseData = [
       {
-        key: 'dashboardNew',
+        key: DashBoardCreateType.DashboardNew,
         icon: dashboardNew,
         dashboardName: '从空白页面新建'
       },
       {
-        key: 'dashboardTemplate',
+        key: DashBoardCreateType.DashboardTemplate,
         icon: dashboardTemplate,
         dashboardName: '从模版创建'
       }
@@ -106,7 +111,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
       return [
         ...baseData,
         {
-          key: 'dashboardLink',
+          key: DashBoardCreateType.DashboardLink,
           icon: dashboardLink,
           dashboardName: '关联已有大屏'
         }
@@ -133,7 +138,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
   ];
 
   const handleCloseModal = () => {
-    setDashboardMethod('dashboardNew');
+    setDashboardMethod(DashBoardCreateType.DashboardNew);
     setMenuIcon('');
     onCancel();
   };
@@ -145,10 +150,10 @@ const CreateModal: React.FC<CreateModalProps> = ({
       name = templateName
     ) => {
       const params = {
-        ...(method === 'dashboardNew' && { hot: IsHot.YES }),
+        ...(method === DashBoardCreateType.DashboardNew && { hot: IsHot.YES }),
         templateType: tab === 'allTemplate' ? '' : tab,
         pageNo: pagination.current,
-        pageSize: method === 'dashboardNew' ? 4 : 8,
+        pageSize: method === DashBoardCreateType.DashboardNew ? 4 : 8,
         templateName: name
       };
       const res = await getDashboardTemplateListApi(params);
@@ -156,12 +161,12 @@ const CreateModal: React.FC<CreateModalProps> = ({
       setTotal(res.total);
       const newData = res.list;
       setDashboardTemplateData(newData);
-      if (method !== 'dashboardNew' && newData.length > 0) {
+      if (method !== DashBoardCreateType.DashboardNew && newData.length > 0) {
         const isSelectedInNewData = newData.some((item) => item.id === selectedTemplateId);
         if (!isSelectedInNewData) {
           setSelectedTemplateId(newData[0].id);
         }
-      } else if (method !== 'dashboardNew' && newData.length === 0) {
+      } else if (method !== DashBoardCreateType.DashboardNew && newData.length === 0) {
         setSelectedTemplateId(''); // 如果没有数据，清空选中状态
       }
     },
@@ -176,7 +181,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
       };
       const res = await getDashboardListApi(params);
       console.log('大屏 res:', res);
-      console.log('大屏 res.data.length:', res.length);
+
       const newData = res.list;
       setDashboardTemplateData(newData);
       setTotal(res.total);
@@ -202,7 +207,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
     setDashboardMethod(value);
     setSelectedTemplateId('');
     // 立即调用获取数据，避免滞后，使用新值
-    if (value !== 'dashboardLink') {
+    if (value !== DashBoardCreateType.DashboardLink) {
       getDashboardTemplateList(value);
     } else {
       getDashboardList();
@@ -211,13 +216,14 @@ const CreateModal: React.FC<CreateModalProps> = ({
     //   setDashboardMethodLoading(false);
     // }, 3000);
   };
+  // const [newCurrent, setNewCurrent] = useState(1);
   const handleDashboardChange = () => {
-    // console.log('换一批 handleDashboardChange:', dashboardPagination);
-    /**
-     * TODO 换一批
-     * params: dashboardMethod == dashboardNew + change
-     */
-    const newCurrent = dashboardPagination.current + 1 > 3 ? 1 : dashboardPagination.current + 1;
+    let newCurrent = 1;
+    if (dashboardTemplateData.length < 4) {
+      newCurrent = 1;
+    } else {
+      newCurrent = dashboardPagination.current + 1;
+    }
     const newPagination = { ...dashboardPagination, current: newCurrent };
     setDashboardPagination(newPagination);
     // 立即调用获取数据，避免滞后
@@ -259,7 +265,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
     const newPagination = { ...dashboardPagination, current };
     setDashboardPagination(newPagination);
     // 立即调用获取数据，避免滞后
-    if (dashboardMethod !== 'dashboardLink') {
+    if (dashboardMethod !== DashBoardCreateType.DashboardLink) {
       getDashboardTemplateList(dashboardMethod, dashboardTemplateTab, newPagination);
     } else {
       getDashboardList(newPagination);
@@ -287,7 +293,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
         </Button>
       </div>
       <div className={styles.dashboardTemplateCardTitle}>
-        {dashboardMethod !== 'dashboardLink' ? item.templateName : item.projectName}
+        {dashboardMethod !== DashBoardCreateType.DashboardLink ? item.templateName : item.projectName}
       </div>
     </div>
   );
@@ -435,67 +441,59 @@ const CreateModal: React.FC<CreateModalProps> = ({
               )}
             </div>
             {dashboardMethod !== 'dashboardNew' && (
-              <>
-                <div className={styles.dashboardTemplateSearch}>
-                  {dashboardMethod === 'dashboardTemplate' && (
-                    <div className={styles.dashboardTemplateSearchTabs}>
-                      {dashboardTemplateTabs.map((item) => (
-                        <div
-                          className={
-                            dashboardTemplateTab === item.value
-                              ? styles.dashboardTemplateSearchTabsItemActive
-                              : styles.dashboardTemplateSearchTabsItem
-                          }
-                          key={item.value}
-                          onClick={() => handleChangeTemplateTab(item.value)}
-                        >
-                          {item.label}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  <div>
-                    <InputSearch
-                      searchButton
-                      placeholder="请输入大屏名称搜索"
-                      allowClear
-                      style={{ width: 220 }}
-                      value={templateName}
-                      onSearch={handleSearchTemplate}
-                      onChange={(value) => setTemplateName(value)}
-                    />
+              <div className={styles.dashboardTemplateSearch}>
+                {dashboardMethod === 'dashboardTemplate' && (
+                  <div className={styles.dashboardTemplateSearchTabs}>
+                    {dashboardTemplateTabs.map((item) => (
+                      <div
+                        className={
+                          dashboardTemplateTab === item.value
+                            ? styles.dashboardTemplateSearchTabsItemActive
+                            : styles.dashboardTemplateSearchTabsItem
+                        }
+                        key={item.value}
+                        onClick={() => handleChangeTemplateTab(item.value)}
+                      >
+                        {item.label}
+                      </div>
+                    ))}
                   </div>
+                )}
+                <div>
+                  <InputSearch
+                    searchButton
+                    placeholder="请输入大屏名称搜索"
+                    allowClear
+                    style={{ width: 220 }}
+                    value={templateName}
+                    onSearch={handleSearchTemplate}
+                    onChange={(value) => setTemplateName(value)}
+                  />
                 </div>
-              </>
+              </div>
             )}
-            {dashboardMethod === 'dashboardNew' && (
-              <>
-                <div className={styles.dashboardTemplateContent}>
-                  {dashboardTemplateData.map((item, index) => (
-                    <div key={index}>{dashboardTemplateCard(item)}</div>
-                  ))}
-                </div>
-              </>
+            {dashboardMethod === DashBoardCreateType.DashboardNew && (
+              <div className={styles.dashboardTemplateContent}>
+                {dashboardTemplateData.map((item, index) => (
+                  <div key={index}>{dashboardTemplateCard(item)}</div>
+                ))}
+              </div>
             )}
-            {dashboardMethod === 'dashboardTemplate' && (
-              <>
-                <div className={styles.dashboardTemplateContent}>
-                  {dashboardTemplateData.map((item, index) => (
-                    <div key={index}>{dashboardTemplateCard(item)}</div>
-                  ))}
-                </div>
-              </>
+            {dashboardMethod === DashBoardCreateType.DashboardTemplate && (
+              <div className={styles.dashboardTemplateContent}>
+                {dashboardTemplateData.map((item, index) => (
+                  <div key={index}>{dashboardTemplateCard(item)}</div>
+                ))}
+              </div>
             )}
-            {dashboardMethod === 'dashboardLink' && (
-              <>
-                <div className={styles.dashboardTemplateContent}>
-                  {dashboardTemplateData.map((item, index) => (
-                    <div key={index}>{dashboardTemplateCard(item)}</div>
-                  ))}
-                </div>
-              </>
+            {dashboardMethod === DashBoardCreateType.DashboardLink && (
+              <div className={styles.dashboardTemplateContent}>
+                {dashboardTemplateData.map((item, index) => (
+                  <div key={index}>{dashboardTemplateCard(item)}</div>
+                ))}
+              </div>
             )}
-            {dashboardMethod !== 'dashboardNew' && (
+            {dashboardMethod !== DashBoardCreateType.DashboardNew && (
               <div className={styles.dashboardPagination}>
                 <Pagination
                   total={total}

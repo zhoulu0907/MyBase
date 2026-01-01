@@ -1,9 +1,9 @@
-import { Form, Input, ColorPicker, Tooltip, Empty } from '@arco-design/web-react';
-import { CONFIG_TYPES, useAppEntityStore, getFieldOptionsConfig } from '@onebase/ui-kit';
+import { ColorPicker, Empty, Form, Input, Tooltip } from '@arco-design/web-react';
 import { type DictData } from '@onebase/platform-center';
+import { CONFIG_TYPES, getFieldOptionsConfig, menuDictSignal, useAppEntityStore } from '@onebase/ui-kit';
 import React, { useEffect, useState } from 'react';
-import { registerConfigRenderer } from '../../registry';
 import styles from '../../index.module.less';
+import { registerConfigRenderer } from '../../registry';
 
 export interface DynamicOptionsProps {
   handlePropsChange: (key: string, value: any) => void;
@@ -14,7 +14,9 @@ export interface DynamicOptionsProps {
 
 const DynamicOptionsConfig: React.FC<DynamicOptionsProps> = ({ handlePropsChange, item, configs, id }) => {
   const { mainEntity, subEntities } = useAppEntityStore();
-  
+
+  const { appDict } = menuDictSignal;
+
   const [options, setOptions] = useState<DictData[]>([]);
 
   useEffect(() => {
@@ -27,7 +29,7 @@ const DynamicOptionsConfig: React.FC<DynamicOptionsProps> = ({ handlePropsChange
 
   // 获取当前字段配置 通过配置获取下拉选项
   const getOptions = async () => {
-    const newOptions = await getFieldOptionsConfig(configs.dataField, mainEntity, subEntities);
+    const newOptions = await getFieldOptionsConfig(configs.dataField, mainEntity, subEntities, appDict.value);
     setOptions(newOptions);
   };
 

@@ -66,7 +66,10 @@ export const onDragLineEnd = async (ctx: FreeLayoutPluginContext, params: onDrag
   // calculate position for the new node - 计算新节点的位置
   const nodePosition = WorkflowNodePanelUtils.adjustNodePosition({
     nodeType,
-    position: mousePos,
+    position: {
+      x: mousePos.x - 140,
+      y: mousePos.y + 30
+    },
     fromPort,
     toPort,
     containerNode,

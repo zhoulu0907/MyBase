@@ -53,6 +53,8 @@ const XPreviewTabsLayout = memo((props: XTabsLayoutConfig & { detailMode?: boole
               setList={(newList) => {
                 colComponents[index] = newList;
               }}
+              sort={false}
+              disabled
               group={{
                 name: COMPONENT_GROUP_NAME
               }}

@@ -6,12 +6,13 @@ import TodoCenterConfig from './TodoCenterConfig';
 import RichTextEditorWorkbenchConfig from './RichTextEditorWorkbenchConfig';
 import CarouselWorkbenchConfig from './CarouselWorkbenchConfig';
 import ButtonWorkbenchConfig from './ButtonWorkbenchConfig';
-
+import WelcomeCardConfig from './WelcomeCardConfig';
 export {
   PageConfig,
   QuickEntryConfig,
   TodoCenterConfig,
   RichTextEditorWorkbenchConfig,
   CarouselWorkbenchConfig,
-  ButtonWorkbenchConfig
+  ButtonWorkbenchConfig,
+  WelcomeCardConfig
 };

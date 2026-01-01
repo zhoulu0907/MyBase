@@ -4,29 +4,49 @@ import { useI18n } from '@/hooks/useI18n';
 import { logout } from '@/utils/session';
 import { Button, Divider, Dropdown, Layout, Menu, Typography } from '@arco-design/web-react';
 import { IconApps, IconExport } from '@arco-design/web-react/icon';
-import { UserPermissionManager } from '@onebase/common';
-import { systemLogout } from '@onebase/platform-center';
-import React from 'react';
+import { TokenManager, UserPermissionManager } from '@onebase/common';
+import { CodeType, getPermissionInfo, getTenantInfo, systemLogout, type TenantInfo } from '@onebase/platform-center';
+import { userPermissionSignal } from '@/store/singals/user_permission';
+import { getTenantInfoFromSession, setTenantInfoFromSession } from '@/utils';
+import React, { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import styles from './header.module.less';
 import TenantLogo from '@/components/TenantLogo';
-import { getTenantInfoFromSession } from '@/utils';
 
 const { Header } = Layout;
 
 interface HeaderProps {
   className?: string;
   avatarUrl: string;
+  tenantInfo: TenantInfo | null;
 }
 
-const AppHeader: React.FC<HeaderProps> = ({ className, avatarUrl }) => {
+const AppHeader: React.FC<HeaderProps> = ({ className, avatarUrl, tenantInfo }) => {
   const navigate = useNavigate();
   const { t } = useI18n();
 
   const { tenantId } = useParams();
 
   // 获取用户信息
+  const tokenInfo = TokenManager.getTokenInfo();
   const userPermissionInfo = UserPermissionManager.getUserPermissionInfo();
+
+  useEffect(() => {
+    if (tokenInfo?.accessToken) {
+      getInfo();
+    }
+  }, [tokenInfo?.accessToken]);
+
+  const getInfo = async () => {
+    const res = await getPermissionInfo(CodeType.TENANT);
+    UserPermissionManager.setUserPermissionInfo(res);
+    userPermissionSignal.setPermissionInfo(res);
+
+    const tenantInfoRes = await getTenantInfo(tenantId || '');
+    if (tenantInfoRes) {
+      setTenantInfoFromSession(tenantInfoRes);
+    }
+  };
 
   // 登出处理
   const handleLogout = async () => {
@@ -57,8 +77,6 @@ const AppHeader: React.FC<HeaderProps> = ({ className, avatarUrl }) => {
       </Menu.Item>
     </Menu>
   );
-
-  const tenantInfo = getTenantInfoFromSession();
 
   return (
     <Header className={`${styles.header} ${className || ''}`}>

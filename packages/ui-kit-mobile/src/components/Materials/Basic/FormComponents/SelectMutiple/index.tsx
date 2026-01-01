@@ -94,7 +94,7 @@ const XSelectMutiple = memo((props: XSelectMutipleConfig & { runtime?: boolean; 
       return <span className='selectMultipleValue'>请选择</span>;
     }
     const selectedOptions = options?.filter(option => selectedKeys.includes(option.id));
-    return selectedOptions?.map(opt => opt.label).join(',');
+    return selectedOptions?.map(opt => opt.label).join('，');
   };
 
   return (
@@ -126,7 +126,7 @@ const XSelectMutiple = memo((props: XSelectMutipleConfig & { runtime?: boolean; 
           className="selectMultipleCellOBMobile"
           onClick={() => setVisible(true)}
         >
-          <Ellipsis className={`selectMultipleValue ${layout === 'vertical' ? 'verticalLayout' : ''}`} text={getSelectedLabels()} maxLine={1} />
+          <Ellipsis className={`selectMultipleValue ${selectedKeys.length ? 'hasValue' : ''} ${layout === 'vertical' ? 'verticalLayout' : ''}`} text={getSelectedLabels()} maxLine={1} />
           <PopupSwiper className="selectMultiplePopupOBMobile" visible={visible} close={(e) => handleCancel(e)} direction={popupDirection}>
             <div>
               <div style={{

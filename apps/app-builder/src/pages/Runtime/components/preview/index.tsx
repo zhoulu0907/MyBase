@@ -4,8 +4,8 @@ import {
   getEntityFieldsWithChildren,
   getPageSetId,
   getPageSetMetaData,
-  listPageView,
   PageType,
+  listPageView,
   type AppEntityField,
   type GetPageSetIdReq
 } from '@onebase/app';
@@ -40,7 +40,6 @@ interface PreviewProps {
 
 const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType }) => {
   useSignals();
-
   const [form] = Form.useForm();
 
   const {
@@ -278,6 +277,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
                     runtime={runtime}
                     preview={preview}
                     showFromPageData={showFromPageData}
+                    pageSetType={pagesetType}
                   />
                 </div>
               )}

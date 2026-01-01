@@ -4,7 +4,7 @@ import dayjs from 'dayjs';
 import { DatePicker, Ellipsis, Form } from '@arco-design/mobile-react';
 import { ItemType } from '@arco-design/mobile-react/cjs/date-picker';
 import { ValidatorType, ITypeRules } from '@arco-design/mobile-utils';
-import { FORM_COMPONENT_TYPES, DATE_OPTIONS, DATE_VALUES, STATUS_OPTIONS, STATUS_VALUES, FormSchema, DATE_EXTREME_TYPE, DATE_DYNAMIC_VALUE } from '@onebase/ui-kit';
+import { FORM_COMPONENT_TYPES, DATE_OPTIONS, DATE_VALUES, STATUS_OPTIONS, STATUS_VALUES, FormSchema, DATE_EXTREME_TYPE, DATE_DYNAMIC_VALUE, securityEncodeText } from '@onebase/ui-kit';
 type XDatePickerConfig = typeof FormSchema.XDatePickerSchema.config;
 import '../index.css';
 
@@ -20,6 +20,7 @@ const XDatePicker = memo((props: XDatePickerConfig & { runtime?: boolean; detail
     runtime = true,
     detailMode,
     form,
+    security,
     dateRange,
     defaultValueConfig
   } = props;
@@ -32,7 +33,9 @@ const XDatePicker = memo((props: XDatePickerConfig & { runtime?: boolean; detail
 
   // 时间范围判断
   const dateSelectRange = () => {
-    let earliestDate, latestDate;
+    const initStart = new Date(1900, 0, 1).getTime();
+    const initEnd = new Date(2099, 11, 31).getTime();
+    let validDate = { startTs: initStart, endTs: initEnd };
     // 今日零点
     const today = dayjs(new Date()).format('YYYY-MM-DD') + ' 00:00:00';
     const todatTime = new Date(today).getTime();
@@ -42,13 +45,13 @@ const XDatePicker = memo((props: XDatePickerConfig & { runtime?: boolean; detail
       // 静态值
       if (dateRange.earliestType === DATE_EXTREME_TYPE.STATIC && dateRange.earliestStaticValue) {
         const earliestTime = new Date(dateRange.earliestStaticValue).getTime()
-        earliestDate = earliestTime
+        validDate.startTs = earliestTime
       }
 
       // 动态值  DATE_DYNAMIC_VALUE  DATE_DYNAMIC_TYPE
       if (dateRange.earliestType === DATE_EXTREME_TYPE.DYNAMIC && dateRange.earliestDynamicValue) {
         const earliestTime = todatTime + (DATE_DYNAMIC_VALUE[dateRange.earliestDynamicValue as keyof typeof DATE_DYNAMIC_VALUE] || 0) * 24 * 3600 * 1000
-        earliestDate = earliestTime
+        validDate.startTs = earliestTime
       }
 
       // 变量
@@ -56,7 +59,7 @@ const XDatePicker = memo((props: XDatePickerConfig & { runtime?: boolean; detail
         const earliestVariableValue = form?.getFieldValue(dateRange.earliestVariableValue);
         if (earliestVariableValue) {
           const earliestTime = new Date(earliestVariableValue).getTime()
-          earliestDate = earliestTime
+          validDate.startTs = earliestTime
         }
       }
     }
@@ -66,13 +69,13 @@ const XDatePicker = memo((props: XDatePickerConfig & { runtime?: boolean; detail
       // 静态值
       if (dateRange.latestType === DATE_EXTREME_TYPE.STATIC && dateRange.latestStaticValue) {
         const latestTime = new Date(dateRange.latestStaticValue).getTime()
-        latestDate = latestTime
+        validDate.endTs = latestTime
       }
 
       // 动态值  DATE_DYNAMIC_VALUE  DATE_DYNAMIC_TYPE
       if (dateRange.latestType === DATE_EXTREME_TYPE.DYNAMIC && dateRange.latestDynamicValue) {
         const latestTime = todatTime + (DATE_DYNAMIC_VALUE[dateRange.latestDynamicValue as keyof typeof DATE_DYNAMIC_VALUE] || 0) * 24 * 3600 * 1000
-        latestDate = latestTime
+        validDate.endTs = latestTime
       }
 
       // 变量
@@ -80,14 +83,13 @@ const XDatePicker = memo((props: XDatePickerConfig & { runtime?: boolean; detail
         const latestVariableValue = form?.getFieldValue(dateRange.latestVariableValue)
         if (latestVariableValue) {
           const latestTime = new Date(latestVariableValue).getTime()
-          latestDate = latestTime
+          validDate.endTs = latestTime
         }
       }
     }
 
     return {
-      earliestDate: earliestDate || new Date(1900, 0, 1).getTime(),
-      latestDate: latestDate || new Date(2099, 11, 31).getTime(),
+      ...validDate
     }
   };
 
@@ -116,8 +118,8 @@ const XDatePicker = memo((props: XDatePickerConfig & { runtime?: boolean; detail
         title={label.text}
         typeArr={mode}
         maskClosable
-        minTs={dateSelectRange().earliestDate}
-        maxTs={dateSelectRange().latestDate}
+        minTs={dateSelectRange().startTs}
+        maxTs={dateSelectRange().endTs}
         formatter={(value, type) => {
           const map = {
             year: '年',
@@ -142,6 +144,22 @@ const XDatePicker = memo((props: XDatePickerConfig & { runtime?: boolean; detail
     }
   ];
 
+  const renderTime = () => {
+    const fieldValue = form.getFieldValue(fieldId);
+    switch (dateType) {
+      case DATE_VALUES[DATE_OPTIONS.YEAR]:
+        return <>{securityEncodeText(security, dayjs(fieldValue).format('YYYY'))}</>;
+      case DATE_VALUES[DATE_OPTIONS.MONTH]:
+        return <>{securityEncodeText(security, dayjs(fieldValue).format('YYYY-MM'))}</>;
+      case DATE_VALUES[DATE_OPTIONS.DATE]:
+        return <>{securityEncodeText(security, dayjs(fieldValue).format('YYYY-MM-DD'))}</>;
+      case DATE_VALUES[DATE_OPTIONS.FULL]:
+        return <>{securityEncodeText(security, dayjs(fieldValue).format('YYYY-MM-DD HH:mm:ss'))}</>;
+      default:
+        return '--';
+    }
+  };
+
   return (
     <Form.Item
       className="inputTextWrapperOBMobile"
@@ -149,7 +167,7 @@ const XDatePicker = memo((props: XDatePickerConfig & { runtime?: boolean; detail
       rules={rules}
       layout={layout}
       label={label.display && <Ellipsis text={label.text} maxLine={2} />}
-      initialValue={form?.getFieldValue(fieldId)}
+      initialValue={defaultValueConfig.customValue}
       style={{
         textAlign,
         pointerEvents: (!runtime || detailMode) ? 'none' : 'unset',
@@ -157,7 +175,7 @@ const XDatePicker = memo((props: XDatePickerConfig & { runtime?: boolean; detail
       }}
     >
       {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
-        <div className="readonlyText">{form?.getFieldValue(fieldId) ? dayjs(form?.getFieldValue(fieldId)).format('YYYY-MM-DD') : '--'}</div>
+        <div className="readonlyText">{form?.getFieldValue(fieldId) ? renderTime() : '--'}</div>
       ) : (
         renderDatePicker()
       )}
