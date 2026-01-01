@@ -120,8 +120,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
   }, [tableName, mainMetaDataFields.value]);
 
   useEffect(() => {
-    // 工作台页面不获取主表数据
-    if (pageSetId && pageSetType !== PageType.WORKBENCH) {
+    // 工作台和大屏页面不获取主表数据
+    if (pageSetId && pageSetType !== PageType.WORKBENCH && pageSetType !== PageType.DASHBOARD) {
       getMainMetaData(pageSetId);
     }
     setPageType(EDITOR_TYPES.LIST_EDITOR);
