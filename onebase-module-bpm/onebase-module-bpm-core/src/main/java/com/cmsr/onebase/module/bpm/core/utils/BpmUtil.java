@@ -1,6 +1,8 @@
 package com.cmsr.onebase.module.bpm.core.utils;
 
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
+import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeExtDTO;
 import com.cmsr.onebase.module.bpm.core.enums.BpmNodeTypeEnum;
 import org.apache.commons.lang3.StringUtils;
@@ -8,6 +10,8 @@ import org.dromara.warm.flow.core.dto.DefJson;
 import org.dromara.warm.flow.core.dto.NodeJson;
 
 import java.util.Objects;
+
+import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 
 /**
  * 流程工具类
@@ -93,5 +97,15 @@ public class BpmUtil {
         }
 
         return node;
+    }
+
+    public static Long getRequiredApplicationId() {
+        Long applicationId = ApplicationManager.getApplicationId();
+
+        if (applicationId == null) {
+            throw exception(ErrorCodeConstants.MISSING_APPLICATION_ID);
+        }
+
+        return applicationId;
     }
 }
