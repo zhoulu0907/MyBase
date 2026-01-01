@@ -218,6 +218,15 @@ A: 不可以。Dev 模式设计为仅从 `dev-class-paths` 加载散落的 class
 **Q: `dev-class-paths` 必须是绝对路径吗？**
 A: 是的，必须使用绝对路径以避免运行目录不同导致的路径错误。
 
+**Q: 运行时报错 "Name for argument of type [xxx] not specified, and parameter name information not available via reflection"？**
+A: 这是因为插件项目编译时没有保留方法参数名称。请在插件项目的 `pom.xml` 中添加：
+```xml
+<properties>
+    <maven.compiler.parameters>true</maven.compiler.parameters>
+</properties>
+```
+这会启用 Java 编译器的 `-parameters` 标志，使 Spring MVC 能够通过反射获取方法参数名称。
+
 ---
 
 ## 💡 最佳实践建议

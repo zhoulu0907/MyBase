@@ -1,5 +1,6 @@
 package com.cmsr.onebase.plugin.model;
 
+import lombok.Data;
 import java.time.LocalDateTime;
 import java.util.Map;
 
@@ -12,6 +13,7 @@ import java.util.Map;
  * @author chengyuansen
  * @date 2025-12-18
  */
+@Data
 public class PluginEvent {
 
     /**
@@ -163,61 +165,4 @@ public class PluginEvent {
         return (T) data.get(key);
     }
 
-    // ==================== Getter/Setter ====================
-
-    public String getEventId() {
-        return eventId;
-    }
-
-    public void setEventId(String eventId) {
-        this.eventId = eventId;
-    }
-
-    public String getEventType() {
-        return eventType;
-    }
-
-    public void setEventType(String eventType) {
-        this.eventType = eventType;
-    }
-
-    public String getSource() {
-        return source;
-    }
-
-    public void setSource(String source) {
-        this.source = source;
-    }
-
-    public LocalDateTime getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(LocalDateTime timestamp) {
-        this.timestamp = timestamp;
-    }
-
-    public Map<String, Object> getData() {
-        return data;
-    }
-
-    public void setData(Map<String, Object> data) {
-        this.data = data;
-    }
-
-    public Long getTenantId() {
-        return tenantId;
-    }
-
-    public void setTenantId(Long tenantId) {
-        this.tenantId = tenantId;
-    }
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
 }

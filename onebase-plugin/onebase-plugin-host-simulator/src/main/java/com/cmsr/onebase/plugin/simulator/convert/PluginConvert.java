@@ -43,10 +43,10 @@ public class PluginConvert {
             return null;
         }
         PluginRespVO vo = new PluginRespVO();
-        vo.setPluginId(info.getPluginId());
-        vo.setDescription(info.getDescription());
-        vo.setVersion(info.getVersion());
-        vo.setState(info.getState());
+        vo.setPluginId(info.pluginId());
+        vo.setDescription(info.description());
+        vo.setVersion(info.version());
+        vo.setState(info.state());
         return vo;
     }
 
