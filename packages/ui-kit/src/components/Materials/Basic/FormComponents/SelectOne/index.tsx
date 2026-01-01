@@ -29,8 +29,6 @@ const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean; det
 
   const getOptions = async () => {
     const newOptions = await getFieldOptionsConfig(dataField, mainEntity, subEntities, appDict.value);
-
-    console.log('newOptions: ', newOptions);
     setOptions(newOptions);
   };
 
