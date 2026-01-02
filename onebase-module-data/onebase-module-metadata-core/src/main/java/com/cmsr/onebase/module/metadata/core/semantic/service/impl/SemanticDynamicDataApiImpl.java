@@ -2,37 +2,24 @@ package com.cmsr.onebase.module.metadata.core.semantic.service.impl;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.metadata.api.semantic.SemanticDynamicDataApi;
+import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusinessEntityDO;
+import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.semantic.dal.DynamicMetadataRepository;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.*;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticConditionTypeEnum;
-import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticMethodCodeEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticDataMethodOpEnum;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticMethodCodeEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticOperatorEnum;
-import com.cmsr.onebase.module.metadata.core.semantic.strategy.SemanticMergeRecordAssembler;
-import com.cmsr.onebase.module.metadata.core.semantic.strategy.SemanticPermissionContextLoader;
-import com.cmsr.onebase.module.metadata.core.semantic.strategy.SemanticPermissionValidator;
-import com.cmsr.onebase.module.metadata.core.semantic.strategy.SemanticProcessLogger;
-import com.cmsr.onebase.module.metadata.core.semantic.strategy.SemanticDataIntegrityValidator;
-import com.cmsr.onebase.module.metadata.core.semantic.strategy.SemanticQueryConditionBuilder;
 import com.cmsr.onebase.module.metadata.core.semantic.service.SemanticDataCrudService;
-import com.cmsr.onebase.module.metadata.core.semantic.strategy.SemanticValueAssembler;
-import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticMergeBodyVO;
-import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticPageBodyVO;
-import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticTargetBodyVO;
-import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticPageConditionVO;
-import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticMergeConditionVO;
-import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticTargetConditionVO;
+import com.cmsr.onebase.module.metadata.core.semantic.strategy.*;
+import com.cmsr.onebase.module.metadata.core.semantic.vo.*;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataEntityFieldCoreService;
-import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusinessEntityDO;
-import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.mybatisflex.core.query.QueryColumn;
-import com.mybatisflex.core.query.QueryCondition;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.core.row.Row;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
@@ -165,7 +152,7 @@ public class SemanticDynamicDataApiImpl implements SemanticDynamicDataApi {
                 SemanticMethodCodeEnum.DELETE,
                 SemanticDataMethodOpEnum.DELETE);
         // 2) 考虑后台调用，暂不初始化权限上下文初始化
-        semanticPermissionContextLoader.loadPermissionContext(record);
+        // semanticPermissionContextLoader.loadPermissionContext(record);
         // 3) 数据完整性校验
         semanticDataIntegrityValidator.validate(record);
         // 4) 执行删除（软删优先）
