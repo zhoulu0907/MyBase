@@ -34,6 +34,7 @@ import {
 } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import DetailPop from '../TaskCenter/page/DetailPop';
 import DetailRuntime from './DetailRuntime';
 import EditRuntime from './EditRuntime';
@@ -53,6 +54,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
   useSignals();
 
   const [form] = Form.useForm();
+
+  const { appId } = useParams();
 
   const {
     curPage,
@@ -116,7 +119,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
       if (res && res.pages && res.pages.length > 0) {
         const imgRes = await getFileUrlById(res.pages[0].indexImage);
 
-        setDashboardImgUrl(imgRes);
+        setDashboardImgUrl(`${imgRes}?applicationId=${appId}`);
       }
     } catch (error) {
       console.error('获取页面视图失败:', error);
