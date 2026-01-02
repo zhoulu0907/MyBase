@@ -55,6 +55,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
 
   const [form] = Form.useForm();
 
+  const { appId } = useParams();
+
   const {
     curPage,
     drawerVisible,
@@ -122,7 +124,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
         setDashboardId(res.pages[0].id);
         const imgRes = await getFileUrlById(res.pages[0].indexImage);
 
-        setDashboardImgUrl(imgRes);
+        setDashboardImgUrl(`${imgRes}?applicationId=${appId}`);
       }
     } catch (error) {
       console.error('获取页面视图失败:', error);
