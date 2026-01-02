@@ -67,14 +67,13 @@ export class TokenManager {
         if (tokenInfo.tenantId) {
           localStorage.setItem(this.addEnv(this.TENANT_ID), tokenInfo.tenantId);
         }
-      } else {
-        // 不记住我：使用 sessionStorage（会话存储，关闭浏览器后清除）
-        sessionStorage.setItem(this.addEnv(this.TOKEN_KEY), tokenInfo.accessToken);
-        sessionStorage.setItem(this.addEnv(this.TOKEN_INFO_KEY), JSON.stringify(tokenInfo));
-        sessionStorage.setItem(this.addEnv(this.REMEMBER_ME_KEY), 'false');
-        if (tokenInfo.tenantId) {
-          sessionStorage.setItem(this.addEnv(this.TENANT_ID), tokenInfo.tenantId);
-        }
+      }
+      // 不记住我：使用 sessionStorage（会话存储，关闭浏览器后清除）
+      sessionStorage.setItem(this.addEnv(this.TOKEN_KEY), tokenInfo.accessToken);
+      sessionStorage.setItem(this.addEnv(this.TOKEN_INFO_KEY), JSON.stringify(tokenInfo));
+      sessionStorage.setItem(this.addEnv(this.REMEMBER_ME_KEY), 'false');
+      if (tokenInfo.tenantId) {
+        sessionStorage.setItem(this.addEnv(this.TENANT_ID), tokenInfo.tenantId);
       }
     } catch (error) {
       console.error('存储 token 失败:', error);
