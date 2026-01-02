@@ -22,7 +22,7 @@ import {
   type UpdateMethodV2Params
 } from '@onebase/app';
 import { fetchSubmitInstance } from '@onebase/app/src/services/app_runtime';
-import { pagesRuntimeSignal } from '@onebase/common';
+import { getDashBoardURL, pagesRuntimeSignal } from '@onebase/common';
 import { getFileUrlById } from '@onebase/platform-center';
 import {
   EDITOR_TYPES,
@@ -34,6 +34,7 @@ import {
 } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import DetailPop from '../TaskCenter/page/DetailPop';
 import DetailRuntime from './DetailRuntime';
 import EditRuntime from './EditRuntime';
@@ -84,6 +85,10 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
   const [isAdd, setAdd] = useState(false);
 
   const [dashboardImgUrl, setDashboardImgUrl] = useState<string>('');
+  const [dashboardId, setDashboardId] = useState<string>('');
+  const { appId } = useParams();
+  const dashboardType = 'dashboard';
+  const resourceUrl = getDashBoardURL();
 
   useEffect(() => {
     if (drawerVisible.value) {
@@ -114,6 +119,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
       });
 
       if (res && res.pages && res.pages.length > 0) {
+        setDashboardId(res.pages[0].id);
         const imgRes = await getFileUrlById(res.pages[0].indexImage);
 
         setDashboardImgUrl(imgRes);
@@ -511,9 +517,13 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
           />
         )}
 
-        {pageType == EDITOR_TYPES.DASHBOARD_PREVIEW && dashboardImgUrl && (
+        {pageType == EDITOR_TYPES.DASHBOARD_PREVIEW && dashboardId && (
           <div className={styles.dashboardPreview}>
-            <img src={dashboardImgUrl} alt="大屏预览" />
+            <iframe
+              src={`${resourceUrl}chart/preview/${dashboardId}/${dashboardType}`}
+              style={{ width: '100%', height: '100%', border: 'none' }}
+              title="Dashboard Preview"
+            />
           </div>
         )}
       </div>
