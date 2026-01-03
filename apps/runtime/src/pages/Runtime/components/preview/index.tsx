@@ -155,10 +155,10 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
     }
 
     if (pageSetType == PageType.WORKBENCH) {
-      setPageType(EDITOR_TYPES.DASHBOARD_PREVIEW);
+      setPageType(EDITOR_TYPES.WORKBENCH_EDITOR);
       return;
     }
-  }, [pageSetId, pageSetType]);
+  }, [pageSetId]);
 
   const handleGetPageSetId = async (menuId: string) => {
     const req: GetPageSetIdReq = { menuId: menuId };
@@ -468,7 +468,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
   return (
     <div className={`${styles.previewPage} runtime-preview-formpage`}>
       <div className={styles.content}>
-        {pageSetType === PageType.WORKBENCH && <WorkbenchRuntime pageSetId={pageSetId} runtime={runtime} />}
+        {pageType === EDITOR_TYPES.WORKBENCH_EDITOR && <WorkbenchRuntime pageSetId={pageSetId} runtime={runtime} />}
 
         {(pageType === EDITOR_TYPES.LIST_EDITOR || pageType === EDITOR_TYPES.FORM_EDITOR) && (
           <ListRuntime
