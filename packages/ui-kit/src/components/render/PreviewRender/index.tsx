@@ -412,6 +412,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
     }
   }, [componentConfig, refresh]);
 
+
   return <>{renderComponent()}</>;
 };
 

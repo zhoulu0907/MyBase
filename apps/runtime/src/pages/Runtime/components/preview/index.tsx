@@ -55,8 +55,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
 
   const [form] = Form.useForm();
 
-  const { appId } = useParams();
-
   const {
     curPage,
     drawerVisible,
@@ -472,7 +470,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
       <div className={styles.content}>
         {pageSetType === PageType.WORKBENCH && <WorkbenchRuntime pageSetId={pageSetId} runtime={runtime} />}
 
-        {pageType === EDITOR_TYPES.LIST_EDITOR && (
+        {(pageType === EDITOR_TYPES.LIST_EDITOR || pageType === EDITOR_TYPES.FORM_EDITOR) && (
           <ListRuntime
             pageSetType={pageSetType}
             pageSetId={pageSetId}
