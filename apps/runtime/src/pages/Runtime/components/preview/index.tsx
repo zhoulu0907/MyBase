@@ -88,7 +88,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
 
   const [dashboardImgUrl, setDashboardImgUrl] = useState<string>('');
   const [dashboardId, setDashboardId] = useState<string>('');
-  const { appId } = useParams();
+
   const dashboardType = 'dashboard';
   const resourceUrl = getDashBoardURL();
 
