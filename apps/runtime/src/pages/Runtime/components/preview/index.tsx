@@ -23,7 +23,6 @@ import {
 } from '@onebase/app';
 import { fetchSubmitInstance } from '@onebase/app/src/services/app_runtime';
 import { getDashBoardURL, pagesRuntimeSignal } from '@onebase/common';
-import { getFileUrlById } from '@onebase/platform-center';
 import {
   EDITOR_TYPES,
   ENTITY_FIELD_TYPE,
@@ -34,7 +33,6 @@ import {
 } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
 import DetailPop from '../TaskCenter/page/DetailPop';
 import DetailRuntime from './DetailRuntime';
 import EditRuntime from './EditRuntime';
@@ -84,7 +82,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
   const [isPredictVisible, setPredictVisible] = useState(false);
   const [isAdd, setAdd] = useState(false);
 
-  const [dashboardImgUrl, setDashboardImgUrl] = useState<string>('');
   const [dashboardId, setDashboardId] = useState<string>('');
 
   const dashboardType = 'dashboard';
@@ -120,9 +117,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
 
       if (res && res.pages && res.pages.length > 0) {
         setDashboardId(res.pages[0].id);
-        const imgRes = await getFileUrlById(res.pages[0].indexImage);
-
-        setDashboardImgUrl(`${imgRes}?applicationId=${appId}`);
+        // const imgRes = await getFileUrlById(res.pages[0].indexImage);
       }
     } catch (error) {
       console.error('获取页面视图失败:', error);
@@ -156,6 +151,11 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
       getDashboardId(pageSetId);
 
       setPageType(EDITOR_TYPES.DASHBOARD_PREVIEW);
+      return;
+    }
+
+    if (pageSetType == PageType.WORKBENCH) {
+      setPageType(EDITOR_TYPES.WORKBENCH_EDITOR);
       return;
     }
   }, [pageSetId]);
@@ -468,7 +468,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
   return (
     <div className={`${styles.previewPage} runtime-preview-formpage`}>
       <div className={styles.content}>
-        {pageSetType === PageType.WORKBENCH && <WorkbenchRuntime pageSetId={pageSetId} runtime={runtime} />}
+        {pageType === EDITOR_TYPES.WORKBENCH_EDITOR && <WorkbenchRuntime pageSetId={pageSetId} runtime={runtime} />}
 
         {(pageType === EDITOR_TYPES.LIST_EDITOR || pageType === EDITOR_TYPES.FORM_EDITOR) && (
           <ListRuntime
@@ -492,7 +492,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
             editTargetId={editTargetId}
           />
         )}
-
         {pageSetType === PageType.BPM && drawerVisible.value && bpmInstanceId.value && (
           <DetailPop
             detailPopVisible={drawerVisible.value}
@@ -502,7 +501,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
             listType={LISTTYPE.LIST}
           />
         )}
-
         {pageType == EDITOR_TYPES.FORM_EDITOR && (
           <EditRuntime
             form={form}
@@ -516,7 +514,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
             tableName={tableName}
           />
         )}
-
         {pageType == EDITOR_TYPES.DASHBOARD_PREVIEW && dashboardId && (
           <div className={styles.dashboardPreview}>
             <iframe
