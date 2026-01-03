@@ -3,7 +3,6 @@ import { useI18n } from '@/hooks/useI18n';
 import { Input, Layout, Tree } from '@arco-design/web-react';
 import { IconDown, IconSearch } from '@arco-design/web-react/icon';
 import {
-  ENTITY_TYPE,
   getApplicationMenuPermission,
   getAppNavigationConfig,
   getEntityListWithFields,
@@ -12,13 +11,11 @@ import {
   MenuType,
   runtimeListApplicationBPMMenu,
   type ApplicationMenu,
-  type AppEntityField,
-  type ChildEntity,
   type ListApplicationMenuReq
 } from '@onebase/app';
 import { menuPermissionSignal, TokenManager, UserPermissionManager } from '@onebase/common';
-import { getPermissionInfo, getDictDataByTypes } from '@onebase/platform-center';
-import { useAppEntityStore, menuDictSignal, setMainMetaData } from '@onebase/ui-kit';
+import { getPermissionInfo } from '@onebase/platform-center';
+import { menuDictSignal, setMainMetaData, useAppEntityStore } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
