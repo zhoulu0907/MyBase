@@ -27,9 +27,15 @@ export const getFileListByIds = (ids: string[]) => {
 };
 
 // 获取文件内容
-export const getFileUrlById = (id: string) => {
+export const getFileUrlById = (id: string, applicationId?: string) => {
   const resourceUrl = getResourceURL();
-  return `${resourceUrl}/${id}`;
+
+  let url = `${resourceUrl}/${id}`;
+  if (applicationId) {
+    url += `?applicationId=${applicationId}`;
+  }
+
+  return url;
 };
 
 export const getSecurityConfigCategories = () => {
