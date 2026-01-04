@@ -1,7 +1,8 @@
 package com.cmsr.onebase.framework.tenant.core.service;
 
-import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.biz.system.tenant.TenantCommonApi;
+import com.cmsr.onebase.framework.common.exception.ServiceException;
+import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import lombok.RequiredArgsConstructor;
@@ -58,7 +59,19 @@ public class TenantFrameworkServiceImpl implements TenantFrameworkService {
     @Override
     @SneakyThrows
     public void validTenant(Long id) {
-        validTenantCache.get(id).checkError();
+        CommonResult<Boolean> result;
+        try {
+            result = validTenantCache.get(id);
+        }
+        catch (Exception e) {
+            // 其他异常也检查是否有ServiceException作为原因
+            Throwable cause = e.getCause();
+            if (cause instanceof ServiceException) {
+                throw cause;
+            }
+            throw e;
+        }
+        result.checkError();
     }
 
 }

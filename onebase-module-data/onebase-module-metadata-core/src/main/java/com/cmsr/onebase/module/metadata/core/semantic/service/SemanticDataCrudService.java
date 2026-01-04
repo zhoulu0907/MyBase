@@ -511,12 +511,6 @@ public class SemanticDataCrudService {
         return affected;
     }
 
-    public void deleteByDraftId(SemanticRecordDTO recordDTO, Long draftId) {
-        SemanticEntitySchemaDTO entity = recordDTO.getEntitySchema();
-        String primaryKey = getPrimaryKeyFieldName(entity.getFields());
-        dynamicMetadataRepository.deleteByDrafId(entity.getTableName(), primaryKey, draftId);
-    }
-
     /**
      * 条件批量更新主表数据（逐条执行并回读）
      * <p>

@@ -86,6 +86,8 @@ public class TenantSecurityWebFilter extends ApiRequestFilter {
             try {
                 tenantFrameworkService.validTenant(tenantId);
             } catch (Throwable ex) {
+                log.error("[doFilterInternal][URL({}/{}) 校验租户({}) 过程中发生异常]",
+                        request.getRequestURI(), request.getMethod(), tenantId, ex);
                 CommonResult<?> result = globalExceptionHandler.allExceptionHandler(request, ex);
                 ServletUtils.writeJSON(response, result);
                 return;

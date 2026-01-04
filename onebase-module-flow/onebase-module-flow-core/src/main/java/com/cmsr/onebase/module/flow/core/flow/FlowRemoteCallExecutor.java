@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.flow.core.flow;
 import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.module.flow.context.graph.nodes.start.StartDateFieldNodeData;
 import com.cmsr.onebase.module.flow.context.graph.nodes.start.StartTimeNodeData;
+import com.cmsr.onebase.module.flow.context.table.RowData;
 import com.cmsr.onebase.module.flow.core.config.FlowEnableCondition;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
 import com.cmsr.onebase.module.flow.core.external.FlowSystemProvider;
@@ -39,7 +40,7 @@ public class FlowRemoteCallExecutor {
     public ExecutorResult executeFlow(FlowRemoteCallRequest callRequest) {
         ExecutorResult executorResult;
         try {
-            Map<String, Object> inputParams;
+            RowData inputParams;
             if (FlowRemoteCallRequest.JOB_TYPE_FIELD.equals(callRequest.getJobType())) {
                 inputParams = createDateFieldInputParams(callRequest);
             } else if (FlowRemoteCallRequest.JOB_TYPE_TIME.equals(callRequest.getJobType())) {
@@ -65,7 +66,7 @@ public class FlowRemoteCallExecutor {
         return executorResult;
     }
 
-    private ExecutorInput createExecutorInput(FlowProcessDO flowProcessDO, Map<String, Object> inputParams) {
+    private ExecutorInput createExecutorInput(FlowProcessDO flowProcessDO, RowData inputParams) {
 
         ExecutorInput executorInput = new ExecutorInput();
         executorInput.setTraceId(FlowUtils.generateTraceId());
@@ -83,22 +84,22 @@ public class FlowRemoteCallExecutor {
         return executorInput;
     }
 
-    private Map<String, Object> createDateFieldInputParams(FlowRemoteCallRequest message) {
+    private RowData createDateFieldInputParams(FlowRemoteCallRequest message) {
         Long processId = message.getProcessId();
         StartDateFieldNodeData startDateFieldNodeData = flowProcessCache.findStartDateFieldNodeDataByProcessId(processId);
         if (startDateFieldNodeData == null) {
             throw new RuntimeException("实体时间字段触发流程未找到:" + processId);
         }
-        return Collections.emptyMap();
+        return new RowData();
     }
 
-    private Map<String, Object> createTimeInputParams(FlowRemoteCallRequest message) {
+    private RowData createTimeInputParams(FlowRemoteCallRequest message) {
         Long processId = message.getProcessId();
         StartTimeNodeData startTimeNodeData = flowProcessCache.findStartTimeNodeDataByProcessId(processId);
         if (startTimeNodeData == null) {
             throw new RuntimeException("定时任务流程未找到:" + processId);
         }
-        return Collections.emptyMap();
+        return new RowData();
     }
 
 }

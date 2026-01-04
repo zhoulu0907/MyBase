@@ -25,9 +25,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -271,27 +273,58 @@ public class DictDataServiceImpl implements DictDataService {
 
     @Override
     @TenantIgnore
-    public Map<String, List<DictDataDO>> getDictDataMapByTypesAndTypeIds(Collection<String> dictTypes, Collection<Long> dictTypeIds) {
-        // 收集所有需要查询的字典类型
-        Set<String> allDictTypes = new HashSet<>();
-        
-        // 添加直接传入的字典类型
-        if (dictTypes != null && !dictTypes.isEmpty()) {
-            allDictTypes.addAll(dictTypes);
-        }
-        
-        // 如果提供了dictTypeIds，批量查询并转换为dictTypes
+    public Map<Long, List<DictDataDO>> getDictDataMapByTypesAndTypeIds(Collection<String> dictTypes, Collection<Long> dictTypeIds) {
+        // 1. 收集所有需要查询的字典类型，并建立 type -> id 的映射
+        Map<String, Long> typeToIdMap = new HashMap<>();
+
+        // 处理 dictTypeIds
         if (dictTypeIds != null && !dictTypeIds.isEmpty()) {
-            List<DictTypeDO> dictTypeList = dictTypeService.getDictTypesByIds(dictTypeIds);
-            for (DictTypeDO dictTypeDO : dictTypeList) {
+            List<DictTypeDO> list = dictTypeService.getDictTypesByIds(dictTypeIds);
+            for (DictTypeDO dictTypeDO : list) {
                 if (dictTypeDO != null && dictTypeDO.getType() != null) {
-                    allDictTypes.add(dictTypeDO.getType());
+                    typeToIdMap.put(dictTypeDO.getType(), dictTypeDO.getId());
                 }
             }
         }
-        
-        // 批量查询并按dictType分组
-        return getDictDataMapByTypes(allDictTypes);
+
+        // 处理 dictTypes
+        if (dictTypes != null && !dictTypes.isEmpty()) {
+            // 找出尚未获取ID的types
+            Set<String> typesToQuery = new HashSet<>();
+            for (String type : dictTypes) {
+                if (!typeToIdMap.containsKey(type)) {
+                    typesToQuery.add(type);
+                }
+            }
+
+            if (!typesToQuery.isEmpty()) {
+                List<DictTypeDO> list = dictTypeService.getDictTypesByTypes(typesToQuery);
+                for (DictTypeDO dictTypeDO : list) {
+                    if (dictTypeDO != null && dictTypeDO.getType() != null) {
+                        typeToIdMap.put(dictTypeDO.getType(), dictTypeDO.getId());
+                    }
+                }
+            }
+        }
+
+        if (typeToIdMap.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        // 2. 批量查询数据
+        Map<String, List<DictDataDO>> dataMap = getDictDataMapByTypes(typeToIdMap.keySet());
+
+        // 3. 按 dictTypeId 分组
+        Map<Long, List<DictDataDO>> result = new HashMap<>();
+        for (Map.Entry<String, List<DictDataDO>> entry : dataMap.entrySet()) {
+            String type = entry.getKey();
+            Long id = typeToIdMap.get(type);
+            if (id != null) {
+                result.put(id, entry.getValue());
+            }
+        }
+
+        return result;
     }
 
 }

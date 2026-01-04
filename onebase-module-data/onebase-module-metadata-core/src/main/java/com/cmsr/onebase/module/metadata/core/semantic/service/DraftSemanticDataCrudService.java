@@ -342,6 +342,19 @@ public class DraftSemanticDataCrudService {
     }
 
     /**
+     * 根据草稿ID删除草稿记录（物理删除）
+     * 用于将草稿提交为正式数据后，清理对应的草稿记录
+     *
+     * @param recordDTO 语义记录上下文，需包含实体元数据
+     * @param draftId   草稿ID（主键值）
+     */
+    public void deleteByDraftId(SemanticRecordDTO recordDTO, Long draftId) {
+        SemanticEntitySchemaDTO entity = recordDTO.getEntitySchema();
+        String primaryKey = getPrimaryKeyFieldName(entity.getFields());
+        draftDynamicMetadataRepository.deleteByDraftId(entity.getTableName(), primaryKey, draftId);
+    }
+
+    /**
      * 按主键读取一条主表数据
      * <p>
      * 流程：

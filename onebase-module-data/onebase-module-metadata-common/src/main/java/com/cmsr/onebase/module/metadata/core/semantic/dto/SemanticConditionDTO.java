@@ -25,6 +25,9 @@ public class SemanticConditionDTO {
     @Schema(description = "字段Uuid")
     private String fieldUuid;
 
+    @Schema(description = "表名")
+    private String tableName;
+
     @Schema(description = "字段名")
     private String fieldName;
 

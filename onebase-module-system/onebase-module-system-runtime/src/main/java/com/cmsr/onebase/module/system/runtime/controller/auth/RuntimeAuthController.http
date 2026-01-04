@@ -13,7 +13,8 @@ tag: {{tag}}
 {
   "mobile": "15890635400",
   "password": "3acdbcfde19ce8f34242052a14f2dd3b3a9075be1bd11efb69f9c375ff72f165c3e22e21856b31e95407b6beac99433388b94287780062d6fb866e587076cb53597c47bb49483918d644f30f715dc861ad37419517d523a69ec6b5993ac77a66c453195659bf0714554d0c189cdc",
-  "deviceId":666
+  "deviceId":666,
+  "loginPlatform":"pc"
 }
 
 > {%
@@ -38,7 +39,9 @@ tag: {{tag}}
 {"password":"124f54e7508c286e1e488e75bc3a80d4a999fa13a2a1646d7ddce30eaaa52f2198131554b6194a52a793ec03aaf94b7e8c841636beea488831b08d8678ed3cee4f95ed83ac683d72ca51252ffecfb6bd9193d981981ff15b0c27c5d7183035ba7c7c235f48827ba27ddbb4bcec3b71","username":"gaoguoqing",
   "appId":"166917874067439616",
   "captchaVerification":"3oJFZk4xdNNjawBg8JwIwkbZv6hhC6yKrjtBq7D7tbCABbnNmu8f0T5qf/LeSpLu1dhHwA+5nS1w+uD7AK6k72E8KSX5zeXQoO1BnNR7iJ0=",
-  "deviceId":"f3b000916478e376e7253f5694a8d1e8"}
+  "deviceId":"f3b000916478e376e7253f5694a8d1e8"
+  ,"loginPlatform":"mobile"
+}
 
 > {%
     // 登录成功后自动更新token到环境变量
@@ -62,7 +65,8 @@ tag: {{tag}}
   "mobile": "15890635400",
   "password": "0f16ab8010a1a7594a375370ceb14d22a4203eac42e431d8a3ccd566ceef555e2e0b2312f58e44815715d16a3e76ee506bf6552965b46c5fab4ad2e74d4450e646639a29b8823e496e16c71663f9ea19c8afa0f82e2429c1dc0b3bfd1713c638fdec434a5e33a30998f1dc071a5c",
   "appId":166917874067439616,
-  "deviceId":666
+  "deviceId":666,
+  "loginPlatform":"mobile"
 }
 
 > {%
@@ -113,7 +117,7 @@ tag: {{tag}}
   "mobile": "15890615200",
   "deviceId":666,
   "loginType":"verifycode",
-  "verifyCode":"888888"
+  "verifyCode":"china2025"
 }
 
 > {%

@@ -40,6 +40,12 @@ public class VersionPageRespVO {
     @Schema(description = "环境")
     private String environment;
 
+    @Schema(description = "创建时间")
+    private LocalDateTime createTime;
+
+    @Schema(description = "创建人")
+    private String creatorName;
+
     @Schema(description = "更新时间")
     private LocalDateTime updateTime;
 

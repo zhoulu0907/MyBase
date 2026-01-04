@@ -8,6 +8,7 @@ import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.framework.data.base.BaseDO;
 import com.cmsr.onebase.framework.orm.repo.BaseDataRepository;
+import com.cmsr.onebase.module.system.api.dept.dto.UserPageApiReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.dal.flex.mapper.SystemUsersMapper;
 import com.cmsr.onebase.module.system.enums.user.UserStatusEnum;
@@ -147,7 +148,7 @@ public class UserDataRepository extends BaseDataRepository<SystemUsersMapper, Ad
 
 
     public List<AdminUserDO> findUserByUserType(Integer userType) {
-        return list(query()
+        return list(buildUserQueryWrapper()
                 .isNull(DEPT_ID)
                 .eq(AdminUserDO.USER_TYPE, userType));
     }
@@ -344,6 +345,16 @@ public class UserDataRepository extends BaseDataRepository<SystemUsersMapper, Ad
                 .orderBy(BaseDO.CREATE_TIME, false);
 
         Page<AdminUserDO> pageResult = page(Page.of(userAppPageReqVO.getPageNo(), userAppPageReqVO.getPageSize()), queryWrapper);
+        return new PageResult<>(pageResult.getRecords(), pageResult.getTotalRow());
+    }
+
+    public PageResult<AdminUserDO> selectPage(Integer status, UserPageApiReqVO pageReqVO) {
+        QueryWrapper queryWrapper = buildUserQueryWrapper().eq(AdminUserDO.STATUS, status)
+                .like(NICKNAME, pageReqVO.getKeywords(), StringUtils.isNotBlank(pageReqVO.getKeywords()))
+                .notIn(AdminUserDO.P_ID, pageReqVO.getExcludeUserIds(), CollectionUtils.isNotEmpty(pageReqVO.getExcludeUserIds()))
+                .orderBy(AdminUserDO.ADMIN_TYPE, true)
+                .orderBy(BaseDO.CREATE_TIME, false);
+        Page<AdminUserDO> pageResult = page(Page.of(pageReqVO.getPageNo(), pageReqVO.getPageSize()), queryWrapper);
         return new PageResult<>(pageResult.getRecords(), pageResult.getTotalRow());
     }
 }

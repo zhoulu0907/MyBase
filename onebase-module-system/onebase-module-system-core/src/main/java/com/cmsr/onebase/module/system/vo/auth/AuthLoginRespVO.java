@@ -52,4 +52,7 @@ public class AuthLoginRespVO {
 
     @Schema(description = "密码有效期检查信息")
     private PasswordExpiryCheckDTO passwordExpiryInfo;
+
+    @Schema(description = "登录来源类型")
+    private String loginPlatform;
 }

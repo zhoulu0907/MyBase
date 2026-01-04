@@ -75,6 +75,12 @@ public class MetadataValidationRuleDefinitionDO extends BaseBizEntity {
     private String fieldCode;
 
     /**
+     * 值类型：VARIABLE（变量）/STATIC（静态值）/FORMULA（公式）
+     */
+    @Column(value = "value_type", comment = "值类型：VARIABLE/STATIC/FORMULA")
+    private String valueType;
+
+    /**
      * 条件值引用（单值条件或范围表达式的第一个）
      */
     @Column(value = "field_value", comment = "条件值引用")

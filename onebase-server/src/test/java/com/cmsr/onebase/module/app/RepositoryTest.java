@@ -95,7 +95,7 @@ public class RepositoryTest {
 
     @Test
     void test3() {
-        List<AppMenuDO> result = appMenuRepository.findVisibleByAppIdAndType(173020283873034240L, Set.of(MenuTypeEnum.PAGE.getValue(), MenuTypeEnum.GROUP.getValue()));
+        List<AppMenuDO> result = appMenuRepository.findByApplicationIdAndType(173020283873034240L, Set.of(MenuTypeEnum.PAGE.getValue(), MenuTypeEnum.GROUP.getValue()));
         log.info("result:{}", result);
     }
 

@@ -25,11 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.IOException;
-import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 
 /**
@@ -71,7 +67,7 @@ public class RuntimeFlowProcessTest {
         reqDTO.setTraceId(UUID.randomUUID().toString());
         reqDTO.setTriggerEvent(TriggerEventEnum.BEFORE_CREATE);
         reqDTO.setApplicationId(173020283873034240L);
-        reqDTO.setTableName("xzqd_student_info");
+        reqDTO.setTableName("xzqd_student_info2");
         reqDTO.setFlowContext(Map.of(
                 SystemFieldConstants.REQUIRE.CREATOR, "155019577667616800",
                 SystemFieldConstants.REQUIRE.UPDATER, "155019577667616800",
@@ -80,15 +76,15 @@ public class RuntimeFlowProcessTest {
         ));
         SemanticFieldValueDTO name = SemanticFieldValueDTO.ofType(SemanticFieldTypeEnum.TEXT);
         name.setFieldName("student_name");
-        name.setRawValue("小");
+        name.setRawValue("小明");
 
         SemanticFieldValueDTO birthday = SemanticFieldValueDTO.ofType(SemanticFieldTypeEnum.DATE);
         birthday.setFieldName("birthday");
         birthday.setRawValue("2025-12-01");
 
-        SemanticFieldValueDTO age = SemanticFieldValueDTO.ofType(SemanticFieldTypeEnum.NUMBER);
+        SemanticFieldValueDTO age = SemanticFieldValueDTO.ofType(SemanticFieldTypeEnum.TEXT);
         age.setFieldName("gender");
-        age.setRawValue(8);
+        age.setRawValue("男");
 
 
         reqDTO.setFieldData(List.of(name, birthday, age));
@@ -99,10 +95,23 @@ public class RuntimeFlowProcessTest {
     @Test
     public void testFormTrigger01() throws IOException {
         FormTriggerReqVO reqVO = new FormTriggerReqVO();
-        reqVO.setProcessId(187687270821101647L);
+        reqVO.setProcessId(195502410512138240L);
         Map<String, Object> inputParams = new HashMap<>();
-        inputParams.put("student_name", "小");
-        inputParams.put("birthday", "2025-10-10");
+        inputParams.put("class_name", "3年级2班");
+        List<Map<String, Object>> courses = new ArrayList<>();
+        inputParams.put("xzqd_course_schedule", courses);
+        {
+            Map<String, Object> course = new HashMap<>();
+            course.put("subject", "语文");
+            course.put("classroom", "4教");
+            courses.add(course);
+        }
+        {
+            Map<String, Object> course = new HashMap<>();
+            course.put("subject", "数学");
+            course.put("classroom", "5教");
+            courses.add(course);
+        }
 
         reqVO.setInputParams(inputParams);
         FormTriggerRespVO formTriggerRespVO = flowProcessExecService.triggerForm(reqVO);
@@ -144,7 +153,7 @@ public class RuntimeFlowProcessTest {
     }
 
     @Test
-    public void testFlowRemoteCallExecutor(){
+    public void testFlowRemoteCallExecutor() {
         FlowRemoteCallRequest callRequest = new FlowRemoteCallRequest();
         callRequest.setApplicationId(173020283873034240L);
         callRequest.setProcessId(193925435951546497L);

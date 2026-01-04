@@ -7,10 +7,10 @@ import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.app.build.service.app.AppApplicationService;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationCreateReqVO;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationCreateRespVO;
-import com.cmsr.onebase.module.app.core.vo.app.ApplicationNavigationConfigVO;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationSimpleRespVO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppApplicationDO;
 import com.cmsr.onebase.module.app.core.enums.app.AppStatusEnum;
+import com.cmsr.onebase.module.app.core.vo.app.ApplicationNavigationConfigVO;
 import com.cmsr.onebase.module.app.core.vo.app.ApplicationPageReqVO;
 import com.cmsr.onebase.module.app.core.vo.app.ApplicationRespVO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -73,8 +73,7 @@ public class AppApplicationController {
     @PostMapping("/update-name")
     @Operation(summary = "更新应用名称")
     @PreAuthorize("@ss.hasPermission('tenant:app:update')")
-    public CommonResult<Boolean> updateApplicationName(@RequestParam("id") Long id,
-                                                       @RequestParam("name") String name) {
+    public CommonResult<Boolean> updateApplicationName(@RequestParam("id") Long id, @RequestParam("name") String name) {
         appApplicationService.updateApplicationName(id, name);
         return CommonResult.success(true);
     }
@@ -82,8 +81,7 @@ public class AppApplicationController {
     @PostMapping("/delete")
     @Operation(summary = "删除应用")
     @PreAuthorize("@ss.hasPermission('tenant:app:delete')")
-    public CommonResult<Boolean> deleteApplication(@RequestParam("id") Long id,
-                                                   @RequestParam("name") String name) {
+    public CommonResult<Boolean> deleteApplication(@RequestParam("id") Long id, @RequestParam("name") String name) {
         appApplicationService.deleteApplication(id, name);
         return CommonResult.success(true);
     }

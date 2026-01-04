@@ -5,9 +5,9 @@ package com.cmsr.onebase.module.screen.api.enums;
  */
 public enum DashboardCreateTypeSetEnum {
 
-    DASHBOARD_NEW("dashboardNew", "空白页创建"),
-    DASHBOARD_TEMPLATE("dashboardTemplate", "模板创建"),
-    DASHBOARD_LINK("dashboardLink", "绑定现有大屏");
+    DASHBOARD_NEW_CREATE("dashboardNew", "空白页创建"),
+    DASHBOARD_TEMPLATE_CREATE("dashboardTemplate", "模板创建"),
+    DASHBOARD_LINK_CREATE("dashboardLink", "绑定现有大屏");
     private final String code;
     private final String description;
     DashboardCreateTypeSetEnum(String code, String description) {

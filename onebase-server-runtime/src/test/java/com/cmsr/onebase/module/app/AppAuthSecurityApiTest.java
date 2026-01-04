@@ -12,6 +12,7 @@ import com.cmsr.onebase.module.app.api.security.bo.DataPermission;
 import com.cmsr.onebase.module.app.api.security.bo.FieldPermission;
 import com.cmsr.onebase.module.app.api.security.bo.OperationPermission;
 import com.cmsr.onebase.module.app.core.vo.menu.MenuListRespVO;
+import com.cmsr.onebase.module.app.runtime.service.menu.RuntimeAppMenuService;
 import com.cmsr.onebase.module.app.runtime.service.menu.RuntimeAppMenuServiceImpl;
 import com.cmsr.onebase.module.app.runtime.vo.menu.MenuPermissionVO;
 import com.cmsr.onebase.server.runtime.OneBaseServerRuntimeApplication;
@@ -33,7 +34,7 @@ import java.util.List;
 public class AppAuthSecurityApiTest {
 
     @Autowired
-    private RuntimeAppMenuServiceImpl appMenuServiceImpl;
+    private RuntimeAppMenuService runtimeAppMenuService;
 
     @Autowired
     private AppAuthSecurityApi appAuthSecurityApi;
@@ -83,13 +84,13 @@ public class AppAuthSecurityApiTest {
 
     @Test
     public void testListApplicationMenu() {
-        List<MenuListRespVO> menuListRespVOS = appMenuServiceImpl.listApplicationMenu();
+        List<MenuListRespVO> menuListRespVOS = runtimeAppMenuService.listApplicationMenu();
         System.out.println(menuListRespVOS);
     }
 
     @Test
     public void testGetMenuPermission() {
-        MenuPermissionVO menuListRespVO = appMenuServiceImpl.getMenuPermission(MENU_ID);
+        MenuPermissionVO menuListRespVO = runtimeAppMenuService.getMenuPermission(MENU_ID);
         System.out.println(menuListRespVO);
     }
 

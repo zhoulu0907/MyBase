@@ -9,6 +9,10 @@ import com.cmsr.onebase.module.flow.context.express.ExpressionExecutor;
 import com.cmsr.onebase.module.flow.context.express.OrExpression;
 import com.cmsr.onebase.module.flow.context.graph.nodes.start.StartFormNodeData;
 import com.cmsr.onebase.module.flow.context.provider.FlowConditionsProvider;
+import com.cmsr.onebase.module.flow.context.table.ColumnType;
+import com.cmsr.onebase.module.flow.context.table.RowData;
+import com.cmsr.onebase.module.flow.context.table.TableData;
+import com.cmsr.onebase.module.flow.context.table.TableFieldSchemas;
 import com.cmsr.onebase.module.flow.core.flow.ExecutorInput;
 import com.cmsr.onebase.module.flow.core.flow.ExecutorResult;
 import com.cmsr.onebase.module.flow.core.flow.FlowProcessExecutor;
@@ -17,7 +21,6 @@ import com.cmsr.onebase.module.flow.core.utils.FlowUtils;
 import com.cmsr.onebase.module.flow.runtime.vo.FormTriggerReqVO;
 import com.cmsr.onebase.module.flow.runtime.vo.FormTriggerRespVO;
 import com.cmsr.onebase.module.flow.runtime.vo.QueryFormTriggerRespVO;
-import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldSchemaDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticFieldTypeEnum;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -28,8 +31,6 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -87,24 +88,24 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
 
         if (StringUtils.isEmpty(reqVO.getExecutionUuid())) {
             // 前端正常的触发逻辑用于表单数据 提交数据前触发
-            Map<String, Object> inputMap = convertInputParamsData(reqVO, startFormNodeData);
+            RowData rowData = convertInputParamsData(reqVO, startFormNodeData);
             boolean isTrigger = true;
             if (CollectionUtils.isNotEmpty(startFormNodeData.getFilterCondition())) {
-                OrExpression orExpression = flowConditionsProvider.formatConditionsForExpression(startFormNodeData.getFilterCondition(), inputMap);
-                isTrigger = expressionExecutor.evaluateInput(orExpression, inputMap);
+                OrExpression orExpression = flowConditionsProvider.formatConditionsForExpression(startFormNodeData.getFilterCondition(), rowData);
+                isTrigger = expressionExecutor.evaluateInput(orExpression, rowData);
             }
             if (!isTrigger) {
                 FormTriggerRespVO vo = formNotTriggerRespVO();
                 vo.setMessage("表单不满足触发条件");
                 return vo;
             } else {
-                ExecutorInput executorInput = buildExecutorInput(reqVO.getProcessId(), inputMap);
+                ExecutorInput executorInput = buildExecutorInput(reqVO.getProcessId(), rowData);
                 ExecutorResult executorResult = flowProcessExecutor.startExecution(executorInput);
                 return formTriggerRespVO(executorResult);
             }
         } else {
             // 前端二次触发，用于表单信息收集等节点流程的继续执行
-            Map<String, Object> inputMap = convertInputFieldsData(reqVO.getInputFields());
+            RowData inputMap = convertInputFieldsData(reqVO.getInputFields());
             ExecutorInput executorInput = buildExecutorInput(reqVO.getProcessId(), inputMap);
             executorInput.setExecutionUuid(reqVO.getExecutionUuid());
             ExecutorResult executorResult = flowProcessExecutor.resumeExecution(executorInput);
@@ -112,7 +113,7 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
         }
     }
 
-    private ExecutorInput buildExecutorInput(Long processId, Map<String, Object> inputParams) {
+    private ExecutorInput buildExecutorInput(Long processId, RowData inputParams) {
         Long loginUserId = SecurityFrameworkUtils.getLoginUserId();
         Long userDeptId = SecurityFrameworkUtils.getLoginUserDeptId();
 
@@ -127,35 +128,65 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
     }
 
 
-    private Map<String, Object> convertInputParamsData(FormTriggerReqVO reqVO, StartFormNodeData startFormNodeData) {
-        String tableName = startFormNodeData.getTableName();
+    private RowData convertInputParamsData(FormTriggerReqVO reqVO, StartFormNodeData startFormNodeData) {
         Map<String, Object> inputParams = reqVO.getInputParams();
-        Map<String, SemanticFieldSchemaDTO> fieldSchemaMap = startFormNodeData.getFieldSchemaMap();
         if (MapUtils.isEmpty(inputParams)) {
-            return Collections.emptyMap();
+            return new RowData();
         }
-        Map<String, Object> result = new HashMap<>();
+
+        TableFieldSchemas tableFieldSchemas = startFormNodeData.getTableFieldSchemas();
+        String tableName = startFormNodeData.getTableName();
+
+        RowData rowData = new RowData();
+        rowData.setTableName(tableName);
+
         for (Map.Entry<String, Object> entry : inputParams.entrySet()) {
             String fieldName = entry.getKey();
-            Object value = entry.getValue();
-            SemanticFieldSchemaDTO fieldSchema = fieldSchemaMap.get(fieldName);
-            SemanticFieldTypeEnum fieldTypeEnum;
-            if (fieldSchema == null) {
-                fieldTypeEnum = SemanticFieldTypeEnum.TEXT;
+            Object fieldValue = entry.getValue();
+            if (tableFieldSchemas.isTableName(fieldName)) {
+                //子表的数据
+                TableData subTableData = convertToTableData(tableName, tableFieldSchemas, fieldValue);
+                rowData.addValue(tableName + "." + fieldName, ColumnType.SUBTABLE, subTableData);
             } else {
-                fieldTypeEnum = fieldSchema.getFieldTypeEnum();
+                //主表的数据
+                SemanticFieldTypeEnum fieldTypeEnum = tableFieldSchemas.getFieldTypeEnum(tableName, fieldName);
+                Object convertValue = FieldTypeConvertor.convert(fieldTypeEnum, fieldValue);
+                rowData.addValue(tableName + "." + fieldName, ColumnType.SIMPLE, convertValue);
             }
-            Object convertValue = FieldTypeConvertor.convert(fieldTypeEnum, value);
-            result.put(tableName + "." + fieldName, convertValue);
         }
-        return result;
+        return rowData;
     }
 
-    private Map<String, Object> convertInputFieldsData(List<SimpleField> inputFields) {
-        if (CollectionUtils.isEmpty(inputFields)) {
-            return Collections.emptyMap();
+    private TableData convertToTableData(String tableName, TableFieldSchemas tableFieldSchemas, Object value) {
+        if (value == null) {
+            return new TableData();
         }
-        Map<String, Object> result = new HashMap<>();
+        if (!(value instanceof List)) {
+            throw new IllegalArgumentException("子表数据必须是List");
+        }
+        List<Map<String, Object>> list = (List<Map<String, Object>>) value;
+        TableData tableData = new TableData();
+        tableData.setTableName(tableName);
+        for (Map<String, Object> objectMap : list) {
+            RowData rowData = new RowData();
+            for (Map.Entry<String, Object> entry : objectMap.entrySet()) {
+                String fieldName = entry.getKey();
+                Object fieldValue = entry.getValue();
+                //
+                SemanticFieldTypeEnum fieldTypeEnum = tableFieldSchemas.getFieldTypeEnum(tableName, fieldName);
+                Object convertValue = FieldTypeConvertor.convert(fieldTypeEnum, fieldValue);
+                rowData.addValue(fieldName, ColumnType.SIMPLE, convertValue);
+            }
+            tableData.addRowData(rowData);
+        }
+        return tableData;
+    }
+
+    private RowData convertInputFieldsData(List<SimpleField> inputFields) {
+        if (CollectionUtils.isEmpty(inputFields)) {
+            return new RowData();
+        }
+        RowData result = new RowData();
         for (SimpleField field : inputFields) {
             SemanticFieldTypeEnum fieldTypeEnum = SemanticFieldTypeEnum.ofCode(field.getFieldType());
             Object value = FieldTypeConvertor.convert(fieldTypeEnum, field.getValue());

@@ -1,7 +1,7 @@
 dzswDSL: |
   {
     "editCanvasConfig": {
-      "projectName": "电商运营数据看板",
+      "projectName": "电商运营大屏",
       "width": 1920,
       "height": 1080,
       "filterShow": false,
