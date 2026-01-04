@@ -20,6 +20,7 @@ import com.cmsr.onebase.module.bpm.core.dto.BpmGlobalConfigDTO;
 import com.cmsr.onebase.module.bpm.core.dto.PageViewGroupDTO;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeExtDTO;
 import com.cmsr.onebase.module.bpm.core.enums.*;
+import com.cmsr.onebase.module.bpm.core.utils.BpmUtil;
 import com.cmsr.onebase.module.bpm.core.validator.BpmAppResourceValidator;
 import com.cmsr.onebase.module.bpm.core.vo.BpmFormDataPageReqVO;
 import com.cmsr.onebase.module.bpm.core.vo.design.BpmDefJsonVO;
@@ -538,10 +539,11 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
     public PageResult<Map<String, Object>> formDataPage(BpmFormDataPageReqVO reqVO) {
         Long loginUserId = WebFrameworkUtils.getLoginUserId();
         PageResult<Map<String, Object>> response = PageResult.empty();
+        Long applicationId = BpmUtil.getRequiredApplicationId();
 
         // menuId转menuUuid
         AppMenuRespDTO appMenuRespDTO = appResourceApi.getAppMenuById(reqVO.getMenuId());
-        bpmAppResourceValidator.validateMenuAndPageset(appMenuRespDTO, appMenuRespDTO.getApplicationId());
+        bpmAppResourceValidator.validateMenuAndPageset(appMenuRespDTO, applicationId);
 
         String menuUuid = appMenuRespDTO.getMenuUuid();
 

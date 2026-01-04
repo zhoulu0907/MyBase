@@ -14,6 +14,8 @@ import com.cmsr.onebase.module.app.core.vo.auth.*;
 import com.cmsr.onebase.module.system.api.dept.DeptApi;
 import com.cmsr.onebase.module.system.api.dept.dto.DeptAndUsersReqDTO;
 import com.cmsr.onebase.module.system.api.dept.dto.DeptAndUsersRespDTO;
+import com.cmsr.onebase.module.system.api.dept.dto.DeptPageApiReqVO;
+import com.cmsr.onebase.module.system.api.dept.dto.DeptRespDTO;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -131,6 +133,17 @@ public class AppAuthRoleServiceProvider {
         deptAndUsersReqDTO.setExcludeUserIds(userIds);
         deptAndUsersReqDTO.setUserType(reqVO.getUserType());
         return deptApi.getDeptAndUsers(deptAndUsersReqDTO).getData();
+    }
+
+    public PageResult<DeptRespDTO> listDept(AuthRoleDeptReqVO reqVO) {
+        List<Long> deptIds = appAuthRoleDeptRepository.findByRoleId(reqVO.getRoleId())
+                .stream()
+                .map(v -> v.getDeptId())
+                .toList();
+        DeptPageApiReqVO deptPageApiReqVO = new DeptPageApiReqVO();
+        deptPageApiReqVO.setExcludeDeptIds(deptIds);
+        deptPageApiReqVO.setKeywords(reqVO.getKeywords());
+        return deptApi.getDeptPage(deptPageApiReqVO).getData();
     }
 
 

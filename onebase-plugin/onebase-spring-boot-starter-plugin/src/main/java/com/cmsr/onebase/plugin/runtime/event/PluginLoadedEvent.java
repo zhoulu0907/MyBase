@@ -1,24 +1,17 @@
 package com.cmsr.onebase.plugin.runtime.event;
 
+import lombok.Getter;
 import org.pf4j.PluginWrapper;
 
 /**
- * 发布当插件成功加载后
+ * 插件已加载事件
  */
-public class PluginLoadedEvent {
-    private final String pluginId;
+@Getter
+public class PluginLoadedEvent extends BasePluginEvent {
     private final PluginWrapper pluginWrapper;
 
     public PluginLoadedEvent(String pluginId, PluginWrapper pluginWrapper) {
-        this.pluginId = pluginId;
+        super(pluginId);
         this.pluginWrapper = pluginWrapper;
-    }
-
-    public String getPluginId() {
-        return pluginId;
-    }
-
-    public PluginWrapper getPluginWrapper() {
-        return pluginWrapper;
     }
 }

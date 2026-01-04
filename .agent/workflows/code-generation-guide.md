@@ -98,6 +98,10 @@ Repository 层  → 数据访问，SQL 操作
 - **脱敏**: 严禁记录密码、Token 等敏感信息
 - **清晰**: 包含足够的上下文信息 (如 `userId`, 参数)
 
+#### 3.1.6 数据传输对象（如DTO、VO、PO等）
+- **第一优先级**: jdk17+优先使用record生成数据传输对象
+- **第二优先级**: record不适用的情况下，使用Lombok生成getter、setter
+
 ### 3.2 代码模板
 
 #### Controller 模板

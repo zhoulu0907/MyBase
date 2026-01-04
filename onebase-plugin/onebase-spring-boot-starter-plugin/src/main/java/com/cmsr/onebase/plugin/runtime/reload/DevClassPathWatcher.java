@@ -168,14 +168,15 @@ public class DevClassPathWatcher {
                 key.reset();
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                log.info("DevClassPathWatcher 监听线程被中断");
+                log.error("DevClassPathWatcher 监听线程被中断", e);
                 break;
             } catch (ClosedWatchServiceException e) {
                 // WatchService 已关闭，这是正常的关闭流程
-                log.debug("WatchService 已关闭，监听线程退出");
+                log.error("WatchService 已关闭，监听线程退出", e);
                 break;
             } catch (Exception e) {
                 log.error("处理文件变更事件时出错", e);
+                break;
             }
         }
 

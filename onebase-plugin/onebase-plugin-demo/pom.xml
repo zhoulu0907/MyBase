@@ -15,6 +15,30 @@
     <name>${project.artifactId}</name>
     <description>OneBase低代码平台插件开发示例</description>
 
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- ❗ 必须启用，否则 Spring MVC 无法通过反射获取方法参数名 -->
+        <maven.compiler.parameters>true</maven.compiler.parameters>
+        <!-- 版本管理 -->
+        <onebase-dependencies.version>1.0.0-SNAPSHOT</onebase-dependencies.version>
+        <onebase-plugin-maven-plugin.version>1.0.0-SNAPSHOT</onebase-plugin-maven-plugin.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- ❗必须导入 OneBase BOM，统一版本管理，否则可能引发版本冲突 -->
+            <dependency>
+                <groupId>com.cmsr.onebase</groupId>
+                <artifactId>onebase-dependencies</artifactId>
+                <version>${onebase-dependencies.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <modules>
         <!-- 子模块列表 -->
         <module>plugin-demo-hello</module>
@@ -28,7 +52,7 @@
                 <plugin>
                     <groupId>com.cmsr.onebase</groupId>
                     <artifactId>onebase-plugin-maven-plugin</artifactId>
-                    <version>${revision}</version>
+                    <version>${onebase-plugin-maven-plugin.version}</version>
                 </plugin>
 
                 <!-- Maven JAR插件 - 禁止生成插件相关的MANIFEST属性 -->
