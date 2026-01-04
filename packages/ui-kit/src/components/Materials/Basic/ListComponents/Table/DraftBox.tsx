@@ -43,6 +43,8 @@ export const DraftBox: React.FC<DraftBoxProps> = ({ showFromPageData, tableColum
 
   // 打开草稿箱
   const handleGetDrafts = async () => {
+    if (!tableName || !menuId || !isRuntimeEnv()) return;
+
     const res = await getDraftPage(tableName, menuId, { pageNo: draftPageNo, pageSize });
 
     const { list = [], total = 0, pageNo = 1 } = res || {};
