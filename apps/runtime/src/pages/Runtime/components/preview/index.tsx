@@ -517,6 +517,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
         {pageType == EDITOR_TYPES.DASHBOARD_PREVIEW && dashboardId && (
           <div className={styles.dashboardPreview}>
             <iframe
+              key={`dashboard-${dashboardId}`}
               src={`${resourceUrl}chart/preview/${dashboardId}/${dashboardType}`}
               style={{ width: '100%', height: '100%', border: 'none' }}
               title="Dashboard Preview"
