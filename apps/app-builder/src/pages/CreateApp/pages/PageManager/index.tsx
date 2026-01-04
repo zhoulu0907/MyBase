@@ -305,7 +305,7 @@ const PageManagerPage: FC = () => {
       .filter(
         (entity) =>
           // 过滤子表
-          entity.relationType !== RELATION_TYPE.MASTER ||
+          entity.relationType == RELATION_TYPE.MASTER ||
           (entity.relationType === RELATION_TYPE.SLAVE &&
             !entity.relationshipTypes?.includes(RELATIONSHIP_TYPE.SUBTABLE_ONE_TO_MANY))
       )
