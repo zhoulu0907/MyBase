@@ -189,14 +189,12 @@ const BusinessPage: React.FC = () => {
   };
 
   useEffect(() => {
-    if (location.pathname === `/onebase/${tenantId}/setting/enterprise`) {
-      if (displayInfo) {
-        setDisplayInfo(false);
-      }
-      fetchTableDataList();
-      fetchIndustryType();
+    if (displayInfo) {
+      setDisplayInfo(false);
     }
-  }, [location.pathname]);
+    fetchTableDataList();
+    fetchIndustryType();
+  }, []);
 
   const handlePageChange = (current: number, pageSize: number) => {
     fetchTableDataList(current, pageSize);

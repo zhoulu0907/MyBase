@@ -2,6 +2,7 @@ import { Collapse } from '@arco-design/web-react';
 import { useState } from 'react';
 import { WorkbenchAttributes, PanelContentStyle } from '../../components/CommonWorkbenchAttributes';
 import { findItem } from '../../../../utils/edit-data';
+import { StyleLibrary } from './StyleLibrary';
 import styles from '../../index.module.less';
 
 const CollapseItem = Collapse.Item;
@@ -11,7 +12,7 @@ const QuickEntryConfig = () => {
 
   return (
     <WorkbenchAttributes
-      renderPanels={({ editData, renderEditItem }) => {
+      renderPanels={({ editData, renderEditItem, handlePropsChange, configs }) => {
         // 找到入口配置项（key 为 'groupConfig'）
         const entryConfigItem = findItem(editData, 'groupConfig');
 
@@ -33,13 +34,19 @@ const QuickEntryConfig = () => {
                 className={styles.collapseConfigs}
               >
                 <CollapseItem header="样式库" name="style" contentStyle={PanelContentStyle}>
-                  {styleConfigItem && renderEditItem(styleConfigItem.item, styleConfigItem.index)}
+                  {styleConfigItem && (
+                    <StyleLibrary
+                      handlePropsChange={handlePropsChange}
+                      item={styleConfigItem.item as { key: string }}
+                      configs={configs}
+                    />
+                  )}
                 </CollapseItem>
                 <CollapseItem header="标题配置" name="title" contentStyle={PanelContentStyle}>
-                  {titleConfigItem && renderEditItem(titleConfigItem.item, titleConfigItem.index)}
+                  {titleConfigItem && renderEditItem(titleConfigItem)}
                 </CollapseItem>
                 <CollapseItem header="入口配置" name="entry" contentStyle={PanelContentStyle}>
-                  {entryConfigItem && renderEditItem(entryConfigItem.item, entryConfigItem.index)}
+                  {entryConfigItem && renderEditItem(entryConfigItem)}
                 </CollapseItem>
               </Collapse>
             </div>

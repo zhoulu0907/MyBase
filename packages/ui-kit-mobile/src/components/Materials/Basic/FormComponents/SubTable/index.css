@@ -3,9 +3,7 @@
   > .arco-form-item-control-wrapper > .arco-form-item-control {
     display: block;
   }
-  .arco-form-item {
-    /* border: none !important; */
-  }
+
   .arco-cell:before {
     transform: none !important;
   }
@@ -17,6 +15,11 @@
   box-sizing: border-box;
   overflow-x: auto;
   overflow-y: visible;
+  padding-top: 0.48rem;
+
+  .arco-form-item {
+    border: 0;
+  }
 }
 
 .componentItemSubtableOBMobile {
@@ -29,6 +32,10 @@
   transition: border-color 0.2s ease;
   position: relative;
   min-width: 200px;
+
+  &:last-of-type .arco-form-item {
+      border: 0 !important;
+  }
 }
 
 .collapseSubtableOBMobile {
@@ -52,20 +59,12 @@
   }
 
   .arco-collapse-content-container {
-    padding: 0;
+    padding-top: 0 !important;
   }
 
   .cell-group-body bordered,
   .arco-cell-group .cell-group-body {
     background-color: transparent;
-  }
-
-  .arco-form-label-item {
-    /* display: none; */
-  }
-
-  .inputTextWrapperOBMobile {
-    /* border: none !important; */
   }
 
   .arco-cell-group .cell-group-body.bordered::before {
@@ -92,9 +91,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  /* :global(.uplaodList-text) {
-    width: calc(100% - 3rem);
-  } */
+
   .arco-uploader-add {
     margin-top: 0.24rem;
   }
@@ -140,7 +137,6 @@
       width: 100%;
 
       & > div {
-        /* padding-left: 0; */
         padding-right: 0;
       }
     }

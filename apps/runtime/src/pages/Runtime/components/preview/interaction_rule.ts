@@ -1,4 +1,10 @@
-import { InteractionActionType, OPERATOR_MAP, type FormAction, type InteractionRule } from '@onebase/app';
+import {
+  InteractionActionType,
+  OPERATOR_MAP,
+  VALIDATION_TYPE,
+  type FormAction,
+  type InteractionRule
+} from '@onebase/app';
 import { STATUS_OPTIONS, STATUS_VALUES } from '@onebase/ui-kit';
 import { Jexl } from '@pawel-up/jexl';
 
@@ -11,6 +17,8 @@ export async function initInteractionRule(
   pageComponentSchemas: any
 ) {
   // 初始化一个map，用于后续交互规则处理
+  //   console.log('formValues: ', formValues);
+
   const fieldMap: Record<string, any> = {};
   Object.entries(pageComponentSchemas).forEach(([key, value]: [string, any]) => {
     if (value.config.dataField?.length > 1) {
@@ -19,6 +27,8 @@ export async function initInteractionRule(
       fieldMap[key.replaceAll('-', '')] = fieldValue;
     }
   });
+
+  //   console.log('fieldMap: ', fieldMap);
 
   let cpActions: Record<string, FormAction[]> = {};
 
@@ -32,11 +42,20 @@ export async function initInteractionRule(
         item.conditions.map((condition, cIndex) => {
           const { cpId, op, value } = condition;
           const newCpId = cpId.replaceAll('-', '');
+          //   console.log('condition: ', condition);
 
-          if (cIndex == item.conditions.length - 1) {
-            exp1 += `${newCpId} ${OPERATOR_MAP[op]} '${value}'`;
+          if (op == VALIDATION_TYPE.IS_EMPTY) {
+            exp1 += `${newCpId} ? false : true`;
+          } else if (op == VALIDATION_TYPE.IS_NOT_EMPTY) {
+            exp1 += `${newCpId} ? true : false`;
+          } else if (typeof value === 'boolean') {
+            exp1 += `${newCpId} ? ${value} : !${value}`;
           } else {
-            exp1 += `${newCpId} ${OPERATOR_MAP[op]} '${value}' && `;
+            exp1 += `${newCpId} ${OPERATOR_MAP[op]} '${value}'`;
+          }
+
+          if (cIndex != item.conditions.length - 1) {
+            exp1 += ' && ';
           }
         });
 
@@ -47,8 +66,14 @@ export async function initInteractionRule(
         }
       });
 
-      const jexl = new Jexl();
-      const result = await jexl.eval(expression, fieldMap);
+      //   console.log('expression: ', expression);
+      //   console.log('fieldMap: ', fieldMap);
+
+      let result = false;
+      if (expression) {
+        const jexl = new Jexl();
+        result = await jexl.eval(expression, fieldMap);
+      }
 
       //   console.log('jexl eval result: ', result);
 

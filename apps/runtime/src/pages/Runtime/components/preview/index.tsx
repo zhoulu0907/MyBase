@@ -9,6 +9,7 @@ import {
   getEntityFieldsWithChildren,
   getPageSetId,
   getPageSetMetaData,
+  listPageView,
   LISTTYPE,
   PageType,
   queryFlowExecForm,
@@ -21,7 +22,7 @@ import {
   type UpdateMethodV2Params
 } from '@onebase/app';
 import { fetchSubmitInstance } from '@onebase/app/src/services/app_runtime';
-import { pagesRuntimeSignal } from '@onebase/common';
+import { getDashBoardURL, pagesRuntimeSignal } from '@onebase/common';
 import {
   EDITOR_TYPES,
   ENTITY_FIELD_TYPE,
@@ -76,11 +77,15 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
 
   const [editTargetId, setEditTargetId] = useState('');
 
-  // 当前时间戳
   const [detailMode, setDetailMode] = useState(true);
   const [refresh, setRefresh] = useState(Date.now());
   const [isPredictVisible, setPredictVisible] = useState(false);
   const [isAdd, setAdd] = useState(false);
+
+  const [dashboardId, setDashboardId] = useState<string>('');
+
+  const dashboardType = 'dashboard';
+  const resourceUrl = getDashBoardURL();
 
   useEffect(() => {
     if (drawerVisible.value) {
@@ -104,6 +109,21 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
     setSubEntities(entityWithChildren.childEntities);
   };
 
+  const getDashboardId = async (pageSetId: string) => {
+    try {
+      const res = await listPageView({
+        pageSetId: pageSetId
+      });
+
+      if (res && res.pages && res.pages.length > 0) {
+        setDashboardId(res.pages[0].id);
+        // const imgRes = await getFileUrlById(res.pages[0].indexImage);
+      }
+    } catch (error) {
+      console.error('获取页面视图失败:', error);
+    }
+  };
+
   useEffect(() => {
     if (menuId) {
       handleGetPageSetId(menuId);
@@ -120,11 +140,24 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
   }, [tableName, mainMetaDataFields.value]);
 
   useEffect(() => {
-    // 工作台页面不获取主表数据
-    if (pageSetId && pageSetType !== PageType.WORKBENCH) {
+    // 工作台和大屏页面不获取主表数据
+    if (pageSetId && pageSetType !== PageType.WORKBENCH && pageSetType !== PageType.DASHBOARD) {
       getMainMetaData(pageSetId);
+      setPageType(EDITOR_TYPES.LIST_EDITOR);
+      return;
     }
-    setPageType(EDITOR_TYPES.LIST_EDITOR);
+
+    if (pageSetId && pageSetType == PageType.DASHBOARD) {
+      getDashboardId(pageSetId);
+
+      setPageType(EDITOR_TYPES.DASHBOARD_PREVIEW);
+      return;
+    }
+
+    if (pageSetType == PageType.WORKBENCH) {
+      setPageType(EDITOR_TYPES.WORKBENCH_EDITOR);
+      return;
+    }
   }, [pageSetId]);
 
   const handleGetPageSetId = async (menuId: string) => {
@@ -435,9 +468,9 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
   return (
     <div className={`${styles.previewPage} runtime-preview-formpage`}>
       <div className={styles.content}>
-        {pageSetType === PageType.WORKBENCH ? (
-          <WorkbenchRuntime pageSetId={pageSetId} runtime={runtime} />
-        ) : (
+        {pageType === EDITOR_TYPES.WORKBENCH_EDITOR && <WorkbenchRuntime pageSetId={pageSetId} runtime={runtime} />}
+
+        {(pageType === EDITOR_TYPES.LIST_EDITOR || pageType === EDITOR_TYPES.FORM_EDITOR) && (
           <ListRuntime
             pageSetType={pageSetType}
             pageSetId={pageSetId}
@@ -459,7 +492,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
             editTargetId={editTargetId}
           />
         )}
-
         {pageSetType === PageType.BPM && drawerVisible.value && bpmInstanceId.value && (
           <DetailPop
             detailPopVisible={drawerVisible.value}
@@ -469,7 +501,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
             listType={LISTTYPE.LIST}
           />
         )}
-
         {pageType == EDITOR_TYPES.FORM_EDITOR && (
           <EditRuntime
             form={form}
@@ -482,6 +513,16 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
             menuId={menuId}
             tableName={tableName}
           />
+        )}
+        {pageType == EDITOR_TYPES.DASHBOARD_PREVIEW && dashboardId && (
+          <div className={styles.dashboardPreview}>
+            <iframe
+              key={`dashboard-${dashboardId}`}
+              src={`${resourceUrl}chart/preview/${dashboardId}/${dashboardType}`}
+              style={{ width: '100%', height: '100%', border: 'none' }}
+              title="Dashboard Preview"
+            />
+          </div>
         )}
       </div>
 

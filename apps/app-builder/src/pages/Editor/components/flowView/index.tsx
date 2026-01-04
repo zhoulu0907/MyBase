@@ -1,23 +1,56 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Modal } from '@arco-design/web-react';
 import FlowEditor from './flowEditor';
 import { getFlowPreview } from '@onebase/app/src/services';
 import type { WorkflowJSON } from './indexType';
 import styles from './index.module.less';
 import '@flowgram.ai/free-layout-editor/index.css';
+import html2canvas from 'html2canvas';
+
 const sourceNodeIDMap = new Map();
 interface PreviewModalProps {
   visible: boolean;
   setVisible: (visible: boolean) => void;
   instanceId?: string;
   businessUuid?: string;
+  title?: string;
 }
 
-const FlowView: React.FC<PreviewModalProps> = ({ visible, setVisible, instanceId = '', businessUuid = '' }) => {
+const FlowView: React.FC<PreviewModalProps> = ({
+  visible,
+  setVisible,
+  instanceId = '',
+  businessUuid = '',
+  title = '流程预览'
+}) => {
   const [isModalReady, setIsModalReady] = useState(false);
   const [preViewData, setPreviewData] = useState<any>({});
+  const captureRef = useRef(null);
   const afterOpen = () => {
     getFlowPreviewData();
+  };
+
+  const handleCapture = async () => {
+    try {
+      if (!captureRef.current) {
+        console.error('截图元素不存在');
+        return;
+      }
+      const canvas = await html2canvas(captureRef.current, {
+        scale: 2,
+        backgroundColor: '#ffffff',
+        logging: false,
+        useCORS: true
+      });
+
+      // 转换为图片并下载
+      const link = document.createElement('a');
+      link.download = title;
+      link.href = canvas.toDataURL();
+      link.click();
+    } catch (error) {
+      console.error('截图失败:', error);
+    }
   };
 
   const normalizeNodes = (obj: WorkflowJSON | undefined) => {
@@ -72,9 +105,13 @@ const FlowView: React.FC<PreviewModalProps> = ({ visible, setVisible, instanceId
             <span className={`${styles.legendDot} ${styles.pending}`}></span>未流转
           </div>
         </div>
-        <div className={styles.right}>下载为图片</div>
+        <div className={styles.right} onClick={handleCapture}>
+          下载为图片
+        </div>
       </div>
-      <div className={styles.flowViewContent}>{isModalReady && <FlowEditor preViewData={preViewData} />}</div>
+      <div ref={captureRef} className={styles.flowViewContent}>
+        {isModalReady && <FlowEditor preViewData={preViewData} />}
+      </div>
     </Modal>
   );
 };

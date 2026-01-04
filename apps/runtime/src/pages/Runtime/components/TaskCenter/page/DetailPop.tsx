@@ -317,6 +317,7 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
         setVisible={setFlowViewVisible}
         instanceId={rowData?.instanceId}
         businessUuid={rowData?.businessUuid}
+        title={detailData?.processTitle}
       />
 
       {isPredictVisible && (

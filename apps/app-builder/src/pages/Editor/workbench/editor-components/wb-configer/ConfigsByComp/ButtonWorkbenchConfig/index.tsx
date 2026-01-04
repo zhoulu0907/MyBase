@@ -50,7 +50,7 @@ const ButtonWorkbenchConfig = () => {
                 name={SECTION_KEYS.TITLE}
                 contentStyle={PanelContentStyle}
               >
-                <div>{renderEditItem(titleConfig.item, titleConfig.index)}</div>
+                <div>{renderEditItem(titleConfig)}</div>
               </CollapseItem>
             )}
 
@@ -63,12 +63,10 @@ const ButtonWorkbenchConfig = () => {
                 contentStyle={PanelContentStyle}
               >
                 <div>
-                  {backgroundColorConfig && (
-                    <div>{renderEditItem(backgroundColorConfig.item, backgroundColorConfig.index)}</div>
-                  )}
-                  {textColorConfig && <div>{renderEditItem(textColorConfig.item, textColorConfig.index)}</div>}
-                  {textSizeConfig && <div>{renderEditItem(textSizeConfig.item, textSizeConfig.index)}</div>}
-                  {textAlignConfig && <div>{renderEditItem(textAlignConfig.item, textAlignConfig.index)}</div>}
+                  {backgroundColorConfig && <div>{renderEditItem(backgroundColorConfig)}</div>}
+                  {textColorConfig && <div>{renderEditItem(textColorConfig)}</div>}
+                  {textSizeConfig && <div>{renderEditItem(textSizeConfig)}</div>}
+                  {textAlignConfig && <div>{renderEditItem(textAlignConfig)}</div>}
                 </div>
               </CollapseItem>
             )}
@@ -82,11 +80,9 @@ const ButtonWorkbenchConfig = () => {
                 contentStyle={PanelContentStyle}
               >
                 <div>
-                  <div>{renderEditItem(jumpTypeConfig.item, jumpTypeConfig.index)}</div>
-                  {showJumpPageId && <div>{renderEditItem(jumpPageIdConfig.item, jumpPageIdConfig.index)}</div>}
-                  {showJumpExternalUrl && (
-                    <div>{renderEditItem(jumpExternalUrlConfig.item, jumpExternalUrlConfig.index)}</div>
-                  )}
+                  <div>{renderEditItem(jumpTypeConfig)}</div>
+                  {showJumpPageId && <div>{renderEditItem(jumpPageIdConfig)}</div>}
+                  {showJumpExternalUrl && <div>{renderEditItem(jumpExternalUrlConfig)}</div>}
                 </div>
               </CollapseItem>
             )}

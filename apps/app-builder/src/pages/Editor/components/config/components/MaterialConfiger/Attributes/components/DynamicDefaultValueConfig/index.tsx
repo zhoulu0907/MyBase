@@ -1,22 +1,23 @@
 import { FormulaEditor } from '@/components/FormulaEditor';
 import { Button, DatePicker, Form, Input, InputNumber, Select, TimePicker } from '@arco-design/web-react';
 import { IconLaunch } from '@arco-design/web-react/icon';
+import type { DictData } from '@onebase/platform-center';
 import {
   CONFIG_TYPES,
   DATE_OPTIONS,
   DATE_VALUES,
   DEFAULT_VALUE_TYPES,
   DEFAULT_VALUE_TYPES_LABELS,
+  FORM_COMPONENT_TYPES,
+  getFieldOptionsConfig,
   getPopupContainer,
+  menuDictSignal,
   PHONE_TYPE,
   TIME_12_FORMAT,
   TIME_FORMAT,
-  FORM_COMPONENT_TYPES,
-  usePageEditorSignal,
-  getFieldOptionsConfig,
-  useAppEntityStore
+  useAppEntityStore,
+  usePageEditorSignal
 } from '@onebase/ui-kit';
-import type { DictData } from '@onebase/platform-center';
 import { useSignals } from '@preact/signals-react/runtime';
 import { useEffect, useState } from 'react';
 import styles from '../../index.module.less';
@@ -37,6 +38,8 @@ const DynamicDefaultValueConfig: React.FC<DynamicDefaultValueConfigProps> = ({
 }) => {
   useSignals();
   const { mainEntity, subEntities } = useAppEntityStore();
+
+  const { appDict } = menuDictSignal;
 
   const defaultValueConfigKey = item.key || 'defaultValueConfig';
 
@@ -75,7 +78,7 @@ const DynamicDefaultValueConfig: React.FC<DynamicDefaultValueConfigProps> = ({
   }, [configs[defaultValueConfigKey]]);
 
   const getOptions = async () => {
-    const newOptions = await getFieldOptionsConfig(configs.dataField, mainEntity, subEntities);
+    const newOptions = await getFieldOptionsConfig(configs.dataField, mainEntity, subEntities, appDict.value);
     setOptions(newOptions);
   };
 
@@ -179,7 +182,9 @@ const DynamicDefaultValueConfig: React.FC<DynamicDefaultValueConfigProps> = ({
                 : value.toString();
             }}
             parser={(value) => value.replace(/,/g, '')}
-            suffix={configs?.numberFormat?.showUnit && configs.numberFormat?.unitValue ? configs.numberFormat.unitValue : ''}
+            suffix={
+              configs?.numberFormat?.showUnit && configs.numberFormat?.unitValue ? configs.numberFormat.unitValue : ''
+            }
           />
         );
       case FORM_COMPONENT_TYPES.RADIO:

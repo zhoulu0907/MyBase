@@ -1,6 +1,13 @@
 import { isRuntimeEnv } from '@onebase/common';
 import { PageParam, PageResult } from '../types/common';
-import { BatchConfigDictDataParams, DictData, DictDataForm, DictForm, DictItem } from '../types/dict';
+import {
+  BatchConfigDictDataParams,
+  DictData,
+  DictDataForm,
+  DictForm,
+  DictItem,
+  GetDictDataByTypesParams
+} from '../types/dict';
 import { runtimeService, systemService } from './clients';
 
 /**
@@ -91,7 +98,9 @@ export const getDictDataListByPage = (params: PageParam & { dictType: string }):
  * 获取字典数据列表-不分页
  */
 export const getDictDataListByTypeId = (dictTypeId: string): Promise<DictData[]> => {
-  return (isRuntimeEnv() ? runtimeService : systemService).get(`/dict-data/simple-list-by-type?dictTypeId=${dictTypeId}`);
+  return (isRuntimeEnv() ? runtimeService : systemService).get(
+    `/dict-data/simple-list-by-type?dictTypeId=${dictTypeId}`
+  );
 };
 
 /**
@@ -113,4 +122,8 @@ export const batchConfigDictData = (data: BatchConfigDictDataParams): Promise<vo
  */
 export const getDictDataByType = (id: string): DictData[] => {
   return (isRuntimeEnv() ? runtimeService : systemService).get(`/dict-data/simple-list-by-type?id=${id}`);
+};
+
+export const getDictDataByTypes = (params: GetDictDataByTypesParams): DictData[] => {
+  return (isRuntimeEnv() ? runtimeService : systemService).post(`/dict-data/simple-list-by-types`, params);
 };

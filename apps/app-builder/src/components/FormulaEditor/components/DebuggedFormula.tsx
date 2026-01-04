@@ -1,9 +1,10 @@
-import { DatePicker, Form, Input, InputNumber, Table, Typography } from '@arco-design/web-react';
+import { DatePicker, Form, Input, InputNumber, Switch, Table, TimePicker, Typography } from '@arco-design/web-react';
 import { IconArrowRight, IconLoading, IconPlusCircle } from '@arco-design/web-react/icon';
 import styles from './DebuggedFormula.module.less';
 import { debugFormula, type fieldListWithNodeData } from '@onebase/app';
 import { useRef, useState } from 'react';
 import dayjs from 'dayjs';
+import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
 
 interface variableItem {
   fieldName: string;
@@ -34,7 +35,7 @@ export function DebuggedFormula(props: DebuggedFormulaProps) {
         // 遍历每个字段名，提取所有行的该字段值
         fieldNames.forEach((fieldName) => {
           // 生成目标 key：表格标识 + 字段名（如 "tableRows$数据查询节点(多条)111.任务名称"）
-          const targetKey = `${newTableKey}.${fieldName}`; 
+          const targetKey = `${newTableKey}.${fieldName}`;
           result[targetKey] = (rows as any)?.map((row: any) => row[fieldName] || '');
         });
       }
@@ -46,7 +47,7 @@ export function DebuggedFormula(props: DebuggedFormulaProps) {
     const isSingleEscapedChar = /^[\x00-\x1F\\"]$/;
     if (isSingleEscapedChar.test(char)) {
       return JSON.stringify(char).slice(1, -1);
-    } 
+    }
     return char;
   }
 
@@ -106,10 +107,16 @@ export function DebuggedFormula(props: DebuggedFormulaProps) {
 
   const renderFormItem = (fieldype: any) => {
     switch (fieldype) {
-      case 'NUMBER':
+      case ENTITY_FIELD_TYPE.NUMBER.VALUE:
         return <InputNumber placeholder="please enter" />;
-      case 'DATEPICKER':
-        return <DatePicker showTime />;
+      case ENTITY_FIELD_TYPE.DATE.VALUE:
+        return <DatePicker showTime style={{width: '100%'}}/>;
+      case ENTITY_FIELD_TYPE.DATETIME.VALUE:
+        return <DatePicker showTime format="YYYY-MM-DD HH:mm:ss" style={{width: '100%'}}/>;
+      case ENTITY_FIELD_TYPE.TIME.VALUE:
+        return <TimePicker format="HH:mm:ss" style={{width: '100%'}}/>;
+      case ENTITY_FIELD_TYPE.BOOLEAN.VALUE:
+        return <Switch />;
       default:
         return <Input />;
     }

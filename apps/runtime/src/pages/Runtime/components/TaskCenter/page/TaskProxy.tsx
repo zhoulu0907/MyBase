@@ -201,7 +201,7 @@ const TaskProxy = ({ appId }: { appId: string | null }) => {
   return (
     <section className="page-content-rgt">
       <div className="normal-box-title">
-        <b>我已处理</b>
+        <b>流程代理</b>
         <span>可授权指定人员在有效期内代理您的流程处理事务</span>
       </div>
       <div className="table-title-box">

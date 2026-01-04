@@ -1,4 +1,4 @@
-import { useAppEntityStore } from '@/signals';
+import { menuDictSignal, useAppEntityStore } from '@/signals';
 import { getFieldOptionsConfig, getPopupContainer } from '@/utils';
 import { Form, Select } from '@arco-design/web-react';
 import type { DictData } from '@onebase/platform-center';
@@ -12,6 +12,7 @@ import type { XInputSelectOneConfig } from './schema';
 const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean; detailMode?: boolean }) => {
   const { label, dataField, tooltip, status, verify, layout, runtime = true, detailMode, defaultValueConfig } = props;
   const { mainEntity, subEntities } = useAppEntityStore();
+  const { appDict } = menuDictSignal;
 
   const { form } = Form.useFormContext();
   const fieldId =
@@ -27,7 +28,7 @@ const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean; det
   }, [dataField]);
 
   const getOptions = async () => {
-    const newOptions = await getFieldOptionsConfig(dataField, mainEntity, subEntities);
+    const newOptions = await getFieldOptionsConfig(dataField, mainEntity, subEntities, appDict.value);
     setOptions(newOptions);
   };
 
@@ -54,7 +55,9 @@ const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean; det
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
           <div>
-            {fieldValue?.name || options.find((op) => op.id === fieldValue?.id || op.id === fieldValue)?.label || '--'}
+            {fieldValue?.name ||
+              options.find((op) => op.value === fieldValue?.id || op.value === fieldValue)?.label ||
+              '--'}
           </div>
         ) : (
           <Select
@@ -70,7 +73,7 @@ const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean; det
             }}
           >
             {options.map((ele, index: number) => (
-              <Select.Option key={index} value={ele.id}>
+              <Select.Option key={index} value={ele.value}>
                 {ele.label}
               </Select.Option>
             ))}

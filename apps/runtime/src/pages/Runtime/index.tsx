@@ -3,7 +3,7 @@ import { useI18n } from '@/hooks/useI18n';
 import { Input, Layout, Tree } from '@arco-design/web-react';
 import { IconDown, IconSearch } from '@arco-design/web-react/icon';
 import {
-  ENTITY_TYPE,
+  getApplicationMenuPermission,
   getAppNavigationConfig,
   getEntityListWithFields,
   listApplicationMenu,
@@ -11,12 +11,11 @@ import {
   MenuType,
   runtimeListApplicationBPMMenu,
   type ApplicationMenu,
-  type ChildEntity,
   type ListApplicationMenuReq
 } from '@onebase/app';
-import { TokenManager, UserPermissionManager } from '@onebase/common';
+import { menuPermissionSignal, TokenManager, UserPermissionManager } from '@onebase/common';
 import { getPermissionInfo } from '@onebase/platform-center';
-import { useAppEntityStore } from '@onebase/ui-kit';
+import { menuDictSignal, setMainMetaData, useAppEntityStore } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
@@ -48,12 +47,11 @@ interface TreeNode {
 const Runtime: React.FC = () => {
   useSignals();
   const { setMainEntity, setSubEntities } = useAppEntityStore();
+  const { setMenuPermission } = menuPermissionSignal;
+  const { batchSetAppDict } = menuDictSignal;
 
   const navigate = useNavigate();
   const location = useLocation();
-
-  //   const [appId, setAppId] = useState('');
-  //   const [tenantId, setTenantId] = useState('');
 
   const [search] = useSearchParams();
   const curMenuId = search.get('curMenu');
@@ -65,19 +63,6 @@ const Runtime: React.FC = () => {
   const cutTreeItemWidth = 25;
   const { curMenu, setCurMenu } = menuSignal;
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
-
-  //   useEffect(() => {
-  //     // 从 window.location.hash 中解析 redirectURL，再从 redirectURL 解析 appId 和 tenantId
-  //     const curAppId = getHashQueryParam('appId');
-  //     const curTenantId = getHashQueryParam('tenantId');
-  //     if (curAppId) {
-  //       setAppId(curAppId);
-  //     }
-
-  //     if (curTenantId) {
-  //       setTenantId(curTenantId);
-  //     }
-  //   }, []);
 
   const { appId, tenantId } = useParams();
 
@@ -117,6 +102,7 @@ const Runtime: React.FC = () => {
   useEffect(() => {
     if (curMenu.value?.entityUuid) {
       getMainMetaData(curMenu.value.entityUuid);
+      getMenuPermission(curMenu.value.id);
     }
   }, [curMenu.value]);
 
@@ -129,37 +115,14 @@ const Runtime: React.FC = () => {
 
     const [entityWithChildren] = entityListWithFields;
     if (entityWithChildren) {
-      setMainEntity({
-        entityId: entityWithChildren.entityId,
-        entityUuid: entityWithChildren.entityUuid,
-        tableName: entityWithChildren.tableName,
-        entityName: entityWithChildren.entityName,
-        entityType: ENTITY_TYPE.MAIN,
-        fields: entityWithChildren.fields
-      });
-      if (entityWithChildren.childEntities && entityWithChildren.childEntities.length > 0) {
-        // 返回新Promise对象，当所有输入Promise成功时返回结果数组（顺序与输入一致）
-        const allChildFields = await Promise.all(
-          entityWithChildren.childEntities.map(async (entity: ChildEntity) => {
-            return entity.childFields;
-          })
-        );
-        const subEntities = entityWithChildren.childEntities.map((entity: ChildEntity, index: number) => ({
-          entityId: entity.childEntityId,
-          entityUuid: entity.childEntityUuid,
-          tableName: entity.childTableName,
-          entityName: entity.childEntityName,
-          entityType: ENTITY_TYPE.SUB,
-          fields: allChildFields[index]
-        }));
-
-        setSubEntities({
-          entities: subEntities
-        });
-      } else {
-        setSubEntities({ entities: [] });
-      }
+      setMainMetaData(entityWithChildren, setMainEntity, setSubEntities, batchSetAppDict);
     }
+  };
+
+  const getMenuPermission = async (menuId: string) => {
+    const permission = await getApplicationMenuPermission(menuId);
+    console.log('permission: ', permission);
+    setMenuPermission(permission);
   };
 
   const getUserInfo = async () => {
@@ -252,8 +215,6 @@ const Runtime: React.FC = () => {
   const handleCurMenuUrl = async (curMenuId: string) => {
     const sp = new URLSearchParams(location.search);
     sp.set('curMenu', String(curMenuId));
-    // const permission = await getApplicationMenuPermission(curMenuId);
-    // console.log('permission: ', permission);
 
     const to = `${location.pathname}?${sp.toString()}`;
     navigate(to, { replace: true });

@@ -15,10 +15,27 @@ interface SecureEncode {
     type?: string;
 };
 
-export const securityEncodeText = (security: SecureEncode, text: string) => {
-    if (!text) {
+export const securityEncodeText = (security: SecureEncode, text: any) => {
+    if (text === null || text === undefined || text === '') {
         return '--';
     }
+
+    if (typeof text === 'object') {
+        if (Array.isArray(text) && text.length === 0) {
+            return '--';
+        }
+        if (!Array.isArray(text) && Object.keys(text).length === 0) {
+            return '--';
+        }
+        try {
+            text = JSON.stringify(text);
+        } catch (e) {
+            text = String(text);
+        }
+    } else {
+        text = String(text);
+    }
+
     if (!security.display || !security.type) {
         return text;
     }

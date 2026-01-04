@@ -401,6 +401,8 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
         return <WorkbenchComp.XRichTextEditorWorkbench cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case WORKBENCH_COMPONENT_TYPES.CAROUSEL_WORKBENCH:
         return <WorkbenchComp.XCarouselWorkbench cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+      case WORKBENCH_COMPONENT_TYPES.WELCOME_CARD:
+        return <WorkbenchComp.XWelcomeCard cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case WORKBENCH_COMPONENT_TYPES.BUTTON_WORKBENCH:
           // 移动端独有组件，web 端静默处理
           return null;
@@ -409,6 +411,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
         return <div>未知组件类型: {cpType}</div>;
     }
   }, [componentConfig, refresh]);
+
 
   return <>{renderComponent()}</>;
 };

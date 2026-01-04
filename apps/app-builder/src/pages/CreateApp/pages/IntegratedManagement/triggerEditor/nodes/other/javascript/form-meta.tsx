@@ -50,12 +50,6 @@ export const renderForm = ({}: FormRenderProps<FlowNodeJSON['data']>) => {
   };
 
   useEffect(() => {
-    // console.log(...triggerEditorSignal.nodeData.value[node.id]);
-    console.log(node.id);
-    console.log(triggerEditorSignal.nodeData.value[node.id]);
-  }, []);
-
-  useEffect(() => {
     getConnectInstanceList();
   }, []);
 

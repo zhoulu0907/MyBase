@@ -54,7 +54,7 @@ const RichTextEditorWorkbenchConfig = () => {
           >
             {collapseItemList.map((item) => (
               <CollapseItem key={item.name} header={item.header} name={item.name} contentStyle={item.contentStyle}>
-                {item.content && <div>{renderEditItem(item.content.item, item.content.index)}</div>}
+                {item.content && <div>{renderEditItem(item.content)}</div>}
               </CollapseItem>
             ))}
           </Collapse>

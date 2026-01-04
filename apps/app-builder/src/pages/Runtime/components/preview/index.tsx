@@ -10,6 +10,7 @@ import {
   type GetPageSetIdReq
 } from '@onebase/app';
 import { getHashQueryParam, pagesRuntimeSignal } from '@onebase/common';
+import { getFileUrlById } from '@onebase/platform-center';
 import {
   EDITOR_TYPES,
   getComponentWidth,
@@ -28,7 +29,6 @@ import {
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { Fragment, useCallback, useEffect, useState } from 'react';
 import styles from './index.module.less';
-import { getFileUrlById } from '@onebase/platform-center';
 
 interface PreviewProps {
   menuId: string;
@@ -38,7 +38,6 @@ interface PreviewProps {
 
 const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType }) => {
   useSignals();
-
   const [form] = Form.useForm();
 
   const {
@@ -153,7 +152,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
     }
   }, [pageSetId]);
 
-  useEffect(() => {}, []);
   const getDashboardId = async (pageSetId: string) => {
     try {
       const res = await listPageView({
@@ -167,6 +165,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
       console.error('获取页面视图失败:', error);
     }
   };
+
   const loadPageSetInfo = async (pageSetId: string) => {
     // 工作台使用独立加载逻辑
     if (pagesetType === PageType.WORKBENCH) {
@@ -226,7 +225,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
     // }
     // return res;
   };
-
   return (
     <div className={styles.previewPage}>
       <div className={styles.content}>
@@ -253,6 +251,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
                     runtime={runtime}
                     preview={preview}
                     showFromPageData={showFromPageData}
+                    pageSetType={pagesetType}
                   />
                 </div>
               )}

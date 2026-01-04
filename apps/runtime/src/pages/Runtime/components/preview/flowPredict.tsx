@@ -50,7 +50,9 @@ const FlowPredict = ({ businessUuid, entityParam }: any) => {
   const fetchData = async () => {
     const res = await fetchFlowPredict({ businessUuid, entity: entityParam });
     setStepData(res);
-    setCurrent(res?.length - 1);
+    // 因为是发起流程，所以它的当前节点永远是第一个
+    // setCurrent(res?.length - 1);
+    setCurrent(1);
   };
 
   useEffect(() => {

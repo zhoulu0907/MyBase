@@ -133,15 +133,15 @@ const VersionManagement: React.FC<VersionManagementProps> = ({
     },
     {
       title: '操作人',
-      dataIndex: 'updaterName',
-      key: 'updaterName',
+      dataIndex: 'creatorName',
+      key: 'creatorName',
       align: 'center',
       width: 120
     },
     {
       title: '操作时间',
-      dataIndex: 'updateTime',
-      key: 'updateTime',
+      dataIndex: 'createTime',
+      key: 'createTime',
       align: 'center',
       width: 180,
       render: (value: string) => {

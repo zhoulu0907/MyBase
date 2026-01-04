@@ -29,13 +29,15 @@ interface ComponentRenderProps {
   pageComponentSchema: any;
   /** 组件预览状态 */
   runtime: boolean;
+  /** 流程页面特殊配置 */
+  pageSetType?: number;
 }
 
 /**
  * ComponentRender 组件
  * 用于渲染传入的组件，支持适配各类组件
  */
-const ComponentEditRender: React.FC<ComponentRenderProps> = ({ cpId, cpType, pageComponentSchema, runtime }) => {
+const ComponentEditRender: React.FC<ComponentRenderProps> = ({ cpId, cpType, pageComponentSchema, runtime, pageSetType }) => {
   // 判断是否为工作台组件类型
   const isWorkbenchType = hasWorkbenchComponentSchema(cpType);
   
@@ -106,7 +108,7 @@ const ComponentEditRender: React.FC<ComponentRenderProps> = ({ cpId, cpType, pag
 
       //  列表组件
       case LIST_COMPONENT_TYPES.TABLE:
-        return <ListComp.XTable cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+        return <ListComp.XTable cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} pageSetType={pageSetType} />;
       case LIST_COMPONENT_TYPES.CALENDAR:
         return <ListComp.XCalendar cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case LIST_COMPONENT_TYPES.TIMELINE:
@@ -143,6 +145,8 @@ const ComponentEditRender: React.FC<ComponentRenderProps> = ({ cpId, cpType, pag
         return <WorkbenchComp.XRichTextEditorWorkbench cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case WORKBENCH_COMPONENT_TYPES.CAROUSEL_WORKBENCH:
         return <WorkbenchComp.XCarouselWorkbench cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+      case WORKBENCH_COMPONENT_TYPES.WELCOME_CARD:
+        return <WorkbenchComp.XWelcomeCard cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case WORKBENCH_COMPONENT_TYPES.BUTTON_WORKBENCH:
         // 移动端独有组件，web 端静默处理
         return null;

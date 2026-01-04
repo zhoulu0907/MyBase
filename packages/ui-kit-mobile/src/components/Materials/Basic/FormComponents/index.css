@@ -125,3 +125,7 @@
 .arco-form-picker-link-container {
   font-size: var(--fontSize);
 }
+
+.arco-switch.type-ios.checked {
+  background-color: rgb(var(--primary-6));
+}

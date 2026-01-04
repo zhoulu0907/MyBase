@@ -11,9 +11,11 @@ const XCarousel = memo((props: XCarouselConfig & { runtime?: boolean }) => {
     label,
     verify,
     // status,
-    interval = 4,
-    carouselConfig = [],
-    runtime
+    interval,
+    carouselConfig,
+    runtime,
+    autoplay,
+    fillStyle,
   } = props;
 
   const { handleJump } = useJump();
@@ -33,8 +35,8 @@ const XCarousel = memo((props: XCarouselConfig & { runtime?: boolean }) => {
 
       <Carousel
         className={styles.carousel}
-        autoPlay={runtime ? { 
-          interval: interval * 1000
+        autoPlay={autoplay ? { 
+          interval: interval ? interval * 1000 : 4 * 1000
         } : false}
         style={{
           pointerEvents: runtime ? 'unset' : 'none'
@@ -43,7 +45,7 @@ const XCarousel = memo((props: XCarouselConfig & { runtime?: boolean }) => {
       >
         {carouselConfig.map((item, index) => (
           <div className={styles.imageWrapper} key={index} onClick={() => handleImgClick(item)}>
-            <img className={styles.image} src={item.image} />
+            <img className={styles.image} src={item.image} style={{ objectFit: fillStyle }} />
             {/* <div className={styles.text}>{item.text}</div> */}
           </div>
         ))}

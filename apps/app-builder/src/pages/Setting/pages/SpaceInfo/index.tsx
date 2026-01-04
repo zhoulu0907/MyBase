@@ -30,7 +30,7 @@ import Tags from './Tags';
 const { Col, Row } = Grid;
 const { Text } = Typography;
 
-const SpaceInfo: React.FC = () => {
+const SpaceInfo: React.FC<{ onTenantInfoChange?: (info: PlatformTenantInfo) => void }> = ({ onTenantInfoChange }) => {
   const [form] = Form.useForm();
   const [spaceInfo, setSpaceInfo] = useState<PlatformTenantInfo | null>(null);
   const [loading, setLoading] = useState(true);
@@ -167,6 +167,24 @@ const SpaceInfo: React.FC = () => {
                             if (uploadImgUrl !== '') {
                               setLogoUrl(uploadImgUrl);
                               onSuccess(uploadImgUrl);
+
+                              // 更新企业Logo
+                              try {
+                                const res = await updateTenant({
+                                  id: spaceInfo.id || '',
+                                  logoUrl: uploadImgUrl
+                                });
+
+                                if (res) {
+                                  const newInfo = {
+                                    ...(spaceInfo as PlatformTenantInfo),
+                                    logoUrl: uploadImgUrl
+                                  };
+                                  onTenantInfoChange?.(newInfo);
+                                }
+                              } catch (error) {
+                                console.error('更新信息失败:', error);
+                              }
                             } else {
                               onError({
                                 status: 'error',
@@ -240,7 +258,7 @@ const SpaceInfo: React.FC = () => {
                     )}
                   </div>
                   <div className={styles.enterpriseId}>
-                    企业ID：<Text copyable>{spaceInfo.id}</Text>
+                   空间ID：<Text copyable>{spaceInfo.id}</Text>
                   </div>
                 </div>
               </div>
