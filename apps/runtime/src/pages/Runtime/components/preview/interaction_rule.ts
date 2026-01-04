@@ -17,7 +17,7 @@ export async function initInteractionRule(
   pageComponentSchemas: any
 ) {
   // 初始化一个map，用于后续交互规则处理
-  console.log('formValues: ', formValues);
+  //   console.log('formValues: ', formValues);
 
   const fieldMap: Record<string, any> = {};
   Object.entries(pageComponentSchemas).forEach(([key, value]: [string, any]) => {
@@ -66,8 +66,8 @@ export async function initInteractionRule(
         }
       });
 
-      console.log('expression: ', expression);
-      console.log('fieldMap: ', fieldMap);
+      //   console.log('expression: ', expression);
+      //   console.log('fieldMap: ', fieldMap);
 
       let result = false;
       if (expression) {
@@ -75,7 +75,7 @@ export async function initInteractionRule(
         result = await jexl.eval(expression, fieldMap);
       }
 
-      console.log('jexl eval result: ', result);
+      //   console.log('jexl eval result: ', result);
 
       if (result) {
         for (const action of rule.formAction) {
