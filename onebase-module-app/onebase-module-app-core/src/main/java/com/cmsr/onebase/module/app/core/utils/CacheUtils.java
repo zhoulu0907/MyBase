@@ -38,4 +38,8 @@ public class CacheUtils {
     public static String fieldForUserRole() {
         return "userRole";
     }
+
+    public static String fieldForView(Long menuId) {
+        return "view:" + menuId;
+    }
 }

@@ -100,7 +100,22 @@ public class DashboardTemplateController {
     @PermitAll
     @ApiSignIgnore
     @TenantIgnore
-    public CommonResult<Boolean> updateDashboardTemplate(@ModelAttribute @Validated DashboardProjectData saveReqVO) {
+    public CommonResult<Boolean> updateDashboardTemplate(@ModelAttribute @Validated DashboardTemplateSaveReqVO saveReqVO) {
+        dashboardTemplateService.updateDashboardTemplate(saveReqVO);
+        return success(true);
+    }
+
+    /**
+     * 更新仪表盘模板（JSON 请求）
+     * @param saveReqVO 更新信息
+     * @return 是否更新成功
+     */
+    @PostMapping(value = "/edit")
+    @ApiOperation("更新模板")
+    @PermitAll
+    @ApiSignIgnore
+    @TenantIgnore
+    public CommonResult<Boolean> updateDashboardTemplateName(@RequestBody DashboardTemplateSaveReqVO saveReqVO) {
         dashboardTemplateService.updateDashboardTemplate(saveReqVO);
         return success(true);
     }

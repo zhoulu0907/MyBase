@@ -23,6 +23,10 @@ public enum AppStatusEnum {
         this.text = text;
     }
 
+    public static boolean isOnline(Integer appStatus) {
+        return ONLINE.value.equals(appStatus);
+    }
+
     public Integer getValue() {
         return value;
     }

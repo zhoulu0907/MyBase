@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.flow.build.service;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.flow.build.vo.NodeConfigActionVO;
 import com.cmsr.onebase.module.flow.build.vo.NodeConfigConnVO;
@@ -43,7 +44,8 @@ public class FlowNodeConfigServiceImpl implements FlowNodeConfigService {
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.NODE_CONFIG_NOT_EXIST);
         }
         NodeConfigConnVO nodeConfigConnVO = new NodeConfigConnVO();
-        BeanUtils.copyProperties(nodeConfigDO, nodeConfigConnVO);
+        nodeConfigConnVO.setConnConfigType(nodeConfigDO.getConnConfigType());
+        nodeConfigConnVO.setConnConfig(JsonUtils.parseTree(nodeConfigDO.getConnConfig()));
         return nodeConfigConnVO;
     }
 
@@ -54,7 +56,8 @@ public class FlowNodeConfigServiceImpl implements FlowNodeConfigService {
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.NODE_CONFIG_NOT_EXIST);
         }
         NodeConfigActionVO nodeConfigActionVO = new NodeConfigActionVO();
-        BeanUtils.copyProperties(nodeConfigDO, nodeConfigActionVO);
+        nodeConfigActionVO.setActionConfigType(nodeConfigDO.getActionConfigType());
+        nodeConfigActionVO.setActionConfig(JsonUtils.parseTree(nodeConfigDO.getActionConfig()));
         return nodeConfigActionVO;
     }
 

@@ -65,6 +65,12 @@ public class ApplicationDTO {
      */
     private LocalDateTime createTime;
 
+
+    /**
+     * 更新时间
+     */
+    private LocalDateTime updateTime;
+
     /**
      * 租户ID
      */

@@ -93,7 +93,7 @@ public class AppApplicationRepository extends ServiceImpl<AppApplicationMapper, 
 
     public List<AppApplicationDO> findAppApplicationByAppName(String appName, Integer status) {
         QueryWrapper queryWrapper = this.query()
-                .where(APP_APPLICATION.APP_NAME.eq(appName).when(StringUtils.isNotBlank(appName)))
+                .where(APP_APPLICATION.APP_NAME.like(appName).when(StringUtils.isNotBlank(appName)))
                 .where(APP_APPLICATION.APP_STATUS.eq(status).when(status != null))
                 .orderBy(APP_APPLICATION.UPDATE_TIME, false)
                 .orderBy(APP_APPLICATION.CREATE_TIME, false);

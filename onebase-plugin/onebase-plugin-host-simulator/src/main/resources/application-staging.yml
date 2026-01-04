@@ -1,0 +1,17 @@
+# 插件配置（预发布模式 - 全生命周期验证）
+# 此模式只加载plugins目录的ZIP/JAR插件，不扫描classpath，用于验证插件完整生命周期
+onebase:
+  plugin:
+    enabled: true
+    mode: staging             # 预发布模式，只加载 plugins-dir 的ZIP包，不扫描classpath
+    plugins-dir: D:/cmsr/10_cmsr/CodingSpace/plugins-root    # 插件目录，存放 ZIP/JAR 插件包
+    auto-load: true           # 自动加载插件
+    auto-start: true          # 自动启动插件
+
+logging:
+  level:
+    root: INFO
+    com.cmsr.onebase.plugin: DEBUG
+    org.pf4j: ERROR
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"

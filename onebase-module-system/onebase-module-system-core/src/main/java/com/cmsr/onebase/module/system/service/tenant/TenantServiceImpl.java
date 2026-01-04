@@ -21,6 +21,7 @@ import com.cmsr.onebase.module.system.api.user.AdminUserRoleApi;
 import com.cmsr.onebase.module.system.convert.tenant.TenantConvert;
 import com.cmsr.onebase.module.system.dal.database.TenantDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.corp.CorpDO;
+import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.dal.dataobject.license.LicenseDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.UserRoleDO;
@@ -35,7 +36,9 @@ import com.cmsr.onebase.module.system.enums.permission.RoleTypeEnum;
 import com.cmsr.onebase.module.system.enums.tenant.TenantCodeEnum;
 import com.cmsr.onebase.module.system.enums.tenant.TenantStatusEnum;
 import com.cmsr.onebase.module.system.enums.user.UserStatusEnum;
+import com.cmsr.onebase.module.system.framework.security.core.PwdEnHelper;
 import com.cmsr.onebase.module.system.service.corp.CorpService;
+import com.cmsr.onebase.module.system.service.dept.DeptService;
 import com.cmsr.onebase.module.system.service.license.LicenseService;
 import com.cmsr.onebase.module.system.service.permission.MenuService;
 import com.cmsr.onebase.module.system.service.permission.PermissionService;
@@ -55,6 +58,7 @@ import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.DataRow;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -109,6 +113,12 @@ public class TenantServiceImpl implements TenantService {
 
     @Resource
     private AdminUserRoleApi adminUserRoleApi;
+
+    @Resource
+    private DeptService deptService;
+
+    @Resource
+    private PwdEnHelper pwdEnHelper;
 
     @Override
     public List<Long> getTenantIdList() {
@@ -299,7 +309,7 @@ public class TenantServiceImpl implements TenantService {
                 }
             }
             reqVO.setAdminType(AdminTypeEnum.SYSTEM.getType());
-            reqVO.setPassword(TENANT_ADMIN_PASSWORD);
+            reqVO.setPassword(pwdEnHelper.encryptHexStr(TENANT_ADMIN_PASSWORD));
             // 通过平台创建空间（Tenant）用户
             reqVO.setUserType(UserTypeEnum.TENANT.getValue());
             // 创建用户
@@ -457,7 +467,7 @@ public class TenantServiceImpl implements TenantService {
                             }
                         }
                         userInsertReqVO.setAdminType(AdminTypeEnum.SYSTEM.getType());
-                        userInsertReqVO.setPassword(TENANT_ADMIN_PASSWORD);
+                        userInsertReqVO.setPassword(pwdEnHelper.encryptHexStr(TENANT_ADMIN_PASSWORD));
                         // 新增的都是空间管理员
                         userInsertReqVO.setUserType(UserTypeEnum.TENANT.getValue());
                         // 创建用户
@@ -629,6 +639,20 @@ public class TenantServiceImpl implements TenantService {
             List<TenantAdminUserResVO> adminUserList = new ArrayList<>();
             if (userIds.size() > 0) {
                 List<AdminUserDO> adminUsers = userService.getUserList(userIds);
+                List<Long> deptIds = adminUsers.stream().map(AdminUserDO::getDeptId).filter(Objects::nonNull).toList();
+
+                Map<Long, DeptDO> deptIdToDeptMap = new HashMap<>();
+                if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(deptIds)) {
+                    List<DeptDO> deptDOList = deptService.getDeptList(deptIds);
+                    deptIdToDeptMap = deptDOList.stream()
+                            .collect(Collectors.toMap(
+                                    DeptDO::getId,  // 以部门ID作为key
+                                    dept -> dept    // 以部门对象作为value
+                            ));
+                }
+
+
+                Map<Long, DeptDO> finalDeptIdToDeptMap = deptIdToDeptMap;
                 adminUserList = adminUsers.stream()
                         .filter(Objects::nonNull)
                         .map(uservo -> new TenantAdminUserResVO()
@@ -639,6 +663,8 @@ public class TenantServiceImpl implements TenantService {
                                 .setAdminEmail(uservo.getEmail())
                                 .setPlatformUserId(uservo.getPlatformUserId())
                                 .setAdminAvatar(uservo.getAvatar())
+                                .setDeptName(finalDeptIdToDeptMap.get(uservo.getDeptId()) != null ? finalDeptIdToDeptMap.get(uservo.getDeptId()).getName() : "")
+
 
                         )
                         .collect(Collectors.toList());

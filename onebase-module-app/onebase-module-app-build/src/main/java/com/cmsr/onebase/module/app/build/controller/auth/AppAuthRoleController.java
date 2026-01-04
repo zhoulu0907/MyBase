@@ -2,8 +2,10 @@ package com.cmsr.onebase.module.app.build.controller.auth;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.app.build.service.auth.AppAuthRoleService;
-import com.cmsr.onebase.module.app.build.vo.auth.*;
+import com.cmsr.onebase.module.app.build.service.auth.BuildAppAuthRoleService;
+import com.cmsr.onebase.module.app.build.vo.auth.AuthRoleCreateReqVO;
+import com.cmsr.onebase.module.app.build.vo.auth.AuthRoleCreateRespVO;
+import com.cmsr.onebase.module.app.core.vo.auth.*;
 import com.cmsr.onebase.module.system.api.dept.dto.DeptAndUsersRespDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -25,7 +27,7 @@ import java.util.List;
 public class AppAuthRoleController {
 
     @Resource
-    private AppAuthRoleService authRoleService;
+    private BuildAppAuthRoleService authRoleService;
 
     /**
      * 获取角色列表
@@ -50,6 +52,7 @@ public class AppAuthRoleController {
     public CommonResult<DeptAndUsersRespDTO> listDeptUsers(@Validated AuthRoleDeptAndUsersReqVO reqVO) {
         return CommonResult.success(authRoleService.listDeptUsers(reqVO));
     }
+
 
     /**
      * 新增角色
@@ -84,19 +87,6 @@ public class AppAuthRoleController {
         return CommonResult.success(true);
     }
 
-//    /**
-//     * 角色删除成员
-//     *
-//     * @param reqVO
-//     * @return
-//     */
-//    @PostMapping("/delete-user")
-//    @Operation(summary = "角色删除用户")
-//    public CommonResult<Boolean> deleteRoleUser(@Valid @RequestBody AuthRoleDeleteUserReqVO reqVO) {
-//        authRoleService.deleteRoleUser(reqVO);
-//        return CommonResult.success(true);
-//    }
-
 
     /**
      * 角色添加成员
@@ -110,19 +100,6 @@ public class AppAuthRoleController {
         authRoleService.addRoleDept(reqVO);
         return CommonResult.success(true);
     }
-
-//    /**
-//     * 角色删除成员
-//     *
-//     * @param reqVO
-//     * @return
-//     */
-//    @PostMapping("/delete-dept")
-//    @Operation(summary = "角色删除部门")
-//    public CommonResult<Boolean> deleteRoleDept(@Valid @RequestBody AuthRoleDeleteDeptReqVO reqVO) {
-//        authRoleService.deleteRoleDept(reqVO);
-//        return CommonResult.success(true);
-//    }
 
 
     @PostMapping("/delete-member")

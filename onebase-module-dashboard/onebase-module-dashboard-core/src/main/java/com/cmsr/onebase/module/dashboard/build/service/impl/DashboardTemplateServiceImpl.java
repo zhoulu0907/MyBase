@@ -7,7 +7,6 @@ import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.dashboard.build.dal.dataobject.DashboardTemplateDO;
 import com.cmsr.onebase.module.dashboard.build.dal.mapper.DashboardTemplateMapper;
 import com.cmsr.onebase.module.dashboard.build.enums.TemplateTypeEnum;
-import com.cmsr.onebase.module.dashboard.build.model.DashboardProjectData;
 import com.cmsr.onebase.module.dashboard.build.service.DashboardTemplateService;
 import com.cmsr.onebase.module.dashboard.build.vo.template.DashboardTemplatePageReqVO;
 import com.cmsr.onebase.module.dashboard.build.vo.template.DashboardTemplateSaveReqVO;
@@ -18,6 +17,7 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,7 +46,7 @@ public class DashboardTemplateServiceImpl extends ServiceImpl<DashboardTemplateM
     public Long createDashboardTemplate(DashboardTemplateSaveReqVO saveReqVO) {
 
         if (saveReqVO.getHot() == null) {
-            saveReqVO.setHot(0);
+            saveReqVO.setHot(NumberUtils.INTEGER_ZERO);
         }
 
         SecurityFrameworkUtils.getLoginUserId();
@@ -60,14 +60,11 @@ public class DashboardTemplateServiceImpl extends ServiceImpl<DashboardTemplateM
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void updateDashboardTemplate(DashboardProjectData saveReqVO) {
+    public void updateDashboardTemplate(DashboardTemplateSaveReqVO saveReqVO) {
         // 校验存在
-        validateDashboardTemplate(saveReqVO.getProjectId());
+        validateDashboardTemplate(saveReqVO.getId());
 
-        // 更新
-        DashboardTemplateDO updateObj = new DashboardTemplateDO();
-        updateObj.setId(saveReqVO.getProjectId());
-        updateObj.setContent(saveReqVO.getContent());
+        DashboardTemplateDO updateObj = BeanUtils.toBean(saveReqVO, DashboardTemplateDO.class);
 
         updateObj.setUpdater(SecurityFrameworkUtils.getLoginUserId());
         dashboardTemplateMapper.update(updateObj);
