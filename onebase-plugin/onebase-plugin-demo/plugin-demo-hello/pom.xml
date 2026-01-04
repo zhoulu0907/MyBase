@@ -22,6 +22,7 @@
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-plugin-sdk</artifactId>
+            <version>${onebase-dependencies.version}</version>
             <scope>provided</scope>
         </dependency>
 
