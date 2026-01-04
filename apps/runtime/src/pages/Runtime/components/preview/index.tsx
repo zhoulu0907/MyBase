@@ -147,7 +147,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
       return;
     }
 
-    if (pageSetType == PageType.DASHBOARD) {
+    if (pageSetId && pageSetType == PageType.DASHBOARD) {
       getDashboardId(pageSetId);
 
       setPageType(EDITOR_TYPES.DASHBOARD_PREVIEW);
