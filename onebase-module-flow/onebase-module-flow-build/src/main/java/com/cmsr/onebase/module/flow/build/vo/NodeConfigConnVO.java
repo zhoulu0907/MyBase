@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.flow.build.vo;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -14,6 +15,6 @@ public class NodeConfigConnVO {
     private String connConfigType;
 
     @Schema(description = "连接配置")
-    private String connConfig;
+    private JsonNode connConfig;
 
 }
