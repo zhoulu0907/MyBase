@@ -619,11 +619,16 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
 
         // 查询流程数据，todo 使用关联查询
 
-        List<FlowInstance> instanceResults =  flowInstanceRepository.listByIds(instanceIds);
+        List<FlowInstance> instanceResults = new ArrayList<>();
+        List<BpmFlowInsBizExtDO> instanceExtResults = new ArrayList<>();
 
-        QueryWrapper instanceExtResultQuery = QueryWrapper.create();
-        instanceExtResultQuery.in(BpmFlowInsBizExtDO::getInstanceId, instanceIds);
-        List<BpmFlowInsBizExtDO> instanceExtResults = flowInsExtRepository.list(instanceExtResultQuery);
+        if (CollectionUtils.isNotEmpty(instanceIds)) {
+            instanceResults = flowInstanceRepository.listByIds(instanceIds);
+
+            QueryWrapper instanceExtResultQuery = QueryWrapper.create();
+            instanceExtResultQuery.in(BpmFlowInsBizExtDO::getInstanceId, instanceIds);
+            instanceExtResults = flowInsExtRepository.list(instanceExtResultQuery);
+        }
 
         Map<Long, FlowInstance> instanceResultMap = new HashMap<>();
         Map<Long, BpmFlowInsBizExtDO> instanceExtResultMap = new HashMap<>();
