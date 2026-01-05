@@ -556,9 +556,10 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         List<FlowInstance> instances = flowInstanceRepository.list(instanceQuery);
         Map<Long, Long> entityDataIdInstanceIdMap = new HashMap<>();
 
-        if (CollectionUtils.isEmpty(instances)) {
-            return response;
-        }
+        // todo 只有携带了BPM相关的条件，才会进行BPM流程的查询
+//        if (CollectionUtils.isEmpty(instances)) {
+//            return response;
+//        }
 
         Set<Long> entityDataIds = new HashSet<>();
 
@@ -589,10 +590,10 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
                 reqVO.getFilters().setChildren(new ArrayList<>());
             }
 
-            reqVO.getFilters().getChildren().add(idCondition);
+            // reqVO.getFilters().getChildren().add(idCondition);
             conditionVO.setSemanticConditionDTO(reqVO.getFilters());
         } else {
-            conditionVO.setSemanticConditionDTO(idCondition);
+            // conditionVO.setSemanticConditionDTO(idCondition);
         }
 
         // 3. 调用 getDataByCondition 方法， todo 增加menuId的权限限制
@@ -666,6 +667,7 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
 
             if (matchedInstance == null && matchedInstanceExt == null) {
                 log.warn("无匹配的流程实例信息 entityDataId = {}", entityValueId);
+                response.getList().add(entityValueDTO.getGlobalRawMapForJson());
                 continue;
             }
 
@@ -731,7 +733,7 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
                 entityValueDTO.getFieldValueMap().put(bpmFieldEnum.getFieldName(), semanticFieldValue);
             }
 
-            response.getList().add(entityValueDTO.getGlobalRawMap());
+            response.getList().add(entityValueDTO.getGlobalRawMapForJson());
         }
 
         return response;
