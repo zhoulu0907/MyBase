@@ -31,6 +31,9 @@ const DepartmentModal: React.FC<DepartmentModalProps> = (props) => {
     if (visible) {
       form.resetFields();
       if (initialValues) {
+        if (initialValues.parentId == 0) {
+          delete initialValues.parentId;
+        }
         form.setFieldsValue({ ...initialValues });
       }
 
