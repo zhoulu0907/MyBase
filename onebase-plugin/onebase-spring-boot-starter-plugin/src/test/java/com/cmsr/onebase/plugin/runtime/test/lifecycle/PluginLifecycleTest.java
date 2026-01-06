@@ -1,6 +1,8 @@
 package com.cmsr.onebase.plugin.runtime.test.lifecycle;
 
 import com.cmsr.onebase.plugin.runtime.manager.OneBasePluginManager;
+import com.cmsr.onebase.plugin.runtime.test.config.PluginTestConfiguration;
+import org.springframework.context.annotation.Import;
 import com.cmsr.onebase.plugin.runtime.test.util.PluginHttpTestUtil;
 import com.cmsr.onebase.plugin.runtime.test.util.PluginStatusAssert;
 import org.junit.jupiter.api.DisplayName;
@@ -43,6 +45,7 @@ import org.springframework.test.context.TestPropertySource;
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@Import(PluginTestConfiguration.class)
 @TestPropertySource(properties = {
         "onebase.plugin.enabled=true",
         "onebase.plugin.mode=staging",

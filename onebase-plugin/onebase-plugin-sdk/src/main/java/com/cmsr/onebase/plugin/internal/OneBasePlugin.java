@@ -43,6 +43,15 @@ public class OneBasePlugin extends Plugin {
     }
 
     /**
+     * 获取插件版本
+     *
+     * @return 插件版本，如果wrapper未设置则返回"unknown"
+     */
+    public String getVersion() {
+        return getWrapper() != null ? getWrapper().getDescriptor().getVersion() : "unknown";
+    }
+
+    /**
      * 插件启动
      * <p>
      * 插件被启动时调用，可以在此进行初始化操作。

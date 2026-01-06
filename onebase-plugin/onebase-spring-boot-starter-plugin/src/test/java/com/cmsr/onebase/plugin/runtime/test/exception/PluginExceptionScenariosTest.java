@@ -1,6 +1,7 @@
 package com.cmsr.onebase.plugin.runtime.test.exception;
 
 import com.cmsr.onebase.plugin.runtime.manager.OneBasePluginManager;
+import com.cmsr.onebase.plugin.runtime.test.config.PluginTestConfiguration;
 import com.cmsr.onebase.plugin.runtime.test.util.PluginHttpTestUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -11,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 
@@ -33,6 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@Import(PluginTestConfiguration.class)
 @TestPropertySource(properties = {
         "onebase.plugin.enabled=true",
         "onebase.plugin.mode=staging",

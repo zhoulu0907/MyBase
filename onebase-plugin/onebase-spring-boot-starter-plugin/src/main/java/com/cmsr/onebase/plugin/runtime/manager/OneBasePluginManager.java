@@ -1,7 +1,5 @@
 package com.cmsr.onebase.plugin.runtime.manager;
 
-import com.cmsr.onebase.plugin.api.DataProcessor;
-import com.cmsr.onebase.plugin.api.EventListener;
 import com.cmsr.onebase.plugin.api.HttpHandler;
 import com.cmsr.onebase.plugin.runtime.event.PluginDeletedEvent;
 import com.cmsr.onebase.plugin.runtime.event.PluginLoadedEvent;
@@ -421,65 +419,6 @@ public class OneBasePluginManager {
     }
 
     // ==================== 扩展点查询 ====================
-
-    /**
-     * 获取所有数据处理器
-     *
-     * @return 数据处理器列表
-     */
-    public List<DataProcessor> getDataProcessors() {
-        return pluginManager.getExtensions(DataProcessor.class);
-    }
-
-    /**
-     * 获取指定类型的数据处理器
-     *
-     * @param type 处理器类型
-     * @return 数据处理器
-     */
-    public Optional<DataProcessor> getDataProcessor(String type) {
-        return getDataProcessors().stream()
-                .filter(p -> type.equals(p.type()))
-                .findFirst();
-    }
-
-    /**
-     * 获取所有事件监听器
-     *
-     * @return 事件监听器列表
-     */
-    public List<EventListener> getEventListeners() {
-        return pluginManager.getExtensions(EventListener.class);
-    }
-
-    /**
-     * 获取指定事件类型的监听器
-     *
-     * @param eventType 事件类型
-     * @return 事件监听器列表
-     */
-    public List<EventListener> getEventListeners(String eventType) {
-        return getEventListeners().stream()
-                .filter(l -> containsEventType(l.eventTypes(), eventType) || containsEventType(l.eventTypes(), "*"))
-                .sorted((a, b) -> Integer.compare(a.order(), b.order()))
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * 检查事件类型数组是否包含指定类型
-     */
-    private boolean containsEventType(String[] eventTypes, String eventType) {
-        if (eventTypes == null) {
-            return false;
-        }
-        for (String type : eventTypes) {
-            if (type.equals(eventType)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     /**
      * 获取所有HTTP处理器
      * <p>
