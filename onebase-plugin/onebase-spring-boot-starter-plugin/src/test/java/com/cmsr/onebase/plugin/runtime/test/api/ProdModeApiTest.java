@@ -1,6 +1,7 @@
 package com.cmsr.onebase.plugin.runtime.test.api;
 
 import com.cmsr.onebase.plugin.runtime.manager.OneBasePluginManager;
+import com.cmsr.onebase.plugin.runtime.test.config.PluginTestConfiguration;
 import com.cmsr.onebase.plugin.runtime.test.util.PluginHttpTestUtil;
 import com.cmsr.onebase.plugin.runtime.test.util.PluginHttpTestUtil.HttpResponse;
 import com.cmsr.onebase.plugin.runtime.test.util.PluginStatusAssert;
@@ -12,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 
@@ -27,6 +29,7 @@ import org.springframework.test.context.TestPropertySource;
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@Import(PluginTestConfiguration.class)
 @TestPropertySource(properties = {
         "onebase.plugin.enabled=true",
         "onebase.plugin.mode=prod",

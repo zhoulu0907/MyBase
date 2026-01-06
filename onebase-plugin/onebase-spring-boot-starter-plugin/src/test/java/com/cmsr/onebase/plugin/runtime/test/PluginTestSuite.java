@@ -11,6 +11,7 @@ import com.cmsr.onebase.plugin.runtime.test.exception.PluginExceptionScenariosTe
 import com.cmsr.onebase.plugin.runtime.test.integration.PluginSystemIntegrationTest;
 import com.cmsr.onebase.plugin.runtime.test.lifecycle.PluginLifecycleTest;
 import com.cmsr.onebase.plugin.runtime.test.reload.DevModeHotReloadTest;
+import com.cmsr.onebase.plugin.runtime.test.util.PluginPropertiesUtilTest;
 import org.junit.platform.suite.api.SelectClasses;
 import org.junit.platform.suite.api.Suite;
 import org.junit.platform.suite.api.SuiteDisplayName;
@@ -27,6 +28,7 @@ import org.junit.platform.suite.api.SuiteDisplayName;
  * <li>API 测试（7个类，47个用例）</li>
  * <li>生命周期测试（1个类，4个用例）</li>
  * <li>热重载测试（1个类，3个用例）</li>
+ * <li>工具类单元测试（1个类，12个用例）</li>
  * </ul>
  * <p>
  * 注：原 config 包的配置测试已合并到 api 包，避免重复测试。
@@ -64,7 +66,10 @@ import org.junit.platform.suite.api.SuiteDisplayName;
         DevModeHotReloadTest.class,
 
         // 插件异常场景测试
-        PluginExceptionScenariosTest.class
+        PluginExceptionScenariosTest.class,
+
+        // 工具类单元测试
+        PluginPropertiesUtilTest.class
 })
 public class PluginTestSuite {
     // 这个类不需要任何代码
