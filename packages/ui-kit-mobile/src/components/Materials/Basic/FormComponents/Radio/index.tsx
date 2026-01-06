@@ -2,7 +2,7 @@ import { memo, useEffect, useState } from 'react';
 import { nanoid } from 'nanoid';
 import { Ellipsis, Form, Radio } from '@arco-design/mobile-react';
 import { ValidatorType, ITypeRules } from '@arco-design/mobile-utils';
-import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, FormSchema, getFieldOptionsConfig, useAppEntityStore, DEFAULT_VALUE_TYPES } from '@onebase/ui-kit';
+import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, FormSchema, getFieldOptionsConfig, useAppEntityStore, DEFAULT_VALUE_TYPES, menuDictSignal } from '@onebase/ui-kit';
 import { DictData } from '@onebase/platform-center';
 import '../index.css';
 import './index.css';
@@ -25,6 +25,7 @@ const XRadio = memo((props: XRadioConfig & { runtime?: boolean; detailMode?: boo
     detailMode
   } = props;
 
+  const { appDict } = menuDictSignal;
   const { mainEntity, subEntities } = useAppEntityStore();
 
   // 生成唯一的字段ID
@@ -44,14 +45,14 @@ const XRadio = memo((props: XRadioConfig & { runtime?: boolean; detailMode?: boo
 
   useEffect(() => {
     if (dataField?.length) {
-      getOptions()
+      getOptions();
     }
-  }, [dataField])
+  }, [dataField]);
 
   const getOptions = async () => {
-    const newOptions = await getFieldOptionsConfig(dataField, mainEntity, subEntities);
-    setOptions(newOptions)
-  }
+    const newOptions = await getFieldOptionsConfig(dataField, mainEntity, subEntities, appDict.value);
+    setOptions(newOptions);
+  };
 
   return (
     <Form.Item
