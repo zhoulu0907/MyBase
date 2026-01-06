@@ -13,7 +13,6 @@ import XCheckbox from './Checkbox';
 import XRadio from './Radio';
 import XSwitch from './Switch';
 import XImgUpload from './ImgUpload';
-import XCarouselForm from './Carousel';
 import XFileUpload from './FileUpload';
 import XAutoCode from './AutoCode';
 import XDeptSelect from './DeptSelect';
@@ -37,7 +36,6 @@ export const FormComp: any = {
   XRadio,
   XSwitch,
   XImgUpload,
-  XCarouselForm,
   XFileUpload,
   XAutoCode,
   XDeptSelect,
@@ -46,6 +44,6 @@ export const FormComp: any = {
   XDataSelect,
 };
 
-export { XInputText, XInputTextArea, XInputEmail, XInputPhone, XInputNumber, XDatePicker, XDateRangePicker, XDateTimePicker, XTimePicker, XSelectOne, XSelectMutiple, XCheckbox, XRadio, XSwitch, XImgUpload, XCarouselForm, XFileUpload, XAutoCode, XDeptSelect, XUserSelect, XSubTable, XDataSelect };
+export { XInputText, XInputTextArea, XInputEmail, XInputPhone, XInputNumber, XDatePicker, XDateRangePicker, XDateTimePicker, XTimePicker, XSelectOne, XSelectMutiple, XCheckbox, XRadio, XSwitch, XImgUpload, XFileUpload, XAutoCode, XDeptSelect, XUserSelect, XSubTable, XDataSelect };
 
 export type FormComponentType = typeof FormComp;

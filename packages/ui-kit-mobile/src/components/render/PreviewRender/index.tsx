@@ -116,7 +116,6 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
     [FORM_COMPONENT_TYPES.IMG_UPLOAD]: { component: FormComp.XImgUpload, extraProps },
     [FORM_COMPONENT_TYPES.AUTO_CODE]: { component: FormComp.XAutoCode, extraProps },
     // [FORM_COMPONENT_TYPES.RELATED_FORM]: { component: FormComp.XRelatedForm, extraProps },
-    [FORM_COMPONENT_TYPES.CAROUSEL_FORM]: { component: FormComp.XCarouselForm, extraProps },
     [FORM_COMPONENT_TYPES.SUB_TABLE]: { component: FormComp.XSubTable, extraProps: { ...extraProps, editLoading, useStoreSignals, editPreview } },
     [FORM_COMPONENT_TYPES.DATA_SELECT]: { component: FormComp.XDataSelect, extraProps: { ...extraProps, editPreview } },
 
@@ -141,6 +140,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
     [SHOW_COMPONENT_TYPES.WEB_VIEW]: { component: ShowComp.XWebView },
     [SHOW_COMPONENT_TYPES.DIVIDER]: { component: ShowComp.XDivider },
     [SHOW_COMPONENT_TYPES.PLACEHOLDER]: { component: ShowComp.XPlaceholder },
+    [SHOW_COMPONENT_TYPES.CAROUSEL_FORM]: { component: ShowComp.XCarouselForm, extraProps },
 
     //  工作台组件
     [WORKBENCH_COMPONENT_TYPES.QUICK_ENTRY]: { component: WorkbenchComp.XQuickEntry },
