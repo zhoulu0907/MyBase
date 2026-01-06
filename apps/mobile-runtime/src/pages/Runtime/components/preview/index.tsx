@@ -469,10 +469,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({
             if (fieldType === ENTITY_FIELD_TYPE.DATE.VALUE || fieldType === ENTITY_FIELD_TYPE.DATETIME.VALUE) {
               formValues[fieldName] = dayjs(value).valueOf();
             } else if (fieldType === ENTITY_FIELD_TYPE.SELECT.VALUE) {
-              // const curComponentSchema = Object.values(pageComponentSchemas.value).find(v => value.id?.includes(v.id)) || {};
-              // const curOptions = curComponentSchema?.config?.defaultOptionsConfig?.defaultOptions || [];
-              // const renderValue = curOptions.find(op => op.value === value.id)?.label || '-';
-              // formValues[fieldName] = [renderValue];
               formValues[fieldName] = value.id ? [value.id] : [];
             } else if (fieldType === ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE) {
               formValues[fieldName] = value.map((v) => v.id) || [];
