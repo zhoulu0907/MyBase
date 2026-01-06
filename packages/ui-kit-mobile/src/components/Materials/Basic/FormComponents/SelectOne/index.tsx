@@ -3,7 +3,7 @@ import { nanoid } from 'nanoid';
 import { memo, useEffect, useState } from 'react';
 import { ValidatorType, ITypeRules } from '@arco-design/mobile-utils';
 import { FormInternalComponentType } from '@arco-design/mobile-react/esm/form';
-import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, DEFAULT_VALUE_TYPES, FormSchema, getFieldOptionsConfig, useAppEntityStore } from '@onebase/ui-kit';
+import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, DEFAULT_VALUE_TYPES, FormSchema, getFieldOptionsConfig, useAppEntityStore, menuDictSignal } from '@onebase/ui-kit';
 import { DictData } from '@onebase/platform-center';
 import '../index.css';
 
@@ -22,6 +22,7 @@ const XSelectOne = memo((props: XSelectOneConfig & { runtime?: boolean; detailMo
     detailMode
   } = props;
 
+  const { appDict } = menuDictSignal;
   const { mainEntity, subEntities } = useAppEntityStore();
 
   // 生成唯一的字段ID
@@ -41,15 +42,14 @@ const XSelectOne = memo((props: XSelectOneConfig & { runtime?: boolean; detailMo
 
   useEffect(() => {
     if (dataField?.length) {
-      getOptions()
+      getOptions();
     }
-  }, [dataField])
+  }, [dataField]);
 
   const getOptions = async () => {
-    const newOptions = await getFieldOptionsConfig(dataField, mainEntity, subEntities);
-    setOptions(newOptions)
-  }
-
+    const newOptions = await getFieldOptionsConfig(dataField, mainEntity, subEntities, appDict.value);
+    setOptions(newOptions);
+  };
 
   return (
     <Form.Item
@@ -67,7 +67,7 @@ const XSelectOne = memo((props: XSelectOneConfig & { runtime?: boolean; detailMo
       }}
     >
       {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
-        <div className="readonlyText">{form?.getFieldValue(fieldId) || options.find((op) => op.id === form?.getFieldValue(fieldId)?.[0]) || '--'}</div>
+        <div className="readonlyText">{options.find((op) => op.id === form?.getFieldValue(fieldId)?.[0])?.label || '--'}</div>
       ) : (
         <Picker
           title={label?.text || ''}

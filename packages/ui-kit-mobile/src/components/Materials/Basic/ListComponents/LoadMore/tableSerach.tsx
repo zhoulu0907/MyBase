@@ -327,20 +327,6 @@ const TableSearch = memo((props: TableSearchConfig) => {
               config,
               cpType
             }
-          case FORM_COMPONENT_TYPES.CAROUSEL_FORM:
-            return {
-              content: (
-                <FormComp.XCarouselForm
-                  cpName={cpId}
-                  id={cpId}
-                  {...componentConfig}
-                  runtime={runtime}
-                  detailMode={detailMode}
-                />
-              ),
-              config,
-              cpType
-            }
           case FORM_COMPONENT_TYPES.DATA_SELECT:
             return {
               content: (

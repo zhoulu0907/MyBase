@@ -1,5 +1,4 @@
 import XAutoCode from './AutoCode';
-import XCarouselForm from './Carousel';
 import XCheckbox from './Checkbox';
 import XDataSelect from './DataSelect';
 import XDatePicker from './DatePicker';
@@ -26,7 +25,6 @@ import XSubTable from './SubTable';
 
 
 import XAutoCodeSchema from './AutoCode/schema';
-import XCarouselFormSchema from './Carousel/schema';
 import XCheckboxSchema from './Checkbox/schema';
 import XDataSelectSchema from './DataSelect/schema';
 import XDatePickerSchema from './DatePicker/schema';
@@ -74,7 +72,6 @@ export const FormComp = {
   XRelatedForm,
   XStaticText,
   XRichText,
-  XCarouselForm,
   XSubTable,
   XDataSelect
 };
@@ -102,7 +99,6 @@ export const FormSchema = {
   XRelatedFormSchema,
   XStaticTextSchema,
   XRichTextSchema,
-  XCarouselFormSchema,
   XSubTableSchema,
   XDataSelectSchema
 };

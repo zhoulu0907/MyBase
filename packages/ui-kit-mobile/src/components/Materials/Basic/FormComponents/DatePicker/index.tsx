@@ -2,7 +2,7 @@ import { memo } from 'react';
 import { nanoid } from 'nanoid';
 import dayjs from 'dayjs';
 import { DatePicker, Ellipsis, Form } from '@arco-design/mobile-react';
-import { ItemType } from '@arco-design/mobile-react/cjs/date-picker';
+// import { ItemType } from '@arco-design/mobile-react/cjs/date-picker';
 import { ValidatorType, ITypeRules } from '@arco-design/mobile-utils';
 import { FORM_COMPONENT_TYPES, DATE_OPTIONS, DATE_VALUES, STATUS_OPTIONS, STATUS_VALUES, FormSchema, DATE_EXTREME_TYPE, DATE_DYNAMIC_VALUE, securityEncodeText } from '@onebase/ui-kit';
 type XDatePickerConfig = typeof FormSchema.XDatePickerSchema.config;
@@ -29,7 +29,7 @@ const XDatePicker = memo((props: XDatePickerConfig & { runtime?: boolean; detail
   const fieldId = dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.DATE_PICKER}_${nanoid()}`
 
   const textAlign = layout === 'vertical' ? 'left' : 'right';
-  const currentDateType = dateType || DATE_VALUES[DATE_OPTIONS.DATE];
+  // const currentDateType = dateType || DATE_VALUES[DATE_OPTIONS.DATE];
 
   // 时间范围判断
   const dateSelectRange = () => {
@@ -95,28 +95,29 @@ const XDatePicker = memo((props: XDatePickerConfig & { runtime?: boolean; detail
 
   // 根据日期类型渲染对应的日期选择器
   const renderDatePicker = () => {
-    let mode: ItemType[] = [];
-    switch (currentDateType) {
-      case DATE_VALUES[DATE_OPTIONS.YEAR]:
-        mode.push('year');
-        break;
-      case DATE_VALUES[DATE_OPTIONS.MONTH]:
-        mode.push('year', 'month');
-        break;
-      case DATE_VALUES[DATE_OPTIONS.DATE]:
-        mode.push('year', 'month', 'date');
-        break;
-      case DATE_VALUES[DATE_OPTIONS.FULL]:
-        mode.push('year', 'month', 'date', 'hour', 'minute');
-        break;
-      default:
-        mode.push('year', 'month', 'date');
-    };
+    // let mode: ItemType[] = [];
+    // switch (currentDateType) {
+    //   case DATE_VALUES[DATE_OPTIONS.YEAR]:
+    //     mode.push('year');
+    //     break;
+    //   case DATE_VALUES[DATE_OPTIONS.MONTH]:
+    //     mode.push('year', 'month');
+    //     break;
+    //   case DATE_VALUES[DATE_OPTIONS.DATE]:
+    //     mode.push('year', 'month', 'date');
+    //     break;
+    //   case DATE_VALUES[DATE_OPTIONS.FULL]:
+    //     mode.push('year', 'month', 'date', 'hour', 'minute');
+    //     break;
+    //   default:
+    //     mode.push('year', 'month', 'date');
+    // };
 
     return (
       <DatePicker
         title={label.text}
-        typeArr={mode}
+        // typeArr={mode}
+        mode='date'
         maskClosable
         minTs={dateSelectRange().startTs}
         maxTs={dateSelectRange().endTs}
@@ -167,7 +168,6 @@ const XDatePicker = memo((props: XDatePickerConfig & { runtime?: boolean; detail
       rules={rules}
       layout={layout}
       label={label.display && <Ellipsis text={label.text} maxLine={2} />}
-      initialValue={defaultValueConfig.customValue}
       style={{
         textAlign,
         pointerEvents: (!runtime || detailMode) ? 'none' : 'unset',
