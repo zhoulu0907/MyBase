@@ -36,6 +36,24 @@ plugins:
     timeout: 30000
     max-file-size: 10485760  # 10MB
 
+  # ===== Dev 模式插件配置（用于开发调试） =====
+  dev-mode-plugin:
+    # API 配置
+    apiKey: "demo-api-key-123456"
+    provider: "baidu"
+    
+    # 性能配置
+    timeout: 5000
+    maxRetries: 3
+    
+    # 功能开关
+    enableLog: true
+    enableCache: false
+    
+    # 业务配置
+    maxFileSize: 10485760  # 10MB
+    supportedFormats: "jpg,png,pdf"
+
   # ===== 添加你的插件配置 =====
   # my-plugin:
   #   key1: value1

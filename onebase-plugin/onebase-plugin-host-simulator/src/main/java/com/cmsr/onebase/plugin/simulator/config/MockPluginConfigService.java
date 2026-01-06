@@ -1,6 +1,6 @@
 package com.cmsr.onebase.plugin.simulator.config;
 
-import com.cmsr.onebase.plugin.config.PluginConfigService;
+import com.cmsr.onebase.plugin.service.PluginConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.DefaultResourceLoader;

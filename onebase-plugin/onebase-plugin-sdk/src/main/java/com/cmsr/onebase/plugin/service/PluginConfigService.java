@@ -1,6 +1,5 @@
-package com.cmsr.onebase.plugin.config;
+package com.cmsr.onebase.plugin.service;
 
-import java.util.Collections;
 import java.util.Map;
 
 /**
