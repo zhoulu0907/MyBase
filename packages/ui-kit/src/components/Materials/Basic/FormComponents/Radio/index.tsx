@@ -67,7 +67,9 @@ const XRadio = memo((props: XInputRadioConfig & { runtime?: boolean; detailMode?
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
           <div>
-            {fieldValue?.name || options.find((op) => op.id === fieldValue?.id || op.id === fieldValue)?.label || '--'}
+            {fieldValue?.name ||
+              options.find((op) => op.value === fieldValue?.id || op.value === fieldValue)?.label ||
+              '--'}
           </div>
         ) : (
           <RadioGroup
@@ -77,7 +79,7 @@ const XRadio = memo((props: XInputRadioConfig & { runtime?: boolean; detailMode?
             }}
           >
             {options.map((ele, index: number) => (
-              <Radio key={index} value={ele.id}>
+              <Radio key={index} value={ele.value}>
                 {ele.colorType ? <Tag color={ele.colorType}>{ele.label}</Tag> : <span>{ele.label}</span>}
               </Radio>
             ))}

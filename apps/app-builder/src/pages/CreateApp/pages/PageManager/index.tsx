@@ -16,7 +16,9 @@ import {
   DashBoardCreateType,
   deleteApplicationMenu,
   getEntityListByApp,
+  getEntityListWithFields,
   getPageSetId,
+  getPageSetMetaData,
   listApplicationMenu,
   listPageView,
   menuSignal,
@@ -27,8 +29,6 @@ import {
   updateApplicationMenu,
   updateApplicationMenuOrder,
   VisibleType,
-  getPageSetMetaData,
-  getEntityListWithFields,
   type ApplicationMenu,
   type CopyApplicationMenuReq,
   type CreateApplicationMenuReq,
@@ -42,7 +42,7 @@ import {
 } from '@onebase/app';
 import { updateApplicationMenuVisibleMobile, updateApplicationMenuVisiblePC } from '@onebase/app/src/services';
 import { getDashBoardURL, pagesRuntimeSignal } from '@onebase/common';
-import { EDITOR_TYPES, menuDictSignal, useAppEntityStore, setMainMetaData } from '@onebase/ui-kit';
+import { EDITOR_TYPES, menuDictSignal, setMainMetaData, useAppEntityStore } from '@onebase/ui-kit';
 import { currentEditorSignal } from '@onebase/ui-kit/src/signals/current_editor';
 import { useSignals } from '@preact/signals-react/runtime';
 import { debounce } from 'lodash-es';
@@ -188,13 +188,13 @@ const PageManagerPage: FC = () => {
   }, [treeData, searchResult]);
 
   useEffect(() => {
-    if (curMenu.value?.id && curMenu.value?.menuType === MenuType.PAGE) {
+    console.log('curMenu.value: ', curMenu.value);
+    if (curMenu.value?.id && curMenu.value?.pagesetType === PageType.NORMAL) {
       loadMainMetaData();
     }
   }, [curMenu.value?.id]);
 
   const loadMainMetaData = async () => {
-    console.log('loadMainMetaData curMenu.value: ', curMenu.value);
     const req: GetPageSetIdReq = {
       menuId: curMenu.value?.id
     };
@@ -305,7 +305,7 @@ const PageManagerPage: FC = () => {
       .filter(
         (entity) =>
           // 过滤子表
-          entity.relationType !== RELATION_TYPE.SLAVE ||
+          entity.relationType == RELATION_TYPE.MASTER ||
           (entity.relationType === RELATION_TYPE.SLAVE &&
             !entity.relationshipTypes?.includes(RELATIONSHIP_TYPE.SUBTABLE_ONE_TO_MANY))
       )
@@ -440,6 +440,7 @@ const PageManagerPage: FC = () => {
   const triggerDelete = (menuID: string) => {
     handleDelete(menuID);
   };
+
   //页面设计新建大屏创建
   const handleScreenCreate = async (id?: string, screenMethod?: string) => {
     console.log('创建大屏参数 id、screenMethod：', id, screenMethod);
@@ -488,6 +489,7 @@ const PageManagerPage: FC = () => {
       }
     });
   };
+
   const handleCreate = async () => {
     createForm.validate(async (error) => {
       if (error !== null) return;

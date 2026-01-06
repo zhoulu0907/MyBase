@@ -3,7 +3,7 @@ import { IconRight } from '@arco-design/web-react/icon';
 import type { CSSProperties } from 'react';
 import { memo, useMemo } from 'react';
 import { ReactSVG } from 'react-svg';
-import { WORKBENCH_STATUS_OPTIONS, WORKBENCH_STATUS_VALUES, QUICK_ENTRY_THEME_OPTIONS, QUICK_ENTRY_THEME_VALUES } from '../../core/constants';
+import { WORKBENCH_STATUS_OPTIONS, WORKBENCH_STATUS_VALUES, WORKBENCH_THEME_OPTIONS } from '../../core/constants';
 import type { QuickEntryTitleConfig, QuickEntryStyleConfig, QuickEntryGroupConfig } from '../../core/types';
 import { mobileMenuIcons } from '@/utils/menuIcons';
 import { type XQuickEntryConfig } from './schema';
@@ -22,7 +22,7 @@ const defaultTitleConfig: QuickEntryTitleConfig = {
 };
 
 const defaultStyleConfig: QuickEntryStyleConfig = {
-  theme: QUICK_ENTRY_THEME_VALUES[QUICK_ENTRY_THEME_OPTIONS.THEME_1]
+  theme: WORKBENCH_THEME_OPTIONS.THEME_1
 };
 
 const defaultGroupConfig: QuickEntryGroupConfig = {
@@ -105,10 +105,10 @@ const XQuickEntry = memo((props: XQuickEntryConfig & { runtime?: boolean; detail
     },
     index: number
   ) => {
-    const theme = finalStyleConfig?.theme || QUICK_ENTRY_THEME_VALUES[QUICK_ENTRY_THEME_OPTIONS.THEME_1];
-    const isThemeOne = theme === QUICK_ENTRY_THEME_VALUES[QUICK_ENTRY_THEME_OPTIONS.THEME_1];
-    const isThemeTwo = theme === QUICK_ENTRY_THEME_VALUES[QUICK_ENTRY_THEME_OPTIONS.THEME_2];
-    const isThemeThree = theme === QUICK_ENTRY_THEME_VALUES[QUICK_ENTRY_THEME_OPTIONS.THEME_3];
+    const theme = finalStyleConfig?.theme || WORKBENCH_THEME_OPTIONS.THEME_1;
+    const isThemeOne = theme === WORKBENCH_THEME_OPTIONS.THEME_1;
+    const isThemeTwo = theme === WORKBENCH_THEME_OPTIONS.THEME_2;
+    const isThemeThree = theme === WORKBENCH_THEME_OPTIONS.THEME_3;
 
     // 样式一：图标 + 名称（垂直布局）
     if (isThemeOne) {

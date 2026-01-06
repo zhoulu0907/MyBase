@@ -39,15 +39,7 @@ import { StatusEnum, StatusEnumLabel, StatusLabelEnum } from '@/constants';
 import type { ApplicationList, TagProps } from '@/types';
 import { appIconMap } from '@onebase/ui-kit';
 import TagModal from './components/tagModal';
-import {
-  appOptions,
-  calculateMaxItems,
-  createTimeOptions,
-  defaultTheme,
-  statusOptions,
-  TagColor,
-  ThemeColorMap
-} from './const';
+import { calculateMaxItems, createTimeOptions, defaultTheme, TagColor, ThemeColorMap } from './const';
 import styles from './index.module.less';
 
 const Option = Select.Option;
@@ -192,7 +184,6 @@ const MyAppPage: React.FC = () => {
       });
     }
   };
-  
 
   const menu = (item: any) => {
     return (
@@ -333,6 +324,7 @@ const MyAppPage: React.FC = () => {
                       <Button
                         type={item.showStatus === StatusEnum.DISABLE ? 'secondary' : 'outline'}
                         long
+                        className={styles.footerBtn}
                         onClick={() => {
                           nagivateToRuntimeApp(item.applicationId);
                         }}

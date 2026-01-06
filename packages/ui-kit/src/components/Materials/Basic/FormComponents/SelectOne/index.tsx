@@ -55,7 +55,9 @@ const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean; det
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
           <div>
-            {fieldValue?.name || options.find((op) => op.id === fieldValue?.id || op.id === fieldValue)?.label || '--'}
+            {fieldValue?.name ||
+              options.find((op) => op.value === fieldValue?.id || op.value === fieldValue)?.label ||
+              '--'}
           </div>
         ) : (
           <Select
@@ -71,7 +73,7 @@ const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean; det
             }}
           >
             {options.map((ele, index: number) => (
-              <Select.Option key={index} value={ele.id}>
+              <Select.Option key={index} value={ele.value}>
                 {ele.label}
               </Select.Option>
             ))}

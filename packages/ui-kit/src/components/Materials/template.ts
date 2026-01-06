@@ -40,7 +40,6 @@ export const COMPONENT_TYPE_DISPLAY_NAME_MAP: Record<string, string> = {
   [FORM_COMPONENT_TYPES.AUTO_CODE]: '自动编号',
   [FORM_COMPONENT_TYPES.RELATED_FORM]: '关联表单',
   [FORM_COMPONENT_TYPES.RICH_TEXT]: '富文本',
-  [FORM_COMPONENT_TYPES.CAROUSEL_FORM]: '轮播图',
   [FORM_COMPONENT_TYPES.SUB_TABLE]: '子表单',
   [FORM_COMPONENT_TYPES.DATA_SELECT]: '数据选择',
 
@@ -59,7 +58,8 @@ export const COMPONENT_TYPE_DISPLAY_NAME_MAP: Record<string, string> = {
   [SHOW_COMPONENT_TYPES.IMAGE]: '静态图片',
   [SHOW_COMPONENT_TYPES.FILE]: '静态文件',
   [SHOW_COMPONENT_TYPES.WEB_VIEW]: '网页组件',
-  [SHOW_COMPONENT_TYPES.PLACEHOLDER]: '占位符'
+  [SHOW_COMPONENT_TYPES.PLACEHOLDER]: '占位符',
+  [SHOW_COMPONENT_TYPES.CAROUSEL_FORM]: '轮播图',
 };
 
 const allTemplate = {
@@ -272,14 +272,6 @@ const allTemplate = {
           category: 'base'
         },
         {
-          type: FORM_COMPONENT_TYPES.CAROUSEL_FORM,
-          h: 36,
-          w: 118,
-          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.CAROUSEL_FORM],
-          icon: 'carousel_cp.svg',
-          category: 'base'
-        },
-        {
           type: FORM_COMPONENT_TYPES.SUB_TABLE,
           h: 36,
           w: 118,
@@ -425,7 +417,15 @@ const allTemplate = {
           displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[SHOW_COMPONENT_TYPES.PLACEHOLDER],
           icon: 'placeholder_cp.svg',
           category: 'base'
-        }
+        },
+        {
+          type: SHOW_COMPONENT_TYPES.CAROUSEL_FORM,
+          h: 36,
+          w: 118,
+          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[SHOW_COMPONENT_TYPES.CAROUSEL_FORM],
+          icon: 'carousel_cp.svg',
+          category: 'base'
+        },
       ]
     }
   ]

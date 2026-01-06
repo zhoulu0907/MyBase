@@ -436,7 +436,6 @@ const XTable = memo(
     const handleCreate = () => {
       console.log('点击新增');
 
-      console.log('runtime: ', runtime);
       if (!runtime) {
         return;
       }

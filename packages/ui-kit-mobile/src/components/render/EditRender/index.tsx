@@ -85,8 +85,6 @@ const ComponentEditRender: React.FC<ComponentRenderProps> = ({ cpId, cpType, pag
         return <FormComp.XDateTimePicker cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case FORM_COMPONENT_TYPES.IMG_UPLOAD:
         return <FormComp.XImgUpload cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
-      case FORM_COMPONENT_TYPES.CAROUSEL_FORM:
-        return <FormComp.XCarouselForm cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case FORM_COMPONENT_TYPES.FILE_UPLOAD:
         return <FormComp.XFileUpload cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case FORM_COMPONENT_TYPES.AUTO_CODE:
@@ -119,6 +117,8 @@ const ComponentEditRender: React.FC<ComponentRenderProps> = ({ cpId, cpType, pag
         return <ShowComp.XDivider cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case SHOW_COMPONENT_TYPES.PLACEHOLDER:
         return <ShowComp.XPlaceholder cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+      case SHOW_COMPONENT_TYPES.CAROUSEL_FORM:
+        return <ShowComp.XCarouselForm cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
 
       //  列表组件
       case LIST_COMPONENT_TYPES.TABLE:
@@ -135,6 +135,8 @@ const ComponentEditRender: React.FC<ComponentRenderProps> = ({ cpId, cpType, pag
         return <WorkbenchComp.XCarouselWorkbench cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case WORKBENCH_COMPONENT_TYPES.BUTTON_WORKBENCH:
         return <WorkbenchComp.XButtonWorkbench cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+      case WORKBENCH_COMPONENT_TYPES.WELCOME_CARD:
+        return <WorkbenchComp.XWelcomeCard cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       
       default:
         return <div>未知组件类型: {cpType}</div>;

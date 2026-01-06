@@ -287,16 +287,6 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
         return (
           <FormComp.XRichText cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} detailMode={detailMode} />
         );
-      case FORM_COMPONENT_TYPES.CAROUSEL_FORM:
-        return (
-          <FormComp.XCarouselForm
-            cpName={cpId}
-            id={cpId}
-            {...componentConfig}
-            runtime={runtime}
-            detailMode={detailMode}
-          />
-        );
       case FORM_COMPONENT_TYPES.SUB_TABLE:
         return (
           <FormComp.XSubTable
@@ -391,6 +381,16 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
         return <ShowComp.XPlaceholder cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case SHOW_COMPONENT_TYPES.DIVIDER:
         return <ShowComp.XDivider cpName={cpId} id={cpId} {...componentConfig} />;
+      case SHOW_COMPONENT_TYPES.CAROUSEL_FORM:
+        return (
+          <ShowComp.XCarouselForm
+            cpName={cpId}
+            id={cpId}
+            {...componentConfig}
+            runtime={runtime}
+            detailMode={detailMode}
+          />
+        );
 
       // 工作台组件
       case WORKBENCH_COMPONENT_TYPES.QUICK_ENTRY:
@@ -401,6 +401,8 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
         return <WorkbenchComp.XRichTextEditorWorkbench cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case WORKBENCH_COMPONENT_TYPES.CAROUSEL_WORKBENCH:
         return <WorkbenchComp.XCarouselWorkbench cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+      case WORKBENCH_COMPONENT_TYPES.WELCOME_CARD:
+        return <WorkbenchComp.XWelcomeCard cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case WORKBENCH_COMPONENT_TYPES.BUTTON_WORKBENCH:
           // 移动端独有组件，web 端静默处理
           return null;
@@ -409,6 +411,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
         return <div>未知组件类型: {cpType}</div>;
     }
   }, [componentConfig, refresh]);
+
 
   return <>{renderComponent()}</>;
 };

@@ -18,9 +18,9 @@ import {
   WORKBENCH_WIDTH_OPTIONS,
   WORKBENCH_WIDTH_VALUES,
   WORKBENCH_CONFIG_TYPES,
-  DATA_CONFIG_RANGE
+  WORKBENCH_THEME_OPTIONS
 } from '../../core/constants';
-import { ILabelConfigType, IBooleanConfigType, TBooleanDefaultType, TTextDefaultType } from '../../core/types';
+import { ILabelConfigType, IBooleanConfigType, TBooleanDefaultType, TTextDefaultType, IThemeConfigType, IWbCheckInputConfigType } from '../../core/types';
 import { IDataConfigConfigType } from '../../core/types';
 
 export interface XWelcomeCardSchema {
@@ -35,51 +35,55 @@ export type TXWelcomeCardEditData = Array<
   | IWidthConfigType<TWorkbenchWidthSelectKeyType>
   | IBooleanConfigType
   | IDataConfigConfigType
+  | IThemeConfigType
+  | IWbCheckInputConfigType
 >;
 
 export interface XWelcomeCardConfig extends ICommonBaseWorkbenchType {
   componentName: string;
-  label: {
+  welcomeText: {
     text: TTextDefaultType;
     display: TBooleanDefaultType;
   };
-  dataConfig: {
-      showPending: boolean;
-      showCreated: boolean;
-      showHandled: boolean;
-      showCc: boolean;
-    }
+  theme: string;
+  userAvatar: TTextDefaultType;
+  userName: TTextDefaultType;
+  welcomeDesc: TTextDefaultType;
   status?: TRadioDefaultType<TWorkbenchStatusSelectKeyType>;
   width: TSelectDefaultType<TWorkbenchWidthSelectKeyType>;
 }
 
 const XWelcomeCard: XWelcomeCardSchema = {
   editData: [...workbenchBaseConfig, workbenchStatusConfig, workbenchWidthConfig, {
-    key: 'label',
-    name: '标题名称',
-    type: WORKBENCH_CONFIG_TYPES.LABEL_INPUT
+    key: 'welcomeText',
+    name: '欢迎语',
+    type: WORKBENCH_CONFIG_TYPES.WB_CHECK_INPUT,
+    checkboxLabel: '显示用户名'
   }, 
   {
-    key: 'dataConfig',
-    name: '数据内容配置',
-    type: WORKBENCH_CONFIG_TYPES.WB_DATA_CONFIG,
-    range: DATA_CONFIG_RANGE
+    key: 'theme',
+    name: '样式库',
+    type: WORKBENCH_CONFIG_TYPES.WB_THEME_SELECTOR
+  },
+  {
+    key: 'welcomeDesc',
+    name: '辅助语',
+    type: WORKBENCH_CONFIG_TYPES.TEXT_INPUT
   }],
+  
   config: {
     ...workbenchBaseDefault,
     componentName: 'TodoCenter',
-    label: {
-      text: '待办中心',
+    welcomeText: {
+      text: '下午好！',
       display: true
     },
-    dataConfig: {
-      showPending: true,
-      showCreated: true,
-      showHandled: true,
-      showCc: true
-    },
-    width: WORKBENCH_WIDTH_VALUES[WORKBENCH_WIDTH_OPTIONS.FULL],
+    userAvatar: '',
+    userName: '',
+    theme: WORKBENCH_THEME_OPTIONS.THEME_1,
+    width: WORKBENCH_WIDTH_VALUES[WORKBENCH_WIDTH_OPTIONS.QUARTER],
     status: WORKBENCH_STATUS_VALUES[WORKBENCH_STATUS_OPTIONS.DEFAULT],
+    welcomeDesc: '开心工作，认真生活'
   }
 };
 
