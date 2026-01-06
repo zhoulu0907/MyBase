@@ -71,6 +71,7 @@ const XRadio = memo((props: XRadioConfig & { runtime?: boolean; detailMode?: boo
         <div>{form?.getFieldValue(fieldId)?.name || options.find((op) => op.id === form?.getFieldValue(fieldId)?.id || op.id === form?.getFieldValue(fieldId))?.label || '--'}</div>
       ) : (
         <RadioGroup
+          className='radioWrapperOBMobile'
           options={options}
         />
       )}
