@@ -10,6 +10,7 @@
     </parent>
     <packaging>pom</packaging>
     <modules>
+        <module>onebase-plugin-common</module>
         <module>onebase-plugin-sdk</module>
         <module>onebase-plugin-core</module>
         <module>onebase-plugin-build</module>

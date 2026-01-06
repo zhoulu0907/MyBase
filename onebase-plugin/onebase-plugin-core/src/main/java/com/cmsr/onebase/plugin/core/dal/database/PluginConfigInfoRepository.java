@@ -40,4 +40,31 @@ public class PluginConfigInfoRepository extends BaseDataRepository<PluginConfigI
                 .eq(PluginConfigInfoDO::getPluginId, pluginId);
         return list(queryWrapper);
     }
+
+    /**
+     * 根据插件ID和版本获取配置列表
+     *
+     * @param pluginId 插件ID
+     * @param pluginVersion 插件版本
+     * @return 配置列表
+     */
+    public List<PluginConfigInfoDO> getListByPluginIdAndVersion(Long pluginId, String pluginVersion) {
+        QueryWrapper queryWrapper = this.query()
+                .eq(PluginConfigInfoDO::getPluginId, pluginId)
+                .eq(PluginConfigInfoDO::getPluginVersion, pluginVersion);
+        return list(queryWrapper);
+    }
+
+    /**
+     * 根据插件ID和版本删除配置
+     *
+     * @param pluginId 插件ID
+     * @param pluginVersion 插件版本
+     */
+    public void deleteByPluginIdAndVersion(Long pluginId, String pluginVersion) {
+        QueryWrapper queryWrapper = this.query()
+                .eq(PluginConfigInfoDO::getPluginId, pluginId)
+                .eq(PluginConfigInfoDO::getPluginVersion, pluginVersion);
+        remove(queryWrapper);
+    }
 }
