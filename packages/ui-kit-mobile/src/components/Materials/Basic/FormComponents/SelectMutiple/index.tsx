@@ -6,7 +6,7 @@ import IconSquareUnchecked from '@arco-design/mobile-react/esm/icon/IconSquareUn
 import IconSquareDisabled from '@arco-design/mobile-react/esm/icon/IconSquareDisabled';
 import { ValidatorType, ITypeRules } from '@arco-design/mobile-utils';
 import { DictData } from '@onebase/platform-center';
-import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, DEFAULT_VALUE_TYPES, FormSchema, getFieldOptionsConfig, useAppEntityStore } from '@onebase/ui-kit';
+import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, DEFAULT_VALUE_TYPES, FormSchema, getFieldOptionsConfig, useAppEntityStore, menuDictSignal } from '@onebase/ui-kit';
 
 import '../index.css';
 import './index.css';
@@ -19,7 +19,7 @@ const squareIcon = {
 }
 type XSelectMutipleConfig = typeof FormSchema.XSelectMutipleSchema.config;
 
-const XSelectMutiple = memo((props: XSelectMutipleConfig & { runtime?: boolean; detailMode?: boolean; form?: any }) => {
+const XSelectMutiple = memo((props: XSelectMutipleConfig & { runtime?: boolean; detailMode?: boolean; form?: any; }) => {
   const {
     label,
     dataField,
@@ -32,6 +32,7 @@ const XSelectMutiple = memo((props: XSelectMutipleConfig & { runtime?: boolean; 
     form
   } = props;
 
+  const { appDict } = menuDictSignal;
   const { mainEntity, subEntities } = useAppEntityStore();
   const textAlign = layout === 'vertical' ? 'left' : 'right';
 
@@ -43,24 +44,18 @@ const XSelectMutiple = memo((props: XSelectMutipleConfig & { runtime?: boolean; 
   const [options, setOptions] = useState<DictData[]>([]);
   const [visible, setVisible] = useState(false);
   const [popupDirection] = useState<'bottom' | 'top' | 'left' | 'right'>('bottom');
-  const [selectedKeys, setSelectedKeys] = useState<string[]>(() => {
-    const formValue = form?.getFieldValue(fieldId);
-    if (Array.isArray(formValue) && formValue.length > 0) {
-      return formValue.map(val => String(val));
-    }
-    return [];
-  });
+  const [selectedKeys, setSelectedKeys] = useState<string[]>(form?.getFieldValue(fieldId) || []);
 
   useEffect(() => {
     if (dataField?.length) {
-      getOptions()
+      getOptions();
     }
-  }, [dataField])
+  }, [dataField]);
 
   const getOptions = async () => {
-    const newOptions = await getFieldOptionsConfig(dataField, mainEntity, subEntities);
-    setOptions(newOptions)
-  }
+    const newOptions = await getFieldOptionsConfig(dataField, mainEntity, subEntities, appDict.value);
+    setOptions(newOptions);
+  };
 
   const rules: ITypeRules<ValidatorType.Custom>[] = [
     {
@@ -97,6 +92,11 @@ const XSelectMutiple = memo((props: XSelectMutipleConfig & { runtime?: boolean; 
     return selectedOptions?.map(opt => opt.label).join('，');
   };
 
+  const getReadonlyLabels = () => {
+    let curValues = form?.getFieldValue(fieldId) ? form?.getFieldValue(fieldId) : selectedKeys;
+    return options.filter(op => curValues?.find(v => op.id === v)).map(v => v.label).join('，') || '--';
+  };
+
   return (
     <Form.Item
       className="inputTextWrapperOBMobile selectMultipleWrapperOBMobile"
@@ -112,15 +112,7 @@ const XSelectMutiple = memo((props: XSelectMutipleConfig & { runtime?: boolean; 
       }}
     >
       {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
-        <div className="readonlyText">
-          {form?.getFieldValue(fieldId) ?
-            Array.isArray(form?.getFieldValue(fieldId)) &&
-            form?.getFieldValue(fieldId).map((ele: any, index: number) => (
-              <div key={index} style={{ marginBottom: '0' }}>
-                {ele?.name || options.find((e => e.id === ele || e.id === ele?.id))?.label}
-              </div>)) : '--'
-          }
-        </div>
+        <div className="readonlyText">{getReadonlyLabels()}</div>
       ) : (
         <Cell
           className="selectMultipleCellOBMobile"
