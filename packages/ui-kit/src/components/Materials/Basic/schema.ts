@@ -1,5 +1,4 @@
 import XAutoCode from './FormComponents/AutoCode/schema';
-import XCarouselForm from './FormComponents/Carousel/schema';
 import XCheckbox from './FormComponents/Checkbox/schema';
 import XDataSelect from './FormComponents/DataSelect/schema';
 import XDatePicker from './FormComponents/DatePicker/schema';
@@ -41,6 +40,7 @@ import XText from './ShowComponents/Text/schema';
 import XWebView from './ShowComponents/WebView/schema';
 import XDivider from './ShowComponents/Divider/schema';
 import XPlaceholder from './ShowComponents/Placeholder/schema';
+import XCarouselForm from './ShowComponents/Carousel/schema';
 
 export const baseSchema = {
   XInputText,
@@ -64,7 +64,6 @@ export const baseSchema = {
   XRelatedForm,
   XStaticText,
   XRichText,
-  XCarouselForm,
   XSubTable,
   XDataSelect,
 
@@ -86,5 +85,6 @@ export const baseSchema = {
   XText,
   XWebView,
   XDivider,
-  XPlaceholder
+  XPlaceholder,
+  XCarouselForm
 };

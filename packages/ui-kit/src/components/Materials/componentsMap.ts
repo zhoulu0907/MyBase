@@ -89,8 +89,6 @@ export const COMPONENT_FIELD_MAP: Record<string, string[]> = {
   [FORM_COMPONENT_TYPES.AUTO_CODE]: [ENTITY_FIELD_TYPE.AUTO_CODE.VALUE],
   // 关联表单 XRelatedForm => 关联表单
   [FORM_COMPONENT_TYPES.RELATED_FORM]: [ENTITY_FIELD_TYPE.RELATION.VALUE],
-  // 轮播图 XCarouselForm => 无
-  [FORM_COMPONENT_TYPES.CAROUSEL_FORM]: [],
   // 子表单 XSubTable => 无
   [FORM_COMPONENT_TYPES.SUB_TABLE]: [],
   //数据选择XDataSelect => 数据选择

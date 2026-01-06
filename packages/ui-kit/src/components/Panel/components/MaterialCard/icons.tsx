@@ -55,7 +55,6 @@ export const ICON_Map: Record<string, React.ReactNode> = {
   // 表单组件
   'text_input_cp.svg': <img src={TextInputIcon} alt="XInputText" />,
   'textarea_input_cp.svg': <img src={TextareaInputIcon} alt="XInputTextArea" />,
-  'carousel_cp.svg': <img src={CarouselIcon} alt="XCarouselForm" />,
   'number_input_cp.svg': <img src={NumberInputIcon} alt="XInputNumber" />,
   'email_input_cp.svg': <img src={EmailInputIcon} alt="XInputEmail" />,
   'phone_input_cp.svg': <img src={PhoneInputIcon} alt="XInputPhone" />,
@@ -97,6 +96,7 @@ export const ICON_Map: Record<string, React.ReactNode> = {
   'web_component_cp.svg': <img src={WebComponentIcon} alt="XWebView" />,
   'divider_cp.svg': <img src={DividerIcon} alt="XDivider" />,
   'placeholder_cp.svg': <img src={PlaceHolderIcon} alt="XPlaceholder" />,
+  'carousel_cp.svg': <img src={CarouselIcon} alt="XCarouselForm" />,
 
   // 布局组件
   'col_layout_cp.svg': <img src={ColumnLayoutIcon} alt="XColumnLayout" />,
@@ -139,7 +139,6 @@ export const ICON_Map_By_Type: Record<string, React.ReactNode> = {
   XRichText: <img src={RichTextIcon} alt="XRichText" />,
   XSubTable: <img src={SubTableIcon} alt="XSubTable" />,
   XDataSelect: <img src={DataSelectIcon} alt="XDataSelect" />,
-  XCarouselForm: <img src={CarouselIcon} alt="XCarouselForm" />,
 
   // 列表组件
   XTable: <img src={TableIcon} alt="XTable" />,
@@ -159,6 +158,7 @@ export const ICON_Map_By_Type: Record<string, React.ReactNode> = {
   XWebView: <img src={WebComponentIcon} alt="XWebView" />,
   XDivider: <img src={DividerIcon} alt="XDivider" />,
   XPlaceholder: <img src={PlaceHolderIcon} alt="XPlaceholder" />,
+  XCarouselForm: <img src={CarouselIcon} alt="XCarouselForm" />,
 
   // 布局组件
   XColumnLayout: <img src={ColumnLayoutIcon} alt="XColumnLayout" />,

@@ -31,7 +31,6 @@ const componentSchemaMap: Partial<Record<ComponentType, ComponentSchema>> = {
   [ALL_COMPONENT_TYPES.RELATED_FORM]: BasicSchema.XRelatedForm,
   [ALL_COMPONENT_TYPES.STATIC_TEXT]: BasicSchema.XStaticText,
   [ALL_COMPONENT_TYPES.RICH_TEXT]: BasicSchema.XRichText,
-  [ALL_COMPONENT_TYPES.CAROUSEL_FORM]: BasicSchema.XCarouselForm,
   [ALL_COMPONENT_TYPES.SUB_TABLE]: BasicSchema.XSubTable,
   [ALL_COMPONENT_TYPES.DATA_SELECT]: BasicSchema.XDataSelect,
 
@@ -52,7 +51,8 @@ const componentSchemaMap: Partial<Record<ComponentType, ComponentSchema>> = {
   [ALL_COMPONENT_TYPES.TEXT]: BasicSchema.XText,
   [ALL_COMPONENT_TYPES.WEB_VIEW]: BasicSchema.XWebView,
   [ALL_COMPONENT_TYPES.DIVIDER]: BasicSchema.XDivider,
-  [ALL_COMPONENT_TYPES.PLACEHOLDER]: BasicSchema.XPlaceholder
+  [ALL_COMPONENT_TYPES.PLACEHOLDER]: BasicSchema.XPlaceholder,
+  [ALL_COMPONENT_TYPES.CAROUSEL_FORM]: BasicSchema.XCarouselForm
 };
 
 /**
