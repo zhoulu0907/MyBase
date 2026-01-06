@@ -10,12 +10,23 @@ import {
   getEntityFieldsWithChildren,
   menuSignal,
   PageMethodV2Params,
-  type AppEntityField,
+  type AppEntityField
 } from '@onebase/app';
 import { menuPermissionSignal, pagesRuntimeSignal } from '@onebase/common';
-import { BUTTON_OPTIONS, BUTTON_VALUES, downloadFileByUrl, ENTITY_FIELD_TYPE, getFieldOptionsConfig, menuDictSignal, RedirectMethod, useAppEntityStore, useFormEditorSignal } from '@onebase/ui-kit';
+import {
+  BUTTON_OPTIONS,
+  BUTTON_VALUES,
+  downloadFileByUrl,
+  ENTITY_FIELD_TYPE,
+  getFieldOptionsConfig,
+  menuDictSignal,
+  RedirectMethod,
+  useAppEntityStore,
+  useFormEditorSignal
+} from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
-import { memo, useEffect, useState } from 'react';
+import { memo, useEffect, useState, useCallback } from 'react';
+import { debounce } from 'lodash-es';
 import TableSearch from './tableSerach';
 import type { XLoadMoreConfig } from './schema';
 import './index.css';
@@ -111,7 +122,7 @@ const XLoadMore = memo(
       const result = await getEntityFieldsWithChildren(metaData);
       setLocalMainMetaData(result);
       return result;
-    }
+    };
 
     const getFinalColumns = async () => {
       let newColumns: any[] = [];
@@ -132,7 +143,7 @@ const XLoadMore = memo(
                   const file = result[0];
                   return (
                     <div className="fileWrapper">
-                      <Ellipsis className='filename' text={file.name} />
+                      <Ellipsis className="filename" text={file.name} />
                       <IconDownload
                         style={{ color: 'rgb(var(--primary-6))', marginLeft: '0.24rem', fontSize: '0.28rem' }}
                         onClick={async () => {
@@ -147,7 +158,7 @@ const XLoadMore = memo(
                         }}
                       />
                     </div>
-                  )
+                  );
                 }
               } else {
                 if (typeof result === 'object') {
@@ -220,8 +231,16 @@ const XLoadMore = memo(
       //   req.sortDirection = sortByObject.sortBy === 1 ? 'asc' : 'desc';
       // }
 
+      let newQueryData: any = {};
+
+      Object.entries(queryData.value).forEach(([key, value]) => {
+        if ((value !== '' && value !== null) || (Array.isArray(value) && value.length !== 0)) {
+          newQueryData[key] = value;
+        }
+      });
+
       const req: PageMethodV2Params = {
-        ...queryData.value,
+        ...newQueryData,
         pageNo: tablePageNo,
         pageSize: pageSize || 10
       };
@@ -232,108 +251,121 @@ const XLoadMore = memo(
 
       const { list = [], total = 0 } = res;
 
-      const newTableData = await Promise.all((list || []).map(async (item: any) => {
-        const newItem = item;
-        for (const [key, value] of Object.entries(newItem)) {
-          // 优化：减少重复查找，提升可读性和性能
-          if (Array.isArray(mainMetaData?.parentFields)) {
-            const dataField = mainMetaData.parentFields.find(
-              (field: AppEntityField) => field.fieldName === key && (field.fieldType === ENTITY_FIELD_TYPE.DATE.VALUE)
-            );
-            if (dataField && newItem[key]) {
-              // 仅当字段类型为日期且有值时格式化
-              const dateValue = new Date(newItem[key]);
-              if (!isNaN(dateValue.getTime())) {
-                newItem[key] = dayjs(dateValue).format('YYYY-MM-DD');
+      const newTableData = await Promise.all(
+        (list || []).map(async (item: any) => {
+          const newItem = item;
+          for (const [key, value] of Object.entries(newItem)) {
+            // 优化：减少重复查找，提升可读性和性能
+            if (Array.isArray(mainMetaData?.parentFields)) {
+              const dataField = mainMetaData.parentFields.find(
+                (field: AppEntityField) => field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.DATE.VALUE
+              );
+              if (dataField && newItem[key]) {
+                // 仅当字段类型为日期且有值时格式化
+                const dateValue = new Date(newItem[key]);
+                if (!isNaN(dateValue.getTime())) {
+                  newItem[key] = dayjs(dateValue).format('YYYY-MM-DD');
+                }
               }
-            }
 
-            const datatimeField = mainMetaData.parentFields.find(
-              (field: AppEntityField) => field.fieldName === key && (field.fieldType === ENTITY_FIELD_TYPE.DATETIME.VALUE)
-            );
-            if (datatimeField && newItem[key]) {
-              // 仅当字段类型为日期且有值时格式化
-              const dateValue = new Date(newItem[key]);
-              if (!isNaN(dateValue.getTime())) {
-                newItem[key] = dayjs(dateValue).format('YYYY-MM-DD HH:mm:ss');
+              const datatimeField = mainMetaData.parentFields.find(
+                (field: AppEntityField) =>
+                  field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.DATETIME.VALUE
+              );
+              if (datatimeField && newItem[key]) {
+                // 仅当字段类型为日期且有值时格式化
+                const dateValue = new Date(newItem[key]);
+                if (!isNaN(dateValue.getTime())) {
+                  newItem[key] = dayjs(dateValue).format('YYYY-MM-DD HH:mm:ss');
+                }
               }
-            }
 
-            // 多选字段回显 逗号分割
-            const multiSelectField = mainMetaData.parentFields.find(
-              (field: AppEntityField) =>
-                field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE
-            );
-            if (multiSelectField && newItem[key] && Array.isArray(newItem[key])) {
-              const newOptions = await getFieldOptionsConfig([tableName, key], mainEntity, subEntities, appDict.value);
-              newItem[key] = newOptions.filter(op => newItem[key].find(v => op.id === v.id)).map(v => v.label).join('，');
-            }
-
-            // 人员选择单选
-            const userSelectField = mainMetaData.parentFields.find(
-              (field: AppEntityField) =>
-                field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.USER.VALUE
-            );
-            if (userSelectField && newItem[key]) {
-              if (newItem[key]) {
-                newItem[key] = newItem[key].name;
+              // 多选字段回显 逗号分割
+              const multiSelectField = mainMetaData.parentFields.find(
+                (field: AppEntityField) =>
+                  field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE
+              );
+              if (multiSelectField && newItem[key] && Array.isArray(newItem[key])) {
+                const newOptions = await getFieldOptionsConfig(
+                  [tableName, key],
+                  mainEntity,
+                  subEntities,
+                  appDict.value
+                );
+                newItem[key] = newOptions
+                  .filter((op) => newItem[key].find((v) => op.id === v.id))
+                  .map((v) => v.label)
+                  .join('，');
               }
-            }
 
-            // 部门
-            const departmentField = mainMetaData.parentFields.find(
-              (field: AppEntityField) =>
-                field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.DEPARTMENT.VALUE
-            );
-            if (departmentField && newItem[key]) {
-              newItem[key] = newItem[key].name || '-';
-            }
+              // 人员选择单选
+              const userSelectField = mainMetaData.parentFields.find(
+                (field: AppEntityField) => field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.USER.VALUE
+              );
+              if (userSelectField && newItem[key]) {
+                if (newItem[key]) {
+                  newItem[key] = newItem[key].name;
+                }
+              }
 
-            // 开关
-            const switchField = mainMetaData.parentFields.find(
-              (field: AppEntityField) =>
-                field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.BOOLEAN.VALUE
-            );
-            if (switchField && typeof newItem[key] === 'boolean') {
-              newItem[key] = newItem[key] ? '是' : '否';
-            }
+              // 部门
+              const departmentField = mainMetaData.parentFields.find(
+                (field: AppEntityField) =>
+                  field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.DEPARTMENT.VALUE
+              );
+              if (departmentField && newItem[key]) {
+                newItem[key] = newItem[key].name || '-';
+              }
 
-            // 单选列表 - 根据id返回对应label
-            const selectField = mainMetaData.parentFields.find(
-              (field: AppEntityField) =>
-                field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.SELECT.VALUE
-            );
-            if (selectField) {
-              const curValue = newItem[key];
-              const newOptions = await getFieldOptionsConfig([tableName, key], mainEntity, subEntities, appDict.value);
-              newItem[key] = newOptions.find(op => op.id === curValue?.id)?.label || '-';
-            }
+              // 开关
+              const switchField = mainMetaData.parentFields.find(
+                (field: AppEntityField) =>
+                  field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.BOOLEAN.VALUE
+              );
+              if (switchField && typeof newItem[key] === 'boolean') {
+                newItem[key] = newItem[key] ? '是' : '否';
+              }
 
-            // 数据选择
-            const dateField = mainMetaData.parentFields.find(
-              (field: AppEntityField) =>
-                field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.DATA_SELECTION.VALUE
-            );
-            if (dateField) {
-              newItem[key] = newItem[key].name || '-';
-            }
+              // 单选列表 - 根据id返回对应label
+              const selectField = mainMetaData.parentFields.find(
+                (field: AppEntityField) => field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.SELECT.VALUE
+              );
+              if (selectField) {
+                const curValue = newItem[key];
+                const newOptions = await getFieldOptionsConfig(
+                  [tableName, key],
+                  mainEntity,
+                  subEntities,
+                  appDict.value
+                );
+                newItem[key] = newOptions.find((op) => op.id === curValue?.id)?.label || '-';
+              }
 
-            // 文件上传
-            const fileField = mainMetaData.parentFields.find(
-              (field: AppEntityField) =>
-                field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.FILE.VALUE
-            );
-            if (fileField) {
-              newItem[key] = newItem[key] || [];
+              // 数据选择
+              const dateField = mainMetaData.parentFields.find(
+                (field: AppEntityField) =>
+                  field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.DATA_SELECTION.VALUE
+              );
+              if (dateField) {
+                newItem[key] = newItem[key].name || '-';
+              }
+
+              // 文件上传
+              const fileField = mainMetaData.parentFields.find(
+                (field: AppEntityField) => field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.FILE.VALUE
+              );
+              if (fileField) {
+                newItem[key] = newItem[key] || [];
+              }
             }
           }
-        };
 
-        return {
-          ...newItem,
-          key: item.id
-        };
-      }));
+          return {
+            ...newItem,
+            key: item.id
+          };
+        })
+      );
       setLoading(false);
       setTableData(req.pageNo === 1 ? newTableData : [...tableData, ...newTableData]);
       setTableTotal(total);
@@ -410,19 +442,23 @@ const XLoadMore = memo(
       if (noEdit) return;
       return (
         <div className="list-body-item-btns">
-          {canDelete.value && <Button
-            color="#1D2129"
-            borderColor="#86909C"
-            type="ghost"
-            size="mini"
-            className="list-body-item-btn"
-            onClick={() => handleDeleteAction(item.id)}
-          >
-            删除
-          </Button>}
-          {canEdit.value && <Button type="primary" size="mini" className="list-body-item-btn" onClick={() => handleEdit(item.id, true)}>
-            编辑
-          </Button>}
+          {canDelete.value && (
+            <Button
+              color="#1D2129"
+              borderColor="#86909C"
+              type="ghost"
+              size="mini"
+              className="list-body-item-btn"
+              onClick={() => handleDeleteAction(item.id)}
+            >
+              删除
+            </Button>
+          )}
+          {canEdit.value && (
+            <Button type="primary" size="mini" className="list-body-item-btn" onClick={() => handleEdit(item.id, true)}>
+              编辑
+            </Button>
+          )}
         </div>
       );
     };
@@ -449,13 +485,28 @@ const XLoadMore = memo(
       );
     };
 
+    const searchValuesChange = useCallback(
+      debounce((changedValues) => {
+        const changeKeys = Object.keys(changedValues);
+        if (changeKeys?.length && searchItems?.length) {
+          const changeKey = changeKeys[0];
+          if (changeKey === searchItems[0].value) {
+            queryData.value[changeKey] = changedValues[changeKey];
+            // 第一个改变了
+            handleSearch();
+          }
+        }
+      }, 500),
+      []
+    );
+
     const getTopSearch = () => {
       if (!searchItems?.length) {
         return null;
       }
       return (
         <Sticky topOffset={0.88 * window.ROOT_FONT_SIZE} className="list-search-header">
-          <Form form={searchForm} className="search-form-wrapper">
+          <Form form={searchForm} className="search-form-wrapper" onValuesChange={searchValuesChange}>
             <TableSearch
               searchItems={searchItems}
               runtime={runtime}
@@ -466,7 +517,7 @@ const XLoadMore = memo(
           </Form>
         </Sticky>
       );
-    }
+    };
 
     return (
       <div className="loadmore-list-wrapper-OBMobile">
