@@ -1,0 +1,68 @@
+server:
+  port: 8080
+
+--- #################### 数据库相关配置 ####################
+spring:
+  # 数据源配置项
+  datasource: # TODO: 修改数据库连接信息
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/onebase_cloud_v3
+    username: sample_usr
+    password: sample_pwd
+    type: com.zaxxer.hikari.HikariDataSource
+    hikari:
+      minimum-idle: 1
+      maximum-pool-size: 20
+  redis:
+    redisson: # TODO: 修改Redis连接信息
+      config: |
+        singleServerConfig:
+          address: "redis://redis:sample_code@localhost:6379"
+          subscriptionConnectionMinimumIdleSize: 1
+          subscriptionConnectionPoolSize: 5
+          connectionMinimumIdleSize: 2
+          connectionPoolSize: 5
+          database: 3
+pagehelper:
+  helperDialect: postgresql # TODO: 修改这个位置的数据库类型，kingbase8可用postgresql
+  reasonable: false
+  defaultCount: true
+--- #################### OneBase相关配置 ####################
+
+# OneBase配置项，设置当前项目所有自定义的配置
+onebase:
+  metadata: # TODO: 修改数据库连接信息
+    default-datasource:
+      type: PostgreSQL
+      host: localhost
+      port: 5432
+      username: sample_usr
+      password: sample_pwd
+      database: onebase_business
+      description: Onebase业务数据库
+  scheduler:
+    address: http://localhost:12345/dolphinscheduler
+    token: sample_token
+    env: sample_env_id
+    flow-project: sample_flow_project_id
+    flow-url: http://onebase-server-runtime:8080/runtime/flow/remote-call/trigger
+    etl-project: sample_etl_project_id
+    tenant: root
+  flink:
+    address: http://onebase-server-flink:8080
+
+justauth:
+  enabled: true
+  cache:
+    type: REDIS
+    prefix: 'social_auth_state:' # 缓存前缀，目前只对 Redis 缓存生效，默认 JUSTAUTH::STATE::
+    timeout: 24h # 超时时长，目前只对 Redis 缓存生效，默认 3 分钟
+
+liteflow:
+  enable: false
+  version-tag: runtime
+  js-server-address: http://onebase-server-js:3000
+
+metadata:
+  runtime:
+    enable-auth-check: false
