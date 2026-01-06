@@ -63,7 +63,6 @@ const XRadio = memo((props: XRadioConfig & { runtime?: boolean; detailMode?: boo
       rules={rules}
       initialValue={defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : undefined}
       style={{
-        textAlign: layout === 'vertical' ? 'left' : 'right',
         pointerEvents: (!runtime || detailMode) ? 'none' : 'unset',
         opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
       }}
@@ -72,6 +71,7 @@ const XRadio = memo((props: XRadioConfig & { runtime?: boolean; detailMode?: boo
         <div>{form?.getFieldValue(fieldId)?.name || options.find((op) => op.id === form?.getFieldValue(fieldId)?.id || op.id === form?.getFieldValue(fieldId))?.label || '--'}</div>
       ) : (
         <RadioGroup
+          className='radioGroup'
           options={options}
         />
       )}

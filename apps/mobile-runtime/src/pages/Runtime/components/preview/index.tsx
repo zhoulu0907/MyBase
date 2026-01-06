@@ -53,6 +53,7 @@ import styles from './index.module.less';
 
 interface PreviewProps {
   menuId: string;
+  menuName: string;
   runtime: boolean;
   mainEntity: AppEntity;
   subEntities: AppEntities;
@@ -73,6 +74,7 @@ const ghostBgColor = {
 
 const PreviewContainer: React.FC<PreviewProps> = ({
   menuId,
+  menuName,
   runtime,
   mainEntity,
   subEntities: subEntitiesValues,
@@ -121,6 +123,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({
   const [editTargetId, setEditTargetId] = useState('');
   const [editLoading, setEditLoading] = useState(false);
 
+  const [hasChanged, setHasChanged] = useState(false); // 防止修改表单某个值导致页面表单数据清空
   const [formValues, setFormValues] = useState({}); // form 实时改动后的值集合
 
   // 当前时间戳
@@ -152,6 +155,13 @@ const PreviewContainer: React.FC<PreviewProps> = ({
       setDetailMode(true);
     }
   }, [drawerVisible.value]);
+
+  useEffect(() => {
+    if (hasChanged) {
+      form.setFieldsValue(formValues);
+      setHasChanged(false);
+    }
+  }, [formValues, hasChanged]);
 
   // 获取主表字段和子表字段
   const getMainMetaData = async (pageSetId: string) => {
@@ -571,17 +581,10 @@ const PreviewContainer: React.FC<PreviewProps> = ({
     return res;
   };
 
-  const handleValuesChange = (_: any, allValues: any) => {
-    setFormValues(allValues);
+  const handleValuesChange = (curValue: any) => {
+    setFormValues((prev: any) => ({ ...prev, ...curValue }));
+    setHasChanged(true);
   };
-
-  const curFormPage =
-    curPage.value?.pages?.find((ele: any) => ele.pageType === CATEGORY_TYPE.LIST)?.pageName || '标题_列表';
-  const curWorkbenchPage =
-    curPage.value?.pages?.find((ele: any) => ele.pageType === CATEGORY_TYPE.WORKBENCH)?.pageName || '标题_工作台';
-
-  const navTitle =
-    pageType === EDITOR_TYPES.WORKBENCH_EDITOR ? curWorkbenchPage : curFormPage.slice(0, curFormPage.length - 3);
 
   return (
     <div className={styles.previewPage}>
@@ -589,7 +592,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({
         {curFormPage.slice(0, curFormPage.length - 3)}
       </Sticky> */}
       <CustomNav
-        title={navTitle}
+        title={menuName}
         style={{ background: '#fff' }}
         toBack={
           pageType === EDITOR_TYPES.LIST_EDITOR || pageType === EDITOR_TYPES.WORKBENCH_EDITOR
@@ -680,24 +683,24 @@ const PreviewContainer: React.FC<PreviewProps> = ({
                     <Fragment key={cp.id}>
                       {useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id].config.status !==
                         STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
-                        <div key={cp.id} className={styles.componentItem}>
-                          <PreviewRender
-                            cpId={cp.id}
-                            cpType={cp.type}
-                            pageComponentSchema={
-                              useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id]
-                            }
-                            editLoading={editLoading}
-                            form={form}
-                            runtime={true}
-                            formValues={formValues}
-                            showFromPageData={() => {
-                              setPageType(EDITOR_TYPES.FORM_EDITOR);
-                            }}
-                            useStoreSignals={{ ...pageEditorSignal, mainEntity, subEntities: subEntitiesValues }}
-                          />
-                        </div>
-                      )}
+                          <div key={cp.id} className={styles.componentItem}>
+                            <PreviewRender
+                              cpId={cp.id}
+                              cpType={cp.type}
+                              pageComponentSchema={
+                                useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id]
+                              }
+                              editLoading={editLoading}
+                              form={form}
+                              runtime={true}
+                              formValues={formValues}
+                              showFromPageData={() => {
+                                setPageType(EDITOR_TYPES.FORM_EDITOR);
+                              }}
+                              useStoreSignals={{ ...pageEditorSignal, mainEntity, subEntities: subEntitiesValues }}
+                            />
+                          </div>
+                        )}
                     </Fragment>
                   ))}
                 </div>
@@ -751,28 +754,28 @@ const PreviewContainer: React.FC<PreviewProps> = ({
                 <Fragment key={cp.id}>
                   {useEditorSignalMap.get(detailPageViewId.value)?.pageComponentSchemas.value[cp.id].config.status !==
                     STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
-                    <div
-                      key={cp.id}
-                      className={styles.componentItem}
-                      style={{
-                        width: getComponentWidth(
-                          useEditorSignalMap.get(detailPageViewId.value)?.pageComponentSchemas.value[cp.id],
-                          cp.type
-                        )
-                      }}
-                    >
-                      <PreviewRender
-                        cpId={cp.id}
-                        cpType={cp.type}
-                        pageComponentSchema={
-                          useEditorSignalMap.get(detailPageViewId.value)?.pageComponentSchemas.value[cp.id]
-                        }
-                        runtime={true}
-                        detailMode={detailMode}
-                        showFromPageData={() => {}}
-                      />
-                    </div>
-                  )}
+                      <div
+                        key={cp.id}
+                        className={styles.componentItem}
+                        style={{
+                          width: getComponentWidth(
+                            useEditorSignalMap.get(detailPageViewId.value)?.pageComponentSchemas.value[cp.id],
+                            cp.type
+                          )
+                        }}
+                      >
+                        <PreviewRender
+                          cpId={cp.id}
+                          cpType={cp.type}
+                          pageComponentSchema={
+                            useEditorSignalMap.get(detailPageViewId.value)?.pageComponentSchemas.value[cp.id]
+                          }
+                          runtime={true}
+                          detailMode={detailMode}
+                          showFromPageData={() => { }}
+                        />
+                      </div>
+                    )}
                 </Fragment>
               ))}
 
