@@ -2,8 +2,7 @@ package com.cmsr.onebase.plugin.runtime.config;
 
 import com.cmsr.onebase.plugin.api.HttpHandler;
 import com.cmsr.onebase.plugin.core.PluginMode;
-import com.cmsr.onebase.plugin.runtime.context.PluginContextFactory;
-import com.cmsr.onebase.plugin.runtime.executor.EventDispatcher;
+
 import com.cmsr.onebase.plugin.runtime.http.PluginControllerRegistrar;
 import com.cmsr.onebase.plugin.runtime.http.PluginHttpManager;
 import com.cmsr.onebase.plugin.runtime.manager.DevModePluginManager;
@@ -260,31 +259,6 @@ public class PluginRuntimeAutoConfiguration {
         });
 
         return manager;
-    }
-
-    /**
-     * 配置插件上下文工厂
-     *
-     * @param applicationContext Spring ApplicationContext
-     * @return PluginContextFactory
-     */
-    @Bean
-    @ConditionalOnMissingBean
-    public PluginContextFactory pluginContextFactory(ApplicationContext applicationContext) {
-        return new PluginContextFactory(applicationContext);
-    }
-
-    /**
-     * 配置事件分发器
-     *
-     * @param pluginManager  插件管理器
-     * @param contextFactory 上下文工厂
-     * @return EventDispatcher
-     */
-    @Bean
-    @ConditionalOnMissingBean
-    public EventDispatcher eventDispatcher(OneBasePluginManager pluginManager, PluginContextFactory contextFactory) {
-        return new EventDispatcher(pluginManager, contextFactory);
     }
 
     /**
