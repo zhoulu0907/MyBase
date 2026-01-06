@@ -47,6 +47,7 @@ import TabsLayoutIcon from '@/assets/images/cp/tabs_layout_cp.svg';
 import QuickEntryIcon from '@/assets/images/cp/quick_entry_cp.svg';
 import RichTextEditorWorkbenchIcon from '@/assets/images/cp/rich_text_editor_workbench_cp.svg';
 import ButtonWorkbenchIcon from '@/assets/images/cp/button_workbench_cp.svg';
+import WelcomeCardIcon from '@/assets/images/cp/welcome_card_cp.svg';
 
 import CarouselWorkbenchIcon from '@/assets/images/cp/carousel_workbench_cp.svg';
 
@@ -54,7 +55,6 @@ export const ICON_Map: Record<string, React.ReactNode> = {
   // 表单组件
   'text_input_cp.svg': <img src={TextInputIcon} alt="XInputText" />,
   'textarea_input_cp.svg': <img src={TextareaInputIcon} alt="XInputTextArea" />,
-  'carousel_cp.svg': <img src={CarouselIcon} alt="XCarouselForm" />,
   'number_input_cp.svg': <img src={NumberInputIcon} alt="XInputNumber" />,
   'email_input_cp.svg': <img src={EmailInputIcon} alt="XInputEmail" />,
   'phone_input_cp.svg': <img src={PhoneInputIcon} alt="XInputPhone" />,
@@ -96,6 +96,7 @@ export const ICON_Map: Record<string, React.ReactNode> = {
   'web_component_cp.svg': <img src={WebComponentIcon} alt="XWebView" />,
   'divider_cp.svg': <img src={DividerIcon} alt="XDivider" />,
   'placeholder_cp.svg': <img src={PlaceHolderIcon} alt="XPlaceholder" />,
+  'carousel_cp.svg': <img src={CarouselIcon} alt="XCarouselForm" />,
 
   // 布局组件
   'col_layout_cp.svg': <img src={ColumnLayoutIcon} alt="XColumnLayout" />,
@@ -106,7 +107,7 @@ export const ICON_Map: Record<string, React.ReactNode> = {
   'quick_entry_cp.svg': <img src={QuickEntryIcon} alt="XQuickEntry" />,
   'rich_text_editor_workbench_cp.svg': <img src={RichTextEditorWorkbenchIcon} alt="XRichTextEditorWorkbench" />,
   'button_workbench_cp.svg': <img src={ButtonWorkbenchIcon} alt="XButtonWorkbench" />,
-  
+  'welcome_card_cp.svg': <img src={WelcomeCardIcon} alt="XWelcomeCard" />,
   // 工作台高级组件
   'carousel_workbench_cp.svg': <img src={CarouselWorkbenchIcon} alt="XCarouselWorkbench" />,
 };
@@ -138,7 +139,6 @@ export const ICON_Map_By_Type: Record<string, React.ReactNode> = {
   XRichText: <img src={RichTextIcon} alt="XRichText" />,
   XSubTable: <img src={SubTableIcon} alt="XSubTable" />,
   XDataSelect: <img src={DataSelectIcon} alt="XDataSelect" />,
-  XCarouselForm: <img src={CarouselIcon} alt="XCarouselForm" />,
 
   // 列表组件
   XTable: <img src={TableIcon} alt="XTable" />,
@@ -158,6 +158,7 @@ export const ICON_Map_By_Type: Record<string, React.ReactNode> = {
   XWebView: <img src={WebComponentIcon} alt="XWebView" />,
   XDivider: <img src={DividerIcon} alt="XDivider" />,
   XPlaceholder: <img src={PlaceHolderIcon} alt="XPlaceholder" />,
+  XCarouselForm: <img src={CarouselIcon} alt="XCarouselForm" />,
 
   // 布局组件
   XColumnLayout: <img src={ColumnLayoutIcon} alt="XColumnLayout" />,
@@ -168,7 +169,7 @@ export const ICON_Map_By_Type: Record<string, React.ReactNode> = {
   XQuickEntry: <img src={QuickEntryIcon} alt="XQuickEntry" />,
   XRichTextEditorWorkbench: <img src={RichTextEditorWorkbenchIcon} alt="XRichTextEditorWorkbench" />,
   XButtonWorkbench: <img src={ButtonWorkbenchIcon} alt="XButtonWorkbench" />,
-
+  XWelcomeCard: <img src={WelcomeCardIcon} alt="XWelcomeCard" />,
   // 工作台高级组件
   XCarouselWorkbench: <img src={CarouselWorkbenchIcon} alt="XCarouselWorkbench" />,
 };

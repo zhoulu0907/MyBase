@@ -2,6 +2,7 @@ import { memo } from 'react';
 import { nanoid } from 'nanoid';
 import { Switch, Form, Ellipsis } from '@arco-design/mobile-react';
 import { FormInternalComponentType } from '@arco-design/mobile-react/esm/form';
+import { getSystem } from '@arco-design/mobile-utils';
 import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, DEFAULT_VALUE_TYPES, FormSchema } from '@onebase/ui-kit';
 import './index.css';
 import '../index.css';
@@ -21,6 +22,8 @@ const XSwitch = memo((props: XSwitchConfig & { runtime?: boolean; detailMode?: b
     detailMode
   } = props;
 
+  const systemInfo = getSystem();
+
   // 生成唯一的字段ID
   const fieldId = dataField && dataField.length > 0
     ? dataField[dataField.length - 1]
@@ -31,6 +34,7 @@ const XSwitch = memo((props: XSwitchConfig & { runtime?: boolean; detailMode?: b
     // 非只读模式，渲染Switch组件
     return (
       <Switch
+        platform={systemInfo === 'ios' ? 'ios' : 'android'}
         text={{ on: fillText?.display ? fillText.checkedText : '', off: fillText?.display ? fillText.uncheckedText : '' }}
       />
     );

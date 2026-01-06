@@ -23,12 +23,14 @@ export const useMainEntityList = () => {
 
   const loadMainEntityList = async () => {
     const res = await getEntityListByApp(curAppId);
+
     const curMainEntities = res.filter(
       (item: MetadataEntityPair) =>
-        item.relationType !== RELATION_TYPE.SLAVE ||
+        item.relationType == RELATION_TYPE.MASTER ||
         (item.relationType === RELATION_TYPE.SLAVE &&
-          !item.relationshipTypes.includes(RELATIONSHIP_TYPE.SUBTABLE_ONE_TO_MANY))
+          !item.relationshipTypes?.includes(RELATIONSHIP_TYPE.SUBTABLE_ONE_TO_MANY))
     );
+
     setMainEntityList(curMainEntities);
   };
 
@@ -68,11 +70,14 @@ export const useEntityFields = () => {
     const res = await getEntityFieldsWithChildren(mainEntityId);
 
     // 设置子表列表
-    const newSubEntityList = (res.childEntities || []).map((item: any) => ({
-      entityId: item.childEntityId,
-      tableName: item.childTableName,
-      entityName: item.childEntityName
-    }));
+    const newSubEntityList = (res.childEntities || [])
+      .filter((item: any) => item.relationshipType == RELATIONSHIP_TYPE.SUBTABLE_ONE_TO_MANY)
+      .map((item: any) => ({
+        entityId: item.childEntityId,
+        tableName: item.childTableName,
+        entityName: item.childEntityName
+      }));
+
     setSubEntityList(newSubEntityList);
 
     // 如果只需要子表列表，提前返回

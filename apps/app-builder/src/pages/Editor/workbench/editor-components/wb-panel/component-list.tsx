@@ -21,8 +21,9 @@ export function ComponentList({ items, components, onItemsChange }: ComponentLis
     return <div className={styles.emptyTip}>暂无组件</div>;
   }
 
-  // 检查workspace中是否已经存在快捷入口组件
+  // 检查workspace中是否已经存在快捷入口、欢迎卡片组件（仅能拖入一个）
   const hasQuickEntry = workbenchComponents?.some((cp) => cp.type === WORKBENCH_COMPONENT_TYPES.QUICK_ENTRY);
+  const hasWelcomeCard = workbenchComponents?.some((cp) => cp.type === WORKBENCH_COMPONENT_TYPES.WELCOME_CARD);
 
   return (
     <ReactSortable
@@ -46,12 +47,12 @@ export function ComponentList({ items, components, onItemsChange }: ComponentLis
       }}
     >
       {components
-        // 过滤掉按钮组件
+        // 过滤掉按钮组件（仅移动端支持）
         .filter((item) => item.type !== WORKBENCH_COMPONENT_TYPES.BUTTON_WORKBENCH)
         .map((item) => {
-          // 如果是快捷入口组件且workspace中已存在，则禁用拖拽
-          const isDisabled = item.type === WORKBENCH_COMPONENT_TYPES.QUICK_ENTRY && hasQuickEntry;
-
+          // 如果是快捷入口、欢迎卡片组件且workspace中已存在，则禁用拖拽
+          const isQuickEntryDisabled = item.type === WORKBENCH_COMPONENT_TYPES.QUICK_ENTRY && hasQuickEntry;
+          const isWelcomeCardDisabled = item.type === WORKBENCH_COMPONENT_TYPES.WELCOME_CARD && hasWelcomeCard;
           return (
             <MaterialCard
               key={item.type}
@@ -60,7 +61,7 @@ export function ComponentList({ items, components, onItemsChange }: ComponentLis
               type={item.type}
               icon={item.icon || ''}
               layout="column"
-              disabled={isDisabled}
+              disabled={isQuickEntryDisabled || isWelcomeCardDisabled}
             />
           );
         })}

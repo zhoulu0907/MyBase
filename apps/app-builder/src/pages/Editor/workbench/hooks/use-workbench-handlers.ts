@@ -129,12 +129,19 @@ export function useWorkbenchHandlers({
 
     console.log(`拖入工作台组件 ${cpID},类型 ${itemType}, 名称 ${itemDisplayName}`);
 
+    // 如果组件已存在, 则不进行创建
     if (cpID) {
       const cpSchema = wbComponentSchemas[cpID];
       if (cpSchema && cpSchema.config && cpSchema.editData) {
         console.log(`组件 ${cpID} 已存在，不进行创建`);
+        const completeSchema = {
+          id: cpID,
+          type: itemType || '',
+          displayName: itemDisplayName || '',
+          ...cpSchema
+        } as WorkbenchComponentSchema & { id: string; type: string; displayName: string };
         setCurComponentID(cpID);
-        setCurComponentSchema(cpSchema);
+        setCurComponentSchema(completeSchema);
         setShowDeleteButton(false);
         return;
       }
@@ -150,10 +157,17 @@ export function useWorkbenchHandlers({
       schema.config.width = getDefaultWidth(itemType as string, WORKBENCH_DEFAULT_WIDTHS);
     }
 
+    // 新创建的组件
     if (cpID) {
       setWbComponentSchemas(cpID, schema);
+      const completeSchema = {
+        id: cpID,
+        type: itemType || '',
+        displayName: itemDisplayName || '',
+        ...schema
+      } as WorkbenchComponentSchema & { id: string; type: string; displayName: string };
       setCurComponentID(cpID);
-      setCurComponentSchema(schema);
+      setCurComponentSchema(completeSchema);
       setShowDeleteButton(false);
     }
   };
