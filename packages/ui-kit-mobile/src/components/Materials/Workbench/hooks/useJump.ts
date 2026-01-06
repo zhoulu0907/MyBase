@@ -22,6 +22,20 @@ export function useJump() {
   const location = useLocation();
   const { appId } = useParams<{ appId?: string }>();
 
+  // 递归查找菜单（包括子菜单）
+  const findMenuByUuid = (menus: ApplicationMenu[], uuid: string): ApplicationMenu | null => {
+    for (const menu of menus) {
+      if (menu.menuUuid === uuid) {
+        return menu;
+      }
+      if (menu.children && menu.children.length > 0) {
+        const found = findMenuByUuid(menu.children, uuid);
+        if (found) return found;
+      }
+    }
+    return null;
+  }; 
+
   const handleJump = async (options: JumpOptions) => {
     const { linkAddress, menuUuid, runtime = true } = options;
 
@@ -40,7 +54,7 @@ export function useJump() {
     // 内部菜单跳转
     if (menuUuid && appId) {
       const appRuntimeMenu = await menuCacheManager.getMenuList(appId);
-      const targetMenu = appRuntimeMenu.find((menu: ApplicationMenu) => menu.menuUuid === menuUuid);
+      const targetMenu = findMenuByUuid(appRuntimeMenu, menuUuid);
 
       if (targetMenu && targetMenu.id) {
         const searchParams = new URLSearchParams(location.search);
@@ -50,17 +64,7 @@ export function useJump() {
         navigate(to, { replace: true });
 
         const { setCurMenu } = menuSignal;
-        setCurMenu({
-          id: targetMenu.id || '',
-          menuCode: targetMenu.menuCode || '',
-          menuSort: targetMenu.menuSort || 1,
-          menuType: targetMenu.menuType || 1,
-          menuName: targetMenu.menuName || '',
-          menuIcon: targetMenu.menuIcon || '',
-          isVisible: targetMenu.isVisible || 1,
-          pagesetType: targetMenu.pagesetType,
-          children: targetMenu.children || [],
-        });
+        setCurMenu(targetMenu);
       } else {
         console.warn('未找到对应菜单或菜单未配置 id', menuUuid);
       }
