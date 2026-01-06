@@ -23,6 +23,20 @@ export function useJump() {
   const { appId } = useParams<{ appId?: string }>();
   const { setCurMenu } = menuSignal;
 
+  // 递归查找菜单（包括子菜单）
+  const findMenuByUuid = (menus: ApplicationMenu[], uuid: string): ApplicationMenu | null => {
+    for (const menu of menus) {
+      if (menu.menuUuid === uuid) {
+        return menu;
+      }
+      if (menu.children && menu.children.length > 0) {
+        const found = findMenuByUuid(menu.children, uuid);
+        if (found) return found;
+      }
+    }
+    return null;
+  }; 
+
   const handleJump = async (options: JumpOptions) => {
     const { linkAddress, menuUuid, runtime = true } = options;
 
@@ -41,7 +55,7 @@ export function useJump() {
     // 内部菜单跳转
     if (menuUuid && appId) {
       const appRuntimeMenu = await menuCacheManager.getMenuList(appId);
-      const targetMenu = appRuntimeMenu.find((menu: ApplicationMenu) => menu.menuUuid === menuUuid);
+      const targetMenu = findMenuByUuid(appRuntimeMenu, menuUuid);
 
       if (targetMenu && targetMenu.id) {
         // 获取当前URL的查询参数, 更新或添加 curMenu 参数

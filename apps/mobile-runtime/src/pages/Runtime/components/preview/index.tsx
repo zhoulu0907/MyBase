@@ -608,7 +608,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({
                   <div
                     className={styles.componentItem}
                     style={{
-                      width: `calc(${getWorkbenchComponentWidth(schema, cp.type as WorkbenchComponentType)} - 8px)`,
+                      width: `calc(100% - 8px)`,
                       margin: '4px'
                     }}
                   >

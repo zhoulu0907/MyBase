@@ -56,7 +56,7 @@ const XRadio = memo((props: XRadioConfig & { runtime?: boolean; detailMode?: boo
 
   return (
     <Form.Item
-      className="inputTextWrapperOBMobile radioWrapperOBMobile"
+      className="inputTextWrapperOBMobile"
       label={label.display && <Ellipsis text={label.text} maxLine={2} />}
       field={fieldId}
       layout={layout}
@@ -71,7 +71,7 @@ const XRadio = memo((props: XRadioConfig & { runtime?: boolean; detailMode?: boo
         <div>{form?.getFieldValue(fieldId)?.name || options.find((op) => op.id === form?.getFieldValue(fieldId)?.id || op.id === form?.getFieldValue(fieldId))?.label || '--'}</div>
       ) : (
         <RadioGroup
-          className='radioGroup'
+          className='radioWrapperOBMobile'
           options={options}
         />
       )}
