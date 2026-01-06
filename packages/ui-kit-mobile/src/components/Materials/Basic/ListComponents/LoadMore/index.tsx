@@ -265,8 +265,7 @@ const XLoadMore = memo(
                 field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE
             );
             if (multiSelectField && newItem[key] && Array.isArray(newItem[key])) {
-              const newOptions = await getFieldOptionsConfig([tableName, key], mainEntity, subEntities, appDict.value);
-              newItem[key] = newOptions.filter(op => newItem[key].find(v => op.id === v.id)).map(v => v.label).join('，');
+              newItem[key] = newItem[key].map(v => v.name).filter(Boolean).join('，');
             }
 
             // 人员选择单选
@@ -303,10 +302,9 @@ const XLoadMore = memo(
               (field: AppEntityField) =>
                 field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.SELECT.VALUE
             );
+
             if (selectField) {
-              const curValue = newItem[key];
-              const newOptions = await getFieldOptionsConfig([tableName, key], mainEntity, subEntities, appDict.value);
-              newItem[key] = newOptions.find(op => op.id === curValue?.id)?.label || '-';
+              newItem[key] = newItem[key]?.name || '-';
             }
 
             // 数据选择
