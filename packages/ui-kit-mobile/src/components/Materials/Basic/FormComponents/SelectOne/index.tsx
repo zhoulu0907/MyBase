@@ -85,7 +85,7 @@ const XSelectOne = memo((props: XSelectOneConfig & { runtime?: boolean; detailMo
           }}
           data={[options.map(op => ({
             label: op.label,
-            value: op.id
+            value: op.value
           }))]}
           maskClosable
         />

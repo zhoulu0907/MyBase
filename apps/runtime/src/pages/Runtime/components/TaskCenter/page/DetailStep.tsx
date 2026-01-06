@@ -256,8 +256,11 @@ const DetailStep: FC<any> = ({ stepData }: any) => {
       <Steps current={current} onChange={setCurrent} direction="vertical" className="rgt-sp-steps">
         {data?.map((item: any, index: number) => {
           if (index === data.length - 1) {
-            // 最后一个，属于未处理状态
-            return <Step key={index} disabled={true} title={item?.nodeName} description={renderDescript(item)} />;
+            if (item?.nodeType === 'end' && item?.isCurrent) {
+              return <Step key={index} disabled={true} title={item?.nodeName} description={renderDescript(item)} className="end-node succss-box"/>;
+            } else {
+              return <Step key={index} disabled={true} title={item?.nodeName} description={renderDescript(item)} />;
+            }
           } else {
             // 完成状态
             return (

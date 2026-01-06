@@ -126,6 +126,11 @@ const MenuSelector = ({
               checkable={mode === 'multiple'}
               checkedKeys={selectedKeys}
               onCheck={handleCheck}
+              fieldNames={{
+                key: 'menuUuid',
+                title: 'menuName',
+                children: 'children'
+              }}
               icons={{
                 switcherIcon: <IconDown />
               }}
