@@ -194,7 +194,7 @@ const BusinessPage: React.FC = () => {
     }
     fetchTableDataList();
     fetchIndustryType();
-  }, []);
+  }, [location.pathname]);
 
   const handlePageChange = (current: number, pageSize: number) => {
     fetchTableDataList(current, pageSize);
