@@ -1,4 +1,4 @@
-package com.cmsr.onebase.plugin.core;
+package com.cmsr.onebase.plugin.common;
 
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;

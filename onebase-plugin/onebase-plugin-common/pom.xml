@@ -9,19 +9,13 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>onebase-plugin-core</artifactId>
+    <artifactId>onebase-plugin-common</artifactId>
     <packaging>jar</packaging>
 
     <name>${project.artifactId}</name>
-    <description>插件核心模块，提供扩展点扫描的公共能力</description>
+    <description>插件公共模块，包含常量、枚举和扫描器</description>
 
     <dependencies>
-        <!-- 插件公共模块 -->
-        <dependency>
-            <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-plugin-common</artifactId>
-        </dependency>
-
         <!-- 插件SDK，定义扩展点接口 -->
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
@@ -52,11 +46,6 @@
             <artifactId>lombok</artifactId>
             <scope>provided</scope>
         </dependency>
-
-        <!-- ORM支持 -->
-        <dependency>
-            <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-spring-boot-starter-orm</artifactId>
-        </dependency>
     </dependencies>
+
 </project>

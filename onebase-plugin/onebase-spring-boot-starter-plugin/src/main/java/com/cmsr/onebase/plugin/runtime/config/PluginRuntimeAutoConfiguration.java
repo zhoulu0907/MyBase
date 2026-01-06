@@ -1,7 +1,7 @@
 package com.cmsr.onebase.plugin.runtime.config;
 
 import com.cmsr.onebase.plugin.api.HttpHandler;
-import com.cmsr.onebase.plugin.core.PluginMode;
+import com.cmsr.onebase.plugin.common.PluginMode;
 import com.cmsr.onebase.plugin.runtime.context.PluginContextFactory;
 import com.cmsr.onebase.plugin.runtime.executor.EventDispatcher;
 import com.cmsr.onebase.plugin.runtime.http.PluginControllerRegistrar;

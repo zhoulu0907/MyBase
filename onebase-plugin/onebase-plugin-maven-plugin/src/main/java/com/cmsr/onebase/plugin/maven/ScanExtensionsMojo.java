@@ -1,7 +1,7 @@
 package com.cmsr.onebase.plugin.maven;
 
-import com.cmsr.onebase.plugin.core.ExtensionPointConstants;
-import com.cmsr.onebase.plugin.core.ExtensionPointScannerASM;
+import com.cmsr.onebase.plugin.common.ExtensionPointConstants;
+import com.cmsr.onebase.plugin.common.ExtensionPointScannerASM;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;

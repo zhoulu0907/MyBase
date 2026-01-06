@@ -1,4 +1,4 @@
-package com.cmsr.onebase.plugin.core;
+package com.cmsr.onebase.plugin.common;
 
 import lombok.extern.slf4j.Slf4j;
 

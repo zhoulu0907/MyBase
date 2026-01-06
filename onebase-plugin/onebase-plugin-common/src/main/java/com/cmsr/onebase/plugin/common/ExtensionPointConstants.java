@@ -1,4 +1,4 @@
-package com.cmsr.onebase.plugin.core;
+package com.cmsr.onebase.plugin.common;
 
 import com.cmsr.onebase.plugin.api.DataProcessor;
 import com.cmsr.onebase.plugin.api.EventListener;

@@ -1,4 +1,4 @@
-package com.cmsr.onebase.plugin.core;
+package com.cmsr.onebase.plugin.common;
 
 /**
  * 插件运行模式枚举
