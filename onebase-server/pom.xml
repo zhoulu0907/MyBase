@@ -90,6 +90,11 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-plugin-build</artifactId>
+            <version>${revision}</version>
+        </dependency>
         <!-- 已移除 onebase-module-metadata-runtime 依赖，运行态功能保留在 runtime 模块 -->
         <!--
         <dependency>
@@ -184,12 +189,6 @@
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-spring-boot-starter-plugin</artifactId>
-        </dependency>
-        <!-- 插件编辑态 -->
-        <dependency>
-            <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-plugin-build</artifactId>
-            <version>${revision}</version>
         </dependency>
     </dependencies>
 

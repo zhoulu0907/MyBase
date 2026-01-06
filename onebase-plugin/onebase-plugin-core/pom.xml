@@ -20,6 +20,7 @@
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-plugin-common</artifactId>
+            <version>${revision}</version>
         </dependency>
 
         <!-- 插件SDK，定义扩展点接口 -->

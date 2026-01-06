@@ -16,6 +16,13 @@
     <description>插件编辑态模块，提供插件管理的编辑态服务</description>
 
     <dependencies>
+        <!-- 插件公共模块 -->
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-plugin-common</artifactId>
+            <version>${revision}</version>
+        </dependency>
+
         <!-- 依赖插件核心模块 -->
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
@@ -27,6 +34,7 @@
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-plugin-sdk</artifactId>
+            <version>${revision}</version>
         </dependency>
 
         <!-- 插件运行时 starter -->
