@@ -146,7 +146,8 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
     [WORKBENCH_COMPONENT_TYPES.QUICK_ENTRY]: { component: WorkbenchComp.XQuickEntry },
     [WORKBENCH_COMPONENT_TYPES.RICH_TEXT_WORKBENCH]: { component: WorkbenchComp.XRichTextEditorWorkbench },
     [WORKBENCH_COMPONENT_TYPES.CAROUSEL_WORKBENCH]: { component: WorkbenchComp.XCarouselWorkbench },
-    [WORKBENCH_COMPONENT_TYPES.BUTTON_WORKBENCH]: { component: WorkbenchComp.XButtonWorkbench }
+    [WORKBENCH_COMPONENT_TYPES.BUTTON_WORKBENCH]: { component: WorkbenchComp.XButtonWorkbench },
+    [WORKBENCH_COMPONENT_TYPES.WELCOME_CARD]: { component: WorkbenchComp.XWelcomeCard }
   };
 
   // 渲染对应的组件
