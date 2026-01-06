@@ -61,8 +61,8 @@ const TableSearch = memo((props: TableSearchConfig) => {
             src={filterIcon}
             alt=""
             onClick={() => {
-              form?.setFieldsValue(queryData?.value || {});
               setShowDropdown(true);
+              form?.setFieldsValue(queryData?.value || {});
             }}
           />
         )}
@@ -350,6 +350,7 @@ const TableSearch = memo((props: TableSearchConfig) => {
         onCancel={() => setShowDropdown(false)}
         clickOtherToClose={false}
         className="search-dropdown"
+        unmountOnExit={false}
         getScrollContainer={() => document.getElementById('ob-loadmore-dropdown-scroll-search')}
       >
         <div id="ob-loadmore-dropdown-scroll-search">

@@ -459,7 +459,7 @@ const XLoadMore = memo(
     const searchValuesChange = useCallback(
       debounce((changedValues) => {
         const changeKeys = Object.keys(changedValues);
-        if (changeKeys?.length && searchItems?.length) {
+        if (changeKeys?.length && changeKeys.length === 1 && searchItems?.length) {
           const changeKey = changeKeys[0];
           if (changeKey === searchItems[0].value) {
             queryData.value[changeKey] = changedValues[changeKey];
@@ -467,7 +467,7 @@ const XLoadMore = memo(
             handleSearch();
           }
         }
-      }, 500),
+      }, 200),
       []
     );
 
