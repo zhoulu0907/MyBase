@@ -62,6 +62,7 @@ const Runtime: React.FC = () => {
     curMenuId.indexOf('TASK-') >= 0 ? null : (
       <PreviewContainer
         menuId={curMenuId || ''}
+        menuName={curMenu.value?.title}
         runtime={true}
         mainEntity={mainEntity}
         subEntities={subEntities}

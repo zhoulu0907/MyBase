@@ -27,6 +27,7 @@ export const useMainEntityList = () => {
     const curMainEntities = res.filter(
       (item: MetadataEntityPair) =>
         item.relationType == RELATION_TYPE.MASTER ||
+        item.relationType == RELATION_TYPE.NONE ||
         (item.relationType === RELATION_TYPE.SLAVE &&
           !item.relationshipTypes?.includes(RELATIONSHIP_TYPE.SUBTABLE_ONE_TO_MANY))
     );

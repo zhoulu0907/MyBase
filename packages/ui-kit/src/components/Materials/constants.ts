@@ -503,8 +503,8 @@ export const DEFAULT_OPTIONS_TYPE = {
 
 export const SELECT_OPTIONS_BPM = [
   { value: 'bpm_title', displayName: '流程标题', fieldName: 'bpm_title', fieldType: 'TEXT' },
-  { value: 'bpm_initiator_id', displayName: '发起人', fieldName: 'bpm_initiator_id', fieldType: 'TEXT' },
-  { value: 'bpm_submit_time', displayName: '发起时间', fieldName: 'bpm_submit_time', fieldType: 'TEXT' },
+  { value: 'bpm_initiator_id', displayName: '发起人', fieldName: 'bpm_initiator_id', fieldType: 'USER' },
+  { value: 'bpm_submit_time', displayName: '发起时间', fieldName: 'bpm_submit_time', fieldType: 'DATETIME' },
   { value: 'bpm_status', displayName: '流程状态', fieldName: 'bpm_status', fieldType: 'SELECT' },
   { value: 'bpm_current_node', displayName: '当前节点', fieldName: 'bpm_current_node', fieldType: 'SELECT' }
 ] as any;

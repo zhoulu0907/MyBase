@@ -12,6 +12,7 @@ interface TagItem {
   adminEmail?: string;
   adminDept?: string;
   adminAvatar?: string;
+  deptName?: string;
 }
 interface IProps {
   data: TagItem[];
@@ -67,7 +68,7 @@ const Tags = ({ data }: IProps) => {
                     <span className={styles.infoKey}>所属部门</span>
                   </Col>
                   <Col span={12}>
-                    <span>{tag.adminDept || '-'}</span>
+                    <span>{tag.deptName || '-'}</span>
                   </Col>
                 </Row>
               </div>

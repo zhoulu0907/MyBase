@@ -88,13 +88,11 @@ const XSelectMutiple = memo((props: XSelectMutipleConfig & { runtime?: boolean; 
     if (selectedKeys.length === 0) {
       return <span className='selectMultipleValue'>请选择</span>;
     }
-    const selectedOptions = options?.filter(option => selectedKeys.includes(option.id));
-    return selectedOptions?.map(opt => opt.label).join('，');
+    return selectedKeys?.map(opt => opt).join('，');
   };
 
   const getReadonlyLabels = () => {
-    let curValues = form?.getFieldValue(fieldId) ? form?.getFieldValue(fieldId) : selectedKeys;
-    return options.filter(op => curValues?.find(v => op.id === v)).map(v => v.label).join('，') || '--';
+    return selectedKeys.map(v => v.trim()).join('，') || '--';
   };
 
   return (
@@ -166,7 +164,7 @@ const XSelectMutiple = memo((props: XSelectMutipleConfig & { runtime?: boolean; 
                       }}
                     >
                       <Checkbox
-                        value={option.id}
+                        value={option.value}
                         icons={squareIcon}
                         style={{ marginRight: '0.2rem' }}
                       >
