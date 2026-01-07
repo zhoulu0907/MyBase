@@ -1,7 +1,7 @@
 package com.cmsr.onebase.plugin.demo.hello.http;
 
 import com.cmsr.onebase.plugin.api.HttpHandler;
-import com.cmsr.onebase.plugin.service.PluginConfigService;
+import com.cmsr.onebase.plugin.service.PluginConfigQueryService;
 import com.cmsr.onebase.plugin.util.PluginPropertiesUtil;
 import jakarta.annotation.Resource;
 import org.springframework.http.ResponseEntity;
@@ -27,27 +27,7 @@ public class ConfigDemoController implements HttpHandler {
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @Resource
-    private PluginConfigService pluginConfigService;
-
-    /**
-     * 获取插件 ID
-     * <p>
-     * 直接使用工具类读取
-     * </p>
-     */
-    private String getPluginId() {
-        return PluginPropertiesUtil.getPluginId(this.getClass());
-    }
-
-    /**
-     * 获取插件版本
-     * <p>
-     * 直接使用工具类读取
-     * </p>
-     */
-    private String getPluginVersion() {
-        return PluginPropertiesUtil.getPluginVersion(this.getClass());
-    }
+    private PluginConfigQueryService pluginConfigQueryService;
 
     /**
      * 获取所有配置
@@ -60,7 +40,7 @@ public class ConfigDemoController implements HttpHandler {
         Map<String, Object> result = new HashMap<>();
         result.put("pluginId", getPluginId());
         result.put("pluginVersion", getPluginVersion());
-        result.put("config", pluginConfigService.getConfig(getPluginId(), getPluginVersion()));
+        result.put("config", pluginConfigQueryService.getConfig(getPluginId(), getPluginVersion()));
         result.put("timestamp", LocalDateTime.now().format(FORMATTER));
 
         return ResponseEntity.ok(result);
@@ -74,12 +54,12 @@ public class ConfigDemoController implements HttpHandler {
      */
     @GetMapping("/key/{key}")
     public ResponseEntity<Map<String, Object>> getConfigValue(@PathVariable String key) {
-        Object value = pluginConfigService.getConfigValue(getPluginId(), getPluginVersion(), key);
+        Object value = pluginConfigQueryService.getConfigValue(getPluginId(), getPluginVersion(), key);
 
         Map<String, Object> result = new HashMap<>();
         result.put("key", key);
         result.put("value", value);
-        result.put("exists", pluginConfigService.hasConfigKey(getPluginId(), getPluginVersion(), key));
+        result.put("exists", pluginConfigQueryService.hasConfigKey(getPluginId(), getPluginVersion(), key));
         result.put("timestamp", LocalDateTime.now().format(FORMATTER));
 
         return ResponseEntity.ok(result);
@@ -95,15 +75,15 @@ public class ConfigDemoController implements HttpHandler {
     @GetMapping("/demo")
     public ResponseEntity<Map<String, Object>> configDemo() {
         // 读取各种类型的配置
-        String apiKey = (String) pluginConfigService.getConfigValue(getPluginId(), getPluginVersion(), "apiKey",
+        String apiKey = pluginConfigQueryService.getConfigValue(getPluginId(), getPluginVersion(), "apiKey",
                 "default-key");
-        String provider = (String) pluginConfigService.getConfigValue(getPluginId(), getPluginVersion(), "provider",
+        String provider = pluginConfigQueryService.getConfigValue(getPluginId(), getPluginVersion(), "provider",
                 "unknown");
-        Integer timeout = (Integer) pluginConfigService.getConfigValue(getPluginId(), getPluginVersion(), "timeout",
+        Integer timeout = pluginConfigQueryService.getConfigValue(getPluginId(), getPluginVersion(), "timeout",
                 3000);
-        Integer maxRetries = (Integer) pluginConfigService.getConfigValue(getPluginId(), getPluginVersion(),
+        Integer maxRetries = pluginConfigQueryService.getConfigValue(getPluginId(), getPluginVersion(),
                 "maxRetries", 3);
-        Boolean enableLog = (Boolean) pluginConfigService.getConfigValue(getPluginId(), getPluginVersion(), "enableLog",
+        Boolean enableLog = pluginConfigQueryService.getConfigValue(getPluginId(), getPluginVersion(), "enableLog",
                 false);
 
         // 模拟业务逻辑
@@ -131,7 +111,7 @@ public class ConfigDemoController implements HttpHandler {
      */
     @GetMapping("/info")
     public ResponseEntity<Map<String, Object>> configInfo() {
-        Map<String, Object> allConfig = pluginConfigService.getConfig(getPluginId(), getPluginVersion());
+        Map<String, Object> allConfig = pluginConfigQueryService.getConfig(getPluginId(), getPluginVersion());
 
         Map<String, Object> info = new HashMap<>();
         info.put("pluginId", getPluginId());

@@ -3,7 +3,7 @@ package com.cmsr.onebase.plugin.service;
 import java.util.Map;
 
 /**
- * 插件配置服务接口
+ * 插件配置查询服务接口
  * <p>
  * 提供插件动态获取配置参数的能力。
  * 插件开发者可通过此接口获取由宿主系统管理的配置。
@@ -24,7 +24,7 @@ import java.util.Map;
  * @author chengyuansen
  * @date 2025-01-05
  */
-public interface PluginConfigService {
+public interface PluginConfigQueryService {
 
     /**
      * 获取指定插件的全部配置

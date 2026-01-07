@@ -5,6 +5,9 @@ import com.cmsr.onebase.plugin.runtime.test.config.PluginTestConfiguration;
 import com.cmsr.onebase.plugin.runtime.test.util.PluginHttpTestUtil;
 import com.cmsr.onebase.plugin.runtime.test.util.PluginHttpTestUtil.HttpResponse;
 import com.cmsr.onebase.plugin.runtime.test.util.PluginStatusAssert;
+import com.cmsr.onebase.plugin.runtime.test.util.PluginTestEnvironmentManager;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,25 +24,36 @@ import org.springframework.test.context.TestPropertySource;
  * PROD 模式 API 响应测试
  * <p>
  * 测试所有插件接口在 PROD 模式下的响应
- * 注意：需要在 plugins 目录下有实际的插件 ZIP 包
+ * 注意：插件会自动编译打包并复制到 plugins 目录
  * </p>
  *
  * @author chengyuansen
  * @date 2025-12-25
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+// @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS) // 移除以保持
+// Context 在 @AfterAll 时可用
 @Import(PluginTestConfiguration.class)
 @TestPropertySource(properties = {
         "onebase.plugin.enabled=true",
         "onebase.plugin.mode=prod",
         "onebase.plugin.auto-load=true",
         "onebase.plugin.auto-start=true",
-        "onebase.plugin.plugins-dir=D:/cmsr/10_cmsr/CodingSpace/plugins-root"
+        "onebase.plugin.plugins-dir=plugins" // 使用相对路径,由环境管理器自动准备
 })
 public class ProdModeApiTest {
 
     private static final Logger log = LoggerFactory.getLogger(ProdModeApiTest.class);
+
+    @BeforeAll
+    static void setupEnvironment() throws Exception {
+        PluginTestEnvironmentManager.setupEnvironment();
+    }
+
+    @AfterAll
+    static void cleanupEnvironment() throws Exception {
+        PluginTestEnvironmentManager.cleanupEnvironment();
+    }
 
     @LocalServerPort
     private int port;
@@ -51,6 +65,7 @@ public class ProdModeApiTest {
 
     @BeforeEach
     void setUp() {
+        PluginTestEnvironmentManager.setPluginManager(pluginManager);
         httpUtil = new PluginHttpTestUtil("http://localhost:" + port);
 
         if (pluginManager != null && pluginManager.getPlugin("hello-plugin").isPresent()) {
@@ -60,6 +75,12 @@ public class ProdModeApiTest {
         } else {
             log.warn("PROD 模式下未找到 hello-plugin，请确保 plugins 目录下有插件包");
         }
+    }
+
+    @org.junit.jupiter.api.AfterEach
+    void tearDown() {
+        // 确保 pluginManager 在 @AfterAll 清理时仍然可用
+        PluginTestEnvironmentManager.setPluginManager(pluginManager);
     }
 
     @Test
