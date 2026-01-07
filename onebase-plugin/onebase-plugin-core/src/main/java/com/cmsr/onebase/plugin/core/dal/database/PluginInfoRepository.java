@@ -35,7 +35,7 @@ public class PluginInfoRepository extends BaseDataRepository<PluginInfoMapper, P
      * @param pluginId 插件ID
      * @return 插件信息列表
      */
-    public List<PluginInfoDO> getListByPluginId(Long pluginId) {
+    public List<PluginInfoDO> getListByPluginId(String pluginId) {
         QueryWrapper queryWrapper = this.query()
                 .eq(PluginInfoDO::getPluginId, pluginId);
         return list(queryWrapper);

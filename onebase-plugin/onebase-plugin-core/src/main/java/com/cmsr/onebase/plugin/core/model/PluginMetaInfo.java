@@ -16,7 +16,7 @@ public class PluginMetaInfo {
     /**
      * 插件唯一标识
      */
-    private Long pluginId;
+    private String pluginId;
 
     /**
      * 插件名称
@@ -66,7 +66,7 @@ public class PluginMetaInfo {
         /**
          * 依赖插件ID
          */
-        private Long pluginId;
+        private String pluginId;
         /**
          * 最低版本
          */
