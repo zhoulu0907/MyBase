@@ -39,7 +39,6 @@ const AppHeader: React.FC<HeaderProps> = ({ className, avatarUrl, tenantInfo }) 
 
   const getInfo = async () => {
     const res = await getPermissionInfo(CodeType.TENANT);
-    console.log('res: ', res);
     UserPermissionManager.setUserPermissionInfo(res);
     userPermissionSignal.setPermissionInfo(res);
 
