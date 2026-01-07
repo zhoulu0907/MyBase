@@ -93,6 +93,10 @@ public class RuntimeApplicationContextHeaderFilter extends OncePerRequestFilter 
                 log.warn("登录用户无应用ID，从请求头中获取应用ID，loginUser={}", loginUser);
                 String applicationIdHeader = request.getHeader(X_APPLICATION_ID);
                 applicationId = NumberUtils.toLong(applicationIdHeader, -1L);
+
+                if (applicationId <=0){
+                    applicationId = NumberUtils.toLong(request.getParameter("applicationId"), -1L);
+                }
             }
             if (applicationId <= 0) {
                 CommonResult<?> result = CommonResult.error(FORBIDDEN_APP.getCode(), "应用ID为空");
