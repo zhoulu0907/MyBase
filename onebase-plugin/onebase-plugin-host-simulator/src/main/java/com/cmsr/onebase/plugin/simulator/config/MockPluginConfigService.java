@@ -1,6 +1,6 @@
 package com.cmsr.onebase.plugin.simulator.config;
 
-import com.cmsr.onebase.plugin.service.PluginConfigService;
+import com.cmsr.onebase.plugin.service.PluginConfigQueryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.DefaultResourceLoader;
@@ -31,7 +31,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @date 2025-01-05
  */
 @Service
-public class MockPluginConfigService implements PluginConfigService {
+public class MockPluginConfigService implements PluginConfigQueryService {
 
     private static final Logger log = LoggerFactory.getLogger(MockPluginConfigService.class);
 
