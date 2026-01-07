@@ -25,6 +25,10 @@ export interface ERchartRef {
   getGraphPositon: () => void;
 }
 
+// 画布缩放范围
+const MIN_SCALE = 0.6;
+const MAX_SCALE = 1.5;
+
 const ERchart = forwardRef<ERchartRef, EntityERProps>(
   (
     {
@@ -407,7 +411,11 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
               nodeMovable: mode === 'edit',
               edgeMovable: mode === 'edit'
             },
-            panning: true, // 支持拖拽平移
+            // 支持拖拽平移
+            panning: {
+              enabled: true,
+              eventTypes: ['leftMouseDown']
+            },
             // 支持鼠标滚轮缩放
             mousewheel: {
               enabled: true,
@@ -415,8 +423,8 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
             },
             // 缩放级别
             scaling: {
-              min: 0.6,
-              max: 1.5
+              min: MIN_SCALE,
+              max: MAX_SCALE
             }
           });
         } catch (error) {
@@ -426,6 +434,50 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
 
         // 初始化折叠处理器
         collapseHandlerRef.current = new SectionCollapseHandler(graphRef.current);
+
+        // 限制平移范围，确保节点始终可见
+        // 以最小缩放（0.6）时的可见视口作为限制范围
+        graphRef.current.on('translate', ({ tx, ty }) => {
+          if (!graphRef.current) return;
+
+          const contentArea = graphRef.current.getContentArea();
+          if (!contentArea || contentArea.width === 0 || contentArea.height === 0) return;
+
+          const graphSize = graphRef.current.getGraphArea();
+          const padding = 100; // 边距
+
+          // 计算内容区域的边界
+          const contentLeft = contentArea.x;
+          const contentRight = contentArea.x + contentArea.width;
+          const contentTop = contentArea.y;
+          const contentBottom = contentArea.y + contentArea.height;
+
+          const { width: containerWidth = graphSize.width, height: containerHeight = graphSize.height } =
+            containerRef.current?.getBoundingClientRect() ?? {};
+          const viewWidthAtMinScale = containerWidth / MIN_SCALE;
+          const viewHeightAtMinScale = containerHeight / MIN_SCALE;
+          const currentScale = graphRef.current.scale().sx;
+          const extraWidth = Math.max(0, viewWidthAtMinScale - containerWidth / currentScale) / 2;
+          const extraHeight = Math.max(0, viewHeightAtMinScale - containerHeight / currentScale) / 2;
+
+          const baseMaxTranslateX = Math.max(0, contentRight + padding - viewWidthAtMinScale);
+          const baseMinTranslateX = Math.min(0, contentLeft - padding);
+          const baseMaxTranslateY = Math.max(0, contentBottom + padding - viewHeightAtMinScale);
+          const baseMinTranslateY = Math.min(0, contentTop - padding);
+          const maxTranslateX = baseMaxTranslateX + extraWidth;
+          const minTranslateX = baseMinTranslateX - extraWidth;
+          const maxTranslateY = baseMaxTranslateY + extraHeight;
+          const minTranslateY = baseMinTranslateY - extraHeight;
+
+          // 限制平移范围
+          const newTx = Math.max(minTranslateX, Math.min(maxTranslateX, tx));
+          const newTy = Math.max(minTranslateY, Math.min(maxTranslateY, ty));
+
+          // 如果平移值被限制，更新画布位置
+          if (newTx !== tx || newTy !== ty) {
+            graphRef.current.translate(newTx, newTy);
+          }
+        });
 
         // 事件监听
         graphRef.current.on('node:mouseenter', ({ node }) => {
