@@ -93,9 +93,15 @@ export default function ApproveDreawer({ handleConfigSubmit, configData }: Appro
 
   function handleSubmit() {
     let errorMsg = '';
-    const { users = [], roles = [] } = approverConfigData.approverConfig || {};
-    if (!users.length && !roles.length) {
-      errorMsg = '节点缺少审批人';
+    const { users = [], roles = [], handlerType } = approverConfigData.approverConfig || {};
+
+    const dataTypeMap = {
+      user: users,
+      role: roles
+    };
+
+    if (handlerType && dataTypeMap[handlerType] && !dataTypeMap[handlerType].length) {
+      errorMsg = '审批人不能为空';
     }
     let flag = false;
     approverConfigData?.buttonConfigs?.forEach((item) => {
