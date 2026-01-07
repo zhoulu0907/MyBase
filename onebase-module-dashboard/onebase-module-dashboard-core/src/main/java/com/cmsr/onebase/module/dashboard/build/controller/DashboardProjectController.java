@@ -57,27 +57,6 @@ public class DashboardProjectController extends BaseController {
     @Resource
     private FileApi                     fileApi;
 
-    @ApiOperation(value = "分页跳转", notes = "分页跳转")
-    @GetMapping("/list")
-    @ResponseBody
-    @ApiSignIgnore
-    public CommonResult<PageResult<DashboardProject>> page(Tablepar tablepar) {
-
-        if (tablepar.getPage() == null && tablepar.getLimit() == null) {
-            tablepar.setPage(1);
-            tablepar.setLimit(10);
-        }
-        Page<DashboardProject> page = new Page<>(tablepar.getPage(), tablepar.getLimit());
-        QueryWrapper queryWrapper = new QueryWrapper()
-                .eq(DashboardProject::getAppId, ApplicationManager.getApplicationId())
-                .like(DashboardProject::getProjectName, tablepar.getSearchText(), StringUtils.isNotBlank(tablepar.getSearchText()))
-                .orderBy(DashboardProject::getCreateTime, false);
-
-        Page<DashboardProject> iPages = dashboardProjectService.page(page, queryWrapper);
-
-        return CommonResult.success(new PageResult<>(iPages.getRecords(), iPages.getTotalRow()));
-    }
-
 
     /**
      * 新增保存
@@ -85,7 +64,6 @@ public class DashboardProjectController extends BaseController {
      * @param
      * @return
      */
-    //@Log(title = "项目表新增", action = "111")
     @ApiOperation(value = "新增", notes = "新增")
     @PostMapping("/create")
     @ResponseBody
@@ -100,93 +78,6 @@ public class DashboardProjectController extends BaseController {
         }
     }
 
-
-    /**
-     * 项目表删除
-     *
-     * @param
-     * @return
-     */
-    //@Log(title = "项目表删除", action = "111")
-    @ApiOperation(value = "删除", notes = "删除")
-    @PostMapping("/delete")
-    @ResponseBody
-    @ApiSignIgnore
-    public AjaxResult remove(@RequestParam Long id) {
-        Boolean b = dashboardProjectService.removeById(id);
-        if (b) {
-            return successData(0, id).put("msg", "删除成功");
-        } else {
-            return error();
-        }
-    }
-
-    @ApiOperation(value = "修改保存", notes = "修改保存")
-    @PostMapping("/edit")
-    @ResponseBody
-    @PermitAll
-    @ApiSignIgnore
-    @TenantIgnore
-    public AjaxResult editSave(@RequestBody DashboardProject goviewProject) {
-        Boolean b = dashboardProjectService.updateById(goviewProject);
-        if (b) {
-            return successData(0, goviewProject).put("msg", "保存成功");
-        }
-        return error();
-    }
-
-
-    @ApiOperation(value = "项目重命名", notes = "项目重命名")
-    @PostMapping("/rename")
-    @ResponseBody
-    @ApiSignIgnore
-    public AjaxResult rename(@RequestBody DashboardProject goviewProject) {
-
-        Boolean b = dashboardProjectService.updateById(goviewProject);
-        if (b) {
-            return successData(0, goviewProject.getId()).put("msg", "操作成功");
-        }
-        return error();
-    }
-
-
-    // 发布/取消项目状态
-    @PostMapping("/publish")
-    @ResponseBody
-    @PermitAll
-    @ApiSignIgnore
-    @TenantIgnore
-    public AjaxResult updateVisible(@RequestBody DashboardProject goviewProject) {
-        if (goviewProject.getState() == -1 || goviewProject.getState() == 1) {
-
-            Boolean b = dashboardProjectService.updateById(goviewProject);
-            if (b) {
-                return success();
-            }
-            return error();
-        }
-        return error("警告非法字段");
-    }
-
-    @ApiOperation(value = "获取项目存储数据", notes = "获取项目存储数据")
-    @GetMapping("/getScreenDSLData")
-    @ResponseBody
-    @PermitAll
-    @ApiSignIgnore
-    @TenantIgnore
-    public CommonResult<DashboardProjectVO> getScreenDSLData(Long projectId, ModelMap map) {
-        DashboardProject goviewProject = dashboardProjectService.getById(projectId);
-
-        DashboardProjectData blogText = dashboardProjectDataService.getProjectid(projectId);
-        if (blogText != null) {
-            DashboardProjectVO dashboardProjectVO = new DashboardProjectVO();
-            BeanUtils.copyProperties(goviewProject, dashboardProjectVO);
-            dashboardProjectVO.setId(String.valueOf(goviewProject.getId()));
-            dashboardProjectVO.setContent(blogText.getContent());
-            return CommonResult.success(dashboardProjectVO);
-        }
-        return CommonResult.success(null);
-    }
 
     @ApiOperation(value = "保存项目数据", notes = "保存项目数据")
     @PostMapping("/save/data")
@@ -280,6 +171,116 @@ public class DashboardProjectController extends BaseController {
     public CommonResult<Long> createDashboardByTemplate(@RequestParam("templateId") Long templateId) throws IOException {
 
         return CommonResult.success(dashboardProjectService.createDashboardByTemplate(templateId));
+    }
+
+    /**
+     * 项目表删除
+     *
+     * @param
+     * @return
+     */
+    //@Log(title = "项目表删除", action = "111")
+    @ApiOperation(value = "删除", notes = "删除")
+    @PostMapping("/delete")
+    @ResponseBody
+    @ApiSignIgnore
+    public AjaxResult remove(@RequestParam Long id) {
+        Boolean b = dashboardProjectService.removeById(id);
+        if (b) {
+            return successData(0, id).put("msg", "删除成功");
+        } else {
+            return error();
+        }
+    }
+
+    @ApiOperation(value = "修改保存", notes = "修改保存")
+    @PostMapping("/edit")
+    @ResponseBody
+    @PermitAll
+    @ApiSignIgnore
+    @TenantIgnore
+    public AjaxResult editSave(@RequestBody DashboardProject goviewProject) {
+        Boolean b = dashboardProjectService.updateById(goviewProject);
+        if (b) {
+            return successData(0, goviewProject).put("msg", "保存成功");
+        }
+        return error();
+    }
+
+
+    @ApiOperation(value = "项目重命名", notes = "项目重命名")
+    @PostMapping("/rename")
+    @ResponseBody
+    @ApiSignIgnore
+    public AjaxResult rename(@RequestBody DashboardProject goviewProject) {
+
+        Boolean b = dashboardProjectService.updateById(goviewProject);
+        if (b) {
+            return successData(0, goviewProject.getId()).put("msg", "操作成功");
+        }
+        return error();
+    }
+
+
+    // 发布/取消项目状态
+    @PostMapping("/publish")
+    @ResponseBody
+    @PermitAll
+    @ApiSignIgnore
+    @TenantIgnore
+    public AjaxResult updateVisible(@RequestBody DashboardProject goviewProject) {
+        if (goviewProject.getState() == -1 || goviewProject.getState() == 1) {
+
+            Boolean b = dashboardProjectService.updateById(goviewProject);
+            if (b) {
+                return success();
+            }
+            return error();
+        }
+        return error("警告非法字段");
+    }
+
+    @ApiOperation(value = "获取项目存储数据", notes = "获取项目存储数据")
+    @GetMapping("/getScreenDSLData")
+    @ResponseBody
+    @PermitAll
+    @ApiSignIgnore
+    @TenantIgnore
+    public CommonResult<DashboardProjectVO> getScreenDSLData(Long projectId, ModelMap map) {
+        DashboardProject goviewProject = dashboardProjectService.getById(projectId);
+
+        DashboardProjectData blogText = dashboardProjectDataService.getProjectid(projectId);
+        if (blogText != null) {
+            DashboardProjectVO dashboardProjectVO = new DashboardProjectVO();
+            BeanUtils.copyProperties(goviewProject, dashboardProjectVO);
+            dashboardProjectVO.setId(String.valueOf(goviewProject.getId()));
+            dashboardProjectVO.setContent(blogText.getContent());
+            return CommonResult.success(dashboardProjectVO);
+        }
+        return CommonResult.success(null);
+    }
+
+
+
+    @ApiOperation(value = "分页跳转", notes = "分页跳转")
+    @GetMapping("/list")
+    @ResponseBody
+    @ApiSignIgnore
+    public CommonResult<PageResult<DashboardProject>> page(Tablepar tablepar) {
+
+        if (tablepar.getPage() == null && tablepar.getLimit() == null) {
+            tablepar.setPage(1);
+            tablepar.setLimit(10);
+        }
+        Page<DashboardProject> page = new Page<>(tablepar.getPage(), tablepar.getLimit());
+        QueryWrapper queryWrapper = new QueryWrapper()
+                .eq(DashboardProject::getAppId, ApplicationManager.getApplicationId())
+                .like(DashboardProject::getProjectName, tablepar.getSearchText(), StringUtils.isNotBlank(tablepar.getSearchText()))
+                .orderBy(DashboardProject::getCreateTime, false);
+
+        Page<DashboardProject> iPages = dashboardProjectService.page(page, queryWrapper);
+
+        return CommonResult.success(new PageResult<>(iPages.getRecords(), iPages.getTotalRow()));
     }
 
 }
