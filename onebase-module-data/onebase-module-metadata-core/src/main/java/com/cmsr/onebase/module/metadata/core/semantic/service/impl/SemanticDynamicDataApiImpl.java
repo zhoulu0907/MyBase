@@ -55,6 +55,8 @@ public class SemanticDynamicDataApiImpl implements SemanticDynamicDataApi {
     @Resource
     private SemanticProcessLogger semanticProcessLogger;
 
+    @Resource
+    private SemanticRefResolver semanticRefResolver;
 
     @Override
     public SemanticEntitySchemaDTO buildEntitySchemaByUuid(String entityUuid) {
@@ -470,6 +472,16 @@ public class SemanticDynamicDataApiImpl implements SemanticDynamicDataApi {
         }
         // 4) 返回字段模型列表
         return list;
+    }
+
+    @Override
+    public void enrich(SemanticEntitySchemaDTO entitySchema, SemanticEntityValueDTO resultVal) {
+        semanticRefResolver.enrich(entitySchema, resultVal);
+    }
+
+    @Override
+    public SemanticEntityValueDTO buildSemanticEntityValueDTO(Map<String, Object> entityData, SemanticEntitySchemaDTO entitySchema) {
+        return semanticMergeRecordAssembler.buildSemanticEntityValueDTO(entityData, entitySchema);
     }
 
     private QueryWrapper buildPageQueryWrapper(SemanticRecordDTO recordDTO, QueryWrapper queryWrapper) {
