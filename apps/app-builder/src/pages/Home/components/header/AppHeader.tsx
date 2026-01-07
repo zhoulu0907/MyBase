@@ -37,6 +37,8 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
 
   const [adminInfo, setAdminInfo] = useState<IAdminInfo | null>(null);
   const { tenantId } = useParams();
+  const [tenantInfor, setTenantInfor] = useState<any>(null);
+
 
   // Tab 切换
   // 根据当前路径设置 activeTab
@@ -71,6 +73,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     const tenantInfoRes = await getTenantInfo(tenantId || '');
     if(tenantInfoRes) {
       setTenantInfoFromSession(tenantInfoRes);
+      setTenantInfor(tenantInfoRes)
     }
   };
 
@@ -120,7 +123,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     <Header className={`${styles.header} ${className || ''}`}>
       <div className={styles.headerContent}>
         <div className={styles.logo}>
-          <TenantLogo tenantInfo={tenantInfo} />
+          <TenantLogo tenantInfo={tenantInfo || tenantInfor} />
         </div>
 
         <Tabs

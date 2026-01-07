@@ -301,11 +301,13 @@ const PageManagerPage: FC = () => {
     const appId: string = curAppId;
     const res: MetadataEntityPair[] = await getEntityListByApp(appId);
 
+    console.log('xxxx: ', res);
     const entityOptions = res
       .filter(
         (entity) =>
           // 过滤子表
           entity.relationType == RELATION_TYPE.MASTER ||
+          entity.relationType == RELATION_TYPE.NONE ||
           (entity.relationType === RELATION_TYPE.SLAVE &&
             !entity.relationshipTypes?.includes(RELATIONSHIP_TYPE.SUBTABLE_ONE_TO_MANY))
       )
