@@ -67,7 +67,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
     bpmInstanceId,
     flows,
     setFlows,
-    resetFlows
+    resetFlows,
+    rowDataType
   } = pagesRuntimeSignal;
 
   const [pageSetId, setPageSetId] = useState('');
@@ -465,6 +466,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
     setPredictVisible(false);
     setTimeout(() => setRefresh(Date.now()), 150);
   };
+<<<<<<< HEAD
 
   React.useEffect(() => {
     pluginBridge.registerContext({ form });
@@ -473,6 +475,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
     };
   }, [form]);
 
+=======
+>>>>>>> dev
   return (
     <div className={`${styles.previewPage} runtime-preview-formpage`}>
       <div className={styles.content}>
@@ -488,7 +492,15 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
           />
         )}
 
-        {pageSetType === PageType.NORMAL && (
+        {rowDataType.value === PageType.BPM ? (
+          <DetailPop
+            detailPopVisible={drawerVisible.value}
+            setPopVisible={setDrawerVisible}
+            onBack={onBack}
+            rowData={{ instanceId: bpmInstanceId.value, pageSetId }}
+            listType={LISTTYPE.LIST}
+          />
+        ) : (
           <DetailRuntime
             visible={drawerVisible.value}
             onCancel={() => setDrawerVisible(false)}
@@ -498,15 +510,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
             onCancelUpdate={cancelSubmitForm}
             showFromPageData={showFromPageData}
             editTargetId={editTargetId}
-          />
-        )}
-        {pageSetType === PageType.BPM && drawerVisible.value && bpmInstanceId.value && (
-          <DetailPop
-            detailPopVisible={drawerVisible.value}
-            setPopVisible={setDrawerVisible}
-            onBack={onBack}
-            rowData={{ instanceId: bpmInstanceId.value, pageSetId }}
-            listType={LISTTYPE.LIST}
           />
         )}
         {pageType == EDITOR_TYPES.FORM_EDITOR && (

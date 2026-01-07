@@ -59,6 +59,19 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({
   // 创建默认条件组
   const createDefaultConditionGroup = (): ConditionRow[] => [createDefaultConditionRow()];
 
+  // 通过 fieldUuid 查找对应的 fieldId
+  const findFieldIdByUuid = (fieldUuid: string): string | undefined => {
+    for (const parent of allOptions) {
+      if (parent.children && Array.isArray(parent.children)) {
+        const found = parent.children.find((child: any) => child.fieldUuid === fieldUuid);
+        if (found) {
+          return found.key as string;
+        }
+      }
+    }
+    return undefined;
+  };
+
   // 根据ID获取规则
   const handleGetRuleById = async (id: string) => {
     try {
@@ -69,12 +82,17 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({
 
         const conditions = res?.valueRules.map((item) => {
           return {
-            conditions: item.map((item) => ({
-              fieldId: item.fieldId,
-              op: item.operator,
-              operatorType: item.valueType,
-              value: item.fieldValue
-            }))
+            conditions: item.map((item) => {
+              // 通过 fieldUuid 查找对应的 fieldId
+              const fieldId = findFieldIdByUuid(item.fieldUuid) || item.fieldId;
+              return {
+                fieldId: fieldId,
+                fieldUuid: item.fieldUuid,
+                op: item.operator,
+                operatorType: item.valueType,
+                value: item.fieldValue
+              };
+            })
           };
         });
         form.setFieldValue('filterCondition', conditions);
@@ -150,7 +168,8 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({
           return {
             key: item.fieldId,
             title: item.displayName,
-            fieldType: item.fieldType
+            fieldType: item.fieldType,
+            fieldUuid: item.fieldUuid
           };
         })
       }
@@ -159,7 +178,7 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({
     // 处理子表字段
     const rawChildEntities = res?.childEntities || [];
     const uniqueChildEntities = Array.from(
-      new Map(rawChildEntities.map((entity) => [entity.childEntityId, entity])).values()
+      new Map(rawChildEntities.map((entity) => [entity.childEntityUuid, entity])).values()
     );
 
     const childFields = uniqueChildEntities.map((entity) => {
@@ -169,7 +188,8 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({
         children: entity.childFields.map((item) => ({
           title: item.displayName,
           key: item.fieldId,
-          fieldType: item.fieldType
+          fieldType: item.fieldType,
+          fieldUuid: item.fieldUuid
         }))
       };
     });
@@ -202,7 +222,8 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({
                 return {
                   key: item.fieldId,
                   title: item.displayName,
-                  fieldType: item.fieldType
+                  fieldType: item.fieldType,
+                  fieldUuid: item.fieldUuid
                 };
               }) || []
           }
@@ -222,7 +243,8 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({
               entity.childFields?.map((item: any) => ({
                 title: item.displayName,
                 key: item.fieldId,
-                fieldType: item.fieldType
+                fieldType: item.fieldType,
+                fieldUuid: item.fieldUuid
               })) || []
           };
         });
@@ -241,10 +263,12 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({
     if (visible) {
       // 设置默认的条件组
       form.setFieldValue('valueRules', [createDefaultConditionGroup()]);
-      loadFieldOptions();
-      if (editRule) {
-        handleGetRuleById(editRule?.id || '');
-      }
+      // 先加载字段选项，然后再获取规则详情
+      loadFieldOptions().then(() => {
+        if (editRule) {
+          handleGetRuleById(editRule?.id || '');
+        }
+      });
     }
   }, [visible, editRule]);
 
