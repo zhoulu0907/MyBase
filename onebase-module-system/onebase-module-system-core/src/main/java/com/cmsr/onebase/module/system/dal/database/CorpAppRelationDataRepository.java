@@ -1,96 +1,142 @@
 package com.cmsr.onebase.module.system.dal.database;
 
-
-import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.enums.CorpAppReationStatusEnum;
 import com.cmsr.onebase.framework.common.enums.CorpStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.system.dal.dataobject.corpapprelation.CorpAppRelationDO;
+import com.cmsr.onebase.framework.orm.repo.BaseDataRepository;
+import com.cmsr.onebase.module.system.dal.flex.mapper.SystemCorpAppRelationMapper;
 import com.cmsr.onebase.module.system.vo.corpapprelation.CorpAppPageReqVO;
 import com.cmsr.onebase.module.system.vo.corpapprelation.CorpAppRelationPageReqVO;
-import org.anyline.data.param.ConfigStore;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.Order;
+import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryWrapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 
+import static com.cmsr.onebase.framework.data.base.BaseDO.CREATE_TIME;
+import static com.cmsr.onebase.module.system.dal.flex.table.SystemCorpAppRelationTableDef.SYSTEM_CORP_APP_RELATION;
+
 /**
- * 企业应用关联 数据仓储接口
+ * 企业应用关联 数据访问层
+ *
+ * @author matianyu
+ * @date 2025-12-22
  */
 @Repository
-public class CorpAppRelationDataRepository extends DataRepository<CorpAppRelationDO> {
+public class CorpAppRelationDataRepository extends BaseDataRepository<SystemCorpAppRelationMapper, CorpAppRelationDO> {
 
-    public CorpAppRelationDataRepository() {
-        super(CorpAppRelationDO.class);
-    }
-
+    /**
+     * 分页查询企业应用关联
+     *
+     * @param pageReqVO 分页条件
+     * @param appIds    应用ID列表
+     * @return 分页数据
+     */
     public PageResult<CorpAppRelationDO> selectPage(CorpAppPageReqVO pageReqVO, List<Long> appIds) {
-        // 构建查询条件
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.eq(CorpAppRelationDO.CORP_ID, pageReqVO.getCorpId());
+        QueryWrapper queryWrapper = query().eq(CorpAppRelationDO.CORP_ID, pageReqVO.getCorpId());
 
         if (CollectionUtils.isNotEmpty(appIds)) {
-            configStore.in(CorpAppRelationDO.APPLICATION_ID, appIds);
+            queryWrapper.in(CorpAppRelationDO.APPLICATION_ID, appIds);
         }
-        // 添加状态查询条件
+
         if (pageReqVO.getStatus() != null) {
             Integer status = pageReqVO.getStatus();
             if (status.equals(CorpAppReationStatusEnum.DISABLE.getValue())) {
-                // 查询企业状态为禁用的记录
-                configStore.eq(CorpAppRelationDO.STATUS, CorpStatusEnum.DISABLE.getValue());
+                queryWrapper.eq(CorpAppRelationDO.STATUS, CorpStatusEnum.DISABLE.getValue());
             } else {
-               // 禁用也要展示出来
                 if (status.equals(CorpAppReationStatusEnum.ENABLE.getValue())) {
-                    // 查询有效期内的（未过期的）
-                    configStore.gt(CorpAppRelationDO.EXPIRES_TIME, java.time.LocalDateTime.now());
-                    configStore.eq(CorpAppRelationDO.STATUS, CorpStatusEnum.ENABLE.getValue());
+                    queryWrapper.gt(CorpAppRelationDO.EXPIRES_TIME, LocalDateTime.now());
+                    queryWrapper.eq(CorpAppRelationDO.STATUS, CorpStatusEnum.ENABLE.getValue());
                 } else if (status.equals(CorpAppReationStatusEnum.EXPIRES.getValue())) {
-                    // 查询已过期的
-                    configStore.le(CorpAppRelationDO.EXPIRES_TIME, java.time.LocalDateTime.now());
+                    queryWrapper.le(CorpAppRelationDO.EXPIRES_TIME, LocalDateTime.now());
                 }
             }
         }
-        // 按创建时间倒序排列
-        configStore.order(CorpAppRelationDO.CREATE_TIME, Order.TYPE.DESC);
-        // 执行分页查询
-        return findPageWithConditions(configStore, pageReqVO.getPageNo(), pageReqVO.getPageSize());
 
+        queryWrapper.orderBy(CREATE_TIME, false);
+
+        Page<CorpAppRelationDO> pageResult = page(Page.of(pageReqVO.getPageNo(), pageReqVO.getPageSize()), queryWrapper);
+        return new PageResult<>(pageResult.getRecords(), pageResult.getTotalRow());
     }
 
-    public void deleteCorpAppRelationByCorpId(Long corpID) {
-        ConfigStore configs = new DefaultConfigStore();
-        configs.eq(CorpAppRelationDO.CORP_ID, corpID);
-        deleteByConfig(configs);
-    }
-
-    public List<CorpAppRelationDO> getCorpAppRelationList(CorpAppRelationPageReqVO corpAppRelationPageReqVO) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        if (CollectionUtils.isNotEmpty(corpAppRelationPageReqVO.getCorpIds())) {
-            configStore.in(CorpAppRelationDO.CORP_ID, corpAppRelationPageReqVO.getCorpIds());
+    /**
+     * 根据企业ID删除关联记录
+     *
+     * @param corpId 企业ID
+     */
+    public void deleteCorpAppRelationByCorpId(Long corpId) {
+        if (corpId == null) {
+            return;
         }
-        if (CollectionUtils.isNotEmpty(corpAppRelationPageReqVO.getAppIds())) {
-            configStore.in(CorpAppRelationDO.APPLICATION_ID, corpAppRelationPageReqVO.getAppIds());
-        }
-        return findAllByConfig(configStore);
-
+        remove(query().eq(CorpAppRelationDO.CORP_ID, corpId));
     }
 
+    /**
+     * 批量查询关联
+     *
+     * @param reqVO 查询条件
+     * @return 列表
+     */
+    public List<CorpAppRelationDO> getCorpAppRelationList(CorpAppRelationPageReqVO reqVO) {
+        QueryWrapper queryWrapper = query();
+        if (CollectionUtils.isNotEmpty(reqVO.getCorpIds())) {
+            queryWrapper.in(CorpAppRelationDO.CORP_ID, reqVO.getCorpIds());
+        }
+        if (CollectionUtils.isNotEmpty(reqVO.getAppIds())) {
+            queryWrapper.in(CorpAppRelationDO.APPLICATION_ID, reqVO.getAppIds());
+        }
+        List<CorpAppRelationDO> list = list(queryWrapper);
+        return list == null ? Collections.emptyList() : list;
+    }
+
+    /**
+     * 根据企业ID查询关联列表
+     *
+     * @param corpId 企业ID
+     * @return 列表
+     */
     public List<CorpAppRelationDO> findCorpAppRelationByCorpId(Long corpId) {
-        ConfigStore configs = new DefaultConfigStore();
-        configs.eq(CorpAppRelationDO.CORP_ID, corpId);
-        return findAllByConfig(configs);
+        if (corpId == null) {
+            return Collections.emptyList();
+        }
+        List<CorpAppRelationDO> list = list(query().eq(CorpAppRelationDO.CORP_ID, corpId));
+        return list == null ? Collections.emptyList() : list;
     }
 
+    /**
+     * 按企业ID+应用ID查询未过期关联
+     *
+     * @param corpId 企业ID（可空）
+     * @param appId  应用ID
+     * @return 列表
+     */
     public List<CorpAppRelationDO> findApplicationByCordIdAndAppId(Long corpId, Long appId) {
-        //  查询应用是否过期
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        if (null != corpId) {
-            configStore.eq(CorpAppRelationDO.CORP_ID, corpId);
+        QueryWrapper queryWrapper = query().eq(CorpAppRelationDO.APPLICATION_ID, appId)
+                .gt(CorpAppRelationDO.EXPIRES_TIME, LocalDateTime.now());
+        if (corpId != null) {
+            queryWrapper.eq(CorpAppRelationDO.CORP_ID, corpId);
         }
-        configStore.eq(CorpAppRelationDO.APPLICATION_ID, appId);
-        configStore.gt(CorpAppRelationDO.EXPIRES_TIME, java.time.LocalDateTime.now());
-        return findAllByConfig(configStore);
+        List<CorpAppRelationDO> list = list(queryWrapper);
+        return list == null ? Collections.emptyList() : list;
+    }
+
+    /**
+     * 更新企业应用关联状态
+     *
+     * @param id     ID
+     * @param status 状态
+     */
+    public void updateStatus(Long id, Integer status) {
+        if (id == null) {
+            return;
+        }
+        updateChain().set(SYSTEM_CORP_APP_RELATION.STATUS, status)
+                .where(SYSTEM_CORP_APP_RELATION.ID.eq(id))
+                .update();
     }
 }
+

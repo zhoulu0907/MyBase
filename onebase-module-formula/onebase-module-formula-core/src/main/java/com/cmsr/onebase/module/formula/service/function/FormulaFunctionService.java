@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.formula.service.function;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.formula.dal.dataobject.FunctionDO;
+import com.cmsr.onebase.module.formula.dal.dataflexdo.FunctionDO;
 import com.cmsr.onebase.module.formula.vo.function.FunctionInsertReqVO;
 import com.cmsr.onebase.module.formula.vo.function.FunctionListReqVO;
 import com.cmsr.onebase.module.formula.vo.function.FunctionPageReqVO;

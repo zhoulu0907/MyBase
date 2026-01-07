@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.app.runtime.controller.resource;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import com.cmsr.onebase.module.app.core.dto.appresource.ComponentDTO;
+import com.cmsr.onebase.module.app.core.dto.resource.ComponentDTO;
 import com.cmsr.onebase.module.app.core.vo.resource.QueryComponentListReqVO;
 import com.cmsr.onebase.module.app.core.vo.resource.QueryComponentListRespVO;
 import com.cmsr.onebase.module.app.runtime.service.resource.ComponentService;

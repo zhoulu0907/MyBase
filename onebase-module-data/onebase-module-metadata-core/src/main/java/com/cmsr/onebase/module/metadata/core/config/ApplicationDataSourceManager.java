@@ -154,7 +154,7 @@ public class ApplicationDataSourceManager {
                 if ("POSTGRESQL".equals(tp)) { defaultPort = "5432"; prefix = "jdbc:postgresql://"; }
                 else if ("MYSQL".equals(tp)) { defaultPort = "3306"; prefix = "jdbc:mysql://"; }
                 else if ("CLICKHOUSE".equals(tp)) { defaultPort = "8123"; prefix = "jdbc:clickhouse://"; }
-                else if ("KINGBASE".equals(tp)) { defaultPort = "5432"; prefix = "jdbc:kingbase://"; }
+                else if ("KINGBASE".equals(tp)) { defaultPort = "54321"; prefix = "jdbc:kingbase8://"; }
                 else if ("TDENGINE".equals(tp)) { defaultPort = "6030"; prefix = "jdbc:TAOS://"; }
                 String p = (port == null || port.isBlank()) ? (defaultPort == null ? "" : defaultPort) : port;
                 if (host != null && database != null) {

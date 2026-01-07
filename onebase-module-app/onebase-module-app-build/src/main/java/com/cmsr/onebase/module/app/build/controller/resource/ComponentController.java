@@ -3,7 +3,7 @@ package com.cmsr.onebase.module.app.build.controller.resource;
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.module.app.build.service.resource.ComponentService;
-import com.cmsr.onebase.module.app.core.dto.appresource.ComponentDTO;
+import com.cmsr.onebase.module.app.core.dto.resource.ComponentDTO;
 import com.cmsr.onebase.module.app.core.vo.resource.QueryComponentListReqVO;
 import com.cmsr.onebase.module.app.core.vo.resource.QueryComponentListRespVO;
 import io.swagger.v3.oas.annotations.Operation;

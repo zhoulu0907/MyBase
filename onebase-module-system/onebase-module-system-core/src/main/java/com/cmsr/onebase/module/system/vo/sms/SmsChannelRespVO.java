@@ -36,7 +36,6 @@ public class SmsChannelRespVO {
     private String apiSecret;
 
     @Schema(description = "短信发送回调 URL", example = "http://cmsr.com")
-    @URL(message = "回调 URL 格式不正确")
     private String callbackUrl;
 
     @Schema(description = "创建时间", requiredMode = Schema.RequiredMode.REQUIRED)

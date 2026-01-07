@@ -5,9 +5,11 @@ import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
+import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.system.api.dept.dto.DeptPageApiReqVO;
 import com.cmsr.onebase.module.system.dal.database.dept.DeptDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
@@ -16,6 +18,7 @@ import com.cmsr.onebase.module.system.enums.corp.CorpConstant;
 import com.cmsr.onebase.module.system.enums.dept.DeptCodeEnum;
 import com.cmsr.onebase.module.system.enums.dept.DeptTypeEnum;
 import com.cmsr.onebase.module.system.enums.dept.IdTypeEnum;
+import com.cmsr.onebase.module.system.enums.user.UserStatusEnum;
 import com.cmsr.onebase.module.system.service.permission.PermissionService;
 import com.cmsr.onebase.module.system.service.user.UserService;
 import com.cmsr.onebase.module.system.vo.dept.*;
@@ -24,8 +27,6 @@ import com.cmsr.onebase.module.system.vo.user.UserSimpleRespVO;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.DataRow;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -126,7 +127,7 @@ public class DeptServiceImpl implements DeptService {
             throw exception(DEPT_EXITS_CHILDREN);
         }
         // 如果一个部门有用户，则不能删除
-        List<AdminUserDO> userListByDeptIds = userService.getUserListByDeptIds(Collections.singleton(id));
+        List<AdminUserDO> userListByDeptIds = userService.getUserListByDeptIds(Collections.singleton(id),null);
         if (CollectionUtils.isNotEmpty(userListByDeptIds)) {
             throw exception(DEPT_DEL_FAILD_EXISTS_USERS);
         }
@@ -300,10 +301,13 @@ public class DeptServiceImpl implements DeptService {
         // 2. 批量获取领导用户信息
         Map<Long, AdminUserDO> leaderUserMap = userService.getUserMap(leaderUserIds);
 
-        List<Long> directorUserIds = deptList.stream().map(DeptDO::getAdminUserId).filter(Objects::nonNull).collect(Collectors.toList());
-
+        List<Long> adminUserIds = deptList.stream()
+                .map(DeptDO::getAdminUserIds)
+                .filter(Objects::nonNull)
+                .flatMap(Set::stream)  // 将多个 Set<Long> 展平为 Stream<Long>
+                .collect(Collectors.toList());  // 收集为 List<Long>
         // 2. 批量获取部门主管用户信息
-        Map<Long, AdminUserDO> directorUserMap = userService.getUserMap(directorUserIds);
+        Map<Long, AdminUserDO> directorUserMap = userService.getUserMap(adminUserIds);
 
         // 4. 设置每个部门的人数和领导姓名
         respList.forEach(dept -> {
@@ -318,11 +322,13 @@ public class DeptServiceImpl implements DeptService {
                     dept.setLeaderUserName(leader.getNickname());
                 }
             }
-            if (dept.getAdminUserId() != null) {
-                AdminUserDO deptDirector = directorUserMap.get(dept.getAdminUserId());
-                if (deptDirector != null) {
-                    dept.setAdminUserName(deptDirector.getNickname());
-                }
+            if (CollectionUtils.isNotEmpty(dept.getAdminUserIds())) {
+                String adminUserNamesStr = dept.getAdminUserIds().stream()
+                        .map(directorUserMap::get)
+                        .filter(Objects::nonNull)
+                        .map(AdminUserDO::getNickname)
+                        .collect(Collectors.joining(","));
+                dept.setAdminUserName(adminUserNamesStr);
             }
         });
 
@@ -346,9 +352,11 @@ public class DeptServiceImpl implements DeptService {
         Map<Long, Integer> deptUserCountMap = userService.getUserCountByDeptIdsIncludeChildren(deptIds);
         // 2. 批量获取领导用户信息
         Map<Long, AdminUserDO> leaderUserMap = userService.getUserMap(leaderUserIds);
-        List<Long> directorUserIds = dept.getAdminUserId() != null ? Collections.singletonList(dept.getLeaderUserId()) : Collections.emptyList();
-        // . 批量获取部门主管用户信息
-        Map<Long, AdminUserDO> directorUserMap = userService.getUserMap(directorUserIds);
+
+        Set<Long> adminUserIds = dept.getAdminUserIds()==null?null:dept.getAdminUserIds();
+
+        // . 批量获取接口人用户信息
+        Map<Long, AdminUserDO> directorUserMap = userService.getUserMap(adminUserIds);
 
         // 设置部门人数（包含下级部门）
         Integer userCount = deptUserCountMap.getOrDefault(id, 0);
@@ -361,11 +369,13 @@ public class DeptServiceImpl implements DeptService {
                 respVO.setLeaderUserName(leader.getNickname());
             }
         }
-        if (dept.getAdminUserId() != null) {
-            AdminUserDO deptDirector = directorUserMap.get(dept.getAdminUserId());
-            if (deptDirector != null) {
-                respVO.setAdminUserName(deptDirector.getNickname());
-            }
+        if (CollectionUtils.isNotEmpty(dept.getAdminUserIds())) {
+            String adminUserNamesStr = dept.getAdminUserIds().stream()
+                    .map(directorUserMap::get)
+                    .filter(Objects::nonNull)
+                    .map(AdminUserDO::getNickname)
+                    .collect(Collectors.joining(","));
+            respVO.setAdminUserName(adminUserNamesStr);
         }
 
         return respVO;
@@ -373,6 +383,7 @@ public class DeptServiceImpl implements DeptService {
 
     @Override
     public DeptAndUsersRespVO getDeptAndUsers(DeptAndUsersReqVO reqVO) {
+        Integer userType = reqVO.getUserType();
         DeptAndUsersRespVO respVO = new DeptAndUsersRespVO();
 
         // 判断是否有搜索关键词
@@ -384,11 +395,18 @@ public class DeptServiceImpl implements DeptService {
             respVO.setDeptInfo(null);
 
             // 按部门名称模糊搜索部门
-            List<DeptDO> matchedDepts = deptDataRepository.findAllByNameAndStatus(reqVO.getKeywords(), null);
+            List<DeptDO> matchedDepts = new ArrayList<>();
+
+            if(null == userType){
+                matchedDepts = deptDataRepository.findAllByNameAndStatus(reqVO.getKeywords(), null);
+            } else if(UserTypeEnum.THIRD.getValue().equals(userType) ) {
+                matchedDepts = deptDataRepository.findDeptListByNameAndDeptType(reqVO.getKeywords(), DeptTypeEnum.THIRD.getCode());
+            }
+
             respVO.setDeptList(BeanUtils.toBean(matchedDepts, DeptRespVO.class));
 
             // 按用户昵称模糊搜索用户
-            List<AdminUserDO> matchedUsers = userService.getUserListByNickname(reqVO.getKeywords());
+            List<AdminUserDO> matchedUsers = userService.getUserListByNickname(reqVO.getKeywords(),userType);
             respVO.setUserList(BeanUtils.toBean(matchedUsers, UserSimpleRespVO.class));
 
         } else if (hasDeptId) {
@@ -402,7 +420,7 @@ public class DeptServiceImpl implements DeptService {
             respVO.setDeptList(BeanUtils.toBean(childDepts, DeptRespVO.class));
 
             // 获取直属用户
-            List<AdminUserDO> directUsers = userService.getUserListByDeptIds(Collections.singletonList(reqVO.getDeptId()));
+            List<AdminUserDO> directUsers = userService.getUserListByDeptIds(Collections.singletonList(reqVO.getDeptId()), userType);
             respVO.setUserList(BeanUtils.toBean(directUsers, UserSimpleRespVO.class));
 
         } else {
@@ -410,11 +428,17 @@ public class DeptServiceImpl implements DeptService {
             respVO.setDeptInfo(null);
 
             // 获取所有一级部门（parentId = 0）
-            List<DeptDO> rootDepts = deptDataRepository.findAllByParentId(DeptDO.PARENT_ID_ROOT);
+            List<DeptDO> rootDepts =new ArrayList<>();
+            if (null == userType) {
+                rootDepts = deptDataRepository.findAllByParentId(DeptDO.PARENT_ID_ROOT);
+            } else if(UserTypeEnum.THIRD.getValue().equals(userType) ) {
+                rootDepts = deptDataRepository.findDeptListByDeptType(DeptTypeEnum.THIRD.getCode());
+            }
+
             respVO.setDeptList(BeanUtils.toBean(rootDepts, DeptRespVO.class));
 
             // 获取所有没有部门的用户（dept_id = null）
-            List<AdminUserDO> usersWithoutDept = userService.getUserListNoDept();
+            List<AdminUserDO> usersWithoutDept = userService.getUserListNoDept(userType);
             respVO.setUserList(BeanUtils.toBean(usersWithoutDept, UserSimpleRespVO.class));
         }
 
@@ -476,15 +500,19 @@ public class DeptServiceImpl implements DeptService {
     @Override
     public void updateAdminOrDirector(UserAdminOrDirectorUpdateReqVO reqVO) {
         // todo 验证部门是否存在/启用；验证空间/企业是否存在此用户
+        DeptDO updateObj = new DeptDO();
+        updateObj.setId(reqVO.getDeptId());
         if (reqVO.getUpdateType().equals(CorpConstant.LEADER_USER_ID)) {
-            DataRow row = new DataRow();
-            row.put(DeptDO.ADMIN_USER_ID, reqVO.getUserId());
-            deptDataRepository.updateByConfig(row, new DefaultConfigStore().eq(DeptDO.ID, reqVO.getDeptId()));
+            updateObj.setAdminUserIds(reqVO.getAdminUserIds());
         } else {
-            DataRow row = new DataRow();
-            row.put(DeptDO.LEADER_USER_ID, reqVO.getUserId());
-            deptDataRepository.updateByConfig(row, new DefaultConfigStore().eq(DeptDO.ID, reqVO.getDeptId()));
+            Set<Long> adminUserIds = reqVO.getAdminUserIds();
+            if (CollectionUtils.isNotEmpty(adminUserIds)) {
+                Long firstAdminUserId = CollUtil.getFirst(adminUserIds);
+                updateObj.setLeaderUserId(firstAdminUserId);
+            }
+
         }
+        deptDataRepository.update(updateObj);
     }
 
 
@@ -496,12 +524,29 @@ public class DeptServiceImpl implements DeptService {
     @Override
     public Long createThirdDefaultDept(DeptSaveReqVO deptRespVO) {
         DeptDO dept = BeanUtils.toBean(deptRespVO, DeptDO.class);
-       return deptDataRepository.insert(dept).getId();
+        deptDataRepository.insert(dept);
+        return dept.getId();
     }
 
     @Override
     public List<DeptDO> getDefaultThirdDept() {
         return deptDataRepository.getDefaultThirdDeptByDefaultCode(DeptCodeEnum.DEFAULT_THIRD_DEPT.getCode(), CommonStatusEnum.ENABLE.getStatus());
+    }
+
+    @Override
+    public PageResult<DeptRespVO> getDeptPage(DeptPageApiReqVO reqVO) {
+
+        // 查询部门数据
+        PageResult<DeptDO> result = deptDataRepository.selectPage(UserStatusEnum.NORMAL.getStatus(), reqVO);
+        if(CollectionUtils.isEmpty(result.getList())){
+            return PageResult.empty();
+        }
+
+        // 转换为 DeptRespVO 列表
+        List<DeptRespVO> deptRespList = BeanUtils.toBean(result.getList(), DeptRespVO.class);
+
+        // 返回转换后的分页结果
+        return new PageResult<>(deptRespList, result.getTotal());
     }
 
 }

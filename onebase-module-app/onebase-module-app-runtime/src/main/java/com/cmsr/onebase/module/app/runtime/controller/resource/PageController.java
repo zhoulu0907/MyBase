@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.app.runtime.controller.resource;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import com.cmsr.onebase.module.app.core.dto.appresource.PageDTO;
+import com.cmsr.onebase.module.app.core.dto.resource.PageDTO;
 import com.cmsr.onebase.module.app.core.vo.resource.*;
 import com.cmsr.onebase.module.app.runtime.service.resource.PageService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -30,14 +30,14 @@ public class PageController {
     @Resource
     private PageService pageService;
 
-    @PostMapping("/form/app_id")
+    @PostMapping("/app_id")
     @Operation(summary = "根据app_id获取表单页面")
-    public CommonResult<GetFormPageListByAppIdRespVO> getFormPageListByAppId(@RequestBody GetFormPageListByAppIdReqVO getFormPageListByAppIdReqVO) {
-        List<PageDTO> pages = pageService.getFormPageListByAppId(getFormPageListByAppIdReqVO.getAppId());
+    public CommonResult<GetPageListByAppIdRespVO> getPageListByAppId(@RequestBody GetPageListByAppIdReqVO getPageListByAppIdReqVO) {
+        List<PageDTO> pages = pageService.getPageListByAppId(getPageListByAppIdReqVO.getAppId());
 
-        GetFormPageListByAppIdRespVO getFormPageListByAppIdRespVO = new GetFormPageListByAppIdRespVO();
-        getFormPageListByAppIdRespVO.setPages(pages);
-        return CommonResult.success(getFormPageListByAppIdRespVO);
+        GetPageListByAppIdRespVO getPageListByAppIdRespVO = new GetPageListByAppIdRespVO();
+        getPageListByAppIdRespVO.setPages(pages);
+        return CommonResult.success(getPageListByAppIdRespVO);
     }
 
     @PostMapping("/metadata")

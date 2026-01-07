@@ -68,6 +68,7 @@ public class AppVersionServiceImpl implements AppVersionService {
         List<VersionPageRespVO> respVOS = pageResult.getList().stream()
                 .map(v -> {
                     VersionPageRespVO bean = BeanUtils.toBean(v, VersionPageRespVO.class);
+                    bean.setCreatorName(userHelper.getUserNickname(v.getCreator()));
                     bean.setUpdaterName(userHelper.getUserNickname(v.getUpdater()));
                     bean.setVersionTypeLabel(VersionTypeEnum.getLabel(v.getVersionType()));
                     return bean;
@@ -80,10 +81,7 @@ public class AppVersionServiceImpl implements AppVersionService {
     public void onlineApplication(VersionOnlineReq createReqVO) {
         AppApplicationDO applicationDO = appCommonService.validateApplicationExist(createReqVO.getApplicationId());
         Long applicationId = applicationDO.getId();
-        validateVersionUnique(applicationId, createReqVO.getVersionNumber(), createReqVO.getVersionName());
-
-        // 删除当前运行版本数据
-        flowDataManager.offlineRuntimeData(applicationId);
+        validateVersionUnique(applicationId, createReqVO.getVersionNumber());
         //
         transactionTemplate.executeWithoutResult(transactionStatus -> {
             // 找打当前Runtime版本信息，肯定能找到，因为发布的时候会同步创建一个，把当前版本信息变成历史状态
@@ -109,11 +107,11 @@ public class AppVersionServiceImpl implements AppVersionService {
             versionRepository.save(newRunVersionDO);
         });
         // online services that required
-        flowDataManager.onlineRuntimeData(applicationId);
+        flowDataManager.updateRuntimeData(applicationId);
     }
 
-    private void validateVersionUnique(Long applicationId, String versionNumber, String versionName) {
-        long count = versionRepository.countByApplicationIdAndName(applicationId, versionNumber, versionName);
+    private void validateVersionUnique(Long applicationId, String versionNumber) {
+        long count = versionRepository.countByApplicationIdAndName(applicationId, versionNumber);
         if (count > 0) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.VERSION_DUPLICATE);
         }
@@ -136,7 +134,7 @@ public class AppVersionServiceImpl implements AppVersionService {
             }
             applicationRepository.updateAppStatusByApplicationId(applicationId, AppStatusEnum.OFFLINE);
         });
-        flowDataManager.onlineRuntimeData(applicationId);
+        flowDataManager.deleteRuntimeData(applicationId);
     }
 
     private AppVersionDO createNewVersion(VersionOnlineReq createReqVO, Long applicationId) {

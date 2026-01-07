@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.metadata.build.controller.admin.datasource;
 
+import com.cmsr.onebase.framework.common.event.AppEntityChangeEvent;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.module.metadata.build.controller.admin.datasource.vo.DatasourceRespVO;
@@ -11,6 +12,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,6 +38,8 @@ public class AppDatasourceController {
     private MetadataDatasourceCoreService datasourceCoreService;
     @Resource
     private ModelMapper modelMapper;
+    @Resource
+    ApplicationEventPublisher applicationEventPublisher;
 
     @PostMapping("/create-relation")
     @Operation(summary = "创建应用与数据源的关联关系")
@@ -53,6 +57,11 @@ public class AppDatasourceController {
         // 通过datasourceId获取datasourceUuid
         MetadataDatasourceDO datasource = datasourceCoreService.getDatasource(datasourceId);
         Long relationId = appAndDatasourceService.createRelation(applicationId, datasource.getDatasourceUuid(), datasourceType, appUid);
+        applicationEventPublisher.publishEvent(
+                AppEntityChangeEvent.builder()
+                        .applicationId(ApplicationManager.getApplicationId())
+                        .build()
+        );
         return success(relationId.toString());
     }
 
@@ -68,6 +77,11 @@ public class AppDatasourceController {
         // 通过datasourceId获取datasourceUuid
         MetadataDatasourceDO datasource = datasourceCoreService.getDatasource(datasourceId);
         boolean success = appAndDatasourceService.deleteRelation(applicationId, datasource.getDatasourceUuid());
+        applicationEventPublisher.publishEvent(
+                AppEntityChangeEvent.builder()
+                        .applicationId(ApplicationManager.getApplicationId())
+                        .build()
+        );
         return success(success);
     }
 
@@ -133,6 +147,11 @@ public class AppDatasourceController {
 
         applicationId = ApplicationManager.getApplicationId();
         long deletedCount = appAndDatasourceService.deleteRelationsByApplicationId(applicationId);
+        applicationEventPublisher.publishEvent(
+                AppEntityChangeEvent.builder()
+                        .applicationId(ApplicationManager.getApplicationId())
+                        .build()
+        );
         return success(deletedCount);
     }
 
@@ -145,6 +164,11 @@ public class AppDatasourceController {
         // 通过datasourceId获取datasourceUuid
         MetadataDatasourceDO datasource = datasourceCoreService.getDatasource(datasourceId);
         long deletedCount = appAndDatasourceService.deleteRelationsByDatasourceUuid(datasource.getDatasourceUuid());
+        applicationEventPublisher.publishEvent(
+                AppEntityChangeEvent.builder()
+                        .applicationId(ApplicationManager.getApplicationId())
+                        .build()
+        );
         return success(deletedCount);
     }
 }

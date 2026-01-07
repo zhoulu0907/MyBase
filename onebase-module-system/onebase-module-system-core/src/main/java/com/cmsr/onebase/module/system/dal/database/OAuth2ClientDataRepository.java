@@ -1,54 +1,53 @@
 package com.cmsr.onebase.module.system.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.system.vo.oauth.OAuth2ClientPageReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2ClientDO;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.Compare;
+import com.cmsr.onebase.framework.orm.repo.BaseDataRepository;
+import com.cmsr.onebase.module.system.dal.flex.mapper.SystemOauth2ClientMapper;
+import com.cmsr.onebase.module.system.vo.oauth.OAuth2ClientPageReqVO;
+import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryWrapper;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
-import org.apache.commons.lang3.StringUtils;
+import static com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2ClientDO.CLIENT_ID;
+import static com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2ClientDO.NAME;
+import static com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2ClientDO.STATUS;
 
 /**
- * OAuth2客户端数据访问层
+ * OAuth2 客户端数据访问层
  *
  * @author matianyu
- * @date 2025-08-11
+ * @date 2025-12-22
  */
 @Repository
-public class OAuth2ClientDataRepository extends DataRepository<OAuth2ClientDO> {
-
-    public OAuth2ClientDataRepository() {
-        super(OAuth2ClientDO.class);
-    }
+public class OAuth2ClientDataRepository extends BaseDataRepository<SystemOauth2ClientMapper, OAuth2ClientDO> {
 
     /**
-     * 根据客户端ID查找OAuth2客户端
+     * 根据客户端ID查找 OAuth2 客户端
      *
      * @param clientId 客户端ID
-     * @return OAuth2客户端
+     * @return OAuth2 客户端
      */
     public OAuth2ClientDO findOneByClientId(String clientId) {
-        return findOne(new DefaultConfigStore().and(Compare.EQUAL, OAuth2ClientDO.CLIENT_ID, clientId));
+        if (StringUtils.isBlank(clientId)) {
+            return null;
+        }
+        return getOne(query().eq(CLIENT_ID, clientId));
     }
 
     /**
-     * 分页查询OAuth2客户端
+     * 分页查询 OAuth2 客户端
      *
      * @param pageReqVO 分页查询参数
      * @return 分页结果
      */
     public PageResult<OAuth2ClientDO> findPage(OAuth2ClientPageReqVO pageReqVO) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
+        QueryWrapper queryWrapper = query()
+                .like(NAME, pageReqVO.getName(), StringUtils.isNotBlank(pageReqVO.getName()))
+                .eq(STATUS, pageReqVO.getStatus(), pageReqVO.getStatus() != null);
 
-        if (StringUtils.isNotBlank(pageReqVO.getName())) {
-            configStore.and(Compare.LIKE, OAuth2ClientDO.NAME, pageReqVO.getName());
-        }
-        if (null != pageReqVO.getStatus()) {
-            configStore.and(Compare.EQUAL, OAuth2ClientDO.STATUS, pageReqVO.getStatus());
-        }
-
-        return findPageWithConditions(configStore, pageReqVO.getPageNo(), pageReqVO.getPageSize());
+        Page<OAuth2ClientDO> pageResult = page(Page.of(pageReqVO.getPageNo(), pageReqVO.getPageSize()), queryWrapper);
+        return new PageResult<>(pageResult.getRecords(), pageResult.getTotalRow());
     }
 }

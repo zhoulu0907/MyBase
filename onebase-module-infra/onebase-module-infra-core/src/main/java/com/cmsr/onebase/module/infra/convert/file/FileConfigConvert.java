@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.infra.convert.file;
 
-import com.cmsr.onebase.module.infra.dal.dataobject.file.FileConfigDO;
+import com.cmsr.onebase.module.infra.dal.dataflexdo.file.FileConfigDO;
 import com.cmsr.onebase.module.infra.dal.vo.file.config.FileConfigRespVO;
 import com.cmsr.onebase.module.infra.dal.vo.file.config.FileConfigSaveReqVO;
 import org.apache.commons.lang3.math.NumberUtils;

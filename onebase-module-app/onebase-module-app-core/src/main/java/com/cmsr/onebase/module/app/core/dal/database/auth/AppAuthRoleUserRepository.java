@@ -1,15 +1,14 @@
 package com.cmsr.onebase.module.app.core.dal.database.auth;
 
-import com.cmsr.onebase.framework.common.pojo.PageParam;
-import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthRoleUserDO;
 import com.cmsr.onebase.module.app.core.dal.mapper.AppAuthRoleUserMapper;
-import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+
+import static com.cmsr.onebase.module.app.core.dal.dataobject.table.AppAuthRoleUserTableDef.APP_AUTH_ROLE_USER;
 
 /**
  * 应用权限用户角色数据访问层
@@ -44,64 +43,40 @@ public class AppAuthRoleUserRepository extends ServiceImpl<AppAuthRoleUserMapper
 
     public long countByRoleId(Long roleId) {
         QueryWrapper queryWrapper = this.query()
-                .eq(AppAuthRoleUserDO::getRoleId, roleId);
+                .where(APP_AUTH_ROLE_USER.ROLE_ID.eq(roleId));
         return count(queryWrapper);
     }
 
     public List<AppAuthRoleUserDO> findByByRoleIds(List<Long> roleIds) {
         QueryWrapper queryWrapper = this.query()
-                .in(AppAuthRoleUserDO::getRoleId, roleIds);
+                .where(APP_AUTH_ROLE_USER.ROLE_ID.in(roleIds));
         return list(queryWrapper);
     }
 
-    public PageResult<AppAuthRoleUserDO> findByRoleId(Long roleId, PageParam pageParam) {
-        QueryWrapper queryWrapper = this.query()
-                .eq(AppAuthRoleUserDO::getRoleId, roleId);
-        Page<AppAuthRoleUserDO> pageQuery = Page.of(pageParam.getPageNo(), pageParam.getPageSize());
-        Page<AppAuthRoleUserDO> pageResult = this.page(pageQuery, queryWrapper);
-        return new PageResult<>(pageResult.getRecords(), pageResult.getTotalRow());
-    }
-
-
-    public void deleteRoleUser(Long roleId, List<Long> userIds) {
-        this.updateChain()
-                .eq(AppAuthRoleUserDO::getRoleId, roleId)
-                .in(AppAuthRoleUserDO::getUserId, userIds)
-                .remove();
-    }
-
-    public void deleteRoleUser(Long roleId, Long userId) {
-        this.updateChain()
-                .eq(AppAuthRoleUserDO::getRoleId, roleId)
-                .eq(AppAuthRoleUserDO::getUserId, userId)
-                .remove();
-    }
 
     public void deleteByRoleId(Long roleId) {
-        this.updateChain()
-                .eq(AppAuthRoleUserDO::getRoleId, roleId)
-                .remove();
+        QueryWrapper queryWrapper = this.query()
+                .where(APP_AUTH_ROLE_USER.ROLE_ID.eq(roleId));
+        this.remove(queryWrapper);
     }
 
 
     public void deleteByUserId(Long userId) {
-        this.updateChain()
-                .eq(AppAuthRoleUserDO::getUserId, userId)
-                .remove();
+        QueryWrapper queryWrapper = this.query()
+                .where(APP_AUTH_ROLE_USER.USER_ID.eq(userId));
+        this.remove(queryWrapper);
     }
 
     public List<AppAuthRoleUserDO> findByUserId(Long userId) {
         QueryWrapper queryWrapper = this.query()
-                .eq(AppAuthRoleUserDO::getUserId, userId);
+                .where(APP_AUTH_ROLE_USER.USER_ID.eq(userId));
         return list(queryWrapper);
     }
 
-    public List<AppAuthRoleUserDO> findAdminByRoleIdAndUserId(Long roleId, Long userId) {
+    public boolean existsByUserIdAndRoleId(Long roleId, Long userId) {
         QueryWrapper queryWrapper = this.query()
                 .eq(AppAuthRoleUserDO::getUserId, userId)
                 .eq(AppAuthRoleUserDO::getRoleId, roleId);
-        return list(queryWrapper);
+        return this.exists(queryWrapper);
     }
-
-
 }

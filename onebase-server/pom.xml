@@ -68,6 +68,11 @@
         </dependency>
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-dashboard-build</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-module-metadata-build</artifactId>
             <version>${revision}</version>
             <exclusions>
@@ -84,6 +89,11 @@
                     <groupId>commons-logging</groupId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-plugin-build</artifactId>
+            <version>${revision}</version>
         </dependency>
         <!-- 已移除 onebase-module-metadata-runtime 依赖，运行态功能保留在 runtime 模块 -->
         <!--
@@ -175,6 +185,11 @@
 <!--            <artifactId>onebase-module-flow-core</artifactId>-->
 <!--            <version>${revision}</version>-->
 <!--        </dependency>-->
+        <!-- 插件运行时 -->
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-spring-boot-starter-plugin</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

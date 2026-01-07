@@ -19,6 +19,9 @@ public class FlinkUtil {
         if (type == null) {
             throw new IllegalArgumentException("Type cannot be null");
         }
+        if (length == null) {
+            length = 1024;
+        }
         return switch (type.toUpperCase()) {
             case "CHAR" -> DataTypes.CHAR(length);
             case "VARCHAR" -> DataTypes.VARCHAR(length);
@@ -27,7 +30,7 @@ public class FlinkUtil {
             case "BINARY" -> DataTypes.BINARY(length);
             case "VARBINARY" -> DataTypes.VARBINARY(length);
             case "BYTES" -> DataTypes.BYTES();
-            case "DECIMAL" -> DataTypes.DECIMAL(precision, scale);
+            case "DECIMAL" -> DataTypes.DECIMAL(precision == null ? 19 : precision, scale == null ? 0 : scale);
             case "TINYINT" -> DataTypes.TINYINT();
             case "SMALLINT" -> DataTypes.SMALLINT();
             case "INTEGER" -> DataTypes.INT();
@@ -36,8 +39,8 @@ public class FlinkUtil {
             case "DOUBLE" -> DataTypes.DOUBLE();
             case "DATE" -> DataTypes.DATE();
             case "TIME" -> DataTypes.TIME(0);
-            case "TIMESTAMP" -> DataTypes.TIMESTAMP(scale);
-            case "TIMESTAMP_LTZ" -> DataTypes.TIMESTAMP_LTZ(scale);
+            case "TIMESTAMP" -> DataTypes.TIMESTAMP(scale == null ? 9 : scale);
+            case "TIMESTAMP_LTZ" -> DataTypes.TIMESTAMP_LTZ(scale == null ? 9 : scale);
             case "INTERVAL" -> DataTypes.INTERVAL(DataTypes.SECOND(3));
             case "ARRAY" -> DataTypes.ARRAY(DataTypes.STRING());
             case "MULTISET" -> DataTypes.MULTISET(DataTypes.STRING());

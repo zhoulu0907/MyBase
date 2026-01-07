@@ -79,4 +79,9 @@ public interface CorpService {
      *
      */
     void checkCorpAdminUser(@Valid CorpAdminReqVO corpAdminReqVO);
+    /**
+     * 获取所有企业
+     *
+     */
+    List<CorpDO> getAllCorpList();
 }

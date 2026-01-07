@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.metadata.build.controller.admin.entity;
 
+import com.cmsr.onebase.framework.common.event.AppEntityChangeEvent;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
@@ -28,6 +29,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -56,6 +58,9 @@ public class EntityFieldController {
     @Resource
     private MetadataIdUuidConverter idUuidConverter;
 
+    @Resource
+    ApplicationEventPublisher applicationEventPublisher;
+
     @PostMapping("/field-types")
     @Operation(summary = "获取系统支持的字段类型列表")
     public CommonResult<List<FieldTypeConfigRespVO>> getFieldTypes() {
@@ -68,6 +73,11 @@ public class EntityFieldController {
         // 从请求头获取应用ID
         reqVO.setApplicationId(String.valueOf(ApplicationManager.getApplicationId()));
         EntityFieldBatchCreateRespVO result = entityFieldService.batchCreateEntityFields(reqVO);
+        applicationEventPublisher.publishEvent(
+                AppEntityChangeEvent.builder()
+                        .applicationId(ApplicationManager.getApplicationId())
+                        .build()
+        );
         return success(result);
     }
 
@@ -77,6 +87,11 @@ public class EntityFieldController {
         // 从请求头获取应用ID
         reqVO.setApplicationId(String.valueOf(ApplicationManager.getApplicationId()));
         EntityFieldRespVO result = entityFieldService.createEntityFieldWithRelated(reqVO);
+        applicationEventPublisher.publishEvent(
+                AppEntityChangeEvent.builder()
+                        .applicationId(ApplicationManager.getApplicationId())
+                        .build()
+        );
         return success(result);
     }
     @PostMapping("/list")
@@ -105,6 +120,11 @@ public class EntityFieldController {
     @Operation(summary = "批量更新实体字段信息")
     public CommonResult<EntityFieldBatchUpdateRespVO> batchUpdateEntityFields(@Valid @RequestBody EntityFieldBatchUpdateReqVO reqVO) {
         EntityFieldBatchUpdateRespVO result = entityFieldService.batchUpdateEntityFields(reqVO);
+        applicationEventPublisher.publishEvent(
+                AppEntityChangeEvent.builder()
+                        .applicationId(ApplicationManager.getApplicationId())
+                        .build()
+        );
         return success(result);
     }
     @PostMapping("/update")
@@ -113,6 +133,11 @@ public class EntityFieldController {
         // 从请求头获取应用ID
         reqVO.setApplicationId(String.valueOf(ApplicationManager.getApplicationId()));
         Boolean result = entityFieldService.updateEntityFieldWithRelated(reqVO);
+        applicationEventPublisher.publishEvent(
+                AppEntityChangeEvent.builder()
+                        .applicationId(ApplicationManager.getApplicationId())
+                        .build()
+        );
         return success(result);
     }
     @PostMapping("/delete")
@@ -121,6 +146,11 @@ public class EntityFieldController {
     public CommonResult<Boolean> deleteEntityField(@RequestParam("id") String id) {
         Long resolvedId = idUuidConverter.resolveFieldId(id);
         entityFieldService.deleteEntityField(String.valueOf(resolvedId));
+        applicationEventPublisher.publishEvent(
+                AppEntityChangeEvent.builder()
+                        .applicationId(ApplicationManager.getApplicationId())
+                        .build()
+        );
         return success(true);
     }
 
@@ -128,6 +158,11 @@ public class EntityFieldController {
     @Operation(summary = "批量更新字段排序")
     public CommonResult<Boolean> batchSortEntityFields(@Valid @RequestBody EntityFieldBatchSortReqVO reqVO) {
         entityFieldService.batchSortEntityFields(reqVO);
+        applicationEventPublisher.publishEvent(
+                AppEntityChangeEvent.builder()
+                        .applicationId(ApplicationManager.getApplicationId())
+                        .build()
+        );
         return success(true);
     }
     @PostMapping("/batch-save")
@@ -136,6 +171,11 @@ public class EntityFieldController {
         // 从请求头获取应用ID
         reqVO.setApplicationId(String.valueOf(ApplicationManager.getApplicationId()));
         EntityFieldBatchSaveRespVO resp = entityFieldService.batchSaveEntityFields(reqVO);
+        applicationEventPublisher.publishEvent(
+                AppEntityChangeEvent.builder()
+                        .applicationId(ApplicationManager.getApplicationId())
+                        .build()
+        );
         return success(resp);
     }
 

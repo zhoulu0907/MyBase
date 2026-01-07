@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.etl.build.vo.datasource;
 
+import com.cmsr.onebase.module.etl.core.vo.ConnectCryptoProperties;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -31,7 +32,7 @@ public class EtlDatasourceUpdateReqVO {
 
     @Schema(description = "数据源配置信息")
     @NotNull(message = "数据源配置信息不能为空")
-    private ConnectProperties config;
+    private ConnectCryptoProperties config;
 
     @Schema(description = "只读", requiredMode = Schema.RequiredMode.NOT_REQUIRED, defaultValue = "1")
     private Integer readonly;

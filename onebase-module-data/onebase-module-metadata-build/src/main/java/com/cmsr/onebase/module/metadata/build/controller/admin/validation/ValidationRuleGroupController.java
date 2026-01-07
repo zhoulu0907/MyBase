@@ -1,7 +1,9 @@
 package com.cmsr.onebase.module.metadata.build.controller.admin.validation;
 
+import com.cmsr.onebase.framework.common.event.AppEntityChangeEvent;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationRuleGroupPageReqVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationRuleGroupSimpleRespVO;
 import com.cmsr.onebase.module.metadata.build.service.validation.MetadataValidationRuleGroupBuildService;
@@ -11,6 +13,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,6 +37,9 @@ public class ValidationRuleGroupController {
     @Resource
     private MetadataIdUuidConverter idUuidConverter;
 
+    @Resource
+    ApplicationEventPublisher applicationEventPublisher;
+
     // 该控制器已精简为仅分页和统一操作入口，不再提供单独的新增/修改/删除/详情接口
     // 新增/修改/删除/详情请使用各具体校验类型 Controller 或自定义验证 Controller
 
@@ -52,6 +58,11 @@ public class ValidationRuleGroupController {
     public CommonResult<Boolean> unifiedDelete(@RequestParam("id") String id) {
         Long groupId = idUuidConverter.resolveRuleGroupId(id);
         validationRuleGroupService.deleteValidationRuleGroup(groupId);
+        applicationEventPublisher.publishEvent(
+                AppEntityChangeEvent.builder()
+                        .applicationId(ApplicationManager.getApplicationId())
+                        .build()
+        );
         return success(true);
     }
 

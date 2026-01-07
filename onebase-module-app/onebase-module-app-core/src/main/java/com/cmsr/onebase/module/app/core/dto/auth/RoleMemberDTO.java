@@ -31,4 +31,12 @@ public class RoleMemberDTO {
     @Column("dept_name")
     private String deptName;
 
+    @Column("account")
+    private String account;
+
+    @Column("avatar")
+    private String avatar;
+
+    @Column("create_source")
+    private String createSource;
 }

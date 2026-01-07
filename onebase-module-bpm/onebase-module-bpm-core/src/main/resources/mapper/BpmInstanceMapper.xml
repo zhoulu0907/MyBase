@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cmsr.onebase.module.bpm.core.dal.mapper.BpmInstanceMapper">
+
+    <select id="getFormDataPage" resultType="com.cmsr.onebase.module.bpm.core.dto.BpmInstanceDTO">
+        select
+            t1.business_data_id,
+            t1.bpm_title,
+            t1.initiator_id,
+            t1.initiator_name,
+            t1.initiator_avatar,
+            t1.submit_time,
+            t1.application_id as app_id,
+            t.flow_status,
+            t.node_code,
+            t.node_name,
+            t1.binding_view_id
+        from  bpm_flow_instance t
+        inner join   bpm_flow_instance_biz_ext t1 on t.id = t1.instance_id
+        where t.deleted = 0 and t1.deleted = 0
+        <!-- 动态条件开始 -->
+        AND t.creator = #{userId}
+        <!-- app_id -->
+            AND t1.application_id = #{queryVO.appId}
+        <!-- keyword 模糊搜索 -->
+        <if test="queryVO != null and queryVO.keyword != null and queryVO.keyword != ''">
+            AND (
+            t1.bpm_title LIKE CONCAT('%', #{queryVO.keyword}, '%')
+            OR t1.initiator_name LIKE CONCAT('%', #{queryVO.keyword}, '%')
+            OR t1.form_summary LIKE CONCAT('%', #{queryVO.keyword}, '%')
+            )
+        </if>
+        <!-- businessUuid -->
+        <if test="queryVO != null and queryVO.businessUuid != null and queryVO.businessUuid != ''">
+            AND t1.binding_view_id = #{queryVO.businessUuid}
+        </if>
+
+            <!-- flowStatusList -->
+            <if test="queryVO != null and queryVO.flowStatusList != null and queryVO.flowStatusList.size() > 0">
+                AND t.flow_status IN
+                <foreach collection="queryVO.flowStatusList" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+
+            <!-- nodeCodeList -->
+            <if test="queryVO != null and queryVO.nodeCodeList != null and queryVO.nodeCodeList.size() > 0">
+                AND t.node_code IN
+                <foreach collection="queryVO.nodeCodeList" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+
+            <!-- 时间范围 -->
+            <if test="queryVO != null and queryVO.submitTimeStart != null">
+                AND t1.submit_time &gt;= #{queryVO.submitTimeStart}
+            </if>
+
+            <if test="queryVO != null and queryVO.submitTimeEnd != null">
+                AND t1.submit_time &lt;= #{queryVO.submitTimeEnd}
+            </if>
+
+            <!-- 发起人 -->
+            <if test="queryVO != null and queryVO.initiatorIdList != null and queryVO.initiatorIdList.size() > 0">
+                AND t1.initiator_id IN
+                <foreach collection="queryVO.initiatorIdList" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        <!-- 排序 -->
+        <choose>
+            <when test="queryVO != null and queryVO.sortType == 'asc'">
+                ORDER BY t.update_time ASC
+            </when>
+            <otherwise>
+                ORDER BY t.update_time DESC
+            </otherwise>
+        </choose>
+
+        <!-- 动态条件结束 -->
+
+
+    </select>
+
+</mapper>

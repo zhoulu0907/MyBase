@@ -1,19 +1,19 @@
 package com.cmsr.onebase.module.system.api.dept;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.system.api.dept.dto.DeptAndUsersReqDTO;
-import com.cmsr.onebase.module.system.api.dept.dto.DeptAndUsersRespDTO;
-import com.cmsr.onebase.module.system.api.dept.dto.DeptRespDTO;
+import com.cmsr.onebase.module.system.api.dept.dto.*;
 import com.cmsr.onebase.module.system.enums.dept.IdTypeEnum;
 import com.cmsr.onebase.module.system.vo.dept.DeptAndUsersRespVO;
 import com.cmsr.onebase.module.system.convert.dept.DeptConvert;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.service.dept.DeptService;
+import com.cmsr.onebase.module.system.vo.dept.DeptRespVO;
 import jakarta.annotation.Resource;
+import jakarta.validation.Valid;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RestController;
-
 import java.util.Collection;
 import java.util.List;
 
@@ -60,5 +60,11 @@ public class DeptApiImpl implements DeptApi {
     public CommonResult<List<DeptRespDTO>> getParentDeptsListByUserId(Long userId) {
         List<DeptDO> deptDOList = deptService.getParentDeptsListById(userId, IdTypeEnum.USER.getCode());
         return success(BeanUtils.toBean(deptDOList, DeptRespDTO.class));
+    }
+
+    @Override
+    public CommonResult<PageResult<DeptRespDTO>> getDeptPage(@Valid DeptPageApiReqVO reqVO) {
+        PageResult<DeptRespVO> result = deptService.getDeptPage(reqVO);
+        return success(BeanUtils.toBean(result, DeptRespDTO.class));
     }
 }

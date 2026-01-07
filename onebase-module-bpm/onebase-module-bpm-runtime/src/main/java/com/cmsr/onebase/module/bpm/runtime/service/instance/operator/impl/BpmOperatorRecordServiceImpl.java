@@ -7,6 +7,7 @@ import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.bpm.core.dal.database.BpmFlowAgentInsRepository;
 import com.cmsr.onebase.module.bpm.core.dal.database.BpmFlowCcRecordRepository;
+import com.cmsr.onebase.module.bpm.core.dal.database.ext.BpmFlowDefinitionRepositoryExt;
 import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowAgentInsDO;
 import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowCcRecordDO;
 import com.cmsr.onebase.module.bpm.core.dto.node.ApproverNodeExtDTO;
@@ -89,6 +90,9 @@ public class BpmOperatorRecordServiceImpl implements BpmOperatorRecordService {
 
     @Resource
     private BpmFlowAgentInsRepository agentInsRepository;
+
+    @Resource
+    private BpmFlowDefinitionRepositoryExt defExtService;
 
     public String formatWaitedTime(LocalDateTime startTime) {
         // startTime 是过去的时间（如任务创建时间）
@@ -385,11 +389,20 @@ public class BpmOperatorRecordServiceImpl implements BpmOperatorRecordService {
         if (NodeType.isEnd(instance.getNodeType())) {
            log.info("当前节点为结束节点");
            return;
-       }
+        }
+
+        // 获取最新的流程定义
+        String definitionUuid = instance.getDefinitionUuid();
+
+        Definition definition = defExtService.getOneByUuid(definitionUuid);
+        if (definition == null) {
+            log.warn("获取流程定义失败 definitionUuid: {}", definitionUuid);
+            return;
+        }
 
         while (true) {
             // todo：理论上只会有一条路径，需要结合实体信息预测下一步走向，主要是涉及到条件分支的
-            Node nextNode = nodeService.getNextNode(instance.getDefinitionId(), currNodeCode, null, SkipType.PASS.getKey());
+            Node nextNode = nodeService.getNextNode(definition.getId(), currNodeCode, null, SkipType.PASS.getKey());
 
             if (nextNode == null) {
                 log.warn("下一个节点为空");

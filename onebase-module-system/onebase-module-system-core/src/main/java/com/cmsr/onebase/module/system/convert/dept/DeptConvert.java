@@ -41,6 +41,7 @@ public interface DeptConvert {
         dto.setDeptInfo(toDeptRespDTO(result.getDeptInfo()));
         dto.setDeptList(toDeptRespDTOList(result.getDeptList()));
         dto.setUserList(toAdminUserRespDTO(result.getUserList()));
+
         return dto;
     }
 

@@ -36,4 +36,5 @@ public interface SmsCodeService {
      */
     void validateSmsCode(@Valid SmsCodeValidateReqDTO reqDTO);
 
+    boolean existsSmsCode(SmsCodeSendReqDTO reqDTO);
 }

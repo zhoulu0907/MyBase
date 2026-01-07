@@ -32,7 +32,13 @@ public enum BpmViewSourceEnum {
     /**
      * 抄送：当前用户被抄送
      */
-    CC("cc", "抄送");
+    CC("cc", "抄送"),
+
+    /**
+     * 抄送：当前用户被抄送
+     */
+    LIST("list", "列表");
+
 
     /**
      * 前端/URL 中使用的 code（小写，兼容现有参数）

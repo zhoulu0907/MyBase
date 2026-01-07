@@ -248,4 +248,12 @@ public interface MetadataEntityFieldBuildService {
      */
     List<FieldTypeValidationTypesRespVO> getValidationTypesByFieldTypes(@Valid FieldTypeValidationTypesReqVO reqVO);
 
+    /**
+     * 根据字段UUID列表批量查询实体字段
+     *
+     * @param fieldUuids 字段UUID列表
+     * @return 实体字段列表
+     */
+    List<MetadataEntityFieldDO> getByFieldUuids(java.util.Collection<String> fieldUuids);
+
 }

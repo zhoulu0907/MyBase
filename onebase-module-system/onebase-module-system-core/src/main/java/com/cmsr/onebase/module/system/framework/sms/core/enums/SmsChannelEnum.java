@@ -14,8 +14,8 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum SmsChannelEnum {
 
-    CMCC("CMCC", "中国移动") ,
-    ;
+    CMCC("CMCC", "中国移动"),
+    INFOCLOUD_OPASS("InfoCloudOpass", "中云数赢-经分助手");
 
     /**
      * 编码

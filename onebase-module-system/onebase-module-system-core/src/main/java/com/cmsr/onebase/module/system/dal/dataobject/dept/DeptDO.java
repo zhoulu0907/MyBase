@@ -1,21 +1,24 @@
 package com.cmsr.onebase.module.system.dal.dataobject.dept;
 
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
-import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
-import jakarta.persistence.Table;
-import jakarta.persistence.Column;
+import com.cmsr.onebase.framework.orm.entity.BaseTenantEntity;
+import com.cmsr.onebase.module.system.dal.flex.typehandler.SetLongJsonTypeHandler;
+import com.mybatisflex.annotation.Column;
+import com.mybatisflex.annotation.Table;
 import lombok.Data;
+
+import java.util.Set;
 
 /**
  * 部门表
  *
  * @author ma
  */
-@Table(name = "system_dept")
+@Table(value = "system_dept")
 @Data
-public class DeptDO extends TenantBaseDO {
-
-    public static final Long PARENT_ID_ROOT = 0L;
+public class DeptDO extends BaseTenantEntity {
+    public static final String P_ID           = "id";
+    public static final Long   PARENT_ID_ROOT = 0L;
 
     // 列名常量
     public static final String NAME           = "name";
@@ -26,7 +29,7 @@ public class DeptDO extends TenantBaseDO {
     public static final String EMAIL          = "email";
     public static final String STATUS         = "status";
     public static final String REMARK         = "remark";
-    public static final String ADMIN_USER_ID  = "admin_user_id";
+    public static final String ADMIN_USER_IDS  = "admin_user_ids";
     public static final String CORP_ID        = "corp_id";
     public static final String DEPT_TYPE      = "dept_type";
     public static final String DEPT_CODE      = "dept_code";
@@ -34,71 +37,72 @@ public class DeptDO extends TenantBaseDO {
     /**
      * 部门名称
      */
-    @Column(name = NAME)
+    @Column(value = NAME)
     private String  name;
     /**
      * 父部门ID
      * <p>
      */
-    @Column(name = PARENT_ID)
+    @Column(value = PARENT_ID)
     private Long    parentId;
     /**
      * 显示顺序
      */
-    @Column(name = SORT)
+    @Column(value = SORT)
     private Integer sort;
     /**
      * 主管UserID
      * <p>
      * 关联
      */
-    @Column(name = LEADER_USER_ID)
+    @Column(value = LEADER_USER_ID)
     private Long    leaderUserId;
 
     /**
-     * 管理员id
+     * 接口人UserIds
      */
-    @Column(name = ADMIN_USER_ID)
-    private Long adminUserId;
+
+    @Column(value = ADMIN_USER_IDS, typeHandler = SetLongJsonTypeHandler.class)
+    private Set<Long> adminUserIds;
 
     /**
      * 联系电话
      */
-    @Column(name = PHONE)
+    @Column(value = PHONE)
     private String  phone;
     /**
      * 邮箱
      */
-    @Column(name = EMAIL)
+    @Column(value = EMAIL)
     private String  email;
     /**
      * 部门状态
      * <p>
      * 枚举 {@link CommonStatusEnum}
      */
-    @Column(name = STATUS)
+    @Column(value = STATUS)
     private Integer status;
 
     /**
      * 备注
      */
-    @Column(name = REMARK)
+    @Column(value = REMARK)
     private String remark;
 
 
     /**
      * 部门类型： tenant-空间部门，corp-企业部门
      */
-    @Column(name = DEPT_TYPE)
+    @Column(value = DEPT_TYPE)
     private String deptType;
 
     /**
      * 归属企业ID
      */
-    @Column(name = CORP_ID)
+    @Column(value = CORP_ID)
     private Long corpId;
 
-    @Column(name = DEPT_CODE)
+    @Column(value = DEPT_CODE)
     private String deptCode;
 
 }

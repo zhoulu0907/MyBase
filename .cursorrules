@@ -10,7 +10,7 @@
    ├── onebase-dependencies/       # 统一管理所有依赖项目
    ├── onebase-framework/          # 统一管理common公共能力和各类中间件
    ├── onebase-module-infra        # 基础设施，如文件存储、监控等。
-   ├── onebase-module-system       # 系统能力，如空间、租户、用户、角色、权限等。
+   ├── onebase-module-system       # 系统能力，如空间、空间、用户、角色、权限等。
    ├── onebase-module-data         # 数据模块
    ├── onebase-module-app          # 应用模块
    ├── onebase-module-flow         # 流程模块
@@ -29,7 +29,7 @@
 6. 带@FeignClient注解的Api类统一作为跨module调用的API入口，一般无需权限控制，给内部其他module提供服务；
 7. 带@Service注解的类统一作为业务逻辑处理类，所有的业务逻辑处理在这里实现，数据服务统一调用DataRepository实现；
 8. 避免核心模型的类放在内部作为static class，要独立出来；
-9. VO类中需要移除lockversion（乐观锁）、tenantid（租户id）等系统使用且对用户无用的基础字段；
+9. VO类中需要移除lockversion（乐观锁）、tenantid（空间id）等系统使用且对用户无用的基础字段；
 10. HTTP请求路径中统一不设置参数，不推荐@GetMapping("/{datasourceId}/tables") ，采用命名方式：Controller层路径采用"/模块/对象"方式，如@RequestMapping("/system/user")，方法层采用“操作”命名，如@PostMapping("/create")，增强可读性和可维护性。
 11. HTTP请求方式建议：get、query、page、list、导入、导出等查询方法使用GET请求方式，create、insert、update、delete等相关方法用POST；未识别操作类型默认采用POST；
 12. DTO类中不允许有业务逻辑，DTO类仅用于数据传输，DTO类中不允许有方法，除非是静态方法；

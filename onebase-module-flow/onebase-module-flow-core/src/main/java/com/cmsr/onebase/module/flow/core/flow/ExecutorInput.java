@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.flow.core.flow;
 
+import com.cmsr.onebase.module.flow.context.table.RowData;
 import lombok.Data;
 
 import java.util.Map;
@@ -20,7 +21,7 @@ public class ExecutorInput {
      */
     private String executionUuid;
 
-    private Map<String, Object> inputParams;
+    private RowData inputParams;
 
     /**
      * 触发用户ID

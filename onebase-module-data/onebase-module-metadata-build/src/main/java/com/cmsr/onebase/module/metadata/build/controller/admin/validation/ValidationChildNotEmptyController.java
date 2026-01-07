@@ -1,6 +1,8 @@
 package com.cmsr.onebase.module.metadata.build.controller.admin.validation;
 
+import com.cmsr.onebase.framework.common.event.AppEntityChangeEvent;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.module.metadata.core.util.MetadataIdUuidConverter;
 import com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationChildNotEmptyRespVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationChildNotEmptySaveReqVO;
@@ -11,6 +13,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,6 +29,9 @@ public class ValidationChildNotEmptyController {
     private MetadataIdUuidConverter idUuidConverter;
 
     @Resource private MetadataValidationChildNotEmptyBuildService childNotEmptyService;
+
+    @Resource
+    ApplicationEventPublisher applicationEventPublisher;
 
     @PostMapping("/get-by-field")
     @Operation(summary = "根据字段UUID获取子表非空校验")
@@ -45,13 +51,24 @@ public class ValidationChildNotEmptyController {
     @PostMapping("/create")
     @Operation(summary = "创建子表非空校验")
     public CommonResult<Long> create(@Valid @RequestBody ValidationChildNotEmptySaveReqVO vo) {
-        return success(childNotEmptyService.create(vo));
+        Long id = childNotEmptyService.create(vo);
+        applicationEventPublisher.publishEvent(
+                AppEntityChangeEvent.builder()
+                        .applicationId(ApplicationManager.getApplicationId())
+                        .build()
+        );
+        return success(id);
     }
 
     @PostMapping("/update")
     @Operation(summary = "更新子表非空校验")
     public CommonResult<Boolean> update(@Valid @RequestBody ValidationChildNotEmptyUpdateReqVO vo) {
         childNotEmptyService.update(vo);
+        applicationEventPublisher.publishEvent(
+                AppEntityChangeEvent.builder()
+                        .applicationId(ApplicationManager.getApplicationId())
+                        .build()
+        );
         return success(true);
     }
 
@@ -60,6 +77,11 @@ public class ValidationChildNotEmptyController {
     @Parameter(name = "id", description = "字段UUID", required = true)
     public CommonResult<Boolean> deleteByField(@RequestParam("id") String fieldUuid) {
         childNotEmptyService.deleteByFieldId(fieldUuid);
+        applicationEventPublisher.publishEvent(
+                AppEntityChangeEvent.builder()
+                        .applicationId(ApplicationManager.getApplicationId())
+                        .build()
+        );
         return success(true);
     }
 
@@ -69,6 +91,11 @@ public class ValidationChildNotEmptyController {
     public CommonResult<Boolean> delete(@RequestParam("id") String id) {
         Long resolvedId = idUuidConverter.resolveRuleGroupId(id);
         childNotEmptyService.deleteById(resolvedId);
+        applicationEventPublisher.publishEvent(
+                AppEntityChangeEvent.builder()
+                        .applicationId(ApplicationManager.getApplicationId())
+                        .build()
+        );
         return success(true);
     }
 }

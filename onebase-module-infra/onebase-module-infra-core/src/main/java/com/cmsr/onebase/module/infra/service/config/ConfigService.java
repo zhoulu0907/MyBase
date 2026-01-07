@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.infra.service.config;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.infra.dal.dataobject.config.ConfigDO;
+import com.cmsr.onebase.module.infra.dal.dataflexdo.config.ConfigDO;
 import com.cmsr.onebase.module.infra.dal.vo.config.ConfigPageReqVO;
 import com.cmsr.onebase.module.infra.dal.vo.config.ConfigSaveReqVO;
 import jakarta.validation.Valid;

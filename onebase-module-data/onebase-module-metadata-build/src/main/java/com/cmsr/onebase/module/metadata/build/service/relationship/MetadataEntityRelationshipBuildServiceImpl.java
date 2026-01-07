@@ -33,6 +33,7 @@ import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEnti
 import com.cmsr.onebase.module.metadata.build.service.entity.MetadataBusinessEntityBuildService;
 import com.cmsr.onebase.module.metadata.build.service.entity.MetadataEntityFieldBuildService;
 import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryColumn;
 import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
@@ -221,9 +222,11 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
             String entityUuid = idUuidConverter.toEntityUuid(pageReqVO.getEntityId().trim());
             log.info("解析实体: 原始值={}, 转换后entityUuid={}", pageReqVO.getEntityId(), entityUuid);
 
-            // 使用MyBatis-Flex链式写法：(source_entity_uuid = ? OR target_entity_uuid = ?)
-            queryWrapper.where(MetadataEntityRelationshipDO::getSourceEntityUuid).eq(entityUuid)
-                    .or(MetadataEntityRelationshipDO::getTargetEntityUuid).eq(entityUuid);
+            // 使用MyBatis-Flex链式写法：AND (source_entity_uuid = ? OR target_entity_uuid = ?)
+            // 必须用QueryColumn构建条件并用where()添加，确保OR条件被括号包裹
+            QueryColumn sourceCol = new QueryColumn("source_entity_uuid");
+            QueryColumn targetCol = new QueryColumn("target_entity_uuid");
+            queryWrapper.where(sourceCol.eq(entityUuid).or(targetCol.eq(entityUuid)));
             log.info("查询实体相关关系，entityUuid: {}", entityUuid);
         } else {
             // 如果没有传入 entityId，则使用精确的源实体UUID和目标实体UUID查询
@@ -390,9 +393,11 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
                 .toList();
 
         // 查询涉及这些实体的所有关系 - 使用 OR + IN
+        // 必须用QueryColumn构建条件并用where()添加，确保OR条件被括号包裹
+        QueryColumn sourceCol = new QueryColumn("source_entity_uuid");
+        QueryColumn targetCol = new QueryColumn("target_entity_uuid");
         QueryWrapper queryWrapper = entityRelationshipRepository.query()
-                .in(MetadataEntityRelationshipDO::getSourceEntityUuid, entityUuids)
-                .or(MetadataEntityRelationshipDO::getTargetEntityUuid).in(entityUuids)
+                .where(sourceCol.in(entityUuids).or(targetCol.in(entityUuids)))
                 .orderBy(MetadataEntityRelationshipDO::getCreateTime, false);
 
         List<MetadataEntityRelationshipDO> relationships = entityRelationshipRepository.list(queryWrapper);

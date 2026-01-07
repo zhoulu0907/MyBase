@@ -13,22 +13,23 @@ public class Field {
     private String fieldName;
 
     /**
-     * 界面配置, 数据库补充
+     * 界面配置
+     * !!!数据库补充!!!
      */
     private String fieldType;
 
     /**
-     * 数据库补充
+     * !!!数据库补充!!!
      */
     private Integer length;
 
     /**
-     * 数据库补充
+     * !!!数据库补充!!!
      */
     private Integer precision;
 
     /**
-     * 数据库补充
+     * !!!数据库补充!!!
      */
     private Integer scale;
 

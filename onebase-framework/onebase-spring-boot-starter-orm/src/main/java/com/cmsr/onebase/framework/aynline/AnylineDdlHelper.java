@@ -113,21 +113,85 @@ public class AnylineDdlHelper {
      * 创建表
      * <p>
      * 使用 Anyline 原生 API 创建表，自动适配不同数据库。
+     * 如果表已存在，会检查并添加缺失的列，确保所有列都存在后再添加注释。
      *
      * @param service AnylineService 实例
      * @param table   Table 对象（包含表名、列定义、主键等）
      */
     public static void createTable(AnylineService<?> service, Table<?> table) {
         clearMetadataCache();
-        log.info("开始创建表: {}", table.getName());
+        String tableName = table.getName();
+        log.info("开始创建表: {}", tableName);
+        
         try {
-            service.ddl().create(table);
+            // 检查表是否已存在
+            boolean tableAlreadyExists = tableExists(service, tableName);
+            
+            if (tableAlreadyExists) {
+                log.info("表 {} 已存在，检查并添加缺失的列", tableName);
+                // 表已存在，检查并添加缺失的列
+                addMissingColumns(service, table);
+                log.info("表 {} 的列同步完成", tableName);
+            } else {
+                // 表不存在，正常创建
+                log.info("表 {} 不存在，执行创建操作", tableName);
+                service.ddl().create(table);
+                log.info("成功创建表: {}", tableName);
+            }
         } catch (Exception e) {
-            log.error("创建表 {} 失败: {}", table.getName(), e.getMessage(), e);
+            log.error("创建表 {} 失败: {}", tableName, e.getMessage(), e);
             throw new RuntimeException("创建表失败: " + e.getMessage(), e);
         }
         clearMetadataCache();
-        log.info("成功创建表: {}", table.getName());
+    }
+
+    /**
+     * 为已存在的表添加缺失的列
+     * <p>
+     * 遍历 Table 对象中定义的所有列，检查每个列是否存在于数据库中，
+     * 如果不存在则添加该列。
+     *
+     * @param service AnylineService 实例
+     * @param table   Table 对象（包含列定义）
+     */
+    private static void addMissingColumns(AnylineService<?> service, Table<?> table) {
+        String tableName = table.getName();
+        LinkedHashMap<String, Column> columns = table.getColumns();
+        
+        if (columns == null || columns.isEmpty()) {
+            log.debug("表 {} 没有定义列，跳过列同步", tableName);
+            return;
+        }
+        
+        int addedCount = 0;
+        for (Column column : columns.values()) {
+            String columnName = column.getName();
+            if (columnName == null || columnName.trim().isEmpty()) {
+                continue;
+            }
+            
+            // 检查列是否已存在
+            if (!columnExists(service, tableName, columnName)) {
+                log.info("表 {} 缺少列 {}，开始添加", tableName, columnName);
+                try {
+                    // 确保列关联到正确的表
+                    column.setTable(table);
+                    service.ddl().add(column);
+                    addedCount++;
+                    log.info("成功为表 {} 添加缺失的列: {}", tableName, columnName);
+                } catch (Exception e) {
+                    log.error("为表 {} 添加列 {} 失败: {}", tableName, columnName, e.getMessage(), e);
+                    throw new RuntimeException("添加缺失列失败: " + e.getMessage(), e);
+                }
+            } else {
+                log.debug("列 {} 已存在于表 {} 中", columnName, tableName);
+            }
+        }
+        
+        if (addedCount > 0) {
+            log.info("为表 {} 添加了 {} 个缺失的列", tableName, addedCount);
+            clearMetadataCache();
+        }
     }
 
     /**

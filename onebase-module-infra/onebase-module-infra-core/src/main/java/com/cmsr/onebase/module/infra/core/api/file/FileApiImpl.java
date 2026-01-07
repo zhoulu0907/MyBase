@@ -41,4 +41,10 @@ public class FileApiImpl implements FileApi {
         fileService.getFileContent(id, request, response, FileVisitModeEnum.PERMISSION.getValue());
     }
 
+    @Override
+    public CommonResult<String> dashboardUpload(FileCreateReqDTO createReqDTO) {
+        return success(fileService.createFile(createReqDTO.getContent(), createReqDTO.getName(),
+                createReqDTO.getDirectory(), createReqDTO.getType(), FileVisitModeEnum.PUBLIC.getValue()));
+    }
+
 }

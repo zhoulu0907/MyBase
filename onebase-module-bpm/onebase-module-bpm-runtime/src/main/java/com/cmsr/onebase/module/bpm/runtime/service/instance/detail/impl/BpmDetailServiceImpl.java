@@ -212,6 +212,8 @@ public class BpmDetailServiceImpl implements BpmDetailService {
                 loadTodoTask(reqVO, context);
                 break;
             case CREATED:
+            case LIST:
+                // todo 增加列表来源的权限校验
                 // 我的创建来源权限已在 buildContext 中校验
                 // CREATED 尝试查找待办任务，没有则只查看流程实例信息
                 loadTodoTaskFromInstance(context);
@@ -677,7 +679,7 @@ public class BpmDetailServiceImpl implements BpmDetailService {
 
         // 填充实体数据
         formData.setTableName(tableName);
-        formData.setData(respVO.getGlobalRawMap());
+        formData.setData(respVO.getGlobalRawMapForJson());
 
         vo.setFormData(formData);
     }

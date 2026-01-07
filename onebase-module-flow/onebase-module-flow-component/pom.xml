@@ -57,7 +57,6 @@
         <dependency>
             <groupId>com.yomahub</groupId>
             <artifactId>liteflow-spring-boot-starter</artifactId>
-            <version>2.13.2.1</version>
         </dependency>
         <dependency>
             <groupId>com.esotericsoftware.kryo</groupId>

@@ -1,9 +1,9 @@
 package com.cmsr.onebase.module.system.dal.dataobject.permission;
 
-import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
+import com.cmsr.onebase.framework.orm.entity.BaseTenantEntity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Table;
+import com.mybatisflex.annotation.Table;
+import com.mybatisflex.annotation.Column;
 import lombok.Data;
 
 /**
@@ -12,8 +12,8 @@ import lombok.Data;
  * @author ma
  */
 @Data
-@Table(name = "system_user_role")
-public class UserRoleDO extends TenantBaseDO {
+@Table(value = "system_user_role")
+public class UserRoleDO extends BaseTenantEntity {
 
     public static final String USER_ID = "user_id";
     public static final String ROLE_ID = "role_id";
@@ -21,12 +21,12 @@ public class UserRoleDO extends TenantBaseDO {
     /**
      * 用户 ID
      */
-    @Column(name = USER_ID)
+    @Column(value = USER_ID)
     private Long userId;
     /**
      * 角色 ID
      */
-    @Column(name = ROLE_ID)
+    @Column(value = ROLE_ID)
     private Long roleId;
 
 }

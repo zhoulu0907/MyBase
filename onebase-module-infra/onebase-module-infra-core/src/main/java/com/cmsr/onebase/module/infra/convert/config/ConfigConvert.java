@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.infra.convert.config;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.infra.dal.dataobject.config.ConfigDO;
+import com.cmsr.onebase.module.infra.dal.dataflexdo.config.ConfigDO;
 import com.cmsr.onebase.module.infra.dal.vo.config.ConfigRespVO;
 import com.cmsr.onebase.module.infra.dal.vo.config.ConfigSaveReqVO;
 import org.apache.commons.lang3.math.NumberUtils;

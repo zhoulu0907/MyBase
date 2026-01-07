@@ -181,11 +181,11 @@ public interface PermissionService {
     /**
      * 从角色中移除用户
      *
-     * @param roleId 角色编号
+     * @param roleId  角色编号
      * @param userIds 用户编号列表
      * @return 删除的行数
      */
-    long deleteRoleUsers(Long roleId, Set<Long> userIds);
+    boolean deleteRoleUsers(Long roleId, Set<Long> userIds);
 
     UserRoleDO getUserRoleByUserAndRoleId(Long userId, Long roleId);
 

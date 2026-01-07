@@ -6,8 +6,8 @@ import com.cmsr.onebase.module.app.core.dal.database.resource.AppWorkbenchPageRe
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePagesetDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourceWorkbenchComponentDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourceWorkbenchPageDO;
-import com.cmsr.onebase.module.app.core.dto.appresource.ComponentDTO;
-import com.cmsr.onebase.module.app.core.dto.appresource.PageDTO;
+import com.cmsr.onebase.module.app.core.dto.resource.ComponentDTO;
+import com.cmsr.onebase.module.app.core.dto.resource.PageDTO;
 import com.cmsr.onebase.module.app.core.vo.resource.LoadPageSetRespVO;
 import jakarta.annotation.Resource;
 import lombok.Setter;

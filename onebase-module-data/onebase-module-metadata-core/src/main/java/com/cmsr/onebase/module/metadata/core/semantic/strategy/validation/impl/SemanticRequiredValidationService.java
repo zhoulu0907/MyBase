@@ -25,7 +25,7 @@ public class SemanticRequiredValidationService implements SemanticValidationServ
             if (operationType == SemanticDataMethodOpEnum.UPDATE && value == null) { continue; }
             if (field.getFieldTypeEnum() == SemanticFieldTypeEnum.AUTO_CODE) { continue; }
             if (!supports(field.getFieldType())) { continue; }
-            List<MetadataValidationRequiredDO> rules = context.getRequiredRules().getOrDefault(field.getId(), Collections.emptyList());
+            List<MetadataValidationRequiredDO> rules = context.getRequiredRules().getOrDefault(field.getFieldUuid(), Collections.emptyList());
             if (rules.isEmpty()) { continue; }
             boolean hasEnabledRule = rules.stream().anyMatch(rule -> rule.getIsEnabled() != null && rule.getIsEnabled() == 1);
             if (!hasEnabledRule) { continue; }

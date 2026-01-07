@@ -70,11 +70,19 @@ public class AppMenuController {
         return CommonResult.success(true);
     }
 
-    @PostMapping("/update-visible")
+    @PostMapping("/update-visible-pc")
     @Operation(summary = "更新应用菜单可见性")
-    public CommonResult<Boolean> updateApplicationMenuVisible(@RequestParam("id") Long id,
+    public CommonResult<Boolean> updateApplicationMenuVisiblePc(@RequestParam("id") Long id,
                                                               @RequestParam("visible") Integer visible) {
-        buildAppMenuService.updateApplicationMenuVisible(id, visible);
+        buildAppMenuService.updateApplicationMenuVisiblePc(id, visible);
+        return CommonResult.success(true);
+    }
+
+    @PostMapping("/update-visible-mobile")
+    @Operation(summary = "更新应用菜单可见性")
+    public CommonResult<Boolean> updateApplicationMenuVisibleMobile(@RequestParam("id") Long id,
+                                                              @RequestParam("visible") Integer visible) {
+        buildAppMenuService.updateApplicationMenuVisibleMobile(id, visible);
         return CommonResult.success(true);
     }
 

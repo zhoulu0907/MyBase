@@ -20,6 +20,7 @@ import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticFieldTyp
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticOperatorEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticPageConditionVO;
 import com.google.common.collect.Lists;
+import com.mybatisflex.core.tenant.TenantManager;
 import com.yomahub.liteflow.annotation.LiteflowComponent;
 import com.yomahub.liteflow.core.NodeComponent;
 import lombok.Setter;
@@ -79,10 +80,12 @@ public class StartDateFieldNodeComponent extends NodeComponent {
         reqDTO.setPageNo(1);
         reqDTO.setPageSize(nodeData.getBatchSize());
         executeContext.addLog("时间字段触发开始查询数据");
-        PageResult<SemanticEntityValueDTO> fieldDataRespDTOS = ApplicationManager.withApplicationIdAndVersionTag(
-                executeContext.getApplicationId(),
-                executeContext.getVersionTag(),
-                () -> semanticDynamicDataApi.getDataByCondition(reqDTO));
+        PageResult<SemanticEntityValueDTO> fieldDataRespDTOS = TenantManager.withoutTenantCondition(() ->
+                ApplicationManager.withApplicationIdAndVersionTag(
+                        executeContext.getApplicationId(),
+                        executeContext.getVersionTag(),
+                        () -> semanticDynamicDataApi.getDataByCondition(reqDTO)
+                ));
         executeContext.addLog("时间字段触发查询返回数据量: " + fieldDataRespDTOS.getTotal());
         variableContext.putNodeVariables(this.getTag(), DataMethodApiHelper.convertToListMap(fieldDataRespDTOS.getList()));
     }
@@ -105,7 +108,7 @@ public class StartDateFieldNodeComponent extends NodeComponent {
             filterCondition.setOperator(SemanticOperatorEnum.EQUALS);
             return filterCondition;
         } else {
-            throw new IllegalArgumentException("参数offsetFiledType错误: " + filedTypeEnum);
+            throw new IllegalArgumentException("参数offsetFiledType错误: " + nodeData.getOffsetFieldName() + ":" + filedTypeEnum);
         }
     }
 

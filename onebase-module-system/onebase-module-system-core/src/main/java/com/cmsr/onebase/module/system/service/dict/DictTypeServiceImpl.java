@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Collection;
 import java.util.List;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
@@ -114,6 +115,16 @@ public class DictTypeServiceImpl implements DictTypeService {
     @Override
     public List<DictTypeDO> getDictTypeList(DictTypeListReqVO reqVO) {
         return dictTypeRepository.findList(reqVO);
+    }
+
+    @Override
+    public List<DictTypeDO> getDictTypesByIds(Collection<Long> ids) {
+        return dictTypeRepository.findByIds(ids);
+    }
+
+    @Override
+    public List<DictTypeDO> getDictTypesByTypes(Collection<String> types) {
+        return dictTypeRepository.findListByTypes(types);
     }
 
     @VisibleForTesting

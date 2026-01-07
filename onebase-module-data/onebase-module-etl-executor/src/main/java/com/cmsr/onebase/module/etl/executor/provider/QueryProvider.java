@@ -5,8 +5,6 @@ import com.github.f4b6a3.tsid.TsidCreator;
 import org.apache.commons.dbutils.QueryRunner;
 
 import javax.sql.DataSource;
-import java.util.ArrayList;
-import java.util.List;
 
 public class QueryProvider {
 
@@ -65,21 +63,20 @@ public class QueryProvider {
                 applicationId, datasourceUuid, 0);
     }
 
-    public List<EtlFlinkMapping> findFlinkMapping(String datasourceType) throws Exception {
+    public EtlFlinkMappings findFlinkMapping() throws Exception {
         String sql = """
-                select origin_type, flink_type from etl_flink_mapping where datasource_type = ? and deleted = ?
+                select datasource_type, origin_type, flink_type from etl_flink_mapping
                 """;
         return runner.query(sql, resultSet -> {
-                    List<EtlFlinkMapping> etlFlinkMappings = new ArrayList<>();
-                    while (resultSet.next()) {
-                        EtlFlinkMapping etlFlinkMapping = new EtlFlinkMapping();
-                        etlFlinkMapping.setOriginType(resultSet.getString("origin_type"));
-                        etlFlinkMapping.setFlinkType(resultSet.getString("flink_type"));
-                        etlFlinkMappings.add(etlFlinkMapping);
-                    }
-                    return etlFlinkMappings;
-                },
-                datasourceType, 0);
+            EtlFlinkMappings etlFlinkMappings = new EtlFlinkMappings();
+            while (resultSet.next()) {
+                String datasourceType = resultSet.getString("datasource_type");
+                String originType = resultSet.getString("origin_type");
+                String flinkType = resultSet.getString("flink_type");
+                etlFlinkMappings.add(datasourceType, originType, flinkType);
+            }
+            return etlFlinkMappings;
+        });
     }
 
     public void insertEtlExecutionLog(EtlExecutionLog etlExecutionLog) throws Exception {

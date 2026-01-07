@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.system.service.corpapprelation;
 
 
+import com.cmsr.onebase.framework.common.enums.CommonPublishModelEnum;
 import com.cmsr.onebase.framework.common.enums.CorpAppReationStatusEnum;
 import com.cmsr.onebase.framework.common.enums.CorpStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
@@ -9,7 +10,6 @@ import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
 import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
 import com.cmsr.onebase.module.app.api.app.dto.TagVO;
 import com.cmsr.onebase.module.system.dal.database.CorpAppRelationDataRepository;
-import com.cmsr.onebase.module.system.dal.dataobject.corp.CorpDO;
 import com.cmsr.onebase.module.system.dal.dataobject.corpapprelation.CorpAppRelationDO;
 import com.cmsr.onebase.module.system.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.system.vo.corp.CorpApplicationRespVO;
@@ -17,10 +17,8 @@ import com.cmsr.onebase.module.system.vo.corpapprelation.*;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.data.param.ConfigStore;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.DataRow;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.Strings;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -29,10 +27,10 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.Comparator;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.APPLICATION_AUTH_TENANT_NOT_EXISTS;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.CORP_NAME_EXISTS;
 
 /**
  * 企业应用关联表 Service 实现类
@@ -48,23 +46,17 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
     @Resource
     private AppApplicationApi appApplicationApi;
 
-    @Resource
-    private CorpAppRelationDataRepository corpAppRelationRepository;
-
     @Override
     public void createListCorpAppRelation(List<AppAuthTimeReqVO> corpAppRelationInertReqVOList, Long corpId) {
         if (CollectionUtils.isEmpty(corpAppRelationInertReqVOList)) {
             return;
         }
-        // 插入
         corpAppRelationInertReqVOList.forEach(corpAppRelationInertReqVO -> {
             // 先删除后插入
-            ConfigStore configs = new DefaultConfigStore();
-            configs.eq(CorpAppRelationDO.APPLICATION_ID, corpAppRelationInertReqVO.getId());
-            configs.eq(CorpAppRelationDO.CORP_ID, corpId);
-            corpAppRelationDataRepository.deleteByConfig(configs);
+            corpAppRelationDataRepository.remove(corpAppRelationDataRepository.query()
+                    .eq(CorpAppRelationDO.APPLICATION_ID, corpAppRelationInertReqVO.getId())
+                    .eq(CorpAppRelationDO.CORP_ID, corpId));
 
-            // 验证是否重复提交，先删除后插入
             CorpAppRelationDO corpAppRelationDO = new CorpAppRelationDO();
             corpAppRelationDO.setApplicationId(corpAppRelationInertReqVO.getId());
             corpAppRelationDO.setAuthorizationTime(corpAppRelationInertReqVO.getAuthorizationTime());
@@ -77,15 +69,12 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
 
     @Override
     public void createCorpAppRelation(CorpAppRelationInertReqVO vo) {
-        // 插入
         vo.getApplicationIdList().forEach(appId -> {
             // 先删除后插入
-            ConfigStore configs = new DefaultConfigStore();
-            configs.eq(CorpAppRelationDO.APPLICATION_ID, appId);
-            configs.eq(CorpAppRelationDO.CORP_ID, vo.getCorpId());
-            corpAppRelationDataRepository.deleteByConfig(configs);
+            corpAppRelationDataRepository.remove(corpAppRelationDataRepository.query()
+                    .eq(CorpAppRelationDO.APPLICATION_ID, appId)
+                    .eq(CorpAppRelationDO.CORP_ID, vo.getCorpId()));
 
-            // 验证是否重复提交，先删除后插入
             CorpAppRelationDO corpAppRelationDO = new CorpAppRelationDO();
             corpAppRelationDO.setApplicationId(appId);
             corpAppRelationDO.setAuthorizationTime(vo.getAuthorizationTime());
@@ -149,7 +138,7 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
         // if(!Objects.equals(corpId, loginCorpId)){
         //     throw exception(CORP_ID_COMPARE_ERROR);
         // }
-        Map<Long, ApplicationDTO> applicationMap = getApplicationDoMap(pageReqVO.getAppName());
+        Map<Long, ApplicationDTO> applicationMap = getApplicationDoMap(pageReqVO.getName());
         List<Long> applicationIds = new ArrayList<>(applicationMap.keySet());
         if(CollectionUtils.isEmpty(applicationIds)){
             return new PageResult<CorpApplicationRespVO>();
@@ -171,7 +160,15 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
         List<CorpApplicationRespVO> filteredList = pageResult.getList().stream()
                 .map(corpDO -> convertToRespVO(corpDO, applicationMap, finalTagMap))
                 .collect(Collectors.toList());
+
         // 返回过滤后的结果和总数
+        if (Strings.CI.equals(pageReqVO.getOrderByTime(), "create")) {
+            filteredList.sort(Comparator.comparing(CorpApplicationRespVO::getCreateTime).reversed());
+        }
+        if (Strings.CI.equals(pageReqVO.getOrderByTime(), "update")) {
+            filteredList.sort(Comparator.comparing(CorpApplicationRespVO::getUpdateTime).reversed());
+        }
+
         return new PageResult<>(filteredList, pageResult.getTotal());
     }
 
@@ -237,15 +234,24 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
 
     @Override
     public void updateStatus(Long id, Long status) {
-        //  企业禁用/开启
-        DataRow row = new DataRow();
-        row.put(CorpDO.STATUS, status);
-        corpAppRelationRepository.updateByConfig(row, new DefaultConfigStore().eq(CorpAppRelationDO.ID, id));
+        // 企业应用禁用/开启
+        corpAppRelationDataRepository.updateStatus(id, status == null ? null : status.intValue());
     }
 
     @Override
     public List<ApplicationDTO> getCorpNoRelationAppList(CorpRelationAppReqVO relationAppReqVO) {
         List<ApplicationDTO> applicationDTOList = appApplicationApi.findAppApplicationByAppName(relationAppReqVO.getAppName());
+        // 过滤，只保留 publishModel 为 SAAS 的应用
+        applicationDTOList = applicationDTOList.stream()
+                .filter(app -> CommonPublishModelEnum.SaaSModel.getValue().equals(app.getPublishModel()))
+                .collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(applicationDTOList)) {
+            return  new ArrayList<>();
+        }
+        // 按创建时间倒序排列
+        applicationDTOList = applicationDTOList.stream()
+                .sorted(Comparator.comparing(ApplicationDTO::getCreateTime, Comparator.nullsLast(Comparator.naturalOrder())).reversed())
+                .collect(Collectors.toList());
         if (null == relationAppReqVO.getCorpId()) {
             // 用于企业创建时拉取全部应用
             return applicationDTOList;
@@ -269,16 +275,15 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
 
     @Override
     public void validCorpAppRelationStatusOrExpireTime(Long corpId, Long appId) {
-        List<CorpAppRelationDO>  corpAppRelationDOList= corpAppRelationRepository.findApplicationByCordIdAndAppId(corpId,appId);
+        List<CorpAppRelationDO> corpAppRelationDOList = corpAppRelationDataRepository.findApplicationByCordIdAndAppId(corpId, appId);
         // 未查出来数据，说明已过期
-        if (CollectionUtils.isEmpty(corpAppRelationDOList)){
+        if (CollectionUtils.isEmpty(corpAppRelationDOList)) {
             throw exception(ErrorCodeConstants.AUTH_LOGIN_APP_EXPIRE);
         }
         // 查看状态是否禁用
-        CorpAppRelationDO corpAppRelationDO=corpAppRelationDOList.get(0);
-        if (CorpStatusEnum.DISABLE.getValue().equals(corpAppRelationDO.getStatus())){
+        CorpAppRelationDO corpAppRelationDO = corpAppRelationDOList.get(0);
+        if (CorpStatusEnum.DISABLE.getValue().equals(corpAppRelationDO.getStatus())) {
             throw exception(ErrorCodeConstants.AUTH_LOGIN_APP_DELETE_OR_DISABLE);
         }
     }
 }
-

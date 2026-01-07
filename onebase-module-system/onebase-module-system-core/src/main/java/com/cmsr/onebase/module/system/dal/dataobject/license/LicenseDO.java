@@ -1,20 +1,18 @@
 package com.cmsr.onebase.module.system.dal.dataobject.license;
 
-import jakarta.persistence.Table;
-import jakarta.persistence.Column;
-import lombok.*;
-import lombok.experimental.SuperBuilder;import java.time.LocalDateTime;
-import com.cmsr.onebase.framework.data.base.BaseDO;
+import com.cmsr.onebase.framework.orm.entity.BaseEntity;
+import com.mybatisflex.annotation.Column;
+import com.mybatisflex.annotation.Table;
+import lombok.Data;
+
+import java.time.LocalDateTime;
 
 /**
  * 平台License信息
  */
-@Table(name = "system_license")
+@Table(value = "system_license")
 @Data
-@SuperBuilder
-@NoArgsConstructor
-@AllArgsConstructor
-public class LicenseDO extends BaseDO{
+public class LicenseDO extends BaseEntity {
 
     public static final String ENTERPRISE_NAME    = "enterprise_name";
     public static final String ENTERPRISE_CODE    = "enterprise_code";
@@ -29,37 +27,37 @@ public class LicenseDO extends BaseDO{
     public static final String CREATE_TIME        = "create_time";
 
     /** 企业名称 */
-    @Column(name = ENTERPRISE_NAME)
+    @Column(value = ENTERPRISE_NAME)
     private String enterpriseName;
     /** 企业编号 */
-    @Column(name = ENTERPRISE_CODE)
+    @Column(value = ENTERPRISE_CODE)
     private String enterpriseCode;
     /** 企业地址 */
-    @Column(name = ENTERPRISE_ADDRESS)
+    @Column(value = ENTERPRISE_ADDRESS)
     private String enterpriseAddress;
     /** 平台类型 */
-    @Column(name = PLATFORM_TYPE)
+    @Column(value = PLATFORM_TYPE)
     private String platformType;
     /** 租户数量限制 */
-    @Column(name = TENANT_LIMIT)
+    @Column(value = TENANT_LIMIT)
     private Integer tenantLimit;
     /** 用户数量限制 */
-    @Column(name = USER_LIMIT)
+    @Column(value = USER_LIMIT)
     private Integer userLimit;
     /** 到期时间 */
-    @Column(name = EXPIRE_TIME)
+    @Column(value = EXPIRE_TIME)
     private LocalDateTime expireTime;
     /** 状态：active, expired, invalid */
-    @Column(name = STATUS)
+    @Column(value = STATUS)
     private String status;
     /** 是否为试用License */
-    @Column(name = IS_TRIAL)
+    @Column(value = IS_TRIAL)
     private Integer isTrial;
     /** License文件 */
-    @Column(name = LICENSE_FILE)
+    @Column(value = LICENSE_FILE)
     private String licenseFile;
     /** 创建时间 */
-    @Column(name = CREATE_TIME)
+    @Column(value = CREATE_TIME)
     private LocalDateTime createTime;
 
 }

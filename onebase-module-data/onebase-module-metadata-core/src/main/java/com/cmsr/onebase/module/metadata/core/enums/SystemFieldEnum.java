@@ -24,7 +24,8 @@ public enum SystemFieldEnum {
     UPDATED_TIME(7L, "updated_time", "更新时间", "DATETIME"),
     LOCK_VERSION(8L, "lock_version", "乐观锁", "NUMBER"),
     DELETED(9L, "deleted", "删除标识", "NUMBER"),
-    PARENT_ID(10L, "parent_id", "关联主表ID", "ID");
+    PARENT_ID(10L, "parent_id", "关联主表ID", "ID"),
+    DRAFT_STATUS(11L, "draft_status", "草稿状态", "NUMBER");
 
     /**
      * 字段ID

@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.metadata.build.controller.admin.datasource;
 
+import com.cmsr.onebase.framework.common.event.AppEntityChangeEvent;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
@@ -14,6 +15,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,6 +40,9 @@ public class DatasourceController {
 
     @Resource
     private MetadataIdUuidConverter idUuidConverter;
+
+    @Resource
+    ApplicationEventPublisher applicationEventPublisher;
 
     @PostMapping("/types")
     @Operation(summary = "获取所有支持的数据源类型")
@@ -70,6 +75,11 @@ public class DatasourceController {
         // 从请求头获取应用ID
         reqVO.setApplicationId(String.valueOf(ApplicationManager.getApplicationId()));
         Long id = datasourceBuildService.createDatasource(reqVO);
+        applicationEventPublisher.publishEvent(
+                AppEntityChangeEvent.builder()
+                        .applicationId(ApplicationManager.getApplicationId())
+                        .build()
+        );
         // 返回完整的数据源信息（包含id和uuid）
         MetadataDatasourceDO datasource = datasourceBuildService.getDatasource(id);
         return success(datasourceBuildService.buildDatasourceRespVO(datasource));
@@ -81,6 +91,11 @@ public class DatasourceController {
         // 从请求头获取应用ID
         reqVO.setApplicationId(String.valueOf(ApplicationManager.getApplicationId()));
         datasourceBuildService.updateDatasource(reqVO);
+        applicationEventPublisher.publishEvent(
+                AppEntityChangeEvent.builder()
+                        .applicationId(ApplicationManager.getApplicationId())
+                        .build()
+        );
         return success(true);
     }
 
@@ -90,6 +105,11 @@ public class DatasourceController {
     public CommonResult<Boolean> deleteDatasource(@RequestParam("id") String id) {
         Long datasourceId = idUuidConverter.resolveDatasourceId(id);
         datasourceBuildService.deleteDatasource(datasourceId);
+        applicationEventPublisher.publishEvent(
+                AppEntityChangeEvent.builder()
+                        .applicationId(ApplicationManager.getApplicationId())
+                        .build()
+        );
         return success(true);
     }
 

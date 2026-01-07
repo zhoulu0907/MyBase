@@ -1,0 +1,100 @@
+services:
+  onebase-ds-standalone:
+    container_name: onebase-ds-standalone
+    platform: linux/arm64
+    image: apache/dolphinscheduler-standalone-server:3.3.1
+    env_file:
+      - onebase.env
+    restart: unless-stopped
+    volumes:
+      - openjdk17:/opt/jdk-17.0.2
+      - onebase-ds-logs:/opt/dolphinscheduler/logs
+      - onebase-ds-shared-local:/opt/soft
+      - onebase-ds-plugins:/opt/dolphinscheduler/plugins
+      - ./dolphinscheduler/conf/standalone.yaml:/opt/dolphinscheduler/standalone-server/conf/application.yaml:ro
+    networks:
+      - onebase
+  onebase-server-js:
+    image: nodesandbox:v0.0.3
+    container_name: onebase-server-js
+    env_file:
+      - onebase.env
+    networks:
+      - onebase
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "sh", "-c", "ping localhost:3000 -c 1"]
+      interval: 5s
+      timeout: 60s
+      retries: 10
+  onebase-server-flink:
+    container_name: onebase-server-flink
+    image: onebase-server-flink:v1.0.0
+    networks:
+      - onebase
+    restart: unless-stopped
+    environment:
+      - JAVA_HOME=/usr/lib/jvm/java-17-openjdk
+    volumes:
+      - onebase-server-logs:/app/logs
+      - /data/onebase/conf/flink.yaml:/app/conf/application-prod.yaml:ro
+  onebase-server-build:
+    container_name: onebase-server-build
+    image: onebase-server-build:v1.0.0
+    ports:
+      - "28080:8080"
+    networks:
+      - onebase
+    restart: unless-stopped
+    environment:
+      - JAVA_HOME=/usr/lib/jvm/java-17-openjdk
+    volumes:
+      - onebase-server-logs:/app/logs
+      - /data/onebase/conf/build.yaml:/app/conf/application-prod.yaml:ro
+  onebase-server-runtime:
+    container_name: onebase-server-runtime
+    image: onebase-server-runtime:v1.0.0
+    ports:
+      - "38080:8080"
+    depends_on:
+      onebase-server-js:
+        condition: service_healthy
+    networks:
+      - onebase
+    restart: unless-stopped
+    environment:
+      - JAVA_HOME=/usr/lib/jvm/java-17-openjdk
+    volumes:
+      - onebase-server-logs:/app/logs
+      - /data/onebase/conf/runtime.yaml:/app/conf/application-prod.yaml:ro
+
+networks:
+  onebase:
+    driver: bridge
+
+volumes:
+  openjdk17:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./jdk-17.0.2
+  onebase-ds-shared-local:
+  onebase-ds-plugins:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: dolphinscheduler/plugins
+  onebase-ds-logs:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: dolphinscheduler/logs
+  onebase-server-logs:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: onebase/logs

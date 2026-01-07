@@ -104,5 +104,5 @@ wx:
 
 liteflow:
   enable: true
-rocketmq:
-  endpoints: 10.0.104.50:8081
+  version-tag: 0
+  js-server-address: http://10.0.104.41:28392

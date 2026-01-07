@@ -24,6 +24,16 @@
         <dependency>
             <groupId>com.mybatis-flex</groupId>
             <artifactId>mybatis-flex-spring-boot3-starter</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>spring-batch-core</artifactId>
+                    <groupId>org.springframework.batch</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>spring-batch-infrastructure</artifactId>
+                    <groupId>org.springframework.batch</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.github.pagehelper</groupId>

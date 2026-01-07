@@ -65,7 +65,8 @@ public class FormulaConstants {
             "REGEXEXTRACTALL", "REGEXEXTRACT", "REGEXMATCH", "REGEXREPLACE",
 
             // 人员函数
-            "GETUSER", "GETDEPT", "GETUPDEPT", "GETROLE", "GETSUPERVISOR", "ISINROLE", "ISINDEPT"
+            "GETUSER", "GETDEPT", "GETUPDEPT", "GETROLE", "GETSUPERVISOR", "ISINROLE", "ISINDEPT",
+            "GETUSERNAME"
     };
 
     /**
@@ -80,6 +81,7 @@ public class FormulaConstants {
      * 人员函数常量
      */
     public static final String GETUSER       = "GETUSER";
+    public static final String GETUSERNAME   = "GETUSERNAME";
     public static final String GETDEPT       = "GETDEPT";
     public static final String GETUPDEPT     = "GETUPDEPT";
     public static final String GETROLE       = "GETROLE";

@@ -1,6 +1,8 @@
 package com.cmsr.onebase.module.metadata.build.controller.admin.validation;
 
+import com.cmsr.onebase.framework.common.event.AppEntityChangeEvent;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.module.metadata.core.util.MetadataIdUuidConverter;
 import com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationRangeRespVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationRangeSaveReqVO;
@@ -11,6 +13,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,6 +30,9 @@ public class ValidationRangeController {
 
     @Resource private MetadataValidationRangeBuildService rangeService;
 
+    @Resource
+    ApplicationEventPublisher applicationEventPublisher;
+
     @PostMapping("/get-by-field")
     @Operation(summary = "根据字段UUID获取范围校验")
     @Parameter(name = "id", description = "字段UUID", required = true)
@@ -37,13 +43,24 @@ public class ValidationRangeController {
     @PostMapping("/create")
     @Operation(summary = "创建范围校验")
     public CommonResult<Long> create(@Valid @RequestBody ValidationRangeSaveReqVO vo) {
-        return success(rangeService.create(vo));
+        Long id = rangeService.create(vo);
+        applicationEventPublisher.publishEvent(
+                AppEntityChangeEvent.builder()
+                        .applicationId(ApplicationManager.getApplicationId())
+                        .build()
+        );
+        return success(id);
     }
 
     @PostMapping("/update")
     @Operation(summary = "更新范围校验")
     public CommonResult<Boolean> update(@Valid @RequestBody ValidationRangeUpdateReqVO vo) {
         rangeService.update(vo);
+        applicationEventPublisher.publishEvent(
+                AppEntityChangeEvent.builder()
+                        .applicationId(ApplicationManager.getApplicationId())
+                        .build()
+        );
         return success(true);
     }
 
@@ -52,6 +69,11 @@ public class ValidationRangeController {
     @Parameter(name = "id", description = "字段UUID", required = true)
     public CommonResult<Boolean> deleteByField(@RequestParam("id") String fieldUuid) {
         rangeService.deleteByFieldId(fieldUuid);
+        applicationEventPublisher.publishEvent(
+                AppEntityChangeEvent.builder()
+                        .applicationId(ApplicationManager.getApplicationId())
+                        .build()
+        );
         return success(true);
     }
 
@@ -69,6 +91,11 @@ public class ValidationRangeController {
     public CommonResult<Boolean> delete(@RequestParam("id") String id) {
         Long resolvedId = idUuidConverter.resolveRuleGroupId(id);
         rangeService.deleteById(resolvedId);
+        applicationEventPublisher.publishEvent(
+                AppEntityChangeEvent.builder()
+                        .applicationId(ApplicationManager.getApplicationId())
+                        .build()
+        );
         return success(true);
     }
 }

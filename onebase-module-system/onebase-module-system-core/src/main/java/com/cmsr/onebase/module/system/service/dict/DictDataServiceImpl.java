@@ -23,9 +23,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
@@ -249,6 +255,76 @@ public class DictDataServiceImpl implements DictDataService {
         respVO.setDeleteCount(deletedIds.size());
 
         return respVO;
+    }
+
+    @Override
+    @TenantIgnore
+    public Map<String, List<DictDataDO>> getDictDataMapByTypes(Collection<String> dictTypes) {
+        if (dictTypes == null || dictTypes.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        // 批量查询所有字典类型的数据（一次性查询）
+        List<DictDataDO> allDataList = dictDataRepository.findListByStatusAndDictTypes(
+                CommonStatusEnum.ENABLE.getStatus(), dictTypes);
+        // 按 dictType 分组
+        return allDataList.stream()
+                .collect(Collectors.groupingBy(DictDataDO::getDictType));
+    }
+
+    @Override
+    @TenantIgnore
+    public Map<Long, List<DictDataDO>> getDictDataMapByTypesAndTypeIds(Collection<String> dictTypes, Collection<Long> dictTypeIds) {
+        // 1. 收集所有需要查询的字典类型，并建立 type -> id 的映射
+        Map<String, Long> typeToIdMap = new HashMap<>();
+
+        // 处理 dictTypeIds
+        if (dictTypeIds != null && !dictTypeIds.isEmpty()) {
+            List<DictTypeDO> list = dictTypeService.getDictTypesByIds(dictTypeIds);
+            for (DictTypeDO dictTypeDO : list) {
+                if (dictTypeDO != null && dictTypeDO.getType() != null) {
+                    typeToIdMap.put(dictTypeDO.getType(), dictTypeDO.getId());
+                }
+            }
+        }
+
+        // 处理 dictTypes
+        if (dictTypes != null && !dictTypes.isEmpty()) {
+            // 找出尚未获取ID的types
+            Set<String> typesToQuery = new HashSet<>();
+            for (String type : dictTypes) {
+                if (!typeToIdMap.containsKey(type)) {
+                    typesToQuery.add(type);
+                }
+            }
+
+            if (!typesToQuery.isEmpty()) {
+                List<DictTypeDO> list = dictTypeService.getDictTypesByTypes(typesToQuery);
+                for (DictTypeDO dictTypeDO : list) {
+                    if (dictTypeDO != null && dictTypeDO.getType() != null) {
+                        typeToIdMap.put(dictTypeDO.getType(), dictTypeDO.getId());
+                    }
+                }
+            }
+        }
+
+        if (typeToIdMap.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        // 2. 批量查询数据
+        Map<String, List<DictDataDO>> dataMap = getDictDataMapByTypes(typeToIdMap.keySet());
+
+        // 3. 按 dictTypeId 分组
+        Map<Long, List<DictDataDO>> result = new HashMap<>();
+        for (Map.Entry<String, List<DictDataDO>> entry : dataMap.entrySet()) {
+            String type = entry.getKey();
+            Long id = typeToIdMap.get(type);
+            if (id != null) {
+                result.put(id, entry.getValue());
+            }
+        }
+
+        return result;
     }
 
 }

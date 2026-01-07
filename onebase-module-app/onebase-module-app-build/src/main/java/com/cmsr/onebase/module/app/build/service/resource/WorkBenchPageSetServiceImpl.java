@@ -9,8 +9,8 @@ import com.cmsr.onebase.module.app.core.dal.database.resource.AppWorkbenchPageRe
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePagesetDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourceWorkbenchComponentDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourceWorkbenchPageDO;
-import com.cmsr.onebase.module.app.core.enums.appresource.AppResourceErrorCodeConstants;
-import com.cmsr.onebase.module.app.core.enums.appresource.PageEnum;
+import com.cmsr.onebase.module.app.core.enums.resource.AppResourceErrorCodeConstants;
+import com.cmsr.onebase.module.app.core.enums.resource.PageEnum;
 import com.cmsr.onebase.module.app.core.provider.resource.WorkBenchPageSetServiceProvider;
 import com.cmsr.onebase.module.app.core.vo.resource.LoadPageSetRespVO;
 import com.cmsr.onebase.module.app.core.vo.resource.SavePageSetReqVO;

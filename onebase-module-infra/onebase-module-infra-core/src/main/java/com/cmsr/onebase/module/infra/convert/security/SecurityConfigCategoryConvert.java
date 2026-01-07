@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.infra.convert.security;
 
-import com.cmsr.onebase.module.infra.dal.dataobject.security.SecurityConfigCategoryDO;
-import com.cmsr.onebase.module.infra.dal.dataobject.security.SecurityConfigTemplateDO;
+import com.cmsr.onebase.module.infra.dal.dataflexdo.ssecurity.SecurityConfigCategoryDO;
+import com.cmsr.onebase.module.infra.dal.dataflexdo.ssecurity.SecurityConfigTemplateDO;
 import com.cmsr.onebase.module.infra.dal.vo.security.SecurityConfigCategoryRespVO;
 import com.cmsr.onebase.module.infra.dal.vo.security.SecurityConfigItemRespVO;
 import org.mapstruct.Mapper;

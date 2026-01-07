@@ -7,6 +7,9 @@ import lombok.Data;
 @Schema(description = "字段选项 DTO")
 public class SemanticFieldOptionDTO {
 
+    @Schema(description = "选项ID")
+    private Long id;
+
     @Schema(description = "选项UUID")
     private String optionUuid;
 

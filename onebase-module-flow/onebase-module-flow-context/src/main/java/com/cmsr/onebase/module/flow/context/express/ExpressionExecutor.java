@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.flow.context.express;
 
 import com.cmsr.onebase.module.flow.context.enums.OperatorTypeEnum;
+import com.cmsr.onebase.module.flow.context.table.RowData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.jexl3.JexlBuilder;
@@ -16,10 +17,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 表达式助手类
@@ -37,6 +35,21 @@ public class ExpressionExecutor implements Serializable {
     public ExpressionExecutor() {
         JexlPermissions permissions = JexlPermissions.UNRESTRICTED;
         this.jexlEngine = new JexlBuilder().permissions(permissions).arithmetic(new ExtJexlArithmetic(false)).silent(false).create();
+    }
+
+    public boolean evaluateInput(OrExpression orExpression, RowData rowData) {
+        if (rowData.hasSubTable()) {
+            List<Map<String, Object>> mapList = rowData.flatRowData();
+            for (Map<String, Object> map : mapList) {
+                boolean result = evaluateInput(orExpression, map);
+                if (result) {
+                    return true;
+                }
+            }
+            return false;
+        } else {
+            return evaluate(orExpression, rowData);
+        }
     }
 
     public boolean evaluateInput(OrExpression orExpression, Map<String, Object> vars) {
@@ -76,7 +89,7 @@ public class ExpressionExecutor implements Serializable {
                 return result;
             }
         } catch (Exception e) {
-            String msg = "表达式执行异常, 执行表达式: " + fullExpression + ", 输入参数:" + vars;
+            String msg = "表达式执行异常, 执行表达式: " + Objects.toString(fullExpression, orExpression.toString()) + ", 输入参数:" + vars;
             throw new RuntimeException(msg, e);
         }
     }
@@ -166,7 +179,7 @@ public class ExpressionExecutor implements Serializable {
      */
     public String buildExpression(ExpressionItem expressionItem) {
         expressionItem = ExpressionItem.copy(expressionItem);
-        expressionItem.setFieldKey(expressionItem.getFieldKey());
+        //expressionItem.setFieldKey(expressionItem.getFieldKey());
         switch (expressionItem.getOp()) {
             case EQUALS:
                 return String.format("%s == %s", expressionItem.getFieldKey(), formatValue(expressionItem));

@@ -5,14 +5,15 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.system.dal.database.RoleDataRepository;
 import com.cmsr.onebase.module.system.dal.database.UserRoleDataRepository;
 import com.cmsr.onebase.module.system.dal.database.dept.DeptDataRepository;
-import com.cmsr.onebase.module.system.dal.database.user.UserDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.UserRoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
+import com.cmsr.onebase.module.system.dal.flex.repo.UserDataRepository;
 import com.cmsr.onebase.module.system.enums.permission.DataScopeEnum;
 import com.cmsr.onebase.module.system.service.permission.PermissionService;
 import com.cmsr.onebase.module.system.vo.user.UserPageReqVO;
+import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.annotation.Resource;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.junit.jupiter.api.AfterEach;
@@ -110,7 +111,7 @@ public class UserServiceTest {
     @AfterEach
     public void tearDown() {
         userRoleDataRepository.deleteByConfig(new DefaultConfigStore());
-        userDataRepository.deleteByConfig(new DefaultConfigStore());
+        userDataRepository.remove(new QueryWrapper());
         roleDataRepository.deleteByConfig(new DefaultConfigStore());
         deptDataRepository.deleteByConfig(new DefaultConfigStore());
     }
@@ -348,7 +349,8 @@ public class UserServiceTest {
         if (createTime != null) {
             user.setCreateTime(createTime);
         }
-        return userDataRepository.insert(user);
+        userDataRepository.save(user);
+        return user;
     }
 
     /**
@@ -361,7 +363,7 @@ public class UserServiceTest {
         dept.setSort(1);
         dept.setStatus(CommonStatusEnum.ENABLE.getStatus());
         dept.setTenantId(0L);
-        return deptDataRepository.insert(dept);
+        return deptDataRepository.insertReturn(dept);
     }
 
     /**
@@ -376,7 +378,7 @@ public class UserServiceTest {
         role.setType(1);
         role.setDataScope(DataScopeEnum.ALL.getScope());
         role.setTenantId(0L);
-        return roleDataRepository.insert(role);
+        return roleDataRepository.insertReturn(role);
     }
 
     /**

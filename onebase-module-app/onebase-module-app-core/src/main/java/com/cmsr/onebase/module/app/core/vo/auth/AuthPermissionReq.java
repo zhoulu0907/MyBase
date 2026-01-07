@@ -26,4 +26,17 @@ public class AuthPermissionReq {
     @Schema(description = "菜单uuid")
     private String menuUuid;
 
+
+    /**
+     * 角色编码
+     * !!! 补充信息，用于返回默认的权限！！！
+     */
+    private String roleCode;
+
+    /**
+     * 角色类型
+     * !!! 补充信息，用于返回默认的权限！！！
+     */
+    private Integer roleType;
+
 }

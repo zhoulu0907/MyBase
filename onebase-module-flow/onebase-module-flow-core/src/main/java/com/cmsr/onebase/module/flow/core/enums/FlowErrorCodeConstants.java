@@ -20,4 +20,5 @@ public interface FlowErrorCodeConstants {
     ErrorCode CONNECTOR_SCRIPT_NOT_EXISTS = new ErrorCode(1123784, "脚本配置不存在");
 
     ErrorCode PROCESS_NOT_EXIST = new ErrorCode(10003, "流程不存在");
+    ErrorCode NODE_CONFIG_NOT_EXIST = new ErrorCode(10004, "节点配置不存在");
 }

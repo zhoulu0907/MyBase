@@ -7,7 +7,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
 /**
- * 租户 Convert
+ * 空间 Convert
  *
  */
 @Mapper

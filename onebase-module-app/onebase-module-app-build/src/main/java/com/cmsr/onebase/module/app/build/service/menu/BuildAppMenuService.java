@@ -27,7 +27,10 @@ public interface BuildAppMenuService {
 
     void updateApplicationMenuOrder(MenuOrderUpdateReqVO updateReqVO);
 
-    void updateApplicationMenuVisible(Long id, Integer visible);
+    void updateApplicationMenuVisiblePc(Long id, Integer visible);
+
+    void updateApplicationMenuVisibleMobile(Long id, Integer visible);
 
     MenuCreateRespVO copyApplicationMenu(MenuCopyReqVO copyReqVO);
+
 }

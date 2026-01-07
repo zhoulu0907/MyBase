@@ -6,8 +6,8 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.util.validation.ValidationUtils;
 import com.cmsr.onebase.module.infra.convert.file.FileConfigConvert;
-import com.cmsr.onebase.module.infra.dal.database.FileConfigDataRepository;
-import com.cmsr.onebase.module.infra.dal.dataobject.file.FileConfigDO;
+import com.cmsr.onebase.module.infra.dal.dataflex.FileConfigDataRepository;
+import com.cmsr.onebase.module.infra.dal.dataflexdo.file.FileConfigDO;
 import com.cmsr.onebase.module.infra.dal.vo.file.config.FileConfigPageReqVO;
 import com.cmsr.onebase.module.infra.dal.vo.file.config.FileConfigRespVO;
 import com.cmsr.onebase.module.infra.dal.vo.file.config.FileConfigSaveReqVO;
@@ -66,8 +66,8 @@ public class FileConfigServiceImpl implements FileConfigService {
                 @Override
                 public FileClient load(Long id) {
                     FileConfigDO config = Objects.equals(CACHE_MASTER_ID, id) ?
-                            fileConfigDataRepository.findByMaster(true)
-                            : fileConfigDataRepository.findById(id);
+                            fileConfigDataRepository.findByMaster(NumberUtils.INTEGER_ONE)
+                            : fileConfigDataRepository.getById(id);
                     if (config != null) {
                         fileClientFactory.createOrUpdateFileClient(config.getId(), config.getStorage(),
                                 parseClientConfig(config.getStorage(), config.getConfig()));
@@ -78,11 +78,11 @@ public class FileConfigServiceImpl implements FileConfigService {
 
     @Override
     public Long createFileConfig(FileConfigSaveReqVO createReqVO) {
-        FileConfigDO fileConfig = FileConfigConvert.INSTANCE.convert(createReqVO)
-                .setConfig(createReqVO.getConfig())
+        FileConfigDO fileConfig = FileConfigConvert.INSTANCE.convert(createReqVO);
+        fileConfig .setConfig(createReqVO.getConfig())
                 // .setConfig(parseClientConfig(createReqVO.getStorage(), createReqVO.getConfig()))
                 .setMaster(NumberUtils.INTEGER_ZERO); // 默认非 master
-        fileConfigDataRepository.insert(fileConfig);
+        fileConfigDataRepository.save(fileConfig);
         return fileConfig.getId();
     }
 
@@ -93,7 +93,7 @@ public class FileConfigServiceImpl implements FileConfigService {
         // 更新
         FileConfigDO updateObj = FileConfigConvert.INSTANCE.convert(updateReqVO);
         // .setConfig(parseClientConfig(config.getStorage(), updateReqVO.getConfig()));
-        fileConfigDataRepository.update(updateObj);
+        fileConfigDataRepository.updateById(updateObj);
 
         // 清空缓存
         clearCache(config.getId(), null);
@@ -131,7 +131,7 @@ public class FileConfigServiceImpl implements FileConfigService {
             throw exception(FILE_CONFIG_DELETE_FAIL_MASTER);
         }
         // 删除
-        fileConfigDataRepository.deleteById(id);
+        fileConfigDataRepository.removeById(id);
 
         // 清空缓存
         clearCache(id, null);
@@ -153,7 +153,7 @@ public class FileConfigServiceImpl implements FileConfigService {
     }
 
     private FileConfigDO validateFileConfigExists(Long id) {
-        FileConfigDO config = fileConfigDataRepository.findById(id);
+        FileConfigDO config = fileConfigDataRepository.getById(id);
         if (config == null) {
             throw exception(FILE_CONFIG_NOT_EXISTS);
         }
@@ -162,7 +162,7 @@ public class FileConfigServiceImpl implements FileConfigService {
 
     @Override
     public FileConfigRespVO getFileConfig(Long id) {
-        FileConfigDO fileConfigDO = fileConfigDataRepository.findById(id);
+        FileConfigDO fileConfigDO = fileConfigDataRepository.getById(id);
         FileConfigRespVO fileConfigRespVO = FileConfigConvert.INSTANCE.convertToFileConfigRespVO(fileConfigDO);
         FileClientConfig config = parseClientConfig(fileConfigDO.getStorage(), fileConfigDO.getConfig());
         fileConfigRespVO.setConfig(config);

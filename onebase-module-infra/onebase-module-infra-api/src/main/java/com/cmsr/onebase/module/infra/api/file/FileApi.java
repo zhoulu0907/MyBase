@@ -73,4 +73,8 @@ public interface FileApi {
     @Parameter(name = "id", description = "文件编号", required = true)
     void getFileContent(@PathVariable("id") Long id, HttpServletRequest request, HttpServletResponse response) throws Exception;
 
+    @PostMapping(PREFIX + "/dashboardUpload")
+    @Operation(summary = "保存文件，并返回文件的访问路径")
+    CommonResult<String> dashboardUpload(@Valid @RequestBody FileCreateReqDTO createReqDTO);
+
 }

@@ -1,6 +1,5 @@
 package com.cmsr.onebase.module.etl.build.vo.datasource;
 
-import com.cmsr.onebase.module.etl.common.entity.JdbcDatasourceConfig;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.EtlDatasourceDO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
@@ -31,7 +30,7 @@ public class DatasourceRespVO {
     private String datasourceType;
 
     @Schema(description = "数据源配置信息")
-    private ConnectProperties config;
+    private ConnectDesensitizeProperties config;
 
     @Schema(description = "只读")
     private Boolean readonly;

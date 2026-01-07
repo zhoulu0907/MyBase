@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.metadata.build.controller.admin.entity;
 
+import com.cmsr.onebase.framework.common.event.AppEntityChangeEvent;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
@@ -18,6 +19,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -44,12 +46,20 @@ public class BusinessEntityController {
     @Resource
     private MetadataIdUuidConverter idUuidConverter;
 
+    @Resource
+    ApplicationEventPublisher applicationEventPublisher;
+
     @PostMapping("/create")
     @Operation(summary = "创建业务实体")
     public CommonResult<BusinessEntityRespVO> createBusinessEntity(@Valid @RequestBody BusinessEntitySaveReqVO reqVO) {
         // 从请求头获取应用ID
         reqVO.setApplicationId(String.valueOf(ApplicationManager.getApplicationId()));
         BusinessEntityRespVO result = businessEntityService.createBusinessEntityWithResponse(reqVO);
+        applicationEventPublisher.publishEvent(
+                AppEntityChangeEvent.builder()
+                        .applicationId(ApplicationManager.getApplicationId())
+                        .build()
+        );
         return success(result);
     }
 
@@ -59,6 +69,11 @@ public class BusinessEntityController {
         // 从请求头获取应用ID
         reqVO.setApplicationId(String.valueOf(ApplicationManager.getApplicationId()));
         businessEntityService.updateBusinessEntity(reqVO);
+        applicationEventPublisher.publishEvent(
+                AppEntityChangeEvent.builder()
+                        .applicationId(ApplicationManager.getApplicationId())
+                        .build()
+        );
         return success(true);
     }
 
@@ -68,6 +83,11 @@ public class BusinessEntityController {
     public CommonResult<Boolean> deleteBusinessEntity(@RequestParam("id") String id) {
         Long entityId = idUuidConverter.resolveEntityId(id);
         businessEntityService.deleteBusinessEntity(entityId);
+        applicationEventPublisher.publishEvent(
+                AppEntityChangeEvent.builder()
+                        .applicationId(ApplicationManager.getApplicationId())
+                        .build()
+        );
         return success(true);
     }
 

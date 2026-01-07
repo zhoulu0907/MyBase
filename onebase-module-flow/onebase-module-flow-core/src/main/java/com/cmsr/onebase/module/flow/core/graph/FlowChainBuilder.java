@@ -125,13 +125,13 @@ public class FlowChainBuilder {
 
     private ELWrapper ifBlockNodeDefine(JsonGraphNode jsonGraphNode) {
         if (CollectionUtils.isEmpty(jsonGraphNode.getBlocks())) {
-            return ELBus.node("noop").tag(jsonGraphNode.getId());
+            return ELBus.element("noop").tag(jsonGraphNode.getId());
         }
         return blocksNodeDefine(jsonGraphNode.getBlocks()).tag(jsonGraphNode.getId());
     }
 
     private CommonNodeELWrapper toDefine(JsonGraphNode node) {
-        return ELBus.node(node.getType()).tag(node.getId());
+        return ELBus.element(node.getType()).tag(node.getId());
     }
 
 }

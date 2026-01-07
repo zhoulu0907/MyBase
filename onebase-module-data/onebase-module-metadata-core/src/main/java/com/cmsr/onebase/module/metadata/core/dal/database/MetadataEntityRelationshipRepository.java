@@ -3,8 +3,9 @@ package com.cmsr.onebase.module.metadata.core.dal.database;
 import com.cmsr.onebase.framework.orm.repo.BaseBizRepository;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.relationship.MetadataEntityRelationshipDO;
 import com.cmsr.onebase.module.metadata.core.dal.mapper.MetadataEntityRelationshipMapper;
+import com.mybatisflex.core.query.QueryColumn;
+import com.mybatisflex.core.query.QueryCondition;
 import com.mybatisflex.core.query.QueryWrapper;
-import com.mybatisflex.spring.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
@@ -147,9 +148,14 @@ public class MetadataEntityRelationshipRepository extends BaseBizRepository<Meta
      * @return 实体关系列表
      */
     public List<MetadataEntityRelationshipDO> getRelationshipsByFieldUuid(String fieldUuid) {
+        // 构建OR条件并用括号包裹，确保生成正确的SQL
+        QueryColumn sourceCol = new QueryColumn("source_field_uuid");
+        QueryColumn targetCol = new QueryColumn("target_field_uuid");
+        QueryCondition orCondition = sourceCol.eq(fieldUuid).or(targetCol.eq(fieldUuid));
+        QueryCondition wrappedCondition = QueryCondition.createEmpty().and(orCondition);
+        
         QueryWrapper queryWrapper = this.query()
-                .where(MetadataEntityRelationshipDO::getSourceFieldUuid).eq(fieldUuid)
-                .or(MetadataEntityRelationshipDO::getTargetFieldUuid).eq(fieldUuid)
+                .and(wrappedCondition)
                 .orderBy(MetadataEntityRelationshipDO::getCreateTime, false);
         return list(queryWrapper);
     }

@@ -150,6 +150,8 @@ public class SecurityFrameworkUtils {
             return XFromSceneTypeEnum.TENANT.getCode();
         }else if(Objects.equals(UserTypeEnum.CORP.getValue(), loginUserType)){
             return XFromSceneTypeEnum.CORP.getCode();
+        }else if(Objects.equals(UserTypeEnum.THIRD.getValue(), loginUserType)){
+            return XFromSceneTypeEnum.THIRD.getCode();
         }else{
             return null;
         }

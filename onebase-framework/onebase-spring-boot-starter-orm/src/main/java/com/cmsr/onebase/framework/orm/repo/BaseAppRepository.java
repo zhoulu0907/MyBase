@@ -275,8 +275,7 @@ public class BaseAppRepository<M extends BaseMapper<T>, T extends BaseAppEntity>
 
     public boolean deleteAllApplicationData(Long applicationId) {
         QueryColumn applicationIdColumn = QueryWrapperUtils.createApplicationIdColumn(this);
-        return super.updateChain()
-                .where(applicationIdColumn.eq(applicationId))
-                .remove();
+        QueryWrapper queryWrapper = QueryWrapper.create().where(applicationIdColumn.eq(applicationId));
+        return super.remove(queryWrapper);
     }
 }

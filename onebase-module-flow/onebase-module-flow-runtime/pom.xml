@@ -28,7 +28,6 @@
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-module-flow-component</artifactId>
             <version>${revision}</version>
-            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
@@ -59,22 +58,6 @@
         <dependency>
             <groupId>com.yomahub</groupId>
             <artifactId>liteflow-spring-boot-starter</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.yomahub</groupId>
-            <artifactId>liteflow-script-groovy</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.yomahub</groupId>
-            <artifactId>liteflow-script-javascript</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.graalvm.js</groupId>
-            <artifactId>js</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.graalvm.js</groupId>
-            <artifactId>js-scriptengine</artifactId>
         </dependency>
         <dependency>
             <groupId>org.dom4j</groupId>

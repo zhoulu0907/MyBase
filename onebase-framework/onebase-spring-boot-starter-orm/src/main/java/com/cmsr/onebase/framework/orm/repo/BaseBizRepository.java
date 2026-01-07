@@ -31,8 +31,10 @@ public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity>
         QueryColumn applicationIdColumn = QueryWrapperUtils.createApplicationIdColumn(this, queryWrapper);
         QueryColumn versionTagColumn = QueryWrapperUtils.createVersionTagColumn(this, queryWrapper);
         //
-        queryWrapper.and(applicationIdColumn.eq(applicationId).when(!ApplicationManager.isIgnoreApplicationCondition()));
-        queryWrapper.and(versionTagColumn.eq(versionTag).when(!ApplicationManager.isIgnoreVersionTagCondition()));
+        queryWrapper.where(
+                applicationIdColumn.eq(applicationId).when(!ApplicationManager.isIgnoreApplicationCondition())
+                        .and(versionTagColumn.eq(versionTag).when(!ApplicationManager.isIgnoreVersionTagCondition()))
+        );
     }
 
     //region ===== 删除（删）操作 =====
@@ -337,16 +339,15 @@ public class BaseBizRepository<M extends BaseMapper<T>, T extends BaseBizEntity>
 
     public boolean deleteAllApplicationData(Long applicationId) {
         QueryColumn applicationIdColumn = QueryWrapperUtils.createApplicationIdColumn(this);
-        return super.updateChain()
-                .where(applicationIdColumn.eq(applicationId))
-                .remove();
+        QueryWrapper queryWrapper = QueryWrapper.create().where(applicationIdColumn.eq(applicationId));
+        return super.remove(queryWrapper);
     }
 
     public boolean deleteApplicationVersionData(Long applicationId, Long versionId) {
         QueryColumn applicationIdColumn = QueryWrapperUtils.createApplicationIdColumn(this);
         QueryColumn versionTagColumn = QueryWrapperUtils.createVersionTagColumn(this);
-        return super.updateChain()
-                .where(applicationIdColumn.eq(applicationId).and(versionTagColumn.eq(versionId)))
-                .remove();
+        QueryWrapper queryWrapper = QueryWrapper.create()
+                .where(applicationIdColumn.eq(applicationId).and(versionTagColumn.eq(versionId)));
+        return super.remove(queryWrapper);
     }
 }

@@ -58,4 +58,21 @@ public class BpmFlowDefinitionRepositoryExt {
 
         return flowDefinitionRepository.getOne(queryWrapper);
     }
+
+    /**
+     * 根据表单路径查询已发布的流程定义
+     *
+     * @param uuid 表单路径（业务ID）
+     * @return Definition 返回已发布的流程定义，如果不存在返回null
+     */
+    public Definition getOneByUuid(String uuid) {
+        FlowDefinition query = new FlowDefinition();
+        query.setDefinitionUuid(uuid);
+        query.setApplicationId(ApplicationManager.getApplicationId());
+
+        QueryWrapper queryWrapper = QueryWrapper.create(query);
+        queryWrapper.orderBy(FlowDefinition::getCreateTime, false);
+
+        return flowDefinitionRepository.getOne(queryWrapper);
+    }
 }

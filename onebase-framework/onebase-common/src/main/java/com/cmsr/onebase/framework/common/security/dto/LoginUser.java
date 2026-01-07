@@ -61,4 +61,9 @@ public class LoginUser {
      */
     private String runMode;
 
+    /**
+     * 登录来源  PC = 'pc',  MOBILE = 'mobile',
+     */
+    private String loginPlatform;
+
 }

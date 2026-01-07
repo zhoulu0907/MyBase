@@ -12,24 +12,24 @@ import lombok.Data;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Schema(description = "管理后台 - 租户 Response VO")
+@Schema(description = "管理后台 - 空间 Response VO")
 @Data
 @ExcelIgnoreUnannotated
 public class TenantRespVO {
 
-    @Schema(description = "租户编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "1024")
-    @ExcelProperty("租户编号")
+    @Schema(description = "空间编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "1024")
+    @ExcelProperty("空间编号")
     private Long id;
 
-    @Schema(description = "租户编码", example = "1")
-    @ExcelProperty("租户编码")
+    @Schema(description = "空间编码", example = "1")
+    @ExcelProperty("空间编码")
     private String tenantCode;
 
-    @Schema(description = "租户名", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase")
-    @ExcelProperty("租户名")
+    @Schema(description = "空间名", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase")
+    @ExcelProperty("空间名")
     private String name;
 
-    @Schema(description = "租户状态", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
+    @Schema(description = "空间状态", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
     @ExcelProperty(value = "状态", converter = DictConvert.class)
     @DictFormat(DictTypeConstants.COMMON_STATUS)
     private Integer status;
@@ -40,7 +40,7 @@ public class TenantRespVO {
     @Schema(description = "域名H5", example = "http://h5.cmsr.com")
     private String websiteH5;
 
-    @Schema(description = "租户套餐编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "1024")
+    @Schema(description = "空间套餐编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "1024")
     private Long packageId;
 
     @Schema(description = "过期时间", requiredMode = Schema.RequiredMode.REQUIRED)

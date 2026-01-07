@@ -47,7 +47,7 @@ public class SemanticFieldValueDTO<T> {
     @Schema(description = "字段名称")
     private String fieldName;
 
-    @Schema(description = "字段名称")
+    @Schema(description = "表名称")
     private String tableName;
 
     @JsonIgnore
@@ -247,7 +247,7 @@ public class SemanticFieldValueDTO<T> {
             throw new IllegalStateException("fieldTypeEnum 未设置");
         }
         Object normalized = normalizeValue(rawValue, this.fieldTypeEnum);
-        T casted = (T) normalized; 
+        T casted = (T) normalized;
         this.rawValue = casted;
     }
 

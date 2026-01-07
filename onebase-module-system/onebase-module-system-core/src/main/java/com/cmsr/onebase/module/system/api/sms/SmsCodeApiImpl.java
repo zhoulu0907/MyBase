@@ -5,10 +5,9 @@ import com.cmsr.onebase.module.system.api.sms.dto.code.SmsCodeSendReqDTO;
 import com.cmsr.onebase.module.system.api.sms.dto.code.SmsCodeUseReqDTO;
 import com.cmsr.onebase.module.system.api.sms.dto.code.SmsCodeValidateReqDTO;
 import com.cmsr.onebase.module.system.service.sms.SmsCodeService;
+import jakarta.annotation.Resource;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RestController;
-
-import jakarta.annotation.Resource;
 
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 
@@ -35,6 +34,12 @@ public class SmsCodeApiImpl implements SmsCodeApi {
     public CommonResult<Boolean> validateSmsCode(SmsCodeValidateReqDTO reqDTO) {
         smsCodeService.validateSmsCode(reqDTO);
         return success(true);
+    }
+
+    @Override
+    public CommonResult<Boolean> existsCode(SmsCodeSendReqDTO reqDTO) {
+        boolean exists = smsCodeService.existsSmsCode(reqDTO);
+        return success(exists);
     }
 
 }

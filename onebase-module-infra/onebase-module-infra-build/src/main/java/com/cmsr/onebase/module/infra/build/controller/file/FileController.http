@@ -12,9 +12,9 @@ Authorization: Bearer {{token}}
 
 --WebAppBoundary
 Content-Disposition: form-data; name="file"; filename="p1.jpg"
-Content-Type: image/jpg
+Content-Type: image/jpeg
 
-< ./p1.jpg
+< ./p6.jpg
 --WebAppBoundary--
 
 ### 请求 /infra/file/presigned-url 接口 => 成功
@@ -48,6 +48,6 @@ tenant-id: {{adminTenantId}}
 Authorization: Bearer {{token}}
 
 ### 请求 /infra/file/page 接口 => 成功
-GET {{baseUrl}}/infra/file/download/172736111653617664
+GET {{baseUrl}}/infra/file/download/195527475941507072
 #tenant-id: {{adminTenantId}}
 #Authorization: Bearer {{token}}

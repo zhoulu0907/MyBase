@@ -1,10 +1,13 @@
 package com.cmsr.onebase.module.metadata.build.controller.admin.number;
 
+import com.cmsr.onebase.framework.common.event.AppEntityChangeEvent;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.module.metadata.build.service.number.AutoNumberStateBuildService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,6 +21,9 @@ public class AutoNumberStateController {
 
     @Resource
     private AutoNumberStateBuildService stateService;
+
+    @Resource
+    ApplicationEventPublisher applicationEventPublisher;
 
     @PostMapping("/next")
     @Operation(summary = "获取下一编号计数（仅测试/预览用途）")
@@ -34,6 +40,11 @@ public class AutoNumberStateController {
                                        @RequestParam(value = "operator", required = false) Long operator,
                                        @RequestParam(value = "reason", required = false) String reason) {
         stateService.reset(configId, periodKey, nextValue, operator, reason);
+        applicationEventPublisher.publishEvent(
+                AppEntityChangeEvent.builder()
+                        .applicationId(ApplicationManager.getApplicationId())
+                        .build()
+        );
         return success(true);
     }
 }

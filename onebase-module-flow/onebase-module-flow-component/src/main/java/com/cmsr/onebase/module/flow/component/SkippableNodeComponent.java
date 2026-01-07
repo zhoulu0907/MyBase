@@ -77,8 +77,6 @@ public abstract class SkippableNodeComponent extends NodeComponent {
 
         } else {
             executeContext.putNodeProcessResult(tag, processResult);
-            executeContext.setExecutionEndNodeTag(tag);
-            executeContext.setExecutionEndNodeType(this.getClass().getSimpleName());
         }
 
     }

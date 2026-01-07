@@ -2,12 +2,12 @@ package com.cmsr.onebase.module.infra.service.logger;
 
 import com.cmsr.onebase.framework.common.biz.infra.logger.dto.ApiErrorLogCreateReqDTO;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.common.util.string.StrUtils;
-import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
-import com.cmsr.onebase.module.infra.dal.database.ApiErrorLogDataRepository;
-import com.cmsr.onebase.module.infra.dal.dataobject.logger.ApiErrorLogDO;
+import com.cmsr.onebase.module.infra.dal.dataflex.ApiErrorLogDataRepository;
+import com.cmsr.onebase.module.infra.dal.dataflexdo.logger.ApiErrorLogDO;
 import com.cmsr.onebase.module.infra.dal.vo.logger.apierrorlog.ApiErrorLogPageReqVO;
 import com.cmsr.onebase.module.infra.enums.logger.ApiErrorLogProcessStatusEnum;
 import jakarta.annotation.Resource;
@@ -40,21 +40,22 @@ public class ApiErrorLogServiceImpl implements ApiErrorLogService {
                 .setProcessStatus(ApiErrorLogProcessStatusEnum.INIT.getStatus());
         apiErrorLog.setRequestParams(StrUtils.maxLength(apiErrorLog.getRequestParams(), REQUEST_PARAMS_MAX_LENGTH));
         if (TenantContextHolder.getTenantId() != null) {
-            apiErrorLogDataRepository.insert(apiErrorLog);
+            apiErrorLogDataRepository.save(apiErrorLog);
         } else {
             // 极端情况下，上下文中没有租户时，此时忽略租户上下文，避免插入失败！
-            TenantUtils.executeIgnore(() -> apiErrorLogDataRepository.insert(apiErrorLog));
+            TenantUtils.executeIgnore(() -> apiErrorLogDataRepository.save(apiErrorLog));
         }
     }
 
     @Override
     public PageResult<ApiErrorLogDO> getApiErrorLogPage(ApiErrorLogPageReqVO pageReqVO) {
-        return apiErrorLogDataRepository.findPage(pageReqVO);
+        PageResult<ApiErrorLogDO> page = apiErrorLogDataRepository.findPage(pageReqVO);
+        return page;
     }
 
     @Override
     public void updateApiErrorLogProcess(Long id, Integer processStatus, Long processUserId) {
-        ApiErrorLogDO errorLog = apiErrorLogDataRepository.findById(id);
+        ApiErrorLogDO errorLog = apiErrorLogDataRepository.getById(id);
         if (errorLog == null) {
             throw exception(API_ERROR_LOG_NOT_FOUND);
         }

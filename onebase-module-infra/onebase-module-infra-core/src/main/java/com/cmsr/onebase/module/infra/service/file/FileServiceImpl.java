@@ -15,8 +15,8 @@ import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.security.config.SecurityProperties;
-import com.cmsr.onebase.module.infra.dal.database.FileDataRepository;
-import com.cmsr.onebase.module.infra.dal.dataobject.file.FileDO;
+import com.cmsr.onebase.module.infra.dal.dataflex.FileDataRepository;
+import com.cmsr.onebase.module.infra.dal.dataflexdo.file.FileDO;
 import com.cmsr.onebase.module.infra.dal.vo.file.file.FileCreateReqVO;
 import com.cmsr.onebase.module.infra.dal.vo.file.file.FilePageReqVO;
 import com.cmsr.onebase.module.infra.dal.vo.file.file.FilePresignedUrlRespVO;
@@ -115,7 +115,12 @@ public class FileServiceImpl implements FileService {
         if (StrUtil.isEmpty(name)) {
             name = DigestUtil.md5Hex(content);
         }
+        // 1.3 处理 visitMode 为空的情况
+        if (StrUtil.isEmpty(visitMode)) {
+            visitMode = FileVisitModeEnum.PUBLIC.getValue();
+        }
 
+        // 1.4 处理 文件后缀 为空的情况
         if (StrUtil.isEmpty(FileNameUtil.extName(name))) {
             // 如果 name 没有后缀 type，则补充后缀
             String extension = FileTypeUtils.getExtension(type);
@@ -124,39 +129,37 @@ public class FileServiceImpl implements FileService {
             }
         }
 
-        // 执行文件校验
+        // 2. 执行文件校验
         validateFile(content, name, type);
 
-        // 检查是否有重复文件（基于MD5）
+        // 3. 检查是否有重复文件（基于MD5）
         String md5 = DigestUtil.md5Hex(content);
-        FileDO existingFile = fileDataRepository.findByMd5(md5);
+        FileDO existingFile = fileDataRepository.findByMd5AndVisitMode(md5, visitMode);
         if (existingFile != null) {
             // 存在相同MD5的文件，直接返回已存在的URL
             return existingFile.getId().toString();
         }
 
-        // 2.1 生成上传的 path，需要保证唯一
+        // 4.1 生成上传的 path，需要保证唯一
         String path = generateUploadPath(name, directory);
-        // 2.2 上传到文件存储器
+        // 4.2 上传到文件存储器
         FileClient client = fileConfigService.getMasterFileClient();
         Assert.notNull(client, "客户端(master) 不能为空");
         String url = client.upload(content, path, type);
 
-        // 3. 保存到数据库
-        if (StrUtil.isEmpty(visitMode)) {
-            visitMode = FileVisitModeEnum.PUBLIC.getValue();
-        }
+        // 5. 保存到数据库
         String runMode = null;
         LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
         if (loginUser != null){
             runMode = loginUser.getRunMode();
         }
-        FileDO fileDO = fileDataRepository.insert(new FileDO().setConfigId(client.getId())
+        FileDO fileDO = new FileDO().setConfigId(client.getId())
                 .setName(name).setPath(path).setUrl(url)
                 .setType(type).setSize(content.length)
                 .setMd5(md5)
                 .setVisitMode(visitMode)
-                .setRunMode(runMode));
+                .setRunMode(runMode);
+        fileDataRepository.save(fileDO);
         return fileDO.getId().toString();
     }
 
@@ -201,15 +204,14 @@ public class FileServiceImpl implements FileService {
             throw exception(FILE_NAME_LENGTH_OVERRUN,maxNameLength);
         }
 
-        // 3. 获取文件扩展名
-        String extension;
-        if (StrUtil.isNotEmpty(name)) {
-            extension = FileNameUtil.extName(name).toLowerCase();
-        } else {
-            extension = FileTypeUtils.getExtension(type);
-        }
+        // 3. 获取文件扩展名(这里不通过文件名获取真实扩展名，有些场景文件名并不准确，比如用户手动修改文件名后缀、图片裁切JPG转为PNG等)
+        String extension = FileTypeUtils.getExtension(type);
+
         if (StrUtil.isEmpty(extension)) {
             throw exception(FILE_EXTENSION_UNIDENTIFIABLE);
+        }else{
+            // 去除扩展名前的点号
+            extension = extension.replaceAll("\\.", "");
         }
         Map<String, FileTypeInfo> configuredFileCheckList = getConfiguredFileCheckList(configMap);
         // 4. 校验文件后缀
@@ -390,7 +392,7 @@ public class FileServiceImpl implements FileService {
     @Override
     public Long createFile(FileCreateReqVO createReqVO) {
         FileDO file = BeanUtils.toBean(createReqVO, FileDO.class);
-        fileDataRepository.insert(file);
+        fileDataRepository.save(file);
         return file.getId();
     }
 
@@ -405,11 +407,11 @@ public class FileServiceImpl implements FileService {
         client.delete(file.getPath());
 
         // 删除记录
-        fileDataRepository.deleteById(id);
+        fileDataRepository.removeById(id);
     }
 
     private FileDO validateFileExists(Long id) {
-        FileDO fileDO = fileDataRepository.findById(id);
+        FileDO fileDO = fileDataRepository.getById(id);
         if (fileDO == null) {
             throw exception(FILE_NOT_EXISTS);
         }
@@ -426,7 +428,7 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public List<FileDO> getFileListByIds(Collection<Long> ids) {
-        return fileDataRepository.findAllByIds(ids);
+        return fileDataRepository.listByIds(ids);
     }
 
     @Override

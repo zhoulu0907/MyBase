@@ -134,8 +134,24 @@ public class SemanticMergeRecordAssembler {
         return buildEntitySchema(entity);
     }
 
-    public SemanticEntitySchemaDTO buildEntitySchemaByUuid(String entityUuid) {
-        MetadataBusinessEntityDO entity = businessEntityCoreService.getBusinessEntityByUuid(entityUuid);
+    public SemanticEntitySchemaDTO buildEntitySchemaByUuid(String entityUuidOrId) {
+        MetadataBusinessEntityDO entity = null;
+        
+        // 先尝试按UUID查询
+        if (entityUuidOrId != null && !entityUuidOrId.trim().isEmpty()) {
+            entity = businessEntityCoreService.getBusinessEntityByUuid(entityUuidOrId);
+            
+            // 如果UUID查询不到，且传入的是纯数字（可能是ID），则按ID查询
+            if (entity == null && entityUuidOrId.matches("^\\d+$")) {
+                try {
+                    Long entityId = Long.parseLong(entityUuidOrId);
+                    entity = businessEntityCoreService.getBusinessEntity(entityId);
+                } catch (NumberFormatException e) {
+                    // 解析失败，继续使用null
+                }
+            }
+        }
+        
         if (entity == null) { throw exception(BUSINESS_ENTITY_NOT_EXISTS); }
         return buildEntitySchema(entity);
     }
@@ -337,6 +353,7 @@ public class SemanticMergeRecordAssembler {
         Map<String, SemanticFieldSchemaDTO> byUuid = new HashMap<>();
         for (MetadataEntityFieldDO f : fields) {
             SemanticFieldSchemaDTO s = new SemanticFieldSchemaDTO();
+            s.setId(f.getId());
             s.setFieldUuid(f.getFieldUuid());
             s.setFieldCode(f.getFieldCode());
             s.setFieldName(f.getFieldName());
@@ -371,6 +388,7 @@ public class SemanticMergeRecordAssembler {
                     if (s == null) { continue; }
                     if (s.getFieldOptions() == null) { s.setFieldOptions(new ArrayList<>()); }
                     com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldOptionDTO dto = new com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldOptionDTO();
+                    dto.setId(opt.getId());
                     dto.setOptionUuid(opt.getOptionUuid());
                     dto.setFieldUuid(opt.getFieldUuid());
                     dto.setOptionLabel(opt.getOptionLabel());

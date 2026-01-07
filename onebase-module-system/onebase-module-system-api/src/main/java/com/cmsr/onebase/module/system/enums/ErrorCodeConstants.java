@@ -22,6 +22,7 @@ public interface ErrorCodeConstants {
 
     ErrorCode AUTH_VERIFY_CODE_NULL = new ErrorCode(1_002_000_100, "验证码为空");
     ErrorCode AUTH_VERIFY_CODE_ERROR = new ErrorCode(1_002_000_100, "验证码错误");
+    ErrorCode AUTH_VERIFY_CODE_EXISTS = new ErrorCode(1_002_000_100, "请勿重复发送验证码");
 
     // ========== 菜单模块 1-002-001-000 ==========
     ErrorCode MENU_NAME_DUPLICATE = new ErrorCode(1_002_001_000, "已经存在该名字的菜单");
@@ -56,7 +57,10 @@ public interface ErrorCodeConstants {
     ErrorCode LICENSE_USER_COUNT_NOT_ENOUGH = new ErrorCode(1_002_003_013, "可分配人员数量不足，人员上限是{}, 剩余{}");
     ErrorCode LICENSE_TENANT_COUNT_NOT_ENOUGH = new ErrorCode(1_002_003_014, "空间数量已达上限");
     ErrorCode LENANT_ALLOCATE_PERSON_COUNT_LESS_THEN_ALLOCATED = new ErrorCode(1_002_003_014, "分配的用户数量不能低于空间内已有用户数：{}");
-    ErrorCode USER_TYPE_EXCEPTION = new ErrorCode(1_002_003_015, "用户类型异常:{}");
+    ErrorCode LENANT_PERSON_COUNT_LESS_THEN_ADMIN = new ErrorCode(1_002_003_015, "管理员数量超过用户上限：{}");
+    ErrorCode USER_TYPE_EXCEPTION = new ErrorCode(1_002_003_016, "用户类型异常:{}");
+    ErrorCode USER_DEPT_LEADER_NOT_ALLOW_CHANGE = new ErrorCode(1_002_003_017, "你是【{}】部门的主管，无法转移到其他部门！");
+    ErrorCode USER_DEPT_ADMIN_NOT_ALLOW_CHANGE = new ErrorCode(1_002_003_018, "你是【{}】部门的接口人，无法转移到其他部门！");
 
     // ========== 部门模块 1-002-004-000 ==========
     ErrorCode DEPT_NAME_DUPLICATE = new ErrorCode(1_002_004_000, "已经存在该名字的部门");
@@ -197,4 +201,15 @@ public interface ErrorCodeConstants {
     ErrorCode AUTH_LOGIN_APP_EXPIRE = new ErrorCode(1_002_025_015, "本企业用户无法登录，授权已过期。");
 
     ErrorCode CONFIG_NO_EXISTS = new ErrorCode(1_002_026_001, "配置项不存在");
+    ErrorCode CONFIG_ALREADY_ENABLE  = new ErrorCode(1_002_026_002, "当前已启用【{}】,不可开启【{}】");
+
+    ErrorCode CONFIG_SAAS_CORP_EXISTS = new ErrorCode(1_002_026_003, "空间内已创建企业无法禁用");
+    ErrorCode CONFIG_SAAS_APP_EXISTS  = new ErrorCode(1_002_026_003, "空间内已创建SAAS应用无法禁用");
+
+    ErrorCode AUTH_VERIFY_THIRD_USER_ERROR = new ErrorCode(1_002_000_104, "外部用户未开启无法登录");
+    ErrorCode AUTH_VERIFY_CORP_USER_ERROR = new ErrorCode(1_002_000_104, "Saas模块未开启无法登录");
+    ErrorCode AUTH_VERIFY_APPTHIRDUSERENABLE_ERROR = new ErrorCode(1_002_000_104, "应用三方用户登录未开启");
+
+    ErrorCode AUTH_VERIFY_NO_CORP_LOGIN_ERROR = new ErrorCode(1_002_000_105, "非企业账号无法登录");
+
 }

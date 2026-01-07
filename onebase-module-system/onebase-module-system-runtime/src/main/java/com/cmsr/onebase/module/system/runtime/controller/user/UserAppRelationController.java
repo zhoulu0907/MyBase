@@ -14,6 +14,7 @@ import com.cmsr.onebase.module.system.vo.user.UserApplicationRespVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
+import jakarta.annotation.security.PermitAll;
 import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -26,7 +27,7 @@ import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 @Tag(name = "外部用户服务 - 用户应用关系")
 @RestController
 @Validated
-@RequestMapping("/user/user-app-relation")
+@RequestMapping("/system/user-app-relation")
 public class UserAppRelationController {
 
     @Resource
@@ -34,8 +35,8 @@ public class UserAppRelationController {
 
 
     @PostMapping("/create")
-    @PreAuthorize("@ss.hasPermission('tenant:app-auth:create')")
     @Operation(summary = "新增企业应用关联")
+    @PermitAll
     public CommonResult<Boolean> createUserAppRelation(@Valid @RequestBody UserAppRelationInertReqVO userAppRelationInertReqVO) {
         userAppRelationService.createUserAppRelation(userAppRelationInertReqVO);
         return success(true);
@@ -43,7 +44,7 @@ public class UserAppRelationController {
 
     @GetMapping("/get-app-by-user-id")
     @Operation(summary = "获得用户授权应用列表-分页")
-    @PreAuthorize("@ss.hasPermission('user:app-auth:query')")
+    @PermitAll
     public CommonResult<List<UserAppVO>> getAppByUserId(@RequestParam("userId") Long userId) {
         List<UserAppVO> list = userAppRelationService.getAppByUserId(userId);
         return success(list);

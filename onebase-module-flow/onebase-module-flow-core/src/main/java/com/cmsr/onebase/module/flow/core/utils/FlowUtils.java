@@ -34,7 +34,8 @@ public class FlowUtils {
         return "flow:trace:" + traceId;
     }
 
-    public static String toRedisProcessLockKey(Long processId) {
-        return "flow:process:lock:" + processId;
+    public static String toRedisFlowLockKey(Long applicationId) {
+        return "flow:process:lock:" + applicationId;
     }
+
 }

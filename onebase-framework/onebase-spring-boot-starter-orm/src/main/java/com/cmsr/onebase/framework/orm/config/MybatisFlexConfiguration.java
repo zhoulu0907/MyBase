@@ -8,6 +8,8 @@ import com.mybatisflex.annotation.UpdateListener;
 import com.mybatisflex.core.FlexGlobalConfig;
 import com.mybatisflex.core.audit.AuditManager;
 import com.mybatisflex.core.keygen.KeyGeneratorFactory;
+import com.mybatisflex.core.logicdelete.LogicDeleteManager;
+import com.mybatisflex.core.logicdelete.impl.TimeStampLogicDeleteProcessor;
 import com.mybatisflex.core.query.QueryColumnBehavior;
 import com.mybatisflex.spring.boot.MyBatisFlexCustomizer;
 import lombok.Setter;
@@ -44,8 +46,7 @@ public class MybatisFlexConfiguration implements MyBatisFlexCustomizer {
         QueryColumnBehavior.setIgnoreFunction(o -> false);
         // logic delete
         defaultConfig.setLogicDeleteColumn("deleted");
-        defaultConfig.setNormalValueOfLogicDelete(0);
-        defaultConfig.setDeletedValueOfLogicDelete(System.currentTimeMillis());
+        LogicDeleteManager.setProcessor(new TimeStampLogicDeleteProcessor());
 
         Map<Class<?>, List<InsertListener>> insertListenerMap = new HashMap<>();
         insertListenerMap.put(BaseEntity.class, List.of(defaultEntityListener));

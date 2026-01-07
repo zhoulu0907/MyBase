@@ -23,6 +23,7 @@ public class AppCodegenMain {
             "app_auth_role_user",
             "app_auth_view",
             "app_menu",
+            "app_navigation",
             "app_resource_component",
             "app_resource_page",
 //            "app_resource_page_metadata",

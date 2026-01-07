@@ -1,10 +1,9 @@
 package com.cmsr.onebase.module.system.build.controller.user;
 
+import cn.hutool.core.collection.CollUtil;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import com.cmsr.onebase.framework.common.pojo.PageParam;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import cn.hutool.core.collection.CollUtil;
 import com.cmsr.onebase.framework.excel.core.util.ExcelUtils;
 import com.cmsr.onebase.module.system.convert.user.UserConvert;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
@@ -16,7 +15,6 @@ import com.cmsr.onebase.module.system.vo.dept.DeptSimpleListRespVO;
 import com.cmsr.onebase.module.system.vo.user.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
@@ -24,7 +22,6 @@ import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -152,16 +149,16 @@ public class TenantUserController {
         return success(userDetail);
     }
 
-    @GetMapping("/export")
-    @Operation(summary = "导出用户")
-    @PreAuthorize("@ss.hasPermission('tenant:user:export')")
-    public void exportUserList(@Validated UserPageReqVO exportReqVO, HttpServletResponse response) throws IOException {
-        exportReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
-        List<AdminUserDO> list = userService.getUserPage(exportReqVO).getList();
-        // 输出 Excel
-        Map<Long, DeptDO> deptMap = deptService.getDeptMap(convertList(list, AdminUserDO::getDeptId));
-        ExcelUtils.write(response, "用户数据.xls", "数据", UserRespVO.class, UserConvert.INSTANCE.convertList(list, deptMap));
-    }
+    // @GetMapping("/export")
+    // @Operation(summary = "导出用户")
+    // @PreAuthorize("@ss.hasPermission('tenant:user:export')")
+    // public void exportUserList(@Validated UserPageReqVO exportReqVO, HttpServletResponse response) throws IOException {
+    //     exportReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
+    //     List<AdminUserDO> list = userService.getUserPage(exportReqVO).getList();
+    //     // 输出 Excel
+    //     Map<Long, DeptDO> deptMap = deptService.getDeptMap(convertList(list, AdminUserDO::getDeptId));
+    //     ExcelUtils.write(response, "用户数据.xls", "数据", UserRespVO.class, UserConvert.INSTANCE.convertList(list, deptMap));
+    // }
 
     @GetMapping("/get-import-template")
     @Operation(summary = "获得导入用户模板")
@@ -172,14 +169,14 @@ public class TenantUserController {
         ExcelUtils.write(response, "用户导入模板.xls", "用户列表", UserImportExcelVO.class, list);
     }
 
-    @PostMapping("/import")
-    @Operation(summary = "导入用户")
-    @Parameters({@Parameter(name = "file", description = "Excel 文件", required = true), @Parameter(name = "updateSupport", description = "是否支持更新，默认为 false", example = "true")})
-    @PreAuthorize("@ss.hasPermission('tenant:user:import')")
-    public CommonResult<UserImportRespVO> importExcel(@RequestParam("file") MultipartFile file, @RequestParam(value = "updateSupport", required = false, defaultValue = "false") Boolean updateSupport) throws Exception {
-        List<UserImportExcelVO> list = ExcelUtils.read(file, UserImportExcelVO.class);
-        return success(userService.importUserList(list, updateSupport));
-    }
+    // @PostMapping("/import")
+    // @Operation(summary = "导入用户")
+    // @Parameters({@Parameter(name = "file", description = "Excel 文件", required = true), @Parameter(name = "updateSupport", description = "是否支持更新，默认为 false", example = "true")})
+    // @PreAuthorize("@ss.hasPermission('tenant:user:import')")
+    // public CommonResult<UserImportRespVO> importExcel(@RequestParam("file") MultipartFile file, @RequestParam(value = "updateSupport", required = false, defaultValue = "false") Boolean updateSupport) throws Exception {
+    //     List<UserImportExcelVO> list = ExcelUtils.read(file, UserImportExcelVO.class);
+    //     return success(userService.importUserList(list, updateSupport));
+    // }
 
     @GetMapping("/get-user-page-by-dept")
     @Operation(summary = "获得指定部门的用户简要分页列表", description = "获取指定部门的直属用户简要信息（分页），isRecurseSub为true时包含所有下级部门用户")

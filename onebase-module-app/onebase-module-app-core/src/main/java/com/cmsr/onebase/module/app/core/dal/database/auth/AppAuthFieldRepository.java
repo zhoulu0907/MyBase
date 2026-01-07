@@ -22,7 +22,7 @@ import static com.cmsr.onebase.module.app.core.dal.dataobject.table.AppAuthField
 @Repository
 public class AppAuthFieldRepository extends BaseBizRepository<AppAuthFieldMapper, AppAuthFieldDO> {
 
-    public List<AppAuthFieldDO> findByQuery(AuthPermissionReq reqVO) {
+    public List<AppAuthFieldDO> findByQueryRequest(AuthPermissionReq reqVO) {
         QueryWrapper queryWrapper = this.query()
                 .where(APP_AUTH_FIELD.APPLICATION_ID.eq(reqVO.getApplicationId()))
                 .where(APP_AUTH_FIELD.ROLE_UUID.eq(reqVO.getRoleUuid()))
@@ -30,12 +30,12 @@ public class AppAuthFieldRepository extends BaseBizRepository<AppAuthFieldMapper
         return list(queryWrapper);
     }
 
-    public void deleteByQuery(AuthPermissionReq reqVO) {
-        this.updateChain()
+    public void deleteByQueryRequest(AuthPermissionReq reqVO) {
+        QueryWrapper queryWrapper = this.query()
                 .where(APP_AUTH_FIELD.APPLICATION_ID.eq(reqVO.getApplicationId()))
                 .where(APP_AUTH_FIELD.ROLE_UUID.eq(reqVO.getRoleUuid()))
-                .where(APP_AUTH_FIELD.MENU_UUID.eq(reqVO.getMenuUuid()))
-                .remove();
+                .where(APP_AUTH_FIELD.MENU_UUID.eq(reqVO.getMenuUuid()));
+        super.remove(queryWrapper);
     }
 
     public List<AppAuthFieldDO> findByAppIdAndRoleIdsAndMenuId(Long applicationId, Set<String> roleUuids, String menuUuid) {

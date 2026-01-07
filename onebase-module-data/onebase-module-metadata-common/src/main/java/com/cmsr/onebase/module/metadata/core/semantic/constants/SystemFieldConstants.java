@@ -17,6 +17,7 @@ public final class SystemFieldConstants {
         public static final String UPDATED_TIME = "updated_time";
         public static final String DELETED = "deleted";
         public static final String LOCK_VERSION = "lock_version";
+        public static final String DRAFT_STATUS = "draft_status";
 
         private OPTIONAL() {}
     }

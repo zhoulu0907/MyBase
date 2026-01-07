@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.app.core.vo.resource;
 
-import com.cmsr.onebase.module.app.core.dto.appresource.ComponentDTO;
+import com.cmsr.onebase.module.app.core.dto.resource.ComponentDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
