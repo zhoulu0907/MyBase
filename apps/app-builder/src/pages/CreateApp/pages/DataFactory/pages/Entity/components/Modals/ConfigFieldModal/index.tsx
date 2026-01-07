@@ -1,4 +1,4 @@
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useRef } from 'react';
 import { Button, Form, Modal, Spin } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
 import { useFieldStore } from '@/store/store_field';
@@ -48,6 +48,17 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = memo(
       ]
     );
 
+    const handleAddField = useCallback(async () => {
+      await fieldManager.addField();
+
+      // 滚动到底部新增行
+      const container = document.getElementById('field-config-container');
+      const tableBody = container?.querySelector('.pc-table-body') as HTMLElement | null;
+      if (tableBody) {
+        tableBody.scrollTop = tableBody.scrollHeight;
+      }
+    }, [fieldManager]);
+
     // 表格列配置
     const columns = TableColumns({
       fieldTypeOptions,
@@ -76,6 +87,9 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = memo(
         cancelText="取消"
         confirmLoading={fieldManager.submitting}
         style={{ width: 1260 }}
+        // 关闭自动聚焦与焦点锁
+        autoFocus={false}
+        focusLock={false}
       >
         <Spin loading={fieldManager.loading} style={{ width: '100%' }}>
           <Form form={fieldManager.form} initialValues={{ fields: fieldManager.activeFields }} id="field-config-form">
@@ -93,7 +107,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = memo(
                       <Button
                         type="dashed"
                         icon={<IconPlus />}
-                        onClick={fieldManager.addField}
+                        onClick={handleAddField}
                         className={styles.addFieldButton}
                       >
                         新增字段
