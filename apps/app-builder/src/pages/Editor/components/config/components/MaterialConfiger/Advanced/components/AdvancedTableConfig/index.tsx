@@ -208,15 +208,15 @@ const AdvancedTableOperationConfig: React.FC<AdvancedTableOperationConfigProps> 
         const newValue = newData.map((op: OperationButtonConfig) =>
           op.type === modalButtonVisible
             ? {
-              ...op,
-              buttonName: values.buttonName,
-              buttonIcon: values.buttonIcon,
-              iconColor: values.iconColor,
-              confirmText: values.confirmText,
-              deletedAction: values.deletedAction,
-              redirectPageId: values.redirectPageId,
-              redirectMethod: values.redirectMethod
-            }
+                ...op,
+                buttonName: values.buttonName,
+                buttonIcon: values.buttonIcon,
+                iconColor: values.iconColor,
+                confirmText: values.confirmText,
+                deletedAction: values.deletedAction,
+                redirectPageId: values.redirectPageId,
+                redirectMethod: values.redirectMethod
+              }
             : op
         );
         handlePropsChange(operationButton, newValue);
@@ -227,6 +227,8 @@ const AdvancedTableOperationConfig: React.FC<AdvancedTableOperationConfigProps> 
       }
     });
   };
+
+  console.log(configs);
 
   return (
     <>
@@ -362,7 +364,8 @@ const AdvancedTableOperationConfig: React.FC<AdvancedTableOperationConfigProps> 
                     />
                     <Switch
                       size="small"
-                      defaultChecked={op.display}
+                      disabled={op.type === 'edit'}
+                      defaultChecked={op.type === 'edit' ? false : op.display}
                       onChange={(value) => {
                         const newArr = [...configs[operationButton]];
                         newArr[index] = { ...newArr[index], display: value };
@@ -424,10 +427,7 @@ const AdvancedTableOperationConfig: React.FC<AdvancedTableOperationConfigProps> 
             style={{ flex: 1 }}
             rules={[{ required: true, message: '请选择打开方式' }]}
           >
-            <Select
-              options={openTypeOptions}
-              getPopupContainer={getPopupContainer}
-            />
+            <Select options={openTypeOptions} getPopupContainer={getPopupContainer} />
           </Form.Item>
         </Form>
       </Modal>
