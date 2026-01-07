@@ -29,7 +29,7 @@ public class PluginCommandPublisher {
      * @param tenantId 租户ID
      * @param packageFileId 包文件ID
      */
-    public void publishEnableCommand(Long pluginId, String pluginVersion, Long tenantId, Long packageFileId) {
+    public void publishEnableCommand(String pluginId, String pluginVersion, Long tenantId, Long packageFileId) {
         PluginCommandMessage message = PluginCommandMessage.builder()
                 .command(PluginCommandMessage.PluginCommand.ENABLE)
                 .pluginId(pluginId)
@@ -48,7 +48,7 @@ public class PluginCommandPublisher {
      * @param pluginVersion 插件版本
      * @param tenantId 租户ID
      */
-    public void publishDisableCommand(Long pluginId, String pluginVersion, Long tenantId) {
+    public void publishDisableCommand(String pluginId, String pluginVersion, Long tenantId) {
         PluginCommandMessage message = PluginCommandMessage.builder()
                 .command(PluginCommandMessage.PluginCommand.DISABLE)
                 .pluginId(pluginId)
@@ -67,7 +67,7 @@ public class PluginCommandPublisher {
      * @param tenantId 租户ID
      * @param packageFileId 包文件ID
      */
-    public void publishReloadCommand(Long pluginId, String pluginVersion, Long tenantId, Long packageFileId) {
+    public void publishReloadCommand(String pluginId, String pluginVersion, Long tenantId, Long packageFileId) {
         PluginCommandMessage message = PluginCommandMessage.builder()
                 .command(PluginCommandMessage.PluginCommand.RELOAD)
                 .pluginId(pluginId)

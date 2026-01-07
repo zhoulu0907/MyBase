@@ -37,12 +37,12 @@ public class PluginConfigController {
     @GetMapping("/list")
     @Operation(summary = "获取配置列表")
     @Parameters({
-            @Parameter(name = "pluginId", description = "插件ID", required = true, example = "1024"),
+            @Parameter(name = "pluginId", description = "插件ID", required = true, example = "test-plugin"),
             @Parameter(name = "pluginVersion", description = "插件版本", required = true, example = "1.0.0")
     })
     @PreAuthorize("@ss.hasPermission('plugin:config:query')")
     public CommonResult<List<PluginConfigRespVO>> getConfigList(
-            @RequestParam("pluginId") Long pluginId,
+            @RequestParam("pluginId") String pluginId,
             @RequestParam("pluginVersion") String pluginVersion) {
         return success(pluginConfigService.getConfigList(pluginId, pluginVersion));
     }
@@ -58,12 +58,12 @@ public class PluginConfigController {
     @GetMapping("/package/list")
     @Operation(summary = "获取包信息列表")
     @Parameters({
-            @Parameter(name = "pluginId", description = "插件ID", required = true, example = "1024"),
+            @Parameter(name = "pluginId", description = "插件ID", required = true, example = "test-plugin"),
             @Parameter(name = "pluginVersion", description = "插件版本", required = true, example = "1.0.0")
     })
     @PreAuthorize("@ss.hasPermission('plugin:config:query')")
     public CommonResult<List<PluginPackageRespVO>> getPackageList(
-            @RequestParam("pluginId") Long pluginId,
+            @RequestParam("pluginId") String pluginId,
             @RequestParam("pluginVersion") String pluginVersion) {
         return success(pluginConfigService.getPackageList(pluginId, pluginVersion));
     }

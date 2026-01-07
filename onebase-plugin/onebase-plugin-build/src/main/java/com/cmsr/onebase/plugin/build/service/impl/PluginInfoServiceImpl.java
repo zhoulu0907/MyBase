@@ -71,7 +71,7 @@ public class PluginInfoServiceImpl implements PluginInfoService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Long uploadPlugin(PluginUploadReqVO uploadReqVO) {
+    public String uploadPlugin(PluginUploadReqVO uploadReqVO) {
         // 1. 校验并读取文件
         byte[] content = pluginZipValidator.validate(uploadReqVO.getFile());
 
@@ -225,7 +225,7 @@ public class PluginInfoServiceImpl implements PluginInfoService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void deletePlugin(Long pluginId) {
+    public void deletePlugin(String pluginId) {
         // 1. 获取所有版本
         List<PluginInfoDO> versions = pluginInfoRepository.getListByPluginId(pluginId);
         if (CollUtil.isEmpty(versions)) {
@@ -325,7 +325,7 @@ public class PluginInfoServiceImpl implements PluginInfoService {
     /**
      * 保存包信息
      */
-    private void savePackageInfo(PluginMetaInfo metaInfo, Long pluginId, String pluginVersion) {
+    private void savePackageInfo(PluginMetaInfo metaInfo, String pluginId, String pluginVersion) {
         if (CollUtil.isEmpty(metaInfo.getPackages())) {
             return;
         }
@@ -343,7 +343,7 @@ public class PluginInfoServiceImpl implements PluginInfoService {
     /**
      * 保存配置信息
      */
-    private void saveConfigInfo(PluginMetaInfo metaInfo, Long pluginId, String pluginVersion) {
+    private void saveConfigInfo(PluginMetaInfo metaInfo, String pluginId, String pluginVersion) {
         if (CollUtil.isEmpty(metaInfo.getConfigTemplates())) {
             return;
         }

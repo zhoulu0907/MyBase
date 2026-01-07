@@ -52,7 +52,7 @@ public class PluginFileManager {
      * @param pluginVersion 插件版本
      * @param packageFileId 包文件ID
      */
-    public void downloadAndExtractPlugin(Long pluginId, String pluginVersion, Long packageFileId) {
+    public void downloadAndExtractPlugin(String pluginId, String pluginVersion, Long packageFileId) {
         log.info("开始下载插件: pluginId={}, version={}, fileId={}", pluginId, pluginVersion, packageFileId);
 
         // 1. 构建目标目录路径
@@ -103,7 +103,7 @@ public class PluginFileManager {
      * @param pluginId 插件ID
      * @param pluginVersion 插件版本
      */
-    public void loadPlugin(Long pluginId, String pluginVersion) {
+    public void loadPlugin(String pluginId, String pluginVersion) {
         log.info("加载插件: pluginId={}, version={}", pluginId, pluginVersion);
 
         Path pluginDir = getPluginDir(pluginId, pluginVersion);
@@ -124,7 +124,7 @@ public class PluginFileManager {
      * @param pluginId 插件ID
      * @param pluginVersion 插件版本
      */
-    public void unloadPlugin(Long pluginId, String pluginVersion) {
+    public void unloadPlugin(String pluginId, String pluginVersion) {
         log.info("卸载插件: pluginId={}, version={}", pluginId, pluginVersion);
 
         // TODO: 调用OneBasePluginManager卸载插件
@@ -139,7 +139,7 @@ public class PluginFileManager {
      * @param pluginId 插件ID
      * @param pluginVersion 插件版本
      */
-    public void cleanupPluginFiles(Long pluginId, String pluginVersion) {
+    public void cleanupPluginFiles(String pluginId, String pluginVersion) {
         Path pluginDir = getPluginDir(pluginId, pluginVersion);
         if (Files.exists(pluginDir)) {
             log.info("清理插件文件: {}", pluginDir);
@@ -154,8 +154,8 @@ public class PluginFileManager {
      * @param pluginVersion 插件版本
      * @return 插件目录路径
      */
-    public Path getPluginDir(Long pluginId, String pluginVersion) {
-        return Paths.get(pluginsDir, String.valueOf(pluginId), pluginVersion);
+    public Path getPluginDir(String pluginId, String pluginVersion) {
+        return Paths.get(pluginsDir, pluginId, pluginVersion);
     }
 
     /**
@@ -219,7 +219,7 @@ public class PluginFileManager {
      * @param pluginVersion 插件版本
      * @return 是否已加载
      */
-    public boolean isPluginLoaded(Long pluginId, String pluginVersion) {
+    public boolean isPluginLoaded(String pluginId, String pluginVersion) {
         // TODO: 根据实际PluginManager实现来检查
         return false;
     }
@@ -231,7 +231,7 @@ public class PluginFileManager {
      * @param pluginVersion 插件版本
      * @return 是否存在
      */
-    public boolean isPluginDirExists(Long pluginId, String pluginVersion) {
+    public boolean isPluginDirExists(String pluginId, String pluginVersion) {
         return Files.exists(getPluginDir(pluginId, pluginVersion));
     }
 

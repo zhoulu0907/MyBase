@@ -29,7 +29,7 @@ public class PluginCommandMessage implements Serializable {
     /**
      * 插件ID
      */
-    private Long pluginId;
+    private String pluginId;
 
     /**
      * 插件版本

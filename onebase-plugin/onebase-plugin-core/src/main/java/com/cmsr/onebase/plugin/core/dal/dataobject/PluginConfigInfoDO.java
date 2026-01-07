@@ -27,7 +27,7 @@ public class PluginConfigInfoDO extends BaseTenantEntity {
      * 插件id，来自zip包中的json文件
      */
     @Column(value = "plugin_id", comment = "插件id")
-    private Long pluginId;
+    private String pluginId;
 
     /**
      * 插件版本

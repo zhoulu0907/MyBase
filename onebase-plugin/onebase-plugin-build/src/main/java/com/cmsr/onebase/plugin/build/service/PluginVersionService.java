@@ -29,7 +29,7 @@ public interface PluginVersionService {
      * @param pluginId 插件ID
      * @return 版本列表
      */
-    List<PluginVersionRespVO> getVersionList(Long pluginId);
+    List<PluginVersionRespVO> getVersionList(String pluginId);
 
     /**
      * 更新版本信息（仅停用状态可更新）
