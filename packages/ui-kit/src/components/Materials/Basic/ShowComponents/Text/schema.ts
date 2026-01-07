@@ -3,12 +3,13 @@ import {
   baseDefault,
   statusConfig,
   widthConfig,
+  colorConfig,
+  contentConfig,
   type ICommonBaseType,
   type TStatusSelectKeyType,
   type TWidthSelectKeyType
 } from '../../../common';
 import {
-  CONFIG_TYPES,
   STATUS_OPTIONS,
   STATUS_VALUES,
   WIDTH_OPTIONS,
@@ -60,16 +61,8 @@ export interface XTextConfig extends ICommonBaseType {
 const XText: XTextSchema = {
   editData: [
     ...baseConfig,
-    {
-      key: 'content',
-      name: '文本内容',
-      type: CONFIG_TYPES.TEXT_INPUT
-    },
-    {
-      key: 'color',
-      name: '文本颜色',
-      type: CONFIG_TYPES.COLOR
-    },
+    contentConfig,
+    colorConfig,
     widthConfig,
     statusConfig
     // TODO(mickey): 补充颜色 背景色配置

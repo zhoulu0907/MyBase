@@ -13,6 +13,7 @@ import type {
     IStatusConfigType,
     ITextConfigType,
     IWidthConfigType,
+    ICommonConfigType,
     TRadioDefaultType,
     TSelectDefaultType
 } from '../../../types';
@@ -23,7 +24,7 @@ export interface XCollapseSchema {
 }
 
 export type TXCollapseEditData = Array<
-  ITextConfigType | IWidthConfigType<TWidthSelectKeyType> | IStatusConfigType<TStatusSelectKeyType> | IBooleanConfigType
+  ITextConfigType | IWidthConfigType<TWidthSelectKeyType> | IStatusConfigType<TStatusSelectKeyType> | IBooleanConfigType | ICommonConfigType
 >;
 
 export interface XCollapseConfig extends ICommonBaseType {

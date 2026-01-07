@@ -3,11 +3,17 @@ import {
   baseDefault,
   dataFieldConfig,
   alignConfig,
-  defaultValueConfig,
   layoutConfig,
   statusConfig,
   widthConfig,
   dateRangeConfig,
+  labelConfig,
+  placeholderConfig,
+  tooltipConfig,
+  defaultDateValueConfig,
+  dateFormatConfig,
+  verifyConfig,
+  securityConfig,
   type ICommonBaseType,
   type TDateTypeSelectKeyType,
   type TLayoutSelectKeyType,
@@ -51,7 +57,8 @@ import type {
   IDefaultValueConfigType,
   IAlignConfigType,
   ISecurityConfigType,
-  IDateRangeConfigType
+  IDateRangeConfigType,
+  ICommonConfigType
 } from '../../../types';
 import { ManipulateType } from 'dayjs';
 
@@ -66,7 +73,7 @@ export type TXInputDatePickerEditData = Array<
   | ITooltipConfigType
   | IDataFieldConfigType
   | IDefaultValueConfigType
-  | IDateFormatConfigType
+  | IDateFormatConfigType<TDateTypeSelectKeyType>
   | IDateRangeConfigType
   | IVerifyConfigType
   | IStatusConfigType<TStatusSelectKeyType>
@@ -74,6 +81,7 @@ export type TXInputDatePickerEditData = Array<
   | ILayoutConfigType<TLayoutSelectKeyType>
   | ISecurityConfigType
   | IWidthConfigType<TWidthSelectKeyType>
+  | ICommonConfigType
 >;
 
 export interface XInputDatePickerConfig extends ICommonBaseType {
@@ -188,56 +196,23 @@ export interface XInputDatePickerConfig extends ICommonBaseType {
 const XDatePicker: XInputDatePickerSchema = {
   editData: [
     ...baseConfig,
-    {
-      key: 'label',
-      name: '标题',
-      type: CONFIG_TYPES.LABEL_INPUT
-    },
-    {
-      key: 'placeholder',
-      name: '占位提示',
-      type: CONFIG_TYPES.PLACEHOLDER_INPUT
-    },
-    {
-      key: 'tooltip',
-      name: '字段描述',
-      type: CONFIG_TYPES.TOOLTIP_INPUT
-    },
+    labelConfig,
+    placeholderConfig,
+    tooltipConfig,
     //  数据绑定
     ...dataFieldConfig,
     // 默认值
-    {
-      key: 'defaultValueConfig',
-      name: '默认值',
-      type: CONFIG_TYPES.DEFAULT_VALUE,
-    },
-    {
-      key: 'dateFormat',
-      name: '日期格式',
-      type: CONFIG_TYPES.DATE_FORMAT,
-      range: [
-        { label: '年', value: DATE_VALUES[DATE_OPTIONS.YEAR] },
-        { label: '年-月', value: DATE_VALUES[DATE_OPTIONS.MONTH] },
-        { label: '年-月-日', value: DATE_VALUES[DATE_OPTIONS.DATE] },
-      ]
-    },
+    defaultDateValueConfig,
+    dateFormatConfig,
     dateRangeConfig,
-    {
-      key: 'verify',
-      name: '校验',
-      type: CONFIG_TYPES.VERIFY
-    },
+    verifyConfig,
     // 显示状态
     statusConfig,
     // 对齐方式
     // alignConfig,
     // 布局方式
     layoutConfig,
-    {
-      key: 'security',
-      name: '安全',
-      type: CONFIG_TYPES.SECURITY
-    },
+    securityConfig,
     // 字段宽度
     widthConfig,
   ],
