@@ -466,7 +466,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
     setPredictVisible(false);
     setTimeout(() => setRefresh(Date.now()), 150);
   };
-<<<<<<< HEAD
 
   React.useEffect(() => {
     pluginBridge.registerContext({ form });
@@ -475,8 +474,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
     };
   }, [form]);
 
-=======
->>>>>>> dev
   return (
     <div className={`${styles.previewPage} runtime-preview-formpage`}>
       <div className={styles.content}>
