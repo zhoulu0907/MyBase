@@ -40,4 +40,18 @@ public class PluginInfoRepository extends BaseDataRepository<PluginInfoMapper, P
                 .eq(PluginInfoDO::getPluginId, pluginId);
         return list(queryWrapper);
     }
+
+    /**
+     * 根据插件ID和版本获取插件信息
+     *
+     * @param pluginId 插件ID
+     * @param pluginVersion 插件版本
+     * @return 插件信息
+     */
+    public PluginInfoDO getByPluginIdAndVersion(String pluginId, String pluginVersion) {
+        QueryWrapper queryWrapper = this.query()
+                .eq(PluginInfoDO::getPluginId, pluginId)
+                .eq(PluginInfoDO::getPluginVersion, pluginVersion);
+        return getOne(queryWrapper);
+    }
 }
