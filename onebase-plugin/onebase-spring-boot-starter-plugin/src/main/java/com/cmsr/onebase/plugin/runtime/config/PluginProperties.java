@@ -1,6 +1,6 @@
 package com.cmsr.onebase.plugin.runtime.config;
 
-import com.cmsr.onebase.plugin.core.PluginMode;
+import com.cmsr.onebase.plugin.common.PluginMode;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
