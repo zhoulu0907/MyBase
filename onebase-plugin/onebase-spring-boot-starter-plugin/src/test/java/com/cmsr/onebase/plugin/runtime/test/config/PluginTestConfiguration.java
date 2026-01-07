@@ -1,6 +1,6 @@
 package com.cmsr.onebase.plugin.runtime.test.config;
 
-import com.cmsr.onebase.plugin.service.PluginConfigService;
+import com.cmsr.onebase.plugin.service.PluginConfigQueryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -23,8 +23,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * 避免 ConfigDemoController 注入失败
  * </p>
  *
- * @author OneBase Team
- * @date 2026-01-06
+ * @author chengyuansen
+ * @date 2026-01-07
  */
 @TestConfiguration
 public class PluginTestConfiguration {
@@ -32,14 +32,14 @@ public class PluginTestConfiguration {
     private static final Logger log = LoggerFactory.getLogger(PluginTestConfiguration.class);
 
     @Bean
-    public PluginConfigService pluginConfigService() {
+    public PluginConfigQueryService pluginConfigService() {
         return new MockPluginConfigServiceForTest();
     }
 
     /**
-     * 测试用的 Mock PluginConfigService
+     * 测试用的 Mock PluginConfigQueryService
      */
-    static class MockPluginConfigServiceForTest implements PluginConfigService {
+    static class MockPluginConfigServiceForTest implements PluginConfigQueryService {
 
         private final Map<String, Map<String, Object>> pluginConfigs = new ConcurrentHashMap<>();
         private final ResourceLoader resourceLoader = new DefaultResourceLoader();
