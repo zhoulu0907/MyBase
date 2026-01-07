@@ -22,7 +22,7 @@ public interface PluginInfoService {
      * @param uploadReqVO 上传请求
      * @return 插件ID
      */
-    Long uploadPlugin(@Valid PluginUploadReqVO uploadReqVO);
+    String uploadPlugin(@Valid PluginUploadReqVO uploadReqVO);
 
     /**
      * 获取插件详情（含版本列表）
@@ -52,7 +52,7 @@ public interface PluginInfoService {
      *
      * @param pluginId 插件ID
      */
-    void deletePlugin(Long pluginId);
+    void deletePlugin(String pluginId);
 
     /**
      * 启用插件版本

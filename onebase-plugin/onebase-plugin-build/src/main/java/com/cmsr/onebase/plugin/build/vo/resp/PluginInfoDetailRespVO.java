@@ -17,7 +17,7 @@ import java.util.List;
 public class PluginInfoDetailRespVO {
 
     @Schema(description = "插件唯一标识", example = "100")
-    private Long pluginId;
+    private String pluginId;
 
     @Schema(description = "插件名称", example = "示例插件")
     private String pluginName;

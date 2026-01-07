@@ -16,9 +16,9 @@ import org.springframework.web.multipart.MultipartFile;
 @Data
 public class PluginVersionUploadReqVO {
 
-    @Schema(description = "插件ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "1024")
-    @NotNull(message = "插件ID不能为空")
-    private Long pluginId;
+    @Schema(description = "插件ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "test-plugin")
+    @NotBlank(message = "插件ID不能为空")
+    private String pluginId;
 
     @Schema(description = "版本号", requiredMode = Schema.RequiredMode.REQUIRED, example = "1.0.0")
     @NotBlank(message = "版本号不能为空")

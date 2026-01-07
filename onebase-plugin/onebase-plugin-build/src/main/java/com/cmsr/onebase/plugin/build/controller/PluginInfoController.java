@@ -37,7 +37,7 @@ public class PluginInfoController {
     @PostMapping("/upload")
     @Operation(summary = "上传插件（首次上传）")
     @PreAuthorize("@ss.hasPermission('plugin:info:create')")
-    public CommonResult<Long> uploadPlugin(@Valid PluginUploadReqVO uploadReqVO) {
+    public CommonResult<String> uploadPlugin(@Valid PluginUploadReqVO uploadReqVO) {
         return success(pluginInfoService.uploadPlugin(uploadReqVO));
     }
 
@@ -66,9 +66,9 @@ public class PluginInfoController {
 
     @PostMapping("/delete")
     @Operation(summary = "删除插件及其所有版本")
-    @Parameter(name = "pluginId", description = "插件ID", required = true, example = "1024")
+    @Parameter(name = "pluginId", description = "插件ID", required = true, example = "test-plugin")
     @PreAuthorize("@ss.hasPermission('plugin:info:delete')")
-    public CommonResult<Boolean> deletePlugin(@RequestParam("pluginId") Long pluginId) {
+    public CommonResult<Boolean> deletePlugin(@RequestParam("pluginId") String pluginId) {
         pluginInfoService.deletePlugin(pluginId);
         return success(true);
     }

@@ -35,7 +35,7 @@ public class PluginConfigInfoRepository extends BaseDataRepository<PluginConfigI
      * @param pluginId 插件ID
      * @return 插件配置信息列表
      */
-    public List<PluginConfigInfoDO> getListByPluginId(Long pluginId) {
+    public List<PluginConfigInfoDO> getListByPluginId(String pluginId) {
         QueryWrapper queryWrapper = this.query()
                 .eq(PluginConfigInfoDO::getPluginId, pluginId);
         return list(queryWrapper);
@@ -48,7 +48,7 @@ public class PluginConfigInfoRepository extends BaseDataRepository<PluginConfigI
      * @param pluginVersion 插件版本
      * @return 配置列表
      */
-    public List<PluginConfigInfoDO> getListByPluginIdAndVersion(Long pluginId, String pluginVersion) {
+    public List<PluginConfigInfoDO> getListByPluginIdAndVersion(String pluginId, String pluginVersion) {
         QueryWrapper queryWrapper = this.query()
                 .eq(PluginConfigInfoDO::getPluginId, pluginId)
                 .eq(PluginConfigInfoDO::getPluginVersion, pluginVersion);
@@ -61,7 +61,7 @@ public class PluginConfigInfoRepository extends BaseDataRepository<PluginConfigI
      * @param pluginId 插件ID
      * @param pluginVersion 插件版本
      */
-    public void deleteByPluginIdAndVersion(Long pluginId, String pluginVersion) {
+    public void deleteByPluginIdAndVersion(String pluginId, String pluginVersion) {
         QueryWrapper queryWrapper = this.query()
                 .eq(PluginConfigInfoDO::getPluginId, pluginId)
                 .eq(PluginConfigInfoDO::getPluginVersion, pluginVersion);

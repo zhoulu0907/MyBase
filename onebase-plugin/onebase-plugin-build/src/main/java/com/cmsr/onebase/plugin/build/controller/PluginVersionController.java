@@ -42,9 +42,9 @@ public class PluginVersionController {
 
     @GetMapping("/list")
     @Operation(summary = "获取版本列表")
-    @Parameter(name = "pluginId", description = "插件ID", required = true, example = "1024")
+    @Parameter(name = "pluginId", description = "插件ID", required = true, example = "test-plugin")
     @PreAuthorize("@ss.hasPermission('plugin:version:query')")
-    public CommonResult<List<PluginVersionRespVO>> getVersionList(@RequestParam("pluginId") Long pluginId) {
+    public CommonResult<List<PluginVersionRespVO>> getVersionList(@RequestParam("pluginId") String pluginId) {
         return success(pluginVersionService.getVersionList(pluginId));
     }
 

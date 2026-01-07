@@ -22,7 +22,7 @@ public interface PluginConfigService {
      * @param pluginVersion 插件版本
      * @return 配置列表
      */
-    List<PluginConfigRespVO> getConfigList(Long pluginId, String pluginVersion);
+    List<PluginConfigRespVO> getConfigList(String pluginId, String pluginVersion);
 
     /**
      * 批量更新配置
@@ -38,6 +38,6 @@ public interface PluginConfigService {
      * @param pluginVersion 插件版本
      * @return 包信息列表
      */
-    List<PluginPackageRespVO> getPackageList(Long pluginId, String pluginVersion);
+    List<PluginPackageRespVO> getPackageList(String pluginId, String pluginVersion);
 
 }

@@ -37,7 +37,7 @@ public class PluginConfigServiceImpl implements PluginConfigService {
     private PluginPackageInfoRepository pluginPackageInfoRepository;
 
     @Override
-    public List<PluginConfigRespVO> getConfigList(Long pluginId, String pluginVersion) {
+    public List<PluginConfigRespVO> getConfigList(String pluginId, String pluginVersion) {
         List<PluginConfigInfoDO> configs = pluginConfigInfoRepository.getListByPluginIdAndVersion(
                 pluginId, pluginVersion);
         return configs.stream()
@@ -60,7 +60,7 @@ public class PluginConfigServiceImpl implements PluginConfigService {
     }
 
     @Override
-    public List<PluginPackageRespVO> getPackageList(Long pluginId, String pluginVersion) {
+    public List<PluginPackageRespVO> getPackageList(String pluginId, String pluginVersion) {
         List<PluginPackageInfoDO> packages = pluginPackageInfoRepository.getListByPluginIdAndVersion(
                 pluginId, pluginVersion);
         return packages.stream()

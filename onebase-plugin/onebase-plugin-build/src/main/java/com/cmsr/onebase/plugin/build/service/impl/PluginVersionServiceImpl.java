@@ -131,7 +131,7 @@ public class PluginVersionServiceImpl implements PluginVersionService {
     }
 
     @Override
-    public List<PluginVersionRespVO> getVersionList(Long pluginId) {
+    public List<PluginVersionRespVO> getVersionList(String pluginId) {
         List<PluginInfoDO> versions = pluginInfoRepository.getListByPluginId(pluginId);
         if (CollUtil.isEmpty(versions)) {
             throw exception(PLUGIN_NOT_FOUND);
@@ -227,7 +227,7 @@ public class PluginVersionServiceImpl implements PluginVersionService {
     /**
      * 保存包信息
      */
-    private void savePackageInfo(PluginMetaInfo metaInfo, Long pluginId, String pluginVersion) {
+    private void savePackageInfo(PluginMetaInfo metaInfo, String pluginId, String pluginVersion) {
         for (PluginMetaInfo.PluginPackageInfo packageInfo : metaInfo.getPackages()) {
             PluginPackageInfoDO packageDO = PluginPackageInfoDO.builder()
                     .pluginId(pluginId)
@@ -242,7 +242,7 @@ public class PluginVersionServiceImpl implements PluginVersionService {
     /**
      * 保存配置信息
      */
-    private void saveConfigInfo(PluginMetaInfo metaInfo, Long pluginId, String pluginVersion) {
+    private void saveConfigInfo(PluginMetaInfo metaInfo, String pluginId, String pluginVersion) {
         for (PluginMetaInfo.PluginConfigTemplate configTemplate : metaInfo.getConfigTemplates()) {
             PluginConfigInfoDO configDO = PluginConfigInfoDO.builder()
                     .pluginId(pluginId)
@@ -258,7 +258,7 @@ public class PluginVersionServiceImpl implements PluginVersionService {
     /**
      * 从上一版本复制配置
      */
-    private void copyConfigFromPreviousVersion(Long pluginId, String previousVersion, String newVersion) {
+    private void copyConfigFromPreviousVersion(String pluginId, String previousVersion, String newVersion) {
         List<PluginConfigInfoDO> previousConfigs = pluginConfigInfoRepository.getListByPluginIdAndVersion(
                 pluginId, previousVersion);
         for (PluginConfigInfoDO config : previousConfigs) {
