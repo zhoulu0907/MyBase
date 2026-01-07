@@ -20,7 +20,7 @@ import {
   type InsertMethodV2Params,
   type UpdateMethodV2Params
 } from '@onebase/app';
-import { pagesRuntimeSignal } from '@onebase/common';
+import { menuPermissionSignal, pagesRuntimeSignal } from '@onebase/common';
 import { getSimpleUserList } from '@onebase/platform-center';
 import dayjs from 'dayjs';
 
@@ -99,6 +99,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({
   } = useListEditorSignal;
   const { clearPageViews, clearCurViewId } = usePageViewEditorSignal;
   const { workbenchComponents, wbComponentSchemas } = useWorkbenchEditorSignal;
+  const { menuPermission } = menuPermissionSignal;
 
   const {
     curPage,
@@ -202,7 +203,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({
   };
 
   const loadPageSetInfo = async (pageSetId: string) => {
-    startLoadPageSet({ pageSetId: pageSetId });
+    startLoadPageSet({ pageSetId: pageSetId, allowViewUuids: menuPermission.value?.viewUuids || [] });
   };
 
   // 信息收集弹窗

@@ -254,16 +254,6 @@ const TableSearch = memo((props: TableSearchConfig) => {
             detailMode={detailMode}
           />
         );
-      case FORM_COMPONENT_TYPES.CAROUSEL_FORM:
-        return (
-          <FormComp.XCarouselForm
-            cpName={cpId}
-            id={cpId}
-            {...componentConfig}
-            runtime={runtime}
-            detailMode={detailMode}
-          />
-        );
       case FORM_COMPONENT_TYPES.DATA_SELECT:
         return (
           <FormComp.XDataSelect

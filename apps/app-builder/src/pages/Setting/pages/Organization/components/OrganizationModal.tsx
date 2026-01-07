@@ -31,6 +31,9 @@ const DepartmentModal: React.FC<DepartmentModalProps> = (props) => {
     if (visible) {
       form.resetFields();
       if (initialValues) {
+        if (initialValues.parentId == 0) {
+          delete initialValues.parentId;
+        }
         form.setFieldsValue({ ...initialValues });
       }
 
@@ -47,8 +50,8 @@ const DepartmentModal: React.FC<DepartmentModalProps> = (props) => {
   }, [visible, initialValues, form]);
 
   const fetchUserList = async () => {
-    const deptId = form.getFieldValue("id");
-    const users = await getSimpleUser(deptId,true);
+    const deptId = form.getFieldValue('id');
+    const users = await getSimpleUser(deptId, true);
     setUserList(users);
   };
 

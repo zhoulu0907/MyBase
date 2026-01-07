@@ -116,14 +116,13 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
     [FORM_COMPONENT_TYPES.IMG_UPLOAD]: { component: FormComp.XImgUpload, extraProps },
     [FORM_COMPONENT_TYPES.AUTO_CODE]: { component: FormComp.XAutoCode, extraProps },
     // [FORM_COMPONENT_TYPES.RELATED_FORM]: { component: FormComp.XRelatedForm, extraProps },
-    [FORM_COMPONENT_TYPES.CAROUSEL_FORM]: { component: FormComp.XCarouselForm, extraProps },
     [FORM_COMPONENT_TYPES.SUB_TABLE]: { component: FormComp.XSubTable, extraProps: { ...extraProps, editLoading, useStoreSignals, editPreview } },
     [FORM_COMPONENT_TYPES.DATA_SELECT]: { component: FormComp.XDataSelect, extraProps: { ...extraProps, editPreview } },
 
     //  布局组件
-    // [LAYOUT_COMPONENT_TYPES.COLUMN_LAYOUT]: { component: LayoutComp.XPreviewColumnLayout, extraProps: { useStoreSignals, editPreview } },
-    // [LAYOUT_COMPONENT_TYPES.TABS_LAYOUT]: { component: LayoutComp.XPreviewTabsLayout, extraProps: { useStoreSignals, editPreview } },
-    // [LAYOUT_COMPONENT_TYPES.COLLAPSE_LAYOUT]: { component: LayoutComp.XPreviewCollapseLayout, extraProps: { useStoreSignals, editPreview } },
+    // [LAYOUT_COMPONENT_TYPES.TABS_LAYOUT]: { component: LayoutComp.XPreviewTabsLayout, extraProps: { ...extraProps, useStoreSignals, editPreview } },
+    // [LAYOUT_COMPONENT_TYPES.COLUMN_LAYOUT]: { component: LayoutComp.XPreviewColumnLayout, extraProps: { ...extraProps, useStoreSignals, editPreview } },
+    // [LAYOUT_COMPONENT_TYPES.COLLAPSE_LAYOUT]: { component: LayoutComp.XPreviewCollapseLayout, extraProps: { ...extraProps, useStoreSignals, editPreview } },
 
     // 列表组件
     [LIST_COMPONENT_TYPES.TABLE]: { component: ListComp.XLoadMore, extraProps: { manuClick: !lastOne, showFromPageData } },
@@ -141,6 +140,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
     [SHOW_COMPONENT_TYPES.WEB_VIEW]: { component: ShowComp.XWebView },
     [SHOW_COMPONENT_TYPES.DIVIDER]: { component: ShowComp.XDivider },
     [SHOW_COMPONENT_TYPES.PLACEHOLDER]: { component: ShowComp.XPlaceholder },
+    [SHOW_COMPONENT_TYPES.CAROUSEL_FORM]: { component: ShowComp.XCarouselForm, extraProps },
 
     //  工作台组件
     [WORKBENCH_COMPONENT_TYPES.QUICK_ENTRY]: { component: WorkbenchComp.XQuickEntry },

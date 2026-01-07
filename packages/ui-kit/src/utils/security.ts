@@ -16,12 +16,20 @@ interface SecureEncode {
 };
 
 export const securityEncodeText = (security: SecureEncode, text: any) => {
-    if (!text && text !== 0) {
+    if (text === null || text === undefined || text === '') {
         return '--';
     }
 
     let strText = text;
     if (typeof text === 'object') {
+        if (Array.isArray(text)) {
+            if (text.length === 0) {
+                return '--';
+            }
+        } else if (Object.keys(text).length === 0) {
+            return '--';
+        }
+
         try {
             strText = JSON.stringify(text);
         } catch (e) {

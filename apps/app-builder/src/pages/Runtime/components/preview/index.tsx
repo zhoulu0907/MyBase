@@ -4,12 +4,13 @@ import {
   getEntityFieldsWithChildren,
   getPageSetId,
   getPageSetMetaData,
-  PageType,
   listPageView,
+  PageType,
   type AppEntityField,
   type GetPageSetIdReq
 } from '@onebase/app';
 import { getHashQueryParam, pagesRuntimeSignal } from '@onebase/common';
+import { getFileUrlById } from '@onebase/platform-center';
 import {
   EDITOR_TYPES,
   getComponentWidth,
@@ -29,7 +30,6 @@ import {
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { Fragment, useCallback, useEffect, useState } from 'react';
 import styles from './index.module.less';
-import { getFileUrlById } from '@onebase/platform-center';
 import { pluginBridge } from '@/plugin/bridge';
 
 interface PreviewProps {
@@ -175,13 +175,14 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
         pageSetId: pageSetId
       });
       if (res && res.pages && res.pages.length > 0) {
-        const imgRes = await getFileUrlById(res.pages[0].indexImage);
+        const imgRes = getFileUrlById(res.pages[0].indexImage);
         setDashboardImgUrl(imgRes);
       }
     } catch (error) {
       console.error('获取页面视图失败:', error);
     }
   };
+
   const loadPageSetInfo = async (pageSetId: string) => {
     // 工作台使用独立加载逻辑
     if (pagesetType === PageType.WORKBENCH) {
@@ -194,7 +195,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
   };
 
   const submitForm = async () => {
-    const fields = form.getFieldsValue();
+    // const fields = form.getFieldsValue();
     if (editTargetId) {
       setEditTargetId('');
     }
@@ -223,7 +224,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
     }
   };
 
-  const handleGetData = async (id: string) => {
+  const handleGetData = async (_id: string) => {
     // const req: DetailMethodV2Params = {
     //   id: id
     // };

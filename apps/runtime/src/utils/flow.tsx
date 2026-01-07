@@ -150,7 +150,6 @@ const ExecuteFlows: React.FC<FlowsProps> = ({ flows, inputParams }) => {
   };
 
   useEffect(() => {
-    console.log('flows: ', flows);
     if (flows?.length) {
       executeSingleFlow();
     }

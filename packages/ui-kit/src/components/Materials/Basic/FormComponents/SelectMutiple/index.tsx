@@ -60,7 +60,7 @@ const XSelectMutiple = memo((props: XInputSelectMutipleConfig & { runtime?: bool
               Array.isArray(fieldValue) &&
               fieldValue.map((ele: any, index: number) => (
                 <Tag key={index} style={{ marginBottom: '0' }}>
-                  {ele?.name || options.find((e) => e.id === ele || e.id === ele?.id)?.label || '--'}
+                  {ele?.name || options.find((e) => e.value === ele || e.value === ele?.id)?.label || '--'}
                 </Tag>
               ))}
           </Space>
@@ -79,7 +79,7 @@ const XSelectMutiple = memo((props: XInputSelectMutipleConfig & { runtime?: bool
             }}
           >
             {options.map((ele, index: number) => (
-              <Select.Option key={index} value={ele.id}>
+              <Select.Option key={index} value={ele.value}>
                 {ele.label}
               </Select.Option>
             ))}

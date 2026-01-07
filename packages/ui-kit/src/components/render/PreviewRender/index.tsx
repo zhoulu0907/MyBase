@@ -151,6 +151,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
     return <Impl {...baseProps} />;
   }, [componentConfig, refresh]);
 
+
   return <>{renderComponent()}</>;
 };
 

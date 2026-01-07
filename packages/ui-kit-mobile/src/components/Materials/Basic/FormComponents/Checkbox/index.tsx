@@ -5,7 +5,7 @@ import { ValidatorType, ITypeRules } from '@arco-design/mobile-utils';
 import IconSquareChecked from '@arco-design/mobile-react/esm/icon/IconSquareChecked';
 import IconSquareUnchecked from '@arco-design/mobile-react/esm/icon/IconSquareUnchecked';
 import IconSquareDisabled from '@arco-design/mobile-react/esm/icon/IconSquareDisabled';
-import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, FormSchema, useAppEntityStore, DEFAULT_VALUE_TYPES, getFieldOptionsConfig } from '@onebase/ui-kit';
+import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, FormSchema, useAppEntityStore, DEFAULT_VALUE_TYPES, getFieldOptionsConfig, menuDictSignal } from '@onebase/ui-kit';
 import { DictData } from '@onebase/platform-center';
 import styles from './index.module.css';
 import '../index.css';
@@ -35,6 +35,7 @@ const XCheckbox = memo((props: XCheckboxConfig & { runtime?: boolean; detailMode
     detailMode
   } = props;
 
+  const { appDict } = menuDictSignal;
   const { mainEntity, subEntities } = useAppEntityStore();
   const [options, setOptions] = useState<DictData[]>([]);
 
@@ -43,14 +44,14 @@ const XCheckbox = memo((props: XCheckboxConfig & { runtime?: boolean; detailMode
 
   useEffect(() => {
     if (dataField?.length) {
-      getOptions()
+      getOptions();
     }
-  }, [dataField])
+  }, [dataField]);
 
   const getOptions = async () => {
-    const newOptions = await getFieldOptionsConfig(dataField, mainEntity, subEntities);
-    setOptions(newOptions)
-  }
+    const newOptions = await getFieldOptionsConfig(dataField, mainEntity, subEntities, appDict.value);
+    setOptions(newOptions);
+  };
 
   // 根据是否为只读模式确定内容
   const renderContent = () => {

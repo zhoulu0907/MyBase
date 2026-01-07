@@ -14,9 +14,9 @@ import './index.css';
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ConfigProvider prefixCls="pc">
-      <ErrorBoundary FallbackComponent={ErrorPage}>
+      {/* <ErrorBoundary FallbackComponent={ErrorPage}> */}
         <App />
-      </ErrorBoundary>
+      {/* </ErrorBoundary> */}
     </ConfigProvider>
   </StrictMode>
 );
