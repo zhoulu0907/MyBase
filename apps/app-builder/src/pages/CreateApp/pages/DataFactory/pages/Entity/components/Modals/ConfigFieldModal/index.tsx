@@ -76,6 +76,9 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = memo(
         cancelText="取消"
         confirmLoading={fieldManager.submitting}
         style={{ width: 1260 }}
+        // 关闭自动聚焦与焦点锁
+        autoFocus={false}
+        focusLock={false}
       >
         <Spin loading={fieldManager.loading} style={{ width: '100%' }}>
           <Form form={fieldManager.form} initialValues={{ fields: fieldManager.activeFields }} id="field-config-form">
