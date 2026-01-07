@@ -34,13 +34,6 @@
             <version>${revision}</version>
         </dependency>
 
-        <!-- OneBase Plugin Core -->
-        <dependency>
-            <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-plugin-core</artifactId>
-            <version>${revision}</version>
-        </dependency>
-
         <!-- Spring Boot Starter -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
