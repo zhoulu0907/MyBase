@@ -1,7 +1,11 @@
 package com.cmsr.onebase.plugin.runtime.test.exception;
 
 import com.cmsr.onebase.plugin.runtime.manager.OneBasePluginManager;
+import com.cmsr.onebase.plugin.runtime.test.config.PluginTestConfiguration;
 import com.cmsr.onebase.plugin.runtime.test.util.PluginHttpTestUtil;
+import com.cmsr.onebase.plugin.runtime.test.util.PluginTestEnvironmentManager;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -11,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 
@@ -26,6 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * <li>异常操作后系统状态的一致性</li>
  * <li>异常操作后插件 API 的可用性</li>
  * </ul>
+ * 注意：插件会自动编译打包并复制到 plugins 目录
  * </p>
  *
  * @author chengyuansen
@@ -33,17 +39,28 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@Import(PluginTestConfiguration.class)
 @TestPropertySource(properties = {
         "onebase.plugin.enabled=true",
         "onebase.plugin.mode=staging",
         "onebase.plugin.auto-load=true",
         "onebase.plugin.auto-start=true",
-        "onebase.plugin.plugins-dir=D:/cmsr/10_cmsr/CodingSpace/plugins-root"
+        "onebase.plugin.plugins-dir=plugins" // 使用相对路径,由环境管理器自动准备
 })
 public class PluginExceptionScenariosTest {
 
     private static final Logger log = LoggerFactory.getLogger(PluginExceptionScenariosTest.class);
     private static final String PLUGIN_ID = "hello-plugin";
+
+    @BeforeAll
+    static void setupEnvironment() throws Exception {
+        PluginTestEnvironmentManager.setupEnvironment();
+    }
+
+    @AfterAll
+    static void cleanupEnvironment() throws Exception {
+        PluginTestEnvironmentManager.cleanupEnvironment();
+    }
 
     @LocalServerPort
     private int port;
@@ -54,8 +71,20 @@ public class PluginExceptionScenariosTest {
     private PluginHttpTestUtil httpUtil;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws Exception {
+        // 注册插件管理器以便清理时释放文件锁
+        PluginTestEnvironmentManager.setPluginManager(pluginManager);
+        // 设置为只卸载不删除,因为测试过程中需要保留插件文件
+        PluginTestEnvironmentManager.setDeletePhysicalFiles(false);
         httpUtil = new PluginHttpTestUtil("http://localhost:" + port);
+        // 确保插件文件存在(某些测试可能会删除插件)
+        PluginTestEnvironmentManager.ensurePluginExists();
+
+        // 确保插件已加载并启动(某些测试会卸载插件)
+        if (pluginManager != null && !pluginManager.getPlugin(PLUGIN_ID).isPresent()) {
+            pluginManager.loadPlugins();
+            pluginManager.startPlugin(PLUGIN_ID);
+        }
     }
 
     // ==================== 重复操作测试 ====================

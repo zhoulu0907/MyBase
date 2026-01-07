@@ -38,10 +38,11 @@
             <artifactId>maven-model</artifactId>
         </dependency>
 
-        <!-- OneBase Plugin Core -->
+        <!-- OneBase Plugin Common -->
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-plugin-core</artifactId>
+            <artifactId>onebase-plugin-common</artifactId>
+            <version>${revision}</version>
         </dependency>
 
         <!-- ASM 用于字节码分析 -->

@@ -82,7 +82,6 @@ aj:
     req-get-minute-limit: 30 # get 接口一分钟内请求数限制
     req-check-minute-limit: 60 # check 接口一分钟内请求数限制
     req-verify-minute-limit: 60 # verify 接口一分钟内请求数限制
-
 --- #################### OneBase相关配置 ####################
 
 onebase:
@@ -138,7 +137,6 @@ debug: false
 easy:
   trans:
     enabled: false
-
 
 anyline:
   is-debug: false

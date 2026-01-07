@@ -20,16 +20,18 @@
     <url>https://cmsr.com</url>
 
     <dependencies>
+        <!-- OneBase Plugin Common -->
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-plugin-common</artifactId>
+            <version>${revision}</version>
+        </dependency>
+
         <!-- OneBase Plugin SDK -->
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-plugin-sdk</artifactId>
-        </dependency>
-
-        <!-- OneBase Plugin Core -->
-        <dependency>
-            <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-plugin-core</artifactId>
+            <version>${revision}</version>
         </dependency>
 
         <!-- Spring Boot Starter -->
@@ -88,7 +90,6 @@
             <artifactId>junit-platform-suite-engine</artifactId>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
 
     <build>
@@ -97,6 +98,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.12</version>
                 <executions>
                     <execution>
                         <id>prepare-agent</id>

@@ -1,6 +1,6 @@
 package com.cmsr.onebase.plugin.runtime.manager;
 
-import com.cmsr.onebase.plugin.core.ExtensionPointScannerSpring;
+import com.cmsr.onebase.plugin.common.ExtensionPointScannerSpring;
 import com.cmsr.onebase.plugin.runtime.config.PluginProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.pf4j.DefaultPluginDescriptor;

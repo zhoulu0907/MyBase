@@ -10,13 +10,14 @@
     </parent>
     <packaging>pom</packaging>
     <modules>
+        <module>onebase-plugin-common</module>
         <module>onebase-plugin-sdk</module>
         <module>onebase-plugin-core</module>
         <module>onebase-plugin-build</module>
         <module>onebase-plugin-runtime</module>
         <module>onebase-spring-boot-starter-plugin</module>
         <module>onebase-plugin-maven-plugin</module>
-        <module>onebase-plugin-demo</module>
+<!--        <module>onebase-plugin-demo</module>-->
         <module>onebase-plugin-host-simulator</module>
     </modules>
 
@@ -25,7 +26,7 @@
     <description>
         OneBase插件体系
         基于PF4J框架实现的插件化架构，支持动态加载、热插拔、隔离运行等特性。
-        
+
         模块说明：
         1. onebase-plugin-sdk：插件开发SDK，提供扩展点接口和上下文API
         2. onebase-spring-boot-starter-plugin：插件运行时自动配置，提供插件加载、管理和调用能力
