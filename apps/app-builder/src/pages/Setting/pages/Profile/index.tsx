@@ -142,7 +142,7 @@ const ProfilePage: React.FC = () => {
         render: (url: any, record: any) => {
           return url ? (
             <img
-              src={url}
+              src={getFileUrlById(url)}
               style={{
                 width: 72,
                 height: 36,
