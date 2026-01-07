@@ -1,17 +1,19 @@
 import corpSVG from '@/assets/images/building-line.svg';
+import externalUserSVG from '@/assets/images/external_user.svg';
 import dictSVG from '@/assets/images/file.svg';
 import organizationSVG from '@/assets/images/organization-chart.svg';
+import plugSVG from '@/assets/images/plug.svg';
 import securitySVG from '@/assets/images/security.svg';
 import tenantInfoSVG from '@/assets/images/space-ship-line.svg';
 import appLicationManageSVG from '@/assets/images/terminal-window-line.svg';
 import userSVG from '@/assets/images/user-group.svg';
 import roleSVG from '@/assets/images/user.svg';
 import userInfoSVG from '@/assets/images/userInfo.svg';
-import plugSVG from '@/assets/images/plug.svg';
-import externalUserSVG from '@/assets/images/external_user.svg';
+import { userPermissionSignal } from '@/store/singals/user_permission';
 import { Button, Layout, Menu } from '@arco-design/web-react';
 import { IconMenuFold, IconMenuUnfold } from '@arco-design/web-react/icon';
 import { hasMenu, TENANT_MENUS } from '@onebase/common';
+import { useSignals } from '@preact/signals-react/runtime';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import type { MenuItemType } from './menuData';
@@ -25,7 +27,7 @@ interface SiderProps {
   className?: string;
   collapsed?: boolean;
   onCollapse?: (collapsed: boolean) => void;
-  menuItems?: MenuItemType[];
+  //   menuItems?: MenuItemType[];
 }
 
 interface MenuGroupConfig {
@@ -34,7 +36,11 @@ interface MenuGroupConfig {
   children: MenuItemType[];
 }
 
-const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollapse, menuItems = [] }) => {
+const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollapse }) => {
+  useSignals();
+
+  const { permissionInfo } = userPermissionSignal;
+  const permissionReady = !!permissionInfo.value;
   const navigate = useNavigate();
   const location = useLocation();
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
@@ -170,10 +176,9 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
     return result;
   };
 
-  // 使用传入的菜单项或默认菜单项
   const finalMenuItems = useMemo(() => {
-    return menuItems.length > 0 ? menuItems : platMenuData();
-  }, [menuItems, menuConfig]);
+    return platMenuData();
+  }, [menuConfig]);
 
   // 查找选中菜单项的函数
   const findSelectedKeys = React.useCallback((items: MenuItemType[], path: string): string[] => {
@@ -232,7 +237,7 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
         .map((item) => {
           // TODO 后端返回数据暂未更新，暂不开启权限控制
           const permissionKey = item.permissionKey;
-          if (permissionKey && !hasMenu(permissionKey as any)) return null;
+          if (permissionReady && permissionKey && !hasMenu(permissionKey as any)) return null;
 
           // 如果 children length === 0，则不渲染这个菜单
           if (item.children && item.children.length === 0) {
@@ -275,7 +280,7 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
         })
         .filter(Boolean);
     },
-    [collapsed]
+    [collapsed, permissionReady, permissionInfo.value]
   );
 
   const defaultKeys = getDefaultKeys();

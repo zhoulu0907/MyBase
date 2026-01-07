@@ -1,17 +1,17 @@
 import UserProfileAvatar from '@/components/UserProfileAvatar';
 
+import TenantLogo from '@/components/TenantLogo';
 import { useI18n } from '@/hooks/useI18n';
+import { userPermissionSignal } from '@/store/singals/user_permission';
+import { setTenantInfoFromSession } from '@/utils';
 import { logout } from '@/utils/session';
 import { Button, Divider, Dropdown, Layout, Menu, Typography } from '@arco-design/web-react';
 import { IconApps, IconExport } from '@arco-design/web-react/icon';
 import { TokenManager, UserPermissionManager } from '@onebase/common';
 import { CodeType, getPermissionInfo, getTenantInfo, systemLogout, type TenantInfo } from '@onebase/platform-center';
-import { userPermissionSignal } from '@/store/singals/user_permission';
-import { getTenantInfoFromSession, setTenantInfoFromSession } from '@/utils';
 import React, { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import styles from './header.module.less';
-import TenantLogo from '@/components/TenantLogo';
 
 const { Header } = Layout;
 
@@ -39,6 +39,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className, avatarUrl, tenantInfo }) 
 
   const getInfo = async () => {
     const res = await getPermissionInfo(CodeType.TENANT);
+    console.log('res: ', res);
     UserPermissionManager.setUserPermissionInfo(res);
     userPermissionSignal.setPermissionInfo(res);
 

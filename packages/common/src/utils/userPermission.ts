@@ -7,7 +7,7 @@ export interface UserInfo {
   deptId: number; // 部门ID
   username: string; // 用户名
   email: string; // 邮箱
-  mobile?: string;  //手机号码
+  mobile?: string; //手机号码
 }
 
 /**
@@ -100,10 +100,15 @@ export class UserPermissionManager {
    */
   static hasMenu(menu: string): boolean {
     // TODO: 目前只解析到第二层
+    console.log('menu: ', menu);
     const [moduleCode] = menu?.split(':');
     const userPermissionInfo = this.getUserPermissionInfo();
+    console.log('userPermissionInfo: ', userPermissionInfo);
     const moduleItem = userPermissionInfo?.menus.find((item) => item.permission === `${moduleCode}`);
-    return moduleItem?.children?.some((item) => item.permission === menu) || false;
+    console.log('moduleItem: ', moduleItem);
+    const find = moduleItem?.children?.some((item) => item.permission === menu) || false;
+    console.log('find: ', find);
+    return find;
   }
 }
 
