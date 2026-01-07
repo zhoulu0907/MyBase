@@ -208,14 +208,14 @@ const AdvancedTableOperationConfig: React.FC<AdvancedTableOperationConfigProps> 
         const newValue = newData.map((op: OperationButtonConfig) =>
           op.type === modalButtonVisible
             ? {
-                ...op,
-                buttonName: values.buttonName,
-                buttonIcon: values.buttonIcon,
-                iconColor: values.iconColor,
-                confirmText: values.confirmText,
-                deletedAction: values.deletedAction,
-                redirectPageId: values.redirectPageId,
-                redirectMethod: values.redirectMethod
+              ...op,
+              buttonName: values.buttonName,
+              buttonIcon: values.buttonIcon,
+              iconColor: values.iconColor,
+              confirmText: values.confirmText,
+              deletedAction: values.deletedAction,
+              redirectPageId: values.redirectPageId,
+              redirectMethod: values.redirectMethod
               }
             : op
         );
@@ -227,8 +227,6 @@ const AdvancedTableOperationConfig: React.FC<AdvancedTableOperationConfigProps> 
       }
     });
   };
-
-  console.log(configs);
 
   return (
     <>
