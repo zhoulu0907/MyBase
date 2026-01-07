@@ -58,6 +58,7 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
     const isUnmounting = useRef(false);
     const isGraphInitialized = useRef(false);
     const collapseHandlerRef = useRef<SectionCollapseHandler | null>(null);
+    const lastTranslate = useRef({ tx: 0, ty: 0 });
 
     const getGraphPositon = () => {
       const contentArea = graphRef.current?.getContentArea();
@@ -470,6 +471,14 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
           const minTranslateY = baseMinTranslateY - extraHeight;
 
           // 限制平移范围
+          if (currentScale <= MIN_SCALE) {
+            if (tx === lastTranslate.current.tx && ty === lastTranslate.current.ty) {
+              return;
+            }
+            graphRef.current.translate(lastTranslate.current.tx, lastTranslate.current.ty);
+            return;
+          }
+
           const newTx = Math.max(minTranslateX, Math.min(maxTranslateX, tx));
           const newTy = Math.max(minTranslateY, Math.min(maxTranslateY, ty));
 
@@ -477,6 +486,7 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
           if (newTx !== tx || newTy !== ty) {
             graphRef.current.translate(newTx, newTy);
           }
+          lastTranslate.current = { tx: newTx, ty: newTy };
         });
 
         // 事件监听
