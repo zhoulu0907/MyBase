@@ -102,7 +102,7 @@ onebase:
     mock-enable: false
     permit-all-urls: # 显式放行认证、注册、刷新、验证码、以及必要静态资源/健康检查，避免 @PermitAll 被覆盖导致 401
       - /runtime/system/captcha/**
-      #      - /runtime/infra/file/download/**
+      - /runtime/infra/file/download/**
       - /runtime/app/application/get
   tenant: # 多租户相关配置项
     enable: true
