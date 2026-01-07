@@ -7,7 +7,7 @@ export interface UserInfo {
   deptId: number; // 部门ID
   username: string; // 用户名
   email: string; // 邮箱
-  mobile?: string;  //手机号码
+  mobile?: string; //手机号码
 }
 
 /**
@@ -103,7 +103,8 @@ export class UserPermissionManager {
     const [moduleCode] = menu?.split(':');
     const userPermissionInfo = this.getUserPermissionInfo();
     const moduleItem = userPermissionInfo?.menus.find((item) => item.permission === `${moduleCode}`);
-    return moduleItem?.children?.some((item) => item.permission === menu) || false;
+    const find = moduleItem?.children?.some((item) => item.permission === menu) || false;
+    return find;
   }
 }
 
