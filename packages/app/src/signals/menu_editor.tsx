@@ -11,7 +11,7 @@ export const createMenuSignal = () => {
     curMenu,
     setCurMenu
   };
-};
+}; 
 
 // 创建默认的 store 实例（向后兼容）
 export const menuSignal = createMenuSignal();
