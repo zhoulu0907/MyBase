@@ -738,6 +738,7 @@ public class SemanticDataCrudService {
      * 生成并应用主表自动编号字段
      * <p>
      * - 收集类型为 `AUTO_CODE` 的字段 ID
+     * - 构建符合 FIELD_REF 规则要求的上下文数据（key格式为 "field_" + fieldUuid）
      * - 调用编号服务生成编码并写回原始值（rawValue）
      *
      * @param fields 字段集合
@@ -748,7 +749,20 @@ public class SemanticDataCrudService {
                 .filter(f -> Objects.equals(f.getFieldTypeEnum(), AUTO_CODE))
                 .map(SemanticFieldSchemaDTO::getFieldUuid)
                 .toList();
-        Map<String, String> autoNumbers = autoNumberService.generateDataNumbers(fieldIds, value.getCurrentEntityRawMap());
+        
+        // 构建上下文数据：将字段名映射到 "field_" + fieldUuid 格式的key
+        // 用于支持 FIELD_REF 类型规则项获取引用字段的值
+        Map<String, Object> rawData = value.getCurrentEntityRawMap();
+        Map<String, Object> contextData = new HashMap<>(rawData);
+        for (SemanticFieldSchemaDTO field : fields) {
+            String fieldName = field.getFieldName();
+            String fieldUuid = field.getFieldUuid();
+            if (fieldName != null && fieldUuid != null && rawData.containsKey(fieldName)) {
+                contextData.put("field_" + fieldUuid, rawData.get(fieldName));
+            }
+        }
+        
+        Map<String, String> autoNumbers = autoNumberService.generateDataNumbers(fieldIds, contextData);
         for (String key : autoNumbers.keySet()) {
             String filedName = fields.stream().filter(semanticFieldSchemaDTO ->
                     semanticFieldSchemaDTO.getFieldUuid().equals(key)
