@@ -14,31 +14,25 @@ import com.cmsr.onebase.framework.common.security.dto.RuntimeLoginUser;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
 import com.cmsr.onebase.framework.security.config.SecurityProperties;
+import com.cmsr.onebase.framework.security.runtime.service.AuthPermitService;
 import com.cmsr.onebase.framework.web.core.handler.GlobalExceptionHandler;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
+import jakarta.annotation.Resource;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.security.core.Authentication;
-import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
-import org.springframework.web.method.HandlerMethod;
-import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
 
 import static com.cmsr.onebase.framework.common.exception.enums.GlobalErrorCodeConstants.SEESION_TIMEOUT;
 import static com.cmsr.onebase.framework.common.exception.enums.GlobalErrorCodeConstants.UNAUTHORIZED;
-import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertList;
 
 /**
  * Token 过滤器，验证 token 的有效性
@@ -46,7 +40,7 @@ import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.
  */
 @RequiredArgsConstructor
 @Slf4j
-public class RuntimeAuthenticationFilter extends OncePerRequestFilter implements ApplicationContextAware {
+public class RuntimeAuthenticationFilter extends OncePerRequestFilter {
 
     private final SecurityProperties securityProperties;
 
@@ -56,23 +50,8 @@ public class RuntimeAuthenticationFilter extends OncePerRequestFilter implements
 
     private final SecurityConfigApi securityConfigApi;
 
-    private ApplicationContext applicationContext;
-
-    private List<String> permitAllUrls;
-
-    private final AntPathMatcher pathMatcher = new AntPathMatcher();
-
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) {
-        this.applicationContext = applicationContext;
-        // 初始化时调用getPermitAllUrls方法并保存结果
-        try {
-            this.permitAllUrls = getPermitAllUrls();
-        } catch (Exception e) {
-            log.error("初始化免登录URL列表失败", e);
-            this.permitAllUrls = new ArrayList<>();
-        }
-    }
+    @Resource
+    private AuthPermitService authPermitService;
 
     @Override
     @SuppressWarnings("NullableProblems")
@@ -88,7 +67,7 @@ public class RuntimeAuthenticationFilter extends OncePerRequestFilter implements
             if (isLoginOrLogoutRequest(request)) {
                 // 如果是登录、登出、注册，那么从header中获取租户信息，无需获取token和登录用户信息
                 TenantContextHolder.setTenantId(WebFrameworkUtils.getTenantIdFromHeader(request));
-            } else if (isPermitAllRequest(request)) {
+            } else if (authPermitService.isPermitAllRequest(request)) {
                 // 如果是其他免登接口，暂保持和登录登出一致的逻辑，从header中获取租户信息
                 TenantContextHolder.setTenantId(WebFrameworkUtils.getTenantIdFromHeader(request));
             } else {
@@ -230,25 +209,6 @@ public class RuntimeAuthenticationFilter extends OncePerRequestFilter implements
     }
 
     /**
-     * 判断请求路径是否在免登录URL列表中
-     * 支持Ant风格路径匹配，如：/runtime/system/auth/**
-     *
-     * @param request HTTP请求
-     * @return 是否为免登录请求
-     */
-    private boolean isPermitAllRequest(HttpServletRequest request) {
-        String requestUri = request.getRequestURI();
-        if (permitAllUrls != null) {
-            for (String pattern : permitAllUrls) {
-                if (pathMatcher.match(pattern, requestUri)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    /**
      * 检查并更新会话空闲状态
      * <p>
      * 实现逻辑：
@@ -293,49 +253,4 @@ public class RuntimeAuthenticationFilter extends OncePerRequestFilter implements
         return true;
     }
 
-
-    /**
-     * 解析和获取免登接口
-     * 获取所有标注 @PermitAll 注解的Controller接口路径，以及 yaml 配置的免登录 URL 列表(securityProperties.getPermitAllUrls())
-     *
-     * @return
-     */
-    private List<String> getPermitAllUrls() {
-        List<String> result = new ArrayList<>();
-
-        // 添加配置文件中的免登录URL列表
-        if (securityProperties.getPermitAllUrls() != null) {
-            result.addAll(securityProperties.getPermitAllUrls());
-        }
-
-        // 获取带有@PermitAll注解的接口URL
-        if (applicationContext != null) {
-            RequestMappingHandlerMapping requestMappingHandlerMapping =
-                    applicationContext.getBean("requestMappingHandlerMapping", RequestMappingHandlerMapping.class);
-            if (requestMappingHandlerMapping != null) {
-                Map<RequestMappingInfo, HandlerMethod> handlerMethodMap = requestMappingHandlerMapping.getHandlerMethods();
-                for (Map.Entry<RequestMappingInfo, HandlerMethod> entry : handlerMethodMap.entrySet()) {
-                    HandlerMethod handlerMethod = entry.getValue();
-                    if (handlerMethod.hasMethodAnnotation(jakarta.annotation.security.PermitAll.class)) {
-                        RequestMappingInfo requestMappingInfo = entry.getKey();
-
-                        Set<String> urls = new HashSet<>();
-                        if (requestMappingInfo.getPatternsCondition() != null) {
-                            urls.addAll(requestMappingInfo.getPatternsCondition().getPatterns());
-                        }
-                        if (requestMappingInfo.getPathPatternsCondition() != null) {
-                            urls.addAll(convertList(requestMappingInfo.getPathPatternsCondition().getPatterns(),
-                                    pathPattern -> pathPattern.getPatternString()));
-                        }
-
-                        if (!urls.isEmpty()) {
-                            result.addAll(urls);
-                        }
-                    }
-                }
-            }
-        }
-
-        return result;
-    }
 }

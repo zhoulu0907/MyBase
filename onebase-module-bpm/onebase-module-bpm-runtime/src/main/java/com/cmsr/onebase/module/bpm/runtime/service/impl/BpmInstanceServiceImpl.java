@@ -41,6 +41,7 @@ import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticConditio
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticFieldTypeEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticOperatorEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.type.BpmSystemFieldEnum;
+import com.cmsr.onebase.module.metadata.core.semantic.type.RefType;
 import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticPageConditionVO;
 import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticTargetBodyVO;
 import com.cmsr.onebase.module.system.api.user.AdminUserApi;
@@ -185,16 +186,23 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
             });
         }
 
+        // 实体数据转换
+        SemanticEntityValueDTO entityValueDTO = semanticDynamicDataApi.buildSemanticEntityValueDTO(entityVO.getData(), entitySchemaDTO);
+        semanticDynamicDataApi.enrich(entitySchemaDTO, entityValueDTO);
+
+        Map<String, SemanticFieldValueDTO<Object>> fieldValueMap = entityValueDTO.getFieldValueMap();
+
         for (String name : formSummaryFieldNames) {
+            SemanticFieldValueDTO<Object> semanticFieldValue  = fieldValueMap.get(name);
             SemanticFieldSchemaDTO fieldDto = mainTableFieldMap.get(name);
 
-            if (fieldDto == null) {
+            if (semanticFieldValue == null || fieldDto == null) {
                 continue;
             }
 
             String displayName = fieldDto.getDisplayName();
             String fieldName = fieldDto.getFieldName();
-            Object fieldValue = entityVO.getData().get(fieldName);
+            Object fieldValue = semanticFieldValue.getRawValue();
 
             if (fieldValue == null) {
                 continue;
@@ -205,15 +213,9 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
                 break;
             }
 
-            // 处理复杂组件类型，转换为SemanticFieldValueDTO获取实际存储值
-            SemanticFieldTypeEnum fieldType = bpmEntityHelper.findFieldType(entitySchemaDTO, entitySchemaDTO.getTableName(), fieldName);
-            if (fieldType != null) {
-                SemanticFieldValueDTO<Object> semanticFieldValue = SemanticFieldValueDTO.ofType(fieldType);
-                semanticFieldValue.setRawValue(fieldValue);
-                Object storeValue = semanticFieldValue.getStoreValue();
-                if (storeValue != null) {
-                    fieldValue = storeValue;
-                }
+            // 复杂类型字段取name
+            if (fieldValue instanceof RefType refFieldValue) {
+                fieldValue = refFieldValue.getName();
             }
 
             sb.append(displayName).append(":").append(fieldValue).append(" ");
@@ -556,9 +558,10 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         List<FlowInstance> instances = flowInstanceRepository.list(instanceQuery);
         Map<Long, Long> entityDataIdInstanceIdMap = new HashMap<>();
 
-        if (CollectionUtils.isEmpty(instances)) {
-            return response;
-        }
+        // todo 只有携带了BPM相关的条件，才会进行BPM流程的查询
+//        if (CollectionUtils.isEmpty(instances)) {
+//            return response;
+//        }
 
         Set<Long> entityDataIds = new HashSet<>();
 
@@ -589,10 +592,10 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
                 reqVO.getFilters().setChildren(new ArrayList<>());
             }
 
-            reqVO.getFilters().getChildren().add(idCondition);
+            // reqVO.getFilters().getChildren().add(idCondition);
             conditionVO.setSemanticConditionDTO(reqVO.getFilters());
         } else {
-            conditionVO.setSemanticConditionDTO(idCondition);
+            // conditionVO.setSemanticConditionDTO(idCondition);
         }
 
         // 3. 调用 getDataByCondition 方法， todo 增加menuId的权限限制
@@ -618,11 +621,16 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
 
         // 查询流程数据，todo 使用关联查询
 
-        List<FlowInstance> instanceResults =  flowInstanceRepository.listByIds(instanceIds);
+        List<FlowInstance> instanceResults = new ArrayList<>();
+        List<BpmFlowInsBizExtDO> instanceExtResults = new ArrayList<>();
 
-        QueryWrapper instanceExtResultQuery = QueryWrapper.create();
-        instanceExtResultQuery.in(BpmFlowInsBizExtDO::getInstanceId, instanceIds);
-        List<BpmFlowInsBizExtDO> instanceExtResults = flowInsExtRepository.list(instanceExtResultQuery);
+        if (CollectionUtils.isNotEmpty(instanceIds)) {
+            instanceResults = flowInstanceRepository.listByIds(instanceIds);
+
+            QueryWrapper instanceExtResultQuery = QueryWrapper.create();
+            instanceExtResultQuery.in(BpmFlowInsBizExtDO::getInstanceId, instanceIds);
+            instanceExtResults = flowInsExtRepository.list(instanceExtResultQuery);
+        }
 
         Map<Long, FlowInstance> instanceResultMap = new HashMap<>();
         Map<Long, BpmFlowInsBizExtDO> instanceExtResultMap = new HashMap<>();
@@ -666,6 +674,7 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
 
             if (matchedInstance == null && matchedInstanceExt == null) {
                 log.warn("无匹配的流程实例信息 entityDataId = {}", entityValueId);
+                response.getList().add(entityValueDTO.getGlobalRawMapForJson());
                 continue;
             }
 
@@ -731,7 +740,7 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
                 entityValueDTO.getFieldValueMap().put(bpmFieldEnum.getFieldName(), semanticFieldValue);
             }
 
-            response.getList().add(entityValueDTO.getGlobalRawMap());
+            response.getList().add(entityValueDTO.getGlobalRawMapForJson());
         }
 
         return response;

@@ -1,0 +1,31 @@
+package com.cmsr.onebase.plugin.build.vo.req;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
+
+/**
+ * 插件基础信息更新请求 VO
+ *
+ * @author matianyu
+ * @date 2026-01-06
+ */
+@Schema(description = "管理后台 - 插件基础信息更新 Request VO")
+@Data
+public class PluginInfoUpdateReqVO {
+
+    @Schema(description = "插件ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "test-plugin")
+    @NotBlank(message = "插件ID不能为空")
+    private String pluginId;
+
+    @Schema(description = "插件名称", example = "示例插件")
+    private String pluginName;
+
+    @Schema(description = "插件描述", example = "这是一个示例插件")
+    private String pluginDescription;
+
+    @Schema(description = "插件图标文件（支持直接上传图片文件）")
+    private MultipartFile pluginIcon;
+
+}

@@ -30,7 +30,7 @@ public class DataRuntimeController {
     private RuntimeDataService runtimeDataService;
 
 
-
+/*
     @PostMapping("/insert")
     @Operation(summary = "新增单条数据")
     @PermitAll
@@ -64,5 +64,5 @@ public class DataRuntimeController {
     @PermitAll
     public CommonResult<PageResult<DynamicDataRespVO>> getDataPage(@Valid @RequestBody DynamicDataPageReqVO reqVO) {
         return success(runtimeDataService.getDataPage(reqVO));
-    }
+    }*/
 }

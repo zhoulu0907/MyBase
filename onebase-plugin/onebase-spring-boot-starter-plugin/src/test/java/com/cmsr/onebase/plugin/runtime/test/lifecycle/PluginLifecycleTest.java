@@ -1,8 +1,14 @@
 package com.cmsr.onebase.plugin.runtime.test.lifecycle;
 
 import com.cmsr.onebase.plugin.runtime.manager.OneBasePluginManager;
+import com.cmsr.onebase.plugin.runtime.test.config.PluginTestConfiguration;
+import org.springframework.context.annotation.Import;
 import com.cmsr.onebase.plugin.runtime.test.util.PluginHttpTestUtil;
 import com.cmsr.onebase.plugin.runtime.test.util.PluginStatusAssert;
+import com.cmsr.onebase.plugin.runtime.test.util.PluginTestEnvironmentManager;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.pf4j.PluginState;
@@ -15,44 +21,55 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 
 /**
- * DEV 模式插件生命周期测试
+ * STAGING 模式插件生命周期测试
  * <p>
- * 测试 DEV 模式下插件的启动和停止功能。
+ * 测试 STAGING 模式下插件的完整生命周期。
  * </p>
  * <p>
  * <strong>重要说明：</strong>
  * <ul>
- * <li><strong>DEV 模式限制：</strong>只支持启动/停止循环，不支持卸载后重新加载</li>
- * <li><strong>原因：</strong>DEV 模式使用虚拟插件（dev-mode-plugin），从 classpath 加载扩展点</li>
- * <li><strong>完整生命周期：</strong>卸载→加载→启动 仅在 STAGING/PROD 模式下可用</li>
+ * <li><strong>STAGING 模式：</strong>支持完整的插件生命周期（加载、启动、停止、卸载）</li>
+ * <li><strong>自动环境准备：</strong>插件会自动编译打包并复制到 plugins 目录</li>
+ * <li><strong>自动清理：</strong>测试完成后自动清理环境</li>
  * </ul>
  * </p>
  * <p>
  * 本测试类验证：
  * <ul>
  * <li>插件停止功能</li>
+ * <li>插件卸载功能</li>
+ * <li>插件重新加载功能</li>
  * <li>插件重新启动功能</li>
- * <li>停止后 HTTP 接口不可访问</li>
- * <li>启动/停止循环的稳定性</li>
+ * <li>完整生命周期的稳定性</li>
  * </ul>
  * </p>
  *
  * @author chengyuansen
  * @date 2025-12-25
- * @see com.cmsr.onebase.plugin.runtime.manager.DevModePluginManager
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
+@Import(PluginTestConfiguration.class)
 @TestPropertySource(properties = {
         "onebase.plugin.enabled=true",
         "onebase.plugin.mode=staging",
         "onebase.plugin.auto-load=true",
         "onebase.plugin.auto-start=true",
-        "onebase.plugin.plugins-dir=D:/cmsr/10_cmsr/CodingSpace/plugins-root"
+        "onebase.plugin.plugins-dir=plugins" // 使用相对路径,由环境管理器自动准备
 })
 public class PluginLifecycleTest {
 
     private static final Logger log = LoggerFactory.getLogger(PluginLifecycleTest.class);
+
+    @BeforeAll
+    static void setupEnvironment() throws Exception {
+        PluginTestEnvironmentManager.setupEnvironment();
+    }
+
+    @AfterAll
+    static void cleanupEnvironment() throws Exception {
+        PluginTestEnvironmentManager.cleanupEnvironment();
+    }
 
     @LocalServerPort
     private int port;
@@ -61,6 +78,16 @@ public class PluginLifecycleTest {
     private OneBasePluginManager pluginManager;
 
     private PluginHttpTestUtil httpUtil;
+
+    @BeforeEach
+    void ensurePluginExists() throws Exception {
+        // 注册插件管理器以便清理时释放文件锁
+        PluginTestEnvironmentManager.setPluginManager(pluginManager);
+        // 设置为只卸载不删除,因为测试过程中需要保留插件文件
+        PluginTestEnvironmentManager.setDeletePhysicalFiles(false);
+        // 确保插件文件存在(某些测试可能会删除插件)
+        PluginTestEnvironmentManager.ensurePluginExists();
+    }
 
     @Test
     @DisplayName("STAGING 完整生命周期测试：停止->验证->卸载->验证->加载->验证->启动->验证")
