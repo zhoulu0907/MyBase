@@ -15,7 +15,7 @@ import {
 import { FormComp } from '@/components/Materials/Basic/FormComponents';
 import { ShowComp } from '@/components/Materials/Basic/ShowComponents';
 import { ListComp } from '@/components/Materials/Basic/ListComponents';
-// import { LayoutComp } from '@/components/Materials/Basic/LayoutComponents';
+import { LayoutComp } from '@/components/Materials/Basic/LayoutComponents';
 import { WorkbenchComp } from '@/components/Materials/Workbench';
 
 // TODO(mickey): 解决样式隔离问题
@@ -130,11 +130,11 @@ const ComponentEditRender: React.FC<ComponentRenderProps> = ({ cpId, cpType, pag
 
       //  布局组件
       case LAYOUT_COMPONENT_TYPES.COLUMN_LAYOUT:
-        // return <LayoutComp.XColumnLayout {...componentConfig} cpName={cpId} id={cpId} runtime={runtime} />;
+        return <LayoutComp.XColumnLayout {...componentConfig} cpName={cpId} id={cpId} runtime={runtime} useStoreSignals={useStoreSignals} />;
       case LAYOUT_COMPONENT_TYPES.TABS_LAYOUT:
-        // return <LayoutComp.XTabsLayout {...componentConfig} cpName={cpId} id={cpId} runtime={runtime} useStoreSignals={useStoreSignals} />;
+        return <LayoutComp.XTabsLayout {...componentConfig} cpName={cpId} id={cpId} runtime={runtime} useStoreSignals={useStoreSignals} />;
       case LAYOUT_COMPONENT_TYPES.COLLAPSE_LAYOUT:
-        // return <LayoutComp.XCollapseLayout {...componentConfig} cpName={cpId} id={cpId} runtime={runtime} useStoreSignals={useStoreSignals} />;
+        return <LayoutComp.XCollapseLayout {...componentConfig} cpName={cpId} id={cpId} runtime={runtime} useStoreSignals={useStoreSignals} />;
 
       //  工作台组件
       case WORKBENCH_COMPONENT_TYPES.QUICK_ENTRY:
