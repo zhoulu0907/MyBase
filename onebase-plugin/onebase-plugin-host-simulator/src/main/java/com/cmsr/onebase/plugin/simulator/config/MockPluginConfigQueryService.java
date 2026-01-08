@@ -3,6 +3,7 @@ package com.cmsr.onebase.plugin.simulator.config;
 import com.cmsr.onebase.plugin.service.PluginConfigQueryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.system.ApplicationHome;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.yaml.snakeyaml.Yaml;
 
 import jakarta.annotation.PostConstruct;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
@@ -31,9 +33,9 @@ import java.util.concurrent.ConcurrentHashMap;
  * @date 2025-01-05
  */
 @Service
-public class MockPluginConfigService implements PluginConfigQueryService {
+public class MockPluginConfigQueryService implements PluginConfigQueryService {
 
-    private static final Logger log = LoggerFactory.getLogger(MockPluginConfigService.class);
+    private static final Logger log = LoggerFactory.getLogger(MockPluginConfigQueryService.class);
 
     /**
      * 插件配置存储：pluginKey (pluginId:version) -> config map
@@ -59,18 +61,18 @@ public class MockPluginConfigService implements PluginConfigQueryService {
         Resource configResource = resolveConfigResource();
 
         if (configResource == null || !configResource.exists()) {
-            log.warn("[MockPluginConfigService] 配置文件不存在，使用空配置");
+            log.warn("配置文件不存在，使用空配置");
             return;
         }
 
         try (InputStream inputStream = configResource.getInputStream()) {
-            log.info("[MockPluginConfigService] 从 {} 加载配置", configResource.getDescription());
+            log.info("从 {} 加载配置", configResource.getDescription());
 
             Yaml yaml = new Yaml();
             Map<String, Object> root = yaml.load(inputStream);
 
             if (root == null) {
-                log.info("[MockPluginConfigService] 配置文件为空");
+                log.info("配置文件为空");
                 return;
             }
 
@@ -84,15 +86,15 @@ public class MockPluginConfigService implements PluginConfigQueryService {
                     if (configObj instanceof Map) {
                         Map<String, Object> config = new ConcurrentHashMap<>((Map<String, Object>) configObj);
                         pluginConfigs.put(pluginId, config);
-                        log.info("[MockPluginConfigService] 已加载插件 [{}] 配置，共 {} 项",
+                        log.info("已加载插件 [{}] 配置，共 {} 项",
                                 pluginId, config.size());
                     }
                 }
             }
 
-            log.info("[MockPluginConfigService] 配置加载完成，共 {} 个插件", pluginConfigs.size());
+            log.info("配置加载完成，共 {} 个插件", pluginConfigs.size());
         } catch (IOException e) {
-            log.error("[MockPluginConfigService] 加载配置文件失败: {}", e.getMessage(), e);
+            log.error("加载配置文件失败: {}", e.getMessage(), e);
         }
     }
 
@@ -105,23 +107,52 @@ public class MockPluginConfigService implements PluginConfigQueryService {
      * </p>
      */
     private Resource resolveConfigResource() {
-        ResourceLoader resourceLoader = new DefaultResourceLoader();
+        ResourceLoader resourceLoader = getResourceLoader();
 
-        // 1. 优先加载外部文件（JAR 包同目录）
-        Resource externalFile = resourceLoader.getResource("file:./plugin-config.yml");
-        if (externalFile.exists()) {
-            log.info("[MockPluginConfigService] 使用外部配置文件: ./plugin-config.yml");
-            return externalFile;
+        // 1. 优先加载外部文件(JAR 包同目录)
+        try {
+            // 使用 ApplicationHome 自动定位应用根目录(兼容 IDE 和 JAR 模式)
+            File homeDir = getApplicationHomeDir();
+            File configFile = null;
+
+            // IDE 模式特殊处理: 如果定位到 target/classes,只查找 target/plugin-config.yml(上一级)
+            // 注意: 不应该使用 classes 目录下的文件,那是内部配置(classpath),应该走降级逻辑加载
+            if ("classes".equals(homeDir.getName())) {
+                File targetDir = homeDir.getParentFile();
+                if (targetDir != null) {
+                    File targetConfigFile = new File(targetDir, "plugin-config.yml");
+                    if (targetConfigFile.exists()) {
+                        configFile = targetConfigFile;
+                        log.debug("IDE模式: 发现外部配置文件 {}", configFile.getAbsolutePath());
+                    } else {
+                        log.info("IDE模式: 外部配置文件不存在: {}, 将使用内置配置", targetConfigFile.getAbsolutePath());
+                    }
+                }
+            } else {
+                // JAR 模式: 直接使用 homeDir 下的配置文件
+                configFile = new File(homeDir, "plugin-config.yml");
+                if (!configFile.exists()) {
+                    log.info("JAR模式: 外部配置文件不存在: {}, 将使用内置配置", configFile.getAbsolutePath());
+                }
+            }
+
+            if (configFile != null && configFile.exists()) {
+                Resource externalFile = resourceLoader.getResource("file:" + configFile.getAbsolutePath());
+                log.info("使用外部配置文件: {}", configFile.getAbsolutePath());
+                return externalFile;
+            }
+        } catch (Exception e) {
+            log.error("无法定位外部配置: {}", e.getMessage());
         }
 
-        // 2. 降级到 JAR 包内部文件（默认模板）
+        // 2. 降级到 JAR 包内部文件(默认模板)
         Resource classpathFile = resourceLoader.getResource("classpath:plugin-config.yml");
         if (classpathFile.exists()) {
-            log.info("[MockPluginConfigService] jar同目录下不存在plugin-config.yml，使用内置配置文件: classpath:plugin-config.yml");
+            log.info("jar同目录下不存在plugin-config.yml，使用内置配置文件: classpath:plugin-config.yml");
             return classpathFile;
         }
 
-        log.error("[MockPluginConfigService] 未找到配置文件（外部: ./plugin-config.yml, 内部: classpath:plugin-config.yml）");
+        log.error("未找到配置文件（外部: ./plugin-config.yml, 内部: classpath:plugin-config.yml）");
         return null;
     }
 
@@ -145,7 +176,7 @@ public class MockPluginConfigService implements PluginConfigQueryService {
      */
     public void setConfig(String pluginId, Map<String, Object> config) {
         pluginConfigs.put(pluginId, new ConcurrentHashMap<>(config));
-        log.info("[MockPluginConfigService] 已更新插件 [{}] 配置，共 {} 项", pluginId, config.size());
+        log.info("已更新插件 [{}] 配置，共 {} 项", pluginId, config.size());
     }
 
     /**
@@ -158,7 +189,7 @@ public class MockPluginConfigService implements PluginConfigQueryService {
     public void setConfigValue(String pluginId, String key, Object value) {
         pluginConfigs.computeIfAbsent(pluginId, k -> new ConcurrentHashMap<>())
                 .put(key, value);
-        log.info("[MockPluginConfigService] 已设置配置: pluginId={}, key={}, value={}",
+        log.info("已设置配置: pluginId={}, key={}, value={}",
                 pluginId, key, value);
     }
 
@@ -169,7 +200,7 @@ public class MockPluginConfigService implements PluginConfigQueryService {
      */
     public void removeConfig(String pluginId) {
         pluginConfigs.remove(pluginId);
-        log.info("[MockPluginConfigService] 已删除插件 [{}] 配置", pluginId);
+        log.info("已删除插件 [{}] 配置", pluginId);
     }
 
     /**
@@ -182,7 +213,7 @@ public class MockPluginConfigService implements PluginConfigQueryService {
         Map<String, Object> config = pluginConfigs.get(pluginId);
         if (config != null) {
             config.remove(key);
-            log.info("[MockPluginConfigService] 已删除配置项: pluginId={}, key={}", pluginId, key);
+            log.info("已删除配置项: pluginId={}, key={}", pluginId, key);
         }
     }
 
@@ -201,6 +232,20 @@ public class MockPluginConfigService implements PluginConfigQueryService {
     public void reloadConfig() {
         pluginConfigs.clear();
         loadConfigFromFile();
-        log.info("[MockPluginConfigService] 配置已重新加载");
+        log.info("配置已重新加载");
+    }
+
+    /**
+     * 获取应用主目录(Protected 方法便于测试 Mock)
+     */
+    protected File getApplicationHomeDir() {
+        return new ApplicationHome(getClass()).getDir();
+    }
+
+    /**
+     * 获取资源加载器(Protected 方法便于测试 Mock)
+     */
+    protected ResourceLoader getResourceLoader() {
+        return new DefaultResourceLoader();
     }
 }

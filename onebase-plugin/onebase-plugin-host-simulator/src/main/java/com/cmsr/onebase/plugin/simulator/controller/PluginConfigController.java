@@ -1,6 +1,6 @@
 package com.cmsr.onebase.plugin.simulator.controller;
 
-import com.cmsr.onebase.plugin.simulator.config.MockPluginConfigService;
+import com.cmsr.onebase.plugin.simulator.config.MockPluginConfigQueryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -30,7 +30,7 @@ public class PluginConfigController {
     private static final Logger log = LoggerFactory.getLogger(PluginConfigController.class);
 
     @Resource
-    private MockPluginConfigService configService;
+    private MockPluginConfigQueryService configService;
 
     /**
      * 获取所有插件配置
