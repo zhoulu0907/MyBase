@@ -85,8 +85,11 @@ const SpaceInfo: React.FC<{ onTenantInfoChange?: (info: PlatformTenantInfo) => v
   const generateFullUrl = (path: string | null | undefined) => {
     if (!path) return '';
     const origin = window.location.origin;
+    // pathname 是/开头和/结尾 空时为/
+    const pathname = window.location.pathname;
+    // normalizedPath是/开头
     const normalizedPath = path.startsWith('/') ? path : `/${path}`;
-    return `${origin}/#/tenant/${tokenInfo?.tenantId}/${normalizedPath}`;
+    return `${origin}${pathname}#/tenant/${tokenInfo?.tenantId}${normalizedPath}`;
   };
 
   // 重命名

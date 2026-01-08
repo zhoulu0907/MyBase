@@ -63,13 +63,6 @@
       padding-bottom: 0.24rem;
     }
 
-    .filter-icon {
-      width: 0.4rem;
-      height: 0.4rem;
-      margin-left: 0.24rem;
-      padding-bottom: 0.24rem;
-    }
-
     .arco-search-bar-container {
       padding: 0 0 0.24rem;
       flex: 1;
@@ -237,6 +230,57 @@
 
     &>div {
       flex: 1;
+    }
+  }
+}
+
+.table-search {
+  font-size: 0.28rem;
+  width: 100%;
+
+  .search-bar {
+    display: flex;
+    align-items: center;
+    height: 0.72rem;
+    overflow: hidden;
+    box-sizing: border-box;
+
+    .search-bar-icon {
+      background-color: #f2f3f5;
+      padding: 0 0.24rem;
+      height: 0.72rem;
+      display: flex;
+      align-items: center;
+      border-radius: 0.04rem 0 0 0.04rem;
+    }
+
+    .arco-form-item {
+      border-top: none;
+    }
+
+    .arco-form-item.arco-form-item-vertical .arco-form-label-item {
+      display: none;
+    }
+
+    .search-bar-input {
+      flex: 1;
+      background-color: #f2f3f5;
+      height: 0.72rem;
+      display: flex;
+      align-items: center;
+      border-radius: 0 0.04rem 0.04rem 0;
+    }
+
+    .inputTextWrapperOBMobile {
+      border-bottom: none !important;
+    }
+
+    .search-bar-filter {
+      width: 0.4rem;
+      height: 0.4rem;
+      margin: 0 0.24rem;
+      display: flex;
+      align-items: center;
     }
   }
 }

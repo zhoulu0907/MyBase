@@ -336,7 +336,7 @@ const EnterpriseAppPage: React.FC = () => {
                           <span className={styles.versionNumber}>{item.versionNumber}</span>
                         </div>
                       </div>
-                      <Dropdown
+                      {/* <Dropdown
                         droplist={menu(item)}
                         trigger="click"
                         position="bottom"
@@ -352,7 +352,7 @@ const EnterpriseAppPage: React.FC = () => {
                         >
                           <IconMoreVertical style={{ color: '#272e3b' }} />
                         </Button>
-                      </Dropdown>
+                      </Dropdown> */}
                     </div>
 
                     <div className={styles.myAppCardBody}>

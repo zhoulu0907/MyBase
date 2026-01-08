@@ -1,4 +1,4 @@
-export { FormComp, FormSchema, LayoutComp, ListComp, ListSchema, NavigateComp, ShowComp, ShowSchema } from './Basic';
+export { FormComp, FormSchema, LayoutComp, LayoutSchema, ListComp, ListSchema, NavigateComp, ShowComp, ShowSchema } from './Basic';
 export * from './common';
 export * from './types';
 export * from './Workbench';

@@ -15,7 +15,8 @@ import {
 import { menuPermissionSignal, pagesRuntimeSignal } from '@onebase/common';
 import { BUTTON_OPTIONS, BUTTON_VALUES, downloadFileByUrl, ENTITY_FIELD_TYPE, getFieldOptionsConfig, menuDictSignal, RedirectMethod, useAppEntityStore, useFormEditorSignal } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
-import { memo, useEffect, useState } from 'react';
+import { memo, useEffect, useState, useCallback } from 'react';
+import { debounce } from 'lodash-es';
 import TableSearch from './tableSerach';
 import type { XLoadMoreConfig } from './schema';
 import './index.css';
@@ -220,8 +221,16 @@ const XLoadMore = memo(
       //   req.sortDirection = sortByObject.sortBy === 1 ? 'asc' : 'desc';
       // }
 
+      let newQueryData: any = {};
+
+      Object.entries(queryData.value).forEach(([key, value]) => {
+        if ((value !== '' && value !== null) || (Array.isArray(value) && value.length !== 0)) {
+          newQueryData[key] = value;
+        }
+      });
+
       const req: PageMethodV2Params = {
-        ...queryData.value,
+        ...newQueryData,
         pageNo: tablePageNo,
         pageSize: pageSize || 10
       };
@@ -447,13 +456,28 @@ const XLoadMore = memo(
       );
     };
 
+    const searchValuesChange = useCallback(
+      debounce((changedValues) => {
+        const changeKeys = Object.keys(changedValues);
+        if (changeKeys?.length && changeKeys.length === 1 && searchItems?.length) {
+          const changeKey = changeKeys[0];
+          if (changeKey === searchItems[0].value) {
+            queryData.value[changeKey] = changedValues[changeKey];
+            // 第一个改变了
+            handleSearch();
+          }
+        }
+      }, 200),
+      []
+    );
+
     const getTopSearch = () => {
       if (!searchItems?.length) {
         return null;
       }
       return (
         <Sticky topOffset={0.88 * window.ROOT_FONT_SIZE} className="list-search-header">
-          <Form form={searchForm} className="search-form-wrapper">
+          <Form form={searchForm} className="search-form-wrapper" onValuesChange={searchValuesChange}>
             <TableSearch
               searchItems={searchItems}
               runtime={runtime}

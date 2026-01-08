@@ -1,6 +1,6 @@
 import { memo, useEffect, useState } from 'react';
 import { nanoid } from 'nanoid';
-import { Checkbox, Ellipsis, Form } from '@arco-design/mobile-react';
+import { Checkbox, Ellipsis, Form, Tag } from '@arco-design/mobile-react';
 import { ValidatorType, ITypeRules } from '@arco-design/mobile-utils';
 import IconSquareChecked from '@arco-design/mobile-react/esm/icon/IconSquareChecked';
 import IconSquareUnchecked from '@arco-design/mobile-react/esm/icon/IconSquareUnchecked';
@@ -75,9 +75,11 @@ const XCheckbox = memo((props: XCheckboxConfig & { runtime?: boolean; detailMode
     }
   ];
 
-  const readonlyText = form?.getFieldValue(fieldId) && Array.isArray(form?.getFieldValue(fieldId)) ? form?.getFieldValue(fieldId).map((ele: any, index: number) => <div key={index} style={{ marginBottom: '0' }}>
-    {ele?.name || options.find((e => e.id === ele || e.id === ele?.id))?.label}
-  </div>) : '--';
+  const readonlyText = form?.getFieldValue(fieldId) && Array.isArray(form?.getFieldValue(fieldId)) ? form?.getFieldValue(fieldId).filter(Boolean).map((ele: any, index: number) => (
+    <Tag key={index} borderStyle='none' color='rgb(var(--primary-6))' bgColor='rgb(var(--primary-1))' style={{ marginRight: '0.08rem' }}>
+      {ele || options.find((e => e.value === ele || e.value === ele?.id))?.label}
+    </Tag>
+  )) : '--';
 
   return (
     <Form.Item
