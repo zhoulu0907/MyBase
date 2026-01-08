@@ -14,16 +14,14 @@ const CollapseItem = Collapse.Item;
 const SECTION_KEYS = {
   THEME: 'theme',
   TITLE: 'title',
-  DATA_CONFIG: 'dataConfig',
-  CONTENT: 'content'
+  DATA_CONFIG: 'dataConfig'
 } as const;
 
 const TodoCenterConfig = () => {
   const [activeKeys, setActiveKeys] = useState<string[]>([
     SECTION_KEYS.THEME,
     SECTION_KEYS.TITLE,
-    SECTION_KEYS.DATA_CONFIG,
-    SECTION_KEYS.CONTENT
+    SECTION_KEYS.DATA_CONFIG
   ]);
   const collapseItemList = (editData: Record<string, unknown>[]) =>
     [
@@ -39,12 +37,6 @@ const TodoCenterConfig = () => {
         contentStyle: PanelContentStyle,
         content: findItem(editData, 'dataConfig')
       }
-      // {
-      //   header: '内容编辑',
-      //   name: SECTION_KEYS.CONTENT,
-      //   contentStyle: PanelContentStyle,
-      //   content: findItem(editData, 'Wb_RichTextContent')
-      // }
     ].filter((item) => item.content !== null);
 
   return (

@@ -1,13 +1,12 @@
 import type { CSSProperties } from 'react';
 import { memo } from 'react';
-import { WORKBENCH_STATUS_OPTIONS, WORKBENCH_STATUS_VALUES, WORKBENCH_THEME_OPTIONS, DATA_CONFIG_NAME_MAP } from '../../core/constants';
-import type { XTodoCenterConfig } from './schema';
+import { WORKBENCH_STATUS_OPTIONS, WORKBENCH_STATUS_VALUES, WORKBENCH_THEME_OPTIONS, DATA_CONFIG_NAME_MAP, workbenchSchema } from '@onebase/ui-kit';
 import styles from './index.module.css';
 
-import showCc from '@/assets/workbench/todo-center/showCcIcon.svg';
-import showCreated from '@/assets/workbench/todo-center/showCreatedIcon.svg';
-import showHandled from '@/assets/workbench/todo-center/showHandledIcon.svg';
-import showPending from '@/assets/workbench/todo-center/showPendingIcon.svg';
+import showCc from '@onebase/ui-kit/src/assets/workbench/todo-center/showCcIcon.svg';
+import showCreated from '@onebase/ui-kit/src/assets/workbench/todo-center/showCreatedIcon.svg';
+import showHandled from '@onebase/ui-kit/src/assets/workbench/todo-center/showHandledIcon.svg';
+import showPending from '@onebase/ui-kit/src/assets/workbench/todo-center/showPendingIcon.svg';
 
 // 图标映射配置
 const ICON_MAP: Record<string, string> = {
@@ -31,6 +30,8 @@ const colorList = [
   '#00B42A',
   '#F53F3F'
 ];
+
+type XTodoCenterConfig = typeof workbenchSchema.XTodoCenter.config;
 
 const XTodoCenter = memo((props: XTodoCenterConfig & { runtime?: boolean }) => {
   const { label, dataConfig, theme, status, runtime } = props;
