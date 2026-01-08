@@ -147,6 +147,8 @@ const ComponentEditRender: React.FC<ComponentRenderProps> = ({ cpId, cpType, pag
         return <WorkbenchComp.XCarouselWorkbench cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case WORKBENCH_COMPONENT_TYPES.WELCOME_CARD:
         return <WorkbenchComp.XWelcomeCard cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+      case WORKBENCH_COMPONENT_TYPES.TODO_CENTER:
+        return <WorkbenchComp.XTodoCenter cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case WORKBENCH_COMPONENT_TYPES.BUTTON_WORKBENCH:
         // 移动端独有组件，web 端静默处理
         return null;
