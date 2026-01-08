@@ -133,10 +133,6 @@ export interface CorpDetailResponse {
    */
   industryType?: string;
   /**
-   * 行业类型名称
-   */
-  industryTypeName?: string;
-  /**
    * 联系人电话
    */
   adminMobile?: string;
