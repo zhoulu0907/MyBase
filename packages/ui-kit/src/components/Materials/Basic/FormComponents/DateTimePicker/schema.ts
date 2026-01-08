@@ -3,17 +3,22 @@ import {
   baseDefault,
   dataFieldConfig,
   alignConfig,
-  defaultValueConfig,
   layoutConfig,
   statusConfig,
   widthConfig,
   dateRangeConfig,
+  labelConfig,
+  placeholderConfig,
+  tooltipConfig,
+  defaultDateTimeValueConfig,
+  verifyConfig,
+  securityConfig,
   type ICommonBaseType,
-  type TDateTimeTypeSelectKeyType,
   type TLayoutSelectKeyType,
   type TStatusSelectKeyType,
   type TAlignSelectKeyType,
-  type TWidthSelectKeyType
+  type TWidthSelectKeyType,
+  dateTimeimeFormatConfig
 } from '../../../common';
 import {
   ALIGN_VALUES,
@@ -53,6 +58,7 @@ import type {
   IAlignConfigType,
   ISecurityConfigType,
   IDateRangeConfigType,
+  ICommonConfigType,
   IDateFormatConfigType
 } from '../../../types';
 import { ManipulateType } from 'dayjs';
@@ -68,7 +74,7 @@ export type TXInputDateTimePickerEditData = Array<
   | ITooltipConfigType
   | IDataFieldConfigType
   | IDefaultValueConfigType
-  | IDateFormatConfigType
+  | IDateFormatConfigType<string>
   | IDateRangeConfigType
   | IVerifyConfigType
   | IStatusConfigType<TStatusSelectKeyType>
@@ -76,6 +82,7 @@ export type TXInputDateTimePickerEditData = Array<
   | ILayoutConfigType<TLayoutSelectKeyType>
   | ISecurityConfigType
   | IWidthConfigType<TWidthSelectKeyType>
+  | ICommonConfigType
 >;
 
 export interface XInputDateTimePickerConfig extends ICommonBaseType {
@@ -110,10 +117,10 @@ export interface XInputDateTimePickerConfig extends ICommonBaseType {
   defaultValueConfig?: any;
 
   /**
-   * 日期格式： 年、年月、年月日、年月日时
-   * 可选值: 'YEAR' | 'MONTH' | 'DATE' | 'FULL'
+   * 日期格式：年月日时分秒
+   * 可选值: DATE_TIME_OPTIONS
    */
-  dateType: TDateTimeTypeSelectKeyType;
+  dateType: string;
 
   /**
    * 可选范围
@@ -190,55 +197,23 @@ export interface XInputDateTimePickerConfig extends ICommonBaseType {
 const XDateTimePicker: XInputDateTimePickerSchema = {
   editData: [
     ...baseConfig,
-    {
-      key: 'label',
-      name: '标题',
-      type: CONFIG_TYPES.LABEL_INPUT
-    },
-    {
-      key: 'placeholder',
-      name: '占位提示',
-      type: CONFIG_TYPES.PLACEHOLDER_INPUT
-    },
-    {
-      key: 'tooltip',
-      name: '字段描述',
-      type: CONFIG_TYPES.TOOLTIP_INPUT
-    },
+    labelConfig,
+    placeholderConfig,
+    tooltipConfig,
     //  数据绑定
     ...dataFieldConfig,
     // 默认值
-    {
-      key: 'defaultValueConfig',
-      name: '默认值',
-      type: CONFIG_TYPES.DEFAULT_VALUE,
-    },
-    {
-      key: 'dateFormat',
-      name: '日期时间格式',
-      type: CONFIG_TYPES.DATE_FORMAT,
-      range: [
-        { label: DATE_TIME_OPTIONS.SECOND, value: DATE_TIME_VALUES[DATE_TIME_OPTIONS.SECOND] },
-        { label: DATE_TIME_OPTIONS.MINUTE, value: DATE_TIME_VALUES[DATE_TIME_OPTIONS.MINUTE] },
-      ]
-    },
+    defaultDateTimeValueConfig,
+    dateTimeimeFormatConfig,
     dateRangeConfig,
-    {
-      key: 'verify',
-      name: '校验',
-      type: CONFIG_TYPES.VERIFY
-    },
+    verifyConfig,
     // 显示状态
     statusConfig,
     // 对齐方式
     // alignConfig,
     // 布局方式
     layoutConfig,
-    {
-      key: 'security',
-      name: '安全',
-      type: CONFIG_TYPES.SECURITY
-    },
+    securityConfig,
     // 字段宽度
     widthConfig,
   ],

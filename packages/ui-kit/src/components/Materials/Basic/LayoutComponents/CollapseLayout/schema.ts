@@ -3,10 +3,14 @@ import {
   baseDefault,
   widthConfig,
   collapsedConfig,
+  collapsedStyleConfig,
+  labelConfig,
+  statusHiddenConfig,
   type ICommonBaseType,
   type TStatusSelectKeyType,
   type TWidthSelectKeyType,
-  type TCollapsedSelectKeyType
+  type TCollapsedSelectKeyType,
+  type TLayoutStatusSelectKeyType
 } from '../../../common';
 import {
   COLUMN_COUNT_OPTIONS,
@@ -25,6 +29,7 @@ import type {
   IStatusConfigType,
   ITextConfigType,
   IWidthConfigType,
+  ICommonConfigType,
   TBooleanDefaultType,
   TSelectDefaultType,
   TTextDefaultType,
@@ -42,11 +47,12 @@ export type TColumnCountSelectKeyType = (typeof COLUMN_COUNT_OPTIONS)[keyof type
 export type XCollapseLayoutEditData = Array<
   | ITextConfigType
   | ILabelConfigType
-  | IStatusConfigType<TStatusSelectKeyType>
+  | IStatusConfigType<TLayoutStatusSelectKeyType>
   | IWidthConfigType<TWidthSelectKeyType>
   | ISelectConfigType<TWidthSelectKeyType | TStatusSelectKeyType>
   | ICollapsedConfigType<TCollapsedSelectKeyType>
   | ICollapsedStyleConfig
+  | ICommonConfigType
 >;
 
 export interface XCollapseLayoutConfig extends ICommonBaseType {
@@ -92,34 +98,10 @@ export interface XCollapseLayoutConfig extends ICommonBaseType {
 const XLCollapseLayout: XCollapseLayoutSchema = {
   editData: [
     ...baseConfig,
-    {
-      key: 'label',
-      name: '标题',
-      type: CONFIG_TYPES.LABEL_INPUT
-    },
-    {
-      key: 'collapseStyle',
-      name: '样式',
-      type: CONFIG_TYPES.COLLAPSED_STYLE
-    },
+    labelConfig,
+    collapsedStyleConfig,
     collapsedConfig,
-    {
-      key: 'status',
-      name: '显示状态',
-      type: CONFIG_TYPES.STATUS_RADIO,
-      range: [
-        {
-          key: STATUS_OPTIONS.DEFAULT,
-          text: STATUS_OPTIONS.DEFAULT,
-          value: STATUS_VALUES[STATUS_OPTIONS.DEFAULT]
-        },
-        {
-          key: STATUS_OPTIONS.HIDDEN,
-          text: STATUS_OPTIONS.HIDDEN,
-          value: STATUS_VALUES[STATUS_OPTIONS.HIDDEN]
-        }
-      ]
-    },
+    statusHiddenConfig,
     widthConfig
   ],
   config: {

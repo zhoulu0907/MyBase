@@ -6,13 +6,15 @@ import {
   layoutConfig,
   statusConfig,
   widthConfig,
+  labelConfig,
+  placeholderConfig,
+  tooltipConfig,
   type ICommonBaseType,
   type TLayoutSelectKeyType,
   type TStatusSelectKeyType,
   type TWidthSelectKeyType
 } from '../../../common';
 import {
-  CONFIG_TYPES,
   LAYOUT_OPTIONS,
   LAYOUT_VALUES,
   STATUS_OPTIONS,
@@ -22,6 +24,7 @@ import {
 } from '../../../constants';
 import type {
   IAutoCodeConfigType,
+  ICommonConfigType,
   IDataFieldConfigType,
   ILabelConfigType,
   ILayoutConfigType,
@@ -53,6 +56,7 @@ export type TXautoCodeEditData = Array<
   | IStatusConfigType<TStatusSelectKeyType>
   | ILayoutConfigType<TLayoutSelectKeyType>
   | IWidthConfigType<TWidthSelectKeyType>
+  | ICommonConfigType
 >;
 
 export interface XautoCodeConfig extends ICommonBaseType {
@@ -102,21 +106,9 @@ export interface XautoCodeConfig extends ICommonBaseType {
 const XautoCode: XautoCodeSchema = {
   editData: [
     ...baseConfig,
-    {
-      key: 'label',
-      name: '标题',
-      type: CONFIG_TYPES.LABEL_INPUT
-    },
-    {
-      key: 'placeholder',
-      name: '占位符',
-      type: CONFIG_TYPES.PLACEHOLDER_INPUT
-    },
-    {
-      key: 'tooltip',
-      name: '字段描述',
-      type: CONFIG_TYPES.TOOLTIP_INPUT
-    },
+    labelConfig,
+    placeholderConfig,
+    tooltipConfig,
     ...dataFieldConfig,
     autoCodeConfig,
     statusConfig,

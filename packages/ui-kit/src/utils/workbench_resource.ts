@@ -12,6 +12,7 @@ import { pagesRuntimeSignal } from '@onebase/common';
 import { WORKBENCH_COMPONENT_TYPE_DISPLAY_NAME_MAP } from 'src/components';
 import type { EditConfig } from 'src/components/Materials/types';
 import { useWorkbenchEditorSignal } from 'src/signals/workbench_editor';
+import { isBlank } from './common';
 
 export interface SaveWorkbenchPageSetParams {
   pageSetId: string;
@@ -128,7 +129,7 @@ export async function startLoadWorkbenchPageSet(params: LoadWorkbenchPageSetPara
   const newPageComponentSchemas: { [key: string]: EditConfig } = {};
 
   workbenchPage.components.forEach((component: ComponentConfig) => {
-    if (!component.parentCode || component.parentCode === '') {
+    if (isBlank(component.parentCode)) {
       newComponents.push({
         id: component.componentCode,
         chosen: false,

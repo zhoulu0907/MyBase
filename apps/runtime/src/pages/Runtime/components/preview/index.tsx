@@ -33,6 +33,7 @@ import {
 } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useState } from 'react';
+import { pluginBridge } from '@/plugin/bridge';
 import DetailPop from '../TaskCenter/page/DetailPop';
 import DetailRuntime from './DetailRuntime';
 import EditRuntime from './EditRuntime';
@@ -319,7 +320,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
               data: { ...formData, ...subFormData }
             }
           };
-          res = await fetchSubmitInstance(reqFlow);
+          res = await fetchSubmitInstance(reqFlow as any);
           setPageType(EDITOR_TYPES.FORM_EDITOR);
         } else {
           console.log(formData);
@@ -465,6 +466,14 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
     setPredictVisible(false);
     setTimeout(() => setRefresh(Date.now()), 150);
   };
+
+  React.useEffect(() => {
+    pluginBridge.registerContext({ form });
+    return () => {
+      pluginBridge.registerContext({ form: undefined });
+    };
+  }, [form]);
+
   return (
     <div className={`${styles.previewPage} runtime-preview-formpage`}>
       <div className={styles.content}>

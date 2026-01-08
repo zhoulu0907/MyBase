@@ -16,6 +16,7 @@ import type {
   IStatusConfigType,
   ITextConfigType,
   IWidthConfigType,
+  ICommonConfigType,
   TNumberDefaultType,
   TRadioDefaultType,
   TSelectDefaultType,
@@ -29,7 +30,7 @@ export interface XFileSchema {
 
 export type TXFileEditData = Array<
   ITextConfigType | IWidthConfigType<TWidthSelectKeyType> | IStatusConfigType<TStatusSelectKeyType> | IBooleanConfigType |
-  IStatusConfigType<TFillSelectKeyType> | IFileConfigType
+  IStatusConfigType<TFillSelectKeyType> | IFileConfigType | ICommonConfigType
 >;
 
 interface Files {

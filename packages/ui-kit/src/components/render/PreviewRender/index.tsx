@@ -2,17 +2,14 @@ import { Form } from '@arco-design/web-react';
 import { cloneDeep } from 'lodash-es';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
-  FORM_COMPONENT_TYPES,
-  FormComp,
-  LAYOUT_COMPONENT_TYPES,
-  LIST_COMPONENT_TYPES,
-  LayoutComp,
-  ListComp,
-  SHOW_COMPONENT_TYPES,
-  ShowComp,
+  getComponentImpl,
+  getComponentDescriptor,
+  isPluginComponentType,
   getComponentConfig,
-  WORKBENCH_COMPONENT_TYPES,
-  WorkbenchComp
+  hasWorkbenchComponentSchema,
+  getWorkbenchComponentConfig,
+  WORKBENCH_COMPONENT_MAP,
+  WorkbenchComponentType
 } from 'src/components/Materials';
 import { PageType } from '@onebase/app';
 
@@ -64,9 +61,14 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
   pageSetType
 }) => {
   // 获取组件配置，使用深拷贝确保每次都是新对象
-  const [componentConfig, setComponentConfig] = useState(() =>
-    cloneDeep(getComponentConfig(pageComponentSchema, cpType))
-  );
+  const [componentConfig, setComponentConfig] = useState(() => {
+    const isWorkbench = hasWorkbenchComponentSchema(cpType);
+    return cloneDeep(
+      isWorkbench
+        ? getWorkbenchComponentConfig(pageComponentSchema, cpType as WorkbenchComponentType)
+        : getComponentConfig(pageComponentSchema, cpType)
+    );
+  });
 
   const { form } = Form.useFormContext();
 
@@ -87,9 +89,12 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
         return updatedConfig;
       });
     } else {
-      // 使用深拷贝确保每次都是新对象，避免引用共享问题
-      const newComponentConfig = cloneDeep(getComponentConfig(pageComponentSchema, cpType));
-
+      const isWorkbench = hasWorkbenchComponentSchema(cpType);
+      const newComponentConfig = cloneDeep(
+        isWorkbench
+          ? getWorkbenchComponentConfig(pageComponentSchema, cpType as WorkbenchComponentType)
+          : getComponentConfig(pageComponentSchema, cpType)
+      );
       setComponentConfig(newComponentConfig);
     }
   }, [cpState, pageComponentSchema, cpType]);
@@ -111,307 +116,39 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
 
   // 基于视图规则渲染
 
-  // 渲染对应的组件
   const renderComponent = useCallback(() => {
-    switch (cpType) {
-      case FORM_COMPONENT_TYPES.INPUT_TEXT:
-        return (
-          <FormComp.XInputText cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} detailMode={detailMode} />
-        );
-      case FORM_COMPONENT_TYPES.INPUT_TEXTAREA:
-        return (
-          <FormComp.XInputTextArea
-            cpName={cpId}
-            id={cpId}
-            {...componentConfig}
-            runtime={runtime}
-            detailMode={detailMode}
-          />
-        );
-      case FORM_COMPONENT_TYPES.INPUT_EMAIL:
-        return (
-          <FormComp.XInputEmail
-            cpName={cpId}
-            id={cpId}
-            {...componentConfig}
-            runtime={runtime}
-            detailMode={detailMode}
-          />
-        );
-      case FORM_COMPONENT_TYPES.INPUT_PHONE:
-        return (
-          <FormComp.XInputPhone
-            cpName={cpId}
-            id={cpId}
-            {...componentConfig}
-            runtime={runtime}
-            detailMode={detailMode}
-          />
-        );
-      case FORM_COMPONENT_TYPES.INPUT_NUMBER:
-        return (
-          <FormComp.XInputNumber
-            cpName={cpId}
-            id={cpId}
-            {...componentConfig}
-            runtime={runtime}
-            detailMode={detailMode}
-          />
-        );
-      case FORM_COMPONENT_TYPES.DATE_PICKER:
-        return (
-          <FormComp.XDatePicker
-            cpName={cpId}
-            id={cpId}
-            {...componentConfig}
-            runtime={runtime}
-            detailMode={detailMode}
-          />
-        );
-      case FORM_COMPONENT_TYPES.DATE_RANGE_PICKER:
-        return (
-          <FormComp.XDateRangePicker
-            cpName={cpId}
-            id={cpId}
-            {...componentConfig}
-            runtime={runtime}
-            detailMode={detailMode}
-          />
-        );
-      case FORM_COMPONENT_TYPES.TIME_PICKER:
-        return (
-          <FormComp.XTimePicker
-            cpName={cpId}
-            id={cpId}
-            {...componentConfig}
-            runtime={runtime}
-            detailMode={detailMode}
-          />
-        );
-      case FORM_COMPONENT_TYPES.DATE_TIME_PICKER:
-        return (
-          <FormComp.XDateTimePicker
-            cpName={cpId}
-            id={cpId}
-            {...componentConfig}
-            runtime={runtime}
-            detailMode={detailMode}
-          />
-        );
-      case FORM_COMPONENT_TYPES.SWITCH:
-        return (
-          <FormComp.XSwitch cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} detailMode={detailMode} />
-        );
-      case FORM_COMPONENT_TYPES.RADIO:
-        return (
-          <FormComp.XRadio cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} detailMode={detailMode} />
-        );
-      case FORM_COMPONENT_TYPES.CHECKBOX:
-        return (
-          <FormComp.XCheckbox cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} detailMode={detailMode} />
-        );
-      case FORM_COMPONENT_TYPES.SELECT_ONE:
-        return (
-          <FormComp.XSelectOne cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} detailMode={detailMode} />
-        );
-      case FORM_COMPONENT_TYPES.SELECT_MUTIPLE:
-        return (
-          <FormComp.XSelectMutiple
-            cpName={cpId}
-            id={cpId}
-            {...componentConfig}
-            runtime={runtime}
-            detailMode={detailMode}
-          />
-        );
-      case FORM_COMPONENT_TYPES.USER_SELECT:
-        return (
-          <FormComp.XUserSelect
-            cpName={cpId}
-            id={cpId}
-            {...componentConfig}
-            runtime={runtime}
-            detailMode={detailMode}
-          />
-        );
-      case FORM_COMPONENT_TYPES.DEPT_SELECT:
-        return (
-          <FormComp.XDeptSelect
-            cpName={cpId}
-            id={cpId}
-            {...componentConfig}
-            runtime={runtime}
-            detailMode={detailMode}
-          />
-        );
-      case FORM_COMPONENT_TYPES.FILE_UPLOAD:
-        return (
-          <FormComp.XFileUpload
-            cpName={cpId}
-            id={cpId}
-            {...componentConfig}
-            runtime={runtime}
-            detailMode={detailMode}
-            recordId={recordId}
-          />
-        );
-      case FORM_COMPONENT_TYPES.IMG_UPLOAD:
-        return (
-          <FormComp.XImgUpload cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} detailMode={detailMode} />
-        );
-      case FORM_COMPONENT_TYPES.AUTO_CODE:
-        return (
-          <FormComp.XAutoCode cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} detailMode={detailMode} />
-        );
-      case FORM_COMPONENT_TYPES.RELATED_FORM:
-        return (
-          <FormComp.XRelatedForm
-            cpName={cpId}
-            id={cpId}
-            {...componentConfig}
-            runtime={runtime}
-            detailMode={detailMode}
-          />
-        );
-      case FORM_COMPONENT_TYPES.STATIC_TEXT:
-        return (
-          <FormComp.XStaticText
-            cpName={cpId}
-            id={cpId}
-            {...componentConfig}
-            runtime={runtime}
-            detailMode={detailMode}
-          />
-        );
-      case FORM_COMPONENT_TYPES.RICH_TEXT:
-        return (
-          <FormComp.XRichText cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} detailMode={detailMode} />
-        );
-      case FORM_COMPONENT_TYPES.SUB_TABLE:
-        return (
-          <FormComp.XSubTable
-            cpName={cpId}
-            id={cpId}
-            {...componentConfig}
-            runtime={runtime}
-            detailMode={detailMode}
-            pageType={pageType}
-          />
-        );
-      case FORM_COMPONENT_TYPES.DATA_SELECT:
-        return (
-          <FormComp.XDataSelect
-            cpName={cpId}
-            id={cpId}
-            {...componentConfig}
-            runtime={runtime}
-            detailMode={detailMode}
-          />
-        );
+    const descriptor = getComponentDescriptor(cpType as any);
+    const Impl: any = getComponentImpl(cpType as any) ?? (WORKBENCH_COMPONENT_MAP as any)[cpType];
+    if (!Impl) return <div>未知组件类型: {cpType}</div>;
 
-      //  布局组件
-      case LAYOUT_COMPONENT_TYPES.COLUMN_LAYOUT:
-        return (
-          <LayoutComp.XPreviewColumnLayout
-            {...componentConfig}
-            cpName={cpId}
-            id={cpId}
-            pageType={pageType}
-            detailMode={detailMode}
-          />
-        );
-      case LAYOUT_COMPONENT_TYPES.TABS_LAYOUT:
-        return (
-          <LayoutComp.XPreviewTabsLayout
-            {...componentConfig}
-            cpName={cpId}
-            id={cpId}
-            pageType={pageType}
-            detailMode={detailMode}
-          />
-        );
-      case LAYOUT_COMPONENT_TYPES.COLLAPSE_LAYOUT:
-        return (
-          <LayoutComp.XPreviewCollapseLayout
-            {...componentConfig}
-            cpName={cpId}
-            id={cpId}
-            pageType={pageType}
-            detailMode={detailMode}
-          />
-        );
+    const baseProps: any = { cpName: cpId, id: cpId, ...componentConfig };
 
-      //  列表组件
-      case LIST_COMPONENT_TYPES.TABLE:
-        return (
-          <ListComp.XTable
-            cpName={cpId}
-            id={cpId}
-            {...componentConfig}
-            runtime={runtime}
-            preview={preview}
-            showFromPageData={showFromPageData}
-            refresh={refresh}
-            pageSetType={pageSetType}
-          />
-        );
-      case LIST_COMPONENT_TYPES.CALENDAR:
-        return <ListComp.XCalendar cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
-      case LIST_COMPONENT_TYPES.TIMELINE:
-        return <ListComp.XTimeline cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
-      case LIST_COMPONENT_TYPES.CAROUSEL:
-        return <ListComp.XCarousel cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
-      case LIST_COMPONENT_TYPES.LIST:
-        return <ListComp.XList cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
-      case LIST_COMPONENT_TYPES.COLLAPSE:
-        return <ListComp.XCollapse cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
-
-      //  展示组件
-      case SHOW_COMPONENT_TYPES.INFO_NOTICE:
-        return <ShowComp.XInfoNotice cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
-      case SHOW_COMPONENT_TYPES.IMAGE:
-        return <ShowComp.XImage cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
-      case SHOW_COMPONENT_TYPES.FILE:
-        return <ShowComp.XFile cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
-      case SHOW_COMPONENT_TYPES.TEXT:
-        return <ShowComp.XText cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
-      case SHOW_COMPONENT_TYPES.WEB_VIEW:
-        return <ShowComp.XWebView cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
-      case SHOW_COMPONENT_TYPES.PLACEHOLDER:
-        return <ShowComp.XPlaceholder cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
-      case SHOW_COMPONENT_TYPES.DIVIDER:
-        return <ShowComp.XDivider cpName={cpId} id={cpId} {...componentConfig} />;
-      case SHOW_COMPONENT_TYPES.CAROUSEL_FORM:
-        return (
-          <ShowComp.XCarouselForm
-            cpName={cpId}
-            id={cpId}
-            {...componentConfig}
-            runtime={runtime}
-            detailMode={detailMode}
-          />
-        );
-
-      // 工作台组件
-      case WORKBENCH_COMPONENT_TYPES.QUICK_ENTRY:
-        return <WorkbenchComp.XQuickEntry cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
-      case WORKBENCH_COMPONENT_TYPES.TODO_CENTER:
-        return <WorkbenchComp.XTodoCenter cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
-      case WORKBENCH_COMPONENT_TYPES.RICH_TEXT_WORKBENCH:
-        return <WorkbenchComp.XRichTextEditorWorkbench cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
-      case WORKBENCH_COMPONENT_TYPES.CAROUSEL_WORKBENCH:
-        return <WorkbenchComp.XCarouselWorkbench cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
-      case WORKBENCH_COMPONENT_TYPES.WELCOME_CARD:
-        return <WorkbenchComp.XWelcomeCard cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
-      case WORKBENCH_COMPONENT_TYPES.TODO_CENTER:
-        return <WorkbenchComp.XTodoCenter cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
-      case WORKBENCH_COMPONENT_TYPES.BUTTON_WORKBENCH:
-          // 移动端独有组件，web 端静默处理
-          return null;
-
-      default:
-        return <div>未知组件类型: {cpType}</div>;
+    if (descriptor) {
+      if (descriptor.template.category === 'form' || descriptor.template.category === 'show') {
+        baseProps.runtime = runtime;
+        baseProps.detailMode = detailMode;
+      }
+      if (descriptor.template.category === 'layout') {
+        baseProps.pageType = pageType;
+        baseProps.detailMode = detailMode;
+      }
+      if (descriptor.template.category === 'list') {
+        baseProps.runtime = runtime;
+        baseProps.preview = preview;
+        baseProps.showFromPageData = showFromPageData;
+        baseProps.refresh = refresh;
+      }
+    } else {
+      baseProps.runtime = runtime;
+      baseProps.detailMode = detailMode;
+      baseProps.preview = preview;
     }
+
+    if (isPluginComponentType(cpType)) {
+      // 预留：插件组件特定扩展点（若未来需要按插件增强 props，可在此统一处理）
+    }
+
+    return <Impl {...baseProps} />;
   }, [componentConfig, refresh]);
 
 
