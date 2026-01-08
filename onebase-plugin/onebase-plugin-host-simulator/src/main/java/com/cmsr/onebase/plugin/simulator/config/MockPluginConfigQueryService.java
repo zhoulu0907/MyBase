@@ -11,9 +11,12 @@ import org.springframework.stereotype.Service;
 import org.yaml.snakeyaml.Yaml;
 
 import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -43,9 +46,23 @@ public class MockPluginConfigQueryService implements PluginConfigQueryService {
      */
     private final Map<String, Map<String, Object>> pluginConfigs = new ConcurrentHashMap<>();
 
+    /**
+     * 配置文件监听器
+     */
+    private ConfigFileWatcher configFileWatcher;
+
     @PostConstruct
     public void init() {
         loadConfigFromFile();
+        startConfigFileWatcher();
+    }
+
+    /**
+     * 销毁时停止配置文件监听
+     */
+    @PreDestroy
+    public void destroy() {
+        stopConfigFileWatcher();
     }
 
     /**
@@ -247,5 +264,72 @@ public class MockPluginConfigQueryService implements PluginConfigQueryService {
      */
     protected ResourceLoader getResourceLoader() {
         return new DefaultResourceLoader();
+    }
+
+    /**
+     * 启动配置文件监听器
+     */
+    private void startConfigFileWatcher() {
+        Path configPath = getConfigFilePath();
+        if (configPath == null) {
+            log.info("未找到外部配置文件，不启动热加载监听");
+            return;
+        }
+
+        try {
+            configFileWatcher = new ConfigFileWatcher(configPath, this::reloadConfig);
+            configFileWatcher.start();
+            log.info("配置文件热加载已启用");
+        } catch (Exception e) {
+            log.error("启动配置文件监听失败", e);
+        }
+    }
+
+    /**
+     * 停止配置文件监听器
+     */
+    private void stopConfigFileWatcher() {
+        if (configFileWatcher != null) {
+            configFileWatcher.stop();
+            configFileWatcher = null;
+        }
+    }
+
+    /**
+     * 获取配置文件路径（仅外部文件）
+     * <p>
+     * 只有外部配置文件才支持热加载，classpath 内的文件无法监控
+     * </p>
+     */
+    private Path getConfigFilePath() {
+        try {
+            File homeDir = getApplicationHomeDir();
+            File configFile = null;
+
+            // IDE 模式特殊处理
+            if ("classes".equals(homeDir.getName())) {
+                File targetDir = homeDir.getParentFile();
+                if (targetDir != null) {
+                    File targetConfigFile = new File(targetDir, "plugin-config.yml");
+                    if (targetConfigFile.exists()) {
+                        configFile = targetConfigFile;
+                    }
+                }
+            } else {
+                // JAR 模式
+                configFile = new File(homeDir, "plugin-config.yml");
+                if (!configFile.exists()) {
+                    configFile = null;
+                }
+            }
+
+            if (configFile != null && configFile.exists()) {
+                return Paths.get(configFile.getAbsolutePath());
+            }
+        } catch (Exception e) {
+            log.error("获取配置文件路径失败", e);
+        }
+
+        return null;
     }
 }
