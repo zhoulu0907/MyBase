@@ -67,7 +67,7 @@ public class DeptServiceImpl implements DeptService {
 
     @Override
     @CacheEvict(cacheNames = RedisKeyConstants.DEPT_CHILDREN_ID_LIST, allEntries = true, beforeInvocation = true)
-    public Long createDept(DeptSaveReqVO createReqVO) {
+    public Long createDept(DeptInsertReqVO createReqVO) {
         if (createReqVO.getParentId() == null) {
             createReqVO.setParentId(DeptDO.PARENT_ID_ROOT);
         }
@@ -101,7 +101,7 @@ public class DeptServiceImpl implements DeptService {
 
     @Override
     @CacheEvict(cacheNames = RedisKeyConstants.DEPT_CHILDREN_ID_LIST, allEntries = true, beforeInvocation = true)
-    public void updateDept(DeptSaveReqVO updateReqVO) {
+    public void updateDept(DeptUpdateReqVO updateReqVO) {
         if (updateReqVO.getParentId() == null) {
             updateReqVO.setParentId(DeptDO.PARENT_ID_ROOT);
         }
@@ -113,9 +113,9 @@ public class DeptServiceImpl implements DeptService {
         validateDeptNameUnique(updateReqVO.getId(), updateReqVO.getParentId(), updateReqVO.getName());
 
         // 更新部门
-        DeptDO updateObj = BeanUtils.toBean(updateReqVO, DeptDO.class);
-        // deptDataRepository.update(updateObj);
-        deptDataRepository.updateDept(updateObj);
+        // DeptDO updateObj = BeanUtils.toBean(updateReqVO, DeptDO.class);
+        // 使用 UpdateChain 显式 set 的方式更新，确保 leaderUserId/adminUserIds 为 null 时也能写入数据库
+        deptDataRepository.updateDept(updateReqVO);
     }
 
     @Override
@@ -518,15 +518,14 @@ public class DeptServiceImpl implements DeptService {
 
 
     @Override
-    public DeptDO findDeptByCodeAndType(DeptSaveReqVO deptRespVO) {
+    public DeptDO findDeptByCodeAndType(DeptDO deptRespVO) {
        return deptDataRepository.findDeptByCodeAndType(deptRespVO);
     }
 
     @Override
-    public Long createThirdDefaultDept(DeptSaveReqVO deptRespVO) {
-        DeptDO dept = BeanUtils.toBean(deptRespVO, DeptDO.class);
-        deptDataRepository.insert(dept);
-        return dept.getId();
+    public Long createThirdDefaultDept(DeptDO deptDO) {
+        deptDataRepository.insert(deptDO);
+        return deptDO.getId();
     }
 
     @Override
