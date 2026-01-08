@@ -4,6 +4,7 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.plugin.build.vo.req.PluginInfoPageReqVO;
 import com.cmsr.onebase.plugin.build.vo.req.PluginInfoUpdateReqVO;
 import com.cmsr.onebase.plugin.build.vo.req.PluginUploadReqVO;
+import com.cmsr.onebase.plugin.build.vo.req.PluginVersionStatusReqVO;
 import com.cmsr.onebase.plugin.build.vo.resp.PluginInfoDetailRespVO;
 import com.cmsr.onebase.plugin.build.vo.resp.PluginInfoRespVO;
 import jakarta.validation.Valid;
@@ -17,12 +18,12 @@ import jakarta.validation.Valid;
 public interface PluginInfoService {
 
     /**
-     * 上传插件（首次上传）
+     * 新增插件（首次上传）
      *
      * @param uploadReqVO 上传请求
      * @return 插件ID
      */
-    String uploadPlugin(@Valid PluginUploadReqVO uploadReqVO);
+    String createPlugin(@Valid PluginUploadReqVO uploadReqVO);
 
     /**
      * 获取插件详情（含版本列表）
@@ -57,15 +58,15 @@ public interface PluginInfoService {
     /**
      * 启用插件版本
      *
-     * @param id 版本记录ID
+     * @param statusReqVO 版本状态变更请求
      */
-    void enablePlugin(Long id);
+    void enablePlugin(@Valid PluginVersionStatusReqVO statusReqVO);
 
     /**
      * 禁用插件版本
      *
-     * @param id 版本记录ID
+     * @param statusReqVO 版本状态变更请求
      */
-    void disablePlugin(Long id);
+    void disablePlugin(@Valid PluginVersionStatusReqVO statusReqVO);
 
 }
