@@ -15,7 +15,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class MockPluginConfigServiceTest {
+public class MockPluginConfigServiceTest {
 
     @TempDir
     Path tempDir;
