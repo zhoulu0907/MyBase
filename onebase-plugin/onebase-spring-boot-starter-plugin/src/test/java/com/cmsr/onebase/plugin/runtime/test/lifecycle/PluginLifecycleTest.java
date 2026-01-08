@@ -48,7 +48,7 @@ import org.springframework.test.context.TestPropertySource;
  * @date 2025-12-25
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 @Import(PluginTestConfiguration.class)
 @TestPropertySource(properties = {
         "onebase.plugin.enabled=true",
