@@ -26,6 +26,13 @@ const containerStyle: CSSProperties = {
   boxSizing: 'border-box'
 };
 
+const colorList = [
+  '#FF7D00',
+  '#165DFF',
+  '#00B42A',
+  '#F53F3F'
+];
+
 const XTodoCenter = memo((props: XTodoCenterConfig & { runtime?: boolean }) => {
   const { label, dataConfig, theme, status, runtime } = props;
   const hiddenStatusValue = WORKBENCH_STATUS_VALUES[WORKBENCH_STATUS_OPTIONS.HIDDEN];
@@ -44,17 +51,18 @@ const XTodoCenter = memo((props: XTodoCenterConfig & { runtime?: boolean }) => {
       </div>
 
       <div className={styles.todoCenterContent}>
-        {Object.entries(dataConfig).map(([key, value]: [string, boolean]) => (
-          <div key={key} className={styles.todoCenterContentItem} style={{ backgroundColor: theme === WORKBENCH_THEME_OPTIONS.THEME_1 ? '#F2F3F5' : '#f5f6f8' }}>
+        {Object.entries(dataConfig).map(([key, value]: [string, boolean], index: number) => (
+          value &&
+          (<div key={key} className={styles.todoCenterContentItem} style={{ backgroundColor: theme === WORKBENCH_THEME_OPTIONS.THEME_1 ? '#F2F3F5' : colorList[index % colorList.length] + '20' }}>
             <div className={styles.todoCenterContentItemLeft}>
               <div className={styles.todoCenterContentItemTitle}>{DATA_CONFIG_NAME_MAP[key] || key}</div>
               <div className={styles.todoCenterContentItemValue}>123</div>
             </div>
 
-            <div className={styles.todoCenterContentItemRight} style={{ backgroundColor: theme === WORKBENCH_THEME_OPTIONS.THEME_1 ? 'rgba(var(--primary-6))' : '#f5f6f8' }}>
+            <div className={styles.todoCenterContentItemRight} style={{ backgroundColor: theme === WORKBENCH_THEME_OPTIONS.THEME_1 ? 'rgba(var(--primary-6))' : colorList[index % colorList.length] }}>
               <img src={ICON_MAP[key]} alt={key} height={28} />
             </div>
-          </div>
+          </div>)
         ))}
       </div>
     </div>
