@@ -18,6 +18,7 @@ import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -138,27 +139,46 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
         // if(!Objects.equals(corpId, loginCorpId)){
         //     throw exception(CORP_ID_COMPARE_ERROR);
         // }
-        Map<Long, ApplicationDTO> applicationMap = getApplicationDoMap(pageReqVO.getName());
-        List<Long> applicationIds = new ArrayList<>(applicationMap.keySet());
-        if(CollectionUtils.isEmpty(applicationIds)){
-            return new PageResult<CorpApplicationRespVO>();
+        List<Long> applicationIds = new ArrayList<>();
+        Map<Long, ApplicationDTO> applicationMap = new HashMap<>();
+        if (StringUtils.isNotBlank(pageReqVO.getName())) {
+            applicationMap = getApplicationDoMap(pageReqVO.getName());
+            applicationIds = new ArrayList<>(applicationMap.keySet());
+            if (CollectionUtils.isEmpty(applicationIds)) {
+                return new PageResult<CorpApplicationRespVO>();
+            }
         }
+
         // 查询原始分页数据
         PageResult<CorpAppRelationDO> pageResult = corpAppRelationDataRepository.selectPage(pageReqVO, applicationIds);
 
-          Map<Long, List<TagVO>> tagMap =new HashMap<Long, List<TagVO>>();
-        // 1. 获取应用ID列表
-        List<Long> appIds = pageResult.getList().stream()
-                .map(CorpAppRelationDO::getApplicationId)
-                .collect(Collectors.toList());
-        if(CollectionUtils.isNotEmpty(appIds)){
-            // 获取标签列表
-            tagMap = appApplicationApi.queryAppTags(appIds);
+        if (!pageResult.getList().isEmpty()) {
+            applicationIds = pageResult.getList().stream().map(CorpAppRelationDO::getApplicationId).collect(Collectors.toList());
+            if (CollectionUtils.isEmpty(applicationIds)) {
+                return new PageResult<CorpApplicationRespVO>();
+            }
+            if (applicationMap.isEmpty()){
+                List<ApplicationDTO> appApplicationByAppIds = appApplicationApi.findAppApplicationByAppIds(applicationIds);
+                applicationMap = appApplicationByAppIds.stream()
+                        .collect(Collectors.toMap(
+                                ApplicationDTO::getId,
+                                Function.identity()
+                        ));
+            }
+        } else {
+            return new PageResult<CorpApplicationRespVO>();
         }
-        final    Map<Long, List<TagVO>> finalTagMap=tagMap;
+
+        Map<Long, List<TagVO>> tagMap = new HashMap<Long, List<TagVO>>();
+
+        // 获取标签列表
+        tagMap = appApplicationApi.queryAppTags(applicationIds);
+
+        final Map<Long, List<TagVO>> finalTagMap = tagMap;
+        final Map<Long, ApplicationDTO> finalApplicationMap = applicationMap;
         // 转换为 VO 对象并根据 applicationName 过滤
         List<CorpApplicationRespVO> filteredList = pageResult.getList().stream()
-                .map(corpDO -> convertToRespVO(corpDO, applicationMap, finalTagMap))
+                .map(corpDO -> convertToRespVO(corpDO, finalApplicationMap, finalTagMap))
                 .collect(Collectors.toList());
 
         // 返回过滤后的结果和总数
@@ -246,7 +266,7 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
                 .filter(app -> CommonPublishModelEnum.SaaSModel.getValue().equals(app.getPublishModel()))
                 .collect(Collectors.toList());
         if (CollectionUtils.isEmpty(applicationDTOList)) {
-            return  new ArrayList<>();
+            return new ArrayList<>();
         }
         // 按创建时间倒序排列
         applicationDTOList = applicationDTOList.stream()
