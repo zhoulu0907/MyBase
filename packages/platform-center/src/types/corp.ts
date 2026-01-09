@@ -18,6 +18,7 @@ export interface updateCorpParams {
   id: string;
   corpCode: string;
   corpName: string;
+  corpLogo: string;
   industryType: string;
   status: number;
   address: string;
