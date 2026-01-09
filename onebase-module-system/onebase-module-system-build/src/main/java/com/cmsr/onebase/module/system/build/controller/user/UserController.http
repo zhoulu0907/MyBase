@@ -81,5 +81,5 @@ Authorization: Bearer {{token}}
 
 
 ### 获得指定部门的用户简要分页列表（仅直属部门）
-GET {{baseUrl}}/system/user/page
+GET {{baseUrl}}/system/user/page?userType=2
 Authorization: Bearer {{token}}
