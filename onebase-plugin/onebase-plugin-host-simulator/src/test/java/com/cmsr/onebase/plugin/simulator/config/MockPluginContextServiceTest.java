@@ -15,16 +15,16 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class MockPluginConfigServiceTest {
+public class MockPluginContextServiceTest {
 
     @TempDir
     Path tempDir;
 
-    private TestableMockPluginConfigService configService;
+    private TestableMockPluginContextService configService;
 
     @BeforeEach
     void setUp() {
-        configService = new TestableMockPluginConfigService();
+        configService = new TestableMockPluginContextService();
     }
 
     // --------------------------------------------------------------------------------------
@@ -44,11 +44,11 @@ public class MockPluginConfigServiceTest {
 
         // 模拟 ResourceLoader 能找到内部配置
         // 这里的逻辑是: 外部找不到 -> 走到降级逻辑 ->
-        // resourceLoader.getResource("classpath:plugin-config.yml")
-        // 由于测试环境真实 classpath 下可能没有 plugin-config.yml (除非我们在 src/test/resources 加一个)
+        // resourceLoader.getResource("classpath:plugin-context.yml")
+        // 由于测试环境真实 classpath 下可能没有 plugin-context.yml (除非我们在 src/test/resources 加一个)
         // 或者我们可以 mock resourceLoader 让它返回存在的 resource
 
-        // 实际上 src/main/resources 下通常会有 plugin-config.yml，所以 maven compile 后
+        // 实际上 src/main/resources 下通常会有 plugin-context.yml，所以 maven compile 后
         // target/classes 下会有
         // 在单元测试中，classpath 会包含 target/classes 和 target/test-classes
 
@@ -56,7 +56,7 @@ public class MockPluginConfigServiceTest {
         configService.setResourceLoader(new DefaultResourceLoader() {
             @Override
             public Resource getResource(String location) {
-                if ("classpath:plugin-config.yml".equals(location)) {
+                if ("classpath:plugin-context.yml".equals(location)) {
                     // 返回一个临时文件作为内部配置
                     try {
                         Path p = tempDir.resolve("internal-config.yml");
@@ -104,7 +104,7 @@ public class MockPluginConfigServiceTest {
 
     /**
      * 场景 3: IDE 模式：外部配置文件存在，内部配置文件也存在
-     * 预期：优先使用外部配置文件 (target/plugin-config.yml)
+     * 预期：优先使用外部配置文件 (target/plugin-context.yml)
      */
     @Test
     void scene3_IdeMode_BothExist() throws IOException {
@@ -113,14 +113,14 @@ public class MockPluginConfigServiceTest {
         Files.createDirectories(classesDir);
 
         // 创建外部配置文件
-        Path externalConfig = targetDir.resolve("plugin-config.yml");
+        Path externalConfig = targetDir.resolve("plugin-context.yml");
         Files.writeString(externalConfig, "plugins:\n  scene3:\n    key: external");
 
         // Mock 内部配置存在
         configService.setResourceLoader(new DefaultResourceLoader() {
             @Override
             public Resource getResource(String location) {
-                if ("classpath:plugin-config.yml".equals(location)) {
+                if ("classpath:plugin-context.yml".equals(location)) {
                     try {
                         Path p = tempDir.resolve("internal-config.yml");
                         if (!Files.exists(p))
@@ -153,14 +153,14 @@ public class MockPluginConfigServiceTest {
         Files.createDirectories(classesDir);
 
         // 创建外部配置文件
-        Path externalConfig = targetDir.resolve("plugin-config.yml");
+        Path externalConfig = targetDir.resolve("plugin-context.yml");
         Files.writeString(externalConfig, "plugins:\n  scene4:\n    key: external");
 
         // Mock 内部配置缺失
         configService.setResourceLoader(new DefaultResourceLoader() {
             @Override
             public Resource getResource(String location) {
-                if ("classpath:plugin-config.yml".equals(location)) {
+                if ("classpath:plugin-context.yml".equals(location)) {
                     return super.getResource("file:non-existent.yml");
                 }
                 return super.getResource(location);
@@ -180,12 +180,12 @@ public class MockPluginConfigServiceTest {
     // --------------------------------------------------------------------------------------
 
     /**
-     * 场景 5: JAR模式：jar包同级目录存在 plugin-config.yml
+     * 场景 5: JAR模式：jar包同级目录存在 plugin-context.yml
      * 预期：加载同级目录配置文件
      */
     @Test
     void scene5_JarMode_ExternalExists() throws IOException {
-        Path externalConfig = tempDir.resolve("plugin-config.yml");
+        Path externalConfig = tempDir.resolve("plugin-context.yml");
         Files.writeString(externalConfig, "plugins:\n  scene5:\n    key: jar-external");
 
         configService.setAppHomeDir(tempDir.toFile());
@@ -198,7 +198,7 @@ public class MockPluginConfigServiceTest {
     }
 
     /**
-     * 场景 6: JAR模式：jar包同级目录不存在 plugin-config.yml，内置配置文件存在
+     * 场景 6: JAR模式：jar包同级目录不存在 plugin-context.yml，内置配置文件存在
      * 预期：加载内置配置文件
      */
     @Test
@@ -209,7 +209,7 @@ public class MockPluginConfigServiceTest {
         configService.setResourceLoader(new DefaultResourceLoader() {
             @Override
             public Resource getResource(String location) {
-                if ("classpath:plugin-config.yml".equals(location)) {
+                if ("classpath:plugin-context.yml".equals(location)) {
                     try {
                         Path p = tempDir.resolve("internal-config.yml");
                         if (!Files.exists(p))
@@ -231,7 +231,7 @@ public class MockPluginConfigServiceTest {
     }
 
     /**
-     * 场景 7: JAR模式：jar包同级目录不存在 plugin-config.yml，内置配置文件也不存在
+     * 场景 7: JAR模式：jar包同级目录不存在 plugin-context.yml，内置配置文件也不存在
      * 预期：无配置
      */
     @Test
@@ -252,7 +252,7 @@ public class MockPluginConfigServiceTest {
     }
 
     // 可测试的子类
-    static class TestableMockPluginConfigService extends MockPluginConfigQueryService {
+    static class TestableMockPluginContextService extends PluginContextServiceMockImpl {
         private File appHomeDir;
         private ResourceLoader resourceLoader = new DefaultResourceLoader();
 
