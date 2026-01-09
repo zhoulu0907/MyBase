@@ -1,9 +1,7 @@
 package com.cmsr.onebase.module.system.service.corp;
 
-import cn.hutool.core.util.ObjUtil;
 import com.cmsr.onebase.framework.common.biz.system.dict.DictDataCommonApi;
 import com.cmsr.onebase.framework.common.biz.system.dict.dto.DictDataRespDTO;
-import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
@@ -99,11 +97,11 @@ public class CorpServiceImpl implements CorpService {
         Long corpId = createCorp(corpCombineReqVO.getCorpReqVO());
 
         // 保存系统管理员
-        CorpAdminUserRespVO vo = createAdminUser(corpCombineReqVO.getCorpAdminReqVO(), corpId);
+        CorpAdminUserRespVO vo = createCorpAdminUser(corpCombineReqVO.getCorpAdminReqVO(), corpId);
         // 保存关联关系
         List<AppAuthTimeReqVO> appAuthTimeReqVO = corpCombineReqVO.getAppAuthTimeReqVO();
 
-        createListCorpAppRelation(appAuthTimeReqVO, corpId);
+        createCorpAndAppRelation(appAuthTimeReqVO, corpId);
         // 更新企业管理员Id
         updateCorpAdminIdById(corpId, vo.getId());
 
@@ -116,8 +114,8 @@ public class CorpServiceImpl implements CorpService {
         return vo;
     }
 
-    private void createListCorpAppRelation(List<AppAuthTimeReqVO> appAuthTimeReqVOs, Long corpId) {
-        corpAppRelationService.createListCorpAppRelation(appAuthTimeReqVOs, corpId);
+    private void createCorpAndAppRelation(List<AppAuthTimeReqVO> appAuthTimeReqVOs, Long corpId) {
+        corpAppRelationService.createCorpAndAppRelation(appAuthTimeReqVOs, corpId);
     }
 
 
@@ -423,7 +421,7 @@ public class CorpServiceImpl implements CorpService {
         return passwordEncoder.encode(password);
     }
 
-    public CorpAdminUserRespVO createAdminUser(CorpAdminReqVO reqVO, Long corpId) {
+    public CorpAdminUserRespVO createCorpAdminUser(CorpAdminReqVO reqVO, Long corpId) {
         // 2.2.1 判断如果不存在，在进行插入
         AdminUserDO existUser = userService.getUserByUsername(reqVO.getUsername());
         if (existUser != null) {
