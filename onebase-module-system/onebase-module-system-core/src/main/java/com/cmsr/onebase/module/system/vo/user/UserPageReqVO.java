@@ -47,4 +47,7 @@ public class UserPageReqVO extends PageParam {
     @Schema(description = "模糊查询关键词", example = "admin123")
     private String keyword;
 
+    @Schema(description = "用户类型，参见 UserTypeEnum 枚举类", example = "1")
+    private Integer userType;
+
 }
