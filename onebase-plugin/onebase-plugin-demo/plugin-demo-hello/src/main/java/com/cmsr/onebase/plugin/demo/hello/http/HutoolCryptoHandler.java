@@ -28,39 +28,41 @@ public class HutoolCryptoHandler implements HttpHandler {
 
     /**
      * 测试Hutool加密功能
-     * <p>访问路径：GET /plugin/hello-plugin/crypto?text=xxx</p>
+     * <p>
+     * 访问路径：GET /plugin/hello-plugin/crypto?text=xxx
+     * </p>
      */
     @GetMapping("/crypto")
     public Map<String, Object> cryptoTest(@RequestParam(defaultValue = "Hello OneBase Plugin") String text) {
         Map<String, Object> result = new HashMap<>();
-        
+
         try {
             // 1. MD5加密
             String md5 = DigestUtil.md5Hex(text);
             result.put("md5", md5);
-            
+
             // 2. SHA256加密
             String sha256 = DigestUtil.sha256Hex(text);
             result.put("sha256", sha256);
-            
+
             // 3. AES加密
-            String key = "onebase123456789cys"; // 16位密钥
+            String key = "onebase123456789"; // 16字节密钥（AES-128）
             AES aes = SecureUtil.aes(key.getBytes(StandardCharsets.UTF_8));
             String encrypted = aes.encryptHex(text);
             result.put("aesEncrypted", encrypted);
-            
+
             // 4. AES解密验证
             String decrypted = aes.decryptStr(encrypted);
             result.put("aesDecrypted", decrypted);
             result.put("aesVerified", text.equals(decrypted));
-            
+
             // 5. 原始文本
             result.put("originalText", text);
-            
+
             // 6. Hutool版本信息
             result.put("hutoolVersion", "5.8.35");
             result.put("hutoolLoaded", true);
-            
+
             // 7. 插件信息
             result.put("pluginId", "hello-plugin");
             result.put("message", "Hutool三方依赖加载成功！AES加密解密验证通过！");
@@ -71,35 +73,37 @@ public class HutoolCryptoHandler implements HttpHandler {
             result.put("error", e.getMessage());
             result.put("errorType", e.getClass().getName());
             result.put("hutoolLoaded", false);
-            log.info("Hutool依赖加载失败！");
+            log.error("Hutool依赖加载失败！");
         }
-        
+
         return result;
     }
-    
+
     /**
      * 检查Hutool是否可用
-     * <p>访问路径：GET /plugin/hello-plugin/check-hutool</p>
+     * <p>
+     * 访问路径：GET /plugin/hello-plugin/check-hutool
+     * </p>
      */
     @GetMapping("/check-hutool")
     public Map<String, Object> checkHutool() {
         Map<String, Object> result = new HashMap<>();
-        
+
         try {
             // 尝试加载Hutool类
             Class<?> clazz = Class.forName("cn.hutool.crypto.SecureUtil");
             result.put("hutoolClassLoaded", true);
             result.put("hutoolClassName", clazz.getName());
             result.put("classLoader", clazz.getClassLoader().getClass().getName());
-            
+
             // 测试简单功能
             String testMd5 = DigestUtil.md5Hex("test");
             result.put("testMd5", testMd5);
             result.put("md5Correct", "098f6bcd4621d373cade4e832627b4f6".equals(testMd5));
-            
+
             result.put("message", "Hutool依赖检查通过！");
             result.put("success", true);
-            
+
         } catch (ClassNotFoundException e) {
             result.put("hutoolClassLoaded", false);
             result.put("error", "Hutool类未找到: " + e.getMessage());
@@ -109,7 +113,7 @@ public class HutoolCryptoHandler implements HttpHandler {
             result.put("errorType", e.getClass().getName());
             result.put("success", false);
         }
-        
+
         return result;
     }
 }
