@@ -47,7 +47,7 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
     private AppApplicationApi appApplicationApi;
 
     @Override
-    public void createListCorpAppRelation(List<AppAuthTimeReqVO> corpAppRelationInertReqVOList, Long corpId) {
+    public void createCorpAndAppRelation(List<AppAuthTimeReqVO> corpAppRelationInertReqVOList, Long corpId) {
         if (CollectionUtils.isEmpty(corpAppRelationInertReqVOList)) {
             return;
         }

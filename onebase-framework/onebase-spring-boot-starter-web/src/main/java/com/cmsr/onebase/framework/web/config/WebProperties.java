@@ -36,7 +36,6 @@ public class WebProperties {
             "**.platform.controller.**",
     });
 
-    // @NotNull(message = "Admin UI 不能为空")
     private Ui adminUi;
 
     /**
