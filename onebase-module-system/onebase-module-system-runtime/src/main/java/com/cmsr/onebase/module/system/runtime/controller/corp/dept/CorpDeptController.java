@@ -3,14 +3,10 @@ package com.cmsr.onebase.module.system.runtime.controller.corp.dept;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.system.convert.user.UserConvert;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
-import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.service.dept.DeptService;
-import com.cmsr.onebase.module.system.service.user.UserService;
 import com.cmsr.onebase.module.system.vo.dept.*;
 import com.cmsr.onebase.module.system.vo.user.UserAdminOrDirectorUpdateReqVO;
-import com.cmsr.onebase.module.system.vo.user.UserDeptSimpleRespVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -21,10 +17,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
-import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertList;
 
 /**
  * 管理后台 - 部门 Controller
@@ -44,7 +38,7 @@ public class CorpDeptController {
     @PostMapping("/create")
     @Operation(summary = "创建部门")
     @PreAuthorize("@ss.hasPermission('corp:dept:create')")
-    public CommonResult<Long> createDept(@Valid @RequestBody DeptSaveReqVO createReqVO) {
+    public CommonResult<Long> createDept(@Valid @RequestBody DeptInsertReqVO createReqVO) {
         Long deptId = deptService.createDept(createReqVO);
         return success(deptId);
     }
@@ -52,7 +46,7 @@ public class CorpDeptController {
     @PostMapping("/update")
     @Operation(summary = "更新部门")
     @PreAuthorize("@ss.hasPermission('corp:dept:update')")
-    public CommonResult<Boolean> updateDept(@Valid @RequestBody DeptSaveReqVO updateReqVO) {
+    public CommonResult<Boolean> updateDept(@Valid @RequestBody DeptUpdateReqVO updateReqVO) {
         deptService.updateDept(updateReqVO);
         return success(true);
     }
