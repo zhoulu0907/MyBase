@@ -66,16 +66,14 @@ public class TenantDataRepository extends BaseDataRepository<SystemTenantMapper,
     }
 
     /**
-     * 根据状态统计租户数量
+     * 统计租户数量（排除平台租户）
      *
-     * @param status 状态
      * @return 租户数量
      */
-    public long countByStatus(Integer status) {
-        if (status == null) {
-            return 0L;
-        }
-        return count(query().eq(TenantDO.STATUS, status));
+    public long countByStatus() {
+        QueryWrapper queryWrapper = query()
+                .ne(TenantDO.TENANT_CODE, TenantCodeEnum.PLATFORM_TENANT.getCode());
+        return count(queryWrapper);
     }
 
     /**
@@ -111,26 +109,6 @@ public class TenantDataRepository extends BaseDataRepository<SystemTenantMapper,
      */
     public List<TenantDO> findAll() {
         return list();
-    }
-
-    /**
-     * 根据状态统计租户数量（排除平台租户）
-     *
-     * @param status 状态
-     * @param excludeTenantId 排除的租户ID（可为 null）
-     * @return 租户数量
-     */
-    public long countByStatusExcludePlatform(Integer status, Long excludeTenantId) {
-        if (status == null) {
-            return 0L;
-        }
-        QueryWrapper queryWrapper = query()
-                .eq(TenantDO.STATUS, status)
-                .ne(TenantDO.TENANT_CODE, TenantCodeEnum.PLATFORM_TENANT.getCode());
-        if (excludeTenantId != null) {
-            queryWrapper.ne(TenantDO.COL_ID, excludeTenantId);
-        }
-        return count(queryWrapper);
     }
 
     /**

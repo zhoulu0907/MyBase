@@ -99,12 +99,11 @@ public interface TenantService {
     Long getTenantCountByPackageId(Long packageId);
 
     /**
-     * 获得指定状态的租户数量
+     * 获得租户数量(排除平台租户)
      *
-     * @param status 状态
      * @return 租户数量
      */
-    Integer getTenantCountByStatus(Integer status);
+    Integer getTenantCount();
 
     /**
      * 获得使用指定套餐的租户数组

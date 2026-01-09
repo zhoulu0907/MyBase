@@ -54,11 +54,8 @@ import com.mzt.logapi.starter.annotation.LogRecord;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.DataRow;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -216,7 +213,7 @@ public class TenantServiceImpl implements TenantService {
             // 获取license总租户数限制
             Integer totalTenantLimit = license.getTenantLimit();
             // 获取现有租户数量
-            Long existTenantCount = getExistTenantCount();
+            Integer existTenantCount = getTenantCount();
             if (existTenantCount >= totalTenantLimit) {
                 throw exception(LICENSE_TENANT_COUNT_NOT_ENOUGH);
             }
@@ -256,14 +253,6 @@ public class TenantServiceImpl implements TenantService {
         LogRecordContext.putVariable("tenant", tenant);
 
         return tenant.getId();
-    }
-
-
-    private Long getExistTenantCount() {
-        // 排除平台租户
-        Long existTenantCount = tenantDataRepository.countByStatusExcludePlatform(
-                TenantStatusEnum.NORMAL.getStatus(), null);
-        return existTenantCount;
     }
 
     private Map<String, AdminUserDO> getUserMobileByUserNames(Set<String> usernamesList) {
@@ -758,8 +747,8 @@ public class TenantServiceImpl implements TenantService {
     }
 
     @Override
-    public Integer getTenantCountByStatus(Integer status) {
-        return (int) tenantDataRepository.countByStatus(status);
+    public Integer getTenantCount() {
+        return (int) tenantDataRepository.countByStatus();
     }
 
     @Override
