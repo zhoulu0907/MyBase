@@ -24,6 +24,10 @@ const EditPage: React.FC<IEditPageProps> = ({ avatarUrl, setAvatarUrl }) => {
   const [curAvatarUrl, setCurAvatarUrl] = useState<string>(avatarUrl);
 
   useEffect(() => {
+    setCurAvatarUrl(avatarUrl);
+  }, [avatarUrl]);
+
+  useEffect(() => {
     fetchUserInfo();
     form.resetFields();
     passwordForm.resetFields();
@@ -65,7 +69,8 @@ const EditPage: React.FC<IEditPageProps> = ({ avatarUrl, setAvatarUrl }) => {
         user: {
           ...userPermissionInfo.user,
           mobile: values.mobile,
-          nickname: values.nickname
+          nickname: values.nickname,
+          avatar: curAvatarUrl
         }
       });
       form.resetFields();

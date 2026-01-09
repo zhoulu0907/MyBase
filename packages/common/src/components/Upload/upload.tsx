@@ -29,8 +29,12 @@ const UploadCommonComponent: React.FC<IUploadProps> = ({ size, aspect, uploadRef
         }
       : undefined;
 
-    const res = await getUploadFile(formData, progressAdapter);
-    return res;
+    try {
+      const res = await getUploadFile(formData, progressAdapter);
+      return res;
+    } catch (error) {
+      console.error('上传文件失败', error);
+    }
   };
 
   // 清理文件列表
@@ -69,19 +73,17 @@ const UploadCommonComponent: React.FC<IUploadProps> = ({ size, aspect, uploadRef
         try {
           const resourceId = await handleUpload(file, onProgress);
 
-          if (resourceId !== '') {
+          if (resourceId && resourceId !== '') {
             onUpdateUrl(resourceId);
             onSuccess(resourceId);
             // 上传成功后清理文件列表，为下次上传做准备
-            setTimeout(() => {
-              clearFileList();
-            }, 100);
           } else {
-            onError({
-              status: 'error',
-              msg: '上传失败'
-            });
+            onSuccess();
           }
+
+          setTimeout(() => {
+            clearFileList();
+          }, 100);
         } catch (error) {
           onError({
             status: 'error',
