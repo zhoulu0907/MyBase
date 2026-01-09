@@ -47,3 +47,7 @@ export const getMobileEditorURL = (): string => {
 export const getResourceURL = (): string => {
   return envConfig?.RESOURCE_URL;
 };
+
+export const getCorpResourceURL = (): string => {
+  return envConfig?.CORP_RESOURCE_URL;
+};

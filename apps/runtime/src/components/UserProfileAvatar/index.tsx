@@ -1,6 +1,5 @@
 import { Avatar } from '@arco-design/web-react';
-import { getFileUrlById } from '@onebase/platform-center';
-import { useParams } from 'react-router-dom';
+import { getCorpResourceById } from '@onebase/common';
 import styles from './index.module.less';
 
 interface IAdminInfo {
@@ -21,14 +20,13 @@ interface IUserProfileAvatar {
 const UserProfileAvatar: React.FC<IUserProfileAvatar> = ({ adminInfo, avatarUrl }) => {
   const defaultNickName = adminInfo?.nickname?.charAt(0) || 'U';
 
-  const { appId } = useParams();
-
   const getAvatar = () => {
     if (avatarUrl) {
-      return <img src={getFileUrlById(avatarUrl)} alt="avatar" />;
+      return <img src={getCorpResourceById(avatarUrl)} alt="avatar" />;
     }
+
     if (adminInfo?.avatar) {
-      return <img src={getFileUrlById(adminInfo?.avatar, appId)} alt="avatar" />;
+      return <img src={getCorpResourceById(adminInfo?.avatar)} alt="avatar" />;
     }
     return defaultNickName;
   };

@@ -1,6 +1,6 @@
 import { Avatar, Button, Image } from '@arco-design/web-react';
 import { useRef } from 'react';
-import { getResourceURL } from 'src/utils';
+import { getCorpResourceById } from 'src/utils';
 import { UploadCommonComponent } from './upload';
 
 export type UploadSizeConfig = {
@@ -34,11 +34,6 @@ const UploadAvatarComponent: React.FC<IUploadComponentProps> = ({
   getUploadFile,
   footer
 }) => {
-  const getFileUrl = (resourceId: string) => {
-    const resourceUrl = getResourceURL();
-    return `${resourceUrl}/${resourceId}`;
-  };
-
   const uploadRef = useRef(null);
   return (
     <div>
@@ -46,7 +41,7 @@ const UploadAvatarComponent: React.FC<IUploadComponentProps> = ({
         <Image
           width={size.width}
           height={size.height}
-          src={getFileUrl(avatarUrl)}
+          src={getCorpResourceById(avatarUrl)}
           alt="头像"
           style={{
             width: size.width,
@@ -75,7 +70,28 @@ const UploadAvatarComponent: React.FC<IUploadComponentProps> = ({
           <Button
             type="outline"
             onClick={() => {
-              (uploadRef.current as any)?.getRootDOMNode()?.querySelector('input[type="file"]').click();
+              const uploadInstance = uploadRef.current;
+              if (uploadInstance) {
+                // 清理文件列表
+                try {
+                  const instance = uploadInstance as any;
+                  if (instance && typeof instance.clear === 'function') {
+                    instance.clear();
+                  }
+                } catch (e) {
+                  // 忽略错误
+                }
+
+                // 重置 input 的值，确保每次点击都能触发 change 事件
+                const input = (uploadInstance as any)?.getRootDOMNode()?.querySelector('input[type="file"]');
+                if (input) {
+                  input.value = '';
+                  // 使用 setTimeout 确保清理操作完成后再触发点击
+                  setTimeout(() => {
+                    input.click();
+                  }, 50);
+                }
+              }
             }}
           >
             {buttonName}

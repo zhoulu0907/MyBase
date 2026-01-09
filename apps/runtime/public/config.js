@@ -8,6 +8,8 @@ window.global_config = {
   RUNTIME_BASE_URL: 'http://s25029301301.dev.internal.virtueit.net:81/v1-snapshot/onebaseserverruntime/runtime',
   RESOURCE_URL:
     'http://s25029301301.dev.internal.virtueit.net:81/v1-snapshot/onebaseserverruntime/runtime/infra/file/download',
+  CORP_RESOURCE_URL:
+    'http://s25029301301.dev.internal.virtueit.net:81/v1-snapshot/onebaseserverruntime/runtime/infra/file/corp/download',
   //   BASE_URL: 'http://s25029301301.sit.internal.virtueit.net:81/v1-snapshot/onebaseserver/admin-api',
   //   RUNTIME_BASE_URL: 'http://s25029301301.sit.internal.virtueit.net:81/v1-snapshot/onebaseserverruntime/runtime',
   APP_BUILDER_DASHBOARD_URL: 'http://s25029301301.dev.internal.virtueit.net:81/v0/appdashboard/#/',

@@ -1,6 +1,6 @@
 import PlaceholderPanel from '@/components/PlaceholderPanel';
 import { Avatar, Button, Grid, Image, Space, Spin, Tag, Typography } from '@arco-design/web-react';
-import { CORP_INFO_PERMISSION as ACTIONS, hasPermission } from '@onebase/common';
+import { CORP_INFO_PERMISSION as ACTIONS, getCorpResourceById, hasPermission } from '@onebase/common';
 import type { PostSimpleRespVO } from '@onebase/platform-center';
 import { getDictDataByType, getLoginedUser } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
@@ -86,7 +86,7 @@ const ProfilePage: React.FC = () => {
                   <Image
                     width={80}
                     height={80}
-                    src={userInfo.avatar}
+                    src={getCorpResourceById(userInfo.avatar)}
                     style={{
                       objectFit: 'cover',
                       borderRadius: '50%', // 强制圆形裁剪
