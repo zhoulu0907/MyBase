@@ -78,11 +78,8 @@ const SpaceInfo: React.FC = () => {
   };
 
   const handleUpdateEnterpriseInfo = async (newCorpLogo?: string) => {
-    console.log('newCorpLogo: ', newCorpLogo);
-
     if (!enterpriseInfo) return;
     const { newName } = await form.validate();
-    console.log('newName: ', newName);
 
     if (!enterpriseInfo.corpCode) {
       Message.error('企业编码不存在，无法更新');
