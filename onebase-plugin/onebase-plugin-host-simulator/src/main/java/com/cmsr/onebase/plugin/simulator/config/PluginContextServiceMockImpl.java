@@ -1,6 +1,6 @@
 package com.cmsr.onebase.plugin.simulator.config;
 
-import com.cmsr.onebase.plugin.service.PluginConfigQueryService;
+import com.cmsr.onebase.plugin.service.PluginContextService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.system.ApplicationHome;
@@ -36,9 +36,9 @@ import java.util.concurrent.ConcurrentHashMap;
  * @date 2025-01-05
  */
 @Service
-public class MockPluginConfigQueryService implements PluginConfigQueryService {
+public class PluginContextServiceMockImpl implements PluginContextService {
 
-    private static final Logger log = LoggerFactory.getLogger(MockPluginConfigQueryService.class);
+    private static final Logger log = LoggerFactory.getLogger(PluginContextServiceMockImpl.class);
 
     /**
      * 插件配置存储：pluginKey (pluginId:version) -> config map
@@ -49,7 +49,18 @@ public class MockPluginConfigQueryService implements PluginConfigQueryService {
     /**
      * 配置文件监听器
      */
-    private ConfigFileWatcher configFileWatcher;
+    private ContextFileWatcher configFileWatcher;
+
+    /**
+     * Mock tenant ID (will be loaded from YAML later)
+     */
+    private Long mockTenantId = 1L;
+
+    @Override
+    public Long getTenantId() {
+        log.debug("Mock simulator returns tenant ID: {}", mockTenantId);
+        return mockTenantId;
+    }
 
     @PostConstruct
     public void init() {
@@ -69,8 +80,8 @@ public class MockPluginConfigQueryService implements PluginConfigQueryService {
      * 从配置文件加载插件配置
      * <p>
      * 加载优先级：
-     * 1. 外部文件：JAR 包同目录的 plugin-config.yml
-     * 2. 内部文件：classpath:plugin-config.yml（默认模板）
+     * 1. 外部文件：JAR 包同目录的 plugin-context.yml
+     * 2. 内部文件：classpath:plugin-context.yml（默认模板）
      * </p>
      */
     @SuppressWarnings("unchecked")
@@ -93,6 +104,18 @@ public class MockPluginConfigQueryService implements PluginConfigQueryService {
                 return;
             }
 
+            // 1. 解析 Tenant ID
+            Object tenantObj = root.get("tenant");
+            if (tenantObj instanceof Map) {
+                Map<String, Object> tenantConfig = (Map<String, Object>) tenantObj;
+                Object tenantIdObj = tenantConfig.get("tenant-id");
+                if (tenantIdObj instanceof Number) {
+                    this.mockTenantId = ((Number) tenantIdObj).longValue();
+                    log.info("已加载模拟租户 ID: {}", this.mockTenantId);
+                }
+            }
+
+            // 2. 解析插件配置
             // 期望格式: plugins: { pluginId: { key: value, ... }, ... }
             Object pluginsObj = root.get("plugins");
             if (pluginsObj instanceof Map) {
@@ -119,8 +142,8 @@ public class MockPluginConfigQueryService implements PluginConfigQueryService {
      * 解析配置文件资源
      * <p>
      * 优先级：
-     * 1. 外部文件：./plugin-config.yml（JAR 包同目录）
-     * 2. 内部文件：classpath:plugin-config.yml（JAR 包内默认模板）
+     * 1. 外部文件：./plugin-context.yml（JAR 包同目录）
+     * 2. 内部文件：classpath:plugin-context.yml（JAR 包内默认模板）
      * </p>
      */
     private Resource resolveConfigResource() {
@@ -130,14 +153,14 @@ public class MockPluginConfigQueryService implements PluginConfigQueryService {
         try {
             // 使用 ApplicationHome 自动定位应用根目录(兼容 IDE 和 JAR 模式)
             File homeDir = getApplicationHomeDir();
-            File configFile = null;
+            File configFile = null; // 初始化 configFile 修复编译错误
 
-            // IDE 模式特殊处理: 如果定位到 target/classes,只查找 target/plugin-config.yml(上一级)
+            // IDE 模式特殊处理: 如果定位到 target/classes,只查找 target/plugin-context.yml(上一级)
             // 注意: 不应该使用 classes 目录下的文件,那是内部配置(classpath),应该走降级逻辑加载
             if ("classes".equals(homeDir.getName())) {
                 File targetDir = homeDir.getParentFile();
                 if (targetDir != null) {
-                    File targetConfigFile = new File(targetDir, "plugin-config.yml");
+                    File targetConfigFile = new File(targetDir, "plugin-context.yml");
                     if (targetConfigFile.exists()) {
                         configFile = targetConfigFile;
                         log.debug("IDE模式: 发现外部配置文件 {}", configFile.getAbsolutePath());
@@ -147,7 +170,7 @@ public class MockPluginConfigQueryService implements PluginConfigQueryService {
                 }
             } else {
                 // JAR 模式: 直接使用 homeDir 下的配置文件
-                configFile = new File(homeDir, "plugin-config.yml");
+                configFile = new File(homeDir, "plugin-context.yml");
                 if (!configFile.exists()) {
                     log.info("JAR模式: 外部配置文件不存在: {}, 将使用内置配置", configFile.getAbsolutePath());
                 }
@@ -163,13 +186,13 @@ public class MockPluginConfigQueryService implements PluginConfigQueryService {
         }
 
         // 2. 降级到 JAR 包内部文件(默认模板)
-        Resource classpathFile = resourceLoader.getResource("classpath:plugin-config.yml");
+        Resource classpathFile = resourceLoader.getResource("classpath:plugin-context.yml");
         if (classpathFile.exists()) {
-            log.info("jar同目录下不存在plugin-config.yml，使用内置配置文件: classpath:plugin-config.yml");
+            log.info("jar同目录下不存在plugin-context.yml，使用内置配置文件: classpath:plugin-context.yml");
             return classpathFile;
         }
 
-        log.error("未找到配置文件（外部: ./plugin-config.yml, 内部: classpath:plugin-config.yml）");
+        log.error("未找到配置文件（外部: ./plugin-context.yml, 内部: classpath:plugin-context.yml）");
         return null;
     }
 
@@ -277,7 +300,7 @@ public class MockPluginConfigQueryService implements PluginConfigQueryService {
         }
 
         try {
-            configFileWatcher = new ConfigFileWatcher(configPath, this::reloadConfig);
+            configFileWatcher = new ContextFileWatcher(configPath, this::reloadConfig);
             configFileWatcher.start();
             log.info("配置文件热加载已启用");
         } catch (Exception e) {
@@ -310,14 +333,14 @@ public class MockPluginConfigQueryService implements PluginConfigQueryService {
             if ("classes".equals(homeDir.getName())) {
                 File targetDir = homeDir.getParentFile();
                 if (targetDir != null) {
-                    File targetConfigFile = new File(targetDir, "plugin-config.yml");
+                    File targetConfigFile = new File(targetDir, "plugin-context.yml");
                     if (targetConfigFile.exists()) {
                         configFile = targetConfigFile;
                     }
                 }
             } else {
                 // JAR 模式
-                configFile = new File(homeDir, "plugin-config.yml");
+                configFile = new File(homeDir, "plugin-context.yml");
                 if (!configFile.exists()) {
                     configFile = null;
                 }
