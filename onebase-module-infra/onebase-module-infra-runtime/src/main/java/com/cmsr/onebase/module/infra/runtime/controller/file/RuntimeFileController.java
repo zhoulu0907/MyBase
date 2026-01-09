@@ -39,7 +39,7 @@ public class RuntimeFileController {
     @Resource
     private FileService fileService;
 
-    @PostMapping("/upload")
+    @PostMapping({"/upload", "corp/upload"})
     @Operation(summary = "上传文件")
     @ApiSignIgnore
     public CommonResult<String> uploadFile(@Valid AppFileUploadReqVO uploadReqVO) throws Exception {
