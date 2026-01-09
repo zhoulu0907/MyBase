@@ -73,19 +73,19 @@ public class PermissionServiceImpl implements PermissionService {
     private static final String d = "0";
 
     @Resource
-    private RoleService roleService;
+    private RoleService          roleService;
     @Resource
-    private MenuService menuService;
+    private MenuService          menuService;
     @Resource
-    private DeptService deptService;
+    private DeptService          deptService;
     @Resource
     @Lazy
-    private UserService userService;
+    private UserService          userService;
     @Resource
     private TenantPackageService tenantPackageService;
     @Resource
     @Lazy // 延迟，避免循环依赖报错
-    private TenantService tenantService;
+    private TenantService        tenantService;
 
     @Resource
     private PermissionService permissionService;
@@ -157,24 +157,41 @@ public class PermissionServiceImpl implements PermissionService {
                 return CollectionUtils.containsAny(tenantAllPermissions, permissions);
             }
         }
-
-        // 情况二：如果是企业管理员，赋予所有企业相关权限
+        boolean hasPermission;
+        // 情况三：如果是企业管理员，赋予所有企业相关权限
         boolean isCorpAdmin = roleService.hasAnyCorpAdmin(convertSet(roles, RoleDO::getId));
         if (isCorpAdmin) {
             Set<Long> menuIds = getAllCorpActiveMenuIds();
             List<MenuDO> menuList = menuService.getAllActiveMenuList(menuIds);
             Set<String> corpAllPermissions = menuList.stream().map(MenuDO::getPermission).filter(Objects::nonNull).collect(Collectors.toSet());
             // permissions 和 tenantAllPermissions对比，命中一个即返回true
-            return CollectionUtils.containsAny(corpAllPermissions, permissions);
+            hasPermission = CollectionUtils.containsAny(corpAllPermissions, permissions);
+            if (hasPermission) {
+                return true;
+            }
         }
-        // 情况二：如果是开发者，赋予所有开发相关权限
+
+        // 情况四：如果是开发者，赋予所有开发相关权限
         boolean isDevAdmin = roleService.hasAnyDevloperAdmin(convertSet(roles, RoleDO::getId));
         if (isDevAdmin) {
             // 所有开发者的权限
-            return CollectionUtils.containsAny(RoleCodeEnum.devloperPermissionCodes, permissions);
+            hasPermission =  CollectionUtils.containsAny(RoleCodeEnum.devloperPermissionCodes, permissions);
+            if (hasPermission) {
+                return true;
+            }
         }
 
-        // 情况三：遍历判断每个权限，如果有一满足，说明有权限
+        // 情况五：如果是开发者，赋予所有开发相关权限
+        boolean isNormalUser = roleService.hasAnyNormalUser(convertSet(roles, RoleDO::getId));
+        if (isNormalUser) {
+            // 所有开发者的权限
+            hasPermission =  CollectionUtils.containsAny(RoleCodeEnum.tenantDefaultPermissionCodes, permissions);
+            if (hasPermission) {
+                return true;
+            }
+        }
+
+        // 其他情况：遍历判断每个权限，如果有一满足，说明有权限
         for (String permission : permissions) {
             if (hasAnyPermission(roles, permission)) {
                 return true;
@@ -640,20 +657,20 @@ public class PermissionServiceImpl implements PermissionService {
 
         // 判断是否开启saas模式 ,第三方用户是否开启
         SystemGeneralConfigDO saasConfigDO = systemConfigService.getTenantConfigByKey(SystemConfigKeyEnum.SaasModeConfig.getKey());
-        if (null == saasConfigDO ||  MenuConstants.DefaultSaasThirdUser.equals(saasConfigDO.getConfigValue())) {
+        if (null == saasConfigDO || MenuConstants.DefaultSaasThirdUser.equals(saasConfigDO.getConfigValue())) {
             //   未开启 saas 模式  移除企业权限
             menuList.removeIf(menu -> menu.getPermission() != null && menu.getPermission()
                     .startsWith(MenuConstants.MENU_TENANT_CORP));
         }
 
         SystemGeneralConfigDO thirdUserConfigDO = systemConfigService.getTenantConfigByKey(SystemConfigKeyEnum.ThirdUserConfig.getKey());
-        if (null == thirdUserConfigDO ||  MenuConstants.DefaultSaasThirdUser.equals(thirdUserConfigDO.getConfigValue())) {
+        if (null == thirdUserConfigDO || MenuConstants.DefaultSaasThirdUser.equals(thirdUserConfigDO.getConfigValue())) {
             //   未开启第三方用户模式  移除第三方用户权限
             menuList.removeIf(menu -> menu.getPermission() != null && menu.getPermission()
                     .startsWith(MenuConstants.MENU_TENANT_THIRD));
         }
 
-            return AuthConvert.INSTANCE.convert(user, roles, menuList, code);
+        return AuthConvert.INSTANCE.convert(user, roles, menuList, code);
     }
 
     /**
