@@ -233,6 +233,9 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         String entityDataId = null;
         Long applicationId = ApplicationManager.getApplicationId();
 
+        // 创建流程不再支持草稿状态
+        reqVO.setDraft(false);
+
         if (applicationId == null) {
             throw exception(ErrorCodeConstants.MISSING_APPLICATION_ID);
         }
