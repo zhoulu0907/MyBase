@@ -45,6 +45,15 @@ const SpaceInfo: React.FC = () => {
     tokenInfo?.corpId && fetchEnterpriseInfo(tokenInfo.corpId);
   }, [tokenInfo?.corpId]);
 
+  // 当 Modal 打开时，同步最新的企业名称到表单
+  useEffect(() => {
+    if (renameVisible && enterpriseInfo?.corpName) {
+      form.setFieldsValue({
+        newName: enterpriseInfo.corpName
+      });
+    }
+  }, [renameVisible, enterpriseInfo?.corpName, form]);
+
   const fetchEnterpriseInfo = async (id: string) => {
     try {
       setLoading(true);
@@ -72,11 +81,6 @@ const SpaceInfo: React.FC = () => {
     if (!enterpriseInfo) return;
     const { newName } = await form.validate();
 
-    if (!newName.trim()) {
-      Message.error('空间名称不能为空');
-      return;
-    }
-
     if (!enterpriseInfo.corpCode) {
       Message.error('企业编码不存在，无法更新');
       return;
@@ -93,24 +97,24 @@ const SpaceInfo: React.FC = () => {
 
       await updateCorpApi({
         id: enterpriseInfo.id!,
-        corpName: newName,
-        corpCode: enterpriseInfo.corpCode,
+        corpName: newName || enterpriseInfo.corpName!,
+        corpCode: enterpriseInfo.corpCode!,
         corpLogo: logoToUpdate,
         industryType: enterpriseInfo.industryType!,
-        status: enterpriseInfo.status,
+        status: enterpriseInfo.status!,
         address: enterpriseInfo.address!,
         userLimit: enterpriseInfo.userLimit!
       });
 
       setEnterpriseInfo({
         ...enterpriseInfo,
-        corpName: newName,
+        corpName: newName || enterpriseInfo.corpName!,
         corpLogo: logoToUpdate
       });
 
       setRenameVisible(false);
       form.resetFields();
-      Message.success('空间名称更新成功');
+      Message.success('更新成功');
     } catch (error) {
       console.error('更新空间信息失败', error);
     }

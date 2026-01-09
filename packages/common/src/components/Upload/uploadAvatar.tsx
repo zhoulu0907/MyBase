@@ -70,28 +70,7 @@ const UploadAvatarComponent: React.FC<IUploadComponentProps> = ({
           <Button
             type="outline"
             onClick={() => {
-              const uploadInstance = uploadRef.current;
-              if (uploadInstance) {
-                // 清理文件列表
-                try {
-                  const instance = uploadInstance as any;
-                  if (instance && typeof instance.clear === 'function') {
-                    instance.clear();
-                  }
-                } catch (e) {
-                  // 忽略错误
-                }
-
-                // 重置 input 的值，确保每次点击都能触发 change 事件
-                const input = (uploadInstance as any)?.getRootDOMNode()?.querySelector('input[type="file"]');
-                if (input) {
-                  input.value = '';
-                  // 使用 setTimeout 确保清理操作完成后再触发点击
-                  setTimeout(() => {
-                    input.click();
-                  }, 50);
-                }
-              }
+              (uploadRef.current as any)?.getRootDOMNode()?.querySelector('input[type="file"]').click();
             }}
           >
             {buttonName}

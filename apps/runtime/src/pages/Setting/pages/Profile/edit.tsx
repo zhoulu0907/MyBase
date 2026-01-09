@@ -21,6 +21,7 @@ const EditPage: React.FC<IEditPageProps> = ({ avatarUrl, setAvatarUrl }) => {
   const [passwordForm] = Form.useForm();
   const [userInfo, setUserInfo] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [curAvatarUrl, setCurAvatarUrl] = useState<string>(avatarUrl);
 
   useEffect(() => {
     fetchUserInfo();
@@ -56,7 +57,7 @@ const EditPage: React.FC<IEditPageProps> = ({ avatarUrl, setAvatarUrl }) => {
         nickname: values.nickname,
         mobile: values.mobile,
         email: values.email,
-        avatar: avatarUrl
+        avatar: curAvatarUrl
       };
       await updateLoginedUser(req);
       UserPermissionManager.setUserPermissionInfo({
@@ -68,6 +69,7 @@ const EditPage: React.FC<IEditPageProps> = ({ avatarUrl, setAvatarUrl }) => {
         }
       });
       form.resetFields();
+      setAvatarUrl(curAvatarUrl);
       nav(`/onebase/${tenantId}/setting/profile`);
       Message.success('保存成功');
     } catch (error) {
@@ -140,8 +142,8 @@ const EditPage: React.FC<IEditPageProps> = ({ avatarUrl, setAvatarUrl }) => {
                 <div>
                   <UploadAvatarComponent
                     getUploadFile={corpUploadFile}
-                    avatarUrl={avatarUrl}
-                    onUpdateUrl={setAvatarUrl}
+                    avatarUrl={curAvatarUrl}
+                    onUpdateUrl={setCurAvatarUrl}
                     defaultPlaceholder={defaultNickName}
                     buttonName="修改头像"
                   />
