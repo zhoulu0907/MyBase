@@ -87,7 +87,7 @@ const SpaceInfo: React.FC = () => {
         id: enterpriseInfo.id!,
         corpName: newName,
         corpCode: enterpriseInfo.corpCode,
-        industryType: +enterpriseInfo.industryType!,
+        industryType: enterpriseInfo.industryType!,
         status: enterpriseInfo.status,
         address: enterpriseInfo.address!,
         userLimit: enterpriseInfo.userLimit!

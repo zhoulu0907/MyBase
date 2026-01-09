@@ -309,7 +309,7 @@ export default function UserTable({
               <Dropdown
                 droplist={
                   <Menu>
-                    <Menu.Item key="disable" onClick={() => handleStatusUpdate(record)}>
+                    <Menu.Item key="disable" disabled={isSystemUser(record)} onClick={() => handleStatusUpdate(record)}>
                       {getStatusLabel(record.status === StatusEnum.DISABLE ? StatusEnum.ENABLE : StatusEnum.DISABLE)}
                     </Menu.Item>
                     <Menu.Item key="del" disabled={isSystemUser(record)} onClick={() => handleDelete(record)}>
@@ -405,7 +405,7 @@ export default function UserTable({
   const handleAddUser = async (selectedMembers: any[]) => {
     console.log('添加成员 selectedMembers:', selectedMembers);
     if (!selectedDeptId || !managerTypeModalVisible) return;
-    const keyIds = selectedMembers?.map(item => item.key).filter(Boolean) || [];
+    const keyIds = selectedMembers?.map((item) => item.key).filter(Boolean) || [];
     const params: UpdateAdminOrDirectorReq = {
       deptId: `${selectedDeptId}`,
       updateType: managerTypeModalVisible,

@@ -42,7 +42,7 @@ const Right: React.FC = () => {
   const tenantId = match ? match[1] : '1';
 
   // 使用记住我hook
-  const { rememberMe, savedAccount, saveRememberMe } = useRememberMe();
+  const { rememberMe, savedAccount, clearRememberMe, saveRememberMe } = useRememberMe();
 
   // 状态管理
   const [loading, setLoading] = useState(false);
@@ -166,6 +166,7 @@ const Right: React.FC = () => {
 
       const response: TenantLoginResponse = await tenantLogin(loginData, headers);
 
+      console.error('登录成功:', response.accessToken);
       if (response.accessToken) {
         TokenManager.setCurIdentifyId(tenantId);
 
@@ -176,6 +177,7 @@ const Right: React.FC = () => {
             refreshToken: response.refreshToken,
             expiresTime: response.expiresTime,
             tenantId: response.tenantId,
+            loginSource: 'web',
             loginURL: window.location.href // 当前地址
           },
           rememberMe
@@ -197,7 +199,6 @@ const Right: React.FC = () => {
         } else {
           navigate(`/onebase/${tenantId}/home/enterprise-app`);
         }
-
         return;
       } else {
         Message.error(t('auth.loginFailed'));

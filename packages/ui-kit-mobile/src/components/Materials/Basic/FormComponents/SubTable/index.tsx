@@ -21,8 +21,10 @@ import {
   GridItem,
   STATUS_OPTIONS,
   STATUS_VALUES,
-  usePageEditorSignal
+  usePageEditorSignal,
+  hasComponentSchema
 } from '@onebase/ui-kit';
+import { getComponentDescriptor } from '@onebase/ui-kit';
 import { ENTITY_TYPE_VALUE } from '@onebase/app';
 import { EditRender, PreviewRender } from '@/components/render';
 import CompDeleteIcon from '@/assets/images/app_delete.svg';
@@ -64,17 +66,16 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
     }
   }, [subTableDataLength.value]);
 
-  // 判断拖拽的组件是否是表单组件
+  // 判断拖拽的组件是否是表单组件（动态注册兼容插件）
   const isFormComponent = (type: string): boolean => {
-    let isForm = false;
-    const keys = Object.keys(FORM_COMPONENT_TYPES);
-    for (let key of keys) {
-      if (type === FORM_COMPONENT_TYPES[key as keyof typeof FORM_COMPONENT_TYPES]) {
-        isForm = true;
-      }
+    if (!type) return false;
+    if (!hasComponentSchema(type)) return false;
+    try {
+      const descriptor = getComponentDescriptor(type as any);
+      return descriptor?.template?.category === 'form';
+    } catch {
+      return false;
     }
-
-    return isForm;
   };
 
   /* 新增数据 */
@@ -123,7 +124,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
   // 删除组件
   const handleDeleteComponent = (componentId: string) => {
     // 从组件列表中移除 遍历，过滤掉 id 匹配的组件
-    const updatedColumns = subTableComponents[id].filter((cp) => cp.id !== componentId);
+    const updatedColumns = subTableComponents[id].filter((cp: any) => cp.id !== componentId);
     setSubTableComponents(id, updatedColumns);
     delPageComponentSchemas(componentId);
 
@@ -139,7 +140,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
     const cpID = e.item.getAttribute('data-cp-id') || e.item.getAttribute('data-id') || e.item.id;
     const itemType = e.item.getAttribute('data-cp-type');
     const fieldName = e.item.getAttribute('data-field-name');
-    const tableName = e.item.getAttribute('data-table-name');
+    let tableName = e.item.getAttribute('data-table-name');
 
     // 不允许拖拽主、子表嵌套、主表字段
     if (
@@ -155,7 +156,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
     const isForm = isFormComponent(itemType || '');
     if (!itemType || !isForm || itemType === FORM_COMPONENT_TYPES.SUB_TABLE) {
       if (cpID) {
-        const updatedColumns = subTableComponents[cpID]?.filter((cp) => cp.id !== cpID);
+        const updatedColumns = subTableComponents[cpID]?.filter((cp: any) => cp.id !== cpID);
         if (updatedColumns) {
           setSubTableComponents(id, updatedColumns);
         }
@@ -167,7 +168,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
 
     // 拖拽的子表项必须是同一个子表
     if (tableName) {
-      const sameField = subTableComponents[id]?.every((ele) => {
+      const sameField = subTableComponents[id]?.every((ele: any) => {
         const dataField = pageComponentSchemas[ele.id].config.dataField;
         return !dataField || dataField?.[0] === tableName;
       });
@@ -205,7 +206,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
       schema.config.verify = {
         ...schema.config.verify,
         required: currentField.isRequired,
-        noRepeat: typeof schema.config?.verify?.noRepeat === 'boolean' ? ele.currentField === 1 : undefined
+        noRepeat: typeof schema.config?.verify?.noRepeat === 'boolean' ? currentField.isUnique : undefined
       };
 
       // 字段选项列表（单/多选字段专用） options
@@ -250,6 +251,12 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
         schema.config.autoCodeDisabled = currentField?.autoNumberConfig?.id ? true : false;
       }
       // 关联的字典类型ID    dictTypeId
+    }
+
+    if (!tableName) {
+      const existed = subTableComponents[id]?.find((ele: any) => pageComponentSchemas?.[ele.id]?.config?.dataField?.[0]);
+      const inferred = pageComponentSchemas?.[existed?.id]?.config?.dataField?.[0];
+      tableName = inferred || tableName;
     }
 
     schema.config.cpName = itemDisplayName;
@@ -373,7 +380,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                   list={subTableComponents[id] || []}
                   setList={(newList) => {
                     const dataFieldPage = subTableComponents[id]?.find(
-                      (ele) => pageComponentSchemas[ele.id].config?.dataField?.[0]
+                      (ele: any) => pageComponentSchemas[ele.id].config?.dataField?.[0]
                     );
                     // 已有的数据源子表id
                     const dataField = pageComponentSchemas?.[dataFieldPage?.id]?.config?.dataField?.[0];

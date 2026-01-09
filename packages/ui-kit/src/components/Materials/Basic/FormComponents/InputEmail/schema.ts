@@ -7,6 +7,11 @@ import {
   layoutConfig,
   statusConfig,
   widthConfig,
+  labelConfig,
+  placeholderConfig,
+  tooltipConfig,
+  verifyConfig,
+  securityConfig,
   type ICommonBaseType,
   type TAlignSelectKeyType,
   type TLayoutSelectKeyType,
@@ -36,6 +41,7 @@ import type {
   ITooltipConfigType,
   IVerifyConfigType,
   IWidthConfigType,
+  ICommonConfigType,
   TBooleanDefaultType,
   TSelectDefaultType,
   TTextAreaDefaultType,
@@ -61,6 +67,7 @@ export type TXInputEmailEditData = Array<
   | ILayoutConfigType<TLayoutSelectKeyType>
   | ISecurityConfigType
   | IWidthConfigType<TWidthSelectKeyType>
+  | ICommonConfigType
 >;
 
 export interface XInputEmailConfig extends ICommonBaseType {
@@ -143,41 +150,21 @@ export interface XInputEmailConfig extends ICommonBaseType {
 const XInputEmail: XInputEmailSchema = {
   editData: [
     ...baseConfig,
-    {
-      key: 'label',
-      name: '标题',
-      type: CONFIG_TYPES.LABEL_INPUT
-    },
-    {
-      key: 'placeholder',
-      name: '占位提示',
-      type: CONFIG_TYPES.PLACEHOLDER_INPUT
-    },
-    {
-      key: 'tooltip',
-      name: '字段描述',
-      type: CONFIG_TYPES.TOOLTIP_INPUT
-    },
+    labelConfig,
+    placeholderConfig,
+    tooltipConfig,
     //  数据绑定
     ...dataFieldConfig,
     // 默认值
     defaultValueConfig,
-    {
-      key: 'verify',
-      name: '校验',
-      type: CONFIG_TYPES.VERIFY
-    },
+    verifyConfig,
     // 显示状态
     statusConfig,
     // 对齐方式
     alignConfig,
     // 布局方式
     layoutConfig,
-    {
-      key: 'security',
-      name: '安全',
-      type: CONFIG_TYPES.SECURITY
-    },
+    securityConfig,
     // 字段宽度
     widthConfig,
   ],
