@@ -65,6 +65,14 @@
             </exclusions>
         </dependency>
 
+        <!-- OneBase Web Starter (for WebProperties) -->
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-spring-boot-starter-web</artifactId>
+            <version>${revision}</version>
+            <optional>true</optional>
+        </dependency>
+
         <!-- Lombok -->
         <dependency>
             <groupId>org.projectlombok</groupId>

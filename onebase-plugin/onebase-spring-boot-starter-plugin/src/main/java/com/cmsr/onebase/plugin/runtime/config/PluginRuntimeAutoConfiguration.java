@@ -27,6 +27,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import com.cmsr.onebase.plugin.runtime.interceptor.PluginSecurityInterceptor;
+import com.cmsr.onebase.framework.web.config.WebProperties;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -302,8 +303,17 @@ public class PluginRuntimeAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    public PluginControllerRegistrar pluginControllerRegistrar(RequestMappingHandlerMapping handlerMapping) {
-        return new PluginControllerRegistrar(handlerMapping);
+    public PluginControllerRegistrar pluginControllerRegistrar(
+            RequestMappingHandlerMapping handlerMapping,
+            ObjectProvider<WebProperties> webPropertiesProvider) {
+
+        // Get runtime path prefix from WebProperties
+        String runtimePrefix = webPropertiesProvider.getIfAvailable() != null
+                ? webPropertiesProvider.getIfAvailable().getRuntimeApi().getPrefix()
+                : null;
+
+        log.info("Creating PluginControllerRegistrar with runtime prefix: {}", runtimePrefix);
+        return new PluginControllerRegistrar(handlerMapping, runtimePrefix);
     }
 
     /**
