@@ -310,18 +310,14 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
     } else {
       try {
         let res = null;
-        if (curPage?.value?.pageSetType === PageType.BPM) {
-          const req: InsertMethodV2Params = { ...formData, ...subFormData };
-          if (isDraft) {
-            if (draftId) {
-              res = await updateDraft(tableName, menuId, {
-                ...req,
-                id: draftId
-              });
-            } else {
-              res = await createDraft(tableName, menuId, req);
-            }
-          } else {
+        const req: InsertMethodV2Params = { ...formData, ...subFormData };
+        if (isDraft) {
+          res = draftId
+            ? await updateDraft(tableName, menuId, { ...req, id: draftId })
+            : await createDraft(tableName, menuId, req);
+          Message.success('保存草稿成功');
+        } else {
+          if (curPage?.value?.pageSetType === PageType.BPM) {
             const reqFlow = {
               isDraft: isSave,
               formName:
@@ -333,31 +329,12 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
               }
             };
             res = await fetchSubmitInstance(reqFlow as any);
-          }
 
-          setPageType(EDITOR_TYPES.FORM_EDITOR);
-        } else {
-          console.log(formData);
-          const req: InsertMethodV2Params = { ...formData, ...subFormData };
-
-          console.log(req);
-
-          if (isDraft) {
-            if (draftId) {
-              res = await updateDraft(tableName, menuId, {
-                ...req,
-                id: draftId
-              });
-            } else {
-              res = await createDraft(tableName, menuId, req);
-            }
+            setPageType(EDITOR_TYPES.FORM_EDITOR);
           } else {
             res = await dataMethodCreateV2(tableName, menuId, req, draftId);
+            setPageType(EDITOR_TYPES.LIST_EDITOR);
           }
-
-          console.log(res);
-
-          setPageType(EDITOR_TYPES.LIST_EDITOR);
         }
 
         const createFlows = (flowRes || []).filter(
