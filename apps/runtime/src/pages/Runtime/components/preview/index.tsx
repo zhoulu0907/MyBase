@@ -311,16 +311,30 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
       try {
         let res = null;
         if (curPage?.value?.pageSetType === PageType.BPM) {
-          const reqFlow = {
-            isDraft: isSave,
-            formName: curPage?.value?.pages?.find((page: any) => page.pageType === CATEGORY_TYPE.FORM)?.pageName || '',
-            businessUuid: menuUuid,
-            entity: {
-              tableName: tableName,
-              data: { ...formData, ...subFormData }
+          const req: InsertMethodV2Params = { ...formData, ...subFormData };
+          if (isDraft) {
+            if (draftId) {
+              res = await updateDraft(tableName, menuId, {
+                ...req,
+                id: draftId
+              });
+            } else {
+              res = await createDraft(tableName, menuId, req);
             }
-          };
-          res = await fetchSubmitInstance(reqFlow as any);
+          } else {
+            const reqFlow = {
+              isDraft: isSave,
+              formName:
+                curPage?.value?.pages?.find((page: any) => page.pageType === CATEGORY_TYPE.FORM)?.pageName || '',
+              businessUuid: menuUuid,
+              entity: {
+                tableName: tableName,
+                data: { ...formData, ...subFormData }
+              }
+            };
+            res = await fetchSubmitInstance(reqFlow as any);
+          }
+
           setPageType(EDITOR_TYPES.FORM_EDITOR);
         } else {
           console.log(formData);
