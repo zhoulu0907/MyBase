@@ -57,6 +57,62 @@ import org.pf4j.ExtensionPoint;
  * @date 2025-12-13
  */
 public interface HttpHandler extends ExtensionPoint {
-    // 纯标记接口，无需定义任何方法
-    // 插件开发者直接使用Spring MVC注解即可
+    
+    /**
+     * 获取当前插件的 ID
+     * <p>
+     * 默认实现：通过 {@link com.cmsr.onebase.plugin.util.PluginPropertiesUtil} 工具类读取。
+     * 使用懒加载缓存机制，同一个类只会读取一次配置文件。
+     * 子类可以直接调用此方法获取插件 ID，无需重复实现。
+     * </p>
+     *
+     * @return 插件 ID
+     */
+    default String getPluginId() {
+        return PluginInfoCache.getPluginId(this.getClass());
+    }
+    
+    /**
+     * 获取当前插件的版本
+     * <p>
+     * 默认实现：通过 {@link com.cmsr.onebase.plugin.util.PluginPropertiesUtil} 工具类读取。
+     * 使用懒加载缓存机制，同一个类只会读取一次配置文件。
+     * 子类可以直接调用此方法获取插件版本，无需重复实现。
+     * </p>
+     *
+     * @return 插件版本
+     */
+    default String getPluginVersion() {
+        return PluginInfoCache.getPluginVersion(this.getClass());
+    }
+    
+    /**
+     * 插件信息缓存
+     * <p>
+     * 使用 ThreadLocal 缓存每个类的插件信息，避免重复读取 plugin.properties 文件。
+     * 由于插件信息在运行时不会改变，因此可以安全地缓存。
+     * </p>
+     */
+    class PluginInfoCache {
+        private static final java.util.Map<Class<?>, PluginInfo> CACHE = 
+            new java.util.concurrent.ConcurrentHashMap<>();
+        
+        static String getPluginId(Class<?> clazz) {
+            return getPluginInfo(clazz).pluginId;
+        }
+        
+        static String getPluginVersion(Class<?> clazz) {
+            return getPluginInfo(clazz).pluginVersion;
+        }
+        
+        private static PluginInfo getPluginInfo(Class<?> clazz) {
+            return CACHE.computeIfAbsent(clazz, key -> {
+                String pluginId = com.cmsr.onebase.plugin.util.PluginPropertiesUtil.getPluginId(key);
+                String pluginVersion = com.cmsr.onebase.plugin.util.PluginPropertiesUtil.getPluginVersion(key);
+                return new PluginInfo(pluginId, pluginVersion);
+            });
+        }
+
+        private record PluginInfo(String pluginId, String pluginVersion) { }
+    }
 }

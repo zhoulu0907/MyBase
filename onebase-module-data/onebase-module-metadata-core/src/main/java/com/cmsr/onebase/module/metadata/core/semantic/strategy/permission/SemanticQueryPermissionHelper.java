@@ -1,8 +1,12 @@
 package com.cmsr.onebase.module.metadata.core.semantic.strategy.permission;
 
+import cn.hutool.core.convert.Convert;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
+import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.module.app.api.security.bo.DataPermission;
+import com.cmsr.onebase.module.app.api.security.bo.DataPermissionFilter;
 import com.cmsr.onebase.module.app.api.security.bo.DataPermissionGroup;
+import com.cmsr.onebase.module.app.api.security.bo.DataPermissionLevel;
 import com.cmsr.onebase.module.app.api.security.bo.DataPermissionTag;
 import com.cmsr.onebase.module.app.api.security.bo.FieldPermission;
 import com.cmsr.onebase.module.app.api.security.bo.FieldPermissionItem;
@@ -12,7 +16,9 @@ import com.cmsr.onebase.module.system.api.user.AdminUserApi;
 import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldSchemaDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticPermissionContext;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.mybatisflex.core.query.QueryColumn;
+import com.mybatisflex.core.query.QueryCondition;
 import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -90,6 +96,8 @@ public class SemanticQueryPermissionHelper {
         // 1) ownerIds：本人提交（OWN_SUBMIT）收集当前用户ID，生成 owner_id IN (...)
         // 2) deptIds：本部门/下级部门（DEPARTMENT_SUBMIT/SUB_DEPARTMENT_SUBMIT）收集部门ID，生成 owner_dept IN (...)
         // 3) ALL_DATA：存在该标签且无其他限定集合时不追加数据权限条件，实现全量放行
+        // 4) CUSTOM_CONDITION：自定义条件，处理 scopeLevel 和 filters
+        List<QueryCondition> customConditions = new ArrayList<>();
         for (DataPermissionGroup group : groups) {
             List<DataPermissionTag> tags = group.getScopTags();
             if (tags == null || tags.isEmpty()) { continue; }
@@ -111,16 +119,23 @@ public class SemanticQueryPermissionHelper {
                             }
                         }
                     }
-                    // 自定义条件：此处不处理，保留给后续 filters/level 扩展
-                    case CUSTOM_CONDITION -> {}
+                    // 自定义条件：处理 scopeLevel
+                    case CUSTOM_CONDITION -> {
+                        QueryCondition levelCondition = buildLevelVisibilityCondition(
+                                group.getScopeLevel(), group.getScopeFieldUuid(), group.getScopeValue(),
+                                loginUserId, userDeptId, fields);
+                        if (levelCondition != null) {
+                            customConditions.add(levelCondition);
+                        }
+                    }
                     default -> {}
                 }
             }
         }
 
-        // 若存在 ALL_DATA 且未收集到具体限定（既无 ownerIds 又无 deptIds），则不追加数据权限条件
+        // 若存在 ALL_DATA 且未收集到具体限定（既无 ownerIds 又无 deptIds 又无 customConditions），则不追加数据权限条件
         // 等价于全量放行，避免构造无意义的 WHERE 子句
-        if (allowAllDataTag && ownerIds.isEmpty() && deptIds.isEmpty()) { return queryWrapper; }
+        if (allowAllDataTag && ownerIds.isEmpty() && deptIds.isEmpty() && customConditions.isEmpty()) { return queryWrapper; }
 
         QueryWrapper perms = QueryWrapper.create();
         boolean added = false;
@@ -131,11 +146,287 @@ public class SemanticQueryPermissionHelper {
         if (!deptIds.isEmpty()) {
             if (!added) { perms.where(new QueryColumn("owner_dept").in(deptIds)); }
             else { perms.or(new QueryColumn("owner_dept").in(deptIds)); }
+            added = true;
+        }
+        // 添加自定义条件（CUSTOM_CONDITION 的 scopeLevel 条件）
+        for (QueryCondition customCond : customConditions) {
+            if (!added) { perms.where(customCond); added = true; }
+            else { perms.or(customCond); }
         }
         if (added) { queryWrapper.and(CPI.getWhereQueryCondition(perms)); }
 
+        // 应用自定义过滤条件（filters）
+        Map<String, String> fieldUuidToNameMap = buildFieldUuidToNameMap(fields);
+        for (DataPermissionGroup group : groups) {
+            QueryCondition filterCondition = buildFiltersCondition(group.getFilters(), fieldUuidToNameMap);
+            if (filterCondition != null) {
+                queryWrapper.and(filterCondition);
+            }
+        }
+
         // 字段选择已在方法开头统一应用
         return queryWrapper;
+    }
+
+    /**
+     * 构建字段UUID到字段名的映射
+     */
+    private Map<String, String> buildFieldUuidToNameMap(List<SemanticFieldSchemaDTO> fields) {
+        Map<String, String> map = new HashMap<>();
+        if (fields == null) { return map; }
+        for (SemanticFieldSchemaDTO f : fields) {
+            if (f.getFieldUuid() != null && f.getFieldName() != null) {
+                map.put(f.getFieldUuid(), f.getFieldName());
+            }
+        }
+        return map;
+    }
+
+    /**
+     * 根据自定义权限级别构建条件
+     */
+    private QueryCondition buildLevelVisibilityCondition(DataPermissionLevel level,
+                                                         String scopeFieldUuid,
+                                                         String scopeValue,
+                                                         Long loginUserId,
+                                                         Long userDeptId,
+                                                         List<SemanticFieldSchemaDTO> fields) {
+        if (level == null || scopeFieldUuid == null) {
+            return null;
+        }
+
+        String fieldName = null;
+        for (SemanticFieldSchemaDTO f : fields) {
+            if (scopeFieldUuid.equals(f.getFieldUuid())) {
+                fieldName = f.getFieldName();
+                break;
+            }
+        }
+        if (fieldName == null) {
+            log.warn("CUSTOM_CONDITION: 未找到字段名：fieldUuid={}", scopeFieldUuid);
+            return null;
+        }
+
+        log.debug("应用权限级别过滤：level={}, fieldName={}", level.getLabel(), fieldName);
+        QueryColumn column = new QueryColumn(fieldName);
+
+        switch (level) {
+            case SELF:
+                if (loginUserId != null) {
+                    return column.eq(loginUserId);
+                }
+                return null;
+
+            case SELF_AND_SUBORDINATES:
+                if (loginUserId != null) {
+                    List<AdminUserRespDTO> subs = adminUserApi.getUserListBySubordinate(loginUserId).getCheckedData();
+                    Set<Long> ids = subs == null ? new HashSet<>() : subs.stream().map(AdminUserRespDTO::getId).collect(Collectors.toSet());
+                    ids.add(loginUserId);
+                    return column.in(ids);
+                }
+                return null;
+
+            case MAIN_DEPARTMENT:
+                if (loginUserId != null && userDeptId != null) {
+                    List<AdminUserRespDTO> users = adminUserApi.getUserListByDeptIds(Set.of(userDeptId)).getCheckedData();
+                    if (users != null && !users.isEmpty()) {
+                        Set<Long> userIds = users.stream().map(AdminUserRespDTO::getId).collect(Collectors.toSet());
+                        return column.in(userIds);
+                    }
+                }
+                return null;
+
+            case MAIN_DEPARTMENT_AND_SUBS:
+                if (loginUserId != null && userDeptId != null) {
+                    List<DeptRespDTO> children = deptApi.getChildDeptList(userDeptId).getCheckedData();
+                    Set<Long> deptIds = children == null ? new HashSet<>() :
+                            children.stream().map(DeptRespDTO::getId).collect(Collectors.toSet());
+                    deptIds.add(userDeptId);
+
+                    List<AdminUserRespDTO> users = adminUserApi.getUserListByDeptIds(deptIds).getCheckedData();
+                    if (users != null && !users.isEmpty()) {
+                        Set<Long> userIds = users.stream().map(AdminUserRespDTO::getId).collect(Collectors.toSet());
+                        return column.in(userIds);
+                    }
+                }
+                return null;
+
+            case SPECIFIED_DEPARTMENT:
+                if (scopeValue != null && !scopeValue.isEmpty()) {
+                    try {
+                        List<Map<String, Object>> scopeList = JsonUtils.parseObject(scopeValue, new TypeReference<List<Map<String, Object>>>() {});
+                        if (scopeList != null && !scopeList.isEmpty()) {
+                            Set<Long> deptIds = scopeList.stream()
+                                    .map(m -> m.get("key"))
+                                    .filter(Objects::nonNull)
+                                    .map(Convert::toLong)
+                                    .collect(Collectors.toSet());
+                            if (!deptIds.isEmpty()) {
+                                List<AdminUserRespDTO> users = adminUserApi.getUserListByDeptIds(deptIds).getCheckedData();
+                                if (users != null && !users.isEmpty()) {
+                                    Set<Long> userIds = users.stream().map(AdminUserRespDTO::getId).collect(Collectors.toSet());
+                                    return column.in(userIds);
+                                }
+                            }
+                        }
+                    } catch (Exception e) {
+                        log.error("解析指定部门scopeValue失败: {}", e.getMessage());
+                    }
+                }
+                return null;
+
+            case SPECIFIED_PERSON:
+                if (scopeValue != null && !scopeValue.isEmpty()) {
+                    try {
+                        List<Map<String, Object>> scopeList = JsonUtils.parseObject(scopeValue, new TypeReference<List<Map<String, Object>>>() {});
+                        if (scopeList != null && !scopeList.isEmpty()) {
+                            Set<Long> userIds = scopeList.stream()
+                                    .map(m -> m.get("key"))
+                                    .filter(Objects::nonNull)
+                                    .map(Convert::toLong)
+                                    .collect(Collectors.toSet());
+                            if (!userIds.isEmpty()) {
+                                return column.in(userIds);
+                            }
+                        }
+                    } catch (Exception e) {
+                        log.error("解析指定人员scopeValue失败: {}", e.getMessage());
+                    }
+                }
+                return null;
+
+            default:
+                log.warn("未知的权限级别：{}", level);
+                return null;
+        }
+    }
+
+    /**
+     * 构建自定义过滤条件（外层AND、内层OR）
+     */
+    private QueryCondition buildFiltersCondition(List<List<DataPermissionFilter>> filters,
+                                                 Map<String, String> fieldUuidToNameMap) {
+        if (filters == null || filters.isEmpty()) {
+            return null;
+        }
+
+        QueryCondition andCondition = null;
+        for (List<DataPermissionFilter> orGroup : filters) {
+            QueryCondition orCondition = null;
+            if (orGroup != null) {
+                for (DataPermissionFilter filter : orGroup) {
+                    String fieldName = fieldUuidToNameMap.get(filter.getFieldUuid());
+                    if (fieldName == null) {
+                        log.warn("过滤条件未找到字段名：fieldUuid={}", filter.getFieldUuid());
+                        continue;
+                    }
+                    QueryCondition filterCond = buildSingleFilterCondition(fieldName, filter, fieldUuidToNameMap);
+                    if (filterCond != null) {
+                        orCondition = orCondition == null ? filterCond : orCondition.or(filterCond);
+                    }
+                }
+            }
+            if (orCondition != null) {
+                andCondition = andCondition == null ? orCondition : andCondition.and(orCondition);
+            }
+        }
+        return andCondition;
+    }
+
+    /**
+     * 构建单个过滤条件
+     */
+    private QueryCondition buildSingleFilterCondition(String fieldName,
+                                                      DataPermissionFilter filter,
+                                                      Map<String, String> fieldUuidToNameMap) {
+        String operator = filter.getFieldOperator();
+        String filterValue = filter.getFieldValue();
+        String filterValueType = filter.getFieldValueType();
+
+        log.debug("应用过滤条件：field={}, operator={}, valueType={}, value={}",
+                fieldName, operator, filterValueType, filterValue);
+
+        if (operator == null) {
+            log.warn("操作符为空，跳过过滤条件");
+            return null;
+        }
+
+        QueryColumn column = new QueryColumn(fieldName);
+        String compareToValue = null;
+        String compareToFieldName = null;
+
+        if ("value".equals(filterValueType)) {
+            compareToValue = filterValue;
+        } else if ("variables".equals(filterValueType)) {
+            String variableExpr = filterValue != null ? filterValue.trim() : null;
+            if (variableExpr != null && variableExpr.contains(".")) {
+                String[] parts = variableExpr.split("\\.");
+                if (parts.length == 2) {
+                    String refFieldUuid = parts[1];
+                    compareToFieldName = fieldUuidToNameMap.get(refFieldUuid);
+                    if (compareToFieldName == null) {
+                        log.error("变量解析失败，未找到字段名：fieldUuid={}", refFieldUuid);
+                        return null;
+                    }
+                } else {
+                    log.error("变量表达式格式不正确：{}", variableExpr);
+                    return null;
+                }
+            } else {
+                log.error("变量表达式未识别：{}", variableExpr);
+                return null;
+            }
+        } else if ("formula".equals(filterValueType)) {
+            log.error("暂不支持公式类型的数据权限过滤");
+            return null;
+        }
+
+        switch (operator.toUpperCase()) {
+            case "EQUALS":
+            case "EQUAL":
+            case "EQ":
+            case "=":
+                if (compareToFieldName != null) {
+                    return column.eq(new QueryColumn(compareToFieldName));
+                } else {
+                    return column.eq(compareToValue);
+                }
+
+            case "NOT_EQUALS":
+            case "NOT_EQUAL":
+            case "NE":
+            case "!=":
+                if (compareToFieldName != null) {
+                    return column.ne(new QueryColumn(compareToFieldName));
+                } else {
+                    return column.ne(compareToValue);
+                }
+
+            case "IN":
+                if (compareToValue != null) {
+                    List<String> values = Arrays.asList(compareToValue.split(","));
+                    return column.in(values.stream().map(String::trim).collect(Collectors.toList()));
+                }
+                return null;
+
+            case "NIN":
+            case "NOT_IN":
+                if (compareToValue != null) {
+                    List<String> values = Arrays.asList(compareToValue.split(","));
+                    return column.notIn(values.stream().map(String::trim).collect(Collectors.toList()));
+                }
+                return null;
+
+            case "IS_EMPTY":
+                return column.isNull().or(column.eq(""));
+
+            case "IS_NOT_EMPTY":
+                return column.isNotNull().and(column.ne(""));
+
+            default:
+                log.warn("未知的操作符：{}", operator);
+                return null;
+        }
     }
 
     /**

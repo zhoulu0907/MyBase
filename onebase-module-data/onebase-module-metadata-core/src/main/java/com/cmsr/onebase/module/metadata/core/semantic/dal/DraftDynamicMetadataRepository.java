@@ -474,7 +474,7 @@ public class DraftDynamicMetadataRepository {
             QueryWrapper qw = QueryWrapper.create()
                     .where(new QueryColumn(SystemFieldConstants.OPTIONAL.DELETED).eq(0))
                     .and(new QueryColumn(SystemFieldConstants.OPTIONAL.DRAFT_STATUS).eq(1))
-                    .and(new QueryColumn(SystemFieldConstants.REQUIRE.CREATOR).eq(userId));
+                    .and(new QueryColumn(SystemFieldConstants.REQUIRE.CREATOR).eq(userId.toString()));
             qw.select(QueryMethods.count().as("total"));
             Row countRow = Db.selectOneByQuery(tableName, qw);
             if (countRow != null) {

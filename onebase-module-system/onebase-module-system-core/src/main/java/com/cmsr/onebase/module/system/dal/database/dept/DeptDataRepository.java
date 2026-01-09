@@ -11,9 +11,10 @@ import com.cmsr.onebase.module.system.api.dept.dto.DeptPageApiReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.dal.flex.mapper.SystemDeptMapper;
 import com.cmsr.onebase.module.system.enums.dept.DeptTypeEnum;
-import com.cmsr.onebase.module.system.vo.dept.DeptSaveReqVO;
+import com.cmsr.onebase.module.system.vo.dept.DeptUpdateReqVO;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.core.update.UpdateChain;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
@@ -151,7 +152,7 @@ public class DeptDataRepository extends BaseDataRepository<SystemDeptMapper, Dep
         return list(queryWrapper);
     }
 
-    public DeptDO findDeptByCodeAndType(DeptSaveReqVO deptRespVO) {
+    public DeptDO findDeptByCodeAndType(DeptDO deptRespVO) {
         return getOne(query()
                 .eq(DeptDO.DEPT_TYPE, deptRespVO.getDeptType(), StringUtils.isNotBlank(deptRespVO.getDeptType()))
                 .eq(DeptDO.DEPT_CODE, deptRespVO.getDeptCode(), StringUtils.isNotBlank(deptRespVO.getDeptCode()))
@@ -189,4 +190,24 @@ public class DeptDataRepository extends BaseDataRepository<SystemDeptMapper, Dep
         Page<DeptDO> pageResult = page(Page.of(pageReqVO.getPageNo(), pageReqVO.getPageSize()), queryWrapper);
         return new PageResult<DeptDO>(pageResult.getRecords(), pageResult.getTotalRow());
     }
+    /**
+     * 更新部门
+     *
+     * @param updateReqVO
+     */
+    public boolean updateDept(DeptUpdateReqVO updateReqVO) {
+        UpdateChain<DeptDO> updateChain = this.updateChain();
+        if (StringUtils.isNotBlank(updateReqVO.getName())) {
+            updateChain.set(DeptDO::getName, updateReqVO.getName());
+        }
+        if (updateReqVO.getParentId() != null) {
+            updateChain.set(DeptDO::getParentId, updateReqVO.getParentId());
+        }
+        // leaderUserId 即使为 null 也要更新
+        updateChain.set(DeptDO::getLeaderUserId, updateReqVO.getLeaderUserId());
+        updateChain.set(DeptDO::getAdminUserIds, updateReqVO.getAdminUserIds());
+        return updateChain.where(DeptDO::getId).eq(updateReqVO.getId()).update();
+    }
 }
+
+

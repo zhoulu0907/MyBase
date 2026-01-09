@@ -45,6 +45,7 @@ public class RuntimeApplicationContextHeaderFilter extends OncePerRequestFilter 
 
     private RequestMatcher systemRequestMatcher   = new AntPathRequestMatcher("/runtime/system/**");
     private RequestMatcher corpRequestMatcher     = new AntPathRequestMatcher("/runtime/corp/**");
+    private RequestMatcher corpFileRequestMatcher     = new AntPathRequestMatcher("/runtime/infra/file/corp/**");
     // todo 这里要删除
     private RequestMatcher appRoleRequestMatcher  = new AntPathRequestMatcher("/runtime/app/auth-role/**");
     private RequestMatcher appGetRequestMatcher   = new AntPathRequestMatcher("/runtime/app/application/get");
@@ -63,6 +64,7 @@ public class RuntimeApplicationContextHeaderFilter extends OncePerRequestFilter 
     private boolean doFilter(HttpServletRequest request) {
         return systemRequestMatcher.matches(request)
                 || corpRequestMatcher.matches(request)
+                || corpFileRequestMatcher.matches(request)
                 || appRoleRequestMatcher.matches(request)
                 || appGetRequestMatcher.matches(request)
                 || appLeastRequestMatcher.matches(request)
@@ -93,6 +95,10 @@ public class RuntimeApplicationContextHeaderFilter extends OncePerRequestFilter 
                 log.warn("登录用户无应用ID，从请求头中获取应用ID，loginUser={}", loginUser);
                 String applicationIdHeader = request.getHeader(X_APPLICATION_ID);
                 applicationId = NumberUtils.toLong(applicationIdHeader, -1L);
+
+                if (applicationId <=0){
+                    applicationId = NumberUtils.toLong(request.getParameter("applicationId"), -1L);
+                }
             }
             if (applicationId <= 0) {
                 CommonResult<?> result = CommonResult.error(FORBIDDEN_APP.getCode(), "应用ID为空");

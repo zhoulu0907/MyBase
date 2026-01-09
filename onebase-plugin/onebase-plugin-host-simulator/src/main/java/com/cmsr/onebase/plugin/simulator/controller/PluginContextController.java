@@ -1,6 +1,6 @@
 package com.cmsr.onebase.plugin.simulator.controller;
 
-import com.cmsr.onebase.plugin.simulator.config.MockPluginConfigService;
+import com.cmsr.onebase.plugin.simulator.config.PluginContextServiceMockImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -24,13 +24,13 @@ import java.util.Map;
  * @date 2025-01-05
  */
 @RestController
-@RequestMapping("/api/plugin-config")
-public class PluginConfigController {
+@RequestMapping("/api/plugin-context")
+public class PluginContextController {
 
-    private static final Logger log = LoggerFactory.getLogger(PluginConfigController.class);
+    private static final Logger log = LoggerFactory.getLogger(PluginContextController.class);
 
     @Resource
-    private MockPluginConfigService configService;
+    private PluginContextServiceMockImpl configService;
 
     /**
      * 获取所有插件配置

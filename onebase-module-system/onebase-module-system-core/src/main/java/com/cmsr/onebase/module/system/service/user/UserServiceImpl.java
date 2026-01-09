@@ -46,7 +46,6 @@ import com.cmsr.onebase.module.system.service.permission.RoleService;
 import com.cmsr.onebase.module.system.service.post.PostService;
 import com.cmsr.onebase.module.system.service.tenant.TenantService;
 import com.cmsr.onebase.module.system.vo.auth.AuthRegisterReqVO;
-import com.cmsr.onebase.module.system.vo.dept.DeptSaveReqVO;
 import com.cmsr.onebase.module.system.vo.dept.DeptSimpleListRespVO;
 import com.cmsr.onebase.module.system.vo.role.RoleInsertReqVO;
 import com.cmsr.onebase.module.system.vo.user.*;
@@ -1191,17 +1190,16 @@ public class UserServiceImpl implements UserService {
 
     // 获取三方用户部门是否存在
     private Long createThirdDefaultDept() {
-        DeptSaveReqVO deptRespVO = new DeptSaveReqVO();
+        DeptDO deptNewVO = new DeptDO();
+        deptNewVO.setDeptType(DeptTypeEnum.THIRD.getCode());
+        deptNewVO.setDeptCode(DeptCodeEnum.DEFAULT_THIRD_DEPT.getCode());
 
-        deptRespVO.setDeptType(DeptTypeEnum.THIRD.getCode());
-        deptRespVO.setDeptCode(DeptCodeEnum.DEFAULT_THIRD_DEPT.getCode());
-        DeptDO deptDO = deptService.findDeptByCodeAndType(deptRespVO);
-
+        DeptDO deptDO = deptService.findDeptByCodeAndType(deptNewVO);
         if (null == deptDO) {
-            deptRespVO.setName(DeptCodeEnum.DEFAULT_THIRD_DEPT.getName());
-            deptRespVO.setParentId(DeptDO.PARENT_ID_ROOT);
-            deptRespVO.setStatus(CommonStatusEnum.ENABLE.getStatus());
-            return deptService.createThirdDefaultDept(deptRespVO);
+            deptNewVO.setName(DeptCodeEnum.DEFAULT_THIRD_DEPT.getName());
+            deptNewVO.setParentId(DeptDO.PARENT_ID_ROOT);
+            deptNewVO.setStatus(CommonStatusEnum.ENABLE.getStatus());
+            return deptService.createThirdDefaultDept(deptNewVO);
         }
         return deptDO.getId();
     }
