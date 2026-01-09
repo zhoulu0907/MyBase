@@ -27,10 +27,10 @@ public class PluginControllerRegistrar {
     private final RequestMappingHandlerMapping handlerMapping;
 
     /**
-     * Runtime path prefix (e.g., /runtime)
+     * Runtime path prefix (hardcoded to /runtime)
      * All plugin routes will be prefixed with this value
      */
-    private final String runtimePathPrefix;
+    private static final String RUNTIME_PREFIX = "/runtime";
 
     /**
      * 记录每个插件注册的路由信息，用于卸载时精确清理
@@ -45,12 +45,7 @@ public class PluginControllerRegistrar {
     private final Map<String, String> controllerToPlugin = new ConcurrentHashMap<>();
 
     public PluginControllerRegistrar(RequestMappingHandlerMapping handlerMapping) {
-        this(handlerMapping, null);
-    }
-
-    public PluginControllerRegistrar(RequestMappingHandlerMapping handlerMapping, String runtimePathPrefix) {
         this.handlerMapping = handlerMapping;
-        this.runtimePathPrefix = runtimePathPrefix != null ? runtimePathPrefix : "";
     }
 
     /**
@@ -218,19 +213,12 @@ public class PluginControllerRegistrar {
      * </p>
      */
     private String addRuntimePrefix(String path) {
-        if (runtimePathPrefix == null || runtimePathPrefix.isEmpty()) {
-            return path;
-        }
         if (path == null || path.isEmpty()) {
-            return runtimePathPrefix;
+            return RUNTIME_PREFIX;
         }
 
-        String normalizedPrefix = runtimePathPrefix.endsWith("/")
-                ? runtimePathPrefix.substring(0, runtimePathPrefix.length() - 1)
-                : runtimePathPrefix;
         String normalizedPath = path.startsWith("/") ? path : "/" + path;
-
-        return normalizedPrefix + normalizedPath;
+        return RUNTIME_PREFIX + normalizedPath;
     }
 
     /**

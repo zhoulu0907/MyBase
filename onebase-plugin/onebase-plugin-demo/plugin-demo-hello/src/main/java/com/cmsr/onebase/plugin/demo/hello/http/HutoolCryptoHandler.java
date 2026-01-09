@@ -65,12 +65,13 @@ public class HutoolCryptoHandler implements HttpHandler {
             result.put("pluginId", "hello-plugin");
             result.put("message", "Hutool三方依赖加载成功！AES加密解密验证通过！");
             result.put("success", true);
-            
+            log.info("Hutool依赖加载成功！");
         } catch (Exception e) {
             result.put("success", false);
             result.put("error", e.getMessage());
             result.put("errorType", e.getClass().getName());
             result.put("hutoolLoaded", false);
+            log.info("Hutool依赖加载失败！");
         }
         
         return result;
