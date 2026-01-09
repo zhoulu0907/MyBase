@@ -50,7 +50,6 @@ import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.warm.flow.core.FlowEngine;
 import org.dromara.warm.flow.core.dto.DefJson;
@@ -238,8 +237,8 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
             throw exception(ErrorCodeConstants.MISSING_APPLICATION_ID);
         }
 
-        // 和更新数据公用了字段，需要手动校验
-        if (MapUtils.isEmpty(reqVO.getEntity().getData())) {
+        // 和更新数据公用了字段，需要手动校验，data数据的完整性由元数据接口校验
+        if (reqVO.getEntity().getData() == null) {
             throw exception(ErrorCodeConstants.FLOW_ENTITY_DATA_NOT_EXISTS.getCode(), "实体数据内容不能为空");
         }
 
