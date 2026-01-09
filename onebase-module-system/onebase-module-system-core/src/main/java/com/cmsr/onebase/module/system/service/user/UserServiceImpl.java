@@ -145,7 +145,6 @@ public class UserServiceImpl implements UserService {
     @LogRecord(type = SYSTEM_USER_TYPE, subType = SYSTEM_USER_CREATE_SUB_TYPE, bizNo = "{{#user.id}}",
             success = SYSTEM_USER_CREATE_SUCCESS)
     @CacheEvict(value = RedisKeyConstants.USER_FIND_BY_DEPT_IDS, allEntries = true)
-    // CacheEvict 不要beforeInvocation=true，避免进方法体前阻塞
     public Long createUser(UserInsertReqVO createReqVO) {
         long startNs = System.nanoTime();
         try {
@@ -221,6 +220,8 @@ public class UserServiceImpl implements UserService {
         validateMobileUnique(null, userDO.getMobile());
         // 校验邮箱唯一
         validateEmailUnique(null, userDO.getEmail());
+        // 检查用户是否超出租户用户数限制
+        validateTenantUserCountMaxLimit();
     }
 
     @Override
