@@ -1,17 +1,17 @@
 import { Form } from '@arco-design/web-react';
+import { PageType } from '@onebase/app';
 import { cloneDeep } from 'lodash-es';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
-  getComponentImpl,
-  getComponentDescriptor,
-  isPluginComponentType,
   getComponentConfig,
-  hasWorkbenchComponentSchema,
+  getComponentDescriptor,
+  getComponentImpl,
   getWorkbenchComponentConfig,
+  hasWorkbenchComponentSchema,
+  isPluginComponentType,
   WORKBENCH_COMPONENT_MAP,
   WorkbenchComponentType
 } from 'src/components/Materials';
-import { PageType } from '@onebase/app';
 
 /**
  * 组件渲染的通用属性
@@ -144,13 +144,16 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
       baseProps.preview = preview;
     }
 
+    if (recordId) {
+      baseProps.recordId = recordId;
+    }
+
     if (isPluginComponentType(cpType)) {
       // 预留：插件组件特定扩展点（若未来需要按插件增强 props，可在此统一处理）
     }
 
     return <Impl {...baseProps} />;
   }, [componentConfig, refresh]);
-
 
   return <>{renderComponent()}</>;
 };

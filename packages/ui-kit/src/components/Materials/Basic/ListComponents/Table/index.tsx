@@ -374,6 +374,7 @@ const XTable = memo(
                       detailMode={true}
                       pageComponentSchema={componentConfig}
                       runtime={true}
+                      recordId={_record.id}
                     />
                   );
                 }
@@ -624,12 +625,12 @@ const XTable = memo(
           // 打开抽屉显示详情
           setDrawerVisible(true);
           redirectPageId && setDrawerPageId(redirectPageId);
-          if(record.bpm_instance_id){
-            setRowDataType(PageType.BPM)
-            setBpmInstanceId(record.bpm_instance_id)
+          if (record.bpm_instance_id) {
+            setRowDataType(PageType.BPM);
+            setBpmInstanceId(record.bpm_instance_id);
           } else {
-            setRowDataType(PageType.NORMAL)
-            setBpmInstanceId('')
+            setRowDataType(PageType.NORMAL);
+            setBpmInstanceId('');
           }
           handleEdit(record.id, false);
           if (runtime) {
