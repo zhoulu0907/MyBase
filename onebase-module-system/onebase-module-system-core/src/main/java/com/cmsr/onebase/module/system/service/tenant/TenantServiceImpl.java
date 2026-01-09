@@ -213,7 +213,7 @@ public class TenantServiceImpl implements TenantService {
             // 获取license总租户数限制
             Integer totalTenantLimit = license.getTenantLimit();
             // 获取现有租户数量
-            Integer existTenantCount = getTenantCount();
+            Integer existTenantCount = getTenantCountExcludePlatform();
             if (existTenantCount >= totalTenantLimit) {
                 throw exception(LICENSE_TENANT_COUNT_NOT_ENOUGH);
             }
@@ -747,8 +747,8 @@ public class TenantServiceImpl implements TenantService {
     }
 
     @Override
-    public Integer getTenantCount() {
-        return (int) tenantDataRepository.countByStatus();
+    public Integer getTenantCountExcludePlatform() {
+        return (int) tenantDataRepository.countExcludePlatform();
     }
 
     @Override

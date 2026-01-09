@@ -70,7 +70,8 @@ public class TenantDataRepository extends BaseDataRepository<SystemTenantMapper,
      *
      * @return 租户数量
      */
-    public long countByStatus() {
+
+    public long countExcludePlatform() {
         QueryWrapper queryWrapper = query()
                 .ne(TenantDO.TENANT_CODE, TenantCodeEnum.PLATFORM_TENANT.getCode());
         return count(queryWrapper);

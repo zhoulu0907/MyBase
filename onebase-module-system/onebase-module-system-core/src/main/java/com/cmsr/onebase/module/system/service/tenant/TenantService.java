@@ -103,7 +103,7 @@ public interface TenantService {
      *
      * @return 租户数量
      */
-    Integer getTenantCount();
+    Integer getTenantCountExcludePlatform();
 
     /**
      * 获得使用指定套餐的租户数组

@@ -53,7 +53,7 @@ public class PlatformInfoController {
 
         LicenseDO license = licenseService.getLatestActiveLicense();
         PlatformInfoRespVo platformInfoRespVo = BeanUtils.toBean(license, PlatformInfoRespVo.class);
-        Integer tenantCount = tenantService.getTenantCount();
+        Integer tenantCount = tenantService.getTenantCountExcludePlatform();
         Integer userCount = userService.getUserCountByStatus(UserStatusEnum.NORMAL.getStatus());
         AdminUserDO user = userService.getUser(platformInfoRespVo.getCreator());
 
