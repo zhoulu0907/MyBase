@@ -105,7 +105,7 @@ public class PluginExceptionScenariosTest {
         log.info("初始状态：插件已启动");
 
         // 2. 验证 API 可用
-        PluginHttpTestUtil.HttpResponse initialResponse = httpUtil.get("/plugin/hello-plugin/hello");
+        PluginHttpTestUtil.HttpResponse initialResponse = httpUtil.get("/runtime/plugin/hello-plugin/hello");
         initialResponse.assertSuccess();
         log.info("初始 API 响应正常");
 
@@ -115,7 +115,7 @@ public class PluginExceptionScenariosTest {
         assertThat(state1).isEqualTo(PluginState.STARTED);
 
         // 4. 验证 API 仍然可用
-        PluginHttpTestUtil.HttpResponse response1 = httpUtil.get("/plugin/hello-plugin/hello");
+        PluginHttpTestUtil.HttpResponse response1 = httpUtil.get("/runtime/plugin/hello-plugin/hello");
         response1.assertSuccess();
         log.info("第1次重复启动后 API 仍然正常");
 
@@ -125,7 +125,7 @@ public class PluginExceptionScenariosTest {
         assertThat(state2).isEqualTo(PluginState.STARTED);
 
         // 6. 验证 API 仍然可用
-        PluginHttpTestUtil.HttpResponse response2 = httpUtil.get("/plugin/hello-plugin/hello");
+        PluginHttpTestUtil.HttpResponse response2 = httpUtil.get("/runtime/plugin/hello-plugin/hello");
         response2.assertSuccess();
         log.info("第2次重复启动后 API 仍然正常");
 
@@ -134,7 +134,7 @@ public class PluginExceptionScenariosTest {
         PluginState state3 = pluginManager.startPlugin(PLUGIN_ID);
         assertThat(state3).isEqualTo(PluginState.STARTED);
 
-        PluginHttpTestUtil.HttpResponse response3 = httpUtil.get("/plugin/hello-plugin/hello");
+        PluginHttpTestUtil.HttpResponse response3 = httpUtil.get("/runtime/plugin/hello-plugin/hello");
         response3.assertSuccess();
         log.info("第3次重复启动后 API 仍然正常");
 
@@ -157,7 +157,7 @@ public class PluginExceptionScenariosTest {
         assertThat(state).isEqualTo(PluginState.STOPPED);
 
         // 2. 验证 API 不可用
-        PluginHttpTestUtil.HttpResponse response = httpUtil.get("/plugin/hello-plugin/hello");
+        PluginHttpTestUtil.HttpResponse response = httpUtil.get("/runtime/plugin/hello-plugin/hello");
         assertThat(response.getStatusCode()).isNotEqualTo(200);
         log.info("停止后 API 不可用（符合预期）");
 
@@ -176,7 +176,7 @@ public class PluginExceptionScenariosTest {
         PluginState restartState = pluginManager.startPlugin(PLUGIN_ID);
         assertThat(restartState).isEqualTo(PluginState.STARTED);
 
-        PluginHttpTestUtil.HttpResponse restartResponse = httpUtil.get("/plugin/hello-plugin/hello");
+        PluginHttpTestUtil.HttpResponse restartResponse = httpUtil.get("/runtime/plugin/hello-plugin/hello");
         restartResponse.assertSuccess();
         log.info("重新启动后 API 恢复正常");
 
@@ -386,7 +386,7 @@ public class PluginExceptionScenariosTest {
         assertThat(restartState).isEqualTo(PluginState.STARTED);
 
         // 7. 验证 API 完全恢复
-        PluginHttpTestUtil.HttpResponse response = httpUtil.get("/plugin/hello-plugin/hello");
+        PluginHttpTestUtil.HttpResponse response = httpUtil.get("/runtime/plugin/hello-plugin/hello");
         response.assertSuccess()
                 .assertJsonFieldExists("message");
 
@@ -405,7 +405,7 @@ public class PluginExceptionScenariosTest {
 
         // 1. 重复启动（幂等）
         pluginManager.startPlugin(PLUGIN_ID);
-        PluginHttpTestUtil.HttpResponse r1 = httpUtil.get("/plugin/hello-plugin/hello");
+        PluginHttpTestUtil.HttpResponse r1 = httpUtil.get("/runtime/plugin/hello-plugin/hello");
         r1.assertSuccess();
 
         // 2. 停止
@@ -433,7 +433,7 @@ public class PluginExceptionScenariosTest {
         assertThat(startState).isEqualTo(PluginState.STARTED);
 
         // 8. 验证 API 恢复
-        PluginHttpTestUtil.HttpResponse r2 = httpUtil.get("/plugin/hello-plugin/hello");
+        PluginHttpTestUtil.HttpResponse r2 = httpUtil.get("/runtime/plugin/hello-plugin/hello");
         r2.assertSuccess();
 
         log.info("✓ 完整生命周期测试通过：所有操作正常");

@@ -1,4 +1,4 @@
-package com.cmsr.onebase.plugin.runtime.test.util;
+package com.cmsr.onebase.plugin.simulator.test.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;

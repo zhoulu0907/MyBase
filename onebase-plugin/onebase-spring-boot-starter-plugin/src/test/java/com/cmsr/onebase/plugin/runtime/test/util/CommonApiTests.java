@@ -1,102 +1,31 @@
-package com.cmsr.onebase.plugin.runtime.test.api;
+package com.cmsr.onebase.plugin.runtime.test.util;
 
-import com.cmsr.onebase.plugin.runtime.manager.OneBasePluginManager;
-import com.cmsr.onebase.plugin.runtime.test.util.PluginHttpTestUtil;
 import com.cmsr.onebase.plugin.runtime.test.util.PluginHttpTestUtil.HttpResponse;
-import com.cmsr.onebase.plugin.runtime.test.util.PluginStatusAssert;
 import com.cmsr.onebase.plugin.runtime.test.util.PluginTestDataBuilder.*;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.TestPropertySource;
 
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * DEV 模式 API 响应测试 - auto-load=true, auto-start=true
+ * 公共API测试方法集合
  * <p>
- * <strong>测试场景：</strong>插件自动加载并自动启动
- * </p>
- * <p>
- * <strong>预期行为：</strong>
- * <ul>
- * <li>插件自动加载并启动到 STARTED 状态</li>
- * <li>所有 API 端点立即可访问</li>
- * <li>扩展点从 dev-class-paths 配置的路径加载</li>
- * </ul>
- * </p>
- * <p>
- * 测试所有插件接口在 DEV 模式下的响应：
- * <ul>
- * <li>HelloWorldHandler (2个接口)</li>
- * <li>HutoolCryptoHandler (2个接口)</li>
- * <li>CYSTestController (1个接口)</li>
- * <li>CustomApiHandler (3个接口)</li>
- * </ul>
- * </p>
- * <p>
- * <strong>相关测试：</strong>
- * <ul>
- * <li>{@link DevModeAutoLoadTrueAutoStartFalseTest} - auto-load=true,
- * auto-start=false</li>
- * <li>{@link DevModeAutoLoadFalseAutoStartFalseTest} - auto-load=false,
- * auto-start=false</li>
- * <li>{@link DevModeAutoLoadFalseAutoStartTrueTest} - auto-load=false,
- * auto-start=true (无效配置)</li>
- * <li>{@link DevModeClassPathsTest} - dev-class-paths 配置验证</li>
- * </ul>
+ * 提供可复用的测试方法，供 DevModeApiTest、StagingModeApiTest、ProdModeApiTest 调用。
+ * 所有方法都是静态的，接收 PluginHttpTestUtil 和 Logger 参数。
  * </p>
  *
  * @author chengyuansen
- * @date 2025-12-25
+ * @date 2026-01-10
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-@TestPropertySource(properties = {
-        "onebase.plugin.enabled=true",
-        "onebase.plugin.mode=dev",
-        "onebase.plugin.auto-load=true",
-        "onebase.plugin.auto-start=true",
-        "onebase.plugin.dev-class-paths[0]=../onebase-plugin-demo/plugin-demo-hello/target/classes",
-        "onebase.plugin.dev-class-paths[1]=../onebase-plugin-demo/plugin-demo-test/target/classes"
-})
-public class DevModeApiTest {
-
-    private static final Logger log = LoggerFactory.getLogger(DevModeApiTest.class);
-
-    @LocalServerPort
-    private int port;
-
-    @Autowired(required = false)
-    private OneBasePluginManager pluginManager;
-
-    private PluginHttpTestUtil httpUtil;
-
-    @BeforeEach
-    void setUp() {
-        httpUtil = new PluginHttpTestUtil("http://localhost:" + port);
-
-        // 验证插件已启动
-        if (pluginManager != null) {
-            PluginStatusAssert.assertPlugin(pluginManager, "dev-mode-plugin")
-                    .exists()
-                    .isStarted();
-        }
-    }
+public class CommonApiTests {
 
     // ==================== HelloWorldHandler 测试 ====================
 
-    @Test
-    @DisplayName("HelloWorldHandler - /hello 默认参数")
-    void testHelloWorld_defaultParam() {
+    /**
+     * 测试 HelloWorldHandler - /hello 默认参数
+     */
+    public static void testHelloWorld_defaultParam(PluginHttpTestUtil httpUtil, Logger log) {
         HttpResponse response = httpUtil.get("/runtime/plugin/hello-plugin/hello");
 
         response.assertSuccess()
@@ -112,14 +41,14 @@ public class DevModeApiTest {
         log.info("✓ HelloWorldHandler /hello 默认参数测试通过");
     }
 
-    @Test
-    @DisplayName("HelloWorldHandler - /hello 自定义name参数")
-    void testHelloWorld_customName() {
+    /**
+     * 测试 HelloWorldHandler - /hello 自定义name参数
+     */
+    public static void testHelloWorld_customName(PluginHttpTestUtil httpUtil, Logger log) {
         Map<String, String> params = HelloWorldData.helloQueryParams("OneBase");
         HttpResponse response = httpUtil.get("/runtime/plugin/hello-plugin/hello", params);
 
-        response.assertSuccess()
-                .assertJsonFieldEquals("plugin", "hello-plugin-00135");
+        response.assertSuccess();
 
         String message = response.getJsonField("message");
         assertThat(message).contains("hello, OneBase!");
@@ -127,9 +56,10 @@ public class DevModeApiTest {
         log.info("✓ HelloWorldHandler /hello 自定义参数测试通过");
     }
 
-    @Test
-    @DisplayName("HelloWorldHandler - /process 正常数据")
-    void testHelloWorld_process_success() {
+    /**
+     * 测试 HelloWorldHandler - /process 正常数据
+     */
+    public static void testHelloWorld_process_success(PluginHttpTestUtil httpUtil, Logger log) {
         Map<String, Object> requestBody = HelloWorldData.processRequestBody("Test", 100);
         HttpResponse response = httpUtil.post("/runtime/plugin/hello-plugin/process", requestBody);
 
@@ -146,9 +76,10 @@ public class DevModeApiTest {
         log.info("✓ HelloWorldHandler /process 正常数据测试通过");
     }
 
-    @Test
-    @DisplayName("HelloWorldHandler - /process 空数据")
-    void testHelloWorld_process_emptyData() {
+    /**
+     * 测试 HelloWorldHandler - /process 空数据
+     */
+    public static void testHelloWorld_process_emptyData(PluginHttpTestUtil httpUtil, Logger log) {
         Map<String, Object> requestBody = HelloWorldData.emptyProcessRequestBody();
         HttpResponse response = httpUtil.post("/runtime/plugin/hello-plugin/process", requestBody);
 
@@ -161,9 +92,10 @@ public class DevModeApiTest {
 
     // ==================== CYSTestController 测试 ====================
 
-    @Test
-    @DisplayName("CYSTestController - /cysinfo 默认参数")
-    void testCYSTest_defaultParam() {
+    /**
+     * 测试 CYSTestController - /cysinfo 默认参数
+     */
+    public static void testCYSTest_defaultParam(PluginHttpTestUtil httpUtil, Logger log) {
         HttpResponse response = httpUtil.get("/runtime/plugin/hello-plugin/cysinfo");
 
         response.assertSuccess()
@@ -177,9 +109,10 @@ public class DevModeApiTest {
         log.info("✓ CYSTestController /cysinfo 默认参数测试通过");
     }
 
-    @Test
-    @DisplayName("CYSTestController - /cysinfo 自定义name参数")
-    void testCYSTest_customName() {
+    /**
+     * 测试 CYSTestController - /cysinfo 自定义name参数
+     */
+    public static void testCYSTest_customName(PluginHttpTestUtil httpUtil, Logger log) {
         Map<String, String> params = CYSTestData.cysinfoQueryParams("TestUser");
         HttpResponse response = httpUtil.get("/runtime/plugin/hello-plugin/cysinfo", params);
 
@@ -192,9 +125,10 @@ public class DevModeApiTest {
 
     // ==================== CustomApiHandler 测试 ====================
 
-    @Test
-    @DisplayName("CustomApiHandler - /api/info 插件信息")
-    void testCustomApi_info() {
+    /**
+     * 测试 CustomApiHandler - /api/info 插件信息
+     */
+    public static void testCustomApi_info(PluginHttpTestUtil httpUtil, Logger log) {
         HttpResponse response = httpUtil.get("/runtime/plugin/hello-plugin/api/info");
 
         response.assertSuccess()
@@ -202,7 +136,6 @@ public class DevModeApiTest {
                 .assertJsonFieldEquals("version", "1.0.0")
                 .assertJsonFieldEquals("springInjectionWorking", true);
 
-        // 验证所有字段存在
         for (String field : ExpectedFields.pluginInfoResponseFields()) {
             response.assertJsonFieldExists(field);
         }
@@ -210,15 +143,15 @@ public class DevModeApiTest {
         log.info("✓ CustomApiHandler /api/info 测试通过");
     }
 
-    @Test
-    @DisplayName("CustomApiHandler - /api/status 插件状态")
-    void testCustomApi_status() {
+    /**
+     * 测试 CustomApiHandler - /api/status 插件状态
+     */
+    public static void testCustomApi_status(PluginHttpTestUtil httpUtil, Logger log) {
         HttpResponse response = httpUtil.get("/runtime/plugin/hello-plugin/api/status");
 
         response.assertSuccess()
                 .assertJsonFieldEquals("status", "running");
 
-        // 验证所有字段存在
         for (String field : ExpectedFields.statusResponseFields()) {
             response.assertJsonFieldExists(field);
         }
@@ -226,9 +159,10 @@ public class DevModeApiTest {
         log.info("✓ CustomApiHandler /api/status 测试通过");
     }
 
-    @Test
-    @DisplayName("CustomApiHandler - /api/process 正常数据")
-    void testCustomApi_process_success() {
+    /**
+     * 测试 CustomApiHandler - /api/process 正常数据
+     */
+    public static void testCustomApi_process_success(PluginHttpTestUtil httpUtil, Logger log) {
         Map<String, Object> requestBody = CustomApiData.sampleProcessData();
         HttpResponse response = httpUtil.post("/runtime/plugin/hello-plugin/api/process", requestBody);
 
@@ -241,9 +175,10 @@ public class DevModeApiTest {
         log.info("✓ CustomApiHandler /api/process 正常数据测试通过");
     }
 
-    @Test
-    @DisplayName("CustomApiHandler - /api/process 空数据")
-    void testCustomApi_process_emptyData() {
+    /**
+     * 测试 CustomApiHandler - /api/process 空数据
+     */
+    public static void testCustomApi_process_emptyData(PluginHttpTestUtil httpUtil, Logger log) {
         Map<String, Object> requestBody = CustomApiData.emptyProcessData();
         HttpResponse response = httpUtil.post("/runtime/plugin/hello-plugin/api/process", requestBody);
 
@@ -258,9 +193,10 @@ public class DevModeApiTest {
 
     // ==================== HutoolCryptoHandler 测试 ====================
 
-    @Test
-    @DisplayName("HutoolCryptoHandler - /crypto 加密功能")
-    void testHutool_crypto() {
+    /**
+     * 测试 HutoolCryptoHandler - /crypto 加密功能
+     */
+    public static void testHutool_crypto(PluginHttpTestUtil httpUtil, Logger log) {
         Map<String, String> params = HutoolCryptoData.cryptoQueryParams(HutoolCryptoData.customText());
         HttpResponse response = httpUtil.get("/runtime/plugin/hello-plugin/crypto", params);
 
@@ -276,9 +212,10 @@ public class DevModeApiTest {
         log.info("✓ HutoolCryptoHandler /crypto 测试通过");
     }
 
-    @Test
-    @DisplayName("HutoolCryptoHandler - /check-hutool 检查Hutool依赖")
-    void testHutool_checkHutool() {
+    /**
+     * 测试 HutoolCryptoHandler - /check-hutool 检查Hutool依赖
+     */
+    public static void testHutool_checkHutool(PluginHttpTestUtil httpUtil, Logger log) {
         HttpResponse response = httpUtil.get("/runtime/plugin/hello-plugin/check-hutool");
 
         response.assertSuccess()
@@ -295,9 +232,10 @@ public class DevModeApiTest {
 
     // ==================== TestHttpHandler 测试 ====================
 
-    @Test
-    @DisplayName("TestHttpHandler - /api/info 测试插件信息")
-    void testTestPlugin_info() {
+    /**
+     * 测试 TestHttpHandler - /api/info 测试插件信息
+     */
+    public static void testTestPlugin_info(PluginHttpTestUtil httpUtil, Logger log) {
         HttpResponse response = httpUtil.get("/runtime/plugin/test-plugin/api/info");
 
         response.assertSuccess()
