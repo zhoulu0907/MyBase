@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.system.vo.license;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Positive;
 import lombok.Data;
 import java.time.LocalDateTime;
 
@@ -29,9 +30,11 @@ public class LicenseSaveReqVO {
     private String platformType;
 
     @Schema(description = "租户数量限制")
+    @Positive(message = "用户上限必须大于零")
     private Integer tenantLimit;
 
     @Schema(description = "用户数量限制")
+    @Positive(message = "用户上限必须大于零")
     private Integer userLimit;
 
     @Schema(description = "到期时间")

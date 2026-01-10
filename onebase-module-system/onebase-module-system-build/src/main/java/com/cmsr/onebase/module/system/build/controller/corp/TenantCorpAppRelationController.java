@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.system.build.controller.corpsys;
+package com.cmsr.onebase.module.system.build.controller.corp;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
@@ -31,7 +31,7 @@ import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 @RestController
 @Validated
 @RequestMapping("/system/corp-app-relation")
-public class SystemCorpAppRelationController {
+public class TenantCorpAppRelationController {
 
     @Resource
     private CorpAppRelationService corpAppRelationService;
