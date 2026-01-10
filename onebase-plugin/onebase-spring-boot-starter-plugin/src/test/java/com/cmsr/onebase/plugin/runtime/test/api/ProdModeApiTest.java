@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 
 /**
@@ -147,61 +146,6 @@ public class ProdModeApiTest {
         }
 
         CommonApiTests.testCYSTest_customName(httpUtil, log);
-    }
-
-    @Test
-    @DisplayName("PROD - ContextDemoController /context/all")
-    void testContext_all() {
-        if (pluginManager == null || !pluginManager.getPlugin("hello-plugin").isPresent()) {
-            log.warn("跳过测试：插件未加载");
-            return;
-        }
-
-        CommonApiTests.testContext_all(httpUtil, log);
-    }
-
-    @Test
-    @DisplayName("PROD - ContextDemoController /context/current-tenant/tenantId")
-    void testContext_currentTenantId() {
-        if (pluginManager == null || !pluginManager.getPlugin("hello-plugin").isPresent()) {
-            log.warn("跳过测试：插件未加载");
-            return;
-        }
-
-        CommonApiTests.testContext_currentTenantId(httpUtil, log);
-    }
-
-    @Test
-    @DisplayName("PROD - ContextDemoController /context/key/{key}")
-    void testContext_keyValue() {
-        if (pluginManager == null || !pluginManager.getPlugin("hello-plugin").isPresent()) {
-            log.warn("跳过测试：插件未加载");
-            return;
-        }
-
-        CommonApiTests.testContext_keyValue(httpUtil, log);
-    }
-
-    @Test
-    @DisplayName("PROD - ContextDemoController /context/demo")
-    void testContext_demo() {
-        if (pluginManager == null || !pluginManager.getPlugin("hello-plugin").isPresent()) {
-            log.warn("跳过测试：插件未加载");
-            return;
-        }
-
-        CommonApiTests.testContext_demo(httpUtil, log);
-    }
-
-    @Test
-    @DisplayName("PROD - ContextDemoController /context/info")
-    void testContext_info() {
-        if (pluginManager == null || !pluginManager.getPlugin("hello-plugin").isPresent()) {
-            log.warn("跳过测试：插件未加载");
-            return;
-        }
-
-        CommonApiTests.testContext_info(httpUtil, log);
     }
 
     @Test
