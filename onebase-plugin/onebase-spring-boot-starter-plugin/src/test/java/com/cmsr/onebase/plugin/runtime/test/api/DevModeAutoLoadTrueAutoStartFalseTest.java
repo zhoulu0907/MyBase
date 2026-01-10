@@ -117,11 +117,11 @@ public class DevModeAutoLoadTrueAutoStartFalseTest {
 
                 // 测试多个 API 端点，都应该返回 404
                 String[] apiPaths = {
-                                "/plugin/hello-plugin/hello",
-                                "/plugin/hello-plugin/process",
-                                "/plugin/hello-plugin/check-hutool",
-                                "/plugin/hello-plugin/cysinfo",
-                                "/plugin/hello-plugin/api/info"
+                                "/runtime/plugin/hello-plugin/hello",
+                                "/runtime/plugin/hello-plugin/process",
+                                "/runtime/plugin/hello-plugin/check-hutool",
+                                "/runtime/plugin/hello-plugin/cysinfo",
+                                "/runtime/plugin/hello-plugin/api/info"
                 };
 
                 for (String apiPath : apiPaths) {
@@ -151,7 +151,7 @@ public class DevModeAutoLoadTrueAutoStartFalseTest {
                 log.info("初始状态: {}", initialState);
 
                 // 2. 验证 API 不可访问
-                HttpResponse beforeStart = httpUtil.get("/plugin/hello-plugin/hello");
+                HttpResponse beforeStart = httpUtil.get("/runtime/plugin/hello-plugin/hello");
                 assertThat(beforeStart.getStatusCode())
                                 .as("启动前 API 应该不可访问")
                                 .isNotEqualTo(200);
@@ -169,7 +169,7 @@ public class DevModeAutoLoadTrueAutoStartFalseTest {
                                 .isInStartedList();
 
                 // 5. 验证 API 现在可访问
-                HttpResponse afterStart = httpUtil.get("/plugin/hello-plugin/hello");
+                HttpResponse afterStart = httpUtil.get("/runtime/plugin/hello-plugin/hello");
                 afterStart.assertSuccess()
                                 .assertJsonFieldExists("message")
                                 .assertJsonFieldExists("timestamp")
@@ -198,7 +198,7 @@ public class DevModeAutoLoadTrueAutoStartFalseTest {
                                 .exists()
                                 .isNotStarted()
                                 .isNotInStartedList();
-                HttpResponse response1 = httpUtil.get("/plugin/hello-plugin/hello");
+                HttpResponse response1 = httpUtil.get("/runtime/plugin/hello-plugin/hello");
                 assertThat(response1.getStatusCode()).isNotEqualTo(200);
                 log.info("  ✓ 插件已加载但未启动，API 不可访问");
 
@@ -208,7 +208,7 @@ public class DevModeAutoLoadTrueAutoStartFalseTest {
                 PluginStatusAssert.assertPlugin(pluginManager, DEV_PLUGIN_ID)
                                 .isStarted()
                                 .isInStartedList();
-                HttpResponse response2 = httpUtil.get("/plugin/hello-plugin/hello");
+                HttpResponse response2 = httpUtil.get("/runtime/plugin/hello-plugin/hello");
                 response2.assertSuccess();
                 log.info("  ✓ 插件已启动，API 可访问");
 
@@ -218,7 +218,7 @@ public class DevModeAutoLoadTrueAutoStartFalseTest {
                 PluginStatusAssert.assertPlugin(pluginManager, DEV_PLUGIN_ID)
                                 .isStopped()
                                 .isNotInStartedList();
-                HttpResponse response3 = httpUtil.get("/plugin/hello-plugin/hello");
+                HttpResponse response3 = httpUtil.get("/runtime/plugin/hello-plugin/hello");
                 assertThat(response3.getStatusCode()).isNotEqualTo(200);
                 log.info("  ✓ 插件已停止，API 不可访问");
 
