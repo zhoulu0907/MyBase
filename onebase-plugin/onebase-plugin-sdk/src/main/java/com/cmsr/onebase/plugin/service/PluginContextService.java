@@ -24,7 +24,14 @@ import java.util.Map;
  * @author chengyuansen
  * @date 2025-01-05
  */
-public interface PluginConfigQueryService {
+public interface PluginContextService {
+
+    /**
+     * Get current tenant ID
+     *
+     * @return tenant ID
+     */
+    Long getTenantId();
 
     /**
      * 获取指定插件的全部配置

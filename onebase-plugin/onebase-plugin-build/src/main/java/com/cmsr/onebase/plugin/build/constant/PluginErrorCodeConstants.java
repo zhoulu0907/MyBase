@@ -46,5 +46,6 @@ public interface PluginErrorCodeConstants {
     ErrorCode PLUGIN_ENABLED_CANNOT_UPDATE = new ErrorCode(1_030_004_008, "启用状态的版本不可更新");
     ErrorCode PLUGIN_ENABLED_CANNOT_DELETE = new ErrorCode(1_030_004_009, "启用状态的版本不可删除");
     ErrorCode PLUGIN_ONLY_VERSION_CANNOT_DELETE = new ErrorCode(1_030_004_010, "唯一版本不可删除，每个插件至少保留一个版本");
+    ErrorCode PLUGIN_ICON_UPLOAD_FAILED = new ErrorCode(1_030_004_011, "插件图标上传失败");
 
 }

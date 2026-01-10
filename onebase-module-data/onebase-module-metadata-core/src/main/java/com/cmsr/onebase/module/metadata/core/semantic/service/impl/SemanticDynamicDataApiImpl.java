@@ -12,6 +12,7 @@ import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticMethodCo
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticOperatorEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.service.SemanticDataCrudService;
 import com.cmsr.onebase.module.metadata.core.semantic.strategy.*;
+import com.cmsr.onebase.module.metadata.core.semantic.strategy.validation.SemanticValidationManager;
 import com.cmsr.onebase.module.metadata.core.semantic.vo.*;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataEntityFieldCoreService;
@@ -55,6 +56,11 @@ public class SemanticDynamicDataApiImpl implements SemanticDynamicDataApi {
     @Resource
     private SemanticProcessLogger semanticProcessLogger;
 
+    @Resource
+    private SemanticRefResolver semanticRefResolver;
+
+    @Resource
+    private SemanticValidationManager semanticValidationManager;
 
     @Override
     public SemanticEntitySchemaDTO buildEntitySchemaByUuid(String entityUuid) {
@@ -406,6 +412,10 @@ public class SemanticDynamicDataApiImpl implements SemanticDynamicDataApi {
         // semanticPermissionContextLoader.loadPermissionContext(record);
         // 3) 数据完整性与功能权限校验
         semanticDataIntegrityValidator.validate(record);
+
+        // 语义数据校验（包含子表空行校验、字段校验等）
+        semanticValidationManager.validate(record);
+
         // 4) 执行创建
         semanticDataCrudService.create(record);
         // 5) 按主键读取创建后的详情
@@ -433,6 +443,10 @@ public class SemanticDynamicDataApiImpl implements SemanticDynamicDataApi {
         // 3) 数据完整性与功能权限校验
         semanticDataIntegrityValidator.validate(record);
         // semanticPermissionValidator.validate(record);
+
+        // 数据校验（必填、长度、范围、格式、唯一等）
+        semanticValidationManager.validate(record);
+
         // 4) 执行更新
         semanticDataCrudService.update(record);
         // 5) 按主键读取更新后的详情
@@ -470,6 +484,16 @@ public class SemanticDynamicDataApiImpl implements SemanticDynamicDataApi {
         }
         // 4) 返回字段模型列表
         return list;
+    }
+
+    @Override
+    public void enrich(SemanticEntitySchemaDTO entitySchema, SemanticEntityValueDTO resultVal) {
+        semanticRefResolver.enrich(entitySchema, resultVal);
+    }
+
+    @Override
+    public SemanticEntityValueDTO buildSemanticEntityValueDTO(Map<String, Object> entityData, SemanticEntitySchemaDTO entitySchema) {
+        return semanticMergeRecordAssembler.buildSemanticEntityValueDTO(entityData, entitySchema);
     }
 
     private QueryWrapper buildPageQueryWrapper(SemanticRecordDTO recordDTO, QueryWrapper queryWrapper) {

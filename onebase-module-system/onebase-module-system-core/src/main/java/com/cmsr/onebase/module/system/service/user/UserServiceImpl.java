@@ -46,7 +46,6 @@ import com.cmsr.onebase.module.system.service.permission.RoleService;
 import com.cmsr.onebase.module.system.service.post.PostService;
 import com.cmsr.onebase.module.system.service.tenant.TenantService;
 import com.cmsr.onebase.module.system.vo.auth.AuthRegisterReqVO;
-import com.cmsr.onebase.module.system.vo.dept.DeptSaveReqVO;
 import com.cmsr.onebase.module.system.vo.dept.DeptSimpleListRespVO;
 import com.cmsr.onebase.module.system.vo.role.RoleInsertReqVO;
 import com.cmsr.onebase.module.system.vo.user.*;
@@ -146,7 +145,6 @@ public class UserServiceImpl implements UserService {
     @LogRecord(type = SYSTEM_USER_TYPE, subType = SYSTEM_USER_CREATE_SUB_TYPE, bizNo = "{{#user.id}}",
             success = SYSTEM_USER_CREATE_SUCCESS)
     @CacheEvict(value = RedisKeyConstants.USER_FIND_BY_DEPT_IDS, allEntries = true)
-    // CacheEvict 不要beforeInvocation=true，避免进方法体前阻塞
     public Long createUser(UserInsertReqVO createReqVO) {
         long startNs = System.nanoTime();
         try {
@@ -222,6 +220,8 @@ public class UserServiceImpl implements UserService {
         validateMobileUnique(null, userDO.getMobile());
         // 校验邮箱唯一
         validateEmailUnique(null, userDO.getEmail());
+        // 检查用户是否超出租户用户数限制
+        validateTenantUserCountMaxLimit();
     }
 
     @Override
@@ -1191,17 +1191,16 @@ public class UserServiceImpl implements UserService {
 
     // 获取三方用户部门是否存在
     private Long createThirdDefaultDept() {
-        DeptSaveReqVO deptRespVO = new DeptSaveReqVO();
+        DeptDO deptNewVO = new DeptDO();
+        deptNewVO.setDeptType(DeptTypeEnum.THIRD.getCode());
+        deptNewVO.setDeptCode(DeptCodeEnum.DEFAULT_THIRD_DEPT.getCode());
 
-        deptRespVO.setDeptType(DeptTypeEnum.THIRD.getCode());
-        deptRespVO.setDeptCode(DeptCodeEnum.DEFAULT_THIRD_DEPT.getCode());
-        DeptDO deptDO = deptService.findDeptByCodeAndType(deptRespVO);
-
+        DeptDO deptDO = deptService.findDeptByCodeAndType(deptNewVO);
         if (null == deptDO) {
-            deptRespVO.setName(DeptCodeEnum.DEFAULT_THIRD_DEPT.getName());
-            deptRespVO.setParentId(DeptDO.PARENT_ID_ROOT);
-            deptRespVO.setStatus(CommonStatusEnum.ENABLE.getStatus());
-            return deptService.createThirdDefaultDept(deptRespVO);
+            deptNewVO.setName(DeptCodeEnum.DEFAULT_THIRD_DEPT.getName());
+            deptNewVO.setParentId(DeptDO.PARENT_ID_ROOT);
+            deptNewVO.setStatus(CommonStatusEnum.ENABLE.getStatus());
+            return deptService.createThirdDefaultDept(deptNewVO);
         }
         return deptDO.getId();
     }

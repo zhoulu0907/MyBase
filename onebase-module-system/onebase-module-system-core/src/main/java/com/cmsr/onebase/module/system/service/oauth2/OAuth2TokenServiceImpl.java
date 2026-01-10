@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.system.service.oauth2;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
@@ -18,6 +19,7 @@ import com.cmsr.onebase.module.system.dal.database.OAuth2RefreshTokenDataReposit
 import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2AccessTokenDO;
 import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2ClientDO;
 import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2RefreshTokenDO;
+import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.dal.redis.oauth2.OAuth2AccessTokenRedisDAO;
 import com.cmsr.onebase.module.system.service.user.UserService;
 import com.cmsr.onebase.module.system.vo.oauth.OAuth2AccessTokenPageReqVO;
@@ -243,17 +245,17 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
      * @param userType 用户类型
      * @return 用户信息
      */
-    @Deprecated
     private Map<String, String> buildUserInfo(Long userId, Integer userType) {
-        // if (userType.equals(UserTypeEnum.THIRD.getValue())) {
-        //     AdminUserDO user = userService.getUser(userId);
-        //     return MapUtil.builder(LoginUser.INFO_KEY_NICKNAME, user.getNickname())
-        //             .put(LoginUser.INFO_KEY_DEPT_ID, StrUtil.toStringOrNull(user.getDeptId())).build();
-        // } else if (userType.equals(UserTypeEnum.CORP.getValue())) {
-        //     // 注意：目前 Member 暂时不读取，可以按需实现
-        //     return Collections.emptyMap();
-        // }
-        return null;
+        if (userId == null) {
+            return null;
+        }
+        // 加载用户信息，获取昵称和部门ID
+        AdminUserDO user = userService.getUser(userId);
+        if (user == null) {
+            return null;
+        }
+        return MapUtil.builder(LoginUser.INFO_KEY_NICKNAME, user.getNickname())
+                .put(LoginUser.INFO_KEY_DEPT_ID, StrUtil.toStringOrNull(user.getDeptId())).build();
     }
 
     private static String generateAccessToken() {
