@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.cmsr.onebase</groupId>
+        <artifactId>onebase-plugin</artifactId>
+        <version>${revision}</version>
+    </parent>
+
+    <artifactId>onebase-plugin-ocr</artifactId>
+    <packaging>jar</packaging>
+    <version>1.0.0</version>
+
+    <name>${project.artifactId}</name>
+    <description>
+        OneBase OCR 插件
+        提供身份证、港澳台通行证及护照的 OCR 识别功能
+    </description>
+
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.parameters>true</maven.compiler.parameters>
+        <!-- 版本管理 -->
+        <onebase-dependencies.version>1.0.0-SNAPSHOT</onebase-dependencies.version>
+        <onebase-plugin-maven-plugin.version>1.0.0-SNAPSHOT</onebase-plugin-maven-plugin.version>
+        <!-- 三方依赖版本 -->
+        <unirest.version>4.7.0</unirest.version>
+        <guava.version>33.0.0-jre</guava.version>
+        <spring.boot.version>3.4.5</spring.boot.version>
+        <lombok.version>1.18.36</lombok.version>
+        <commons-lang3.version>3.18.0</commons-lang3.version>
+        <commons-collections4.version>4.4</commons-collections4.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.cmsr.onebase</groupId>
+                <artifactId>onebase-dependencies</artifactId>
+                <version>${onebase-dependencies.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <!-- 核心 SDK (Provided) -->
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-plugin-sdk</artifactId>
+            <version>${onebase-dependencies.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Spring Web (Provided) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <version>${spring.boot.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Lombok (Provided) -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- 三方依赖 (Compile - 打包进插件) -->
+        <!-- unirest-java-core: HTTP 客户端核心库，用于调用百度 OCR API -->
+        <dependency>
+            <groupId>com.konghq</groupId>
+            <artifactId>unirest-java-core</artifactId>
+            <version>${unirest.version}</version>
+        </dependency>
+        <!-- unirest-modules-jackson: Unirest 的 Jackson 模块，用于 JSON 序列化/反序列化 -->
+        <dependency>
+            <groupId>com.konghq</groupId>
+            <artifactId>unirest-modules-jackson</artifactId>
+            <version>${unirest.version}</version>
+        </dependency>
+        <!-- guava: Google 核心库，用于 Access Token 缓存管理 (LoadingCache) -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>${guava.version}</version>
+        </dependency>
+        
+        <!-- Commons 工具库 (Compile - 打包进插件，避免宿主版本冲突) -->
+        <!-- commons-lang3: 字符串工具类，用于参数校验 (StringUtils) -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>${commons-lang3.version}</version>
+        </dependency>
+        <!-- commons-collections4: 集合工具类，用于 Map 判空 (MapUtils) -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-collections4</artifactId>
+            <version>${commons-collections4.version}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- OneBase 插件构建插件 -->
+
+            <!-- OneBase 插件构建插件 -->
+            <plugin>
+                <groupId>com.cmsr.onebase</groupId>
+                <artifactId>onebase-plugin-maven-plugin</artifactId>
+                <version>${onebase-plugin-maven-plugin.version}</version>
+                <executions>
+                    <!-- 1. 自动生成插件主类 -->
+                    <execution>
+                        <id>generate-plugin-class</id>
+                        <goals>
+                            <goal>generate-plugin-class</goal>
+                        </goals>
+                        <configuration>
+                            <generatedPackage>com.cmsr.onebase.plugin.ocr</generatedPackage>
+                        </configuration>
+                    </execution>
+
+                    <!-- 2. 自动生成插件配置文件 -->
+                    <execution>
+                        <id>generate-properties</id>
+                        <goals>
+                            <goal>generate-properties</goal>
+                        </goals>
+                        <configuration>
+                            <pluginId>onebase-plugin-ocr</pluginId>
+                            <pluginVersion>${project.version}</pluginVersion>
+                            <pluginDescription>${project.description}</pluginDescription>
+                            <pluginProvider>OneBase Team</pluginProvider>
+                            <pluginDependencies />
+                        </configuration>
+                    </execution>
+
+                    <!-- 3. 扫描扩展点 -->
+                    <execution>
+                        <id>scan-extensions</id>
+                        <goals>
+                            <goal>scan-extensions</goal>
+                        </goals>
+                    </execution>
+
+                    <!-- 4. 打包插件 ZIP -->
+                    <execution>
+                        <id>package-plugin</id>
+                        <goals>
+                            <goal>package-plugin</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- 禁止生成 Maven 描述符，避免 PF4J 冲突 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <addMavenDescriptor>false</addMavenDescriptor>
+                    </archive>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
