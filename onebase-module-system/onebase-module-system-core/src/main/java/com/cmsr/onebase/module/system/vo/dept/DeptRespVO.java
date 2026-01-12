@@ -56,4 +56,7 @@ public class DeptRespVO {
     @Schema(description = "管理员名称", example = "")
     private String adminUserName;
 
+    @Schema(description = "部门类型", example = "")
+    private String deptType;
+
 }

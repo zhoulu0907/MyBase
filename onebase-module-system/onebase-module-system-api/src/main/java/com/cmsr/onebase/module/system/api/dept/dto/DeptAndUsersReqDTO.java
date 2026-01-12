@@ -29,4 +29,8 @@ public class DeptAndUsersReqDTO {
 
     @Schema(description = "用户类型", example = "onebase")
     private  Integer userType;
+
+    @Schema(description = "部门类型", example = "")
+    private String deptType;
+
 }

@@ -28,6 +28,7 @@ import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
@@ -385,6 +386,7 @@ public class DeptServiceImpl implements DeptService {
     @Override
     public DeptAndUsersRespVO getDeptAndUsers(DeptAndUsersReqVO reqVO) {
         Integer userType = reqVO.getUserType();
+        String deptType = reqVO.getDeptType();
         DeptAndUsersRespVO respVO = new DeptAndUsersRespVO();
 
         // 判断是否有搜索关键词
@@ -454,6 +456,24 @@ public class DeptServiceImpl implements DeptService {
             Set<Long> excludeUserIds = CollUtil.unionDistinct(reqVO.getExcludeUserIds(), excludeRoleUserIds);
             // 过滤掉排除的用户
             respVO.setUserList(respVO.getUserList().stream().filter(user -> !excludeUserIds.contains(user.getId())).collect(Collectors.toList()));
+        }
+
+        // 如果用户类型不为空，则过滤用户列表
+        if (reqVO.getUserType() != null) {
+            if (respVO.getUserList() != null) {
+                respVO.setUserList(respVO.getUserList().stream()
+                    .filter(user -> reqVO.getUserType().equals(user.getUserType()))
+                    .collect(Collectors.toList()));
+            }
+        }
+
+        // 如果deptType不为空，从respVO中过滤出符合deptType的数据
+        if (StringUtils.isNotBlank(deptType)) {
+            if (respVO.getDeptList() != null) {
+                respVO.setDeptList(respVO.getDeptList().stream()
+                    .filter(dept -> deptType.equals(dept.getDeptType()))
+                    .collect(Collectors.toList()));
+            }
         }
 
         return respVO;

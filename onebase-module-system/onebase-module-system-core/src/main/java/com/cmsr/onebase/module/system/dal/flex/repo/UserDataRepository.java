@@ -29,8 +29,7 @@ import java.util.List;
 import java.util.Set;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO.DEPT_ID;
-import static com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO.NICKNAME;
+import static com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO.*;
 import static com.cmsr.onebase.module.system.dal.flex.table.SystemUsersTableDef.SYSTEM_USERS;
 import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
 
@@ -209,7 +208,7 @@ public class UserDataRepository extends BaseDataRepository<SystemUsersMapper, Ad
      */
     public PageResult<AdminUserDO> findPage(UserPageReqVO reqVO, Collection<Long> deptIds, Collection<Long> includeRoleUserIds, Collection<Long> excludeRoleUserIds) {
 
-        QueryWrapper queryWrapper = buildUserQueryWrapper();
+        QueryWrapper queryWrapper = userQueryPageWrapper(reqVO);
         queryWrapper.like(NICKNAME, reqVO.getNickname(), StringUtils.isNotBlank(reqVO.getNickname()))
                 .like(AdminUserDO.MOBILE, reqVO.getMobile(), StringUtils.isNotBlank(reqVO.getMobile()))
                 .like(AdminUserDO.EMAIL, reqVO.getEmail(), StringUtils.isNotBlank(reqVO.getEmail()))
@@ -236,6 +235,43 @@ public class UserDataRepository extends BaseDataRepository<SystemUsersMapper, Ad
 
         Page<AdminUserDO> pageResult = page(Page.of(reqVO.getPageNo(), reqVO.getPageSize()), queryWrapper);
         return new PageResult<>(pageResult.getRecords(), pageResult.getTotalRow());
+    }
+
+    private QueryWrapper userQueryPageWrapper(UserPageReqVO reqVO) {
+        QueryWrapper queryWrapper = new QueryWrapper();
+        LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
+        if (loginUser == null || loginUser.getId() == null) {
+            // 立即失败，抛出异常，防止数据越权
+            throw exception(USER_NOT_EXISTS);
+        }
+
+        if (reqVO.getUserType() == null) {
+            String fromSceneType = getSceneByUserType();
+            if (XFromSceneTypeEnum.PLATFORM.getCode().equals(fromSceneType)) {
+                queryWrapper.eq(AdminUserDO.USER_TYPE, UserTypeEnum.PLATFORM.getValue());
+            } else if (XFromSceneTypeEnum.TENANT.getCode().equals(fromSceneType)) {
+                queryWrapper.eq(AdminUserDO.USER_TYPE, UserTypeEnum.TENANT.getValue());
+            } else if (XFromSceneTypeEnum.CORP.getCode().equals(fromSceneType)) {
+                Long corpId = loginUser.getCorpId();
+                if (null == corpId) {
+                    // 立即失败，抛出异常，防止数据越权
+                    throw exception(CORP_ID_NULL);
+                }
+                queryWrapper.eq(AdminUserDO.CORP_ID, corpId);
+                queryWrapper.eq(AdminUserDO.USER_TYPE, UserTypeEnum.CORP.getValue());
+
+            } else if (XFromSceneTypeEnum.THIRD.getCode().equals(fromSceneType)) {
+                queryWrapper.eq(AdminUserDO.USER_TYPE, UserTypeEnum.THIRD.getValue());
+            } else if (XFromSceneTypeEnum.ALL.getCode().equals(fromSceneType)) {
+                // 全部类型，不做任何处理
+            } else {
+                // 立即失败，抛出异常，防止数据越权
+                throw exception(USER_TYPE_EXCEPTION, fromSceneType);
+            }
+        } else {
+            queryWrapper.eq(AdminUserDO.USER_TYPE, reqVO.getUserType());
+        }
+        return queryWrapper;
     }
 
     /**
