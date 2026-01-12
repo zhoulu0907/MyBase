@@ -110,8 +110,8 @@ public class PluginZipValidator {
                     throw exception(PLUGIN_ZIP_FORBIDDEN_FILE);
                 }
 
-                // 检查是否包含plugin.json
-                if ("plugin.json".equals(entryName) || entryName.endsWith("/plugin.json")) {
+                // 检查是否包含plugin.manifest.json
+                if ("plugin.manifest.json".equals(entryName) || entryName.endsWith("/plugin.manifest.json")) {
                     hasPluginJson = true;
                 }
 
@@ -130,7 +130,7 @@ public class PluginZipValidator {
     }
 
     /**
-     * 从ZIP中提取plugin.json内容
+     * 从 ZIP 中提取plugin.json内容
      *
      * @param content ZIP文件内容
      * @return plugin.json内容
@@ -140,7 +140,7 @@ public class PluginZipValidator {
             ZipEntry entry;
             while ((entry = zis.getNextEntry()) != null) {
                 String entryName = entry.getName();
-                if ("plugin.json".equals(entryName) || entryName.endsWith("/plugin.json")) {
+                if ("plugin.manifest.json".equals(entryName) || entryName.endsWith("/plugin.manifest.json")) {
                     return IoUtil.readUtf8(zis);
                 }
                 zis.closeEntry();
@@ -150,6 +150,30 @@ public class PluginZipValidator {
             throw exception(PLUGIN_JSON_READ_ERROR);
         }
         throw exception(PLUGIN_JSON_NOT_FOUND);
+    }
+    
+    /**
+     * 从ZIP中提取plugin.schema.json内容（插件配置模板）
+     *
+     * @param content ZIP文件内容
+     * @return plugin.schema.json内容，如果不存在则返回空JSON对象
+     */
+    public String extractPluginSchemaJson(byte[] content) {
+        try (ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(content))) {
+            ZipEntry entry;
+            while ((entry = zis.getNextEntry()) != null) {
+                String entryName = entry.getName();
+                if ("plugin.schema.json".equals(entryName) || entryName.endsWith("/plugin.schema.json")) {
+                    return IoUtil.readUtf8(zis);
+                }
+                zis.closeEntry();
+            }
+        } catch (IOException e) {
+            log.error("提取plugin.schema.json失败", e);
+            // plugin.schema.json不是必须的，提取失败时返回空JSON对象
+        }
+        // 如果文件不存在，返回空JSON对象
+        return "{}";
     }
 
     /**

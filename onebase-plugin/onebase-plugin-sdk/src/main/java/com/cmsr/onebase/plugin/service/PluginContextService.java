@@ -27,11 +27,18 @@ import java.util.Map;
 public interface PluginContextService {
 
     /**
-     * Get current tenant ID
+     * 获取当前租户ID
      *
      * @return tenant ID
      */
     Long getTenantId();
+
+    /**
+     * 获取当前应用ID
+     *
+     * @return applicationId
+     */
+    Long getApplicationId();
 
     /**
      * 获取指定插件的全部配置

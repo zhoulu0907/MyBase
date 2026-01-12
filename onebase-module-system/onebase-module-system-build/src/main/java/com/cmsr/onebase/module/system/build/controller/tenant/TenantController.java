@@ -17,7 +17,6 @@ import jakarta.annotation.Resource;
 import jakarta.annotation.security.PermitAll;
 import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,7 +27,6 @@ import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.
 @Tag(name = "管理后台 - 空间")
 @RestController
 @RequestMapping("/system/tenant")
-@Component("oldTenantController")
 public class TenantController {
 
     @Resource

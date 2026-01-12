@@ -63,6 +63,23 @@ public class ContextDemoController implements HttpHandler {
     }
 
     /**
+     * 获取应用ID
+     * <p>
+     * 示例：GET /plugin/hello-plugin/context/current-application/applicationId
+     * </p>
+     */
+    @GetMapping("/current-tenant/applicationId")
+    public ResponseEntity<Map<String, Object>> getCurrentApplicationId() {
+        Long applicationId = pluginContextService.getApplicationId() ;
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("applicationId", applicationId);
+        result.put("timestamp", LocalDateTime.now().format(FORMATTER));
+
+        return ResponseEntity.ok(result);
+    }
+
+    /**
      * 获取指定配置项
      * <p>
      * 示例：GET /plugin/hello-plugin/context/key/apiKey
