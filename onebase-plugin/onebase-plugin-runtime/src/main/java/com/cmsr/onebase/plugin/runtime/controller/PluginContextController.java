@@ -34,7 +34,6 @@ public class PluginContextController {
 
     @GetMapping("/tenant-id")
     @Operation(summary = "获取当前租户ID")
-    @PermitAll
     public CommonResult<Long> getTenantId() {
         Long tenantId = pluginContextService.getTenantId();
         return success(tenantId);
@@ -42,7 +41,6 @@ public class PluginContextController {
 
     @GetMapping("/application-id")
     @Operation(summary = "获取当前应用ID")
-    @PermitAll
     public CommonResult<Long> getApplicationId() {
         Long applicationId = pluginContextService.getApplicationId();
         return success(applicationId);
@@ -50,7 +48,6 @@ public class PluginContextController {
 
     @GetMapping("/config")
     @Operation(summary = "获取指定插件的全部配置")
-    @PermitAll
     public CommonResult<Map<String, Object>> getConfig(
             @Parameter(description = "插件ID", required = true) @RequestParam("pluginId") String pluginId,
             @Parameter(description = "插件版本", required = true) @RequestParam("version") String version) {
