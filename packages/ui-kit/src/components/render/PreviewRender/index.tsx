@@ -121,7 +121,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
     const Impl: any = getComponentImpl(cpType as any) ?? (WORKBENCH_COMPONENT_MAP as any)[cpType];
     if (!Impl) return <div>未知组件类型: {cpType}</div>;
 
-    const baseProps: any = { cpName: cpId, id: cpId, ...componentConfig };
+    const baseProps: any = { cpName: cpId, id: cpId, pageSetType, ...componentConfig };
 
     if (descriptor) {
       if (descriptor.template.category === 'form' || descriptor.template.category === 'show') {
