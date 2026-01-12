@@ -62,16 +62,6 @@ const Right: React.FC = () => {
     }
 
     handleGetTenantSecurityConfig();
-
-    // 如果已经登录了就自动跳转到首页
-    // if (TokenManager.isTokenValid()) {
-    //   const redirectURL = getHashQueryParam('redirectURL');
-    //   if (redirectURL) {
-    //     window.location.href = redirectURL;
-    //   } else {
-    //     navigate('/onebase/enterprise-app');
-    //   }
-    // }
   }, []);
 
   const handleGetTenantSecurityConfig = async () => {

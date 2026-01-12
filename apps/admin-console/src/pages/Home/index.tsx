@@ -2,14 +2,13 @@ import { Layout } from '@arco-design/web-react';
 import React, { useState } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import AppBreadcrumb from '../../components/Breadcrumb';
+import Administrator from '../Administrator';
 import PlatformInfo from '../PlatformInfo';
 import Tenant from '../Tenant';
 import TenantCreate from '../Tenant/create';
 import TenantEdit from '../Tenant/edit';
-import Administrator from '../Administrator';
 import AppHeader from './components/header';
 import AppSider from './components/sider';
-// import Welcome from './components/Welcome';
 import styles from './index.module.less';
 
 const Content = Layout.Content;

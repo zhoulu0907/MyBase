@@ -202,7 +202,6 @@ const Administrator: React.FC = () => {
     } catch (error) {
       console.error('表单验证失败或创建失败:', error);
       Message.error('创建管理员失败');
-    } finally {
     }
   };
 
@@ -247,8 +246,6 @@ const Administrator: React.FC = () => {
       console.log(error);
       Message.error('删除失败');
     }
-
-    // setDeleteConfirmVisible(true);
   };
 
   const handleUpdate = async () => {
