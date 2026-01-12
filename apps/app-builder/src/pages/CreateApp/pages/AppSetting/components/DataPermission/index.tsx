@@ -1,5 +1,5 @@
 import { Button, Divider, Message, Popconfirm, Space, Tag } from '@arco-design/web-react';
-import { IconDelete, IconEdit, IconEmpty, IconPlusCircle } from '@arco-design/web-react/icon';
+import { IconDelete, IconEdit, IconPlusCircle } from '@arco-design/web-react/icon';
 import {
   deleteDataGroup,
   getDataPermission,
@@ -25,8 +25,8 @@ import { useEffect, useState, type FC } from 'react';
 import DataPermissionModal from './components/DataPermissionModal';
 
 import type { TreeSelectDataType } from '@arco-design/web-react/es/TreeSelect/interface';
-import styles from './index.module.less';
 import { OPERATION_OPTIONS, PERMISSION_SCOPE } from '@onebase/common';
+import styles from './index.module.less';
 
 const initialFormValues: AuthDataGroupVO = {
   id: '',
@@ -54,7 +54,7 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId, roleType }: IProps)
   const [appEntityFields, setAppEntityFields] = useState<AppEntityField[]>([]);
   const [dataPermissionPerson, setDataPermissionPerson] = useState<AuthDataPermissionPersonVO[]>([]);
   const [filterFieldCheckType, setFilterFieldCheckType] = useState<EntityFieldValidationTypes[]>([]);
-  const [DataPermission, setDataPermission] = useState<AuthDataGroupVO[]>([]);
+  const [dataPermissions, setDataPermissions] = useState<AuthDataGroupVO[]>([]);
 
   const [editingPermData, setEditingPermData] = useState<AuthDataGroupVO | null>(null);
   const [variableOptions, setVariableOptions] = useState<TreeSelectDataType[]>([]);
@@ -82,7 +82,7 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId, roleType }: IProps)
     // 后端返回默认权限组
     // setDataPermission(addDisabled);
     // 前端生成默认权限组
-    setDataPermission(() => {
+    setDataPermissions(() => {
       // 保留第一个默认权限组，将获取到的数据添加到后面
       // const defaultPermission = prevDataPermission[0];
       return [...addDisabled];
@@ -96,7 +96,7 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId, roleType }: IProps)
 
     if (id) {
       // 查找要编辑的权限组
-      const permToEdit = DataPermission.find((perm) => perm.id === id);
+      const permToEdit = dataPermissions.find((perm) => perm.id === id);
       if (permToEdit) {
         // 创建编辑数据对象
         const editingData: AuthDataGroupVO = { ...permToEdit };
@@ -530,8 +530,8 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId, roleType }: IProps)
     <>
       {menuId && (
         <div className={styles.dataPermission}>
-          {DataPermission.length > 0 &&
-            DataPermission.map((perm, index) => (
+          {dataPermissions.length > 0 &&
+            dataPermissions.map((perm, index) => (
               <div className={styles.permItem} key={index}>
                 <div className={styles.top}>
                   <div className={styles.left}>
@@ -552,14 +552,14 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId, roleType }: IProps)
                       onOk={() => {
                         handleDelete(perm.id!);
                       }}
-                      disabled={DataPermission.length <= 1}
+                      disabled={dataPermissions.length <= 1}
                     >
                       <IconDelete
                         style={{
                           fontSize: 20,
-                          color: DataPermission.length <= 1 ? '#C9CDD4' : '#F53F3F',
+                          color: dataPermissions.length <= 1 ? '#C9CDD4' : '#F53F3F',
                           marginLeft: 10,
-                          cursor: DataPermission.length <= 1 ? 'not-allowed' : 'pointer'
+                          cursor: dataPermissions.length <= 1 ? 'not-allowed' : 'pointer'
                         }}
                         // disabled={!perm.id}
                       />
