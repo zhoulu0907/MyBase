@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>${groupId}</groupId>
+    <artifactId>${artifactId}</artifactId>
+    <version>${version}</version>
+    <packaging>jar</packaging>
+
+    <name>${artifactId}</name>
+    <description>OneBase Plugin - ${artifactId}</description>
+
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- ❗ 必须启用，否则 Spring MVC 无法通过反射获取方法参数名 -->
+        <maven.compiler.parameters>true</maven.compiler.parameters>
+
+        <!-- 版本管理 -->
+        <onebase-dependencies.version>1.0.0-SNAPSHOT</onebase-dependencies.version>
+        <onebase-plugin-maven-plugin.version>1.0.0-SNAPSHOT</onebase-plugin-maven-plugin.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- ❗必须导入 OneBase BOM，统一版本管理，否则可能引发版本冲突 -->
+            <dependency>
+                <groupId>com.cmsr.onebase</groupId>
+                <artifactId>onebase-dependencies</artifactId>
+                <version>${onebase-dependencies.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <!-- OneBase 插件 SDK -->
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-plugin-sdk</artifactId>
+            <version>${onebase-dependencies.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Spring Web - 用于 @RestController 等注解 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Hutool - 第三方依赖示例：如果不需要则无需引入 -->
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-all</artifactId>
+        </dependency>
+
+        <!-- Lombok -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- OneBase插件Maven插件 - 提供自动生成和打包能力 -->
+            <plugin>
+                <groupId>com.cmsr.onebase</groupId>
+                <artifactId>onebase-plugin-maven-plugin</artifactId>
+                <version>${onebase-plugin-maven-plugin.version}</version>
+                <executions>
+                    <!-- 1. 自动生成插件主类 GeneratedPlugin -->
+                    <execution>
+                        <id>generate-plugin-class</id>
+                        <goals>
+                            <goal>generate-plugin-class</goal>
+                        </goals>
+                        <configuration>
+                            <generatedPackage>${package}</generatedPackage>
+                        </configuration>
+                    </execution>
+
+                    <!-- 2. 自动生成插件配置文件 plugin.properties -->
+                    <execution>
+                        <id>generate-properties</id>
+                        <goals>
+                            <goal>generate-properties</goal>
+                        </goals>
+                        <configuration>
+                            <!-- 插件唯一标识 -->
+                            <pluginId>${artifactId}</pluginId>
+                            <!-- 插件版本，通常引用项目版本 -->
+                            <pluginVersion>${project.version}</pluginVersion>
+                            <!-- 插件描述 -->
+                            <pluginDescription>${project.description}</pluginDescription>
+                            <!-- 插件提供者 -->
+                            <pluginProvider>Your Organization</pluginProvider>
+                        </configuration>
+                    </execution>
+
+                    <!-- 3. 扫描扩展点并生成索引 -->
+                    <execution>
+                        <id>scan-extensions</id>
+                        <goals>
+                            <goal>scan-extensions</goal>
+                        </goals>
+                    </execution>
+
+                    <!-- 4. 打包插件为 ZIP -->
+                    <execution>
+                        <id>package-plugin</id>
+                        <goals>
+                            <goal>package-plugin</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Maven JAR插件 - 配置JAR打包选项 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <!-- 禁止生成Maven描述符，避免与PF4J冲突 -->
+                        <addMavenDescriptor>false</addMavenDescriptor>
+                    </archive>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

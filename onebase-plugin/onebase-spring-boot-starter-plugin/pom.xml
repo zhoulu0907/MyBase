@@ -90,6 +90,14 @@
             <artifactId>junit-platform-suite-engine</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <!-- Hutool (Test Scope for DevModeApiTest：解决单元测试时dev模式下找不到hutool包依赖问题) -->
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-all</artifactId>
+            <version>5.8.26</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>

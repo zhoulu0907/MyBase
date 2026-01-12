@@ -39,7 +39,7 @@ public class RuntimeFileController {
     @Resource
     private FileService fileService;
 
-    @PostMapping("/upload")
+    @PostMapping({"/upload", "corp/upload"})
     @Operation(summary = "上传文件")
     @ApiSignIgnore
     public CommonResult<String> uploadFile(@Valid AppFileUploadReqVO uploadReqVO) throws Exception {
@@ -80,7 +80,7 @@ public class RuntimeFileController {
         return success(BeanUtils.toBean(fileList, FileListRespVO.class));
     }
 
-    @GetMapping("/download/{id}")
+    @GetMapping({"/download/{id}", "/corp/download/{id}"})
     @Operation(summary = "获取文件内容")
     @PermitAll
     @TenantIgnore

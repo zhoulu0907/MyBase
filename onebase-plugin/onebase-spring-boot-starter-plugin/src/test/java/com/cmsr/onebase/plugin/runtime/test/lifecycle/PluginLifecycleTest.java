@@ -103,7 +103,7 @@ public class PluginLifecycleTest {
 
         httpUtil = new PluginHttpTestUtil("http://localhost:" + port);
         String pluginId = "hello-plugin";
-        String apiPath = "/plugin/hello-plugin/hello";
+        String apiPath = "/runtime/plugin/hello-plugin/hello";
 
         // ==========================================
         // 1. 初始状态检查 (Started)

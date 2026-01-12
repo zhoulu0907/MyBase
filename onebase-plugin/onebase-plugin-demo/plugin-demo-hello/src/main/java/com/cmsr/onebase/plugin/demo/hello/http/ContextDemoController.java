@@ -1,8 +1,7 @@
 package com.cmsr.onebase.plugin.demo.hello.http;
 
 import com.cmsr.onebase.plugin.api.HttpHandler;
-import com.cmsr.onebase.plugin.service.PluginConfigQueryService;
-import com.cmsr.onebase.plugin.util.PluginPropertiesUtil;
+import com.cmsr.onebase.plugin.service.PluginContextService;
 import jakarta.annotation.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,18 +20,18 @@ import java.util.Map;
  * @date 2026-01-05
  */
 @RestController
-@RequestMapping("/plugin/hello-plugin/config")
-public class ConfigDemoController implements HttpHandler {
+@RequestMapping("/plugin/hello-plugin/context")
+public class ContextDemoController implements HttpHandler {
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @Resource
-    private PluginConfigQueryService pluginConfigQueryService;
+    private PluginContextService pluginContextService;
 
     /**
      * 获取所有配置
      * <p>
-     * 示例：GET /plugin/hello-plugin/config/all
+     * 示例：GET /plugin/hello-plugin/context/all
      * </p>
      */
     @GetMapping("/all")
@@ -40,7 +39,41 @@ public class ConfigDemoController implements HttpHandler {
         Map<String, Object> result = new HashMap<>();
         result.put("pluginId", getPluginId());
         result.put("pluginVersion", getPluginVersion());
-        result.put("config", pluginConfigQueryService.getConfig(getPluginId(), getPluginVersion()));
+        result.put("config", pluginContextService.getConfig(getPluginId(), getPluginVersion()));
+        result.put("timestamp", LocalDateTime.now().format(FORMATTER));
+
+        return ResponseEntity.ok(result);
+    }
+
+    /**
+     * 获取租户ID
+     * <p>
+     * 示例：GET /plugin/hello-plugin/context/current-tenant/tenantId
+     * </p>
+     */
+    @GetMapping("/current-tenant/tenantId")
+    public ResponseEntity<Map<String, Object>> getCurrentTenantId() {
+        Long tenantId = pluginContextService.getTenantId() ;
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("tenantId", tenantId);
+        result.put("timestamp", LocalDateTime.now().format(FORMATTER));
+
+        return ResponseEntity.ok(result);
+    }
+
+    /**
+     * 获取应用ID
+     * <p>
+     * 示例：GET /plugin/hello-plugin/context/current-application/applicationId
+     * </p>
+     */
+    @GetMapping("/current-tenant/applicationId")
+    public ResponseEntity<Map<String, Object>> getCurrentApplicationId() {
+        Long applicationId = pluginContextService.getApplicationId() ;
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("applicationId", applicationId);
         result.put("timestamp", LocalDateTime.now().format(FORMATTER));
 
         return ResponseEntity.ok(result);
@@ -49,17 +82,17 @@ public class ConfigDemoController implements HttpHandler {
     /**
      * 获取指定配置项
      * <p>
-     * 示例：GET /plugin/hello-plugin/config/key/apiKey
+     * 示例：GET /plugin/hello-plugin/context/key/apiKey
      * </p>
      */
     @GetMapping("/key/{key}")
     public ResponseEntity<Map<String, Object>> getConfigValue(@PathVariable String key) {
-        Object value = pluginConfigQueryService.getConfigValue(getPluginId(), getPluginVersion(), key);
+        Object value = pluginContextService.getConfigValue(getPluginId(), getPluginVersion(), key);
 
         Map<String, Object> result = new HashMap<>();
         result.put("key", key);
         result.put("value", value);
-        result.put("exists", pluginConfigQueryService.hasConfigKey(getPluginId(), getPluginVersion(), key));
+        result.put("exists", pluginContextService.hasConfigKey(getPluginId(), getPluginVersion(), key));
         result.put("timestamp", LocalDateTime.now().format(FORMATTER));
 
         return ResponseEntity.ok(result);
@@ -69,21 +102,21 @@ public class ConfigDemoController implements HttpHandler {
      * 配置应用演示
      * <p>
      * 演示如何在实际业务中使用配置参数。
-     * 示例：GET /plugin/hello-plugin/config/demo
+     * 示例：GET /plugin/hello-plugin/context/demo
      * </p>
      */
     @GetMapping("/demo")
     public ResponseEntity<Map<String, Object>> configDemo() {
         // 读取各种类型的配置
-        String apiKey = pluginConfigQueryService.getConfigValue(getPluginId(), getPluginVersion(), "apiKey",
+        String apiKey = pluginContextService.getConfigValue(getPluginId(), getPluginVersion(), "apiKey",
                 "default-key");
-        String provider = pluginConfigQueryService.getConfigValue(getPluginId(), getPluginVersion(), "provider",
+        String provider = pluginContextService.getConfigValue(getPluginId(), getPluginVersion(), "provider",
                 "unknown");
-        Integer timeout = pluginConfigQueryService.getConfigValue(getPluginId(), getPluginVersion(), "timeout",
+        Integer timeout = pluginContextService.getConfigValue(getPluginId(), getPluginVersion(), "timeout",
                 3000);
-        Integer maxRetries = pluginConfigQueryService.getConfigValue(getPluginId(), getPluginVersion(),
+        Integer maxRetries = pluginContextService.getConfigValue(getPluginId(), getPluginVersion(),
                 "maxRetries", 3);
-        Boolean enableLog = pluginConfigQueryService.getConfigValue(getPluginId(), getPluginVersion(), "enableLog",
+        Boolean enableLog = pluginContextService.getConfigValue(getPluginId(), getPluginVersion(), "enableLog",
                 false);
 
         // 模拟业务逻辑
@@ -106,12 +139,12 @@ public class ConfigDemoController implements HttpHandler {
     /**
      * 配置信息总览
      * <p>
-     * 示例：GET /plugin/hello-plugin/config/info
+     * 示例：GET /plugin/hello-plugin/context/info
      * </p>
      */
     @GetMapping("/info")
     public ResponseEntity<Map<String, Object>> configInfo() {
-        Map<String, Object> allConfig = pluginConfigQueryService.getConfig(getPluginId(), getPluginVersion());
+        Map<String, Object> allConfig = pluginContextService.getConfig(getPluginId(), getPluginVersion());
 
         Map<String, Object> info = new HashMap<>();
         info.put("pluginId", getPluginId());
@@ -125,7 +158,7 @@ public class ConfigDemoController implements HttpHandler {
         tips.put("viewAll", "GET /plugin/hello-plugin/config/all");
         tips.put("viewKey", "GET /plugin/hello-plugin/config/key/{key}");
         tips.put("demo", "GET /plugin/hello-plugin/config/demo");
-        tips.put("updateConfig", "PUT http://localhost:8080/api/plugin-config/dev-mode-plugin");
+        tips.put("updateConfig", "PUT http://localhost:8080/api/plugin-context/dev-mode-plugin");
 
         info.put("apiTips", tips);
 

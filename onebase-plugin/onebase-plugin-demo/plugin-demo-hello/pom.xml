@@ -33,7 +33,7 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- Hutool - 测试compile scope三方依赖打包 -->
+        <!-- Hutool - 测试compile scope三方依赖打包：如果不需要则无需引入 -->
         <dependency>
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-all</artifactId>

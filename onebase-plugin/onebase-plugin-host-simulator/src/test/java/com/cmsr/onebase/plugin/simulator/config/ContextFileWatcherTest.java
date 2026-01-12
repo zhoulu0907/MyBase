@@ -19,20 +19,20 @@ import static org.junit.jupiter.api.Assertions.*;
  *
  * @date 2025-01-08
  */
-public class ConfigFileWatcherTest {
+public class ContextFileWatcherTest {
 
     @TempDir
     Path tempDir;
 
     private Path configFile;
-    private ConfigFileWatcher watcher;
+    private ContextFileWatcher watcher;
     private AtomicInteger reloadCount;
     private CountDownLatch reloadLatch;
 
     @BeforeEach
     void setUp() throws IOException {
         // 创建临时配置文件
-        configFile = tempDir.resolve("plugin-config.yml");
+        configFile = tempDir.resolve("plugin-context.yml");
         Files.writeString(configFile, "plugins:\n  test-plugin:\n    key1: value1\n");
 
         reloadCount = new AtomicInteger(0);
@@ -49,7 +49,7 @@ public class ConfigFileWatcherTest {
     void testConfigFileChange() throws Exception {
         // 准备：创建监听器，期待触发一次重载
         reloadLatch = new CountDownLatch(1);
-        watcher = new ConfigFileWatcher(configFile, () -> {
+        watcher = new ContextFileWatcher(configFile, () -> {
             reloadCount.incrementAndGet();
             reloadLatch.countDown();
         });
@@ -71,7 +71,7 @@ public class ConfigFileWatcherTest {
     void testDebounce() throws Exception {
         // 准备：创建监听器，期待多次修改只触发一次重载
         reloadLatch = new CountDownLatch(1);
-        watcher = new ConfigFileWatcher(configFile, () -> {
+        watcher = new ContextFileWatcher(configFile, () -> {
             reloadCount.incrementAndGet();
             reloadLatch.countDown();
         });
@@ -100,7 +100,7 @@ public class ConfigFileWatcherTest {
     void testStopWatcher() throws Exception {
         // 准备：创建并启动监听器
         reloadLatch = new CountDownLatch(1);
-        watcher = new ConfigFileWatcher(configFile, () -> {
+        watcher = new ContextFileWatcher(configFile, () -> {
             reloadCount.incrementAndGet();
             reloadLatch.countDown();
         });
@@ -126,7 +126,7 @@ public class ConfigFileWatcherTest {
         Path nonExistentFile = tempDir.resolve("non-existent.yml");
 
         // 执行：创建监听器
-        watcher = new ConfigFileWatcher(nonExistentFile, () -> reloadCount.incrementAndGet());
+        watcher = new ContextFileWatcher(nonExistentFile, () -> reloadCount.incrementAndGet());
         watcher.start();
 
         // 验证：应该优雅地处理，不抛出异常
@@ -137,7 +137,7 @@ public class ConfigFileWatcherTest {
     void testReloadCallbackException() throws Exception {
         // 准备：创建会抛出异常的回调
         reloadLatch = new CountDownLatch(1);
-        watcher = new ConfigFileWatcher(configFile, () -> {
+        watcher = new ContextFileWatcher(configFile, () -> {
             reloadCount.incrementAndGet();
             reloadLatch.countDown();
             throw new RuntimeException("Test exception");

@@ -11,16 +11,16 @@ import java.util.concurrent.*;
 /**
  * 配置文件监听器
  * <p>
- * 监听 plugin-config.yml 文件的变化，触发配置重载。
+ * 监听 plugin-context.yml 文件的变化，触发配置重载。
  * 支持防抖处理，合并短时间内的多次变更。
  * </p>
  *
  * @author chengyuansen
  * @date 2025-01-08
  */
-public class ConfigFileWatcher {
+public class ContextFileWatcher {
 
-    private static final Logger log = LoggerFactory.getLogger(ConfigFileWatcher.class);
+    private static final Logger log = LoggerFactory.getLogger(ContextFileWatcher.class);
 
     private final Path configFilePath;
     private final Runnable reloadCallback;
@@ -39,7 +39,7 @@ public class ConfigFileWatcher {
      */
     private final Map<Path, Long> pendingChanges = new ConcurrentHashMap<>();
     private final ScheduledExecutorService debounceExecutor = Executors.newSingleThreadScheduledExecutor(
-            r -> new Thread(r, "ConfigFileWatcher-Debounce"));
+            r -> new Thread(r, "ContextFileWatcher-Debounce"));
 
     /**
      * 构造函数
@@ -47,7 +47,7 @@ public class ConfigFileWatcher {
      * @param configFilePath 配置文件路径
      * @param reloadCallback 重载回调函数
      */
-    public ConfigFileWatcher(Path configFilePath, Runnable reloadCallback) {
+    public ContextFileWatcher(Path configFilePath, Runnable reloadCallback) {
         this.configFilePath = configFilePath;
         this.reloadCallback = reloadCallback;
     }
@@ -57,7 +57,7 @@ public class ConfigFileWatcher {
      */
     public void start() {
         if (running) {
-            log.warn("ConfigFileWatcher 已经在运行中");
+            log.warn("ContextFileWatcher 已经在运行中");
             return;
         }
 
@@ -78,7 +78,7 @@ public class ConfigFileWatcher {
             running = true;
 
             // 启动监听线程
-            watchThread = new Thread(this::watchLoop, "ConfigFileWatcher");
+            watchThread = new Thread(this::watchLoop, "ContextFileWatcher");
             watchThread.setDaemon(true);
             watchThread.start();
 
@@ -89,9 +89,9 @@ public class ConfigFileWatcher {
                     DEBOUNCE_DELAY_MS,
                     TimeUnit.MILLISECONDS);
 
-            log.info("ConfigFileWatcher 已启动，监听文件: {}", configFilePath);
+            log.info("ContextFileWatcher 已启动，监听文件: {}", configFilePath);
         } catch (IOException e) {
-            log.error("启动 ConfigFileWatcher 失败", e);
+            log.error("启动 ContextFileWatcher 失败", e);
         }
     }
 
@@ -99,7 +99,7 @@ public class ConfigFileWatcher {
      * 监听循环
      */
     private void watchLoop() {
-        log.debug("ConfigFileWatcher 监听线程已启动");
+        log.debug("ContextFileWatcher 监听线程已启动");
 
         while (running) {
             try {
@@ -131,7 +131,7 @@ public class ConfigFileWatcher {
                 key.reset();
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                log.error("ConfigFileWatcher 监听线程被中断", e);
+                log.error("ContextFileWatcher 监听线程被中断", e);
                 break;
             } catch (ClosedWatchServiceException e) {
                 // WatchService 已关闭，这是正常的关闭流程
@@ -142,7 +142,7 @@ public class ConfigFileWatcher {
             }
         }
 
-        log.debug("ConfigFileWatcher 监听线程已退出");
+        log.debug("ContextFileWatcher 监听线程已退出");
     }
 
     /**
@@ -199,6 +199,6 @@ public class ConfigFileWatcher {
 
         debounceExecutor.shutdown();
 
-        log.info("ConfigFileWatcher 已停止");
+        log.info("ContextFileWatcher 已停止");
     }
 }

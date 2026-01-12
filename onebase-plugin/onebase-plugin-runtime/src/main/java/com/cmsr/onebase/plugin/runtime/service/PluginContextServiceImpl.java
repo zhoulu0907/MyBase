@@ -1,9 +1,10 @@
 package com.cmsr.onebase.plugin.runtime.service;
 
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.plugin.core.dal.database.PluginConfigInfoRepository;
 import com.cmsr.onebase.plugin.core.dal.dataobject.PluginConfigInfoDO;
-import com.cmsr.onebase.plugin.service.PluginConfigQueryService;
+import com.cmsr.onebase.plugin.service.PluginContextService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -21,11 +22,25 @@ import java.util.Map;
  */
 @Slf4j
 @Service
-public class PluginConfigQueryServiceImpl implements PluginConfigQueryService {
+public class PluginContextServiceImpl implements PluginContextService {
 
     /** 插件配置信息仓储 */
     @Resource
     private PluginConfigInfoRepository pluginConfigInfoRepository;
+
+    @Override
+    public Long getTenantId() {
+        Long tenantId = TenantContextHolder.getTenantId();
+        log.info("租户ID: {}", tenantId);
+        return tenantId;
+    }
+
+    @Override
+    public Long getApplicationId() {
+        Long applicationId =ApplicationManager.getApplicationId();
+        log.info("应用ID: {}", applicationId);
+        return applicationId;
+    }
 
     /**
      * 获取指定插件的全部配置
@@ -38,7 +53,7 @@ public class PluginConfigQueryServiceImpl implements PluginConfigQueryService {
     public Map<String, Object> getConfig(String pluginId, String version) {
         // 获取当前租户 ID
         Long tenantId = TenantContextHolder.getTenantId();
-        
+
         log.info("从数据库加载插件配置，tenantId: {}, pluginId: {}, version: {}", tenantId, pluginId, version);
 
         // 从数据库查询配置列表
@@ -55,7 +70,8 @@ public class PluginConfigQueryServiceImpl implements PluginConfigQueryService {
             configMap.put(config.getConfigKey(), config.getConfigValue());
         }
 
-        log.info("插件配置加载完成，tenantId: {}, pluginId: {}, version: {}, 配置项数量: {}", tenantId, pluginId, version, configMap.size());
+        log.info("插件配置加载完成，tenantId: {}, pluginId: {}, version: {}, 配置项数量: {}", tenantId, pluginId, version,
+                configMap.size());
 
         return configMap;
     }

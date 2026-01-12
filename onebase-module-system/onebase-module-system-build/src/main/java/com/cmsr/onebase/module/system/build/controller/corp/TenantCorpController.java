@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.system.build.controller.corpsys;
+package com.cmsr.onebase.module.system.build.controller.corp;
 
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
@@ -30,7 +30,7 @@ import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 @RestController
 @RequestMapping("/system/corp")
 @Validated
-public class SystemCorpController {
+public class TenantCorpController {
 
     @Resource
     private CorpService corpService;
@@ -106,7 +106,7 @@ public class SystemCorpController {
     @PostMapping("/check-corp-admin-user")
     @Operation(summary = "验证企业管理员")
     @PreAuthorize("@ss.hasPermission('tenant:corp:query')")
-    public CommonResult<Boolean> checkCorpAdminUsr(@RequestBody @Valid CorpAdminReqVO corpAdminReqVO) {
+    public CommonResult<Boolean> checkCorpAdminUser(@RequestBody @Valid CorpAdminReqVO corpAdminReqVO) {
         corpService.checkCorpAdminUser(corpAdminReqVO);
         return success(true);
     }

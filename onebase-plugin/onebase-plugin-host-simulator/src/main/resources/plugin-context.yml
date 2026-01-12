@@ -9,6 +9,10 @@
 #
 # 插件开发者可根据需要添加自己的插件配置
 
+tenant:
+  tenant-id: 1
+  application-id: 100
+
 plugins:
   # ===== 示例：Hello 插件配置 =====
   hello-plugin:
