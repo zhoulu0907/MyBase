@@ -1,5 +1,6 @@
 package com.cmsr.onebase.plugin.runtime.service;
 
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.plugin.core.dal.database.PluginConfigInfoRepository;
 import com.cmsr.onebase.plugin.core.dal.dataobject.PluginConfigInfoDO;
@@ -30,8 +31,15 @@ public class PluginContextServiceImpl implements PluginContextService {
     @Override
     public Long getTenantId() {
         Long tenantId = TenantContextHolder.getTenantId();
-        log.debug("租户ID: {}", tenantId);
+        log.info("租户ID: {}", tenantId);
         return tenantId;
+    }
+
+    @Override
+    public Long getApplicationId() {
+        Long applicationId =ApplicationManager.getApplicationId();
+        log.info("应用ID: {}", applicationId);
+        return applicationId;
     }
 
     /**
