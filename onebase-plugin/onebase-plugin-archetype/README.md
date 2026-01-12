@@ -120,25 +120,6 @@ mvn clean package
 - `my-plugin-1.0.0-SNAPSHOT.jar` - 插件 JAR 包
 - `my-plugin-1.0.0-SNAPSHOT.zip` - 插件发布包（包含所有依赖）
 
-### 3. 部署插件
-
-将生成的 ZIP 文件复制到 OneBase 插件目录：
-
-```bash
-cp target/my-plugin-1.0.0-SNAPSHOT.zip /path/to/onebase/plugins/
-```
-
-### 4. 测试插件
-
-启动 OneBase 应用后，访问插件接口：
-
-```bash
-# 测试上下文服务
-curl http://localhost:8080/plugin/my-plugin/context/info
-
-# 测试加密功能
-curl http://localhost:8080/plugin/my-plugin/crypto/test?text=Hello
-```
 
 ## 自定义开发
 
