@@ -139,7 +139,7 @@ public class AppApplicationApiImpl implements AppApplicationApi {
         List<AppVersionDO> versionDOList = ApplicationManager.withoutApplicationCondition(() ->
                 versionRepository.findVersionList(listIds));
 
-        // 检查导航列表是否为空
+        // 检查版本号列表是否为空
         if (CollectionUtils.isEmpty(versionDOList)) {
             return applicationDTOList;
         }
