@@ -4,18 +4,38 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <!-- 继承 onebase-plugin-demo 父模块 -->
-    <parent>
-        <groupId>com.cmsr.onebase</groupId>
-        <artifactId>onebase-plugin-demo</artifactId>
-        <version>${revision}</version>
-    </parent>
-
-    <artifactId>plugin-demo-hello</artifactId>
+    <groupId>${groupId}</groupId>
+    <artifactId>${artifactId}</artifactId>
+    <version>${version}</version>
     <packaging>jar</packaging>
 
-    <name>${project.artifactId}</name>
-    <description>OneBase插件开发示例 - Hello模块</description>
+    <name>${artifactId}</name>
+    <description>OneBase Plugin - ${artifactId}</description>
+
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- ❗ 必须启用，否则 Spring MVC 无法通过反射获取方法参数名 -->
+        <maven.compiler.parameters>true</maven.compiler.parameters>
+
+        <!-- 版本管理 -->
+        <onebase-dependencies.version>1.0.0-SNAPSHOT</onebase-dependencies.version>
+        <onebase-plugin-maven-plugin.version>1.0.0-SNAPSHOT</onebase-plugin-maven-plugin.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- ❗必须导入 OneBase BOM，统一版本管理，否则可能引发版本冲突 -->
+            <dependency>
+                <groupId>com.cmsr.onebase</groupId>
+                <artifactId>onebase-dependencies</artifactId>
+                <version>${onebase-dependencies.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <!-- OneBase 插件 SDK -->
@@ -33,11 +53,12 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- Hutool - 测试compile scope三方依赖打包：如果不需要则无需引入 -->
+        <!-- Hutool - 第三方依赖示例：如果不需要则无需引入 -->
         <dependency>
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-all</artifactId>
         </dependency>
+
         <!-- Lombok -->
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -52,15 +73,16 @@
             <plugin>
                 <groupId>com.cmsr.onebase</groupId>
                 <artifactId>onebase-plugin-maven-plugin</artifactId>
+                <version>${onebase-plugin-maven-plugin.version}</version>
                 <executions>
-                    <!-- 1. 自动生成插件主类 GeneratedPlugin - 包名通过 generatedPackage 参数指定 -->
+                    <!-- 1. 自动生成插件主类 GeneratedPlugin -->
                     <execution>
                         <id>generate-plugin-class</id>
                         <goals>
                             <goal>generate-plugin-class</goal>
                         </goals>
                         <configuration>
-                            <generatedPackage>com.cmsr.onebase.plugin.demo.hello</generatedPackage>
+                            <generatedPackage>${package}</generatedPackage>
                         </configuration>
                     </execution>
 
@@ -72,13 +94,13 @@
                         </goals>
                         <configuration>
                             <!-- 插件唯一标识 -->
-                            <pluginId>hello-plugin</pluginId>
+                            <pluginId>${artifactId}</pluginId>
                             <!-- 插件版本，通常引用项目版本 -->
                             <pluginVersion>${project.version}</pluginVersion>
                             <!-- 插件描述 -->
-                            <pluginDescription>OneBase演示插件 - Hello模块，展示HttpHandler等扩展点的使用</pluginDescription>
+                            <pluginDescription>${project.description}</pluginDescription>
                             <!-- 插件提供者 -->
-                            <pluginProvider>OneBase Team</pluginProvider>
+                            <pluginProvider>Your Organization</pluginProvider>
                         </configuration>
                     </execution>
 
@@ -111,7 +133,6 @@
                     </archive>
                 </configuration>
             </plugin>
-
         </plugins>
     </build>
 </project>

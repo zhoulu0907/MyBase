@@ -56,10 +56,21 @@ public class PluginContextServiceMockImpl implements PluginContextService {
      */
     private Long mockTenantId = 1L;
 
+    /**
+     * Mock application ID (will be loaded from YAML later)
+     */
+    private Long mockApplicationId = 100L;
+
     @Override
     public Long getTenantId() {
-        log.debug("Mock simulator returns tenant ID: {}", mockTenantId);
+        log.debug("模拟租户ID值为: {}", mockTenantId);
         return mockTenantId;
+    }
+
+    @Override
+    public Long getApplicationId() {
+        log.debug("模拟应用ID值为: {}", mockApplicationId);
+        return mockApplicationId;
     }
 
     @PostConstruct
@@ -104,14 +115,23 @@ public class PluginContextServiceMockImpl implements PluginContextService {
                 return;
             }
 
-            // 1. 解析 Tenant ID
+            // 1. 解析 Tenant 配置
             Object tenantObj = root.get("tenant");
             if (tenantObj instanceof Map) {
                 Map<String, Object> tenantConfig = (Map<String, Object>) tenantObj;
+
+                // 解析 tenant-id
                 Object tenantIdObj = tenantConfig.get("tenant-id");
                 if (tenantIdObj instanceof Number) {
                     this.mockTenantId = ((Number) tenantIdObj).longValue();
                     log.info("已加载模拟租户 ID: {}", this.mockTenantId);
+                }
+
+                // 解析 application-id
+                Object applicationIdObj = tenantConfig.get("application-id");
+                if (applicationIdObj instanceof Number) {
+                    this.mockApplicationId = ((Number) applicationIdObj).longValue();
+                    log.info("已加载模拟应用 ID: {}", this.mockApplicationId);
                 }
             }
 

@@ -3,10 +3,9 @@ package com.cmsr.onebase.plugin.runtime.test.api;
 import com.cmsr.onebase.plugin.runtime.manager.OneBasePluginManager;
 import com.cmsr.onebase.plugin.runtime.test.config.PluginTestConfiguration;
 import com.cmsr.onebase.plugin.runtime.test.util.PluginHttpTestUtil;
-import com.cmsr.onebase.plugin.runtime.test.util.PluginHttpTestUtil.HttpResponse;
 import com.cmsr.onebase.plugin.runtime.test.util.PluginStatusAssert;
-import com.cmsr.onebase.plugin.runtime.test.util.PluginTestDataBuilder.*;
 import com.cmsr.onebase.plugin.runtime.test.util.PluginTestEnvironmentManager;
+import com.cmsr.onebase.plugin.runtime.test.util.CommonApiTests;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,12 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
-
-import java.util.Map;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * STAGING 模式 API 响应测试
@@ -90,34 +84,145 @@ public class StagingModeApiTest {
     }
 
     @Test
-    @DisplayName("STAGING - HelloWorldHandler /hello 接口")
-    void testHelloWorld() {
+    @DisplayName("STAGING - HelloWorldHandler /hello 默认参数")
+    void testHelloWorld_defaultParam() {
         if (pluginManager == null || !pluginManager.getPlugin("hello-plugin").isPresent()) {
             log.warn("跳过测试：插件未加载");
             return;
         }
 
-        HttpResponse response = httpUtil.get("/plugin/hello-plugin/hello");
-        response.assertSuccess()
-                .assertJsonFieldExists("message")
-                .assertJsonFieldExists("timestamp");
-
-        log.info("✓ STAGING 模式 HelloWorldHandler /hello 测试通过");
+        CommonApiTests.testHelloWorld_defaultParam(httpUtil, log);
     }
 
     @Test
-    @DisplayName("STAGING - CustomApiHandler /api/info 接口")
-    void testCustomApiInfo() {
+    @DisplayName("STAGING - HelloWorldHandler /hello 自定义name参数")
+    void testHelloWorld_customName() {
         if (pluginManager == null || !pluginManager.getPlugin("hello-plugin").isPresent()) {
             log.warn("跳过测试：插件未加载");
             return;
         }
 
-        HttpResponse response = httpUtil.get("/plugin/hello-plugin/api/info");
-        response.assertSuccess()
-                .assertJsonFieldEquals("plugin", "hello-plugin")
-                .assertJsonFieldEquals("springInjectionWorking", true);
+        CommonApiTests.testHelloWorld_customName(httpUtil, log);
+    }
 
-        log.info("✓ STAGING 模式 CustomApiHandler /api/info 测试通过");
+    @Test
+    @DisplayName("STAGING - HelloWorldHandler /process 正常数据")
+    void testHelloWorld_process_success() {
+        if (pluginManager == null || !pluginManager.getPlugin("hello-plugin").isPresent()) {
+            log.warn("跳过测试：插件未加载");
+            return;
+        }
+
+        CommonApiTests.testHelloWorld_process_success(httpUtil, log);
+    }
+
+    @Test
+    @DisplayName("STAGING - HelloWorldHandler /process 空数据")
+    void testHelloWorld_process_emptyData() {
+        if (pluginManager == null || !pluginManager.getPlugin("hello-plugin").isPresent()) {
+            log.warn("跳过测试：插件未加载");
+            return;
+        }
+
+        CommonApiTests.testHelloWorld_process_emptyData(httpUtil, log);
+    }
+
+    @Test
+    @DisplayName("STAGING - CYSTestController /cysinfo 默认参数")
+    void testCYSTest_defaultParam() {
+        if (pluginManager == null || !pluginManager.getPlugin("hello-plugin").isPresent()) {
+            log.warn("跳过测试：插件未加载");
+            return;
+        }
+
+        CommonApiTests.testCYSTest_defaultParam(httpUtil, log);
+    }
+
+    @Test
+    @DisplayName("STAGING - CYSTestController /cysinfo 自定义name参数")
+    void testCYSTest_customName() {
+        if (pluginManager == null || !pluginManager.getPlugin("hello-plugin").isPresent()) {
+            log.warn("跳过测试：插件未加载");
+            return;
+        }
+
+        CommonApiTests.testCYSTest_customName(httpUtil, log);
+    }
+
+    @Test
+    @DisplayName("STAGING - CustomApiHandler /api/info")
+    void testCustomApi_info() {
+        if (pluginManager == null || !pluginManager.getPlugin("hello-plugin").isPresent()) {
+            log.warn("跳过测试：插件未加载");
+            return;
+        }
+
+        CommonApiTests.testCustomApi_info(httpUtil, log);
+    }
+
+    @Test
+    @DisplayName("STAGING - CustomApiHandler /api/status")
+    void testCustomApi_status() {
+        if (pluginManager == null || !pluginManager.getPlugin("hello-plugin").isPresent()) {
+            log.warn("跳过测试：插件未加载");
+            return;
+        }
+
+        CommonApiTests.testCustomApi_status(httpUtil, log);
+    }
+
+    @Test
+    @DisplayName("STAGING - CustomApiHandler /api/process 正常数据")
+    void testCustomApi_process_success() {
+        if (pluginManager == null || !pluginManager.getPlugin("hello-plugin").isPresent()) {
+            log.warn("跳过测试：插件未加载");
+            return;
+        }
+
+        CommonApiTests.testCustomApi_process_success(httpUtil, log);
+    }
+
+    @Test
+    @DisplayName("STAGING - CustomApiHandler /api/process 空数据")
+    void testCustomApi_process_emptyData() {
+        if (pluginManager == null || !pluginManager.getPlugin("hello-plugin").isPresent()) {
+            log.warn("跳过测试：插件未加载");
+            return;
+        }
+
+        CommonApiTests.testCustomApi_process_emptyData(httpUtil, log);
+    }
+
+    @Test
+    @DisplayName("STAGING - HutoolCryptoHandler /crypto")
+    void testHutool_crypto() {
+        if (pluginManager == null || !pluginManager.getPlugin("hello-plugin").isPresent()) {
+            log.warn("跳过测试：插件未加载");
+            return;
+        }
+
+        CommonApiTests.testHutool_crypto(httpUtil, log);
+    }
+
+    @Test
+    @DisplayName("STAGING - HutoolCryptoHandler /check-hutool")
+    void testHutool_checkHutool() {
+        if (pluginManager == null || !pluginManager.getPlugin("hello-plugin").isPresent()) {
+            log.warn("跳过测试：插件未加载");
+            return;
+        }
+
+        CommonApiTests.testHutool_checkHutool(httpUtil, log);
+    }
+
+    @Test
+    @DisplayName("STAGING - TestHttpHandler /api/info")
+    void testTestPlugin_info() {
+        if (pluginManager == null || !pluginManager.getPlugin("test-plugin").isPresent()) {
+            log.warn("跳过测试：插件未加载");
+            return;
+        }
+
+        CommonApiTests.testTestPlugin_info(httpUtil, log);
     }
 }

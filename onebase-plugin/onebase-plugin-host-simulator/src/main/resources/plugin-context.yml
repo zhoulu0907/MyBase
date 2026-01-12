@@ -11,6 +11,7 @@
 
 tenant:
   tenant-id: 1
+  application-id: 100
 
 plugins:
   # ===== 示例：Hello 插件配置 =====
