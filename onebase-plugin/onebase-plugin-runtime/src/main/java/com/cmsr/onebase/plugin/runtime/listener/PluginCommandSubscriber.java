@@ -54,10 +54,34 @@ public class PluginCommandSubscriber implements MessageListener {
      */
     private void handleCommand(PluginCommandMessage message) {
         switch (message.getCommand()) {
+            case UPLOAD -> handleUploadCommand(message);
             case ENABLE -> handleEnableCommand(message);
             case DISABLE -> handleDisableCommand(message);
             case RELOAD -> handleReloadCommand(message);
             default -> log.warn("未知的插件命令: {}", message.getCommand());
+        }
+    }
+
+    /**
+     * 处理上传命令
+     * 当调用上传接口时，接收消息并下载解压插件到指定目录
+     */
+    private void handleUploadCommand(PluginCommandMessage message) {
+        log.info("处理插件上传命令: pluginId={}, version={}, tenantId={}",
+                message.getPluginId(), message.getPluginVersion(), message.getTenantId());
+
+        try {
+            // 下载并解压插件（支持前后端分离存储）
+            pluginFileManager.downloadAndExtractPlugin(
+                    message.getPluginId(),
+                    message.getPluginVersion(),
+                    message.getPackageFileId(),
+                    message.getPackages()
+            );
+
+            log.info("插件上传处理成功: pluginId={}, version={}", message.getPluginId(), message.getPluginVersion());
+        } catch (Exception e) {
+            log.error("插件上传处理失败: pluginId={}, version={}", message.getPluginId(), message.getPluginVersion(), e);
         }
     }
 
