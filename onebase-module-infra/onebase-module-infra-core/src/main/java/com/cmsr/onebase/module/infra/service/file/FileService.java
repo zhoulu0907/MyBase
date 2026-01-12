@@ -88,4 +88,12 @@ public interface FileService {
      */
     void getFileContent(Long id, HttpServletRequest request, HttpServletResponse response, String visitMode) throws Exception;
 
+    /**
+     * 根据文件ID获取文件内容（字节数组）
+     *
+     * @param id 文件ID
+     * @return 文件内容字节数组
+     */
+    byte[] getFileContentBytes(Long id) throws Exception;
+
 }

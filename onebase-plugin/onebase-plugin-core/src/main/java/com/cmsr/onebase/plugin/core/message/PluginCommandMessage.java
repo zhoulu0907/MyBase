@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * 插件命令消息
@@ -52,9 +53,18 @@ public class PluginCommandMessage implements Serializable {
     private Long timestamp;
 
     /**
+     * 插件包信息列表（用于UPLOAD命令）
+     */
+    private List<PackageInfo> packages;
+
+    /**
      * 插件命令枚举
      */
     public enum PluginCommand {
+        /**
+         * 上传插件（通知Runtime下载并解压插件）
+         */
+        UPLOAD,
         /**
          * 启用插件
          */
@@ -68,5 +78,32 @@ public class PluginCommandMessage implements Serializable {
          */
         RELOAD
     }
+
+    /**
+     * 插件包信息
+     */
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class PackageInfo implements Serializable {
+        private static final long serialVersionUID = 1L;
+
+        /**
+         * 包名称
+         */
+        private String packageName;
+
+        /**
+         * 包类型（0=前端，1=后端）
+         */
+        private Integer packageType;
+    }
+
+    /**
+     * 包类型常量
+     */
+    public static final int PACKAGE_TYPE_FRONTEND = 0;
+    public static final int PACKAGE_TYPE_BACKEND = 1;
 
 }
