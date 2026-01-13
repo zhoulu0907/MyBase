@@ -27,13 +27,6 @@
         <!-- 版本管理 -->
         <onebase-dependencies.version>1.0.0-SNAPSHOT</onebase-dependencies.version>
         <onebase-plugin-maven-plugin.version>1.0.0-SNAPSHOT</onebase-plugin-maven-plugin.version>
-        <!-- 三方依赖版本 -->
-        <unirest.version>4.7.0</unirest.version>
-        <guava.version>33.0.0-jre</guava.version>
-        <spring.boot.version>3.4.5</spring.boot.version>
-        <lombok.version>1.18.36</lombok.version>
-        <commons-lang3.version>3.18.0</commons-lang3.version>
-        <commons-collections4.version>4.4</commons-collections4.version>
     </properties>
 
     <dependencyManagement>
@@ -61,7 +54,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-            <version>${spring.boot.version}</version>
             <scope>provided</scope>
         </dependency>
 
@@ -73,24 +65,22 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- 三方依赖 (Compile - 打包进插件) -->
-        <!-- unirest-java-core: HTTP 客户端核心库，用于调用百度 OCR API -->
         <dependency>
             <groupId>com.konghq</groupId>
             <artifactId>unirest-java-core</artifactId>
-            <version>${unirest.version}</version>
+            <scope>provided</scope>
         </dependency>
         <!-- unirest-modules-jackson: Unirest 的 Jackson 模块，用于 JSON 序列化/反序列化 -->
         <dependency>
             <groupId>com.konghq</groupId>
             <artifactId>unirest-modules-jackson</artifactId>
-            <version>${unirest.version}</version>
+            <scope>provided</scope>
         </dependency>
         <!-- guava: Google 核心库，用于 Access Token 缓存管理 (LoadingCache) -->
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>${guava.version}</version>
+            <scope>provided</scope>
         </dependency>
         
         <!-- Commons 工具库 (Compile - 打包进插件，避免宿主版本冲突) -->
@@ -98,13 +88,13 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>${commons-lang3.version}</version>
+            <scope>provided</scope>
         </dependency>
         <!-- commons-collections4: 集合工具类，用于 Map 判空 (MapUtils) -->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-collections4</artifactId>
-            <version>${commons-collections4.version}</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 
