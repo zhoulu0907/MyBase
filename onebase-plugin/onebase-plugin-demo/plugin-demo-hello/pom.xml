@@ -17,6 +17,18 @@
     <name>${project.artifactId}</name>
     <description>OneBase插件开发示例 - Hello模块</description>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.cmsr.onebase</groupId>
+                <artifactId>onebase-dependencies</artifactId>
+                <version>${onebase-dependencies.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
         <!-- OneBase 插件 SDK -->
         <dependency>
@@ -33,10 +45,16 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- Lombok -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Hutool - (Compile with provided scope) -->
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-all</artifactId>
             <scope>provided</scope>
         </dependency>
     </dependencies>
