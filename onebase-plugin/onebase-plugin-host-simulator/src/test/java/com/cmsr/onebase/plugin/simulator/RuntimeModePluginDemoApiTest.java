@@ -62,7 +62,7 @@ public class RuntimeModePluginDemoApiTest {
             String accessToken = login();
             Assertions.assertNotNull(accessToken, "❌ 登录失败，终止测试");
             log.info("✅ 登录成功");
-            log.info("Token: {}...\n", accessToken);
+            log.info("Token: {}\n", accessToken);
 
             // 2. 准备测试任务
             Map<String, ApiRequest> requests = buildRequests();
