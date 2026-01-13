@@ -1,23 +1,14 @@
-import {
-  Form,
-  Input,
-  Toast,
-  ShowMonitor,
-  Button,
-} from '@arco-design/mobile-react';
+import { Button, Form, Input, ShowMonitor, Toast } from '@arco-design/mobile-react';
 import { useForm } from '@arco-design/mobile-react/esm/form';
-import { memo, useEffect, useState } from 'react';
 import {
   BUTTON_OPTIONS,
   BUTTON_VALUES,
-  STATUS_OPTIONS,
-  STATUS_VALUES,
   ENTITY_FIELD_TYPE,
-  TableOperationButton,
-  TableOperationButtonStyle,
-  iconMap,
   RedirectMethod,
+  STATUS_OPTIONS,
+  STATUS_VALUES
 } from '@onebase/ui-kit';
+import { memo, useEffect, useState } from 'react';
 
 // import DynamicIcon from '@/components/DynamicIcon';
 import {
@@ -31,8 +22,8 @@ import {
 } from '@onebase/app';
 import { pagesRuntimeSignal } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
-import type { XShowMonitorConfig } from './schema';
 import './index.css';
+import type { XShowMonitorConfig } from './schema';
 
 const leftPanelWidth = 318;
 const rightPanelWidth = 310;
@@ -103,8 +94,8 @@ const XShowMonitor = memo(
 
     const onReachBottom = () => {
       console.log('onReachBottom', tablePageNo);
-      setTablePageNo(prevPageNo => prevPageNo + 1);
-    }
+      setTablePageNo((prevPageNo) => prevPageNo + 1);
+    };
 
     const opearate: any = {
       title: '操作',
@@ -115,10 +106,7 @@ const XShowMonitor = memo(
         if (advancedButtonPermission === BUTTON_VALUES[BUTTON_OPTIONS.HIDDEN] && !hasOperationPermission) return;
         const isDisabled =
           advancedButtonPermission === BUTTON_VALUES[BUTTON_OPTIONS.DISABLED] && !hasOperationPermission;
-        return (
-          <div>11
-          </div>
-        );
+        return <div>11</div>;
       }
     };
 
@@ -394,25 +382,22 @@ const XShowMonitor = memo(
           >
             <div style={{ width: '100%' }}>
               <div style={{ minHeight: '900px', backgroundColor: 'red' }}>
-                {
-                  tableData.map((item) => (
-                    <div key={item.key} className="show-monitor-content">
-                      <div>-----------------------</div>
-                      {finalColumns?.map((col) => {
-                        return <div key={col.dataIndex}>{`${col.title}：${item[col.dataIndex]}`}</div>
-                      })}
-                    </div>
-                  ))
-                }
+                {tableData.map((item) => (
+                  <div key={item.key} className="show-monitor-content">
+                    <div>-----------------------</div>
+                    {finalColumns?.map((col) => {
+                      return <div key={col.dataIndex}>{`${col.title}：${item[col.dataIndex]}`}</div>;
+                    })}
+                  </div>
+                ))}
               </div>
-              {
-                tablePageNo * pageSize >= (tableTotal || Number.MAX_SAFE_INTEGER) ? null : <ShowMonitor
-                  onVisibleChange={onReachBottom}
-                  threshold={0.1}
-                >
-                  <div className="show-monitor-content" onClick={onReachBottom}>正在加载。。。</div>
+              {tablePageNo * pageSize >= (tableTotal || Number.MAX_SAFE_INTEGER) ? null : (
+                <ShowMonitor onVisibleChange={onReachBottom} threshold={0.1}>
+                  <div className="show-monitor-content" onClick={onReachBottom}>
+                    正在加载。。。
+                  </div>
                 </ShowMonitor>
-              }
+              )}
             </div>
           </div>
         </div>
