@@ -1,8 +1,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { NavBar } from '@arco-design/mobile-react';
-import styles from './index.module.less';
 import { IconArrowBack } from '@arco-design/mobile-react/esm/icon';
+import './index.css';
 
 interface CustomNav {
   title: string;
@@ -22,9 +22,9 @@ const CustomNav: React.FC<CustomNav> = (props) => {
   const back = props.toBack || (() => navigate(-1));
 
   return (
-    <div className={styles.navWrapper}>
+    <div className='navWrapper'>
       <NavBar
-        className={`${className} ${styles.nav}`}
+        className={`${className} nav`}
         fixed={fixed}
         title={title}
         leftContent={hideBackIcon ? null : <IconArrowBack />}

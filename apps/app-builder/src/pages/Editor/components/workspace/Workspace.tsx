@@ -133,6 +133,7 @@ export default function EditorWorkspace() {
     delSubTableComponents,
     batchDelSubTableComponents
   });
+
   useEffect(() => {
     if (editMode.value !== EditMode.MOBILE) {
       return;

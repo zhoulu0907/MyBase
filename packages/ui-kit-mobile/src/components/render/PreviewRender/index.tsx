@@ -125,7 +125,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
     [LAYOUT_COMPONENT_TYPES.COLLAPSE_LAYOUT]: { component: LayoutComp.XPreviewCollapseLayout, extraProps: { ...extraProps, useStoreSignals, editPreview } },
 
     // 列表组件
-    [LIST_COMPONENT_TYPES.TABLE]: { component: ListComp.XLoadMore, extraProps: { manuClick: !lastOne, showFromPageData } },
+    [LIST_COMPONENT_TYPES.TABLE]: { component: ListComp.XLoadMore, extraProps: { ...extraProps, manuClick: !lastOne, showFromPageData } },
     // [LIST_COMPONENT_TYPES.CALENDAR]: { component: ListComp.XCalendar },
     // [LIST_COMPONENT_TYPES.TIMELINE]: { component: ListComp.XTimeline },
     [LIST_COMPONENT_TYPES.CAROUSEL]: { component: ListComp.XCarousel },

@@ -24,14 +24,29 @@ const XTabsLayout = memo((props: XTabsLayoutConfig & { runtime?: boolean; detail
       : 'line';
 
   useEffect(() => {
-    const currentColumns = layoutSubComponents[id];
-    if (!currentColumns || currentColumns.length !== defaultValue.length) {
-      setLayoutSubComponents(
-        id,
-        Array.from({ length: defaultValue.length }, () => [])
-      );
+    // 1. 从 props/state 中获取当前列的最新数据。
+    const currentColumns = layoutSubComponents[id] || [];
+    const newLength = defaultValue.length;
+
+      console.log(currentColumns, newLength, 'newLength')
+    // 2. 【核心保护逻辑】
+    //    这是避免不必要更新和潜在无限循环的关键。
+    //    只有当数组长度确实需要改变时，才继续执行。
+    if (currentColumns.length !== newLength) {
+      let updatedColumns;
+
+      // 根据新旧长度的比较，决定是增加还是删减
+      if (newLength > currentColumns.length) {
+        const diff = newLength - currentColumns.length;
+        const newEmptyArrays = Array.from({ length: diff }, () => []);
+        updatedColumns = [...currentColumns, ...newEmptyArrays];
+      } else {
+        updatedColumns = currentColumns.slice(0, newLength);
+      }
+
+      setLayoutSubComponents(id, updatedColumns);
     }
-  }, [defaultValue, id, colComponents, setLayoutSubComponents]);
+  }, [defaultValue, id, layoutSubComponents, setLayoutSubComponents]);
 
   return (
     <Tabs
