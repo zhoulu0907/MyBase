@@ -123,6 +123,17 @@ export const DATA_CONFIG_RANGE: IBooleanConfigType[] = [
   }
 ];
 
+/**
+ * 待办中心-数据配置字段名到中文名称的映射
+ */
+export const DATA_CONFIG_NAME_MAP: Record<string, string> = DATA_CONFIG_RANGE.reduce(
+  (acc, item) => {
+    acc[item.key] = item.name;
+    return acc;
+  },
+  {} as Record<string, string>
+);
+
 // 垂直对齐方式
 export const VERTICAL_ALIGN_OPTIONS = {
   TOP: 'top',

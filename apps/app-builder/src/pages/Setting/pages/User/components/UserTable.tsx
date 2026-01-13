@@ -17,6 +17,7 @@ import {
 import type { PageParam, UpdateAdminOrDirectorReq, UserVO } from '@onebase/platform-center';
 import {
   deleteUser,
+  getDept,
   getSimpleUser,
   getUserListByName,
   getUserPage,
@@ -96,7 +97,7 @@ export default function UserTable({
 
   const [userData, setUsertData] = useState<{ userList: any[] }>();
   const [memberLoading, setMemberLoading] = useState<boolean>(false);
-  const [selectedMembers, setSelectedMembers] = useState<AuthRoleUsersPageRespVO[]>([]);
+  const [selectedMembers, setSelectedMembers] = useState<any[]>([]);
 
   const [userModalVisible, setUserModalVisible] = useState(false);
   const [detailModalVisible, setDetailModalVisible] = useState(false);
@@ -309,7 +310,7 @@ export default function UserTable({
               <Dropdown
                 droplist={
                   <Menu>
-                    <Menu.Item key="disable" onClick={() => handleStatusUpdate(record)}>
+                    <Menu.Item key="disable" disabled={isSystemUser(record)} onClick={() => handleStatusUpdate(record)}>
                       {getStatusLabel(record.status === StatusEnum.DISABLE ? StatusEnum.ENABLE : StatusEnum.DISABLE)}
                     </Menu.Item>
                     <Menu.Item key="del" disabled={isSystemUser(record)} onClick={() => handleDelete(record)}>
@@ -371,14 +372,39 @@ export default function UserTable({
   };
 
   // 设置主管/管理员
-  const handleSetAdminOrDirector = async (updateType: UserRole) => {
+  const handleSetAdminOrDirector = async (userRoleType: UserRole) => {
     if (!selectedDeptId) return Message.warning('请先选择部门');
     await getSimpleUsers({});
-    setManagerTypeModalVisible(updateType);
-    if (updateType === UserRole.ADMIN) {
-      setIsMultiple(true);
-    } else {
+    const deptInfo = await getDeptInfo();
+    // 设置主管、管理员时，设置默认选中的成员
+    setManagerTypeModalVisible(userRoleType);
+    if (userRoleType === UserRole.DIRECTOR) {
+      if (deptInfo?.leaderUserId) {
+        setSelectedMembers([
+          {
+            department: deptInfo?.name,
+            key: deptInfo?.leaderUserId,
+            name: deptInfo?.leaderUserName
+          }
+        ]);
+      } else {
+        setSelectedMembers([]);
+      }
       setIsMultiple(false);
+    } else if (userRoleType === UserRole.ADMIN) {
+      if (deptInfo?.adminUserIds.length > 0) {
+        const adminUserNames = deptInfo?.adminUserName.split(',');
+        const adminUsers = deptInfo?.adminUserIds.map((id: string, index: number) => ({
+          department: deptInfo?.name,
+          key: id,
+          name: adminUserNames?.[index] || ''
+        }));
+        setSelectedMembers(adminUsers || []);
+      } else {
+        setSelectedMembers([]);
+      }
+
+      setIsMultiple(true);
     }
   };
 
@@ -401,11 +427,17 @@ export default function UserTable({
     }
   };
 
+  const getDeptInfo = async () => {
+    if (!selectedDeptId) return;
+    const res = await getDept(selectedDeptId);
+    return res;
+  };
+
   // 添加成员
   const handleAddUser = async (selectedMembers: any[]) => {
     console.log('添加成员 selectedMembers:', selectedMembers);
     if (!selectedDeptId || !managerTypeModalVisible) return;
-    const keyIds = selectedMembers?.map(item => item.key).filter(Boolean) || [];
+    const keyIds = selectedMembers?.map((item) => item.key).filter(Boolean) || [];
     const params: UpdateAdminOrDirectorReq = {
       deptId: `${selectedDeptId}`,
       updateType: managerTypeModalVisible,

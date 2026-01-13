@@ -303,7 +303,12 @@ export default function UserFormModal({
             </Form.Item>
           </Col>
           <Col span={12}>
-            <Form.Item label="角色" field="roleIds" rules={[{ required: true, message: '请选择角色' }]}>
+            <Form.Item
+              label="角色"
+              disabled={isSystemUser}
+              field="roleIds"
+              rules={[{ required: true, message: '请选择角色' }]}
+            >
               <Select
                 placeholder="选择角色"
                 mode="multiple"

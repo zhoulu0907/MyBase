@@ -1,6 +1,7 @@
 import { useI18n } from '@/hooks/useI18n';
 import { formatTimestamp } from '@/utils/date';
 import {
+  Button,
   Card,
   Descriptions,
   Message,
@@ -88,9 +89,11 @@ const PlatformInfo: React.FC = () => {
       // 认证内容
       dataIndex: 'certificationContent',
       key: 'certificationContent',
-      render: (_text, record) =>  (<div>
-        {t('platformInfo.tenantCount')}: {record.tenantLimit}，用户数量：{record.userLimit}
-      </div>)
+      render: (_text, record) => (
+        <div>
+          {t('platformInfo.tenantCount')}: {record.tenantLimit}，用户数量：{record.userLimit}
+        </div>
+      )
     },
     {
       title: '当前状态',
@@ -108,11 +111,12 @@ const PlatformInfo: React.FC = () => {
       title: '操作',
       dataIndex: 'operation',
       key: 'operation',
+      align: 'center',
       render: (_, record) => (
         <div className={styles.operation}>
-          <a
-            href="#"
+          <Button
             className={styles.btn}
+            type="text"
             onClick={(e) => {
               e.preventDefault();
               setSelectedLicenseInfo(record);
@@ -120,7 +124,7 @@ const PlatformInfo: React.FC = () => {
             }}
           >
             {t('platformInfo.check')}
-          </a>
+          </Button>
         </div>
       )
     }

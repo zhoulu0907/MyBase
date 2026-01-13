@@ -79,7 +79,7 @@ const XInputText = memo((props: XInputTextConfig & { runtime?: boolean; detailMo
         initialValue={defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : ''}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
-          <div>{securityEncodeText(security, fieldValue)}</div>
+          <div>{String(securityEncodeText(security, fieldValue))}</div>
         ) : (
           <Input
             placeholder={placeholder}

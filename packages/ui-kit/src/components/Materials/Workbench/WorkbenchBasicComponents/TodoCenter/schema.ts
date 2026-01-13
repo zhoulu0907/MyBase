@@ -18,10 +18,11 @@ import {
   WORKBENCH_WIDTH_OPTIONS,
   WORKBENCH_WIDTH_VALUES,
   WORKBENCH_CONFIG_TYPES,
-  DATA_CONFIG_RANGE
+  DATA_CONFIG_RANGE,
+  WORKBENCH_THEME_OPTIONS
 } from '../../core/constants';
 import { ILabelConfigType, IBooleanConfigType, TBooleanDefaultType, TTextDefaultType } from '../../core/types';
-import { IDataConfigConfigType } from '../../core/types';
+import { IDataConfigConfigType, IThemeConfigType } from '../../core/types';
 
 export interface XTodoCenterSchema {
   editData: TXTodoCenterEditData;
@@ -35,6 +36,7 @@ export type TXTodoCenterEditData = Array<
   | IWidthConfigType<TWorkbenchWidthSelectKeyType>
   | IBooleanConfigType
   | IDataConfigConfigType
+  | IThemeConfigType
 >;
 
 export interface XTodoCenterConfig extends ICommonBaseWorkbenchType {
@@ -49,6 +51,7 @@ export interface XTodoCenterConfig extends ICommonBaseWorkbenchType {
       showHandled: boolean;
       showCc: boolean;
     }
+  theme: string;
   status?: TRadioDefaultType<TWorkbenchStatusSelectKeyType>;
   width: TSelectDefaultType<TWorkbenchWidthSelectKeyType>;
 }
@@ -64,10 +67,16 @@ const XTodoCenter: XTodoCenterSchema = {
     name: '数据内容配置',
     type: WORKBENCH_CONFIG_TYPES.WB_DATA_CONFIG,
     range: DATA_CONFIG_RANGE
+  },
+  {
+    key: 'theme',
+    name: '样式库',
+    type: WORKBENCH_CONFIG_TYPES.WB_THEME_SELECTOR
   }],
   config: {
     ...workbenchBaseDefault,
     componentName: 'TodoCenter',
+    theme: WORKBENCH_THEME_OPTIONS.THEME_1,
     label: {
       text: '待办中心',
       display: true

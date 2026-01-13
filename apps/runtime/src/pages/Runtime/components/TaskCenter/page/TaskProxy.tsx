@@ -144,7 +144,6 @@ const TaskProxy = ({ appId }: { appId: string | null }) => {
       fetchProxyList();
     } catch (error) {
       console.error('撤销代理失败:', error);
-    } finally {
     }
   };
 

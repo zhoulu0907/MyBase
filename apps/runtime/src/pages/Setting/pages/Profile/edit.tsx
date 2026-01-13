@@ -1,6 +1,6 @@
 import { Button, Form, Input, Message, Select, Spin, Tabs } from '@arco-design/web-react';
 import { getPublicKey, sm2Encrypt, UploadAvatarComponent, UserPermissionManager } from '@onebase/common';
-import { getLoginedUser, updateLoginedUser, updateLoginedUserPwd, uploadFile } from '@onebase/platform-center';
+import { corpUploadFile, getLoginedUser, updateLoginedUser, updateLoginedUserPwd } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import styles from './index.module.less';
@@ -21,6 +21,11 @@ const EditPage: React.FC<IEditPageProps> = ({ avatarUrl, setAvatarUrl }) => {
   const [passwordForm] = Form.useForm();
   const [userInfo, setUserInfo] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [curAvatarUrl, setCurAvatarUrl] = useState<string>(avatarUrl);
+
+  useEffect(() => {
+    setCurAvatarUrl(avatarUrl);
+  }, [avatarUrl]);
 
   useEffect(() => {
     fetchUserInfo();
@@ -56,7 +61,7 @@ const EditPage: React.FC<IEditPageProps> = ({ avatarUrl, setAvatarUrl }) => {
         nickname: values.nickname,
         mobile: values.mobile,
         email: values.email,
-        avatar: avatarUrl
+        avatar: curAvatarUrl
       };
       await updateLoginedUser(req);
       UserPermissionManager.setUserPermissionInfo({
@@ -64,10 +69,12 @@ const EditPage: React.FC<IEditPageProps> = ({ avatarUrl, setAvatarUrl }) => {
         user: {
           ...userPermissionInfo.user,
           mobile: values.mobile,
-          nickname: values.nickname
+          nickname: values.nickname,
+          avatar: curAvatarUrl
         }
       });
       form.resetFields();
+      setAvatarUrl(curAvatarUrl);
       nav(`/onebase/${tenantId}/setting/profile`);
       Message.success('保存成功');
     } catch (error) {
@@ -136,12 +143,12 @@ const EditPage: React.FC<IEditPageProps> = ({ avatarUrl, setAvatarUrl }) => {
             }}
           >
             <Form form={form} layout="horizontal" onSubmit={handleSubmit}>
-              <FormItem label="头像" field="avatar">
+              <FormItem label="头像">
                 <div>
                   <UploadAvatarComponent
-                    getUploadFile={uploadFile}
-                    avatarUrl={avatarUrl}
-                    onUpdateUrl={setAvatarUrl}
+                    getUploadFile={corpUploadFile}
+                    avatarUrl={curAvatarUrl}
+                    onUpdateUrl={setCurAvatarUrl}
                     defaultPlaceholder={defaultNickName}
                     buttonName="修改头像"
                   />
