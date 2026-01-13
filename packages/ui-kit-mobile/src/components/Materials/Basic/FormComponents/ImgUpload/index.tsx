@@ -1,4 +1,5 @@
 import { Ellipsis, Form, ImagePicker, ImagePreview, Toast } from '@arco-design/mobile-react';
+import type { ImagePickItem } from '@arco-design/mobile-react/cjs/image-picker/type';
 import { ITypeRules, ValidatorType } from '@arco-design/mobile-utils';
 import { attachmentDownload, attachmentUpload, menuSignal } from '@onebase/app';
 import { pagesRuntimeSignal } from '@onebase/common';
@@ -78,21 +79,28 @@ const XImgUpload = memo((props: XImgUploadConfig & { runtime?: boolean; detailMo
     };
   }, []);
 
-  const handleUpload = async ({ file }: { file: File }) => {
+  const handleUpload = async (file: ImagePickItem): Promise<ImagePickItem | null> => {
+    if (!file.file) {
+      return null;
+    }
+
     try {
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append('file', file.file);
 
       if (runtime) {
         const res = await attachmentUpload(tableName, formData);
         return {
-          name: file.name,
+          ...file,
+          url: file.url || '',
           response: res
-        };
-      } else {
-        return '';
+        } as ImagePickItem;
       }
-    } catch (error) {}
+
+      return null;
+    } catch (error) {
+      return null;
+    }
   };
 
   const onClick = (e: React.MouseEvent, image: any, index: number) => {
@@ -133,6 +141,7 @@ const XImgUpload = memo((props: XImgUploadConfig & { runtime?: boolean; detailMo
         maxSize={verify.maxSize * 1024}
         onClick={onClick}
         upload={handleUpload}
+        images={(form.getFieldValue(fieldId) || []).map((item: any) => ({ src: item.url }))}
         disabled={status !== STATUS_VALUES[STATUS_OPTIONS.DEFAULT] || detailMode}
         onMaxSizeExceed={(file) => {
           Toast.toast({
