@@ -1,24 +1,16 @@
-import { memo, useEffect, useRef } from 'react';
-import { nanoid } from 'nanoid';
+import { Ellipsis, Form, ImagePicker, ImagePreview, Toast } from '@arco-design/mobile-react';
 import { ITypeRules, ValidatorType } from '@arco-design/mobile-utils';
-import { Toast, ImagePicker, Form, Ellipsis, ImagePreview } from '@arco-design/mobile-react';
 import { attachmentDownload, attachmentUpload, menuSignal } from '@onebase/app';
 import { pagesRuntimeSignal } from '@onebase/common';
-import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, FormSchema } from '@onebase/ui-kit';
+import { FORM_COMPONENT_TYPES, FormSchema, STATUS_OPTIONS, STATUS_VALUES } from '@onebase/ui-kit';
+import { nanoid } from 'nanoid';
+import { memo, useEffect, useRef } from 'react';
 import './index.css';
 
 type XImgUploadConfig = typeof FormSchema.XImgUploadSchema.config;
 
 const XImgUpload = memo((props: XImgUploadConfig & { runtime?: boolean; detailMode?: boolean; form?: any }) => {
-  const {
-    label,
-    dataField,
-    status,
-    verify,
-    runtime = true,
-    form,
-    detailMode,
-  } = props;
+  const { label, dataField, status, verify, runtime = true, form, detailMode } = props;
   const { curMenu } = menuSignal;
   const { rowDataId } = pagesRuntimeSignal;
 
@@ -48,10 +40,10 @@ const XImgUpload = memo((props: XImgUploadConfig & { runtime?: boolean; detailMo
 
   const initUlr = async () => {
     if (!form || !fieldId) return;
-    
+
     const array = form.getFieldValue(fieldId) || [];
     const urls = [] as string[];
-    
+
     const updatedArray = await Promise.all(
       array.map(async (item: any) => {
         if (item.id && !item.url) {
@@ -100,35 +92,32 @@ const XImgUpload = memo((props: XImgUploadConfig & { runtime?: boolean; detailMo
       } else {
         return '';
       }
-    } catch (error) {
-    }
+    } catch (error) {}
   };
 
   const onClick = (e: React.MouseEvent, image: any, index: number) => {
-    window.modalInstance = ImagePreview.open({
+    (globalThis as any).modalInstance = ImagePreview.open({
       showLoading: true,
       openIndex: index,
       loop: true,
-      onImageDoubleClick: index => console.log('dbl click', index),
+      onImageDoubleClick: (index) => console.log('dbl click', index),
       onImageLongTap: (index, image) => console.log('long tap', index, image),
-      images: (form.getFieldValue(fieldId) || []).map((item: any) => ({ src: item.url })),
+      images: (form.getFieldValue(fieldId) || []).map((item: any) => ({ src: item.url }))
     });
-  }
+  };
 
   const rules: ITypeRules<ValidatorType.Custom>[] = [
-      {
-        required: verify?.required,
-        type: ValidatorType.Custom,
-        message: `${label.text}是必填项`
-      }
-    ];
+    {
+      required: verify?.required,
+      type: ValidatorType.Custom,
+      message: `${label.text}是必填项`
+    }
+  ];
 
   return (
     <Form.Item
       className="inputTextWrapperOBMobile ImgUploadWrapperOBMobile"
-      label={
-        label.display && <Ellipsis text={label.text} maxLine={2} />
-      }
+      label={label.display && <Ellipsis text={label.text} maxLine={2} />}
       layout="vertical"
       field={fieldId}
       rules={rules}
