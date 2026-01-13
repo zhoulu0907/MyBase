@@ -1,20 +1,25 @@
 import { Collapse } from '@arco-design/web-react';
-import { UserPermissionManager } from '@onebase/common';
 import { useEffect, useState } from 'react';
+import { UserPermissionManager } from '@onebase/common';
 import { WorkbenchAttributes, PanelContentStyle } from '../../components/CommonWorkbenchAttributes';
 import { findItem } from '../../../../utils/edit-data';
-import type { WorkbenchAttributeContext } from '../../components/CommonWorkbenchAttributes/useWorkbenchAttributeContext';
 import { StyleLibrary } from './StyleLibrary';
 import styles from '../../index.module.less';
+import type { WorkbenchAttributeContext } from '../../components/CommonWorkbenchAttributes/useWorkbenchAttributeContext';
+
+/**
+ * 待办列表配置
+ */
 
 const CollapseItem = Collapse.Item;
 
 const SECTION_KEYS = {
   THEME: 'theme',
-  CONTENT: 'content'
+  TITLE: 'title',
+  DATA_CONFIG: 'dataConfig'
 } as const;
 
-const WelcomeCardPanels = ({
+const TodoListPanels = ({
   editData,
   renderEditItem,
   handleMultiPropsChange,
@@ -47,8 +52,9 @@ const WelcomeCardPanels = ({
   }, []);
 
   const themeConfig = findItem(editData, 'theme');
-  const welcomeTextConfig = findItem(editData, 'welcomeText');
-  const welcomeDescConfig = findItem(editData, 'welcomeDesc');
+  const titleConfig = findItem(editData, 'label');
+  const dataConfig = findItem(editData, 'dataConfig');
+  const dataCountConfig = findItem(editData, 'dataCount');
 
   return (
     <Collapse
@@ -73,42 +79,50 @@ const WelcomeCardPanels = ({
           />
         </CollapseItem>
       )}
-
-      {(welcomeTextConfig || welcomeDescConfig) && (
-        <CollapseItem
-          key={SECTION_KEYS.CONTENT}
-          header="内容配置"
-          name={SECTION_KEYS.CONTENT}
-          contentStyle={PanelContentStyle}
-        >
-          <div>
-            {welcomeTextConfig && <div>{renderEditItem(welcomeTextConfig)}</div>}
-            {welcomeDescConfig && <div>{renderEditItem(welcomeDescConfig)}</div>}
-          </div>
-        </CollapseItem>
-      )}
+      <CollapseItem
+        key={SECTION_KEYS.TITLE}
+        header="标题配置"
+        name={SECTION_KEYS.TITLE}
+        contentStyle={PanelContentStyle}
+      >
+        {titleConfig && renderEditItem(titleConfig)}
+      </CollapseItem>
+      <CollapseItem
+        key={SECTION_KEYS.DATA_CONFIG}
+        header="数据内容配置"
+        name={SECTION_KEYS.DATA_CONFIG}
+        contentStyle={PanelContentStyle}
+      >
+        {dataConfig && renderEditItem(dataConfig)}
+        {dataCountConfig && renderEditItem(dataCountConfig)}
+      </CollapseItem>
     </Collapse>
   );
 };
 
-const WelcomeCardConfig = () => {
-  const [activeKeys, setActiveKeys] = useState<string[]>([SECTION_KEYS.THEME, SECTION_KEYS.CONTENT]);
-
+const TodoListConfig = () => {
+  const [activeKeys, setActiveKeys] = useState<string[]>([
+    SECTION_KEYS.THEME,
+    SECTION_KEYS.TITLE,
+    SECTION_KEYS.DATA_CONFIG
+  ]);
   return (
     <WorkbenchAttributes
-      renderPanels={({ editData, renderEditItem, handleMultiPropsChange, handlePropsChange, configs }) => (
-        <WelcomeCardPanels
-          editData={editData}
-          renderEditItem={renderEditItem}
-          handleMultiPropsChange={handleMultiPropsChange}
-          handlePropsChange={handlePropsChange}
-          configs={configs}
-          activeKeys={activeKeys}
-          setActiveKeys={setActiveKeys}
-        />
-      )}
+      renderPanels={({ editData, renderEditItem, handleMultiPropsChange, handlePropsChange, configs }) => {
+        return (
+          <TodoListPanels
+            editData={editData}
+            renderEditItem={renderEditItem}
+            handleMultiPropsChange={handleMultiPropsChange}
+            handlePropsChange={handlePropsChange}
+            configs={configs}
+            activeKeys={activeKeys}
+            setActiveKeys={setActiveKeys}
+          />
+        );
+      }}
     />
   );
 };
 
-export default WelcomeCardConfig;
+export default TodoListConfig;

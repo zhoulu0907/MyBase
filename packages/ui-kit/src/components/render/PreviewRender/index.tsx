@@ -139,6 +139,10 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
         baseProps.showFromPageData = showFromPageData;
         baseProps.refresh = refresh;
       }
+      if (descriptor.template.category === 'workbench') {
+        baseProps.runtime = runtime;
+        baseProps.preview = preview;
+      }
     } else {
       baseProps.runtime = runtime;
       baseProps.detailMode = detailMode;
