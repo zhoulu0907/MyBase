@@ -3,6 +3,9 @@ import {
   baseDefault,
   widthConfig,
   collapsedConfig,
+  collapsedStyleConfig,
+  labelConfig,
+  statusHiddenConfig,
   type ICommonBaseType,
   type TStatusSelectKeyType,
   type TWidthSelectKeyType,
@@ -30,7 +33,8 @@ import type {
   TTextDefaultType,
   TRadioDefaultType,
   ICollapsedConfigType,
-  ICollapsedStyleConfig
+  ICollapsedStyleConfig,
+  ICommonConfigType
 } from '../../../types';
 
 export interface XCollapseLayoutSchema {
@@ -47,6 +51,7 @@ export type XCollapseLayoutEditData = Array<
   | ISelectConfigType<TWidthSelectKeyType | TStatusSelectKeyType>
   | ICollapsedConfigType<TCollapsedSelectKeyType>
   | ICollapsedStyleConfig
+  | ICommonConfigType
 >;
 
 export interface XCollapseLayoutConfig extends ICommonBaseType {
@@ -95,34 +100,10 @@ export interface XCollapseLayoutConfig extends ICommonBaseType {
 const XLCollapseLayout: XCollapseLayoutSchema = {
   editData: [
     ...baseConfig,
-    {
-      key: 'label',
-      name: '标题',
-      type: CONFIG_TYPES.LABEL_INPUT
-    },
-    {
-      key: 'collapseStyle',
-      name: '样式',
-      type: CONFIG_TYPES.COLLAPSED_STYLE
-    },
+    labelConfig,
+    collapsedStyleConfig,
     collapsedConfig,
-    {
-      key: 'status',
-      name: '显示状态',
-      type: CONFIG_TYPES.STATUS_RADIO,
-      range: [
-        {
-          key: STATUS_OPTIONS.DEFAULT,
-          text: STATUS_OPTIONS.DEFAULT,
-          value: STATUS_VALUES[STATUS_OPTIONS.DEFAULT]
-        },
-        {
-          key: STATUS_OPTIONS.HIDDEN,
-          text: STATUS_OPTIONS.HIDDEN,
-          value: STATUS_VALUES[STATUS_OPTIONS.HIDDEN]
-        }
-      ]
-    },
+    statusHiddenConfig,
     widthConfig
   ],
   config: {

@@ -23,12 +23,14 @@ import {
   useEditorSignalMap,
   useListEditorSignal,
   useWorkbenchEditorSignal,
+  useAppEntityStore,
   type GridItem,
   type WorkbenchComponentType
 } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { Fragment, useCallback, useEffect, useState } from 'react';
 import styles from './index.module.less';
+import { pluginBridge } from '@/plugin/bridge';
 
 interface PreviewProps {
   menuId: string;
@@ -49,6 +51,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
 
   const { workbenchComponents, wbComponentSchemas, clearWorkbenchComponents, clearWbComponentSchemas } =
     useWorkbenchEditorSignal;
+
+  const { setMainEntity, setSubEntities } = useAppEntityStore();
 
   const { editPageViewId } = pagesRuntimeSignal;
 
@@ -80,6 +84,19 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
 
     setTableName(entityWithChildren.tableName);
     setMainMetaDataFields(entityWithChildren.parentFields);
+
+    // Update entity store for plugins
+    if (entityWithChildren) {
+      setMainEntity({
+        entityId: entityWithChildren.entityId,
+        entityName: entityWithChildren.entityName,
+        tableName: entityWithChildren.tableName,
+        fields: entityWithChildren.parentFields,
+        entityUuid: (entityWithChildren as any).entityUuid || '',
+        entityType: 'main'
+      } as any);
+      setSubEntities({ entities: entityWithChildren.childEntities || [] });
+    }
   };
 
   const handleGetPageSetId = useCallback(async (menuId: string) => {
@@ -158,7 +175,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
         pageSetId: pageSetId
       });
       if (res && res.pages && res.pages.length > 0) {
-        const imgRes = await getFileUrlById(res.pages[0].indexImage);
+        const imgRes = getFileUrlById(res.pages[0].indexImage);
         setDashboardImgUrl(imgRes);
       }
     } catch (error) {
@@ -178,7 +195,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
   };
 
   const submitForm = async () => {
-    const fields = form.getFieldsValue();
+    // const fields = form.getFieldsValue();
     if (editTargetId) {
       setEditTargetId('');
     }
@@ -207,7 +224,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
     }
   };
 
-  const handleGetData = async (id: string) => {
+  const handleGetData = async (_id: string) => {
     // const req: DetailMethodV2Params = {
     //   id: id
     // };
@@ -225,6 +242,16 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
     // }
     // return res;
   };
+
+  React.useEffect(() => {
+    pluginBridge.registerContext({ form, appId, pageSetId, menuId });
+    console.log('[Preview] Form instance registered in bridge context', { appId, pageSetId, menuId });
+    return () => {
+      pluginBridge.registerContext({ form: undefined });
+      console.log('[Preview] Form instance unregistered from bridge context');
+    };
+  }, [form, appId, pageSetId, menuId]);
+
   return (
     <div className={styles.previewPage}>
       <div className={styles.content}>

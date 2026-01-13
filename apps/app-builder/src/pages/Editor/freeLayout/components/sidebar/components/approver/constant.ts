@@ -34,8 +34,10 @@ interface User {
   roleName?: string;
 }
 
+type HandlerType = 'user' | 'role';
+
 export interface ApproverConfigType {
-  handlerType?: string;
+  handlerType?: HandlerType;
   users?: User[];
   roles?: User[];
   approvalMode?: string;
@@ -101,7 +103,7 @@ export interface AdvancedConfig extends BaseConfig<AdvancedConfigType> {
   advancedConfig: AdvancedConfigType;
 }
 
-export const defaultBtnConfigArr:any[] = [
+export const defaultBtnConfigArr: any[] = [
   {
     key: '1',
     buttonType: 'approve',

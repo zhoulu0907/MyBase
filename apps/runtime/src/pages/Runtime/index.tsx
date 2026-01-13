@@ -21,7 +21,9 @@ import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import RuntimeMenuItem from './components/menuItem';
 import PreviewContainer from './components/preview';
+import { initPlugins } from '@/plugin';
 import './components/TaskCenter/style/taskSide.less';
+
 import TaskCenterPage from './components/TaskCenter/TaskCenterPage';
 import styles from './index.module.less';
 
@@ -96,6 +98,7 @@ const Runtime: React.FC = () => {
   }, [appId]);
 
   useEffect(() => {
+    initPlugins();
     getUserInfo();
   }, []);
 

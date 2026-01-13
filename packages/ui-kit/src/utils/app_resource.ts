@@ -25,6 +25,7 @@ import {
   useListEditorSignal,
   usePageViewEditorSignal
 } from 'src/signals';
+import { isBlank } from './common';
 
 export interface SavePageSetParams {
   pageSetId: string;
@@ -262,7 +263,7 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
     let newSubTableComponentsMap = new Map<string, any[]>();
 
     page.components.forEach((component: ComponentConfig) => {
-      if (component.parentCode == '' || component.parentCode == null) {
+      if (isBlank(component.parentCode)) {
         newComponents.push({
           id: component.componentCode,
           chosen: false,
@@ -306,8 +307,8 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
 
     //   载入布局组件内的组件配置
     page.components.forEach((component: ComponentConfig) => {
-      if (component.parentCode !== '' && component.parentCode !== null) {
-        if (component.parentCode?.indexOf(FORM_COMPONENT_TYPES.SUB_TABLE) !== -1) {
+      if (!isBlank(component.parentCode)) {
+        if (component.parentCode.indexOf(FORM_COMPONENT_TYPES.SUB_TABLE) !== -1) {
           const colComponents = newSubTableComponentsMap.get(component.parentCode);
           if (colComponents) {
             colComponents[component.containerIndex] = {

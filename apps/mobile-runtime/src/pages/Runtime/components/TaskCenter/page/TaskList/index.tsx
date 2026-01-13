@@ -1,5 +1,4 @@
 import {
-  Dialog,
   Sticky,
   Ellipsis,
   SearchBar,
@@ -10,7 +9,7 @@ import {
 } from '@arco-design/mobile-react';
 import { useForm } from '@arco-design/mobile-react/esm/form';
 import { memo, useEffect, useState } from 'react';
-import CustomNav from '@/pages/components/Nav';
+import { CustomNav } from '@onebase/ui-kit-mobile';
 import filterIcon from '@/assets/images/filter.svg';
 import {
   menuSignal,

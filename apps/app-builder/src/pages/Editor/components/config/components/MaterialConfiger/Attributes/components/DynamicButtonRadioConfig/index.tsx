@@ -48,9 +48,7 @@ const DynamicButtonRadioConfig = ({ handlePropsChange, item, configs }: Props) =
   );
 };
 
-export default DynamicButtonRadioConfig;
-
-registerConfigRenderer(CONFIG_TYPES.STATUS_RADIO, ({ handlePropsChange, item, configs }) => (
+registerConfigRenderer(CONFIG_TYPES.RADIO_INPUT, ({ handlePropsChange, item, configs }) => (
   <DynamicButtonRadioConfig handlePropsChange={handlePropsChange} item={item} configs={configs} />
 ));
 registerConfigRenderer(CONFIG_TYPES.DATE_TYPE, ({ handlePropsChange, item, configs }) => (
@@ -68,3 +66,8 @@ registerConfigRenderer(CONFIG_TYPES.TEXT_ALIGN, ({ handlePropsChange, item, conf
 registerConfigRenderer(CONFIG_TYPES.DATA_SELECT_MODE, ({ handlePropsChange, item, configs }) => (
   <DynamicButtonRadioConfig handlePropsChange={handlePropsChange} item={item} configs={configs} />
 ));
+registerConfigRenderer(CONFIG_TYPES.STATUS_RADIO, ({ handlePropsChange, item, configs }) => (
+  <DynamicButtonRadioConfig handlePropsChange={handlePropsChange} item={item} configs={configs} />
+));
+
+export default DynamicButtonRadioConfig;

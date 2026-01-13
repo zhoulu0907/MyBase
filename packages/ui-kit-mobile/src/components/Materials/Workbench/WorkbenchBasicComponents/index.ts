@@ -5,11 +5,13 @@ import XQuickEntry from './QuickEntry';
 import XRichTextEditorWorkbench from './RichTextEditorWorkbench';
 import XButtonWorkbench from './ButtonWorkbench';
 import XWelcomeCard from './WelcomeCard';
+import XTodoCenter from './TodoCenter';
 
 export const WorkbenchBasicComp: Record<string, ComponentType<any>> = {
   XQuickEntry,
   XRichTextEditorWorkbench,
   XButtonWorkbench,
-  XWelcomeCard
+  XWelcomeCard,
+  XTodoCenter
 } satisfies Record<WorkbenchComponentType, ComponentType<any>>;
 

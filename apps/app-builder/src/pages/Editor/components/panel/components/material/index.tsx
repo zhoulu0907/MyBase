@@ -6,7 +6,9 @@ import { useI18n } from '@/hooks/useI18n';
 import { useSignals } from '@preact/signals-react/runtime';
 import { Collapse, Input, Layout, Tabs } from '@arco-design/web-react';
 import { CATEGORY_TYPE } from '@onebase/app';
-import { allTemplate, COMPONENT_GROUP_NAME, EDITOR_TYPES, type EditorType } from '@onebase/ui-kit';
+import { buildTemplate, COMPONENT_GROUP_NAME, EDITOR_TYPES, type EditorType, listPluginComponentTypes, COMPONENT_REGISTRY } from '@onebase/ui-kit';
+
+// 插件组件与配置渲染采用动态注册机制，物料面板仅消费注册结果
 import React, { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import { v4 as uuidv4 } from 'uuid';
@@ -38,16 +40,19 @@ const MaterialContainer: React.FC<MaterialContainerProps> = ({ activeTab, childC
   const [activeComponentTab, setActiveComponentTab] = useState('base-component');
 
   const [baseItems, setBaseItems] = useState<{ key: CategoryKey; items: any[] }[]>([]);
+  const [customItems, setCustomItems] = useState<any[]>([]);
   const [showSearchInput, setShowSearchInput] = useState<boolean>(false);
   const [keyword, setKeyword] = useState<string>(''); // 搜索关键词
   const [components, setComponents] = useState<{ key: CategoryKey; items: any[] }[]>([]); // 关键词过滤后的组件
 
   // 按 category 分类，分成 3 个 items
   //   const baseNavigateItems = allTemplate.base.find((cat) => cat.category === CATEGORY_TYPE.NAVIGATE)?.items || [];
-  const baseLayoutItems = allTemplate.base.find((cat) => cat.category === CATEGORY_TYPE.LAYOUT)?.items || [];
-  const baseFormItems = allTemplate.base.find((cat) => cat.category === CATEGORY_TYPE.FORM)?.items || [];
-  const baseListItems = allTemplate.base.find((cat) => cat.category === CATEGORY_TYPE.LIST)?.items || [];
-  const baseShowItems = allTemplate.base.find((cat) => cat.category === CATEGORY_TYPE.SHOW)?.items || [];
+  const template = buildTemplate();
+  console.log('MaterialContainer template:', template);
+  const baseLayoutItems = template.base.find((cat: any) => cat.category === CATEGORY_TYPE.LAYOUT)?.items || [];
+  const baseFormItems = template.base.find((cat: any) => cat.category === CATEGORY_TYPE.FORM)?.items || [];
+  const baseListItems = template.base.find((cat: any) => cat.category === CATEGORY_TYPE.LIST)?.items || [];
+  const baseShowItems = template.base.find((cat: any) => cat.category === CATEGORY_TYPE.SHOW)?.items || [];
 
   // category 对应的国际化 key
   const categoryI18nMap: Record<CategoryKey, string> = {
@@ -66,6 +71,8 @@ const MaterialContainer: React.FC<MaterialContainerProps> = ({ activeTab, childC
     { key: CATEGORY_TYPE.SHOW, items: baseShowItems }
   ];
 
+  const templateStr = JSON.stringify(baseCategories);
+
   useEffect(() => {
     const lowerKeyword = keyword.toLowerCase();
 
@@ -79,7 +86,8 @@ const MaterialContainer: React.FC<MaterialContainerProps> = ({ activeTab, childC
             return {
               type: item.type,
               displayName: item.displayName,
-              id: cpID
+              id: cpID,
+              icon: item.icon
             };
           });
 
@@ -91,7 +99,24 @@ const MaterialContainer: React.FC<MaterialContainerProps> = ({ activeTab, childC
       .filter((cat) => cat.items.length > 0); // 去掉空的分类
 
     setBaseItems(newBaseItems);
-  }, [keyword]);
+
+    // 处理自定义组件
+    const pluginTypes = listPluginComponentTypes();
+    const newCustomItems = pluginTypes
+      .map((type) => {
+        const desc = COMPONENT_REGISTRY[type];
+        if (!desc) return null;
+        if (keyword && !desc.template.displayName.toLowerCase().includes(lowerKeyword)) return null;
+        return {
+          type: desc.type,
+          displayName: desc.template.displayName,
+          id: `${desc.type}-${uuidv4()}`,
+          icon: desc.template.icon
+        };
+      })
+      .filter((item) => item !== null);
+    setCustomItems(newCustomItems);
+  }, [keyword, templateStr]);
 
   useEffect(() => {
     if (!keyword) return setComponents(baseCategories); // 没关键词直接返回原数据
@@ -108,7 +133,7 @@ const MaterialContainer: React.FC<MaterialContainerProps> = ({ activeTab, childC
       .filter((category) => category.items.length > 0); // 移除没有匹配项的分类
 
     setComponents(filterData);
-  }, [keyword]);
+  }, [keyword, templateStr]);
 
   return (
     <div>
@@ -238,6 +263,47 @@ const MaterialContainer: React.FC<MaterialContainerProps> = ({ activeTab, childC
                   );
                 })}
               </Collapse>
+            )}
+
+            {activeComponentTab === 'custom-component' && (
+              <div style={{ padding: '0 12px' }}>
+                {customItems.length === 0 ? (
+                  <div className={styles.emptyTip}>{t('editor.empty')}</div>
+                ) : (
+                  <ReactSortable
+                    list={customItems}
+                    setList={() => { }}
+                    group={{
+                      name: COMPONENT_GROUP_NAME,
+                      pull: 'clone',
+                      put: false
+                    }}
+                    sort={false}
+                    className={styles.componentCollapseContent}
+                    forceFallback={true}
+                    animation={150}
+                    onClone={(e) => {
+                      const cpType = e.item.getAttribute('data-cp-type');
+                      e.item.id = `${cpType}-${uuidv4()}`;
+                      setCustomItems((prev) =>
+                        prev.map((item) =>
+                          item.type === cpType ? { ...item, id: `${e.item.id}` } : item
+                        )
+                      );
+                    }}
+                  >
+                    {customItems.map((item) => (
+                      <MaterialCard
+                        key={item.type}
+                        id={item.id}
+                        displayName={item.displayName}
+                        type={item.type}
+                        icon={item.icon}
+                      />
+                    ))}
+                  </ReactSortable>
+                )}
+              </div>
             )}
           </div>
         </div>

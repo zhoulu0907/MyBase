@@ -18,7 +18,8 @@ export interface updateCorpParams {
   id: string;
   corpCode: string;
   corpName: string;
-  industryType: number;
+  corpLogo: string;
+  industryType: string;
   status: number;
   address: string;
   userLimit: number;
@@ -129,9 +130,13 @@ export interface CorpDetailResponse {
    */
   id?: string;
   /**
-   * 行业类型
+   * 行业类型id
    */
   industryType?: string;
+  /**
+   * 行业类型名称
+   */
+  industryTypeName?: string;
   /**
    * 联系人电话
    */

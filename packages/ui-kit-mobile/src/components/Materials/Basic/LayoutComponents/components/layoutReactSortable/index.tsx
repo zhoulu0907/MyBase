@@ -460,7 +460,7 @@ const LayoutReactSortable: React.FC<LayoutReactSortableProps> = ({
   return (
     <ReactSortable
       id={sortableId}
-      list={colComponents[index]}
+      list={colComponents[index] || []}
       group={{ name: groupName }}
       sort={true}
       forceFallback={true}
@@ -507,7 +507,6 @@ const LayoutReactSortable: React.FC<LayoutReactSortableProps> = ({
             {/* 操作按钮 */}
             {curComponentID === cp.id && showDeleteButton && (
               <div className="operationArea">
-                <>{console.log('pageComponentSchemas', pageComponentSchemas, cp)}</>
                 {pageComponentSchemas[cp.id].config.status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
                   <>
                     <div
@@ -519,7 +518,7 @@ const LayoutReactSortable: React.FC<LayoutReactSortableProps> = ({
                     >
                       <img src={CompShowIcon} alt="component show" />
                     </div>
-                    <span>|</span>
+                    <span>&nbsp;|&nbsp;</span>
                   </>
                 )}
 
@@ -533,7 +532,7 @@ const LayoutReactSortable: React.FC<LayoutReactSortableProps> = ({
                 >
                   <img src={CompCopyIcon} alt="component copy" />
                 </div>
-                <span>|</span>
+                <span>&nbsp;|&nbsp;</span>
 
                 <div
                   className="deleteButton"

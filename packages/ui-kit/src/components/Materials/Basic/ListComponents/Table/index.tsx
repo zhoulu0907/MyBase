@@ -81,7 +81,8 @@ const XTable = memo(
       setDetailPageViewId,
       setRowDataId,
       setFlows,
-      setBpmInstanceId
+      setBpmInstanceId,
+      setRowDataType
     } = pagesRuntimeSignal;
     const { runtime = true, showFromPageData, showAddBtn = true, preview, pageSetType } = props;
     const hasOperationPermission = true;
@@ -373,6 +374,7 @@ const XTable = memo(
                       detailMode={true}
                       pageComponentSchema={componentConfig}
                       runtime={true}
+                      recordId={_record.id}
                     />
                   );
                 }
@@ -618,15 +620,18 @@ const XTable = memo(
       if (!runtime) {
         return;
       }
-
       if (advancedRowRedirect) {
         if (redirectMethod === RedirectMethod.DRAWER) {
           // 打开抽屉显示详情
           setDrawerVisible(true);
           redirectPageId && setDrawerPageId(redirectPageId);
-
-          record.bpm_instance_id && setBpmInstanceId(record.bpm_instance_id);
-
+          if (record.bpm_instance_id) {
+            setRowDataType(PageType.BPM);
+            setBpmInstanceId(record.bpm_instance_id);
+          } else {
+            setRowDataType(PageType.NORMAL);
+            setBpmInstanceId('');
+          }
           handleEdit(record.id, false);
           if (runtime) {
             redirectPageId && setDetailPageViewId(redirectPageId);

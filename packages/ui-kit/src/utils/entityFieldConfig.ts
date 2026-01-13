@@ -57,6 +57,7 @@ export const getFieldOptionsConfig = async (
     }
 
     const dictOptions = dictDataList?.filter((e: DictData) => e.status === 1); // 只显示启用状态的字典数据
+    currentField.options = dictOptions;
     return dictOptions || [];
   } else if (currentField.options?.length) {
     const newOptions = currentField.options.map((ele: EntityFieldOption) => ({

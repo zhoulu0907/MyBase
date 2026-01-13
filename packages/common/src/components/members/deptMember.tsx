@@ -1,8 +1,8 @@
+import { Avatar, Breadcrumb, Button, Input, List, Space, Spin, Typography } from '@arco-design/web-react';
+import { IconClose, IconRight } from '@arco-design/web-react/icon';
 import { useCallback, useEffect, useState } from 'react';
-import { Button, Input, Space, List, Breadcrumb, Avatar, Typography, Spin, Radio, Checkbox } from '@arco-design/web-react';
-import { IconRight, IconClose } from '@arco-design/web-react/icon';
-import { formatDeptAndUsers } from './const';
 import { SelectDeptMember } from './components/selectDeptMember';
+import { formatDeptAndUsers } from './const';
 
 interface IData {
   children: IData[];
@@ -50,7 +50,7 @@ const DeptMember = (props: IProps) => {
     setSelectedKeys(selectedMembers.map((member) => member.key));
   }, [selectedMembers, visible]);
 
-  useEffect(() => { 
+  useEffect(() => {
     if (visible) {
       setInitialSelectedMembers(selectedMembers);
       // 当弹窗可见时，更新面包屑
@@ -96,51 +96,51 @@ const DeptMember = (props: IProps) => {
   };
 
   return (
+    <div
+      style={{
+        height: 500,
+        border: '1px solid #e5e6eb',
+        borderRadius: 4,
+        boxSizing: 'border-box',
+        padding: 12,
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        position: 'relative'
+      }}
+    >
       <div
         style={{
-          height: 500,
-          border: '1px solid #e5e6eb',
-          borderRadius: 4,
-          boxSizing: 'border-box',
-          padding: 12,
+          flex: 1.1,
           display: 'flex',
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          position: 'relative'
+          flexDirection: 'column',
+          marginRight: 24
         }}
       >
-        <div
-          style={{
-            flex: 1.1,
-            display: 'flex',
-            flexDirection: 'column',
-            marginRight: 24
-          }}
-        >
-          <Space direction="vertical">
-            <Input.Search
-              placeholder={title === 'specifiedDepartment' ? '搜索部门' : '搜索用户或部门'}
-              onChange={onSearch}
-              onPressEnter={(e) => {
-                console.log('ipt关键字', e);
-                const value = e.target.value;
-                onSearch(value);
-              }}
-            />
+        <Space direction="vertical">
+          <Input.Search
+            placeholder={title === 'specifiedDepartment' ? '搜索部门' : '搜索用户或部门'}
+            onChange={onSearch}
+            onPressEnter={(e) => {
+              console.log('ipt关键字', e);
+              const value = e.target.value;
+              onSearch(value);
+            }}
+          />
 
-            <Breadcrumb separator={<IconRight />}>
-              {breadcrumbs.map((node, index) => (
-                <Breadcrumb.Item key={node.key} onClick={() => handleBreadcrumbClick(node, index)}>
-                  <Typography.Text style={{ cursor: 'pointer' }}>{node.title}</Typography.Text>
-                </Breadcrumb.Item>
-              ))}
-            </Breadcrumb>
-          </Space>
+          <Breadcrumb separator={<IconRight />}>
+            {breadcrumbs.map((node, index) => (
+              <Breadcrumb.Item key={node.key} onClick={() => handleBreadcrumbClick(node, index)}>
+                <Typography.Text style={{ cursor: 'pointer' }}>{node.title}</Typography.Text>
+              </Breadcrumb.Item>
+            ))}
+          </Breadcrumb>
+        </Space>
 
-          <div style={{ overflow: 'hidden auto' }}>
-            <Spin loading={loading} block style={{ height: '100%' }}>
-              {renderData?.children?.map((item: any) =>
-                item.type === 'user' && !isSelectDepartment ? (
+        <div style={{ overflow: 'hidden auto' }}>
+          <Spin loading={loading} block style={{ height: '100%' }}>
+            {renderData?.children?.map((item: any) =>
+              item.type === 'user' && !isSelectDepartment ? (
                 <div key={`user-${item.key}`} style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 }}>
                   <SelectDeptMember
                     deptInfo={item}
@@ -157,113 +157,113 @@ const DeptMember = (props: IProps) => {
                   </Avatar>
                   <span>{item.title}</span>
                 </div>
-                ) : item.type !== 'user' && isSelectDepartment ? (
-                  <div
-                    key={`dept-${item.key}`}
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      gap: 8,
-                      marginTop: 8
-                    }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 }}>
-                     <SelectDeptMember
-                        deptInfo={item}
-                        breadCrumbs={breadcrumbs}
-                        selectedKeys={selectedKeys}
-                        selectedMembers={selectedMembers}
-                        isMultiple={isMultiple}
-                        setSelectedKeys={setSelectedKeys}
-                        onUpdateSelectedMembers={onUpdateSelectedMembers}
-                        removeMember={removeMember}
-                      />
-                      <Avatar size={24} style={{ backgroundColor: 'rgb(var(--primary-6))' }}>
-                        部
-                      </Avatar>
-                      <span>{item.title}</span>
-                    </div>
-                    <Button type="text" onClick={() => handleDeptClick(item)}>
-                      下级
-                      <IconRight />
-                    </Button>
+              ) : item.type !== 'user' && isSelectDepartment ? (
+                <div
+                  key={`dept-${item.key}`}
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    gap: 8,
+                    marginTop: 8
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 }}>
+                    <SelectDeptMember
+                      deptInfo={item}
+                      breadCrumbs={breadcrumbs}
+                      selectedKeys={selectedKeys}
+                      selectedMembers={selectedMembers}
+                      isMultiple={isMultiple}
+                      setSelectedKeys={setSelectedKeys}
+                      onUpdateSelectedMembers={onUpdateSelectedMembers}
+                      removeMember={removeMember}
+                    />
+                    <Avatar size={24} style={{ backgroundColor: 'rgb(var(--primary-6))' }}>
+                      部
+                    </Avatar>
+                    <span>{item.title}</span>
                   </div>
-                ) : item.type !== 'user' && !isSelectDepartment ? (
-                  <div
-                    key={`dept-${item.key}`}
-                    style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}
-                  >
+                  <Button type="text" onClick={() => handleDeptClick(item)}>
+                    下级
+                    <IconRight />
+                  </Button>
+                </div>
+              ) : item.type !== 'user' && !isSelectDepartment ? (
+                <div
+                  key={`dept-${item.key}`}
+                  style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <Avatar size={24} style={{ backgroundColor: 'rgb(var(--primary-6))' }}>
+                      部
+                    </Avatar>
+                    <span>{item.title}</span>
+                  </div>
+                  <Button type="text" onClick={() => handleDeptClick(item)}>
+                    下级
+                    <IconRight />
+                  </Button>
+                </div>
+              ) : null
+            )}
+          </Spin>
+        </div>
+      </div>
+
+      {/* 右侧 */}
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          flex: 0.9
+        }}
+      >
+        <div style={{ width: '300px', height: '100%', paddingLeft: '16px', overflow: 'hidden' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <span>已选择: {selectedMembers.length} 个</span>
+            <Button
+              type="text"
+              onClick={() => {
+                setSelectedKeys([]);
+                if (onUpdateSelectedMembers) {
+                  onUpdateSelectedMembers([]);
+                }
+              }}
+            >
+              清空
+            </Button>
+          </div>
+          <div style={{ height: 'calc(100% - 40px)', overflow: 'auto' }}>
+            <List
+              split={false}
+              bordered={false}
+              dataSource={selectedMembers}
+              render={(item) => (
+                <List.Item
+                  key={item.key}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 0' }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                       <Avatar size={24} style={{ backgroundColor: 'rgb(var(--primary-6))' }}>
-                        部
+                        {item.name[0]}
                       </Avatar>
-                      <span>{item.title}</span>
-                    </div>
-                    <Button type="text" onClick={() => handleDeptClick(item)}>
-                      下级
-                      <IconRight />
-                    </Button>
-                  </div>
-                ) : null
-              )}
-            </Spin>
-          </div>
-        </div>
-
-        {/* 右侧 */}
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            flex: 0.9
-          }}
-        >
-          <div style={{ width: '300px', height: '100%', paddingLeft: '16px', overflow: 'hidden' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-              <span>已选择: {selectedMembers.length} 个</span>
-              <Button
-                type="text"
-                onClick={() => {
-                  setSelectedKeys([]);
-                  if (onUpdateSelectedMembers) {
-                    onUpdateSelectedMembers([]);
-                  }
-                }}
-              >
-                清空
-              </Button>
-            </div>
-            <div style={{ height: 'calc(100% - 40px)', overflow: 'auto' }}>
-              <List
-                split={false}
-                bordered={false}
-                dataSource={selectedMembers}
-                render={(item) => (
-                  <List.Item
-                    key={item.key}
-                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 0' }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <Avatar size={24} style={{ backgroundColor: 'rgb(var(--primary-6))' }}>
-                          {item.name[0]}
-                        </Avatar>
-                        <div>
-                          <div>{item.name}</div>
-                          <div style={{ color: '#ccc' }}>{item.department || '未分配部门'}</div>
-                        </div>
+                      <div>
+                        <div>{item.name}</div>
+                        <div style={{ color: '#ccc' }}>{item.department || '未分配部门'}</div>
                       </div>
-
-                      <Button type="text" icon={<IconClose />} onClick={() => removeMember(item.key)} />
                     </div>
-                  </List.Item>
-                )}
-              />
-            </div>
+
+                    <Button type="text" icon={<IconClose />} onClick={() => removeMember(item.key)} />
+                  </div>
+                </List.Item>
+              )}
+            />
           </div>
         </div>
       </div>
+    </div>
   );
 };
 
