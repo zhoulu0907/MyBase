@@ -95,6 +95,7 @@ const COMPONENT_TYPE = {
   PLACEHOLDER: 'XPlaceholder',
   // 工作台
   QUICK_ENTRY: 'XQuickEntry',
+  TODO_CENTER: 'XTodoCenter',
   CAROUSEL_WORKBENCH: 'XCarouselWorkbench',
   RICH_TEXT_WORKBENCH: 'XRichTextEditorWorkbench',
   BUTTON_WORKBENCH: 'XButtonWorkbench',
@@ -460,6 +461,13 @@ const WORKBENCH_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescr
     type: COMPONENT_TYPE.QUICK_ENTRY,
     schema: cloneDeep(workbenchSchema.XQuickEntry),
     template: { h: 36, w: 118, displayName: '快捷入口', icon: 'quick_entry_cp.svg', category: 'workbench' },
+    fieldMap: [],
+    entityMap: []
+  },
+  [COMPONENT_TYPE.TODO_CENTER]: {
+    type: COMPONENT_TYPE.TODO_CENTER,
+    schema: cloneDeep(workbenchSchema.XTodoCenter),
+    template: { h: 36, w: 118, displayName: '待办中心', icon: 'todo_center_cp.svg', category: 'workbench' },
     fieldMap: [],
     entityMap: []
   },

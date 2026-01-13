@@ -2,6 +2,7 @@ import { EditRender, WORKBENCH_COMPONENT_TYPES } from '@onebase/ui-kit';
 import { ResizableWorkbenchItem } from './resizable-workbench-item';
 import { OperationButtons } from './operatio-buttons';
 import type { WorkbenchItemProps } from '../../../types/workbench-component';
+import styles from '../index.module.less';
 
 /**
  * 工作台组件项
@@ -40,6 +41,12 @@ export function WorkbenchItem({
           runtime={false}
           pageComponentSchema={pageComponentSchema}
         />
+
+        {isSelected && pageComponentSchema && (
+          <div className={styles.nameArea}>
+            {pageComponentSchema.config?.cpName && pageComponentSchema.config.cpName}
+          </div>
+        )}
 
         {isSelected && pageComponentSchema && (
           <OperationButtons component={component} pageComponentSchema={pageComponentSchema} onOperation={onOperation} />
