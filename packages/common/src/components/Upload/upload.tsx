@@ -1,4 +1,5 @@
 import { Message, Modal, Upload } from '@arco-design/web-react';
+import { useRef, useState } from 'react';
 import { Cropper } from '../Cropper';
 import { UploadSizeConfig } from './uploadAvatar';
 
@@ -12,6 +13,9 @@ interface IUploadProps {
 }
 
 const UploadCommonComponent: React.FC<IUploadProps> = ({ size, aspect, uploadRef, getUploadFile, onUpdateUrl }) => {
+  const [fileList, setFileList] = useState<any[]>([]);
+  const beforeUploadPromiseRef = useRef<Promise<any> | null>(null);
+
   const handleUpload = async (file: File, onProgress?: (percent: number, event?: ProgressEvent) => void) => {
     const formData = new FormData();
     formData.append('file', file);
@@ -25,8 +29,28 @@ const UploadCommonComponent: React.FC<IUploadProps> = ({ size, aspect, uploadRef
         }
       : undefined;
 
-    const res = await getUploadFile(formData, progressAdapter);
-    return res;
+    try {
+      const res = await getUploadFile(formData, progressAdapter);
+      return res;
+    } catch (error) {
+      console.error('上传文件失败', error);
+    }
+  };
+
+  // 清理文件列表
+  const clearFileList = () => {
+    setFileList([]);
+    // 通过 ref 访问 Upload 组件的方法来清理
+    if (uploadRef?.current) {
+      try {
+        const uploadInstance = uploadRef.current;
+        if (uploadInstance && typeof uploadInstance.clear === 'function') {
+          uploadInstance.clear();
+        }
+      } catch (e) {
+        // 忽略错误
+      }
+    }
   };
 
   return (
@@ -36,20 +60,30 @@ const UploadCommonComponent: React.FC<IUploadProps> = ({ size, aspect, uploadRef
       accept="image/*"
       listType="picture-card"
       showUploadList={false}
+      fileList={fileList}
+      onChange={(fileList) => {
+        setFileList(fileList);
+        // 如果文件列表为空，说明用户取消了上传
+        if (fileList.length === 0) {
+          beforeUploadPromiseRef.current = null;
+        }
+      }}
       customRequest={async (option) => {
         const { onProgress, onError, onSuccess, file } = option;
         try {
           const resourceId = await handleUpload(file, onProgress);
 
-          if (resourceId !== '') {
+          if (resourceId && resourceId !== '') {
             onUpdateUrl(resourceId);
             onSuccess(resourceId);
+            // 上传成功后清理文件列表，为下次上传做准备
           } else {
-            onError({
-              status: 'error',
-              msg: '上传失败'
-            });
+            onSuccess();
           }
+
+          setTimeout(() => {
+            clearFileList();
+          }, 100);
         } catch (error) {
           onError({
             status: 'error',
@@ -58,13 +92,41 @@ const UploadCommonComponent: React.FC<IUploadProps> = ({ size, aspect, uploadRef
         }
       }}
       beforeUpload={(file) => {
-        return new Promise((resolve) => {
+        // 如果之前有未完成的 Promise，先清理
+        if (beforeUploadPromiseRef.current) {
+          clearFileList();
+        }
+
+        const promise = new Promise((resolve) => {
+          let resolved = false;
+          const resolveOnce = (value: any) => {
+            if (!resolved) {
+              resolved = true;
+              resolve(value);
+              beforeUploadPromiseRef.current = null;
+              // 如果返回 false，清理文件列表
+              if (value === false) {
+                setTimeout(() => {
+                  clearFileList();
+                }, 100);
+              }
+            }
+          };
+
           const modal = Modal.confirm({
             title: '裁剪图片',
             onCancel: () => {
-              Message.info('取消上传');
-              resolve(false);
+              if (!resolved) {
+                Message.info('取消上传');
+                resolveOnce(false);
+              }
               modal.close();
+            },
+            onOk: () => {
+              // 防止用户通过其他方式关闭 Modal
+              if (!resolved) {
+                resolveOnce(false);
+              }
             },
             simple: false,
             content: (
@@ -72,12 +134,14 @@ const UploadCommonComponent: React.FC<IUploadProps> = ({ size, aspect, uploadRef
                 aspect={aspect ? aspect : size?.aspect}
                 file={file}
                 onOK={(file: any) => {
-                  resolve(file);
+                  resolveOnce(file);
                   modal.close();
                 }}
                 onCancel={() => {
-                  resolve(false);
-                  Message.info('取消上传');
+                  if (!resolved) {
+                    Message.info('取消上传');
+                    resolveOnce(false);
+                  }
                   modal.close();
                 }}
               />
@@ -85,6 +149,9 @@ const UploadCommonComponent: React.FC<IUploadProps> = ({ size, aspect, uploadRef
             footer: null
           });
         });
+
+        beforeUploadPromiseRef.current = promise;
+        return promise;
       }}
       style={{
         display: 'none'

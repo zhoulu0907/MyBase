@@ -1,5 +1,5 @@
+import { Button, Checkbox, Modal } from '@arco-design/web-react';
 import { useState } from 'react';
-import { Button, Modal, Checkbox } from '@arco-design/web-react';
 import DeptMember from './deptMember';
 
 interface IData {
@@ -48,23 +48,26 @@ const AddMembers = (props: IProps) => {
   const isSelectDepartment = title === 'specifiedDepartment';
   const isSelectPerson = title === 'specifiedPerson';
   const modalTitle = (() => {
-  if (!isSelectDepartment && !isSelectPerson) return title;
-  const action = isFromPermission ? '添加' : '指定';
-  const subject = isSelectDepartment ? '部门' : '成员';
-  return `${action}${subject}`;
-})();
+    if (!isSelectDepartment && !isSelectPerson) return title;
+    const action = isFromPermission ? '添加' : '指定';
+    const subject = isSelectDepartment ? '部门' : '成员';
+    return `${action}${subject}`;
+  })();
 
   // 点击取消时的处理函数
   const handleCancel = () => {
-    setResetFlag(flag => !flag);
+    setResetFlag((flag) => !flag);
     onCancel();
+  };
+
+  const handleConfirm = () => {
+    onConfirm(selectedMembers, isIncludeChild);
+    handleCancel();
   };
 
   return (
     <Modal
-      title={
-        <div style={{ textAlign: 'left' }}>{modalTitle}</div>
-      }
+      title={<div style={{ textAlign: 'left' }}>{modalTitle}</div>}
       onOk={onCancel}
       onCancel={handleCancel}
       visible={visible}
@@ -76,22 +79,30 @@ const AddMembers = (props: IProps) => {
       style={{ width }}
       maskClosable={true}
       footer={
-        <div style={{display: 'flex'}}>
-          <div style={{ flex: 1,textAlign: 'left' }}>
-            {(isFromPermission && isSelectDepartment) && <Checkbox checked={isIncludeChild} onChange={(value)=>setIsIncludeChild(value)}>包含勾选部门及下级部门</Checkbox>}
+        <div style={{ display: 'flex' }}>
+          <div style={{ flex: 1, textAlign: 'left' }}>
+            {isFromPermission && isSelectDepartment && (
+              <Checkbox checked={isIncludeChild} onChange={(value) => setIsIncludeChild(value)}>
+                包含勾选部门及下级部门
+              </Checkbox>
+            )}
           </div>
           <div>
             <Button type="default" onClick={handleCancel} style={{ marginRight: 12 }}>
               取消
             </Button>
-            <Button type="primary" disabled={!selectMemberCanEmpty && selectedMembers.length === 0} onClick={() => onConfirm(selectedMembers, isIncludeChild)}>
+            <Button
+              type="primary"
+              disabled={!selectMemberCanEmpty && selectedMembers.length === 0}
+              onClick={handleConfirm}
+            >
               确定
             </Button>
           </div>
         </div>
       }
     >
-      <DeptMember 
+      <DeptMember
         visible={visible}
         title={title}
         data={data}
@@ -101,7 +112,8 @@ const AddMembers = (props: IProps) => {
         resetFlag={resetFlag}
         onExpand={onExpand}
         onSearch={onSearch}
-        onUpdateSelectedMembers={onUpdateSelectedMembers}/>
+        onUpdateSelectedMembers={onUpdateSelectedMembers}
+      />
     </Modal>
   );
 };

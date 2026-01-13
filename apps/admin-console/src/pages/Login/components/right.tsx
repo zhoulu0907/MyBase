@@ -10,7 +10,7 @@ import {
   type SliderCaptchaRef
 } from '@onebase/common';
 import { adminLogin, checkCaptchaApi, getCaptchaApi, type LoginRequest } from '@onebase/platform-center';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useI18n } from '../../../hooks/useI18n';
 import { useRememberMe } from '../../../hooks/useRememberMe';
@@ -35,16 +35,11 @@ const Right: React.FC = () => {
   const [loading, setLoading] = useState(false);
 
   // 组件初始化时设置保存的账号
-  useState(() => {
+  useEffect(() => {
     if (savedAccount) {
       accountForm.setFieldValue('username', savedAccount);
     }
-
-    // 如果已经登录了就自动跳转到首页
-    if (TokenManager.isTokenValid()) {
-      navigate('/onebase/platform-info');
-    }
-  });
+  }, []);
 
   // 处理记住我状态变化
   const handleRememberMeChange = (checked: boolean) => {

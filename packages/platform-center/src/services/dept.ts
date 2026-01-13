@@ -19,7 +19,7 @@ export const getDeptList = (params?: any) => {
 };
 
 // 查询部门详情
-export const getDept = (id: number) => {
+export const getDept = (id: string) => {
   return systemService.get('/dept/get?id=' + id);
 };
 

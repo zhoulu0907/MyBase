@@ -13,6 +13,7 @@ export interface UploadProgressCallback {
  * visitMode 文件保存标识 public-公开访问，authen-文件需登录鉴权,permission-内部调用
  */
 const envService = isRuntimeEnv() ? runtimeInfraService : isPlatformEnv() ? platformInfraService : infraService;
+
 export const uploadFile = (data: any, onProgress?: UploadProgressCallback) => {
   return envService.post('/file/upload', data, {
     headers: {
@@ -21,6 +22,16 @@ export const uploadFile = (data: any, onProgress?: UploadProgressCallback) => {
     onUploadProgress: onProgress
   });
 };
+
+export const corpUploadFile = (data: any, onProgress?: UploadProgressCallback) => {
+  return envService.post('/file/corp/upload', data, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    },
+    onUploadProgress: onProgress
+  });
+};
+
 // 根据文件 ID 列表获取文件详情列表
 export const getFileListByIds = (ids: string[]) => {
   return envService.get(`/file/list-by-ids?ids=${ids}`);

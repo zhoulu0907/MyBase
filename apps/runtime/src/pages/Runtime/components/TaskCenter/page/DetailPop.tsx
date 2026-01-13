@@ -154,7 +154,7 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
                   type={item?.buttonType === BPMConfigButtonType.APPROVE ? 'primary' : 'outline'}
                   onClick={() => fetchExec(item)}
                 >
-                  {item?.buttonName}
+                  {item?.displayName}
                 </Button>
               );
             } else {
@@ -186,7 +186,7 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
                     type={item?.buttonType === BPMConfigButtonType.APPROVE ? 'primary' : 'outline'}
                     onClick={() => setPopupVisibleByIndex(index, true, item)}
                   >
-                    {item?.buttonName}
+                    {item?.displayName}
                   </Button>
                 </Popconfirm>
               );
