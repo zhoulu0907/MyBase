@@ -3,7 +3,6 @@ package com.cmsr.onebase.framework.desensitize.serializer;
 import cn.hutool.core.util.HexUtil;
 import cn.hutool.crypto.asymmetric.KeyType;
 import cn.hutool.crypto.asymmetric.SM2;
-import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
@@ -38,6 +37,10 @@ public class PasswordDecryptoDeserializer extends JsonDeserializer<String> {
             byte[] cipherBytes = HexUtil.decodeHex(encryptedPwd);
             byte[] plainBytes = sm2.decrypt(cipherBytes, KeyType.PrivateKey);
             String plainPassword = new String(plainBytes, StandardCharsets.UTF_8);
+            int plainLength = plainPassword.length();
+            if (Strings.CI.equals(plainPassword, StringUtils.repeat("*", plainLength))) {
+                return null;
+            }
             return plainPassword;
         } catch (Exception e) {
             throw new IllegalArgumentException("密码错误");
