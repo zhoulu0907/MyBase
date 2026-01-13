@@ -774,7 +774,7 @@ const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({ props, isListEditor =
                             >
                               <img src={CompShowIcon} alt="component show" />
                             </div>
-                            <span>|</span>
+                            <span>&nbsp;|&nbsp;</span>
                           </>
                         )}
 
@@ -788,7 +788,7 @@ const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({ props, isListEditor =
                         >
                           <img src={CompCopyIcon} alt="component copy" />
                         </div>
-                        <span>|</span>
+                        <span>&nbsp;|&nbsp;</span>
                         {/* 删除按钮 */}
                         {/* TODO(mickey): 组件继续封装，和layout中的共用一套 */}
                         <div

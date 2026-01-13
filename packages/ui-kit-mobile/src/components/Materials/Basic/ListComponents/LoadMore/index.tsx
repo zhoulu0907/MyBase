@@ -13,7 +13,7 @@ import {
   type AppEntityField,
 } from '@onebase/app';
 import { menuPermissionSignal, pagesRuntimeSignal } from '@onebase/common';
-import { BUTTON_OPTIONS, BUTTON_VALUES, downloadFileByUrl, ENTITY_FIELD_TYPE, getFieldOptionsConfig, menuDictSignal, RedirectMethod, useAppEntityStore, useFormEditorSignal } from '@onebase/ui-kit';
+import { BUTTON_OPTIONS, BUTTON_VALUES, downloadFileByUrl, ENTITY_FIELD_TYPE, menuDictSignal, RedirectMethod, useAppEntityStore, useFormEditorSignal } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import { memo, useEffect, useState, useCallback } from 'react';
 import { debounce } from 'lodash-es';
@@ -23,6 +23,8 @@ import './index.css';
 
 type XTableSelectProps = {
   showSelect: boolean;
+  //   隐藏草稿箱
+  hiddenDraft?: boolean;
   selectedDataId: string | null;
   setSelectData: (value: any) => void;
 };
@@ -66,8 +68,8 @@ const XLoadMore = memo(
     } = props;
 
     const { curMenu } = menuSignal;
-    const { appDict } = menuDictSignal;
-    const { mainEntity, subEntities } = useAppEntityStore();
+    // const { appDict } = menuDictSignal;
+    // const { mainEntity, subEntities } = useAppEntityStore();
 
     const [finalColumns, setFinalColumns] = useState<any[]>();
     // 实际查询用的参数
@@ -77,7 +79,7 @@ const XLoadMore = memo(
     const [tableTotal, setTableTotal] = useState<number>(0);
     const [tablePageNo, setTablePageNo] = useState<number>(1);
     const [loading, setLoading] = useState<boolean>(false);
-    const [showDropdown, setShowDropdown] = useState(false);
+    // const [showDropdown, setShowDropdown] = useState(false);
     const [localMainMetaData, setLocalMainMetaData] = useState<AppEntityField[]>();
 
     const [searchForm] = useForm();
@@ -360,6 +362,7 @@ const XLoadMore = memo(
         }
       });
     };
+
     const handleDelete = async (id: string) => {
       if (!runtime || !showFromPageData) {
         return;
@@ -484,6 +487,12 @@ const XLoadMore = memo(
               onSearch={handleSearch}
               form={searchForm}
               queryData={queryData}
+              showFromPageData={showFromPageData}
+              showDraftBox={!props?.xTableSelectProps?.hiddenDraft && canCreate.value}
+              metaData={metaData}
+              tableName={tableName}
+              refresh={refresh}
+              tableColumns={finalColumns}
             />
           </Form>
         </Sticky>
