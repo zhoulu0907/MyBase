@@ -86,7 +86,7 @@ const XSelectMutiple = memo((props: XSelectMutipleConfig & { runtime?: boolean; 
   // 获取选中的标签文本（用于显示在Cell中）
   const getSelectedLabels = () => {
     if (selectedKeys.length === 0) {
-      return <span className='selectMultipleValue'>请选择</span>;
+      return '请选择';
     }
     return selectedKeys?.map(opt => opt).join('，');
   };
@@ -148,7 +148,7 @@ const XSelectMutiple = memo((props: XSelectMutipleConfig & { runtime?: boolean; 
                   layout='block'
                   icons={squareIcon}
                   value={selectedKeys}
-                  onChange={(values) => {
+                  onChange={(values: any[]) => {
                     setSelectedKeys(values);
                   }}
                 >
