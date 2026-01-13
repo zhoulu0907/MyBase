@@ -15,13 +15,15 @@ import org.springframework.stereotype.Component;
  * @date 2026-01-12
  */
 @Slf4j
-@Component
 public class OcrPluginConfig {
 
     private static final String DEFAULT_BAIDU_ENDPOINT = "https://aip.baidubce.com";
 
-    @Resource
-    private PluginContextService pluginContextService;
+    private final PluginContextService pluginContextService;
+
+    public OcrPluginConfig(PluginContextService pluginContextService) {
+        this.pluginContextService = pluginContextService;
+    }
 
     /**
      * 获取 OCR 服务商 Client ID

@@ -14,14 +14,15 @@ import org.springframework.stereotype.Component;
  * @date 2026-01-12
  */
 @Slf4j
-@Component
 public class OcrProviderFactory {
 
-    @Resource
-    private OcrPluginConfig ocrConfig;
+    private final OcrPluginConfig ocrConfig;
+    private final BaiduOcrService baiduOcrService;
 
-    @Resource
-    private BaiduOcrService baiduOcrService;
+    public OcrProviderFactory(OcrPluginConfig ocrConfig, BaiduOcrService baiduOcrService) {
+        this.ocrConfig = ocrConfig;
+        this.baiduOcrService = baiduOcrService;
+    }
 
     // 未来扩展: 注入阿里云、腾讯云服务
     // @Resource

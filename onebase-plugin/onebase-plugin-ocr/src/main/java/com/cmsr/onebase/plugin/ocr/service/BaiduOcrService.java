@@ -24,7 +24,6 @@ import java.util.concurrent.TimeUnit;
  * @date 2026-01-12
  */
 @Slf4j
-@Service
 public class BaiduOcrService implements IOcrProvider {
 
     private static final String TOKEN_URI = "/oauth/2.0/token";
@@ -34,8 +33,11 @@ public class BaiduOcrService implements IOcrProvider {
 
     private static final Long CACHE_KEY = 0L;
 
-    @Resource
-    private OcrPluginConfig ocrConfig;
+    private final OcrPluginConfig ocrConfig;
+
+    public BaiduOcrService(OcrPluginConfig ocrConfig) {
+        this.ocrConfig = ocrConfig;
+    }
 
     /**
      * Access Token 缓存 (缩短为 1 天，配合被动失效机制)

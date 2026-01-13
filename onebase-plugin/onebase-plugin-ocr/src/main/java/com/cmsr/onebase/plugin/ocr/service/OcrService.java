@@ -20,14 +20,15 @@ import java.util.Map;
  * @date 2026-01-12
  */
 @Slf4j
-@Service
 public class OcrService {
 
-    @Resource
-    private OcrProviderFactory providerFactory;
+    private final OcrProviderFactory providerFactory;
+    private final ObjectMapper objectMapper;
 
-    @Resource
-    private ObjectMapper objectMapper;
+    public OcrService(OcrProviderFactory providerFactory, ObjectMapper objectMapper) {
+        this.providerFactory = providerFactory;
+        this.objectMapper = objectMapper;
+    }
 
     /**
      * 身份证识别
@@ -36,7 +37,7 @@ public class OcrService {
      * @param idCardSide 身份证正反面
      * @return 识别结果 Map
      */
-    public Map<String, Object> ocrIdCard(MultipartFile file, IdCardSideEnum idCardSide) {
+    public Map<String, Object> recognizeIdCard(MultipartFile file, IdCardSideEnum idCardSide) {
         if (file == null || file.isEmpty()) {
             return null;
         }
@@ -58,7 +59,7 @@ public class OcrService {
      * @param exitentrypermitType 通行证类型
      * @return 识别结果 Map
      */
-    public Map<String, Object> ocrExitentrypermit(MultipartFile file, ExitentrypermitType exitentrypermitType) {
+    public Map<String, Object> recognizeExitentrypermit(MultipartFile file, ExitentrypermitType exitentrypermitType) {
         if (file == null || file.isEmpty()) {
             return null;
         }
@@ -79,7 +80,7 @@ public class OcrService {
      * @param file 护照图片文件
      * @return 识别结果 Map
      */
-    public Map<String, Object> ocrPassport(MultipartFile file) {
+    public Map<String, Object> recognizePassport(MultipartFile file) {
         if (file == null || file.isEmpty()) {
             return null;
         }
