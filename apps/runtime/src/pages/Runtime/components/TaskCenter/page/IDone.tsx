@@ -4,7 +4,7 @@ import TableSearch from './TableSearch';
 import DetailPop from './DetailPop';
 import { getDonePageList } from '@onebase/app/src/services/app_runtime';
 import { LISTTYPE, TaskStatusMap } from '@onebase/app';
-import { avatarPath } from '../constant'
+import { getCorpResourceById } from '@onebase/common';
 // import { getDonePageList } from '../../../../../../../../packages/app/src/services/app_runtime';
 import dayjs from 'dayjs';
 import {displayStatusMap} from '../constant'
@@ -23,7 +23,9 @@ const IDone: FC = ({ appId }: any) => {
       ellipsis: true,
       render: (obj: any) => (
         <span className="flex-bw-center">
-          <div className="photo-img">{obj?.avatar ? <img src={avatarPath + obj?.avatar} /> : obj?.name?.charAt(0)}</div>
+          <div className="photo-img">
+            {obj?.avatar ? <img src={getCorpResourceById(obj?.avatar)} /> : obj?.name?.charAt(0)}
+          </div>
           {obj?.name}
         </span>
       )
