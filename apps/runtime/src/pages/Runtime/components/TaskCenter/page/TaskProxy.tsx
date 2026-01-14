@@ -4,6 +4,7 @@ import { agentPage, agentRevoke } from '@onebase/app/src/services';
 import { UserPermissionManager } from '@onebase/common';
 import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
+import { avatarPath } from '../constant'
 import EditProxyModal from '../modal/editProxyForm';
 import '../style/tcPage.less';
 import TableSearch from './TableSearch';
@@ -44,7 +45,7 @@ const TaskProxy = ({ appId }: { appId: string | null }) => {
       dataIndex: 'principal',
       render: (val) => (
         <span className="flex-bw-center">
-          <div className="photo-img">{val?.avatar && <img src={val?.avatar} />}</div>
+          <div className="photo-img">{val?.avatar && <img src={avatarPath + val?.avatar} />}</div>
           {val.name}
         </span>
       )
@@ -54,7 +55,7 @@ const TaskProxy = ({ appId }: { appId: string | null }) => {
       dataIndex: 'agent',
       render: (val) => (
         <span className="flex-bw-center">
-          <div className="photo-img">{val?.avatar && <img src={val?.avatar} />}</div>
+          <div className="photo-img">{val?.avatar && <img src={avatarPath + val?.avatar} />}</div>
           {val.name}
         </span>
       )
@@ -99,7 +100,7 @@ const TaskProxy = ({ appId }: { appId: string | null }) => {
       dataIndex: 'creator',
       render: (val) => (
         <span className="flex-bw-center">
-          <div className="photo-img">{val?.avatar && <img src={val?.avatar} />}</div>
+          <div className="photo-img">{val?.avatar && <img src={avatarPath + val?.avatar} />}</div>
           {val.name}
         </span>
       )
