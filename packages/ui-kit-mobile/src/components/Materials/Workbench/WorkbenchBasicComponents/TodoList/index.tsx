@@ -1,12 +1,13 @@
 import type { CSSProperties } from 'react';
 import { memo, useEffect, useState } from 'react';
-import { Empty, Tabs } from '@arco-design/web-react';
+import { Tabs } from '@arco-design/mobile-react';
 import dayjs from 'dayjs';
 import { TokenManager } from '@onebase/common';
 import { getTodoPageList, getDonePageList, getMyCreatePageList, getMyCCPageList } from '@onebase/app/src/services/app_runtime';
-import { WORKBENCH_STATUS_OPTIONS, WORKBENCH_STATUS_VALUES, WORKBENCH_THEME_OPTIONS, DATA_CONFIG_NAME_MAP } from '../../core/constants';
-import type { XTodoListConfig } from './schema';
+import { WORKBENCH_STATUS_OPTIONS, WORKBENCH_STATUS_VALUES, WORKBENCH_THEME_OPTIONS, DATA_CONFIG_NAME_MAP, workbenchSchema } from '@onebase/ui-kit';
 import styles from './index.module.css';
+
+type XTodoListConfig = typeof workbenchSchema.XTodoList.config;
 
 const containerStyle: CSSProperties = {
   width: '100%',
@@ -42,6 +43,12 @@ export interface ITodoItem {
   businessUuid: string;
   nodeCode: string;
 }
+
+interface TabData {
+  key: string;
+  title: string;
+}
+
 const pendingListDefault: ITodoItem[] = [
   {
     id: '1',
@@ -94,6 +101,14 @@ const XTodoList = memo((props: XTodoListConfig & { runtime?: boolean }) => {
     showHandled: handledList,
     showCc: ccList
   }
+
+  const tabData = Object.entries(dataConfig).map(([key, value]: [string, boolean], index: number) => (
+    value &&
+    ({
+      key: key,
+      title: DATA_CONFIG_NAME_MAP[key] || key
+    })
+  ));
 
   if (runtime && status === hiddenStatusValue) {
     return null;
@@ -175,44 +190,42 @@ const XTodoList = memo((props: XTodoListConfig & { runtime?: boolean }) => {
       </div>
 
       <div className={styles.todoListContent}>
-        <Tabs style={{ width: '100%' }} onChange={runtime ? fetchListData : undefined}>
+        <Tabs className={styles.todoListTabs} tabs={tabData as TabData[]} type="line-divide" onTabClick={(tab) => fetchListData(tab.key)}>
           {Object.entries(dataConfig).map(([key, value]: [string, boolean], index: number) => (
             value &&
-            (<Tabs.TabPane key={key} title={DATA_CONFIG_NAME_MAP[key] || key}>
-              <div className={styles.todoListContentList}>
-                {getListMap[key as keyof typeof getListMap].length > 0 && getListMap[key as keyof typeof getListMap]?.slice(0, dataCount)?.map((item: ITodoItem, index: number) => (
-                  <div key={item.id || index} className={styles.todoListContentItem}>
-                    <div className={styles.todoListContentItemLeft} style={{ display: theme === WORKBENCH_THEME_OPTIONS.THEME_1 ? 'flex' : 'none' }}>
-                      {item?.initiator?.avatar ? (
-                        <img src={item.initiator.avatar} alt={item.initiator.name} className={styles.userAvatar} />
-                      ) : (
-                        <div className={styles.userAvatar}>{item.initiator.name?.charAt(0)}</div>
-                      )}
+            <div className={styles.todoListContentList}>
+              {getListMap[key as keyof typeof getListMap].length > 0 && getListMap[key as keyof typeof getListMap]?.slice(0, dataCount)?.map((item: ITodoItem, index: number) => (
+                <div key={item.id || index} className={styles.todoListContentItem}>
+                  <div className={styles.todoListContentItemLeft} style={{ display: theme === WORKBENCH_THEME_OPTIONS.THEME_1 ? 'flex' : 'none' }}>
+                    {item?.initiator?.avatar ? (
+                      <img src={item.initiator.avatar} alt={item.initiator.name} className={styles.userAvatar} />
+                    ) : (
+                      <div className={styles.userAvatar}>{item.initiator.name?.charAt(0)}</div>
+                    )}
+                  </div>
+                  <div className={styles.todoListContentItemRight}>
+                    <div className={styles.todoListContentItemRightTop}>
+                      <div className={styles.todoListTitle}>{item?.processTitle}</div>
+                      <div className={item?.flowStatus === 'timeout' ? styles.todoListStatueTimeout : styles.todoListStatueNormal}>
+                        {statusMap[item?.flowStatus] || item?.flowStatus}
+                      </div>
                     </div>
-                    <div className={styles.todoListContentItemRight}>
-                      <div className={styles.todoListContentItemRightTop}>
-                        <div className={styles.todoListTitle}>{item?.processTitle}</div>
-                        <div className={item?.flowStatus === 'timeout' ? styles.todoListStatueTimeout : styles.todoListStatueNormal}>
-                          {statusMap[item?.flowStatus] || item?.flowStatus}
-                        </div>
-                      </div>
-                      <div className={styles.todoListContentItemRightBottom}>
-                        <div className={styles.todoListInitiator}>发起人：{item?.initiator?.name}</div>
-                        {/* <div className={styles.todoListSourceSystem}>表单摘要：{item.formSummary}</div> */}
-                        <div className={styles.todoListCreateTime}>创建时间：{dayjs(item?.submitTime).format('YYYY-MM-DD HH:mm:ss')}</div>
-                      </div>
+                    <div className={styles.todoListContentItemRightBottom}>
+                      <div className={styles.todoListInitiator}>发起人：{item?.initiator?.name}</div>
+                      {/* <div className={styles.todoListSourceSystem}>表单摘要：{item.formSummary}</div> */}
+                      <div className={styles.todoListCreateTime}>创建时间：{dayjs(item?.submitTime).format('YYYY-MM-DD HH:mm:ss')}</div>
                     </div>
                   </div>
-                ))}
+                </div>
+              ))}
 
-                {/* {getListMap[key as keyof typeof getListMap].length === 0 && (
-                  <div className={styles.todoListContentItemEmpty}>
-                    <Empty description="暂无数据" />
-                  </div>
-                )} */}
-              </div>
-            </Tabs.TabPane>
-            )))}
+              {/* {getListMap[key as keyof typeof getListMap].length === 0 && (
+                <div className={styles.todoListContentItemEmpty}>
+                  <Empty description="暂无数据" />
+                </div>
+              )} */}
+            </div>
+          ))}
         </Tabs>
       </div>
     </div>

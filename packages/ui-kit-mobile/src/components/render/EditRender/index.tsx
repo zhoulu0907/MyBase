@@ -149,6 +149,8 @@ const ComponentEditRender: React.FC<ComponentRenderProps> = ({ cpId, cpType, pag
         return <WorkbenchComp.XWelcomeCard cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case WORKBENCH_COMPONENT_TYPES.TODO_CENTER:
         return <WorkbenchComp.XTodoCenter cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+      case WORKBENCH_COMPONENT_TYPES.TODO_LIST:
+        return <WorkbenchComp.XTodoList cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       default:
         return <div>未知组件类型: {cpType}</div>;
     }

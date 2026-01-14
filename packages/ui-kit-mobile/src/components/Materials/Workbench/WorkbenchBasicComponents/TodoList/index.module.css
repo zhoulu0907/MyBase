@@ -17,6 +17,18 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  background: white;
+  border-radius: 8px;
+}
+
+.todoListTabs {
+  width: 100%;
+  :global(.arco-tab-cell.vertical:not(.custom).line-divide.active) {
+    color: rgb(var(--primary-6));
+  }
+  :global(.arco-tab-cell-underline-inner) {
+    background-color: rgb(var(--primary-6));
+  }
 }
 
 .todoListContentList {
