@@ -67,38 +67,9 @@ public class ExtensionPointScannerSpring {
                 log.error("开发模式类路径不存在或不是目录: {}", path);
                 continue;
             }
-            try {
-                urls.add(path.toUri().toURL());
-                log.info("加入开发模式类路径: {}", path.toString());
 
-                // 读取 dev-dependencies-classpath.txt 并加载依赖
-                Path devClasspathFile = path.resolve("dev-dependencies-classpath.txt");
-                if (Files.exists(devClasspathFile)) {
-                    log.info("发现开发依赖类路径文件: {}", devClasspathFile);
-                    try {
-                        List<String> dependencyPaths = Files.readAllLines(devClasspathFile);
-                        int loadedCount = 0;
-                        for (String depPath : dependencyPaths) {
-                            String trimmedPath = depPath.trim();
-                            if (!trimmedPath.isEmpty()) {
-                                Path dependencyPath = Paths.get(trimmedPath);
-                                if (Files.exists(dependencyPath)) {
-                                    urls.add(dependencyPath.toUri().toURL());
-                                    loadedCount++;
-                                    log.debug("  加载依赖: {}", dependencyPath.getFileName());
-                                } else {
-                                    log.warn("依赖文件不存在: {}", trimmedPath);
-                                }
-                            }
-                        }
-                        log.info("从 {} 加载了 {} 个第三方依赖", devClasspathFile.getFileName(), loadedCount);
-                    } catch (Exception e) {
-                        log.error("读取开发依赖类路径文件失败: {}", devClasspathFile, e);
-                    }
-                }
-            } catch (Exception e) {
-                log.error("转换类路径为URL失败 {}: {}", p, e.getMessage());
-            }
+            // 使用工具类加载类路径和依赖
+            urls.addAll(DevDependencyUtil.getUrlsWithDependencies(path));
         }
 
         if (!urls.isEmpty()) {

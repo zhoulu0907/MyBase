@@ -13,13 +13,13 @@ import org.springframework.context.ConfigurableApplicationContext;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.ArrayList;
+
+import com.cmsr.onebase.plugin.common.DevDependencyUtil;
 
 /**
  * 热重载管理器
@@ -158,36 +158,14 @@ public class HotReloadManager {
         // 1. 添加插件类目录及其依赖
         for (Path classRoot : classesRoots) {
             try {
-                allUrls.add(classRoot.toUri().toURL());
-
-                // 2. 检查并加载 dev-dependencies-classpath.txt
-                Path devClasspathFile = classRoot.resolve("dev-dependencies-classpath.txt");
-                if (Files.exists(devClasspathFile)) {
-                    log.debug("热重载: 发现依赖配置文件: {}", devClasspathFile);
-                    try {
-                        List<String> dependencyPaths = Files.readAllLines(devClasspathFile);
-                        int loadedCount = 0;
-                        for (String depPath : dependencyPaths) {
-                            String trimmedPath = depPath.trim();
-                            if (!trimmedPath.isEmpty()) {
-                                Path dependencyPath = Paths.get(trimmedPath);
-                                if (Files.exists(dependencyPath)) {
-                                    allUrls.add(dependencyPath.toUri().toURL());
-                                    loadedCount++;
-                                }
-                            }
-                        }
-                        log.debug("热重载: 从 {} 加载了 {} 个额外依赖", devClasspathFile.getFileName(), loadedCount);
-                    } catch (Exception e) {
-                        log.warn("热重载: 读取依赖配置文件失败: {}", devClasspathFile, e);
-                    }
-                }
+                // 使用工具类加载类路径和依赖
+                allUrls.addAll(DevDependencyUtil.getUrlsWithDependencies(classRoot));
             } catch (Exception e) {
                 log.warn("热重载: 处理类路径失败: {}", classRoot, e);
             }
         }
 
-        // 3. 转换为 URL 数组
+        // 2. 转换为 URL 数组
         URL[] urls = allUrls.toArray(new URL[0]);
         log.info("创建热重载 ClassLoader，包含 {} 个路径", urls.length);
 
