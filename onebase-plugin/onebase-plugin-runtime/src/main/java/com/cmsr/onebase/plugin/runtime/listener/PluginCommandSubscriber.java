@@ -71,12 +71,11 @@ public class PluginCommandSubscriber implements MessageListener {
                 message.getPluginId(), message.getPluginVersion(), message.getTenantId());
 
         try {
-            // 下载并解压插件（支持前后端分离存储）
+            // 下载并解压插件
             pluginFileManager.downloadAndExtractPlugin(
                     message.getPluginId(),
                     message.getPluginVersion(),
-                    message.getPackageFileId(),
-                    message.getPackages()
+                    message.getPackageFileId()
             );
 
             log.info("插件上传处理成功: pluginId={}, version={}", message.getPluginId(), message.getPluginVersion());
