@@ -160,5 +160,3 @@ export function displayStatusMap(_status: string) {
   }
   return _map;
 }
-
-export const avatarPath = `http://${window.location.host}/v1-snapshot/onebaseserverruntime/runtime/infra/file/corp/download/`;

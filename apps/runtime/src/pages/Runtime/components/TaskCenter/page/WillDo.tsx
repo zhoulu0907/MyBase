@@ -5,7 +5,7 @@ import DetailPop from './DetailPop';
 import BatchApproveModal from '../modal/batchApprove';
 import { FLOWSTATUS_TYPE, FlowStatusMap, LISTTYPE } from '@onebase/app';
 import { getTodoPageList } from '@onebase/app/src/services/app_runtime';
-import { avatarPath } from '../constant'
+import { getCorpResourceById } from '@onebase/common';
 import dayjs from 'dayjs';
 import '../style/tcPage.less';
 
@@ -29,7 +29,7 @@ const WillDo: FC<WillDoProps> = ({ appId }) => {
     {
       title: '流程标题',
       dataIndex: 'processTitle',
-      width:250,
+      width: 250,
       ellipsis: true
     },
     {
@@ -37,7 +37,9 @@ const WillDo: FC<WillDoProps> = ({ appId }) => {
       dataIndex: 'initiator',
       render: (obj: any) => (
         <span className="flex-bw-center">
-          <div className="photo-img">{obj?.avatar ? <img src={avatarPath + obj?.avatar} /> : obj?.name?.charAt(0)}</div>
+          <div className="photo-img">
+            {obj?.avatar ? <img src={getCorpResourceById(obj?.avatar)} /> : obj?.name?.charAt(0)}
+          </div>
           {obj?.name}
         </span>
       ),
@@ -77,7 +79,7 @@ const WillDo: FC<WillDoProps> = ({ appId }) => {
     {
       title: '表单摘要',
       dataIndex: 'formSummary',
-      width:320,
+      width: 320,
       ellipsis: true
     },
     {
