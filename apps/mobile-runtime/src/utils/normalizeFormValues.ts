@@ -47,7 +47,7 @@ export const normalizeFormValues = ({
         formValues[fieldName] = (value || []).map((item: any) => {
           return {
             ...item,
-            response: item.response || item.id,
+            id: item.id,
             status: currentSchema?.type === FORM_COMPONENT_TYPES.FILE_UPLOAD ? 'loaded' : 'loading'
           };
         });
@@ -58,6 +58,9 @@ export const normalizeFormValues = ({
       ) {
         // 处理下拉列表
         formValues[fieldName] = value?.id ? [value.id] : [];
+      } else if (currentSchema?.type === FORM_COMPONENT_TYPES.RADIO && typeof value === 'object' && value !== null) {
+        // 处理单选框
+        formValues[fieldName] = value?.id ? value.id : '';
       } else if (currentSchema?.type === FORM_COMPONENT_TYPES.SELECT_MUTIPLE && Array.isArray(value)) {
         // 处理下拉多选列表
         formValues[fieldName] = (value || []).map((ele: any) => ele.id);
@@ -102,7 +105,7 @@ export const normalizeFormValues = ({
               ) {
                 formValues[`${subEntity.childTableName}.${idx}.${fieldName}`] = (fieldValue || []).map((e: any) => ({
                   ...e,
-                  response: e.response || e.id,
+                  id: e.id,
                   status:
                     componentSchemas[componentId]?.type === FORM_COMPONENT_TYPES.FILE_UPLOAD ? 'loaded' : 'loading'
                 }));

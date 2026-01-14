@@ -7,6 +7,7 @@ import { attachmentDownload, attachmentUpload, menuSignal } from '@onebase/app';
 import { FORM_COMPONENT_TYPES, FormSchema, STATUS_OPTIONS, STATUS_VALUES, downloadFileByUrl } from '@onebase/ui-kit';
 import { nanoid } from 'nanoid';
 import { memo, useEffect, useState } from 'react';
+import { CommonFileItem } from '@arco-design/mobile-react/cjs/uploader/upload/type';
 import '../index.css';
 import './index.css';
 
@@ -20,7 +21,6 @@ interface FileItem {
   name?: string;
   id?: string;
   type: string;
-  response?: string;
 }
 
 const XFileUpload = memo(
@@ -41,20 +41,24 @@ const XFileUpload = memo(
       }
     }, [form, fieldId]);
 
-    const handleUpload = async ({ file }: { file: File }) => {
-      const formData = new FormData();
-      formData.append('file', file);
+    const handleUpload = async (files: CommonFileItem): Promise<CommonFileItem | null> => {
+      if (!files.file) {
+        return null;
+      }
 
       try {
+        const formData = new FormData();
+        formData.append('file', files.file);
+
         if (runtime) {
           const res = await attachmentUpload(tableName, formData);
           return {
-            name: file.name,
-            response: res
-          };
-        } else {
-          return '';
+            id: res,
+            url: files.url,
+            name: files.file.name || '',
+          } as CommonFileItem;
         }
+        return null;
       } catch (error) {
         Toast.toast({
           content: '上传失败，请重试',
@@ -72,7 +76,7 @@ const XFileUpload = memo(
         const formValues = files.map((file) => ({
           name: file.name,
           url: file.url || '',
-          response: file.response
+          id: file.id
         }));
         form.setFieldValue(fieldId, formValues);
       }
@@ -91,7 +95,7 @@ const XFileUpload = memo(
 
       return (
         <div className="uplaodList-text">
-          {filesList.map(({ id, type, status, url, name, response }, index) => (
+          {filesList.map(({ id, type, status, url, name }, index) => (
             <div key={index} className="uplaodList-text-item">
               {getFileIcon(type as any)}
               <div className="uplaodList-text-item-name">{name}</div>
@@ -118,7 +122,7 @@ const XFileUpload = memo(
                             menuId: curMenu.value?.id,
                             id: form?.getFieldValue('id') || '',
                             fieldName: curFieldName,
-                            fileId: id || response || ''
+                            fileId: id || ''
                           };
 
                           const fileUrl = await attachmentDownload(tableName, param);
@@ -179,7 +183,7 @@ const XFileUpload = memo(
           }}
           renderFileList={renderUploadList}
           onChange={handleChange}
-          // upload={handleUpload}
+          upload={handleUpload}
         />
       </Form.Item>
     );
