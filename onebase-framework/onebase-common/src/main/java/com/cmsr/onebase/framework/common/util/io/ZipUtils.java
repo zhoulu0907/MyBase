@@ -21,9 +21,6 @@ import com.cmsr.onebase.framework.common.util.json.JsonUtils;
  */
 public class ZipUtils {
 
-    /**
-     * 私有构造函数，防止实例化
-     */
     private ZipUtils() {
     }
 

@@ -126,7 +126,7 @@ public class MetadataDatasourceApiImpl implements MetadataDatasourceApi {
     }
 
     @Override
-    public void importDatasource(Long newApplicationId, Long tenantId, Long versionTag, Object datasourceConfig) {
+    public void importDatasource(Long newApplicationId, String applicationUid, Long tenantId, Long versionTag, Object datasourceConfig) {
 
     }
 }

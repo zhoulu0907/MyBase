@@ -17,9 +17,6 @@ import com.cmsr.onebase.framework.orm.repo.BaseBizRepository;
  */
 public class VersionDataImporter {
 
-    /**
-     * 私有构造函数，防止实例化
-     */
     private VersionDataImporter() {
     }
 

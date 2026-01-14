@@ -53,7 +53,7 @@ public interface MetadataDatasourceApi {
     Object exportDatasource(Long applicationId, Long versionTag);
 
     @Operation(summary = "导入数据源信息")
-    void importDatasource(Long newApplicationId, Long tenantId, Long versionTag, Object datasourceConfig);
+    void importDatasource(Long newApplicationId, String applicationUid, Long tenantId, Long versionTag, Object datasourceConfig);
 
 
 }

@@ -237,7 +237,6 @@ public class AppVersionServiceImpl implements AppVersionService {
     @Override
     public void exportApplicationVersion(Long versionId, HttpServletResponse response) {
         // 获取版本信息
-        log.info("versionId: {}", versionId);
         AppVersionDO versionDO = versionRepository.getById(versionId);
         if (versionDO == null) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_VERSION_NOT_EXIST);
@@ -314,7 +313,7 @@ public class AppVersionServiceImpl implements AppVersionService {
             Long applicationId = newApp.getId();
 
             // 导入配置数据到新应用
-            appDataManager.saveApplicationVersionConfigData(applicationId, newApp.getTenantId(), 0L,
+            appDataManager.saveApplicationVersionConfigData(applicationId, appUid, newApp.getTenantId(), 0L,
                     importPackage.getConfigData());
         });
     }

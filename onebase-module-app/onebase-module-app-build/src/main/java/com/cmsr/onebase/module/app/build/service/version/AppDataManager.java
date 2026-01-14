@@ -160,9 +160,6 @@ public class AppDataManager {
     public ApplicationVersionConfigData getApplicationVersionConfigData(Long applicationId, Long versionTag) {
         ApplicationVersionConfigData configData = new ApplicationVersionConfigData();
 
-        log.info("ApplicationID: {}", applicationId);
-        log.info("VersionTag: {}", versionTag);
-
         // 工作台组件
         QueryWrapper workbenchComponentQuery = workbenchComponentRepository.query()
                 .where(APP_RESOURCE_WORKBENCH_COMPONENT.APPLICATION_ID.eq(applicationId))
@@ -251,7 +248,7 @@ public class AppDataManager {
      * @param versionTag    版本标签
      * @param configData    配置数据
      */
-    public void saveApplicationVersionConfigData(Long applicationId, Long tenantId, Long versionTag,
+    public void saveApplicationVersionConfigData(Long applicationId, String appUid, Long tenantId, Long versionTag,
             ApplicationVersionConfigData configData) {
         if (configData == null) {
             return;
@@ -290,7 +287,7 @@ public class AppDataManager {
 //
 //        Object metaDataConfig = configData.getMetaDataConfig();
 //        if (metaDataConfig != null){
-//            metadataDatasourceApi.importDatasource(applicationId, tenantId, versionTag, metaDataConfig);
+//            metadataDatasourceApi.importDatasource(applicationId, appUid, tenantId, versionTag, metaDataConfig);
 //        }
     }
 }
