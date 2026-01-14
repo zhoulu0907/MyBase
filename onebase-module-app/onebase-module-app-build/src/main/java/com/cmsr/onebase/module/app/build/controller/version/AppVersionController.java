@@ -1,22 +1,32 @@
 package com.cmsr.onebase.module.app.build.controller.version;
 
+import org.springframework.http.MediaType;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.app.build.service.version.AppVersionService;
+import com.cmsr.onebase.module.app.build.vo.version.VersionImportReq;
 import com.cmsr.onebase.module.app.build.vo.version.VersionOnlineReq;
 import com.cmsr.onebase.module.app.build.vo.version.VersionPageReqVo;
 import com.cmsr.onebase.module.app.build.vo.version.VersionPageRespVO;
 import com.fasterxml.jackson.databind.JsonNode;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * @Author：huangjie
- * @Date：2025/7/22 16:32
+ *                  @Date：2025/7/22 16:32
  */
 @Tag(name = "应用管理-版本管理")
 @RestController
@@ -61,6 +71,21 @@ public class AppVersionController {
     public CommonResult<Boolean> deleteApplicationVersion(@RequestParam("versionId") Long versionId) {
         appVersionService.deleteApplicationVersion(versionId);
         return CommonResult.success(true);
+    }
+
+    @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "版本导入")
+    public CommonResult<Boolean> importApplicationVersion(@Validated VersionImportReq versionImportReq) {
+        appVersionService.importApplicationVersion(versionImportReq);
+        return CommonResult.success(true);
+    }
+
+    @GetMapping("/export")
+    @Operation(summary = "版本导出")
+    @Parameter(name = "versionId", description = "版本ID", required = true)
+    public void exportApplicationVersion(@RequestParam("versionId") Long versionId,
+            HttpServletResponse response) {
+        appVersionService.exportApplicationVersion(versionId, response);
     }
 
 }
