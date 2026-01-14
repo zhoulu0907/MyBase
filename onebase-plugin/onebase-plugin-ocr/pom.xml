@@ -90,11 +90,41 @@
             <artifactId>commons-lang3</artifactId>
             <scope>provided</scope>
         </dependency>
-        <!-- commons-collections4: 集合工具类，用于 Map 判空 (MapUtils) -->
+        <!-- commons-collections4: 集合工具类,用于 Map 判空 (MapUtils) -->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-collections4</artifactId>
             <scope>provided</scope>
+        </dependency>
+
+        <!-- 测试依赖 -->
+        <!-- Spring Boot Test Starter -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- onebase-plugin-host-simulator: 用于测试插件 -->
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-plugin-host-simulator</artifactId>
+            <version>${onebase-dependencies.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Spring JDBC: 测试运行时需要 (onebase-plugin-host-simulator的传递依赖) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jdbc</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- H2 Database: 测试运行时需要 (避免DataSource配置错误) -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

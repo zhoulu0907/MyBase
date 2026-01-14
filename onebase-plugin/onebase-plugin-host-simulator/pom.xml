@@ -37,6 +37,19 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
+        <!-- Spring Boot Starter JDBC: 支持anyline和插件的JDBC功能 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jdbc</artifactId>
+        </dependency>
+
+        <!-- H2 Database: 提供默认的内存数据库，避免DataSource配置错误 -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
         <!-- OneBase Common Framework -->
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
