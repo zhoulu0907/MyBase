@@ -1,8 +1,17 @@
 package com.cmsr.onebase.module.app.build.service;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.orm.entity.BaseEntity;
+import com.cmsr.onebase.module.app.build.util.AppUtils;
 import com.cmsr.onebase.module.app.core.dal.database.app.AppApplicationRepository;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleRepository;
 import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
@@ -12,19 +21,13 @@ import com.cmsr.onebase.module.app.core.dal.dataobject.AppMenuDO;
 import com.cmsr.onebase.module.app.core.enums.AppErrorCodeConstants;
 import com.cmsr.onebase.module.system.api.user.AdminUserApi;
 import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
+
 import jakarta.annotation.Resource;
 import lombok.Setter;
-import org.springframework.stereotype.Service;
-
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * @Author：huangjie
- * @Date：2025/7/24 12:42
+ *                  @Date：2025/7/24 12:42
  */
 @Setter
 @Service
@@ -80,17 +83,32 @@ public class AppCommonService {
         ids.addAll(ids1);
         ids.addAll(ids2);
         CommonResult<List<AdminUserRespDTO>> dtos = adminUserApi.getUserList(ids);
-        Map<Long, AdminUserRespDTO> dtoMap = dtos.getData().stream().collect(Collectors.toMap(AdminUserRespDTO::getId, v -> v));
+        Map<Long, AdminUserRespDTO> dtoMap = dtos.getData().stream()
+                .collect(Collectors.toMap(AdminUserRespDTO::getId, v -> v));
         return new UserHelper(dtoMap);
     }
-
 
     public UserHelper getUserHelper(Set<Long> ids) {
         CommonResult<List<AdminUserRespDTO>> dtos = adminUserApi.getUserList(ids);
-        Map<Long, AdminUserRespDTO> dtoMap = dtos.getData().stream().collect(Collectors.toMap(AdminUserRespDTO::getId, v -> v));
+        Map<Long, AdminUserRespDTO> dtoMap = dtos.getData().stream()
+                .collect(Collectors.toMap(AdminUserRespDTO::getId, v -> v));
         return new UserHelper(dtoMap);
     }
 
+    /**
+     * 随机生成一个appUid，然后去数据库里面查询是否唯一，如果不唯一，则重新生成一个，尝试25次
+     *
+     * @return 唯一的appUid
+     */
+    public String findAndCreateAppUid() {
+        for (int i = 0; i < 25; i++) {
+            String appUid = AppUtils.createAppUid();
+            if (applicationRepository.findOneByUid(appUid) == 0) {
+                return appUid;
+            }
+        }
+        throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_UID_GENERATE_FAILED);
+    }
 
     public static class UserHelper {
 

@@ -1,5 +1,21 @@
 package com.cmsr.onebase.module.app.build.service.app;
 
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.validation.annotation.Validated;
+
 import com.cmsr.onebase.framework.common.enums.CommonPublishModelEnum;
 import com.cmsr.onebase.framework.common.enums.VersionTagEnum;
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
@@ -39,27 +55,13 @@ import com.cmsr.onebase.module.metadata.api.datasource.MetadataDatasourceApi;
 import com.cmsr.onebase.module.metadata.api.datasource.dto.DatasourceCreateDefaultReqDTO;
 import com.cmsr.onebase.module.metadata.api.datasource.dto.DatasourceSaveReqDTO;
 import com.cmsr.onebase.module.metadata.api.version.MetadataDataManagerApi;
+
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionTemplate;
-import org.springframework.validation.annotation.Validated;
-
-import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * @Author：huangjie
- * @Date：2025/7/23 17:11
+ *                  @Date：2025/7/23 17:11
  */
 @Setter
 @Service
@@ -142,7 +144,8 @@ public class BuildAppApplicationServiceImpl implements AppApplicationService {
         if (CollectionUtils.isEmpty(appIds)) {
             return;
         }
-        List<AppNavigationDO> navigationDOS = ApplicationManager.withoutApplicationCondition(() -> appNavigationRepository.findByApplicationIds(appIds));
+        List<AppNavigationDO> navigationDOS = ApplicationManager
+                .withoutApplicationCondition(() -> appNavigationRepository.findByApplicationIds(appIds));
         for (ApplicationRespVO respVO : respVOS) {
             AppNavigationDO navigationDO = navigationDOS.stream()
                     .filter(navigation -> navigation.getApplicationId().equals(respVO.getId()))
@@ -194,7 +197,6 @@ public class BuildAppApplicationServiceImpl implements AppApplicationService {
             respVO.setUserPhotoList(userListMap.get(respVO.getId()));
         }
     }
-
 
     private List<TagRespVO> queryAppTags(Long appId) {
         List<Long> tagIds = applicationTagRepository.findTagIdsByApplicationId(appId);
@@ -257,7 +259,7 @@ public class BuildAppApplicationServiceImpl implements AppApplicationService {
 
             AppApplicationDO applicationDO = BeanUtils.toBean(createReqVO, AppApplicationDO.class);
             applicationDO.setId(null);
-            applicationDO.setAppUid(findAndCreateAppUid());
+            applicationDO.setAppUid(appCommonService.findAndCreateAppUid());
             applicationDO.setAppStatus(AppStatusEnum.OFFLINE.getValue());
 
             if (StringUtils.isNoneBlank(createReqVO.getAppCode())) {
@@ -266,7 +268,9 @@ public class BuildAppApplicationServiceImpl implements AppApplicationService {
                 applicationDO.setAppCode(AppUtils.createAppCode());
             }
             // 新增发布模式，新增空间id
-            applicationDO.setPublishModel(createReqVO.getPublishModel() == null ? CommonPublishModelEnum.InnerModel.getValue() : createReqVO.getPublishModel());
+            applicationDO.setPublishModel(
+                    createReqVO.getPublishModel() == null ? CommonPublishModelEnum.InnerModel.getValue()
+                            : createReqVO.getPublishModel());
             applicationRepository.save(applicationDO);
             // 保存导航配置
             AppNavigationDO appNavigationDO = new AppNavigationDO();
@@ -328,14 +332,15 @@ public class BuildAppApplicationServiceImpl implements AppApplicationService {
         appNavigationRepository.saveOrUpdate(appNavigationDO);
     }
 
-
     @Override
     public void updateApplication(ApplicationCreateReqVO createReqVO) {
         appCommonService.validateApplicationExist(createReqVO.getId());
         validApplicationCodeDuplicate(createReqVO.getAppCode(), createReqVO.getId());
         transactionTemplate.executeWithoutResult(transactionStatus -> {
             AppApplicationDO updateObj = BeanUtils.toBean(createReqVO, AppApplicationDO.class);
-            updateObj.setPublishModel(createReqVO.getPublishModel() == null ? CommonPublishModelEnum.InnerModel.getValue() : createReqVO.getPublishModel());
+            updateObj.setPublishModel(
+                    createReqVO.getPublishModel() == null ? CommonPublishModelEnum.InnerModel.getValue()
+                            : createReqVO.getPublishModel());
             applicationRepository.updateById(updateObj);
             saveApplicationTags(createReqVO.getId(), createReqVO.getTagIds());
             saveApplicationNavigation(createReqVO.getId(), createReqVO);
@@ -382,7 +387,6 @@ public class BuildAppApplicationServiceImpl implements AppApplicationService {
         return uid;
     }
 
-
     /**
      * 检查 AppApplicationDO 表 code 码是否重复，重复跑出异常
      */
@@ -396,21 +400,6 @@ public class BuildAppApplicationServiceImpl implements AppApplicationService {
                 throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_CODE_DUPLICATE);
             }
         }
-    }
-
-    /**
-     * 随机生成一个appUid，然后去数据库里面查询是否唯一，如果不唯一，则重新生成一个，尝试25次
-     *
-     * @return 唯一的appUid
-     */
-    private String findAndCreateAppUid() {
-        for (int i = 0; i < 25; i++) {
-            String appUid = AppUtils.createAppUid();
-            if (applicationRepository.findOneByUid(appUid) == 0) {
-                return appUid;
-            }
-        }
-        throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_UID_GENERATE_FAILED);
     }
 
     @Override

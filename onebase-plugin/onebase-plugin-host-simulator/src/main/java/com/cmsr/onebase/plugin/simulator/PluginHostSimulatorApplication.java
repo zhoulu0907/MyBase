@@ -2,7 +2,6 @@ package com.cmsr.onebase.plugin.simulator;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.ComponentScan;
 
 /**
  * OneBase 插件宿主模拟器
@@ -13,8 +12,10 @@ import org.springframework.context.annotation.ComponentScan;
  * @author chengyuansen
  * @date 2025-12-14
  */
-@SpringBootApplication
-@ComponentScan(basePackages = {"com.cmsr.onebase.plugin.simulator"})
+@SpringBootApplication(excludeName = {
+        "org.anyline.environment.spring.data.driver.actuator.jdbc.SpringJDBCActuator",
+        "org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration"
+})
 public class PluginHostSimulatorApplication {
     public static void main(String[] args) {
         SpringApplication.run(PluginHostSimulatorApplication.class, args);

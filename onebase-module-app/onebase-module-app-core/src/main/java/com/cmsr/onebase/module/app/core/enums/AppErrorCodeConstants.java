@@ -4,7 +4,7 @@ import com.cmsr.onebase.framework.common.exception.ErrorCode;
 
 /**
  * @Author：huangjie
- * @Date：2025/7/24 8:51
+ *                  @Date：2025/7/24 8:51
  */
 public interface AppErrorCodeConstants {
 
@@ -39,5 +39,11 @@ public interface AppErrorCodeConstants {
     ErrorCode VERSION_DUPLICATE = new ErrorCode(10016, "版本重复");
 
     ErrorCode APP_ONLINE_ERROR = new ErrorCode(10017, "应用已上线");
+
+    ErrorCode APP_VERSION_EXPORT_ERROR = new ErrorCode(10018, "应用版本配置导出失败");
+
+    ErrorCode APP_VERSION_IMPORT_FILE_EMPTY = new ErrorCode(10019, "导入文件不能为空");
+
+    ErrorCode APP_VERSION_IMPORT_ERROR = new ErrorCode(10020, "应用版本配置导入失败");
 
 }

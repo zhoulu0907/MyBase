@@ -179,4 +179,14 @@ public class BpmDataManagerImpl implements BpmDataManager {
         flowNodeRepository.deleteAllApplicationData(applicationId);
         flowSkipRepository.deleteAllApplicationData(applicationId);
     }
+
+    @Override
+    public Object exportApplication(Long applicationId, Long versionTag) {
+        return null;
+    }
+
+    @Override
+    public void importApplication(Long newApplicationId, Long tenantId, Long versionTag, Object bpmConfig) {
+
+    }
 }

@@ -1,9 +1,12 @@
 package com.cmsr.onebase.module.app.build.service.version;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.module.app.build.vo.version.VersionImportReq;
 import com.cmsr.onebase.module.app.build.vo.version.VersionOnlineReq;
 import com.cmsr.onebase.module.app.build.vo.version.VersionPageReqVo;
 import com.cmsr.onebase.module.app.build.vo.version.VersionPageRespVO;
+
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * @Author：huangjie
@@ -21,4 +24,8 @@ public interface AppVersionService {
 
     void deleteApplicationVersion(Long versionId);
 
- }
+    void exportApplicationVersion(Long versionId, HttpServletResponse response);
+
+    void importApplicationVersion(VersionImportReq versionImportReq);
+
+}

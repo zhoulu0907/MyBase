@@ -17,6 +17,7 @@
     <module>onebase-plugin-demo</module>
     <module>onebase-plugin-host-simulator</module>
     <module>onebase-plugin-archetype</module>
+    <module>onebase-plugin-ocr</module>
   </modules>
   <artifactId>onebase-plugin</artifactId>
   <name>${project.artifactId}</name>
