@@ -19,6 +19,7 @@ import com.cmsr.onebase.module.bpm.core.dto.BpmTodoTaskDTO;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeExtDTO;
 import com.cmsr.onebase.module.bpm.core.enums.BpmBusinessStatusEnum;
 import com.cmsr.onebase.module.bpm.core.enums.BpmConstants;
+import com.cmsr.onebase.module.bpm.core.utils.BpmUtil;
 import com.cmsr.onebase.module.bpm.core.validator.BpmAppResourceValidator;
 import com.cmsr.onebase.module.bpm.core.vo.*;
 import com.cmsr.onebase.module.bpm.runtime.convert.BpmTaskCenterConvert;
@@ -431,6 +432,47 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         }
 
         return new PageResult<>(copyTaskList, pageResult.getTotal());
+    }
+
+    @Override
+    public BpmOverviewRespVO getOverview() {
+        Long applicationId = BpmUtil.getRequiredApplicationId();
+
+        BpmOverviewRespVO overviewRespVO = new BpmOverviewRespVO();
+
+        // 获取待办数量
+        BpmTodoTaskPageReqVO todoReqVO = new BpmTodoTaskPageReqVO();
+        todoReqVO.setAppId(applicationId);
+        todoReqVO.setPageNo(1);
+        todoReqVO.setPageSize(1);
+        PageResult<BpmFlowTodoTaskVO> todoPage = getTodoPage(todoReqVO);
+        overviewRespVO.setTodoCount(todoPage.getTotal().intValue());
+
+        // 获取已办数量
+        BpmDoneTaskPageReqVO doneReqVO = new BpmDoneTaskPageReqVO();
+        doneReqVO.setAppId(applicationId);
+        doneReqVO.setPageNo(1);
+        doneReqVO.setPageSize(1);
+        PageResult<BpmFlowDoneTaskVO> donePage = getDonePage(doneReqVO);
+        overviewRespVO.setDoneCount(donePage.getTotal().intValue());
+
+        // 获取抄送数量
+        BpmCcTaskPageReqVO ccReqVO = new BpmCcTaskPageReqVO();
+        ccReqVO.setAppId(applicationId);
+        ccReqVO.setPageNo(1);
+        ccReqVO.setPageSize(1);
+        PageResult<BpmCcTaskPageResVO> ccPage = getCcPage(ccReqVO);
+        overviewRespVO.setCcCount(ccPage.getTotal().intValue());
+
+        // 获取我创建的流程数量
+        BpmMyCreatedPageReqVO myCreatedReqVO = new BpmMyCreatedPageReqVO();
+        myCreatedReqVO.setAppId(applicationId);
+        myCreatedReqVO.setPageNo(1);
+        myCreatedReqVO.setPageSize(1);
+        PageResult<BpmMyCreatedVO> myCreatedPage = getMyCreatedPage(myCreatedReqVO);
+        overviewRespVO.setMyCreatedCount(myCreatedPage.getTotal().intValue());
+
+        return overviewRespVO;
     }
 
     /**
