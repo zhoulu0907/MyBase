@@ -17,6 +17,18 @@
     <name>${project.artifactId}</name>
     <description>OneBase插件开发示例 - Test模块</description>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.cmsr.onebase</groupId>
+                <artifactId>onebase-dependencies</artifactId>
+                <version>${onebase-dependencies.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
         <!-- OneBase 插件 SDK -->
         <dependency>
@@ -77,7 +89,16 @@
                         </goals>
                     </execution>
 
-                    <!-- 4. 打包插件为 ZIP -->
+                    <!-- 4. 生成开发模式依赖类路径文件 -->
+                    <execution>
+                        <id>generate-dev-classpath</id>
+                        <goals>
+                            <goal>generate-dev-classpath</goal>
+                        </goals>
+                        <phase>process-classes</phase>
+                    </execution>
+
+                    <!-- 5. 打包插件为 ZIP -->
                     <execution>
                         <id>package-plugin</id>
                         <goals>

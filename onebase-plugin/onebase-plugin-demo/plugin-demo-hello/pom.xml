@@ -17,6 +17,18 @@
     <name>${project.artifactId}</name>
     <description>OneBase插件开发示例 - Hello模块</description>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.cmsr.onebase</groupId>
+                <artifactId>onebase-dependencies</artifactId>
+                <version>${onebase-dependencies.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
         <!-- OneBase 插件 SDK -->
         <dependency>
@@ -33,15 +45,16 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- Hutool - 测试compile scope三方依赖打包：如果不需要则无需引入 -->
-        <dependency>
-            <groupId>cn.hutool</groupId>
-            <artifactId>hutool-all</artifactId>
-        </dependency>
-        <!-- Lombok -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Hutool - (Compile with provided scope) -->
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-all</artifactId>
             <scope>provided</scope>
         </dependency>
     </dependencies>
@@ -90,7 +103,16 @@
                         </goals>
                     </execution>
 
-                    <!-- 4. 打包插件为 ZIP -->
+                    <!-- 4. 生成开发模式依赖类路径文件 -->
+                    <execution>
+                        <id>generate-dev-classpath</id>
+                        <goals>
+                            <goal>generate-dev-classpath</goal>
+                        </goals>
+                        <phase>process-classes</phase>
+                    </execution>
+
+                    <!-- 5. 打包插件为 ZIP -->
                     <execution>
                         <id>package-plugin</id>
                         <goals>

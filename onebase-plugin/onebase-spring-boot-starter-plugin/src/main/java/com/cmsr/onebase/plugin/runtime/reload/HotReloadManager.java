@@ -17,6 +17,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.ArrayList;
+
+import com.cmsr.onebase.plugin.common.DevDependencyUtil;
 
 /**
  * 热重载管理器
@@ -150,18 +153,21 @@ public class HotReloadManager {
      * </p>
      */
     private URLClassLoader createClassLoader() throws Exception {
-        // 将所有 classesRoots 转换为 URL 数组
-        URL[] urls = classesRoots.stream()
-                .map(path -> {
-                    try {
-                        return path.toUri().toURL();
-                    } catch (Exception e) {
-                        throw new RuntimeException("Failed to convert path to URL: " + path, e);
-                    }
-                })
-                .toArray(URL[]::new);
+        List<URL> allUrls = new ArrayList<>();
 
-        log.info("创建 ClassLoader，包含 {} 个路径: {}", urls.length, classesRoots);
+        // 1. 添加插件类目录及其依赖
+        for (Path classRoot : classesRoots) {
+            try {
+                // 使用工具类加载类路径和依赖
+                allUrls.addAll(DevDependencyUtil.getUrlsWithDependencies(classRoot));
+            } catch (Exception e) {
+                log.warn("热重载: 处理类路径失败: {}", classRoot, e);
+            }
+        }
+
+        // 2. 转换为 URL 数组
+        URL[] urls = allUrls.toArray(new URL[0]);
+        log.info("创建热重载 ClassLoader，包含 {} 个路径", urls.length);
 
         // Child-First ClassLoader：只对能在 URL 中找到的类使用子加载器
         return new URLClassLoader(urls, getClass().getClassLoader()) {

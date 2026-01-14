@@ -3,22 +3,27 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.cmsr.onebase</groupId>
+        <artifactId>onebase-plugin</artifactId>
+        <version>${revision}</version>
+    </parent>
 
-    <groupId>${groupId}</groupId>
-    <artifactId>${artifactId}</artifactId>
-    <version>${version}</version>
+    <artifactId>onebase-plugin-ocr</artifactId>
     <packaging>jar</packaging>
+    <version>1.0.0</version>
 
-    <name>${artifactId}</name>
-    <description>OneBase Plugin - ${artifactId}</description>
+    <name>${project.artifactId}</name>
+    <description>
+        OneBase OCR 插件
+        提供身份证、港澳台通行证及护照的 OCR 识别功能
+    </description>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <!-- ❗ 必须启用，否则 Spring MVC 无法通过反射获取方法参数名 -->
         <maven.compiler.parameters>true</maven.compiler.parameters>
-
         <!-- 版本管理 -->
         <onebase-dependencies.version>1.0.0-SNAPSHOT</onebase-dependencies.version>
         <onebase-plugin-maven-plugin.version>1.0.0-SNAPSHOT</onebase-plugin-maven-plugin.version>
@@ -26,7 +31,6 @@
 
     <dependencyManagement>
         <dependencies>
-            <!-- ❗必须导入 OneBase BOM，统一版本管理，否则可能引发版本冲突 -->
             <dependency>
                 <groupId>com.cmsr.onebase</groupId>
                 <artifactId>onebase-dependencies</artifactId>
@@ -38,7 +42,7 @@
     </dependencyManagement>
 
     <dependencies>
-        <!-- OneBase 插件 SDK -->
+        <!-- 核心 SDK (Provided) -->
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-plugin-sdk</artifactId>
@@ -46,62 +50,117 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- Spring Web - 用于 @RestController 等注解 -->
+        <!-- Spring Web (Provided) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
             <scope>provided</scope>
         </dependency>
 
-        <!-- Hutool - 第三方依赖示例：如果不需要则无需引入 -->
-        <dependency>
-            <groupId>cn.hutool</groupId>
-            <artifactId>hutool-all</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-        <!-- Lombok -->
+        <!-- Lombok (Provided) -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
             <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.konghq</groupId>
+            <artifactId>unirest-java-core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <!-- unirest-modules-jackson: Unirest 的 Jackson 模块，用于 JSON 序列化/反序列化 -->
+        <dependency>
+            <groupId>com.konghq</groupId>
+            <artifactId>unirest-modules-jackson</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <!-- guava: Google 核心库，用于 Access Token 缓存管理 (LoadingCache) -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        
+        <!-- Commons 工具库 (Compile - 打包进插件，避免宿主版本冲突) -->
+        <!-- commons-lang3: 字符串工具类，用于参数校验 (StringUtils) -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <!-- commons-collections4: 集合工具类,用于 Map 判空 (MapUtils) -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-collections4</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- 测试依赖 -->
+        <!-- Spring Boot Test Starter -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- onebase-plugin-host-simulator: 用于测试插件 -->
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-plugin-host-simulator</artifactId>
+            <version>${onebase-dependencies.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Spring JDBC: 测试运行时需要 (onebase-plugin-host-simulator的传递依赖) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jdbc</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- H2 Database: 测试运行时需要 (避免DataSource配置错误) -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
     <build>
         <plugins>
-            <!-- OneBase插件Maven插件 - 提供自动生成和打包能力 -->
+            <!-- OneBase 插件构建插件 -->
+
+            <!-- OneBase 插件构建插件 -->
             <plugin>
                 <groupId>com.cmsr.onebase</groupId>
                 <artifactId>onebase-plugin-maven-plugin</artifactId>
                 <version>${onebase-plugin-maven-plugin.version}</version>
                 <executions>
-                    <!-- 1. 自动生成插件主类 GeneratedPlugin -->
+                    <!-- 1. 自动生成插件主类 -->
                     <execution>
                         <id>generate-plugin-class</id>
                         <goals>
                             <goal>generate-plugin-class</goal>
                         </goals>
                         <configuration>
-                            <generatedPackage>${package}</generatedPackage>
+                            <generatedPackage>com.cmsr.onebase.plugin.ocr</generatedPackage>
                         </configuration>
                     </execution>
 
-                    <!-- 2. 自动生成插件配置文件 plugin.properties -->
+                    <!-- 2. 自动生成插件配置文件 -->
                     <execution>
                         <id>generate-properties</id>
                         <goals>
                             <goal>generate-properties</goal>
                         </goals>
                         <configuration>
-                            <!-- 插件唯一标识 -->
-                            <pluginId>${artifactId}</pluginId>
-                            <!-- 插件版本，通常引用项目版本 -->
+                            <pluginId>onebase-plugin-ocr</pluginId>
                             <pluginVersion>${project.version}</pluginVersion>
-                            <!-- 插件描述 -->
                             <pluginDescription>${project.description}</pluginDescription>
-                            <!-- 插件提供者 -->
-                            <pluginProvider>Your Organization</pluginProvider>
+                            <pluginProvider>OneBase Team</pluginProvider>
+                            <pluginDependencies />
                         </configuration>
                     </execution>
 
@@ -132,13 +191,12 @@
                 </executions>
             </plugin>
 
-            <!-- Maven JAR插件 - 配置JAR打包选项 -->
+            <!-- 禁止生成 Maven 描述符，避免 PF4J 冲突 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <configuration>
                     <archive>
-                        <!-- 禁止生成Maven描述符，避免与PF4J冲突 -->
                         <addMavenDescriptor>false</addMavenDescriptor>
                     </archive>
                 </configuration>
