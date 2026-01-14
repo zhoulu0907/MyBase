@@ -1,7 +1,7 @@
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import { PageType } from '@onebase/app';
 import { Button, Form, Input, Toast } from '@arco-design/mobile-react';
-import { menuPermissionSignal, pagesRuntimeSignal } from '@onebase/common';
+import { pagesRuntimeSignal } from '@onebase/common';
 import {
   SHOW_COMPONENT_TYPES,
   STATUS_OPTIONS,
@@ -68,7 +68,6 @@ const EditRuntime: React.FC<EditRuntimeProps> = ({
   const { editPageViewId, curPage, subEntities } = pagesRuntimeSignal;
 
   const pageEditorSignal = usePageEditorSignal();
-  const { canCreate } = menuPermissionSignal;
 
   const [cpStates, setCpStates] = useState<Record<string, any>>({});
   const [hasChanged, setHasChanged] = useState(false); // 防止修改表单某个值导致页面表单数据清空
@@ -99,6 +98,7 @@ const EditRuntime: React.FC<EditRuntimeProps> = ({
   const handleLoadDraft = useCallback(
     async (draftData: any) => {
       if (draftData) {
+        setEditLoading(true);
         console.log('latestDraft: ', draftData);
         const componentSchemas = useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value;
         const subTableComponents = useEditorSignalMap.get(editPageViewId.value)?.subTableComponents.value;
@@ -140,15 +140,14 @@ const EditRuntime: React.FC<EditRuntimeProps> = ({
       if (draftDataFromStorage) {
         try {
           const draftData = JSON.parse(draftDataFromStorage);
-          // 清除 localStorage 中的数据，避免重复载入
-          localStorage.removeItem('draftData');
           // 标记为从草稿箱载入，避免重复提示
           isLoadingFromDraftBoxRef.current = true;
           // 载入草稿数据
           handleLoadDraft(draftData);
         } catch (error) {
           console.error('解析 localStorage 草稿数据失败:', error);
-          // 解析失败时清除无效数据
+        } finally {
+          // 清除 localStorage 中的数据
           localStorage.removeItem('draftData');
         }
       }
@@ -179,12 +178,7 @@ const EditRuntime: React.FC<EditRuntimeProps> = ({
   };
 
   return (
-    <Form
-      form={form}
-      className={styles.formWrapper}
-      layout="inline"
-      onValuesChange={handleValuesChange}
-    >
+    <Form form={form} className={styles.formWrapper} layout="inline" onValuesChange={handleValuesChange}>
       <Form.Item field="draftId" label style={{ display: 'none' }}>
         <Input />
       </Form.Item>
@@ -261,7 +255,7 @@ const EditRuntime: React.FC<EditRuntimeProps> = ({
             取消
           </Button>
         )}
-        {curPage?.value?.pageSetType === PageType.BPM && isAdd && canCreate.value && (
+        {curPage?.value?.pageSetType === PageType.BPM && isAdd && (
           <Button type="primary" onClick={onSaveSubmit} loading={editLoading}>
             保存
           </Button>
@@ -271,7 +265,7 @@ const EditRuntime: React.FC<EditRuntimeProps> = ({
           loading={editLoading}
           bgColor={colorConfig}
           borderColor={colorConfig}
-          onClick={() => onSubmit()}
+          onClick={onSubmit}
           style={{ flex: 5 }}
         >
           提交

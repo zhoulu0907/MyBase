@@ -1,198 +1,193 @@
-import { Form, Uploader, Toast, Loading, Ellipsis } from '@arco-design/mobile-react';
-import { type UploadItem } from '@arco-design/mobile-react/lib/Upload';
-import { FileListMethods } from '@arco-design/mobile-react/cjs/uploader';
-import { ITypeRules, ValidatorType } from '@arco-design/mobile-utils';
-import { IconDelete, IconClose, IconDownload } from '@arco-design/mobile-react/esm/icon';
-import { nanoid } from 'nanoid';
-import { memo, useState, useEffect } from 'react';
-import { attachmentDownload, attachmentUpload, menuSignal } from '@onebase/app';
-import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, FormSchema, downloadFileByUrl } from '@onebase/ui-kit';
 import DownloadLink from '@/assets/images/download_link.svg';
+import { Ellipsis, Form, Loading, Toast, Uploader } from '@arco-design/mobile-react';
+import { FileListMethods } from '@arco-design/mobile-react/cjs/uploader';
+import { IconClose, IconDelete, IconDownload } from '@arco-design/mobile-react/esm/icon';
+import { ITypeRules, ValidatorType } from '@arco-design/mobile-utils';
+import { attachmentDownload, attachmentUpload, menuSignal } from '@onebase/app';
+import { FORM_COMPONENT_TYPES, FormSchema, STATUS_OPTIONS, STATUS_VALUES, downloadFileByUrl } from '@onebase/ui-kit';
+import { nanoid } from 'nanoid';
+import { memo, useEffect, useState } from 'react';
+import { CommonFileItem } from '@arco-design/mobile-react/cjs/uploader/upload/type';
 import '../index.css';
-import './index.css'
+import './index.css';
 
 type XFileUploadConfig = typeof FormSchema.XFileUploadSchema.config;
 
 // 定义文件项类型
 interface FileItem {
   url?: string;
-  status?: "loaded" | "loading" | "error";
+  status?: 'loaded' | 'loading' | 'error';
   file?: File;
   name?: string;
   id?: string;
   type: string;
-  response?: string;
 }
 
-const XFileUpload = memo((props: XFileUploadConfig & { runtime?: boolean; detailMode?: boolean; recordId?: string; form?: any; }) => {
-  const {
-    label,
-    dataField,
-    status,
-    verify,
-    layout,
-    runtime = true,
-    detailMode,
-    form,
-    showDownload,
-  } = props;
+const XFileUpload = memo(
+  (props: XFileUploadConfig & { runtime?: boolean; detailMode?: boolean; recordId?: string; form?: any }) => {
+    const { label, dataField, status, verify, layout, runtime = true, detailMode, form, showDownload } = props;
 
-  const [tableName, fieldName] = dataField;
-  const { curMenu } = menuSignal;
+    const [tableName, fieldName] = dataField;
+    const { curMenu } = menuSignal;
 
-  const [filesList, setFilesList] = useState<FileItem[]>([]);
-  const fieldId =
-    dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.FILE_UPLOAD}_${nanoid()}`;
+    const [filesList, setFilesList] = useState<FileItem[]>([]);
+    const fieldId =
+      dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.FILE_UPLOAD}_${nanoid()}`;
 
-  useEffect(() => {
-    const fieldValue = form?.getFieldValue(fieldId);
-    if (fieldValue && Array.isArray(fieldValue)) {
-      setFilesList(fieldValue);
-    }
-  }, [form, fieldId]);
+    useEffect(() => {
+      const fieldValue = form?.getFieldValue(fieldId);
+      if (fieldValue && Array.isArray(fieldValue)) {
+        setFilesList(fieldValue);
+      }
+    }, [form, fieldId]);
 
-  const handleUpload = async ({ file }: { file: File }) => {
-    const formData = new FormData();
-    formData.append('file', file);
+    const handleUpload = async (files: CommonFileItem): Promise<CommonFileItem | null> => {
+      if (!files.file) {
+        return null;
+      }
 
-    try {
-      if (runtime) {
-        const res = await attachmentUpload(tableName, formData);
-        return {
+      try {
+        const formData = new FormData();
+        formData.append('file', files.file);
+
+        if (runtime) {
+          const res = await attachmentUpload(tableName, formData);
+          return {
+            id: res,
+            url: files.url,
+            name: files.file.name || '',
+          } as CommonFileItem;
+        }
+        return null;
+      } catch (error) {
+        Toast.toast({
+          content: '上传失败，请重试',
+          duration: 2000
+        });
+        throw error;
+      }
+    };
+
+    const handleChange = (files: any[]) => {
+      setFilesList(files);
+      // 将文件数据同步到表单字段
+      if (form) {
+        // 提取需要保存到表单的数据，如文件名和URL
+        const formValues = files.map((file) => ({
           name: file.name,
-          response: res
-        };
-      } else {
-        return '';
+          url: file.url || '',
+          id: file.id
+        }));
+        form.setFieldValue(fieldId, formValues);
       }
-    } catch (error) {
-      Toast.toast({
-        content: '上传失败，请重试',
-        duration: 2000
-      });
-      throw error;
-    }
-  };
+    };
 
-  const handleChange = (files: any[]) => {
-    setFilesList(files);
-    // 将文件数据同步到表单字段
-    if (form) {
-      // 提取需要保存到表单的数据，如文件名和URL
-      const formValues = files.map(file => ({
-        name: file.name,
-        url: file.url || '',
-        response: file.response
-      }));
-      form.setFieldValue(fieldId, formValues);
-    }
-  };
+    // 自定义文件列表展示
+    const renderUploadList = (fileListMethods: FileListMethods) => {
+      const getFileIcon = (file: any) => {
+        if (file?.name) {
+          // todo  根据文件类型展示不同icon
+          const index = file.name.lastIndexOf('.');
+          const type = file.name.slice(index + 1);
+        }
+        return <img src={DownloadLink} alt="download_link" />;
+      };
 
-  // 自定义文件列表展示
-  const renderUploadList = (fileListMethods: FileListMethods) => {
-    const getFileIcon = (file: UploadItem) => {
-      if (file?.name) {
-        // todo  根据文件类型展示不同icon
-        const index = file.name.lastIndexOf('.');
-        const type = file.name.slice(index + 1)
+      return (
+        <div className="uplaodList-text">
+          {filesList.map(({ id, type, status, url, name }, index) => (
+            <div key={index} className="uplaodList-text-item">
+              {getFileIcon(type as any)}
+              <div className="uplaodList-text-item-name">{name}</div>
+              {status && status !== 'loaded' ? (
+                <div className="uplaodList-text-item-process">
+                  <Loading type="circle" radius={7} />
+                  <IconClose
+                    className="uplaodList-text-item-process-close"
+                    onClick={() => fileListMethods.deleteFile(index)}
+                  />
+                </div>
+              ) : (
+                <div className="uplaodList-text-item-opera">
+                  {showDownload && (
+                    <IconDownload
+                      style={{ color: 'rgb(var(--primary-6))' }}
+                      onClick={async (e) => {
+                        e.stopPropagation();
+
+                        if (url && name) {
+                          const lastIndexOf = fieldName.lastIndexOf('.');
+                          const curFieldName = lastIndexOf === -1 ? fieldName : fieldName.slice(lastIndexOf + 1);
+                          const param = {
+                            menuId: curMenu.value?.id,
+                            id: form?.getFieldValue('id') || '',
+                            fieldName: curFieldName,
+                            fileId: id || ''
+                          };
+
+                          const fileUrl = await attachmentDownload(tableName, param);
+                          downloadFileByUrl(fileUrl, name);
+                        }
+                      }}
+                    />
+                  )}
+                  {!detailMode && <IconDelete onClick={() => fileListMethods.deleteFile(index)} />}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      );
+    };
+
+    const rules: ITypeRules<ValidatorType.Custom>[] = [
+      {
+        required: verify?.required,
+        type: ValidatorType.Custom,
+        message: `${label.text}是必填项`
       }
-      return <img src={DownloadLink} alt="download_link" />;
-    }
+    ];
 
     return (
-      <div className="uplaodList-text">
-        {filesList.map(({ id, type, status, url, name, response }, index) => (
-          <div key={index} className="uplaodList-text-item">
-            {getFileIcon(type as UploadItem)}
-            <div className="uplaodList-text-item-name">{name}</div>
-            {status && status !== 'loaded' ? (
-              <div className="uplaodList-text-item-process">
-                <Loading type="circle" radius={7} />
-                <IconClose
-                  className="uplaodList-text-item-process-close"
-                  onClick={() => fileListMethods.deleteFile(index)}
-                />
-              </div>
-            ) : (
-              <div className="uplaodList-text-item-opera">
-                {showDownload && <IconDownload
-                  style={{ color: 'rgb(var(--primary-6))' }}
-                  onClick={async (e) => {
-                    e.stopPropagation();
-
-                    if (url && name) {
-                      const lastIndexOf = fieldName.lastIndexOf('.');
-                      const curFieldName = lastIndexOf === -1 ? fieldName : fieldName.slice(lastIndexOf + 1);
-                      const param = {
-                        menuId: curMenu.value?.id,
-                        id: form?.getFieldValue('id') || '',
-                        fieldName: curFieldName,
-                        fileId: id || response || ''
-                      };
-
-                      const fileUrl = await attachmentDownload(tableName, param);
-                      downloadFileByUrl(fileUrl, name);
-                    }
-                  }}
-                />}
-                {!detailMode && <IconDelete
-                  onClick={() => fileListMethods.deleteFile(index)}
-                />}
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
-    );
-  };
-
-  const rules: ITypeRules<ValidatorType.Custom>[] = [
-    {
-      required: verify?.required,
-      type: ValidatorType.Custom,
-      message: `${label.text}是必填项`
-    }
-  ];
-
-  return (
-    <Form.Item
-      className="inputTextWrapperOBMobile fileUploadWrapperOBMobile"
-      label={
-        label.display && <Ellipsis text={label.text} maxLine={2} />
-      }
-      layout="vertical"
-      field={fieldId}
-      rules={rules}
-      trigger="fileList"
-      style={{
-        pointerEvents: runtime ? 'unset' : 'none',
-        opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
-      }}
-    >
-      <Uploader
-        accept={verify?.fileFormat}
-        files={filesList}
-        limit={verify?.maxCount === -1 ? undefined : verify?.maxCount}
-        onMaxSizeExceed={(file) =>
-          Toast.toast({
-            content: '文件大小超出限制',
-            duration: 2000
-          })}
-        onLimitExceed={(file) =>
-          Toast.toast({
-            content: '文件数量超出限制',
-            duration: 2000
-          })}
-        disabled={status !== STATUS_VALUES[STATUS_OPTIONS.DEFAULT] || detailMode}
+      <Form.Item
+        className="inputTextWrapperOBMobile fileUploadWrapperOBMobile"
+        label={label.display && <Ellipsis text={label.text} maxLine={2} />}
+        layout="vertical"
+        field={fieldId}
+        rules={rules}
+        trigger="fileList"
         style={{
-          width: '100%'
+          pointerEvents: runtime ? 'unset' : 'none',
+          opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
-        renderFileList={renderUploadList}
-        onChange={handleChange}
-        upload={handleUpload}
-      />
-    </Form.Item>
-  );
-});
+      >
+        <Uploader
+          accept={verify?.fileFormat}
+          files={filesList}
+          limit={verify?.maxCount === -1 ? undefined : verify?.maxCount}
+          onMaxSizeExceed={(file) =>
+            Toast.toast({
+              content: '文件大小超出限制',
+              duration: 2000
+            })
+          }
+          onLimitExceed={(file) =>
+            Toast.toast({
+              content: '文件数量超出限制',
+              duration: 2000
+            })
+          }
+          disabled={status !== STATUS_VALUES[STATUS_OPTIONS.DEFAULT] || detailMode}
+          style={{
+            width: '100%'
+          }}
+          renderFileList={renderUploadList}
+          onChange={handleChange}
+          upload={handleUpload}
+        />
+      </Form.Item>
+    );
+  }
+);
 
 export default XFileUpload;
