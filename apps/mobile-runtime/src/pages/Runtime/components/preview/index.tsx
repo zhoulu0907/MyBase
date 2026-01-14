@@ -192,17 +192,17 @@ const PreviewContainer: React.FC<PreviewProps> = ({
   };
 
   // 信息收集弹窗
-  const [flows, setFlows] = useState<any[]>([]);
-  const [inputParams, setInputParams] = useState<any>({});
+  // const [flows, setFlows] = useState<any[]>([]);
+  // const [inputParams, setInputParams] = useState<any>({});
 
   const resetImageFile = (formData: any, field: { fieldType: string; fieldName: string }, value: any) => {
     const filterByUpload = ['IMAGE', 'FILE'];
     if (filterByUpload.includes(field.fieldType) && Array.isArray(value)) {
       formData[field.fieldName] = value.map((item: any) => {
-        if ((item.response || item.id) && item.name) {
+        if (item.id && item.name) {
           return {
             name: item.name,
-            id: item.response || item.id
+            id: item.id
           };
         }
         return item;
@@ -233,7 +233,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({
     const subFormData = {} as any;
     const groups = [] as any;
     let subEntityUuid: string = '';
-    Object.entries(fields).forEach(async ([key, value]) => {
+    for (const [key, value] of Object.entries(fields)) {
       console.log('key: ', key, '   value: ', value);
       // 处理主表逻辑
       const field = (mainMetaDataFields.value || [])
@@ -249,7 +249,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({
         } else if (field.fieldType === ENTITY_FIELD_TYPE.DATETIME.VALUE) {
           formData[field.fieldName] = value ? dayjs(value).format('YYYY-MM-DD hh:mm:ss') : '';
         } else if (field.fieldType === ENTITY_FIELD_TYPE.SELECT.VALUE) {
-          formData[field.fieldName] = value?.[0];
+          formData[field.fieldName] = typeof value === 'object' ? value[0] : value;
         } else if (field.fieldType === ENTITY_FIELD_TYPE.USER.VALUE && Array.isArray(value)) {
           let userTempData = userSelectData;
           if (userTempData.length === 0) {
@@ -293,7 +293,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({
         } else if (fieldType === ENTITY_FIELD_TYPE.DATETIME.VALUE) {
           subFormData[key] = value ? dayjs(value).format('YYYY-MM-DD hh:mm:ss') : '';
         } else if (fieldType === ENTITY_FIELD_TYPE.SELECT.VALUE) {
-          subFormData[key] = value[0];
+          subFormData[key] = typeof value === 'object' ? value[0] : value;
         } else if (fieldType === ENTITY_FIELD_TYPE.USER.VALUE && Array.isArray(value)) {
           let userTempData = userSelectData;
           if (userTempData.length === 0) {
@@ -310,7 +310,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({
           subFormData[key] = value;
         }
       }
-    });
+    }
 
     const result = Object.entries(subFormData).reduce((acc, [key, val]) => {
       const [, i, field] = key.split('.');
@@ -327,12 +327,12 @@ const PreviewContainer: React.FC<PreviewProps> = ({
     console.log('subFormData:   ', subFormData);
 
     // 接口判断 页面触发
-    const curFormPage = curPage.value?.pages?.find((ele: any) => ele.pageType === CATEGORY_TYPE.FORM);
-    const pageId = curFormPage?.id;
-    const flowRes = pageId ? await queryFlowExecForm(pageId) : [];
-    setInputParams(formData);
+    // const curFormPage = curPage.value?.pages?.find((ele: any) => ele.pageType === CATEGORY_TYPE.FORM);
+    // const pageId = curFormPage?.id;
+    // const flowRes = pageId ? await queryFlowExecForm(pageId) : [];
+    // setInputParams(formData);
 
-    // console.log('editTargetId: ', editTargetId);
+    // console.log('editTargetId: ', editTargetId, formData);
 
     if (editTargetId) {
       const req: UpdateMethodV2Params = {
@@ -344,10 +344,10 @@ const PreviewContainer: React.FC<PreviewProps> = ({
       const res = await dataMethodUpdateV2(tableName, menuId, req);
       console.log(res);
 
-      const updateFlows = (flowRes || []).filter(
-        (ele: any) => ele.recordTriggerEvents && ele.recordTriggerEvents.includes(TRIGGER_EVENTS.UPDATE)
-      );
-      setFlows(updateFlows);
+      // const updateFlows = (flowRes || []).filter(
+      //   (ele: any) => ele.recordTriggerEvents && ele.recordTriggerEvents.includes(TRIGGER_EVENTS.UPDATE)
+      // );
+      // setFlows(updateFlows);
       if (res) {
         Toast.success('更新成功');
         setPageType(EDITOR_TYPES.LIST_EDITOR);
@@ -398,10 +398,10 @@ const PreviewContainer: React.FC<PreviewProps> = ({
           setPageType(EDITOR_TYPES.LIST_EDITOR);
         }
 
-        const createFlows = (flowRes || []).filter(
-          (ele: any) => ele.recordTriggerEvents && ele.recordTriggerEvents.includes(TRIGGER_EVENTS.CREATE)
-        );
-        setFlows(createFlows);
+        // const createFlows = (flowRes || []).filter(
+        //   (ele: any) => ele.recordTriggerEvents && ele.recordTriggerEvents.includes(TRIGGER_EVENTS.CREATE)
+        // );
+        // setFlows(createFlows);
 
         if (res) {
           if (isDraft) {

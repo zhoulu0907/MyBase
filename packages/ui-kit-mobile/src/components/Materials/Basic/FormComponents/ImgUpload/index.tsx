@@ -39,7 +39,7 @@ const XImgUpload = memo((props: XImgUploadConfig & { runtime?: boolean; detailMo
     }
   };
 
-  const initUlr = async () => {
+  const initUrl = async () => {
     if (!form || !fieldId) return;
 
     const array = form.getFieldValue(fieldId) || [];
@@ -66,7 +66,7 @@ const XImgUpload = memo((props: XImgUploadConfig & { runtime?: boolean; detailMo
   };
 
   useEffect(() => {
-    initUlr();
+    initUrl();
   }, [fieldId]);
 
   useEffect(() => {
@@ -79,26 +79,30 @@ const XImgUpload = memo((props: XImgUploadConfig & { runtime?: boolean; detailMo
     };
   }, []);
 
-  const handleUpload = async (file: ImagePickItem): Promise<ImagePickItem | null> => {
-    if (!file.file) {
+  const handleUpload = async (files: ImagePickItem): Promise<ImagePickItem | null> => {
+    if (!files.file) {
       return null;
     }
 
     try {
       const formData = new FormData();
-      formData.append('file', file.file);
+      formData.append('file', files.file);
 
       if (runtime) {
         const res = await attachmentUpload(tableName, formData);
         return {
-          ...file,
-          url: file.url || '',
-          response: res
+          id: res,
+          url: files.url || '',
+          name: files.file.name || ''
         } as ImagePickItem;
       }
 
       return null;
     } catch (error) {
+      Toast.toast({
+        content: '上传失败，请重试',
+        duration: 2000
+      });
       return null;
     }
   };
@@ -141,7 +145,7 @@ const XImgUpload = memo((props: XImgUploadConfig & { runtime?: boolean; detailMo
         maxSize={verify.maxSize * 1024}
         onClick={onClick}
         upload={handleUpload}
-        images={(form.getFieldValue(fieldId) || []).map((item: any) => ({ src: item.url }))}
+        images={(form.getFieldValue(fieldId) || []).map((item: any) => ({ url: item.url }))}
         disabled={status !== STATUS_VALUES[STATUS_OPTIONS.DEFAULT] || detailMode}
         onMaxSizeExceed={(file) => {
           Toast.toast({
