@@ -148,7 +148,8 @@ public class EtlDatasourceServiceImpl implements EtlDatasourceService {
         ConnectCryptoProperties newProperties = BeanUtils.copyBean(connectProperties);
         String newPwd = connectProperties.getPassword();
         if (StringUtils.isBlank(newPwd)) {
-            String oldPwd = JsonUtils.parseTree(oldDatasource.getConfig()).get("password").asText();
+            ConnectCryptoProperties oldProperties = JsonUtils.parseObject(oldDatasource.getConfig(), ConnectCryptoProperties.class);
+            String oldPwd = oldProperties.getPassword();
             newProperties.setPassword(oldPwd);
         }
         oldDatasource.setConfig(JsonUtils.toJsonString(newProperties));
