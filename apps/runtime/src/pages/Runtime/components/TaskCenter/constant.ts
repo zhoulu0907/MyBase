@@ -158,3 +158,6 @@ export function displayStatusMap(_status: string) {
     }
     return _map
 }
+
+export const avatarPath =
+  'http://s25029301301.dev.internal.virtueit.net:81/v1-snapshot/onebaseserverruntime/runtime/infra/file/corp/download/';

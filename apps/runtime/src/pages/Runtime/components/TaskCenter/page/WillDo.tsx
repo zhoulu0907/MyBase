@@ -5,6 +5,7 @@ import DetailPop from './DetailPop';
 import BatchApproveModal from '../modal/batchApprove';
 import { FLOWSTATUS_TYPE, FlowStatusMap, LISTTYPE } from '@onebase/app';
 import { getTodoPageList } from '@onebase/app/src/services/app_runtime';
+import { avatarPath } from '../constant'
 import dayjs from 'dayjs';
 import '../style/tcPage.less';
 
@@ -36,7 +37,7 @@ const WillDo: FC<WillDoProps> = ({ appId }) => {
       dataIndex: 'initiator',
       render: (obj: any) => (
         <span className="flex-bw-center">
-          <div className="photo-img">{obj?.avatar ? <img src={obj?.avatar} /> : obj?.name?.charAt(0)}</div>
+          <div className="photo-img">{obj?.avatar ? <img src={avatarPath + obj?.avatar} /> : obj?.name?.charAt(0)}</div>
           {obj?.name}
         </span>
       ),

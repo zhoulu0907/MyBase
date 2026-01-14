@@ -6,7 +6,7 @@ import dayjs from 'dayjs';
 import dotImg from '../../../../../assets/images/task_center/one-dot.svg'
 import systemImg from '../../../../../assets/images/task_center/system.svg'
 import '../style/tcPage.less';
-import {approvalConfigVar, displayStatusMap} from '../constant'
+import {approvalConfigVar, displayStatusMap, avatarPath} from '../constant'
 
 
 const Step = Steps.Step;
@@ -123,7 +123,7 @@ const DetailStep: FC<any> = ({ stepData }: any) => {
         isPending = item.taskStatus === 'curr_in_approval' || item.taskStatus === '审批中'
         if (isPending || isNotStart) {
           const user = {imgUrl: '', uName: ''}
-          user.imgUrl = item?.avatar || '';
+          user.imgUrl = item?.avatar ? avatarPath + item.avatar : '';
           if (item?.operator) {
             user.uName = item.operator?.charAt(0)
           }
@@ -207,7 +207,7 @@ const DetailStep: FC<any> = ({ stepData }: any) => {
     }
     return <>
       <div className="flex-bw-center user-temp">
-        <p className="photo-img">{opperator?.avatar ? <img src={opperator.avatar} alt='' /> : opperator?.operator?.charAt(0)}</p>
+        <p className="photo-img">{opperator?.avatar ? <img src={avatarPath + opperator.avatar} alt='' /> : opperator?.operator?.charAt(0)}</p>
         <div style={{ flex: 1 }}>
           <p className="flex-bw-center">
             <span style={{fontSize: '14px'}}>{opperator?.operator}</span>
