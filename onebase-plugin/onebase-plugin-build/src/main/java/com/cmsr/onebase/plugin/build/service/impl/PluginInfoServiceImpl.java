@@ -25,7 +25,6 @@ import com.cmsr.onebase.plugin.core.dal.database.PluginPackageInfoRepository;
 import com.cmsr.onebase.plugin.core.dal.dataobject.PluginConfigInfoDO;
 import com.cmsr.onebase.plugin.core.dal.dataobject.PluginInfoDO;
 import com.cmsr.onebase.plugin.core.dal.dataobject.PluginPackageInfoDO;
-import com.cmsr.onebase.plugin.core.message.PluginCommandMessage;
 import com.cmsr.onebase.plugin.core.model.PluginMetaInfo;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
@@ -128,22 +127,6 @@ public class PluginInfoServiceImpl implements PluginInfoService {
 
         // 9. 保存配置信息
         saveConfigInfo(metaInfo, pluginInfoDO.getPluginId(), pluginInfoDO.getPluginVersion());
-
-        // 10. 发布Redis消息通知Runtime下载并解压插件
-        Long tenantId = TenantContextHolder.getTenantId();
-        List<PluginCommandMessage.PackageInfo> packageInfoList = packages.stream()
-                .map(p -> PluginCommandMessage.PackageInfo.builder()
-                        .packageName(p.getPackageName())
-                        .packageType(p.getPackageType())
-                        .build())
-                .collect(Collectors.toList());
-        pluginCommandPublisher.publishUploadCommand(
-                pluginInfoDO.getPluginId(),
-                pluginInfoDO.getPluginVersion(),
-                tenantId,
-                pluginInfoDO.getPluginPackage(),
-                packageInfoList
-        );
 
         log.info("插件上传成功: pluginId={}, version={}", metaInfo.getPluginId(), pluginInfoDO.getPluginVersion());
         return pluginInfoDO.getPluginId();
