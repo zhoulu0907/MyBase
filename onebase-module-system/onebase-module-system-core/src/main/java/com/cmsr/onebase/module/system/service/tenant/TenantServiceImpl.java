@@ -663,6 +663,21 @@ public class TenantServiceImpl implements TenantService {
         return tenantRespVO;
     }
 
+    @Override
+    public TenantRespVO getTenantAndPlatformAdminInfo(Long id) {
+        TenantRespVO tenantPlatformInfo = getTenantWithAppCount(id);
+
+        // 过滤出tenantAdminUserList中platformUserId不为空的数据
+        if (tenantPlatformInfo.getTenantAdminUserList() != null) {
+            List<TenantAdminUserResVO> filteredAdminUserList = tenantPlatformInfo.getTenantAdminUserList().stream()
+                    .filter(adminUser -> adminUser.getPlatformUserId() != null)
+                    .collect(Collectors.toList());
+            tenantPlatformInfo.setTenantAdminUserList(filteredAdminUserList);
+        }
+
+        return tenantPlatformInfo;
+    }
+
     /**
      * 获取所有企业的数据，并根据tenantId分组获取条数
      *

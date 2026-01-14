@@ -67,6 +67,14 @@ public class PlatformTenantController {
         return success(tenantService.getTenantWithAppCount(id));
     }
 
+    @GetMapping("/get-tenant-platform-info")
+    @Operation(summary = "获得租户和租户下平台管理员信息")
+    @Parameter(name = "id", description = "编号", required = true, example = "1024")
+    @PreAuthorize("@ss.hasPermission('tenant:space:query')")
+    public CommonResult<TenantRespVO> getTenantAndPlatformAdminInfo(@RequestParam("id") Long id) {
+        return success(tenantService.getTenantAndPlatformAdminInfo(id));
+    }
+
     @GetMapping("/get-id-by-name")
     @PermitAll
     @TenantIgnore

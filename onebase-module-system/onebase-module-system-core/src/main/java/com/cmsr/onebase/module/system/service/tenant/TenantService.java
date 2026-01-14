@@ -67,6 +67,14 @@ public interface TenantService {
     TenantRespVO getTenantWithAppCount(Long id);
 
     /**
+     * 获得空间和平台管理员信息（包含应用数量）
+     *
+     * @param id 编号
+     * @return 空间信息
+     */
+    TenantRespVO getTenantAndPlatformAdminInfo(Long id);
+
+    /**
      * 获得空间分页
      *
      * @param pageReqVO 分页查询
