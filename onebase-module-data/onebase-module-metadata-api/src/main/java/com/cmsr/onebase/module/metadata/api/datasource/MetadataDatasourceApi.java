@@ -45,4 +45,15 @@ public interface MetadataDatasourceApi {
      */
     @Operation(summary = "获取数据源信息")
     Object getDatasource(@PathVariable("id") Long id);
+
+    /**
+     * TODO(biantianyu): 实现导入导出接口
+     * */
+    @Operation(summary = "导出数据源信息")
+    Object exportDatasource(Long applicationId, Long versionTag);
+
+    @Operation(summary = "导入数据源信息")
+    void importDatasource(Long newApplicationId, Long tenantId, Long versionTag, Object datasourceConfig);
+
+
 }

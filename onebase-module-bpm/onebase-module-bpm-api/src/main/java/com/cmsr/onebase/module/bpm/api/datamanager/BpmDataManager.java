@@ -1,5 +1,7 @@
 package com.cmsr.onebase.module.bpm.api.datamanager;
 
+import io.swagger.v3.oas.annotations.Operation;
+
 /**
  *
  * 数据管理API
@@ -43,4 +45,22 @@ public interface BpmDataManager {
      *  @param applicationId
      */
     void removeApplication(Long applicationId);
+
+    /**
+     * TODO(liyang): 实现导入导出接口
+     * */
+
+    /**
+     *  导出数据
+     *  @param applicationId
+     *  @param versionTag
+     */
+    Object exportApplication(Long applicationId, Long versionTag);
+
+    /**
+     *  导入数据
+     *  @param newApplicationId
+     *  @param bpmConfig
+     */
+    void importApplication(Long newApplicationId, Long tenantId, Long versionTag, Object bpmConfig);
 }

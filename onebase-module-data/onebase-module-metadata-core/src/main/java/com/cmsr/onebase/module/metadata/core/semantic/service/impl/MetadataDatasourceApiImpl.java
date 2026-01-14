@@ -29,7 +29,7 @@ public class MetadataDatasourceApiImpl implements MetadataDatasourceApi {
 
     @Resource
     private MetadataDatasourceCoreService metadataDatasourceCoreService;
-    
+
     @Resource
     private MetadataConfig metadataConfig;
 
@@ -44,11 +44,11 @@ public class MetadataDatasourceApiImpl implements MetadataDatasourceApi {
             config.put("database", metadataConfig.getDefaultDatasourceDatabase());
             config.put("username", metadataConfig.getDefaultDatasourceUsername());
             config.put("password", metadataConfig.getDefaultDatasourcePassword());
-            
+
             // 将配置转换为JSON字符串
             String configJson = String.format(
                 "{\"host\":\"%s\",\"port\":%d,\"database\":\"%s\",\"username\":\"%s\",\"password\":\"%s\"}",
-                config.get("host"), config.get("port"), config.get("database"), 
+                config.get("host"), config.get("port"), config.get("database"),
                 config.get("username"), config.get("password")
             );
 
@@ -60,7 +60,7 @@ public class MetadataDatasourceApiImpl implements MetadataDatasourceApi {
                     configJson
             );
 
-            log.info("创建默认数据源成功，数据源ID: {}，应用ID: {}，类型: {}", 
+            log.info("创建默认数据源成功，数据源ID: {}，应用ID: {}，类型: {}",
                     datasourceId, reqDTO.getApplicationId(), metadataConfig.getDefaultDatasourceType());
             return datasourceId;
         } catch (Exception e) {
@@ -118,5 +118,15 @@ public class MetadataDatasourceApiImpl implements MetadataDatasourceApi {
             log.error("获取数据源信息失败，ID: {}", id, e);
             throw new RuntimeException("获取数据源信息失败: " + e.getMessage());
         }
+    }
+
+    @Override
+    public Object exportDatasource(Long applicationId, Long versionTag) {
+        return null;
+    }
+
+    @Override
+    public void importDatasource(Long newApplicationId, Long tenantId, Long versionTag, Object datasourceConfig) {
+
     }
 }
