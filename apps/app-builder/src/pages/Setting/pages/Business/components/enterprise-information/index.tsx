@@ -1,3 +1,4 @@
+import { displayCorpLogo } from '@/utils';
 import {
   Button,
   Card,
@@ -17,11 +18,11 @@ import {
   createCorpAppApi,
   getCorpAuthorizedAppListApi,
   getCorpDetailByIdApi,
+  getFileUrlById,
   removeCorpAppApi,
   updateCorpApi,
   updateCorpAppApi,
   uploadFile,
-  getFileUrlById,
   type CorpAppParams,
   type corpListParams
 } from '@onebase/platform-center';
@@ -32,7 +33,6 @@ import type { AppItem, cropItem, industryTypeOption, OutletContextType, updatedP
 import { AuthorizedApp } from '../createApp/authorizedApp';
 import EditableFormItem from '../formItem';
 import styles from './index.module.less';
-import { displayCorpLogo } from '@/utils';
 
 const EnterpriseInfoPage: React.FC = () => {
   const { activeTab } = useParams();
@@ -328,7 +328,7 @@ const EnterpriseInfoPage: React.FC = () => {
           onChange={handleChange.bind(null, 'adminMobile')}
           isEdit={isEdited}
           component={Input}
-          componentProps={{ placeholder: '请输入手机号' }}
+          componentProps={{ placeholder: '请输入手机号', disabled: true }}
         />
       )
     },
@@ -395,7 +395,7 @@ const EnterpriseInfoPage: React.FC = () => {
           isEdit={isEdited}
           type="status"
           component={Checkbox}
-          componentProps={{ placeholder: '请选择是否启用', checked: formData?.status === 0 ? false : true}}
+          componentProps={{ placeholder: '请选择是否启用', checked: formData?.status === 0 ? false : true }}
         />
       )
     }
