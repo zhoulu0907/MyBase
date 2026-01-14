@@ -64,6 +64,10 @@ public class PluginCommandMessage implements Serializable {
          */
         DISABLE,
         /**
+         * 上传插件
+         */
+        UPLOAD,
+        /**
          * 重新加载插件
          */
         RELOAD
