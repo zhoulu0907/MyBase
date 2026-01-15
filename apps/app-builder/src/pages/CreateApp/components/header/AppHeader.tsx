@@ -75,7 +75,8 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
         iconName: appResp.iconName || '',
         iconColor: appResp.iconColor || '',
         appName: appResp.appName || '--',
-        appStatus: appResp.appStatus || 0
+        appStatus: appResp.appStatus || 0,
+        publishModel: appResp.publishModel
       });
     }
   };
