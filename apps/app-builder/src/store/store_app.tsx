@@ -6,6 +6,7 @@ interface CurAppInfo {
   iconColor: string;
   appName: string;
   appStatus: AppStatus;
+  publishModel?: string;
 }
 export interface appStore {
   // 当前应用的appCode
