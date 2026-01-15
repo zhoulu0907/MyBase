@@ -1,4 +1,6 @@
-package com.cmsr.onebase.plugin.maven;
+package com.cmsr.onebase.plugin.maven.mojo;
+
+import com.cmsr.onebase.plugin.maven.constant.PluginPackagingConstants;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -30,12 +32,7 @@ import java.util.Properties;
  * @author chengyuansen
  * @date 2025-12-18
  */
-@Mojo(
-        name = "generate-properties",
-        defaultPhase = LifecyclePhase.GENERATE_RESOURCES,
-        requiresDependencyResolution = ResolutionScope.COMPILE,
-        threadSafe = true
-)
+@Mojo(name = "generate-properties", defaultPhase = LifecyclePhase.GENERATE_RESOURCES, requiresDependencyResolution = ResolutionScope.COMPILE, threadSafe = true)
 public class GeneratePropertiesMojo extends AbstractMojo {
 
     /**
@@ -176,7 +173,7 @@ public class GeneratePropertiesMojo extends AbstractMojo {
         Properties props = new Properties();
         props.setProperty("plugin.id", pluginId);
         props.setProperty("plugin.version", pluginVersion);
-        
+
         // 关键修复：优先使用配置的 pluginMainClass，如果没有配置则使用自动生成的类名
         String finalPluginClass;
         if (pluginMainClass != null && !pluginMainClass.trim().isEmpty()) {
@@ -205,11 +202,12 @@ public class GeneratePropertiesMojo extends AbstractMojo {
         }
 
         File propertiesFile = new File(outputDirectory, "plugin.properties");
-        try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(propertiesFile), StandardCharsets.ISO_8859_1)) {
+        try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(propertiesFile),
+                StandardCharsets.ISO_8859_1)) {
             // 手动写入文件头
             writer.write("# OneBase Plugin Properties - Auto Generated\n");
             writer.write("# " + new java.util.Date().toString() + "\n");
-            
+
             // 按照固定顺序写入属性，中文字符会自动转换为Unicode转义
             writeProperty(writer, "plugin.id", props.getProperty("plugin.id"));
             writeProperty(writer, "plugin.description", props.getProperty("plugin.description"));
@@ -217,14 +215,14 @@ public class GeneratePropertiesMojo extends AbstractMojo {
             writeProperty(writer, "plugin.license", props.getProperty("plugin.license"));
             writeProperty(writer, "plugin.version", props.getProperty("plugin.version"));
             writeProperty(writer, "plugin.provider", props.getProperty("plugin.provider"));
-            
+
             if (props.getProperty("plugin.dependencies") != null) {
                 writeProperty(writer, "plugin.dependencies", props.getProperty("plugin.dependencies"));
             }
             if (props.getProperty("plugin.requires") != null) {
                 writeProperty(writer, "plugin.requires", props.getProperty("plugin.requires"));
             }
-            
+
             getLog().info("已生成: " + propertiesFile.getAbsolutePath());
         } catch (IOException e) {
             throw new MojoExecutionException("无法写入plugin.properties", e);

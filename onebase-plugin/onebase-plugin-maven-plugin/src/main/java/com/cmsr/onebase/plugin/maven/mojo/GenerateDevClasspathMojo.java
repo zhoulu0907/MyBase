@@ -1,4 +1,7 @@
-package com.cmsr.onebase.plugin.maven;
+package com.cmsr.onebase.plugin.maven.mojo;
+
+import com.cmsr.onebase.plugin.maven.constant.PluginPackagingConstants;
+import com.cmsr.onebase.plugin.maven.util.DependencyFilterUtil;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.AbstractMojo;
@@ -87,48 +90,18 @@ public class GenerateDevClasspathMojo extends AbstractMojo {
     /**
      * 收集需要包含的依赖路径
      * <p>
-     * 策略：只收集项目的直接依赖（不包括传递依赖），且 scope 为 compile 或 runtime。
-     * 这样可以完全避免 provided 依赖的传递依赖被包含进来。
+     * 使用 DependencyFilterUtil 统一处理依赖筛选逻辑
      * </p>
      */
     private List<String> collectDependencyPaths() {
         List<String> paths = new ArrayList<>();
 
-        // 只处理直接依赖
-        for (org.apache.maven.model.Dependency dep : project.getDependencies()) {
-            String scope = dep.getScope();
+        // 使用工具类收集依赖
+        List<Artifact> dependencies = DependencyFilterUtil.collectRuntimeDependencies(project, getLog());
 
-            // 只包含 compile 和 runtime scope（默认是 compile）
-            if (scope == null) {
-                scope = "compile";
-            }
-
-            if (!"compile".equals(scope) && !"runtime".equals(scope)) {
-                getLog().debug("排除非 compile/runtime scope 的直接依赖: " + dep.getArtifactId() + " (scope: " + scope + ")");
-                continue;
-            }
-
-            // 排除宿主核心模块
-            if (PluginPackagingConstants.HOST_PROVIDED_ARTIFACTS.contains(dep.getArtifactId())) {
-                getLog().debug("排除宿主核心模块: " + dep.getArtifactId());
-                continue;
-            }
-
-            // 从已解析的 artifacts 中找到对应的 artifact
-            for (Artifact artifact : project.getArtifacts()) {
-                if (artifact.getGroupId().equals(dep.getGroupId())
-                        && artifact.getArtifactId().equals(dep.getArtifactId())) {
-                    File artifactFile = artifact.getFile();
-                    if (artifactFile != null && artifactFile.exists()) {
-                        String absolutePath = artifactFile.getAbsolutePath();
-                        paths.add(absolutePath);
-                        getLog().debug("  包含直接依赖: " + artifact.getArtifactId() + " -> " + absolutePath);
-                    } else {
-                        getLog().warn("依赖文件不存在: " + artifact.getArtifactId());
-                    }
-                    break;
-                }
-            }
+        // 转换为路径列表
+        for (Artifact artifact : dependencies) {
+            paths.add(artifact.getFile().getAbsolutePath());
         }
 
         return paths;

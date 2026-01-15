@@ -1,4 +1,4 @@
-package com.cmsr.onebase.plugin.maven;
+package com.cmsr.onebase.plugin.maven.constant;
 
 import java.util.Set;
 
@@ -46,5 +46,6 @@ public final class PluginPackagingConstants {
     /**
      * 私有构造函数，防止实例化
      */
-    private PluginPackagingConstants() {}
+    private PluginPackagingConstants() {
+    }
 }
