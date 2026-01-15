@@ -68,7 +68,7 @@ const XRadio = memo((props: XRadioConfig & { runtime?: boolean; detailMode?: boo
       }}
     >
       {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? (
-        <div>{form?.getFieldValue(fieldId)?.name || options.find((op) => op.id === form?.getFieldValue(fieldId)?.id || op.id === form?.getFieldValue(fieldId))?.label || '--'}</div>
+        <div>{form?.getFieldValue(fieldId)?.[0] || options.find((op) => op.value === form?.getFieldValue(fieldId)?.[0])?.label || '--'}</div>
       ) : (
         <RadioGroup
           className='radioWrapperOBMobile'

@@ -56,7 +56,7 @@ const Right: React.FC = () => {
 
   useEffect(() => {
     // 从 window.location.hash 中解析 redirectURL，再从 redirectURL 解析 appId 和 tenantId
-    getHashTenantIdAndAppId(setTenantId,setAppId);
+    getHashTenantIdAndAppId(setTenantId, setAppId);
   }, []);
 
   // 组件初始化时设置保存的账号
@@ -64,20 +64,6 @@ const Right: React.FC = () => {
     if (savedAccount) {
       form.setFieldValue('account', savedAccount);
     }
-
-    // 如果已经登录了就自动跳转到首
-    // if (TokenManager.isTokenValid()) {
-    //   const redirectURL = getHashQueryParam('redirectURL');
-    //   if (redirectURL) {
-    //     window.location.href = redirectURL;
-    //   } else {
-    //     // 跳转到首页
-    //     navigate(`/onebase/runtime-home/${appId}/${tenantId}`);
-    //   }
-    //   return;
-    // }
-
-    // handleGetApplication();
   }, []);
 
   useEffect(() => {

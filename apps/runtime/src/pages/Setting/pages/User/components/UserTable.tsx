@@ -1,6 +1,7 @@
 import { PermissionButton as Button } from '@/components/PermissionControl';
 import PlaceholderPanel from '@/components/PlaceholderPanel';
 import StatusTag, { getStatusLabel } from '@/components/StatusTag';
+import { StatusEnum as LocalStatusEnum } from '@/constants';
 import { Dropdown, Input, Menu, Message, Modal, Pagination, Select, Space, Table, Tag } from '@arco-design/web-react';
 import { IconDownload, IconMoreVertical, IconPlus, IconUpload } from '@arco-design/web-react/icon';
 import { type AuthRoleUsersPageRespVO } from '@onebase/app';
@@ -75,6 +76,11 @@ export enum UserRole {
 export const RoleLabelMap: Record<UserRole, string> = {
   [UserRole.ADMIN]: '部门接口人',
   [UserRole.DIRECTOR]: '主管'
+};
+
+// 将 platform-center 的 StatusEnum 转换为 constants 的 StatusEnum
+const toLocalStatusEnum = (status: StatusEnum): LocalStatusEnum => {
+  return status === StatusEnum.ENABLE ? LocalStatusEnum.ENABLE : LocalStatusEnum.DISABLE;
 };
 
 export default function UserTable({
@@ -198,7 +204,7 @@ export default function UserTable({
   // 禁用用户，需确认
   const handleStatusUpdate = (record: UserRecord) => {
     const newStatus = record.status === StatusEnum.ENABLE ? StatusEnum.DISABLE : StatusEnum.ENABLE;
-    const newLabel = getStatusLabel(newStatus);
+    const newLabel = getStatusLabel(toLocalStatusEnum(newStatus));
     Modal.confirm({
       title: `${newLabel}账号（${record.nickname}）？`,
       content: newStatus === StatusEnum.DISABLE ? '禁用状态下，用户无法登录系统，再次启用时用户可恢复正常使用' : '',
@@ -300,8 +306,10 @@ export default function UserTable({
               <Dropdown
                 droplist={
                   <Menu>
-                    <Menu.Item key="disable" onClick={() => handleStatusUpdate(record)}>
-                      {getStatusLabel(record.status === StatusEnum.DISABLE ? StatusEnum.ENABLE : StatusEnum.DISABLE)}
+                    <Menu.Item key="disable" disabled={isSystemUser(record)} onClick={() => handleStatusUpdate(record)}>
+                      {getStatusLabel(
+                        toLocalStatusEnum(record.status === StatusEnum.DISABLE ? StatusEnum.ENABLE : StatusEnum.DISABLE)
+                      )}
                     </Menu.Item>
                     <Menu.Item key="del" disabled={isSystemUser(record)} onClick={() => handleDelete(record)}>
                       删除
@@ -316,7 +324,9 @@ export default function UserTable({
             ) : (
               <>
                 <Button permission={ACTIONS.UPDATE} type="text" onClick={() => handleStatusUpdate(record)}>
-                  {getStatusLabel(record.status === StatusEnum.DISABLE ? StatusEnum.ENABLE : StatusEnum.DISABLE)}
+                  {getStatusLabel(
+                    toLocalStatusEnum(record.status === StatusEnum.DISABLE ? StatusEnum.ENABLE : StatusEnum.DISABLE)
+                  )}
                 </Button>
                 <Button
                   permission={ACTIONS.RESET}
@@ -391,7 +401,7 @@ export default function UserTable({
   const handleAddUser = async (selectedMembers: any[]) => {
     console.log('添加成员 selectedMembers:', selectedMembers);
     if (!selectedDeptId || !managerTypeModalVisible) return;
-    const keyIds = selectedMembers?.map(item => item.key).filter(Boolean) || [];
+    const keyIds = selectedMembers?.map((item) => item.key).filter(Boolean) || [];
     const params: UpdateAdminOrDirectorReq = {
       deptId: `${selectedDeptId}`,
       updateType: managerTypeModalVisible,

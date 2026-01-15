@@ -86,7 +86,7 @@
 .quickEntryThemeThree .quickEntryItems {
   display: grid;
   justify-content: space-between;
-  grid-template-columns: repeat(auto-fit, 22%);
+  grid-template-columns: repeat(auto-fit, max(22%, 190px));
   gap: min(10px);
   border-radius: 8px;
 }
@@ -99,6 +99,7 @@
   align-items: center;
   gap: 10px;
   width: 100%;
+  min-width: 190px;
   padding: 16px;
   border-radius: 8px;
   box-sizing: border-box;

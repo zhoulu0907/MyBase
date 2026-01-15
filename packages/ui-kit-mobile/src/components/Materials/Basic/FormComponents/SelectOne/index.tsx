@@ -67,7 +67,7 @@ const XSelectOne = memo((props: XSelectOneConfig & { runtime?: boolean; detailMo
       }}
     >
       {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
-        <div className="readonlyText">{options.find((op) => op.id === form?.getFieldValue(fieldId)?.[0])?.label || '--'}</div>
+        <div className="readonlyText">{options.find((op) => op.value === form?.getFieldValue(fieldId)?.[0])?.label || '--'}</div>
       ) : (
         <Picker
           title={label?.text || ''}
@@ -75,9 +75,9 @@ const XSelectOne = memo((props: XSelectOneConfig & { runtime?: boolean; detailMo
           renderLinkedContainer={(a, b = []) => {
             let result: any = ''
             if (b[0]) {
-              result = b[0].label
+              result = b[0].value
             }
-            result = options.find(op => op.id === a[0])?.label || a[0]
+            result = options.find(op => op.value === a[0])?.label || a[0]
             if (!result) {
               return <div className="arco-form-picker-link-container"><div className="arco-form-picker-link-container-placeholder">请选择</div></div>
             }

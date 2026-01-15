@@ -1,3 +1,4 @@
+import { displayCorpLogo } from '@/utils';
 import {
   Button,
   Card,
@@ -18,6 +19,7 @@ import {
   createCorpAppApi,
   getCorpAuthorizedAppListApi,
   getCorpDetailByIdApi,
+  getFileUrlById,
   removeCorpAppApi,
   updateCorpApi,
   updateCorpAppApi,

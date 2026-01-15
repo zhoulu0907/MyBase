@@ -24,7 +24,7 @@ export const BasicInformation: React.FC<IBasicInfoProps> = ({ industryOptions, b
       onValuesChange={handleValuesChange}
       form={basicInfoForm}
       initialValues={{
-        userLimit: basicValues?.userLimit,
+        userLimit: basicValues?.userLimit || 5000,
         status: basicValues?.status === 0 ? false : true,
         corpName: basicValues?.corpName,
         corpCode: basicValues?.corpCode,

@@ -6,6 +6,9 @@ import {
   relatedFormdataFieldConfig,
   statusConfig,
   widthConfig,
+  labelConfig,
+  placeholderConfig,
+  tooltipConfig,
   type ICommonBaseType,
   type TLayoutSelectKeyType,
   type TStatusSelectKeyType,
@@ -30,6 +33,7 @@ import type {
   ITextConfigType,
   ITooltipConfigType,
   IWidthConfigType,
+  ICommonConfigType,
   TBooleanDefaultType,
   TRadioDefaultType,
   TTextAreaDefaultType,
@@ -55,6 +59,7 @@ export type TXRelatedFormEditData = Array<
   | IStatusConfigType<TStatusSelectKeyType>
   | ILayoutConfigType<TLayoutSelectKeyType>
   | IWidthConfigType<TWidthSelectKeyType>
+  | ICommonConfigType
 >;
 
 export interface XRelatedFormConfig extends ICommonBaseType {
@@ -109,21 +114,9 @@ export interface XRelatedFormConfig extends ICommonBaseType {
 const XRelatedForm: XRelatedFormSchema = {
   editData: [
     ...baseConfig,
-    {
-      key: 'label',
-      name: '标题',
-      type: CONFIG_TYPES.LABEL_INPUT
-    },
-    {
-      key: 'placeholder',
-      name: '占位符',
-      type: CONFIG_TYPES.PLACEHOLDER_INPUT
-    },
-    {
-      key: 'tooltip',
-      name: '字段描述',
-      type: CONFIG_TYPES.TOOLTIP_INPUT
-    },
+    labelConfig,
+    placeholderConfig,
+    tooltipConfig,
     ...dataFieldConfig,
     ...relatedFormdataFieldConfig,
     statusConfig,

@@ -5,6 +5,7 @@ import { useSignals } from '@preact/signals-react/runtime';
 import { useEffect, useState } from 'react';
 import styles from './index.module.less';
 import { renderConfigItem } from './registry';
+import { resolveEditData } from './mapping';
 
 const FormItem = Form.Item;
 
@@ -63,7 +64,8 @@ const Attributes = ({ cpID }: ConfigsProps) => {
     const componentSchema = pageComponentSchemas[cpID] || curComponentSchema;
     const type = resolveType();
     const defaultSchema = type ? getComponentSchema(type as any) : { editData: componentSchema?.editData || [] };
-    setEditData(defaultSchema.editData || []);
+    const rawEditData = defaultSchema.editData || [];
+    setEditData(resolveEditData(rawEditData));
     // 使用当前组件的配置，确保切换组件时显示正确的配置
     // 创建新的对象引用，确保 React 能检测到变化
     const newConfigs = componentSchema?.config || {};
@@ -116,7 +118,7 @@ const Attributes = ({ cpID }: ConfigsProps) => {
   };
 
   const renderEditItem = (item: any, index: number) => {
-    return renderConfigItem({
+    const renderConfig =  renderConfigItem({
       id: cpID,
       item,
       index,
@@ -127,6 +129,7 @@ const Attributes = ({ cpID }: ConfigsProps) => {
       handleMultiPropsChange,
       handleLayoutChange
     });
+    return renderConfig;
   };
 
   // 可根据 id 获取/设置对应组件的属性，这里暂时未实现具体逻辑

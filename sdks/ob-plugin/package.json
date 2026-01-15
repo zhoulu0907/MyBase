@@ -1,0 +1,56 @@
+{
+  "name": "@ob/plugin",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./sdk": {
+      "types": "./dist/sdk/index.d.ts",
+      "import": "./dist/sdk/index.js",
+      "require": "./dist/sdk/index.cjs"
+    },
+    "./host": {
+      "types": "./dist/host/index.d.ts",
+      "import": "./dist/host/index.js",
+      "require": "./dist/host/index.cjs"
+    },
+    "./mock": {
+      "types": "./dist/mock/index.d.ts",
+      "import": "./dist/mock/index.js",
+      "require": "./dist/mock/index.cjs"
+    },
+    "./types": {
+      "types": "./dist/types.d.ts",
+      "default": "./dist/types.d.ts"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "sdk": ["dist/sdk/index.d.ts"],
+      "host": ["dist/host/index.d.ts"],
+      "mock": ["dist/mock/index.d.ts"],
+      "types": ["dist/types.d.ts"]
+    }
+  },
+  "sideEffects": false,
+  "scripts": {
+    "dev": "tsup --watch",
+    "build": "tsup"
+  },
+  "dependencies": {
+    "eventemitter3": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.7",
+    "tsup": "^8.3.5",
+    "typescript": "~5.8.3"
+  }
+}

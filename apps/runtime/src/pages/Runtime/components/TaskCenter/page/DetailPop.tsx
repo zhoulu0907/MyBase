@@ -10,6 +10,7 @@ import { getFormDetail, getOperatorRecord, fetchExecTask } from '@onebase/app/sr
 import PreviewContainer from './DetailForm';
 import FlowView from '../../../../../../../app-builder/src/pages/Editor/components/flowView';
 import { type FetchExecTaskReq } from '@onebase/app';
+import { getCorpResourceById } from '@onebase/common';
 import FlowPredict from '../../../../Runtime/components/preview/flowPredict';
 const Row = Grid.Row;
 const Col = Grid.Col;
@@ -154,7 +155,7 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
                   type={item?.buttonType === BPMConfigButtonType.APPROVE ? 'primary' : 'outline'}
                   onClick={() => fetchExec(item)}
                 >
-                  {item?.buttonName}
+                  {item?.displayName}
                 </Button>
               );
             } else {
@@ -186,7 +187,7 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
                     type={item?.buttonType === BPMConfigButtonType.APPROVE ? 'primary' : 'outline'}
                     onClick={() => setPopupVisibleByIndex(index, true, item)}
                   >
-                    {item?.buttonName}
+                    {item?.displayName}
                   </Button>
                 </Popconfirm>
               );
@@ -271,7 +272,7 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
               <div className="photo-box">
                 <p className="photo-img">
                   {detailData?.initiator?.avatar ? (
-                    <img src={detailData?.initiator?.avatar} alt="" />
+                    <img src={getCorpResourceById(detailData?.initiator?.avatar)} alt="" />
                   ) : (
                     detailData?.initiatorName?.charAt(0)
                   )}

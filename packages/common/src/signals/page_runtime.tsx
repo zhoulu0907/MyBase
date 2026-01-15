@@ -62,6 +62,11 @@ export const createPagesRuntimeSignal = () => {
     flows.value = [];
   };
 
+  const rowDataType = signal<string>('');
+  const setRowDataType = (newRowDataType: string) => {
+    rowDataType.value = newRowDataType;
+  }
+
   return {
     curPage,
     setCurPage,
@@ -96,7 +101,9 @@ export const createPagesRuntimeSignal = () => {
 
     flows,
     setFlows,
-    resetFlows
+    resetFlows,
+    rowDataType,
+    setRowDataType,
   };
 };
 

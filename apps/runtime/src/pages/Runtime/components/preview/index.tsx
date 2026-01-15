@@ -33,6 +33,7 @@ import {
 } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useState } from 'react';
+import { pluginBridge } from '@/plugin/bridge';
 import DetailPop from '../TaskCenter/page/DetailPop';
 import DetailRuntime from './DetailRuntime';
 import EditRuntime from './EditRuntime';
@@ -66,7 +67,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
     bpmInstanceId,
     flows,
     setFlows,
-    resetFlows
+    resetFlows,
+    rowDataType
   } = pagesRuntimeSignal;
 
   const [pageSetId, setPageSetId] = useState('');
@@ -308,40 +310,31 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
     } else {
       try {
         let res = null;
-        if (curPage?.value?.pageSetType === PageType.BPM) {
-          const reqFlow = {
-            isDraft: isSave,
-            formName: curPage?.value?.pages?.find((page: any) => page.pageType === CATEGORY_TYPE.FORM)?.pageName || '',
-            businessUuid: menuUuid,
-            entity: {
-              tableName: tableName,
-              data: { ...formData, ...subFormData }
-            }
-          };
-          res = await fetchSubmitInstance(reqFlow);
-          setPageType(EDITOR_TYPES.FORM_EDITOR);
+        const req: InsertMethodV2Params = { ...formData, ...subFormData };
+        if (isDraft) {
+          res = draftId
+            ? await updateDraft(tableName, menuId, { ...req, id: draftId })
+            : await createDraft(tableName, menuId, req);
+          Message.success('保存草稿成功');
         } else {
-          console.log(formData);
-          const req: InsertMethodV2Params = { ...formData, ...subFormData };
+          if (curPage?.value?.pageSetType === PageType.BPM) {
+            const reqFlow = {
+              isDraft: isSave,
+              formName:
+                curPage?.value?.pages?.find((page: any) => page.pageType === CATEGORY_TYPE.FORM)?.pageName || '',
+              businessUuid: menuUuid,
+              entity: {
+                tableName: tableName,
+                data: { ...formData, ...subFormData }
+              }
+            };
+            res = await fetchSubmitInstance(reqFlow as any);
 
-          console.log(req);
-
-          if (isDraft) {
-            if (draftId) {
-              res = await updateDraft(tableName, menuId, {
-                ...req,
-                id: draftId
-              });
-            } else {
-              res = await createDraft(tableName, menuId, req);
-            }
+            setPageType(EDITOR_TYPES.FORM_EDITOR);
           } else {
             res = await dataMethodCreateV2(tableName, menuId, req, draftId);
+            setPageType(EDITOR_TYPES.LIST_EDITOR);
           }
-
-          console.log(res);
-
-          setPageType(EDITOR_TYPES.LIST_EDITOR);
         }
 
         const createFlows = (flowRes || []).filter(
@@ -465,6 +458,13 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
     setTimeout(() => setRefresh(Date.now()), 150);
   };
 
+  React.useEffect(() => {
+    pluginBridge.registerContext({ form });
+    return () => {
+      pluginBridge.registerContext({ form: undefined });
+    };
+  }, [form]);
+
   return (
     <div className={`${styles.previewPage} runtime-preview-formpage`}>
       <div className={styles.content}>
@@ -480,7 +480,15 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
           />
         )}
 
-        {pageSetType === PageType.NORMAL && (
+        {rowDataType.value === PageType.BPM ? (
+          <DetailPop
+            detailPopVisible={drawerVisible.value}
+            setPopVisible={setDrawerVisible}
+            onBack={onBack}
+            rowData={{ instanceId: bpmInstanceId.value, pageSetId }}
+            listType={LISTTYPE.LIST}
+          />
+        ) : (
           <DetailRuntime
             visible={drawerVisible.value}
             onCancel={() => setDrawerVisible(false)}
@@ -490,15 +498,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
             onCancelUpdate={cancelSubmitForm}
             showFromPageData={showFromPageData}
             editTargetId={editTargetId}
-          />
-        )}
-        {pageSetType === PageType.BPM && drawerVisible.value && bpmInstanceId.value && (
-          <DetailPop
-            detailPopVisible={drawerVisible.value}
-            setPopVisible={setDrawerVisible}
-            onBack={onBack}
-            rowData={{ instanceId: bpmInstanceId.value, pageSetId }}
-            listType={LISTTYPE.LIST}
           />
         )}
         {pageType == EDITOR_TYPES.FORM_EDITOR && (
