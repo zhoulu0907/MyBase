@@ -1,6 +1,6 @@
 import phoneIcon from '@/assets/images/login/phone.svg';
 import passwordIcon from '@/assets/images/login/password.svg';
-import CustomNav from '@/pages/components/Nav';
+import { CustomNav } from '@onebase/ui-kit-mobile';
 import { Form, Input, Button } from '@arco-design/mobile-react';
 import { type IFormInstance } from '@arco-design/mobile-react/esm/form';
 import { IconSuccessCircle, IconEyeVisible, IconEyelashInvisible } from '@arco-design/mobile-react/esm/icon';

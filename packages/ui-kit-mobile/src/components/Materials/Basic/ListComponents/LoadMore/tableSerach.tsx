@@ -1,7 +1,10 @@
+import { memo, useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+import { Button, Dropdown } from '@arco-design/mobile-react';
+import { useSignals } from '@preact/signals-react/runtime';
+
 import filterIcon from '@/assets/images/filter.svg';
 import { IconSearch } from '@arco-design/mobile-react/esm/icon';
-import { memo, useState } from 'react';
-import { useSignals } from '@preact/signals-react/runtime';
 import {
   useFormEditorSignal,
   useAppEntityStore,
@@ -13,9 +16,20 @@ import {
   DEFAULT_VALUE_TYPES
 } from '@onebase/ui-kit';
 import { FormComp } from '../../FormComponents';
-import { Button, Dropdown } from '@arco-design/mobile-react';
-import { v4 as uuidv4 } from 'uuid';
 import './index.css';
+import DraftBox from './DraftBox';
+
+const colorConfig = {
+  normal: 'rgb(var(--primary-6))',
+  active: 'rgb(var(--primary-9))',
+  disabled: 'rgb(var(--primary-1))'
+};
+
+const ghostBgColor = {
+  normal: '#FFF',
+  active: 'rgb(var(--primary-6))',
+  disabled: '#FFF'
+};
 
 interface TableSearchConfig {
   searchItems?: any[];
@@ -24,26 +38,21 @@ interface TableSearchConfig {
   form?: any;
   queryData: any;
   onSearch?: () => void;
+  showDraftBox?: boolean;
+  showFromPageData?: Function;
+  metaData: any;
+  tableName: string;
+  refresh?: number;
+  tableColumns?: any[];
 }
 
 const TableSearch = memo((props: TableSearchConfig) => {
-  const { searchItems, labelColSpan, runtime, onSearch, form, queryData } = props;
   useSignals();
+
+  const { searchItems, labelColSpan, runtime, onSearch, form, queryData, showDraftBox, showFromPageData, metaData, tableName, tableColumns, refresh } = props;
   const { pageComponentSchemas: fromPageComponentSchemas, components } = useFormEditorSignal;
   const componentSchemasKeys = Object.keys(fromPageComponentSchemas.value || {});
   const { mainEntity } = useAppEntityStore();
-
-  const colorConfig = {
-    normal: 'rgb(var(--primary-6))',
-    active: 'rgb(var(--primary-9))',
-    disabled: 'rgb(var(--primary-1))'
-  };
-
-  const ghostBgColor = {
-    normal: '#FFF',
-    active: 'rgb(var(--primary-6))',
-    disabled: '#FFF'
-  };
 
   // 显示搜索条件
   const [showDropdown, setShowDropdown] = useState(false);
@@ -51,6 +60,16 @@ const TableSearch = memo((props: TableSearchConfig) => {
   const renderSearchBar = (firstSearchItem: any) => {
     return (
       <div className="search-bar">
+        {showDraftBox && (
+          <DraftBox
+            onlyIcon
+            refresh={refresh}
+            metaData={metaData}
+            tableName={tableName}
+            tableColumns={tableColumns}
+            showFromPageData={showFromPageData}
+          />
+        )}
         <div className="search-bar-icon">
           <IconSearch />
         </div>
@@ -332,6 +351,7 @@ const TableSearch = memo((props: TableSearchConfig) => {
       onSearch();
     }
   };
+
   // 重置
   const handleReset = () => {
     form?.resetFields();
@@ -348,7 +368,6 @@ const TableSearch = memo((props: TableSearchConfig) => {
       <Dropdown
         showDropdown={showDropdown}
         onCancel={() => setShowDropdown(false)}
-        clickOtherToClose={false}
         className="search-dropdown"
         unmountOnExit={false}
         getScrollContainer={() => document.getElementById('ob-loadmore-dropdown-scroll-search')}

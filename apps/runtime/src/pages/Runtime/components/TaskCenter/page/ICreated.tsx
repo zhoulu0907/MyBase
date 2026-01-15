@@ -2,6 +2,7 @@ import { useState, useEffect, type FC } from 'react';
 import { Table, type TableColumnProps, Button, Tag, Message, Pagination, Avatar } from '@arco-design/web-react';
 import { getMyCreatePageList } from '@onebase/app/src/services/app_runtime';
 import { LISTTYPE, FLOWSTATUS_TYPE, FlowStatusMap } from '@onebase/app';
+import { getCorpResourceById } from '@onebase/common';
 import dayjs from 'dayjs';
 import TableSearch from './TableSearch';
 import DetailPop from './DetailPop';
@@ -59,7 +60,9 @@ const ICreated: FC = ({ appId }: any) => {
                 <AvatarGroup className="color-avatar">
                   {userArr.map((item: any, i: number) => {
                     return (
-                      <Avatar key={i}>{item?.avatar ? <img src={item?.avatar} /> : item?.userName?.charAt(0)}</Avatar>
+                      <Avatar key={i}>
+                        {item?.avatar ? <img src={getCorpResourceById(item?.avatar)} /> : item?.userName?.charAt(0)}
+                      </Avatar>
                     );
                   })}
                 </AvatarGroup>

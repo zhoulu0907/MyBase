@@ -1,13 +1,12 @@
 import React from 'react';
-import CustomNav from '@/pages/components/Nav';
+import { CustomNav } from '@onebase/ui-kit-mobile';
+import logoIcon from '@/assets/images/logo-icon.svg';
 import styles from './index.module.less';
-import logoIcon from '../../../../assets/images/logo-icon.svg';
 
 const Protocol: React.FC = () => {
-
   return (
     <div className={styles.about}>
-      <CustomNav title="关于我们" />
+      <CustomNav title="关于我们" style={{ backgroundColor: 'transparent' }} />
       <div className={styles.container}>
         <div className={styles.basicInfo}>
           <img className={styles.icon} src={logoIcon} />
