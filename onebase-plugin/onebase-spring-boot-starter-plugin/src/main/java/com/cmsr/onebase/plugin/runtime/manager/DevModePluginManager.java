@@ -79,6 +79,19 @@ public class DevModePluginManager extends SpringPluginManager {
     }
 
     /**
+     * 设置热重载管理器（用于插件级热重载）
+     * 在 HotReloadConfiguration 中调用
+     * 
+     * @param hotReloadManager 热重载管理器实例
+     */
+    public void setHotReloadManager(Object hotReloadManager) {
+        if (scanner != null) {
+            scanner.setHotReloadManager(hotReloadManager);
+            log.debug("已设置热重载管理器到扩展点扫描器");
+        }
+    }
+
+    /**
      * 覆盖 SpringPluginManager.init()
      * <p>
      * 禁止父类通过 @PostConstruct 自动调用 loadPlugins() 和 startPlugins()。

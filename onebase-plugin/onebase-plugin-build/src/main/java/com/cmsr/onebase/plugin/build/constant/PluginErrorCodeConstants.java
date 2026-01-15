@@ -25,6 +25,7 @@ public interface PluginErrorCodeConstants {
     ErrorCode PLUGIN_ZIP_FORBIDDEN_FILE = new ErrorCode(1_030_002_003, "ZIP文件包含禁止的文件类型");
     ErrorCode PLUGIN_JSON_NOT_FOUND = new ErrorCode(1_030_002_004, "ZIP文件中未找到plugin.json");
     ErrorCode PLUGIN_JSON_READ_ERROR = new ErrorCode(1_030_002_005, "读取plugin.json失败");
+    ErrorCode PLUGIN_PACKAGE_NOT_FOUND = new ErrorCode(1_030_002_006, "插件包中未检测到前端或后端包，请确保至少包含一个");
 
     // ========== 元数据校验相关 1-030-003-xxx ==========
     ErrorCode PLUGIN_JSON_EMPTY = new ErrorCode(1_030_003_001, "plugin.json内容为空");

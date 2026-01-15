@@ -195,49 +195,45 @@ public class DevClassPathWatcher {
 
     /**
      * 处理防抖后的文件变更
+     * 按插件分组，触发插件级重载
      */
     private void processDebounced() {
         long now = System.currentTimeMillis();
-        List<Path> toProcess = new ArrayList<>();
 
-        // 找出已经超过防抖延迟的文件
+        // 按插件分组
+        Map<Path, List<Path>> changesByPlugin = new HashMap<>();
+
+        // 找出已经超过防抖延迟的文件，并按插件分组
         pendingChanges.entrySet().removeIf(entry -> {
             if (now - entry.getValue() >= DEBOUNCE_DELAY_MS) {
-                toProcess.add(entry.getKey());
+                Path classFile = entry.getKey();
+
+                // 找到这个文件属于哪个插件
+                Path pluginClassPath = hotReloadManager.findPluginForClassFile(classFile);
+
+                if (pluginClassPath != null) {
+                    changesByPlugin.computeIfAbsent(pluginClassPath, k -> new ArrayList<>())
+                            .add(classFile);
+                }
                 return true;
             }
             return false;
         });
 
-        // 处理这些文件
-        for (Path classFile : toProcess) {
-            try {
-                String className = extractClassName(classFile);
-                if (className != null) {
-                    log.info("触发热重载: {}", className);
-                    hotReloadManager.reloadExtension(className, classFile);
-                }
-            } catch (Exception e) {
-                log.error("热重载失败: {}", classFile, e);
-            }
-        }
-    }
+        // 对每个有变化的插件，触发插件级重载
+        for (Map.Entry<Path, List<Path>> entry : changesByPlugin.entrySet()) {
+            Path pluginClassPath = entry.getKey();
+            List<Path> changedFiles = entry.getValue();
 
-    /**
-     * 从 .class 文件路径提取完整类名
-     */
-    private String extractClassName(Path classFile) {
-        // 找到包含此文件的监听根路径
-        for (Path watchPath : watchPaths) {
-            if (classFile.startsWith(watchPath)) {
-                Path relativePath = watchPath.relativize(classFile);
-                String className = relativePath.toString()
-                        .replace(classFile.getFileSystem().getSeparator(), ".")
-                        .replace(".class", "");
-                return className;
+            log.info("插件 {} 检测到 {} 个文件变化，触发插件级重载",
+                    pluginClassPath.getFileName(), changedFiles.size());
+
+            try {
+                hotReloadManager.reloadPlugin(pluginClassPath);
+            } catch (Exception e) {
+                log.error("插件重载失败: {}", pluginClassPath, e);
             }
         }
-        return null;
     }
 
     /**

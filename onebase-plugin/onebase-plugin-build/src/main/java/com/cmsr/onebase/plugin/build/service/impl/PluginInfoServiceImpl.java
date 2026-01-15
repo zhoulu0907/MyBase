@@ -10,6 +10,7 @@ import com.cmsr.onebase.plugin.build.redis.PluginCommandPublisher;
 import com.cmsr.onebase.plugin.build.service.PluginInfoService;
 import com.cmsr.onebase.plugin.build.validator.PluginMetaValidator;
 import com.cmsr.onebase.plugin.build.validator.PluginZipValidator;
+import com.cmsr.onebase.plugin.build.validator.PluginZipValidator.PackageInfo;
 import com.cmsr.onebase.plugin.build.vo.req.PluginInfoPageReqVO;
 import com.cmsr.onebase.plugin.build.vo.req.PluginInfoUpdateReqVO;
 import com.cmsr.onebase.plugin.build.vo.req.PluginUploadReqVO;
@@ -120,8 +121,9 @@ public class PluginInfoServiceImpl implements PluginInfoService {
                 .build();
         pluginInfoRepository.insert(pluginInfoDO);
 
-        // 8. 保存包信息
-        savePackageInfo(metaInfo, pluginInfoDO.getPluginId(), pluginInfoDO.getPluginVersion());
+        // 8. 检测并保存包信息（自动检测前端/后端包）
+        List<PackageInfo> packages = pluginZipValidator.detectPackages(content);
+        savePackageInfo(packages, pluginInfoDO.getPluginId(), pluginInfoDO.getPluginVersion());
 
         // 9. 保存配置信息
         saveConfigInfo(metaInfo, pluginInfoDO.getPluginId(), pluginInfoDO.getPluginVersion());
@@ -357,13 +359,13 @@ public class PluginInfoServiceImpl implements PluginInfoService {
     }
 
     /**
-     * 保存包信息
+     * 保存包信息（使用自动检测的包信息）
      */
-    private void savePackageInfo(PluginMetaInfo metaInfo, String pluginId, String pluginVersion) {
-        if (CollUtil.isEmpty(metaInfo.getPackages())) {
+    private void savePackageInfo(List<PackageInfo> packages, String pluginId, String pluginVersion) {
+        if (CollUtil.isEmpty(packages)) {
             return;
         }
-        for (PluginMetaInfo.PluginPackageInfo packageInfo : metaInfo.getPackages()) {
+        for (PackageInfo packageInfo : packages) {
             PluginPackageInfoDO packageDO = PluginPackageInfoDO.builder()
                     .pluginId(pluginId)
                     .pluginVersion(pluginVersion)

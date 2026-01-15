@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import com.cmsr.onebase.plugin.demo.hello.service.HelloService;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -123,6 +124,17 @@ public class HelloWorldHandler implements HttpHandler {
             log.error("[HelloWorldHandler] 检测加载来源失败: {}", e.getMessage());
             return "CLASSPATH_DIRECT";
         }
+    }
+
+    @GetMapping("/service-test")
+    public Map<String, Object> serviceTest(@RequestParam(defaultValue = "cys") String name) {
+        HelloService helloService = new HelloService();
+        Map<String, Object> result = new HashMap<>();
+        result.put("service-hello", helloService.hello(name) );
+        result.put("service-hello2", helloService.hello2(name) );
+        result.put("timestamp", LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+
+        return result;
     }
     
     /**

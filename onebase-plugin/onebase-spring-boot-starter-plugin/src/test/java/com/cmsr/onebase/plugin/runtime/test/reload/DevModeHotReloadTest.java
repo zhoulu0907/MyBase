@@ -94,7 +94,7 @@ public class DevModeHotReloadTest {
                         // 2. 获取初始响应
                         log.info("步骤2: 获取初始响应");
                         PluginHttpTestUtil.HttpResponse initialResponse = httpUtil
-                                        .get("/plugin/hello-plugin/hello?name=Test");
+                                        .get("/runtime/plugin/hello-plugin/hello?name=Test");
                         initialResponse.assertSuccess();
                         String initialPlugin = initialResponse.getJsonField("plugin");
                         log.info("初始响应 plugin 字段: {}", initialPlugin);
@@ -123,7 +123,7 @@ public class DevModeHotReloadTest {
                         // 6. 验证响应已更新
                         log.info("步骤6: 验证响应已更新");
                         PluginHttpTestUtil.HttpResponse updatedResponse = httpUtil
-                                        .get("/plugin/hello-plugin/hello?name=Test");
+                                        .get("/runtime/plugin/hello-plugin/hello?name=Test");
                         updatedResponse.assertSuccess();
                         String updatedPlugin = updatedResponse.getJsonField("plugin");
                         log.info("更新后响应 plugin 字段: {}", updatedPlugin);
@@ -197,7 +197,7 @@ public class DevModeHotReloadTest {
                                         java.nio.file.StandardCopyOption.REPLACE_EXISTING);
 
                         PluginHttpTestUtil.HttpResponse helloInitial = httpUtil
-                                        .get("/plugin/hello-plugin/hello?name=Test");
+                                        .get("/runtime/plugin/hello-plugin/hello?name=Test");
                         helloInitial.assertSuccess();
                         String helloInitialPlugin = helloInitial.getJsonField("plugin");
                         log.info("HelloWorldHandler 初始 plugin: {}", helloInitialPlugin);
@@ -208,7 +208,7 @@ public class DevModeHotReloadTest {
                         Thread.sleep(5000);
 
                         PluginHttpTestUtil.HttpResponse helloUpdated = httpUtil
-                                        .get("/plugin/hello-plugin/hello?name=Test");
+                                        .get("/runtime/plugin/hello-plugin/hello?name=Test");
                         helloUpdated.assertSuccess();
                         String helloUpdatedPlugin = helloUpdated.getJsonField("plugin");
                         assertThat(helloUpdatedPlugin).as("第一次热重载应该成功").isEqualTo(helloNewPlugin);
@@ -219,7 +219,8 @@ public class DevModeHotReloadTest {
                         java.nio.file.Files.copy(testSourceFile, testBackup,
                                         java.nio.file.StandardCopyOption.REPLACE_EXISTING);
 
-                        PluginHttpTestUtil.HttpResponse testInitial = httpUtil.get("/plugin/test-plugin/api/info");
+                        PluginHttpTestUtil.HttpResponse testInitial = httpUtil
+                                        .get("/runtime/plugin/test-plugin/api/info");
                         testInitial.assertSuccess();
                         String testInitialVersion = testInitial.getJsonField("version");
                         log.info("TestHttpHandler 初始 version: {}", testInitialVersion);
@@ -229,7 +230,8 @@ public class DevModeHotReloadTest {
                         compileSingleJavaFile(testSourceFile, testOutputDir);
                         Thread.sleep(5000);
 
-                        PluginHttpTestUtil.HttpResponse testUpdated = httpUtil.get("/plugin/test-plugin/api/info");
+                        PluginHttpTestUtil.HttpResponse testUpdated = httpUtil
+                                        .get("/runtime/plugin/test-plugin/api/info");
                         testUpdated.assertSuccess();
                         String testUpdatedVersion = testUpdated.getJsonField("version");
                         assertThat(testUpdatedVersion).as("第二次热重载应该成功!").isEqualTo(testNewVersion);

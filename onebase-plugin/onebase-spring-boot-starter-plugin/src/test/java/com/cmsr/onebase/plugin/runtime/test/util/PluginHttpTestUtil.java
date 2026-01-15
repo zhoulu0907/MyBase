@@ -97,7 +97,13 @@ public class PluginHttpTestUtil {
          * 断言成功响应
          */
         public HttpResponse assertSuccess() {
-            assertThat(isSuccess()).isTrue();
+            if (!isSuccess()) {
+                String errorMsg = String.format(
+                        "Expected HTTP success (200-299) but got %d.%nResponse body: %s",
+                        statusCode,
+                        body != null ? body : "(null)");
+                throw new AssertionError(errorMsg);
+            }
             return this;
         }
 

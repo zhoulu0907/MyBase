@@ -82,6 +82,11 @@ public class PluginTestConfiguration {
         }
 
         @Override
+        public Long getApplicationId() {
+            return 100L;
+        }
+
+        @Override
         public Map<String, Object> getConfig(String pluginId, String version) {
             return pluginConfigs.getOrDefault(pluginId, Collections.emptyMap());
         }
