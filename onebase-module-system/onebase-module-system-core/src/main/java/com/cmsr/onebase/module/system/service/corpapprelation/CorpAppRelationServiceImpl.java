@@ -51,7 +51,7 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
     private AppApplicationApi appApplicationApi;
 
     @Resource
-    private CorpService corpService;
+    private CorpDataRepository corpDataRepository;
 
     @Override
     public void createCorpAndAppRelation(List<AppAuthTimeReqVO> corpAppRelationInertReqVOList, Long corpId) {
@@ -294,7 +294,7 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
         }
         //查看企业是否禁用
         if (corpId != null){
-            CorpRespVO corp = corpService.getCorp(corpId);
+            CorpDO corp = corpDataRepository.findById(corpId);
             if (corp == null || CorpStatusEnum.DISABLE.getValue().equals(corp.getStatus())){
                 throw exception(ErrorCodeConstants.AUTH_LOGIN_CORP_DELETE_OR_DISABLE);
             }
