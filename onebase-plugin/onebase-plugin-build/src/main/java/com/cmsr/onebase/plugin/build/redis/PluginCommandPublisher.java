@@ -42,6 +42,27 @@ public class PluginCommandPublisher {
     }
 
     /**
+     * 发布插件上传命令
+     * 当插件上传成功后调用，通知Runtime下载并解压插件
+     *
+     * @param pluginId 插件ID
+     * @param pluginVersion 插件版本
+     * @param tenantId 租户ID
+     * @param packageFileId 包文件ID
+     */
+    public void publishUploadCommand(String pluginId, String pluginVersion, Long tenantId, Long packageFileId) {
+        PluginCommandMessage message = PluginCommandMessage.builder()
+                .command(PluginCommandMessage.PluginCommand.UPLOAD)
+                .pluginId(pluginId)
+                .pluginVersion(pluginVersion)
+                .tenantId(tenantId)
+                .packageFileId(packageFileId)
+                .timestamp(System.currentTimeMillis())
+                .build();
+        publish(message);
+    }
+
+    /**
      * 发布插件禁用命令
      *
      * @param pluginId 插件ID
