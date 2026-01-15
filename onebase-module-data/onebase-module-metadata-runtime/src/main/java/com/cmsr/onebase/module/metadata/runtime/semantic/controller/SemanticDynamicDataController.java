@@ -6,18 +6,17 @@ import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticMergeBodyVO;
 import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticPageBodyVO;
 import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticTargetBodyVO;
 import com.cmsr.onebase.module.metadata.runtime.semantic.service.SemanticDynamicDataService;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.validation.annotation.Validated;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 import java.util.UUID;
-import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/runtime/metadata/{tableName}")
@@ -46,21 +45,23 @@ public class SemanticDynamicDataController {
      *
      * @param tableName 表名，用于解析实体ID
      * @param menuId 菜单ID（用于权限与上下文）
+     * @param draftId 草稿ID（可选）
      * @param body 语义化合并请求体，顶层键为业务字段或连接器
      * @param request HTTP 请求对象，用于读取 `X-Trace-Id`
      * @param response HTTP 响应对象，用于回写 `X-Trace-Id`
      * @return 创建后的动态数据响应
      */
     public CommonResult<Map<String, Object>> create(@PathVariable("tableName") String tableName,
-                                                  @RequestParam("menuId") Long menuId,
-                                                  @RequestBody SemanticMergeBodyVO body,
-                                                  HttpServletRequest request,
-                                                  HttpServletResponse response) {
+                                                    @RequestParam("menuId") Long menuId,
+                                                    @RequestParam(value = "draftId", required = false) Long draftId,
+                                                    @RequestBody SemanticMergeBodyVO body,
+                                                    HttpServletRequest request,
+                                                    HttpServletResponse response) {
         String traceId = request.getHeader("X-Trace-Id");
         if (StringUtils.isBlank(traceId)) {
             traceId = UUID.randomUUID().toString();
         }
-        Map<String, Object> resp = semanticDynamicDataService.create(tableName, menuId, body, traceId);
+        Map<String, Object> resp = semanticDynamicDataService.create(tableName, menuId, body, traceId, draftId);
         if (traceId != null) {
             response.setHeader("X-Trace-Id", traceId);
         }
@@ -80,11 +81,11 @@ public class SemanticDynamicDataController {
      * @return 更新后的动态数据响应
      */
     public CommonResult<Map<String, Object>> update(@PathVariable("tableName") String tableName,
-                                                  @RequestParam("menuId") Long menuId,
-                                                  @RequestBody SemanticMergeBodyVO body,
-                                                  HttpServletRequest request,
-                                                  HttpServletResponse response) {
-        String traceId = request.getHeader("X-Trace-Id"); 
+                                                    @RequestParam("menuId") Long menuId,
+                                                    @RequestBody SemanticMergeBodyVO body,
+                                                    HttpServletRequest request,
+                                                    HttpServletResponse response) {
+        String traceId = request.getHeader("X-Trace-Id");
         if (StringUtils.isBlank(traceId)) {
             traceId = UUID.randomUUID().toString();
         }
@@ -132,10 +133,10 @@ public class SemanticDynamicDataController {
      * @return 详情动态数据响应
      */
     public CommonResult<Map<String, Object>> detail(@PathVariable("tableName") String tableName,
-                                                  @RequestParam("menuId") Long menuId,
-                                                  @RequestBody SemanticTargetBodyVO body,
-                                                  HttpServletRequest request,
-                                                  HttpServletResponse response) {
+                                                    @RequestParam("menuId") Long menuId,
+                                                    @RequestBody SemanticTargetBodyVO body,
+                                                    HttpServletRequest request,
+                                                    HttpServletResponse response) {
         String traceId = request.getHeader("X-Trace-Id");
         if (StringUtils.isBlank(traceId)) {
             traceId = UUID.randomUUID().toString();
@@ -158,10 +159,10 @@ public class SemanticDynamicDataController {
      * @return 分页结果
      */
     public CommonResult<PageResult<Map<String, Object>>> page(@PathVariable("tableName") String tableName,
-                                                            @RequestParam("menuId") Long menuId,
-                                                            @RequestBody SemanticPageBodyVO body,
-                                                            HttpServletRequest request,
-                                                            HttpServletResponse response) {
+                                                              @RequestParam("menuId") Long menuId,
+                                                              @RequestBody SemanticPageBodyVO body,
+                                                              HttpServletRequest request,
+                                                              HttpServletResponse response) {
         String traceId = request.getHeader("X-Trace-Id");
         if (StringUtils.isBlank(traceId)) {
             traceId = UUID.randomUUID().toString();

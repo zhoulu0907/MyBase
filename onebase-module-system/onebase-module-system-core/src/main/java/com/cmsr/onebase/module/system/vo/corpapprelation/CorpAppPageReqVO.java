@@ -24,5 +24,10 @@ public class CorpAppPageReqVO extends PageParam {
     private Integer status = 0;
 
     @Schema(description = "应用名称")
-    private String appName;
+    private String name;
+
+    @Schema(description = "排序")
+    private String orderByTime;
+
+
 }

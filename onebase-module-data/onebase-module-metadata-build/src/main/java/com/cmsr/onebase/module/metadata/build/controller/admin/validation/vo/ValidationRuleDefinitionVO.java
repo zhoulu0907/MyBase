@@ -25,8 +25,14 @@ public class ValidationRuleDefinitionVO {
     @Schema(description = "关联的业务实体ID", example = "1")
     private Long entityId;
 
+    @Schema(description = "关联的业务实体UUID", example = "01onal1s-0000-0000-0000-000000000002")
+    private String entityUuid;
+
     @Schema(description = "关联的实体字段ID", example = "1")
     private Long fieldId;
+
+    @Schema(description = "关联的实体字段UUID", example = "01onal1s-0000-0000-0000-000000000003")
+    private String fieldUuid;
 
     @Schema(description = "逻辑类型：LOGIC（逻辑操作符）/CONDITION（条件判断）", example = "LOGIC")
     private String logicType;
@@ -39,6 +45,9 @@ public class ValidationRuleDefinitionVO {
 
     @Schema(description = "条件字段编码", example = "ANNUAL_SPEND")
     private String fieldCode;
+
+    @Schema(description = "值类型：VARIABLE（变量）/STATIC（静态值）/FORMULA（公式）", example = "STATIC")
+    private String valueType;
 
     @Schema(description = "条件值引用（单值条件或范围表达式的第一个）", example = "100000")
     private String fieldValue;

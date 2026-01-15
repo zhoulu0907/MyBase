@@ -19,4 +19,8 @@ public enum MenuVisibleEnum {
         this.text = text;
     }
 
+    public static boolean isVisible(Integer value) {
+        return YES.value.equals(value);
+    }
+
 }

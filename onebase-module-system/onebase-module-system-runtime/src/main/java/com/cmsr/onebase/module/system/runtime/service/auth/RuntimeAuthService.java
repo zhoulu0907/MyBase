@@ -89,4 +89,6 @@ public interface RuntimeAuthService {
      *
      */
     AuthLoginRespVO thirdUserRegister(@Valid ThirdSupplementUserReqVO reqVO);
+
+    void sendSmsCode(@Valid VerifyCodeSendReqVO reqVO);
 }

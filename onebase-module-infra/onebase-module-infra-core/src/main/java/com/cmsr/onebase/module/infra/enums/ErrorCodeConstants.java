@@ -60,7 +60,7 @@ public interface ErrorCodeConstants {
     ErrorCode WEAK_PASSWORD_SAME_CHAR_SEQUENTIAL = new ErrorCode(1_001_005_011, "密码包含连续相同字符");
     ErrorCode WEAK_PASSWORD_TENANT_EMPTY = new ErrorCode(1_001_005_012, "无法获取租户ID信息");
     ErrorCode PASSWORD_IN_HISTORY = new ErrorCode(1_001_005_013, "新密码不能与最近{}次历史密码相同");
-    ErrorCode PASSWORD_EXPIRED = new ErrorCode(1_001_005_014, "您的密码已过期{}天，请联系账号所属管理员重置密码");
+    ErrorCode PASSWORD_EXPIRED = new ErrorCode(1_001_005_014, "您的密码已过期{}天，请联系管理员重置密码");
 
     // ========== 防暴力破解相关 1-001-005-020 ==========
     ErrorCode AUTH_LOGIN_ACCOUNT_LOCKED = new ErrorCode(1_001_005_020, "账号已被锁定，请{}后再试");

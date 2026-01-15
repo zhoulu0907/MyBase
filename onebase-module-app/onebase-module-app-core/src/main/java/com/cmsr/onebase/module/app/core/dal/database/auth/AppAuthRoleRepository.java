@@ -3,10 +3,10 @@ package com.cmsr.onebase.module.app.core.dal.database.auth;
 import com.cmsr.onebase.framework.common.pojo.PageParam;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.orm.repo.BaseAppRepository;
-import com.cmsr.onebase.framework.orm.repo.BaseBizRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthRoleDO;
 import com.cmsr.onebase.module.app.core.dal.mapper.AppAuthRoleMapper;
 import com.cmsr.onebase.module.app.core.dto.auth.RoleMemberDTO;
+import com.cmsr.onebase.module.app.core.enums.auth.AuthRoleTypeEnum;
 import com.cmsr.onebase.module.app.core.vo.app.AppUserPhotoDTO;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
@@ -35,7 +35,7 @@ public class AppAuthRoleRepository extends BaseAppRepository<AppAuthRoleMapper, 
 
     public List<AppAuthRoleDO> findByApplicationId(Long applicationId) {
         QueryWrapper queryWrapper = this.query()
-                .eq(AppAuthRoleDO::getApplicationId, applicationId)
+                .where(APP_AUTH_ROLE.APPLICATION_ID.eq(applicationId))
                 .orderBy(AppAuthRoleDO::getRoleType, true)
                 .orderBy(AppAuthRoleDO::getRoleName, true);
         return this.list(queryWrapper);
@@ -43,23 +43,31 @@ public class AppAuthRoleRepository extends BaseAppRepository<AppAuthRoleMapper, 
 
     public AppAuthRoleDO findByApplicationIdAndRoleName(Long applicationId, String roleName) {
         QueryWrapper queryWrapper = this.query()
-                .eq(AppAuthRoleDO::getApplicationId, applicationId)
-                .eq(AppAuthRoleDO::getRoleName, roleName);
+                .where(APP_AUTH_ROLE.APPLICATION_ID.eq(applicationId))
+                .where(APP_AUTH_ROLE.ROLE_NAME.eq(roleName));
         return getOne(queryWrapper);
     }
 
-    public AppAuthRoleDO findByAppIdAndRoleCode(Long applicationId, String roleCode) {
+    public AppAuthRoleDO findOneByAppIdAndRoleType(Long applicationId, Integer roleType) {
         QueryWrapper queryWrapper = this.query()
-                .eq(AppAuthRoleDO::getApplicationId, applicationId)
-                .eq(AppAuthRoleDO::getRoleCode, roleCode);
+                .where(APP_AUTH_ROLE.APPLICATION_ID.eq(applicationId))
+                .where(APP_AUTH_ROLE.ROLE_TYPE.eq(roleType));
         return getOne(queryWrapper);
     }
+
+    public List<AppAuthRoleDO> findByAppIdAndRoleType(Long applicationId, Integer roleType) {
+        QueryWrapper queryWrapper = this.query()
+                .where(APP_AUTH_ROLE.APPLICATION_ID.eq(applicationId))
+                .where(APP_AUTH_ROLE.ROLE_TYPE.eq(roleType));
+        return list(queryWrapper);
+    }
+
 
     public AppAuthRoleDO findByApplicationIdAndRoleNameAndIdNot(Long applicationId, String roleName, Long roleId) {
         QueryWrapper queryWrapper = this.query()
-                .eq(AppAuthRoleDO::getApplicationId, applicationId)
-                .eq(AppAuthRoleDO::getRoleName, roleName)
-                .eq(AppAuthRoleDO::getId, roleId);
+                .where(APP_AUTH_ROLE.APPLICATION_ID.eq(applicationId))
+                .where(APP_AUTH_ROLE.ROLE_NAME.eq(roleName))
+                .where(APP_AUTH_ROLE.ID.ne(roleId));
         return getOne(queryWrapper);
     }
 
@@ -112,5 +120,13 @@ public class AppAuthRoleRepository extends BaseAppRepository<AppAuthRoleMapper, 
                 .where(APP_AUTH_ROLE.APPLICATION_ID.eq(applicationId))
                 .where(APP_AUTH_ROLE.ROLE_UUID.eq(roleUuid));
         return getOne(queryWrapper);
+    }
+
+    public AppAuthRoleDO findThirdpartyRoleByApplicationId(Long applicationId) {
+        QueryWrapper queryWrapper = this.query()
+                .where(APP_AUTH_ROLE.APPLICATION_ID.eq(applicationId)
+                        .and(APP_AUTH_ROLE.ROLE_CODE.eq(AuthRoleTypeEnum.OUTER_USER.getCode()))
+                        .and(APP_AUTH_ROLE.ROLE_TYPE.eq(AuthRoleTypeEnum.OUTER_USER.getValue())));
+        return this.getOne(queryWrapper);
     }
 }

@@ -8,7 +8,8 @@ public enum PageTypeSetEnum {
 
     NORMAL_FORM(1, "普通表单"),
     PROCESS_FORM(2, "流程表单"),
-    WORKBENCH(3, "工作台");
+    WORKBENCH(3, "工作台"),
+    DASHBOARD(4, "数据大屏");
     private final Integer code;
     private final String description;
     PageTypeSetEnum(Integer code, String description) {
@@ -25,6 +26,11 @@ public enum PageTypeSetEnum {
     //判断如果是工作台类型
     public static boolean isWorkBenchType(Integer code) {
         return WORKBENCH.getCode().equals(code);
+    }
+
+    //判断如果是流程表单类型
+    public static boolean isDashboardType(Integer code) {
+        return DASHBOARD.getCode().equals(code);
     }
 
 }

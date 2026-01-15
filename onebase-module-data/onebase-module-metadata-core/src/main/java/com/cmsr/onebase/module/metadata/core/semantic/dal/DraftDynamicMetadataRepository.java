@@ -120,7 +120,7 @@ public class DraftDynamicMetadataRepository {
      * @param qw        条件包装器
      * @return 影响行数
      */
-/*    public int updateByQuery(String tableName, Row row, QueryWrapper qw) {
+    public int updateByQuery(String tableName, Row row, QueryWrapper qw) {
         ApplicationDataSourceManager.useBizDatasourceByAppId(ApplicationManager.getApplicationId());
         try {
             LocalDateTime now = LocalDateTime.now();
@@ -129,11 +129,12 @@ public class DraftDynamicMetadataRepository {
             if (userId != null) {
                 setIfMissingOrNull(row, SystemFieldConstants.REQUIRE.UPDATER, userId);
             }
+            qw.and(new QueryColumn(SystemFieldConstants.OPTIONAL.DRAFT_STATUS).eq(1));
             return Db.updateByQuery(tableName, row, qw);
         } finally {
             ApplicationDataSourceManager.clear();
         }
-    }*/
+    }
 
     /**
      * 当字段缺失或值为空时设置默认值。
@@ -178,7 +179,7 @@ public class DraftDynamicMetadataRepository {
      * @param ids 原始 ID 列表
      * @return Long 列表或空列表
      */
-/*    private List<?> toLongListIfNotEmpty(List<?> ids) {
+    private List<?> toLongListIfNotEmpty(List<?> ids) {
         if (ids == null || ids.isEmpty()) { return List.of(); }
         List<Object> out = new java.util.ArrayList<>(ids.size());
         for (Object id : ids) {
@@ -186,7 +187,7 @@ public class DraftDynamicMetadataRepository {
             if (v != null) { out.add(v); }
         }
         return out;
-    }*/
+    }
 
     /**
      * 软删除：将逻辑删除标志置为 1。
@@ -194,16 +195,17 @@ public class DraftDynamicMetadataRepository {
      * @param qw        条件
      * @return 影响行数
      */
-/*    public int softDeleteByQuery(String tableName, QueryWrapper qw) {
+    public int softDeleteByQuery(String tableName, QueryWrapper qw) {
         ApplicationDataSourceManager.useBizDatasourceByAppId(ApplicationManager.getApplicationId());
         try {
             Row update = new Row();
             update.put(SystemFieldConstants.OPTIONAL.DELETED, 1);
+            qw.and(new QueryColumn(SystemFieldConstants.OPTIONAL.DRAFT_STATUS).eq(1));
             return Db.updateByQuery(tableName, update, qw);
         } finally {
             ApplicationDataSourceManager.clear();
         }
-    }*/
+    }
 
     /**
      * 物理删除：按条件直接删除记录。
@@ -211,14 +213,35 @@ public class DraftDynamicMetadataRepository {
      * @param qw        条件
      * @return 影响行数
      */
-/*    public int deleteByQuery(String tableName, QueryWrapper qw) {
+    public int deleteByQuery(String tableName, QueryWrapper qw) {
         ApplicationDataSourceManager.useBizDatasourceByAppId(ApplicationManager.getApplicationId());
         try {
+            qw.and(new QueryColumn(SystemFieldConstants.OPTIONAL.DRAFT_STATUS).eq(1));
             return Db.deleteByQuery(tableName, qw);
         } finally {
             ApplicationDataSourceManager.clear();
         }
-    }*/
+    }
+
+    /**
+     * 根据草稿ID删除草稿记录（物理删除）。
+     * 仅删除 draft_status=1 的草稿数据。
+     *
+     * @param tableName  表名
+     * @param primaryKey 主键字段名
+     * @param draftId    草稿ID（主键值）
+     * @return 影响行数
+     */
+    public int deleteByDraftId(String tableName, String primaryKey, Long draftId) {
+        ApplicationDataSourceManager.useBizDatasourceByAppId(ApplicationManager.getApplicationId());
+        try {
+            QueryWrapper qw = QueryWrapper.create().where(new QueryColumn(primaryKey).eq(draftId));
+            qw.and(new QueryColumn(SystemFieldConstants.OPTIONAL.DRAFT_STATUS).eq(1));
+            return Db.deleteByQuery(tableName, qw);
+        } finally {
+            ApplicationDataSourceManager.clear();
+        }
+    }
 
     /**
      * 按条件查询单条记录。
@@ -226,14 +249,15 @@ public class DraftDynamicMetadataRepository {
      * @param qw        条件
      * @return 行数据；不存在时返回 null
      */
-/*    public Row selectOneByQuery(String tableName, QueryWrapper qw) {
+    public Row selectOneByQuery(String tableName, QueryWrapper qw) {
         ApplicationDataSourceManager.useBizDatasourceByAppId(ApplicationManager.getApplicationId());
         try {
+            qw.and(new QueryColumn(SystemFieldConstants.OPTIONAL.DRAFT_STATUS).eq(1));
             return Db.selectOneByQuery(tableName, qw);
         } finally {
             ApplicationDataSourceManager.clear();
         }
-    }*/
+    }
 
     /**
      * 按条件查询多条记录。
@@ -241,14 +265,15 @@ public class DraftDynamicMetadataRepository {
      * @param qw        条件
      * @return 行数据列表
      */
-/*    public List<Row> selectListByQuery(String tableName, QueryWrapper qw) {
+    public List<Row> selectListByQuery(String tableName, QueryWrapper qw) {
         ApplicationDataSourceManager.useBizDatasourceByAppId(ApplicationManager.getApplicationId());
         try {
+            qw.and(new QueryColumn(SystemFieldConstants.OPTIONAL.DRAFT_STATUS).eq(1));
             return Db.selectListByQuery(tableName, qw);
         } finally {
             ApplicationDataSourceManager.clear();
         }
-    }*/
+    }
 
     /**
      * 根据主键 ID 查询主表记录。
@@ -268,9 +293,9 @@ public class DraftDynamicMetadataRepository {
                 return null;
             }
             QueryWrapper qw = QueryWrapper.create().where(new QueryColumn(pkField).eq(v));
+            qw.and(new QueryColumn(SystemFieldConstants.OPTIONAL.DRAFT_STATUS).eq(1));
             if (filterDeleted) {
                 qw.and(new QueryColumn(SystemFieldConstants.OPTIONAL.DELETED).eq(0));
-                qw.and(new QueryColumn(SystemFieldConstants.OPTIONAL.DRAFT_STATUS).eq(1));
             }
             return Db.selectOneByQuery(tableName, qw);
         } finally {
@@ -285,9 +310,9 @@ public class DraftDynamicMetadataRepository {
      * @param id        主键值
      * @return 行数据；当 ID 为空或不可解析为数值时返回 null
      */
-/*    public Row selectMainById(String tableName, String pkField, Object id) {
+    public Row selectMainById(String tableName, String pkField, Object id) {
         return selectMainById(tableName, pkField, id, true);
-    }*/
+    }
 
     /**
      * 根据主键 ID 列表查询主表记录。
@@ -298,7 +323,7 @@ public class DraftDynamicMetadataRepository {
      * @param filterDeleted 是否过滤逻辑删除
      * @return 结果列表；当列表为空或无有效 ID 返回空列表
      */
-/*    public List<Row> selectMainByIds(String tableName, String pkField, List<?> ids, boolean filterDeleted) {
+    public List<Row> selectMainByIds(String tableName, String pkField, List<?> ids, boolean filterDeleted) {
         if (ids == null || ids.isEmpty()) { return List.of(); }
         ApplicationDataSourceManager.useBizDatasourceByAppId(ApplicationManager.getApplicationId());
         try {
@@ -306,11 +331,12 @@ public class DraftDynamicMetadataRepository {
             if (v.isEmpty()) { return List.of(); }
             QueryWrapper qw = QueryWrapper.create().where(new QueryColumn(pkField).in(v));
             if (filterDeleted) { qw.and(new QueryColumn(SystemFieldConstants.OPTIONAL.DELETED).eq(0)); }
+            qw.and(new QueryColumn(SystemFieldConstants.OPTIONAL.DRAFT_STATUS).eq(1));
             return Db.selectListByQuery(tableName, qw);
         } finally {
             ApplicationDataSourceManager.clear();
         }
-    }*/
+    }
 
     /**
      * 根据主键 ID 列表查询主表记录（默认过滤逻辑删除）。
@@ -319,9 +345,9 @@ public class DraftDynamicMetadataRepository {
      * @param ids       主键列表
      * @return 结果列表；当列表为空或无有效 ID 返回空列表
      */
-/*    public List<Row> selectMainByIds(String tableName, String pkField, List<?> ids) {
+    public List<Row> selectMainByIds(String tableName, String pkField, List<?> ids) {
         return selectMainByIds(tableName, pkField, ids, true);
-    }*/
+    }
 
     /**
      * 查询子表：根据父记录 ID（parent_id）查询关联行（默认过滤逻辑删除）。
@@ -352,8 +378,8 @@ public class DraftDynamicMetadataRepository {
             QueryWrapper qw = QueryWrapper.create().where(new QueryColumn("parent_id").eq(v));
             if (filterDeleted) {
                 qw.and(new QueryColumn(SystemFieldConstants.OPTIONAL.DELETED).eq(0));
-                qw.and(new QueryColumn(SystemFieldConstants.OPTIONAL.DRAFT_STATUS).eq(1));
             }
+            qw.and(new QueryColumn(SystemFieldConstants.OPTIONAL.DRAFT_STATUS).eq(1));
             return Db.selectListByQuery(tableName, qw);
         } finally {
             ApplicationDataSourceManager.clear();
@@ -391,8 +417,8 @@ public class DraftDynamicMetadataRepository {
             QueryWrapper qw = QueryWrapper.create().where(new QueryColumn(relationKey).eq(v));
             if (filterDeleted) {
                 qw.and(new QueryColumn(SystemFieldConstants.OPTIONAL.DELETED).eq(0));
-                qw.and(new QueryColumn(SystemFieldConstants.OPTIONAL.DRAFT_STATUS).eq(1));
             }
+            qw.and(new QueryColumn(SystemFieldConstants.OPTIONAL.DRAFT_STATUS).eq(1));
             return Db.selectListByQuery(tableName, qw);
         } finally {
             ApplicationDataSourceManager.clear();
@@ -430,6 +456,37 @@ public class DraftDynamicMetadataRepository {
             qw.limit(offset, pageSize);
             List<Row> rows = Db.selectListByQuery(tableName, qw);
             return new PageResult<>(rows, total);
+        } finally {
+            ApplicationDataSourceManager.clear();
+        }
+    }
+
+    /**
+     * 统计指定用户在指定表中的草稿数量
+     *
+     * @param tableName 表名
+     * @param userId    用户ID
+     * @return 草稿数量
+     */
+    public long countDraftByUser(String tableName, Long userId) {
+        ApplicationDataSourceManager.useBizDatasourceByAppId(ApplicationManager.getApplicationId());
+        try {
+            QueryWrapper qw = QueryWrapper.create()
+                    .where(new QueryColumn(SystemFieldConstants.OPTIONAL.DELETED).eq(0))
+                    .and(new QueryColumn(SystemFieldConstants.OPTIONAL.DRAFT_STATUS).eq(1))
+                    .and(new QueryColumn(SystemFieldConstants.REQUIRE.CREATOR).eq(userId.toString()));
+            qw.select(QueryMethods.count().as("total"));
+            Row countRow = Db.selectOneByQuery(tableName, qw);
+            if (countRow != null) {
+                Object tv = countRow.get("total");
+                if (tv != null) {
+                    try {
+                        return Long.parseLong(String.valueOf(tv));
+                    } catch (Exception ignored) {
+                    }
+                }
+            }
+            return 0L;
         } finally {
             ApplicationDataSourceManager.clear();
         }

@@ -73,7 +73,10 @@ public class RuntimeAppApplicationServiceImpl implements AppApplicationService {
         }
         ApplicationRespVO respVO = new ApplicationRespVO();
 
-        AppNavigationDO appNavigationDO = appNavigationRepository.findByApplicationId(id);
+        AppNavigationDO appNavigationDO = TenantManager.withoutTenantCondition(() ->
+                ApplicationManager.withoutApplicationIdAndVersionTag(() ->
+                        appNavigationRepository.findByApplicationIdAndVersionTag(id, VersionTagEnum.RUNTIME.getValue())
+                ));
         if (appNavigationDO != null) {
             BeanUtils.copyProperties(appNavigationDO, respVO);
         }

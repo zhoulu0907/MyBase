@@ -53,6 +53,14 @@ public class AppVersionRepository extends BaseAppRepository<AppVersionMapper, Ap
         return this.list(queryWrapper);
     }
 
+    public List<AppVersionDO> findVersionListByAppIds(List<Long> appIds) {
+        QueryWrapper queryWrapper = this.query()
+                .eq(AppVersionDO::getVersionType, VersionTypeEnum.RUNTIME.getValue())
+                .in(AppVersionDO::getApplicationId, appIds)
+                .orderBy(AppVersionDO::getCreateTime, false);
+        return this.list(queryWrapper);
+    }
+
     public AppVersionDO findByApplicationIdAndVersionType(Long applicationId, int versionType) {
         QueryWrapper queryWrapper = this.query()
                 .where(APP_VERSION.APPLICATION_ID.eq(applicationId))

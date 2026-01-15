@@ -44,4 +44,34 @@ public interface DraftSemanticDynamicDataService {
      * @return 分页响应
      */
     PageResult<Map<String, Object>> page(String tableName, Long menuId, SemanticPageBodyVO body, String traceId);
+
+    /**
+     * 删除数据
+     * @param tableName 表名
+     * @param menuId 菜单ID
+     * @param body 目标请求体，包含待删除主键
+     * @param traceId 链路追踪ID
+     * @return 删除成功返回 true，失败返回 false
+     */
+    boolean delete(String tableName, Long menuId, SemanticTargetBodyVO body, String traceId);
+
+    /**
+     * 根据表名删除数据
+     * @param tableName 表名
+     * @param menuId 菜单ID
+     * @param body 目标请求体，包含待删除主键
+     * @param traceId 链路追踪ID
+     * @return 删除成功返回 true，失败返回 false
+     */
+    boolean deleteByTable(String tableName, Long menuId,SemanticTargetBodyVO body, String traceId);
+
+    /**
+     * 更新数据
+     * @param tableName 表名
+     * @param menuId 菜单ID
+     * @param body 合并请求体，包含主键
+     * @param traceId 链路追踪ID
+     * @return 更新后的响应
+     */
+    Map<String, Object> update(String tableName, Long menuId, SemanticMergeBodyVO body, String traceId);
 }

@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.infra.service.file;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.infra.dal.dataobject.file.FileDO;
+import com.cmsr.onebase.module.infra.dal.dataflexdo.file.FileDO;
 import com.cmsr.onebase.module.infra.dal.vo.file.file.FileCreateReqVO;
 import com.cmsr.onebase.module.infra.dal.vo.file.file.FilePageReqVO;
 import com.cmsr.onebase.module.infra.dal.vo.file.file.FilePresignedUrlRespVO;
@@ -87,5 +87,13 @@ public interface FileService {
      * @return 文件信息
      */
     void getFileContent(Long id, HttpServletRequest request, HttpServletResponse response, String visitMode) throws Exception;
+
+    /**
+     * 根据文件ID获取文件内容（字节数组）
+     *
+     * @param id 文件ID
+     * @return 文件内容字节数组
+     */
+    byte[] getFileContentBytes(Long id) throws Exception;
 
 }

@@ -20,6 +20,7 @@ import com.cmsr.onebase.module.bpm.core.dto.BpmGlobalConfigDTO;
 import com.cmsr.onebase.module.bpm.core.dto.PageViewGroupDTO;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeExtDTO;
 import com.cmsr.onebase.module.bpm.core.enums.*;
+import com.cmsr.onebase.module.bpm.core.utils.BpmUtil;
 import com.cmsr.onebase.module.bpm.core.validator.BpmAppResourceValidator;
 import com.cmsr.onebase.module.bpm.core.vo.BpmFormDataPageReqVO;
 import com.cmsr.onebase.module.bpm.core.vo.design.BpmDefJsonVO;
@@ -40,6 +41,7 @@ import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticConditio
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticFieldTypeEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticOperatorEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.type.BpmSystemFieldEnum;
+import com.cmsr.onebase.module.metadata.core.semantic.type.RefType;
 import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticPageConditionVO;
 import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticTargetBodyVO;
 import com.cmsr.onebase.module.system.api.user.AdminUserApi;
@@ -48,7 +50,6 @@ import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.warm.flow.core.FlowEngine;
 import org.dromara.warm.flow.core.dto.DefJson;
@@ -184,16 +185,23 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
             });
         }
 
+        // 实体数据转换
+        SemanticEntityValueDTO entityValueDTO = semanticDynamicDataApi.buildSemanticEntityValueDTO(entityVO.getData(), entitySchemaDTO);
+        semanticDynamicDataApi.enrich(entitySchemaDTO, entityValueDTO);
+
+        Map<String, SemanticFieldValueDTO<Object>> fieldValueMap = entityValueDTO.getFieldValueMap();
+
         for (String name : formSummaryFieldNames) {
+            SemanticFieldValueDTO<Object> semanticFieldValue  = fieldValueMap.get(name);
             SemanticFieldSchemaDTO fieldDto = mainTableFieldMap.get(name);
 
-            if (fieldDto == null) {
+            if (semanticFieldValue == null || fieldDto == null) {
                 continue;
             }
 
             String displayName = fieldDto.getDisplayName();
             String fieldName = fieldDto.getFieldName();
-            Object fieldValue = entityVO.getData().get(fieldName);
+            Object fieldValue = semanticFieldValue.getRawValue();
 
             if (fieldValue == null) {
                 continue;
@@ -204,15 +212,9 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
                 break;
             }
 
-            // 处理复杂组件类型，转换为SemanticFieldValueDTO获取实际存储值
-            SemanticFieldTypeEnum fieldType = bpmEntityHelper.findFieldType(entitySchemaDTO, entitySchemaDTO.getTableName(), fieldName);
-            if (fieldType != null) {
-                SemanticFieldValueDTO<Object> semanticFieldValue = SemanticFieldValueDTO.ofType(fieldType);
-                semanticFieldValue.setRawValue(fieldValue);
-                Object storeValue = semanticFieldValue.getStoreValue();
-                if (storeValue != null) {
-                    fieldValue = storeValue;
-                }
+            // 复杂类型字段取name
+            if (fieldValue instanceof RefType refFieldValue) {
+                fieldValue = refFieldValue.getName();
             }
 
             sb.append(displayName).append(":").append(fieldValue).append(" ");
@@ -231,12 +233,15 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         String entityDataId = null;
         Long applicationId = ApplicationManager.getApplicationId();
 
+        // 创建流程不再支持草稿状态
+        reqVO.setDraft(false);
+
         if (applicationId == null) {
             throw exception(ErrorCodeConstants.MISSING_APPLICATION_ID);
         }
 
-        // 和更新数据公用了字段，需要手动校验
-        if (MapUtils.isEmpty(reqVO.getEntity().getData())) {
+        // 和更新数据公用了字段，需要手动校验，data数据的完整性由元数据接口校验
+        if (reqVO.getEntity().getData() == null) {
             throw exception(ErrorCodeConstants.FLOW_ENTITY_DATA_NOT_EXISTS.getCode(), "实体数据内容不能为空");
         }
 
@@ -538,10 +543,11 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
     public PageResult<Map<String, Object>> formDataPage(BpmFormDataPageReqVO reqVO) {
         Long loginUserId = WebFrameworkUtils.getLoginUserId();
         PageResult<Map<String, Object>> response = PageResult.empty();
+        Long applicationId = BpmUtil.getRequiredApplicationId();
 
         // menuId转menuUuid
         AppMenuRespDTO appMenuRespDTO = appResourceApi.getAppMenuById(reqVO.getMenuId());
-        bpmAppResourceValidator.validateMenuAndPageset(appMenuRespDTO, appMenuRespDTO.getApplicationId());
+        bpmAppResourceValidator.validateMenuAndPageset(appMenuRespDTO, applicationId);
 
         String menuUuid = appMenuRespDTO.getMenuUuid();
 
@@ -554,9 +560,10 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         List<FlowInstance> instances = flowInstanceRepository.list(instanceQuery);
         Map<Long, Long> entityDataIdInstanceIdMap = new HashMap<>();
 
-        if (CollectionUtils.isEmpty(instances)) {
-            return response;
-        }
+        // todo 只有携带了BPM相关的条件，才会进行BPM流程的查询
+//        if (CollectionUtils.isEmpty(instances)) {
+//            return response;
+//        }
 
         Set<Long> entityDataIds = new HashSet<>();
 
@@ -587,10 +594,10 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
                 reqVO.getFilters().setChildren(new ArrayList<>());
             }
 
-            reqVO.getFilters().getChildren().add(idCondition);
+            // reqVO.getFilters().getChildren().add(idCondition);
             conditionVO.setSemanticConditionDTO(reqVO.getFilters());
         } else {
-            conditionVO.setSemanticConditionDTO(idCondition);
+            // conditionVO.setSemanticConditionDTO(idCondition);
         }
 
         // 3. 调用 getDataByCondition 方法， todo 增加menuId的权限限制
@@ -616,11 +623,16 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
 
         // 查询流程数据，todo 使用关联查询
 
-        List<FlowInstance> instanceResults =  flowInstanceRepository.listByIds(instanceIds);
+        List<FlowInstance> instanceResults = new ArrayList<>();
+        List<BpmFlowInsBizExtDO> instanceExtResults = new ArrayList<>();
 
-        QueryWrapper instanceExtResultQuery = QueryWrapper.create();
-        instanceExtResultQuery.in(BpmFlowInsBizExtDO::getInstanceId, instanceIds);
-        List<BpmFlowInsBizExtDO> instanceExtResults = flowInsExtRepository.list(instanceExtResultQuery);
+        if (CollectionUtils.isNotEmpty(instanceIds)) {
+            instanceResults = flowInstanceRepository.listByIds(instanceIds);
+
+            QueryWrapper instanceExtResultQuery = QueryWrapper.create();
+            instanceExtResultQuery.in(BpmFlowInsBizExtDO::getInstanceId, instanceIds);
+            instanceExtResults = flowInsExtRepository.list(instanceExtResultQuery);
+        }
 
         Map<Long, FlowInstance> instanceResultMap = new HashMap<>();
         Map<Long, BpmFlowInsBizExtDO> instanceExtResultMap = new HashMap<>();
@@ -664,6 +676,7 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
 
             if (matchedInstance == null && matchedInstanceExt == null) {
                 log.warn("无匹配的流程实例信息 entityDataId = {}", entityValueId);
+                response.getList().add(entityValueDTO.getGlobalRawMapForJson());
                 continue;
             }
 
@@ -729,7 +742,7 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
                 entityValueDTO.getFieldValueMap().put(bpmFieldEnum.getFieldName(), semanticFieldValue);
             }
 
-            response.getList().add(entityValueDTO.getGlobalRawMap());
+            response.getList().add(entityValueDTO.getGlobalRawMapForJson());
         }
 
         return response;

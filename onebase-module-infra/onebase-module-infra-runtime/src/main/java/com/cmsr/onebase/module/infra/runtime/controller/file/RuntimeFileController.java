@@ -5,7 +5,7 @@ import com.cmsr.onebase.framework.common.annotaion.ApiSignIgnore;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
-import com.cmsr.onebase.module.infra.dal.dataobject.file.FileDO;
+import com.cmsr.onebase.module.infra.dal.dataflexdo.file.FileDO;
 import com.cmsr.onebase.module.infra.dal.vo.app.AppFileUploadReqVO;
 import com.cmsr.onebase.module.infra.dal.vo.file.file.FileListRespVO;
 import com.cmsr.onebase.module.infra.enums.file.FileVisitModeEnum;
@@ -39,7 +39,7 @@ public class RuntimeFileController {
     @Resource
     private FileService fileService;
 
-    @PostMapping("/upload")
+    @PostMapping({"/upload", "corp/upload"})
     @Operation(summary = "上传文件")
     @ApiSignIgnore
     public CommonResult<String> uploadFile(@Valid AppFileUploadReqVO uploadReqVO) throws Exception {
@@ -80,7 +80,7 @@ public class RuntimeFileController {
         return success(BeanUtils.toBean(fileList, FileListRespVO.class));
     }
 
-    @GetMapping("/download/{id}")
+    @GetMapping({"/download/{id}", "/corp/download/{id}"})
     @Operation(summary = "获取文件内容")
     @PermitAll
     @TenantIgnore

@@ -2,39 +2,27 @@ package com.cmsr.onebase.module.metadata.core.semantic.service.impl;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.metadata.api.semantic.SemanticDynamicDataApi;
-import com.cmsr.onebase.module.metadata.core.semantic.dal.DynamicMetadataRepository;
-import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntitySchemaDTO;
-import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntityValueDTO;
-import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticRecordDTO;
-import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldSchemaDTO;
-import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticSortRuleDTO;
-import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticConditionDTO;
-import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticMethodCodeEnum;
-import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticDataMethodOpEnum;
-import com.cmsr.onebase.module.metadata.core.semantic.strategy.SemanticMergeRecordAssembler;
-import com.cmsr.onebase.module.metadata.core.semantic.strategy.SemanticPermissionContextLoader;
-import com.cmsr.onebase.module.metadata.core.semantic.strategy.SemanticPermissionValidator;
-import com.cmsr.onebase.module.metadata.core.semantic.strategy.SemanticProcessLogger;
-import com.cmsr.onebase.module.metadata.core.semantic.strategy.SemanticDataIntegrityValidator;
-import com.cmsr.onebase.module.metadata.core.semantic.strategy.SemanticQueryConditionBuilder;
-import com.cmsr.onebase.module.metadata.core.semantic.service.SemanticDataCrudService;
-import com.cmsr.onebase.module.metadata.core.semantic.strategy.SemanticValueAssembler;
-import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticMergeBodyVO;
-import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticPageBodyVO;
-import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticTargetBodyVO;
-import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticPageConditionVO;
-import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticMergeConditionVO;
-import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticTargetConditionVO;
-import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService;
-import com.cmsr.onebase.module.metadata.core.service.entity.MetadataEntityFieldCoreService;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
+import com.cmsr.onebase.module.metadata.core.semantic.dal.DynamicMetadataRepository;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.*;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticConditionTypeEnum;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticDataMethodOpEnum;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticMethodCodeEnum;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticOperatorEnum;
+import com.cmsr.onebase.module.metadata.core.semantic.service.SemanticDataCrudService;
+import com.cmsr.onebase.module.metadata.core.semantic.strategy.*;
+import com.cmsr.onebase.module.metadata.core.semantic.strategy.validation.SemanticValidationManager;
+import com.cmsr.onebase.module.metadata.core.semantic.vo.*;
+import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService;
+import com.cmsr.onebase.module.metadata.core.service.entity.MetadataEntityFieldCoreService;
+import com.mybatisflex.core.query.QueryColumn;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.core.row.Row;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -67,6 +55,12 @@ public class SemanticDynamicDataApiImpl implements SemanticDynamicDataApi {
     private SemanticValueAssembler semanticValueAssembler;
     @Resource
     private SemanticProcessLogger semanticProcessLogger;
+
+    @Resource
+    private SemanticRefResolver semanticRefResolver;
+
+    @Resource
+    private SemanticValidationManager semanticValidationManager;
 
     @Override
     public SemanticEntitySchemaDTO buildEntitySchemaByUuid(String entityUuid) {
@@ -164,7 +158,7 @@ public class SemanticDynamicDataApiImpl implements SemanticDynamicDataApi {
                 SemanticMethodCodeEnum.DELETE,
                 SemanticDataMethodOpEnum.DELETE);
         // 2) 考虑后台调用，暂不初始化权限上下文初始化
-        semanticPermissionContextLoader.loadPermissionContext(record);
+        // semanticPermissionContextLoader.loadPermissionContext(record);
         // 3) 数据完整性校验
         semanticDataIntegrityValidator.validate(record);
         // 4) 执行删除（软删优先）
@@ -202,11 +196,169 @@ public class SemanticDynamicDataApiImpl implements SemanticDynamicDataApi {
     }
 
     @Override
+    public Integer deleteSubTableDataByCondition(SemanticTargetConditionVO body) {
+        String tableName = body == null ? null : body.getTableName();
+        if (tableName == null || tableName.isBlank()) { return 0; }
+        SemanticConditionDTO cond = body.getSemanticConditionDTO();
+
+        SemanticConditionTypeEnum conditionType = cond.getConditionType();//sub_condition main_condition
+        if(SemanticConditionTypeEnum.MAIN_CONDITION == conditionType){
+            String mainTableName = cond.getTableName();
+            String fieldName = cond.getFieldName();
+            // 查询主子表关联关系
+            SemanticEntitySchemaDTO  semanticEntitySchemaDTO = semanticMergeRecordAssembler.buildEntitySchemaByTableName(mainTableName);
+            SemanticRelationSchemaDTO semanticRelationSchemaDTO = semanticEntitySchemaDTO.getConnectors().stream().filter(relationSchemaDTO ->
+                    tableName.equals(relationSchemaDTO.getTargetEntityTableName())).findFirst().orElse(null);
+            if(ObjectUtils.isEmpty(semanticRelationSchemaDTO)){
+                log.error("主子表关联关系不存在");
+                return null;
+            }
+            String sourceFieldUuid = semanticRelationSchemaDTO.getSourceKeyFieldUuid();// 主表关联字段
+            SemanticFieldSchemaDTO sourceSemanticFieldSchemaDTO = semanticEntitySchemaDTO.getFields().stream().filter(fieldSchemaDTO -> sourceFieldUuid.equals(fieldSchemaDTO.getFieldUuid())).findFirst().orElse(null);
+            if(ObjectUtils.isEmpty(sourceSemanticFieldSchemaDTO)){
+                log.error("主表fieldschema不存在");
+                return null;
+            }
+            String targetFieldUuid = semanticRelationSchemaDTO.getTargetKeyFieldUuid();// 子表关联字段
+            SemanticFieldSchemaDTO targetSemanticFieldSchemaDTO = semanticRelationSchemaDTO.getRelationAttributes().stream().filter(fieldSchemaDTO -> targetFieldUuid.equals(fieldSchemaDTO.getFieldUuid())).findFirst().orElse(null);
+            if(ObjectUtils.isEmpty(targetSemanticFieldSchemaDTO)){
+                log.error("子表fieldschema不存在");
+                return null;
+            }
+            // 查询出关联主表的id集合
+            List<Object> parentIds = new ArrayList<Object>();
+            QueryWrapper qw = new QueryWrapper();
+            if(cond.getFieldValue().size() > 1){
+                qw.and(new QueryColumn(fieldName).in(cond.getFieldValue()));
+            }else{
+                qw.and(new QueryColumn(fieldName).eq(cond.getFieldValue().get(0)));
+            }
+            List<Row> rows = dynamicMetadataRepository.selectListByQuery(mainTableName,qw,null);
+            for(Row row : rows){
+                parentIds.add(row.get(sourceSemanticFieldSchemaDTO.getFieldName()));
+            }
+            if(ObjectUtils.isEmpty(parentIds)){
+                return null;// 主表中未匹配到数据 不进行子表更新 直接返回null
+            }
+            body.getSemanticConditionDTO().setFieldName(targetSemanticFieldSchemaDTO.getFieldName());
+            body.getSemanticConditionDTO().setOperator(SemanticOperatorEnum.EXISTS_IN);
+            body.getSemanticConditionDTO().setFieldValue(parentIds);
+            body.getSemanticConditionDTO().setTableName(body.getTableName());
+            body.getSemanticConditionDTO().setConditionType(SemanticConditionTypeEnum.SUB_CONDITION);
+        }
+        // 1) 构建 RecordDTO（目标请求体 + 过滤条件）
+        SemanticRecordDTO record = buildDeleteRecord(body);
+        // 2) 考虑后台调用，暂不初始化权限上下文初始化
+        // semanticPermissionContextLoader.loadPermissionContext(record);
+        // 3) 数据完整性校验
+        semanticDataIntegrityValidator.validate(record);
+        // // 4) 功能权限校验
+        // semanticPermissionValidator.validate(record);
+        // 5) 条件安全校验，避免误删全表
+//        SemanticConditionDTO cond = body.getSemanticConditionDTO();
+        if (!SemanticConditionDTO.hasCondition(cond)) {
+            throw new IllegalArgumentException("deleteDataByCondition: 为了避免删除全表数据，必须指定删除条件");
+        }
+        // 6) 构建条件查询包装器（仅条件，不应用数据权限）
+        List<SemanticFieldSchemaDTO> fields = record.getEntitySchema().getFields();
+        QueryWrapper qw = QueryWrapper.create();
+        semanticQueryConditionBuilder.apply(qw, fields, cond, null);
+        int affected = semanticDataCrudService.deleteByQuery(record, qw);
+        // 7) 记录过程日志并返回
+        semanticProcessLogger.log(record);
+        return affected;
+    }
+
+    @Override
     public List<SemanticEntityValueDTO> updateDataByCondition(SemanticTargetConditionVO body) {
         // 1) 参数校验
         String tableName = body == null ? null : body.getTableName();
         if (tableName == null || tableName.isBlank()) { return List.of(); }
         SemanticConditionDTO cond = body.getSemanticConditionDTO();
+        if (!SemanticConditionDTO.hasCondition(cond)) {
+            throw new IllegalArgumentException("updateDataByCondition: 为了避免更新全表数据，必须指定更新条件");
+        }
+        Map<String, Object> updates = body.getUpdateProperties();
+        if (updates.isEmpty()) { return List.of(); }
+
+        // 2) 构建 RecordDTO（目标请求体 + 过滤条件）
+        SemanticRecordDTO record = semanticMergeRecordAssembler.assembleTargetBody(tableName, new SemanticTargetBodyVO(), null, null,
+                SemanticMethodCodeEnum.UPDATE,
+                SemanticDataMethodOpEnum.UPDATE);
+        record.getRecordContext().setFilters(cond);
+
+        // 3) 考虑后台调用，暂不初始化权限上下文初始化
+        // semanticPermissionContextLoader.loadPermissionContext(record);
+
+        // 4) 数据完整性校验
+        semanticDataIntegrityValidator.validate(record);
+
+        // 5) 构建条件查询包装器（仅条件，不应用数据权限）
+        List<SemanticFieldSchemaDTO> fields = record.getEntitySchema().getFields();
+        QueryWrapper qw = QueryWrapper.create();
+        semanticQueryConditionBuilder.apply(qw, fields, cond, null);
+        List<Map<String, Object>> result = semanticDataCrudService.updateByQuery(record, updates, qw);
+
+        // 6) 转换为语义值对象列表
+        List<SemanticEntityValueDTO> values = convertToValues(record.getEntitySchema(), result);
+
+        // 7) 记录过程日志并返回
+        semanticProcessLogger.log(record);
+        return values;
+    }
+
+    @Override
+    public List<SemanticEntityValueDTO> updateSubTableDataByCondition(SemanticTargetConditionVO body) {
+        // 1) 参数校验
+        String tableName = body == null ? null : body.getTableName();
+        if (tableName == null || tableName.isBlank()) { return List.of(); }
+        SemanticConditionDTO cond = body.getSemanticConditionDTO();
+
+        SemanticConditionTypeEnum conditionType = cond.getConditionType();//sub_condition main_condition
+        if(SemanticConditionTypeEnum.MAIN_CONDITION == conditionType){
+            String mainTableName = cond.getTableName();
+            String fieldName = cond.getFieldName();
+            // 查询主子表关联关系
+            SemanticEntitySchemaDTO  semanticEntitySchemaDTO = semanticMergeRecordAssembler.buildEntitySchemaByTableName(mainTableName);
+            SemanticRelationSchemaDTO semanticRelationSchemaDTO = semanticEntitySchemaDTO.getConnectors().stream().filter(relationSchemaDTO ->
+                    tableName.equals(relationSchemaDTO.getTargetEntityTableName())).findFirst().orElse(null);
+            if(ObjectUtils.isEmpty(semanticRelationSchemaDTO)){
+                log.error("主子表关联关系不存在");
+                return null;
+            }
+            String sourceFieldUuid = semanticRelationSchemaDTO.getSourceKeyFieldUuid();// 主表关联字段
+            SemanticFieldSchemaDTO sourceSemanticFieldSchemaDTO = semanticEntitySchemaDTO.getFields().stream().filter(fieldSchemaDTO -> sourceFieldUuid.equals(fieldSchemaDTO.getFieldUuid())).findFirst().orElse(null);
+            if(ObjectUtils.isEmpty(sourceSemanticFieldSchemaDTO)){
+                log.error("主表fieldschema不存在");
+                return null;
+            }
+            String targetFieldUuid = semanticRelationSchemaDTO.getTargetKeyFieldUuid();// 子表关联字段
+            SemanticFieldSchemaDTO targetSemanticFieldSchemaDTO = semanticRelationSchemaDTO.getRelationAttributes().stream().filter(fieldSchemaDTO -> targetFieldUuid.equals(fieldSchemaDTO.getFieldUuid())).findFirst().orElse(null);
+            if(ObjectUtils.isEmpty(targetSemanticFieldSchemaDTO)){
+                log.error("子表fieldschema不存在");
+                return null;
+            }
+            // 查询出关联主表的id集合
+            List<Object> parentIds = new ArrayList<Object>();
+            QueryWrapper qw = new QueryWrapper();
+            if(cond.getFieldValue().size() > 1){
+                qw.and(new QueryColumn(fieldName).in(cond.getFieldValue()));
+            }else{
+                qw.and(new QueryColumn(fieldName).eq(cond.getFieldValue().get(0)));
+            }
+            List<Row> rows = dynamicMetadataRepository.selectListByQuery(mainTableName,qw,null);
+            for(Row row : rows){
+                parentIds.add(row.get(sourceSemanticFieldSchemaDTO.getFieldName()));
+            }
+            if(ObjectUtils.isEmpty(parentIds)){
+                return null;// 主表中未匹配到数据 不进行子表更新 直接返回null
+            }
+            body.getSemanticConditionDTO().setFieldName(targetSemanticFieldSchemaDTO.getFieldName());
+            body.getSemanticConditionDTO().setOperator(SemanticOperatorEnum.EXISTS_IN);
+            body.getSemanticConditionDTO().setFieldValue(parentIds);
+            body.getSemanticConditionDTO().setTableName(body.getTableName());
+            body.getSemanticConditionDTO().setConditionType(SemanticConditionTypeEnum.SUB_CONDITION);
+        }
         if (!SemanticConditionDTO.hasCondition(cond)) {
             throw new IllegalArgumentException("updateDataByCondition: 为了避免更新全表数据，必须指定更新条件");
         }
@@ -260,6 +412,10 @@ public class SemanticDynamicDataApiImpl implements SemanticDynamicDataApi {
         // semanticPermissionContextLoader.loadPermissionContext(record);
         // 3) 数据完整性与功能权限校验
         semanticDataIntegrityValidator.validate(record);
+
+        // 语义数据校验（包含子表空行校验、字段校验等）
+        semanticValidationManager.validate(record);
+
         // 4) 执行创建
         semanticDataCrudService.create(record);
         // 5) 按主键读取创建后的详情
@@ -287,6 +443,10 @@ public class SemanticDynamicDataApiImpl implements SemanticDynamicDataApi {
         // 3) 数据完整性与功能权限校验
         semanticDataIntegrityValidator.validate(record);
         // semanticPermissionValidator.validate(record);
+
+        // 数据校验（必填、长度、范围、格式、唯一等）
+        semanticValidationManager.validate(record);
+
         // 4) 执行更新
         semanticDataCrudService.update(record);
         // 5) 按主键读取更新后的详情
@@ -324,6 +484,16 @@ public class SemanticDynamicDataApiImpl implements SemanticDynamicDataApi {
         }
         // 4) 返回字段模型列表
         return list;
+    }
+
+    @Override
+    public void enrich(SemanticEntitySchemaDTO entitySchema, SemanticEntityValueDTO resultVal) {
+        semanticRefResolver.enrich(entitySchema, resultVal);
+    }
+
+    @Override
+    public SemanticEntityValueDTO buildSemanticEntityValueDTO(Map<String, Object> entityData, SemanticEntitySchemaDTO entitySchema) {
+        return semanticMergeRecordAssembler.buildSemanticEntityValueDTO(entityData, entitySchema);
     }
 
     private QueryWrapper buildPageQueryWrapper(SemanticRecordDTO recordDTO, QueryWrapper queryWrapper) {

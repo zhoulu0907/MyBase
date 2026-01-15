@@ -7,7 +7,9 @@ import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.framework.common.security.dto.RuntimeLoginUser;
 import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
+import com.cmsr.onebase.framework.security.runtime.service.AuthPermitService;
 import com.cmsr.onebase.module.app.api.security.AppAuthSecurityApi;
+import jakarta.annotation.Resource;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,7 +17,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
@@ -37,16 +38,21 @@ public class RuntimeApplicationContextHeaderFilter extends OncePerRequestFilter 
     @Value("${data.isolation:true}")
     private boolean dataIsolation;
 
-    @Autowired
+    @Resource
     private AppAuthSecurityApi appAuthSecurityApi;
 
     private static final String X_APPLICATION_ID = "X-Application-Id";
 
-    private RequestMatcher systemRequestMatcher = new AntPathRequestMatcher("/runtime/system/**");
-    private RequestMatcher corpRequestMatcher = new AntPathRequestMatcher("/runtime/corp/**");
-    //todo 这里要删除
-    private RequestMatcher appGetRequestMatcher = new AntPathRequestMatcher("/runtime/app/application/get");
+    private RequestMatcher systemRequestMatcher   = new AntPathRequestMatcher("/runtime/system/**");
+    private RequestMatcher corpRequestMatcher     = new AntPathRequestMatcher("/runtime/corp/**");
+    private RequestMatcher corpFileRequestMatcher     = new AntPathRequestMatcher("/runtime/infra/file/corp/**");
+    // todo 这里要删除
+    private RequestMatcher appRoleRequestMatcher  = new AntPathRequestMatcher("/runtime/app/auth-role/**");
+    private RequestMatcher appGetRequestMatcher   = new AntPathRequestMatcher("/runtime/app/application/get");
     private RequestMatcher appLeastRequestMatcher = new AntPathRequestMatcher("/runtime/app/application/least");
+
+    @Resource
+    private AuthPermitService authPermitService ;
 
 
     /**
@@ -58,6 +64,8 @@ public class RuntimeApplicationContextHeaderFilter extends OncePerRequestFilter 
     private boolean doFilter(HttpServletRequest request) {
         return systemRequestMatcher.matches(request)
                 || corpRequestMatcher.matches(request)
+                || corpFileRequestMatcher.matches(request)
+                || appRoleRequestMatcher.matches(request)
                 || appGetRequestMatcher.matches(request)
                 || appLeastRequestMatcher.matches(request)
                 || RemoteCallAuthenticationFilter.flowRemoteCallRequestMatcher.matches(request);
@@ -87,6 +95,10 @@ public class RuntimeApplicationContextHeaderFilter extends OncePerRequestFilter 
                 log.warn("登录用户无应用ID，从请求头中获取应用ID，loginUser={}", loginUser);
                 String applicationIdHeader = request.getHeader(X_APPLICATION_ID);
                 applicationId = NumberUtils.toLong(applicationIdHeader, -1L);
+
+                if (applicationId <=0){
+                    applicationId = NumberUtils.toLong(request.getParameter("applicationId"), -1L);
+                }
             }
             if (applicationId <= 0) {
                 CommonResult<?> result = CommonResult.error(FORBIDDEN_APP.getCode(), "应用ID为空");
@@ -94,11 +106,16 @@ public class RuntimeApplicationContextHeaderFilter extends OncePerRequestFilter 
                 return;
             }
             ApplicationManager.setApplicationId(applicationId);
-            if (!hasApplicationPermission(loginUser.getId(), ApplicationManager.getApplicationId())) {
-                CommonResult<?> result = CommonResult.error(FORBIDDEN_APP);
-                ServletUtils.writeJSON(response, result);
-                return;
+
+            // 免登录接口放行，其他接口校验应用权限
+            if (!authPermitService.isPermitAllRequest(request)) {
+                if (!hasApplicationPermission(loginUser.getId(), ApplicationManager.getApplicationId())) {
+                    CommonResult<?> result = CommonResult.error(FORBIDDEN_APP);
+                    ServletUtils.writeJSON(response, result);
+                    return;
+                }
             }
+
             chain.doFilter(request, response);
         } finally {
             ApplicationManager.clearAll();
@@ -107,6 +124,11 @@ public class RuntimeApplicationContextHeaderFilter extends OncePerRequestFilter 
 
 
     private boolean hasApplicationPermission(Long userId, Long applicationId) {
-        return appAuthSecurityApi.hasApplicationPermission(userId, applicationId);
+        boolean hasApplicationPermission = appAuthSecurityApi.hasApplicationPermission(userId, applicationId);
+        // TODO 暂时这样弄这，如果没有权限，清理掉缓存
+        if (!hasApplicationPermission) {
+            appAuthSecurityApi.cleanAuthCache(userId, applicationId);
+        }
+        return hasApplicationPermission;
     }
 }

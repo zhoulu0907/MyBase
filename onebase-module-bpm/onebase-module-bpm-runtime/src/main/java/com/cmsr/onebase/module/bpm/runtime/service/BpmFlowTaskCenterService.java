@@ -50,4 +50,12 @@ public interface BpmFlowTaskCenterService {
      * @return
      */
     PageResult<BpmCcTaskPageResVO> getCcPage(BpmCcTaskPageReqVO pageReqVO);
+
+
+    /**
+     * 获取流程概览
+     *
+     * @return
+     */
+    BpmOverviewRespVO getOverview();
 }

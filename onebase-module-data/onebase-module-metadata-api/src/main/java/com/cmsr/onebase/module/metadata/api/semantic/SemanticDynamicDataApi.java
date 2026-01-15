@@ -1,10 +1,5 @@
 package com.cmsr.onebase.module.metadata.api.semantic;
 
-import java.util.List;
-import java.util.Map;
-
-import org.springframework.web.bind.annotation.RequestBody;
-
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntitySchemaDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntityValueDTO;
@@ -13,11 +8,13 @@ import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticMergeConditionV
 import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticPageConditionVO;
 import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticTargetBodyVO;
 import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticTargetConditionVO;
-
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.RequestBody;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * 数据方法API接口
@@ -134,6 +131,16 @@ public interface SemanticDynamicDataApi {
     Integer deleteDataByCondition(@Valid @RequestBody SemanticTargetConditionVO body);
 
     /**
+     * 根据条件删除子表实体数据
+     *
+     * - 存在 `deleted` 字段时执行软删除，否则物理删除
+     * - 为避免误删全表，条件必填
+     *
+     * @param body 条件请求体（表名 + 过滤条件）
+     * @return 删除影响行数
+     */
+    Integer deleteSubTableDataByCondition(@Valid @RequestBody SemanticTargetConditionVO body);
+    /**
      * 根据条件批量更新实体数据并返回更新后的结果
      *
      * - 仅更新实体定义中的合法字段（忽略未知键）
@@ -144,6 +151,18 @@ public interface SemanticDynamicDataApi {
      * @return 更新后的语义值列表
      */
     List<SemanticEntityValueDTO> updateDataByCondition(@Valid @RequestBody SemanticTargetConditionVO body);
+
+    /**
+     * 根据条件批量更新子表实体数据并返回更新后的结果
+     *
+     * - 仅更新实体定义中的合法字段（忽略未知键）
+     * - 自动填充系统字段占位（如 `updated_time`、`updater`）
+     * - 返回更新后的行的语义值列表（已做权限过滤与引用解析）
+     *
+     * @param body 条件与更新内容请求体（`tableName` + `semanticConditionDTO` + `updateProperties`）
+     * @return 更新后的语义值列表
+     */
+    List<SemanticEntityValueDTO> updateSubTableDataByCondition(@Valid @RequestBody SemanticTargetConditionVO body);
 
     /**
      * 插入实体数据（编辑态调用）
@@ -166,5 +185,8 @@ public interface SemanticDynamicDataApi {
      * @return 更新后的语义值
      */
     SemanticEntityValueDTO updateDataById(@Valid @RequestBody SemanticMergeConditionVO body);
-    
+
+    void enrich(SemanticEntitySchemaDTO entitySchema, SemanticEntityValueDTO resultVal);
+
+    SemanticEntityValueDTO buildSemanticEntityValueDTO(Map<String, Object> entityData, SemanticEntitySchemaDTO entitySchema);
 }

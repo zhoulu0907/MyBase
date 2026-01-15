@@ -24,9 +24,11 @@ public final class FileMNValidateUtil {
             case FileUploadCheckConstants.XLSX -> FileMagicNumber.XLSX.match(content);
             case FileUploadCheckConstants.PPT -> FileMagicNumber.PPT.match(content);
             case FileUploadCheckConstants.PPTX -> FileMagicNumber.PPTX.match(content);
-            case FileUploadCheckConstants.JPG, FileUploadCheckConstants.JPEG -> FileMagicNumber.JPEG.match(content);
+            case FileUploadCheckConstants.JPG, FileUploadCheckConstants.JPEG -> FileMagicNumber.JPEG.match(content) || FileMagicNumber.PNG.match(content);
             case FileUploadCheckConstants.PNG -> FileMagicNumber.PNG.match(content);
             case FileUploadCheckConstants.GIF -> FileMagicNumber.GIF.match(content);
+            //todo 增加zip文件类型验证
+            case FileUploadCheckConstants.ZIP -> FileMagicNumber.ZIP.match(content);
             // 可添加更多文件类型的魔数校验
             default -> false;
         };

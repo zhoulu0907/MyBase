@@ -1,9 +1,12 @@
 package com.cmsr.onebase.module.system.service.dept;
 
+import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
+import com.cmsr.onebase.module.system.api.dept.dto.DeptPageApiReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.vo.dept.*;
 import com.cmsr.onebase.module.system.vo.user.UserAdminOrDirectorUpdateReqVO;
+import jakarta.validation.Valid;
 
 import java.util.*;
 
@@ -19,14 +22,14 @@ public interface DeptService {
      * @param createReqVO 部门信息
      * @return 部门编号
      */
-    Long createDept(DeptSaveReqVO createReqVO);
+    Long createDept(DeptInsertReqVO createReqVO);
 
     /**
      * 更新部门
      *
      * @param updateReqVO 部门信息
      */
-    void updateDept(DeptSaveReqVO updateReqVO);
+    void updateDept(DeptUpdateReqVO updateReqVO);
 
     /**
      * 删除部门
@@ -149,18 +152,16 @@ public interface DeptService {
     /**
      * 根据部门编号和部门类型，查询部门
      *
-     * @param code 部门编号
-     * @param type 部门类型
      * @return 部门
      */
-    DeptDO findDeptByCodeAndType(DeptSaveReqVO deptRespVO);
+    DeptDO findDeptByCodeAndType(DeptDO deptRespVO);
     /**
      * 创建第三方部门
      *
      * @param deptRespVO 部门信息
      * @return 部门编号
      */
-    Long createThirdDefaultDept(DeptSaveReqVO deptRespVO);
+    Long createThirdDefaultDept(DeptDO deptRespVO);
 
     /**
      * 获得第三方部门列表
@@ -168,4 +169,12 @@ public interface DeptService {
      * @return 部门列表
      */
     List<DeptDO> getDefaultThirdDept();
+
+    /**
+     * 获得部门列表，排除指定编号的部门
+     *
+     * @param reqVO 筛选条件请求 VO
+     * @return 部门列表
+     */
+    PageResult<DeptRespVO> getDeptPage(@Valid DeptPageApiReqVO reqVO);
 }

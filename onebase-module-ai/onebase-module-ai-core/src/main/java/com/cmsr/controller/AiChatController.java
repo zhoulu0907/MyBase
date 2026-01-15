@@ -34,17 +34,17 @@ import static org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvis
 
 /**
  * Ai对话
+ * @author mty
  */
 @CrossOrigin(origins = "*")
 @RestController
-@RequestMapping("/chat")
+@RequestMapping("/ai/chat")
 public class AiChatController {
 
     private static final String DEFAULT_PROMPT = "你是一个博学的智能聊天助手，请根据用户提问回答！";
     private static final Logger log = LoggerFactory.getLogger(AiChatController.class);
 
     private final ChatClient dashScopeChatClient;
-    // private ChatClient dashScopeChatClientN;
 
     @Autowired
     private RestTemplate restTemplate;

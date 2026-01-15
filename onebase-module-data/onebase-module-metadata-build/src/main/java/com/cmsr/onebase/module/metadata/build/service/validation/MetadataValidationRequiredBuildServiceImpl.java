@@ -217,7 +217,8 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
         ValidationRequiredRespVO respVO = BeanUtils.toBean(requiredDO, ValidationRequiredRespVO.class);
         
         // 获取规则组信息，包括提示语等字段
-        var ruleGroup = validationRuleGroupService.getValidationRuleGroupByUuid(requiredDO.getGroupUuid());
+        // 修复：直接使用 groupId 查询规则组，因为 requiredDO.getGroupUuid() 存储的是 groupId 的字符串形式
+        var ruleGroup = validationRuleGroupService.getValidationRuleGroup(id);
         if (ruleGroup != null) {
             respVO.setRgName(ruleGroup.getRgName());
             respVO.setPromptMessage(ruleGroup.getPopPrompt());

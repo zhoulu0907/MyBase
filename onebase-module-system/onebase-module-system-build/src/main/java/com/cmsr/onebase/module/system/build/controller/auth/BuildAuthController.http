@@ -6,11 +6,9 @@
 ### 超管登录 => 成功
 POST {{baseUrl}}/system/auth/tenant-login
 Content-Type: application/json
-X-Tenant-Id: {{adminTenantId}}
+X-Tenant-Id: 184717008866115584
 
-{"username":"admin","password":"e1845c18b2711120d72bbfa33d79b794fe245df27a00c96487b2fb2452d1b01b815a27701a446e7a7c1e2d222972b6315174f83dd465254e467b71a84f7827bb272d10994a7586862dd2f2ee778587de97a01b2a7306db618bbf7607e32ca59f3808611ca97136cb","captchaVerification":"n89lvlHjSOsQQ5kGXjNNtdnkfPnK2Y3YbPwvAEXoVyL0TqzrDumdg8MONVs+z5VaSPf4ni6QKFhhx0GcaXBF4pWVx9hsSsBZ8mysqU8u45E=",
- "deviceId":666}
-
+{"username":"zhuchunhui","password":"a1495fcfc6eeed115ff8e73aad07e7c2c223b207f8dd6f240ae80dc61ccc0180af24af5e99e81988699488cad581bb1dd57e8c1f45966e321d87fe3098d55641d8ec87f30b065ff72b1d1c5c574bb93fa7deebda4b56e015af2c94e1906dda853bcd767464ea296f5ecd89b66aa8f6","captchaVerification":"GSjRjRGx9ntfsGkLLaPtInfuB+hcDREbT9fKKNkSGl923GpAJfCQRIJgbXbuJteCk94rvCI93Bczj1kmBhGoB0etQe4MoEwSS0PzfzJZg1Q=","deviceId":"60c78cdd38ca3836b7176be580f57e4c"}
 > {%
     // 登录成功后自动更新token到环境变量
     if (response.status === 200) {
@@ -25,19 +23,13 @@ X-Tenant-Id: {{adminTenantId}}
 ### 请求 /login 接口 => 成功
 POST {{baseUrl}}/system/auth/tenant-login
 Content-Type: application/json
-#X-Tenant-Id: 153539686553452544
-X-Tenant-Id: 1
+X-Tenant-Id: 158088726951460864
 tag: {{tag}}
 
-{"username":"admin","password":"admin123","captchaVerification":"n89lvlHjSOsQQ5kGXjNNtdnkfPnK2Y3YbPwvAEXoVyL0TqzrDumdg8MONVs+z5VaSPf4ni6QKFhhx0GcaXBF4pWVx9hsSsBZ8mysqU8u45E=",
+{"username":"gaoguoqing","password":"ae61b79d21e870717365d944806e340e36f8480f5ac095c7d3c2afe67ad1dc4fa420b316383f3c8cd43e94a47fc7c752fd51e44b4637b9ce658653761fbc9335627562b18b4cbe89dc13d9b005ca660f87ebc9e8ff6dcd12682fea75ed38e6a58dadd7e95f830dc78580ca48be544e","captchaVerification":"n89lvlHjSOsQQ5kGXjNNtdnkfPnK2Y3YbPwvAEXoVyL0TqzrDumdg8MONVs+z5VaSPf4ni6QKFhhx0GcaXBF4pWVx9hsSsBZ8mysqU8u45E=",
   "deviceId":666}
 
-#{
-#  "username": "admin",
-#  "password": "AdminChina2025!",
-#  "captchaVerification": "UiXVbPBz2XVbr7pdOfIuR78qXvgiWZAg9UDiH27YsSrkyZja+6iDVorl9d2otg0yGqcH5k8a1VJopEwvzobmFdGhkjSIBFjbyaLGKYsoXbY=",
-#  "deviceId": "50dddd1e2dcbb0f792b0fe3e9028890b"
-#}
+
 
 > {%
     // 登录成功后自动更新token到环境变量

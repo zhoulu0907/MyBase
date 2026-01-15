@@ -4,7 +4,6 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import com.cmsr.onebase.framework.common.biz.system.permission.dto.DeptDataPermissionRespDTO;
-import com.cmsr.onebase.framework.common.enums.CommonPublishModelEnum;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
@@ -39,11 +38,11 @@ import com.cmsr.onebase.module.system.vo.permission.PermissionMenuRespVO;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.Sets;
+import com.mybatisflex.core.query.QueryWrapper;
 import com.mzt.logapi.context.LogRecordContext;
 import com.mzt.logapi.starter.annotation.LogRecord;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.data.param.init.DefaultConfigStore;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -74,19 +73,19 @@ public class PermissionServiceImpl implements PermissionService {
     private static final String d = "0";
 
     @Resource
-    private RoleService roleService;
+    private RoleService          roleService;
     @Resource
-    private MenuService menuService;
+    private MenuService          menuService;
     @Resource
-    private DeptService deptService;
+    private DeptService          deptService;
     @Resource
     @Lazy
-    private UserService userService;
+    private UserService          userService;
     @Resource
     private TenantPackageService tenantPackageService;
     @Resource
     @Lazy // 延迟，避免循环依赖报错
-    private TenantService tenantService;
+    private TenantService        tenantService;
 
     @Resource
     private PermissionService permissionService;
@@ -158,24 +157,41 @@ public class PermissionServiceImpl implements PermissionService {
                 return CollectionUtils.containsAny(tenantAllPermissions, permissions);
             }
         }
-
-        // 情况二：如果是企业管理员，赋予所有企业相关权限
+        boolean hasPermission;
+        // 情况三：如果是企业管理员，赋予所有企业相关权限
         boolean isCorpAdmin = roleService.hasAnyCorpAdmin(convertSet(roles, RoleDO::getId));
         if (isCorpAdmin) {
             Set<Long> menuIds = getAllCorpActiveMenuIds();
             List<MenuDO> menuList = menuService.getAllActiveMenuList(menuIds);
             Set<String> corpAllPermissions = menuList.stream().map(MenuDO::getPermission).filter(Objects::nonNull).collect(Collectors.toSet());
             // permissions 和 tenantAllPermissions对比，命中一个即返回true
-            return CollectionUtils.containsAny(corpAllPermissions, permissions);
+            hasPermission = CollectionUtils.containsAny(corpAllPermissions, permissions);
+            if (hasPermission) {
+                return true;
+            }
         }
-        // 情况二：如果是开发者，赋予所有开发相关权限
+
+        // 情况四：如果是开发者，赋予所有开发相关权限
         boolean isDevAdmin = roleService.hasAnyDevloperAdmin(convertSet(roles, RoleDO::getId));
         if (isDevAdmin) {
             // 所有开发者的权限
-            return CollectionUtils.containsAny(RoleCodeEnum.devloperPermissionCodes, permissions);
+            hasPermission =  CollectionUtils.containsAny(RoleCodeEnum.devloperPermissionCodes, permissions);
+            if (hasPermission) {
+                return true;
+            }
         }
 
-        // 情况三：遍历判断每个权限，如果有一满足，说明有权限
+        // 情况五：如果是开发者，赋予所有开发相关权限
+        boolean isNormalUser = roleService.hasAnyNormalUser(convertSet(roles, RoleDO::getId));
+        if (isNormalUser) {
+            // 所有开发者的权限
+            hasPermission =  CollectionUtils.containsAny(RoleCodeEnum.tenantDefaultPermissionCodes, permissions);
+            if (hasPermission) {
+                return true;
+            }
+        }
+
+        // 其他情况：遍历判断每个权限，如果有一满足，说明有权限
         for (String permission : permissions) {
             if (hasAnyPermission(roles, permission)) {
                 return true;
@@ -525,7 +541,7 @@ public class PermissionServiceImpl implements PermissionService {
             return userRole;
         }).collect(Collectors.toList());
 
-        List<UserRoleDO> insertedList = userRoleDataRepository.upsertBatch(userRoleList);
+        userRoleDataRepository.upsertBatch(userRoleList);
         List<AdminUserDO> userList = userService.getUserList(userIds);
 
         // 记录操作日志上下文
@@ -535,20 +551,20 @@ public class PermissionServiceImpl implements PermissionService {
         LogRecordContext.putVariable("role", role);
         LogRecordContext.putVariable("userNames",
                 userList.stream().map(AdminUserDO::getNickname).collect(Collectors.joining(",")));
-        return CollUtil.isEmpty(insertedList) ? 0 : insertedList.size();
+        return CollUtil.isEmpty(userRoleList) ? 0 : userRoleList.size();
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     @TenantIgnore
     @LogRecord(type = SYSTEM_PERMISSION_TYPE, subType = SYSTEM_PERMISSION_DELETE_ROLE_USERS_SUB_TYPE, bizNo = "{{#role.id}}", success = SYSTEM_PERMISSION_DELETE_ROLE_USERS__SUCCESS)
-    public long deleteRoleUsers(Long roleId, Set<Long> userIds) {
+    public boolean deleteRoleUsers(Long roleId, Set<Long> userIds) {
         // 参数校验
         if (CollUtil.isEmpty(userIds)) {
-            return 0;
+            return false;
         }
 
-        long deleted = userRoleDataRepository.deleteByRoleIdAndUserIds(roleId, userIds);
+        boolean deleted = userRoleDataRepository.deleteByRoleIdAndUserIds(roleId, userIds);
 
         RoleDO role = roleService.getRole(roleId);
 
@@ -566,8 +582,8 @@ public class PermissionServiceImpl implements PermissionService {
 
     @Override
     public UserRoleDO getUserRoleByUserAndRoleId(Long userId, Long roleId) {
-        return userRoleDataRepository.findOne(
-                new DefaultConfigStore().eq(UserRoleDO.USER_ID, userId).eq(UserRoleDO.ROLE_ID, roleId));
+        return userRoleDataRepository.getOne(
+                new QueryWrapper().eq(UserRoleDO.USER_ID, userId).eq(UserRoleDO.ROLE_ID, roleId));
     }
 
     @Override
@@ -641,20 +657,20 @@ public class PermissionServiceImpl implements PermissionService {
 
         // 判断是否开启saas模式 ,第三方用户是否开启
         SystemGeneralConfigDO saasConfigDO = systemConfigService.getTenantConfigByKey(SystemConfigKeyEnum.SaasModeConfig.getKey());
-        if (null == saasConfigDO ||  MenuConstants.DefaultSaasThirdUser.equals(saasConfigDO.getConfigValue())) {
+        if (null == saasConfigDO || MenuConstants.DefaultSaasThirdUser.equals(saasConfigDO.getConfigValue())) {
             //   未开启 saas 模式  移除企业权限
             menuList.removeIf(menu -> menu.getPermission() != null && menu.getPermission()
                     .startsWith(MenuConstants.MENU_TENANT_CORP));
         }
 
         SystemGeneralConfigDO thirdUserConfigDO = systemConfigService.getTenantConfigByKey(SystemConfigKeyEnum.ThirdUserConfig.getKey());
-        if (null == thirdUserConfigDO ||  MenuConstants.DefaultSaasThirdUser.equals(thirdUserConfigDO.getConfigValue())) {
+        if (null == thirdUserConfigDO || MenuConstants.DefaultSaasThirdUser.equals(thirdUserConfigDO.getConfigValue())) {
             //   未开启第三方用户模式  移除第三方用户权限
             menuList.removeIf(menu -> menu.getPermission() != null && menu.getPermission()
                     .startsWith(MenuConstants.MENU_TENANT_THIRD));
         }
 
-            return AuthConvert.INSTANCE.convert(user, roles, menuList, code);
+        return AuthConvert.INSTANCE.convert(user, roles, menuList, code);
     }
 
     /**

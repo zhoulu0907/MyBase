@@ -27,4 +27,8 @@ public class UserSimpleRespVO {
 
     @Schema(description = "部门ID", example = "我是一个用户")
     private Long deptId;
+
+    @Schema(description = "用户类型", example = "1024")
+    private Integer userType;
+
 }

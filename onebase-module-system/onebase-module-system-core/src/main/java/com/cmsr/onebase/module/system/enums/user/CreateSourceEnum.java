@@ -12,7 +12,7 @@ public enum CreateSourceEnum implements ArrayValuable<String> {
     /**
      * 后台注册
      */
-    BACK ("back", "后台注册"),
+    BACK ("back", "后台创建"),
     /**
      * 自主注册
      */

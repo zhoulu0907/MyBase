@@ -1,30 +1,24 @@
 package com.cmsr.onebase.module.system.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.UserPostDO;
-import org.anyline.data.param.init.DefaultConfigStore;
+import com.cmsr.onebase.framework.orm.repo.BaseDataRepository;
+import com.cmsr.onebase.module.system.dal.flex.mapper.SystemUserPostMapper;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 /**
  * 用户岗位关联数据访问层
- *
- * 负责用户岗位关联相关的数据操作，继承DataRepositoryNew，提供标准CRUD能力。
+ * <p>
+ * 基于 MyBatis-Flex 实现用户岗位关联相关的 CRUD 及常用查询能力。
  *
  * @author matianyu
- * @date 2025-08-18
+ * @date 2025-12-22
  */
 @Repository
-public class UserPostDataRepository extends DataRepository<UserPostDO> {
-
-    /**
-     * 构造方法，指定默认实体类
-     */
-    public UserPostDataRepository() {
-        super(UserPostDO.class);
-    }
+public class UserPostDataRepository extends BaseDataRepository<SystemUserPostMapper, UserPostDO> {
 
     /**
      * 根据用户ID查询用户岗位关联
@@ -33,9 +27,10 @@ public class UserPostDataRepository extends DataRepository<UserPostDO> {
      * @return 用户岗位关联列表
      */
     public List<UserPostDO> findAllByUserId(Long userId) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.eq(UserPostDO.USER_ID, userId);
-        return findAllByConfig(configStore);
+        if (userId == null) {
+            return Collections.emptyList();
+        }
+        return list(query().eq(UserPostDO.USER_ID, userId));
     }
 
     /**
@@ -45,9 +40,10 @@ public class UserPostDataRepository extends DataRepository<UserPostDO> {
      * @return 用户岗位关联列表
      */
     public List<UserPostDO> findAllByPostIds(Collection<Long> postIds) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.in(UserPostDO.POST_ID, postIds);
-        return findAllByConfig(configStore);
+        if (postIds == null || postIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return list(query().in(UserPostDO.POST_ID, postIds));
     }
 
     /**
@@ -56,9 +52,10 @@ public class UserPostDataRepository extends DataRepository<UserPostDO> {
      * @param userId 用户ID
      */
     public void deleteByUserId(Long userId) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.eq(UserPostDO.USER_ID, userId);
-        deleteByConfig(configStore);
+        if (userId == null) {
+            return;
+        }
+        remove(query().eq(UserPostDO.USER_ID, userId));
     }
 
     /**
@@ -68,8 +65,9 @@ public class UserPostDataRepository extends DataRepository<UserPostDO> {
      * @param postIds 岗位ID列表
      */
     public void deleteByUserIdAndPostIds(Long userId, Collection<Long> postIds) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.eq(UserPostDO.USER_ID, userId).in(UserPostDO.POST_ID, postIds);
-        deleteByConfig(configStore);
+        if (userId == null || postIds == null || postIds.isEmpty()) {
+            return;
+        }
+        remove(query().eq(UserPostDO.USER_ID, userId).in(UserPostDO.POST_ID, postIds));
     }
 }

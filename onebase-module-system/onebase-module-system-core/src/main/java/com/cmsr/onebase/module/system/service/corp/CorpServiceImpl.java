@@ -2,7 +2,6 @@ package com.cmsr.onebase.module.system.service.corp;
 
 import com.cmsr.onebase.framework.common.biz.system.dict.DictDataCommonApi;
 import com.cmsr.onebase.framework.common.biz.system.dict.dto.DictDataRespDTO;
-import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
@@ -31,8 +30,6 @@ import com.mzt.logapi.context.LogRecordContext;
 import com.mzt.logapi.starter.annotation.LogRecord;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.DataRow;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Lazy;
@@ -98,12 +95,13 @@ public class CorpServiceImpl implements CorpService {
     public CorpAdminUserRespVO createCorpCombined(CorpCombinedVo corpCombineReqVO) {
         // 保存基础数据
         Long corpId = createCorp(corpCombineReqVO.getCorpReqVO());
+
         // 保存系统管理员
-        CorpAdminUserRespVO vo = createAdminUser(corpCombineReqVO.getCorpAdminReqVO(), corpId);
+        CorpAdminUserRespVO vo = createCorpAdminUser(corpCombineReqVO.getCorpAdminReqVO(), corpId);
         // 保存关联关系
         List<AppAuthTimeReqVO> appAuthTimeReqVO = corpCombineReqVO.getAppAuthTimeReqVO();
 
-        createListCorpAppRelation(appAuthTimeReqVO, corpId);
+        createCorpAndAppRelation(appAuthTimeReqVO, corpId);
         // 更新企业管理员Id
         updateCorpAdminIdById(corpId, vo.getId());
 
@@ -116,8 +114,8 @@ public class CorpServiceImpl implements CorpService {
         return vo;
     }
 
-    private void createListCorpAppRelation(List<AppAuthTimeReqVO> appAuthTimeReqVOs, Long corpId) {
-        corpAppRelationService.createListCorpAppRelation(appAuthTimeReqVOs, corpId);
+    private void createCorpAndAppRelation(List<AppAuthTimeReqVO> appAuthTimeReqVOs, Long corpId) {
+        corpAppRelationService.createCorpAndAppRelation(appAuthTimeReqVOs, corpId);
     }
 
 
@@ -127,8 +125,9 @@ public class CorpServiceImpl implements CorpService {
 
         CorpDO corpDO = BeanUtils.toBean(reqVO, CorpDO.class);
         corpDO.setTenantId(TenantContextHolder.getTenantId());
-        corpDO.setStatus(CommonStatusEnum.ENABLE.getStatus());
-        return corpDataRepository.insert(corpDO).getId();
+
+        corpDataRepository.insert(corpDO);
+        return corpDO.getId();
     }
 
     private Integer getExistUserLimitExcludeCorp(Long corpId) {
@@ -140,39 +139,67 @@ public class CorpServiceImpl implements CorpService {
                 .sum();
     }
 
-    private void validCorpUserMaxCountLimit(Integer userCount, Long corpId) {
-        if (userCount != null && userCount > CorpConstant.USER_LIMIT) {
-            throw exception(CORP_USER_LIMIT_COUNT, userCount);
+    private void validCorpUserMaxCountLimit(Integer corpUserLimit, Long corpId) {
+        if (corpUserLimit != null && corpUserLimit > CorpConstant.USER_LIMIT) {
+            throw exception(CORP_USER_LIMIT_COUNT, corpUserLimit);
         }
         // 验证同一空间内企业数据是否超出限制
         LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
         TenantDO tenantDO = tenantService.getTenant(loginUser.getTenantId());
         // 空间用户总数
         Integer tenantUserLimit = tenantDO.getAccountCount();
+
+        // 验证空间目前已存在用户数
+        Long tenantRealUserCount = tenantService.getTenantExistUserCount(loginUser.getTenantId());
+        //  计算实际剩余可用用户数量
+        Integer realRemainingCount = Math.toIntExact(tenantUserLimit - tenantRealUserCount);
+        if (realRemainingCount <= 0) {
+            throw exception(CORP_USER_LIMIT_COUNT_CHECK, tenantUserLimit, realRemainingCount);
+        }
+
         // 获取企业已存在数量
         Integer existUserLimit = getExistUserLimitExcludeCorp(corpId);
-        if (existUserLimit + userCount > tenantUserLimit) {
-            Integer remainingCount = tenantUserLimit - existUserLimit;
+        //  计算已分配其他企业之后的剩余可用数量
+        Integer limitRemainingCount = tenantUserLimit - existUserLimit;
+
+        // 取实际剩余数量和限制剩余数量的最小值，作为最终可用数量
+        Integer remainingCount = Math.min(realRemainingCount, limitRemainingCount);
+        if (corpUserLimit > remainingCount) {
             throw exception(CORP_USER_LIMIT_COUNT_CHECK, tenantUserLimit, remainingCount);
         }
     }
 
-    private void validCorpNameDuplicate(String name) {
+    private void validCorpNameDuplicate(String name, Long corpId) {
         if (StringUtils.isBlank(name)) {
             return;
         }
         CorpDO corpDO = corpDataRepository.findCorpByName(name);
-        if (corpDO != null) {
+        if (corpDO == null) {
+            return;
+        }
+        // 如果 id 为空，说明不用比较是否为相同名字的租户
+        if (corpId == null) {
+            throw exception(CORP_NAME_EXISTS, name);
+        }
+        if (!corpDO.getId().equals(corpId)) {
             throw exception(CORP_NAME_EXISTS, name);
         }
     }
 
-    private void validCorpIdDuplicate(String corpCode) {
+    private void validCorpCodeDuplicate(String corpCode, Long corpId) {
         if (StringUtils.isBlank(corpCode)) {
             return;
         }
         CorpDO corpDO = corpDataRepository.findCorpByCorpCode(corpCode);
-        if (corpDO != null) {
+        if (corpDO == null) {
+            return;
+        }
+
+        // 如果 id 为空，说明不用比较是否为相同名字的租户
+        if (corpId == null) {
+            throw exception(CORP_ID_EXISTS, corpCode);
+        }
+        if (!corpDO.getId().equals(corpId)) {
             throw exception(CORP_ID_EXISTS, corpCode);
         }
     }
@@ -186,6 +213,10 @@ public class CorpServiceImpl implements CorpService {
         if (checkCorp == null) {
             throw exception(CORP_NO_EXISTS, reqVO.getCorpName());
         }
+        // 用于校验企业名称是否已存在
+        validCorpNameDuplicate(reqVO.getCorpName(), reqVO.getId());
+        validCorpCodeDuplicate(reqVO.getCorpCode(), reqVO.getId());
+
         if (null != reqVO.getUserLimit()) {
             //  检查1：用户数下限，不能小于企业已有开启状态的用户实际数量
             validCorpUserMinCountLimit(reqVO.getUserLimit(), reqVO.getId());
@@ -214,11 +245,8 @@ public class CorpServiceImpl implements CorpService {
 
     @Transactional(rollbackFor = Exception.class)
     public void updateCorpAdminIdById(Long corpId, Long adminId) {
-        //  企业修改管理员Id
-        DataRow row = new DataRow();
-        row.put(CorpDO.ADMIN_ID, adminId);
-        corpDataRepository.updateByConfig(row, new DefaultConfigStore().eq(CorpDO.ID, corpId));
-
+        // 企业修改管理员Id
+        corpDataRepository.updateCorpAdminId(corpId, adminId);
     }
 
 
@@ -398,7 +426,7 @@ public class CorpServiceImpl implements CorpService {
         return passwordEncoder.encode(password);
     }
 
-    public CorpAdminUserRespVO createAdminUser(CorpAdminReqVO reqVO, Long corpId) {
+    public CorpAdminUserRespVO createCorpAdminUser(CorpAdminReqVO reqVO, Long corpId) {
         // 2.2.1 判断如果不存在，在进行插入
         AdminUserDO existUser = userService.getUserByUsername(reqVO.getUsername());
         if (existUser != null) {
@@ -427,10 +455,8 @@ public class CorpServiceImpl implements CorpService {
 
     @Override
     public void updateStatus(Long id, Long status) {
-        //  企业禁用/开启
-        DataRow row = new DataRow();
-        row.put(CorpDO.STATUS, status);
-        corpDataRepository.updateByConfig(row, new DefaultConfigStore().eq(CorpDO.ID, id));
+        // 企业禁用/开启
+        corpDataRepository.updateStatus(id, status == null ? null : status.intValue());
     }
 
 
@@ -446,9 +472,9 @@ public class CorpServiceImpl implements CorpService {
 
     public void validCreateCorp(CorpReqVO corpReqVO) {
         // 用于校验企业名称是否已存在
-        validCorpNameDuplicate(corpReqVO.getCorpName());
+        validCorpNameDuplicate(corpReqVO.getCorpName(), null);
         // 用于校验企业ID是否已存在
-        validCorpIdDuplicate(corpReqVO.getCorpCode());
+        validCorpCodeDuplicate(corpReqVO.getCorpCode(), null);
         // 用于校验企业用户数量是否超过限制（如大于500）
         validCorpUserMaxCountLimit(corpReqVO.getUserLimit(), null);
     }

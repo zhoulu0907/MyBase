@@ -33,6 +33,12 @@ public class DraftSemanticDynamicDataServiceImpl implements DraftSemanticDynamic
     @Resource
     private DraftSemanticPageExecutor draftPageExecutor;
 
+    @Resource
+    private DraftSemanticDeleteExecutor draftDeleteExecutor;
+
+    @Resource
+    private DraftSemanticUpdateExecutor draftUpdateExecutor;
+
     @Override
     /**
      * 创建数据：解析合并语义体并执行业务创建
@@ -77,5 +83,47 @@ public class DraftSemanticDynamicDataServiceImpl implements DraftSemanticDynamic
     public PageResult<Map<String, Object>> page(String tableName, Long menuId, SemanticPageBodyVO body, String traceId) {
         PageResult<Map<String, Object>> page = draftPageExecutor.execute(tableName, menuId, traceId, body);
         return page;
+    }
+
+    @Override
+    /**
+     * 删除数据：解析目标语义体并执行业务删除
+     *
+     * @param tableName 表名
+     * @param menuId    菜单ID
+     * @param body      目标请求体，包含主键
+     * @param traceId   链路追踪ID
+     * @return 删除成功返回被删除数据ID，失败返回 null
+     */
+    public boolean delete(String tableName, Long menuId, SemanticTargetBodyVO body, String traceId) {
+        return draftDeleteExecutor.execute(tableName, menuId, traceId, body);
+    }
+
+    @Override
+    /**
+     * 删除数据：解析目标语义体并执行业务删除
+     *
+     * @param tableName 表名
+     * @param menuId    菜单ID
+     * @param body      目标请求体，包含主键
+     * @param traceId   链路追踪ID
+     * @return 删除成功返回被删除数据ID，失败返回 null
+     */
+    public boolean deleteByTable(String tableName, Long menuId, SemanticTargetBodyVO body, String traceId) {
+        return draftDeleteExecutor.deleteByTable(tableName, menuId, body, traceId);
+    }
+
+    /**
+     * 更新数据：解析合并语义体并执行业务更新
+     *
+     * @param tableName 表名
+     * @param menuId    菜单ID
+     * @param body      合并请求体，包含主键
+     * @param traceId   链路追踪ID
+     * @return 更新后的响应
+     */
+    public Map<String, Object> update(String tableName, Long menuId, SemanticMergeBodyVO body, String traceId) {
+        Map<String, Object> result = draftUpdateExecutor.execute(tableName, menuId, traceId, body);
+        return result;
     }
 }

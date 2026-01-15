@@ -23,7 +23,7 @@ public class CreatePageSetDTO {
     @NotNull(message = "菜单id不能为空")
     private Long menuId;
 
-    @Schema(description = "页面集类型 1-普通表单 2-流程表单 3-工作台", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
+    @Schema(description = "页面集类型 1-普通表单 2-流程表单 3-工作台 4-数据大屏", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
     @NotNull(message = "页面集类型不能为空")
     private Integer pageSetType;
 
@@ -32,4 +32,10 @@ public class CreatePageSetDTO {
 
     @Schema(description = "页面集主元数据", requiredMode = Schema.RequiredMode.REQUIRED, example = "xxx")
     private String mainMetadata;
+
+    @Schema(description = "数据大屏页面创建类型", requiredMode = Schema.RequiredMode.NOT_REQUIRED, example = "xxx")
+    private String createDashboardType;
+
+    @Schema(description = "数据大屏/模板id", requiredMode = Schema.RequiredMode.NOT_REQUIRED, example = "xxx")
+    private Long dashboardId;
 }

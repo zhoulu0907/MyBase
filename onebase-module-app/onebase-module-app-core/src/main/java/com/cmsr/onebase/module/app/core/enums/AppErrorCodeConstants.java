@@ -4,7 +4,7 @@ import com.cmsr.onebase.framework.common.exception.ErrorCode;
 
 /**
  * @Author：huangjie
- * @Date：2025/7/24 8:51
+ *                  @Date：2025/7/24 8:51
  */
 public interface AppErrorCodeConstants {
 
@@ -31,9 +31,19 @@ public interface AppErrorCodeConstants {
     ErrorCode APP_AUTH_ROLE_NOT_EXISTS = new ErrorCode(10011, "角色不存在");
 
     ErrorCode APP_AUTH_ROLE_NOT_ALLOW_DELETE = new ErrorCode(10012, "角色不允许删除");
+
     ErrorCode APP_AUTH_ROLE_NOT_ALLOW_RENAME = new ErrorCode(10013, "角色不允许重命名");
+
     ErrorCode APP_UID_GENERATE_FAILED = new ErrorCode(10014, "应用UID生成失败");
 
-
     ErrorCode VERSION_DUPLICATE = new ErrorCode(10016, "版本重复");
+
+    ErrorCode APP_ONLINE_ERROR = new ErrorCode(10017, "应用已上线");
+
+    ErrorCode APP_VERSION_EXPORT_ERROR = new ErrorCode(10018, "应用版本配置导出失败");
+
+    ErrorCode APP_VERSION_IMPORT_FILE_EMPTY = new ErrorCode(10019, "导入文件不能为空");
+
+    ErrorCode APP_VERSION_IMPORT_ERROR = new ErrorCode(10020, "应用版本配置导入失败");
+
 }

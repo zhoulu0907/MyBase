@@ -19,8 +19,8 @@ spring:
   servlet:
     # 文件上传相关配置项
     multipart:
-      max-file-size: 16MB # 单个文件大小
-      max-request-size: 32MB # 设置总上传的文件大小
+      max-file-size: 32MB # 单个文件大小
+      max-request-size: 64MB # 设置总上传的文件大小
 
   # Jackson 配置项
   jackson:
@@ -37,6 +37,8 @@ spring:
       time-to-live: 1h # 设置过期时间为 1 小时
 
 server:
+  tomcat:
+    max-http-form-post-size: 10MB
   servlet:
     encoding:
       enabled: true
@@ -80,7 +82,6 @@ aj:
     req-get-minute-limit: 30 # get 接口一分钟内请求数限制
     req-check-minute-limit: 60 # check 接口一分钟内请求数限制
     req-verify-minute-limit: 60 # verify 接口一分钟内请求数限制
-
 --- #################### OneBase相关配置 ####################
 
 onebase:
@@ -128,15 +129,19 @@ onebase:
     expire-times: 10m
     send-frequency: 1m
     send-maximum-quantity-per-day: 10
-    begin-code: 9999 # 这里配置 9999 的原因是，测试方便。
-    end-code: 9999 # 这里配置 9999 的原因是，测试方便。
+    begin-code: 000000 # 这里配置 9999 的原因是，测试方便。
+    end-code: 999999 # 这里配置 9999 的原因是，测试方便。
+  plugin: # 插件相关配置项
+    plugins-dir: plugins # 插件存放根目录
+    frontend-dir: plugins/frontend # 前端插件存放目录
+    backend-dir: plugins/backend # 后端插件存放目录
+    temp-dir: plugins/.temp # 临时目录
 
 debug: false
 
 easy:
   trans:
     enabled: false
-
 
 anyline:
   is-debug: false

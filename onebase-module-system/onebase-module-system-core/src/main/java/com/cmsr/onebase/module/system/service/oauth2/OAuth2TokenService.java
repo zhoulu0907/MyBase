@@ -39,7 +39,7 @@ public interface OAuth2TokenService {
      * @param scopes
      * @return
      */
-    OAuth2AccessTokenDO createAccessTokenWithMode(String runMode,  Long corpId, Long appId, Long userId, Integer userType, String clientId, List<String> scopes);
+    OAuth2AccessTokenDO createAccessTokenWithMode(String runMode, Long corpId, Long appId, Long userId, Integer userType, String clientId, List<String> scopes, String loginPlatform);
 
     /**
      * 刷新访问令牌

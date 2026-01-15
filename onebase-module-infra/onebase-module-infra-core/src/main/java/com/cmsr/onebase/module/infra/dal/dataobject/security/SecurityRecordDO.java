@@ -1,8 +1,8 @@
 package com.cmsr.onebase.module.infra.dal.dataobject.security;
 
 import com.cmsr.onebase.framework.data.base.BaseDO;
+import com.mybatisflex.annotation.Table;
 import jakarta.persistence.Column;
-import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,7 +18,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "infra_security_record")
+@Table(value = "infra_security_record")
 public class SecurityRecordDO extends BaseDO {
 
     public static final String TENANT_ID = "tenant_id";

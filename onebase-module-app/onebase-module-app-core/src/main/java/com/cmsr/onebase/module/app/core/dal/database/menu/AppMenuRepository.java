@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.app.core.dal.database.menu;
 
+import com.cmsr.onebase.framework.common.enums.TerminalEnum;
 import com.cmsr.onebase.framework.orm.repo.BaseBizRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppMenuDO;
 import com.cmsr.onebase.module.app.core.dal.mapper.AppMenuMapper;
@@ -60,14 +61,13 @@ public class AppMenuRepository extends BaseBizRepository<AppMenuMapper, AppMenuD
         return (int) count(queryWrapper);
     }
 
-    public List<AppMenuDO> findVisibleByAppIdAndType(Long applicationId, Set<Integer> menuTypes) {
-        QueryWrapper queryWrapper = this.query()
-                .where(APP_MENU.APPLICATION_ID.eq(applicationId))
-                .where(APP_MENU.MENU_TYPE.in(menuTypes))
-                .where(APP_MENU.IS_VISIBLE.eq(1))
-                .orderBy(AppMenuDO::getMenuSort, true);
-        return list(queryWrapper);
-    }
+//    public List<AppMenuDO> findVisibleByAppIdAndType(Long applicationId, Set<Integer> menuTypes) {
+//        QueryWrapper queryWrapper = this.query()
+//                .where(APP_MENU.APPLICATION_ID.eq(applicationId))
+//                .where(APP_MENU.MENU_TYPE.in(menuTypes))
+//                .orderBy(AppMenuDO::getMenuSort, true);
+//        return list(queryWrapper);
+//    }
 
     public List<AppMenuDO> findByApplicationIdAndType(Long applicationId, Set<Integer> menuTypes) {
         QueryWrapper queryWrapper = this.query()

@@ -46,22 +46,22 @@ public class SemanticDynamicDataServiceImpl implements SemanticDynamicDataServic
     @Override
     /**
      * 创建数据：解析合并语义体并执行业务创建
-     * 
+     *
      * @param tableName 表名
      * @param menuId    菜单ID
      * @param body      合并请求体
      * @param traceId   链路追踪ID
      * @return 创建后的响应
      */
-    public Map<String, Object> create(String tableName, Long menuId, SemanticMergeBodyVO body, String traceId) {
-        Map<String, Object> result = createExecutor.execute(tableName, menuId, traceId, body);
+    public Map<String, Object> create(String tableName, Long menuId, SemanticMergeBodyVO body, String traceId, Long draftId) {
+        Map<String, Object> result = createExecutor.execute(tableName, menuId, traceId, body, draftId);
         return result;
     }
 
     @Override
     /**
      * 更新数据：解析合并语义体并执行业务更新
-     * 
+     *
      * @param tableName 表名
      * @param menuId    菜单ID
      * @param body      合并请求体，包含主键
@@ -76,7 +76,7 @@ public class SemanticDynamicDataServiceImpl implements SemanticDynamicDataServic
     @Override
     /**
      * 删除数据：解析目标语义体并执行业务删除
-     * 
+     *
      * @param tableName 表名
      * @param menuId    菜单ID
      * @param body      目标请求体，包含主键
@@ -90,7 +90,7 @@ public class SemanticDynamicDataServiceImpl implements SemanticDynamicDataServic
     @Override
     /**
      * 查询详情：解析目标语义体并执行业务查询
-     * 
+     *
      * @param tableName 表名
      * @param menuId    菜单ID
      * @param body      目标请求体，包含主键
@@ -105,7 +105,7 @@ public class SemanticDynamicDataServiceImpl implements SemanticDynamicDataServic
     @Override
     /**
      * 分页查询：解析分页语义体并执行业务分页
-     * 
+     *
      * @param tableName 表名
      * @param menuId    菜单ID
      * @param body      分页请求体

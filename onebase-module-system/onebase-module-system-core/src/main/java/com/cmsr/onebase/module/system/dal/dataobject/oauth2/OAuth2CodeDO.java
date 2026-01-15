@@ -4,19 +4,19 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
-import com.cmsr.onebase.framework.data.base.BaseDO;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Table;
+import com.cmsr.onebase.framework.orm.entity.BaseEntity;
+import com.mybatisflex.annotation.Table;
+import com.mybatisflex.annotation.Column;
 import lombok.Data;
 
 /**
  * OAuth2 授权码 DO
  *
  */
-@Table(name = "system_oauth2_code")
+@Table(value = "system_oauth2_code")
 @Data
-public class OAuth2CodeDO extends BaseDO {
+public class OAuth2CodeDO extends BaseEntity {
 
     public static final String CODE         = "code";
     public static final String USER_ID      = "user_id";
@@ -30,46 +30,46 @@ public class OAuth2CodeDO extends BaseDO {
     /**
      * 授权码
      */
-    @Column(name = CODE)
+    @Column(value = CODE)
     private String code;
     /**
      * 用户编号
      */
-    @Column(name = USER_ID)
+    @Column(value = USER_ID)
     private Long userId;
     /**
      * 用户类型
      *
      * 枚举 {@link UserTypeEnum}
      */
-    @Column(name = USER_TYPE)
+    @Column(value = USER_TYPE)
     private Integer userType;
     /**
      * 客户端编号
      *
      * 关联 {@link OAuth2ClientDO#getClientId()}
      */
-    @Column(name = CLIENT_ID)
+    @Column(value = CLIENT_ID)
     private String clientId;
     /**
      * 授权范围
      */
-    @Column(name = SCOPES)
+    @Column(value = SCOPES)
     private List<String> scopes;
     /**
      * 重定向地址
      */
-    @Column(name = REDIRECT_URI)
+    @Column(value = REDIRECT_URI)
     private String redirectUri;
     /**
      * 状态
      */
-    @Column(name = STATE)
+    @Column(value = STATE)
     private String state;
     /**
      * 过期时间
      */
-    @Column(name = EXPIRES_TIME)
+    @Column(value = EXPIRES_TIME)
     private LocalDateTime expiresTime;
 
 }

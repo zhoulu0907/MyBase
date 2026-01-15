@@ -24,5 +24,5 @@ public class UserAppPageSearchReqVO extends PageParam {
     private Integer status;
 
     @Schema(description = "部门id")
-    private String deptId;
+    private Long deptId;
 }

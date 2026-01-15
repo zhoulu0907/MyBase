@@ -23,13 +23,6 @@ public interface BuildAuthService {
     AdminUserDO authenticate(String username, String password);
 
     /**
-     * Admin账号登录
-     *
-     * @param reqVO 登录信息
-     * @return 登录结果
-     */
-    AuthLoginRespVO adminLogin(@Valid UserLoginReqVO reqVO);
-    /**
      * 账号登录
      *
      * @param reqVO 登录信息

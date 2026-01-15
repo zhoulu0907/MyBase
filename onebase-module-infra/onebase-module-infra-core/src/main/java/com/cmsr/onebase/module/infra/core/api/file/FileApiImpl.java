@@ -41,4 +41,19 @@ public class FileApiImpl implements FileApi {
         fileService.getFileContent(id, request, response, FileVisitModeEnum.PERMISSION.getValue());
     }
 
+    @Override
+    public CommonResult<String> dashboardUpload(FileCreateReqDTO createReqDTO) {
+        return success(fileService.createFile(createReqDTO.getContent(), createReqDTO.getName(),
+                createReqDTO.getDirectory(), createReqDTO.getType(), FileVisitModeEnum.PUBLIC.getValue()));
+    }
+
+    @Override
+    public CommonResult<byte[]> getFileContentBytes(Long id) {
+        try {
+            return success(fileService.getFileContentBytes(id));
+        } catch (Exception e) {
+            throw new RuntimeException("获取文件内容失败", e);
+        }
+    }
+
 }

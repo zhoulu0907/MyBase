@@ -5,14 +5,15 @@ import com.cmsr.onebase.framework.common.exception.ServiceException;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.system.dal.database.RoleDataRepository;
 import com.cmsr.onebase.module.system.dal.database.UserRoleDataRepository;
-import com.cmsr.onebase.module.system.dal.database.user.UserDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
+import com.cmsr.onebase.module.system.dal.flex.repo.UserDataRepository;
 import com.cmsr.onebase.module.system.enums.permission.DataScopeEnum;
 import com.cmsr.onebase.module.system.enums.permission.RoleCodeEnum;
 import com.cmsr.onebase.module.system.enums.permission.RoleTypeEnum;
 import com.cmsr.onebase.module.system.vo.role.RoleInsertReqVO;
 import com.cmsr.onebase.module.system.vo.role.RolePageReqVO;
 import com.cmsr.onebase.module.system.vo.role.RoleUpdateReqVO;
+import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.annotation.Resource;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.junit.jupiter.api.AfterEach;
@@ -76,7 +77,7 @@ public class RoleDTOServiceTest {
         // 清理测试数据
         userRoleDataRepository.deleteByConfig(new DefaultConfigStore());
         roleDataRepository.deleteByConfig(new DefaultConfigStore());
-        userDataRepository.deleteByConfig(new DefaultConfigStore());
+        userDataRepository.remove(new QueryWrapper());
     }
 
     /**
@@ -510,7 +511,6 @@ public class RoleDTOServiceTest {
      */
     private RoleDO createTestRole(Long roleId, String name, String code, Integer status) {
         RoleDO role = new RoleDO();
-        // 完全不设置ID，让Anyline使用SnowflakeIdGenerator自动生成
         role.setName(name);
         role.setCode(code);
         role.setSort(1);
@@ -519,8 +519,7 @@ public class RoleDTOServiceTest {
         role.setDataScope(DataScopeEnum.ALL.getScope());
         role.setRemark("测试角色");
         role.setTenantId(0L);
-        RoleDO saved = roleDataRepository.insert(role);
-        return saved;
+        return roleDataRepository.insertReturn(role);
     }
 }
 

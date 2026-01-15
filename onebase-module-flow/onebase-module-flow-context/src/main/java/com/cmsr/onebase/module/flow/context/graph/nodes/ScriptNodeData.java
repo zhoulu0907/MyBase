@@ -9,7 +9,7 @@ import java.io.Serializable;
 import java.util.List;
 
 @Data
-@NodeType("script")
+@NodeType("javascript")
 public class ScriptNodeData extends NodeData implements Serializable {
 
     /**
@@ -18,6 +18,9 @@ public class ScriptNodeData extends NodeData implements Serializable {
     private String script;
 
     private String instanceUuid;
+
+    // TODO: 临时的兼容策略，由于连接器暂未实现版本发布
+    private Long actionId;
 
     private String actionUuid;
 

@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.etl.common.entity;
 import lombok.Data;
 
 @Data
+@Deprecated
 public class JdbcDatasourceConfig {
     private String connectMode;
     private String host;

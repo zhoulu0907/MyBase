@@ -1,7 +1,6 @@
 package com.cmsr.onebase.module.metadata.core.dal.dataobject.validation;
 
 import com.cmsr.onebase.framework.orm.entity.BaseBizEntity;
-import com.cmsr.onebase.framework.orm.entity.BaseTenantEntity;
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Table;
 import lombok.Data;
@@ -57,10 +56,7 @@ public class MetadataValidationUniqueDO extends BaseBizEntity {
     @Column(value = "prompt_message", comment = "提示信息")
     private String promptMessage;
 
-    @Column(value = "version_tag", comment = "版本标识")
-    private Long versionTag;
-
-    @Column(value = "application_id", comment = "应用ID")
-    private Long applicationId;
+    // 注意：applicationId 和 versionTag 字段已在父类 BaseBizEntity 中定义，
+    // 此处删除重复定义以避免字段冲突问题
 
 }

@@ -2,7 +2,7 @@
 rlzyDSL: |
   {
     "editCanvasConfig": {
-      "projectName": "人力资源数据大屏",
+      "projectName": "人力资源大屏",
       "width": 1920,
       "height": 1080,
       "filterShow": false,

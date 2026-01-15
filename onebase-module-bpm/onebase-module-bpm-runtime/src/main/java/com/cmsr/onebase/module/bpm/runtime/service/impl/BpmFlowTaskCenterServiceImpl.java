@@ -19,6 +19,7 @@ import com.cmsr.onebase.module.bpm.core.dto.BpmTodoTaskDTO;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeExtDTO;
 import com.cmsr.onebase.module.bpm.core.enums.BpmBusinessStatusEnum;
 import com.cmsr.onebase.module.bpm.core.enums.BpmConstants;
+import com.cmsr.onebase.module.bpm.core.utils.BpmUtil;
 import com.cmsr.onebase.module.bpm.core.validator.BpmAppResourceValidator;
 import com.cmsr.onebase.module.bpm.core.vo.*;
 import com.cmsr.onebase.module.bpm.runtime.convert.BpmTaskCenterConvert;
@@ -79,8 +80,6 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
 
     @Resource
     private BpmAppResourceValidator bpmAppResourceValidator;
-
-    private final BpmTaskCenterConvert bpmTaskCenterConvert = BpmTaskCenterConvert.INSTANCE;
 
     private List<String> splitToList(String str) {
         if (StringUtils.isBlank(str)) {
@@ -186,7 +185,7 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         Set<String> menuUuids = new HashSet<>();
 
         for (BpmTodoTaskDTO flowTaskExt : pageResult.getResult()) {
-            BpmFlowTodoTaskVO todoTaskVO = bpmTaskCenterConvert.toTodoTaskVO(flowTaskExt);
+            BpmFlowTodoTaskVO todoTaskVO = BpmTaskCenterConvert.toTodoTaskVO(flowTaskExt);
 
             // 处理代理逻辑
             handleAgentLogic(todoTaskVO, flowTaskExt.getAgentId(), flowTaskExt.getBpmTitle(), loginUserId);
@@ -243,7 +242,7 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         List<BpmFlowDoneTaskVO> doneTaskList = new ArrayList<>();
         Set<String> menuUuids = new HashSet<>();
         for (BpmDoneTaskDTO doneTaskDTO : pageResult.getResult()) {
-            BpmFlowDoneTaskVO doneTaskVO = bpmTaskCenterConvert.toDoneTaskVO(doneTaskDTO);
+            BpmFlowDoneTaskVO doneTaskVO = BpmTaskCenterConvert.toDoneTaskVO(doneTaskDTO);
             // 处理代理逻辑
             handleAgentLogic(doneTaskVO, doneTaskDTO.getAgentId(), doneTaskDTO.getBpmTitle(), loginUserId);
             doneTaskList.add(doneTaskVO);
@@ -292,7 +291,7 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         List<BpmMyCreatedVO> list = new ArrayList<>();
         Set<String> menuUuids = new HashSet<>();
         for (BpmMyInstanceDTO flowInstance : pageResult.getResult()) {
-            BpmMyCreatedVO bpmMyCreatedVO = bpmTaskCenterConvert.toMyCreatedVO(flowInstance);
+            BpmMyCreatedVO bpmMyCreatedVO = BpmTaskCenterConvert.toMyCreatedVO(flowInstance);
 
             //设置当前节点处理人
             List<Task> flowTaskList = taskService.getByInsId(flowInstance.getId());
@@ -411,7 +410,7 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         Set<String> menuUuids = new HashSet<>();
 
         for (BpmCcRecordDTO ccRecord : pageResult.getResult()) {
-            BpmCcTaskPageResVO ccTaskVO = bpmTaskCenterConvert.toCcTaskVO(ccRecord);
+            BpmCcTaskPageResVO ccTaskVO = BpmTaskCenterConvert.toCcTaskVO(ccRecord);
             // 处理代理逻辑
             handleAgentLogic(ccTaskVO, ccRecord.getAgentId(), ccRecord.getBpmTitle(), loginUserId);
             copyTaskList.add(ccTaskVO);
@@ -433,6 +432,47 @@ public class BpmFlowTaskCenterServiceImpl implements BpmFlowTaskCenterService {
         }
 
         return new PageResult<>(copyTaskList, pageResult.getTotal());
+    }
+
+    @Override
+    public BpmOverviewRespVO getOverview() {
+        Long applicationId = BpmUtil.getRequiredApplicationId();
+
+        BpmOverviewRespVO overviewRespVO = new BpmOverviewRespVO();
+
+        // 获取待办数量
+        BpmTodoTaskPageReqVO todoReqVO = new BpmTodoTaskPageReqVO();
+        todoReqVO.setAppId(applicationId);
+        todoReqVO.setPageNo(1);
+        todoReqVO.setPageSize(1);
+        PageResult<BpmFlowTodoTaskVO> todoPage = getTodoPage(todoReqVO);
+        overviewRespVO.setTodoCount(todoPage.getTotal().intValue());
+
+        // 获取已办数量
+        BpmDoneTaskPageReqVO doneReqVO = new BpmDoneTaskPageReqVO();
+        doneReqVO.setAppId(applicationId);
+        doneReqVO.setPageNo(1);
+        doneReqVO.setPageSize(1);
+        PageResult<BpmFlowDoneTaskVO> donePage = getDonePage(doneReqVO);
+        overviewRespVO.setDoneCount(donePage.getTotal().intValue());
+
+        // 获取抄送数量
+        BpmCcTaskPageReqVO ccReqVO = new BpmCcTaskPageReqVO();
+        ccReqVO.setAppId(applicationId);
+        ccReqVO.setPageNo(1);
+        ccReqVO.setPageSize(1);
+        PageResult<BpmCcTaskPageResVO> ccPage = getCcPage(ccReqVO);
+        overviewRespVO.setCcCount(ccPage.getTotal().intValue());
+
+        // 获取我创建的流程数量
+        BpmMyCreatedPageReqVO myCreatedReqVO = new BpmMyCreatedPageReqVO();
+        myCreatedReqVO.setAppId(applicationId);
+        myCreatedReqVO.setPageNo(1);
+        myCreatedReqVO.setPageSize(1);
+        PageResult<BpmMyCreatedVO> myCreatedPage = getMyCreatedPage(myCreatedReqVO);
+        overviewRespVO.setMyCreatedCount(myCreatedPage.getTotal().intValue());
+
+        return overviewRespVO;
     }
 
     /**

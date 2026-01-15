@@ -1,0 +1,10 @@
+spring:
+  datasource: # TODO: 修改数据库连接信息
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/onebase_cloud_v3
+    username: sample_usr
+    password: sample_pwd
+    type: com.zaxxer.hikari.HikariDataSource
+    hikari:
+      minimum-idle: 1
+      maximum-pool-size: 20

@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.metadata.build.service.entity;
 
+
 import com.cmsr.onebase.framework.aynline.AnylineDdlHelper;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
@@ -43,9 +44,6 @@ import com.cmsr.onebase.module.metadata.build.service.datasource.MetadataDatasou
 import com.cmsr.onebase.module.metadata.build.service.field.MetadataEntityFieldOptionBuildService;
 import com.cmsr.onebase.module.metadata.build.service.field.MetadataEntityFieldConstraintBuildService;
 import com.cmsr.onebase.module.metadata.build.service.number.AutoNumberConfigBuildService;
-import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.EntityFieldValidationTypesReqVO;
-import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.EntityFieldValidationTypesRespVO;
-import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.ValidationTypeItemRespVO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.number.MetadataAutoNumberConfigDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.number.MetadataAutoNumberRuleItemDO;
 import com.cmsr.onebase.module.metadata.core.enums.BusinessEntityTypeEnum;
@@ -80,12 +78,15 @@ import java.util.stream.Collectors;
 
 import org.springframework.util.StringUtils;
 
+import com.cmsr.onebase.module.metadata.core.enums.DatabaseReservedKeywords;
+
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.BUSINESS_ENTITY_NOT_EXISTS;
 import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.ENTITY_FIELD_NOT_EXISTS;
 import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.ENTITY_FIELD_NAME_DUPLICATE;
 import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.ENTITY_FIELD_DISPLAY_NAME_DUPLICATE;
 import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.ENTITY_FIELD_NAME_IS_SYSTEM_RESERVED;
+import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.ENTITY_FIELD_NAME_IS_DATABASE_KEYWORD;
 
 /**
  * 实体字段 Service 实现类
@@ -367,6 +368,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
 
         for (EntityFieldCreateItemVO fieldItem : reqVO.getFields()) {
             // 直接执行创建逻辑，异常由全局统一处理
+            validateFieldNameNotDatabaseKeyword(fieldItem.getFieldName());
             validateEntityFieldNameUnique(null, reqVO.getEntityId(), fieldItem.getFieldName());
             validateEntityFieldDisplayNameUnique(null, reqVO.getEntityId(), fieldItem.getDisplayName());
             // 创建字段及数据库插入操作
@@ -948,6 +950,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                         item.getFieldName(), reqVO.getEntityId(), reqVO.getApplicationId());
 
                 // 新增字段的情况
+                validateFieldNameNotDatabaseKeyword(item.getFieldName());
                 validateEntityFieldNameUnique(null, reqVO.getEntityId(), item.getFieldName());
                 validateEntityFieldDisplayNameUnique(null, reqVO.getEntityId(), item.getDisplayName());
                 validateEntityAllowModifyStructure(reqVO.getEntityId());
@@ -1227,6 +1230,8 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
 
         // 校验字段名不能与系统保留字段冲突
         validateFieldNameNotSystemReserved(createReqVO.getFieldName());
+        // 校验字段名不能是数据库保留关键字
+        validateFieldNameNotDatabaseKeyword(createReqVO.getFieldName());
         // 校验字段名唯一性
         validateEntityFieldNameUnique(null, createReqVO.getEntityUuid(), createReqVO.getFieldName());
         validateEntityFieldDisplayNameUnique(null, createReqVO.getEntityUuid(), createReqVO.getDisplayName());
@@ -1435,6 +1440,25 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         MetadataSystemFieldsDO systemField = systemFieldsRepository.getSystemFieldByName(trimmedFieldName);
         if (systemField != null) {
             throw exception(ENTITY_FIELD_NAME_IS_SYSTEM_RESERVED, trimmedFieldName);
+        }
+    }
+
+    /**
+     * 校验字段名是否为数据库保留关键字
+     * <p>
+     * 如if、select、case等PostgreSQL/人大金仓的保留关键字不能作为字段名，
+     * 否则会导致SQL语法错误。
+     * </p>
+     *
+     * @param fieldName 字段名
+     */
+    private void validateFieldNameNotDatabaseKeyword(String fieldName) {
+        if (fieldName == null || fieldName.trim().isEmpty()) {
+            return;
+        }
+        String trimmedFieldName = fieldName.trim();
+        if (DatabaseReservedKeywords.isReservedKeyword(trimmedFieldName)) {
+            throw exception(ENTITY_FIELD_NAME_IS_DATABASE_KEYWORD, trimmedFieldName);
         }
     }
 
@@ -2546,6 +2570,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 } else {
                     // 确实是新选项，新增
                     MetadataEntityFieldOptionDO d = new MetadataEntityFieldOptionDO();
+                    d.setOptionUuid(UuidUtils.getUuid()); // 生成选项UUID
                     d.setFieldUuid(fieldUuid);
                     d.setOptionLabel(opt.getOptionLabel());
                     d.setOptionValue(opt.getOptionValue());

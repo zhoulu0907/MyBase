@@ -79,6 +79,10 @@ sessionStore
 # cursor editor
 /.cursor
 
+# AI assistant configs
+/.claude
+/.promptx
+
 # requirements documentation
 /需求文档
 /.github/copilot-instructions.md
@@ -124,3 +128,11 @@ LOG_FILE_IS_UNDEFINED
 /onebase-module-data/onebase-module-metadata-api/src/main/java/com/cmsr/onebase/module/metadata/api/datamethod/entity/BizRecord.java
 /onebase-module-data/onebase-module-metadata-api/src/main/java/com/cmsr/onebase/module/metadata/api/datamethod/entity/FieldTypeEnum.java
 /sql/metadata_field_comparison_rules.sql
+/docs/空字符串转Null处理方案.md
+/plugins/frontend/ocr-service-processor/frontend/<!DOCTYPE html>.html
+/plugins/frontend/ocr-service-processor/frontend.manifest.json
+/plugins/backend/ocr-service-processor/lib/hutool-all-5.8.35.jar
+/plugins/backend/ocr-service-processor/ocr-service-processor_1.0.0.zip
+/plugins/frontend/ocr-service-processor/ocr-service-processor_1.0.0.zip
+/plugins/backend/ocr-service-processor/plugin.properties
+/plugins/backend/ocr-service-processor/lib/plugin-demo-hello-1.0.0-SNAPSHOT.jar

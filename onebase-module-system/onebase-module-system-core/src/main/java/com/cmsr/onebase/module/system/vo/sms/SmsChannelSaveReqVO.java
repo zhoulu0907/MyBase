@@ -36,7 +36,6 @@ public class SmsChannelSaveReqVO {
     private String apiSecret;
 
     @Schema(description = "短信发送回调 URL", example = "")
-    @URL(message = "回调 URL 格式不正确")
     private String callbackUrl;
 
 }

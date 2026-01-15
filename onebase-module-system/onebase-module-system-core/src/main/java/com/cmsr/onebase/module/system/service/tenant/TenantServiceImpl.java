@@ -21,6 +21,7 @@ import com.cmsr.onebase.module.system.api.user.AdminUserRoleApi;
 import com.cmsr.onebase.module.system.convert.tenant.TenantConvert;
 import com.cmsr.onebase.module.system.dal.database.TenantDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.corp.CorpDO;
+import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.dal.dataobject.license.LicenseDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.UserRoleDO;
@@ -35,7 +36,9 @@ import com.cmsr.onebase.module.system.enums.permission.RoleTypeEnum;
 import com.cmsr.onebase.module.system.enums.tenant.TenantCodeEnum;
 import com.cmsr.onebase.module.system.enums.tenant.TenantStatusEnum;
 import com.cmsr.onebase.module.system.enums.user.UserStatusEnum;
+import com.cmsr.onebase.module.system.framework.security.core.PwdEnHelper;
 import com.cmsr.onebase.module.system.service.corp.CorpService;
+import com.cmsr.onebase.module.system.service.dept.DeptService;
 import com.cmsr.onebase.module.system.service.license.LicenseService;
 import com.cmsr.onebase.module.system.service.permission.MenuService;
 import com.cmsr.onebase.module.system.service.permission.PermissionService;
@@ -51,8 +54,6 @@ import com.mzt.logapi.starter.annotation.LogRecord;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.DataRow;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -109,6 +110,12 @@ public class TenantServiceImpl implements TenantService {
 
     @Resource
     private AdminUserRoleApi adminUserRoleApi;
+
+    @Resource
+    private DeptService deptService;
+
+    @Resource
+    private PwdEnHelper pwdEnHelper;
 
     @Override
     public List<Long> getTenantIdList() {
@@ -206,7 +213,7 @@ public class TenantServiceImpl implements TenantService {
             // 获取license总租户数限制
             Integer totalTenantLimit = license.getTenantLimit();
             // 获取现有租户数量
-            Long existTenantCount = getExistTenantCount();
+            Integer existTenantCount = getTenantCountExcludePlatform();
             if (existTenantCount >= totalTenantLimit) {
                 throw exception(LICENSE_TENANT_COUNT_NOT_ENOUGH);
             }
@@ -225,7 +232,7 @@ public class TenantServiceImpl implements TenantService {
         // 5. 保存数据
         TenantDO tenant = BeanUtils.toBean(createReqVO, TenantDO.class);
         tenant.setPublishModel(createReqVO.getPublishModel() == null ? CommonPublishModelEnum.InnerModel.getValue() : createReqVO.getPublishModel());
-        tenant = tenantDataRepository.insert(tenant);
+        tenantDataRepository.insert(tenant);
 
         // 6. 创建租户的管理员1
         TenantUtils.execute(tenant.getId(), () -> {
@@ -246,14 +253,6 @@ public class TenantServiceImpl implements TenantService {
         LogRecordContext.putVariable("tenant", tenant);
 
         return tenant.getId();
-    }
-
-
-    private Long getExistTenantCount() {
-        // 排除平台租户
-        Long existTenantCount = tenantDataRepository.countByStatusExcludePlatform(
-                TenantStatusEnum.NORMAL.getStatus(), null);
-        return existTenantCount;
     }
 
     private Map<String, AdminUserDO> getUserMobileByUserNames(Set<String> usernamesList) {
@@ -299,7 +298,7 @@ public class TenantServiceImpl implements TenantService {
                 }
             }
             reqVO.setAdminType(AdminTypeEnum.SYSTEM.getType());
-            reqVO.setPassword(TENANT_ADMIN_PASSWORD);
+            reqVO.setPassword(pwdEnHelper.encryptHexStr(TENANT_ADMIN_PASSWORD));
             // 通过平台创建空间（Tenant）用户
             reqVO.setUserType(UserTypeEnum.TENANT.getValue());
             // 创建用户
@@ -386,32 +385,15 @@ public class TenantServiceImpl implements TenantService {
             });
         }
         // 先更新租户
-        TenantDO updateObj = BeanUtils.toBean(updateReqVO, TenantDO.class);
-
-        DataRow row = new DataRow();
-        row.put(TenantDO.ID, updateObj.getId());
-
-        if (StringUtils.isNotEmpty(updateObj.getName())) {
-            row.put(TenantDO.NAME, updateObj.getName());
-        }
-        if (StringUtils.isNotEmpty(updateObj.getWebsite())) {
-            row.put(TenantDO.WEBSITE, updateObj.getWebsite());
-        }
-        if (updateObj.getAccountCount() != null) {
-            row.put(TenantDO.ACCOUNT_COUNT, updateObj.getAccountCount());
-        }
-        if (updateObj.getStatus() != null) {
-            row.put(TenantDO.STATUS, updateObj.getStatus());
-        }
-        if (StringUtils.isNotEmpty(updateObj.getPublishModel())) {
-            row.put(TenantDO.PUBLISH_MODEL, updateObj.getPublishModel());
-        }
-
-        if (StringUtils.isNotEmpty(updateObj.getLogoUrl())) {
-            row.put(TenantDO.LOGO_URL, updateObj.getLogoUrl());
-        }
-
-        tenantDataRepository.updateByConfig(row, new DefaultConfigStore().eq(TenantDO.ID, updateObj.getId()));
+        TenantDO updateObj = new TenantDO();
+        updateObj.setId(updateReqVO.getId());
+        updateObj.setName(updateReqVO.getName());
+        updateObj.setWebsite(updateReqVO.getWebsite());
+        updateObj.setAccountCount(updateReqVO.getAccountCount());
+        updateObj.setStatus(updateReqVO.getStatus());
+        updateObj.setPublishModel(updateReqVO.getPublishModel());
+        updateObj.setLogoUrl(updateReqVO.getLogoUrl());
+        tenantDataRepository.update(updateObj);
         // 修改租户管理员
         if (updateReqVO.getTenantAdminUserUpdateReqVOSList() != null) {
             if (updateReqVO.getTenantAdminUserUpdateReqVOSList().isEmpty()) {
@@ -474,7 +456,7 @@ public class TenantServiceImpl implements TenantService {
                             }
                         }
                         userInsertReqVO.setAdminType(AdminTypeEnum.SYSTEM.getType());
-                        userInsertReqVO.setPassword(TENANT_ADMIN_PASSWORD);
+                        userInsertReqVO.setPassword(pwdEnHelper.encryptHexStr(TENANT_ADMIN_PASSWORD));
                         // 新增的都是空间管理员
                         userInsertReqVO.setUserType(UserTypeEnum.TENANT.getValue());
                         // 创建用户
@@ -609,7 +591,7 @@ public class TenantServiceImpl implements TenantService {
 
     @Override
     public TenantRespVO getTenantWithAppCount(Long id) {
-        // 仅允许获取自己的租户信息(平台管理员除外)
+        // 1. 非平台管理员，仅允许获取自己的租户信息
         boolean isPlatformAdmin = permissionService.isPlatformSuperAdmin(SecurityFrameworkUtils.getLoginUserId());
         if (!isPlatformAdmin) {
             Long loginTenantId = TenantContextHolder.getTenantId();
@@ -618,6 +600,7 @@ public class TenantServiceImpl implements TenantService {
             }
         }
 
+        // 2. 获取空间的企业数量信息
         Map<Long, Integer> corpCountMap = findCorpCount();
         TenantDO tenantDO = getTenant(id);
         // 查询当前租户下的已有的正常状态的用户数量
@@ -632,7 +615,7 @@ public class TenantServiceImpl implements TenantService {
             corpCount = CorpConstant.ZERO; // 默认值处理
         }
         tenantRespVO.setCorpCount(corpCount);
-        // 获取当前空间的管理员角色id
+        // 3. 获取当前空间的管理员角色id
         //  RoleDO roleDO = roleService.getRoleIdsByCode(RoleCodeEnum.TENANT_ADMIN.getCode());
         RoleDO roleDO = roleService.getRoleIdsByCodeAndTenantId(RoleCodeEnum.TENANT_ADMIN.getCode(), id);
         if (roleDO != null) {
@@ -644,8 +627,22 @@ public class TenantServiceImpl implements TenantService {
             // 获取角色对应的管理员
             // 获取租户管理员用户信息
             List<TenantAdminUserResVO> adminUserList = new ArrayList<>();
-            if (userIds.size() > 0) {
+            if (!userIds.isEmpty()) {
                 List<AdminUserDO> adminUsers = userService.getUserList(userIds);
+                List<Long> deptIds = adminUsers.stream().map(AdminUserDO::getDeptId).filter(Objects::nonNull).toList();
+
+                Map<Long, DeptDO> deptIdToDeptMap = new HashMap<>();
+                if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(deptIds)) {
+                    List<DeptDO> deptDOList = deptService.getDeptList(deptIds);
+                    deptIdToDeptMap = deptDOList.stream()
+                            .collect(Collectors.toMap(
+                                    DeptDO::getId,  // 以部门ID作为key
+                                    dept -> dept    // 以部门对象作为value
+                            ));
+                }
+
+
+                Map<Long, DeptDO> finalDeptIdToDeptMap = deptIdToDeptMap;
                 adminUserList = adminUsers.stream()
                         .filter(Objects::nonNull)
                         .map(uservo -> new TenantAdminUserResVO()
@@ -656,6 +653,8 @@ public class TenantServiceImpl implements TenantService {
                                 .setAdminEmail(uservo.getEmail())
                                 .setPlatformUserId(uservo.getPlatformUserId())
                                 .setAdminAvatar(uservo.getAvatar())
+                                .setDeptName(finalDeptIdToDeptMap.get(uservo.getDeptId()) != null ? finalDeptIdToDeptMap.get(uservo.getDeptId()).getName() : "")
+
 
                         )
                         .collect(Collectors.toList());
@@ -663,6 +662,21 @@ public class TenantServiceImpl implements TenantService {
             tenantRespVO.setTenantAdminUserList(adminUserList);
         }
         return tenantRespVO;
+    }
+
+    @Override
+    public TenantRespVO getTenantAndPlatformAdminInfo(Long id) {
+        TenantRespVO tenantPlatformInfo = getTenantWithAppCount(id);
+
+        // 过滤出tenantAdminUserList中platformUserId不为空的数据
+        if (tenantPlatformInfo.getTenantAdminUserList() != null) {
+            List<TenantAdminUserResVO> filteredAdminUserList = tenantPlatformInfo.getTenantAdminUserList().stream()
+                    .filter(adminUser -> adminUser.getPlatformUserId() != null)
+                    .collect(Collectors.toList());
+            tenantPlatformInfo.setTenantAdminUserList(filteredAdminUserList);
+        }
+
+        return tenantPlatformInfo;
     }
 
     /**
@@ -749,8 +763,8 @@ public class TenantServiceImpl implements TenantService {
     }
 
     @Override
-    public Integer getTenantCountByStatus(Integer status) {
-        return (int) tenantDataRepository.countByStatus(status);
+    public Integer getTenantCountExcludePlatform() {
+        return (int) tenantDataRepository.countExcludePlatform();
     }
 
     @Override
@@ -810,3 +824,4 @@ public class TenantServiceImpl implements TenantService {
         return tenantProperties == null || Boolean.FALSE.equals(tenantProperties.getEnable());
     }
 }
+

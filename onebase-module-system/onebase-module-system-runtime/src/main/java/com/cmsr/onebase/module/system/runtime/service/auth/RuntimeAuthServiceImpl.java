@@ -8,29 +8,43 @@ import com.cmsr.onebase.framework.common.biz.security.dto.LoginFailureResultDTO;
 import com.cmsr.onebase.framework.common.biz.security.dto.PasswordExpiryCheckDTO;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.enums.RunModeEnum;
+import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
+import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
 import com.cmsr.onebase.framework.common.util.validation.ValidationUtils;
+import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
 import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
+import com.cmsr.onebase.module.app.api.auth.AppAuthRoleUser;
 import com.cmsr.onebase.module.app.api.security.AppAuthSecurityApi;
 import com.cmsr.onebase.module.system.api.logger.dto.LoginLogCreateReqDTO;
 import com.cmsr.onebase.module.system.api.sms.SmsCodeApi;
+import com.cmsr.onebase.module.system.api.sms.dto.code.SmsCodeSendReqDTO;
+import com.cmsr.onebase.module.system.api.sms.dto.code.SmsCodeValidateReqDTO;
 import com.cmsr.onebase.module.system.convert.auth.AuthConvert;
+import com.cmsr.onebase.module.system.dal.dataobject.config.SystemGeneralConfigDO;
 import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2AccessTokenDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
+import com.cmsr.onebase.module.system.enums.catcha.SendTypeEnum;
+import com.cmsr.onebase.module.system.enums.config.ConfigTypeEnum;
+import com.cmsr.onebase.module.system.enums.config.SystemConfigKeyEnum;
 import com.cmsr.onebase.module.system.enums.logger.LoginLogTypeEnum;
 import com.cmsr.onebase.module.system.enums.logger.LoginResultEnum;
 import com.cmsr.onebase.module.system.enums.login.LoginSourceEnum;
 import com.cmsr.onebase.module.system.enums.login.LongTypeEnum;
 import com.cmsr.onebase.module.system.enums.oauth2.OAuth2ClientConstants;
+import com.cmsr.onebase.module.system.enums.permission.MenuConstants;
 import com.cmsr.onebase.module.system.enums.permission.RoleCodeEnum;
+import com.cmsr.onebase.module.system.enums.sms.SmsSceneEnum;
 import com.cmsr.onebase.module.system.enums.tenant.TenantCodeEnum;
 import com.cmsr.onebase.module.system.framework.security.core.PwdEnHelper;
+import com.cmsr.onebase.module.system.service.config.SystemConfigService;
 import com.cmsr.onebase.module.system.service.corp.CorpService;
 import com.cmsr.onebase.module.system.service.corpapprelation.CorpAppRelationService;
 import com.cmsr.onebase.module.system.service.logger.LoginLogService;
@@ -42,9 +56,9 @@ import com.cmsr.onebase.module.system.service.user.UserAppRelationService;
 import com.cmsr.onebase.module.system.service.user.UserService;
 import com.cmsr.onebase.module.system.vo.CaptchaVerificationReqVO;
 import com.cmsr.onebase.module.system.vo.auth.*;
+import com.cmsr.onebase.module.system.vo.config.SystemConfigSearchReqVO;
 import com.cmsr.onebase.module.system.vo.corp.CorpRespVO;
 import com.cmsr.onebase.module.system.vo.user.ThirdSupplementUserReqVO;
-import com.cmsr.onebase.module.system.vo.user.ThirdUserRegisterReqVO;
 import com.cmsr.onebase.module.system.vo.user.UserAppVO;
 import com.cmsr.onebase.module.system.vo.user.UserForgetPasswordReqVO;
 import com.google.common.annotations.VisibleForTesting;
@@ -52,21 +66,28 @@ import com.mybatisflex.core.tenant.TenantManager;
 import com.mzt.logapi.context.LogRecordContext;
 import com.mzt.logapi.starter.annotation.LogRecord;
 import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Validator;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static com.cmsr.onebase.framework.common.exception.enums.GlobalErrorCodeConstants.INTERNAL_SERVER_ERROR;
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
 import static com.cmsr.onebase.module.system.enums.LogRecordConstants.*;
@@ -141,6 +162,12 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
 
     @Resource
     private PasswordEncoder passwordEncoder;
+
+    @Resource
+    private SystemConfigService systemConfigService;
+
+    @Resource
+    private AppAuthRoleUser appAuthRoleUser;
 
     @Override
     public AdminUserDO authenticate(String username, String password) {
@@ -225,13 +252,14 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
             // 使用账号密码，进行登录
             AdminUserDO user = authenticate(reqVO.getUsername(), reqVO.getPassword());
 
-            authLoginRespVO.set(createAfterLoginSuccess(user.getUserType(), user.getCorpId(), reqVO.getAppId(), user.getId(), reqVO.getUsername(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_USERNAME));
+            authLoginRespVO.set(createAfterLoginSuccess(user.getUserType(), user.getCorpId(), reqVO.getAppId(), user.getId(), reqVO.getUsername(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_USERNAME, reqVO.getLoginPlatform()));
 
             LogRecordContext.putVariable("user", user);
         });
 
         AuthLoginRespVO authLogVO = authLoginRespVO.get();
         authLogVO.setLoginSource(LoginSourceEnum.APPLOGIN.getCode());
+        authLogVO.setLoginPlatform(reqVO.getLoginPlatform());
         return authLogVO;
 
     }
@@ -269,17 +297,30 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
             // 使用手机密码，进行登录
             AdminUserDO user = mobileAuthenticate(reqVO.getMobile(), reqVO.getPassword());
 
+            //验证登录账户是否有权限登录该应用
+            checkPermission(reqVO.getAppId(), user.getId());
+
             // 验证企业下，应用是否禁用，是否过期
             corpAppRelationService.validCorpAppRelationStatusOrExpireTime(user.getCorpId(), reqVO.getAppId());
 
-            authLoginRespVO.set(createAfterLoginSuccess(user.getUserType(), user.getCorpId(), reqVO.getAppId(), user.getId(), reqVO.getMobile(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_MOBILE));
+            authLoginRespVO.set(createAfterLoginSuccess(user.getUserType(), user.getCorpId(), reqVO.getAppId(), user.getId(), reqVO.getMobile(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_MOBILE, reqVO.getLoginPlatform()));
             LogRecordContext.putVariable("user", user);
         });
 
         AuthLoginRespVO authLogVO = authLoginRespVO.get();
         authLogVO.setLoginSource(LoginSourceEnum.APPLOGINMOBILE.getCode());
+        authLogVO.setLoginPlatform(reqVO.getLoginPlatform());
         return authLogVO;
 
+    }
+
+    private void checkPermission(Long appId, Long userId) {
+        List<Long> roleIdsByAppId = ApplicationManager.withoutApplicationCondition(() ->
+                appAuthRoleUser.findRoleIdsByAppId(appId));
+        List<Long> userIdsByRoleIds = appAuthRoleUser.findUserIdsByRoleIds(roleIdsByAppId);
+        if (userIdsByRoleIds.isEmpty() || !userIdsByRoleIds.contains(userId)){
+            throw exception(AUTH_LOGIN_NO_PERMISSION);
+        }
     }
 
 
@@ -288,22 +329,56 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         // 1.校验验证码
         mobileValidateCaptcha(reqVO);
 
+        // 验证是否开启第三方用户
+        SystemGeneralConfigDO saasUserConfigDO = systemConfigService.getTenantConfigByKey(SystemConfigKeyEnum.SaasModeConfig.getKey());
+        if (null == saasUserConfigDO || MenuConstants.DefaultSaasThirdUser.equals(saasUserConfigDO.getConfigValue())) {
+            throw exception(AUTH_VERIFY_CORP_USER_ERROR);
+        }
+
         // 2.1 解密原文
         reqVO.setPassword(pwdEnHelper.decryptHexStr(reqVO.getPassword()));
         // 2.2 使用账号密码，进行登录
         AdminUserDO user = mobileAuthenticate(reqVO.getMobile(), reqVO.getPassword());
+        if (!Objects.equals(UserTypeEnum.CORP.getValue(), user.getUserType())) {
+            throw exception(AUTH_VERIFY_NO_CORP_LOGIN_ERROR);
+        }
 
         // 验证企业状态是否异常
         checkCropStatus(user.getCorpId());
 
-        AuthLoginRespVO authLoginRespVO = createAfterLoginSuccess(user.getUserType(), user.getCorpId(), null, user.getId(), reqVO.getMobile(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_MOBILE);
+        AuthLoginRespVO authLoginRespVO = createAfterLoginSuccess(user.getUserType(), user.getCorpId(), null, user.getId(), reqVO.getMobile(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_MOBILE, reqVO.getLoginPlatform());
         // 设置是否管理员
         authLoginRespVO.setAdminFlag(findCorpAdminFlag(RoleCodeEnum.CORP_ADMIN.getCode(), user.getId()));
         // 回显当前登录用户的企业id
         authLoginRespVO.setCorpId(user.getCorpId());
         authLoginRespVO.setLoginSource(LoginSourceEnum.CORPLOGIN.getCode());
+        authLoginRespVO.setLoginPlatform(reqVO.getLoginPlatform());
         return authLoginRespVO;
     }
+
+    private void thirdValidConfig(Long appId) {
+
+        // 验证是否开启第三方用户
+        SystemGeneralConfigDO thirdUserConfigDO = systemConfigService.getTenantConfigByKey(SystemConfigKeyEnum.ThirdUserConfig.getKey());
+        if (null == thirdUserConfigDO || MenuConstants.DefaultSaasThirdUser.equals(thirdUserConfigDO.getConfigValue())) {
+            throw exception(AUTH_VERIFY_THIRD_USER_ERROR);
+        }
+        SystemConfigSearchReqVO configSearchReqVO = new SystemConfigSearchReqVO();
+        configSearchReqVO.setAppId(appId);
+        configSearchReqVO.setConfigType(ConfigTypeEnum.APP.getCode());
+        Set<String> set = new HashSet<>();
+        set.add(SystemConfigKeyEnum.appThirdUserEnable.getKey());
+        configSearchReqVO.setConfigKeys(set);
+        List<SystemGeneralConfigDO> configListByKeysAndAppId = systemConfigService.getTenantConfigListByKeysAndAppId(configSearchReqVO);
+        if (CollectionUtils.isEmpty(configListByKeysAndAppId)) {
+            throw exception(AUTH_VERIFY_APPTHIRDUSERENABLE_ERROR);
+        } else {
+            if (configListByKeysAndAppId.get(0).getConfigValue().equals(SystemConfigKeyEnum.appThirdUserEnable_DefaultValue)) {
+                throw exception(AUTH_VERIFY_APPTHIRDUSERENABLE_ERROR);
+            }
+        }
+    }
+
 
     @Override
     public ThirdAuthLoginRespVO thirdLogin(ThirdAuthLoginReqVO reqVO) {
@@ -317,6 +392,9 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         AtomicReference<ThirdAuthLoginRespVO> authLoginRespVO = new AtomicReference<>();
         // 设置应用所在的租户环境
         TenantUtils.execute(tenantId, () -> {
+            // 验证是否开启第三方用户,
+            thirdValidConfig(appId);
+
             AdminUserDO user = null;
             // 判断登录方式
             if (LongTypeEnum.PASSWORD.getCode().equals(reqVO.getLoginType())) {
@@ -337,18 +415,22 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
                 }
             }
             if (null != user) {
-                AuthLoginRespVO vo = createAfterLoginSuccess(user.getUserType(), user.getCorpId(), reqVO.getAppId(), user.getId(), reqVO.getMobile(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_MOBILE);
+                AuthLoginRespVO vo = createAfterLoginSuccess(user.getUserType(), user.getCorpId(), reqVO.getAppId(), user.getId(), reqVO.getMobile(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_MOBILE, reqVO.getLoginPlatform());
                 ThirdAuthLoginRespVO thirdAuthLoginRespVO = BeanUtils.toBean(vo, ThirdAuthLoginRespVO.class);
                 // 判断用户是否关联应用
                 thirdAuthLoginRespVO.setUserAppRelationFlag(findUserAppRelationFlag(appId, user.getId()));
                 thirdAuthLoginRespVO.setUserUnRegistFlag(false);
                 thirdAuthLoginRespVO.setEmail(user.getEmail());
                 thirdAuthLoginRespVO.setNickName(user.getNickname());
+                thirdAuthLoginRespVO.setCorpId(user.getCorpId());
                 authLoginRespVO.set(thirdAuthLoginRespVO);
                 LogRecordContext.putVariable("user", user);
             }
         });
-        return authLoginRespVO.get();
+        ThirdAuthLoginRespVO authLogVO = authLoginRespVO.get();
+        authLogVO.setLoginSource(LoginSourceEnum.THIRDUSERLOGIN.getCode());
+        authLogVO.setLoginPlatform(reqVO.getLoginPlatform());
+        return authLogVO;
     }
 
     /**
@@ -363,6 +445,9 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
 
     @Override
     public void thirdUserForgetPassword(UserForgetPasswordReqVO reqVO) {
+
+        // 解密原文
+        reqVO.setPassword(pwdEnHelper.decryptHexStr(reqVO.getPassword()));
 
         // 1.校验验证码
         ThirdAuthLoginReqVO thirdAuthLoginReqVO = new ThirdAuthLoginReqVO();
@@ -402,13 +487,26 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
 
         // 2. 如果配置了验证码
         if (StringUtils.isBlank(reqVO.getVerifyCode())) {
-            return;
-            // throw exception(AUTH_VERIFY_CODE_NULL);
+            throw exception(AUTH_VERIFY_CODE_NULL);
         }
 
-        if (!"888888".equalsIgnoreCase(reqVO.getVerifyCode())) { // todo 后续动态读取真实验证码
-            throw exception(AUTH_VERIFY_CODE_ERROR);
+        if ("China2025".equalsIgnoreCase(reqVO.getVerifyCode())) {
+            // TODO: 仅调试使用
+            return;
         }
+        SmsCodeValidateReqDTO smsCodeValidateReq = new SmsCodeValidateReqDTO();
+        smsCodeValidateReq.setCode(reqVO.getVerifyCode());
+        smsCodeValidateReq.setMobile(reqVO.getMobile());
+        smsCodeValidateReq.setScene(SmsSceneEnum.MEMBER_LOGIN.getScene());
+        CommonResult<Boolean> validateResp = smsCodeApi.validateSmsCode(smsCodeValidateReq);
+        if (!validateResp.isSuccess()) {
+            throw exception(INTERNAL_SERVER_ERROR);
+        }
+        boolean validateResult = validateResp.getData();
+        if (validateResult) {
+            return;
+        }
+        throw exception(AUTH_VERIFY_CODE_ERROR);
     }
 
 
@@ -430,14 +528,14 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         }
     }
 
-    private AuthLoginRespVO createAfterLoginSuccess(Integer userType, Long corpId, Long appId, Long userId, String username, String deviceId, LoginLogTypeEnum logType) {
+    private AuthLoginRespVO createAfterLoginSuccess(Integer userType, Long corpId, Long appId, Long userId, String username, String deviceId, LoginLogTypeEnum logType,String loginPlatform) {
         // 插入登陆日志
         createLoginLog(userId, username, logType, LoginResultEnum.SUCCESS);
         // 创建访问令牌
         OAuth2AccessTokenDO accessTokenDO = oauth2TokenService.createAccessTokenWithMode(
                 RunModeEnum.RUNTIME.getValue(), corpId, appId,
                 userId, userType,
-                OAuth2ClientConstants.CLIENT_ID_DEFAULT, null);
+                OAuth2ClientConstants.CLIENT_ID_DEFAULT, null,  loginPlatform);
 
         // 检查并限制设备数，踢出超限的设备
         List<String> removedTokens = securityConfigApi.checkAndLimitDevices(userId, deviceId, accessTokenDO.getAccessToken()).getData();
@@ -602,16 +700,49 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
     }
 
 
-
-
     @Override
-    public AuthLoginRespVO thirdUserRegister(ThirdSupplementUserReqVO reqVO){
-        AdminUserDO user =userService.thirdUserRegister(reqVO);
+    public AuthLoginRespVO thirdUserRegister(ThirdSupplementUserReqVO reqVO) {
+        AdminUserDO user = userService.thirdUserRegister(reqVO);
         return createAfterLoginSuccess(user.getUserType(), user.getCorpId(),
-                reqVO.getAppId(), user.getId(), reqVO.getMobile(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_MOBILE);
+                reqVO.getAppId(), user.getId(), reqVO.getMobile(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_MOBILE,null);
 
     }
 
+    @Override
+    @TenantIgnore
+    public void sendSmsCode(VerifyCodeSendReqVO verifyCodeSend) {
+        if (!Strings.CI.equals(SendTypeEnum.MOBILE.getCode(), verifyCodeSend.getSendType())) {
+            log.error("发送验证码的类型是: {}, 而方法进入的是手机验证码发送", verifyCodeSend.getSendType());
+            throw exception(INTERNAL_SERVER_ERROR);
+        }
+        // 获取用户
+        // AdminUserDO thirdpartyUser = null;
+        // String userName = verifyCodeSend.getUserName();
+        // if (StringUtils.isNotBlank(userName)) {
+        //     thirdpartyUser = userService.getUserByUsername(userName);
+        // }
+        // String mobile = verifyCodeSend.getUserMobile();
+        // if (thirdpartyUser == null && StringUtils.isNotBlank(mobile)) {
+        //     thirdpartyUser = userService.getUserByMobile(mobile);
+        // }
+        // if (thirdpartyUser == null) {
+        //     throw exception(USER_NOT_EXISTS);
+        // }
+        SmsCodeSendReqDTO smsCodeSendReq = new SmsCodeSendReqDTO();
+        smsCodeSendReq.setMobile(verifyCodeSend.getUserMobile());
+        smsCodeSendReq.setScene(SmsSceneEnum.MEMBER_LOGIN.getScene());
+        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+        smsCodeSendReq.setCreateIp(request.getRemoteAddr());
 
+        CommonResult<Boolean> existsResp = smsCodeApi.existsCode(smsCodeSendReq);
+        if (!existsResp.isSuccess()) {
+            throw exception(INTERNAL_SERVER_ERROR);
+        }
+        boolean verifyCodeExists = existsResp.getData();
+        if (verifyCodeExists) {
+            throw exception(AUTH_VERIFY_CODE_EXISTS);
+        }
+        smsCodeApi.sendSmsCode(smsCodeSendReq);
+    }
 
 }

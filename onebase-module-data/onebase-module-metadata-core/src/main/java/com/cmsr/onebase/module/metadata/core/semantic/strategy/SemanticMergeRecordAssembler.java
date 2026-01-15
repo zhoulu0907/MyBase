@@ -1,38 +1,26 @@
 package com.cmsr.onebase.module.metadata.core.semantic.strategy;
 
+import com.cmsr.onebase.framework.common.util.object.ObjectUtils;
+import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityFieldOptionRepository;
+import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityFieldRepository;
+import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityRelationshipRepository;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.relationship.MetadataEntityRelationshipDO;
-import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticDataMethodOpEnum;
 import com.cmsr.onebase.module.metadata.core.enums.RelationshipTypeEnum;
-import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityRelationshipRepository;
-import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityFieldRepository;
-import com.cmsr.onebase.framework.common.util.object.ObjectUtils;
-import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityFieldOptionRepository;
-import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService;
-import com.cmsr.onebase.module.metadata.core.service.entity.MetadataEntityFieldCoreService;
-import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntitySchemaDTO;
-import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntityValueDTO;
-import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldSchemaDTO;
-import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldValueDTO;
-import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticRecordContextDTO;
-import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticRecordDTO;
-import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticRelationSchemaDTO;
-import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticRelationValueDTO;
-import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticRowValueDTO;
-import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticFieldTypeEnum;
-import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticConnectorCardinalityEnum;
-import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticRelationshipTypeEnum;
-import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticMethodCodeEnum;
+import com.cmsr.onebase.module.metadata.core.semantic.constants.SystemFieldConstants;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.*;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.*;
 import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticMergeBodyVO;
 import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticPageBodyVO;
 import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticTargetBodyVO;
+import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService;
+import com.cmsr.onebase.module.metadata.core.service.entity.MetadataEntityFieldCoreService;
+import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
-import com.mybatisflex.core.query.QueryWrapper;
-import com.cmsr.onebase.module.metadata.core.semantic.constants.SystemFieldConstants;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.BUSINESS_ENTITY_NOT_EXISTS;
@@ -66,10 +54,10 @@ public class SemanticMergeRecordAssembler {
     /**
      * 按实体编码装配合并请求
      *
-     * @param tableName  表名称
-     * @param body       合并请求体（顶层属性为主实体字段或连接器名）
-     * @param menuId     菜单ID
-     * @param traceId    链路追踪ID
+     * @param tableName 表名称
+     * @param body      合并请求体（顶层属性为主实体字段或连接器名）
+     * @param menuId    菜单ID
+     * @param traceId   链路追踪ID
      * @return 统一记录对象
      */
     public SemanticRecordDTO assembleMergeBody(String tableName,
@@ -79,7 +67,9 @@ public class SemanticMergeRecordAssembler {
                                                SemanticMethodCodeEnum methodCode,
                                                SemanticDataMethodOpEnum operationType) {
         MetadataBusinessEntityDO entity = businessEntityCoreService.getBusinessEntityByTableName(tableName);
-        if (entity == null) { throw exception(BUSINESS_ENTITY_NOT_EXISTS); }
+        if (entity == null) {
+            throw exception(BUSINESS_ENTITY_NOT_EXISTS);
+        }
         return parseMerge(entity, body, menuId, traceId, methodCode, operationType);
     }
 
@@ -89,7 +79,9 @@ public class SemanticMergeRecordAssembler {
     public SemanticRecordDTO assemblePageBody(String tableName, SemanticPageBodyVO body, Long menuId, String traceId,
                                               SemanticMethodCodeEnum methodCode, SemanticDataMethodOpEnum operationType) {
         MetadataBusinessEntityDO entity = businessEntityCoreService.getBusinessEntityByTableName(tableName);
-        if (entity == null) { throw exception(BUSINESS_ENTITY_NOT_EXISTS); }
+        if (entity == null) {
+            throw exception(BUSINESS_ENTITY_NOT_EXISTS);
+        }
         SemanticDataMethodOpEnum op = operationType == null ? SemanticDataMethodOpEnum.GET_PAGE : operationType;
         SemanticRecordContextDTO context = buildContext(menuId, traceId, SemanticMethodCodeEnum.GET_PAGE, op);
         if (body != null) {
@@ -113,7 +105,9 @@ public class SemanticMergeRecordAssembler {
                                                 SemanticMethodCodeEnum methodCode,
                                                 SemanticDataMethodOpEnum operationType) {
         MetadataBusinessEntityDO entity = businessEntityCoreService.getBusinessEntityByTableName(tableName);
-        if (entity == null) { throw exception(BUSINESS_ENTITY_NOT_EXISTS); }
+        if (entity == null) {
+            throw exception(BUSINESS_ENTITY_NOT_EXISTS);
+        }
         SemanticMethodCodeEnum method = methodCode == null ? SemanticMethodCodeEnum.GET : methodCode;
         SemanticDataMethodOpEnum op = operationType == null ? ((method == SemanticMethodCodeEnum.DELETE) ? SemanticDataMethodOpEnum.DELETE : SemanticDataMethodOpEnum.GET) : operationType;
         SemanticRecordContextDTO context = buildContext(menuId, traceId, method, op);
@@ -123,24 +117,28 @@ public class SemanticMergeRecordAssembler {
         record.setRecordContext(context);
         record.setEntitySchema(buildEntitySchema(entity));
         SemanticEntityValueDTO value = new SemanticEntityValueDTO();
-        if (body != null) { value.setId(body.getId()); }
+        if (body != null) {
+            value.setId(body.getId());
+        }
         record.setEntityValue(value);
         return record;
     }
 
     public SemanticEntitySchemaDTO buildEntitySchemaByTableName(String tableName) {
         MetadataBusinessEntityDO entity = businessEntityCoreService.getBusinessEntityByTableName(tableName);
-        if (entity == null) { throw exception(BUSINESS_ENTITY_NOT_EXISTS); }
+        if (entity == null) {
+            throw exception(BUSINESS_ENTITY_NOT_EXISTS);
+        }
         return buildEntitySchema(entity);
     }
 
     public SemanticEntitySchemaDTO buildEntitySchemaByUuid(String entityUuidOrId) {
         MetadataBusinessEntityDO entity = null;
-        
+
         // 先尝试按UUID查询
         if (entityUuidOrId != null && !entityUuidOrId.trim().isEmpty()) {
             entity = businessEntityCoreService.getBusinessEntityByUuid(entityUuidOrId);
-            
+
             // 如果UUID查询不到，且传入的是纯数字（可能是ID），则按ID查询
             if (entity == null && entityUuidOrId.matches("^\\d+$")) {
                 try {
@@ -151,17 +149,45 @@ public class SemanticMergeRecordAssembler {
                 }
             }
         }
-        
-        if (entity == null) { throw exception(BUSINESS_ENTITY_NOT_EXISTS); }
+
+        if (entity == null) {
+            throw exception(BUSINESS_ENTITY_NOT_EXISTS);
+        }
         return buildEntitySchema(entity);
     }
 
     public SemanticEntityValueDTO buildEntityValueByNames(String tableName, Map<String, Object> properties) {
         MetadataBusinessEntityDO entity = businessEntityCoreService.getBusinessEntityByTableName(tableName);
-        if (entity == null) { throw exception(BUSINESS_ENTITY_NOT_EXISTS); }
+        if (entity == null) {
+            throw exception(BUSINESS_ENTITY_NOT_EXISTS);
+        }
         SemanticRecordContextDTO context = new SemanticRecordContextDTO();
         SemanticRecordDTO record = parseFromProps(entity, properties == null ? Map.of() : properties, context);
         return record.getEntityValue();
+    }
+
+    public SemanticEntityValueDTO buildSemanticEntityValueDTO(Map<String, Object> props, SemanticEntitySchemaDTO entitySchema) {
+        String entityUuid = entitySchema.getEntityUuid();
+        List<MetadataEntityFieldDO> entityFields = fieldCoreService.getEntityFieldListByEntityUuid(entityUuid);
+
+        SemanticEntityValueDTO entityValue = new SemanticEntityValueDTO();
+        Map<String, SemanticFieldValueDTO<Object>> entityFieldValues = new HashMap<>();
+        Map<String, SemanticRelationValueDTO> relationValues = new HashMap<>();
+
+        Set<String> entityFieldNameSet = getFieldNameSet(entityFields);
+        Map<String, MetadataEntityFieldDO> entityFieldMetaByName = buildFieldMetaMap(entityFields);
+        Map<String, Object> properties = props == null ? Map.of() : props;
+        properties.forEach((propName, propRawValue) -> {
+            if (entityFieldNameSet.contains(propName) || "id".equals(propName)) {
+                entityFieldValues.put(propName, toFieldValue(propRawValue, entityFieldMetaByName.get(propName), propName));
+            } else {
+                relationValues.put(propName, toConnectorValue(propName, propRawValue, entitySchema.getConnectors()));
+            }
+        });
+        entityValue.setFieldValueMap(entityFieldValues);
+        entityValue.setConnectors(relationValues);
+        entityValue.setId(properties.get("id"));
+        return entityValue;
     }
 
     /**
@@ -197,29 +223,11 @@ public class SemanticMergeRecordAssembler {
         SemanticRecordDTO record = new SemanticRecordDTO();
         record.setRecordContext(context);
 
-        String entityUuid = entity.getEntityUuid();
-        List<MetadataEntityFieldDO> entityFields = fieldCoreService.getEntityFieldListByEntityUuid(entityUuid);
-
         SemanticEntitySchemaDTO entitySchema = buildEntitySchema(entity);
         record.setEntitySchema(entitySchema);
 
-        SemanticEntityValueDTO entityValue = new SemanticEntityValueDTO();
-        Map<String, SemanticFieldValueDTO<Object>> entityFieldValues = new HashMap<>();
-        Map<String, SemanticRelationValueDTO> relationValues = new HashMap<>();
+        SemanticEntityValueDTO entityValue = buildSemanticEntityValueDTO(props, entitySchema);
 
-        Set<String> entityFieldNameSet = getFieldNameSet(entityFields);
-        Map<String, MetadataEntityFieldDO> entityFieldMetaByName = buildFieldMetaMap(entityFields);
-        Map<String, Object> properties = props == null ? Map.of() : props;
-        properties.forEach((propName, propRawValue) -> {
-            if (entityFieldNameSet.contains(propName) || "id".equals(propName)) {
-                entityFieldValues.put(propName, toFieldValue(propRawValue, entityFieldMetaByName.get(propName), propName));
-            } else {
-                relationValues.put(propName, toConnectorValue(propName, propRawValue, entitySchema.getConnectors()));
-            }
-        });
-        entityValue.setFieldValueMap(entityFieldValues);
-        entityValue.setConnectors(relationValues);
-        entityValue.setId(properties.get("id"));
         record.setEntityValue(entityValue);
         return record;
     }

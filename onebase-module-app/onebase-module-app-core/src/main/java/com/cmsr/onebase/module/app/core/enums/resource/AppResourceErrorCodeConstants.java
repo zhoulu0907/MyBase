@@ -16,4 +16,8 @@ public interface AppResourceErrorCodeConstants {
 
     ErrorCode APP_RESOURCE_MENU_NOT_EXIST = new ErrorCode(20004, "菜单不存在");
 
+    ErrorCode DASHBOARD_NOT_EXIST = new ErrorCode(20005, "数据大屏不存在");
+
+    ErrorCode DASHBOARD_TEMPLATE_NOT_EXIST = new ErrorCode(20006, "大屏模板不存在");
+
 }
