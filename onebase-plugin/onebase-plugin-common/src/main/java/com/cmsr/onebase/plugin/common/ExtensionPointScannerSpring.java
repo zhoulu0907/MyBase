@@ -36,6 +36,7 @@ public class ExtensionPointScannerSpring {
      */
     private final List<String> devClassPaths;
     private URLClassLoader devClassLoader;
+    private Object hotReloadManager; // 使用 Object 避免循环依赖，运行时会是 HotReloadManager 实例
 
     public ExtensionPointScannerSpring() {
         this.devClassPaths = Collections.emptyList();
@@ -51,6 +52,16 @@ public class ExtensionPointScannerSpring {
     public ExtensionPointScannerSpring(List<String> devClassPaths) {
         this.devClassPaths = devClassPaths == null ? Collections.emptyList() : new ArrayList<>(devClassPaths);
         initDevClassLoader();
+    }
+
+    /**
+     * 设置热重载管理器（用于注册扩展点到插件映射）
+     * 使用 Object 类型避免循环依赖
+     * 
+     * @param hotReloadManager 热重载管理器实例（运行时类型为 HotReloadManager）
+     */
+    public void setHotReloadManager(Object hotReloadManager) {
+        this.hotReloadManager = hotReloadManager;
     }
 
     private void initDevClassLoader() {
@@ -118,14 +129,28 @@ public class ExtensionPointScannerSpring {
                                 @SuppressWarnings("unchecked")
                                 T instance = (T) clazz.getDeclaredConstructor().newInstance();
                                 extensions.add(instance);
+
+                                // 注册扩展点到插件映射（用于插件级热重载）
+                                if (hotReloadManager != null) {
+                                    try {
+                                        // 使用反射调用 registerExtension 方法，避免循环依赖
+                                        hotReloadManager.getClass()
+                                                .getMethod("registerExtension", String.class, Path.class)
+                                                .invoke(hotReloadManager, className, base);
+                                    } catch (Exception ex) {
+                                        // 【P1 修复】：说明失败的影响
+                                        log.error("注册扩展点到插件映射失败，该扩展点的非扩展点类热加载将不可用: {}", className, ex);
+                                    }
+                                }
+
                                 log.debug("发现扩展点: {} -> {} (来自 {})",
                                         extensionType.getSimpleName(), className, base);
                             } catch (ClassNotFoundException cnf) {
-                                log.debug("类未找到: {}", cnf.getMessage());
+                                log.error("类未找到: {}", cnf.getMessage());
                             } catch (NoClassDefFoundError nde) {
-                                log.debug("类依赖缺失: {}", nde.getMessage());
+                                log.error("类依赖缺失: {}", nde.getMessage());
                             } catch (Exception e) {
-                                log.warn("从开发目录加载扩展点失败 {}: {}", classFile, e.getMessage());
+                                log.error("从开发目录加载扩展点失败 {}: {}", classFile, e.getMessage());
                             }
                         });
             }

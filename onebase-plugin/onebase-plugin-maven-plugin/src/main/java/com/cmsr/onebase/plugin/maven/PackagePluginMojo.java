@@ -18,7 +18,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -145,31 +144,48 @@ public class PackagePluginMojo extends AbstractMojo {
             addFileToZip(zos, baseDir + "lib/" + mainJar.getName(), mainJar);
 
             // 添加运行时依赖
-            Set<Artifact> dependencies = project.getArtifacts();
+            // 策略：只收集项目的直接依赖（不包括传递依赖），且 scope 为 compile 或 runtime
+            // 这样可以完全避免 provided 依赖的传递依赖被包含进来
             int dependencyCount = 0;
 
-            for (Artifact artifact : dependencies) {
-                // 跳过非运行时依赖
-                if (!isRuntimeScope(artifact.getScope())) {
+            for (org.apache.maven.model.Dependency dep : project.getDependencies()) {
+                String scope = dep.getScope();
+
+                // 默认 scope 是 compile
+                if (scope == null) {
+                    scope = "compile";
+                }
+
+                // 只包含 compile 和 runtime scope
+                if (!"compile".equals(scope) && !"runtime".equals(scope)) {
+                    getLog().debug(
+                            "排除非 compile/runtime scope 的直接依赖: " + dep.getArtifactId() + " (scope: " + scope + ")");
                     continue;
                 }
 
                 // 排除宿主核心模块
-                if (PluginPackagingConstants.HOST_PROVIDED_ARTIFACTS.contains(artifact.getArtifactId())) {
-                    getLog().debug("排除宿主核心模块: " + artifact.getArtifactId());
+                if (PluginPackagingConstants.HOST_PROVIDED_ARTIFACTS.contains(dep.getArtifactId())) {
+                    getLog().debug("排除宿主核心模块: " + dep.getArtifactId());
                     continue;
                 }
 
-                File artifactFile = artifact.getFile();
-                if (artifactFile != null && artifactFile.exists()) {
-                    String libPath = baseDir + "lib/" + artifactFile.getName();
-                    addFileToZip(zos, libPath, artifactFile);
-                    dependencyCount++;
-                    getLog().debug("  添加依赖: " + artifactFile.getName());
+                // 从已解析的 artifacts 中找到对应的 artifact 文件
+                for (Artifact artifact : project.getArtifacts()) {
+                    if (artifact.getGroupId().equals(dep.getGroupId())
+                            && artifact.getArtifactId().equals(dep.getArtifactId())) {
+                        File artifactFile = artifact.getFile();
+                        if (artifactFile != null && artifactFile.exists()) {
+                            String libPath = baseDir + "lib/" + artifactFile.getName();
+                            addFileToZip(zos, libPath, artifactFile);
+                            dependencyCount++;
+                            getLog().debug("  添加依赖: " + artifactFile.getName());
+                        }
+                        break;
+                    }
                 }
             }
 
-            getLog().info("共添加 " + dependencyCount + " 个运行时依赖");
+            getLog().info("共添加 " + dependencyCount + " 个运行时依赖（仅直接依赖）");
         }
     }
 
@@ -191,15 +207,6 @@ public class PackagePluginMojo extends AbstractMojo {
         }
 
         zos.closeEntry();
-    }
-
-    /**
-     * 判断是否为运行时依赖
-     */
-    private boolean isRuntimeScope(String scope) {
-        return scope == null ||
-                Artifact.SCOPE_COMPILE.equals(scope) ||
-                Artifact.SCOPE_RUNTIME.equals(scope);
     }
 
     /**
