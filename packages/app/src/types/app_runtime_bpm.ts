@@ -128,3 +128,6 @@ export interface GetMyCCPageListReq {
   businessId?: string;
   viewed?: string;
 }
+export interface GetTaskCenterOverviewReq {
+  appId: string;
+}

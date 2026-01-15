@@ -193,7 +193,7 @@ const XTodoList = memo((props: XTodoListConfig & { runtime?: boolean }) => {
         <Tabs className={styles.todoListTabs} tabs={tabData as TabData[]} type="line-divide" onTabClick={(tab) => fetchListData(tab.key)}>
           {Object.entries(dataConfig).map(([key, value]: [string, boolean], index: number) => (
             value &&
-            <div className={styles.todoListContentList}>
+            <div className={styles.todoListContentList} key={key}>
               {getListMap[key as keyof typeof getListMap].length > 0 && getListMap[key as keyof typeof getListMap]?.slice(0, dataCount)?.map((item: ITodoItem, index: number) => (
                 <div key={item.id || index} className={styles.todoListContentItem}>
                   <div className={styles.todoListContentItemLeft} style={{ display: theme === WORKBENCH_THEME_OPTIONS.THEME_1 ? 'flex' : 'none' }}>
