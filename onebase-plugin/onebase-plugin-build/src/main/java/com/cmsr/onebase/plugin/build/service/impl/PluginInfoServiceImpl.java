@@ -128,6 +128,15 @@ public class PluginInfoServiceImpl implements PluginInfoService {
         // 9. 保存配置信息
         saveConfigInfo(metaInfo, pluginInfoDO.getPluginId(), pluginInfoDO.getPluginVersion());
 
+        // 10. 发布Redis消息通知Runtime下载插件
+        Long tenantId = TenantContextHolder.getTenantId();
+        pluginCommandPublisher.publishUploadCommand(
+                pluginInfoDO.getPluginId(),
+                pluginInfoDO.getPluginVersion(),
+                tenantId,
+                pluginInfoDO.getPluginPackage()
+        );
+
         log.info("插件上传成功: pluginId={}, version={}", metaInfo.getPluginId(), pluginInfoDO.getPluginVersion());
         return pluginInfoDO.getPluginId();
     }
