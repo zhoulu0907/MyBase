@@ -35,6 +35,11 @@
         </dependency>
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-flow-core</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-module-system-api</artifactId>
             <version>${revision}</version>
         </dependency>
@@ -70,6 +75,17 @@
         <dependency>
             <groupId>com.konghq</groupId>
             <artifactId>unirest-modules-jackson</artifactId>
+        </dependency>
+        <!-- Jakarta Mail for Email Connector -->
+        <dependency>
+            <groupId>org.eclipse.angus</groupId>
+            <artifactId>angus-mail</artifactId>
+        </dependency>
+        <!-- Aliyun SMS for SMS Connector -->
+        <dependency>
+            <groupId>com.aliyun</groupId>
+            <artifactId>dysmsapi20170525</artifactId>
+            <version>2.0.24</version>
         </dependency>
         <!-- 测试依赖 -->
         <dependency>

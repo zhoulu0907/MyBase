@@ -72,9 +72,13 @@ public class FlowNodeConfigDO extends BaseEntity implements Serializable {
 
     private String connConfig;
 
+    private String connConfigJson;
+
     private String actionConfigType;
 
     private String actionConfig;
+
+    private String actionConfigJson;
 
     private Integer sortOrder;
 

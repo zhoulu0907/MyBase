@@ -38,16 +38,14 @@ public class IfCaseNodeComponent extends NodeBooleanComponent {
         IfCaseNodeData nodeData = (IfCaseNodeData) executeContext.getNodeData(this.getTag());
         InLoopDepth inLoopDepth = nodeData.getInLoopDepth();
         Map<String, Object> expressionContext = VariableProvider.resolveLoopVariables(this, inLoopDepth, variableContext.getNodeVariables());
-        //
         if (executeContext.hasNodeProcessResult(this.getTag())) {
             Boolean result = (Boolean) executeContext.getNodeProcessResult(this.getTag());
             executeContext.addLog("条件节点已执行过，直接返回结果: " + result);
+            return result;
         }
-        //
         List<Conditions> conditions = nodeData.getFilterCondition();
         OrExpression orExpression = flowConditionsProvider.formatConditionsForExpression(conditions, expressionContext);
         boolean evaluated = expressionExecutor.evaluateContext(orExpression, expressionContext);
-        //
         executeContext.putNodeProcessResult(this.getTag(), evaluated);
         executeContext.addLog("条件节点执行完毕，结果为: " + evaluated);
         return evaluated;

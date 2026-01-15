@@ -108,7 +108,7 @@ public class DictTypeRepository extends BaseDataRepository<SystemDictTypeMapper,
         if (StringUtils.isNotBlank(dictOwnerType)) {
             queryWrapper.eq(DICT_OWNER_TYPE, dictOwnerType);
             // 仅当字典所有者类型为 app 时才过滤字典所有者ID；tenant 类型字典为公共字典，不限制 dictOwnerId
-            if (DictOwnerTypeEnum.isApp(dictOwnerType) && dictOwnerId != null) {
+            if (!DictOwnerTypeEnum.isGlobal(dictOwnerType) && dictOwnerId != null) {
                 queryWrapper.eq(DICT_OWNER_ID, dictOwnerId);
             }
         } else if (dictOwnerId != null) {

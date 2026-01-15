@@ -79,6 +79,10 @@ sessionStore
 # cursor editor
 /.cursor
 
+# AI assistant configs
+/.claude
+/.promptx
+
 # requirements documentation
 /需求文档
 /.github/copilot-instructions.md

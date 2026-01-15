@@ -5,16 +5,25 @@ import com.cmsr.onebase.module.flow.context.graph.InLoopDepth;
 import com.cmsr.onebase.module.flow.context.graph.JsonGraph;
 import com.cmsr.onebase.module.flow.context.graph.JsonGraphNode;
 import com.cmsr.onebase.module.flow.context.graph.nodes.ScriptNodeData;
+import com.cmsr.onebase.module.flow.context.graph.nodes.CommonNodeData;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowConnectorScriptRepository;
+import com.cmsr.onebase.module.flow.core.dal.mapper.FlowConnectorMapper;
+import com.cmsr.onebase.module.flow.core.dal.mapper.FlowNodeConfigMapper;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowConnectorScriptDO;
+import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowConnectorDO;
+import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowNodeConfigDO;
 import com.cmsr.onebase.module.flow.core.external.FlowFieldTypeProvider;
 import com.mybatisflex.core.tenant.TenantManager;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @Author：huangjie
@@ -30,6 +39,14 @@ public class FlowGraphBuilder {
     @Setter
     @Autowired
     private FlowConnectorScriptRepository connectorScriptRepository;
+
+    @Setter
+    @Autowired
+    private FlowConnectorMapper flowConnectorMapper;
+
+    @Setter
+    @Autowired
+    private FlowNodeConfigMapper flowNodeConfigMapper;
 
 
     public JsonGraph build(Long applicationId, String json) {
@@ -83,6 +100,35 @@ public class FlowGraphBuilder {
             scriptNodeData.setScript(connectorScriptDO.getRawScript());
             scriptNodeData.setInputSchema(connectorScriptDO.getInputSchema());
             scriptNodeData.setOutputSchema(connectorScriptDO.getOutputSchema());
+        }
+        if (node.getData() instanceof CommonNodeData commonNodeData) {
+            // 加载连接器配置
+            FlowConnectorDO connectorDO = TenantManager.withoutTenantCondition(() ->
+                flowConnectorMapper.selectByApplicationAndCode(applicationId, commonNodeData.getConnectorCode()));
+            if (connectorDO != null) {
+                Map<String, Object> connectorConfig = new HashMap<>();
+                if (StringUtils.isNotBlank(connectorDO.getConfigJson())) {
+                    connectorConfig = JsonUtils.parseObject(connectorDO.getConfigJson(), Map.class);
+                }
+                commonNodeData.setConnectorConfig(connectorConfig);
+            }
+            
+            // 加载节点配置
+            FlowNodeConfigDO nodeConfigDO = TenantManager.withoutTenantCondition(() ->
+                flowNodeConfigMapper.selectByApplicationAndCode(applicationId, commonNodeData.getNodeCode()));
+            if (nodeConfigDO != null) {
+                Map<String, Object> componentContext = new HashMap<>();
+                if (StringUtils.isNotBlank(nodeConfigDO.getConnConfigJson())) {
+                    componentContext = JsonUtils.parseObject(nodeConfigDO.getConnConfigJson(), Map.class);
+                }
+                commonNodeData.setComponentContext(componentContext);
+                
+                Map<String, Object> actionConfig = new HashMap<>();
+                if (StringUtils.isNotBlank(nodeConfigDO.getActionConfigJson())) {
+                    actionConfig = JsonUtils.parseObject(nodeConfigDO.getActionConfigJson(), Map.class);
+                }
+                commonNodeData.setActionConfig(actionConfig);
+            }
         }
         if (CollectionUtils.isNotEmpty(node.getBlocks())) {
             for (JsonGraphNode child : node.getBlocks()) {

@@ -352,14 +352,14 @@ public class UserServiceImpl implements UserService {
         AdminUserDO oldUser = validateUserForCreateOrUpdate(updateReqVO.getId(), updateReqVO.getUsername(),
                 updateReqVO.getMobile(), updateReqVO.getEmail(), updateReqVO.getDeptId(), updateReqVO.getPostIds());
         checkTenantUserCountLimit(updateReqVO.getStatus(), oldUser);
-        //1.2 检查用户部门
-        if (oldUser.getDeptId() != null && !oldUser.getDeptId().equals(updateReqVO.getDeptId())){
+        // 1.2 检查用户部门
+        if (oldUser.getDeptId() != null && !oldUser.getDeptId().equals(updateReqVO.getDeptId())) {
             DeptDO dept = deptService.getDept(oldUser.getDeptId());
-            if (Objects.equals(dept.getLeaderUserId(), oldUser.getId())){
+            if (Objects.equals(dept.getLeaderUserId(), oldUser.getId())) {
                 throw exception(USER_DEPT_LEADER_NOT_ALLOW_CHANGE, dept.getName());
             }
-            if (!dept.getAdminUserIds().isEmpty()){
-                if (dept.getAdminUserIds().contains(oldUser.getId())){
+            if (!dept.getAdminUserIds().isEmpty()) {
+                if (dept.getAdminUserIds().contains(oldUser.getId())) {
                     throw exception(USER_DEPT_ADMIN_NOT_ALLOW_CHANGE, dept.getName());
                 }
             }
@@ -592,12 +592,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<AdminUserDO> getUserListNoDept(Integer userType) {
-        if (null == userType) {
-            return userDataRepository.findNullDeptUser();
-        } else {
-            return userDataRepository.findUserByUserType(userType);
-        }
+    public List<AdminUserDO> getNoneDeptUserList(Integer userType) {
+        return userDataRepository.findNoneDeptUserList(userType);
     }
 
     @Override
@@ -1463,7 +1459,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public PageResult<UserSimpleRespVO> getUserPage(UserPageApiReqVO pageReqVO) {
         PageResult<AdminUserDO> userDOList = userDataRepository.selectPage(UserStatusEnum.NORMAL.getStatus(), pageReqVO);
-        if(org.apache.commons.collections4.CollectionUtils.isEmpty(userDOList.getList())){
+        if (org.apache.commons.collections4.CollectionUtils.isEmpty(userDOList.getList())) {
             return PageResult.empty();
         }
         return BeanUtils.toBean(userDOList, UserSimpleRespVO.class);

@@ -132,6 +132,7 @@ public class AppAuthRoleServiceProvider {
         deptAndUsersReqDTO.setKeywords(reqVO.getKeywords());
         deptAndUsersReqDTO.setExcludeUserIds(userIds);
         deptAndUsersReqDTO.setUserType(reqVO.getUserType());
+        deptAndUsersReqDTO.setDeptType(reqVO.getDeptType());
         return deptApi.getDeptAndUsers(deptAndUsersReqDTO).getData();
     }
 
