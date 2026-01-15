@@ -62,7 +62,7 @@
     padding-top: 0 !important;
   }
 
-  .cell-group-body bordered,
+  .cell-group-body.bordered,
   .arco-cell-group .cell-group-body {
     background-color: transparent;
   }
