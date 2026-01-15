@@ -21,62 +21,46 @@ import java.util.List;
 public class HttpNodeData extends NodeData implements Serializable {
 
     /**
-     * 请求 URL
-     * 支持变量替换，如: http://api.com/users/${userId}
+     * 请求 URL（支持变量替换，如: http://api.com/users/${userId}）
      */
     private String url;
 
     /**
-     * HTTP 请求方法
-     * 支持: GET, POST, PUT, DELETE, PATCH
+     * HTTP 请求方法（GET, POST, PUT, DELETE, PATCH）
      */
     private String method;
 
     /**
      * 请求头列表
-     * 每个 Header 包含 key 和 value
      */
     private List<Header> headers;
 
     /**
-     * 请求体类型
-     * 支持: JSON (application/json), FORM (application/x-www-form-urlencoded), RAW (text/plain)
+     * 请求体类型（预留字段：JSON/FORM/RAW）
      */
     private String bodyType;
 
     /**
-     * 请求体内容
-     * 支持变量替换，如: {"name": "${userName}", "age": ${userAge}}
+     * 请求体内容（支持变量替换）
      */
     private String bodyContent;
 
     /**
-     * 超时时间（毫秒）
-     * 默认: 5000ms
+     * 超时时间（毫秒，默认 5000ms）
      */
     private Integer timeout;
 
     /**
-     * 重试次数
-     * 默认: 0（不重试）
+     * 重试次数（默认 0）
      */
     private Integer retry;
 
     /**
-     * 请求头内部类
+     * 请求头
      */
     @Data
     public static class Header implements Serializable {
-        /**
-         * 请求头名称
-         * 如: Content-Type, Authorization
-         */
         private String key;
-
-        /**
-         * 请求头值
-         * 支持变量替换，如: Bearer ${token}
-         */
         private String value;
     }
 }

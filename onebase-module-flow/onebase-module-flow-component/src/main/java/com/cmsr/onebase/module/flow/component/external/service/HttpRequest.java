@@ -5,7 +5,6 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Map;
 
 /**
  * HTTP 请求封装
@@ -34,7 +33,7 @@ public class HttpRequest implements Serializable {
     private List<HttpNodeData.Header> headers;
 
     /**
-     * 请求体类型
+     * 请求体类型（预留字段）
      * JSON, FORM, RAW
      */
     private String bodyType;
@@ -53,10 +52,4 @@ public class HttpRequest implements Serializable {
      * 重试次数
      */
     private Integer retry;
-
-    /**
-     * 额外的查询参数
-     * 用于动态添加到 URL 的 query string
-     */
-    private Map<String, String> queryParams;
 }

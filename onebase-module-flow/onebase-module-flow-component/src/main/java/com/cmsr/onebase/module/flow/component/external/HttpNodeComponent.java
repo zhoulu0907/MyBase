@@ -40,18 +40,13 @@ import java.util.regex.Pattern;
 @LiteflowComponent("api_http")
 public class HttpNodeComponent extends SkippableNodeComponent {
 
+    private static final Pattern VARIABLE_PATTERN = Pattern.compile("\\$\\{([^}]+)}");
+
     @Autowired
     private HttpExecuteService httpExecuteService;
 
-    /**
-     * 变量替换正则表达式
-     * 匹配 ${variableName} 格式的变量
-     */
-    private static final Pattern VARIABLE_PATTERN = Pattern.compile("\\$\\{([^}]+)}");
-
     @Override
     public void process() throws Exception {
-        // 1. 初始化上下文
         ExecuteContext executeContext = this.getContextBean(ExecuteContext.class);
         executeContext.addLog("HTTP 请求节点开始执行");
         VariableContext variableContext = this.getContextBean(VariableContext.class);
@@ -61,19 +56,15 @@ public class HttpNodeComponent extends SkippableNodeComponent {
                 this, inLoopDepth, variableContext.getNodeVariables()
         );
 
-        // 2. 变量替换
         String resolvedUrl = replaceVariables(nodeData.getUrl(), expressionContext);
         String resolvedBodyContent = replaceVariables(nodeData.getBodyContent(), expressionContext);
 
-        // 替换 headers 中的变量
         if (nodeData.getHeaders() != null) {
             for (HttpNodeData.Header header : nodeData.getHeaders()) {
-                String resolvedValue = replaceVariables(header.getValue(), expressionContext);
-                header.setValue(resolvedValue);
+                header.setValue(replaceVariables(header.getValue(), expressionContext));
             }
         }
 
-        // 3. 构建请求
         HttpRequest request = new HttpRequest();
         request.setUrl(resolvedUrl);
         request.setMethod(nodeData.getMethod());
@@ -83,37 +74,24 @@ public class HttpNodeComponent extends SkippableNodeComponent {
         request.setTimeout(nodeData.getTimeout() != null ? nodeData.getTimeout() : 5000);
         request.setRetry(nodeData.getRetry() != null ? nodeData.getRetry() : 0);
 
-        // 4. 执行请求
         HttpServiceResponse serviceResponse = httpExecuteService.execute(request);
 
-        // 5. 构建输出（严格按照要求的结构）
         Map<String, Object> output = new HashMap<>();
-        output.put("statusCode", serviceResponse.getStatusCode());      // Integer
-        output.put("headers", serviceResponse.getHeaders());            // Map<String, List<String>>
-        output.put("body", serviceResponse.getBody());                  // Object (Map/List/String)
-        output.put("rawBody", serviceResponse.getRawBody());            // String
-        output.put("duration", serviceResponse.getDuration());          // Long (ms)
+        output.put("statusCode", serviceResponse.getStatusCode());
+        output.put("headers", serviceResponse.getHeaders());
+        output.put("body", serviceResponse.getBody());
+        output.put("rawBody", serviceResponse.getRawBody());
+        output.put("duration", serviceResponse.getDuration());
 
-        // 6. 记录日志并输出
         executeContext.addLog(String.format(
                 "HTTP 请求执行成功 - 方法: %s, URL: %s, 状态码: %d, 耗时: %dms",
-                request.getMethod(),
-                request.getUrl(),
-                serviceResponse.getStatusCode(),
-                serviceResponse.getDuration()
+                request.getMethod(), request.getUrl(),
+                serviceResponse.getStatusCode(), serviceResponse.getDuration()
         ));
 
         variableContext.putNodeVariables(this.getTag(), output);
     }
 
-    /**
-     * 变量替换
-     * 将模板中的 ${variableName} 替换为实际值
-     *
-     * @param template 模板字符串
-     * @param context 变量上下文
-     * @return 替换后的字符串
-     */
     private String replaceVariables(String template, Map<String, Object> context) {
         if (template == null || template.isEmpty()) {
             return template;
@@ -125,12 +103,9 @@ public class HttpNodeComponent extends SkippableNodeComponent {
         while (matcher.find()) {
             String variableName = matcher.group(1);
             Object value = context.get(variableName);
-
             if (value != null) {
                 matcher.appendReplacement(result, Matcher.quoteReplacement(value.toString()));
             } else {
-                // 变量不存在，保持原样或使用空字符串
-                // 这里选择保持原样，方便调试
                 matcher.appendReplacement(result, Matcher.quoteReplacement(matcher.group()));
             }
         }
