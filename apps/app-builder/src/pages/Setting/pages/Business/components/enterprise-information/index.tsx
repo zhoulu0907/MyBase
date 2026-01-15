@@ -57,6 +57,7 @@ const EnterpriseInfoPage: React.FC = () => {
   const [formData, setFormData] = useState<cropItem | CorpDetailResponse | null>(null);
   const [originalInfo, setOriginalInfo] = useState<cropItem | CorpDetailResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
+  const [submitLoading, setSubmitLoading] = useState<boolean>(false);
   const [searchValue, setSearchValue] = useState<string>('');
   const [pageInation, setPageInation] = useState({
     showTotal: true,
@@ -144,16 +145,29 @@ const EnterpriseInfoPage: React.FC = () => {
   const handleSubmitInfo = () => {
     form.validate().then(async (values) => {
       try {
-        const param = form.getFieldsValue();
+        setSubmitLoading(true);
+        const param: CorpDetailResponse = form.getFieldsValue();
         console.log('formparams', param, avatarUrl);
-        const res = await updateCorpApi({ ...param, corpLogo: avatarUrl, id: currentId });
+        const res = await updateCorpApi({
+          ...param,
+          corpCode: param?.corpCode || '',
+          corpName: param?.corpName || '',
+          industryType: param?.corpName || '',
+          address: param?.address || '',
+          status: param?.status || 0,
+          corpLogo: avatarUrl,
+          userLimit: param?.userLimit || 0,
+          id: currentId
+        });
         if (res) {
           Message.success('企业基本信息保存成功');
           setFormData(param);
           setIsEdited(false);
         }
+        setSubmitLoading(false);
       } catch (error) {
         console.log(error);
+        setSubmitLoading(false);
       }
     });
   };
@@ -419,7 +433,7 @@ const EnterpriseInfoPage: React.FC = () => {
                 {renderForm()}
                 <Space>
                   <Button onClick={handleCancel}>取消</Button>
-                  <Button type="primary" onClick={handleSubmitInfo}>
+                  <Button type="primary" onClick={handleSubmitInfo} loading={submitLoading}>
                     保存修改
                   </Button>
                 </Space>
