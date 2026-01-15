@@ -18,6 +18,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -58,7 +59,7 @@ public class CommonConnectorComponent extends SkippableNodeComponent {
             throw new RuntimeException("通用连接器节点执行失败，未找到输入参数");
         }
 
-        settingToJdbcType(conditionItems);
+        setJdbcType(conditionItems);
         List<ExpressionItem> expressionItems = flowConditionsProvider.formatConditionItemsForValue(conditionItems, expressionContext);
         Map<String, Object> inputData = expressionItems.stream()
                 .collect(Collectors.toMap(ExpressionItem::getFieldKey, ExpressionItem::getFieldValue));
@@ -67,7 +68,7 @@ public class CommonConnectorComponent extends SkippableNodeComponent {
         String connectorCode = nodeData.getConnectorCode();
         String actionType = nodeData.getActionType();
 
-        Map<String, Object> mergedConfig = new java.util.HashMap<>();
+        Map<String, Object> mergedConfig = new HashMap<>();
         mergedConfig.putAll(nodeData.getConnectorConfig());
         mergedConfig.putAll(nodeData.getActionConfig());
         mergedConfig.put("inputData", inputData);
@@ -103,7 +104,7 @@ public class CommonConnectorComponent extends SkippableNodeComponent {
     /**
      * 设置字段类型为 TEXT
      */
-    private void settingToJdbcType(List<ConditionItem> conditionItems) {
+    private void setJdbcType(List<ConditionItem> conditionItems) {
         for (ConditionItem conditionItem : conditionItems) {
             conditionItem.setFieldTypeEnum(SemanticFieldTypeEnum.TEXT);
         }
