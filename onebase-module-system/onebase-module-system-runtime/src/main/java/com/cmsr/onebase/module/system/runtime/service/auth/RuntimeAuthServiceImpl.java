@@ -10,6 +10,7 @@ import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.enums.RunModeEnum;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
@@ -18,6 +19,7 @@ import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
 import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
+import com.cmsr.onebase.module.app.api.auth.AppAuthRoleUser;
 import com.cmsr.onebase.module.app.api.security.AppAuthSecurityApi;
 import com.cmsr.onebase.module.system.api.logger.dto.LoginLogCreateReqDTO;
 import com.cmsr.onebase.module.system.api.sms.SmsCodeApi;
@@ -164,6 +166,9 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
     @Resource
     private SystemConfigService systemConfigService;
 
+    @Resource
+    private AppAuthRoleUser appAuthRoleUser;
+
     @Override
     public AdminUserDO authenticate(String username, String password) {
         final LoginLogTypeEnum logTypeEnum = LoginLogTypeEnum.LOGIN_USERNAME;
@@ -292,6 +297,9 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
             // 使用手机密码，进行登录
             AdminUserDO user = mobileAuthenticate(reqVO.getMobile(), reqVO.getPassword());
 
+            //验证登录账户是否有权限登录该应用
+            checkPermission(reqVO.getAppId(), user.getId());
+
             // 验证企业下，应用是否禁用，是否过期
             corpAppRelationService.validCorpAppRelationStatusOrExpireTime(user.getCorpId(), reqVO.getAppId());
 
@@ -304,6 +312,15 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         authLogVO.setLoginPlatform(reqVO.getLoginPlatform());
         return authLogVO;
 
+    }
+
+    private void checkPermission(Long appId, Long userId) {
+        List<Long> roleIdsByAppId = ApplicationManager.withoutApplicationCondition(() ->
+                appAuthRoleUser.findRoleIdsByAppId(appId));
+        List<Long> userIdsByRoleIds = appAuthRoleUser.findUserIdsByRoleIds(roleIdsByAppId);
+        if (userIdsByRoleIds.isEmpty() || !userIdsByRoleIds.contains(userId)){
+            throw exception(AUTH_LOGIN_NO_PERMISSION);
+        }
     }
 
 
