@@ -143,7 +143,7 @@ const EnterpriseInfoPage: React.FC = () => {
   };
 
   const handleSubmitInfo = () => {
-    form.validate().then(async (values) => {
+    form.validate().then(async () => {
       try {
         setSubmitLoading(true);
         const param: CorpDetailResponse = form.getFieldsValue();
