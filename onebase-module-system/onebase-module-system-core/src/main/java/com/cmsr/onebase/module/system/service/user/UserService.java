@@ -165,7 +165,12 @@ public interface UserService {
      */
     List<AdminUserDO> getUserListByDeptIds(Collection<Long> deptIds, Integer userType);
 
-    List<AdminUserDO> getUserListNoDept(Integer userType);
+    /**
+     * 获得没有部门的用户List
+     *
+     * @return 用户数组
+     */
+    List<AdminUserDO> getNoneDeptUserList(Integer userType);
 
     /**
      * 获得指定岗位的用户数组
