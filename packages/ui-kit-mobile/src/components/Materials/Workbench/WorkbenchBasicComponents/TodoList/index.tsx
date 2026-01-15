@@ -5,6 +5,7 @@ import dayjs from 'dayjs';
 import { TokenManager } from '@onebase/common';
 import { getTodoPageList, getDonePageList, getMyCreatePageList, getMyCCPageList } from '@onebase/app/src/services/app_runtime';
 import { WORKBENCH_STATUS_OPTIONS, WORKBENCH_STATUS_VALUES, WORKBENCH_THEME_OPTIONS, DATA_CONFIG_NAME_MAP, workbenchSchema } from '@onebase/ui-kit';
+import {type ITodoItem, pendingListDefault } from '@onebase/ui-kit/src/components/Materials/Workbench/WorkbenchBasicComponents/TodoList/schema';
 import styles from './index.module.css';
 
 type XTodoListConfig = typeof workbenchSchema.XTodoList.config;
@@ -25,72 +26,16 @@ const statusMap: Record<string, string> = {
   in_approval: '审批中'
 }
 
-// 待办事项数据结构
-export interface ITodoItem {
-  id: string;
-  processTitle: string;
-  initiator: {
-    userId: string;
-    name: string;
-    avatar: string;
-  };
-  flowStatus: string;
-  formSummary: string;
-  arrivalTime: number;
-  submitTime: number;
-  taskId: string;
-  instanceId: string;
-  businessUuid: string;
-  nodeCode: string;
-}
-
 interface TabData {
   key: string;
   title: string;
 }
 
-const pendingListDefault: ITodoItem[] = [
-  {
-    id: '1',
-    processTitle: '张三发起的流程表单测试_表单',
-    initiator: {
-      userId: '155019577667616772',
-      name: '张三',
-      avatar: ''
-    },
-    flowStatus: 'in_approval',
-    formSummary: '流程表单测试_表单',
-    arrivalTime: 1764924217968,
-    submitTime: 1764924218175,
-    taskId: '1446542543792771072',
-    instanceId: '1446542538365341696',
-    businessUuid: '019aed4e-fd96-7901-92ba-7c1de80cd46f',
-    nodeCode: '3'
-  },
-  {
-    id: '2',
-    processTitle: '李四发起的流程表单测试_表单',
-    initiator: {
-      userId: '155019577667616772',
-      name: '李四',
-      avatar: ''
-    },
-    flowStatus: 'in_approval',
-    formSummary: '流程表单测试_表单',
-    arrivalTime: 1764924152154,
-    submitTime: 1764924153065,
-    taskId: '1446542266519916544',
-    instanceId: '1446542260803080192',
-    businessUuid: '019aed4e-fd96-7901-92ba-7c1de80cd46f',
-    nodeCode: '3'
-  },
-];
-
 const XTodoList = memo((props: XTodoListConfig & { runtime?: boolean }) => {
   const { label, dataConfig, theme, status, runtime, dataCount, userAvatar, userName } = props;
   const hiddenStatusValue = WORKBENCH_STATUS_VALUES[WORKBENCH_STATUS_OPTIONS.HIDDEN];
 
-  const [pendingList, setPendingList] = useState<ITodoItem[]>(pendingListDefault);
+const [pendingList, setPendingList] = useState<ITodoItem[]>(runtime ? [] : pendingListDefault);
   const [createdList, setCreatedList] = useState<ITodoItem[]>([]);
   const [handledList, setHandledList] = useState<ITodoItem[]>([]);
   const [ccList, setCcList] = useState<ITodoItem[]>([]);
