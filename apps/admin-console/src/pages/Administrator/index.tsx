@@ -356,7 +356,7 @@ const Administrator: React.FC = () => {
             current: currentPage,
             pageSize: 10,
             showTotal: true,
-            total: total || 10,
+            total: total ?? 10,
             onChange: handlePageChange
           }}
           rowKey="id"

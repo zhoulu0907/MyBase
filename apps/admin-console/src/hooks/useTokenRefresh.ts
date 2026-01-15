@@ -6,13 +6,13 @@ import { useEffect, useRef } from 'react';
  * 在 token 即将过期时自动刷新
  */
 export const useTokenRefresh = () => {
-  const refreshTimerRef = useRef<number | null>(null);
+  const refreshTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const checkAndRefreshToken = async () => {
       const tokenInfo = TokenManager.getTokenInfo();
 
-      if (!tokenInfo || !tokenInfo.expiresTime) {
+      if (!tokenInfo?.expiresTime) {
         return;
       }
       // 计算距离过期的时间（毫秒）
@@ -31,12 +31,12 @@ export const useTokenRefresh = () => {
             // 清除无效token
             TokenManager.clearToken();
             // 可以在这里触发重新登录逻辑
-            window.location.href = '/login';
+            location.href = '/login';
           }
         } catch (error) {
           console.error('Token刷新出错:', error);
           TokenManager.clearToken();
-          window.location.href = '/login';
+          location.href = '/login';
         }
       }
     };
@@ -45,7 +45,7 @@ export const useTokenRefresh = () => {
     checkAndRefreshToken();
 
     // 设置定时器，每分钟检查一次
-    refreshTimerRef.current = window.setInterval(checkAndRefreshToken, 60 * 1000);
+    refreshTimerRef.current = setInterval(checkAndRefreshToken, 60 * 1000);
 
     return () => {
       if (refreshTimerRef.current) {
