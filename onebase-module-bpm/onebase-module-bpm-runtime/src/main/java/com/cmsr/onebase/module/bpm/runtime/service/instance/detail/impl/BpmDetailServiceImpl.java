@@ -675,6 +675,10 @@ public class BpmDetailServiceImpl implements BpmDetailService {
 
         SemanticEntityValueDTO respVO = semanticDynamicDataApi.getDataById(reqVO);
 
+        if (respVO == null) {
+            throw exception(ErrorCodeConstants.FLOW_ENTITY_DATA_NOT_EXISTS);
+        }
+
         BpmTaskDetailRespVO.FormData formData = new BpmTaskDetailRespVO.FormData();
 
         // 填充实体数据

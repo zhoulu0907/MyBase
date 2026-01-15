@@ -71,4 +71,11 @@ public class BpmFlowTaskCenterController {
         PageResult<BpmCcTaskPageResVO> pageResult = flowTaskCenterService.getCcPage(reqVO);
         return success(pageResult);
     }
+
+    @GetMapping("/overview")
+    @Operation(summary = "任务中心总览")
+    public CommonResult<BpmOverviewRespVO> getOverview() {
+        BpmOverviewRespVO overviewRespVO = flowTaskCenterService.getOverview();
+        return success(overviewRespVO);
+    }
 }

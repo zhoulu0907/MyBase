@@ -1,10 +1,8 @@
 package com.cmsr.onebase.plugin.build.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
-import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.infra.api.file.FileApi;
-import com.cmsr.onebase.plugin.build.redis.PluginCommandPublisher;
 import com.cmsr.onebase.plugin.build.service.PluginVersionService;
 import com.cmsr.onebase.plugin.build.validator.PluginMetaValidator;
 import com.cmsr.onebase.plugin.build.validator.PluginZipValidator;
@@ -19,7 +17,6 @@ import com.cmsr.onebase.plugin.core.dal.database.PluginPackageInfoRepository;
 import com.cmsr.onebase.plugin.core.dal.dataobject.PluginConfigInfoDO;
 import com.cmsr.onebase.plugin.core.dal.dataobject.PluginInfoDO;
 import com.cmsr.onebase.plugin.core.dal.dataobject.PluginPackageInfoDO;
-import com.cmsr.onebase.plugin.core.message.PluginCommandMessage;
 import com.cmsr.onebase.plugin.core.model.PluginMetaInfo;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -57,9 +54,6 @@ public class PluginVersionServiceImpl implements PluginVersionService {
 
     @Resource
     private PluginMetaValidator pluginMetaValidator;
-
-    @Resource
-    private PluginCommandPublisher pluginCommandPublisher;
 
     @Resource
     private FileApi fileApi;
@@ -124,9 +118,8 @@ public class PluginVersionServiceImpl implements PluginVersionService {
         pluginInfoRepository.insert(pluginInfoDO);
 
         // 8. 检测并保存包信息（自动检测前端/后端包）
-        List<PackageInfo> packages = null;
         if (originalFilename != null && originalFilename.toLowerCase().endsWith(".zip")) {
-            packages = pluginZipValidator.detectPackages(content);
+            List<PackageInfo> packages = pluginZipValidator.detectPackages(content);
             savePackageInfo(packages, uploadReqVO.getPluginId(), uploadReqVO.getPluginVersion());
         }
 
@@ -137,24 +130,6 @@ public class PluginVersionServiceImpl implements PluginVersionService {
             // 复制上一版本的配置
             copyConfigFromPreviousVersion(latestVersion.getPluginId(), latestVersion.getPluginVersion(),
                     uploadReqVO.getPluginVersion());
-        }
-
-        // 10. 发布Redis消息通知Runtime下载并解压插件
-        if (packages != null && !packages.isEmpty()) {
-            Long tenantId = TenantContextHolder.getTenantId();
-            List<PluginCommandMessage.PackageInfo> packageInfoList = packages.stream()
-                    .map(p -> PluginCommandMessage.PackageInfo.builder()
-                            .packageName(p.getPackageName())
-                            .packageType(p.getPackageType())
-                            .build())
-                    .collect(Collectors.toList());
-            pluginCommandPublisher.publishUploadCommand(
-                    pluginInfoDO.getPluginId(),
-                    pluginInfoDO.getPluginVersion(),
-                    tenantId,
-                    pluginInfoDO.getPluginPackage(),
-                    packageInfoList
-            );
         }
 
         log.info("新版本上传成功: pluginId={}, version={}", uploadReqVO.getPluginId(), uploadReqVO.getPluginVersion());
@@ -194,7 +169,6 @@ public class PluginVersionServiceImpl implements PluginVersionService {
         }
 
         // 4. 如果有新文件上传，更新安装包
-        List<PackageInfo> packages = null;
         if (updateReqVO.getFile() != null && !updateReqVO.getFile().isEmpty()) {
             // 校验文件
             byte[] content = pluginZipValidator.validate(updateReqVO.getFile());
@@ -216,31 +190,13 @@ public class PluginVersionServiceImpl implements PluginVersionService {
                 // 更新包信息（自动检测前端/后端包）
                 pluginPackageInfoRepository.deleteByPluginIdAndVersion(
                         pluginInfo.getPluginId(), pluginInfo.getPluginVersion());
-                packages = pluginZipValidator.detectPackages(content);
+                List<PackageInfo> packages = pluginZipValidator.detectPackages(content);
                 savePackageInfo(packages, pluginInfo.getPluginId(), pluginInfo.getPluginVersion());
             }
         }
 
         // 5. 保存更新
         pluginInfoRepository.update(pluginInfo);
-
-        // 6. 发布Redis消息通知Runtime下载并解压插件
-        if (packages != null && !packages.isEmpty()) {
-            Long tenantId = TenantContextHolder.getTenantId();
-            List<PluginCommandMessage.PackageInfo> packageInfoList = packages.stream()
-                    .map(p -> PluginCommandMessage.PackageInfo.builder()
-                            .packageName(p.getPackageName())
-                            .packageType(p.getPackageType())
-                            .build())
-                    .collect(Collectors.toList());
-            pluginCommandPublisher.publishUploadCommand(
-                    pluginInfo.getPluginId(),
-                    pluginInfo.getPluginVersion(),
-                    tenantId,
-                    pluginInfo.getPluginPackage(),
-                    packageInfoList
-            );
-        }
 
         log.info("版本更新成功: id={}, version={}", updateReqVO.getId(), pluginInfo.getPluginVersion());
     }

@@ -57,6 +57,7 @@
         <dependency>
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-all</artifactId>
+            <scope>provided</scope>
         </dependency>
 
         <!-- Lombok -->
@@ -104,7 +105,7 @@
                         </configuration>
                     </execution>
 
-                    <!-- 3. 扫描扩展点并生成索引 -->
+                    <!-- 3. 扫描扩展点 -->
                     <execution>
                         <id>scan-extensions</id>
                         <goals>
@@ -112,7 +113,16 @@
                         </goals>
                     </execution>
 
-                    <!-- 4. 打包插件为 ZIP -->
+                    <!-- 4. 生成开发模式依赖类路径文件 -->
+                    <execution>
+                        <id>generate-dev-classpath</id>
+                        <goals>
+                            <goal>generate-dev-classpath</goal>
+                        </goals>
+                        <phase>process-classes</phase>
+                    </execution>
+
+                    <!-- 5. 打包插件 ZIP -->
                     <execution>
                         <id>package-plugin</id>
                         <goals>

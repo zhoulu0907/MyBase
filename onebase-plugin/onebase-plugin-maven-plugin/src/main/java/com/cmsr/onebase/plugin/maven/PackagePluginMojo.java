@@ -39,26 +39,6 @@ import java.util.zip.ZipOutputStream;
 @Mojo(name = "package-plugin", defaultPhase = LifecyclePhase.PACKAGE, requiresDependencyResolution = ResolutionScope.RUNTIME, threadSafe = true)
 public class PackagePluginMojo extends AbstractMojo {
 
-    /**
-     * 宿主核心模块，不应打入插件 ZIP 包
-     * <p>
-     * 采用保守策略，仅排除 OneBase 核心模块：
-     * - onebase-plugin-sdk: 插件 SDK，由宿主提供
-     * - onebase-common: 公共工具库，由宿主提供
-     * - onebase-spring-boot-starter-plugin: 插件运行时，由宿主提供
-     * - onebase-plugin-core: 插件核心，由宿主提供
-     * - onebase-plugin-host-simulator: 模拟器，仅用于本地调试
-     * - spring-boot-starter-web: Spring Boot Web starter，由宿主提供，该依赖提供RestController注解等
-     * </p>
-     */
-    private static final Set<String> HOST_PROVIDED_ARTIFACTS = Set.of(
-            "onebase-plugin-sdk",
-            "onebase-common",
-            "onebase-spring-boot-starter-plugin",
-            "onebase-plugin-core",
-            "onebase-plugin-host-simulator",
-            "spring-boot-starter-web");
-
     private static final int BUFFER_SIZE = 8192;
 
     /**
@@ -175,7 +155,7 @@ public class PackagePluginMojo extends AbstractMojo {
                 }
 
                 // 排除宿主核心模块
-                if (HOST_PROVIDED_ARTIFACTS.contains(artifact.getArtifactId())) {
+                if (PluginPackagingConstants.HOST_PROVIDED_ARTIFACTS.contains(artifact.getArtifactId())) {
                     getLog().debug("排除宿主核心模块: " + artifact.getArtifactId());
                     continue;
                 }
