@@ -339,7 +339,13 @@ const EnterpriseInfoPage: React.FC = () => {
 
   const renderForm = () => {
     return (
-      <Form layout="horizontal" labelCol={{ span: 2 }} form={form}>
+      <Form
+        layout="horizontal"
+        labelAlign="left"
+        labelCol={{ span: 2, style: { width: '90px', flex: '0 0 auto' } }}
+        wrapperCol={{ style: { flex: '1' } }}
+        form={form}
+      >
         <Form.Item label="企业Logo" field="corpLogo" triggerPropName="fileList">
           <div style={{ marginBottom: '8px' }}>
             <Image alt="头像" src={getFileUrlById(avatarUrl)} onError={handleImageError} width={160} height={80} />
