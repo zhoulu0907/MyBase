@@ -149,6 +149,8 @@ export interface AuthDataGroupVO {
    * 业务实体字段对应的权限范围值
    */
   scopeValue?: string;
+
+  filterCondition?: any[]
 }
 
 export enum IsOperable {
