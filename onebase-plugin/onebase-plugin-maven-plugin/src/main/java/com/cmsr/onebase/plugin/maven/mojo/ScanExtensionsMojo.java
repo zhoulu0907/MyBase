@@ -1,4 +1,4 @@
-package com.cmsr.onebase.plugin.maven;
+package com.cmsr.onebase.plugin.maven.mojo;
 
 import com.cmsr.onebase.plugin.common.ExtensionPointConstants;
 import com.cmsr.onebase.plugin.common.ExtensionPointScannerASM;
@@ -32,12 +32,7 @@ import java.util.Set;
  * @author chengyuansen
  * @date 2025-12-18
  */
-@Mojo(
-        name = "scan-extensions",
-        defaultPhase = LifecyclePhase.PROCESS_CLASSES,
-        requiresDependencyResolution = ResolutionScope.COMPILE,
-        threadSafe = true
-)
+@Mojo(name = "scan-extensions", defaultPhase = LifecyclePhase.PROCESS_CLASSES, requiresDependencyResolution = ResolutionScope.COMPILE, threadSafe = true)
 public class ScanExtensionsMojo extends AbstractMojo {
 
     /**
@@ -73,12 +68,12 @@ public class ScanExtensionsMojo extends AbstractMojo {
      * 找到的扩展点实现类
      */
     private List<String> extensionClasses = new ArrayList<>();
-    
+
     /**
      * HttpHandler路由校验错误列表
      */
     private final List<String> routeValidationErrors = new ArrayList<>();
-    
+
     /**
      * 扩展点扫描器
      */
@@ -98,12 +93,12 @@ public class ScanExtensionsMojo extends AbstractMojo {
 
         // 使用ExtensionPointScannerASM扫描所有扩展点
         extensionClasses = scanner.scanExtensions(classesDirectory);
-        
+
         // 输出扫描结果
         for (String className : extensionClasses) {
             getLog().info("  发现扩展点: " + className);
         }
-        
+
         // 校验HttpHandler路由（需要额外处理）
         validateHttpHandlerRoutes();
 
@@ -113,7 +108,7 @@ public class ScanExtensionsMojo extends AbstractMojo {
         }
 
         getLog().info("共发现 " + extensionClasses.size() + " 个扩展点实现类");
-        
+
         // 检查路由校验错误
         if (!routeValidationErrors.isEmpty()) {
             getLog().error("========== HttpHandler 路由校验失败 ==========");
@@ -122,8 +117,7 @@ public class ScanExtensionsMojo extends AbstractMojo {
             }
             getLog().error("==============================================");
             throw new MojoFailureException(
-                "HttpHandler 路由校验失败！所有实现 HttpHandler 的 Controller 路由必须以 /plugin/" + pluginId + "/ 开头"
-            );
+                    "HttpHandler 路由校验失败！所有实现 HttpHandler 的 Controller 路由必须以 /plugin/" + pluginId + "/ 开头");
         }
     }
 
@@ -157,7 +151,7 @@ public class ScanExtensionsMojo extends AbstractMojo {
     private void scanClass(File classFile) {
         // 保留方法签名以兼容，实际逻辑已移至ExtensionPointScannerASM
     }
-    
+
     /**
      * 校验 HttpHandler 的路由前缀
      */
@@ -168,16 +162,16 @@ public class ScanExtensionsMojo extends AbstractMojo {
                 // 重新读取class文件以获取路由信息
                 String classFilePath = className.replace('.', '/') + ".class";
                 File classFile = new File(classesDirectory, classFilePath);
-                
+
                 if (!classFile.exists()) {
                     continue;
                 }
-                
+
                 try (FileInputStream fis = new FileInputStream(classFile)) {
                     ClassReader reader = new ClassReader(fis);
                     HttpHandlerRouteValidator validator = new HttpHandlerRouteValidator(className);
                     reader.accept(validator, ClassReader.SKIP_CODE | ClassReader.SKIP_DEBUG);
-                    
+
                     if (validator.isHttpHandler()) {
                         validateRoutes(validator, className);
                     }
@@ -187,30 +181,28 @@ public class ScanExtensionsMojo extends AbstractMojo {
             }
         }
     }
-    
+
     /**
      * 校验路由前缀
      */
     private void validateRoutes(HttpHandlerRouteValidator validator, String className) {
         List<String> mappingPaths = validator.getRequestMappingPaths();
         String requiredPrefix = "/plugin/" + pluginId + "/";
-        
+
         if (mappingPaths.isEmpty()) {
             String error = String.format(
-                "  [错误] %s 实现了 HttpHandler，但未找到 @RequestMapping 注解！", 
-                className
-            );
+                    "  [错误] %s 实现了 HttpHandler，但未找到 @RequestMapping 注解！",
+                    className);
             getLog().warn(error);
             routeValidationErrors.add(error);
             return;
         }
-        
+
         for (String path : mappingPaths) {
             if (!path.startsWith(requiredPrefix)) {
                 String error = String.format(
-                    "  [错误] %s 的路由 '%s' 不符合规范！必须以 '%s' 开头",
-                    className, path, requiredPrefix
-                );
+                        "  [错误] %s 的路由 '%s' 不符合规范！必须以 '%s' 开头",
+                        className, path, requiredPrefix);
                 getLog().error(error);
                 routeValidationErrors.add(error);
             } else {
@@ -263,7 +255,7 @@ public class ScanExtensionsMojo extends AbstractMojo {
 
         @Override
         public void visit(int version, int access, String name, String signature,
-                          String superName, String[] interfaces) {
+                String superName, String[] interfaces) {
             if (interfaces != null) {
                 for (String iface : interfaces) {
                     if ("com/cmsr/onebase/plugin/api/HttpHandler".equals(iface)) {
@@ -273,7 +265,7 @@ public class ScanExtensionsMojo extends AbstractMojo {
                 }
             }
         }
-        
+
         @Override
         public AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
             // 扫描类级别的 @RequestMapping 注解
@@ -293,7 +285,7 @@ public class ScanExtensionsMojo extends AbstractMojo {
                         }
                         return null;
                     }
-                    
+
                     @Override
                     public void visit(String name, Object value) {
                         if (("value".equals(name) || "path".equals(name)) && value instanceof String) {
@@ -307,18 +299,18 @@ public class ScanExtensionsMojo extends AbstractMojo {
 
         @Override
         public MethodVisitor visitMethod(int access, String name, String descriptor,
-                                          String signature, String[] exceptions) {
+                String signature, String[] exceptions) {
             return new MethodVisitor(Opcodes.ASM9) {
                 @Override
                 public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
                     // 扫描方法级别的 @GetMapping、@PostMapping等
                     if ("Lorg/springframework/web/bind/annotation/GetMapping;".equals(desc)
-                        || "Lorg/springframework/web/bind/annotation/PostMapping;".equals(desc)
-                        || "Lorg/springframework/web/bind/annotation/PutMapping;".equals(desc)
-                        || "Lorg/springframework/web/bind/annotation/DeleteMapping;".equals(desc)
-                        || "Lorg/springframework/web/bind/annotation/PatchMapping;".equals(desc)
-                        || "Lorg/springframework/web/bind/annotation/RequestMapping;".equals(desc)) {
-                        
+                            || "Lorg/springframework/web/bind/annotation/PostMapping;".equals(desc)
+                            || "Lorg/springframework/web/bind/annotation/PutMapping;".equals(desc)
+                            || "Lorg/springframework/web/bind/annotation/DeleteMapping;".equals(desc)
+                            || "Lorg/springframework/web/bind/annotation/PatchMapping;".equals(desc)
+                            || "Lorg/springframework/web/bind/annotation/RequestMapping;".equals(desc)) {
+
                         return new AnnotationVisitor(Opcodes.ASM9) {
                             @Override
                             public AnnotationVisitor visitArray(String name) {
@@ -334,7 +326,7 @@ public class ScanExtensionsMojo extends AbstractMojo {
                                 }
                                 return null;
                             }
-                            
+
                             @Override
                             public void visit(String name, Object value) {
                                 if (("value".equals(name) || "path".equals(name)) && value instanceof String) {
@@ -351,7 +343,7 @@ public class ScanExtensionsMojo extends AbstractMojo {
         public boolean isHttpHandler() {
             return isHttpHandler;
         }
-        
+
         /**
          * 获取组合后的完整路径列表
          * 将类级别前缀与方法级别路径组合
@@ -362,7 +354,7 @@ public class ScanExtensionsMojo extends AbstractMojo {
             }
             return combinedPaths;
         }
-        
+
         /**
          * 组合类级别前缀和方法级别路径
          */
@@ -372,14 +364,14 @@ public class ScanExtensionsMojo extends AbstractMojo {
                 combinedPaths.add(classLevelPrefix);
                 return;
             }
-            
+
             // 如果有方法级别路径
             for (String methodPath : methodLevelPaths) {
                 String fullPath = combinePath(classLevelPrefix, methodPath);
                 combinedPaths.add(fullPath);
             }
         }
-        
+
         /**
          * 组合两个路径，处理斜杠
          */
@@ -390,7 +382,7 @@ public class ScanExtensionsMojo extends AbstractMojo {
             if (suffix == null || suffix.isEmpty()) {
                 return prefix;
             }
-            
+
             // 确保前缀以 / 开头
             if (!prefix.startsWith("/")) {
                 prefix = "/" + prefix;
@@ -399,12 +391,12 @@ public class ScanExtensionsMojo extends AbstractMojo {
             if (prefix.endsWith("/")) {
                 prefix = prefix.substring(0, prefix.length() - 1);
             }
-            
+
             // 确保后缀以 / 开头
             if (!suffix.startsWith("/")) {
                 suffix = "/" + suffix;
             }
-            
+
             return prefix + suffix;
         }
     }

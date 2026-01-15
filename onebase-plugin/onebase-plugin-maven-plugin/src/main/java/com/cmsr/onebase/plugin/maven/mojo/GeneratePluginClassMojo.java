@@ -1,4 +1,6 @@
-package com.cmsr.onebase.plugin.maven;
+package com.cmsr.onebase.plugin.maven.mojo;
+
+import com.cmsr.onebase.plugin.maven.constant.PluginPackagingConstants;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -24,12 +26,7 @@ import java.io.PrintWriter;
  * @author chengyuansen
  * @date 2025-12-18
  */
-@Mojo(
-        name = "generate-plugin-class",
-        defaultPhase = LifecyclePhase.GENERATE_SOURCES,
-        requiresDependencyResolution = ResolutionScope.COMPILE,
-        threadSafe = true
-)
+@Mojo(name = "generate-plugin-class", defaultPhase = LifecyclePhase.GENERATE_SOURCES, requiresDependencyResolution = ResolutionScope.COMPILE, threadSafe = true)
 public class GeneratePluginClassMojo extends AbstractMojo {
 
     /**
