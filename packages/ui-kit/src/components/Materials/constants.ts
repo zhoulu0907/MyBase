@@ -312,8 +312,8 @@ export const LAYOUT_VALUES = {
 
 // 图片填充方式
 export const FILL_OPTIONS = {
-  CONTAIN: '原图局中',
-  COVER: '局中填满',
+  CONTAIN: '原图居中',
+  COVER: '居中填满',
   FILL: '拉伸填满'
 } as const;
 
