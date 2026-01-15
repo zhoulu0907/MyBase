@@ -1,4 +1,5 @@
 import { displayCorpLogo } from '@/utils';
+import { phoneValidator } from '@/utils/validator';
 import {
   Button,
   Card,
@@ -12,7 +13,8 @@ import {
   Space,
   Tabs,
   Typography,
-  Upload
+  Upload,
+  Form
 } from '@arco-design/web-react';
 import {
   createCorpAppApi,
@@ -23,28 +25,34 @@ import {
   updateCorpApi,
   updateCorpAppApi,
   uploadFile,
+  StatusEnum,
   type CorpAppParams,
   type corpListParams,
   type CorpDetailResponse
 } from '@onebase/platform-center';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useOutletContext, useParams } from 'react-router-dom';
 import { allowedFormats } from '../../constants';
 import type { AppItem, cropItem, industryTypeOption, OutletContextType, updatedParams } from '../../types/appItem';
 import { AuthorizedApp } from '../createApp/authorizedApp';
-import EditableFormItem from '../formItem';
 import styles from './index.module.less';
+
+enum StatusLabelEnum {
+  ENABLE = '启用',
+  DISABLE = '禁用',
+  EXPIRED = '过期'
+}
 
 const EnterpriseInfoPage: React.FC = () => {
   const { activeTab } = useParams();
   const { currentId, industryOptions, editable } = useOutletContext<OutletContextType>();
   const [addAppModalVisible, setAddAppModalVisible] = useState<boolean>(false);
-  const uploadRef = useRef(null);
+  const [form] = Form.useForm();
   const [isImageFailed, setIsImageFailed] = useState<boolean>(false);
   const [avatarUrl, setAvatarUrl] = useState<string>('');
   const [visible, setVisible] = useState<boolean>(false);
   const [currentTab, setCurrentTab] = useState(activeTab === '授权应用' ? 'authorized' : 'basic');
-  const [isEdited, setIsEdited] = useState<boolean>(editable || false);
+  const [isEdited, setIsEdited] = useState<boolean>(false);
   const [tableData, setTableData] = useState<AppItem[]>([]);
   const [formData, setFormData] = useState<cropItem | CorpDetailResponse | null>(null);
   const [originalInfo, setOriginalInfo] = useState<cropItem | CorpDetailResponse | null>(null);
@@ -65,6 +73,12 @@ const EnterpriseInfoPage: React.FC = () => {
       const res = await getCorpDetailByIdApi(currentId);
       setFormData(res || null);
       setOriginalInfo(res || null);
+      setIsEdited(editable || false);
+      if (editable) {
+        form.setFieldsValue({
+          ...res
+        });
+      }
       if (res.corpLogo) {
         setIsImageFailed(false);
         setAvatarUrl(res.corpLogo);
@@ -115,18 +129,11 @@ const EnterpriseInfoPage: React.FC = () => {
     fetchCorpAuthorizedList(current, pageSize);
   };
 
-  const handleChange = (field: string, value: number | string | boolean) => {
-    let newValue = value;
-    if (field === 'status') {
-      newValue = newValue === true ? 1 : 0;
-    } else if (field === 'corpLogo') {
-      newValue = (value as any)?.[0]?.response || '';
-    }
-    setFormData((prev: any) => ({ ...prev, [field]: newValue }));
-  };
-
   const toggleEdit = () => {
     setIsEdited(!isEdited);
+    form.setFieldsValue({
+      ...formData
+    });
   };
 
   const handleCancel = () => {
@@ -134,16 +141,21 @@ const EnterpriseInfoPage: React.FC = () => {
     setIsEdited(false);
   };
 
-  const handleSubmitInfo = async () => {
-    try {
-      const res = await updateCorpApi({ ...formData, id: currentId });
-      if (res) {
-        Message.success('企业基本信息保存成功');
-        setIsEdited(false);
+  const handleSubmitInfo = () => {
+    form.validate().then(async (values) => {
+      try {
+        const param = form.getFieldsValue();
+        console.log('formparams', param, avatarUrl);
+        const res = await updateCorpApi({ ...param, corpLogo: avatarUrl, id: currentId });
+        if (res) {
+          Message.success('企业基本信息保存成功');
+          setFormData(param);
+          setIsEdited(false);
+        }
+      } catch (error) {
+        console.log(error);
       }
-    } catch (error) {
-      console.log(error);
-    }
+    });
   };
 
   const handleUpdateTime = async (params: updatedParams) => {
@@ -215,8 +227,8 @@ const EnterpriseInfoPage: React.FC = () => {
   // 头像上传
   const handleUpload = async (file: File, onProgress?: (percent: number, event?: ProgressEvent) => void) => {
     setIsImageFailed(false);
-    const formData = new FormData();
-    formData.append('file', file);
+    const fileFormData = new FormData();
+    fileFormData.append('file', file);
 
     const progressAdapter = onProgress
       ? (progressEvent: ProgressEvent) => {
@@ -227,7 +239,7 @@ const EnterpriseInfoPage: React.FC = () => {
         }
       : undefined;
 
-    const res = await uploadFile(formData, progressAdapter);
+    const res = await uploadFile(fileFormData, progressAdapter);
     return res;
   };
 
@@ -265,147 +277,129 @@ const EnterpriseInfoPage: React.FC = () => {
     setIsImageFailed(true);
   };
 
+  const getStatus = (status?: StatusEnum): string => {
+    // 启用1 ENABLE，禁用0 DISABLE, 过期2 EXPIRED,
+    if (status === StatusEnum.ENABLE) {
+      return StatusLabelEnum.ENABLE;
+    } else if (status === StatusEnum.DISABLE) {
+      return StatusLabelEnum.DISABLE;
+    } else if (status === StatusEnum.EXPIRED) {
+      return StatusLabelEnum.EXPIRED;
+    }
+    return '--';
+  };
+
   const data = [
     {
       label: '企业Logo',
-      value: (
-        <EditableFormItem
-          value={
-            isImageFailed ? (
-              <Button type="dashed" style={{ width: '160px', height: '80px', backgroundColor: '#F2F3F5' }}>
-                {displayCorpLogo(formData?.corpName)}
-              </Button>
-            ) : (
-              <Image alt="头像" src={getFileUrlById(avatarUrl)} onError={handleImageError} width={160} height={80} />
-            )
-          }
-          type="logo"
-          onChange={handleChange.bind(null, 'corpLogo')}
-          isEdit={isEdited}
-          component={Upload}
-          componentProps={{
-            ref: uploadRef,
-            accept: 'image/*',
-            listType: 'picture-card',
-            limit: 1,
-            showUploadList: false,
-            beforeUpload: beforeUpload,
-            customRequest: customRequest,
-            headers: { authorization: 'authorization-text' }
-          }}
-          logoContent={
-            <Space style={{ display: 'flex', alignItems: 'flex-end' }}>
-              <Button type="primary">重新上传</Button>
-              <Typography.Text type="secondary">建议比例2:1</Typography.Text>
-            </Space>
-          }
-        />
+      value: isImageFailed ? (
+        <Button type="dashed" style={{ width: '160px', height: '80px', backgroundColor: '#F2F3F5' }}>
+          {displayCorpLogo(formData?.corpName)}
+        </Button>
+      ) : (
+        <Image alt="头像" src={getFileUrlById(avatarUrl)} onError={handleImageError} width={160} height={80} />
       )
     },
     {
       label: '企业名称',
-      value: (
-        <EditableFormItem
-          value={formData?.corpName}
-          onChange={handleChange.bind(null, 'corpName')}
-          isEdit={isEdited}
-          component={Input}
-          componentProps={{ placeholder: '请输入企业名称' }}
-        />
-      )
+      value: formData?.corpName || '--'
     },
     {
       label: '企业管理员',
-      value: (
-        <EditableFormItem
-          value={formData?.adminName}
-          onChange={() => null}
-          isEdit={isEdited}
-          component={Input}
-          componentProps={{ disabled: true }}
-        />
-      )
+      value: formData?.adminName || '--'
     },
     {
       label: '手机号',
-      value: (
-        <EditableFormItem
-          value={formData?.adminMobile}
-          onChange={handleChange.bind(null, 'adminMobile')}
-          isEdit={isEdited}
-          component={Input}
-          componentProps={{ placeholder: '请输入手机号', disabled: true }}
-        />
-      )
+      value: formData?.adminMobile || '--'
     },
     {
       label: '企业编码',
-      value: (
-        <EditableFormItem
-          value={formData?.corpCode}
-          onChange={handleChange.bind(null, 'corpCode')}
-          isEdit={isEdited}
-          component={Input}
-          componentProps={{ placeholder: '请输入企业编码' }}
-        />
-      )
+      value: formData?.corpCode || '--'
     },
     {
       label: '行业类型',
-      value: (
-        <EditableFormItem
-          value={formData?.industryType}
-          onChange={handleChange.bind(null, 'industryType')}
-          isEdit={isEdited}
-          component={Select}
-          type="industryType"
-          componentProps={{
-            placeholder: '请选择行业',
-            options: industryOptions.map(
-              (option: industryTypeOption) => ({ label: option.label, value: option.id }) as industryTypeOption
-            )
-          }}
-        />
-      )
+      value: formData?.industryType
+        ? industryOptions.find((option: industryTypeOption) => formData.industryType === option.id)?.label
+        : '--'
     },
     {
       label: '企业地址',
-      value: (
-        <EditableFormItem
-          value={formData?.address}
-          onChange={handleChange.bind(null, 'address')}
-          isEdit={isEdited}
-          component={Input.TextArea}
-          componentProps={{ placeholder: '请输入企业地址' }}
-        />
-      )
+      value: formData?.address || '--'
     },
     {
       label: '用户上限',
-      value: (
-        <EditableFormItem
-          value={formData?.userLimit}
-          onChange={handleChange.bind(null, 'userLimit')}
-          isEdit={isEdited}
-          component={InputNumber}
-          componentProps={{ placeholder: '请输入用户上限', max: 5000, min: 0 }}
-        />
-      )
+      value: formData?.userLimit || '--'
     },
     {
       label: '状态',
-      value: (
-        <EditableFormItem
-          value={formData?.status}
-          onChange={handleChange.bind(null, 'status')}
-          isEdit={isEdited}
-          type="status"
-          component={Checkbox}
-          componentProps={{ placeholder: '请选择是否启用', checked: formData?.status !== 0 }}
-        />
-      )
+      // 启用1 ENABLE，禁用0 DISABLE, 过期2 EXPIRED,
+      value: getStatus(formData?.status)
     }
   ];
+
+  const renderForm = () => {
+    return (
+      <Form layout="horizontal" labelCol={{ span: 2 }} form={form}>
+        <Form.Item label="企业Logo" field="corpLogo" triggerPropName="fileList">
+          <div style={{ marginBottom: '8px' }}>
+            <Image alt="头像" src={getFileUrlById(avatarUrl)} onError={handleImageError} width={160} height={80} />
+          </div>
+          <Upload
+            accept="image/*"
+            listType="picture-card"
+            showUploadList={false}
+            beforeUpload={beforeUpload}
+            customRequest={customRequest}
+            headers={{ authorization: 'authorization-text' }}
+          >
+            <Space style={{ display: 'flex', alignItems: 'flex-end' }}>
+              <Button type="primary">重新上传</Button>
+              <Typography.Text type="secondary">建议比例2:1</Typography.Text>
+            </Space>
+          </Upload>
+        </Form.Item>
+
+        <Form.Item label="企业名称" field="corpName" rules={[{ required: true, message: '请输入企业名称' }]}>
+          <Input placeholder="输入企业名称" maxLength={50} />
+        </Form.Item>
+
+        <Form.Item label="企业管理员" field="adminName">
+          <Input readOnly disabled />
+        </Form.Item>
+
+        <Form.Item
+          label="手机号"
+          field="adminMobile"
+          rules={[{ required: true, message: '请输入手机号' }, { validator: phoneValidator }]}
+        >
+          <Input placeholder="输入手机号" maxLength={11} />
+        </Form.Item>
+
+        <Form.Item label="企业编码" field="corpCode" rules={[{ required: true, message: '请输入企业编码' }]}>
+          <Input placeholder="输入企业编码" />
+        </Form.Item>
+
+        <Form.Item label="行业类型" field="industryType" rules={[{ required: true, message: '请选择行业类型' }]}>
+          <Select
+            options={industryOptions.map((option: industryTypeOption) => ({ label: option.label, value: option.id }))}
+            placeholder="行业类型"
+          />
+        </Form.Item>
+
+        <Form.Item label="企业地址" field="address">
+          <Input.TextArea placeholder="请输入详细地址" autoSize={{ minRows: 2, maxRows: 6 }} />
+        </Form.Item>
+
+        <Form.Item label="用户上限" field="userLimit" rules={[{ required: true }]}>
+          <InputNumber placeholder="请输入用户上限" max={5000} min={0} />
+        </Form.Item>
+
+        <Form.Item label="状态" field="status" triggerPropName="checked" rules={[{ required: true }]}>
+          <Checkbox>启用</Checkbox>
+        </Form.Item>
+      </Form>
+    );
+  };
 
   return (
     <div className={styles.enterpriseWrapper}>
@@ -414,18 +408,22 @@ const EnterpriseInfoPage: React.FC = () => {
         {/* 标签页组件 */}
         <Tabs activeTab={currentTab} onChange={setCurrentTab}>
           <Tabs.TabPane key="basic" title="基本信息">
-            {/* 企业Logo展示 */}
-            <Descriptions size="large" data={data} column={1} border={false} className={styles.infoPreview} />
-            {/* 编辑按钮 */}
             {isEdited ? (
-              <Space>
-                <Button onClick={handleCancel}>取消</Button>
-                <Button type="primary" onClick={handleSubmitInfo}>
-                  保存修改
-                </Button>
-              </Space>
+              <>
+                {renderForm()}
+                <Space>
+                  <Button onClick={handleCancel}>取消</Button>
+                  <Button type="primary" onClick={handleSubmitInfo}>
+                    保存修改
+                  </Button>
+                </Space>
+              </>
             ) : (
-              <Button onClick={toggleEdit}>编辑</Button>
+              <>
+                {/* 企业信息展示 */}
+                <Descriptions size="large" data={data} column={1} border={false} className={styles.infoPreview} />
+                <Button onClick={toggleEdit}>编辑</Button>
+              </>
             )}
           </Tabs.TabPane>
           <Tabs.TabPane key="authorized" title="授权应用">
