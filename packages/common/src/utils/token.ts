@@ -199,7 +199,7 @@ export class TokenManager {
       //   return true;
       // }
 
-      return false;
+      return true;
     } catch (error) {
       console.error('刷新 token 失败:', error);
       return false;
