@@ -2,7 +2,6 @@ package com.cmsr.onebase.module.system.dal.flex.repo;
 
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
-import com.cmsr.onebase.framework.common.enums.XFromSceneTypeEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.security.dto.LoginUser;
@@ -29,7 +28,8 @@ import java.util.List;
 import java.util.Set;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO.*;
+import static com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO.DEPT_ID;
+import static com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO.NICKNAME;
 import static com.cmsr.onebase.module.system.dal.flex.table.SystemUsersTableDef.SYSTEM_USERS;
 import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
 
@@ -50,44 +50,35 @@ public class UserDataRepository extends BaseDataRepository<SystemUsersMapper, Ad
      *
      * @return
      */
-    private String getSceneByUserType() {
-        String userSceneType = SecurityFrameworkUtils.getSceneByUserType();
-        if (StringUtils.isBlank(userSceneType)) {
+    private UserTypeEnum getLoginUserType() {
+        Integer userType = SecurityFrameworkUtils.getLoginUserType();
+        if (userType == null) {
             throw exception(USER_TYPE_EXCEPTION, SecurityFrameworkUtils.getLoginUserType());
         }
-        return userSceneType;
+        return UserTypeEnum.valueOf(userType);
     }
 
-    private QueryWrapper buildUserQueryWrapper() {
-        QueryWrapper queryWrapper = new QueryWrapper();
+    private QueryWrapper buildLoginUserQueryWrapper() {
         LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
         if (loginUser == null || loginUser.getId() == null) {
             // 立即失败，抛出异常，防止数据越权
             throw exception(USER_NOT_EXISTS);
         }
 
-        String fromSceneType = getSceneByUserType();
-        if (XFromSceneTypeEnum.PLATFORM.getCode().equals(fromSceneType)) {
-            queryWrapper.eq(AdminUserDO.USER_TYPE, UserTypeEnum.PLATFORM.getValue());
-        } else if (XFromSceneTypeEnum.TENANT.getCode().equals(fromSceneType)) {
-            queryWrapper.eq(AdminUserDO.USER_TYPE, UserTypeEnum.TENANT.getValue());
-        } else if (XFromSceneTypeEnum.CORP.getCode().equals(fromSceneType)) {
+        UserTypeEnum loginUserType = getLoginUserType();
+        QueryWrapper queryWrapper = new QueryWrapper();
+        if (loginUserType == null) {
+            // 立即失败，抛出异常，防止数据越权
+            throw exception(USER_TYPE_EXCEPTION, loginUserType);
+        } else if (loginUserType == UserTypeEnum.CORP) {
             Long corpId = loginUser.getCorpId();
+            // 立即失败，抛出异常，防止数据越权
             if (null == corpId) {
-                // 立即失败，抛出异常，防止数据越权
                 throw exception(CORP_ID_NULL);
             }
             queryWrapper.eq(AdminUserDO.CORP_ID, corpId);
-            queryWrapper.eq(AdminUserDO.USER_TYPE, UserTypeEnum.CORP.getValue());
-
-        } else if (XFromSceneTypeEnum.THIRD.getCode().equals(fromSceneType)) {
-            queryWrapper.eq(AdminUserDO.USER_TYPE, UserTypeEnum.THIRD.getValue());
-        } else if (XFromSceneTypeEnum.ALL.getCode().equals(fromSceneType)) {
-            // 全部类型，不做任何处理
-        } else {
-            // 立即失败，抛出异常，防止数据越权
-            throw exception(USER_TYPE_EXCEPTION, fromSceneType);
         }
+        queryWrapper.eq(AdminUserDO.USER_TYPE, loginUserType.getValue());
         return queryWrapper;
     }
 
@@ -131,9 +122,7 @@ public class UserDataRepository extends BaseDataRepository<SystemUsersMapper, Ad
         if (deptIds == null || deptIds.isEmpty()) {
             return Collections.emptyList();
         }
-        return list(query()
-                .in(DEPT_ID, deptIds)
-                .eq(AdminUserDO.USER_TYPE, userType, userType != null));
+        return list(buildQueryWrapperByType(userType).in(DEPT_ID, deptIds));
     }
 
     /**
@@ -141,15 +130,8 @@ public class UserDataRepository extends BaseDataRepository<SystemUsersMapper, Ad
      *
      * @return 用户列表
      */
-    public List<AdminUserDO> findNullDeptUser() {
-        return list(buildUserQueryWrapper().isNull(DEPT_ID));
-    }
-
-
-    public List<AdminUserDO> findUserByUserType(Integer userType) {
-        return list(buildUserQueryWrapper()
-                .isNull(DEPT_ID)
-                .eq(AdminUserDO.USER_TYPE, userType));
+    public List<AdminUserDO> findNoneDeptUserList(Integer userType) {
+        return list(buildQueryWrapperByType(userType).isNull(DEPT_ID));
     }
 
     /**
@@ -159,8 +141,7 @@ public class UserDataRepository extends BaseDataRepository<SystemUsersMapper, Ad
      * @return 用户列表
      */
     public List<AdminUserDO> findAllByNicknameLike(String nickname, Integer userType) {
-        return list(buildUserQueryWrapper().like(NICKNAME, nickname)
-                .eq(AdminUserDO.USER_TYPE, userType, userType != null));
+        return list(buildQueryWrapperByType(userType).like(NICKNAME, nickname));
     }
 
     /**
@@ -170,7 +151,7 @@ public class UserDataRepository extends BaseDataRepository<SystemUsersMapper, Ad
      * @return 用户列表
      */
     public List<AdminUserDO> findAllByStatus(Integer status, String userNickName) {
-        return list(buildUserQueryWrapper()
+        return list(buildLoginUserQueryWrapper()
                 .eq(AdminUserDO.STATUS, status)
                 .like(NICKNAME, userNickName, StringUtils.isNotBlank(userNickName))
                 .orderBy(AdminUserDO.ADMIN_TYPE, true)
@@ -208,7 +189,7 @@ public class UserDataRepository extends BaseDataRepository<SystemUsersMapper, Ad
      */
     public PageResult<AdminUserDO> findPage(UserPageReqVO reqVO, Collection<Long> deptIds, Collection<Long> includeRoleUserIds, Collection<Long> excludeRoleUserIds) {
 
-        QueryWrapper queryWrapper = userQueryPageWrapper(reqVO);
+        QueryWrapper queryWrapper = buildQueryWrapperByType(reqVO.getUserType());
         queryWrapper.like(NICKNAME, reqVO.getNickname(), StringUtils.isNotBlank(reqVO.getNickname()))
                 .like(AdminUserDO.MOBILE, reqVO.getMobile(), StringUtils.isNotBlank(reqVO.getMobile()))
                 .like(AdminUserDO.EMAIL, reqVO.getEmail(), StringUtils.isNotBlank(reqVO.getEmail()))
@@ -237,41 +218,16 @@ public class UserDataRepository extends BaseDataRepository<SystemUsersMapper, Ad
         return new PageResult<>(pageResult.getRecords(), pageResult.getTotalRow());
     }
 
-    private QueryWrapper userQueryPageWrapper(UserPageReqVO reqVO) {
-        QueryWrapper queryWrapper = new QueryWrapper();
-        LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
-        if (loginUser == null || loginUser.getId() == null) {
-            // 立即失败，抛出异常，防止数据越权
-            throw exception(USER_NOT_EXISTS);
-        }
-
-        if (reqVO.getUserType() == null) {
-            String fromSceneType = getSceneByUserType();
-            if (XFromSceneTypeEnum.PLATFORM.getCode().equals(fromSceneType)) {
-                queryWrapper.eq(AdminUserDO.USER_TYPE, UserTypeEnum.PLATFORM.getValue());
-            } else if (XFromSceneTypeEnum.TENANT.getCode().equals(fromSceneType)) {
-                queryWrapper.eq(AdminUserDO.USER_TYPE, UserTypeEnum.TENANT.getValue());
-            } else if (XFromSceneTypeEnum.CORP.getCode().equals(fromSceneType)) {
-                Long corpId = loginUser.getCorpId();
-                if (null == corpId) {
-                    // 立即失败，抛出异常，防止数据越权
-                    throw exception(CORP_ID_NULL);
-                }
-                queryWrapper.eq(AdminUserDO.CORP_ID, corpId);
-                queryWrapper.eq(AdminUserDO.USER_TYPE, UserTypeEnum.CORP.getValue());
-
-            } else if (XFromSceneTypeEnum.THIRD.getCode().equals(fromSceneType)) {
-                queryWrapper.eq(AdminUserDO.USER_TYPE, UserTypeEnum.THIRD.getValue());
-            } else if (XFromSceneTypeEnum.ALL.getCode().equals(fromSceneType)) {
-                // 全部类型，不做任何处理
-            } else {
-                // 立即失败，抛出异常，防止数据越权
-                throw exception(USER_TYPE_EXCEPTION, fromSceneType);
-            }
+    private QueryWrapper buildQueryWrapperByType(Integer userType) {
+        if (userType == null) {
+            // 1. 如果前端给用户类型为空，则按照登录用户类型过滤。
+            return buildLoginUserQueryWrapper();
         } else {
-            queryWrapper.eq(AdminUserDO.USER_TYPE, reqVO.getUserType());
+            // 2. 如果前端指定了用户类型，则按照前端传递的用户类型过滤。
+            QueryWrapper queryWrapper = new QueryWrapper();
+            queryWrapper.eq(AdminUserDO.USER_TYPE, userType);
+            return queryWrapper;
         }
-        return queryWrapper;
     }
 
     /**
@@ -281,7 +237,7 @@ public class UserDataRepository extends BaseDataRepository<SystemUsersMapper, Ad
      * @return 分页结果
      */
     public PageResult<AdminUserDO> findSimpleEnablePage(UserSimplePageReqVO reqVO) {
-        QueryWrapper queryWrapper = buildUserQueryWrapper().eq(AdminUserDO.STATUS, CommonStatusEnum.ENABLE.getStatus())
+        QueryWrapper queryWrapper = buildLoginUserQueryWrapper().eq(AdminUserDO.STATUS, CommonStatusEnum.ENABLE.getStatus())
                 .like(NICKNAME, reqVO.getKeywords(), StringUtils.isNotBlank(reqVO.getKeywords()))
                 .orderBy(AdminUserDO.ADMIN_TYPE, true)
                 .orderBy(BaseDO.CREATE_TIME, false);
@@ -298,7 +254,7 @@ public class UserDataRepository extends BaseDataRepository<SystemUsersMapper, Ad
      */
     public PageResult<AdminUserDO> findEnableUserPageByDeptIds(UserByDeptPageReqVO reqVO, Set<Long> deptIds) {
         log.info("[findEnableUserPageByDeptIds][deptIds({}) reqVO({})]", deptIds, reqVO);
-        QueryWrapper queryWrapper = buildUserQueryWrapper().eq(AdminUserDO.STATUS, CommonStatusEnum.ENABLE.getStatus())
+        QueryWrapper queryWrapper = buildLoginUserQueryWrapper().eq(AdminUserDO.STATUS, CommonStatusEnum.ENABLE.getStatus())
                 .like(NICKNAME, reqVO.getKeywords(), StringUtils.isNotBlank(reqVO.getKeywords()))
                 .in(DEPT_ID, deptIds, CollectionUtils.isNotEmpty(deptIds))
                 .orderBy(AdminUserDO.ADMIN_TYPE, true)
@@ -308,7 +264,7 @@ public class UserDataRepository extends BaseDataRepository<SystemUsersMapper, Ad
     }
 
     public List<AdminUserDO> findEnableUserByIds(Set<Long> userIds, String keyword, Integer status) {
-        QueryWrapper queryWrapper = buildUserQueryWrapper()
+        QueryWrapper queryWrapper = buildLoginUserQueryWrapper()
                 .in(AdminUserDO.COL_ID, userIds)
                 .eq(AdminUserDO.STATUS, status)
                 .orderBy(AdminUserDO.ADMIN_TYPE, true);
@@ -322,7 +278,7 @@ public class UserDataRepository extends BaseDataRepository<SystemUsersMapper, Ad
     }
 
     public List<AdminUserDO> findPlatformEnableUserByIds(Set<Long> userIds) {
-        QueryWrapper queryWrapper = buildUserQueryWrapper()
+        QueryWrapper queryWrapper = buildLoginUserQueryWrapper()
                 .in(AdminUserDO.COL_ID, userIds)
                 .eq(AdminUserDO.STATUS, UserStatusEnum.NORMAL.getStatus())
                 .orderBy(AdminUserDO.ADMIN_TYPE, true)
@@ -351,7 +307,7 @@ public class UserDataRepository extends BaseDataRepository<SystemUsersMapper, Ad
     }
 
     public List<AdminUserDO> findAllByStatusAndDeptIds(Integer status, Set<Long> deptIds) {
-        QueryWrapper queryWrapper = buildUserQueryWrapper();
+        QueryWrapper queryWrapper = buildLoginUserQueryWrapper();
         queryWrapper.eq(AdminUserDO.STATUS, status)
                 .in(DEPT_ID, deptIds)
                 .orderBy(AdminUserDO.ADMIN_TYPE, true)
@@ -385,7 +341,7 @@ public class UserDataRepository extends BaseDataRepository<SystemUsersMapper, Ad
     }
 
     public PageResult<AdminUserDO> selectPage(Integer status, UserPageApiReqVO pageReqVO) {
-        QueryWrapper queryWrapper = buildUserQueryWrapper().eq(AdminUserDO.STATUS, status)
+        QueryWrapper queryWrapper = buildLoginUserQueryWrapper().eq(AdminUserDO.STATUS, status)
                 .like(NICKNAME, pageReqVO.getKeywords(), StringUtils.isNotBlank(pageReqVO.getKeywords()))
                 .notIn(AdminUserDO.P_ID, pageReqVO.getExcludeUserIds(), CollectionUtils.isNotEmpty(pageReqVO.getExcludeUserIds()))
                 .orderBy(AdminUserDO.ADMIN_TYPE, true)

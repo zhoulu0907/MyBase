@@ -59,19 +59,17 @@ public class PlatformTenantController {
         return success(true);
     }
 
+    /**
+     *  // 1. 平台租户信息获取（只展示平台用户管理员）：platform/system/tenant/get
+     *  // 2. 空间租户信息获取（展示所有管理员）：admin-api/system/tenant/get
+     * @param id
+     * @return
+     */
     @GetMapping("/get")
     @Operation(summary = "获得租户(安全考虑仅获取用户所属租户)")
     @Parameter(name = "id", description = "编号", required = true, example = "1024")
     @PreAuthorize("@ss.hasPermission('tenant:space:query')")
     public CommonResult<TenantRespVO> getTenant(@RequestParam("id") Long id) {
-        return success(tenantService.getTenantWithAppCount(id));
-    }
-
-    @GetMapping("/get-tenant-platform-info")
-    @Operation(summary = "获得租户和租户下平台管理员信息")
-    @Parameter(name = "id", description = "编号", required = true, example = "1024")
-    @PreAuthorize("@ss.hasPermission('tenant:space:query')")
-    public CommonResult<TenantRespVO> getTenantAndPlatformAdminInfo(@RequestParam("id") Long id) {
         return success(tenantService.getTenantAndPlatformAdminInfo(id));
     }
 
