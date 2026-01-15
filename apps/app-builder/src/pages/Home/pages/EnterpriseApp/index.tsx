@@ -3,7 +3,6 @@ import { useAppStore } from '@/store/store_app';
 import {
   Button,
   Divider,
-  Dropdown,
   Input,
   Link,
   Menu,
@@ -15,7 +14,7 @@ import {
   Tooltip,
   Typography
 } from '@arco-design/web-react';
-import { IconEmpty, IconMoreVertical, IconSearch, IconSettings } from '@arco-design/web-react/icon';
+import { IconSearch, IconSettings } from '@arco-design/web-react/icon';
 import { listApplication, type Application, type PageParam } from '@onebase/app';
 import { getCommonPaginationList, getRuntimeURL, hasPermission, TokenManager } from '@onebase/common';
 import { debounce } from 'lodash-es';
@@ -279,7 +278,7 @@ const EnterpriseAppPage: React.FC = () => {
           {/* 我的应用列表 */}
           <Spin loading={loading} size={40} style={{ width: '100%', height: '100%' }} tip="加载中...">
             <div className={styles.myAppList} ref={appContainerRef}>
-              {applicationEmpty && !loading && (
+              {(applicationEmpty || applicationFilterEmpty) && !loading && (
                 <div className={styles.applicationEmpty}>
                   <img src={emptyApplicationSVG} alt="暂无应用" />
                   <Typography.Text type="secondary">
@@ -293,12 +292,6 @@ const EnterpriseAppPage: React.FC = () => {
                       应用管理！
                     </Link>
                   </Typography.Text>
-                </div>
-              )}
-              {applicationFilterEmpty && !loading && (
-                <div className={styles.applicationEmpty}>
-                  <IconEmpty fontSize={56} />
-                  暂无数据
                 </div>
               )}
               {dataList?.map((item, index) => (
