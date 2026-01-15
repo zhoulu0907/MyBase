@@ -137,20 +137,14 @@ public class AppApplicationApiImpl implements AppApplicationApi {
 
         // 获取版本列表并按 applicationId 分组，每组取第一条数据
         List<AppVersionDO> versionDOList = ApplicationManager.withoutApplicationCondition(() ->
-                versionRepository.findVersionList(listIds));
+                versionRepository.findVersionListByAppIds(listIds));
 
         // 检查版本号列表是否为空
         if (CollectionUtils.isEmpty(versionDOList)) {
             return applicationDTOList;
         }
-
-        // 按更新日期倒序排列
-        List<AppVersionDO> sortedVersionDOList = versionDOList.stream()
-                .sorted(Comparator.comparing(AppVersionDO::getUpdateTime).reversed())
-                .toList();
-
         // 按 applicationId 分组并获取每组的第一条记录
-        Map<Long, AppVersionDO> versionMap = sortedVersionDOList.stream()
+        Map<Long, AppVersionDO> versionMap = versionDOList.stream()
                 .filter(version -> version.getApplicationId() != null)  // 过滤 applicationId 为空的记录
                 .collect(Collectors.groupingBy(
                         AppVersionDO::getApplicationId,  // 按 applicationId 分组
