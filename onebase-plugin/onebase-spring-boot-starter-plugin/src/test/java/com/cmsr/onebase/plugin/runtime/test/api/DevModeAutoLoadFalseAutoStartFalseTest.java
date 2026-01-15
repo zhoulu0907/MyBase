@@ -124,11 +124,11 @@ public class DevModeAutoLoadFalseAutoStartFalseTest {
 
                 // 测试多个 API 端点，都应该返回 404
                 String[] apiPaths = {
-                                "/plugin/hello-plugin/hello",
-                                "/plugin/hello-plugin/process",
-                                "/plugin/hello-plugin/check-hutool",
-                                "/plugin/hello-plugin/cysinfo",
-                                "/plugin/hello-plugin/api/info"
+                                "/runtime/plugin/hello-plugin/hello",
+                                "/runtime/plugin/hello-plugin/process",
+                                "/runtime/plugin/hello-plugin/check-hutool",
+                                "/runtime/plugin/hello-plugin/cysinfo",
+                                "/runtime/plugin/hello-plugin/api/info"
                 };
 
                 for (String apiPath : apiPaths) {
@@ -177,7 +177,7 @@ public class DevModeAutoLoadFalseAutoStartFalseTest {
                                 .isNotInStartedList();
 
                 // 6. 验证 API 仍不可访问（已加载但未启动）
-                HttpResponse response = httpUtil.get("/plugin/hello-plugin/hello");
+                HttpResponse response = httpUtil.get("/runtime/plugin/hello-plugin/hello");
                 assertThat(response.getStatusCode())
                                 .as("加载后但未启动时 API 应该不可访问")
                                 .isNotEqualTo(200);
@@ -200,7 +200,7 @@ public class DevModeAutoLoadFalseAutoStartFalseTest {
                 log.info("阶段 1: 验证初始状态");
                 PluginStatusAssert.assertPlugin(pluginManager, DEV_PLUGIN_ID)
                                 .notExists();
-                HttpResponse response1 = httpUtil.get("/plugin/hello-plugin/hello");
+                HttpResponse response1 = httpUtil.get("/runtime/plugin/hello-plugin/hello");
                 assertThat(response1.getStatusCode()).isNotEqualTo(200);
                 log.info("  ✓ 插件不存在，API 不可访问");
 
@@ -211,7 +211,7 @@ public class DevModeAutoLoadFalseAutoStartFalseTest {
                                 .exists()
                                 .isNotStarted()
                                 .isNotInStartedList();
-                HttpResponse response2 = httpUtil.get("/plugin/hello-plugin/hello");
+                HttpResponse response2 = httpUtil.get("/runtime/plugin/hello-plugin/hello");
                 assertThat(response2.getStatusCode()).isNotEqualTo(200);
                 log.info("  ✓ 插件已加载但未启动，API 仍不可访问");
 
@@ -222,7 +222,7 @@ public class DevModeAutoLoadFalseAutoStartFalseTest {
                 PluginStatusAssert.assertPlugin(pluginManager, DEV_PLUGIN_ID)
                                 .isStarted()
                                 .isInStartedList();
-                HttpResponse response3 = httpUtil.get("/plugin/hello-plugin/hello");
+                HttpResponse response3 = httpUtil.get("/runtime/plugin/hello-plugin/hello");
                 response3.assertSuccess()
                                 .assertJsonFieldExists("message")
                                 .assertJsonFieldExists("timestamp");
@@ -259,14 +259,14 @@ public class DevModeAutoLoadFalseAutoStartFalseTest {
                 pluginManager.startPlugin(DEV_PLUGIN_ID);
                 PluginStatusAssert.assertPlugin(pluginManager, DEV_PLUGIN_ID)
                                 .isStarted();
-                httpUtil.get("/plugin/hello-plugin/hello").assertSuccess();
+                httpUtil.get("/runtime/plugin/hello-plugin/hello").assertSuccess();
 
                 // 阶段 3: 停止插件
                 log.info("阶段 3: 停止插件");
                 pluginManager.stopPlugin(DEV_PLUGIN_ID);
                 PluginStatusAssert.assertPlugin(pluginManager, DEV_PLUGIN_ID)
                                 .isStopped();
-                HttpResponse response = httpUtil.get("/plugin/hello-plugin/hello");
+                HttpResponse response = httpUtil.get("/runtime/plugin/hello-plugin/hello");
                 assertThat(response.getStatusCode()).isNotEqualTo(200);
 
                 // 阶段 4: 卸载插件

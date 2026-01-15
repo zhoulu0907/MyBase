@@ -13,6 +13,7 @@ import jakarta.annotation.PreDestroy;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 热重载配置类
@@ -69,6 +70,57 @@ public class HotReloadConfiguration {
                     applicationContext,
                     controllerRegistrar,
                     classesRoots);
+
+            // 将热重载管理器注入到插件管理器的扫描器中（用于插件级热重载）
+            try {
+                Object pluginManager = applicationContext.getBean("pluginManager");
+                if (pluginManager != null) {
+                    pluginManager.getClass()
+                            .getMethod("setHotReloadManager", Object.class)
+                            .invoke(pluginManager, hotReloadManager);
+                    log.info("已将热重载管理器注入到插件管理器");
+
+                    // 【P0 修复】：手动注册已扫描的扩展点
+                    // 因为扫描发生在 HotReloadManager 创建之前，需要补充注册
+                    try {
+                        // 获取扩展点缓存
+                        java.lang.reflect.Field cacheField = pluginManager.getClass()
+                                .getDeclaredField("extensionCache");
+                        cacheField.setAccessible(true);
+                        @SuppressWarnings("unchecked")
+                        Map<Class<?>, List<?>> extensionCache = (Map<Class<?>, List<?>>) cacheField.get(pluginManager);
+
+                        // 注册所有已缓存的扩展点
+                        int registeredCount = 0;
+                        for (Map.Entry<Class<?>, List<?>> entry : extensionCache.entrySet()) {
+                            for (Object extension : entry.getValue()) {
+                                String className = extension.getClass().getName();
+
+                                // 找到该扩展点所属的插件路径
+                                for (String pathStr : devClassPaths) {
+                                    Path pluginClassPath = Paths.get(pathStr).toAbsolutePath().normalize();
+
+                                    // 检查类文件是否在该路径下
+                                    String classFilePath = className.replace('.', '/') + ".class";
+                                    Path fullPath = pluginClassPath.resolve(classFilePath);
+
+                                    if (java.nio.file.Files.exists(fullPath)) {
+                                        hotReloadManager.registerExtension(className, pluginClassPath);
+                                        registeredCount++;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+
+                        log.info("已补充注册 {} 个已扫描的扩展点到插件映射", registeredCount);
+                    } catch (Exception ex) {
+                        log.warn("补充注册已扫描的扩展点失败（不影响后续扫描的扩展点）", ex);
+                    }
+                }
+            } catch (Exception e) {
+                log.warn("注入热重载管理器到插件管理器失败（这不影响基本热重载功能）", e);
+            }
 
             // 创建文件监听器
             watcher = new DevClassPathWatcher(devClassPaths, hotReloadManager);

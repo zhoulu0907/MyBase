@@ -23,7 +23,7 @@ public interface CorpAppRelationService {
      */
     void createCorpAppRelation(CorpAppRelationInertReqVO vo);
 
-    void createListCorpAppRelation(List<AppAuthTimeReqVO> appAuthTimeReqVOs, Long corpId);
+    void createCorpAndAppRelation(List<AppAuthTimeReqVO> appAuthTimeReqVOs, Long corpId);
     /**
      * 更新企业应用关联
      * 通过id 可以更新关联关系，业可以更新授权时间

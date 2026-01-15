@@ -19,6 +19,7 @@ public interface ErrorCodeConstants {
     ErrorCode AUTH_LOGIN_USER_NOT_ADMIN_ERROR = new ErrorCode(1_002_000_009, "登录失败，仅平台管理员可登录。");
     ErrorCode AUTH_LOGIN_PLATFORM_TENANT_ERROR = new ErrorCode(1_002_000_010, "登录失败，平台租户不可登录。");
     ErrorCode AUTH_LOGIN_NO_EXISTS = new ErrorCode(1_002_000_011, "登录失败，当前账号不存在。");
+    ErrorCode AUTH_LOGIN_NO_PERMISSION = new ErrorCode(1_002_000_012, "登录失败，当前账号无登录权限。");
 
     ErrorCode AUTH_VERIFY_CODE_NULL = new ErrorCode(1_002_000_100, "验证码为空");
     ErrorCode AUTH_VERIFY_CODE_ERROR = new ErrorCode(1_002_000_100, "验证码错误");
@@ -49,7 +50,7 @@ public interface ErrorCodeConstants {
     ErrorCode USER_IMPORT_LIST_IS_EMPTY = new ErrorCode(1_002_003_004, "导入用户数据不能为空！");
     ErrorCode USER_PASSWORD_FAILED = new ErrorCode(1_002_003_005, "用户密码校验失败");
     ErrorCode USER_IS_DISABLE = new ErrorCode(1_002_003_006, "名字为【{}】的用户已被禁用");
-    ErrorCode USER_COUNT_MAX = new ErrorCode(1_002_003_008, "创建用户失败，原因：超过空间最大空间配额({})！");
+    ErrorCode USER_COUNT_MAX = new ErrorCode(1_002_003_008, "创建用户失败，原因：超过空间最大空间配额:{}！");
     ErrorCode USER_IMPORT_INIT_PASSWORD = new ErrorCode(1_002_003_009, "初始密码不能为空");
     ErrorCode USER_MOBILE_NOT_EXISTS = new ErrorCode(1_002_003_010, "该手机号尚未注册");
     ErrorCode USER_REGISTER_DISABLED = new ErrorCode(1_002_003_011, "注册功能已关闭");

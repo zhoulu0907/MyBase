@@ -38,7 +38,7 @@ public class TenantDeptController {
     @PostMapping("/create")
     @Operation(summary = "创建部门")
     @PreAuthorize("@ss.hasPermission('tenant:dept:create')")
-    public CommonResult<Long> createDept(@Valid @RequestBody DeptSaveReqVO createReqVO) {
+    public CommonResult<Long> createDept(@Valid @RequestBody DeptInsertReqVO createReqVO) {
         Long deptId = deptService.createDept(createReqVO);
         return success(deptId);
     }
@@ -46,7 +46,7 @@ public class TenantDeptController {
     @PostMapping("/update")
     @Operation(summary = "更新部门")
     @PreAuthorize("@ss.hasPermission('tenant:dept:update')")
-    public CommonResult<Boolean> updateDept(@Valid @RequestBody DeptSaveReqVO updateReqVO) {
+    public CommonResult<Boolean> updateDept(@Valid @RequestBody DeptUpdateReqVO updateReqVO) {
         deptService.updateDept(updateReqVO);
         return success(true);
     }

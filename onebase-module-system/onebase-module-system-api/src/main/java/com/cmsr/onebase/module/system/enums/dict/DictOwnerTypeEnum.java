@@ -68,6 +68,16 @@ public enum DictOwnerTypeEnum implements ArrayValuable<String> {
         return ObjUtil.equal(TENANT.type, type);
     }
 
+    /**
+     * 判断是否为全局类型字典
+     *
+     * @param type 字典所有者类型
+     * @return 是否为应用类型
+     */
+    public static boolean isGlobal(String type) {
+        return ObjUtil.equal(GLOBAL.type, type);
+    }
+
 }
 
 

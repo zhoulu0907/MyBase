@@ -1,6 +1,6 @@
 package com.cmsr.onebase.plugin.runtime.test.config;
 
-import com.cmsr.onebase.plugin.service.PluginConfigQueryService;
+import com.cmsr.onebase.plugin.service.PluginContextService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -17,10 +17,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 测试配置 - 提供 MockPluginConfigService
+ * 测试配置 - 提供 MockPluginContextService
  * <p>
- * 为所有测试提供 PluginConfigService 实现，
- * 避免 ConfigDemoController 注入失败
+ * 为所有测试提供 PluginContextService 实现，
+ * 避免 ContextDemoController 注入失败
  * </p>
  *
  * @author chengyuansen
@@ -32,27 +32,27 @@ public class PluginTestConfiguration {
     private static final Logger log = LoggerFactory.getLogger(PluginTestConfiguration.class);
 
     @Bean
-    public PluginConfigQueryService pluginConfigService() {
-        return new MockPluginConfigServiceForTest();
+    public PluginContextService pluginContextService() {
+        return new MockPluginContextServiceForTest();
     }
 
     /**
-     * 测试用的 Mock PluginConfigQueryService
+     * 测试用的 Mock PluginContextService
      */
-    static class MockPluginConfigServiceForTest implements PluginConfigQueryService {
+    static class MockPluginContextServiceForTest implements PluginContextService {
 
         private final Map<String, Map<String, Object>> pluginConfigs = new ConcurrentHashMap<>();
         private final ResourceLoader resourceLoader = new DefaultResourceLoader();
 
-        public MockPluginConfigServiceForTest() {
+        public MockPluginContextServiceForTest() {
             loadConfigFromFile();
         }
 
         private void loadConfigFromFile() {
             try {
-                Resource resource = resourceLoader.getResource("classpath:plugin-config.yml");
+                Resource resource = resourceLoader.getResource("classpath:plugin-context.yml");
                 if (!resource.exists()) {
-                    log.warn("plugin-config.yml 不存在，使用空配置");
+                    log.warn("plugin-context.yml 不存在，使用空配置");
                     return;
                 }
 
@@ -74,6 +74,16 @@ public class PluginTestConfiguration {
             } catch (IOException e) {
                 log.error("加载插件配置文件失败", e);
             }
+        }
+
+        @Override
+        public Long getTenantId() {
+            return 1L;
+        }
+
+        @Override
+        public Long getApplicationId() {
+            return 100L;
         }
 
         @Override

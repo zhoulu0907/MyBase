@@ -54,11 +54,8 @@ import com.mzt.logapi.starter.annotation.LogRecord;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.DataRow;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -216,7 +213,7 @@ public class TenantServiceImpl implements TenantService {
             // 获取license总租户数限制
             Integer totalTenantLimit = license.getTenantLimit();
             // 获取现有租户数量
-            Long existTenantCount = getExistTenantCount();
+            Integer existTenantCount = getTenantCountExcludePlatform();
             if (existTenantCount >= totalTenantLimit) {
                 throw exception(LICENSE_TENANT_COUNT_NOT_ENOUGH);
             }
@@ -256,14 +253,6 @@ public class TenantServiceImpl implements TenantService {
         LogRecordContext.putVariable("tenant", tenant);
 
         return tenant.getId();
-    }
-
-
-    private Long getExistTenantCount() {
-        // 排除平台租户
-        Long existTenantCount = tenantDataRepository.countByStatusExcludePlatform(
-                TenantStatusEnum.NORMAL.getStatus(), null);
-        return existTenantCount;
     }
 
     private Map<String, AdminUserDO> getUserMobileByUserNames(Set<String> usernamesList) {
@@ -602,7 +591,7 @@ public class TenantServiceImpl implements TenantService {
 
     @Override
     public TenantRespVO getTenantWithAppCount(Long id) {
-        // 仅允许获取自己的租户信息(平台管理员除外)
+        // 1. 非平台管理员，仅允许获取自己的租户信息
         boolean isPlatformAdmin = permissionService.isPlatformSuperAdmin(SecurityFrameworkUtils.getLoginUserId());
         if (!isPlatformAdmin) {
             Long loginTenantId = TenantContextHolder.getTenantId();
@@ -611,6 +600,7 @@ public class TenantServiceImpl implements TenantService {
             }
         }
 
+        // 2. 获取空间的企业数量信息
         Map<Long, Integer> corpCountMap = findCorpCount();
         TenantDO tenantDO = getTenant(id);
         // 查询当前租户下的已有的正常状态的用户数量
@@ -625,7 +615,7 @@ public class TenantServiceImpl implements TenantService {
             corpCount = CorpConstant.ZERO; // 默认值处理
         }
         tenantRespVO.setCorpCount(corpCount);
-        // 获取当前空间的管理员角色id
+        // 3. 获取当前空间的管理员角色id
         //  RoleDO roleDO = roleService.getRoleIdsByCode(RoleCodeEnum.TENANT_ADMIN.getCode());
         RoleDO roleDO = roleService.getRoleIdsByCodeAndTenantId(RoleCodeEnum.TENANT_ADMIN.getCode(), id);
         if (roleDO != null) {
@@ -637,7 +627,7 @@ public class TenantServiceImpl implements TenantService {
             // 获取角色对应的管理员
             // 获取租户管理员用户信息
             List<TenantAdminUserResVO> adminUserList = new ArrayList<>();
-            if (userIds.size() > 0) {
+            if (!userIds.isEmpty()) {
                 List<AdminUserDO> adminUsers = userService.getUserList(userIds);
                 List<Long> deptIds = adminUsers.stream().map(AdminUserDO::getDeptId).filter(Objects::nonNull).toList();
 
@@ -672,6 +662,21 @@ public class TenantServiceImpl implements TenantService {
             tenantRespVO.setTenantAdminUserList(adminUserList);
         }
         return tenantRespVO;
+    }
+
+    @Override
+    public TenantRespVO getTenantAndPlatformAdminInfo(Long id) {
+        TenantRespVO tenantPlatformInfo = getTenantWithAppCount(id);
+
+        // 过滤出tenantAdminUserList中platformUserId不为空的数据
+        if (tenantPlatformInfo.getTenantAdminUserList() != null) {
+            List<TenantAdminUserResVO> filteredAdminUserList = tenantPlatformInfo.getTenantAdminUserList().stream()
+                    .filter(adminUser -> adminUser.getPlatformUserId() != null)
+                    .collect(Collectors.toList());
+            tenantPlatformInfo.setTenantAdminUserList(filteredAdminUserList);
+        }
+
+        return tenantPlatformInfo;
     }
 
     /**
@@ -758,8 +763,8 @@ public class TenantServiceImpl implements TenantService {
     }
 
     @Override
-    public Integer getTenantCountByStatus(Integer status) {
-        return (int) tenantDataRepository.countByStatus(status);
+    public Integer getTenantCountExcludePlatform() {
+        return (int) tenantDataRepository.countExcludePlatform();
     }
 
     @Override

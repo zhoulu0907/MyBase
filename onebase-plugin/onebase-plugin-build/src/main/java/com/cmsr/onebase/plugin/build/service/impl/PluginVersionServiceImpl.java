@@ -6,6 +6,7 @@ import com.cmsr.onebase.module.infra.api.file.FileApi;
 import com.cmsr.onebase.plugin.build.service.PluginVersionService;
 import com.cmsr.onebase.plugin.build.validator.PluginMetaValidator;
 import com.cmsr.onebase.plugin.build.validator.PluginZipValidator;
+import com.cmsr.onebase.plugin.build.validator.PluginZipValidator.PackageInfo;
 import com.cmsr.onebase.plugin.build.vo.req.PluginVersionUpdateReqVO;
 import com.cmsr.onebase.plugin.build.vo.req.PluginVersionUploadReqVO;
 import com.cmsr.onebase.plugin.build.vo.resp.PluginVersionRespVO;
@@ -76,13 +77,16 @@ public class PluginVersionServiceImpl implements PluginVersionService {
         // 3. 校验并读取文件
         byte[] content = pluginZipValidator.validate(uploadReqVO.getFile());
 
-        // 4. 如果是ZIP文件，提取plugin.json进行校验
+        // 4. 如果是ZIP文件，提取plugin.json和plugin.schema.json进行校验
         String originalFilename = uploadReqVO.getFile().getOriginalFilename();
         PluginMetaInfo metaInfo = null;
         String pluginJson = null;
+        String pluginSchemaJson = "{}";
         if (originalFilename != null && originalFilename.toLowerCase().endsWith(".zip")) {
             pluginJson = pluginZipValidator.extractPluginJson(content);
             metaInfo = pluginMetaValidator.validate(pluginJson);
+            // 提取plugin.schema.json（插件配置模板）
+            pluginSchemaJson = pluginZipValidator.extractPluginSchemaJson(content);
 
             // 校验pluginId一致性
             if (!metaInfo.getPluginId().equals(uploadReqVO.getPluginId())) {
@@ -108,13 +112,15 @@ public class PluginVersionServiceImpl implements PluginVersionService {
                 .pluginVersionDescription(uploadReqVO.getPluginVersionDescription())
                 .pluginPackage(Long.parseLong(fileId))
                 .pluginMetaInfo(pluginJson)
+                .pluginConfigInfo(pluginSchemaJson)  // 插件配置模板，来自zip包中的plugin.schema.json
                 .status(PluginStatusConstants.DISABLED)
                 .build();
         pluginInfoRepository.insert(pluginInfoDO);
 
-        // 8. 保存包信息
-        if (metaInfo != null && CollUtil.isNotEmpty(metaInfo.getPackages())) {
-            savePackageInfo(metaInfo, uploadReqVO.getPluginId(), uploadReqVO.getPluginVersion());
+        // 8. 检测并保存包信息（自动检测前端/后端包）
+        if (originalFilename != null && originalFilename.toLowerCase().endsWith(".zip")) {
+            List<PackageInfo> packages = pluginZipValidator.detectPackages(content);
+            savePackageInfo(packages, uploadReqVO.getPluginId(), uploadReqVO.getPluginVersion());
         }
 
         // 9. 复制或保存配置信息
@@ -171,19 +177,21 @@ public class PluginVersionServiceImpl implements PluginVersionService {
             String fileId = fileApi.createFile(content, updateReqVO.getFile().getOriginalFilename());
             pluginInfo.setPluginPackage(Long.parseLong(fileId));
 
-            // 如果是ZIP，更新元数据
+            // 如果是ZIP，更新元数据和配置模板
             String originalFilename = updateReqVO.getFile().getOriginalFilename();
             if (originalFilename != null && originalFilename.toLowerCase().endsWith(".zip")) {
                 String pluginJson = pluginZipValidator.extractPluginJson(content);
                 PluginMetaInfo metaInfo = pluginMetaValidator.validate(pluginJson);
                 pluginInfo.setPluginMetaInfo(pluginJson);
+                // 提取并更新plugin.schema.json（插件配置模板）
+                String pluginSchemaJson = pluginZipValidator.extractPluginSchemaJson(content);
+                pluginInfo.setPluginConfigInfo(pluginSchemaJson);
 
-                // 更新包信息
+                // 更新包信息（自动检测前端/后端包）
                 pluginPackageInfoRepository.deleteByPluginIdAndVersion(
                         pluginInfo.getPluginId(), pluginInfo.getPluginVersion());
-                if (CollUtil.isNotEmpty(metaInfo.getPackages())) {
-                    savePackageInfo(metaInfo, pluginInfo.getPluginId(), pluginInfo.getPluginVersion());
-                }
+                List<PackageInfo> packages = pluginZipValidator.detectPackages(content);
+                savePackageInfo(packages, pluginInfo.getPluginId(), pluginInfo.getPluginVersion());
             }
         }
 
@@ -225,10 +233,13 @@ public class PluginVersionServiceImpl implements PluginVersionService {
     }
 
     /**
-     * 保存包信息
+     * 保存包信息（使用自动检测的包信息）
      */
-    private void savePackageInfo(PluginMetaInfo metaInfo, String pluginId, String pluginVersion) {
-        for (PluginMetaInfo.PluginPackageInfo packageInfo : metaInfo.getPackages()) {
+    private void savePackageInfo(List<PackageInfo> packages, String pluginId, String pluginVersion) {
+        if (CollUtil.isEmpty(packages)) {
+            return;
+        }
+        for (PackageInfo packageInfo : packages) {
             PluginPackageInfoDO packageDO = PluginPackageInfoDO.builder()
                     .pluginId(pluginId)
                     .pluginVersion(pluginVersion)

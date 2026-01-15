@@ -128,8 +128,8 @@ public class DevModeAutoLoadFalseAutoStartTrueTest {
 
         // 测试 API 端点，应该返回 404
         String[] apiPaths = {
-                "/plugin/hello-plugin/hello",
-                "/plugin/hello-plugin/api/info"
+                "/runtime/plugin/hello-plugin/hello",
+                "/runtime/plugin/hello-plugin/api/info"
         };
 
         for (String apiPath : apiPaths) {
@@ -172,7 +172,7 @@ public class DevModeAutoLoadFalseAutoStartTrueTest {
                 .isStarted();
 
         // 4. API 可访问
-        HttpResponse response = httpUtil.get("/plugin/hello-plugin/hello");
+        HttpResponse response = httpUtil.get("/runtime/plugin/hello-plugin/hello");
         response.assertSuccess();
 
         log.info("✓ 无效配置行为等同于 auto-load=false, auto-start=false");

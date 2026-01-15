@@ -12,10 +12,8 @@ import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
 import com.cmsr.onebase.module.app.core.dal.database.resource.AppComponentRepository;
 import com.cmsr.onebase.module.app.core.dal.database.tag.AppApplicationTagRepository;
 import com.cmsr.onebase.module.app.core.dal.database.tag.AppTagRepository;
-import com.cmsr.onebase.module.app.core.dal.dataobject.AppApplicationDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.AppApplicationTagDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.AppNavigationDO;
-import com.cmsr.onebase.module.app.core.dal.dataobject.AppTagDO;
+import com.cmsr.onebase.module.app.core.dal.database.version.AppVersionRepository;
+import com.cmsr.onebase.module.app.core.dal.dataobject.*;
 import com.cmsr.onebase.module.app.core.enums.app.AppStatusEnum;
 import com.mybatisflex.core.tenant.TenantManager;
 import jakarta.annotation.Resource;
@@ -56,6 +54,9 @@ public class AppApplicationApiImpl implements AppApplicationApi {
 
     @Autowired
     private AppNavigationRepository navigationRepository;
+
+    @Resource
+    private AppVersionRepository versionRepository;
 
     @Override
     public Long countApplicationByTenantId(Long tenantId) {
@@ -133,6 +134,36 @@ public class AppApplicationApiImpl implements AppApplicationApi {
                 }
             }
         });
+
+        // 获取版本列表并按 applicationId 分组，每组取第一条数据
+        List<AppVersionDO> versionDOList = ApplicationManager.withoutApplicationCondition(() ->
+                versionRepository.findVersionListByAppIds(listIds));
+
+        // 检查版本号列表是否为空
+        if (CollectionUtils.isEmpty(versionDOList)) {
+            return applicationDTOList;
+        }
+        // 按 applicationId 分组并获取每组的第一条记录
+        Map<Long, AppVersionDO> versionMap = versionDOList.stream()
+                .filter(version -> version.getApplicationId() != null)  // 过滤 applicationId 为空的记录
+                .collect(Collectors.groupingBy(
+                        AppVersionDO::getApplicationId,  // 按 applicationId 分组
+                        Collectors.collectingAndThen(
+                                Collectors.toList(),
+                                list -> list.isEmpty() ? null : list.get(0)  // 每组取第一条数据
+                        )
+                ));
+
+        // 将版本数据赋值给 applicationList 中的每个 ApplicationDTO 对象
+        applicationDTOList.forEach(app -> {
+            if (app != null) {  // 检查 app 对象是否为空
+                AppVersionDO appVersion = versionMap.get(app.getId()); // 假设 getId() 返回 appId
+                if (appVersion != null) {
+                    app.setVersionNumber(appVersion.getVersionNumber());
+                }
+            }
+        });
+
         return applicationDTOList;
     }
 

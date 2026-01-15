@@ -34,5 +34,6 @@ public interface FileUploadCheckConstants {
     String PNG ="png";
     String GIF ="gif";
     String MP4 ="mp4";
+    String ZIP ="zip";
 
 }

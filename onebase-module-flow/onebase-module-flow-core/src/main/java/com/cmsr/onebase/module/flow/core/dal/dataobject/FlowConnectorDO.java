@@ -17,6 +17,9 @@ public class FlowConnectorDO extends BaseAppEntity {
     @Column(value = "connector_name")
     private String connectorName;
 
+    @Column(value = "code")
+    private String code;
+
     @Column(value = "type_code")
     private String typeCode;
 
@@ -25,5 +28,8 @@ public class FlowConnectorDO extends BaseAppEntity {
 
     @Column(value = "config")
     private String config;
+
+    @Column(value = "config_json")
+    private String configJson;
 
 }

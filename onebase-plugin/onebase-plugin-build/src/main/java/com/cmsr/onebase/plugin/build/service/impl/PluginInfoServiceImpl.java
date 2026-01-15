@@ -10,6 +10,7 @@ import com.cmsr.onebase.plugin.build.redis.PluginCommandPublisher;
 import com.cmsr.onebase.plugin.build.service.PluginInfoService;
 import com.cmsr.onebase.plugin.build.validator.PluginMetaValidator;
 import com.cmsr.onebase.plugin.build.validator.PluginZipValidator;
+import com.cmsr.onebase.plugin.build.validator.PluginZipValidator.PackageInfo;
 import com.cmsr.onebase.plugin.build.vo.req.PluginInfoPageReqVO;
 import com.cmsr.onebase.plugin.build.vo.req.PluginInfoUpdateReqVO;
 import com.cmsr.onebase.plugin.build.vo.req.PluginUploadReqVO;
@@ -80,16 +81,19 @@ public class PluginInfoServiceImpl implements PluginInfoService {
         String pluginJson = pluginZipValidator.extractPluginJson(content);
         PluginMetaInfo metaInfo = pluginMetaValidator.validate(pluginJson);
 
-        // 3. 检查插件是否已存在
+        // 3. 提取plugin.schema.json（插件配置模板）
+        String pluginSchemaJson = pluginZipValidator.extractPluginSchemaJson(content);
+
+        // 4. 检查插件是否已存在
         List<PluginInfoDO> existingPlugins = pluginInfoRepository.getListByPluginId(metaInfo.getPluginId());
         if (CollUtil.isNotEmpty(existingPlugins)) {
             throw exception(PLUGIN_ALREADY_EXISTS);
         }
 
-        // 4. 上传插件包到MinIO
+        // 5. 上传插件包到MinIO
         String fileId = fileApi.createFile(content, uploadReqVO.getFile().getOriginalFilename());
 
-        // 5. 上传图标文件到MinIO（如果有）
+        // 6. 上传图标文件到MinIO（如果有）
         Long pluginIconId = null;
         if (uploadReqVO.getPluginIcon() != null && !uploadReqVO.getPluginIcon().isEmpty()) {
             try {
@@ -102,7 +106,7 @@ public class PluginInfoServiceImpl implements PluginInfoService {
             }
         }
 
-        // 6. 保存插件信息（优先使用用户输入的名称和描述，否则使用plugin.json中的）
+        // 7. 保存插件信息（优先使用用户输入的名称和描述，否则使用plugin.json中的）
         PluginInfoDO pluginInfoDO = PluginInfoDO.builder()
                 .pluginId(metaInfo.getPluginId())
                 .pluginName(StrUtil.isNotBlank(uploadReqVO.getPluginName()) ? uploadReqVO.getPluginName() : metaInfo.getPluginName())
@@ -112,14 +116,16 @@ public class PluginInfoServiceImpl implements PluginInfoService {
                 .pluginPackage(Long.parseLong(fileId))
                 .pluginIcon(pluginIconId)
                 .pluginMetaInfo(pluginJson)
+                .pluginConfigInfo(pluginSchemaJson)  // 插件配置模板，来自zip包中的plugin.schema.json
                 .status(PluginStatusConstants.DISABLED)
                 .build();
         pluginInfoRepository.insert(pluginInfoDO);
 
-        // 7. 保存包信息
-        savePackageInfo(metaInfo, pluginInfoDO.getPluginId(), pluginInfoDO.getPluginVersion());
+        // 8. 检测并保存包信息（自动检测前端/后端包）
+        List<PackageInfo> packages = pluginZipValidator.detectPackages(content);
+        savePackageInfo(packages, pluginInfoDO.getPluginId(), pluginInfoDO.getPluginVersion());
 
-        // 8. 保存配置信息
+        // 9. 保存配置信息
         saveConfigInfo(metaInfo, pluginInfoDO.getPluginId(), pluginInfoDO.getPluginVersion());
 
         log.info("插件上传成功: pluginId={}, version={}", metaInfo.getPluginId(), pluginInfoDO.getPluginVersion());
@@ -353,13 +359,13 @@ public class PluginInfoServiceImpl implements PluginInfoService {
     }
 
     /**
-     * 保存包信息
+     * 保存包信息（使用自动检测的包信息）
      */
-    private void savePackageInfo(PluginMetaInfo metaInfo, String pluginId, String pluginVersion) {
-        if (CollUtil.isEmpty(metaInfo.getPackages())) {
+    private void savePackageInfo(List<PackageInfo> packages, String pluginId, String pluginVersion) {
+        if (CollUtil.isEmpty(packages)) {
             return;
         }
-        for (PluginMetaInfo.PluginPackageInfo packageInfo : metaInfo.getPackages()) {
+        for (PackageInfo packageInfo : packages) {
             PluginPackageInfoDO packageDO = PluginPackageInfoDO.builder()
                     .pluginId(pluginId)
                     .pluginVersion(pluginVersion)

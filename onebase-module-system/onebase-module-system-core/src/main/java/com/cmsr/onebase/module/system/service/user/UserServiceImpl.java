@@ -46,7 +46,6 @@ import com.cmsr.onebase.module.system.service.permission.RoleService;
 import com.cmsr.onebase.module.system.service.post.PostService;
 import com.cmsr.onebase.module.system.service.tenant.TenantService;
 import com.cmsr.onebase.module.system.vo.auth.AuthRegisterReqVO;
-import com.cmsr.onebase.module.system.vo.dept.DeptSaveReqVO;
 import com.cmsr.onebase.module.system.vo.dept.DeptSimpleListRespVO;
 import com.cmsr.onebase.module.system.vo.role.RoleInsertReqVO;
 import com.cmsr.onebase.module.system.vo.user.*;
@@ -146,7 +145,6 @@ public class UserServiceImpl implements UserService {
     @LogRecord(type = SYSTEM_USER_TYPE, subType = SYSTEM_USER_CREATE_SUB_TYPE, bizNo = "{{#user.id}}",
             success = SYSTEM_USER_CREATE_SUCCESS)
     @CacheEvict(value = RedisKeyConstants.USER_FIND_BY_DEPT_IDS, allEntries = true)
-    // CacheEvict 不要beforeInvocation=true，避免进方法体前阻塞
     public Long createUser(UserInsertReqVO createReqVO) {
         long startNs = System.nanoTime();
         try {
@@ -222,6 +220,8 @@ public class UserServiceImpl implements UserService {
         validateMobileUnique(null, userDO.getMobile());
         // 校验邮箱唯一
         validateEmailUnique(null, userDO.getEmail());
+        // 检查用户是否超出租户用户数限制
+        validateTenantUserCountMaxLimit();
     }
 
     @Override
@@ -352,14 +352,14 @@ public class UserServiceImpl implements UserService {
         AdminUserDO oldUser = validateUserForCreateOrUpdate(updateReqVO.getId(), updateReqVO.getUsername(),
                 updateReqVO.getMobile(), updateReqVO.getEmail(), updateReqVO.getDeptId(), updateReqVO.getPostIds());
         checkTenantUserCountLimit(updateReqVO.getStatus(), oldUser);
-        //1.2 检查用户部门
-        if (oldUser.getDeptId() != null && !oldUser.getDeptId().equals(updateReqVO.getDeptId())){
+        // 1.2 检查用户部门
+        if (oldUser.getDeptId() != null && !oldUser.getDeptId().equals(updateReqVO.getDeptId())) {
             DeptDO dept = deptService.getDept(oldUser.getDeptId());
-            if (Objects.equals(dept.getLeaderUserId(), oldUser.getId())){
+            if (Objects.equals(dept.getLeaderUserId(), oldUser.getId())) {
                 throw exception(USER_DEPT_LEADER_NOT_ALLOW_CHANGE, dept.getName());
             }
-            if (!dept.getAdminUserIds().isEmpty()){
-                if (dept.getAdminUserIds().contains(oldUser.getId())){
+            if (!dept.getAdminUserIds().isEmpty()) {
+                if (dept.getAdminUserIds().contains(oldUser.getId())) {
                     throw exception(USER_DEPT_ADMIN_NOT_ALLOW_CHANGE, dept.getName());
                 }
             }
@@ -592,12 +592,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<AdminUserDO> getUserListNoDept(Integer userType) {
-        if (null == userType) {
-            return userDataRepository.findNullDeptUser();
-        } else {
-            return userDataRepository.findUserByUserType(userType);
-        }
+    public List<AdminUserDO> getNoneDeptUserList(Integer userType) {
+        return userDataRepository.findNoneDeptUserList(userType);
     }
 
     @Override
@@ -1191,17 +1187,16 @@ public class UserServiceImpl implements UserService {
 
     // 获取三方用户部门是否存在
     private Long createThirdDefaultDept() {
-        DeptSaveReqVO deptRespVO = new DeptSaveReqVO();
+        DeptDO deptNewVO = new DeptDO();
+        deptNewVO.setDeptType(DeptTypeEnum.THIRD.getCode());
+        deptNewVO.setDeptCode(DeptCodeEnum.DEFAULT_THIRD_DEPT.getCode());
 
-        deptRespVO.setDeptType(DeptTypeEnum.THIRD.getCode());
-        deptRespVO.setDeptCode(DeptCodeEnum.DEFAULT_THIRD_DEPT.getCode());
-        DeptDO deptDO = deptService.findDeptByCodeAndType(deptRespVO);
-
+        DeptDO deptDO = deptService.findDeptByCodeAndType(deptNewVO);
         if (null == deptDO) {
-            deptRespVO.setName(DeptCodeEnum.DEFAULT_THIRD_DEPT.getName());
-            deptRespVO.setParentId(DeptDO.PARENT_ID_ROOT);
-            deptRespVO.setStatus(CommonStatusEnum.ENABLE.getStatus());
-            return deptService.createThirdDefaultDept(deptRespVO);
+            deptNewVO.setName(DeptCodeEnum.DEFAULT_THIRD_DEPT.getName());
+            deptNewVO.setParentId(DeptDO.PARENT_ID_ROOT);
+            deptNewVO.setStatus(CommonStatusEnum.ENABLE.getStatus());
+            return deptService.createThirdDefaultDept(deptNewVO);
         }
         return deptDO.getId();
     }
@@ -1464,7 +1459,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public PageResult<UserSimpleRespVO> getUserPage(UserPageApiReqVO pageReqVO) {
         PageResult<AdminUserDO> userDOList = userDataRepository.selectPage(UserStatusEnum.NORMAL.getStatus(), pageReqVO);
-        if(org.apache.commons.collections4.CollectionUtils.isEmpty(userDOList.getList())){
+        if (org.apache.commons.collections4.CollectionUtils.isEmpty(userDOList.getList())) {
             return PageResult.empty();
         }
         return BeanUtils.toBean(userDOList, UserSimpleRespVO.class);

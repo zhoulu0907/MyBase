@@ -39,22 +39,18 @@ public class SwitchConditionNodeComponent extends NodeSwitchComponent {
         InLoopDepth inLoopDepth = nodeData.getInLoopDepth();
         Map<String, Object> expressionContext = VariableProvider.resolveLoopVariables(this, inLoopDepth, variableContext.getNodeVariables());
 
-        //
         if (executeContext.hasNodeProcessResult(this.getTag())) {
             String result = (String) executeContext.getNodeProcessResult(this.getTag());
             executeContext.addLog("分支节点已执行过，直接返回结果: " + result);
             return result;
         }
-        //
         String result = "tag:" + evaluateSwitchCondition(nodeData, expressionContext);
         executeContext.addLog("分支节点执行完毕，结果为: " + result);
-        //
         executeContext.putNodeProcessResult(this.getTag(), result);
         return result;
     }
 
     private String evaluateSwitchCondition(SwitchConditionNodeData nodeData, Map<String, Object> expressionContext) {
-        //
         for (SwitchConditionNodeData.Case aCase : nodeData.getCases()) {
             List<Conditions> conditions = aCase.getFilterCondition();
             OrExpression orExpression = flowConditionsProvider.formatConditionsForExpression(conditions, expressionContext);

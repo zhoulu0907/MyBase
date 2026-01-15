@@ -29,4 +29,8 @@ public class DeptAndUsersReqVO {
 
     @Schema(description = "用户类型", example = "1024")
     private Integer userType;
+
+    @Schema(description = "部门类型", example = "1024")
+    private String deptType;
+
 }
