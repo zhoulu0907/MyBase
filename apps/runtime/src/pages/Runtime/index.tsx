@@ -65,6 +65,7 @@ const Runtime: React.FC = () => {
   const cutTreeItemWidth = 25;
   const { curMenu, setCurMenu } = menuSignal;
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
+  const viewDetailId = search.get('viewDetail');
 
   const { appId, tenantId } = useParams();
 
@@ -174,7 +175,11 @@ const Runtime: React.FC = () => {
         id: appID
       });
 
-      if (appNavigationConfig.webDefaultMenu === 'default' || appNavigationConfig.webDefaultMenu === '') {
+      if (
+        appNavigationConfig.webDefaultMenu === 'default' ||
+        appNavigationConfig.webDefaultMenu === '' ||
+        viewDetailId
+      ) {
         let curMenuObj = curMenuId ? findMenuWithParents(pageList, [], curMenuId) : findMenuWithParents(pageList, []);
 
         if (!curMenuObj) {
@@ -186,6 +191,8 @@ const Runtime: React.FC = () => {
         }
       } else {
         const curMenuObj = findMenuWithParents(pageList, [], appNavigationConfig.webDefaultMenu);
+
+        console.log(curMenuObj);
 
         if (curMenuObj) {
           setExpandedKeys(curMenuObj.parentIds);
@@ -217,6 +224,11 @@ const Runtime: React.FC = () => {
   // 更新当前路由的 curMenu（不刷新页面）
   const handleCurMenuUrl = async (curMenuId: string) => {
     const sp = new URLSearchParams(location.search);
+    sp.delete('businessUuid');
+    sp.delete('instanceId');
+    sp.delete('taskId');
+    sp.delete('pageSetId');
+    sp.delete('viewDetail');
     sp.set('curMenu', String(curMenuId));
 
     const to = `${location.pathname}?${sp.toString()}`;
