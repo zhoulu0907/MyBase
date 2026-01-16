@@ -35,12 +35,14 @@ export default function UserFormModal({
   const [loading, setLoading] = React.useState(false);
   const [statusCheckedValue, setStatusCheckedValue] = useState(false);
   const [hasDeptQueryPermission, setHasDeptQueryPermission] = useState(true);
+  const [isSystemUser, setIsSystemUser] = useState(false);
 
   useEffect(() => {
     if (visible) {
       form.resetFields();
       if (initialValues) {
         form.setFieldsValue(initialValues);
+        setIsSystemUser(initialValues.adminType === UserType.SYSTEM);
         setStatusCheckedValue(initialValues.status === StatusEnum.ENABLE ? true : false);
       } else {
         // 创建时用户状态默认为开启
@@ -103,8 +105,6 @@ export default function UserFormModal({
       setLoading(false);
     }
   };
-
-  const isSystemUser = form.getFieldValue('adminType') === UserType.SYSTEM;
 
   return (
     <Modal
