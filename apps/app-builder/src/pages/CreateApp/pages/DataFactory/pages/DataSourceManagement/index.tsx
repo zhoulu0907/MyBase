@@ -1,6 +1,6 @@
 import CreateExternalModal from '@/components/CreateExternalModal';
 import { useAppStore } from '@/store';
-import { Button, Input, Message, Pagination, Spin } from '@arco-design/web-react';
+import { Button, Input, Message, Modal, Pagination, Spin } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
 import {
   collectETLDatasource,
@@ -100,11 +100,17 @@ const DataSourceManagementPage: React.FC = () => {
   };
 
   const handleDeleteDatasource = async (datasourceId: string) => {
-    const res = await deleteETLDatasource(datasourceId);
-    if (res) {
-      Message.success('删除成功');
-      handleGetDatasourceList();
-    }
+    Modal.confirm({
+      title: '确认删除',
+      content: '确定要删除吗？删除后无法恢复。',
+      onOk: async () => {
+        const res = await deleteETLDatasource(datasourceId);
+        if (res) {
+          Message.success('删除成功');
+          handleGetDatasourceList();
+        }
+      }
+    });
   };
 
   const handleCreateExternalModalCreate = (datasourceUuid: string) => {
