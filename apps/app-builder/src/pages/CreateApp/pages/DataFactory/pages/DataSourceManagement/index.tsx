@@ -2,7 +2,13 @@ import CreateExternalModal from '@/components/CreateExternalModal';
 import { useAppStore } from '@/store';
 import { Button, Input, Message, Pagination, Spin } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
-import { deleteETLDatasource, getETLDatasource, pageETLDatasource, type PageDatasourceItem } from '@onebase/app';
+import {
+  collectETLDatasource,
+  deleteETLDatasource,
+  getETLDatasource,
+  pageETLDatasource,
+  type PageDatasourceItem
+} from '@onebase/app';
 import { debounce } from 'lodash-es';
 import React, { useEffect, useRef, useState } from 'react';
 import DataSourceCard from './card';
@@ -43,6 +49,14 @@ const DataSourceManagementPage: React.FC = () => {
     setDatasourceList(res.list);
     setTotal(res.total);
     setLoading(false);
+  };
+
+  const handleCollectDatasource = async (datasourceId: string) => {
+    const res = await collectETLDatasource(datasourceId);
+    if (res) {
+      Message.success('采集任务已提交，请稍后刷新查看采集结果');
+      handleGetDatasourceList();
+    }
   };
 
   const debouncedSearchRef = useRef(
@@ -133,6 +147,7 @@ const DataSourceManagementPage: React.FC = () => {
                     }}
                     handleDelete={handleDeleteDatasource}
                     handlePage={handleGetDatasourceList}
+                    handleCollect={handleCollectDatasource}
                     data={item}
                   />
                 ))}
