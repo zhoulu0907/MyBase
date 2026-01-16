@@ -1,6 +1,5 @@
 import { Button, Form, Input, Message, Modal } from '@arco-design/web-react';
 import { IconFullscreen, IconFullscreenExit } from '@arco-design/web-react/icon';
-import { PageType } from '@onebase/app';
 import { pagesRuntimeSignal } from '@onebase/common';
 import {
   EDITOR_TYPES,
