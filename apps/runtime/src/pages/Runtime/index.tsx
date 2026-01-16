@@ -224,13 +224,8 @@ const Runtime: React.FC = () => {
   // 更新当前路由的 curMenu（不刷新页面）
   const handleCurMenuUrl = async (curMenuId: string) => {
     const sp = new URLSearchParams(location.search);
-    sp.delete('businessUuid');
-    sp.delete('instanceId');
-    sp.delete('taskId');
-    sp.delete('pageSetId');
-    sp.delete('viewDetail');
     sp.set('curMenu', String(curMenuId));
-
+    
     const to = `${location.pathname}?${sp.toString()}`;
     navigate(to, { replace: true });
   };

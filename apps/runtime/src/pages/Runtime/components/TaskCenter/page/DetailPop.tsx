@@ -11,7 +11,7 @@ import PreviewContainer from './DetailForm';
 import FlowView from '../../../../../../../app-builder/src/pages/Editor/components/flowView';
 import { type FetchExecTaskReq } from '@onebase/app';
 import { getCorpResourceById } from '@onebase/common';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import FlowPredict from '../../../../Runtime/components/preview/flowPredict';
 const Row = Grid.Row;
 const Col = Grid.Col;
@@ -46,6 +46,8 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
   const formRef = useRef<any>(null);
   const [popupVisibleMap, setPopupVisibleMap] = useState<any>({});
   const [search] = useSearchParams();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const setPopupVisibleByIndex = (index: number, visible: boolean, item?: any) => {
     if (item?.buttonName && detailData?.buttonConfigs) {
@@ -95,7 +97,7 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
   }
 
   const copyLink = async () => {
-    const [hashPath, queryString] = location.hash.split('?');
+    const [hashPath, queryString] = window.location.hash.split('?');
     const searchParams = new URLSearchParams(queryString);
     searchParams.set('viewDetail', search.get('curMenu') || '');
     searchParams.set('businessUuid', rowData.businessUuid || '');
@@ -103,7 +105,7 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
     searchParams.set('taskId', rowData.taskId || '');
     searchParams.set('pageSetId', rowData.pageSetId || '');
 
-    const newUrl = `${location.origin}${location.pathname}${hashPath}?${searchParams.toString()}`;
+    const newUrl = `${window.location.origin}${window.location.pathname}${hashPath}?${searchParams.toString()}`;
     try {
       if (navigator.clipboard && window.isSecureContext) {
         await navigator.clipboard.writeText(newUrl);
@@ -276,6 +278,21 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
     }
   }, [listType]);
 
+  const closeDrawer = () => {
+    setPopVisible(false);
+    console.log(location);
+
+    const sp = new URLSearchParams(location.search);
+    sp.delete('businessUuid');
+    sp.delete('instanceId');
+    sp.delete('taskId');
+    sp.delete('pageSetId');
+    sp.delete('viewDetail');
+
+    const to = `${location.pathname}?${sp.toString()}`;
+    navigate(to, { replace: true });
+  };
+
   return (
     <section>
       <Drawer
@@ -284,12 +301,8 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
         title={renderTitle()}
         visible={detailPopVisible}
         footer={renderDrawerFooter()}
-        onOk={() => {
-          setPopVisible(false);
-        }}
-        onCancel={() => {
-          setPopVisible(false);
-        }}
+        onOk={closeDrawer}
+        onCancel={closeDrawer}
       >
         <div className="draw-wrap-box">
           <Row className="header-row" style={{ marginBottom: 16 }}>
