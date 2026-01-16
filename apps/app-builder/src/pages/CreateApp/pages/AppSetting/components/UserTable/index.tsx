@@ -31,7 +31,7 @@ import {
   type UserMembers
 } from '@onebase/app';
 import { AddMembers, PUBLISH_MODULE } from '@onebase/common';
-import { getDeptsById, type GetDeptsByIdReq } from '@onebase/platform-center';
+import { getDeptsById, CodeType, type GetDeptsByIdReq } from '@onebase/platform-center';
 import { debounce } from 'lodash-es';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAppStore } from '@/store/store_app';
@@ -150,8 +150,8 @@ const UserMembers = (props: IProps) => {
       const params: GetDeptUserReq = {
         roleId: roleInfo.id,
         deptId,
-        deptType: curAppInfo.publishModel === PUBLISH_MODULE.SASS ? 'corp' : 'tenant',
-        userType: curAppInfo.publishModel === PUBLISH_MODULE.SASS ? 3 : 2,
+        deptType: curAppInfo.publishModel === PUBLISH_MODULE.SASS ? CodeType.CORP : CodeType.TENANT,
+        userType: curAppInfo.publishModel === PUBLISH_MODULE.SASS ? RoleType.CUSTOM : RoleType.USER,
         keywords
       };
       let res = [];
