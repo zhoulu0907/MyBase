@@ -30,7 +30,6 @@ import org.anyline.metadata.Table;
 import org.anyline.proxy.ServiceProxy;
 import org.anyline.service.AnylineService;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Strings;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -62,20 +61,17 @@ public class DataInspectServiceImpl implements DataInspectService {
     @Override
     public boolean testConnection(TestConnectionVO pingVO) {
         Long datasourceId = pingVO.getId();
-        EtlDatasourceDO datasourceDO;
         String datasourceType = pingVO.getDatasourceType();
-        ConnectCryptoProperties connectProperties;
-        if (datasourceId == null) {
-            connectProperties = pingVO.getConfig();
-        } else {
-            datasourceDO = datasourceRepository.getById(datasourceId);
-            connectProperties = JsonUtils.parseObject(datasourceDO.getConfig(), ConnectCryptoProperties.class);
-            String inputPwd = pingVO.getConfig().getPassword();
-            String storedPwd = connectProperties.getPassword();
-            if (StringUtils.isNotBlank(inputPwd) && !Strings.CS.equals(inputPwd, storedPwd)) {
-                connectProperties.setPassword(inputPwd);
+        ConnectCryptoProperties connectProperties = pingVO.getConfig();
+        if (datasourceId != null) {
+            EtlDatasourceDO datasourceDO = datasourceRepository.getById(datasourceId);
+            // 判断密码是否为脱敏数据
+            if (StringUtils.isBlank(connectProperties.getPassword())) {
+                ConnectCryptoProperties storedProperties = JsonUtils.parseObject(datasourceDO.getConfig(), ConnectCryptoProperties.class);
+                connectProperties.setPassword(storedProperties.getPassword());
             }
         }
+
         DataSource datasource = dataSourceFactory.constructDataSource(datasourceType, connectProperties, true);
         String runnerKey = "ping-" + UuidUtils.getUuid();
 
