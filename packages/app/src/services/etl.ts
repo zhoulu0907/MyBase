@@ -26,6 +26,8 @@ export const getETLDatasource = (datasourceId: string) => etlService.get(`/datas
 
 export const pageETLDatasource = (params: PageDatasourceReq) => etlService.get(`/datasource/page`, params);
 
+export const collectETLDatasource = (datasourceId: string) => etlService.post(`/datasource/collect?id=${datasourceId}`);
+
 export const deleteETLDatasource = (datasourceId: string) => etlService.post(`/datasource/delete?id=${datasourceId}`);
 
 export const previewETLDatasource = (params: PreviewDatasourceReq) => etlService.post(`/datasource/preview`, params);

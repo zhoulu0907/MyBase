@@ -3,6 +3,7 @@ import { IconEdit, IconMoreVertical } from '@arco-design/web-react/icon';
 import { type PageDatasourceItem } from '@onebase/app';
 import React from 'react';
 
+import { IconDownload } from '@douyinfe/semi-icons';
 import styles from './index.module.less';
 /**
  * Card 组件
@@ -11,10 +12,11 @@ export interface DataSourceCardProps {
   data: PageDatasourceItem;
   handleEdit: Function;
   handleDelete: Function;
+  handleCollect: Function;
   handlePage: Function;
 }
 
-const DataSourceCard: React.FC<DataSourceCardProps> = ({ data, handleEdit, handleDelete, handlePage }) => {
+const DataSourceCard: React.FC<DataSourceCardProps> = ({ data, handleEdit, handleDelete, handleCollect }) => {
   return (
     <div className={styles.card}>
       <div className={styles.cardHeader}>
@@ -44,6 +46,14 @@ const DataSourceCard: React.FC<DataSourceCardProps> = ({ data, handleEdit, handl
           >
             <IconEdit />
             <span>编辑</span>
+          </div>
+
+          <div
+            style={{ display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer' }}
+            onClick={() => handleCollect(data.id)}
+          >
+            <IconDownload />
+            <span>采集</span>
           </div>
           <Dropdown
             position="bl"
