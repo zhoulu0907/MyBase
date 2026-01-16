@@ -103,7 +103,6 @@ const EtlDataFactoryPage: React.FC = () => {
       content: '确定要删除吗？删除后无法恢复。',
       onOk: async () => {
         const res = await deleteETLFlow(flowId);
-        console.log('handleDeleteFlow res: ', res);
         if (res) {
           Message.success('删除成功');
           handleGetETLFlowList();
