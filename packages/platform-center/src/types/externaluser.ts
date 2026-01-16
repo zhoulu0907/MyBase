@@ -96,10 +96,6 @@ export interface updateStatusParams {
   status: number;
 }
 
-export interface pluginParams {
-  name?: string;
-  status?: number | null;
-}
 
 export interface updatePasswordParams {
   /**
@@ -277,3 +273,5 @@ export interface forgotPWDParams {
      */
     verifyCode: string;
 }
+
+// 插件相关类型已迁移至 types/plugin.ts

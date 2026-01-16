@@ -15,6 +15,20 @@
     }
   }
 
+  .pluginSection {
+    width: 100%;
+    margin-bottom: 24px;
+
+    .sectionTitle {
+      font-size: 18px;
+      font-weight: 500;
+      color: #272e3b;
+      margin-bottom: 16px;
+      padding-left: 8px;
+      border-left: 4px solid #009E9E;
+    }
+  }
+
   .cardContainer {
     width: 100%;
     height: 100%;
@@ -24,12 +38,13 @@
     justify-content: flex-start;
     flex-wrap: wrap;
     gap: 16px;
+    margin-bottom: 20px;
 
     .card {
-      width: calc((100% - 32px) / 3); // 一行显示3个组件：总宽度减去2个gap(16px*2=32px)，然后除以3
-
-      min-width: 400px;
-      height: 100px;
+      // 默认一行 3 个卡片，留出 2 个 gap（16px*2=32px）
+      width: calc((100% - 32px) / 3);
+      min-width: 280px;
+      min-height: 100px;
       border: 2px solid #009e9e;
       border-radius: 16px;
       padding: 16px;
@@ -38,6 +53,12 @@
       flex-direction: row;
       align-items: center;
       justify-content: space-between;
+      position: relative;
+
+      &:hover {
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+        border-color: #009e9e;
+      }
 
       .icon {
         padding: 12px;
@@ -49,11 +70,14 @@
       .textContent {
         display: flex;
         flex-direction: column;
+        flex: 1;
+        margin-right: 16px;
 
         .name {
           font-size: 16px;
           font-weight: 500;
           color: #272e3b;
+          margin-bottom: 4px;
         }
         .description {
           color: #86909c;
@@ -63,7 +87,93 @@
           overflow: hidden;
           text-overflow: ellipsis;
         }
+        .pluginInfo {
+          margin-top: 8px;
+          font-size: 12px;
+          color: #86909c;
+          display: flex;
+          gap: 12px;
+          
+          span {
+            white-space: nowrap;
+          }
+        }
+
+        .cardActions {
+          margin-top: 8px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          justify-content: flex-end;
+          position: absolute;
+          bottom: 8px;
+          right: 8px;
+        }
+        .actionBtn {
+          border: none;
+          background: transparent;
+          padding: 4px;
+          cursor: pointer;
+          color: #4e5969;
+
+          &:hover {
+            color: #165dff;
+          }
+        }
       }
     }
+  }
+
+  .pagination {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 16px;
+    padding: 16px 0;
+    border-top: 1px solid #f0f1f2;
+  }
+
+  .settingsBtn {
+    border: none;
+    background: transparent;
+    padding: 4px;
+    cursor: pointer;
+    color: #4e5969;
+
+    &:hover {
+      color: #165dff;
+    }
+  }
+
+  .settingsBtnTop {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    border: none;
+    background: transparent;
+    padding: 4px;
+    cursor: pointer;
+    color: #4e5969;
+
+    &:hover {
+      color: #165dff;
+    }
+  }
+
+  .configContent {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .configItem {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .configLabel {
+    min-width: 80px;
+    color: #4e5969;
   }
 }
