@@ -15,7 +15,7 @@ import {
   Tag
 } from '@arco-design/web-react';
 import { IconMoreVertical, IconPlus } from '@arco-design/web-react/icon';
-import { TENANT_THIRD_PERMISSION as ACTIONS, hasAllPermissions, hasPermission } from '@onebase/common';
+import { TENANT_THIRD_PERMISSION as ACTIONS, hasAllPermissions, hasPermission, DynamicIcon } from '@onebase/common';
 import type { externalUserListParams, updateExternalPwdParams } from '@onebase/platform-center';
 import {
   deleteExternalUserApi,
@@ -31,6 +31,7 @@ import s from '../index.module.less';
 import UserFormModal from './UserFormModal';
 import { CreateSource, CreateSourceValue, statusOptions } from '../constant';
 import type { CreateSourceKey, DataItem, externalUserRecord, userApplicationList, UserTableProps } from '../type';
+import { appIconMap } from '@onebase/ui-kit';
 
 export default function UserTable({
   selectedDeptId = undefined,
@@ -181,8 +182,17 @@ export default function UserTable({
             >
               {applicationList?.map((item, index) => {
                 return (
-                  <Avatar key={index} style={{ backgroundColor: item.iconColor }}>
-                    {item.iconName}
+                  <Avatar key={index} style={{ backgroundColor: item.iconColor, fontSize: '16px' }}>
+                    {item.iconName ? (
+                      <DynamicIcon
+                        IconComponent={appIconMap[item.iconName as keyof typeof appIconMap]}
+                        theme="outline"
+                        size={16}
+                        fill="#F2F3F5"
+                      />
+                    ) : (
+                      item.appName?.slice(0, 1)
+                    )}
                   </Avatar>
                 );
               })}
@@ -222,7 +232,7 @@ export default function UserTable({
         width: 100,
         dataIndex: 'createSource',
         render: (source: CreateSourceKey) => (
-          <Tag color={source === CreateSourceValue.BACK ? "cyan" : 'blue'} size="small">
+          <Tag color={source === CreateSourceValue.BACK ? 'cyan' : 'blue'} size="small">
             {CreateSource[source]}
           </Tag>
         )

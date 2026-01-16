@@ -1,0 +1,66 @@
+.content {
+  height: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-content: flex-start;
+}
+
+.componentItem {
+  width: calc(100% - 0.16rem);
+  cursor: move;
+  box-sizing: border-box;
+  border: 1px solid transparent;
+  border-radius: 0.16rem;
+  transition: border-color 0.2s ease;
+  position: relative;
+  flex-shrink: 0;
+  flex-grow: 0;
+  margin: 0.08rem;
+
+  &:hover {
+    border-color: #4fae7b;
+  }
+}
+
+.operationArea {
+  position: absolute;
+  top: -0.36rem;
+  right: 0.32rem;
+  height: 0.48rem;
+  padding: 0.08rem;
+  border: 1px solid #e5e6eb;
+  border-radius: 0.16rem;
+  box-sizing: border-box;
+  background-color: #fff;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 10;
+
+  .divider {
+    margin: 0 0.08rem;
+  }
+
+  .copyButton,
+  .deleteButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: var(--fontSize);
+    color: #4e5969;
+    background-color: #fff;
+
+    &:hover {
+      transform: scale(1.1);
+    }
+  }
+
+  .deleteButton {
+    color: #f53f3f;
+  }
+}

@@ -1,0 +1,112 @@
+.XTabsLayout {
+  width: 100%;
+  border-radius: 00.16rem;
+
+  .arco-tab-cell-container {
+    .arco-tab-cell.active {
+      color: rgb(var(--primary-6)) !important;
+    }
+
+    .arco-tab-cell-underline-inner {
+      background-color: rgb(var(--primary-6));
+    }
+  }
+
+  .arco-tab-cell-container-wrap {
+    background-color: transparent;
+  }
+
+  .arco-tab-cell-container.type-card {
+    border: 1PX solid rgb(var(--primary-6));
+  }
+
+  .arco-tab-cell.vertical:not(.custom).card {
+    color: rgb(var(--primary-6));
+  }
+
+  .arco-tab-cell.vertical:not(.custom).card:not(:last-child) {
+    border-right: 1PX solid rgb(var(--primary-6));
+  }
+
+  .arco-tab-cell.vertical:not(.custom).card.active {
+    background-color: rgb(var(--primary-6)); 
+    color: rgb(var(--primary-1)) !important;
+  }
+
+  .item {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding-top: 0.36rem;
+
+    .content {
+      height: 100%;
+      min-height: 1rem;
+      width: 100%;
+      box-sizing: border-box;
+      display: flex;
+      flex-wrap: wrap;
+      align-content: flex-start;
+    }
+
+    .componentItem {
+      cursor: move;
+      box-sizing: border-box;
+      border: 1px dashed transparent;
+      border-radius: 0.16rem;
+      transition: border-color 0.2s ease;
+      position: relative;
+
+      & .operationArea {
+        pointer-events: auto !important;
+      }
+
+      &:hover {
+        border-color: rgb(var(--primary-6));
+      }
+    }
+
+    .operationArea {
+      position: absolute;
+      top: -0.36rem;
+      right: 0.32rem;
+      height: 0.48rem;
+      padding: 0.08rem;
+      border: 1px solid #e5e6eb;
+      border-radius: 0.16rem;
+      box-sizing: border-box;
+      background-color: #fff;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 10;
+
+      .divider {
+        margin: 0 0.08rem;
+      }
+
+      .copyButton,
+      .deleteButton {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: var(--fontSize);
+        color: #4e5969;
+        background-color: #fff;
+
+        &:hover {
+          transform: scale(1.1);
+        }
+      }
+
+      .deleteButton {
+        color: #f53f3f;
+      }
+    }
+  }
+}

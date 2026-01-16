@@ -1,11 +1,11 @@
 import { memo } from 'react';
 import { Carousel, Ellipsis } from '@arco-design/mobile-react';
-import { STATUS_OPTIONS, STATUS_VALUES, FormSchema } from '@onebase/ui-kit';
+import { STATUS_OPTIONS, STATUS_VALUES, ShowSchema } from '@onebase/ui-kit';
 import { getFileUrlById } from '@onebase/platform-center';
 import styles from './index.module.css';
 import '../index.css';
 
-type XCarouselConfig = typeof FormSchema.XCarouselFormSchema.config;
+type XCarouselConfig = typeof ShowSchema.XCarouselFormSchema.config;
 
 const XCarousel = memo((props: XCarouselConfig & { runtime?: boolean; detailMode?: boolean; }) => {
   const {
@@ -35,7 +35,7 @@ const XCarousel = memo((props: XCarouselConfig & { runtime?: boolean; detailMode
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
       >
-        {carouselConfig.map((img, index) => {
+        {carouselConfig.map((img: any, index: number) => {
           const urlImg = getFileUrlById(img.fileId);
           return (
             <div className={styles.imageWrapper} key={index} onClick={() => window.open(urlImg)}>

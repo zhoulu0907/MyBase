@@ -159,6 +159,12 @@ export interface GetDeptUserReq {
    */
   deptId?: string;
   /**
+   * 部门类型
+   * 根据应用类型确定部门类型 SaaS=>企业  内部=>空间
+   * tenant空间  corp企业  third三方用户
+   */
+  deptType?: string;
+  /**
    * 搜索关键词
    */
   keywords?: string;
@@ -166,6 +172,11 @@ export interface GetDeptUserReq {
    * 角色ID
    */
   roleId: string;
+  /**
+   * 用户类型
+   * 1平台管理员  2空间用户  3企业用户  4三方用户
+   */
+  userType?: number;
 }
 
 export interface getRoleMembersReq {

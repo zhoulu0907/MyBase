@@ -1,13 +1,13 @@
 import AvatarSVG from '@/assets/images/avatar.svg';
+import { logout } from '@/utils/session';
 import { Cell, Popup } from '@arco-design/mobile-react';
 import React from 'react';
-import { logout } from '@/utils/session';
 
-import { useNavigate } from 'react-router-dom';
 import accountSVG from '@/assets/images/account.svg';
 import fileSVG from '@/assets/images/file.svg';
 import lockSVG from '@/assets/images/lock.svg';
 import logoutSVG from '@/assets/images/logout.svg';
+import { useNavigate } from 'react-router-dom';
 import styles from './index.module.less';
 
 interface MeProps {
@@ -20,14 +20,14 @@ const Me: React.FC<MeProps> = ({ nickname, username }) => {
 
   const handleLogout = () => {
     // 关闭弹窗
-    window.modalInstance?.close();
+    (globalThis as any).modalInstance?.close();
     sessionStorage.removeItem('ENTITY_UUID');
     // 跳转到登录页
     logout(navigate);
   };
 
   const toLogout = () => {
-    window.modalInstance = Popup.open({
+    (globalThis as any).modalInstance = Popup.open({
       contentStyle: { borderRadius: '10px 10px 0 0' },
       children: (
         <div className={styles.popupContainer}>
@@ -35,7 +35,7 @@ const Me: React.FC<MeProps> = ({ nickname, username }) => {
           <div className={styles.popupLogout} onClick={handleLogout}>
             退出登录
           </div>
-          <div className={styles.popupCancel} onClick={() => window.modalInstance?.close()}>
+          <div className={styles.popupCancel} onClick={() => (globalThis as any).modalInstance?.close()}>
             取消
           </div>
         </div>

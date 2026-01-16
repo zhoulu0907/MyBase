@@ -2,9 +2,15 @@ import CreateExternalModal from '@/components/CreateExternalModal';
 import { useAppStore } from '@/store';
 import { Button, Input, Message, Pagination, Spin } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
-import { deleteETLDatasource, getETLDatasource, pageETLDatasource, type PageDatasourceItem } from '@onebase/app';
+import {
+  collectETLDatasource,
+  deleteETLDatasource,
+  getETLDatasource,
+  pageETLDatasource,
+  type PageDatasourceItem
+} from '@onebase/app';
 import { debounce } from 'lodash-es';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import DataSourceCard from './card';
 import styles from './index.module.less';
 /**
@@ -24,29 +30,58 @@ const DataSourceManagementPage: React.FC = () => {
 
   const { curAppId } = useAppStore();
 
-  const debouncedSearch = useCallback(
-    debounce(() => {
-      handleGetDatasourceList();
-    }, 500),
-    []
-  );
-
+  // 使用 ref 存储最新的搜索关键字，避免闭包问题
+  const searchDatasourceNameRef = useRef(searchDatasourceName);
   useEffect(() => {
-    handleGetDatasourceList();
-  }, [pageNo, pageSize]);
+    searchDatasourceNameRef.current = searchDatasourceName;
+  }, [searchDatasourceName]);
 
   const handleGetDatasourceList = async () => {
     setLoading(true);
+    const currentSearchName = searchDatasourceNameRef.current;
     const res = await pageETLDatasource({
       applicationId: curAppId,
       pageNo,
-      pageSize
+      pageSize,
+      datasourceName: currentSearchName || undefined
     });
 
     setDatasourceList(res.list);
     setTotal(res.total);
     setLoading(false);
   };
+
+  const handleCollectDatasource = async (datasourceId: string) => {
+    const res = await collectETLDatasource(datasourceId);
+    if (res) {
+      Message.success('采集任务已提交，请稍后刷新查看采集结果');
+      handleGetDatasourceList();
+    }
+  };
+
+  const debouncedSearchRef = useRef(
+    debounce(() => {
+      setPageNo(1); // 搜索时重置到第一页
+      handleGetDatasourceList();
+    }, 500)
+  );
+
+  useEffect(() => {
+    handleGetDatasourceList();
+  }, [pageNo, pageSize]);
+
+  useEffect(() => {
+    debouncedSearchRef.current();
+    return () => {
+      debouncedSearchRef.current.cancel();
+    };
+  }, [searchDatasourceName]);
+
+  useEffect(() => {
+    return () => {
+      debouncedSearchRef.current.cancel();
+    };
+  }, []);
 
   const handleCreateDatasource = () => {
     setEditInitialData(null);
@@ -112,6 +147,7 @@ const DataSourceManagementPage: React.FC = () => {
                     }}
                     handleDelete={handleDeleteDatasource}
                     handlePage={handleGetDatasourceList}
+                    handleCollect={handleCollectDatasource}
                     data={item}
                   />
                 ))}

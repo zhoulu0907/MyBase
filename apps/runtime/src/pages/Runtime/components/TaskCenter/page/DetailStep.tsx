@@ -2,6 +2,7 @@ import { useEffect, useState, type FC } from 'react';
 import { Steps, Avatar } from '@arco-design/web-react';
 // import { IconDownload, IconEye } from '@arco-design/web-react/icon';
 import dayjs from 'dayjs';
+import { getCorpResourceById } from '@onebase/common';
 // import ExpendSp from '@/assets/images/task_center/expend-sp.svg';
 import dotImg from '../../../../../assets/images/task_center/one-dot.svg'
 import systemImg from '../../../../../assets/images/task_center/system.svg'
@@ -123,7 +124,7 @@ const DetailStep: FC<any> = ({ stepData }: any) => {
         isPending = item.taskStatus === 'curr_in_approval' || item.taskStatus === '审批中'
         if (isPending || isNotStart) {
           const user = {imgUrl: '', uName: ''}
-          user.imgUrl = item?.avatar || '';
+          user.imgUrl = item?.avatar ? getCorpResourceById(item.avatar) : '';
           if (item?.operator) {
             user.uName = item.operator?.charAt(0)
           }
@@ -205,40 +206,62 @@ const DetailStep: FC<any> = ({ stepData }: any) => {
     } else {
       hasComment = false
     }
-    return <>
-      <div className="flex-bw-center user-temp">
-        <p className="photo-img">{opperator?.avatar ? <img src={opperator.avatar} alt='' /> : opperator?.operator?.charAt(0)}</p>
-        <div style={{ flex: 1 }}>
-          <p className="flex-bw-center">
-            <span style={{fontSize: '14px'}}>{opperator?.operator}</span>
-            <span className="gray-color">
-              {(nodeItem?.displayTime || opperator?.operatorTime)
-                ? dayjs(nodeItem?.displayTime || opperator?.operatorTime).format('YYYY-MM-DD HH:mm:ss')
-                : '-'}
-            </span>
+    return (
+      <>
+        <div className="flex-bw-center user-temp">
+          <p className="photo-img">
+            {opperator?.avatar ? (
+              <img src={getCorpResourceById(opperator.avatar)} alt="" />
+            ) : (
+              opperator?.operator?.charAt(0)
+            )}
           </p>
-          <p className="flex-bw-center get-width-temp">
-            {
-              (opperator?.autoCopyArr?.length > 0) ? 
-                <p style={{position: 'relative'}}>
-                  <span className={`sp-options ${userMap?.labelColor}`} style={{fontWeight: 'normal'}}>{userMap?.label}</span>&nbsp;
-                  <span className='auto-copy-color-span'>{opperator?.colorText}</span>
-                  <span className='auto-copy-color-span absolute-span'>{opperator?.autoCopyArr?.length}人</span>
-                </p> : 
+          <div style={{ flex: 1 }}>
+            <p className="flex-bw-center">
+              <span style={{ fontSize: '14px' }}>{opperator?.operator}</span>
+              <span className="gray-color">
+                {nodeItem?.displayTime || opperator?.operatorTime
+                  ? dayjs(nodeItem?.displayTime || opperator?.operatorTime).format('YYYY-MM-DD HH:mm:ss')
+                  : '-'}
+              </span>
+            </p>
+            <p className="flex-bw-center get-width-temp">
+              {opperator?.autoCopyArr?.length > 0 ? (
+                <p style={{ position: 'relative' }}>
+                  <span className={`sp-options ${userMap?.labelColor}`} style={{ fontWeight: 'normal' }}>
+                    {userMap?.label}
+                  </span>
+                  &nbsp;
+                  <span className="auto-copy-color-span">{opperator?.colorText}</span>
+                  <span className="auto-copy-color-span absolute-span">{opperator?.autoCopyArr?.length}人</span>
+                </p>
+              ) : (
                 <section>
                   <p>
                     <b className={`sp-options ${userMap?.labelColor}`}>{userMap?.label}</b>
-                    {hasComment && <span className={`gray-color many-node-comment ${collapseObj?.[comment_key]?.moreLineClass} ${collapseObj?.[comment_key]?.isOpen?'open':''}`} data-comment={comment_key}>({opperator.comment})</span>}
+                    {hasComment && (
+                      <span
+                        className={`gray-color many-node-comment ${collapseObj?.[comment_key]?.moreLineClass} ${collapseObj?.[comment_key]?.isOpen ? 'open' : ''}`}
+                        data-comment={comment_key}
+                      >
+                        ({opperator.comment})
+                      </span>
+                    )}
                   </p>
-                  {(hasComment && collapseObj?.[comment_key]?.hasMoreBtn) && <p style={{textAlign: 'right'}}>
-                    <span style={{cursor: 'pointer'}} onClick={() => switchCollapse(opperator)}>{!collapseObj?.[comment_key]?.isOpen ? '展开' : '收起'}</span>
-                  </p>}
+                  {hasComment && collapseObj?.[comment_key]?.hasMoreBtn && (
+                    <p style={{ textAlign: 'right' }}>
+                      <span style={{ cursor: 'pointer' }} onClick={() => switchCollapse(opperator)}>
+                        {!collapseObj?.[comment_key]?.isOpen ? '展开' : '收起'}
+                      </span>
+                    </p>
+                  )}
                 </section>
-            }
-          </p>
+              )}
+            </p>
+          </div>
         </div>
-      </div>
-    </>
+      </>
+    );
   }
 
   function switchCollapse(operatorItem: any) {

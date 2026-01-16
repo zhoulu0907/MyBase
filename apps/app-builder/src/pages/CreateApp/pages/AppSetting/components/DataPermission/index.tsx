@@ -58,7 +58,7 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId, roleType }: IProps)
 
   const [editingPermData, setEditingPermData] = useState<AuthDataGroupVO | null>(null);
   const [variableOptions, setVariableOptions] = useState<TreeSelectDataType[]>([]);
-  const [modalVisible, setModelVisible] = useState<boolean>(false);
+  const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [dataPermissionEntity, setDataPermissionEntity] = useState<MetadataEntityPair>();
 
   useEffect(() => {
@@ -92,7 +92,7 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId, roleType }: IProps)
   // 打开model
   const handleModal = async (status: 'create' | 'edit', id?: string) => {
     setStatus(status);
-    setModelVisible(true);
+    setModalVisible(true);
 
     if (id) {
       // 查找要编辑的权限组
@@ -131,13 +131,12 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId, roleType }: IProps)
       }
     } else {
       // 创建模式下清空编辑数据
-      // setEditingPermData(null);
       setEditingPermData({ ...initialFormValues });
     }
   };
 
   const normalizeCondition = (c: any) => ({
-    fieldId: c?.fieldId != null ? String(c.fieldId) : '',
+    fieldId: c?.fieldId == null ? '' : String(c.fieldId),
     op: c?.fieldOperator ?? '',
     operatorType: c?.fieldValueType ?? 'value',
     value: c?.fieldValue
@@ -170,6 +169,7 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId, roleType }: IProps)
       const resq = await getEntityById(id);
       setDataPermissionEntity({
         entityId: id,
+        entityUuid: id,
         entityName: resq.displayName,
         tableName: resq.tableName
       });
@@ -437,7 +437,7 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId, roleType }: IProps)
         // 转换每个条件为前端格式
         const convertedConditions = groupConditions.map((condition) => {
           // 处理字段值
-          let value = condition.fieldValue || '';
+          let value:any = condition.fieldValue || '';
 
           // 根据字段值类型处理特殊值格式
           if (condition.fieldValueType === 'value') {
@@ -445,7 +445,7 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId, roleType }: IProps)
             if (value.includes(',')) {
               // 检查是否是范围值 (begin,end 格式)
               const rangeValues = value.split(',');
-              if (rangeValues.length === 2 && !isNaN(Number(rangeValues[0])) && !isNaN(Number(rangeValues[1]))) {
+              if (rangeValues.length === 2 && !Number.isNaN(Number(rangeValues[0])) && !Number.isNaN(Number(rangeValues[1]))) {
                 // 可能是范围值，但需要更多信息才能确定
                 // 这里我们保守处理，仍然作为字符串数组
                 value = rangeValues;
@@ -507,7 +507,7 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId, roleType }: IProps)
     try {
       await updateDataGroupPermission(requestData);
       // 提交成功后刷新数据或关闭模态框
-      setModelVisible(false);
+      setModalVisible(false);
       // 提交后刷新数据
       await getFieldsPermission();
       Message.success(status === 'edit' ? '修改数据权限成功' : '添加数据权限成功');
@@ -517,7 +517,7 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId, roleType }: IProps)
   };
 
   const handleModalCancel = () => {
-    setModelVisible(false);
+    setModalVisible(false);
     setEditingPermData(null);
   };
 
