@@ -336,13 +336,6 @@ const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescripto
     fieldMap: [ENTITY_FIELD_TYPE.RELATION.VALUE],
     entityMap: [ENTITY_FIELD_TYPE.RELATION.VALUE]
   },
-  [COMPONENT_TYPE.CAROUSEL_FORM]: {
-    type: COMPONENT_TYPE.CAROUSEL_FORM,
-    schema: cloneDeep(BasicSchema.XCarouselForm),
-    template: { h: 36, w: 118, displayName: '轮播图', icon: 'carousel_cp.svg', category: 'form' },
-    fieldMap: [],
-    entityMap: []
-  },
   [COMPONENT_TYPE.SUB_TABLE]: {
     type: COMPONENT_TYPE.SUB_TABLE,
     schema: cloneDeep(BasicSchema.XSubTable),
@@ -448,6 +441,13 @@ const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescripto
     type: COMPONENT_TYPE.PLACEHOLDER,
     schema: cloneDeep(BasicSchema.XPlaceholder),
     template: { h: 36, w: 118, displayName: '占位符', icon: 'placeholder_cp.svg', category: 'show' },
+    fieldMap: [],
+    entityMap: []
+  },
+  [COMPONENT_TYPE.CAROUSEL_FORM]: {
+    type: COMPONENT_TYPE.CAROUSEL_FORM,
+    schema: cloneDeep(BasicSchema.XCarouselForm),
+    template: { h: 36, w: 118, displayName: '轮播图', icon: 'carousel_cp.svg', category: 'show' },
     fieldMap: [],
     entityMap: []
   },
