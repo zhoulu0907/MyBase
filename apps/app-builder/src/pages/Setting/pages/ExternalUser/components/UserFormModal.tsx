@@ -13,7 +13,7 @@ import {
   Switch,
   Typography
 } from '@arco-design/web-react';
-import { formatTimeYMDHMS } from '@onebase/common';
+import { formatTimeYMDHMS, DynamicIcon } from '@onebase/common';
 import type { SimpleRoleVO, UserVO } from '@onebase/platform-center';
 import {
   createExternalUserApi,
@@ -25,6 +25,7 @@ import {
 import React, { useEffect, useState } from 'react';
 import styles from '../index.module.less';
 import type { authorizedAppList } from '../../Business/types/appItem';
+import { appIconMap } from '@onebase/ui-kit';
 
 const Row = Grid.Row;
 const Col = Grid.Col;
@@ -74,7 +75,7 @@ export default function UserFormModal({
       if (initialValues) {
         form.setFieldsValue(initialValues);
         setAvatarUrl(initialValues.avatar);
-        setStatusCheckedValue(initialValues.status === StatusEnum.ENABLE ? true : false);
+        setStatusCheckedValue(initialValues.status === StatusEnum.ENABLE);
       } else {
         // 创建时用户状态默认为开启
         form.setFieldValue('status', StatusEnum.ENABLE);
@@ -94,7 +95,7 @@ export default function UserFormModal({
         setEncryptedMobile(initialValues.mobile);
       }
       getExternalUser(initialValues.id).then((user: UserVO) => {
-        const defaultSelectedIds = user.userApplicationList?.map(data => data.appId)?.filter(Boolean) ?? [];
+        const defaultSelectedIds = user.userApplicationList?.map((data) => data.appId)?.filter(Boolean) ?? [];
         form.setFieldsValue({
           roleIds: user.roles?.map((item: SimpleRoleVO) => item.id),
           applicationIdList: defaultSelectedIds
@@ -188,7 +189,7 @@ export default function UserFormModal({
                 []
               }
             >
-              <Input placeholder="请输入" maxLength={11}/>
+              <Input placeholder="请输入" maxLength={11} />
             </Form.Item>
           </Col>
         </Row>
@@ -208,7 +209,18 @@ export default function UserFormModal({
                 {filterOptions.map((option) => (
                   <Select.Option key={option.id} value={option.id}>
                     <Space align="center" size={12}>
-                      <Avatar style={{ backgroundColor: option.iconColor }}>{option.iconName}</Avatar>
+                      <Avatar style={{ backgroundColor: option.iconColor, fontSize: '18px' }}>
+                        {option.iconName ? (
+                          <DynamicIcon
+                            IconComponent={appIconMap[option.iconName as keyof typeof appIconMap]}
+                            theme="outline"
+                            size={24}
+                            fill="#F2F3F5"
+                          />
+                        ) : (
+                          option.appName?.slice(0, 1)
+                        )}
+                      </Avatar>
                       <div className={styles.authorizedOption}>
                         <Typography.Text>{option.appName}</Typography.Text>
                         <Typography.Text type="secondary">
