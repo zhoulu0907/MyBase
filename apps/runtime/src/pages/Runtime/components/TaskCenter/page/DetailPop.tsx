@@ -280,8 +280,6 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
 
   const closeDrawer = () => {
     setPopVisible(false);
-    console.log(location);
-
     const sp = new URLSearchParams(location.search);
     sp.delete('businessUuid');
     sp.delete('instanceId');

@@ -192,8 +192,6 @@ const Runtime: React.FC = () => {
       } else {
         const curMenuObj = findMenuWithParents(pageList, [], appNavigationConfig.webDefaultMenu);
 
-        console.log(curMenuObj);
-
         if (curMenuObj) {
           setExpandedKeys(curMenuObj.parentIds);
           setCurMenu(curMenuObj.node);
@@ -225,7 +223,7 @@ const Runtime: React.FC = () => {
   const handleCurMenuUrl = async (curMenuId: string) => {
     const sp = new URLSearchParams(location.search);
     sp.set('curMenu', String(curMenuId));
-    
+
     const to = `${location.pathname}?${sp.toString()}`;
     navigate(to, { replace: true });
   };

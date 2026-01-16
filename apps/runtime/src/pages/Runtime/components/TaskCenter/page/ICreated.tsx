@@ -184,7 +184,6 @@ const ICreated: FC = ({ appId }: any) => {
     const searchParams = new URLSearchParams(url.split('?')[1]);
     const viewDetailId = searchParams.get('viewDetail');
     const curMenuId = searchParams.get('curMenu');
-    console.log(viewDetailId===curMenuId,viewDetailId,curMenuId);
     
     if (viewDetailId && viewDetailId === curMenuId) {
       const rowData: any = {};
