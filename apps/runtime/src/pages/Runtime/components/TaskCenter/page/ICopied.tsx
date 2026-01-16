@@ -5,6 +5,7 @@ import { FLOWSTATUS_TYPE, FlowStatusMap, LISTTYPE } from '@onebase/app';
 import TableSearch from './TableSearch';
 import DetailPop from './DetailPop';
 import { getCorpResourceById } from '@onebase/common';
+import { useSearchParams } from 'react-router-dom';
 import '../style/tcPage.less';
 
 const getTimeAgo = (time: number) => {
@@ -110,6 +111,7 @@ const ICopied: FC = ({ appId }: any) => {
   const [filters, setFilters] = useState<any>({});
   const [viewed, setViewed] = useState<any>();
   const defaultPageNo = 1;
+  const [search] = useSearchParams();
 
   function handleDetailPage(row: any) {
     setRowData(row);
@@ -171,8 +173,24 @@ const ICopied: FC = ({ appId }: any) => {
     fetchFormData(filters, current, pageSize);
   };
 
+  const initDetail = () => {
+    const url = location.href;
+    const searchParams = new URLSearchParams(url.split('?')[1]);
+    const viewDetailId = searchParams.get('viewDetail');
+    const curMenuId = searchParams.get('curMenu');
+    if (viewDetailId && viewDetailId === curMenuId) {
+      const rowData: any = {};
+      rowData.businessUuid = search.get('businessUuid');
+      rowData.instanceId = search.get('instanceId');
+      rowData.taskId = search.get('taskId');
+      rowData.pageSetId = search.get('pageSetId');
+      handleDetailPage(rowData);
+    }
+  };
+
   useEffect(() => {
     fetchFormData({}, defaultPageNo);
+    initDetail();
   }, []);
 
   function CreatedRadioChange(val: string) {
