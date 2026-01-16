@@ -377,7 +377,7 @@ const DataPermissionModal = (props: IProps) => {
         visible={modalVisible}
         autoFocus={false}
         focusLock={true}
-        okText={status === 'create' ? '创建' : '编辑'}
+        okText={status === 'create' ? '创建' : '保存'}
         onOk={handleOk}
         onCancel={handleCancel}
         unmountOnExit={true}
