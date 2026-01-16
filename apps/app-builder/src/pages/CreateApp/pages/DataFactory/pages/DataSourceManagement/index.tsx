@@ -24,7 +24,7 @@ const DataSourceManagementPage: React.FC = () => {
 
   const [datasourceList, setDatasourceList] = useState<PageDatasourceItem[]>([]);
 
-  const [pageSize, setPageSize] = useState<number>(8);
+  const [pageSize, setPageSize] = useState<number>(9);
   const [pageNo, setPageNo] = useState(1);
   const [total, setTotal] = useState(0);
 
