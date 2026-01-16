@@ -189,7 +189,7 @@ const CreateExternalModal: React.FC<CreateExternalModalProps> = ({ visible, onCl
             },
             declaration: values.declaration,
             readonly: values.readonly ? 1 : 0,
-            withCollect: 1
+            withCollect: 0
           });
           Message.success('数据源创建成功');
           onCreate(res);
