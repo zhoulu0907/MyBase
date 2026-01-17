@@ -150,12 +150,11 @@ public class FlowGraphBuilder {
 
             if (httpActionDO != null) {
                 // 加载连接器配置
+                QueryWrapper connectorQuery = QueryWrapper.create()
+                        .where(FlowConnectorTableDef.FLOW_CONNECTOR.APPLICATION_ID.eq(applicationId))
+                        .and(FlowConnectorTableDef.FLOW_CONNECTOR.CONNECTOR_UUID.eq(httpActionDO.getConnectorUuid()));
                 FlowConnectorDO connectorDO = TenantManager.withoutTenantCondition(() ->
-                    flowConnectorMapper.selectOneByCondition(
-                        QueryWrapper.create()
-                            .where(FlowConnectorTableDef.FLOW_CONNECTOR.APPLICATION_ID.eq(applicationId))
-                            .and(FlowConnectorTableDef.FLOW_CONNECTOR.CONNECTOR_UUID.eq(httpActionDO.getConnectorUuid()))
-                    ));
+                        flowConnectorMapper.selectOneByQuery(connectorQuery));
 
                 if (connectorDO != null) {
                     Map<String, Object> connectorConfig = new HashMap<>();
