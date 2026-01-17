@@ -114,19 +114,21 @@ public class HttpNodeComponent extends SkippableNodeComponent {
         }
 
         // ========== 步骤 4: 构建完整URL ==========
-        String baseUrl = (String) connectorConfig.get("baseUrl");
-        String requestPath = (String) actionConfig.get("requestPath");
-        String resolvedPath = replaceVariables(requestPath, expressionContext);
+        String baseUrl = connectorConfig != null ? (String) connectorConfig.get("baseUrl") : null;
+        String requestPath = actionConfig != null ? (String) actionConfig.get("requestPath") : null;
+        String resolvedPath = replaceVariables(requestPath != null ? requestPath : "", expressionContext);
         String fullUrl = baseUrl != null ? baseUrl + resolvedPath : resolvedPath;
 
         // ========== 步骤 5: 构建请求对象 ==========
         HttpRequest request = new HttpRequest();
         request.setUrl(fullUrl);
-        request.setMethod((String) actionConfig.get("requestMethod"));
+        request.setMethod(actionConfig != null ? (String) actionConfig.get("requestMethod") : null);
 
         // 处理请求头
         @SuppressWarnings("unchecked")
-        java.util.List<HttpNodeData.Header> headersFromConfig = (java.util.List<HttpNodeData.Header>) actionConfig.get("requestHeaders");
+        java.util.List<HttpNodeData.Header> headersFromConfig = actionConfig != null
+                ? (java.util.List<HttpNodeData.Header>) actionConfig.get("requestHeaders")
+                : null;
         java.util.List<HttpNodeData.Header> headers = headersFromConfig != null ? headersFromConfig : nodeData.getHeaders();
         if (headers != null) {
             for (HttpNodeData.Header header : headers) {
@@ -137,15 +139,15 @@ public class HttpNodeComponent extends SkippableNodeComponent {
         request.setHeaders(headers);
 
         // 处理请求体
-        String requestBodyTemplate = (String) actionConfig.get("requestBodyTemplate");
+        String requestBodyTemplate = actionConfig != null ? (String) actionConfig.get("requestBodyTemplate") : null;
         String resolvedBodyContent = replaceVariables(requestBodyTemplate != null ? requestBodyTemplate : nodeData.getBodyContent(), expressionContext);
         request.setBodyContent(resolvedBodyContent);
 
         // 处理超时和重试
-        Integer timeout = (Integer) actionConfig.get("timeout");
+        Integer timeout = actionConfig != null ? (Integer) actionConfig.get("timeout") : null;
         request.setTimeout(timeout != null ? timeout : (nodeData.getTimeout() != null ? nodeData.getTimeout() : 5000));
 
-        Integer retryCount = (Integer) actionConfig.get("retryCount");
+        Integer retryCount = actionConfig != null ? (Integer) actionConfig.get("retryCount") : null;
         request.setRetry(retryCount != null ? retryCount : (nodeData.getRetry() != null ? nodeData.getRetry() : 0));
 
         // ========== 步骤 5: 执行 HTTP 请求 ==========
