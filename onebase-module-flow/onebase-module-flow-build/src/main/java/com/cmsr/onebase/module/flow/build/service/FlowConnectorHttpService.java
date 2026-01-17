@@ -6,7 +6,7 @@ import com.cmsr.onebase.module.flow.core.vo.HttpActionVO;
 import com.cmsr.onebase.module.flow.core.vo.PageConnectorHttpReqVO;
 import com.cmsr.onebase.module.flow.core.vo.UpdateHttpActionReqVO;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 /**
  * HTTP连接器动作Service接口

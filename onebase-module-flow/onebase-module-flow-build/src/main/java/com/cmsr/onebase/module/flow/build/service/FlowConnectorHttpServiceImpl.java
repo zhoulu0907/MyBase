@@ -10,14 +10,15 @@ import com.cmsr.onebase.module.flow.core.vo.PageConnectorHttpReqVO;
 import com.cmsr.onebase.module.flow.core.vo.UpdateHttpActionReqVO;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
-import com.mybatisflex.spring.service.impl.ServiceImpl;
 import lombok.Setter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static com.cmsr.onebase.module.flow.core.dal.dataobject.table.FlowConnectorHttpTableDef.FLOW_CONNECTOR_HTTP;
 
@@ -29,8 +30,7 @@ import static com.cmsr.onebase.module.flow.core.dal.dataobject.table.FlowConnect
  */
 @Service
 @Validated
-public class FlowConnectorHttpServiceImpl extends ServiceImpl<FlowConnectorHttpRepository, FlowConnectorHttpDO>
-        implements FlowConnectorHttpService {
+public class FlowConnectorHttpServiceImpl implements FlowConnectorHttpService {
 
     @Setter
     private FlowConnectorHttpRepository connectorHttpRepository;
@@ -116,11 +116,15 @@ public class FlowConnectorHttpServiceImpl extends ServiceImpl<FlowConnectorHttpR
         }
 
         // 分页查询
-        Page<FlowConnectorHttpDO> page = connectorHttpRepository.paginate(
-                pageReqVO.getPageNo(), pageReqVO.getPageSize(), queryWrapper
+        Page<FlowConnectorHttpDO> page = connectorHttpRepository.page(
+                Page.of(pageReqVO.getPageNo(), pageReqVO.getPageSize()), queryWrapper
         );
 
-        // 转换为VO
-        return BeanUtils.toPage(page, HttpActionVO.class);
+        // 手动转换 DO 为 VO
+        List<HttpActionVO> voList = page.getRecords().stream()
+                .map(doObj -> BeanUtils.toBean(doObj, HttpActionVO.class))
+                .collect(Collectors.toList());
+
+        return new PageResult<>(voList, page.getTotalRow());
     }
 }

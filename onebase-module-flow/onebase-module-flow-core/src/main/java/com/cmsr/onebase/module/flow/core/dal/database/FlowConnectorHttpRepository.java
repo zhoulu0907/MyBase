@@ -1,10 +1,10 @@
 package com.cmsr.onebase.module.flow.core.dal.database;
 
-import com.cmsr.onebase.framework.orm.repo.BaseAppRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowConnectorHttpDO;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.table.FlowConnectorHttpTableDef;
 import com.cmsr.onebase.module.flow.core.dal.mapper.FlowConnectorHttpMapper;
 import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.spring.service.impl.ServiceImpl;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -18,7 +18,7 @@ import static com.cmsr.onebase.module.flow.core.dal.dataobject.table.FlowConnect
  * @since 2026-01-16
  */
 @Repository
-public class FlowConnectorHttpRepository extends BaseAppRepository<FlowConnectorHttpMapper, FlowConnectorHttpDO> {
+public class FlowConnectorHttpRepository extends ServiceImpl<FlowConnectorHttpMapper, FlowConnectorHttpDO> {
 
     /**
      * 根据应用ID和UUID查询HTTP动作配置
@@ -32,7 +32,7 @@ public class FlowConnectorHttpRepository extends BaseAppRepository<FlowConnector
                 .where(FLOW_CONNECTOR_HTTP.APPLICATION_ID.eq(applicationId))
                 .and(FLOW_CONNECTOR_HTTP.HTTP_UUID.eq(httpUuid))
                 .and(FLOW_CONNECTOR_HTTP.ACTIVE_STATUS.eq(1));
-        return getMapper().selectOneByQuery(query);
+        return this.getOne(query);
     }
 
     /**
@@ -46,7 +46,7 @@ public class FlowConnectorHttpRepository extends BaseAppRepository<FlowConnector
                 .where(FLOW_CONNECTOR_HTTP.CONNECTOR_UUID.eq(connectorUuid))
                 .and(FLOW_CONNECTOR_HTTP.ACTIVE_STATUS.eq(1))
                 .orderBy(FLOW_CONNECTOR_HTTP.SORT_ORDER.asc());
-        return getMapper().selectListByQuery(query);
+        return this.list(query);
     }
 
     /**
@@ -63,7 +63,7 @@ public class FlowConnectorHttpRepository extends BaseAppRepository<FlowConnector
                 .and(FLOW_CONNECTOR_HTTP.CONNECTOR_UUID.eq(connectorUuid))
                 .and(FLOW_CONNECTOR_HTTP.ACTIVE_STATUS.eq(1))
                 .orderBy(FLOW_CONNECTOR_HTTP.SORT_ORDER.asc());
-        return getMapper().selectListByQuery(query);
+        return this.list(query);
     }
 
     /**
@@ -78,6 +78,6 @@ public class FlowConnectorHttpRepository extends BaseAppRepository<FlowConnector
                 .where(FLOW_CONNECTOR_HTTP.APPLICATION_ID.eq(applicationId))
                 .and(FLOW_CONNECTOR_HTTP.HTTP_CODE.eq(httpCode))
                 .and(FLOW_CONNECTOR_HTTP.ACTIVE_STATUS.eq(1));
-        return getMapper().selectOneByQuery(query);
+        return this.getOne(query);
     }
 }

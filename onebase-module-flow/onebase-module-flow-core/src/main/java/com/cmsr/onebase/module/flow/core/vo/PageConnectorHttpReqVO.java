@@ -1,9 +1,8 @@
 package com.cmsr.onebase.module.flow.core.vo;
 
+import com.cmsr.onebase.framework.common.pojo.PageParam;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-
-import java.io.Serializable;
 
 /**
  * 分页查询HTTP动作请求VO
@@ -13,9 +12,7 @@ import java.io.Serializable;
  */
 @Data
 @Schema(description = "分页查询HTTP动作请求VO")
-public class PageConnectorHttpReqVO implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class PageConnectorHttpReqVO extends PageParam {
 
     /**
      * 连接器UUID
