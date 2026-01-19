@@ -1,6 +1,9 @@
 .radioWrapperOBMobile {
-  /* display: flex !important; */
   width: 100%;
   display: flex;
   flex-direction: column;
+
+  .radio-text {
+    font-size: 0.28rem;
+  }
 }
