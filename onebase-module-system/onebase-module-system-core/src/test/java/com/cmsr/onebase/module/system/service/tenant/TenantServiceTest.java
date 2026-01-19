@@ -317,7 +317,8 @@ public class TenantServiceTest {
         tenant.setPackageId(1L);
         tenant.setAccountCount(10);
         tenant.setExpireTime(LocalDateTime.now().plusYears(1));
-        return tenantDataRepository.insert(tenant);
+        return tenant;
+        //return tenantDataRepository.insert(tenant);
     }
 
     /**

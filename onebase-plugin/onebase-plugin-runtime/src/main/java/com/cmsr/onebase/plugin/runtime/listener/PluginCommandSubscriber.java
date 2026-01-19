@@ -58,6 +58,7 @@ public class PluginCommandSubscriber implements MessageListener {
             case ENABLE -> handleEnableCommand(message);
             case DISABLE -> handleDisableCommand(message);
             case RELOAD -> handleReloadCommand(message);
+            case DELETE -> handleDeleteCommand(message);
             default -> log.warn("未知的插件命令: {}", message.getCommand());
         }
     }
@@ -152,6 +153,23 @@ public class PluginCommandSubscriber implements MessageListener {
             log.info("插件重载成功: pluginId={}, version={}", message.getPluginId(), message.getPluginVersion());
         } catch (Exception e) {
             log.error("插件重载失败: pluginId={}, version={}", message.getPluginId(), message.getPluginVersion(), e);
+        }
+    }
+
+    /**
+     * 处理删除命令
+     */
+    private void handleDeleteCommand(PluginCommandMessage message) {
+        log.info("处理插件删除命令: pluginId={}, version={}, tenantId={}",
+                message.getPluginId(), message.getPluginVersion(), message.getTenantId());
+
+        try {
+            // 删除插件（包括停止、卸载和清理文件）
+            pluginFileManager.deletePlugin(message.getPluginId(), message.getPluginVersion());
+
+            log.info("插件删除成功: pluginId={}, version={}", message.getPluginId(), message.getPluginVersion());
+        } catch (Exception e) {
+            log.error("插件删除失败: pluginId={}, version={}", message.getPluginId(), message.getPluginVersion(), e);
         }
     }
 
