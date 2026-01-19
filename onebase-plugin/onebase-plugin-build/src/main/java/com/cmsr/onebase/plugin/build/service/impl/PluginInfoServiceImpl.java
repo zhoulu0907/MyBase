@@ -128,12 +128,11 @@ public class PluginInfoServiceImpl implements PluginInfoService {
         // 9. 保存配置信息
         saveConfigInfo(metaInfo, pluginInfoDO.getPluginId(), pluginInfoDO.getPluginVersion());
 
-        // 10. 发布Redis消息通知Runtime下载插件
-        Long tenantId = TenantContextHolder.getTenantId();
+        // 10. 发布插件上传消息通知runtime模块
         pluginCommandPublisher.publishUploadCommand(
                 pluginInfoDO.getPluginId(),
                 pluginInfoDO.getPluginVersion(),
-                tenantId,
+                TenantContextHolder.getTenantId(),
                 pluginInfoDO.getPluginPackage()
         );
 
@@ -282,8 +281,18 @@ public class PluginInfoServiceImpl implements PluginInfoService {
             throw exception(PLUGIN_ENABLED_CANNOT_DELETE);
         }
 
-        // 3. 删除所有版本及关联数据
+        // 3. 获取租户ID
+        Long tenantId = TenantContextHolder.getTenantId();
+
+        // 4. 删除所有版本及关联数据，并通知Runtime删除插件
         for (PluginInfoDO version : versions) {
+            // 发布Redis消息通知Runtime删除插件
+            pluginCommandPublisher.publishDeleteCommand(
+                    pluginId,
+                    version.getPluginVersion(),
+                    tenantId
+            );
+
             // 删除配置信息
             pluginConfigInfoRepository.deleteByPluginIdAndVersion(pluginId, version.getPluginVersion());
             // 删除包信息

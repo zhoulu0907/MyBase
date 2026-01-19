@@ -134,7 +134,7 @@ onebase:
   plugin: # 插件相关配置项
     plugins-dir: plugins # 插件存放根目录
     frontend-dir: plugins/frontend # 前端插件存放目录
-    backend-dir: plugins/backend # 后端插件存放目录
+    backend-dir: plugins # 后端插件存放目录
     temp-dir: plugins/.temp # 临时目录
 
 debug: false
