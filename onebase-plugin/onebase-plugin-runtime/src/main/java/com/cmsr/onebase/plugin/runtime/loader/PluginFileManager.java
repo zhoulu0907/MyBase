@@ -2,6 +2,7 @@ package com.cmsr.onebase.plugin.runtime.loader;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
+import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.module.infra.api.file.FileApi;
 import com.cmsr.onebase.plugin.runtime.manager.OneBasePluginManager;
 import jakarta.annotation.Resource;
@@ -44,7 +45,7 @@ public class PluginFileManager {
     private FileApi fileApi;
 
     @Resource
-    private OneBasePluginManager pluginManager;
+    private OneBasePluginManager oneBasePluginManager;
 
     /**
      * 下载并解压插件
@@ -56,15 +57,14 @@ public class PluginFileManager {
     public void downloadAndExtractPlugin(String pluginId, String pluginVersion, Long packageFileId) {
         log.info("开始下载插件: pluginId={}, version={}, fileId={}", pluginId, pluginVersion, packageFileId);
 
-        // 1. 构建目标目录路径
-        Path targetDir = getPluginDir(pluginId, pluginVersion);
+        // 1. 构建目标目录路径（直接放在backend目录下，不再创建子目录）
+        Path targetDir = Paths.get(backendDir);
         Path tempPath = Paths.get(tempDir, pluginId + "_" + pluginVersion + "_" + System.currentTimeMillis());
 
         try {
-            // 2. 如果目标目录已存在，先删除
-            if (Files.exists(targetDir)) {
-                log.info("删除已存在的插件目录: {}", targetDir);
-                FileUtil.del(targetDir.toFile());
+            // 2. 如果目标目录不存在，创建目录
+            if (!Files.exists(targetDir)) {
+                Files.createDirectories(targetDir);
             }
 
             // 3. 创建临时目录
@@ -81,17 +81,21 @@ public class PluginFileManager {
             Files.write(tempZipFile, content);
 
             // 6. 解压后端zip到目标目录
-            Files.createDirectories(targetDir);
-            extractBackendZip(tempZipFile, targetDir);
+            Path extractedZipPath = extractBackendZip(tempZipFile, targetDir);
 
-            log.info("插件下载解压成功: pluginId={}, version={}, targetDir={}",
-                    pluginId, pluginVersion, targetDir);
+            // 7. 加载并启动插件
+            if (extractedZipPath != null) {
+                log.info("插件下载解压成功，开始加载: path={}", extractedZipPath);
+                oneBasePluginManager.loadAndStartPlugin(extractedZipPath);
+            } else {
+                throw new RuntimeException("未在插件包中找到后端ZIP文件");
+            }
+
+            log.info("插件加载启动流程完成: pluginId={}, version={}", pluginId, pluginVersion);
 
         } catch (Exception e) {
-            log.error("下载解压插件失败: pluginId={}, version={}", pluginId, pluginVersion, e);
-            // 清理可能创建的目录
-            FileUtil.del(targetDir.toFile());
-            throw new RuntimeException("下载解压插件失败", e);
+            log.error("下载加载插件失败: pluginId={}, version={}", pluginId, pluginVersion, e);
+            throw new RuntimeException("下载加载插件失败", e);
         } finally {
             // 清理临时目录
             FileUtil.del(tempPath.toFile());
@@ -120,7 +124,7 @@ public class PluginFileManager {
         }
 
         // 调用OneBasePluginManager加载并启动插件
-        PluginState state = pluginManager.loadAndStartPlugin(zipPath);
+        PluginState state = oneBasePluginManager.loadAndStartPlugin(zipPath);
         log.info("插件加载完成: pluginId={}, version={}, state={}", pluginId, pluginVersion, state);
         return state;
     }
@@ -136,7 +140,7 @@ public class PluginFileManager {
         log.info("卸载插件: pluginId={}, version={}", pluginId, pluginVersion);
 
         // 调用OneBasePluginManager卸载插件
-        boolean result = pluginManager.stopAndUnloadPlugin(pluginId);
+        boolean result = oneBasePluginManager.stopAndUnloadPlugin(pluginId);
         log.info("插件卸载结果: pluginId={}, version={}, success={}", pluginId, pluginVersion, result);
         return result;
     }
@@ -175,16 +179,14 @@ public class PluginFileManager {
     private byte[] downloadFileFromMinIO(Long fileId) {
         try {
             // 通过FileApi获取文件内容
-            // 注意：这里需要根据实际的FileApi实现来调整
             log.info("从MinIO下载文件: fileId={}", fileId);
-
-            // TODO: 根据实际FileApi实现调整
-            // 目前FileApi没有直接返回byte[]的方法，需要通过Response获取
-            // 临时方案：可以通过内部调用FileService来获取
-
-            // 这里返回null，实际实现时需要补充
-            log.warn("FileApi暂不支持直接获取文件内容，需要补充实现");
-            return null;
+            CommonResult<byte[]> result = fileApi.getFileContentBytes(fileId);
+            if (result.isSuccess()) {
+                return result.getData();
+            } else {
+                log.error("FileApi调用失败: code={}, msg={}", result.getCode(), result.getMsg());
+                throw new RuntimeException("FileApi调用失败: " + result.getMsg());
+            }
 
         } catch (Exception e) {
             log.error("从MinIO下载文件失败: fileId={}", fileId, e);
@@ -201,8 +203,10 @@ public class PluginFileManager {
      *
      * @param zipFile 主ZIP文件路径
      * @param targetDir 目标目录
+     * @return 提取出的后端ZIP文件路径，如果未找到返回null
      */
-    private void extractBackendZip(Path zipFile, Path targetDir) throws IOException {
+    private Path extractBackendZip(Path zipFile, Path targetDir) throws IOException {
+        Path extractedPath = null;
         try (ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile.toFile()))) {
             ZipEntry entry;
             while ((entry = zis.getNextEntry()) != null) {
@@ -220,6 +224,7 @@ public class PluginFileManager {
                         try (OutputStream os = new FileOutputStream(targetFile.toFile())) {
                             IoUtil.copy(zis, os);
                         }
+                        extractedPath = targetFile;
                         // 只提取一个后端zip
                         if (lowerName.contains("backend")) {
                             break;
@@ -230,6 +235,7 @@ public class PluginFileManager {
                 zis.closeEntry();
             }
         }
+        return extractedPath;
     }
 
     /**
@@ -240,7 +246,7 @@ public class PluginFileManager {
      * @return 是否已加载
      */
     public boolean isPluginLoaded(String pluginId, String pluginVersion) {
-        return pluginManager.getPlugin(pluginId).isPresent();
+        return oneBasePluginManager.getPlugin(pluginId).isPresent();
     }
 
     /**
@@ -266,7 +272,7 @@ public class PluginFileManager {
         log.info("删除插件: pluginId={}, version={}", pluginId, pluginVersion);
 
         // 1. 调用OneBasePluginManager删除插件（会先停止、卸载，然后删除文件）
-        boolean result = pluginManager.deletePlugin(pluginId);
+        boolean result = oneBasePluginManager.deletePlugin(pluginId);
 
         // 2. 无论删除结果如何，都清理本地插件目录（确保文件被清理）
         cleanupPluginFiles(pluginId, pluginVersion);

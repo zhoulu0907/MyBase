@@ -128,6 +128,14 @@ public class PluginInfoServiceImpl implements PluginInfoService {
         // 9. 保存配置信息
         saveConfigInfo(metaInfo, pluginInfoDO.getPluginId(), pluginInfoDO.getPluginVersion());
 
+        // 10. 发布插件上传消息通知runtime模块
+        pluginCommandPublisher.publishUploadCommand(
+                pluginInfoDO.getPluginId(),
+                pluginInfoDO.getPluginVersion(),
+                TenantContextHolder.getTenantId(),
+                pluginInfoDO.getPluginPackage()
+        );
+
         log.info("插件上传成功: pluginId={}, version={}", metaInfo.getPluginId(), pluginInfoDO.getPluginVersion());
         return pluginInfoDO.getPluginId();
     }

@@ -53,13 +53,18 @@ public class PluginCommandSubscriber implements MessageListener {
      * @param message 命令消息
      */
     private void handleCommand(PluginCommandMessage message) {
-        switch (message.getCommand()) {
-            case UPLOAD -> handleUploadCommand(message);
-            case ENABLE -> handleEnableCommand(message);
-            case DISABLE -> handleDisableCommand(message);
-            case RELOAD -> handleReloadCommand(message);
-            case DELETE -> handleDeleteCommand(message);
-            default -> log.warn("未知的插件命令: {}", message.getCommand());
+        if (PluginCommandMessage.PluginCommand.UPLOAD == message.getCommand()) {
+            handleUploadCommand(message);
+        } else if (PluginCommandMessage.PluginCommand.ENABLE == message.getCommand()) {
+            handleEnableCommand(message);
+        } else if (PluginCommandMessage.PluginCommand.DISABLE == message.getCommand()) {
+            handleDisableCommand(message);
+        } else if (PluginCommandMessage.PluginCommand.RELOAD == message.getCommand()) {
+            handleReloadCommand(message);
+        } else if (PluginCommandMessage.PluginCommand.DELETE == message.getCommand()) {
+            handleDeleteCommand(message);
+        } else {
+            log.warn("未知的插件命令: {}", message.getCommand());
         }
     }
 
