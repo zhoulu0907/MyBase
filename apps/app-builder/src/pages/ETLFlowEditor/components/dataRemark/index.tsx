@@ -1,28 +1,18 @@
 import { Input } from '@arco-design/web-react';
-import { etlEditorSignal } from '@onebase/common';
-import { useSignals } from '@preact/signals-react/runtime';
-import React, { useState } from 'react';
+import React from 'react';
+import { useRemarkContext } from '../drawer';
 const { TextArea } = Input;
 
 /**
  * 节点备注输入组件
- * @param props.nodeData 节点数据对象
- * @param props.curNode 当前节点对象
+ * 使用 Context 来管理备注值，只有在点击确定时才会保存到 nodeData
  */
 interface DataRemarkProps {}
 
-const DataRemark: React.FC<DataRemarkProps> = ({}) => {
-  useSignals();
-
-  const { nodeData, curNode } = etlEditorSignal;
-
-  const [remark, setRemark] = useState<string>(nodeData.value[curNode.value.id]?.description || '');
+const DataRemark: React.FC<DataRemarkProps> = () => {
+  const { remark, setRemark } = useRemarkContext();
 
   const handleChangeRemark = (value: string) => {
-    if (!curNode.value.id) {
-      return;
-    }
-    nodeData.value[curNode.value.id].description = value;
     setRemark(value);
   };
 
