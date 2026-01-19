@@ -1,0 +1,62 @@
+.predictTitle {
+  font-size: 0.32rem;
+  font-weight: 500;
+  line-height: 0.56rem;
+  padding-bottom: 0.24rem;
+}
+
+.predictBox {
+  display: flex;
+
+  .pc-avatar-image {
+    background: rgb(var(--primary-5));
+    border: 1px solid rgb(var(--primary-5));
+  }
+}
+
+.predictImg {
+  width: 0.48rem;
+  height: 0.48rem;
+  background: #86909c;
+  border-radius: 100%;
+  overflow: hidden;
+}
+
+.predictText {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding-left: 0.06rem;
+  text-align: left;
+  word-break: break-word;
+}
+
+.predictName {
+  font-size: 0.28rem;
+  line-height: 0.44rem;
+}
+
+.predictDesc {
+  font-size: 0.24rem;
+  color: #86909C;
+  line-height: 0.44rem;
+}
+
+.finish .arco-steps-item-icon-dot {
+  border-color: rgb(var(--primary-6));
+  background-color: rgb(var(--primary-6));
+}
+
+.arco-steps-item-tail-status-finish::after {
+  background-color: #e5e6eb;
+}
+
+.process .arco-steps-item-icon-dot {
+  border-color: #c9cdd4;
+  background-color: #c9cdd4;
+}
+
+.process .arco-steps-item-title {
+  color: rgb(var(--primary-6));
+}

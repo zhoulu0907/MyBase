@@ -1,5 +1,4 @@
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react';
-import { PageType } from '@onebase/app';
 import { Button, Form, Input, Toast } from '@arco-design/mobile-react';
 import { pagesRuntimeSignal } from '@onebase/common';
 import {
@@ -33,6 +32,7 @@ interface EditRuntimeProps {
   form: any;
   isAdd: boolean;
   editLoading: boolean;
+  submitLoading: boolean;
   onSubmit: () => void;
   onSaveSubmit: () => void;
   onSaveDraft: () => void;
@@ -50,6 +50,7 @@ const EditRuntime: React.FC<EditRuntimeProps> = ({
   form,
   isAdd,
   editLoading,
+  submitLoading,
   onSubmit,
   onSaveSubmit,
   onSaveDraft,
@@ -228,10 +229,10 @@ const EditRuntime: React.FC<EditRuntimeProps> = ({
       })}
 
       <div className={styles.footer}>
-        {curPage?.value?.pageSetType !== PageType.BPM && isAdd ? (
+        {isAdd ? (
           <Button
             type="ghost"
-            loading={editLoading}
+            loading={submitLoading}
             color={colorConfig}
             bgColor={ghostBgColor}
             borderColor={colorConfig}
@@ -255,14 +256,9 @@ const EditRuntime: React.FC<EditRuntimeProps> = ({
             取消
           </Button>
         )}
-        {curPage?.value?.pageSetType === PageType.BPM && isAdd && (
-          <Button type="primary" onClick={onSaveSubmit} loading={editLoading}>
-            保存
-          </Button>
-        )}
         <Button
           type="primary"
-          loading={editLoading}
+          loading={submitLoading}
           bgColor={colorConfig}
           borderColor={colorConfig}
           onClick={onSubmit}
