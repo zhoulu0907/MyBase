@@ -78,6 +78,7 @@ const COMPONENT_TYPE = {
   CAROUSEL_FORM: 'XCarouselForm',
   SUB_TABLE: 'XSubTable',
   DATA_SELECT: 'XDataSelect',
+  RATE: 'XRate',
   // 列表
   TABLE: 'XTable',
   CALENDAR: 'XCalendar',
@@ -352,6 +353,13 @@ const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescripto
       ENTITY_FIELD_TYPE.DATA_SELECTION.VALUE,
       ENTITY_FIELD_TYPE.MULTI_DATA_SELECTION.VALUE
     ]
+  },
+  [COMPONENT_TYPE.RATE]: {
+    type: COMPONENT_TYPE.RATE,
+    schema: cloneDeep(BasicSchema.XRate),
+    template: { h: 36, w: 118, displayName: '评分', icon: 'number_input_cp.svg', category: 'form' },
+    fieldMap: [ENTITY_FIELD_TYPE.RATE.VALUE],
+    entityMap: [ENTITY_FIELD_TYPE.RATE.VALUE]
   },
   [COMPONENT_TYPE.TABLE]: {
     type: COMPONENT_TYPE.TABLE,
