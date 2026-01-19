@@ -80,8 +80,7 @@ interface Options {
 }
 
 const menuStyles = {
-  height: '40px',
-  padding: '9px 12px'
+  height: '32px',
 };
 
 const PageManagerPage: FC = () => {
