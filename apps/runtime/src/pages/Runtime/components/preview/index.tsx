@@ -1,3 +1,4 @@
+import { pluginBridge } from '@/plugin/bridge';
 import ExecuteFlows from '@/utils/flow';
 import { Form, Message, Modal } from '@arco-design/web-react';
 import {
@@ -33,7 +34,6 @@ import {
 } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useState } from 'react';
-import { pluginBridge } from '@/plugin/bridge';
 import DetailPop from '../TaskCenter/page/DetailPop';
 import DetailRuntime from './DetailRuntime';
 import EditRuntime from './EditRuntime';
@@ -53,6 +53,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
   useSignals();
 
   const [form] = Form.useForm();
+  const [detailForm] = Form.useForm();
 
   const {
     curPage,
@@ -92,8 +93,11 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
   useEffect(() => {
     if (drawerVisible.value) {
       setDetailMode(true);
+    } else {
+      // 关闭 drawer 时重置 detailForm，避免显示旧数据
+      detailForm.resetFields();
     }
-  }, [drawerVisible.value]);
+  }, [drawerVisible.value, detailForm]);
 
   // 获取主表字段和子表字段
   const getMainMetaData = async (pageSetId: string) => {
@@ -392,6 +396,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
 
     if (toFormPage) {
       setPageType(EDITOR_TYPES.FORM_EDITOR);
+      setDrawerVisible(false);
     }
   };
 
@@ -419,6 +424,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
 
     console.log('formValues: ', formValues);
     form.setFieldsValue(formValues);
+    detailForm.setFieldsValue(formValues);
 
     return res;
   };
@@ -492,7 +498,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
           <DetailRuntime
             visible={drawerVisible.value}
             onCancel={() => setDrawerVisible(false)}
-            form={form}
+            form={detailForm}
             detailMode={detailMode}
             onUpdate={() => submitForm()}
             onCancelUpdate={cancelSubmitForm}

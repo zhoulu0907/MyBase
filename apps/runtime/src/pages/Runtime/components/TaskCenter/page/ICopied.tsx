@@ -4,6 +4,8 @@ import { getMyCCPageList } from '@onebase/app/src/services/app_runtime';
 import { FLOWSTATUS_TYPE, FlowStatusMap, LISTTYPE } from '@onebase/app';
 import TableSearch from './TableSearch';
 import DetailPop from './DetailPop';
+import { getCorpResourceById } from '@onebase/common';
+import { useSearchParams } from 'react-router-dom';
 import '../style/tcPage.less';
 
 const getTimeAgo = (time: number) => {
@@ -30,13 +32,15 @@ const ICopied: FC = ({ appId }: any) => {
       title: '流程标题',
       dataIndex: 'processTitle'
     },
-     {
+    {
       title: '发起人',
       dataIndex: 'initiator',
       ellipsis: true,
       render: (obj: any) => (
         <span className="flex-bw-center">
-          <div className="photo-img">{obj?.avatar ? <img src={obj?.avatar} /> : obj?.name?.charAt(0)}</div>
+          <div className="photo-img">
+            {obj?.avatar ? <img src={getCorpResourceById(obj?.avatar)} /> : obj?.name?.charAt(0)}
+          </div>
           {obj?.name}
         </span>
       )
@@ -107,6 +111,7 @@ const ICopied: FC = ({ appId }: any) => {
   const [filters, setFilters] = useState<any>({});
   const [viewed, setViewed] = useState<any>();
   const defaultPageNo = 1;
+  const [search] = useSearchParams();
 
   function handleDetailPage(row: any) {
     setRowData(row);
@@ -168,8 +173,24 @@ const ICopied: FC = ({ appId }: any) => {
     fetchFormData(filters, current, pageSize);
   };
 
+  const initDetail = () => {
+    const url = location.href;
+    const searchParams = new URLSearchParams(url.split('?')[1]);
+    const viewDetailId = searchParams.get('viewDetail');
+    const curMenuId = searchParams.get('curMenu');
+    if (viewDetailId && viewDetailId === curMenuId) {
+      const rowData: any = {};
+      rowData.businessUuid = search.get('businessUuid');
+      rowData.instanceId = search.get('instanceId');
+      rowData.taskId = search.get('taskId');
+      rowData.pageSetId = search.get('pageSetId');
+      handleDetailPage(rowData);
+    }
+  };
+
   useEffect(() => {
     fetchFormData({}, defaultPageNo);
+    initDetail();
   }, []);
 
   function CreatedRadioChange(val: string) {

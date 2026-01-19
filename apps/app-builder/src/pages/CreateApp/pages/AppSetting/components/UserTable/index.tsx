@@ -30,10 +30,11 @@ import {
   type RoleDeleteMemberReq,
   type UserMembers
 } from '@onebase/app';
-import { AddMembers } from '@onebase/common';
-import { getDeptsById, type GetDeptsByIdReq } from '@onebase/platform-center';
+import { AddMembers, PUBLISH_MODULE } from '@onebase/common';
+import { getDeptsById, CodeType, type GetDeptsByIdReq } from '@onebase/platform-center';
 import { debounce } from 'lodash-es';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useAppStore } from '@/store/store_app';
 import styles from './index.module.less';
 
 interface IProps {
@@ -61,6 +62,7 @@ const CREATESOURCE = {
 // 用户成员列表
 const UserMembers = (props: IProps) => {
   const { roleInfo, memberList, memberTotal } = props;
+  const { curAppInfo } = useAppStore();
 
   const [deptData, setDeptData] = useState<DeptAndUsersRespDTO>();
   const [userList, setMuneList] = useState(memberList || []); // 用户列表
@@ -148,6 +150,8 @@ const UserMembers = (props: IProps) => {
       const params: GetDeptUserReq = {
         roleId: roleInfo.id,
         deptId,
+        deptType: curAppInfo.publishModel === PUBLISH_MODULE.SASS ? CodeType.CORP : CodeType.TENANT,
+        userType: curAppInfo.publishModel === PUBLISH_MODULE.SASS ? RoleType.CUSTOM : RoleType.USER,
         keywords
       };
       let res = [];

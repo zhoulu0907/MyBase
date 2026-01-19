@@ -45,7 +45,7 @@ const DetailRuntime: React.FC<DetailRuntimeProps> = ({
       width={fullScreen ? '98vw' : '60vw'}
       title={
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div className="predictTitle">详情</div>
+          <div>详情</div>
           <div className={styles.titleDetailIconArea}>
             <IconEdit className={styles.fullscreenIcon} onClick={() => showFromPageData(editTargetId, true)} />
             {fullScreen ? (

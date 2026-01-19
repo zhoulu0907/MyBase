@@ -40,6 +40,64 @@ export interface SavePageSetParams {
   };
 }
 
+const processColComponent = (
+  component: any,
+  colIndex: number,
+  blockIndex: number,
+  parentCode: string,
+  pageComponentSchemas: Map<string, EditConfig>
+): ComponentConfig => {
+  return {
+    componentCode: component.id,
+    componentType: component.type,
+    config: JSON.stringify(pageComponentSchemas.get(component.id)?.config),
+    editData: JSON.stringify(pageComponentSchemas.get(component.id)?.editData),
+    parentCode: parentCode,
+    blockIndex: blockIndex,
+    containerIndex: colIndex
+  } as ComponentConfig;
+};
+
+const processColComponents = (
+  cols: any[][],
+  parentCode: string,
+  pageComponentSchemas: Map<string, EditConfig>
+): ComponentConfig[] => {
+  const colComponents: ComponentConfig[] = [];
+  cols?.forEach((col: any[], index: number) => {
+    col.forEach((component: any, colIndex: number) => {
+      colComponents.push(processColComponent(component, colIndex, index, parentCode, pageComponentSchemas));
+    });
+  });
+  return colComponents;
+};
+
+const processLayoutSubComponents = (
+  layoutSubComponentsMap: Map<string, any[][]>,
+  pageComponentSchemas: Map<string, EditConfig>
+): ComponentConfig[] => {
+  const colComponents: ComponentConfig[] = [];
+  layoutSubComponentsMap.forEach((cols: any[][], parentCode: string) => {
+    console.log(parentCode, ': cols: ', cols);
+    const components = processColComponents(cols, parentCode, pageComponentSchemas);
+    colComponents.push(...components);
+  });
+  return colComponents;
+};
+
+const processListColComponents = (
+  listColComponentsMap: { colComponents: Map<string, any[][]> },
+  listPageComponentSchemas: Map<string, EditConfig>
+): ComponentConfig[] => {
+  const colComponents: ComponentConfig[] = [];
+  listColComponentsMap.colComponents.forEach((cols: any[][], parentCode: string) => {
+    console.log(parentCode, ': cols: ', cols);
+    const components = processColComponents(cols, parentCode, listPageComponentSchemas);
+    colComponents.push(...components);
+  });
+  return colComponents;
+};
+
 export async function startSavePageSet(params: SavePageSetParams, onSuccess?: Function) {
   const {
     formComponents,
@@ -111,25 +169,7 @@ export async function startSavePageSet(params: SavePageSetParams, onSuccess?: Fu
         } as ComponentConfig;
       });
 
-      const colComponents: any[] = [];
-      layoutSubComponentsMap.forEach((cols: any[][], parentCode: string) => {
-        console.log(parentCode, ': cols: ', cols);
-
-        cols &&
-          cols.forEach((col: any[], index: number) => {
-            col.forEach((component: any, colIndex: number) => {
-              colComponents.push({
-                componentCode: component.id,
-                componentType: component.type,
-                config: JSON.stringify(pageComponentSchemas.get(component.id)?.config),
-                editData: JSON.stringify(pageComponentSchemas.get(component.id)?.editData),
-                parentCode: parentCode,
-                blockIndex: index,
-                containerIndex: colIndex
-              } as ComponentConfig);
-            });
-          });
-      });
+      const colComponents = processLayoutSubComponents(layoutSubComponentsMap, pageComponentSchemas);
       subTableComponentsMap.forEach((col: any[], parentCode: string) => {
         console.log(parentCode, 'parentCode : col: ', col);
         col?.forEach((component: any, colIndex: number) => {
@@ -169,24 +209,7 @@ export async function startSavePageSet(params: SavePageSetParams, onSuccess?: Fu
         } as ComponentConfig;
       });
 
-      const colComponents: any[] = [];
-      listColComponentsMap.colComponents.forEach((cols: any[][], parentCode: string) => {
-        console.log(parentCode, ': cols: ', cols);
-        cols &&
-          cols.forEach((col: any[], index: number) => {
-            col.forEach((component: any, colIndex: number) => {
-              colComponents.push({
-                componentCode: component.id,
-                componentType: component.type,
-                config: JSON.stringify(listPageComponentSchemas.get(component.id)?.config),
-                editData: JSON.stringify(listPageComponentSchemas.get(component.id)?.editData),
-                parentCode: parentCode,
-                blockIndex: index,
-                containerIndex: colIndex
-              } as ComponentConfig);
-            });
-          });
-      });
+      const colComponents = processListColComponents(listColComponentsMap, listPageComponentSchemas);
 
       loadPagesetResp.pages[index].components.push(...colComponents);
     }

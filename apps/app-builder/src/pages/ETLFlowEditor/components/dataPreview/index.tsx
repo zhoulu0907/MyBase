@@ -20,10 +20,7 @@ const DataPreview: React.FC<DataPreviewProps> = ({ data, columns }) => {
         virtualized={true}
         columns={columns}
         pagination={false}
-        scroll={{
-          y: 480,
-          x: true
-        }}
+        scroll={{ x: 'max-content' }}
         border={{
           wrapper: true,
           cell: true

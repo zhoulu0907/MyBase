@@ -43,11 +43,12 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
 
   const helpers = {
     detailValue: (value: number) => {
-      let result = (value || '').toString();
-      if (!value) {
+      let result: number | string = (value || '').toString();
+      if (!value && value !== 0) {
         return result;
       } else {
         value = Number(value);
+        result = value;
       }
       if (showPercent) {
         value = value * 100;
@@ -65,7 +66,7 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
         result = `${result}${unitValue}`;
       }
 
-      return (result || '').toString();
+      return result.toString();
     }
   };
 

@@ -50,7 +50,9 @@ const ETLFlowEditorPage: React.FC = () => {
 
   const handleLoadETLFlow = async (flowId: string) => {
     const res = await getETLFlow(flowId);
-    console.log(res);
+    if (res) {
+      setFlowName(res.flowName);
+    }
 
     if (res.config && res.config.edges) {
       const graphData = {
@@ -75,7 +77,6 @@ const ETLFlowEditorPage: React.FC = () => {
       };
       setGraphData(graphData);
       setInitData(graphData);
-      setFlowName(res.flowName);
     }
 
     if (res.config && res.config.nodes) {
