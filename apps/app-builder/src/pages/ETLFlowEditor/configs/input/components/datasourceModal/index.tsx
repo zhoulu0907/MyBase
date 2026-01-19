@@ -101,6 +101,7 @@ const DatasourceModal: React.FC<DatasourceModalProps> = ({ isModalVisible, onClo
   const handleCreateExternalModalCreate = (datasourceUuid: string) => {
     setCreateExternalModalVisible(false);
     setCurDatasourceUUID(datasourceUuid);
+    handleListETLDatasources();
   };
 
   const handleTableSelect = (tableUuid: string) => {

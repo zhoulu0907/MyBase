@@ -118,7 +118,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
 
   const renderComponent = useCallback(() => {
     const descriptor = getComponentDescriptor(cpType as any);
-    const Impl: any = getComponentImpl(cpType as any) ?? (WORKBENCH_COMPONENT_MAP as any)[cpType];
+    const Impl: any = getComponentImpl(cpType as any, runtime) ?? (WORKBENCH_COMPONENT_MAP as any)[cpType];
     if (!Impl) return <div>未知组件类型: {cpType}</div>;
 
     const baseProps: any = { cpName: cpId, id: cpId, pageSetType, ...componentConfig };

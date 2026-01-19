@@ -846,13 +846,27 @@ export function registerComponent(descriptor: ComponentDescriptor, options?: Reg
  * @param type 组件类型字符串
  * @returns 对应的 React 组件实现；若未找到则返回 `undefined`
  */
-export function getComponentImpl(type: ComponentType): ReactComponentType<any> | undefined {
+export function getComponentImpl(type: ComponentType, runtime?:boolean): ReactComponentType<any> | undefined {
   const d = COMPONENT_REGISTRY[type]
   if (!d) return undefined
-  if (d.component) return d.component
   const category = d.template.category
+  // 先布局组件
+  if (category === 'layout') {
+    if(runtime){
+      if(type === COMPONENT_TYPE.COLUMN_LAYOUT){
+        return (LayoutComp as any)[COMPONENT_TYPE.PREVIEW_COLUMN_LAYOUT]
+      }
+      if(type === COMPONENT_TYPE.COLLAPSE_LAYOUT){
+        return (LayoutComp as any)[COMPONENT_TYPE.PREVIEW_COLLAPSE_LAYOUT]
+      }
+      if(type === COMPONENT_TYPE.TABS_LAYOUT){
+        return (LayoutComp as any)[COMPONENT_TYPE.PREVIEW_TABS_LAYOUT]
+      }
+    }
+    return (LayoutComp as any)[type]
+  }
+  if (d.component) return d.component
   if (category === 'form') return (FormComp as any)[type]
-  if (category === 'layout') return (LayoutComp as any)[type]
   if (category === 'list') return (ListComp as any)[type]
   if (category === 'show') return (ShowComp as any)[type]
   return undefined
