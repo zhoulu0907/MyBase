@@ -29,30 +29,6 @@
       height: 100%;
     }
 
-    .content {
-      height: 100%;
-      width: 100%;
-      box-sizing: border-box;
-
-      display: flex;
-      flex-direction: row;
-      flex-wrap: wrap;
-      align-content: flex-start;
-    }
-
-    .componentItem {
-      cursor: move;
-      /* padding: 6px; */
-      box-sizing: border-box;
-      border: 1px solid transparent;
-      border-radius: 8px;
-      transition: border-color 0.2s ease;
-
-      &:hover {
-        border-color: #4fae7b;
-      }
-    }
-
     .placeholder {
       position: absolute;
       width: 100%;
@@ -75,6 +51,30 @@
     .sortableWrapper.drag-over .placeholder {
       opacity: 0;
       visibility: hidden;
+    }
+
+    .content {
+      height: 100%;
+      width: 100%;
+      box-sizing: border-box;
+
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-content: flex-start;
+    }
+
+    .componentItem {
+      cursor: move;
+      /* padding: 6px; */
+      box-sizing: border-box;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      transition: border-color 0.2s ease;
+
+      &:hover {
+        border-color: #4fae7b;
+      }
     }
 
     .operationArea {
