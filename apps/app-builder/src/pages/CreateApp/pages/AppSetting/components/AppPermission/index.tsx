@@ -223,8 +223,7 @@ const AppPermission: FC = () => {
                         ) : (
                           <>
                             {role.roleName}
-                            {role.roleType === RoleType.CUSTOM && (
-                              <IconEdit
+                            <IconEdit
                                 onClick={() => setUpdateRoleId(role.id)}
                                 className={styles.editIcon}
                                 style={{
@@ -232,7 +231,6 @@ const AppPermission: FC = () => {
                                   transition: 'opacity 0.2s'
                                 }}
                               />
-                            )}
                           </>
                         )}
                       </div>
