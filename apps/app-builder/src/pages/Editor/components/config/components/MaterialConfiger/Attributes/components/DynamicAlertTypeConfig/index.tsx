@@ -55,9 +55,7 @@ const DynamicAlertTypeConfig = ({ handlePropsChange, item, configs, isInSubTable
       }
 
     >
-      <Select options={options}
-
-      placeholder={`请输入${item.name}`} value={localValue} onChange={handleChange} />
+      <Select options={options} placeholder={`请输入${item.name}`} value={localValue} onChange={handleChange} />
 
     </Form.Item>
   );
