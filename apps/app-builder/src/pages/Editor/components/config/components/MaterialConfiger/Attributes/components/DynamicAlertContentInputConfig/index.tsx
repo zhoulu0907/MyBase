@@ -11,7 +11,7 @@ interface Props {
   isInSubTable: boolean;
 }
 
-const DynamicLabelInputConfig = ({ handlePropsChange, item, configs, isInSubTable }: Props) => {
+const DynamicAlertContentInputConfig = ({ handlePropsChange, item, configs, isInSubTable }: Props) => {
   const [localValue, setLocalValue] = useState(configs[item.key]?.['text'] || '');
   const isInternalUpdateRef = useRef(false);
 
@@ -43,7 +43,7 @@ const DynamicLabelInputConfig = ({ handlePropsChange, item, configs, isInSubTabl
                 handlePropsChange(item.key, { ...configs[item.key], display: value });
               }}
             >
-              显示文本内容
+              显示标题
             </Checkbox>
           )}
         </>
@@ -54,10 +54,10 @@ const DynamicLabelInputConfig = ({ handlePropsChange, item, configs, isInSubTabl
   );
 };
 
-export default DynamicLabelInputConfig;
+export default DynamicAlertContentInputConfig;
 
-registerConfigRenderer(CONFIG_TYPES.LABEL_INPUT, ({ isInSubTable, handlePropsChange, item, configs }) => (
-  <DynamicLabelInputConfig
+registerConfigRenderer(CONFIG_TYPES.ALERT_CONTENT_INPUT, ({ isInSubTable, handlePropsChange, item, configs }) => (
+  <DynamicAlertContentInputConfig
     isInSubTable={isInSubTable}
     handlePropsChange={handlePropsChange}
     item={item}

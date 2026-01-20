@@ -1,21 +1,25 @@
 import {
-  CONFIG_TYPES,
-  labelConfig,
-  placeholderConfig,
-  tooltipConfig,
-  dataFieldConfig,
-  defaultValueConfig,
-  verifyConfig,
-  statusConfig,
-  alignConfig,
-  layoutConfig,
-  securityConfig,
-  widthConfig,
-  baseConfig,
+    alertContentConfig,
+    alertTypeConfig,
+    alignConfig,
+    baseConfig,
+    CONFIG_TYPES,
+    dataFieldConfig,
+    defaultValueConfig,
+    labelConfig,
+    layoutConfig,
+    placeholderConfig,
+    securityConfig,
+    statusConfig,
+    tooltipConfig,
+    verifyConfig,
+    widthConfig,
 } from '@onebase/ui-kit';
 
 export const CONFIG_MAPPING: Record<string, any> = {
   [CONFIG_TYPES.LABEL_INPUT]: labelConfig,
+  [CONFIG_TYPES.ALERT_CONTENT_INPUT]: alertContentConfig,
+  [CONFIG_TYPES.ALERT_TYPE]: alertTypeConfig,
   [CONFIG_TYPES.PLACEHOLDER_INPUT]: placeholderConfig,
   [CONFIG_TYPES.TOOLTIP_INPUT]: tooltipConfig,
   [CONFIG_TYPES.FIELD_DATA]: dataFieldConfig,
@@ -32,7 +36,7 @@ export const CONFIG_MAPPING: Record<string, any> = {
 
 export const resolveEditData = (editData: any[]) => {
   if (!Array.isArray(editData)) return [];
-  
+
   return editData.flatMap(item => {
     if (typeof item === 'string') {
       const config = CONFIG_MAPPING[item];
