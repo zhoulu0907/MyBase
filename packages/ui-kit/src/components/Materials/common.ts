@@ -11,6 +11,7 @@ import type {
     ICollapsedStyleConfig,
     IColorConfigType,
     IColumnCountConfigType,
+    IColumnGapConfigType,
     ICommonConfigType,
     IDataFieldConfigType,
     IDataSelectModeConfigType,
