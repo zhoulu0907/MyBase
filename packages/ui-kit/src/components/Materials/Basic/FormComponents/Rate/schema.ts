@@ -180,7 +180,7 @@ const XRate: XRateSchema = {
     },
     rateConfig:{
       showIcon: true,
-      iconName: 'IconStar',
+      iconName: 'IconStarFill',
       iconColor: '#FFD32D',
       max: 5,
       allowHalf: false,

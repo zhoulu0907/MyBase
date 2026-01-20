@@ -17,11 +17,11 @@ import {
   IconMinus
 } from '@arco-design/web-react/icon';
 import { nanoid } from 'nanoid';
-import { memo } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { DEFAULT_VALUE_TYPES, STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import { type XRateConfig } from './schema';
-import { useFormFieldWatch } from '../useFormField';
+import { useFormField } from '../useFormField';
 import '../index.css';
 // ===== 导入 end =====
 
@@ -65,8 +65,14 @@ const XRate = memo((props: XRateConfig & { runtime?: boolean; detailMode?: boole
   // =====  内部状态 & 回显 end =====
 
   // ===== 表单上下文与字段名与值读取 begin =====
-  const { fieldValue } = useFormFieldWatch(dataField);
+  const { fieldValue } = useFormField(dataField, nanoid(), FORM_COMPONENT_TYPES.RATEs);
+  const [tooltipValue, setTooltipValue] = useState('');
   // ===== 表单上下文与字段名与值读取 end =====
+
+  useEffect(() => {
+    const newTooltipValue = rateConfig.showCustomTooltips ? rateConfig.tooltips?.[Math.ceil(fieldValue) - 1] || '' : fieldValue
+    setTooltipValue(newTooltipValue);
+  }, [fieldValue]);
 
   return (
     <div className="formWrapper">
@@ -85,17 +91,15 @@ const XRate = memo((props: XRateConfig & { runtime?: boolean; detailMode?: boole
           margin: 0,
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
-        initialValue={
-          defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? Number(defaultValueConfig?.customValue || 0) : 0
-        }
+        initialValue={defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : 0}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
           <div>{String(fieldValue)}</div>
         ) : (
-          <div style={{ display: 'flex', alignItems: 'center' }} className='custom-rate'>
+          <div style={{ display: 'flex', alignItems: 'center' }} className="custom-rate">
             <Rate
               count={rateConfig.max || 5}
-              style={{ stroke: rateConfig.iconColor,fill: rateConfig.iconColor }}
+              style={{ stroke: rateConfig.iconColor, fill: rateConfig.iconColor }}
               allowHalf={rateConfig.allowHalf}
               tooltips={
                 rateConfig.showResult
@@ -112,12 +116,8 @@ const XRate = memo((props: XRateConfig & { runtime?: boolean; detailMode?: boole
               }}
             />
             {rateConfig.showResult && (
-              <Typography.Text style={{ marginRight: '16px' }}>
-                {rateConfig.showCustomTooltips
-                  ? rateConfig.tooltips[Math.ceil(fieldValue) - 1]
-                  : Array.from({ length: rateConfig.max || 5 }, (_, index) => `${index + 1}`)[
-                      Math.ceil(fieldValue) - 1
-                    ]}
+              <Typography.Text style={{ marginLeft: '16px' }}>
+                {tooltipValue}
               </Typography.Text>
             )}
           </div>
