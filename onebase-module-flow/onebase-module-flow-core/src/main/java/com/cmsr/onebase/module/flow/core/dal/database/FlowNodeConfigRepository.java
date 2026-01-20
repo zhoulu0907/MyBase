@@ -12,6 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 import static com.cmsr.onebase.module.flow.core.dal.dataobject.table.FlowNodeConfigTableDef.FLOW_NODE_CONFIG;
 
 @Slf4j
@@ -40,5 +42,16 @@ public class FlowNodeConfigRepository extends ServiceImpl<FlowNodeConfigMapper, 
                 .where(FLOW_NODE_CONFIG.NODE_CODE.eq(nodeCode))
                 .where(FLOW_NODE_CONFIG.ACTIVE_STATUS.eq(1));
         return this.getOne(queryWrapper);
+    }
+
+    /**
+     * Get all active connectors
+     */
+    public List<FlowNodeConfigDO> listAllConnectors() {
+        QueryWrapper queryWrapper = this.query()
+                .where(FLOW_NODE_CONFIG.ACTIVE_STATUS.eq(1))
+                .orderBy(FLOW_NODE_CONFIG.SORT_ORDER, true)
+                .orderBy(FLOW_NODE_CONFIG.NODE_NAME, true);
+        return this.list(queryWrapper);
     }
 }
