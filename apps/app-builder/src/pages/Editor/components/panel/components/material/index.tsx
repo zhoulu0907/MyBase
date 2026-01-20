@@ -3,10 +3,10 @@ import IconCollapsed from '@/assets/images/collapsed_left_icon.svg';
 import IconSearchForm from '@/assets/images/search_form_icon.svg';
 import MaterialCard from '@/components/MaterialCard';
 import { useI18n } from '@/hooks/useI18n';
-import { useSignals } from '@preact/signals-react/runtime';
 import { Collapse, Input, Layout, Tabs } from '@arco-design/web-react';
 import { CATEGORY_TYPE } from '@onebase/app';
-import { buildTemplate, COMPONENT_GROUP_NAME, EDITOR_TYPES, type EditorType, listPluginComponentTypes, COMPONENT_REGISTRY } from '@onebase/ui-kit';
+import { buildTemplate, COMPONENT_GROUP_NAME, COMPONENT_REGISTRY, EDITOR_TYPES, type EditorType, listPluginComponentTypes } from '@onebase/ui-kit';
+import { useSignals } from '@preact/signals-react/runtime';
 
 // 插件组件与配置渲染采用动态注册机制，物料面板仅消费注册结果
 import React, { useEffect, useState } from 'react';
@@ -48,7 +48,6 @@ const MaterialContainer: React.FC<MaterialContainerProps> = ({ activeTab, childC
   // 按 category 分类，分成 3 个 items
   //   const baseNavigateItems = allTemplate.base.find((cat) => cat.category === CATEGORY_TYPE.NAVIGATE)?.items || [];
   const template = buildTemplate();
-  console.log('MaterialContainer template:', template);
   const baseLayoutItems = template.base.find((cat: any) => cat.category === CATEGORY_TYPE.LAYOUT)?.items || [];
   const baseFormItems = template.base.find((cat: any) => cat.category === CATEGORY_TYPE.FORM)?.items || [];
   const baseListItems = template.base.find((cat: any) => cat.category === CATEGORY_TYPE.LIST)?.items || [];

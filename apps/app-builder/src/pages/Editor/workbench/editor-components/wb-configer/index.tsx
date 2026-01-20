@@ -1,18 +1,10 @@
+import { useMemo } from 'react';
 import { ICON_Map_By_Type } from '@/components/MaterialCard/icons';
 import { useWorkbenchSignal } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import pageIcon from '@/assets/workbench/page_icon.svg';
-import {
-  PageConfig,
-  QuickEntryConfig,
-  TodoCenterConfig,
-  RichTextEditorWorkbenchConfig,
-  CarouselWorkbenchConfig,
-  ButtonWorkbenchConfig,
-  WelcomeCardConfig
-} from './ConfigsByComp';
+import * as ComponentConfig from './ConfigsByComp';
 import styles from './index.module.less';
-import { useMemo } from 'react';
 
 /**
  * 工作台配置面板组件
@@ -28,26 +20,17 @@ const WorkbenchConfiger = () => {
 
   const configComponent = useMemo(() => {
     if (isPageConfig) {
-      return <PageConfig />;
+      return <ComponentConfig.PageConfig />;
     }
 
-    // 根据组件类型加载对应的配置组件
-    switch (componentType) {
-      case 'XQuickEntry':
-        return <QuickEntryConfig />;
-      case 'XTodoCenter':
-        return <TodoCenterConfig />;
-      case 'XRichTextEditorWorkbench':
-        return <RichTextEditorWorkbenchConfig />;
-      case 'XCarouselWorkbench':
-        return <CarouselWorkbenchConfig />;
-      case 'XButtonWorkbench':
-        return <ButtonWorkbenchConfig />;
-      case 'XWelcomeCard':
-        return <WelcomeCardConfig />;
-      default:
-        return <QuickEntryConfig />;
+    // 根据组件类型动态加载对应的配置组件，例如：XQuickEntry -> QuickEntryConfig
+    if (!componentType) {
+      return <ComponentConfig.QuickEntryConfig />;
     }
+
+    const configName = `${componentType.replace(/^X/, '')}Config`;
+    const ConfigComponent = ComponentConfig[configName as keyof typeof ComponentConfig];
+    return ConfigComponent ? <ConfigComponent /> : <ComponentConfig.QuickEntryConfig />;
   }, [isPageConfig, componentType]);
 
   // 显示名称

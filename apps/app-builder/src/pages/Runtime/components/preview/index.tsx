@@ -358,7 +358,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
                       cpId={cp.id}
                       cpType={cp.type}
                       pageComponentSchema={wbComponentSchemas.value[cp.id]}
-                      runtime={runtime}
+                      runtime={false}
                       preview={preview}
                     />
                   </div>

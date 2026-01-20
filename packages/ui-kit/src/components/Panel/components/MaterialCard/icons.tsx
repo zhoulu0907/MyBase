@@ -49,6 +49,7 @@ import RichTextEditorWorkbenchIcon from '@/assets/images/cp/rich_text_editor_wor
 import ButtonWorkbenchIcon from '@/assets/images/cp/button_workbench_cp.svg';
 import WelcomeCardIcon from '@/assets/images/cp/welcome_card_cp.svg';
 import TodoCenterIcon from '@/assets/images/cp/todo_center_cp.svg';
+import TodoListIcon from '@/assets/images/cp/todo_list_cp.svg';
 
 import CarouselWorkbenchIcon from '@/assets/images/cp/carousel_workbench_cp.svg';
 
@@ -110,6 +111,7 @@ export const ICON_Map: Record<string, React.ReactNode> = {
   'button_workbench_cp.svg': <img src={ButtonWorkbenchIcon} alt="XButtonWorkbench" />,
   'welcome_card_cp.svg': <img src={WelcomeCardIcon} alt="XWelcomeCard" />,
   'todo_center_cp.svg': <img src={TodoCenterIcon} alt="XTodoCenter" />,
+  'todo_list_cp.svg': <img src={TodoListIcon} alt="XTodoList" />,
   // 工作台高级组件
   'carousel_workbench_cp.svg': <img src={CarouselWorkbenchIcon} alt="XCarouselWorkbench" />,
 };
@@ -173,6 +175,7 @@ export const ICON_Map_By_Type: Record<string, React.ReactNode> = {
   XButtonWorkbench: <img src={ButtonWorkbenchIcon} alt="XButtonWorkbench" />,
   XWelcomeCard: <img src={WelcomeCardIcon} alt="XWelcomeCard" />,
   XTodoCenter: <img src={TodoCenterIcon} alt="XTodoCenter" />,
+  XTodoList: <img src={TodoListIcon} alt="XTodoList" />,
   // 工作台高级组件
   XCarouselWorkbench: <img src={CarouselWorkbenchIcon} alt="XCarouselWorkbench" />,
 };

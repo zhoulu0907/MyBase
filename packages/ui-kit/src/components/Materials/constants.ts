@@ -13,6 +13,10 @@ export const CONFIG_TYPES = {
 
   // 组件标题输入
   LABEL_INPUT: 'LabelInput',
+  // 提示内容输入
+  ALERT_CONTENT_INPUT: 'AlertContentInput',
+  // 提示类型选择
+  ALERT_TYPE: 'AlertType',
   // 组件占位符输入
   PLACEHOLDER_INPUT: 'PlaceholderInput',
   // 组件选项输入
@@ -314,8 +318,8 @@ export const LAYOUT_VALUES = {
 
 // 图片填充方式
 export const FILL_OPTIONS = {
-  CONTAIN: '原图局中',
-  COVER: '局中填满',
+  CONTAIN: '原图居中',
+  COVER: '居中填满',
   FILL: '拉伸填满'
 } as const;
 

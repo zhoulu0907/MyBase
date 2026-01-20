@@ -211,7 +211,7 @@ const DetailStep: FC<any> = ({ stepData }: any) => {
         <div className="flex-bw-center user-temp">
           <p className="photo-img">
             {opperator?.avatar ? (
-              <img src={getCorpResourceById(opperator.avatar)} alt="" />
+              <img src={opperator?.operator === '系统' ? opperator.avatar : getCorpResourceById(opperator.avatar)} alt="" />
             ) : (
               opperator?.operator?.charAt(0)
             )}
