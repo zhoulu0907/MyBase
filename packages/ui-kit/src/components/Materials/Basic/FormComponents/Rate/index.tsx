@@ -114,6 +114,10 @@ const XRate = memo((props: XRateConfig & { runtime?: boolean; detailMode?: boole
                 }
                 return <span>{dropList.find((ele) => ele.value === rateConfig.iconName)?.lable}</span>;
               }}
+              onChange={(value)=>{
+                const newTooltipValue = rateConfig.showCustomTooltips ? rateConfig.tooltips?.[Math.ceil(value) - 1] || '' : `${value}`
+                setTooltipValue(newTooltipValue);
+              }}
             />
             {rateConfig.showResult && (
               <Typography.Text style={{ marginLeft: '16px' }}>
