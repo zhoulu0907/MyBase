@@ -38,10 +38,17 @@ const SQLConfig: React.FC<SQLConfigProps> = ({ onRegisterSave, newPayload, setNe
   const [fieldList, setFieldList] = useState<any[]>([]);
 
   const [showSQLValue, setShowSQLValue] = useState<string>(
-    nodeData.value[curNode.value.id]?.config?.showSQLValue || ''
+    newPayload?.config?.showSQLValue || ''
   );
   const [sqlVariables, setSqlVariables] = useState<Record<string, string>>({});
   const [currentCursorPos, setCurrentCursorPos] = useState<number | null>(null);
+
+  // 当节点切换或组件重新挂载时，从 newPayload 同步 showSQLValue（用于切换tab后恢复编辑的值）
+  useEffect(() => {
+    if (newPayload?.config?.showSQLValue !== undefined) {
+      setShowSQLValue(newPayload.config.showSQLValue);
+    }
+  }, [curNode.value.id]);
 
   useEffect(() => {
     handleGetFlinkFunctionTypeList();
@@ -83,7 +90,7 @@ const SQLConfig: React.FC<SQLConfigProps> = ({ onRegisterSave, newPayload, setNe
   }, [nodeData, curNode]);
 
   useEffect(() => {
-    let payload = newPayload;
+    let payload = { ...newPayload };
 
     let sqlValue = showSQLValue;
     for (const [key, value] of Object.entries(sqlVariables)) {
@@ -91,6 +98,7 @@ const SQLConfig: React.FC<SQLConfigProps> = ({ onRegisterSave, newPayload, setNe
     }
 
     payload.config = {
+      ...payload.config,
       sqlValue: sqlValue,
       sqlVariables: sqlVariables,
       showSQLValue: showSQLValue
