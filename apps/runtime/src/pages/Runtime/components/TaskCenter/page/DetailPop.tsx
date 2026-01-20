@@ -264,6 +264,7 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
   };
 
   useEffect(() => {
+    if (!detailPopVisible) return;
     if (
       listType === LISTTYPE.WILLDO ||
       listType === LISTTYPE.IDONE ||
@@ -276,7 +277,7 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
     } else {
       //根据列表类型请求对应的详情
     }
-  }, [listType]);
+  }, [listType, detailPopVisible]);
 
   const closeDrawer = () => {
     setPopVisible(false);
