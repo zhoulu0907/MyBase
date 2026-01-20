@@ -18,10 +18,68 @@ import {
   WORKBENCH_WIDTH_OPTIONS,
   WORKBENCH_WIDTH_VALUES,
   WORKBENCH_CONFIG_TYPES,
-  DATA_CONFIG_RANGE
+  DATA_CONFIG_RANGE,
+  WORKBENCH_THEME_OPTIONS
 } from '../../core/constants';
 import { ILabelConfigType, IBooleanConfigType, TBooleanDefaultType, TTextDefaultType } from '../../core/types';
-import { IDataConfigConfigType } from '../../core/types';
+import { IDataConfigConfigType, IThemeConfigType, INumberConfigType } from '../../core/types';
+
+// 待办事项数据结构
+export interface ITodoItem {
+  id: string;
+  processTitle: string;
+  initiator: {
+    userId: string;
+    name: string;
+    avatar: string;
+  };
+  flowStatus: string;
+  formSummary: string;
+  arrivalTime: number;
+  submitTime: number;
+  taskId: string;
+  instanceId: string;
+  businessUuid: string;
+  nodeCode: string;
+}
+
+// 默认待办列表数据（用于非 runtime 模式）
+export const pendingListDefault: ITodoItem[] = [
+  {
+    id: '1',
+    processTitle: '张三发起的流程表单测试_表单',
+    initiator: {
+      userId: '155019577667616772',
+      name: '张三',
+      avatar: ''
+    },
+    flowStatus: 'in_approval',
+    formSummary: '流程表单测试_表单',
+    arrivalTime: 1764924217968,
+    submitTime: 1764924218175,
+    taskId: '1446542543792771072',
+    instanceId: '1446542538365341696',
+    businessUuid: '019aed4e-fd96-7901-92ba-7c1de80cd46f',
+    nodeCode: '3'
+  },
+  {
+    id: '2',
+    processTitle: '李四发起的流程表单测试_表单',
+    initiator: {
+      userId: '155019577667616772',
+      name: '李四',
+      avatar: ''
+    },
+    flowStatus: 'in_approval',
+    formSummary: '流程表单测试_表单',
+    arrivalTime: 1764924152154,
+    submitTime: 1764924153065,
+    taskId: '1446542266519916544',
+    instanceId: '1446542260803080192',
+    businessUuid: '019aed4e-fd96-7901-92ba-7c1de80cd46f',
+    nodeCode: '3'
+  },
+];
 
 export interface XTodoListSchema {
   editData: TXTodoListEditData;
@@ -35,6 +93,8 @@ export type TXTodoListEditData = Array<
   | IWidthConfigType<TWorkbenchWidthSelectKeyType>
   | IBooleanConfigType
   | IDataConfigConfigType
+  | IThemeConfigType
+  | INumberConfigType
 >;
 
 export interface XTodoListConfig extends ICommonBaseWorkbenchType {
@@ -49,6 +109,10 @@ export interface XTodoListConfig extends ICommonBaseWorkbenchType {
       showHandled: boolean;
       showCc: boolean;
     }
+  theme: string;
+  dataCount: number;
+  userAvatar: TTextDefaultType;
+  userName: TTextDefaultType;
   status?: TRadioDefaultType<TWorkbenchStatusSelectKeyType>;
   width: TSelectDefaultType<TWorkbenchWidthSelectKeyType>;
 }
@@ -64,12 +128,22 @@ const XTodoList: XTodoListSchema = {
     name: '数据内容配置',
     type: WORKBENCH_CONFIG_TYPES.WB_DATA_CONFIG,
     range: DATA_CONFIG_RANGE
+  },
+  {
+    key: 'theme',
+    name: '样式库',
+    type: WORKBENCH_CONFIG_TYPES.WB_THEME_SELECTOR
+  }, {
+    key: 'dataCount',
+    name: '数据条数',
+    type: WORKBENCH_CONFIG_TYPES.NUMBER_INPUT,
   }],
   config: {
     ...workbenchBaseDefault,
-    componentName: 'TodoCenter',
+    componentName: 'TodoList',
+    theme: WORKBENCH_THEME_OPTIONS.THEME_1,
     label: {
-      text: '待办中心',
+      text: '待办列表',
       display: true
     },
     dataConfig: {
@@ -78,6 +152,9 @@ const XTodoList: XTodoListSchema = {
       showHandled: true,
       showCc: true
     },
+    dataCount: 5,
+    userAvatar: '',
+    userName: '',
     width: WORKBENCH_WIDTH_VALUES[WORKBENCH_WIDTH_OPTIONS.FULL],
     status: WORKBENCH_STATUS_VALUES[WORKBENCH_STATUS_OPTIONS.DEFAULT],
   }

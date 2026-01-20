@@ -386,13 +386,13 @@ export const fillConfig: IStatusConfigType<TFillSelectKeyType> = {
   type: 'StatusRadio',
   range: [
     {
-      key: '原图局中',
-      text: '原图局中',
+      key: '原图居中',
+      text: '原图居中',
       value: 'contain'
     },
     {
-      key: '局中填满',
-      text: '局中填满',
+      key: '居中填满',
+      text: '居中填满',
       value: 'cover'
     },
     {

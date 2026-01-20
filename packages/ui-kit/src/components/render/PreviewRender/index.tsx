@@ -10,7 +10,8 @@ import {
   hasWorkbenchComponentSchema,
   isPluginComponentType,
   WORKBENCH_COMPONENT_MAP,
-  WorkbenchComponentType
+  WorkbenchComponentType,
+  WORKBENCH_COMPONENT_TYPES
 } from 'src/components/Materials';
 
 /**
@@ -138,6 +139,10 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
         baseProps.showFromPageData = showFromPageData;
         baseProps.refresh = refresh;
       }
+      if (descriptor.template.category === 'workbench') {
+        baseProps.runtime = runtime;
+        baseProps.preview = preview;
+      }
     } else {
       baseProps.runtime = runtime;
       baseProps.detailMode = detailMode;
@@ -150,6 +155,11 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
 
     if (isPluginComponentType(cpType)) {
       // 预留：插件组件特定扩展点（若未来需要按插件增强 props，可在此统一处理）
+    }
+
+    // 按钮组件在web端不渲染
+    if (cpType === WORKBENCH_COMPONENT_TYPES.BUTTON_WORKBENCH) {
+      return null;
     }
 
     return <Impl {...baseProps} />;

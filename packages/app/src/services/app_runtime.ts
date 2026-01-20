@@ -9,7 +9,8 @@ import {
   GetOperatorRecord,
   GetPageSetListReq,
   GetRunTimePageSetIdReq,
-  SubMitInstanceReq
+  SubMitInstanceReq,
+  GetTaskCenterOverviewReq
 } from '../types';
 import { appService, runtimeAppService, runtimeListdataService } from './clients';
 
@@ -46,4 +47,8 @@ export const getListNodes = (params: GetListNodesReq) => {
 };
 export const getMyCCPageList = (params: GetMyCCPageListReq) => {
   return runtimeListdataService.get('/task-center/cc/page', params);
+};
+
+export const getTaskCenterOverview = (params: GetTaskCenterOverviewReq) => {
+  return runtimeListdataService.get('/task-center/overview', params);
 };

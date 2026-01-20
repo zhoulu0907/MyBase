@@ -1,6 +1,6 @@
 // hooks/useJump.ts 或类似文件
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
-import { menuCacheManager } from '@onebase/ui-kit';
+import { menuCacheManager, DATA_CONFIG_NAME_MAP } from '@onebase/ui-kit';
 import { menuSignal, type ApplicationMenu } from '@onebase/app';
 
 /**
@@ -30,6 +30,20 @@ export function useJump() {
       }
       if (menu.children && menu.children.length > 0) {
         const found = findMenuByUuid(menu.children, uuid);
+        if (found) return found;
+      }
+    }
+    return null;
+  };
+
+  // 根据菜单名称递归查找菜单
+  const findMenuByName = (menus: ApplicationMenu[], name: string): ApplicationMenu | null => {
+    for (const menu of menus) {
+      if (menu.menuName === name) {
+        return menu;
+      }
+      if (menu.children && menu.children.length > 0) {
+        const found = findMenuByName(menu.children, name);
         if (found) return found;
       }
     }
@@ -71,5 +85,38 @@ export function useJump() {
     }
   };
 
-  return { handleJump };
+  // 根据配置键跳转到BPM菜单
+  const handleBPMJump = async (configKey: string, runtime = true) => {
+    if (!runtime || !appId) return;
+
+    const menuName = DATA_CONFIG_NAME_MAP[configKey];
+    if (!menuName) {
+      console.warn('未找到对应的菜单名称', configKey);
+      return;
+    }
+
+    const bpmMenuList = await menuCacheManager.getBPMMenuList(appId);
+    
+    const targetMenu = findMenuByName(bpmMenuList, menuName);
+
+    if (!targetMenu) {
+      console.warn('未找到对应的 BPM 菜单', menuName);
+      return;
+    }
+
+    // 根据BPM菜单的menuCode进行跳转
+    if (targetMenu.menuCode) {
+      const searchParams = new URLSearchParams(location.search);
+      searchParams.set('curMenu', targetMenu.menuCode);
+      const to = `${location.pathname}?${searchParams.toString()}`;
+
+      navigate(to, { replace: true });
+
+      const { setCurMenu } = menuSignal;
+      setCurMenu(targetMenu);
+      return;
+    }
+  };
+
+  return { handleJump, handleBPMJump };
 }
