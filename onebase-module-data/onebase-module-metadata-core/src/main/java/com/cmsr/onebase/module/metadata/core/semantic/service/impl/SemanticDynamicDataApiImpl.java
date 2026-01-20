@@ -12,6 +12,7 @@ import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticMethodCo
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticOperatorEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.service.SemanticDataCrudService;
 import com.cmsr.onebase.module.metadata.core.semantic.strategy.*;
+import com.cmsr.onebase.module.metadata.core.semantic.strategy.permission.SemanticQueryPermissionHelper;
 import com.cmsr.onebase.module.metadata.core.semantic.strategy.validation.SemanticValidationManager;
 import com.cmsr.onebase.module.metadata.core.semantic.vo.*;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService;
@@ -61,6 +62,9 @@ public class SemanticDynamicDataApiImpl implements SemanticDynamicDataApi {
 
     @Resource
     private SemanticValidationManager semanticValidationManager;
+
+    @Resource
+    private SemanticQueryPermissionHelper semanticQueryPermissionHelper;
 
     @Override
     public SemanticEntitySchemaDTO buildEntitySchemaByUuid(String entityUuid) {
@@ -496,6 +500,34 @@ public class SemanticDynamicDataApiImpl implements SemanticDynamicDataApi {
         return semanticMergeRecordAssembler.buildSemanticEntityValueDTO(entityData, entitySchema);
     }
 
+    @Override
+    public PageResult<SemanticEntityValueDTO> getPermittedDataByCondition(SemanticPageConditionVO body) {
+        String tableName = body == null ? null : body.getTableName();
+        if (tableName == null || tableName.isBlank()) { return new PageResult<>(new ArrayList<>(), 0L); }
+        // 1) 构建 RecordDTO（分页请求体与过滤条件）
+        SemanticRecordDTO record = buildPageRecord(body);
+        // 2) 考虑后台调用，暂不初始化权限上下文初始化
+        semanticPermissionContextLoader.loadPermissionContext(record);
+        // 3) 数据完整性校验（内部调用忽略功能权限）
+        semanticDataIntegrityValidator.validate(record);
+        // 4) 构建查询条件（仅条件与排序，不应用数据权限）
+        List<SemanticFieldSchemaDTO> fields = record.getEntitySchema().getFields();
+        SemanticConditionDTO condition = record.getRecordContext().getFilters();
+        List<SemanticSortRuleDTO> sortBy = record.getRecordContext().getSortBy();
+
+        // 5) 数据权限校验：当前类 validateDataPermission
+        QueryWrapper qw = semanticQueryPermissionHelper.applyQueryPermissionFilter(null, record.getRecordContext().getPermissionContext(), record.getEntitySchema().getFields());
+
+        semanticQueryConditionBuilder.apply(qw, fields, condition, sortBy);
+
+        // 6) 执行分页查询并转换结果
+        PageResult<Map<String, Object>> page = semanticDataCrudService.queryPage(record, qw);
+        List<SemanticEntityValueDTO> values = convertToValues(record.getEntitySchema(), page.getList());
+        // 7) 记录过程日志并返回
+        semanticProcessLogger.log(record);
+        return new PageResult<>(values, page.getTotal());
+    }
+
     private QueryWrapper buildPageQueryWrapper(SemanticRecordDTO recordDTO, QueryWrapper queryWrapper) {
         // 1) 初始化 QueryWrapper
         if (queryWrapper == null) { queryWrapper = QueryWrapper.create(); }
@@ -518,7 +550,7 @@ public class SemanticDynamicDataApiImpl implements SemanticDynamicDataApi {
         pageBody.setSortBy(body.getSortBy());
         pageBody.setFilters(body.getSemanticConditionDTO());
         // 3) 组装 RecordDTO（包含权限上下文与操作类型）
-        return semanticMergeRecordAssembler.assemblePageBody(body.getTableName(), pageBody, null, null,
+        return semanticMergeRecordAssembler.assemblePageBody(body.getTableName(), pageBody, body.getMenuId(), null,
                 SemanticMethodCodeEnum.GET_PAGE, SemanticDataMethodOpEnum.GET_PAGE);
     }
 
