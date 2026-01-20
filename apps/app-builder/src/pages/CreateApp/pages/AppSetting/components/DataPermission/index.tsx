@@ -136,7 +136,8 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId, roleType }: IProps)
   };
 
   const normalizeCondition = (c: any) => ({
-    fieldId: c?.fieldId == null ? '' : String(c.fieldId),
+    fieldId: c?.fieldName == null ? '' : String(c.fieldName),
+    fieldIKey: c?.fieldName == null ? '' : String(c.fieldName),
     op: c?.fieldOperator ?? '',
     operatorType: c?.fieldValueType ?? 'value',
     value: c?.fieldValue
@@ -381,7 +382,7 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId, roleType }: IProps)
         }
 
         const convertedCondition: AuthDataFilterVO = {
-          fieldId: andCondition.fieldKey,
+          fieldName: andCondition.fieldKey,
           fieldOperator: andCondition.op || '',
           fieldValue: fieldValue !== undefined ? fieldValue : '',
           fieldValueType: andCondition.operatorType || 'value',
