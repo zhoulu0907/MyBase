@@ -26,4 +26,12 @@
       }
     }
   }
+
+  .custom-rate {
+    .pc-rate-character-full .pc-icon[stroke='currentColor'],
+    .pc-rate-character-half .pc-rate-character-left .pc-icon[stroke='currentColor']
+    {
+          stroke: inherit;
+    }
+  }
 }

@@ -106,7 +106,7 @@ export interface XRateConfig extends ICommonBaseType {
     max: number;
     allowHalf: boolean;
     showResult: boolean;
-    showTooltips: boolean;
+    showCustomTooltips: boolean;
     tooltips: string[];
   };
 
@@ -175,8 +175,8 @@ const XRate: XRateSchema = {
     dataField: [],
     defaultValueConfig: {
       type: DEFAULT_VALUE_TYPES.CUSTOM,
-      customValue: 0,
-      formulaValue: 0
+      customValue: '',
+      formulaValue: ''
     },
     rateConfig:{
       showIcon: true,
@@ -185,7 +185,7 @@ const XRate: XRateSchema = {
       max: 5,
       allowHalf: false,
       showResult: false,
-      showTooltips: false,
+      showCustomTooltips: false,
       tooltips: []
     },
     verify: {

@@ -1,7 +1,35 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { registerConfigRenderer } from '../../registry';
 import { CONFIG_TYPES } from '@onebase/ui-kit';
-import { Form, Checkbox, Grid, Dropdown, Menu, ColorPicker, InputNumber, Switch, Button } from '@arco-design/web-react';
+import {
+  Form,
+  Checkbox,
+  Grid,
+  Dropdown,
+  Menu,
+  ColorPicker,
+  InputNumber,
+  Switch,
+  Input,
+  Button,
+  Modal
+} from '@arco-design/web-react';
+import {
+  IconStar,
+  IconBulb,
+  IconSun,
+  IconThumbUp,
+  IconFire,
+  IconHeart,
+  IconBug,
+  IconExclamationCircle,
+  IconPushpin,
+  IconSubscribe,
+  IconClose,
+  IconNotification,
+  IconSafe,
+  IconMinus
+} from '@arco-design/web-react/icon';
 import styles from '../../index.module.less';
 
 export interface DynamicRateConfigProps {
@@ -16,11 +44,25 @@ const DynamicRateConfig: React.FC<DynamicRateConfigProps> = ({ handlePropsChange
 
   // 图标下拉内容
   const dropList = [
-    { lable: '1', value: '1' },
-    { lable: '2', value: '2' },
-    { lable: '3', value: '3' },
-    { lable: '4', value: '4' }
+    { lable: <IconStar />, value: 'IconStar' },
+    { lable: <IconBulb />, value: 'IconBulb' },
+    { lable: <IconSun />, value: 'IconSun' },
+    { lable: <IconThumbUp />, value: 'IconThumbUp' },
+    { lable: <IconFire />, value: 'IconFire' },
+    { lable: <IconHeart />, value: 'IconHeart' },
+    { lable: <IconBug />, value: 'IconBug' },
+    { lable: <IconExclamationCircle />, value: 'IconExclamationCircle' },
+    { lable: <IconPushpin />, value: 'IconPushpin' },
+    { lable: <IconSubscribe />, value: 'IconSubscribe' },
+    { lable: <IconClose />, value: 'IconClose' },
+    { lable: <IconNotification />, value: 'IconNotification' },
+    { lable: <IconSafe />, value: 'IconSafe' },
+    { lable: <IconMinus />, value: 'IconMinus' }
   ];
+
+  // 等级说明
+  const [tooltipVisible, setTooltipVisible] = useState(false);
+  const [tooltipList, setTooltipList] = useState<any[]>([]);
 
   return (
     <>
@@ -34,7 +76,7 @@ const DynamicRateConfig: React.FC<DynamicRateConfigProps> = ({ handlePropsChange
               checked={configs[rateKey]['showIcon']}
               style={{ float: 'right' }}
               onChange={(value) => {
-                handlePropsChange(item.key, { ...configs[item.key], display: value });
+                handlePropsChange(rateKey, { ...configs[rateKey], showIcon: value });
               }}
             >
               显示图标
@@ -44,7 +86,7 @@ const DynamicRateConfig: React.FC<DynamicRateConfigProps> = ({ handlePropsChange
         className={styles.formItem}
       >
         <Grid.Row gutter={8} align="center">
-          <Grid.Col span={6}>
+          <Grid.Col span={4}>
             <Dropdown
               droplist={
                 <Menu>
@@ -55,13 +97,26 @@ const DynamicRateConfig: React.FC<DynamicRateConfigProps> = ({ handlePropsChange
                         handlePropsChange(rateKey, { ...configs[rateKey], iconName: iconItem.value });
                       }}
                     >
-                      {iconItem.lable}
+                      <span style={{ fontSize: '16px' }}>{iconItem.lable}</span>
                     </Menu.Item>
                   ))}
                 </Menu>
               }
             >
-              <div>{configs[rateKey]['iconName']}</div>
+              <div
+                style={{
+                  width: '32px',
+                  height: '32px',
+                  backgroundColor: 'var(--color-secondary)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '24px',
+                  borderRadius: '4px'
+                }}
+              >
+                {dropList.find((ele) => ele.value === configs[rateKey]['iconName'])?.lable}
+              </div>
             </Dropdown>
           </Grid.Col>
           <Grid.Col span={18}>
@@ -86,7 +141,11 @@ const DynamicRateConfig: React.FC<DynamicRateConfigProps> = ({ handlePropsChange
               step={1}
               value={configs[rateKey]['max']}
               onChange={(value) => {
-                handlePropsChange(rateKey, { ...configs[rateKey], max: value });
+                handlePropsChange(rateKey, {
+                  ...configs[rateKey],
+                  max: value,
+                  tooltips: configs[rateKey]['tooltips'].slice(0, value)
+                });
               }}
             />
           </Grid.Col>
@@ -123,15 +182,74 @@ const DynamicRateConfig: React.FC<DynamicRateConfigProps> = ({ handlePropsChange
           <Grid.Col span={14} style={{ textAlign: 'right' }}>
             <Switch
               size="small"
-              checked={configs[rateKey]['showTooltips']}
+              checked={configs[rateKey]['showCustomTooltips']}
               onChange={(value) => {
-                handlePropsChange(rateKey, { ...configs[rateKey], showTooltips: value });
+                handlePropsChange(rateKey, { ...configs[rateKey], showCustomTooltips: value });
               }}
             />
           </Grid.Col>
         </Grid.Row>
-        {configs[rateKey]['showTooltips'] && <Button long>配置评分文案</Button>}
+        {configs[rateKey]['showCustomTooltips'] && (
+          <Button
+            long
+            onClick={() => {
+              const max = configs[rateKey]['max'];
+              const newTooltipList = Array.from({ length: configs[rateKey]['max'] }, (_, index) => {
+                return index < max ? configs[rateKey]['tooltips'][index] : undefined;
+              });
+              setTooltipList(newTooltipList);
+              setTooltipVisible(true);
+            }}
+          >
+            配置评分文案
+          </Button>
+        )}
       </Form.Item>
+      <Modal
+        visible={tooltipVisible}
+        title="设置等级说明"
+        footer={[
+          <Button onClick={() => setTooltipVisible(false)}>取消</Button>,
+          <Button
+            type="primary"
+            onClick={() => {
+              handlePropsChange(rateKey, { ...configs[rateKey], tooltips: tooltipList });
+              setTooltipVisible(false);
+            }}
+          >
+            确定
+          </Button>
+        ]}
+        onCancel={() => setTooltipVisible(false)}
+      >
+        <div style={{ marginBottom: '8px' }}>
+          为每个等级设置说明文案。当鼠标悬停在对应等级或选中后，显示对等级的描述文案
+        </div>
+        <Grid.Row gutter={8}>
+          <Grid.Col span={4}>等级</Grid.Col>
+          <Grid.Col span={20}>文字</Grid.Col>
+        </Grid.Row>
+        {tooltipList.map((item, index) => (
+          <Grid.Row gutter={8} key={index} style={{ marginBottom: '8px' }}>
+            <Grid.Col span={4}>
+              <div style={{ backgroundColor: 'var(--color-secondary)', padding: '5px 8px', borderRadius: '2px' }}>
+                {index + 1}
+              </div>
+            </Grid.Col>
+            <Grid.Col span={20}>
+              <Input
+                placeholder="请输入文字"
+                value={item}
+                onChange={(value) => {
+                  const newTooltips = [...tooltipList];
+                  newTooltips[index] = value;
+                  setTooltipList(newTooltips);
+                }}
+              />
+            </Grid.Col>
+          </Grid.Row>
+        ))}
+      </Modal>
     </>
   );
 };
