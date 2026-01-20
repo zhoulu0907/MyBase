@@ -83,19 +83,13 @@ const XLoadMore = memo(
     const [queryData, setQueryData] = useState<any>({ value: {} });
 
     const [tableData, setTableData] = useState<any[]>([]);
-    const [tableTotal, setTableTotal] = useState<number>(0);
+    const [tableTotal, setTableTotal] = useState<number>();
     const [tablePageNo, setTablePageNo] = useState<number>(1);
     const [loading, setLoading] = useState<boolean>(false);
     // const [showDropdown, setShowDropdown] = useState(false);
     const [localMainMetaData, setLocalMainMetaData] = useState<AppEntityField[]>();
 
     const [searchForm] = useForm();
-
-    const onReachBottom = (cb: Function) => {
-      if (!tableData.length) return;
-      setTablePageNo((prevPageNo) => prevPageNo + 1);
-      cb('prepare');
-    };
 
     useEffect(() => {
       if (refresh) {
@@ -218,144 +212,149 @@ const XLoadMore = memo(
     };
 
     const handlePage = async () => {
-      if (!runtime || (tablePageNo - 1) * pageSize >= (tableTotal || Number.MAX_SAFE_INTEGER)) {
-        return;
-      }
-
-      setLoading(true);
-
-      // TODO: 后续调试（同步ui-kit/Table组件）
-      // if (sortByObject?.fieldName) {
-      //   req.sortField = sortByObject.fieldName;
-      //   req.sortDirection = sortByObject.sortBy === 1 ? 'asc' : 'desc';
-      // }
-
-      let newQueryData: any = {};
-
-      Object.entries(queryData.value).forEach(([key, value]) => {
-        if ((value !== '' && value !== null) || (Array.isArray(value) && value.length !== 0)) {
-          newQueryData[key] = value;
+      try {
+        if (!runtime || (tablePageNo - 1) * pageSize >= (tableTotal || Number.MAX_SAFE_INTEGER)) {
+          return;
         }
-      });
 
-      const req: PageMethodV2Params = {
-        ...newQueryData,
-        pageNo: tablePageNo,
-        pageSize: pageSize || 10
-      };
+        setLoading(true);
 
-      const res = await dataMethodPageV2(tableName, curMenu.value?.id, req);
+        // TODO: 后续调试（同步ui-kit/Table组件）
+        // if (sortByObject?.fieldName) {
+        //   req.sortField = sortByObject.fieldName;
+        //   req.sortDirection = sortByObject.sortBy === 1 ? 'asc' : 'desc';
+        // }
 
-      const mainMetaData = await getMainMetaData();
+        let newQueryData: any = {};
 
-      const { list = [], total = 0 } = res;
+        Object.entries(queryData.value).forEach(([key, value]) => {
+          if ((value !== '' && value !== null) || (Array.isArray(value) && value.length !== 0)) {
+            newQueryData[key] = value;
+          }
+        });
 
-      const newTableData = await Promise.all(
-        (list || []).map(async (item: any) => {
-          const newItem = item;
-          for (const [key, value] of Object.entries(newItem)) {
-            // 优化：减少重复查找，提升可读性和性能
-            if (Array.isArray(mainMetaData?.parentFields)) {
-              const dataField = mainMetaData.parentFields.find(
-                (field: AppEntityField) => field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.DATE.VALUE
-              );
-              if (dataField && newItem[key]) {
-                // 仅当字段类型为日期且有值时格式化
-                const dateValue = new Date(newItem[key]);
-                if (!isNaN(dateValue.getTime())) {
-                  newItem[key] = dayjs(dateValue).format('YYYY-MM-DD');
+        const req: PageMethodV2Params = {
+          ...newQueryData,
+          pageNo: tablePageNo,
+          pageSize: pageSize || 10
+        };
+
+        const res = await dataMethodPageV2(tableName, curMenu.value?.id, req);
+
+        const mainMetaData = await getMainMetaData();
+
+        const { list = [], total = 0 } = res;
+
+        const newTableData = await Promise.all(
+          (list || []).map(async (item: any) => {
+            const newItem = item;
+            for (const [key, value] of Object.entries(newItem)) {
+              // 优化：减少重复查找，提升可读性和性能
+              if (Array.isArray(mainMetaData?.parentFields)) {
+                const dataField = mainMetaData.parentFields.find(
+                  (field: AppEntityField) => field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.DATE.VALUE
+                );
+                if (dataField && newItem[key]) {
+                  // 仅当字段类型为日期且有值时格式化
+                  const dateValue = new Date(newItem[key]);
+                  if (!isNaN(dateValue.getTime())) {
+                    newItem[key] = dayjs(dateValue).format('YYYY-MM-DD');
+                  }
                 }
-              }
 
-              const datatimeField = mainMetaData.parentFields.find(
-                (field: AppEntityField) =>
-                  field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.DATETIME.VALUE
-              );
-              if (datatimeField && newItem[key]) {
-                // 仅当字段类型为日期且有值时格式化
-                const dateValue = new Date(newItem[key]);
-                if (!isNaN(dateValue.getTime())) {
-                  newItem[key] = dayjs(dateValue).format('YYYY-MM-DD HH:mm:ss');
+                const datatimeField = mainMetaData.parentFields.find(
+                  (field: AppEntityField) =>
+                    field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.DATETIME.VALUE
+                );
+                if (datatimeField && newItem[key]) {
+                  // 仅当字段类型为日期且有值时格式化
+                  const dateValue = new Date(newItem[key]);
+                  if (!isNaN(dateValue.getTime())) {
+                    newItem[key] = dayjs(dateValue).format('YYYY-MM-DD HH:mm:ss');
+                  }
                 }
-              }
 
-              // 多选字段回显 逗号分割
-              const multiSelectField = mainMetaData.parentFields.find(
-                (field: AppEntityField) =>
-                  field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE
-              );
-              if (multiSelectField && newItem[key] && Array.isArray(newItem[key])) {
-                newItem[key] = newItem[key]
-                  .map((v) => v.name)
-                  .filter(Boolean)
-                  .join('，');
-              }
-
-              // 人员选择单选
-              const userSelectField = mainMetaData.parentFields.find(
-                (field: AppEntityField) => field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.USER.VALUE
-              );
-              if (userSelectField && newItem[key]) {
-                if (newItem[key]) {
-                  newItem[key] = newItem[key].name;
+                // 多选字段回显 逗号分割
+                const multiSelectField = mainMetaData.parentFields.find(
+                  (field: AppEntityField) =>
+                    field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE
+                );
+                if (multiSelectField && newItem[key] && Array.isArray(newItem[key])) {
+                  newItem[key] = newItem[key]
+                    .map((v) => v.name)
+                    .filter(Boolean)
+                    .join('，');
                 }
-              }
 
-              // 部门
-              const departmentField = mainMetaData.parentFields.find(
-                (field: AppEntityField) =>
-                  field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.DEPARTMENT.VALUE
-              );
-              if (departmentField && newItem[key]) {
-                newItem[key] = newItem[key].name || '-';
-              }
+                // 人员选择单选
+                const userSelectField = mainMetaData.parentFields.find(
+                  (field: AppEntityField) => field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.USER.VALUE
+                );
+                if (userSelectField && newItem[key]) {
+                  if (newItem[key]) {
+                    newItem[key] = newItem[key].name;
+                  }
+                }
 
-              // 开关
-              const switchField = mainMetaData.parentFields.find(
-                (field: AppEntityField) =>
-                  field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.BOOLEAN.VALUE
-              );
-              if (switchField && typeof newItem[key] === 'boolean') {
-                newItem[key] = newItem[key] ? '是' : '否';
-              }
+                // 部门
+                const departmentField = mainMetaData.parentFields.find(
+                  (field: AppEntityField) =>
+                    field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.DEPARTMENT.VALUE
+                );
+                if (departmentField && newItem[key]) {
+                  newItem[key] = newItem[key].name || '-';
+                }
 
-              // 单选列表 - 根据id返回对应label
-              const selectField = mainMetaData.parentFields.find(
-                (field: AppEntityField) => field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.SELECT.VALUE
-              );
+                // 开关
+                const switchField = mainMetaData.parentFields.find(
+                  (field: AppEntityField) =>
+                    field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.BOOLEAN.VALUE
+                );
+                if (switchField && typeof newItem[key] === 'boolean') {
+                  newItem[key] = newItem[key] ? '是' : '否';
+                }
 
-              if (selectField) {
-                newItem[key] = newItem[key]?.name || '-';
-              }
+                // 单选列表 - 根据id返回对应label
+                const selectField = mainMetaData.parentFields.find(
+                  (field: AppEntityField) => field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.SELECT.VALUE
+                );
 
-              // 数据选择
-              const dateField = mainMetaData.parentFields.find(
-                (field: AppEntityField) =>
-                  field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.DATA_SELECTION.VALUE
-              );
-              if (dateField) {
-                newItem[key] = newItem[key].name || '-';
-              }
+                if (selectField) {
+                  newItem[key] = newItem[key]?.name || '-';
+                }
 
-              // 文件上传
-              const fileField = mainMetaData.parentFields.find(
-                (field: AppEntityField) => field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.FILE.VALUE
-              );
-              if (fileField) {
-                newItem[key] = newItem[key] || [];
+                // 数据选择
+                const dateField = mainMetaData.parentFields.find(
+                  (field: AppEntityField) =>
+                    field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.DATA_SELECTION.VALUE
+                );
+                if (dateField) {
+                  newItem[key] = newItem[key].name || '-';
+                }
+
+                // 文件上传
+                const fileField = mainMetaData.parentFields.find(
+                  (field: AppEntityField) => field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.FILE.VALUE
+                );
+                if (fileField) {
+                  newItem[key] = newItem[key] || [];
+                }
               }
             }
-          }
 
-          return {
-            ...newItem,
-            key: item.id
-          };
-        })
-      );
-      setLoading(false);
-      setTableData(req.pageNo === 1 ? newTableData : [...tableData, ...newTableData]);
-      setTableTotal(total);
+            return {
+              ...newItem,
+              key: item.id
+            };
+          })
+        );
+        setLoading(false);
+        setTableData(req.pageNo === 1 ? newTableData : [...tableData, ...newTableData]);
+        setTableTotal(+total);
+      } catch (error) {
+        setLoading(false);
+        setTableTotal(0);
+      }
     };
 
     const handleDeleteAction = (id: string) => {
@@ -452,15 +451,22 @@ const XLoadMore = memo(
     };
 
     const getBottomBar = () => {
+      const onReachBottom = (cb: Function) => {
+        if (!tableData.length) return;
+        setTablePageNo((prevPageNo) => prevPageNo + 1);
+        cb('prepare');
+      };
+
       if (editMode) {
         return null;
       }
-      if (!loading && !tableData.length && tableTotal == 0) {
+      if (!loading && !tableData.length && typeof tableTotal === 'number' && tableTotal === 0) {
         return <div className="no-data">暂无数据</div>;
       }
       if (loading || tablePageNo * pageSize >= (tableTotal || Number.MAX_SAFE_INTEGER)) {
         return tableTotal ? <div className="total-data">共{tableTotal}条数据</div> : null;
       }
+
       return (
         <LoadMore
           getData={onReachBottom}

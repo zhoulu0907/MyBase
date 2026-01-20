@@ -64,6 +64,7 @@ const Runtime: React.FC = () => {
         menuId={curMenuId || ''}
         menuName={curMenu.value?.title}
         runtime={true}
+        menuUuid={curMenu.value?.menuUuid}
         mainEntity={mainEntity}
         subEntities={subEntities}
         pageSetType={curMenu.value?.pagesetType}
