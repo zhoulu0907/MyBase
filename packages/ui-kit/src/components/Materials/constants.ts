@@ -13,6 +13,10 @@ export const CONFIG_TYPES = {
 
   // 组件标题输入
   LABEL_INPUT: 'LabelInput',
+  // 提示内容输入
+  ALERT_CONTENT_INPUT: 'AlertContentInput',
+  // 提示类型选择
+  ALERT_TYPE: 'AlertType',
   // 组件占位符输入
   PLACEHOLDER_INPUT: 'PlaceholderInput',
   // 组件选项输入
