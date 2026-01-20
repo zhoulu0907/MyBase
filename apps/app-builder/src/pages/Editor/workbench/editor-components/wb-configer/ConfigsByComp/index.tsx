@@ -7,6 +7,8 @@ import RichTextEditorWorkbenchConfig from './RichTextEditorWorkbenchConfig';
 import CarouselWorkbenchConfig from './CarouselWorkbenchConfig';
 import ButtonWorkbenchConfig from './ButtonWorkbenchConfig';
 import WelcomeCardConfig from './WelcomeCardConfig';
+import TodoListConfig from './TodoListConfig';
+
 export {
   PageConfig,
   QuickEntryConfig,
@@ -14,5 +16,6 @@ export {
   RichTextEditorWorkbenchConfig,
   CarouselWorkbenchConfig,
   ButtonWorkbenchConfig,
-  WelcomeCardConfig
+  WelcomeCardConfig,
+  TodoListConfig
 };

@@ -46,6 +46,7 @@ export const ENTITY_FIELD_TYPE = {
   MULTI_DATA_SELECTION: { VALUE: 'MULTI_DATA_SELECTION', LABEL: '数据多选' },
   RADIO: { VALUE: 'RADIO', LABEL: '单选框' },
   CHECKBOX: { VALUE: 'CHECKBOX', LABEL: '复选框' },
+  RATE: { VALUE: 'RATE', LABEL: '评分' },
 };
 // 字段标签
 export const FIELD_TAG_TYPE = {
@@ -81,6 +82,7 @@ export const FIELD_TAG_TYPE = {
   MULTI_DATA_SELECTION: { VALUE: 'MULTI_DATA_SELECTION', LABEL: '数据多选', COLOR: '#EBBC00' },
   RADIO: { VALUE: 'RADIO', LABEL: '单选框', COLOR: '#008699' },
   CHECKBOX: { VALUE: 'CHECKBOX', LABEL: '复选框', COLOR: '#1979FF' },
+  RATE: { VALUE: 'RATE', LABEL: '评分', COLOR: '#1979FF' },
 };
 
 // 系统字段对应

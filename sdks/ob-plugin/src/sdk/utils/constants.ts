@@ -54,7 +54,8 @@ export const CONFIG_TYPES = {
   DATE_RANGE: 'DateRange',
   TIME_FORMAT: 'TimeFormat',
   COMMON: 'common',
-  USER_DEFAULT_VALUE: 'userDefaultValue'
+  USER_DEFAULT_VALUE: 'userDefaultValue',
+  RATE_CONFIG: 'RateConfig'
 } as const;
 
 export const WIDTH_OPTIONS = {

@@ -93,32 +93,25 @@ export const WORKBENCH_THEME_OPTIONS = {
 /**
  * 待办中心-数据内容配置选项
  */
-export const DATA_CONFIG_OPTIONS = {
-  SHOW_PENDING: '待我处理',
-  SHOW_CREATED: '我创建的',
-  SHOW_HANDLED: '我已处理',
-  SHOW_CC: '抄送我的'
-} as const;
-
 export const DATA_CONFIG_RANGE: IBooleanConfigType[] = [
   {
     key: 'showPending',
-    name: DATA_CONFIG_OPTIONS.SHOW_PENDING,
+    name: '待我处理',
     type: WORKBENCH_CONFIG_TYPES.SWITCH_INPUT
   },
   {
     key: 'showCreated',
-    name: DATA_CONFIG_OPTIONS.SHOW_CREATED,
+    name: '我创建的',
     type: WORKBENCH_CONFIG_TYPES.SWITCH_INPUT
   },
   {
     key: 'showHandled',
-    name: DATA_CONFIG_OPTIONS.SHOW_HANDLED,
+    name: '我已处理',
     type: WORKBENCH_CONFIG_TYPES.SWITCH_INPUT
   },
   {
     key: 'showCc',
-    name: DATA_CONFIG_OPTIONS.SHOW_CC,
+    name: '抄送我的',
     type: WORKBENCH_CONFIG_TYPES.SWITCH_INPUT
   }
 ];

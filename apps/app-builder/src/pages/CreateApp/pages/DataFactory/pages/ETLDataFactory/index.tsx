@@ -2,16 +2,15 @@ import { useAppStore } from '@/store';
 import { Button, Input, Message, Modal, Pagination, Spin, Tabs } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
 import {
-  deleteETLFlow,
-  ETL_SCHEDULE_STRATEGY,
-  getETLFlowScheduleInfo,
-  pageETLFlow,
-  updateETLFlowScheduleInfo,
-  type ETLFlowMgmt,
-  type UpdateWorkflowScheduleInfoReq
+    deleteETLFlow,
+    ETL_SCHEDULE_STRATEGY,
+    getETLFlowScheduleInfo,
+    pageETLFlow,
+    updateETLFlowScheduleInfo,
+    type ETLFlowMgmt,
+    type UpdateWorkflowScheduleInfoReq
 } from '@onebase/app';
-import { debounce } from 'lodash-es';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import ETLFlowCard from './components/card';
 import EditModal from './components/editModal';
@@ -38,27 +37,18 @@ const EtlDataFactoryPage: React.FC = () => {
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [curFlowStrategyInfo, setCurFlowStrategyInfo] = useState<any>(null);
 
-  const debouncedSearch = useCallback(
-    debounce(() => {
-      handleGetETLFlowList();
-    }, 500),
-    []
-  );
-
   useEffect(() => {
     handleGetETLFlowList();
-  }, [pageNo, pageSize]);
-
-  useEffect(() => {
-    return () => debouncedSearch.cancel();
-  }, [debouncedSearch]);
+  }, [pageNo, pageSize, searchETLFlowProcessName, searchETLFlowType]);
 
   const handleGetETLFlowList = async () => {
     setLoading(true);
     const res = await pageETLFlow({
       applicationId: curAppId,
       pageNo,
-      pageSize
+      pageSize,
+      flowName: searchETLFlowProcessName || undefined,
+      scheduleStrategy: searchETLFlowType === ETL_SCHEDULE_STRATEGY.ALL ? undefined : searchETLFlowType
     });
     setEltFlowList(res.list);
     setTotal(res.total);
@@ -125,6 +115,7 @@ const EtlDataFactoryPage: React.FC = () => {
             <div className={styles.contentHeaderRight}>
               <Tabs
                 onChange={(key) => {
+                  setPageNo(1);
                   setSearchETLFlowType(key as ETL_SCHEDULE_STRATEGY);
                 }}
               >
@@ -139,6 +130,7 @@ const EtlDataFactoryPage: React.FC = () => {
                 placeholder="请输入流程名称"
                 style={{ width: 240 }}
                 onChange={(value) => {
+                  setPageNo(1);
                   setSearchETLFlowProcessName(value);
                 }}
               />

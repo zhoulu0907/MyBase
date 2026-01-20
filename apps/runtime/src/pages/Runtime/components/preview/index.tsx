@@ -381,8 +381,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
   const showFromPageData = (id: string, toFormPage: boolean = false) => {
     setAdd(!id);
     form.resetFields();
-
-    if (id && id !== '') {
+    if (id && id !== '' && rowDataType.value !== PageType.BPM) {
       console.log('edit row id: ', id);
       setEditTargetId(id);
       if (tableName) {
@@ -393,7 +392,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
       setEditTargetId('');
       pagesRuntimeSignal.resetSubTableDataLength();
     }
-
     if (toFormPage) {
       setPageType(EDITOR_TYPES.FORM_EDITOR);
       setDrawerVisible(false);

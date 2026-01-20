@@ -121,6 +121,24 @@ export interface ILabelConfigType extends ICommonConfigType {
   placeholder?: string;
 }
 
+// 内容配置
+export interface IAlertContentConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.ALERT_CONTENT_INPUT;
+}
+
+export interface IAlertTypeConfigType<KeyType> extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.ALERT_TYPE;
+  range: Array<{
+    key: string;
+    text: string;
+    value: KeyType;
+  }>;
+}
+
 // 占位符配置
 export interface IPlaceholderConfigType extends ICommonConfigType {
   key: string;
