@@ -6,6 +6,9 @@
 .react-grid-item.react-grid-placeholder {
   background: lightblue !important;
 }
+.pc-color-picker-size-default {
+  padding: 4px;
+}
 
 /* tab下划线隐藏 */
 .createAppTabs {

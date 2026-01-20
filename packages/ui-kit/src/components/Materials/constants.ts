@@ -125,6 +125,8 @@ export const CONFIG_TYPES = {
   DIVIDER_STYLE_TYPE: 'DividerStyleType',
   //选择人员默认值
   USER_DEFAULT_VALUE: 'userDefaultValue',
+  // 评分组件
+  RATE_CONFIG: 'RateConfig'
 } as const;
 
 // 状态选项常量

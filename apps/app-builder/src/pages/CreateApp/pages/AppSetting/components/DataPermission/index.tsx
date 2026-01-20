@@ -381,7 +381,7 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId, roleType }: IProps)
         }
 
         const convertedCondition: AuthDataFilterVO = {
-          fieldId: andCondition.fieldId,
+          fieldId: andCondition.fieldKey,
           fieldOperator: andCondition.op || '',
           fieldValue: fieldValue !== undefined ? fieldValue : '',
           fieldValueType: andCondition.operatorType || 'value',

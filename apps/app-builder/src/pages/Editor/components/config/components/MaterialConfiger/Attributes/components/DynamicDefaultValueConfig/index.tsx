@@ -223,7 +223,8 @@ const DynamicDefaultValueConfig: React.FC<DynamicDefaultValueConfigProps> = ({
             ))}
           </Select>
         );
-
+      case FORM_COMPONENT_TYPES.RATE:
+        return <InputNumber min={0} max={configs.rateConfig?.max} step={configs.rateConfig?.allowHalf ? 0.5 : 1} />;
       default:
         return (
           <Input
