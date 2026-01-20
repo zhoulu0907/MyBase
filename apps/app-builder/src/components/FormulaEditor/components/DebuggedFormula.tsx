@@ -6,14 +6,14 @@ import { useRef, useState } from 'react';
 import dayjs from 'dayjs';
 import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
 
-interface variableItem {
+interface VariableItem {
   fieldName: string;
   fieldId: string;
   fieldType: any;
 }
 
 interface DebuggedFormulaProps {
-  entityFields: variableItem[];
+  entityFields: VariableItem[];
   formula: string;
   tableData: fieldListWithNodeData;
 }
@@ -23,7 +23,20 @@ export function DebuggedFormula(props: DebuggedFormulaProps) {
   const [displayValue, setDisplayValue] = useState<any>();
   const [loading, setLoading] = useState<boolean>(false); //当调用接口的时候显示加载中
   const [form] = Form.useForm();
-  const formRef = useRef(null); // Form实例引用
+  const formRef = useRef<any>(null); // Form实例引用
+
+  const handleTableItem = (
+    fieldNames: string[],
+    newTableKey: string,
+    result: { [key: string]: string[] },
+    rows: any
+  ) => {
+    fieldNames.forEach((fieldName) => {
+      // 生成目标 key：表格标识 + 字段名（如 "tableRows$数据查询节点(多条)111.任务名称"）
+      const targetKey = `${newTableKey}.${fieldName}`;
+      result[targetKey] = rows?.map((row: any) => row[fieldName] || '');
+    });
+  };
 
   const transformTableData = (items: fieldListWithNodeData[]) => {
     const result: { [key: string]: string[] } = {};
@@ -33,11 +46,7 @@ export function DebuggedFormula(props: DebuggedFormulaProps) {
         const newTableKey = tableKey.replace('tableRows', '');
         const fieldNames = Object.keys(rows[0]);
         // 遍历每个字段名，提取所有行的该字段值
-        fieldNames.forEach((fieldName) => {
-          // 生成目标 key：表格标识 + 字段名（如 "tableRows$数据查询节点(多条)111.任务名称"）
-          const targetKey = `${newTableKey}.${fieldName}`;
-          result[targetKey] = (rows as any)?.map((row: any) => row[fieldName] || '');
-        });
+        handleTableItem(fieldNames, newTableKey, result, rows);
       }
     });
     return result;
@@ -49,8 +58,7 @@ export function DebuggedFormula(props: DebuggedFormulaProps) {
       return JSON.stringify(char).slice(1, -1);
     }
     return char;
-  }
-
+  };
 
   const handleFormula = async () => {
     setLoading(true);
@@ -110,11 +118,11 @@ export function DebuggedFormula(props: DebuggedFormulaProps) {
       case ENTITY_FIELD_TYPE.NUMBER.VALUE:
         return <InputNumber placeholder="please enter" />;
       case ENTITY_FIELD_TYPE.DATE.VALUE:
-        return <DatePicker showTime style={{width: '100%'}}/>;
+        return <DatePicker showTime style={{ width: '100%' }} />;
       case ENTITY_FIELD_TYPE.DATETIME.VALUE:
-        return <DatePicker showTime format="YYYY-MM-DD HH:mm:ss" style={{width: '100%'}}/>;
+        return <DatePicker showTime format="YYYY-MM-DD HH:mm:ss" style={{ width: '100%' }} />;
       case ENTITY_FIELD_TYPE.TIME.VALUE:
-        return <TimePicker format="HH:mm:ss" style={{width: '100%'}}/>;
+        return <TimePicker format="HH:mm:ss" style={{ width: '100%' }} />;
       case ENTITY_FIELD_TYPE.BOOLEAN.VALUE:
         return <Switch />;
       default:
@@ -123,7 +131,7 @@ export function DebuggedFormula(props: DebuggedFormulaProps) {
   };
 
   //生成table的column数据
-  const getColumns = (rootField: string, fields: variableItem[]) => {
+  const getColumns = (rootField: string, fields: VariableItem[]): any => {
     const columns = fields.map((data) => ({
       title: data.fieldName,
       dataIndex: data.fieldName,
@@ -149,7 +157,7 @@ export function DebuggedFormula(props: DebuggedFormulaProps) {
   };
 
   //生成新增行的空数据结构
-  const getNewRow = (fieldConfig: variableItem[]) => {
+  const getNewRow = (fieldConfig: VariableItem[]) => {
     return fieldConfig.reduce((row: any, { fieldName }) => {
       row[fieldName] = '';
       return row;

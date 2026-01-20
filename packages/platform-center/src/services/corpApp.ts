@@ -9,7 +9,7 @@ export const createCorpAppApi = (data: CorpAppParams) => systemService.post('/co
 export const updateCorpAppApi = (data: updateAppParams) => systemService.post('/corp-app-relation/update', data);
 
 //删除应用授权企业
-export const removeCorpAppApi = (id: number) => systemService.post(`/corp-app-relation/delete?id=${id}`);
+export const removeCorpAppApi = (id: string) => systemService.post(`/corp-app-relation/delete?id=${id}`);
 
 //获得企业授权应用列表-分页
 export const getCorpAuthorizedAppListApi = (data: corpAppListParams) =>

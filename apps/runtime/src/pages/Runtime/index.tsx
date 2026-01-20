@@ -65,6 +65,7 @@ const Runtime: React.FC = () => {
   const cutTreeItemWidth = 25;
   const { curMenu, setCurMenu } = menuSignal;
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
+  const viewDetailId = search.get('viewDetail');
 
   const { appId, tenantId } = useParams();
 
@@ -174,7 +175,11 @@ const Runtime: React.FC = () => {
         id: appID
       });
 
-      if (appNavigationConfig.webDefaultMenu === 'default' || appNavigationConfig.webDefaultMenu === '') {
+      if (
+        appNavigationConfig.webDefaultMenu === 'default' ||
+        appNavigationConfig.webDefaultMenu === '' ||
+        viewDetailId
+      ) {
         let curMenuObj = curMenuId ? findMenuWithParents(pageList, [], curMenuId) : findMenuWithParents(pageList, []);
 
         if (!curMenuObj) {

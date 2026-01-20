@@ -189,7 +189,7 @@ const CreateExternalModal: React.FC<CreateExternalModalProps> = ({ visible, onCl
             },
             declaration: values.declaration,
             readonly: values.readonly ? 1 : 0,
-            withCollect: 1
+            withCollect: 0
           });
           Message.success('数据源创建成功');
           onCreate(res);
@@ -323,7 +323,15 @@ const CreateExternalModal: React.FC<CreateExternalModalProps> = ({ visible, onCl
 
         {currentStep == 2 && (
           <div className={styles.createExternalModalContent}>
-            <Form form={form} layout="vertical">
+            <Form
+              form={form}
+              layout="vertical"
+              onValuesChange={() => {
+                if (isEditMode) {
+                  setTestConnectionSuccess(false);
+                }
+              }}
+            >
               <Row>
                 <Form.Item label="数据源名称" field="datasourceName" required>
                   <Input placeholder="请输入数据源名称" />

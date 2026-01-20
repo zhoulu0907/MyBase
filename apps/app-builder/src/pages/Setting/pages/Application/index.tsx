@@ -317,6 +317,7 @@ const AppManagement: React.FC = () => {
                   </Option>
                 ))}
               </Select>
+              <Divider type="vertical" />
 
               <Input
                 className={styles.appInput}

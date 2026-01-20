@@ -121,8 +121,9 @@ const DepartmentModal: React.FC<DepartmentModalProps> = (props) => {
 
           {modalType === 'edit' && (
             <Col span={12}>
-              <FormItem label="部门接口人" field="adminUserId">
+              <FormItem label="部门接口人" field="adminUserIds">
                 <Select
+                  mode="multiple"
                   placeholder={hasUserQueryPermission ? '请选择部门接口人' : '无权限'}
                   allowClear
                   showSearch

@@ -1,5 +1,5 @@
 // import ExecuteFlows from '@/utils/flow';
-import { Button, Form, PopupSwiper, Toast } from '@arco-design/mobile-react';
+import { Button, Dialog, Form, Loading, PopupSwiper, Toast } from '@arco-design/mobile-react';
 import { useForm } from '@arco-design/mobile-react/esm/form';
 import {
   CATEGORY_TYPE,
@@ -47,11 +47,13 @@ import React, { Fragment, useEffect, useState } from 'react';
 import styles from './index.module.less';
 import EditRuntime from './EditRuntime';
 import { normalizeFormValues } from '@/utils';
+import FlowPredict from './flowPredict';
 
 interface PreviewProps {
   menuId: string;
   menuName: string;
   runtime: boolean;
+  menuUuid: string;
   mainEntity: AppEntity;
   subEntities: AppEntities;
   pageSetType?: PageType;
@@ -61,6 +63,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({
   menuId,
   menuName,
   runtime,
+  menuUuid,
   mainEntity,
   subEntities: subEntitiesValues,
   pageSetType
@@ -98,7 +101,10 @@ const PreviewContainer: React.FC<PreviewProps> = ({
     subEntities,
     setSubEntities,
     setCurPage,
-    setEditPageViewId
+    setEditPageViewId,
+    flows,
+    setFlows,
+    resetFlows
   } = pagesRuntimeSignal;
   const [pageSetId, setPageSetId] = useState('');
   const [pageType, setPageType] = useState('');
@@ -106,12 +112,15 @@ const PreviewContainer: React.FC<PreviewProps> = ({
   const [tableName, setTableName] = useState<string>('');
   const [editTargetId, setEditTargetId] = useState('');
   const [editLoading, setEditLoading] = useState(false);
+  const [submitLoading, setSubmitLoading] = useState<boolean>(false);
 
   // 当前时间戳
   const [detailMode, setDetailMode] = useState(true);
   const [userSelectData, setUserSelectData] = useState<any[]>([]); // 人员选择数据
   const [refresh, setRefresh] = useState(Date.now());
   const [isAdd, setAdd] = useState(false); // 是否新增数据
+
+  const [isPredictVisible, setPredictVisible] = useState(false);
 
   /* 数据初始化，解决二次进入旧数据闪烁问题 */
   useEffect(() => {
@@ -130,6 +139,11 @@ const PreviewContainer: React.FC<PreviewProps> = ({
     clearListPageComponentSchemas();
     clearListLayoutSubComponents();
     clearListSubTableComponents();
+
+    return () => {
+      setPredictVisible(false);
+      setTimeout(() => setRefresh(Date.now()), 150);
+    };
   }, []);
 
   useEffect(() => {
@@ -157,6 +171,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({
     if (menuId) {
       handleGetPageSetId(menuId);
       setEditTargetId('');
+      resetFlows();
     }
   }, [menuId]);
 
@@ -192,8 +207,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({
   };
 
   // 信息收集弹窗
-  // const [flows, setFlows] = useState<any[]>([]);
-  // const [inputParams, setInputParams] = useState<any>({});
+  const [inputParams, setInputParams] = useState<any>({});
+  const [entityParam, setEntityParam] = useState<any>();
 
   const resetImageFile = (formData: any, field: { fieldType: string; fieldName: string }, value: any) => {
     const filterByUpload = ['IMAGE', 'FILE'];
@@ -223,6 +238,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({
 
     const draftId = form.getFieldValue('draftId');
 
+    !isSave && setSubmitLoading(true);
     const fields = form.getFieldsValue();
 
     console.log('fields: ', fields);
@@ -327,10 +343,10 @@ const PreviewContainer: React.FC<PreviewProps> = ({
     console.log('subFormData:   ', subFormData);
 
     // 接口判断 页面触发
-    // const curFormPage = curPage.value?.pages?.find((ele: any) => ele.pageType === CATEGORY_TYPE.FORM);
-    // const pageId = curFormPage?.id;
-    // const flowRes = pageId ? await queryFlowExecForm(pageId) : [];
-    // setInputParams(formData);
+    const curFormPage = curPage.value?.pages?.find((ele: any) => ele.pageType === CATEGORY_TYPE.FORM);
+    const pageId = curFormPage?.id;
+    const flowRes = pageId ? await queryFlowExecForm(pageId) : [];
+    setInputParams({ ...formData, ...groups });
 
     // console.log('editTargetId: ', editTargetId, formData);
 
@@ -344,64 +360,59 @@ const PreviewContainer: React.FC<PreviewProps> = ({
       const res = await dataMethodUpdateV2(tableName, menuId, req);
       console.log(res);
 
-      // const updateFlows = (flowRes || []).filter(
-      //   (ele: any) => ele.recordTriggerEvents && ele.recordTriggerEvents.includes(TRIGGER_EVENTS.UPDATE)
-      // );
-      // setFlows(updateFlows);
+      const updateFlows = (flowRes || []).filter(
+        (ele: any) => ele.recordTriggerEvents && ele.recordTriggerEvents.includes(TRIGGER_EVENTS.UPDATE)
+      );
+      setFlows(updateFlows);
       if (res) {
         Toast.success('更新成功');
-        setPageType(EDITOR_TYPES.LIST_EDITOR);
       }
       setEditTargetId('');
       setDrawerVisible(false);
+      setTimeout(() => setRefresh(Date.now()), 150);
+
+      setSubmitLoading(false);
 
       if (curPage?.value?.pageSetType === PageType.BPM) {
         setPageType(EDITOR_TYPES.FORM_EDITOR);
       } else {
         setPageType(EDITOR_TYPES.LIST_EDITOR);
       }
-      setRefresh(Date.now());
     } else {
       try {
         let res = null;
-        if (curPage?.value?.pageSetType === PageType.BPM) {
-          const reqFlow = {
-            isDraft: isSave,
-            formName: curPage?.value?.pages?.find((page: any) => page.pageType === CATEGORY_TYPE.FORM)?.pageName || '',
-            businessId: curPage?.value?.id,
-            entity: {
-              entityId: tableName,
-              data: { ...formData, ...groups }
-            }
-          };
-          res = await fetchSubmitInstance(reqFlow);
-          setPageType(EDITOR_TYPES.FORM_EDITOR);
-        } else {
-          console.log(formData);
-          const req: InsertMethodV2Params = { ...formData, ...groups };
-          console.log(req);
+        const req: InsertMethodV2Params = { ...formData, ...groups };
 
-          if (isDraft) {
-            if (draftId) {
-              res = await updateDraft(tableName, menuId, {
-                ...req,
-                id: draftId
-              });
-            } else {
-              res = await createDraft(tableName, menuId, req);
-            }
+        if (isDraft) {
+          res = draftId
+            ? await updateDraft(tableName, menuId, { ...req, id: draftId })
+            : await createDraft(tableName, menuId, req);
+          Toast.success('保存草稿成功');
+        } else {
+          if (curPage?.value?.pageSetType === PageType.BPM) {
+            const reqFlow = {
+              isDraft: isSave,
+              formName:
+                curPage?.value?.pages?.find((page: any) => page.pageType === CATEGORY_TYPE.FORM)?.pageName || '',
+              businessId: menuUuid,
+              entity: {
+                entityId: tableName,
+                data: { ...formData, ...groups }
+              }
+            };
+            res = await fetchSubmitInstance(reqFlow);
+            setPageType(EDITOR_TYPES.FORM_EDITOR);
           } else {
             res = await dataMethodCreateV2(tableName, menuId, req, draftId);
+            setPageType(EDITOR_TYPES.LIST_EDITOR);
           }
-          console.log(res);
-
-          setPageType(EDITOR_TYPES.LIST_EDITOR);
         }
 
-        // const createFlows = (flowRes || []).filter(
-        //   (ele: any) => ele.recordTriggerEvents && ele.recordTriggerEvents.includes(TRIGGER_EVENTS.CREATE)
-        // );
-        // setFlows(createFlows);
+        const createFlows = (flowRes || []).filter(
+          (ele: any) => ele.recordTriggerEvents && ele.recordTriggerEvents.includes(TRIGGER_EVENTS.CREATE)
+        );
+        setFlows(createFlows);
+        setPredictVisible(false);
 
         if (res) {
           if (isDraft) {
@@ -409,21 +420,40 @@ const PreviewContainer: React.FC<PreviewProps> = ({
           } else {
             Toast.success('创建成功');
           }
+          cancelSubmitForm();
         }
-        setPageType(EDITOR_TYPES.LIST_EDITOR);
+        setTimeout(() => setRefresh(Date.now()), 150);
+        setSubmitLoading(false);
       } catch (error) {
         Toast.error('创建失败');
         console.error('创建失败', error);
+        setPredictVisible(false);
+        setSubmitLoading(false);
       }
     }
 
+    setPredictVisible(false);
     // 关闭页面后子表清空
     pagesRuntimeSignal.resetSubTableDataLength();
   };
 
   const onSubmit = () => {
     if (curPage?.value?.pageSetType === PageType.BPM) {
-      // todo something
+      const fields = form.getFieldsValue();
+      const formData: any = {};
+      Object.entries(fields).forEach(([key, value]) => {
+        // 处理主表逻辑
+        const field = (mainMetaDataFields.value || []).find((f: AppEntityField) => f.fieldId == key);
+        if (field) {
+          formData[field.fieldId] = value || '';
+        }
+      });
+
+      setEntityParam({
+        tableName,
+        data: formData
+      });
+      setPredictVisible(true);
     } else {
       submitForm();
     }
@@ -541,7 +571,9 @@ const PreviewContainer: React.FC<PreviewProps> = ({
         {pageSetType !== PageType.WORKBENCH &&
           pageType === EDITOR_TYPES.LIST_EDITOR &&
           (!listComponents.value?.length ? (
-            <div className={styles.noData}>暂无数据</div>
+            <div className={styles.noData}>
+              <Loading type='circle' color='rgb(var(--primary-6))' />
+            </div>
           ) : (
             listComponents.value.map((cp: GridItem, index: number) => (
               <Fragment key={cp.id}>
@@ -573,6 +605,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({
             form={form}
             isAdd={isAdd}
             editLoading={editLoading}
+            submitLoading={submitLoading}
             onSubmit={onSubmit}
             onSaveSubmit={onSaveSubmit}
             onSaveDraft={onSaveDraft}
@@ -651,6 +684,23 @@ const PreviewContainer: React.FC<PreviewProps> = ({
 
       {/* 信息收集弹窗 */}
       {/* <ExecuteFlows flows={flows} inputParams={inputParams}></ExecuteFlows> */}
+      {isPredictVisible && (
+        <Dialog
+          title=""
+          visible={isPredictVisible}
+          close={() => setPredictVisible(false)}
+          platform="ios"
+          footer={[
+            { content: <div style={{ color: '#1d2129' }}>取消</div> },
+            {
+              content: <div style={{ color: 'rgb(var(--primary-6))' }}>确定</div>,
+              onClick: (() => submitForm()) as any
+            }
+          ]}
+        >
+          <FlowPredict businessId={curPage?.value?.id} entityParam={entityParam} businessUuid={menuUuid} />
+        </Dialog>
+      )}
     </div>
   );
 };

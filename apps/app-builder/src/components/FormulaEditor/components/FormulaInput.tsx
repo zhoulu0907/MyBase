@@ -52,25 +52,7 @@ export function FormulaInput({
     return diagnostics;
   });
 
-  //插入内容到指定位置，使用[[${id}.${label}]]的格式
-  /**
-   * 在编辑器的当前光标位置插入指定文本内容。
-   * @param {string} text - 要插入的文本内容
-   * @param {string} type - 文本类型，可选，默认值为 'text'
-   * @param {number} position - 插入位置，可选，默认值为当前光标位置
-   *
-   */
-  const insertAtPosition = useCallback((text: string, type?: string, position?: number) => {
-    // 获取编辑器实例
-    if (!updateRef.current || !updateRef.current.view) {
-      console.warn('编辑器实例未准备好');
-      return;
-    }
-    const view = updateRef.current.view;
-    const state = view.state;
-    const [range] = state?.selection?.ranges || [];
-
-    // 根据类型格式化插入文本
+  const handleInsertText = (text: string, type?: string): string => {
     let insertText = text;
     if (type === 'var') {
       // 如果已经是[[...]]格式，不再重复添加
@@ -88,6 +70,28 @@ export function FormulaInput({
         insertText = `${text}()`;
       }
     }
+    return insertText;
+  };
+  //插入内容到指定位置，使用[[${id}.${label}]]的格式
+  /**
+   * 在编辑器的当前光标位置插入指定文本内容。
+   * @param {string} text - 要插入的文本内容
+   * @param {string} type - 文本类型，可选，默认值为 'text'
+   * @param {number} position - 插入位置，可选，默认值为当前光标位置
+   *
+   */
+  const insertAtPosition = useCallback((text: string, type?: string, position?: number) => {
+    // 获取编辑器实例
+    if (!updateRef.current?.view) {
+      console.warn('编辑器实例未准备好');
+      return;
+    }
+    const view = updateRef.current.view;
+    const state = view.state;
+    const [range] = state?.selection?.ranges || [];
+
+    // 根据类型格式化插入文本
+    let insertText = handleInsertText(text, type);
 
     // 确定插入位置
     let insertFrom = range?.from || 0;
