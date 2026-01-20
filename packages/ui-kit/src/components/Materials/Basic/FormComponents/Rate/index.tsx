@@ -1,23 +1,23 @@
 // ===== 导入 begin =====
 import { Form, Rate, Typography } from '@arco-design/web-react';
 import {
-  IconStar,
+  IconStarFill,
+  IconFaceSmileFill,
   IconBulb,
-  IconSun,
-  IconThumbUp,
+  IconSunFill,
+  IconThumbUpFill,
   IconFire,
-  IconHeart,
+  IconHeartFill,
   IconBug,
-  IconExclamationCircle,
+  IconExclamationCircleFill,
   IconPushpin,
   IconSubscribe,
   IconClose,
   IconNotification,
-  IconSafe,
   IconMinus
 } from '@arco-design/web-react/icon';
 import { nanoid } from 'nanoid';
-import { memo, useEffect, useState } from 'react';
+import { memo } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { DEFAULT_VALUE_TYPES, STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import { type XRateConfig } from './schema';
@@ -46,19 +46,19 @@ const XRate = memo((props: XRateConfig & { runtime?: boolean; detailMode?: boole
   // ===== 内部状态 & 回显begin =====
   // 图标下拉内容
   const dropList = [
-    { lable: <IconStar />, value: 'IconStar' },
+    { lable: <IconStarFill />, value: 'IconStarFill' },
+    { lable: <IconFaceSmileFill />, value: 'IconFaceSmileFill' },
     { lable: <IconBulb />, value: 'IconBulb' },
-    { lable: <IconSun />, value: 'IconSun' },
-    { lable: <IconThumbUp />, value: 'IconThumbUp' },
+    { lable: <IconSunFill />, value: 'IconSunFill' },
+    { lable: <IconThumbUpFill />, value: 'IconThumbUpFill' },
     { lable: <IconFire />, value: 'IconFire' },
-    { lable: <IconHeart />, value: 'IconHeart' },
+    { lable: <IconHeartFill />, value: 'IconHeartFill' },
     { lable: <IconBug />, value: 'IconBug' },
-    { lable: <IconExclamationCircle />, value: 'IconExclamationCircle' },
+    { lable: <IconExclamationCircleFill />, value: 'IconExclamationCircleFill' },
     { lable: <IconPushpin />, value: 'IconPushpin' },
     { lable: <IconSubscribe />, value: 'IconSubscribe' },
     { lable: <IconClose />, value: 'IconClose' },
     { lable: <IconNotification />, value: 'IconNotification' },
-    { lable: <IconSafe />, value: 'IconSafe' },
     { lable: <IconMinus />, value: 'IconMinus' }
   ];
   const fieldId = dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.RATE}_${nanoid()}`;
@@ -95,7 +95,7 @@ const XRate = memo((props: XRateConfig & { runtime?: boolean; detailMode?: boole
           <div style={{ display: 'flex', alignItems: 'center' }} className='custom-rate'>
             <Rate
               count={rateConfig.max || 5}
-              style={{ stroke: rateConfig.iconColor }}
+              style={{ stroke: rateConfig.iconColor,fill: rateConfig.iconColor }}
               allowHalf={rateConfig.allowHalf}
               tooltips={
                 rateConfig.showResult

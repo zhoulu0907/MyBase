@@ -15,19 +15,19 @@ import {
   Modal
 } from '@arco-design/web-react';
 import {
-  IconStar,
+  IconStarFill,
+  IconFaceSmileFill,
   IconBulb,
-  IconSun,
-  IconThumbUp,
+  IconSunFill,
+  IconThumbUpFill,
   IconFire,
-  IconHeart,
+  IconHeartFill,
   IconBug,
-  IconExclamationCircle,
+  IconExclamationCircleFill,
   IconPushpin,
   IconSubscribe,
   IconClose,
   IconNotification,
-  IconSafe,
   IconMinus
 } from '@arco-design/web-react/icon';
 import styles from '../../index.module.less';
@@ -44,19 +44,19 @@ const DynamicRateConfig: React.FC<DynamicRateConfigProps> = ({ handlePropsChange
 
   // 图标下拉内容
   const dropList = [
-    { lable: <IconStar />, value: 'IconStar' },
+    { lable: <IconStarFill />, value: 'IconStarFill' },
+    { lable: <IconFaceSmileFill />, value: 'IconFaceSmileFill' },
     { lable: <IconBulb />, value: 'IconBulb' },
-    { lable: <IconSun />, value: 'IconSun' },
-    { lable: <IconThumbUp />, value: 'IconThumbUp' },
+    { lable: <IconSunFill />, value: 'IconSunFill' },
+    { lable: <IconThumbUpFill />, value: 'IconThumbUpFill' },
     { lable: <IconFire />, value: 'IconFire' },
-    { lable: <IconHeart />, value: 'IconHeart' },
+    { lable: <IconHeartFill />, value: 'IconHeartFill' },
     { lable: <IconBug />, value: 'IconBug' },
-    { lable: <IconExclamationCircle />, value: 'IconExclamationCircle' },
+    { lable: <IconExclamationCircleFill />, value: 'IconExclamationCircleFill' },
     { lable: <IconPushpin />, value: 'IconPushpin' },
     { lable: <IconSubscribe />, value: 'IconSubscribe' },
     { lable: <IconClose />, value: 'IconClose' },
     { lable: <IconNotification />, value: 'IconNotification' },
-    { lable: <IconSafe />, value: 'IconSafe' },
     { lable: <IconMinus />, value: 'IconMinus' }
   ];
 
