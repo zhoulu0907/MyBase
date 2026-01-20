@@ -98,6 +98,7 @@
         <sqlite.version>3.45.1.0</sqlite.version>
         <mysql.version>8.0.33</mysql.version>
         <lombok-maven-plugin.version>1.18.20.0</lombok-maven-plugin.version>
+        <calcite.version>1.41.0</calcite.version>
     </properties>
 
     <dependencyManagement>
@@ -583,6 +584,18 @@
             </dependency>
 
             <!--  其他-->
+
+            <!-- 卡尔塞特 Calcite 数据联邦查询引擎 -->
+            <dependency>
+                <groupId>org.apache.calcite</groupId>
+                <artifactId>calcite-core</artifactId>
+                <version>${calcite.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.calcite</groupId>
+                <artifactId>calcite-linq4j</artifactId>
+                <version>${calcite.version}</version>
+            </dependency>
 
             <!-- 公式引擎相关 -->
             <dependency>
