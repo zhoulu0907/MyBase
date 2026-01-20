@@ -1,64 +1,62 @@
 import {
-  baseConfig,
-  baseDefault,
-  labelColSpanConfig,
-  statusConfig,
-  tableButtonPermissionConfig,
-  tableMetaDataConfig,
-  tableOperationConfig,
-  widthConfig,
-  labelConfig,
-  tablePagePositionConfig,
-  tablePageSizeConfig,
-  tableBorderConfig,
-  tableBorderCellConfig,
-  tableShowHeaderConfig,
-  tableHoverConfig,
-  tableStripeConfig,
-  tableShowTotalConfig,
-  tableShowOperateConfig,
-  tableFixedOperateConfig,
-  rowRedirectConfig,
-  type ICommonBaseType,
-  type TButtonSelectKeyType,
-  type TPagePositionSelectKeyType,
-  type TStatusSelectKeyType,
-  type TWidthSelectKeyType
+    baseConfig,
+    baseDefault,
+    rowRedirectConfig,
+    statusConfig,
+    tableBorderCellConfig,
+    tableBorderConfig,
+    tableButtonPermissionConfig,
+    tableFixedOperateConfig,
+    tableHoverConfig,
+    tableMetaDataConfig,
+    tableOperationConfig,
+    tablePagePositionConfig,
+    tablePageSizeConfig,
+    tableShowHeaderConfig,
+    tableShowOperateConfig,
+    tableShowTotalConfig,
+    tableStripeConfig,
+    widthConfig,
+    type ICommonBaseType,
+    type TButtonSelectKeyType,
+    type TPagePositionSelectKeyType,
+    type TStatusSelectKeyType,
+    type TWidthSelectKeyType
 } from '../../../common';
 import {
-  BUTTON_OPTIONS,
-  BUTTON_VALUES,
-  PAGINATION_POSITION_OPTIONS,
-  PAGINATION_POSITION_VALUES,
-  RedirectMethod,
-  STATUS_OPTIONS,
-  STATUS_VALUES,
-  TableOperationButton,
-  WIDTH_OPTIONS,
-  WIDTH_VALUES
+    BUTTON_OPTIONS,
+    BUTTON_VALUES,
+    PAGINATION_POSITION_OPTIONS,
+    PAGINATION_POSITION_VALUES,
+    RedirectMethod,
+    STATUS_OPTIONS,
+    STATUS_VALUES,
+    TableOperationButton,
+    WIDTH_OPTIONS,
+    WIDTH_VALUES
 } from '../../../constants';
 import type {
-  IBooleanConfigType,
-  ICommonConfigType,
-  ILabelConfigType,
-  INumberConfigType,
-  IStatusConfigType,
-  ITableButtonConfigType,
-  ITableDataConfigType,
-  ITableOperationConfigType,
-  ITablePagePositionConfigType,
-  ITablePageSizeConfigType,
-  ITextConfigType,
-  IWidthConfigType,
-  TBooleanDefaultType,
-  TNumberDefaultType,
-  TRadioDefaultType,
-  TSelectDefaultType,
-  TTextDefaultType
+    IBooleanConfigType,
+    ICommonConfigType,
+    ILabelConfigType,
+    INumberConfigType,
+    IStatusConfigType,
+    ITableButtonConfigType,
+    ITableDataConfigType,
+    ITableOperationConfigType,
+    ITablePagePositionConfigType,
+    ITablePageSizeConfigType,
+    ITextConfigType,
+    IWidthConfigType,
+    TBooleanDefaultType,
+    TNumberDefaultType,
+    TRadioDefaultType,
+    TSelectDefaultType,
+    TTextDefaultType
 } from '../../../types';
 
 import {
-  PageType
+    PageType
 } from '@onebase/app';
 
 export interface XTableSchema {
@@ -88,10 +86,10 @@ export interface XTableConfig extends ICommonBaseType {
    * text：标题
    * display：是否显示
    */
-  label: {
-    text: TTextDefaultType;
-    display: TBooleanDefaultType;
-  };
+//   label: {
+//     text: TTextDefaultType;
+//     display: TBooleanDefaultType;
+//   };
 
   /**
    * 默认值
@@ -176,7 +174,7 @@ export interface XTableConfig extends ICommonBaseType {
   /**
    * 表头搜索项标题宽度
    */
-  labelColSpan?: TNumberDefaultType;
+//   labelColSpan?: TNumberDefaultType;
   metaData: TTextDefaultType;
   tableName: TTextDefaultType;
   /**
@@ -236,10 +234,10 @@ export interface OperationButtonConfig {
 const XTable: XTableSchema = {
   editData: [
     ...baseConfig,
-    labelConfig,
+    // labelConfig,
     tableMetaDataConfig,
     // keyDataConfig,
-    labelColSpanConfig,
+    // labelColSpanConfig,
     tablePagePositionConfig,
     tablePageSizeConfig,
     tableBorderConfig,
@@ -263,10 +261,10 @@ const XTable: XTableSchema = {
   ],
   config: {
     ...baseDefault,
-    label: {
-      text: '表格',
-      display: false
-    },
+    // label: {
+    //   text: '表格',
+    //   display: false
+    // },
     stripe: true,
     border: true,
     borderCell: true,
@@ -283,7 +281,7 @@ const XTable: XTableSchema = {
     metaData: '',
     tableName: '',
     filterCondition:{},
-    labelColSpan: 100,
+    // labelColSpan: 100,
     defaultValue: [],
     columns: [],
 
