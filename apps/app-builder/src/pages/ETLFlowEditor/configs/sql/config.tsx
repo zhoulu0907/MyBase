@@ -1,12 +1,12 @@
 import { placeholdersPlugin } from '@/components/FormulaEditor/utils/placeholders';
 import { Popover, Select, Tree } from '@arco-design/web-react';
 import {
-  flinkFunctionList,
-  flinkFunctionTypeList,
-  getETLFlowData,
-  type ELTColumn,
-  type FlinkFunction,
-  type FlinkFunctionListReq
+    flinkFunctionList,
+    flinkFunctionTypeList,
+    getETLFlowData,
+    type ELTColumn,
+    type FlinkFunction,
+    type FlinkFunctionListReq
 } from '@onebase/app';
 import { etlEditorSignal } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
