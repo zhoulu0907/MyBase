@@ -18,6 +18,7 @@ export const CONFIG_TYPES = {
   DEFAULT_VALUE: 'DefaultValue',
   REQUIRED_CHECKBOX: 'RequiredCheckBox',
   COLUMN_COUNT_RADIO: 'ColumnCountRadio',
+  COLUMN_GAP_SELECT: 'ColumnGapSelect',
   TABLE_PAGE_POSITION_RADIO: 'TablePagePositionRadio',
   FIELD_DATA: 'FieldData',
   RELATED_FORM_DATA: 'RelatedFormData',

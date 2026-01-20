@@ -7,14 +7,8 @@
   flex-wrap: nowrap;
   align-items: center;
   justify-content: center;
-
-  border: 1px solid #d4d4d4;
   border-radius: 8px;
   box-sizing: border-box;
-  padding-left: 5px;
-  padding-right: 5px;
-  padding-top: 10px;
-  padding-bottom: 10px;
 
   .item {
     flex: 1;
@@ -27,8 +21,13 @@
     align-items: flex-start;
     justify-content: flex-start;
     box-sizing: border-box;
-    padding: 5px;
-    margin: 5px;
+    position: relative;
+
+    .sortableWrapper {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
 
     .content {
       height: 100%;
@@ -41,7 +40,6 @@
       align-content: flex-start;
     }
 
-
     .componentItem {
       cursor: move;
       /* padding: 6px; */
@@ -49,11 +47,34 @@
       border: 1px solid transparent;
       border-radius: 8px;
       transition: border-color 0.2s ease;
-      position: relative;
 
       &:hover {
         border-color: #4fae7b;
       }
+    }
+
+    .placeholder {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      text-align: center;
+      align-content: center;
+      background: #F7F8FA;
+      color: #86909C;
+      font-size: 14px;
+      font-weight: 400;
+      border-radius: 8px;
+      user-select: none;
+      pointer-events: none;
+      transition: opacity 0.15s ease, visibility 0.15s ease;
+      opacity: 1;
+      visibility: visible;
+      z-index: 1;
+    }
+
+    .sortableWrapper.drag-over .placeholder {
+      opacity: 0;
+      visibility: hidden;
     }
 
     .operationArea {

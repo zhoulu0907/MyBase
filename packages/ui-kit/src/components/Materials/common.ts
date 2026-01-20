@@ -51,6 +51,7 @@ import type {
   ISwitchFillTextConfigType,
   IColorConfigType,
   ICommonConfigType,
+  IColumnGapConfigType,
 } from './types';
 
 // ==================== 基础与通用 ====================
@@ -919,6 +920,19 @@ export const columnCountConfig: IColumnCountConfigType<number> = {
     { key: '2', text: '2', value: 2 },
     { key: '3', text: '3', value: 3 },
     { key: '4', text: '4', value: 4 },
+  ]
+}
+
+export const columnGapConfig: IColumnGapConfigType<string> = {
+  key: 'colGap',
+  name: '列间距',
+  type: 'ColumnGapSelect',
+  range: [
+    { key: '24px', text: '24px', value: '24px' },
+    { key: '16px', text: '16px', value: '16px' },
+    { key: '12px', text: '12px', value: '12px' },
+    { key: '8px', text: '8px', value: '8px' },
+    { key: '0px', text: '0px', value: '0px' }
   ]
 }
 

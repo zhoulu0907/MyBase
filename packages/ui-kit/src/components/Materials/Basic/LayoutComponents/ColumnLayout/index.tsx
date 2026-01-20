@@ -3,12 +3,12 @@ import { useSignals } from '@preact/signals-react/runtime';
 import { useEffect } from 'react';
 import { usePageEditorSignal } from 'src/hooks/useSignal';
 import { COMPONENT_GROUP_NAME } from 'src/utils/const';
-import './index.css';
 import { type XColumnLayoutConfig } from './schema';
 import LayoutReactSortable from '../components/layoutReactSortable';
+import './index.css';
 
 const XColumnLayout = (props: XColumnLayoutConfig & { runtime?: boolean; detailMode?: boolean }) => {
-  const { colCount, id, runtime = true } = props;
+  const { colCount, id, colGap, runtime = true } = props;
 
   useSignals();
 
@@ -16,7 +16,7 @@ const XColumnLayout = (props: XColumnLayoutConfig & { runtime?: boolean; detailM
 
   // 从 store 中获取当前组件的列数据，如果不存在则初始化为空数组
   const colComponents = layoutSubComponents[id] || Array.from({ length: colCount }, () => []);
-  //   console.log('colComponents', colComponents);
+  // console.log('colComponents', colComponents, props);
 
   // 如果列数变了，就重新初始化列
   useEffect(() => {
@@ -29,7 +29,7 @@ const XColumnLayout = (props: XColumnLayoutConfig & { runtime?: boolean; detailM
   }, [colCount, id, colComponents]);
 
   return (
-    <Layout className="XColumnLayout">
+    <Layout className="XColumnLayout" style={{ gap: colGap }}> 
       {colComponents.map((_colComponents, index) => (
         <div key={index} className="item">
           <LayoutReactSortable
@@ -39,7 +39,7 @@ const XColumnLayout = (props: XColumnLayoutConfig & { runtime?: boolean; detailM
             groupName={COMPONENT_GROUP_NAME}
             index={index}
             runtime={runtime}
-          ></LayoutReactSortable>
+          />
         </div>
       ))}
     </Layout>
