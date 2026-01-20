@@ -579,6 +579,7 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         conditionVO.setTableName(reqVO.getTableName());
         conditionVO.setPageNo(reqVO.getPageNo());
         conditionVO.setPageSize(reqVO.getPageSize());
+        conditionVO.setMenuId(appMenuRespDTO.getId());
 
         // 2. 构造查询条件 - 通过 entityId 集合查询
         SemanticConditionDTO idCondition = new SemanticConditionDTO();
@@ -601,7 +602,7 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         }
 
         // 3. 调用 getDataByCondition 方法， todo 增加menuId的权限限制
-        PageResult<SemanticEntityValueDTO> entityPageResult = semanticDynamicDataApi.getDataByCondition(conditionVO);
+        PageResult<SemanticEntityValueDTO> entityPageResult = semanticDynamicDataApi.getPermittedDataByCondition(conditionVO);
         Set<Long> instanceIds = new HashSet<>();
 
         response.setTotal(entityPageResult.getTotal());
