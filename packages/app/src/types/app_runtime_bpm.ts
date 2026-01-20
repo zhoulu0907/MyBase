@@ -63,7 +63,7 @@ export interface GetListNodesReq {
 
 export enum FLOWSTATUS_TYPE {
   IN_APPROVAL = 'in_approval',
-  DRAFT = 'draft',
+  // DRAFT = 'draft',
   APPROVED = 'approved',
   REJECTED = 'rejected',
   WITHDRAWN = 'withdrawn',
@@ -72,7 +72,7 @@ export enum FLOWSTATUS_TYPE {
 
 export const FlowStatusMap = {
   [FLOWSTATUS_TYPE.IN_APPROVAL]: '审批中',
-  [FLOWSTATUS_TYPE.DRAFT]: '草稿',
+  // [FLOWSTATUS_TYPE.DRAFT]: '草稿',
   [FLOWSTATUS_TYPE.APPROVED]: '已通过',
   [FLOWSTATUS_TYPE.REJECTED]: '已拒绝',
   [FLOWSTATUS_TYPE.WITHDRAWN]: '已撤回',
@@ -127,4 +127,7 @@ export interface GetMyCCPageListReq {
   nodeCode?: string;
   businessId?: string;
   viewed?: string;
+}
+export interface GetTaskCenterOverviewReq {
+  appId: string;
 }

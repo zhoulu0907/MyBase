@@ -174,7 +174,7 @@
       border-color: #009e9e;
     }
 
-    & .operationArea {
+    & .operationArea, & .nameArea {
       pointer-events: auto !important;
     }
   }
@@ -237,6 +237,7 @@
     align-items: center;
     justify-content: space-between;
     z-index: 10;
+    box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.12), 0 1px 2px -2px rgba(0, 0, 0, 0.16);
 
     .divider {
       margin: 0 4px;
@@ -261,6 +262,23 @@
     .deleteButton {
       color: #f53f3f;
     }
+  }
+
+  // 名称区域样式
+  .nameArea {
+    position: absolute;
+    top: -18px;
+    right: 78px;
+    height: 24px;
+    line-height: 24px;
+    padding: 0 4px;
+    border: 1px solid #e5e6eb;
+    border-radius: 8px;
+    background-color: #fff;
+    font-size: 12px;
+    color: #4E5969;
+    box-sizing: border-box;
+    box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.12), 0 1px 2px -2px rgba(0, 0, 0, 0.16);
   }
 }
 

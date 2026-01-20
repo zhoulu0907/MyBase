@@ -1,23 +1,9 @@
 import {
   baseConfig,
   baseDefault,
-  labelColSpanConfig,
-  statusConfig,
-  tableButtonPermissionConfig,
-  tableMetaDataConfig,
-  tableOperationConfig,
-  widthConfig,
   BUTTON_OPTIONS,
   BUTTON_VALUES,
   CONFIG_TYPES,
-  PAGINATION_POSITION_OPTIONS,
-  PAGINATION_POSITION_VALUES,
-  RedirectMethod,
-  STATUS_OPTIONS,
-  STATUS_VALUES,
-  TableOperationButton,
-  WIDTH_OPTIONS,
-  WIDTH_VALUES,
   IBooleanConfigType,
   ILabelConfigType,
   INumberConfigType,
@@ -29,11 +15,25 @@ import {
   ITablePageSizeConfigType,
   ITextConfigType,
   IWidthConfigType,
+  labelColSpanConfig,
+  PAGINATION_POSITION_OPTIONS,
+  PAGINATION_POSITION_VALUES,
+  RedirectMethod,
+  STATUS_OPTIONS,
+  STATUS_VALUES,
+  statusConfig,
+  tableButtonPermissionConfig,
+  tableMetaDataConfig,
+  TableOperationButton,
+  tableOperationConfig,
   TBooleanDefaultType,
   TNumberDefaultType,
   TRadioDefaultType,
   TSelectDefaultType,
   TTextDefaultType,
+  WIDTH_OPTIONS,
+  WIDTH_VALUES,
+  widthConfig,
   type ICommonBaseType,
   type TButtonSelectKeyType,
   type TPagePositionSelectKeyType,
@@ -124,7 +124,7 @@ export interface XShowMonitorConfig extends ICommonBaseType {
   /**
    * 分页数量
    */
-  pageSize?: TNumberDefaultType;
+  pageSize: TNumberDefaultType;
 
   /**
    * 是否开启操作项

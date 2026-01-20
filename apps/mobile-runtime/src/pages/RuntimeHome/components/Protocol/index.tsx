@@ -1,6 +1,6 @@
 import React from 'react';
 import styles from './index.module.less';
-import CustomNav from '@/pages/components/Nav';
+import { CustomNav } from '@onebase/ui-kit-mobile';
 
 const Protocol: React.FC = () => {
   return (

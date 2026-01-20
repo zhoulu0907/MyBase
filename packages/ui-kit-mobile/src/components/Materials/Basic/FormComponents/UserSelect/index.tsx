@@ -35,7 +35,6 @@ const XUserSelect = memo((props: XUserSelectConfig & { runtime?: boolean; detail
   const fetchUserData = async () => {
     const res = await getSimpleUserList();
     setUserData(res);
-
   };
 
   const rules: ITypeRules<ValidatorType.Custom>[] = [

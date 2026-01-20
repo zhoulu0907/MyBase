@@ -2,9 +2,11 @@ import { useState, useEffect, type FC } from 'react';
 import { Table, type TableColumnProps, Button, Tag, Message, Pagination, Avatar } from '@arco-design/web-react';
 import { getMyCreatePageList } from '@onebase/app/src/services/app_runtime';
 import { LISTTYPE, FLOWSTATUS_TYPE, FlowStatusMap } from '@onebase/app';
+import { getCorpResourceById } from '@onebase/common';
 import dayjs from 'dayjs';
 import TableSearch from './TableSearch';
 import DetailPop from './DetailPop';
+import { useSearchParams } from 'react-router-dom';
 import '../style/tcPage.less';
 
 const AvatarGroup = Avatar.Group;
@@ -59,7 +61,9 @@ const ICreated: FC = ({ appId }: any) => {
                 <AvatarGroup className="color-avatar">
                   {userArr.map((item: any, i: number) => {
                     return (
-                      <Avatar key={i}>{item?.avatar ? <img src={item?.avatar} /> : item?.userName?.charAt(0)}</Avatar>
+                      <Avatar key={i}>
+                        {item?.avatar ? <img src={getCorpResourceById(item?.avatar)} /> : item?.userName?.charAt(0)}
+                      </Avatar>
                     );
                   })}
                 </AvatarGroup>
@@ -118,6 +122,7 @@ const ICreated: FC = ({ appId }: any) => {
   });
   const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState<any>({});
+  const [search] = useSearchParams();
   const defaultPageNo = 1;
 
   function handleDetailPage(row: any) {
@@ -174,8 +179,25 @@ const ICreated: FC = ({ appId }: any) => {
     fetchFormData(filters, current, pageSize);
   };
 
+  const initDetail = () => {
+    const url = location.href;
+    const searchParams = new URLSearchParams(url.split('?')[1]);
+    const viewDetailId = searchParams.get('viewDetail');
+    const curMenuId = searchParams.get('curMenu');
+    
+    if (viewDetailId && viewDetailId === curMenuId) {
+      const rowData: any = {};
+      rowData.businessUuid = search.get('businessUuid');
+      rowData.instanceId = search.get('instanceId');
+      rowData.taskId = search.get('taskId');
+      rowData.pageSetId = search.get('pageSetId');
+      handleDetailPage(rowData);
+    }
+  };
+
   useEffect(() => {
     fetchFormData({}, defaultPageNo);
+    initDetail();
   }, []);
 
   return (

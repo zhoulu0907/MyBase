@@ -42,7 +42,7 @@ const EditTenant = () => {
   const id = searchParams.get('id');
 
   const [isEdit, setIsEdit] = useState(false);
-  const [saasChecked, setSaaSChecked] = useState<boolean>(false);
+  const [saasChecked, setSaasChecked] = useState<boolean>(false);
   const [tenantInfo, setTenantInfo] = useState<any>();
   const [adminList, setAdminList] = useState<UserVO[]>([]);
   const [logoUrl, setLogoUrl] = useState<string>();
@@ -50,7 +50,7 @@ const EditTenant = () => {
   const fullUrl = `${platformFe}/#/tenant/${tenantInfo?.id}/${tenantInfo?.website}/`;
   const displayUrl = simplifyUrl(fullUrl);
 
-  const uploadRef = useRef(null);
+  const uploadRef = useRef<any>(null);
 
   useEffect(() => {
     if (id) {
@@ -71,7 +71,7 @@ const EditTenant = () => {
         tenantAdminUserList: tenantInfo.tenantAdminUserList.map((ten: TenantAdminUserResVO) => ten.platformUserId),
         publishModel: tenantInfo.publishModel === PlatformTenantPublishMode.saas
       };
-      setSaaSChecked(tenantInfo.publishModel === PlatformTenantPublishMode.saas ? true : false);
+      setSaasChecked(tenantInfo.publishModel === PlatformTenantPublishMode.saas);
       setLogoUrl(tenantInfo.logoUrl);
       form.setFieldsValue(initialValues);
     }
@@ -85,7 +85,6 @@ const EditTenant = () => {
   // 获取用户列表
   const getPlatformAdminList = async () => {
     try {
-      //   const adminListResp = await getSimpleUserList();
       const adminListResp = await getPlatformTenantAdminListApi();
       console.log('adminListResp: ', adminListResp);
       setAdminList(adminListResp);
@@ -165,7 +164,7 @@ const EditTenant = () => {
   };
 
   const handleChecked = (value: boolean) => {
-    setSaaSChecked(value);
+    setSaasChecked(value);
   };
 
   return (
@@ -173,14 +172,13 @@ const EditTenant = () => {
       <Tabs defaultActiveTab="1" destroyOnHide={false} style={{ width: '100%' }}>
         <Tabs.TabPane key="1" title="基本信息">
           <Form form={form} layout="horizontal" autoComplete="off" labelCol={{ span: 2 }} wrapperCol={{ span: 22 }}>
-            <Form.Item label="空间名称" field="name" rules={[{ required: isEdit, message: '请输入空间名称' }]}>
-              {isEdit ? <Input placeholder="输入空间名称" /> : <span>{tenantInfo?.name}</span>}
-            </Form.Item>
-
-            <Form.Item label="空间 Logo" field="logoUrl">
-              <Space direction="vertical">
-                {isEdit ? (
-                  <>
+            {isEdit ? (
+              <>
+                <Form.Item label="空间名称" field="name" rules={[{ required: true, message: '请输入空间名称' }]}>
+                  <Input placeholder="输入空间名称" />
+                </Form.Item>
+                <Form.Item label="空间 Logo" field="logoUrl">
+                  <Space direction="vertical">
                     <Upload
                       ref={uploadRef}
                       limit={1}
@@ -191,7 +189,7 @@ const EditTenant = () => {
                         const { onProgress, onError, onSuccess, file } = option;
                         try {
                           const uploadImgUrl = await handleUpload(file, onProgress);
-                          if (uploadImgUrl !== '') {
+                          if (uploadImgUrl) {
                             setLogoUrl(uploadImgUrl);
                             onSuccess(uploadImgUrl);
                           } else {
@@ -205,6 +203,7 @@ const EditTenant = () => {
                             status: 'error',
                             msg: '上传失败'
                           });
+                          console.log(error);
                         }
                       }}
                       beforeUpload={(file) => {
@@ -238,125 +237,158 @@ const EditTenant = () => {
                       }}
                     >
                       {logoUrl ? (
-                        <Image className={styles.tenantLogo} preview width={160} height={80} src={getFileUrlById(logoUrl)} />
+                        <Image
+                          className={styles.tenantLogo}
+                          preview
+                          width={160}
+                          height={80}
+                          src={getFileUrlById(logoUrl)}
+                        />
                       ) : (
                         <div className={styles.tenantLogo}>{tenantInfo?.name.slice(0, 6)}</div>
                       )}
                     </Upload>
-                    {isEdit && (
-                      <Space>
-                        <Button
-                          type="outline"
-                          icon={<IconUpload />}
-                          onClick={() => {
-                            uploadRef.current?.getRootDOMNode()?.querySelector('input[type="file"]').click();
-                          }}
-                        >
-                          上传图片
-                        </Button>
-                        <div style={{ color: '#999', marginTop: 4 }}>建议比例 2:1</div>
-                      </Space>
-                    )}
-                  </>
-                ) : (
-                  <>
+                    <Space>
+                      <Button
+                        type="outline"
+                        icon={<IconUpload />}
+                        onClick={() => {
+                          uploadRef.current?.getRootDOMNode()?.querySelector('input[type="file"]').click();
+                        }}
+                      >
+                        上传图片
+                      </Button>
+                      <div style={{ color: '#999', marginTop: 4 }}>建议比例 2:1</div>
+                    </Space>
+                  </Space>
+                </Form.Item>
+                <Form.Item label="空间ID" field="id">
+                  <Input type="number" disabled />
+                </Form.Item>
+                <Form.Item
+                  label="访问地址"
+                  field="website"
+                  rules={[{ required: true, message: '请输入访问地址' }]}
+                  validateTrigger={['onBlur']}
+                >
+                  <Input
+                    addBefore={<div style={{ width: '250px' }}>{getPlatformFeDomain()}</div>}
+                    placeholder="www.onebase.com"
+                  />
+                </Form.Item>
+
+                <Form.Item
+                  label="用户上限"
+                  field="accountCount"
+                  rules={[{ required: true, message: '请输入用户上限' }]}
+                >
+                  <Input type="number" />
+                </Form.Item>
+
+                <Form.Item
+                  label="管理员"
+                  field="tenantAdminUserList"
+                  rules={[{ required: true, message: '请选择管理员' }]}
+                  extra={'当前用户将作为空间所有者'}
+                >
+                  <Select
+                    placeholder="选择管理员"
+                    mode="multiple"
+                    allowClear
+                    style={{ width: '100%' }}
+                    options={[...(tenantInfo?.tenantAdminUserList || []), ...(adminList || [])].map((u) => ({
+                      label: u.nickname || u.username || u.adminNickName || u.adminUserName,
+                      value: u.id || u.platformUserId
+                    }))}
+                    filterOption={(inputValue: any, option: any) => {
+                      return option.props.children?.includes(inputValue);
+                    }}
+                  ></Select>
+                </Form.Item>
+
+                <Form.Item label="状态" field="status" triggerPropName="checked" rules={[{ required: true }]}>
+                  <Checkbox>启用</Checkbox>
+                </Form.Item>
+
+                <Form.Item label="SaaS 功能" field="publishModel">
+                  <Checkbox checked={saasChecked} onChange={handleChecked}>
+                    启用
+                  </Checkbox>
+                </Form.Item>
+
+                <Form.Item wrapperCol={{ offset: 5 }}>
+                  <Space>
+                    <Button onClick={() => setIsEdit((pre) => !pre)}>取消</Button>
+                    <Button type="primary" onClick={handleSave}>
+                      保存修改
+                    </Button>
+                  </Space>
+                </Form.Item>
+              </>
+            ) : (
+              <>
+                <Form.Item label="空间名称" field="name">
+                  <span>{tenantInfo?.name}</span>
+                </Form.Item>
+                <Form.Item label="空间 Logo" field="logoUrl">
+                  <Space direction="vertical">
                     {logoUrl ? (
-                      <Image className={styles.tenantLogo} preview width={160} height={80} src={getFileUrlById(logoUrl)} />
+                      <Image
+                        className={styles.tenantLogo}
+                        preview
+                        width={160}
+                        height={80}
+                        src={getFileUrlById(logoUrl)}
+                      />
                     ) : (
                       <div className={styles.tenantLogo}>{tenantInfo?.name.slice(0, 6)}</div>
                     )}
-                  </>
-                )}
-              </Space>
-            </Form.Item>
+                  </Space>
+                </Form.Item>
+                <Form.Item label="空间ID" field="id">
+                  <span>{tenantInfo?.id}</span>
+                </Form.Item>
+                <Form.Item label="访问地址" field="website" validateTrigger={['onBlur']}>
+                  <div className={styles.urlWrapper}>
+                    <Tooltip content={displayUrl}>
+                      <span className={styles.url}>{displayUrl}</span>
+                    </Tooltip>
+                    <IconCopy className={styles.copyIcon} onClick={() => copyToClipboard(fullUrl)} />
+                  </div>
+                </Form.Item>
 
-            <Form.Item label="空间ID" field="id">
-              {isEdit ? <Input type="number" disabled /> : <span>{tenantInfo?.id}</span>}
-            </Form.Item>
+                <Form.Item label="用户上限" field="accountCount">
+                  <span>{tenantInfo?.accountCount}</span>
+                </Form.Item>
 
-            <Form.Item
-              label="访问地址"
-              field="website"
-              rules={[{ required: isEdit, message: '请输入访问地址' }]}
-              validateTrigger={['onBlur']}
-            >
-              {isEdit ? (
-                <Input
-                  addBefore={<div style={{ width: '250px' }}>{getPlatformFeDomain()}</div>}
-                  placeholder="www.onebase.com"
-                />
-              ) : (
-                <div className={styles.urlWrapper}>
-                  <Tooltip content={displayUrl}>
-                    <span className={styles.url}>{displayUrl}</span>
-                  </Tooltip>
-                  <IconCopy className={styles.copyIcon} onClick={() => copyToClipboard(fullUrl)} />
-                </div>
-              )}
-            </Form.Item>
+                <Form.Item label="管理员" field="tenantAdminUserList">
+                  <div className={styles.tagWrapper}>
+                    {tenantInfo?.tenantAdminUserList?.map((tag: any, index: number) => (
+                      <Tag className={styles.adminTag} key={index} size="large" style={{ borderRadius: 16 }}>
+                        <Avatar size={24} style={{ marginRight: 4 }}>
+                          {tag.adminNickName.slice(0, 1)}
+                        </Avatar>
+                        {tag.adminNickName}
+                      </Tag>
+                    ))}
+                  </div>
+                </Form.Item>
 
-            <Form.Item label="用户上限" field="accountCount" rules={[{ required: isEdit, message: '请输入用户上限' }]}>
-              {isEdit ? <Input type="number" /> : <span>{tenantInfo?.accountCount}</span>}
-            </Form.Item>
+                <Form.Item label="状态" field="status" triggerPropName="checked">
+                  <span>{tenantInfo?.status ? '已启用' : '未启用'}</span>
+                </Form.Item>
 
-            <Form.Item
-              label="管理员"
-              field="tenantAdminUserList"
-              rules={[{ required: isEdit, message: '请选择管理员' }]}
-              extra={isEdit && '当前用户将作为空间所有者'}
-            >
-              {isEdit ? (
-                <Select
-                  placeholder="选择管理员"
-                  mode="multiple"
-                  allowClear
-                  style={{ width: '100%' }}
-                  options={[...(tenantInfo?.tenantAdminUserList || []), ...(adminList || [])].map((u) => ({
-                    label: u.nickname || u.username || u.adminNickName || u.adminUserName,
-                    value: u.id || u.platformUserId
-                  }))}
-                  filterOption={(inputValue: any, option: any) => {
-                    return option.props.children?.includes(inputValue);
-                  }}
-                ></Select>
-              ) : (
-                <div className={styles.tagWrapper}>
-                  {tenantInfo?.tenantAdminUserList?.map((tag: any, index: number) => (
-                    <Tag className={styles.adminTag} key={index} size="large" style={{ borderRadius: 16 }}>
-                      <Avatar size={24} style={{ marginRight: 4 }}>
-                        {tag.adminNickName.slice(0, 1)}
-                      </Avatar>
-                      {tag.adminNickName}
-                    </Tag>
-                  ))}
-                </div>
-              )}
-            </Form.Item>
+                <Form.Item label="SaaS 功能" field="publishModel">
+                  <span>{tenantInfo?.publishModel === PlatformTenantPublishMode.saas ? '已启用' : '未启用'}</span>
+                </Form.Item>
 
-            <Form.Item label="状态" field="status" triggerPropName="checked" rules={[{ required: isEdit }]}>
-              {isEdit ? <Checkbox>启用</Checkbox> : <span>{tenantInfo?.status ? '已启用' : '未启用'}</span>}
-            </Form.Item>
-
-            <Form.Item label="SaaS 功能" field="publishModel">
-              {isEdit ? (
-                <Checkbox checked={saasChecked} onChange={handleChecked}>
-                  启用
-                </Checkbox>
-              ) : (
-                <span>{tenantInfo?.publishModel === PlatformTenantPublishMode.saas ? '已启用' : '未启用'}</span>
-              )}
-            </Form.Item>
-
-            <Form.Item wrapperCol={{ offset: 5 }}>
-              <Space>
-                <Button onClick={() => setIsEdit((pre) => !pre)}>{isEdit ? '取消' : '编辑'}</Button>
-                {isEdit && (
-                  <Button type="primary" onClick={handleSave}>
-                    保存修改
-                  </Button>
-                )}
-              </Space>
-            </Form.Item>
+                <Form.Item wrapperCol={{ offset: 5 }}>
+                  <Space>
+                    <Button onClick={() => setIsEdit((pre) => !pre)}>编辑</Button>
+                  </Space>
+                </Form.Item>
+              </>
+            )}
           </Form>
         </Tabs.TabPane>
       </Tabs>

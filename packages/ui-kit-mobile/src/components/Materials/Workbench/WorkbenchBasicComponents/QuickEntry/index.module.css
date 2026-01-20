@@ -58,6 +58,14 @@
   color: #fff;
   overflow: hidden;
   margin-bottom: 0;
+  & > div {
+    position: relative;
+    height: 24px;
+    width: 24px;
+    svg {
+      position: absolute;
+    }
+  }
 }
 
 .quickEntryItemTitle {

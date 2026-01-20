@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState, type FC } from 'react';
-import { Drawer, Grid, Tag, Button, Popconfirm, Tooltip, Modal } from '@arco-design/web-react';
+import { Drawer, Grid, Tag, Button, Popconfirm, Tooltip, Modal, Message } from '@arco-design/web-react';
 import { IconFullscreen, IconLink, IconDoubleRight, IconFullscreenExit } from '@arco-design/web-react/icon';
 import ExpendSp from '@/assets/images/task_center/expend-sp.svg';
 import ProPreviewImg from '@/assets/images/task_center/process-preview.svg';
@@ -10,6 +10,8 @@ import { getFormDetail, getOperatorRecord, fetchExecTask } from '@onebase/app/sr
 import PreviewContainer from './DetailForm';
 import FlowView from '../../../../../../../app-builder/src/pages/Editor/components/flowView';
 import { type FetchExecTaskReq } from '@onebase/app';
+import { getCorpResourceById } from '@onebase/common';
+import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import FlowPredict from '../../../../Runtime/components/preview/flowPredict';
 const Row = Grid.Row;
 const Col = Grid.Col;
@@ -43,6 +45,9 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
   let confirmRef = useRef<any>(null);
   const formRef = useRef<any>(null);
   const [popupVisibleMap, setPopupVisibleMap] = useState<any>({});
+  const [search] = useSearchParams();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const setPopupVisibleByIndex = (index: number, visible: boolean, item?: any) => {
     if (item?.buttonName && detailData?.buttonConfigs) {
@@ -85,11 +90,43 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
           ) : (
             <IconFullscreenExit onClick={() => toggleFullScreen('INITSCREEN')} />
           )}
-          <IconLink />
+          <IconLink onClick={copyLink} />
         </div>
       </>
     );
   }
+
+  const copyLink = async () => {
+    const [hashPath, queryString] = window.location.hash.split('?');
+    const searchParams = new URLSearchParams(queryString);
+    searchParams.set('viewDetail', search.get('curMenu') || '');
+    searchParams.set('businessUuid', rowData.businessUuid || '');
+    searchParams.set('instanceId', rowData.instanceId || '');
+    searchParams.set('taskId', rowData.taskId || '');
+    searchParams.set('pageSetId', rowData.pageSetId || '');
+
+    const newUrl = `${window.location.origin}${window.location.pathname}${hashPath}?${searchParams.toString()}`;
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(newUrl);
+      } else {
+        const textArea = document.createElement('textarea');
+        textArea.value = newUrl;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        textArea.style.top = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        document.execCommand('copy');
+        textArea.remove();
+      }
+      Message.success('复制成功');
+    } catch (err) {
+      console.error('复制失败:', err);
+      // 可以在这里添加错误提示
+    }
+  };
 
   const fetchExec = async (value: any) => {
     const buttonType = value?.buttonType;
@@ -154,7 +191,7 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
                   type={item?.buttonType === BPMConfigButtonType.APPROVE ? 'primary' : 'outline'}
                   onClick={() => fetchExec(item)}
                 >
-                  {item?.buttonName}
+                  {item?.displayName}
                 </Button>
               );
             } else {
@@ -186,7 +223,7 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
                     type={item?.buttonType === BPMConfigButtonType.APPROVE ? 'primary' : 'outline'}
                     onClick={() => setPopupVisibleByIndex(index, true, item)}
                   >
-                    {item?.buttonName}
+                    {item?.displayName}
                   </Button>
                 </Popconfirm>
               );
@@ -227,6 +264,7 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
   };
 
   useEffect(() => {
+    if (!detailPopVisible) return;
     if (
       listType === LISTTYPE.WILLDO ||
       listType === LISTTYPE.IDONE ||
@@ -239,7 +277,20 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
     } else {
       //根据列表类型请求对应的详情
     }
-  }, [listType]);
+  }, [listType, detailPopVisible]);
+
+  const closeDrawer = () => {
+    setPopVisible(false);
+    const sp = new URLSearchParams(location.search);
+    sp.delete('businessUuid');
+    sp.delete('instanceId');
+    sp.delete('taskId');
+    sp.delete('pageSetId');
+    sp.delete('viewDetail');
+
+    const to = `${location.pathname}?${sp.toString()}`;
+    navigate(to, { replace: true });
+  };
 
   return (
     <section>
@@ -249,12 +300,8 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
         title={renderTitle()}
         visible={detailPopVisible}
         footer={renderDrawerFooter()}
-        onOk={() => {
-          setPopVisible(false);
-        }}
-        onCancel={() => {
-          setPopVisible(false);
-        }}
+        onOk={closeDrawer}
+        onCancel={closeDrawer}
       >
         <div className="draw-wrap-box">
           <Row className="header-row" style={{ marginBottom: 16 }}>
@@ -271,7 +318,7 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
               <div className="photo-box">
                 <p className="photo-img">
                   {detailData?.initiator?.avatar ? (
-                    <img src={detailData?.initiator?.avatar} alt="" />
+                    <img src={getCorpResourceById(detailData?.initiator?.avatar)} alt="" />
                   ) : (
                     detailData?.initiatorName?.charAt(0)
                   )}

@@ -1,13 +1,14 @@
 .navWrapper {
   width: 100%;
   margin: 0 auto;
-  background-color: #fff;
+
   @media screen and (min-width: 900px) {
     width: 450px;
+
     :global(.arco-nav-bar-wrapper.arco-nav-bar-wrapper-fixed) {
-        width: 450px;
-        left: calc(50vw - 225px);
-      }
+      width: 450px;
+      left: calc(50vw - 225px);
+    }
   }
 
   :global(.arco-nav-bar) {
@@ -25,16 +26,22 @@
       padding: 0 0.3rem;
       font-size: 0.36rem;
 
-      & > div {
+      &>div {
         width: 0.32rem;
         height: 0.32rem;
       }
     }
 
     :global(.arco-nav-bar-title) {
-      & > div {
+      &>div {
         font-size: 0.36rem;
       }
     }
   }
+}
+
+.nav.arco-nav-bar-wrapper.arco-nav-bar-wrapper-fixed {
+  max-width: 450px;
+  left: 50%;
+  transform: translateX(-50%);
 }

@@ -1,5 +1,5 @@
 import { useAppStore } from '@/store';
-import { Button, Input, Message, Pagination, Spin, Tabs } from '@arco-design/web-react';
+import { Button, Input, Message, Modal, Pagination, Spin, Tabs } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
 import {
   deleteETLFlow,
@@ -98,12 +98,17 @@ const EtlDataFactoryPage: React.FC = () => {
   };
 
   const handleDeleteFlow = async (flowId: string) => {
-    const res = await deleteETLFlow(flowId);
-    console.log('handleDeleteFlow res: ', res);
-    if (res) {
-      Message.success('删除成功');
-      handleGetETLFlowList();
-    }
+    Modal.confirm({
+      title: '确认删除',
+      content: '确定要删除吗？删除后无法恢复。',
+      onOk: async () => {
+        const res = await deleteETLFlow(flowId);
+        if (res) {
+          Message.success('删除成功');
+          handleGetETLFlowList();
+        }
+      }
+    });
   };
 
   return (

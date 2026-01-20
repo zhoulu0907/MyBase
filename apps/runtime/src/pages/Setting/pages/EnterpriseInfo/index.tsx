@@ -14,9 +14,15 @@ import {
   Upload
 } from '@arco-design/web-react';
 import { IconCamera, IconEdit } from '@arco-design/web-react/icon';
-import { CORP_INFO_PERMISSION as ACTIONS, Cropper, hasPermission, TokenManager } from '@onebase/common';
+import {
+  CORP_INFO_PERMISSION as ACTIONS,
+  Cropper,
+  getCorpResourceById,
+  hasPermission,
+  TokenManager
+} from '@onebase/common';
 import type { CorpDetailResponse, DictData } from '@onebase/platform-center';
-import { getCorpDetailByIdApiInCorp, getDictDataByType, updateCorpApi, uploadFile } from '@onebase/platform-center';
+import { corpUploadFile, getCorpDetailByIdApiInCorp, getDictDataByType, updateCorpApi } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
 
@@ -38,6 +44,15 @@ const SpaceInfo: React.FC = () => {
   useEffect(() => {
     tokenInfo?.corpId && fetchEnterpriseInfo(tokenInfo.corpId);
   }, [tokenInfo?.corpId]);
+
+  // 当 Modal 打开时，同步最新的企业名称到表单
+  useEffect(() => {
+    if (renameVisible && enterpriseInfo?.corpName) {
+      form.setFieldsValue({
+        newName: enterpriseInfo.corpName
+      });
+    }
+  }, [renameVisible, enterpriseInfo?.corpName, form]);
 
   const fetchEnterpriseInfo = async (id: string) => {
     try {
@@ -62,15 +77,9 @@ const SpaceInfo: React.FC = () => {
     }
   };
 
-  // 重命名
-  const handleRenameSubmit = async () => {
+  const handleUpdateEnterpriseInfo = async (newCorpLogo?: string) => {
     if (!enterpriseInfo) return;
     const { newName } = await form.validate();
-
-    if (!newName.trim()) {
-      Message.error('空间名称不能为空');
-      return;
-    }
 
     if (!enterpriseInfo.corpCode) {
       Message.error('企业编码不存在，无法更新');
@@ -83,24 +92,29 @@ const SpaceInfo: React.FC = () => {
     }
 
     try {
+      // 使用传入的 corpLogo，如果没有传入则使用 enterpriseInfo.corpLogo
+      const logoToUpdate = newCorpLogo !== undefined ? newCorpLogo : enterpriseInfo.corpLogo || '';
+
       await updateCorpApi({
         id: enterpriseInfo.id!,
-        corpName: newName,
-        corpCode: enterpriseInfo.corpCode,
+        corpName: newName || enterpriseInfo.corpName!,
+        corpCode: enterpriseInfo.corpCode!,
+        corpLogo: logoToUpdate,
         industryType: enterpriseInfo.industryType!,
-        status: enterpriseInfo.status,
+        status: enterpriseInfo.status!,
         address: enterpriseInfo.address!,
         userLimit: enterpriseInfo.userLimit!
       });
 
       setEnterpriseInfo({
         ...enterpriseInfo,
-        corpName: newName
+        corpName: newName || enterpriseInfo.corpName!,
+        corpLogo: logoToUpdate
       });
 
       setRenameVisible(false);
       form.resetFields();
-      Message.success('空间名称更新成功');
+      Message.success('更新成功');
     } catch (error) {
       console.error('更新空间信息失败', error);
     }
@@ -119,7 +133,7 @@ const SpaceInfo: React.FC = () => {
         }
       : undefined;
 
-    const res = await uploadFile(formData, progressAdapter);
+    const res = await corpUploadFile(formData, progressAdapter);
     return res;
   };
 
@@ -162,6 +176,7 @@ const SpaceInfo: React.FC = () => {
                       <Upload
                         disabled={!hasPermission(ACTIONS.UPDATE)}
                         limit={1}
+                        fileList={[]}
                         accept="image/*"
                         listType="picture-card"
                         customRequest={async (option) => {
@@ -169,8 +184,11 @@ const SpaceInfo: React.FC = () => {
                           try {
                             const uploadImgUrl = await handleUpload(file, onProgress);
                             if (uploadImgUrl !== '') {
+                              // 先更新状态用于 UI 显示
                               setCorpLogo(uploadImgUrl);
                               onSuccess(uploadImgUrl);
+                              // 然后更新企业信息，传入新的 logo URL
+                              await handleUpdateEnterpriseInfo(uploadImgUrl);
                             } else {
                               onError({
                                 status: 'error',
@@ -216,10 +234,10 @@ const SpaceInfo: React.FC = () => {
                         {corpLogo ? (
                           <Image
                             className={styles.reUploadLogo}
-                            src={corpLogo}
+                            src={getCorpResourceById(corpLogo)}
                             width={160}
                             height={80}
-                            preview={false}
+                            preview={true}
                             actions={[<IconCamera />]}
                           />
                         ) : (
@@ -320,7 +338,7 @@ const SpaceInfo: React.FC = () => {
       <Modal
         title="修改企业名称"
         visible={renameVisible}
-        onOk={handleRenameSubmit}
+        onOk={() => handleUpdateEnterpriseInfo()}
         onCancel={() => setRenameVisible(false)}
       >
         <Form

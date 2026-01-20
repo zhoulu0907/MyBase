@@ -151,6 +151,7 @@ const Home: React.FC<{ nickname: string }> = ({ nickname }) => {
 
   const convertMenuToTreeData = (menus: ApplicationMenu[]): any[] => {
     return menus.map((menu) => ({
+      ...menu,
       key: menu.menuCode,
       id: menu.id,
       icon: menu.menuIcon,

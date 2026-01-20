@@ -6,14 +6,13 @@ import {
   getFieldPermission,
   RoleAllFieldPermission,
   updateFieldPermission,
-  Visibility,
   type AuthFieldVO,
   type GetPermissionReq,
   type UpdateFieldPermissionReq
 } from '@onebase/app';
 import { useEffect, useState, type FC } from 'react';
 
-import { IconAttachment, IconEmpty } from '@arco-design/web-react/icon';
+import { IconAttachment } from '@arco-design/web-react/icon';
 import styles from './index.module.less';
 
 const Row = Grid.Row;

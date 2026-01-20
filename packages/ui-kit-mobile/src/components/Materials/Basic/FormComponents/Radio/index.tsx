@@ -1,6 +1,6 @@
 import { memo, useEffect, useState } from 'react';
 import { nanoid } from 'nanoid';
-import { Ellipsis, Form, Radio } from '@arco-design/mobile-react';
+import { Ellipsis, Form, Radio, Tag } from '@arco-design/mobile-react';
 import { ValidatorType, ITypeRules } from '@arco-design/mobile-utils';
 import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, FormSchema, getFieldOptionsConfig, useAppEntityStore, DEFAULT_VALUE_TYPES, menuDictSignal } from '@onebase/ui-kit';
 import { DictData } from '@onebase/platform-center';
@@ -68,12 +68,15 @@ const XRadio = memo((props: XRadioConfig & { runtime?: boolean; detailMode?: boo
       }}
     >
       {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? (
-        <div>{form?.getFieldValue(fieldId)?.name || options.find((op) => op.id === form?.getFieldValue(fieldId)?.id || op.id === form?.getFieldValue(fieldId))?.label || '--'}</div>
+        <div>{form?.getFieldValue(fieldId)?.[0] || options.find((op) => op.value === form?.getFieldValue(fieldId)?.[0])?.label || '--'}</div>
       ) : (
-        <RadioGroup
-          className='radioWrapperOBMobile'
-          options={options}
-        />
+        <RadioGroup className='radioWrapperOBMobile'>
+          {options.map((ele, index: number) => (
+            <Radio key={index} value={ele.value}>
+              {ele.colorType ? <Tag color='#fff' bgColor={ele.colorType} borderColor={ele.colorType}>{ele.label}</Tag> : <span>{ele.label}</span>}
+            </Radio>
+          ))}
+        </RadioGroup>
       )}
     </Form.Item>
   );

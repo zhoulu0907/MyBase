@@ -1,17 +1,18 @@
 import { Form } from '@arco-design/web-react';
+import { PageType } from '@onebase/app';
 import { cloneDeep } from 'lodash-es';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
-  getComponentImpl,
-  getComponentDescriptor,
-  isPluginComponentType,
   getComponentConfig,
-  hasWorkbenchComponentSchema,
+  getComponentDescriptor,
+  getComponentImpl,
   getWorkbenchComponentConfig,
+  hasWorkbenchComponentSchema,
+  isPluginComponentType,
   WORKBENCH_COMPONENT_MAP,
-  WorkbenchComponentType
+  WorkbenchComponentType,
+  WORKBENCH_COMPONENT_TYPES
 } from 'src/components/Materials';
-import { PageType } from '@onebase/app';
 
 /**
  * 组件渲染的通用属性
@@ -118,10 +119,10 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
 
   const renderComponent = useCallback(() => {
     const descriptor = getComponentDescriptor(cpType as any);
-    const Impl: any = getComponentImpl(cpType as any) ?? (WORKBENCH_COMPONENT_MAP as any)[cpType];
+    const Impl: any = getComponentImpl(cpType as any, runtime) ?? (WORKBENCH_COMPONENT_MAP as any)[cpType];
     if (!Impl) return <div>未知组件类型: {cpType}</div>;
 
-    const baseProps: any = { cpName: cpId, id: cpId, ...componentConfig };
+    const baseProps: any = { cpName: cpId, id: cpId, pageSetType, ...componentConfig };
 
     if (descriptor) {
       if (descriptor.template.category === 'form' || descriptor.template.category === 'show') {
@@ -138,19 +139,31 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
         baseProps.showFromPageData = showFromPageData;
         baseProps.refresh = refresh;
       }
+      if (descriptor.template.category === 'workbench') {
+        baseProps.runtime = runtime;
+        baseProps.preview = preview;
+      }
     } else {
       baseProps.runtime = runtime;
       baseProps.detailMode = detailMode;
       baseProps.preview = preview;
     }
 
+    if (recordId) {
+      baseProps.recordId = recordId;
+    }
+
     if (isPluginComponentType(cpType)) {
       // 预留：插件组件特定扩展点（若未来需要按插件增强 props，可在此统一处理）
     }
 
+    // 按钮组件在web端不渲染
+    if (cpType === WORKBENCH_COMPONENT_TYPES.BUTTON_WORKBENCH) {
+      return null;
+    }
+
     return <Impl {...baseProps} />;
   }, [componentConfig, refresh]);
-
 
   return <>{renderComponent()}</>;
 };

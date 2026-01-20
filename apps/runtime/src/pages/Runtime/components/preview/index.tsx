@@ -1,3 +1,4 @@
+import { pluginBridge } from '@/plugin/bridge';
 import ExecuteFlows from '@/utils/flow';
 import { Form, Message, Modal } from '@arco-design/web-react';
 import {
@@ -33,7 +34,6 @@ import {
 } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useState } from 'react';
-import { pluginBridge } from '@/plugin/bridge';
 import DetailPop from '../TaskCenter/page/DetailPop';
 import DetailRuntime from './DetailRuntime';
 import EditRuntime from './EditRuntime';
@@ -53,6 +53,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
   useSignals();
 
   const [form] = Form.useForm();
+  const [detailForm] = Form.useForm();
 
   const {
     curPage,
@@ -92,8 +93,11 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
   useEffect(() => {
     if (drawerVisible.value) {
       setDetailMode(true);
+    } else {
+      // 关闭 drawer 时重置 detailForm，避免显示旧数据
+      detailForm.resetFields();
     }
-  }, [drawerVisible.value]);
+  }, [drawerVisible.value, detailForm]);
 
   // 获取主表字段和子表字段
   const getMainMetaData = async (pageSetId: string) => {
@@ -310,40 +314,31 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
     } else {
       try {
         let res = null;
-        if (curPage?.value?.pageSetType === PageType.BPM) {
-          const reqFlow = {
-            isDraft: isSave,
-            formName: curPage?.value?.pages?.find((page: any) => page.pageType === CATEGORY_TYPE.FORM)?.pageName || '',
-            businessUuid: menuUuid,
-            entity: {
-              tableName: tableName,
-              data: { ...formData, ...subFormData }
-            }
-          };
-          res = await fetchSubmitInstance(reqFlow as any);
-          setPageType(EDITOR_TYPES.FORM_EDITOR);
+        const req: InsertMethodV2Params = { ...formData, ...subFormData };
+        if (isDraft) {
+          res = draftId
+            ? await updateDraft(tableName, menuId, { ...req, id: draftId })
+            : await createDraft(tableName, menuId, req);
+          Message.success('保存草稿成功');
         } else {
-          console.log(formData);
-          const req: InsertMethodV2Params = { ...formData, ...subFormData };
+          if (curPage?.value?.pageSetType === PageType.BPM) {
+            const reqFlow = {
+              isDraft: isSave,
+              formName:
+                curPage?.value?.pages?.find((page: any) => page.pageType === CATEGORY_TYPE.FORM)?.pageName || '',
+              businessUuid: menuUuid,
+              entity: {
+                tableName: tableName,
+                data: { ...formData, ...subFormData }
+              }
+            };
+            res = await fetchSubmitInstance(reqFlow as any);
 
-          console.log(req);
-
-          if (isDraft) {
-            if (draftId) {
-              res = await updateDraft(tableName, menuId, {
-                ...req,
-                id: draftId
-              });
-            } else {
-              res = await createDraft(tableName, menuId, req);
-            }
+            setPageType(EDITOR_TYPES.FORM_EDITOR);
           } else {
             res = await dataMethodCreateV2(tableName, menuId, req, draftId);
+            setPageType(EDITOR_TYPES.LIST_EDITOR);
           }
-
-          console.log(res);
-
-          setPageType(EDITOR_TYPES.LIST_EDITOR);
         }
 
         const createFlows = (flowRes || []).filter(
@@ -386,8 +381,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
   const showFromPageData = (id: string, toFormPage: boolean = false) => {
     setAdd(!id);
     form.resetFields();
-
-    if (id && id !== '') {
+    if (id && id !== '' && rowDataType.value !== PageType.BPM) {
       console.log('edit row id: ', id);
       setEditTargetId(id);
       if (tableName) {
@@ -398,9 +392,9 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
       setEditTargetId('');
       pagesRuntimeSignal.resetSubTableDataLength();
     }
-
     if (toFormPage) {
       setPageType(EDITOR_TYPES.FORM_EDITOR);
+      setDrawerVisible(false);
     }
   };
 
@@ -428,6 +422,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
 
     console.log('formValues: ', formValues);
     form.setFieldsValue(formValues);
+    detailForm.setFieldsValue(formValues);
 
     return res;
   };
@@ -501,7 +496,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
           <DetailRuntime
             visible={drawerVisible.value}
             onCancel={() => setDrawerVisible(false)}
-            form={form}
+            form={detailForm}
             detailMode={detailMode}
             onUpdate={() => submitForm()}
             onCancelUpdate={cancelSubmitForm}

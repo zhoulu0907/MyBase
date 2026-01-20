@@ -5,7 +5,8 @@ import {
   WORKBENCH_COMPONENT_MAP,
   getWorkbenchComponentConfig,
   WorkbenchComponentType,
-  hasWorkbenchComponentSchema
+  hasWorkbenchComponentSchema,
+  WORKBENCH_COMPONENT_TYPES
 } from 'src/components/Materials';
 
 import React from 'react';
@@ -48,7 +49,7 @@ const ComponentEditRender: React.FC<ComponentRenderProps> = ({ cpId, cpType, pag
 
     if (!Impl) return <div>未知组件类型: {cpType}</div>;
 
-    const baseProps: any = { cpName: cpId, id: cpId, ...componentConfig };
+    const baseProps: any = { cpName: cpId, id: cpId, pageSetType, ...componentConfig };
 
     if (descriptor) {
       if (descriptor.template.category === 'form' || descriptor.template.category === 'show') {
@@ -63,6 +64,11 @@ const ComponentEditRender: React.FC<ComponentRenderProps> = ({ cpId, cpType, pag
     } else {
       // Workbench 组件
       baseProps.runtime = runtime;
+    }
+
+    // 按钮组件在web端不渲染
+    if (cpType === WORKBENCH_COMPONENT_TYPES.BUTTON_WORKBENCH) {
+      return null;
     }
 
     return <Impl {...baseProps} />;

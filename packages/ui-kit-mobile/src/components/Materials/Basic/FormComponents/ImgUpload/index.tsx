@@ -1,24 +1,17 @@
-import { memo, useEffect, useRef } from 'react';
-import { nanoid } from 'nanoid';
+import { Ellipsis, Form, ImagePicker, ImagePreview, Toast } from '@arco-design/mobile-react';
+import type { ImagePickItem } from '@arco-design/mobile-react/cjs/image-picker/type';
 import { ITypeRules, ValidatorType } from '@arco-design/mobile-utils';
-import { Toast, ImagePicker, Form, Ellipsis, ImagePreview } from '@arco-design/mobile-react';
 import { attachmentDownload, attachmentUpload, menuSignal } from '@onebase/app';
 import { pagesRuntimeSignal } from '@onebase/common';
-import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, FormSchema } from '@onebase/ui-kit';
+import { FORM_COMPONENT_TYPES, FormSchema, STATUS_OPTIONS, STATUS_VALUES } from '@onebase/ui-kit';
+import { nanoid } from 'nanoid';
+import { memo, useEffect, useRef } from 'react';
 import './index.css';
 
 type XImgUploadConfig = typeof FormSchema.XImgUploadSchema.config;
 
 const XImgUpload = memo((props: XImgUploadConfig & { runtime?: boolean; detailMode?: boolean; form?: any }) => {
-  const {
-    label,
-    dataField,
-    status,
-    verify,
-    runtime = true,
-    form,
-    detailMode,
-  } = props;
+  const { label, dataField, status, verify, runtime = true, form, detailMode } = props;
   const { curMenu } = menuSignal;
   const { rowDataId } = pagesRuntimeSignal;
 
@@ -46,12 +39,12 @@ const XImgUpload = memo((props: XImgUploadConfig & { runtime?: boolean; detailMo
     }
   };
 
-  const initUlr = async () => {
+  const initUrl = async () => {
     if (!form || !fieldId) return;
-    
+
     const array = form.getFieldValue(fieldId) || [];
     const urls = [] as string[];
-    
+
     const updatedArray = await Promise.all(
       array.map(async (item: any) => {
         if (item.id && !item.url) {
@@ -73,7 +66,7 @@ const XImgUpload = memo((props: XImgUploadConfig & { runtime?: boolean; detailMo
   };
 
   useEffect(() => {
-    initUlr();
+    initUrl();
   }, [fieldId]);
 
   useEffect(() => {
@@ -86,49 +79,57 @@ const XImgUpload = memo((props: XImgUploadConfig & { runtime?: boolean; detailMo
     };
   }, []);
 
-  const handleUpload = async ({ file }: { file: File }) => {
+  const handleUpload = async (files: ImagePickItem): Promise<ImagePickItem | null> => {
+    if (!files.file) {
+      return null;
+    }
+
     try {
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append('file', files.file);
 
       if (runtime) {
         const res = await attachmentUpload(tableName, formData);
         return {
-          name: file.name,
-          response: res
-        };
-      } else {
-        return '';
+          id: res,
+          url: files.url || '',
+          name: files.file.name || ''
+        } as ImagePickItem;
       }
+
+      return null;
     } catch (error) {
+      Toast.toast({
+        content: '上传失败，请重试',
+        duration: 2000
+      });
+      return null;
     }
   };
 
   const onClick = (e: React.MouseEvent, image: any, index: number) => {
-    window.modalInstance = ImagePreview.open({
+    (globalThis as any).modalInstance = ImagePreview.open({
       showLoading: true,
       openIndex: index,
       loop: true,
-      onImageDoubleClick: index => console.log('dbl click', index),
+      onImageDoubleClick: (index) => console.log('dbl click', index),
       onImageLongTap: (index, image) => console.log('long tap', index, image),
-      images: (form.getFieldValue(fieldId) || []).map((item: any) => ({ src: item.url })),
+      images: (form.getFieldValue(fieldId) || []).map((item: any) => ({ src: item.url }))
     });
-  }
+  };
 
   const rules: ITypeRules<ValidatorType.Custom>[] = [
-      {
-        required: verify?.required,
-        type: ValidatorType.Custom,
-        message: `${label.text}是必填项`
-      }
-    ];
+    {
+      required: verify?.required,
+      type: ValidatorType.Custom,
+      message: `${label.text}是必填项`
+    }
+  ];
 
   return (
     <Form.Item
       className="inputTextWrapperOBMobile ImgUploadWrapperOBMobile"
-      label={
-        label.display && <Ellipsis text={label.text} maxLine={2} />
-      }
+      label={label.display && <Ellipsis text={label.text} maxLine={2} />}
       layout="vertical"
       field={fieldId}
       rules={rules}
@@ -144,6 +145,7 @@ const XImgUpload = memo((props: XImgUploadConfig & { runtime?: boolean; detailMo
         maxSize={verify.maxSize * 1024}
         onClick={onClick}
         upload={handleUpload}
+        images={(form.getFieldValue(fieldId) || []).map((item: any) => ({ url: item.url }))}
         disabled={status !== STATUS_VALUES[STATUS_OPTIONS.DEFAULT] || detailMode}
         onMaxSizeExceed={(file) => {
           Toast.toast({

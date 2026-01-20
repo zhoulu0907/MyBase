@@ -2,7 +2,7 @@ import clearIcon from '@/assets/images/clear.svg';
 import draftBoxIcon from '@/assets/images/draft.svg';
 import { Alert, Badge, Button, Divider, Form, Modal, Popconfirm, Space, Table } from '@arco-design/web-react';
 import { IconDelete } from '@arco-design/web-react/icon';
-import { deleteDraft, deleteDraftTable, getDraftPage } from '@onebase/app';
+import { deleteDraft, deleteDraftTable, getDraftPage, getDraftDetail } from '@onebase/app';
 import { isRuntimeEnv } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
 import dayjs from 'dayjs';
@@ -92,8 +92,13 @@ export const DraftBox: React.FC<DraftBoxProps> = ({ showFromPageData, tableColum
   };
 
   // 载入草稿
-  const handleLoadDraft = (draft: any) => {
-    localStorage.setItem('draftData', JSON.stringify(draft));
+  const handleLoadDraft = async(draft: any) => {
+    // 加载草稿详情
+    const param = {
+      id: draft.id
+    }
+    const draftDetail = await getDraftDetail(tableName, menuId, param)
+    localStorage.setItem('draftData', JSON.stringify(draftDetail || draft ));
 
     // 打开编辑弹窗（新增模式）
     showFromPageData?.('', true);

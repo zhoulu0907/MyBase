@@ -1,9 +1,9 @@
-import { Image } from '@arco-design/web-react';
-import styles from './index.module.less';
 import LogoSVG from '@/assets/images/ob_logo.svg';
+import { Image } from '@arco-design/web-react';
+import { DynamicIcon, getCorpResourceById } from '@onebase/common';
 import type { CorpDetailResponse } from '@onebase/platform-center';
 import { appIconMap } from '@onebase/ui-kit';
-import { DynamicIcon } from '@onebase/common';
+import styles from './index.module.less';
 
 type TenantInfo = CorpDetailResponse & {
   iconColor?: string;
@@ -25,7 +25,7 @@ const TenantLogo: React.FC<ITenantLogoProps> = ({ tenantInfo }) => {
         </>
       )}
       {tenantInfo?.corpLogo ? (
-        <Image src={tenantInfo?.corpLogo} height={28} alt="tenant-logo" />
+        <Image src={getCorpResourceById(tenantInfo?.corpLogo)} height={28} alt="tenant-logo" />
       ) : (
         <div
           className={styles.appIcon}

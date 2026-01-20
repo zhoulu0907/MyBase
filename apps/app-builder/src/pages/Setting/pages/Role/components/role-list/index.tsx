@@ -1,16 +1,15 @@
 import ListItem from '@/components/ListItem';
 import { PermissionButton as Button } from '@/components/PermissionControl';
 import PlaceholderPanel from '@/components/PlaceholderPanel';
-import { Input, Spin, Tag, Tree } from '@arco-design/web-react';
-import { IconPlus } from '@arco-design/web-react/icon';
-import { TENANT_ROLE_PERMISSION as ACTIONS } from '@onebase/common';
-import type { PageParam } from '@onebase/platform-center';
-import { getRolePage, RoleType, type RoleVO } from '@onebase/platform-center';
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
-import s from '../../index.module.less';
-import type { TreeDataType } from '@arco-design/web-react/es/Tree/interface';
 import { renderDraggedTree } from '@/utils';
 import { listToTree } from '@/utils/tree';
+import { Input, Spin, Tag, Tree } from '@arco-design/web-react';
+import type { TreeDataType } from '@arco-design/web-react/es/Tree/interface';
+import { IconPlus } from '@arco-design/web-react/icon';
+import { TENANT_ROLE_PERMISSION as ACTIONS } from '@onebase/common';
+import { getRolePage, RoleType, type PageParam, type RoleVO } from '@onebase/platform-center';
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import s from '../../index.module.less';
 
 interface RoleListProps {
   activeId: string | undefined;
@@ -211,12 +210,8 @@ export default forwardRef(function RoleList({ activeId, onSelect, onAdd }: RoleL
               renderTitle={(node: TreeDataType) => {
                 return (
                   <>
-                    <span style={{minWidth:'120px', display:'inline-block'}}>{node.name}</span>
-                    {node.type === RoleType.SYSTEM && (
-                      <Tag color="cyan">
-                        系统
-                      </Tag>
-                    )}
+                    <span style={{ minWidth: '120px', display: 'inline-block' }}>{node.name}</span>
+                    {node.type === RoleType.SYSTEM && <Tag color="cyan">系统</Tag>}
                   </>
                 );
               }}

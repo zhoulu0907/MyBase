@@ -5,6 +5,8 @@ import DetailPop from './DetailPop';
 import BatchApproveModal from '../modal/batchApprove';
 import { FLOWSTATUS_TYPE, FlowStatusMap, LISTTYPE } from '@onebase/app';
 import { getTodoPageList } from '@onebase/app/src/services/app_runtime';
+import { getCorpResourceById } from '@onebase/common';
+import { useSearchParams } from 'react-router-dom';
 import dayjs from 'dayjs';
 import '../style/tcPage.less';
 
@@ -28,7 +30,7 @@ const WillDo: FC<WillDoProps> = ({ appId }) => {
     {
       title: '流程标题',
       dataIndex: 'processTitle',
-      width:250,
+      width: 250,
       ellipsis: true
     },
     {
@@ -36,7 +38,9 @@ const WillDo: FC<WillDoProps> = ({ appId }) => {
       dataIndex: 'initiator',
       render: (obj: any) => (
         <span className="flex-bw-center">
-          <div className="photo-img">{obj?.avatar ? <img src={obj?.avatar} /> : obj?.name?.charAt(0)}</div>
+          <div className="photo-img">
+            {obj?.avatar ? <img src={getCorpResourceById(obj?.avatar)} /> : obj?.name?.charAt(0)}
+          </div>
           {obj?.name}
         </span>
       ),
@@ -76,7 +80,7 @@ const WillDo: FC<WillDoProps> = ({ appId }) => {
     {
       title: '表单摘要',
       dataIndex: 'formSummary',
-      width:320,
+      width: 320,
       ellipsis: true
     },
     {
@@ -122,6 +126,8 @@ const WillDo: FC<WillDoProps> = ({ appId }) => {
   });
   const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState<any>({});
+  const [search] = useSearchParams();
+
   const defaultPageNo = 1;
 
   function handleBatchClick(hasRowCheck: boolean) {
@@ -196,8 +202,24 @@ const WillDo: FC<WillDoProps> = ({ appId }) => {
     fetchFormData(filters, current, pageSize);
   };
 
+  const initDetail = () => {
+    const url = location.href;
+    const searchParams = new URLSearchParams(url.split('?')[1]);
+    const viewDetailId = searchParams.get('viewDetail');
+    const curMenuId = searchParams.get('curMenu');
+    if (viewDetailId && viewDetailId === curMenuId) {
+      const rowData: any = {};
+      rowData.businessUuid = search.get('businessUuid');
+      rowData.instanceId = search.get('instanceId');
+      rowData.taskId = search.get('taskId');
+      rowData.pageSetId = search.get('pageSetId');
+      handleDetailPage(rowData);
+    }
+  };
+
   useEffect(() => {
     fetchFormData({}, defaultPageNo);
+    initDetail();
   }, []);
 
   return (
@@ -205,7 +227,7 @@ const WillDo: FC<WillDoProps> = ({ appId }) => {
       <div className="table-title-box">
         <b>待我处理</b>
         <TableSearch
-          uiConfig={{ hasInput: true, hasFilter: {hasStartMan: true}, hasSort: true, hasBatch: true }}
+          uiConfig={{ hasInput: true, hasFilter: { hasStartMan: true }, hasSort: true, hasBatch: true }}
           batchEvent={handleBatchClick}
           onReset={handleReset}
           onFilterChange={handleSearch}

@@ -1,5 +1,5 @@
 import { Button, Dropdown, Menu, Message, Switch, Typography } from '@arco-design/web-react';
-import { IconCheckCircleFill, IconEdit, IconMoreVertical } from '@arco-design/web-react/icon';
+import { IconEdit, IconMoreVertical } from '@arco-design/web-react/icon';
 import {
   disableETLFlow,
   enableETLFlow,
@@ -84,7 +84,7 @@ const ETLFlowCard: React.FC<ETLFlowCardProps> = ({ data, handleEdit, handleDelet
             </div>
 
             <div className={styles.cardHeaderSubTitleItem}>
-              最后更新: {dayjs(data.lastSuccessTime).format('YYYY-MM-DD mm:ss')}
+              {data.lastSuccessTime && `最近同步时间: ${dayjs(data.lastSuccessTime).format('YYYY-MM-DD mm:ss')}`}
             </div>
           </div>
         </div>
@@ -116,10 +116,10 @@ const ETLFlowCard: React.FC<ETLFlowCardProps> = ({ data, handleEdit, handleDelet
             <img src={etlTable} alt="" />
             <span>{data.targetTable}</span>
           </div>
-          <div className={styles.cardBodyRowSyncDone}>
+          {/* <div className={styles.cardBodyRowSyncDone}>
             <IconCheckCircleFill style={{ fontSize: '12px', color: '#00B42A', marginRight: '4px' }} />
             数据同步完成
-          </div>
+          </div> */}
         </div>
       </div>
       <div className={styles.cardFooter}>

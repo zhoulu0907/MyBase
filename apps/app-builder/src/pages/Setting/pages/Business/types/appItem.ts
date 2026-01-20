@@ -61,11 +61,12 @@ export interface corpApplicationListProps {
 export interface cropItem {
   id: string;
   address: string;
+  corpLogo?: string;
   corpCode?: string;
   corpName: string;
   createTime: number;
   industryType: string;
-  industryTypeName: string;
+  industryTypeName?: string;
   status: number;
   userLimit: number;
   adminName: string;

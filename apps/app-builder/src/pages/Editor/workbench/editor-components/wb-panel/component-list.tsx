@@ -17,7 +17,11 @@ interface ComponentListProps {
 export function ComponentList({ items, components, onItemsChange }: ComponentListProps) {
   const { workbenchComponents } = useWorkbenchSignal();
 
-  if (components.length === 0) {
+  // 过滤掉按钮组件
+  const sortableItems = items.filter((item) => item.type !== WORKBENCH_COMPONENT_TYPES.BUTTON_WORKBENCH);
+  const displayComponents = components.filter((item) => item.type !== WORKBENCH_COMPONENT_TYPES.BUTTON_WORKBENCH);
+
+  if (displayComponents.length === 0) {
     return <div className={styles.emptyTip}>暂无组件</div>;
   }
 
@@ -27,7 +31,7 @@ export function ComponentList({ items, components, onItemsChange }: ComponentLis
 
   return (
     <ReactSortable
-      list={items}
+      list={sortableItems}
       setList={onItemsChange}
       group={{
         name: COMPONENT_GROUP_NAME,
@@ -43,28 +47,25 @@ export function ComponentList({ items, components, onItemsChange }: ComponentLis
         const cpType = e.item.getAttribute('data-cp-type');
         e.item.id = `${cpType}-${uuidv4()}`;
 
-        onItemsChange(items.map((item) => (item.type === cpType ? { ...item, id: e.item.id } : item)));
+        onItemsChange(sortableItems.map((item) => (item.type === cpType ? { ...item, id: e.item.id } : item)));
       }}
     >
-      {components
-        // 过滤掉按钮组件（仅移动端支持）
-        .filter((item) => item.type !== WORKBENCH_COMPONENT_TYPES.BUTTON_WORKBENCH)
-        .map((item) => {
-          // 如果是快捷入口、欢迎卡片组件且workspace中已存在，则禁用拖拽
-          const isQuickEntryDisabled = item.type === WORKBENCH_COMPONENT_TYPES.QUICK_ENTRY && hasQuickEntry;
-          const isWelcomeCardDisabled = item.type === WORKBENCH_COMPONENT_TYPES.WELCOME_CARD && hasWelcomeCard;
-          return (
-            <MaterialCard
-              key={item.type}
-              id={item.id}
-              displayName={item.displayName}
-              type={item.type}
-              icon={item.icon || ''}
-              layout="column"
-              disabled={isQuickEntryDisabled || isWelcomeCardDisabled}
-            />
-          );
-        })}
+      {displayComponents.map((item) => {
+        // 如果是快捷入口、欢迎卡片组件且workspace中已存在，则禁用拖拽
+        const isQuickEntryDisabled = item.type === WORKBENCH_COMPONENT_TYPES.QUICK_ENTRY && hasQuickEntry;
+        const isWelcomeCardDisabled = item.type === WORKBENCH_COMPONENT_TYPES.WELCOME_CARD && hasWelcomeCard;
+        return (
+          <MaterialCard
+            key={item.type}
+            id={item.id}
+            displayName={item.displayName}
+            type={item.type}
+            icon={item.icon || ''}
+            layout="column"
+            disabled={isQuickEntryDisabled || isWelcomeCardDisabled}
+          />
+        );
+      })}
     </ReactSortable>
   );
 }

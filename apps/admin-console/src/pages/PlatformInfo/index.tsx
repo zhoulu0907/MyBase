@@ -1,6 +1,7 @@
 import { useI18n } from '@/hooks/useI18n';
 import { formatTimestamp } from '@/utils/date';
 import {
+  Button,
   Card,
   Descriptions,
   Message,
@@ -66,7 +67,8 @@ const PlatformInfo: React.FC = () => {
     const fetchData = async () => {
       setPageLoading(true);
       try {
-        (await getPlatformInfoList(pagination.current, pagination.pageSize), await getPlatformInfo());
+        await getPlatformInfoList(pagination.current, pagination.pageSize);
+        await getPlatformInfo();
       } catch (error) {
         console.error('上传跳转报错', error);
       } finally {
@@ -88,9 +90,11 @@ const PlatformInfo: React.FC = () => {
       // 认证内容
       dataIndex: 'certificationContent',
       key: 'certificationContent',
-      render: (_text, record) =>  (<div>
-        {t('platformInfo.tenantCount')}: {record.tenantLimit}，用户数量：{record.userLimit}
-      </div>)
+      render: (_text, record) => (
+        <div>
+          {t('platformInfo.tenantCount')}: {record.tenantLimit}，用户数量：{record.userLimit}
+        </div>
+      )
     },
     {
       title: '当前状态',
@@ -108,11 +112,12 @@ const PlatformInfo: React.FC = () => {
       title: '操作',
       dataIndex: 'operation',
       key: 'operation',
+      align: 'center',
       render: (_, record) => (
         <div className={styles.operation}>
-          <a
-            href="#"
+          <Button
             className={styles.btn}
+            type="text"
             onClick={(e) => {
               e.preventDefault();
               setSelectedLicenseInfo(record);
@@ -120,7 +125,7 @@ const PlatformInfo: React.FC = () => {
             }}
           >
             {t('platformInfo.check')}
-          </a>
+          </Button>
         </div>
       )
     }
@@ -135,28 +140,17 @@ const PlatformInfo: React.FC = () => {
 
     // 只处理最新上传的文件，不累积处理
     if (fileList.length > 0) {
-      const latestFile = fileList[fileList.length - 1];
+      const latestFile = fileList.at(-1);
 
       // 获取原始文件对象 - 关键修正
-      let file = null;
-
-      // 尝试多种方式获取文件对象
-      if (latestFile.originFile) {
-        file = latestFile.originFile;
-      } else if (latestFile.file) {
-        file = latestFile.file;
-      } else if (latestFile instanceof File) {
-        file = latestFile;
-      } else if (latestFile.raw) {
-        file = latestFile.raw;
-      }
+      const file = getOriginFile(latestFile);
 
       // 验证文件对象
-      if (file && (file instanceof File || file instanceof Blob)) {
+      if (file) {
         const formData = new FormData();
         if (file instanceof File) {
           formData.append('file', file, file.name || 'license.lic.sm4');
-        } else {
+        } else if(file instanceof Blob) {
           // 对于 Blob 类型，使用固定文件名
           formData.append('file', file, 'license.lic.sm4');
         }
@@ -181,12 +175,25 @@ const PlatformInfo: React.FC = () => {
       } else {
         // 如果文件对象无效，显示错误信息
         Message.error('文件上传失败,请检查文件是否正确选择');
-        console.error('无效的文件对象:', file);
-        console.error('latestFile的完整结构:', JSON.stringify(latestFile, null, 2));
       }
-    } else {
-      console.log('没有选择文件');
     }
+  };
+
+  // 获取原始文件对象 - 关键修正
+  const getOriginFile = (latestFile: any) => {
+    let file = null;
+
+    // 尝试多种方式获取文件对象
+    if (latestFile.originFile) {
+      file = latestFile.originFile;
+    } else if (latestFile.file) {
+      file = latestFile.file;
+    } else if (latestFile instanceof File) {
+      file = latestFile;
+    } else if (latestFile.raw) {
+      file = latestFile.raw;
+    }
+    return file;
   };
 
   // 分页器
@@ -205,7 +212,7 @@ const PlatformInfo: React.FC = () => {
       const pageSize = paginationInfo.pageSize || 10;
 
       // 如果页面大小改变，重置到第一页
-      const actualPageNo = pageSize !== pagination.pageSize ? 1 : pageNo;
+      const actualPageNo = pageSize === pagination.pageSize ? pageNo : 1;
 
       await getPlatformInfoList(actualPageNo, pageSize);
 

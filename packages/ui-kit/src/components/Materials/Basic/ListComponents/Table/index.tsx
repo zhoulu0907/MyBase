@@ -157,7 +157,7 @@ const XTable = memo(
                     style={{ padding: '0 8px' }}
                     onClick={(event) => {
                       event.stopPropagation();
-                      handleEdit(record.id, true);
+                      handleEdit(record.id, true, record);
                     }}
                     icon={
                       (operationButtonShowType === TableOperationButtonStyle.ICON ||
@@ -374,6 +374,7 @@ const XTable = memo(
                       detailMode={true}
                       pageComponentSchema={componentConfig}
                       runtime={true}
+                      recordId={_record.id}
                     />
                   );
                 }
@@ -606,9 +607,18 @@ const XTable = memo(
       handlePage();
     };
 
-    const handleEdit = (id: string, toFormPage: boolean) => {
+    const handleEdit = (id: string, toFormPage: boolean, record?: any) => {
       if (!runtime) {
         return;
+      }
+      if(record) {
+        if (record.bpm_instance_id) {
+          setRowDataType(PageType.BPM);
+          setBpmInstanceId(record.bpm_instance_id);
+        } else {
+           setRowDataType(PageType.NORMAL);
+          setBpmInstanceId('');
+        }
       }
       setRowDataId(id);
       showFromPageData?.(id, toFormPage);
@@ -624,12 +634,12 @@ const XTable = memo(
           // 打开抽屉显示详情
           setDrawerVisible(true);
           redirectPageId && setDrawerPageId(redirectPageId);
-          if(record.bpm_instance_id){
-            setRowDataType(PageType.BPM)
-            setBpmInstanceId(record.bpm_instance_id)
+          if (record.bpm_instance_id) {
+            setRowDataType(PageType.BPM);
+            setBpmInstanceId(record.bpm_instance_id);
           } else {
-            setRowDataType(PageType.NORMAL)
-            setBpmInstanceId('')
+            setRowDataType(PageType.NORMAL);
+            setBpmInstanceId('');
           }
           handleEdit(record.id, false);
           if (runtime) {
