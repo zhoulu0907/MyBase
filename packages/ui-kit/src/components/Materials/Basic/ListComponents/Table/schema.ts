@@ -86,10 +86,10 @@ export interface XTableConfig extends ICommonBaseType {
    * text：标题
    * display：是否显示
    */
-//   label: {
-//     text: TTextDefaultType;
-//     display: TBooleanDefaultType;
-//   };
+  label: {
+    text: TTextDefaultType;
+    display: TBooleanDefaultType;
+  };
 
   /**
    * 默认值
@@ -234,7 +234,7 @@ export interface OperationButtonConfig {
 const XTable: XTableSchema = {
   editData: [
     ...baseConfig,
-    // labelConfig,
+    labelConfig,
     tableMetaDataConfig,
     // keyDataConfig,
     // labelColSpanConfig,
@@ -261,10 +261,10 @@ const XTable: XTableSchema = {
   ],
   config: {
     ...baseDefault,
-    // label: {
-    //   text: '表格',
-    //   display: false
-    // },
+    label: {
+      text: '表格',
+      display: false
+    },
     stripe: true,
     border: true,
     borderCell: true,
