@@ -53,7 +53,7 @@ const XCheckItem = memo((props: XCheckItemConfig & { runtime?: boolean; detailMo
           margin: 0,
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
-        triggerPropName={showMode.type === SHOW_MODE_TYPES.WHETHER ? undefined : 'checked'}
+        triggerPropName={showMode.type === SHOW_MODE_TYPES.CHECKBOX || showMode.type === SHOW_MODE_TYPES.SWITCH ? 'checked' : undefined}
         initialValue={
           defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : undefined
         }

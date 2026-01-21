@@ -86,7 +86,7 @@ const DynamicDefaultValueConfig: React.FC<DynamicDefaultValueConfigProps> = ({
     setOptions(newOptions);
   };
 
-  const handleChange = (key: string, value: boolean | string) => {
+  const handleChange = (key: string, value: boolean | string | number) => {
     const newConfig = { ...configs[defaultValueConfigKey], [key]: value };
     handlePropsChange(defaultValueConfigKey, newConfig);
   };
@@ -176,6 +176,8 @@ const DynamicDefaultValueConfig: React.FC<DynamicDefaultValueConfigProps> = ({
       case FORM_COMPONENT_TYPES.INPUT_NUMBER:
         return (
           <InputNumber
+            value={defaultValueConfig?.customValue}
+            onChange={(value) => handleChange('customValue', value)}
             step={configs.step}
             min={configs.verify?.numberLimit ? configs.verify?.min : undefined}
             max={configs.verify?.numberLimit ? configs.verify?.max : undefined}
@@ -228,7 +230,15 @@ const DynamicDefaultValueConfig: React.FC<DynamicDefaultValueConfigProps> = ({
           </Select>
         );
       case FORM_COMPONENT_TYPES.RATE:
-        return <InputNumber min={0} max={configs.rateConfig?.max} step={configs.rateConfig?.allowHalf ? 0.5 : 1} />;
+        return (
+          <InputNumber
+            value={defaultValueConfig?.customValue}
+            onChange={(value) => handleChange('customValue', value)}
+            min={0}
+            max={configs.rateConfig?.max}
+            step={configs.rateConfig?.allowHalf ? 0.5 : 1}
+          />
+        );
       case FORM_COMPONENT_TYPES.CHECK_ITEM:
         return (
           <Select
