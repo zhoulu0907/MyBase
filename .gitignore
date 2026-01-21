@@ -89,6 +89,7 @@ sessionStore
 # documentation (local only)
 docs/plans/
 docs/prd/
+docs/design/
 
 # requirements documentation
 /需求文档
