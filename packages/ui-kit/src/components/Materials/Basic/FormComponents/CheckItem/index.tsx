@@ -53,29 +53,29 @@ const XCheckItem = memo((props: XCheckItemConfig & { runtime?: boolean; detailMo
           margin: 0,
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
-        triggerPropName={showMode.type === SHOW_MODE_TYPES.CHECKBOX || showMode.type === SHOW_MODE_TYPES.SWITCH ? 'checked' : undefined}
+        triggerPropName={
+          showMode.type === SHOW_MODE_TYPES.CHECKBOX || showMode.type === SHOW_MODE_TYPES.SWITCH ? 'checked' : undefined
+        }
         initialValue={
           defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : undefined
         }
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
           <div>
-            {showMode.type === SHOW_MODE_TYPES.CHECKBOX && <Checkbox disabled>{showMode.checkText}</Checkbox>}
+            {showMode.type === SHOW_MODE_TYPES.CHECKBOX && (fieldValue ? showMode.checkText : '--')}
             {showMode.type === SHOW_MODE_TYPES.SWITCH && (fieldValue ? '开启' : '关闭')}
             {showMode.type === SHOW_MODE_TYPES.WHETHER &&
               (fieldValue ? showMode.yesText || '是' : showMode.noText || '否')}
           </div>
+        ) : showMode.type === SHOW_MODE_TYPES.CHECKBOX ? (
+          <Checkbox>{showMode.checkText}</Checkbox>
+        ) : showMode.type === SHOW_MODE_TYPES.SWITCH ? (
+          <Switch />
         ) : (
-          <>
-            {showMode.type === SHOW_MODE_TYPES.CHECKBOX && <Checkbox>{showMode.checkText}</Checkbox>}
-            {showMode.type === SHOW_MODE_TYPES.SWITCH && <Switch />}
-            {showMode.type === SHOW_MODE_TYPES.WHETHER && (
-              <Radio.Group>
-                <Radio value={true}>{showMode.yesText || '是'}</Radio>
-                <Radio value={false}>{showMode.noText || '否'}</Radio>
-              </Radio.Group>
-            )}
-          </>
+          <Radio.Group>
+            <Radio value={true}>{showMode.yesText || '是'}</Radio>
+            <Radio value={false}>{showMode.noText || '否'}</Radio>
+          </Radio.Group>
         )}
       </Form.Item>
     </div>
