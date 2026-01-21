@@ -148,7 +148,7 @@ public class BuildAppAuthRoleServiceImpl implements BuildAppAuthRoleService {
     @Override
     public void renameRole(Long roleId, String name) {
         AppAuthRoleDO authRoleDO = appCommonService.validateRoleExist(roleId);
-        if (AuthRoleTypeEnum.isDefaultRoleType(authRoleDO.getRoleType())) {
+        if (AuthRoleTypeEnum.isDefaultRoleTypeRename(authRoleDO.getRoleType())) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_AUTH_ROLE_NOT_ALLOW_RENAME);
         }
         checkRoleNameExists(authRoleDO.getApplicationId(), name, roleId);
