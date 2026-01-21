@@ -55,8 +55,8 @@ const NavigatorSetting = (props: IProps) => {
       id: curAppId
     };
     const res = await getAppNavigationConfig(params);
-    const webHomeTypeValue = res.webDefaultMenu === 'default' ? 'default' : 'custom';
-    const mobileHomeTypeValue = res.mobileDefaultMenu === 'default' ? 'default' : 'custom';
+    const webHomeTypeValue = !res.webDefaultMenu || res.webDefaultMenu === 'default' ? 'default' : 'custom';
+    const mobileHomeTypeValue = !res.mobileDefaultMenu || res.mobileDefaultMenu === 'default' ? 'default' : 'custom';
     form.setFieldsValue({
       webNavLayout: res.webNavLayout || 'SIDEBAR',
       mobileNavLayout: res.mobileNavLayout || 'GRID',
