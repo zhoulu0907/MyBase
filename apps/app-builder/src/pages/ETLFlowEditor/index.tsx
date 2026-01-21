@@ -37,7 +37,22 @@ const ETLFlowEditorPage: React.FC = () => {
   });
   const editorProps = useEditorProps(FlowNodeRegistries);
 
-  const { graphData, nodeData, setGraphData, setAllNodeData } = etlEditorSignal;
+  const { graphData, nodeData, setGraphData, setAllNodeData, clearNodeData, clearCurNode } = etlEditorSignal;
+
+  const resetFlowState = useCallback(() => {
+    // 清空全局信号缓存，避免上一次编辑残留
+    clearCurNode();
+    clearNodeData();
+    setGraphData({
+      nodes: [],
+      edges: []
+    });
+    setInitData({
+      nodes: [],
+      edges: []
+    });
+    setFlowName('数据流名称');
+  }, [clearCurNode, clearNodeData, setGraphData]);
 
   const backToDataFactory = () => {
     const appId = getHashQueryParam('appId');
@@ -47,9 +62,13 @@ const ETLFlowEditorPage: React.FC = () => {
 
   useEffect(() => {
     const flowId = getHashQueryParam('flowId');
+    // 每次进入页面先重置，避免复用同一信号导致脏数据
+    resetFlowState();
     if (flowId) {
       handleLoadETLFlow(flowId);
     }
+    // 离开时也清理，防止下一次进入复用旧数据
+
   }, []);
 
   useEffect(() => {
@@ -118,8 +137,6 @@ const ETLFlowEditorPage: React.FC = () => {
         };
         return acc;
       }, {});
-      console.log('nodesRes: ', nodesRes);
-
       setAllNodeData(nodesRes);
     }
   };
