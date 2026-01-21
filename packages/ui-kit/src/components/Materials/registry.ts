@@ -361,7 +361,7 @@ const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescripto
     schema: cloneDeep(BasicSchema.XRate),
     template: { h: 36, w: 118, displayName: '评分', icon: 'number_input_cp.svg', category: 'form' },
     fieldMap: [ENTITY_FIELD_TYPE.NUMBER.VALUE, ENTITY_FIELD_TYPE.RATE.VALUE],
-    entityMap: [ENTITY_FIELD_TYPE.NUMBER.VALUE, ENTITY_FIELD_TYPE.RATE.VALUE]
+    entityMap: [ENTITY_FIELD_TYPE.RATE.VALUE]
   },
   [COMPONENT_TYPE.TABLE]: {
     type: COMPONENT_TYPE.TABLE,
