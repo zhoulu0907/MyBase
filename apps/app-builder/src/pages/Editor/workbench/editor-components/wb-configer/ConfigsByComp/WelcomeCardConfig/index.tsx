@@ -1,6 +1,5 @@
 import { Collapse } from '@arco-design/web-react';
-import { UserPermissionManager } from '@onebase/common';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { WorkbenchAttributes, PanelContentStyle } from '../../components/CommonWorkbenchAttributes';
 import { findItem } from '../../../../utils/edit-data';
 import type { WorkbenchAttributeContext } from '../../components/CommonWorkbenchAttributes/useWorkbenchAttributeContext';
@@ -17,7 +16,6 @@ const SECTION_KEYS = {
 const WelcomeCardPanels = ({
   editData,
   renderEditItem,
-  handleMultiPropsChange,
   handlePropsChange,
   configs,
   activeKeys,
@@ -31,21 +29,6 @@ const WelcomeCardPanels = ({
   activeKeys: string[];
   setActiveKeys: (keys: string[]) => void;
 }) => {
-  const userPermissionInfo = UserPermissionManager.getUserPermissionInfo();
-
-  // 读取用户头像和姓名作为默认值
-  useEffect(() => {
-    if (userPermissionInfo?.user) {
-      const currentAvatar = userPermissionInfo.user.avatar || '';
-      const currentNickname = userPermissionInfo.user.nickname || '';
-
-      const updates = [];
-      updates.push({ key: 'userAvatar', value: currentAvatar });
-      updates.push({ key: 'userName', value: currentNickname });
-      handleMultiPropsChange(updates);
-    }
-  }, []);
-
   const themeConfig = findItem(editData, 'theme');
   const welcomeTextConfig = findItem(editData, 'welcomeText');
   const welcomeDescConfig = findItem(editData, 'welcomeDesc');
