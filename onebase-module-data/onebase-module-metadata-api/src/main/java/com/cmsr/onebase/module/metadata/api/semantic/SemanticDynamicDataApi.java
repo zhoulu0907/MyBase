@@ -189,4 +189,16 @@ public interface SemanticDynamicDataApi {
     void enrich(SemanticEntitySchemaDTO entitySchema, SemanticEntityValueDTO resultVal);
 
     SemanticEntityValueDTO buildSemanticEntityValueDTO(Map<String, Object> entityData, SemanticEntitySchemaDTO entitySchema);
+
+    /**
+     * 根据条件分页查询实体数据
+     *
+     * - 支持多条件过滤与多字段排序
+     * - 返回语义化的实体值列表与总数
+     *
+     * @param body 分页与过滤请求体
+     * @return 分页结果（语义值列表）
+     */
+    @Operation(summary = "根据条件分页查询实体数据")
+    PageResult<SemanticEntityValueDTO> getPermittedDataByCondition(@Valid @RequestBody SemanticPageConditionVO body);
 }

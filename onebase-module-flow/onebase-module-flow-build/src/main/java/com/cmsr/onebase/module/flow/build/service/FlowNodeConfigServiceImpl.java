@@ -4,6 +4,7 @@ import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.flow.build.vo.ConnectorTypeListVO;
 import com.cmsr.onebase.module.flow.build.vo.NodeConfigActionVO;
 import com.cmsr.onebase.module.flow.build.vo.NodeConfigConnVO;
 import com.cmsr.onebase.module.flow.build.vo.NodeConfigVO;
@@ -13,10 +14,12 @@ import com.cmsr.onebase.module.flow.core.enums.FlowErrorCodeConstants;
 import com.cmsr.onebase.module.flow.core.vo.PageNodeConfigReqVO;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @Author：huangjie
@@ -59,6 +62,36 @@ public class FlowNodeConfigServiceImpl implements FlowNodeConfigService {
         nodeConfigActionVO.setActionConfigType(nodeConfigDO.getActionConfigType());
         nodeConfigActionVO.setActionConfig(JsonUtils.parseTree(nodeConfigDO.getActionConfig()));
         return nodeConfigActionVO;
+    }
+
+    @Override
+    public List<ConnectorTypeListVO> getAllConnectorTypes() {
+        List<FlowNodeConfigDO> dos = flowNodeConfigRepository.listAllConnectorTypes();
+        return dos.stream()
+                .filter(doObj -> {
+                    // level1 cannot be empty
+                    if (StringUtils.isBlank(doObj.getLevel1Code())) {
+                        log.warn("[ConnectorTypeList] Connector skipped due to empty level1, nodeCode: {}", doObj.getNodeCode());
+                        return false;
+                    }
+                    return true;
+                })
+                .map(doObj -> {
+                    ConnectorTypeListVO vo = new ConnectorTypeListVO();
+                    // Build category: level1-level2-level3
+                    StringBuilder category = new StringBuilder(doObj.getLevel1Code());
+                    if (StringUtils.isNotBlank(doObj.getLevel2Code())) {
+                        category.append("-").append(doObj.getLevel2Code());
+                        if (StringUtils.isNotBlank(doObj.getLevel3Code())) {
+                            category.append("-").append(doObj.getLevel3Code());
+                        }
+                    }
+                    vo.setCategory(category.toString());
+                    vo.setNodeName(doObj.getNodeName());
+                    vo.setNodeCode(doObj.getNodeCode());
+                    return vo;
+                })
+                .collect(Collectors.toList());
     }
 
 }

@@ -43,13 +43,13 @@ public class DraftSemanticDeleteExecutor {
                     SemanticDataMethodOpEnum.DELETE);
 
             // 2) 权限上下文初始化：当前类 initializeContext
-            semanticPermissionContextLoader.loadPermissionContext(record);
+            //semanticPermissionContextLoader.loadPermissionContext(record);
 
             // 4) 数据完整性校验：当前类 validateDataIntegrity
-            semanticDataIntegrityValidator.validate(record);
+            //semanticDataIntegrityValidator.validate(record);
 
             // 5) 功能权限校验
-            semanticPermissionValidator.validate(record);
+            //semanticPermissionValidator.validate(record);
 
             // // 6) 数据校验（RecordDTO 简化入口）
             // semanticValidationManager.validate(record);

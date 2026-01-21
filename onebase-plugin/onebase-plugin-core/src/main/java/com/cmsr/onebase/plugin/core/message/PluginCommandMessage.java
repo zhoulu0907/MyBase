@@ -70,7 +70,11 @@ public class PluginCommandMessage implements Serializable {
         /**
          * 重新加载插件
          */
-        RELOAD
+        RELOAD,
+        /**
+         * 删除插件
+         */
+        DELETE
     }
 
 }

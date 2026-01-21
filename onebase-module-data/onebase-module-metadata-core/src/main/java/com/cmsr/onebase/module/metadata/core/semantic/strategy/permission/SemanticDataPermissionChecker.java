@@ -141,7 +141,7 @@ public class SemanticDataPermissionChecker implements SemanticRuntimePermissionC
      * 检查是否本部门提交
      */
     private boolean checkDepartmentMatch(Map<String,Object> dataRow, Long userDeptId) {
-        String[] deptFieldNames = {"owner_dept"};
+        String[] deptFieldNames = {SystemFieldConstants.REQUIRE.OWNER_DEPT};
         for (String fieldName : deptFieldNames) {
             Object deptId = dataRow.get(fieldName);
             if (deptId != null && Objects.equals(toLong(deptId), userDeptId)) { return true; }
@@ -155,7 +155,7 @@ public class SemanticDataPermissionChecker implements SemanticRuntimePermissionC
     private boolean checkSubDepartmentMatch(Map<String,Object> dataRow, Long userDeptId) {
         List<DeptRespDTO> childDepts = deptApi.getChildDeptList(userDeptId).getCheckedData();
         Set<Long> childDeptIds = childDepts.stream().map(DeptRespDTO::getId).collect(Collectors.toSet());
-        String[] deptFieldNames = {"owner_dept"};
+        String[] deptFieldNames = {SystemFieldConstants.REQUIRE.OWNER_DEPT};
         for (String fieldName : deptFieldNames) {
             Object deptId = dataRow.get(fieldName);
             if (deptId != null && childDeptIds.contains(toLong(deptId))) { return true; }
@@ -234,6 +234,13 @@ public class SemanticDataPermissionChecker implements SemanticRuntimePermissionC
         for (SemanticFieldSchemaDTO f : fields) {
             String name = f.getFieldName();
             if (name != null) { map.put(name, row.get(name)); }
+        }
+        // 补全权限校验所需的系统字段（如果 Row 中存在但在 fields 中未定义）
+        if (!map.containsKey(SystemFieldConstants.REQUIRE.OWNER_ID) && row.get(SystemFieldConstants.REQUIRE.OWNER_ID) != null) {
+            map.put(SystemFieldConstants.REQUIRE.OWNER_ID, row.get(SystemFieldConstants.REQUIRE.OWNER_ID));
+        }
+        if (!map.containsKey(SystemFieldConstants.REQUIRE.OWNER_DEPT) && row.get(SystemFieldConstants.REQUIRE.OWNER_DEPT) != null) {
+            map.put(SystemFieldConstants.REQUIRE.OWNER_DEPT, row.get(SystemFieldConstants.REQUIRE.OWNER_DEPT));
         }
         return map;
     }

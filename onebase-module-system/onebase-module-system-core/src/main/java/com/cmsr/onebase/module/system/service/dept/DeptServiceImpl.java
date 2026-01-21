@@ -489,19 +489,8 @@ public class DeptServiceImpl implements DeptService {
     @Override
     public void updateAdminOrDirector(UserAdminOrDirectorUpdateReqVO reqVO) {
         // todo 验证部门是否存在/启用；验证空间/企业是否存在此用户
-        DeptDO updateObj = new DeptDO();
-        updateObj.setId(reqVO.getDeptId());
-        if (reqVO.getUpdateType().equals(CorpConstant.LEADER_USER_ID)) {
-            updateObj.setAdminUserIds(reqVO.getAdminUserIds());
-        } else {
-            Set<Long> adminUserIds = reqVO.getAdminUserIds();
-            if (CollectionUtils.isNotEmpty(adminUserIds)) {
-                Long firstAdminUserId = CollUtil.getFirst(adminUserIds);
-                updateObj.setLeaderUserId(firstAdminUserId);
-            }
 
-        }
-        deptDataRepository.update(updateObj);
+        deptDataRepository.updateDeptLeaderOrDirector(reqVO);
     }
 
 

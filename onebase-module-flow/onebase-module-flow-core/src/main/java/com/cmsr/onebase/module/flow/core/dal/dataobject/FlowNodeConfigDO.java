@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.flow.core.dal.dataobject;
 
 import com.cmsr.onebase.framework.orm.entity.BaseEntity;
+import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -72,12 +73,20 @@ public class FlowNodeConfigDO extends BaseEntity implements Serializable {
 
     private String connConfig;
 
+    /**
+     * Connection config JSON (not mapped to DB)
+     */
+    @Column(ignore = true)
     private String connConfigJson;
 
     private String actionConfigType;
 
     private String actionConfig;
 
+    /**
+     * Action config JSON (not mapped to DB)
+     */
+    @Column(ignore = true)
     private String actionConfigJson;
 
     private Integer sortOrder;

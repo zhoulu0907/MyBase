@@ -103,6 +103,16 @@ public class WarmFlowBaseEntity {
         return String.valueOf(creator);
     }
 
+    /**
+     * 把 creator、createTime、updateTime、updater 都清空，避免前端直接传递 creator 之类的字段，直接就被更新了
+     */
+    public void clean() {
+        this.creator = null;
+        this.createTime = null;
+        this.updater = null;
+        this.updateTime = null;
+    }
+
     // =============== 以下实现set函数提供给Mybatis-flex的Listener使用 =================
 
     public void setIdByListener(Long id) {

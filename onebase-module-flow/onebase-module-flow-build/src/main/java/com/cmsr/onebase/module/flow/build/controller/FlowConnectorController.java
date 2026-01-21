@@ -7,12 +7,16 @@ import com.cmsr.onebase.module.flow.build.vo.CreateFlowConnectorReqVO;
 import com.cmsr.onebase.module.flow.build.vo.FlowConnectorVO;
 import com.cmsr.onebase.module.flow.build.vo.UpdateFlowConnectorReqVO;
 import com.cmsr.onebase.module.flow.core.vo.PageConnectorReqVO;
+import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Tag(name = "连接器", description = "连接器接口")
 @RestController
@@ -56,5 +60,30 @@ public class FlowConnectorController {
     public CommonResult<Boolean> deleteConnector(@RequestParam("id") Long connectorId) {
         connectorService.deleteById(connectorId);
         return CommonResult.success(Boolean.TRUE);
+    }
+
+    @Operation(summary = "根据类型查询连接器实例列表")
+    @GetMapping("/list-by-type")
+    public CommonResult<List<FlowConnectorVO>> listByType(
+            @RequestParam("typeCode") String typeCode) {
+        List<FlowConnectorVO> result = connectorService.listByType(typeCode);
+        return CommonResult.success(result);
+    }
+
+    @Operation(summary = "查询连接器动作清单")
+    @GetMapping("/actions")
+    public CommonResult<List<String>> getActions(
+            @RequestParam("connectorUuid") @NotBlank(message = "连接器UUID不能为空") String connectorUuid) {
+        List<String> actions = connectorService.getActionsByConnectorUuid(connectorUuid);
+        return CommonResult.success(actions);
+    }
+
+    @Operation(summary = "查询指定动作配置内容")
+    @GetMapping("/action-value")
+    public CommonResult<JsonNode> getActionValue(
+            @RequestParam("connectorUuid") @NotBlank(message = "连接器UUID不能为空") String connectorUuid,
+            @RequestParam("actionName") @NotBlank(message = "动作名称不能为空") String actionName) {
+        JsonNode actionValue = connectorService.getActionValueByConnectorUuid(connectorUuid, actionName);
+        return CommonResult.success(actionValue);
     }
 }

@@ -3,10 +3,13 @@ package com.cmsr.onebase.module.flow.build.controller;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.flow.build.service.FlowNodeConfigService;
+import com.cmsr.onebase.module.flow.build.vo.ConnectorTypeListVO;
 import com.cmsr.onebase.module.flow.build.vo.NodeConfigActionVO;
 import com.cmsr.onebase.module.flow.build.vo.NodeConfigConnVO;
 import com.cmsr.onebase.module.flow.build.vo.NodeConfigVO;
 import com.cmsr.onebase.module.flow.core.vo.PageNodeConfigReqVO;
+
+import java.util.List;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
@@ -47,6 +50,13 @@ public class FlowNodeConfigController {
     @GetMapping("/get-action-config")
     public CommonResult<NodeConfigActionVO> getActionConfig(@RequestParam("nodeCode") String nodeCode) {
         NodeConfigActionVO result = flowNodeConfigService.findActionConfig(nodeCode);
+        return CommonResult.success(result);
+    }
+
+    @Operation(summary = "获取连接器类型清单")
+    @GetMapping("/list-all")
+    public CommonResult<List<ConnectorTypeListVO>> listAllConnectorTypes() {
+        List<ConnectorTypeListVO> result = flowNodeConfigService.getAllConnectorTypes();
         return CommonResult.success(result);
     }
 

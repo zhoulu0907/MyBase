@@ -1,6 +1,8 @@
 package com.cmsr.onebase.module.system.runtime.controller.dept;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.service.dept.DeptService;
 import com.cmsr.onebase.module.system.vo.dept.*;
 import io.swagger.v3.oas.annotations.Operation;
@@ -35,4 +37,14 @@ public class RuntimeDeptController {
         List<DeptRespVO> respList = deptService.getDeptListWithUserCount(reqVO);
         return success(respList);
     }
+
+    @GetMapping("/get-depts-by-id")
+    @Operation(summary = "根据ID和类型获取其所属部门及其父部门列表")
+    @PreAuthorize("@ss.hasPermission('tenant:dept:query')")
+    public CommonResult<List<DeptSimpleRespVO>> getParentDeptsListById(@RequestParam("id") Long id,
+                                                                       @RequestParam("idType") String idType) {
+        List<DeptDO> deptDOList = deptService.getParentDeptsListById(id,idType);
+        return success(BeanUtils.toBean(deptDOList, DeptSimpleRespVO.class));
+    }
+
 }

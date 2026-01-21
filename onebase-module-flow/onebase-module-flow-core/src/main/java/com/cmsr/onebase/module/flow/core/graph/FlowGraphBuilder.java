@@ -6,13 +6,18 @@ import com.cmsr.onebase.module.flow.context.graph.JsonGraph;
 import com.cmsr.onebase.module.flow.context.graph.JsonGraphNode;
 import com.cmsr.onebase.module.flow.context.graph.nodes.ScriptNodeData;
 import com.cmsr.onebase.module.flow.context.graph.nodes.CommonNodeData;
+import com.cmsr.onebase.module.flow.context.graph.nodes.HttpNodeData;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowConnectorScriptRepository;
+import com.cmsr.onebase.module.flow.core.dal.database.FlowConnectorHttpRepository;
+import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowConnectorHttpDO;
+import com.cmsr.onebase.module.flow.core.dal.dataobject.table.FlowConnectorTableDef;
 import com.cmsr.onebase.module.flow.core.dal.mapper.FlowConnectorMapper;
 import com.cmsr.onebase.module.flow.core.dal.mapper.FlowNodeConfigMapper;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowConnectorScriptDO;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowConnectorDO;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowNodeConfigDO;
 import com.cmsr.onebase.module.flow.core.external.FlowFieldTypeProvider;
+import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.core.tenant.TenantManager;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -47,6 +52,10 @@ public class FlowGraphBuilder {
     @Setter
     @Autowired
     private FlowNodeConfigMapper flowNodeConfigMapper;
+
+    @Setter
+    @Autowired
+    private FlowConnectorHttpRepository connectorHttpRepository;
 
 
     public JsonGraph build(Long applicationId, String json) {
@@ -112,7 +121,7 @@ public class FlowGraphBuilder {
                 }
                 commonNodeData.setConnectorConfig(connectorConfig);
             }
-            
+
             // 加载节点配置
             FlowNodeConfigDO nodeConfigDO = TenantManager.withoutTenantCondition(() ->
                 flowNodeConfigMapper.selectByApplicationAndCode(applicationId, commonNodeData.getNodeCode()));
@@ -122,7 +131,7 @@ public class FlowGraphBuilder {
                     componentContext = JsonUtils.parseObject(nodeConfigDO.getConnConfigJson(), Map.class);
                 }
                 commonNodeData.setComponentContext(componentContext);
-                
+
                 Map<String, Object> actionConfig = new HashMap<>();
                 if (StringUtils.isNotBlank(nodeConfigDO.getActionConfigJson())) {
                     actionConfig = JsonUtils.parseObject(nodeConfigDO.getActionConfigJson(), Map.class);
@@ -130,6 +139,58 @@ public class FlowGraphBuilder {
                 commonNodeData.setActionConfig(actionConfig);
             }
         }
+        // ========== 新增：HttpNodeData处理 ==========
+        if (node.getData() instanceof HttpNodeData httpNodeData) {
+            // 从数据库加载HTTP动作配置
+            FlowConnectorHttpDO httpActionDO = TenantManager.withoutTenantCondition(() ->
+                connectorHttpRepository.findByApplicationAndUuid(
+                    applicationId,
+                    httpNodeData.getHttpUuid()
+                ));
+
+            if (httpActionDO != null) {
+                // 加载连接器配置
+                QueryWrapper connectorQuery = QueryWrapper.create()
+                        .where(FlowConnectorTableDef.FLOW_CONNECTOR.APPLICATION_ID.eq(applicationId))
+                        .and(FlowConnectorTableDef.FLOW_CONNECTOR.CONNECTOR_UUID.eq(httpActionDO.getConnectorUuid()));
+                FlowConnectorDO connectorDO = TenantManager.withoutTenantCondition(() ->
+                        flowConnectorMapper.selectOneByQuery(connectorQuery));
+
+                if (connectorDO != null) {
+                    Map<String, Object> connectorConfig = new HashMap<>();
+                    if (StringUtils.isNotBlank(connectorDO.getConfigJson())) {
+                        connectorConfig = JsonUtils.parseObject(connectorDO.getConfigJson(), Map.class);
+                    }
+                    httpNodeData.setConnectorConfig(connectorConfig);
+                }
+
+                // 合并HTTP动作配置
+                Map<String, Object> httpActionConfig = new HashMap<>();
+                httpActionConfig.put("requestMethod", httpActionDO.getRequestMethod());
+                httpActionConfig.put("requestPath", httpActionDO.getRequestPath());
+                httpActionConfig.put("requestQuery", httpActionDO.getRequestQuery());
+                httpActionConfig.put("requestHeaders", httpActionDO.getRequestHeaders());
+                httpActionConfig.put("requestBodyType", httpActionDO.getRequestBodyType());
+                httpActionConfig.put("requestBodyTemplate", httpActionDO.getRequestBodyTemplate());
+                httpActionConfig.put("authType", httpActionDO.getAuthType());
+                httpActionConfig.put("authConfig", httpActionDO.getAuthConfig());
+                httpActionConfig.put("responseMapping", httpActionDO.getResponseMapping());
+                httpActionConfig.put("successCondition", httpActionDO.getSuccessCondition());
+                httpActionConfig.put("inputSchema", httpActionDO.getInputSchema());
+                httpActionConfig.put("outputSchema", httpActionDO.getOutputSchema());
+
+                // 覆盖超时和重试配置
+                if (httpActionDO.getTimeout() != null) {
+                    httpActionConfig.put("timeout", httpActionDO.getTimeout());
+                }
+                if (httpActionDO.getRetryCount() != null) {
+                    httpActionConfig.put("retryCount", httpActionDO.getRetryCount());
+                }
+
+                httpNodeData.setActionConfig(httpActionConfig);
+            }
+        }
+        // ========== 新增结束 ==========
         if (CollectionUtils.isNotEmpty(node.getBlocks())) {
             for (JsonGraphNode child : node.getBlocks()) {
                 traverseNodeAndEnrichData(applicationId, child);
