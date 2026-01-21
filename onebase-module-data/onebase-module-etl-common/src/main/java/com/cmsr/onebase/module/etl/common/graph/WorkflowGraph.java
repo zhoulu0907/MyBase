@@ -61,6 +61,66 @@ public class WorkflowGraph {
         return result;
     }
 
+    /**
+     * 获取整个图从开始节点到结束节点路径上的所有节点
+     * (排除游离节点，且按拓扑顺序返回)
+     * 规则：
+     * 1. Start 节点必须是 Input 类型，且有出度
+     * 2. End 节点必须是 Output 类型
+     */
+    public List<Node> getNodesFromStartToEnd() {
+        // 获取起点（排除孤立节点：即同时也是终点的节点，除非图只包含一个节点且允许单节点流）
+        // 这里策略是：如果一个节点既是起点又是终点（即孤立节点），则视为无效路径节点排除
+        Set<Node> startNodes = new HashSet<>();
+        for (Node node : findStartNodes()) {
+            if (isInputNode(node) && directedGraph().outDegreeOf(node) > 0) {
+                startNodes.add(node);
+            }
+        }
+
+        Set<Node> endNodes = new HashSet<>();
+        for (Node node : findEndNodes()) {
+            if (isOutputNode(node)) {
+                endNodes.add(node);
+            }
+        }
+
+        if (startNodes.isEmpty() || endNodes.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        AllDirectedPaths<Node, Edge> allPathsFinder = new AllDirectedPaths<>(directedGraph());
+        List<GraphPath<Node, Edge>> allPaths = allPathsFinder.getAllPaths(
+                startNodes,
+                endNodes,
+                true,
+                Math.max(1, directedGraph().vertexSet().size())
+        );
+
+        Set<Node> pathNodes = new HashSet<>();
+        for (GraphPath<Node, Edge> path : allPaths) {
+            pathNodes.addAll(path.getVertexList());
+        }
+
+        // 结合拓扑排序结果，返回有序的节点列表
+        List<Node> allNodes = iterateNodes();
+        List<Node> result = new ArrayList<>();
+        for (Node node : allNodes) {
+            if (pathNodes.contains(node)) {
+                result.add(node);
+            }
+        }
+        return result;
+    }
+
+    private boolean isInputNode(Node node) {
+        return node.getType() != null && node.getType().toLowerCase().contains("input");
+    }
+
+    private boolean isOutputNode(Node node) {
+        return node.getType() != null && node.getType().toLowerCase().contains("output");
+    }
+
     private Node findNodeById(String nodeId) {
         for (Node node : nodes) {
             if (node.getId().equals(nodeId)) {
