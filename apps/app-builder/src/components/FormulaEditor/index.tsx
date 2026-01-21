@@ -16,6 +16,7 @@ import {
   type variableItem,
   type VariablesList
 } from '@onebase/app';
+import { cloneDeep } from 'lodash-es';
 import { NodeType } from '@onebase/common';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { DebuggedFormula, FormulaInput, FunctionList, InfoPanel, VariableList } from './components';
@@ -178,14 +179,15 @@ export function FormulaEditor({ fieldName, visible, onCancel, onConfirm, initial
    */
   const filteredVariables: VariablesList[] = useMemo(() => {
     if (!variableSearch) return variables || [];
+    const cloneVariables = cloneDeep(variables);
     const newFields =
-      variables?.[0]?.fields?.filter(
+      cloneVariables?.[0]?.fields?.filter(
         (v) =>
           v.displayName.toLowerCase().includes(variableSearch.toLowerCase()) ||
           v.displayName.toLowerCase().includes(variableSearch.toLowerCase())
       ) || [];
-    variables[0].fields = newFields;
-    return variables;
+    cloneVariables[0].fields = newFields;
+    return cloneVariables;
   }, [variableSearch]);
 
   /**
