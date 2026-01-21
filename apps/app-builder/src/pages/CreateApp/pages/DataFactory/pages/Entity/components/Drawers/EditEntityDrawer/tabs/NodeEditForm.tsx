@@ -195,7 +195,6 @@ const NodeEditForm: React.FC<NodeEditFormProps> = ({ node, onCancel, onSave, suc
             type="primary"
             onClick={() => {
               onSave({ ...form.getFieldsValue(), id: node.id || node.entityId });
-              successCallback?.();
             }}
           >
             保存

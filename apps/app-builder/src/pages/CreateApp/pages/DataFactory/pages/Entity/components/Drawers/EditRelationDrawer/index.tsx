@@ -20,11 +20,11 @@ interface FieldOption {
 }
 
 interface RelationFormValues {
-  sourceEntityId?: string;
-  sourceFieldId: string;
+  sourceEntityUuid?: string;
+  sourceFieldUuid: string;
   relationshipType: string;
-  targetEntityId?: string;
-  targetFieldId?: string;
+  targetEntityUuid?: string;
+  targetFieldUuid?: string;
   relationName?: string;
   id?: string;
   relationshipId?: string;
@@ -64,11 +64,11 @@ const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVis
     console.log('relationData=====', relationData);
     if (visible && relationData) {
       form.setFieldsValue({
-        sourceEntityId: relationData.source?.cell || relationData.sourceEntityId,
-        sourceFieldId: relationData.source?.port || relationData.sourceFieldId,
+        sourceEntityUuid: relationData.source?.cell || relationData.sourceEntityUuid,
+        sourceFieldUuid: relationData.source?.port || relationData.sourceFieldUuid,
         relationshipType: relationData.relationshipType,
-        targetEntityId: relationData.target?.cell || relationData.targetEntityId,
-        targetFieldId: relationData.target?.port || relationData.targetFieldId
+        targetEntityUuid: relationData.target?.cell || relationData.targetEntityUuid,
+        targetFieldUuid: relationData.target?.port || relationData.targetFieldUuid
       });
     }
   }, [visible, relationData]);
@@ -79,12 +79,12 @@ const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVis
       if (res.length > 0) {
         const entityOptions = res.map((entity: any) => ({
           label: entity.displayName,
-          value: entity.id
+          value: entity.entityUuid
         }));
         setLeftEntityOptions(entityOptions);
         setRightEntityOptions(entityOptions.filter((item: EntityOption) => item.value !== relationData?.source?.cell));
-        handleEntityChange(relationData?.source?.cell || relationData?.sourceEntityId || '', 'left');
-        handleEntityChange(relationData?.target?.cell || relationData?.targetEntityId || '', 'right');
+        handleEntityChange(relationData?.source?.cell || relationData?.sourceEntityUuid || '', 'left');
+        handleEntityChange(relationData?.target?.cell || relationData?.targetEntityUuid || '', 'right');
       }
     } catch (error) {
       console.error('加载资产列表失败:', error);
@@ -98,7 +98,7 @@ const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVis
       if (res.length > 0) {
         const fieldOptions = res.map((field: any) => ({
           label: field.displayName,
-          value: field.id
+          value: field.fieldUuid
         }));
 
         if (side === 'left') {
@@ -121,10 +121,10 @@ const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVis
     } else {
       if (side === 'left') {
         setLeftFieldOptions([]);
-        form.setFieldValue('sourceFieldId', undefined);
+        form.setFieldValue('sourceFieldUuid', undefined);
       } else {
         setRightFieldOptions([]);
-        form.setFieldValue('targetFieldId', undefined);
+        form.setFieldValue('targetFieldUuid', undefined);
       }
     }
   };
@@ -208,7 +208,7 @@ const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVis
         <h4 className={styles.formSectionTitle}>基本设置</h4>
 
         <Form form={form} layout="vertical" className={styles.form}>
-          <Form.Item label="主表" field="sourceEntityId" required rules={[{ required: true, message: '请选择主表' }]}>
+          <Form.Item label="主表" field="sourceEntityUuid" required rules={[{ required: true, message: '请选择主表' }]}>
             <Select
               placeholder="请选择主表"
               options={leftEntityOptions}
@@ -219,7 +219,7 @@ const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVis
 
           <Form.Item
             label="主表字段"
-            field="sourceFieldId"
+            field="sourceFieldUuid"
             required
             rules={[{ required: true, message: '请选择主表字段' }]}
           >
@@ -227,7 +227,7 @@ const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVis
               placeholder="请选择字段"
               options={leftFieldOptions}
               allowClear
-              disabled={!form.getFieldValue('sourceEntityId')}
+              disabled={!form.getFieldValue('sourceEntityUuid')}
             />
           </Form.Item>
 
@@ -261,7 +261,7 @@ const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVis
           {/* 关联表 */}
           <Form.Item
             label="关联表"
-            field="targetEntityId"
+            field="targetEntityUuid"
             required
             rules={[{ required: true, message: '请选择关联表' }]}
           >
@@ -275,7 +275,7 @@ const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVis
 
           <Form.Item
             label="关联字段"
-            field="targetFieldId"
+            field="targetFieldUuid"
             required
             rules={[{ required: true, message: '请选择关联字段' }]}
           >
@@ -283,7 +283,7 @@ const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVis
               placeholder="请选择字段"
               options={rightFieldOptions}
               allowClear
-              disabled={!form.getFieldValue('targetEntityId')}
+              disabled={!form.getFieldValue('targetEntityUuid')}
             />
           </Form.Item>
         </Form>
