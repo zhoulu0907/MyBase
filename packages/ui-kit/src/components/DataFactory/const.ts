@@ -47,6 +47,7 @@ export const ENTITY_FIELD_TYPE = {
   RADIO: { VALUE: 'RADIO', LABEL: '单选框' },
   CHECKBOX: { VALUE: 'CHECKBOX', LABEL: '复选框' },
   RATE: { VALUE: 'RATE', LABEL: '评分' },
+  CHECK_ITEM: { VALUE: 'CHECK_ITEM', LABEL: '检查项' },
 };
 // 字段标签
 export const FIELD_TAG_TYPE = {
