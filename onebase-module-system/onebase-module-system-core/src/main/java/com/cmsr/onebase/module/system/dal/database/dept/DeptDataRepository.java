@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.system.dal.database.dept;
 
+import cn.hutool.core.collection.CollUtil;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
@@ -10,8 +11,10 @@ import com.cmsr.onebase.framework.orm.repo.BaseDataRepository;
 import com.cmsr.onebase.module.system.api.dept.dto.DeptPageApiReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.dal.flex.mapper.SystemDeptMapper;
+import com.cmsr.onebase.module.system.enums.corp.CorpConstant;
 import com.cmsr.onebase.module.system.enums.dept.DeptTypeEnum;
 import com.cmsr.onebase.module.system.vo.dept.DeptUpdateReqVO;
+import com.cmsr.onebase.module.system.vo.user.UserAdminOrDirectorUpdateReqVO;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.core.update.UpdateChain;
@@ -23,6 +26,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
@@ -226,6 +230,25 @@ public class DeptDataRepository extends BaseDataRepository<SystemDeptMapper, Dep
         updateChain.set(DeptDO::getLeaderUserId, updateReqVO.getLeaderUserId());
         updateChain.set(DeptDO::getAdminUserIds, updateReqVO.getAdminUserIds());
         return updateChain.where(DeptDO::getId).eq(updateReqVO.getId()).update();
+    }
+
+    /**
+     * 更新部门主管或接口人,可以为null
+     */
+    public void updateDeptLeaderOrDirector(UserAdminOrDirectorUpdateReqVO updateObj) {
+        UpdateChain<DeptDO> updateChain = this.updateChain();
+       if (updateObj.getUpdateType().equals(CorpConstant.LEADER_USER_ID)){
+           updateChain.set(DeptDO::getAdminUserIds, updateObj.getAdminUserIds());
+       } else {
+           Set<Long> adminUserIds = updateObj.getAdminUserIds();
+           if (CollectionUtils.isNotEmpty(adminUserIds)) {
+               Long firstAdminUserId = CollUtil.getFirst(adminUserIds);
+               updateChain.set(DeptDO::getLeaderUserId, firstAdminUserId);
+           } else {
+               updateChain.set(DeptDO::getLeaderUserId, null);
+           }
+       }
+        updateChain.where(DeptDO::getId).eq(updateObj.getDeptId()).update();
     }
 }
 

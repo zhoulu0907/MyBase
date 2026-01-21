@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -66,5 +67,13 @@ public class FlowConnectorController {
             @RequestParam("typeCode") String typeCode) {
         List<FlowConnectorVO> result = connectorService.listByType(typeCode);
         return CommonResult.success(result);
+    }
+
+    @Operation(summary = "查询连接器动作清单")
+    @GetMapping("/actions")
+    public CommonResult<List<String>> getActions(
+            @RequestParam("connectorUuid") @NotBlank(message = "连接器UUID不能为空") String connectorUuid) {
+        List<String> actions = connectorService.getActionsByConnectorUuid(connectorUuid);
+        return CommonResult.success(actions);
     }
 }

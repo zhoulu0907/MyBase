@@ -21,4 +21,6 @@ public interface FlowErrorCodeConstants {
 
     ErrorCode PROCESS_NOT_EXIST = new ErrorCode(10003, "流程不存在");
     ErrorCode NODE_CONFIG_NOT_EXIST = new ErrorCode(10004, "节点配置不存在");
+
+    ErrorCode INVALID_CONNECTOR_CONFIG = new ErrorCode(1123785, "连接器配置格式错误");
 }

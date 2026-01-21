@@ -24,4 +24,12 @@ public interface FlowConnectorService {
      * List connector instances by type code
      */
     List<FlowConnectorVO> listByType(String typeCode);
+
+    /**
+     * Get action list by connector UUID
+     *
+     * @param connectorUuid the connector UUID
+     * @return list of action keys
+     */
+    List<String> getActionsByConnectorUuid(String connectorUuid);
 }
