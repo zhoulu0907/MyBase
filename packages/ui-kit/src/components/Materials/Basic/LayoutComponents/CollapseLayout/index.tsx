@@ -76,8 +76,7 @@ const XCollapseLayout = memo((props: XCollapseLayoutConfig & { runtime?: boolean
         name="1"
         contentStyle={{
           backgroundColor: '#fff',
-          paddingLeft: 13,
-          paddingTop: 5,
+          padding: 0,
           borderTop: collapseStyle.showDivider ? '1px solid #ccc' : 'none'
         }}
       >

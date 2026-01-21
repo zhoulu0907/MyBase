@@ -217,6 +217,18 @@ export interface IColumnCountConfigType<KeyType> extends ICommonConfigType {
   }>;
 }
 
+// 分栏布局列间距
+export interface IColumnGapConfigType<KeyType> extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.COLUMN_GAP_SELECT;
+  range: Array<{
+    key: string;
+    text: string;
+    value: KeyType;
+  }>;
+}
+
 // TODO(mickey): remove
 // export interface ITableColumnConfigType {
 //   key: string;
