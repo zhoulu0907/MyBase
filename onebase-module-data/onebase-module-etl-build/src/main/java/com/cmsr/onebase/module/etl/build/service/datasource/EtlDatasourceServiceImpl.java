@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.etl.build.service.datasource;
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.etl.build.service.DatasourceFactory;
@@ -148,7 +149,8 @@ public class EtlDatasourceServiceImpl implements EtlDatasourceService {
         ConnectCryptoProperties newProperties = BeanUtils.copyBean(connectProperties);
         String newPwd = connectProperties.getPassword();
         if (StringUtils.isBlank(newPwd)) {
-            String oldPwd = JsonUtils.parseTree(oldDatasource.getConfig()).get("password").asText();
+            ConnectCryptoProperties oldProperties = JsonUtils.parseObject(oldDatasource.getConfig(), ConnectCryptoProperties.class);
+            String oldPwd = oldProperties.getPassword();
             newProperties.setPassword(oldPwd);
         }
         oldDatasource.setConfig(JsonUtils.toJsonString(newProperties));
@@ -214,7 +216,7 @@ public class EtlDatasourceServiceImpl implements EtlDatasourceService {
             ConnectCryptoProperties connectProperties = JsonUtils.parseObject(datasourceDO.getConfig(), ConnectCryptoProperties.class);
             DataSource datasource = datasourceFactory.constructDataSource(datasourceDO.getDatasourceType(), connectProperties, false);
             CatalogData catalogData = metadataCollector.collectCatalog(datasourceId, datasource);
-            metadataManager.saveMetadata(applicationId, datasourceUuid, catalogData);
+            ApplicationManager.withoutApplicationCondition(() -> metadataManager.saveMetadata(applicationId, datasourceUuid, catalogData));
             LocalDateTime endTime = LocalDateTime.now();
             long timeCost = Duration.between(plannedTime, endTime).toMillis();
             datasourceRepository.changeCollectStatus(datasourceDO.getId(), CollectStatus.SUCCESS, endTime);

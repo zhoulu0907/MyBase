@@ -1,10 +1,5 @@
 package com.cmsr.onebase.module.metadata.api.semantic;
 
-import java.util.List;
-import java.util.Map;
-
-import org.springframework.web.bind.annotation.RequestBody;
-
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntitySchemaDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntityValueDTO;
@@ -13,11 +8,13 @@ import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticMergeConditionV
 import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticPageConditionVO;
 import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticTargetBodyVO;
 import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticTargetConditionVO;
-
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.RequestBody;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * 数据方法API接口
@@ -188,5 +185,20 @@ public interface SemanticDynamicDataApi {
      * @return 更新后的语义值
      */
     SemanticEntityValueDTO updateDataById(@Valid @RequestBody SemanticMergeConditionVO body);
-    
+
+    void enrich(SemanticEntitySchemaDTO entitySchema, SemanticEntityValueDTO resultVal);
+
+    SemanticEntityValueDTO buildSemanticEntityValueDTO(Map<String, Object> entityData, SemanticEntitySchemaDTO entitySchema);
+
+    /**
+     * 根据条件分页查询实体数据
+     *
+     * - 支持多条件过滤与多字段排序
+     * - 返回语义化的实体值列表与总数
+     *
+     * @param body 分页与过滤请求体
+     * @return 分页结果（语义值列表）
+     */
+    @Operation(summary = "根据条件分页查询实体数据")
+    PageResult<SemanticEntityValueDTO> getPermittedDataByCondition(@Valid @RequestBody SemanticPageConditionVO body);
 }

@@ -10,9 +10,13 @@ import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
 import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
 import com.cmsr.onebase.module.app.api.app.dto.TagVO;
 import com.cmsr.onebase.module.system.dal.database.CorpAppRelationDataRepository;
+import com.cmsr.onebase.module.system.dal.database.CorpDataRepository;
+import com.cmsr.onebase.module.system.dal.dataobject.corp.CorpDO;
 import com.cmsr.onebase.module.system.dal.dataobject.corpapprelation.CorpAppRelationDO;
 import com.cmsr.onebase.module.system.enums.ErrorCodeConstants;
+import com.cmsr.onebase.module.system.service.corp.CorpService;
 import com.cmsr.onebase.module.system.vo.corp.CorpApplicationRespVO;
+import com.cmsr.onebase.module.system.vo.corp.CorpRespVO;
 import com.cmsr.onebase.module.system.vo.corpapprelation.*;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
@@ -46,8 +50,11 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
     @Resource
     private AppApplicationApi appApplicationApi;
 
+    @Resource
+    private CorpDataRepository corpDataRepository;
+
     @Override
-    public void createListCorpAppRelation(List<AppAuthTimeReqVO> corpAppRelationInertReqVOList, Long corpId) {
+    public void createCorpAndAppRelation(List<AppAuthTimeReqVO> corpAppRelationInertReqVOList, Long corpId) {
         if (CollectionUtils.isEmpty(corpAppRelationInertReqVOList)) {
             return;
         }
@@ -146,7 +153,7 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
         // 查询原始分页数据
         PageResult<CorpAppRelationDO> pageResult = corpAppRelationDataRepository.selectPage(pageReqVO, applicationIds);
 
-          Map<Long, List<TagVO>> tagMap =new HashMap<Long, List<TagVO>>();
+        Map<Long, List<TagVO>> tagMap =new HashMap<Long, List<TagVO>>();
         // 1. 获取应用ID列表
         List<Long> appIds = pageResult.getList().stream()
                 .map(CorpAppRelationDO::getApplicationId)
@@ -246,7 +253,7 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
                 .filter(app -> CommonPublishModelEnum.SaaSModel.getValue().equals(app.getPublishModel()))
                 .collect(Collectors.toList());
         if (CollectionUtils.isEmpty(applicationDTOList)) {
-            return  new ArrayList<>();
+            return new ArrayList<>();
         }
         // 按创建时间倒序排列
         applicationDTOList = applicationDTOList.stream()
@@ -284,6 +291,13 @@ public class CorpAppRelationServiceImpl implements CorpAppRelationService {
         CorpAppRelationDO corpAppRelationDO = corpAppRelationDOList.get(0);
         if (CorpStatusEnum.DISABLE.getValue().equals(corpAppRelationDO.getStatus())) {
             throw exception(ErrorCodeConstants.AUTH_LOGIN_APP_DELETE_OR_DISABLE);
+        }
+        //查看企业是否禁用
+        if (corpId != null){
+            CorpDO corp = corpDataRepository.findById(corpId);
+            if (corp == null || CorpStatusEnum.DISABLE.getValue().equals(corp.getStatus())){
+                throw exception(ErrorCodeConstants.AUTH_LOGIN_CORP_DELETE_OR_DISABLE);
+            }
         }
     }
 }

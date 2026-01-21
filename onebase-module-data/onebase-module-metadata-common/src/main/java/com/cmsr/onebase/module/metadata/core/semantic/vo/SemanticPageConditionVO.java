@@ -1,12 +1,11 @@
 package com.cmsr.onebase.module.metadata.core.semantic.vo;
 
-import java.util.List;
-
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticConditionDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticSortRuleDTO;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+
+import java.util.List;
 
 /**
  * 分页查询条件 VO
@@ -28,6 +27,9 @@ public class SemanticPageConditionVO {
 
     @Schema(description = "分页大小")
     private Integer pageSize;
+
+    @Schema(description = "菜单ID")
+    private Long menuId;
 
     @Schema(description = "多字段排序规则")
     private List<SemanticSortRuleDTO> sortBy;

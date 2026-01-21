@@ -112,6 +112,20 @@ public class PluginTestDataBuilder {
     }
 
     /**
+     * ContextDemoController 测试数据
+     */
+
+    /**
+     * TestHttpHandler 测试数据
+     */
+    public static class TestPluginData {
+
+        public static String[] testPluginInfoResponseFields() {
+            return new String[] { "message", "currentTime", "plugin", "version" };
+        }
+    }
+
+    /**
      * 预期响应字段验证器
      */
     public static class ExpectedFields {

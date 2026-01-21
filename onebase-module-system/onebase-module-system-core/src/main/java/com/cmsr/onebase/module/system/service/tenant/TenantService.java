@@ -67,6 +67,14 @@ public interface TenantService {
     TenantRespVO getTenantWithAppCount(Long id);
 
     /**
+     * 获得空间和平台管理员信息（包含应用数量）
+     *
+     * @param id 编号
+     * @return 空间信息
+     */
+    TenantRespVO getTenantAndPlatformAdminInfo(Long id);
+
+    /**
      * 获得空间分页
      *
      * @param pageReqVO 分页查询
@@ -99,12 +107,11 @@ public interface TenantService {
     Long getTenantCountByPackageId(Long packageId);
 
     /**
-     * 获得指定状态的租户数量
+     * 获得租户数量(排除平台租户)
      *
-     * @param status 状态
      * @return 租户数量
      */
-    Integer getTenantCountByStatus(Integer status);
+    Integer getTenantCountExcludePlatform();
 
     /**
      * 获得使用指定套餐的租户数组

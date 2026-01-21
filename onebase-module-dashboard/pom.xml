@@ -18,23 +18,4 @@
     </modules>
     <packaging>pom</packaging>
 
-    <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
-        <!-- MyBatis Plus -->
-        <mybatis-plus.version>3.5.7</mybatis-plus.version>
-
-        <!-- Spring AI -->
-        <spring-ai.version>1.0.0-M6</spring-ai.version>
-
-        <!-- Spring AI Alibaba -->
-        <spring-ai-alibaba.version>1.0.0-M6.1</spring-ai-alibaba.version>
-
-        <!-- Spring Boot -->
-        <spring-boot.version>3.2.5</spring-boot.version>
-
-    </properties>
-
 </project>

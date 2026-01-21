@@ -67,7 +67,7 @@ public class DeptServiceImpl implements DeptService {
 
     @Override
     @CacheEvict(cacheNames = RedisKeyConstants.DEPT_CHILDREN_ID_LIST, allEntries = true, beforeInvocation = true)
-    public Long createDept(DeptSaveReqVO createReqVO) {
+    public Long createDept(DeptInsertReqVO createReqVO) {
         if (createReqVO.getParentId() == null) {
             createReqVO.setParentId(DeptDO.PARENT_ID_ROOT);
         }
@@ -81,16 +81,16 @@ public class DeptServiceImpl implements DeptService {
         dept.setStatus(CommonStatusEnum.ENABLE.getStatus());
 
         Integer loginUserType = SecurityFrameworkUtils.getLoginUserType();
-        if(Objects.equals(UserTypeEnum.TENANT.getValue(), loginUserType)){
+        if (Objects.equals(UserTypeEnum.TENANT.getValue(), loginUserType)) {
             dept.setDeptType(DeptTypeEnum.TENANT.getCode());
-        }else if(Objects.equals(UserTypeEnum.CORP.getValue(), loginUserType)){
+        } else if (Objects.equals(UserTypeEnum.CORP.getValue(), loginUserType)) {
             dept.setDeptType(DeptTypeEnum.CORP.getCode());
             LoginUser user = SecurityFrameworkUtils.getLoginUser();
             if (user == null || user.getCorpId() == null) {
                 throw exception(CORP_ID_NULL);
             }
             dept.setCorpId(user.getCorpId());
-        }else{
+        } else {
             throw exception(USER_TYPE_EXCEPTION, loginUserType);
         }
 
@@ -101,7 +101,7 @@ public class DeptServiceImpl implements DeptService {
 
     @Override
     @CacheEvict(cacheNames = RedisKeyConstants.DEPT_CHILDREN_ID_LIST, allEntries = true, beforeInvocation = true)
-    public void updateDept(DeptSaveReqVO updateReqVO) {
+    public void updateDept(DeptUpdateReqVO updateReqVO) {
         if (updateReqVO.getParentId() == null) {
             updateReqVO.setParentId(DeptDO.PARENT_ID_ROOT);
         }
@@ -113,8 +113,9 @@ public class DeptServiceImpl implements DeptService {
         validateDeptNameUnique(updateReqVO.getId(), updateReqVO.getParentId(), updateReqVO.getName());
 
         // 更新部门
-        DeptDO updateObj = BeanUtils.toBean(updateReqVO, DeptDO.class);
-        deptDataRepository.update(updateObj);
+        // DeptDO updateObj = BeanUtils.toBean(updateReqVO, DeptDO.class);
+        // 使用 UpdateChain 显式 set 的方式更新，确保 leaderUserId/adminUserIds 为 null 时也能写入数据库
+        deptDataRepository.updateDept(updateReqVO);
     }
 
     @Override
@@ -127,7 +128,7 @@ public class DeptServiceImpl implements DeptService {
             throw exception(DEPT_EXITS_CHILDREN);
         }
         // 如果一个部门有用户，则不能删除
-        List<AdminUserDO> userListByDeptIds = userService.getUserListByDeptIds(Collections.singleton(id),null);
+        List<AdminUserDO> userListByDeptIds = userService.getUserListByDeptIds(Collections.singleton(id), null);
         if (CollectionUtils.isNotEmpty(userListByDeptIds)) {
             throw exception(DEPT_DEL_FAILD_EXISTS_USERS);
         }
@@ -353,7 +354,7 @@ public class DeptServiceImpl implements DeptService {
         // 2. 批量获取领导用户信息
         Map<Long, AdminUserDO> leaderUserMap = userService.getUserMap(leaderUserIds);
 
-        Set<Long> adminUserIds = dept.getAdminUserIds()==null?null:dept.getAdminUserIds();
+        Set<Long> adminUserIds = dept.getAdminUserIds() == null ? null : dept.getAdminUserIds();
 
         // . 批量获取接口人用户信息
         Map<Long, AdminUserDO> directorUserMap = userService.getUserMap(adminUserIds);
@@ -384,6 +385,7 @@ public class DeptServiceImpl implements DeptService {
     @Override
     public DeptAndUsersRespVO getDeptAndUsers(DeptAndUsersReqVO reqVO) {
         Integer userType = reqVO.getUserType();
+        String deptType = reqVO.getDeptType();
         DeptAndUsersRespVO respVO = new DeptAndUsersRespVO();
 
         // 判断是否有搜索关键词
@@ -395,18 +397,11 @@ public class DeptServiceImpl implements DeptService {
             respVO.setDeptInfo(null);
 
             // 按部门名称模糊搜索部门
-            List<DeptDO> matchedDepts = new ArrayList<>();
-
-            if(null == userType){
-                matchedDepts = deptDataRepository.findAllByNameAndStatus(reqVO.getKeywords(), null);
-            } else if(UserTypeEnum.THIRD.getValue().equals(userType) ) {
-                matchedDepts = deptDataRepository.findDeptListByNameAndDeptType(reqVO.getKeywords(), DeptTypeEnum.THIRD.getCode());
-            }
-
+            List<DeptDO>  matchedDepts = deptDataRepository.findDeptListByNameAndDeptType(reqVO.getKeywords(), deptType);
             respVO.setDeptList(BeanUtils.toBean(matchedDepts, DeptRespVO.class));
 
             // 按用户昵称模糊搜索用户
-            List<AdminUserDO> matchedUsers = userService.getUserListByNickname(reqVO.getKeywords(),userType);
+            List<AdminUserDO> matchedUsers = userService.getUserListByNickname(reqVO.getKeywords(), userType);
             respVO.setUserList(BeanUtils.toBean(matchedUsers, UserSimpleRespVO.class));
 
         } else if (hasDeptId) {
@@ -427,18 +422,12 @@ public class DeptServiceImpl implements DeptService {
             // 场景1：部门ID和搜索词都为空
             respVO.setDeptInfo(null);
 
-            // 获取所有一级部门（parentId = 0）
-            List<DeptDO> rootDepts =new ArrayList<>();
-            if (null == userType) {
-                rootDepts = deptDataRepository.findAllByParentId(DeptDO.PARENT_ID_ROOT);
-            } else if(UserTypeEnum.THIRD.getValue().equals(userType) ) {
-                rootDepts = deptDataRepository.findDeptListByDeptType(DeptTypeEnum.THIRD.getCode());
-            }
-
+            // 获取所有一级部门（parentId = DeptDO.PARENT_ID_ROOT）
+            List<DeptDO>   rootDepts = deptDataRepository.findAllByParentIdAndType(DeptDO.PARENT_ID_ROOT, deptType);
             respVO.setDeptList(BeanUtils.toBean(rootDepts, DeptRespVO.class));
 
             // 获取所有没有部门的用户（dept_id = null）
-            List<AdminUserDO> usersWithoutDept = userService.getUserListNoDept(userType);
+            List<AdminUserDO> usersWithoutDept = userService.getNoneDeptUserList(userType);
             respVO.setUserList(BeanUtils.toBean(usersWithoutDept, UserSimpleRespVO.class));
         }
 
@@ -517,15 +506,14 @@ public class DeptServiceImpl implements DeptService {
 
 
     @Override
-    public DeptDO findDeptByCodeAndType(DeptSaveReqVO deptRespVO) {
-       return deptDataRepository.findDeptByCodeAndType(deptRespVO);
+    public DeptDO findDeptByCodeAndType(DeptDO deptRespVO) {
+        return deptDataRepository.findDeptByCodeAndType(deptRespVO);
     }
 
     @Override
-    public Long createThirdDefaultDept(DeptSaveReqVO deptRespVO) {
-        DeptDO dept = BeanUtils.toBean(deptRespVO, DeptDO.class);
-        deptDataRepository.insert(dept);
-        return dept.getId();
+    public Long createThirdDefaultDept(DeptDO deptDO) {
+        deptDataRepository.insert(deptDO);
+        return deptDO.getId();
     }
 
     @Override
@@ -538,7 +526,7 @@ public class DeptServiceImpl implements DeptService {
 
         // 查询部门数据
         PageResult<DeptDO> result = deptDataRepository.selectPage(UserStatusEnum.NORMAL.getStatus(), reqVO);
-        if(CollectionUtils.isEmpty(result.getList())){
+        if (CollectionUtils.isEmpty(result.getList())) {
             return PageResult.empty();
         }
 

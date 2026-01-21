@@ -10,12 +10,7 @@ Content-Type: application/json
 tenant-id: {{adminTenantId}}
 tag: {{tag}}
 
-{
-  "username": "admin",
-  "password": "b2b3091d8090ff1a3bfdf0ee1c5505ccd501c717a70fbe135475d7e53bc82b0b86ade391a640937c2c93a0fb7f8a9227a963434f9a78d4b09fd0d3a8551960cc2d2770a52345b1cc03654d9315ac974675e4600d9fd7f698bd15d548a6d2f4a100cdb7d3c62b85ca",
-  "deviceId":666,
-  "loginPlatform": "pc"
-}
+{"username":"zhuchunhui","password":"daf9cf8fccba5c3a483246f8107ea3b08c7fa9fe5fb036b337289c537cbe0e94f3fc22068c94a61a17bf946886ed63ca811e0126856877c3ccfeedd966f65a08c2739eaae0ccc9652c487c45d65ebaebfca56f2a7ee06aeb8fcdbd2ec339e2bd3b435916ba18820fb712132ef9b0ba","captchaVerification":"kGLz/xBFDXfYREKszNF0TjVxoV3UnWpBoO12OlILrnUCSm/KoBAl/mioI6OUnX7GsZJbOIUXgaDyyfxmSzFDuQbagUzoxEp52SZrXPBfvE4=","deviceId":"60c78cdd38ca3836b7176be580f57e4c"}
 
 > {%
     // 登录成功后自动更新token到环境变量

@@ -2,8 +2,8 @@ package com.cmsr.onebase.plugin.build.vo.req;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * 插件基础信息更新请求 VO
@@ -25,7 +25,7 @@ public class PluginInfoUpdateReqVO {
     @Schema(description = "插件描述", example = "这是一个示例插件")
     private String pluginDescription;
 
-    @Schema(description = "插件图标文件ID", example = "2048")
-    private Long pluginIcon;
+    @Schema(description = "插件图标文件（支持直接上传图片文件）")
+    private MultipartFile pluginIcon;
 
 }

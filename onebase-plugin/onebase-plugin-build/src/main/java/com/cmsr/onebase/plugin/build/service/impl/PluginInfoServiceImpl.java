@@ -10,9 +10,11 @@ import com.cmsr.onebase.plugin.build.redis.PluginCommandPublisher;
 import com.cmsr.onebase.plugin.build.service.PluginInfoService;
 import com.cmsr.onebase.plugin.build.validator.PluginMetaValidator;
 import com.cmsr.onebase.plugin.build.validator.PluginZipValidator;
+import com.cmsr.onebase.plugin.build.validator.PluginZipValidator.PackageInfo;
 import com.cmsr.onebase.plugin.build.vo.req.PluginInfoPageReqVO;
 import com.cmsr.onebase.plugin.build.vo.req.PluginInfoUpdateReqVO;
 import com.cmsr.onebase.plugin.build.vo.req.PluginUploadReqVO;
+import com.cmsr.onebase.plugin.build.vo.req.PluginVersionStatusReqVO;
 import com.cmsr.onebase.plugin.build.vo.resp.PluginInfoDetailRespVO;
 import com.cmsr.onebase.plugin.build.vo.resp.PluginInfoRespVO;
 import com.cmsr.onebase.plugin.build.vo.resp.PluginVersionRespVO;
@@ -71,43 +73,70 @@ public class PluginInfoServiceImpl implements PluginInfoService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public String uploadPlugin(PluginUploadReqVO uploadReqVO) {
-        // 1. 校验并读取文件
+    public String createPlugin(PluginUploadReqVO uploadReqVO) {
+        // 1. 校验并读取插件包文件
         byte[] content = pluginZipValidator.validate(uploadReqVO.getFile());
 
         // 2. 提取并解析plugin.json
         String pluginJson = pluginZipValidator.extractPluginJson(content);
         PluginMetaInfo metaInfo = pluginMetaValidator.validate(pluginJson);
 
-        // 3. 检查插件是否已存在
+        // 3. 提取plugin.schema.json（插件配置模板）
+        String pluginSchemaJson = pluginZipValidator.extractPluginSchemaJson(content);
+
+        // 4. 检查插件是否已存在
         List<PluginInfoDO> existingPlugins = pluginInfoRepository.getListByPluginId(metaInfo.getPluginId());
         if (CollUtil.isNotEmpty(existingPlugins)) {
             throw exception(PLUGIN_ALREADY_EXISTS);
         }
 
-        // 4. 上传文件到MinIO
+        // 5. 上传插件包到MinIO
         String fileId = fileApi.createFile(content, uploadReqVO.getFile().getOriginalFilename());
 
-        // 5. 保存插件信息
+        // 6. 上传图标文件到MinIO（如果有）
+        Long pluginIconId = null;
+        if (uploadReqVO.getPluginIcon() != null && !uploadReqVO.getPluginIcon().isEmpty()) {
+            try {
+                byte[] iconContent = uploadReqVO.getPluginIcon().getBytes();
+                String iconFileId = fileApi.createFile(iconContent, uploadReqVO.getPluginIcon().getOriginalFilename());
+                pluginIconId = Long.parseLong(iconFileId);
+            } catch (Exception e) {
+                log.error("插件图标上传失败", e);
+                throw exception(PLUGIN_ICON_UPLOAD_FAILED);
+            }
+        }
+
+        // 7. 保存插件信息（优先使用用户输入的名称和描述，否则使用plugin.json中的）
         PluginInfoDO pluginInfoDO = PluginInfoDO.builder()
                 .pluginId(metaInfo.getPluginId())
-                .pluginName(metaInfo.getPluginName())
-                .pluginDescription(metaInfo.getDescription())
-                .pluginVersion(metaInfo.getPluginVersion())
-                .pluginVersionDescription(metaInfo.getVersionDescription())
+                .pluginName(StrUtil.isNotBlank(uploadReqVO.getPluginName()) ? uploadReqVO.getPluginName() : metaInfo.getPluginName())
+                .pluginDescription(StrUtil.isNotBlank(uploadReqVO.getPluginDescription()) ? uploadReqVO.getPluginDescription() : metaInfo.getDescription())
+                .pluginVersion(StrUtil.isNotBlank(uploadReqVO.getPluginVersion()) ? uploadReqVO.getPluginVersion() : metaInfo.getPluginVersion())
+                .pluginVersionDescription(StrUtil.isNotBlank(uploadReqVO.getPluginVersionDescription()) ? uploadReqVO.getPluginVersionDescription() : metaInfo.getVersionDescription())
                 .pluginPackage(Long.parseLong(fileId))
+                .pluginIcon(pluginIconId)
                 .pluginMetaInfo(pluginJson)
+                .pluginConfigInfo(pluginSchemaJson)  // 插件配置模板，来自zip包中的plugin.schema.json
                 .status(PluginStatusConstants.DISABLED)
                 .build();
         pluginInfoRepository.insert(pluginInfoDO);
 
-        // 6. 保存包信息
-        savePackageInfo(metaInfo, pluginInfoDO.getPluginId(), pluginInfoDO.getPluginVersion());
+        // 8. 检测并保存包信息（自动检测前端/后端包）
+        List<PackageInfo> packages = pluginZipValidator.detectPackages(content);
+        savePackageInfo(packages, pluginInfoDO.getPluginId(), pluginInfoDO.getPluginVersion());
 
-        // 7. 保存配置信息
+        // 9. 保存配置信息
         saveConfigInfo(metaInfo, pluginInfoDO.getPluginId(), pluginInfoDO.getPluginVersion());
 
-        log.info("插件上传成功: pluginId={}, version={}", metaInfo.getPluginId(), metaInfo.getPluginVersion());
+        // 10. 发布插件上传消息通知runtime模块
+        pluginCommandPublisher.publishUploadCommand(
+                pluginInfoDO.getPluginId(),
+                pluginInfoDO.getPluginVersion(),
+                TenantContextHolder.getTenantId(),
+                pluginInfoDO.getPluginPackage()
+        );
+
+        log.info("插件上传成功: pluginId={}, version={}", metaInfo.getPluginId(), pluginInfoDO.getPluginVersion());
         return pluginInfoDO.getPluginId();
     }
 
@@ -206,7 +235,20 @@ public class PluginInfoServiceImpl implements PluginInfoService {
             throw exception(PLUGIN_NOT_FOUND);
         }
 
-        // 2. 更新所有版本的基础信息
+        // 2. 上传图标文件到MinIO（如果有）
+        Long pluginIconId = null;
+        if (updateReqVO.getPluginIcon() != null && !updateReqVO.getPluginIcon().isEmpty()) {
+            try {
+                byte[] iconContent = updateReqVO.getPluginIcon().getBytes();
+                String iconFileId = fileApi.createFile(iconContent, updateReqVO.getPluginIcon().getOriginalFilename());
+                pluginIconId = Long.parseLong(iconFileId);
+            } catch (Exception e) {
+                log.error("插件图标上传失败", e);
+                throw exception(PLUGIN_ICON_UPLOAD_FAILED);
+            }
+        }
+
+        // 3. 更新所有版本的基础信息
         for (PluginInfoDO version : versions) {
             if (StrUtil.isNotBlank(updateReqVO.getPluginName())) {
                 version.setPluginName(updateReqVO.getPluginName());
@@ -214,8 +256,8 @@ public class PluginInfoServiceImpl implements PluginInfoService {
             if (updateReqVO.getPluginDescription() != null) {
                 version.setPluginDescription(updateReqVO.getPluginDescription());
             }
-            if (updateReqVO.getPluginIcon() != null) {
-                version.setPluginIcon(updateReqVO.getPluginIcon());
+            if (pluginIconId != null) {
+                version.setPluginIcon(pluginIconId);
             }
             pluginInfoRepository.update(version);
         }
@@ -239,8 +281,18 @@ public class PluginInfoServiceImpl implements PluginInfoService {
             throw exception(PLUGIN_ENABLED_CANNOT_DELETE);
         }
 
-        // 3. 删除所有版本及关联数据
+        // 3. 获取租户ID
+        Long tenantId = TenantContextHolder.getTenantId();
+
+        // 4. 删除所有版本及关联数据，并通知Runtime删除插件
         for (PluginInfoDO version : versions) {
+            // 发布Redis消息通知Runtime删除插件
+            pluginCommandPublisher.publishDeleteCommand(
+                    pluginId,
+                    version.getPluginVersion(),
+                    tenantId
+            );
+
             // 删除配置信息
             pluginConfigInfoRepository.deleteByPluginIdAndVersion(pluginId, version.getPluginVersion());
             // 删除包信息
@@ -254,9 +306,10 @@ public class PluginInfoServiceImpl implements PluginInfoService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void enablePlugin(Long id) {
-        // 1. 获取版本信息
-        PluginInfoDO pluginInfo = pluginInfoRepository.getPluginInfoById(id);
+    public void enablePlugin(PluginVersionStatusReqVO statusReqVO) {
+        // 1. 根据pluginId和version获取版本信息
+        PluginInfoDO pluginInfo = pluginInfoRepository.getByPluginIdAndVersion(
+                statusReqVO.getPluginId(), statusReqVO.getPluginVersion());
         if (pluginInfo == null) {
             throw exception(PLUGIN_VERSION_NOT_FOUND);
         }
@@ -295,9 +348,10 @@ public class PluginInfoServiceImpl implements PluginInfoService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void disablePlugin(Long id) {
-        // 1. 获取版本信息
-        PluginInfoDO pluginInfo = pluginInfoRepository.getPluginInfoById(id);
+    public void disablePlugin(PluginVersionStatusReqVO statusReqVO) {
+        // 1. 根据pluginId和version获取版本信息
+        PluginInfoDO pluginInfo = pluginInfoRepository.getByPluginIdAndVersion(
+                statusReqVO.getPluginId(), statusReqVO.getPluginVersion());
         if (pluginInfo == null) {
             throw exception(PLUGIN_VERSION_NOT_FOUND);
         }
@@ -323,13 +377,13 @@ public class PluginInfoServiceImpl implements PluginInfoService {
     }
 
     /**
-     * 保存包信息
+     * 保存包信息（使用自动检测的包信息）
      */
-    private void savePackageInfo(PluginMetaInfo metaInfo, String pluginId, String pluginVersion) {
-        if (CollUtil.isEmpty(metaInfo.getPackages())) {
+    private void savePackageInfo(List<PackageInfo> packages, String pluginId, String pluginVersion) {
+        if (CollUtil.isEmpty(packages)) {
             return;
         }
-        for (PluginMetaInfo.PluginPackageInfo packageInfo : metaInfo.getPackages()) {
+        for (PackageInfo packageInfo : packages) {
             PluginPackageInfoDO packageDO = PluginPackageInfoDO.builder()
                     .pluginId(pluginId)
                     .pluginVersion(pluginVersion)

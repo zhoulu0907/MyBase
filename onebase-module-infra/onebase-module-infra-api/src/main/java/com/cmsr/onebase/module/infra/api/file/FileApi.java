@@ -77,4 +77,9 @@ public interface FileApi {
     @Operation(summary = "保存文件，并返回文件的访问路径")
     CommonResult<String> dashboardUpload(@Valid @RequestBody FileCreateReqDTO createReqDTO);
 
+    @GetMapping(PREFIX + "/content/{id}")
+    @Operation(summary = "根据文件ID获取文件内容（字节数组）")
+    @Parameter(name = "id", description = "文件编号", required = true)
+    CommonResult<byte[]> getFileContentBytes(@PathVariable("id") Long id);
+
 }

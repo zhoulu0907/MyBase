@@ -472,5 +472,22 @@ public class FileServiceImpl implements FileService {
         writeAttachment(response, path, content);
     }
 
+    @Override
+    public byte[] getFileContentBytes(Long id) throws Exception {
+        // 1. 获取文件信息
+        FileDO file = fileDataRepository.getById(id);
+        if (file == null) {
+            throw exception(FILE_NOT_EXISTS);
+        }
+
+        // 2. 获取文件内容
+        if (StrUtil.isEmpty(file.getPath())) {
+            throw exception(FILE_PATH_NOT_EXISTS);
+        }
+        String path = URLUtil.decode(file.getPath());
+        
+        return getFileContent(file.getConfigId(), path);
+    }
+
 
 }

@@ -35,6 +35,8 @@ public class ExtensionPointScannerSpring {
      * @return 扩展点实例列表
      */
     private final List<String> devClassPaths;
+    private URLClassLoader devClassLoader;
+    private Object hotReloadManager; // 使用 Object 避免循环依赖，运行时会是 HotReloadManager 实例
 
     public ExtensionPointScannerSpring() {
         this.devClassPaths = Collections.emptyList();
@@ -49,6 +51,42 @@ public class ExtensionPointScannerSpring {
      */
     public ExtensionPointScannerSpring(List<String> devClassPaths) {
         this.devClassPaths = devClassPaths == null ? Collections.emptyList() : new ArrayList<>(devClassPaths);
+        initDevClassLoader();
+    }
+
+    /**
+     * 设置热重载管理器（用于注册扩展点到插件映射）
+     * 使用 Object 类型避免循环依赖
+     * 
+     * @param hotReloadManager 热重载管理器实例（运行时类型为 HotReloadManager）
+     */
+    public void setHotReloadManager(Object hotReloadManager) {
+        this.hotReloadManager = hotReloadManager;
+    }
+
+    private void initDevClassLoader() {
+        if (this.devClassPaths == null || this.devClassPaths.isEmpty()) {
+            return;
+        }
+
+        List<URL> urls = new ArrayList<>();
+        for (String p : devClassPaths) {
+            if (p == null || p.trim().isEmpty())
+                continue;
+            Path path = Paths.get(p.trim());
+            if (!Files.exists(path) || !Files.isDirectory(path)) {
+                log.error("开发模式类路径不存在或不是目录: {}", path);
+                continue;
+            }
+
+            // 使用工具类加载类路径和依赖
+            urls.addAll(DevDependencyUtil.getUrlsWithDependencies(path));
+        }
+
+        if (!urls.isEmpty()) {
+            this.devClassLoader = new URLClassLoader(urls.toArray(new URL[0]),
+                    Thread.currentThread().getContextClassLoader());
+        }
     }
 
     public <T> List<T> scanExtensions(Class<T> extensionType) {
@@ -63,68 +101,58 @@ public class ExtensionPointScannerSpring {
                 return extensions;
             }
 
-            // 仅从指定目录加载类（不加载jar/zip）
-            List<URL> urls = new ArrayList<>();
-            for (String p : devClassPaths) {
-                if (p == null || p.trim().isEmpty())
-                    continue;
-                Path path = Paths.get(p.trim());
-                if (!Files.exists(path) || !Files.isDirectory(path)) {
-                    log.error("开发模式类路径不存在或不是目录: {}", path);
-                    continue;
-                }
-                try {
-                    urls.add(path.toUri().toURL());
-                    log.debug("加入开发模式类路径: {}", path.toString());
-                } catch (Exception e) {
-                    log.warn("转换类路径为URL失败 {}: {}", p, e.getMessage());
-                }
-            }
-
-            if (urls.isEmpty()) {
-                log.warn("未找到有效的开发模式类路径");
+            if (devClassLoader == null) {
+                log.warn("开发模式类加载器未初始化（可能是未找到有效的类路径）");
                 return extensions;
             }
-            URL[] urlArray = urls.toArray(new URL[0]);
-            try (URLClassLoader urlClassLoader = new URLClassLoader(urlArray,
-                    Thread.currentThread().getContextClassLoader())) {
 
-                // 遍历目录下的 class 文件，按包名方式扫描
-                for (String dir : devClassPaths) {
-                    Path base = Paths.get(dir);
-                    if (!Files.exists(base) || !Files.isDirectory(base))
-                        continue;
-                    Files.walk(base)
-                            .filter(p -> p.toString().endsWith(".class"))
-                            .forEach(classFile -> {
-                                try {
-                                    String relative = base.relativize(classFile).toString();
-                                    String className = relative.replaceAll("\\\\", "/")
-                                            .replace('/', '.')
-                                            .replaceAll("\\.class$", "");
-                                    Class<?> clazz = Class.forName(className, false, urlClassLoader);
-                                    if (Modifier.isAbstract(clazz.getModifiers()) || clazz.isInterface())
-                                        return;
-                                    if (!extensionType.isAssignableFrom(clazz))
-                                        return;
+            // 遍历目录下的 class 文件，按包名方式扫描
+            for (String dir : devClassPaths) {
+                Path base = Paths.get(dir);
+                if (!Files.exists(base) || !Files.isDirectory(base))
+                    continue;
+                Files.walk(base)
+                        .filter(p -> p.toString().endsWith(".class"))
+                        .forEach(classFile -> {
+                            try {
+                                String relative = base.relativize(classFile).toString();
+                                String className = relative.replaceAll("\\\\", "/")
+                                        .replace('/', '.')
+                                        .replaceAll("\\.class$", "");
+                                Class<?> clazz = Class.forName(className, false, devClassLoader);
+                                if (Modifier.isAbstract(clazz.getModifiers()) || clazz.isInterface())
+                                    return;
+                                if (!extensionType.isAssignableFrom(clazz))
+                                    return;
 
-                                    // 创建扩展点实例（Bean 注册由 ExtensionsInjector 自动处理）
-                                    @SuppressWarnings("unchecked")
-                                    T instance = (T) clazz.getDeclaredConstructor().newInstance();
-                                    extensions.add(instance);
-                                    log.debug("发现扩展点: {} -> {} (来自 {})",
-                                            extensionType.getSimpleName(), className, base);
-                                } catch (ClassNotFoundException cnf) {
-                                    log.debug("类未找到: {}", cnf.getMessage());
-                                } catch (NoClassDefFoundError nde) {
-                                    log.debug("类依赖缺失: {}", nde.getMessage());
-                                } catch (Exception e) {
-                                    log.warn("从开发目录加载扩展点失败 {}: {}", classFile, e.getMessage());
+                                // 创建扩展点实例（Bean 注册由 ExtensionsInjector 自动处理）
+                                @SuppressWarnings("unchecked")
+                                T instance = (T) clazz.getDeclaredConstructor().newInstance();
+                                extensions.add(instance);
+
+                                // 注册扩展点到插件映射（用于插件级热重载）
+                                if (hotReloadManager != null) {
+                                    try {
+                                        // 使用反射调用 registerExtension 方法，避免循环依赖
+                                        hotReloadManager.getClass()
+                                                .getMethod("registerExtension", String.class, Path.class)
+                                                .invoke(hotReloadManager, className, base);
+                                    } catch (Exception ex) {
+                                        // 【P1 修复】：说明失败的影响
+                                        log.error("注册扩展点到插件映射失败，该扩展点的非扩展点类热加载将不可用: {}", className, ex);
+                                    }
                                 }
-                            });
-                }
-            } catch (Exception e) {
-                log.error("使用 URLClassLoader 加载开发类路径失败", e);
+
+                                log.debug("发现扩展点: {} -> {} (来自 {})",
+                                        extensionType.getSimpleName(), className, base);
+                            } catch (ClassNotFoundException cnf) {
+                                log.error("类未找到: {}", cnf.getMessage());
+                            } catch (NoClassDefFoundError nde) {
+                                log.error("类依赖缺失: {}", nde.getMessage());
+                            } catch (Exception e) {
+                                log.error("从开发目录加载扩展点失败 {}: {}", classFile, e.getMessage());
+                            }
+                        });
             }
 
             if (extensions.isEmpty()) {

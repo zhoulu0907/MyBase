@@ -56,7 +56,10 @@ public class PluginTestEnvironmentManager {
     /**
      * 需要打包的插件模块路径(相对于项目根目录)
      */
-    private static final String PLUGIN_DEMO_HELLO_MODULE = "onebase-plugin/onebase-plugin-demo/plugin-demo-hello";
+    private static final String[] PLUGIN_MODULES = {
+            "onebase-plugin/onebase-plugin-demo/plugin-demo-hello",
+            "onebase-plugin/onebase-plugin-demo/plugin-demo-test"
+    };
 
     /**
      * 项目根目录
@@ -441,17 +444,17 @@ public class PluginTestEnvironmentManager {
     /**
      * 编译打包插件
      * <p>
-     * 使用 Maven 命令编译打包 plugin-demo-hello 模块
+     * 使用 Maven 命令编译打包所有插件模块
      * </p>
      *
      * @throws Exception 如果编译失败
      */
     private static void buildPlugin() throws Exception {
         log.info("========================================");
-        log.info("开始编译打包插件: {}", PLUGIN_DEMO_HELLO_MODULE);
+        log.info("开始编译打包 {} 个插件模块", PLUGIN_MODULES.length);
         log.info("========================================");
 
-        // 构建 Maven 命令
+        // 构建 Maven 命令 - 一次性编译所有插件模块
         List<String> command = new ArrayList<>();
 
         // Windows 环境使用 mvn.cmd, Linux/Mac 使用 mvn
@@ -463,7 +466,8 @@ public class PluginTestEnvironmentManager {
         command.add("clean");
         command.add("package");
         command.add("-pl");
-        command.add(PLUGIN_DEMO_HELLO_MODULE);
+        // 用逗号连接所有模块路径
+        command.add(String.join(",", PLUGIN_MODULES));
         command.add("-am");
         command.add("-DskipTests");
 
@@ -494,50 +498,63 @@ public class PluginTestEnvironmentManager {
             throw new RuntimeException("插件编译失败,退出码: " + exitCode);
         }
 
-        log.info("✓ 插件编译成功");
+        log.info("✓ 所有插件编译成功");
     }
 
     /**
      * 复制插件到测试目录
      * <p>
-     * 从插件模块的 target 目录查找所有 ZIP 包并复制到测试目录,保持原始文件名
+     * 从所有插件模块的 target 目录查找所有 ZIP 包并复制到测试目录,保持原始文件名
      * </p>
      *
      * @throws IOException 如果复制失败
      */
     private static void copyPluginToTestDirectory() throws IOException {
-        // 查找插件 ZIP 包
-        Path pluginModuleDir = projectRoot.resolve(PLUGIN_DEMO_HELLO_MODULE);
-        Path targetDir = pluginModuleDir.resolve("target");
+        int totalCopied = 0;
 
-        if (!Files.exists(targetDir)) {
-            throw new IOException("插件 target 目录不存在: " + targetDir);
+        // 遍历所有插件模块
+        for (String pluginModule : PLUGIN_MODULES) {
+            Path pluginModuleDir = projectRoot.resolve(pluginModule);
+            Path targetDir = pluginModuleDir.resolve("target");
+
+            if (!Files.exists(targetDir)) {
+                log.warn("插件 target 目录不存在,跳过: {}", targetDir);
+                continue;
+            }
+
+            // 查找所有 ZIP 文件
+            List<Path> zipFiles;
+            try (Stream<Path> files = Files.list(targetDir)) {
+                zipFiles = files
+                        .filter(p -> p.getFileName().toString().endsWith(".zip"))
+                        .collect(Collectors.toList());
+            }
+
+            if (zipFiles.isEmpty()) {
+                log.warn("未找到插件 ZIP 包: {}", targetDir);
+                continue;
+            }
+
+            log.info("在 {} 中找到 {} 个插件包", pluginModule, zipFiles.size());
+
+            // 复制所有 ZIP 文件到测试目录,保持原始文件名
+            for (Path sourceZip : zipFiles) {
+                String fileName = sourceZip.getFileName().toString();
+                Path targetZip = pluginsDir.resolve(fileName);
+
+                Files.copy(sourceZip, targetZip, StandardCopyOption.REPLACE_EXISTING);
+                copiedFiles.add(targetZip);
+                totalCopied++;
+
+                log.info("✓ 插件复制成功: {}", fileName);
+            }
         }
 
-        // 查找所有 ZIP 文件
-        List<Path> zipFiles;
-        try (Stream<Path> files = Files.list(targetDir)) {
-            zipFiles = files
-                    .filter(p -> p.getFileName().toString().endsWith(".zip"))
-                    .collect(Collectors.toList());
+        if (totalCopied == 0) {
+            throw new IOException("未找到任何插件 ZIP 包");
         }
 
-        if (zipFiles.isEmpty()) {
-            throw new IOException("未找到插件 ZIP 包: " + targetDir);
-        }
-
-        log.info("找到 {} 个插件包", zipFiles.size());
-
-        // 复制所有 ZIP 文件到测试目录,保持原始文件名
-        for (Path sourceZip : zipFiles) {
-            String fileName = sourceZip.getFileName().toString();
-            Path targetZip = pluginsDir.resolve(fileName);
-
-            Files.copy(sourceZip, targetZip, StandardCopyOption.REPLACE_EXISTING);
-            copiedFiles.add(targetZip);
-
-            log.info("✓ 插件复制成功: {}", fileName);
-        }
+        log.info("✓ 共复制 {} 个插件包到测试目录", totalCopied);
     }
 
     /**

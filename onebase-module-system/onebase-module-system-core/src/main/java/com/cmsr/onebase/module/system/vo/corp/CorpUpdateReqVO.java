@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.system.vo.corp;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.Data;
 
 @Data
@@ -28,6 +29,7 @@ public class CorpUpdateReqVO {
     private String address;
 
     @Schema(description = "用户数量上限")
+    @Positive(message = "用户上限必须大于零")
     private Integer userLimit;
 
     @Schema(description = "企业logo", example = "")

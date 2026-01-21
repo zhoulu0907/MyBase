@@ -5,6 +5,7 @@ import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.util.string.UuidUtils;
 import com.cmsr.onebase.module.etl.build.service.DatasourceFactory;
 import com.cmsr.onebase.module.etl.build.vo.datasource.TestConnectionVO;
+import com.cmsr.onebase.module.etl.build.vo.preview.PreviewTableDef;
 import com.cmsr.onebase.module.etl.build.vo.preview.TablePreviewVO;
 import com.cmsr.onebase.module.etl.common.entity.ColumnData;
 import com.cmsr.onebase.module.etl.common.entity.TableData;
@@ -17,20 +18,18 @@ import com.cmsr.onebase.module.etl.core.dal.dataobject.EtlDatasourceDO;
 import com.cmsr.onebase.module.etl.core.dal.dataobject.EtlTableDO;
 import com.cmsr.onebase.module.etl.core.dto.FlinkMappings;
 import com.cmsr.onebase.module.etl.core.enums.EtlErrorCodeConstants;
-import com.cmsr.onebase.module.etl.core.enums.MetadataType;
 import com.cmsr.onebase.module.etl.core.vo.ConnectCryptoProperties;
+import com.mybatisflex.core.FlexGlobalConfig;
+import com.mybatisflex.core.datasource.DataSourceKey;
+import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.core.row.Db;
+import com.mybatisflex.core.row.Row;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.datasource.DataSourceHolder;
-import org.anyline.data.param.ConfigStore;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.DataRow;
-import org.anyline.entity.DataSet;
-import org.anyline.metadata.Table;
 import org.anyline.proxy.ServiceProxy;
 import org.anyline.service.AnylineService;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Strings;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -62,20 +61,17 @@ public class DataInspectServiceImpl implements DataInspectService {
     @Override
     public boolean testConnection(TestConnectionVO pingVO) {
         Long datasourceId = pingVO.getId();
-        EtlDatasourceDO datasourceDO;
         String datasourceType = pingVO.getDatasourceType();
-        ConnectCryptoProperties connectProperties;
-        if (datasourceId == null) {
-            connectProperties = pingVO.getConfig();
-        } else {
-            datasourceDO = datasourceRepository.getById(datasourceId);
-            connectProperties = JsonUtils.parseObject(datasourceDO.getConfig(), ConnectCryptoProperties.class);
-            String inputPwd = pingVO.getConfig().getPassword();
-            String storedPwd = connectProperties.getPassword();
-            if (StringUtils.isNotBlank(inputPwd) && !Strings.CS.equals(inputPwd, storedPwd)) {
-                connectProperties.setPassword(inputPwd);
+        ConnectCryptoProperties connectProperties = pingVO.getConfig();
+        if (datasourceId != null) {
+            EtlDatasourceDO datasourceDO = datasourceRepository.getById(datasourceId);
+            // 判断密码是否为脱敏数据
+            if (StringUtils.isBlank(connectProperties.getPassword())) {
+                ConnectCryptoProperties storedProperties = JsonUtils.parseObject(datasourceDO.getConfig(), ConnectCryptoProperties.class);
+                connectProperties.setPassword(storedProperties.getPassword());
             }
         }
+
         DataSource datasource = dataSourceFactory.constructDataSource(datasourceType, connectProperties, true);
         String runnerKey = "ping-" + UuidUtils.getUuid();
 
@@ -93,6 +89,9 @@ public class DataInspectServiceImpl implements DataInspectService {
         }
     }
 
+    /**
+     * Mybaits-Flex version,.
+     */
     @Override
     public DataPreview previewData(TablePreviewVO previewVO) {
         String datasourceUuid = previewVO.getDatasourceUuid();
@@ -107,31 +106,26 @@ public class DataInspectServiceImpl implements DataInspectService {
             throw ServiceExceptionUtil.exception(EtlErrorCodeConstants.TABLE_NOT_EXIST);
         }
         ConnectCryptoProperties connectProperties = JsonUtils.parseObject(datasourceDO.getConfig(), ConnectCryptoProperties.class);
-        DataSource dataSource = dataSourceFactory.constructDataSource(datasourceType, connectProperties, true);
-        String runnerKey = "preview-" + datasourceUuid + UuidUtils.getUuid();
+        String datasourceKey = "preview-" + datasourceUuid + UuidUtils.getUuid();
         try {
-            DataSourceHolder.reg(runnerKey, dataSource);
-            AnylineService<?> temporary = ServiceProxy.service(runnerKey);
-            Table<?> table;
-            MetadataType metadataType = MetadataType.getType(tableDO.getTableType());
-            switch (metadataType) {
-                case TABLE -> table = temporary.metadata().table(tableDO.getTableName());
-                case VIEW -> table = temporary.metadata().view(tableDO.getTableName());
-                default -> throw ServiceExceptionUtil.exception(EtlErrorCodeConstants.ILLEGAL_METADATA_TYPE);
-            }
+            DataSource dataSource = dataSourceFactory.constructDataSource(datasourceType, connectProperties, true);
             FlinkMappings fieldTypeMapping = flinkMappingRepository.findByDatasourceType(datasourceType);
             DataPreview dataPreview = new DataPreview();
             TableData tableData = JsonUtils.parseObject(tableDO.getMetaInfo(), TableData.class);
             List<ColumnData> columnDataList = tableData.getColumns();
             List<PreviewColumn> columnList = extractPreviewColumns(datasourceType, columnDataList, fieldTypeMapping);
             dataPreview.setColumns(columnList);
-            ConfigStore cs = new DefaultConfigStore();
-            cs.limit(inspectSize);
+            FlexGlobalConfig defaultOrmConfig = FlexGlobalConfig.getDefaultConfig();
+            defaultOrmConfig.getDataSource().addDataSource(datasourceKey, dataSource);
 
-            DataSet dataSet = temporary.querys(table, cs);
-            List<DataRow> rows = dataSet.getRows();
+            PreviewTableDef tableDef = PreviewTableDef.of(tableData);
+            List<Row> rows = DataSourceKey.use(datasourceKey, () -> {
+                QueryWrapper queryWrapper = QueryWrapper.create().from(tableDef).limit(inspectSize);
+                return Db.selectListByQuery(queryWrapper);
+            });
+
             int rowIdx = 1;
-            for (DataRow row : rows) {
+            for (Row row : rows) {
                 Map<String, Object> rowMap = new HashMap<>();
                 rowMap.put("key", rowIdx);
                 for (int colIdx = 0; colIdx < columnDataList.size(); colIdx++) {
@@ -146,7 +140,7 @@ public class DataInspectServiceImpl implements DataInspectService {
             log.error("数据源连接异常，数据源信息: {}", datasourceDO, e);
             throw new RuntimeException(e);
         } finally {
-            unregisterDataSource(runnerKey);
+            unregisterDataSource(datasourceKey);
         }
     }
 
@@ -169,7 +163,7 @@ public class DataInspectServiceImpl implements DataInspectService {
 
     private void unregisterDataSource(String datasourceKey) {
         try {
-            DataSourceHolder.destroy(datasourceKey);
+            FlexGlobalConfig.getDefaultConfig().getDataSource().removeDatasource(datasourceKey);
         } catch (Exception ex) {
             log.error("注销数据源失败，数据源标识：{}", datasourceKey, ex);
         }

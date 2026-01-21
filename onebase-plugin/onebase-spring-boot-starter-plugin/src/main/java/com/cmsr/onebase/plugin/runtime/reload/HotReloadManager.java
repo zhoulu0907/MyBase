@@ -16,7 +16,12 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.ArrayList;
+import java.util.stream.Collectors;
+
+import com.cmsr.onebase.plugin.common.DevDependencyUtil;
 
 /**
  * 热重载管理器
@@ -35,7 +40,7 @@ public class HotReloadManager {
 
     private final ApplicationContext applicationContext;
     private final PluginControllerRegistrar controllerRegistrar;
-    private final List<Path> classesRoots;
+    private final List<Path> classesRoots; // 已去重的插件路径
 
     /**
      * 记录每个类对应的 ClassLoader
@@ -48,16 +53,127 @@ public class HotReloadManager {
      */
     private final Map<String, String> beanNameMap = new ConcurrentHashMap<>();
 
+    /**
+     * 记录每个插件包含的扩展点
+     * 插件 classes 目录 → 该插件的所有扩展点类名
+     * 用于插件级热重载
+     */
+    private final Map<Path, Set<String>> pluginExtensionsMap = new ConcurrentHashMap<>();
+
     public HotReloadManager(ApplicationContext applicationContext,
             PluginControllerRegistrar controllerRegistrar,
             List<Path> classesRoots) {
         this.applicationContext = applicationContext;
         this.controllerRegistrar = controllerRegistrar;
-        this.classesRoots = classesRoots;
+
+        // 去重并规范化插件路径
+        this.classesRoots = classesRoots.stream()
+                .map(Path::toAbsolutePath)
+                .map(Path::normalize)
+                .distinct()
+                .collect(Collectors.toList());
+
+        log.info("初始化 HotReloadManager，监听 {} 个插件路径", this.classesRoots.size());
+        this.classesRoots.forEach(p -> log.debug("  - {}", p));
     }
 
     /**
-     * 重载扩展点
+     * 注册扩展点到插件映射
+     * 在扫描时调用，建立插件与扩展点的关联
+     *
+     * @param className       扩展点类名
+     * @param pluginClassPath 插件的 classes 目录
+     */
+    public void registerExtension(String className, Path pluginClassPath) {
+        // 【P0 修复】：参数校验
+        if (className == null || className.trim().isEmpty()) {
+            log.warn("注册扩展点失败：类名为空");
+            return;
+        }
+        if (pluginClassPath == null) {
+            log.warn("注册扩展点失败：插件路径为空，类名: {}", className);
+            return;
+        }
+
+        // 【P0 修复】：路径规范化，确保与 classesRoots 一致
+        Path normalizedPath = pluginClassPath.toAbsolutePath().normalize();
+
+        pluginExtensionsMap
+                .computeIfAbsent(normalizedPath, k -> ConcurrentHashMap.newKeySet())
+                .add(className);
+
+        log.info("注册扩展点: {} → 插件: {}", className, normalizedPath.getFileName());
+    }
+
+    /**
+     * 根据类文件路径找到所属插件
+     *
+     * @param classFile 类文件的完整路径
+     * @return 插件的 classes 目录，如果找不到返回 null
+     */
+    public Path findPluginForClassFile(Path classFile) {
+        if (classFile == null) {
+            log.warn("查找插件失败：类文件路径为空");
+            return null;
+        }
+
+        // 【P0 修复】：路径规范化，避免匹配错误
+        Path normalizedClassFile = classFile.toAbsolutePath().normalize();
+
+        // 【P0 修复】：确保是真正的子路径，而不是前缀匹配
+        // 例如：避免 plugin-a-ext 被错误匹配到 plugin-a
+        for (Path pluginClassPath : classesRoots) {
+            if (normalizedClassFile.startsWith(pluginClassPath) &&
+                    !normalizedClassFile.equals(pluginClassPath)) {
+                // 额外验证：确保是目录边界
+                // 例如：D:/plugin-a/target/classes/Foo.class 匹配 D:/plugin-a/target/classes
+                // 但 D:/plugin-a-ext/target/classes/Foo.class 不匹配 D:/plugin-a/target/classes
+                try {
+                    // relativize 用于验证是否是真正的子路径，变量本身不需要使用
+                    @SuppressWarnings("unused")
+                    Path relative = pluginClassPath.relativize(normalizedClassFile);
+                    // 如果能成功 relativize，说明是真正的子路径
+                    return pluginClassPath;
+                } catch (IllegalArgumentException e) {
+                    // 不是子路径，继续查找
+                    continue;
+                }
+            }
+        }
+
+        log.warn("无法确定类文件 {} 属于哪个插件", classFile);
+        return null;
+    }
+
+    /**
+     * 重载整个插件的所有扩展点
+     *
+     * @param pluginClassPath 插件的 classes 目录
+     */
+    public synchronized void reloadPlugin(Path pluginClassPath) {
+        Set<String> extensions = pluginExtensionsMap.get(pluginClassPath);
+
+        if (extensions == null || extensions.isEmpty()) {
+            log.warn("插件 {} 没有扩展点，跳过重载", pluginClassPath.getFileName());
+            return;
+        }
+
+        log.info("重载插件 {}，共 {} 个扩展点",
+                pluginClassPath.getFileName(), extensions.size());
+
+        for (String className : extensions) {
+            try {
+                reloadExtension(className, null);
+            } catch (Exception e) {
+                log.error("重载扩展点失败: {}", className, e);
+            }
+        }
+
+        log.info("插件 {} 重载完成", pluginClassPath.getFileName());
+    }
+
+    /**
+     * 热重载扩展点
      *
      * @param className 完整类名
      * @param classFile .class 文件路径
@@ -150,18 +266,21 @@ public class HotReloadManager {
      * </p>
      */
     private URLClassLoader createClassLoader() throws Exception {
-        // 将所有 classesRoots 转换为 URL 数组
-        URL[] urls = classesRoots.stream()
-                .map(path -> {
-                    try {
-                        return path.toUri().toURL();
-                    } catch (Exception e) {
-                        throw new RuntimeException("Failed to convert path to URL: " + path, e);
-                    }
-                })
-                .toArray(URL[]::new);
+        List<URL> allUrls = new ArrayList<>();
 
-        log.info("创建 ClassLoader，包含 {} 个路径: {}", urls.length, classesRoots);
+        // 1. 添加插件类目录及其依赖
+        for (Path classRoot : classesRoots) {
+            try {
+                // 使用工具类加载类路径和依赖
+                allUrls.addAll(DevDependencyUtil.getUrlsWithDependencies(classRoot));
+            } catch (Exception e) {
+                log.warn("热重载: 处理类路径失败: {}", classRoot, e);
+            }
+        }
+
+        // 2. 转换为 URL 数组
+        URL[] urls = allUrls.toArray(new URL[0]);
+        log.info("创建热重载 ClassLoader，包含 {} 个路径", urls.length);
 
         // Child-First ClassLoader：只对能在 URL 中找到的类使用子加载器
         return new URLClassLoader(urls, getClass().getClassLoader()) {

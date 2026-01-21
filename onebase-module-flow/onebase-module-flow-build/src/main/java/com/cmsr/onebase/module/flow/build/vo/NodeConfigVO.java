@@ -20,10 +20,10 @@ public class NodeConfigVO {
     @Schema(description = "level3_code")
     private String level3Code;
 
-    @Schema(description = "类别名称")
+    @Schema(description = "连接器名称")
     private String nodeName;
 
-    @Schema(description = "类别编码，唯一的")
+    @Schema(description = "连接器编码，唯一的")
     private String nodeCode;
 
     @Schema(description = "简单备注")

@@ -27,6 +27,12 @@ public class PluginControllerRegistrar {
     private final RequestMappingHandlerMapping handlerMapping;
 
     /**
+     * Runtime path prefix (hardcoded to /runtime)
+     * All plugin routes will be prefixed with this value
+     */
+    private static final String RUNTIME_PREFIX = "/runtime";
+
+    /**
      * 记录每个插件注册的路由信息，用于卸载时精确清理
      * Key: pluginId, Value: List<RequestMappingInfo>
      */
@@ -167,7 +173,10 @@ public class PluginControllerRegistrar {
         // 组合类级别和方法级别的路径
         Set<String> combinedPaths = new HashSet<>();
         if (classPaths.length == 0) {
-            combinedPaths.addAll(Arrays.asList(paths));
+            // 没有类级别路径时，直接使用方法路径，但需要添加 runtime 前缀
+            for (String path : paths) {
+                combinedPaths.add(addRuntimePrefix(path));
+            }
         } else {
             for (String classPath : classPaths) {
                 for (String methodPath : paths) {
@@ -188,16 +197,31 @@ public class PluginControllerRegistrar {
      */
     private String combinePath(String prefix, String suffix) {
         if (prefix == null || prefix.isEmpty()) {
-            return suffix;
+            return addRuntimePrefix(suffix);
         }
         if (suffix == null || suffix.isEmpty()) {
-            return prefix;
+            return addRuntimePrefix(prefix);
         }
 
         String normalizedPrefix = prefix.endsWith("/") ? prefix.substring(0, prefix.length() - 1) : prefix;
         String normalizedSuffix = suffix.startsWith("/") ? suffix : "/" + suffix;
 
-        return normalizedPrefix + normalizedSuffix;
+        return addRuntimePrefix(normalizedPrefix + normalizedSuffix);
+    }
+
+    /**
+     * Add runtime path prefix to plugin route
+     * <p>
+     * Example: /plugin/hello-plugin/hello -> /runtime/plugin/hello-plugin/hello
+     * </p>
+     */
+    private String addRuntimePrefix(String path) {
+        if (path == null || path.isEmpty()) {
+            return RUNTIME_PREFIX;
+        }
+
+        String normalizedPath = path.startsWith("/") ? path : "/" + path;
+        return RUNTIME_PREFIX + normalizedPath;
     }
 
     /**

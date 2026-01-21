@@ -1,8 +1,10 @@
 package com.cmsr.onebase.module.bpm.core.api.impl;
 
 import com.cmsr.onebase.framework.common.enums.VersionTagEnum;
+import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.uid.UidGenerator;
 import com.cmsr.onebase.module.bpm.api.datamanager.BpmDataManager;
+import com.cmsr.onebase.module.bpm.core.dto.BpmExportDataDto;
 import com.cmsr.onebase.module.engine.orm.mybatisflex.entity.FlowDefinition;
 import com.cmsr.onebase.module.engine.orm.mybatisflex.entity.FlowNode;
 import com.cmsr.onebase.module.engine.orm.mybatisflex.entity.FlowSkip;
@@ -11,6 +13,7 @@ import com.cmsr.onebase.module.engine.orm.mybatisflex.repository.FlowNodeReposit
 import com.cmsr.onebase.module.engine.orm.mybatisflex.repository.FlowSkipRepository;
 import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +23,7 @@ import java.util.*;
  * @author liyang
  * @date 2025-12-08
  */
+@Slf4j
 @Service
 public class BpmDataManagerImpl implements BpmDataManager {
     @Resource
@@ -178,5 +182,146 @@ public class BpmDataManagerImpl implements BpmDataManager {
         flowDefinitionRepository.deleteAllApplicationData(applicationId);
         flowNodeRepository.deleteAllApplicationData(applicationId);
         flowSkipRepository.deleteAllApplicationData(applicationId);
+    }
+
+    @Override
+    public Object exportApplication(Long applicationId, Long versionTag) {
+        BpmExportDataDto exportDataDto = new BpmExportDataDto();
+
+        // 第一步：根据 applicationId + versionTag查出 def 数据
+        QueryWrapper defQueryWrapper = new QueryWrapper();
+        defQueryWrapper.eq(FlowDefinition::getApplicationId, applicationId);
+        defQueryWrapper.eq(FlowDefinition::getVersionTag, versionTag);
+        defQueryWrapper.limit(1);
+        List<FlowDefinition> flowDefinitionList = flowDefinitionRepository.getMapper().selectListByQuery(defQueryWrapper);
+
+        if (CollectionUtils.isEmpty(flowDefinitionList)) {
+            return exportDataDto;
+        }
+
+        // 收集流程Id
+        Set<Long> defIds = new HashSet<>();
+        for (FlowDefinition def : flowDefinitionList) {
+            Long defId = def.getId();
+            defIds.add(defId);
+        }
+
+        // 第二步：根据 defId 查出 node 和 skip 数据
+        QueryWrapper nodeQueryWrapper = new QueryWrapper();
+        nodeQueryWrapper.in(FlowNode::getDefinitionId, defIds);
+        List<FlowNode> flowNodeList = flowNodeRepository.getMapper().selectListByQuery(nodeQueryWrapper);
+
+        QueryWrapper skipQueryWrapper = new QueryWrapper();
+        skipQueryWrapper.in(FlowSkip::getDefinitionId, defIds);
+        List<FlowSkip> flowSkipList = flowSkipRepository.getMapper().selectListByQuery(skipQueryWrapper);
+
+        exportDataDto.setFlowDefinitions(flowDefinitionList);
+        exportDataDto.setFlowNodes(flowNodeList);
+        exportDataDto.setFlowSkips(flowSkipList);
+
+        return exportDataDto;
+    }
+
+    @Override
+    public void importApplication(Long newApplicationId, Long tenantId, Long versionTag, Object bpmConfig) {
+        if (bpmConfig == null) {
+            return;
+        }
+
+        // 转成json String
+        String bpmConfigJson = JsonUtils.toJsonString(bpmConfig);
+
+        // 转成对象
+        BpmExportDataDto exportDataDto = JsonUtils.parseObject(bpmConfigJson, BpmExportDataDto.class);
+
+        if (exportDataDto == null || CollectionUtils.isEmpty(exportDataDto.getFlowDefinitions())) {
+            log.warn("流程定义数据为空，跳过导入，newAppId: {}, tenantId: {}, versionTag: {}", newApplicationId, tenantId, versionTag);
+            return;
+        }
+
+        if (CollectionUtils.isEmpty(exportDataDto.getFlowNodes()) || CollectionUtils.isEmpty(exportDataDto.getFlowNodes())) {
+            log.warn("缺少流程节点或边数据，跳过导入，newAppId: {}, tenantId: {}, versionTag: {}", newApplicationId, tenantId, versionTag);
+            return;
+        }
+
+        // 收集旧 def_id，并构建旧 def_id 到新 def_id 的映射
+        Set<Long> oldDefIds = new HashSet<>();
+        Map<Long, Long> defIdMapping = new HashMap<>();
+        for (FlowDefinition def : exportDataDto.getFlowDefinitions()) {
+            Long oldDefId = def.getId();
+            Long newDefId = uidGenerator.getUID();
+            oldDefIds.add(oldDefId);
+            defIdMapping.put(oldDefId, newDefId);
+        }
+
+        List<FlowDefinition> flowDefinitionList = exportDataDto.getFlowDefinitions();
+        List<FlowNode> flowNodeList = new ArrayList<>();
+        List<FlowSkip> flowSkipList = new ArrayList<>();
+
+        // 更新 def
+        for (FlowDefinition def : flowDefinitionList) {
+            Long newDefId = defIdMapping.get(def.getId());
+            def.setId(newDefId);
+            def.setApplicationId(newApplicationId);
+            def.setTenantIdByListener(tenantId);
+            def.setVersionTag(versionTag);
+
+            // 清理公共字段
+            def.clean();
+        }
+
+        // 更新 node
+        for (FlowNode node : exportDataDto.getFlowNodes()) {
+            Long newDefId = defIdMapping.get(node.getDefinitionId());
+
+            if (newDefId == null) {
+                log.warn("节点未匹配到流程定义信息 {} {} ", node.getId(), node.getNodeName());
+                continue;
+            }
+
+            node.setId(uidGenerator.getUID());
+            node.setDefinitionId(newDefId);
+            node.setVersionTag(versionTag);
+            node.setApplicationId(newApplicationId);
+            node.setTenantIdByListener(tenantId);
+
+            // 清理公共字段
+            node.clean();
+
+            flowNodeList.add(node);
+        }
+
+        // 更新 skip
+        for (FlowSkip skip : exportDataDto.getFlowSkips()) {
+            Long newDefId = defIdMapping.get(skip.getDefinitionId());
+            if (newDefId == null) {
+                log.warn("边未匹配到流程定义信息 {} {} ", skip.getId(), skip.getSkipName());
+                continue;
+            }
+
+            skip.setId(uidGenerator.getUID());
+            skip.setDefinitionId(newDefId);
+            skip.setVersionTag(versionTag);
+            skip.setApplicationId(newApplicationId);
+            skip.setTenantIdByListener(tenantId);
+
+            // 清理公共字段
+            skip.clean();
+
+            flowSkipList.add(skip);
+        }
+
+        // 第四步：批量保存
+        if (CollectionUtils.isNotEmpty(flowDefinitionList)) {
+            flowDefinitionRepository.getMapper().insertBatch(flowDefinitionList);
+        }
+
+        if (CollectionUtils.isNotEmpty(flowNodeList)) {
+            flowNodeRepository.getMapper().insertBatch(flowNodeList);
+        }
+
+        if (CollectionUtils.isNotEmpty(flowSkipList)) {
+            flowSkipRepository.getMapper().insertBatch(flowSkipList);
+        }
     }
 }

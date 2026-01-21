@@ -6,6 +6,8 @@ import com.cmsr.onebase.module.flow.build.vo.FlowConnectorVO;
 import com.cmsr.onebase.module.flow.build.vo.UpdateFlowConnectorReqVO;
 import com.cmsr.onebase.module.flow.core.vo.PageConnectorReqVO;
 
+import java.util.List;
+
 public interface FlowConnectorService {
 
     PageResult<FlowConnectorVO> pageConnectors(PageConnectorReqVO pageReqVO);
@@ -17,4 +19,9 @@ public interface FlowConnectorService {
     void updateConnector(UpdateFlowConnectorReqVO updateVO);
 
     void deleteById(Long connectorId);
+
+    /**
+     * List connector instances by type code
+     */
+    List<FlowConnectorVO> listByType(String typeCode);
 }

@@ -48,7 +48,7 @@ import org.springframework.test.context.TestPropertySource;
  * @date 2025-12-25
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 @Import(PluginTestConfiguration.class)
 @TestPropertySource(properties = {
         "onebase.plugin.enabled=true",
@@ -103,7 +103,7 @@ public class PluginLifecycleTest {
 
         httpUtil = new PluginHttpTestUtil("http://localhost:" + port);
         String pluginId = "hello-plugin";
-        String apiPath = "/plugin/hello-plugin/hello";
+        String apiPath = "/runtime/plugin/hello-plugin/hello";
 
         // ==========================================
         // 1. 初始状态检查 (Started)

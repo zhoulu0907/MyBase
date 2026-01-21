@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.flow.build.service;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.common.util.string.UuidUtils;
@@ -88,6 +89,14 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
     @Override
     public void deleteById(Long connectorId) {
         connectorRepository.removeById(connectorId);
+    }
+
+    @Override
+    public List<FlowConnectorVO> listByType(String typeCode) {
+        List<FlowConnectorDO> dos = connectorRepository.listByType(typeCode);
+        return dos.stream()
+                .map(this::convertToVO)
+                .toList();
     }
 
     public String jsonNodeToString(JsonNode jsonNode) {
