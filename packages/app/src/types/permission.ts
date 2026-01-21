@@ -217,7 +217,7 @@ export interface AuthDataFilterVO {
   /**
    * 字段id
    */
-  fieldId?: string;
+  fieldUuid: string;
   /**
    * 字段名称
    */
@@ -296,7 +296,7 @@ export interface AuthFieldVO {
   /**
    * 字段id
    */
-  fieldId: string;
+  fieldUuid: string;
   /**
    * 字段类型
    */
