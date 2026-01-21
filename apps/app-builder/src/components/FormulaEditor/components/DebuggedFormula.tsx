@@ -178,7 +178,7 @@ export function DebuggedFormula(props: DebuggedFormulaProps) {
         <Form className={styles.variablesDisplay} form={form} ref={formRef}>
           {entityFields.map((item) => {
             return (
-              <Form.Item label={item.fieldName} field={item.fieldName} rules={[{ required: true }]}>
+              <Form.Item label={item.fieldName} field={item.fieldName} rules={[{ required: true }]} labelCol={{ span: 6 }} wrapperCol={{ style: { flex: 1 } }}>
                 {renderFormItem(item.fieldType)}
               </Form.Item>
             );
