@@ -314,4 +314,113 @@ class FlowConnectorControllerTest {
 
         verify(service).getActionsByConnectorUuid(eq("test-connector-uuid"));
     }
+
+    // ==================== getActionValue 测试用例 ====================
+
+    /**
+     * 测试查询指定动作配置内容 - 成功
+     */
+    @Test
+    void testGetActionValue_Success() throws Exception {
+        // Given
+        JsonNodeFactory factory = JsonNodeFactory.instance;
+        ObjectNode actionValue = factory.objectNode();
+        actionValue.put("type", "object");
+        actionValue.put("title", "获取客户列表");
+        actionValue.put("x-component", "FormDataGrid");
+
+        when(service.getActionValueByConnectorUuid(eq("test-connector-uuid"), eq("getCustomerList")))
+                .thenReturn(actionValue);
+
+        // When & Then
+        mockMvc.perform(get("/flow/connector/action-value")
+                        .param("connectorUuid", "test-connector-uuid")
+                        .param("actionName", "getCustomerList"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(0))
+                .andExpect(jsonPath("$.data.type").value("object"))
+                .andExpect(jsonPath("$.data.title").value("获取客户列表"))
+                .andExpect(jsonPath("$.data.x-component").value("FormDataGrid"));
+
+        verify(service).getActionValueByConnectorUuid(eq("test-connector-uuid"), eq("getCustomerList"));
+    }
+
+    /**
+     * 测试查询指定动作配置内容 - 缺少connectorUuid参数
+     */
+    @Test
+    void testGetActionValue_MissingConnectorUuid() throws Exception {
+        // When & Then
+        mockMvc.perform(get("/flow/connector/action-value")
+                        .param("actionName", "getCustomerList"))
+                .andExpect(status().isBadRequest());
+
+        verify(service, never()).getActionValueByConnectorUuid(any(), any());
+    }
+
+    /**
+     * 测试查询指定动作配置内容 - 缺少actionName参数
+     */
+    @Test
+    void testGetActionValue_MissingActionName() throws Exception {
+        // When & Then
+        mockMvc.perform(get("/flow/connector/action-value")
+                        .param("connectorUuid", "test-connector-uuid"))
+                .andExpect(status().isBadRequest());
+
+        verify(service, never()).getActionValueByConnectorUuid(any(), any());
+    }
+
+    /**
+     * 测试查询指定动作配置内容 - 缺少所有参数
+     */
+    @Test
+    void testGetActionValue_MissingAllParams() throws Exception {
+        // When & Then
+        mockMvc.perform(get("/flow/connector/action-value"))
+                .andExpect(status().isBadRequest());
+
+        verify(service, never()).getActionValueByConnectorUuid(any(), any());
+    }
+
+    /**
+     * 测试查询指定动作配置内容 - 复杂JSON结构
+     */
+    @Test
+    void testGetActionValue_ComplexJsonStructure() throws Exception {
+        // Given
+        JsonNodeFactory factory = JsonNodeFactory.instance;
+        ObjectNode actionValue = factory.objectNode();
+        actionValue.put("type", "object");
+        actionValue.put("title", "获取客户详情");
+
+        // 添加嵌套对象
+        ObjectNode apiMeta = factory.objectNode();
+        apiMeta.put("method", "GET");
+        apiMeta.put("path", "/api/customers/{id}");
+        actionValue.set("x-api-meta", apiMeta);
+
+        // 添加数组
+        ObjectNode componentProps = factory.objectNode();
+        componentProps.put("label", "客户详情");
+        componentProps.set("required", factory.arrayNode().add("id").add("name"));
+        actionValue.set("x-component-props", componentProps);
+
+        when(service.getActionValueByConnectorUuid(eq("test-connector-uuid"), eq("getCustomerDetail")))
+                .thenReturn(actionValue);
+
+        // When & Then
+        mockMvc.perform(get("/flow/connector/action-value")
+                        .param("connectorUuid", "test-connector-uuid")
+                        .param("actionName", "getCustomerDetail"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(0))
+                .andExpect(jsonPath("$.data.type").value("object"))
+                .andExpect(jsonPath("$.data.title").value("获取客户详情"))
+                .andExpect(jsonPath("$.data.x-api-meta.method").value("GET"))
+                .andExpect(jsonPath("$.data.x-api-meta.path").value("/api/customers/{id}"))
+                .andExpect(jsonPath("$.data.x-component-props.label").value("客户详情"));
+
+        verify(service).getActionValueByConnectorUuid(eq("test-connector-uuid"), eq("getCustomerDetail"));
+    }
 }

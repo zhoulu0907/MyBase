@@ -23,4 +23,6 @@ public interface FlowErrorCodeConstants {
     ErrorCode NODE_CONFIG_NOT_EXIST = new ErrorCode(10004, "节点配置不存在");
 
     ErrorCode INVALID_CONNECTOR_CONFIG = new ErrorCode(1123785, "连接器配置格式错误");
+
+    ErrorCode ACTION_NOT_EXISTS = new ErrorCode(1123786, "动作不存在");
 }
