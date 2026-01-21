@@ -1,6 +1,6 @@
 import { Layout } from '@arco-design/web-react';
-import React, { useState } from 'react';
-import { Navigate, Route, Routes } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Navigate, Route, Routes, useParams } from 'react-router-dom';
 import AppBreadcrumb from '../../components/Breadcrumb';
 import AppHeader from './components/header';
 import AppSider from './components/sider';
@@ -23,13 +23,15 @@ import SecurityPage from './pages/Security';
 import PluginPage from './pages/Plugin';
 import ExternalUserPage from './pages/ExternalUser';
 import { getTenantInfoFromSession, setTenantInfoFromSession } from '@/utils';
-import { type TenantInfo } from '@onebase/platform-center';
+import { TokenManager } from '@onebase/common';
+import { getTenantInfo, type TenantInfo } from '@onebase/platform-center';
 
 const Content = Layout.Content;
 
 const SettingPage: React.FC = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string>('');
+  const { tenantId } = useParams();
 
   const [tenantInfo, setTenantInfo] = useState<TenantInfo | null>(() => getTenantInfoFromSession());
 
@@ -40,6 +42,23 @@ const SettingPage: React.FC = () => {
 
   const handleCollapse = (collapsed: boolean) => {
     setCollapsed(collapsed);
+  };
+
+  // 获取用户信息
+  const tokenInfo = TokenManager.getTokenInfo();
+
+  useEffect(() => {
+    if (tokenInfo?.accessToken) {
+      getInfo();
+    }
+  }, [tokenInfo?.accessToken]);
+
+  const getInfo = async () => {
+    const tenantInfoRes = await getTenantInfo(tenantId || '');
+    if (tenantInfoRes) {
+      setTenantInfoFromSession(tenantInfoRes);
+      setTenantInfo(tenantInfoRes);
+    }
   };
 
   return (
