@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.flow.build.service;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.flow.build.vo.ConnectorListVO;
+import com.cmsr.onebase.module.flow.build.vo.ConnectorTypeListVO;
 import com.cmsr.onebase.module.flow.build.vo.NodeConfigActionVO;
 import com.cmsr.onebase.module.flow.build.vo.NodeConfigConnVO;
 import com.cmsr.onebase.module.flow.build.vo.NodeConfigVO;
@@ -22,7 +22,7 @@ public interface FlowNodeConfigService {
     NodeConfigActionVO findActionConfig(String nodeCode);
 
     /**
-     * Get all active connectors
+     * Get all active connector types
      */
-    List<ConnectorListVO> getAllConnectors();
+    List<ConnectorTypeListVO> getAllConnectorTypes();
 }

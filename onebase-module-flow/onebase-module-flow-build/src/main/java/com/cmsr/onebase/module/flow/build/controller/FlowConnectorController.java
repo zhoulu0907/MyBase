@@ -14,6 +14,8 @@ import jakarta.validation.Valid;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Tag(name = "连接器", description = "连接器接口")
 @RestController
 @RequestMapping("/flow/connector")
@@ -56,5 +58,13 @@ public class FlowConnectorController {
     public CommonResult<Boolean> deleteConnector(@RequestParam("id") Long connectorId) {
         connectorService.deleteById(connectorId);
         return CommonResult.success(Boolean.TRUE);
+    }
+
+    @Operation(summary = "根据类型查询连接器实例列表")
+    @GetMapping("/list-by-type")
+    public CommonResult<List<FlowConnectorVO>> listByType(
+            @RequestParam("typeCode") String typeCode) {
+        List<FlowConnectorVO> result = connectorService.listByType(typeCode);
+        return CommonResult.success(result);
     }
 }

@@ -4,13 +4,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 /**
- * Connector List VO
+ * Connector Type List VO
  * @Author：zhoulu
  * @Date：2025/01/20
  */
 @Data
-@Schema(description = "Connector List")
-public class ConnectorListVO {
+@Schema(description = "Connector Type List")
+public class ConnectorTypeListVO {
 
     @Schema(description = "连接器类别：level1-level2-level3")
     private String Category;

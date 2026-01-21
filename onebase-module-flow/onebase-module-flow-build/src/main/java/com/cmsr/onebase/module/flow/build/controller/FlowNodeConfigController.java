@@ -3,7 +3,7 @@ package com.cmsr.onebase.module.flow.build.controller;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.flow.build.service.FlowNodeConfigService;
-import com.cmsr.onebase.module.flow.build.vo.ConnectorListVO;
+import com.cmsr.onebase.module.flow.build.vo.ConnectorTypeListVO;
 import com.cmsr.onebase.module.flow.build.vo.NodeConfigActionVO;
 import com.cmsr.onebase.module.flow.build.vo.NodeConfigConnVO;
 import com.cmsr.onebase.module.flow.build.vo.NodeConfigVO;
@@ -53,10 +53,10 @@ public class FlowNodeConfigController {
         return CommonResult.success(result);
     }
 
-    @Operation(summary = "获取连接器清单")
+    @Operation(summary = "获取连接器类型清单")
     @GetMapping("/list-all")
-    public CommonResult<List<ConnectorListVO>> listAllConnectors() {
-        List<ConnectorListVO> result = flowNodeConfigService.getAllConnectors();
+    public CommonResult<List<ConnectorTypeListVO>> listAllConnectorTypes() {
+        List<ConnectorTypeListVO> result = flowNodeConfigService.getAllConnectorTypes();
         return CommonResult.success(result);
     }
 
