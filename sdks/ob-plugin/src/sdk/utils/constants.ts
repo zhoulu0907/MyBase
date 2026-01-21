@@ -18,6 +18,7 @@ export const CONFIG_TYPES = {
   DEFAULT_VALUE: 'DefaultValue',
   REQUIRED_CHECKBOX: 'RequiredCheckBox',
   COLUMN_COUNT_RADIO: 'ColumnCountRadio',
+  COLUMN_GAP_SELECT: 'ColumnGapSelect',
   TABLE_PAGE_POSITION_RADIO: 'TablePagePositionRadio',
   FIELD_DATA: 'FieldData',
   RELATED_FORM_DATA: 'RelatedFormData',
@@ -53,7 +54,8 @@ export const CONFIG_TYPES = {
   DATE_RANGE: 'DateRange',
   TIME_FORMAT: 'TimeFormat',
   COMMON: 'common',
-  USER_DEFAULT_VALUE: 'userDefaultValue'
+  USER_DEFAULT_VALUE: 'userDefaultValue',
+  RATE_CONFIG: 'RateConfig'
 } as const;
 
 export const WIDTH_OPTIONS = {

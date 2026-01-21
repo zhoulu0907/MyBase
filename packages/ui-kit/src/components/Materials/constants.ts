@@ -34,6 +34,8 @@ export const CONFIG_TYPES = {
   REQUIRED_CHECKBOX: 'RequiredCheckBox',
   // 布局列数选择
   COLUMN_COUNT_RADIO: 'ColumnCountRadio',
+  // 布局列间距选择
+  COLUMN_GAP_SELECT: 'ColumnGapSelect',
   // 表格分页位置选择
   TABLE_PAGE_POSITION_RADIO: 'TablePagePositionRadio',
   // 字段数据配置
@@ -125,6 +127,8 @@ export const CONFIG_TYPES = {
   DIVIDER_STYLE_TYPE: 'DividerStyleType',
   //选择人员默认值
   USER_DEFAULT_VALUE: 'userDefaultValue',
+  // 评分组件
+  RATE_CONFIG: 'RateConfig'
 } as const;
 
 // 状态选项常量
@@ -173,6 +177,23 @@ export const COLUMN_COUNT_VALUES = {
   [COLUMN_COUNT_OPTIONS.TWO]: 2,
   [COLUMN_COUNT_OPTIONS.THREE]: 3,
   [COLUMN_COUNT_OPTIONS.FOUR]: 4
+} as const;
+
+// 列间距常量
+export const COLUMN_GAP_OPTIONS = {
+  PX24: '24px',
+  PX16: '16px',
+  PX12: '12px',
+  PX8: '8px',
+  PX0: '0px'
+} as const;
+
+export const COLUMN_GAP_VALUES = {
+  [COLUMN_GAP_OPTIONS.PX24]: '24px',
+  [COLUMN_GAP_OPTIONS.PX16]: '16px',
+  [COLUMN_GAP_OPTIONS.PX12]: '12px',
+  [COLUMN_GAP_OPTIONS.PX8]: '8px',
+  [COLUMN_GAP_OPTIONS.PX0]: '0px'
 } as const;
 
 export const PAGINATION_POSITION_OPTIONS = {

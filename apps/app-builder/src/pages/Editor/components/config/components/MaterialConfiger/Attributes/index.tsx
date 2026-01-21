@@ -118,7 +118,7 @@ const Attributes = ({ cpID }: ConfigsProps) => {
   };
 
   const renderEditItem = (item: any, index: number) => {
-    const renderConfig =  renderConfigItem({
+    const renderConfig = renderConfigItem({
       id: cpID,
       item,
       index,

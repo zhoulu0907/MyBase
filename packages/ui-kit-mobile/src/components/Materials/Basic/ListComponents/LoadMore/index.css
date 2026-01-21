@@ -32,6 +32,8 @@
     padding: 0 0.32rem 0;
     background-color: #fff;
     width: calc(100% - 0.64rem) !important;
+    left: 50% !important;
+    transform: translate(-50%) !important;
 
     @media screen and (min-width: 900px) {
       max-width: calc(450px - 0.64rem) !important;

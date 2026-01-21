@@ -22,6 +22,7 @@ import XSubTable from './FormComponents/SubTable/schema';
 import XSwitch from './FormComponents/Switch/schema';
 import XTimePicker from './FormComponents/TimePicker/schema';
 import XUserSelect from './FormComponents/UserSelect/schema';
+import XRate from './FormComponents/Rate/schema';
 
 import XCollapseLayout from './LayoutComponents/CollapseLayout/schema';
 import XColumnLayout from './LayoutComponents/ColumnLayout/schema';
@@ -67,6 +68,7 @@ export const baseSchema = {
   XRichText,
   XSubTable,
   XDataSelect,
+  XRate,
 
   XTable,
   XCalendar,

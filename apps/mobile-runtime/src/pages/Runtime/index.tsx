@@ -23,11 +23,6 @@ const Runtime: React.FC = () => {
       ...curMenu.value,
       id: curMenuId,
       menuCode: curMenuId,
-      menuSort: 1,
-      menuType: 1,
-      menuName: curMenuId,
-      menuIcon: '',
-      isVisible: 1,
       pagesetType: curMenu.value?.pagesetType,
       children: []
     });
@@ -62,7 +57,7 @@ const Runtime: React.FC = () => {
     curMenuId.indexOf('TASK-') >= 0 ? null : (
       <PreviewContainer
         menuId={curMenuId || ''}
-        menuName={curMenu.value?.title}
+        menuName={curMenu.value?.menuName}
         runtime={true}
         menuUuid={curMenu.value?.menuUuid}
         mainEntity={mainEntity}
