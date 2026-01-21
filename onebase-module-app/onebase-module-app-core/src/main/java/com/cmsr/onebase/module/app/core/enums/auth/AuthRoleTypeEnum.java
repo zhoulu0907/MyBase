@@ -66,6 +66,18 @@ public enum AuthRoleTypeEnum {
                 || OUTER_USER.getValue().equals(value);
     }
 
+    /**
+     * 判断角色类型是否允许修改名称
+     * CUSTOM_ROLE 和 SYSTEM_USER 可以修改名称
+     *
+     * @param value 角色类型值
+     * @return true-允许修改，false-不允许修改
+     */
+    public static boolean isDefaultRoleTypeRename(Integer value) {
+        return SYSTEM_ADMIN.getValue().equals(value)
+                || OUTER_USER.getValue().equals(value);
+    }
+
     public static boolean isSystemAdminRole(Integer value) {
         return SYSTEM_ADMIN.getValue().equals(value);
     }

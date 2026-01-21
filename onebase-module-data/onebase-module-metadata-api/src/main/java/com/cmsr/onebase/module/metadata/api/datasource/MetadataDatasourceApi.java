@@ -1,8 +1,10 @@
 package com.cmsr.onebase.module.metadata.api.datasource;
 
 import com.cmsr.onebase.module.metadata.api.datasource.dto.DatasourceCreateDefaultReqDTO;
+import com.cmsr.onebase.module.metadata.api.datasource.dto.DatasourceImportReqDTO;
 import com.cmsr.onebase.module.metadata.api.datasource.dto.DatasourceSaveReqDTO;
 
+import com.cmsr.onebase.module.metadata.api.datasource.dto.export.MetadataExportDataDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -50,10 +52,10 @@ public interface MetadataDatasourceApi {
      * TODO(biantianyu): 实现导入导出接口
      * */
     @Operation(summary = "导出数据源信息")
-    Object exportDatasource(Long applicationId, Long versionTag);
+    MetadataExportDataDTO exportDatasource(Long applicationId, Long versionTag);
 
     @Operation(summary = "导入数据源信息")
-    void importDatasource(Long newApplicationId, String appUid, Long tenantId, Long versionTag, Object datasourceConfig);
+    void importDatasource(Long newApplicationId, String appUid, Long tenantId, Long versionTag, MetadataExportDataDTO importData, DatasourceImportReqDTO reqDTO);
 
 
 }

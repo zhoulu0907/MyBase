@@ -71,6 +71,44 @@ public class DictTypeRepository extends BaseDataRepository<SystemDictTypeMapper,
     }
 
     /**
+     * 根据字典类型和所有者范围查询字典类型对象
+     *
+     * @param type 字典类型
+     * @param dictOwnerType 字典所有者类型
+     * @param dictOwnerId 字典所有者ID
+     * @return 字典类型对象
+     */
+    public DictTypeDO findOneByTypeAndOwner(String type, String dictOwnerType, Long dictOwnerId) {
+        QueryWrapper qw = query().eq(TYPE, type);
+        if (StringUtils.isNotBlank(dictOwnerType)) {
+            qw.eq(DICT_OWNER_TYPE, dictOwnerType);
+            if (!DictOwnerTypeEnum.isGlobal(dictOwnerType) && dictOwnerId != null) {
+                qw.eq(DICT_OWNER_ID, dictOwnerId);
+            }
+        }
+        return getOne(qw);
+    }
+
+    /**
+     * 根据字典类型名称和所有者范围查询字典类型对象
+     *
+     * @param name 字典类型名称
+     * @param dictOwnerType 字典所有者类型
+     * @param dictOwnerId 字典所有者ID
+     * @return 字典类型对象
+     */
+    public DictTypeDO findOneByNameAndOwner(String name, String dictOwnerType, Long dictOwnerId) {
+        QueryWrapper qw = query().eq(NAME, name);
+        if (StringUtils.isNotBlank(dictOwnerType)) {
+            qw.eq(DICT_OWNER_TYPE, dictOwnerType);
+            if (!DictOwnerTypeEnum.isGlobal(dictOwnerType) && dictOwnerId != null) {
+                qw.eq(DICT_OWNER_ID, dictOwnerId);
+            }
+        }
+        return getOne(qw);
+    }
+
+    /**
      * 查询所有字典类型列表
      *
      * @return 字典类型列表

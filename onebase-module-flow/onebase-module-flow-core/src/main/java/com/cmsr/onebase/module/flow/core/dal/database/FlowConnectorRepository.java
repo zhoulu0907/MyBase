@@ -43,4 +43,17 @@ public class FlowConnectorRepository extends BaseAppRepository<FlowConnectorMapp
                 .orderBy(FLOW_CONNECTOR.CREATE_TIME, false);
         return this.list(queryWrapper);
     }
+
+    /**
+     * Select connector by connector UUID
+     * Note: Ignores application isolation since connector_uuid is globally unique
+     *
+     * @param connectorUuid the connector UUID
+     * @return the connector DO, or null if not found
+     */
+    public FlowConnectorDO selectByConnectorUuid(String connectorUuid) {
+        QueryWrapper queryWrapper = this.query()
+                .where(FLOW_CONNECTOR.CONNECTOR_UUID.eq(connectorUuid));
+        return this.getOne(queryWrapper);
+    }
 }

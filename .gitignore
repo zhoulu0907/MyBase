@@ -87,8 +87,7 @@ sessionStore
 /.promptx
 
 # documentation (local only)
-docs/plans/
-docs/prd/
+docs/
 
 # requirements documentation
 /需求文档

@@ -23,6 +23,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 @Slf4j
@@ -97,6 +99,85 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         return dos.stream()
                 .map(this::convertToVO)
                 .toList();
+    }
+
+    @Override
+    public List<String> getActionsByConnectorUuid(String connectorUuid) {
+        log.info("getActionsByConnectorUuid start, connectorUuid: {}", connectorUuid);
+
+        // 1. Query connector by UUID
+        FlowConnectorDO connector = connectorRepository.selectByConnectorUuid(connectorUuid);
+        if (connector == null) {
+            log.warn("Connector not found, connectorUuid: {}", connectorUuid);
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS);
+        }
+
+        // 2. Get config
+        String config = connector.getConfig();
+        if (StringUtils.isBlank(config)) {
+            log.info("Config is blank, return empty list, connectorUuid: {}", connectorUuid);
+            return Collections.emptyList();
+        }
+
+        // 3. Parse JSON and extract properties keys
+        JsonNode root = JsonUtils.parseTree(config);
+        JsonNode properties = root.get("properties");
+
+        if (properties == null || !properties.isObject()) {
+            log.error("Invalid connector config, properties not found or not an object, connectorUuid: {}", connectorUuid);
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.INVALID_CONNECTOR_CONFIG);
+        }
+
+        // 4. Extract keys while preserving order
+        List<String> actions = new ArrayList<>();
+        Iterator<String> fieldNames = properties.fieldNames();
+        while (fieldNames.hasNext()) {
+            actions.add(fieldNames.next());
+        }
+
+        log.info("getActionsByConnectorUuid success, connectorUuid: {}, actions: {}", connectorUuid, actions);
+        return actions;
+    }
+
+    @Override
+    public JsonNode getActionValueByConnectorUuid(String connectorUuid, String actionName) {
+        log.info("getActionValueByConnectorUuid start, connectorUuid: {}, actionName: {}",
+                connectorUuid, actionName);
+
+        // 1. Query connector by UUID
+        FlowConnectorDO connector = connectorRepository.selectByConnectorUuid(connectorUuid);
+        if (connector == null) {
+            log.warn("Connector not found, connectorUuid: {}", connectorUuid);
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS);
+        }
+
+        // 2. Get config
+        String config = connector.getConfig();
+        if (StringUtils.isBlank(config)) {
+            log.error("Config is blank, connectorUuid: {}", connectorUuid);
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.INVALID_CONNECTOR_CONFIG);
+        }
+
+        // 3. Parse JSON and extract properties
+        JsonNode root = JsonUtils.parseTree(config);
+        JsonNode properties = root.get("properties");
+
+        if (properties == null || !properties.isObject()) {
+            log.error("Invalid connector config, properties not found or not an object, connectorUuid: {}",
+                    connectorUuid);
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.INVALID_CONNECTOR_CONFIG);
+        }
+
+        // 4. Get action value by actionName
+        JsonNode actionValue = properties.get(actionName);
+        if (actionValue == null || actionValue.isNull()) {
+            log.warn("Action not found, connectorUuid: {}, actionName: {}", connectorUuid, actionName);
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ACTION_NOT_EXISTS);
+        }
+
+        log.info("getActionValueByConnectorUuid success, connectorUuid: {}, actionName: {}",
+                connectorUuid, actionName);
+        return actionValue;
     }
 
     public String jsonNodeToString(JsonNode jsonNode) {

@@ -25,7 +25,7 @@ public class PluginInfoUpdateReqVO {
     @Schema(description = "插件描述", example = "这是一个示例插件")
     private String pluginDescription;
 
-    @Schema(description = "插件图标文件（支持直接上传图片文件）")
-    private MultipartFile pluginIcon;
+    @Schema(description = "插件图标名称")
+    private String pluginIcon;
 
 }

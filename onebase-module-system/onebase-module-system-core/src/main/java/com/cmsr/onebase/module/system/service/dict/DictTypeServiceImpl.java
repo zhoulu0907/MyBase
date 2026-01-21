@@ -57,11 +57,6 @@ public class DictTypeServiceImpl implements DictTypeService {
 
     @Override
     public Long createDictType(DictTypeSaveReqVO createReqVO) {
-        // 校验字典类型的名字的唯一性
-        validateDictTypeNameUnique(null, createReqVO.getName());
-        // 校验字典类型的类型的唯一性
-        validateDictTypeUnique(null, createReqVO.getType());
-
         // 插入字典类型
         DictTypeDO dictType = BeanUtils.toBean(createReqVO, DictTypeDO.class);
 
@@ -69,6 +64,11 @@ public class DictTypeServiceImpl implements DictTypeService {
         if (StrUtil.isEmpty(dictType.getDictOwnerType())) {
             dictType.setDictOwnerType(DictOwnerTypeEnum.TENANT.getType());
         }
+
+        // 校验字典类型的名字的唯一性（同一所有者范围内）
+        validateDictTypeNameUnique(null, createReqVO.getName(), dictType.getDictOwnerType(), dictType.getDictOwnerId());
+        // 校验字典类型的类型的唯一性（同一所有者范围内）
+        validateDictTypeUnique(null, createReqVO.getType(), dictType.getDictOwnerType(), dictType.getDictOwnerId());
 
         dictType.setDeletedTime(LocalDateTime.ofInstant(Instant.ofEpochMilli(0), ZoneId.systemDefault())); // 唯一索引，避免
                                                                                                            // null 值
@@ -79,14 +79,18 @@ public class DictTypeServiceImpl implements DictTypeService {
     @Override
     public void updateDictType(DictTypeSaveReqVO updateReqVO) {
         // 校验自己存在
-        validateDictTypeExists(updateReqVO.getId());
-        // 校验字典类型的名字的唯一性
-        validateDictTypeNameUnique(updateReqVO.getId(), updateReqVO.getName());
-        // 校验字典类型的类型的唯一性
-        validateDictTypeUnique(updateReqVO.getId(), updateReqVO.getType());
-
+        DictTypeDO existingDictType = validateDictTypeExists(updateReqVO.getId());
+        
         // 更新字典类型
         DictTypeDO updateObj = BeanUtils.toBean(updateReqVO, DictTypeDO.class);
+        
+        // 校验字典类型的名字的唯一性（使用现有的所有者信息）
+        validateDictTypeNameUnique(updateReqVO.getId(), updateReqVO.getName(), 
+                existingDictType.getDictOwnerType(), existingDictType.getDictOwnerId());
+        // 校验字典类型的类型的唯一性（使用现有的所有者信息）
+        validateDictTypeUnique(updateReqVO.getId(), updateReqVO.getType(), 
+                existingDictType.getDictOwnerType(), existingDictType.getDictOwnerId());
+
         dictTypeRepository.update(updateObj);
     }
 
@@ -142,12 +146,61 @@ public class DictTypeServiceImpl implements DictTypeService {
         }
     }
 
+    /**
+     * 校验字典类型名称的唯一性（同一所有者范围内）
+     *
+     * @param id 字典类型ID（更新时使用，新建时传null）
+     * @param name 字典类型名称
+     * @param dictOwnerType 字典所有者类型
+     * @param dictOwnerId 字典所有者ID
+     */
+    @VisibleForTesting
+    void validateDictTypeNameUnique(Long id, String name, String dictOwnerType, Long dictOwnerId) {
+        DictTypeDO dictType = dictTypeRepository.findOneByNameAndOwner(name, dictOwnerType, dictOwnerId);
+        if (dictType == null) {
+            return;
+        }
+        // 如果 id 为空，说明不用比较是否为相同 id 的字典类型
+        if (id == null) {
+            throw exception(DICT_TYPE_NAME_DUPLICATE);
+        }
+        if (!dictType.getId().equals(id)) {
+            throw exception(DICT_TYPE_NAME_DUPLICATE);
+        }
+    }
+
     @VisibleForTesting
     void validateDictTypeUnique(Long id, String type) {
         if (StrUtil.isEmpty(type)) {
             return;
         }
         DictTypeDO dictType = dictTypeRepository.findOneByType(type);
+        if (dictType == null) {
+            return;
+        }
+        // 如果 id 为空，说明不用比较是否为相同 id 的字典类型
+        if (id == null) {
+            throw exception(DICT_TYPE_TYPE_DUPLICATE);
+        }
+        if (!dictType.getId().equals(id)) {
+            throw exception(DICT_TYPE_TYPE_DUPLICATE);
+        }
+    }
+
+    /**
+     * 校验字典类型的唯一性（同一所有者范围内）
+     *
+     * @param id 字典类型ID（更新时使用，新建时传null）
+     * @param type 字典类型
+     * @param dictOwnerType 字典所有者类型
+     * @param dictOwnerId 字典所有者ID
+     */
+    @VisibleForTesting
+    void validateDictTypeUnique(Long id, String type, String dictOwnerType, Long dictOwnerId) {
+        if (StrUtil.isEmpty(type)) {
+            return;
+        }
+        DictTypeDO dictType = dictTypeRepository.findOneByTypeAndOwner(type, dictOwnerType, dictOwnerId);
         if (dictType == null) {
             return;
         }
