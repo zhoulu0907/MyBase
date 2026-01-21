@@ -22,8 +22,8 @@ public class PluginInfoDetailRespVO {
     @Schema(description = "插件名称", example = "示例插件")
     private String pluginName;
 
-    @Schema(description = "插件图标ID", example = "2048")
-    private Long pluginIcon;
+    @Schema(description = "插件图标", example = "el-icon-user")
+    private String pluginIcon;
 
     @Schema(description = "插件描述", example = "这是一个示例插件")
     private String pluginDescription;

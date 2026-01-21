@@ -20,8 +20,8 @@ public class PluginUploadReqVO {
     @NotBlank(message = "插件名称不能为空")
     private String pluginName;
 
-    @Schema(description = "插件图标文件")
-    private MultipartFile pluginIcon;
+    @Schema(description = "插件图标名称")
+    private String pluginIcon;
 
     @Schema(description = "插件描述", example = "这是一个示例插件")
     private String pluginDescription;

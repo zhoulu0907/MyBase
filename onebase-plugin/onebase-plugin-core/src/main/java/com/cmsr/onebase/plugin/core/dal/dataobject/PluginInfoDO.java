@@ -36,10 +36,10 @@ public class PluginInfoDO extends BaseTenantEntity {
     private String pluginName;
 
     /**
-     * 插件icon，存的是插件在minio中的id
+     * 插件icon，存的是插件系统图标名称
      */
     @Column(value = "plugin_icon", comment = "插件icon")
-    private Long pluginIcon;
+    private String pluginIcon;
 
     /**
      * 插件描述
