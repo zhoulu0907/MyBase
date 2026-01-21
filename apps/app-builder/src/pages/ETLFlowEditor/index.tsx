@@ -67,7 +67,6 @@ const ETLFlowEditorPage: React.FC = () => {
     if (flowId) {
       handleLoadETLFlow(flowId);
     }
-    // 离开时也清理，防止下一次进入复用旧数据
 
   }, []);
 
