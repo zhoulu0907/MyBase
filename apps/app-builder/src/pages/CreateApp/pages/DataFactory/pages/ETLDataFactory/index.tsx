@@ -27,7 +27,7 @@ const EtlDataFactoryPage: React.FC = () => {
 
   const [loading, setLoading] = useState(false);
 
-  const [pageSize, setPageSize] = useState<number>(8);
+  const [pageSize, setPageSize] = useState<number>(9);
   const [pageNo, setPageNo] = useState(1);
   const [total, setTotal] = useState(0);
   const [eltFlowList, setEltFlowList] = useState<ETLFlowMgmt[]>([]);
