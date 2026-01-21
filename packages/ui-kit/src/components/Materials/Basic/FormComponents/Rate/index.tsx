@@ -65,7 +65,7 @@ const XRate = memo((props: XRateConfig & { runtime?: boolean; detailMode?: boole
   // =====  内部状态 & 回显 end =====
 
   // ===== 表单上下文与字段名与值读取 begin =====
-  const { fieldValue } = useFormField(dataField, nanoid(), FORM_COMPONENT_TYPES.RATEs);
+  const { form, fieldValue } = useFormField(dataField, nanoid(), FORM_COMPONENT_TYPES.RATEs);
   const [tooltipValue, setTooltipValue] = useState('');
   // ===== 表单上下文与字段名与值读取 end =====
 
@@ -117,6 +117,7 @@ const XRate = memo((props: XRateConfig & { runtime?: boolean; detailMode?: boole
               onChange={(value)=>{
                 const newTooltipValue = rateConfig.showCustomTooltips ? rateConfig.tooltips?.[Math.ceil(value) - 1] || '' : `${value}`
                 setTooltipValue(newTooltipValue);
+                form.setFieldValue(fieldId, value);
               }}
             />
             {rateConfig.showResult && (
