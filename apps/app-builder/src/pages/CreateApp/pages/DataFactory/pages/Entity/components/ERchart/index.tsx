@@ -437,7 +437,7 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
         collapseHandlerRef.current = new SectionCollapseHandler(graphRef.current);
 
         // 限制平移范围，确保节点始终可见
-        // 以最小缩放（0.6）时的可见视口作为限制范围
+        // 以当前缩放下的可见视口作为限制范围，避免缩放后点击导致画布跳动
         graphRef.current.on('translate', ({ tx, ty }) => {
           if (!graphRef.current) return;
 
@@ -445,7 +445,7 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
           if (!contentArea || contentArea.width === 0 || contentArea.height === 0) return;
 
           const graphSize = graphRef.current.getGraphArea();
-          const padding = 100; // 边距
+          const padding = 800; // 边距
 
           // 计算内容区域的边界
           const contentLeft = contentArea.x;
@@ -455,23 +455,14 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
 
           const { width: containerWidth = graphSize.width, height: containerHeight = graphSize.height } =
             containerRef.current?.getBoundingClientRect() ?? {};
-          const viewWidthAtMinScale = containerWidth / MIN_SCALE;
-          const viewHeightAtMinScale = containerHeight / MIN_SCALE;
           const currentScale = graphRef.current.scale().sx;
-          const extraWidth = Math.max(0, viewWidthAtMinScale - containerWidth / currentScale) / 2;
-          const extraHeight = Math.max(0, viewHeightAtMinScale - containerHeight / currentScale) / 2;
 
-          const baseMaxTranslateX = Math.max(0, contentRight + padding - viewWidthAtMinScale);
-          const baseMinTranslateX = Math.min(0, contentLeft - padding);
-          const baseMaxTranslateY = Math.max(0, contentBottom + padding - viewHeightAtMinScale);
-          const baseMinTranslateY = Math.min(0, contentTop - padding);
-          const maxTranslateX = baseMaxTranslateX + extraWidth;
-          const minTranslateX = baseMinTranslateX - extraWidth;
-          const maxTranslateY = baseMaxTranslateY + extraHeight;
-          const minTranslateY = baseMinTranslateY - extraHeight;
+          const maxTranslateX = Math.max(0, contentRight + padding - containerWidth);
+          const minTranslateX = Math.min(0, contentLeft - padding);
+          const maxTranslateY = Math.max(0, contentBottom + padding - containerHeight);
+          const minTranslateY = Math.min(0, contentTop - padding);
 
-          // 限制平移范围
-          if (currentScale <= MIN_SCALE) {
+          if (currentScale < MIN_SCALE) {
             if (tx === lastTranslate.current.tx && ty === lastTranslate.current.ty) {
               return;
             }
