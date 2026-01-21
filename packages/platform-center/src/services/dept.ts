@@ -50,7 +50,7 @@ export const updateAdminOrDirector = (data: UpdateAdminOrDirectorReq) => {
 
 // 根据用户ID获取其所属部门及其父部门列表
 export const getDeptsById = (params: GetDeptsByIdReq) => {
-  return (isRuntimeEnv() ? runtimeCorpService : systemService).get(`/dept/get-depts-by-id?id=${params.id}&idType=${params.idType}`);
+  return (isRuntimeEnv() ? runtimeService : systemService).get(`/dept/get-depts-by-id?id=${params.id}&idType=${params.idType}`);
 };
 
 // 指定/搜索获取部门和用户信息
