@@ -65,13 +65,14 @@ const AppBreadcrumb: React.FC<BreadcrumbProps> = ({ className, items }) => {
         case 'organization':
           result.push({
             key: 'onebase',
-            title: '应用管理',
+            title: '用户与组织',
             path: '/onebase'
           });
           break;
         case 'spaceInfo':
         case 'system-dict':
         case 'security':
+        case 'profile':
         case 'tenant':
           result.push({
             key: 'onebase',
