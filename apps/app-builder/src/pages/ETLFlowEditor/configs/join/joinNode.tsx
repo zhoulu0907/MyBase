@@ -1,4 +1,4 @@
-import { Checkbox, Form, Input, Layout, Table } from '@arco-design/web-react';
+import { Form, Input, Layout, Table } from '@arco-design/web-react';
 import useForm from '@arco-design/web-react/es/Form/useForm';
 import { ETLDrawerTab, etlEditorSignal } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
@@ -179,7 +179,7 @@ export const JoinNodeConfig: React.FC<JoinNodeConfigProps> = ({ onRegisterSave }
         <div>
           <div className={styles.joinHeader}>
             <span>添加连接字段</span>
-            <Checkbox>合并连接字段</Checkbox>
+            {/* <Checkbox>合并连接字段</Checkbox> */}
           </div>
 
           <Form form={form} className={styles.content} initialValues={newPayload?.config}>
