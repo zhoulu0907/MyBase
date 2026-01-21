@@ -1,6 +1,8 @@
 import {
     baseConfig,
     baseDefault,
+    labelColSpanConfig,
+    labelConfig,
     rowRedirectConfig,
     statusConfig,
     tableBorderCellConfig,
@@ -174,7 +176,7 @@ export interface XTableConfig extends ICommonBaseType {
   /**
    * 表头搜索项标题宽度
    */
-//   labelColSpan?: TNumberDefaultType;
+  labelColSpan?: TNumberDefaultType;
   metaData: TTextDefaultType;
   tableName: TTextDefaultType;
   /**
@@ -237,7 +239,7 @@ const XTable: XTableSchema = {
     labelConfig,
     tableMetaDataConfig,
     // keyDataConfig,
-    // labelColSpanConfig,
+    labelColSpanConfig,
     tablePagePositionConfig,
     tablePageSizeConfig,
     tableBorderConfig,
