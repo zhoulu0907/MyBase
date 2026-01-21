@@ -45,9 +45,9 @@ public class FlowNodeConfigRepository extends ServiceImpl<FlowNodeConfigMapper, 
     }
 
     /**
-     * Get all active connectors
+     * Get all active connector types
      */
-    public List<FlowNodeConfigDO> listAllConnectors() {
+    public List<FlowNodeConfigDO> listAllConnectorTypes() {
         QueryWrapper queryWrapper = this.query()
                 .where(FLOW_NODE_CONFIG.ACTIVE_STATUS.eq(1))
                 .orderBy(FLOW_NODE_CONFIG.SORT_ORDER, true)
