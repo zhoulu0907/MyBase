@@ -1,0 +1,219 @@
+package com.cmsr.onebase.module.flow.build.controller;
+
+import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.module.flow.build.service.FlowConnectorService;
+import com.cmsr.onebase.module.flow.build.vo.FlowConnectorVO;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+/**
+ * FlowConnectorController 单元测试
+ * <p>
+ * 测试连接器管理 Controller 的 REST API 接口
+ *
+ * @author zhoulu
+ * @since 2026-01-21
+ */
+@ExtendWith(MockitoExtension.class)
+class FlowConnectorControllerTest {
+
+    @Mock
+    private FlowConnectorService service;
+
+    @InjectMocks
+    private FlowConnectorController controller;
+
+    private MockMvc mockMvc;
+
+    private FlowConnectorVO connectorVO;
+
+    /**
+     * 初始化测试数据和MockMvc
+     */
+    @BeforeEach
+    void setUp() {
+        mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
+
+        // 创建测试数据 - script类型连接器
+        connectorVO = new FlowConnectorVO();
+        connectorVO.setId(1L);
+        connectorVO.setConnectorUuid("script-connector-uuid-001");
+        connectorVO.setConnectorName("测试脚本连接器");
+        connectorVO.setTypeCode("script");
+        connectorVO.setDescription("用于测试的脚本连接器");
+
+        // 创建 JsonNode 类型的 config
+        JsonNodeFactory factory = JsonNodeFactory.instance;
+        ObjectNode configNode = factory.objectNode();
+        configNode.put("test", "value");
+        connectorVO.setConfig(configNode);
+
+        connectorVO.setApplicationId(158284491560812544L);
+        connectorVO.setConnectorVersion("1.0.0");
+    }
+
+    /**
+     * 测试根据类型查询连接器实例列表 - 成功（有数据）
+     */
+    @Test
+    void testListByType_Success_WithData() throws Exception {
+        // Given
+        List<FlowConnectorVO> connectorList = Arrays.asList(connectorVO);
+        when(service.listByType(eq("script"))).thenReturn(connectorList);
+
+        // When & Then
+        mockMvc.perform(get("/flow/connector/list-by-type")
+                        .param("typeCode", "script"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(0))
+                .andExpect(jsonPath("$.data").isArray())
+                .andExpect(jsonPath("$.data.length()").value(1))
+                .andExpect(jsonPath("$.data[0].id").value(1))
+                .andExpect(jsonPath("$.data[0].connectorUuid").value("script-connector-uuid-001"))
+                .andExpect(jsonPath("$.data[0].connectorName").value("测试脚本连接器"))
+                .andExpect(jsonPath("$.data[0].typeCode").value("script"));
+
+        verify(service).listByType(eq("script"));
+    }
+
+    /**
+     * 测试根据类型查询连接器实例列表 - 空结果
+     */
+    @Test
+    void testListByType_EmptyResult() throws Exception {
+        // Given
+        when(service.listByType(eq("script"))).thenReturn(Collections.emptyList());
+
+        // When & Then
+        mockMvc.perform(get("/flow/connector/list-by-type")
+                        .param("typeCode", "script"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(0))
+                .andExpect(jsonPath("$.data").isArray())
+                .andExpect(jsonPath("$.data.length()").value(0));
+
+        verify(service).listByType(eq("script"));
+    }
+
+    /**
+     * 测试根据类型查询连接器实例列表 - 缺少typeCode参数
+     */
+    @Test
+    void testListByType_MissingTypeCode() throws Exception {
+        // When & Then - 不传 typeCode 参数
+        mockMvc.perform(get("/flow/connector/list-by-type"))
+                .andExpect(status().isBadRequest());
+
+        verify(service, never()).listByType(any());
+    }
+
+    /**
+     * 测试根据类型查询连接器实例列表 - 多条数据
+     */
+    @Test
+    void testListByType_MultipleResults() throws Exception {
+        // Given
+        FlowConnectorVO connectorVO2 = new FlowConnectorVO();
+        connectorVO2.setId(2L);
+        connectorVO2.setConnectorUuid("script-connector-uuid-002");
+        connectorVO2.setConnectorName("脚本连接器2");
+        connectorVO2.setTypeCode("script");
+
+        List<FlowConnectorVO> connectorList = Arrays.asList(connectorVO, connectorVO2);
+        when(service.listByType(eq("script"))).thenReturn(connectorList);
+
+        // When & Then
+        mockMvc.perform(get("/flow/connector/list-by-type")
+                        .param("typeCode", "script"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(0))
+                .andExpect(jsonPath("$.data").isArray())
+                .andExpect(jsonPath("$.data.length()").value(2))
+                .andExpect(jsonPath("$.data[0].typeCode").value("script"))
+                .andExpect(jsonPath("$.data[1].typeCode").value("script"));
+
+        verify(service).listByType(eq("script"));
+    }
+
+    /**
+     * 测试根据类型查询连接器实例列表 - 不同类型
+     */
+    @Test
+    void testListByType_DifferentType() throws Exception {
+        // Given - 测试 EMAIL 类型
+        FlowConnectorVO emailConnector = new FlowConnectorVO();
+        emailConnector.setId(3L);
+        emailConnector.setConnectorUuid("email-connector-uuid");
+        emailConnector.setConnectorName("邮件连接器");
+        emailConnector.setTypeCode("EMAIL_163");
+
+        when(service.listByType(eq("EMAIL_163"))).thenReturn(Arrays.asList(emailConnector));
+
+        // When & Then
+        mockMvc.perform(get("/flow/connector/list-by-type")
+                        .param("typeCode", "EMAIL_163"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(0))
+                .andExpect(jsonPath("$.data.length()").value(1))
+                .andExpect(jsonPath("$.data[0].typeCode").value("EMAIL_163"));
+
+        verify(service).listByType(eq("EMAIL_163"));
+    }
+
+    /**
+     * 测试返回的CommonResult结构
+     */
+    @Test
+    void testCommonResultStructure() throws Exception {
+        // Given
+        when(service.listByType(eq("script"))).thenReturn(Arrays.asList(connectorVO));
+
+        // When & Then
+        mockMvc.perform(get("/flow/connector/list-by-type")
+                        .param("typeCode", "script"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").exists())
+                .andExpect(jsonPath("$.data").exists())
+                .andExpect(jsonPath("$.msg").exists());
+
+        verify(service).listByType(eq("script"));
+    }
+
+    /**
+     * 测试JSON序列化
+     */
+    @Test
+    void testJsonSerialization() throws Exception {
+        // Given
+        when(service.listByType(eq("script"))).thenReturn(Arrays.asList(connectorVO));
+
+        // When & Then
+        mockMvc.perform(get("/flow/connector/list-by-type")
+                        .param("typeCode", "script")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(0))
+                .andExpect(jsonPath("$.data[0].connectorName").value("测试脚本连接器"));
+
+        verify(service).listByType(eq("script"));
+    }
+}

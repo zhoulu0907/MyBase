@@ -6,6 +6,9 @@ target/
 
 .flattened-pom.xml
 
+### local config###
+*.yaml
+
 ### STS ###
 .apt_generated
 .classpath
@@ -82,6 +85,10 @@ sessionStore
 # AI assistant configs
 /.claude
 /.promptx
+
+# documentation (local only)
+docs/plans/
+docs/prd/
 
 # requirements documentation
 /需求文档
