@@ -1,11 +1,11 @@
 import { Grid, Message, Select } from '@arco-design/web-react';
 import {
-  listAppETLDatasource,
-  listETLTableColumns,
-  listETLTables,
-  type ELTColumn,
-  type ETLDatasourceOption,
-  type ETLTable
+    listAppETLDatasource,
+    listETLTableColumns,
+    listETLTables,
+    type ELTColumn,
+    type ETLDatasourceOption,
+    type ETLTable
 } from '@onebase/app';
 import { ETLDrawerTab, etlEditorSignal, getHashQueryParam } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
@@ -237,7 +237,7 @@ export const OutputNodeConfig: React.FC<OutputNodeConfigProps> = ({ onRegisterSa
         </div>
       )}
 
-      {curDrawerTab.value === ETLDrawerTab.DATA_PREVIEW && <div className={styles.dataPreview}></div>}
+      {/* {curDrawerTab.value === ETLDrawerTab.DATA_PREVIEW && <div className={styles.dataPreview}></div>} */}
 
       {curDrawerTab.value === ETLDrawerTab.NODE_REMARK && <DataRemark />}
     </div>

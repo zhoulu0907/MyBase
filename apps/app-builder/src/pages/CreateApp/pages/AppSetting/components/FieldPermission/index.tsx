@@ -66,7 +66,7 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
     if (fieldPermission) {
       const formattedFields = fieldPermission.reduce(
         (acc, field) => {
-          acc[field.fieldId] = {
+          acc[field.fieldUuid] = {
             isCanRead: field.isCanRead === FieldRead.canRead,
             isCanEdit: field.isCanEdit === FieldEdit.canEdit,
             isCanDownload: field.isCanDownload === FieldDownloadable.canDownloadable
@@ -87,7 +87,7 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
     if (operationConfig) {
       const formattedOperationFields = operationConfig.reduce(
         (acc, field) => {
-          acc[field.fieldId] = {
+          acc[field.fieldUuid] = {
             isCanDownload: field.isCanDownload === FieldDownloadable.canDownloadable
           };
           return acc;
@@ -227,6 +227,7 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
   const onChangeDownloadableAll = (checked: boolean) => {
     const formData = form.getFieldsValue();
 
+    // 如果【可阅读】权限取消勾选了，【可下载】也自动取消；如果【可下载】勾选上了，上面【可阅读】也自动勾选上
     const updatedOperationPermissions = Object.fromEntries(
       Object.entries(formData.operationPermissions as Record<string, { isCanDownload: boolean }>).map(
         ([key, value]: [string, any]) => [key, { ...value, isCanDownload: checked }]
@@ -279,7 +280,7 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
 
               if (changeFieldAuthFields === 'authFields') {
                 const updateField = fieldPermission?.map((field) => {
-                  if (field.fieldId === changeFieldId) {
+                  if (field.fieldUuid === changeFieldId) {
                     return {
                       ...field,
                       isCanRead: Number(getChangeFieldValue) || field.isCanRead,
@@ -291,14 +292,14 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
 
                 setFieldPermission(updateField);
 
-                const modifiedField = updateField?.filter((field) => field.fieldId === changeFieldId) || [];
+                const modifiedField = updateField?.filter((field) => field.fieldUuid === changeFieldId) || [];
                 updateFieldsPermission(
                   modifiedField,
                   isAllFieldsAllowed || RoleAllFieldPermission.FieldCustomFieldPermission
                 );
               } else if (changeFieldAuthFields === 'operationPermissions') {
                 const updateField = operationConfig?.map((field) => {
-                  if (field.fieldId === changeFieldId) {
+                  if (field.fieldUuid === changeFieldId) {
                     return {
                       ...field,
                       [changeFieldValueName]: Number(getChangeFieldValue)
@@ -309,7 +310,7 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
 
                 setOperationConfig(updateField);
 
-                const modifiedField = updateField?.filter((field) => field.fieldId === changeFieldId) || [];
+                const modifiedField = updateField?.filter((field) => field.fieldUuid === changeFieldId) || [];
                 updateFieldsPermission(
                   modifiedField,
                   isAllFieldsAllowed || RoleAllFieldPermission.FieldCustomFieldPermission
@@ -371,7 +372,7 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
                       <Divider />
                       {fieldPermission?.map((field) => {
                         return (
-                          <Row className={styles.rowItem} key={field.fieldId}>
+                          <Row className={styles.rowItem} key={field.fieldUuid}>
                             <Col span={8}>
                               <span>{field.fieldDisplayName}</span>
                             </Col>
@@ -379,7 +380,7 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
                             {/* 可阅读权限 */}
                             <Col span={4}>
                               <Form.Item
-                                field={`authFields.${field.fieldId}.isCanRead`}
+                                field={`authFields.${field.fieldUuid}.isCanRead`}
                                 trigger="onChange"
                                 triggerPropName="checked"
                                 noStyle
@@ -391,7 +392,7 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
                             {/* 可编辑权限 */}
                             <Col span={4}>
                               <Form.Item
-                                field={`authFields.${field.fieldId}.isCanEdit`}
+                                field={`authFields.${field.fieldUuid}.isCanEdit`}
                                 triggerPropName="checked"
                                 noStyle
                               >
@@ -426,7 +427,7 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
                       <Divider />
                       {operationConfig?.map((field: any) => {
                         return (
-                          <Row className={styles.rowItem} key={field.fieldId}>
+                          <Row className={styles.rowItem} key={field.fieldUuid}>
                             <Col span={8}>
                               <IconAttachment style={{ marginRight: 8 }} />
                               <span>{field.fieldDisplayName}</span>
@@ -434,7 +435,7 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
 
                             <Col span={4}>
                               <Form.Item
-                                field={`operationPermissions.${field.fieldId}.isCanDownload`}
+                                field={`operationPermissions.${field.fieldUuid}.isCanDownload`}
                                 trigger="onChange"
                                 triggerPropName="checked"
                                 noStyle

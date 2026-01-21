@@ -3,6 +3,7 @@ import { useSignals } from '@preact/signals-react/runtime';
 import { cloneDeep } from 'lodash-es';
 import React, { useEffect, useRef, useState } from 'react';
 import DataPreview from '../../components/dataPreview';
+import DataRemark from '../../components/dataRemark';
 import { handlePreviewData, type PreviewData } from '../utils';
 import UnionConfig from './config';
 import styles from './index.module.less';
@@ -49,7 +50,7 @@ export const UnionNodeConfig: React.FC<UnionNodeConfigProps> = ({ onRegisterSave
       {curDrawerTab.value === ETLDrawerTab.DATA_PREVIEW && (
         <DataPreview data={previewData.data} columns={previewData.columns} />
       )}
-      {curDrawerTab.value === ETLDrawerTab.NODE_REMARK && <div></div>}
+      {curDrawerTab.value === ETLDrawerTab.NODE_REMARK && <DataRemark />}
     </div>
   );
 };

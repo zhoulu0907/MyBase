@@ -57,15 +57,21 @@ export function getAllDownstreamNodeIds(
 }
 
 export const clearDownStreamNodeConfig = (curNodeId: string, graphData: any, nodeData: any) => {
-  const { setNodeData } = etlEditorSignal;
+
   console.log(curNodeId);
   console.log('graphData: ', graphData);
   console.log('nodeData: ', nodeData);
 
   const nodeIds = getAllDownstreamNodeIds(graphData, curNodeId);
-  console.log(nodeIds);
 
   for (const nodeId of nodeIds) {
+    clearNodeConfig(nodeId, nodeData);
+  }
+};
+
+export const clearNodeConfig = (nodeId: string, nodeData: any) => {
+    const { setNodeData } = etlEditorSignal;
+
     const curNodeData = nodeData[nodeId];
 
     switch (curNodeData.type) {
@@ -85,7 +91,7 @@ export const clearDownStreamNodeConfig = (curNodeId: string, graphData: any, nod
           ...curNodeData.config,
           leftNodeId: undefined,
           rightNodeId: undefined,
-          joinType: '', // 连接类型
+          joinType: '',
           fieldPairs: [],
           mappings: []
         };
@@ -113,8 +119,7 @@ export const clearDownStreamNodeConfig = (curNodeId: string, graphData: any, nod
 
     console.log('curNodeData: ', curNodeData);
     setNodeData(nodeId, curNodeData);
-  }
-};
+}
 
 export const setNodeDataAndResetDownstream = (
   payload: any,
