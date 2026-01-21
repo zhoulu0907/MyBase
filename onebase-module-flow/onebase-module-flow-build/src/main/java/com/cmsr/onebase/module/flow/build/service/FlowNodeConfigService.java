@@ -1,10 +1,13 @@
 package com.cmsr.onebase.module.flow.build.service;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.module.flow.build.vo.ConnectorListVO;
 import com.cmsr.onebase.module.flow.build.vo.NodeConfigActionVO;
 import com.cmsr.onebase.module.flow.build.vo.NodeConfigConnVO;
 import com.cmsr.onebase.module.flow.build.vo.NodeConfigVO;
 import com.cmsr.onebase.module.flow.core.vo.PageNodeConfigReqVO;
+
+import java.util.List;
 
 /**
  * @Author：huangjie
@@ -17,4 +20,9 @@ public interface FlowNodeConfigService {
     NodeConfigConnVO findConnConfig(String nodeCode);
 
     NodeConfigActionVO findActionConfig(String nodeCode);
+
+    /**
+     * Get all active connectors
+     */
+    List<ConnectorListVO> getAllConnectors();
 }
