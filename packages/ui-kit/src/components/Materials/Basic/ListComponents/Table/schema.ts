@@ -1,6 +1,8 @@
 import {
     baseConfig,
     baseDefault,
+    labelColSpanConfig,
+    labelConfig,
     rowRedirectConfig,
     statusConfig,
     tableBorderCellConfig,
@@ -86,10 +88,10 @@ export interface XTableConfig extends ICommonBaseType {
    * text：标题
    * display：是否显示
    */
-//   label: {
-//     text: TTextDefaultType;
-//     display: TBooleanDefaultType;
-//   };
+  label: {
+    text: TTextDefaultType;
+    display: TBooleanDefaultType;
+  };
 
   /**
    * 默认值
@@ -174,7 +176,7 @@ export interface XTableConfig extends ICommonBaseType {
   /**
    * 表头搜索项标题宽度
    */
-//   labelColSpan?: TNumberDefaultType;
+  labelColSpan?: TNumberDefaultType;
   metaData: TTextDefaultType;
   tableName: TTextDefaultType;
   /**
@@ -234,10 +236,10 @@ export interface OperationButtonConfig {
 const XTable: XTableSchema = {
   editData: [
     ...baseConfig,
-    // labelConfig,
+    labelConfig,
     tableMetaDataConfig,
     // keyDataConfig,
-    // labelColSpanConfig,
+    labelColSpanConfig,
     tablePagePositionConfig,
     tablePageSizeConfig,
     tableBorderConfig,
@@ -261,10 +263,10 @@ const XTable: XTableSchema = {
   ],
   config: {
     ...baseDefault,
-    // label: {
-    //   text: '表格',
-    //   display: false
-    // },
+    label: {
+      text: '表格',
+      display: false
+    },
     stripe: true,
     border: true,
     borderCell: true,
