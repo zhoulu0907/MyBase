@@ -1,6 +1,6 @@
-import { useEffect, useRef } from 'react';
 import type { FreeLayoutPluginContext } from '@flowgram.ai/free-layout-editor';
 import { etlEditorSignal } from '@onebase/common';
+import { useEffect, useRef } from 'react';
 
 export interface DeletedEdge {
   sourceNodeID: string;
@@ -21,7 +21,7 @@ export interface UseEdgeDeletionListenerOptions {
 export function useEdgeDeletionListener(options: UseEdgeDeletionListenerOptions) {
   const { editorRef, initDataNodesLength, onEdgeDeleted } = options;
   const { graphData } = etlEditorSignal;
-  
+
   const previousEdgeIdsRef = useRef<Set<string>>(new Set());
   const previousEdgesMapRef = useRef<Map<string, { sourceNodeID: string; targetNodeID: string }>>(new Map());
 
