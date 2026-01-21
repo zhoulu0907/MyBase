@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.metadata.api.datasource;
 
 import com.cmsr.onebase.module.metadata.api.datasource.dto.DatasourceCreateDefaultReqDTO;
+import com.cmsr.onebase.module.metadata.api.datasource.dto.DatasourceImportReqDTO;
 import com.cmsr.onebase.module.metadata.api.datasource.dto.DatasourceSaveReqDTO;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -53,7 +54,7 @@ public interface MetadataDatasourceApi {
     Object exportDatasource(Long applicationId, Long versionTag);
 
     @Operation(summary = "导入数据源信息")
-    void importDatasource(Long newApplicationId, String appUid, Long tenantId, Long versionTag, Object datasourceConfig);
+    void importDatasource(Long newApplicationId, String appUid, Long tenantId, Long versionTag, Object importData, DatasourceImportReqDTO reqDTO);
 
 
 }
