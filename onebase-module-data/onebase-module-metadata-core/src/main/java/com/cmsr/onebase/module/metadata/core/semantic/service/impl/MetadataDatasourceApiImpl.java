@@ -17,6 +17,7 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.number.MetadataAutoN
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.relationship.MetadataEntityRelationshipDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.*;
 import com.cmsr.onebase.module.metadata.core.dal.database.*;
+import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.FieldTypeMappingDO;
 import com.cmsr.onebase.module.metadata.core.service.datasource.MetadataDatasourceCoreService;
 import com.mybatisflex.core.query.QueryWrapper;
 import io.swagger.v3.oas.annotations.Operation;
@@ -82,6 +83,8 @@ public class MetadataDatasourceApiImpl implements MetadataDatasourceApi {
     private MetadataValidationFormatRepository metadataValidationFormatRepository;
     @Resource
     private MetadataValidationChildNotEmptyRepository metadataValidationChildNotEmptyRepository;
+    @Resource
+    private FieldTypeMappingRepository fieldTypeMappingRepository;
 
     @Resource
     private TemporaryDatasourceService temporaryDatasourceService;
@@ -174,7 +177,7 @@ public class MetadataDatasourceApiImpl implements MetadataDatasourceApi {
     }
 
     @Override
-    public Object exportDatasource(Long applicationId, Long versionTag) {
+    public MetadataExportDataDTO exportDatasource(Long applicationId, Long versionTag) {
         log.info("开始导出数据源，applicationId: {}, versionTag: {}", applicationId, versionTag);
         MetadataExportDataDTO exportData = new MetadataExportDataDTO();
 
@@ -522,8 +525,8 @@ public class MetadataDatasourceApiImpl implements MetadataDatasourceApi {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void importDatasource(Long newApplicationId, String appUid, Long tenantId, Long versionTag, Object datasourceConfig, DatasourceImportReqDTO reqDTO) {
-        if (datasourceConfig == null) {
+    public void importDatasource(Long newApplicationId, String appUid, Long tenantId, Long versionTag, MetadataExportDataDTO exportData, DatasourceImportReqDTO reqDTO) {
+        if (exportData == null) {
             log.warn("导入数据为空，跳过导入");
             return;
         }
@@ -531,8 +534,8 @@ public class MetadataDatasourceApiImpl implements MetadataDatasourceApi {
         log.info("开始导入数据源，newApplicationId: {}, appUid: {}, tenantId: {}, versionTag: {}",
                 newApplicationId, appUid, tenantId, versionTag);
 
-        String configJson = JsonUtils.toJsonString(datasourceConfig);
-        MetadataExportDataDTO exportData = JsonUtils.parseObject(configJson, MetadataExportDataDTO.class);
+        //String configJson = JsonUtils.toJsonString(datasourceConfig);
+        //MetadataExportDataDTO exportData = JsonUtils.parseObject(configJson, MetadataExportDataDTO.class);
         if (exportData == null || exportData.getDatasource() == null) {
             log.warn("解析导入数据失败或数据源为空，跳过导入");
             return;
@@ -929,6 +932,9 @@ public class MetadataDatasourceApiImpl implements MetadataDatasourceApi {
 
         log.info("开始在业务库创建物理表，共 {} 个实体", entities.size());
 
+        // 获取字段类型映射
+        java.util.List<FieldTypeMappingDO> typeMappings = fieldTypeMappingRepository.list();
+
         // 按实体UUID分组字段
         Map<String, java.util.List<MetadataEntityFieldDO>> fieldsByEntity = fields.stream()
                 .collect(Collectors.groupingBy(MetadataEntityFieldDO::getEntityUuid));
@@ -947,7 +953,7 @@ public class MetadataDatasourceApiImpl implements MetadataDatasourceApi {
                 }
 
                 // 构建建表SQL
-                String createTableSql = buildCreateTableSql(tableName, entityFields, datasource.getDatasourceType());
+                String createTableSql = buildCreateTableSql(tableName, entityFields, datasource.getDatasourceType(), typeMappings);
                 log.debug("创建表SQL: {}", createTableSql);
 
                 // 执行建表
@@ -960,7 +966,7 @@ public class MetadataDatasourceApiImpl implements MetadataDatasourceApi {
         }
     }
 
-    private String buildCreateTableSql(String tableName, java.util.List<MetadataEntityFieldDO> fields, String datasourceType) {
+    private String buildCreateTableSql(String tableName, java.util.List<MetadataEntityFieldDO> fields, String datasourceType, java.util.List<FieldTypeMappingDO> typeMappings) {
         StringBuilder sql = new StringBuilder();
         sql.append("CREATE TABLE IF NOT EXISTS ").append(tableName).append(" (\n");
 
@@ -968,7 +974,7 @@ public class MetadataDatasourceApiImpl implements MetadataDatasourceApi {
         String primaryKeyField = null;
 
         for (MetadataEntityFieldDO field : fields) {
-            String columnDef = buildColumnDefinition(field, datasourceType);
+            String columnDef = buildColumnDefinition(field, datasourceType, typeMappings);
             columnDefs.add("  " + columnDef);
 
             if (field.getIsPrimaryKey() != null && field.getIsPrimaryKey() == 1) {
@@ -986,11 +992,11 @@ public class MetadataDatasourceApiImpl implements MetadataDatasourceApi {
         return sql.toString();
     }
 
-    private String buildColumnDefinition(MetadataEntityFieldDO field, String datasourceType) {
+    private String buildColumnDefinition(MetadataEntityFieldDO field, String datasourceType, java.util.List<FieldTypeMappingDO> typeMappings) {
         StringBuilder def = new StringBuilder();
         def.append(field.getFieldName()).append(" ");
 
-        String dbType = mapFieldTypeToDbType(field.getFieldType(), field.getDataLength(), field.getDecimalPlaces(), datasourceType);
+        String dbType = mapFieldTypeToDbType(field.getFieldType(), field.getDataLength(), field.getDecimalPlaces(), datasourceType, typeMappings);
         def.append(dbType);
 
         if (field.getIsRequired() != null && field.getIsRequired() == 1) {
@@ -1003,12 +1009,42 @@ public class MetadataDatasourceApiImpl implements MetadataDatasourceApi {
 
         return def.toString();
     }
-
-    private String mapFieldTypeToDbType(String fieldType, Integer dataLength, Integer decimalPlaces, String datasourceType) {
+    //todo metadata_field_type_mapping 表中有存字段类型和数据库类型的映射关系，可以改为从该表中读取映射关系，而不是写死在代码中
+    private String mapFieldTypeToDbType(String fieldType, Integer dataLength, Integer decimalPlaces, String datasourceType, java.util.List<FieldTypeMappingDO> typeMappings) {
         if (fieldType == null) {
             return "VARCHAR(255)";
         }
 
+        // 1. 优先从映射表中查找
+        if (CollectionUtils.isNotEmpty(typeMappings)) {
+            String dbType = typeMappings.stream()
+                    .filter(m -> m.getBusinessFieldType().equalsIgnoreCase(fieldType) &&
+                            m.getDatabaseType().equalsIgnoreCase(datasourceType))
+                    .findFirst()
+                    .map(FieldTypeMappingDO::getDatabaseField)
+                    .orElse(null);
+
+            if (dbType != null) {
+                // 特殊处理需要长度和精度的类型
+                if (("STRING".equalsIgnoreCase(fieldType) || "TEXT".equalsIgnoreCase(fieldType)) 
+                        && !dbType.contains("(") 
+                        && (dbType.toUpperCase().contains("CHAR") || dbType.toUpperCase().contains("VARCHAR"))) {
+                    int len = (dataLength != null && dataLength > 0) ? dataLength : 255;
+                    return dbType + "(" + len + ")";
+                }
+                
+                if (("DECIMAL".equalsIgnoreCase(fieldType) || "NUMBER".equalsIgnoreCase(fieldType)) 
+                        && !dbType.contains("(")) {
+                    int precision = (dataLength != null && dataLength > 0) ? dataLength : 18;
+                    int scale = (decimalPlaces != null && decimalPlaces >= 0) ? decimalPlaces : 2;
+                    return dbType + "(" + precision + "," + scale + ")";
+                }
+
+                return dbType;
+            }
+        }
+
+        // 2. 默认兜底逻辑
         boolean isPostgres = "POSTGRESQL".equalsIgnoreCase(datasourceType) || "KINGBASE".equalsIgnoreCase(datasourceType);
 
         return switch (fieldType.toUpperCase()) {
