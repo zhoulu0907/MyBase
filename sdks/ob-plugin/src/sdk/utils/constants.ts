@@ -55,7 +55,9 @@ export const CONFIG_TYPES = {
   TIME_FORMAT: 'TimeFormat',
   COMMON: 'common',
   USER_DEFAULT_VALUE: 'userDefaultValue',
-  RATE_CONFIG: 'RateConfig'
+  RATE_CONFIG: 'RateConfig',
+  // 检查项 显示方式
+  CHECK_ITEM_SHOW_MODE: 'CheckItemShowMode'
 } as const;
 
 export const WIDTH_OPTIONS = {

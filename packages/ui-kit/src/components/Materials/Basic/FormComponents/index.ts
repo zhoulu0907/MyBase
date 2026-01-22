@@ -23,7 +23,7 @@ import XTimePicker from './TimePicker';
 import XUserSelect from './UserSelect';
 import XSubTable from './SubTable';
 import XRate from './Rate';
-
+import XCheckItem from './CheckItem';
 
 import XAutoCodeSchema from './AutoCode/schema';
 import XCheckboxSchema from './Checkbox/schema';
@@ -50,6 +50,7 @@ import XTimePickerSchema from './TimePicker/schema';
 import XUserSelectSchema from './UserSelect/schema';
 import XSubTableSchema from './SubTable/schema';
 import XRateSchema from './Rate/schema';
+import XCheckItemSchema from './CheckItem/schema';
 
 export const FormComp = {
   XInputText,
@@ -76,7 +77,8 @@ export const FormComp = {
   XRichText,
   XSubTable,
   XDataSelect,
-  XRate
+  XRate,
+  XCheckItem
 };
 
 export const FormSchema = {
@@ -104,5 +106,6 @@ export const FormSchema = {
   XRichTextSchema,
   XSubTableSchema,
   XDataSelectSchema,
-  XRateSchema
+  XRateSchema,
+  XCheckItemSchema
 };

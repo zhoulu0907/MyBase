@@ -65,17 +65,19 @@ const XRate = memo((props: XRateConfig & { runtime?: boolean; detailMode?: boole
   // =====  内部状态 & 回显 end =====
 
   // ===== 表单上下文与字段名与值读取 begin =====
-  const { fieldValue } = useFormField(dataField, nanoid(), FORM_COMPONENT_TYPES.RATEs);
+  const { form, fieldValue } = useFormField(dataField, nanoid(), FORM_COMPONENT_TYPES.RATEs);
   const [tooltipValue, setTooltipValue] = useState('');
   // ===== 表单上下文与字段名与值读取 end =====
 
   useEffect(() => {
-    const newTooltipValue = rateConfig.showCustomTooltips ? rateConfig.tooltips?.[Math.ceil(fieldValue) - 1] || '' : fieldValue
+    const newTooltipValue = rateConfig.showCustomTooltips
+      ? rateConfig.tooltips?.[Math.ceil(fieldValue) - 1] || ''
+      : fieldValue;
     setTooltipValue(newTooltipValue);
   }, [fieldValue]);
 
   return (
-    <div className="formWrapper">
+    <div className="formWrapper" style={{ display: 'flex', alignItems: 'end' }}>
       <Form.Item
         label={
           label.display &&
@@ -88,45 +90,52 @@ const XRate = memo((props: XRateConfig & { runtime?: boolean; detailMode?: boole
         rules={[{ required: verify?.required, message: `${label.text}是必填项` }]}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
+          width: 'auto',
+          maxWidth: '100%',
           margin: 0,
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
-        initialValue={defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : 0}
+        initialValue={
+          defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : undefined
+        }
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
-          <div>{String(fieldValue)}</div>
-        ) : (
-          <div style={{ display: 'flex', alignItems: 'center' }} className="custom-rate">
-            <Rate
-              count={rateConfig.max || 5}
-              style={{ stroke: rateConfig.iconColor, fill: rateConfig.iconColor }}
-              allowHalf={rateConfig.allowHalf}
-              tooltips={
-                rateConfig.showResult
-                  ? rateConfig.showCustomTooltips
-                    ? rateConfig.tooltips
-                    : Array.from({ length: rateConfig.max || 5 }, (_, index) => `${index + 1}`)
-                  : undefined
-              }
-              character={(index) => {
-                if (!rateConfig.showIcon) {
-                  return <span>{index + 1}</span>;
-                }
-                return <span>{dropList.find((ele) => ele.value === rateConfig.iconName)?.lable}</span>;
-              }}
-              onChange={(value)=>{
-                const newTooltipValue = rateConfig.showCustomTooltips ? rateConfig.tooltips?.[Math.ceil(value) - 1] || '' : `${value}`
-                setTooltipValue(newTooltipValue);
-              }}
-            />
-            {rateConfig.showResult && (
-              <Typography.Text style={{ marginLeft: '16px' }}>
-                {tooltipValue}
-              </Typography.Text>
-            )}
+          <div>
+            {rateConfig.showResult && rateConfig.showCustomTooltips
+              ? rateConfig.tooltips?.[Math.ceil(fieldValue) - 1]
+              : fieldValue}
           </div>
+        ) : (
+          <Rate
+            count={rateConfig.max || 5}
+            style={{ stroke: rateConfig.iconColor, fill: rateConfig.iconColor }}
+            allowHalf={rateConfig.allowHalf}
+            tooltips={
+              rateConfig.showResult
+                ? rateConfig.showCustomTooltips
+                  ? rateConfig.tooltips
+                  : Array.from({ length: rateConfig.max || 5 }, (_, index) => `${index + 1}`)
+                : undefined
+            }
+            character={(index) => {
+              if (!rateConfig.showIcon) {
+                return <span>{index + 1}</span>;
+              }
+              return <span>{dropList.find((ele) => ele.value === rateConfig.iconName)?.lable}</span>;
+            }}
+            onChange={(value) => {
+              const newTooltipValue = rateConfig.showCustomTooltips
+                ? rateConfig.tooltips?.[Math.ceil(value) - 1] || ''
+                : `${value}`;
+              setTooltipValue(newTooltipValue);
+              form.setFieldValue(fieldId, value);
+            }}
+          />
         )}
       </Form.Item>
+      {rateConfig.showResult && (
+        <Typography.Text style={{ marginLeft: '16px', lineHeight: '34px' }}>{tooltipValue}</Typography.Text>
+      )}
     </div>
   );
 });
