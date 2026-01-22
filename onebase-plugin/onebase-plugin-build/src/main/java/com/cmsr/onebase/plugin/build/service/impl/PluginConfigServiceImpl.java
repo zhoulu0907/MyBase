@@ -83,6 +83,7 @@ public class PluginConfigServiceImpl implements PluginConfigService {
         }
 
         respVO.setConfigTemplates(templateItems);
+        respVO.setPluginConfigInfo(pluginInfo.getPluginConfigInfo());
         return respVO;
     }
 
