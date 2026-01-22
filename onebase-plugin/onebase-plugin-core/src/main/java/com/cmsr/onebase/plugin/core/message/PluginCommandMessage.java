@@ -64,6 +64,10 @@ public class PluginCommandMessage implements Serializable {
          */
         DISABLE,
         /**
+         * 禁用并清理插件（用于版本切换时清理旧版本）
+         */
+        DISABLE_AND_CLEAN,
+        /**
          * 上传插件
          */
         UPLOAD,

@@ -59,6 +59,8 @@ public class PluginCommandSubscriber implements MessageListener {
             handleEnableCommand(message);
         } else if (PluginCommandMessage.PluginCommand.DISABLE == message.getCommand()) {
             handleDisableCommand(message);
+        } else if (PluginCommandMessage.PluginCommand.DISABLE_AND_CLEAN == message.getCommand()) {
+            handleDisableAndCleanCommand(message);
         } else if (PluginCommandMessage.PluginCommand.RELOAD == message.getCommand()) {
             handleReloadCommand(message);
         } else if (PluginCommandMessage.PluginCommand.DELETE == message.getCommand()) {
@@ -131,6 +133,27 @@ public class PluginCommandSubscriber implements MessageListener {
             log.info("插件禁用成功: pluginId={}, version={}", message.getPluginId(), message.getPluginVersion());
         } catch (Exception e) {
             log.error("插件禁用失败: pluginId={}, version={}", message.getPluginId(), message.getPluginVersion(), e);
+        }
+    }
+
+    /**
+     * 处理禁用并清理命令
+     * 用于版本切换时，卸载旧版本插件并清理其文件（包括zip包和解压后的目录）
+     */
+    private void handleDisableAndCleanCommand(PluginCommandMessage message) {
+        log.info("处理插件禁用并清理命令: pluginId={}, version={}, tenantId={}",
+                message.getPluginId(), message.getPluginVersion(), message.getTenantId());
+
+        try {
+            // 1. 卸载插件
+            pluginFileManager.unloadPlugin(message.getPluginId(), message.getPluginVersion());
+
+            // 2. 清理该pluginId下所有版本的文件（zip包和解压目录）
+            pluginFileManager.cleanupPluginAllVersionFiles(message.getPluginId());
+
+            log.info("插件禁用并清理成功: pluginId={}, version={}", message.getPluginId(), message.getPluginVersion());
+        } catch (Exception e) {
+            log.error("插件禁用并清理失败: pluginId={}, version={}", message.getPluginId(), message.getPluginVersion(), e);
         }
     }
 
