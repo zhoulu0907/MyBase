@@ -151,6 +151,7 @@ export interface ConnectFlowNode {
   typeCode: string;
   typeName?: string; // 保留旧字段以保持兼容性
   nodeName?: string; // 新字段，优先使用
+  nodeCode?: string; // 连接器类型代码，如"weaverE9"
 }
 
 export interface ListConnectInstanceReq {
@@ -183,9 +184,10 @@ export enum TypeCode {
 export interface ConnectInstance {
   applicationId: string;
   id: string;
-  connectorUuid: string;
+  connectorUuid: string; // 实例的 UUID
   connectorName: string;
-  typeCode: TypeCode;
+  typeCode: TypeCode; // 连接器类型代码，如 "script"
+  nodeCode?: string; // 连接器节点代码，如 "weaverE9"
   createTime: string;
   description?: string;
   connectorTypeName?: string; // 连接器类型名称，如"泛微e9"

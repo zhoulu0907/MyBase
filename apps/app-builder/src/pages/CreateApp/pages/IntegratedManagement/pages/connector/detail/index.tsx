@@ -116,7 +116,8 @@ const ConnectorDetailPage: React.FC<ConnectorInstanceDetailProps> = ({}) => {
     if (res) {
       setBaseInfo(res);
 
-      // 如果有 typeCode，获取连接器类型详细信息
+      // 使用 typeCode 字段来获取连接器类型详细信息
+      // 注意：后端的 typeCode 字段存储的是 nodeCode（如 "weaverE9"），而不是类型（如 "script"）
       if (res.typeCode) {
         try {
           const typeInfo = await getConnectorTypeInfo(res.typeCode);

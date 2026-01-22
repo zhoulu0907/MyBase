@@ -56,8 +56,11 @@ export const transformConnectorData = (
     const level1Code = item.level1Code || 'system_preset';
     // 优先使用 nodeName，如果没有则使用 typeName，最后使用默认值
     const displayName = item.nodeName || item.typeName || '未命名连接器';
+    // 优先使用 nodeCode（如 weaverE9、MQ_RABBITMQ_CONSUMER）
+    const nodeId = item.nodeCode || item.typeCode || `node-${index}`;
+
     return {
-      id: item.typeCode || `node-${index}`,
+      id: nodeId,
       name: displayName,
       icon: getIconByLevel1Code(level1Code),
       category: getCategoryByLevel1Code(level1Code),

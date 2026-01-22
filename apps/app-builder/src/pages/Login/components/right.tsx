@@ -136,7 +136,14 @@ const Right: React.FC = () => {
       const deviceId = await getOrCreateDeviceInfo();
 
       if (values.password) {
-        values.password = await sm2Encrypt(getPublicKey(), values.password);
+        try {
+          values.password = await sm2Encrypt(getPublicKey(), values.password);
+        } catch (encryptError) {
+          console.error('密码加密失败:', encryptError);
+          Message.error('密码加密失败，请检查公钥配置');
+          setLoading(false);
+          return;
+        }
       }
 
       const loginData: LoginRequest = {
@@ -156,7 +163,8 @@ const Right: React.FC = () => {
 
       const response: TenantLoginResponse = await tenantLogin(loginData, headers);
 
-      console.error('登录成功:', response.accessToken);
+      console.log('登录 API 响应:', response);
+      console.log('是否有 accessToken:', !!response.accessToken);
       if (response.accessToken) {
         TokenManager.setCurIdentifyId(tenantId);
 
@@ -197,6 +205,9 @@ const Right: React.FC = () => {
       }
     } catch (error: any) {
       console.error('登录失败:', error);
+      // 显示错误提示
+      const errorMessage = error?.response?.data?.msg || error?.message || '登录失败，请检查用户名和密码';
+      Message.error(errorMessage);
       // 登录失败，清除验证码，下次需要重新验证
       clearLoginVerification();
     } finally {
