@@ -71,6 +71,14 @@ const WORKBENCH_COMPONENT_DEFINITIONS: ReadonlyArray<WorkbenchComponentDefinitio
     icon: 'button_workbench_cp.svg',
     category: 'basic',
     size: { h: 36, w: 118 }
+  },
+  {
+    key: 'INFORMATION_LIST',
+    type: 'XInformationList',
+    displayName: '资讯列表',
+    icon: 'information_list_cp.svg',
+    category: 'basic',
+    size: { h: 36, w: 118 }
   }
 ] as const;
 

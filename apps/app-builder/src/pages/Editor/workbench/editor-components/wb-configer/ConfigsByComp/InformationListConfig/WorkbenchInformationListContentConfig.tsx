@@ -1,0 +1,109 @@
+import { Button, Form, Message, Radio, Select } from '@arco-design/web-react';
+import { WORKBENCH_CONFIG_TYPES } from '@onebase/ui-kit';
+import { registerConfigRenderer } from '../../registry';
+import StaticInformationList from './StaticInformationList';
+import type { InformationListItem, Props, InformationListContentMeta, VerifyConfig } from './types';
+import styles from '../../index.module.less';
+
+const FormItem = Form.Item;
+const Option = Select.Option;
+
+const WbInformationListContentConfig = ({ item, configs, handlePropsChange }: Props) => {
+  const meta: InformationListContentMeta = item.meta ?? {};
+  const modeField = meta.modeField ?? { key: 'dataSourceMode', options: [] };
+  const dynamicFields = meta.dynamicFields ?? [];
+  const filterField = meta.filterField;
+  const staticFieldKey = meta.staticFieldKey ?? 'informationListConfig';
+  console.log('configs', configs, item);
+  console.log('modeField', modeField);
+  console.log('dynamicFields', dynamicFields);
+  console.log('filterField', filterField);
+  console.log('staticFieldKey', staticFieldKey);
+  const currentMode =
+    (typeof configs[modeField.key] === 'string' ? (configs[modeField.key] as string) : undefined) ??
+    modeField.defaultValue ??
+    'dynamic';
+
+  const handleModeChange = (value: string) => {
+    handlePropsChange(modeField.key, value);
+  };
+
+  const renderDynamicFields = () =>
+    dynamicFields.map((field) => (
+      <FormItem key={field.key} className={styles.formItem} label={field.label}>
+        <Select
+          allowClear
+          placeholder={field.placeholder}
+          value={typeof configs[field.key] === 'string' ? (configs[field.key] as string) : undefined}
+          onChange={(value) => handlePropsChange(field.key, value)}
+        >
+          {(field.options ?? []).map((option) => (
+            <Option key={option.value} value={option.value}>
+              {option.label ?? option.value}
+            </Option>
+          ))}
+        </Select>
+      </FormItem>
+    ));
+
+  const renderFilterField = () =>
+    filterField ? (
+      <FormItem className={styles.formItem} label={filterField.label}>
+        <Button
+          type="outline"
+          onClick={() => {
+            Message.info('筛选条件配置功能开发中');
+          }}
+        >
+          {filterField.buttonText ?? '设置条件'}
+        </Button>
+      </FormItem>
+    ) : null;
+
+  return (
+    <div>
+      <FormItem className={styles.formItem} label="数据来源">
+        <Radio.Group type="button" value={currentMode} onChange={handleModeChange} style={{ width: '100%' }}>
+          {(modeField.options ?? []).map((option) => (
+            <Radio key={option.key} value={option.value} style={{ flex: 1, textAlign: 'center' }}>
+              {option.text}
+            </Radio>
+          ))}
+        </Radio.Group>
+      </FormItem>
+
+      {currentMode === 'dynamic' ? (
+        <>
+          {renderDynamicFields()}
+          {renderFilterField()}
+        </>
+      ) : (
+        <StaticInformationList
+          staticInformationList={(configs[staticFieldKey] as InformationListItem[]) || []}
+          maxSizeMB={
+            configs.verify && typeof (configs.verify as VerifyConfig).maxSize === 'number'
+              ? (configs.verify as VerifyConfig).maxSize
+              : 5
+          }
+          maxCount={
+            configs.verify && typeof (configs.verify as VerifyConfig).maxCount === 'number'
+              ? (configs.verify as VerifyConfig).maxCount
+              : 10
+          }
+          onConfigChange={(newConfig) => {
+            handlePropsChange(staticFieldKey, newConfig);
+          }}
+        />
+      )}
+    </div>
+  );
+};
+
+registerConfigRenderer(
+  WORKBENCH_CONFIG_TYPES.WB_INFORMATION_LIST_CONTENT,
+  ({ id, item, configs, handlePropsChange }) => (
+    <WbInformationListContentConfig id={id} item={item} configs={configs} handlePropsChange={handlePropsChange} />
+  )
+);
+
+export default WbInformationListContentConfig;
