@@ -58,7 +58,7 @@ public class BuildAuthenticationFilter extends OncePerRequestFilter implements A
 
     private ApplicationContext applicationContext;
 
-    private         List<String>      permitAllUrls;
+    private List<String> permitAllUrls;
 
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
@@ -82,7 +82,7 @@ public class BuildAuthenticationFilter extends OncePerRequestFilter implements A
             // 如果是登录、登出、注册，那么从header中获取租户信息
             TenantContextHolder.setTenantId(WebFrameworkUtils.getTenantIdFromHeader(request));
             // 无需获取token和登录用户信息
-        } else if(isPermitAllRequest(request)){
+        } else if (isPermitAllRequest(request)) {
             // 如果是其他免登接口，暂保持和登录登出一致的逻辑，从header中获取租户信息
             TenantContextHolder.setTenantId(WebFrameworkUtils.getTenantIdFromHeader(request));
         } else {
@@ -117,13 +117,18 @@ public class BuildAuthenticationFilter extends OncePerRequestFilter implements A
             if (loginUser != null) {
                 SecurityFrameworkUtils.setLoginUser(loginUser, request);
                 TenantContextHolder.setTenantId(loginUser.getTenantId());
-                // 会话空闲检查：排除登录和登出请求
-                boolean checkSuc = checkAndUpdateSessionIdle(loginUser, token);
-                if (!checkSuc) {
-                    log.error("[BuildAuthenticationFilter][长时间内无操作，自动登出, 401 会话超时, userID={}]", loginUser.getId());
-                    CommonResult<?> result = CommonResult.error(SEESION_TIMEOUT);
-                    ServletUtils.writeJSON(response, result);
-                    return; // 中断
+                if (securityProperties.getMockEnable()) {
+                    // mock模式不检查会话空闲
+                    log.info("[BuildAuthenticationFilter][TOKEN MOCK开启，用户ID：{}]", loginUser.getId());
+                } else {
+                    // 会话空闲检查：排除登录和登出请求
+                    boolean checkSuc = checkAndUpdateSessionIdle(loginUser, token);
+                    if (!checkSuc) {
+                        log.error("[BuildAuthenticationFilter][长时间内无操作，自动登出, 401 会话超时, userID={}]", loginUser.getId());
+                        CommonResult<?> result = CommonResult.error(SEESION_TIMEOUT);
+                        ServletUtils.writeJSON(response, result);
+                        return; // 中断
+                    }
                 }
             } else {
                 log.error("[BuildAuthenticationFilter][无效的Token，401 登录已过期]");
@@ -168,8 +173,8 @@ public class BuildAuthenticationFilter extends OncePerRequestFilter implements A
      * <p>
      * 注意，在线上环境下，一定要关闭该功能！！！
      *
-     * @param request  请求
-     * @param token    模拟的 token，格式为 {@link SecurityProperties#getMockSecret()} + 用户编号
+     * @param request 请求
+     * @param token   模拟的 token，格式为 {@link SecurityProperties#getMockSecret()} + 用户编号
      * @return 模拟的 LoginUser
      */
     private LoginUser mockLoginUser(HttpServletRequest request, String token) {
