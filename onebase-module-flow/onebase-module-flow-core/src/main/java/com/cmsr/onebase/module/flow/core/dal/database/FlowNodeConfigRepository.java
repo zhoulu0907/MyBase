@@ -54,4 +54,12 @@ public class FlowNodeConfigRepository extends ServiceImpl<FlowNodeConfigMapper, 
                 .orderBy(FLOW_NODE_CONFIG.NODE_NAME, true);
         return this.list(queryWrapper);
     }
+
+    /**
+     * List all active node types (alias for listAllConnectorTypes)
+     * Queries active_status=1, ordered by sort_order ASC, node_name ASC
+     */
+    public List<FlowNodeConfigDO> listActiveNodeTypes() {
+        return listAllConnectorTypes();
+    }
 }
