@@ -56,19 +56,27 @@ public class PluginConfigServiceImpl implements PluginConfigService {
             throw exception(PLUGIN_VERSION_NOT_FOUND);
         }
 
-        // 2. 解析plugin_meta_info中的配置模板
+        // 2. 构建响应对象
         PluginConfigTemplateRespVO respVO = new PluginConfigTemplateRespVO();
         List<PluginConfigTemplateRespVO.ConfigTemplateItem> templateItems = new ArrayList<>();
 
-        if (StrUtil.isNotBlank(pluginInfo.getPluginMetaInfo())) {
+        // 3. 优先从plugin_config_info（plugin.schema.json）读取配置模板
+        if (StrUtil.isNotBlank(pluginInfo.getPluginConfigInfo()) && !"{}".equals(pluginInfo.getPluginConfigInfo())) {
+            templateItems = parseConfigTemplatesFromSchemaJson(pluginInfo.getPluginConfigInfo());
+        }
+
+        // 4. 如果plugin_config_info为空，则从plugin_meta_info（plugin.json）读取
+        if (CollUtil.isEmpty(templateItems) && StrUtil.isNotBlank(pluginInfo.getPluginMetaInfo())) {
             PluginMetaInfo metaInfo = JSONUtil.toBean(pluginInfo.getPluginMetaInfo(), PluginMetaInfo.class);
             if (CollUtil.isNotEmpty(metaInfo.getConfigTemplates())) {
                 for (PluginMetaInfo.PluginConfigTemplate template : metaInfo.getConfigTemplates()) {
                     PluginConfigTemplateRespVO.ConfigTemplateItem item = new PluginConfigTemplateRespVO.ConfigTemplateItem();
                     item.setConfigKey(template.getConfigKey());
+                    item.setConfigName(template.getConfigName());
                     item.setDefaultValue(template.getDefaultValue());
                     item.setValueType(template.getValueType());
                     item.setDescription(template.getDescription());
+                    item.setRequired(template.getRequired());
                     templateItems.add(item);
                 }
             }
@@ -76,6 +84,48 @@ public class PluginConfigServiceImpl implements PluginConfigService {
 
         respVO.setConfigTemplates(templateItems);
         return respVO;
+    }
+
+    /**
+     * 从plugin.schema.json解析配置模板
+     * 支持多种格式：
+     * 1. 直接的配置数组: [{"configKey": "xxx", ...}]
+     * 2. 包含configTemplates字段: {"configTemplates": [...]}
+     *
+     * @param schemaJson plugin.schema.json内容
+     * @return 配置模板列表
+     */
+    private List<PluginConfigTemplateRespVO.ConfigTemplateItem> parseConfigTemplatesFromSchemaJson(String schemaJson) {
+        List<PluginConfigTemplateRespVO.ConfigTemplateItem> templateItems = new ArrayList<>();
+        try {
+            cn.hutool.json.JSONObject jsonObject = JSONUtil.parseObj(schemaJson);
+            cn.hutool.json.JSONArray configArray = null;
+
+            // 尝试获取configTemplates字段
+            if (jsonObject.containsKey("configTemplates")) {
+                configArray = jsonObject.getJSONArray("configTemplates");
+            } else if (jsonObject.containsKey("configs")) {
+                configArray = jsonObject.getJSONArray("configs");
+            }
+
+            // 如果有配置数组，解析每个配置项
+            if (configArray != null && !configArray.isEmpty()) {
+                for (int i = 0; i < configArray.size(); i++) {
+                    cn.hutool.json.JSONObject configObj = configArray.getJSONObject(i);
+                    PluginConfigTemplateRespVO.ConfigTemplateItem item = new PluginConfigTemplateRespVO.ConfigTemplateItem();
+                    item.setConfigKey(configObj.getStr("configKey"));
+                    item.setConfigName(configObj.getStr("configName"));
+                    item.setDefaultValue(configObj.getStr("defaultValue"));
+                    item.setValueType(configObj.getStr("valueType"));
+                    item.setDescription(configObj.getStr("description"));
+                    item.setRequired(configObj.getBool("required"));
+                    templateItems.add(item);
+                }
+            }
+        } catch (Exception e) {
+            log.warn("解析plugin.schema.json失败: {}", e.getMessage());
+        }
+        return templateItems;
     }
 
     @Override

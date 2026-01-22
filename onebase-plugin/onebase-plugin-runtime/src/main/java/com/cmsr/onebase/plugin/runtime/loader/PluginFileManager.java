@@ -160,6 +160,37 @@ public class PluginFileManager {
     }
 
     /**
+     * 清理指定pluginId下所有版本的文件
+     * 包括zip包和解压后的目录，用于版本切换时清理旧版本
+     *
+     * @param pluginId 插件ID
+     */
+    public void cleanupPluginAllVersionFiles(String pluginId) {
+        log.info("开始清理插件所有版本文件: pluginId={}", pluginId);
+
+        Path backendPath = Paths.get(backendDir);
+        if (!Files.exists(backendPath)) {
+            log.info("插件目录不存在，无需清理: {}", backendPath);
+            return;
+        }
+
+        try {
+            // 遍历backend目录，删除与pluginId相关的所有文件和目录
+            Files.list(backendPath).forEach(path -> {
+                String fileName = path.getFileName().toString();
+                // 匹配以pluginId开头的文件或目录（如 onebase-plugin-ocr.zip, onebase-plugin-ocr/, onebase-plugin-ocr-backend.zip等）
+                if (fileName.startsWith(pluginId) || fileName.contains(pluginId)) {
+                    log.info("删除插件文件/目录: {}", path);
+                    FileUtil.del(path.toFile());
+                }
+            });
+            log.info("插件所有版本文件清理完成: pluginId={}", pluginId);
+        } catch (IOException e) {
+            log.error("清理插件文件失败: pluginId={}", pluginId, e);
+        }
+    }
+
+    /**
      * 获取插件目录路径
      *
      * @param pluginId 插件ID
