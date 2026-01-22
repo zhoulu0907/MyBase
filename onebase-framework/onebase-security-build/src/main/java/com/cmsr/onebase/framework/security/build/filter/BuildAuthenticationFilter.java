@@ -103,7 +103,7 @@ public class BuildAuthenticationFilter extends OncePerRequestFilter implements A
 
                         loginUser = buildLoginUserByToken(runMode, token);
                         // 1.2 模拟 Login 功能，方便日常开发调试
-                        if (loginUser == null) {
+                        if (loginUser == null && isTokenMockable(token)) {
                             loginUser = mockLoginUser(request, token);
                         }
                     } catch (Throwable ex) {
