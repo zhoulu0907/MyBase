@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.bpm.runtime.service.instance.detail.impl;
 
+import com.cmsr.onebase.framework.common.util.string.UuidUtils;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.bpm.core.dal.database.BpmFlowAgentInsRepository;
@@ -13,6 +14,7 @@ import com.cmsr.onebase.module.bpm.core.enums.BpmConstants;
 import com.cmsr.onebase.module.bpm.core.enums.BpmViewSourceEnum;
 import com.cmsr.onebase.module.bpm.core.utils.BpmUtil;
 import com.cmsr.onebase.module.bpm.core.vo.UserBasicInfoVO;
+import com.cmsr.onebase.module.bpm.runtime.helper.BpmEntityHelper;
 import com.cmsr.onebase.module.bpm.runtime.service.context.BpmPermissionUserContext;
 import com.cmsr.onebase.module.bpm.runtime.service.instance.detail.BpmDetailService;
 import com.cmsr.onebase.module.bpm.runtime.service.instance.detail.strategy.InstanceDetailStrategyManager;
@@ -83,6 +85,9 @@ public class BpmDetailServiceImpl implements BpmDetailService {
 
     @Resource
     private SemanticDynamicDataApi semanticDynamicDataApi;
+
+    @Resource
+    private BpmEntityHelper bpmEntityHelper;
 
     /**
      * 流程详情上下文
@@ -672,6 +677,7 @@ public class BpmDetailServiceImpl implements BpmDetailService {
         SemanticTargetBodyVO reqVO = new SemanticTargetBodyVO();
         reqVO.setTableName(tableName);
         reqVO.setId(entityDataId);
+        reqVO.setTraceId(UuidUtils.getUuid());
 
         SemanticEntityValueDTO respVO = semanticDynamicDataApi.getDataById(reqVO);
 
