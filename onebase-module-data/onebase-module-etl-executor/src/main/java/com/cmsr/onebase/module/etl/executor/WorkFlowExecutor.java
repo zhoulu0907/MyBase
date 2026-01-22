@@ -95,7 +95,7 @@ public class WorkFlowExecutor implements Closeable {
         executionLog.setWorkflowId(executeRequest.getWorkflowId());
         executionLog.setStartTime(execStartTime);
         try {
-            for (Node node : workflowGraph.iterateNodes()) {
+            for (Node node : workflowGraph.getNodesFromStartToEnd()) {
                 doAction(node);
             }
             executionLog.setTaskStatus("success");

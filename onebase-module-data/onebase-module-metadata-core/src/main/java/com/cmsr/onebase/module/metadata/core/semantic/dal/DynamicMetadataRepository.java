@@ -7,6 +7,7 @@ import com.cmsr.onebase.framework.uid.UidGenerator;
 import com.cmsr.onebase.module.metadata.core.config.ApplicationDataSourceManager;
 import com.cmsr.onebase.module.metadata.core.semantic.constants.SystemFieldConstants;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldSchemaDTO;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticFieldTypeEnum;
 import com.mybatisflex.core.query.CPI;
 import com.mybatisflex.core.query.QueryColumn;
 import com.mybatisflex.core.query.QueryMethods;
@@ -18,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -215,6 +217,45 @@ public class DynamicMetadataRepository {
     }
 
     /**
+     * 根据 PK 字段类型过滤 ID 列表。
+     * 若 PK 为数字类型，则剔除无法转换为 Long 的值；
+     * 否则保留原始转换结果（尝试转 Long，失败保留原值）。
+     */
+    private List<?> filterIdsByType(List<?> ids, String pkField, List<SemanticFieldSchemaDTO> fields) {
+        if (ids == null || ids.isEmpty()) {
+            return List.of();
+        }
+
+        SemanticFieldTypeEnum pkType = null;
+        if (fields != null) {
+            for (SemanticFieldSchemaDTO f : fields) {
+                if (f != null && pkField.equals(f.getFieldName())) {
+                    pkType = f.getFieldTypeEnum();
+                    break;
+                }
+            }
+        }
+
+        List<Object> validIds = new ArrayList<>();
+        // 若明确为主键/数字类型，则严格过滤非 Long 值
+        boolean strictLong = pkType != null && pkType.isNumberType();
+
+        for (Object id : ids) {
+            Object v = toLongIfNotEmpty(id);
+            if (strictLong) {
+                if (v instanceof Long) {
+                    validIds.add(v);
+                }
+            } else {
+                if (v != null) {
+                    validIds.add(v);
+                }
+            }
+        }
+        return validIds;
+    }
+
+    /**
      * 软删除：将逻辑删除标志置为 1。
      *
      * @param tableName 表名
@@ -357,7 +398,7 @@ public class DynamicMetadataRepository {
         }
         ApplicationDataSourceManager.useBizDatasourceByAppId(ApplicationManager.getApplicationId());
         try {
-            List<?> v = toLongListIfNotEmpty(ids);
+            List<?> v = filterIdsByType(ids, pkField, fields);
             if (v.isEmpty()) {
                 return List.of();
             }

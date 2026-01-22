@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.flow.build.service;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.flow.build.vo.CreateFlowConnectorReqVO;
+import com.cmsr.onebase.module.flow.build.vo.CreateFlowConnectorRespVO;
 import com.cmsr.onebase.module.flow.build.vo.FlowConnectorVO;
 import com.cmsr.onebase.module.flow.build.vo.UpdateFlowConnectorReqVO;
 import com.cmsr.onebase.module.flow.core.vo.PageConnectorReqVO;
@@ -15,7 +16,7 @@ public interface FlowConnectorService {
 
     FlowConnectorVO getConnectorDetail(Long connectorId);
 
-    Long createConnector(CreateFlowConnectorReqVO createVO);
+    CreateFlowConnectorRespVO createConnector(CreateFlowConnectorReqVO createVO);
 
     void updateConnector(UpdateFlowConnectorReqVO updateVO);
 

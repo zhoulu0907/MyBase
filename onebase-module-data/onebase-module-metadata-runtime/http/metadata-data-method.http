@@ -434,3 +434,52 @@ Content-Type: application/json
 X-Application-Id: 176207115261378560
 X-Tenant-Id: 153935442021842944
 login-user: {"id":"155019577667616816","applicationId":"176207115261378560","tenantId":"153935442021842944"}
+
+### 运行态 - 动态数据分页（snapshot）
+POST {{base}}/metadata/any9_contractor/page?menuId=178978039191208299
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer 3b911661018341da8a28a80c20076f10
+X-Application-Id: 168411371638652928
+X-Tenant-Id: 168334577623138304
+appKey: onebase
+nonce: zt8iiLtzgDHkahat
+sign: 74060b9bab3be5f84681160beb2db0f0a99e1c585807be957eac5cb8d0f93eba
+timestamp: 1765607385681
+
+{
+  "pageNo": 1,
+  "pageSize": 10
+}
+
+### 运行态 - 动态数据更新（本地）
+POST {{base}}/metadata/yoid_shujuxuanze/update?menuId=181995236538449963
+Accept: application/json
+Content-Type: application/json
+X-Application-Id: 181672189277396480
+X-Tenant-Id: 153935442021842944
+login-user: {"id":"153935442021842949","applicationId":"181672186277396480","tenantId":"153935442021842944", "userType": 2, "runMode": "runtime"}
+appKey: onebase
+
+{
+  "id": 181763033425674240,
+  "data1": {
+    "id": 181763033425674240
+  }
+}
+
+### 运行态 - 动态数据更新（本地）
+POST {{base}}/metadata/yoid_shujuxuanze/create?menuId=181995236538449963
+Accept: application/json
+Content-Type: application/json
+X-Application-Id: 181672189277396480
+X-Tenant-Id: 153935442021842944
+login-user: {"id":"153935442021842949","applicationId":"181672186277396480","tenantId":"153935442021842944", "userType": 2, "runMode": "runtime"}
+appKey: onebase
+
+{
+  "data1": {
+    "id": 182085224694906880,
+    "name": "text2"
+  }
+}

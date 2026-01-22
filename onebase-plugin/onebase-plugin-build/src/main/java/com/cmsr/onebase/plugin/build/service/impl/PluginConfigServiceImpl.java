@@ -56,26 +56,124 @@ public class PluginConfigServiceImpl implements PluginConfigService {
             throw exception(PLUGIN_VERSION_NOT_FOUND);
         }
 
-        // 2. 解析plugin_meta_info中的配置模板
+        // 2. 构建响应对象
         PluginConfigTemplateRespVO respVO = new PluginConfigTemplateRespVO();
         List<PluginConfigTemplateRespVO.ConfigTemplateItem> templateItems = new ArrayList<>();
 
-        if (StrUtil.isNotBlank(pluginInfo.getPluginMetaInfo())) {
+        // 3. 优先从plugin_config_info（plugin.schema.json）读取配置模板
+        if (StrUtil.isNotBlank(pluginInfo.getPluginConfigInfo()) && !"{}".equals(pluginInfo.getPluginConfigInfo())) {
+            templateItems = parseConfigTemplatesFromSchemaJson(pluginInfo.getPluginConfigInfo());
+        }
+
+        // 4. 如果plugin_config_info为空，则从plugin_meta_info（plugin.json）读取
+        if (CollUtil.isEmpty(templateItems) && StrUtil.isNotBlank(pluginInfo.getPluginMetaInfo())) {
             PluginMetaInfo metaInfo = JSONUtil.toBean(pluginInfo.getPluginMetaInfo(), PluginMetaInfo.class);
             if (CollUtil.isNotEmpty(metaInfo.getConfigTemplates())) {
                 for (PluginMetaInfo.PluginConfigTemplate template : metaInfo.getConfigTemplates()) {
                     PluginConfigTemplateRespVO.ConfigTemplateItem item = new PluginConfigTemplateRespVO.ConfigTemplateItem();
                     item.setConfigKey(template.getConfigKey());
+                    item.setConfigName(template.getConfigName());
                     item.setDefaultValue(template.getDefaultValue());
                     item.setValueType(template.getValueType());
                     item.setDescription(template.getDescription());
+                    item.setRequired(template.getRequired());
                     templateItems.add(item);
                 }
             }
         }
 
         respVO.setConfigTemplates(templateItems);
+        respVO.setPluginConfigInfo(pluginInfo.getPluginConfigInfo());
         return respVO;
+    }
+
+    /**
+     * 从plugin.schema.json解析配置模板
+     * 支持多种格式：
+     * 1. 直接的配置数组: [{"configKey": "xxx", ...}]
+     * 2. 包含configTemplates字段: {"configTemplates": [...]}
+     * 3. 标准JSON Schema格式（通过properties定义）
+     *
+     * @param schemaJson plugin.schema.json内容
+     * @return 配置模板列表
+     */
+    private List<PluginConfigTemplateRespVO.ConfigTemplateItem> parseConfigTemplatesFromSchemaJson(String schemaJson) {
+        List<PluginConfigTemplateRespVO.ConfigTemplateItem> templateItems = new ArrayList<>();
+        try {
+            cn.hutool.json.JSONObject jsonObject = JSONUtil.parseObj(schemaJson);
+            cn.hutool.json.JSONArray configArray = null;
+
+            // 1. 尝试获取configTemplates字段 or configs (Custom format)
+            if (jsonObject.containsKey("configTemplates")) {
+                configArray = jsonObject.getJSONArray("configTemplates");
+            } else if (jsonObject.containsKey("configs")) {
+                configArray = jsonObject.getJSONArray("configs");
+            }
+
+            // Custom format handling
+            if (configArray != null && !configArray.isEmpty()) {
+                for (int i = 0; i < configArray.size(); i++) {
+                    cn.hutool.json.JSONObject configObj = configArray.getJSONObject(i);
+                    PluginConfigTemplateRespVO.ConfigTemplateItem item = new PluginConfigTemplateRespVO.ConfigTemplateItem();
+                    item.setConfigKey(configObj.getStr("configKey"));
+                    item.setConfigName(configObj.getStr("configName"));
+                    item.setDefaultValue(configObj.getStr("defaultValue"));
+                    item.setValueType(configObj.getStr("valueType"));
+                    item.setDescription(configObj.getStr("description"));
+                    item.setRequired(configObj.getBool("required"));
+                    templateItems.add(item);
+                }
+            }
+            // 2. Standard JSON Schema handling
+            else if (jsonObject.containsKey("properties")) {
+                parseJsonSchema(jsonObject, "", templateItems);
+            }
+        } catch (Exception e) {
+            log.warn("解析plugin.schema.json失败: {}", e.getMessage());
+        }
+        return templateItems;
+    }
+
+    private void parseJsonSchema(cn.hutool.json.JSONObject schemaObj, String prefix,
+                                 List<PluginConfigTemplateRespVO.ConfigTemplateItem> templateItems) {
+        if (!schemaObj.containsKey("properties")) {
+            return;
+        }
+        cn.hutool.json.JSONObject properties = schemaObj.getJSONObject("properties");
+        cn.hutool.json.JSONArray requiredArray = schemaObj.getJSONArray("required");
+        List<String> requiredFields = requiredArray != null ? requiredArray.toList(String.class) : new ArrayList<>();
+
+        for (String key : properties.keySet()) {
+            cn.hutool.json.JSONObject propObj = properties.getJSONObject(key);
+            String fullKey = StrUtil.isEmpty(prefix) ? key : prefix + "." + key;
+            String type = propObj.getStr("type");
+
+            if ("object".equalsIgnoreCase(type) && propObj.containsKey("properties")) {
+                parseJsonSchema(propObj, fullKey, templateItems);
+            } else {
+                PluginConfigTemplateRespVO.ConfigTemplateItem item = new PluginConfigTemplateRespVO.ConfigTemplateItem();
+                item.setConfigKey(fullKey);
+                // Use title as configName, fallback to key
+                String title = propObj.getStr("title");
+                item.setConfigName(StrUtil.isNotBlank(title) ? title : key);
+                item.setDescription(propObj.getStr("description"));
+
+                // Handle defaultValue
+                Object defaultVal = propObj.get("default");
+                item.setDefaultValue(defaultVal != null ? String.valueOf(defaultVal) : null);
+
+                // Handle valueType
+                String uiType = propObj.getStr("$ui:type");
+                if (StrUtil.isNotEmpty(uiType)) {
+                    item.setValueType(uiType);
+                } else {
+                    item.setValueType("normal");
+                }
+
+                item.setRequired(requiredFields.contains(key));
+                templateItems.add(item);
+            }
+        }
     }
 
     @Override

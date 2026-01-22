@@ -80,6 +80,25 @@ public class PluginCommandPublisher {
     }
 
     /**
+     * 发布插件禁用并清理命令
+     * 用于版本切换时，停用旧版本并清理其文件
+     *
+     * @param pluginId 插件ID
+     * @param pluginVersion 插件版本
+     * @param tenantId 租户ID
+     */
+    public void publishDisableAndCleanCommand(String pluginId, String pluginVersion, Long tenantId) {
+        PluginCommandMessage message = PluginCommandMessage.builder()
+                .command(PluginCommandMessage.PluginCommand.DISABLE_AND_CLEAN)
+                .pluginId(pluginId)
+                .pluginVersion(pluginVersion)
+                .tenantId(tenantId)
+                .timestamp(System.currentTimeMillis())
+                .build();
+        publish(message);
+    }
+
+    /**
      * 发布插件删除命令
      *
      * @param pluginId 插件ID

@@ -93,18 +93,8 @@ public class PluginInfoServiceImpl implements PluginInfoService {
         // 5. 上传插件包到MinIO
         String fileId = fileApi.createFile(content, uploadReqVO.getFile().getOriginalFilename());
 
-        // 6. 上传图标文件到MinIO（如果有）
-        Long pluginIconId = null;
-        if (uploadReqVO.getPluginIcon() != null && !uploadReqVO.getPluginIcon().isEmpty()) {
-            try {
-                byte[] iconContent = uploadReqVO.getPluginIcon().getBytes();
-                String iconFileId = fileApi.createFile(iconContent, uploadReqVO.getPluginIcon().getOriginalFilename());
-                pluginIconId = Long.parseLong(iconFileId);
-            } catch (Exception e) {
-                log.error("插件图标上传失败", e);
-                throw exception(PLUGIN_ICON_UPLOAD_FAILED);
-            }
-        }
+        // 6. 获取插件图标（直接存储字符串）
+        String pluginIcon = uploadReqVO.getPluginIcon();
 
         // 7. 保存插件信息（优先使用用户输入的名称和描述，否则使用plugin.json中的）
         PluginInfoDO pluginInfoDO = PluginInfoDO.builder()
@@ -114,7 +104,7 @@ public class PluginInfoServiceImpl implements PluginInfoService {
                 .pluginVersion(StrUtil.isNotBlank(uploadReqVO.getPluginVersion()) ? uploadReqVO.getPluginVersion() : metaInfo.getPluginVersion())
                 .pluginVersionDescription(StrUtil.isNotBlank(uploadReqVO.getPluginVersionDescription()) ? uploadReqVO.getPluginVersionDescription() : metaInfo.getVersionDescription())
                 .pluginPackage(Long.parseLong(fileId))
-                .pluginIcon(pluginIconId)
+                .pluginIcon(pluginIcon)
                 .pluginMetaInfo(pluginJson)
                 .pluginConfigInfo(pluginSchemaJson)  // 插件配置模板，来自zip包中的plugin.schema.json
                 .status(PluginStatusConstants.DISABLED)
@@ -235,18 +225,8 @@ public class PluginInfoServiceImpl implements PluginInfoService {
             throw exception(PLUGIN_NOT_FOUND);
         }
 
-        // 2. 上传图标文件到MinIO（如果有）
-        Long pluginIconId = null;
-        if (updateReqVO.getPluginIcon() != null && !updateReqVO.getPluginIcon().isEmpty()) {
-            try {
-                byte[] iconContent = updateReqVO.getPluginIcon().getBytes();
-                String iconFileId = fileApi.createFile(iconContent, updateReqVO.getPluginIcon().getOriginalFilename());
-                pluginIconId = Long.parseLong(iconFileId);
-            } catch (Exception e) {
-                log.error("插件图标上传失败", e);
-                throw exception(PLUGIN_ICON_UPLOAD_FAILED);
-            }
-        }
+        // 2. 获取插件图标
+        String pluginIcon = updateReqVO.getPluginIcon();
 
         // 3. 更新所有版本的基础信息
         for (PluginInfoDO version : versions) {
@@ -256,8 +236,8 @@ public class PluginInfoServiceImpl implements PluginInfoService {
             if (updateReqVO.getPluginDescription() != null) {
                 version.setPluginDescription(updateReqVO.getPluginDescription());
             }
-            if (pluginIconId != null) {
-                version.setPluginIcon(pluginIconId);
+            if (StrUtil.isNotBlank(pluginIcon)) {
+                version.setPluginIcon(pluginIcon);
             }
             pluginInfoRepository.update(version);
         }
@@ -319,23 +299,34 @@ public class PluginInfoServiceImpl implements PluginInfoService {
             throw exception(PLUGIN_ALREADY_ENABLED);
         }
 
-        // 3. 检查是否有其他已启用版本
-        List<PluginInfoDO> versions = pluginInfoRepository.getListByPluginId(pluginInfo.getPluginId());
-        PluginInfoDO enabledVersion = versions.stream()
-                .filter(v -> PluginStatusConstants.ENABLED.equals(v.getStatus()))
-                .findFirst()
-                .orElse(null);
+        // 3. 获取租户ID
+        Long tenantId = TenantContextHolder.getTenantId();
 
-        if (enabledVersion != null) {
-            throw exception(PLUGIN_HAS_ENABLED_VERSION);
+        // 4. 查找并自动停用其他已启用版本
+        List<PluginInfoDO> versions = pluginInfoRepository.getListByPluginId(pluginInfo.getPluginId());
+        List<PluginInfoDO> enabledVersions = versions.stream()
+                .filter(v -> PluginStatusConstants.ENABLED.equals(v.getStatus()))
+                .filter(v -> !v.getId().equals(pluginInfo.getId()))
+                .toList();
+
+        for (PluginInfoDO enabledVersion : enabledVersions) {
+            log.info("自动停用其他版本: pluginId={}, version={}", enabledVersion.getPluginId(), enabledVersion.getPluginVersion());
+            // 更新数据库状态为禁用
+            enabledVersion.setStatus(PluginStatusConstants.DISABLED);
+            pluginInfoRepository.update(enabledVersion);
+            // 发布禁用命令通知Runtime卸载并清理旧版本
+            pluginCommandPublisher.publishDisableAndCleanCommand(
+                    enabledVersion.getPluginId(),
+                    enabledVersion.getPluginVersion(),
+                    tenantId
+            );
         }
 
-        // 4. 更新状态为启用
+        // 5. 更新状态为启用
         pluginInfo.setStatus(PluginStatusConstants.ENABLED);
         pluginInfoRepository.update(pluginInfo);
 
-        // 5. 发布Redis消息通知Runtime
-        Long tenantId = TenantContextHolder.getTenantId();
+        // 6. 发布Redis消息通知Runtime启用新版本
         pluginCommandPublisher.publishEnableCommand(
                 pluginInfo.getPluginId(),
                 pluginInfo.getPluginVersion(),

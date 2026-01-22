@@ -144,7 +144,9 @@ public class TenantDataRepository extends BaseDataRepository<SystemTenantMapper,
         // 根据关键词模糊查询
         if (StringUtils.isNotBlank(pageReqVO.getKeyword())) {
             queryWrapper.and(SYSTEM_TENANT.NAME.like(pageReqVO.getKeyword())
-                    .or(SYSTEM_TENANT.TENANT_CODE.like(pageReqVO.getKeyword()))
+                    .or(SYSTEM_TENANT.TENANT_CODE.like(pageReqVO.getKeyword())
+                    .or(SYSTEM_TENANT.ID.eq(pageReqVO.getKeyword()))
+                    )
             );
         }
 
