@@ -149,7 +149,8 @@ export interface ConnectFlowNode {
   level2Code?: string;
   level3Code?: string;
   typeCode: string;
-  typeName: string;
+  typeName?: string; // 保留旧字段以保持兼容性
+  nodeName?: string; // 新字段，优先使用
 }
 
 export interface ListConnectInstanceReq {
@@ -187,6 +188,8 @@ export interface ConnectInstance {
   typeCode: TypeCode;
   createTime: string;
   description?: string;
+  connectorTypeName?: string; // 连接器类型名称，如"泛微e9"
+  version?: string; // 连接器版本
 }
 
 export interface UpdateConnectInstanceReq {
@@ -232,4 +235,46 @@ export interface ScriptActionItem {
   craeteTime: string;
   description: string;
   scriptName: string;
+}
+
+// ============ 连接器页面相关类型定义 ============
+
+/**
+ * 连接器节点类型 - 后端接口返回的数据结构
+ */
+export interface ConnectorNodeType {
+  nodeName: string;
+  level1Code: 'system_preset' | 'custom';
+  version?: string;
+  authType?: string;
+  instanceCount?: number;
+}
+
+/**
+ * 连接器类型详细信息 - /flow/node-config/type-info 接口返回的数据结构
+ */
+export interface ConnectorTypeInfo {
+  nodeName: string; // 连接器名称，如"泛微e9"
+  version: string; // 连接器版本，如"1.0.0"
+  nodeCode: string; // 连接器类型代码，如"weaverE9"
+  level1Code: string; // 连接器类型一级分类，如 "script"、"system_preset"、"custom"
+  // 可能还有其他字段，根据实际接口返回补充
+}
+
+/**
+ * 连接器卡片数据 - UI 组件使用的数据结构
+ */
+export interface ConnectorItem {
+  id: string;
+  name: string;
+  icon: string | React.ReactNode;
+  category: string;
+  type: 'system_preset' | 'custom';
+  fields: {
+    serviceType?: string;
+    version?: string;
+    authType?: string;
+    instanceCount?: number;
+  };
+  canEdit: boolean;
 }

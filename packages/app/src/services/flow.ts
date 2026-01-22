@@ -80,6 +80,17 @@ export const listConnectFlowNode = (params: ListConnectFlowNodeReq) => {
   return flowService.get('/node-type/page', params);
 };
 
+/**
+ * 获取连接器类型列表（全部）
+ * 使用 pageSize: -1 获取全量数据
+ */
+export const getConnectorNodeTypesAll = () => {
+  return flowService.get('/node-type/page', {
+    pageNo: 1,
+    pageSize: -1
+  });
+};
+
 export const listConnectInstance = (params: ListConnectInstanceReq) => {
   return flowService.get('/connector/page', params);
 };
@@ -118,4 +129,21 @@ export const updateScriptAction = (params: UpdateScriptActionReq) => {
 
 export const deleteScriptAction = (id: string) => {
   return flowService.post(`/connector/script/delete?id=${id}`);
+};
+
+/**
+ * 获取连接器节点类型列表（用于连接器类型页面）
+ * 从 /flow/node-config/node-types 接口获取所有可用的连接器类型
+ */
+export const getConnectorNodeTypes = () => {
+  return flowService.get('/node-config/node-types');
+};
+
+/**
+ * 获取连接器节点类型详细信息
+ * 从 /flow/node-config/type-info 接口获取指定连接器类型的详细信息
+ * @param nodeCode 连接器类型代码，如 'weaverE9'
+ */
+export const getConnectorTypeInfo = (nodeCode: string) => {
+  return flowService.get(`/node-config/type-info?nodeCode=${nodeCode}`);
 };
