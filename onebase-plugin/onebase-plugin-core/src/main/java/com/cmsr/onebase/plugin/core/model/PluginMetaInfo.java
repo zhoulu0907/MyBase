@@ -83,6 +83,10 @@ public class PluginMetaInfo {
          */
         private String configKey;
         /**
+         * 配置名称
+         */
+        private String configName;
+        /**
          * 默认值
          */
         private String defaultValue;
@@ -94,6 +98,10 @@ public class PluginMetaInfo {
          * 配置描述
          */
         private String description;
+        /**
+         * 是否必填
+         */
+        private Boolean required;
     }
 
     /**
