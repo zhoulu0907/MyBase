@@ -91,6 +91,7 @@ public class PluginConfigServiceImpl implements PluginConfigService {
      * 支持多种格式：
      * 1. 直接的配置数组: [{"configKey": "xxx", ...}]
      * 2. 包含configTemplates字段: {"configTemplates": [...]}
+     * 3. 标准JSON Schema格式（通过properties定义）
      *
      * @param schemaJson plugin.schema.json内容
      * @return 配置模板列表
@@ -101,14 +102,14 @@ public class PluginConfigServiceImpl implements PluginConfigService {
             cn.hutool.json.JSONObject jsonObject = JSONUtil.parseObj(schemaJson);
             cn.hutool.json.JSONArray configArray = null;
 
-            // 尝试获取configTemplates字段
+            // 1. 尝试获取configTemplates字段 or configs (Custom format)
             if (jsonObject.containsKey("configTemplates")) {
                 configArray = jsonObject.getJSONArray("configTemplates");
             } else if (jsonObject.containsKey("configs")) {
                 configArray = jsonObject.getJSONArray("configs");
             }
 
-            // 如果有配置数组，解析每个配置项
+            // Custom format handling
             if (configArray != null && !configArray.isEmpty()) {
                 for (int i = 0; i < configArray.size(); i++) {
                     cn.hutool.json.JSONObject configObj = configArray.getJSONObject(i);
@@ -122,10 +123,56 @@ public class PluginConfigServiceImpl implements PluginConfigService {
                     templateItems.add(item);
                 }
             }
+            // 2. Standard JSON Schema handling
+            else if (jsonObject.containsKey("properties")) {
+                parseJsonSchema(jsonObject, "", templateItems);
+            }
         } catch (Exception e) {
             log.warn("解析plugin.schema.json失败: {}", e.getMessage());
         }
         return templateItems;
+    }
+
+    private void parseJsonSchema(cn.hutool.json.JSONObject schemaObj, String prefix,
+                                 List<PluginConfigTemplateRespVO.ConfigTemplateItem> templateItems) {
+        if (!schemaObj.containsKey("properties")) {
+            return;
+        }
+        cn.hutool.json.JSONObject properties = schemaObj.getJSONObject("properties");
+        cn.hutool.json.JSONArray requiredArray = schemaObj.getJSONArray("required");
+        List<String> requiredFields = requiredArray != null ? requiredArray.toList(String.class) : new ArrayList<>();
+
+        for (String key : properties.keySet()) {
+            cn.hutool.json.JSONObject propObj = properties.getJSONObject(key);
+            String fullKey = StrUtil.isEmpty(prefix) ? key : prefix + "." + key;
+            String type = propObj.getStr("type");
+
+            if ("object".equalsIgnoreCase(type) && propObj.containsKey("properties")) {
+                parseJsonSchema(propObj, fullKey, templateItems);
+            } else {
+                PluginConfigTemplateRespVO.ConfigTemplateItem item = new PluginConfigTemplateRespVO.ConfigTemplateItem();
+                item.setConfigKey(fullKey);
+                // Use title as configName, fallback to key
+                String title = propObj.getStr("title");
+                item.setConfigName(StrUtil.isNotBlank(title) ? title : key);
+                item.setDescription(propObj.getStr("description"));
+
+                // Handle defaultValue
+                Object defaultVal = propObj.get("default");
+                item.setDefaultValue(defaultVal != null ? String.valueOf(defaultVal) : null);
+
+                // Handle valueType
+                String uiType = propObj.getStr("$ui:type");
+                if (StrUtil.isNotEmpty(uiType)) {
+                    item.setValueType(uiType);
+                } else {
+                    item.setValueType("normal");
+                }
+
+                item.setRequired(requiredFields.contains(key));
+                templateItems.add(item);
+            }
+        }
     }
 
     @Override
