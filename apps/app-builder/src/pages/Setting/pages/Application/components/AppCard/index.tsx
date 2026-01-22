@@ -1,4 +1,6 @@
 import launchSVG from '@/assets/images/launch.svg';
+import appExportSVG from '@/assets/images/appExport.svg';
+import appUpdateSVG from '@/assets/images/appUpdate.svg';
 import DynamicIcon from '@/components/DynamicIcon';
 import { Avatar, Divider, Dropdown, Menu, Space, Tag, Tooltip, Typography } from '@arco-design/web-react';
 import { IconDelete, IconEdit, IconMoreVertical } from '@arco-design/web-react/icon';
@@ -6,11 +8,13 @@ import { type Application } from '@onebase/app';
 import { appIconMap } from '@onebase/ui-kit';
 import { getFileUrlById, PlatformTenantPublishMode } from '@onebase/platform-center';
 import dayjs from 'dayjs';
-import React from 'react';
+import React, { useState } from 'react';
 import { ApplicationStatus, ApplicationStatusLabel, TagColor } from '../../const';
 import styles from './index.module.less';
 import type { developUser } from '@onebase/app/src/types';
 import { hasPermission, TENANT_APP_PERMISSION as ACTIONS } from '@onebase/common';
+import AppExportModal from '@/components/AppExportModal';
+import AppImportModal from '@/components/AppImportModal';
 
 const AvatarGroup = Avatar.Group;
 
@@ -59,6 +63,11 @@ const AppCard: React.FC<AppCardProps> = ({
     return item.appStatus === 0 ? '#F7F8FA' : '#E8FFEA';
   };
 
+  // 应用导出弹窗
+  const [exportVisible, setExportVisible] = useState(false);
+  // 应用导入/更新弹窗
+  const [importVisible, setImportVisible] = useState(false);
+
   const menu = (
     <Menu style={{ marginRight: '10px' }}>
       <Menu.Item
@@ -73,9 +82,35 @@ const AppCard: React.FC<AppCardProps> = ({
           访问应用
         </div>
       </Menu.Item>
+      <Menu.Item
+        key="2"
+        onClick={(e) => {
+          e.stopPropagation();
+          setExportVisible(true);
+        }}
+      >
+        <div className={styles.menuItem}>
+          <img src={appExportSVG} alt="导出" style={{ marginRight: 4 }} />
+          导出
+        </div>
+      </Menu.Item>
+      {hasPermission(ACTIONS.UPDATE) && (
+        <Menu.Item
+          key="3"
+          onClick={(e) => {
+            e.stopPropagation();
+            setImportVisible(true);
+          }}
+        >
+          <div className={styles.menuItem}>
+            <img src={appUpdateSVG} alt="导入更新" style={{ marginRight: 4 }} />
+            导入更新
+          </div>
+        </Menu.Item>
+      )}
       {hasPermission(ACTIONS.DELETE) && (
         <Menu.Item
-          key="2"
+          key="4"
           onClick={(e) => {
             e.stopPropagation();
             onDelete(item);
@@ -235,6 +270,8 @@ const AppCard: React.FC<AppCardProps> = ({
           </Space>
         </div>
       </div>
+      <AppExportModal visible={exportVisible} onClose={() => setExportVisible(false)} appInfo={item} />
+      <AppImportModal visible={importVisible} onClose={() => setImportVisible(false)} appInfo={item} />
     </div>
   );
 };
