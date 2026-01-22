@@ -1,0 +1,148 @@
+.settingsPage {
+  padding: 20px;
+}
+
+.section {
+  margin-bottom: 30px;
+}
+
+.sectionTitle {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.form {
+  max-width: 600px;
+}
+
+.rule {
+  margin-top: 10px;
+  padding: 10px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ruleTitle {
+  font-weight: 600;
+  color: #666;
+}
+
+.ruleItem {
+  padding: 4px 8px;
+  background-color: #e5e5e5;
+  border-radius: 4px;
+  color: #333;
+}
+
+.example {
+  margin-top: 10px;
+  color: #666;
+}
+
+.exampleTitle {
+  font-weight: 600;
+}
+
+.exampleContent {
+  margin-left: 10px;
+}
+
+.customTitle {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.customTitle textarea {
+  resize: none;
+}
+
+.textareaWrapper {
+  position: relative;
+}
+
+.fieldTags {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 8px;
+  pointer-events: none;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+}
+
+.fieldSelector {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: white;
+  border: 1px solid #e5e5e5;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 8px;
+  margin-top: 4px;
+}
+
+.tagInputWrapper {
+  position: relative;
+  width: 100%;
+  min-height: 100px;
+  border: 1px solid #e5e5e5;
+  border-radius: 4px;
+  padding: 8px;
+  background: white;
+  cursor: text;
+}
+
+.tagInputContent {
+  min-height: 80px;
+  outline: none;
+}
+
+.tagInputContent:empty::before {
+  content: attr(data-placeholder);
+  color: #999;
+  pointer-events: none;
+}
+
+.tagInputContent:focus {
+  outline: none;
+}
+
+.tagItem {
+  background-color: #E8FFFE;
+  color: #009E9E;
+  padding: 2px 4px;
+  border-radius: 2px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.inputTag {
+  margin: 0;
+}
+
+.tagInput {
+  border: none;
+  outline: none;
+  font-size: 14px;
+  padding: 4px 0;
+  min-width: 100px;
+  flex: 1;
+  background: transparent;
+}
+
+.tagInput:focus {
+  outline: none;
+}
