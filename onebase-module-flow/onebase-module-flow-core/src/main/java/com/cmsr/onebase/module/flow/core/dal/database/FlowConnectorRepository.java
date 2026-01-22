@@ -12,6 +12,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import static com.cmsr.onebase.module.flow.core.dal.dataobject.table.FlowConnectorTableDef.FLOW_CONNECTOR;
 
 @Slf4j
@@ -55,5 +60,28 @@ public class FlowConnectorRepository extends BaseAppRepository<FlowConnectorMapp
         QueryWrapper queryWrapper = this.query()
                 .where(FLOW_CONNECTOR.CONNECTOR_UUID.eq(connectorUuid));
         return this.getOne(queryWrapper);
+    }
+
+    /**
+     * Count connector instances by type codes (only non-deleted records)
+     *
+     * @param typeCodes the connector type code list
+     * @return Map<typeCode, count>
+     */
+    public Map<String, Integer> countByTypeCodes(List<String> typeCodes) {
+        if (typeCodes == null || typeCodes.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        List<Map<String, Object>> result = this.getMapper().countByTypeCodes(typeCodes);
+        if (result == null || result.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        return result.stream()
+                .collect(Collectors.toMap(
+                        record -> (String) record.get("type_code"),
+                        record -> ((Number) record.get("count")).intValue()
+                ));
     }
 }

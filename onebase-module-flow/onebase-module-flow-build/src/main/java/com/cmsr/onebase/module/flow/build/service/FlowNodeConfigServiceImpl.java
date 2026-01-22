@@ -4,21 +4,26 @@ import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.flow.api.vo.NodeInfoVO;
 import com.cmsr.onebase.module.flow.build.vo.ConnectorTypeListVO;
 import com.cmsr.onebase.module.flow.build.vo.NodeConfigActionVO;
 import com.cmsr.onebase.module.flow.build.vo.NodeConfigConnVO;
 import com.cmsr.onebase.module.flow.build.vo.NodeConfigVO;
+import com.cmsr.onebase.module.flow.core.dal.database.FlowConnectorRepository;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowNodeConfigRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowNodeConfigDO;
 import com.cmsr.onebase.module.flow.core.enums.FlowErrorCodeConstants;
 import com.cmsr.onebase.module.flow.core.vo.PageNodeConfigReqVO;
+import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -32,6 +37,9 @@ public class FlowNodeConfigServiceImpl implements FlowNodeConfigService {
 
     @Autowired
     private FlowNodeConfigRepository flowNodeConfigRepository;
+
+    @Autowired
+    private FlowConnectorRepository flowConnectorRepository;
 
     @Override
     public PageResult<NodeConfigVO> pageNodeType(PageNodeConfigReqVO reqVO) {
@@ -92,6 +100,72 @@ public class FlowNodeConfigServiceImpl implements FlowNodeConfigService {
                     return vo;
                 })
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<NodeInfoVO> getAllNodeTypes() {
+        log.info("getAllNodeTypes start");
+
+        // 1. Query all active node types (already sorted)
+        List<FlowNodeConfigDO> nodeConfigs = flowNodeConfigRepository.listActiveNodeTypes();
+        if (nodeConfigs == null || nodeConfigs.isEmpty()) {
+            log.info("No active node types found");
+            return Collections.emptyList();
+        }
+
+        // 2. Count connector instances for each type
+        List<String> typeCodes = nodeConfigs.stream()
+                .map(FlowNodeConfigDO::getNodeName)
+                .collect(Collectors.toList());
+        Map<String, Integer> instanceCountMap = flowConnectorRepository.countByTypeCodes(typeCodes);
+
+        // 3. Build VO list
+        List<NodeInfoVO> result = nodeConfigs.stream()
+                .map(this::convertToNodeInfoVO)
+                .peek(vo -> vo.setInstanceCount(instanceCountMap.getOrDefault(vo.getNodeName(), 0)))
+                .collect(Collectors.toList());
+
+        log.info("getAllNodeTypes success, count: {}", result.size());
+        return result;
+    }
+
+    /**
+     * Convert FlowNodeConfigDO to NodeInfoVO
+     */
+    private NodeInfoVO convertToNodeInfoVO(FlowNodeConfigDO config) {
+        NodeInfoVO vo = new NodeInfoVO();
+        vo.setNodeName(config.getNodeName());
+        vo.setLevel1Code(config.getLevel1Code());
+        vo.setLevel2Code(config.getLevel2Code());
+        vo.setLevel3Code(config.getLevel3Code());
+
+        // Parse conn_config JSON with default values
+        try {
+            JsonNode connConfigJson = JsonUtils.parseTree(config.getConnConfig());
+            vo.setVersion(getJsonValue(connConfigJson, "version", "1.0.0"));
+            vo.setAuthType(getJsonValue(connConfigJson, "authType", "NONE"));
+        } catch (Exception e) {
+            log.warn("Failed to parse conn_config for nodeCode: {}, using defaults",
+                    config.getNodeCode(), e);
+            vo.setVersion("1.0.0");
+            vo.setAuthType("NONE");
+        }
+
+        return vo;
+    }
+
+    /**
+     * Get JSON field value with default
+     */
+    private String getJsonValue(JsonNode jsonNode, String fieldName, String defaultValue) {
+        if (jsonNode == null || jsonNode.isNull()) {
+            return defaultValue;
+        }
+        JsonNode field = jsonNode.get(fieldName);
+        if (field == null || field.isNull()) {
+            return defaultValue;
+        }
+        return field.asText();
     }
 
 }
