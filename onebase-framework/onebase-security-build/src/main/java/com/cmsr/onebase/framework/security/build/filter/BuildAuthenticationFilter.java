@@ -117,7 +117,7 @@ public class BuildAuthenticationFilter extends OncePerRequestFilter implements A
             if (loginUser != null) {
                 SecurityFrameworkUtils.setLoginUser(loginUser, request);
                 TenantContextHolder.setTenantId(loginUser.getTenantId());
-                if (securityProperties.getMockEnable()) {
+                if (isTokenMockable(token)) {
                     // mock模式不检查会话空闲
                     log.info("[BuildAuthenticationFilter][TOKEN MOCK开启，用户ID：{}, prefix:{}]", loginUser.getId(), securityProperties.getMockSecret());
                 } else {
@@ -178,11 +178,7 @@ public class BuildAuthenticationFilter extends OncePerRequestFilter implements A
      * @return 模拟的 LoginUser
      */
     private LoginUser mockLoginUser(HttpServletRequest request, String token) {
-        if (!securityProperties.getMockEnable()) {
-            return null;
-        }
-        // 必须以 mockSecret 开头
-        if (!token.startsWith(securityProperties.getMockSecret())) {
+        if (!isTokenMockable(token)) {
             return null;
         }
         // 构建模拟用户
@@ -190,6 +186,11 @@ public class BuildAuthenticationFilter extends OncePerRequestFilter implements A
         token = token.substring(securityProperties.getMockSecret().length());
         // 4d8fd6314da943f496b14f29b8f50000 -> 4d8fd6314da943f496b14f29b8f5d4f4
         return buildLoginUserByInnerToken(token);
+    }
+
+    public boolean isTokenMockable(String token){
+        // 必须开启且token以“mock-secret”配置项的值为开头
+        return securityProperties.getMockEnable() && token.startsWith(securityProperties.getMockSecret());
     }
 
     private LoginUser buildLoginUserByInnerToken(String token) {
