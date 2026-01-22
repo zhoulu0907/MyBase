@@ -38,14 +38,13 @@ debug: false
 onebase:
   plugin:
     enabled: false # 编辑态(onebase-server)禁用插件系统，避免加载 plugins 目录的插件
-  sign:
-    request-timeout: 86400 # 签名请求超时时间（秒）
   captcha:
     enable: false # 本地环境，暂时关闭图片验证码，方便登录等接口的测试；
   platform-tenant:
     enable-create-app: true # 测试环境，暂时允许平台租户创建应用，方便登录接口测试；
   security:
     mock-enable: true
+    mock-secret: inner-
   access-log: # 访问日志的配置项
     enable: false
   web:
