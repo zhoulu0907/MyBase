@@ -244,7 +244,7 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
     updateFieldsPermission(updateFields || [], isAllFieldsAllowed || RoleAllFieldPermission.FieldCustomFieldPermission);
   };
 
-  const handleIsAllFieldsAllowedChange = (value: number) => {
+  const handleIsAllFieldsAllowedChange = async (value: number) => {
     setIsAllFieldsAllowed(value);
     if (value) {
       updateFieldsPermission(fieldPermission || [], value);
@@ -258,8 +258,21 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
       form.setFieldValue('authFields', defaultAuthFields);
       setCheckEditableAll(true);
       setCheckReadableAll(true);
-      setFieldPermission(defaultAuthFields);
-      updateFieldsPermission(defaultAuthFields, value); //更新数据
+      await updateFieldsPermission(defaultAuthFields, value); //更新数据
+      const params: GetPermissionReq = {
+        applicationId: appId,
+        menuId,
+        roleId
+      };
+      const res = await getFieldPermission(params);
+      setOperationConfig(res.authFieldsDL);
+      setFieldPermission(
+        res.authFieldsRD.map((field: AuthFieldVO) => ({
+          ...field,
+          isCanEdit: 1,
+          isCanRead: 1
+        }))
+      );
     }
   };
 
