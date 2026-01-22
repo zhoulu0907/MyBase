@@ -4,6 +4,7 @@ import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.flow.build.service.FlowConnectorService;
 import com.cmsr.onebase.module.flow.build.vo.CreateFlowConnectorReqVO;
+import com.cmsr.onebase.module.flow.build.vo.CreateFlowConnectorRespVO;
 import com.cmsr.onebase.module.flow.build.vo.FlowConnectorVO;
 import com.cmsr.onebase.module.flow.build.vo.UpdateFlowConnectorReqVO;
 import com.cmsr.onebase.module.flow.core.vo.PageConnectorReqVO;
@@ -43,9 +44,9 @@ public class FlowConnectorController {
 
     @Operation(summary = "创建连接器")
     @PostMapping("/create")
-    public CommonResult<Long> createConnectorBrief(@RequestBody @Valid CreateFlowConnectorReqVO createVO) {
-        Long connectorId = connectorService.createConnector(createVO);
-        return CommonResult.success(connectorId);
+    public CommonResult<CreateFlowConnectorRespVO> createConnectorBrief(@RequestBody @Valid CreateFlowConnectorReqVO createVO) {
+        CreateFlowConnectorRespVO result = connectorService.createConnector(createVO);
+        return CommonResult.success(result);
     }
 
     @Operation(summary = "更新连接器")

@@ -7,6 +7,7 @@ import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.common.util.string.UuidUtils;
 import com.cmsr.onebase.module.flow.build.vo.CreateFlowConnectorReqVO;
+import com.cmsr.onebase.module.flow.build.vo.CreateFlowConnectorRespVO;
 import com.cmsr.onebase.module.flow.build.vo.FlowConnectorVO;
 import com.cmsr.onebase.module.flow.build.vo.UpdateFlowConnectorReqVO;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowConnectorRepository;
@@ -67,12 +68,15 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
     }
 
     @Override
-    public Long createConnector(CreateFlowConnectorReqVO createVO) {
+    public CreateFlowConnectorRespVO createConnector(CreateFlowConnectorReqVO createVO) {
         FlowConnectorDO connectorDO = BeanUtils.toBean(createVO, FlowConnectorDO.class);
         connectorDO.setConnectorUuid(UuidUtils.getUuid());
         connectorDO.setConfig(jsonNodeToString(createVO.getConfig()));
         connectorRepository.save(connectorDO);
-        return connectorDO.getId();
+        return CreateFlowConnectorRespVO.builder()
+                .id(connectorDO.getId())
+                .connectorUuid(connectorDO.getConnectorUuid())
+                .build();
     }
 
     @Override

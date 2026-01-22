@@ -91,4 +91,9 @@ public class FlowNodeConfigDO extends BaseEntity implements Serializable {
 
     private Integer sortOrder;
 
+    /**
+     * Connector version (e.g., 1.0.0)
+     */
+    private String version;
+
 }
