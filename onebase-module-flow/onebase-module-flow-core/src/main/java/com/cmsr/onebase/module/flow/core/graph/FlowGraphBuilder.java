@@ -113,11 +113,11 @@ public class FlowGraphBuilder {
         if (node.getData() instanceof CommonNodeData commonNodeData) {
             // 加载连接器配置
             FlowConnectorDO connectorDO = TenantManager.withoutTenantCondition(() ->
-                flowConnectorMapper.selectByApplicationAndCode(applicationId, commonNodeData.getConnectorCode()));
+                flowConnectorMapper.selectByApplicationAndTypeCode(applicationId, commonNodeData.getConnectorCode()));
             if (connectorDO != null) {
                 Map<String, Object> connectorConfig = new HashMap<>();
-                if (StringUtils.isNotBlank(connectorDO.getConfigJson())) {
-                    connectorConfig = JsonUtils.parseObject(connectorDO.getConfigJson(), Map.class);
+                if (StringUtils.isNotBlank(connectorDO.getConfig())) {
+                    connectorConfig = JsonUtils.parseObject(connectorDO.getConfig(), Map.class);
                 }
                 commonNodeData.setConnectorConfig(connectorConfig);
             }
@@ -158,8 +158,8 @@ public class FlowGraphBuilder {
 
                 if (connectorDO != null) {
                     Map<String, Object> connectorConfig = new HashMap<>();
-                    if (StringUtils.isNotBlank(connectorDO.getConfigJson())) {
-                        connectorConfig = JsonUtils.parseObject(connectorDO.getConfigJson(), Map.class);
+                    if (StringUtils.isNotBlank(connectorDO.getConfig())) {
+                        connectorConfig = JsonUtils.parseObject(connectorDO.getConfig(), Map.class);
                     }
                     httpNodeData.setConnectorConfig(connectorConfig);
                 }

@@ -16,8 +16,8 @@ import java.util.Map;
  */
 public interface FlowConnectorMapper extends BaseMapper<FlowConnectorDO> {
 
-    @Select("SELECT * FROM flow_connector WHERE application_id = #{applicationId} AND code = #{code} AND deleted = 0")
-    FlowConnectorDO selectByApplicationAndCode(@Param("applicationId") Long applicationId, @Param("code") String code);
+    @Select("SELECT * FROM flow_connector WHERE application_id = #{applicationId} AND type_code = #{typeCode} AND deleted = 0")
+    FlowConnectorDO selectByApplicationAndTypeCode(@Param("applicationId") Long applicationId, @Param("typeCode") String typeCode);
 
     /**
      * Count connector instances by type codes (only non-deleted records)
