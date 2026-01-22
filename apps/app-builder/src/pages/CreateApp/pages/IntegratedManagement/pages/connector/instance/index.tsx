@@ -1,13 +1,12 @@
-import { Button, Input, Message, Pagination, Spin } from '@arco-design/web-react';
+import { Button, Message, Pagination, Spin } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
 import {
   deleteConnectInstance,
-  listConnectInstance,
-  type ListConnectInstanceReq
+  listAllConnectInstance,
+  type ConnectInstance
 } from '@onebase/app';
-import { getCommonPaginationList, getHashQueryParam } from '@onebase/common';
-import { debounce } from 'lodash-es';
-import React, { useCallback, useEffect, useState } from 'react';
+import { getHashQueryParam } from '@onebase/common';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import ConnectInstanceCard from '../../../components/ConnectInstanceCard';
 import styles from './index.module.less';
@@ -21,58 +20,42 @@ const ConnectorInstancesPage: React.FC = () => {
   const { tenantId } = useParams();
 
   const [loading, setLoading] = useState(false);
-  const [searchInstanceName, setSearchInstanceName] = useState('');
-
-  const [pageSize, setPageSize] = useState<number>(8);
-  const [pageNo, setPageNo] = useState(1);
 
   // 连接器实例列表
-  const [instanceList, setInstanceList] = useState<any[]>();
+  const [instanceList, setInstanceList] = useState<ConnectInstance[]>([]);
   const [total, setTotal] = useState(0);
 
-  useEffect(() => {
-    pageSize && getConnectInstanceList(searchInstanceName);
-  }, [pageNo, pageSize, searchInstanceName]);
-
-  const debouncedSearch = useCallback(
-    debounce((typeName: string) => {
-      getConnectInstanceList(typeName);
-    }, 500),
-    []
-  );
+  // 分页状态
+  const [pageNo, setPageNo] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   useEffect(() => {
-    return () => debouncedSearch.cancel();
-  }, [debouncedSearch]);
+    getConnectInstanceList();
+  }, [pageNo, pageSize]);
 
-  const getConnectInstanceList = async (typeName?: string) => {
+  const getConnectInstanceList = async () => {
     setLoading(true);
-    const curAppId = getHashQueryParam('appId');
-
-    // 检查是否获取到 appId
-    if (!curAppId) {
-      Message.error('应用ID获取失败，请重新进入页面');
-      setLoading(false);
-      return;
-    }
-
-    const req: ListConnectInstanceReq = {
-      applicationId: curAppId,
-      pageNo: pageNo,
-      pageSize: pageSize || 8,
-      connectorName: typeName || ''
-    };
 
     try {
-      const res = await getCommonPaginationList(
-        (param) => listConnectInstance(param),
-        req,
-        setPageNo
-      );
-      console.log('res :', res);
+      // 调用 /flow/connector/list-all 接口，传递分页参数
+      const res = await listAllConnectInstance({ pageNo, pageSize });
+
       if (res) {
-        setInstanceList(res.list || []);
-        setTotal(res.total || 0);
+        if (Array.isArray(res)) {
+          // 后端直接返回数组，需要在前端分页
+          const start = (pageNo - 1) * pageSize;
+          const end = start + pageSize;
+          const paginatedList = res.slice(start, end);
+          setInstanceList(paginatedList);
+          setTotal(res.length);
+        } else if (res.list && Array.isArray(res.list)) {
+          // 后端返回分页数据
+          setInstanceList(res.list);
+          setTotal(res.total || 0);
+        } else {
+          setInstanceList([]);
+          setTotal(0);
+        }
       }
     } catch (error) {
       console.error('获取连接器实例列表失败:', error);
@@ -85,25 +68,27 @@ const ConnectorInstancesPage: React.FC = () => {
     }
   };
 
-  const handleCreateInstance = () => {
+  const getAppId = () => {
     const curAppId = getHashQueryParam('appId');
-
     if (!curAppId) {
-      Message.error('应用ID获取失败，无法创建实例');
-      return;
+      Message.error('应用ID获取失败');
+      return null;
     }
+    return curAppId;
+  };
 
-    // 跳转到连接器类型选择页面（选择模式）
+  const handleCreateInstance = () => {
+    const curAppId = getAppId();
+    if (!curAppId) return;
+
     navigate(`/onebase/${tenantId}/home/create-app/integrated-management/connector?appId=${curAppId}&mode=select`);
   };
 
-  const handleEdit = (id: string) => {
-    const curAppId = getHashQueryParam('appId');
-    if (curAppId) {
-      navigate(`/onebase/${tenantId}/home/create-app/integrated-management/connector-detail?appId=${curAppId}&id=${id}`);
-    } else {
-      Message.error('应用ID获取失败，无法跳转到编辑页面');
-    }
+  const handleEdit = (connectorUuid: string) => {
+    const curAppId = getAppId();
+    if (!curAppId) return;
+
+    navigate(`/onebase/${tenantId}/home/create-app/integrated-management/connector-detail?appId=${curAppId}&connectorUuid=${connectorUuid}`);
   };
 
   const handleDelete = async (id: string) => {
@@ -123,15 +108,6 @@ const ConnectorInstancesPage: React.FC = () => {
         <Button type="primary" icon={<IconPlus />} onClick={handleCreateInstance}>
           创建实例
         </Button>
-
-        <Input.Search
-          allowClear
-          placeholder="请输入连接器实例名称"
-          style={{ width: 240 }}
-          onChange={(value) => {
-            setSearchInstanceName(value);
-          }}
-        />
       </div>
 
       <div className={styles.body}>

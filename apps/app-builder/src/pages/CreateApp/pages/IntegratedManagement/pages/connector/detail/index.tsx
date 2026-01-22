@@ -2,6 +2,7 @@ import { Input, Menu, Message } from '@arco-design/web-react';
 import { IconArrowLeft, IconCheck, IconClose, IconEdit } from '@arco-design/web-react/icon';
 import {
   getConnectInstance,
+  getConnectorByUuid,
   updateConnectInstance,
   createConnectInstance,
   getConnectorTypeInfo,
@@ -31,70 +32,51 @@ const ConnectorDetailPage: React.FC<ConnectorInstanceDetailProps> = ({}) => {
   const nameInputRef = useRef<any>(null);
 
   useEffect(() => {
+    const connectorUuid = getHashQueryParam('connectorUuid');
     const id = getHashQueryParam('id');
     const mode = getHashQueryParam('mode');
     const connectorTypeParam = getHashQueryParam('connectorType');
     const connectorNameParam = getHashQueryParam('connectorName');
 
+    // 创建临时的 baseInfo 对象
+    const createTempBaseInfo = (typeName?: string, version?: string): ConnectInstance => ({
+      id: '',
+      applicationId: getHashQueryParam('appId') || '',
+      connectorUuid: connectorTypeParam,
+      connectorName: connectorNameParam || '新连接器实例',
+      typeCode: TypeCode.SCRIPT,
+      createTime: new Date().toISOString(),
+      description: '',
+      connectorTypeName: typeName || connectorNameParam || '未知类型',
+      version: version || '1.0.0'
+    });
+
     // 检查是否为创建模式
-    if (mode === 'create' && connectorTypeParam && !id) {
+    if (mode === 'create' && connectorTypeParam && !connectorUuid && !id) {
       setIsCreateMode(true);
       setConnectorType(connectorTypeParam);
 
       // 获取连接器类型详细信息
       getConnectorTypeInfo(connectorTypeParam)
         .then((typeInfo: any) => {
-          if (typeInfo) {
-            // 创建一个临时的 baseInfo 对象用于显示
-            const tempBaseInfo: ConnectInstance = {
-              id: '',
-              applicationId: getHashQueryParam('appId') || '',
-              connectorUuid: connectorTypeParam,
-              connectorName: connectorNameParam || '新连接器实例',
-              typeCode: TypeCode.SCRIPT,
-              createTime: new Date().toISOString(),
-              description: '',
-              connectorTypeName: typeInfo.nodeName || connectorNameParam || '未知类型',
-              version: typeInfo.version || '1.0.0'
-            };
-            setBaseInfo(tempBaseInfo);
-            setEditName(connectorNameParam || '新连接器实例');
-          } else {
-            // 接口返回空数据，使用默认值
-            const tempBaseInfo: ConnectInstance = {
-              id: '',
-              applicationId: getHashQueryParam('appId') || '',
-              connectorUuid: connectorTypeParam,
-              connectorName: connectorNameParam || '新连接器实例',
-              typeCode: TypeCode.SCRIPT,
-              createTime: new Date().toISOString(),
-              description: '',
-              connectorTypeName: connectorNameParam || '未知类型',
-              version: '1.0.0'
-            };
-            setBaseInfo(tempBaseInfo);
-            setEditName(connectorNameParam || '新连接器实例');
-          }
+          const tempBaseInfo = createTempBaseInfo(
+            typeInfo?.nodeName,
+            typeInfo?.version
+          );
+          setBaseInfo(tempBaseInfo);
+          setEditName(connectorNameParam || '新连接器实例');
         })
         .catch((error: any) => {
           console.error('Failed to get connector type info:', error);
-          // 如果获取失败，使用连接器名称作为类型名称
-          const tempBaseInfo: ConnectInstance = {
-            id: '',
-            applicationId: getHashQueryParam('appId') || '',
-            connectorUuid: connectorTypeParam,
-            connectorName: connectorNameParam || '新连接器实例',
-            typeCode: TypeCode.SCRIPT,
-            createTime: new Date().toISOString(),
-            description: '',
-            connectorTypeName: connectorNameParam || '未知类型',
-            version: '1.0.0'
-          };
+          const tempBaseInfo = createTempBaseInfo();
           setBaseInfo(tempBaseInfo);
           setEditName(connectorNameParam || '新连接器实例');
         });
+    } else if (connectorUuid) {
+      // 编辑模式：使用 connectorUuid 加载现有实例
+      handleGetIntanceDetail(connectorUuid);
     } else if (id) {
-      // 编辑模式：加载现有实例
+      // 兼容旧模式：使用 id 加载现有实例
       handleGetIntanceDetail(id);
     }
   }, []);
@@ -111,29 +93,14 @@ const ConnectorDetailPage: React.FC<ConnectorInstanceDetailProps> = ({}) => {
     }
   }, [baseInfo]);
 
-  const handleGetIntanceDetail = async (id: string) => {
-    const res = await getConnectInstance(id);
+  const handleGetIntanceDetail = async (param: string) => {
+    // 判断参数格式，UUID 格式使用 connectorUuid，否则使用 id
+    const isUuid = param.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);
+    const res = isUuid ? await getConnectorByUuid(param) : await getConnectInstance(param);
+
     if (res) {
       setBaseInfo(res);
-
-      // 使用 typeCode 字段来获取连接器类型详细信息
-      // 注意：后端的 typeCode 字段存储的是 nodeCode（如 "weaverE9"），而不是类型（如 "script"）
-      if (res.typeCode) {
-        try {
-          const typeInfo = await getConnectorTypeInfo(res.typeCode);
-          if (typeInfo) {
-            // 更新 baseInfo，添加连接器类型和版本
-            setBaseInfo((prev) => ({
-              ...prev!,
-              connectorTypeName: typeInfo.nodeName || prev?.connectorTypeName,
-              version: typeInfo.version || prev?.version
-            }));
-          }
-        } catch (error) {
-          console.error('Failed to get connector type info:', error);
-          // 接口调用失败时，保持原有数据不变
-        }
-      }
+      // 后端接口 /connector/get 已经返回完整的连接器信息，不需要再次调用 type-info 接口
     }
   };
 
@@ -188,9 +155,11 @@ const ConnectorDetailPage: React.FC<ConnectorInstanceDetailProps> = ({}) => {
           Message.success('更新成功');
           setIsEditingName(false);
           // 刷新数据
+          const connectorUuid = getHashQueryParam('connectorUuid');
           const id = getHashQueryParam('id');
-          if (id) {
-            await handleGetIntanceDetail(id);
+          const param = connectorUuid || id;
+          if (param) {
+            await handleGetIntanceDetail(param);
           }
         }
       }

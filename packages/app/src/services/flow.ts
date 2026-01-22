@@ -95,12 +95,28 @@ export const listConnectInstance = (params: ListConnectInstanceReq) => {
   return flowService.get('/connector/page', params);
 };
 
+/**
+ * 获取所有连接器实例（支持分页）
+ * 调用 /flow/connector/list-all，支持 pageNo 和 pageSize 参数
+ */
+export const listAllConnectInstance = (params?: { pageNo?: number; pageSize?: number }) => {
+  return flowService.get('/connector/list-all', params);
+};
+
 export const createConnectInstance = (params: CreateConnectInstanceReq) => {
   return flowService.post('/connector/create', params);
 };
 
 export const getConnectInstance = (id: string) => {
   return flowService.get(`/connector/get?id=${id}`);
+};
+
+/**
+ * 通过 connectorUuid 获取连接器实例详情
+ * @param connectorUuid 连接器实例的 UUID
+ */
+export const getConnectorByUuid = (connectorUuid: string) => {
+  return flowService.get(`/connector/get?connectorUuid=${connectorUuid}`);
 };
 
 export const updateConnectInstance = (params: UpdateConnectInstanceReq) => {
