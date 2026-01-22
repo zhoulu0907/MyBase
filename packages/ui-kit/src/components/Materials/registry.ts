@@ -4,14 +4,14 @@
  * 统一维护组件的：类型字符串、schema、模板展示信息、字段能力映射（fieldMap）、默认实体字段映射（entityMap）。
  * 其他模块（类型常量、模板、组件与实体映射等）均从此注册表派生，避免重复维护与配置漂移。
  */
+import { ENTITY_FIELD_TYPE } from '@/components/DataFactory'
 import { cloneDeep } from 'lodash-es'
-import { baseSchema as BasicSchema } from './Basic/schema'
+import type { ComponentType as ReactComponentType } from 'react'
 import { FormComp, LayoutComp, ListComp, ShowComp } from './Basic'
+import { baseSchema as BasicSchema } from './Basic/schema'
+import type { ComponentType } from './componentTypes'
 import { WorkbenchComp } from './Workbench'
 import { workbenchSchema } from './Workbench/schema/schema'
-import { ENTITY_FIELD_TYPE } from '@/components/DataFactory'
-import type { ComponentType } from './componentTypes'
-import type { ComponentType as ReactComponentType } from 'react'
 
 /** 组件分类类型 */
 type ComponentCategory = 'layout' | 'form' | 'list' | 'show' | 'workbench'
@@ -78,6 +78,8 @@ const COMPONENT_TYPE = {
   CAROUSEL_FORM: 'XCarouselForm',
   SUB_TABLE: 'XSubTable',
   DATA_SELECT: 'XDataSelect',
+  RATE: 'XRate',
+  CHECK_ITEM: 'XCheckItem',
   // 列表
   TABLE: 'XTable',
   CALENDAR: 'XCalendar',
@@ -92,6 +94,7 @@ const COMPONENT_TYPE = {
   FILE: 'XFile',
   WEB_VIEW: 'XWebView',
   DIVIDER: 'XDivider',
+  ALERT: 'XAlert',
   PLACEHOLDER: 'XPlaceholder',
   // 工作台
   QUICK_ENTRY: 'XQuickEntry',
@@ -354,6 +357,20 @@ const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescripto
       ENTITY_FIELD_TYPE.MULTI_DATA_SELECTION.VALUE
     ]
   },
+  [COMPONENT_TYPE.RATE]: {
+    type: COMPONENT_TYPE.RATE,
+    schema: cloneDeep(BasicSchema.XRate),
+    template: { h: 36, w: 118, displayName: '评分', icon: 'number_input_cp.svg', category: 'form' },
+    fieldMap: [ENTITY_FIELD_TYPE.NUMBER.VALUE, ENTITY_FIELD_TYPE.RATE.VALUE],
+    entityMap: [ENTITY_FIELD_TYPE.RATE.VALUE]
+  },
+  [COMPONENT_TYPE.CHECK_ITEM]: {
+    type: COMPONENT_TYPE.CHECK_ITEM,
+    schema: cloneDeep(BasicSchema.XCheckItem),
+    template: { h: 36, w: 118, displayName: '检查项', icon: 'number_input_cp.svg', category: 'form' },
+    fieldMap: [ENTITY_FIELD_TYPE.BOOLEAN.VALUE, ENTITY_FIELD_TYPE.CHECK_ITEM.VALUE],
+    entityMap: [ENTITY_FIELD_TYPE.CHECK_ITEM.VALUE]
+  },
   [COMPONENT_TYPE.TABLE]: {
     type: COMPONENT_TYPE.TABLE,
     schema: cloneDeep(BasicSchema.XTable),
@@ -435,6 +452,13 @@ const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescripto
     type: COMPONENT_TYPE.DIVIDER,
     schema: cloneDeep(BasicSchema.XDivider),
     template: { h: 36, w: 118, displayName: '分割线', icon: 'divider_cp.svg', category: 'show' },
+    fieldMap: [],
+    entityMap: []
+  },
+  [COMPONENT_TYPE.ALERT]: {
+    type: COMPONENT_TYPE.ALERT,
+    schema: cloneDeep(BasicSchema.XAlert),
+    template: { h: 36, w: 118, displayName: '提示框', icon: 'placeholder_cp.svg', category: 'show' },
     fieldMap: [],
     entityMap: []
   },
@@ -614,7 +638,7 @@ export function buildTemplate() {
       icon: descriptor.template.icon,
       category: descriptor.template.category
     }
-    
+
     // 防错处理：确保分类存在，否则归类到 'form'
     const group = templateGroups[descriptor.template.category];
     if (group) {

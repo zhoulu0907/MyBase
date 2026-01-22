@@ -26,4 +26,16 @@
       }
     }
   }
+
+  .custom-rate {
+    .pc-rate-character-full .pc-icon[stroke='currentColor'],
+    .pc-rate-character-half .pc-rate-character-left .pc-icon[stroke='currentColor'] {
+      stroke: inherit;
+      /* fill 不能删 否则 path 继承不到 */
+      fill: inherit;
+      path, circle {
+        fill: inherit;
+      }
+    }
+  }
 }

@@ -5,7 +5,7 @@ import { Divider } from '@arco-design/web-react';
 import { ENTITY_TYPE, ENTITY_TYPE_VALUE, type AppEntityField } from '@onebase/app';
 import { useSignals } from '@preact/signals-react/runtime';
 import { cloneDeep } from 'lodash-es';
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { ReactSortable, type SortableEvent } from 'react-sortablejs';
 import {
   ALL_COMPONENT_TYPES,
@@ -60,6 +60,8 @@ const LayoutReactSortable: React.FC<LayoutReactSortableProps> = ({
     setLayoutSubComponents,
     setSubTableComponents
   } = usePageEditorSignal();
+
+  const wrapperRef = useRef<HTMLDivElement>(null);
 
   // 新增组件/组件拖拽进来
   const handleSortableAdd = (e: SortableEvent) => {
@@ -130,10 +132,10 @@ const LayoutReactSortable: React.FC<LayoutReactSortableProps> = ({
           // 回显字段  name
           schema.config.displayFields = currentField.dataSelectionConfig?.targetFieldName
             ? [
-                {
-                  value: currentField.dataSelectionConfig?.targetFieldName
-                }
-              ]
+              {
+                value: currentField.dataSelectionConfig?.targetFieldName
+              }
+            ]
             : [];
         }
       }
@@ -216,10 +218,10 @@ const LayoutReactSortable: React.FC<LayoutReactSortableProps> = ({
             // 回显字段  name
             schema.config.displayFields = field.dataSelectionConfig?.targetFieldName
               ? [
-                  {
-                    value: field.dataSelectionConfig?.targetFieldName
-                  }
-                ]
+                {
+                  value: field.dataSelectionConfig?.targetFieldName
+                }
+              ]
               : [];
           }
 
@@ -308,10 +310,10 @@ const LayoutReactSortable: React.FC<LayoutReactSortableProps> = ({
             // 回显字段  name
             subSchema.config.displayFields = ele.dataSelectionConfig?.targetFieldName
               ? [
-                  {
-                    value: ele.dataSelectionConfig?.targetFieldName
-                  }
-                ]
+                {
+                  value: ele.dataSelectionConfig?.targetFieldName
+                }
+              ]
               : [];
           }
 
@@ -464,99 +466,132 @@ const LayoutReactSortable: React.FC<LayoutReactSortableProps> = ({
     }
   };
 
+  useEffect(() => {
+    const wrapper = wrapperRef.current;
+    if (!wrapper) return;
+
+    const checkPos = (e) => {
+      const rect = wrapper.getBoundingClientRect();
+      const inside = e.clientX >= rect.left && e.clientX <= rect.right &&
+        e.clientY >= rect.top && e.clientY <= rect.bottom;
+      wrapper.classList.toggle('drag-over', inside && colComponents[index].length === 0);
+    };
+
+    const handleDown = (e) => {
+      if (!wrapper.contains(e.target)) window.addEventListener('mousemove', checkPos);
+    };
+
+    const handleUp = () => {
+      window.removeEventListener('mousemove', checkPos);
+      wrapper.classList.remove('drag-over');
+    };
+
+    document.addEventListener('mousedown', handleDown);
+    document.addEventListener('mouseup', handleUp);
+    return () => {
+      document.removeEventListener('mousedown', handleDown);
+      document.removeEventListener('mouseup', handleUp);
+      window.removeEventListener('mousemove', checkPos);
+    };
+  }, [colComponents, index]);
+
   return (
-    <ReactSortable
-      id={sortableId}
-      list={colComponents[index]}
-      group={{ name: groupName }}
-      sort={true}
-      forceFallback={true}
-      animation={150}
-      fallbackOnBody={true}
-      swapThreshold={0.65}
-      className="content"
-      onAdd={handleSortableAdd}
-      onStart={handleSortableStart}
-      setList={handleSortableSetList}
-    >
-      {colComponents[index] &&
-        colComponents[index].map((cp: GridItem) => (
-          <div
-            key={cp.id}
-            data-cp-type={cp.type}
-            data-cp-displayname={cp.displayName}
-            data-cp-id={cp.id}
-            className="componentItem"
-            style={{
-              width: `calc(${getComponentWidth(pageComponentSchemas[cp.id], cp.type)} - 8px)`,
-              flexShrink: 0,
-              flexGrow: 0,
-              borderColor: curComponentID === cp.id ? 'rgb(var(--primary-6))' : 'transparent',
-              borderStyle: curComponentID === cp.id ? 'solid' : 'dashed',
-              margin: '4px'
-            }}
-            onClick={(e: React.MouseEvent<HTMLDivElement>) => {
-              e.stopPropagation();
-              console.log('点击组件: ', cp.id);
-              setCurComponentID(cp.id);
+    <div ref={wrapperRef} className='sortableWrapper'>
+      {colComponents[index].length === 0 && <div className='placeholder'>将组件拖入这里</div>}
+      <ReactSortable
+        id={sortableId}
+        list={colComponents[index]}
+        group={{ name: groupName }}
+        sort={true}
+        forceFallback={true}
+        animation={150}
+        fallbackOnBody={true}
+        swapThreshold={0.65}
+        className="content"
+        onAdd={handleSortableAdd}
+        onStart={handleSortableStart}
+        setList={handleSortableSetList}
+        onEnd={() => wrapperRef.current?.classList.remove('drag-over')}
+      >
+        {colComponents[index] &&
+          colComponents[index].map((cp: GridItem) => (
+            <div
+              key={cp.id}
+              data-cp-type={cp.type}
+              data-cp-displayname={cp.displayName}
+              data-cp-id={cp.id}
+              className="componentItem"
+              style={{
+                width: `calc(${getComponentWidth(pageComponentSchemas[cp.id], cp.type)} - 8px)`,
+                flexShrink: 0,
+                flexGrow: 0,
+                borderColor: curComponentID === cp.id ? 'rgb(var(--primary-6))' : 'transparent',
+                borderStyle: curComponentID === cp.id ? 'solid' : 'dashed',
+                margin: '4px'
+              }}
+              onClick={(e: React.MouseEvent<HTMLDivElement>) => {
+                e.stopPropagation();
+                console.log('点击组件: ', cp.id);
+                setCurComponentID(cp.id);
 
-              const curComponentSchema = pageComponentSchemas[cp.id];
-              setCurComponentSchema(curComponentSchema);
-              setShowDeleteButton(true);
-            }}
-          >
-            <EditRender
-              runtime={runtime}
-              cpId={cp.id}
-              cpType={cp.type}
-              pageComponentSchema={pageComponentSchemas[cp.id]}
-            />
+                const curComponentSchema = pageComponentSchemas[cp.id];
+                setCurComponentSchema(curComponentSchema);
+                setShowDeleteButton(true);
+              }}
+            >
+              <EditRender
+                runtime={runtime}
+                cpId={cp.id}
+                cpType={cp.type}
+                pageComponentSchema={pageComponentSchemas[cp.id]}
+              />
 
-            {/* 操作按钮 */}
-            {curComponentID === cp.id && showDeleteButton && (
-              <div className="operationArea">
-                {pageComponentSchemas[cp.id].config.status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
-                  <>
-                    <div
-                      className="copyButton"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleShowComponent(cp.id);
-                      }}
-                    >
-                      <img src={CompShowIcon} alt="component show" />
-                    </div>
-                    <Divider className="divider" type="vertical" />
-                  </>
-                )}
+              {/* 操作按钮 */}
+              {curComponentID === cp.id && showDeleteButton && (
+                <div className="operationArea">
+                  {pageComponentSchemas[cp.id].config.status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+                    <>
+                      <div
+                        className="copyButton"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleShowComponent(cp.id);
+                        }}
+                      >
+                        <img src={CompShowIcon} alt="component show" />
+                      </div>
+                      <Divider className="divider" type="vertical" />
+                    </>
+                  )}
 
-                <div
-                  className="copyButton"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    console.log('复制组件: ', cp);
-                    handleCopyComponent({ ...cp, id: `${cp.type}-${uuidv4()}` }, cp.id, index);
-                  }}
-                >
-                  <img src={CompCopyIcon} alt="component copy" />
+                  <div
+                    className="copyButton"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      console.log('复制组件: ', cp);
+                      handleCopyComponent({ ...cp, id: `${cp.type}-${uuidv4()}` }, cp.id, index);
+                    }}
+                  >
+                    <img src={CompCopyIcon} alt="component copy" />
+                  </div>
+                  <Divider className="divider" type="vertical" />
+
+                  <div
+                    className="deleteButton"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      console.log('删除组件: ', cp.id);
+                      handleDeleteComponent(cp.id);
+                    }}
+                  >
+                    <img src={CompDeleteIcon} alt="component delete" />
+                  </div>
                 </div>
-                <Divider className="divider" type="vertical" />
-
-                <div
-                  className="deleteButton"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    console.log('删除组件: ', cp.id);
-                    handleDeleteComponent(cp.id);
-                  }}
-                >
-                  <img src={CompDeleteIcon} alt="component delete" />
-                </div>
-              </div>
-            )}
-          </div>
-        ))}
-    </ReactSortable>
+              )}
+            </div>
+          ))}
+      </ReactSortable>
+    </div>
   );
 };
 

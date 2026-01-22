@@ -5,7 +5,6 @@ const XPlaceholder = memo(() => {
 
   return (
     <div
-      className='formWrapper'
       style={{
         height: 30
       }}

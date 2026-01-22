@@ -298,7 +298,7 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
         </div>
       )}
       {showOption && (
-        <div className={styles.dropdownContainer} style={{ marginRight: isGroup ? 26 : 0 }}>
+        <div className={styles.dropdownContainer} style={{ marginRight: isGroup ? 24 : 8 }}>
           <Dropdown
             popupVisible={popupVisible}
             onVisibleChange={(visible) => {

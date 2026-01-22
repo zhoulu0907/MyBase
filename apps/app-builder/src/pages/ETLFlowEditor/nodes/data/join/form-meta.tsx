@@ -12,7 +12,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
   return (
     <div className={styles.joinNode}>
-      <img src={JoinIcon} alt="union" />
+      <img src={JoinIcon} alt="join" />
       {nodeData.value[form.getValueIn('id')]?.title || '横向连接节点'}
     </div>
   );
