@@ -168,4 +168,20 @@ public class FlowNodeConfigServiceImpl implements FlowNodeConfigService {
         return field.asText();
     }
 
+    @Override
+    public NodeInfoVO getNodeTypeInfo(String nodeCode) {
+        log.info("getNodeTypeInfo start, nodeCode: {}", nodeCode);
+
+        FlowNodeConfigDO nodeConfig = flowNodeConfigRepository.findByNodeCode(nodeCode);
+        if (nodeConfig == null) {
+            log.warn("Node config not found, nodeCode: {}", nodeCode);
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.NODE_CONFIG_NOT_EXIST);
+        }
+
+        NodeInfoVO result = convertToNodeInfoVO(nodeConfig);
+        log.info("getNodeTypeInfo success, nodeCode: {}, nodeName: {}, version: {}",
+                nodeCode, result.getNodeName(), result.getVersion());
+        return result;
+    }
+
 }
