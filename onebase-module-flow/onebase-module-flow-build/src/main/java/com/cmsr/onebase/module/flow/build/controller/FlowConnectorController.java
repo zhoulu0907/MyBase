@@ -1,10 +1,12 @@
 package com.cmsr.onebase.module.flow.build.controller;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.framework.common.pojo.PageParam;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.flow.build.service.FlowConnectorService;
 import com.cmsr.onebase.module.flow.build.vo.CreateFlowConnectorReqVO;
 import com.cmsr.onebase.module.flow.build.vo.CreateFlowConnectorRespVO;
+import com.cmsr.onebase.module.flow.build.vo.FlowConnectorLiteVO;
 import com.cmsr.onebase.module.flow.build.vo.FlowConnectorVO;
 import com.cmsr.onebase.module.flow.build.vo.UpdateFlowConnectorReqVO;
 import com.cmsr.onebase.module.flow.core.vo.PageConnectorReqVO;
@@ -37,8 +39,8 @@ public class FlowConnectorController {
 
     @Operation(summary = "获取连接器详情")
     @GetMapping("/get")
-    public CommonResult<FlowConnectorVO> getConnector(@RequestParam("id") Long connectorId) {
-        FlowConnectorVO connectorDetail = connectorService.getConnectorDetail(connectorId);
+    public CommonResult<FlowConnectorVO> getConnector(@RequestParam("connectorUuid") String connectorUuid) {
+        FlowConnectorVO connectorDetail = connectorService.getConnectorDetailByUuid(connectorUuid);
         return CommonResult.success(connectorDetail);
     }
 
@@ -68,6 +70,13 @@ public class FlowConnectorController {
     public CommonResult<List<FlowConnectorVO>> listByType(
             @RequestParam("typeCode") String typeCode) {
         List<FlowConnectorVO> result = connectorService.listByType(typeCode);
+        return CommonResult.success(result);
+    }
+
+    @Operation(summary = "查询所有连接器实例")
+    @GetMapping("/list-all")
+    public CommonResult<PageResult<FlowConnectorLiteVO>> listAll(PageParam pageParam) {
+        PageResult<FlowConnectorLiteVO> result = connectorService.listAll(pageParam);
         return CommonResult.success(result);
     }
 

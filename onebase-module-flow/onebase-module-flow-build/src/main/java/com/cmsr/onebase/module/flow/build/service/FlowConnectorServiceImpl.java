@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.flow.build.service;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
+import com.cmsr.onebase.framework.common.pojo.PageParam;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
@@ -8,6 +9,7 @@ import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.common.util.string.UuidUtils;
 import com.cmsr.onebase.module.flow.build.vo.CreateFlowConnectorReqVO;
 import com.cmsr.onebase.module.flow.build.vo.CreateFlowConnectorRespVO;
+import com.cmsr.onebase.module.flow.build.vo.FlowConnectorLiteVO;
 import com.cmsr.onebase.module.flow.build.vo.FlowConnectorVO;
 import com.cmsr.onebase.module.flow.build.vo.UpdateFlowConnectorReqVO;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowConnectorRepository;
@@ -27,6 +29,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+
+import com.mybatisflex.core.paginate.Page;
 
 @Slf4j
 @Setter
@@ -61,6 +65,15 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
     @Override
     public FlowConnectorVO getConnectorDetail(Long connectorId) {
         FlowConnectorDO connectorDO = connectorRepository.getById(connectorId);
+        if (connectorDO == null) {
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS);
+        }
+        return convertToVO(connectorDO);
+    }
+
+    @Override
+    public FlowConnectorVO getConnectorDetailByUuid(String connectorUuid) {
+        FlowConnectorDO connectorDO = connectorRepository.selectByConnectorUuid(connectorUuid);
         if (connectorDO == null) {
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS);
         }
@@ -182,6 +195,26 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         log.info("getActionValueByConnectorUuid success, connectorUuid: {}, actionName: {}",
                 connectorUuid, actionName);
         return actionValue;
+    }
+
+    @Override
+    public PageResult<FlowConnectorLiteVO> listAll(PageParam pageParam) {
+        log.info("listAll start, pageNo: {}, pageSize: {}", pageParam.getPageNo(), pageParam.getPageSize());
+        Page<FlowConnectorDO> page = connectorRepository.page(
+                new Page<>(pageParam.getPageNo(), pageParam.getPageSize()));
+        List<FlowConnectorLiteVO> records = page.getRecords().stream()
+                .map(this::convertToLiteVO)
+                .toList();
+        PageResult<FlowConnectorLiteVO> result = new PageResult<>(records, page.getTotalRow());
+        log.info("listAll success, total: {}", result.getTotal());
+        return result;
+    }
+
+    /**
+     * Convert FlowConnectorDO to FlowConnectorLiteVO
+     */
+    private FlowConnectorLiteVO convertToLiteVO(FlowConnectorDO connectorDO) {
+        return BeanUtils.toBean(connectorDO, FlowConnectorLiteVO.class);
     }
 
     public String jsonNodeToString(JsonNode jsonNode) {
