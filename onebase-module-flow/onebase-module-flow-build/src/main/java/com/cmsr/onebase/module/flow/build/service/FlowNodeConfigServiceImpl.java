@@ -135,6 +135,7 @@ public class FlowNodeConfigServiceImpl implements FlowNodeConfigService {
     private NodeInfoVO convertToNodeInfoVO(FlowNodeConfigDO config) {
         NodeInfoVO vo = new NodeInfoVO();
         vo.setNodeName(config.getNodeName());
+        vo.setNodeCode(config.getNodeCode());
         vo.setLevel1Code(config.getLevel1Code());
         vo.setLevel2Code(config.getLevel2Code());
         vo.setLevel3Code(config.getLevel3Code());

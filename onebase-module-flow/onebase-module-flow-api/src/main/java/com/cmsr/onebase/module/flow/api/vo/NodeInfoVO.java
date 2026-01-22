@@ -17,6 +17,12 @@ public class NodeInfoVO {
     private String nodeName;
 
     /**
+     * 连接器类型编码
+     */
+    @Schema(description = "连接器类型编码")
+    private String nodeCode;
+
+    /**
      * 一级分类编码
      */
     @Schema(description = "一级分类编码")
