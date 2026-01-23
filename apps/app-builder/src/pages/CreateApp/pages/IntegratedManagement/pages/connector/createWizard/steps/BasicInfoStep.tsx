@@ -12,19 +12,9 @@ const BasicInfoStep: React.FC = () => {
 
   // 组件挂载时确保 schemas 已加载
   useEffect(() => {
-    console.log('[BasicInfoStep] useEffect 触发', {
-      connectorTypeNodeCode: connectorType.nodeCode,
-      uiError: ui.error,
-      schemasConnConfig: schemas.conn_config,
-      shouldFetch: connectorType.nodeCode && !ui.error && !schemas.conn_config
-    });
-
     if (connectorType.nodeCode && !ui.error && !schemas.conn_config) {
       // 如果 schemas 还未加载，则调用接口
-      console.log('[BasicInfoStep] 调用 fetchSchemas');
       fetchSchemas(connectorType.nodeCode);
-    } else {
-      console.log('[BasicInfoStep] 跳过 fetchSchemas 调用');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [connectorType.nodeCode]);
@@ -35,11 +25,6 @@ const BasicInfoStep: React.FC = () => {
   };
 
   const handleNext = () => {
-    console.log('[BasicInfoStep] handleNext 点击', {
-      connectorName: formData.basicInfo.connectorName,
-      description: formData.basicInfo.description
-    });
-
     // 校验
     if (!formData.basicInfo.connectorName.trim()) {
       Message.error('请输入实例名称');
@@ -54,7 +39,6 @@ const BasicInfoStep: React.FC = () => {
       return;
     }
 
-    console.log('[BasicInfoStep] 校验通过，调用 nextStep');
     nextStep();
   };
 
