@@ -123,8 +123,9 @@ export const useConnectorWizardStore = create<ConnectorWizardStore>()(
 
       fetchEnvList: async () => {
         try {
-          // TODO: 替换为实际的 API 调用
-          // 临时使用空数组，等后端接口确认后更新
+          // TODO: 等待后端 API 接口确认后实现
+          // 预计接口: GET /env/list
+          // 临时返回空数组，功能待实现
           set({ envList: [] });
         } catch (error) {
           console.error('获取环境列表失败:', error);
@@ -144,7 +145,7 @@ export const useConnectorWizardStore = create<ConnectorWizardStore>()(
             relatedFlows: [],
             requestLogs: [],
           },
-          ui: { isLoading: false },
+          ui: { isLoading: false, error: undefined },
           envList: [],
         }),
     }),
