@@ -98,7 +98,8 @@ export const SYSTEM_FIELD_MAP = {
   update_by: '更新人',
   parent_id: '主表ID',
   deleted: '软删除标记',
-  lock_version: '乐观锁版本'
+  lock_version: '乐观锁版本',
+  draft_status: '草稿状态'
 };
 
 // 字段类型常量
