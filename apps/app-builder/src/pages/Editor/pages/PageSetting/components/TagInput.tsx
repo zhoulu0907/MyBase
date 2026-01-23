@@ -225,7 +225,7 @@ const TagInput: React.FC<TagInputProps> = ({
         extensions={extensions}
       />
       <div className={styles.buttonWrapper}>
-        <Button type="primary" onClick={() => setShowFieldSelector(!showFieldSelector)}>
+        <Button type="outline" onClick={() => setShowFieldSelector(!showFieldSelector)}>
           + 添加字段
         </Button>
         {showFieldSelector && (
