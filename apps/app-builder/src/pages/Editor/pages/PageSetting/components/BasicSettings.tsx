@@ -5,11 +5,6 @@ import TagInput from './TagInput';
 
 const BasicSettings: React.FC = () => {
   const [titleType, setTitleType] = useState('default');
-  const [textValue, setTextValue] = useState('');
-
-  const handleTextChange = (value: string) => {
-    setTextValue(value);
-  };
 
   return (
     <div className={styles.settingsPage}>
@@ -36,11 +31,7 @@ const BasicSettings: React.FC = () => {
               </>
             ) : (
               <div className={styles.customTitle}>
-                <TagInput
-                  value={textValue}
-                  onChange={handleTextChange}
-                  placeholder="请输入文字或添加字段，至少添加一个字段"
-                />
+                <TagInput />
               </div>
             )}
           </Form.Item>

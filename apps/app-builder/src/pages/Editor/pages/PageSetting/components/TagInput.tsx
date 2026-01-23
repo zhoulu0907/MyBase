@@ -7,6 +7,9 @@ import {
   useAppEntityStore
 } from '@onebase/ui-kit';
 import React, { useRef, useState, useEffect, useCallback } from 'react';
+import CodeMirror, { type ReactCodeMirrorRef } from '@uiw/react-codemirror';
+import { EditorView, keymap, type ViewUpdate } from '@codemirror/view';
+import { tagPlaceholdersPlugin } from './tagPlaceholders';
 import styles from './components.module.less';
 
 interface TagInputProps {
@@ -25,10 +28,9 @@ interface FieldItem {
   isSystemField: number;
 }
 
-interface ContentItem {
-  type: 'text' | 'tag';
-  content: string;
-  fieldName?: string;
+interface TagItem {
+  label: string;
+  fieldName: string;
 }
 
 const TagInput: React.FC<TagInputProps> = ({
@@ -36,11 +38,12 @@ const TagInput: React.FC<TagInputProps> = ({
   onChange,
   placeholder = '请输入文字或添加字段，至少添加一个字段'
 }) => {
-  const contentRef = useRef<HTMLDivElement>(null);
+  const editorRef = useRef<ReactCodeMirrorRef>(null);
+  const updateRef = useRef<ViewUpdate | null>(null);
   const [showFieldSelector, setShowFieldSelector] = useState(false);
   const [customFields, setCustomFields] = useState<FieldItem[]>([]);
   const [systemFields, setSystemFields] = useState<FieldItem[]>([]);
-  const [content, setContent] = useState<ContentItem[]>([{ type: 'text', content: '' }]);
+  const [tags, setTags] = useState<TagItem[]>([]);
 
   const { mainEntity } = useAppEntityStore();
 
@@ -74,206 +77,113 @@ const TagInput: React.FC<TagInputProps> = ({
 
   const allFields = [...customFields, ...systemFields];
 
-  const addField = useCallback(
-    (fieldName: string) => {
-      const field = allFields.find((f) => f.fieldName === fieldName);
-      if (!field) return;
+  const insertTag = useCallback(
+    (field: FieldItem) => {
+      if (!updateRef.current?.view) return;
 
-      setContent((prevContent) => {
-        const newContent = [...prevContent];
-        const lastItem = newContent[newContent.length - 1];
+      const view = updateRef.current.view;
+      const state = view.state;
+      const [range] = state?.selection?.ranges || [];
 
-        if (lastItem.type === 'text' && lastItem.content === '') {
-          newContent[newContent.length - 1] = { type: 'tag', content: field.label, fieldName: field.fieldName };
-        } else {
-          newContent.push({ type: 'tag', content: field.label, fieldName: field.fieldName });
-          newContent.push({ type: 'text', content: '' });
+      const insertFrom = range?.from || 0;
+      const insertTo = range?.to || insertFrom;
+
+      const tagText = `{{${field.label}}}`;
+
+      view.dispatch({
+        changes: {
+          from: insertFrom,
+          to: insertTo,
+          insert: tagText
+        },
+        selection: {
+          anchor: insertFrom + tagText.length
         }
-
-        const textValue = newContent
-          .map((item) => (item.type === 'tag' ? `【${item.content}】` : item.content))
-          .join('');
-        onChange(textValue);
-
-        return newContent;
       });
 
+      setTags([...tags, { label: field.label, fieldName: field.fieldName }]);
       setShowFieldSelector(false);
 
-      setTimeout(() => {
-        if (contentRef.current) {
-          const textNodes = contentRef.current.querySelectorAll('span:last-child');
-          const lastTextNode = textNodes[textNodes.length - 1];
-          if (lastTextNode) {
-            const range = document.createRange();
-            range.selectNodeContents(lastTextNode);
-            range.collapse(true);
-            const selection = window.getSelection();
-            if (selection) {
-              selection.removeAllRanges();
-              selection.addRange(range);
-            }
+      view.focus();
+    },
+    [tags]
+  );
+
+  const handleAddField = useCallback(
+    (fieldName: string) => {
+      const field = allFields.find((f) => f.fieldName === fieldName);
+      if (field) {
+        insertTag(field);
+      }
+    },
+    [allFields, tags, insertTag]
+  );
+
+  const extensions = [
+    EditorView.updateListener.of((update) => {
+      updateRef.current = update;
+    }),
+    tagPlaceholdersPlugin(),
+    keymap.of([
+      {
+        key: 'Backspace',
+        run: (view) => {
+          const state = view.state;
+          const [range] = state.selection.ranges;
+          const doc = state.doc;
+
+          if (range.from !== range.to) {
+            return false;
           }
-          contentRef.current.focus();
-        }
-      }, 0);
-    },
-    [allFields, onChange]
-  );
 
-  const removeTag = useCallback(
-    (index: number) => {
-      setContent((prevContent) => {
-        const newContent = [...prevContent];
-        newContent.splice(index, 1);
+          const line = doc.lineAt(range.from);
+          const lineText = line.text;
+          const lineStart = line.from;
 
-        if (newContent.length === 0) {
-          newContent.push({ type: 'text', content: '' });
-        }
+          const beforeCursor = lineText.slice(0, range.from - lineStart);
 
-        const textValue = newContent
-          .map((item) => (item.type === 'tag' ? `【${item.content}】` : item.content))
-          .join('');
-        onChange(textValue);
+          const tagMatch = beforeCursor.match(/\{\{.+?\}\}$/);
 
-        return newContent;
-      });
-    },
-    [onChange]
-  );
+          if (tagMatch) {
+            const tagText = tagMatch[0];
+            const tagStart = range.from - tagText.length;
 
-  const updateText = useCallback(
-    (text: string) => {
-      setContent((prevContent) => {
-        const newContent = [...prevContent];
-        const lastItem = newContent[newContent.length - 1];
-
-        if (lastItem.type === 'text') {
-          lastItem.content = text;
-        } else {
-          newContent.push({ type: 'text', content: text });
-        }
-
-        const textValue = newContent
-          .map((item) => (item.type === 'tag' ? `【${item.content}】` : item.content))
-          .join('');
-        onChange(textValue);
-
-        return newContent;
-      });
-    },
-    [onChange]
-  );
-
-  const handleInput = useCallback(
-    (e: React.FormEvent<HTMLDivElement>) => {
-      const div = e.currentTarget;
-      const selection = window.getSelection();
-      if (!selection || selection.rangeCount === 0) return;
-
-      const range = selection.getRangeAt(0);
-      const node = range.startContainer;
-
-      if (node.nodeType !== Node.TEXT_NODE) return;
-
-      const textContent = node.textContent || '';
-
-      setContent((prevContent) => {
-        const newContent = [...prevContent];
-        const textIndex = Array.from(div.childNodes).indexOf(node);
-
-        if (textIndex >= 0 && textIndex < newContent.length && newContent[textIndex].type === 'text') {
-          newContent[textIndex].content = textContent;
-
-          const textValue = newContent
-            .map((item) => (item.type === 'tag' ? `【${item.content}】` : item.content))
-            .join('');
-          onChange(textValue);
-        }
-
-        return newContent;
-      });
-    },
-    [onChange]
-  );
-
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLDivElement>) => {
-      if (e.key === 'Backspace') {
-        const selection = window.getSelection();
-        if (selection && selection.rangeCount > 0) {
-          const range = selection.getRangeAt(0);
-          const node = range.startContainer;
-
-          if (node.nodeType === Node.TEXT_NODE) {
-            const textContent = node.textContent || '';
-
-            if (range.startOffset === 0 && textContent.length === 0) {
-              const prevSibling = node.previousSibling;
-              if (prevSibling && prevSibling.nodeType === Node.ELEMENT_NODE) {
-                const tagIndex = Array.from(contentRef.current?.childNodes || []).indexOf(prevSibling);
-                if (tagIndex >= 0) {
-                  e.preventDefault();
-                  removeTag(tagIndex);
-                }
+            view.dispatch({
+              changes: {
+                from: tagStart,
+                to: range.from,
+                insert: ''
+              },
+              selection: {
+                anchor: tagStart
               }
+            });
+
+            const tag = tags.find((t) => `{{${t.label}}}` === tagText);
+            if (tag) {
+              setTags(tags.filter((t) => t.fieldName !== tag.fieldName));
             }
+
+            return true;
           }
+
+          return false;
         }
       }
-    },
-    [removeTag]
-  );
-
-  useEffect(() => {
-    if (contentRef.current) {
-      contentRef.current.focus();
-    }
-  }, []);
-
-  const getUsedFieldNames = useCallback(() => {
-    return content.filter((item) => item.type === 'tag').map((item) => item.fieldName);
-  }, [content]);
-
-  const renderContent = () => {
-    return content.map((item, index) => {
-      if (item.type === 'text') {
-        return (
-          <span
-            key={`text-${index}`}
-            contentEditable
-            suppressContentEditableWarning
-            onInput={handleInput}
-          >
-            {item.content}
-          </span>
-        );
-      } else {
-        return (
-          <span
-            key={`tag-${index}`}
-            className={styles.tagItem}
-            onClick={() => removeTag(index)}
-          >
-            【{item.content}】
-          </span>
-        );
-      }
-    });
-  };
+    ])
+  ];
 
   return (
     <div className={styles.tagInputWrapper}>
-      <div
-        ref={contentRef}
-        className={styles.tagInputContent}
-        contentEditable
-        suppressContentEditableWarning
-        onKeyDown={handleKeyDown}
-        data-placeholder={content.length === 1 && content[0].content === '' ? placeholder : ''}
-      >
-        {renderContent()}
-      </div>
+      <CodeMirror
+        ref={editorRef}
+        value={value}
+        onChange={onChange}
+        height="100px"
+        placeholder={placeholder}
+        className={styles.editor}
+        extensions={extensions}
+      />
       <div style={{ position: 'relative', marginTop: '8px' }}>
         <Button type="primary" onClick={() => setShowFieldSelector(!showFieldSelector)}>
           + 添加字段
@@ -284,12 +194,10 @@ const TagInput: React.FC<TagInputProps> = ({
               placeholder="请选择字段"
               options={allFields.map((field) => ({
                 label: field.label,
-                value: field.fieldName,
-                disabled: getUsedFieldNames().includes(field.fieldName)
+                value: field.fieldName
               }))}
-              onChange={addField}
+              onChange={handleAddField}
               style={{ width: '100%' }}
-              autoFocus
               showSearch
             />
           </div>
