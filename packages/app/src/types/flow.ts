@@ -239,6 +239,23 @@ export interface ScriptActionItem {
   scriptName: string;
 }
 
+export interface ConnectorNodeConfig {
+  nodeName: string;
+  nodeCode: string;
+  category: string;
+}
+export interface ListConnectorByTypeReq {
+  typeCode: string;
+}
+
+export interface ListConnectorActionReq {
+  connectorUuid: string;
+}
+
+export interface GetActionValueReq {
+  connectorUuid: string;
+  actionName: string;
+}
 // ============ 连接器页面相关类型定义 ============
 
 /**
