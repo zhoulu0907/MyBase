@@ -5,9 +5,8 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.flow.api.vo.NodeInfoVO;
+import com.cmsr.onebase.module.flow.api.vo.NodeTypeInfoVO;
 import com.cmsr.onebase.module.flow.build.vo.ConnectorTypeListVO;
-import com.cmsr.onebase.module.flow.build.vo.NodeConfigActionVO;
-import com.cmsr.onebase.module.flow.build.vo.NodeConfigConnVO;
 import com.cmsr.onebase.module.flow.build.vo.NodeConfigVO;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowConnectorRepository;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowNodeConfigRepository;
@@ -46,30 +45,6 @@ public class FlowNodeConfigServiceImpl implements FlowNodeConfigService {
         PageResult<FlowNodeConfigDO> dos = flowNodeConfigRepository.pageNodeConfigByCode(reqVO);
         List<NodeConfigVO> vos = BeanUtils.toBean(dos.getList(), NodeConfigVO.class);
         return new PageResult(vos, dos.getTotal());
-    }
-
-    @Override
-    public NodeConfigConnVO findConnConfig(String nodeCode) {
-        FlowNodeConfigDO nodeConfigDO = flowNodeConfigRepository.findByNodeCode(nodeCode);
-        if (nodeConfigDO == null) {
-            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.NODE_CONFIG_NOT_EXIST);
-        }
-        NodeConfigConnVO nodeConfigConnVO = new NodeConfigConnVO();
-        nodeConfigConnVO.setConnConfigType(nodeConfigDO.getConnConfigType());
-        nodeConfigConnVO.setConnConfig(JsonUtils.parseTree(nodeConfigDO.getConnConfig()));
-        return nodeConfigConnVO;
-    }
-
-    @Override
-    public NodeConfigActionVO findActionConfig(String nodeCode) {
-        FlowNodeConfigDO nodeConfigDO = flowNodeConfigRepository.findByNodeCode(nodeCode);
-        if (nodeConfigDO == null) {
-            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.NODE_CONFIG_NOT_EXIST);
-        }
-        NodeConfigActionVO nodeConfigActionVO = new NodeConfigActionVO();
-        nodeConfigActionVO.setActionConfigType(nodeConfigDO.getActionConfigType());
-        nodeConfigActionVO.setActionConfig(JsonUtils.parseTree(nodeConfigDO.getActionConfig()));
-        return nodeConfigActionVO;
     }
 
     @Override
@@ -170,7 +145,7 @@ public class FlowNodeConfigServiceImpl implements FlowNodeConfigService {
     }
 
     @Override
-    public NodeInfoVO getNodeTypeInfo(String nodeCode) {
+    public NodeTypeInfoVO getNodeTypeInfo(String nodeCode) {
         log.info("getNodeTypeInfo start, nodeCode: {}", nodeCode);
 
         FlowNodeConfigDO nodeConfig = flowNodeConfigRepository.findByNodeCode(nodeCode);
@@ -179,10 +154,45 @@ public class FlowNodeConfigServiceImpl implements FlowNodeConfigService {
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.NODE_CONFIG_NOT_EXIST);
         }
 
-        NodeInfoVO result = convertToNodeInfoVO(nodeConfig);
+        NodeTypeInfoVO result = convertToNodeTypeInfoVO(nodeConfig);
         log.info("getNodeTypeInfo success, nodeCode: {}, nodeName: {}, version: {}",
                 nodeCode, result.getNodeName(), result.getVersion());
         return result;
+    }
+
+    /**
+     * Convert FlowNodeConfigDO to NodeTypeInfoVO (with full Schema)
+     */
+    private NodeTypeInfoVO convertToNodeTypeInfoVO(FlowNodeConfigDO config) {
+        NodeTypeInfoVO vo = new NodeTypeInfoVO();
+        vo.setNodeCode(config.getNodeCode());
+        vo.setNodeName(config.getNodeName());
+
+        // Parse conn_config JSON with default values
+        try {
+            JsonNode connConfigJson = JsonUtils.parseTree(config.getConnConfig());
+            vo.setVersion(getJsonValue(connConfigJson, "version", "1.0.0"));
+            vo.setAuthType(getJsonValue(connConfigJson, "authType", "NONE"));
+            vo.setConnConfig(connConfigJson);
+        } catch (Exception e) {
+            log.warn("Failed to parse conn_config for nodeCode: {}, using defaults",
+                    config.getNodeCode(), e);
+            vo.setVersion("1.0.0");
+            vo.setAuthType("NONE");
+            vo.setConnConfig(null);
+        }
+
+        // Parse action_config
+        try {
+            JsonNode actionConfigJson = JsonUtils.parseTree(config.getActionConfig());
+            vo.setActionConfig(actionConfigJson);
+        } catch (Exception e) {
+            log.warn("Failed to parse action_config for nodeCode: {}",
+                    config.getNodeCode(), e);
+            vo.setActionConfig(null);
+        }
+
+        return vo;
     }
 
 }

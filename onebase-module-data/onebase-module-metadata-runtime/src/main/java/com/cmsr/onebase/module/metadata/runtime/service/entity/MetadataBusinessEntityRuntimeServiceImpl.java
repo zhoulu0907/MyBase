@@ -10,6 +10,7 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntit
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.field.MetadataEntityFieldOptionDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.relationship.MetadataEntityRelationshipDO;
 import com.cmsr.onebase.module.metadata.runtime.controller.app.entity.vo.ChildEntityWithFieldsRespVO;
+import com.cmsr.onebase.module.metadata.runtime.controller.app.entity.vo.DataSelectionConfig;
 import com.cmsr.onebase.module.metadata.runtime.controller.app.entity.vo.EntityFieldRespVO;
 import com.cmsr.onebase.module.metadata.runtime.controller.app.entity.vo.EntityWithFieldsBatchQueryReqVO;
 import com.cmsr.onebase.module.metadata.runtime.controller.app.entity.vo.EntityWithFieldsRespVO;
@@ -27,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 
 /**
  * 运行态 - 业务实体服务实现类
@@ -303,6 +305,14 @@ public class MetadataBusinessEntityRuntimeServiceImpl implements MetadataBusines
             if (fieldDO.getFieldUuid() != null && fieldOptionsMap.containsKey(fieldDO.getFieldUuid())) {
                 fieldVO.setOptions(fieldOptionsMap.get(fieldDO.getFieldUuid()));
             }
+            // 填充数据选择配置（单选和多选都需要）
+            if ("DATA_SELECTION".equalsIgnoreCase(fieldDO.getFieldType()) || 
+                "MULTI_DATA_SELECTION".equalsIgnoreCase(fieldDO.getFieldType())) {
+                DataSelectionConfig dataSelectionConfig = buildDataSelectionConfig(fieldDO);
+                if (dataSelectionConfig != null) {
+                    fieldVO.setDataSelectionConfig(dataSelectionConfig);
+                }
+            }
             result.add(fieldVO);
         }
 
@@ -352,5 +362,61 @@ public class MetadataBusinessEntityRuntimeServiceImpl implements MetadataBusines
         }
         MetadataEntityFieldDO field = metadataEntityFieldRepository.getByFieldUuid(fieldUuid);
         return field != null ? field.getFieldName() : null;
+    }
+
+    /**
+     * 查询并构建数据选择配置
+     *
+     * @param field 字段
+     * @return 数据选择配置
+     */
+    private DataSelectionConfig buildDataSelectionConfig(MetadataEntityFieldDO field) {
+        if (field == null || field.getId() == null || field.getEntityUuid() == null) {
+            return null;
+        }
+
+        // 查询以当前实体为source的关系
+        QueryWrapper queryWrapper = metadataEntityRelationshipRepository.query()
+                .eq(MetadataEntityRelationshipDO::getSourceEntityUuid, field.getEntityUuid());
+        List<MetadataEntityRelationshipDO> relationships = metadataEntityRelationshipRepository.list(queryWrapper);
+        
+        // 过滤出 sourceFieldUuid 匹配当前字段的关系
+        MetadataEntityRelationshipDO relationship = null;
+        if (relationships != null) {
+            for (MetadataEntityRelationshipDO rel : relationships) {
+                if (rel.getSourceFieldUuid() != null && rel.getSourceFieldUuid().equals(field.getFieldUuid())) {
+                    relationship = rel;
+                    break;
+                }
+            }
+        }
+        
+        if (relationship == null || relationship.getTargetEntityUuid() == null || relationship.getSelectFieldUuid() == null) {
+            return null;
+        }
+
+        // 构建返回数据
+        DataSelectionConfig dataSelectionConfig = new DataSelectionConfig();
+        dataSelectionConfig.setRelationId(relationship.getId());
+        dataSelectionConfig.setTargetEntityUuid(relationship.getTargetEntityUuid());
+        dataSelectionConfig.setTargetFieldUuid(relationship.getSelectFieldUuid());
+        
+        // 同时提供ID格式和字段名称
+        try {
+            MetadataBusinessEntityDO targetEntity = metadataBusinessEntityRepository.getByEntityUuid(relationship.getTargetEntityUuid());
+            if (targetEntity != null) {
+                dataSelectionConfig.setTargetEntityId(targetEntity.getId());
+            }
+            
+            MetadataEntityFieldDO selectField = metadataEntityFieldRepository.getByFieldUuid(relationship.getSelectFieldUuid());
+            if (selectField != null) {
+                dataSelectionConfig.setTargetFieldId(selectField.getId());
+                dataSelectionConfig.setTargetFieldName(selectField.getFieldName());
+            }
+        } catch (Exception e) {
+            log.warn("查询UUID对应的ID失败: {}", e.getMessage());
+        }
+        
+        return dataSelectionConfig;
     }
 }
