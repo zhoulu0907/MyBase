@@ -54,7 +54,7 @@ export default function UserPage() {
             onDeptSelect={setSelectedDeptId}
             totalUserCount={totalUserCount}
             treeData={deptTree}
-            setDeptTree = {setDeptTree}
+            setDeptTree={setDeptTree}
             deptLoading={deptLoading}
           />
         </PlaceholderPanel>
