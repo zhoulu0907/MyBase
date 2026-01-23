@@ -25,6 +25,7 @@ interface AppCardProps {
   onEdit: (appId: string) => void;
   onLaunch: (appId: string) => void;
   onDelete: (item: Application) => void;
+  onUpdate?: () => void;
 }
 
 const AppCard: React.FC<AppCardProps> = ({
@@ -33,7 +34,8 @@ const AppCard: React.FC<AppCardProps> = ({
   onOptionVisibleChange,
   onEdit,
   onLaunch,
-  onDelete
+  onDelete,
+  onUpdate
 }) => {
   const getModel = (model?: string) => {
     if (model === PlatformTenantPublishMode.inner) {
@@ -63,7 +65,7 @@ const AppCard: React.FC<AppCardProps> = ({
     return item.appStatus === 0 ? '#F7F8FA' : '#E8FFEA';
   };
 
-  // 应用导出弹窗
+  // 应用导出/下载弹窗
   const [exportVisible, setExportVisible] = useState(false);
   // 应用导入/更新弹窗
   const [importVisible, setImportVisible] = useState(false);
@@ -271,7 +273,16 @@ const AppCard: React.FC<AppCardProps> = ({
         </div>
       </div>
       <AppExportModal visible={exportVisible} onClose={() => setExportVisible(false)} appInfo={item} />
-      <AppImportModal visible={importVisible} onClose={() => setImportVisible(false)} appInfo={item} />
+      <AppImportModal
+        visible={importVisible}
+        onClose={() => setImportVisible(false)}
+        appInfo={item}
+        onComplete={() => {
+          if (onUpdate) {
+            onUpdate();
+          }
+        }}
+      />
     </div>
   );
 };
