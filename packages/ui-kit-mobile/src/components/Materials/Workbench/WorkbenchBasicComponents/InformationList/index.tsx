@@ -81,7 +81,6 @@ const XInformationList = memo((props: XInformationListConfig & { runtime?: boole
   ]);
 
   const handleItemClick = (item: any) => {
-    console.log('information list item', item);
     if (!runtime) {
       return;
     }

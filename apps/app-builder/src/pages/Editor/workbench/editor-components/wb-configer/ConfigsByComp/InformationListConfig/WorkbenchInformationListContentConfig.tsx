@@ -14,11 +14,7 @@ const WbInformationListContentConfig = ({ item, configs, handlePropsChange }: Pr
   const dynamicFields = meta.dynamicFields ?? [];
   const filterField = meta.filterField;
   const staticFieldKey = meta.staticFieldKey ?? 'informationListConfig';
-  console.log('configs', configs, item);
-  console.log('modeField', modeField);
-  console.log('dynamicFields', dynamicFields);
-  console.log('filterField', filterField);
-  console.log('staticFieldKey', staticFieldKey);
+
   const currentMode =
     (typeof configs[modeField.key] === 'string' ? (configs[modeField.key] as string) : undefined) ??
     modeField.defaultValue ??
