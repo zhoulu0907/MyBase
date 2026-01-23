@@ -1,15 +1,18 @@
 import { type PageParam } from '../types/common';
 import {
-  CreateConnectInstanceReq,
-  CreateFlowMgmtReq,
-  CreateScriptActionReq,
-  ListConnectFlowNodeReq,
-  ListConnectInstanceReq,
-  ListScriptActionReq,
-  RenameFlowMgmtReq,
-  UpdateConnectInstanceReq,
-  UpdateFlowMgmtDefinitionReq,
-  UpdateScriptActionReq
+    CreateConnectInstanceReq,
+    CreateFlowMgmtReq,
+    CreateScriptActionReq,
+    GetActionValueReq,
+    ListConnectFlowNodeReq,
+    ListConnectInstanceReq,
+    ListConnectorActionReq,
+    ListConnectorByTypeReq,
+    ListScriptActionReq,
+    RenameFlowMgmtReq,
+    UpdateConnectInstanceReq,
+    UpdateFlowMgmtDefinitionReq,
+    UpdateScriptActionReq
 } from '../types/flow';
 import { flowService } from './clients';
 
@@ -119,3 +122,19 @@ export const updateScriptAction = (params: UpdateScriptActionReq) => {
 export const deleteScriptAction = (id: string) => {
   return flowService.post(`/connector/script/delete?id=${id}`);
 };
+
+export const listConnectorNodeConfig= ()=>{
+  return flowService.get('/node-config/list-all');
+}
+
+export const listConnectorByType = (params: ListConnectorByTypeReq) =>{
+  return flowService.get(`/connector/list-by-type`, params);
+}
+
+export const listConnectorAction = (params: ListConnectorActionReq)=>{
+    return flowService.get(`/connector/action/list-all`, params);
+}
+
+export const getActionValue=(params: GetActionValueReq)=>{
+    return flowService.get(`/connector/action-value`, params);
+}

@@ -233,3 +233,21 @@ export interface ScriptActionItem {
   description: string;
   scriptName: string;
 }
+
+export interface ConnectorNodeConfig {
+  nodeName: string;
+  nodeCode: string;
+  category: string;
+}
+export interface ListConnectorByTypeReq {
+  typeCode: string;
+}
+
+export interface ListConnectorActionReq {
+  connectorUuid: string;
+}
+
+export interface GetActionValueReq {
+  connectorUuid: string;
+  actionName: string;
+}
