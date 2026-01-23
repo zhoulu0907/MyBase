@@ -1,4 +1,4 @@
-import { useMemo, useEffect } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import { createForm, onFormValuesChange } from '@formily/core';
 import { createSchemaField, FormProvider, type ISchema } from '@formily/react';
 import { Button, Message, Spin } from '@arco-design/web-react';
@@ -14,6 +14,7 @@ interface DynamicConfigStepProps {
 
 const DynamicConfigStep: React.FC<DynamicConfigStepProps> = ({ schemaType, title }) => {
   const { schemas, formData, updateFormData, nextStep, prevStep, ui, envList, fetchEnvList } = useConnectorWizardStore();
+  const [isEnvListLoading, setIsEnvListLoading] = useState(false);
 
   // 获取对应的 schema
   const schema = schemas[schemaType] as ISchema;
@@ -38,11 +39,13 @@ const DynamicConfigStep: React.FC<DynamicConfigStepProps> = ({ schemaType, title
     if (schemaType === 'conn_config') {
       const envModeValue = formData[schemaType]?.envMode;
       if (envModeValue === 'select' && envList.length === 0) {
-        // 首次切换到"选择已有环境信息"模式时加载环境列表
-        fetchEnvList();
+        setIsEnvListLoading(true);
+        fetchEnvList().finally(() => {
+          setIsEnvListLoading(false);
+        });
       }
     }
-  }, [formData[schemaType]?.envMode, schemaType, envList.length, fetchEnvList]);
+  }, [formData, schemaType, envList.length, fetchEnvList]);
 
   // 当环境列表更新时，动态更新 existingEnvId 字段的选项
   useEffect(() => {
@@ -58,6 +61,18 @@ const DynamicConfigStep: React.FC<DynamicConfigStepProps> = ({ schemaType, title
       });
     }
   }, [form, schemaType, envList]);
+
+  // 设置 existingEnvId 字段的加载状态
+  useEffect(() => {
+    if (schemaType === 'conn_config' && form) {
+      form.setFieldState('existingEnvId', (state) => {
+        state.componentProps = {
+          ...state.componentProps,
+          loading: isEnvListLoading,
+        };
+      });
+    }
+  }, [form, schemaType, isEnvListLoading]);
 
   // 创建 SchemaField 组件
   const SchemaField = useMemo(
