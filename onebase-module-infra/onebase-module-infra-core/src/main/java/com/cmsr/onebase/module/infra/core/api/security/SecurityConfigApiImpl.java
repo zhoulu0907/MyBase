@@ -6,7 +6,9 @@ import com.cmsr.onebase.framework.common.biz.security.dto.PasswordExpiryCheckDTO
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.module.infra.dal.dataflex.SecurityRecordDataRepository;
+import com.cmsr.onebase.module.infra.dal.dataflex.SecurityConfigDataRepository;
 import com.cmsr.onebase.module.infra.dal.dataflexdo.ssecurity.SecurityRecordDO;
+import com.cmsr.onebase.module.infra.dal.dataflexdo.ssecurity.SecurityConfigDO;
 import com.cmsr.onebase.module.infra.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.infra.enums.security.SecurityRecordTypeEnum;
 import com.cmsr.onebase.module.infra.service.security.AntiBruteForceService;
@@ -48,6 +50,9 @@ public class SecurityConfigApiImpl implements SecurityConfigApi {
 
     @Resource
     private SecurityRecordDataRepository securityRecordDataRepository;
+
+    @Resource
+    private SecurityConfigDataRepository securityConfigDataRepository;
 
     @Resource
     private PasswordEncoder passwordEncoder;
@@ -291,5 +296,19 @@ public class SecurityConfigApiImpl implements SecurityConfigApi {
                                                        @RequestParam("deviceId") String deviceId) {
         boolean result = sessionIdleService.updateRedisIdleKey(tenantId, userId, deviceId);
         return success(result);
+    }
+
+    @Override
+    @Operation(summary = "根据租户ID删除安全配置记录")
+    public CommonResult<Long> deleteSecurityConfigsByTenantId(@RequestParam("tenantId") Long tenantId) {
+        long deletedCount = securityConfigService.deleteSecurityConfigsByTenantIds(tenantId);
+        return success(deletedCount);
+    }
+
+    @Override
+    @Operation(summary = "根据租户ID删除安全记录")
+    public CommonResult<Long> deleteSecurityRecordsByTenantId(@RequestParam("tenantId") Long tenantId) {
+        long deletedCount = securityConfigService.deleteSecurityRecordsByTenantIds(tenantId);
+        return success(deletedCount);
     }
 }

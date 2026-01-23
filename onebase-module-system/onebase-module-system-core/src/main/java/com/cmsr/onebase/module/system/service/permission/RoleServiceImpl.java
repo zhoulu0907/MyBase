@@ -147,6 +147,23 @@ public class RoleServiceImpl implements RoleService {
         LogRecordContext.putVariable("role", role);
     }
 
+    @Override
+    public void deleteRoleIds(Collection<Long> ids) {
+        for (Long id : ids) {
+            RoleDO role = roleDataRepository.findById(id);
+            if (role == null) {
+                ids.remove(id);
+            }
+            // 内置角色，不允许删除
+            if (RoleTypeEnum.SYSTEM.getType().equals(role.getType())) {
+                ids.remove(id);
+            }
+            deleteRole(id);
+        }
+        roleDataRepository.deleteByIds(ids);
+        permissionService.processRolesDeleted(ids);
+    }
+
     /**
      * 校验角色的唯一字段是否重复
      * <p>

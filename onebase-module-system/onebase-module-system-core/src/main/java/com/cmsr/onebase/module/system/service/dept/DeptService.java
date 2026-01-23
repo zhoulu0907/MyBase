@@ -39,6 +39,13 @@ public interface DeptService {
     void deleteDept(Long id);
 
     /**
+     * 删除部门
+     *
+     * @param ids 部门编号
+     */
+    void deleteDepts(Collection<Long> ids);
+
+    /**
      * 获得部门信息
      *
      * @param id 部门编号
@@ -61,6 +68,13 @@ public interface DeptService {
      * @return 部门列表
      */
     List<DeptDO> getDeptList(DeptListReqVO reqVO);
+
+    /**
+     * 获取所有部门列表
+     *
+     * @return 部门列表
+     */
+    List<DeptDO> getDeptListAll();
 
     /**
      * 获得指定编号的部门 Map

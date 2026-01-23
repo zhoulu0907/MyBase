@@ -408,6 +408,11 @@ public class BuildAppApplicationServiceImpl implements AppApplicationService {
     }
 
     @Override
+    public List<AppApplicationDO> getSimpleAllAppList(Long tenantId) {
+        return applicationRepository.getSimpleAllAppList(tenantId);
+    }
+
+    @Override
     public List<AppApplicationDO> getMySimpleAppListByName(String appName) {
         Long currentUserId = SecurityFrameworkUtils.getLoginUserId();
         return applicationRepository.findMyAppApplicationByAppName(appName, currentUserId);

@@ -125,6 +125,19 @@ public class DictDataServiceImpl implements DictDataService {
     }
 
     @Override
+    public void deleteDictDataByIds(Collection<Long> ids) {
+        for (Long id : ids) {
+            // 由于 DictDataDO 有 @TenantIgnore 注解，需要忽略租户过滤
+            DictDataDO dictData = TenantUtils.executeIgnore(() -> dictDataRepository.findById(id));
+            if (dictData == null) {
+                ids.remove(id);
+            }
+        }
+        // 删除字典数据
+        dictDataRepository.deleteByIds(ids);
+    }
+
+    @Override
     public long getDictDataCountByDictType(String dictType) {
         return dictDataRepository.countByDictType(dictType);
     }

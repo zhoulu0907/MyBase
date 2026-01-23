@@ -72,6 +72,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertList;
@@ -539,6 +540,32 @@ public class UserServiceImpl implements UserService {
         appAuthRoleUser.deleteByUserId(id);
         // 3. 记录操作日志上下文
         LogRecordContext.putVariable("user", user);
+    }
+
+    @Override
+    public void deleteUsers(Collection<Long> ids) {
+        for (Long id : ids) {
+            // 1. 校验用户存在
+            AdminUserDO user = validateUserExists(id);
+            // 如果是内置系统管理员，则从删除列表中移除
+            if (AdminTypeEnum.SYSTEM.getType().equals(user.getAdminType())) {
+                ids.remove(id);
+            }
+        }
+        // 2.1 删除用户
+        userDataRepository.deleteByIds(ids);
+        // 2.2 删除用户关联数据
+        permissionService.processUsersDeleted(ids);
+        // 2.2 删除用户岗位
+        userPostDataRepository.deleteByIds(ids);
+        // 2.2 删除用户角色
+        appAuthRoleUser.deleteByUserIds(ids);
+    }
+
+    @Override
+    public List<Long> getUserIds() {
+        List<AdminUserDO> users = userDataRepository.list();
+        return convertList(users, AdminUserDO::getId);
     }
 
     @Override

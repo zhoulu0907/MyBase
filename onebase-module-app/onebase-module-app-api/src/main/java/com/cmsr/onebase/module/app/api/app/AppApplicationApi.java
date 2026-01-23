@@ -31,4 +31,7 @@ public interface AppApplicationApi {
 
     boolean existsEntityFieldRelation(String entityUuid, String entityName, String fieldUuid, String fieldName);
 
+    List<ApplicationDTO> getSimpleAllAppList(Long tenantId);
+
+    void deleteApplication(Long id, String name);
 }

@@ -32,6 +32,8 @@ public interface AppApplicationService {
 
     List<AppApplicationDO> getSimpleAppList(Integer status);
 
+    List<AppApplicationDO> getSimpleAllAppList(Long tenantId);
+
     List<AppApplicationDO> getMySimpleAppListByName(String appName);
 
     ApplicationNavigationConfigVO getApplicationNavigationConfig(Long id);

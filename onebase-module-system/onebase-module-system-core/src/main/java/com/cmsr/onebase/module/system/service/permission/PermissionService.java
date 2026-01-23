@@ -60,6 +60,13 @@ public interface PermissionService {
     void processRoleDeleted(Long roleId);
 
     /**
+     * 处理角色删除时，批量删除关联授权数据
+     *
+     * @param roleIds 角色编号
+     */
+    void processRolesDeleted(Collection<Long> roleIds);
+
+    /**
      * 处理菜单删除时，删除关联授权数据
      *
      * @param menuId 菜单编号
@@ -125,6 +132,13 @@ public interface PermissionService {
      * @param userId 用户编号
      */
     void processUserDeleted(Long userId);
+
+    /**
+     * 处理用户删除时，批量删除关联授权数据
+     *
+     * @param userIds 用户编号
+     */
+    void processUsersDeleted(Collection<Long> userIds);
 
     /**
      * 获得拥有多个角色的用户编号集合

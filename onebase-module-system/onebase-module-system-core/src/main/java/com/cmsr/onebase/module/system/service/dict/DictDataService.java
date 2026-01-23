@@ -51,6 +51,13 @@ public interface DictDataService {
     void deleteDictData(Long id);
 
     /**
+     * 批量字典数据
+     *
+     * @param ids 字典数据编号
+     */
+    void deleteDictDataByIds(Collection<Long> ids);
+
+    /**
      * 获得字典数据列表
      *
      * @param status   状态

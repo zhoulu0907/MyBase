@@ -8,6 +8,7 @@ import com.cmsr.onebase.module.infra.convert.security.SecurityConfigCategoryConv
 import com.cmsr.onebase.module.infra.dal.dataflex.SecurityConfigCategoryDataRepository;
 import com.cmsr.onebase.module.infra.dal.dataflex.SecurityConfigDataRepository;
 import com.cmsr.onebase.module.infra.dal.dataflex.SecurityConfigTemplateDataRepository;
+import com.cmsr.onebase.module.infra.dal.dataflex.SecurityRecordDataRepository;
 import com.cmsr.onebase.module.infra.dal.dataflexdo.ssecurity.SecurityConfigCategoryDO;
 import com.cmsr.onebase.module.infra.dal.dataflexdo.ssecurity.SecurityConfigDO;
 import com.cmsr.onebase.module.infra.dal.dataflexdo.ssecurity.SecurityConfigTemplateDO;
@@ -57,6 +58,9 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
 
     @Resource
     private SecurityConfigDataRepository securityConfigDataRepository;
+
+    @Resource
+    private SecurityRecordDataRepository securityRecordDataRepository;
 
     @Override
     public List<SecurityConfigCategoryRespVO> getAllCategories() {
@@ -418,5 +422,15 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
             }
         }
         return configValues;
+    }
+
+    @Override
+    public long deleteSecurityConfigsByTenantIds(Long tenantId) {
+      return  securityConfigDataRepository.deleteByTenantId(tenantId);
+    }
+
+    @Override
+    public long deleteSecurityRecordsByTenantIds(Long tenantId) {
+        return  securityRecordDataRepository.deleteByTenantId(tenantId);
     }
 }

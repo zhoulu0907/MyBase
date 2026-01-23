@@ -136,6 +136,19 @@ public class DeptServiceImpl implements DeptService {
         deptDataRepository.deleteById(id);
     }
 
+    @Override
+    public void deleteDepts(Collection<Long> ids) {
+        for (Long id : ids) {
+            // 校验部门存在
+            DeptDO dept = deptDataRepository.findById(id);
+            if (dept == null) {
+                ids.remove(id);
+            }
+         }
+        // 删除部门
+        deptDataRepository.deleteByIds(ids);
+    }
+
     /**
      * 获取子部门数量
      */
@@ -223,6 +236,11 @@ public class DeptServiceImpl implements DeptService {
     @Override
     public List<DeptDO> getDeptList(DeptListReqVO reqVO) {
         return deptDataRepository.findAllByNameAndStatus(reqVO.getName(), reqVO.getStatus());
+    }
+
+    @Override
+    public List<DeptDO> getDeptListAll() {
+        return deptDataRepository.findAll();
     }
 
     @Override

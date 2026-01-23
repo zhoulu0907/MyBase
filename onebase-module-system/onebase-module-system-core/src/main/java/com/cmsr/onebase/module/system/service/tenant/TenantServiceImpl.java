@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.system.service.tenant;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
+import com.cmsr.onebase.framework.common.biz.security.SecurityConfigApi;
 import com.cmsr.onebase.framework.common.enums.CommonPublishModelEnum;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
@@ -17,11 +18,15 @@ import com.cmsr.onebase.framework.tenant.config.TenantProperties;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
+import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
 import com.cmsr.onebase.module.system.api.user.AdminUserRoleApi;
 import com.cmsr.onebase.module.system.convert.tenant.TenantConvert;
 import com.cmsr.onebase.module.system.dal.database.TenantDataRepository;
+import com.cmsr.onebase.module.system.dal.dataobject.config.SystemGeneralConfigDO;
 import com.cmsr.onebase.module.system.dal.dataobject.corp.CorpDO;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
+import com.cmsr.onebase.module.system.dal.dataobject.dict.DictDataDO;
+import com.cmsr.onebase.module.system.dal.dataobject.dict.DictTypeDO;
 import com.cmsr.onebase.module.system.dal.dataobject.license.LicenseDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.UserRoleDO;
@@ -37,8 +42,11 @@ import com.cmsr.onebase.module.system.enums.tenant.TenantCodeEnum;
 import com.cmsr.onebase.module.system.enums.tenant.TenantStatusEnum;
 import com.cmsr.onebase.module.system.enums.user.UserStatusEnum;
 import com.cmsr.onebase.module.system.framework.security.core.PwdEnHelper;
+import com.cmsr.onebase.module.system.service.config.SystemConfigService;
 import com.cmsr.onebase.module.system.service.corp.CorpService;
 import com.cmsr.onebase.module.system.service.dept.DeptService;
+import com.cmsr.onebase.module.system.service.dict.DictDataService;
+import com.cmsr.onebase.module.system.service.dict.DictTypeService;
 import com.cmsr.onebase.module.system.service.license.LicenseService;
 import com.cmsr.onebase.module.system.service.permission.MenuService;
 import com.cmsr.onebase.module.system.service.permission.PermissionService;
@@ -46,6 +54,7 @@ import com.cmsr.onebase.module.system.service.permission.RoleService;
 import com.cmsr.onebase.module.system.service.tenant.handler.TenantInfoHandler;
 import com.cmsr.onebase.module.system.service.tenant.handler.TenantMenuHandler;
 import com.cmsr.onebase.module.system.service.user.UserService;
+import com.cmsr.onebase.module.system.vo.config.SystemConfigReqVO;
 import com.cmsr.onebase.module.system.vo.role.RoleInsertReqVO;
 import com.cmsr.onebase.module.system.vo.tenant.*;
 import com.cmsr.onebase.module.system.vo.user.UserInsertReqVO;
@@ -116,6 +125,24 @@ public class TenantServiceImpl implements TenantService {
 
     @Resource
     private PwdEnHelper pwdEnHelper;
+
+    @Resource
+    private SystemConfigService systemConfigService;
+
+    @Resource
+    private DictDataService dictDataService;
+
+    @Resource
+    private DictTypeService dictTypeService;
+
+    @Resource
+    private SecurityConfigApi securityConfigApi;
+
+    // @Resource
+    // private AppApplicationService appApplicationService;
+
+    // @Resource
+    // private CorpAppRelationService corpAppRelationService;
 
     @Override
     public List<Long> getTenantIdList() {
@@ -562,6 +589,59 @@ public class TenantServiceImpl implements TenantService {
         TenantDO tenant = validateUpdateTenant(id);
         // 删除
         tenantDataRepository.deleteById(id);
+
+        // 在租户上下文中执行其他删除操作
+        TenantUtils.execute(id, () -> {
+
+            // 删除用户
+            List<Long> userIds = userService.getUserIds();
+            userService.deleteUsers(userIds);
+            // 删除角色
+            // 获取当前租户的所有角色并删除
+            List<RoleDO> roles = roleService.getRoleList();
+            roleService.deleteRoleIds(roles.stream().map(RoleDO::getId).collect(Collectors.toList()));
+
+            // 删除部门
+            // 获取当前租户的所有部门并删除
+            List<DeptDO> depts = deptService.getDeptListAll();
+            deptService.deleteDepts(depts.stream().map(DeptDO::getId).collect(Collectors.toList()));
+
+            // 删除数据字典 - 先删除字典数据，再删除字典类型
+            List<DictTypeDO> dictTypes = dictTypeService.getDictTypeList();
+            for (DictTypeDO dictType : dictTypes) {
+                // 删除该类型下的所有字典数据
+                List<DictDataDO> dictDataList = dictDataService.getDictDataList(null, dictType.getType());
+                if (!dictDataList.isEmpty()) {
+                    dictDataService.deleteDictDataByIds(dictDataList.stream().map(DictDataDO::getId).collect(Collectors.toList()));
+                }
+                // 删除字典类型
+                dictTypeService.deleteDictType(dictType.getId());
+            }
+
+            // 删除安全和
+            securityConfigApi.deleteSecurityConfigsByTenantId(tenant.getId());
+            securityConfigApi.deleteSecurityRecordsByTenantId(tenant.getId());
+
+            // 通用配置 - 获取当前租户的所有配置并删除
+            SystemConfigReqVO configReqVO = new SystemConfigReqVO();
+            List<SystemGeneralConfigDO> configs = systemConfigService.getTenantConfigList(configReqVO);
+            for (SystemGeneralConfigDO config : configs) {
+                systemConfigService.deleteConfig(config.getId());
+            }
+
+            // 删除应用
+            List<ApplicationDTO> applications = appApplicationApi.getSimpleAllAppList(tenant.getId());
+            for (ApplicationDTO application : applications) {
+                appApplicationApi.deleteApplication(application.getId(), application.getAppName());
+            }
+
+            // 删除企业
+            List<CorpDO> corps = corpService.findCorpAll();
+            for (CorpDO corp : corps) {
+                corpService.deleteCorp(corp.getId());
+            }
+
+        });
 
         // 记录操作日志上下文
         LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();

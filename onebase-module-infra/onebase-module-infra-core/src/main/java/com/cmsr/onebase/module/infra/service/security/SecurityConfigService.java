@@ -68,4 +68,20 @@ public interface SecurityConfigService {
      */
     Set<String> getTenantDesensitizedFieldValues();
 
+    /**
+     * 删除当前租户的所有安全配置
+     *
+     * @param tenantId 租户ID
+     * @return
+     */
+    long deleteSecurityConfigsByTenantIds(Long tenantId);
+
+    /**
+     * 删除当前租户的所有安全记录
+     *
+     * @param tenantId 租户ID
+     * @return
+     */
+    long deleteSecurityRecordsByTenantIds(Long tenantId);
+
 }
