@@ -79,6 +79,7 @@ const COMPONENT_TYPE = {
   SUB_TABLE: 'XSubTable',
   DATA_SELECT: 'XDataSelect',
   RATE: 'XRate',
+  CHECK_ITEM: 'XCheckItem',
   // 列表
   TABLE: 'XTable',
   CALENDAR: 'XCalendar',
@@ -363,6 +364,13 @@ const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescripto
     template: { h: 36, w: 118, displayName: '评分', icon: 'number_input_cp.svg', category: 'form' },
     fieldMap: [ENTITY_FIELD_TYPE.NUMBER.VALUE, ENTITY_FIELD_TYPE.RATE.VALUE],
     entityMap: [ENTITY_FIELD_TYPE.RATE.VALUE]
+  },
+  [COMPONENT_TYPE.CHECK_ITEM]: {
+    type: COMPONENT_TYPE.CHECK_ITEM,
+    schema: cloneDeep(BasicSchema.XCheckItem),
+    template: { h: 36, w: 118, displayName: '检查项', icon: 'number_input_cp.svg', category: 'form' },
+    fieldMap: [ENTITY_FIELD_TYPE.BOOLEAN.VALUE, ENTITY_FIELD_TYPE.CHECK_ITEM.VALUE],
+    entityMap: [ENTITY_FIELD_TYPE.CHECK_ITEM.VALUE]
   },
   [COMPONENT_TYPE.TABLE]: {
     type: COMPONENT_TYPE.TABLE,

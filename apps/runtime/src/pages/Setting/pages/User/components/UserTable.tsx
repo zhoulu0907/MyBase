@@ -6,25 +6,26 @@ import { Dropdown, Input, Menu, Message, Modal, Pagination, Select, Space, Table
 import { IconDownload, IconMoreVertical, IconPlus, IconUpload } from '@arco-design/web-react/icon';
 import { type AuthRoleUsersPageRespVO } from '@onebase/app';
 import {
-  CORP_USER_PERMISSION as ACTIONS,
-  AddMembers,
-  getPublicKey,
-  hasAllPermissions,
-  hasPermission,
-  sm2Encrypt
+    CORP_USER_PERMISSION as ACTIONS,
+    AddMembers,
+    getPublicKey,
+    hasAllPermissions,
+    hasPermission,
+    sm2Encrypt
 } from '@onebase/common';
 import type { PageParam, UpdateAdminOrDirectorReq, UserVO } from '@onebase/platform-center';
 import {
-  deleteUser,
-  getSimpleUser,
-  getUserListByName,
-  getUserPage,
-  PlatformTenantStatus,
-  resetUserPassword,
-  StatusEnum,
-  updateCorpAdminOrDirector,
-  updateUserStatus,
-  UserType
+    deleteUser,
+    getCorpDept,
+    getSimpleUser,
+    getUserListByName,
+    getUserPage,
+    PlatformTenantStatus,
+    resetUserPassword,
+    StatusEnum,
+    updateCorpAdminOrDirector,
+    updateUserStatus,
+    UserType
 } from '@onebase/platform-center';
 import { debounce } from 'lodash-es';
 import { useCallback, useEffect, useState } from 'react';
@@ -101,13 +102,14 @@ export default function UserTable({
 
   const [userData, setUsertData] = useState<{ userList: any[] }>();
   const [memberLoading, setMemberLoading] = useState<boolean>(false);
-  const [selectedMembers, setSelectedMembers] = useState<AuthRoleUsersPageRespVO[]>([]);
+  const [selectedMembers, setSelectedMembers] = useState<AuthRoleUsersPageRespVO[] | any[]>([]);
 
   const [userModalVisible, setUserModalVisible] = useState(false);
   const [detailModalVisible, setDetailModalVisible] = useState(false);
   const [resetPasswordModalVisible, setResetPasswordModalVisible] = useState(false);
   const [importModalVisible, setImportModalVisible] = useState(false); // 导入
   const [managerTypeModalVisible, setManagerTypeModalVisible] = useState<UserRole | null>(null); // 设置主管 or 管理员
+  const [isMultiple, setIsMultiple] = useState<boolean>(false);
 
   // 查询用户列表
   const getUserList = useCallback(
@@ -375,7 +377,35 @@ export default function UserTable({
   const handleSetAdminOrDirector = async (updateType: UserRole) => {
     if (!selectedDeptId) return Message.warning('请先选择部门');
     await getSimpleUsers({});
+    const deptInfo = await getDeptInfo();
     setManagerTypeModalVisible(updateType);
+    if (updateType === UserRole.DIRECTOR) {
+      if (deptInfo?.leaderUserId) {
+        setSelectedMembers([
+          {
+            department: deptInfo?.name,
+            key: deptInfo?.leaderUserId,
+            name: deptInfo?.leaderUserName
+          }
+        ]);
+      } else {
+        setSelectedMembers([]);
+      }
+      setIsMultiple(false);
+    } else if (updateType === UserRole.ADMIN) {
+      if (deptInfo?.adminUserIds?.length > 0) {
+        const adminUserNames = deptInfo?.adminUserName?.split(',') || [];
+        const adminUsers = deptInfo.adminUserIds.map((id: string, index: number) => ({
+          department: deptInfo?.name,
+          key: id,
+          name: adminUserNames[index] || ''
+        }));
+        setSelectedMembers(adminUsers || []);
+      } else {
+        setSelectedMembers([]);
+      }
+      setIsMultiple(true);
+    }
   };
 
   // 获取部门用户信息
@@ -395,6 +425,12 @@ export default function UserTable({
     } finally {
       setMemberLoading(false);
     }
+  };
+
+  const getDeptInfo = async () => {
+    if (!selectedDeptId) return;
+    const res = await getCorpDept(selectedDeptId);
+    return res;
   };
 
   // 添加成员
@@ -423,7 +459,7 @@ export default function UserTable({
     return () => debouncedUpdate.cancel();
   }, [debouncedUpdate]);
 
-  const handleUpdateSelectedMembers = useCallback((members: AuthRoleUsersPageRespVO[]) => {
+  const handleUpdateSelectedMembers = useCallback((members: AuthRoleUsersPageRespVO[] | any[]) => {
     setSelectedMembers(members);
   }, []);
 
@@ -533,6 +569,7 @@ export default function UserTable({
         visible={!!managerTypeModalVisible}
         data={userData}
         loading={memberLoading}
+        isMultiple={isMultiple}
         selectedMembers={selectedMembers || []}
         onSearch={debouncedUpdate}
         onConfirm={handleAddUser}

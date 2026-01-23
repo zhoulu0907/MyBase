@@ -35,6 +35,7 @@ export enum NodeType {
   MESSAGE = 'message',
   SCRIPT = 'script',
   DATA_MAPPER = 'dataMapper',
+  CONNECTOR = 'connector',
 
   MODAL = 'modal',
   NAVIGATE = 'navigate',

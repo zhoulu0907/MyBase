@@ -148,6 +148,11 @@ const XDeptSelect = memo(
     );
     const selectedParseDeptName = parseDeptName(deptData?.deptList, selectedKeys) || form?.getFieldValue(fieldId)?.name;
 
+    // 返回上一级部门
+    const handleDeptBack = async () => {
+      await getDeptUsers({ deptId: renderData?.parentId });
+    };
+
     return (
       <Form.Item
         className="inputTextWrapperOBMobile inputDeptSelectOBMobile"
@@ -185,15 +190,15 @@ const XDeptSelect = memo(
                   </Button>
                 </div>
 
-                <div style={{ padding: '0.24rem 0.32rem' }}>
-                  <SearchBar
-                    clearable
-                    placeholder="搜索部门"
-                    actionButton={null}
-                    onChange={debouncedUpdate}
-                    onClear={resetFetchDept}
-                  />
-                </div>
+                <SearchBar
+                  clearable
+                  placeholder="搜索部门"
+                  actionButton={null}
+                  onChange={debouncedUpdate}
+                  onClear={resetFetchDept}
+                />
+
+                {renderData?.parentId && <div className={styles.goPrevLevel} onClick={handleDeptBack}>返回上一级</div>}
 
                 <div className={styles.container}>
                   {loading && <LoadingComp />}

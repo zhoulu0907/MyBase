@@ -128,7 +128,9 @@ export const CONFIG_TYPES = {
   //选择人员默认值
   USER_DEFAULT_VALUE: 'userDefaultValue',
   // 评分组件
-  RATE_CONFIG: 'RateConfig'
+  RATE_CONFIG: 'RateConfig',
+  // 检查项 显示方式
+  CHECK_ITEM_SHOW_MODE: 'CheckItemShowMode'
 } as const;
 
 // 状态选项常量
@@ -419,7 +421,12 @@ export enum TableOperationButtonStyle {
   TEXT = 'text',
   ALL = 'all'
 }
-
+// 检查项-展示方式
+export const SHOW_MODE_TYPES = {
+  CHECKBOX: 'checkbox',
+  SWITCH: 'switch',
+  WHETHER: 'whether'
+}
 // 默认值
 export const DEFAULT_VALUE_TYPES = {
   CUSTOM: 'custom',

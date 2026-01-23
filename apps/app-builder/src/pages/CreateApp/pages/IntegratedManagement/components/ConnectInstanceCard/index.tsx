@@ -29,7 +29,7 @@ const ConnectInstanceCard: React.FC<CardProps> = ({ data, onEdit, onDelete }) =>
     <div
       className={styles.card}
       onClick={() => {
-        handleEdit(data.id);
+        handleEdit(data.connectorUuid);
       }}
     >
       <div className={styles.cardHeader}>
@@ -38,7 +38,7 @@ const ConnectInstanceCard: React.FC<CardProps> = ({ data, onEdit, onDelete }) =>
         </div>
         <div className={styles.cardHeaderContent}>
           <Typography.Text ellipsis={{ showTooltip: true }} className={styles.cardHeaderContentTitle}>
-            {data.connectorName}
+            {data.connectorTypeName ? `${data.connectorTypeName}-实例` : data.connectorName}
           </Typography.Text>
         </div>
       </div>
@@ -68,7 +68,7 @@ const ConnectInstanceCard: React.FC<CardProps> = ({ data, onEdit, onDelete }) =>
             size="small"
             onClick={(e) => {
               e.stopPropagation();
-              handleEdit(data.id);
+              handleEdit(data.connectorUuid);
             }}
           >
             编辑

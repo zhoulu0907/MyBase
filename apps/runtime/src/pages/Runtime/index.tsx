@@ -279,8 +279,7 @@ const Runtime: React.FC = () => {
               boxSizing: 'border-box',
               padding: '4px 8px',
               display: 'flex',
-              flexDirection: 'column',
-              gap: 8
+              flexDirection: 'column'
             }}
           />
         </Sider>

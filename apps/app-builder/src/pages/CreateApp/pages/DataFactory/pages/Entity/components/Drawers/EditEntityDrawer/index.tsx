@@ -32,9 +32,6 @@ const EditEntityDrawer: React.FC<{
       onNodeEdit(formData);
       setVisible(false);
       setEditingNode(null);
-      if (successCallback) {
-        successCallback();
-      }
     }
   };
 

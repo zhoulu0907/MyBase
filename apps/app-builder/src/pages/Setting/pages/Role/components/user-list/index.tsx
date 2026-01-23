@@ -1,13 +1,13 @@
+import UserProfileAvatar from '@/components/UserProfileAvatar';
+import { isSystemUser } from '@/utils';
 import { Button, Input, Message, Modal, Pagination, Space, Spin, Table } from '@arco-design/web-react';
 import { IconPlus, IconSearch } from '@arco-design/web-react/icon';
 import type { PageParam, UserVO } from '@onebase/platform-center';
 import { addRoleUsers, getUserPage, removeRoleUsers } from '@onebase/platform-center';
 import { debounce } from 'lodash-es';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import UserSelectModal from './UserSelectModal';
 import styles from '../../index.module.less';
-import UserProfileAvatar from '@/components/UserProfileAvatar';
-import { isSystemUser } from '@/utils';
+import UserSelectModal from './UserSelectModal';
 
 interface UserListProps {
   selectedRoleId?: string;

@@ -93,7 +93,7 @@ const AddMembers = (props: IProps) => {
             </Button>
             <Button
               type="primary"
-              disabled={!selectMemberCanEmpty && selectedMembers.length === 0}
+            //   disabled={!selectMemberCanEmpty && selectedMembers.length === 0}
               onClick={handleConfirm}
             >
               确定

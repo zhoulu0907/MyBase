@@ -32,8 +32,6 @@
     padding: 0 0.32rem 0;
     background-color: #fff;
     width: calc(100% - 0.64rem) !important;
-    left: 50% !important;
-    transform: translate(-50%) !important;
 
     @media screen and (min-width: 900px) {
       max-width: calc(450px - 0.64rem) !important;
@@ -339,5 +337,13 @@
     overflow: auto;
     padding-top: 0;
     flex: 1;
+  }
+}
+
+.arco-dialog-mask {
+  @media screen and (min-width: 900px) {
+    max-width: 450px;
+    left: 50%;
+    transform: translate(-50%);
   }
 }

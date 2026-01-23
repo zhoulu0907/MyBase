@@ -437,7 +437,7 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
         collapseHandlerRef.current = new SectionCollapseHandler(graphRef.current);
 
         // 限制平移范围，确保节点始终可见
-        // 以最小缩放（0.6）时的可见视口作为限制范围
+        // 以当前缩放下的可见视口作为限制范围，避免缩放后点击导致画布跳动
         graphRef.current.on('translate', ({ tx, ty }) => {
           if (!graphRef.current) return;
 
@@ -445,7 +445,7 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
           if (!contentArea || contentArea.width === 0 || contentArea.height === 0) return;
 
           const graphSize = graphRef.current.getGraphArea();
-          const padding = 100; // 边距
+          const padding = 800; // 边距
 
           // 计算内容区域的边界
           const contentLeft = contentArea.x;
@@ -455,34 +455,23 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
 
           const { width: containerWidth = graphSize.width, height: containerHeight = graphSize.height } =
             containerRef.current?.getBoundingClientRect() ?? {};
-          const viewWidthAtMinScale = containerWidth / MIN_SCALE;
-          const viewHeightAtMinScale = containerHeight / MIN_SCALE;
           const currentScale = graphRef.current.scale().sx;
-          const extraWidth = Math.max(0, viewWidthAtMinScale - containerWidth / currentScale) / 2;
-          const extraHeight = Math.max(0, viewHeightAtMinScale - containerHeight / currentScale) / 2;
 
-          const baseMaxTranslateX = Math.max(0, contentRight + padding - viewWidthAtMinScale);
-          const baseMinTranslateX = Math.min(0, contentLeft - padding);
-          const baseMaxTranslateY = Math.max(0, contentBottom + padding - viewHeightAtMinScale);
-          const baseMinTranslateY = Math.min(0, contentTop - padding);
-          const maxTranslateX = baseMaxTranslateX + extraWidth;
-          const minTranslateX = baseMinTranslateX - extraWidth;
-          const maxTranslateY = baseMaxTranslateY + extraHeight;
-          const minTranslateY = baseMinTranslateY - extraHeight;
+          // 计算当前缩放下的视口大小（在画布坐标系中）
+          const viewWidth = containerWidth / currentScale;
+          const viewHeight = containerHeight / currentScale;
 
-          // 限制平移范围
-          if (currentScale <= MIN_SCALE) {
-            if (tx === lastTranslate.current.tx && ty === lastTranslate.current.ty) {
-              return;
-            }
-            graphRef.current.translate(lastTranslate.current.tx, lastTranslate.current.ty);
-            return;
-          }
+          // 以偏移量为标准，保证内容边界在视口内（留 padding）
+          const rightOffsetX = viewWidth - padding - contentRight;
+          const leftOffsetX = contentArea.width > viewWidth ? contentArea.width - viewWidth + padding : padding;
+          const bottomOffsetY =
+            contentArea.height < viewHeight ? -padding : (viewHeight - contentArea.height - padding) * currentScale;
+          const topOffsetY = contentTop - viewHeight + padding / currentScale;
 
-          const newTx = Math.max(minTranslateX, Math.min(maxTranslateX, tx));
-          const newTy = Math.max(minTranslateY, Math.min(maxTranslateY, ty));
+          const newTx = Math.max(rightOffsetX, Math.min(leftOffsetX, tx));
+          const newTy = Math.max(bottomOffsetY, Math.min(topOffsetY, ty));
 
-          // 如果平移值被限制，更新画布位置
+          // 限制平移值
           if (newTx !== tx || newTy !== ty) {
             graphRef.current.translate(newTx, newTy);
           }

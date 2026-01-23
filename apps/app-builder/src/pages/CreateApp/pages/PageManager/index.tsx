@@ -130,7 +130,7 @@ const PageManagerPage: FC = () => {
   const [searchResult, setSearchResult] = useState<boolean>(false); // 菜单搜索结果
   const dashboardPageType = 4;
 
-  const initTreeItemWidth = 146;
+  const initTreeItemWidth = 110;
   const cutTreeItemWidth = 25;
 
   const { clearEditMode } = currentEditorSignal;
@@ -792,8 +792,7 @@ const PageManagerPage: FC = () => {
               boxSizing: 'border-box',
               padding: '4px 8px',
               display: 'flex',
-              flexDirection: 'column',
-              gap: 8
+              flexDirection: 'column'
             }}
             allowDrop={(info: any) => {
               const dragNode = info.dragNode;
