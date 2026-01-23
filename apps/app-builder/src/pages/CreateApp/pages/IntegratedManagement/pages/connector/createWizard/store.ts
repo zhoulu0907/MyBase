@@ -114,6 +114,114 @@ export const useConnectorWizardStore = create<ConnectorWizardStore>()(
               },
               ui: { isLoading: false },
             });
+          } else {
+            // TODO: 后端 API 返回 null 或空数据时，使用 mock schema 用于开发测试
+            console.warn('后端未返回 schema，使用临时 mock schema');
+            const mockConnConfig = {
+              type: "object",
+              properties: {
+                envMode: {
+                  type: "string",
+                  title: "环境信息",
+                  enum: ["create", "select"],
+                  enumNames: ["创建环境信息", "选择已有环境信息"],
+                  default: "create",
+                  "x-decorator": "FormItem",
+                  "x-component": "Radio.Group",
+                  "x-component-props": {
+                    optionType: "button",
+                    buttonStyle: "solid"
+                  }
+                },
+                existingEnvId: {
+                  type: "string",
+                  title: "请选择环境信息",
+                  "x-decorator": "FormItem",
+                  "x-component": "Select",
+                  "x-visible": "{{ $form.values.envMode === 'select' }}",
+                  "x-component-props": {
+                    placeholder: "请选择环境信息",
+                    allowClear: true,
+                    disabled: true // 暂时禁用，后端 API 就绪后启用
+                  }
+                },
+                envName: {
+                  type: "string",
+                  title: "环境名称",
+                  "x-decorator": "FormItem",
+                  "x-component": "Input",
+                  "x-visible": "{{ $form.values.envMode === 'create' }}",
+                  "x-component-props": {
+                    placeholder: "请输入环境名称"
+                  },
+                  "x-reactions": [
+                    {
+                      dependencies: ["envMode"],
+                      fulfill: {
+                        state: {
+                          visible: "{{$deps[0] === 'create'}}"
+                        }
+                      }
+                    }
+                  ],
+                  required: true
+                },
+                url: {
+                  type: "string",
+                  title: "URL",
+                  "x-decorator": "FormItem",
+                  "x-component": "Input",
+                  "x-visible": "{{ $form.values.envMode === 'create' }}",
+                  "x-component-props": {
+                    placeholder: "请输入URL"
+                  },
+                  "x-reactions": [
+                    {
+                      dependencies: ["envMode"],
+                      fulfill: {
+                        state: {
+                          visible: "{{$deps[0] === 'create'}}"
+                        }
+                      }
+                    }
+                  ],
+                  required: true
+                },
+                authType: {
+                  type: "string",
+                  title: "选择认证类型",
+                  "x-decorator": "FormItem",
+                  "x-component": "Select",
+                  "x-visible": "{{ $form.values.envMode === 'create' }}",
+                  "x-component-props": {
+                    placeholder: "请选择认证类型",
+                    allowClear: false
+                  },
+                  "x-reactions": [
+                    {
+                      dependencies: ["envMode"],
+                      fulfill: {
+                        state: {
+                          visible: "{{$deps[0] === 'create'}}"
+                        }
+                      }
+                    }
+                  ],
+                  "default": "none",
+                  "enum": ["none", "basic", "bearer", "apiKey", "oauth2", "custom", "awsSignature"],
+                  "enumNames": ["无认证", "Basic认证", "Bearer认证", "API Key", "OAuth 2.0", "自定义认证", "AWS签名"],
+                  required: true
+                }
+              }
+            };
+
+            set({
+              schemas: {
+                conn_config: mockConnConfig,
+                action_config: null,
+              },
+              ui: { isLoading: false },
+            });
           }
         } catch (error) {
           console.error('获取 schema 失败:', error);
