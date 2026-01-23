@@ -103,16 +103,26 @@ export const useConnectorWizardStore = create<ConnectorWizardStore>()(
         })),
 
       fetchSchemas: async (nodeCode) => {
+        console.log('[fetchSchemas] 开始获取 schema，nodeCode:', nodeCode);
         set({ ui: { ...get().ui, isLoading: true } });
         try {
           const res = await getConnectorTypeInfo(nodeCode);
+          console.log('[fetchSchemas] 后端返回完整响应:', res);
 
           // 检查后端是否返回了有效的 schema
           const hasValidConnConfig = res?.conn_config && Object.keys(res.conn_config).length > 0;
           const hasValidActionConfig = res?.action_config && Object.keys(res.action_config).length > 0;
 
+          console.log('[fetchSchemas] Schema 有效性检查:', {
+            hasValidConnConfig,
+            hasValidActionConfig,
+            connConfigKeys: res?.conn_config ? Object.keys(res.conn_config) : [],
+            actionConfigKeys: res?.action_config ? Object.keys(res.action_config) : []
+          });
+
           if (hasValidConnConfig || hasValidActionConfig) {
             // 后端返回了有效的 schema，使用后端数据
+            console.log('[fetchSchemas] 使用后端返回的 schema');
             set({
               schemas: {
                 conn_config: res.conn_config || null,
@@ -122,7 +132,7 @@ export const useConnectorWizardStore = create<ConnectorWizardStore>()(
             });
           } else {
             // 后端未返回有效 schema，使用 mock schema 用于开发测试
-            console.warn('后端未返回有效 schema，使用临时 mock schema');
+            console.warn('[fetchSchemas] 后端未返回有效 schema，使用临时 mock schema');
             const mockConnConfig = {
               type: "object",
               properties: {
@@ -221,16 +231,19 @@ export const useConnectorWizardStore = create<ConnectorWizardStore>()(
               }
             };
 
+            const schemasToSet = {
+              conn_config: mockConnConfig,
+              action_config: null,
+            };
+            console.log('[fetchSchemas] 设置 mock schema:', schemasToSet);
             set({
-              schemas: {
-                conn_config: mockConnConfig,
-                action_config: null,
-              },
+              schemas: schemasToSet,
               ui: { isLoading: false },
             });
+            console.log('[fetchSchemas] schema 设置完成，当前 store schemas:', get().schemas);
           }
         } catch (error) {
-          console.error('获取 schema 失败:', error);
+          console.error('[fetchSchemas] 获取 schema 失败:', error);
           set({ ui: { ...get().ui, isLoading: false, error: '获取配置失败' } });
         }
       },

@@ -50,6 +50,7 @@ const createFormilyComponent = <T extends React.ComponentType<any>>(Component: T
 // 使用 connect 包装 Arco Design 组件，使其兼容 Formily
 // Formily 会自动传递 value 和 onChange，我们只需要确保它们正确映射到 Arco 组件
 const FormilyInput = createFormilyComponent(Input, { defaultValue: '' });
+const FormilyInputPassword = createFormilyComponent(Input.Password, { defaultValue: '' });
 const FormilyInputNumber = createFormilyComponent(InputNumber);
 const FormilyTextArea = createFormilyComponent(Input.TextArea, { defaultValue: '' });
 
@@ -253,6 +254,7 @@ export const FormilyFormItem = connect(FormItemInner, mapProps());
 // 组件映射表
 export const componentMap: Record<string, React.ComponentType<any>> = {
   Input: FormilyInput,
+  'Input.Password': FormilyInputPassword,
   InputNumber: FormilyInputNumber,
   TextArea: FormilyTextArea,
   Select: FormilySelect,
@@ -260,6 +262,7 @@ export const componentMap: Record<string, React.ComponentType<any>> = {
   TimePicker: FormilyTimePicker,
   Switch: FormilySwitch,
   Radio: FormilyRadio,
+  'Radio.Group': FormilyRadio,
   Checkbox: FormilyCheckbox,
   Upload: FormilyUpload,
   Slider: FormilySlider,

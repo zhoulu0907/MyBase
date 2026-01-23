@@ -16,8 +16,18 @@ const DynamicConfigStep: React.FC<DynamicConfigStepProps> = ({ schemaType, title
   const { schemas, formData, updateFormData, nextStep, prevStep, ui, envList, fetchEnvList } = useConnectorWizardStore();
   const [isEnvListLoading, setIsEnvListLoading] = useState(false);
 
+  console.log('[DynamicConfigStep] 组件渲染', {
+    schemaType,
+    title,
+    schemas,
+    'schemas[schemaType]': schemas[schemaType],
+    ui
+  });
+
   // 获取对应的 schema
   const schema = schemas[schemaType] as ISchema;
+
+  console.log('[DynamicConfigStep] 获取到的 schema:', schema);
 
   // 创建 Formily 表单实例
   const form = useMemo(
@@ -99,7 +109,15 @@ const DynamicConfigStep: React.FC<DynamicConfigStepProps> = ({ schemaType, title
     }
   };
 
+  console.log('[DynamicConfigStep] 渲染条件检查', {
+    uiLoading: ui.isLoading,
+    hasSchema: !!schema,
+    schemaType,
+    shouldShowSpinner: ui.isLoading || !schema
+  });
+
   if (ui.isLoading || !schema) {
+    console.log('[DynamicConfigStep] 显示加载状态');
     return (
       <div className={styles.stepContainer}>
         <Spin loading={true} tip="加载配置中...">
@@ -110,6 +128,7 @@ const DynamicConfigStep: React.FC<DynamicConfigStepProps> = ({ schemaType, title
   }
 
   if (ui.error) {
+    console.log('[DynamicConfigStep] 显示错误状态:', ui.error);
     return (
       <div className={styles.stepContainer}>
         <h3>{title}</h3>
@@ -121,6 +140,7 @@ const DynamicConfigStep: React.FC<DynamicConfigStepProps> = ({ schemaType, title
     );
   }
 
+  console.log('[DynamicConfigStep] 正常渲染表单');
   return (
     <div className={styles.stepContainer}>
       <h3>{title}</h3>
