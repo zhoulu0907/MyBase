@@ -28,12 +28,25 @@
 
 .list {
   border: none;
+  :global(.cell-group-body) {
+    background-color: transparent !important;
+  }
 }
 
 .listItem {
   padding: 0 !important;
   border: none !important;
+  margin: 0 !important;
+  height: 90px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
   cursor: pointer;
+  :global(.cell-content) {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
 }
 
 .row {
@@ -55,8 +68,8 @@
 
 .cover {
   flex: 0 0 auto;
-  width: 153px;
-  height: 86px;
+  width: 110px;
+  height: 54px;
 }
 
 .coverImg {
@@ -112,4 +125,13 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.divider {
+  background-color: #E5E6EB;
+  width: 1px;
+  height: 10px;
 }

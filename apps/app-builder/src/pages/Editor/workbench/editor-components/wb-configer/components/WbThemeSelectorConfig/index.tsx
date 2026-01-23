@@ -42,8 +42,13 @@ const WbThemeSelectorConfig = ({
     (() => <div style={{ padding: '20px', textAlign: 'center', color: '#86909c' }}>未传入配置</div>);
 
   // 兼容两种数据结构：
+  const itemKey = item?.key;
+
   const currentTheme = useMemo(() => {
-    const value = configs?.[item.key];
+    if (!itemKey) {
+      return WORKBENCH_THEME_OPTIONS.THEME_1;
+    }
+    const value = configs?.[itemKey];
     if (typeof value === 'string') {
       // 如果是字符串，直接使用
       return value || WORKBENCH_THEME_OPTIONS.THEME_1;
@@ -52,20 +57,21 @@ const WbThemeSelectorConfig = ({
       return (value as { theme?: string }).theme || WORKBENCH_THEME_OPTIONS.THEME_1;
     }
     return WORKBENCH_THEME_OPTIONS.THEME_1;
-  }, [configs, item.key]);
+  }, [configs, itemKey]);
 
   const handleThemeChange = useCallback(
     (theme: string) => {
       if (currentTheme === theme) return;
-      const currentValue = configs?.[item.key];
+      if (!itemKey) return;
+      const currentValue = configs?.[itemKey];
       if (typeof currentValue === 'string') {
-        handlePropsChange(item.key, theme);
+        handlePropsChange(itemKey, theme);
       } else {
-        handlePropsChange(item.key, { ...(currentValue as object), theme });
+        handlePropsChange(itemKey, { ...(currentValue as object), theme });
       }
       setDrawerVisible(false);
     },
-    [currentTheme, configs, handlePropsChange, item.key]
+    [currentTheme, configs, handlePropsChange, itemKey]
   );
 
   // 样式库抽屉内容
