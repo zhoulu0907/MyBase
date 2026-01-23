@@ -15,6 +15,14 @@
     }
   }
 
+  .uploadWrapper {
+    :global {
+        .arco-upload-list-item-operation .arco-icon-upload {
+            display: none;
+        }
+    }
+  }
+
   .pluginSection {
     width: 100%;
     margin-bottom: 24px;
@@ -31,20 +39,13 @@
 
   .cardContainer {
     width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: row;
-    align-items: flex-start;
-    justify-content: flex-start;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
     gap: 16px;
     margin-bottom: 20px;
 
     .card {
-      // 默认一行 3 个卡片，留出 2 个 gap（16px*2=32px）
-      width: calc((100% - 32px) / 3);
-      min-width: 280px;
-      min-height: 100px;
+      width: 100%;
       border: 2px solid #009e9e;
       border-radius: 16px;
       padding: 16px;
@@ -54,6 +55,7 @@
       align-items: center;
       justify-content: space-between;
       position: relative;
+      background-color: #fff;
 
       &:hover {
         box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
@@ -72,17 +74,20 @@
         flex-direction: column;
         flex: 1;
         margin-right: 16px;
+        min-width: 0;
 
         .name {
           font-size: 16px;
           font-weight: 500;
           color: #272e3b;
           margin-bottom: 4px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
         .description {
           color: #86909c;
-          max-width: 250px;
-          word-wrap: break-word;
+          width: 100%;
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;

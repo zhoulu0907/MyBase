@@ -1,3 +1,4 @@
+
 export interface pluginParams {
   name?: string;
   status?: number | null;
@@ -65,6 +66,20 @@ export interface PluginInfoRespVO {
   updateTime: string;
 }
 
+export interface PluginVersionVO {
+  id: number;
+  pluginId: string;
+  version: string;
+  description: string;
+  createTime: string;
+  updateTime: string;
+  status: number; // 1: active, 0: inactive
+}
+
+export interface PluginDetailRespVO extends PluginInfoRespVO {
+  versions: PluginVersionVO[];
+}
+
 export interface PageResultPluginInfoRespVO {
   /**
    * 插件列表
@@ -90,4 +105,3 @@ export interface CommonResultPageResultPluginInfoRespVO {
    */
   msg: string;
 }
-
