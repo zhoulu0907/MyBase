@@ -2,7 +2,7 @@ import { Avatar, Breadcrumb, Button, Input, List, Space, Spin, Typography } from
 import { IconClose, IconRight } from '@arco-design/web-react/icon';
 import { useCallback, useEffect, useState } from 'react';
 import { SelectDeptMember } from './components/selectDeptMember';
-import { getResourceURL } from 'src/utils';
+import { getResourceById } from 'src/utils';
 import { formatDeptAndUsers } from './const';
 
 interface IData {
@@ -96,17 +96,6 @@ const DeptMember = (props: IProps) => {
     setBreadcrumbs(breadcrumbs.slice(0, index + 1));
   };
 
-  const getFileUrlById = (id: string, applicationId?: string) => {
-    const resourceUrl = getResourceURL();
-
-    let url = `${resourceUrl}/${id}`;
-    if (applicationId) {
-      url += `?applicationId=${applicationId}`;
-    }
-
-    return url;
-  };
-
   return (
     <div
       style={{
@@ -165,7 +154,7 @@ const DeptMember = (props: IProps) => {
                     removeMember={removeMember}
                   />
                   <Avatar size={24} style={{ backgroundColor: 'rgb(var(--primary-6))' }}>
-                    {item.avatar ? <img src={getFileUrlById(item.avatar)} alt="avatar" /> : (item.title?.slice(0, 1) || 'U')}
+                    {item.avatar ? <img src={getResourceById(item.avatar)} alt="avatar" /> : (item.title?.slice(0, 1) || 'U')}
                   </Avatar>
                   <span>{item.title}</span>
                 </div>
@@ -259,7 +248,7 @@ const DeptMember = (props: IProps) => {
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                       <Avatar size={24} style={{ backgroundColor: 'rgb(var(--primary-6))' }}>
-                        {item.avatar ? <img src={getFileUrlById(item.avatar)} alt="avatar" /> : (item.name?.slice(0, 1) || 'U')}
+                        {item.avatar ? <img src={getResourceById(item.avatar)} alt="avatar" /> : (item.name?.slice(0, 1) || 'U')}
                       </Avatar>
                       <div>
                         <div>{item.name}</div>
