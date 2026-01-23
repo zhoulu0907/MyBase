@@ -2,11 +2,20 @@ import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-e
 
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { Form, Steps } from '@arco-design/web-react';
-import { listConnectorNodeConfig } from '@onebase/app';
-import { useEffect, useState } from 'react';
+import {
+  listConnectorByType,
+  listConnectorNodeConfig,
+  type ConnectorNodeConfig,
+  type FlowConnector
+} from '@onebase/app';
+import { useEffect, useMemo, useState } from 'react';
 import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
+import { ActionFormConfig } from './components/ActionFormConfig';
+import { ActionList, type ActionItem } from './components/ActionList';
+import { ConnectorList } from './components/ConnectorList';
+import { ConnectorNodeConfigList } from './components/ConnectorNodeConfigList';
 
 const Step = Steps.Step;
 
@@ -25,7 +34,26 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const [payloadForm] = Form.useForm();
   const [currentStep, setCurrentStep] = useState(1);
 
-  const [nodeConfigList, setNodeConfigList] = useState<any[]>([]);
+  const [nodeConfigList, setNodeConfigList] = useState<ConnectorNodeConfig[]>([]);
+  const [connectorList, setConnectorList] = useState<FlowConnector[]>([]);
+  const [selectedConnector, setSelectedConnector] = useState<FlowConnector | null>(null);
+  const [selectedActionKey, setSelectedActionKey] = useState<string | null>(null);
+
+  const actionItems = useMemo(() => {
+    const config = selectedConnector?.config;
+    if (!config) return [];
+    const properties = config.properties;
+    if (!properties || typeof properties !== 'object') return [];
+
+    const actions = Object.entries(properties).map(([key, property]: [string, any]) => ({
+      key: key,
+      title: property.title,
+      description: property.description
+    }));
+
+    console.log('actions :', actions);
+    return actions;
+  }, [selectedConnector]);
 
   useEffect(() => {
     if (currentStep === 1) {
@@ -45,6 +73,30 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     }
   };
 
+  const handleListConnectorByType = async (typeCode: string) => {
+    const res = await listConnectorByType({ typeCode });
+    console.log(res);
+    if (res) {
+      setConnectorList(res);
+    }
+  };
+
+  const handleConnectorTypeSelect = (typeCode: string) => {
+    setCurrentStep(2);
+    handleListConnectorByType(typeCode);
+  };
+
+  const handleConnectorSelect = (connector: FlowConnector) => {
+    console.log('connector:', connector);
+    setSelectedConnector(connector);
+    setCurrentStep(3);
+  };
+
+  const handleActionSelect = (item: ActionItem) => {
+    setSelectedActionKey(item.key);
+    setCurrentStep(4);
+  };
+
   return (
     <>
       <FormHeader />
@@ -55,8 +107,13 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             initialValues={{ ...triggerEditorSignal.nodeData.value[node.id] }}
             requiredSymbol={{ position: 'end' }}
           >
-            <Steps type="navigation"
-            current={currentStep} style={{ padding: '16px' }} size="small" onChange={handleStepChange}>
+            <Steps
+              type="navigation"
+              current={currentStep}
+              style={{ padding: '16px' }}
+              size="small"
+              onChange={handleStepChange}
+            >
               <Step title="选择连接器" />
               <Step title="选择连接" />
               <Step title="选择动作" />
@@ -66,90 +123,34 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             {/* 步骤1: 选择连接器 */}
             {currentStep === 1 && (
               <div style={{ padding: '16px', minHeight: '200px' }}>
-              {/* 渲染 nodeConfig 列表，允许用户选择连接器 */}
-              <div>
-                {nodeConfigList && nodeConfigList.length > 0 ? (
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16 }}>
-                    {nodeConfigList.map((config) => (
-                      <div
-                        key={config.nodeName}
-                        style={{
-                          border: '1px solid #e5e6eb',
-                          borderRadius: 8,
-                          padding: 16,
-                          minWidth: 160,
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          background: payloadForm.getFieldValue('nodeConfigId') === config.id ? 'rgba(22, 119, 255, 0.08)' : '#fff',
-                          boxShadow: payloadForm.getFieldValue('nodeConfigId') === config.id ? '0 0 0 2px #1677ff' : 'none'
-                        }}
-                        onClick={() => {
-                          payloadForm.setFieldValue('nodeConfigId', config.id);
-                          // 可根据流程设置 node 数据（示例）
-                          triggerEditorSignal.setNodeData(node.id, {
-                            ...triggerEditorSignal.nodeData.value[node.id],
-                            nodeConfigId: config.id,
-                            nodeConfigName: config.connectorName
-                          });
-                        }}
-                      >
-                        {config.iconUrl ? (
-                          <img src={config.iconUrl} alt={config.connectorName} style={{ width: 36, height: 36, marginRight: 12 }} />
-                        ) : (
-                          <div style={{
-                            width: 36,
-                            height: 36,
-                            borderRadius: '50%',
-                            background: '#f5f6fa',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            color: '#999',
-                            fontSize: 18,
-                            marginRight: 12
-                          }}>
-                            {config.connectorName?.[0] || 'C'}
-                          </div>
-                        )}
-                        <div>
-                          <div style={{ fontWeight: 500 }}>{config.connectorName}</div>
-                          <div style={{ color: '#999', fontSize: 12 }}>{config.description}</div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div style={{ color: '#999', padding: '32px 0', textAlign: 'center' }}>
-                    暂无可用连接器，请先在集成管理-连接器中心添加
-                  </div>
-                )}
-              </div>
-
+                <ConnectorNodeConfigList
+                  nodeConfigList={nodeConfigList}
+                  form={payloadForm}
+                  onSelect={handleConnectorTypeSelect}
+                />
               </div>
             )}
 
             {/* 步骤2: 选择连接 */}
             {currentStep === 2 && (
               <div style={{ padding: '16px', minHeight: '200px' }}>
-                {/* 步骤2内容容器 */}
+                <ConnectorList connectorList={connectorList} form={payloadForm} onSelect={handleConnectorSelect} />
               </div>
             )}
 
             {/* 步骤3: 选择动作 */}
             {currentStep === 3 && (
               <div style={{ padding: '16px', minHeight: '200px' }}>
-                {/* 步骤3内容容器 */}
+                <ActionList items={actionItems} form={payloadForm} onSelect={handleActionSelect} />
               </div>
             )}
 
             {/* 步骤4: 参数配置 */}
             {currentStep === 4 && (
               <div style={{ padding: '16px', minHeight: '200px' }}>
-                {/* 步骤4内容容器 */}
+                <ActionFormConfig connector={selectedConnector} actionKey={selectedActionKey} />
               </div>
             )}
-
           </Form>
         </FormContent>
       ) : (

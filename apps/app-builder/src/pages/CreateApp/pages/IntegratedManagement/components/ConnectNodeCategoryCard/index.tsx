@@ -24,9 +24,7 @@ const ConnectorCard: React.FC<ConnectorCardProps> = ({ data, onEdit, onClick }) 
       <div className={styles.cardHeader}>
         <div className={styles.cardHeaderIcon}>{data.icon}</div>
         <div className={styles.cardHeaderContent}>
-          <Typography.Text ellipsis={{ showTooltip: true }} className={styles.cardHeaderContentTitle}>
-            {data.name}
-          </Typography.Text>
+          <Typography.Text className={styles.cardHeaderContentTitle}>{data.name}</Typography.Text>
           <Typography.Text ellipsis={{ showTooltip: true }} className={styles.cardHeaderContentDesc}>
             v{data.fields.version}
           </Typography.Text>
