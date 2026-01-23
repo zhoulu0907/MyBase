@@ -1,8 +1,9 @@
-import { Button, Select } from '@arco-design/web-react';
+import { Button, Select, Input, List, Tag } from '@arco-design/web-react';
 import { FilterEntityFields, type AppEntityField } from '@onebase/app';
 import {
   COMPONENT_MAP,
   COMPONENT_TYPE_DISPLAY_NAME_MAP,
+  FIELD_TAG_TYPE,
   FORM_COMPONENT_TYPES,
   useAppEntityStore
 } from '@onebase/ui-kit';
@@ -44,6 +45,7 @@ const TagInput: React.FC<TagInputProps> = ({
   const [customFields, setCustomFields] = useState<FieldItem[]>([]);
   const [systemFields, setSystemFields] = useState<FieldItem[]>([]);
   const [tags, setTags] = useState<TagItem[]>([]);
+  const [searchValue, setSearchValue] = useState('');
 
   const { mainEntity } = useAppEntityStore();
 
@@ -61,6 +63,7 @@ const TagInput: React.FC<TagInputProps> = ({
             displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[cpType] || '',
             label: field.displayName,
             type: cpType,
+            fieldType: field.fieldType,
             tableName: mainEntity.tableName,
             fieldName: field.fieldName,
             isSystemField: field.isSystemField
@@ -76,6 +79,30 @@ const TagInput: React.FC<TagInputProps> = ({
   }, [mainEntity]);
 
   const allFields = [...customFields, ...systemFields];
+
+  const getTypeColor = useCallback((type: string) => {
+    for (let ele in FIELD_TAG_TYPE) {
+      const item = FIELD_TAG_TYPE[ele as keyof typeof FIELD_TAG_TYPE];
+      if (item.VALUE === type) {
+        return item.COLOR;
+      }
+    }
+    return '#1979FF';
+  }, []);
+
+  const getTypeName = useCallback((field: FieldItem) => {
+    for (let ele in FIELD_TAG_TYPE) {
+      const item = FIELD_TAG_TYPE[ele as keyof typeof FIELD_TAG_TYPE];
+      if (item.VALUE === field.type) {
+        return item.LABEL;
+      }
+    }
+    return field.type;
+  }, []);
+
+  const filteredFields = allFields.filter(
+    (field) => field.label.toLowerCase().includes(searchValue.toLowerCase()) || field.displayName.toLowerCase().includes(searchValue.toLowerCase())
+  );
 
   const insertTag = useCallback(
     (field: FieldItem) => {
@@ -170,7 +197,17 @@ const TagInput: React.FC<TagInputProps> = ({
           return false;
         }
       }
-    ])
+    ]),
+    EditorView.theme({
+      '&.cm-editor.cm-focused': {
+        outline: '0 solid transparent'
+      }
+    }),
+    EditorView.baseTheme({
+      '.cm-gutterElement': { display: 'none' },
+      '.cm-content': { padding: 0 },
+      '.cm-gutters.cm-gutters-before': { borderRightWidth: 0 }
+    })
   ];
 
   return (
@@ -184,21 +221,38 @@ const TagInput: React.FC<TagInputProps> = ({
         className={styles.editor}
         extensions={extensions}
       />
-      <div style={{ position: 'relative', marginTop: '8px' }}>
+      <div className={styles.buttonWrapper}>
         <Button type="primary" onClick={() => setShowFieldSelector(!showFieldSelector)}>
           + 添加字段
         </Button>
         {showFieldSelector && (
           <div className={styles.fieldSelector}>
-            <Select
-              placeholder="请选择字段"
-              options={allFields.map((field) => ({
-                label: field.label,
-                value: field.fieldName
-              }))}
-              onChange={handleAddField}
-              style={{ width: '100%' }}
-              showSearch
+            <Input
+              placeholder="搜索字段"
+              value={searchValue}
+              onChange={setSearchValue}
+              style={{ marginBottom: '8px' }}
+            />
+            <List
+              size="small"
+              style={{ maxHeight: '200px', overflowY: 'auto' }}
+              dataSource={filteredFields}
+              render={(field, index) => (
+                <List.Item key={index} onClick={() => handleAddField(field.fieldName)}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span>{field.label}</span>
+                    <Tag
+                      style={{
+                        color: getTypeColor(field.fieldType),
+                        backgroundColor: `${getTypeColor(field.fieldType)}22`
+                      }}
+                      size="small"
+                    >
+                      {field.displayName}
+                    </Tag>
+                  </div>
+                </List.Item>
+              )}
             />
           </div>
         )}
