@@ -119,7 +119,7 @@ public class BuildAuthenticationFilter extends OncePerRequestFilter implements A
                 TenantContextHolder.setTenantId(loginUser.getTenantId());
                 if (isTokenMockable(token)) {
                     // mock模式不检查会话空闲
-                    log.info("[BuildAuthenticationFilter][TOKEN MOCK开启，用户ID：{}, prefix:{}]", loginUser.getId(), securityProperties.getMockSecret());
+                    log.info("[BuildAuthenticationFilter][TOKEN MOCK开启，用户ID：{}, prefix:{}, token:{}]", loginUser.getId(), securityProperties.getMockSecret(), token);
                 } else {
                     // 会话空闲检查：排除登录和登出请求
                     boolean checkSuc = checkAndUpdateSessionIdle(loginUser, token);

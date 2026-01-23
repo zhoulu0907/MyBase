@@ -31,4 +31,9 @@ public interface FlowNodeConfigService {
      * Get all node types with instance count
      */
     List<NodeInfoVO> getAllNodeTypes();
+
+    /**
+     * Get connector type info by node code
+     */
+    NodeInfoVO getNodeTypeInfo(String nodeCode);
 }

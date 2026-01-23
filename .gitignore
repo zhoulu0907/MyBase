@@ -136,3 +136,9 @@ LOG_FILE_IS_UNDEFINED
 /sql/metadata_field_comparison_rules.sql
 /docs/空字符串转Null处理方案.md
 /plugins/*
+/onebase-framework/AGENTS.md
+/onebase-module-data/AGENTS.md
+/onebase-module-flow/AGENTS.md
+/onebase-module-system/AGENTS.md
+/onebase-plugin/AGENTS.md
+/AGENTS.md

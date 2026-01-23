@@ -68,4 +68,11 @@ public class FlowNodeConfigController {
         return CommonResult.success(result);
     }
 
+    @Operation(summary = "根据 nodeCode 获取连接器类型信息")
+    @GetMapping("/type-info")
+    public CommonResult<NodeInfoVO> getNodeTypeInfo(@RequestParam("nodeCode") String nodeCode) {
+        NodeInfoVO result = flowNodeConfigService.getNodeTypeInfo(nodeCode);
+        return CommonResult.success(result);
+    }
+
 }

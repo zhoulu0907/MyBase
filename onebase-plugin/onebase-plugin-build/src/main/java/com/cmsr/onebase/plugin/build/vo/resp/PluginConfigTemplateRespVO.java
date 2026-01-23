@@ -18,6 +18,8 @@ public class PluginConfigTemplateRespVO {
     @Schema(description = "配置模板列表")
     private List<ConfigTemplateItem> configTemplates;
 
+    @Schema(description = "插件配置信息原始JSON（plugin_info表的plugin_config_info字段）")
+    private String pluginConfigInfo;
     /**
      * 配置模板项
      */
