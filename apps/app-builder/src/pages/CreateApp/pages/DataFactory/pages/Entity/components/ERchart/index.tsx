@@ -457,23 +457,21 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
             containerRef.current?.getBoundingClientRect() ?? {};
           const currentScale = graphRef.current.scale().sx;
 
-          const maxTranslateX = Math.max(0, contentRight + padding - containerWidth);
-          const minTranslateX = Math.min(0, contentLeft - padding);
-          const maxTranslateY = Math.max(0, contentBottom + padding - containerHeight);
-          const minTranslateY = Math.min(0, contentTop - padding);
+          // 计算当前缩放下的视口大小（在画布坐标系中）
+          const viewWidth = containerWidth / currentScale;
+          const viewHeight = containerHeight / currentScale;
 
-          if (currentScale < MIN_SCALE) {
-            if (tx === lastTranslate.current.tx && ty === lastTranslate.current.ty) {
-              return;
-            }
-            graphRef.current.translate(lastTranslate.current.tx, lastTranslate.current.ty);
-            return;
-          }
+          // 以偏移量为标准，保证内容边界在视口内（留 padding）
+          const rightOffsetX = viewWidth - padding - contentRight;
+          const leftOffsetX = contentArea.width > viewWidth ? contentArea.width - viewWidth + padding : padding;
+          const bottomOffsetY =
+            contentArea.height < viewHeight ? -padding : (viewHeight - contentArea.height - padding) * currentScale;
+          const topOffsetY = contentTop - viewHeight + padding / currentScale;
 
-          const newTx = Math.max(minTranslateX, Math.min(maxTranslateX, tx));
-          const newTy = Math.max(minTranslateY, Math.min(maxTranslateY, ty));
+          const newTx = Math.max(rightOffsetX, Math.min(leftOffsetX, tx));
+          const newTy = Math.max(bottomOffsetY, Math.min(topOffsetY, ty));
 
-          // 如果平移值被限制，更新画布位置
+          // 限制平移值
           if (newTx !== tx || newTy !== ty) {
             graphRef.current.translate(newTx, newTy);
           }
