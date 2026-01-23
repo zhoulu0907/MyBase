@@ -363,6 +363,7 @@ const XLoadMore = memo(
       }
       (globalThis as any).modalInstance = Dialog.confirm({
         title: '删除确认',
+        platform: 'ios',
         children: '确定删除？删除后不可恢复！',
         okText: <div style={{ color: '#F53F3F' }}>确定</div>,
         cancelText: '取消',
