@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.flow.build.controller;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.flow.api.vo.NodeInfoVO;
+import com.cmsr.onebase.module.flow.api.vo.NodeTypeInfoVO;
 import com.cmsr.onebase.module.flow.build.service.FlowNodeConfigService;
 import com.cmsr.onebase.module.flow.build.vo.ConnectorTypeListVO;
 import com.cmsr.onebase.module.flow.build.vo.NodeConfigActionVO;
@@ -40,20 +41,6 @@ public class FlowNodeConfigController {
         return CommonResult.success(result);
     }
 
-    @Operation(summary = "根据node code获取conn配置类型和参数")
-    @GetMapping("/get-conn-config")
-    public CommonResult<NodeConfigConnVO> getConnConfig(@RequestParam("nodeCode") String nodeCode) {
-        NodeConfigConnVO result = flowNodeConfigService.findConnConfig(nodeCode);
-        return CommonResult.success(result);
-    }
-
-    @Operation(summary = "根据node code获取action配置类型和参数")
-    @GetMapping("/get-action-config")
-    public CommonResult<NodeConfigActionVO> getActionConfig(@RequestParam("nodeCode") String nodeCode) {
-        NodeConfigActionVO result = flowNodeConfigService.findActionConfig(nodeCode);
-        return CommonResult.success(result);
-    }
-
     @Operation(summary = "获取连接器类型清单")
     @GetMapping("/list-all")
     public CommonResult<List<ConnectorTypeListVO>> listAllConnectorTypes() {
@@ -65,6 +52,13 @@ public class FlowNodeConfigController {
     @GetMapping("/node-types")
     public CommonResult<List<NodeInfoVO>> getAllNodeTypes() {
         List<NodeInfoVO> result = flowNodeConfigService.getAllNodeTypes();
+        return CommonResult.success(result);
+    }
+
+    @Operation(summary = "根据 nodeCode 获取连接器类型信息（含完整 Schema）")
+    @GetMapping("/type-info")
+    public CommonResult<NodeTypeInfoVO> getNodeTypeInfo(@RequestParam("nodeCode") String nodeCode) {
+        NodeTypeInfoVO result = flowNodeConfigService.getNodeTypeInfo(nodeCode);
         return CommonResult.success(result);
     }
 

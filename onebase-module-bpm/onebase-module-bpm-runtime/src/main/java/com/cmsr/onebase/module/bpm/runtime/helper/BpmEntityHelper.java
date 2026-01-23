@@ -1,9 +1,13 @@
 package com.cmsr.onebase.module.bpm.runtime.helper;
 
+import com.cmsr.onebase.framework.common.util.string.UuidUtils;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.bpm.runtime.vo.EntityVO;
 import com.cmsr.onebase.module.metadata.api.semantic.SemanticDynamicDataApi;
-import com.cmsr.onebase.module.metadata.core.semantic.dto.*;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntitySchemaDTO;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntityValueDTO;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldSchemaDTO;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticRelationSchemaDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticFieldTypeEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticMergeConditionVO;
 import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticTargetBodyVO;
@@ -44,9 +48,11 @@ public class BpmEntityHelper {
         String tableName = entityVO.getTableName();
         Map<String, Object> data = entityVO.getData();
 
+        String traceId = UuidUtils.getUuid();
         SemanticMergeConditionVO insertDataReqVO = new SemanticMergeConditionVO();
         insertDataReqVO.setTableName(tableName);
         insertDataReqVO.setData(data);
+        insertDataReqVO.setTraceId(traceId);
 
         SemanticEntityValueDTO entityValueDTO = semanticDynamicDataApi.insertData(insertDataReqVO);
 
@@ -68,12 +74,14 @@ public class BpmEntityHelper {
      *
      * @param tableName   表名
      * @param entityDataId 实体数据主键 ID
-     * @return 实体数据 Map
+     * @return 实体数据
      */
-    public Map<String, Object> getEntityData(String tableName, String entityDataId) {
+    public SemanticEntityValueDTO getEntityData(String tableName, String entityDataId) {
         SemanticTargetBodyVO reqVO = new SemanticTargetBodyVO();
+        String traceId = UuidUtils.getUuid();
         reqVO.setTableName(tableName);
         reqVO.setId(entityDataId);
+        reqVO.setTraceId(traceId);
 
         SemanticEntityValueDTO respVO = semanticDynamicDataApi.getDataById(reqVO);
 
@@ -81,7 +89,7 @@ public class BpmEntityHelper {
             throw exception(ErrorCodeConstants.FLOW_ENTITY_DATA_NOT_EXISTS);
         }
 
-        return respVO.getGlobalRawMap();
+        return respVO;
     }
 
     /**
@@ -100,10 +108,12 @@ public class BpmEntityHelper {
 
         String tableName = entityVO.getTableName();
         Map<String, Object> data = entityVO.getData();
+        String traceId = UuidUtils.getUuid();
 
         SemanticMergeConditionVO updateDataReqVO = new SemanticMergeConditionVO();
         updateDataReqVO.setTableName(tableName);
         updateDataReqVO.setData(data);
+        updateDataReqVO.setTraceId(traceId);
 
         semanticDynamicDataApi.updateDataById(updateDataReqVO);
     }

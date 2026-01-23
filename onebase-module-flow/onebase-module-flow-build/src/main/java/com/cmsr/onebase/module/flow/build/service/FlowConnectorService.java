@@ -1,7 +1,10 @@
 package com.cmsr.onebase.module.flow.build.service;
 
+import com.cmsr.onebase.framework.common.pojo.PageParam;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.flow.build.vo.CreateFlowConnectorReqVO;
+import com.cmsr.onebase.module.flow.build.vo.CreateFlowConnectorRespVO;
+import com.cmsr.onebase.module.flow.build.vo.FlowConnectorLiteVO;
 import com.cmsr.onebase.module.flow.build.vo.FlowConnectorVO;
 import com.cmsr.onebase.module.flow.build.vo.UpdateFlowConnectorReqVO;
 import com.cmsr.onebase.module.flow.core.vo.PageConnectorReqVO;
@@ -15,7 +18,12 @@ public interface FlowConnectorService {
 
     FlowConnectorVO getConnectorDetail(Long connectorId);
 
-    Long createConnector(CreateFlowConnectorReqVO createVO);
+    /**
+     * Get connector detail by connector UUID
+     */
+    FlowConnectorVO getConnectorDetailByUuid(String connectorUuid);
+
+    CreateFlowConnectorRespVO createConnector(CreateFlowConnectorReqVO createVO);
 
     void updateConnector(UpdateFlowConnectorReqVO updateVO);
 
@@ -42,4 +50,9 @@ public interface FlowConnectorService {
      * @return action value as JsonNode
      */
     JsonNode getActionValueByConnectorUuid(String connectorUuid, String actionName);
+
+    /**
+     * List all connector instances with pagination (lite version without config)
+     */
+    PageResult<FlowConnectorLiteVO> listAll(PageParam pageParam);
 }
