@@ -26,15 +26,8 @@ const ConnectorPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState('');
   const [activeTab, setActiveTab] = useState<string>('all');
-  const [selectingMode, setSelectingMode] = useState(false); // 是否处于选择模式
 
   const [connectorList, setConnectorList] = useState<ConnectorItem[]>([]);
-
-  // 检查URL参数，判断是否为选择模式
-  useEffect(() => {
-    const mode = getHashQueryParam('mode');
-    setSelectingMode(mode === 'select');
-  }, []);
 
   useEffect(() => {
     fetchConnectorList();
@@ -103,31 +96,24 @@ const ConnectorPage: React.FC = () => {
   const handleCardClick = async (data: ConnectorItem) => {
     console.log('Card clicked:', data);
 
-    const curAppId = getHashQueryParam('appId');
+    // 检查是否是从实例列表页进入的（mode=select）
+    const mode = getHashQueryParam('mode');
+    const isSelectMode = mode === 'select' || mode === 'create';
 
-    if (!curAppId) {
-      Message.error('应用ID获取失败，无法进入配置页面');
-      return;
-    }
+    if (isSelectMode) {
+      // 从实例列表进入，跳转到连接器详情页面（创建模式）
+      const curAppId = getHashQueryParam('appId');
+      if (!curAppId) {
+        Message.error('应用ID获取失败，无法进入配置页面');
+        return;
+      }
 
-    // 如果是选择模式
-    if (selectingMode) {
-      // 跳转到配置页面，传递连接器类型信息（不创建实例）
       navigate(
-        `/onebase/${tenantId}/home/create-app/integrated-management/connector-detail?appId=${curAppId}&connectorType=${encodeURIComponent(data.id)}&connectorName=${encodeURIComponent(data.name)}&mode=create`
+        `/onebase/${tenantId}/home/create-app/integrated-management/connector-create?appId=${curAppId}&connectorType=${encodeURIComponent(data.id)}&connectorName=${encodeURIComponent(data.name)}`
       );
     } else {
-      // 非选择模式：查看连接器详情或配置
-      // 目前只支持Script类型的连接器配置，其他类型显示"建设中"
-      if (data.id === 'script' || data.id?.toString().toLowerCase() === 'script') {
-        // Script类型连接器：跳转到配置页面（不创建实例）
-        navigate(
-          `/onebase/${tenantId}/home/create-app/integrated-management/connector-detail?appId=${curAppId}&connectorType=${encodeURIComponent(data.id)}&connectorName=${encodeURIComponent(data.name)}&mode=create`
-        );
-      } else {
-        // 其他类型连接器：显示"建设中"提示
-        Message.info(`${data.name} 连接器配置功能建设中，敬请期待！`);
-      }
+      // 直接从连接器类型页面进入，显示提示
+      Message.info('尚未支持编辑');
     }
   };
 
@@ -140,10 +126,7 @@ const ConnectorPage: React.FC = () => {
     <div className={styles.connectorPage}>
       <div className={styles.header}>
         <div className={styles.title}>
-          {selectingMode ? '选择连接器类型' : '连接器类型'}
-          {selectingMode && (
-            <span style={{ fontSize: 14, color: '#999', marginLeft: 10, fontWeight: 'normal' }}>点击卡片创建实例</span>
-          )}
+          连接器类型
         </div>
         <Input.Search allowClear placeholder="请输入类型名称搜索" style={{ width: 240 }} onChange={handleSearch} />
       </div>
