@@ -40,6 +40,7 @@ export enum NodeTypeName {
   message = '消息',
   script = '脚本',
   dataMapper = '数据映射',
+  connector = '连接器',
 
   // 交互节点
   modal = '弹窗',

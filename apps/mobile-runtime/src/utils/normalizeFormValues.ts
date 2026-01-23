@@ -66,7 +66,7 @@ export const normalizeFormValues = ({
         formValues[fieldName] = (value || []).map((ele: any) => ele.id);
       } else if (currentSchema?.type === FORM_COMPONENT_TYPES.USER_SELECT) {
         // 处理人员选择
-        formValues[fieldName] = Object.entries(value).length > 0 && typeof value === 'object' ? [value?.name] : [value];
+        formValues[fieldName] = Object.entries(value).length > 0 && typeof value === 'object' ? [value?.name] : '';
       } else {
         formValues[fieldName] = value;
       }
@@ -97,7 +97,7 @@ export const normalizeFormValues = ({
                 componentSchemas[componentId]?.type === FORM_COMPONENT_TYPES.DATE_TIME_PICKER
               ) {
                 // 处理日期
-                formValues[fieldName] = dayjs(fieldValue).valueOf();
+                formValues[`${subEntity.childTableName}.${idx}.${fieldName}`] = dayjs(fieldValue).valueOf();
               } else if (
                 (componentSchemas[componentId]?.type === FORM_COMPONENT_TYPES.IMG_UPLOAD ||
                   componentSchemas[componentId]?.type === FORM_COMPONENT_TYPES.FILE_UPLOAD) &&
@@ -124,7 +124,7 @@ export const normalizeFormValues = ({
                 );
               } else if (componentSchemas[componentId]?.type === FORM_COMPONENT_TYPES.USER_SELECT) {
                 formValues[`${subEntity.childTableName}.${idx}.${fieldName}`] =
-                  Object.entries(fieldValue).length > 0 ? [fieldValue.name] : fieldValue;
+                  Object.entries(fieldValue).length > 0 ? [fieldValue.name] : '';
               } else {
                 formValues[`${subEntity.childTableName}.${idx}.${fieldName}`] = fieldValue;
               }

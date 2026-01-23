@@ -47,6 +47,13 @@
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+
+        span {
+          display: block;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
       }
 
       .nameInput {
@@ -71,6 +78,10 @@
         gap: 8px;
       }
     }
+
+    .sideMenu {
+      padding: 8px 0;
+    }
   }
 
   .content {
@@ -80,5 +91,38 @@
     height: 100%;
     box-sizing: border-box;
     padding: 16px;
+    overflow-y: auto;
+
+    .baseInfoContainer,
+    .envContainer,
+    .actionContainer,
+    .logicContainer,
+    .logsContainer {
+      width: 100%;
+      height: 100%;
+    }
+
+    .loadingContainer {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 200px;
+      color: #86909c;
+    }
+
+    .emptyState {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 300px;
+      color: #86909c;
+      text-align: center;
+
+      p {
+        margin: 0;
+        font-size: 14px;
+      }
+    }
   }
 }
