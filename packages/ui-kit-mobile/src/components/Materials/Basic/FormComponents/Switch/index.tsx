@@ -1,4 +1,4 @@
-import { memo, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { nanoid } from 'nanoid';
 import { Switch, Form, Ellipsis } from '@arco-design/mobile-react';
 import { FormInternalComponentType } from '@arco-design/mobile-react/esm/form';
@@ -23,12 +23,13 @@ const XSwitch = memo((props: XSwitchConfig & { runtime?: boolean; detailMode?: b
   } = props;
 
   const systemInfo = getSystem();
-  const [switchChecked, setSwitchChecked] = useState(false);
 
   // 生成唯一的字段ID
   const fieldId = dataField && dataField.length > 0
     ? dataField[dataField.length - 1]
     : `${FORM_COMPONENT_TYPES.SWITCH}_${nanoid()}`;
+
+  const [switchChecked, setSwitchChecked] = useState(form?.getFieldValue(fieldId));
 
   // 根据是否为只读模式确定内容
   const renderContent = () => {
@@ -44,7 +45,7 @@ const XSwitch = memo((props: XSwitchConfig & { runtime?: boolean; detailMode?: b
           checked={switchChecked}
           onChange={(value) => {
             setSwitchChecked(value);
-            form.setFieldValue('switch', value);
+            form.setFieldValue(fieldId, value);
           }}
         />
       </div>
@@ -57,7 +58,7 @@ const XSwitch = memo((props: XSwitchConfig & { runtime?: boolean; detailMode?: b
       e.stopPropagation();
       const newValue = !switchChecked;
       setSwitchChecked(newValue);
-      form.setFieldValue('switch', newValue);
+      form.setFieldValue(fieldId, newValue);
     }
   }
 

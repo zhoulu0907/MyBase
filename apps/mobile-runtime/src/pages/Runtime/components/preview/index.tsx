@@ -113,6 +113,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({
   const [editTargetId, setEditTargetId] = useState('');
   const [editLoading, setEditLoading] = useState(false);
   const [submitLoading, setSubmitLoading] = useState<boolean>(false);
+  const [draftLoading, setDraftLoading] = useState<boolean>(false);
 
   // 当前时间戳
   const [detailMode, setDetailMode] = useState(true);
@@ -303,7 +304,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({
         // const groupIndex = parts[parts.length - 2];
         const fieldName = parts[parts.length - 1];
 
-        const fieldType = subEntities.value[0].childFields.find((v) => v.fieldName === fieldName)?.fieldType;
+        const fieldType = subEntity.childFields.find((v) => v.fieldName === fieldName)?.fieldType;
+
         if (fieldType === ENTITY_FIELD_TYPE.DATE.VALUE) {
           subFormData[key] = value ? dayjs(value).format('YYYY-MM-DD') : '';
         } else if (fieldType === ENTITY_FIELD_TYPE.DATETIME.VALUE) {
@@ -384,6 +386,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({
         const req: InsertMethodV2Params = { ...formData, ...groups };
 
         if (isDraft) {
+          setDraftLoading(true);
           res = draftId
             ? await updateDraft(tableName, menuId, { ...req, id: draftId })
             : await createDraft(tableName, menuId, req);
@@ -424,11 +427,13 @@ const PreviewContainer: React.FC<PreviewProps> = ({
         }
         setTimeout(() => setRefresh(Date.now()), 150);
         setSubmitLoading(false);
+        setDraftLoading(false);
       } catch (error) {
         Toast.error('创建失败');
         console.error('创建失败', error);
         setPredictVisible(false);
         setSubmitLoading(false);
+        setDraftLoading(false);
       }
     }
 
@@ -606,6 +611,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({
             isAdd={isAdd}
             editLoading={editLoading}
             submitLoading={submitLoading}
+            draftLoading={draftLoading}
             onSubmit={onSubmit}
             onSaveSubmit={onSaveSubmit}
             onSaveDraft={onSaveDraft}
@@ -614,7 +620,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({
             tableName={tableName}
             mainEntity={mainEntity}
             subEntitiesValues={subEntitiesValues}
-            setEditLoading={setEditLoading}
+            setDraftLoading={setDraftLoading}
             showFromPageData={showFromPageData}
           />
         )}

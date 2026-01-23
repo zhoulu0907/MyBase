@@ -339,3 +339,11 @@
     flex: 1;
   }
 }
+
+.arco-dialog-mask {
+  @media screen and (min-width: 900px) {
+    max-width: 450px;
+    left: 50%;
+    transform: translate(-50%);
+  }
+}

@@ -83,8 +83,27 @@ export const listConnectFlowNode = (params: ListConnectFlowNodeReq) => {
   return flowService.get('/node-type/page', params);
 };
 
+/**
+ * 获取连接器类型列表（全部）
+ * 使用 pageSize: -1 获取全量数据
+ */
+export const getConnectorNodeTypesAll = () => {
+  return flowService.get('/node-type/page', {
+    pageNo: 1,
+    pageSize: -1
+  });
+};
+
 export const listConnectInstance = (params: ListConnectInstanceReq) => {
   return flowService.get('/connector/page', params);
+};
+
+/**
+ * 获取所有连接器实例（支持分页）
+ * 调用 /flow/connector/list-all，支持 pageNo 和 pageSize 参数
+ */
+export const listAllConnectInstance = (params?: { pageNo?: number; pageSize?: number }) => {
+  return flowService.get('/connector/list-all', params);
 };
 
 export const createConnectInstance = (params: CreateConnectInstanceReq) => {
@@ -93,6 +112,14 @@ export const createConnectInstance = (params: CreateConnectInstanceReq) => {
 
 export const getConnectInstance = (id: string) => {
   return flowService.get(`/connector/get?id=${id}`);
+};
+
+/**
+ * 通过 connectorUuid 获取连接器实例详情
+ * @param connectorUuid 连接器实例的 UUID
+ */
+export const getConnectorByUuid = (connectorUuid: string) => {
+  return flowService.get(`/connector/get?connectorUuid=${connectorUuid}`);
 };
 
 export const updateConnectInstance = (params: UpdateConnectInstanceReq) => {
@@ -138,3 +165,19 @@ export const listConnectorAction = (params: ListConnectorActionReq)=>{
 export const getActionValue=(params: GetActionValueReq)=>{
     return flowService.get(`/connector/action-value`, params);
 }
+/**
+ * 获取连接器节点类型列表（用于连接器类型页面）
+ * 从 /flow/node-config/node-types 接口获取所有可用的连接器类型
+ */
+export const getConnectorNodeTypes = () => {
+  return flowService.get('/node-config/node-types');
+};
+
+/**
+ * 获取连接器节点类型详细信息
+ * 从 /flow/node-config/type-info 接口获取指定连接器类型的详细信息
+ * @param nodeCode 连接器类型代码，如 'weaverE9'
+ */
+export const getConnectorTypeInfo = (nodeCode: string) => {
+  return flowService.get(`/node-config/type-info?nodeCode=${nodeCode}`);
+};
