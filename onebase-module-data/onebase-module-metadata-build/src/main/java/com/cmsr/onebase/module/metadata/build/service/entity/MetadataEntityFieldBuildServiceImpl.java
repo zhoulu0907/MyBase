@@ -3028,7 +3028,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         dataSelectionConfig.setTargetFieldUuid(relationship.getSelectFieldUuid());
         
         // 同时提供ID格式，兼容前端
-        // 通过UUID查询对应的实体和字段,获取其ID
+        // 通过UUID查询对应的实体和字段,获取其ID和名称
         try {
             MetadataBusinessEntityDO targetEntity = metadataBusinessEntityRepository.getByEntityUuid(relationship.getTargetEntityUuid());
             if (targetEntity != null) {
@@ -3038,6 +3038,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             MetadataEntityFieldDO selectField = metadataEntityFieldRepository.getByFieldUuid(relationship.getSelectFieldUuid());
             if (selectField != null) {
                 dataSelectionConfig.setTargetFieldId(selectField.getId());
+                dataSelectionConfig.setTargetFieldName(selectField.getFieldName());
             }
         } catch (Exception e) {
             log.warn("查询UUID对应的ID失败: {}", e.getMessage());

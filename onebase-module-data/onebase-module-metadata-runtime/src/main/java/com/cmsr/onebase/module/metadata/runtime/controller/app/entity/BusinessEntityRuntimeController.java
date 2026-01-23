@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.metadata.runtime.controller.app.entity;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
+import com.cmsr.onebase.module.metadata.runtime.controller.app.entity.vo.DataSelectionConfig;
 import com.cmsr.onebase.module.metadata.runtime.controller.app.entity.vo.EntityWithFieldsBatchQueryReqVO;
 import com.cmsr.onebase.module.metadata.runtime.controller.app.entity.vo.EntityWithFieldsRespVO;
 import com.cmsr.onebase.module.metadata.runtime.controller.app.entity.vo.SimpleEntityRespVO;
@@ -55,6 +56,7 @@ public class BusinessEntityRuntimeController {
         return success(result);
     }
 
+
     /**
      * 批量查询实体及完整字段信息（包含一级子表）
      *
@@ -62,7 +64,7 @@ public class BusinessEntityRuntimeController {
      * @return 实体及字段信息列表
      */
     @PostMapping("/list-with-fields")
-    @Operation(summary = "批量查询实体及完整字段信息", 
+    @Operation(summary = "批量查询实体及完整字段信息",
                description = "根据实体UUID列表或表名列表批量查询实体及其完整字段信息，包含一级子表")
     public CommonResult<List<EntityWithFieldsRespVO>> getEntitiesWithFullFields(
             @RequestBody @Valid EntityWithFieldsBatchQueryReqVO reqVO) {
