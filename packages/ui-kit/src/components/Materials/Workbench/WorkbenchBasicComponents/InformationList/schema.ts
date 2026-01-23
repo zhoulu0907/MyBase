@@ -60,6 +60,8 @@ export interface XInformationListConfig extends ICommonBaseWorkbenchType {
     display: TBooleanDefaultType;
   };
   theme: string;
+  showMore: boolean,
+  showMoreLink: string;
   /**
    * 静态资讯列表数据
    */
@@ -139,6 +141,14 @@ const XInformationList: XInformationListSchema = {
     key: 'dataCount',
     name: '数据条数',
     type: WORKBENCH_CONFIG_TYPES.NUMBER_INPUT,
+  }, {
+    key: 'showMore',
+    name: '查看更多',
+    type: WORKBENCH_CONFIG_TYPES.SWITCH_INPUT,
+  }, {
+    key: 'showMoreLink',
+    name: '查看更多链接',
+    type: WORKBENCH_CONFIG_TYPES.TEXT_INPUT,
   }],
   config: {
     ...workbenchBaseDefault,
@@ -148,6 +158,8 @@ const XInformationList: XInformationListSchema = {
       text: '资讯列表',
       display: true
     },
+    showMore: false,
+    showMoreLink: '',
     dataCount: 10,
     informationListConfig: [],
     dataSourceMode: 'static',

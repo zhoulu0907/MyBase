@@ -18,6 +18,13 @@
   font-weight: 600;
 }
 
+.showMore {
+  font-size: 14px;
+  color: #6B7785;
+  text-decoration: none;
+  cursor: pointer;
+}
+
 .informationListContent {
   display: flex;
   width: 100%;

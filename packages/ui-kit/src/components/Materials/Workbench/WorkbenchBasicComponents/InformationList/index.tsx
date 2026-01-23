@@ -1,6 +1,6 @@
 import { Divider, List, Space } from '@arco-design/web-react';
+import { IconRight } from '@arco-design/web-react/icon';
 import { memo, useMemo } from 'react';
-
 import { WORKBENCH_STATUS_OPTIONS, WORKBENCH_STATUS_VALUES, WORKBENCH_THEME_OPTIONS } from '../../core/constants';
 import type { InformationListItem, XInformationListConfig } from './schema';
 import { useJump } from '../../hooks/useJump';
@@ -20,7 +20,9 @@ const XInformationList = memo((props: XInformationListConfig & { runtime?: boole
     titleField,
     subtitleField,
     dateField,
-    linkField
+    linkField,
+    showMore,
+    showMoreLink
   } = props;
   const hiddenStatusValue = WORKBENCH_STATUS_VALUES[WORKBENCH_STATUS_OPTIONS.HIDDEN];
   const { handleJump } = useJump();
@@ -88,11 +90,24 @@ const XInformationList = memo((props: XInformationListConfig & { runtime?: boole
     });
   };
 
+  const handleShowMoreClick = () => {
+    if (!runtime) {
+      return;
+    }
+    handleJump({
+      menuUuid: undefined,
+      linkAddress: showMoreLink,
+      runtime
+    });
+  };
   return (
     <div className={styles.container}>
       <div className={styles.informationListHeader}>
         {label?.display && (
           <span className={styles.informationListHeaderTitle}>{label?.text}</span>
+        )}
+        {showMore && (
+          <a href={showMoreLink} className={styles.showMore} onClick={() => handleShowMoreClick()}>更多<IconRight /></a>
         )}
       </div>
 

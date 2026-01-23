@@ -31,7 +31,9 @@ const InfortmationListConfig = () => {
       label: findItem(editData, 'label'),
       theme: findItem(editData, 'theme'),
       informationListContent: findItem(editData, 'informationListContent'),
-      dataCount: findItem(editData, 'dataCount')
+      dataCount: findItem(editData, 'dataCount'),
+      showMore: findItem(editData, 'showMore'),
+      showMoreLink: findItem(editData, 'showMoreLink')
     };
   }, [editData]);
 
@@ -55,6 +57,8 @@ const InfortmationListConfig = () => {
           </CollapseItem>
           <CollapseItem header="标题配置" name={SECTION_KEYS.TITLE} contentStyle={PanelContentStyle}>
             {configItems.label && <div>{renderEditItem(configItems.label)}</div>}
+            {configItems.showMore && <div>{renderEditItem(configItems.showMore)}</div>}
+            {configItems.showMoreLink && <div>{renderEditItem(configItems.showMoreLink)}</div>}
           </CollapseItem>
           <CollapseItem header="数据来源配置" name={SECTION_KEYS.CONTENT} contentStyle={PanelContentStyle}>
             {cpID && configItems.informationListContent && (

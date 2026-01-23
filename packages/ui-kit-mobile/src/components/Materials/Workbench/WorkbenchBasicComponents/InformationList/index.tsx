@@ -1,6 +1,6 @@
 import { Divider, Cell } from '@arco-design/mobile-react';
+import { IconArrowIn } from '@arco-design/mobile-react/esm/icon';
 import { memo, useMemo } from 'react';
-
 import { WORKBENCH_STATUS_OPTIONS, WORKBENCH_STATUS_VALUES, WORKBENCH_THEME_OPTIONS, workbenchSchema, type InformationListItem } from '@onebase/ui-kit';
 import { useJump } from '../../hooks/useJump';
 import styles from './index.module.css';
@@ -21,7 +21,9 @@ const XInformationList = memo((props: XInformationListConfig & { runtime?: boole
     titleField,
     subtitleField,
     dateField,
-    linkField
+    linkField,
+    showMore,
+    showMoreLink
   } = props;
   const hiddenStatusValue = WORKBENCH_STATUS_VALUES[WORKBENCH_STATUS_OPTIONS.HIDDEN];
   const { handleJump } = useJump();
@@ -90,11 +92,24 @@ const XInformationList = memo((props: XInformationListConfig & { runtime?: boole
     });
   };
 
+  const handleShowMoreClick = () => {
+    if (!runtime) {
+      return;
+    }
+    handleJump({
+      menuUuid: undefined,
+      linkAddress: showMoreLink,
+      runtime
+    });
+  };
   return (
     <div className={styles.container}>
       <div className={styles.informationListHeader}>
         {label?.display && (
           <span className={styles.informationListHeaderTitle}>{label?.text}</span>
+        )}
+        {showMore && (
+          <a href={showMoreLink} className={styles.showMore} onClick={() => handleShowMoreClick()}>更多<IconArrowIn /></a>
         )}
       </div>
 
