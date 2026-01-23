@@ -1,13 +1,10 @@
 import { useMemo, useEffect } from 'react';
-import { createForm } from '@formily/core';
+import { createForm, onFormValuesChange } from '@formily/core';
 import { createSchemaField, FormProvider, type ISchema } from '@formily/react';
 import { Button, Message, Spin } from '@arco-design/web-react';
 import { useConnectorWizardStore } from '../store';
 import { componentMap, FormilyFormItem } from '../../../../../../../../components/DynamicForm/componentMapper';
 import styles from '../index.module.less';
-
-// Formily effects 全局函数类型声明
-declare const onFormValuesChange: any;
 
 interface DynamicConfigStepProps {
   schemaType: 'conn_config' | 'action_config';
@@ -28,7 +25,7 @@ const DynamicConfigStep: React.FC<DynamicConfigStepProps> = ({ schemaType, title
         values: formData[schemaType] || {},
         effects() {
           // 监听表单值变化，同步到 store
-          onFormValuesChange(() => {
+          onFormValuesChange((form) => {
             updateFormData({ [schemaType]: form.values });
           });
         },
@@ -45,7 +42,7 @@ const DynamicConfigStep: React.FC<DynamicConfigStepProps> = ({ schemaType, title
         fetchEnvList();
       }
     }
-  }, [formData, schemaType, envList.length, fetchEnvList]);
+  }, [formData[schemaType]?.envMode, schemaType, envList.length, fetchEnvList]);
 
   // 当环境列表更新时，动态更新 existingEnvId 字段的选项
   useEffect(() => {
