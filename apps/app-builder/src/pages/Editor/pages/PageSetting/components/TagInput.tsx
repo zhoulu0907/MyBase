@@ -47,8 +47,22 @@ const TagInput: React.FC<TagInputProps> = ({
   const [systemFields, setSystemFields] = useState<FieldItem[]>([]);
   const [tags, setTags] = useState<TagItem[]>([]);
   const [searchValue, setSearchValue] = useState('');
+  const fieldSelectorRef = useRef<HTMLDivElement>(null);
 
   const { mainEntity } = useAppEntityStore();
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (fieldSelectorRef.current && !fieldSelectorRef.current.contains(event.target as Node)) {
+        setShowFieldSelector(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [fieldSelectorRef]);
 
   useEffect(() => {
     if (mainEntity.fields.length > 0) {
@@ -229,7 +243,7 @@ const TagInput: React.FC<TagInputProps> = ({
           + 添加字段
         </Button>
         {showFieldSelector && (
-          <div className={styles.fieldSelector}>
+          <div ref={fieldSelectorRef} className={styles.fieldSelector}>
             <Input
               placeholder="搜索字段"
               value={searchValue}
