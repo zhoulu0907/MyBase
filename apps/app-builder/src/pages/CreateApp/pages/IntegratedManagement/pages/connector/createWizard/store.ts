@@ -123,14 +123,29 @@ export const useConnectorWizardStore = create<ConnectorWizardStore>()(
 
       fetchEnvList: async () => {
         try {
-          const res = await getEnvList();
-          if (Array.isArray(res)) {
-            set({ envList: res });
-          } else if (res?.list && Array.isArray(res.list)) {
-            set({ envList: res.list });
-          } else {
-            set({ envList: [] });
-          }
+          // TODO: 后端 API 开发完成后，启用下面的代码
+          // const res = await getEnvList();
+          // if (Array.isArray(res)) {
+          //   set({ envList: res });
+          // } else if (res?.list && Array.isArray(res.list)) {
+          //   set({ envList: res.list });
+          // } else {
+          //   set({ envList: [] });
+          // }
+
+          // MOCK 数据 - 后端 API 开发前使用
+          // 模拟延迟，让加载状态可见
+          await new Promise(resolve => setTimeout(resolve, 500));
+
+          const mockEnvList = [
+            { id: 'env-001', name: '测试环境', url: 'https://test.example.com' },
+            { id: 'env-002', name: '开发环境', url: 'https://dev.example.com' },
+            { id: 'env-003', name: '预发布环境', url: 'https://staging.example.com' },
+            { id: 'env-004', name: '生产环境', url: 'https://prod.example.com' },
+          ];
+
+          set({ envList: mockEnvList });
+          console.log('使用 MOCK 环境列表数据:', mockEnvList);
         } catch (error) {
           console.error('获取环境列表失败:', error);
           set({ envList: [] });
