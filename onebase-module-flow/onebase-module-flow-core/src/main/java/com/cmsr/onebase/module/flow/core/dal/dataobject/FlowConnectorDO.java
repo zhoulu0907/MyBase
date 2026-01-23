@@ -32,9 +32,19 @@ public class FlowConnectorDO extends BaseAppEntity {
     private String description;
 
     /**
+     * 环境配置UUID
+     * <p>
+     * 关联到 flow_connector_env.env_uuid
+     * 用于引用该类型下的环境配置（URL、认证信息等）
+     */
+    @Column(value = "env_uuid")
+    private String envUuid;
+
+    /**
      * 连接器配置（JSON格式）
      * <p>
-     * 存储连接器的配置参数，如SMTP服务器、数据库连接等
+     * 存储连接器实例的补充配置参数
+     * 环境通用配置（URL、认证）已通过 env_uuid 引用
      */
     @Column(value = "config")
     private String config;
