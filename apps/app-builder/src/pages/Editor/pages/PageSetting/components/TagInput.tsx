@@ -20,6 +20,7 @@ interface TagInputProps {
 }
 
 interface FieldItem {
+  fieldType: string;
   id: string;
   displayName: string;
   label: string;
@@ -81,7 +82,7 @@ const TagInput: React.FC<TagInputProps> = ({
   const allFields = [...customFields, ...systemFields];
 
   const getTypeColor = useCallback((type: string) => {
-    for (let ele in FIELD_TAG_TYPE) {
+    for (const ele in FIELD_TAG_TYPE) {
       const item = FIELD_TAG_TYPE[ele as keyof typeof FIELD_TAG_TYPE];
       if (item.VALUE === type) {
         return item.COLOR;
@@ -91,17 +92,19 @@ const TagInput: React.FC<TagInputProps> = ({
   }, []);
 
   const getTypeName = useCallback((field: FieldItem) => {
-    for (let ele in FIELD_TAG_TYPE) {
+    for (const ele in FIELD_TAG_TYPE) {
       const item = FIELD_TAG_TYPE[ele as keyof typeof FIELD_TAG_TYPE];
-      if (item.VALUE === field.type) {
+      if (item.VALUE === field.fieldType) {
         return item.LABEL;
       }
     }
-    return field.type;
+    return field.fieldType;
   }, []);
 
   const filteredFields = allFields.filter(
-    (field) => field.label.toLowerCase().includes(searchValue.toLowerCase()) || field.displayName.toLowerCase().includes(searchValue.toLowerCase())
+    (field) =>
+      field.label.toLowerCase().includes(searchValue.toLowerCase()) ||
+      field.displayName.toLowerCase().includes(searchValue.toLowerCase())
   );
 
   const insertTag = useCallback(
@@ -239,7 +242,7 @@ const TagInput: React.FC<TagInputProps> = ({
               dataSource={filteredFields}
               render={(field, index) => (
                 <List.Item key={index} onClick={() => handleAddField(field.fieldName)}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div className={styles.fieldItemContent}>
                     <span>{field.label}</span>
                     <Tag
                       style={{
@@ -248,7 +251,7 @@ const TagInput: React.FC<TagInputProps> = ({
                       }}
                       size="small"
                     >
-                      {field.displayName}
+                      {getTypeName(field)}
                     </Tag>
                   </div>
                 </List.Item>
