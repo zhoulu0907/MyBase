@@ -503,13 +503,14 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
         let isDragging = false;
         let dragStartPosition = { x: 0, y: 0 };
 
-        graphRef.current.on('node:move', ({ x, y }) => {
-          // 记录拖拽开始位置
-          dragStartPosition = { x, y };
+        graphRef.current.on('node:move', ({ node }) => {
+          // 记录节点起始位置（节点坐标系）
+          dragStartPosition = node.getPosition();
           isDragging = false; // 重置拖拽状态
         });
 
-        graphRef.current.on('node:moving', ({ x, y }) => {
+        graphRef.current.on('node:moving', ({ node }) => {
+          const { x, y } = node.getPosition();
           // 移动距离超过阈值则判断为在拖拽
           const deltaX = Math.abs(x - dragStartPosition.x);
           const deltaY = Math.abs(y - dragStartPosition.y);
@@ -520,7 +521,7 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
           }
         });
 
-        graphRef.current.on('node:moved', ({ e, x, y, node }) => {
+        graphRef.current.on('node:moved', ({ e, node }) => {
           // 阻止折叠图标点击触发
           const target = e.target as HTMLElement;
           if (
@@ -537,6 +538,7 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
           if (isDragging) {
             e.preventDefault();
             e.stopPropagation();
+            const { x, y } = node.getPosition(); // 使用节点坐标
             updateEntityPosition?.(node.getData().data, x, y);
           }
 
