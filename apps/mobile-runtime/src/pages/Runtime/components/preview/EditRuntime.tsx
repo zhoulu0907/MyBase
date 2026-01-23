@@ -1,5 +1,4 @@
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react';
-import { PageType } from '@onebase/app';
 import { Button, Form, Input, Toast } from '@arco-design/mobile-react';
 import { pagesRuntimeSignal } from '@onebase/common';
 import {
@@ -33,6 +32,8 @@ interface EditRuntimeProps {
   form: any;
   isAdd: boolean;
   editLoading: boolean;
+  submitLoading: boolean;
+  draftLoading: boolean;
   onSubmit: () => void;
   onSaveSubmit: () => void;
   onSaveDraft: () => void;
@@ -42,7 +43,7 @@ interface EditRuntimeProps {
 
   mainEntity: any;
   subEntitiesValues: any;
-  setEditLoading: (value: boolean) => void;
+  setDraftLoading: (value: boolean) => void;
   showFromPageData?: Function;
 }
 
@@ -50,6 +51,8 @@ const EditRuntime: React.FC<EditRuntimeProps> = ({
   form,
   isAdd,
   editLoading,
+  submitLoading,
+  draftLoading,
   onSubmit,
   onSaveSubmit,
   onSaveDraft,
@@ -59,7 +62,7 @@ const EditRuntime: React.FC<EditRuntimeProps> = ({
 
   mainEntity,
   subEntitiesValues,
-  setEditLoading,
+  setDraftLoading,
   showFromPageData
 }) => {
   useSignals();
@@ -98,7 +101,7 @@ const EditRuntime: React.FC<EditRuntimeProps> = ({
   const handleLoadDraft = useCallback(
     async (draftData: any) => {
       if (draftData) {
-        setEditLoading(true);
+        setDraftLoading(true);
         console.log('latestDraft: ', draftData);
         const componentSchemas = useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value;
         const subTableComponents = useEditorSignalMap.get(editPageViewId.value)?.subTableComponents.value;
@@ -116,7 +119,7 @@ const EditRuntime: React.FC<EditRuntimeProps> = ({
           form.setFieldsValue(formValues);
         }, 100);
         setTimeout(() => {
-          setEditLoading(false);
+          setDraftLoading(false);
         }, 200);
         await handleFormValuesChange({}, formValues);
         // 触发表单值变化，更新组件状态
@@ -171,10 +174,10 @@ const EditRuntime: React.FC<EditRuntimeProps> = ({
     [cpStates, editPageViewId.value]
   );
 
-  const handleValuesChange = (curValue: any, values: any) => {
+  const handleValuesChange = (curValue: any) => {
     setFormValues((prev: any) => ({ ...prev, ...curValue }));
     setHasChanged(true);
-    handleFormValuesChange(curValue, values);
+    // handleFormValuesChange(curValue, values);
   };
 
   return (
@@ -228,10 +231,10 @@ const EditRuntime: React.FC<EditRuntimeProps> = ({
       })}
 
       <div className={styles.footer}>
-        {curPage?.value?.pageSetType !== PageType.BPM && isAdd ? (
+        {isAdd ? (
           <Button
             type="ghost"
-            loading={editLoading}
+            loading={draftLoading}
             color={colorConfig}
             bgColor={ghostBgColor}
             borderColor={colorConfig}
@@ -255,14 +258,9 @@ const EditRuntime: React.FC<EditRuntimeProps> = ({
             取消
           </Button>
         )}
-        {curPage?.value?.pageSetType === PageType.BPM && isAdd && (
-          <Button type="primary" onClick={onSaveSubmit} loading={editLoading}>
-            保存
-          </Button>
-        )}
         <Button
           type="primary"
-          loading={editLoading}
+          loading={submitLoading}
           bgColor={colorConfig}
           borderColor={colorConfig}
           onClick={onSubmit}

@@ -48,6 +48,7 @@ export default function UserFormModal({
   const [roleList, setRoleList] = useState<RoleVO[]>([]);
   const [encryptedMobile, setEncryptedMobile] = useState<string>('');
   const [encryptedEmail, setEncryptedEmail] = useState<string>('');
+  const [isSystemUser, setIsSystemUser] = useState(false);
 
   // 获取角色列表
   const fetchRoleList = async () => {
@@ -66,6 +67,7 @@ export default function UserFormModal({
       if (initialValues) {
         form.setFieldsValue(initialValues);
         setAvatarUrl(initialValues.avatar);
+        setIsSystemUser(initialValues.adminType === UserType.SYSTEM);
         setStatusCheckedValue(initialValues.status === StatusEnum.ENABLE ? true : false);
       } else {
         // 创建时用户角色默认为普通用户
@@ -176,8 +178,6 @@ export default function UserFormModal({
     traverseNodes(treeData, []);
     return titlePath;
   };
-
-  const isSystemUser = form.getFieldValue('adminType') === UserType.SYSTEM;
 
   return (
     <Modal

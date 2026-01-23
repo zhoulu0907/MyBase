@@ -4,14 +4,14 @@
  * 统一维护组件的：类型字符串、schema、模板展示信息、字段能力映射（fieldMap）、默认实体字段映射（entityMap）。
  * 其他模块（类型常量、模板、组件与实体映射等）均从此注册表派生，避免重复维护与配置漂移。
  */
+import { ENTITY_FIELD_TYPE } from '@/components/DataFactory'
 import { cloneDeep } from 'lodash-es'
-import { baseSchema as BasicSchema } from './Basic/schema'
+import type { ComponentType as ReactComponentType } from 'react'
 import { FormComp, LayoutComp, ListComp, ShowComp } from './Basic'
+import { baseSchema as BasicSchema } from './Basic/schema'
+import type { ComponentType } from './componentTypes'
 import { WorkbenchComp } from './Workbench'
 import { workbenchSchema } from './Workbench/schema/schema'
-import { ENTITY_FIELD_TYPE } from '@/components/DataFactory'
-import type { ComponentType } from './componentTypes'
-import type { ComponentType as ReactComponentType } from 'react'
 
 /** 组件分类类型 */
 type ComponentCategory = 'layout' | 'form' | 'list' | 'show' | 'workbench'
@@ -78,6 +78,8 @@ const COMPONENT_TYPE = {
   CAROUSEL_FORM: 'XCarouselForm',
   SUB_TABLE: 'XSubTable',
   DATA_SELECT: 'XDataSelect',
+  RATE: 'XRate',
+  CHECK_ITEM: 'XCheckItem',
   // 列表
   TABLE: 'XTable',
   CALENDAR: 'XCalendar',
@@ -92,10 +94,12 @@ const COMPONENT_TYPE = {
   FILE: 'XFile',
   WEB_VIEW: 'XWebView',
   DIVIDER: 'XDivider',
+  ALERT: 'XAlert',
   PLACEHOLDER: 'XPlaceholder',
   // 工作台
   QUICK_ENTRY: 'XQuickEntry',
   TODO_CENTER: 'XTodoCenter',
+  TODO_LIST: 'XTodoList',
   CAROUSEL_WORKBENCH: 'XCarouselWorkbench',
   RICH_TEXT_WORKBENCH: 'XRichTextEditorWorkbench',
   BUTTON_WORKBENCH: 'XButtonWorkbench',
@@ -353,6 +357,20 @@ const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescripto
       ENTITY_FIELD_TYPE.MULTI_DATA_SELECTION.VALUE
     ]
   },
+  [COMPONENT_TYPE.RATE]: {
+    type: COMPONENT_TYPE.RATE,
+    schema: cloneDeep(BasicSchema.XRate),
+    template: { h: 36, w: 118, displayName: '评分', icon: 'number_input_cp.svg', category: 'form' },
+    fieldMap: [ENTITY_FIELD_TYPE.NUMBER.VALUE, ENTITY_FIELD_TYPE.RATE.VALUE],
+    entityMap: [ENTITY_FIELD_TYPE.RATE.VALUE]
+  },
+  [COMPONENT_TYPE.CHECK_ITEM]: {
+    type: COMPONENT_TYPE.CHECK_ITEM,
+    schema: cloneDeep(BasicSchema.XCheckItem),
+    template: { h: 36, w: 118, displayName: '检查项', icon: 'number_input_cp.svg', category: 'form' },
+    fieldMap: [ENTITY_FIELD_TYPE.BOOLEAN.VALUE, ENTITY_FIELD_TYPE.CHECK_ITEM.VALUE],
+    entityMap: [ENTITY_FIELD_TYPE.CHECK_ITEM.VALUE]
+  },
   [COMPONENT_TYPE.TABLE]: {
     type: COMPONENT_TYPE.TABLE,
     schema: cloneDeep(BasicSchema.XTable),
@@ -437,6 +455,13 @@ const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescripto
     fieldMap: [],
     entityMap: []
   },
+  [COMPONENT_TYPE.ALERT]: {
+    type: COMPONENT_TYPE.ALERT,
+    schema: cloneDeep(BasicSchema.XAlert),
+    template: { h: 36, w: 118, displayName: '提示框', icon: 'placeholder_cp.svg', category: 'show' },
+    fieldMap: [],
+    entityMap: []
+  },
   [COMPONENT_TYPE.PLACEHOLDER]: {
     type: COMPONENT_TYPE.PLACEHOLDER,
     schema: cloneDeep(BasicSchema.XPlaceholder),
@@ -468,6 +493,13 @@ const WORKBENCH_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescr
     type: COMPONENT_TYPE.TODO_CENTER,
     schema: cloneDeep(workbenchSchema.XTodoCenter),
     template: { h: 36, w: 118, displayName: '待办中心', icon: 'todo_center_cp.svg', category: 'workbench' },
+    fieldMap: [],
+    entityMap: []
+  },
+  [COMPONENT_TYPE.TODO_LIST]: {
+    type: COMPONENT_TYPE.TODO_LIST,
+    schema: cloneDeep(workbenchSchema.XTodoList),
+    template: { h: 36, w: 118, displayName: '待办列表', icon: 'todo_list_cp.svg', category: 'workbench' },
     fieldMap: [],
     entityMap: []
   },
@@ -606,7 +638,7 @@ export function buildTemplate() {
       icon: descriptor.template.icon,
       category: descriptor.template.category
     }
-    
+
     // 防错处理：确保分类存在，否则归类到 'form'
     const group = templateGroups[descriptor.template.category];
     if (group) {
@@ -846,13 +878,27 @@ export function registerComponent(descriptor: ComponentDescriptor, options?: Reg
  * @param type 组件类型字符串
  * @returns 对应的 React 组件实现；若未找到则返回 `undefined`
  */
-export function getComponentImpl(type: ComponentType): ReactComponentType<any> | undefined {
+export function getComponentImpl(type: ComponentType, runtime?:boolean): ReactComponentType<any> | undefined {
   const d = COMPONENT_REGISTRY[type]
   if (!d) return undefined
-  if (d.component) return d.component
   const category = d.template.category
+  // 先布局组件
+  if (category === 'layout') {
+    if(runtime){
+      if(type === COMPONENT_TYPE.COLUMN_LAYOUT){
+        return (LayoutComp as any)[COMPONENT_TYPE.PREVIEW_COLUMN_LAYOUT]
+      }
+      if(type === COMPONENT_TYPE.COLLAPSE_LAYOUT){
+        return (LayoutComp as any)[COMPONENT_TYPE.PREVIEW_COLLAPSE_LAYOUT]
+      }
+      if(type === COMPONENT_TYPE.TABS_LAYOUT){
+        return (LayoutComp as any)[COMPONENT_TYPE.PREVIEW_TABS_LAYOUT]
+      }
+    }
+    return (LayoutComp as any)[type]
+  }
+  if (d.component) return d.component
   if (category === 'form') return (FormComp as any)[type]
-  if (category === 'layout') return (LayoutComp as any)[type]
   if (category === 'list') return (ListComp as any)[type]
   if (category === 'show') return (ShowComp as any)[type]
   return undefined

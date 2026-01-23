@@ -1,13 +1,20 @@
 import { Button, Input, Message } from '@arco-design/web-react';
 import { IconArrowLeft, IconEdit } from '@arco-design/web-react/icon';
-import { EditorRenderer, FreeLayoutEditorProvider, type WorkflowJSON } from '@flowgram.ai/free-layout-editor';
+import {
+    EditorRenderer,
+    FreeLayoutEditorProvider,
+    type FreeLayoutPluginContext,
+    type WorkflowJSON
+} from '@flowgram.ai/free-layout-editor';
 import { craeteETLFlow, getETLFlow, updateETLFlow } from '@onebase/app';
 import { etlEditorSignal, getHashQueryParam } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import NodeConfigPage from './components/drawer';
 import ETLFlowPanel from './components/panel';
+import { clearNodeConfig } from './configs/utils';
+import { useEdgeDeletionListener, type DeletedEdge } from './hooks/use-edge-deletion-listener';
 import { useEditorProps } from './hooks/use-editor-props';
 import styles from './index.module.less';
 import { FlowNodeRegistries } from './nodes';
@@ -19,6 +26,7 @@ const ETLFlowEditorPage: React.FC = () => {
 
   const navigate = useNavigate();
   const refWrapper = useRef<HTMLDivElement>(null);
+  const editorRef = useRef<FreeLayoutPluginContext | null>(null);
 
   const [flowName, setFlowName] = useState<string>('数据流名称');
   const [isEditFlowName, setIsEditFlowName] = useState<boolean>(false);
@@ -29,7 +37,22 @@ const ETLFlowEditorPage: React.FC = () => {
   });
   const editorProps = useEditorProps(FlowNodeRegistries);
 
-  const { graphData, nodeData, setGraphData, setAllNodeData } = etlEditorSignal;
+  const { graphData, nodeData, setGraphData, setAllNodeData, clearNodeData, clearCurNode } = etlEditorSignal;
+
+  const resetFlowState = useCallback(() => {
+    // 清空全局信号缓存，避免上一次编辑残留
+    clearCurNode();
+    clearNodeData();
+    setGraphData({
+      nodes: [],
+      edges: []
+    });
+    setInitData({
+      nodes: [],
+      edges: []
+    });
+    setFlowName('数据流名称');
+  }, [clearCurNode, clearNodeData, setGraphData]);
 
   const backToDataFactory = () => {
     const appId = getHashQueryParam('appId');
@@ -39,18 +62,43 @@ const ETLFlowEditorPage: React.FC = () => {
 
   useEffect(() => {
     const flowId = getHashQueryParam('flowId');
+    // 每次进入页面先重置，避免复用同一信号导致脏数据
+    resetFlowState();
     if (flowId) {
       handleLoadETLFlow(flowId);
     }
+
   }, []);
 
   useEffect(() => {
     console.log('initData: ', initData);
   }, [initData]);
 
+  // 处理边删除后的逻辑
+  const handleEdgeDeleted = useCallback((deletedEdges: DeletedEdge[]) => {
+    // deletedEdges: 被删除的边的信息数组，包含 sourceNodeID 和 targetNodeID
+    console.log('处理边删除:', deletedEdges);
+
+    // 遍历被删除的边，处理每条边的删除
+    deletedEdges.forEach((edge) => {
+      const { sourceNodeID, targetNodeID } = edge;
+      console.log(`边被删除: ${sourceNodeID} -> ${targetNodeID}`);
+      clearNodeConfig(targetNodeID, nodeData.value);
+    });
+  }, []);
+
+  // 监听边的删除和新增
+  useEdgeDeletionListener({
+    editorRef,
+    initDataNodesLength: initData.nodes.length,
+    onEdgeDeleted: handleEdgeDeleted
+  });
+
   const handleLoadETLFlow = async (flowId: string) => {
     const res = await getETLFlow(flowId);
-    console.log(res);
+    if (res) {
+      setFlowName(res.flowName);
+    }
 
     if (res.config && res.config.edges) {
       const graphData = {
@@ -75,7 +123,6 @@ const ETLFlowEditorPage: React.FC = () => {
       };
       setGraphData(graphData);
       setInitData(graphData);
-      setFlowName(res.flowName);
     }
 
     if (res.config && res.config.nodes) {
@@ -89,8 +136,6 @@ const ETLFlowEditorPage: React.FC = () => {
         };
         return acc;
       }, {});
-      console.log('nodesRes: ', nodesRes);
-
       setAllNodeData(nodesRes);
     }
   };
@@ -180,7 +225,12 @@ const ETLFlowEditorPage: React.FC = () => {
       </div>
       <div className={styles.etlFlowEditorContent}>
         {initData && (
-          <FreeLayoutEditorProvider key={initData?.nodes?.length ?? 0} initialData={initData} {...editorProps}>
+          <FreeLayoutEditorProvider
+            ref={editorRef}
+            key={initData?.nodes?.length ?? 0}
+            initialData={initData}
+            {...editorProps}
+          >
             <div className={styles.sidebar}>
               <ETLFlowPanel />
             </div>

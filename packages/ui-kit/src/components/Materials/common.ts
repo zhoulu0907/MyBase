@@ -1,56 +1,59 @@
 // ==================== 类型导入 ====================
 import type {
-  IAlignConfigType,
-  ICarouselConfigType,
-  IDataFieldConfigType,
-  IDateTypeConfigType,
-  ILayoutConfigType,
-  INumberConfigType,
-  IRadioDataConfigType,
-  ICheckboxDataConfigType,
-  IRelatedFormDataConfigType,
-  ISelectConfigType,
-  ISelectOptionsConfigType,
-  IMutipleSelectOptionsConfigType,
-  IStatusConfigType,
-  ITableDataConfigType,
-  ITablePagePositionConfigType,
-  ITablePageSizeConfigType,
-  IColumnCountConfigType,
-  ITextConfigType,
-  IWidthConfigType,
-  TTextDefaultType,
-  ISelectDataSourceConfigType,
-  ISubTableConfigType,
-  ITabsConfigType,
-  ITabsTypeConfigType,
-  ITabsPositionConfigType,
-  IImageConfigType,
-  IFileConfigType,
-  ICollapsedConfigType,
-  ICollapsedStyleConfig,
-  ITableButtonConfigType,
-  ITableOperationConfigType,
-  IBooleanConfigType,
-  IDataSelectModeConfigType,
-  IPhoneType,
-  IDividerTooltipConfigType,
-  IDividerStyleTypeConfigType,
-  IPlaceholderConfigType,
-  ITooltipConfigType,
-  IVerifyConfigType,
-  ISecurityConfigType,
-  IDefaultValueConfigType,
-  IDateFormatConfigType,
-  ITimeFormatConfigType,
-  INumberFormatConfigType,
-  IDateRangeConfigType,
-  ITimeRangeConfigType,
-  IImageHandleConfigType,
-  IAutoCodeConfigType,
-  ISwitchFillTextConfigType,
-  IColorConfigType,
-  ICommonConfigType,
+    IAlertContentConfigType,
+    IAlertTypeConfigType,
+    IAlignConfigType,
+    IAutoCodeConfigType,
+    IBooleanConfigType,
+    ICarouselConfigType,
+    ICheckboxDataConfigType,
+    ICollapsedConfigType,
+    ICollapsedStyleConfig,
+    IColorConfigType,
+    IColumnCountConfigType,
+    IColumnGapConfigType,
+    ICommonConfigType,
+    IDataFieldConfigType,
+    IDataSelectModeConfigType,
+    IDateFormatConfigType,
+    IDateRangeConfigType,
+    IDateTypeConfigType,
+    IDefaultValueConfigType,
+    IDividerStyleTypeConfigType,
+    IDividerTooltipConfigType,
+    IFileConfigType,
+    IImageConfigType,
+    IImageHandleConfigType,
+    ILayoutConfigType,
+    IMutipleSelectOptionsConfigType,
+    INumberConfigType,
+    INumberFormatConfigType,
+    IPhoneType,
+    IPlaceholderConfigType,
+    IRadioDataConfigType,
+    IRelatedFormDataConfigType,
+    ISecurityConfigType,
+    ISelectConfigType,
+    ISelectDataSourceConfigType,
+    ISelectOptionsConfigType,
+    IStatusConfigType,
+    ISubTableConfigType,
+    ISwitchFillTextConfigType,
+    ITableButtonConfigType,
+    ITableDataConfigType,
+    ITableOperationConfigType,
+    ITablePagePositionConfigType,
+    ITablePageSizeConfigType,
+    ITabsConfigType,
+    ITabsPositionConfigType,
+    ITabsTypeConfigType,
+    ITextConfigType,
+    ITimeFormatConfigType,
+    ITimeRangeConfigType,
+    ITooltipConfigType,
+    IVerifyConfigType,
+    IWidthConfigType,
+    TTextDefaultType,
 } from './types';
 
 // ==================== 基础与通用 ====================
@@ -386,13 +389,13 @@ export const fillConfig: IStatusConfigType<TFillSelectKeyType> = {
   type: 'StatusRadio',
   range: [
     {
-      key: '原图局中',
-      text: '原图局中',
+      key: '原图居中',
+      text: '原图居中',
       value: 'contain'
     },
     {
-      key: '局中填满',
-      text: '局中填满',
+      key: '居中填满',
+      text: '居中填满',
       value: 'cover'
     },
     {
@@ -462,6 +465,56 @@ export const mutipleSelectOptionsConfig: IMutipleSelectOptionsConfigType = {
   key: 'defaultOptionsConfig',
   name: '自定义选项',
   type: 'MutipleOptionsInput'
+};
+
+// ==================== 提示框 ====================
+export type TAlertTypeSelectKeyType = 'info' | 'success' | 'warning' | 'error';
+export const alertContentConfig: IAlertContentConfigType = {
+  key: 'content',
+  name: '文本内容',
+  type: 'AlertContentInput'
+};
+
+export const showIconConfig: IBooleanConfigType = {
+  key: 'showIcon',
+  name: '显示图标',
+  type: 'SwitchInput'
+};
+
+export const allowCloseConfig: IBooleanConfigType = {
+  key: 'allowClose',
+  name: '支持关闭',
+  type: 'SwitchInput'
+};
+
+export const alertStatusConfig: IStatusConfigType<TStatusSelectKeyType> = {
+    key: 'status',
+    name: '显示状态',
+    type: 'StatusRadio',
+    range: [
+      {
+        key: '普通',
+        text: '普通',
+        value: 'default'
+      },
+      {
+        key: '隐藏',
+        text: '隐藏',
+        value: 'hidden'
+      }
+    ]
+  };
+
+export const alertTypeConfig: IAlertTypeConfigType<TAlertTypeSelectKeyType> = {
+  key: 'alertType',
+  name: '提示类型',
+  type: 'AlertType',
+  range: [
+    { key: 'info', text: '通知', value: 'info' },
+    { key: 'success', text: '成功', value: 'success' },
+    { key: 'warning', text: '提示', value: 'warning' },
+    { key: 'error', text: '警告', value: 'error' }
+  ]
 };
 
 // ==================== 轮播与媒体 ====================
@@ -919,6 +972,19 @@ export const columnCountConfig: IColumnCountConfigType<number> = {
     { key: '2', text: '2', value: 2 },
     { key: '3', text: '3', value: 3 },
     { key: '4', text: '4', value: 4 },
+  ]
+}
+
+export const columnGapConfig: IColumnGapConfigType<string> = {
+  key: 'colGap',
+  name: '列间距',
+  type: 'ColumnGapSelect',
+  range: [
+    { key: '24px', text: '24px', value: '24px' },
+    { key: '16px', text: '16px', value: '16px' },
+    { key: '12px', text: '12px', value: '12px' },
+    { key: '8px', text: '8px', value: '8px' },
+    { key: '0px', text: '0px', value: '0px' }
   ]
 }
 

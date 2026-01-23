@@ -326,7 +326,7 @@ const DataPermissionModal = (props: IProps) => {
     try {
       const values = await form.validate();
       // scope 表单验证
-      const formValues = await form.getFieldsValue();
+      const formValues = form.getFieldsValue();
       // 如果开启自定义范围，先检查基础配置是否完整
       if (formValues.customCondition) {
         if (!formValues.scopeFieldUuid || !formValues.scopeLevel) {
@@ -377,7 +377,7 @@ const DataPermissionModal = (props: IProps) => {
         visible={modalVisible}
         autoFocus={false}
         focusLock={true}
-        okText={status === 'create' ? '创建' : '编辑'}
+        okText={status === 'create' ? '创建' : '保存'}
         onOk={handleOk}
         onCancel={handleCancel}
         unmountOnExit={true}

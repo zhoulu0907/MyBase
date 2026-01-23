@@ -51,7 +51,7 @@ const WorkbenchRuntime: React.FC<WorkbenchRuntimeProps> = ({ pageSetId, runtime 
                 // pageType={EDITOR_TYPES.WORKBENCH_EDITOR}
                 pageComponentSchema={sanitizedSchema}
                 runtime={runtime}
-                preview={true}
+                preview={false}
               />
             </div>
           </Fragment>

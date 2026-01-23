@@ -13,6 +13,10 @@ export const CONFIG_TYPES = {
 
   // 组件标题输入
   LABEL_INPUT: 'LabelInput',
+  // 提示内容输入
+  ALERT_CONTENT_INPUT: 'AlertContentInput',
+  // 提示类型选择
+  ALERT_TYPE: 'AlertType',
   // 组件占位符输入
   PLACEHOLDER_INPUT: 'PlaceholderInput',
   // 组件选项输入
@@ -30,6 +34,8 @@ export const CONFIG_TYPES = {
   REQUIRED_CHECKBOX: 'RequiredCheckBox',
   // 布局列数选择
   COLUMN_COUNT_RADIO: 'ColumnCountRadio',
+  // 布局列间距选择
+  COLUMN_GAP_SELECT: 'ColumnGapSelect',
   // 表格分页位置选择
   TABLE_PAGE_POSITION_RADIO: 'TablePagePositionRadio',
   // 字段数据配置
@@ -121,6 +127,10 @@ export const CONFIG_TYPES = {
   DIVIDER_STYLE_TYPE: 'DividerStyleType',
   //选择人员默认值
   USER_DEFAULT_VALUE: 'userDefaultValue',
+  // 评分组件
+  RATE_CONFIG: 'RateConfig',
+  // 检查项 显示方式
+  CHECK_ITEM_SHOW_MODE: 'CheckItemShowMode'
 } as const;
 
 // 状态选项常量
@@ -169,6 +179,23 @@ export const COLUMN_COUNT_VALUES = {
   [COLUMN_COUNT_OPTIONS.TWO]: 2,
   [COLUMN_COUNT_OPTIONS.THREE]: 3,
   [COLUMN_COUNT_OPTIONS.FOUR]: 4
+} as const;
+
+// 列间距常量
+export const COLUMN_GAP_OPTIONS = {
+  PX24: '24px',
+  PX16: '16px',
+  PX12: '12px',
+  PX8: '8px',
+  PX0: '0px'
+} as const;
+
+export const COLUMN_GAP_VALUES = {
+  [COLUMN_GAP_OPTIONS.PX24]: '24px',
+  [COLUMN_GAP_OPTIONS.PX16]: '16px',
+  [COLUMN_GAP_OPTIONS.PX12]: '12px',
+  [COLUMN_GAP_OPTIONS.PX8]: '8px',
+  [COLUMN_GAP_OPTIONS.PX0]: '0px'
 } as const;
 
 export const PAGINATION_POSITION_OPTIONS = {
@@ -312,8 +339,8 @@ export const LAYOUT_VALUES = {
 
 // 图片填充方式
 export const FILL_OPTIONS = {
-  CONTAIN: '原图局中',
-  COVER: '局中填满',
+  CONTAIN: '原图居中',
+  COVER: '居中填满',
   FILL: '拉伸填满'
 } as const;
 
@@ -394,7 +421,12 @@ export enum TableOperationButtonStyle {
   TEXT = 'text',
   ALL = 'all'
 }
-
+// 检查项-展示方式
+export const SHOW_MODE_TYPES = {
+  CHECKBOX: 'checkbox',
+  SWITCH: 'switch',
+  WHETHER: 'whether'
+}
 // 默认值
 export const DEFAULT_VALUE_TYPES = {
   CUSTOM: 'custom',

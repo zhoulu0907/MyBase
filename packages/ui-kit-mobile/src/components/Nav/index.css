@@ -39,3 +39,9 @@
     }
   }
 }
+
+.nav.arco-nav-bar-wrapper.arco-nav-bar-wrapper-fixed {
+  max-width: 450px;
+  left: 50%;
+  transform: translateX(-50%);
+}

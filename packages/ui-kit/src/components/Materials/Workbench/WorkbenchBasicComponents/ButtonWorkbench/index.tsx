@@ -47,9 +47,6 @@ const XButtonWorkbench = memo((props: XButtonWorkbenchConfig & { runtime?: boole
       <div style={buttonStyle}>
         {buttonText}
       </div>
-      <div style={{ fontSize: '12px', color: '#86909C', marginTop: '8px' }}>
-        （此组件仅在移动端可用）
-      </div>
     </div>
   );
 });

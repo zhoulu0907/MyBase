@@ -10,6 +10,14 @@ import { PluginHostAPI } from './host-api';
 
 export async function initPlugins() {
   try {
+    // 开发模式：检查是否启用插件
+    const enablePlugins = (window as any)?.global_config?.ENABLE_PLUGINS !== false;
+
+    if (!enablePlugins) {
+      console.log('[Plugin Loader] 插件功能已禁用');
+      return;
+    }
+
     // 1. 全局变量注入 (Polyfills)
     (window as any).React = (window as any).React ?? React;
     (window as any).ReactDOM = (window as any).ReactDOM ?? ReactDOM;

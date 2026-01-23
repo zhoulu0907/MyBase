@@ -1,12 +1,12 @@
 import { Button, Dropdown, Menu, Message, Switch, Typography } from '@arco-design/web-react';
 import { IconEdit, IconMoreVertical } from '@arco-design/web-react/icon';
 import {
-  disableETLFlow,
-  enableETLFlow,
-  ETL_FLOW_STATUS,
-  ETL_SCHEDULE_STRATEGY,
-  startETLFlow,
-  type ETLFlowMgmt
+    disableETLFlow,
+    enableETLFlow,
+    ETL_FLOW_STATUS,
+    ETL_SCHEDULE_STRATEGY,
+    startETLFlow,
+    type ETLFlowMgmt
 } from '@onebase/app';
 import dayjs from 'dayjs';
 import React from 'react';
@@ -130,7 +130,7 @@ const ETLFlowCard: React.FC<ETLFlowCardProps> = ({ data, handleEdit, handleDelet
           <Button type="text" size="small" className={styles.cardFooterLeftBtn}>
             查看日志
           </Button>
-          {data.enableStatus === ETL_FLOW_STATUS.ENABLED && (
+          {data.enableStatus === ETL_FLOW_STATUS.ENABLED && data.scheduleStrategy === ETL_SCHEDULE_STRATEGY.MANUALLY && (
             <Button
               type="text"
               size="small"

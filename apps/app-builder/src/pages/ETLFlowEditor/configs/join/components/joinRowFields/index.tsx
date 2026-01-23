@@ -94,7 +94,7 @@ const JoinRowFields = (props: JoinRowFieldsProps) => {
         <Grid.Col span={8}>
           <FormItem noStyle field={rowField.field + NODEFIELDTYPE.LEFT}>
             <Select placeholder="请选择字段" allowClear onChange={(value) => handleLeftFieldChange(value)}>
-              {finialLeftFieldList.map((field) => (
+              {finialLeftFieldList?.map((field) => (
                 <Option key={field.fieldFqn} value={field.fieldFqn}>
                   {field.fieldName}
                 </Option>
@@ -108,7 +108,7 @@ const JoinRowFields = (props: JoinRowFieldsProps) => {
         <Grid.Col span={8}>
           <FormItem noStyle field={rowField.field + NODEFIELDTYPE.RIGHT}>
             <Select placeholder="请选择字段" allowClear onChange={(value) => handleRightFieldChange(value)}>
-              {finialRightFieldList.map((field) => (
+              {finialRightFieldList?.map((field) => (
                 <Option key={field.fieldFqn} value={field.fieldFqn}>
                   {field.fieldName}
                 </Option>

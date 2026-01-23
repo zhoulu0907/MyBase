@@ -91,7 +91,7 @@ const WelcomeCardPanels = ({
   );
 };
 
-const ButtonWorkbenchConfig = () => {
+const WelcomeCardConfig = () => {
   const [activeKeys, setActiveKeys] = useState<string[]>([SECTION_KEYS.THEME, SECTION_KEYS.CONTENT]);
 
   return (
@@ -111,4 +111,4 @@ const ButtonWorkbenchConfig = () => {
   );
 };
 
-export default ButtonWorkbenchConfig;
+export default WelcomeCardConfig;

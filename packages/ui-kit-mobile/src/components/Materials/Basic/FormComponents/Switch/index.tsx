@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { nanoid } from 'nanoid';
 import { Switch, Form, Ellipsis } from '@arco-design/mobile-react';
 import { FormInternalComponentType } from '@arco-design/mobile-react/esm/form';
@@ -29,16 +29,38 @@ const XSwitch = memo((props: XSwitchConfig & { runtime?: boolean; detailMode?: b
     ? dataField[dataField.length - 1]
     : `${FORM_COMPONENT_TYPES.SWITCH}_${nanoid()}`;
 
+  const [switchChecked, setSwitchChecked] = useState(form?.getFieldValue(fieldId));
+
   // 根据是否为只读模式确定内容
   const renderContent = () => {
     // 非只读模式，渲染Switch组件
     return (
-      <Switch
-        platform={systemInfo === 'ios' ? 'ios' : 'android'}
-        text={{ on: fillText?.display ? fillText.checkedText : '', off: fillText?.display ? fillText.uncheckedText : '' }}
-      />
+      <div
+        onClick={handleSwitchClick}
+        style={{ display: 'flex', cursor: 'pointer' }}
+      >
+        <Switch
+          platform={systemInfo === 'ios' ? 'ios' : 'android'}
+          text={{ on: fillText?.display ? fillText.checkedText : '', off: fillText?.display ? fillText.uncheckedText : '' }}
+          checked={switchChecked}
+          onChange={(value) => {
+            setSwitchChecked(value);
+            form.setFieldValue(fieldId, value);
+          }}
+        />
+      </div>
     );
   };
+
+  const handleSwitchClick = (e: any) => {
+    const isPC = !('ontouchstart' in window);
+    if (isPC) {
+      e.stopPropagation();
+      const newValue = !switchChecked;
+      setSwitchChecked(newValue);
+      form.setFieldValue(fieldId, newValue);
+    }
+  }
 
   return (
     <Form.Item

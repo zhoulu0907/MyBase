@@ -22,6 +22,11 @@ export const SQLNodeConfig: React.FC<SQLNodeConfigProps> = ({ onRegisterSave }) 
   });
   const [newPayload, setNewPayload] = useState<any>(cloneDeep(nodeData.value[curNode.value.id]));
 
+  // 当节点切换时，更新 newPayload
+  useEffect(() => {
+    setNewPayload(cloneDeep(nodeData.value[curNode.value.id]));
+  }, [curNode.value.id]);
+
   const handleRegisterFromChild = (fn: () => void) => {
     saveFnRef.current = fn;
     onRegisterSave?.(fn);

@@ -43,7 +43,7 @@ const DynamicLabelInputConfig = ({ handlePropsChange, item, configs, isInSubTabl
                 handlePropsChange(item.key, { ...configs[item.key], display: value });
               }}
             >
-              显示标题
+              显示文本内容
             </Checkbox>
           )}
         </>

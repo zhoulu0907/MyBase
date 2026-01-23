@@ -212,6 +212,7 @@ export default function DraftBox(props: IProps) {
     const deleteAll = id === 'all';
     (globalThis as any).modalInstance = Dialog.confirm({
       title: `确认${deleteAll ? '清空所有' : '删除'}草稿？`,
+      platform: 'ios',
       children: '此操作不可撤销',
       okText: <div style={{ color: '#F53F3F' }}>确定</div>,
       cancelText: '取消',
