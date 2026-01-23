@@ -11,7 +11,7 @@ import styles from './index.module.less';
  * 集成触发器编辑器作为主内容
  */
 const FlowEditorPage: React.FC = () => {
-  const { nodeData, nodes, flowId } = triggerEditorSignal;
+  const { nodeData, nodes, flowId, invalidNodes, isInvalidNode } = triggerEditorSignal;
   const { getTriggerNodeOutput } = triggerNodeOutputSignal;
 
   const dealProcessDefinition = (newNodes: any[]): any[] => {
@@ -51,28 +51,44 @@ const FlowEditorPage: React.FC = () => {
     return processDefinitionJson;
   };
 
-  const handleSaveAndRelease = async (type: string) => {
+  const handleSaveAndRelease = async () => {
+    // 表单校验结果验证
+    console.log('invalidNodes.value', invalidNodes.value);
+    console.log('invalidNodes.value', nodes.value);
+    const nodesValidate = Object.entries(invalidNodes.value).every(([key, value]) => {
+      if (!key || key === 'undefined') {
+        return true;
+      }
+      if (nodes.value.find((ele) => ele.id === key)) {
+        return !value;
+      }
+      return true;
+    });
+    if (!nodesValidate) {
+      Message.warning('存在未配置完成的节点');
+      return;
+    }
     const processDefinitionJson = dealProcessDefinition(nodes.value);
     console.log('processDefinition', processDefinitionJson);
 
     const params = {
       id: flowId.value || '',
       processDefinition: JSON.stringify({ nodes: processDefinitionJson }),
-      enableStatus: type === 'save' ? ProcessStatus.ORIGINAL : ProcessStatus.ENABLED
+      enableStatus: ProcessStatus.ORIGINAL
     };
 
     console.log('params', params);
 
     const res = await updateFlowMgmtDefinition(params);
     if (res) {
-      Message.success(`${type === 'save' ? '保存' : '发布'}成功`);
+      Message.success(`保存成功`);
     }
   };
 
   return (
     <div className={styles.flowEditorPage}>
       <div className={styles.header}>
-        <Button type="primary" onClick={() => handleSaveAndRelease('save')}>
+        <Button type="primary" onClick={handleSaveAndRelease}>
           保存
         </Button>
       </div>

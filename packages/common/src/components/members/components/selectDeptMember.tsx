@@ -42,7 +42,8 @@ export const SelectDeptMember:React.FC<ISelectDeptMemberProps> = ({
             key: deptInfo.key,
             name: deptInfo.title,
             department: buildDepartmentPath(deptInfo?.deptName),
-            email: deptInfo.email
+            email: deptInfo.email,
+            avatar: deptInfo?.avatar || undefined
         }
         if(type === 'checkbox') {
             newSelectedMembers.push(addedNewMember);

@@ -152,7 +152,7 @@ const EnterpriseInfoPage: React.FC = () => {
           ...param,
           corpCode: param?.corpCode || '',
           corpName: param?.corpName || '',
-          industryType: param?.corpName || '',
+          industryType: param?.industryType || '',
           address: param?.address || '',
           status: param?.status || 0,
           corpLogo: avatarUrl,

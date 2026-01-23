@@ -1,5 +1,6 @@
 import appPermissionSVG from '@/assets/images/appRelease/app_auth.svg';
 import appReleaseSVG from '@/assets/images/appRelease/app_release.svg';
+import appExportSVG from '@/assets/images/appExport.svg';
 import baseSettingSVG from '@/assets/images/appRelease/base_setting.svg';
 import loginPermissionSVG from '@/assets/images/appRelease/login_permission.svg';
 import navigatorSettingSVG from '@/assets/images/appRelease/navigator_setting.svg';
@@ -19,6 +20,7 @@ import {
 import { useEffect, useState, type FC } from 'react';
 import { ReactSVG } from 'react-svg';
 import AppReleasePage from '../AppRelease';
+import AppExportPage from '../AppExport';
 import AppPermission from './components/AppPermission';
 import BasicSetting from './components/BasicSetting';
 import LoginPermission from './components/LoginPermission';
@@ -43,6 +45,7 @@ const AppSettingPage: FC = () => {
     { title: '登录设置', icon: loginPermissionSVG, key: 'loginPermission' },
     { title: '应用权限', icon: appPermissionSVG, key: 'appPermission' },
     { title: '应用发布', icon: appReleaseSVG, key: 'appRelease' },
+    { title: '应用导出', icon: appExportSVG, key: 'appExport' },
     { title: '导航设置', icon: navigatorSettingSVG, key: 'navigatorSetting' }
   ];
 
@@ -198,6 +201,7 @@ const AppSettingPage: FC = () => {
               {activeTab === 'baseSetting' && <BasicSetting form={form} data={appData!} />}
               {activeTab === 'appPermission' && <AppPermission />}
               {activeTab === 'appRelease' && <AppReleasePage />}
+              {activeTab === 'appExport' && <AppExportPage />}
               {activeTab === 'navigatorSetting' && <NavigatorSetting form={navigatorForm} />}
               {activeTab === 'loginPermission' && <LoginPermission appId={curAppId} />}
               {activeTab === 'navigatorSetting' && (

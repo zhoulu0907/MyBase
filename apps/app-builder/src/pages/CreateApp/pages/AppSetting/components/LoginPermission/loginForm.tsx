@@ -28,12 +28,7 @@ const LoginForm: React.FC<ILoginFormProps> = ({ appId, showForgotPWD, showRegist
     if (appId) {
       const appResp = await getApplication({ id: appId });
       if (appResp) {
-        setCurAppInfo({
-          iconName: appResp.iconName || '',
-          iconColor: appResp.iconColor || '',
-          appName: appResp.appName || '--',
-          appStatus: appResp.appStatus || 0
-        });
+        setCurAppInfo(appResp);
       }
     }
   };

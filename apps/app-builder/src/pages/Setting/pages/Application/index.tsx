@@ -351,6 +351,7 @@ const AppManagement: React.FC = () => {
                   onEdit={handleEdit}
                   onLaunch={handleLaunch}
                   onDelete={handleDelete}
+                  onUpdate={getApplicationList}
                 />
               ))}
             </div>
