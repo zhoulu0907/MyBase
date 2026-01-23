@@ -106,7 +106,13 @@ export const useConnectorWizardStore = create<ConnectorWizardStore>()(
         set({ ui: { ...get().ui, isLoading: true } });
         try {
           const res = await getConnectorTypeInfo(nodeCode);
-          if (res) {
+
+          // 检查后端是否返回了有效的 schema
+          const hasValidConnConfig = res?.conn_config && Object.keys(res.conn_config).length > 0;
+          const hasValidActionConfig = res?.action_config && Object.keys(res.action_config).length > 0;
+
+          if (hasValidConnConfig || hasValidActionConfig) {
+            // 后端返回了有效的 schema，使用后端数据
             set({
               schemas: {
                 conn_config: res.conn_config || null,
@@ -115,8 +121,8 @@ export const useConnectorWizardStore = create<ConnectorWizardStore>()(
               ui: { isLoading: false },
             });
           } else {
-            // TODO: 后端 API 返回 null 或空数据时，使用 mock schema 用于开发测试
-            console.warn('后端未返回 schema，使用临时 mock schema');
+            // 后端未返回有效 schema，使用 mock schema 用于开发测试
+            console.warn('后端未返回有效 schema，使用临时 mock schema');
             const mockConnConfig = {
               type: "object",
               properties: {
