@@ -1,15 +1,11 @@
 import { Input, Message, Spin, Tabs } from '@arco-design/web-react';
-import {
-  getConnectorNodeTypes,
-  type ConnectorItem,
-  type ConnectFlowNode
-} from '@onebase/app';
+import { getConnectorNodeTypes, type ConnectorItem } from '@onebase/app';
+import { getHashQueryParam } from '@onebase/common';
 import { debounce } from 'lodash-es';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import ConnectorCard from '../../../components/ConnectNodeCategoryCard';
 import { CATEGORY_MAP, transformConnectorData } from '../../../utils/transform';
-import { getHashQueryParam } from '@onebase/common';
 import styles from './index.module.less';
 
 const TabPane = Tabs.TabPane;
@@ -68,9 +64,10 @@ const ConnectorPage: React.FC = () => {
   };
 
   const debouncedSearch = useMemo(
-    () => debounce((value: string) => {
-      setSearchKeyword(value);
-    }, 500),
+    () =>
+      debounce((value: string) => {
+        setSearchKeyword(value);
+      }, 500),
     []
   );
 
@@ -84,12 +81,12 @@ const ConnectorPage: React.FC = () => {
     let list = connectorList;
 
     if (activeTab !== 'all') {
-      list = list.filter(item => item.category === CATEGORY_MAP[activeTab]);
+      list = list.filter((item) => item.category === CATEGORY_MAP[activeTab]);
     }
 
     if (searchKeyword) {
       const keyword = searchKeyword.toLowerCase();
-      list = list.filter(item => item.name.toLowerCase().includes(keyword));
+      list = list.filter((item) => item.name.toLowerCase().includes(keyword));
     }
 
     return list;
@@ -144,20 +141,17 @@ const ConnectorPage: React.FC = () => {
       <div className={styles.header}>
         <div className={styles.title}>
           {selectingMode ? '选择连接器类型' : '连接器类型'}
-          {selectingMode && <span style={{ fontSize: 14, color: '#999', marginLeft: 10, fontWeight: 'normal' }}>点击卡片创建实例</span>}
+          {selectingMode && (
+            <span style={{ fontSize: 14, color: '#999', marginLeft: 10, fontWeight: 'normal' }}>点击卡片创建实例</span>
+          )}
         </div>
-        <Input.Search
-          allowClear
-          placeholder="请输入类型名称搜索"
-          style={{ width: 240 }}
-          onChange={handleSearch}
-        />
+        <Input.Search allowClear placeholder="请输入类型名称搜索" style={{ width: 240 }} onChange={handleSearch} />
       </div>
 
       <div className={styles.body}>
         <div className={styles.tabsContainer}>
           <Tabs activeTabKey={activeTab} onChange={handleTabChange}>
-            {CATEGORIES.map(category => (
+            {CATEGORIES.map((category) => (
               <TabPane key={category.key} title={category.label} />
             ))}
           </Tabs>
@@ -167,13 +161,8 @@ const ConnectorPage: React.FC = () => {
           <Spin loading={loading} size={40} style={{ width: '100%', height: '100%' }} tip="加载中...">
             <div className={styles.tableContainer}>
               {filteredList.length > 0 ? (
-                filteredList.map(item => (
-                  <ConnectorCard
-                    key={item.id}
-                    data={item}
-                    onClick={handleCardClick}
-                    onEdit={handleEdit}
-                  />
+                filteredList.map((item) => (
+                  <ConnectorCard key={item.id} data={item} onClick={handleCardClick} onEdit={handleEdit} />
                 ))
               ) : (
                 <div className={styles.emptyState}>暂无数据</div>

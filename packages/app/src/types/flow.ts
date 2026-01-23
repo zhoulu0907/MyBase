@@ -244,6 +244,7 @@ export interface ConnectorNodeConfig {
   nodeCode: string;
   category: string;
 }
+
 export interface ListConnectorByTypeReq {
   typeCode: string;
 }
@@ -256,6 +257,25 @@ export interface GetActionValueReq {
   connectorUuid: string;
   actionName: string;
 }
+
+export interface FlowConnector {
+  applicationId: string;
+  config: FlowConnectorConfig;
+  connectorName: string;
+  connectorUuid: string;
+  connectorVersion: string;
+  createTime: string;
+  description: string;
+  id: string;
+  typeCode: string;
+}
+
+export interface FlowConnectorConfig {
+  properties: Record<string, any>;
+  title: string;
+  type: string;
+}
+
 // ============ 连接器页面相关类型定义 ============
 
 /**

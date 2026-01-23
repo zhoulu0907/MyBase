@@ -1,18 +1,18 @@
 import { type PageParam } from '../types/common';
 import {
-    CreateConnectInstanceReq,
-    CreateFlowMgmtReq,
-    CreateScriptActionReq,
-    GetActionValueReq,
-    ListConnectFlowNodeReq,
-    ListConnectInstanceReq,
-    ListConnectorActionReq,
-    ListConnectorByTypeReq,
-    ListScriptActionReq,
-    RenameFlowMgmtReq,
-    UpdateConnectInstanceReq,
-    UpdateFlowMgmtDefinitionReq,
-    UpdateScriptActionReq
+  CreateConnectInstanceReq,
+  CreateFlowMgmtReq,
+  CreateScriptActionReq,
+  GetActionValueReq,
+  ListConnectFlowNodeReq,
+  ListConnectInstanceReq,
+  ListConnectorActionReq,
+  ListConnectorByTypeReq,
+  ListScriptActionReq,
+  RenameFlowMgmtReq,
+  UpdateConnectInstanceReq,
+  UpdateFlowMgmtDefinitionReq,
+  UpdateScriptActionReq
 } from '../types/flow';
 import { flowService } from './clients';
 
@@ -150,21 +150,22 @@ export const deleteScriptAction = (id: string) => {
   return flowService.post(`/connector/script/delete?id=${id}`);
 };
 
-export const listConnectorNodeConfig= ()=>{
+export const listConnectorNodeConfig = () => {
   return flowService.get('/node-config/list-all');
-}
+};
 
-export const listConnectorByType = (params: ListConnectorByTypeReq) =>{
+export const listConnectorByType = (params: ListConnectorByTypeReq) => {
   return flowService.get(`/connector/list-by-type`, params);
-}
+};
 
-export const listConnectorAction = (params: ListConnectorActionReq)=>{
-    return flowService.get(`/connector/action/list-all`, params);
-}
+export const listConnectorAction = (params: ListConnectorActionReq) => {
+  return flowService.get(`/connector/action/list-all`, params);
+};
 
-export const getActionValue=(params: GetActionValueReq)=>{
-    return flowService.get(`/connector/action-value`, params);
-}
+export const getActionValue = (params: GetActionValueReq) => {
+  return flowService.get(`/connector/action-value`, params);
+};
+
 /**
  * 获取连接器节点类型列表（用于连接器类型页面）
  * 从 /flow/node-config/node-types 接口获取所有可用的连接器类型
