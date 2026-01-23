@@ -54,14 +54,22 @@
       .cardHeaderTagTitle {
         font-size: 14px;
         font-weight: 400;
-        color: #009e9e;
-        background-color: #e8fffe;
         width: auto;
         height: 24px;
         line-height: 22px;
         text-align: center;
         padding: 1px 8px;
         border-radius: 2px;
+
+        &.system_preset {
+          color: #009e9e;
+          background-color: #e8fffe;
+        }
+
+        &.custom {
+          color: #00b42a;
+          background-color: #e8fffe;
+        }
       }
     }
   }
@@ -109,8 +117,18 @@
     display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-end;
     background-color: #fff;
-    border-radius: 0 0 8px 8px;
+    border-top: 1px solid #e5e5e5;
+
+    .editButton {
+      color: #165dff;
+      cursor: pointer;
+      font-size: 12px;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
   }
 }

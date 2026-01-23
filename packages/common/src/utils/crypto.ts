@@ -10,17 +10,29 @@ export const generateSm2KeyPair = () => {
 };
 
 export const sm2Encrypt = async (publicKey: string, data: string) => {
-  const compressedPublicKey = sm2.compressPublicKeyHex(publicKey); // compressedPublicKey 和 publicKey 等价
-  sm2.comparePublicKeyHex(publicKey, compressedPublicKey); // 判断公钥是否等价
+  try {
+    // 尝试压缩公钥（如果公钥已经是压缩格式或无效，会抛出错误）
+    const compressedPublicKey = sm2.compressPublicKeyHex(publicKey);
+    sm2.comparePublicKeyHex(publicKey, compressedPublicKey); // 判断公钥是否等价
+  } catch (error) {
+    console.warn('公钥压缩失败，使用原始公钥:', error);
+    // 如果压缩失败，继续使用原始公钥
+  }
 
   // 初始化随机数池，在某些场景下可能会用到
   await sm2.initRNGPool();
 
-  let verifyResult = sm2.verifyPublicKey(publicKey); // 验证公钥
-  verifyResult = sm2.verifyPublicKey(compressedPublicKey); // 验证公钥
+  // 验证公钥
+  try {
+    let verifyResult = sm2.verifyPublicKey(publicKey); // 验证公钥
+    if (!verifyResult) {
+      console.warn('公钥验证失败，但继续尝试加密');
+    }
+  } catch (error) {
+    console.warn('公钥验证异常:', error);
+  }
 
   // 加密解密
-
   const cipherMode = 1; // 1 - C1C3C2，0 - C1C2C3，默认为1
   // 支持使用 asn1 对加密结果进行编码，在 options 参数中传入 { asn1: true } 即可，默认不开启
 

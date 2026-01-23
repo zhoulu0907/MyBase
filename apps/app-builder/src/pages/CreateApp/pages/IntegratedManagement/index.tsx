@@ -36,15 +36,59 @@ const IntegratedManagementPage: React.FC = () => {
     let selectedKey: string = 'flow';
     let openKeysList: string[] = [];
 
+    // 检查URL参数来判断是否为创建模式
+    // 尝试从 hash 和 search 中获取参数
+    let searchParams = new URLSearchParams();
+    try {
+      // 从 location.hash 中解析参数（格式：#xxx?appId=123&mode=select）
+      const hashQuery = location.hash.split('?')[1];
+      // 从 location.search 中解析参数（格式：?appId=123&mode=select）
+      const searchQuery = location.search.substring(1);
+
+      searchParams = new URLSearchParams(hashQuery || searchQuery || '');
+    } catch (e) {
+      console.error('Failed to parse URL params:', e);
+    }
+
+    const isCreateMode = searchParams.get('mode') === 'select' || searchParams.get('mode') === 'create';
+
+    console.log('Menu activation check:', {
+      pathname,
+      hash: location.hash,
+      search: location.search,
+      isCreateMode,
+      selectedKey: selectedKey
+    });
+
     if (pathname.includes(ROUTE_PATHS.FLOW_MANAGEMENT)) {
       selectedKey = 'flow';
     } else if (pathname.includes(ROUTE_PATHS.FLOW_EXECUTE_RECORD)) {
       selectedKey = 'record';
     } else if (pathname.includes(ROUTE_PATHS.CONNECTOR_INSTANCES)) {
+      // 连接器实例列表页
       selectedKey = 'connector-instances';
       openKeysList = ['connectors'];
+    } else if (pathname.includes(ROUTE_PATHS.CONNECTOR_DETAIL)) {
+      // 连接器详情页：根据模式判断高亮哪个菜单
+      // 如果有 id 参数（编辑现有实例）或有 mode=create（从实例列表创建），高亮"连接器实例"
+      const hasId = searchParams.get('id');
+      const isFromInstances = isCreateMode || hasId;
+
+      if (isFromInstances) {
+        selectedKey = 'connector-instances';
+      } else {
+        selectedKey = 'connectors-list';
+      }
+      openKeysList = ['connectors'];
     } else if (pathname.includes(ROUTE_PATHS.CONNECTOR)) {
-      selectedKey = 'connectors-list';
+      // 连接器类型页
+      if (isCreateMode) {
+        // 如果是从实例列表创建，高亮"连接器实例"
+        selectedKey = 'connector-instances';
+      } else {
+        // 否则高亮"连接器"
+        selectedKey = 'connectors-list';
+      }
       openKeysList = ['connectors'];
     }
 
@@ -52,7 +96,7 @@ const IntegratedManagementPage: React.FC = () => {
       selectedKeys: [selectedKey],
       openKeys: openKeysList.length > 0 ? openKeysList : ['connectors']
     };
-  }, [location.pathname]);
+  }, [location.pathname, location.hash, location.search]);
 
   return (
     <div className={styles.integratedManagementPage}>
