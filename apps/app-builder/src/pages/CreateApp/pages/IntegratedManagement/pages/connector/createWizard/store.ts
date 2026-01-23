@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { getConnectorTypeInfo } from '@onebase/app';
+import { getConnectorTypeInfo, getEnvList } from '@onebase/app';
 
 interface ConnectorWizardState {
   // 当前步骤 (0-4)
@@ -123,10 +123,14 @@ export const useConnectorWizardStore = create<ConnectorWizardStore>()(
 
       fetchEnvList: async () => {
         try {
-          // TODO: 等待后端 API 接口确认后实现
-          // 预计接口: GET /env/list
-          // 临时返回空数组，功能待实现
-          set({ envList: [] });
+          const res = await getEnvList();
+          if (Array.isArray(res)) {
+            set({ envList: res });
+          } else if (res?.list && Array.isArray(res.list)) {
+            set({ envList: res.list });
+          } else {
+            set({ envList: [] });
+          }
         } catch (error) {
           console.error('获取环境列表失败:', error);
           set({ envList: [] });
