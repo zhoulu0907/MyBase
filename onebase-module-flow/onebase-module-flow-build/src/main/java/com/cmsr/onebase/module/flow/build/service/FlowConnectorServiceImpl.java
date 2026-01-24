@@ -47,6 +47,11 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
 
     @Override
     public PageResult<FlowConnectorVO> pageConnectors(PageConnectorReqVO pageReqVO) {
+        // 自动填充 applicationId（如果未传递）
+        if (pageReqVO.getApplicationId() == null) {
+            pageReqVO.setApplicationId(ApplicationManager.getApplicationId());
+        }
+
         PageResult<FlowConnectorDO> connectorPage = connectorRepository.selectConnectorPage(pageReqVO);
         List<FlowConnectorVO> voList = new ArrayList<>();
         for (FlowConnectorDO connectorDO : connectorPage.getList()) {
@@ -70,15 +75,6 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
     @Override
     public FlowConnectorVO getConnectorDetail(Long connectorId) {
         FlowConnectorDO connectorDO = connectorRepository.getById(connectorId);
-        if (connectorDO == null) {
-            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS);
-        }
-        return convertToVO(connectorDO);
-    }
-
-    @Override
-    public FlowConnectorVO getConnectorDetailByUuid(String connectorUuid) {
-        FlowConnectorDO connectorDO = connectorRepository.selectByConnectorUuid(connectorUuid);
         if (connectorDO == null) {
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS);
         }
@@ -121,85 +117,6 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         return dos.stream()
                 .map(this::convertToVO)
                 .toList();
-    }
-
-    @Override
-    public List<String> getActionsByConnectorUuid(String connectorUuid) {
-        log.info("getActionsByConnectorUuid start, connectorUuid: {}", connectorUuid);
-
-        // 1. Query connector by UUID
-        FlowConnectorDO connector = connectorRepository.selectByConnectorUuid(connectorUuid);
-        if (connector == null) {
-            log.warn("Connector not found, connectorUuid: {}", connectorUuid);
-            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS);
-        }
-
-        // 2. Get config
-        String config = connector.getConfig();
-        if (StringUtils.isBlank(config)) {
-            log.info("Config is blank, return empty list, connectorUuid: {}", connectorUuid);
-            return Collections.emptyList();
-        }
-
-        // 3. Parse JSON and extract properties keys
-        JsonNode root = JsonUtils.parseTree(config);
-        JsonNode properties = root.get("properties");
-
-        if (properties == null || !properties.isObject()) {
-            log.error("Invalid connector config, properties not found or not an object, connectorUuid: {}", connectorUuid);
-            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.INVALID_CONNECTOR_CONFIG);
-        }
-
-        // 4. Extract keys while preserving order
-        List<String> actions = new ArrayList<>();
-        Iterator<String> fieldNames = properties.fieldNames();
-        while (fieldNames.hasNext()) {
-            actions.add(fieldNames.next());
-        }
-
-        log.info("getActionsByConnectorUuid success, connectorUuid: {}, actions: {}", connectorUuid, actions);
-        return actions;
-    }
-
-    @Override
-    public JsonNode getActionValueByConnectorUuid(String connectorUuid, String actionName) {
-        log.info("getActionValueByConnectorUuid start, connectorUuid: {}, actionName: {}",
-                connectorUuid, actionName);
-
-        // 1. Query connector by UUID
-        FlowConnectorDO connector = connectorRepository.selectByConnectorUuid(connectorUuid);
-        if (connector == null) {
-            log.warn("Connector not found, connectorUuid: {}", connectorUuid);
-            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS);
-        }
-
-        // 2. Get config
-        String config = connector.getConfig();
-        if (StringUtils.isBlank(config)) {
-            log.error("Config is blank, connectorUuid: {}", connectorUuid);
-            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.INVALID_CONNECTOR_CONFIG);
-        }
-
-        // 3. Parse JSON and extract properties
-        JsonNode root = JsonUtils.parseTree(config);
-        JsonNode properties = root.get("properties");
-
-        if (properties == null || !properties.isObject()) {
-            log.error("Invalid connector config, properties not found or not an object, connectorUuid: {}",
-                    connectorUuid);
-            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.INVALID_CONNECTOR_CONFIG);
-        }
-
-        // 4. Get action value by actionName
-        JsonNode actionValue = properties.get(actionName);
-        if (actionValue == null || actionValue.isNull()) {
-            log.warn("Action not found, connectorUuid: {}, actionName: {}", connectorUuid, actionName);
-            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ACTION_NOT_EXISTS);
-        }
-
-        log.info("getActionValueByConnectorUuid success, connectorUuid: {}, actionName: {}",
-                connectorUuid, actionName);
-        return actionValue;
     }
 
     @Override
@@ -255,7 +172,7 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
             log.warn("Connector not found, id: {}", id);
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS);
         }
-        return getActionsByConnectorUuid(connector.getConnectorUuid());
+        return parseActionsFromConnector(connector, id.toString());
     }
 
     @Override
@@ -266,7 +183,78 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
             log.warn("Connector not found, id: {}", id);
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS);
         }
-        return getActionValueByConnectorUuid(connector.getConnectorUuid(), actionName);
+        return parseActionValueFromConnector(connector, actionName, id.toString());
+    }
+
+    /**
+     * 从连接器对象解析动作列表（私有辅助方法，避免重复查询）
+     *
+     * @param connector 连接器数据对象
+     * @param connectorIdentifier 连接器标识（用于日志，可能是id或uuid）
+     * @return 动作名称列表
+     */
+    private List<String> parseActionsFromConnector(FlowConnectorDO connector, String connectorIdentifier) {
+        // 1. Get config
+        String config = connector.getConfig();
+        if (StringUtils.isBlank(config)) {
+            log.info("Config is blank, return empty list, connector: {}", connectorIdentifier);
+            return Collections.emptyList();
+        }
+
+        // 2. Parse JSON and extract properties keys
+        JsonNode root = JsonUtils.parseTree(config);
+        JsonNode properties = root.get("properties");
+
+        if (properties == null || !properties.isObject()) {
+            log.error("Invalid connector config, properties not found or not an object, connector: {}", connectorIdentifier);
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.INVALID_CONNECTOR_CONFIG);
+        }
+
+        // 3. Extract keys while preserving order
+        List<String> actions = new ArrayList<>();
+        Iterator<String> fieldNames = properties.fieldNames();
+        while (fieldNames.hasNext()) {
+            actions.add(fieldNames.next());
+        }
+
+        log.info("parseActionsFromConnector success, connector: {}, actions: {}", connectorIdentifier, actions);
+        return actions;
+    }
+
+    /**
+     * 从连接器对象解析指定动作的配置值（私有辅助方法，避免重复查询）
+     *
+     * @param connector 连接器数据对象
+     * @param actionName 动作名称
+     * @param connectorIdentifier 连接器标识（用于日志，可能是id或uuid）
+     * @return 动作配置值
+     */
+    private JsonNode parseActionValueFromConnector(FlowConnectorDO connector, String actionName, String connectorIdentifier) {
+        // 1. Get config
+        String config = connector.getConfig();
+        if (StringUtils.isBlank(config)) {
+            log.error("Config is blank, connector: {}", connectorIdentifier);
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.INVALID_CONNECTOR_CONFIG);
+        }
+
+        // 2. Parse JSON and extract properties
+        JsonNode root = JsonUtils.parseTree(config);
+        JsonNode properties = root.get("properties");
+
+        if (properties == null || !properties.isObject()) {
+            log.error("Invalid connector config, properties not found or not an object, connector: {}", connectorIdentifier);
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.INVALID_CONNECTOR_CONFIG);
+        }
+
+        // 3. Get action value by actionName
+        JsonNode actionValue = properties.get(actionName);
+        if (actionValue == null || actionValue.isNull()) {
+            log.warn("Action not found, connector: {}, actionName: {}", connectorIdentifier, actionName);
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ACTION_NOT_EXISTS);
+        }
+
+        log.info("parseActionValueFromConnector success, connector: {}, actionName: {}", connectorIdentifier, actionName);
+        return actionValue;
     }
 
     @Override

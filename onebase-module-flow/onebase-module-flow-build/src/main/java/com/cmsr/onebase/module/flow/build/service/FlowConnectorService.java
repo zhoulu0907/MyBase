@@ -18,11 +18,6 @@ public interface FlowConnectorService {
 
     FlowConnectorVO getConnectorDetail(Long connectorId);
 
-    /**
-     * Get connector detail by connector UUID
-     */
-    FlowConnectorVO getConnectorDetailByUuid(String connectorUuid);
-
     CreateFlowConnectorRespVO createConnector(CreateFlowConnectorReqVO createVO);
 
     void updateConnector(UpdateFlowConnectorReqVO updateVO);
@@ -33,23 +28,6 @@ public interface FlowConnectorService {
      * List connector instances by type code
      */
     List<FlowConnectorVO> listByType(String typeCode);
-
-    /**
-     * Get action list by connector UUID
-     *
-     * @param connectorUuid the connector UUID
-     * @return list of action keys
-     */
-    List<String> getActionsByConnectorUuid(String connectorUuid);
-
-    /**
-     * Get action value by connector UUID and action name
-     *
-     * @param connectorUuid the connector UUID
-     * @param actionName the action name
-     * @return action value as JsonNode
-     */
-    JsonNode getActionValueByConnectorUuid(String connectorUuid, String actionName);
 
     /**
      * List all connector instances with pagination (lite version without config)
