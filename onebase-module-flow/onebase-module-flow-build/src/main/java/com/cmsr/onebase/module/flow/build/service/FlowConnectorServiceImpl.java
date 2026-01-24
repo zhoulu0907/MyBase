@@ -34,6 +34,11 @@ import java.util.List;
 
 import com.mybatisflex.core.paginate.Page;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 @Slf4j
 @Setter
 @Service
@@ -46,17 +51,30 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
     private FlowConnectorEnvRepository connectorEnvRepository;
 
     @Override
-    public PageResult<FlowConnectorVO> pageConnectors(PageConnectorReqVO pageReqVO) {
+    public PageResult<FlowConnectorLiteVO> pageConnectors(PageConnectorReqVO pageReqVO) {
         // 自动填充 applicationId（如果未传递）
         if (pageReqVO.getApplicationId() == null) {
             pageReqVO.setApplicationId(ApplicationManager.getApplicationId());
         }
 
         PageResult<FlowConnectorDO> connectorPage = connectorRepository.selectConnectorPage(pageReqVO);
-        List<FlowConnectorVO> voList = new ArrayList<>();
+
+        // 批量查询环境信息
+        List<String> envUuids = connectorPage.getList().stream()
+                .map(FlowConnectorDO::getEnvUuid)
+                .filter(StringUtils::isNotBlank)
+                .distinct()
+                .toList();
+
+        Map<String, FlowConnectorEnvDO> envMap = new HashMap<>();
+        if (!envUuids.isEmpty()) {
+            List<FlowConnectorEnvDO> envList = connectorEnvRepository.selectByEnvUuids(envUuids);
+            envMap = envList.stream().collect(Collectors.toMap(FlowConnectorEnvDO::getEnvUuid, Function.identity()));
+        }
+
+        List<FlowConnectorLiteVO> voList = new ArrayList<>();
         for (FlowConnectorDO connectorDO : connectorPage.getList()) {
-            FlowConnectorVO connectorVO = convertToVO(connectorDO);
-            connectorVO.setConfig(null);
+            FlowConnectorLiteVO connectorVO = convertToLiteVO(connectorDO, envMap);
             voList.add(connectorVO);
         }
         return new PageResult<>(voList, connectorPage.getTotal());
@@ -135,12 +153,16 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
     /**
      * Convert FlowConnectorDO to FlowConnectorLiteVO
      * 填充配置状态、环境信息等列表页面需要的字段
+     * <p>
+     * 此方法会单独查询每个连接器的环境信息，适用于单个对象转换
      */
     private FlowConnectorLiteVO convertToLiteVO(FlowConnectorDO connectorDO) {
         FlowConnectorLiteVO vo = BeanUtils.toBean(connectorDO, FlowConnectorLiteVO.class);
 
         // 计算配置状态
-        vo.setConfigStatus(connectorDO.getEnvUuid() != null ? "configured" : "unconfigured");
+        String configStatus = connectorDO.getEnvUuid() != null ? "configured" : "unconfigured";
+        vo.setConfigStatus(configStatus);
+        vo.setStatus(configStatus); // 前端使用的字段
 
         // 如果有环境配置，获取环境名称和编码
         if (connectorDO.getEnvUuid() != null) {
@@ -148,7 +170,45 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
             if (env != null) {
                 vo.setEnvName(env.getEnvName());
                 vo.setEnvCode(env.getEnvCode());
+                // 前端使用的环境信息字段，格式："{envName} ({envCode})"
+                vo.setEnvironment(env.getEnvName() + " (" + env.getEnvCode() + ")");
             }
+        } else {
+            vo.setEnvironment(null); // 未配置环境时为空
+        }
+
+        return vo;
+    }
+
+    /**
+     * Convert FlowConnectorDO to FlowConnectorLiteVO with pre-fetched environment map
+     * 填充配置状态、环境信息等列表页面需要的字段
+     * <p>
+     * 此方法使用预加载的环境信息Map，避免N+1查询问题，适用于批量转换
+     *
+     * @param connectorDO 连接器数据对象
+     * @param envMap       预加载的环境信息Map（key=envUuid）
+     * @return 精简VO对象
+     */
+    private FlowConnectorLiteVO convertToLiteVO(FlowConnectorDO connectorDO, Map<String, FlowConnectorEnvDO> envMap) {
+        FlowConnectorLiteVO vo = BeanUtils.toBean(connectorDO, FlowConnectorLiteVO.class);
+
+        // 计算配置状态
+        String configStatus = connectorDO.getEnvUuid() != null ? "configured" : "unconfigured";
+        vo.setConfigStatus(configStatus);
+        vo.setStatus(configStatus); // 前端使用的字段
+
+        // 如果有环境配置，从预加载的Map中获取环境名称和编码
+        if (connectorDO.getEnvUuid() != null) {
+            FlowConnectorEnvDO env = envMap.get(connectorDO.getEnvUuid());
+            if (env != null) {
+                vo.setEnvName(env.getEnvName());
+                vo.setEnvCode(env.getEnvCode());
+                // 前端使用的环境信息字段，格式："{envName} ({envCode})"
+                vo.setEnvironment(env.getEnvName() + " (" + env.getEnvCode() + ")");
+            }
+        } else {
+            vo.setEnvironment(null); // 未配置环境时为空
         }
 
         return vo;
@@ -189,7 +249,7 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
     /**
      * 从连接器对象解析动作列表（私有辅助方法，避免重复查询）
      *
-     * @param connector 连接器数据对象
+     * @param connector           连接器数据对象
      * @param connectorIdentifier 连接器标识（用于日志，可能是id或uuid）
      * @return 动作名称列表
      */
@@ -206,7 +266,8 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         JsonNode properties = root.get("properties");
 
         if (properties == null || !properties.isObject()) {
-            log.error("Invalid connector config, properties not found or not an object, connector: {}", connectorIdentifier);
+            log.error("Invalid connector config, properties not found or not an object, connector: {}",
+                    connectorIdentifier);
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.INVALID_CONNECTOR_CONFIG);
         }
 
@@ -224,12 +285,13 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
     /**
      * 从连接器对象解析指定动作的配置值（私有辅助方法，避免重复查询）
      *
-     * @param connector 连接器数据对象
-     * @param actionName 动作名称
+     * @param connector           连接器数据对象
+     * @param actionName          动作名称
      * @param connectorIdentifier 连接器标识（用于日志，可能是id或uuid）
      * @return 动作配置值
      */
-    private JsonNode parseActionValueFromConnector(FlowConnectorDO connector, String actionName, String connectorIdentifier) {
+    private JsonNode parseActionValueFromConnector(FlowConnectorDO connector, String actionName,
+            String connectorIdentifier) {
         // 1. Get config
         String config = connector.getConfig();
         if (StringUtils.isBlank(config)) {
@@ -242,7 +304,8 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         JsonNode properties = root.get("properties");
 
         if (properties == null || !properties.isObject()) {
-            log.error("Invalid connector config, properties not found or not an object, connector: {}", connectorIdentifier);
+            log.error("Invalid connector config, properties not found or not an object, connector: {}",
+                    connectorIdentifier);
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.INVALID_CONNECTOR_CONFIG);
         }
 
@@ -253,7 +316,8 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ACTION_NOT_EXISTS);
         }
 
-        log.info("parseActionValueFromConnector success, connector: {}, actionName: {}", connectorIdentifier, actionName);
+        log.info("parseActionValueFromConnector success, connector: {}, actionName: {}", connectorIdentifier,
+                actionName);
         return actionValue;
     }
 

@@ -83,4 +83,19 @@ public class FlowConnectorEnvRepository extends BaseAppRepository<FlowConnectorE
     public boolean existsByTypeAndEnvCode(String typeCode, String envCode, Long applicationId) {
         return getMapper().countByTypeAndEnvCode(typeCode, envCode, applicationId) > 0;
     }
+
+    /**
+     * 批量根据环境UUID查询
+     *
+     * @param envUuids 环境配置UUID列表
+     * @return 环境配置列表
+     */
+    public List<FlowConnectorEnvDO> selectByEnvUuids(List<String> envUuids) {
+        if (envUuids == null || envUuids.isEmpty()) {
+            return java.util.Collections.emptyList();
+        }
+        QueryWrapper queryWrapper = this.query()
+                .where(FLOW_CONNECTOR_ENV.ENV_UUID.in(envUuids));
+        return this.list(queryWrapper);
+    }
 }

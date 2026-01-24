@@ -49,8 +49,22 @@ public class FlowConnectorLiteVO implements Serializable {
     @Schema(description = "配置状态（configured-已配置, unconfigured-未配置）")
     private String configStatus;
 
+    /**
+     * 前端使用的配置状态字段
+     * 映射到 configStatus，保持向后兼容
+     */
+    @Schema(description = "配置状态（configured-已配置, unconfigured-未配置）")
+    private String status;
+
     @Schema(description = "启用状态（0-禁用，1-启用）")
     private Integer activeStatus;
+
+    /**
+     * 前端使用的环境信息字段
+     * 格式："{envName} ({envCode})" 或仅 envName
+     */
+    @Schema(description = "环境信息（显示用）")
+    private String environment;
 
     @Schema(description = "创建时间")
     private LocalDateTime createTime;

@@ -14,7 +14,16 @@ import java.util.List;
 
 public interface FlowConnectorService {
 
-    PageResult<FlowConnectorVO> pageConnectors(PageConnectorReqVO pageReqVO);
+    /**
+     * 分页查询连接器实例（精简版，用于列表展示）
+     * <p>
+     * 返回 FlowConnectorLiteVO，不包含完整的 config 配置信息
+     * 包含：实例名称、类型、环境信息、配置状态、启用状态、创建时间等
+     *
+     * @param pageReqVO 分页查询参数（支持按名称、类型、状态筛选）
+     * @return 分页结果（FlowConnectorLiteVO）
+     */
+    PageResult<FlowConnectorLiteVO> pageConnectors(PageConnectorReqVO pageReqVO);
 
     FlowConnectorVO getConnectorDetail(Long connectorId);
 

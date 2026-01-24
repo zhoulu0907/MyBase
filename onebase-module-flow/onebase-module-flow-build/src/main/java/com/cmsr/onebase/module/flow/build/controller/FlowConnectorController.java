@@ -31,10 +31,10 @@ public class FlowConnectorController {
     @Resource
     private FlowConnectorService connectorService;
 
-    @Operation(summary = "分页查询连接器")
+    @Operation(summary = "分页查询连接器实例", description = "返回精简VO，包含实例名称、类型、环境信息、配置状态、启用状态等列表展示所需字段")
     @GetMapping("/page")
-    public CommonResult<PageResult<FlowConnectorVO>> pageQuery(@Valid PageConnectorReqVO pageConnectorReqVO) {
-        PageResult<FlowConnectorVO> connectorPage = connectorService.pageConnectors(pageConnectorReqVO);
+    public CommonResult<PageResult<FlowConnectorLiteVO>> pageQuery(@Valid PageConnectorReqVO pageConnectorReqVO) {
+        PageResult<FlowConnectorLiteVO> connectorPage = connectorService.pageConnectors(pageConnectorReqVO);
         return CommonResult.success(connectorPage);
     }
 

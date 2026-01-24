@@ -24,4 +24,10 @@ public class PageConnectorReqVO extends PageParam {
     @Schema(description = "Level3 编号")
     private String level3Code;
 
+    @Schema(description = "连接器类型编码")
+    private String typeCode;
+
+    @Schema(description = "启用状态（0-禁用，1-启用）")
+    private Integer activeStatus;
+
 }
