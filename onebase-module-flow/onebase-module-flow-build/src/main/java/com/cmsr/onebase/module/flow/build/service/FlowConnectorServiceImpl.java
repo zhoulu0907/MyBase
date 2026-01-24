@@ -12,8 +12,10 @@ import com.cmsr.onebase.module.flow.build.vo.CreateFlowConnectorRespVO;
 import com.cmsr.onebase.module.flow.build.vo.FlowConnectorLiteVO;
 import com.cmsr.onebase.module.flow.build.vo.FlowConnectorVO;
 import com.cmsr.onebase.module.flow.build.vo.UpdateFlowConnectorReqVO;
+import com.cmsr.onebase.module.flow.core.dal.database.FlowConnectorEnvRepository;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowConnectorRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowConnectorDO;
+import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowConnectorEnvDO;
 import com.cmsr.onebase.module.flow.core.enums.FlowErrorCodeConstants;
 import com.cmsr.onebase.module.flow.core.vo.PageConnectorReqVO;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -39,6 +41,9 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
 
     @Autowired
     private FlowConnectorRepository connectorRepository;
+
+    @Autowired
+    private FlowConnectorEnvRepository connectorEnvRepository;
 
     @Override
     public PageResult<FlowConnectorVO> pageConnectors(PageConnectorReqVO pageReqVO) {
@@ -212,9 +217,24 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
 
     /**
      * Convert FlowConnectorDO to FlowConnectorLiteVO
+     * 填充配置状态、环境信息等列表页面需要的字段
      */
     private FlowConnectorLiteVO convertToLiteVO(FlowConnectorDO connectorDO) {
-        return BeanUtils.toBean(connectorDO, FlowConnectorLiteVO.class);
+        FlowConnectorLiteVO vo = BeanUtils.toBean(connectorDO, FlowConnectorLiteVO.class);
+
+        // 计算配置状态
+        vo.setConfigStatus(connectorDO.getEnvUuid() != null ? "configured" : "unconfigured");
+
+        // 如果有环境配置，获取环境名称和编码
+        if (connectorDO.getEnvUuid() != null) {
+            FlowConnectorEnvDO env = connectorEnvRepository.selectByEnvUuid(connectorDO.getEnvUuid());
+            if (env != null) {
+                vo.setEnvName(env.getEnvName());
+                vo.setEnvCode(env.getEnvCode());
+            }
+        }
+
+        return vo;
     }
 
     public String jsonNodeToString(JsonNode jsonNode) {
@@ -225,5 +245,51 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
             return jsonNode.asText();
         }
         return JsonUtils.toJsonString(jsonNode);
+    }
+
+    @Override
+    public List<String> getActionsById(Long id) {
+        log.info("getActionsById start, id: {}", id);
+        FlowConnectorDO connector = connectorRepository.getById(id);
+        if (connector == null) {
+            log.warn("Connector not found, id: {}", id);
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS);
+        }
+        return getActionsByConnectorUuid(connector.getConnectorUuid());
+    }
+
+    @Override
+    public JsonNode getActionValueById(Long id, String actionName) {
+        log.info("getActionValueById start, id: {}, actionName: {}", id, actionName);
+        FlowConnectorDO connector = connectorRepository.getById(id);
+        if (connector == null) {
+            log.warn("Connector not found, id: {}", id);
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS);
+        }
+        return getActionValueByConnectorUuid(connector.getConnectorUuid(), actionName);
+    }
+
+    @Override
+    public void updateActiveStatus(Long id, Integer activeStatus) {
+        log.info("updateActiveStatus start, id: {}, activeStatus: {}", id, activeStatus);
+
+        // 1. 查询连接器实例
+        FlowConnectorDO connector = connectorRepository.getById(id);
+        if (connector == null) {
+            log.warn("Connector not found, id: {}", id);
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS);
+        }
+
+        // 2. 启用操作：检查环境配置
+        if (activeStatus == 1 && connector.getEnvUuid() == null) {
+            log.warn("Cannot activate connector without env config, id: {}", id);
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_ENV_NOT_CONFIGURED);
+        }
+
+        // 3. 更新状态
+        connector.setActiveStatus(activeStatus);
+        connectorRepository.updateById(connector);
+
+        log.info("updateActiveStatus success, id: {}, activeStatus: {}", id, activeStatus);
     }
 }

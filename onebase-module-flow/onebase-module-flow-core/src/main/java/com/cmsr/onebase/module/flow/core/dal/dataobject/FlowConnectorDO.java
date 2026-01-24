@@ -49,4 +49,10 @@ public class FlowConnectorDO extends BaseAppEntity {
     @Column(value = "config")
     private String config;
 
+    /**
+     * 启用状态（0-禁用，1-启用）
+     */
+    @Column(value = "active_status")
+    private Integer activeStatus;
+
 }

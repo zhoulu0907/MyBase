@@ -17,6 +17,8 @@ public interface FlowErrorCodeConstants {
 
     ErrorCode CONNECTOR_NOT_EXISTS = new ErrorCode(1123784, "连接器不存在");
 
+    ErrorCode CONNECTOR_ENV_NOT_CONFIGURED = new ErrorCode(1123787, "连接器未配置环境信息，请先配置环境后再启用");
+
     ErrorCode CONNECTOR_SCRIPT_NOT_EXISTS = new ErrorCode(1123784, "脚本配置不存在");
 
     ErrorCode PROCESS_NOT_EXIST = new ErrorCode(10003, "流程不存在");
