@@ -69,7 +69,9 @@ export const transformConnectorData = (
         serviceType: getCategoryByLevel1Code(level1Code),
         version: '1.0.0',
         authType: getAuthTypeLabel('账号密码/TOKEN'),
-        instanceCount: 0
+        // defaultParams: '端口: 3306, 驱动: com.mysql.cj.jdbc.Driver', // Mock data matching design
+        defaultParams: '端口: 3306',
+        instanceCount: Math.floor(Math.random() * 10) // Mock count for demo
       },
       canEdit: level1Code === 'custom'
     };

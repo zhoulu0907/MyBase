@@ -7,6 +7,7 @@ import styles from './index.module.less';
 import ConnectorPage from './pages/connector/connectorNode';
 import ConnectorDetailPage from './pages/connector/detail';
 import ConnectorInstancesPage from './pages/connector/instance';
+import ConnectorCreateWizard from './pages/connector/createWizard';
 import FlowEditorPage from './pages/flowEditor';
 import FlowExecuteRecordPage from './pages/flowExecuteRecord';
 import FlowManagementPage from './pages/flowManagement';
@@ -20,7 +21,8 @@ const ROUTE_PATHS = {
   FLOW_EDITOR: 'flow-editor',
   CONNECTOR: 'connector',
   CONNECTOR_INSTANCES: 'connector-instances',
-  CONNECTOR_DETAIL: 'connector-detail'
+  CONNECTOR_DETAIL: 'connector-detail',
+  CONNECTOR_CREATE: 'connector-create'
 } as const;
 
 const IntegratedManagementPage: React.FC = () => {
@@ -68,11 +70,16 @@ const IntegratedManagementPage: React.FC = () => {
       // 连接器实例列表页
       selectedKey = 'connector-instances';
       openKeysList = ['connectors'];
+    } else if (pathname.includes(ROUTE_PATHS.CONNECTOR_CREATE)) {
+      // 连接器创建向导页 - 应该高亮"连接器实例"
+      selectedKey = 'connector-instances';
+      openKeysList = ['connectors'];
     } else if (pathname.includes(ROUTE_PATHS.CONNECTOR_DETAIL)) {
       // 连接器详情页：根据模式判断高亮哪个菜单
-      // 如果有 id 参数（编辑现有实例）或有 mode=create（从实例列表创建），高亮"连接器实例"
+      // 如果有 id 参数（编辑现有实例）或有 mode=create（从实例列表创建）或有 connectorUuid，高亮"连接器实例"
       const hasId = searchParams.get('id');
-      const isFromInstances = isCreateMode || hasId;
+      const hasUuid = searchParams.get('connectorUuid');
+      const isFromInstances = isCreateMode || hasId || hasUuid;
 
       if (isFromInstances) {
         selectedKey = 'connector-instances';
@@ -186,6 +193,7 @@ const IntegratedManagementPage: React.FC = () => {
           <Route path={ROUTE_PATHS.CONNECTOR} element={<ConnectorPage />} />
           <Route path={ROUTE_PATHS.CONNECTOR_INSTANCES} element={<ConnectorInstancesPage />} />
           <Route path={ROUTE_PATHS.CONNECTOR_DETAIL} element={<ConnectorDetailPage />} />
+          <Route path={ROUTE_PATHS.CONNECTOR_CREATE} element={<ConnectorCreateWizard />} />
         </Routes>
       </div>
     </div>

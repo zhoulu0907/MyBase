@@ -102,7 +102,7 @@ export const listConnectInstance = (params: ListConnectInstanceReq) => {
  * 获取所有连接器实例（支持分页）
  * 调用 /flow/connector/list-all，支持 pageNo 和 pageSize 参数
  */
-export const listAllConnectInstance = (params?: { pageNo?: number; pageSize?: number }) => {
+export const listAllConnectInstance = (params?: { pageNo?: number; pageSize?: number; connectorName?: string }) => {
   return flowService.get('/connector/list-all', params);
 };
 
@@ -111,23 +111,24 @@ export const createConnectInstance = (params: CreateConnectInstanceReq) => {
 };
 
 export const getConnectInstance = (id: string) => {
-  return flowService.get(`/connector/get?id=${id}`);
+  return flowService.get(`/connector/${id}`);
 };
 
 /**
- * 通过 connectorUuid 获取连接器实例详情
- * @param connectorUuid 连接器实例的 UUID
+ * @deprecated 接口已废弃，统一使用 getConnectInstance(id)
  */
 export const getConnectorByUuid = (connectorUuid: string) => {
-  return flowService.get(`/connector/get?connectorUuid=${connectorUuid}`);
+  console.error('getConnectorByUuid is deprecated, please use getConnectInstance(id)');
+  return flowService.get(`/connector/detail?connectorUuid=${connectorUuid}`);
 };
 
 export const updateConnectInstance = (params: UpdateConnectInstanceReq) => {
-  return flowService.post('/connector/update', params);
+  const { id, ...data } = params;
+  return flowService.put(`/connector/${id}`, data);
 };
 
 export const deleteConnectInstance = (id: string) => {
-  return flowService.post(`/connector/delete?id=${id}`);
+  return flowService.delete(`/connector/${id}`);
 };
 
 export const getScriptAction = (id: string) => {
@@ -135,7 +136,8 @@ export const getScriptAction = (id: string) => {
 };
 
 export const listScriptAction = (params: ListScriptActionReq) => {
-  return flowService.get('/connector/script/page', params);
+  const { connectorId, ...rest } = params;
+  return flowService.get(`/connector/${connectorId}/actions`, { params: rest });
 };
 
 export const createScriptAction = (params: CreateScriptActionReq) => {

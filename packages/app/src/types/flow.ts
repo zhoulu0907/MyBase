@@ -192,7 +192,11 @@ export interface ConnectInstance {
   description?: string;
   connectorTypeName?: string; // 连接器类型名称，如"泛微e9"
   version?: string; // 连接器版本
+  environment?: string; // 环境信息
+  status?: ConnectInstanceStatus; // 配置状态
 }
+
+export type ConnectInstanceStatus = 'configured' | 'unconfigured';
 
 export interface UpdateConnectInstanceReq {
   id: string;
@@ -314,6 +318,7 @@ export interface ConnectorItem {
     version?: string;
     authType?: string;
     instanceCount?: number;
+    defaultParams?: string;
   };
   canEdit: boolean;
 }
