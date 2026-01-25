@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.flow.build.service;
 import com.cmsr.onebase.framework.common.pojo.PageParam;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.flow.build.vo.CreateFlowConnectorEnvReqVO;
+import com.cmsr.onebase.module.flow.build.vo.EnvOptionVO;
 import com.cmsr.onebase.module.flow.build.vo.FlowConnectorEnvLiteVO;
 import com.cmsr.onebase.module.flow.build.vo.FlowConnectorEnvVO;
 import com.cmsr.onebase.module.flow.build.vo.UpdateFlowConnectorEnvReqVO;
@@ -51,6 +52,17 @@ public interface FlowConnectorEnvService {
      * @return 环境配置列表
      */
     List<FlowConnectorEnvVO> listByTypeCode(String typeCode);
+
+    /**
+     * 获取环境配置下拉选项
+     * <p>
+     * 用于连接器实例编辑页面的环境选择下拉框
+     * 返回格式化的选项列表，只包含启用的环境配置
+     *
+     * @param typeCode 连接器类型编号
+     * @return 下拉选项列表（value=label格式）
+     */
+    List<EnvOptionVO> getEnvOptions(String typeCode);
 
     /**
      * 创建环境配置

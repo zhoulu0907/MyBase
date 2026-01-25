@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.flow.build.service;
 import com.cmsr.onebase.framework.common.pojo.PageParam;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.flow.build.vo.CreateFlowConnectorEnvReqVO;
+import com.cmsr.onebase.module.flow.build.vo.EnvOptionVO;
 import com.cmsr.onebase.module.flow.build.vo.FlowConnectorEnvLiteVO;
 import com.cmsr.onebase.module.flow.build.vo.FlowConnectorEnvVO;
 import com.cmsr.onebase.module.flow.build.vo.UpdateFlowConnectorEnvReqVO;
@@ -66,6 +67,29 @@ public class FlowConnectorEnvServiceImpl implements FlowConnectorEnvService {
         return envList.stream()
                 .map(this::convertToVO)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<EnvOptionVO> getEnvOptions(String typeCode) {
+        log.info("getEnvOptions start, typeCode: {}", typeCode);
+
+        // 查询该类型下的所有启用的环境配置
+        List<FlowConnectorEnvDO> envList = repository.selectByTypeCode(typeCode);
+
+        // 转换为下拉选项格式
+        List<EnvOptionVO> options = envList.stream()
+                .filter(env -> env.getActiveStatus() != null && env.getActiveStatus() == 1)  // 只返回启用的
+                .map(env -> {
+                    EnvOptionVO option = new EnvOptionVO();
+                    option.setValue(env.getEnvUuid());  // value = env_uuid
+                    option.setLabel(env.getEnvName() + " (" + env.getEnvCode() + ")");  // label = "环境名称 (环境编码)"
+                    option.setActiveStatus(env.getActiveStatus());
+                    return option;
+                })
+                .collect(Collectors.toList());
+
+        log.info("getEnvOptions success, typeCode: {}, options count: {}", typeCode, options.size());
+        return options;
     }
 
     @Override

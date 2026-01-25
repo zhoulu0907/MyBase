@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.flow.build.controller;
 import com.cmsr.onebase.framework.common.pojo.PageParam;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.flow.build.vo.CreateFlowConnectorEnvReqVO;
+import com.cmsr.onebase.module.flow.build.vo.EnvOptionVO;
 import com.cmsr.onebase.module.flow.build.vo.FlowConnectorEnvLiteVO;
 import com.cmsr.onebase.module.flow.build.vo.FlowConnectorEnvVO;
 import com.cmsr.onebase.module.flow.build.service.FlowConnectorEnvService;
@@ -74,6 +75,23 @@ public class FlowConnectorEnvController {
     public List<FlowConnectorEnvVO> listByTypeCode(
             @Parameter(description = "连接器类型编号") @PathVariable String typeCode) {
         return flowConnectorEnvService.listByTypeCode(typeCode);
+    }
+
+    /**
+     * 获取环境配置下拉选项
+     * <p>
+     * 用于连接器实例编辑页面选择环境配置
+     * 返回格式化的 {value, label} 结构，适用于下拉选择框
+     *
+     * @param typeCode 连接器类型编号（如 HTTP, DATABASE_MYSQL）
+     * @return 下拉选项列表
+     */
+    @GetMapping("/options/{typeCode}")
+    @Operation(summary = "获取环境配置下拉选项",
+              description = "用于连接器实例编辑页面的环境选择下拉框，返回启用的环境配置")
+    public List<EnvOptionVO> getEnvOptions(
+            @Parameter(description = "连接器类型编号", example = "HTTP") @PathVariable String typeCode) {
+        return flowConnectorEnvService.getEnvOptions(typeCode);
     }
 
     @PostMapping("/create")
