@@ -56,10 +56,6 @@ const ConnectorBaseInfo: React.FC<ConnectorBaseInfoProps> = ({ baseInfo, isCreat
           连接器版本: {baseInfo?.version || '1.0.0'}
         </div>
 
-        <div className={styles.contentItem}>
-          实例名称: {isCreateMode ? createName : baseInfo?.connectorName}
-        </div>
-
         <div className={styles.description}>
           <div>描述</div>
           <Input.TextArea

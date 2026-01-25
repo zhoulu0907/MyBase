@@ -184,3 +184,11 @@ export const getConnectorNodeTypes = () => {
 export const getConnectorTypeInfo = (nodeCode: string) => {
   return flowService.get(`/node-config/type-info?nodeCode=${nodeCode}`);
 };
+
+/**
+ * 根据连接器类型获取环境配置列表
+ * @param typeCode 连接器类型代码
+ */
+export const getConnectorEnvByType = (typeCode: string) => {
+  return flowService.get(`/connector-env/by-type/${typeCode}`);
+};

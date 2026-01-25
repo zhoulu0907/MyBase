@@ -14,6 +14,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import ScriptActionListPage from '../action/list';
 import ConnectorBaseInfo from './components/baseInfo';
+import ConnectorEnvConfig from './components/envConfig';
 import styles from './index.module.less';
 
 interface ConnectorInstanceDetailProps { }
@@ -172,9 +173,13 @@ const ConnectorDetailPage: React.FC<ConnectorInstanceDetailProps> = ({ }) => {
 
       if (res) {
         Message.success('创建成功');
+        // 获取新创建的实例详情
+        // createConnectInstance可能返回字符串ID或包含id字段的对象
+        const instanceId = typeof res === 'string' ? res : res.id || res;
+        await handleGetIntanceDetail(instanceId);
         setIsCreateMode(false);
-        // 跳转到编辑模式（使用新创建的实例ID）
-        navigate(`/onebase/${tenantId}/home/create-app/integrated-management/connector-detail?appId=${appId}&id=${res}`);
+        // 切换到环境配置页面
+        setActiveKey('env');
       }
     } catch (error) {
       console.error('Failed to create connector:', error);
@@ -251,20 +256,12 @@ const ConnectorDetailPage: React.FC<ConnectorInstanceDetailProps> = ({ }) => {
         )}
         {activeKey === 'env' && (
           <div className={styles.envContainer}>
-            {!isCreateMode ? (
-              <div>环境配置</div>
-            ) : (
-              <div className={styles.envContainer}>
-                <div className={styles.content}>
-                  <div>环境配置内容</div>
-                  <div className={styles.footer}>
-                    <Button onClick={() => setActiveKey('base')}>上一步</Button>
-                    <Button type="primary" onClick={() => setActiveKey('action')}>
-                      下一步
-                    </Button>
-                  </div>
-                </div>
-              </div>
+            {baseInfo && (
+              <ConnectorEnvConfig
+                baseInfo={baseInfo}
+                onNext={() => setActiveKey('action')}
+                onPrev={() => setActiveKey('base')}
+              />
             )}
           </div>
         )}
