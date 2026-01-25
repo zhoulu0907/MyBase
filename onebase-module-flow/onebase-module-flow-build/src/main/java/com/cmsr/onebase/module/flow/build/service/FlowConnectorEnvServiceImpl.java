@@ -95,15 +95,14 @@ public class FlowConnectorEnvServiceImpl implements FlowConnectorEnvService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public FlowConnectorEnvVO createEnv(CreateFlowConnectorEnvReqVO createVO) {
-        // 检查环境编码是否已存在
-        if (repository.existsByTypeAndEnvCode(createVO.getTypeCode(),
-                createVO.getEnvCode(), createVO.getApplicationId())) {
+        // 检查环境编码是否已存在（租户级唯一）
+        if (repository.existsByTypeAndEnvCode(createVO.getTypeCode(), createVO.getEnvCode())) {
             throw new IllegalArgumentException("该连接器类型下已存在相同环境编码");
         }
 
         FlowConnectorEnvDO envDO = new FlowConnectorEnvDO();
         envDO.setEnvUuid(UUID.randomUUID().toString());
-        envDO.setApplicationId(createVO.getApplicationId());
+        envDO.setTenantId(createVO.getTenantId());  // 设置租户ID
         envDO.setEnvName(createVO.getEnvName());
         envDO.setEnvCode(createVO.getEnvCode());
         envDO.setTypeCode(createVO.getTypeCode());

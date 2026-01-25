@@ -18,9 +18,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 @Schema(description = "创建连接器环境配置请求")
 public class CreateFlowConnectorEnvReqVO {
 
-    @Schema(description = "应用ID", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull(message = "应用ID不能为空")
-    private Long applicationId;
+    @Schema(description = "租户ID", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotNull(message = "租户ID不能为空")
+    private Long tenantId;
 
     @Schema(description = "环境名称", requiredMode = Schema.RequiredMode.REQUIRED, example = "开发数据库")
     @NotBlank(message = "环境名称不能为空")
