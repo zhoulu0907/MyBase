@@ -62,10 +62,10 @@ public class FlowConnectorEnvServiceImpl implements FlowConnectorEnvService {
     }
 
     @Override
-    public List<FlowConnectorEnvVO> listByTypeCode(String typeCode) {
+    public List<FlowConnectorEnvLiteVO> listByTypeCode(String typeCode, Long tenantId) {
         List<FlowConnectorEnvDO> envList = repository.selectByTypeCode(typeCode);
         return envList.stream()
-                .map(this::convertToVO)
+                .map(this::convertToMinimalVO)
                 .collect(Collectors.toList());
     }
 
@@ -213,13 +213,30 @@ public class FlowConnectorEnvServiceImpl implements FlowConnectorEnvService {
     }
 
     /**
-     * 转换为精简VO
+     * 转换为精简VO（仅包含：id, envUuid, envName, typeCode）
+     * 用于 listByTypeCode 接口
+     */
+    private FlowConnectorEnvLiteVO convertToMinimalVO(FlowConnectorEnvDO envDO) {
+        if (envDO == null) {
+            return null;
+        }
+        FlowConnectorEnvLiteVO vo = new FlowConnectorEnvLiteVO();
+        vo.setId(envDO.getId());
+        vo.setEnvUuid(envDO.getEnvUuid());
+        vo.setEnvName(envDO.getEnvName());
+        vo.setTypeCode(envDO.getTypeCode());
+        return vo;
+    }
+
+    /**
+     * 转换为精简VO（用于列表展示）
      */
     private FlowConnectorEnvLiteVO convertToLiteVO(FlowConnectorEnvDO envDO) {
         if (envDO == null) {
             return null;
         }
         FlowConnectorEnvLiteVO vo = new FlowConnectorEnvLiteVO();
+        vo.setId(envDO.getId());
         vo.setEnvUuid(envDO.getEnvUuid());
         vo.setEnvName(envDO.getEnvName());
         vo.setEnvCode(envDO.getEnvCode());

@@ -32,7 +32,7 @@ public interface FlowConnectorEnvMapper extends BaseMapper<FlowConnectorEnvDO> {
      * @param typeCode 连接器类型编号
      * @return 环境配置列表
      */
-    @Select("SELECT * FROM flow_connector_env WHERE type_code = #{typeCode} AND deleted = 0 ORDER BY sort_order, create_time")
+    @Select("SELECT * FROM flow_connector_env WHERE type_code = #{typeCode} AND deleted = 0 ORDER BY sort_order ASC, id ASC")
     List<FlowConnectorEnvDO> selectByTypeCode(@Param("typeCode") String typeCode);
 
     /**

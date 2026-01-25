@@ -70,11 +70,13 @@ public class FlowConnectorEnvController {
     }
 
     @GetMapping("/by-type/{typeCode}")
-    @Operation(summary = "根据连接器类型查询环境配置列表")
+    @Operation(summary = "根据连接器类型查询环境配置列表（精简版）",
+              description = "返回环境配置的基本信息：id, envUuid, envName, typeCode")
     @PreAuthorize("@ss.hasPermission('flow:connector-env:query')")
-    public List<FlowConnectorEnvVO> listByTypeCode(
-            @Parameter(description = "连接器类型编号") @PathVariable String typeCode) {
-        return flowConnectorEnvService.listByTypeCode(typeCode);
+    public List<FlowConnectorEnvLiteVO> listByTypeCode(
+            @Parameter(description = "连接器类型编号") @PathVariable String typeCode,
+            @Parameter(description = "租户ID（可选）") @RequestParam(required = false) Long tenantId) {
+        return flowConnectorEnvService.listByTypeCode(typeCode, tenantId);
     }
 
     /**

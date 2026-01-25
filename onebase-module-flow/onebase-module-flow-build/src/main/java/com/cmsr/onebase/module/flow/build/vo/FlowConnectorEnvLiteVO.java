@@ -22,6 +22,9 @@ public class FlowConnectorEnvLiteVO implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
+    @Schema(description = "环境配置编号")
+    private Long id;
+
     @Schema(description = "环境配置UUID")
     private String envUuid;
 

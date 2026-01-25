@@ -46,12 +46,13 @@ public interface FlowConnectorEnvService {
     FlowConnectorEnvVO getEnvDetailByUuid(String envUuid);
 
     /**
-     * 根据连接器类型查询环境配置列表
+     * 根据连接器类型查询环境配置列表（精简版）
      *
      * @param typeCode 连接器类型编号
-     * @return 环境配置列表
+     * @param tenantId 租户ID（可选）
+     * @return 环境配置精简列表（包含：id, envUuid, envName, typeCode）
      */
-    List<FlowConnectorEnvVO> listByTypeCode(String typeCode);
+    List<FlowConnectorEnvLiteVO> listByTypeCode(String typeCode, Long tenantId);
 
     /**
      * 获取环境配置下拉选项
