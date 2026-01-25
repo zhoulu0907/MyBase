@@ -19,6 +19,8 @@ import {
 import { IconDelete, IconPlus } from '@arco-design/web-react/icon';
 import { connect, mapProps, RecursionField, useField, useFieldSchema } from '@formily/react';
 import React from 'react';
+import { AuthSettingsCard, KeyValueList } from './AuthComponents';
+import { TokenAuthPanel } from './TokenAuthPanel';
 
 // 通用的 mapProps 辅助函数
 type MapPropsOptions = {
@@ -269,5 +271,8 @@ export const componentMap: Record<string, React.ComponentType<any>> = {
   Rate: FormilyRate,
   Cascader: FormilyCascader,
   TreeSelect: FormilyTreeSelect,
-  ArrayItems: FormilyArrayItems
+  ArrayItems: FormilyArrayItems,
+  AuthSettingsCard: AuthSettingsCard,
+  KeyValueList: KeyValueList,
+  TokenAuthPanel: TokenAuthPanel
 };

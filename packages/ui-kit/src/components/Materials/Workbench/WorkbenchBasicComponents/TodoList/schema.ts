@@ -104,11 +104,11 @@ export interface XTodoListConfig extends ICommonBaseWorkbenchType {
     display: TBooleanDefaultType;
   };
   dataConfig: {
-      showPending: boolean;
-      showCreated: boolean;
-      showHandled: boolean;
-      showCc: boolean;
-    }
+    showPending: boolean;
+    showCreated: boolean;
+    showHandled: boolean;
+    showCc: boolean;
+  }
   theme: string;
   dataCount: number;
   userAvatar: TTextDefaultType;
@@ -122,7 +122,7 @@ const XTodoList: XTodoListSchema = {
     key: 'label',
     name: '标题名称',
     type: WORKBENCH_CONFIG_TYPES.LABEL_INPUT
-  }, 
+  },
   {
     key: 'dataConfig',
     name: '数据内容配置',

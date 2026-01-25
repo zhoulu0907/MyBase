@@ -1,6 +1,11 @@
-import { Button, Input, Message, Radio, Select } from '@arco-design/web-react';
+import { Button, Message, Radio, Select, Spin } from '@arco-design/web-react';
 import { getConnectorEnvByType, getConnectorEnvDetail, updateConnectorEnv, type ConnectInstance } from '@onebase/app';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { createForm } from '@formily/core';
+import { createSchemaField, FormProvider } from '@formily/react';
+import { componentMap, FormilyFormItem } from '../../../../../../../../../components/DynamicForm/componentMapper';
+import { AuthSettingsCard } from '../../../../../../../../../components/DynamicForm/AuthComponents';
+import { mockConnConfig } from '../../../../../../../../../mocks/connectorSchemas';
 import styles from './index.module.less';
 
 interface ConnectorEnvConfigProps {
@@ -9,16 +14,57 @@ interface ConnectorEnvConfigProps {
     onPrev: () => void;
 }
 
+const SchemaField = createSchemaField({
+    components: {
+        ...componentMap,
+        FormItem: FormilyFormItem,
+        AuthSettingsCard: AuthSettingsCard
+    },
+});
+
 const ConnectorEnvConfig: React.FC<ConnectorEnvConfigProps> = ({ baseInfo, onNext, onPrev }) => {
     const [configType, setConfigType] = useState<'existing' | 'create'>('existing');
     const [loading, setLoading] = useState(false);
     const [envList, setEnvList] = useState<{ label: string; value: string }[]>([]);
-    const [selectedEnv, setSelectedEnv] = useState<string | undefined>(baseInfo.environment);
+    const [selectedEnv, setSelectedEnv] = useState<string | undefined>(baseInfo.environment); // For the outer selector
     const [envDetail, setEnvDetail] = useState<any>(null);
-    const [envName, setEnvName] = useState('');
-    const [envUrl, setEnvUrl] = useState('');
-    const [authType, setAuthType] = useState('none');
     const [detailLoading, setDetailLoading] = useState(false);
+
+    // Filter the schema to only include relevant fields for editing
+    const editSchema = useMemo(() => {
+        const {
+            envName, url, authType, authConfig,
+            // Custom Auth split fields are already in authConfig
+            // Token Auth new fields
+            // Note: Since I added them under `authConfig.properties` in the schema file,
+            // they are nested inside `authConfig`.
+            // Wait, in `connectorSchemas.ts` I added them under `authConfig.properties`.
+            // So `editSchema` just needs to include `authConfig`.
+            // Previously I filtered `mockConnConfig.properties` which has `authConfig`.
+            // So `editSchema` automatically includes the updated `authConfig` object with all its new properties.
+            // NO CHANGE NEEDED HERE.
+            // But I should verify that `mockConnConfig.properties` is what I am destructing.
+            // Yes.
+            // So this step is actually just verification.
+            // I will update the code comment to reflect that dynamic sub-fields are included.
+        } = mockConnConfig.properties;
+        return {
+            type: 'object',
+            properties: {
+                envName,
+                url,
+                authType,
+                authConfig
+            }
+        };
+    }, []);
+
+    const form = useMemo(() => createForm({
+        values: {
+            envMode: 'create', // Force visibility of fields that depend on envMode='create'
+            authType: 'none',
+        }
+    }), []);
 
     useEffect(() => {
         if (configType === 'existing') {
@@ -31,9 +77,7 @@ const ConnectorEnvConfig: React.FC<ConnectorEnvConfigProps> = ({ baseInfo, onNex
         try {
             const res = await getConnectorEnvByType(baseInfo.typeCode);
             if (res) {
-                // 后端返回格式：{ code: 0, data: [...], msg: "" }
                 const list = res.data || res.list || (Array.isArray(res) ? res : []);
-
                 setEnvList(list.map((item: any) => ({
                     label: item.envName,
                     value: item.id
@@ -41,8 +85,8 @@ const ConnectorEnvConfig: React.FC<ConnectorEnvConfigProps> = ({ baseInfo, onNex
             }
         } catch (error) {
             console.error('Failed to fetch environment list:', error);
-            Message.error('获取环境列表失败，请检查网络连接或联系管理员');
-            // Mock data fallback
+            Message.error('获取环境列表失败');
+            // Mock data
             setEnvList([
                 { label: 'Development Environment', value: 'dev' },
                 { label: 'Testing Environment', value: 'test' },
@@ -53,25 +97,21 @@ const ConnectorEnvConfig: React.FC<ConnectorEnvConfigProps> = ({ baseInfo, onNex
         }
     };
 
-    // 获取环境详情
     const fetchEnvDetail = async (envId: string) => {
         setDetailLoading(true);
         try {
             const res = await getConnectorEnvDetail(envId);
+            const data = (res && res.data) ? res.data : (res && res.id ? res : null);
 
-            if (res && res.data) {
-                setEnvDetail(res.data);
-                setEnvName(res.data.envName || '');
-                setEnvUrl(res.data.envUrl || '');
-                setAuthType(res.data.authType || 'none');
+            if (data) {
+                setEnvDetail(data);
+                // Populate form
+                form.setValues({
+                    ...data,
+                    envMode: 'create', // Ensure visibility
+                });
             } else {
-                // 尝试检查res本身是否就是data
-                if (res && res.id) {
-                    setEnvDetail(res);
-                    setEnvName(res.envName || '');
-                    setEnvUrl(res.envUrl || '');
-                    setAuthType(res.authType || 'none');
-                }
+                setEnvDetail(null);
             }
         } catch (error) {
             console.error('Failed to fetch environment detail:', error);
@@ -81,33 +121,32 @@ const ConnectorEnvConfig: React.FC<ConnectorEnvConfigProps> = ({ baseInfo, onNex
         }
     };
 
-    // 处理环境选择变化
     const handleEnvChange = (envId: string) => {
         setSelectedEnv(envId);
         if (envId) {
             fetchEnvDetail(envId);
         } else {
             setEnvDetail(null);
+            form.reset();
         }
     };
 
-    // 保存环境配置
     const handleSave = async () => {
         if (!envDetail) {
             Message.warning('请先选择环境');
             return;
         }
         try {
+            await form.validate();
+            const values = form.values;
             await updateConnectorEnv({
                 id: envDetail.id,
-                envName,
-                envUrl,
-                authType
+                ...values
             });
             Message.success('保存成功');
         } catch (error) {
             console.error('Failed to save environment:', error);
-            Message.error('保存失败');
+            Message.error((error as any).message || '保存失败');
         }
     };
 
@@ -116,7 +155,6 @@ const ConnectorEnvConfig: React.FC<ConnectorEnvConfigProps> = ({ baseInfo, onNex
             Message.warning('请选择环境信息');
             return;
         }
-        // detailed save logic can be added here
         onNext();
     };
 
@@ -153,53 +191,24 @@ const ConnectorEnvConfig: React.FC<ConnectorEnvConfigProps> = ({ baseInfo, onNex
                         ))}
                     </Select>
 
-                    {/* 环境详情显示区域 */}
                     {envDetail && (
-                        <div className={styles.envDetail}>
-                            <div className={styles.formItem}>
-                                <div className={styles.label}>环境名称</div>
-                                <Input
-                                    value={envName}
-                                    onChange={setEnvName}
-                                    placeholder="测试环境1"
-                                    style={{ width: 480 }}
-                                />
-                            </div>
+                        <Spin loading={detailLoading} style={{ width: '100%', marginTop: 20 }}>
+                            <div className={styles.envDetail}>
+                                <FormProvider form={form}>
+                                    <SchemaField schema={editSchema} />
+                                </FormProvider>
 
-                            <div className={styles.formItem}>
-                                <div className={styles.label}>URL</div>
-                                <Input
-                                    value={envUrl}
-                                    onChange={setEnvUrl}
-                                    placeholder="http://test.com"
-                                    style={{ width: 480 }}
-                                />
+                                <div className={styles.saveButton} style={{ marginTop: 24 }}>
+                                    <Button type="primary" onClick={handleSave}>
+                                        保存
+                                    </Button>
+                                </div>
                             </div>
-
-                            <div className={styles.formItem}>
-                                <div className={styles.label}>选择认证类型</div>
-                                <Select
-                                    value={authType}
-                                    onChange={setAuthType}
-                                    style={{ width: 480 }}
-                                >
-                                    <Select.Option value="none">无认证</Select.Option>
-                                    <Select.Option value="Basic">Basic Auth</Select.Option>
-                                    <Select.Option value="OAuth">OAuth</Select.Option>
-                                </Select>
-                            </div>
-
-                            <div className={styles.saveButton}>
-                                <Button type="primary" onClick={handleSave}>
-                                    保存
-                                </Button>
-                            </div>
-                        </div>
+                        </Spin>
                     )}
                 </div>
             ) : (
                 <div className={styles.formItem}>
-                    {/* Placeholder for Create New Environment */}
                     <div style={{ padding: '20px', border: '1px dashed var(--color-border-3)', textAlign: 'center', color: 'var(--color-text-3)' }}>
                         创建环境信息功能开发中...
                     </div>
