@@ -47,6 +47,11 @@ public interface CorpService {
     List<CorpDO> findCorpAll();
 
     /**
+     * 获得所有企业
+     *
+     */
+    List<CorpDO> findTenantCorpAll();
+    /**
      * 获得企业详情
      *
      */

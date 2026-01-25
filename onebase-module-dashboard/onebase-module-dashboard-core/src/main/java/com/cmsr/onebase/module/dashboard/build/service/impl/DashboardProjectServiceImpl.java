@@ -8,17 +8,23 @@ import com.cmsr.onebase.module.dashboard.build.model.DashboardProjectData;
 import com.cmsr.onebase.module.dashboard.build.service.DashboardProjectDataService;
 import com.cmsr.onebase.module.dashboard.build.service.DashboardProjectService;
 import com.cmsr.onebase.module.dashboard.build.service.DashboardTemplateService;
+import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.module.dashboard.build.enums.ErrorCodeConstants.DASHBOARD_CONTENT_NOT_EXIST;
 
 /**
  * <p>
- *  服务实现类
+ * 数据大屏项目服务实现类
+ * 提供数据大屏项目的创建、删除等操作
  * </p>
  *
  * @author mty
@@ -27,6 +33,8 @@ import static com.cmsr.onebase.module.dashboard.build.enums.ErrorCodeConstants.D
 @Service
 public class DashboardProjectServiceImpl extends ServiceImpl<DashboardProjectMapper, DashboardProject> implements DashboardProjectService {
 
+    public static final String PROJECT_ID = "project_id";
+    public static final String TENANT_ID = "tenant_id";
     @Resource
     DashboardProjectDataService dashboardProjectDataService;
 
@@ -56,4 +64,28 @@ public class DashboardProjectServiceImpl extends ServiceImpl<DashboardProjectMap
         return dashboardProject.getId();
     }
 
+    @Override
+    public Long deleteDashboardByTenantId(Long tenantId) {
+        // 根据租户ID删除该租户下的所有数据大屏项目及其相关数据
+        // 先查询该租户下的所有项目
+        List<DashboardProject> dashboardProjects = list(new QueryWrapper().eq(TENANT_ID, tenantId));
+        
+        if (CollectionUtils.isEmpty(dashboardProjects)) {
+            return 0L;
+        }
+        
+        // 获取项目ID列表
+        List<Long> projectIds = dashboardProjects.stream()
+                .map(DashboardProject::getId)
+                .collect(Collectors.toList());
+        
+        // 批量删除项目关联的数据
+        dashboardProjectDataService.remove(new QueryWrapper()
+                .in(PROJECT_ID, projectIds));
+        
+        // 删除项目本身
+        removeByIds(projectIds);
+        
+        return Long.valueOf(projectIds.size());
+    }
 }

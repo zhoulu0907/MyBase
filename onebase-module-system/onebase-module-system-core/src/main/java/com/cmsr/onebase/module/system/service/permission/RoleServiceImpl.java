@@ -154,11 +154,6 @@ public class RoleServiceImpl implements RoleService {
             if (role == null) {
                 ids.remove(id);
             }
-            // 内置角色，不允许删除
-            if (RoleTypeEnum.SYSTEM.getType().equals(role.getType())) {
-                ids.remove(id);
-            }
-            deleteRole(id);
         }
         roleDataRepository.deleteByIds(ids);
         permissionService.processRolesDeleted(ids);

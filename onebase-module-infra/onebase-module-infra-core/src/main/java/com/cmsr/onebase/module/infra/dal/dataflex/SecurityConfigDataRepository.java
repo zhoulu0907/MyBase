@@ -4,6 +4,7 @@ import com.cmsr.onebase.framework.orm.repo.BaseDataRepository;
 import com.cmsr.onebase.module.infra.dal.dataflexdo.ssecurity.SecurityConfigDO;
 import com.cmsr.onebase.module.infra.dal.mapper.ssecurity.SecurityConfigMapper;
 import com.mybatisflex.core.query.QueryWrapper;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -33,6 +34,6 @@ public class SecurityConfigDataRepository extends BaseDataRepository<SecurityCon
      */
     public long deleteByTenantId(Long tenantId) {
         QueryWrapper queryWrapper = query().eq(SecurityConfigDO.TENANT_ID, tenantId);
-        return deleteByQuery(queryWrapper);
+        return remove(queryWrapper) ? NumberUtils.INTEGER_ONE : NumberUtils.INTEGER_ZERO;
     }
 }

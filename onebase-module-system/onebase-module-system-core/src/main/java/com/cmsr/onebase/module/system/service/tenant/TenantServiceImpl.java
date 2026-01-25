@@ -19,6 +19,7 @@ import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
 import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
+import com.cmsr.onebase.module.screen.api.DashboardProjectApi;
 import com.cmsr.onebase.module.system.api.user.AdminUserRoleApi;
 import com.cmsr.onebase.module.system.convert.tenant.TenantConvert;
 import com.cmsr.onebase.module.system.dal.database.TenantDataRepository;
@@ -138,11 +139,11 @@ public class TenantServiceImpl implements TenantService {
     @Resource
     private SecurityConfigApi securityConfigApi;
 
-    // @Resource
-    // private AppApplicationService appApplicationService;
+    @Resource(name = "applicationApiImpl")
+    private AppApplicationApi applicationApi;
 
-    // @Resource
-    // private CorpAppRelationService corpAppRelationService;
+    @Resource
+    private DashboardProjectApi dashboardProjectApi;
 
     @Override
     public List<Long> getTenantIdList() {
@@ -584,6 +585,7 @@ public class TenantServiceImpl implements TenantService {
     @Override
     @LogRecord(type = SYSTEM_TENANT_TYPE, subType = SYSTEM_TENANT_DELETE_SUB_TYPE, bizNo = "{{#tenant.id}}",
             success = SYSTEM_TENANT_DELETE_SUCCESS)
+    @Transactional(rollbackFor = Exception.class)
     public void deleteTenant(Long id) {
         // 校验存在
         TenantDO tenant = validateUpdateTenant(id);
@@ -600,7 +602,6 @@ public class TenantServiceImpl implements TenantService {
             // 获取当前租户的所有角色并删除
             List<RoleDO> roles = roleService.getRoleList();
             roleService.deleteRoleIds(roles.stream().map(RoleDO::getId).collect(Collectors.toList()));
-
             // 删除部门
             // 获取当前租户的所有部门并删除
             List<DeptDO> depts = deptService.getDeptListAll();
@@ -618,7 +619,7 @@ public class TenantServiceImpl implements TenantService {
                 dictTypeService.deleteDictType(dictType.getId());
             }
 
-            // 删除安全和
+            // 删除安全和安全记录
             securityConfigApi.deleteSecurityConfigsByTenantId(tenant.getId());
             securityConfigApi.deleteSecurityRecordsByTenantId(tenant.getId());
 
@@ -632,14 +633,17 @@ public class TenantServiceImpl implements TenantService {
             // 删除应用
             List<ApplicationDTO> applications = appApplicationApi.getSimpleAllAppList(tenant.getId());
             for (ApplicationDTO application : applications) {
-                appApplicationApi.deleteApplication(application.getId(), application.getAppName());
+                applicationApi.deleteApplication(application.getId(), application.getAppName());
             }
 
             // 删除企业
-            List<CorpDO> corps = corpService.findCorpAll();
+            List<CorpDO> corps = corpService.findTenantCorpAll();
             for (CorpDO corp : corps) {
                 corpService.deleteCorp(corp.getId());
             }
+
+            // 删除大屏
+            dashboardProjectApi.removeDashboardByTenantId(tenant.getId());
 
         });
 

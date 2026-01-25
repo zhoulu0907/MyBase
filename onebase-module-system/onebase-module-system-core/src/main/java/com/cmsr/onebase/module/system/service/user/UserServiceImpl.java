@@ -544,22 +544,24 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void deleteUsers(Collection<Long> ids) {
-        for (Long id : ids) {
-            // 1. 校验用户存在
-            AdminUserDO user = validateUserExists(id);
-            // 如果是内置系统管理员，则从删除列表中移除
-            if (AdminTypeEnum.SYSTEM.getType().equals(user.getAdminType())) {
-                ids.remove(id);
+        // 1. 校验用户存在,过滤不存在的id
+        Iterator<Long> iterator = ids.iterator();
+        while (iterator.hasNext()) {
+            Long id = iterator.next();
+            if (userDataRepository.getById(id) == null) {
+                iterator.remove();
             }
         }
+
+        List<Long> idsToDelete = new ArrayList<>(ids);
         // 2.1 删除用户
-        userDataRepository.deleteByIds(ids);
+        userDataRepository.deleteByIds(idsToDelete);
         // 2.2 删除用户关联数据
-        permissionService.processUsersDeleted(ids);
+        permissionService.processUsersDeleted(idsToDelete);
         // 2.2 删除用户岗位
-        userPostDataRepository.deleteByIds(ids);
+        userPostDataRepository.deleteByIds(idsToDelete);
         // 2.2 删除用户角色
-        appAuthRoleUser.deleteByUserIds(ids);
+        appAuthRoleUser.deleteByUserIds(idsToDelete);
     }
 
     @Override

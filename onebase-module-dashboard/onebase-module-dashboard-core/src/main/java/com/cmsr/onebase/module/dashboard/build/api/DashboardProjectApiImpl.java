@@ -66,4 +66,10 @@ public class DashboardProjectApiImpl implements DashboardProjectApi {
         dashboardProjectDataService.save(dashboardProjectData);
         return dashboardProject.getId();
     }
+
+    @Override
+    public Long removeDashboardByTenantId(Long tenantId) {
+        return dashboardProjectService.deleteDashboardByTenantId(tenantId);
+    }
+
 }

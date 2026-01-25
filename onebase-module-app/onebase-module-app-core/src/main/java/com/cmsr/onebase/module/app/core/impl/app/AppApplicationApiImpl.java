@@ -1,6 +1,5 @@
 package com.cmsr.onebase.module.app.core.impl.app;
 
-import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
@@ -15,14 +14,13 @@ import com.cmsr.onebase.module.app.core.dal.database.tag.AppApplicationTagReposi
 import com.cmsr.onebase.module.app.core.dal.database.tag.AppTagRepository;
 import com.cmsr.onebase.module.app.core.dal.database.version.AppVersionRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.*;
-import com.cmsr.onebase.module.app.core.enums.AppErrorCodeConstants;
 import com.cmsr.onebase.module.app.core.enums.app.AppStatusEnum;
 import com.mybatisflex.core.tenant.TenantManager;
 import jakarta.annotation.Resource;
 import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -34,6 +32,7 @@ import java.util.stream.Collectors;
  */
 @Setter
 @Service
+@Primary
 public class AppApplicationApiImpl implements AppApplicationApi {
 
     @Autowired
