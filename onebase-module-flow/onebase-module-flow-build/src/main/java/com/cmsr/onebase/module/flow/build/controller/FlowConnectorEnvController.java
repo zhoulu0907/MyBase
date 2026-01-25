@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.flow.build.controller;
 
+import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageParam;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.flow.build.vo.CreateFlowConnectorEnvReqVO;
@@ -42,41 +43,46 @@ public class FlowConnectorEnvController {
     @GetMapping("/page")
     @Operation(summary = "分页查询环境配置")
     @PreAuthorize("@ss.hasPermission('flow:connector-env:query')")
-    public PageResult<FlowConnectorEnvVO> pageEnvs(@Valid PageConnectorEnvReqVO pageReqVO) {
-        return flowConnectorEnvService.pageEnvs(pageReqVO);
+    public CommonResult<PageResult<FlowConnectorEnvVO>> pageEnvs(@Valid PageConnectorEnvReqVO pageReqVO) {
+        PageResult<FlowConnectorEnvVO> result = flowConnectorEnvService.pageEnvs(pageReqVO);
+        return CommonResult.success(result);
     }
 
     @GetMapping("/list")
     @Operation(summary = "查询所有环境配置（精简版）")
     @PreAuthorize("@ss.hasPermission('flow:connector-env:query')")
-    public PageResult<FlowConnectorEnvLiteVO> listAll(@Valid PageParam pageParam) {
-        return flowConnectorEnvService.listAll(pageParam);
+    public CommonResult<PageResult<FlowConnectorEnvLiteVO>> listAll(@Valid PageParam pageParam) {
+        PageResult<FlowConnectorEnvLiteVO> result = flowConnectorEnvService.listAll(pageParam);
+        return CommonResult.success(result);
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "根据ID查询环境配置详情")
     @PreAuthorize("@ss.hasPermission('flow:connector-env:query')")
-    public FlowConnectorEnvVO getEnvDetail(
+    public CommonResult<FlowConnectorEnvVO> getEnvDetail(
             @Parameter(description = "主键ID") @PathVariable Long id) {
-        return flowConnectorEnvService.getEnvDetail(id);
+        FlowConnectorEnvVO result = flowConnectorEnvService.getEnvDetail(id);
+        return CommonResult.success(result);
     }
 
     @GetMapping("/by-uuid/{envUuid}")
     @Operation(summary = "根据UUID查询环境配置详情")
     @PreAuthorize("@ss.hasPermission('flow:connector-env:query')")
-    public FlowConnectorEnvVO getEnvDetailByUuid(
+    public CommonResult<FlowConnectorEnvVO> getEnvDetailByUuid(
             @Parameter(description = "环境配置UUID") @PathVariable String envUuid) {
-        return flowConnectorEnvService.getEnvDetailByUuid(envUuid);
+        FlowConnectorEnvVO result = flowConnectorEnvService.getEnvDetailByUuid(envUuid);
+        return CommonResult.success(result);
     }
 
     @GetMapping("/by-type/{typeCode}")
     @Operation(summary = "根据连接器类型查询环境配置列表（精简版）",
               description = "返回环境配置的基本信息：id, envUuid, envName, typeCode")
     @PreAuthorize("@ss.hasPermission('flow:connector-env:query')")
-    public List<FlowConnectorEnvLiteVO> listByTypeCode(
+    public CommonResult<List<FlowConnectorEnvLiteVO>> listByTypeCode(
             @Parameter(description = "连接器类型编号") @PathVariable String typeCode,
             @Parameter(description = "租户ID（可选）") @RequestParam(required = false) Long tenantId) {
-        return flowConnectorEnvService.listByTypeCode(typeCode, tenantId);
+        List<FlowConnectorEnvLiteVO> result = flowConnectorEnvService.listByTypeCode(typeCode, tenantId);
+        return CommonResult.success(result);
     }
 
     /**
@@ -91,39 +97,44 @@ public class FlowConnectorEnvController {
     @GetMapping("/options/{typeCode}")
     @Operation(summary = "获取环境配置下拉选项",
               description = "用于连接器实例编辑页面的环境选择下拉框，返回启用的环境配置")
-    public List<EnvOptionVO> getEnvOptions(
+    public CommonResult<List<EnvOptionVO>> getEnvOptions(
             @Parameter(description = "连接器类型编号", example = "HTTP") @PathVariable String typeCode) {
-        return flowConnectorEnvService.getEnvOptions(typeCode);
+        List<EnvOptionVO> result = flowConnectorEnvService.getEnvOptions(typeCode);
+        return CommonResult.success(result);
     }
 
     @PostMapping("/create")
     @Operation(summary = "创建环境配置")
     @PreAuthorize("@ss.hasPermission('flow:connector-env:create')")
-    public FlowConnectorEnvVO createEnv(@Valid @RequestBody CreateFlowConnectorEnvReqVO createVO) {
-        return flowConnectorEnvService.createEnv(createVO);
+    public CommonResult<FlowConnectorEnvVO> createEnv(@Valid @RequestBody CreateFlowConnectorEnvReqVO createVO) {
+        FlowConnectorEnvVO result = flowConnectorEnvService.createEnv(createVO);
+        return CommonResult.success(result);
     }
 
     @PutMapping("/update")
     @Operation(summary = "更新环境配置")
     @PreAuthorize("@ss.hasPermission('flow:connector-env:update')")
-    public void updateEnv(@Valid @RequestBody UpdateFlowConnectorEnvReqVO updateVO) {
+    public CommonResult<Boolean> updateEnv(@Valid @RequestBody UpdateFlowConnectorEnvReqVO updateVO) {
         flowConnectorEnvService.updateEnv(updateVO);
+        return CommonResult.success(Boolean.TRUE);
     }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "删除环境配置")
     @PreAuthorize("@ss.hasPermission('flow:connector-env:delete')")
-    public void deleteById(
+    public CommonResult<Boolean> deleteById(
             @Parameter(description = "主键ID") @PathVariable Long id) {
         flowConnectorEnvService.deleteById(id);
+        return CommonResult.success(Boolean.TRUE);
     }
 
     @PutMapping("/{id}/status")
     @Operation(summary = "启用/禁用环境配置")
     @PreAuthorize("@ss.hasPermission('flow:connector-env:update')")
-    public void updateActiveStatus(
+    public CommonResult<Boolean> updateActiveStatus(
             @PathVariable Long id,
             @Parameter(description = "启用状态（0-禁用，1-启用）") @RequestParam Integer activeStatus) {
         flowConnectorEnvService.updateActiveStatus(id, activeStatus);
+        return CommonResult.success(Boolean.TRUE);
     }
 }
