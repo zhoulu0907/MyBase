@@ -192,3 +192,19 @@ export const getConnectorTypeInfo = (nodeCode: string) => {
 export const getConnectorEnvByType = (typeCode: string) => {
   return flowService.get(`/connector-env/by-type/${typeCode}`);
 };
+
+/**
+ * 获取连接器环境详情
+ * @param id 环境ID
+ */
+export const getConnectorEnvDetail = (id: string) => {
+  return flowService.get(`/connector-env/${id}`);
+};
+
+/**
+ * 更新连接器环境配置
+ * @param params 更新参数
+ */
+export const updateConnectorEnv = (params: any) => {
+  return flowService.post('/connector-env/update', params);
+};
