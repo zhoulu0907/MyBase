@@ -41,6 +41,11 @@ import type {
     ISwitchFillTextConfigType,
     ITableButtonConfigType,
     ITableDataConfigType,
+    ICardDataConfigType,
+    IDataSortByConfigType,
+    IDataFilterConfigType,
+    ICoverImageConfigType,
+    IGroupFilterConfigType,
     ITableOperationConfigType,
     ITablePagePositionConfigType,
     ITablePageSizeConfigType,
@@ -434,6 +439,37 @@ export const keyDataConfig: ITableDataConfigType = {
   key: 'keyData',
   name: '主键',
   type: 'TableData'
+};
+
+// ==================== 卡片数据 ====================
+export const cardMetaDataConfig: ICardDataConfigType = {
+  key: 'cardMetaData',
+  name: '数据',
+  type: 'CardData'
+};
+
+export const dataSortByConfig: IDataSortByConfigType = {
+  key: 'sortBy',
+  name: '数据排序规则',
+  type: 'DataSortBy'
+};
+
+export const dataFilterConfig: IDataFilterConfigType = {
+  key: 'filterCondition',
+  name: '数据排序规则',
+  type: 'DataFilter'
+};
+
+export const coverImageConfig: ICoverImageConfigType = {
+  key: 'filterCondition',
+  name: '数据排序规则',
+  type: 'CoverImage'
+};
+
+export const groupFilterConfig: IGroupFilterConfigType = {
+  key: 'filterCondition',
+  name: '数据排序规则',
+  type: 'GroupFilter'
 };
 
 // ==================== 默认基础值 ====================

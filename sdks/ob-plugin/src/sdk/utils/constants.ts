@@ -57,7 +57,17 @@ export const CONFIG_TYPES = {
   USER_DEFAULT_VALUE: 'userDefaultValue',
   RATE_CONFIG: 'RateConfig',
   // 检查项 显示方式
-  CHECK_ITEM_SHOW_MODE: 'CheckItemShowMode'
+  CHECK_ITEM_SHOW_MODE: 'CheckItemShowMode',
+  // 卡片数据配置
+  CARD_DATA: 'CardData',
+  // 数据排序规则
+  DATA_SORT_BY: 'DataSortBy',
+  // 数据过滤
+  DATA_FILTER: 'DataFilter',
+  // 封面图片
+  COVER_IMAGE: 'CoverImage',
+  // 绑定分组筛选
+  GROUP_FILTER: 'GroupFilter',
 } as const;
 
 export const WIDTH_OPTIONS = {
