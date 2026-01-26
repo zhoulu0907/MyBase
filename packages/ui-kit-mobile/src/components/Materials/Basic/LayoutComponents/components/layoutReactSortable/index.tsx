@@ -113,7 +113,9 @@ const LayoutReactSortable: React.FC<LayoutReactSortableProps> = ({
           // 数据源
           schema.config.selectedDataSource = {
             ...schema.config.selectedDataSource,
-            entityUuid: currentField.dataSelectionConfig?.targetEntityUuid
+            entityUuid: currentField.dataSelectionConfig?.targetEntityUuid,
+            tableName: currentField.dataSelectionConfig?.targetTableName,
+            entityName: currentField.dataSelectionConfig?.targetFieldName,
           };
           // 回显字段  name
           schema.config.displayFields = currentField.dataSelectionConfig?.targetFieldName
@@ -202,7 +204,9 @@ const LayoutReactSortable: React.FC<LayoutReactSortableProps> = ({
             // 数据源
             schema.config.selectedDataSource = {
               ...schema.config.selectedDataSource,
-              entityUuid: field.dataSelectionConfig?.targetEntityUuid
+              entityUuid: field.dataSelectionConfig?.targetEntityUuid,
+              tableName: field.dataSelectionConfig?.targetTableName,
+              entityName: field.dataSelectionConfig?.targetFieldName,
             };
             // 回显字段  name
             schema.config.displayFields = field.dataSelectionConfig?.targetFieldName
@@ -294,7 +298,9 @@ const LayoutReactSortable: React.FC<LayoutReactSortableProps> = ({
             // 数据源
             subSchema.config.selectedDataSource = {
               ...subSchema.config.selectedDataSource,
-              entityUuid: ele.dataSelectionConfig?.targetEntityUuid
+              entityUuid: ele.dataSelectionConfig?.targetEntityUuid,
+              tableName: ele.dataSelectionConfig?.targetTableName,
+              entityName: ele.dataSelectionConfig?.targetFieldName,
             };
             // 回显字段  name
             subSchema.config.displayFields = ele.dataSelectionConfig?.targetFieldName
