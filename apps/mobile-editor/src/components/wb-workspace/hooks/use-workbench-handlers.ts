@@ -105,9 +105,14 @@ export function useWorkbenchHandlers({
   };
 
   // 选择组件
-  const handleSelectComponent = (componentId: string) => {
+  const handleSelectComponent = (componentId: string, component?: GridItem) => {
     setCurComponentID(componentId);
-    const curComponentSchema = wbComponentSchemas[componentId] || {};
+    const curComponentSchema = {
+      id: componentId,
+      type: component?.type,
+      displayName: component?.displayName,
+      ...wbComponentSchemas[componentId]
+    };
     setCurComponentSchema(curComponentSchema);
     setShowDeleteButton(true);
   };
@@ -115,8 +120,15 @@ export function useWorkbenchHandlers({
   // 处理拖拽开始
   const handleDragStart = (e: { item: HTMLElement }) => {
     const cpID = e.item.getAttribute('data-cp-id') || '';
+    const itemType = e.item.getAttribute('data-cp-type') || undefined;
+    const itemDisplayName = e.item.getAttribute('data-cp-displayname') || undefined;
     setCurComponentID(cpID);
-    const curComponentSchema = wbComponentSchemas[cpID] || {};
+    const curComponentSchema = {
+      id: cpID,
+      type: itemType,
+      displayName: itemDisplayName,
+      ...wbComponentSchemas[cpID]
+    };
     setCurComponentSchema(curComponentSchema);
     setShowDeleteButton(true);
   };
@@ -175,8 +187,14 @@ export function useWorkbenchHandlers({
   
       if (cpID) {
         setWbComponentSchemas(cpID, schema);
+        const completeSchema = {
+          id: cpID,
+          type: itemType || undefined,
+          displayName: itemDisplayName || undefined,
+          ...schema
+        };
         setCurComponentID(cpID);
-        setCurComponentSchema(schema);
+        setCurComponentSchema(completeSchema);
         setShowDeleteButton(false);
       }
     };

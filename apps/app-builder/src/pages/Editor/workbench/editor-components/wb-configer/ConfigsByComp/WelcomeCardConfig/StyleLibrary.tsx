@@ -1,5 +1,6 @@
 import dayjs from 'dayjs';
 import { WORKBENCH_THEME_OPTIONS } from '@onebase/ui-kit';
+import { getWorkbenchRuntimeUserInfo } from '@onebase/ui-kit/src/components/Materials/Workbench/utils/user-avatar';
 import WbThemeSelectorConfig from '../../components/WbThemeSelectorConfig';
 import commonStyles from '../../components/WbThemeSelectorConfig/index.module.less';
 import styles from './index.module.less';
@@ -30,10 +31,14 @@ export function StyleLibrary({ handlePropsChange, item, configs }: StyleLibraryP
     const previewImage = imageMap[theme as keyof typeof imageMap] || theme1Image;
 
     // 从 configs 中获取数据，提供默认值
-    const userName = (configs.userName as string) || '用户';
+    const runtimeUserInfo = getWorkbenchRuntimeUserInfo({
+      avatar: configs.userAvatar as string | undefined,
+      name: configs.userName as string | undefined
+    });
+    const userName = runtimeUserInfo.name || '用户';
     const welcomeText = '下午好！';
     const welcomeDesc = '开心工作，认真生活';
-    const userAvatar = configs.userAvatar as string | undefined;
+    const userAvatar = runtimeUserInfo.avatar || undefined;
     const currentTime = dayjs().format('YYYY-MM-DD HH:mm:ss');
 
     const isTheme3 = theme === WORKBENCH_THEME_OPTIONS.THEME_3;

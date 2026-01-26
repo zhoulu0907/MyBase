@@ -66,6 +66,8 @@ export const WORKBENCH_CONFIG_TYPES = {
   // 欢迎卡片
   WB_THEME_SELECTOR: 'Wb_ThemeSelector' as const,
   WB_CHECK_INPUT: 'Wb_CheckInput' as const,
+  // 资讯列表
+  WB_INFORMATION_LIST_CONTENT: 'Wb_InformationListContent' as const,
 } as const;
 
 /**
