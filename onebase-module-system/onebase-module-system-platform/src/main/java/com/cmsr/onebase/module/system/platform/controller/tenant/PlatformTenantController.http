@@ -73,3 +73,9 @@ GET {{baseUrl}}/system/tenant/get
 Content-Type: application/json
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
+
+### 获得租户详情 /admin-api/system/tenant/delete
+POST {{baseUrl}}/system/tenant/delete?id=244125202721669120
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}

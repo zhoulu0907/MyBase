@@ -13,7 +13,6 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 public class BaseTenantEntity extends BaseEntity {
 
-    @Deprecated // 请flex的TableDef类
     public static final String TENANT_ID = "tenant_id";
 
     @Column(value = "tenant_id", comment = "租户ID", tenantId = true)
