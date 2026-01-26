@@ -26,7 +26,7 @@ const BasicSettings: React.FC = () => {
                 </p>
                 <p>
                   <span className={styles.title}>示例：</span>
-                  <span>小贝发起的111工时填报</span>
+                  <span>小贝发起的工时填报</span>
                 </p>
               </div>
             ) : (
@@ -37,7 +37,7 @@ const BasicSettings: React.FC = () => {
           </Form.Item>
 
           <Form.Item label="表单提交后跳转页面">
-            <Radio.Group defaultValue="list">
+            <Radio.Group defaultValue="list" direction="vertical">
               <Radio value="list">列表页</Radio>
               <Radio value="create">展示【是否创建下一条】窗口</Radio>
               <Radio value="record">打开刚才创建的记录</Radio>

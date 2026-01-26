@@ -20,14 +20,15 @@ export const tagPlaceholdersPlugin = () => {
       const elt = document.createElement('span');
       if (!this.text) return elt;
 
+      const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-6').trim() || '0, 158, 158';
+
       elt.style.cssText = `
-        border: 1px solid rgba(79, 174, 123, 0.1);
-        border-radius: 4px;
+        border-radius: 2px;
         line-height: 20px;
-        background: rgba(79, 174, 123, 0.1);
-        color: #4FAE7B;
-        font-size: 12px;
-        padding: 2px 7px;
+        background-color: #E8FFFE;
+        color: rgb(${primaryColor});
+        font-size: 14px;
+        padding: 2px 8px;
         user-select: none;
         margin: 0 2px;
       `;
