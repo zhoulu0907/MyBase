@@ -72,7 +72,6 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertList;
@@ -519,42 +518,35 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @LogRecord(type = SYSTEM_USER_TYPE, subType = SYSTEM_USER_DELETE_SUB_TYPE, bizNo = "{{#id}}",
+    @LogRecord(type = SYSTEM_USER_TYPE, subType = SYSTEM_USER_DELETE_SUB_TYPE, bizNo = "{{#userId}}",
             success = SYSTEM_USER_DELETE_SUCCESS)
     @CacheEvict(value = RedisKeyConstants.USER_FIND_BY_DEPT_IDS, allEntries = true, beforeInvocation = true)
-    public void deleteUser(Long id) {
+    public void deleteUser(Long userId) {
         // 1. 校验用户存在
-        AdminUserDO user = validateUserExists(id);
+        AdminUserDO user = validateUserExists(userId);
         // 如果是内置系统管理员，不允许删除
         if (AdminTypeEnum.SYSTEM.getType().equals(user.getAdminType())) {
             throw exception(USER_PASSWORD_NOT_ALLOW_DEL);
         }
 
         // 2.1 删除用户
-        userDataRepository.deleteById(id);
+        userDataRepository.deleteById(userId);
         // 2.2 删除用户关联数据
-        permissionService.processUserDeleted(id);
+        permissionService.processUserDeleted(userId);
         // 2.2 删除用户岗位
-        userPostDataRepository.deleteByUserId(id);
+        userPostDataRepository.deleteByUserId(userId);
         // 2.2 删除用户角色
-        appAuthRoleUser.deleteByUserId(id);
+        userRoleDataRepository.deleteByUserId(userId);
+        appAuthRoleUser.deleteByUserId(userId);
         // 3. 记录操作日志上下文
         LogRecordContext.putVariable("user", user);
     }
 
     @Override
     public void deleteUsers(Collection<Long> ids) {
-        // 1. 校验用户存在,过滤不存在的id
-        Iterator<Long> iterator = ids.iterator();
-        while (iterator.hasNext()) {
-            Long id = iterator.next();
-            if (userDataRepository.getById(id) == null) {
-                iterator.remove();
-            }
-        }
 
         List<Long> idsToDelete = new ArrayList<>(ids);
-        // 2.1 删除用户
+        // 1. 删除用户
         userDataRepository.deleteByIds(idsToDelete);
         // 2.2 删除用户关联数据
         permissionService.processUsersDeleted(idsToDelete);

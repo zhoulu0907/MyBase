@@ -18,22 +18,20 @@ import com.cmsr.onebase.framework.tenant.config.TenantProperties;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
-import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
 import com.cmsr.onebase.module.screen.api.DashboardProjectApi;
 import com.cmsr.onebase.module.system.api.user.AdminUserRoleApi;
 import com.cmsr.onebase.module.system.convert.tenant.TenantConvert;
 import com.cmsr.onebase.module.system.dal.database.TenantDataRepository;
-import com.cmsr.onebase.module.system.dal.dataobject.config.SystemGeneralConfigDO;
+import com.cmsr.onebase.module.system.dal.database.UserPostDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.corp.CorpDO;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
-import com.cmsr.onebase.module.system.dal.dataobject.dict.DictDataDO;
-import com.cmsr.onebase.module.system.dal.dataobject.dict.DictTypeDO;
 import com.cmsr.onebase.module.system.dal.dataobject.license.LicenseDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.UserRoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantPackageDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
+import com.cmsr.onebase.module.system.dal.flex.repo.UserDataRepository;
 import com.cmsr.onebase.module.system.enums.corp.CorpConstant;
 import com.cmsr.onebase.module.system.enums.permission.AdminTypeEnum;
 import com.cmsr.onebase.module.system.enums.permission.PackageTypeEnum;
@@ -55,7 +53,6 @@ import com.cmsr.onebase.module.system.service.permission.RoleService;
 import com.cmsr.onebase.module.system.service.tenant.handler.TenantInfoHandler;
 import com.cmsr.onebase.module.system.service.tenant.handler.TenantMenuHandler;
 import com.cmsr.onebase.module.system.service.user.UserService;
-import com.cmsr.onebase.module.system.vo.config.SystemConfigReqVO;
 import com.cmsr.onebase.module.system.vo.role.RoleInsertReqVO;
 import com.cmsr.onebase.module.system.vo.tenant.*;
 import com.cmsr.onebase.module.system.vo.user.UserInsertReqVO;
@@ -144,6 +141,7 @@ public class TenantServiceImpl implements TenantService {
 
     @Resource
     private DashboardProjectApi dashboardProjectApi;
+
 
     @Override
     public List<Long> getTenantIdList() {
@@ -582,77 +580,126 @@ public class TenantServiceImpl implements TenantService {
         });
     }
 
+    @Resource
+    private UserDataRepository userDataRepository;
+    @Resource
+    private UserPostDataRepository userPostDataRepository;
     @Override
     @LogRecord(type = SYSTEM_TENANT_TYPE, subType = SYSTEM_TENANT_DELETE_SUB_TYPE, bizNo = "{{#tenant.id}}",
             success = SYSTEM_TENANT_DELETE_SUCCESS)
     @Transactional(rollbackFor = Exception.class)
-    public void deleteTenant(Long id) {
+    public void deleteTenant(Long tenantId) {
         // 校验存在
-        TenantDO tenant = validateUpdateTenant(id);
+        TenantDO tenant = validateUpdateTenant(tenantId);
         // 删除
-        tenantDataRepository.deleteById(id);
+        // tenantDataRepository.deleteById(tenantId);
 
         // 在租户上下文中执行其他删除操作
-        TenantUtils.execute(id, () -> {
+        TenantUtils.execute(tenantId, () -> {
+            // 1. 删除用户
+            // userDataRepository.removeByTenant(tenantId);
+            userPostDataRepository.removeByTenant(tenantId);
+            // 1.1. 删除用户&应用关联
 
-            // 删除用户
-            List<Long> userIds = userService.getUserIds();
-            userService.deleteUsers(userIds);
-            // 删除角色
-            // 获取当前租户的所有角色并删除
-            List<RoleDO> roles = roleService.getRoleList();
-            roleService.deleteRoleIds(roles.stream().map(RoleDO::getId).collect(Collectors.toList()));
-            // 删除部门
-            // 获取当前租户的所有部门并删除
-            List<DeptDO> depts = deptService.getDeptListAll();
-            deptService.deleteDepts(depts.stream().map(DeptDO::getId).collect(Collectors.toList()));
+            // 1.2 删除用户&角色关联
 
-            // 删除数据字典 - 先删除字典数据，再删除字典类型
-            List<DictTypeDO> dictTypes = dictTypeService.getDictTypeList();
-            for (DictTypeDO dictType : dictTypes) {
-                // 删除该类型下的所有字典数据
-                List<DictDataDO> dictDataList = dictDataService.getDictDataList(null, dictType.getType());
-                if (!dictDataList.isEmpty()) {
-                    dictDataService.deleteDictDataByIds(dictDataList.stream().map(DictDataDO::getId).collect(Collectors.toList()));
-                }
-                // 删除字典类型
-                dictTypeService.deleteDictType(dictType.getId());
-            }
+            // 2. 删除角色
 
-            // 删除安全和安全记录
-            securityConfigApi.deleteSecurityConfigsByTenantId(tenant.getId());
-            securityConfigApi.deleteSecurityRecordsByTenantId(tenant.getId());
+            // 2.1 删除角色&权限点
 
-            // 通用配置 - 获取当前租户的所有配置并删除
-            SystemConfigReqVO configReqVO = new SystemConfigReqVO();
-            List<SystemGeneralConfigDO> configs = systemConfigService.getTenantConfigList(configReqVO);
-            for (SystemGeneralConfigDO config : configs) {
-                systemConfigService.deleteConfig(config.getId());
-            }
+            // 3. 删除部门
 
-            // 删除应用
-            List<ApplicationDTO> applications = appApplicationApi.getSimpleAllAppList(tenant.getId());
-            for (ApplicationDTO application : applications) {
-                applicationApi.deleteApplication(application.getId(), application.getAppName());
-            }
+            // 4. 删除企业
 
-            // 删除企业
-            List<CorpDO> corps = corpService.findTenantCorpAll();
-            for (CorpDO corp : corps) {
-                corpService.deleteCorp(corp.getId());
-            }
+            // 4.1 删除企业&应用授权
 
-            // 删除大屏
-            dashboardProjectApi.removeDashboardByTenantId(tenant.getId());
+            // 5. 删除租户级别字典Dict
+
+            // 6. 删除租户级别配置项Config
+
+            // 7. 删除安全配置和安全记录
+
+            // 8. 删除应用和大屏
 
         });
-
         // 记录操作日志上下文
         LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
-
         LogRecordContext.putVariable("loginUser", loginUser);
         LogRecordContext.putVariable("tenant", tenant);
     }
+
+    //
+    // @Override
+    // @LogRecord(type = SYSTEM_TENANT_TYPE, subType = SYSTEM_TENANT_DELETE_SUB_TYPE, bizNo = "{{#tenant.id}}",
+    //         success = SYSTEM_TENANT_DELETE_SUCCESS)
+    // @Transactional(rollbackFor = Exception.class)
+    // public void deleteTenant(Long id) {
+    //     // 校验存在
+    //     TenantDO tenant = validateUpdateTenant(id);
+    //     // 删除
+    //     tenantDataRepository.deleteById(id);
+    //
+    //     // 在租户上下文中执行其他删除操作
+    //     TenantUtils.execute(id, () -> {
+    //
+    //         // 删除用户
+    //         List<Long> userIds = userService.getUserIds();
+    //         userService.deleteUsers(userIds);
+    //         // 删除角色
+    //         // 获取当前租户的所有角色并删除
+    //         List<RoleDO> roles = roleService.getRoleList();
+    //         roleService.deleteRoleIds(roles.stream().map(RoleDO::getId).collect(Collectors.toList()));
+    //         // 删除部门
+    //         // 获取当前租户的所有部门并删除
+    //         List<DeptDO> depts = deptService.getDeptListAll();
+    //         deptService.deleteDepts(depts.stream().map(DeptDO::getId).collect(Collectors.toList()));
+    //
+    //         // 删除数据字典 - 先删除字典数据，再删除字典类型
+    //         List<DictTypeDO> dictTypes = dictTypeService.getDictTypeList();
+    //         for (DictTypeDO dictType : dictTypes) {
+    //             // 删除该类型下的所有字典数据
+    //             List<DictDataDO> dictDataList = dictDataService.getDictDataList(null, dictType.getType());
+    //             if (!dictDataList.isEmpty()) {
+    //                 dictDataService.deleteDictDataByIds(dictDataList.stream().map(DictDataDO::getId).collect(Collectors.toList()));
+    //             }
+    //             // 删除字典类型
+    //             dictTypeService.deleteDictType(dictType.getId());
+    //         }
+    //
+    //         // 删除安全和安全记录
+    //         securityConfigApi.deleteSecurityConfigsByTenantId(tenant.getId());
+    //         securityConfigApi.deleteSecurityRecordsByTenantId(tenant.getId());
+    //
+    //         // 通用配置 - 获取当前租户的所有配置并删除
+    //         SystemConfigReqVO configReqVO = new SystemConfigReqVO();
+    //         List<SystemGeneralConfigDO> configs = systemConfigService.getTenantConfigList(configReqVO);
+    //         for (SystemGeneralConfigDO config : configs) {
+    //             systemConfigService.deleteConfig(config.getId());
+    //         }
+    //
+    //         // 删除应用
+    //         List<ApplicationDTO> applications = appApplicationApi.getSimpleAllAppList(tenant.getId());
+    //         for (ApplicationDTO application : applications) {
+    //             applicationApi.deleteApplication(application.getId(), application.getAppName());
+    //         }
+    //
+    //         // 删除企业
+    //         List<CorpDO> corps = corpService.findTenantCorpAll();
+    //         for (CorpDO corp : corps) {
+    //             corpService.deleteCorp(corp.getId());
+    //         }
+    //
+    //         // 删除大屏
+    //         dashboardProjectApi.removeDashboardByTenantId(tenant.getId());
+    //
+    //     });
+    //
+    //     // 记录操作日志上下文
+    //     LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
+    //
+    //     LogRecordContext.putVariable("loginUser", loginUser);
+    //     LogRecordContext.putVariable("tenant", tenant);
+    // }
 
     private TenantDO validateUpdateTenant(Long id) {
         TenantDO tenant = tenantDataRepository.findById(id);
