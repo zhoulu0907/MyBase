@@ -444,7 +444,7 @@ export const keyDataConfig: ITableDataConfigType = {
 // ==================== 卡片数据 ====================
 export const cardMetaDataConfig: ICardDataConfigType = {
   key: 'cardMetaData',
-  name: '数据',
+  name: '卡片数据配置',
   type: 'CardData'
 };
 
@@ -456,19 +456,19 @@ export const dataSortByConfig: IDataSortByConfigType = {
 
 export const dataFilterConfig: IDataFilterConfigType = {
   key: 'filterCondition',
-  name: '数据排序规则',
+  name: '数据过滤',
   type: 'DataFilter'
 };
 
 export const coverImageConfig: ICoverImageConfigType = {
   key: 'filterCondition',
-  name: '数据排序规则',
+  name: '封面图片',
   type: 'CoverImage'
 };
 
 export const groupFilterConfig: IGroupFilterConfigType = {
   key: 'filterCondition',
-  name: '数据排序规则',
+  name: '绑定分组筛选',
   type: 'GroupFilter'
 };
 
