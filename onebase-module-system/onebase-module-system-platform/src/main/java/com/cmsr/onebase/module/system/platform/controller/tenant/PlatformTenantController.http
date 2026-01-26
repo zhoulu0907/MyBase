@@ -45,7 +45,7 @@ tenant-id: {{adminTenantId}}
 }
 
 ### 获取租户分页 /admin-api/system/tenant/page
-GET {{baseUrl}}/system/tenant/page?pageNum=1&pageSize=10
+GET {{baseUrl}}/system/tenant/page?pageNum=1&pageSize=10&keyword=3434
 Content-Type: application/json
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
