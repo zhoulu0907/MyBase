@@ -10,7 +10,6 @@ import lombok.Data;
 public class PageConnectorReqVO extends PageParam {
 
     @Schema(description = "应用ID")
-    @NotNull(message = "应用ID不能为空")
     private Long applicationId;
 
     @Schema(description = "连接器名称")
@@ -24,5 +23,11 @@ public class PageConnectorReqVO extends PageParam {
 
     @Schema(description = "Level3 编号")
     private String level3Code;
+
+    @Schema(description = "连接器类型编码")
+    private String typeCode;
+
+    @Schema(description = "启用状态（0-禁用，1-启用）")
+    private Integer activeStatus;
 
 }

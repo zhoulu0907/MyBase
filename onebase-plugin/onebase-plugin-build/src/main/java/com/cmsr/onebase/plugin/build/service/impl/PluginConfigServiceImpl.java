@@ -66,7 +66,7 @@ public class PluginConfigServiceImpl implements PluginConfigService {
         }
 
         // 4. 如果plugin_config_info为空，则从plugin_meta_info（plugin.json）读取
-        if (CollUtil.isEmpty(templateItems) && StrUtil.isNotBlank(pluginInfo.getPluginMetaInfo())) {
+/*        if (CollUtil.isEmpty(templateItems) && StrUtil.isNotBlank(pluginInfo.getPluginMetaInfo())) {
             PluginMetaInfo metaInfo = JSONUtil.toBean(pluginInfo.getPluginMetaInfo(), PluginMetaInfo.class);
             if (CollUtil.isNotEmpty(metaInfo.getConfigTemplates())) {
                 for (PluginMetaInfo.PluginConfigTemplate template : metaInfo.getConfigTemplates()) {
@@ -80,7 +80,7 @@ public class PluginConfigServiceImpl implements PluginConfigService {
                     templateItems.add(item);
                 }
             }
-        }
+        }*/
 
         respVO.setConfigTemplates(templateItems);
         respVO.setPluginConfigInfo(pluginInfo.getPluginConfigInfo());
@@ -163,7 +163,7 @@ public class PluginConfigServiceImpl implements PluginConfigService {
                 item.setDefaultValue(defaultVal != null ? String.valueOf(defaultVal) : null);
 
                 // Handle valueType
-                String uiType = propObj.getStr("$ui:type");
+                String uiType = propObj.getStr("valueType");
                 if (StrUtil.isNotEmpty(uiType)) {
                     item.setValueType(uiType);
                 } else {
@@ -176,25 +176,88 @@ public class PluginConfigServiceImpl implements PluginConfigService {
         }
     }
 
+    /**
+     * 密文类型配置值的掩码
+     */
+    private static final String SECRET_MASK = "******";
+
     @Override
     public PluginConfigDetailRespVO getConfigDetail(String pluginId, String pluginVersion) {
-        // 1. 获取配置列表
+        // 1. 获取当前版本的配置列表
         List<PluginConfigInfoDO> configs = pluginConfigInfoRepository.getListByPluginIdAndVersion(
                 pluginId, pluginVersion);
 
-        // 2. 转换为Map结构
+        // 2. 如果当前版本没有配置，尝试获取上一个版本的配置
+        if (CollUtil.isEmpty(configs)) {
+            String previousVersion = getPreviousVersion(pluginId, pluginVersion);
+            if (StrUtil.isNotBlank(previousVersion)) {
+                configs = pluginConfigInfoRepository.getListByPluginIdAndVersion(pluginId, previousVersion);
+                log.info("当前版本 {} 无配置，使用上一版本 {} 的配置，共 {} 条", 
+                        pluginVersion, previousVersion, configs.size());
+            }
+        }
+
+        // 3. 转换为Map结构
         PluginConfigDetailRespVO respVO = new PluginConfigDetailRespVO();
         Map<String, PluginConfigDetailRespVO.ConfigValueItem> configMap = new HashMap<>();
 
         for (PluginConfigInfoDO config : configs) {
             PluginConfigDetailRespVO.ConfigValueItem item = new PluginConfigDetailRespVO.ConfigValueItem();
-            item.setConfigValue(config.getConfigValue());
+            // 如果valueType为secret，则用******代替配置值
+            if ("secret".equalsIgnoreCase(config.getValueType())) {
+                item.setConfigValue(SECRET_MASK);
+            } else {
+                item.setConfigValue(config.getConfigValue());
+            }
             item.setValueType(config.getValueType());
             configMap.put(config.getConfigKey(), item);
         }
 
         respVO.setConfigs(configMap);
         return respVO;
+    }
+
+    /**
+     * 获取指定版本的上一个版本号
+     * 按创建时间倒序排列，找到当前版本后返回其前一个版本
+     *
+     * @param pluginId 插件ID
+     * @param currentVersion 当前版本号
+     * @return 上一个版本号，如果没有则返回null
+     */
+    private String getPreviousVersion(String pluginId, String currentVersion) {
+        // 获取该插件的所有版本，按创建时间倒序排列
+        List<PluginInfoDO> allVersions = pluginInfoRepository.getListByPluginId(pluginId);
+        if (CollUtil.isEmpty(allVersions)) {
+            return null;
+        }
+        
+        // 按创建时间倒序排序（最新版本在前）
+        allVersions.sort((a, b) -> {
+            if (a.getCreateTime() == null && b.getCreateTime() == null) {
+                return 0;
+            }
+            if (a.getCreateTime() == null) {
+                return 1;
+            }
+            if (b.getCreateTime() == null) {
+                return -1;
+            }
+            return b.getCreateTime().compareTo(a.getCreateTime());
+        });
+        
+        // 找到当前版本的索引，返回下一个版本（即上一个版本）
+        for (int i = 0; i < allVersions.size(); i++) {
+            if (currentVersion.equals(allVersions.get(i).getPluginVersion())) {
+                // 找到当前版本，返回下一个（即时间上更早的版本）
+                if (i + 1 < allVersions.size()) {
+                    return allVersions.get(i + 1).getPluginVersion();
+                }
+                break;
+            }
+        }
+        
+        return null;
     }
 
     @Override
