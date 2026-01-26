@@ -16,6 +16,7 @@ import {
   queryFlowExecForm,
   TRIGGER_EVENTS,
   updateDraft,
+  getFormDetail,
   type AppEntityField,
   type DetailMethodV2Params,
   type GetPageSetIdReq,
@@ -47,6 +48,11 @@ interface PreviewProps {
   runtime: boolean;
   menuUuid: string;
   pageSetType: PageType;
+}
+
+
+enum PageTypeMap {
+  list = 'list'
 }
 
 const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, pageSetType }) => {
@@ -381,7 +387,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
   const showFromPageData = (id: string, toFormPage: boolean = false) => {
     setAdd(!id);
     form.resetFields();
-    if (id && id !== '' && rowDataType.value !== PageType.BPM) {
+    if (id && id !== '') {
       console.log('edit row id: ', id);
       setEditTargetId(id);
       if (tableName) {
@@ -402,9 +408,16 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
     const req: DetailMethodV2Params = {
       id: id
     };
-    const res = await dataMethodDetailV2(tableName, menuId, req);
-    console.log(res);
-
+    let res;
+    if (rowDataType.value === PageType.BPM) {
+      const formDetail = await getFormDetail({
+        instanceId: bpmInstanceId.value,
+        from: PageTypeMap.list
+      });
+      res = formDetail?.formData?.data;
+    } else {
+      res = await dataMethodDetailV2(tableName, menuId, req);
+    }
     let formValues: Record<string, any> = {};
 
     if (res) {
