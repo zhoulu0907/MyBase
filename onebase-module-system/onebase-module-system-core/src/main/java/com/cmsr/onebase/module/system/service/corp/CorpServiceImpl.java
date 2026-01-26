@@ -32,6 +32,7 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -153,7 +154,7 @@ public class CorpServiceImpl implements CorpService {
         Long tenantRealUserCount = tenantService.getTenantExistUserCount(loginUser.getTenantId());
         //  计算实际剩余可用用户数量
         Integer realRemainingCount = Math.toIntExact(tenantUserLimit - tenantRealUserCount);
-        if (realRemainingCount <= 0) {
+        if (realRemainingCount < NumberUtils.INTEGER_ZERO) {
             throw exception(CORP_USER_LIMIT_COUNT_CHECK, tenantUserLimit, realRemainingCount);
         }
 
@@ -255,14 +256,21 @@ public class CorpServiceImpl implements CorpService {
     @LogRecord(type = SYSTEM_CORP_TYPE, subType = SYSTEM_CORP_DELETE_SUB_TYPE, bizNo = "{{#corp.id}}",
             success = SYSTEM_CORP_DELETE_SUCCESS)
     public void deleteCorp(Long id) {
-        // 查询企业
+        // 1.查询企业
         CorpDO corp = corpDataRepository.findById(id);
-        // 删除企业
+        // 2.删除企业
         corpDataRepository.deleteById(id);
-        // 删除关联关系
+        // 3.删除关联关系
         corpAppRelationService.deleteCorpAppRelationByCorpId(id);
+        //4.删除企业下的用户
+        //4.1 查询企业下的用户id
+        Set<Long> userList = userService.getUserIdsListByCorpId(id);
+        userList.forEach(userId -> {
+            //4.2 删除用户
+            userService.deleteUser(userId);
+        });
 
-        // 记录操作日志上下文
+        // 5.记录操作日志上下文
         LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
 
         LogRecordContext.putVariable("loginUser", loginUser);
