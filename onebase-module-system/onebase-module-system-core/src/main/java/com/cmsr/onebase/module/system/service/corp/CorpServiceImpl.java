@@ -152,9 +152,14 @@ public class CorpServiceImpl implements CorpService {
 
         // 验证空间目前已存在用户数
         Long tenantRealUserCount = tenantService.getTenantExistUserCount(loginUser.getTenantId());
+        if (corpId != null){
+            Long userCountLong = userService.getUserCountByCorpId(corpId);
+            tenantRealUserCount = tenantRealUserCount - userCountLong;
+        }
+
         //  计算实际剩余可用用户数量
         Integer realRemainingCount = Math.toIntExact(tenantUserLimit - tenantRealUserCount);
-        if (realRemainingCount < NumberUtils.INTEGER_ZERO) {
+        if (realRemainingCount <= NumberUtils.INTEGER_ZERO) {
             throw exception(CORP_USER_LIMIT_COUNT_CHECK, tenantUserLimit, realRemainingCount);
         }
 
@@ -256,21 +261,14 @@ public class CorpServiceImpl implements CorpService {
     @LogRecord(type = SYSTEM_CORP_TYPE, subType = SYSTEM_CORP_DELETE_SUB_TYPE, bizNo = "{{#corp.id}}",
             success = SYSTEM_CORP_DELETE_SUCCESS)
     public void deleteCorp(Long id) {
-        // 1.查询企业
+        // 查询企业
         CorpDO corp = corpDataRepository.findById(id);
-        // 2.删除企业
+        // 删除企业
         corpDataRepository.deleteById(id);
-        // 3.删除关联关系
+        // 删除关联关系
         corpAppRelationService.deleteCorpAppRelationByCorpId(id);
-        //4.删除企业下的用户
-        //4.1 查询企业下的用户id
-        Set<Long> userList = userService.getUserIdsListByCorpId(id);
-        userList.forEach(userId -> {
-            //4.2 删除用户
-            userService.deleteUser(userId);
-        });
 
-        // 5.记录操作日志上下文
+        // 记录操作日志上下文
         LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
 
         LogRecordContext.putVariable("loginUser", loginUser);
