@@ -17,18 +17,18 @@ const BasicSettings: React.FC = () => {
               <Radio value="custom">自定义标题</Radio>
             </Radio.Group>
             {titleType === 'default' ? (
-              <>
-                <div className={styles.rule}>
-                  <span className={styles.ruleTitle}>规则：</span>
-                  <span className={styles.ruleItem}>发起人</span>
-                  <span className={styles.ruleItem}>发起的</span>
-                  <span className={styles.ruleItem}>页面名称</span>
-                </div>
-                <div className={styles.example}>
-                  <span className={styles.exampleTitle}>示例：</span>
-                  <span className={styles.exampleContent}>小贝发起的111工时填报</span>
-                </div>
-              </>
+              <div className={styles.defaultTitleInfo}>
+                <p>
+                  <span className={styles.title}>规则：</span>
+                  <span className={styles.label}>发起人</span>
+                  <span>发起的</span>
+                  <span className={styles.label}>页面名称</span>
+                </p>
+                <p>
+                  <span className={styles.title}>示例：</span>
+                  <span>小贝发起的111工时填报</span>
+                </p>
+              </div>
             ) : (
               <div className={styles.customTitle}>
                 <TagInput />
