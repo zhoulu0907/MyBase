@@ -27,3 +27,8 @@ export enum AutoApproveType {
   DUP_USER_AUTO_APPROVE = 'dupUserAutoApprove',
   PREV_NODE_DUP_USER_AUTO_APPROVE = 'prevNodeDupUserAutoApprove'
 }
+
+export enum userType {
+  SAAS = 3,
+  INNER = 2
+}
