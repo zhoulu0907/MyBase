@@ -27,6 +27,10 @@ public interface PluginConfigService {
 
     /**
      * 获取配置项详情（Map结构，key为configKey，value为配置值对象）
+     * <p>
+     * 1. 如果valueType为secret，则配置值用******代替
+     * 2. 如果用户上传的新版本没有更新配置，用最新的pluginId是查不到配置的，这时候会返回上一个版本的配置
+     * 3. 如果上一个版本也没有配置，则返回空
      *
      * @param pluginId 插件ID
      * @param pluginVersion 插件版本

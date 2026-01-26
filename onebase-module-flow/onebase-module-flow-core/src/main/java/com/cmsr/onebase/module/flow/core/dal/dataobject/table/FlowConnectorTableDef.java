@@ -55,8 +55,18 @@ public class FlowConnectorTableDef extends TableDef {
     
     public final QueryColumn CONNECTOR_NAME = new QueryColumn(this, "connector_name");
 
-    
+
     public final QueryColumn CONNECTOR_UUID = new QueryColumn(this, "connector_uuid");
+
+    /**
+     * 环境配置UUID
+     */
+    public final QueryColumn ENV_UUID = new QueryColumn(this, "env_uuid");
+
+    /**
+     * 启用状态
+     */
+    public final QueryColumn ACTIVE_STATUS = new QueryColumn(this, "active_status");
 
     /**
      * 所有字段。
@@ -66,7 +76,7 @@ public class FlowConnectorTableDef extends TableDef {
     /**
      * 默认字段，不包含逻辑删除或者 large 等字段。
      */
-    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, CONNECTOR_UUID, CONNECTOR_NAME, TYPE_CODE, DESCRIPTION, CONFIG, APPLICATION_ID, CREATOR, CREATE_TIME, UPDATER, UPDATE_TIME, DELETED, TENANT_ID};
+    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, CONNECTOR_UUID, CONNECTOR_NAME, TYPE_CODE, DESCRIPTION, ENV_UUID, CONFIG, ACTIVE_STATUS, APPLICATION_ID, CREATOR, CREATE_TIME, UPDATER, UPDATE_TIME, DELETED, TENANT_ID};
 
     public FlowConnectorTableDef() {
         super("", "flow_connector");

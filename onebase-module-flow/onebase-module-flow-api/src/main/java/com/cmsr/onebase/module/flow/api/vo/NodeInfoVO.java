@@ -4,10 +4,19 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 /**
- * 连接器类型信息 VO
+ * 连接器类型信息 VO（轻量版）
+ * <p>
+ * 用于连接器类型列表展示，仅包含基本信息，不包含大字段的 Schema 配置。
+ * </p>
+ * <p>
+ * 如需获取完整的 Schema 配置，请使用 NodeTypeInfoVO
+ * </p>
+ *
+ * @author zhoulu
+ * @since 2026-01-22
  */
 @Data
-@Schema(description = "连接器类型信息")
+@Schema(description = "连接器类型信息（轻量版）")
 public class NodeInfoVO {
 
     /**
@@ -15,6 +24,12 @@ public class NodeInfoVO {
      */
     @Schema(description = "连接器类型名称")
     private String nodeName;
+
+    /**
+     * 连接器类型编码
+     */
+    @Schema(description = "连接器类型编码")
+    private String nodeCode;
 
     /**
      * 一级分类编码

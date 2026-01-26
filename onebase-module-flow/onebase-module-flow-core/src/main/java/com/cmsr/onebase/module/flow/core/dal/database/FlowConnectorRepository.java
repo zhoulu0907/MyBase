@@ -23,13 +23,16 @@ import static com.cmsr.onebase.module.flow.core.dal.dataobject.table.FlowConnect
 @Repository
 public class FlowConnectorRepository extends BaseAppRepository<FlowConnectorMapper, FlowConnectorDO> {
 
-
     public PageResult<FlowConnectorDO> selectConnectorPage(PageConnectorReqVO pageReqVO) {
         String connectorName = pageReqVO.getConnectorName();
 
         QueryWrapper query = this.query()
                 .where(FLOW_CONNECTOR.APPLICATION_ID.eq(pageReqVO.getApplicationId()))
                 .where(FLOW_CONNECTOR.CONNECTOR_NAME.like(connectorName).when(StringUtils.isNotBlank(connectorName)))
+                .where(FLOW_CONNECTOR.TYPE_CODE.eq(pageReqVO.getTypeCode())
+                        .when(StringUtils.isNotBlank(pageReqVO.getTypeCode())))
+                .where(FLOW_CONNECTOR.ACTIVE_STATUS.eq(pageReqVO.getActiveStatus())
+                        .when(pageReqVO.getActiveStatus() != null))
                 .orderBy(FLOW_CONNECTOR.UPDATE_TIME, false)
                 .orderBy(FLOW_CONNECTOR.CREATE_TIME, false);
         Page<FlowConnectorDO> page = new Page<>(pageReqVO.getPageNo(), pageReqVO.getPageSize());
@@ -40,26 +43,14 @@ public class FlowConnectorRepository extends BaseAppRepository<FlowConnectorMapp
 
     /**
      * List connector instances by type code
-     * Uses withoutApplicationCondition to disable auto-filtering and manually set applicationId
+     * Uses withoutApplicationCondition to disable auto-filtering and manually set
+     * applicationId
      */
     public java.util.List<FlowConnectorDO> listByType(String typeCode) {
         QueryWrapper queryWrapper = this.query()
                 .where(FLOW_CONNECTOR.TYPE_CODE.eq(typeCode))
                 .orderBy(FLOW_CONNECTOR.CREATE_TIME, false);
         return this.list(queryWrapper);
-    }
-
-    /**
-     * Select connector by connector UUID
-     * Note: Ignores application isolation since connector_uuid is globally unique
-     *
-     * @param connectorUuid the connector UUID
-     * @return the connector DO, or null if not found
-     */
-    public FlowConnectorDO selectByConnectorUuid(String connectorUuid) {
-        QueryWrapper queryWrapper = this.query()
-                .where(FLOW_CONNECTOR.CONNECTOR_UUID.eq(connectorUuid));
-        return this.getOne(queryWrapper);
     }
 
     /**
@@ -81,7 +72,6 @@ public class FlowConnectorRepository extends BaseAppRepository<FlowConnectorMapp
         return result.stream()
                 .collect(Collectors.toMap(
                         record -> (String) record.get("type_code"),
-                        record -> ((Number) record.get("count")).intValue()
-                ));
+                        record -> ((Number) record.get("count")).intValue()));
     }
 }

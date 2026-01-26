@@ -2,9 +2,8 @@ package com.cmsr.onebase.module.flow.build.service;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.flow.api.vo.NodeInfoVO;
+import com.cmsr.onebase.module.flow.api.vo.NodeTypeInfoVO;
 import com.cmsr.onebase.module.flow.build.vo.ConnectorTypeListVO;
-import com.cmsr.onebase.module.flow.build.vo.NodeConfigActionVO;
-import com.cmsr.onebase.module.flow.build.vo.NodeConfigConnVO;
 import com.cmsr.onebase.module.flow.build.vo.NodeConfigVO;
 import com.cmsr.onebase.module.flow.core.vo.PageNodeConfigReqVO;
 
@@ -18,10 +17,6 @@ public interface FlowNodeConfigService {
 
     PageResult<NodeConfigVO> pageNodeType(PageNodeConfigReqVO reqVO);
 
-    NodeConfigConnVO findConnConfig(String nodeCode);
-
-    NodeConfigActionVO findActionConfig(String nodeCode);
-
     /**
      * Get all active connector types
      */
@@ -33,7 +28,7 @@ public interface FlowNodeConfigService {
     List<NodeInfoVO> getAllNodeTypes();
 
     /**
-     * Get connector type info by node code
+     * Get connector type info by node code (with full Schema)
      */
-    NodeInfoVO getNodeTypeInfo(String nodeCode);
+    NodeTypeInfoVO getNodeTypeInfo(String nodeCode);
 }
