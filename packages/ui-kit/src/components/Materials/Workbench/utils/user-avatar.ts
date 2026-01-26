@@ -1,9 +1,10 @@
-import { UserPermissionManager } from '@onebase/common';
+import { getCorpResourceById, UserPermissionManager } from '@onebase/common';
 import { getFileUrlById } from '@onebase/platform-center';
 
 export interface WorkbenchRuntimeUserInfo {
   avatar: string;
   name: string;
+  runtime?: boolean;
 }
 
 export function getWorkbenchRuntimeUserInfo(
@@ -11,11 +12,16 @@ export function getWorkbenchRuntimeUserInfo(
 ): WorkbenchRuntimeUserInfo {
   const userPermissionInfo = UserPermissionManager.getUserPermissionInfo();
   const avatarId = userPermissionInfo?.user?.avatar;
-  const avatarUrl = avatarId ? getFileUrlById(avatarId) || '' : '';
   const nickname = userPermissionInfo?.user?.nickname || '';
 
+  let avatarUrl = '';
+  if (avatarId) {
+    const url = fallback?.runtime ? getCorpResourceById(avatarId) : getFileUrlById(avatarId);
+    avatarUrl = url && !url.includes('undefined') ? url : '';
+  }
+  
   return {
-    avatar: avatarUrl || fallback?.avatar || '',
-    name: nickname || fallback?.name || ''
+    avatar: avatarUrl,
+    name: nickname
   };
 }

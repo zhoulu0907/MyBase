@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'react';
 import { memo, useMemo, useState, useEffect } from 'react';
 import dayjs from 'dayjs';
-import { WORKBENCH_STATUS_OPTIONS, WORKBENCH_STATUS_VALUES, WORKBENCH_THEME_OPTIONS, workbenchSchema } from '@onebase/ui-kit';
+import { WORKBENCH_STATUS_OPTIONS, WORKBENCH_STATUS_VALUES, WORKBENCH_THEME_OPTIONS, workbenchSchema, getWorkbenchRuntimeUserInfo } from '@onebase/ui-kit';
 import styles from './index.module.css';
 
 import theme1Image from '@/assets/workbench/welcome-card/theme1.svg';
@@ -19,6 +19,11 @@ type XWelcomeCardConfig = typeof workbenchSchema.XWelcomeCard.config;
 
 const XWelcomeCard = memo((props: XWelcomeCardConfig & { runtime?: boolean }) => {
   const { status, runtime, theme, userAvatar, userName, welcomeText, welcomeDesc } = props;
+  
+  const runtimeUserInfo = useMemo(
+    () => getWorkbenchRuntimeUserInfo({ avatar: userAvatar, name: userName, runtime }),
+    [userAvatar, userName, runtime]
+  );
   const hiddenStatusValue = WORKBENCH_STATUS_VALUES[WORKBENCH_STATUS_OPTIONS.HIDDEN];
   const [currentTime, setCurrentTime] = useState(() => dayjs().format('YYYY-MM-DD HH:mm:ss'));
 
@@ -57,15 +62,15 @@ const XWelcomeCard = memo((props: XWelcomeCardConfig & { runtime?: boolean }) =>
         <img src={backgroundImage} alt="background" className={styles.backgroundImage} />
 
         <div className={styles.welcomeCardContentWrapper}>
-          {userAvatar ? (
-            <img src={userAvatar} alt="userAvatar" className={styles.userAvatar} />
+          {runtimeUserInfo.avatar ? (
+            <img src={runtimeUserInfo.avatar} alt="userAvatar" className={styles.userAvatar} style={{backgroundColor: 'transparent'}}/>
           ) : (
-            <div className={styles.userAvatar}>{userName.charAt(0)}</div>
+            <div className={styles.userAvatar}>{(runtimeUserInfo.name || '').charAt(0)}</div>
           )}
 
           <div className={styles.welcomeCardContent}>
             <div className={styles.welcomeCardTitle}>
-              {(welcomeText?.display && userName) ? userName + '，' : ''}
+              {(welcomeText?.display && runtimeUserInfo.name) ? runtimeUserInfo.name + '，' : ''}
               {welcomeText?.text || ''}
             </div>
             {theme !== WORKBENCH_THEME_OPTIONS.THEME_3 && <div className={styles.welcomeCardDesc}>{welcomeDesc}</div>}
