@@ -35,9 +35,8 @@ public class SemanticRequiredValidationService implements SemanticValidationServ
                         .map(MetadataValidationRequiredDO::getPromptMessage)
                         .filter(msg -> msg != null && !msg.trim().isEmpty())
                         .findFirst()
-                        .orElse("字段[" + field.getDisplayName() + "]为必填字段");
-                String prefix = context.getTableName() != null ? "表[" + context.getTableName() + "] " : "";
-                throw new IllegalArgumentException(prefix + errorMessage);
+                        .orElse(field.getDisplayName() + "为必填项");
+                throw new IllegalArgumentException(errorMessage);
             }
         }
     }

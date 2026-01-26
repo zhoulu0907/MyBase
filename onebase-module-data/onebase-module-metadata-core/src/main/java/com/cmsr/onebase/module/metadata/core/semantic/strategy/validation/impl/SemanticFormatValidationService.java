@@ -40,9 +40,8 @@ public class SemanticFormatValidationService implements SemanticValidationServic
                 boolean isValid = isValidRegex(stringValue, regexPattern, rule.getFlags());
                 if (!isValid) {
                     String errorMessage = rule.getPromptMessage() != null && !rule.getPromptMessage().trim().isEmpty()
-                            ? rule.getPromptMessage() : "字段[" + field.getDisplayName() + "]格式不正确";
-                    String prefix = context.getTableName() != null ? "表[" + context.getTableName() + "] " : "";
-                    throw new IllegalArgumentException(prefix + errorMessage);
+                            ? rule.getPromptMessage() : field.getDisplayName() + "格式不正确";
+                    throw new IllegalArgumentException(errorMessage);
                 }
             }
         }
