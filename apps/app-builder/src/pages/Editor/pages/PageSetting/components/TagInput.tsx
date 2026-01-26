@@ -47,6 +47,7 @@ const TagInput: React.FC<TagInputProps> = ({
   const [systemFields, setSystemFields] = useState<FieldItem[]>([]);
   const [tags, setTags] = useState<TagItem[]>([]);
   const [searchValue, setSearchValue] = useState('');
+  const [isFocused, setIsFocused] = useState(false);
   const fieldSelectorRef = useRef<HTMLDivElement>(null);
 
   const { mainEntity } = useAppEntityStore();
@@ -222,8 +223,18 @@ const TagInput: React.FC<TagInputProps> = ({
     }),
     EditorView.baseTheme({
       '.cm-gutterElement': { display: 'none' },
-      '.cm-content': { padding: 0 },
-      '.cm-gutters.cm-gutters-before': { borderRightWidth: 0 }
+      '.cm-content': { padding: '4px 12px' },
+      '.cm-gutters.cm-gutters-before': { borderRightWidth: 0 },
+      '.cm-activeLine': { backgroundColor: 'transparent' },
+      '.cm-activeLineGutter': { backgroundColor: 'transparent' }
+    }),
+    EditorView.domEventHandlers({
+      focus: () => {
+        setIsFocused(true);
+      },
+      blur: () => {
+        setIsFocused(false);
+      }
     })
   ];
 
@@ -234,7 +245,7 @@ const TagInput: React.FC<TagInputProps> = ({
         value={value}
         onChange={onChange}
         height="100px"
-        placeholder={placeholder}
+        placeholder={isFocused ? '' : placeholder}
         className={styles.editor}
         extensions={extensions}
       />

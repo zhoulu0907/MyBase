@@ -126,10 +126,26 @@
 .tagInputWrapper {
   position: relative;
   width: 100%;
-  min-height: 100px;
+  height: 100px;
   border: 1px solid #e5e5e5;
   border-radius: 4px;
   background: white;
+  transition: all 0.2s;
+}
+
+.tagInputWrapper :global(.cm-editor.cm-focused) {
+  border-color: rgb(var(--primary-6));
+  box-shadow: 0 0 0 1px rgba(var(--primary-6), 1);
+}
+
+.tagInputWrapper :global(.cm-scroller) {
+  overflow: auto;
+}
+
+.tagInputWrapper :global(.cm-line) {
+  padding: 0;
+  min-height: 32px;
+  line-height: 32px;
 }
 
 .tagInputContent {
