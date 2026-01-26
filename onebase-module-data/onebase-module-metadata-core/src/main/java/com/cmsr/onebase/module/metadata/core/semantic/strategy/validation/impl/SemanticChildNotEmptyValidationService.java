@@ -53,9 +53,12 @@ public class SemanticChildNotEmptyValidationService implements SemanticValidatio
                 count = list == null ? 0 : list.size();
             }
             if (count < minRows) {
-                String name = matched.getTargetEntityTableName();
+                String name = matched.getTargetEntityDisplayName();
+                if (name == null || name.trim().isEmpty()) {
+                    name = matched.getTargetEntityTableName();
+                }
                 String msg = rule.getPromptMessage();
-                if (msg == null || msg.trim().isEmpty()) { msg = "子表[" + (name == null ? childUuid : name) + "]数据行不能为空"; }
+                if (msg == null || msg.trim().isEmpty()) { msg = (name == null ? "子表" : name) + "数据行不能为空"; }
                 throw new IllegalArgumentException(msg);
             }
         }
