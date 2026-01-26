@@ -409,7 +409,13 @@ public class DraftSemanticDataCrudService {
                             connVals.put(c.getTargetEntityTableName(), rv);
                         }
                     } else if (RelationshipTypeEnum.isConnectorRelationTable(c.getRelationshipType().getRelationshipType())) {
-                        // 读取关系表连接器的值
+                        // 读取关系表连接器的值（包括一对一关系）
+                        SemanticRelationValueDTO rv = readRelationConnector(c, id);
+                        if (rv != null) {
+                            connVals.put(c.getTargetEntityTableName(), rv);
+                        }
+                    } else if (RelationshipTypeEnum.isDataSelectRelationship(c.getRelationshipType().getRelationshipType())) {
+                        // 读取数据选择关系的值（包括单选和多选）
                         SemanticRelationValueDTO rv = readRelationConnector(c, id);
                         if (rv != null) {
                             connVals.put(c.getTargetEntityTableName(), rv);

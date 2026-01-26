@@ -200,7 +200,17 @@ public class SemanticValidationManager {
             ruleDefsByGroup.computeIfAbsent(def.getGroupUuid(), k -> new ArrayList<>()).add(def);
         }
 
-        Map<String, String> fieldUuidToNameMap = fields.stream().collect(Collectors.toMap(SemanticFieldSchemaDTO::getFieldUuid, SemanticFieldSchemaDTO::getFieldName));
+        // 构建字段UUID到字段名的映射，同时添加字段ID到字段名的映射（支持规则中使用字段ID引用）
+        Map<String, String> fieldUuidToNameMap = new HashMap<>();
+        for (SemanticFieldSchemaDTO field : fields) {
+            if (field.getFieldUuid() != null && field.getFieldName() != null) {
+                fieldUuidToNameMap.put(field.getFieldUuid(), field.getFieldName());
+            }
+            // 同时添加字段ID映射，因为规则的field_value可能存储的是字段ID而非UUID
+            if (field.getId() != null && field.getFieldName() != null) {
+                fieldUuidToNameMap.put(String.valueOf(field.getId()), field.getFieldName());
+            }
+        }
 
         return new SemanticValidationContext(lengthRules, formatRules, rangeRules, requiredRules, uniqueRules, uniqueExists, ruleGroups, ruleDefsByGroup, fieldUuidToNameMap, entity.getTableName());   
     }

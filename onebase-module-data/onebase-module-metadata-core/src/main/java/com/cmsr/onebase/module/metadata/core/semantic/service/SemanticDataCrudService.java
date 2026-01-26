@@ -415,7 +415,7 @@ public class SemanticDataCrudService {
                             connVals.put(c.getTargetEntityTableName(), rv);
                         }
                     } else if (RelationshipTypeEnum.isConnectorRelationTable(c.getRelationshipType().getRelationshipType())) {
-                        // 读取关系表连接器的值
+                        // 读取关系表连接器的值（包括一对一关系）
                         SemanticFieldSchemaDTO targetFiledSchema = c.getRelationAttributes().stream().filter(attr ->
                                 attr.getFieldUuid().equals(c.getTargetKeyFieldUuid())).findFirst().orElse(null);
                         if (targetFiledSchema == null) continue;
@@ -423,7 +423,29 @@ public class SemanticDataCrudService {
                         SemanticFieldSchemaDTO sourceFiledSchema = entity.getFields().stream().filter(filed ->
                                 filed.getFieldUuid().equals(c.getSourceKeyFieldUuid())).findFirst().orElse(null);
                         if (sourceFiledSchema == null) continue;
-                        Object targetFiledValue = resultVal.getFieldValueMap().get(sourceFiledSchema.getFieldName()).getStoreValue();
+                        // 安全获取源字段值，避免NPE
+                        SemanticFieldValueDTO<?> sourceFieldValueDto = resultVal.getFieldValueMap().get(sourceFiledSchema.getFieldName());
+                        if (sourceFieldValueDto == null) continue;
+                        Object targetFiledValue = sourceFieldValueDto.getStoreValue();
+                        if (targetFiledValue == null) continue;
+                        SemanticRelationValueDTO rv = readRelationConnector(c, targetFiledName, targetFiledValue);
+                        if (rv != null) {
+                            connVals.put(c.getTargetEntityTableName(), rv);
+                        }
+                    } else if (RelationshipTypeEnum.isDataSelectRelationship(c.getRelationshipType().getRelationshipType())) {
+                        // 读取数据选择关系的值（包括单选和多选）
+                        SemanticFieldSchemaDTO targetFiledSchema = c.getRelationAttributes().stream().filter(attr ->
+                                attr.getFieldUuid().equals(c.getTargetKeyFieldUuid())).findFirst().orElse(null);
+                        if (targetFiledSchema == null) continue;
+                        String targetFiledName = targetFiledSchema.getFieldName();
+                        SemanticFieldSchemaDTO sourceFiledSchema = entity.getFields().stream().filter(filed ->
+                                filed.getFieldUuid().equals(c.getSourceKeyFieldUuid())).findFirst().orElse(null);
+                        if (sourceFiledSchema == null) continue;
+                        // 安全获取源字段值
+                        SemanticFieldValueDTO<?> sourceFieldValueDto = resultVal.getFieldValueMap().get(sourceFiledSchema.getFieldName());
+                        if (sourceFieldValueDto == null) continue;
+                        Object targetFiledValue = sourceFieldValueDto.getStoreValue();
+                        if (targetFiledValue == null) continue;
                         SemanticRelationValueDTO rv = readRelationConnector(c, targetFiledName, targetFiledValue);
                         if (rv != null) {
                             connVals.put(c.getTargetEntityTableName(), rv);
