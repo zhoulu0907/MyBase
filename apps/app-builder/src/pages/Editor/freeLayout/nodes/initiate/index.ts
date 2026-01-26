@@ -10,7 +10,7 @@ export const InitiateNodeRegistry: FlowNodeRegistry = {
   category: 'interaction',
   meta: {
     isStart: false,
-    deleteDisable: false,
+    deleteDisable: true,
     selectable: true,
     copyDisable: false,
     expandable: false,
