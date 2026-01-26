@@ -11,6 +11,7 @@ import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -30,6 +31,11 @@ public class AppAuthRoleUserImpl implements AppAuthRoleUser {
     @Override
     public void deleteByUserId(Long userId) {
         appAuthRoleUserRepository.deleteByUserId(userId);
+    }
+
+    @Override
+    public void deleteByTenant(Long tenantId) {
+        appAuthRoleUserRepository.removeByTenant(tenantId);
     }
 
     @Override

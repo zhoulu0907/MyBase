@@ -137,4 +137,17 @@ public class DictDataRepository extends BaseDataRepository<SystemDictDataMapper,
                 .orderBy(DictDataDO.SORT, true);
         return list(queryWrapper);
     }
+
+    /**
+     * 根据字典类型批量删除字典数据
+     *
+     * @param dictTypes 字典类型集合
+     * @return 字典数据列表
+     */
+    public void removeDictDataByType(Collection<String> dictTypes) {
+        if (dictTypes == null || dictTypes.isEmpty()) {
+            return;
+        }
+        this.remove(query().in(DictDataDO.DICT_TYPE, dictTypes));
+    }
 }

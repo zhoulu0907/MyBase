@@ -5,6 +5,7 @@ import com.cmsr.onebase.module.infra.dal.dataflexdo.ssecurity.SecurityRecordDO;
 import com.cmsr.onebase.module.infra.dal.mapper.ssecurity.SecurityRecordMapper;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -49,6 +50,27 @@ public class SecurityRecordDataRepository extends ServiceImpl<SecurityRecordMapp
         queryWrapper.orderBy(BaseDO.CREATE_TIME, false);
         queryWrapper.limit(1);
         return getOne(queryWrapper);
+    }
+
+    /**
+     * 根据租户ID逻辑删除安全记录
+     *
+     * @param tenantId 租户ID
+     * @return 删除记录数量
+     */
+    public long deleteByTenantId(Long tenantId) {
+        QueryWrapper queryWrapper = QueryWrapper.create();
+        queryWrapper.eq(SecurityRecordDO.TENANT_ID, tenantId);
+        return remove(queryWrapper)? NumberUtils.INTEGER_ONE : NumberUtils.INTEGER_ZERO;
+    }
+
+    /**
+     * 根据租户ID删除数据
+     *
+     * @param tenantId 租户ID
+     */
+    public void removeByTenant(Long tenantId) {
+        this.remove(query().eq("tenant_id", tenantId));
     }
 
 }
