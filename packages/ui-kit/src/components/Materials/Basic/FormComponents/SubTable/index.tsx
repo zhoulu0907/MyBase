@@ -173,7 +173,9 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
         // 数据源
         schema.config.selectedDataSource = {
           ...schema.config.selectedDataSource,
-          entityUuid: currentField.dataSelectionConfig?.targetEntityUuid
+          entityUuid: currentField.dataSelectionConfig?.targetEntityUuid,
+          tableName: currentField.dataSelectionConfig?.targetEntityName,
+          entityName: currentField.dataSelectionConfig?.targetFieldName,
         };
         // 回显字段  name
         schema.config.displayFields = currentField.dataSelectionConfig?.targetFieldName
