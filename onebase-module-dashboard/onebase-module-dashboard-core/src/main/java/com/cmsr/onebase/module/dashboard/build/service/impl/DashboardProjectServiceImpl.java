@@ -35,6 +35,7 @@ public class DashboardProjectServiceImpl extends ServiceImpl<DashboardProjectMap
 
     public static final String PROJECT_ID = "project_id";
     public static final String TENANT_ID = "tenant_id";
+    public static final String APP_ID = "app_id";
     @Resource
     DashboardProjectDataService dashboardProjectDataService;
 
@@ -65,10 +66,10 @@ public class DashboardProjectServiceImpl extends ServiceImpl<DashboardProjectMap
     }
 
     @Override
-    public Long deleteDashboardByTenantId(Long tenantId) {
+    public Long deleteDashboardByTenantId(Long appId) {
         // 根据租户ID删除该租户下的所有数据大屏项目及其相关数据
         // 先查询该租户下的所有项目
-        List<DashboardProject> dashboardProjects = list(new QueryWrapper().eq(TENANT_ID, tenantId));
+        List<DashboardProject> dashboardProjects = list(new QueryWrapper().eq(APP_ID, appId));
         
         if (CollectionUtils.isEmpty(dashboardProjects)) {
             return 0L;
@@ -82,7 +83,6 @@ public class DashboardProjectServiceImpl extends ServiceImpl<DashboardProjectMap
         // 批量删除项目关联的数据
         dashboardProjectDataService.remove(new QueryWrapper()
                 .in(PROJECT_ID, projectIds));
-        
         // 删除项目本身
         removeByIds(projectIds);
         

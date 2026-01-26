@@ -425,12 +425,12 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
     }
 
     @Override
-    public long deleteSecurityConfigsByTenantIds(Long tenantId) {
-      return  securityConfigDataRepository.deleteByTenantId(tenantId);
+    public void removeSecurityConfigsByTenantIds(Long tenantId) {
+        securityConfigDataRepository.removeByTenant(tenantId);
     }
 
     @Override
-    public long deleteSecurityRecordsByTenantIds(Long tenantId) {
-        return  securityRecordDataRepository.deleteByTenantId(tenantId);
+    public void removeSecurityRecordsByTenantIds(Long tenantId) {
+        securityRecordDataRepository.removeByTenant(tenantId);
     }
 }

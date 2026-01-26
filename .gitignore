@@ -6,8 +6,6 @@ target/
 
 .flattened-pom.xml
 
-### local config###
-*.yaml
 
 ### STS ###
 .apt_generated

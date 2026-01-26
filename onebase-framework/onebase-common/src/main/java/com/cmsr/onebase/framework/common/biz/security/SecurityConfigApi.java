@@ -219,7 +219,7 @@ public interface SecurityConfigApi {
      * @return 删除记录数量
      */
     @PostMapping("/delete-config-by-tenant")
-    CommonResult<Long> deleteSecurityConfigsByTenantId(@RequestParam("tenantId") Long tenantId);
+    CommonResult<Long> removeSecurityConfigsByTenantId(@RequestParam("tenantId") Long tenantId);
 
     /**
      * 根据租户ID删除安全记录
@@ -228,5 +228,5 @@ public interface SecurityConfigApi {
      * @return 删除记录数量
      */
     @PostMapping("/delete-record-by-tenant")
-    CommonResult<Long> deleteSecurityRecordsByTenantId(@RequestParam("tenantId") Long tenantId);
+    CommonResult<Long> removeSecurityRecordsByTenantId(@RequestParam("tenantId") Long tenantId);
 }

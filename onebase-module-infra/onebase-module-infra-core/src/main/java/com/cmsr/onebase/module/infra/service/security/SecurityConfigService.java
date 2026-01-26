@@ -74,7 +74,7 @@ public interface SecurityConfigService {
      * @param tenantId 租户ID
      * @return
      */
-    long deleteSecurityConfigsByTenantIds(Long tenantId);
+    void removeSecurityConfigsByTenantIds(Long tenantId);
 
     /**
      * 删除当前租户的所有安全记录
@@ -82,6 +82,6 @@ public interface SecurityConfigService {
      * @param tenantId 租户ID
      * @return
      */
-    long deleteSecurityRecordsByTenantIds(Long tenantId);
+    void removeSecurityRecordsByTenantIds(Long tenantId);
 
 }

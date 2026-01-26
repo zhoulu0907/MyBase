@@ -68,6 +68,15 @@ public class AppAuthRoleUserRepository extends ServiceImpl<AppAuthRoleUserMapper
         this.remove(queryWrapper);
     }
 
+    /**
+     * 根据租户ID删除数据
+     *
+     * @param tenantId 租户ID
+     */
+    public void removeByTenant(Long tenantId) {
+        this.remove(query().eq("tenant_id", tenantId));
+    }
+
     public List<AppAuthRoleUserDO> findByUserId(Long userId) {
         QueryWrapper queryWrapper = this.query()
                 .where(APP_AUTH_ROLE_USER.USER_ID.eq(userId));

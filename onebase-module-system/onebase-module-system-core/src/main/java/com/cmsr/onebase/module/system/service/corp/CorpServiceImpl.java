@@ -384,11 +384,6 @@ public class CorpServiceImpl implements CorpService {
     }
 
     @Override
-    public List<CorpDO> findTenantCorpAll() {
-        return corpDataRepository.findAll();
-    }
-
-    @Override
     public CorpRespVO getCorp(Long id) {
         CorpDO corpDO = corpDataRepository.findById(id);
         if (corpDO == null) {

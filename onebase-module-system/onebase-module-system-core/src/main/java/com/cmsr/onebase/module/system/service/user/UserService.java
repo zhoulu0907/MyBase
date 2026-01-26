@@ -124,19 +124,6 @@ public interface UserService {
     void deleteUser(Long id);
 
     /**
-     * 批量删除用户
-     *
-     * @param ids 用户编号
-     */
-    void deleteUsers(Collection<Long> ids);
-
-    /**
-     * 获取当前租户下的所有用户
-     *
-     */
-    List<Long> getUserIds();
-
-    /**
      * 通过用户名查询用户
      *
      * @param username 用户名

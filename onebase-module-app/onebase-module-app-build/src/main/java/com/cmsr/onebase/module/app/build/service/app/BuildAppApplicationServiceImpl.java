@@ -8,6 +8,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.cmsr.onebase.module.screen.api.DashboardProjectApi;
+import jakarta.annotation.Resource;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -119,6 +121,9 @@ public class BuildAppApplicationServiceImpl implements AppApplicationService {
 
     @Autowired
     private AppNavigationRepository appNavigationRepository;
+
+    @Resource
+    private DashboardProjectApi dashboardProjectApi;
 
     @Override
     public PageResult<ApplicationRespVO> getApplicationPage(ApplicationPageReqVO pageReqVO) {
@@ -377,6 +382,8 @@ public class BuildAppApplicationServiceImpl implements AppApplicationService {
             versionRepository.deleteByApplicationId(id);
             applicationTagRepository.deleteByApplicationId(id);
             applicationRepository.removeById(id);
+            // 删除大屏
+            dashboardProjectApi.removeDashboardByAppId(id);
         });
     }
 

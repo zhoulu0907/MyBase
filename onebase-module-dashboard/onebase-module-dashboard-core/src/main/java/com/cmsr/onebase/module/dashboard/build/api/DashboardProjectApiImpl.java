@@ -68,8 +68,8 @@ public class DashboardProjectApiImpl implements DashboardProjectApi {
     }
 
     @Override
-    public Long removeDashboardByTenantId(Long tenantId) {
-        return dashboardProjectService.deleteDashboardByTenantId(tenantId);
+    public Long removeDashboardByAppId(Long appId) {
+        return dashboardProjectService.deleteDashboardByTenantId(appId);
     }
 
 }

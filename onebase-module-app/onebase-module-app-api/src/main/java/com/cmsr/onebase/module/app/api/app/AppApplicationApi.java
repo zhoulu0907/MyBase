@@ -33,5 +33,5 @@ public interface AppApplicationApi {
 
     List<ApplicationDTO> getSimpleAllAppList(Long tenantId);
 
-    void deleteApplication(Long id, String name);
+
 }

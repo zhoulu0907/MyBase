@@ -32,7 +32,6 @@ import java.util.stream.Collectors;
  */
 @Setter
 @Service
-@Primary
 public class AppApplicationApiImpl implements AppApplicationApi {
 
     @Autowired
@@ -252,13 +251,6 @@ public class AppApplicationApiImpl implements AppApplicationApi {
                 .collect(Collectors.toList());
         return getAppApplicationNavigation(applicationDTOList, appIds);
     }
-
-    @Override
-    public void deleteApplication(Long id, String name) {
-
-    }
-
-
 
     public Map<Long, List<Long>> findTagIdsByApplicationIdsGrouped(List<Long> appIds) {
         List<AppApplicationTagDO> tagDOListIds = applicationTagRepository.findTagIdsByApplicationIds(appIds);

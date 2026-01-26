@@ -429,11 +429,6 @@ public class PermissionServiceImpl implements PermissionService {
     }
 
     @Override
-    public void processUsersDeleted(Collection<Long> userIds) {
-        userRoleDataRepository.deleteByIds(userIds);
-    }
-
-    @Override
     public Set<Long> getRoleIdsListByUserId(Long userId) {
         return convertSet(userRoleDataRepository.findListByUserId(userId), UserRoleDO::getRoleId);
     }

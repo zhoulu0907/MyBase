@@ -543,26 +543,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void deleteUsers(Collection<Long> ids) {
-
-        List<Long> idsToDelete = new ArrayList<>(ids);
-        // 1. 删除用户
-        userDataRepository.deleteByIds(idsToDelete);
-        // 2.2 删除用户关联数据
-        permissionService.processUsersDeleted(idsToDelete);
-        // 2.2 删除用户岗位
-        userPostDataRepository.deleteByIds(idsToDelete);
-        // 2.2 删除用户角色
-        appAuthRoleUser.deleteByUserIds(idsToDelete);
-    }
-
-    @Override
-    public List<Long> getUserIds() {
-        List<AdminUserDO> users = userDataRepository.list();
-        return convertList(users, AdminUserDO::getId);
-    }
-
-    @Override
     public AdminUserDO getUserByUsername(String username) {
         return userDataRepository.findByUsername(username);
     }

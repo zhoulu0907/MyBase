@@ -64,4 +64,13 @@ public class SecurityRecordDataRepository extends ServiceImpl<SecurityRecordMapp
         return remove(queryWrapper)? NumberUtils.INTEGER_ONE : NumberUtils.INTEGER_ZERO;
     }
 
+    /**
+     * 根据租户ID删除数据
+     *
+     * @param tenantId 租户ID
+     */
+    public void removeByTenant(Long tenantId) {
+        this.remove(query().eq("tenant_id", tenantId));
+    }
+
 }
