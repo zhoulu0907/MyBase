@@ -91,7 +91,7 @@ public class TenantServiceImpl implements TenantService {
 
     // 空间管理员设置默认密码
     private static final String TENANT_ADMIN_PASSWORD = "AdminChina2025!";
-    public static final String TENANT = "tenant";
+    public static final  String TENANT                = "tenant";
 
     @SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection")
     @Resource // 由于 onebase.tenant.enable 配置项，可以关闭多租户的功能，所以这里只能不强制注入
@@ -585,7 +585,7 @@ public class TenantServiceImpl implements TenantService {
     }
 
     @Resource
-    private UserDataRepository userDataRepository;
+    private UserDataRepository     userDataRepository;
     @Resource
     private UserPostDataRepository userPostDataRepository;
 
@@ -619,13 +619,20 @@ public class TenantServiceImpl implements TenantService {
     @Resource
     private SystemConfigDataRepository systemConfigDataRepository;
 
+    @Resource
+    private UserAppRelationDataRepository userAppRelationDataRepository;
+
     @Override
     @LogRecord(type = SYSTEM_TENANT_TYPE, subType = SYSTEM_TENANT_DELETE_SUB_TYPE, bizNo = "{{#tenant.id}}",
             success = SYSTEM_TENANT_DELETE_SUCCESS)
     @Transactional(rollbackFor = Exception.class)
     public void deleteTenant(Long tenantId) {
+        long startTime = System.currentTimeMillis();
+        log.info("开始删除空间（租户），租户ID：{}, 时间：{}", tenantId, startTime);
         // 校验存在
         TenantDO tenant = validateUpdateTenant(tenantId);
+        log.info("校验空间，空间信息：{}", tenant);
+
         // 在租户上下文中执行其他删除操作
         TenantUtils.execute(tenantId, () -> {
             // 1. 删除用户
@@ -646,6 +653,8 @@ public class TenantServiceImpl implements TenantService {
             corpDataRepository.removeByTenant(tenantId);
             // 4.1 删除企业&应用授权
             corpAppRelationDataRepository.removeByTenant(tenantId);
+            // 4.2 删除用户&应用授权
+            userAppRelationDataRepository.removeByTenant(tenantId);
             // 5. 删除租户级别字典Dict
             List<DictTypeDO> dictTypeDOList = dictTypeRepository.findAllListByOwner(TENANT, tenantId);
             // 5.1 删除字典类型对应的数据
@@ -655,20 +664,29 @@ public class TenantServiceImpl implements TenantService {
             // 6. 删除租户级别配置项Config
             systemConfigDataRepository.removeByTenant(tenantId);
             // 7. 删除安全配置和安全记录
-            securityConfigApi.removeSecurityConfigsByTenantId(tenant.getId());
-            securityConfigApi.removeSecurityRecordsByTenantId(tenant.getId());
+            securityConfigApi.removeSecurityConfigsByTenantId(tenantId);
+            securityConfigApi.removeSecurityRecordsByTenantId(tenantId);
             // 8. 删除应用和大屏
-            List<ApplicationDTO> applications = appApplicationApi.getSimpleAllAppList(tenant.getId());
+            long currentTime = System.currentTimeMillis();
+            log.info("开始删除应用，空间ID：{}, 已耗时：{} MS", tenantId, (startTime - currentTime));
+            List<ApplicationDTO> applications = appApplicationApi.getSimpleAllAppList(tenantId);
             for (ApplicationDTO application : applications) {
                 appServiceApi.deleteApplication(application.getId(), application.getAppName());
             }
+            currentTime = System.currentTimeMillis();
+            log.info("完成删除应用，空间ID：{}, 已耗时：{} MS", tenantId, (startTime - currentTime));
+
         });
         // 删除空间
         tenantDataRepository.deleteById(tenantId);
+        log.info("已删除空间，租户ID：{}", tenantId);
+
         // 记录操作日志上下文
         LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
         LogRecordContext.putVariable("loginUser", loginUser);
         LogRecordContext.putVariable("tenant", tenant);
+        long currentTime = System.currentTimeMillis();
+        log.info("完成删除空间（租户），空间ID：{}, 已耗时：{} MS", tenantId, (startTime - currentTime));
     }
 
     private TenantDO validateUpdateTenant(Long id) {
