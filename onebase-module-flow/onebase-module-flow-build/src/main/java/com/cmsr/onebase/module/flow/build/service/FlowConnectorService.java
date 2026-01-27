@@ -83,6 +83,18 @@ public interface FlowConnectorService {
     List<ConnectorActionVO> getActionList(Long connectorId);
 
     /**
+     * 获取连接器在指定环境下的动作列表
+     * <p>
+     * 从 flow_connector_env.config 字段读取动作配置
+     * 返回精简VO，按创建时间倒序排列
+     *
+     * @param connectorId 连接器ID
+     * @param envId       环境配置ID（flow_connector_env.id）
+     * @return 动作列表（精简VO）
+     */
+    List<ConnectorActionLiteVO> getActionList(Long connectorId, Long envId);
+
+    /**
      * 获取动作详情
      *
      * @param connectorId 连接器ID

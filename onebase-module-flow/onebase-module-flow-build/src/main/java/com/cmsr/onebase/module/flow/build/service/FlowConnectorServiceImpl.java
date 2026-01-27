@@ -18,6 +18,7 @@ import com.cmsr.onebase.module.flow.core.enums.FlowErrorCodeConstants;
 import com.cmsr.onebase.module.flow.core.util.ActionNameGenerator;
 import com.cmsr.onebase.module.flow.core.util.ConnectorConfigHelper;
 import com.cmsr.onebase.module.flow.core.vo.PageConnectorReqVO;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -29,8 +30,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -40,7 +43,6 @@ import com.mybatisflex.core.paginate.Page;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Setter
@@ -55,6 +57,9 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
 
     @Autowired
     private FlowNodeActionRefRepository actionRefRepository;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     private final ConnectorConfigHelper configHelper = new ConnectorConfigHelper(new ObjectMapper());
     private final ActionNameGenerator nameGenerator = new ActionNameGenerator();
@@ -392,6 +397,90 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
 
         log.info("getActionList success, connectorId: {}, count: {}", connectorId, result.size());
         return result;
+    }
+
+    @Override
+    public List<ConnectorActionLiteVO> getActionList(Long connectorId, Long envId) {
+        log.info("getActionList start, connectorId: {}, envId: {}", connectorId, envId);
+
+        // 1. 查询环境配置
+        FlowConnectorEnvDO env = connectorEnvRepository.getById(envId);
+        if (env == null) {
+            log.warn("Environment config not found, envId: {}", envId);
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_ENV_NOT_CONFIGURED);
+        }
+
+        // 2. 解析 config 字段
+        String configJson = env.getConfig();
+        if (configJson == null || configJson.isEmpty() || "null".equals(configJson)) {
+            log.info("Config is empty, return empty list, envId: {}", envId);
+            return Collections.emptyList();
+        }
+
+        try {
+            // 3. 提取 actions 对象
+            JsonNode configNode = objectMapper.readTree(configJson);
+            JsonNode actionsNode = configNode.get("actions");
+
+            if (actionsNode == null || !actionsNode.isObject()) {
+                log.info("Actions node not found or not an object, return empty list, envId: {}", envId);
+                return Collections.emptyList();
+            }
+
+            // 4. 转换为 VO 列表
+            List<ConnectorActionLiteVO> result = new ArrayList<>();
+            Iterator<Map.Entry<String, JsonNode>> fields = actionsNode.fields();
+
+            while (fields.hasNext()) {
+                Map.Entry<String, JsonNode> entry = fields.next();
+                JsonNode actionNode = entry.getValue();
+
+                // 解析创建时间
+                LocalDateTime createTime = null;
+                JsonNode createTimeNode = actionNode.get("createTime");
+                if (createTimeNode != null && !createTimeNode.isNull()) {
+                    try {
+                        createTime = LocalDateTime.parse(createTimeNode.asText());
+                    } catch (Exception e) {
+                        log.warn("Failed to parse createTime for action, using null. Value: {}, error: {}",
+                                createTimeNode.asText(), e.getMessage());
+                        createTime = null;
+                    }
+                }
+
+                ConnectorActionLiteVO vo = ConnectorActionLiteVO.builder()
+                        .actionId(getJsonText(actionNode, "actionId"))
+                        .actionName(getJsonText(actionNode, "actionName"))
+                        .actionCode(getJsonText(actionNode, "actionCode"))
+                        .status(getJsonText(actionNode, "status"))
+                        .version(actionNode.has("version") ? actionNode.get("version").asInt() : 1)
+                        .createTime(createTime)
+                        .build();
+
+                result.add(vo);
+            }
+
+            // 5. 按创建时间倒序排序（null 值排最后）
+            result.sort(Comparator.comparing(
+                    ConnectorActionLiteVO::getCreateTime,
+                    Comparator.nullsLast(Comparator.naturalOrder())
+            ).reversed());
+
+            log.info("getActionList success, connectorId: {}, envId: {}, count: {}", connectorId, envId, result.size());
+            return result;
+
+        } catch (JsonProcessingException e) {
+            log.error("Failed to parse action config, envId: {}, error: {}", envId, e.getMessage(), e);
+            throw new RuntimeException("解析动作配置失败: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 辅助方法：安全获取 JSON 字段文本值
+     */
+    private String getJsonText(JsonNode node, String fieldName) {
+        JsonNode field = node.get(fieldName);
+        return (field != null && !field.isNull()) ? field.asText() : null;
     }
 
     @Override
