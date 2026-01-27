@@ -1,6 +1,8 @@
-import { createForm } from '@formily/core';
+import { createForm, type Form } from '@formily/core';
 import { createSchemaField, FormProvider, type ISchema } from '@formily/react';
 import { componentMap, FormilyFormItem } from './componentMapper';
+import { useMemo } from 'react';
+import { Form as ArcoForm } from '@arco-design/web-react';
 
 const SchemaField = createSchemaField({
   components: {
@@ -11,14 +13,17 @@ const SchemaField = createSchemaField({
 
 interface DynamicFormProps {
   schema: ISchema;
+  form?: Form;
 }
 
-const DynamicForm = ({ schema }: DynamicFormProps) => {
-  const form = createForm();
+const DynamicForm = ({ schema, form: propForm }: DynamicFormProps) => {
+  const form = useMemo(() => propForm || createForm(), [propForm]);
 
   return (
     <FormProvider form={form}>
-      <SchemaField schema={schema} />
+      <ArcoForm layout="vertical">
+        <SchemaField schema={schema} />
+      </ArcoForm>
     </FormProvider>
   );
 }

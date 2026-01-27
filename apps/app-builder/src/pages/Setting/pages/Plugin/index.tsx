@@ -1,10 +1,12 @@
 import externalUserSVG from '@/assets/images/external_user.svg';
 import { Input, Message, Modal, Space, Spin, Switch, Tabs, Pagination, Drawer, Dropdown, Menu, Button, Form, Upload, Table, Popconfirm, Divider } from '@arco-design/web-react';
-import { IconSettings, IconEdit, IconMoreVertical, IconPlus, IconUpload, IconRight, IconDelete } from '@arco-design/web-react/icon';
-import { getPluginListApi, type pluginParams, updatePluginStatusApi, getPluginPageListApi, type pluginPageParams, createPluginApi, getPluginDetailApi, updatePluginInfoApi, uploadPluginVersionApi, getPluginVersionListApi, deletePluginVersionApi, activePluginVersionApi, enablePluginApi, disablePluginApi, getPluginConfigTemplateApi, type PluginDetailRespVO, type PluginVersionVO } from '@onebase/platform-center';
+import { IconSettings, IconEdit, IconMoreVertical, IconPlus, IconUpload } from '@arco-design/web-react/icon';
+import { getPluginListApi, type pluginParams, updatePluginStatusApi, getPluginPageListApi, type pluginPageParams, createPluginApi, getPluginDetailApi, updatePluginInfoApi, uploadPluginVersionApi, getPluginVersionListApi, deletePluginVersionApi, activePluginVersionApi, enablePluginApi, disablePluginApi, getPluginConfigTemplateApi, savePluginConfigApi, getPluginConfigDetailApi, type PluginDetailRespVO, type PluginVersionVO } from '@onebase/platform-center';
 import dayjs from 'dayjs';
 import { useEffect, useMemo, useState } from 'react';
 import MenuComp from '@/components/MenuIcon';
+import DynamicForm from '@/components/DynamicForm';
+import { createForm } from '@formily/core';
 import { webMenuIcons } from '@onebase/ui-kit';
 import { statusMapping, StatusValue } from './constants';
 import styles from './index.module.less';
@@ -40,7 +42,9 @@ const PluginPage = () => {
   const [configVisible, setConfigVisible] = useState<boolean>(false);
   const [configPlugin, setConfigPlugin] = useState<PluginItem | null>(null);
   const [configContent, setConfigContent] = useState<string>('');
+  const [configTemplates, setConfigTemplates] = useState<any[]>([]); // Store raw config templates
   const [editVisible, setEditVisible] = useState<boolean>(false);
+  const configForm = useMemo(() => createForm(), []); // Create Formily form instance
   const [currentPluginDetail, setCurrentPluginDetail] = useState<PluginDetailRespVO | null>(null);
   const [versionList, setVersionList] = useState<PluginVersionVO[]>([]);
   const [editLoading, setEditLoading] = useState<boolean>(false);
@@ -303,6 +307,106 @@ const PluginPage = () => {
                 }
             }
             
+            // Store raw config templates if available
+            if (displayData && displayData.configTemplates) {
+                setConfigTemplates(displayData.configTemplates);
+                
+                // Initial values from template (defaults)
+                const initialValues: Record<string, any> = {};
+                displayData.configTemplates.forEach((tpl: any) => {
+                    if (tpl.configKey && tpl.configValue !== undefined) {
+                        initialValues[tpl.configKey] = tpl.configValue;
+                    }
+                });
+
+                // Fetch saved config values
+                try {
+                    const detailRes = await getPluginConfigDetailApi({
+                        pluginId: plugin.pluginId,
+                        pluginVersion: plugin.pluginVersion
+                    });
+                    
+                    let savedConfigs: Record<string, any> = {};
+                    if (detailRes && (detailRes.code === 200 || detailRes.code === 0) && detailRes.data && detailRes.data.configs) {
+                        savedConfigs = detailRes.data.configs;
+                    } else if (detailRes && detailRes.configs) {
+                         // Direct data response case
+                        savedConfigs = detailRes.configs;
+                    }
+
+                    // Merge saved values into initialValues
+                    // Handle dot notation keys from savedConfigs (e.g. "baidu.apiKey")
+                    // and unflatten them into nested objects for Formily if needed.
+                    // However, Formily usually expects values matching the schema structure.
+                    // If the schema is nested, we need nested values.
+                    
+                    // Helper to unflatten dot notation keys to nested object
+                    const unflatten = (data: Record<string, any>) => {
+                        const result: Record<string, any> = {};
+                        for (const key in data) {
+                             let value = data[key];
+                             // Check if value is wrapped in configValue object
+                             if (value && typeof value === 'object' && 'configValue' in value) {
+                                 value = value.configValue;
+                             }
+                             
+                             if (value === undefined || value === null) continue;
+
+                             const parts = key.split('.');
+                             let current = result;
+                             for (let i = 0; i < parts.length - 1; i++) {
+                                 const part = parts[i];
+                                 if (!current[part]) current[part] = {};
+                                 current = current[part];
+                             }
+                             current[parts[parts.length - 1]] = value;
+                        }
+                        return result;
+                    };
+
+                    // We don't use savedValues directly, we merge into mergedValues first
+                    // const savedValues = unflatten(savedConfigs);
+                    
+                    const mergedValues = { ...initialValues };
+                    Object.keys(savedConfigs).forEach(key => {
+                        if (savedConfigs[key]?.configValue !== undefined) {
+                            mergedValues[key] = savedConfigs[key].configValue;
+                        }
+                    });
+                    
+                    const finalValues = unflatten(mergedValues);
+                    
+                    configForm.setInitialValues(finalValues);
+                    configForm.setValues(finalValues);
+
+                } catch (err) {
+                    console.error('Failed to fetch config detail', err);
+                    // Fallback to template defaults if detail fetch fails
+                    // But we need to unflatten template defaults too if they are dot-notation
+                    const unflattenedDefaults = (() => {
+                         const result: Record<string, any> = {};
+                         for (const key in initialValues) {
+                             const value = initialValues[key];
+                             const parts = key.split('.');
+                             let current = result;
+                             for (let i = 0; i < parts.length - 1; i++) {
+                                 const part = parts[i];
+                                 if (!current[part]) current[part] = {};
+                                 current = current[part];
+                             }
+                             current[parts[parts.length - 1]] = value;
+                         }
+                         return result;
+                    })();
+                    
+                    configForm.setInitialValues(unflattenedDefaults);
+                    configForm.setValues(unflattenedDefaults);
+                }
+            } else {
+                setConfigTemplates([]);
+                configForm.reset();
+            }
+
             // Check for pluginConfigInfo field and use it if available
             if (displayData && typeof displayData === 'object' && 'pluginConfigInfo' in displayData) {
                 try {
@@ -326,15 +430,82 @@ const PluginPage = () => {
         } catch (e) {
             console.error(e);
             setConfigContent('');
+            setConfigTemplates([]);
+            configForm.reset();
         }
     } else {
         setConfigContent('');
+        setConfigTemplates([]);
+        configForm.reset();
     }
   };
   const closeConfig = () => {
     setConfigVisible(false);
     setConfigPlugin(null);
     setConfigContent('');
+    setConfigTemplates([]);
+    configForm.reset();
+  };
+
+  const handleSaveConfig = async () => {
+      try {
+          if (!configPlugin?.pluginId || !configPlugin?.pluginVersion) {
+              Message.error('缺少插件信息');
+              return;
+          }
+
+          const values = await configForm.submit();
+          
+          const configs: Record<string, any> = {};
+          const formValues = values as Record<string, any>;
+          
+          // Helper function to recursively collect configs
+          const collectConfigs = (data: any, prefix = '') => {
+              Object.keys(data).forEach(key => {
+                  const value = data[key];
+                  const fullKey = prefix ? `${prefix}.${key}` : key;
+                  const template = configTemplates.find(t => t.configKey === fullKey);
+                  
+                  // Case 1: Key exists in templates -> Use it directly
+                  if (template) {
+                      configs[fullKey] = {
+                          configValue: value,
+                          valueType: template.valueType || 'normal'
+                      };
+                  } 
+                  // Case 2: Value is an object and not in templates -> Recurse
+                  else if (value && typeof value === 'object' && !Array.isArray(value)) {
+                      collectConfigs(value, fullKey);
+                  }
+                  // Case 3: Primitive value not in templates -> Add as normal config
+                  else {
+                       configs[fullKey] = {
+                          configValue: value,
+                          valueType: 'normal'
+                      };
+                  }
+              });
+          };
+
+          collectConfigs(formValues);
+          
+          const payload = {
+              pluginId: configPlugin.pluginId,
+              pluginVersion: configPlugin.pluginVersion,
+              configs
+          };
+          
+          const res = await savePluginConfigApi(payload);
+          if (res === true || (res && (res.code === 200 || res.code === 0))) {
+              Message.success('保存配置成功');
+              closeConfig();
+          } else {
+              Message.error(res?.msg || '保存配置失败');
+          }
+      } catch (error) {
+          console.error(error);
+          Message.error('保存配置失败');
+      }
   };
 
   const openEdit = async (plugin: PluginItem) => {
@@ -454,11 +625,17 @@ const PluginPage = () => {
             Message.info('功能开发中');
             return;
         }
-        if (currentPluginDetail) {
+        const refreshId = currentPluginDetail?.id || editingPluginId;
+        if (currentPluginDetail && refreshId) {
             fetchVersions(currentPluginDetail.pluginId);
-            const res = await fetchPluginDetailWrapper(currentPluginDetail.id);
+            const res = await fetchPluginDetailWrapper(refreshId);
             if (res.code === 200 || res.code === 0) {
-                setCurrentPluginDetail(res.data);
+                 // Ensure id exists in refreshed data
+                const detailData = { ...res.data };
+                if (!detailData.id) {
+                    detailData.id = refreshId;
+                }
+                setCurrentPluginDetail(detailData);
             }
         }
       } catch (error) {
@@ -597,8 +774,8 @@ const PluginPage = () => {
                       {filterSystemPlugins.map((plugin: PluginItem, index: number) => {
                         return (
                           <div className={styles.card} key={`system-${index}`}>
-                            <Space size={16} style={{ flex: 1, minWidth: 0 }}>
-                              <div className={styles.icon} style={{ backgroundColor: '#009E9E' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', flex: 1, minWidth: 0, gap: '16px' }}>
+                              <div className={styles.icon} style={{ backgroundColor: '#009E9E', flexShrink: 0 }}>
                                 <img
                                   src={externalUserSVG}
                                   style={{ width: '32px', height: '32px', filter: 'brightness(0) invert(1)' }}
@@ -608,13 +785,13 @@ const PluginPage = () => {
                                 <span className={styles.name}>{plugin.name}</span>
                                 <span className={styles.description}>{plugin.remark}</span>
                               </div>
-                            </Space>
-                            <Space>
+                            </div>
+                            <div style={{ paddingLeft: '16px', flexShrink: 0 }}>
                               <Switch
                                 checked={plugin.status === 1 ? true : false}
                                 onChange={(checked) => handleSwitchChange(plugin, checked)}
                               />
-                            </Space>
+                            </div>
                           </div>
                         );
                       })}
@@ -634,8 +811,8 @@ const PluginPage = () => {
                             key={`dynamic-${index}`}
                             style={{ borderColor: plugin.isDynamic ? '#165DFF' : '#009E9E', height: 'auto' }}
                           >
-                            <Space size={16} style={{ flex: 1, minWidth: 0 }}>
-                              <div className={styles.icon} style={{ backgroundColor: '#165DFF' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', flex: 1, minWidth: 0, gap: '16px' }}>
+                              <div className={styles.icon} style={{ backgroundColor: '#165DFF', flexShrink: 0 }}>
                                 {getIconUrl(plugin.icon) ? (
                                     <img
                                       src={getIconUrl(plugin.icon)}
@@ -679,13 +856,13 @@ const PluginPage = () => {
                                   </Dropdown>
                                 </div>
                               </div>
-                            </Space>
-                            <Space>
+                            </div>
+                            <div style={{ paddingLeft: '16px', flexShrink: 0 }}>
                               <Switch
                                 checked={plugin.status === 1 ? true : false}
                                 onChange={(checked) => handleSwitchChange(plugin, checked)}
                               />
-                            </Space>
+                            </div>
                           </div>
                         );
                       })}
@@ -878,21 +1055,35 @@ const PluginPage = () => {
       </Modal>
       <Drawer
         visible={configVisible}
-        width="40%"
+        width={800}
         title={configPlugin?.name || '插件配置'}
         onCancel={closeConfig}
         unmountOnExit
         maskClosable
+        footer={
+          <div style={{ textAlign: 'right' }}>
+            <Space>
+              <Button onClick={closeConfig}>取消</Button>
+              <Button type="primary" onClick={handleSaveConfig}>保存</Button>
+            </Space>
+          </div>
+        }
       >
         <div className={styles.configContent}>
-          <div className={styles.configItem} style={{ height: '100%' }}>
-            <Input.TextArea 
-                value={configContent} 
-                onChange={(value) => setConfigContent(value)} 
-                placeholder="请输入配置内容" 
-                style={{ height: 'calc(100vh - 200px)', minHeight: 400, fontFamily: 'monospace' }} 
-            />
-          </div>
+          {(() => {
+              let schema = null;
+              try {
+                  schema = configContent ? JSON.parse(configContent) : null;
+              } catch(e) {}
+              
+              if (schema && typeof schema === 'object' && (schema.properties || schema.type === 'object')) {
+                   return (
+                       <div style={{ padding: '0 16px', height: 'calc(100vh - 150px)', overflowY: 'auto' }}>
+                           <DynamicForm schema={schema} form={configForm} />
+                       </div>
+                   );
+              }
+          })()}
         </div>
       </Drawer>
       <Modal
