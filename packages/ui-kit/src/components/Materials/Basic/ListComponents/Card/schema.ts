@@ -31,7 +31,8 @@ import {
   type ICommonBaseType,
   type TStatusSelectKeyType,
   type TLayoutSelectKeyType,
-  type TWidthSelectKeyType
+  type TWidthSelectKeyType,
+  type TFillSelectKeyType
 } from '../../../common';
 import {
   LAYOUT_OPTIONS,
@@ -39,7 +40,7 @@ import {
   STATUS_OPTIONS,
   STATUS_VALUES,
   WIDTH_OPTIONS,
-  WIDTH_VALUES
+  WIDTH_VALUES,
 } from '../../../constants';
 
 export interface XCardSchema {
@@ -94,7 +95,7 @@ export interface XCardConfig extends ICommonBaseType {
    * 封面图片
    */
   coverField: TTextDefaultType;
-  imageFill: TTextDefaultType;
+  imageFill: TFillSelectKeyType;
 
   /**
    * 排序
