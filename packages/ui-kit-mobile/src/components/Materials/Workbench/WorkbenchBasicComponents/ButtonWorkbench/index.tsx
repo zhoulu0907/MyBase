@@ -22,8 +22,8 @@ const XButtonWorkbench = memo((props: XButtonWorkbenchConfig & { runtime?: boole
     status
   } = props;
 
-  const textAlignHorizontal = textAlign.horizontal || 'center';
-  const textAlignVertical = textAlign.vertical || 'middle'
+  const textAlignHorizontal = textAlign?.horizontal || 'center';
+  const textAlignVertical = textAlign?.vertical || 'middle'
 
   const { handleJump } = useJump();
 

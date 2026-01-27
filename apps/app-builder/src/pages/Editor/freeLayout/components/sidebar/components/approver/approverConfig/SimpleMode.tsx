@@ -4,8 +4,11 @@ import { Radio, Form, Select } from '@arco-design/web-react';
 import { IconQuestionCircle } from '@arco-design/web-react/icon';
 import styles from './index.module.less';
 import { type ApproverConfig } from '../constant';
+import { userType } from '../../../constants';
 import { getUserPage, type PageParam } from '@onebase/platform-center';
 import { getAppIdByPageSetId, listRole, type ListRoleReq } from '@onebase/app';
+import { useAppStore } from '@/store/store_app';
+import { PUBLISH_MODULE } from '@onebase/common';
 
 const FormItem = Form.Item;
 const RadioGroup = Radio.Group;
@@ -23,6 +26,8 @@ const SimpleMode = ({ setApprovalConfigData, approverConfig }: ApproverConfig) =
   const [form] = Form.useForm();
   const [selectedUser, setSelectedUser] = useState<string[]>([]);
   const [selectedRole, setSelectedRole] = useState<string[]>([]);
+  const { curAppInfo } = useAppStore();
+  
   const handleChangeUser = (val: string[]) => {
     if (val.length <= userMaxCount) {
       setSelectedUser(val);
@@ -45,51 +50,61 @@ const SimpleMode = ({ setApprovalConfigData, approverConfig }: ApproverConfig) =
   function initUserData() {
     const params: PageParam = {
       pageNo: 1,
-      pageSize: 100
+      pageSize: 100,
+      userType: userType.INNER
     };
-    getUserPage(params).then((res:any) => {
-      if (Array.isArray(res?.list)) {
-        const selectArr: any[] = [];
-        res.list?.forEach((item: any) => {
-          selectArr.push({
-            userId: item.id,
-            name: item.nickname
+    if (curAppInfo.publishModel && curAppInfo.publishModel === PUBLISH_MODULE.SASS) {
+      params.userType = userType.SAAS;
+    }
+    getUserPage(params)
+      .then((res: any) => {
+        if (Array.isArray(res?.list)) {
+          const selectArr: any[] = [];
+          res.list?.forEach((item: any) => {
+            selectArr.push({
+              userId: item.id,
+              name: item.nickname
+            });
           });
-        });
-        setUserOptions(selectArr);
-      }
-    }).catch((err:any) => {
-      console.info('Api getUserPage Error:', err)
-    })
+          setUserOptions(selectArr);
+        }
+      })
+      .catch((err: any) => {
+        console.info('Api getUserPage Error:', err);
+      });
   }
   function initRoleData() {
     if (!pageSetId) {
-      console.error('Api getAppIdByPageSetId param is Error.')
+      console.error('Api getAppIdByPageSetId param is Error.');
       return;
     }
-    getAppIdByPageSetId({ pageSetId }).then((appId:any) => {
-      if (appId) {
-        const params: ListRoleReq = {
-          applicationId: appId
-        };
-        listRole(params).then((roleRes:any) => {
-          if (Array.isArray(roleRes)) {
-            const selectArr: any[] = [];
-            roleRes?.forEach((item: any) => {
-              selectArr.push({
-                roleId: item.id,
-                roleName: item.roleName
-              });
+    getAppIdByPageSetId({ pageSetId })
+      .then((appId: any) => {
+        if (appId) {
+          const params: ListRoleReq = {
+            applicationId: appId
+          };
+          listRole(params)
+            .then((roleRes: any) => {
+              if (Array.isArray(roleRes)) {
+                const selectArr: any[] = [];
+                roleRes?.forEach((item: any) => {
+                  selectArr.push({
+                    roleId: item.id,
+                    roleName: item.roleName
+                  });
+                });
+                setRoleOptions(selectArr);
+              }
+            })
+            .catch((err: any) => {
+              console.error('Api listRole Error:', err);
             });
-            setRoleOptions(selectArr);
-          }
-        }).catch((err:any) => {
-          console.error('Api listRole Error:', err)
-        })
-      }
-    }).catch((err:any) => {
-      console.error('Api getAppIdByPageSetId Error:', err)
-    })
+        }
+      })
+      .catch((err: any) => {
+        console.error('Api getAppIdByPageSetId Error:', err);
+      });
   }
 
   function changeSimpleType(val: string) {
@@ -109,16 +124,16 @@ const SimpleMode = ({ setApprovalConfigData, approverConfig }: ApproverConfig) =
       selOptions = roleOptions;
       itemKey = 'roleId';
     }
-    const obj:any = {
+    const obj: any = {
       handlerType: simpleCkType
-    }
+    };
     if (selOptions?.length > 0) {
       obj[dataKey] = selOptions.filter((item: any) => {
         if (Array.isArray(formRes[simpleCkType])) {
           return formRes[simpleCkType].indexOf(item[itemKey]) > -1;
         }
         return false;
-      })
+      });
     }
     setApprovalConfigData('approverConfig', obj);
   }, [simpleCkType, formRes]);
@@ -161,7 +176,7 @@ const SimpleMode = ({ setApprovalConfigData, approverConfig }: ApproverConfig) =
       setSimpleCkType(handlerType);
       if (handlerType === 'user') {
         const userArr = users.map((item: any) => item.userId);
-        prevUserIdsRef.current = userArr
+        prevUserIdsRef.current = userArr;
         form.setFieldsValue({
           user: userArr
         });

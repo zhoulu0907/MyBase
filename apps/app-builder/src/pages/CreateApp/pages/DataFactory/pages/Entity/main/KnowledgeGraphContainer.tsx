@@ -71,8 +71,9 @@ export const KnowledgeGraphContainer: React.FC<KnowledgeGraphContainerProps> = (
                 isLeaf: true,
                 size: 20
               });
-              // field-edge(entity -> field)
+              // field-edge(entity -> field)，每条边需要唯一 id 避免 G6 报 "Edge already exists"
               edges.push({
+                id: `ef-${entity.entityId}-${field.fieldId}`,
                 source: entity.entityId,
                 target: field.fieldId,
                 label: '',
@@ -82,10 +83,11 @@ export const KnowledgeGraphContainer: React.FC<KnowledgeGraphContainerProps> = (
           }
         });
 
-        // 处理实体间关系
+        // 处理实体间关系，同一对实体间可能有多条关系，每条边需要唯一 id 避免 G6 报 "Edge already exists"
         if (Array.isArray(res.relationships) && res.relationships.length > 0) {
-          res.relationships.forEach((rel: Relationship) => {
+          res.relationships.forEach((rel: Relationship, index: number) => {
             edges.push({
+              id: `rel-${rel.sourceEntityId}-${rel.targetEntityId}-${index}`,
               source: rel.sourceEntityId,
               target: rel.targetEntityId,
               label:

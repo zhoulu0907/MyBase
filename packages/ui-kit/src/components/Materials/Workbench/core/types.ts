@@ -221,3 +221,13 @@ export interface IWbCheckInputConfigType {
   type: typeof WORKBENCH_CONFIG_TYPES.WB_CHECK_INPUT;
   checkboxLabel?: string; // checkbox 的标题
 }
+
+/**
+ * 资讯列表-内容配置类型
+ */
+export interface IInformationListContentConfigType {
+  key: string;
+  name: string;
+  type: typeof WORKBENCH_CONFIG_TYPES.WB_INFORMATION_LIST_CONTENT;
+  meta?: Record<string, any>;
+}

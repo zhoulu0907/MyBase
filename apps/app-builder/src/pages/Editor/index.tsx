@@ -9,6 +9,7 @@ import FlowEditorPage from './pages/FlowEditor/index';
 import { FormEditor } from './pages/FromEditor';
 import { ListEditor } from './pages/ListEditor';
 import WorkbenchEditor from './pages/WorkbenchEditor';
+import { PageSetting } from './pages/PageSetting';
 
 const EditorPage: React.FC = () => {
   useSignals();
@@ -25,6 +26,7 @@ const EditorPage: React.FC = () => {
           <Route path={EDITOR_TYPES.LIST_EDITOR} element={<ListEditor editMode={editMode.value} />} />
           <Route path={EDITOR_TYPES.FLOW_EDITOR} element={<FlowEditorPage />} />
           <Route path={EDITOR_TYPES.WORKBENCH_EDITOR} element={<WorkbenchEditor editMode={editMode.value} />} />
+          <Route path={EDITOR_TYPES.PAGE_SETTING} element={<PageSetting />} />
         </Routes>
       </div>
     </div>
