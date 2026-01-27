@@ -145,7 +145,7 @@ const XImgUpload = memo((props: XImgUploadConfig & { runtime?: boolean; detailMo
         maxSize={verify.maxSize * 1024}
         onClick={onClick}
         upload={handleUpload}
-        images={(form.getFieldValue(fieldId) || []).map((item: any) => ({ url: item.url }))}
+        images={(form?.getFieldValue(fieldId) || []).map((item: any) => ({ url: item.url }))}
         disabled={status !== STATUS_VALUES[STATUS_OPTIONS.DEFAULT] || detailMode}
         onMaxSizeExceed={(file) => {
           Toast.toast({

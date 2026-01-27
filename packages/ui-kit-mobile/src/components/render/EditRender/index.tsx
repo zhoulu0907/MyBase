@@ -59,7 +59,7 @@ const ComponentEditRender: React.FC<ComponentRenderProps> = ({ cpId, cpType, pag
     switch (cpType) {
       case FORM_COMPONENT_TYPES.INPUT_TEXT:
         return <FormComp.XInputText cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
-      case FORM_COMPONENT_TYPES.INPUT_TEXTAREA:
+        case FORM_COMPONENT_TYPES.INPUT_TEXT_AREA:
         return <FormComp.XInputTextArea cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case FORM_COMPONENT_TYPES.INPUT_EMAIL:
         return <FormComp.XInputEmail cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;

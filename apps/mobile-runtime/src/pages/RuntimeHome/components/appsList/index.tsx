@@ -36,7 +36,7 @@ const AppsList: React.FC<IProps> = ({ treeData, mobileNavLayout, loading }) => {
           <ReactSVG
             className={styles.menuIcon}
             src={
-              allMobileMenuIcons.find((ele) => ele.code === itemData.icon)?.icon ||
+              allMobileMenuIcons.find((ele) => ele.code === itemData.menuIcon)?.icon ||
               allMobileMenuIcons.find((ele) => ele.code === 'FormPage')?.icon ||
               ''
             }
@@ -66,7 +66,7 @@ const AppsList: React.FC<IProps> = ({ treeData, mobileNavLayout, loading }) => {
             <ReactSVG
               className={styles.menuIcon}
               src={
-                allMobileMenuIcons.find((ele) => ele.code === itemData.icon)?.icon ||
+                allMobileMenuIcons.find((ele) => ele.code === itemData.menuIcon)?.icon ||
                 allMobileMenuIcons.find((ele) => ele.code === 'FormPage')?.icon ||
                 ''
               }
@@ -104,7 +104,7 @@ const AppsList: React.FC<IProps> = ({ treeData, mobileNavLayout, loading }) => {
           <ReactSVG
             className={styles.menuIcon}
             src={
-              allMobileMenuIcons.find((ele) => ele.code === item.icon)?.icon ||
+              allMobileMenuIcons.find((ele) => ele.code === item.menuIcon)?.icon ||
               allMobileMenuIcons.find((ele) => ele.code === 'FormPage')?.icon ||
               ''
             }
@@ -144,7 +144,7 @@ const AppsList: React.FC<IProps> = ({ treeData, mobileNavLayout, loading }) => {
   const gridData = useMemo(() => {
     const flatData = splitAndFlatten(treeData).filter((item) => item.children && item.children.length > 0);
     return {
-      tabs: flatData.map((item) => ({ title: item.title })),
+      tabs: flatData.map((item) => ({ title: item.menuName })),
       grids: flatData
     };
   }, [treeData]);
@@ -183,7 +183,7 @@ const AppsList: React.FC<IProps> = ({ treeData, mobileNavLayout, loading }) => {
         <div className={styles.appsList}>
           <Tabs className={styles.tabs} tabs={gridData.tabs} tabBarArrange={'start'} tabBarHasDivider={false}>
             {gridData.grids.map((item) => (
-              <GridLayout data={item.children} key={item.key} />
+              <GridLayout data={item.children} key={item.id} />
             ))}
           </Tabs>
         </div>

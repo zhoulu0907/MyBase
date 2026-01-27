@@ -45,7 +45,7 @@ const XSwitch = memo((props: XSwitchConfig & { runtime?: boolean; detailMode?: b
           checked={switchChecked}
           onChange={(value) => {
             setSwitchChecked(value);
-            form.setFieldValue(fieldId, value);
+            form?.setFieldValue(fieldId, value);
           }}
         />
       </div>
