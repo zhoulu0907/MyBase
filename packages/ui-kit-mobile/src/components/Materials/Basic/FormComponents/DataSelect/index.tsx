@@ -84,7 +84,7 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
     e.stopPropagation();
     const value = options.find((item) => item.id === selectedKeys[0]);
     setLastSelectedKeys(selectedKeys);
-    form.setFieldValue(fieldId, value);
+    form?.setFieldValue(fieldId, value);
 
     const data = dataList.find((item) => item.id === selectedKeys[0]);
     fillDatabyRule(data);

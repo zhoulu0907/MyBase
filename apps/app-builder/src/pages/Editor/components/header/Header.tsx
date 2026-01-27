@@ -420,9 +420,7 @@ export default function EditorHeader() {
       if (appResp.appName) {
         setAppName(appResp.appName);
       }
-      if (appResp.appStatusText) {
-        setAppStatus(appResp.appStatus);
-      }
+      setAppStatus(AppStatus.DEVELOPING);
     }
 
     // 获取数据源ID
@@ -525,7 +523,7 @@ export default function EditorHeader() {
           return;
         }
       }
-      const res = await fetchPublish({ id: flowId });
+      await fetchPublish({ id: flowId });
       getVersonList();
       Message.success('发布成功');
     } catch (error) {
