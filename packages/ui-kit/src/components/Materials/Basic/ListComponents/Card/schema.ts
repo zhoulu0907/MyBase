@@ -27,11 +27,12 @@ import {
   groupFilterConfig,
   statusConfig,
   layoutConfig,
-  widthConfig,
+  cardWidthConfig,
   type ICommonBaseType,
   type TStatusSelectKeyType,
   type TLayoutSelectKeyType,
-  type TWidthSelectKeyType
+  type TWidthSelectKeyType,
+  type TFillSelectKeyType
 } from '../../../common';
 import {
   LAYOUT_OPTIONS,
@@ -39,7 +40,7 @@ import {
   STATUS_OPTIONS,
   STATUS_VALUES,
   WIDTH_OPTIONS,
-  WIDTH_VALUES
+  WIDTH_VALUES,
 } from '../../../constants';
 
 export interface XCardSchema {
@@ -79,11 +80,11 @@ export interface XCardConfig extends ICommonBaseType {
   /**
    * 显示字段
    */
-  displayFields: TBooleanDefaultType;
+  showFields: TBooleanDefaultType;
   columns?: any[];
 
   // 卡片标题字段
-  titleField: TTextDefaultType;
+  titleField?: TTextDefaultType;
 
   /**
    * 搜索项
@@ -94,7 +95,7 @@ export interface XCardConfig extends ICommonBaseType {
    * 封面图片
    */
   coverField: TTextDefaultType;
-  imageFill: TTextDefaultType;
+  imageFill: TFillSelectKeyType;
 
   /**
    * 排序
@@ -130,6 +131,11 @@ export interface XCardConfig extends ICommonBaseType {
    * 宽度
    */
   width: TSelectDefaultType<TWidthSelectKeyType>;
+
+  /**
+   * 卡片宽度
+   */
+  cardWidth: TSelectDefaultType<TWidthSelectKeyType>;
 }
 
 const XCard: XCardSchema = {
@@ -141,9 +147,9 @@ const XCard: XCardSchema = {
     // 封面图片
     coverImageConfig,
     // 数据排序规则
-    dataSortByConfig,
+    // dataSortByConfig,
     // 数据过滤
-    dataFilterConfig,
+    // dataFilterConfig,
     // 绑定分组筛选
     groupFilterConfig,
     // 显示状态
@@ -151,28 +157,29 @@ const XCard: XCardSchema = {
     // 字段布局方式
     layoutConfig,
     // 宽度
-    widthConfig
+    cardWidthConfig
   ],
   config: {
     ...baseDefault,
     label: {
-      text: '表格',
+      text: '卡片',
       display: false
     },
     metaData: '',
     tableName: '',
-    displayFields: true,
+    showFields: true,
     columns: [],
     titleField: '',
     searchItems: [],
     coverField: '',
-    imageFill: '',
+    imageFill: 'fill',
     sortBy: [],
     filterCondition: [],
     groupFilter: '',
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
-    width: WIDTH_VALUES[WIDTH_OPTIONS.FULL]
+    width: WIDTH_VALUES[WIDTH_OPTIONS.FULL],
+    cardWidth: WIDTH_VALUES[WIDTH_OPTIONS.QUARTER]
   }
 };
 

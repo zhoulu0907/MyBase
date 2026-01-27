@@ -115,6 +115,34 @@ export const widthConfig: IWidthConfigType<TWidthSelectKeyType> = {
   ]
 };
 
+export const cardWidthConfig: IWidthConfigType<TWidthSelectKeyType> = {
+  key: 'cardWidth',
+  name: '卡片宽度',
+  type: 'WidthRadio',
+  range: [
+    {
+      key: '1/4',
+      text: '1/4',
+      value: '25%'
+    },
+    {
+      key: '1/3',
+      text: '1/3',
+      value: '33.33%'
+    },
+    {
+      key: '1/2',
+      text: '1/2',
+      value: '50%'
+    },
+    {
+      key: 'editor.full',
+      text: 'editor.full',
+      value: '100%'
+    }
+  ]
+};
+
 // ==================== 状态与对齐 ====================
 export type TStatusSelectKeyType = 'default' | 'readonly' | 'hidden';
 export const statusConfig: IStatusConfigType<TStatusSelectKeyType> = {
@@ -455,15 +483,20 @@ export const dataSortByConfig: IDataSortByConfigType = {
 };
 
 export const dataFilterConfig: IDataFilterConfigType = {
-  key: 'filterCondition',
+  key: 'dataFilter',
   name: '数据过滤',
   type: 'DataFilter'
 };
 
 export const coverImageConfig: ICoverImageConfigType = {
-  key: 'filterCondition',
+  key: 'coverImage',
   name: '封面图片',
-  type: 'CoverImage'
+  type: 'CoverImage',
+  range: [
+    { label: '拉伸填满',  value: 'fill'},
+    { label: '居中填满',  value: 'cover'},
+    { label: '原图居中', value: 'contain'},
+  ]
 };
 
 export const groupFilterConfig: IGroupFilterConfigType = {

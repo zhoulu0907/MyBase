@@ -11,7 +11,7 @@ interface Props {
 }
 
 const DynamicGroupFilterConfig = ({ handlePropsChange, item, configs }: Props) => {
-  return <Form.Item className={styles.formItem} label="绑定分组筛选">ss</Form.Item>;
+  return <Form.Item className={styles.formItem} label="绑定分组筛选">绑定分组筛选</Form.Item>;
 };
 
 export default DynamicGroupFilterConfig;

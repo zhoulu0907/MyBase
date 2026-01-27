@@ -97,8 +97,6 @@ const Attributes = ({ cpID }: ConfigsProps) => {
   };
 
   const handleMultiPropsChange = (updates: { key: string; value: string | number | boolean | any[] }[]) => {
-    console.log(`更新了属性: ${updates}`);
-
     // 将 updates 数组中的每个 key-value 展开到 config 中
     const updatesObj = updates.reduce(
       (acc, cur) => {
@@ -107,6 +105,8 @@ const Attributes = ({ cpID }: ConfigsProps) => {
       },
       {} as Record<string, any>
     );
+
+    console.log(`更新了属性:`, updatesObj);
 
     updateSchema({ ...updatesObj });
   };

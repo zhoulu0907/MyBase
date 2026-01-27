@@ -246,6 +246,7 @@ const LayoutReactSortable: React.FC<LayoutReactSortableProps> = ({
         schema.config.label.text = cpName;
         schema.config.status = STATUS_VALUES[STATUS_OPTIONS.DEFAULT];
         schema.config.subTable = item.id;
+        schema.config.tableName  = item.tableName;
 
         const props = {
           id: cpID,

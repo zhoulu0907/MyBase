@@ -104,6 +104,10 @@ export interface ICoverImageConfigType extends ICommonConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.COVER_IMAGE;
+  range: Array<{
+    label: string;
+    value: string;
+  }>;
 }
 export interface IGroupFilterConfigType extends ICommonConfigType {
   key: string;

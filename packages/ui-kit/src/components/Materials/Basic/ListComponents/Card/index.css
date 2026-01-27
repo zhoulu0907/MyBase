@@ -5,7 +5,7 @@
   align-items: flex-start;
   justify-content: flex-start;
   flex-wrap: wrap;
-  margin-bottom: 10px;
+  margin-bottom: 16px;
 }
 
 .headerActions {
@@ -30,6 +30,21 @@
   align-items: center;
   justify-content: flex-start;
   flex-wrap: wrap;
+}
+
+.cardContent {
+  .card {
+    box-shadow: 0px 2px 4px 0px #00000014;
+    border-radius: 8px;
+  }
+
+  .pc-list {
+    overflow: hidden;
+  }
+
+  .pc-list-row-col {
+    box-sizing: border-box;
+  }
 }
 
 .tableFormItem {
