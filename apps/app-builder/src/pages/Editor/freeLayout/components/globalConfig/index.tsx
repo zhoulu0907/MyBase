@@ -7,7 +7,9 @@ import { getEntityFieldsWithChildren, getPageSetMetaData } from '@onebase/app';
 import { getUserPage, type PageParam } from '@onebase/platform-center';
 import { useFlowEditorStor } from '@/store/index';
 import { type GlobalConfigData } from '../../context/globalConfigContext';
-import { HandlerMode, Permission, Timing, Rule, AutoApproveType } from './constants';
+import { HandlerMode, Permission, Timing, Rule, AutoApproveType, userType } from './constants';
+import { useAppStore } from '@/store/store_app';
+import { PUBLISH_MODULE } from '@onebase/common';
 import styles from './index.module.less';
 
 const RadioGroup = Radio.Group;
@@ -21,12 +23,17 @@ export function GlobalConfig(props = { visible: false, onClose: () => {} }) {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const pageSetId = searchParams.get('pageSetId') || '';
-  
+  const { curAppInfo } = useAppStore();
+
   const initUserData = () => {
     const params: PageParam = {
       pageNo: 1,
-      pageSize: 100
+      pageSize: 100,
+      userType: userType.INNER
     };
+    if (curAppInfo.publishModel && curAppInfo.publishModel === PUBLISH_MODULE.SASS) {
+      params.userType = userType.SAAS;
+    }
     getUserPage(params)
       .then((res: any) => {
         if (Array.isArray(res?.list)) {
@@ -356,7 +363,9 @@ export function GlobalConfig(props = { visible: false, onClose: () => {} }) {
                       value={option.fieldName}
                       disabled={
                         useConfigData.formSummaryCfg?.fieldConfigs.length >= 3 &&
-                        !useConfigData.formSummaryCfg?.fieldConfigs.some((field) => field.fieldName === option.fieldName)
+                        !useConfigData.formSummaryCfg?.fieldConfigs.some(
+                          (field) => field.fieldName === option.fieldName
+                        )
                       }
                     >
                       {option.displayName}

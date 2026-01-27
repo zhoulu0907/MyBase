@@ -8,6 +8,7 @@ import CarouselWorkbenchConfig from './CarouselWorkbenchConfig';
 import ButtonWorkbenchConfig from './ButtonWorkbenchConfig';
 import WelcomeCardConfig from './WelcomeCardConfig';
 import TodoListConfig from './TodoListConfig';
+import InformationListConfig from './InformationListConfig';
 
 export {
   PageConfig,
@@ -17,5 +18,6 @@ export {
   CarouselWorkbenchConfig,
   ButtonWorkbenchConfig,
   WelcomeCardConfig,
-  TodoListConfig
+  TodoListConfig,
+  InformationListConfig
 };

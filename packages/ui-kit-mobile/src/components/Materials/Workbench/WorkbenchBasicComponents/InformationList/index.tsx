@@ -1,10 +1,11 @@
-import { Divider, List, Space } from '@arco-design/web-react';
-import { IconRight } from '@arco-design/web-react/icon';
+import { Divider, Cell } from '@arco-design/mobile-react';
+import { IconArrowIn } from '@arco-design/mobile-react/esm/icon';
 import { memo, useMemo } from 'react';
-import { WORKBENCH_STATUS_OPTIONS, WORKBENCH_STATUS_VALUES, WORKBENCH_THEME_OPTIONS } from '../../core/constants';
-import type { InformationListItem, XInformationListConfig } from './schema';
+import { WORKBENCH_STATUS_OPTIONS, WORKBENCH_STATUS_VALUES, WORKBENCH_THEME_OPTIONS, workbenchSchema, type InformationListItem } from '@onebase/ui-kit';
 import { useJump } from '../../hooks/useJump';
 import styles from './index.module.css';
+
+type XInformationListConfig = typeof workbenchSchema.XInformationList.config;
 
 const XInformationList = memo((props: XInformationListConfig & { runtime?: boolean }) => {
   const {
@@ -107,24 +108,21 @@ const XInformationList = memo((props: XInformationListConfig & { runtime?: boole
           <span className={styles.informationListHeaderTitle}>{label?.text}</span>
         )}
         {showMore && (
-          <a href={showMoreLink} className={styles.showMore} onClick={() => handleShowMoreClick()}>更多<IconRight /></a>
+          <a href={showMoreLink} className={styles.showMore} onClick={() => handleShowMoreClick()}>更多<IconArrowIn /></a>
         )}
       </div>
 
       <div className={styles.informationListContent}>
-        <List
+        <Cell.Group
           className={styles.list}
-          dataSource={dataSource}
-          render={(item: any) => (
-            <List.Item
+          bordered={false}
+        >
+          {dataSource.map((item) => (
+            <Cell
               key={item.id}
               className={styles.listItem}
               onClick={() => handleItemClick(item)}
             >
-              <div
-                className={styles.row}
-                data-runtime={runtime ? 'true' : 'false'}
-              >
                 {theme === WORKBENCH_THEME_OPTIONS.THEME_1 && <div className={styles.cover}>
                   {item.image ? (
                     <img src={item.image} alt="cover" className={styles.coverImg} />
@@ -136,15 +134,15 @@ const XInformationList = memo((props: XInformationListConfig & { runtime?: boole
                 <div className={styles.meta}>
                   <div className={styles.title}>{item.title || ''}</div>
                   <div className={styles.subtitle}>{item.subtitle || ''}</div>
-                  <Space split={item.author && item.date ? <Divider type='vertical' /> : undefined} className={styles.timeContainer}>
+                  <div className={styles.timeContainer}>
                     <div className={styles.author}>{item.author || ''}</div>
+                    {item.title && item.date && <div className={styles.divider} />}
                     <div className={styles.time}>{item.date || ''}</div>
-                  </Space>
+                  </div>
                 </div>
-              </div>
-            </List.Item>
-          )}
-        />
+            </Cell>
+          ))}
+        </Cell.Group>
       </div>
     </div>
   );
