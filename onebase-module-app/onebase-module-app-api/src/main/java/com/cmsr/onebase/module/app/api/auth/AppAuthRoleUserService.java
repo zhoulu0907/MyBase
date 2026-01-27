@@ -12,6 +12,8 @@ public interface AppAuthRoleUserService {
 
     void deleteByUserId(Long userId);
 
+    void deleteByUserIds(Collection<Long> userIds);
+
     void deleteByTenant(Long tenantId);
 
     List<Long> findUserIdsByRoleIds(List<Long> roleIds);

@@ -33,6 +33,11 @@ public class AppAuthRoleUserServiceImpl implements AppAuthRoleUserService {
     }
 
     @Override
+    public void deleteByUserIds(Collection<Long> userIds) {
+        appAuthRoleUserRepository.deleteByUserIds(userIds);
+    }
+
+    @Override
     public void deleteByTenant(Long tenantId) {
         appAuthRoleUserRepository.removeByTenant(tenantId);
     }

@@ -68,6 +68,15 @@ public class AppAuthRoleUserRepository extends ServiceImpl<AppAuthRoleUserMapper
         this.remove(queryWrapper);
     }
 
+    public void deleteByUserIds(Collection<Long> userIds) {
+        if (userIds == null || userIds.isEmpty()) {
+            return;
+        }
+        QueryWrapper queryWrapper = this.query()
+                .where(APP_AUTH_ROLE_USER.USER_ID.in(userIds));
+        this.remove(queryWrapper);
+    }
+
     /**
      * 根据租户ID删除数据
      *

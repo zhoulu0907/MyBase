@@ -108,13 +108,8 @@ public class AppApplicationApiImpl implements AppApplicationApi {
             return applicationDTOList;
         }
 
-        // 按更新日期倒序排列
-        List<AppNavigationDO> sortedNavigationList = navigationList.stream()
-                .sorted(Comparator.comparing(AppNavigationDO::getUpdateTime).reversed())
-                .toList();
-
         // 按 applicationId 分组并获取每组的第一条记录
-        Map<Long, AppNavigationDO> navigationMap = sortedNavigationList.stream()
+        Map<Long, AppNavigationDO> navigationMap = navigationList.stream()
                 .filter(navigation -> navigation.getApplicationId() != null)  // 过滤 applicationId 为空的记录
                 .collect(Collectors.groupingBy(
                         AppNavigationDO::getApplicationId,  // 按 applicationId 分组

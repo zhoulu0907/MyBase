@@ -197,10 +197,19 @@ public class TenantServiceImpl implements TenantService {
     }
 
     @Override
-    public Long getTenantExistUserCount(Long tenantId) {
+    public long getTenantExistUserCount(Long tenantId) {
         // 查询当前租户下已分配的用户数量
         return TenantUtils.execute(tenantId, () -> {
             return Long.valueOf(userService.getUserCountByStatus(UserStatusEnum.NORMAL.getStatus()));
+        });
+    }
+
+
+    @Override
+    public long getTenantExistInnerUserCount(Long tenantId) {
+        // 查询当前租户下已分配的用户数量
+        return TenantUtils.execute(tenantId, () -> {
+            return userService.getInnerUserCountByStatus(UserStatusEnum.NORMAL.getStatus());
         });
     }
 

@@ -40,4 +40,9 @@ public class DataSelectionConfig {
      */
     private String targetFieldName;
 
+    /**
+     * 关联的目标表名
+     */
+    private String targetTableName;
+
 }

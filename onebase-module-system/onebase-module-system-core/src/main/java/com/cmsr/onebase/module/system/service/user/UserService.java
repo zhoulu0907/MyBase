@@ -307,7 +307,7 @@ public interface UserService {
 
     boolean findAdminByRoleIdAndUserId(Long roleId, Long userId);
 
-    Long getUserCountByCorpId(Long id);
+    Long getUserCountByCorpId(Long id, Integer status);
 
     /**
      * 验证企业用户信息
@@ -422,4 +422,18 @@ public interface UserService {
      * @return
      */
     PageResult<UserSimpleRespVO> getUserPage(@Valid UserPageApiReqVO pageReqVO);
+
+    /**
+     * 删除企业下的用户
+     *
+     * @param corpId 企业id
+     */
+    void deleteUserByCorpId(Long corpId);
+
+    /**
+     * 获取内部用户数量
+     * @param status
+     * @return
+     */
+    long getInnerUserCountByStatus(Integer status);
 }
