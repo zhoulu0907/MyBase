@@ -87,7 +87,7 @@ const XTree: XTreeSchema = {
   editData: [
     ...baseConfig,
     labelConfig,
-    {
+    /* {
       key: 'metaData',
       name: '数据绑定',
       type: 'TableData',
@@ -106,7 +106,7 @@ const XTree: XTreeSchema = {
       range: [1, 5],
       step: 1,
       advanced: false
-    },
+    }, 
     {
       key: 'border',
       name: '显示边框',
@@ -124,7 +124,7 @@ const XTree: XTreeSchema = {
       name: '鼠标悬浮效果',
       type: 'SwitchInput',
       advanced: true
-    },
+    },*/
     widthConfig,
     statusConfig
   ],

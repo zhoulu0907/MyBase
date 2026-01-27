@@ -1,59 +1,47 @@
 import { Tree } from '@arco-design/web-react';
 import { memo, useEffect, useState } from 'react';
 import {
-  CATEGORY_TYPE,
   dataMethodPageV2,
-  menuSignal,
-  PageMethodV2Params,
-  type AppEntityField
+  PageMethodV2Params
 } from '@onebase/app';
 import { isRuntimeEnv } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
-import { ENTITY_FIELD_TYPE } from '../../../../DataFactory/const';
 import './index.css';
 import type { XTreeConfig } from './schema';
+import { IconCaretDown } from '@arco-design/web-react/icon';
 
 const XTree = memo(
   (
     props: XTreeConfig & {
       runtime?: boolean;
-      preview?: boolean;
-      pageSetType?: number;
     }
   ) => {
     useSignals();
 
-    const { runtime = true, preview, pageSetType } = props;
-    const { curMenu } = menuSignal;
+    const { runtime = true } = props;
 
     const {
       id,
-      label,
       status,
-      defaultValue,
       metaData,
-      tableName,
       treeFields,
       defaultExpandLevel,
-      border,
-      showLine,
-      hover
+      showLine
     } = props;
 
     const [treeData, setTreeData] = useState<any[]>([]);
-    const [expandedKeys, setExpandedKeys] = useState<React.Key[]>([]);
-    const [selectedKeys, setSelectedKeys] = useState<React.Key[]>([]);
-    const [loading, setLoading] = useState(false);
+    const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
+    const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
 
     const getDefaultPreviewData = () => {
       return [
         {
           key: '1',
-          title: '根节点 1',
+          title: '根节点',
           children: [
             {
               key: '1-1',
-              title: '子节点 1-1',
+              title: '子节点',
               children: [
                 {
                   key: '1-1-1',
@@ -97,7 +85,6 @@ const XTree = memo(
     }, [metaData, treeFields]);
 
     const loadTreeData = async () => {
-      setLoading(true);
       try {
         const params: PageMethodV2Params = {
           entityUuid: metaData,
@@ -107,18 +94,16 @@ const XTree = memo(
         };
 
         const res = await dataMethodPageV2(params);
-        
+
         if (res?.data?.list) {
           const treeStructure = buildTreeStructure(res.data.list, treeFields);
           setTreeData(treeStructure);
-          
+
           const defaultExpanded = getDefaultExpandedKeys(treeStructure, defaultExpandLevel || 2);
           setExpandedKeys(defaultExpanded);
         }
       } catch (error) {
         console.error('加载树数据失败:', error);
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -135,12 +120,6 @@ const XTree = memo(
       const nodeMap = new Map<string, any>();
 
       data.forEach(item => {
-        let currentNode: any = {
-          key: item.id,
-          title: item[levelFieldMap.get(1)],
-          children: []
-        };
-
         for (let level = 1; level <= maxLevel; level++) {
           const fieldName = levelFieldMap.get(level);
           if (!fieldName) continue;
@@ -153,13 +132,11 @@ const XTree = memo(
               const rootNode = {
                 key: nodeKey,
                 title: fieldValue,
-                children: [],
                 level: level
               };
               nodeMap.set(nodeKey, rootNode);
               rootNodes.push(rootNode);
             }
-            currentNode = nodeMap.get(nodeKey);
           } else {
             const parentField = levelFieldMap.get(level - 1);
             const parentValue = item[parentField];
@@ -171,35 +148,26 @@ const XTree = memo(
                 const childNode = {
                   key: nodeKey,
                   title: fieldValue,
-                  children: [],
                   level: level,
                   data: item
                 };
                 nodeMap.set(nodeKey, childNode);
+
+                if (!parentNode.children) {
+                  parentNode.children = [];
+                }
                 parentNode.children.push(childNode);
               }
-              currentNode = nodeMap.get(nodeKey);
             }
           }
         }
       });
 
-      return cleanEmptyChildren(rootNodes);
+      return rootNodes;
     };
 
-    const cleanEmptyChildren = (nodes: any[]): any[] => {
-      return nodes.map(node => {
-        if (node.children && node.children.length > 0) {
-          node.children = cleanEmptyChildren(node.children);
-        } else {
-          delete node.children;
-        }
-        return node;
-      });
-    };
-
-    const getDefaultExpandedKeys = (nodes: any[], level: number): React.Key[] => {
-      const keys: React.Key[] = [];
+    const getDefaultExpandedKeys = (nodes: any[], level: number): string[] => {
+      const keys: string[] = [];
 
       const traverse = (nodeList: any[], currentLevel: number) => {
         if (currentLevel > level) return;
@@ -216,12 +184,12 @@ const XTree = memo(
       return keys;
     };
 
-    const handleSelect = (selectedKeys: React.Key[], info: any) => {
+    const handleSelect = (selectedKeys: string[], info: any) => {
       setSelectedKeys(selectedKeys);
       console.log('选中节点:', selectedKeys, info);
     };
 
-    const handleExpand = (expandedKeys: React.Key[], info: any) => {
+    const handleExpand = (expandedKeys: string[], info: any) => {
       setExpandedKeys(expandedKeys);
     };
 
@@ -231,24 +199,15 @@ const XTree = memo(
 
     return (
       <div className="x-tree-container">
-        {label?.display && (
-          <div className="x-tree-label" style={{ marginBottom: '8px' }}>
-            {label.text}
-          </div>
-        )}
         <Tree
-          data={treeData}
-          showLine={showLine}
-          bordered={border}
-          hoverable={hover}
-          defaultExpandAll={false}
-          defaultExpandedKeys={expandedKeys}
-          selectedKeys={selectedKeys}
+          treeData={treeData}
+          icons={{
+            switcherIcon: <IconCaretDown />
+          }}
+          showLine
+          autoExpandParent
           onSelect={handleSelect}
           onExpand={handleExpand}
-          loading={loading}
-          disabled={status === 'readonly'}
-          blockNode
         />
       </div>
     );
