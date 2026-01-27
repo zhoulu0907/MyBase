@@ -87,13 +87,6 @@ public class FlowConnectorEnvDO extends BaseEntity {
     private String description;
 
     /**
-     * 扩展配置（JSON格式）
-     */
-    @Schema(description = "扩展配置（JSON格式）")
-    @Column(value = "extra_config")
-    private String extraConfig;
-
-    /**
      * 动作配置（JSON格式）
      * <p>
      * 存储动作配置，包含：
