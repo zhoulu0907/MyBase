@@ -9,7 +9,7 @@ import java.util.List;
  * @Author：huangjie
  * @Date：2025/10/27 14:29
  */
-public interface AppAuthRoleUser {
+public interface AppAuthRoleUserService {
 
     void deleteByUserId(Long userId);
 
@@ -24,4 +24,5 @@ public interface AppAuthRoleUser {
     List<AuthRoleDTO> findRolesByUserId(Long userId);
 
     void grantThirdpartyUserPrivileges(Long userId, Long applicationId);
+
 }

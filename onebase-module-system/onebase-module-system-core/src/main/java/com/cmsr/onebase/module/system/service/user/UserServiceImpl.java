@@ -16,7 +16,7 @@ import com.cmsr.onebase.framework.common.util.validation.ValidationUtils;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
 import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
-import com.cmsr.onebase.module.app.api.auth.AppAuthRoleUser;
+import com.cmsr.onebase.module.app.api.auth.AppAuthRoleUserService;
 import com.cmsr.onebase.module.infra.api.config.ConfigApi;
 import com.cmsr.onebase.module.system.api.dept.dto.UserPageApiReqVO;
 import com.cmsr.onebase.module.system.convert.user.UserConvert;
@@ -124,7 +124,7 @@ public class UserServiceImpl implements UserService {
     private UserRoleDataRepository userRoleDataRepository;
 
     @Resource
-    private AppAuthRoleUser appAuthRoleUser;
+    private AppAuthRoleUserService appAuthRoleUserService;
 
     @Resource
     private UserDataRepository userDataRepository;
@@ -561,7 +561,7 @@ public class UserServiceImpl implements UserService {
         // 2.2 删除用户岗位
         userPostDataRepository.deleteByUserId(userId);
         // 2.2 删除用户角色
-        appAuthRoleUser.deleteByUserId(userId);
+        appAuthRoleUserService.deleteByUserId(userId);
         // 3. 记录操作日志上下文
         LogRecordContext.putVariable("user", user);
     }
@@ -1509,7 +1509,7 @@ public class UserServiceImpl implements UserService {
             // 4 删除用户角色
             userRoleDataRepository.deleteByUserIds(userIds);
             // 5 删除用户应用关系
-            appAuthRoleUser.deleteByUserIds(userIds);
+            appAuthRoleUserService.deleteByUserIds(userIds);
             // 6. 记录操作日志上下文
             LogRecordContext.putVariable("userIds", userIds);
         }
