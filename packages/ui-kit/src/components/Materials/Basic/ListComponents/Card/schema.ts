@@ -79,11 +79,11 @@ export interface XCardConfig extends ICommonBaseType {
   /**
    * 显示字段
    */
-  displayFields: TBooleanDefaultType;
+  showFields: TBooleanDefaultType;
   columns?: any[];
 
   // 卡片标题字段
-  titleField: TTextDefaultType;
+  titleField?: TTextDefaultType;
 
   /**
    * 搜索项
@@ -156,12 +156,12 @@ const XCard: XCardSchema = {
   config: {
     ...baseDefault,
     label: {
-      text: '表格',
+      text: '卡片',
       display: false
     },
     metaData: '',
     tableName: '',
-    displayFields: true,
+    showFields: true,
     columns: [],
     titleField: '',
     searchItems: [],
