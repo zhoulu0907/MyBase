@@ -51,7 +51,7 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
 
   const setPopupVisibleByIndex = (index: number, visible: boolean, item?: any) => {
     if (item?.buttonName && detailData?.buttonConfigs) {
-      detailData?.buttonConfigs.forEach((element: any) => {
+      detailData?.buttonConfigs?.forEach((element: any) => {
         if (element.buttonName === item.buttonName) {
           setDefaultApprovalComment(element.defaultApprovalComment);
         }
@@ -137,7 +137,7 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
         tableName: detailData?.formData?.tableName,
         data: fieldData
       });
-      setBusinessUuid(rowData.businessUuid);
+      setBusinessUuid(rowData?.businessUuid);
       setPredictVisible(true);
       return;
     }
