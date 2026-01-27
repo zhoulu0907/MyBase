@@ -45,7 +45,7 @@ export const BasicInformation: React.FC<IBasicInfoProps> = ({ industryOptions, b
       <Form.Item label="联系地址" field="address">
         <Input.TextArea placeholder="请输入详细地址" autoSize={{ minRows: 2, maxRows: 6 }} />
       </Form.Item>
-      <Form.Item label="用户上限" field="userLimit" rules={[{ required: true }]}>
+      <Form.Item label="用户上限" field="userLimit" rules={[{ required: true, message: '请输入用户上限' }]}>
         <InputNumber placeholder="请输入用户上限" max={MAX_USER_LIMIT} min={0} />
       </Form.Item>
       <Form.Item label="状态" field="status" triggerPropName="checked" rules={[{ required: true }]}>
