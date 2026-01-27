@@ -18,9 +18,9 @@ import com.cmsr.onebase.framework.tenant.config.TenantProperties;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
-import com.cmsr.onebase.module.app.api.app.ApplicationApi;
+import com.cmsr.onebase.module.app.api.app.AppServiceApi;
 import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
-import com.cmsr.onebase.module.app.api.auth.AppAuthRoleUser;
+import com.cmsr.onebase.module.app.api.auth.AppAuthRoleUserService;
 import com.cmsr.onebase.module.screen.api.DashboardProjectApi;
 import com.cmsr.onebase.module.system.api.user.AdminUserRoleApi;
 import com.cmsr.onebase.module.system.convert.tenant.TenantConvert;
@@ -142,7 +142,7 @@ public class TenantServiceImpl implements TenantService {
     private SecurityConfigApi securityConfigApi;
 
     @Resource
-    private ApplicationApi applicationApi;
+    private AppServiceApi appServiceApi;
 
     @Resource
     private DashboardProjectApi dashboardProjectApi;
@@ -593,7 +593,7 @@ public class TenantServiceImpl implements TenantService {
     private UserRoleDataRepository userRoleDataRepository;
 
     @Resource
-    private AppAuthRoleUser appAuthRoleUser;
+    private AppAuthRoleUserService appAuthRoleUserService;
 
     @Resource
     private RoleDataRepository roleDataRepository;
@@ -631,7 +631,7 @@ public class TenantServiceImpl implements TenantService {
             // 1. 删除用户
             userDataRepository.removeByTenant(tenantId);
             // 1.1. 删除用户&应用关联
-            appAuthRoleUser.deleteByTenant(tenantId);
+            appAuthRoleUserService.deleteByTenant(tenantId);
             // 1.2 删除用户&角色关联
             userRoleDataRepository.removeByTenant(tenantId);
             // 1.3 删除用户岗位
@@ -660,7 +660,7 @@ public class TenantServiceImpl implements TenantService {
             // 8. 删除应用和大屏
             List<ApplicationDTO> applications = appApplicationApi.getSimpleAllAppList(tenant.getId());
             for (ApplicationDTO application : applications) {
-                applicationApi.deleteApplication(application.getId(), application.getAppName());
+                appServiceApi.deleteApplication(application.getId(), application.getAppName());
             }
         });
         // 删除空间

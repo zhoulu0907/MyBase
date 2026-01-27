@@ -5,7 +5,7 @@ import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
 import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
-import com.cmsr.onebase.module.app.api.auth.AppAuthRoleUser;
+import com.cmsr.onebase.module.app.api.auth.AppAuthRoleUserService;
 import com.cmsr.onebase.module.system.dal.database.UserAppRelationDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.user.UserAppRelationDO;
 import com.cmsr.onebase.module.system.vo.user.UserAppPageReqVO;
@@ -46,7 +46,7 @@ public class UserAppRelationServiceImpl implements UserAppRelationService {
     private AppApplicationApi appApplicationApi;
 
     @Autowired
-    private AppAuthRoleUser appAuthRoleUser;
+    private AppAuthRoleUserService appAuthRoleUserService;
 
     @Override
     public List<UserAppRelationDO> getUserAppRelationList(UserAppPageReqVO userAppPageReqVO) {
@@ -96,7 +96,7 @@ public class UserAppRelationServiceImpl implements UserAppRelationService {
 
                 // 添加应用外部用户权限
                 ApplicationManager.withoutApplicationCondition(() -> {
-                    appAuthRoleUser.grantThirdpartyUserPrivileges(userAppReqVO.getUserId(), appId);
+                    appAuthRoleUserService.grantThirdpartyUserPrivileges(userAppReqVO.getUserId(), appId);
                 });
             });
 
