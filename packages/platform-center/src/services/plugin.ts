@@ -46,4 +46,10 @@ export const disablePluginApi = (data: { pluginId: string; pluginVersion: string
 // 获取插件配置模版
 export const getPluginConfigTemplateApi = (params: { pluginId: string; pluginVersion: string }) => pluginService.get('/config/template', params);
 
+// 保存/更新插件配置
+export const savePluginConfigApi = (data: any) => pluginService.post('/config/save', data);
+
+// 获取插件配置详情
+export const getPluginConfigDetailApi = (params: { pluginId: string; pluginVersion: string }) => pluginService.get('/config/detail', params);
+
 
