@@ -21,8 +21,8 @@ const XWelcomeCard = memo((props: XWelcomeCardConfig & { runtime?: boolean }) =>
   const { status, runtime, theme, userAvatar, userName, welcomeText, welcomeDesc } = props;
   
   const runtimeUserInfo = useMemo(
-    () => getWorkbenchRuntimeUserInfo({ avatar: userAvatar, name: userName }),
-    [userAvatar, userName]
+    () => getWorkbenchRuntimeUserInfo({ avatar: userAvatar, name: userName, runtime }),
+    [userAvatar, userName, runtime]
   );
   const hiddenStatusValue = WORKBENCH_STATUS_VALUES[WORKBENCH_STATUS_OPTIONS.HIDDEN];
   const [currentTime, setCurrentTime] = useState(() => dayjs().format('YYYY-MM-DD HH:mm:ss'));

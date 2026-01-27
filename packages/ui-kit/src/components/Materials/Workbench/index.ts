@@ -67,5 +67,6 @@ export {
   workbenchWidthConfig
 } from './config/workbenchShared';
 
+// 工具函数导出
 export { menuCacheManager } from './utils/menu-cache';
-
+export { getWorkbenchRuntimeUserInfo } from './utils/user-avatar';
