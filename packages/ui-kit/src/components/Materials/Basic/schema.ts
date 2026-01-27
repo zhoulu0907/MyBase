@@ -34,6 +34,7 @@ import XCollapse from './ListComponents/Collapse/schema';
 import XList from './ListComponents/List/schema';
 import XTable from './ListComponents/Table/schema';
 import XTimeline from './ListComponents/Timeline/schema';
+import XTree from './ListComponents/Tree/schema';
 
 import XAlert from './ShowComponents/Alert/schema';
 import XCarouselForm from './ShowComponents/Carousel/schema';
@@ -79,6 +80,7 @@ export const baseSchema = {
   XCarousel,
   XCollapse,
   XList,
+  XTree,
 
   XColumnLayout,
   XCollapseLayout,
