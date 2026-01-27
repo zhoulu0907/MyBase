@@ -24,6 +24,9 @@ public class ApplicationSimpleRespVO {
     @Schema(description = "图标颜色")
     private String iconColor;
 
+    @Schema(description = "主题色")
+    private String themeColor;
+
     @Schema(description = "版本号")
     private String versionNumber;
 
