@@ -3033,6 +3033,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             MetadataBusinessEntityDO targetEntity = metadataBusinessEntityRepository.getByEntityUuid(relationship.getTargetEntityUuid());
             if (targetEntity != null) {
                 dataSelectionConfig.setTargetEntityId(targetEntity.getId());
+                dataSelectionConfig.setTargetTableName(targetEntity.getTableName());
             }
             
             MetadataEntityFieldDO selectField = metadataEntityFieldRepository.getByFieldUuid(relationship.getSelectFieldUuid());
