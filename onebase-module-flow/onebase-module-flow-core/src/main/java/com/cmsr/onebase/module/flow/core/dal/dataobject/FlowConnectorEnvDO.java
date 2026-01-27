@@ -94,6 +94,17 @@ public class FlowConnectorEnvDO extends BaseEntity {
     private String extraConfig;
 
     /**
+     * 动作配置（JSON格式）
+     * <p>
+     * 存储动作配置，包含：
+     * - actions: 动作列表字段（actionId、actionName、actionCode、status、version、createTime）
+     * - actionDetails: 动作详细配置（basicInfo、inputConfig、outputConfig、debugConfig）
+     */
+    @Schema(description = "动作配置（JSON格式）")
+    @Column(value = "config")
+    private String config;
+
+    /**
      * 启用状态（0-禁用，1-启用）
      */
     @Schema(description = "启用状态（0-禁用，1-启用）")

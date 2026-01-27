@@ -71,6 +71,11 @@ public class FlowConnectorEnvTableDef extends TableDef {
     public final QueryColumn EXTRA_CONFIG = new QueryColumn(this, "extra_config");
 
     /**
+     * 动作配置
+     */
+    public final QueryColumn CONFIG = new QueryColumn(this, "config");
+
+    /**
      * 启用状态
      */
     public final QueryColumn ACTIVE_STATUS = new QueryColumn(this, "active_status");
@@ -130,7 +135,7 @@ public class FlowConnectorEnvTableDef extends TableDef {
      */
     public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{
             ID, ENV_UUID, ENV_NAME, ENV_CODE, TYPE_CODE, ENV_URL, AUTH_TYPE,
-            AUTH_CONFIG, DESCRIPTION, EXTRA_CONFIG, ACTIVE_STATUS, SORT_ORDER,
+            AUTH_CONFIG, DESCRIPTION, EXTRA_CONFIG, CONFIG, ACTIVE_STATUS, SORT_ORDER,
             TENANT_ID, APPLICATION_ID, CREATOR, CREATE_TIME, UPDATER,
             UPDATE_TIME, DELETED, LOCK_VERSION
     };
