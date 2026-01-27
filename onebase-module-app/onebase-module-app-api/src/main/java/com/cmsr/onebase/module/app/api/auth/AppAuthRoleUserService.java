@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.app.api.auth;
 
 import com.cmsr.onebase.module.app.api.auth.dto.AuthRoleDTO;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
