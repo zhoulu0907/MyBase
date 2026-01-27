@@ -118,6 +118,16 @@ public class DictTypeRepository extends BaseDataRepository<SystemDictTypeMapper,
     }
 
     /**
+     * 查询所有字典类型列表
+     *
+     * @return 字典类型列表
+     */
+    public List<DictTypeDO> findAllListByOwner(String dictOwnerType, Long dictOwnerId) {
+        return list(query().eq(DICT_OWNER_TYPE, dictOwnerType, StringUtils.isNotBlank(dictOwnerType))
+                .eq(DICT_OWNER_ID, dictOwnerId, dictOwnerId != null));
+    }
+
+    /**
      * 根据条件查询字典类型列表（不分页）
      *
      * @param reqVO 查询条件
@@ -181,5 +191,14 @@ public class DictTypeRepository extends BaseDataRepository<SystemDictTypeMapper,
             return Collections.emptyList();
         }
         return list(query().in(TYPE, types));
+    }
+
+    /**
+     * 根据dictOwnerId删除数据
+     *
+      * @param dictOwnerId 租户ID
+     */
+    public void removeByDictOwnerId(Long dictOwnerId) {
+        this.remove(query().eq("dict_owner_id", dictOwnerId));
     }
 }

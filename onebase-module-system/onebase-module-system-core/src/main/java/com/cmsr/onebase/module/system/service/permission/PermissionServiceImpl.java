@@ -300,6 +300,15 @@ public class PermissionServiceImpl implements PermissionService {
     }
 
     @Override
+    public void processRolesDeleted(Collection<Long> roleIds) {
+        // 标记删除 UserRole
+        userRoleDataRepository.deleteByIds(roleIds);
+        // 标记删除 RoleMenu
+        roleMenuDataRepository.deleteByIds(roleIds);
+    }
+
+
+    @Override
     @CacheEvict(value = RedisKeyConstants.MENU_ROLE_ID_LIST, key = "#menuId")
     public void processMenuDeleted(Long menuId) {
         roleMenuDataRepository.deleteByMenuId(menuId);

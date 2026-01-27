@@ -258,21 +258,22 @@ public class CorpServiceImpl implements CorpService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @LogRecord(type = SYSTEM_CORP_TYPE, subType = SYSTEM_CORP_DELETE_SUB_TYPE, bizNo = "{{#corp.id}}",
+    @LogRecord(type = SYSTEM_CORP_TYPE, subType = SYSTEM_CORP_DELETE_SUB_TYPE, bizNo = "{{#id}}",
             success = SYSTEM_CORP_DELETE_SUCCESS)
     public void deleteCorp(Long id) {
         // 查询企业
         CorpDO corp = corpDataRepository.findById(id);
-        // 删除企业
-        corpDataRepository.deleteById(id);
-        // 删除关联关系
-        corpAppRelationService.deleteCorpAppRelationByCorpId(id);
-
         // 记录操作日志上下文
         LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
 
         LogRecordContext.putVariable("loginUser", loginUser);
         LogRecordContext.putVariable("corp", corp);
+        LogRecordContext.putVariable("id", id);
+        
+        // 删除企业
+        corpDataRepository.deleteById(id);
+        // 删除关联关系
+        corpAppRelationService.deleteCorpAppRelationByCorpId(id);
     }
 
 

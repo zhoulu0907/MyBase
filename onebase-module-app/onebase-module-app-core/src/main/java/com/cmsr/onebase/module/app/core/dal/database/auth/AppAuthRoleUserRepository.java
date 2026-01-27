@@ -6,6 +6,7 @@ import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 
 import static com.cmsr.onebase.module.app.core.dal.dataobject.table.AppAuthRoleUserTableDef.APP_AUTH_ROLE_USER;
@@ -67,6 +68,15 @@ public class AppAuthRoleUserRepository extends ServiceImpl<AppAuthRoleUserMapper
         this.remove(queryWrapper);
     }
 
+    /**
+     * 根据租户ID删除数据
+     *
+     * @param tenantId 租户ID
+     */
+    public void removeByTenant(Long tenantId) {
+        this.remove(query().eq("tenant_id", tenantId));
+    }
+
     public List<AppAuthRoleUserDO> findByUserId(Long userId) {
         QueryWrapper queryWrapper = this.query()
                 .where(APP_AUTH_ROLE_USER.USER_ID.eq(userId));
@@ -78,5 +88,18 @@ public class AppAuthRoleUserRepository extends ServiceImpl<AppAuthRoleUserMapper
                 .eq(AppAuthRoleUserDO::getUserId, userId)
                 .eq(AppAuthRoleUserDO::getRoleId, roleId);
         return this.exists(queryWrapper);
+    }
+
+    /**
+     * 兼容 anyline 的 deleteByIds，返回删除行数
+     *
+     * @param ids 主键集合
+     * @return 删除行数
+     */
+    public long deleteByIds(Collection<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return 0L;
+        }
+        return this.getMapper().deleteBatchByIds(ids);
     }
 }

@@ -9,7 +9,6 @@ import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticFieldTyp
 import com.cmsr.onebase.module.metadata.core.semantic.strategy.validation.SemanticValidationContext;
 import com.cmsr.onebase.module.metadata.core.semantic.strategy.validation.SemanticValidationService;
 import com.mybatisflex.core.query.QueryWrapper;
-import com.mybatisflex.core.row.Db;
 import com.mybatisflex.core.row.Row;
 
 import jakarta.annotation.Resource;
@@ -41,11 +40,10 @@ public class SemanticUniqueValidationService implements SemanticValidationServic
             if (rules.isEmpty()) { continue; }
             boolean hasEnabledRule = rules.stream().anyMatch(rule -> rule.getIsEnabled() != null && rule.getIsEnabled() == 1);
             if (!hasEnabledRule) { continue; }
-            Boolean exist = context.getUniqueExists().get(field.getId());
+            Boolean exist = context.getUniqueExists().get(field.getFieldUuid());
             boolean isExist = exist != null && exist;
             if (isExist) {
-                String prefix = context.getTableName() != null ? "表[" + context.getTableName() + "] " : "";
-                throw new IllegalArgumentException(prefix + "字段[" + field.getDisplayName() + "]值已存在");
+                throw new IllegalArgumentException(field.getDisplayName() + "值已存在");
             }
         }
     }

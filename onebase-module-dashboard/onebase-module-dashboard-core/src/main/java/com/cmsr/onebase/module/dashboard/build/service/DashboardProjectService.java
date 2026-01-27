@@ -14,5 +14,7 @@ import com.mybatisflex.core.service.IService;
 public interface DashboardProjectService extends IService<DashboardProject> {
     // 从模板创建大屏
     public Long createDashboardByTemplate(Long templateId);
+    // 通过租户ID删除大屏
+    public Long deleteDashboardByTenantId(Long tenantId);
 
 }

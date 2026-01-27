@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.app.api.auth;
 
 import com.cmsr.onebase.module.app.api.auth.dto.AuthRoleDTO;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -11,6 +12,8 @@ import java.util.List;
 public interface AppAuthRoleUser {
 
     void deleteByUserId(Long userId);
+
+    void deleteByTenant(Long tenantId);
 
     List<Long> findUserIdsByRoleIds(List<Long> roleIds);
 
