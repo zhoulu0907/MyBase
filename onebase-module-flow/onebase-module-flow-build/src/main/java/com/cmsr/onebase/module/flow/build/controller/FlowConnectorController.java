@@ -111,10 +111,15 @@ public class FlowConnectorController {
 
     // ==================== 动作管理接口 ====================
 
-    @Operation(summary = "获取连接器的动作列表")
+    @Operation(summary = "获取连接器在指定环境下的动作列表",
+              description = "返回精简VO，按创建时间倒序排列，需要传递环境配置ID")
     @GetMapping("/{connectorId}/actions")
-    public CommonResult<List<ConnectorActionVO>> getActionList(@PathVariable Long connectorId) {
-        List<ConnectorActionVO> actions = connectorService.getActionList(connectorId);
+    public CommonResult<List<ConnectorActionLiteVO>> getActionList(
+            @Parameter(description = "连接器实例ID", required = true, example = "1")
+            @PathVariable Long connectorId,
+            @Parameter(description = "环境配置ID（flow_connector_env.id）", required = true, example = "5")
+            @RequestParam Long envId) {
+        List<ConnectorActionLiteVO> actions = connectorService.getActionList(connectorId, envId);
         return CommonResult.success(actions);
     }
 
