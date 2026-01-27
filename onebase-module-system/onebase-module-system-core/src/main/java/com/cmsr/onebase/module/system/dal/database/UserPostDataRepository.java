@@ -59,6 +59,18 @@ public class UserPostDataRepository extends BaseDataRepository<SystemUserPostMap
     }
 
     /**
+     * 根据用户ID列表删除用户岗位关联
+     *
+     * @param userIds 用户ID列表
+     */
+    public void deleteByUserIds(Collection<Long> userIds) {
+        if (userIds == null || userIds.isEmpty()) {
+            return;
+        }
+        remove(query().in(UserPostDO.USER_ID, userIds));
+    }
+
+    /**
      * 根据用户ID和岗位ID列表删除用户岗位关联
      *
      * @param userId 用户ID

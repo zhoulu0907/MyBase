@@ -62,6 +62,7 @@ public interface ErrorCodeConstants {
     ErrorCode USER_TYPE_EXCEPTION = new ErrorCode(1_002_003_016, "用户类型异常:{}");
     ErrorCode USER_DEPT_LEADER_NOT_ALLOW_CHANGE = new ErrorCode(1_002_003_017, "你是【{}】部门的主管，无法转移到其他部门！");
     ErrorCode USER_DEPT_ADMIN_NOT_ALLOW_CHANGE = new ErrorCode(1_002_003_018, "你是【{}】部门的接口人，无法转移到其他部门！");
+    ErrorCode CORP_USER_COUNT_MAX = new ErrorCode(1_002_003_019, "创建/启用用户失败，原因：超过企业最大用户配额:{}！");
 
     // ========== 部门模块 1-002-004-000 ==========
     ErrorCode DEPT_NAME_DUPLICATE = new ErrorCode(1_002_004_000, "已经存在该名字的部门");

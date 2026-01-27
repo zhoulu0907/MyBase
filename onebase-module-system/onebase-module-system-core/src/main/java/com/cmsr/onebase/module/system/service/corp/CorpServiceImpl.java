@@ -19,6 +19,7 @@ import com.cmsr.onebase.module.system.dal.dataobject.dict.DictDataDO;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.enums.corp.CorpConstant;
+import com.cmsr.onebase.module.system.enums.user.UserStatusEnum;
 import com.cmsr.onebase.module.system.service.corpapprelation.CorpAppRelationService;
 import com.cmsr.onebase.module.system.service.dict.DictDataService;
 import com.cmsr.onebase.module.system.service.tenant.TenantService;
@@ -153,7 +154,8 @@ public class CorpServiceImpl implements CorpService {
         // 验证空间目前已存在用户数
         Long tenantRealUserCount = tenantService.getTenantExistUserCount(loginUser.getTenantId());
         if (corpId != null){
-            Long userCountLong = userService.getUserCountByCorpId(corpId);
+            // 如果企业id不为空，说明是修改企业，需要排除当前企业的用户数量
+            Long userCountLong = userService.getUserCountByCorpId(corpId, UserStatusEnum.NORMAL.getStatus());
             tenantRealUserCount = tenantRealUserCount - userCountLong;
         }
 
@@ -263,17 +265,18 @@ public class CorpServiceImpl implements CorpService {
     public void deleteCorp(Long id) {
         // 查询企业
         CorpDO corp = corpDataRepository.findById(id);
+        // 删除企业
+        corpDataRepository.deleteById(id);
+        // 删除关联关系
+        corpAppRelationService.deleteCorpAppRelationByCorpId(id);
+        //4.删除企业下的用户
+        userService.deleteUserByCorpId(id);
+
         // 记录操作日志上下文
         LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
 
         LogRecordContext.putVariable("loginUser", loginUser);
         LogRecordContext.putVariable("corp", corp);
-        LogRecordContext.putVariable("id", id);
-        
-        // 删除企业
-        corpDataRepository.deleteById(id);
-        // 删除关联关系
-        corpAppRelationService.deleteCorpAppRelationByCorpId(id);
     }
 
 
@@ -403,7 +406,7 @@ public class CorpServiceImpl implements CorpService {
             respVO.setAdminMobile(userDO.getMobile());
         }
         respVO.setAppCount(getCorpAppCount(id));
-        Long userCountLong = userService.getUserCountByCorpId(id);
+        Long userCountLong = userService.getUserCountByCorpId(id, null);
         Integer userCount = (userCountLong != null) ? userCountLong.intValue() : 0;
         respVO.setUserCount(userCount);
 
