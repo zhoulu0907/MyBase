@@ -138,7 +138,7 @@ export class HttpClient {
                 const pathURL = window.location.pathname;
                 // 正则匹配路径中的 tententId
                 const match = redirectURL.match(/\/onebase\/(\d+)\//);
-                const newTenantId = match && match.length > 1 ? match[1] : ''
+                const newTenantId = match && match.length > 1 ? match[1] : '';
                 if (isPlatformEnv()) {
                   window.location.href = `${pathURL}#/login`;
                 } else if (isBuilderEnv()) {
