@@ -519,12 +519,17 @@ public class DynamicMetadataRepository {
      * @param relationKey   关系键字段名（如某外键列）
      * @param relationValue 关系值
      * @param filterDeleted 是否过滤逻辑删除
-     * @return 结果列表；当值为空或不可解析为数值时返回空列表
+     * @return 结果列表；当值为空时返回空列表
      */
     public List<Row> selectRelationRowsByCondition(String tableName, String relationKey, Object relationValue, boolean filterDeleted) {
         ApplicationDataSourceManager.useBizDatasourceByAppId(ApplicationManager.getApplicationId());
         try {
-            QueryWrapper qw = QueryWrapper.create().where(new QueryColumn(relationKey).eq(relationValue));
+            // 将 relationValue 转换为 Long 类型，避免字符串与 bigint 类型比较出错
+            Object normalizedValue = toLongIfNotEmpty(relationValue);
+            if (normalizedValue == null) {
+                return List.of();
+            }
+            QueryWrapper qw = QueryWrapper.create().where(new QueryColumn(relationKey).eq(normalizedValue));
             if (filterDeleted) {
                 qw.and(new QueryColumn(SystemFieldConstants.OPTIONAL.DELETED).eq(0));
             }
