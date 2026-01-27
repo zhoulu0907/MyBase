@@ -27,7 +27,7 @@ import {
   groupFilterConfig,
   statusConfig,
   layoutConfig,
-  widthConfig,
+  cardWidthConfig,
   type ICommonBaseType,
   type TStatusSelectKeyType,
   type TLayoutSelectKeyType,
@@ -130,6 +130,11 @@ export interface XCardConfig extends ICommonBaseType {
    * 宽度
    */
   width: TSelectDefaultType<TWidthSelectKeyType>;
+
+  /**
+   * 卡片宽度
+   */
+  cardWidth: TSelectDefaultType<TWidthSelectKeyType>;
 }
 
 const XCard: XCardSchema = {
@@ -151,7 +156,7 @@ const XCard: XCardSchema = {
     // 字段布局方式
     layoutConfig,
     // 宽度
-    widthConfig
+    cardWidthConfig
   ],
   config: {
     ...baseDefault,
@@ -172,7 +177,8 @@ const XCard: XCardSchema = {
     groupFilter: '',
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
-    width: WIDTH_VALUES[WIDTH_OPTIONS.FULL]
+    width: WIDTH_VALUES[WIDTH_OPTIONS.FULL],
+    cardWidth: WIDTH_VALUES[WIDTH_OPTIONS.QUARTER]
   }
 };
 

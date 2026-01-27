@@ -115,6 +115,34 @@ export const widthConfig: IWidthConfigType<TWidthSelectKeyType> = {
   ]
 };
 
+export const cardWidthConfig: IWidthConfigType<TWidthSelectKeyType> = {
+  key: 'cardWidth',
+  name: '卡片宽度',
+  type: 'WidthRadio',
+  range: [
+    {
+      key: '1/4',
+      text: '1/4',
+      value: '25%'
+    },
+    {
+      key: '1/3',
+      text: '1/3',
+      value: '33.33%'
+    },
+    {
+      key: '1/2',
+      text: '1/2',
+      value: '50%'
+    },
+    {
+      key: 'editor.full',
+      text: 'editor.full',
+      value: '100%'
+    }
+  ]
+};
+
 // ==================== 状态与对齐 ====================
 export type TStatusSelectKeyType = 'default' | 'readonly' | 'hidden';
 export const statusConfig: IStatusConfigType<TStatusSelectKeyType> = {
