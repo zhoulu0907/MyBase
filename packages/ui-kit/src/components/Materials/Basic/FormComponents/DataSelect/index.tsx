@@ -142,7 +142,6 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
     if (!runtime || !isRuntimeEnv()) {
       return;
     }
-
     const tableName = props?.selectedDataSource?.tableName;
     if (!tableName) return;
     const { curMenu } = menuSignal;
@@ -152,6 +151,7 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
     };
 
     const res = await dataMethodPageV2(tableName, curMenu.value?.id, req);
+    console.log('res11111',res,displayFields)
     const lastKey = (displayFields || []).length ? displayFields[displayFields.length - 1]?.value : undefined;
     const list = Array.isArray(res?.list) ? res.list : [];
     const opts = list.map((item: any) => ({

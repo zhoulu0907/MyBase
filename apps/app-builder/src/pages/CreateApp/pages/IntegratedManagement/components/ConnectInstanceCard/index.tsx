@@ -1,6 +1,5 @@
-import jsNodeIcon from '@/assets/flow/connect/js_node.svg';
 import { Button, Dropdown, Menu, Tag, Typography } from '@arco-design/web-react';
-import { IconMoreVertical } from '@arco-design/web-react/icon';
+import { IconEdit, IconMoreVertical } from '@arco-design/web-react/icon';
 import { TypeCode, type ConnectInstance } from '@onebase/app';
 import dayjs from 'dayjs';
 import React from 'react';
@@ -28,24 +27,30 @@ const ConnectInstanceCard: React.FC<CardProps> = ({ data, onEdit, onDelete }) =>
   return (
     <div
       className={styles.card}
-      onClick={() => {
-        handleEdit(data.connectorUuid);
-      }}
     >
       <div className={styles.cardHeader}>
-        <div className={styles.cardHeaderIcon}>
-          {data.typeCode === TypeCode.SCRIPT && <img src={jsNodeIcon} alt="" />}
-        </div>
-        <div className={styles.cardHeaderContent}>
-          <Typography.Text ellipsis={{ showTooltip: true }} className={styles.cardHeaderContentTitle}>
-            {data.connectorTypeName ? `${data.connectorTypeName}-实例` : data.connectorName}
+        <div className={styles.cardHeaderTitle}>
+          <Typography.Text ellipsis={{ showTooltip: true }} style={{ fontSize: 16, fontWeight: 500 }}>
+            {data.connectorName}
           </Typography.Text>
+          <div className={styles.cardHeaderBadges} style={{ marginLeft: 8, display: 'inline-flex', gap: 8 }}>
+            <Tag color="green" size="small">已启用</Tag>
+            {/* 这里的 status 是 mock 的，后端需要返回 */}
+            <Tag color={data.status === 'configured' ? 'blue' : 'gray'} size="small">
+              {data.status === 'configured' ? '已配置' : '未配置'}
+            </Tag>
+          </div>
         </div>
       </div>
       <div className={styles.cardBody}>
         <div className={styles.cardBodyRow}>
           <div className={styles.cardBodyRowLabel}>关联类型</div>
-          <div className={styles.cardBodyRowContent}>JavaScript脚本</div>
+          <div className={styles.cardBodyRowContent}>{data.connectorTypeName || (data.typeCode === TypeCode.SCRIPT ? 'JavaScript脚本' : data.typeCode)}</div>
+        </div>
+
+        <div className={styles.cardBodyRow}>
+          <div className={styles.cardBodyRowLabel}>环境信息</div>
+          <div className={styles.cardBodyRowContent}>{data.environment || '-'}</div>
         </div>
 
         <div className={styles.cardBodyRow}>
@@ -59,16 +64,14 @@ const ConnectInstanceCard: React.FC<CardProps> = ({ data, onEdit, onDelete }) =>
           e.stopPropagation();
         }}
       >
-        <div className={styles.cardFooterLeft}>
-          <Tag color="green">已启用</Tag>
-        </div>
-        <div className={styles.cardFooterRight}>
+        <div className={styles.cardFooterRight} style={{ width: '100%', display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
           <Button
             type="text"
             size="small"
+            icon={<IconEdit />}
             onClick={(e) => {
               e.stopPropagation();
-              handleEdit(data.connectorUuid);
+              handleEdit(data.id);
             }}
           >
             编辑
@@ -95,7 +98,7 @@ const ConnectInstanceCard: React.FC<CardProps> = ({ data, onEdit, onDelete }) =>
                 </Menu>
               }
             >
-              <IconMoreVertical className={styles.cardFooterRightBtn} />
+              <Button type="text" size="small" icon={<IconMoreVertical />} />
             </Dropdown>
           </div>
         </div>

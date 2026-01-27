@@ -1,6 +1,6 @@
 import { Button, Modal, Steps, Upload, Radio, Tag, Progress, Alert, Input } from '@arco-design/web-react';
 import { IconUpload, IconLoading, IconRefresh, IconCheckCircleFill, IconEdit } from '@arco-design/web-react/icon';
-import { type Application } from '@onebase/app';
+import { ExportStatus, type Application } from '@onebase/app';
 import { uploadFile, getFileUrlById } from '@onebase/platform-center';
 import { useState } from 'react';
 import styles from './index.module.less';
@@ -26,7 +26,7 @@ const AppImportModal: React.FC<AppImportModalProps> = ({ visible, onClose, onCom
   const [importRange, setImportRange] = useState<string[]>([]);
 
   const [progressPercent, setProgressPercent] = useState(0);
-  const [installStatus, setInstallStatus] = useState('installing');
+  const [installStatus, setInstallStatus] = useState<ExportStatus>(ExportStatus.EXPORTING);
 
   // 下一步
   const handleNext = () => {
@@ -204,15 +204,15 @@ const AppImportModal: React.FC<AppImportModalProps> = ({ visible, onClose, onCom
             <div className={styles.progressContent}>
               <Progress
                 percent={progressPercent}
-                color={installStatus === 'error' ? '#FF7D00' : 'rgb(var(--primary-6))'}
+                color={installStatus === ExportStatus.ERROR ? '#FF7D00' : 'rgb(var(--primary-6))'}
                 size="large"
                 showText={false}
               />
-              {installStatus === 'installing' && (
+              {installStatus === ExportStatus.EXPORTING && (
                 <div className={styles.progressTips}>{`正在安装应用，进度${progressPercent}%`}</div>
               )}
-              {installStatus === 'success' && <div className={styles.progressTips}>安装成功</div>}
-              {installStatus === 'error' && (
+              {installStatus === ExportStatus.SUCCESS && <div className={styles.progressTips}>安装成功</div>}
+              {installStatus === ExportStatus.ERROR && (
                 <div className={styles.progressTips}>
                   <span>安装失败</span>
                   <Button type="text" status="danger" icon={<IconRefresh />}>

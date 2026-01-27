@@ -291,7 +291,7 @@ const PlatformInfo: React.FC = () => {
                     <Space>
                       <span>{licenseInfo?.actualTenantCount || '--'}</span>
                       <span> / </span>
-                      <span>{licenseInfo?.userLimit || '--'}</span>
+                      <span>{licenseInfo?.tenantLimit || '--'}</span>
                     </Space>
                   )
                 }

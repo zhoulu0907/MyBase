@@ -1,6 +1,6 @@
 import { Avatar, Button, Image } from '@arco-design/web-react';
 import { useRef } from 'react';
-import { getCorpResourceById } from 'src/utils';
+import { getResourceById } from 'src/utils';
 import { UploadCommonComponent } from './upload';
 
 export type UploadSizeConfig = {
@@ -41,7 +41,7 @@ const UploadAvatarComponent: React.FC<IUploadComponentProps> = ({
         <Image
           width={size.width}
           height={size.height}
-          src={getCorpResourceById(avatarUrl)}
+          src={getResourceById(avatarUrl)}
           alt="头像"
           style={{
             width: size.width,

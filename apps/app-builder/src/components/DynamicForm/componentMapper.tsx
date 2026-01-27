@@ -24,6 +24,8 @@ import { connect, mapProps, RecursionField, useField, useFieldSchema, useForm, o
 import React from "react";
 import ReactCodeMirror from "@uiw/react-codemirror";
 import { json } from "@codemirror/lang-json";
+import { AuthSettingsCard, KeyValueList } from './AuthComponents';
+import { TokenAuthPanel } from './TokenAuthPanel';
 import { MatchDecorator, ViewPlugin, Decoration, EditorView } from "@codemirror/view";
 
 // 通用的 mapProps 辅助函数
@@ -33,10 +35,7 @@ type MapPropsOptions = {
   transformValue?: (value: any) => any; // 转换 value 的函数
 };
 
-const createFormilyComponent = <T extends React.ComponentType<any>>(
-  Component: T,
-  options: MapPropsOptions = {}
-) => {
+const createFormilyComponent = <T extends React.ComponentType<any>>(Component: T, options: MapPropsOptions = {}) => {
   const { defaultValue = undefined, valueKey = 'value', transformValue } = options;
 
   return connect(
@@ -50,7 +49,7 @@ const createFormilyComponent = <T extends React.ComponentType<any>>(
         [valueKey]: value,
         onChange: (newValue: any) => {
           onChange?.(newValue);
-        },
+        }
       };
 
       // 优先使用 props 中的 dataSource，其次使用 field.dataSource (enum)
@@ -68,9 +67,41 @@ const createFormilyComponent = <T extends React.ComponentType<any>>(
 // Formily 会自动传递 value 和 onChange，我们只需要确保它们正确映射到 Arco 组件
 const FormilyInput = createFormilyComponent(Input, { defaultValue: "" });
 const FormilyPassword = createFormilyComponent(Input.Password, { defaultValue: "" });
+const FormilyInputPassword = createFormilyComponent(Input.Password, { defaultValue: "" });
 const FormilyInputNumber = createFormilyComponent(InputNumber);
-const FormilyTextArea = createFormilyComponent(Input.TextArea, { defaultValue: "" });
-const FormilySelect = createFormilyComponent(Select);
+const FormilyTextArea = createFormilyComponent(Input.TextArea, { defaultValue: '' });
+
+// Select 组件需要特殊处理 enum 选项
+const SelectInner: React.FC<any> = (props: any) => {
+  const schema = useFieldSchema();
+  const { value, onChange, options, ...restProps } = props;
+
+  // 从 schema 中获取 enum，并转换为 options 格式
+  let selectOptions = options;
+  if (!selectOptions && schema?.enum) {
+    const enumValues = schema.enum;
+    // 判断 enum 是简单数组还是对象数组
+    if (Array.isArray(enumValues) && enumValues.length > 0) {
+      if (typeof enumValues[0] === 'object' && enumValues[0] !== null && 'value' in enumValues[0]) {
+        // 对象数组格式：[{label: 'xxx', value: 'xxx'}]
+        selectOptions = enumValues.map((item: any) => ({
+          label: item.label || item.name || String(item.value || ''),
+          value: item.value
+        }));
+      } else {
+        // 简单数组格式：['a', 'b', 'c']
+        selectOptions = enumValues.map((item: any) => ({
+          label: String(item),
+          value: item
+        }));
+      }
+    }
+  }
+
+  return <Select value={value} onChange={onChange} options={selectOptions} {...restProps} />;
+};
+
+const FormilySelect = connect(SelectInner, mapProps());
 const FormilyDatePicker = createFormilyComponent(DatePicker);
 const FormilyTimePicker = createFormilyComponent(TimePicker);
 const FormilySwitch = createFormilyComponent(Switch, {
@@ -80,6 +111,53 @@ const FormilySwitch = createFormilyComponent(Switch, {
 const FormilyRadio = createFormilyComponent(Radio.Group);
 // 兼容 x-component: "Radio.Group" 的写法
 (FormilyRadio as any).Group = FormilyRadio;
+
+
+// Radio.Group 组件需要特殊处理 enum 选项
+const RadioInner: React.FC<any> = (props: any) => {
+  const schema = useFieldSchema();
+  const { value, onChange, options, ...restProps } = props;
+
+  // 从 schema 中获取 enum，并转换为 Radio 选项
+  let radioOptions = options;
+  if (!radioOptions && schema?.enum) {
+    const enumValues = schema.enum;
+    // 判断 enum 是简单数组还是对象数组
+    if (Array.isArray(enumValues) && enumValues.length > 0) {
+      if (typeof enumValues[0] === 'object' && enumValues[0] !== null && 'value' in enumValues[0]) {
+        // 对象数组格式：[{label: 'xxx', value: 'xxx'}]
+        radioOptions = enumValues.map((item: any) => ({
+          label: item.label || item.name || String(item.value || ''),
+          value: item.value
+        }));
+      } else {
+        // 简单数组格式：['a', 'b', 'c']
+        radioOptions = enumValues.map((item: any) => ({
+          label: String(item),
+          value: item
+        }));
+      }
+    }
+  }
+
+  // 使用 Radio.Group 作为变量，避免 JSX 中直接使用 <Radio.Group>
+  const RadioGroup = Radio.Group;
+
+  // 如果有选项，使用子组件方式渲染
+  if (radioOptions && radioOptions.length > 0) {
+    return (
+      <RadioGroup value={value} onChange={onChange} {...restProps}>
+        {radioOptions.map((option: any, index: number) => (
+          <Radio key={index} value={option.value}>
+            {option.label}
+          </Radio>
+        ))}
+      </RadioGroup>
+    );
+  }
+
+  return <RadioGroup value={value} onChange={onChange} {...restProps} />;
+};
 
 const FormilyCheckbox = createFormilyComponent(Checkbox.Group, { defaultValue: [] });
 const FormilyUpload = createFormilyComponent(Upload, {
@@ -417,7 +495,7 @@ const ArrayItemsInner: React.FC<any> = () => {
   const fieldRaw = useField();
   const field = fieldRaw as any; // 类型断言，确保可以访问 value 和 setValue
   const schema = useFieldSchema();
-  const items = ((field.value || []) as any[]);
+  const items = (field.value || []) as any[];
 
   // 获取 items schema，如果是数组则取第一个，确保是单个 schema 对象
   let itemSchema: any = {};
@@ -433,14 +511,14 @@ const ArrayItemsInner: React.FC<any> = () => {
     <div>
       <Space direction="vertical" style={{ width: '100%' }} size="small">
         {items.map((_: any, index: number) => {
-          const fieldAddress = (field.address?.toString() || '') || String(index);
+          const fieldAddress = field.address?.toString() || '' || String(index);
           return (
-            <div key={`${fieldAddress}-${index}`} style={{ width: '100%', display: 'flex', alignItems: 'flex-start', gap: 8 }}>
-              <div style={{ flex: 1}}>
-                <RecursionField
-                  schema={itemSchema}
-                  name={index}
-                />
+            <div
+              key={`${fieldAddress}-${index}`}
+              style={{ width: '100%', display: 'flex', alignItems: 'flex-start', gap: 8 }}
+            >
+              <div style={{ flex: 1 }}>
+                <RecursionField schema={itemSchema} name={index} />
               </div>
               <Button
                 type="text"
@@ -485,10 +563,7 @@ const ArrayItemsInner: React.FC<any> = () => {
   );
 };
 
-export const FormilyArrayItems = connect(
-  ArrayItemsInner,
-  mapProps()
-);
+export const FormilyArrayItems = connect(ArrayItemsInner, mapProps());
 
 export const FormilyStepNav = connect(
   StepNav,
@@ -663,26 +738,37 @@ export const FormilyJsonEditor = connect(
 );
 
 // FormItem 装饰器
-export const FormilyFormItem = connect(
-  Form.Item,
-  mapProps((props: any, field: any) => {
-    const { errors, title, required, children, ...rest } = props;
-    return {
-      label: field?.title || title,
-      validateStatus: field?.errors?.length ? "error" : undefined,
-      help: field?.errors?.length ? field.errors[0].message : undefined,
-      extra: field?.description, // 映射 description 到 extra
-      required: field?.required || required,
-      children,
-      ...rest,
-    };
-  })
-);
+const FormItemInner: React.FC<any> = (props: any) => {
+  const schema = useFieldSchema();
+  const field = useField();
+  const { errors, required, children, ...rest } = props;
+
+  // 从多个来源获取 title：props.title > schema.title > field.title > field.componentProps.title
+  const finalTitle =
+    props.title || schema?.title || field?.title || field?.componentProps?.title || field?.decoratorProps?.title;
+
+  return (
+    <Form.Item
+      label={finalTitle || undefined}
+      labelCol={{ span: 4 }}
+      wrapperCol={{ span: 20 }}
+      validateStatus={errors?.length ? 'error' : undefined}
+      help={errors?.length ? errors[0].message : undefined}
+      required={required}
+      {...rest}
+    >
+      {children}
+    </Form.Item>
+  );
+};
+
+export const FormilyFormItem = connect(FormItemInner, mapProps());
 
 // 组件映射表
 export const componentMap: Record<string, React.ComponentType<any>> = {
   Input: FormilyInput,
   Password: FormilyPassword,
+  'Input.Password': FormilyInputPassword,
   InputNumber: FormilyInputNumber,
   TextArea: FormilyTextArea,
   Select: FormilySelect,
@@ -706,4 +792,7 @@ export const componentMap: Record<string, React.ComponentType<any>> = {
   Tabs: FormilyTabs,
   HorizontalLayout: FormilyHorizontalLayout,
   JsonEditor: FormilyJsonEditor,
+  AuthSettingsCard: AuthSettingsCard,
+  KeyValueList: KeyValueList,
+  TokenAuthPanel: TokenAuthPanel
 };

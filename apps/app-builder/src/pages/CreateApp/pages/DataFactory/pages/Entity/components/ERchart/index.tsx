@@ -437,7 +437,6 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
         collapseHandlerRef.current = new SectionCollapseHandler(graphRef.current);
 
         // 限制平移范围，确保节点始终可见
-        // 以当前缩放下的可见视口作为限制范围，避免缩放后点击导致画布跳动
         graphRef.current.on('translate', ({ tx, ty }) => {
           if (!graphRef.current) return;
 
@@ -445,31 +444,39 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
           if (!contentArea || contentArea.width === 0 || contentArea.height === 0) return;
 
           const graphSize = graphRef.current.getGraphArea();
-          const padding = 800; // 边距
+          const padding = 200; // 边距
 
-          // 计算内容区域的边界
+          // 内容边界（local坐标系）
           const contentLeft = contentArea.x;
           const contentRight = contentArea.x + contentArea.width;
           const contentTop = contentArea.y;
           const contentBottom = contentArea.y + contentArea.height;
 
+          // 视口大小（graph 坐标系）
           const { width: containerWidth = graphSize.width, height: containerHeight = graphSize.height } =
             containerRef.current?.getBoundingClientRect() ?? {};
-          const currentScale = graphRef.current.scale().sx;
+          const scale = graphRef.current.scale().sx;
 
-          // 计算当前缩放下的视口大小（在画布坐标系中）
-          const viewWidth = containerWidth / currentScale;
-          const viewHeight = containerHeight / currentScale;
+          // 缩放后的内容尺寸
+          const scaledLeft = contentLeft * scale;
+          const scaledRight = contentRight * scale;
+          const scaledTop = contentTop * scale;
+          const scaledBottom = contentBottom * scale;
+          const scaledWidth = scaledRight - scaledLeft;
+          const scaledHeight = scaledBottom - scaledTop;
 
-          // 以偏移量为标准，保证内容边界在视口内（留 padding）
-          const rightOffsetX = viewWidth - padding - contentRight;
-          const leftOffsetX = contentArea.width > viewWidth ? contentArea.width - viewWidth + padding : padding;
-          const bottomOffsetY =
-            contentArea.height < viewHeight ? -padding : (viewHeight - contentArea.height - padding) * currentScale;
-          const topOffsetY = contentTop - viewHeight + padding / currentScale;
+          // 计算额外平移空间：当内容缩放后超出视口时，需要更多空间
+          const extraSpaceX = Math.min(0, scaledWidth - containerWidth);
+          const extraSpaceY = Math.min(0, scaledHeight - containerHeight);
 
-          const newTx = Math.max(rightOffsetX, Math.min(leftOffsetX, tx));
-          const newTy = Math.max(bottomOffsetY, Math.min(topOffsetY, ty));
+          // 平移限制
+          const minTx = -scaledWidth - padding + extraSpaceX;
+          const maxTx = containerWidth - scaledLeft + padding + extraSpaceX;
+          const minTy = -scaledHeight - padding + extraSpaceY;
+          const maxTy = containerHeight - scaledTop + padding + extraSpaceY;
+
+          const newTx = Math.max(minTx, Math.min(maxTx, tx));
+          const newTy = Math.max(minTy, Math.min(maxTy, ty));
 
           // 限制平移值
           if (newTx !== tx || newTy !== ty) {
@@ -503,13 +510,14 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
         let isDragging = false;
         let dragStartPosition = { x: 0, y: 0 };
 
-        graphRef.current.on('node:move', ({ x, y }) => {
-          // 记录拖拽开始位置
-          dragStartPosition = { x, y };
+        graphRef.current.on('node:move', ({ node }) => {
+          // 记录节点起始位置（节点坐标系）
+          dragStartPosition = node.getPosition();
           isDragging = false; // 重置拖拽状态
         });
 
-        graphRef.current.on('node:moving', ({ x, y }) => {
+        graphRef.current.on('node:moving', ({ node }) => {
+          const { x, y } = node.getPosition();
           // 移动距离超过阈值则判断为在拖拽
           const deltaX = Math.abs(x - dragStartPosition.x);
           const deltaY = Math.abs(y - dragStartPosition.y);
@@ -520,7 +528,7 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
           }
         });
 
-        graphRef.current.on('node:moved', ({ e, x, y, node }) => {
+        graphRef.current.on('node:moved', ({ e, node }) => {
           // 阻止折叠图标点击触发
           const target = e.target as HTMLElement;
           if (
@@ -537,6 +545,7 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
           if (isDragging) {
             e.preventDefault();
             e.stopPropagation();
+            const { x, y } = node.getPosition(); // 使用节点坐标
             updateEntityPosition?.(node.getData().data, x, y);
           }
 

@@ -7,7 +7,7 @@ export const listApplicationTag = (params: ListTagReq) => {
 };
 
 // 应用标签分组统计
-export const getApplicationTagGroupCount = ()=>{
+export const getApplicationTagGroupCount = () => {
   return appService.get('/tag/group-count');
 }
 

@@ -1,15 +1,12 @@
-import { Input, Message, Spin, Tabs } from '@arco-design/web-react';
-import {
-  getConnectorNodeTypes,
-  type ConnectorItem,
-  type ConnectFlowNode
-} from '@onebase/app';
+import { Button, Input, Message, Spin, Tabs } from '@arco-design/web-react';
+import { IconClose } from '@arco-design/web-react/icon';
+import { getConnectorNodeTypes, type ConnectorItem } from '@onebase/app';
+import { getHashQueryParam } from '@onebase/common';
 import { debounce } from 'lodash-es';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import ConnectorCard from '../../../components/ConnectNodeCategoryCard';
 import { CATEGORY_MAP, transformConnectorData } from '../../../utils/transform';
-import { getHashQueryParam } from '@onebase/common';
 import styles from './index.module.less';
 
 const TabPane = Tabs.TabPane;
@@ -30,17 +27,15 @@ const ConnectorPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState('');
   const [activeTab, setActiveTab] = useState<string>('all');
-  const [selectingMode, setSelectingMode] = useState(false); // 是否处于选择模式
 
   const [connectorList, setConnectorList] = useState<ConnectorItem[]>([]);
 
-  // 检查URL参数，判断是否为选择模式
-  useEffect(() => {
-    const mode = getHashQueryParam('mode');
-    setSelectingMode(mode === 'select');
-  }, []);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [isSelectMode, setIsSelectMode] = useState(false);
 
   useEffect(() => {
+    const mode = getHashQueryParam('mode');
+    setIsSelectMode(mode === 'select' || mode === 'create');
     fetchConnectorList();
   }, []);
 
@@ -68,9 +63,10 @@ const ConnectorPage: React.FC = () => {
   };
 
   const debouncedSearch = useMemo(
-    () => debounce((value: string) => {
-      setSearchKeyword(value);
-    }, 500),
+    () =>
+      debounce((value: string) => {
+        setSearchKeyword(value);
+      }, 500),
     []
   );
 
@@ -84,12 +80,12 @@ const ConnectorPage: React.FC = () => {
     let list = connectorList;
 
     if (activeTab !== 'all') {
-      list = list.filter(item => item.category === CATEGORY_MAP[activeTab]);
+      list = list.filter((item) => item.category === CATEGORY_MAP[activeTab]);
     }
 
     if (searchKeyword) {
       const keyword = searchKeyword.toLowerCase();
-      list = list.filter(item => item.name.toLowerCase().includes(keyword));
+      list = list.filter((item) => item.name.toLowerCase().includes(keyword));
     }
 
     return list;
@@ -103,65 +99,69 @@ const ConnectorPage: React.FC = () => {
     debouncedSearch(value);
   };
 
-  const handleCardClick = async (data: ConnectorItem) => {
-    console.log('Card clicked:', data);
+
+  const handleCardClick = (data: ConnectorItem) => {
+    if (isSelectMode) {
+      setSelectedId(data.id);
+    } else {
+      console.log('Card clicked not in select mode:', data);
+    }
+  };
+
+  const handleConfirm = () => {
+    if (!selectedId) {
+      Message.warning('请选择连接器类型');
+      return;
+    }
+
+    const selectedItem = connectorList.find(item => item.id === selectedId);
+    if (!selectedItem) return;
 
     const curAppId = getHashQueryParam('appId');
-
     if (!curAppId) {
       Message.error('应用ID获取失败，无法进入配置页面');
       return;
     }
 
-    // 如果是选择模式
-    if (selectingMode) {
-      // 跳转到配置页面，传递连接器类型信息（不创建实例）
-      navigate(
-        `/onebase/${tenantId}/home/create-app/integrated-management/connector-detail?appId=${curAppId}&connectorType=${encodeURIComponent(data.id)}&connectorName=${encodeURIComponent(data.name)}&mode=create`
-      );
-    } else {
-      // 非选择模式：查看连接器详情或配置
-      // 目前只支持Script类型的连接器配置，其他类型显示"建设中"
-      if (data.id === 'script' || data.id?.toString().toLowerCase() === 'script') {
-        // Script类型连接器：跳转到配置页面（不创建实例）
-        navigate(
-          `/onebase/${tenantId}/home/create-app/integrated-management/connector-detail?appId=${curAppId}&connectorType=${encodeURIComponent(data.id)}&connectorName=${encodeURIComponent(data.name)}&mode=create`
-        );
-      } else {
-        // 其他类型连接器：显示"建设中"提示
-        Message.info(`${data.name} 连接器配置功能建设中，敬请期待！`);
-      }
-    }
+    navigate(
+      `/onebase/${tenantId}/home/create-app/integrated-management/connector-detail?appId=${curAppId}&mode=create&connectorType=${encodeURIComponent(selectedItem.id)}&connectorName=${encodeURIComponent(selectedItem.name)}&instanceCount=${selectedItem.fields.instanceCount}`
+    );
   };
 
-  const handleEdit = (id: string) => {
-    console.log('Edit clicked:', id);
-    Message.info('编辑功能待实现');
+  const handleClose = () => {
+    const curAppId = getHashQueryParam('appId');
+    navigate(`/onebase/${tenantId}/home/create-app/integrated-management/connector-instances?appId=${curAppId}`);
   };
 
   return (
     <div className={styles.connectorPage}>
       <div className={styles.header}>
         <div className={styles.title}>
-          {selectingMode ? '选择连接器类型' : '连接器类型'}
-          {selectingMode && <span style={{ fontSize: 14, color: '#999', marginLeft: 10, fontWeight: 'normal' }}>点击卡片创建实例</span>}
+          {isSelectMode ? '新建连接器实例' : '连接器类型'}
         </div>
-        <Input.Search
-          allowClear
-          placeholder="请输入类型名称搜索"
-          style={{ width: 240 }}
-          onChange={handleSearch}
-        />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <Input.Search
+            allowClear
+            placeholder="请输入类型名称搜索"
+            style={{ width: 240 }}
+            onChange={handleSearch}
+          />
+          {isSelectMode && (
+            <Button icon={<IconClose />} shape="circle" type="text" onClick={handleClose} />
+          )}
+        </div>
       </div>
 
       <div className={styles.body}>
-        <div className={styles.tabsContainer}>
-          <Tabs activeTabKey={activeTab} onChange={handleTabChange}>
-            {CATEGORIES.map(category => (
-              <TabPane key={category.key} title={category.label} />
-            ))}
-          </Tabs>
-        </div>
+        <Tabs
+          activeTab={activeTab}
+          onChange={(key) => handleTabChange(key)}
+          className={styles.tabsContainer}
+        >
+          {CATEGORIES.map(category => (
+            <TabPane key={category.key} title={category.label} />
+          ))}
+        </Tabs>
 
         <div className={styles.content}>
           <Spin loading={loading} size={40} style={{ width: '100%', height: '100%' }} tip="加载中...">
@@ -171,8 +171,8 @@ const ConnectorPage: React.FC = () => {
                   <ConnectorCard
                     key={item.id}
                     data={item}
+                    isSelected={selectedId === item.id}
                     onClick={handleCardClick}
-                    onEdit={handleEdit}
                   />
                 ))
               ) : (
@@ -182,6 +182,14 @@ const ConnectorPage: React.FC = () => {
           </Spin>
         </div>
       </div>
+
+      {isSelectMode && (
+        <div className={styles.footer}>
+          <Button type="primary" disabled={!selectedId} onClick={handleConfirm} style={{ width: 80 }}>
+            确定
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

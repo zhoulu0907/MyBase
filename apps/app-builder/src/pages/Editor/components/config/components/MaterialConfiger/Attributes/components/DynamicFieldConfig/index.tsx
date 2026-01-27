@@ -113,6 +113,8 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({
       // 包含当前节点的子表单
       const isSubComponent = ele?.find((item: any) => item.id === curComponentSchema.config.id);
       if (isSubComponent) {
+        const subConfig = { ...pageComponentSchemas[key].config, tableName: value?.[0] };
+        setPageComponentSchemas(key, { ...pageComponentSchemas[key], config: subConfig });
         ele.forEach((item: any) => {
           // 不是本身 并且和当前子表不一致
           if (

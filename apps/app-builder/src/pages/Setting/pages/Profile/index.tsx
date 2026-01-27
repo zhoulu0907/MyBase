@@ -149,7 +149,7 @@ const ProfilePage: React.FC = () => {
                 borderRadius: 5,
                 border: '1px solid #F2F3F5',
                 backgroundColor: '#F7F8FA',
-                objectFit: 'contain'
+                objectFit: 'cover'
               }}
             />
           ) : (

@@ -97,7 +97,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
   const ComponentRegistry: Record<string, { component: any, extraProps?: object }> = {
     // 表单组件
     [FORM_COMPONENT_TYPES.INPUT_TEXT]: { component: FormComp.XInputText, extraProps },
-    [FORM_COMPONENT_TYPES.INPUT_TEXTAREA]: { component: FormComp.XInputTextArea, extraProps },
+    [FORM_COMPONENT_TYPES.INPUT_TEXT_AREA]: { component: FormComp.XInputTextArea, extraProps },
     [FORM_COMPONENT_TYPES.INPUT_EMAIL]: { component: FormComp.XInputEmail, extraProps },
     [FORM_COMPONENT_TYPES.INPUT_PHONE]: { component: FormComp.XInputPhone, extraProps },
     [FORM_COMPONENT_TYPES.INPUT_NUMBER]: { component: FormComp.XInputNumber, extraProps },
@@ -151,7 +151,8 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
     [WORKBENCH_COMPONENT_TYPES.BUTTON_WORKBENCH]: { component: WorkbenchComp.XButtonWorkbench },
     [WORKBENCH_COMPONENT_TYPES.WELCOME_CARD]: { component: WorkbenchComp.XWelcomeCard },
     [WORKBENCH_COMPONENT_TYPES.TODO_CENTER]: { component: WorkbenchComp.XTodoCenter },
-    [WORKBENCH_COMPONENT_TYPES.TODO_LIST]: { component: WorkbenchComp.XTodoList }
+    [WORKBENCH_COMPONENT_TYPES.TODO_LIST]: { component: WorkbenchComp.XTodoList },
+    [WORKBENCH_COMPONENT_TYPES.INFORMATION_LIST]: { component: WorkbenchComp.XInformationList }
   };
 
   // 渲染对应的组件

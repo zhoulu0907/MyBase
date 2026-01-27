@@ -4,6 +4,9 @@ import { Radio, Form, Select } from '@arco-design/web-react';
 import { IconQuestionCircle } from '@arco-design/web-react/icon';
 import { getUserPage, type PageParam } from '@onebase/platform-center';
 import { getAppIdByPageSetId, listRole, type ListRoleReq } from '@onebase/app';
+import { userType } from '../../../constants';
+import { useAppStore } from '@/store/store_app';
+import { PUBLISH_MODULE } from '@onebase/common';
 import styles from './index.module.less';
 
 const FormItem = Form.Item;
@@ -22,6 +25,8 @@ const SimpleMode = ({ setCcRecipientsConfigData, copyReceiverConfig }) => {
   const [form] = Form.useForm();
   const [selectedUser, setSelectedUser] = useState<string[]>([]);
   const [selectedRole, setSelectedRole] = useState<string[]>([]);
+  const { curAppInfo } = useAppStore();
+
   const handleChangeUser = (val: string[]) => {
     if (val.length <= userMaxCount) {
       setSelectedUser(val);
@@ -32,7 +37,7 @@ const SimpleMode = ({ setCcRecipientsConfigData, copyReceiverConfig }) => {
       setSelectedRole(val);
     }
   };
-  
+
   const ccRecipientsFormRules = {
     user: [{ required: true, message: '请选择抄送人' }],
     role: [{ required: true, message: '请选择角色' }]
@@ -44,8 +49,12 @@ const SimpleMode = ({ setCcRecipientsConfigData, copyReceiverConfig }) => {
   function initUserData() {
     const params: PageParam = {
       pageNo: 1,
-      pageSize: 100
+      pageSize: 100,
+      userType: userType.INNER
     };
+    if (curAppInfo.publishModel && curAppInfo.publishModel === PUBLISH_MODULE.SASS) {
+      params.userType = userType.SAAS;
+    }
     getUserPage(params)
       .then((res: any) => {
         if (Array.isArray(res?.list)) {

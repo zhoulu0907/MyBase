@@ -1,5 +1,5 @@
 import { Collapse, Ellipsis, Grid, Loading, Tabs } from '@arco-design/mobile-react';
-import { menuSignal } from '@onebase/app';
+import { menuSignal, MenuType, type ApplicationMenu } from '@onebase/app';
 import React, { useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ReactSVG } from 'react-svg';
@@ -25,7 +25,7 @@ const AppsList: React.FC<IProps> = ({ treeData, mobileNavLayout, loading }) => {
   const location = useLocation();
 
   const getGroupItem = (itemData: TreeNode, level: number = 0) => {
-    if (itemData.isPage) {
+    if (itemData.menuType === MenuType.PAGE) {
       return (
         <div
           key={itemData.key + 1}
@@ -36,7 +36,7 @@ const AppsList: React.FC<IProps> = ({ treeData, mobileNavLayout, loading }) => {
           <ReactSVG
             className={styles.menuIcon}
             src={
-              allMobileMenuIcons.find((ele) => ele.code === itemData.icon)?.icon ||
+              allMobileMenuIcons.find((ele) => ele.code === itemData.menuIcon)?.icon ||
               allMobileMenuIcons.find((ele) => ele.code === 'FormPage')?.icon ||
               ''
             }
@@ -51,7 +51,7 @@ const AppsList: React.FC<IProps> = ({ treeData, mobileNavLayout, loading }) => {
               svg.setAttribute('height', '0.48rem');
             }}
           />
-          <Ellipsis text={itemData.title} />
+          <Ellipsis text={itemData.menuName} />
         </div>
       );
     }
@@ -66,7 +66,7 @@ const AppsList: React.FC<IProps> = ({ treeData, mobileNavLayout, loading }) => {
             <ReactSVG
               className={styles.menuIcon}
               src={
-                allMobileMenuIcons.find((ele) => ele.code === itemData.icon)?.icon ||
+                allMobileMenuIcons.find((ele) => ele.code === itemData.menuIcon)?.icon ||
                 allMobileMenuIcons.find((ele) => ele.code === 'FormPage')?.icon ||
                 ''
               }
@@ -81,7 +81,7 @@ const AppsList: React.FC<IProps> = ({ treeData, mobileNavLayout, loading }) => {
                 svg.setAttribute('height', '0.48rem');
               }}
             />
-            <Ellipsis text={level + '--' + itemData.title} />
+            <Ellipsis text={level + '--' + itemData.menuName} />
           </div>
         }
         value={itemData.key}
@@ -98,13 +98,13 @@ const AppsList: React.FC<IProps> = ({ treeData, mobileNavLayout, loading }) => {
 
   const GridLayout = ({ data, isAppIcon = false }: { data: TreeNode[]; isAppIcon?: boolean }) => {
     const renderData = data
-      .filter((node) => node.isPage)
+      .filter((node) => node.menuType === MenuType.PAGE)
       .map((item) => ({
         img: (
           <ReactSVG
             className={styles.menuIcon}
             src={
-              allMobileMenuIcons.find((ele) => ele.code === item.icon)?.icon ||
+              allMobileMenuIcons.find((ele) => ele.code === item.menuIcon)?.icon ||
               allMobileMenuIcons.find((ele) => ele.code === 'FormPage')?.icon ||
               ''
             }
@@ -120,26 +120,18 @@ const AppsList: React.FC<IProps> = ({ treeData, mobileNavLayout, loading }) => {
             }}
           />
         ),
-        title: <Ellipsis text={item.title} />,
+        title: <Ellipsis text={item.menuName} />,
         onClick: () => handlerItemClick(item)
       }));
 
     return <Grid className={styles.gridLayout} data={renderData} gutter={16} columns={4} />;
   };
 
-  const handlerItemClick = (item: TreeNode) => {
+  const handlerItemClick = (item: ApplicationMenu & { entityUuid: string }) => {
     const sp = new URLSearchParams(location.search);
     sp.set('curMenu', String(item.id));
     setCurMenu({
       ...item,
-      id: item.id || '',
-      menuUuid: item.menuUuid,
-      menuCode: item.key,
-      menuSort: item.menuSort,
-      menuType: item.menuType,
-      menuName: item.title,
-      menuIcon: item.icon || '',
-      isVisible: item.isVisible || 0,
       pagesetType: item.pagesetType,
       children: []
     });
@@ -152,7 +144,7 @@ const AppsList: React.FC<IProps> = ({ treeData, mobileNavLayout, loading }) => {
   const gridData = useMemo(() => {
     const flatData = splitAndFlatten(treeData).filter((item) => item.children && item.children.length > 0);
     return {
-      tabs: flatData.map((item) => ({ title: item.title })),
+      tabs: flatData.map((item) => ({ title: item.menuName })),
       grids: flatData
     };
   }, [treeData]);
@@ -191,7 +183,7 @@ const AppsList: React.FC<IProps> = ({ treeData, mobileNavLayout, loading }) => {
         <div className={styles.appsList}>
           <Tabs className={styles.tabs} tabs={gridData.tabs} tabBarArrange={'start'} tabBarHasDivider={false}>
             {gridData.grids.map((item) => (
-              <GridLayout data={item.children} key={item.key} />
+              <GridLayout data={item.children} key={item.id} />
             ))}
           </Tabs>
         </div>

@@ -1,4 +1,4 @@
-import { Button, Message, Pagination, Spin } from '@arco-design/web-react';
+import { Button, Input, Message, Pagination, Select, Spin } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
 import {
   deleteConnectInstance,
@@ -28,17 +28,18 @@ const ConnectorInstancesPage: React.FC = () => {
   // 分页状态
   const [pageNo, setPageNo] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [keyword, setKeyword] = useState('');
 
   useEffect(() => {
     getConnectInstanceList();
-  }, [pageNo, pageSize]);
+  }, [pageNo, pageSize, keyword]);
 
   const getConnectInstanceList = async () => {
     setLoading(true);
 
     try {
       // 调用 /flow/connector/list-all 接口，传递分页参数
-      const res = await listAllConnectInstance({ pageNo, pageSize });
+      const res = await listAllConnectInstance({ pageNo, pageSize, connectorName: keyword });
 
       if (res) {
         if (Array.isArray(res)) {
@@ -84,11 +85,11 @@ const ConnectorInstancesPage: React.FC = () => {
     navigate(`/onebase/${tenantId}/home/create-app/integrated-management/connector?appId=${curAppId}&mode=select`);
   };
 
-  const handleEdit = (connectorUuid: string) => {
+  const handleEdit = (id: string) => {
     const curAppId = getAppId();
     if (!curAppId) return;
 
-    navigate(`/onebase/${tenantId}/home/create-app/integrated-management/connector-detail?appId=${curAppId}&connectorUuid=${connectorUuid}`);
+    navigate(`/onebase/${tenantId}/home/create-app/integrated-management/connector-detail?appId=${curAppId}&id=${id}`);
   };
 
   const handleDelete = async (id: string) => {
@@ -104,10 +105,28 @@ const ConnectorInstancesPage: React.FC = () => {
       <div className={styles.header}>
         <div className={styles.title}>连接器实例</div>
       </div>
-      <div className={styles.searchContainer}>
-        <Button type="primary" icon={<IconPlus />} onClick={handleCreateInstance}>
-          创建实例
-        </Button>
+      <div className={styles.searchContainer} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
+        <Input.Search
+          allowClear
+          placeholder="请输入实例名称搜索"
+          style={{ width: 300 }}
+          onSearch={(val) => {
+            setKeyword(val);
+            // Trigger search logic here if needed (currently client - side filtering might be implemented or API call updated)
+          }}
+        />
+        <div style={{ display: 'flex', gap: 8 }}>
+          <Select placeholder="全部类型" style={{ width: 120 }} allowClear>
+            {/* Options will be populated possibly from API */}
+          </Select>
+          <Select placeholder="全部状态" style={{ width: 120 }} allowClear>
+            <Select.Option value="enabled">已启用</Select.Option>
+            <Select.Option value="disabled">已禁用</Select.Option>
+          </Select>
+          <Button type="primary" icon={<IconPlus />} onClick={handleCreateInstance}>
+            创建实例
+          </Button>
+        </div>
       </div>
 
       <div className={styles.body}>

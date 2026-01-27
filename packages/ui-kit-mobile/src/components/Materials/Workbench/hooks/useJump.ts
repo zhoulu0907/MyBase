@@ -57,7 +57,7 @@ export function useJump() {
 
     // 外部链接
     if (linkAddress) {
-      if (linkAddress.startsWith('http://') || linkAddress.startsWith('https://')) {
+      if (linkAddress.startsWith('http') || linkAddress.startsWith('www.')) {
         window.open(linkAddress, '_blank');
       } else {
         navigate(linkAddress);

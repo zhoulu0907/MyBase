@@ -280,7 +280,7 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
         })
         .filter(Boolean);
     },
-    [collapsed, permissionReady, permissionInfo.value]
+    [collapsed, permissionReady]
   );
 
   const defaultKeys = getDefaultKeys();
@@ -289,6 +289,7 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
     return (
       <Menu
         mode="vertical"
+        autoOpen={true}
         selectedKeys={selectedKeys}
         defaultOpenKeys={defaultKeys.defaultOpenKeys}
         defaultSelectedKeys={defaultKeys.defaultSelectedKeys}

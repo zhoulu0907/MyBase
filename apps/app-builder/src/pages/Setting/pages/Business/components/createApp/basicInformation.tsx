@@ -8,6 +8,7 @@ interface IBasicInfoProps {
   onDataChange: (values: Record<string, any>) => void;
 }
 
+const MAX_USER_LIMIT = 500000; // 最大用户上限
 export const BasicInformation: React.FC<IBasicInfoProps> = ({ industryOptions, basicValues, onDataChange }) => {
   const [basicInfoForm] = Form.useForm();
 
@@ -15,7 +16,7 @@ export const BasicInformation: React.FC<IBasicInfoProps> = ({ industryOptions, b
     (option: industryTypeOption) => ({ label: option.label, value: option.id }) as industryTypeOption
   );
 
-  const handleValuesChange = (changedValues: Record<string, any>, allValues: Record<string, any>) => {
+  const handleValuesChange = (_changedValues: Record<string, any>, allValues: Record<string, any>) => {
     onDataChange(allValues);
   };
 
@@ -44,8 +45,8 @@ export const BasicInformation: React.FC<IBasicInfoProps> = ({ industryOptions, b
       <Form.Item label="联系地址" field="address">
         <Input.TextArea placeholder="请输入详细地址" autoSize={{ minRows: 2, maxRows: 6 }} />
       </Form.Item>
-      <Form.Item label="用户上限" field="userLimit" rules={[{ required: true }]}>
-        <InputNumber placeholder="请输入用户上限" max={5000} min={0} />
+      <Form.Item label="用户上限" field="userLimit" rules={[{ required: true, message: '请输入用户上限' }]}>
+        <InputNumber placeholder="请输入用户上限" max={MAX_USER_LIMIT} min={0} />
       </Form.Item>
       <Form.Item label="状态" field="status" triggerPropName="checked" rules={[{ required: true }]}>
         <Checkbox>启用</Checkbox>

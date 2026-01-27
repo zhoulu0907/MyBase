@@ -82,6 +82,7 @@ const COMPONENT_TYPE = {
   CHECK_ITEM: 'XCheckItem',
   // 列表
   TABLE: 'XTable',
+  CARD: 'XCard',
   CALENDAR: 'XCalendar',
   TIMELINE: 'XTimeline',
   LIST_COLLAPSE: 'XCollapse',
@@ -103,7 +104,8 @@ const COMPONENT_TYPE = {
   CAROUSEL_WORKBENCH: 'XCarouselWorkbench',
   RICH_TEXT_WORKBENCH: 'XRichTextEditorWorkbench',
   BUTTON_WORKBENCH: 'XButtonWorkbench',
-  WELCOME_CARD: 'XWelcomeCard'
+  WELCOME_CARD: 'XWelcomeCard',
+  INFORMATION_LIST: 'XInformationList'
 } as const
 
 
@@ -413,6 +415,13 @@ const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescripto
     fieldMap: [],
     entityMap: []
   },
+   [COMPONENT_TYPE.CARD]: {
+    type: COMPONENT_TYPE.CARD,
+    schema: cloneDeep(BasicSchema.XCard),
+    template: { h: 48, w: 68, displayName: '卡片', icon: 'table_cp.svg', category: 'list' },
+    fieldMap: [],
+    entityMap: []
+  },
   [COMPONENT_TYPE.INFO_NOTICE]: {
     type: COMPONENT_TYPE.INFO_NOTICE,
     schema: cloneDeep(BasicSchema.XInfoNotice),
@@ -531,6 +540,13 @@ const WORKBENCH_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescr
     fieldMap: [],
     entityMap: []
   },
+  [COMPONENT_TYPE.INFORMATION_LIST]: {
+    type: COMPONENT_TYPE.INFORMATION_LIST,
+    schema: cloneDeep(workbenchSchema.XInformationList),
+    template: { h: 36, w: 118, displayName: '资讯列表', icon: 'information_list_cp.svg', category: 'workbench' },
+    fieldMap: [],
+    entityMap: []
+  }
 }
 
 /**
@@ -901,6 +917,7 @@ export function getComponentImpl(type: ComponentType, runtime?:boolean): ReactCo
   if (category === 'form') return (FormComp as any)[type]
   if (category === 'list') return (ListComp as any)[type]
   if (category === 'show') return (ShowComp as any)[type]
+  if (category === 'workbench') return (WorkbenchComp as any)[type]
   return undefined
 }
 

@@ -71,13 +71,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     };
     const appResp = await getApplication(appReq);
     if (appResp) {
-      setCurAppInfo({
-        iconName: appResp.iconName || '',
-        iconColor: appResp.iconColor || '',
-        appName: appResp.appName || '--',
-        appStatus: appResp.appStatus || 0,
-        publishModel: appResp.publishModel
-      });
+      setCurAppInfo(appResp);
     }
   };
 

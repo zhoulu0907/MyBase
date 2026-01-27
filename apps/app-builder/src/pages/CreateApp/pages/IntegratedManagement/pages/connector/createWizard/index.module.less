@@ -1,0 +1,284 @@
+.wizardContainer {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  background-color: #f5f5f5;
+  box-sizing: border-box;
+
+  // 左侧侧边栏 - 垂直步骤条
+  .wizardSidebar {
+    width: 240px;
+    min-width: 240px;
+    background-color: #fff;
+    border-right: 1px solid #e5e5e5;
+    padding: 24px 16px;
+
+    // Arco Design 垂直 Steps 组件样式覆盖
+    :global {
+      .arco-steps {
+        .arco-steps-item {
+          .arco-steps-item-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: #4e5969;
+          }
+
+          .arco-steps-item-description {
+            font-size: 12px;
+            color: #86909c;
+          }
+
+          // 当前活动步骤
+          &.arco-steps-item-active {
+            .arco-steps-item-title {
+              color: rgb(var(--primary-6));
+              font-weight: 600;
+            }
+
+            .arco-steps-item-icon {
+              background-color: rgb(var(--primary-6));
+              border-color: rgb(var(--primary-6));
+              color: #fff;
+              font-weight: 600;
+            }
+
+            .arco-steps-item-description {
+              color: rgb(var(--primary-6));
+            }
+          }
+
+          // 已完成步骤
+          &.arco-steps-item-finish {
+            .arco-steps-item-icon {
+              background-color: rgb(var(--primary-6));
+              border-color: rgb(var(--primary-6));
+              color: #fff;
+            }
+
+            .arco-steps-item-title {
+              color: rgb(var(--primary-6));
+            }
+
+            .arco-steps-item-description {
+              color: #86909c;
+            }
+          }
+
+          // 等待步骤
+          &.arco-steps-item-wait {
+            .arco-steps-item-icon {
+              background-color: #f7f8fa;
+              border-color: #e5e5e5;
+              color: #86909c;
+            }
+
+            .arco-steps-item-title {
+              color: #86909c;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // 右侧主内容区
+  .wizardMain {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: #fff;
+    overflow: hidden;
+
+    // 顶部 Header
+    .wizardHeader {
+      padding: 16px 24px;
+      border-bottom: 1px solid #e5e5e5;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background-color: #fff;
+
+      .headerBack {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        color: #4e5969;
+        font-size: 14px;
+        transition: all 0.2s;
+
+        &:hover {
+          color: rgb(var(--primary-6));
+        }
+      }
+
+      .headerTitle {
+        font-size: 16px;
+        font-weight: 500;
+        color: #1d2129;
+      }
+    }
+
+    // 表单内容区
+    .wizardContent {
+      flex: 1;
+      padding: 24px;
+      overflow-y: auto;
+      background-color: #f5f5f5;
+    }
+  }
+}
+
+.stepContainer {
+  max-width: 800px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 24px;
+
+  h3 {
+    font-size: 18px;
+    font-weight: 500;
+    color: #1d2129;
+    margin-bottom: 24px;
+  }
+
+  .stepFooter {
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid #e5e5e5;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+  }
+
+  .filters {
+    margin-bottom: 16px;
+  }
+
+  // 基本信息样式
+  .baseInfo {
+    width: 100%;
+    background-color: #fff;
+
+    .baseInfoTitle {
+      font-size: 16px;
+      font-weight: 500;
+      color: #1d2129;
+      margin-bottom: 24px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #e5e5e5;
+    }
+
+    .baseInfoContent {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .baseInfoItem {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+
+      .baseInfoLabel {
+        font-size: 14px;
+        color: #4e5969;
+        font-weight: 500;
+      }
+
+      .baseInfoValue {
+        flex: 1;
+
+        // 确保输入框为白色背景
+        :global {
+          .arco-input,
+          .arco-input[disabled] {
+            background-color: #fff !important;
+            border: 1px solid #e5e5e5;
+            color: #1d2129;
+          }
+
+          .arco-textarea {
+            background-color: #fff !important;
+            border: 1px solid #e5e5e5;
+            color: #1d2129;
+          }
+        }
+
+        // 只读文本样式
+        .readOnlyText {
+          padding: 8px 12px;
+          color: #1d2129;
+          font-size: 14px;
+          line-height: 1.5715;
+          background-color: transparent;
+        }
+      }
+    }
+
+    // 实例名称编辑样式
+    .nameDisplayContainer {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 12px;
+      background-color: #f7f8fa;
+      border-radius: 4px;
+      min-height: 32px;
+
+      .instanceName {
+        flex: 1;
+        font-size: 14px;
+        color: #1d2129;
+      }
+    }
+
+    .nameEditContainer {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .nameInput {
+        flex: 1;
+      }
+
+      .nameEditActions {
+        display: flex;
+        gap: 4px;
+
+        .iconBtn {
+          padding: 4px 8px;
+          background: none;
+          border: none;
+          cursor: pointer;
+          font-size: 16px;
+          transition: all 0.2s;
+
+          &:hover {
+            opacity: 0.8;
+          }
+        }
+      }
+    }
+
+    .iconBtn {
+      padding: 4px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #86909c;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+
+      &:hover {
+        color: rgb(var(--primary-6));
+        background-color: #f2f3f5;
+        border-radius: 4px;
+      }
+    }
+  }
+}

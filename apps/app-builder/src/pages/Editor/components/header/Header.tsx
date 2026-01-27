@@ -159,7 +159,7 @@ export default function EditorHeader() {
 
   const { setMainEntity, setSubEntities } = useAppEntityStore();
   const { curMenu, setCurMenu } = menuSignal;
-  const { curAppId, setCurAppId } = useAppStore();
+  const { curAppId, setCurAppId, setCurAppInfo } = useAppStore();
 
   const { setCurDataSourceId } = useResourceStore();
 
@@ -402,6 +402,14 @@ export default function EditorHeader() {
     };
 
     const appResp = await getApplication(appReq);
+    const curAppInfo = {
+      iconName: appResp.iconName,
+      iconColor: appResp.iconColor,
+      appName: appResp.appName,
+      appStatus: appResp.appStatus,
+      publishModel: appResp.publishModel
+    };
+    setCurAppInfo(curAppInfo);
     if (appResp) {
       if (appResp.iconName) {
         setAppIcon(appResp.iconName);
@@ -412,9 +420,7 @@ export default function EditorHeader() {
       if (appResp.appName) {
         setAppName(appResp.appName);
       }
-      if (appResp.appStatusText) {
-        setAppStatus(appResp.appStatus);
-      }
+      setAppStatus(AppStatus.DEVELOPING);
     }
 
     // 获取数据源ID
@@ -517,7 +523,7 @@ export default function EditorHeader() {
           return;
         }
       }
-      const res = await fetchPublish({ id: flowId });
+      await fetchPublish({ id: flowId });
       getVersonList();
       Message.success('发布成功');
     } catch (error) {
