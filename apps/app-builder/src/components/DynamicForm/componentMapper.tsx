@@ -229,52 +229,48 @@ const ParamsTableInner: React.FC<any> = () => {
 
   const columns = [
     {
-      title: "字段 Key",
+      title: "参数名",
       dataIndex: "key",
+      width: 150,
       render: (value: any, _record: any, index: number) => (
         <Input
           value={value}
           onChange={(v) => setRow(index, { key: v })}
+          placeholder="Key"
         />
       ),
     },
     {
-      title: "字段名称",
-      dataIndex: "label",
-      render: (value: any, _record: any, index: number) => (
-        <Input
-          value={value}
-          onChange={(v) => setRow(index, { label: v })}
-        />
-      ),
-    },
-    {
-      title: "字段类型",
-      dataIndex: "type",
+      title: "值类型",
+      dataIndex: "paramType",
+      width: 100,
       render: (value: any, _record: any, index: number) => (
         <Select
-          value={value}
-          onChange={(v) => setRow(index, { type: v })}
+          value={value || "fixed"}
+          onChange={(v) => setRow(index, { paramType: v })}
         >
-          <Select.Option value="string">string</Select.Option>
-          <Select.Option value="number">number</Select.Option>
-          <Select.Option value="boolean">boolean</Select.Option>
+          <Select.Option value="fixed">固定值</Select.Option>
+          <Select.Option value="variable">变量</Select.Option>
         </Select>
       ),
     },
     {
-      title: "字段描述",
-      dataIndex: "description",
-      render: (value: any, _record: any, index: number) => (
+      title: "参数值",
+      dataIndex: "value",
+      render: (value: any, record: any, index: number) => (
         <Input
           value={value}
-          onChange={(v) => setRow(index, { description: v })}
+          onChange={(v) => setRow(index, { value: v })}
+          placeholder={record.paramType === "variable" ? "请输入变量名" : "请输入值"}
+          prefix={record.paramType === "variable" ? "${" : null}
+          suffix={record.paramType === "variable" ? "}" : null}
         />
       ),
     },
     {
       title: "操作",
       dataIndex: "operation",
+      width: 60,
       render: (_value: any, _record: any, index: number) => (
         <Button
           type="text"
@@ -325,6 +321,7 @@ const ConnectorParamsInner: React.FC<any> = observer(() => {
   const headers = (form.getValuesIn("inputGroup.headers") || []) as any[];
   const queryParams = (form.getValuesIn("inputGroup.queryParams") || []) as any[];
   const pathParams = (form.getValuesIn("inputGroup.pathParams") || []) as any[];
+  const requestPath = form.getValuesIn("inputGroup.requestLine.path") as string;
   const bodyRaw = form.getValuesIn("inputGroup.body") as any;
 
   type Row = {
@@ -347,84 +344,44 @@ const ConnectorParamsInner: React.FC<any> = observer(() => {
       id,
       name: variableName,
       label: usage,
-      location: `${source}变量`,
+      location: `${source}`,
     });
   };
 
-  headers.forEach((item) => {
-    if (item && item.key) {
-      rows.push({
-        id: `header-${item.key}`,
-        name: item.key,
-        label: item.label,
-        location: "HTTP请求头",
-      });
+  // 1. Parse URL Path variables
+  if (requestPath) {
+    const regexp = /\$\{([^}]+)\}/g;
+    let match: RegExpExecArray | null;
+    while ((match = regexp.exec(requestPath))) {
+      const varName = match[1];
+      addVariableRow("URL路径", varName, "Path参数");
     }
+  }
 
-    if (item) {
-      Object.keys(item).forEach((k) => {
-        const v = (item as any)[k];
-        if (typeof v === "string") {
-          const regexp = /\$\{([^}]+)\}/g;
-          let match: RegExpExecArray | null;
-          while ((match = regexp.exec(v))) {
-            const varName = match[1];
-            addVariableRow("HTTP请求头", varName, item.key ? `${item.key}.${k}` : k);
-          }
+  // 2. Parse Params Table (Headers, Query, Path)
+  const processParamsTable = (items: any[], location: string) => {
+    items.forEach((item) => {
+      if (!item || !item.key) return;
+
+      // Case 1: Explicit Variable Type
+      if (item.paramType === 'variable' && item.value) {
+        addVariableRow(location, item.value, item.key);
+      }
+      // Case 2: Fixed Type but contains ${var} syntax (backward compatibility & flexibility)
+      else if (item.value && typeof item.value === 'string') {
+        const regexp = /\$\{([^}]+)\}/g;
+        let match: RegExpExecArray | null;
+        while ((match = regexp.exec(item.value))) {
+          const varName = match[1];
+          addVariableRow(location, varName, item.key);
         }
-      });
-    }
-  });
+      }
+    });
+  };
 
-  queryParams.forEach((item) => {
-    if (item && item.key) {
-      rows.push({
-        id: `query-${item.key}`,
-        name: item.key,
-        label: item.label,
-        location: "URL查询参数",
-      });
-    }
-
-    if (item) {
-      Object.keys(item).forEach((k) => {
-        const v = (item as any)[k];
-        if (typeof v === "string") {
-          const regexp = /\$\{([^}]+)\}/g;
-          let match: RegExpExecArray | null;
-          while ((match = regexp.exec(v))) {
-            const varName = match[1];
-            addVariableRow("URL查询参数", varName, item.key ? `${item.key}.${k}` : k);
-          }
-        }
-      });
-    }
-  });
-
-  pathParams.forEach((item) => {
-    if (item && item.key) {
-      rows.push({
-        id: `path-${item.key}`,
-        name: item.key,
-        label: item.label,
-        location: "URL路径参数",
-      });
-    }
-
-    if (item) {
-      Object.keys(item).forEach((k) => {
-        const v = (item as any)[k];
-        if (typeof v === "string") {
-          const regexp = /\$\{([^}]+)\}/g;
-          let match: RegExpExecArray | null;
-          while ((match = regexp.exec(v))) {
-            const varName = match[1];
-            addVariableRow("URL路径参数", varName, item.key ? `${item.key}.${k}` : k);
-          }
-        }
-      });
-    }
-  });
+  processParamsTable(headers, "HTTP请求头");
+  processParamsTable(queryParams, "URL查询参数");
+  processParamsTable(pathParams, "URL路径参数");
 
   const addBodyParams = (prefix: string, value: any) => {
     if (value === null || value === undefined) {

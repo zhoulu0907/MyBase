@@ -116,6 +116,11 @@ export const MULTI_STEP_SCHEMA = {
               title: "HTTP请求头",
               "x-component": "ParamsTable",
             },
+            pathParams: {
+              type: "array",
+              title: "URL路径参数",
+              "x-component": "ParamsTable",
+            },
             body: {
               type: "string",
               title: "HTTP请求体",
