@@ -561,7 +561,6 @@ public class UserServiceImpl implements UserService {
         // 2.2 删除用户岗位
         userPostDataRepository.deleteByUserId(userId);
         // 2.2 删除用户角色
-        userRoleDataRepository.deleteByUserId(userId);
         appAuthRoleUser.deleteByUserId(userId);
         // 3. 记录操作日志上下文
         LogRecordContext.putVariable("user", user);
