@@ -195,10 +195,11 @@ public class DictTypeRepository extends BaseDataRepository<SystemDictTypeMapper,
 
     /**
      * 根据dictOwnerId删除数据
-     *
-      * @param dictOwnerId 租户ID
+     * @param dictOwnerType 字典所有者类型
+     * @param dictOwnerId 租户ID
      */
-    public void removeByDictOwnerId(Long dictOwnerId) {
-        this.remove(query().eq("dict_owner_id", dictOwnerId));
+    public void removeByDictOwnerId(String dictOwnerType,Long dictOwnerId) {
+        this.remove(query().eq(DICT_OWNER_TYPE, dictOwnerType, StringUtils.isNotBlank(dictOwnerType))
+                .eq("dict_owner_id", dictOwnerId));
     }
 }

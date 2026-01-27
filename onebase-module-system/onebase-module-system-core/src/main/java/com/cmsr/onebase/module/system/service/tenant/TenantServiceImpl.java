@@ -660,7 +660,7 @@ public class TenantServiceImpl implements TenantService {
             // 5.1 删除字典类型对应的数据
             dictDataRepository.removeDictDataByType(dictTypeDOList.stream().map(DictTypeDO::getType).collect(Collectors.toList()));
             // 5.2 删除字典类型
-            dictTypeRepository.removeByDictOwnerId(tenantId);
+            dictTypeRepository.removeByDictOwnerId(TENANT,tenantId);
             // 6. 删除租户级别配置项Config
             systemConfigDataRepository.removeByTenant(tenantId);
             // 7. 删除安全配置和安全记录
