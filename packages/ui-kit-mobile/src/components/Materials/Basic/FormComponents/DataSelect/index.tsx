@@ -148,7 +148,7 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
           onClick={() => setVisible(true)}
         >
           {selectedParseDataName ? <Ellipsis className={`selectValue ${layout === 'vertical' ? 'verticalLayout' : ''}`} text={selectedParseDataName} maxLine={1} /> :
-            <div className={`selectValue ${layout === 'vertical' ? 'verticalLayout' : ''}`}>请选择</div>}
+            <div className={`defaultValue ${layout === 'vertical' ? 'verticalLayout' : ''}`}>请选择</div>}
           <PopupSwiper visible={visible} close={(e) => handleCancel(e)} direction="bottom">
             <div className={`inputDataSelectPopupContainer ${editPreview ? 'editPreview' : ''}`}>
               <div className="popupHeaderOBMobile">
