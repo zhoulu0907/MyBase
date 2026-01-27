@@ -455,15 +455,20 @@ export const dataSortByConfig: IDataSortByConfigType = {
 };
 
 export const dataFilterConfig: IDataFilterConfigType = {
-  key: 'filterCondition',
+  key: 'dataFilter',
   name: '数据过滤',
   type: 'DataFilter'
 };
 
 export const coverImageConfig: ICoverImageConfigType = {
-  key: 'filterCondition',
+  key: 'coverImage',
   name: '封面图片',
-  type: 'CoverImage'
+  type: 'CoverImage',
+  range: [
+    { label: '拉伸填满',  value: 'fill'},
+    { label: '居中填满',  value: 'cover'},
+    { label: '原图居中', value: 'contain'},
+  ]
 };
 
 export const groupFilterConfig: IGroupFilterConfigType = {

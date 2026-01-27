@@ -16,6 +16,6 @@ const DynamicFilterConditionConfig = ({ handlePropsChange, item, configs }: Prop
 
 export default DynamicFilterConditionConfig;
 
-registerConfigRenderer(CONFIG_TYPES.FIELD_DATA, ({ handlePropsChange, item, configs }) => (
+registerConfigRenderer(CONFIG_TYPES.DATA_FILTER, ({ handlePropsChange, item, configs }) => (
   <DynamicFilterConditionConfig handlePropsChange={handlePropsChange} item={item} configs={configs} />
 ));
