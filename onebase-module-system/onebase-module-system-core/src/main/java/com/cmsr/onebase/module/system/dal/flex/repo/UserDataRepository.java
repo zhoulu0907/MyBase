@@ -353,4 +353,8 @@ public class UserDataRepository extends BaseDataRepository<SystemUsersMapper, Ad
         Page<AdminUserDO> pageResult = page(Page.of(pageReqVO.getPageNo(), pageReqVO.getPageSize()), queryWrapper);
         return new PageResult<>(pageResult.getRecords(), pageResult.getTotalRow());
     }
+
+    public long countInnerUserByStatus(Integer status) {
+        return  count(query().eq(AdminUserDO.STATUS, status).eq(AdminUserDO.USER_TYPE, UserTypeEnum.TENANT.getValue()));
+    }
 }

@@ -429,4 +429,11 @@ public interface UserService {
      * @param corpId 企业id
      */
     void deleteUserByCorpId(Long corpId);
+
+    /**
+     * 获取内部用户数量
+     * @param status
+     * @return
+     */
+    long getInnerUserCountByStatus(Integer status);
 }

@@ -963,6 +963,12 @@ public class UserServiceImpl implements UserService {
         return (int) userDataRepository.countByStatus(status);
     }
 
+
+    @Override
+    public long getInnerUserCountByStatus(Integer status) {
+        return userDataRepository.countInnerUserByStatus(status);
+    }
+
     @Override
     public Long getUserCountByCorpId(Long corpId, Integer status) {
         return userDataRepository.getUserCountByCorpId(corpId, status);

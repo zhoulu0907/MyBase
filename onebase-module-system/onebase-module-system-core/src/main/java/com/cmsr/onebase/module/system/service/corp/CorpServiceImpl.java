@@ -132,7 +132,7 @@ public class CorpServiceImpl implements CorpService {
         return corpDO.getId();
     }
 
-    private Integer getExistUserLimitExcludeCorp(Long corpId) {
+    private int getCorpUserLimitSumExcludeThis(Long corpId) {
         List<CorpDO> corpList = corpDataRepository.getAllEnableCorp();
         return corpList.stream()
                 .filter(corp -> !Objects.equals(corp.getId(), corpId))
@@ -142,38 +142,45 @@ public class CorpServiceImpl implements CorpService {
     }
 
     private void validCorpUserMaxCountLimit(Integer corpUserLimit, Long corpId) {
-        if (corpUserLimit != null && corpUserLimit > CorpConstant.USER_LIMIT) {
+        // 1. 基础判断
+        if (corpUserLimit == null) {
+            return;
+        }
+        if (corpUserLimit > CorpConstant.USER_LIMIT) {
             throw exception(CORP_USER_LIMIT_COUNT, corpUserLimit);
         }
-        // 验证同一空间内企业数据是否超出限制
+
+        // 2. 验证企业用户上限公式：corpUserLimit >= 当前企业真实有效用户数 && corpUserLimit <= 当前空间剩余可用用户数
+
+        // 2.1 先判定最小值：新建不能低于1个，更新不能低于实际用户数；
+        if (corpId == null) {
+            // 如果企业id为空，说明是新增企业，需要验证最小用户数1
+            long minCorpUserCount = 1L;
+            if (corpUserLimit < minCorpUserCount) {
+                throw exception(CORP_USER_LIMIT_COUNT_MIN_CHECK, corpUserLimit);
+            }
+        } else {
+            // 如果企业id不为空，说明是修改企业，需要排除当前企业的用户数量
+            long realCorpUserCount = userService.getUserCountByCorpId(corpId, UserStatusEnum.NORMAL.getStatus());
+            if (corpUserLimit < realCorpUserCount) {
+                throw exception(CORP_USER_EXITES_LIMIT_COUNT_CHECK, realCorpUserCount);
+            }
+        }
+
+        // 2.2 再判定最大值
         LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
         TenantDO tenantDO = tenantService.getTenant(loginUser.getTenantId());
         // 空间用户总数
         Integer tenantUserLimit = tenantDO.getAccountCount();
-
-        // 验证空间目前已存在用户数
-        Long tenantRealUserCount = tenantService.getTenantExistUserCount(loginUser.getTenantId());
-        if (corpId != null){
-            // 如果企业id不为空，说明是修改企业，需要排除当前企业的用户数量
-            Long userCountLong = userService.getUserCountByCorpId(corpId, UserStatusEnum.NORMAL.getStatus());
-            tenantRealUserCount = tenantRealUserCount - userCountLong;
-        }
-
-        //  计算实际剩余可用用户数量
-        Integer realRemainingCount = Math.toIntExact(tenantUserLimit - tenantRealUserCount);
-        if (realRemainingCount <= NumberUtils.INTEGER_ZERO) {
-            throw exception(CORP_USER_LIMIT_COUNT_CHECK, tenantUserLimit, realRemainingCount);
-        }
-
-        // 获取企业已存在数量
-        Integer existUserLimit = getExistUserLimitExcludeCorp(corpId);
-        //  计算已分配其他企业之后的剩余可用数量
-        Integer limitRemainingCount = tenantUserLimit - existUserLimit;
-
-        // 取实际剩余数量和限制剩余数量的最小值，作为最终可用数量
-        Integer remainingCount = Math.min(realRemainingCount, limitRemainingCount);
-        if (corpUserLimit > remainingCount) {
-            throw exception(CORP_USER_LIMIT_COUNT_CHECK, tenantUserLimit, remainingCount);
+        // 获取空间内部用户数量
+        long tenantRealInnerUserCount = tenantService.getTenantExistInnerUserCount(loginUser.getTenantId());
+        // 获取已分配给其他企业的用户数量总和
+        int corpUserLimitSumExcludeThis = getCorpUserLimitSumExcludeThis(corpId);
+        // 获取空间剩余可用用户数量
+        long maxCorpUserCount = tenantUserLimit - corpUserLimitSumExcludeThis - tenantRealInnerUserCount;
+        // 验证企业用户上限公式：corpUserLimit <= 当前空间剩余可用用户数
+        if (corpUserLimit > maxCorpUserCount) {
+            throw exception(CORP_USER_LIMIT_COUNT_CHECK, tenantUserLimit, maxCorpUserCount);
         }
     }
 
