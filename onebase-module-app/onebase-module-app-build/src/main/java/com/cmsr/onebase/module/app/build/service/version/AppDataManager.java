@@ -12,6 +12,12 @@ import static com.cmsr.onebase.module.app.core.dal.dataobject.table.AppResourceP
 import static com.cmsr.onebase.module.app.core.dal.dataobject.table.AppResourceWorkbenchComponentTableDef.APP_RESOURCE_WORKBENCH_COMPONENT;
 import static com.cmsr.onebase.module.app.core.dal.dataobject.table.AppResourceWorkbenchPageTableDef.APP_RESOURCE_WORKBENCH_PAGE;
 
+import java.io.IOException;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.zip.ZipOutputStream;
+
+import com.cmsr.onebase.framework.common.util.io.ZipUtils;
 import com.cmsr.onebase.module.bpm.api.datamanager.BpmDataManager;
 import com.cmsr.onebase.module.metadata.api.datasource.MetadataDatasourceApi;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -229,13 +235,13 @@ public class AppDataManager {
                 .where(APP_AUTH_ROLE.VERSION_TAG.eq(versionTag));
         configData.setAuthRoles(authRoleRepository.list(authRoleQuery));
 
-        // Bpm流程
-        Object bpmConfig = bpmDataManager.exportApplication(applicationId, versionTag);
-        configData.setBpmConfig(bpmConfig);
-
-        // 元数据配置
-        Object metadataConfig = metadataDatasourceApi.exportDatasource(applicationId, versionTag);
-        configData.setMetaDataConfig(metadataConfig);
+//        // Bpm流程
+//        Object bpmConfig = bpmDataManager.exportApplication(applicationId, versionTag);
+//        configData.setBpmConfig(bpmConfig);
+//
+//        // 元数据配置
+//        Object metadataConfig = metadataDatasourceApi.exportDatasource(applicationId, versionTag);
+//        configData.setMetaDataConfig(metadataConfig);
 
         return configData;
     }
@@ -289,5 +295,55 @@ public class AppDataManager {
 //        if (metaDataConfig != null){
 //            metadataDatasourceApi.importDatasource(applicationId, appUid, tenantId, versionTag, metaDataConfig);
 //        }
+    }
+
+    /**
+     * 配置文件名常量，与 AppVersionServiceImpl 单版本导出保持一致
+     */
+    private static final String CONFIG_WORKBENCH_COMPONENTS = "config/workbenchComponents.json";
+    private static final String CONFIG_COMPONENTS = "config/components.json";
+    private static final String CONFIG_WORKBENCH_PAGES = "config/workbenchPages.json";
+    private static final String CONFIG_PAGES = "config/pages.json";
+    private static final String CONFIG_PAGE_SETS = "config/pageSets.json";
+    private static final String CONFIG_MENUS = "config/menus.json";
+    private static final String CONFIG_AUTH_VIEWS = "config/authViews.json";
+    private static final String CONFIG_AUTH_FIELDS = "config/authFields.json";
+    private static final String CONFIG_AUTH_DATA_GROUPS = "config/authDataGroups.json";
+    private static final String CONFIG_AUTH_PERMISSIONS = "config/authPermissions.json";
+    private static final String CONFIG_NAVIGATION = "config/navigation.json";
+    private static final String CONFIG_AUTH_ROLES = "config/authRoles.json";
+    private static final String CONFIG_METADATA = "config/metadata.json";
+    private static final String CONFIG_BPM = "config/bpm.json";
+
+    /**
+     * 将应用版本配置数据写入 ZIP，支持路径前缀（全应用导出时按版本分子目录）
+     *
+     * @param zos        ZIP 输出流
+     * @param configData 配置数据
+     * @param pathPrefix 路径前缀，单版本导出传空串，多版本时可传 "versions/{versionId}/"
+     * @throws IOException IO 异常
+     */
+    public void writeConfigDataToZip(ZipOutputStream zos, ApplicationVersionConfigData configData, String pathPrefix)
+            throws IOException {
+        Map<String, Object> configMap = new LinkedHashMap<>();
+        configMap.put(CONFIG_WORKBENCH_COMPONENTS, configData.getWorkbenchComponents());
+        configMap.put(CONFIG_COMPONENTS, configData.getComponents());
+        configMap.put(CONFIG_WORKBENCH_PAGES, configData.getWorkbenchPages());
+        configMap.put(CONFIG_PAGES, configData.getPages());
+        configMap.put(CONFIG_PAGE_SETS, configData.getPageSets());
+        configMap.put(CONFIG_MENUS, configData.getMenus());
+        configMap.put(CONFIG_AUTH_VIEWS, configData.getAuthViews());
+        configMap.put(CONFIG_AUTH_FIELDS, configData.getAuthFields());
+        configMap.put(CONFIG_AUTH_DATA_GROUPS, configData.getAuthDataGroups());
+        configMap.put(CONFIG_AUTH_PERMISSIONS, configData.getAuthPermissions());
+        configMap.put(CONFIG_NAVIGATION, configData.getNavigation());
+        configMap.put(CONFIG_AUTH_ROLES, configData.getAuthRoles());
+        configMap.put(CONFIG_METADATA, configData.getMetaDataConfig());
+        configMap.put(CONFIG_BPM, configData.getBpmConfig());
+
+        String prefix = pathPrefix != null ? pathPrefix : "";
+        for (Map.Entry<String, Object> entry : configMap.entrySet()) {
+            ZipUtils.writeJsonToZip(zos, prefix + entry.getKey(), entry.getValue());
+        }
     }
 }

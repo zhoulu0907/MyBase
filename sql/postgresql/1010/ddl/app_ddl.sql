@@ -521,6 +521,9 @@ CREATE TABLE public.app_resource_pageset (
 	main_metadata varchar(255) NOT NULL,
 	pageset_name varchar(255) NOT NULL,
 	display_name varchar(255) NOT NULL,
+	data_title_type int4 NOT NULL DEFAULT 0,
+	data_title varchar(255),
+	redirect_type int4 NOT NULL DEFAULT 0,
 	description text NULL,
 	tenant_id int8 NULL,
 	id int8 NULL,
@@ -659,3 +662,25 @@ COMMENT ON COLUMN public.app_version_resource.application_id IS '应用ID';
 COMMENT ON COLUMN public.app_version_resource.version_id IS '版本ID';
 COMMENT ON COLUMN public.app_version_resource.res_type IS '协议类型';
 COMMENT ON COLUMN public.app_version_resource.res_data IS '资源数据';
+
+CREATE TABLE public.app_export (
+    id int8 NOT NULL, -- 主键ID
+    application_id int8 NOT NULL, -- 应用ID
+    object_id varchar(64), -- 资源ID
+    version_id int8 NOT NULL, -- 版本ID
+    export_status int2 NOT NULL, -- 导出状态 0-未知 1-导出中 2-导出成功 3-导出失败
+    lock_version int8 DEFAULT 0 NOT NULL,
+    creator int8 DEFAULT 0 NOT NULL,
+    create_time timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updater int8 DEFAULT 0 NOT NULL,
+    update_time timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    deleted int8 DEFAULT 0 NOT NULL,
+    tenant_id int8 DEFAULT 0 NOT NULL,
+    CONSTRAINT pk_app_application_version_resource PRIMARY KEY (id)
+);
+
+COMMENT ON COLUMN public.app_export.id IS '主键ID';
+COMMENT ON COLUMN public.app_export.application_id IS '应用ID';
+COMMENT ON COLUMN public.app_export.version_id IS '版本ID';
+COMMENT ON COLUMN public.app_export.object_id IS '资源ID';
+COMMENT ON COLUMN public.app_export.export_status IS '导出状态 0-未知 1-导出中 2-导出成功 3-导出失败';

@@ -35,6 +35,7 @@ public class AppCodegenMain {
             "app_resource_workbench_page",
             "app_tag",
             "app_version",
+            "app_export",
 //            "app_version_resource"
     };
 
