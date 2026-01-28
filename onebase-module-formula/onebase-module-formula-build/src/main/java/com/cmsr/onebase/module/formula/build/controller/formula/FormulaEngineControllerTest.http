@@ -136,23 +136,20 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "REGEXREPLACE('abc12312345678','X')" }
+{ "formula": "REGEXREPLACE('abc12312345678','^\\\\d{11}','X')" }
 
 ### REGEXMATCH
-POST {{baseUrl}}/formula/engine/execute-formula
+POST {{baseUrl}}/formula/engine/debug-formula
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "REGEXMATCH(text,reg)",
-  "parameters": {
-    "text": "13812345679",
-    "reg": "^\\d{11}$"
-  }
+{ "formula": "REGEXMATCH('13812345679','^\\d{11}$')",
+  "parameters": {}
 }
 
 ### REGEXEXTRACT
-POST {{baseUrl}}/formula/engine/execute-formula
+POST {{baseUrl}}/formula/engine/debug-formula
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
@@ -194,7 +191,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "TEXTSPLIT('a#b#c','c')" }
+{ "formula": "TEXTSPLIT('a#b#c','#')" }
 
 ### GETUSER
 POST {{baseUrl}}/formula/engine/execute-formula

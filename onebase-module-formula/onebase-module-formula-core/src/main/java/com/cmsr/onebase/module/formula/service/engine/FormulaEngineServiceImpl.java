@@ -83,7 +83,7 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
         }
 
         // 检查的函数是否存在，函数参数个数，参数类型，并返回报错提示
-        FormulaValidate.validateSupportedFunctions(formula);
+        formula = FormulaValidate.validateSupportedFunctions(formula);
         // 创建GraalVM JavaScript上下文
         Context.Builder contextBuilder = Context.newBuilder("js")
                 .allowHostAccess(HostAccess.CONSTRAINED)
