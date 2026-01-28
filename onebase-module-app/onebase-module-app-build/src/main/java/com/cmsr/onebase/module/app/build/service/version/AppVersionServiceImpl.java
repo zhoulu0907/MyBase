@@ -378,8 +378,7 @@ public class AppVersionServiceImpl implements AppVersionService {
      * @return 导出记录ID
      */
     @Override
-    public Long exportApplicationVersion(Long versionId) {
-        Long applicationId = ApplicationManager.getRequiredApplicationId();
+    public Long exportApplicationVersion(Long versionId, Long applicationId) {
         AppApplicationDO applicationDO = appCommonService.validateApplicationExist(applicationId);
 
         // 验证版本是否存在且属于当前应用

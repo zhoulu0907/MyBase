@@ -35,7 +35,7 @@ public interface AppVersionService {
      * @param versionId 版本ID
      * @return 导出记录ID
      */
-    Long exportApplicationVersion(Long versionId);
+    Long exportApplicationVersion(Long versionId, Long applicationId);
 
     /**
      * 根据导出记录ID获取导出资源

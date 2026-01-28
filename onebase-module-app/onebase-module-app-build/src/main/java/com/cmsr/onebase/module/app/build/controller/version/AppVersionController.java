@@ -87,8 +87,9 @@ public class AppVersionController {
     @GetMapping("/export")
     @Operation(summary = "导出应用")
     @PreAuthorize("@ss.hasPermission('tenant:app:query')")
-    public CommonResult<Long> exportApplication(@RequestParam("versionId") Long versionId) {
-        Long exportId = appVersionService.exportApplicationVersion(versionId);
+    public CommonResult<Long> exportApplication(@RequestParam("versionId") Long versionId,
+            @RequestParam("applicationId") Long applicationId) {
+        Long exportId = appVersionService.exportApplicationVersion(versionId, applicationId);
         return CommonResult.success(exportId);
     }
 
