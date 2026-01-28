@@ -87,7 +87,7 @@ const XCard = memo(
     let queryData: object = {};
     let scrollLoad = false;
 
-    const [cardData, setCardData] = useState<any[]>([
+    const [cardData, setCardData] = useState<any[]>(runtime ? [] : [
       { key1: '1', key2: '2' },
       { key1: '1', key2: '2' },
       { key1: '1', key2: '2' },
@@ -136,7 +136,6 @@ const XCard = memo(
     // 查询
     const handleSearch = () => {
       setCardPageNo(1);
-      setCardData([])
       handlePage();
     };
 
@@ -154,7 +153,6 @@ const XCard = memo(
       }
 
       queryData = form.getFieldsValue();
-
 
       const conditions: any[] = [];
       Object.entries(queryData).forEach(([key, value]) => {
