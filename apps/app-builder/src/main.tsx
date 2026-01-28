@@ -7,9 +7,25 @@ import { ErrorPage } from '@onebase/common';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { ErrorBoundary } from 'react-error-boundary';
+import { registerMicroApps, start, initGlobalState } from 'qiankun';
 import App from './App.tsx';
 import './i18n';
 import './index.css';
+
+const actions = initGlobalState({
+  user: { name: 'admin' }
+});
+registerMicroApps([
+  {
+    name: 'chat',
+    entry: 'http://localhost:7100', // 子应用运行端口
+    container: '#subapp-container',
+    activeRule: (location) => location.hash.startsWith('#/chat'),
+    props: actions
+  }
+]);
+
+start();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

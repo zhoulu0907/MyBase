@@ -132,9 +132,9 @@ const AppManagement: React.FC = () => {
         setTotal(res.total || 0);
         setLoading(false);
       }
-    }catch(error) {
-      console.log("error", error);
-    }finally {
+    } catch (error) {
+      console.log('error', error);
+    } finally {
       setLoading(false);
     }
   };
@@ -273,6 +273,15 @@ const AppManagement: React.FC = () => {
             >
               创建应用
             </Button>
+            <Button
+              type="primary"
+              size="large"
+              permission={ACTIONS.CREATE}
+              icon={<IconPlus fontSize={16} />}
+              onClick={() => navigate('/chat')}
+            >
+              子应用
+            </Button>
 
             {/* 筛选下拉框 */}
             <div>
@@ -336,7 +345,11 @@ const AppManagement: React.FC = () => {
                 <div className={styles.applicationEmpty}>
                   <img src={emptyApplicationSVG} alt="暂无应用" />
                   <Typography.Text type="secondary">还没有应用</Typography.Text>
-                  <Button className={styles.goCreateApplication} permission={ACTIONS.CREATE} onClick={() => setCreateVisible(true)}>
+                  <Button
+                    className={styles.goCreateApplication}
+                    permission={ACTIONS.CREATE}
+                    onClick={() => setCreateVisible(true)}
+                  >
                     去创建
                     <IconRight style={{ marginLeft: '4px' }} />
                   </Button>
