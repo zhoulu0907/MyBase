@@ -216,6 +216,11 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         if (applicationDTO == null) {
             throw exception(AUTH_LOGIN_APP_DELETE_OR_DISABLE);
         }
+
+        if (!Objects.equals(applicationDTO.getAppStatus(), CommonStatusEnum.ENABLE.getStatus())) {
+            throw exception(AUTH_LOGIN_APP_NOT_LAUNCHED_YET);
+        }
+
         return applicationDTO.getTenantId();
     }
 
