@@ -748,21 +748,18 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 validateEntityAllowModifyStructure(existing.getEntityUuid());
 
                 // 先删子配置（选项、约束、自动编号、校验规则）
-                if (existing != null) {
-                    try {
-                        fieldOptionService.deleteByFieldId(existing.getFieldUuid());
-                        fieldConstraintService.deleteByFieldId(existing.getFieldUuid());
-                        autoNumberConfigBuildService.deleteByFieldId(existing.getFieldUuid());
+                // 注意：这些删除操作必须在同一事务中执行，不要捕获并忽略异常，否则会导致事务回滚异常
+                fieldOptionService.deleteByFieldId(existing.getFieldUuid());
+                fieldConstraintService.deleteByFieldId(existing.getFieldUuid());
+                autoNumberConfigBuildService.deleteByFieldId(existing.getFieldUuid());
 
-                        // 删除校验规则
-                        validationRequiredService.deleteByFieldId(existing.getFieldUuid());
-                        validationUniqueService.deleteByFieldId(existing.getFieldUuid());
-                        validationLengthService.deleteByFieldId(existing.getFieldUuid());
+                // 删除校验规则
+                validationRequiredService.deleteByFieldId(existing.getFieldUuid());
+                validationUniqueService.deleteByFieldId(existing.getFieldUuid());
+                validationLengthService.deleteByFieldId(existing.getFieldUuid());
 
-                        // 删除实体间关联关系
-                        metadataEntityRelationshipBuildService.deleteRelationShipByFieldId(existing.getFieldUuid());
-                    } catch (Exception ignore) {}
-                }
+                // 删除实体间关联关系
+                metadataEntityRelationshipBuildService.deleteRelationShipByFieldId(existing.getFieldUuid());
 
                 // 先删库记录
                 metadataEntityFieldRepository.removeById(Long.valueOf(item.getId()));
