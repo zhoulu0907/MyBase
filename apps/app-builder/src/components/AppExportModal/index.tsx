@@ -83,7 +83,7 @@ const AppExportModal: React.FC<AppExportModalProps> = ({ visible, onClose, appIn
     } else if (res === ExportStatus.SUCCESS) {
       setPercentValue(100);
       // 进度条加载完成后，自动下载导出文件到本地
-      handleDownload()
+      handleDownload(newExportId);
     } else {
       setExportIsError(true);
     }
@@ -97,10 +97,10 @@ const AppExportModal: React.FC<AppExportModalProps> = ({ visible, onClose, appIn
     }
   };
   // 下载文件
-  const handleDownload = async () => {
+  const handleDownload = async (newExportId?: string) => {
     setDownloadLoading(true);
     try {
-      const fileUrl = await exportAppVersionFile({ exportId }, appInfo.appName);
+      const fileUrl = await exportAppVersionFile({ exportId: newExportId || exportId }, appInfo.appName);
       if (fileUrl) {
         const date = dayjs(new Date()).format('YYYYMMDD');
         downloadFileByUrl(fileUrl, `${appInfo.appName}_${appInfo.appCode}_${date}.zip`);

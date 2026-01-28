@@ -75,12 +75,12 @@ const AppExportPage: React.FC = () => {
       width: 200,
       render: (_, record: any) => (
         <>
-          {record.status === ExportStatus.SUCCESS && (
+          {record.exportStatus === ExportStatus.SUCCESS && (
             <Button size="mini" type="text" onClick={() => handleDownload(record)}>
               下载
             </Button>
           )}
-          {record.status === ExportStatus.ERROR && (
+          {record.exportStatus === ExportStatus.ERROR && (
             <Button size="mini" type="text" onClick={() => handleRetry(record)}>
               重试
             </Button>

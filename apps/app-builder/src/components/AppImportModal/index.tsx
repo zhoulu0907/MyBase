@@ -1,6 +1,6 @@
-import { Button, Modal, Steps, Upload, Radio, Tag, Progress, Alert, Input } from '@arco-design/web-react';
+import { Button, Modal, Steps, Upload, Radio, Tag, Progress, Alert, Input, Message } from '@arco-design/web-react';
 import { IconUpload, IconLoading, IconRefresh, IconCheckCircleFill, IconEdit } from '@arco-design/web-react/icon';
-import { ExportStatus, type Application } from '@onebase/app';
+import { ExportStatus, importAppVersion, type Application } from '@onebase/app';
 import { uploadFile, getFileUrlById } from '@onebase/platform-center';
 import { useState } from 'react';
 import styles from './index.module.less';
@@ -19,6 +19,7 @@ interface AppImportModalProps {
 const AppImportModal: React.FC<AppImportModalProps> = ({ visible, onClose, onComplete, appInfo }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [appStatus, setAppStatus] = useState('');
+  const [fileId, setFileId] = useState('');
   const [appCode, setAppCode] = useState('');
   // 编码重复处理类型
   const [updateType, setUpdateType] = useState('');
@@ -30,8 +31,18 @@ const AppImportModal: React.FC<AppImportModalProps> = ({ visible, onClose, onCom
 
   // 下一步
   const handleNext = () => {
-    // todo 不同步骤处理
-    setCurrentStep(currentStep + 1);
+    if (currentStep === 1) {
+      if (!fileId) {
+        Message.warning('请先上传文件');
+        return;
+      }
+      setCurrentStep(currentStep + 1);
+    }
+    if (currentStep === 2) {
+      setCurrentStep(currentStep + 1);
+      setProgressPercent(100);
+      setInstallStatus(ExportStatus.SUCCESS);
+    }
   };
 
   // 完成
@@ -48,6 +59,7 @@ const AppImportModal: React.FC<AppImportModalProps> = ({ visible, onClose, onCom
   const handleUpload = async (file: File, onProgress?: (percent: number, event?: ProgressEvent) => void) => {
     const formData = new FormData();
     formData.append('file', file);
+    formData.append('applicationId', appInfo.id);
 
     const progressAdapter = onProgress
       ? (progressEvent: ProgressEvent) => {
@@ -58,7 +70,7 @@ const AppImportModal: React.FC<AppImportModalProps> = ({ visible, onClose, onCom
         }
       : undefined;
 
-    const res = await uploadFile(formData, progressAdapter);
+    const res = await importAppVersion(formData, progressAdapter);
     return res;
   };
 
@@ -104,7 +116,7 @@ const AppImportModal: React.FC<AppImportModalProps> = ({ visible, onClose, onCom
           {currentStep === 1 && (
             <div>
               <Upload
-                tip="点击上传OB格式的应用文件"
+                tip="点击上传zip格式的应用文件"
                 limit={1}
                 showUploadList={{
                   progressRender: () => <IconLoading />,
@@ -115,10 +127,17 @@ const AppImportModal: React.FC<AppImportModalProps> = ({ visible, onClose, onCom
                   ),
                   successIcon: <IconCheckCircleFill color="#4FAE7B" />
                 }}
+                beforeUpload={async (file: any) => {
+                  if (!['application/x-zip-compressed'].includes(file.type)) {
+                    Message.warning(`不支持该格式，仅支持 zip`);
+                    return false;
+                  }
+                }}
                 customRequest={async (option) => {
                   const { onProgress, onError, onSuccess, file } = option;
                   try {
                     const fileId = await handleUpload(file, onProgress);
+                    setFileId(fileId);
                     const uploadFileUrl = URL.createObjectURL(file);
                     // 上传文件id
                     if (fileId && uploadFileUrl !== '') {
@@ -136,6 +155,9 @@ const AppImportModal: React.FC<AppImportModalProps> = ({ visible, onClose, onCom
                     });
                     console.log(error);
                   }
+                }}
+                onRemove={() => {
+                  setFileId('');
                 }}
               >
                 <Button type="primary" icon={<IconUpload />}>
@@ -186,7 +208,7 @@ const AppImportModal: React.FC<AppImportModalProps> = ({ visible, onClose, onCom
             <div>
               <div style={{ marginBottom: '8px' }}>应用创建者</div>
               <Tag className={styles.tag}>{appInfo?.createUser}</Tag>
-              <div style={{ margin: '8px 0' }}>导入范围</div>
+              {/* <div style={{ margin: '8px 0' }}>导入范围</div>
               <div>
                 {importRange.map((item, index) => (
                   <Tag key={`tag-${index}`} className={styles.tag}>
@@ -196,7 +218,7 @@ const AppImportModal: React.FC<AppImportModalProps> = ({ visible, onClose, onCom
               </div>
               <div className={styles.tips}>
                 注：组织、角色和用户信息将以增量方式导入至应用所在空间，不会覆盖已有数据
-              </div>
+              </div> */}
             </div>
           )}
 
