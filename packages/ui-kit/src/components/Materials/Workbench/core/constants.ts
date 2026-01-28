@@ -68,6 +68,8 @@ export const WORKBENCH_CONFIG_TYPES = {
   WB_CHECK_INPUT: 'Wb_CheckInput' as const,
   // 资讯列表
   WB_INFORMATION_LIST_CONTENT: 'Wb_InformationListContent' as const,
+  // 数据列表
+  WB_TABLE_CONFIG: 'Wb_TableConfig' as const,
 } as const;
 
 /**
