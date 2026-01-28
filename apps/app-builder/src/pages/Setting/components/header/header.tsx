@@ -9,7 +9,7 @@ import { Button, Divider, Dropdown, Layout, Menu, Typography } from '@arco-desig
 import { IconApps, IconExport } from '@arco-design/web-react/icon';
 import { TokenManager, UserPermissionManager } from '@onebase/common';
 import { CodeType, getPermissionInfo, getTenantInfo, systemLogout, type TenantInfo } from '@onebase/platform-center';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import styles from './header.module.less';
 
@@ -27,6 +27,8 @@ const AppHeader: React.FC<HeaderProps> = ({ className, avatarUrl, tenantInfo }) 
 
   const { tenantId } = useParams();
 
+  const [tenantInfor,setTenantInfor] = useState<any>({})
+
   // 获取用户信息
   const tokenInfo = TokenManager.getTokenInfo();
   const userPermissionInfo = UserPermissionManager.getUserPermissionInfo();
@@ -40,6 +42,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className, avatarUrl, tenantInfo }) 
   const getInfo = async () => {
     const res = await getPermissionInfo(CodeType.TENANT);
     UserPermissionManager.setUserPermissionInfo(res);
+    setTenantInfor(res)
     userPermissionSignal.setPermissionInfo(res);
 
     const tenantInfoRes = await getTenantInfo(tenantId || '');
@@ -82,7 +85,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className, avatarUrl, tenantInfo }) 
     <Header className={`${styles.header} ${className || ''}`}>
       <div className={styles.headerContent}>
         <div className={styles.logo} onClick={() => navigate(`/onebase/${tenantId}/home/enterprise-app`)}>
-          <TenantLogo tenantInfo={tenantInfo} />
+          <TenantLogo tenantInfo={tenantInfo || tenantInfor} />
         </div>
 
         <div className={styles.userInfo}>

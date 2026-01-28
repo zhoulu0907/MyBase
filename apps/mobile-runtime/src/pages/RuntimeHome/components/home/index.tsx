@@ -30,7 +30,6 @@ interface TreeNode {
   id: string;
   icon: string;
   title: string;
-  isVisible: number;
   children?: TreeNode[];
 }
 
@@ -152,13 +151,12 @@ const Home: React.FC<{ nickname: string }> = ({ nickname }) => {
   const convertMenuToTreeData = (menus: ApplicationMenu[]): any[] => {
     return menus.map((menu) => ({
       ...menu,
-      key: menu.menuCode,
-      id: menu.id,
-      icon: menu.menuIcon,
-      title: menu.menuName,
-      isVisible: menu.isVisible,
-      entityUuid: menu.entityUuid,
-      isPage: menu.menuType === MenuType.PAGE,
+      // key: menu.menuCode,
+      // id: menu.id,
+      // icon: menu.menuIcon,
+      // title: menu.menuName,
+      // entityUuid: menu.entityUuid,
+      // isPage: menu.menuType === MenuType.PAGE,
       pagesetType: menu.pagesetType,
       // title1: (
       //   <RuntimeMenuItem

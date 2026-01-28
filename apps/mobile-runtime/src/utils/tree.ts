@@ -1,12 +1,11 @@
+import { MenuType, type ApplicationMenu } from "@onebase/app";
 import { SHOW_COMPONENT_TYPES } from "@onebase/ui-kit";
 
-export interface TreeNode {
+export interface TreeNode extends ApplicationMenu {
   key: string; // arco-design default tree props
   title: string; // arco-design default tree props
   id?: string;
   icon?: string;
-  isVisible?: number;
-  isPage?: boolean;
   children?: TreeNode[];
   [key: string]: any;
 }
@@ -131,7 +130,7 @@ export const flattenChildren = (nodes: TreeNode[]): TreeNode[] => {
    */
   const dfs = (arr: TreeNode[]) => {
     arr.forEach((node) => {
-      if (node.isPage) {
+      if (node.menuType === MenuType.PAGE) {
         result.push(node);
       }
 
@@ -155,7 +154,7 @@ export const splitAndFlatten = (treeData: TreeNode[]) => {
     .filter((node) => node.children && node.children.length > 0)
     .map(({ children, ...rest }) => ({
       ...rest,
-      children: children ? flattenChildren(children) : [],
+      children: children ? flattenChildren(children) : []
     }));
 };
 

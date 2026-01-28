@@ -4,6 +4,7 @@ export * from './app_menu';
 export * from './app_resource';
 export * from './app_version';
 export * from './application';
+export * from './env';
 export * from './etl';
 export * from './flow';
 export * from './formula';

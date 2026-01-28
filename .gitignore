@@ -1,3 +1,6 @@
+# 过程草稿
+docs/
+
 # 通用忽略文件
 HELP.md
 .DS_Store
@@ -58,3 +61,12 @@ devops_config/
 
 scripts/encrypt-config.ts
 scripts/deploy.sh
+
+# Local Config
+packages/common/src/utils/base.ts
+
+# AI Config
+.claude/
+
+# App Config
+**/public/config.js

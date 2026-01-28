@@ -348,3 +348,8 @@ export const entityOptions = [
     type: FieldType.DATE
   }
 ];
+
+export enum userType {
+  SAAS = 3,
+  INNER = 2
+}

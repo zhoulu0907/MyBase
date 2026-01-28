@@ -8,5 +8,6 @@ export {
   runtimeService,
   systemService,
   dashboardDataSetService,
-  dashboardService
+  dashboardService,
+  pluginService
 } from './factory';

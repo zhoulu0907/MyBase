@@ -1,43 +1,62 @@
-import jsNodeIcon from '@/assets/flow/connect/js_node.svg';
 import { Typography } from '@arco-design/web-react';
-import { type ConnectFlowNode } from '@onebase/app';
+import type { ConnectorItem } from '@onebase/app';
 import React from 'react';
 import styles from './index.module.less';
 
-/**
- * FlowCard 组件
- * 用于流程管理页面的卡片展示
- */
-export interface CardProps {
-  data: ConnectFlowNode;
+export interface ConnectorCardProps {
+  data: ConnectorItem;
+  isSelected?: boolean;
+  onEdit?: (id: string) => void;
+  onClick?: (data: ConnectorItem) => void;
 }
 
-const ConnectNodeCategoryCard: React.FC<CardProps> = ({ data }) => {
+const ConnectorCard: React.FC<ConnectorCardProps> = ({ data, isSelected, onClick }) => {
+  const handleCardClick = () => {
+    onClick?.(data);
+  };
+
   return (
-    <div className={styles.card}>
+    <div
+      className={`${styles.card} ${isSelected ? styles.selected : ''}`}
+      onClick={handleCardClick}
+    >
       <div className={styles.cardHeader}>
-        <div className={styles.cardHeaderIcon}>{data.typeCode === 'script' && <img src={jsNodeIcon} alt="" />}</div>
+        <div className={styles.cardHeaderIcon}>{data.icon}</div>
         <div className={styles.cardHeaderContent}>
-          <Typography.Text ellipsis={{ showTooltip: true }} className={styles.cardHeaderContentTitle}>
-            {data.typeName}
-          </Typography.Text>
+          <div className={styles.titleRow}>
+            <Typography.Text ellipsis={{ showTooltip: true }} className={styles.cardHeaderContentTitle}>
+              {data.name}
+            </Typography.Text>
+            <div className={`${styles.cardHeaderTagTitle} ${styles[data.type]}`}>
+              {data.type === 'system_preset' ? '系统预设' : '自定义'}
+            </div>
+          </div>
           <Typography.Text ellipsis={{ showTooltip: true }} className={styles.cardHeaderContentDesc}>
-            v1.0.0
+            v{data.fields.version}
           </Typography.Text>
-        </div>
-        <div className={styles.cardHeaderTag}>
-          <div className={styles.cardHeaderTagTitle}>系统预设</div>
         </div>
       </div>
+
       <div className={styles.cardBody}>
         <div className={styles.cardBodyRow}>
-          <div className={styles.cardBodyRowLabel}></div>
-          <div className={styles.cardBodyRowContent}>{/* todo 暂不展示数据 */}</div>
+          <div className={styles.cardBodyRowLabel}>服务类型:</div>
+          <div className={styles.cardBodyRowContent}>{data.fields.serviceType || '-'}</div>
+        </div>
+        <div className={styles.cardBodyRow}>
+          <div className={styles.cardBodyRowLabel}>默认参数:</div>
+          <div className={styles.cardBodyRowContent} title={data.fields.defaultParams}>{data.fields.defaultParams || '-'}</div>
+        </div>
+        <div className={styles.cardBodyRow}>
+          <div className={styles.cardBodyRowLabel}>认证方式:</div>
+          <div className={styles.cardBodyRowContent}>{data.fields.authType}</div>
+        </div>
+        <div className={styles.cardBodyRow}>
+          <div className={styles.cardBodyRowLabel}>实例数量:</div>
+          <div className={styles.cardBodyRowContent}>{data.fields.instanceCount}</div>
         </div>
       </div>
-      <div className={styles.cardFooter}></div>
     </div>
   );
 };
 
-export default ConnectNodeCategoryCard;
+export default ConnectorCard;

@@ -59,7 +59,7 @@ const ComponentEditRender: React.FC<ComponentRenderProps> = ({ cpId, cpType, pag
     switch (cpType) {
       case FORM_COMPONENT_TYPES.INPUT_TEXT:
         return <FormComp.XInputText cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
-      case FORM_COMPONENT_TYPES.INPUT_TEXTAREA:
+        case FORM_COMPONENT_TYPES.INPUT_TEXT_AREA:
         return <FormComp.XInputTextArea cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case FORM_COMPONENT_TYPES.INPUT_EMAIL:
         return <FormComp.XInputEmail cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
@@ -151,6 +151,8 @@ const ComponentEditRender: React.FC<ComponentRenderProps> = ({ cpId, cpType, pag
         return <WorkbenchComp.XTodoCenter cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case WORKBENCH_COMPONENT_TYPES.TODO_LIST:
         return <WorkbenchComp.XTodoList cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+      case WORKBENCH_COMPONENT_TYPES.INFORMATION_LIST:
+        return <WorkbenchComp.XInformationList cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       default:
         return <div>未知组件类型: {cpType}</div>;
     }

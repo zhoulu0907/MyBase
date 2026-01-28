@@ -12,9 +12,10 @@ import {
   Select,
   Space,
   Tabs,
-  Typography,
   Upload,
-  Form
+  Form,
+  Avatar,
+  Modal
 } from '@arco-design/web-react';
 import {
   createCorpAppApi,
@@ -30,11 +31,12 @@ import {
   type corpListParams,
   type CorpDetailResponse
 } from '@onebase/platform-center';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useOutletContext, useParams } from 'react-router-dom';
-import { allowedFormats } from '../../constants';
 import type { AppItem, cropItem, industryTypeOption, OutletContextType, updatedParams } from '../../types/appItem';
 import { AuthorizedApp } from '../createApp/authorizedApp';
+import { Cropper } from '@onebase/common';
+import { IconUpload } from '@arco-design/web-react/icon';
 import styles from './index.module.less';
 
 enum StatusLabelEnum {
@@ -68,6 +70,8 @@ const EnterpriseInfoPage: React.FC = () => {
     pageSizeChangeResetCurrent: true
   });
   const [corpId, setCorpId] = useState<string>('');
+
+  const uploadRef = useRef<any>(null);
 
   const fetchCorpDetail = async () => {
     try {
@@ -152,7 +156,7 @@ const EnterpriseInfoPage: React.FC = () => {
           ...param,
           corpCode: param?.corpCode || '',
           corpName: param?.corpName || '',
-          industryType: param?.corpName || '',
+          industryType: param?.industryType || '',
           address: param?.address || '',
           status: param?.status || 0,
           corpLogo: avatarUrl,
@@ -246,45 +250,15 @@ const EnterpriseInfoPage: React.FC = () => {
 
     const progressAdapter = onProgress
       ? (progressEvent: ProgressEvent) => {
-          if (progressEvent.lengthComputable) {
-            const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-            onProgress(percent, progressEvent);
-          }
+        if (progressEvent.lengthComputable) {
+          const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          onProgress(percent, progressEvent);
         }
+      }
       : undefined;
 
     const res = await uploadFile(fileFormData, progressAdapter);
     return res;
-  };
-
-  const beforeUpload = async (file: any) => {
-    if (!allowedFormats.includes(file.type)) {
-      Message.warning(`不支持该格式，仅支持 JPG / JPEG / PNG / GIF`);
-      return false;
-    }
-  };
-
-  const customRequest = async (option: any) => {
-    const { onProgress, onError, onSuccess, file } = option;
-    try {
-      const uploadImgUrl = await handleUpload(file, onProgress);
-      if (uploadImgUrl) {
-        setIsImageFailed(false);
-        setAvatarUrl(uploadImgUrl);
-        onSuccess(uploadImgUrl);
-      } else {
-        onError({
-          status: 'error',
-          msg: '上传失败'
-        });
-      }
-    } catch (error) {
-      onError({
-        status: 'error',
-        msg: '上传失败'
-      });
-      console.log(error);
-    }
   };
 
   const handleImageError = () => {
@@ -311,7 +285,7 @@ const EnterpriseInfoPage: React.FC = () => {
           {displayCorpLogo(formData?.corpName)}
         </Button>
       ) : (
-        <Image alt="头像" src={getFileUrlById(avatarUrl)} onError={handleImageError} width={160} height={80} />
+        <Image className={styles.corpLogo} alt="头像" src={getFileUrlById(avatarUrl)} onError={handleImageError} width={160} height={80} />
       )
     },
     {
@@ -361,22 +335,96 @@ const EnterpriseInfoPage: React.FC = () => {
         form={form}
       >
         <Form.Item label="企业Logo" field="corpLogo" triggerPropName="fileList">
-          <div style={{ marginBottom: '8px' }}>
-            <Image alt="头像" src={getFileUrlById(avatarUrl)} onError={handleImageError} width={160} height={80} />
-          </div>
-          <Upload
-            accept="image/*"
-            listType="picture-card"
-            showUploadList={false}
-            beforeUpload={beforeUpload}
-            customRequest={customRequest}
-            headers={{ authorization: 'authorization-text' }}
-          >
-            <Space style={{ display: 'flex', alignItems: 'flex-end' }}>
-              <Button type="primary">重新上传</Button>
-              <Typography.Text type="secondary">建议比例2:1</Typography.Text>
+          <Space direction="vertical">
+            <Upload
+              ref={uploadRef}
+              limit={1}
+              imagePreview
+              accept="image/*"
+              listType="picture-card"
+              customRequest={async (option) => {
+                const { onProgress, onError, onSuccess, file } = option;
+                try {
+                  const uploadImgUrl = await handleUpload(file, onProgress);
+                  if (uploadImgUrl) {
+                    setIsImageFailed(false);
+                    setAvatarUrl(uploadImgUrl);
+                    onSuccess(uploadImgUrl);
+                  } else {
+                    onError({
+                      status: 'error',
+                      msg: '上传失败'
+                    });
+                  }
+                } catch (error) {
+                  onError({
+                    status: 'error',
+                    msg: '上传失败'
+                  });
+                }
+              }}
+              beforeUpload={(file) => {
+                return new Promise((resolve) => {
+                  const modal = Modal.confirm({
+                    title: '裁剪图片',
+                    onCancel: () => {
+                      Message.info('取消上传');
+                      resolve(false);
+                      modal.close();
+                    },
+                    simple: false,
+                    content: (
+                      <Cropper
+                        file={file}
+                        aspect={2 / 1}
+                        onOK={(file: any) => {
+                          resolve(file);
+                          modal.close();
+                        }}
+                        onCancel={() => {
+                          resolve(false);
+                          Message.info('取消上传');
+                          modal.close();
+                        }}
+                      />
+                    ),
+                    footer: null
+                  });
+                });
+              }}
+            >
+              {avatarUrl ? (
+                <div onClick={(e) => e.stopPropagation()}>
+                  <Image
+                    className={styles.corpLogo}
+                    preview
+                    width={160}
+                    height={80}
+                    src={getFileUrlById(avatarUrl)}
+                  />
+                </div>
+              ) : (
+                <Avatar
+                  shape="square"
+                  style={{ width: 160, height: 80, backgroundColor: '#F7F8FA', borderRadius: 12 }}
+                >
+                  <span className={styles.avatarText}>{originalInfo?.corpName?.slice(0, 6)}</span>
+                </Avatar>
+              )}
+            </Upload>
+            <Space>
+              <Button
+                type="outline"
+                icon={<IconUpload />}
+                onClick={() => {
+                  uploadRef.current?.getRootDOMNode()?.querySelector('input[type="file"]').click();
+                }}
+              >
+                上传图片
+              </Button>
+              <div style={{ color: '#999', marginTop: 4 }}>建议比例 2:1</div>
             </Space>
-          </Upload>
+          </Space>
         </Form.Item>
 
         <Form.Item label="企业名称" field="corpName" rules={[{ required: true, message: '请输入企业名称' }]}>
@@ -392,7 +440,7 @@ const EnterpriseInfoPage: React.FC = () => {
           field="adminMobile"
           rules={[{ required: true, message: '请输入手机号' }, { validator: phoneValidator }]}
         >
-          <Input placeholder="输入手机号" maxLength={11} />
+          <Input placeholder="输入手机号" maxLength={11} disabled />
         </Form.Item>
 
         <Form.Item label="企业编码" field="corpCode" rules={[{ required: true, message: '请输入企业编码' }]}>

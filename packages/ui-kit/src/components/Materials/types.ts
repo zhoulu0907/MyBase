@@ -83,6 +83,38 @@ export interface ITableDataConfigType extends ICommonConfigType {
   advanced?: boolean;
 }
 
+export interface ICardDataConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.CARD_DATA;
+}
+
+export interface IDataSortByConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.DATA_SORT_BY;
+}
+
+export interface IDataFilterConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.DATA_FILTER;
+}
+export interface ICoverImageConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.COVER_IMAGE;
+  range: Array<{
+    label: string;
+    value: string;
+  }>;
+}
+export interface IGroupFilterConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.GROUP_FILTER;
+}
+
 export interface IRadioDataConfigType extends ICommonConfigType {
   key: string;
   name: string;

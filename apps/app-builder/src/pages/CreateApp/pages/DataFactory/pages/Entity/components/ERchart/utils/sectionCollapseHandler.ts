@@ -1,11 +1,7 @@
 import { Graph, Edge, Node } from '@antv/x6';
 import { FIELD_TYPE } from '@onebase/ui-kit';
 import type { EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
-
-const LINE_HEAD_HEIGHT = 48;
-const LINE_TITLE_HEIGHT = 44;
-const LINE_HEIGHT = 34.8;
-const NODE_WIDTH = 280;
+import { LINE_HEAD_HEIGHT, LINE_TITLE_HEIGHT, LINE_HEIGHT, NODE_WIDTH } from './constants';
 
 /**
  * 处理节点字段折叠逻辑

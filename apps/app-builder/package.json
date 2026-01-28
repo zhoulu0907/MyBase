@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "debug": "vite --port 4400 --open /debug.html",
     "build": "tsc -b && vite build",
     "devops_build": "vite build",
     "lint": "eslint .",
@@ -21,6 +22,7 @@
     "@codemirror/autocomplete": "^6.18.6",
     "@codemirror/commands": "^6.8.1",
     "@codemirror/lang-javascript": "^6.2.4",
+    "@codemirror/lang-json": "^6.0.2",
     "@codemirror/language": "^6.11.3",
     "@codemirror/lint": "^6.8.5",
     "@codemirror/state": "^6.5.2",

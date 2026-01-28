@@ -15,6 +15,7 @@ import {
 } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import { forwardRef, Fragment, useEffect, useImperativeHandle, useState, useRef } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
 
 interface PreviewProps {
   pageSetId: string;
@@ -246,7 +247,9 @@ const PreviewContainer = forwardRef<any, PreviewProps>((props: PreviewProps, ref
   };
 
   const parseData = () => {
+    console.info('定位错误 1')
     startLoadPageSet({ pageSetId: pageSetId, runtime: true });
+    console.info('定位错误 2')
   };
 
   useEffect(() => {
@@ -286,16 +289,18 @@ const PreviewContainer = forwardRef<any, PreviewProps>((props: PreviewProps, ref
                     margin: '4px'
                   }}
                 >
-                  <PreviewRender
-                    cpId={cp.id}
-                    cpType={cp.type}
-                    pageType={pageType}
-                    pageComponentSchema={newCompents && newCompents[cp.id]}
-                    runtime={true}
-                    showFromPageData={() => {
-                      setPageType(EDITOR_TYPES.FORM_EDITOR);
-                    }}
-                  />
+                  <ErrorBoundary FallbackComponent={() => <div style={{display: 'none'}}>组件错误</div>}>
+                    <PreviewRender
+                      cpId={cp.id}
+                      cpType={cp.type}
+                      pageType={pageType}
+                      pageComponentSchema={newCompents && newCompents[cp.id]}
+                      runtime={true}
+                      showFromPageData={() => {
+                        setPageType(EDITOR_TYPES.FORM_EDITOR);
+                      }}
+                    />
+                  </ErrorBoundary>
                 </div>
               )}
             </Fragment>

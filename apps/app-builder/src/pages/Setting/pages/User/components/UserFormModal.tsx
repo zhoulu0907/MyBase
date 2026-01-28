@@ -1,7 +1,14 @@
 import { filterSpace } from '@/utils';
 import { emailValidator, phoneValidator } from '@/utils/validator';
 import { Button, Form, Grid, Input, Message, Modal, Select, Space, Switch, TreeSelect } from '@arco-design/web-react';
-import { getPublicKey, hasPermission, sm2Encrypt, TENANT_DEPT_QUERY, UploadAvatarComponent } from '@onebase/common';
+import {
+  getPublicKey,
+  hasPermission,
+  sm2Encrypt,
+  TENANT_DEPT_QUERY,
+  TENANT_ROLE_QUERY,
+  UploadAvatarComponent
+} from '@onebase/common';
 import type { RoleVO, SimpleRoleVO, UserVO } from '@onebase/platform-center';
 import {
   createUser,
@@ -44,6 +51,7 @@ export default function UserFormModal({
   const [loading, setLoading] = React.useState(false);
   const [statusCheckedValue, setStatusCheckedValue] = useState(false);
   const [hasDeptQueryPermission, setHasDeptQueryPermission] = useState(true);
+  const [hasRoleQueryPermission, setHasroleQueryPermission] = useState(true);
   const [avatarUrl, setAvatarUrl] = useState<string>();
   const [roleList, setRoleList] = useState<RoleVO[]>([]);
   const [encryptedMobile, setEncryptedMobile] = useState<string>('');
@@ -63,7 +71,6 @@ export default function UserFormModal({
   useEffect(() => {
     if (visible) {
       fetchRoleList();
-      form.resetFields();
       if (initialValues) {
         form.setFieldsValue(initialValues);
         setAvatarUrl(initialValues.avatar);
@@ -89,7 +96,9 @@ export default function UserFormModal({
 
     // 检查是否有角色/部门查询权限
     const deptPermission = hasPermission(TENANT_DEPT_QUERY);
+    const rolePermission = hasPermission(TENANT_ROLE_QUERY);
     setHasDeptQueryPermission(deptPermission);
+    setHasroleQueryPermission(rolePermission);
 
     // 在编辑模式下获取用户信息并设置角色ID为初始值
     if (mode === 'edit' && initialValues?.id) {
@@ -100,15 +109,18 @@ export default function UserFormModal({
         setEncryptedEmail(initialValues.email || '');
       }
       getUser(initialValues.id).then((user: UserVO) => {
-        form.setFieldsValue({ roleIds: user.roles?.map((item: SimpleRoleVO) => item.id) });
+        const hasRole = user.roles?.map((item: SimpleRoleVO) => item.id);
+        form.setFieldValue('roleIds', hasRole);
       });
     }
   }, [visible, mode, initialValues, form]);
 
   const handleCancel = () => {
+    setAvatarUrl('');
     setEncryptedEmail('');
     setEncryptedMobile('');
     onCancel();
+    form.resetFields();
   };
 
   const handleSubmit = async () => {
@@ -310,7 +322,7 @@ export default function UserFormModal({
               rules={[{ required: true, message: '请选择角色' }]}
             >
               <Select
-                placeholder="选择角色"
+                placeholder={hasRoleQueryPermission ? '选择角色' : '无权限'}
                 mode="multiple"
                 allowClear
                 options={roleList.map((u) => ({
@@ -319,6 +331,11 @@ export default function UserFormModal({
                 }))}
                 filterOption={(inputValue: any, option: any) => {
                   return option.props.children?.includes(inputValue);
+                }}
+                disabled={deptLoading || isDetail || !hasRoleQueryPermission}
+                renderFormat={(option) => {
+                  if (!hasRoleQueryPermission) return '无权限';
+                  return <span>{option?.children}</span>;
                 }}
               ></Select>
             </Form.Item>

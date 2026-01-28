@@ -33,6 +33,7 @@ interface EditRuntimeProps {
   isAdd: boolean;
   editLoading: boolean;
   submitLoading: boolean;
+  draftLoading: boolean;
   onSubmit: () => void;
   onSaveSubmit: () => void;
   onSaveDraft: () => void;
@@ -42,7 +43,7 @@ interface EditRuntimeProps {
 
   mainEntity: any;
   subEntitiesValues: any;
-  setEditLoading: (value: boolean) => void;
+  setDraftLoading: (value: boolean) => void;
   showFromPageData?: Function;
 }
 
@@ -51,6 +52,7 @@ const EditRuntime: React.FC<EditRuntimeProps> = ({
   isAdd,
   editLoading,
   submitLoading,
+  draftLoading,
   onSubmit,
   onSaveSubmit,
   onSaveDraft,
@@ -60,7 +62,7 @@ const EditRuntime: React.FC<EditRuntimeProps> = ({
 
   mainEntity,
   subEntitiesValues,
-  setEditLoading,
+  setDraftLoading,
   showFromPageData
 }) => {
   useSignals();
@@ -99,7 +101,7 @@ const EditRuntime: React.FC<EditRuntimeProps> = ({
   const handleLoadDraft = useCallback(
     async (draftData: any) => {
       if (draftData) {
-        setEditLoading(true);
+        setDraftLoading(true);
         console.log('latestDraft: ', draftData);
         const componentSchemas = useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value;
         const subTableComponents = useEditorSignalMap.get(editPageViewId.value)?.subTableComponents.value;
@@ -117,7 +119,7 @@ const EditRuntime: React.FC<EditRuntimeProps> = ({
           form.setFieldsValue(formValues);
         }, 100);
         setTimeout(() => {
-          setEditLoading(false);
+          setDraftLoading(false);
         }, 200);
         await handleFormValuesChange({}, formValues);
         // 触发表单值变化，更新组件状态
@@ -172,10 +174,10 @@ const EditRuntime: React.FC<EditRuntimeProps> = ({
     [cpStates, editPageViewId.value]
   );
 
-  const handleValuesChange = (curValue: any, values: any) => {
+  const handleValuesChange = (curValue: any) => {
     setFormValues((prev: any) => ({ ...prev, ...curValue }));
     setHasChanged(true);
-    handleFormValuesChange(curValue, values);
+    // handleFormValuesChange(curValue, values);
   };
 
   return (
@@ -232,7 +234,7 @@ const EditRuntime: React.FC<EditRuntimeProps> = ({
         {isAdd ? (
           <Button
             type="ghost"
-            loading={submitLoading}
+            loading={draftLoading}
             color={colorConfig}
             bgColor={ghostBgColor}
             borderColor={colorConfig}

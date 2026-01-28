@@ -22,9 +22,10 @@ const DynamicWidthRadioConfig = ({ handleLayoutChange, item, configs }: Props) =
         onChange={(value) => {
           handleLayoutChange(item.key, value);
         }}
+        style={{ width: '100%', display: 'flex' }}
       >
         {item.range.map((option: any) => (
-          <Radio key={option.key} value={option.value} className={styles.widthRadio}>
+          <Radio key={option.key} value={option.value} className={styles.widthRadio} style={{ flex: 1, textAlign: 'center', whiteSpace: 'nowrap' }}>
             {option.text && option.text.startsWith('editor.') ? t(option.text) : option.text}
           </Radio>
         ))}

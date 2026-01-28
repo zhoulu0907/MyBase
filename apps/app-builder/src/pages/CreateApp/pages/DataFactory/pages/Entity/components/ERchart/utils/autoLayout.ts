@@ -1,5 +1,6 @@
 import type { EntityNode, EdgeData } from '../../../../../utils/interface';
 import { FIELD_TYPE } from '@onebase/ui-kit';
+import { LINE_HEAD_HEIGHT, LINE_TITLE_HEIGHT, LINE_HEIGHT } from './constants';
 
 // 布局配置
 interface LayoutConfig {
@@ -21,11 +22,6 @@ interface NodePosition {
   isTarget: boolean; // 是否为target节点
   isIsolated: boolean; // 是否为孤立节点
 }
-
-// 节点高度计算常量（与主组件保持一致）
-const LINE_HEAD_HEIGHT = 48;
-const LINE_HEIGHT = 34.8;
-const LINE_TITLE_HEIGHT = 44;
 
 // 默认布局配置
 const DEFAULT_CONFIG: LayoutConfig = {

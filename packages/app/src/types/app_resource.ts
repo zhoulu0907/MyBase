@@ -90,7 +90,7 @@ export interface PageView {
   isLatestUpdated?: number;
 
   interactionRules?: InteractionRule[];
-  
+
   pageSetUuid?: string;
   pageUuid: string;
 }

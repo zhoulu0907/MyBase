@@ -95,7 +95,7 @@ export default function UserTable({
   const [detailUser, setDetailUser] = useState<UserRecord | undefined>();
   const [resetPasswordUser, setResetPasswordUser] = useState<UserRecord | undefined>();
 
-  const [userData, setUsertData] = useState<{ userList: any[] }>();
+  const [userData, setUserData] = useState<{ userList: any[] }>();
   const [memberLoading, setMemberLoading] = useState<boolean>(false);
   const [selectedMembers, setSelectedMembers] = useState<any[]>([]);
 
@@ -374,7 +374,7 @@ export default function UserTable({
   // 设置主管/管理员
   const handleSetAdminOrDirector = async (userRoleType: UserRole) => {
     if (!selectedDeptId) return Message.warning('请先选择部门');
-    await getSimpleUsers({});
+    const userList = await getSimpleUsers({});
     const deptInfo = await getDeptInfo();
     // 设置主管、管理员时，设置默认选中的成员
     setManagerTypeModalVisible(userRoleType);
@@ -384,7 +384,8 @@ export default function UserTable({
           {
             department: deptInfo?.name,
             key: deptInfo?.leaderUserId,
-            name: deptInfo?.leaderUserName
+            name: deptInfo?.leaderUserName,
+            avatar: userList?.find((item:any)=>item.id === deptInfo?.leaderUserId)?.avatar || undefined
           }
         ]);
       } else {
@@ -397,7 +398,8 @@ export default function UserTable({
         const adminUsers = deptInfo?.adminUserIds.map((id: string, index: number) => ({
           department: deptInfo?.name,
           key: id,
-          name: adminUserNames?.[index] || ''
+          name: adminUserNames?.[index] || '',
+          avatar: userList?.find((item:any)=>item.id === id)?.avatar || undefined
         }));
         setSelectedMembers(adminUsers || []);
       } else {
@@ -419,7 +421,8 @@ export default function UserTable({
       } else {
         res = await getSimpleUser(selectedDeptId, true);
       }
-      setUsertData({ userList: res });
+      setUserData({ userList: res });
+      return res;
     } catch (error) {
       console.error('获取部门用户信息失败 error:', error);
     } finally {

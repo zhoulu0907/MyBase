@@ -152,11 +152,11 @@ const EditTenant = () => {
 
     const progressAdapter = onProgress
       ? (progressEvent: ProgressEvent) => {
-          if (progressEvent.lengthComputable) {
-            const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-            onProgress(percent, progressEvent);
-          }
+        if (progressEvent.lengthComputable) {
+          const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          onProgress(percent, progressEvent);
         }
+      }
       : undefined;
 
     const res = await uploadFile(formData, progressAdapter);
@@ -237,13 +237,15 @@ const EditTenant = () => {
                       }}
                     >
                       {logoUrl ? (
-                        <Image
-                          className={styles.tenantLogo}
-                          preview
-                          width={160}
-                          height={80}
-                          src={getFileUrlById(logoUrl)}
-                        />
+                        <div onClick={(e) => e.stopPropagation()}>
+                          <Image
+                            className={styles.tenantLogo}
+                            preview
+                            width={160}
+                            height={80}
+                            src={getFileUrlById(logoUrl)}
+                          />
+                        </div>
                       ) : (
                         <div className={styles.tenantLogo}>{tenantInfo?.name.slice(0, 6)}</div>
                       )}

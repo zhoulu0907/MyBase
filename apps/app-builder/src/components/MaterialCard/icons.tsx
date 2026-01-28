@@ -48,7 +48,7 @@ import QuickEntryIcon from '@/assets/images/cp/quick_entry_cp.svg';
 import TodoCenterIcon from '@/assets/images/cp/todo_center_cp.svg';
 import TodoListIcon from '@/assets/images/cp/todo_list_cp.svg';
 import WelcomeCardIcon from '@/assets/images/cp/welcome_card_cp.svg';
-import InformationListIcon from '@/assets/images/cp/infomation_list_cp.svg';
+import InformationListIcon from '@/assets/images/cp/information_list_cp.svg';
 import RichTextEditorWorkbenchIcon from '@/assets/images/cp/rich_text_editor_workbench_cp.svg';
 import ButtonWorkbenchIcon from '@/assets/images/cp/button_workbench_cp.svg';
 
@@ -111,7 +111,7 @@ export const ICON_Map: Record<string, React.ReactNode> = {
   'todo_center_cp.svg': <img src={TodoCenterIcon} alt="XTodoCenter" />,
   'todo_list_cp.svg': <img src={TodoListIcon} alt="XTodoList" />,
   'welcome_card_cp.svg': <img src={WelcomeCardIcon} alt="XWelcomeCard" />,
-  'infomation_list_cp.svg': <img src={InformationListIcon} alt="XInformationList" />,
+  'information_list_cp.svg': <img src={InformationListIcon} alt="XInformationList" />,
   'rich_text_editor_workbench_cp.svg': <img src={RichTextEditorWorkbenchIcon} alt="XRichTextEditorWorkbench" />,
   'button_workbench_cp.svg': <img src={ButtonWorkbenchIcon} alt="XButtonWorkbench" />,
 
