@@ -8,6 +8,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { ErrorBoundary } from 'react-error-boundary';
 import { registerMicroApps, start, initGlobalState } from 'qiankun';
+import { loadMicroApp, type MicroApp } from 'qiankun';
 import App from './App.tsx';
 import './i18n';
 import './index.css';
@@ -15,15 +16,26 @@ import './index.css';
 const actions = initGlobalState({
   user: { name: 'admin' }
 });
+const copilotActions = initGlobalState({
+  user: { id: '123123' }
+});
+
 registerMicroApps([
   {
     name: 'chat',
     entry: 'http://localhost:7100', // 子应用运行端口
-    container: '#subapp-container',
+    container: '#chat-container',
     activeRule: (location) => location.hash.startsWith('#/chat'),
     props: actions
   }
 ]);
+
+loadMicroApp({
+  name: 'copilot',
+  entry: 'http://localhost:8888',
+  container: '#copilot-container',
+  props: copilotActions
+});
 
 start();
 
@@ -32,6 +44,8 @@ createRoot(document.getElementById('root')!).render(
     <ConfigProvider prefixCls="pc">
       <ErrorBoundary FallbackComponent={ErrorPage}>
         <App />
+        <div id="chat-container"></div>
+        <div id="copilot-container"></div>
       </ErrorBoundary>
     </ConfigProvider>
   </StrictMode>
