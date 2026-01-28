@@ -72,8 +72,8 @@ class FlowConnectorEnvControllerTest {
     @Test
     void testListByTypeCode() throws Exception {
         // Given
-        when(service.listByTypeCode(eq("DATABASE_MYSQL")))
-                .thenReturn(Arrays.asList(envVO));
+        // when(service.listByTypeCode(eq("DATABASE_MYSQL")))
+        //         .thenReturn(Arrays.asList(envVO));
 
         // When & Then
         mockMvc.perform(get("/flow/connector-env/by-type/DATABASE_MYSQL"))
@@ -94,8 +94,8 @@ class FlowConnectorEnvControllerTest {
     @Test
     void testListByTypeCode_EmptyResult() throws Exception {
         // Given
-        when(service.listByTypeCode(eq("DATABASE_MYSQL")))
-                .thenReturn(Collections.emptyList());
+        // when(service.listByTypeCode(eq("DATABASE_MYSQL")))
+        //         .thenReturn(Collections.emptyList());
 
         // When & Then
         mockMvc.perform(get("/flow/connector-env/by-type/DATABASE_MYSQL"))

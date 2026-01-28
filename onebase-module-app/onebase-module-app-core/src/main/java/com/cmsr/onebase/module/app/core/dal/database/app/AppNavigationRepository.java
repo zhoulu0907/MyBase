@@ -31,7 +31,8 @@ public class AppNavigationRepository extends BaseBizRepository<AppNavigationMapp
 
     public List<AppNavigationDO> findByApplicationIds(List<Long> appIds) {
         QueryWrapper queryWrapper = this.query()
-                .where(APP_NAVIGATION.APPLICATION_ID.in(appIds));
+                .where(APP_NAVIGATION.APPLICATION_ID.in(appIds))
+                .orderBy(APP_NAVIGATION.UPDATE_TIME, false);
         return this.list(queryWrapper);
     }
 }

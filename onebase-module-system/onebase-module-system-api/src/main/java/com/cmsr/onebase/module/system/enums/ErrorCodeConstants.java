@@ -62,6 +62,7 @@ public interface ErrorCodeConstants {
     ErrorCode USER_TYPE_EXCEPTION = new ErrorCode(1_002_003_016, "用户类型异常:{}");
     ErrorCode USER_DEPT_LEADER_NOT_ALLOW_CHANGE = new ErrorCode(1_002_003_017, "你是【{}】部门的主管，无法转移到其他部门！");
     ErrorCode USER_DEPT_ADMIN_NOT_ALLOW_CHANGE = new ErrorCode(1_002_003_018, "你是【{}】部门的接口人，无法转移到其他部门！");
+    ErrorCode CORP_USER_COUNT_MAX = new ErrorCode(1_002_003_019, "创建/启用用户失败，原因：超过企业最大用户配额:{}！");
 
     // ========== 部门模块 1-002-004-000 ==========
     ErrorCode DEPT_NAME_DUPLICATE = new ErrorCode(1_002_004_000, "已经存在该名字的部门");
@@ -197,7 +198,8 @@ public interface ErrorCodeConstants {
     ErrorCode AUTH_LOGIN_CORP_DELETE_OR_DISABLE = new ErrorCode(1_002_025_010, "你的的账号所属企业已被删除或禁用，暂时无法登录。");
     ErrorCode AUTH_LOGIN_TENANT_DELETE_OR_DISABLE = new ErrorCode(1_002_025_011, "你的的账号所属空间已被删除或禁用，暂时无法登录。");
     ErrorCode AUTH_LOGIN_APP_DELETE_OR_DISABLE = new ErrorCode(1_002_025_012, "该应用已被删除或禁用，暂时无法登录。");
-    ErrorCode CORP_USER_LIMIT_COUNT_CHECK = new ErrorCode(1_002_003_013, "空间可分配人员数量不足，人员上限是{}, 剩余{}");
+    ErrorCode CORP_USER_LIMIT_COUNT_CHECK = new ErrorCode(1_002_003_013, "空间可分配人员数量不足，空间人员上限是{}, 剩余{}");
+    ErrorCode CORP_USER_LIMIT_COUNT_MIN_CHECK = new ErrorCode(1_002_003_013, "分配的用户数量不能小于1人");
     ErrorCode CORP_USER_EXITES_LIMIT_COUNT_CHECK = new ErrorCode(1_002_003_014, "分配的用户数量不能低于企业内已有用户数：{}");
     ErrorCode AUTH_LOGIN_APP_EXPIRE = new ErrorCode(1_002_025_015, "本企业用户无法登录，授权已过期。");
 

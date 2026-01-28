@@ -22,4 +22,13 @@ public class SavePageSetReqVO {
     @Schema(description = "页面集描述", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "页面集不能为空")
     private List<PageDTO> pages;
+
+    @Schema(description = "数据标题类型")
+    private Integer dataTitleType;
+
+    @Schema(description = "数据标题")
+    private String dataTitle;
+
+    @Schema(description = "重定向类型")
+    private Integer redirectType;
 }

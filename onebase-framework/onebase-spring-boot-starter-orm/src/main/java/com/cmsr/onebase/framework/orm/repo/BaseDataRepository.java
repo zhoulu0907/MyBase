@@ -162,4 +162,13 @@ public class BaseDataRepository<M extends BaseMapper<T>, T extends BaseEntity> e
     public List<T> upsertBatch(Collection<T> dataList) {
         return upsertBatchReturnList(dataList);
     }
+
+    /**
+     * 根据租户ID删除数据
+     *
+     * @param tenantId 租户ID
+     */
+    public void removeByTenant(Long tenantId) {
+        this.remove(query().eq("tenant_id", tenantId));
+    }
 }

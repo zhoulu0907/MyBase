@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.system.service.tenant;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
+import com.cmsr.onebase.framework.common.biz.security.SecurityConfigApi;
 import com.cmsr.onebase.framework.common.enums.CommonPublishModelEnum;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
@@ -17,17 +18,24 @@ import com.cmsr.onebase.framework.tenant.config.TenantProperties;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
+import com.cmsr.onebase.module.app.api.app.AppServiceApi;
+import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
+import com.cmsr.onebase.module.app.api.auth.AppAuthRoleUserService;
+import com.cmsr.onebase.module.screen.api.DashboardProjectApi;
 import com.cmsr.onebase.module.system.api.user.AdminUserRoleApi;
 import com.cmsr.onebase.module.system.convert.tenant.TenantConvert;
-import com.cmsr.onebase.module.system.dal.database.TenantDataRepository;
+import com.cmsr.onebase.module.system.dal.database.*;
+import com.cmsr.onebase.module.system.dal.database.dept.DeptDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.corp.CorpDO;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
+import com.cmsr.onebase.module.system.dal.dataobject.dict.DictTypeDO;
 import com.cmsr.onebase.module.system.dal.dataobject.license.LicenseDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.UserRoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantPackageDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
+import com.cmsr.onebase.module.system.dal.flex.repo.UserDataRepository;
 import com.cmsr.onebase.module.system.enums.corp.CorpConstant;
 import com.cmsr.onebase.module.system.enums.permission.AdminTypeEnum;
 import com.cmsr.onebase.module.system.enums.permission.PackageTypeEnum;
@@ -37,8 +45,11 @@ import com.cmsr.onebase.module.system.enums.tenant.TenantCodeEnum;
 import com.cmsr.onebase.module.system.enums.tenant.TenantStatusEnum;
 import com.cmsr.onebase.module.system.enums.user.UserStatusEnum;
 import com.cmsr.onebase.module.system.framework.security.core.PwdEnHelper;
+import com.cmsr.onebase.module.system.service.config.SystemConfigService;
 import com.cmsr.onebase.module.system.service.corp.CorpService;
 import com.cmsr.onebase.module.system.service.dept.DeptService;
+import com.cmsr.onebase.module.system.service.dict.DictDataService;
+import com.cmsr.onebase.module.system.service.dict.DictTypeService;
 import com.cmsr.onebase.module.system.service.license.LicenseService;
 import com.cmsr.onebase.module.system.service.permission.MenuService;
 import com.cmsr.onebase.module.system.service.permission.PermissionService;
@@ -80,6 +91,7 @@ public class TenantServiceImpl implements TenantService {
 
     // 空间管理员设置默认密码
     private static final String TENANT_ADMIN_PASSWORD = "AdminChina2025!";
+    public static final  String TENANT                = "tenant";
 
     @SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection")
     @Resource // 由于 onebase.tenant.enable 配置项，可以关闭多租户的功能，所以这里只能不强制注入
@@ -116,6 +128,24 @@ public class TenantServiceImpl implements TenantService {
 
     @Resource
     private PwdEnHelper pwdEnHelper;
+
+    @Resource
+    private SystemConfigService systemConfigService;
+
+    @Resource
+    private DictDataService dictDataService;
+
+    @Resource
+    private DictTypeService dictTypeService;
+
+    @Resource
+    private SecurityConfigApi securityConfigApi;
+
+    @Resource
+    private AppServiceApi appServiceApi;
+
+    @Resource
+    private DashboardProjectApi dashboardProjectApi;
 
     @Override
     public List<Long> getTenantIdList() {
@@ -167,10 +197,19 @@ public class TenantServiceImpl implements TenantService {
     }
 
     @Override
-    public Long getTenantExistUserCount(Long tenantId) {
+    public long getTenantExistUserCount(Long tenantId) {
         // 查询当前租户下已分配的用户数量
         return TenantUtils.execute(tenantId, () -> {
             return Long.valueOf(userService.getUserCountByStatus(UserStatusEnum.NORMAL.getStatus()));
+        });
+    }
+
+
+    @Override
+    public long getTenantExistInnerUserCount(Long tenantId) {
+        // 查询当前租户下已分配的用户数量
+        return TenantUtils.execute(tenantId, () -> {
+            return userService.getInnerUserCountByStatus(UserStatusEnum.NORMAL.getStatus());
         });
     }
 
@@ -554,20 +593,109 @@ public class TenantServiceImpl implements TenantService {
         });
     }
 
+    @Resource
+    private UserDataRepository     userDataRepository;
+    @Resource
+    private UserPostDataRepository userPostDataRepository;
+
+    @Resource
+    private UserRoleDataRepository userRoleDataRepository;
+
+    @Resource
+    private AppAuthRoleUserService appAuthRoleUserService;
+
+    @Resource
+    private RoleDataRepository roleDataRepository;
+
+    @Resource
+    private RoleMenuDataRepository roleMenuDataRepository;
+
+    @Resource
+    private DeptDataRepository deptDataRepository;
+
+    @Resource
+    private CorpDataRepository corpDataRepository;
+
+    @Resource
+    private CorpAppRelationDataRepository corpAppRelationDataRepository;
+
+    @Resource
+    private DictTypeRepository dictTypeRepository;
+
+    @Resource
+    private DictDataRepository dictDataRepository;
+
+    @Resource
+    private SystemConfigDataRepository systemConfigDataRepository;
+
+    @Resource
+    private UserAppRelationDataRepository userAppRelationDataRepository;
+
     @Override
     @LogRecord(type = SYSTEM_TENANT_TYPE, subType = SYSTEM_TENANT_DELETE_SUB_TYPE, bizNo = "{{#tenant.id}}",
             success = SYSTEM_TENANT_DELETE_SUCCESS)
-    public void deleteTenant(Long id) {
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteTenant(Long tenantId) {
+        long startTime = System.currentTimeMillis();
+        log.info("开始删除空间（租户），租户ID：{}, 时间：{}", tenantId, startTime);
         // 校验存在
-        TenantDO tenant = validateUpdateTenant(id);
-        // 删除
-        tenantDataRepository.deleteById(id);
+        TenantDO tenant = validateUpdateTenant(tenantId);
+        log.info("校验空间，空间信息：{}", tenant);
+
+        // 在租户上下文中执行其他删除操作
+        TenantUtils.execute(tenantId, () -> {
+            // 1. 删除用户
+            userDataRepository.removeByTenant(tenantId);
+            // 1.1. 删除用户&应用关联
+            appAuthRoleUserService.deleteByTenant(tenantId);
+            // 1.2 删除用户&角色关联
+            userRoleDataRepository.removeByTenant(tenantId);
+            // 1.3 删除用户岗位
+            userPostDataRepository.removeByTenant(tenantId);
+            // 2. 删除角色
+            roleDataRepository.removeByTenant(tenantId);
+            // 2.1 删除角色&权限点
+            roleMenuDataRepository.removeByTenant(tenantId);
+            // 3. 删除部门
+            deptDataRepository.removeByTenant(tenantId);
+            // 4. 删除企业
+            corpDataRepository.removeByTenant(tenantId);
+            // 4.1 删除企业&应用授权
+            corpAppRelationDataRepository.removeByTenant(tenantId);
+            // 4.2 删除用户&应用授权
+            userAppRelationDataRepository.removeByTenant(tenantId);
+            // 5. 删除租户级别字典Dict
+            List<DictTypeDO> dictTypeDOList = dictTypeRepository.findAllListByOwner(TENANT, tenantId);
+            // 5.1 删除字典类型对应的数据
+            dictDataRepository.removeDictDataByType(dictTypeDOList.stream().map(DictTypeDO::getType).collect(Collectors.toList()));
+            // 5.2 删除字典类型
+            dictTypeRepository.removeByDictOwnerId(TENANT,tenantId);
+            // 6. 删除租户级别配置项Config
+            systemConfigDataRepository.removeByTenant(tenantId);
+            // 7. 删除安全配置和安全记录
+            securityConfigApi.removeSecurityConfigsByTenantId(tenantId);
+            securityConfigApi.removeSecurityRecordsByTenantId(tenantId);
+            // 8. 删除应用和大屏
+            long currentTime = System.currentTimeMillis();
+            log.info("开始删除应用，空间ID：{}, 已耗时：{} MS", tenantId, (startTime - currentTime));
+            List<ApplicationDTO> applications = appApplicationApi.getSimpleAllAppList(tenantId);
+            for (ApplicationDTO application : applications) {
+                appServiceApi.deleteApplication(application.getId(), application.getAppName());
+            }
+            currentTime = System.currentTimeMillis();
+            log.info("完成删除应用，空间ID：{}, 已耗时：{} MS", tenantId, (startTime - currentTime));
+
+        });
+        // 删除空间
+        tenantDataRepository.deleteById(tenantId);
+        log.info("已删除空间，租户ID：{}", tenantId);
 
         // 记录操作日志上下文
         LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
-
         LogRecordContext.putVariable("loginUser", loginUser);
         LogRecordContext.putVariable("tenant", tenant);
+        long currentTime = System.currentTimeMillis();
+        log.info("完成删除空间（租户），空间ID：{}, 已耗时：{} MS", tenantId, (startTime - currentTime));
     }
 
     private TenantDO validateUpdateTenant(Long id) {

@@ -2,11 +2,8 @@ package com.cmsr.onebase.module.flow.build.service;
 
 import com.cmsr.onebase.framework.common.pojo.PageParam;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.flow.build.vo.CreateFlowConnectorReqVO;
-import com.cmsr.onebase.module.flow.build.vo.CreateFlowConnectorRespVO;
-import com.cmsr.onebase.module.flow.build.vo.FlowConnectorLiteVO;
-import com.cmsr.onebase.module.flow.build.vo.FlowConnectorVO;
-import com.cmsr.onebase.module.flow.build.vo.UpdateFlowConnectorReqVO;
+import com.cmsr.onebase.module.flow.build.vo.*;
+import com.cmsr.onebase.module.flow.core.util.ConnectorConfigHelper;
 import com.cmsr.onebase.module.flow.core.vo.PageConnectorReqVO;
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -74,4 +71,103 @@ public interface FlowConnectorService {
      * @throws ServiceException CONNECTOR_ENV_NOT_CONFIGURED - 启用时未配置环境
      */
     void updateActiveStatus(Long id, Integer activeStatus);
+
+    // ==================== 动作管理接口 ====================
+
+    /**
+     * 获取连接器的动作列表
+     *
+     * @param connectorId 连接器ID
+     * @return 动作列表
+     */
+    List<ConnectorActionVO> getActionList(Long connectorId);
+
+    /**
+     * 获取动作详情
+     *
+     * @param connectorId 连接器ID
+     * @param actionId    动作ID
+     * @return 动作详情
+     */
+    ConnectorActionVO getActionDetail(Long connectorId, String actionId);
+
+    /**
+     * 保存动作草稿
+     *
+     * @param connectorId 连接器ID
+     * @param createVO    创建请求
+     * @return 创建的动作ID
+     */
+    String saveActionDraft(Long connectorId, CreateConnectorActionReqVO createVO);
+
+    /**
+     * 更新动作草稿
+     *
+     * @param connectorId 连接器ID
+     * @param actionId    动作ID
+     * @param updateVO    更新请求
+     */
+    void updateActionDraft(Long connectorId, String actionId, UpdateConnectorActionReqVO updateVO);
+
+    /**
+     * 发布动作
+     * <p>
+     * 业务规则：
+     * - 校验所有步骤配置是否完整
+     * - 完整性校验通过后更新状态为 published，版本号+1
+     *
+     * @param connectorId 连接器ID
+     * @param actionId    动作ID
+     */
+    void publishAction(Long connectorId, String actionId);
+
+    /**
+     * 下架动作
+     *
+     * @param connectorId 连接器ID
+     * @param actionId    动作ID
+     */
+    void offlineAction(Long connectorId, String actionId);
+
+    /**
+     * 重新上线动作
+     *
+     * @param connectorId 连接器ID
+     * @param actionId    动作ID
+     */
+    void republishAction(Long connectorId, String actionId);
+
+    /**
+     * 复制动作
+     * <p>
+     * 业务规则：
+     * - 自动生成唯一名称：原名称_copy序号
+     * - 复制的动作状态为 draft
+     *
+     * @param connectorId 连接器ID
+     * @param actionId    动作ID
+     * @return 新复制的动作ID
+     */
+    String copyAction(Long connectorId, String actionId);
+
+    /**
+     * 删除动作
+     * <p>
+     * 业务规则：
+     * - 检查是否被逻辑流引用
+     * - 如被引用则抛出异常并返回引用信息
+     *
+     * @param connectorId 连接器ID
+     * @param actionId    动作ID
+     */
+    void deleteAction(Long connectorId, String actionId);
+
+    /**
+     * 校验动作是否可发布
+     *
+     * @param connectorId 连接器ID
+     * @param actionId    动作ID
+     * @return 校验结果
+     */
+    ConnectorConfigHelper.ValidationResult validateActionForPublish(Long connectorId, String actionId);
 }

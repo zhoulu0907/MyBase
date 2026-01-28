@@ -125,6 +125,10 @@ public class UserDataRepository extends BaseDataRepository<SystemUsersMapper, Ad
         return list(buildQueryWrapperByType(userType).in(DEPT_ID, deptIds));
     }
 
+    public List<AdminUserDO> getUserByCorpId(Long corpId){
+        return list(query().eq(AdminUserDO.CORP_ID, corpId).eq(AdminUserDO.USER_TYPE, UserTypeEnum.CORP.getValue()));
+    }
+
     /**
      * 查询没有部门的用户
      *
@@ -174,8 +178,8 @@ public class UserDataRepository extends BaseDataRepository<SystemUsersMapper, Ad
      * @param corpId 企业id
      * @return 用户数量
      */
-    public long getUserCountByCorpId(Long corpId) {
-        return count(query().eq(AdminUserDO.CORP_ID, corpId));
+    public long getUserCountByCorpId(Long corpId, Integer status) {
+        return count(query().eq(AdminUserDO.CORP_ID, corpId).eq(AdminUserDO.STATUS, status, status != null));
     }
 
     /**
@@ -348,5 +352,9 @@ public class UserDataRepository extends BaseDataRepository<SystemUsersMapper, Ad
                 .orderBy(BaseDO.CREATE_TIME, false);
         Page<AdminUserDO> pageResult = page(Page.of(pageReqVO.getPageNo(), pageReqVO.getPageSize()), queryWrapper);
         return new PageResult<>(pageResult.getRecords(), pageResult.getTotalRow());
+    }
+
+    public long countInnerUserByStatus(Integer status) {
+        return  count(query().eq(AdminUserDO.STATUS, status).eq(AdminUserDO.USER_TYPE, UserTypeEnum.TENANT.getValue()));
     }
 }

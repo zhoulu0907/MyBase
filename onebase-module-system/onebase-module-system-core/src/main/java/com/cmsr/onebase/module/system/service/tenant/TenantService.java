@@ -20,6 +20,8 @@ import java.util.Set;
  */
 public interface TenantService {
 
+    long getTenantExistInnerUserCount(Long tenantId);
+
     /**
      * 创建空间
      *
@@ -177,6 +179,6 @@ public interface TenantService {
      *
      * @return 获取当前租户已存在的用户数量
      */
-    Long getTenantExistUserCount(Long tenantId);
+    long getTenantExistUserCount(Long tenantId);
 
 }
