@@ -46,6 +46,11 @@
     box-sizing: border-box;
   }
 }
+.cardListForm {
+  .pc-form-label-item {
+    text-align: left;
+  }
+}
 
 .tableFormItem {
   .pc-form-label-item {

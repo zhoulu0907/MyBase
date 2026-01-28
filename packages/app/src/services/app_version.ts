@@ -33,12 +33,12 @@ export const deleteApplicationVersion = (params: DeleteApplicationVersionReq) =>
 };
 
 // 获取导出应用资源 应用下载
-export const exportAppVersionFile = (params: { exportId: string, applicationId?: string }, fileName: string) => {
+export const exportAppVersionFile = (params: { exportId: string }, fileName: string) => {
   return appService.download('/version/export/file', fileName, { params }, true) as Promise<string>;;
 };
 
-// 导出应用 0开发  1生产  版本id
-export const exportAppVersion = (params: { versionId: string }) => {
+// 导出应用 0开发  1生产  版本id  
+export const exportAppVersion = (params: { versionId: string, applicationId?: string }) => {
   return appService.get('/version/export', params);
 };
 
@@ -63,7 +63,7 @@ export const deleteExportAppVersion = (params: { exportId: string }) => {
 };
 
 // 重试导出
-export const retryExportAppVersion = (params: { exportId: string }) => {
+export const retryExportAppVersion = (params: { exportId: string, applicationId?: string }) => {
   return appService.get('/version/export/retry', params);
 };
 

@@ -6,6 +6,7 @@ export interface PageApplicationVersionReq {
 
 export interface PageAppVersionExportReq {
   exportStatus: string;
+  applicationId?: string;
   pageNo: number;
   pageSize: number;
 } 
