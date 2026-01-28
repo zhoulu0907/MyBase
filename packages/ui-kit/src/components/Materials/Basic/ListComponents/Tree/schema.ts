@@ -131,7 +131,7 @@ const XTree: XTreeSchema = {
   config: {
     ...baseDefault,
     label: {
-      text: '树结构',
+      text: '树形目录',
       display: false
     },
     metaData: '',
