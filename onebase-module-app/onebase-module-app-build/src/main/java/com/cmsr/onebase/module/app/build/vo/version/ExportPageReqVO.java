@@ -16,6 +16,8 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class ExportPageReqVO extends PageParam {
+    @Schema(description = "应用ID")
+    private Long applicationId;
 
     @Schema(description = "导出状态 0-未知 1-导出中 2-导出成功 3-导出失败")
     private Integer exportStatus;
