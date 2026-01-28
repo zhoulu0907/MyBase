@@ -557,8 +557,8 @@ public class AppVersionServiceImpl implements AppVersionService {
      */
     @Override
     public PageResult<ExportPageRespVO> getExportPage(ExportPageReqVO pageReqVO) {
-        Long applicationId = ApplicationManager.getApplicationId();
-        PageResult<AppExportDO> pageResult = appExportRepository.selectPage(applicationId, pageReqVO.getExportStatus(),
+        PageResult<AppExportDO> pageResult = appExportRepository.selectPage(pageReqVO.getApplicationId(),
+                pageReqVO.getExportStatus(),
                 pageReqVO);
 
         if (pageResult.getList().isEmpty()) {
@@ -609,8 +609,7 @@ public class AppVersionServiceImpl implements AppVersionService {
      * @return 导出记录ID（返回原导出记录ID）
      */
     @Override
-    public Long retryExportApplication(Long exportId) {
-        Long applicationId = ApplicationManager.getRequiredApplicationId();
+    public Long retryExportApplication(Long exportId, Long applicationId) {
         AppApplicationDO applicationDO = appCommonService.validateApplicationExist(applicationId);
 
         // 查询导出记录并验证是否属于当前应用

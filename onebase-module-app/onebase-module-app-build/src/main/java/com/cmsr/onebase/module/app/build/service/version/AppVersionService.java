@@ -75,6 +75,6 @@ public interface AppVersionService {
      * @param exportId 导出记录ID
      * @return 导出记录ID（返回原导出记录ID）
      */
-    Long retryExportApplication(Long exportId);
+    Long retryExportApplication(Long exportId, Long applicationId);
 
 }
