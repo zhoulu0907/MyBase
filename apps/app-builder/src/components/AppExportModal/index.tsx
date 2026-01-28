@@ -1,14 +1,16 @@
-import { Button, Form, Checkbox, Radio, Modal, Typography, Progress } from '@arco-design/web-react';
-import { IconUpload, IconLoading, IconRefresh, IconCheckCircleFill, IconEdit } from '@arco-design/web-react/icon';
+import { Button, Radio, Modal, Typography, Progress } from '@arco-design/web-react';
+import { IconRefresh } from '@arco-design/web-react/icon';
 import {
   VersionExportType,
   ExportStatus,
   exportAppVersion,
   exportAppVersionFile,
+  retryExportAppVersion,
   getExportAppVersionStatus,
   type Application
 } from '@onebase/app';
 import { appIconMap, downloadFileByUrl } from '@onebase/ui-kit';
+import dayjs from 'dayjs';
 import DynamicIcon from '@/components/DynamicIcon';
 import { useState } from 'react';
 import styles from './index.module.less';
@@ -45,17 +47,24 @@ const AppExportModal: React.FC<AppExportModalProps> = ({ visible, onClose, appIn
 
   const handleExport = async () => {
     setExportLoading(true);
+
     const param = {
-      versionId: versionInfo?.id || version
+      versionId: versionInfo?.id || version,
+      applicationId: appInfo.id
     };
-    const newExportId = await exportAppVersion(param);
-    setExportId(newExportId);
-    if (newExportId) {
-      onClose();
-      setProgressVisible(true);
-      handleProgress(newExportId);
+    try {
+      const newExportId = await exportAppVersion(param);
+      setExportId(newExportId);
+      if (newExportId) {
+        onClose();
+        setProgressVisible(true);
+        handleProgress(newExportId);
+      }
+      setExportLoading(false);
+    } catch (error) {
+      console.log(error);
+      setExportLoading(false);
     }
-    setExportLoading(false);
   };
 
   const [progressVisible, setProgressVisible] = useState(false);
@@ -73,24 +82,35 @@ const AppExportModal: React.FC<AppExportModalProps> = ({ visible, onClose, appIn
       handleProgress(newExportId);
     } else if (res === ExportStatus.SUCCESS) {
       setPercentValue(100);
+      // 进度条加载完成后，自动下载导出文件到本地
+      handleDownload()
     } else {
       setExportIsError(true);
     }
   };
   // 重新导出
-  const retryExport = (newExportId: string) => {
+  const retryExport = async (newExportId: string) => {
     setPercentValue(0);
-    handleProgress(newExportId);
+    const res = await retryExportAppVersion({ exportId: newExportId });
+    if (res) {
+      handleProgress(newExportId);
+    }
   };
   // 下载文件
   const handleDownload = async () => {
     setDownloadLoading(true);
-    const fileUrl = await exportAppVersionFile({ exportId }, appInfo.appName);
-    if (fileUrl) {
-      downloadFileByUrl(fileUrl, `${appInfo.appName}.zip`);
-      setProgressVisible(false);
+    try {
+      const fileUrl = await exportAppVersionFile({ exportId }, appInfo.appName);
+      if (fileUrl) {
+        const date = dayjs(new Date()).format('YYYYMMDD');
+        downloadFileByUrl(fileUrl, `${appInfo.appName}_${appInfo.appCode}_${date}.zip`);
+        setProgressVisible(false);
+      }
+      setDownloadLoading(false);
+    } catch (error) {
+      console.log(error);
+      setDownloadLoading(false);
     }
-    setDownloadLoading(false);
   };
 
   return (

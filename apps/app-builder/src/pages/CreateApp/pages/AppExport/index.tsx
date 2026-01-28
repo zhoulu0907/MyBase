@@ -1,7 +1,15 @@
-import { Table, Button, Alert, Select, Tag, Modal } from '@arco-design/web-react';
+import { Table, Button, Alert, Select, Tag, Modal, Message } from '@arco-design/web-react';
 import type { ColumnProps } from '@arco-design/web-react/es/Table';
 import { IconInfoCircleFill } from '@arco-design/web-react/icon';
-import { ExportStatus,pageExportAppVersion,deleteExportAppVersion, type AppExportRecord } from '@onebase/app';
+import {
+  ExportStatus,
+  pageExportAppVersion,
+  deleteExportAppVersion,
+  exportAppVersionFile,
+  retryExportAppVersion,
+  type AppExportRecord
+} from '@onebase/app';
+import { downloadFileByUrl } from '@onebase/ui-kit';
 import dayjs from 'dayjs';
 import { useAppStore } from '@/store';
 import React, { useEffect, useState } from 'react';
@@ -32,21 +40,21 @@ const AppExportPage: React.FC = () => {
   const columns: ColumnProps<AppExportRecord>[] = [
     {
       title: '操作人',
-      dataIndex: 'operator',
-      key: 'operator'
+      dataIndex: 'creatorName',
+      key: 'creatorName'
     },
     {
       title: '操作时间',
-      dataIndex: 'operateTime',
-      key: 'operateTime',
+      dataIndex: 'createTime',
+      key: 'createTime',
       render: (value: string) => {
         return value ? dayjs(value).format('YYYY-MM-DD HH:mm:ss') : '-';
       }
     },
     {
       title: '状态',
-      dataIndex: 'status',
-      key: 'status',
+      dataIndex: 'exportStatus',
+      key: 'exportStatus',
       render: (value: ExportStatus) => {
         if (value === ExportStatus.EXPORTING) {
           return <Tag className={styles.exportingTag}>导出中</Tag>;
@@ -86,15 +94,20 @@ const AppExportPage: React.FC = () => {
   ];
 
   // 下载
-  const handleDownload = (record: AppExportRecord) => {
-    console.log(record);
-    // todo
+  const handleDownload = async (record: AppExportRecord) => {
+    const fileUrl = await exportAppVersionFile({ exportId: record.id }, curAppInfo.appName);
+    if (fileUrl) {
+      const date = dayjs(new Date()).format('YYYYMMDD');
+      downloadFileByUrl(fileUrl, `${curAppInfo.appName}_${curAppInfo.appCode}_${date}.zip`);
+    }
   };
 
   // 重试
-  const handleRetry = (record: AppExportRecord) => {
-    console.log(record);
-    // todo
+  const handleRetry = async (record: AppExportRecord) => {
+    const res = await retryExportAppVersion({ exportId: record.id });
+    if (res) {
+      getExportList();
+    }
   };
 
   // 删除
@@ -103,7 +116,8 @@ const AppExportPage: React.FC = () => {
       title: `确定要删除吗？`,
       content: `删除后，数据将被永久删除，操作不可逆，请谨慎操作。`,
       onOk: async () => {
-        // todo 接口删除
+        await deleteExportAppVersion({ exportId: record.id });
+        Message.success('删除成功');
       }
     });
   };
@@ -113,25 +127,25 @@ const AppExportPage: React.FC = () => {
     getExportList();
   }, [status, pagination.current, pagination.pageSize]);
 
-  // todo 接口获取表格数据
-  const getExportList = async() => {
+  // 接口获取表格数据
+  const getExportList = async () => {
     const param = {
       exportStatus: status,
       pageNo: pagination.current,
       pageSize: pagination.pageSize
-    }
+    };
     const res = await pageExportAppVersion(param);
     setTableData(res?.list || []);
-    setPagination((prev)=>({...prev, total: res?.total || 0}))
+    setPagination((prev) => ({ ...prev, total: res?.total || 0 }));
   };
 
   return (
     <div className={styles.appExportPage}>
       <Alert icon={<IconInfoCircleFill />} content="导出文件保留180天，逾期将自动删除且无法恢复，请及时下载。" />
       <div className={styles.headerActions}>
-        <Button type="primary" onClick={() => setExportVisible(true)}>
+        {/* <Button type="primary" onClick={() => setExportVisible(true)}>
           应用导出
-        </Button>
+        </Button> */}
         <div>
           <Select
             placeholder="全部状态"

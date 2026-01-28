@@ -29,7 +29,7 @@ export const deleteApplicationVersion = (params: DeleteApplicationVersionReq) =>
 };
 
 // 获取导出应用资源 应用下载
-export const exportAppVersionFile = (params: { exportId: string }, fileName:string) => {
+export const exportAppVersionFile = (params: { exportId: string,applicationId?: string }, fileName:string) => {
   return appService.download('/version/export/file', fileName, {params}, true) as Promise<string>;;
 };
 
