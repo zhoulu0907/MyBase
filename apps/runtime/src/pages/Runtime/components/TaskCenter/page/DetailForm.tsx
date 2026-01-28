@@ -14,7 +14,7 @@ import {
   type GridItem
 } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
-import { forwardRef, Fragment, useEffect, useImperativeHandle, useState, useRef } from 'react';
+import { forwardRef, Fragment, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
 interface PreviewProps {
@@ -138,7 +138,6 @@ const PreviewContainer = forwardRef<any, PreviewProps>((props: PreviewProps, ref
           useEditorSignalMap.get(editPageViewId.value)!.setPageComponentSchemas(key, newConfig);
           loadFormPageComponentSchemas(useEditorSignalMap.get(editPageViewId.value)!.pageComponentSchemas.value);
           prevFieldPermRef.current = useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value;
-
         }
       });
     }
@@ -211,7 +210,7 @@ const PreviewContainer = forwardRef<any, PreviewProps>((props: PreviewProps, ref
       const field = (mainMetaDataFields.value || []).find((f: AppEntityField) => f.fieldName == key);
       if (field) {
         console.log('field: ', field);
-        formData[field.fieldName] = value||'';
+        formData[field.fieldName] = value || '';
       }
 
       if (key.startsWith(FORM_COMPONENT_TYPES.SUB_TABLE)) {
@@ -234,7 +233,6 @@ const PreviewContainer = forwardRef<any, PreviewProps>((props: PreviewProps, ref
           subTableRows.push(temp);
         }
         subFormData[subTableName] = subTableRows;
-
       }
     });
     console.log('formData:   ', formData);
@@ -247,9 +245,9 @@ const PreviewContainer = forwardRef<any, PreviewProps>((props: PreviewProps, ref
   };
 
   const parseData = () => {
-    console.info('定位错误 1')
+    console.info('定位错误 1');
     startLoadPageSet({ pageSetId: pageSetId, runtime: true });
-    console.info('定位错误 2')
+    console.info('定位错误 2');
   };
 
   useEffect(() => {
@@ -289,7 +287,7 @@ const PreviewContainer = forwardRef<any, PreviewProps>((props: PreviewProps, ref
                     margin: '4px'
                   }}
                 >
-                  <ErrorBoundary FallbackComponent={() => <div style={{display: 'none'}}>组件错误</div>}>
+                  <ErrorBoundary FallbackComponent={() => <div style={{ display: 'none' }}>组件错误</div>}>
                     <PreviewRender
                       cpId={cp.id}
                       cpType={cp.type}
