@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.app.core.impl.auth;
 
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.app.api.auth.AppAuthRoleUser;
+import com.cmsr.onebase.module.app.api.auth.AppAuthRoleUserService;
 import com.cmsr.onebase.module.app.api.auth.dto.AuthRoleDTO;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleRepository;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleUserRepository;
@@ -11,6 +11,7 @@ import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -19,7 +20,7 @@ import java.util.List;
  */
 @Setter
 @Service
-public class AppAuthRoleUserImpl implements AppAuthRoleUser {
+public class AppAuthRoleUserServiceImpl implements AppAuthRoleUserService {
 
     @Autowired
     private AppAuthRoleUserRepository appAuthRoleUserRepository;
@@ -30,6 +31,16 @@ public class AppAuthRoleUserImpl implements AppAuthRoleUser {
     @Override
     public void deleteByUserId(Long userId) {
         appAuthRoleUserRepository.deleteByUserId(userId);
+    }
+
+    @Override
+    public void deleteByUserIds(Collection<Long> userIds) {
+        appAuthRoleUserRepository.deleteByUserIds(userIds);
+    }
+
+    @Override
+    public void deleteByTenant(Long tenantId) {
+        appAuthRoleUserRepository.removeByTenant(tenantId);
     }
 
     @Override

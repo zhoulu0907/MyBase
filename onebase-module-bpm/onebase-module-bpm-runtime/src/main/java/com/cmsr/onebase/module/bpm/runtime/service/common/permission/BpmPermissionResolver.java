@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.bpm.runtime.service.common.permission;
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
-import com.cmsr.onebase.module.app.api.auth.AppAuthRoleUser;
+import com.cmsr.onebase.module.app.api.auth.AppAuthRoleUserService;
 import com.cmsr.onebase.module.bpm.core.dto.node.NodePermFlagDTO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +22,7 @@ import java.util.Set;
 @Service
 public class BpmPermissionResolver {
     @Resource
-    private AppAuthRoleUser appAuthRoleUser;
+    private AppAuthRoleUserService appAuthRoleUserService;
 
     public Set<String> resolveUserIds(String permFlag) {
        return resolveUserIds(permFlag, 0);
@@ -51,7 +51,7 @@ public class BpmPermissionResolver {
             userIdSet.addAll(permFlagDTO.getUserIds().stream().map(String::valueOf).toList());
         } else if (CollectionUtils.isNotEmpty(permFlagDTO.getRoleIds())) {
             // 处理角色列表
-            List<Long> userIds = appAuthRoleUser.findUserIdsByRoleIds(permFlagDTO.getRoleIds());
+            List<Long> userIds = appAuthRoleUserService.findUserIdsByRoleIds(permFlagDTO.getRoleIds());
 
             if (CollectionUtils.isNotEmpty(userIds)) {
                 userIdSet.addAll(userIds.stream().map(String::valueOf).toList());

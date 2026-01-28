@@ -86,6 +86,13 @@ public class UserRoleDataRepository extends BaseDataRepository<SystemUserRoleMap
         remove(query().eq(UserRoleDO.USER_ID, userId));
     }
 
+    public void deleteByUserIds(Collection<Long> userIds) {
+        if (userIds == null || userIds.isEmpty()) {
+            return;
+        }
+        remove(query().in(UserRoleDO.USER_ID, userIds));;
+    }
+
     /**
      * 根据角色ID和用户ID列表删除用户角色关联
      *

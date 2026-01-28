@@ -20,6 +20,7 @@ import jakarta.annotation.Resource;
 import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -107,13 +108,8 @@ public class AppApplicationApiImpl implements AppApplicationApi {
             return applicationDTOList;
         }
 
-        // 按更新日期倒序排列
-        List<AppNavigationDO> sortedNavigationList = navigationList.stream()
-                .sorted(Comparator.comparing(AppNavigationDO::getUpdateTime).reversed())
-                .toList();
-
         // 按 applicationId 分组并获取每组的第一条记录
-        Map<Long, AppNavigationDO> navigationMap = sortedNavigationList.stream()
+        Map<Long, AppNavigationDO> navigationMap = navigationList.stream()
                 .filter(navigation -> navigation.getApplicationId() != null)  // 过滤 applicationId 为空的记录
                 .collect(Collectors.groupingBy(
                         AppNavigationDO::getApplicationId,  // 按 applicationId 分组
@@ -237,6 +233,20 @@ public class AppApplicationApiImpl implements AppApplicationApi {
         return false;
     }
 
+    @Override
+    public List<ApplicationDTO> getSimpleAllAppList(Long tenantId) {
+
+        List<AppApplicationDO> applicationList = appApplicationRepository.getSimpleAllAppList(tenantId);
+        List<ApplicationDTO> applicationDTOList = applicationList.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+        List<Long> appIds = applicationList.stream()
+                .map(AppApplicationDO::getId)  // 获取每个 AppApplicationDO 的 id
+                .filter(Objects::nonNull)      // 过滤掉 null 值
+                .collect(Collectors.toList());
+        return getAppApplicationNavigation(applicationDTOList, appIds);
+    }
+
     public Map<Long, List<Long>> findTagIdsByApplicationIdsGrouped(List<Long> appIds) {
         List<AppApplicationTagDO> tagDOListIds = applicationTagRepository.findTagIdsByApplicationIds(appIds);
         return tagDOListIds.stream()
@@ -245,5 +255,6 @@ public class AppApplicationApiImpl implements AppApplicationApi {
                         Collectors.mapping(AppApplicationTagDO::getTagId, Collectors.toList())
                 ));
     }
+
 
 }

@@ -44,11 +44,9 @@ class FlowConnectorRepositoryTest {
         testData = new FlowConnectorDO();
         testData.setConnectorUuid("test-connector-uuid");
         testData.setConnectorName("测试连接器");
-        testData.setCode("TEST_CONNECTOR");
         testData.setTypeCode("HTTP");
         testData.setDescription("这是一个测试连接器");
-        testData.setConfig("{}");
-        testData.setConfigJson("{\"type\":\"object\",\"properties\":{\"action1\":{},\"action2\":{}}}");
+        testData.setConfig("{\"type\":\"object\",\"properties\":{\"action1\":{},\"action2\":{}}}");
         repository.save(testData);
     }
 
