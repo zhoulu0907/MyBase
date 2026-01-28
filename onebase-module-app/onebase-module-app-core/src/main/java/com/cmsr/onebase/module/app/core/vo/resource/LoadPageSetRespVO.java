@@ -15,4 +15,10 @@ public class LoadPageSetRespVO {
     private Integer pageSetType;
 
     private List<PageDTO> pages;
+
+    private Integer dataTitleType;
+
+    private String dataTitle;
+
+    private Integer redirectType;
 }
