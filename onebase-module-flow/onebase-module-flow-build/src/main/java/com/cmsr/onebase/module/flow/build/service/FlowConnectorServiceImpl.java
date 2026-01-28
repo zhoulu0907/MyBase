@@ -400,6 +400,10 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
     }
 
     @Override
+    public List<ConnectorActionVO> getActionInfos(Long connectorId) {
+        return getActionList(connectorId);
+    }
+
     public List<ConnectorActionLiteVO> getActionList(Long connectorId, Long envId) {
         log.info("getActionList start, connectorId: {}, envId: {}", connectorId, envId);
 
