@@ -247,7 +247,9 @@ const PreviewContainer = forwardRef<any, PreviewProps>((props: PreviewProps, ref
   };
 
   const parseData = () => {
+    console.info('定位错误 1')
     startLoadPageSet({ pageSetId: pageSetId, runtime: true });
+    console.info('定位错误 2')
   };
 
   useEffect(() => {
