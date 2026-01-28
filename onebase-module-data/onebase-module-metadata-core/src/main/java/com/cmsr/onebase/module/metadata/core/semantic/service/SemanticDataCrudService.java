@@ -1240,13 +1240,28 @@ public class SemanticDataCrudService {
         QueryWrapper qw = QueryWrapper.create().where(new QueryColumn("id").eq(toLongIfNotEmpty(id)))
                 .and(new QueryColumn("deleted").eq(0));
         Row row = dynamicMetadataRepository.selectOneByQuery(recordDTO.getEntitySchema().getTableName(), qw, fields);
+        // 查询不到数据时，使用空值填充所有字段
+        if (row == null) {
+            log.warn("未查询到id={}的记录数据，将使用空值填充字段", id);
+            for (SemanticFieldSchemaDTO semanticFieldSchemaDTO : fields) {
+                String fieldName = semanticFieldSchemaDTO.getFieldName();
+                SemanticFieldValueDTO semanticFieldValueDTO = new SemanticFieldValueDTO(SemanticFieldTypeEnum.valueOf(semanticFieldSchemaDTO.getFieldType()));
+                semanticFieldValueDTO.setFieldId(semanticFieldSchemaDTO.getId());
+                semanticFieldValueDTO.setFieldUuid(semanticFieldSchemaDTO.getFieldUuid());
+                semanticFieldValueDTO.setTableName(recordDTO.getEntitySchema().getTableName());
+                semanticFieldValueDTO.setFieldName(fieldName);
+                semanticFieldValueDTO.setRawValue(null);
+                valueDTOMap.put(fieldName, semanticFieldValueDTO);
+            }
+            return valueDTOMap;
+        }
         for (SemanticFieldSchemaDTO semanticFieldSchemaDTO : fields) {
             String fieldName = semanticFieldSchemaDTO.getFieldName();
             Object value = row.get(fieldName);
             SemanticFieldValueDTO semanticFieldValueDTO = new SemanticFieldValueDTO(SemanticFieldTypeEnum.valueOf(semanticFieldSchemaDTO.getFieldType()));
             semanticFieldValueDTO.setFieldId(semanticFieldSchemaDTO.getId());
             semanticFieldValueDTO.setFieldUuid(semanticFieldSchemaDTO.getFieldUuid());
-            semanticFieldValueDTO.setTableName(semanticFieldValueDTO.getTableName());
+            semanticFieldValueDTO.setTableName(recordDTO.getEntitySchema().getTableName());
             semanticFieldValueDTO.setFieldName(fieldName);
             semanticFieldValueDTO.setRawValue(value);
             valueDTOMap.put(fieldName, semanticFieldValueDTO);
