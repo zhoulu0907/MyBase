@@ -38,4 +38,13 @@ public class AppResourcePagesetDO extends BaseBizEntity {
     @Column(value = "dashboard_id", comment = "数据大屏id")
     private Long dashboardId;
 
+    @Column(value = "data_title_type", comment = "数据标题类型")
+    private Integer dataTitleType;
+
+    @Column(value = "data_title", comment = "数据标题")
+    private String dataTitle;
+
+    @Column(value = "redirect_type", comment = "重定向类型")
+    private Integer redirectType;
+
 }

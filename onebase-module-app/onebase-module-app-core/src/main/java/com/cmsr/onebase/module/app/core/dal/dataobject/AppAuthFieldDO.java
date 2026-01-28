@@ -1,6 +1,5 @@
 package com.cmsr.onebase.module.app.core.dal.dataobject;
 
-import com.cmsr.onebase.framework.orm.entity.BaseAppEntity;
 import com.cmsr.onebase.framework.orm.entity.BaseBizEntity;
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Table;

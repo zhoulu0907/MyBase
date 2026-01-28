@@ -46,4 +46,8 @@ public interface AppErrorCodeConstants {
 
     ErrorCode APP_VERSION_IMPORT_ERROR = new ErrorCode(10020, "应用版本配置导入失败");
 
+    ErrorCode APP_VERSION_EXPORT_RECORD_DELETE_ERROR = new ErrorCode(10021, "应用导出记录删除失败");
+
+    ErrorCode APP_VERSION_EXPORT_RECORD_NOT_EXIST = new ErrorCode(10022, "应用导出记录不存在");
+
 }
