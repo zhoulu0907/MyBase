@@ -4,9 +4,19 @@ export interface PageApplicationVersionReq {
   pageSize: number;
 }
 
+export interface PageAppVersionExportReq {
+  exportStatus: string;
+  pageNo: number;
+  pageSize: number;
+} 
 export enum OperationType {
   PUBLISH = 1, // 发布版本
   SAVE = 2 // 保存版本
+}
+
+export enum VersionExportType {
+  DEV = 0, // 开发环境
+  PROD = 1 // 正式环境
 }
 
 export interface OnlineApplicationReq {

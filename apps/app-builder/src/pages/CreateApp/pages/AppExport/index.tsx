@@ -1,12 +1,11 @@
 import { Table, Button, Alert, Select, Tag, Modal } from '@arco-design/web-react';
 import type { ColumnProps } from '@arco-design/web-react/es/Table';
 import { IconInfoCircleFill } from '@arco-design/web-react/icon';
-import { ExportStatus, type AppExportRecord } from '@onebase/app';
+import { ExportStatus,pageExportAppVersion,deleteExportAppVersion, type AppExportRecord } from '@onebase/app';
 import dayjs from 'dayjs';
 import { useAppStore } from '@/store';
 import React, { useEffect, useState } from 'react';
 import AppExportModal from '@/components/AppExportModal';
-import AppImportModal from '@/components/AppImportModal';
 import styles from './index.module.less';
 
 const AppExportPage: React.FC = () => {
@@ -15,7 +14,12 @@ const AppExportPage: React.FC = () => {
   const [exportVisible, setExportVisible] = useState(false);
 
   const [status, setStatus] = useState('');
-  const statusOptions = [{ label: '全部状态', value: '' }];
+  const statusOptions = [
+    { label: '全部状态', value: '' },
+    { label: '导出中', value: ExportStatus.EXPORTING },
+    { label: '导出成功', value: ExportStatus.SUCCESS },
+    { label: '导出失败', value: ExportStatus.ERROR }
+  ];
   const [tableData, setTableData] = useState<AppExportRecord[]>([]);
   const [pagination, setPagination] = useState({
     sizeCanChange: true,
@@ -53,7 +57,7 @@ const AppExportPage: React.FC = () => {
         if (value === ExportStatus.ERROR) {
           return <Tag className={styles.errorTag}>导出失败</Tag>;
         }
-        return '--';
+        return '未知';
       }
     },
     {
@@ -61,7 +65,7 @@ const AppExportPage: React.FC = () => {
       key: 'actions',
       align: 'center',
       width: 200,
-      render: (_, record: AppExportRecord) => (
+      render: (_, record: any) => (
         <>
           {record.status === ExportStatus.SUCCESS && (
             <Button size="mini" type="text" onClick={() => handleDownload(record)}>
@@ -107,11 +111,18 @@ const AppExportPage: React.FC = () => {
   // 状态改变重新获取表格数据
   useEffect(() => {
     getExportList();
-  }, [status, pagination]);
+  }, [status, pagination.current, pagination.pageSize]);
 
   // todo 接口获取表格数据
-  const getExportList = () => {
-    setTableData([{ id: '11', operator: '张三', operateTime: '2026-01-23 11:13:00', status: 'success' }]);
+  const getExportList = async() => {
+    const param = {
+      exportStatus: status,
+      pageNo: pagination.current,
+      pageSize: pagination.pageSize
+    }
+    const res = await pageExportAppVersion(param);
+    setTableData(res?.list || []);
+    setPagination((prev)=>({...prev, total: res?.total || 0}))
   };
 
   return (

@@ -1,7 +1,8 @@
 export enum ExportStatus {
-  EXPORTING = 'exporting',
-  SUCCESS = 'success',
-  ERROR = 'error'
+  UNKNOWN = 0,
+  EXPORTING = 1,
+  SUCCESS = 2,
+  ERROR = 3
 }
 export interface AppExportRecord {
     id: string;
