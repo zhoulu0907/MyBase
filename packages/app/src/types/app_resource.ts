@@ -17,6 +17,9 @@ export interface SavePageSetReq {
   id: string;
   pageSetName: string;
   pages: PageSet[];
+  dataTitleType?: number;
+  redirectType?: number;
+  dataTitle?: string;
 }
 
 export interface LoadPageSetReq {
