@@ -24,6 +24,8 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static com.cmsr.onebase.module.formula.enums.ErrorCodeConstants.*;
 import static com.cmsr.onebase.module.formula.enums.FormulaConstants.DANGEROUS_PATTERNS;
 import static com.cmsr.onebase.module.formula.enums.FormulaConstants.SUPPORTED_FUNCTIONS;
 
@@ -143,11 +145,40 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
                 throw new IllegalStateException("超时时间配置无效");
             }
         } catch (PolyglotException e) {
-            log.error("公式执行异常：{}, 公式：{}, 参数：{}", e.getMessage(), formula, parameters);
-            throw new RuntimeException("公式执行失败：" + e.getMessage(), e);
+            if (e.isSyntaxError()) {
+                log.error("公式执行异常，SyntaxError，公式：{}, 参数：{},错误：{}", formula, parameters, e.getMessage());
+                throw exception(FORMULA_SYNTAX_ERROR);
+            } else if (e.isGuestException()) {
+                log.error("公式执行异常，GuestException，公式：{}, 参数：{},错误：{}", formula, parameters, e.getMessage());
+                throw exception(FORMULA_GUEST_EXCEPTION);
+            } else if (e.isHostException()) {
+                log.error("公式执行异常，HostException，公式：{}, 参数：{},错误：{}", formula, parameters, e.getMessage());
+                throw exception(FORMULA_HOST_EXCEPTION);
+            } else if (e.isCancelled()) {
+                log.error("公式执行异常，Cancelled，公式：{}, 参数：{},错误：{}", formula, parameters, e.getMessage());
+                throw exception(FORMULA_IS_CANCELLED);
+            } else if (e.isExit()) {
+                log.error("公式执行异常，Exit，公式：{}, 参数：{},错误：{}", formula, parameters, e.getMessage());
+                throw exception(FORMULA_ISEXIT_ERROR);
+            } else if (e.isIncompleteSource()) {
+                log.error("公式执行异常，IncompleteSource，公式：{}, 参数：{},错误：{}", formula, parameters, e.getMessage());
+                throw exception(FORMULA_INCOMPLETESOURCE_ERROR);
+            } else if (e.isInternalError()) {
+                log.error("公式执行异常，InternalError，公式：{}, 参数：{},错误：{}", formula, parameters, e.getMessage());
+                throw exception(FORMULA_INTERNAL_ERROR);
+            } else if (e.isInterrupted()) {
+                log.error("公式执行异常，Interrupted，公式：{}, 参数：{},错误：{}", formula, parameters, e.getMessage());
+                throw exception(FORMULA_INTERRUPTED_ERROR);
+            } else if (e.isResourceExhausted()) {
+                log.error("公式执行异常，ResourceExhausted，公式：{}, 参数：{},错误：{}", formula, parameters, e.getMessage());
+                throw exception(FORMULA_RESOURCEEXHAUSTED_ERROR);
+            } else  {
+                log.error("公式执行异常，其他异常 PolyglotException，公式：{}, 参数：{},错误：{}", formula, parameters, e.getMessage());
+                throw exception(FORMULA_OTHER_ERROR);
+            }
         } catch (Exception e) {
-            log.error("公式引擎执行异常", e);
-            throw e;
+            log.error("公式执行异常，其他异常 Exception，公式：{}, 参数：{},错误：{}", formula, parameters, e.getMessage());
+            throw exception(FORMULA_OTHER_ERROR);
         }
     }
 
@@ -323,7 +354,7 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
         if (result.isDate()) {
             return LocalDateTime.parse(result.toString(), DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"));
         }
-        
+
         // 处理JavaScript数组
         if (result.hasArrayElements()) {
             List<Object> resultList = new ArrayList<>();
@@ -344,8 +375,9 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
             }
             return resultMap;
         }
-        if (result.isString()&&result.asString().startsWith("[{")) {
-            return JsonUtils.parseObject(result.toString(), new TypeReference<List<Map<String, Object>>>() {});
+        if (result.isString() && result.asString().startsWith("[{")) {
+            return JsonUtils.parseObject(result.toString(), new TypeReference<List<Map<String, Object>>>() {
+            });
         }
         // 对于其他类型，转换为字符串
         return result.toString();

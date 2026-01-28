@@ -42,9 +42,9 @@ public class FormulaValidate {
             // 验证参数类型
             validateFunctionParameterTypes(functionName, params);
         }
-        if (formula.contains(REGEX)) {
-            formula = formula.replace("\\","\\\\");
-        }
+        // if (formula.contains(REGEX)) {
+        //     formula = formula.replace("\\","\\\\");
+        // }
         return formula;
     }
 
