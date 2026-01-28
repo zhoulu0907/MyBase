@@ -1,22 +1,16 @@
-import { Button, Checkbox, Form, Message, Popconfirm, Space, Table, Tooltip, List, Card } from '@arco-design/web-react';
+import { Button, Form, List, Card } from '@arco-design/web-react';
 import { IconPlus, IconRefresh } from '@arco-design/web-react/icon';
 import { memo, useEffect, useState } from 'react';
 import { useSignals } from '@preact/signals-react/runtime';
 import { isRuntimeEnv, menuPermissionSignal, pagesRuntimeSignal } from '@onebase/common';
-import { getFileUrlById } from '@onebase/platform-center';
 import {
-  CATEGORY_TYPE,
-  dataMethodDeleteV2,
   dataMethodPageV2,
-  deleteFormDataPage,
-  DeleteMethodV2Params,
   getEntityFieldsWithChildren,
   getFormDataPage,
+  attachmentDownload,
   menuSignal,
   PageMethodV2Params,
   PageType,
-  queryFlowExecForm,
-  TRIGGER_EVENTS,
   VALIDATION_TYPE,
   type AppEntityField
 } from '@onebase/app';
@@ -161,6 +155,7 @@ const XCard = memo(
 
       queryData = form.getFieldsValue();
 
+
       const conditions: any[] = [];
       Object.entries(queryData).forEach(([key, value]) => {
         if (typeof value === 'object') {
@@ -206,7 +201,8 @@ const XCard = memo(
 
       const { list, total } = res;
 
-      const newCardData = (list || []).map((item: any) => {
+      let newCardData= [];
+      for(let item of (list || [])){
         const newItem = item;
         Object.entries(newItem).forEach(([key, value]) => {
           // 优化：减少重复查找，提升可读性和性能
@@ -225,12 +221,23 @@ const XCard = memo(
         });
 
         const rowId = (item && item.id) || (item?.data && item.data.id);
-        return {
+
+        let coverFieldValue = null;
+        if (coverField) {
+          coverFieldValue = await attachmentDownload(tableName, {
+            menuId: curMenu.value.id,
+            id: rowId,
+            fieldName: coverField,
+            fileId: item[coverField]?.[0].id
+          })
+        }
+        newCardData.push({
           id: rowId,
           ...newItem,
-          key: rowId
-        };
-      });
+          key: rowId,
+          [coverField]: coverFieldValue
+        })
+      }
 
       cardForm.setFieldsValue({ [mainMetaData.tableName]: newCardData });
       if (scrollLoad) {
@@ -399,7 +406,9 @@ const XCard = memo(
               bordered={false}
               dataSource={cardData}
               grid={{ span: getSpan(), gutter: [20, 20] }}
-              render={(item, index) => (
+              render={(item, index) => {
+                console.log('itrm',item,coverField)
+                return (
                 <Card
                   className="card"
                   bordered={false}
@@ -407,7 +416,7 @@ const XCard = memo(
                     coverField ? (
                       <img
                         style={{ width: '100%', height: '128px', objectFit: imageFill || 'fill' }}
-                        src={getFileUrlById(item[coverField]?.[0]?.id)}
+                        src={item[coverField]}
                         alt=""
                       />
                     ) : undefined
@@ -426,7 +435,8 @@ const XCard = memo(
                     }
                   />
                 </Card>
-              )}
+              )
+              }}
               onReachBottom={(currentPage) => {
                 if (currentPage < cardTotal) {
                   scrollLoad = true;
