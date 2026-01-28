@@ -1,13 +1,11 @@
 package com.cmsr.onebase.module.app.build.service.app;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.cmsr.onebase.module.app.build.vo.app.ApplicationSimpleRespVO;
 import com.cmsr.onebase.module.screen.api.DashboardProjectApi;
 import jakarta.annotation.Resource;
 import org.apache.commons.collections4.CollectionUtils;
@@ -420,9 +418,12 @@ public class BuildAppApplicationServiceImpl implements AppApplicationService {
     }
 
     @Override
-    public List<AppApplicationDO> getMySimpleAppListByName(String appName) {
+    public List<ApplicationSimpleRespVO> getMySimpleAppListByName(String appName) {
         Long currentUserId = SecurityFrameworkUtils.getLoginUserId();
-        return applicationRepository.findMyAppApplicationByAppName(appName, currentUserId);
+        List<AppApplicationDO> applicationList = applicationRepository.findMyAppApplicationByAppName(appName, currentUserId);
+        List<ApplicationRespVO> applicationRespVOS = BeanUtils.toBean(applicationList, ApplicationRespVO.class);
+        enrichIcons(applicationRespVOS);
+        return BeanUtils.toBean(applicationRespVOS, ApplicationSimpleRespVO.class);
     }
 
     @Override

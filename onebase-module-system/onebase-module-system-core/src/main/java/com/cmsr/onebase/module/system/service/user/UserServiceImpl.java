@@ -16,13 +16,15 @@ import com.cmsr.onebase.framework.common.util.validation.ValidationUtils;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
 import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
-import com.cmsr.onebase.module.app.api.auth.AppAuthRoleUser;
+import com.cmsr.onebase.module.app.api.auth.AppAuthRoleUserService;
 import com.cmsr.onebase.module.infra.api.config.ConfigApi;
 import com.cmsr.onebase.module.system.api.dept.dto.UserPageApiReqVO;
 import com.cmsr.onebase.module.system.convert.user.UserConvert;
+import com.cmsr.onebase.module.system.dal.database.CorpDataRepository;
 import com.cmsr.onebase.module.system.dal.database.RoleDataRepository;
 import com.cmsr.onebase.module.system.dal.database.UserPostDataRepository;
 import com.cmsr.onebase.module.system.dal.database.UserRoleDataRepository;
+import com.cmsr.onebase.module.system.dal.dataobject.corp.CorpDO;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.UserPostDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
@@ -122,7 +124,7 @@ public class UserServiceImpl implements UserService {
     private UserRoleDataRepository userRoleDataRepository;
 
     @Resource
-    private AppAuthRoleUser appAuthRoleUser;
+    private AppAuthRoleUserService appAuthRoleUserService;
 
     @Resource
     private UserDataRepository userDataRepository;
@@ -139,6 +141,9 @@ public class UserServiceImpl implements UserService {
 
     @Resource
     private PwdEnHelper pwdEnHelper;
+
+    @Resource
+    private CorpDataRepository corpDataRepository;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -187,6 +192,9 @@ public class UserServiceImpl implements UserService {
                 throw exception(USER_NOT_EXISTS);
             }
             if (UserTypeEnum.CORP.getValue().equals(user.getUserType())) {
+                // 企业用户校验企业用户上限
+                validateCorpUserCountMaxLimit(loginUser.getCorpId());
+                // 设置企业用户所属企业
                 user.setCorpId(loginUser.getCorpId());
             }
             userDataRepository.save(user);
@@ -500,10 +508,27 @@ public class UserServiceImpl implements UserService {
         });
     }
 
+    //校验企业用户数量
+    public void validateCorpUserCountMaxLimit(Long corpId) {
+        //1.查询企业下的正常用户
+        Long userCountByCorpId = getUserCountByCorpId(corpId, UserStatusEnum.NORMAL.getStatus());
+        //2.查询企业用户上限
+        CorpDO corp = corpDataRepository.findById(corpId);
+        Integer userLimit = corp.getUserLimit();
+        if (userCountByCorpId >= userLimit) {
+            throw exception(CORP_USER_COUNT_MAX, userLimit);
+        }
+    }
+
     @Override
     public void updateUserStatus(Long id, Integer status) {
         if (CommonStatusEnum.ENABLE.getStatus().equals(status)) {
             validateTenantUserCountMaxLimit();
+        }
+
+        LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
+        if (loginUser != null && UserTypeEnum.CORP.getValue().equals(loginUser.getUserType())) {
+            validateCorpUserCountMaxLimit(loginUser.getCorpId());
         }
 
 
@@ -536,8 +561,7 @@ public class UserServiceImpl implements UserService {
         // 2.2 删除用户岗位
         userPostDataRepository.deleteByUserId(userId);
         // 2.2 删除用户角色
-        userRoleDataRepository.deleteByUserId(userId);
-        appAuthRoleUser.deleteByUserId(userId);
+        appAuthRoleUserService.deleteByUserId(userId);
         // 3. 记录操作日志上下文
         LogRecordContext.putVariable("user", user);
     }
@@ -939,9 +963,15 @@ public class UserServiceImpl implements UserService {
         return (int) userDataRepository.countByStatus(status);
     }
 
+
     @Override
-    public Long getUserCountByCorpId(Long corpId) {
-        return userDataRepository.getUserCountByCorpId(corpId);
+    public long getInnerUserCountByStatus(Integer status) {
+        return userDataRepository.countInnerUserByStatus(status);
+    }
+
+    @Override
+    public Long getUserCountByCorpId(Long corpId, Integer status) {
+        return userDataRepository.getUserCountByCorpId(corpId, status);
     }
 
     @Override
@@ -1464,6 +1494,25 @@ public class UserServiceImpl implements UserService {
             return PageResult.empty();
         }
         return BeanUtils.toBean(userDOList, UserSimpleRespVO.class);
+    }
+
+    @Override
+    public void deleteUserByCorpId(Long corpId){
+        //1.查询公司下的所有用户
+        List<AdminUserDO> usersByCorpId = userDataRepository.getUserByCorpId(corpId);
+        if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(usersByCorpId)) {
+            Set<Long> userIds = usersByCorpId.stream().map(AdminUserDO::getId).collect(Collectors.toSet());
+            // 2 删除用户
+            userDataRepository.deleteByIds(userIds);
+            // 3 删除用户岗位
+            userPostDataRepository.deleteByUserIds(userIds);
+            // 4 删除用户角色
+            userRoleDataRepository.deleteByUserIds(userIds);
+            // 5 删除用户应用关系
+            appAuthRoleUserService.deleteByUserIds(userIds);
+            // 6. 记录操作日志上下文
+            LogRecordContext.putVariable("userIds", userIds);
+        }
     }
 
 }
