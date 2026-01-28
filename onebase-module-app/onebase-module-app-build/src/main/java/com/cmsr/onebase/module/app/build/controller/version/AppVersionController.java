@@ -87,7 +87,7 @@ public class AppVersionController {
     @GetMapping("/export")
     @Operation(summary = "导出应用")
     @PreAuthorize("@ss.hasPermission('tenant:app:query')")
-    public CommonResult<Long> exportApplication(@RequestParam("version_id") Long versionId) {
+    public CommonResult<Long> exportApplication(@RequestParam("versionId") Long versionId) {
         Long exportId = appVersionService.exportApplicationVersion(versionId);
         return CommonResult.success(exportId);
     }
@@ -95,7 +95,7 @@ public class AppVersionController {
     @PostMapping("/export/retry")
     @Operation(summary = "重试导出应用")
     @PreAuthorize("@ss.hasPermission('tenant:app:query')")
-    public CommonResult<Long> retryExportApplication(@RequestParam("export_id") Long exportId) {
+    public CommonResult<Long> retryExportApplication(@RequestParam("exportId") Long exportId) {
         Long retryExportId = appVersionService.retryExportApplication(exportId);
         return CommonResult.success(retryExportId);
     }
@@ -103,7 +103,7 @@ public class AppVersionController {
     @GetMapping("/export/status")
     @Operation(summary = "获取导出应用状态")
     @PreAuthorize("@ss.hasPermission('tenant:app:query')")
-    public CommonResult<Integer> getExportApplicationStatus(@RequestParam("export_id") Long id) {
+    public CommonResult<Integer> getExportApplicationStatus(@RequestParam("exportId") Long id) {
         Integer status = appVersionService.getExportStatus(id);
         return CommonResult.success(status);
     }
@@ -111,7 +111,7 @@ public class AppVersionController {
     @GetMapping("/export/file")
     @Operation(summary = "获取导出应用文件")
     @PreAuthorize("@ss.hasPermission('tenant:app:query')")
-    public void getExportApplicationResource(@RequestParam("export_id") Long id,
+    public void getExportApplicationResource(@RequestParam("exportId") Long id,
             HttpServletRequest request, HttpServletResponse response) {
         appVersionService.getExportApplicationResource(id, request, response);
     }
@@ -126,7 +126,7 @@ public class AppVersionController {
     @PostMapping("/export/delete")
     @Operation(summary = "删除导出记录")
     @PreAuthorize("@ss.hasPermission('tenant:app:delete')")
-    public CommonResult<Boolean> deleteExportRecord(@RequestParam("export_id") Long exportId) {
+    public CommonResult<Boolean> deleteExportRecord(@RequestParam("exportId") Long exportId) {
         appVersionService.deleteExportRecord(exportId);
         return CommonResult.success(true);
     }
