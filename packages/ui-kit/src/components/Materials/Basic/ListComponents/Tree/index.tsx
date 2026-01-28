@@ -72,17 +72,62 @@ const XTree = memo(
       ];
     };
 
+    // 根据配置的字段生成预览数据
+    const generatePreviewDataFromFields = (fields: any[]): any[] => {
+      if (!fields || fields.length === 0) {
+        return getDefaultPreviewData();
+      }
+
+      // 按层级排序字段
+      const sortedFields = [...fields].sort((a, b) => a.level - b.level);
+      
+      // 生成预览数据
+      const generateLevelData = (level: number, parentKey: string = ''): any[] => {
+        if (level > sortedFields.length) return [];
+        
+        const fieldConfig = sortedFields[level - 1];
+        const levelCount = level === 1 ? 2 : 2; // 根节点2个，其他层级2个
+        
+        return Array.from({ length: levelCount }, (_, index) => {
+          const key = parentKey ? `${parentKey}-${index + 1}` : `${index + 1}`;
+          // 只显示字段的displayName或fieldName，不添加额外的节点字样
+          const title = fieldConfig.displayName || fieldConfig.fieldName;
+          
+          const children = generateLevelData(level + 1, key);
+          
+          return {
+            key,
+            title,
+            level: level,
+            fieldName: fieldConfig.fieldName,
+            fieldValue: title,
+            ...(children.length > 0 && { children })
+          };
+        });
+      };
+
+      return generateLevelData(1);
+    };
+
     useEffect(() => {
-      if (isRuntimeEnv()) {
-        if (metaData && treeFields && treeFields.length > 0) {
-          loadTreeData();
-        } else {
-          setTreeData(getDefaultPreviewData());
-        }
+    if (isRuntimeEnv()) {
+      // 运行时环境：有配置就加载真实数据，没配置就给默认数据
+      if (metaData && treeFields && treeFields.length > 0) {
+        loadTreeData();
       } else {
         setTreeData(getDefaultPreviewData());
       }
-    }, [metaData, treeFields]);
+    } else {
+      // 编辑/预览环境：根据treeFields配置生成预览数据
+      if (treeFields && treeFields.length > 0) {
+        // 根据配置的字段生成结构化的预览数据
+        const previewData = generatePreviewDataFromFields(treeFields);
+        setTreeData(previewData);
+      } else {
+        setTreeData(getDefaultPreviewData());
+      }
+    }
+  }, [metaData, treeFields, defaultExpandLevel]);
 
     const loadTreeData = async () => {
       try {
@@ -110,58 +155,83 @@ const XTree = memo(
     const buildTreeStructure = (data: any[], fields: any[]): any[] => {
       if (!data || data.length === 0) return [];
 
+      // 按层级排序字段配置
+      const sortedFields = [...fields].sort((a, b) => a.level - b.level);
       const levelFieldMap = new Map();
-      fields.forEach(field => {
-        levelFieldMap.set(field.level, field.fieldName);
+      sortedFields.forEach(field => {
+        levelFieldMap.set(field.level, field);
       });
 
-      const maxLevel = fields.length;
       const rootNodes: any[] = [];
       const nodeMap = new Map<string, any>();
 
-      data.forEach(item => {
-        for (let level = 1; level <= maxLevel; level++) {
-          const fieldName = levelFieldMap.get(level);
-          if (!fieldName) continue;
-
+      data.forEach((item, itemIndex) => {
+        let parentNode = null;
+        
+        // 按层级顺序处理每个层级的字段
+        for (let i = 0; i < sortedFields.length; i++) {
+          const fieldConfig = sortedFields[i];
+          const level = fieldConfig.level;
+          const fieldName = fieldConfig.fieldName;
           const fieldValue = item[fieldName];
-          const nodeKey = `${level}-${fieldValue}`;
-
-          if (level === 1) {
-            if (!nodeMap.has(nodeKey)) {
-              const rootNode = {
-                key: nodeKey,
-                title: fieldValue,
-                level: level
-              };
-              nodeMap.set(nodeKey, rootNode);
-              rootNodes.push(rootNode);
-            }
-          } else {
-            const parentField = levelFieldMap.get(level - 1);
-            const parentValue = item[parentField];
-            const parentKey = `${level - 1}-${parentValue}`;
-            const parentNode = nodeMap.get(parentKey);
-
-            if (parentNode) {
-              if (!nodeMap.has(nodeKey)) {
-                const childNode = {
-                  key: nodeKey,
-                  title: fieldValue,
-                  level: level,
-                  data: item
-                };
-                nodeMap.set(nodeKey, childNode);
-
-                if (!parentNode.children) {
-                  parentNode.children = [];
-                }
-                parentNode.children.push(childNode);
+          
+          if (!fieldValue) continue; // 跳过空值
+          
+          const nodeKey = `${level}-${fieldValue}-${itemIndex}`; // 添加itemIndex避免重复
+          
+          // 查找或创建节点
+          let currentNode = nodeMap.get(nodeKey);
+          if (!currentNode) {
+            currentNode = {
+              key: nodeKey,
+              title: fieldValue,
+              level: level,
+              fieldName: fieldName,
+              fieldValue: fieldValue,
+              data: item,
+              children: []
+            };
+            nodeMap.set(nodeKey, currentNode);
+            
+            // 建立父子关系
+            if (level === 1) {
+              // 根节点
+              rootNodes.push(currentNode);
+            } else if (parentNode) {
+              // 子节点，添加到父节点的children中
+              if (!parentNode.children) {
+                parentNode.children = [];
+              }
+              // 避免重复添加
+              if (!parentNode.children.some(child => child.key === currentNode.key)) {
+                parentNode.children.push(currentNode);
               }
             }
           }
+          
+          // 更新父节点引用，用于下一层级
+          parentNode = currentNode;
         }
       });
+
+      // 清理空children数组
+      rootNodes.forEach(node => {
+        if (node.children && node.children.length === 0) {
+          delete node.children;
+        }
+      });
+
+      // 递归清理所有节点的空children
+      const cleanEmptyChildren = (nodes: any[]) => {
+        nodes.forEach(node => {
+          if (node.children && node.children.length === 0) {
+            delete node.children;
+          } else if (node.children) {
+            cleanEmptyChildren(node.children);
+          }
+        });
+      };
+      cleanEmptyChildren(rootNodes);
 
       return rootNodes;
     };

@@ -134,6 +134,11 @@ const DynamicTreeConfig: React.FC<DynamicTreeConfigProps> = ({
     }
   }, [entityUuid]);
 
+  // 监听树字段配置变化，实时更新组件显示
+  useEffect(() => {
+    console.log('树字段配置发生变化:', treeFieldsConfig);
+  }, [treeFieldsConfig]);
+
   // 处理实体变更
   const handleEntityChange = (value: string) => {
     const entity = entityList.find((item) => item.entityUuid === value);
@@ -208,6 +213,9 @@ const DynamicTreeConfig: React.FC<DynamicTreeConfigProps> = ({
               <div key={index} className={styles.treeFieldItem}>
                 <div className={styles.treeFieldHeader}>
                   <span>第 {field.level} 级</span>
+                  <span style={{ fontSize: '12px', color: '#999' }}>
+                    {field.displayName || '未选择字段'}
+                  </span>
                   <Button
                     icon={<IconDelete />}
                     size="small"
