@@ -39,6 +39,9 @@ public class PluginConfigTemplateRespVO {
         @Schema(description = "默认值", example = "http://localhost:8080")
         private String defaultValue;
 
+        @Schema(description = "配置值（已保存的值）", example = "http://api.example.com")
+        private String configValue;
+
         @Schema(description = "值类型（normal普通，secret密文）", example = "normal")
         private String valueType;
 

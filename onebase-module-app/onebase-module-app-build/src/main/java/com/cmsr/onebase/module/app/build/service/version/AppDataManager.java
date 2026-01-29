@@ -296,7 +296,7 @@ public class AppDataManager {
         Object metaDataConfig = configData.getMetaDataConfig();
 
         if (metaDataConfig != null) {
-//            metadataDatasourceApi.importDatasource(applicationId, appUid, tenantId, versionTag, metaDataConfig, null);
+            metadataDatasourceApi.importDatasource(applicationId, appUid, tenantId, versionTag, metaDataConfig, null);
         }
     }
 

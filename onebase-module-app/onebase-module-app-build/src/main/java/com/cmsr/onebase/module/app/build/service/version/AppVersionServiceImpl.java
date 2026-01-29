@@ -378,7 +378,7 @@ public class AppVersionServiceImpl implements AppVersionService {
 
         String metadataJson = ZipUtils.toUtf8String(entryMap.get(CONFIG_METADATA));
         if (metadataJson != null) {
-            configData.setMetaDataConfig(JsonUtils.parseObject(metadataJson, MetadataExportDataDTO.class));
+            configData.setMetaDataConfig(JsonUtils.parseObject(metadataJson, Object.class));
         }
 
     }
@@ -628,7 +628,6 @@ public class AppVersionServiceImpl implements AppVersionService {
      * 重试导出应用
      *
      * @param exportId  导出记录ID
-     * @param versionId 版本ID
      * @return 导出记录ID（返回原导出记录ID）
      */
     @Override

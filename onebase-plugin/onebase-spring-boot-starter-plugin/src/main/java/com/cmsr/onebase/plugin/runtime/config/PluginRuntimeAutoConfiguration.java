@@ -103,13 +103,23 @@ public class PluginRuntimeAutoConfiguration {
         // STAGING模式：只加载plugin目录ZIP包扩展点
         if (mode.isStaging()) {
             // 创建 STAGING 模式插件管理器
-            SpringPluginManager pluginManager = createSpringPluginManager(this.absolutePath);
+            // 修正：指向 backend 目录
+            Path backendPath = this.absolutePath.resolve(properties.getBackendDir());
+            if (!backendPath.toFile().exists()) {
+                backendPath.toFile().mkdirs();
+            }
+            SpringPluginManager pluginManager = createSpringPluginManager(backendPath);
             // 配置并初始化插件管理器
             return configureAndInitPluginManager(pluginManager);
         }
 
         // PROD模式：使用SpringPluginManager加载plugin目录
-        SpringPluginManager pluginManager = createSpringPluginManager(this.absolutePath);
+        // 修正：指向 backend 目录
+        Path backendPath = this.absolutePath.resolve(properties.getBackendDir());
+        if (!backendPath.toFile().exists()) {
+            backendPath.toFile().mkdirs();
+        }
+        SpringPluginManager pluginManager = createSpringPluginManager(backendPath);
         // 配置并初始化插件管理器
         return configureAndInitPluginManager(pluginManager);
     }
