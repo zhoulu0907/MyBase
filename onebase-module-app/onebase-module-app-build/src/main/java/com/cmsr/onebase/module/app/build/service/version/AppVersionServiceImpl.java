@@ -381,8 +381,19 @@ public class AppVersionServiceImpl implements AppVersionService {
     public Long exportApplicationVersion(Long versionId, Long applicationId) {
         AppApplicationDO applicationDO = appCommonService.validateApplicationExist(applicationId);
 
+        AppVersionDO versionDO = null;
         // 验证版本是否存在且属于当前应用
-        AppVersionDO versionDO = versionRepository.getById(versionId);
+        if (versionId.intValue() == VersionTypeEnum.BUILD.getValue()
+                || versionId.intValue() == VersionTypeEnum.RUNTIME.getValue()) {
+            versionDO = new AppVersionDO();
+            versionDO.setApplicationId(applicationId);
+            versionDO.setVersionType(versionId.intValue());
+        } else {
+            versionDO = ApplicationManager
+                    .withoutApplicationIdAndVersionTag(
+                            () -> versionRepository.getById(versionId));
+        }
+
         if (versionDO == null) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_VERSION_NOT_EXIST);
         }
