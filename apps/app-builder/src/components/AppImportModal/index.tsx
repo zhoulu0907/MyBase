@@ -93,7 +93,10 @@ const AppImportModal: React.FC<AppImportModalProps> = ({ visible, onClose, onCom
           >
             取消
           </Button>
-          {currentStep < stepList.length && (
+          <Button type="primary" onClick={handleComplete} disabled={!fileId}>
+              完成
+            </Button>
+          {/* {currentStep < stepList.length && (
             <Button type="primary" onClick={handleNext}>
               下一步
             </Button>
@@ -102,16 +105,16 @@ const AppImportModal: React.FC<AppImportModalProps> = ({ visible, onClose, onCom
             <Button type="primary" onClick={handleComplete} disabled={progressPercent !== 100}>
               完成
             </Button>
-          )}
+          )} */}
         </div>
       }
     >
       <div>
-        <Steps current={currentStep}>
+        {/* <Steps current={currentStep}>
           {stepList.map((item, index) => (
             <Steps.Step key={index} title={item} />
           ))}
-        </Steps>
+        </Steps> */}
         <div className={styles.stepContent}>
           {currentStep === 1 && (
             <div>
