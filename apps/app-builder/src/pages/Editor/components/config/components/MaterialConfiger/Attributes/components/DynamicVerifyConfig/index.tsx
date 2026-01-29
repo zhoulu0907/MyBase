@@ -122,17 +122,50 @@ const DynamicVerifyConfig: React.FC<DynamicVerifyConfigProps> = ({ handlePropsCh
             </Grid.Row>
           )}
 
-          {typeof configs[verifyKey]['maxChecked'] === 'number' && (
-            <InputNumber
-              value={configs[verifyKey]['maxChecked']}
-              min={0}
-              prefix="可选数量限制"
-              onChange={(value) => {
-                if (!value) return;
-                handlePropsChange(verifyKey, { ...configs[verifyKey], maxChecked: value });
-              }}
-            />
+          {typeof configs[verifyKey]['checkedLimit'] === 'boolean' && (
+            <Grid.Row align="center">
+              <Grid.Col span={8}>
+                <Checkbox
+                  checked={configs[verifyKey]['checkedLimit']}
+                  onChange={(value) => {
+                    handlePropsChange(verifyKey, { ...configs[verifyKey], checkedLimit: value });
+                  }}
+                >
+                  可选数量
+                </Checkbox>
+              </Grid.Col>
+              <Grid.Col span={7}>
+                <InputNumber
+                  size="mini"
+                  placeholder="最小值"
+                  min={0}
+                  max={configs[verifyKey]['maxChecked']}
+                  precision={0}
+                  value={configs[verifyKey]['minChecked']}
+                  onChange={(value) => {
+                    if (value > configs[verifyKey]['maxChecked']) return;
+                    handlePropsChange(verifyKey, { ...configs[verifyKey], minChecked: value });
+                  }}
+                />
+              </Grid.Col>
+              <Grid.Col span={2} style={{ textAlign: 'center' }}>
+                -
+              </Grid.Col>
+              <Grid.Col span={7}>
+                <InputNumber
+                  size="mini"
+                  placeholder="最大值"
+                  precision={0}
+                  min={configs[verifyKey]['minChecked'] || 0}
+                  value={configs[verifyKey]['maxChecked']}
+                  onChange={(value) => {
+                    handlePropsChange(verifyKey, { ...configs[verifyKey], maxChecked: value });
+                  }}
+                />
+              </Grid.Col>
+            </Grid.Row>
           )}
+
           {typeof configs[verifyKey]['maxCount'] === 'number' && (
             <InputNumber
               value={configs[verifyKey]['maxCount']}

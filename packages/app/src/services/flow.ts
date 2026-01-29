@@ -157,15 +157,15 @@ export const listConnectorNodeConfig = () => {
 };
 
 export const listConnectorByType = (params: ListConnectorByTypeReq) => {
-  return flowService.get(`/connector/list-by-type`, params);
+  return flowService.get(`/connector/by-type/${params.typeCode}`);
 };
 
 export const listConnectorAction = (params: ListConnectorActionReq) => {
-  return flowService.get(`/connector/action/list-all`, params);
+  return flowService.get(`/connector/${params.id}/actions`);
 };
 
-export const getActionValue = (params: GetActionValueReq) => {
-  return flowService.get(`/connector/action-value`, params);
+export const getActionValue = (id: string, params: GetActionValueReq) => {
+  return flowService.get(`/connector/${id}/action-value`, params);
 };
 
 /**

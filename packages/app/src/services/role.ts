@@ -64,7 +64,10 @@ export const getRoleUser = (params: GerRoleUserReq) => {
 
 // 获取部门用户列表
 export const getDeptUser = (params: GetDeptUserReq, userType?: number) => {
-  return (isRuntimeEnv() ? runtimeAppService : appService).get(`${userType ? `/auth-role/list-dept-users?userType=${userType}` : '/auth-role/list-dept-users'}`, params);
+  if (userType) {
+    params.userType = userType;
+  }
+  return (isRuntimeEnv() ? runtimeAppService : appService).get(`/auth-role/list-dept-users`, params);
 };
 
 // 获取角色成员列表

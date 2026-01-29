@@ -153,6 +153,46 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
 
   const [rules, setRules] = useState<Rule[]>([]);
   const [curRule, setCurRule] = useState<string>('');
+  const [searchKeyword, setSearchKeyword] = useState<string>('');
+
+  // 根据搜索关键词过滤规则（支持模糊搜索，多个关键词用空格分隔）
+  const filteredRules = React.useMemo(() => {
+    if (!searchKeyword.trim()) {
+      return rules;
+    }
+    // 将搜索关键词按空格分割，支持多个关键词
+    const keywords = searchKeyword
+      .trim()
+      .toLowerCase()
+      .split(/\s+/)
+      .filter((k) => k.length > 0);
+
+    return rules.filter((rule) => {
+      const ruleName = rule.name?.toLowerCase() || '';
+      const ruleDescription = rule.description?.toLowerCase() || '';
+
+      // 所有关键词都要在规则名称或描述中匹配（模糊搜索）
+      return keywords.every((keyword) => {
+        return ruleName.includes(keyword) || ruleDescription.includes(keyword);
+      });
+    });
+  }, [rules, searchKeyword]);
+
+  // 当过滤结果变化时，如果当前选中的规则不在过滤结果中，清空选中状态
+  useEffect(() => {
+    if (curRule && filteredRules.length > 0) {
+      const isCurrentRuleInFiltered = filteredRules.some((rule) => rule.id === curRule);
+      if (!isCurrentRuleInFiltered) {
+        // 如果当前选中的规则不在过滤结果中，自动选中过滤结果中的第一个规则
+        setCurRule(filteredRules[0].id);
+        lastSetRuleIdRef.current = '';
+      }
+    } else if (curRule && filteredRules.length === 0) {
+      // 如果过滤结果为空，清空选中状态
+      setCurRule('');
+      lastSetRuleIdRef.current = '';
+    }
+  }, [filteredRules, curRule]);
 
   // 当 modal 打开时，重新加载 rules
   useEffect(() => {
@@ -176,6 +216,7 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
       // 弹窗关闭时，重置状态
       setRules([]);
       setCurRule('');
+      setSearchKeyword('');
       lastSetRuleIdRef.current = '';
       form.resetFields();
     }
@@ -595,13 +636,19 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
       <div className={styles.interactionRuleModal}>
         <div className={styles.left}>
           <div className={styles.leftHeader}>
-            <Input.Search placeholder="搜索" />
+            <Input.Search
+              placeholder="搜索"
+              value={searchKeyword}
+              onChange={(value) => setSearchKeyword(value)}
+              onSearch={(value) => setSearchKeyword(value)}
+              allowClear
+            />
             <Button type="text" icon={<IconPlus />} onClick={handleAddRule}>
               新建
             </Button>
           </div>
           <div className={styles.leftContent}>
-            {rules.map((rule) => (
+            {filteredRules.map((rule) => (
               <div
                 key={rule.id}
                 className={styles.ruleItem}
@@ -668,7 +715,7 @@ const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, on
           </div>
         </div>
         <div className={styles.right}>
-          {curRule && rules.find((rule) => rule.id === curRule) && (
+          {curRule && filteredRules.find((rule) => rule.id === curRule) && (
             <Form
               layout="vertical"
               form={form}

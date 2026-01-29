@@ -1,0 +1,9 @@
+.x-tree-container {
+  width: 100%;
+}
+
+.x-tree-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-1);
+}
